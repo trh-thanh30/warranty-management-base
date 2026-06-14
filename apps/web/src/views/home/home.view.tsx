@@ -1,31 +1,77 @@
-import { useTranslations } from "next-intl";
-import { Button } from "@repo/ui/button";
+"use client";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4100";
+import { useState } from "react";
+import { HeroSection } from "./components/hero-section";
+import { BrandsSection } from "./components/brands-section";
+import { StatsSection } from "./components/stats-section";
+import { HowItWorksSection } from "./components/how-it-works-section";
+import { PricingSection } from "./components/pricing-section";
+import { TestimonialsSection } from "./components/testimonials-section";
+import { FaqSection } from "./components/faq-section";
+import { CtaSection } from "./components/cta-section";
+import { QuoteModal } from "./components/quote-modal";
+import { LookupSection } from "./components/lookup-section";
+import { WorkshopsSection } from "./components/workshops-section";
 
 export function HomeView() {
-  const t = useTranslations("Home");
+  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<{
+    type: "warranty" | "service";
+    term: string;
+    price: string;
+  } | null>(null);
+
+  const handleOpenQuote = (
+    plan: { type: "warranty" | "service"; term: string; price: string } | null,
+  ) => {
+    setSelectedPlan(plan);
+    setIsQuoteModalOpen(true);
+  };
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-5xl flex-col justify-center px-6 py-12">
-      <div className="max-w-2xl space-y-6">
-        <p className="text-sm font-medium uppercase tracking-wide text-slate-500">
-          {t("eyebrow")}
-        </p>
-        <h1 className="text-4xl font-semibold tracking-normal text-slate-950">
-          {t("title")}
-        </h1>
-        <p className="text-base leading-7 text-slate-600">{t("description")}</p>
-        <div className="flex items-center gap-3">
-          <Button>{t("primaryAction")}</Button>
-          <a
-            className="text-sm font-medium text-slate-700 hover:text-slate-950"
-            href={`${apiUrl}/docs`}
-          >
-            {t("apiDocs")}
-          </a>
-        </div>
+    <main className="overflow-x-hidden bg-[#EEF3F5] text-slate-950">
+      <HeroSection
+        onOpenQuote={() =>
+          handleOpenQuote({
+            type: "warranty",
+            term: "Custom Warranty",
+            price: "Custom",
+          })
+        }
+      />
+      <BrandsSection />
+
+      <div className="flex min-h-screen flex-col justify-center bg-[#EEF3F5]">
+        <StatsSection />
       </div>
+
+      <div className="flex min-h-screen flex-col justify-center bg-white">
+        <HowItWorksSection />
+      </div>
+
+      <div className="flex min-h-screen flex-col justify-center bg-[#EEF3F5]">
+        <PricingSection onOpenQuote={handleOpenQuote} />
+      </div>
+
+      <LookupSection />
+
+      <div className="flex min-h-screen flex-col justify-center bg-white">
+        <TestimonialsSection />
+      </div>
+
+      <WorkshopsSection />
+
+      <div className="flex min-h-screen flex-col justify-center bg-[#EEF3F5]">
+        <FaqSection />
+      </div>
+
+      <CtaSection onOpenQuote={() => handleOpenQuote(null)} />
+
+      <QuoteModal
+        isOpen={isQuoteModalOpen}
+        onClose={() => setIsQuoteModalOpen(false)}
+        selectedPlan={selectedPlan}
+      />
     </main>
   );
 }
