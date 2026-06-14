@@ -72,7 +72,7 @@ export class AssetsService {
 
     const response = await fetch(normalizedUrl, {
       headers: {
-        'User-Agent': 'booking-base-assets/1.0',
+        'User-Agent': 'warranty-management-base-assets/1.0',
       },
     });
 

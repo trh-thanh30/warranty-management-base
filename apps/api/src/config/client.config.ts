@@ -4,5 +4,6 @@ import { registerAs } from '@nestjs/config';
 export default registerAs('client', () => ({
   nominatimBaseUrl:
     process.env.NOMINATIM_BASE_URL || 'https://nominatim.openstreetmap.org',
-  nominatimUserAgent: process.env.NOMINATIM_USER_AGENT || 'booking-base/1.0',
+  nominatimUserAgent:
+    process.env.NOMINATIM_USER_AGENT || 'warranty-management-base/1.0',
 }));

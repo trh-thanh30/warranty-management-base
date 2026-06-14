@@ -8,7 +8,7 @@ export const BASE_LOGGER = Symbol('BASE_LOGGER');
 
 const isProd = process.env.NODE_ENV === 'production';
 const serviceMeta = {
-  app: process.env.APP_NAME ?? 'Booking System API',
+  app: process.env.APP_NAME ?? 'Warranty Management API',
   role: process.env.APP_ROLE ?? 'api',
   env: process.env.NODE_ENV ?? 'development',
 };

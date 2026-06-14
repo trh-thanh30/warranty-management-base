@@ -2,7 +2,7 @@ import { registerAs } from '@nestjs/config';
 
 export default registerAs('email', () => {
   const smtpUser = process.env.SMTP_USER || '';
-  const appName = process.env.APP_NAME || 'Booking System API';
+  const appName = process.env.APP_NAME || 'Warranty Management API';
 
   // Manual expansion for variables like ${VAR} which might not be expanded by Railway/dotenv
   let from = process.env.EMAIL_FROM || `"${appName}" <${smtpUser}>`;

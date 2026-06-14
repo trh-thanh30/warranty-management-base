@@ -6,19 +6,19 @@ export const services: ServiceCheckSummary[] = [
     latency: "24ms",
     name: "API",
     status: "Healthy",
-    target: "http://localhost:3000/health",
+    target: "http://localhost:4100/health",
   },
   {
     latency: "8ms",
     name: "PostgreSQL",
     status: "Healthy",
-    target: "booking-db:5432",
+    target: "warranty-management-base-db:5432",
   },
   {
     latency: "3ms",
     name: "Redis",
     status: "Healthy",
-    target: "booking-redis:6379",
+    target: "warranty-management-base-redis:6379",
   },
   {
     latency: "N/A",

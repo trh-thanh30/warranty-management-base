@@ -133,7 +133,7 @@ BCRYPT_ROUNDS=12
 HEALTH_ENDPOINTS_ENABLED=false
 
 # CORS
-CORS_ORIGINS=http://localhost:3000,http://localhost:4200
+CORS_ORIGINS=http://localhost:4100,http://localhost:4101,http://localhost:4102
 ```
 
 ## Project Structure
@@ -415,7 +415,7 @@ The application uses `@nestjs/throttler` for rate limiting to prevent abuse:
 Configurable CORS origins for cross-origin requests:
 
 ```bash
-CORS_ORIGINS=http://localhost:3000,http://localhost:4200
+CORS_ORIGINS=http://localhost:4100,http://localhost:4101,http://localhost:4102
 ```
 
 ### Development

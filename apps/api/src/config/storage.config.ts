@@ -13,7 +13,7 @@ export default registerAs('storage', () => ({
   publicDirName: process.env.STORAGE_PUBLIC_DIR_NAME ?? 'public',
   privateDirName: process.env.STORAGE_PRIVATE_DIR_NAME ?? 'private',
   tempDirName: process.env.STORAGE_TEMP_DIR_NAME ?? 'temp',
-  cdnUrl: (process.env.ASSET_CDN_URL ?? 'http://localhost:3000/cdn').replace(
+  cdnUrl: (process.env.ASSET_CDN_URL ?? 'http://localhost:4100/cdn').replace(
     /\/$/,
     '',
   ),
@@ -29,9 +29,12 @@ export default registerAs('storage', () => ({
     region: process.env.MINIO_REGION ?? 'us-east-1',
     accessKey: process.env.MINIO_ACCESS_KEY,
     secretKey: process.env.MINIO_SECRET_KEY,
-    publicBucket: process.env.MINIO_BUCKET_PUBLIC ?? 'booking-public',
-    privateBucket: process.env.MINIO_BUCKET_PRIVATE ?? 'booking-private',
-    tempBucket: process.env.MINIO_BUCKET_TEMP ?? 'booking-temp',
+    publicBucket:
+      process.env.MINIO_BUCKET_PUBLIC ?? 'warranty-management-base-public',
+    privateBucket:
+      process.env.MINIO_BUCKET_PRIVATE ?? 'warranty-management-base-private',
+    tempBucket:
+      process.env.MINIO_BUCKET_TEMP ?? 'warranty-management-base-temp',
   },
 }));
 

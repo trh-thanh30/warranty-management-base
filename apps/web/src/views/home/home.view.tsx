@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Button } from "@repo/ui/button";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
+const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4100";
 
 export function HomeView() {
   const t = useTranslations("Home");

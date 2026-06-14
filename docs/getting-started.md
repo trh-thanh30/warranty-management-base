@@ -44,9 +44,9 @@ pnpm dev:full
 
 URL mặc định:
 
-- API: `http://localhost:${API_PORT:-3000}`
-- Web: `http://localhost:${WEB_PORT:-3001}`
-- Admin: `http://localhost:${ADMIN_PORT:-3002}`
+- API: `http://localhost:${API_PORT:-4100}`
+- Web: `http://localhost:${WEB_PORT:-4101}`
+- Admin: `http://localhost:${ADMIN_PORT:-4102}`
 
 ## Kiểm Tra Repo
 

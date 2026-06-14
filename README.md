@@ -165,6 +165,7 @@ Các port mặc định trong `.env.example` đã được đổi sang dải ri�
 | Admin      | `ADMIN_PORT`    | `4102`   |
 | PostgreSQL | `DEV_DB_PORT`   | `15432`  |
 | Redis      | `REDIS_DB_PORT` | `16379`  |
+| MinIO      | `MINIO_PORT`    | `19000`  |
 
 ### 3. Chạy Hạ Tầng Phát Triển
 
@@ -208,9 +209,9 @@ pnpm dev:admin
 
 URL cục bộ mặc định:
 
-- API: `http://localhost:3000`
-- Web: `http://localhost:3001`
-- Admin: `http://localhost:3002`
+- API: `http://localhost:4100`
+- Web: `http://localhost:4101`
+- Admin: `http://localhost:4102`
 
 ## Danh Sách Lệnh
 
@@ -355,7 +356,7 @@ pnpm infra:dev:down
 Compose giống sản xuất dùng Docker image, không mount mã nguồn:
 
 ```bash
-API_IMAGE=booking-api WEB_IMAGE=booking-web ADMIN_IMAGE=booking-admin IMAGE_TAG=latest \
+API_IMAGE=warranty-management-base-api WEB_IMAGE=warranty-management-base-web ADMIN_IMAGE=warranty-management-base-admin IMAGE_TAG=latest \
 pnpm infra:prod:up
 ```
 

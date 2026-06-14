@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node ../../scripts/next-port.mjs dev ADMIN_PORT 3002",
+    "dev": "node ../../scripts/next-port.mjs dev ADMIN_PORT 4102",
     "build": "next build",
-    "start": "node ../../scripts/next-port.mjs start ADMIN_PORT 3002",
+    "start": "node ../../scripts/next-port.mjs start ADMIN_PORT 4102",
     "lint": "eslint . --max-warnings 0",
     "check-types": "next typegen && tsc --noEmit"
   },

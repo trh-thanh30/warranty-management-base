@@ -84,7 +84,9 @@ export const envSchema = z
     // CORS Configuration
     CORS_ORIGINS: z
       .string()
-      .default('http://localhost:3000,http://localhost:4200'),
+      .default(
+        'http://localhost:4100,http://localhost:4101,http://localhost:4102',
+      ),
 
     // Security
     BCRYPT_ROUNDS: z.coerce.number().int().min(1).max(20).default(12),
@@ -107,12 +109,14 @@ export const envSchema = z
     MINIO_REGION: z.string().default('us-east-1'),
     MINIO_ACCESS_KEY: z.string().optional(),
     MINIO_SECRET_KEY: z.string().optional(),
-    MINIO_BUCKET_PUBLIC: z.string().default('booking-public'),
-    MINIO_BUCKET_PRIVATE: z.string().default('booking-private'),
-    MINIO_BUCKET_TEMP: z.string().default('booking-temp'),
+    MINIO_BUCKET_PUBLIC: z.string().default('warranty-management-base-public'),
+    MINIO_BUCKET_PRIVATE: z
+      .string()
+      .default('warranty-management-base-private'),
+    MINIO_BUCKET_TEMP: z.string().default('warranty-management-base-temp'),
 
     // CDN / Public Access
-    ASSET_CDN_URL: z.string().default('http://localhost:3000/cdn'),
+    ASSET_CDN_URL: z.string().default('http://localhost:4100/cdn'),
 
     // File Upload Limits
     ASSET_MAX_FILE_SIZE: z.coerce.number().int().positive().default(10485760), // 10 MB
