@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String      @id @default(uuid()) @db.Uuid
+  email         String      @unique
+  password      String
+  username      String      @unique
+  full_name     String?
+  phone         String?     @unique
+  avatar_url    String?
+  role          user_role   @default(USER)
+  status        user_status @default(ACTIVE)
+  is_verified   Boolean     @default(false)
+  refresh_token String?
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
+
+  assets                  Asset[]
+  created_notifications   Notification[]          @relation("NotificationCreatedBy")
+  notification_recipients NotificationRecipient[]
+
+  @@index([role, status])
+  @@index([email])
+  @@map("user")
+}
+
+model Asset {
+  id             String            @id @default(uuid()) @db.Uuid
+  original_name  String
+  filename       String
+  mime_type      String
+  size           Int
+  path           String
+  access_type    asset_access_type @default(PUBLIC)
+  type           asset_type        @default(OTHER)
+  folder         String?
+  metadata       Json?
+  is_deleted     Boolean           @default(false)
+  uploaded_by_id String?           @db.Uuid
+  created_at     DateTime          @default(now())
+  updated_at     DateTime          @updatedAt
+
+  uploaded_by User?       @relation(fields: [uploaded_by_id], references: [id])
+  links       AssetLink[]
+
+  @@index([access_type])
+  @@index([type])
+  @@index([uploaded_by_id])
+  @@index([is_deleted])
+  @@index([created_at])
+  @@map("asset")
+}
+
+model AssetLink {
+  id          String   @id @default(uuid()) @db.Uuid
+  asset_id    String   @db.Uuid
+  entity_id   String   @db.Uuid
+  entity_type String
+  created_at  DateTime @default(now())
+
+  asset Asset @relation(fields: [asset_id], references: [id], onDelete: Cascade)
+
+  @@unique([asset_id, entity_id, entity_type])
+  @@index([entity_id, entity_type])
+  @@map("asset_link")
+}
+
+model Notification {
+  id              String                       @id @default(uuid()) @db.Uuid
+  title           String
+  content         String
+  type            String
+  source          notification_source          @default(SYSTEM)
+  scope           notification_scope
+  delivery_status notification_delivery_status @default(SENT)
+  metadata        Json?
+  scheduled_at    DateTime?
+  sent_at         DateTime?
+  created_by_id   String?                      @db.Uuid
+  created_at      DateTime                     @default(now())
+  updated_at      DateTime                     @updatedAt
+
+  created_by User?                   @relation("NotificationCreatedBy", fields: [created_by_id], references: [id], onDelete: SetNull)
+  recipients NotificationRecipient[]
+
+  @@index([type])
+  @@index([source])
+  @@index([scope])
+  @@index([delivery_status, scheduled_at])
+  @@index([created_at])
+  @@map("notification")
+}
+
+model NotificationRecipient {
+  id              String                   @id @default(uuid()) @db.Uuid
+  notification_id String                   @db.Uuid
+  user_id         String                   @db.Uuid
+  status          notification_read_status @default(UNREAD)
+  read_at         DateTime?
+  delivered_at    DateTime                 @default(now())
+  created_at      DateTime                 @default(now())
+
+  notification Notification @relation(fields: [notification_id], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([notification_id, user_id])
+  @@index([user_id, status, created_at])
+  @@index([notification_id])
+  @@map("notification_recipient")
+}
+
+model ActivityLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  admin_id   String?  @db.Uuid
+  admin_name String
+  action     String
+  type       String
+  created_at DateTime @default(now())
+
+  @@index([created_at])
+  @@map("activity_log")
+}
+
+enum user_role {
+  ADMIN
+  STAFF
+  USER
+}
+
+enum user_status {
+  ACTIVE
+  INACTIVE
+}
+
+enum asset_type {
+  IMAGE
+  VIDEO
+  AUDIO
+  DOCUMENT
+  OTHER
+  THUMBNAIL
+  BANNER
+}
+
+enum asset_access_type {
+  PUBLIC
+  PRIVATE
+  TEMP
+}
+
+enum notification_source {
+  ADMIN
+  SYSTEM
+}
+
+enum notification_scope {
+  ALL
+  ROLE
+  USER
+}
+
+enum notification_delivery_status {
+  SCHEDULED
+  SENT
+}
+
+enum notification_read_status {
+  UNREAD
+  READ
+}

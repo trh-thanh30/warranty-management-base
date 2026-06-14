@@ -1,0 +1,13 @@
+{
+  "App": {
+    "title": "Web App",
+    "description": "Ứng dụng public cho monorepo base"
+  },
+  "Home": {
+    "eyebrow": "Monorepo base",
+    "title": "Khung ứng dụng web public",
+    "description": "Bắt đầu phần domain từ một vertical slice: API route, shared contract, UI state và verification.",
+    "primaryAction": "Hành động chính",
+    "apiDocs": "Tài liệu API"
+  }
+}

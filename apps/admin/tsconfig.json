@@ -1,0 +1,16 @@
+{
+  "extends": "@repo/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "plugins": [{ "name": "next" }],
+    "baseUrl": ".",
+    "paths": {
+      "@/button": ["../../packages/ui/src/button.tsx"],
+      "@/card": ["../../packages/ui/src/card.tsx"],
+      "@/input": ["../../packages/ui/src/input.tsx"],
+      "@/lib/*": ["../../packages/ui/src/lib/*"],
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}

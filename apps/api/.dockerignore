@@ -1,0 +1,55 @@
+# Dependencies
+node_modules
+*.lock
+pnpm-lock.yaml
+
+# Build outputs
+dist
+build
+*.tsbuildinfo
+.turbo
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Testing
+coverage
+.nyc_output
+test
+
+# Environment files
+.env*
+!.env.example
+
+# Files to ignore
+.vscode
+.idea
+*.swp
+*.swo
+.git
+.gitignore
+.eslintcache
+.prettiercache
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Documentation
+README.md
+docs
+
+# Docker
+Dockerfile*
+docker-compose*
+
+# Temporary files
+tmp
+temp

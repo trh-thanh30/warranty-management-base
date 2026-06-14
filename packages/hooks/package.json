@@ -1,0 +1,30 @@
+{
+  "name": "@repo/hooks",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./async": "./src/async/index.ts",
+    "./auth": "./src/auth/index.ts",
+    "./browser": "./src/browser/index.ts",
+    "./data": "./src/data/index.ts",
+    "./state": "./src/state/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit && mkdir -p dist && touch dist/.build",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/react": "19.2.2",
+    "eslint": "^9.39.1",
+    "react": "^19.2.0",
+    "typescript": "5.9.2"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  }
+}

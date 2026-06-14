@@ -1,0 +1,13 @@
+{
+  "App": {
+    "title": "Web App",
+    "description": "Public app shell for the monorepo base"
+  },
+  "Home": {
+    "eyebrow": "Monorepo base",
+    "title": "Public web app shell",
+    "description": "Start domain work from a vertical slice: API route, shared contract, UI state, and verification.",
+    "primaryAction": "Primary action",
+    "apiDocs": "API docs"
+  }
+}

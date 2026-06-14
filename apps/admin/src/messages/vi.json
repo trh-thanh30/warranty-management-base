@@ -1,0 +1,125 @@
+{
+  "App": {
+    "title": "Booking Admin",
+    "description": "Bảng điều hành cho nền tảng đặt lịch"
+  },
+  "DashboardConfig": {
+    "brandDescription": "Next + Turborepo",
+    "sections": {
+      "general": "Tổng quan",
+      "pages": "Trang",
+      "other": "Khác"
+    },
+    "items": {
+      "dashboard": "Bảng điều khiển",
+      "bookings": "Đặt lịch",
+      "users": "Người dùng",
+      "chats": "Trò chuyện",
+      "securedByAuth": "Bảo vệ bởi Auth",
+      "auth": "Xác thực",
+      "errors": "Lỗi",
+      "system": "Hệ thống",
+      "settings": "Cài đặt",
+      "helpCenter": "Trung tâm trợ giúp",
+      "overview": "Tổng quan",
+      "customers": "Khách hàng",
+      "profile": "Hồ sơ",
+      "signOut": "Đăng xuất"
+    }
+  },
+  "Common": {
+    "search": "Tìm kiếm",
+    "searchPages": "Tìm trang",
+    "searchPagesDescription": "Tìm và đi đến các trang trong bảng điều hành.",
+    "searchPagesPlaceholder": "Tìm trang...",
+    "noResults": "Không tìm thấy kết quả.",
+    "toggleSidebar": "Ẩn/hiện thanh bên",
+    "collapseSidebar": "Thu gọn thanh bên",
+    "openNavigation": "Mở điều hướng",
+    "openSettings": "Mở cài đặt",
+    "language": "Ngôn ngữ",
+    "vietnamese": "Tiếng Việt",
+    "english": "English"
+  },
+  "Dashboard": {
+    "title": "Bảng điều khiển",
+    "download": "Tải xuống",
+    "tabs": {
+      "overview": "Tổng quan",
+      "analytics": "Phân tích",
+      "reports": "Báo cáo",
+      "notifications": "Thông báo"
+    },
+    "stats": {
+      "totalRevenue": "Tổng doanh thu",
+      "subscriptions": "Gói đăng ký",
+      "sales": "Doanh số",
+      "activeNow": "Đang hoạt động",
+      "fromLastMonth": "+{value} so với tháng trước",
+      "sinceLastHour": "+201 từ giờ trước",
+      "live": "Trực tiếp",
+      "now": "Hiện tại"
+    },
+    "overview": "Tổng quan",
+    "recentSales": "Giao dịch gần đây",
+    "recentSalesDescription": "Bạn có 265 giao dịch trong tháng này.",
+    "analyticsTitle": "Phân tích",
+    "analyticsDescription": "Các widget phân tích sẽ được gắn tại đây khi kết nối chỉ số sản phẩm.",
+    "reportsTitle": "Báo cáo",
+    "reportsDescription": "Dùng tab này cho các báo cáo vận hành có thể xuất file.",
+    "notificationsTitle": "Thông báo",
+    "notificationsDescription": "Dùng tab này cho thông báo hệ thống và quy trình gần đây."
+  },
+  "Bookings": {
+    "title": "Đặt lịch",
+    "eyebrow": "Vận hành",
+    "description": "Mẫu bảng, bộ lọc, trạng thái rỗng và biểu mẫu có thể tái sử dụng cho vận hành admin.",
+    "export": "Xuất file",
+    "queueTitle": "Hàng đợi đặt lịch",
+    "queueDescription": "Tìm kiếm, lọc và phân loại bản ghi đặt lịch trước khi kết nối API thật.",
+    "newBooking": "Đặt lịch mới",
+    "searchLabel": "Tìm đặt lịch",
+    "searchPlaceholder": "Tìm theo mã đặt lịch, khách hàng, địa điểm hoặc người phụ trách",
+    "emptyTitle": "Không có đặt lịch phù hợp bộ lọc",
+    "emptyDescription": "Thử từ khóa khác hoặc đặt lại bộ lọc trạng thái để xem tất cả bản ghi.",
+    "clearFilters": "Xóa bộ lọc",
+    "quickCreateTitle": "Mẫu tạo nhanh",
+    "quickCreateDescription": "Mẫu biểu mẫu gọn cho các luồng đặt lịch, người dùng và hệ thống sau này.",
+    "visibleLabelsDescription": "Dùng label hiển thị thay vì chỉ dùng placeholder.",
+    "customer": "Khách hàng",
+    "workspaceName": "Tên workspace",
+    "bookingDate": "Ngày đặt lịch",
+    "owner": "Người phụ trách",
+    "ownerDescription": "Điều phối viên có thể cập nhật sau khi phân công.",
+    "teamMember": "Thành viên nhóm",
+    "saveDraft": "Lưu nháp",
+    "selectAll": "Chọn tất cả đặt lịch",
+    "selectBooking": "Chọn đặt lịch {id}",
+    "booking": "Đặt lịch",
+    "date": "Ngày",
+    "status": "Trạng thái",
+    "total": "Tổng tiền",
+    "openActions": "Mở thao tác cho {id}",
+    "viewBooking": "Xem đặt lịch",
+    "assignOwner": "Gán người phụ trách",
+    "sendConfirmation": "Gửi xác nhận",
+    "filters": {
+      "all": "Tất cả",
+      "pending": "Chờ xử lý",
+      "confirmed": "Đã xác nhận",
+      "completed": "Hoàn tất",
+      "cancelled": "Đã hủy"
+    }
+  },
+  "Home": {
+    "redirectLabel": "Chuyển đến bảng điều khiển"
+  },
+  "RouteStates": {
+    "backToDashboard": "Quay về bảng điều khiển",
+    "notFoundTitle": "Không tìm thấy trang admin",
+    "notFoundDescription": "Route admin này không tồn tại hoặc chưa được thêm vào điều hướng dashboard.",
+    "tryAgain": "Thử lại",
+    "errorTitle": "Không tải được dashboard",
+    "errorDescription": "Không thể render màn hình admin. Hãy thử lại route hoặc kiểm tra browser console và server logs."
+  }
+}

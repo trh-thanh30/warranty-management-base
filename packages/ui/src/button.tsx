@@ -1,0 +1,56 @@
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+import type { ButtonHTMLAttributes } from "react";
+import { cn } from "@/lib/utils";
+
+const buttonVariants = cva(
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:focus-visible:ring-slate-300",
+  {
+    variants: {
+      variant: {
+        primary:
+          "bg-slate-950 text-white hover:bg-slate-800 dark:bg-slate-50 dark:text-slate-950 dark:hover:bg-slate-200",
+        secondary:
+          "border border-slate-300 bg-white text-slate-950 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:hover:bg-slate-900",
+        ghost:
+          "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-900",
+        outline:
+          "border border-slate-300 bg-transparent text-slate-950 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-50 dark:hover:bg-slate-900",
+        destructive: "bg-red-600 text-white hover:bg-red-700",
+      },
+      size: {
+        sm: "h-9 px-3 gap-1.5",
+        md: "h-10 px-4 gap-2",
+        icon: "h-10 w-10 px-0",
+      },
+    },
+    defaultVariants: {
+      variant: "primary",
+      size: "md",
+    },
+  },
+);
+
+export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean;
+  };
+
+export function Button({
+  asChild,
+  className,
+  size,
+  variant,
+  ...props
+}: ButtonProps) {
+  const Comp = asChild ? Slot : "button";
+
+  return (
+    <Comp
+      className={cn(buttonVariants({ className, size, variant }))}
+      {...props}
+    />
+  );
+}
+
+export { buttonVariants };

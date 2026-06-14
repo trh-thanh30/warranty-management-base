@@ -1,0 +1,125 @@
+{
+  "App": {
+    "title": "Booking Admin",
+    "description": "Operational dashboard for the booking system base"
+  },
+  "DashboardConfig": {
+    "brandDescription": "Next + Turborepo",
+    "sections": {
+      "general": "General",
+      "pages": "Pages",
+      "other": "Other"
+    },
+    "items": {
+      "dashboard": "Dashboard",
+      "bookings": "Bookings",
+      "users": "Users",
+      "chats": "Chats",
+      "securedByAuth": "Secured by Auth",
+      "auth": "Auth",
+      "errors": "Errors",
+      "system": "System",
+      "settings": "Settings",
+      "helpCenter": "Help Center",
+      "overview": "Overview",
+      "customers": "Customers",
+      "profile": "Profile",
+      "signOut": "Sign out"
+    }
+  },
+  "Common": {
+    "search": "Search",
+    "searchPages": "Search pages",
+    "searchPagesDescription": "Search and navigate to pages in the booking system dashboard.",
+    "searchPagesPlaceholder": "Search pages...",
+    "noResults": "No results found.",
+    "toggleSidebar": "Toggle sidebar",
+    "collapseSidebar": "Collapse sidebar",
+    "openNavigation": "Open navigation",
+    "openSettings": "Open settings",
+    "language": "Language",
+    "vietnamese": "Tiếng Việt",
+    "english": "English"
+  },
+  "Dashboard": {
+    "title": "Dashboard",
+    "download": "Download",
+    "tabs": {
+      "overview": "Overview",
+      "analytics": "Analytics",
+      "reports": "Reports",
+      "notifications": "Notifications"
+    },
+    "stats": {
+      "totalRevenue": "Total Revenue",
+      "subscriptions": "Subscriptions",
+      "sales": "Sales",
+      "activeNow": "Active Now",
+      "fromLastMonth": "+{value} from last month",
+      "sinceLastHour": "+201 since last hour",
+      "live": "Live",
+      "now": "Now"
+    },
+    "overview": "Overview",
+    "recentSales": "Recent Sales",
+    "recentSalesDescription": "You made 265 sales this month.",
+    "analyticsTitle": "Analytics",
+    "analyticsDescription": "Analytics widgets can be mounted here when product metrics are connected.",
+    "reportsTitle": "Reports",
+    "reportsDescription": "Use this tab for exportable operational reports.",
+    "notificationsTitle": "Notifications",
+    "notificationsDescription": "Use this tab for recent system and workflow notifications."
+  },
+  "Bookings": {
+    "title": "Bookings",
+    "eyebrow": "Operations",
+    "description": "Reusable table, filter, empty-state, and form patterns for admin operations.",
+    "export": "Export",
+    "queueTitle": "Booking queue",
+    "queueDescription": "Search, filter, and triage booking records before wiring real API data.",
+    "newBooking": "New booking",
+    "searchLabel": "Search bookings",
+    "searchPlaceholder": "Search by booking, customer, location, or owner",
+    "emptyTitle": "No bookings match these filters",
+    "emptyDescription": "Try another keyword or reset status filters to see all booking records.",
+    "clearFilters": "Clear filters",
+    "quickCreateTitle": "Quick create pattern",
+    "quickCreateDescription": "A compact form pattern for later booking, user, and system workflows.",
+    "visibleLabelsDescription": "Use visible labels instead of placeholder-only fields.",
+    "customer": "Customer",
+    "workspaceName": "Workspace name",
+    "bookingDate": "Booking date",
+    "owner": "Owner",
+    "ownerDescription": "Operators can update this after assignment.",
+    "teamMember": "Team member",
+    "saveDraft": "Save draft",
+    "selectAll": "Select all bookings",
+    "selectBooking": "Select booking {id}",
+    "booking": "Booking",
+    "date": "Date",
+    "status": "Status",
+    "total": "Total",
+    "openActions": "Open actions for {id}",
+    "viewBooking": "View booking",
+    "assignOwner": "Assign owner",
+    "sendConfirmation": "Send confirmation",
+    "filters": {
+      "all": "All",
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    }
+  },
+  "Home": {
+    "redirectLabel": "Go to dashboard"
+  },
+  "RouteStates": {
+    "backToDashboard": "Back to dashboard",
+    "notFoundTitle": "Admin page not found",
+    "notFoundDescription": "The admin route does not exist or has not been added to the dashboard navigation yet.",
+    "tryAgain": "Try again",
+    "errorTitle": "Dashboard failed to load",
+    "errorDescription": "The admin view could not be rendered. Retry the route or inspect the browser console and server logs."
+  }
+}

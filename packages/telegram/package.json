@@ -1,0 +1,32 @@
+{
+  "name": "@repo/telegram",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "telegram-notify": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc && tsc-alias -p tsconfig.json",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "notify": "pnpm build && node dist/cli.js"
+  },
+  "dependencies": {
+    "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^22.10.7",
+    "eslint": "^9.39.1",
+    "tsc-alias": "^1.8.16",
+    "typescript": "5.9.2"
+  }
+}
