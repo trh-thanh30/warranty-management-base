@@ -1,43 +1,84 @@
-# Booking System Base
+# Warranty Management Automotive Demo
 
-`booking-system-base` là nền tảng monorepo có thể tái sử dụng cho các dự án booking, SaaS, công cụ quản trị nội bộ hoặc các hệ thống sản phẩm cần nhiều ứng dụng chạy chung trong một kho mã nguồn. Repo được xây dựng trên Turborepo, pnpm workspace, NestJS, Next.js, Prisma, PostgreSQL, Redis và Docker Compose.
+Repo này là nền tảng monorepo đang được chuẩn bị để triển khai demo hệ thống quản lý bảo hành, tập trung trước vào ô tô, phụ kiện, phụ tùng và các gói dịch vụ liên quan đến ô tô.
 
-Mục tiêu của repo là cung cấp một nền tảng đủ chuẩn để clone sang dự án mới mà không bị khóa cứng vào một domain cụ thể. Các module nghiệp vụ nên được thêm theo hướng lát cắt dọc trong `apps/api/src/module`, còn UI và các giao kèo dữ liệu dùng chung nên được đưa vào `packages/*` khi thật sự cần tái sử dụng giữa nhiều app.
+Dự án được khởi tạo từ một base booking/SaaS có sẵn, nhưng ngữ cảnh triển khai hiện tại đã chuyển sang bài toán bảo hành: admin quản lý sản phẩm, gán sản phẩm cho khách hàng, kích hoạt bảo hành và cho phép khách hàng đăng nhập để tra cứu đúng các sản phẩm thuộc quyền sở hữu của mình.
+
+Tài liệu PRD chính:
+
+- [docs/prd/warranty-management-automotive-demo.md](docs/prd/warranty-management-automotive-demo.md)
+- [docs/prd/warranty-management-automotive-demo.docx](docs/prd/warranty-management-automotive-demo.docx)
+
+## Mục Tiêu Demo
+
+MVP demo cần chứng minh được luồng nghiệp vụ cốt lõi:
+
+1. Admin tạo, sửa, xóa mềm và xem danh sách sản phẩm.
+2. Mỗi sản phẩm có mã tra cứu bảo hành duy nhất, ví dụ `warrantyCode` hoặc `serialNumber`.
+3. Mã tra cứu có thể tự sinh hoặc do admin nhập thủ công khi sản phẩm đã có VIN/serial/mã nhà sản xuất.
+4. Admin gán sản phẩm cho khách hàng mua sản phẩm.
+5. Khách hàng đăng nhập vào web và chỉ xem được sản phẩm thuộc về mình.
+6. Khách hàng tra cứu sản phẩm bằng mã, nhưng API phải kiểm tra quan hệ sở hữu trước khi trả kết quả.
+7. Trang chi tiết bảo hành hiển thị sản phẩm, ngày mua/ngày kích hoạt, thời hạn và trạng thái bảo hành.
+
+Rule quan trọng nhất của demo: **mã bảo hành không phải cơ chế bảo mật duy nhất; backend use case phải enforce quyền truy cập theo customer ownership.**
+
+## Phạm Vi Demo Đầu Tiên
+
+Demo đầu tiên tập trung vào:
+
+- Quản lý khách hàng.
+- Quản lý sản phẩm được bảo hành.
+- Gán ownership giữa sản phẩm và khách hàng.
+- Kích hoạt và tra cứu bảo hành.
+- Admin dashboard cơ bản.
+- Customer web cơ bản cho danh sách sản phẩm, tra cứu và chi tiết bảo hành.
+- Seed dữ liệu mẫu để trình bày luồng thành công và luồng bị từ chối khi tra cứu sản phẩm của người khác.
+
+Chưa ưu tiên trong demo đầu tiên:
+
+- Thanh toán.
+- Tích hợp nhà sản xuất, đại lý ngoài hoặc DMS.
+- Quản lý tồn kho chi tiết.
+- Ký số/chứng thư bảo hành.
+- Lịch hẹn sửa chữa phức tạp.
+- Mobile native app.
+- Phân quyền đa tenant phức tạp.
 
 ## Công Nghệ Sử Dụng
 
 ### Ứng Dụng
 
-- **API** (`apps/api`): NestJS, Prisma, PostgreSQL, Redis, BullMQ, kiểm tra sức khỏe hệ thống và cấu trúc module sẵn sàng mở rộng.
-- **Web** (`apps/web`): Next.js 16, React 19, TailwindCSS 4, dùng cho giao diện công khai hoặc phía khách hàng.
-- **Admin** (`apps/admin`): Next.js 16, React 19, TailwindCSS 4, dùng cho dashboard quản trị nội bộ.
+- **API** (`apps/api`): NestJS, Prisma, PostgreSQL, Redis, BullMQ, health check và module backend theo Clean Architecture nhẹ.
+- **Web** (`apps/web`): Next.js 16, React 19, TailwindCSS 4, dùng cho trải nghiệm khách hàng.
+- **Admin** (`apps/admin`): Next.js 16, React 19, TailwindCSS 4, dùng cho dashboard quản trị.
 
 ### Package Dùng Chung
 
-- **@repo/shared** (`packages/shared`): kiểu dữ liệu, schema, hằng số, HTTP helper và utility dùng chung.
-- **@repo/hooks** (`packages/hooks`): React hooks dùng chung cho admin, web và các client Next.js khác.
-- **@repo/ui** (`packages/ui`): các thành phần UI nền tảng có thể tái sử dụng.
-- **@repo/telegram** (`packages/telegram`): module gửi thông báo CI/CD qua Telegram, hỗ trợ tin nhắn HTML và ảnh được dựng từ mẫu giao diện.
+- **@repo/shared** (`packages/shared`): type, schema, hằng số, HTTP helper và utility dùng chung.
+- **@repo/hooks** (`packages/hooks`): React hooks dùng chung cho Web/Admin.
+- **@repo/ui** (`packages/ui`): thành phần UI nền tảng có thể tái sử dụng.
+- **@repo/telegram** (`packages/telegram`): module gửi thông báo CI/CD qua Telegram.
 - **@repo/eslint-config** (`packages/eslint-config`): cấu hình ESLint dùng chung.
 - **@repo/typescript-config** (`packages/typescript-config`): cấu hình TypeScript dùng chung.
 
 ### Hạ Tầng Và Công Cụ
 
-- **Turborepo**: điều phối tác vụ trong monorepo và cache kết quả build.
-- **pnpm**: quản lý gói phụ thuộc theo workspace.
-- **Docker Compose**: chạy cụm dịch vụ phát triển và cụm dịch vụ giống sản xuất.
-- **Makefile**: gom các lệnh thường dùng thành shortcut ngắn.
-- **Husky + lint-staged + Commitlint**: kiểm tra chất lượng trước commit và áp dụng Conventional Commits.
-- **GitHub Actions**: quy trình CI có tích hợp thông báo Telegram tùy chọn.
+- **Turborepo**: điều phối tác vụ trong monorepo và cache build.
+- **pnpm workspace**: quản lý dependency theo workspace.
+- **Docker Compose**: chạy PostgreSQL, Redis và các app.
+- **Prisma**: schema, migration, seed và database client.
+- **Husky + lint-staged + Commitlint**: kiểm tra chất lượng trước commit.
+- **GitHub Actions**: CI cho Packages, API, Web, Admin và thông báo Telegram tùy chọn.
 
 ## Cấu Trúc Dự Án
 
 ```txt
-booking-system-base/
+warranty-management-base/
 ├── apps/
 │   ├── api/                 # @repo/api - Backend NestJS
-│   ├── web/                 # @repo/web - app Next.js công khai
-│   └── admin/               # @repo/admin - app Next.js quản trị
+│   ├── web/                 # @repo/web - app khách hàng
+│   └── admin/               # @repo/admin - dashboard quản trị
 ├── packages/
 │   ├── shared/              # @repo/shared - giao kèo dữ liệu và utility dùng chung
 │   ├── hooks/               # @repo/hooks - React hooks dùng chung
@@ -47,74 +88,57 @@ booking-system-base/
 │   └── typescript-config/   # @repo/typescript-config
 ├── docs/
 │   ├── agents/              # quy trình cho AI agent
-│   ├── adr/                 # ghi chú quyết định kiến trúc
-│   ├── architecture/        # tổng quan kiến trúc
-│   ├── conventions/         # quy ước code và module
-│   ├── integrations/        # hướng dẫn tích hợp
+│   ├── adr/                 # quyết định kiến trúc
+│   ├── architecture/        # hướng dẫn frontend/backend folder structure
 │   ├── issues/              # ticket triển khai nội bộ
 │   └── prd/                 # tài liệu yêu cầu sản phẩm
-├── .github/
-│   └── workflows/           # quy trình CI
-├── docker-compose.dev.yml   # cụm dev: db, redis, api
-├── docker-compose.prod.yml  # cụm giống sản xuất: db, redis, api, worker-email, web, admin
-├── Makefile                 # shortcut lệnh
-├── pnpm-workspace.yaml      # cấu hình pnpm workspace
-└── turbo.json               # cấu hình Turborepo
+├── docker-compose.dev.yml
+├── docker-compose.prod.yml
+├── Makefile
+├── pnpm-workspace.yaml
+└── turbo.json
 ```
 
-## Kiến Trúc Frontend
+## Domain Chính
 
-Các app Next.js trong `apps/admin` và `apps/web` dùng chung rule folder để dễ tái sử dụng làm boilerplate.
+Các module nghiệp vụ cần ưu tiên cho demo:
 
-Nguyên tắc chính:
+- **auth/users**: đăng nhập admin và khách hàng, guard theo role.
+- **customers**: hồ sơ khách hàng mua sản phẩm.
+- **products**: sản phẩm được bảo hành, mã nội bộ, mã bảo hành, VIN/serial, trạng thái.
+- **product_ownerships**: quan hệ sở hữu hiện tại và lịch sử chuyển chủ.
+- **warranties**: thông tin bảo hành, ngày bắt đầu/kết thúc, trạng thái.
+- **warranty_claims**: chuẩn bị sau demo cho yêu cầu bảo hành/sửa chữa.
 
-- `app/**/page.tsx` là server component mỏng, chỉ import và render view.
-- UI màn hình đặt trong `src/views/<feature>/<feature>.view.tsx`.
-- Component riêng của feature đặt trong `src/views/<feature>/components`.
-- Component dùng lại trong app đặt trong `src/components/common`.
-- Layout shell, sidebar, header đặt trong `src/components/layout`.
-- Hook dùng chung nhiều client đặt trong `packages/hooks`.
-- Mock data, tab config, filter options đặt trong `*.constants.ts`.
-- API/domain type đặt trong `packages/shared/src/types`.
-- Type riêng cho view/local UI state đặt trong `*.types.ts`.
-- Table columns đặt trong `*.columns.tsx`.
-- `index.ts` chỉ dùng để export.
+Mã tra cứu đề xuất:
+
+```txt
+WM-YYYY-XXXXXX
+```
 
 Ví dụ:
 
-```tsx
-import { BookingsView } from "@/src/views/bookings/bookings.view";
-
-export default function BookingsPage() {
-  return <BookingsView />;
-}
+```txt
+WM-2026-8F3K2A
 ```
-
-Chi tiết rule nằm tại `docs/architecture/frontend-folder-structure.md` và `docs/architecture/frontend-shared-hooks.md`.
 
 ## Kiến Trúc Backend
 
-API trong `apps/api` dùng NestJS và tổ chức module nghiệp vụ theo Clean Architecture nhẹ.
-
-Luồng phụ thuộc chuẩn:
+API trong `apps/api` dùng NestJS và tổ chức module nghiệp vụ theo luồng:
 
 ```txt
-controller -> use-case -> repository -> database
-                 |
-                 -> domain service
-                 -> external gateway/job/email service
+controller -> use case -> repository -> database
 ```
 
-Mỗi module nghiệp vụ nên có cấu trúc:
+Module nghiệp vụ nên có cấu trúc:
 
 ```txt
-src/modules/<module>/
+apps/api/src/modules/<module>/
 ├── <module>.module.ts
 ├── <module>.controller.ts
 ├── dto/
 ├── repository/
 ├── use-cases/
-├── service/
 └── tests/
 ```
 
@@ -123,17 +147,59 @@ Rule chính:
 - Controller chỉ nhận HTTP input và gọi use case.
 - Use case chứa business flow và là phần ưu tiên unit test.
 - Repository chứa data access qua Prisma/database.
-- `tests/` trong mỗi module chứa `*.use-case.spec.ts` để test use case bằng mock repository.
-- DTO chỉ dùng bởi Nest controller nằm trong `dto/`; type/schema dùng chung Admin/Web/API đặt trong `packages/shared`.
+- `tests/` trong mỗi module chứa `*.use-case.spec.ts`, dùng mock repository.
+- API/domain contracts dùng chung Admin/Web đặt trong `packages/shared`.
+- Nest-only DTO nằm trong module `dto/`.
 
-Chi tiết rule nằm tại `docs/architecture/backend-folder-structure.md`.
+Module demo đề xuất:
 
-## Yêu Cầu Môi Trường
+```txt
+apps/api/src/modules/customers/
+apps/api/src/modules/products/
+apps/api/src/modules/warranties/
+```
+
+Chi tiết rule nằm tại [docs/architecture/backend-folder-structure.md](docs/architecture/backend-folder-structure.md).
+
+## Kiến Trúc Frontend
+
+Các app Next.js trong `apps/admin` và `apps/web` phải giữ `app/**/page.tsx` là server component mỏng, chỉ import và render view từ `src/views`.
+
+Rule chính:
+
+- View màn hình đặt trong `src/views/<feature>/<feature>.view.tsx`.
+- Component riêng của feature đặt trong `src/views/<feature>/components`.
+- Component dùng lại trong app đặt trong `src/components/common`.
+- Layout shell, sidebar, header đặt trong `src/components/layout`.
+- Mock data, tab config, filter options đặt trong `*.constants.ts`.
+- Type API/domain dùng chung đặt trong `packages/shared/src/types`.
+- Type riêng cho view/local UI state đặt trong `*.types.ts`.
+- Table columns đặt trong `*.columns.tsx`.
+- Không thêm `"use client"` vào `app/**/page.tsx`.
+
+Màn hình demo Admin:
+
+- `Products List`: danh sách, tìm kiếm theo mã/tên/VIN/khách hàng, filter theo category/status/warranty status.
+- `Create/Edit Product`: form sản phẩm, toggle tự sinh mã/nhập thủ công, chọn khách hàng, cấu hình bảo hành.
+- `Product Detail`: sản phẩm, owner, bảo hành, hành động sửa/xóa mềm/kích hoạt.
+- `Customers`: danh sách khách hàng và sản phẩm đang sở hữu.
+
+Màn hình demo Web:
+
+- `My Products`: danh sách sản phẩm khách đang sở hữu.
+- `Warranty Lookup`: nhập mã tra cứu và hiển thị kết quả hợp lệ.
+- `Warranty Detail`: thông tin sản phẩm, mã bảo hành, ngày bắt đầu/kết thúc, trạng thái.
+
+Chi tiết rule nằm tại [docs/architecture/frontend-folder-structure.md](docs/architecture/frontend-folder-structure.md) và [docs/architecture/frontend-shared-hooks.md](docs/architecture/frontend-shared-hooks.md).
+
+## Bắt Đầu Nhanh
+
+### 1. Yêu Cầu Môi Trường
 
 - Node.js `>= 20`
 - pnpm `9.x`
 - Docker và Docker Compose
-- Make, không bắt buộc nhưng nên có
+- Make, không bắt buộc nhưng khuyến nghị dùng
 
 Bật pnpm qua Corepack nếu máy chưa có pnpm:
 
@@ -142,21 +208,19 @@ corepack enable
 corepack prepare pnpm@9.0.0 --activate
 ```
 
-## Bắt Đầu Nhanh
-
-### 1. Cài Dependency
+### 2. Cài Dependency
 
 ```bash
 pnpm install
 ```
 
-### 2. Tạo File Môi Trường Local
+### 3. Tạo File Môi Trường Local
 
 ```bash
 cp .env.example .env.development
 ```
 
-Các port mặc định trong `.env.example` đã được đổi sang dải riêng để hạn chế đụng với dự án khác:
+Các port mặc định:
 
 | Dịch vụ    | Biến môi trường | Mặc định |
 | :--------- | :-------------- | :------- |
@@ -167,21 +231,21 @@ Các port mặc định trong `.env.example` đã được đổi sang dải ri�
 | Redis      | `REDIS_DB_PORT` | `16379`  |
 | MinIO      | `MINIO_PORT`    | `19000`  |
 
-### 3. Chạy Hạ Tầng Phát Triển
+Không commit `.env.development`, `.env.production` hoặc secret thật.
 
-Cụm dịch vụ phát triển hiện gồm PostgreSQL, Redis và API:
+### 4. Chạy Hạ Tầng Phát Triển
 
 ```bash
 pnpm infra:dev:up
 ```
 
-hoặc dùng Makefile:
+hoặc:
 
 ```bash
 make infra-dev-up
 ```
 
-### 4. Chuẩn Bị Database
+### 5. Chuẩn Bị Database
 
 ```bash
 pnpm prisma:generate
@@ -189,9 +253,9 @@ pnpm prisma:migrate:dev
 pnpm db:seed:dev
 ```
 
-Chỉ nên dùng `db:push:dev` khi cần thử nhanh schema. Với luồng phát triển chuẩn, ưu tiên migration để lịch sử schema rõ ràng.
+Chỉ dùng `pnpm db:push:dev` khi cần thử nhanh schema. Luồng chuẩn nên dùng migration để lịch sử schema rõ ràng.
 
-### 5. Chạy Ứng Dụng
+### 6. Chạy Ứng Dụng
 
 Chạy API, Web và Admin cùng lúc:
 
@@ -213,23 +277,23 @@ URL cục bộ mặc định:
 - Web: `http://localhost:4101`
 - Admin: `http://localhost:4102`
 
-## Danh Sách Lệnh
+## Lệnh Thường Dùng
 
 ### Lệnh Chung
 
-| Lệnh                      | Mô tả                                   |
-| :------------------------ | :-------------------------------------- |
-| `pnpm install`            | Cài gói phụ thuộc cho toàn bộ workspace |
-| `pnpm dev`                | Chạy toàn bộ tác vụ `dev` qua Turbo     |
-| `pnpm dev:full`           | Chạy API, Web và Admin                  |
-| `pnpm build`              | Biên dịch toàn bộ monorepo              |
-| `pnpm build:packages`     | Biên dịch các package dùng chung        |
-| `pnpm lint`               | Kiểm tra lint toàn bộ monorepo          |
-| `pnpm lint:packages`      | Kiểm tra lint các package dùng chung    |
-| `pnpm check-types`        | Kiểm tra TypeScript toàn bộ monorepo    |
-| `pnpm typecheck:packages` | Kiểm tra type các package dùng chung    |
-| `pnpm test`               | Chạy test qua Turbo                     |
-| `pnpm format`             | Format file bằng Prettier               |
+| Lệnh                      | Mô tả                                |
+| :------------------------ | :----------------------------------- |
+| `pnpm install`            | Cài dependency cho toàn bộ workspace |
+| `pnpm dev`                | Chạy toàn bộ tác vụ `dev` qua Turbo  |
+| `pnpm dev:full`           | Chạy API, Web và Admin               |
+| `pnpm build`              | Build toàn bộ monorepo               |
+| `pnpm build:packages`     | Build các package dùng chung         |
+| `pnpm lint`               | Kiểm tra lint toàn bộ monorepo       |
+| `pnpm lint:packages`      | Kiểm tra lint các package dùng chung |
+| `pnpm check-types`        | Kiểm tra TypeScript toàn bộ monorepo |
+| `pnpm typecheck:packages` | Kiểm tra type các package dùng chung |
+| `pnpm test`               | Chạy test qua Turbo                  |
+| `pnpm format`             | Format file bằng Prettier            |
 
 ### Lệnh Theo App
 
@@ -239,9 +303,9 @@ URL cục bộ mặc định:
 | `pnpm dev:api:debug` | Chạy API ở chế độ debug watch       |
 | `pnpm dev:web`       | Chạy app Web                        |
 | `pnpm dev:admin`     | Chạy app Admin                      |
-| `pnpm build:api`     | Biên dịch riêng API                 |
-| `pnpm build:web`     | Biên dịch riêng Web                 |
-| `pnpm build:admin`   | Biên dịch riêng Admin               |
+| `pnpm build:api`     | Build riêng API                     |
+| `pnpm build:web`     | Build riêng Web                     |
+| `pnpm build:admin`   | Build riêng Admin                   |
 | `pnpm start:api`     | Chạy API đã build ở chế độ sản xuất |
 | `pnpm start:web`     | Chạy Web đã build                   |
 | `pnpm start:admin`   | Chạy Admin đã build                 |
@@ -303,8 +367,6 @@ URL cục bộ mặc định:
 
 ### Shortcut Makefile
 
-Các lệnh quan trọng đã có alias trong `Makefile`:
-
 ```bash
 make help
 make install
@@ -334,7 +396,7 @@ make db-seed-dev
 - `redis`: Redis 7
 - `api`: container API NestJS chạy môi trường phát triển
 
-Service `api` mount mã nguồn của repo vào `/app` và mount `./storage:/app/storage` để lưu file upload hoặc asset cục bộ trong quá trình phát triển.
+Service `api` mount mã nguồn vào `/app` và mount `./storage:/app/storage` để lưu file upload hoặc asset cục bộ.
 
 ```bash
 pnpm infra:dev:up
@@ -360,17 +422,17 @@ API_IMAGE=warranty-management-base-api WEB_IMAGE=warranty-management-base-web AD
 pnpm infra:prod:up
 ```
 
-Migration Prisma nên được chạy bằng lệnh riêng:
+Migration Prisma nên chạy bằng lệnh riêng:
 
 ```bash
 pnpm prisma:migrate:prod
 ```
 
-Không nên tự chạy migration khi ứng dụng khởi động.
+Không chạy migration tự động khi ứng dụng khởi động.
 
 ## Biến Môi Trường
 
-Sao chép `.env.example` thành `.env.development` cho môi trường cục bộ. Với môi trường sản xuất, tạo `.env.production` và thay bằng secret, domain, database, Redis thật.
+Sao chép `.env.example` thành `.env.development` cho môi trường cục bộ. Với môi trường sản xuất, tạo `.env.production` và thay bằng secret/domain/database/Redis thật.
 
 Các nhóm biến quan trọng:
 
@@ -382,18 +444,16 @@ Các nhóm biến quan trọng:
 - **Web/Admin**: `WEB_PORT`, `ADMIN_PORT`, `NEXT_PUBLIC_API_URL`
 - **Telegram CI/CD**: `CI_TELEGRAM_BOT_TOKEN`, `CI_TELEGRAM_CHAT_ID`
 
-Không commit `.env.development`, `.env.production` hoặc bất kỳ file nào chứa secret thật.
-
-## Thông Báo Telegram Cho CI/CD
+## CI/CD Và Telegram
 
 Repo có sẵn module gửi thông báo Telegram tại `packages/telegram`.
 
-Giá trị bí mật bắt buộc:
+Secrets tùy chọn cho GitHub Actions:
 
 - `CI_TELEGRAM_BOT_TOKEN`
 - `CI_TELEGRAM_CHAT_ID`
 
-Hai giá trị này nên được cấu hình trong phần secret của repository trên GitHub Actions.
+Nếu thiếu hai secret này, notification sẽ tự skip.
 
 Chạy thử mà không gửi thật:
 
@@ -403,7 +463,7 @@ pnpm notify:telegram \
   --mode text \
   --event ci \
   --status success \
-  --project booking-system-base \
+  --project warranty-management-base \
   --repository owner/repo \
   --branch main \
   --commit abc123 \
@@ -414,82 +474,69 @@ pnpm notify:telegram \
   --passed 1
 ```
 
-Các chế độ hỗ trợ:
+Xem thêm tại [docs/integrations/telegram.md](docs/integrations/telegram.md).
 
-- `text`: gửi tin nhắn HTML qua Telegram.
-- `image`: dựng card thành ảnh PNG rồi gửi dưới dạng ảnh.
-- `both`: gửi cả tin nhắn HTML và ảnh.
+## Kế Hoạch Triển Khai Demo
 
-Xem thêm tại `docs/integrations/telegram.md`.
+### Giai Đoạn 1: Nền Tảng Dữ Liệu Và API
 
-## CI
+1. Thêm schema Prisma cho `customers`, `products`, `product_ownerships`, `warranties`.
+2. Tạo module `customers`.
+3. Tạo module `products`.
+4. Tạo module `warranties`.
+5. Viết use-case test cho các rule quan trọng:
+   - Tạo mã tự động không trùng.
+   - Admin nhập mã bị trùng thì fail.
+   - Customer không tra cứu được sản phẩm của người khác.
 
-Quy trình GitHub Actions hiện có:
+### Giai Đoạn 2: Admin Demo
 
-| Quy trình | Kích hoạt                       | Công việc                                                                                  |
-| :-------- | :------------------------------ | :----------------------------------------------------------------------------------------- |
-| `CI`      | Pull request và push vào `main` | tách job Packages, API, Web, Admin; chạy lint, typecheck, test/build phù hợp; gửi Telegram |
+1. Tạo trang danh sách sản phẩm.
+2. Tạo form thêm/sửa sản phẩm.
+3. Gán sản phẩm với khách hàng.
+4. Hiển thị chi tiết sản phẩm và bảo hành.
 
-Thông báo Telegram sẽ tự bỏ qua nếu chưa cấu hình đủ `CI_TELEGRAM_BOT_TOKEN` và `CI_TELEGRAM_CHAT_ID`.
+### Giai Đoạn 3: Customer Demo
 
-## Quy Ước Kiến Trúc
+1. Tạo trang danh sách sản phẩm của tôi.
+2. Tạo trang tra cứu bảo hành.
+3. Hiển thị trang chi tiết bảo hành.
+4. Demo case thành công và case bị từ chối do không phải chủ sở hữu.
 
-### Module API
+### Giai Đoạn 4: Dữ Liệu Mẫu
 
-Các tính năng backend nên nằm trong `apps/api/src/module/<feature>`. Ưu tiên lát cắt dọc để controller, DTO, service/use-case, repository và test nằm gần cùng một ranh giới module.
+Seed tối thiểu:
 
-Các khu vực API có sẵn:
-
-- `auth`
-- `user`
-- `assets`
-- `notification`
-- `email`
-- `health`
-- `jobs`
-- `verification`
-
-Đọc `docs/conventions/modules.md` trước khi thêm module lớn.
-
-### Code Dùng Chung
-
-Chỉ đưa code vào shared package khi thật sự có nhu cầu dùng chung giữa nhiều ranh giới:
-
-- Dùng `@repo/shared` cho giao kèo dữ liệu, schema, hằng số và utility thuần.
-- Dùng `@repo/hooks` cho React hooks dùng chung giữa Web/Admin.
-- Dùng `@repo/ui` cho thành phần UI React nền tảng có thể tái sử dụng.
-- Giữ logic riêng của app trong chính app đó nếu chưa có trường hợp dùng chung rõ ràng.
-
-### Quy Ước Import
-
-Import nội bộ trong app nên ưu tiên alias đã cấu hình thay vì relative import quá sâu. Shared package nên được import bằng tên package:
-
-```ts
-import { something } from "@/module/example";
-import { ApiResponse } from "@repo/shared";
-```
+- 1 admin.
+- 2 khách hàng.
+- 3 sản phẩm:
+  - 1 xe gán cho khách A.
+  - 1 phụ kiện gán cho khách A.
+  - 1 xe gán cho khách B.
+- Demo khách A tra cứu sản phẩm của A thành công.
+- Demo khách A tra cứu mã của khách B bị từ chối.
 
 ## Quy Trình Cho AI Agent
 
-Repo có quy trình nhẹ cho AI agent, lấy cảm hứng từ AI Hero skills, để giữ quá trình triển khai rõ ràng, có tài liệu và dễ bàn giao.
+Repo có workflow nhẹ cho AI agent để giữ quá trình triển khai rõ ràng, có tài liệu và dễ bàn giao.
 
 Luồng mặc định:
 
-1. Dùng `docs/agents/workflows/01-grill-with-docs.md` cho công việc chưa rõ hoặc có ảnh hưởng lớn.
+1. Dùng [docs/agents/workflows/01-grill-with-docs.md](docs/agents/workflows/01-grill-with-docs.md) cho công việc chưa rõ hoặc có ảnh hưởng lớn.
 2. Viết PRD trong `docs/prd/`.
-3. Tách PRD thành các issue dọc trong `docs/issues/`.
-4. Dùng hướng dẫn TDD cho phần logic rủi ro.
-5. Dùng quy trình chẩn đoán và review kiến trúc khi debug regression hoặc refactor lớn.
-6. Tạo tài liệu bàn giao trước khi chuyển ngữ cảnh hoặc dừng giữa chừng.
+3. Tách PRD thành issue dọc trong `docs/issues/`.
+4. Dùng hướng dẫn TDD cho logic rủi ro.
+5. Dùng quy trình diagnose/review architecture khi debug regression hoặc refactor lớn.
+6. Tạo handoff trước khi chuyển ngữ cảnh hoặc dừng giữa chừng.
 
 Bộ nhớ của repo:
 
-- `CONTEXT.md`: ngôn ngữ chung và các quyết định kiến trúc.
-- `docs/adr/`: các quyết định kiến trúc đã chấp nhận.
-- `docs/prd/`: tài liệu yêu cầu sản phẩm.
-- `docs/issues/`: ticket triển khai nội bộ.
+- [CONTEXT.md](CONTEXT.md): ngôn ngữ chung và nguyên tắc kiến trúc.
+- [docs/adr/](docs/adr/): quyết định kiến trúc đã chấp nhận.
+- [docs/prd/](docs/prd/): tài liệu yêu cầu sản phẩm.
+- [docs/issues/](docs/issues/): ticket triển khai nội bộ.
 
-Đọc `AGENTS.md` trước khi lên kế hoạch hoặc triển khai thay đổi lớn.
+Đọc [AGENTS.md](AGENTS.md) trước khi lên kế hoạch hoặc triển khai thay đổi lớn.
 
 ## Quy Ước Git
 
@@ -501,7 +548,7 @@ Repo dùng Conventional Commits với Commitlint.
 <type>: <subject>
 ```
 
-Các loại commit thường dùng:
+Các type thường dùng:
 
 | Type       | Ý nghĩa                             |
 | :--------- | :---------------------------------- |
@@ -516,36 +563,22 @@ Các loại commit thường dùng:
 Ví dụ:
 
 ```bash
-git commit -m "feat: add booking availability module"
-git commit -m "fix: correct redis health check"
-git commit -m "docs: update docker compose guide"
+git commit -m "feat: add warranty lookup module"
+git commit -m "fix: enforce customer ownership on warranty lookup"
+git commit -m "docs: update automotive warranty demo readme"
 ```
-
-## Tái Sử Dụng Base Cho Dự Án Mới
-
-Danh sách kiểm tra khuyến nghị:
-
-1. Đổi metadata trong `package.json`.
-2. Cập nhật `APP_NAME`, port, tên database và giá trị secret mẫu trong `.env.example`.
-3. Cập nhật tên Docker image trong script và compose env.
-4. Thay UI mẫu trong `apps/web` và `apps/admin`.
-5. Thêm module nghiệp vụ dưới `apps/api/src/module`.
-6. Tạo hoặc cập nhật PRD trong `docs/prd`.
-7. Tạo ADR cho các quyết định kiến trúc quan trọng.
-8. Cấu hình GitHub Actions secrets cho Telegram nếu cần thông báo CI/CD.
-9. Chạy `pnpm lint`, `pnpm check-types`, `pnpm test:api` và `pnpm build`.
 
 ## Liên Kết Hữu Ích
 
-- `AGENTS.md` - điểm bắt đầu cho quy trình AI agent.
-- `CONTEXT.md` - context và quyết định chung của repo.
-- `docs/architecture/overview.md` - tổng quan kiến trúc.
-- `docs/getting-started.md` - hướng dẫn chạy repo lần đầu.
-- `docs/development.md` - workflow phát triển.
-- `docs/testing.md` - chiến lược test.
-- `docs/deployment.md` - build/deploy/CI.
-- `docs/env.md` - quy ước biến môi trường.
-- `docs/conventions/modules.md` - quy ước tổ chức module.
-- `docs/integrations/telegram.md` - hướng dẫn thông báo Telegram.
-- `docker-compose.dev.yml` - hạ tầng phát triển.
-- `docker-compose.prod.yml` - hạ tầng giống sản xuất.
+- [AGENTS.md](AGENTS.md) - điểm bắt đầu cho quy trình AI agent.
+- [CONTEXT.md](CONTEXT.md) - context và nguyên tắc kiến trúc chung.
+- [docs/prd/warranty-management-automotive-demo.md](docs/prd/warranty-management-automotive-demo.md) - PRD demo bảo hành ô tô.
+- [docs/architecture/overview.md](docs/architecture/overview.md) - tổng quan kiến trúc.
+- [docs/architecture/frontend-folder-structure.md](docs/architecture/frontend-folder-structure.md) - rule frontend.
+- [docs/architecture/backend-folder-structure.md](docs/architecture/backend-folder-structure.md) - rule backend.
+- [docs/getting-started.md](docs/getting-started.md) - hướng dẫn chạy repo lần đầu.
+- [docs/development.md](docs/development.md) - workflow phát triển.
+- [docs/testing.md](docs/testing.md) - chiến lược test.
+- [docs/deployment.md](docs/deployment.md) - build/deploy/CI.
+- [docs/env.md](docs/env.md) - quy ước biến môi trường.
+- [docs/integrations/telegram.md](docs/integrations/telegram.md) - thông báo Telegram.
