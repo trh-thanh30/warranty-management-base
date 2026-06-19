@@ -29,7 +29,7 @@ export function HomeView() {
   };
 
   return (
-    <main className="overflow-x-hidden bg-[#EEF3F5] text-slate-950">
+    <main className="overflow-x-hidden bg-white text-charcoal">
       <HeroSection
         onOpenQuote={() =>
           handleOpenQuote({
@@ -41,7 +41,7 @@ export function HomeView() {
       />
       <BrandsSection />
 
-      <div className="flex min-h-screen flex-col justify-center bg-[#EEF3F5]">
+      <div className="flex min-h-screen flex-col justify-center bg-ash">
         <StatsSection />
       </div>
 
@@ -49,7 +49,7 @@ export function HomeView() {
         <HowItWorksSection />
       </div>
 
-      <div className="flex min-h-screen flex-col justify-center bg-[#EEF3F5]">
+      <div className="flex min-h-screen flex-col justify-center bg-ash">
         <PricingSection onOpenQuote={handleOpenQuote} />
       </div>
 
@@ -61,7 +61,7 @@ export function HomeView() {
 
       <WorkshopsSection />
 
-      <div className="flex min-h-screen flex-col justify-center bg-[#EEF3F5]">
+      <div className="flex min-h-screen flex-col justify-center bg-ash">
         <FaqSection />
       </div>
 

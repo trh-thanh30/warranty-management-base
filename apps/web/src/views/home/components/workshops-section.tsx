@@ -165,17 +165,17 @@ export function WorkshopsSection() {
         }}
       />
 
-      <div className="overflow-hidden rounded-[2.5rem] border border-slate-200 bg-[#f8fafc] p-6 shadow-[0_28px_85px_-45px_rgba(15,23,42,0.4)] sm:p-10 lg:p-12">
+      <div className="overflow-hidden rounded-xl border border-cloud bg-ash p-6 sm:p-10 lg:p-12">
         {/* Header */}
         <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wider text-[#0b7dff]">
+            <p className="text-sm font-medium uppercase tracking-wider text-brand-blue">
               Partner Network
             </p>
-            <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-tight text-slate-950 sm:text-5xl">
+            <h2 className="mt-4 text-3xl font-medium leading-tight tracking-normal text-charcoal sm:text-5xl">
               Our Certified Workshops
             </h2>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600">
+            <p className="mt-3 max-w-xl text-sm leading-6 text-graphite">
               Access 350+ certified garages nationwide. Our partners support
               direct warranty claim settlement, meaning zero paperwork and no
               cash advance required.
@@ -184,13 +184,13 @@ export function WorkshopsSection() {
 
           {/* Search bar inside workshops */}
           <div className="relative w-full max-w-xs shrink-0">
-            <Search className="absolute left-4.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute left-4.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-pewter" />
             <input
               type="text"
               placeholder="Search garage name or specialty..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-11 w-full rounded-full border border-slate-200 bg-white pl-11 pr-4 text-xs text-slate-950 placeholder:text-slate-400 outline-none focus:border-[#0b7dff] focus:ring-1 focus:ring-[#0b7dff]"
+              className="h-11 w-full rounded-[4px] border border-cloud bg-white pl-11 pr-4 text-xs text-charcoal placeholder:text-pewter outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
             />
           </div>
         </div>
@@ -205,10 +205,10 @@ export function WorkshopsSection() {
                 key={city}
                 type="button"
                 onClick={() => setSelectedCity(city)}
-                className={`rounded-full px-5 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
+                className={`rounded-[4px] px-5 py-2 text-xs font-medium uppercase tracking-wider transition-all duration-[330ms] cursor-pointer ${
                   selectedCity === city
-                    ? "bg-slate-950 text-white shadow-md shadow-slate-950/10"
-                    : "bg-white border border-slate-200 text-slate-600 hover:text-slate-950"
+                    ? "bg-charcoal text-white border border-charcoal"
+                    : "bg-white border border-cloud text-graphite hover:text-charcoal hover:border-pewter"
                 }`}
               >
                 {city === "all" ? "All Locations" : city}
@@ -221,7 +221,7 @@ export function WorkshopsSection() {
             <button
               type="button"
               onClick={() => handleScroll("left")}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 shadow-sm transition-all cursor-pointer"
+              className="flex h-10 w-10 items-center justify-center rounded-[4px] border border-cloud bg-white text-graphite hover:bg-ash hover:text-charcoal transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/30"
               aria-label="Previous page"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -229,7 +229,7 @@ export function WorkshopsSection() {
             <button
               type="button"
               onClick={() => handleScroll("right")}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 shadow-sm transition-all cursor-pointer"
+              className="flex h-10 w-10 items-center justify-center rounded-[4px] border border-cloud bg-white text-graphite hover:bg-ash hover:text-charcoal transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/30"
               aria-label="Next page"
             >
               <ChevronRight className="h-5 w-5" />
@@ -244,7 +244,7 @@ export function WorkshopsSection() {
               <motion.div
                 ref={scrollContainerRef}
                 layout
-                className="flex gap-6 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-4"
+                className="flex items-stretch gap-6 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-4 group/slider"
               >
                 {filteredWorkshops.map((workshop) => (
                   <motion.article
@@ -254,10 +254,10 @@ export function WorkshopsSection() {
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.3 }}
                     key={workshop.id}
-                    className="flex flex-col rounded-3xl border border-slate-200 bg-white p-6 transition-all duration-300 hover:border-slate-300 hover:shadow-lg w-full min-w-full md:w-[calc(50%-12px)] md:min-w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] lg:min-w-[calc(33.333%-16px)] snap-start"
+                    className="flex flex-col rounded-xl border border-cloud bg-white p-6 transition-all duration-500 ease-out hover:border-brand-blue/30 w-full min-w-full md:w-[calc(50%-12px)] md:min-w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] lg:min-w-[calc(33.333%-16px)] group-hover/slider:lg:w-[calc(26%-16px)] group-hover/slider:lg:min-w-[calc(26%-16px)] lg:hover:!w-[calc(48%-16px)] lg:hover:!min-w-[calc(48%-16px)] snap-start overflow-hidden group/card"
                   >
                     {/* Visual Image */}
-                    <div className="relative h-40 w-full overflow-hidden rounded-2xl bg-slate-100">
+                    <div className="relative h-40 w-full overflow-hidden rounded-lg bg-ash">
                       <Image
                         src={workshop.imageUrl}
                         alt={workshop.name}
@@ -265,7 +265,7 @@ export function WorkshopsSection() {
                         sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="object-cover transition-transform duration-500 hover:scale-105"
                       />
-                      <div className="absolute left-3 top-3 rounded-full bg-slate-900/60 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
+                      <div className="absolute left-3 top-3 rounded-[4px] bg-charcoal/80 px-2.5 py-1 text-[9px] font-medium uppercase tracking-wider text-white">
                         Certified Partner
                       </div>
                     </div>
@@ -273,7 +273,7 @@ export function WorkshopsSection() {
                     {/* Content */}
                     <div className="mt-5 flex-1 flex flex-col">
                       <div className="flex items-center justify-between">
-                        <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                        <span className="rounded-[4px] bg-ash px-3 py-1 text-[10px] font-medium uppercase tracking-wider text-pewter">
                           {workshop.city}
                         </span>
                         <div className="flex items-center gap-1 text-xs font-bold text-amber-500">
@@ -282,52 +282,55 @@ export function WorkshopsSection() {
                         </div>
                       </div>
 
-                      <h3 className="mt-3 text-lg font-bold tracking-tight text-slate-950">
+                      <h3 className="mt-3 text-lg font-medium tracking-tight text-charcoal">
                         {workshop.name}
                       </h3>
 
-                      <div className="mt-3 space-y-2 text-xs text-slate-500">
-                        <div className="flex items-start gap-2">
-                          <MapPin className="h-4 w-4 shrink-0 text-slate-400" />
-                          <span>{workshop.address}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-4 w-4 shrink-0 text-slate-400" />
-                          <span>{workshop.phone}</span>
-                        </div>
-                      </div>
-
-                      {/* Specialty Badges */}
-                      <div className="mt-4 flex flex-wrap gap-1.5">
-                        {workshop.specialties.map((spec) => (
-                          <span
-                            key={spec}
-                            className="rounded-md border border-slate-100 bg-slate-50 px-2 py-0.5 text-[10px] font-medium text-slate-600"
-                          >
-                            {spec}
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* Feature checkmarks */}
-                      <div className="mt-5 space-y-1.5 border-t border-slate-100 pt-4 text-xs text-slate-600">
-                        {workshop.features.map((feat) => (
-                          <div key={feat} className="flex items-center gap-2">
-                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                            <span>{feat}</span>
+                      {/* Expandable Details Container (Desktop Hover Only) */}
+                      <div className="lg:max-h-0 lg:opacity-0 lg:pointer-events-none transition-all duration-500 ease-out overflow-hidden lg:group-hover/card:max-h-[600px] lg:group-hover/card:opacity-100 lg:group-hover/card:pointer-events-auto flex flex-col flex-1">
+                        <div className="mt-3 space-y-2 text-xs text-pewter">
+                          <div className="flex items-start gap-2">
+                            <MapPin className="h-4 w-4 shrink-0 text-pewter" />
+                            <span>{workshop.address}</span>
                           </div>
-                        ))}
-                      </div>
+                          <div className="flex items-center gap-2">
+                            <Phone className="h-4 w-4 shrink-0 text-pewter" />
+                            <span>{workshop.phone}</span>
+                          </div>
+                        </div>
 
-                      {/* Action Button */}
-                      <Button
-                        type="button"
-                        onClick={() => handleBookAppointment(workshop.name)}
-                        className="mt-6 h-11 w-full rounded-full border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-900 cursor-pointer flex items-center justify-center gap-1.5"
-                      >
-                        <Calendar className="h-4 w-4" />
-                        Book Appointment
-                      </Button>
+                        {/* Specialty Badges */}
+                        <div className="mt-4 flex flex-wrap gap-1.5">
+                          {workshop.specialties.map((spec) => (
+                            <span
+                              key={spec}
+                              className="rounded-[4px] border border-cloud bg-ash px-2 py-0.5 text-[10px] font-medium text-graphite"
+                            >
+                              {spec}
+                            </span>
+                          ))}
+                        </div>
+
+                        {/* Feature checkmarks */}
+                        <div className="mt-5 flex-1 space-y-1.5 border-t border-cloud pt-4 text-xs text-graphite">
+                          {workshop.features.map((feat) => (
+                            <div key={feat} className="flex items-center gap-2">
+                              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                              <span>{feat}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Action Button */}
+                        <Button
+                          type="button"
+                          onClick={() => handleBookAppointment(workshop.name)}
+                          className="mt-6 h-11 w-full rounded-[4px] border border-cloud bg-ash text-xs font-medium text-graphite hover:bg-cloud hover:text-charcoal cursor-pointer flex items-center justify-center gap-1.5 transition-colors duration-[330ms]"
+                        >
+                          <Calendar className="h-4 w-4" />
+                          Book Appointment
+                        </Button>
+                      </div>
                     </div>
                   </motion.article>
                 ))}

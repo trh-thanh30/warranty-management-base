@@ -8,7 +8,7 @@ const track = [...carBrands, ...carBrands];
 
 function BrandCard({ brand }: { brand: (typeof carBrands)[number] }) {
   return (
-    <div className="flex h-12 min-w-[140px] shrink-0 items-center justify-center rounded-xl border border-slate-100 bg-slate-50 px-5 shadow-sm transition-colors duration-300 hover:border-[#0b7dff]/30 hover:bg-[#e9f4ff]/25 group">
+    <div className="flex h-12 min-w-[140px] shrink-0 items-center justify-center rounded-[4px] border border-cloud bg-ash px-5 transition-colors duration-[330ms] hover:border-brand-blue/30 hover:bg-brand-blue/5 group">
       <Image
         src={brand.src}
         alt={`${brand.name} logo`}
@@ -25,10 +25,10 @@ export function BrandsSection() {
   return (
     <section
       aria-label="Supported car brands"
-      className="overflow-hidden border-y border-slate-200 bg-white py-6"
+      className="overflow-hidden border-y border-cloud bg-white py-6"
     >
       {/* Label */}
-      <p className="mb-5 text-center text-xs font-medium uppercase tracking-widest text-slate-400">
+      <p className="mb-5 text-center text-xs font-medium uppercase tracking-widest text-pewter">
         All makes &amp; models covered
       </p>
 

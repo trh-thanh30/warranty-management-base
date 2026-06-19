@@ -2,8 +2,15 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
+import { Montserrat } from "next/font/google";
 import { routing } from "@/src/i18n/routing";
 import "../globals.css";
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-montserrat",
+});
 
 export const metadata: Metadata = {
   title: "Web App",
@@ -30,7 +37,7 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className="scroll-smooth">
+    <html lang={locale} className={`scroll-smooth ${montserrat.variable}`}>
       <body>
         <NextIntlClientProvider messages={messages}>
           {children}

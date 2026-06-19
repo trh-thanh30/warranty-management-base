@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
-import { Button } from "@repo/ui/button";
 import { navItems, carHeroImages } from "../home.constants";
 import { motionDuration, motionEase } from "@/src/constants/motion.constants";
 
@@ -66,9 +65,9 @@ export function HeroSection({ onOpenQuote }: { onOpenQuote: () => void }) {
         <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent" />
       </div>
 
-      {/* Navigation header — floating capsule glassmorphism bar */}
+      {/* Navigation header — full-width transparent bar */}
       <motion.header
-        className="relative z-20 px-4 pt-5 sm:px-6 lg:px-10"
+        className="relative z-20 w-full px-6 py-5 lg:px-12"
         initial="hidden"
         animate="show"
         variants={{
@@ -77,7 +76,7 @@ export function HeroSection({ onOpenQuote }: { onOpenQuote: () => void }) {
         }}
       >
         <motion.div
-          className="mx-auto flex max-w-7xl items-center justify-between rounded-full border border-white/8 bg-black/15 px-6 py-2.5 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)]"
+          className="mx-auto flex max-w-[1440px] items-center justify-between w-full"
           variants={{
             hidden: { opacity: 0, y: -16 },
             show: {
@@ -92,18 +91,18 @@ export function HeroSection({ onOpenQuote }: { onOpenQuote: () => void }) {
         >
           {/* Logo */}
           <div className="flex items-center">
-            <span className="text-sm font-extrabold tracking-widest text-white">
-              LOGO
+            <span className="text-sm font-medium tracking-[0.4em] text-white uppercase">
+              GARANTY
             </span>
           </div>
 
-          {/* Nav items — centered, uppercase small caps */}
-          <nav className="hidden items-center gap-8 lg:flex">
+          {/* Nav items — centered, clean, medium weight */}
+          <nav className="hidden items-center gap-1.5 lg:flex">
             {navItems.map((item) => (
               <motion.a
                 key={item}
                 href={`#${item.toLowerCase().replaceAll(" ", "-")}`}
-                className="text-sm font-semibold uppercase tracking-widest text-white/55 transition-colors duration-200 hover:text-white"
+                className="text-sm font-medium text-white/75 px-4 py-1.5 rounded-[4px] transition-all duration-[330ms] hover:text-white hover:bg-white/10"
                 variants={{
                   hidden: { opacity: 0, y: -10 },
                   show: {
@@ -121,12 +120,12 @@ export function HeroSection({ onOpenQuote }: { onOpenQuote: () => void }) {
             ))}
           </nav>
 
-          {/* CTA — rounded-full outline button */}
+          {/* CTA — flat, barely rounded outline button */}
           <motion.a
             href="#pricing"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="hidden sm:inline-flex items-center rounded-full border border-white/20 px-5 py-2 text-sm font-bold uppercase tracking-[0.12em] text-white/90 transition-all duration-200 hover:border-white/50 hover:bg-white/5"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="hidden sm:inline-flex items-center rounded-[4px] border border-white/25 bg-white/5 px-5 py-2 text-sm font-medium text-white transition-all duration-[330ms] hover:bg-white hover:text-charcoal hover:border-white"
           >
             Check Price
           </motion.a>
@@ -151,7 +150,7 @@ export function HeroSection({ onOpenQuote }: { onOpenQuote: () => void }) {
             className="max-w-2xl"
           >
             {/* Headline */}
-            <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold leading-[0.95] tracking-tight text-white uppercase overflow-hidden">
+            <h1 className="text-4xl sm:text-[40px] font-medium leading-tight tracking-[0.02em] text-white overflow-hidden">
               {(carHeroImages[currentIdx]?.title ?? "")
                 .split(" ")
                 .map((word, i) => (
@@ -159,7 +158,7 @@ export function HeroSection({ onOpenQuote }: { onOpenQuote: () => void }) {
                     key={i}
                     className="mr-[0.25em] inline-block"
                     variants={{
-                      hidden: { opacity: 0, y: 30 },
+                      hidden: { opacity: 0, y: 20 },
                       show: {
                         opacity: 1,
                         y: 0,
@@ -167,7 +166,7 @@ export function HeroSection({ onOpenQuote }: { onOpenQuote: () => void }) {
                       },
                       exit: {
                         opacity: 0,
-                        y: -20,
+                        y: -10,
                         transition: { duration: 0.2, ease: "easeIn" },
                       },
                     }}
@@ -180,9 +179,9 @@ export function HeroSection({ onOpenQuote }: { onOpenQuote: () => void }) {
             {/* Subtitle */}
             <div className="overflow-hidden">
               <motion.p
-                className="mt-4 text-base text-white/70 max-w-lg"
+                className="mt-3 text-sm text-white/80 max-w-lg font-normal"
                 variants={{
-                  hidden: { opacity: 0, y: 15 },
+                  hidden: { opacity: 0, y: 12 },
                   show: {
                     opacity: 1,
                     y: 0,
@@ -190,7 +189,7 @@ export function HeroSection({ onOpenQuote }: { onOpenQuote: () => void }) {
                   },
                   exit: {
                     opacity: 0,
-                    y: -15,
+                    y: -10,
                     transition: { duration: 0.2, ease: "easeIn" },
                   },
                 }}
@@ -199,11 +198,11 @@ export function HeroSection({ onOpenQuote }: { onOpenQuote: () => void }) {
               </motion.p>
             </div>
 
-            {/* CTA Button */}
+            {/* CTA Buttons - Side by Side, flat styling */}
             <motion.div
-              className="mt-6"
+              className="mt-8 flex flex-col sm:flex-row gap-4"
               variants={{
-                hidden: { opacity: 0, y: 15 },
+                hidden: { opacity: 0, y: 12 },
                 show: {
                   opacity: 1,
                   y: 0,
@@ -211,23 +210,26 @@ export function HeroSection({ onOpenQuote }: { onOpenQuote: () => void }) {
                 },
                 exit: {
                   opacity: 0,
-                  y: -15,
+                  y: -10,
                   transition: { duration: 0.2, ease: "easeIn" },
                 },
               }}
             >
-              <motion.div
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.97 }}
-                className="inline-block"
+              <motion.button
+                onClick={onOpenQuote}
+                whileTap={{ scale: 0.98 }}
+                className="h-10 w-full sm:w-[200px] rounded-[4px] bg-brand-blue text-xs font-medium uppercase tracking-wider text-white transition-all duration-[330ms] hover:bg-brand-blue/90 cursor-pointer"
               >
-                <Button
-                  onClick={onOpenQuote}
-                  className="h-12 rounded-full px-8 text-sm font-bold uppercase tracking-wider cursor-pointer"
-                >
-                  Get a quote
-                </Button>
-              </motion.div>
+                Get a quote
+              </motion.button>
+
+              <motion.a
+                href="#pricing"
+                whileTap={{ scale: 0.98 }}
+                className="flex h-10 w-full sm:w-[200px] items-center justify-center rounded-[4px] bg-white/80 text-xs font-medium uppercase tracking-wider text-charcoal backdrop-blur-sm transition-all duration-[330ms] hover:bg-white cursor-pointer"
+              >
+                Explore Plans
+              </motion.a>
             </motion.div>
           </motion.div>
         </AnimatePresence>

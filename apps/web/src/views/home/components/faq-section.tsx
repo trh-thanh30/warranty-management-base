@@ -41,37 +41,37 @@ export function FaqSection() {
         initial="hidden"
         whileInView="show"
         viewport={viewportOnce}
-        className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_28px_80px_-55px_rgba(15,23,42,0.55)] lg:min-h-[72vh]"
+        className="overflow-hidden rounded-xl border border-cloud bg-white lg:min-h-[72vh]"
       >
         <div className="grid min-h-[inherit] lg:grid-cols-[0.9fr_1.35fr]">
           <motion.div
             variants={fadeUp}
-            className="flex flex-col justify-between gap-10 border-b border-slate-200 bg-[#f8fafc] p-7 sm:p-9 lg:border-b-0 lg:border-r lg:p-12"
+            className="flex flex-col justify-between gap-10 border-b border-cloud bg-ash p-7 sm:p-9 lg:border-b-0 lg:border-r lg:p-12"
           >
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wider text-[#0b7dff]">
+              <p className="text-sm font-medium uppercase tracking-wider text-brand-blue">
                 Got questions?
               </p>
-              <h2 className="mt-4 text-4xl font-light leading-tight tracking-tight text-slate-950 sm:text-5xl lg:text-[4rem]">
+              <h2 className="mt-4 text-4xl font-medium leading-tight tracking-normal text-charcoal sm:text-5xl lg:text-[3.5rem]">
                 Answers before you choose a plan.
               </h2>
-              <p className="mt-6 max-w-xl text-base leading-8 text-slate-600 lg:text-lg">
+              <p className="mt-6 max-w-xl text-base leading-8 text-graphite lg:text-lg">
                 Eligibility, claims, garages, limits, and support are grouped
                 here so the warranty flow stays clear before checkout.
               </p>
             </div>
 
             <div className="space-y-4">
-              <div className="rounded-[1.5rem] border border-slate-200 bg-white p-5">
+              <div className="rounded-lg border border-cloud bg-white p-5">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e9f4ff] text-[#0b7dff]">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-brand-blue/5 text-brand-blue">
                     <ShieldCheck className="h-5 w-5" aria-hidden="true" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-slate-950">
+                    <p className="text-sm font-semibold text-charcoal">
                       Need a quick answer?
                     </p>
-                    <p className="mt-1 text-sm leading-6 text-slate-500">
+                    <p className="mt-1 text-sm leading-6 text-pewter">
                       Our support team can confirm eligibility and claim next
                       steps before you book a repair.
                     </p>
@@ -81,14 +81,14 @@ export function FaqSection() {
                 <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                   <a
                     href="mailto:support@garanty.com"
-                    className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:border-[#0b7dff]/40 hover:text-[#0b7dff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7dff]"
+                    className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[4px] border border-cloud bg-white px-4 py-2.5 text-sm font-medium text-graphite transition-colors hover:border-pewter hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/30"
                   >
                     <Mail className="h-4 w-4" aria-hidden="true" />
                     Email support
                   </a>
                   <a
                     href="tel:+33000000000"
-                    className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-[#0b7dff] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_14px_32px_-20px_rgba(11,125,255,0.9)] transition-all hover:bg-[#0969d9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7dff]"
+                    className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[4px] bg-brand-blue px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-brand-blue/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/30"
                   >
                     <PhoneCall className="h-4 w-4" aria-hidden="true" />
                     Call claims
@@ -100,12 +100,12 @@ export function FaqSection() {
                 {quickFacts.map((fact) => (
                   <div
                     key={fact.label}
-                    className="rounded-2xl border border-slate-200 bg-white p-4"
+                    className="rounded-lg border border-cloud bg-white p-4"
                   >
-                    <p className="text-[0.7rem] font-semibold uppercase tracking-wider text-slate-500">
+                    <p className="text-[0.7rem] font-medium uppercase tracking-wider text-pewter">
                       {fact.label}
                     </p>
-                    <p className="mt-2 text-2xl font-light tracking-tight text-slate-950">
+                    <p className="mt-2 text-2xl font-medium tracking-tight text-charcoal">
                       {fact.value}
                     </p>
                   </div>
@@ -125,24 +125,24 @@ export function FaqSection() {
                   <motion.div
                     key={item.question}
                     variants={scaleIn}
-                    className={`rounded-[1.5rem] border transition-all duration-300 ${
+                    className={`rounded-lg border transition-all duration-[330ms] ${
                       isOpen
-                        ? "border-[#0b7dff]/25 bg-[#f7fbff] shadow-[0_16px_42px_-34px_rgba(11,125,255,0.7)]"
-                        : "border-slate-200 bg-white"
+                        ? "border-brand-blue bg-brand-blue/5"
+                        : "border-cloud bg-white"
                     }`}
                   >
                     <button
                       type="button"
                       onClick={() => setOpenIdx(isOpen ? null : i)}
                       aria-expanded={isOpen}
-                      className="flex min-h-[72px] w-full cursor-pointer items-center justify-between gap-5 px-5 py-4 text-left text-base font-semibold text-slate-950 transition-colors hover:text-[#0b7dff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0b7dff] sm:px-6"
+                      className="flex min-h-[72px] w-full cursor-pointer items-center justify-between gap-5 px-5 py-4 text-left text-base font-medium text-charcoal transition-colors hover:text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-blue/30 sm:px-6"
                     >
                       <span>{item.question}</span>
                       <span
-                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all duration-200 ${
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] border transition-all duration-[330ms] ${
                           isOpen
-                            ? "border-[#0b7dff] bg-[#0b7dff] text-white"
-                            : "border-slate-200 bg-white text-slate-500"
+                            ? "border-brand-blue bg-brand-blue text-white"
+                            : "border-cloud bg-white text-pewter"
                         }`}
                       >
                         {isOpen ? (
@@ -166,7 +166,7 @@ export function FaqSection() {
                           }}
                           className="overflow-hidden"
                         >
-                          <p className="px-5 pb-6 text-base leading-8 text-slate-600 sm:px-6">
+                          <p className="px-5 pb-6 text-base leading-8 text-graphite sm:px-6">
                             {item.answer}
                           </p>
                         </motion.div>
@@ -179,12 +179,12 @@ export function FaqSection() {
 
             <motion.div
               variants={fadeUp}
-              className="grid gap-3 border-t border-slate-200 pt-6 sm:grid-cols-3"
+              className="grid gap-3 border-t border-cloud pt-6 sm:grid-cols-3"
             >
               {supportItems.map((item) => (
                 <div
                   key={item}
-                  className="flex min-h-[64px] items-center gap-3 rounded-2xl bg-slate-50 px-4 text-sm font-medium text-slate-700"
+                  className="flex min-h-[64px] items-center gap-3 rounded-[4px] bg-ash px-4 text-sm font-medium text-graphite"
                 >
                   <CheckCircle2
                     className="h-4 w-4 shrink-0 text-emerald-500"

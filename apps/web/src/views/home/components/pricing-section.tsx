@@ -1,16 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { Button } from "@repo/ui/button";
-import { pricingPlans, servicePlans, carHeroImage } from "../home.constants";
+import { pricingPlans, servicePlans } from "../home.constants";
 import { useScrollReveal, viewportOnce } from "@/src/hooks/use-scroll-reveal";
-import {
-  motionDuration,
-  motionEase,
-  motionSpring,
-} from "@/src/constants/motion.constants";
+import { motionSpring } from "@/src/constants/motion.constants";
 
 export function PricingSection({
   onOpenQuote,
@@ -69,18 +64,7 @@ export function PricingSection({
     >
       {/* Invisible anchor to support browser scrolling matching the navbar */}
       <div id="warranty" className="absolute top-0" />
-      <div className="relative overflow-hidden rounded-[2.5rem] bg-[#0a1628] p-5 text-white border border-slate-800 shadow-[0_30px_60px_-15px_rgba(15,23,42,0.4)] sm:p-8 lg:p-12">
-        <Image
-          src={carHeroImage.src}
-          alt=""
-          fill
-          sizes="(min-width: 1024px) 1440px, 100vw"
-          className="object-cover object-center opacity-10"
-          aria-hidden="true"
-        />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(11,125,255,0.35),transparent_40%)]" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/70 to-transparent" />
-
+      <div className="relative overflow-hidden rounded-xl bg-white p-5 text-charcoal border border-cloud sm:p-8 lg:p-12">
         <motion.div
           variants={container}
           initial="hidden"
@@ -94,14 +78,14 @@ export function PricingSection({
             className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end"
           >
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wider text-[#9ed5ff]">
+              <p className="text-sm font-medium uppercase tracking-wider text-brand-blue">
                 One price, complete cover
               </p>
-              <h2 className="mt-3 max-w-xl text-3xl font-semibold leading-tight tracking-tight sm:text-5xl">
+              <h2 className="mt-3 max-w-xl text-3xl font-medium leading-tight tracking-normal text-charcoal sm:text-5xl">
                 Guarantee your vehicle for years at a small cost
               </h2>
             </div>
-            <p className="max-w-sm text-sm leading-6 text-slate-400">
+            <p className="max-w-sm text-sm leading-6 text-graphite">
               Every plan includes mechanical claim review, partner workshops and
               clear repair limits before you commit.
             </p>
@@ -110,14 +94,14 @@ export function PricingSection({
           {/* Cards */}
           {/* Tab Switcher */}
           <motion.div variants={fadeUp} className="mt-8 flex justify-center">
-            <div className="relative flex rounded-full bg-slate-950/80 p-1 border border-white/5 shadow-2xl">
+            <div className="relative flex rounded-[4px] bg-ash p-1 border border-cloud">
               <button
                 type="button"
                 onClick={() => handleTabChange("service")}
-                className={`relative rounded-full px-6 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
+                className={`relative rounded-[4px] px-6 py-2.5 text-xs font-medium uppercase tracking-wider transition-all duration-[330ms] cursor-pointer ${
                   activeTab === "service"
-                    ? "bg-[#0b7dff] text-white shadow-lg shadow-[#0b7dff]/20"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-white text-charcoal border border-cloud shadow-sm"
+                    : "text-pewter hover:text-charcoal"
                 }`}
               >
                 Scheduled Servicing
@@ -125,10 +109,10 @@ export function PricingSection({
               <button
                 type="button"
                 onClick={() => handleTabChange("warranty")}
-                className={`relative rounded-full px-6 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
+                className={`relative rounded-[4px] px-6 py-2.5 text-xs font-medium uppercase tracking-wider transition-all duration-[330ms] cursor-pointer ${
                   activeTab === "warranty"
-                    ? "bg-[#0b7dff] text-white shadow-lg shadow-[#0b7dff]/20"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-white text-charcoal border border-cloud shadow-sm"
+                    : "text-pewter hover:text-charcoal"
                 }`}
               >
                 Warranty Cover
@@ -168,63 +152,53 @@ export function PricingSection({
                   }
                   animate={
                     isSelected && !shouldReduce
-                      ? { y: -6, scale: 1.015 }
+                      ? { y: -2, scale: 1.005 }
                       : { y: 0, scale: 1 }
                   }
                   whileHover={
-                    shouldReduce ? undefined : { y: isSelected ? -6 : -4 }
+                    shouldReduce ? undefined : { y: isSelected ? -2 : -1 }
                   }
-                  whileTap={shouldReduce ? undefined : { scale: 0.99 }}
-                  className={`relative flex flex-col cursor-pointer overflow-hidden rounded-[1.75rem] border p-6 text-left backdrop-blur-sm outline-none transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-[#9ed5ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a1628] ${
+                  whileTap={shouldReduce ? undefined : { scale: 0.995 }}
+                  className={`relative flex flex-col cursor-pointer overflow-hidden rounded-xl border p-6 text-left outline-none transition-colors duration-[330ms] focus-visible:ring-2 focus-visible:ring-brand-blue/30 ${
                     isSelected
-                      ? "border-[#9ed5ff] bg-[#0b7dff]/24 shadow-[0_0_44px_rgba(11,125,255,0.28)]"
+                      ? "border-brand-blue bg-brand-blue/5"
                       : plan.featured
-                        ? "border-[#69b7ff]/70 bg-[#0b7dff]/16 shadow-[0_0_32px_rgba(11,125,255,0.16)]"
-                        : "border-white/10 bg-white/5 hover:border-white/20"
+                        ? "border-brand-blue/30 bg-ash/50"
+                        : "border-cloud bg-white hover:border-pewter"
                   }`}
                 >
-                  {(plan.featured || isSelected) && (
-                    <motion.div
-                      className="pointer-events-none absolute inset-0 rounded-[inherit] bg-gradient-to-br from-[#0b7dff]/16 to-transparent"
-                      initial={false}
-                      animate={{ opacity: isSelected ? 1 : 0.65 }}
-                      transition={{
-                        duration: motionDuration.normal,
-                        ease: motionEase.out,
-                      }}
-                    />
-                  )}
-
                   <div className="flex items-center justify-between gap-3">
-                    <h3 className="text-base font-semibold">{plan.term}</h3>
+                    <h3 className="text-base font-medium text-charcoal">
+                      {plan.term}
+                    </h3>
                     {(plan.featured || isSelected) && (
                       <span
-                        className={`rounded-full px-3 py-1 text-xs font-semibold ${isSelected ? "bg-[#9ed5ff] text-slate-950" : "bg-white text-slate-950"}`}
+                        className={`rounded-[4px] px-3 py-1 text-xs font-medium ${isSelected ? "bg-brand-blue text-white" : "bg-ash text-graphite"}`}
                       >
                         {isSelected ? "Selected" : "Recommended"}
                       </span>
                     )}
                   </div>
 
-                  <p className="mt-7 text-5xl font-semibold tracking-tight">
+                  <p className="mt-7 text-5xl font-medium tracking-tight text-charcoal">
                     {plan.price}
-                    <span className="text-base font-medium text-slate-400">
-                      /month
+                    <span className="text-base font-medium text-pewter">
+                      /mo
                     </span>
                   </p>
 
-                  <p className="mt-3 min-h-10 text-sm leading-6 text-slate-400">
+                  <p className="mt-3 min-h-10 text-sm leading-6 text-graphite">
                     {plan.note}
                   </p>
 
-                  <div className="mt-5 space-y-2 border-t border-white/10 pt-4 text-xs text-slate-400">
+                  <div className="mt-5 space-y-2 border-t border-cloud pt-4 text-xs text-pewter">
                     <div className="flex justify-between">
                       <span>
                         {activeTab === "warranty"
                           ? "Max claim limit"
                           : "Included scope"}
                       </span>
-                      <span className="font-semibold text-white">
+                      <span className="font-medium text-charcoal">
                         {activeTab === "warranty"
                           ? i === 0
                             ? "$3,000"
@@ -244,7 +218,7 @@ export function PricingSection({
                           ? "Diagnostic cover"
                           : "Interval scope"}
                       </span>
-                      <span className="font-semibold text-white">
+                      <span className="font-medium text-charcoal">
                         {activeTab === "warranty"
                           ? "Full Cover"
                           : i === 0
@@ -257,8 +231,12 @@ export function PricingSection({
                   </div>
 
                   <Button
-                    variant={isSelected ? "secondary" : "primary"}
-                    className="mt-auto h-12 min-h-[44px] w-full rounded-full cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                    type="button"
+                    className={`mt-auto h-12 min-h-[44px] w-full rounded-[4px] cursor-pointer transition-colors duration-[330ms] text-xs font-medium uppercase tracking-wider ${
+                      isSelected
+                        ? "bg-brand-blue text-white hover:bg-brand-blue/90"
+                        : "bg-cloud text-graphite hover:bg-cloud/85"
+                    }`}
                     onClick={(event) => {
                       event.stopPropagation();
                       setSelectedPlanIndex(i);
@@ -278,7 +256,7 @@ export function PricingSection({
 
           <motion.p
             variants={fadeUp}
-            className="mt-6 text-center text-xs text-slate-500"
+            className="mt-6 text-center text-xs text-pewter"
           >
             {selectedPlanSummary} Final price may vary depending on vehicle
             model, age and mileage.

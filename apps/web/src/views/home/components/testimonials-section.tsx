@@ -46,21 +46,21 @@ export function TestimonialsSection() {
         initial="hidden"
         whileInView="show"
         viewport={viewportOnce}
-        className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_28px_80px_-55px_rgba(15,23,42,0.55)] lg:min-h-[72vh]"
+        className="overflow-hidden rounded-xl border border-cloud bg-white lg:min-h-[72vh]"
       >
         <div className="grid min-h-[inherit] lg:grid-cols-[0.9fr_1.35fr]">
           <motion.div
             variants={fadeUp}
-            className="flex flex-col justify-between gap-10 border-b border-slate-200 bg-[#f8fafc] p-7 sm:p-9 lg:border-b-0 lg:border-r lg:p-12"
+            className="flex flex-col justify-between gap-10 border-b border-cloud bg-ash p-7 sm:p-9 lg:border-b-0 lg:border-r lg:p-12"
           >
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wider text-[#0b7dff]">
+              <p className="text-sm font-medium uppercase tracking-wider text-brand-blue">
                 Real stories
               </p>
-              <h2 className="mt-4 text-4xl font-light leading-tight tracking-tight text-slate-950 sm:text-5xl lg:text-[4rem]">
+              <h2 className="mt-4 text-4xl font-medium leading-tight tracking-normal text-charcoal sm:text-5xl lg:text-[3.5rem]">
                 Drivers who avoided surprise repair bills.
               </h2>
-              <p className="mt-6 max-w-xl text-base leading-8 text-slate-600 lg:text-lg">
+              <p className="mt-6 max-w-xl text-base leading-8 text-graphite lg:text-lg">
                 Real claims from everyday drivers, with the repair amount,
                 workshop handoff, and cover outcome made easy to compare.
               </p>
@@ -70,12 +70,12 @@ export function TestimonialsSection() {
               {proofPoints.map((point) => (
                 <div
                   key={point.label}
-                  className="rounded-2xl border border-slate-200 bg-white p-4"
+                  className="rounded-lg border border-cloud bg-white p-4"
                 >
-                  <p className="text-[0.7rem] font-semibold uppercase tracking-wider text-slate-500">
+                  <p className="text-[0.7rem] font-medium uppercase tracking-wider text-pewter">
                     {point.label}
                   </p>
-                  <p className="mt-2 text-2xl font-light tracking-tight text-slate-950">
+                  <p className="mt-2 text-2xl font-medium tracking-tight text-charcoal">
                     {point.value}
                   </p>
                 </div>
@@ -91,10 +91,10 @@ export function TestimonialsSection() {
               animate="show"
               className="grid flex-1 gap-6 lg:grid-cols-[1fr_0.72fr]"
             >
-              <article className="flex min-h-[380px] flex-col justify-between rounded-[1.75rem] border border-[#0b7dff]/20 bg-[#f7fbff] p-6 shadow-[0_20px_60px_-42px_rgba(11,125,255,0.6)] sm:p-8">
+              <article className="flex min-h-[380px] flex-col justify-between rounded-xl border border-brand-blue/25 bg-brand-blue/5 p-6 sm:p-8">
                 <div>
                   <div className="flex items-start justify-between gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0b7dff] text-white shadow-[0_14px_32px_-18px_rgba(11,125,255,0.8)]">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-brand-blue text-white">
                       <Quote className="h-5 w-5" aria-hidden="true" />
                     </div>
                     <div
@@ -111,71 +111,71 @@ export function TestimonialsSection() {
                     </div>
                   </div>
 
-                  <blockquote className="mt-8 text-2xl font-light leading-[1.45] tracking-tight text-slate-950 sm:text-3xl">
+                  <blockquote className="mt-8 text-2xl font-medium leading-[1.45] tracking-tight text-charcoal sm:text-3xl">
                     &ldquo;{active.quote}&rdquo;
                   </blockquote>
                 </div>
 
-                <div className="mt-8 flex flex-col gap-5 border-t border-[#0b7dff]/10 pt-6 sm:flex-row sm:items-end sm:justify-between">
+                <div className="mt-8 flex flex-col gap-5 border-t border-brand-blue/15 pt-6 sm:flex-row sm:items-end sm:justify-between">
                   <div className="flex items-center gap-4">
                     <div
                       aria-hidden="true"
-                      className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold text-[#0b7dff] shadow-sm"
+                      className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[4px] bg-white text-sm font-semibold text-brand-blue border border-cloud"
                     >
                       {active.avatar}
                     </div>
                     <div>
-                      <p className="text-base font-semibold text-slate-950">
+                      <p className="text-base font-semibold text-charcoal">
                         {active.name}
                       </p>
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="mt-1 text-sm text-pewter">
                         {active.role} - {active.location}
                       </p>
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="mt-1 text-sm text-pewter">
                         {active.carModel}
                       </p>
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+                  <div className="rounded-[4px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
                     Claim covered: {active.claimAmount}
                   </div>
                 </div>
               </article>
 
               <aside className="grid gap-4">
-                <div className="rounded-[1.5rem] border border-slate-200 bg-white p-5">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+                <div className="rounded-lg border border-cloud bg-white p-5">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
                     <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
                   </div>
-                  <p className="mt-5 text-sm font-semibold uppercase tracking-wider text-slate-500">
+                  <p className="mt-5 text-sm font-medium uppercase tracking-wider text-pewter">
                     Outcome
                   </p>
-                  <p className="mt-2 text-2xl font-light tracking-tight text-slate-950">
+                  <p className="mt-2 text-2xl font-medium tracking-tight text-charcoal">
                     Covered repair, no upfront workshop payment.
                   </p>
                 </div>
 
-                <div className="rounded-[1.5rem] border border-slate-200 bg-white p-5">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e9f4ff] text-[#0b7dff]">
+                <div className="rounded-lg border border-cloud bg-white p-5">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-brand-blue/5 text-brand-blue">
                     <Wrench className="h-5 w-5" aria-hidden="true" />
                   </div>
-                  <p className="mt-5 text-sm font-semibold uppercase tracking-wider text-slate-500">
+                  <p className="mt-5 text-sm font-medium uppercase tracking-wider text-pewter">
                     Workshop
                   </p>
-                  <p className="mt-2 text-2xl font-light tracking-tight text-slate-950">
+                  <p className="mt-2 text-2xl font-medium tracking-tight text-charcoal">
                     Partner garage coordinated directly by Garanty.
                   </p>
                 </div>
 
-                <div className="rounded-[1.5rem] border border-slate-200 bg-white p-5">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
+                <div className="rounded-lg border border-cloud bg-white p-5">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-ash text-graphite">
                     <ShieldCheck className="h-5 w-5" aria-hidden="true" />
                   </div>
-                  <p className="mt-5 text-sm font-semibold uppercase tracking-wider text-slate-500">
+                  <p className="mt-5 text-sm font-medium uppercase tracking-wider text-pewter">
                     Confidence
                   </p>
-                  <p className="mt-2 text-2xl font-light tracking-tight text-slate-950">
+                  <p className="mt-2 text-2xl font-medium tracking-tight text-charcoal">
                     Clear claim status and repair cost visibility.
                   </p>
                 </div>
@@ -184,7 +184,7 @@ export function TestimonialsSection() {
 
             <motion.div
               variants={fadeUp}
-              className="grid gap-4 border-t border-slate-200 pt-6 lg:grid-cols-[1fr_auto]"
+              className="grid gap-4 border-t border-cloud pt-6 lg:grid-cols-[1fr_auto]"
             >
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 {testimonials.map((testimonial, i) => (
@@ -195,21 +195,21 @@ export function TestimonialsSection() {
                     whileHover={shouldReduce ? undefined : { y: -2 }}
                     whileTap={shouldReduce ? undefined : { scale: 0.98 }}
                     aria-pressed={activeIdx === i}
-                    className={`min-h-[92px] rounded-2xl border p-4 text-left transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7dff] ${
+                    className={`min-h-[92px] rounded-lg border p-4 text-left transition-all duration-[330ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/30 ${
                       activeIdx === i
-                        ? "border-[#0b7dff]/35 bg-[#f7fbff] shadow-[0_16px_38px_-28px_rgba(11,125,255,0.75)]"
-                        : "border-slate-200 bg-white hover:border-slate-300"
+                        ? "border-brand-blue bg-brand-blue/5"
+                        : "border-cloud bg-white hover:border-pewter"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <p className="truncate text-sm font-semibold text-slate-950">
+                      <p className="truncate text-sm font-medium text-charcoal">
                         {testimonial.name}
                       </p>
-                      <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                      <span className="shrink-0 rounded-[4px] bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
                         {testimonial.claimAmount}
                       </span>
                     </div>
-                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-500">
+                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-pewter">
                       {testimonial.carModel}
                     </p>
                   </motion.button>
@@ -223,7 +223,7 @@ export function TestimonialsSection() {
                   aria-label="Previous testimonial"
                   whileTap={shouldReduce ? undefined : { scale: 0.94 }}
                   transition={motionSpring.snappy}
-                  className="flex h-12 w-12 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7dff]"
+                  className="flex h-12 w-12 min-h-[44px] min-w-[44px] items-center justify-center rounded-[4px] border border-cloud bg-white text-graphite transition-colors hover:bg-ash focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/30"
                 >
                   <ChevronLeft className="h-5 w-5" aria-hidden="true" />
                 </motion.button>
@@ -233,7 +233,7 @@ export function TestimonialsSection() {
                   aria-label="Next testimonial"
                   whileTap={shouldReduce ? undefined : { scale: 0.94 }}
                   transition={motionSpring.snappy}
-                  className="flex h-12 w-12 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7dff]"
+                  className="flex h-12 w-12 min-h-[44px] min-w-[44px] items-center justify-center rounded-[4px] border border-cloud bg-white text-graphite transition-colors hover:bg-ash focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/30"
                 >
                   <ChevronRight className="h-5 w-5" aria-hidden="true" />
                 </motion.button>
