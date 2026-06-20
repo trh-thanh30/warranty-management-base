@@ -1,108 +1,109 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle2, Layers, Search, Shield } from "lucide-react";
+import { AlertTriangle, Lightbulb, Cog, CheckCircle2 } from "lucide-react";
 import { useScrollReveal, viewportOnce } from "@/src/hooks/use-scroll-reveal";
-import { howItWorksSteps } from "../home.constants";
 
-const iconMap: Record<string, React.ReactNode> = {
-  search: <Search className="h-6 w-6" aria-hidden="true" />,
-  layers: <Layers className="h-6 w-6" aria-hidden="true" />,
-  shield: <Shield className="h-6 w-6" aria-hidden="true" />,
-  check: <CheckCircle2 className="h-6 w-6" aria-hidden="true" />,
-};
-
-const processTrustItems = [
-  "No hidden fees",
-  "Cancel anytime",
-  "24-hour claims response",
-  "350+ partner workshops",
+const stepsData = [
+  {
+    step: "STEP 1",
+    title: "IDENTIFY ISSUES",
+    description:
+      "Conduct a detailed inspection to accurately diagnose the vehicle's problems, ensuring no issue goes unnoticed.",
+    icon: <AlertTriangle className="h-6 w-6 sm:h-7 sm:w-7 stroke-[2.2]" />,
+  },
+  {
+    step: "STEP 2",
+    title: "PREPARE SOLUTION",
+    description:
+      "Develop a comprehensive, customized repair plan to address the identified issues efficiently.",
+    icon: <Lightbulb className="h-6 w-6 sm:h-7 sm:w-7 stroke-[2.2]" />,
+  },
+  {
+    step: "STEP 3",
+    title: "START WORKING",
+    description:
+      "Begin the repair process with expert craftsmanship, focusing on precision and quality at every step.",
+    icon: <Cog className="h-6 w-6 sm:h-7 sm:w-7 stroke-[2.2]" />,
+  },
+  {
+    step: "STEP 4",
+    title: "DELIVER ON HAND",
+    description:
+      "Complete the repairs and hand over your vehicle in optimal condition, ready for the road.",
+    icon: <CheckCircle2 className="h-6 w-6 sm:h-7 sm:w-7 stroke-[2.2]" />,
+  },
 ];
 
 export function HowItWorksSection() {
-  const { container, fadeUp } = useScrollReveal();
+  const { fadeUp } = useScrollReveal();
 
   return (
     <section
       id="how-it-works"
-      className="mx-auto flex w-full max-w-[1440px] flex-col justify-center px-5 py-12 sm:px-8 lg:px-12"
+      className="mx-auto flex w-full max-w-[1440px] flex-col justify-center px-5 py-24 sm:px-8 lg:px-12 bg-ash"
       aria-label="How it works"
     >
-      <motion.div
-        variants={container}
-        initial="hidden"
-        whileInView="show"
-        viewport={viewportOnce}
-        className="min-h-[72vh] overflow-hidden rounded-xl border border-cloud bg-ash"
-      >
-        <div className="grid min-h-[72vh] gap-0 lg:grid-cols-[0.82fr_1.18fr]">
-          <motion.div
-            variants={fadeUp}
-            className="flex flex-col justify-center border-b border-cloud bg-white p-7 sm:p-10 lg:border-b-0 lg:border-r lg:p-12"
-          >
-            <p className="text-sm font-medium uppercase tracking-wider text-brand-blue">
-              Simple process
-            </p>
-            <h2 className="mt-5 text-4xl font-medium leading-tight tracking-normal text-charcoal sm:text-5xl lg:text-[3.5rem]">
-              From quote to claim, handled in four clear steps.
-            </h2>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-graphite">
-              We keep the warranty flow predictable: check eligibility, choose a
-              term, activate cover, then let us coordinate approved repairs with
-              the workshop.
-            </p>
+      <div className="flex flex-col items-center">
+        {/* Section Header */}
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="show"
+          viewport={viewportOnce}
+          className="text-center max-w-2xl mx-auto mb-20"
+        >
+          <div className="inline-flex items-center gap-1.5 sm:gap-2.5 text-[11px] sm:text-sm lg:text-base font-sans font-bold uppercase tracking-[0.18em] sm:tracking-[0.25em] text-brand-blue whitespace-nowrap">
+            <span>OUR WORK PROCESS</span>
+            <span className="text-charcoal/40 font-sans">•</span>
+            <span>STEP</span>
+          </div>
+          <h2 className="mt-4 text-3xl font-condensed font-bold uppercase tracking-wider text-charcoal sm:text-5xl lg:text-6xl max-w-none">
+            HOW WE WORKS FOR YOU!
+          </h2>
+          <div className="mt-6 mx-auto h-[3px] w-16 bg-brand-blue" />
+        </motion.div>
 
-            <div className="mt-10 grid gap-3">
-              {processTrustItems.map((item) => (
-                <div
-                  key={item}
-                  className="flex min-h-[48px] items-center gap-3 rounded-[4px] bg-ash px-4 text-base text-graphite"
-                >
-                  <CheckCircle2
-                    className="h-4 w-4 shrink-0 text-emerald-500"
-                    aria-hidden="true"
-                  />
-                  <span>{item}</span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
+        {/* Wider Staggered Cards Grid */}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 w-full max-w-7xl mx-auto px-4 mt-4">
+          {stepsData.map((item, index) => {
+            // Apply staggered translation on desktop for up-down-up-down effect
+            const desktopStaggerClass =
+              index % 2 === 1 ? "lg:translate-y-8" : "lg:-translate-y-2";
 
-          <motion.div
-            variants={container}
-            className="grid min-h-[72vh] gap-px bg-cloud sm:grid-cols-2"
-          >
-            {howItWorksSteps.map((step, index) => (
+            return (
               <motion.article
-                key={step.step}
+                key={index}
                 variants={fadeUp}
-                transition={{ delay: index * 0.08 }}
-                className="group relative flex min-h-[300px] flex-col justify-between bg-white p-7 transition-colors duration-[330ms] hover:bg-brand-blue/5 sm:p-9 lg:min-h-0"
+                initial="hidden"
+                whileInView="show"
+                viewport={viewportOnce}
+                className={`flex flex-col items-center text-center p-8 sm:p-10 rounded-[24px] bg-white border border-cloud shadow-xs hover:bg-brand-blue hover:border-brand-blue hover:shadow-lg hover:shadow-brand-blue/20 transition-all duration-[330ms] group ${desktopStaggerClass}`}
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-charcoal text-white transition-colors duration-[330ms] group-hover:bg-brand-blue">
-                    {iconMap[step.icon]}
-                  </div>
-                  <span className="font-mono text-5xl font-medium text-ash transition-colors duration-[330ms] group-hover:text-brand-blue/20">
-                    0{step.step}
-                  </span>
+                {/* Icon Circular Badge */}
+                <div className="flex h-16 w-16 sm:h-18 sm:w-18 items-center justify-center rounded-full bg-brand-blue text-white shadow-md transition-all duration-300 group-hover:bg-white group-hover:text-brand-blue group-hover:scale-110 mb-6">
+                  {item.icon}
                 </div>
 
-                <div className="mt-10">
-                  <h3 className="text-2xl font-medium tracking-tight text-charcoal">
-                    {step.title}
-                  </h3>
-                  <p className="mt-4 text-base leading-7 text-graphite">
-                    {step.description}
-                  </p>
-                </div>
+                {/* Step Label (Montserrat/Sans-serif font) */}
+                <span className="text-xs sm:text-sm font-sans font-bold uppercase tracking-widest text-brand-blue group-hover:text-white/80 transition-colors duration-300 mb-3">
+                  {item.step}
+                </span>
 
-                <div className="absolute bottom-0 left-0 h-1 w-0 bg-brand-blue transition-all duration-[330ms] group-hover:w-full" />
+                {/* Title (Condensed font, changes to white on hover) */}
+                <h3 className="text-xl sm:text-2xl font-condensed font-bold uppercase tracking-wide text-charcoal group-hover:text-white transition-colors duration-300 mb-4">
+                  {item.title}
+                </h3>
+
+                {/* Description (Montserrat/Sans-serif font, changes to white/90 on hover) */}
+                <p className="text-sm sm:text-base leading-relaxed text-pewter group-hover:text-white/90 transition-colors duration-300 font-sans">
+                  {item.description}
+                </p>
               </motion.article>
-            ))}
-          </motion.div>
+            );
+          })}
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }

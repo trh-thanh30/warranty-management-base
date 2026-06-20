@@ -1,201 +1,253 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import {
-  Car,
-  CheckCircle2,
-  Clock,
-  FileCheck2,
-  ShieldCheck,
-  Wrench,
-} from "lucide-react";
-import { motionSpring } from "@/src/constants/motion.constants";
+import { useState, useCallback, useEffect } from "react";
+import Image from "next/image";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import useEmblaCarousel from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
+import { motion } from "framer-motion";
 import { useScrollReveal, viewportOnce } from "@/src/hooks/use-scroll-reveal";
-import { statsItems } from "../home.constants";
 
-const coveredParts = [
-  "Engine",
-  "Gearbox",
-  "Diagnostics",
-  "Approved labor",
-  "Starter",
-  "Steering rack",
+const servicesData = [
+  {
+    id: "service-1",
+    subtitle: "SERVICE 01",
+    title: "MECHANICAL WARRANTY",
+    description:
+      "Comprehensive coverage for engine parts, gearbox components, transmission assemblies, and certified workshop labor.",
+    imageUrl: "/service_3.jpg",
+  },
+  {
+    id: "service-2",
+    subtitle: "SERVICE 02",
+    title: "ELECTRICAL COVERAGE",
+    description:
+      "Protection for starters, alternators, ECUs, wiring harnesses, sensors, and high-cost digital screen clusters.",
+    imageUrl: "/workshop_1.jpg",
+  },
+  {
+    id: "service-3",
+    subtitle: "SERVICE 03",
+    title: "24/7 ROADSIDE ASSIST",
+    description:
+      "Instant nationwide dispatch for towing, emergency battery jump-starts, fuel delivery, and roadside tyre replacement.",
+    imageUrl: "/service_1.jpg",
+  },
+  {
+    id: "service-4",
+    subtitle: "SERVICE 04",
+    title: "PAINT & CERAMIC COAT",
+    description:
+      "Premium exterior paint correction, multi-layer ceramic coatings, and specialized body maintenance.",
+    imageUrl: "/service_2.jpg",
+  },
+  {
+    id: "service-5",
+    subtitle: "SERVICE 05",
+    title: "ROUTINE MAINTENANCE",
+    description:
+      "Scheduled engine oil flushes, filter servicing, brake pad replacements, and alignment tuning.",
+    imageUrl: "/service_4.jpg",
+  },
+  {
+    id: "service-6",
+    subtitle: "SERVICE 06",
+    title: "DIAGNOSTICS & TUNING",
+    description:
+      "High-end electronic OBD diagnostics, check engine light resolution, and performance system calibrations.",
+    imageUrl: "/workshop_2.jpg",
+  },
 ];
 
-function AnimatedCounter({
-  target,
-  suffix,
-  duration = 1800,
-}: {
-  target: number;
-  suffix: string;
-  duration?: number;
-}) {
-  const [count, setCount] = useState(0);
-  const [started, setStarted] = useState(false);
+export function StatsSection() {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
+
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    {
+      loop: true,
+      align: "start",
+      slidesToScroll: 1,
+    },
+    [
+      Autoplay({
+        delay: 3000,
+        stopOnInteraction: false,
+        stopOnMouseEnter: true,
+      }),
+    ],
+  );
+
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    if (emblaApi) emblaApi.scrollNext();
+  }, [emblaApi]);
+
+  const scrollTo = useCallback(
+    (index: number) => {
+      if (emblaApi) emblaApi.scrollTo(index);
+    },
+    [emblaApi],
+  );
+
+  const onSelect = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (emblaApi: any) => {
+      setSelectedIndex(emblaApi.selectedScrollSnap());
+    },
+    [],
+  );
 
   useEffect(() => {
-    if (!started) return;
-    const start = performance.now();
-    const step = (now: number) => {
-      const elapsed = Math.min((now - start) / duration, 1);
-      const eased = elapsed === 1 ? 1 : 1 - Math.pow(2, -10 * elapsed);
-      setCount(Math.floor(eased * target));
-      if (elapsed < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }, [started, target, duration]);
+    if (!emblaApi) return;
+    setScrollSnaps(emblaApi.scrollSnapList());
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
+    onSelect(emblaApi);
+  }, [emblaApi, onSelect]);
 
-  return (
-    <motion.span
-      onViewportEnter={() => setStarted(true)}
-      viewport={{ once: true, margin: "-60px" }}
-    >
-      {count.toLocaleString("en-US")}
-      {suffix}
-    </motion.span>
-  );
-}
-
-function StatIcon({ label }: { label: string }) {
-  const normalized = label.toLowerCase();
-  if (normalized.includes("car"))
-    return <Car className="h-5 w-5" aria-hidden="true" />;
-  if (normalized.includes("claim") || normalized.includes("response"))
-    return <Clock className="h-5 w-5" aria-hidden="true" />;
-  return <Wrench className="h-5 w-5" aria-hidden="true" />;
-}
-
-export function StatsSection() {
-  const { container, fadeUp, scaleIn } = useScrollReveal();
-  const shouldReduce = useReducedMotion();
+  const { container, fadeUp } = useScrollReveal();
 
   return (
     <section
-      className="mx-auto flex h-full w-full max-w-[1440px] flex-col justify-center px-5 py-12 sm:px-8 lg:px-12"
-      aria-label="Why Garanty"
+      id="services"
+      className="w-full bg-slate-50/50 py-16 lg:py-20 border-b border-cloud min-h-[90vh] lg:min-h-screen flex flex-col justify-center items-center"
     >
       <motion.div
         variants={container}
         initial="hidden"
         whileInView="show"
         viewport={viewportOnce}
-        className="space-y-7"
+        className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12 w-full"
       >
-        <div className="grid overflow-hidden rounded-xl border border-cloud bg-white lg:grid-cols-[1.35fr_0.9fr]">
-          <motion.div variants={fadeUp} className="p-6 sm:p-8 lg:p-10">
-            <div className="inline-flex items-center gap-2 rounded-[4px] border border-brand-blue/15 bg-brand-blue/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-brand-blue">
-              <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-              Mechanical warranty
-            </div>
+        <motion.div variants={fadeUp} className="text-center pb-12">
+          <div className="inline-flex items-center gap-2.5 text-sm sm:text-base font-sans font-bold uppercase tracking-[0.25em] text-brand-blue">
+            <span>SERVICES</span>
+            <span className="text-charcoal/40 text-sm sm:text-base font-sans">
+              •
+            </span>
+            <span>WE PROVIDE</span>
+          </div>
+          <h2 className="mt-4 text-3xl font-condensed font-bold uppercase tracking-wider text-charcoal sm:text-5xl lg:text-6xl max-w-none">
+            OUR SERVICE AREA WHERE YOUR CAR SHINES
+          </h2>
+          <div className="mt-6 mx-auto h-[3px] w-16 bg-brand-blue" />
+        </motion.div>
 
-            <h2 className="mt-5 max-w-3xl text-4xl font-medium leading-tight tracking-normal text-charcoal sm:text-5xl">
-              Mechanical repair cover from{" "}
-              <span className="font-medium text-brand-blue">$36/mo</span>
-            </h2>
+        <motion.div variants={fadeUp} className="relative mt-12 px-2 sm:px-12">
+          {/* Left Arrow Button */}
+          <div className="absolute top-1/2 -left-2 sm:-left-4 md:-left-8 z-10 -translate-y-1/2 hidden sm:block">
+            <button
+              onClick={scrollPrev}
+              className="group/btn relative flex h-12 w-12 items-center justify-center rounded-full border border-brand-blue bg-white text-brand-blue overflow-hidden hover:scale-105 active:scale-95 transition-all duration-300 shadow-xs cursor-pointer"
+              aria-label="Previous service"
+            >
+              <span className="absolute w-[200%] aspect-square -top-[50%] -left-[50%] bg-brand-blue rotate-45 translate-y-[120%] translate-x-[120%] transition-transform duration-[500ms] ease-out group-hover/btn:translate-y-0 group-hover/btn:translate-x-0 z-0" />
+              <ChevronLeft className="relative h-5 w-5 z-10 transition-colors duration-300 group-hover/btn:text-white" />
+            </button>
+          </div>
 
-            <p className="mt-5 max-w-2xl text-base leading-7 text-graphite">
-              Protect the repairs that usually hurt ownership costs: engine,
-              gearbox, diagnostics, and approved labor through a certified
-              workshop network.
-            </p>
+          {/* Right Arrow Button */}
+          <div className="absolute top-1/2 -right-2 sm:-right-4 md:-right-8 z-10 -translate-y-1/2 hidden sm:block">
+            <button
+              onClick={scrollNext}
+              className="group/btn relative flex h-12 w-12 items-center justify-center rounded-full border border-brand-blue bg-white text-brand-blue overflow-hidden hover:scale-105 active:scale-95 transition-all duration-300 shadow-xs cursor-pointer"
+              aria-label="Next service"
+            >
+              <span className="absolute w-[200%] aspect-square -top-[50%] -left-[50%] bg-brand-blue rotate-45 translate-y-[120%] translate-x-[120%] transition-transform duration-[500ms] ease-out group-hover/btn:translate-y-0 group-hover/btn:translate-x-0 z-0" />
+              <ChevronRight className="relative h-5 w-5 z-10 transition-colors duration-300 group-hover/btn:text-white" />
+            </button>
+          </div>
 
-            <div className="mt-7 grid gap-2.5 sm:grid-cols-2 lg:max-w-2xl">
-              {coveredParts.map((label) => (
+          {/* Embla Viewport */}
+          <div className="overflow-hidden w-full mt-4" ref={emblaRef}>
+            {/* Embla Container (Track) */}
+            <div className="flex -ml-8">
+              {servicesData.map((service) => (
                 <div
-                  key={label}
-                  className="flex min-h-[44px] items-center gap-3 rounded-[4px] border border-cloud bg-ash px-3.5 text-sm text-graphite"
+                  key={service.id}
+                  className="pl-8 w-full md:w-1/3 flex-shrink-0"
                 >
-                  <CheckCircle2
-                    className="h-4 w-4 shrink-0 text-emerald-500"
-                    aria-hidden="true"
-                  />
-                  <span>{label}</span>
+                  <div className="group flex flex-col h-full justify-between overflow-hidden rounded-[16px] border border-cloud bg-white p-5 shadow-xs hover:bg-brand-blue hover:border-brand-blue hover:shadow-lg hover:shadow-brand-blue/20 transition-all duration-[330ms]">
+                    <div>
+                      <div className="relative h-[220px] w-full overflow-hidden rounded-[12px]">
+                        <Image
+                          src={service.imageUrl}
+                          alt={service.title}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 400px"
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      </div>
+                      <div className="mt-6 flex flex-col">
+                        <span className="text-xs sm:text-sm font-sans font-bold uppercase tracking-widest text-brand-blue group-hover:text-white/80 transition-colors duration-300">
+                          {service.subtitle}
+                        </span>
+                        <h3 className="mt-2 text-2xl sm:text-3xl font-condensed font-bold uppercase tracking-wide text-charcoal group-hover:text-white transition-colors duration-300">
+                          {service.title}
+                        </h3>
+                        <p className="mt-3 text-sm leading-relaxed text-graphite group-hover:text-white/95 transition-colors duration-300 min-h-[60px]">
+                          {service.description}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="group/btn relative mt-5 inline-flex overflow-hidden rounded-full border border-brand-blue px-[20px] py-[10px] text-[16px] font-condensed font-bold uppercase tracking-wider text-brand-blue bg-transparent transition-all duration-300 hover:scale-105 active:scale-95 shadow-xs cursor-pointer w-fit z-10 group-hover:border-white"
+                    >
+                      {/* Sweeps white background on card hover or button hover */}
+                      <span className="absolute w-[200%] aspect-square -top-[50%] -left-[50%] bg-white rotate-45 translate-y-[120%] translate-x-[120%] transition-transform duration-[400ms] ease-out group-hover:translate-y-0 group-hover:translate-x-0 group-hover/btn:translate-y-0 group-hover/btn:translate-x-0 z-0" />
+                      <span className="relative z-10 transition-colors duration-300 text-brand-blue">
+                        Book Now!
+                      </span>
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
-          </motion.div>
-
-          <motion.div
-            variants={scaleIn}
-            className="relative flex items-center justify-center border-t border-cloud bg-ash p-6 text-charcoal lg:border-l lg:border-t-0 lg:p-8"
-          >
-            <motion.div
-              whileHover={shouldReduce ? undefined : { y: -2, scale: 1.005 }}
-              transition={motionSpring.snappy}
-              className="relative w-full max-w-[410px] overflow-hidden rounded-xl border border-cloud bg-white p-6"
-            >
-              <div className="relative flex items-start justify-between gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-brand-blue/15 bg-brand-blue/5 text-brand-blue">
-                  <FileCheck2 className="h-6 w-6" aria-hidden="true" />
-                </div>
-                <div className="flex items-center gap-1.5 rounded-[4px] border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-emerald-700">
-                  <span className="h-1.5 w-1.5 rounded-[4px] bg-emerald-500 animate-pulse" />
-                  Quote ready
-                </div>
-              </div>
-
-              <div className="relative mt-7">
-                <p className="text-xs font-medium uppercase tracking-wider text-pewter">
-                  Coverage summary
-                </p>
-                <h3 className="mt-2 text-3xl font-medium tracking-tight text-charcoal">
-                  Comprehensive Cover
-                </h3>
-                <p className="mt-3 text-sm leading-6 text-graphite">
-                  Claim review, certified workshop routing, diagnostics, and
-                  approved labor are handled in one place.
-                </p>
-              </div>
-
-              <div className="relative mt-6 grid grid-cols-2 gap-3">
-                {[
-                  ["Max claim", "$5,000"],
-                  ["Response", "24h"],
-                  ["Workshops", "350+"],
-                  ["Labor", "Approved"],
-                ].map(([label, value]) => (
-                  <div
-                    key={label}
-                    className="rounded-lg border border-cloud bg-ash p-3"
-                  >
-                    <p className="text-[10px] uppercase tracking-wider text-pewter">
-                      {label}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-charcoal">
-                      {value}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          </motion.div>
-        </div>
-
-        <motion.div variants={scaleIn} className="grid gap-4 md:grid-cols-3">
-          {statsItems.map((stat) => (
-            <div
-              key={stat.label}
-              className="group rounded-xl border border-cloud bg-white p-6 transition-all duration-[330ms] hover:border-brand-blue/30"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-cloud bg-ash text-pewter transition-colors duration-[330ms] group-hover:border-brand-blue/30 group-hover:bg-brand-blue/5 group-hover:text-brand-blue">
-                  <StatIcon label={stat.label} />
-                </div>
-                <p className="text-right text-4xl font-medium tracking-tight text-charcoal">
-                  <AnimatedCounter target={stat.value} suffix={stat.suffix} />
-                </p>
-              </div>
-              <p className="mt-5 text-sm font-medium text-charcoal">
-                {stat.label}
-              </p>
-              <p className="mt-1 text-sm leading-6 text-pewter">
-                {stat.description}
-              </p>
-            </div>
-          ))}
+          </div>
         </motion.div>
+
+        {/* Dot Indicators & Mobile Navigation */}
+        <div className="mt-8 flex items-center justify-center gap-4">
+          {/* Mobile Prev Button */}
+          <button
+            onClick={scrollPrev}
+            className="flex sm:hidden h-9 w-9 items-center justify-center rounded-full border border-brand-blue bg-white text-brand-blue hover:bg-brand-blue/5 active:scale-95 transition-all cursor-pointer"
+            aria-label="Previous service"
+          >
+            <ChevronLeft className="h-4.5 w-4.5" />
+          </button>
+
+          {/* Dot Indicators */}
+          <div className="flex gap-2">
+            {scrollSnaps.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => scrollTo(index)}
+                className={`h-2 w-2 rounded-full transition-all duration-300 cursor-pointer ${
+                  selectedIndex === index
+                    ? "bg-brand-blue w-4"
+                    : "bg-pale-silver"
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+
+          {/* Mobile Next Button */}
+          <button
+            onClick={scrollNext}
+            className="flex sm:hidden h-9 w-9 items-center justify-center rounded-full border border-brand-blue bg-white text-brand-blue hover:bg-brand-blue/5 active:scale-95 transition-all cursor-pointer"
+            aria-label="Next service"
+          >
+            <ChevronRight className="h-4.5 w-4.5" />
+          </button>
+        </div>
       </motion.div>
     </section>
   );

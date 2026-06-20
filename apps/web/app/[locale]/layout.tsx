@@ -2,14 +2,19 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
-import { Montserrat } from "next/font/google";
+import { Saira_Condensed, Inter } from "next/font/google";
 import { routing } from "@/src/i18n/routing";
 import "../globals.css";
 
-const montserrat = Montserrat({
+const sairaCondensed = Saira_Condensed({
   subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-montserrat",
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-saira-condensed",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
@@ -37,7 +42,10 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={`scroll-smooth ${montserrat.variable}`}>
+    <html
+      lang={locale}
+      className={`scroll-smooth ${sairaCondensed.variable} ${inter.variable}`}
+    >
       <body>
         <NextIntlClientProvider messages={messages}>
           {children}

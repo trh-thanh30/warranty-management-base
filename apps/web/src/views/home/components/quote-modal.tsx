@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Car, User, Phone, Mail, CheckCircle2 } from "lucide-react";
 import { Button } from "@repo/ui/button";
@@ -13,9 +13,19 @@ interface QuoteModalProps {
     term: string;
     price: string;
   } | null;
+  defaultBrand?: string;
+  defaultYear?: string;
+  defaultMileage?: string;
 }
 
-export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
+export function QuoteModal({
+  isOpen,
+  onClose,
+  selectedPlan,
+  defaultBrand,
+  defaultYear,
+  defaultMileage,
+}: QuoteModalProps) {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     plate: "",
@@ -25,6 +35,24 @@ export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
     phone: "",
     email: "",
   });
+
+  useEffect(() => {
+    if (isOpen) {
+      let mappedMileage = "";
+      if (defaultMileage === "low") mappedMileage = "< 50,000 km";
+      if (defaultMileage === "medium") mappedMileage = "50,000 - 100,000 km";
+      if (defaultMileage === "high") mappedMileage = "> 100,000 km";
+
+      setFormData((prev) => ({
+        ...prev,
+        model:
+          defaultBrand && defaultYear
+            ? `${defaultBrand} (${defaultYear === "2025" ? "2024-2026" : defaultYear === "2021" ? "2020-2023" : "2016-2019"})`
+            : defaultBrand || prev.model,
+        mileage: mappedMileage || prev.mileage,
+      }));
+    }
+  }, [isOpen, defaultBrand, defaultYear, defaultMileage]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -94,7 +122,7 @@ export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleReset}
-            className="absolute inset-0 bg-charcoal/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-brand-blue/20 backdrop-blur-sm"
           />
 
           {/* Modal Card */}
@@ -108,10 +136,10 @@ export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
             {/* Header */}
             <div className="relative flex items-center justify-between">
               <div>
-                <span className="text-xs font-medium uppercase tracking-widest text-brand-blue">
+                <span className="text-xs font-condensed font-bold uppercase tracking-widest text-brand-blue">
                   Get Started
                 </span>
-                <h3 className="mt-1 text-2xl font-medium tracking-tight text-charcoal">
+                <h3 className="mt-1 text-2xl font-condensed font-bold uppercase tracking-wide text-charcoal">
                   {selectedPlan
                     ? `Quote: ${selectedPlan.term}`
                     : "Request a custom quote"}
@@ -120,7 +148,7 @@ export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
               <button
                 type="button"
                 onClick={handleReset}
-                className="flex h-10 w-10 items-center justify-center rounded-[4px] border border-cloud bg-ash text-graphite transition-colors hover:bg-cloud hover:text-charcoal cursor-pointer"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-cloud bg-ash text-graphite transition-all hover:bg-cloud hover:text-charcoal cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -130,10 +158,10 @@ export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
             {step < 3 && (
               <div className="relative mt-6 flex gap-2">
                 <div
-                  className={`h-1.5 flex-1 rounded-[2px] transition-colors duration-300 ${step >= 1 ? "bg-brand-blue" : "bg-cloud"}`}
+                  className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${step >= 1 ? "bg-brand-blue" : "bg-cloud"}`}
                 />
                 <div
-                  className={`h-1.5 flex-1 rounded-[2px] transition-colors duration-300 ${step >= 2 ? "bg-brand-blue" : "bg-cloud"}`}
+                  className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${step >= 2 ? "bg-brand-blue" : "bg-cloud"}`}
                 />
               </div>
             )}
@@ -143,7 +171,7 @@ export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
               {step === 1 && (
                 <div className="space-y-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium uppercase tracking-wider text-graphite">
+                    <label className="text-xs font-condensed font-bold uppercase tracking-wider text-charcoal">
                       Vehicle Brand & Model
                     </label>
                     <div className="relative">
@@ -155,7 +183,7 @@ export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
                         onChange={(e) =>
                           handleInputChange("model", e.target.value)
                         }
-                        className={`w-full rounded-[4px] border bg-white py-3 pl-10 pr-4 text-sm text-charcoal placeholder-pewter outline-none transition-all focus:border-brand-blue focus:ring-1 focus:ring-brand-blue ${
+                        className={`w-full rounded-lg border bg-white py-3 pl-10 pr-4 text-sm text-charcoal placeholder:text-pewter outline-none transition-all focus:border-brand-blue focus:ring-1 focus:ring-brand-blue ${
                           errors.model
                             ? "border-red-500 focus:border-red-500"
                             : "border-cloud"
@@ -168,7 +196,7 @@ export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium uppercase tracking-wider text-graphite">
+                    <label className="text-xs font-condensed font-bold uppercase tracking-wider text-charcoal">
                       License Plate or VIN
                     </label>
                     <input
@@ -178,7 +206,7 @@ export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
                       onChange={(e) =>
                         handleInputChange("plate", e.target.value)
                       }
-                      className={`w-full rounded-[4px] border bg-white py-3 px-4 text-sm text-charcoal placeholder-pewter outline-none transition-all focus:border-brand-blue focus:ring-1 focus:ring-brand-blue ${
+                      className={`w-full rounded-lg border bg-white py-3 px-4 text-sm text-charcoal placeholder:text-pewter outline-none transition-all focus:border-brand-blue focus:ring-1 focus:ring-brand-blue ${
                         errors.plate
                           ? "border-red-500 focus:border-red-500"
                           : "border-cloud"
@@ -190,7 +218,7 @@ export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium uppercase tracking-wider text-graphite">
+                    <label className="text-xs font-condensed font-bold uppercase tracking-wider text-charcoal">
                       Mileage (Optional)
                     </label>
                     <input
@@ -200,14 +228,14 @@ export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
                       onChange={(e) =>
                         handleInputChange("mileage", e.target.value)
                       }
-                      className="w-full rounded-[4px] border border-cloud bg-white py-3 px-4 text-sm text-charcoal placeholder-pewter outline-none transition-all focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+                      className="w-full rounded-lg border border-cloud bg-white py-3 px-4 text-sm text-charcoal placeholder:text-pewter outline-none transition-all focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
                     />
                   </div>
 
                   <Button
                     type="button"
                     onClick={handleNext}
-                    className="mt-2 h-11 w-full rounded-[4px] bg-brand-blue text-white hover:bg-brand-blue/90 cursor-pointer text-xs font-medium uppercase tracking-wider transition-colors duration-[330ms]"
+                    className="mt-2 h-11 w-full rounded-xl bg-brand-blue text-[15px] font-condensed font-bold uppercase tracking-wider text-white transition-all duration-[330ms] hover:bg-brand-blue/90 hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
                   >
                     Continue
                   </Button>
@@ -217,7 +245,7 @@ export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
               {step === 2 && (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium uppercase tracking-wider text-graphite">
+                    <label className="text-xs font-condensed font-bold uppercase tracking-wider text-charcoal">
                       Your Full Name
                     </label>
                     <div className="relative">
@@ -229,7 +257,7 @@ export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
                         onChange={(e) =>
                           handleInputChange("name", e.target.value)
                         }
-                        className={`w-full rounded-[4px] border bg-white py-3 pl-10 pr-4 text-sm text-charcoal placeholder-pewter outline-none transition-all focus:border-brand-blue focus:ring-1 focus:ring-brand-blue ${
+                        className={`w-full rounded-lg border bg-white py-3 pl-10 pr-4 text-sm text-charcoal placeholder:text-pewter outline-none transition-all focus:border-brand-blue focus:ring-1 focus:ring-brand-blue ${
                           errors.name
                             ? "border-red-500 focus:border-red-500"
                             : "border-cloud"
@@ -242,7 +270,7 @@ export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium uppercase tracking-wider text-graphite">
+                    <label className="text-xs font-condensed font-bold uppercase tracking-wider text-charcoal">
                       Phone Number
                     </label>
                     <div className="relative">
@@ -254,7 +282,7 @@ export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
                         onChange={(e) =>
                           handleInputChange("phone", e.target.value)
                         }
-                        className={`w-full rounded-[4px] border bg-white py-3 pl-10 pr-4 text-sm text-charcoal placeholder-pewter outline-none transition-all focus:border-brand-blue focus:ring-1 focus:ring-brand-blue ${
+                        className={`w-full rounded-lg border bg-white py-3 pl-10 pr-4 text-sm text-charcoal placeholder:text-pewter outline-none transition-all focus:border-brand-blue focus:ring-1 focus:ring-brand-blue ${
                           errors.phone
                             ? "border-red-500 focus:border-red-500"
                             : "border-cloud"
@@ -267,7 +295,7 @@ export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium uppercase tracking-wider text-graphite">
+                    <label className="text-xs font-condensed font-bold uppercase tracking-wider text-charcoal">
                       Email Address
                     </label>
                     <div className="relative">
@@ -279,7 +307,7 @@ export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
                         onChange={(e) =>
                           handleInputChange("email", e.target.value)
                         }
-                        className={`w-full rounded-[4px] border bg-white py-3 pl-10 pr-4 text-sm text-charcoal placeholder-pewter outline-none transition-all focus:border-brand-blue focus:ring-1 focus:ring-brand-blue ${
+                        className={`w-full rounded-lg border bg-white py-3 pl-10 pr-4 text-sm text-charcoal placeholder:text-pewter outline-none transition-all focus:border-brand-blue focus:ring-1 focus:ring-brand-blue ${
                           errors.email
                             ? "border-red-500 focus:border-red-500"
                             : "border-cloud"
@@ -295,13 +323,13 @@ export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
                     <button
                       type="button"
                       onClick={() => setStep(1)}
-                      className="h-11 flex-1 rounded-[4px] border border-cloud bg-ash text-xs font-medium uppercase tracking-wider text-graphite transition-colors hover:bg-cloud cursor-pointer"
+                      className="h-11 flex-1 rounded-xl bg-cloud px-6 text-xs font-condensed font-bold uppercase tracking-wider text-charcoal hover:bg-cloud/80 hover:scale-[1.02] active:scale-[0.98] transition-all duration-[330ms] cursor-pointer"
                     >
                       Back
                     </button>
                     <Button
                       type="submit"
-                      className="h-11 flex-[2] rounded-[4px] bg-brand-blue text-white hover:bg-brand-blue/90 cursor-pointer text-xs font-medium uppercase tracking-wider transition-colors duration-[330ms]"
+                      className="h-11 flex-[2] rounded-xl bg-brand-blue text-[15px] font-condensed font-bold uppercase tracking-wider text-white transition-all duration-[330ms] hover:bg-brand-blue/90 hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
                     >
                       Submit
                     </Button>
@@ -323,7 +351,7 @@ export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
                   >
                     <CheckCircle2 className="h-8 w-8" />
                   </motion.div>
-                  <h4 className="mt-4 text-lg font-medium text-charcoal">
+                  <h4 className="mt-4 text-xl font-condensed font-bold uppercase tracking-wide text-charcoal">
                     Request Submitted!
                   </h4>
                   <p className="mt-2 text-xs leading-5 text-graphite">
@@ -333,7 +361,7 @@ export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
                     </span>
                     . We have received your request for:
                   </p>
-                  <div className="mt-2 rounded-[4px] bg-ash px-4 py-2 border border-cloud">
+                  <div className="mt-2 rounded-lg bg-ash px-4 py-2 border border-cloud">
                     <span className="text-sm font-semibold text-brand-blue">
                       {selectedPlan
                         ? `${selectedPlan.type === "warranty" ? "Warranty" : "Maintenance"} - ${selectedPlan.term}`
@@ -351,7 +379,7 @@ export function QuoteModal({ isOpen, onClose, selectedPlan }: QuoteModalProps) {
                   <Button
                     type="button"
                     onClick={handleReset}
-                    className="mt-6 h-11 w-full rounded-[4px] bg-brand-blue text-white hover:bg-brand-blue/90 cursor-pointer text-xs font-medium uppercase tracking-wider transition-colors duration-[330ms]"
+                    className="mt-6 h-11 w-full rounded-xl bg-brand-blue text-[15px] font-condensed font-bold uppercase tracking-wider text-white transition-all duration-[330ms] hover:bg-brand-blue/90 hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
                   >
                     Done
                   </Button>

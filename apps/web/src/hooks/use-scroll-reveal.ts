@@ -19,59 +19,75 @@ export function useScrollReveal() {
   };
 
   const fadeUp: Variants = {
-    hidden: shouldReduce ? { opacity: 0 } : { opacity: 0, y: 32 },
+    hidden: shouldReduce
+      ? { opacity: 0 }
+      : { opacity: 0, y: 20, transition: { duration: 0.5, ease: "easeInOut" } },
     show: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: shouldReduce ? motionDuration.instant : motionDuration.slow,
+        duration: shouldReduce ? motionDuration.instant : 0.65,
         ease: motionEase.out,
       },
     },
   };
 
   const fadeIn: Variants = {
-    hidden: { opacity: 0 },
+    hidden: { opacity: 0, transition: { duration: 0.45, ease: "easeInOut" } },
     show: {
       opacity: 1,
       transition: {
-        duration: shouldReduce ? motionDuration.instant : motionDuration.reveal,
+        duration: shouldReduce ? motionDuration.instant : 0.65,
         ease: "easeOut",
       },
     },
   };
 
   const scaleIn: Variants = {
-    hidden: shouldReduce ? { opacity: 0 } : { opacity: 0, scale: 0.92 },
+    hidden: shouldReduce
+      ? { opacity: 0 }
+      : {
+          opacity: 0,
+          scale: 0.96,
+          transition: { duration: 0.5, ease: "easeInOut" },
+        },
     show: {
       opacity: 1,
       scale: 1,
       transition: {
-        duration: shouldReduce ? motionDuration.instant : motionDuration.reveal,
+        duration: shouldReduce ? motionDuration.instant : 0.65,
         ease: motionEase.out,
       },
     },
   };
 
   const slideLeft: Variants = {
-    hidden: shouldReduce ? { opacity: 0 } : { opacity: 0, x: 48 },
+    hidden: shouldReduce
+      ? { opacity: 0 }
+      : { opacity: 0, x: 80, transition: { duration: 0.5, ease: "easeInOut" } },
     show: {
       opacity: 1,
       x: 0,
       transition: {
-        duration: shouldReduce ? motionDuration.instant : motionDuration.slow,
+        duration: shouldReduce ? motionDuration.instant : 0.65,
         ease: motionEase.out,
       },
     },
   };
 
   const slideRight: Variants = {
-    hidden: shouldReduce ? { opacity: 0 } : { opacity: 0, x: -48 },
+    hidden: shouldReduce
+      ? { opacity: 0 }
+      : {
+          opacity: 0,
+          x: -80,
+          transition: { duration: 0.5, ease: "easeInOut" },
+        },
     show: {
       opacity: 1,
       x: 0,
       transition: {
-        duration: shouldReduce ? motionDuration.instant : motionDuration.slow,
+        duration: shouldReduce ? motionDuration.instant : 0.65,
         ease: motionEase.out,
       },
     },
@@ -81,4 +97,7 @@ export function useScrollReveal() {
 }
 
 /** Standard viewport config for whileInView */
-export const viewportOnce = { once: true, margin: "-80px" } as const;
+export const viewportOnce = {
+  once: false,
+  margin: "0px 0px -120px 0px",
+} as const;

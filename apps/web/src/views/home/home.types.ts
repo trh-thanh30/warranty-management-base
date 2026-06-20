@@ -23,3 +23,25 @@ export interface HowItWorksStep {
   description: string;
   icon: string;
 }
+
+export interface WarrantyDetails {
+  vehicleName: string;
+  vin: string;
+  licensePlate: string;
+  planName: string;
+  status: "Active" | "Expired" | "Pending";
+  startDate: string;
+  endDate: string;
+  claimLimit: string;
+  claimsUsed: string;
+  remainingLimit: string;
+  daysRemaining: number;
+  progressPercent: number;
+  coverageScope: string[];
+}
+
+export interface MockWarrantyRecord {
+  details: WarrantyDetails;
+  ownerPhone: string;
+  ownerEmail: string;
+}

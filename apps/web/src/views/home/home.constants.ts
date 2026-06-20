@@ -1,4 +1,9 @@
-import type { StatItem, Testimonial, HowItWorksStep } from "./home.types";
+import type {
+  StatItem,
+  Testimonial,
+  HowItWorksStep,
+  MockWarrantyRecord,
+} from "./home.types";
 
 export const carHeroImage = {
   src: "/service_1.jpg",
@@ -37,12 +42,12 @@ export const carHeroImages = [
 ];
 
 export const navItems = [
+  "Home",
+  "Services",
+  "About us",
   "How it works",
-  "Warranty",
-  "Lookup",
-  "Activate",
-  "Claim",
-  "Workshops",
+  "Pricing",
+  "Stories",
   "FAQ",
 ];
 
@@ -75,18 +80,18 @@ export const servicePlans = [
   {
     term: "Basic Care",
     price: "$18",
-    note: "Perfect for routine checks & essential oil changes",
+    note: "Essential checks & routine oil changes",
   },
   {
     term: "Standard Care",
     price: "$28",
-    note: "Covers full diagnostics, fluids, filters & inspection",
+    note: "Full diagnostics, fluids & filters cover",
     featured: true,
   },
   {
     term: "Premium Care",
     price: "$48",
-    note: "Comprehensive service covering brakes, plugs & air-con",
+    note: "Full package: brakes, plugs & air-con",
   },
 ];
 
@@ -263,5 +268,121 @@ export const faqItems = [
     question: "What is the step-by-step guideline when my vehicle breaks down?",
     answer:
       "Step 1: Pull over safely and call our 24/7 hotline. Step 2: Have your vehicle towed or driven to the nearest partner workshop. Step 3: The workshop will submit a diagnostic report to us. Step 4: We approve the claim limit directly, the garage repairs your vehicle, and you drive away with zero out-of-pocket costs.",
+  },
+];
+
+export const mockWarrantyDatabase: Record<string, MockWarrantyRecord> = {
+  "WM-2026-AUDIA4": {
+    ownerPhone: "0901234567",
+    ownerEmail: "customer.a@gmail.com",
+    details: {
+      vehicleName: "Audi A4 2.0 TFSI (2023)",
+      vin: "VIN-AUDI-2026-A4",
+      licensePlate: "LN71 DXG",
+      planName: "Gold Warranty Package",
+      status: "Active",
+      startDate: "2026-01-15",
+      endDate: "2029-01-15",
+      claimLimit: "$8,000",
+      claimsUsed: "$600",
+      remainingLimit: "$7,400",
+      daysRemaining: 942,
+      progressPercent: 15,
+      coverageScope: [
+        "Engine & Turbocharger",
+        "Automatic Transmission",
+        "Steering System & Rack",
+        "Air Conditioning & Climate",
+        "Body Electrical Systems",
+      ],
+    },
+  },
+  "WM-2026-CAMERA": {
+    ownerPhone: "0901234567",
+    ownerEmail: "customer.a@gmail.com",
+    details: {
+      vehicleName: "Dashcam 4K Pro (Accessory)",
+      vin: "SN-CAM-8899",
+      licensePlate: "Linked to Vehicle LN71 DXG",
+      planName: "Accessory Protection Package",
+      status: "Active",
+      startDate: "2026-02-10",
+      endDate: "2027-02-10",
+      claimLimit: "$200",
+      claimsUsed: "$0",
+      remainingLimit: "$200",
+      daysRemaining: 238,
+      progressPercent: 35,
+      coverageScope: [
+        "Mainboard & Processor",
+        "Image Sensor & Lens Lens",
+        "Internal Battery & Power Supply",
+      ],
+    },
+  },
+  "WM-2026-TOYOTA": {
+    ownerPhone: "0987654321",
+    ownerEmail: "customer.b@gmail.com",
+    details: {
+      vehicleName: "Toyota Camry 2.5Q (2021)",
+      vin: "VIN-TOYO-2026-C5",
+      licensePlate: "LO19 KWY",
+      planName: "Standard Warranty Package",
+      status: "Expired",
+      startDate: "2023-05-10",
+      endDate: "2026-05-10",
+      claimLimit: "$6,000",
+      claimsUsed: "$6,000",
+      remainingLimit: "$0",
+      daysRemaining: 0,
+      progressPercent: 100,
+      coverageScope: [
+        "Engine Block & Internals",
+        "Manual/Automatic Gearbox",
+        "Starter Motor & Alternator",
+      ],
+    },
+  },
+};
+
+export const leftSolutionsData = [
+  {
+    iconKey: "auto-fixers" as const,
+    title: "AUTO FIXERS",
+    description:
+      "It provides reliable and fast car repair services to get your vehicle back on the road in top condition.",
+  },
+  {
+    iconKey: "mechanic-masters" as const,
+    title: "MECHANIC MASTERS",
+    description:
+      "Delivers expert car repair and maintenance services, ensuring your vehicle performs at its best every time.",
+  },
+  {
+    iconKey: "paint-workshop" as const,
+    title: "PAINT & BODYWORK",
+    description:
+      "Premium exterior paint correction, scratch repairs, and bodywork restoration by certified experts.",
+  },
+];
+
+export const rightSolutionsData = [
+  {
+    iconKey: "precision-auto" as const,
+    title: "PRECISION AUTO",
+    description:
+      "Precision Auto delivers expert car repair and maintenance for flawless performance.",
+  },
+  {
+    iconKey: "drive-in-garage" as const,
+    title: "DRIVE-IN GARAGE",
+    description:
+      "Offers fast, reliable car repair and maintenance services to keep your vehicle in top shape.",
+  },
+  {
+    iconKey: "pro-equipments" as const,
+    title: "PRO EQUIPMENTS",
+    description:
+      "Utilizing state-of-the-art diagnostic machinery and certified professional tools.",
   },
 ];

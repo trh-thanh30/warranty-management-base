@@ -165,17 +165,18 @@ export function WorkshopsSection() {
         }}
       />
 
-      <div className="overflow-hidden rounded-xl border border-cloud bg-ash p-6 sm:p-10 lg:p-12">
+      <div className="overflow-hidden rounded-2xl border border-cloud bg-ash p-6 sm:p-10 lg:p-12">
         {/* Header */}
         <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
           <div>
-            <p className="text-sm font-medium uppercase tracking-wider text-brand-blue">
-              Partner Network
-            </p>
-            <h2 className="mt-4 text-3xl font-medium leading-tight tracking-normal text-charcoal sm:text-5xl">
+            <div className="inline-flex items-center gap-2.5 text-xs sm:text-sm font-sans font-bold uppercase tracking-[0.25em] text-brand-blue">
+              <span>Partner Network</span>
+            </div>
+            <h2 className="mt-4 text-3xl font-condensed font-bold uppercase tracking-wider text-charcoal sm:text-5xl lg:text-[40px] leading-tight">
               Our Certified Workshops
             </h2>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-graphite">
+            <div className="mt-6 h-[3px] w-16 bg-brand-blue" />
+            <p className="mt-6 max-w-xl text-sm leading-6 text-graphite font-sans font-medium">
               Access 350+ certified garages nationwide. Our partners support
               direct warranty claim settlement, meaning zero paperwork and no
               cash advance required.
@@ -184,13 +185,13 @@ export function WorkshopsSection() {
 
           {/* Search bar inside workshops */}
           <div className="relative w-full max-w-xs shrink-0">
-            <Search className="absolute left-4.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-pewter" />
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-pewter" />
             <input
               type="text"
               placeholder="Search garage name or specialty..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-11 w-full rounded-[4px] border border-cloud bg-white pl-11 pr-4 text-xs text-charcoal placeholder:text-pewter outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+              className="h-11 w-full rounded-xl border border-cloud bg-white pl-10 pr-4 text-xs text-charcoal placeholder:text-pewter outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
             />
           </div>
         </div>
@@ -205,10 +206,10 @@ export function WorkshopsSection() {
                 key={city}
                 type="button"
                 onClick={() => setSelectedCity(city)}
-                className={`rounded-[4px] px-5 py-2 text-xs font-medium uppercase tracking-wider transition-all duration-[330ms] cursor-pointer ${
+                className={`rounded-xl px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-[330ms] cursor-pointer ${
                   selectedCity === city
-                    ? "bg-charcoal text-white border border-charcoal"
-                    : "bg-white border border-cloud text-graphite hover:text-charcoal hover:border-pewter"
+                    ? "bg-brand-blue text-white border border-brand-blue"
+                    : "bg-white border border-cloud text-graphite hover:text-brand-blue hover:border-brand-blue/30"
                 }`}
               >
                 {city === "all" ? "All Locations" : city}
@@ -221,7 +222,7 @@ export function WorkshopsSection() {
             <button
               type="button"
               onClick={() => handleScroll("left")}
-              className="flex h-10 w-10 items-center justify-center rounded-[4px] border border-cloud bg-white text-graphite hover:bg-ash hover:text-charcoal transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/30"
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-cloud bg-white text-graphite hover:bg-ash hover:text-charcoal transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/30"
               aria-label="Previous page"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -229,7 +230,7 @@ export function WorkshopsSection() {
             <button
               type="button"
               onClick={() => handleScroll("right")}
-              className="flex h-10 w-10 items-center justify-center rounded-[4px] border border-cloud bg-white text-graphite hover:bg-ash hover:text-charcoal transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/30"
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-cloud bg-white text-graphite hover:bg-ash hover:text-charcoal transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/30"
               aria-label="Next page"
             >
               <ChevronRight className="h-5 w-5" />
@@ -254,10 +255,10 @@ export function WorkshopsSection() {
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.3 }}
                     key={workshop.id}
-                    className="flex flex-col rounded-xl border border-cloud bg-white p-6 transition-all duration-500 ease-out hover:border-brand-blue/30 w-full min-w-full md:w-[calc(50%-12px)] md:min-w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] lg:min-w-[calc(33.333%-16px)] group-hover/slider:lg:w-[calc(26%-16px)] group-hover/slider:lg:min-w-[calc(26%-16px)] lg:hover:!w-[calc(48%-16px)] lg:hover:!min-w-[calc(48%-16px)] snap-start overflow-hidden group/card"
+                    className="flex flex-col rounded-2xl border border-cloud bg-white p-6 transition-all duration-500 ease-out hover:border-brand-blue/30 w-full min-w-full md:w-[calc(50%-12px)] md:min-w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] lg:min-w-[calc(33.333%-16px)] group-hover/slider:lg:w-[calc(26%-16px)] group-hover/slider:lg:min-w-[calc(26%-16px)] lg:hover:!w-[calc(48%-16px)] lg:hover:!min-w-[calc(48%-16px)] snap-start overflow-hidden group/card shadow-[0_8px_30px_rgba(0,0,0,0.02)]"
                   >
                     {/* Visual Image */}
-                    <div className="relative h-40 w-full overflow-hidden rounded-lg bg-ash">
+                    <div className="relative h-40 w-full overflow-hidden rounded-xl bg-ash">
                       <Image
                         src={workshop.imageUrl}
                         alt={workshop.name}
@@ -265,7 +266,7 @@ export function WorkshopsSection() {
                         sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="object-cover transition-transform duration-500 hover:scale-105"
                       />
-                      <div className="absolute left-3 top-3 rounded-[4px] bg-charcoal/80 px-2.5 py-1 text-[9px] font-medium uppercase tracking-wider text-white">
+                      <div className="absolute left-3 top-3 rounded-md bg-brand-blue/90 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-white">
                         Certified Partner
                       </div>
                     </div>
@@ -273,7 +274,7 @@ export function WorkshopsSection() {
                     {/* Content */}
                     <div className="mt-5 flex-1 flex flex-col">
                       <div className="flex items-center justify-between">
-                        <span className="rounded-[4px] bg-ash px-3 py-1 text-[10px] font-medium uppercase tracking-wider text-pewter">
+                        <span className="rounded-full bg-ash px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-pewter">
                           {workshop.city}
                         </span>
                         <div className="flex items-center gap-1 text-xs font-bold text-amber-500">
@@ -282,7 +283,7 @@ export function WorkshopsSection() {
                         </div>
                       </div>
 
-                      <h3 className="mt-3 text-lg font-medium tracking-tight text-charcoal">
+                      <h3 className="mt-3 text-lg font-bold font-condensed uppercase tracking-wider text-charcoal">
                         {workshop.name}
                       </h3>
 
@@ -304,7 +305,7 @@ export function WorkshopsSection() {
                           {workshop.specialties.map((spec) => (
                             <span
                               key={spec}
-                              className="rounded-[4px] border border-cloud bg-ash px-2 py-0.5 text-[10px] font-medium text-graphite"
+                              className="rounded-full border border-cloud bg-ash px-2.5 py-0.5 text-[10px] font-semibold text-graphite"
                             >
                               {spec}
                             </span>
@@ -325,7 +326,7 @@ export function WorkshopsSection() {
                         <Button
                           type="button"
                           onClick={() => handleBookAppointment(workshop.name)}
-                          className="mt-6 h-11 w-full rounded-[4px] border border-cloud bg-ash text-xs font-medium text-graphite hover:bg-cloud hover:text-charcoal cursor-pointer flex items-center justify-center gap-1.5 transition-colors duration-[330ms]"
+                          className="mt-6 h-11 w-full rounded-xl border border-cloud bg-ash text-xs font-bold uppercase tracking-wider text-charcoal hover:bg-brand-blue hover:text-white hover:border-brand-blue cursor-pointer flex items-center justify-center gap-1.5 transition-all duration-[330ms]"
                         >
                           <Calendar className="h-4 w-4" />
                           Book Appointment

@@ -8,9 +8,11 @@
 }
 
 @theme {
-  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-condensed: var(--font-saira-condensed), sans-serif;
 
   --color-brand-blue: #3E6AE1;
+  --color-brand-blue-hover: #2B52BE;
   --color-charcoal: #171A20;
   --color-graphite: #393C41;
   --color-pewter: #5C5E62;
@@ -41,6 +43,10 @@
       transform: translateX(0);
     }
   }
+}
+
+html {
+  scrollbar-gutter: stable;
 }
 
 body {
