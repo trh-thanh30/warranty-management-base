@@ -1,31 +1,119 @@
-import { useTranslations } from "next-intl";
-import { Button } from "@repo/ui/button";
+"use client";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4100";
+import { useState } from "react";
+import { HeroSection } from "./components/hero-section";
+import { StatsSection } from "./components/stats-section";
+import { HowItWorksSection } from "./components/how-it-works-section";
+import { PricingSection } from "./components/pricing-section";
+import { TestimonialsSection } from "./components/testimonials-section";
+import { FaqSection } from "./components/faq-section";
+import { CtaSection } from "./components/cta-section";
+import { QuoteModal } from "./components/quote-modal";
+import { LookupSection } from "./components/lookup-section";
+import { CalculatorDrawer } from "./components/calculator-drawer";
+import { AboutSection } from "./components/about-section";
+import { SolutionsSection } from "./components/solutions-section";
+import { ServiceBanner } from "./components/service-banner";
+import { RequestSection } from "./components/request-section";
 
 export function HomeView() {
-  const t = useTranslations("Home");
+  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
+  const [selectedBrand, setSelectedBrand] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedMileage, setSelectedMileage] = useState("");
+  const [activeTab, setActiveTab] = useState<"warranty" | "service">("service");
+
+  const [selectedPlan, setSelectedPlan] = useState<{
+    type: "warranty" | "service";
+    term: string;
+    price: string;
+  } | null>(null);
+
+  const handleOpenQuote = (
+    plan: { type: "warranty" | "service"; term: string; price: string } | null,
+  ) => {
+    setSelectedPlan(plan);
+    setIsQuoteModalOpen(true);
+  };
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-5xl flex-col justify-center px-6 py-12">
-      <div className="max-w-2xl space-y-6">
-        <p className="text-sm font-medium uppercase tracking-wide text-slate-500">
-          {t("eyebrow")}
-        </p>
-        <h1 className="text-4xl font-semibold tracking-normal text-slate-950">
-          {t("title")}
-        </h1>
-        <p className="text-base leading-7 text-slate-600">{t("description")}</p>
-        <div className="flex items-center gap-3">
-          <Button>{t("primaryAction")}</Button>
-          <a
-            className="text-sm font-medium text-slate-700 hover:text-slate-950"
-            href={`${apiUrl}/docs`}
-          >
-            {t("apiDocs")}
-          </a>
-        </div>
+    <main className="overflow-x-hidden bg-white text-charcoal">
+      {/* Floating Calculator Tag */}
+      <button
+        onClick={() => setIsCalculatorOpen(true)}
+        className="fixed right-0 top-1/2 z-40 -translate-y-1/2 hidden md:flex items-center rounded-l-[16px] bg-brand-blue py-6 px-3.5 text-white shadow-[0_4px_20px_rgba(62,106,225,0.35)] transition-all hover:pl-5 duration-300 cursor-pointer"
+        aria-label="Open Price Calculator"
+      >
+        <span className="text-[12px] font-bold uppercase tracking-[0.18em] [writing-mode:vertical-lr] rotate-180">
+          CALCULATE PRICE
+        </span>
+      </button>
+
+      <HeroSection onOpenCalculator={() => setIsCalculatorOpen(true)} />
+      <StatsSection />
+      <AboutSection />
+      <SolutionsSection />
+
+      <div className="flex min-h-screen flex-col justify-center bg-ash">
+        <HowItWorksSection />
       </div>
+
+      <ServiceBanner />
+
+      <div className="flex min-h-screen flex-col justify-center bg-white border-b border-cloud">
+        <PricingSection
+          onOpenQuote={handleOpenQuote}
+          selectedBrand={selectedBrand}
+          setSelectedBrand={setSelectedBrand}
+          selectedYear={selectedYear}
+          setSelectedYear={setSelectedYear}
+          selectedMileage={selectedMileage}
+          setSelectedMileage={setSelectedMileage}
+          onOpenCalculator={() => setIsCalculatorOpen(true)}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
+      </div>
+
+      <div className="flex min-h-screen flex-col justify-center bg-ash border-b border-cloud">
+        <RequestSection />
+      </div>
+
+      <LookupSection />
+
+      <div className="flex min-h-screen flex-col justify-center bg-slate-50">
+        <TestimonialsSection />
+      </div>
+
+      <div className="flex min-h-screen flex-col justify-center bg-ash">
+        <FaqSection />
+      </div>
+
+      <CtaSection />
+
+      <QuoteModal
+        isOpen={isQuoteModalOpen}
+        onClose={() => setIsQuoteModalOpen(false)}
+        selectedPlan={selectedPlan}
+        defaultBrand={selectedBrand}
+        defaultYear={selectedYear}
+        defaultMileage={selectedMileage}
+      />
+
+      <CalculatorDrawer
+        isOpen={isCalculatorOpen}
+        onClose={() => setIsCalculatorOpen(false)}
+        selectedBrand={selectedBrand}
+        setSelectedBrand={setSelectedBrand}
+        selectedYear={selectedYear}
+        setSelectedYear={setSelectedYear}
+        selectedMileage={selectedMileage}
+        setSelectedMileage={setSelectedMileage}
+        onOpenQuote={handleOpenQuote}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
     </main>
   );
 }
