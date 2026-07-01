@@ -1,5 +1,6 @@
 import { BcryptService } from '@/common/helpers/bcrypt.util';
 import { CodeService } from '@/common/helpers/code.util';
+import { PermissionsModule } from '@/common/permissions/permissions.module';
 import { cookieConfig } from '@/config';
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { RedisModule } from '@/database/redis/redis.module';
@@ -42,6 +43,7 @@ import { ConfigModule } from '@nestjs/config';
   ],
   imports: [
     AssetsModule,
+    PermissionsModule,
     UsersModule,
     EmailModule,
     VerificationModule,

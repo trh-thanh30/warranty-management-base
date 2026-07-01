@@ -592,6 +592,10 @@ importers:
         version: 8.60.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.2)
 
   packages/hooks:
+    dependencies:
+      '@repo/shared':
+        specifier: workspace:*
+        version: link:../shared
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*

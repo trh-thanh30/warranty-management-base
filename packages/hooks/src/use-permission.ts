@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from "react";
+import type { PermissionKey, UserRole } from "@repo/shared";
 import { useAuth, type BaseAuthUser } from "./use-auth";
 
 export type UsePermissionOptions = {
@@ -6,7 +7,7 @@ export type UsePermissionOptions = {
 };
 
 export function usePermission<TUser extends BaseAuthUser = BaseAuthUser>(
-  requiredPermissions: string | string[] = [],
+  requiredPermissions: PermissionKey | PermissionKey[] = [],
   options: UsePermissionOptions = {},
 ) {
   const { mode = "all" } = options;
@@ -18,14 +19,14 @@ export function usePermission<TUser extends BaseAuthUser = BaseAuthUser>(
   }, [requiredPermissions]);
 
   const hasPermission = useCallback(
-    (permission: string) => {
+    (permission: PermissionKey) => {
       return isAuthenticated && permissions.includes(permission);
     },
     [isAuthenticated, permissions],
   );
 
   const hasAnyPermission = useCallback(
-    (items: string[]) => {
+    (items: PermissionKey[]) => {
       return (
         isAuthenticated &&
         items.some((permission) => permissions.includes(permission))
@@ -35,7 +36,7 @@ export function usePermission<TUser extends BaseAuthUser = BaseAuthUser>(
   );
 
   const hasAllPermissions = useCallback(
-    (items: string[]) => {
+    (items: PermissionKey[]) => {
       return (
         isAuthenticated &&
         items.every((permission) => permissions.includes(permission))
@@ -45,7 +46,7 @@ export function usePermission<TUser extends BaseAuthUser = BaseAuthUser>(
   );
 
   const hasRole = useCallback(
-    (allowedRoles: string | string[]) => {
+    (allowedRoles: UserRole | UserRole[]) => {
       const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
       return isAuthenticated && role !== null && roles.includes(role);
     },

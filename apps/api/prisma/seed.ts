@@ -65,7 +65,7 @@ async function main() {
     email: 'staff@example.com',
     password: hashedPassword,
     username: 'staff',
-    role: user_role.STAFF,
+    role: user_role.MODERATOR,
     status: user_status.ACTIVE,
     is_verified: true,
   });
@@ -74,7 +74,7 @@ async function main() {
     email: 'user@example.com',
     password: hashedPassword,
     username: 'user',
-    role: user_role.USER,
+    role: user_role.CUSTOMER,
     status: user_status.ACTIVE,
     is_verified: true,
   });

@@ -7,7 +7,7 @@ function user(overrides: Record<string, unknown> = {}) {
     email: 'user@example.com',
     username: 'user',
     password: 'hashed-password',
-    role: user_role.USER,
+    role: user_role.CUSTOMER,
     status: user_status.ACTIVE,
     is_verified: true,
     ...overrides,

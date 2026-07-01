@@ -1,6 +1,7 @@
 import { ApiSuccess } from '@/common/decorators/api-response.decorator';
 import { Public } from '@/common/decorators/public.decorator';
 import { User } from '@/common/decorators/user.decorator';
+import { PermissionService } from '@/common/permissions/permissions.service';
 import {
   BadRequestError,
   ConflictError,
@@ -43,6 +44,7 @@ import {
 } from '@nestjs/common';
 import { type ConfigType } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { normalizeUserRole } from '@repo/shared/constants';
 import { user_role, type User as CurrentUser } from '@prisma/client';
 import express from 'express';
 
@@ -62,6 +64,7 @@ export class AuthController {
     private readonly changePasswordUseCase: ChangePasswordUseCase,
     private readonly usersService: UsersService,
     private readonly assetsService: AssetsService,
+    private readonly permissionService: PermissionService,
     @Inject(cookieConfig.KEY)
     private readonly configCookie: ConfigType<typeof cookieConfig>,
   ) {}
@@ -83,7 +86,10 @@ export class AuthController {
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: express.Response,
   ) {
-    const result = await this.loginUserUseCase.execute(dto, user_role.ADMIN);
+    const result = await this.loginUserUseCase.execute(dto, [
+      user_role.ADMIN,
+      user_role.MODERATOR,
+    ]);
     this.setRefreshCookies(res, 'admin', result.refresh_token);
 
     return {
@@ -99,7 +105,7 @@ export class AuthController {
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: express.Response,
   ) {
-    const result = await this.loginUserUseCase.execute(dto, user_role.USER);
+    const result = await this.loginUserUseCase.execute(dto, user_role.CUSTOMER);
     this.setRefreshCookies(res, 'client', result.refresh_token);
 
     return {
@@ -125,7 +131,7 @@ export class AuthController {
     try {
       const result = await this.refreshTokenUseCase.execute(
         refreshToken,
-        this.getRequiredRole(context),
+        this.getRequiredRoles(context),
       );
 
       this.setRefreshCookies(res, context, result.refresh_token);
@@ -305,6 +311,11 @@ export class AuthController {
       throw new NotFoundError('User not found');
     }
 
+    const permissions = await this.permissionService.getEffectivePermissions(
+      user.id,
+      user.role,
+    );
+
     return {
       id: user.id,
       email: user.email,
@@ -312,7 +323,8 @@ export class AuthController {
       full_name: user.full_name,
       phone: user.phone,
       avatar_url: user.avatar_url,
-      role: user.role,
+      role: normalizeUserRole(user.role),
+      permissions,
       status: user.status,
       is_verified: user.is_verified,
       created_at: user.created_at,
@@ -330,15 +342,17 @@ export class AuthController {
       : { refreshToken: 'client_refresh_token', refreshFlag: 'client_has_rt' };
   }
 
-  private getRequiredRole(context: 'client' | 'admin'): user_role {
-    return context === 'admin' ? user_role.ADMIN : user_role.USER;
+  private getRequiredRoles(context: 'client' | 'admin'): user_role[] {
+    return context === 'admin'
+      ? [user_role.ADMIN, user_role.MODERATOR]
+      : [user_role.CUSTOMER];
   }
 
   private assertUserMatchesAuthContext(
     user: AuthRequestUser,
     context: 'client' | 'admin',
   ): void {
-    if (user.role !== this.getRequiredRole(context)) {
+    if (!this.getRequiredRoles(context).includes(user.role)) {
       throw new UnauthorizedError('Invalid session for this app');
     }
   }

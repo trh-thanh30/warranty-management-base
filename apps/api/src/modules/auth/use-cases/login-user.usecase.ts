@@ -35,7 +35,7 @@ export class LoginUserUseCase implements BaseUseCase<LoginDto, AuthResponse> {
 
   async execute(
     dto: LoginDto,
-    requiredRole?: user_role,
+    requiredRole?: user_role | user_role[],
   ): Promise<AuthResponse> {
     // Find user by email or username
     const user = await this.prismaService.user.findFirst({
@@ -48,8 +48,13 @@ export class LoginUserUseCase implements BaseUseCase<LoginDto, AuthResponse> {
     }
 
     // Check role if required
-    if (requiredRole && user.role !== requiredRole) {
-      throw new UnauthorizedError(this.errorMessages.INVALID_CREDENTIALS);
+    if (requiredRole) {
+      const allowedRoles = Array.isArray(requiredRole)
+        ? requiredRole
+        : [requiredRole];
+      if (!allowedRoles.includes(user.role)) {
+        throw new UnauthorizedError(this.errorMessages.INVALID_CREDENTIALS);
+      }
     }
 
     // Validate password

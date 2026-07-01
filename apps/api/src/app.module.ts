@@ -35,8 +35,10 @@ import { LoggerCoreModule, LoggerModule } from '@/common/logger';
 // modules
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { OptionalAuthGuard } from '@/common/guards/optional-auth.guard';
+import { PermissionsGuard } from '@/common/guards/permissions.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { IdentityMiddleware } from '@/common/middleware/identity.middleware';
+import { PermissionsModule } from '@/common/permissions/permissions.module';
 import { PrismaModule } from '@/database/prisma/prisma.module';
 import { RedisModule } from '@/database/redis/redis.module';
 import { AssetsModule } from '@/modules/assets/assets.module';
@@ -123,6 +125,7 @@ const envPath = join(rootDir, envFile);
       },
     }),
     PrismaModule,
+    PermissionsModule,
     RedisModule,
     EmailModule,
     AuthModule,
@@ -154,6 +157,10 @@ const envPath = join(rootDir, envFile);
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionsGuard,
     },
   ],
 })

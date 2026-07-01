@@ -1,6 +1,4 @@
-import type { USER_ROLES } from "@/constants/index.js";
-
-export type UserRole = (typeof USER_ROLES)[number];
+import type { UserRole } from "@/constants/index.js";
 
 export type UserSummary = {
   id: string;

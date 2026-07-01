@@ -1,20 +1,21 @@
 import { createContext, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
+import type { PermissionKey, UserRole } from "@repo/shared";
 
 export type AuthStatus = "authenticated" | "loading" | "unauthenticated";
 
 export type BaseAuthUser = {
   email?: string | null;
   id: string;
-  permissions?: string[];
-  role?: string | null;
+  permissions?: PermissionKey[];
+  role?: UserRole | null;
 };
 
 export type AuthContextValue<TUser extends BaseAuthUser = BaseAuthUser> = {
   isAuthenticated: boolean;
   isLoading: boolean;
-  permissions: string[];
-  role: string | null;
+  permissions: PermissionKey[];
+  role: UserRole | null;
   status: AuthStatus;
   user: TUser | null;
 };
@@ -23,7 +24,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export type AuthProviderProps<TUser extends BaseAuthUser = BaseAuthUser> = {
   children: ReactNode;
-  permissions?: string[];
+  permissions?: PermissionKey[];
   status?: AuthStatus;
   user: TUser | null;
 };

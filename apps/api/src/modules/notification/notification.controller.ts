@@ -35,7 +35,7 @@ export class NotificationController {
   }
 
   @Get('admin')
-  @Roles([user_role.ADMIN, user_role.STAFF])
+  @Roles([user_role.ADMIN, user_role.MODERATOR])
   async listAdmin(@Query() query: ListAdminNotificationsDto) {
     const { data, total } = await this.notificationService.listAdmin(query);
 

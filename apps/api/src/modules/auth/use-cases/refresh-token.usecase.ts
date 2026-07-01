@@ -24,7 +24,7 @@ export class RefreshTokenUseCase extends BaseUseCase<
 
   async execute(
     refreshToken: string,
-    requiredRole?: user_role,
+    requiredRole?: user_role | user_role[],
   ): Promise<RefreshTokenResponse> {
     if (!refreshToken) {
       throw new UnauthorizedError('Refresh token is missing');
@@ -59,8 +59,13 @@ export class RefreshTokenUseCase extends BaseUseCase<
         });
       }
 
-      if (requiredRole && user.role !== requiredRole) {
-        throw new UnauthorizedError('Invalid refresh token for this app');
+      if (requiredRole) {
+        const allowedRoles = Array.isArray(requiredRole)
+          ? requiredRole
+          : [requiredRole];
+        if (!allowedRoles.includes(user.role)) {
+          throw new UnauthorizedError('Invalid refresh token for this app');
+        }
       }
 
       // 3. Generate a fresh access token but keep the refresh token stable.

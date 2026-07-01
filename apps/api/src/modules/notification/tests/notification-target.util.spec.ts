@@ -15,11 +15,11 @@ describe('notification target util', () => {
     expect(
       normalizeNotificationTarget({
         scope: notification_scope.ROLE,
-        target_roles: [user_role.ADMIN, user_role.ADMIN, user_role.STAFF],
+        target_roles: [user_role.ADMIN, user_role.ADMIN, user_role.MODERATOR],
       }),
     ).toEqual({
       scope: notification_scope.ROLE,
-      target_roles: [user_role.ADMIN, user_role.STAFF],
+      target_roles: [user_role.ADMIN, user_role.MODERATOR],
     });
 
     expect(() =>
