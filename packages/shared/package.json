@@ -9,10 +9,15 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./constants": {
+      "types": "./dist/constants/index.d.ts",
+      "require": "./dist-cjs/constants/index.js",
+      "default": "./dist/constants/index.js"
     }
   },
   "scripts": {
-    "build": "tsc && tsc-alias -p tsconfig.json",
+    "build": "tsc && tsc-alias -p tsconfig.json && tsc -p tsconfig.cjs.json && node scripts/write-cjs-package.cjs",
     "check-types": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0"
   },

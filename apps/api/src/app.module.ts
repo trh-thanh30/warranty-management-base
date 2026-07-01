@@ -35,19 +35,24 @@ import { LoggerCoreModule, LoggerModule } from '@/common/logger';
 // modules
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { OptionalAuthGuard } from '@/common/guards/optional-auth.guard';
+import { PermissionsGuard } from '@/common/guards/permissions.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { IdentityMiddleware } from '@/common/middleware/identity.middleware';
+import { PermissionsModule } from '@/common/permissions/permissions.module';
 import { PrismaModule } from '@/database/prisma/prisma.module';
 import { RedisModule } from '@/database/redis/redis.module';
 import { AssetsModule } from '@/modules/assets/assets.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { CommonModule } from '@/modules/common/common.module';
+import { CustomersModule } from '@/modules/customers/customers.module';
 import { EmailModule } from '@/modules/email/email.module';
 import { HealthModule } from '@/modules/health/health.module';
 import { JobsModule } from '@/modules/jobs/jobs.module';
 import { NotificationModule } from '@/modules/notification/notification.module';
+import { ProductsModule } from '@/modules/products/products.module';
 import { UsersModule } from '@/modules/user/user.module';
 import { VerificationModule } from '@/modules/verification/verification.module';
+import { WarrantiesModule } from '@/modules/warranties/warranties.module';
 import { MiddlewareConsumer, NestModule } from '@nestjs/common';
 
 const rootDir = join(__dirname, '..', '..', '..');
@@ -123,6 +128,7 @@ const envPath = join(rootDir, envFile);
       },
     }),
     PrismaModule,
+    PermissionsModule,
     RedisModule,
     EmailModule,
     AuthModule,
@@ -132,6 +138,9 @@ const envPath = join(rootDir, envFile);
     AssetsModule,
     CommonModule,
     NotificationModule,
+    CustomersModule,
+    ProductsModule,
+    WarrantiesModule,
     UsersModule,
     VerificationModule,
   ],
@@ -154,6 +163,10 @@ const envPath = join(rootDir, envFile);
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionsGuard,
     },
   ],
 })

@@ -16,6 +16,9 @@
     "check-types": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0"
   },
+  "dependencies": {
+    "@repo/shared": "workspace:*"
+  },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
