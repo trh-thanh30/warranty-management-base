@@ -44,12 +44,15 @@ import { RedisModule } from '@/database/redis/redis.module';
 import { AssetsModule } from '@/modules/assets/assets.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { CommonModule } from '@/modules/common/common.module';
+import { CustomersModule } from '@/modules/customers/customers.module';
 import { EmailModule } from '@/modules/email/email.module';
 import { HealthModule } from '@/modules/health/health.module';
 import { JobsModule } from '@/modules/jobs/jobs.module';
 import { NotificationModule } from '@/modules/notification/notification.module';
+import { ProductsModule } from '@/modules/products/products.module';
 import { UsersModule } from '@/modules/user/user.module';
 import { VerificationModule } from '@/modules/verification/verification.module';
+import { WarrantiesModule } from '@/modules/warranties/warranties.module';
 import { MiddlewareConsumer, NestModule } from '@nestjs/common';
 
 const rootDir = join(__dirname, '..', '..', '..');
@@ -135,6 +138,9 @@ const envPath = join(rootDir, envFile);
     AssetsModule,
     CommonModule,
     NotificationModule,
+    CustomersModule,
+    ProductsModule,
+    WarrantiesModule,
     UsersModule,
     VerificationModule,
   ],

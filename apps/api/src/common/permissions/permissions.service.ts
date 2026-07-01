@@ -1,12 +1,12 @@
+import { PrismaService } from '@/database/prisma/prisma.service';
+import { Injectable } from '@nestjs/common';
+import { permission_key, user_role } from '@prisma/client';
 import {
   ALL_PERMISSIONS,
   ROLE_DEFAULT_PERMISSIONS,
   normalizeUserRole,
   type PermissionKey,
 } from '@repo/shared/constants';
-import { PrismaService } from '@/database/prisma/prisma.service';
-import { Injectable } from '@nestjs/common';
-import { permission_key, user_role } from '@prisma/client';
 
 @Injectable()
 export class PermissionService {
@@ -14,21 +14,21 @@ export class PermissionService {
 
   async hasPermission(
     userId: string,
-    role: user_role | string,
+    role: user_role,
     key: permission_key | PermissionKey,
   ): Promise<boolean> {
     const permissions = await this.getEffectivePermissions(userId, role);
-    return permissions.includes(key as permission_key);
+    return permissions.includes(key);
   }
 
   async getEffectivePermissions(
     userId: string,
-    role: user_role | string,
+    role: user_role,
   ): Promise<permission_key[]> {
     const normalizedRole = normalizeUserRole(role);
 
     if (normalizedRole === 'admin') {
-      return ALL_PERMISSIONS as permission_key[];
+      return ALL_PERMISSIONS;
     }
 
     if (!normalizedRole) {
@@ -48,7 +48,7 @@ export class PermissionService {
     });
 
     for (const override of overrides) {
-      const key = override.permission_key as PermissionKey;
+      const key = override.permission_key;
 
       if (override.granted) {
         effectivePermissions.add(key);
@@ -58,7 +58,7 @@ export class PermissionService {
       effectivePermissions.delete(key);
     }
 
-    return Array.from(effectivePermissions) as permission_key[];
+    return Array.from(effectivePermissions);
   }
 
   async setUserPermissionOverrides(

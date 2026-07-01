@@ -25,6 +25,8 @@ model User {
   created_notifications   Notification[]          @relation("NotificationCreatedBy")
   notification_recipients NotificationRecipient[]
   permissions             UserPermission[]
+  customer_profile        Customer?
+  owned_products          ProductOwnership[]
 
   @@index([role, status])
   @@index([email])
@@ -143,6 +145,96 @@ model UserPermission {
   @@map("user_permission")
 }
 
+model Customer {
+  id            String   @id @default(uuid()) @db.Uuid
+  user_id       String   @unique @db.Uuid
+  customer_code String   @unique
+  full_name     String
+  phone         String?
+  email         String?
+  address       String?
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  user       User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  ownerships ProductOwnership[]
+
+  @@index([customer_code])
+  @@index([full_name])
+  @@index([phone])
+  @@index([email])
+  @@map("customer")
+}
+
+model Product {
+  id                String           @id @default(uuid()) @db.Uuid
+  product_code      String           @unique
+  warranty_code     String           @unique
+  serial_number     String?          @unique
+  name              String
+  category          product_category
+  brand             String?
+  model             String?
+  manufacture_year  Int?
+  description       String?
+  status            product_status   @default(ACTIVE)
+  created_at        DateTime         @default(now())
+  updated_at        DateTime         @updatedAt
+  deleted_at        DateTime?
+
+  ownerships ProductOwnership[]
+  warranty   Warranty?
+
+  @@index([category])
+  @@index([status])
+  @@index([warranty_code])
+  @@index([serial_number])
+  @@index([name])
+  @@map("product")
+}
+
+model ProductOwnership {
+  id               String    @id @default(uuid()) @db.Uuid
+  product_id       String    @db.Uuid
+  customer_id      String    @db.Uuid
+  owner_user_id    String    @db.Uuid
+  purchase_date    DateTime?
+  activated_at     DateTime?
+  ended_at         DateTime?
+  is_current_owner Boolean   @default(true)
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+
+  product    Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  customer   Customer @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  owner_user User     @relation(fields: [owner_user_id], references: [id], onDelete: Cascade)
+
+  @@index([product_id, is_current_owner])
+  @@index([customer_id, is_current_owner])
+  @@index([owner_user_id, is_current_owner])
+  @@map("product_ownership")
+}
+
+model Warranty {
+  id              String          @id @default(uuid()) @db.Uuid
+  product_id      String          @unique @db.Uuid
+  warranty_code   String          @unique
+  start_date      DateTime?
+  end_date        DateTime?
+  duration_months Int
+  status          warranty_status @default(DRAFT)
+  terms           String?
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@index([warranty_code])
+  @@index([status])
+  @@index([end_date])
+  @@map("warranty")
+}
+
 enum user_role {
   ADMIN
   MODERATOR
@@ -219,4 +311,24 @@ enum permission_key {
 
   SYSTEM_VIEW
   AUDIT_LOG_VIEW
+}
+
+enum product_category {
+  CAR
+  ACCESSORY
+  SPARE_PART
+  SERVICE_PACKAGE
+}
+
+enum product_status {
+  ACTIVE
+  INACTIVE
+  DELETED
+}
+
+enum warranty_status {
+  DRAFT
+  ACTIVE
+  EXPIRED
+  VOIDED
 }

@@ -9,7 +9,7 @@ type PermissionRequest = {
   effectivePermissions?: permission_key[];
   user?: {
     id?: string;
-    role?: user_role | string;
+    role?: user_role;
   };
 };
 
