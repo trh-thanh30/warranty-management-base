@@ -1,0 +1,20 @@
+[
+  {
+    "id": "overview",
+    "title": "Overview",
+    "description": "Bức tranh tổng quan để FE biết docs này dùng cho việc gì.",
+    "file": "overview.md"
+  },
+  {
+    "id": "api-contracts",
+    "title": "API Contracts",
+    "description": "Quy ước contract giữa frontend và backend.",
+    "file": "api-contracts.md"
+  },
+  {
+    "id": "frontend-guide",
+    "title": "Frontend Guide",
+    "description": "Checklist khi FE thêm màn hình, service, type và UI state.",
+    "file": "frontend-guide.md"
+  }
+]
