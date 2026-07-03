@@ -52,6 +52,7 @@ import { NotificationModule } from '@/modules/notification/notification.module';
 import { ProductsModule } from '@/modules/products/products.module';
 import { UsersModule } from '@/modules/user/user.module';
 import { VerificationModule } from '@/modules/verification/verification.module';
+import { WarrantyClaimsModule } from '@/modules/warranty-claims/warranty-claims.module';
 import { WarrantiesModule } from '@/modules/warranties/warranties.module';
 import { MiddlewareConsumer, NestModule } from '@nestjs/common';
 
@@ -141,6 +142,7 @@ const envPath = join(rootDir, envFile);
     CustomersModule,
     ProductsModule,
     WarrantiesModule,
+    WarrantyClaimsModule,
     UsersModule,
     VerificationModule,
   ],
