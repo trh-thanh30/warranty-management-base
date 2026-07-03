@@ -66,6 +66,12 @@
     "file": "api-modules/warranty-claims.md"
   },
   {
+    "id": "api-service-centers",
+    "title": "API Service Centers",
+    "description": "Quản lý trạm bảo hành và dữ liệu assign claim.",
+    "file": "api-modules/service-centers.md"
+  },
+  {
     "id": "api-assets",
     "title": "API Assets",
     "description": "Upload, list, xem metadata và xoá asset.",
