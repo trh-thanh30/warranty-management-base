@@ -1,5 +1,7 @@
-import { warranty_claim_status } from '@prisma/client';
+import { warranty_claim_priority, warranty_claim_status } from '@prisma/client';
 import {
+  IsBooleanString,
+  IsDateString,
   IsEnum,
   IsOptional,
   IsString,
@@ -32,4 +34,20 @@ export class ListWarrantyClaimsDto {
   @IsOptional()
   @IsUUID()
   serviceCenterId?: string;
+
+  @IsOptional()
+  @IsEnum(warranty_claim_priority)
+  priority?: warranty_claim_priority;
+
+  @IsOptional()
+  @IsBooleanString()
+  isOverdue?: string;
+
+  @IsOptional()
+  @IsDateString()
+  dueFrom?: string;
+
+  @IsOptional()
+  @IsDateString()
+  dueTo?: string;
 }

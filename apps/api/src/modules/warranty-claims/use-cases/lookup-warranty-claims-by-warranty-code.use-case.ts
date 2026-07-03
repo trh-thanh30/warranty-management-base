@@ -11,6 +11,6 @@ export class LookupWarrantyClaimsByWarrantyCodeUseCase {
   async execute(warrantyCode: string) {
     const code = warrantyCode.trim().toUpperCase();
     const claims = await this.warrantyClaimsRepository.findByWarrantyCode(code);
-    return claims.map(toWarrantyClaimResponse);
+    return claims.map((claim) => toWarrantyClaimResponse(claim));
   }
 }

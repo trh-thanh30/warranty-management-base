@@ -1,6 +1,7 @@
 import { BadRequestError, NotFoundError } from '@/common/response';
 import { AssignWarrantyClaimServiceCenterDto } from '@/modules/warranty-claims/dto/assign-warranty-claim-service-center.dto';
 import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/warranty-claims.repository';
+import { WarrantyClaimNotificationService } from '@/modules/warranty-claims/service/warranty-claim-notification.service';
 import { toWarrantyClaimResponse } from '@/modules/warranty-claims/warranty-claims.types';
 import { Injectable } from '@nestjs/common';
 
@@ -12,6 +13,7 @@ type AssignWarrantyClaimServiceCenterContext = {
 export class AssignWarrantyClaimServiceCenterUseCase {
   constructor(
     private readonly warrantyClaimsRepository: WarrantyClaimsRepository,
+    private readonly warrantyClaimNotificationService?: WarrantyClaimNotificationService,
   ) {}
 
   async execute(
@@ -47,6 +49,8 @@ export class AssignWarrantyClaimServiceCenterUseCase {
       note: dto.note?.trim(),
       changedByUserId: context.changedByUserId,
     });
+
+    await this.warrantyClaimNotificationService?.serviceCenterAssigned(claim);
 
     return toWarrantyClaimResponse(claim);
   }

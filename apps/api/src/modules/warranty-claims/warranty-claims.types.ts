@@ -1,4 +1,5 @@
 import {
+  Asset,
   Customer,
   Product,
   ServiceCenter,
@@ -7,6 +8,36 @@ import {
   WarrantyClaim,
   WarrantyClaimStatusHistory,
 } from '@prisma/client';
+
+export type WarrantyClaimAttachmentResponse = {
+  id: string;
+  originalName: string;
+  filename: string;
+  mimeType: string;
+  size: number;
+  url: string;
+  type: string;
+  accessType: string;
+  uploadedById: string | null;
+  createdAt: Date;
+};
+
+export function toWarrantyClaimAttachmentResponse(
+  asset: Asset & { url?: string },
+): WarrantyClaimAttachmentResponse {
+  return {
+    id: asset.id,
+    originalName: asset.original_name,
+    filename: asset.filename,
+    mimeType: asset.mime_type,
+    size: asset.size,
+    url: asset.url ?? asset.path,
+    type: asset.type,
+    accessType: asset.access_type,
+    uploadedById: asset.uploaded_by_id,
+    createdAt: asset.created_at,
+  };
+}
 
 type WarrantyClaimWithRelations = WarrantyClaim & {
   product?: Product;
@@ -20,7 +51,10 @@ type WarrantyClaimWithRelations = WarrantyClaim & {
   >;
 };
 
-export function toWarrantyClaimResponse(claim: WarrantyClaimWithRelations) {
+export function toWarrantyClaimResponse(
+  claim: WarrantyClaimWithRelations,
+  attachments: WarrantyClaimAttachmentResponse[] = [],
+) {
   return {
     id: claim.id,
     claimCode: claim.claim_code,
@@ -33,6 +67,9 @@ export function toWarrantyClaimResponse(claim: WarrantyClaimWithRelations) {
     issueTitle: claim.issue_title,
     issueDetail: claim.issue_detail,
     status: claim.status,
+    priority: claim.priority,
+    dueAt: claim.due_at,
+    slaBreachedAt: claim.sla_breached_at,
     submittedAt: claim.submitted_at,
     resolvedAt: claim.resolved_at,
     createdAt: claim.created_at,
@@ -96,5 +133,6 @@ export function toWarrantyClaimResponse(claim: WarrantyClaimWithRelations) {
           : null,
         createdAt: history.created_at,
       })) ?? [],
+    attachments,
   };
 }

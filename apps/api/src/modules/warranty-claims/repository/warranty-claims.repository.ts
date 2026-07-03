@@ -1,7 +1,13 @@
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { ListWarrantyClaimsDto } from '@/modules/warranty-claims/dto/list-warranty-claims.dto';
 import { Injectable } from '@nestjs/common';
-import { Prisma, warranty_claim_status } from '@prisma/client';
+import {
+  Prisma,
+  warranty_claim_priority,
+  warranty_claim_status,
+} from '@prisma/client';
+
+export const WARRANTY_CLAIM_ASSET_ENTITY_TYPE = 'warranty_claim';
 
 const claimInclude = {
   product: true,
@@ -75,13 +81,34 @@ export class WarrantyClaimsRepository {
     const search = filters.search?.trim();
     const warrantyCode = filters.warrantyCode?.trim().toUpperCase();
     const claimCode = filters.claimCode?.trim().toUpperCase();
+    const dueFilter: Prisma.DateTimeNullableFilter = {
+      gte: filters.dueFrom ? new Date(filters.dueFrom) : undefined,
+      lte: filters.dueTo ? new Date(filters.dueTo) : undefined,
+    };
+    const hasDueFilter = Boolean(dueFilter.gte || dueFilter.lte);
+    const terminalStatuses = [
+      warranty_claim_status.COMPLETED,
+      warranty_claim_status.REJECTED,
+      warranty_claim_status.CANCELLED,
+    ];
+    const statusFilter =
+      filters.isOverdue === 'true'
+        ? (filters.status ?? { notIn: terminalStatuses })
+        : filters.status;
 
     return this.prismaService.warrantyClaim.findMany({
       where: {
-        status: filters.status,
+        status: statusFilter,
+        priority: filters.priority,
         warranty_code: warrantyCode,
         claim_code: claimCode,
         service_center_id: filters.serviceCenterId,
+        due_at:
+          filters.isOverdue === 'true'
+            ? { lt: new Date() }
+            : hasDueFilter
+              ? dueFilter
+              : undefined,
         OR: search
           ? [
               { claim_code: { contains: search, mode: 'insensitive' } },
@@ -129,6 +156,7 @@ export class WarrantyClaimsRepository {
     fromStatus: warranty_claim_status;
     toStatus: warranty_claim_status;
     resolvedAt?: Date | null;
+    slaBreachedAt?: Date | null;
     note?: string;
     changedByUserId?: string;
   }) {
@@ -138,6 +166,7 @@ export class WarrantyClaimsRepository {
         data: {
           status: input.toStatus,
           resolved_at: input.resolvedAt,
+          sla_breached_at: input.slaBreachedAt,
         },
       });
       await tx.warrantyClaimStatusHistory.create({
@@ -195,5 +224,176 @@ export class WarrantyClaimsRepository {
         include: claimInclude,
       });
     });
+  }
+
+  updatePriority(input: {
+    id: string;
+    priority?: warranty_claim_priority;
+    dueAt?: Date | null;
+    slaBreachedAt?: Date | null;
+  }) {
+    return this.prismaService.warrantyClaim.update({
+      where: { id: input.id },
+      data: {
+        priority: input.priority,
+        due_at: input.dueAt,
+        sla_breached_at: input.slaBreachedAt,
+      },
+      include: claimInclude,
+    });
+  }
+
+  findAssetById(assetId: string) {
+    return this.prismaService.asset.findFirst({
+      where: {
+        id: assetId,
+        is_deleted: false,
+      },
+    });
+  }
+
+  linkAssetToClaim(input: {
+    claimId: string;
+    assetId: string;
+    note?: string;
+    linkedByUserId?: string;
+  }) {
+    return this.prismaService.assetLink.upsert({
+      where: {
+        asset_id_entity_id_entity_type: {
+          asset_id: input.assetId,
+          entity_id: input.claimId,
+          entity_type: WARRANTY_CLAIM_ASSET_ENTITY_TYPE,
+        },
+      },
+      create: {
+        asset_id: input.assetId,
+        entity_id: input.claimId,
+        entity_type: WARRANTY_CLAIM_ASSET_ENTITY_TYPE,
+      },
+      update: {},
+      include: { asset: true },
+    });
+  }
+
+  listClaimAssets(claimId: string) {
+    return this.prismaService.assetLink.findMany({
+      where: {
+        entity_id: claimId,
+        entity_type: WARRANTY_CLAIM_ASSET_ENTITY_TYPE,
+        asset: { is_deleted: false },
+      },
+      include: { asset: true },
+      orderBy: { created_at: 'desc' },
+    });
+  }
+
+  unlinkAssetFromClaim(claimId: string, assetId: string) {
+    return this.prismaService.assetLink.deleteMany({
+      where: {
+        asset_id: assetId,
+        entity_id: claimId,
+        entity_type: WARRANTY_CLAIM_ASSET_ENTITY_TYPE,
+      },
+    });
+  }
+
+  async getMetrics(filters: {
+    dateFrom?: string;
+    dateTo?: string;
+    serviceCenterId?: string;
+  }) {
+    const where: Prisma.WarrantyClaimWhereInput = {
+      service_center_id: filters.serviceCenterId,
+      created_at:
+        filters.dateFrom || filters.dateTo
+          ? {
+              gte: filters.dateFrom ? new Date(filters.dateFrom) : undefined,
+              lte: filters.dateTo ? new Date(filters.dateTo) : undefined,
+            }
+          : undefined,
+    };
+    const now = new Date();
+    const startOfToday = new Date(now);
+    startOfToday.setHours(0, 0, 0, 0);
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const terminalStatuses = [
+      warranty_claim_status.COMPLETED,
+      warranty_claim_status.REJECTED,
+      warranty_claim_status.CANCELLED,
+    ];
+
+    const [
+      total,
+      createdToday,
+      createdThisMonth,
+      overdue,
+      byStatus,
+      byPriority,
+      byServiceCenter,
+      resolvedClaims,
+    ] = await Promise.all([
+      this.prismaService.warrantyClaim.count({ where }),
+      this.prismaService.warrantyClaim.count({
+        where: { ...where, created_at: { gte: startOfToday } },
+      }),
+      this.prismaService.warrantyClaim.count({
+        where: { ...where, created_at: { gte: startOfMonth } },
+      }),
+      this.prismaService.warrantyClaim.count({
+        where: {
+          ...where,
+          due_at: { lt: now },
+          status: { notIn: terminalStatuses },
+        },
+      }),
+      this.prismaService.warrantyClaim.groupBy({
+        by: ['status'],
+        where,
+        _count: { _all: true },
+      }),
+      this.prismaService.warrantyClaim.groupBy({
+        by: ['priority'],
+        where,
+        _count: { _all: true },
+      }),
+      this.prismaService.warrantyClaim.groupBy({
+        by: ['service_center_id'],
+        where,
+        _count: { _all: true },
+      }),
+      this.prismaService.warrantyClaim.findMany({
+        where: {
+          ...where,
+          resolved_at: { not: null },
+        },
+        select: {
+          created_at: true,
+          resolved_at: true,
+        },
+      }),
+    ]);
+
+    const averageResolutionHours =
+      resolvedClaims.length === 0
+        ? null
+        : resolvedClaims.reduce((totalHours, claim) => {
+            const resolvedAt = claim.resolved_at ?? claim.created_at;
+            return (
+              totalHours +
+              (resolvedAt.getTime() - claim.created_at.getTime()) / 3_600_000
+            );
+          }, 0) / resolvedClaims.length;
+
+    return {
+      total,
+      createdToday,
+      createdThisMonth,
+      overdue,
+      byStatus,
+      byPriority,
+      byServiceCenter,
+      averageResolutionHours,
+    };
   }
 }

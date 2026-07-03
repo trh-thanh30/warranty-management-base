@@ -1,13 +1,10 @@
 import { NotFoundError } from '@/common/response';
 import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/warranty-claims.repository';
-import {
-  toWarrantyClaimAttachmentResponse,
-  toWarrantyClaimResponse,
-} from '@/modules/warranty-claims/warranty-claims.types';
+import { toWarrantyClaimAttachmentResponse } from '@/modules/warranty-claims/warranty-claims.types';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class GetWarrantyClaimDetailUseCase {
+export class ListWarrantyClaimAssetsUseCase {
   constructor(
     private readonly warrantyClaimsRepository: WarrantyClaimsRepository,
   ) {}
@@ -19,11 +16,7 @@ export class GetWarrantyClaimDetailUseCase {
       throw new NotFoundError('Warranty claim not found');
     }
 
-    const attachments = await this.warrantyClaimsRepository.listClaimAssets(id);
-
-    return toWarrantyClaimResponse(
-      claim,
-      attachments.map((link) => toWarrantyClaimAttachmentResponse(link.asset)),
-    );
+    const links = await this.warrantyClaimsRepository.listClaimAssets(id);
+    return links.map((link) => toWarrantyClaimAttachmentResponse(link.asset));
   }
 }

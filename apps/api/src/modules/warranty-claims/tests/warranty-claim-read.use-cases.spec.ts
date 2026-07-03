@@ -29,6 +29,7 @@ describe('Warranty claim read use cases', () => {
     findById: jest.fn(),
     findByClaimCode: jest.fn(),
     findByWarrantyCode: jest.fn(),
+    listClaimAssets: jest.fn(),
   };
 
   beforeEach(() => {
@@ -54,6 +55,7 @@ describe('Warranty claim read use cases', () => {
 
   it('returns claim detail by id', async () => {
     warrantyClaimsRepository.findById.mockResolvedValue(claim);
+    warrantyClaimsRepository.listClaimAssets.mockResolvedValue([]);
     const useCase = new GetWarrantyClaimDetailUseCase(
       warrantyClaimsRepository as never,
     );

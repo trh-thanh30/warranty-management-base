@@ -1,10 +1,16 @@
 import { BadRequestError, NotFoundError } from '@/common/response';
 import { CreateWarrantyClaimDto } from '@/modules/warranty-claims/dto/create-warranty-claim.dto';
 import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/warranty-claims.repository';
+import { WarrantyClaimNotificationService } from '@/modules/warranty-claims/service/warranty-claim-notification.service';
+import { WarrantyClaimSlaService } from '@/modules/warranty-claims/service/warranty-claim-sla.service';
 import { GenerateWarrantyClaimCodeUseCase } from '@/modules/warranty-claims/use-cases/generate-warranty-claim-code.use-case';
 import { toWarrantyClaimResponse } from '@/modules/warranty-claims/warranty-claims.types';
 import { Injectable } from '@nestjs/common';
-import { Prisma, warranty_status } from '@prisma/client';
+import {
+  Prisma,
+  warranty_claim_priority,
+  warranty_status,
+} from '@prisma/client';
 
 const CLAIM_CODE_GENERATION_ATTEMPTS = 3;
 
@@ -13,6 +19,8 @@ export class CreateWarrantyClaimUseCase {
   constructor(
     private readonly warrantyClaimsRepository: WarrantyClaimsRepository,
     private readonly generateWarrantyClaimCodeUseCase: GenerateWarrantyClaimCodeUseCase,
+    private readonly warrantyClaimSlaService?: WarrantyClaimSlaService,
+    private readonly warrantyClaimNotificationService?: WarrantyClaimNotificationService,
   ) {}
 
   async execute(dto: CreateWarrantyClaimDto) {
@@ -38,11 +46,16 @@ export class CreateWarrantyClaimUseCase {
       attempt += 1
     ) {
       const claimCode = await this.generateWarrantyClaimCodeUseCase.execute();
+      const dueAt =
+        this.warrantyClaimSlaService?.calculateDueAt(
+          warranty_claim_priority.NORMAL,
+        ) ?? this.defaultDueAt();
 
       try {
         const claim = await this.warrantyClaimsRepository.create({
           claim_code: claimCode,
           warranty_code: product.warranty_code,
+          due_at: dueAt,
           requester_name: dto.requesterName,
           requester_phone: dto.requesterPhone,
           issue_title: dto.issueTitle,
@@ -53,6 +66,8 @@ export class CreateWarrantyClaimUseCase {
             ? { connect: { id: currentOwnership.customer.id } }
             : undefined,
         });
+
+        await this.warrantyClaimNotificationService?.claimCreated(claim);
 
         return toWarrantyClaimResponse(claim);
       } catch (error) {
@@ -77,5 +92,11 @@ export class CreateWarrantyClaimUseCase {
       Array.isArray(error.meta?.target) &&
       error.meta.target.includes('claim_code')
     );
+  }
+
+  private defaultDueAt() {
+    const dueAt = new Date();
+    dueAt.setDate(dueAt.getDate() + 3);
+    return dueAt;
   }
 }

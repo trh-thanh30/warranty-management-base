@@ -240,22 +240,25 @@ model Warranty {
 }
 
 model WarrantyClaim {
-  id                String                @id @default(uuid()) @db.Uuid
-  claim_code        String                @unique
-  warranty_id       String                @db.Uuid
-  product_id        String                @db.Uuid
-  customer_id       String?               @db.Uuid
-  service_center_id String?               @db.Uuid
+  id                String                  @id @default(uuid()) @db.Uuid
+  claim_code        String                  @unique
+  warranty_id       String                  @db.Uuid
+  product_id        String                  @db.Uuid
+  customer_id       String?                 @db.Uuid
+  service_center_id String?                 @db.Uuid
   warranty_code     String
   requester_name    String?
   requester_phone   String?
   issue_title       String
   issue_detail      String?
-  status            warranty_claim_status @default(SUBMITTED)
-  submitted_at      DateTime              @default(now())
+  status            warranty_claim_status   @default(SUBMITTED)
+  priority          warranty_claim_priority @default(NORMAL)
+  due_at            DateTime?
+  sla_breached_at   DateTime?
+  submitted_at      DateTime                @default(now())
   resolved_at       DateTime?
-  created_at        DateTime              @default(now())
-  updated_at        DateTime              @updatedAt
+  created_at        DateTime                @default(now())
+  updated_at        DateTime                @updatedAt
 
   warranty       Warranty                     @relation(fields: [warranty_id], references: [id], onDelete: Cascade)
   product        Product                      @relation(fields: [product_id], references: [id], onDelete: Cascade)
@@ -269,6 +272,9 @@ model WarrantyClaim {
   @@index([product_id])
   @@index([customer_id])
   @@index([service_center_id])
+  @@index([priority])
+  @@index([due_at])
+  @@index([sla_breached_at])
   @@index([created_at])
   @@map("warranty_claim")
 }
@@ -427,4 +433,11 @@ enum warranty_claim_status {
   IN_REPAIR
   COMPLETED
   CANCELLED
+}
+
+enum warranty_claim_priority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
 }

@@ -1,6 +1,8 @@
 import { BadRequestError, NotFoundError } from '@/common/response';
 import { UpdateWarrantyClaimStatusDto } from '@/modules/warranty-claims/dto/update-warranty-claim-status.dto';
 import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/warranty-claims.repository';
+import { WarrantyClaimNotificationService } from '@/modules/warranty-claims/service/warranty-claim-notification.service';
+import { WarrantyClaimSlaService } from '@/modules/warranty-claims/service/warranty-claim-sla.service';
 import { toWarrantyClaimResponse } from '@/modules/warranty-claims/warranty-claims.types';
 import { Injectable } from '@nestjs/common';
 import { warranty_claim_status } from '@prisma/client';
@@ -45,6 +47,8 @@ type UpdateWarrantyClaimStatusContext = {
 export class UpdateWarrantyClaimStatusUseCase {
   constructor(
     private readonly warrantyClaimsRepository: WarrantyClaimsRepository,
+    private readonly warrantyClaimSlaService?: WarrantyClaimSlaService,
+    private readonly warrantyClaimNotificationService?: WarrantyClaimNotificationService,
   ) {}
 
   async execute(
@@ -69,14 +73,30 @@ export class UpdateWarrantyClaimStatusUseCase {
     }
 
     const resolvedAt = TERMINAL_STATUSES.has(dto.status) ? new Date() : null;
+    const slaBreachedAt =
+      this.warrantyClaimSlaService?.calculateSlaBreachedAt({
+        status: dto.status,
+        due_at: existingClaim.due_at,
+        sla_breached_at: existingClaim.sla_breached_at,
+      }) ?? existingClaim.sla_breached_at;
     const claim = await this.warrantyClaimsRepository.updateStatusWithHistory({
       id,
       fromStatus: existingClaim.status,
       toStatus: dto.status,
       resolvedAt,
+      slaBreachedAt,
       note: dto.note?.trim(),
       changedByUserId: context.changedByUserId,
     });
+
+    await this.warrantyClaimNotificationService?.statusChanged(
+      claim,
+      existingClaim.status,
+    );
+
+    if (slaBreachedAt && !existingClaim.sla_breached_at) {
+      await this.warrantyClaimNotificationService?.slaBreached(claim);
+    }
 
     return toWarrantyClaimResponse(claim);
   }
