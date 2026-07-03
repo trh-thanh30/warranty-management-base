@@ -4,6 +4,7 @@
   "globalEnv": [
     "NODE_ENV",
     "NEXT_PUBLIC_API_URL",
+    "DOCS_PORT",
     "CI_TELEGRAM_BOT_TOKEN",
     "CI_TELEGRAM_CHAT_ID"
   ],
