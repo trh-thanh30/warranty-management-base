@@ -1,11 +1,11 @@
-import { NotFoundError } from '@/common/response';
+import { BadRequestError, NotFoundError } from '@/common/response';
 import { UpdateWarrantyClaimStatusUseCase } from '@/modules/warranty-claims/use-cases/update-warranty-claim-status.use-case';
 import { warranty_claim_status } from '@prisma/client';
 
 describe('UpdateWarrantyClaimStatusUseCase', () => {
   const warrantyClaimsRepository = {
     findById: jest.fn(),
-    updateStatus: jest.fn(),
+    updateStatusWithHistory: jest.fn(),
   };
 
   beforeEach(() => {
@@ -17,7 +17,7 @@ describe('UpdateWarrantyClaimStatusUseCase', () => {
       id: 'claim-id',
       status: warranty_claim_status.IN_REPAIR,
     });
-    warrantyClaimsRepository.updateStatus.mockResolvedValue({
+    warrantyClaimsRepository.updateStatusWithHistory.mockResolvedValue({
       id: 'claim-id',
       claim_code: 'CLM-2026-ABC123',
       warranty_id: 'warranty-id',
@@ -42,12 +42,49 @@ describe('UpdateWarrantyClaimStatusUseCase', () => {
       status: warranty_claim_status.COMPLETED,
     });
 
-    expect(warrantyClaimsRepository.updateStatus).toHaveBeenCalledWith(
-      'claim-id',
-      warranty_claim_status.COMPLETED,
-      expect.any(Date),
+    expect(
+      warrantyClaimsRepository.updateStatusWithHistory,
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'claim-id',
+        fromStatus: warranty_claim_status.IN_REPAIR,
+        toStatus: warranty_claim_status.COMPLETED,
+        resolvedAt: expect.any(Date),
+      }),
     );
     expect(result.status).toBe(warranty_claim_status.COMPLETED);
+  });
+
+  it('rejects invalid status transitions', async () => {
+    warrantyClaimsRepository.findById.mockResolvedValue({
+      id: 'claim-id',
+      status: warranty_claim_status.SUBMITTED,
+    });
+    const useCase = new UpdateWarrantyClaimStatusUseCase(
+      warrantyClaimsRepository as never,
+    );
+
+    await expect(
+      useCase.execute('claim-id', {
+        status: warranty_claim_status.COMPLETED,
+      }),
+    ).rejects.toBeInstanceOf(BadRequestError);
+  });
+
+  it('rejects duplicate status updates', async () => {
+    warrantyClaimsRepository.findById.mockResolvedValue({
+      id: 'claim-id',
+      status: warranty_claim_status.REVIEWING,
+    });
+    const useCase = new UpdateWarrantyClaimStatusUseCase(
+      warrantyClaimsRepository as never,
+    );
+
+    await expect(
+      useCase.execute('claim-id', {
+        status: warranty_claim_status.REVIEWING,
+      }),
+    ).rejects.toBeInstanceOf(BadRequestError);
   });
 
   it('throws not found when claim does not exist', async () => {

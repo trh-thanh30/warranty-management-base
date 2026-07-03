@@ -1,5 +1,12 @@
 import { warranty_claim_status } from '@prisma/client';
-import { IsEnum, IsOptional, IsString, Length, Matches } from 'class-validator';
+import {
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Length,
+  Matches,
+} from 'class-validator';
 
 export class ListWarrantyClaimsDto {
   @IsOptional()
@@ -21,4 +28,8 @@ export class ListWarrantyClaimsDto {
   @Length(6, 64)
   @Matches(/^[A-Z0-9-]+$/i)
   claimCode?: string;
+
+  @IsOptional()
+  @IsUUID()
+  serviceCenterId?: string;
 }

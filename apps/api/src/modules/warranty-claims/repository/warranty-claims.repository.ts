@@ -7,6 +7,13 @@ const claimInclude = {
   product: true,
   warranty: true,
   customer: true,
+  service_center: true,
+  status_history: {
+    include: {
+      changed_by: true,
+    },
+    orderBy: { created_at: 'asc' },
+  },
 } satisfies Prisma.WarrantyClaimInclude;
 
 @Injectable()
@@ -51,7 +58,7 @@ export class WarrantyClaimsRepository {
           startsWith: prefix,
         },
       },
-      orderBy: [{ created_at: 'desc' }, { claim_code: 'desc' }],
+      orderBy: { claim_code: 'desc' },
       select: { claim_code: true },
     });
   }
@@ -74,6 +81,7 @@ export class WarrantyClaimsRepository {
         status: filters.status,
         warranty_code: warrantyCode,
         claim_code: claimCode,
+        service_center_id: filters.serviceCenterId,
         OR: search
           ? [
               { claim_code: { contains: search, mode: 'insensitive' } },
@@ -113,6 +121,79 @@ export class WarrantyClaimsRepository {
         resolved_at: resolvedAt,
       },
       include: claimInclude,
+    });
+  }
+
+  updateStatusWithHistory(input: {
+    id: string;
+    fromStatus: warranty_claim_status;
+    toStatus: warranty_claim_status;
+    resolvedAt?: Date | null;
+    note?: string;
+    changedByUserId?: string;
+  }) {
+    return this.prismaService.$transaction(async (tx) => {
+      await tx.warrantyClaim.update({
+        where: { id: input.id },
+        data: {
+          status: input.toStatus,
+          resolved_at: input.resolvedAt,
+        },
+      });
+      await tx.warrantyClaimStatusHistory.create({
+        data: {
+          warranty_claim_id: input.id,
+          from_status: input.fromStatus,
+          to_status: input.toStatus,
+          note: input.note,
+          changed_by_user_id: input.changedByUserId,
+        },
+      });
+
+      return tx.warrantyClaim.findUniqueOrThrow({
+        where: { id: input.id },
+        include: claimInclude,
+      });
+    });
+  }
+
+  findActiveServiceCenterById(id: string) {
+    return this.prismaService.serviceCenter.findFirst({
+      where: {
+        id,
+        is_active: true,
+      },
+    });
+  }
+
+  assignServiceCenter(input: {
+    id: string;
+    serviceCenterId: string;
+    status: warranty_claim_status;
+    note?: string;
+    changedByUserId?: string;
+  }) {
+    return this.prismaService.$transaction(async (tx) => {
+      await tx.warrantyClaim.update({
+        where: { id: input.id },
+        data: {
+          service_center_id: input.serviceCenterId,
+        },
+      });
+      await tx.warrantyClaimStatusHistory.create({
+        data: {
+          warranty_claim_id: input.id,
+          from_status: input.status,
+          to_status: input.status,
+          note: input.note ?? 'Assigned service center',
+          changed_by_user_id: input.changedByUserId,
+        },
+      });
+
+      return tx.warrantyClaim.findUniqueOrThrow({
+        where: { id: input.id },
+        include: claimInclude,
+      });
     });
   }
 }

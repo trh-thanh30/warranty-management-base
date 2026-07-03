@@ -50,6 +50,7 @@ import { HealthModule } from '@/modules/health/health.module';
 import { JobsModule } from '@/modules/jobs/jobs.module';
 import { NotificationModule } from '@/modules/notification/notification.module';
 import { ProductsModule } from '@/modules/products/products.module';
+import { ServiceCentersModule } from '@/modules/service-centers/service-centers.module';
 import { UsersModule } from '@/modules/user/user.module';
 import { VerificationModule } from '@/modules/verification/verification.module';
 import { WarrantyClaimsModule } from '@/modules/warranty-claims/warranty-claims.module';
@@ -142,6 +143,7 @@ const envPath = join(rootDir, envFile);
     CustomersModule,
     ProductsModule,
     WarrantiesModule,
+    ServiceCentersModule,
     WarrantyClaimsModule,
     UsersModule,
     VerificationModule,
