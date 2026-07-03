@@ -52,6 +52,7 @@ Chưa ưu tiên trong demo đầu tiên:
 - **API** (`apps/api`): NestJS, Prisma, PostgreSQL, Redis, BullMQ, health check và module backend theo Clean Architecture nhẹ.
 - **Web** (`apps/web`): Next.js 16, React 19, TailwindCSS 4, dùng cho trải nghiệm khách hàng.
 - **Admin** (`apps/admin`): Next.js 16, React 19, TailwindCSS 4, dùng cho dashboard quản trị.
+- **Docs** (`apps/docs`): static HTML + TailwindCSS + markdown renderer, dùng để frontend đọc tài liệu module qua port cục bộ.
 
 ### Package Dùng Chung
 
@@ -78,7 +79,8 @@ warranty-management-base/
 ├── apps/
 │   ├── api/                 # @repo/api - Backend NestJS
 │   ├── web/                 # @repo/web - app khách hàng
-│   └── admin/               # @repo/admin - dashboard quản trị
+│   ├── admin/               # @repo/admin - dashboard quản trị
+│   └── docs/                # @repo/docs - static module docs
 ├── packages/
 │   ├── shared/              # @repo/shared - giao kèo dữ liệu và utility dùng chung
 │   ├── hooks/               # @repo/hooks - React hooks dùng chung
@@ -227,6 +229,7 @@ Các port mặc định:
 | API        | `API_PORT`      | `4100`   |
 | Web        | `WEB_PORT`      | `4101`   |
 | Admin      | `ADMIN_PORT`    | `4102`   |
+| Docs       | `DOCS_PORT`     | `8080`   |
 | PostgreSQL | `DEV_DB_PORT`   | `15432`  |
 | Redis      | `REDIS_DB_PORT` | `16379`  |
 | MinIO      | `MINIO_PORT`    | `19000`  |
@@ -269,6 +272,7 @@ Chạy từng ứng dụng riêng:
 pnpm dev:api
 pnpm dev:web
 pnpm dev:admin
+pnpm dev:docs
 ```
 
 URL cục bộ mặc định:
@@ -276,6 +280,41 @@ URL cục bộ mặc định:
 - API: `http://localhost:4100`
 - Web: `http://localhost:4101`
 - Admin: `http://localhost:4102`
+- Docs: `http://127.0.0.1:8080`
+
+### 7. Chạy Module Docs
+
+Docs app là static page nhẹ để render các file markdown trong `apps/docs/public/content`.
+
+Chạy từ root repo:
+
+```bash
+pnpm dev:docs
+```
+
+Mở:
+
+```txt
+http://127.0.0.1:8080
+```
+
+Nếu port `8080` đang bận, đổi port bằng biến môi trường:
+
+```bash
+DOCS_PORT=8081 pnpm dev:docs
+```
+
+Kiểm tra cấu hình docs trước khi commit:
+
+```bash
+pnpm build:docs
+```
+
+Thêm docs module mới:
+
+1. Tạo file `.md` trong `apps/docs/public/content`.
+2. Thêm item mới vào `apps/docs/public/content/modules.json`.
+3. Chạy `pnpm build:docs` để kiểm tra file được khai báo hợp lệ.
 
 ## Lệnh Thường Dùng
 
@@ -303,12 +342,15 @@ URL cục bộ mặc định:
 | `pnpm dev:api:debug` | Chạy API ở chế độ debug watch       |
 | `pnpm dev:web`       | Chạy app Web                        |
 | `pnpm dev:admin`     | Chạy app Admin                      |
+| `pnpm dev:docs`      | Chạy static module docs ở port 8080 |
 | `pnpm build:api`     | Build riêng API                     |
 | `pnpm build:web`     | Build riêng Web                     |
 | `pnpm build:admin`   | Build riêng Admin                   |
+| `pnpm build:docs`    | Kiểm tra static docs và modules     |
 | `pnpm start:api`     | Chạy API đã build ở chế độ sản xuất |
 | `pnpm start:web`     | Chạy Web đã build                   |
 | `pnpm start:admin`   | Chạy Admin đã build                 |
+| `pnpm start:docs`    | Chạy static docs server             |
 
 ### Lệnh Test
 
@@ -441,7 +483,7 @@ Các nhóm biến quan trọng:
 - **Database**: `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DATABASE_URL`
 - **Redis**: `REDIS_HOST`, `REDIS_DEV_PORT`, `REDIS_PASSWORD`, `REDIS_URL`
 - **Storage**: `STORAGE_DRIVER`, `STORAGE_ROOT_DIR`, `ASSET_CDN_URL`
-- **Web/Admin**: `WEB_PORT`, `ADMIN_PORT`, `NEXT_PUBLIC_API_URL`
+- **Web/Admin/Docs**: `WEB_PORT`, `ADMIN_PORT`, `DOCS_PORT`, `NEXT_PUBLIC_API_URL`
 - **Telegram CI/CD**: `CI_TELEGRAM_BOT_TOKEN`, `CI_TELEGRAM_CHAT_ID`
 
 ## CI/CD Và Telegram

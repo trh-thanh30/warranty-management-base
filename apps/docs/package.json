@@ -1,0 +1,13 @@
+{
+  "name": "@repo/docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs",
+    "build": "node scripts/check-docs.mjs",
+    "lint": "node scripts/check-docs.mjs",
+    "check-types": "node --check server.mjs && node --check public/app.js && node --check scripts/check-docs.mjs"
+  }
+}
