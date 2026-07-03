@@ -18,7 +18,7 @@ FE dùng module này cho:
 - Admin service center list.
 - Admin create/update/deactivate service center.
 - Dropdown service center trong màn claim detail.
-- Trang “Trạm bảo hành” ở main FE trong phase sau nếu BE mở public endpoint hoặc cấp permission phù hợp.
+- Trang “Trạm bảo hành” ở main FE qua Public Guest APIs.
 
 ## Trạng thái triển khai
 
@@ -32,11 +32,11 @@ Status: `implemented`
 - Update service center.
 - Deactivate service center bằng soft state `isActive = false`.
 - Permission riêng cho service center.
+- Public guest endpoint chỉ trả trạm active.
 
 Chưa có:
 
 - Delete cứng.
-- Public guest endpoint.
 - Pagination.
 - Tọa độ bản đồ.
 - Giờ làm việc.
@@ -54,7 +54,11 @@ Authorization: Bearer <access_token>
 x-auth-context: admin
 ```
 
-Hiện các endpoint đều yêu cầu auth và permission. Nếu main FE cần guest xem “Trạm bảo hành”, BE cần phase riêng để thêm public endpoint hoặc đánh dấu route public.
+Các endpoint dưới `/service-centers` yêu cầu auth và permission. Main FE/guest dùng:
+
+```txt
+GET /api/v1/public/service-centers
+```
 
 ## Permissions
 

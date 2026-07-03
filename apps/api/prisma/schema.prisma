@@ -131,6 +131,24 @@ model ActivityLog {
   @@map("activity_log")
 }
 
+model ContentPage {
+  id           String              @id @default(uuid()) @db.Uuid
+  slug         String              @unique
+  title        String
+  summary      String?
+  content      String
+  kind         content_page_kind   @default(POLICY)
+  status       content_page_status @default(DRAFT)
+  published_at DateTime?
+  created_at   DateTime            @default(now())
+  updated_at   DateTime            @updatedAt
+
+  @@index([kind])
+  @@index([status])
+  @@index([published_at])
+  @@map("content_page")
+}
+
 model UserPermission {
   id             String         @id @default(uuid()) @db.Uuid
   user_id        String         @db.Uuid
@@ -395,6 +413,11 @@ enum permission_key {
   SERVICE_CENTER_UPDATE
   SERVICE_CENTER_DELETE
 
+  CONTENT_PAGE_VIEW
+  CONTENT_PAGE_CREATE
+  CONTENT_PAGE_UPDATE
+  CONTENT_PAGE_DELETE
+
   USER_VIEW
   USER_CREATE
   USER_UPDATE
@@ -440,4 +463,17 @@ enum warranty_claim_priority {
   NORMAL
   HIGH
   URGENT
+}
+
+enum content_page_kind {
+  POLICY
+  GUIDE
+  INTRO
+  FAQ
+}
+
+enum content_page_status {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
 }

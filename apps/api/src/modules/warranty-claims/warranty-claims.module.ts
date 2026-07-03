@@ -42,5 +42,10 @@ import { Module } from '@nestjs/common';
     UpdateWarrantyClaimPriorityUseCase,
     AssignWarrantyClaimServiceCenterUseCase,
   ],
+  exports: [
+    CreateWarrantyClaimUseCase,
+    LookupWarrantyClaimByCodeUseCase,
+    WarrantyClaimsRepository,
+  ],
 })
 export class WarrantyClaimsModule {}

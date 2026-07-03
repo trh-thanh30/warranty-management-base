@@ -23,5 +23,10 @@ import { Module } from '@nestjs/common';
     ListMyProductsUseCase,
     GetMyProductWarrantyUseCase,
   ],
+  exports: [
+    ActivateWarrantyByCodeUseCase,
+    LookupWarrantyByCodeUseCase,
+    WarrantiesRepository,
+  ],
 })
 export class WarrantiesModule {}

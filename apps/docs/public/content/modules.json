@@ -60,6 +60,12 @@
     "file": "api-modules/warranties.md"
   },
   {
+    "id": "api-public",
+    "title": "Public APIs",
+    "description": "Endpoint guest cho 6 chức năng chính ngoài website.",
+    "file": "api-modules/public-apis.md"
+  },
+  {
     "id": "api-warranty-claims",
     "title": "API Claims",
     "description": "Tạo, tra cứu và xử lý yêu cầu bảo hành.",
@@ -70,6 +76,12 @@
     "title": "API Service Centers",
     "description": "Quản lý trạm bảo hành và dữ liệu assign claim.",
     "file": "api-modules/service-centers.md"
+  },
+  {
+    "id": "api-content-pages",
+    "title": "API Content Pages",
+    "description": "Quản lý chính sách và hướng dẫn cho website.",
+    "file": "api-modules/content-pages.md"
   },
   {
     "id": "api-assets",

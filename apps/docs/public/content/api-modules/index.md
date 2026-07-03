@@ -92,8 +92,10 @@ client_has_rt
 - `customers`: Admin quản lý hồ sơ customer.
 - `products`: Admin quản lý sản phẩm, warranty code và owner.
 - `warranties`: Admin/customer kích hoạt và tra cứu bảo hành.
+- `public`: endpoint guest cho 6 chức năng chính ngoài website.
 - `warranty-claims`: tạo, tra cứu, list, assign trạm và cập nhật trạng thái yêu cầu bảo hành.
 - `service-centers`: quản lý trạm bảo hành để assign claim và phục vụ trang trạm bảo hành.
+- `content-pages`: quản lý chính sách và hướng dẫn để main FE đọc bản published.
 - `assets`: upload/list/metadata/delete asset.
 - `notifications`: thông báo admin và thông báo user.
 - `system`: health check và common utility endpoint.
@@ -142,8 +144,10 @@ Mở từng mục trong sidebar:
 - API Customers
 - API Products
 - API Warranties
+- Public APIs
 - API Claims
 - API Service Centers
+- API Content Pages
 - API Assets
 - API Notifications
 - API System

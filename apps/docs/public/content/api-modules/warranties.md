@@ -12,6 +12,7 @@ Warranties API quản lý kích hoạt và tra cứu bảo hành. Module này c�
 
 - Admin flow: tra cứu warranty theo mã, kích hoạt warranty theo product hoặc warrantyCode.
 - Customer flow: customer xem sản phẩm thuộc sở hữu của mình và tra cứu bảo hành nhưng BE enforce ownership.
+- Public flow: guest tra cứu/kích hoạt bằng mã qua `Public Guest APIs`.
 
 Rule quan trọng nhất: Customer không được xem sản phẩm chỉ vì biết warrantyCode. BE luôn kiểm tra ownership hiện tại.
 
@@ -131,6 +132,7 @@ FE triển khai chuẩn:
 - Search box nên uppercase input.
 - Nếu 404, hiển thị “Không tìm thấy bảo hành” thay vì generic error.
 - Không dùng endpoint này ở customer web.
+- Main FE/guest dùng `GET /api/v1/public/warranties/lookup`.
 
 ## POST /api/v1/warranties/activate-by-code
 
@@ -182,6 +184,7 @@ Error:
 FE triển khai chuẩn:
 
 - Dùng cho action “Activate by code” trong Admin.
+- Main FE/guest dùng `POST /api/v1/public/warranties/activate-by-code` nếu cần flow không đăng nhập.
 - Sau success, refetch product/warranty detail.
 - Nếu user không nhập startDate, UI có thể nói “BE sẽ dùng hôm nay”.
 
