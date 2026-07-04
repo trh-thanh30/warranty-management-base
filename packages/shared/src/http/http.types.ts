@@ -56,6 +56,12 @@ export class HttpClientError extends Error {
 
 export type HttpClientAxiosError = AxiosError<{
   message?: string;
-  error?: string;
+  error?:
+    | string
+    | {
+        code?: string;
+        message?: string;
+        details?: unknown;
+      };
   details?: unknown;
 }>;
