@@ -1,4 +1,4 @@
-import type { UserRole } from "./roles.js";
+import type { UserRole } from "./roles.ts";
 
 export const PERMISSIONS = {
   DASHBOARD_VIEW: "DASHBOARD_VIEW",

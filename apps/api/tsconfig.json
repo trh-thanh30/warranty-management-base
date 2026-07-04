@@ -2,6 +2,7 @@
   "compilerOptions": {
     "module": "nodenext",
     "moduleResolution": "nodenext",
+    "allowImportingTsExtensions": true,
     "resolvePackageJsonExports": true,
     "esModuleInterop": true,
     "isolatedModules": true,
@@ -14,6 +15,7 @@
     "types": ["node", "jest"],
     "sourceMap": true,
     "outDir": "./dist",
+    "rewriteRelativeImportExtensions": true,
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,

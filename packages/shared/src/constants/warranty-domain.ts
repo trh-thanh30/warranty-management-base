@@ -4,7 +4,7 @@ import type {
   WarrantyClaimPriority,
   WarrantyClaimStatus,
   WarrantyStatus,
-} from "../types/index.js";
+} from "../types/index.ts";
 
 export const WARRANTY_STATUS_LABELS: Record<WarrantyStatus, string> = {
   DRAFT: "Chua kich hoat",

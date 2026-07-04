@@ -1,7 +1,7 @@
-import type { CustomerSummary } from "./customer.types.js";
-import type { ProductSummary } from "./product.types.js";
-import type { ServiceCenterSummary } from "./service-center.types.js";
-import type { WarrantySummary } from "./warranty.types.js";
+import type { CustomerSummary } from "./customer.types.ts";
+import type { ProductSummary } from "./product.types.ts";
+import type { ServiceCenterSummary } from "./service-center.types.ts";
+import type { WarrantySummary } from "./warranty.types.ts";
 
 export type WarrantyClaimStatus =
   | "SUBMITTED"

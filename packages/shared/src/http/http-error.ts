@@ -1,5 +1,5 @@
 import { AxiosError } from "axios";
-import { HttpClientError, type HttpClientAxiosError } from "./http.types.js";
+import { HttpClientError, type HttpClientAxiosError } from "./http.types.ts";
 
 function resolveMessage(error: HttpClientAxiosError): string {
   const data = error.response?.data;

@@ -1,3 +1,3 @@
-export * from "./axios-client.js";
-export * from "./http-error.js";
-export * from "./http.types.js";
+export * from "./axios-client.ts";
+export * from "./http-error.ts";
+export * from "./http.types.ts";
