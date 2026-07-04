@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
-import { extname, join, normalize } from "node:path";
+import { extname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const rootDir = fileURLToPath(new URL("./public", import.meta.url));
@@ -16,13 +16,14 @@ const contentTypes = {
   ".svg": "image/svg+xml",
 };
 
-function resolvePublicPath(urlPath) {
-  const cleanPath = normalize(decodeURIComponent(urlPath.split("?")[0] || "/"));
+function resolvePublicPath(requestUrl) {
+  const urlPath = decodeURIComponent(requestUrl.split("?")[0] || "/");
   const relativePath =
-    cleanPath === "/" ? "index.html" : cleanPath.replace(/^\/+/, "");
-  const filePath = join(rootDir, relativePath);
+    urlPath === "/" ? "index.html" : urlPath.replace(/^\/+/, "");
+  const filePath = resolve(rootDir, relativePath);
+  const pathFromRoot = relative(rootDir, filePath);
 
-  if (!filePath.startsWith(rootDir)) {
+  if (pathFromRoot.startsWith("..") || isAbsolute(pathFromRoot)) {
     return null;
   }
 
