@@ -5,6 +5,7 @@ import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { NotFoundError } from '@/common/response';
 import { CreateUserDto } from '@/modules/user/dto/create-user.dto';
+import { ListUsersDto } from '@/modules/user/dto/list-users.dto';
 import { UpdateUserPermissionsDto } from '@/modules/user/dto/update-user-permissions.dto';
 import { UpdateUserDto } from '@/modules/user/dto/update-user.dto';
 import { UsersService } from '@/modules/user/user.service';
@@ -16,6 +17,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { normalizeUserRole } from '@repo/shared/constants';
@@ -51,9 +53,8 @@ export class UsersController {
   @Get()
   @Roles(['ADMIN'])
   @Permissions([permission_key.USER_VIEW])
-  async findAll() {
-    // Implement pagination later
-    return this.usersService.findAll();
+  async findAll(@Query() query: ListUsersDto) {
+    return this.usersService.findAll(query);
   }
 
   @Get(':id/permissions')

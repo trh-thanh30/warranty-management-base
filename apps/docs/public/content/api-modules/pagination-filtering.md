@@ -45,6 +45,7 @@ sortOrder = desc
 - `GET /api/v1/content-pages`
 - `GET /api/v1/products`
 - `GET /api/v1/customers`
+- `GET /api/v1/users`
 - `GET /api/v1/public/service-centers`
 - `GET /api/v1/public/content-pages`
 
@@ -260,6 +261,52 @@ phone
 email
 createdAt
 updatedAt
+```
+
+## Users
+
+Endpoint:
+
+```txt
+GET /api/v1/users
+```
+
+Query:
+
+```ts
+type Query = PaginationQuery & {
+  search?: string;
+  role?: "ADMIN" | "MODERATOR" | "CUSTOMER";
+  roles?: string;
+  status?: "ACTIVE" | "INACTIVE";
+};
+```
+
+Search match:
+
+- `email`
+- `username`
+- `fullName`
+- `phone`
+
+Sort fields:
+
+```txt
+email
+username
+fullName
+phone
+role
+status
+createdAt
+updatedAt
+```
+
+Role filtering:
+
+```txt
+GET /api/v1/users?role=MODERATOR
+GET /api/v1/users?roles=MODERATOR,CUSTOMER
 ```
 
 ## FE usage
