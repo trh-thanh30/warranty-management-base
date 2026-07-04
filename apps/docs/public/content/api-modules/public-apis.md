@@ -147,8 +147,12 @@ Query:
 
 ```ts
 type Query = {
+  page?: number;
+  limit?: number;
   search?: string;
   province?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 };
 ```
 
@@ -157,7 +161,7 @@ BE luôn ép `isActive=true`, nên guest chỉ thấy trạm đang hoạt độn
 Response:
 
 ```ts
-type Response = ServiceCenterResponse[];
+type Response = PaginatedResponse<ServiceCenterResponse>;
 ```
 
 ## Content public APIs

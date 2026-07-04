@@ -10,7 +10,11 @@ export class ListServiceCentersUseCase {
   ) {}
 
   async execute(filters: ListServiceCentersDto) {
-    const serviceCenters = await this.serviceCentersRepository.list(filters);
-    return serviceCenters.map(toServiceCenterResponse);
+    const result = await this.serviceCentersRepository.list(filters);
+
+    return {
+      items: result.items.map(toServiceCenterResponse),
+      meta: result.meta,
+    };
   }
 }

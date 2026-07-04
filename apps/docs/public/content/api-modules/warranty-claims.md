@@ -31,7 +31,7 @@ Status: `implemented`
 
 Chưa có:
 
-- Pagination cho list claim.
+- Export CSV/Excel cho claim.
 
 ## Base route
 
@@ -165,6 +165,8 @@ Query:
 
 ```ts
 type Query = {
+  page?: number;
+  limit?: number;
   search?: string;
   status?: WarrantyClaimStatus;
   priority?: WarrantyClaimPriority;
@@ -174,12 +176,20 @@ type Query = {
   isOverdue?: "true" | "false";
   dueFrom?: string;
   dueTo?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 };
 ```
 
-Response: `WarrantyClaimResponse[]`.
+Response:
 
-Chưa có pagination.
+```ts
+type Response = PaginatedResponse<WarrantyClaimResponse>;
+```
+
+Xem thêm `Pagination & Filtering` để biết field search/filter/sort hợp lệ.
 
 ### GET /api/v1/warranty-claims/metrics/summary
 

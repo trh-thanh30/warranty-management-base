@@ -1,7 +1,8 @@
+import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
 import { content_page_kind, content_page_status } from '@prisma/client';
 import { IsEnum, IsOptional, IsString, Length } from 'class-validator';
 
-export class ListContentPagesDto {
+export class ListContentPagesDto extends PaginationQueryDto {
   @IsOptional()
   @IsString()
   @Length(1, 120)

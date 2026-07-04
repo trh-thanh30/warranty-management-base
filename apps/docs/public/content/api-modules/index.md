@@ -139,6 +139,7 @@ packages/shared/src/types
 
 Mở từng mục trong sidebar:
 
+- Pagination & Filtering
 - API Auth
 - API Users
 - API Customers

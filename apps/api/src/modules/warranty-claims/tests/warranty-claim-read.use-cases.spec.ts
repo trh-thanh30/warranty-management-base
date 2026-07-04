@@ -37,7 +37,17 @@ describe('Warranty claim read use cases', () => {
   });
 
   it('lists claims with filters', async () => {
-    warrantyClaimsRepository.list.mockResolvedValue([claim]);
+    warrantyClaimsRepository.list.mockResolvedValue({
+      items: [claim],
+      meta: {
+        page: 1,
+        limit: 20,
+        total: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+    });
     const useCase = new ListWarrantyClaimsUseCase(
       warrantyClaimsRepository as never,
     );
@@ -49,8 +59,9 @@ describe('Warranty claim read use cases', () => {
     expect(warrantyClaimsRepository.list).toHaveBeenCalledWith({
       status: 'SUBMITTED',
     });
-    expect(result).toHaveLength(1);
-    expect(result[0]?.claimCode).toBe('CLM-2026-ABC123');
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.claimCode).toBe('CLM-2026-ABC123');
+    expect(result.meta.total).toBe(1);
   });
 
   it('returns claim detail by id', async () => {

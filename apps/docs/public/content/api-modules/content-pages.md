@@ -58,10 +58,20 @@ Query:
 
 ```ts
 type Query = {
+  page?: number;
+  limit?: number;
   search?: string;
   kind?: ContentPageKind;
   status?: ContentPageStatus;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 };
+```
+
+Response:
+
+```ts
+type Response = PaginatedResponse<ContentPageResponse>;
 ```
 
 ### POST /api/v1/content-pages
@@ -118,9 +128,19 @@ Query:
 
 ```ts
 type Query = {
+  page?: number;
+  limit?: number;
   search?: string;
   kind?: ContentPageKind;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 };
+```
+
+Response:
+
+```ts
+type Response = PaginatedResponse<ContentPageResponse>;
 ```
 
 ### GET /api/v1/public/content-pages/:slug

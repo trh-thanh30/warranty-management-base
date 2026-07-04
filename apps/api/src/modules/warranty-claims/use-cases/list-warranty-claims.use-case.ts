@@ -10,7 +10,11 @@ export class ListWarrantyClaimsUseCase {
   ) {}
 
   async execute(filters: ListWarrantyClaimsDto) {
-    const claims = await this.warrantyClaimsRepository.list(filters);
-    return claims.map((claim) => toWarrantyClaimResponse(claim));
+    const result = await this.warrantyClaimsRepository.list(filters);
+
+    return {
+      items: result.items.map((claim) => toWarrantyClaimResponse(claim)),
+      meta: result.meta,
+    };
   }
 }

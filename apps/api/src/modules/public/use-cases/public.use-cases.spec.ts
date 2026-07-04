@@ -4,7 +4,17 @@ import { toPublicWarrantyClaimResponse } from '@/modules/public/use-cases/public
 describe('Public use cases', () => {
   it('forces service centers to active only', async () => {
     const serviceCentersRepository = {
-      list: jest.fn().mockResolvedValue([]),
+      list: jest.fn().mockResolvedValue({
+        items: [],
+        meta: {
+          page: 1,
+          limit: 20,
+          total: 0,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      }),
     };
     const useCase = new PublicListServiceCentersUseCase(
       serviceCentersRepository as never,
@@ -16,6 +26,10 @@ describe('Public use cases', () => {
       search: undefined,
       province: 'Ha Noi',
       isActive: 'true',
+      page: undefined,
+      limit: undefined,
+      sortBy: undefined,
+      sortOrder: undefined,
     });
   });
 

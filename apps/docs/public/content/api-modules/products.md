@@ -104,17 +104,21 @@ Query params:
 
 ```ts
 type ListProductsQuery = {
+  page?: number;
+  limit?: number;
   search?: string;
   category?: "CAR" | "ACCESSORY" | "SPARE_PART" | "SERVICE_PACKAGE";
   status?: "ACTIVE" | "INACTIVE" | "DELETED";
   warrantyStatus?: "DRAFT" | "ACTIVE" | "EXPIRED" | "VOIDED";
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 };
 ```
 
 Response:
 
 ```ts
-type Response = ProductResponse[];
+type Response = PaginatedResponse<ProductResponse>;
 ```
 
 BE behavior:
@@ -122,13 +126,13 @@ BE behavior:
 - Chỉ trả product chưa bị xoá mềm: `deleted_at = null`.
 - `search` match theo `name`, `product_code`, `warranty_code`, `serial_number`, `brand`, `model`, hoặc tên customer owner hiện tại.
 - Sort theo `created_at desc`.
-- Hiện chưa có pagination ở endpoint này.
+- Có pagination chuẩn qua `page`, `limit`.
 
 FE triển khai chuẩn:
 
 - Search input nên debounce khoảng 300ms.
 - Filter category/status/warrantyStatus dùng select.
-- Vì chưa có pagination, FE chưa nên build UI phân trang thật cho endpoint này.
+- FE dùng `meta` để render pagination.
 - Empty state tách 2 case: chưa có sản phẩm và search/filter không có kết quả.
 - Table nên hiển thị tối thiểu: name, productCode, warrantyCode, serialNumber, category, owner.fullName, warranty.status, status.
 

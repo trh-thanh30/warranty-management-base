@@ -30,6 +30,12 @@
     "file": "api-modules/template.md"
   },
   {
+    "id": "api-pagination-filtering",
+    "title": "Pagination & Filtering",
+    "description": "Contract chuẩn cho list endpoint, search, filter và sort.",
+    "file": "api-modules/pagination-filtering.md"
+  },
+  {
     "id": "api-auth",
     "title": "API Auth",
     "description": "Đăng ký, đăng nhập, refresh token, profile và verification.",

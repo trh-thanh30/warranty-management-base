@@ -9,9 +9,17 @@ export class ListPublishedContentPagesUseCase {
     private readonly contentPagesRepository: ContentPagesRepository,
   ) {}
 
-  async execute(dto: Pick<ListContentPagesDto, 'kind' | 'search'>) {
-    const pages = await this.contentPagesRepository.listPublished(dto);
+  async execute(
+    dto: Pick<
+      ListContentPagesDto,
+      'kind' | 'search' | 'page' | 'limit' | 'sortBy' | 'sortOrder'
+    >,
+  ) {
+    const result = await this.contentPagesRepository.listPublished(dto);
 
-    return pages.map(toContentPageResponse);
+    return {
+      items: result.items.map(toContentPageResponse),
+      meta: result.meta,
+    };
   }
 }

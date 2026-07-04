@@ -67,28 +67,32 @@ Query params:
 
 ```ts
 type ListCustomersQuery = {
+  page?: number;
+  limit?: number;
   search?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 };
 ```
 
 Response:
 
 ```ts
-type Response = CustomerResponse[];
+type Response = PaginatedResponse<CustomerResponse>;
 ```
 
 BE behavior:
 
 - Nếu có `search`, BE search theo `customer_code`, `full_name`, `phone`, `email`.
 - Sort theo `created_at desc`.
-- Hiện chưa có pagination.
+- Có pagination chuẩn qua `page`, `limit`.
 
 FE triển khai chuẩn:
 
 - Search input nên debounce 300ms.
 - Customer picker nên hiển thị `fullName`, `customerCode`, `phone`, `email`.
 - Empty state: phân biệt chưa có customer và search không có kết quả.
-- Vì chưa có pagination, nếu data lớn cần đề xuất backend bổ sung `page/limit`.
+- FE dùng `meta` để render pagination.
 
 ## POST /api/v1/customers
 

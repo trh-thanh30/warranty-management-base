@@ -1,3 +1,4 @@
+import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
 import { warranty_claim_priority, warranty_claim_status } from '@prisma/client';
 import {
   IsBooleanString,
@@ -10,7 +11,7 @@ import {
   Matches,
 } from 'class-validator';
 
-export class ListWarrantyClaimsDto {
+export class ListWarrantyClaimsDto extends PaginationQueryDto {
   @IsOptional()
   @IsString()
   search?: string;
@@ -50,4 +51,12 @@ export class ListWarrantyClaimsDto {
   @IsOptional()
   @IsDateString()
   dueTo?: string;
+
+  @IsOptional()
+  @IsDateString()
+  dateFrom?: string;
+
+  @IsOptional()
+  @IsDateString()
+  dateTo?: string;
 }

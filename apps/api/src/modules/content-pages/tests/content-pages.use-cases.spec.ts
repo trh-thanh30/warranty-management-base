@@ -109,7 +109,17 @@ describe('Content page use cases', () => {
   });
 
   it('lists only published content pages for public API', async () => {
-    contentPagesRepository.listPublished.mockResolvedValue([page]);
+    contentPagesRepository.listPublished.mockResolvedValue({
+      items: [page],
+      meta: {
+        page: 1,
+        limit: 20,
+        total: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+    });
     const useCase = new ListPublishedContentPagesUseCase(
       contentPagesRepository as never,
     );
@@ -121,6 +131,7 @@ describe('Content page use cases', () => {
     expect(contentPagesRepository.listPublished).toHaveBeenCalledWith({
       kind: content_page_kind.POLICY,
     });
-    expect(result).toHaveLength(1);
+    expect(result.items).toHaveLength(1);
+    expect(result.meta.total).toBe(1);
   });
 });

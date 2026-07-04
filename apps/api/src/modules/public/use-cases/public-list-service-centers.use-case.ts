@@ -8,13 +8,27 @@ export class PublicListServiceCentersUseCase {
     private readonly serviceCentersRepository: ServiceCentersRepository,
   ) {}
 
-  async execute(query: { search?: string; province?: string }) {
-    const serviceCenters = await this.serviceCentersRepository.list({
+  async execute(query: {
+    search?: string;
+    province?: string;
+    page?: number;
+    limit?: number;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) {
+    const result = await this.serviceCentersRepository.list({
       search: query.search,
       province: query.province,
       isActive: 'true',
+      page: query.page,
+      limit: query.limit,
+      sortBy: query.sortBy,
+      sortOrder: query.sortOrder,
     });
 
-    return serviceCenters.map(toServiceCenterResponse);
+    return {
+      items: result.items.map(toServiceCenterResponse),
+      meta: result.meta,
+    };
   }
 }

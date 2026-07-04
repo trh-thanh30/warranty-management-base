@@ -10,8 +10,11 @@ export class ListContentPagesUseCase {
   ) {}
 
   async execute(dto: ListContentPagesDto) {
-    const pages = await this.contentPagesRepository.list(dto);
+    const result = await this.contentPagesRepository.list(dto);
 
-    return pages.map(toContentPageResponse);
+    return {
+      items: result.items.map(toContentPageResponse),
+      meta: result.meta,
+    };
   }
 }

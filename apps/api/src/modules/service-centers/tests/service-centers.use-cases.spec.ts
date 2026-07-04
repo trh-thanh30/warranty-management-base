@@ -56,7 +56,17 @@ describe('Service center use cases', () => {
   });
 
   it('lists service centers with filters', async () => {
-    serviceCentersRepository.list.mockResolvedValue([serviceCenter]);
+    serviceCentersRepository.list.mockResolvedValue({
+      items: [serviceCenter],
+      meta: {
+        page: 1,
+        limit: 20,
+        total: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+    });
     const useCase = new ListServiceCentersUseCase(
       serviceCentersRepository as never,
     );
@@ -70,7 +80,8 @@ describe('Service center use cases', () => {
       province: 'Ha Noi',
       isActive: 'true',
     });
-    expect(result[0]?.name).toBe('Tram Bao Hanh Ha Noi');
+    expect(result.items[0]?.name).toBe('Tram Bao Hanh Ha Noi');
+    expect(result.meta.total).toBe(1);
   });
 
   it('returns service center detail', async () => {

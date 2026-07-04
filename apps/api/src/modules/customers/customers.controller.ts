@@ -29,7 +29,7 @@ export class CustomersController {
   @Get()
   @Permissions([permission_key.CUSTOMER_VIEW])
   list(@Query() query: ListCustomersDto) {
-    return this.listCustomersUseCase.execute(query.search);
+    return this.listCustomersUseCase.execute(query);
   }
 
   @Post()

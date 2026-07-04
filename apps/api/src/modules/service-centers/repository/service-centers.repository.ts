@@ -1,4 +1,5 @@
 import { PrismaService } from '@/database/prisma/prisma.service';
+import { normalizePagination, paginate } from '@/common/pagination/pagination';
 import { ListServiceCentersDto } from '@/modules/service-centers/dto/list-service-centers.dto';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
@@ -18,25 +19,50 @@ export class ServiceCentersRepository {
     const province = filters.province?.trim();
     const isActive =
       filters.isActive === undefined ? undefined : filters.isActive === 'true';
+    const { page, limit, skip, take } = normalizePagination(filters);
+    const sortMap = {
+      name: 'name',
+      province: 'province',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+      isActive: 'is_active',
+    } satisfies Record<
+      string,
+      keyof Prisma.ServiceCenterOrderByWithRelationInput
+    >;
+    const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
+    const where: Prisma.ServiceCenterWhereInput = {
+      is_active: isActive,
+      province: province
+        ? { contains: province, mode: 'insensitive' }
+        : undefined,
+      OR: search
+        ? [
+            { name: { contains: search, mode: 'insensitive' } },
+            { phone: { contains: search, mode: 'insensitive' } },
+            { email: { contains: search, mode: 'insensitive' } },
+            { province: { contains: search, mode: 'insensitive' } },
+            { district: { contains: search, mode: 'insensitive' } },
+            { address: { contains: search, mode: 'insensitive' } },
+          ]
+        : undefined,
+    };
+    const orderBy: Prisma.ServiceCenterOrderByWithRelationInput[] = sortBy
+      ? [{ [sortBy]: filters.sortOrder ?? 'desc' }]
+      : [{ is_active: 'desc' }, { province: 'asc' }, { name: 'asc' }];
 
-    return this.prismaService.serviceCenter.findMany({
-      where: {
-        is_active: isActive,
-        province: province
-          ? { contains: province, mode: 'insensitive' }
-          : undefined,
-        OR: search
-          ? [
-              { name: { contains: search, mode: 'insensitive' } },
-              { phone: { contains: search, mode: 'insensitive' } },
-              { email: { contains: search, mode: 'insensitive' } },
-              { province: { contains: search, mode: 'insensitive' } },
-              { district: { contains: search, mode: 'insensitive' } },
-              { address: { contains: search, mode: 'insensitive' } },
-            ]
-          : undefined,
-      },
-      orderBy: [{ is_active: 'desc' }, { province: 'asc' }, { name: 'asc' }],
+    return this.prismaService.$transaction(async (tx) => {
+      const [items, total] = await Promise.all([
+        tx.serviceCenter.findMany({
+          where,
+          orderBy,
+          skip,
+          take,
+        }),
+        tx.serviceCenter.count({ where }),
+      ]);
+
+      return paginate(items, { page, limit, total });
     });
   }
 

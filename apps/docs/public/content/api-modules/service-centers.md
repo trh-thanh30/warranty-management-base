@@ -153,9 +153,13 @@ Query params:
 
 ```ts
 type ListServiceCentersQuery = {
+  page?: number;
+  limit?: number;
   search?: string;
   province?: string;
   isActive?: "true" | "false";
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 };
 ```
 
@@ -168,7 +172,7 @@ Validation:
 Response:
 
 ```ts
-type Response = ServiceCenterResponse[];
+type Response = PaginatedResponse<ServiceCenterResponse>;
 ```
 
 BE behavior:
@@ -177,14 +181,14 @@ BE behavior:
 - `province` filter dùng contains insensitive.
 - `isActive` filter theo boolean.
 - Sort theo `is_active desc`, `province asc`, `name asc`.
-- Hiện chưa có pagination.
+- Có pagination chuẩn qua `page`, `limit`.
 
 FE triển khai chuẩn:
 
 - Admin list nên có search, province filter, active/inactive filter.
 - Dropdown assign claim nên gọi `isActive=true`.
 - Empty state: “Chưa có trạm bảo hành”.
-- Không build pagination thật cho đến khi BE có pagination.
+- FE dùng `meta` để render pagination.
 
 ## GET /api/v1/service-centers/:id
 

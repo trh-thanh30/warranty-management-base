@@ -35,6 +35,44 @@ DOCS_PORT=8081 pnpm dev:docs
 - Dùng type từ `@repo/shared` khi đó là contract domain/API.
 - Không gọi API trực tiếp trong component trình bày.
 
+## Shared contract FE nên dùng
+
+Import pagination contract:
+
+```ts
+import type { PaginatedResponse, PaginationQuery } from "@repo/shared";
+```
+
+Import warranty domain types:
+
+```ts
+import type {
+  ContentPageSummary,
+  CustomerSummary,
+  ProductSummary,
+  PublicWarrantyClaimSummary,
+  ServiceCenterSummary,
+  WarrantyClaimSummary,
+  WarrantyLookupResult,
+} from "@repo/shared";
+```
+
+Import labels/constants:
+
+```ts
+import {
+  CONTENT_PAGE_KIND_LABELS,
+  CONTENT_PAGE_STATUS_LABELS,
+  WARRANTY_CLAIM_PRIORITY_LABELS,
+  WARRANTY_CLAIM_STATUS_LABELS,
+  WARRANTY_STATUS_LABELS,
+} from "@repo/shared/constants";
+```
+
+Table/list services nên trả nguyên `PaginatedResponse<T>` để UI dùng `meta` render pagination.
+
+Khi search/filter/sort thay đổi, reset `page` về `1`.
+
 ## Khi viết UI
 
 - Có đủ loading, empty, error state.
