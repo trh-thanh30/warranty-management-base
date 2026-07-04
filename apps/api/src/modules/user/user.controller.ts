@@ -3,6 +3,7 @@ import { PermissionService } from '@/common/permissions/permissions.service';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
+import { NotFoundError } from '@/common/response';
 import { CreateUserDto } from '@/modules/user/dto/create-user.dto';
 import { UpdateUserPermissionsDto } from '@/modules/user/dto/update-user-permissions.dto';
 import { UpdateUserDto } from '@/modules/user/dto/update-user.dto';
@@ -59,14 +60,11 @@ export class UsersController {
   @Roles(['ADMIN'])
   @Permissions([permission_key.USER_PERMISSION_MANAGE])
   async getPermissions(@Param('id') id: string) {
-    const user = await this.usersService.findById(id);
+    const user = await this.findRequiredUser(id);
     const overrides =
       await this.permissionService.getUserPermissionOverrides(id);
     const effectivePermissions =
-      await this.permissionService.getEffectivePermissions(
-        id,
-        user?.role ?? '',
-      );
+      await this.permissionService.getEffectivePermissions(id, user.role);
 
     return {
       userId: id,
@@ -87,12 +85,9 @@ export class UsersController {
       id,
       dto.overrides,
     );
-    const user = await this.usersService.findById(id);
+    const user = await this.findRequiredUser(id);
     const effectivePermissions =
-      await this.permissionService.getEffectivePermissions(
-        id,
-        user?.role ?? '',
-      );
+      await this.permissionService.getEffectivePermissions(id, user.role);
 
     return {
       userId: id,
@@ -137,5 +132,15 @@ export class UsersController {
   @Permissions([permission_key.USER_DELETE])
   async remove(@Param('id') id: string) {
     return this.usersService.delete(id);
+  }
+
+  private async findRequiredUser(id: string) {
+    const user = await this.usersService.findById(id);
+
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+
+    return user;
   }
 }

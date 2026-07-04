@@ -1,3 +1,3 @@
-export * from "./error.js";
-export * from "./invariant.js";
-export * from "./object.js";
+export * from "./error.ts";
+export * from "./invariant.ts";
+export * from "./object.ts";

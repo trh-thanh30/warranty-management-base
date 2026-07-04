@@ -1,6 +1,6 @@
 import axios from "axios";
-import { toHttpClientError } from "./http-error.js";
-import type { CreateHttpClientOptions, HttpClient } from "./http.types.js";
+import { toHttpClientError } from "./http-error.ts";
+import type { CreateHttpClientOptions, HttpClient } from "./http.types.ts";
 
 export function createHttpClient(
   options: CreateHttpClientOptions = {},

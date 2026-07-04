@@ -75,8 +75,8 @@
   </head>
   <body class="bg-canvas text-ink antialiased">
     <div class="min-h-screen lg:grid lg:grid-cols-[280px_1fr]">
-      <aside class="border-b border-line bg-panel/95 shadow-sm lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r">
-        <div class="border-b border-line px-5 py-5">
+      <aside class="border-b border-line bg-panel/95 shadow-sm lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:overflow-hidden lg:border-b-0 lg:border-r">
+        <div class="shrink-0 border-b border-line px-5 py-5">
           <a class="group inline-flex min-h-11 items-center gap-3 rounded-md text-xl font-semibold tracking-tight focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2" href="#overview">
             <span class="grid size-10 place-items-center rounded-md bg-slate-950 text-sm font-bold text-white shadow-sm transition group-hover:bg-accent">WD</span>
             <span>Warranty Docs</span>
@@ -85,9 +85,9 @@
             Tài liệu module để frontend đọc nhanh contract, flow và quy ước tích hợp.
           </p>
         </div>
-        <div class="px-5 py-4">
+        <div class="min-h-0 px-5 py-4 lg:flex lg:flex-1 lg:flex-col">
           <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Modules</p>
-          <nav class="flex gap-2 overflow-x-auto pb-1 lg:block lg:space-y-2 lg:overflow-visible lg:pb-0" id="module-nav" aria-label="Docs modules"></nav>
+          <nav class="flex gap-2 overflow-x-auto pb-1 lg:block lg:min-h-0 lg:flex-1 lg:space-y-2 lg:overflow-y-auto lg:overflow-x-hidden lg:pb-6 lg:pr-1" id="module-nav" aria-label="Docs modules"></nav>
         </div>
       </aside>
 

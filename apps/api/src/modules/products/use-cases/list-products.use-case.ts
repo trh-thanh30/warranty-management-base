@@ -8,7 +8,11 @@ export class ListProductsUseCase {
   constructor(private readonly productsRepository: ProductsRepository) {}
 
   async execute(dto: ListProductsDto) {
-    const products = await this.productsRepository.list(dto);
-    return products.map(toProductResponse);
+    const result = await this.productsRepository.list(dto);
+
+    return {
+      items: result.items.map(toProductResponse),
+      meta: result.meta,
+    };
   }
 }

@@ -16,5 +16,95 @@
     "title": "Frontend Guide",
     "description": "Checklist khi FE thêm màn hình, service, type và UI state.",
     "file": "frontend-guide.md"
+  },
+  {
+    "id": "api-module-index",
+    "title": "API Modules",
+    "description": "Danh mục module backend đã triển khai để FE tra cứu nhanh.",
+    "file": "api-modules/index.md"
+  },
+  {
+    "id": "api-module-template",
+    "title": "API Template",
+    "description": "Template chuẩn để viết docs cho một backend module.",
+    "file": "api-modules/template.md"
+  },
+  {
+    "id": "api-pagination-filtering",
+    "title": "Pagination & Filtering",
+    "description": "Contract chuẩn cho list endpoint, search, filter và sort.",
+    "file": "api-modules/pagination-filtering.md"
+  },
+  {
+    "id": "api-auth",
+    "title": "API Auth",
+    "description": "Đăng ký, đăng nhập, refresh token, profile và verification.",
+    "file": "api-modules/auth.md"
+  },
+  {
+    "id": "api-users",
+    "title": "API Users",
+    "description": "Quản trị user và permission override cho Admin.",
+    "file": "api-modules/users.md"
+  },
+  {
+    "id": "api-customers",
+    "title": "API Customers",
+    "description": "Quản lý hồ sơ khách hàng mua sản phẩm.",
+    "file": "api-modules/customers.md"
+  },
+  {
+    "id": "api-products",
+    "title": "API Products",
+    "description": "Quản lý sản phẩm bảo hành và gán chủ sở hữu.",
+    "file": "api-modules/products.md"
+  },
+  {
+    "id": "api-warranties",
+    "title": "API Warranties",
+    "description": "Kích hoạt, tra cứu bảo hành và luồng sản phẩm của khách.",
+    "file": "api-modules/warranties.md"
+  },
+  {
+    "id": "api-public",
+    "title": "Public APIs",
+    "description": "Endpoint guest cho 6 chức năng chính ngoài website.",
+    "file": "api-modules/public-apis.md"
+  },
+  {
+    "id": "api-warranty-claims",
+    "title": "API Claims",
+    "description": "Tạo, tra cứu và xử lý yêu cầu bảo hành.",
+    "file": "api-modules/warranty-claims.md"
+  },
+  {
+    "id": "api-service-centers",
+    "title": "API Service Centers",
+    "description": "Quản lý trạm bảo hành và dữ liệu assign claim.",
+    "file": "api-modules/service-centers.md"
+  },
+  {
+    "id": "api-content-pages",
+    "title": "API Content Pages",
+    "description": "Quản lý chính sách và hướng dẫn cho website.",
+    "file": "api-modules/content-pages.md"
+  },
+  {
+    "id": "api-assets",
+    "title": "API Assets",
+    "description": "Upload, list, xem metadata và xoá asset.",
+    "file": "api-modules/assets.md"
+  },
+  {
+    "id": "api-notifications",
+    "title": "API Notifications",
+    "description": "Thông báo admin, thông báo user và trạng thái đã đọc.",
+    "file": "api-modules/notifications.md"
+  },
+  {
+    "id": "api-system",
+    "title": "API System",
+    "description": "Health check và endpoint common utility.",
+    "file": "api-modules/system.md"
   }
 ]

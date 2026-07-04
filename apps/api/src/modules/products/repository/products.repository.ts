@@ -1,4 +1,5 @@
 import { PrismaService } from '@/database/prisma/prisma.service';
+import { normalizePagination, paginate } from '@/common/pagination/pagination';
 import { Injectable } from '@nestjs/common';
 import { Prisma, product_status, warranty_status } from '@prisma/client';
 
@@ -51,40 +52,69 @@ export class ProductsRepository {
     category?: string;
     status?: product_status;
     warrantyStatus?: warranty_status;
+    page?: number;
+    limit?: number;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
   }) {
     const search = filters.search?.trim();
-
-    return this.prismaService.product.findMany({
-      where: {
-        deleted_at: null,
-        category: filters.category as never,
-        status: filters.status,
-        warranty: filters.warrantyStatus
-          ? { status: filters.warrantyStatus }
-          : undefined,
-        OR: search
-          ? [
-              { name: { contains: search, mode: 'insensitive' } },
-              { product_code: { contains: search, mode: 'insensitive' } },
-              { warranty_code: { contains: search, mode: 'insensitive' } },
-              { serial_number: { contains: search, mode: 'insensitive' } },
-              { brand: { contains: search, mode: 'insensitive' } },
-              { model: { contains: search, mode: 'insensitive' } },
-              {
-                ownerships: {
-                  some: {
-                    is_current_owner: true,
-                    customer: {
-                      full_name: { contains: search, mode: 'insensitive' },
-                    },
+    const { page, limit, skip, take } = normalizePagination(filters);
+    const sortMap = {
+      productCode: 'product_code',
+      warrantyCode: 'warranty_code',
+      serialNumber: 'serial_number',
+      name: 'name',
+      category: 'category',
+      status: 'status',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+    } satisfies Record<string, keyof Prisma.ProductOrderByWithRelationInput>;
+    const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
+    const where: Prisma.ProductWhereInput = {
+      deleted_at: null,
+      category: filters.category as never,
+      status: filters.status,
+      warranty: filters.warrantyStatus
+        ? { status: filters.warrantyStatus }
+        : undefined,
+      OR: search
+        ? [
+            { name: { contains: search, mode: 'insensitive' } },
+            { product_code: { contains: search, mode: 'insensitive' } },
+            { warranty_code: { contains: search, mode: 'insensitive' } },
+            { serial_number: { contains: search, mode: 'insensitive' } },
+            { brand: { contains: search, mode: 'insensitive' } },
+            { model: { contains: search, mode: 'insensitive' } },
+            {
+              ownerships: {
+                some: {
+                  is_current_owner: true,
+                  customer: {
+                    full_name: { contains: search, mode: 'insensitive' },
                   },
                 },
               },
-            ]
-          : undefined,
-      },
-      include: productInclude,
-      orderBy: { created_at: 'desc' },
+            },
+          ]
+        : undefined,
+    };
+    const orderBy: Prisma.ProductOrderByWithRelationInput[] = sortBy
+      ? [{ [sortBy]: filters.sortOrder ?? 'desc' }]
+      : [{ created_at: 'desc' }];
+
+    return this.prismaService.$transaction(async (tx) => {
+      const [items, total] = await Promise.all([
+        tx.product.findMany({
+          where,
+          include: productInclude,
+          orderBy,
+          skip,
+          take,
+        }),
+        tx.product.count({ where }),
+      ]);
+
+      return paginate(items, { page, limit, total });
     });
   }
 
