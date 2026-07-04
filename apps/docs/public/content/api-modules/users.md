@@ -13,6 +13,7 @@ Users API phục vụ Admin quản trị user account và permission override. C
 FE Admin dùng module này cho:
 
 - User management list/detail.
+- Quản lý riêng nhóm `MODERATOR` và `CUSTOMER`.
 - Tạo user nội bộ.
 - Update role/status/account fields.
 - Delete user.
@@ -58,25 +59,57 @@ Params/query/body:
 
 ```ts
 type Params = {};
-type Query = {};
+type Query = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  role?: "ADMIN" | "MODERATOR" | "CUSTOMER";
+  roles?: string;
+  status?: "ACTIVE" | "INACTIVE";
+  sortBy?:
+    | "email"
+    | "username"
+    | "fullName"
+    | "phone"
+    | "role"
+    | "status"
+    | "createdAt"
+    | "updatedAt";
+  sortOrder?: "asc" | "desc";
+};
 type Body = never;
 ```
 
 Response:
 
 ```ts
-type Response = User[];
+type Response = PaginatedResponse<User>;
 ```
 
 BE behavior:
 
-- Trả toàn bộ users.
-- Hiện chưa có pagination/filter.
+- Có pagination chuẩn qua `page`, `limit`.
+- `search` match theo `email`, `username`, `full_name`, `phone`.
+- `role` filter một role.
+- `roles` filter nhiều role bằng comma-separated string, ví dụ `MODERATOR,CUSTOMER`.
+- Nếu gửi cả `role` và `roles`, BE ưu tiên `roles`.
+- `status` filter theo trạng thái account.
+- Sort mặc định theo `created_at desc`.
 
 FE triển khai chuẩn:
 
-- Chưa build pagination server-side cho endpoint này.
-- Nếu cần search/filter lớn, cần request BE bổ sung query.
+- Màn quản lý moderator/customer dùng `roles=MODERATOR,CUSTOMER`.
+- Tab riêng moderator dùng `role=MODERATOR`.
+- Tab riêng customer dùng `role=CUSTOMER`.
+- FE dùng `meta.total`, `meta.totalPages`, `meta.hasNextPage` để render pagination.
+- Search input nên debounce khoảng 300ms.
+
+Ví dụ:
+
+```txt
+GET /api/v1/users?roles=MODERATOR,CUSTOMER&page=1&limit=20
+GET /api/v1/users?role=MODERATOR&search=nguyen
+```
 
 ## POST /api/v1/users
 
