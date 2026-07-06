@@ -135,6 +135,13 @@ export const PERMISSION_GROUPS = [
   },
 ] as const;
 
+export const MODERATOR_PERMISSION_GROUPS = PERMISSION_GROUPS.filter(
+  (group) => group.key !== "users",
+);
+
+export const MODERATOR_MANAGEABLE_PERMISSIONS: PermissionKey[] =
+  MODERATOR_PERMISSION_GROUPS.flatMap((group) => [...group.permissions]);
+
 export const ROLE_DEFAULT_PERMISSIONS: Record<UserRole, PermissionKey[]> = {
   admin: ALL_PERMISSIONS,
   moderator: [

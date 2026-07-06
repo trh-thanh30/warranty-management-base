@@ -6,6 +6,8 @@
 - **Vertical slice**: a small task that passes through the relevant API, package, and UI layers to validate integration early.
 - **Core module**: generic module that can be reused across domains, such as auth, users, settings, files, email, notifications, and health.
 - **Domain module**: product-specific module, such as booking, ecommerce, CRM, inventory, or billing.
+- **Staff account**: an internal user account with the Moderator role. Staff accounts are created, activated, deactivated, and assigned permissions by an Admin; Customer accounts are not staff accounts.
+- **Permission override**: an Admin-controlled grant or revocation applied to one Staff account relative to the Moderator role defaults. Only differences from the role defaults are persisted.
 
 ## Architecture Principles
 

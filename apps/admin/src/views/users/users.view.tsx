@@ -1,133 +1,186 @@
-import { MoreHorizontal, Plus } from "lucide-react";
-import {
-  Avatar,
-  AvatarFallback,
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  Input,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@repo/ui";
+"use client";
+
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Plus, UserRoundX } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useDebounce } from "@repo/hooks";
+import type { ApiUserStatus, UserAccountSummary } from "@repo/shared";
+import { Button } from "@repo/ui";
 import { PageHeader } from "@/src/components/common/page-header";
-import { StatsCard } from "@/src/components/common/stats-card";
-import { users, userStats } from "@/src/views/users/users.constants";
+import { StatePanel } from "@/src/components/common/state-panel";
+import { useToast } from "@/src/hooks/use-toast";
+import { usersService } from "@/src/services/users.service";
+import { useAuth } from "@/src/app/providers/auth-provider";
+import { StaffDirectoryCard } from "./components/staff-directory-card";
+import { StaffFormDialog } from "./components/staff-form-dialog";
+import { StaffPermissionsDialog } from "./components/staff-permissions-dialog";
+import { TemporaryPasswordDialog } from "./components/temporary-password-dialog";
+
+const STAFF_PAGE_SIZE = 10;
 
 export function UsersView() {
+  const t = useTranslations("Staff");
+  const toast = useToast();
+  const { user: currentUser } = useAuth();
+  const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState<"ALL" | ApiUserStatus>("ALL");
+  const [formOpen, setFormOpen] = useState(false);
+  const [permissionsOpen, setPermissionsOpen] = useState(false);
+  const [temporaryPasswordOpen, setTemporaryPasswordOpen] = useState(false);
+  const [temporaryPassword, setTemporaryPassword] = useState<string | null>(
+    null,
+  );
+  const [selectedUser, setSelectedUser] = useState<UserAccountSummary | null>(
+    null,
+  );
+  const debouncedSearch = useDebounce(search.trim(), 300);
+  const queryKey = [
+    "staff",
+    { page, search: debouncedSearch, status },
+  ] as const;
+  const staffQuery = useQuery({
+    queryKey,
+    queryFn: () =>
+      usersService.listModerators({
+        limit: STAFF_PAGE_SIZE,
+        page,
+        search: debouncedSearch || undefined,
+        status: status === "ALL" ? undefined : status,
+      }),
+    enabled: currentUser?.role === "admin",
+  });
+  const statusMutation = useMutation({
+    mutationFn: (user: UserAccountSummary) =>
+      usersService.updateModerator(user.id, {
+        status: user.status === "ACTIVE" ? "INACTIVE" : "ACTIVE",
+      }),
+    onSuccess: () => {
+      toast.success(t("statusUpdated"));
+      void queryClient.invalidateQueries({ queryKey: ["staff"] });
+    },
+    onError: () => toast.error(t("saveError")),
+  });
+
+  function openCreate() {
+    setSelectedUser(null);
+    setFormOpen(true);
+  }
+
+  function openEdit(user: UserAccountSummary) {
+    setSelectedUser(user);
+    setFormOpen(true);
+  }
+
+  function openPermissions(user: UserAccountSummary) {
+    setSelectedUser(user);
+    setPermissionsOpen(true);
+  }
+
+  function updateSearch(nextSearch: string) {
+    setSearch(nextSearch);
+    setPage(1);
+  }
+
+  function updateStatus(nextStatus: "ALL" | ApiUserStatus) {
+    setStatus(nextStatus);
+    setPage(1);
+  }
+
+  function toggleStatus(user: UserAccountSummary) {
+    const message =
+      user.status === "ACTIVE"
+        ? t("confirmDeactivate", { name: user.fullName || user.username })
+        : t("confirmActivate", { name: user.fullName || user.username });
+
+    if (window.confirm(message)) {
+      statusMutation.mutate(user);
+    }
+  }
+
+  function handleSaved(
+    user: UserAccountSummary,
+    created: boolean,
+    generatedPassword?: string,
+  ) {
+    void queryClient.invalidateQueries({ queryKey: ["staff"] });
+    if (created && generatedPassword) {
+      setSelectedUser(user);
+      setTemporaryPassword(generatedPassword);
+      setTemporaryPasswordOpen(true);
+    }
+  }
+
+  function handleTemporaryPasswordOpenChange(open: boolean) {
+    setTemporaryPasswordOpen(open);
+    if (!open) {
+      setTemporaryPassword(null);
+      setPermissionsOpen(true);
+    }
+  }
+
+  const data = staffQuery.data;
+
+  if (currentUser?.role !== "admin") {
+    return (
+      <StatePanel
+        description={t("forbiddenDescription")}
+        icon={UserRoundX}
+        title={t("forbiddenTitle")}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
         actions={
-          <Button>
-            <Plus className="h-4 w-4" />
-            Invite user
+          <Button onClick={openCreate}>
+            <Plus className="size-4" />
+            {t("create")}
           </Button>
         }
-        description="Reusable user management pattern with stats, search, roles, status, and row actions."
-        eyebrow="Access"
-        title="Users"
+        description={t("description")}
+        eyebrow={t("eyebrow")}
+        title={t("title")}
       />
 
-      <section className="grid gap-4 md:grid-cols-3">
-        {userStats.map((item) => (
-          <StatsCard key={item.title} {...item} />
-        ))}
-      </section>
+      <StaffDirectoryCard
+        data={data}
+        isError={staffQuery.isError}
+        isLoading={staffQuery.isLoading}
+        onCreate={openCreate}
+        onEdit={openEdit}
+        onPermissions={openPermissions}
+        onRetry={() => {
+          void staffQuery.refetch();
+        }}
+        onSearchChange={updateSearch}
+        onStatusChange={updateStatus}
+        onToggleStatus={toggleStatus}
+        search={search}
+        setPage={setPage}
+        status={status}
+      />
 
-      <Card>
-        <CardHeader className="gap-4">
-          <div>
-            <CardTitle>User directory</CardTitle>
-            <CardDescription>
-              Mock admin users until the auth module is connected.
-            </CardDescription>
-          </div>
-          <Input
-            aria-label="Search users"
-            className="max-w-md"
-            placeholder="Search by name, email, or role"
-          />
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-hidden rounded-md border border-slate-200 dark:border-slate-800">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Last seen</TableHead>
-                    <TableHead aria-label="Actions" />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.map((user) => (
-                    <TableRow key={user.email}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarFallback>{user.initials}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium text-slate-950 dark:text-slate-50">
-                              {user.name}
-                            </p>
-                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                              {user.email}
-                            </p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{user.role}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            user.status === "Active" ? "success" : "warning"
-                          }
-                        >
-                          {user.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{user.lastSeen}</TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              aria-label={`Open actions for ${user.name}`}
-                              size="icon"
-                              variant="ghost"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Edit role</DropdownMenuItem>
-                            <DropdownMenuItem>Reset password</DropdownMenuItem>
-                            <DropdownMenuItem>Deactivate user</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <StaffFormDialog
+        onOpenChange={setFormOpen}
+        onSaved={handleSaved}
+        open={formOpen}
+        user={selectedUser}
+      />
+      <StaffPermissionsDialog
+        onOpenChange={setPermissionsOpen}
+        open={permissionsOpen}
+        user={selectedUser}
+      />
+      <TemporaryPasswordDialog
+        onOpenChange={handleTemporaryPasswordOpenChange}
+        open={temporaryPasswordOpen}
+        password={temporaryPassword}
+      />
     </div>
   );
 }

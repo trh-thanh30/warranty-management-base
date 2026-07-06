@@ -127,7 +127,9 @@ Body:
 type CreateUserBody = {
   username: string;
   email: string;
-  password: string;
+  password?: string;
+  full_name?: string;
+  phone?: string;
   role?: "ADMIN" | "MODERATOR" | "CUSTOMER";
   status?: string;
 };
@@ -137,23 +139,35 @@ Validation:
 
 - `username`: required string.
 - `email`: email.
-- `password`: required string.
+- `password`: không gửi khi tạo `MODERATOR`; backend tự sinh. Bắt buộc và tối thiểu 8 ký tự với loại account khác.
+- `full_name`: required by the service when role is `MODERATOR`.
+- `phone`: optional, maximum 32 characters.
 - `role`: Prisma `user_role` enum nếu gửi.
 - `status`: Prisma `user_status` enum nếu gửi.
 
 Response:
 
 ```ts
-type Response = User;
+type ModeratorResponse = {
+  user: User;
+  temporaryPassword: string;
+};
+
+type OtherUserResponse = User;
 ```
 
 BE behavior:
 
-- Hash password trước khi lưu.
+- Khi tạo `MODERATOR`, backend sinh mật khẩu tạm 12 ký tự có chữ thường, chữ hoa, số và ký tự đặc biệt.
+- Chỉ password hash được lưu trong database.
+- Plaintext temporary password chỉ trả về trong response tạo Moderator và không thể truy xuất lại.
+- Admin-created Moderator accounts are stored with `is_verified=true`.
+- User responses never include password hashes or refresh tokens.
+- Nếu `email`, `username` hoặc `phone` bị trùng, API trả `409` với code `USER_ACCOUNT_EXISTS` và `error.details.fields`.
 
 FE triển khai chuẩn:
 
-- Không hiển thị password sau create.
+- Hiển thị temporary password đúng một lần và cho phép Admin copy trước khi tiếp tục phân quyền.
 - Sau success refresh list.
 - Nếu role là CUSTOMER và cần customer profile, tạo thêm customer qua Customers API.
 

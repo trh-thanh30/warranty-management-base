@@ -82,11 +82,12 @@ export class UsersController {
     @Param('id') id: string,
     @Body() dto: UpdateUserPermissionsDto,
   ) {
+    const user = await this.findRequiredUser(id);
     const overrides = await this.permissionService.setUserPermissionOverrides(
       id,
+      user.role,
       dto.overrides,
     );
-    const user = await this.findRequiredUser(id);
     const effectivePermissions =
       await this.permissionService.getEffectivePermissions(id, user.role);
 
@@ -107,7 +108,7 @@ export class UsersController {
   @Roles(['ADMIN'])
   @Permissions([permission_key.USER_VIEW])
   async findOne(@Param('id') id: string) {
-    return this.usersService.findById(id);
+    return this.usersService.findAccountById(id);
   }
 
   /**
@@ -136,7 +137,7 @@ export class UsersController {
   }
 
   private async findRequiredUser(id: string) {
-    const user = await this.usersService.findById(id);
+    const user = await this.usersService.findAccountById(id);
 
     if (!user) {
       throw new NotFoundError('User not found');

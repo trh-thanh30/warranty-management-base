@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import type { PermissionKey } from "@repo/shared/constants";
 
 export interface BrandConfig {
   name: string;
@@ -11,6 +12,7 @@ export interface NavigationItem {
   href?: string;
   icon: ComponentType<{ className?: string }>;
   badge?: string;
+  requiredPermission?: PermissionKey;
 }
 
 export interface NavigationSection {

@@ -13,13 +13,14 @@ import {
   Users,
 } from "lucide-react";
 import type { DashboardConfig } from "./dashboard.types";
+import { PERMISSIONS } from "@repo/shared/constants";
 
 type Translate = (key: string) => string;
 
 export function getDashboardConfig(t: Translate): DashboardConfig {
   return {
     brand: {
-      name: "Booking Admin",
+      name: "Warranty Admin",
       description: t("brandDescription"),
       logo: ClipboardList,
     },
@@ -41,6 +42,7 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             title: t("items.users"),
             href: "/users",
             icon: Users,
+            requiredPermission: PERMISSIONS.USER_VIEW,
           },
           {
             title: t("items.chats"),
@@ -92,7 +94,7 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
         href: "/dashboard",
       },
       {
-        title: t("items.customers"),
+        title: t("items.users"),
         href: "/users",
       },
       {
