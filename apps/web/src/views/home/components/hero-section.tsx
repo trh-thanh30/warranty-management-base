@@ -8,10 +8,10 @@ import { navItems, carHeroImages } from "../home.constants";
 import { motionDuration, motionEase } from "@/src/constants/motion.constants";
 
 interface HeroSectionProps {
-  onOpenCalculator?: () => void;
+  onOpenHub?: (tab: "lookup" | "activate" | "claim") => void;
 }
 
-export function HeroSection({ onOpenCalculator }: HeroSectionProps) {
+export function HeroSection({ onOpenHub }: HeroSectionProps) {
   const shouldReduce = useReducedMotion();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -192,7 +192,7 @@ export function HeroSection({ onOpenCalculator }: HeroSectionProps) {
             }}
           >
             {/* Logo */}
-            <div className="flex items-center">
+            <div className="flex items-center lg:w-[150px]">
               <span className="text-sm font-condensed font-bold tracking-[0.4em] text-white uppercase">
                 GARANTY
               </span>
@@ -249,18 +249,20 @@ export function HeroSection({ onOpenCalculator }: HeroSectionProps) {
             </nav>
 
             {/* CTA — flat, barely rounded outline button */}
-            <motion.a
-              href="#pricing"
+            {/* <motion.button
+              onClick={onOpenQuote}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="group relative hidden sm:inline-flex items-center justify-center overflow-hidden rounded-full border border-white/25 bg-white/5 px-6 py-2.5 text-sm font-condensed font-semibold uppercase tracking-wider text-white transition-all duration-[330ms] cursor-pointer"
             >
-              {/* Horizontal slide-in fill effect */}
               <span className="absolute inset-0 bg-white -translate-x-full group-hover:translate-x-0 transition-transform duration-[300ms] ease-out z-0" />
               <span className="relative z-10 transition-colors duration-[330ms] group-hover:text-brand-blue">
                 CHECK PRICE
               </span>
-            </motion.a>
+            </motion.button> */}
+            {/* Spacer to center the nav items (balances logo width on desktop) */}
+            <div className="hidden lg:block lg:w-[150px]" />
+
             {/* Hamburger Button (Mobile Only) */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -330,16 +332,16 @@ export function HeroSection({ onOpenCalculator }: HeroSectionProps) {
               </nav>
 
               {/* CTA Button */}
-              {onOpenCalculator && (
+              {onOpenHub && (
                 <div className="mt-8">
                   <button
                     onClick={() => {
                       setIsMobileMenuOpen(false);
-                      onOpenCalculator();
+                      onOpenHub("lookup");
                     }}
                     className="flex h-11 px-8 items-center justify-center rounded-full bg-brand-blue text-xs font-condensed font-bold uppercase tracking-wider text-white hover:bg-brand-blue-hover hover:scale-[1.02] active:scale-[0.98] transition-all duration-[300ms] cursor-pointer w-full"
                   >
-                    CALCULATE PRICE
+                    WARRANTY HUB
                   </button>
                 </div>
               )}
@@ -432,29 +434,26 @@ export function HeroSection({ onOpenCalculator }: HeroSectionProps) {
               }}
             >
               <motion.button
-                onClick={() => {
-                  const el = document.getElementById("request-quote");
-                  if (el) el.scrollIntoView({ behavior: "smooth" });
-                }}
+                onClick={() => onOpenHub?.("lookup")}
                 whileTap={{ scale: 0.98 }}
-                className="group relative flex h-12 w-full sm:w-[200px] items-center justify-center overflow-hidden rounded-full bg-brand-blue text-sm font-condensed font-medium uppercase tracking-wider text-white transition-all duration-[330ms] cursor-pointer shadow-sm"
+                className="group relative flex h-12 w-full sm:w-[240px] items-center justify-center overflow-hidden rounded-full bg-brand-blue text-sm font-condensed font-medium uppercase tracking-wider text-white transition-all duration-[330ms] cursor-pointer shadow-sm"
               >
                 {/* Horizontal slide-in fill effect */}
                 <span className="absolute inset-0 bg-brand-blue-hover -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out z-0" />
-                <span className="relative z-10">GET A QUOTE</span>
+                <span className="relative z-10">CHECK WARRANTY STATUS</span>
               </motion.button>
 
-              <motion.a
-                href="#pricing"
+              <motion.button
+                onClick={() => onOpenHub?.("activate")}
                 whileTap={{ scale: 0.98 }}
-                className="group relative flex h-12 w-full sm:w-[200px] items-center justify-center overflow-hidden rounded-full bg-white/80 text-sm font-condensed font-medium uppercase tracking-wider text-charcoal backdrop-blur-sm transition-all duration-[330ms] cursor-pointer shadow-sm"
+                className="group relative flex h-12 w-full sm:w-[240px] items-center justify-center overflow-hidden rounded-full bg-white/80 text-sm font-condensed font-medium uppercase tracking-wider text-charcoal backdrop-blur-sm transition-all duration-[330ms] cursor-pointer shadow-sm"
               >
                 {/* Horizontal slide-in fill effect */}
                 <span className="absolute inset-0 bg-white -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out z-0" />
                 <span className="relative z-10 transition-colors duration-[330ms] group-hover:text-brand-blue">
-                  EXPLORE PLANS
+                  ACTIVATE WARRANTY
                 </span>
-              </motion.a>
+              </motion.button>
             </motion.div>
           </motion.div>
         </AnimatePresence>

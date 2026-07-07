@@ -141,8 +141,8 @@ export function QuoteModal({
                 </span>
                 <h3 className="mt-1 text-2xl font-condensed font-bold uppercase tracking-wide text-charcoal">
                   {selectedPlan
-                    ? `Quote: ${selectedPlan.term}`
-                    : "Request a custom quote"}
+                    ? `Warranty Quote: ${selectedPlan.term}`
+                    : "Request Warranty Quote"}
                 </h3>
               </div>
               <button
@@ -170,6 +170,10 @@ export function QuoteModal({
             <div className="relative mt-6">
               {step === 1 && (
                 <div className="space-y-4">
+                  <p className="text-xs text-graphite font-sans leading-relaxed">
+                    Enter your vehicle details to check warranty eligibility and
+                    get a custom quote.
+                  </p>
                   <div className="space-y-1.5">
                     <label className="text-xs font-condensed font-bold uppercase tracking-wider text-charcoal">
                       Vehicle Brand & Model
@@ -352,7 +356,7 @@ export function QuoteModal({
                     <CheckCircle2 className="h-8 w-8" />
                   </motion.div>
                   <h4 className="mt-4 text-xl font-condensed font-bold uppercase tracking-wide text-charcoal">
-                    Request Submitted!
+                    Warranty Request Submitted!
                   </h4>
                   <p className="mt-2 text-xs leading-5 text-graphite">
                     Thank you,{" "}
@@ -365,12 +369,12 @@ export function QuoteModal({
                     <span className="text-sm font-semibold text-brand-blue">
                       {selectedPlan
                         ? `${selectedPlan.type === "warranty" ? "Warranty" : "Maintenance"} - ${selectedPlan.term}`
-                        : "Custom Care Plan"}
+                        : "Custom Warranty Plan"}
                     </span>
                   </div>
                   <p className="mt-4 text-xs leading-5 text-pewter">
-                    Our advisor will review your vehicle details and contact you
-                    at{" "}
+                    Our advisor will review your vehicle details to check
+                    eligibility and contact you at{" "}
                     <span className="font-semibold text-charcoal">
                       {formData.phone}
                     </span>{" "}
