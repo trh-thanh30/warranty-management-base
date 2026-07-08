@@ -10,6 +10,7 @@ export function toWarrantyResponse(warranty: Warranty) {
     durationMonths: warranty.duration_months,
     status: warranty.status,
     terms: warranty.terms,
+    metadata: warranty.metadata as Record<string, unknown> | null,
     createdAt: warranty.created_at,
     updatedAt: warranty.updated_at,
   };

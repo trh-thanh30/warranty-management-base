@@ -60,6 +60,12 @@
     "file": "api-modules/products.md"
   },
   {
+    "id": "api-categories",
+    "title": "API Categories",
+    "description": "Quản lý taxonomy/danh mục dùng chung cho admin.",
+    "file": "api-modules/categories.md"
+  },
+  {
     "id": "api-warranties",
     "title": "API Warranties",
     "description": "Kích hoạt, tra cứu bảo hành và luồng sản phẩm của khách.",

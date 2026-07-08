@@ -172,6 +172,7 @@ model Customer {
   phone         String?
   email         String?
   address       String?
+  metadata      Json?
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 
@@ -186,6 +187,32 @@ model Customer {
   @@map("customer")
 }
 
+model Category {
+  id          String        @id @default(uuid()) @db.Uuid
+  type        category_type
+  code        String?
+  slug        String
+  name        String
+  description String?
+  parent_id   String?       @db.Uuid
+  icon        String?
+  image_url   String?
+  order       Int           @default(0)
+  is_active   Boolean       @default(true)
+  metadata    Json?
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
+
+  parent   Category?  @relation("CategoryHierarchy", fields: [parent_id], references: [id], onDelete: SetNull)
+  children Category[] @relation("CategoryHierarchy")
+  products Product[]
+
+  @@unique([type, slug])
+  @@index([type, is_active, order])
+  @@index([parent_id])
+  @@map("category")
+}
+
 model Product {
   id               String           @id @default(uuid()) @db.Uuid
   product_code     String           @unique
@@ -193,20 +220,24 @@ model Product {
   serial_number    String?          @unique
   name             String
   category         product_category
+  category_id      String?          @db.Uuid
   brand            String?
   model            String?
   manufacture_year Int?
   description      String?
   status           product_status   @default(ACTIVE)
+  metadata         Json?
   created_at       DateTime         @default(now())
   updated_at       DateTime         @updatedAt
   deleted_at       DateTime?
 
-  ownerships ProductOwnership[]
-  warranty   Warranty?
-  claims     WarrantyClaim[]
+  category_ref Category?          @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  ownerships   ProductOwnership[]
+  warranty     Warranty?
+  claims       WarrantyClaim[]
 
   @@index([category])
+  @@index([category_id])
   @@index([status])
   @@index([warranty_code])
   @@index([serial_number])
@@ -245,6 +276,7 @@ model Warranty {
   duration_months Int
   status          warranty_status @default(DRAFT)
   terms           String?
+  metadata        Json?
   created_at      DateTime        @default(now())
   updated_at      DateTime        @updatedAt
 
@@ -273,6 +305,7 @@ model WarrantyClaim {
   priority          warranty_claim_priority @default(NORMAL)
   due_at            DateTime?
   sla_breached_at   DateTime?
+  metadata          Json?
   submitted_at      DateTime                @default(now())
   resolved_at       DateTime?
   created_at        DateTime                @default(now())
@@ -324,6 +357,7 @@ model ServiceCenter {
   district   String?
   address    String
   is_active  Boolean  @default(true)
+  metadata   Json?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
@@ -418,6 +452,11 @@ enum permission_key {
   CONTENT_PAGE_UPDATE
   CONTENT_PAGE_DELETE
 
+  CATEGORY_VIEW
+  CATEGORY_CREATE
+  CATEGORY_UPDATE
+  CATEGORY_DELETE
+
   USER_VIEW
   USER_CREATE
   USER_UPDATE
@@ -433,6 +472,13 @@ enum product_category {
   ACCESSORY
   SPARE_PART
   SERVICE_PACKAGE
+}
+
+enum category_type {
+  PRODUCT
+  CONTENT_PAGE
+  ASSET
+  WARRANTY_CLAIM_ISSUE
 }
 
 enum product_status {

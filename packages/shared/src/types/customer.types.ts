@@ -6,6 +6,7 @@ export type CustomerSummary = {
   phone: string | null;
   email: string | null;
   address: string | null;
+  metadata: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
 };

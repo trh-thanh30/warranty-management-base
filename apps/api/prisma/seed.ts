@@ -1,5 +1,6 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import {
+  category_type,
   PrismaClient,
   product_category,
   product_status,
@@ -88,6 +89,10 @@ async function upsertDemoProduct(data: {
   durationMonths: number;
   warrantyStatus: warranty_status;
 }) {
+  const category = await prisma.category.findFirst({
+    where: { type: category_type.PRODUCT, code: data.category },
+  });
+
   const product = await prisma.product.upsert({
     where: { warranty_code: data.warrantyCode },
     update: {
@@ -99,6 +104,7 @@ async function upsertDemoProduct(data: {
       model: data.model,
       manufacture_year: data.manufactureYear,
       status: product_status.ACTIVE,
+      category_id: category?.id,
       deleted_at: null,
     },
     create: {
@@ -111,6 +117,7 @@ async function upsertDemoProduct(data: {
       model: data.model,
       manufacture_year: data.manufactureYear,
       status: product_status.ACTIVE,
+      category_id: category?.id,
     },
   });
 
@@ -158,6 +165,66 @@ async function upsertDemoProduct(data: {
   return product;
 }
 
+async function seedDefaultCategories() {
+  const productCategories = [
+    {
+      code: product_category.CAR,
+      slug: 'car',
+      name: 'Car',
+      description: 'Vehicles covered by warranty.',
+      order: 10,
+    },
+    {
+      code: product_category.ACCESSORY,
+      slug: 'accessory',
+      name: 'Accessory',
+      description: 'Vehicle accessories and add-ons.',
+      order: 20,
+    },
+    {
+      code: product_category.SPARE_PART,
+      slug: 'spare-part',
+      name: 'Spare Part',
+      description: 'Replacement parts and components.',
+      order: 30,
+    },
+    {
+      code: product_category.SERVICE_PACKAGE,
+      slug: 'service-package',
+      name: 'Service Package',
+      description: 'Prepaid or bundled service packages.',
+      order: 40,
+    },
+  ];
+
+  for (const category of productCategories) {
+    await prisma.category.upsert({
+      where: {
+        type_slug: {
+          type: category_type.PRODUCT,
+          slug: category.slug,
+        },
+      },
+      update: {
+        code: category.code,
+        name: category.name,
+        description: category.description,
+        order: category.order,
+        is_active: true,
+      },
+      create: {
+        type: category_type.PRODUCT,
+        code: category.code,
+        slug: category.slug,
+        name: category.name,
+        description: category.description,
+        order: category.order,
+        is_active: true,
+      },
+    });
+  }
+}
+
 async function main() {
   console.log('Seeding base database...');
 
@@ -171,6 +238,8 @@ async function main() {
   prisma = new PrismaClient({ adapter });
 
   const hashedPassword = await bcrypt.hash('password123', 12);
+
+  await seedDefaultCategories();
 
   const adminUser = await upsertSeedUser({
     email: 'admin@example.com',

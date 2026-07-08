@@ -1,12 +1,17 @@
 import { ConflictError, NotFoundError } from '@/common/response';
+import { PrismaService } from '@/database/prisma/prisma.service';
 import { UpdateProductDto } from '@/modules/products/dto/update-product.dto';
 import { toProductResponse } from '@/modules/products/products.types';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
 import { Injectable } from '@nestjs/common';
+import { category_type, Prisma } from '@prisma/client';
 
 @Injectable()
 export class UpdateProductUseCase {
-  constructor(private readonly productsRepository: ProductsRepository) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly productsRepository: ProductsRepository,
+  ) {}
 
   async execute(id: string, dto: UpdateProductDto) {
     const existingProduct = await this.productsRepository.findById(id);
@@ -25,6 +30,8 @@ export class UpdateProductUseCase {
       }
     }
 
+    const categoryRef = await this.resolveProductCategory(dto.categoryId);
+
     const product = await this.productsRepository.update(id, {
       name: dto.name,
       category: dto.category,
@@ -34,8 +41,31 @@ export class UpdateProductUseCase {
       description: dto.description,
       status: dto.status,
       serial_number: dto.serialNumber,
+      category_ref:
+        dto.categoryId === null
+          ? { disconnect: true }
+          : categoryRef
+            ? { connect: { id: categoryRef.id } }
+            : undefined,
+      metadata: dto.metadata as Prisma.InputJsonValue | undefined,
     });
 
     return toProductResponse(product);
+  }
+
+  private async resolveProductCategory(categoryId: string | null | undefined) {
+    if (!categoryId) {
+      return null;
+    }
+
+    const category = await this.prismaService.category.findUnique({
+      where: { id: categoryId },
+    });
+
+    if (!category || category.type !== category_type.PRODUCT) {
+      throw new NotFoundError('Product category not found');
+    }
+
+    return category;
   }
 }

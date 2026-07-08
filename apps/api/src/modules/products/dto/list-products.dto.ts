@@ -4,7 +4,7 @@ import {
   product_status,
   warranty_status,
 } from '@prisma/client';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class ListProductsDto extends PaginationQueryDto {
   @IsOptional()
@@ -14,6 +14,10 @@ export class ListProductsDto extends PaginationQueryDto {
   @IsOptional()
   @IsEnum(product_category)
   category?: product_category;
+
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;
 
   @IsOptional()
   @IsEnum(product_status)

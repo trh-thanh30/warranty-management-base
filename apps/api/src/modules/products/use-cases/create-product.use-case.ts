@@ -9,7 +9,12 @@ import { toProductResponse } from '@/modules/products/products.types';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
 import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { Injectable } from '@nestjs/common';
-import { product_status, warranty_status } from '@prisma/client';
+import {
+  category_type,
+  Prisma,
+  product_status,
+  warranty_status,
+} from '@prisma/client';
 
 @Injectable()
 export class CreateProductUseCase {
@@ -26,6 +31,7 @@ export class CreateProductUseCase {
     const activatedAt = dto.activatedAt ? new Date(dto.activatedAt) : null;
     const purchaseDate = dto.purchaseDate ? new Date(dto.purchaseDate) : null;
     const startDate = activatedAt ?? purchaseDate;
+    const categoryRef = await this.resolveProductCategory(dto.categoryId);
 
     if (dto.serialNumber) {
       const existingSerial = await this.productsRepository.findBySerialNumber(
@@ -58,6 +64,10 @@ export class CreateProductUseCase {
         manufacture_year: dto.manufactureYear,
         description: dto.description,
         status: dto.status ?? product_status.ACTIVE,
+        category_ref: categoryRef
+          ? { connect: { id: categoryRef.id } }
+          : undefined,
+        metadata: dto.metadata as Prisma.InputJsonObject | undefined,
         warranty: {
           create: {
             warranty_code: warrantyCode,
@@ -115,6 +125,22 @@ export class CreateProductUseCase {
     }
 
     return warrantyCode;
+  }
+
+  private async resolveProductCategory(categoryId: string | undefined) {
+    if (!categoryId) {
+      return null;
+    }
+
+    const category = await this.prismaService.category.findUnique({
+      where: { id: categoryId },
+    });
+
+    if (!category || category.type !== category_type.PRODUCT) {
+      throw new NotFoundError('Product category not found');
+    }
+
+    return category;
   }
 
   private async generateProductCode() {

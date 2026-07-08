@@ -3,6 +3,7 @@ import {
   IsDateString,
   IsEnum,
   IsInt,
+  IsObject,
   IsOptional,
   IsString,
   IsUUID,
@@ -20,6 +21,10 @@ export class CreateProductDto {
 
   @IsEnum(product_category)
   category: product_category;
+
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;
 
   @IsOptional()
   @IsString()
@@ -83,4 +88,8 @@ export class CreateProductDto {
   @IsString()
   @Length(0, 2000)
   warrantyTerms?: string;
+
+  @IsOptional()
+  @IsObject()
+  metadata?: Record<string, unknown>;
 }
