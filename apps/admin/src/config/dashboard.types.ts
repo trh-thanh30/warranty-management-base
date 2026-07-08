@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import type { PermissionKey } from "@repo/shared/constants";
+import type { AuthUserRole } from "@repo/shared";
 
 export interface BrandConfig {
   name: string;
@@ -13,6 +14,7 @@ export interface NavigationItem {
   icon: ComponentType<{ className?: string }>;
   badge?: string;
   requiredPermission?: PermissionKey;
+  requiredRole?: Exclude<AuthUserRole, null>;
 }
 
 export interface NavigationSection {
@@ -23,6 +25,8 @@ export interface NavigationSection {
 export interface TopNavigationItem {
   title: string;
   href: string;
+  requiredPermission?: PermissionKey;
+  requiredRole?: Exclude<AuthUserRole, null>;
 }
 
 export interface UserMenuItem {

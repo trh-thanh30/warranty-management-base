@@ -43,6 +43,7 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             href: "/users",
             icon: Users,
             requiredPermission: PERMISSIONS.USER_VIEW,
+            requiredRole: "admin",
           },
           {
             title: t("items.chats"),
@@ -96,6 +97,8 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
       {
         title: t("items.users"),
         href: "/users",
+        requiredPermission: PERMISSIONS.USER_VIEW,
+        requiredRole: "admin",
       },
       {
         title: t("items.bookings"),

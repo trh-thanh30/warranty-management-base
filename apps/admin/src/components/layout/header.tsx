@@ -11,11 +11,13 @@ import { useAdminUiStore } from "@/src/app/stores/ui.store";
 import { getDashboardConfig } from "@/src/config/dashboard.config";
 import { LanguageSwitcher } from "@/src/components/language-switcher";
 import { Link } from "@/src/i18n/navigation";
+import { usePermissions } from "@/src/hooks/use-permissions";
 
 export function Header() {
   const t = useTranslations("DashboardConfig");
   const tCommon = useTranslations("Common");
   const dashboardConfig = getDashboardConfig(t);
+  const { hasPermission, hasRole } = usePermissions();
   const setCommandOpen = useAdminUiStore((state) => state.setCommandOpen);
   const toggleSidebar = useAdminUiStore((state) => state.toggleSidebar);
 
@@ -34,15 +36,22 @@ export function Header() {
         </Button>
         <div className="hidden h-6 w-px bg-slate-200 dark:bg-slate-800 lg:block" />
         <nav className="hidden items-center gap-6 lg:flex">
-          {dashboardConfig.topNavigation.map((item) => (
-            <Link
-              className="text-sm font-medium text-slate-500 transition-colors hover:text-slate-950 first:text-slate-950 dark:text-slate-400 dark:hover:text-slate-50 dark:first:text-slate-50"
-              href={item.href}
-              key={item.href}
-            >
-              {item.title}
-            </Link>
-          ))}
+          {dashboardConfig.topNavigation
+            .filter(
+              (item) =>
+                (!item.requiredRole || hasRole(item.requiredRole)) &&
+                (!item.requiredPermission ||
+                  hasPermission(item.requiredPermission)),
+            )
+            .map((item) => (
+              <Link
+                className="text-sm font-medium text-slate-500 transition-colors hover:text-slate-950 first:text-slate-950 dark:text-slate-400 dark:hover:text-slate-50 dark:first:text-slate-50"
+                href={item.href}
+                key={item.href}
+              >
+                {item.title}
+              </Link>
+            ))}
         </nav>
       </div>
       <div className="flex items-center gap-2">

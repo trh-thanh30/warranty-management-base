@@ -8,7 +8,7 @@ import { useAdminUiStore } from "@/src/app/stores/ui.store";
 import { getDashboardConfig } from "@/src/config/dashboard.config";
 import type { NavigationItem } from "@/src/config/dashboard.types";
 import { Link, usePathname } from "@/src/i18n/navigation";
-import { useAuth } from "@/src/app/providers/auth-provider";
+import { usePermissions } from "@/src/hooks/use-permissions";
 
 type NavGroupProps = {
   items: NavigationItem[];
@@ -112,7 +112,7 @@ export function AppSidebar({
   const t = useTranslations("DashboardConfig");
   const tCommon = useTranslations("Common");
   const dashboardConfig = getDashboardConfig(t);
-  const { user: authUser } = useAuth();
+  const { hasPermission, hasRole } = usePermissions();
   const pathname = usePathname();
   const BrandLogo = dashboardConfig.brand.logo;
   const user = dashboardConfig.userMenu;
@@ -165,8 +165,9 @@ export function AppSidebar({
         {dashboardConfig.sidebarSections.map((section) => {
           const items = section.items.filter(
             (item) =>
-              !item.requiredPermission ||
-              authUser?.permissions.includes(item.requiredPermission),
+              (!item.requiredRole || hasRole(item.requiredRole)) &&
+              (!item.requiredPermission ||
+                hasPermission(item.requiredPermission)),
           );
 
           return items.length > 0 ? (
