@@ -5,6 +5,7 @@ import { CreateCategoryUseCase } from '@/modules/categories/use-cases/create-cat
 import { DeactivateCategoryUseCase } from '@/modules/categories/use-cases/deactivate-category.use-case';
 import { GetCategoryDetailUseCase } from '@/modules/categories/use-cases/get-category-detail.use-case';
 import { ListCategoriesUseCase } from '@/modules/categories/use-cases/list-categories.use-case';
+import { ReorderCategoriesUseCase } from '@/modules/categories/use-cases/reorder-categories.use-case';
 import { UpdateCategoryUseCase } from '@/modules/categories/use-cases/update-category.use-case';
 import { Module } from '@nestjs/common';
 
@@ -16,6 +17,7 @@ import { Module } from '@nestjs/common';
     CreateCategoryUseCase,
     ListCategoriesUseCase,
     GetCategoryDetailUseCase,
+    ReorderCategoriesUseCase,
     UpdateCategoryUseCase,
     DeactivateCategoryUseCase,
   ],

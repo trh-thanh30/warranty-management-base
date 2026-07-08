@@ -3,7 +3,7 @@ import { toCategoryResponse } from '@/modules/categories/categories.types';
 import { UpdateCategoryDto } from '@/modules/categories/dto/update-category.dto';
 import { CategoriesRepository } from '@/modules/categories/repository/categories.repository';
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Category, Prisma } from '@prisma/client';
 
 @Injectable()
 export class UpdateCategoryUseCase {
@@ -39,6 +39,8 @@ export class UpdateCategoryUseCase {
       if (parent.type !== existingCategory.type) {
         throw new ConflictError('Parent category must have the same type');
       }
+
+      await this.assertParentDoesNotCreateCycle(id, parent);
     }
 
     const metadata = dto.metadata as Prisma.InputJsonValue | undefined;
@@ -68,5 +70,31 @@ export class UpdateCategoryUseCase {
     });
 
     return toCategoryResponse(category);
+  }
+
+  private async assertParentDoesNotCreateCycle(
+    categoryId: string,
+    parent: Category,
+  ) {
+    let cursor: Category | null = parent;
+    const visited = new Set<string>();
+
+    while (cursor) {
+      if (cursor.id === categoryId) {
+        throw new ConflictError('Category parent would create a cycle');
+      }
+
+      if (visited.has(cursor.id)) {
+        throw new ConflictError('Existing category hierarchy contains a cycle');
+      }
+
+      visited.add(cursor.id);
+
+      if (!cursor.parent_id) {
+        return;
+      }
+
+      cursor = await this.categoriesRepository.findById(cursor.parent_id);
+    }
   }
 }

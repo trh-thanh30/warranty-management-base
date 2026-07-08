@@ -16,6 +16,12 @@ export class CategoriesRepository {
     return this.prismaService.category.findUnique({ where: { id } });
   }
 
+  findByIds(ids: string[]) {
+    return this.prismaService.category.findMany({
+      where: { id: { in: ids } },
+    });
+  }
+
   findByTypeAndSlug(type: category_type, slug: string) {
     return this.prismaService.category.findUnique({
       where: { type_slug: { type, slug } },
@@ -68,5 +74,22 @@ export class CategoriesRepository {
       where: { id },
       data,
     });
+  }
+
+  reorder(input: {
+    parentId: string | null;
+    items: Array<{ id: string; order: number }>;
+  }) {
+    return this.prismaService.$transaction(
+      input.items.map((item) =>
+        this.prismaService.category.update({
+          where: { id: item.id },
+          data: {
+            order: item.order,
+            parent_id: input.parentId,
+          },
+        }),
+      ),
+    );
   }
 }

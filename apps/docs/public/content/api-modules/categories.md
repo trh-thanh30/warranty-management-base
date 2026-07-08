@@ -167,6 +167,7 @@ type UpdateCategoryBody = {
 Behavior:
 
 - Không cho category tự làm parent của chính nó.
+- Không cho set parent tạo vòng lặp sâu trong cây, ví dụ A → B → C → A.
 - Nếu `parentId = null`, BE disconnect parent.
 - Không đổi `type` sau khi tạo để tránh phá data đang liên kết.
 
@@ -175,8 +176,58 @@ Error FE cần xử lý:
 - `404 Category not found`
 - `404 Parent category not found`
 - `409 Category cannot be its own parent`
+- `409 Category parent would create a cycle`
+- `409 Existing category hierarchy contains a cycle`
 - `409 Category slug already exists for this type`
 - `409 Parent category must have the same type`
+
+## PATCH /api/v1/categories/reorder
+
+Dùng cho: Admin sắp xếp thứ tự category hoặc chuyển một nhóm category sang parent khác.
+
+Permission:
+
+```txt
+CATEGORY_UPDATE
+```
+
+Body:
+
+```ts
+type ReorderCategoriesBody = {
+  parentId?: string | null;
+  items: Array<{
+    id: string;
+    order: number;
+  }>;
+};
+```
+
+Behavior:
+
+- `items` phải có ít nhất 1 phần tử.
+- `id` trong `items` không được trùng.
+- Tất cả category trong cùng request phải cùng `type`.
+- Nếu gửi `parentId`, parent phải tồn tại và cùng `type`.
+- Nếu `parentId` không gửi hoặc là `null`, BE chuyển các item lên root level.
+- BE update `order` và `parentId` trong một transaction.
+- BE chặn reorder tạo vòng lặp parent/child.
+
+Response:
+
+```ts
+type Response = CategoryResponse[];
+```
+
+Error FE cần xử lý:
+
+- `400 Category reorder items must be unique`
+- `404 One or more categories were not found`
+- `404 Parent category not found`
+- `409 Categories in one reorder request must have the same type`
+- `409 Parent category must have the same type`
+- `409 Category parent would create a cycle`
+- `409 Existing category hierarchy contains a cycle`
 
 ## DELETE /api/v1/categories/:id
 
