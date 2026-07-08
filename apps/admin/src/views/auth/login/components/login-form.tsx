@@ -17,7 +17,7 @@ import {
   HttpClientError,
   type AdminLoginInput,
 } from "@repo/shared";
-import { Button, Checkbox, Input, Label } from "@repo/ui";
+import { Button, Input, Label } from "@repo/ui";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { useRouter } from "@/src/i18n/navigation";
 import { useToast } from "@/src/hooks/use-toast";
@@ -95,15 +95,7 @@ export function LoginForm() {
       </div>
 
       <div className="space-y-2">
-        <div className="flex items-center justify-between gap-4">
-          <Label htmlFor="password">{t("passwordLabel")}</Label>
-          <button
-            className="rounded text-sm font-medium text-blue-600 outline-none hover:text-blue-700 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:text-blue-400 dark:hover:text-blue-300 dark:focus-visible:ring-blue-400 dark:focus-visible:ring-offset-slate-950"
-            type="button"
-          >
-            {t("forgotPassword")}
-          </button>
-        </div>
+        <Label htmlFor="password">{t("passwordLabel")}</Label>
         <div className="relative">
           <LockKeyhole
             aria-hidden="true"
@@ -137,16 +129,6 @@ export function LoginForm() {
             {t("passwordRequired")}
           </p>
         ) : null}
-      </div>
-
-      <div className="flex items-center gap-2.5">
-        <Checkbox id="remember" />
-        <Label
-          className="cursor-pointer text-sm font-normal text-slate-600 dark:text-slate-400"
-          htmlFor="remember"
-        >
-          {t("remember")}
-        </Label>
       </div>
 
       <Button
