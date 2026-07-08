@@ -7,6 +7,7 @@ export type ServiceCenterSummary = {
   district: string | null;
   address: string;
   isActive: boolean;
+  metadata: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
 };

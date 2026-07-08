@@ -6,6 +6,8 @@
 - **Vertical slice**: a small task that passes through the relevant API, package, and UI layers to validate integration early.
 - **Core module**: generic module that can be reused across domains, such as auth, users, settings, files, email, notifications, and health.
 - **Domain module**: product-specific module, such as booking, ecommerce, CRM, inventory, or billing.
+- **Category taxonomy**: shared, admin-managed classification records for domain data. Product categories now use dynamic `Category` records while the legacy product category enum remains for backward compatibility.
+- **Metadata field**: nullable JSON extension data for low-query-frequency integration or display attributes. Business-critical fields that drive filtering, sorting, permissions, status transitions, or reports must remain first-class columns.
 
 ## Architecture Principles
 

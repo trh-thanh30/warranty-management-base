@@ -57,6 +57,7 @@ export type WarrantyClaimSummary = {
   priority: WarrantyClaimPriority;
   dueAt: string | null;
   slaBreachedAt: string | null;
+  metadata: Record<string, unknown> | null;
   submittedAt: string;
   resolvedAt: string | null;
   createdAt: string;

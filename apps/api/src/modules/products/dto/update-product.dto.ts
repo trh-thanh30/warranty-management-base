@@ -1,8 +1,10 @@
 import {
   IsEnum,
   IsInt,
+  IsObject,
   IsOptional,
   IsString,
+  IsUUID,
   Length,
   Max,
   Min,
@@ -18,6 +20,10 @@ export class UpdateProductDto {
   @IsOptional()
   @IsEnum(product_category)
   category?: product_category;
+
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string | null;
 
   @IsOptional()
   @IsString()
@@ -48,4 +54,8 @@ export class UpdateProductDto {
   @IsString()
   @Length(1, 64)
   serialNumber?: string | null;
+
+  @IsOptional()
+  @IsObject()
+  metadata?: Record<string, unknown> | null;
 }

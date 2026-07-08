@@ -38,6 +38,7 @@ x-auth-context: admin
 
 ```txt
 packages/shared/src/types/product.types.ts
+packages/shared/src/types/category.types.ts
 packages/shared/src/types/warranty.types.ts
 packages/shared/src/constants/permissions.ts
 ```
@@ -62,11 +63,29 @@ type ProductResponse = {
   serialNumber: string | null;
   name: string;
   category: "CAR" | "ACCESSORY" | "SPARE_PART" | "SERVICE_PACKAGE";
+  categoryId: string | null;
+  categoryRef: {
+    id: string;
+    type: "PRODUCT";
+    code: string | null;
+    slug: string;
+    name: string;
+    description: string | null;
+    parentId: string | null;
+    icon: string | null;
+    imageUrl: string | null;
+    order: number;
+    isActive: boolean;
+    metadata: Record<string, unknown> | null;
+    createdAt: string;
+    updatedAt: string;
+  } | null;
   brand: string | null;
   model: string | null;
   manufactureYear: number | null;
   description: string | null;
   status: "ACTIVE" | "INACTIVE" | "DELETED";
+  metadata: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -108,6 +127,7 @@ type ListProductsQuery = {
   limit?: number;
   search?: string;
   category?: "CAR" | "ACCESSORY" | "SPARE_PART" | "SERVICE_PACKAGE";
+  categoryId?: string;
   status?: "ACTIVE" | "INACTIVE" | "DELETED";
   warrantyStatus?: "DRAFT" | "ACTIVE" | "EXPIRED" | "VOIDED";
   sortBy?: string;
@@ -125,6 +145,8 @@ BE behavior:
 
 - Chỉ trả product chưa bị xoá mềm: `deleted_at = null`.
 - `search` match theo `name`, `product_code`, `warranty_code`, `serial_number`, `brand`, `model`, hoặc tên customer owner hiện tại.
+- `category` là enum legacy để backward compatibility.
+- `categoryId` là category động từ Categories API, nên ưu tiên dùng cho FE mới.
 - Sort theo `created_at desc`.
 - Có pagination chuẩn qua `page`, `limit`.
 
@@ -132,6 +154,7 @@ FE triển khai chuẩn:
 
 - Search input nên debounce khoảng 300ms.
 - Filter category/status/warrantyStatus dùng select.
+- Category select mới nên lấy từ `GET /api/v1/categories?type=PRODUCT&isActive=true`.
 - FE dùng `meta` để render pagination.
 - Empty state tách 2 case: chưa có sản phẩm và search/filter không có kết quả.
 - Table nên hiển thị tối thiểu: name, productCode, warrantyCode, serialNumber, category, owner.fullName, warranty.status, status.
@@ -152,6 +175,7 @@ Body:
 type CreateProductBody = {
   name: string;
   category: "CAR" | "ACCESSORY" | "SPARE_PART" | "SERVICE_PACKAGE";
+  categoryId?: string;
   brand?: string;
   model?: string;
   manufactureYear?: number;
@@ -165,13 +189,14 @@ type CreateProductBody = {
   activatedAt?: string;
   durationMonths?: number;
   warrantyTerms?: string;
+  metadata?: Record<string, unknown>;
 };
 ```
 
 Required fields:
 
 - `name`
-- `category`
+- `category` legacy bucket hiện vẫn bắt buộc để không phá client cũ. Nếu FE dùng category động, vẫn gửi bucket gần nhất cùng `categoryId`.
 
 Validation:
 
@@ -183,6 +208,7 @@ Validation:
 - `serialNumber`: 1 đến 64 ký tự.
 - `warrantyCode`: 6 đến 64 ký tự, chỉ chữ/số/dấu gạch ngang.
 - `customerId`: UUID nếu gửi.
+- `categoryId`: UUID nếu gửi; category phải tồn tại và có `type = PRODUCT`.
 - `purchaseDate`, `activatedAt`: ISO date string nếu gửi.
 - `durationMonths`: 1 đến 120, default BE là `36`.
 - `warrantyTerms`: tối đa 2000 ký tự.
@@ -194,6 +220,7 @@ BE behavior:
 - Nếu `autoGenerateWarrantyCode === false`, FE bắt buộc gửi `warrantyCode`.
 - Luôn tạo warranty record cùng product.
 - Nếu gửi `customerId`, BE tạo ownership hiện tại.
+- Nếu gửi `categoryId`, BE connect product với category động.
 - Nếu có `activatedAt` hoặc `purchaseDate`, warranty sẽ có `startDate`; nếu không warranty ở trạng thái `DRAFT`.
 - Nếu `serialNumber` đã tồn tại, BE trả conflict.
 
@@ -210,6 +237,7 @@ Error FE cần xử lý:
 - `400 Could not generate a unique product code`: lỗi hiếm khi auto generate productCode.
 - `400 Could not generate a unique warranty code`: lỗi hiếm khi auto generate warrantyCode.
 - `404 Customer not found`: customerId không tồn tại.
+- `404 Product category not found`: categoryId không tồn tại hoặc không phải type PRODUCT.
 - `409 Serial number already exists`: serialNumber bị trùng.
 - `409 Warranty code already exists`: warrantyCode bị trùng.
 
@@ -219,6 +247,7 @@ FE triển khai chuẩn:
 - Nếu toggle bật, disable input warrantyCode.
 - Nếu toggle tắt, require input warrantyCode và uppercase trước khi submit.
 - Nếu chọn customer, nên dùng customer picker lấy từ Customers API.
+- Nếu chọn category động, nên dùng Categories API và lưu `categoryId`.
 - Sau create success, redirect detail hoặc refresh product list.
 
 ## GET /api/v1/products/:id
@@ -280,12 +309,14 @@ Body:
 type UpdateProductBody = {
   name?: string;
   category?: "CAR" | "ACCESSORY" | "SPARE_PART" | "SERVICE_PACKAGE";
+  categoryId?: string | null;
   brand?: string | null;
   model?: string | null;
   manufactureYear?: number | null;
   description?: string | null;
   status?: "ACTIVE" | "INACTIVE" | "DELETED";
   serialNumber?: string | null;
+  metadata?: Record<string, unknown> | null;
 };
 ```
 
@@ -298,12 +329,15 @@ type Response = ProductResponse;
 BE behavior:
 
 - Không cho update product đã soft delete.
+- Nếu gửi `categoryId`, BE connect sang category động type PRODUCT.
+- Nếu gửi `categoryId = null`, BE bỏ relation category động nhưng vẫn giữ enum `category` legacy.
 - Nếu đổi `serialNumber` sang giá trị đã tồn tại ở product khác, trả conflict.
 - Endpoint này không update warrantyCode, owner hay warranty fields.
 
 Error FE cần xử lý:
 
 - `404 Product not found`.
+- `404 Product category not found`.
 - `409 Serial number already exists`.
 
 FE triển khai chuẩn:

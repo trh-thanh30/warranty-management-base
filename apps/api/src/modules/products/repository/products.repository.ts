@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, product_status, warranty_status } from '@prisma/client';
 
 const productInclude = {
+  category_ref: true,
   ownerships: {
     include: { customer: true },
     orderBy: { created_at: 'desc' as const },
@@ -50,6 +51,7 @@ export class ProductsRepository {
   list(filters: {
     search?: string;
     category?: string;
+    categoryId?: string;
     status?: product_status;
     warrantyStatus?: warranty_status;
     page?: number;
@@ -73,6 +75,7 @@ export class ProductsRepository {
     const where: Prisma.ProductWhereInput = {
       deleted_at: null,
       category: filters.category as never,
+      category_id: filters.categoryId,
       status: filters.status,
       warranty: filters.warrantyStatus
         ? { status: filters.warrantyStatus }

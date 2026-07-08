@@ -11,6 +11,7 @@ export type WarrantySummary = {
   durationMonths: number;
   status: WarrantyStatus;
   terms: string | null;
+  metadata: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
 };
