@@ -1,13 +1,16 @@
 import { Permissions } from '@/common/decorators/permissions.decorator';
 import { User } from '@/common/decorators/user.decorator';
+import { ActivateWarrantyByCodeDto } from '@/modules/warranties/dto/activate-warranty-by-code.dto';
 import { ActivateWarrantyDto } from '@/modules/warranties/dto/activate-warranty.dto';
 import { LookupWarrantyDto } from '@/modules/warranties/dto/lookup-warranty.dto';
+import { ActivateWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/activate-warranty-by-code.use-case';
 import { ActivateWarrantyUseCase } from '@/modules/warranties/use-cases/activate-warranty.use-case';
 import { GetMyProductWarrantyUseCase } from '@/modules/warranties/use-cases/get-my-product-warranty.use-case';
 import { GetWarrantyByProductUseCase } from '@/modules/warranties/use-cases/get-warranty-by-product.use-case';
 import { ListMyProductsUseCase } from '@/modules/warranties/use-cases/list-my-products.use-case';
+import { LookupWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/lookup-warranty-by-code.use-case';
 import { LookupWarrantyForCustomerUseCase } from '@/modules/warranties/use-cases/lookup-warranty-for-customer.use-case';
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { permission_key } from '@prisma/client';
 
 type RequestUser = {
@@ -18,11 +21,25 @@ type RequestUser = {
 export class WarrantiesController {
   constructor(
     private readonly activateWarrantyUseCase: ActivateWarrantyUseCase,
+    private readonly activateWarrantyByCodeUseCase: ActivateWarrantyByCodeUseCase,
     private readonly getWarrantyByProductUseCase: GetWarrantyByProductUseCase,
+    private readonly lookupWarrantyByCodeUseCase: LookupWarrantyByCodeUseCase,
     private readonly lookupWarrantyForCustomerUseCase: LookupWarrantyForCustomerUseCase,
     private readonly listMyProductsUseCase: ListMyProductsUseCase,
     private readonly getMyProductWarrantyUseCase: GetMyProductWarrantyUseCase,
   ) {}
+
+  @Get('warranties/lookup')
+  @Permissions([permission_key.WARRANTY_VIEW])
+  lookupWarrantyByCode(@Query() dto: LookupWarrantyDto) {
+    return this.lookupWarrantyByCodeUseCase.execute(dto);
+  }
+
+  @Post('warranties/activate-by-code')
+  @Permissions([permission_key.WARRANTY_ACTIVATE])
+  activateWarrantyByCode(@Body() dto: ActivateWarrantyByCodeDto) {
+    return this.activateWarrantyByCodeUseCase.execute(dto);
+  }
 
   @Post('products/:id/activate-warranty')
   @Permissions([permission_key.WARRANTY_ACTIVATE])

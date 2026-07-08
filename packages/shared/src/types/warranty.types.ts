@@ -1,4 +1,4 @@
-import type { ProductSummary } from "./product.types.js";
+import type { ProductSummary } from "./product.types.ts";
 
 export type WarrantyStatus = "DRAFT" | "ACTIVE" | "EXPIRED" | "VOIDED";
 

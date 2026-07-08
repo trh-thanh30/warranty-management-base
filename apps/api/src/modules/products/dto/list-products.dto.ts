@@ -1,3 +1,4 @@
+import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
 import {
   product_category,
   product_status,
@@ -5,7 +6,7 @@ import {
 } from '@prisma/client';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 
-export class ListProductsDto {
+export class ListProductsDto extends PaginationQueryDto {
   @IsOptional()
   @IsString()
   search?: string;

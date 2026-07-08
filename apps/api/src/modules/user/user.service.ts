@@ -1,9 +1,12 @@
 import { BcryptService } from '@/common/helpers/bcrypt.util';
+import { normalizePagination, paginate } from '@/common/pagination/pagination';
+import { BadRequestError } from '@/common/response';
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { CreateUserDto } from '@/modules/user/dto/create-user.dto';
+import { ListUsersDto } from '@/modules/user/dto/list-users.dto';
 import { UpdateUserDto } from '@/modules/user/dto/update-user.dto';
 import { Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Prisma, User, user_role } from '@prisma/client';
 
 /**
  * Service for handling user-related operations
@@ -111,8 +114,72 @@ export class UsersService {
    * Get all users
    * @returns List of users
    */
-  async findAll(): Promise<User[]> {
-    return this.prismaService.user.findMany();
+  async findAll(query: ListUsersDto) {
+    const search = query.search?.trim();
+    const roles = this.resolveRoles(query);
+    const { page, limit, skip, take } = normalizePagination(query);
+    const sortMap = {
+      email: 'email',
+      username: 'username',
+      fullName: 'full_name',
+      phone: 'phone',
+      role: 'role',
+      status: 'status',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+    } satisfies Record<string, keyof Prisma.UserOrderByWithRelationInput>;
+    const sortBy = query.sortBy ? sortMap[query.sortBy] : undefined;
+    const where: Prisma.UserWhereInput = {
+      role: roles.length > 0 ? { in: roles } : query.role,
+      status: query.status,
+      OR: search
+        ? [
+            { email: { contains: search, mode: 'insensitive' } },
+            { username: { contains: search, mode: 'insensitive' } },
+            { full_name: { contains: search, mode: 'insensitive' } },
+            { phone: { contains: search, mode: 'insensitive' } },
+          ]
+        : undefined,
+    };
+    const orderBy: Prisma.UserOrderByWithRelationInput[] = sortBy
+      ? [{ [sortBy]: query.sortOrder ?? 'desc' }]
+      : [{ created_at: 'desc' }];
+
+    return this.prismaService.$transaction(async (tx) => {
+      const [items, total] = await Promise.all([
+        tx.user.findMany({
+          where,
+          orderBy,
+          skip,
+          take,
+        }),
+        tx.user.count({ where }),
+      ]);
+
+      return paginate(items, { page, limit, total });
+    });
+  }
+
+  private resolveRoles(query: ListUsersDto): user_role[] {
+    if (!query.roles) {
+      return [];
+    }
+
+    const roles = query.roles
+      ?.split(',')
+      .map((role) => role.trim().toUpperCase())
+      .filter(Boolean);
+    const invalidRoles = roles.filter(
+      (role) => !Object.values(user_role).includes(role as user_role),
+    );
+
+    if (invalidRoles.length > 0) {
+      throw new BadRequestError('Invalid user role filter', 'INVALID_ROLE', {
+        roles: invalidRoles,
+      });
+    }
+
+    return roles as user_role[];
   }
 
   /**

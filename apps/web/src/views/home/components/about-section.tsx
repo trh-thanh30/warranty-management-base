@@ -6,7 +6,11 @@ import { ShieldCheck, PhoneCall } from "lucide-react";
 import { useScrollReveal, viewportOnce } from "@/src/hooks/use-scroll-reveal";
 import { BrandsSection } from "./brands-section";
 
-export function AboutSection() {
+interface AboutSectionProps {
+  onOpenHub?: (tab: "lookup" | "activate" | "claim") => void;
+}
+
+export function AboutSection({ onOpenHub }: AboutSectionProps) {
   const { container, fadeUp } = useScrollReveal();
 
   return (
@@ -102,14 +106,15 @@ export function AboutSection() {
 
             {/* CTA Buttons & Phone Row */}
             <div className="mt-10 flex flex-wrap items-center gap-6">
-              {/* Book Now Button */}
+              {/* Get Covered Button */}
               <button
                 type="button"
+                onClick={() => onOpenHub?.("claim")}
                 className="group/btn relative inline-flex overflow-hidden rounded-full border border-brand-blue px-[32px] py-[14px] text-[16px] font-condensed font-bold uppercase tracking-wider text-white bg-brand-blue transition-all duration-300 hover:scale-105 active:scale-95 hover:border-brand-blue-hover shadow-md cursor-pointer w-fit"
               >
                 {/* Rotated square diagonal sweep fill effect - sweeps to dark blue */}
                 <span className="absolute w-[200%] aspect-square -top-[50%] -left-[50%] bg-brand-blue-hover rotate-45 translate-y-[120%] translate-x-[120%] transition-transform duration-[400ms] ease-out group-hover/btn:translate-y-0 group-hover/btn:translate-x-0 z-0" />
-                <span className="relative z-10 text-white">Book Now!</span>
+                <span className="relative z-10 text-white">SUBMIT A CLAIM</span>
               </button>
 
               {/* Call Us Link */}
@@ -132,8 +137,8 @@ export function AboutSection() {
               </a>
 
               {/* Learn More Button */}
-              <button
-                type="button"
+              <a
+                href="#how-it-works"
                 className="group/btn relative inline-flex overflow-hidden rounded-full border border-brand-blue px-[32px] py-[14px] text-[16px] font-condensed font-bold uppercase tracking-wider text-brand-blue bg-transparent transition-all duration-300 hover:scale-105 active:scale-95 shadow-xs cursor-pointer w-fit"
               >
                 {/* Rotated square diagonal sweep fill effect - sweeps to brand-blue */}
@@ -141,7 +146,7 @@ export function AboutSection() {
                 <span className="relative z-10 transition-colors duration-[330ms] group-hover/btn:text-white">
                   Learn More About Us
                 </span>
-              </button>
+              </a>
             </div>
           </motion.div>
         </motion.div>

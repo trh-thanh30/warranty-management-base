@@ -25,9 +25,37 @@ import { useScrollReveal, viewportOnce } from "@/src/hooks/use-scroll-reveal";
 
 type HubTab = "lookup" | "activate" | "claim";
 
-export function LookupSection() {
-  const [activeTab, setActiveTab] = useState<HubTab>("lookup");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+interface LookupSectionProps {
+  isModalOpen?: boolean;
+  setIsModalOpen?: (isOpen: boolean) => void;
+  activeTab?: HubTab;
+  setActiveTab?: (tab: HubTab) => void;
+}
+
+export function LookupSection({
+  isModalOpen: controlledIsModalOpen,
+  setIsModalOpen: controlledSetIsModalOpen,
+  activeTab: controlledActiveTab,
+  setActiveTab: controlledSetActiveTab,
+}: LookupSectionProps) {
+  const [localActiveTab, localSetActiveTab] = useState<HubTab>("lookup");
+  const [localIsModalOpen, localSetIsModalOpen] = useState(false);
+
+  const activeTab =
+    controlledActiveTab !== undefined ? controlledActiveTab : localActiveTab;
+  const setActiveTab =
+    controlledSetActiveTab !== undefined
+      ? controlledSetActiveTab
+      : localSetActiveTab;
+  const isModalOpen =
+    controlledIsModalOpen !== undefined
+      ? controlledIsModalOpen
+      : localIsModalOpen;
+  const setIsModalOpen =
+    controlledSetIsModalOpen !== undefined
+      ? controlledSetIsModalOpen
+      : localSetIsModalOpen;
+
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -48,7 +76,7 @@ export function LookupSection() {
     handleHashChange();
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
-  }, []);
+  }, [setActiveTab, setIsModalOpen]);
 
   // Tab 1: Lookup state
   const [lookupQuery, setLookupQuery] = useState("");

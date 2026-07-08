@@ -22,11 +22,12 @@ model User {
   updated_at    DateTime    @updatedAt
 
   assets                  Asset[]
-  created_notifications   Notification[]          @relation("NotificationCreatedBy")
+  created_notifications   Notification[]               @relation("NotificationCreatedBy")
   notification_recipients NotificationRecipient[]
   permissions             UserPermission[]
   customer_profile        Customer?
   owned_products          ProductOwnership[]
+  warranty_claim_changes  WarrantyClaimStatusHistory[] @relation("WarrantyClaimStatusChangedBy")
 
   @@index([role, status])
   @@index([email])
@@ -130,6 +131,24 @@ model ActivityLog {
   @@map("activity_log")
 }
 
+model ContentPage {
+  id           String              @id @default(uuid()) @db.Uuid
+  slug         String              @unique
+  title        String
+  summary      String?
+  content      String
+  kind         content_page_kind   @default(POLICY)
+  status       content_page_status @default(DRAFT)
+  published_at DateTime?
+  created_at   DateTime            @default(now())
+  updated_at   DateTime            @updatedAt
+
+  @@index([kind])
+  @@index([status])
+  @@index([published_at])
+  @@map("content_page")
+}
+
 model UserPermission {
   id             String         @id @default(uuid()) @db.Uuid
   user_id        String         @db.Uuid
@@ -158,6 +177,7 @@ model Customer {
 
   user       User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
   ownerships ProductOwnership[]
+  claims     WarrantyClaim[]
 
   @@index([customer_code])
   @@index([full_name])
@@ -167,23 +187,24 @@ model Customer {
 }
 
 model Product {
-  id                String           @id @default(uuid()) @db.Uuid
-  product_code      String           @unique
-  warranty_code     String           @unique
-  serial_number     String?          @unique
-  name              String
-  category          product_category
-  brand             String?
-  model             String?
-  manufacture_year  Int?
-  description       String?
-  status            product_status   @default(ACTIVE)
-  created_at        DateTime         @default(now())
-  updated_at        DateTime         @updatedAt
-  deleted_at        DateTime?
+  id               String           @id @default(uuid()) @db.Uuid
+  product_code     String           @unique
+  warranty_code    String           @unique
+  serial_number    String?          @unique
+  name             String
+  category         product_category
+  brand            String?
+  model            String?
+  manufacture_year Int?
+  description      String?
+  status           product_status   @default(ACTIVE)
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+  deleted_at       DateTime?
 
   ownerships ProductOwnership[]
   warranty   Warranty?
+  claims     WarrantyClaim[]
 
   @@index([category])
   @@index([status])
@@ -227,12 +248,91 @@ model Warranty {
   created_at      DateTime        @default(now())
   updated_at      DateTime        @updatedAt
 
-  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  product Product         @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  claims  WarrantyClaim[]
 
   @@index([warranty_code])
   @@index([status])
   @@index([end_date])
   @@map("warranty")
+}
+
+model WarrantyClaim {
+  id                String                  @id @default(uuid()) @db.Uuid
+  claim_code        String                  @unique
+  warranty_id       String                  @db.Uuid
+  product_id        String                  @db.Uuid
+  customer_id       String?                 @db.Uuid
+  service_center_id String?                 @db.Uuid
+  warranty_code     String
+  requester_name    String?
+  requester_phone   String?
+  issue_title       String
+  issue_detail      String?
+  status            warranty_claim_status   @default(SUBMITTED)
+  priority          warranty_claim_priority @default(NORMAL)
+  due_at            DateTime?
+  sla_breached_at   DateTime?
+  submitted_at      DateTime                @default(now())
+  resolved_at       DateTime?
+  created_at        DateTime                @default(now())
+  updated_at        DateTime                @updatedAt
+
+  warranty       Warranty                     @relation(fields: [warranty_id], references: [id], onDelete: Cascade)
+  product        Product                      @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  customer       Customer?                    @relation(fields: [customer_id], references: [id], onDelete: SetNull)
+  service_center ServiceCenter?               @relation(fields: [service_center_id], references: [id], onDelete: SetNull)
+  status_history WarrantyClaimStatusHistory[]
+
+  @@index([claim_code])
+  @@index([warranty_code])
+  @@index([status])
+  @@index([product_id])
+  @@index([customer_id])
+  @@index([service_center_id])
+  @@index([priority])
+  @@index([due_at])
+  @@index([sla_breached_at])
+  @@index([created_at])
+  @@map("warranty_claim")
+}
+
+model WarrantyClaimStatusHistory {
+  id                 String                 @id @default(uuid()) @db.Uuid
+  warranty_claim_id  String                 @db.Uuid
+  from_status        warranty_claim_status?
+  to_status          warranty_claim_status
+  note               String?
+  changed_by_user_id String?                @db.Uuid
+  created_at         DateTime               @default(now())
+
+  warranty_claim WarrantyClaim @relation(fields: [warranty_claim_id], references: [id], onDelete: Cascade)
+  changed_by     User?         @relation("WarrantyClaimStatusChangedBy", fields: [changed_by_user_id], references: [id], onDelete: SetNull)
+
+  @@index([warranty_claim_id, created_at])
+  @@index([to_status])
+  @@index([changed_by_user_id])
+  @@map("warranty_claim_status_history")
+}
+
+model ServiceCenter {
+  id         String   @id @default(uuid()) @db.Uuid
+  name       String
+  phone      String?
+  email      String?
+  province   String
+  district   String?
+  address    String
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  claims WarrantyClaim[]
+
+  @@index([is_active])
+  @@index([province])
+  @@index([name])
+  @@map("service_center")
 }
 
 enum user_role {
@@ -303,6 +403,21 @@ enum permission_key {
   WARRANTY_ACTIVATE
   WARRANTY_LOOKUP_OWN
 
+  WARRANTY_CLAIM_VIEW
+  WARRANTY_CLAIM_CREATE
+  WARRANTY_CLAIM_UPDATE
+  WARRANTY_CLAIM_STATUS_UPDATE
+
+  SERVICE_CENTER_VIEW
+  SERVICE_CENTER_CREATE
+  SERVICE_CENTER_UPDATE
+  SERVICE_CENTER_DELETE
+
+  CONTENT_PAGE_VIEW
+  CONTENT_PAGE_CREATE
+  CONTENT_PAGE_UPDATE
+  CONTENT_PAGE_DELETE
+
   USER_VIEW
   USER_CREATE
   USER_UPDATE
@@ -331,4 +446,34 @@ enum warranty_status {
   ACTIVE
   EXPIRED
   VOIDED
+}
+
+enum warranty_claim_status {
+  SUBMITTED
+  REVIEWING
+  APPROVED
+  REJECTED
+  IN_REPAIR
+  COMPLETED
+  CANCELLED
+}
+
+enum warranty_claim_priority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum content_page_kind {
+  POLICY
+  GUIDE
+  INTRO
+  FAQ
+}
+
+enum content_page_status {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
 }
