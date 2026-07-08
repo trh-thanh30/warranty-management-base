@@ -1,8 +1,9 @@
 "use client";
 
-import { MoreHorizontal, ShieldCheck, UserRoundX } from "lucide-react";
+import { MoreHorizontal, Pencil, ShieldCheck, UserRoundX } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { UserAccountSummary } from "@repo/shared";
+import { PERMISSIONS } from "@repo/shared/constants";
 import {
   Avatar,
   AvatarFallback,
@@ -20,6 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui";
+import { usePermissions } from "@/src/hooks/use-permissions";
 import { getInitials } from "@/src/utils/get-initials";
 
 type StaffTableProps = {
@@ -217,6 +219,17 @@ function StaffActionsMenu({
 }: StaffTableActionProps & { user: UserAccountSummary }) {
   const t = useTranslations("Staff");
   const displayName = getStaffDisplayName(user);
+  const { hasPermission, hasRole } = usePermissions();
+  const canManageStaff = hasRole("admin");
+  const canEdit = canManageStaff && hasPermission(PERMISSIONS.USER_UPDATE);
+  const canManagePermissions =
+    canManageStaff && hasPermission(PERMISSIONS.USER_PERMISSION_MANAGE);
+  const canToggleStatus =
+    canManageStaff && hasPermission(PERMISSIONS.USER_UPDATE);
+
+  if (!canEdit && !canManagePermissions && !canToggleStatus) {
+    return null;
+  }
 
   return (
     <DropdownMenu>
@@ -231,17 +244,24 @@ function StaffActionsMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={() => onEdit(user)}>
-          {t("edit")}
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => onPermissions(user)}>
-          <ShieldCheck className="mr-2 size-4" />
-          {t("managePermissions")}
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => onToggleStatus(user)}>
-          <UserRoundX className="mr-2 size-4" />
-          {user.status === "ACTIVE" ? t("deactivate") : t("activate")}
-        </DropdownMenuItem>
+        {canEdit ? (
+          <DropdownMenuItem onSelect={() => onEdit(user)}>
+            <Pencil className="mr-2 size-4" />
+            {t("edit")}
+          </DropdownMenuItem>
+        ) : null}
+        {canManagePermissions ? (
+          <DropdownMenuItem onSelect={() => onPermissions(user)}>
+            <ShieldCheck className="mr-2 size-4" />
+            {t("managePermissions")}
+          </DropdownMenuItem>
+        ) : null}
+        {canToggleStatus ? (
+          <DropdownMenuItem onSelect={() => onToggleStatus(user)}>
+            <UserRoundX className="mr-2 size-4" />
+            {user.status === "ACTIVE" ? t("deactivate") : t("activate")}
+          </DropdownMenuItem>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );

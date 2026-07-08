@@ -17,12 +17,14 @@ import {
   Input,
   Skeleton,
 } from "@repo/ui";
+import { PaginationControls } from "@/src/components/common/pagination-controls";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { StaffTable } from "./staff-table";
 
 type StaffStatusFilter = "ALL" | ApiUserStatus;
 
 type StaffDirectoryCardProps = {
+  canCreate: boolean;
   data?: PaginatedResponse<UserAccountSummary>;
   isError: boolean;
   isLoading: boolean;
@@ -30,27 +32,28 @@ type StaffDirectoryCardProps = {
   onEdit: (user: UserAccountSummary) => void;
   onPermissions: (user: UserAccountSummary) => void;
   onRetry: () => void;
+  onPageChange: (page: number) => void;
   onSearchChange: (search: string) => void;
   onStatusChange: (status: StaffStatusFilter) => void;
   onToggleStatus: (user: UserAccountSummary) => void;
   search: string;
-  setPage: (page: number | ((current: number) => number)) => void;
   status: StaffStatusFilter;
 };
 
 export function StaffDirectoryCard({
+  canCreate,
   data,
   isError,
   isLoading,
   onCreate,
   onEdit,
   onPermissions,
+  onPageChange,
   onRetry,
   onSearchChange,
   onStatusChange,
   onToggleStatus,
   search,
-  setPage,
   status,
 }: StaffDirectoryCardProps) {
   const t = useTranslations("Staff");
@@ -74,18 +77,19 @@ export function StaffDirectoryCard({
       </CardHeader>
       <CardContent className="px-3 sm:px-6">
         <StaffDirectoryContent
+          canCreate={canCreate}
           data={data}
           hasFilters={hasFilters}
           isError={isError}
           isLoading={isLoading}
           onCreate={onCreate}
           onEdit={onEdit}
+          onPageChange={onPageChange}
           onPermissions={onPermissions}
           onRetry={onRetry}
           onSearchChange={onSearchChange}
           onStatusChange={onStatusChange}
           onToggleStatus={onToggleStatus}
-          setPage={setPage}
         />
       </CardContent>
     </Card>
@@ -134,31 +138,33 @@ function StaffDirectoryFilters({
 }
 
 function StaffDirectoryContent({
+  canCreate,
   data,
   hasFilters,
   isError,
   isLoading,
   onCreate,
   onEdit,
+  onPageChange,
   onPermissions,
   onRetry,
   onSearchChange,
   onStatusChange,
   onToggleStatus,
-  setPage,
 }: Pick<
   StaffDirectoryCardProps,
+  | "canCreate"
   | "data"
   | "isError"
   | "isLoading"
   | "onCreate"
   | "onEdit"
+  | "onPageChange"
   | "onPermissions"
   | "onRetry"
   | "onSearchChange"
   | "onStatusChange"
   | "onToggleStatus"
-  | "setPage"
 > & {
   hasFilters: boolean;
 }) {
@@ -192,7 +198,7 @@ function StaffDirectoryContent({
           onPermissions={onPermissions}
           onToggleStatus={onToggleStatus}
         />
-        <StaffPagination data={data} setPage={setPage} />
+        <StaffPagination data={data} onPageChange={onPageChange} />
       </>
     );
   }
@@ -210,9 +216,9 @@ function StaffDirectoryContent({
           >
             {t("clearFilters")}
           </Button>
-        ) : (
+        ) : canCreate ? (
           <Button onClick={onCreate}>{t("create")}</Button>
-        )
+        ) : null
       }
       description={
         hasFilters ? t("emptyFilteredDescription") : t("emptyDescription")
@@ -235,40 +241,25 @@ function StaffDirectorySkeleton() {
 
 function StaffPagination({
   data,
-  setPage,
+  onPageChange,
 }: {
   data: PaginatedResponse<UserAccountSummary>;
-  setPage: StaffDirectoryCardProps["setPage"];
+  onPageChange: StaffDirectoryCardProps["onPageChange"];
 }) {
   const t = useTranslations("Staff");
 
   return (
-    <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-      <p className="text-sm text-slate-500 dark:text-slate-400">
-        {t("pagination", {
-          page: data.meta.page,
-          totalPages: Math.max(data.meta.totalPages, 1),
-          total: data.meta.total,
-        })}
-      </p>
-      <div className="grid grid-cols-2 gap-2 sm:flex">
-        <Button
-          className="w-full sm:w-auto"
-          disabled={!data.meta.hasPreviousPage}
-          onClick={() => setPage((current) => current - 1)}
-          variant="secondary"
-        >
-          {t("previous")}
-        </Button>
-        <Button
-          className="w-full sm:w-auto"
-          disabled={!data.meta.hasNextPage}
-          onClick={() => setPage((current) => current + 1)}
-          variant="secondary"
-        >
-          {t("next")}
-        </Button>
-      </div>
-    </div>
+    <PaginationControls
+      nextLabel={t("next")}
+      onPageChange={onPageChange}
+      page={data.meta.page}
+      previousLabel={t("previous")}
+      summary={t("pagination", {
+        page: data.meta.page,
+        total: data.meta.total,
+        totalPages: Math.max(data.meta.totalPages, 1),
+      })}
+      totalPages={data.meta.totalPages}
+    />
   );
 }

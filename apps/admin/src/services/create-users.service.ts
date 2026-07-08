@@ -53,6 +53,14 @@ export function createUsersService(http: UsersHttpClient) {
       return unwrap(await http.post<CreateModeratorResponse>("/users", body));
     },
 
+    async getModerator(userId: string): Promise<UserAccountSummary | null> {
+      const user = unwrap(
+        await http.get<UserAccountSummary | null>(`/users/${userId}`),
+      );
+
+      return user?.role === "MODERATOR" ? user : null;
+    },
+
     async updateModerator(
       userId: string,
       body: UpdateModeratorBody,

@@ -14,12 +14,14 @@ import {
 import { useToast } from "@/src/hooks/use-toast";
 
 type TemporaryPasswordDialogProps = {
+  actionLabel?: string;
   onOpenChange: (open: boolean) => void;
   open: boolean;
   password: string | null;
 };
 
 export function TemporaryPasswordDialog({
+  actionLabel,
   onOpenChange,
   open,
   password,
@@ -83,7 +85,7 @@ export function TemporaryPasswordDialog({
 
         <div className="mt-6 flex justify-end">
           <Button onClick={() => handleOpenChange(false)} type="button">
-            {t("continueToPermissions")}
+            {actionLabel ?? t("continueToPermissions")}
           </Button>
         </div>
       </DialogContent>

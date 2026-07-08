@@ -2,41 +2,43 @@
 
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, UserRoundX } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useDebounce } from "@repo/hooks";
 import type { ApiUserStatus, UserAccountSummary } from "@repo/shared";
 import { Button } from "@repo/ui";
+import { PERMISSIONS } from "@repo/shared/constants";
 import { PageHeader } from "@/src/components/common/page-header";
-import { StatePanel } from "@/src/components/common/state-panel";
+import { PermissionGuard } from "@/src/components/permission-guard";
 import { useToast } from "@/src/hooks/use-toast";
+import { usePermissions } from "@/src/hooks/use-permissions";
 import { usersService } from "@/src/services/users.service";
 import { useAuth } from "@/src/app/providers/auth-provider";
+import { Link, useRouter } from "@/src/i18n/navigation";
 import { StaffDirectoryCard } from "./components/staff-directory-card";
-import { StaffFormDialog } from "./components/staff-form-dialog";
 import { StaffPermissionsDialog } from "./components/staff-permissions-dialog";
-import { TemporaryPasswordDialog } from "./components/temporary-password-dialog";
 
 const STAFF_PAGE_SIZE = 10;
 
 export function UsersView() {
   const t = useTranslations("Staff");
   const toast = useToast();
+  const router = useRouter();
   const { user: currentUser } = useAuth();
+  const { hasPermission, hasRole } = usePermissions();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<"ALL" | ApiUserStatus>("ALL");
-  const [formOpen, setFormOpen] = useState(false);
   const [permissionsOpen, setPermissionsOpen] = useState(false);
-  const [temporaryPasswordOpen, setTemporaryPasswordOpen] = useState(false);
-  const [temporaryPassword, setTemporaryPassword] = useState<string | null>(
-    null,
-  );
   const [selectedUser, setSelectedUser] = useState<UserAccountSummary | null>(
     null,
   );
   const debouncedSearch = useDebounce(search.trim(), 300);
+  const canManageStaff = hasRole("admin");
+  const canViewStaff = canManageStaff && hasPermission(PERMISSIONS.USER_VIEW);
+  const canCreateStaff =
+    canManageStaff && hasPermission(PERMISSIONS.USER_CREATE);
   const queryKey = [
     "staff",
     { page, search: debouncedSearch, status },
@@ -50,7 +52,7 @@ export function UsersView() {
         search: debouncedSearch || undefined,
         status: status === "ALL" ? undefined : status,
       }),
-    enabled: currentUser?.role === "admin",
+    enabled: Boolean(currentUser) && canViewStaff,
   });
   const statusMutation = useMutation({
     mutationFn: (user: UserAccountSummary) =>
@@ -65,13 +67,11 @@ export function UsersView() {
   });
 
   function openCreate() {
-    setSelectedUser(null);
-    setFormOpen(true);
+    router.push("/users/create");
   }
 
   function openEdit(user: UserAccountSummary) {
-    setSelectedUser(user);
-    setFormOpen(true);
+    router.push(`/users/${user.id}/edit`);
   }
 
   function openPermissions(user: UserAccountSummary) {
@@ -100,87 +100,52 @@ export function UsersView() {
     }
   }
 
-  function handleSaved(
-    user: UserAccountSummary,
-    created: boolean,
-    generatedPassword?: string,
-  ) {
-    void queryClient.invalidateQueries({ queryKey: ["staff"] });
-    if (created && generatedPassword) {
-      setSelectedUser(user);
-      setTemporaryPassword(generatedPassword);
-      setTemporaryPasswordOpen(true);
-    }
-  }
-
-  function handleTemporaryPasswordOpenChange(open: boolean) {
-    setTemporaryPasswordOpen(open);
-    if (!open) {
-      setTemporaryPassword(null);
-      setPermissionsOpen(true);
-    }
-  }
-
   const data = staffQuery.data;
 
-  if (currentUser?.role !== "admin") {
-    return (
-      <StatePanel
-        description={t("forbiddenDescription")}
-        icon={UserRoundX}
-        title={t("forbiddenTitle")}
-      />
-    );
-  }
-
   return (
-    <div className="space-y-6">
-      <PageHeader
-        actions={
-          <Button onClick={openCreate}>
-            <Plus className="size-4" />
-            {t("create")}
-          </Button>
-        }
-        description={t("description")}
-        eyebrow={t("eyebrow")}
-        title={t("title")}
-      />
+    <PermissionGuard permissions={[PERMISSIONS.USER_VIEW]} requiredRole="admin">
+      <div className="space-y-6">
+        <PageHeader
+          actions={
+            canCreateStaff ? (
+              <Button asChild>
+                <Link href="/users/create">
+                  <Plus className="size-4" />
+                  {t("create")}
+                </Link>
+              </Button>
+            ) : null
+          }
+          description={t("description")}
+          eyebrow={t("eyebrow")}
+          title={t("title")}
+        />
 
-      <StaffDirectoryCard
-        data={data}
-        isError={staffQuery.isError}
-        isLoading={staffQuery.isLoading}
-        onCreate={openCreate}
-        onEdit={openEdit}
-        onPermissions={openPermissions}
-        onRetry={() => {
-          void staffQuery.refetch();
-        }}
-        onSearchChange={updateSearch}
-        onStatusChange={updateStatus}
-        onToggleStatus={toggleStatus}
-        search={search}
-        setPage={setPage}
-        status={status}
-      />
+        <StaffDirectoryCard
+          data={data}
+          canCreate={canCreateStaff}
+          isError={staffQuery.isError}
+          isLoading={staffQuery.isLoading}
+          onCreate={openCreate}
+          onEdit={openEdit}
+          onPageChange={setPage}
+          onPermissions={openPermissions}
+          onRetry={() => {
+            void staffQuery.refetch();
+          }}
+          onSearchChange={updateSearch}
+          onStatusChange={updateStatus}
+          onToggleStatus={toggleStatus}
+          search={search}
+          status={status}
+        />
 
-      <StaffFormDialog
-        onOpenChange={setFormOpen}
-        onSaved={handleSaved}
-        open={formOpen}
-        user={selectedUser}
-      />
-      <StaffPermissionsDialog
-        onOpenChange={setPermissionsOpen}
-        open={permissionsOpen}
-        user={selectedUser}
-      />
-      <TemporaryPasswordDialog
-        onOpenChange={handleTemporaryPasswordOpenChange}
-        open={temporaryPasswordOpen}
-        password={temporaryPassword}
-      />
-    </div>
+        <StaffPermissionsDialog
+          onOpenChange={setPermissionsOpen}
+          open={permissionsOpen}
+          user={selectedUser}
+        />
+      </div>
+    </PermissionGuard>
   );
 }
