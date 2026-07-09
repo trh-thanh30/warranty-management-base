@@ -10,6 +10,7 @@ export function toServiceCenterResponse(serviceCenter: ServiceCenter) {
     district: serviceCenter.district,
     address: serviceCenter.address,
     isActive: serviceCenter.is_active,
+    metadata: serviceCenter.metadata as Record<string, unknown> | null,
     createdAt: serviceCenter.created_at,
     updatedAt: serviceCenter.updated_at,
   };

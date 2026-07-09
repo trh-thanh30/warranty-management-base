@@ -37,6 +37,7 @@ export function CalculatorDrawer({
   activeTab,
   setActiveTab,
 }: CalculatorDrawerProps) {
+  const enableServiceTab = false;
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -280,30 +281,32 @@ export function CalculatorDrawer({
 
                 {/* Tab Switcher inside Drawer */}
                 <div className="space-y-4">
-                  <div className="flex border-b border-cloud">
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab("warranty")}
-                      className={`flex-1 pb-3 text-xs font-bold font-condensed uppercase tracking-[0.15em] border-b-2 transition-all cursor-pointer ${
-                        activeTab === "warranty"
-                          ? "border-brand-blue text-brand-blue"
-                          : "border-transparent text-pewter hover:text-charcoal"
-                      }`}
-                    >
-                      Warranty plans
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab("service")}
-                      className={`flex-1 pb-3 text-xs font-bold font-condensed uppercase tracking-[0.15em] border-b-2 transition-all cursor-pointer ${
-                        activeTab === "service"
-                          ? "border-brand-blue text-brand-blue"
-                          : "border-transparent text-pewter hover:text-charcoal"
-                      }`}
-                    >
-                      Servicing plans
-                    </button>
-                  </div>
+                  {enableServiceTab && (
+                    <div className="flex border-b border-cloud">
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("warranty")}
+                        className={`flex-1 pb-3 text-xs font-bold font-condensed uppercase tracking-[0.15em] border-b-2 transition-all cursor-pointer ${
+                          activeTab === "warranty"
+                            ? "border-brand-blue text-brand-blue"
+                            : "border-transparent text-pewter hover:text-charcoal"
+                        }`}
+                      >
+                        Warranty plans
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("service")}
+                        className={`flex-1 pb-3 text-xs font-bold font-condensed uppercase tracking-[0.15em] border-b-2 transition-all cursor-pointer ${
+                          activeTab === "service"
+                            ? "border-brand-blue text-brand-blue"
+                            : "border-transparent text-pewter hover:text-charcoal"
+                        }`}
+                      >
+                        Servicing plans
+                      </button>
+                    </div>
+                  )}
 
                   {/* Calculated Plan List */}
                   <div className="space-y-3">

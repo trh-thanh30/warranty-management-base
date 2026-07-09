@@ -91,6 +91,7 @@ client_has_rt
 - `users`: Admin quản trị user và permission override.
 - `customers`: Admin quản lý hồ sơ customer.
 - `products`: Admin quản lý sản phẩm, warranty code và owner.
+- `categories`: Admin quản lý taxonomy/danh mục dùng chung, trước mắt dùng cho product category động.
 - `warranties`: Admin/customer kích hoạt và tra cứu bảo hành.
 - `public`: endpoint guest cho 6 chức năng chính ngoài website.
 - `warranty-claims`: tạo, tra cứu, list, assign trạm và cập nhật trạng thái yêu cầu bảo hành.
@@ -144,6 +145,7 @@ Mở từng mục trong sidebar:
 - API Users
 - API Customers
 - API Products
+- API Categories
 - API Warranties
 - Public APIs
 - API Claims

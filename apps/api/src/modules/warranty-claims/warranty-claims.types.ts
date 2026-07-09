@@ -70,6 +70,7 @@ export function toWarrantyClaimResponse(
     priority: claim.priority,
     dueAt: claim.due_at,
     slaBreachedAt: claim.sla_breached_at,
+    metadata: claim.metadata as Record<string, unknown> | null,
     submittedAt: claim.submitted_at,
     resolvedAt: claim.resolved_at,
     createdAt: claim.created_at,

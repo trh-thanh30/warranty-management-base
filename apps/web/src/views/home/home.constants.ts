@@ -14,9 +14,9 @@ export const carHeroImages = [
   {
     src: "/service_1.jpg",
     alt: "Professional vehicle service checkup",
-    title: "Professional vehicle maintenance & servicing",
+    title: "COMPREHENSIVE VEHICLE WARRANTY COVER",
     description:
-      "Keep your vehicle running smoothly with our certified service packages and expert care.",
+      "Protect your car against unexpected breakdown and repair costs. Get complete coverage for mechanical and electrical parts with zero hassle.",
   },
   {
     src: "/service_2.jpg",
@@ -41,15 +41,7 @@ export const carHeroImages = [
   },
 ];
 
-export const navItems = [
-  "Home",
-  "Services",
-  "About us",
-  "How it works",
-  "Pricing",
-  "Stories",
-  "FAQ",
-];
+export const navItems = ["Home", "About us", "How it works", "FAQ"];
 
 export const trustItems = [
   "Certified repair network",

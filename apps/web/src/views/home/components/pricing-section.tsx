@@ -35,6 +35,8 @@ export function PricingSection({
   const { container, fadeUp, scaleIn } = useScrollReveal();
   const shouldReduce = useReducedMotion();
 
+  const enableServiceTab = false;
+
   const [isComparisonOpen, setIsComparisonOpen] = useState(false);
 
   useEffect(() => {
@@ -97,14 +99,14 @@ export function PricingSection({
       if (hash === "#warranty") {
         setActiveTab("warranty");
       } else if (hash === "#pricing") {
-        setActiveTab("service");
+        setActiveTab(enableServiceTab ? "service" : "warranty");
       }
     };
 
     handleHashChange();
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
-  }, [setActiveTab]);
+  }, [setActiveTab, enableServiceTab]);
   const plans = activeTab === "warranty" ? pricingPlans : servicePlans;
 
   const defaultPlanIndex = Math.max(
@@ -269,30 +271,32 @@ export function PricingSection({
             variants={fadeUp}
             className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3"
           >
-            <div className="flex items-center justify-center gap-3">
-              <button
-                type="button"
-                onClick={() => handleTabChange("service")}
-                className={`rounded-full px-4 sm:px-6 py-3 text-[10px] sm:text-xs font-bold font-sans uppercase tracking-wider transition-all duration-300 cursor-pointer border whitespace-nowrap ${
-                  activeTab === "service"
-                    ? "bg-brand-blue border-brand-blue text-white shadow-md shadow-brand-blue/15"
-                    : "bg-white border-cloud text-pewter hover:border-brand-blue/30 hover:text-charcoal"
-                }`}
-              >
-                Scheduled Servicing
-              </button>
-              <button
-                type="button"
-                onClick={() => handleTabChange("warranty")}
-                className={`rounded-full px-4 sm:px-6 py-3 text-[10px] sm:text-xs font-bold font-sans uppercase tracking-wider transition-all duration-300 cursor-pointer border whitespace-nowrap ${
-                  activeTab === "warranty"
-                    ? "bg-brand-blue border-brand-blue text-white shadow-md shadow-brand-blue/15"
-                    : "bg-white border-cloud text-pewter hover:border-brand-blue/30 hover:text-charcoal"
-                }`}
-              >
-                Warranty Cover
-              </button>
-            </div>
+            {enableServiceTab && (
+              <div className="flex items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleTabChange("service")}
+                  className={`rounded-full px-4 sm:px-6 py-3 text-[10px] sm:text-xs font-bold font-sans uppercase tracking-wider transition-all duration-300 cursor-pointer border whitespace-nowrap ${
+                    activeTab === "service"
+                      ? "bg-brand-blue border-brand-blue text-white shadow-md shadow-brand-blue/15"
+                      : "bg-white border-cloud text-pewter hover:border-brand-blue/30 hover:text-charcoal"
+                  }`}
+                >
+                  Scheduled Servicing
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleTabChange("warranty")}
+                  className={`rounded-full px-4 sm:px-6 py-3 text-[10px] sm:text-xs font-bold font-sans uppercase tracking-wider transition-all duration-300 cursor-pointer border whitespace-nowrap ${
+                    activeTab === "warranty"
+                      ? "bg-brand-blue border-brand-blue text-white shadow-md shadow-brand-blue/15"
+                      : "bg-white border-cloud text-pewter hover:border-brand-blue/30 hover:text-charcoal"
+                  }`}
+                >
+                  Warranty Cover
+                </button>
+              </div>
+            )}
             <button
               type="button"
               onClick={onOpenCalculator}

@@ -8,6 +8,8 @@
 - **Domain module**: product-specific module, such as booking, ecommerce, CRM, inventory, or billing.
 - **Staff account**: an internal user account with the Moderator role. Staff accounts are created, activated, deactivated, and assigned permissions by an Admin; Customer accounts are not staff accounts.
 - **Permission override**: an Admin-controlled grant or revocation applied to one Staff account relative to the Moderator role defaults. Only differences from the role defaults are persisted.
+- **Category taxonomy**: shared, admin-managed classification records for domain data. Product categories now use dynamic `Category` records while the legacy product category enum remains for backward compatibility.
+- **Metadata field**: nullable JSON extension data for low-query-frequency integration or display attributes. Business-critical fields that drive filtering, sorting, permissions, status transitions, or reports must remain first-class columns.
 
 ## Architecture Principles
 
