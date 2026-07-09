@@ -15,6 +15,7 @@
     "./input": "./src/input.tsx",
     "./label": "./src/label.tsx",
     "./lib/utils": "./src/lib/utils.ts",
+    "./pagination": "./src/pagination.tsx",
     "./separator": "./src/separator.tsx",
     "./sheet": "./src/sheet.tsx",
     "./skeleton": "./src/skeleton.tsx",

@@ -63,7 +63,7 @@ export function SettingsView() {
                 htmlFor="workspace-name"
                 label="Workspace name"
               >
-                <Input defaultValue="Booking Operations" id="workspace-name" />
+                <Input defaultValue="Warranty Operations" id="workspace-name" />
               </FormField>
               <FormField
                 description="Used for operational reports."
@@ -83,7 +83,7 @@ export function SettingsView() {
                   label="Internal notes"
                 >
                   <Textarea
-                    defaultValue="Use this template as the starting point for booking, CRM, inventory, or marketplace admin apps."
+                    defaultValue="Internal workspace for warranty operations, claims, products, service centers, and customer support."
                     id="workspace-notes"
                   />
                 </FormField>

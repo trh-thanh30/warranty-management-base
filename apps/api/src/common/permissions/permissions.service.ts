@@ -3,10 +3,12 @@ import { Injectable } from '@nestjs/common';
 import { permission_key, user_role } from '@prisma/client';
 import {
   ALL_PERMISSIONS,
+  MODERATOR_MANAGEABLE_PERMISSIONS,
   ROLE_DEFAULT_PERMISSIONS,
   normalizeUserRole,
   type PermissionKey,
 } from '@repo/shared/constants';
+import { BadRequestError } from '@/common/response';
 
 @Injectable()
 export class PermissionService {
@@ -63,8 +65,28 @@ export class PermissionService {
 
   async setUserPermissionOverrides(
     userId: string,
+    role: user_role,
     overrides: Array<{ permissionKey: permission_key; granted: boolean }>,
   ) {
+    if (role !== user_role.MODERATOR) {
+      throw new BadRequestError(
+        'Permission overrides can only be managed for moderator accounts',
+        'INVALID_PERMISSION_TARGET',
+      );
+    }
+
+    const invalidPermissions = overrides
+      .map((override) => override.permissionKey)
+      .filter((key) => !MODERATOR_MANAGEABLE_PERMISSIONS.includes(key));
+
+    if (invalidPermissions.length > 0) {
+      throw new BadRequestError(
+        'One or more permissions cannot be assigned to moderators',
+        'INVALID_MODERATOR_PERMISSION',
+        { permissions: invalidPermissions },
+      );
+    }
+
     return this.prismaService.$transaction(async (tx) => {
       await tx.userPermission.deleteMany({
         where: { user_id: userId },

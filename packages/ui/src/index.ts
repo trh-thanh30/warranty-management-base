@@ -8,6 +8,7 @@ export * from "./dropdown-menu";
 export * from "./input";
 export * from "./label";
 export * from "./lib/utils";
+export * from "./pagination";
 export * from "./separator";
 export * from "./sheet";
 export * from "./skeleton";

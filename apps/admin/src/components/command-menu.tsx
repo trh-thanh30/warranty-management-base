@@ -13,11 +13,13 @@ import {
 import { useAdminUiStore } from "@/src/app/stores/ui.store";
 import { getDashboardConfig } from "@/src/config/dashboard.config";
 import { Link } from "@/src/i18n/navigation";
+import { usePermissions } from "@/src/hooks/use-permissions";
 
 export function CommandMenu() {
   const t = useTranslations("DashboardConfig");
   const tCommon = useTranslations("Common");
   const dashboardConfig = getDashboardConfig(t);
+  const { hasPermission, hasRole } = usePermissions();
   const open = useAdminUiStore((state) => state.commandOpen);
   const setOpen = useAdminUiStore((state) => state.setCommandOpen);
 
@@ -46,7 +48,11 @@ export function CommandMenu() {
 
   dashboardConfig.sidebarSections.forEach((section) => {
     section.items.forEach((item) => {
-      if (item.href) {
+      if (
+        item.href &&
+        (!item.requiredRole || hasRole(item.requiredRole)) &&
+        (!item.requiredPermission || hasPermission(item.requiredPermission))
+      ) {
         itemsMap.set(item.href, {
           title: item.title,
           href: item.href,
@@ -57,7 +63,12 @@ export function CommandMenu() {
   });
 
   dashboardConfig.topNavigation.forEach((item) => {
-    if (item.href && !itemsMap.has(item.href)) {
+    if (
+      item.href &&
+      !itemsMap.has(item.href) &&
+      (!item.requiredRole || hasRole(item.requiredRole)) &&
+      (!item.requiredPermission || hasPermission(item.requiredPermission))
+    ) {
       itemsMap.set(item.href, {
         title: item.title,
         href: item.href,

@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
-import { Button, Card, CardContent } from "@repo/ui";
+import { Card, CardContent } from "@repo/ui";
 
 type StatePanelProps = {
   action?: ReactNode;
@@ -27,11 +27,7 @@ export function StatePanel({
         <p className="mt-2 max-w-md text-sm leading-6 text-slate-500 dark:text-slate-400">
           {description}
         </p>
-        {action ? (
-          <div className="mt-4">{action}</div>
-        ) : (
-          <Button className="mt-4">Create item</Button>
-        )}
+        {action ? <div className="mt-4">{action}</div> : null}
       </CardContent>
     </Card>
   );
