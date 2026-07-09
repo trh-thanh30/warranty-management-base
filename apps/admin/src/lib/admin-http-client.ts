@@ -9,6 +9,7 @@ import {
   clearAuthSession,
   getAuthSession,
   setAccessToken,
+  setAuthRedirectReason,
 } from "@/src/app/stores/auth-session.store";
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & {
@@ -80,6 +81,7 @@ adminHttpClient.interceptors.response.use(
         config.headers.Authorization = `Bearer ${accessToken}`;
         return adminHttpClient.request(config);
       } catch {
+        setAuthRedirectReason("session-expired");
         clearAuthSession();
         throw new HttpClientError({
           message: "Your session has expired. Please sign in again.",

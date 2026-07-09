@@ -69,6 +69,7 @@
     "passwordRequired": "Nhập mật khẩu.",
     "genericError": "Không thể đăng nhập. Vui lòng thử lại.",
     "loginSuccess": "Đăng nhập thành công.",
+    "sessionExpired": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
     "showPassword": "Hiện mật khẩu",
     "hidePassword": "Ẩn mật khẩu",
     "support": "Không thể đăng nhập? Liên hệ quản trị viên hệ thống."

@@ -69,6 +69,7 @@
     "passwordRequired": "Enter your password.",
     "genericError": "Unable to sign in. Please try again.",
     "loginSuccess": "Signed in successfully.",
+    "sessionExpired": "Your session has expired. Please sign in again.",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "support": "Having trouble signing in? Contact your system administrator."

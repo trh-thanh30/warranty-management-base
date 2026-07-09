@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowRight,
@@ -19,6 +19,7 @@ import {
 } from "@repo/shared";
 import { Button, Input, Label } from "@repo/ui";
 import { useAuth } from "@/src/app/providers/auth-provider";
+import { consumeAuthRedirectReason } from "@/src/app/stores/auth-session.store";
 import { useRouter } from "@/src/i18n/navigation";
 import { useToast } from "@/src/hooks/use-toast";
 
@@ -40,6 +41,12 @@ export function LoginForm() {
       password: "",
     },
   });
+
+  useEffect(() => {
+    if (consumeAuthRedirectReason() === "session-expired") {
+      toast.error(t("sessionExpired"));
+    }
+  }, [t, toast]);
 
   async function submit(values: AdminLoginInput) {
     try {
