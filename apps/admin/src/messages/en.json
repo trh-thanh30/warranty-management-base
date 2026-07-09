@@ -39,6 +39,7 @@
     "openSettings": "Open settings",
     "accessDeniedTitle": "Access denied",
     "accessDeniedDescription": "You do not have permission to view or manage this area.",
+    "loadingSession": "Loading session",
     "language": "Language",
     "vietnamese": "Tiếng Việt",
     "english": "English"

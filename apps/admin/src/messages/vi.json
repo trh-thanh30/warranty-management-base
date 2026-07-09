@@ -39,6 +39,7 @@
     "openSettings": "Mở cài đặt",
     "accessDeniedTitle": "Không có quyền truy cập",
     "accessDeniedDescription": "Bạn không có quyền xem hoặc quản lý khu vực này.",
+    "loadingSession": "Đang tải phiên đăng nhập",
     "language": "Ngôn ngữ",
     "vietnamese": "Tiếng Việt",
     "english": "English"
