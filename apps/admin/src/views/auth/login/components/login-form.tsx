@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowRight,
@@ -25,7 +25,7 @@ import { useToast } from "@/src/hooks/use-toast";
 export function LoginForm() {
   const t = useTranslations("Login");
   const [showPassword, setShowPassword] = useState(false);
-  const { login, status } = useAuth();
+  const { login } = useAuth();
   const router = useRouter();
   const toast = useToast();
   const {
@@ -40,12 +40,6 @@ export function LoginForm() {
       password: "",
     },
   });
-
-  useEffect(() => {
-    if (status === "authenticated") {
-      router.replace("/dashboard");
-    }
-  }, [router, status]);
 
   async function submit(values: AdminLoginInput) {
     try {
