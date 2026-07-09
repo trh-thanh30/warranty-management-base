@@ -1,6 +1,6 @@
 export type CustomerSummary = {
   id: string;
-  userId: string;
+  userId: string | null;
   customerCode: string;
   fullName: string;
   phone: string | null;
@@ -9,4 +9,34 @@ export type CustomerSummary = {
   metadata: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
+};
+
+export type ListCustomersQuery = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sortBy?:
+    | "customerCode"
+    | "fullName"
+    | "phone"
+    | "email"
+    | "createdAt"
+    | "updatedAt";
+  sortOrder?: "asc" | "desc";
+};
+
+export type CreateCustomerBody = {
+  userId?: string;
+  customerCode?: string;
+  fullName: string;
+  phone: string;
+  email: string;
+  address: string;
+};
+
+export type UpdateCustomerBody = {
+  fullName?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
 };

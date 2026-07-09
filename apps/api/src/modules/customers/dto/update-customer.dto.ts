@@ -1,4 +1,10 @@
-import { IsEmail, IsOptional, IsString, Length } from 'class-validator';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  Length,
+  ValidateIf,
+} from 'class-validator';
 
 export class UpdateCustomerDto {
   @IsOptional()
@@ -6,17 +12,17 @@ export class UpdateCustomerDto {
   @Length(2, 120)
   fullName?: string;
 
-  @IsOptional()
+  @ValidateIf((_, value) => value !== undefined)
   @IsString()
   @Length(6, 32)
-  phone?: string | null;
+  phone?: string;
 
-  @IsOptional()
+  @ValidateIf((_, value) => value !== undefined)
   @IsEmail()
-  email?: string | null;
+  email?: string;
 
-  @IsOptional()
+  @ValidateIf((_, value) => value !== undefined)
   @IsString()
-  @Length(0, 255)
-  address?: string | null;
+  @Length(1, 255)
+  address?: string;
 }
