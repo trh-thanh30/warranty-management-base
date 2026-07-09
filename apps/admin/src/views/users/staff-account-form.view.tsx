@@ -32,10 +32,9 @@ export function StaffAccountFormView({
 }: StaffAccountFormViewProps) {
   const t = useTranslations("Staff");
   const workflow = useStaffAccountWorkflow();
-  const { formUser, isEditing, userQuery } = useStaffAccountDetail({
-    mode,
-    userId,
-  });
+  const { formUser, isEditing, userQuery } = useStaffAccountDetail(
+    mode === "edit" ? { mode: "edit", userId } : { mode: "create" },
+  );
   const requiredPermission: PermissionKey = isEditing
     ? PERMISSIONS.USER_UPDATE
     : PERMISSIONS.USER_CREATE;
