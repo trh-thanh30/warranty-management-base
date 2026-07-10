@@ -1,73 +1,64 @@
-import { BadRequestError } from '@/common/response';
 import { GenerateCustomerCodeUseCase } from '@/modules/customers/use-cases/generate-customer-code.use-case';
 
 describe('GenerateCustomerCodeUseCase', () => {
   const createCustomersRepository = () => ({
-    findByCustomerCode: jest.fn(),
+    findLastCustomerCode: jest.fn(),
   });
 
   beforeEach(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-07-09T00:00:00.000Z'));
+    jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    jest.useRealTimers();
-    jest.restoreAllMocks();
-  });
-
-  it('returns the first unique generated customer code', async () => {
+  it('starts at CUS000001 when no prior customer code exists', async () => {
     const customersRepository = createCustomersRepository();
-    customersRepository.findByCustomerCode.mockResolvedValue(null);
-    jest.spyOn(Math, 'random').mockReturnValue(0.123456);
+    customersRepository.findLastCustomerCode.mockResolvedValue(null);
     const useCase = new GenerateCustomerCodeUseCase(
       customersRepository as never,
     );
 
-    const result = await useCase.execute();
-
-    expect(result).toBe('CUS-2026-4FZY');
-    expect(customersRepository.findByCustomerCode).toHaveBeenCalledWith(
-      'CUS-2026-4FZY',
+    await expect(useCase.generateCustomerCode()).resolves.toBe('CUS000001');
+    expect(customersRepository.findLastCustomerCode).toHaveBeenCalledWith(
+      'CUS',
     );
   });
 
-  it('retries when a generated customer code already exists', async () => {
+  it('generates a sequential batch after the last customer code', async () => {
     const customersRepository = createCustomersRepository();
-    customersRepository.findByCustomerCode
-      .mockResolvedValueOnce({ id: 'existing-customer-id' })
-      .mockResolvedValueOnce(null);
-    jest
-      .spyOn(Math, 'random')
-      .mockReturnValueOnce(0.123456)
-      .mockReturnValueOnce(0.654321);
-    const useCase = new GenerateCustomerCodeUseCase(
-      customersRepository as never,
-    );
-
-    const result = await useCase.execute();
-
-    expect(result).toBe('CUS-2026-NK00');
-    expect(customersRepository.findByCustomerCode).toHaveBeenNthCalledWith(
-      1,
-      'CUS-2026-4FZY',
-    );
-    expect(customersRepository.findByCustomerCode).toHaveBeenNthCalledWith(
-      2,
-      'CUS-2026-NK00',
-    );
-  });
-
-  it('throws when a unique customer code cannot be generated', async () => {
-    const customersRepository = createCustomersRepository();
-    customersRepository.findByCustomerCode.mockResolvedValue({
-      id: 'existing-customer-id',
+    customersRepository.findLastCustomerCode.mockResolvedValue({
+      customer_code: 'CUS000099',
     });
-    jest.spyOn(Math, 'random').mockReturnValue(0.123456);
     const useCase = new GenerateCustomerCodeUseCase(
       customersRepository as never,
     );
 
-    await expect(useCase.execute()).rejects.toBeInstanceOf(BadRequestError);
-    expect(customersRepository.findByCustomerCode).toHaveBeenCalledTimes(5);
+    await expect(useCase.generateCustomerCodeBatch(3)).resolves.toEqual([
+      'CUS000100',
+      'CUS000101',
+      'CUS000102',
+    ]);
+  });
+
+  it('keeps execute as a compatibility alias for single code generation', async () => {
+    const customersRepository = createCustomersRepository();
+    customersRepository.findLastCustomerCode.mockResolvedValue({
+      customer_code: 'CUS000001',
+    });
+    const useCase = new GenerateCustomerCodeUseCase(
+      customersRepository as never,
+    );
+
+    await expect(useCase.execute()).resolves.toBe('CUS000002');
+  });
+
+  it('starts a new sequential range when the last matching code is legacy format', async () => {
+    const customersRepository = createCustomersRepository();
+    customersRepository.findLastCustomerCode.mockResolvedValue({
+      customer_code: 'CUS-2026-ABCD',
+    });
+    const useCase = new GenerateCustomerCodeUseCase(
+      customersRepository as never,
+    );
+
+    await expect(useCase.generateCustomerCode()).resolves.toBe('CUS000001');
   });
 });

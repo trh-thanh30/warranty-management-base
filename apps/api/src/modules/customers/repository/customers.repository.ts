@@ -28,6 +28,18 @@ export class CustomersRepository {
     });
   }
 
+  findLastCustomerCode(prefix: string) {
+    return this.prismaService.customer.findFirst({
+      where: {
+        customer_code: {
+          startsWith: prefix,
+        },
+      },
+      orderBy: { customer_code: 'desc' },
+      select: { customer_code: true },
+    });
+  }
+
   findByPhone(phone: string, excludeId?: string) {
     return this.prismaService.customer.findFirst({
       where: {
