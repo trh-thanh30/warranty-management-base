@@ -11,8 +11,8 @@ import {
   CustomerFormCard,
   CustomerFormSkeleton,
 } from "./components/customer-form-card";
-import { useCustomerDetail } from "./use-customer-detail";
-import { useCustomerFormWorkflow } from "./use-customer-form-workflow";
+import { useCustomerDetail } from "./hooks/use-customer-detail";
+import { useCustomerFormWorkflow } from "./hooks/use-customer-form-workflow";
 
 type CustomerFormViewProps =
   | {

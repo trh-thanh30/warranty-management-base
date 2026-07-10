@@ -1,24 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
 import type { ReactNode } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useForm, type UseFormSetError } from "react-hook-form";
-import {
-  HttpClientError,
-  type CreateCustomerBody,
-  type CustomerSummary,
-  type UpdateCustomerBody,
-} from "@repo/shared";
+import type { CustomerSummary } from "@repo/shared";
 import { Button, Input, Label, Textarea } from "@repo/ui";
-import { useToast } from "@/src/hooks/use-toast";
-import {
-  customerFormSchema,
-  type CustomerFormValues,
-} from "../customers.types";
-import { useCreateCustomer, useUpdateCustomer } from "../use-customers";
+import { useCustomerForm } from "../hooks/use-customer-form";
 
 type CustomerFormProps = {
   customer: CustomerSummary | null;
@@ -32,54 +19,11 @@ export function CustomerForm({
   onSaved,
 }: CustomerFormProps) {
   const t = useTranslations("Customers");
-  const toast = useToast();
-  const creating = !customer;
-  const createCustomer = useCreateCustomer();
-  const updateCustomer = useUpdateCustomer(customer?.id ?? null);
-  const {
-    formState: { errors, isSubmitting },
-    handleSubmit,
-    register,
-    reset,
-    setError,
-  } = useForm<CustomerFormValues>({
-    resolver: zodResolver(customerFormSchema),
-    defaultValues: getDefaultValues(null),
-  });
-
-  useEffect(() => {
-    reset(getDefaultValues(customer));
-  }, [customer, reset]);
-
-  async function submit(values: CustomerFormValues) {
-    try {
-      if (creating) {
-        await createCustomer.mutateAsync(toCreateCustomerBody(values));
-        toast.success(t("created"));
-        onSaved();
-        return;
-      }
-
-      await updateCustomer.mutateAsync(toUpdateCustomerBody(values));
-      toast.success(t("updated"));
-      onSaved();
-    } catch (error) {
-      const handledMessage = handleCustomerSaveError(error, setError, t);
-      if (handledMessage) {
-        toast.error(handledMessage);
-        return;
-      }
-
-      const message =
-        error instanceof HttpClientError ? error.message : t("saveError");
-
-      setError("root", { message });
-      toast.error(message);
-    }
-  }
+  const { creating, errors, isSubmitting, onSubmit, register } =
+    useCustomerForm({ customer, onSaved });
 
   return (
-    <form className="space-y-6" noValidate onSubmit={handleSubmit(submit)}>
+    <form className="space-y-6" noValidate onSubmit={onSubmit}>
       {errors.root?.message ? (
         <div
           className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300"
@@ -188,77 +132,6 @@ export function CustomerForm({
       </div>
     </form>
   );
-}
-
-function getDefaultValues(
-  customer: CustomerSummary | null,
-): CustomerFormValues {
-  return {
-    address: customer?.address ?? "",
-    customerCode: customer?.customerCode ?? "",
-    email: customer?.email ?? "",
-    fullName: customer?.fullName ?? "",
-    phone: customer?.phone ?? "",
-  };
-}
-
-function toCreateCustomerBody(values: CustomerFormValues): CreateCustomerBody {
-  return {
-    address: toRequiredValue(values.address),
-    customerCode: toOptionalValue(values.customerCode)?.toUpperCase(),
-    email: toRequiredValue(values.email),
-    fullName: values.fullName.trim(),
-    phone: toRequiredValue(values.phone),
-  };
-}
-
-function toUpdateCustomerBody(values: CustomerFormValues): UpdateCustomerBody {
-  return {
-    address: toRequiredValue(values.address),
-    email: toRequiredValue(values.email),
-    fullName: values.fullName.trim(),
-    phone: toRequiredValue(values.phone),
-  };
-}
-
-function toOptionalValue(value: string) {
-  const trimmed = value.trim();
-  return trimmed || undefined;
-}
-
-function toRequiredValue(value: string) {
-  const trimmed = value.trim();
-  return trimmed;
-}
-
-function handleCustomerSaveError(
-  error: unknown,
-  setError: UseFormSetError<CustomerFormValues>,
-  t: (key: string) => string,
-) {
-  if (!(error instanceof HttpClientError)) {
-    return null;
-  }
-
-  if (error.message === "Customer code already exists") {
-    const message = t("duplicateCustomerCode");
-    setError("customerCode", { message });
-    return message;
-  }
-
-  if (error.message === "Customer phone already exists") {
-    const message = t("duplicatePhone");
-    setError("phone", { message });
-    return message;
-  }
-
-  if (error.message === "Customer email already exists") {
-    const message = t("duplicateEmail");
-    setError("email", { message });
-    return message;
-  }
-
-  return null;
 }
 
 function formatFieldError(

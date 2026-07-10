@@ -8,7 +8,7 @@ import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
 import { CustomersDirectoryCard } from "./components/customers-directory-card";
-import { useCustomersDirectory } from "./use-customers-directory";
+import { useCustomersDirectory } from "./hooks/use-customers-directory";
 
 export function CustomersView() {
   const t = useTranslations("Customers");
