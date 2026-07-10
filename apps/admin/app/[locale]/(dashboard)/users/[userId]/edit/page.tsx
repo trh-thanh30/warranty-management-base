@@ -1,4 +1,4 @@
-import { StaffAccountFormView } from "@/src/views/users/staff-account-form.view";
+import { StaffAccountFormView } from "@/src/views/staff/staff-account-form.view";
 
 type EditUserPageProps = {
   params: Promise<{

@@ -1,5 +1,5 @@
-import { UsersView } from "@/src/views/users/users.view";
+import { StaffView } from "@/src/views/staff/staff.view";
 
 export default function UsersPage() {
-  return <UsersView />;
+  return <StaffView />;
 }
