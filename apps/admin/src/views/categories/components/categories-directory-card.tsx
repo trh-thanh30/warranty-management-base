@@ -26,10 +26,13 @@ import type {
 import { CategoriesTable } from "./categories-table";
 
 type CategoriesDirectoryCardProps = {
+  canCreate: boolean;
   data?: PaginatedResponse<CategoryResponse>;
   isError: boolean;
   isLoading: boolean;
   onClearFilters: () => void;
+  onCreate: () => void;
+  onEdit: (category: CategoryResponse) => void;
   onPageChange: (page: number) => void;
   onRetry: () => void;
   onSearchChange: (search: string) => void;
@@ -41,10 +44,13 @@ type CategoriesDirectoryCardProps = {
 };
 
 export function CategoriesDirectoryCard({
+  canCreate,
   data,
   isError,
   isLoading,
   onClearFilters,
+  onCreate,
+  onEdit,
   onPageChange,
   onRetry,
   onSearchChange,
@@ -79,10 +85,13 @@ export function CategoriesDirectoryCard({
       <CardContent className="px-3 sm:px-6">
         <CategoriesDirectoryContent
           data={data}
+          canCreate={canCreate}
           hasFilters={hasFilters}
           isError={isError}
           isLoading={isLoading}
           onClearFilters={onClearFilters}
+          onCreate={onCreate}
+          onEdit={onEdit}
           onPageChange={onPageChange}
           onRetry={onRetry}
         />
@@ -156,18 +165,24 @@ function CategoriesDirectoryFilters({
 
 function CategoriesDirectoryContent({
   data,
+  canCreate,
   hasFilters,
   isError,
   isLoading,
   onClearFilters,
+  onCreate,
+  onEdit,
   onPageChange,
   onRetry,
 }: Pick<
   CategoriesDirectoryCardProps,
   "data" | "isError" | "isLoading" | "onPageChange" | "onRetry"
 > & {
+  canCreate: CategoriesDirectoryCardProps["canCreate"];
   hasFilters: boolean;
   onClearFilters: CategoriesDirectoryCardProps["onClearFilters"];
+  onCreate: CategoriesDirectoryCardProps["onCreate"];
+  onEdit: CategoriesDirectoryCardProps["onEdit"];
 }) {
   const t = useTranslations("Categories");
 
@@ -193,7 +208,7 @@ function CategoriesDirectoryContent({
   if (data && data.items.length > 0) {
     return (
       <>
-        <CategoriesTable items={data.items} />
+        <CategoriesTable items={data.items} onEdit={onEdit} />
         <CategoriesPagination data={data} onPageChange={onPageChange} />
       </>
     );
@@ -206,6 +221,8 @@ function CategoriesDirectoryContent({
           <Button onClick={onClearFilters} variant="secondary">
             {t("clearFilters")}
           </Button>
+        ) : canCreate ? (
+          <Button onClick={onCreate}>{t("create")}</Button>
         ) : null
       }
       description={

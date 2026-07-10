@@ -1,9 +1,15 @@
 "use client";
 
-import { ImageIcon } from "lucide-react";
+import { ImageIcon, MoreHorizontal, Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { CategoryResponse } from "@repo/shared";
+import { PERMISSIONS } from "@repo/shared/constants";
 import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   Table,
   TableBody,
   TableCell,
@@ -11,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui";
+import { usePermissions } from "@/src/hooks/use-permissions";
 import {
   formatCategoryCreatedAt,
   getCategoryDisplayCode,
@@ -22,9 +29,10 @@ import { MetadataSummary } from "./metadata-summary";
 
 type CategoriesTableProps = {
   items: CategoryResponse[];
+  onEdit: (category: CategoryResponse) => void;
 };
 
-export function CategoriesTable({ items }: CategoriesTableProps) {
+export function CategoriesTable({ items, onEdit }: CategoriesTableProps) {
   const t = useTranslations("Categories");
 
   return (
@@ -35,6 +43,7 @@ export function CategoriesTable({ items }: CategoriesTableProps) {
             category={category}
             items={items}
             key={category.id}
+            onEdit={onEdit}
           />
         ))}
       </div>
@@ -54,6 +63,7 @@ export function CategoriesTable({ items }: CategoriesTableProps) {
               <TableHead>{t("status")}</TableHead>
               <TableHead>{t("metadata")}</TableHead>
               <TableHead>{t("createdAt")}</TableHead>
+              <TableHead aria-label={t("actions")} />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -62,6 +72,7 @@ export function CategoriesTable({ items }: CategoriesTableProps) {
                 category={category}
                 items={items}
                 key={category.id}
+                onEdit={onEdit}
               />
             ))}
           </TableBody>
@@ -74,9 +85,11 @@ export function CategoriesTable({ items }: CategoriesTableProps) {
 function CategoryTableRow({
   category,
   items,
+  onEdit,
 }: {
   category: CategoryResponse;
   items: CategoryResponse[];
+  onEdit: CategoriesTableProps["onEdit"];
 }) {
   const parentLabel = getCategoryParentLabel(category, items);
 
@@ -114,6 +127,9 @@ function CategoryTableRow({
         <MetadataSummary metadata={category.metadata} />
       </TableCell>
       <TableCell>{formatCategoryCreatedAt(category.createdAt)}</TableCell>
+      <TableCell className="text-right">
+        <CategoryActionsMenu category={category} onEdit={onEdit} />
+      </TableCell>
     </TableRow>
   );
 }
@@ -121,9 +137,11 @@ function CategoryTableRow({
 function CategoryMobileCard({
   category,
   items,
+  onEdit,
 }: {
   category: CategoryResponse;
   items: CategoryResponse[];
+  onEdit: CategoriesTableProps["onEdit"];
 }) {
   const t = useTranslations("Categories");
   const parentLabel = getCategoryParentLabel(category, items);
@@ -139,9 +157,12 @@ function CategoryMobileCard({
             {category.slug}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <CategoryTypeBadge type={category.type} />
-          <CategoryStatusBadge isActive={category.isActive} />
+        <div className="flex items-start gap-2">
+          <div className="flex flex-wrap gap-2">
+            <CategoryTypeBadge type={category.type} />
+            <CategoryStatusBadge isActive={category.isActive} />
+          </div>
+          <CategoryActionsMenu category={category} onEdit={onEdit} />
         </div>
       </div>
 
@@ -203,5 +224,42 @@ function ImageUrlCell({ imageUrl }: { imageUrl: string | null }) {
       <ImageIcon className="size-4 shrink-0" />
       <span className="truncate">{imageUrl}</span>
     </span>
+  );
+}
+
+function CategoryActionsMenu({
+  category,
+  onEdit,
+}: {
+  category: CategoryResponse;
+  onEdit: CategoriesTableProps["onEdit"];
+}) {
+  const t = useTranslations("Categories");
+  const { hasPermission } = usePermissions();
+  const canEdit = hasPermission(PERMISSIONS.CATEGORY_UPDATE);
+
+  if (!canEdit) {
+    return null;
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          aria-label={t("openActions", { name: category.name })}
+          className="size-10 md:size-9"
+          size="icon"
+          variant="ghost"
+        >
+          <MoreHorizontal className="size-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onSelect={() => onEdit(category)}>
+          <Pencil className="mr-2 size-4" />
+          {t("edit")}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { useDebounce } from "@repo/hooks";
+import type { CategoryResponse } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { usePermissions } from "@/src/hooks/use-permissions";
+import { useRouter } from "@/src/i18n/navigation";
 import { CATEGORIES_PAGE_SIZE } from "../categories.constants";
 import type {
   CategoryStatusFilter,
@@ -13,6 +15,7 @@ import type {
 import { useCategories } from "./use-categories";
 
 export function useCategoriesDirectory() {
+  const router = useRouter();
   const { user: currentUser } = useAuth();
   const { hasPermission } = usePermissions();
   const [page, setPage] = useState(1);
@@ -21,6 +24,7 @@ export function useCategoriesDirectory() {
   const [status, setStatus] = useState<CategoryStatusFilter>("ALL");
   const debouncedSearch = useDebounce(search.trim(), 300);
   const canViewCategories = hasPermission(PERMISSIONS.CATEGORY_VIEW);
+  const canCreateCategories = hasPermission(PERMISSIONS.CATEGORY_CREATE);
   const categoriesQuery = useCategories(
     {
       isActive: toIsActiveQuery(status),
@@ -58,9 +62,20 @@ export function useCategoriesDirectory() {
     setPage(1);
   }
 
+  function openCreate() {
+    router.push("/categories/create");
+  }
+
+  function openEdit(category: CategoryResponse) {
+    router.push(`/categories/${category.id}/edit`);
+  }
+
   return {
+    canCreateCategories,
     categoriesQuery,
     clearFilters,
+    openCreate,
+    openEdit,
     search,
     setPage,
     status,
