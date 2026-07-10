@@ -8,6 +8,7 @@ import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
 import { CategoriesDirectoryCard } from "./components/categories-directory-card";
+import { DeactivateCategoryDialog } from "./components/deactivate-category-dialog";
 import { useCategoriesDirectory } from "./hooks/use-categories-directory";
 
 export function CategoriesView() {
@@ -15,8 +16,13 @@ export function CategoriesView() {
   const {
     canCreateCategories,
     categoriesQuery,
+    categoryToDeactivate,
     clearFilters,
+    closeDeactivate,
+    confirmDeactivate,
+    isDeactivating,
     openCreate,
+    openDeactivate,
     openEdit,
     search,
     setPage,
@@ -53,6 +59,7 @@ export function CategoriesView() {
           isLoading={categoriesQuery.isLoading}
           onClearFilters={clearFilters}
           onCreate={openCreate}
+          onDeactivate={openDeactivate}
           onEdit={openEdit}
           onPageChange={setPage}
           onRetry={() => {
@@ -64,6 +71,18 @@ export function CategoriesView() {
           search={search}
           status={status}
           type={type}
+        />
+
+        <DeactivateCategoryDialog
+          category={categoryToDeactivate}
+          isDeactivating={isDeactivating}
+          onConfirm={() => {
+            void confirmDeactivate();
+          }}
+          onOpenChange={(open) => {
+            if (!open) closeDeactivate();
+          }}
+          open={Boolean(categoryToDeactivate)}
         />
       </div>
     </PermissionGuard>

@@ -1,30 +1,37 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useDebounce } from "@repo/hooks";
 import type { CategoryResponse } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { usePermissions } from "@/src/hooks/use-permissions";
+import { useToast } from "@/src/hooks/use-toast";
 import { useRouter } from "@/src/i18n/navigation";
 import { CATEGORIES_PAGE_SIZE } from "../categories.constants";
 import type {
   CategoryStatusFilter,
   CategoryTypeFilter,
 } from "../categories.types";
-import { useCategories } from "./use-categories";
+import { useCategories, useDeactivateCategory } from "./use-categories";
 
 export function useCategoriesDirectory() {
+  const t = useTranslations("Categories");
   const router = useRouter();
+  const toast = useToast();
   const { user: currentUser } = useAuth();
   const { hasPermission } = usePermissions();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [type, setType] = useState<CategoryTypeFilter>("ALL");
   const [status, setStatus] = useState<CategoryStatusFilter>("ALL");
+  const [categoryToDeactivate, setCategoryToDeactivate] =
+    useState<CategoryResponse | null>(null);
   const debouncedSearch = useDebounce(search.trim(), 300);
   const canViewCategories = hasPermission(PERMISSIONS.CATEGORY_VIEW);
   const canCreateCategories = hasPermission(PERMISSIONS.CATEGORY_CREATE);
+  const deactivateCategory = useDeactivateCategory();
   const categoriesQuery = useCategories(
     {
       isActive: toIsActiveQuery(status),
@@ -70,11 +77,36 @@ export function useCategoriesDirectory() {
     router.push(`/categories/${category.id}/edit`);
   }
 
+  function openDeactivate(category: CategoryResponse) {
+    setCategoryToDeactivate(category);
+  }
+
+  function closeDeactivate() {
+    setCategoryToDeactivate(null);
+  }
+
+  async function confirmDeactivate() {
+    if (!categoryToDeactivate) return;
+
+    try {
+      await deactivateCategory.mutateAsync(categoryToDeactivate.id);
+      toast.success(t("deactivated"));
+      setCategoryToDeactivate(null);
+    } catch {
+      toast.error(t("deactivateError"));
+    }
+  }
+
   return {
     canCreateCategories,
     categoriesQuery,
+    categoryToDeactivate,
     clearFilters,
+    closeDeactivate,
+    confirmDeactivate,
+    isDeactivating: deactivateCategory.isPending,
     openCreate,
+    openDeactivate,
     openEdit,
     search,
     setPage,

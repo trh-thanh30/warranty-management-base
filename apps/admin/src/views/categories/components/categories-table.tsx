@@ -1,6 +1,6 @@
 "use client";
 
-import { ImageIcon, MoreHorizontal, Pencil } from "lucide-react";
+import { Ban, ImageIcon, MoreHorizontal, Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { CategoryResponse } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
@@ -9,6 +9,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
   Table,
   TableBody,
@@ -29,10 +30,15 @@ import { MetadataSummary } from "./metadata-summary";
 
 type CategoriesTableProps = {
   items: CategoryResponse[];
+  onDeactivate: (category: CategoryResponse) => void;
   onEdit: (category: CategoryResponse) => void;
 };
 
-export function CategoriesTable({ items, onEdit }: CategoriesTableProps) {
+export function CategoriesTable({
+  items,
+  onDeactivate,
+  onEdit,
+}: CategoriesTableProps) {
   const t = useTranslations("Categories");
 
   return (
@@ -43,6 +49,7 @@ export function CategoriesTable({ items, onEdit }: CategoriesTableProps) {
             category={category}
             items={items}
             key={category.id}
+            onDeactivate={onDeactivate}
             onEdit={onEdit}
           />
         ))}
@@ -72,6 +79,7 @@ export function CategoriesTable({ items, onEdit }: CategoriesTableProps) {
                 category={category}
                 items={items}
                 key={category.id}
+                onDeactivate={onDeactivate}
                 onEdit={onEdit}
               />
             ))}
@@ -85,10 +93,12 @@ export function CategoriesTable({ items, onEdit }: CategoriesTableProps) {
 function CategoryTableRow({
   category,
   items,
+  onDeactivate,
   onEdit,
 }: {
   category: CategoryResponse;
   items: CategoryResponse[];
+  onDeactivate: CategoriesTableProps["onDeactivate"];
   onEdit: CategoriesTableProps["onEdit"];
 }) {
   const parentLabel = getCategoryParentLabel(category, items);
@@ -128,7 +138,11 @@ function CategoryTableRow({
       </TableCell>
       <TableCell>{formatCategoryCreatedAt(category.createdAt)}</TableCell>
       <TableCell className="text-right">
-        <CategoryActionsMenu category={category} onEdit={onEdit} />
+        <CategoryActionsMenu
+          category={category}
+          onDeactivate={onDeactivate}
+          onEdit={onEdit}
+        />
       </TableCell>
     </TableRow>
   );
@@ -137,10 +151,12 @@ function CategoryTableRow({
 function CategoryMobileCard({
   category,
   items,
+  onDeactivate,
   onEdit,
 }: {
   category: CategoryResponse;
   items: CategoryResponse[];
+  onDeactivate: CategoriesTableProps["onDeactivate"];
   onEdit: CategoriesTableProps["onEdit"];
 }) {
   const t = useTranslations("Categories");
@@ -162,7 +178,11 @@ function CategoryMobileCard({
             <CategoryTypeBadge type={category.type} />
             <CategoryStatusBadge isActive={category.isActive} />
           </div>
-          <CategoryActionsMenu category={category} onEdit={onEdit} />
+          <CategoryActionsMenu
+            category={category}
+            onDeactivate={onDeactivate}
+            onEdit={onEdit}
+          />
         </div>
       </div>
 
@@ -229,16 +249,19 @@ function ImageUrlCell({ imageUrl }: { imageUrl: string | null }) {
 
 function CategoryActionsMenu({
   category,
+  onDeactivate,
   onEdit,
 }: {
   category: CategoryResponse;
+  onDeactivate: CategoriesTableProps["onDeactivate"];
   onEdit: CategoriesTableProps["onEdit"];
 }) {
   const t = useTranslations("Categories");
   const { hasPermission } = usePermissions();
   const canEdit = hasPermission(PERMISSIONS.CATEGORY_UPDATE);
+  const canDelete = hasPermission(PERMISSIONS.CATEGORY_DELETE);
 
-  if (!canEdit) {
+  if (!canEdit && !canDelete) {
     return null;
   }
 
@@ -255,10 +278,24 @@ function CategoryActionsMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={() => onEdit(category)}>
-          <Pencil className="mr-2 size-4" />
-          {t("edit")}
-        </DropdownMenuItem>
+        {canEdit ? (
+          <DropdownMenuItem onSelect={() => onEdit(category)}>
+            <Pencil className="mr-2 size-4" />
+            {t("edit")}
+          </DropdownMenuItem>
+        ) : null}
+        {canDelete && category.isActive ? (
+          <>
+            {canEdit ? <DropdownMenuSeparator /> : null}
+            <DropdownMenuItem
+              className="text-red-600 focus:text-red-700 dark:text-red-400"
+              onSelect={() => onDeactivate(category)}
+            >
+              <Ban className="mr-2 size-4" />
+              {t("deactivate")}
+            </DropdownMenuItem>
+          </>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -32,6 +32,7 @@ type CategoriesDirectoryCardProps = {
   isLoading: boolean;
   onClearFilters: () => void;
   onCreate: () => void;
+  onDeactivate: (category: CategoryResponse) => void;
   onEdit: (category: CategoryResponse) => void;
   onPageChange: (page: number) => void;
   onRetry: () => void;
@@ -50,6 +51,7 @@ export function CategoriesDirectoryCard({
   isLoading,
   onClearFilters,
   onCreate,
+  onDeactivate,
   onEdit,
   onPageChange,
   onRetry,
@@ -91,6 +93,7 @@ export function CategoriesDirectoryCard({
           isLoading={isLoading}
           onClearFilters={onClearFilters}
           onCreate={onCreate}
+          onDeactivate={onDeactivate}
           onEdit={onEdit}
           onPageChange={onPageChange}
           onRetry={onRetry}
@@ -171,6 +174,7 @@ function CategoriesDirectoryContent({
   isLoading,
   onClearFilters,
   onCreate,
+  onDeactivate,
   onEdit,
   onPageChange,
   onRetry,
@@ -182,6 +186,7 @@ function CategoriesDirectoryContent({
   hasFilters: boolean;
   onClearFilters: CategoriesDirectoryCardProps["onClearFilters"];
   onCreate: CategoriesDirectoryCardProps["onCreate"];
+  onDeactivate: CategoriesDirectoryCardProps["onDeactivate"];
   onEdit: CategoriesDirectoryCardProps["onEdit"];
 }) {
   const t = useTranslations("Categories");
@@ -208,7 +213,11 @@ function CategoriesDirectoryContent({
   if (data && data.items.length > 0) {
     return (
       <>
-        <CategoriesTable items={data.items} onEdit={onEdit} />
+        <CategoriesTable
+          items={data.items}
+          onDeactivate={onDeactivate}
+          onEdit={onEdit}
+        />
         <CategoriesPagination data={data} onPageChange={onPageChange} />
       </>
     );
