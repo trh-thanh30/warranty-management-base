@@ -1,0 +1,52 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+import { PERMISSIONS } from "@repo/shared/constants";
+import { PageHeader } from "@/src/components/common/page-header";
+import { PermissionGuard } from "@/src/components/permission-guard";
+import { CategoriesDirectoryCard } from "./components/categories-directory-card";
+import { useCategoriesDirectory } from "./hooks/use-categories-directory";
+
+export function CategoriesView() {
+  const t = useTranslations("Categories");
+  const {
+    categoriesQuery,
+    clearFilters,
+    search,
+    setPage,
+    status,
+    type,
+    updateSearch,
+    updateStatus,
+    updateType,
+  } = useCategoriesDirectory();
+
+  return (
+    <PermissionGuard permissions={[PERMISSIONS.CATEGORY_VIEW]}>
+      <div className="space-y-6">
+        <PageHeader
+          description={t("description")}
+          eyebrow={t("eyebrow")}
+          title={t("title")}
+        />
+
+        <CategoriesDirectoryCard
+          data={categoriesQuery.data}
+          isError={categoriesQuery.isError}
+          isLoading={categoriesQuery.isLoading}
+          onClearFilters={clearFilters}
+          onPageChange={setPage}
+          onRetry={() => {
+            void categoriesQuery.refetch();
+          }}
+          onSearchChange={updateSearch}
+          onStatusChange={updateStatus}
+          onTypeChange={updateType}
+          search={search}
+          status={status}
+          type={type}
+        />
+      </div>
+    </PermissionGuard>
+  );
+}

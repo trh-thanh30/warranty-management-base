@@ -23,6 +23,7 @@
       "helpCenter": "Trung tâm trợ giúp",
       "overview": "Tổng quan",
       "customers": "Khách hàng",
+      "categories": "Danh mục",
       "profile": "Hồ sơ",
       "signOut": "Đăng xuất"
     }
@@ -296,6 +297,53 @@
     "phoneLength": "Số điện thoại phải từ 6 đến 32 ký tự.",
     "emailRequired": "Nhập email khách hàng.",
     "emailInvalid": "Nhập email hợp lệ."
+  },
+  "Categories": {
+    "title": "Quản lý danh mục",
+    "eyebrow": "Danh mục động",
+    "description": "Quản lý danh mục dùng để phân nhóm sản phẩm, nội dung, tài sản và phân loại lỗi bảo hành.",
+    "directoryTitle": "Danh sách danh mục",
+    "directoryDescription": "Tìm kiếm và lọc danh mục động theo loại, trạng thái, mã, slug hoặc tên.",
+    "searchLabel": "Tìm danh mục",
+    "searchPlaceholder": "Tìm theo mã, slug hoặc tên",
+    "typeFilter": "Lọc theo loại",
+    "statusFilter": "Lọc theo trạng thái",
+    "allTypes": "Tất cả loại",
+    "type": "Loại",
+    "code": "Mã",
+    "slug": "Slug",
+    "name": "Tên",
+    "parent": "Danh mục cha",
+    "icon": "Biểu tượng",
+    "imageUrl": "URL hình ảnh",
+    "order": "Thứ tự",
+    "status": "Trạng thái",
+    "metadata": "Metadata",
+    "createdAt": "Ngày tạo",
+    "active": "Đang hoạt động",
+    "inactive": "Ngưng hoạt động",
+    "tryAgain": "Thử lại",
+    "loadErrorTitle": "Không tải được danh sách danh mục",
+    "loadErrorDescription": "Kiểm tra kết nối API hoặc quyền tài khoản rồi thử lại.",
+    "emptyTitle": "Chưa có danh mục",
+    "emptyDescription": "Tạo danh mục trước khi gán sản phẩm hoặc nội dung dùng taxonomy.",
+    "emptyFilteredTitle": "Không có danh mục phù hợp",
+    "emptyFilteredDescription": "Thử từ khóa khác hoặc xóa bộ lọc.",
+    "clearFilters": "Xóa bộ lọc",
+    "pagination": "Trang {page}/{totalPages} - {total} danh mục",
+    "previous": "Trước",
+    "next": "Sau",
+    "types": {
+      "PRODUCT": "Sản phẩm",
+      "CONTENT_PAGE": "Trang nội dung",
+      "ASSET": "Tài sản",
+      "WARRANTY_CLAIM_ISSUE": "Nhóm lỗi bảo hành"
+    },
+    "statuses": {
+      "ALL": "Tất cả trạng thái",
+      "ACTIVE": "Đang hoạt động",
+      "INACTIVE": "Ngưng hoạt động"
+    }
   },
   "Home": {
     "redirectLabel": "Chuyển đến bảng điều khiển"

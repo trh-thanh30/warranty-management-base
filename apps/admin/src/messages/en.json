@@ -23,6 +23,7 @@
       "helpCenter": "Help Center",
       "overview": "Overview",
       "customers": "Customers",
+      "categories": "Categories",
       "profile": "Profile",
       "signOut": "Sign out"
     }
@@ -296,6 +297,53 @@
     "phoneLength": "Phone must be 6 to 32 characters.",
     "emailRequired": "Enter the customer's email address.",
     "emailInvalid": "Enter a valid email address."
+  },
+  "Categories": {
+    "title": "Category management",
+    "eyebrow": "Dynamic taxonomy",
+    "description": "Manage category records used for product grouping, content, assets, and warranty claim classification.",
+    "directoryTitle": "Category directory",
+    "directoryDescription": "Search and filter dynamic categories by type, status, code, slug, or name.",
+    "searchLabel": "Search categories",
+    "searchPlaceholder": "Search by code, slug, or name",
+    "typeFilter": "Filter by type",
+    "statusFilter": "Filter by status",
+    "allTypes": "All types",
+    "type": "Type",
+    "code": "Code",
+    "slug": "Slug",
+    "name": "Name",
+    "parent": "Parent",
+    "icon": "Icon",
+    "imageUrl": "Image URL",
+    "order": "Order",
+    "status": "Status",
+    "metadata": "Metadata",
+    "createdAt": "Created",
+    "active": "Active",
+    "inactive": "Inactive",
+    "tryAgain": "Try again",
+    "loadErrorTitle": "Unable to load categories",
+    "loadErrorDescription": "Check the API connection or your account permissions and try again.",
+    "emptyTitle": "No categories yet",
+    "emptyDescription": "Create categories before assigning products or taxonomy-driven content.",
+    "emptyFilteredTitle": "No categories match these filters",
+    "emptyFilteredDescription": "Try another keyword or clear the filters.",
+    "clearFilters": "Clear filters",
+    "pagination": "Page {page} of {totalPages} - {total} categories",
+    "previous": "Previous",
+    "next": "Next",
+    "types": {
+      "PRODUCT": "Product",
+      "CONTENT_PAGE": "Content page",
+      "ASSET": "Asset",
+      "WARRANTY_CLAIM_ISSUE": "Warranty claim issue"
+    },
+    "statuses": {
+      "ALL": "All statuses",
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive"
+    }
   },
   "Home": {
     "redirectLabel": "Go to dashboard"
