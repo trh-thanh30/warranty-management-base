@@ -2,7 +2,7 @@ import { Customer } from '@prisma/client';
 
 export type CustomerResponse = {
   id: string;
-  userId: string;
+  userId: string | null;
   customerCode: string;
   fullName: string;
   phone: string | null;

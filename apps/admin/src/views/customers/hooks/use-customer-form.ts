@@ -1,0 +1,141 @@
+"use client";
+
+import { useEffect } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
+import { useForm, type UseFormSetError } from "react-hook-form";
+import {
+  HttpClientError,
+  type CreateCustomerBody,
+  type CustomerSummary,
+  type UpdateCustomerBody,
+} from "@repo/shared";
+import { useToast } from "@/src/hooks/use-toast";
+import {
+  customerFormSchema,
+  type CustomerFormValues,
+} from "../customers.types";
+import { useCreateCustomer, useUpdateCustomer } from "./use-customers";
+
+export function useCustomerForm({
+  customer,
+  onSaved,
+}: {
+  customer: CustomerSummary | null;
+  onSaved: () => void;
+}) {
+  const t = useTranslations("Customers");
+  const toast = useToast();
+  const creating = !customer;
+  const createCustomer = useCreateCustomer();
+  const updateCustomer = useUpdateCustomer(customer?.id ?? null);
+  const {
+    formState: { errors, isSubmitting },
+    handleSubmit,
+    register,
+    reset,
+    setError,
+  } = useForm<CustomerFormValues>({
+    resolver: zodResolver(customerFormSchema),
+    defaultValues: getDefaultValues(null),
+  });
+
+  useEffect(() => {
+    reset(getDefaultValues(customer));
+  }, [customer, reset]);
+
+  async function submit(values: CustomerFormValues) {
+    try {
+      if (creating) {
+        await createCustomer.mutateAsync(toCreateCustomerBody(values));
+        toast.success(t("created"));
+        onSaved();
+        return;
+      }
+
+      await updateCustomer.mutateAsync(toUpdateCustomerBody(values));
+      toast.success(t("updated"));
+      onSaved();
+    } catch (error) {
+      const handledMessage = handleCustomerSaveError(error, setError, t);
+      if (handledMessage) {
+        toast.error(handledMessage);
+        return;
+      }
+
+      const message =
+        error instanceof HttpClientError ? error.message : t("saveError");
+      setError("root", { message });
+      toast.error(message);
+    }
+  }
+
+  return {
+    creating,
+    errors,
+    isSubmitting,
+    onSubmit: handleSubmit(submit),
+    register,
+  };
+}
+
+function getDefaultValues(
+  customer: CustomerSummary | null,
+): CustomerFormValues {
+  return {
+    address: customer?.address ?? "",
+    customerCode: customer?.customerCode ?? "",
+    email: customer?.email ?? "",
+    fullName: customer?.fullName ?? "",
+    phone: customer?.phone ?? "",
+  };
+}
+
+function toCreateCustomerBody(values: CustomerFormValues): CreateCustomerBody {
+  return {
+    address: toRequiredValue(values.address),
+    customerCode: toOptionalValue(values.customerCode)?.toUpperCase(),
+    email: toRequiredValue(values.email),
+    fullName: values.fullName.trim(),
+    phone: toRequiredValue(values.phone),
+  };
+}
+
+function toUpdateCustomerBody(values: CustomerFormValues): UpdateCustomerBody {
+  return {
+    address: toRequiredValue(values.address),
+    email: toRequiredValue(values.email),
+    fullName: values.fullName.trim(),
+    phone: toRequiredValue(values.phone),
+  };
+}
+
+function toOptionalValue(value: string) {
+  const trimmed = value.trim();
+  return trimmed || undefined;
+}
+
+function toRequiredValue(value: string) {
+  return value.trim();
+}
+
+function handleCustomerSaveError(
+  error: unknown,
+  setError: UseFormSetError<CustomerFormValues>,
+  t: (key: string) => string,
+) {
+  if (!(error instanceof HttpClientError)) return null;
+
+  const messages = {
+    "Customer code already exists": ["customerCode", "duplicateCustomerCode"],
+    "Customer phone already exists": ["phone", "duplicatePhone"],
+    "Customer email already exists": ["email", "duplicateEmail"],
+  } as const;
+  const match = messages[error.message as keyof typeof messages];
+  if (!match) return null;
+
+  const [field, translationKey] = match;
+  const message = t(translationKey);
+  setError(field, { message });
+  return message;
+}

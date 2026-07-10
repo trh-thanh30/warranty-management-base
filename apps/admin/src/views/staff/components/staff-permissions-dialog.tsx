@@ -1,12 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   MODERATOR_PERMISSION_GROUPS,
-  ROLE_DEFAULT_PERMISSIONS,
   type PermissionKey,
 } from "@repo/shared/constants";
 import type { UserAccountSummary } from "@repo/shared";
@@ -21,12 +18,8 @@ import {
   Label,
   Skeleton,
 } from "@repo/ui";
-import { usersService } from "@/src/services/users.service";
-import { useToast } from "@/src/hooks/use-toast";
-import {
-  buildModeratorPermissionOverrides,
-  formatPermissionLabel,
-} from "../users.utils";
+import { formatPermissionLabel } from "../staff.utils";
+import { useStaffPermissions } from "../hooks/use-staff-permissions";
 
 type ModeratorPermissionGroup = (typeof MODERATOR_PERMISSION_GROUPS)[number];
 
@@ -42,43 +35,14 @@ export function StaffPermissionsDialog({
   user,
 }: StaffPermissionsDialogProps) {
   const t = useTranslations("Staff");
-  const toast = useToast();
-  const queryClient = useQueryClient();
-  const [selected, setSelected] = useState<Set<PermissionKey>>(new Set());
-  const queryKey = ["staff-permissions", user?.id] as const;
-  const permissionsQuery = useQuery({
-    queryKey,
-    queryFn: () => usersService.getPermissions(user!.id),
-    enabled: open && Boolean(user),
-  });
-  const saveMutation = useMutation({
-    mutationFn: (nextSelected: Set<PermissionKey>) =>
-      usersService.updatePermissions(user!.id, {
-        overrides: buildModeratorPermissionOverrides(nextSelected),
-      }),
-    onSuccess: (result) => {
-      setSelected(new Set(result.effectivePermissions));
-      void queryClient.invalidateQueries({ queryKey });
-      toast.success(t("permissionsSaved"));
-      onOpenChange(false);
-    },
-    onError: () => toast.error(t("permissionsSaveError")),
-  });
-
-  useEffect(() => {
-    if (permissionsQuery.data) {
-      setSelected(new Set(permissionsQuery.data.effectivePermissions));
-    }
-  }, [permissionsQuery.data]);
-
-  function toggle(permission: PermissionKey, checked: boolean) {
-    setSelected((current) => {
-      const next = new Set(current);
-      if (checked) next.add(permission);
-      else next.delete(permission);
-      return next;
-    });
-  }
+  const {
+    isSaving,
+    permissionsQuery,
+    restoreDefaults,
+    save,
+    selected,
+    toggle,
+  } = useStaffPermissions({ open, user, onOpenChange });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -107,11 +71,9 @@ export function StaffPermissionsDialog({
           <PermissionsActions
             canSave={!permissionsQuery.isLoading && !permissionsQuery.isError}
             isLoading={permissionsQuery.isLoading}
-            isSaving={saveMutation.isPending}
-            onRestoreDefaults={() =>
-              setSelected(new Set(ROLE_DEFAULT_PERMISSIONS.moderator))
-            }
-            onSave={() => saveMutation.mutate(selected)}
+            isSaving={isSaving}
+            onRestoreDefaults={restoreDefaults}
+            onSave={save}
           />
         </div>
       </DialogContent>

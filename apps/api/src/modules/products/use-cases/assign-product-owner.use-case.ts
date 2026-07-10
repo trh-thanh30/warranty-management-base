@@ -39,7 +39,7 @@ export class AssignProductOwnerUseCase {
           data: {
             product_id: productId,
             customer_id: customer.id,
-            owner_user_id: customer.user_id,
+            owner_user_id: customer.user_id ?? null,
             purchase_date: dto.purchaseDate ? new Date(dto.purchaseDate) : null,
             activated_at: dto.activatedAt ? new Date(dto.activatedAt) : null,
             is_current_owner: true,

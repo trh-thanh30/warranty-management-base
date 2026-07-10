@@ -84,7 +84,9 @@ export class CreateProductUseCase {
           ? {
               create: {
                 customer: { connect: { id: customer.id } },
-                owner_user: { connect: { id: customer.user_id } },
+                owner_user: customer.user_id
+                  ? { connect: { id: customer.user_id } }
+                  : undefined,
                 purchase_date: purchaseDate,
                 activated_at: activatedAt,
                 is_current_owner: true,

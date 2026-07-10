@@ -122,7 +122,7 @@ Hồ sơ khách hàng mua sản phẩm. Nếu muốn đơn giản, có thể dù
 Trường chính:
 
 - `id`
-- `userId`
+- `userId`: optional, chi co khi customer duoc link voi tai khoan dang nhap.
 - `customerCode`
 - `fullName`
 - `phone`
@@ -165,7 +165,7 @@ Trường chính:
 - `id`
 - `productId`
 - `customerId`
-- `ownerUserId`
+- `ownerUserId`: optional, chi co khi customer da link voi tai khoan dang nhap.
 - `purchaseDate`
 - `activatedAt`
 - `endedAt`

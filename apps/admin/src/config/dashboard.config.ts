@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   TriangleAlert,
   User,
+  UserRound,
   Users,
 } from "lucide-react";
 import type { DashboardConfig } from "./dashboard.types";
@@ -44,6 +45,12 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             icon: Users,
             requiredPermission: PERMISSIONS.USER_VIEW,
             requiredRole: "admin",
+          },
+          {
+            title: t("items.customers"),
+            href: "/customers",
+            icon: UserRound,
+            requiredPermission: PERMISSIONS.CUSTOMER_VIEW,
           },
           {
             title: t("items.chats"),
@@ -99,6 +106,11 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
         href: "/users",
         requiredPermission: PERMISSIONS.USER_VIEW,
         requiredRole: "admin",
+      },
+      {
+        title: t("items.customers"),
+        href: "/customers",
+        requiredPermission: PERMISSIONS.CUSTOMER_VIEW,
       },
       {
         title: t("items.bookings"),

@@ -47,7 +47,7 @@ async function upsertSeedUser(data: SeedUserInput) {
 }
 
 async function upsertCustomer(data: {
-  userId: string;
+  userId?: string | null;
   customerCode: string;
   fullName: string;
   phone?: string;
@@ -84,7 +84,7 @@ async function upsertDemoProduct(data: {
   model: string;
   manufactureYear: number;
   customerId: string;
-  ownerUserId: string;
+  ownerUserId?: string | null;
   purchaseDate: Date;
   durationMonths: number;
   warrantyStatus: warranty_status;
@@ -155,7 +155,7 @@ async function upsertDemoProduct(data: {
     data: {
       product_id: product.id,
       customer_id: data.customerId,
-      owner_user_id: data.ownerUserId,
+      owner_user_id: data.ownerUserId ?? null,
       purchase_date: data.purchaseDate,
       activated_at: data.purchaseDate,
       is_current_owner: true,
@@ -295,6 +295,15 @@ async function main() {
     address: 'Ho Chi Minh City',
   });
 
+  const walkInCustomer = await upsertCustomer({
+    userId: null,
+    customerCode: 'CUS-WALKIN-001',
+    fullName: 'Le Thi Minh',
+    phone: '0900000003',
+    email: 'walkin.customer@example.com',
+    address: 'Da Nang',
+  });
+
   await upsertDemoProduct({
     productCode: 'PRD-2026-CAMRY',
     warrantyCode: 'WM-2026-CAMRYA',
@@ -343,13 +352,33 @@ async function main() {
     warrantyStatus: warranty_status.ACTIVE,
   });
 
+  await upsertDemoProduct({
+    productCode: 'PRD-2026-WALKIN-BATTERY',
+    warrantyCode: 'WM-2026-WALKIN1',
+    serialNumber: 'SN-WALKIN-BATTERY-001',
+    name: 'Genuine Battery Pack',
+    category: product_category.SPARE_PART,
+    brand: 'Toyota',
+    model: 'Battery Plus',
+    manufactureYear: 2026,
+    customerId: walkInCustomer.id,
+    ownerUserId: null,
+    purchaseDate: new Date('2026-07-01T00:00:00.000Z'),
+    durationMonths: 24,
+    warrantyStatus: warranty_status.ACTIVE,
+  });
+
   console.log('Base database seed completed successfully.');
   console.log(`Admin: ${adminUser.email} (${adminUser.role})`);
   console.log(`Moderator: ${moderatorUser.email} (${moderatorUser.role})`);
   console.log(`Customer A: ${customerAUser.email} (${customerAUser.role})`);
   console.log(`Customer B: ${customerBUser.email} (${customerBUser.role})`);
+  console.log(
+    `Walk-in customer: ${walkInCustomer.customer_code} (no login account)`,
+  );
   console.log('Customer A codes: WM-2026-CAMRYA, WM-2026-DASHAA');
   console.log('Customer B code: WM-2026-CIVICB');
+  console.log('Walk-in customer code: WM-2026-WALKIN1');
   console.log('Default password: password123');
 }
 

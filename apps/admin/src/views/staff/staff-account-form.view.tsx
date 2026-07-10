@@ -13,8 +13,8 @@ import {
 } from "./components/staff-account-form-card";
 import { StaffPermissionsDialog } from "./components/staff-permissions-dialog";
 import { TemporaryPasswordDialog } from "./components/temporary-password-dialog";
-import { useStaffAccountDetail } from "./use-staff-account-detail";
-import { useStaffAccountWorkflow } from "./use-staff-account-workflow";
+import { useStaffAccountDetail } from "./hooks/use-staff-account-detail";
+import { useStaffAccountWorkflow } from "./hooks/use-staff-account-workflow";
 
 type StaffAccountFormViewProps =
   | {

@@ -6,6 +6,7 @@ import type { UserAccountSummary } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { useRouter } from "@/src/i18n/navigation";
+import { staffKeys } from "./use-staff";
 
 export function useStaffAccountWorkflow() {
   const router = useRouter();
@@ -30,7 +31,7 @@ export function useStaffAccountWorkflow() {
     generatedPassword?: string,
   ) {
     setSavedUser(user);
-    void queryClient.invalidateQueries({ queryKey: ["staff"] });
+    void queryClient.invalidateQueries({ queryKey: staffKeys.all });
 
     if (created && generatedPassword) {
       setTemporaryPassword(generatedPassword);

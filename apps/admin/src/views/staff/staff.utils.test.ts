@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { PERMISSIONS } from "@repo/shared/constants";
-import { buildModeratorPermissionOverrides } from "./users.utils.ts";
+import { buildModeratorPermissionOverrides } from "./staff.utils.ts";
 
 test("persists only permission differences from moderator defaults", () => {
   const selected = new Set([
