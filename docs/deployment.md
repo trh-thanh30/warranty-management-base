@@ -86,15 +86,15 @@ GitHub Actions hiện tách job:
 - Admin
 - Telegram notification
 
-CD dùng GitHub Container Registry (GHCR) làm registry mặc định:
+Docker images dùng GitHub Container Registry (GHCR) làm registry mặc định:
 
 - `ghcr.io/<owner>/<repo>-api:<commit-sha>`
 - `ghcr.io/<owner>/<repo>-web:<commit-sha>`
 - `ghcr.io/<owner>/<repo>-admin:<commit-sha>`
 
-Workflow `.github/workflows/cd.yml` chạy sau khi workflow `CI` xanh trên `main` và build/push image cho API, Web, Admin. Khi chưa có VPS/server, phần này đã đủ để có artifact deploy được.
+Workflow `.github/workflows/publish-images.yml` chạy sau khi workflow `CI` xanh trên `main` và build/push image cho API, Web, Admin. Khi chưa có VPS/server, phần này đã đủ để có artifact deploy được.
 
-Khi đã có server, chạy workflow `CD` thủ công với input `deploy=true`. Server cần có repo hoặc bundle deploy trong `DEPLOY_PATH`, file `.env.production`, Docker, Docker Compose, và quyền pull GHCR image.
+Khi đã có server, chạy workflow `.github/workflows/deploy.yml` thủ công với input `image_tag`. Server cần có repo hoặc bundle deploy trong `DEPLOY_PATH`, file `.env.production`, Docker, Docker Compose, và quyền pull GHCR image.
 
 Nếu GHCR package để private, đăng nhập registry trên server trước khi deploy:
 

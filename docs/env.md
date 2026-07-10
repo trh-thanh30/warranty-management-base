@@ -52,14 +52,14 @@ Không cần đưa token thật vào file env local.
 
 ### CD / Deployment
 
-CD hiện build và push Docker image lên GitHub Container Registry:
+Workflow `Publish Images` build và push Docker image lên GitHub Container Registry:
 
 - `API_IMAGE`
 - `WEB_IMAGE`
 - `ADMIN_IMAGE`
 - `IMAGE_TAG`
 
-Khi deploy qua VPS/server, cấu hình các GitHub Actions Secrets:
+Khi deploy qua workflow `Deploy` tới VPS/server, cấu hình các GitHub Actions Secrets:
 
 - `DEPLOY_HOST`
 - `DEPLOY_USER`
