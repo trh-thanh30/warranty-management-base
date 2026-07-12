@@ -4,6 +4,7 @@ import { Search, UserRoundX, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type {
   ApiUserStatus,
+  ListUsersQuery,
   PaginatedResponse,
   UserAccountSummary,
 } from "@repo/shared";
@@ -19,24 +20,29 @@ import {
 } from "@repo/ui";
 import { PaginationControls } from "@/src/components/common/pagination-controls";
 import { StatePanel } from "@/src/components/common/state-panel";
+import { Link } from "@/src/i18n/navigation";
 import { StaffTable } from "./staff-table";
 
 type StaffStatusFilter = "ALL" | ApiUserStatus;
+type StaffSortBy = NonNullable<ListUsersQuery["sortBy"]>;
 
 type StaffDirectoryCardProps = {
   canCreate: boolean;
   data?: PaginatedResponse<UserAccountSummary>;
   isError: boolean;
   isLoading: boolean;
-  onCreate: () => void;
-  onEdit: (user: UserAccountSummary) => void;
   onPermissions: (user: UserAccountSummary) => void;
   onRetry: () => void;
   onPageChange: (page: number) => void;
+  onPageSizeChange: (pageSize: number) => void;
   onSearchChange: (search: string) => void;
+  onSortChange: (sortBy: StaffSortBy) => void;
   onStatusChange: (status: StaffStatusFilter) => void;
   onToggleStatus: (user: UserAccountSummary) => void;
+  pageSize: number;
   search: string;
+  sortBy?: StaffSortBy;
+  sortOrder: "asc" | "desc";
   status: StaffStatusFilter;
 };
 
@@ -45,15 +51,18 @@ export function StaffDirectoryCard({
   data,
   isError,
   isLoading,
-  onCreate,
-  onEdit,
   onPermissions,
   onPageChange,
+  onPageSizeChange,
   onRetry,
   onSearchChange,
+  onSortChange,
   onStatusChange,
   onToggleStatus,
+  pageSize,
   search,
+  sortBy,
+  sortOrder,
   status,
 }: StaffDirectoryCardProps) {
   const t = useTranslations("Staff");
@@ -82,14 +91,17 @@ export function StaffDirectoryCard({
           hasFilters={hasFilters}
           isError={isError}
           isLoading={isLoading}
-          onCreate={onCreate}
-          onEdit={onEdit}
           onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
           onPermissions={onPermissions}
           onRetry={onRetry}
           onSearchChange={onSearchChange}
+          onSortChange={onSortChange}
           onStatusChange={onStatusChange}
           onToggleStatus={onToggleStatus}
+          pageSize={pageSize}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
         />
       </CardContent>
     </Card>
@@ -143,28 +155,34 @@ function StaffDirectoryContent({
   hasFilters,
   isError,
   isLoading,
-  onCreate,
-  onEdit,
   onPageChange,
+  onPageSizeChange,
   onPermissions,
   onRetry,
   onSearchChange,
+  onSortChange,
   onStatusChange,
   onToggleStatus,
+  pageSize,
+  sortBy,
+  sortOrder,
 }: Pick<
   StaffDirectoryCardProps,
   | "canCreate"
   | "data"
   | "isError"
   | "isLoading"
-  | "onCreate"
-  | "onEdit"
   | "onPageChange"
+  | "onPageSizeChange"
   | "onPermissions"
   | "onRetry"
   | "onSearchChange"
+  | "onSortChange"
   | "onStatusChange"
   | "onToggleStatus"
+  | "pageSize"
+  | "sortBy"
+  | "sortOrder"
 > & {
   hasFilters: boolean;
 }) {
@@ -194,11 +212,18 @@ function StaffDirectoryContent({
       <>
         <StaffTable
           items={data.items}
-          onEdit={onEdit}
           onPermissions={onPermissions}
+          onSortChange={onSortChange}
           onToggleStatus={onToggleStatus}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
         />
-        <StaffPagination data={data} onPageChange={onPageChange} />
+        <StaffPagination
+          data={data}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
+          pageSize={pageSize}
+        />
       </>
     );
   }
@@ -217,7 +242,9 @@ function StaffDirectoryContent({
             {t("clearFilters")}
           </Button>
         ) : canCreate ? (
-          <Button onClick={onCreate}>{t("create")}</Button>
+          <Button asChild>
+            <Link href="/users/create">{t("create")}</Link>
+          </Button>
         ) : null
       }
       description={
@@ -242,9 +269,13 @@ function StaffDirectorySkeleton() {
 function StaffPagination({
   data,
   onPageChange,
+  onPageSizeChange,
+  pageSize,
 }: {
   data: PaginatedResponse<UserAccountSummary>;
   onPageChange: StaffDirectoryCardProps["onPageChange"];
+  onPageSizeChange: StaffDirectoryCardProps["onPageSizeChange"];
+  pageSize: StaffDirectoryCardProps["pageSize"];
 }) {
   const t = useTranslations("Staff");
 
@@ -252,7 +283,10 @@ function StaffPagination({
     <PaginationControls
       nextLabel={t("next")}
       onPageChange={onPageChange}
+      onPageSizeChange={onPageSizeChange}
       page={data.meta.page}
+      pageSize={pageSize}
+      pageSizeLabel={t("pageSize")}
       previousLabel={t("previous")}
       summary={t("pagination", {
         page: data.meta.page,

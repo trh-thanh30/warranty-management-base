@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useDebounce } from "@repo/hooks";
-import type { CategoryResponse } from "@repo/shared";
+import type { CategoryResponse, CategorySortBy } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { usePermissions } from "@/src/hooks/use-permissions";
+import { useTableControls } from "@/src/hooks/use-table-controls";
 import { useToast } from "@/src/hooks/use-toast";
-import { useRouter } from "@/src/i18n/navigation";
 import { CATEGORIES_PAGE_SIZE } from "../categories.constants";
 import type {
   CategoryStatusFilter,
@@ -16,66 +16,61 @@ import type {
 } from "../categories.types";
 import { useCategories, useDeactivateCategory } from "./use-categories";
 
+type CategoryDirectoryFilters = {
+  status: CategoryStatusFilter;
+  type: CategoryTypeFilter;
+};
+
+const INITIAL_CATEGORY_DIRECTORY_FILTERS = {
+  status: "ALL",
+  type: "ALL",
+} satisfies CategoryDirectoryFilters;
+
 export function useCategoriesDirectory() {
   const t = useTranslations("Categories");
-  const router = useRouter();
   const toast = useToast();
   const { user: currentUser } = useAuth();
   const { hasPermission } = usePermissions();
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [type, setType] = useState<CategoryTypeFilter>("ALL");
-  const [status, setStatus] = useState<CategoryStatusFilter>("ALL");
+  const {
+    filterHandlers,
+    filters,
+    page,
+    pageSize,
+    resetControls,
+    search,
+    setPage,
+    setPageSize,
+    setSearch,
+    sortBy,
+    sortOrder,
+    toggleSort,
+  } = useTableControls<CategoryDirectoryFilters, CategorySortBy>({
+    initialFilters: INITIAL_CATEGORY_DIRECTORY_FILTERS,
+    initialPageSize: CATEGORIES_PAGE_SIZE,
+    initialSortBy: "order",
+    initialSortOrder: "asc",
+  });
   const [categoryToDeactivate, setCategoryToDeactivate] =
     useState<CategoryResponse | null>(null);
   const debouncedSearch = useDebounce(search.trim(), 300);
+  const { status, type } = filters;
   const canViewCategories = hasPermission(PERMISSIONS.CATEGORY_VIEW);
   const canCreateCategories = hasPermission(PERMISSIONS.CATEGORY_CREATE);
   const deactivateCategory = useDeactivateCategory();
   const categoriesQuery = useCategories(
     {
       isActive: toIsActiveQuery(status),
-      limit: CATEGORIES_PAGE_SIZE,
+      limit: pageSize,
       page,
       search: debouncedSearch || undefined,
-      sortBy: "order",
-      sortOrder: "asc",
+      sortBy,
+      sortOrder,
       type: type === "ALL" ? undefined : type,
     },
     {
       enabled: Boolean(currentUser) && canViewCategories,
     },
   );
-
-  function updateSearch(nextSearch: string) {
-    setSearch(nextSearch);
-    setPage(1);
-  }
-
-  function updateType(nextType: CategoryTypeFilter) {
-    setType(nextType);
-    setPage(1);
-  }
-
-  function updateStatus(nextStatus: CategoryStatusFilter) {
-    setStatus(nextStatus);
-    setPage(1);
-  }
-
-  function clearFilters() {
-    setSearch("");
-    setType("ALL");
-    setStatus("ALL");
-    setPage(1);
-  }
-
-  function openCreate() {
-    router.push("/categories/create");
-  }
-
-  function openEdit(category: CategoryResponse) {
-    router.push(`/categories/${category.id}/edit`);
-  }
 
   function openDeactivate(category: CategoryResponse) {
     setCategoryToDeactivate(category);
@@ -101,20 +96,23 @@ export function useCategoriesDirectory() {
     canCreateCategories,
     categoriesQuery,
     categoryToDeactivate,
-    clearFilters,
+    clearFilters: resetControls,
     closeDeactivate,
     confirmDeactivate,
     isDeactivating: deactivateCategory.isPending,
-    openCreate,
     openDeactivate,
-    openEdit,
+    pageSize,
     search,
     setPage,
+    setPageSize,
+    sortBy,
+    sortOrder,
     status,
+    toggleSort,
     type,
-    updateSearch,
-    updateStatus,
-    updateType,
+    updateSearch: setSearch,
+    updateStatus: filterHandlers.status,
+    updateType: filterHandlers.type,
   };
 }
 

@@ -16,7 +16,11 @@ type PaginationPageItem = number | "ellipsis-start" | "ellipsis-end";
 type PaginationControlsProps = {
   nextLabel: string;
   onPageChange: (page: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
   page: number;
+  pageSize?: number;
+  pageSizeLabel?: string;
+  pageSizeOptions?: number[];
   previousLabel: string;
   summary?: ReactNode;
   totalPages: number;
@@ -25,7 +29,11 @@ type PaginationControlsProps = {
 export function PaginationControls({
   nextLabel,
   onPageChange,
+  onPageSizeChange,
   page,
+  pageSize,
+  pageSizeLabel,
+  pageSizeOptions = [10, 20, 50],
   previousLabel,
   summary,
   totalPages,
@@ -36,9 +44,29 @@ export function PaginationControls({
 
   return (
     <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-      {summary ? (
-        <p className="text-sm text-slate-500 dark:text-slate-400">{summary}</p>
-      ) : null}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+        {summary ? (
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            {summary}
+          </p>
+        ) : null}
+        {onPageSizeChange && pageSize ? (
+          <label className="inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+            <span>{pageSizeLabel}</span>
+            <select
+              className="h-9 rounded-md border border-slate-200 bg-white px-2 text-sm text-slate-950 shadow-sm outline-none focus:border-slate-400 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50"
+              onChange={(event) => onPageSizeChange(Number(event.target.value))}
+              value={pageSize}
+            >
+              {pageSizeOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
+      </div>
       <Pagination className="mx-0 w-auto justify-start sm:justify-end">
         <PaginationContent>
           <PaginationItem>

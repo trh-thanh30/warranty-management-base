@@ -2,7 +2,7 @@
 
 import { MoreHorizontal, Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
-import type { CustomerSummary } from "@repo/shared";
+import type { CustomerSummary, ListCustomersQuery } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
   Avatar,
@@ -20,7 +20,9 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui";
+import { SortableTableHead } from "@/src/components/common/sortable-table-head";
 import { usePermissions } from "@/src/hooks/use-permissions";
+import { Link } from "@/src/i18n/navigation";
 import { getInitials } from "@/src/utils/get-initials";
 import {
   formatCustomerCreatedAt,
@@ -30,21 +32,26 @@ import {
 
 type CustomersTableProps = {
   items: CustomerSummary[];
-  onEdit: (customer: CustomerSummary) => void;
+  onSortChange: (sortBy: CustomerSortBy) => void;
+  sortBy?: CustomerSortBy;
+  sortOrder: "asc" | "desc";
 };
 
-export function CustomersTable({ items, onEdit }: CustomersTableProps) {
+type CustomerSortBy = NonNullable<ListCustomersQuery["sortBy"]>;
+
+export function CustomersTable({
+  items,
+  onSortChange,
+  sortBy,
+  sortOrder,
+}: CustomersTableProps) {
   const t = useTranslations("Customers");
 
   return (
     <>
       <div className="space-y-3 md:hidden">
         {items.map((customer) => (
-          <CustomerMobileCard
-            customer={customer}
-            key={customer.id}
-            onEdit={onEdit}
-          />
+          <CustomerMobileCard customer={customer} key={customer.id} />
         ))}
       </div>
 
@@ -52,21 +59,45 @@ export function CustomersTable({ items, onEdit }: CustomersTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t("customer")}</TableHead>
-              <TableHead>{t("phone")}</TableHead>
-              <TableHead>{t("email")}</TableHead>
+              <SortableTableHead
+                activeSortBy={sortBy}
+                onSortChange={onSortChange}
+                sortBy="fullName"
+                sortOrder={sortOrder}
+              >
+                {t("customer")}
+              </SortableTableHead>
+              <SortableTableHead
+                activeSortBy={sortBy}
+                onSortChange={onSortChange}
+                sortBy="phone"
+                sortOrder={sortOrder}
+              >
+                {t("phone")}
+              </SortableTableHead>
+              <SortableTableHead
+                activeSortBy={sortBy}
+                onSortChange={onSortChange}
+                sortBy="email"
+                sortOrder={sortOrder}
+              >
+                {t("email")}
+              </SortableTableHead>
               <TableHead>{t("account")}</TableHead>
-              <TableHead>{t("createdAt")}</TableHead>
+              <SortableTableHead
+                activeSortBy={sortBy}
+                onSortChange={onSortChange}
+                sortBy="createdAt"
+                sortOrder={sortOrder}
+              >
+                {t("createdAt")}
+              </SortableTableHead>
               <TableHead aria-label={t("actions")} />
             </TableRow>
           </TableHeader>
           <TableBody>
             {items.map((customer) => (
-              <CustomerTableRow
-                customer={customer}
-                key={customer.id}
-                onEdit={onEdit}
-              />
+              <CustomerTableRow customer={customer} key={customer.id} />
             ))}
           </TableBody>
         </Table>
@@ -75,13 +106,7 @@ export function CustomersTable({ items, onEdit }: CustomersTableProps) {
   );
 }
 
-function CustomerTableRow({
-  customer,
-  onEdit,
-}: {
-  customer: CustomerSummary;
-  onEdit: CustomersTableProps["onEdit"];
-}) {
+function CustomerTableRow({ customer }: { customer: CustomerSummary }) {
   return (
     <TableRow>
       <TableCell>
@@ -94,7 +119,7 @@ function CustomerTableRow({
       </TableCell>
       <TableCell>{formatCustomerCreatedAt(customer.createdAt)}</TableCell>
       <TableCell className="text-right">
-        <CustomerActionsMenu customer={customer} onEdit={onEdit} />
+        <CustomerActionsMenu customer={customer} />
       </TableCell>
     </TableRow>
   );
@@ -120,20 +145,14 @@ function CustomerIdentityCell({ customer }: { customer: CustomerSummary }) {
   );
 }
 
-function CustomerMobileCard({
-  customer,
-  onEdit,
-}: {
-  customer: CustomerSummary;
-  onEdit: CustomersTableProps["onEdit"];
-}) {
+function CustomerMobileCard({ customer }: { customer: CustomerSummary }) {
   const t = useTranslations("Customers");
 
   return (
     <article className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
       <div className="flex items-start justify-between gap-3">
         <CustomerIdentityCell customer={customer} />
-        <CustomerActionsMenu customer={customer} onEdit={onEdit} />
+        <CustomerActionsMenu customer={customer} />
       </div>
 
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
@@ -190,13 +209,7 @@ function CustomerAccountBadge({ customer }: { customer: CustomerSummary }) {
   );
 }
 
-function CustomerActionsMenu({
-  customer,
-  onEdit,
-}: {
-  customer: CustomerSummary;
-  onEdit: CustomersTableProps["onEdit"];
-}) {
+function CustomerActionsMenu({ customer }: { customer: CustomerSummary }) {
   const t = useTranslations("Customers");
   const { hasPermission } = usePermissions();
   const canEdit = hasPermission(PERMISSIONS.CUSTOMER_UPDATE);
@@ -219,9 +232,11 @@ function CustomerActionsMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={() => onEdit(customer)}>
-          <Pencil className="mr-2 size-4" />
-          {t("edit")}
+        <DropdownMenuItem asChild>
+          <Link href={`/customers/${customer.id}/edit`}>
+            <Pencil className="mr-2 size-4" />
+            {t("edit")}
+          </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

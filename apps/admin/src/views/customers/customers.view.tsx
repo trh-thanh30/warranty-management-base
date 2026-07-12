@@ -15,10 +15,13 @@ export function CustomersView() {
   const {
     canCreateCustomers,
     customersQuery,
-    openCreate,
-    openEdit,
+    pageSize,
     search,
     setPage,
+    setPageSize,
+    sortBy,
+    sortOrder,
+    toggleSort,
     updateSearch,
   } = useCustomersDirectory();
 
@@ -46,14 +49,17 @@ export function CustomersView() {
           data={customersQuery.data}
           isError={customersQuery.isError}
           isLoading={customersQuery.isLoading}
-          onCreate={openCreate}
-          onEdit={openEdit}
           onPageChange={setPage}
+          onPageSizeChange={setPageSize}
           onRetry={() => {
             void customersQuery.refetch();
           }}
           onSearchChange={updateSearch}
+          onSortChange={toggleSort}
+          pageSize={pageSize}
           search={search}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
         />
       </div>
     </PermissionGuard>

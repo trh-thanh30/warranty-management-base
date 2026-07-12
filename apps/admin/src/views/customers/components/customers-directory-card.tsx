@@ -2,7 +2,11 @@
 
 import { Search, UserRoundX, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
-import type { CustomerSummary, PaginatedResponse } from "@repo/shared";
+import type {
+  CustomerSummary,
+  ListCustomersQuery,
+  PaginatedResponse,
+} from "@repo/shared";
 import {
   Button,
   Card,
@@ -15,19 +19,25 @@ import {
 } from "@repo/ui";
 import { PaginationControls } from "@/src/components/common/pagination-controls";
 import { StatePanel } from "@/src/components/common/state-panel";
+import { Link } from "@/src/i18n/navigation";
 import { CustomersTable } from "./customers-table";
+
+type CustomerSortBy = NonNullable<ListCustomersQuery["sortBy"]>;
 
 type CustomersDirectoryCardProps = {
   canCreate: boolean;
   data?: PaginatedResponse<CustomerSummary>;
   isError: boolean;
   isLoading: boolean;
-  onCreate: () => void;
-  onEdit: (customer: CustomerSummary) => void;
   onPageChange: (page: number) => void;
+  onPageSizeChange: (pageSize: number) => void;
   onRetry: () => void;
   onSearchChange: (search: string) => void;
+  onSortChange: (sortBy: CustomerSortBy) => void;
+  pageSize: number;
   search: string;
+  sortBy?: CustomerSortBy;
+  sortOrder: "asc" | "desc";
 };
 
 export function CustomersDirectoryCard({
@@ -35,12 +45,15 @@ export function CustomersDirectoryCard({
   data,
   isError,
   isLoading,
-  onCreate,
-  onEdit,
   onPageChange,
+  onPageSizeChange,
   onRetry,
   onSearchChange,
+  onSortChange,
+  pageSize,
   search,
+  sortBy,
+  sortOrder,
 }: CustomersDirectoryCardProps) {
   const t = useTranslations("Customers");
   const hasSearch = Boolean(search.trim());
@@ -66,11 +79,14 @@ export function CustomersDirectoryCard({
           hasSearch={hasSearch}
           isError={isError}
           isLoading={isLoading}
-          onCreate={onCreate}
-          onEdit={onEdit}
           onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
           onRetry={onRetry}
           onSearchChange={onSearchChange}
+          onSortChange={onSortChange}
+          pageSize={pageSize}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
         />
       </CardContent>
     </Card>
@@ -108,22 +124,28 @@ function CustomersDirectoryContent({
   hasSearch,
   isError,
   isLoading,
-  onCreate,
-  onEdit,
   onPageChange,
+  onPageSizeChange,
   onRetry,
   onSearchChange,
+  onSortChange,
+  pageSize,
+  sortBy,
+  sortOrder,
 }: Pick<
   CustomersDirectoryCardProps,
   | "canCreate"
   | "data"
   | "isError"
   | "isLoading"
-  | "onCreate"
-  | "onEdit"
   | "onPageChange"
+  | "onPageSizeChange"
   | "onRetry"
   | "onSearchChange"
+  | "onSortChange"
+  | "pageSize"
+  | "sortBy"
+  | "sortOrder"
 > & {
   hasSearch: boolean;
 }) {
@@ -151,8 +173,18 @@ function CustomersDirectoryContent({
   if (data && data.items.length > 0) {
     return (
       <>
-        <CustomersTable items={data.items} onEdit={onEdit} />
-        <CustomersPagination data={data} onPageChange={onPageChange} />
+        <CustomersTable
+          items={data.items}
+          onSortChange={onSortChange}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+        />
+        <CustomersPagination
+          data={data}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
+          pageSize={pageSize}
+        />
       </>
     );
   }
@@ -165,7 +197,9 @@ function CustomersDirectoryContent({
             {t("clearSearch")}
           </Button>
         ) : canCreate ? (
-          <Button onClick={onCreate}>{t("create")}</Button>
+          <Button asChild>
+            <Link href="/customers/create">{t("create")}</Link>
+          </Button>
         ) : null
       }
       description={
@@ -190,9 +224,13 @@ function CustomersDirectorySkeleton() {
 function CustomersPagination({
   data,
   onPageChange,
+  onPageSizeChange,
+  pageSize,
 }: {
   data: PaginatedResponse<CustomerSummary>;
   onPageChange: CustomersDirectoryCardProps["onPageChange"];
+  onPageSizeChange: CustomersDirectoryCardProps["onPageSizeChange"];
+  pageSize: CustomersDirectoryCardProps["pageSize"];
 }) {
   const t = useTranslations("Customers");
 
@@ -200,7 +238,10 @@ function CustomersPagination({
     <PaginationControls
       nextLabel={t("next")}
       onPageChange={onPageChange}
+      onPageSizeChange={onPageSizeChange}
       page={data.meta.page}
+      pageSize={pageSize}
+      pageSizeLabel={t("pageSize")}
       previousLabel={t("previous")}
       summary={t("pagination", {
         page: data.meta.page,

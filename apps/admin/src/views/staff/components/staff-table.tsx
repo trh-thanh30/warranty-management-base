@@ -2,7 +2,7 @@
 
 import { MoreHorizontal, Pencil, ShieldCheck, UserRoundX } from "lucide-react";
 import { useTranslations } from "next-intl";
-import type { UserAccountSummary } from "@repo/shared";
+import type { ListUsersQuery, UserAccountSummary } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
   Avatar,
@@ -21,26 +21,34 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui";
+import { SortableTableHead } from "@/src/components/common/sortable-table-head";
 import { usePermissions } from "@/src/hooks/use-permissions";
+import { Link } from "@/src/i18n/navigation";
 import { getInitials } from "@/src/utils/get-initials";
 
 type StaffTableProps = {
   items: UserAccountSummary[];
-  onEdit: (user: UserAccountSummary) => void;
   onPermissions: (user: UserAccountSummary) => void;
+  onSortChange: (sortBy: StaffSortBy) => void;
   onToggleStatus: (user: UserAccountSummary) => void;
+  sortBy?: StaffSortBy;
+  sortOrder: "asc" | "desc";
 };
+
+type StaffSortBy = NonNullable<ListUsersQuery["sortBy"]>;
 
 type StaffTableActionProps = Pick<
   StaffTableProps,
-  "onEdit" | "onPermissions" | "onToggleStatus"
+  "onPermissions" | "onToggleStatus"
 >;
 
 export function StaffTable({
   items,
-  onEdit,
   onPermissions,
+  onSortChange,
   onToggleStatus,
+  sortBy,
+  sortOrder,
 }: StaffTableProps) {
   const t = useTranslations("Staff");
 
@@ -50,7 +58,6 @@ export function StaffTable({
         {items.map((user) => (
           <StaffMobileCard
             key={user.id}
-            onEdit={onEdit}
             onPermissions={onPermissions}
             onToggleStatus={onToggleStatus}
             user={user}
@@ -62,11 +69,39 @@ export function StaffTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t("staffMember")}</TableHead>
-              <TableHead>{t("username")}</TableHead>
-              <TableHead>{t("status")}</TableHead>
+              <SortableTableHead
+                activeSortBy={sortBy}
+                onSortChange={onSortChange}
+                sortBy="fullName"
+                sortOrder={sortOrder}
+              >
+                {t("staffMember")}
+              </SortableTableHead>
+              <SortableTableHead
+                activeSortBy={sortBy}
+                onSortChange={onSortChange}
+                sortBy="username"
+                sortOrder={sortOrder}
+              >
+                {t("username")}
+              </SortableTableHead>
+              <SortableTableHead
+                activeSortBy={sortBy}
+                onSortChange={onSortChange}
+                sortBy="status"
+                sortOrder={sortOrder}
+              >
+                {t("status")}
+              </SortableTableHead>
               <TableHead>{t("verified")}</TableHead>
-              <TableHead>{t("createdAt")}</TableHead>
+              <SortableTableHead
+                activeSortBy={sortBy}
+                onSortChange={onSortChange}
+                sortBy="createdAt"
+                sortOrder={sortOrder}
+              >
+                {t("createdAt")}
+              </SortableTableHead>
               <TableHead aria-label={t("actions")} />
             </TableRow>
           </TableHeader>
@@ -74,7 +109,6 @@ export function StaffTable({
             {items.map((user) => (
               <StaffTableRow
                 key={user.id}
-                onEdit={onEdit}
                 onPermissions={onPermissions}
                 onToggleStatus={onToggleStatus}
                 user={user}
@@ -88,7 +122,6 @@ export function StaffTable({
 }
 
 function StaffTableRow({
-  onEdit,
   onPermissions,
   onToggleStatus,
   user,
@@ -108,7 +141,6 @@ function StaffTableRow({
       <TableCell>{formatStaffCreatedAt(user.createdAt)}</TableCell>
       <TableCell className="text-right">
         <StaffActionsMenu
-          onEdit={onEdit}
           onPermissions={onPermissions}
           onToggleStatus={onToggleStatus}
           user={user}
@@ -140,7 +172,6 @@ function StaffMemberCell({ user }: { user: UserAccountSummary }) {
 }
 
 function StaffMobileCard({
-  onEdit,
   onPermissions,
   onToggleStatus,
   user,
@@ -152,7 +183,6 @@ function StaffMobileCard({
       <div className="flex items-start justify-between gap-3">
         <StaffMemberCell user={user} />
         <StaffActionsMenu
-          onEdit={onEdit}
           onPermissions={onPermissions}
           onToggleStatus={onToggleStatus}
           user={user}
@@ -212,7 +242,6 @@ function StaffStatusBadge({
 }
 
 function StaffActionsMenu({
-  onEdit,
   onPermissions,
   onToggleStatus,
   user,
@@ -245,9 +274,11 @@ function StaffActionsMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {canEdit ? (
-          <DropdownMenuItem onSelect={() => onEdit(user)}>
-            <Pencil className="mr-2 size-4" />
-            {t("edit")}
+          <DropdownMenuItem asChild>
+            <Link href={`/users/${user.id}/edit`}>
+              <Pencil className="mr-2 size-4" />
+              {t("edit")}
+            </Link>
           </DropdownMenuItem>
         ) : null}
         {canManagePermissions ? (

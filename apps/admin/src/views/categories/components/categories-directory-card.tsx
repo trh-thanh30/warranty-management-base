@@ -2,7 +2,11 @@
 
 import { FolderTree, Search, Tags } from "lucide-react";
 import { useTranslations } from "next-intl";
-import type { CategoryResponse, PaginatedResponse } from "@repo/shared";
+import type {
+  CategoryResponse,
+  CategorySortBy,
+  PaginatedResponse,
+} from "@repo/shared";
 import {
   Button,
   Card,
@@ -15,6 +19,7 @@ import {
 } from "@repo/ui";
 import { PaginationControls } from "@/src/components/common/pagination-controls";
 import { StatePanel } from "@/src/components/common/state-panel";
+import { Link } from "@/src/i18n/navigation";
 import {
   CATEGORY_STATUS_FILTERS,
   CATEGORY_TYPES,
@@ -31,15 +36,18 @@ type CategoriesDirectoryCardProps = {
   isError: boolean;
   isLoading: boolean;
   onClearFilters: () => void;
-  onCreate: () => void;
   onDeactivate: (category: CategoryResponse) => void;
-  onEdit: (category: CategoryResponse) => void;
   onPageChange: (page: number) => void;
+  onPageSizeChange: (pageSize: number) => void;
   onRetry: () => void;
   onSearchChange: (search: string) => void;
   onStatusChange: (status: CategoryStatusFilter) => void;
+  onSortChange: (sortBy: CategorySortBy) => void;
   onTypeChange: (type: CategoryTypeFilter) => void;
+  pageSize: number;
   search: string;
+  sortBy?: CategorySortBy;
+  sortOrder: "asc" | "desc";
   status: CategoryStatusFilter;
   type: CategoryTypeFilter;
 };
@@ -50,15 +58,18 @@ export function CategoriesDirectoryCard({
   isError,
   isLoading,
   onClearFilters,
-  onCreate,
   onDeactivate,
-  onEdit,
   onPageChange,
+  onPageSizeChange,
   onRetry,
   onSearchChange,
+  onSortChange,
   onStatusChange,
   onTypeChange,
+  pageSize,
   search,
+  sortBy,
+  sortOrder,
   status,
   type,
 }: CategoriesDirectoryCardProps) {
@@ -92,11 +103,14 @@ export function CategoriesDirectoryCard({
           isError={isError}
           isLoading={isLoading}
           onClearFilters={onClearFilters}
-          onCreate={onCreate}
           onDeactivate={onDeactivate}
-          onEdit={onEdit}
           onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
           onRetry={onRetry}
+          onSortChange={onSortChange}
+          pageSize={pageSize}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
         />
       </CardContent>
     </Card>
@@ -173,21 +187,31 @@ function CategoriesDirectoryContent({
   isError,
   isLoading,
   onClearFilters,
-  onCreate,
   onDeactivate,
-  onEdit,
   onPageChange,
+  onPageSizeChange,
   onRetry,
+  onSortChange,
+  pageSize,
+  sortBy,
+  sortOrder,
 }: Pick<
   CategoriesDirectoryCardProps,
-  "data" | "isError" | "isLoading" | "onPageChange" | "onRetry"
+  | "data"
+  | "isError"
+  | "isLoading"
+  | "onPageChange"
+  | "onPageSizeChange"
+  | "onRetry"
+  | "onSortChange"
+  | "pageSize"
+  | "sortBy"
+  | "sortOrder"
 > & {
   canCreate: CategoriesDirectoryCardProps["canCreate"];
   hasFilters: boolean;
   onClearFilters: CategoriesDirectoryCardProps["onClearFilters"];
-  onCreate: CategoriesDirectoryCardProps["onCreate"];
   onDeactivate: CategoriesDirectoryCardProps["onDeactivate"];
-  onEdit: CategoriesDirectoryCardProps["onEdit"];
 }) {
   const t = useTranslations("Categories");
 
@@ -216,9 +240,16 @@ function CategoriesDirectoryContent({
         <CategoriesTable
           items={data.items}
           onDeactivate={onDeactivate}
-          onEdit={onEdit}
+          onSortChange={onSortChange}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
         />
-        <CategoriesPagination data={data} onPageChange={onPageChange} />
+        <CategoriesPagination
+          data={data}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
+          pageSize={pageSize}
+        />
       </>
     );
   }
@@ -231,7 +262,9 @@ function CategoriesDirectoryContent({
             {t("clearFilters")}
           </Button>
         ) : canCreate ? (
-          <Button onClick={onCreate}>{t("create")}</Button>
+          <Button asChild>
+            <Link href="/categories/create">{t("create")}</Link>
+          </Button>
         ) : null
       }
       description={
@@ -256,9 +289,13 @@ function CategoriesDirectorySkeleton() {
 function CategoriesPagination({
   data,
   onPageChange,
+  onPageSizeChange,
+  pageSize,
 }: {
   data: PaginatedResponse<CategoryResponse>;
   onPageChange: CategoriesDirectoryCardProps["onPageChange"];
+  onPageSizeChange: CategoriesDirectoryCardProps["onPageSizeChange"];
+  pageSize: CategoriesDirectoryCardProps["pageSize"];
 }) {
   const t = useTranslations("Categories");
 
@@ -266,7 +303,10 @@ function CategoriesPagination({
     <PaginationControls
       nextLabel={t("next")}
       onPageChange={onPageChange}
+      onPageSizeChange={onPageSizeChange}
       page={data.meta.page}
+      pageSize={pageSize}
+      pageSizeLabel={t("pageSize")}
       previousLabel={t("previous")}
       summary={t("pagination", {
         page: data.meta.page,

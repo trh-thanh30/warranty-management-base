@@ -21,12 +21,15 @@ export function CategoriesView() {
     closeDeactivate,
     confirmDeactivate,
     isDeactivating,
-    openCreate,
     openDeactivate,
-    openEdit,
+    pageSize,
     search,
     setPage,
+    setPageSize,
+    sortBy,
+    sortOrder,
     status,
+    toggleSort,
     type,
     updateSearch,
     updateStatus,
@@ -58,17 +61,20 @@ export function CategoriesView() {
           isError={categoriesQuery.isError}
           isLoading={categoriesQuery.isLoading}
           onClearFilters={clearFilters}
-          onCreate={openCreate}
           onDeactivate={openDeactivate}
-          onEdit={openEdit}
           onPageChange={setPage}
+          onPageSizeChange={setPageSize}
           onRetry={() => {
             void categoriesQuery.refetch();
           }}
           onSearchChange={updateSearch}
+          onSortChange={toggleSort}
           onStatusChange={updateStatus}
           onTypeChange={updateType}
+          pageSize={pageSize}
           search={search}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
           status={status}
           type={type}
         />
