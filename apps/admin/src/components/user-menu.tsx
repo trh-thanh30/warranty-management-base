@@ -23,7 +23,7 @@ export function UserMenu() {
   const t = useTranslations("DashboardConfig");
   const dashboardConfig = getDashboardConfig(t);
   const fallbackUser = dashboardConfig.userMenu;
-  const { user, logout } = useAuth();
+  const { user, isLoggingOut, logout } = useAuth();
   const router = useRouter();
   const displayName = user?.full_name || user?.username || fallbackUser.name;
   const email = user?.email || fallbackUser.email;
@@ -67,9 +67,15 @@ export function UserMenu() {
           if (item.isDestructive) {
             return (
               <DropdownMenuItem asChild key={item.label}>
-                <button className={itemClassName} onClick={handleLogout}>
+                <button
+                  className={itemClassName}
+                  disabled={isLoggingOut}
+                  onClick={handleLogout}
+                >
                   <Icon className="h-4 w-4 shrink-0" />
-                  <span>{item.label}</span>
+                  <span>
+                    {isLoggingOut ? t("items.signingOut") : item.label}
+                  </span>
                 </button>
               </DropdownMenuItem>
             );
