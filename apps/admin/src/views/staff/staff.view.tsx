@@ -9,23 +9,31 @@ import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
 import { StaffDirectoryCard } from "./components/staff-directory-card";
 import { StaffPermissionsDialog } from "./components/staff-permissions-dialog";
+import { StaffStatusDialog } from "./components/staff-status-dialog";
 import { useStaffDirectory } from "./hooks/use-staff-directory";
 
 export function StaffView() {
   const t = useTranslations("Staff");
   const {
     canCreateStaff,
-    openCreate,
-    openEdit,
+    closeStatusConfirm,
+    confirmStatusChange,
+    isUpdatingStatus,
     openPermissions,
+    openStatusConfirm,
+    pageSize,
     permissionsOpen,
     search,
     selectedUser,
     setPage,
+    setPageSize,
     setPermissionsOpen,
+    sortBy,
+    sortOrder,
     staffQuery,
     status,
-    toggleStatus,
+    statusUser,
+    toggleSort,
     updateSearch,
     updateStatus,
   } = useStaffDirectory();
@@ -54,17 +62,20 @@ export function StaffView() {
           canCreate={canCreateStaff}
           isError={staffQuery.isError}
           isLoading={staffQuery.isLoading}
-          onCreate={openCreate}
-          onEdit={openEdit}
           onPageChange={setPage}
+          onPageSizeChange={setPageSize}
           onPermissions={openPermissions}
           onRetry={() => {
             void staffQuery.refetch();
           }}
           onSearchChange={updateSearch}
+          onSortChange={toggleSort}
           onStatusChange={updateStatus}
-          onToggleStatus={toggleStatus}
+          onToggleStatus={openStatusConfirm}
+          pageSize={pageSize}
           search={search}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
           status={status}
         />
 
@@ -72,6 +83,15 @@ export function StaffView() {
           onOpenChange={setPermissionsOpen}
           open={permissionsOpen}
           user={selectedUser}
+        />
+        <StaffStatusDialog
+          isUpdating={isUpdatingStatus}
+          onConfirm={confirmStatusChange}
+          onOpenChange={(open) => {
+            if (!open) closeStatusConfirm();
+          }}
+          open={Boolean(statusUser)}
+          user={statusUser}
         />
       </div>
     </PermissionGuard>
