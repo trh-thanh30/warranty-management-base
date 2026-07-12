@@ -1,8 +1,8 @@
 "use client";
 
-import { Ban, ImageIcon, MoreHorizontal, Pencil } from "lucide-react";
+import { Ban, MoreHorizontal, Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
-import type { CategoryResponse } from "@repo/shared";
+import type { CategoryResponse, CategorySortBy } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
   Button,
@@ -18,7 +18,9 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui";
+import { SortableTableHead } from "@/src/components/common/sortable-table-head";
 import { usePermissions } from "@/src/hooks/use-permissions";
+import { Link } from "@/src/i18n/navigation";
 import {
   formatCategoryCreatedAt,
   getCategoryDisplayCode,
@@ -26,18 +28,21 @@ import {
 } from "../categories.utils";
 import { CategoryStatusBadge } from "./category-status-badge";
 import { CategoryTypeBadge } from "./category-type-badge";
-import { MetadataSummary } from "./metadata-summary";
 
 type CategoriesTableProps = {
   items: CategoryResponse[];
   onDeactivate: (category: CategoryResponse) => void;
-  onEdit: (category: CategoryResponse) => void;
+  onSortChange: (sortBy: CategorySortBy) => void;
+  sortBy?: CategorySortBy;
+  sortOrder: "asc" | "desc";
 };
 
 export function CategoriesTable({
   items,
   onDeactivate,
-  onEdit,
+  onSortChange,
+  sortBy,
+  sortOrder,
 }: CategoriesTableProps) {
   const t = useTranslations("Categories");
 
@@ -50,7 +55,6 @@ export function CategoriesTable({
             items={items}
             key={category.id}
             onDeactivate={onDeactivate}
-            onEdit={onEdit}
           />
         ))}
       </div>
@@ -61,15 +65,47 @@ export function CategoriesTable({
             <TableRow>
               <TableHead>{t("type")}</TableHead>
               <TableHead>{t("code")}</TableHead>
-              <TableHead>{t("slug")}</TableHead>
-              <TableHead>{t("name")}</TableHead>
+              <SortableTableHead
+                activeSortBy={sortBy}
+                onSortChange={onSortChange}
+                sortBy="slug"
+                sortOrder={sortOrder}
+              >
+                {t("slug")}
+              </SortableTableHead>
+              <SortableTableHead
+                activeSortBy={sortBy}
+                onSortChange={onSortChange}
+                sortBy="name"
+                sortOrder={sortOrder}
+              >
+                {t("name")}
+              </SortableTableHead>
               <TableHead>{t("parent")}</TableHead>
-              <TableHead>{t("icon")}</TableHead>
-              <TableHead>{t("imageUrl")}</TableHead>
-              <TableHead>{t("order")}</TableHead>
-              <TableHead>{t("status")}</TableHead>
-              <TableHead>{t("metadata")}</TableHead>
-              <TableHead>{t("createdAt")}</TableHead>
+              <SortableTableHead
+                activeSortBy={sortBy}
+                onSortChange={onSortChange}
+                sortBy="order"
+                sortOrder={sortOrder}
+              >
+                {t("order")}
+              </SortableTableHead>
+              <SortableTableHead
+                activeSortBy={sortBy}
+                onSortChange={onSortChange}
+                sortBy="isActive"
+                sortOrder={sortOrder}
+              >
+                {t("status")}
+              </SortableTableHead>
+              <SortableTableHead
+                activeSortBy={sortBy}
+                onSortChange={onSortChange}
+                sortBy="createdAt"
+                sortOrder={sortOrder}
+              >
+                {t("createdAt")}
+              </SortableTableHead>
               <TableHead aria-label={t("actions")} />
             </TableRow>
           </TableHeader>
@@ -80,7 +116,6 @@ export function CategoriesTable({
                 items={items}
                 key={category.id}
                 onDeactivate={onDeactivate}
-                onEdit={onEdit}
               />
             ))}
           </TableBody>
@@ -94,12 +129,10 @@ function CategoryTableRow({
   category,
   items,
   onDeactivate,
-  onEdit,
 }: {
   category: CategoryResponse;
   items: CategoryResponse[];
   onDeactivate: CategoriesTableProps["onDeactivate"];
-  onEdit: CategoriesTableProps["onEdit"];
 }) {
   const parentLabel = getCategoryParentLabel(category, items);
 
@@ -125,24 +158,13 @@ function CategoryTableRow({
         </div>
       </TableCell>
       <TableCell>{parentLabel ?? "-"}</TableCell>
-      <TableCell>{category.icon ?? "-"}</TableCell>
-      <TableCell>
-        <ImageUrlCell imageUrl={category.imageUrl} />
-      </TableCell>
       <TableCell>{category.order}</TableCell>
       <TableCell>
         <CategoryStatusBadge isActive={category.isActive} />
       </TableCell>
-      <TableCell>
-        <MetadataSummary metadata={category.metadata} />
-      </TableCell>
       <TableCell>{formatCategoryCreatedAt(category.createdAt)}</TableCell>
       <TableCell className="text-right">
-        <CategoryActionsMenu
-          category={category}
-          onDeactivate={onDeactivate}
-          onEdit={onEdit}
-        />
+        <CategoryActionsMenu category={category} onDeactivate={onDeactivate} />
       </TableCell>
     </TableRow>
   );
@@ -152,12 +174,10 @@ function CategoryMobileCard({
   category,
   items,
   onDeactivate,
-  onEdit,
 }: {
   category: CategoryResponse;
   items: CategoryResponse[];
   onDeactivate: CategoriesTableProps["onDeactivate"];
-  onEdit: CategoriesTableProps["onEdit"];
 }) {
   const t = useTranslations("Categories");
   const parentLabel = getCategoryParentLabel(category, items);
@@ -181,7 +201,6 @@ function CategoryMobileCard({
           <CategoryActionsMenu
             category={category}
             onDeactivate={onDeactivate}
-            onEdit={onEdit}
           />
         </div>
       </div>
@@ -192,27 +211,15 @@ function CategoryMobileCard({
           value={getCategoryDisplayCode(category)}
         />
         <CategoryMobileField label={t("parent")} value={parentLabel ?? "-"} />
-        <CategoryMobileField label={t("icon")} value={category.icon ?? "-"} />
         <CategoryMobileField
           label={t("order")}
           value={String(category.order)}
-        />
-        <CategoryMobileField
-          label={t("imageUrl")}
-          value={category.imageUrl ?? "-"}
         />
         <CategoryMobileField
           label={t("createdAt")}
           value={formatCategoryCreatedAt(category.createdAt)}
         />
       </dl>
-
-      <div className="mt-4">
-        <p className="mb-1 text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-          {t("metadata")}
-        </p>
-        <MetadataSummary metadata={category.metadata} />
-      </div>
     </article>
   );
 }
@@ -236,25 +243,12 @@ function CategoryMobileField({
   );
 }
 
-function ImageUrlCell({ imageUrl }: { imageUrl: string | null }) {
-  if (!imageUrl) return <span>-</span>;
-
-  return (
-    <span className="inline-flex max-w-[12rem] items-center gap-2 truncate text-xs text-slate-500 dark:text-slate-400">
-      <ImageIcon className="size-4 shrink-0" />
-      <span className="truncate">{imageUrl}</span>
-    </span>
-  );
-}
-
 function CategoryActionsMenu({
   category,
   onDeactivate,
-  onEdit,
 }: {
   category: CategoryResponse;
   onDeactivate: CategoriesTableProps["onDeactivate"];
-  onEdit: CategoriesTableProps["onEdit"];
 }) {
   const t = useTranslations("Categories");
   const { hasPermission } = usePermissions();
@@ -279,9 +273,11 @@ function CategoryActionsMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {canEdit ? (
-          <DropdownMenuItem onSelect={() => onEdit(category)}>
-            <Pencil className="mr-2 size-4" />
-            {t("edit")}
+          <DropdownMenuItem asChild>
+            <Link href={`/categories/${category.id}/edit`}>
+              <Pencil className="mr-2 size-4" />
+              {t("edit")}
+            </Link>
           </DropdownMenuItem>
         ) : null}
         {canDelete && category.isActive ? (

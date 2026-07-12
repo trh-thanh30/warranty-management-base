@@ -21,30 +21,6 @@ export function getCategoryDisplayCode(category: CategoryResponse) {
   return category.code || "-";
 }
 
-export function getCategoryMetadataSummary(
-  metadata: Record<string, unknown> | null,
-) {
-  if (!metadata) return null;
-
-  const entries = Object.entries(metadata);
-  if (entries.length === 0) return null;
-
-  return entries
-    .slice(0, 3)
-    .map(([key, value]) => `${key}: ${formatMetadataValue(value)}`)
-    .join(", ");
-}
-
-function formatMetadataValue(value: unknown) {
-  if (value === null) return "null";
-  if (typeof value === "string") return value;
-  if (typeof value === "number" || typeof value === "boolean") {
-    return String(value);
-  }
-
-  return JSON.stringify(value);
-}
-
 function shortCategoryId(categoryId: string) {
   return `${categoryId.slice(0, 8)}...`;
 }
