@@ -8,6 +8,7 @@ import {
   MessageSquare,
   Settings,
   ShieldCheck,
+  Tags,
   TriangleAlert,
   User,
   UserRound,
@@ -51,6 +52,12 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             href: "/customers",
             icon: UserRound,
             requiredPermission: PERMISSIONS.CUSTOMER_VIEW,
+          },
+          {
+            title: t("items.categories"),
+            href: "/categories",
+            icon: Tags,
+            requiredPermission: PERMISSIONS.CATEGORY_VIEW,
           },
           {
             title: t("items.chats"),
@@ -111,6 +118,11 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
         title: t("items.customers"),
         href: "/customers",
         requiredPermission: PERMISSIONS.CUSTOMER_VIEW,
+      },
+      {
+        title: t("items.categories"),
+        href: "/categories",
+        requiredPermission: PERMISSIONS.CATEGORY_VIEW,
       },
       {
         title: t("items.bookings"),

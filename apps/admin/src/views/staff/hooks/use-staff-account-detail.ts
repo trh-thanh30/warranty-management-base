@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { usePermissions } from "@/src/hooks/use-permissions";
-import { usersService } from "@/src/services/users.service";
+import { usersService } from "@/src/services/users/users.service";
 
 type StaffAccountDetailOptions =
   | {

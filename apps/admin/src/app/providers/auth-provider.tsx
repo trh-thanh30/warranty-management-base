@@ -18,13 +18,14 @@ import {
   setAuthSession,
   subscribeAuthSession,
 } from "@/src/app/stores/auth-session.store";
-import { authService } from "@/src/services/auth.service";
+import { authService } from "@/src/services/auth/auth.service";
 
 type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 
 type AuthContextValue = {
   user: AuthUser | null;
   status: AuthStatus;
+  isLoggingOut: boolean;
   login: (body: AdminLoginBody) => Promise<void>;
   logout: () => Promise<void>;
 };
@@ -33,6 +34,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [bootstrapping, setBootstrapping] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const session = useSyncExternalStore(
     subscribeAuthSession,
     getAuthSession,
@@ -79,16 +81,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
+    setIsLoggingOut(true);
     try {
       await authService.logout();
     } finally {
       clearAuthSession();
+      setIsLoggingOut(false);
     }
   }, []);
 
   const value = useMemo(
-    () => ({ user: session.user, status, login, logout }),
-    [login, logout, session.user, status],
+    () => ({ user: session.user, status, isLoggingOut, login, logout }),
+    [isLoggingOut, login, logout, session.user, status],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

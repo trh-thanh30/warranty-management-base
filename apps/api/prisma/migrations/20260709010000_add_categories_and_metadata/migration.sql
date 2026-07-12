@@ -60,24 +60,3 @@ ALTER TABLE "category" ADD CONSTRAINT "category_parent_id_fkey" FOREIGN KEY ("pa
 
 -- AddForeignKey
 ALTER TABLE "product" ADD CONSTRAINT "product_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "category"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- Seed default product categories for backward-compatible enum values.
-INSERT INTO "category" ("id", "type", "code", "slug", "name", "description", "order", "is_active", "updated_at")
-VALUES
-  ('00000000-0000-4000-8000-000000000101', 'PRODUCT', 'CAR', 'car', 'Car', 'Vehicles covered by warranty.', 10, true, CURRENT_TIMESTAMP),
-  ('00000000-0000-4000-8000-000000000102', 'PRODUCT', 'ACCESSORY', 'accessory', 'Accessory', 'Vehicle accessories and add-ons.', 20, true, CURRENT_TIMESTAMP),
-  ('00000000-0000-4000-8000-000000000103', 'PRODUCT', 'SPARE_PART', 'spare-part', 'Spare Part', 'Replacement parts and components.', 30, true, CURRENT_TIMESTAMP),
-  ('00000000-0000-4000-8000-000000000104', 'PRODUCT', 'SERVICE_PACKAGE', 'service-package', 'Service Package', 'Prepaid or bundled service packages.', 40, true, CURRENT_TIMESTAMP)
-ON CONFLICT ("type", "slug") DO UPDATE SET
-  "code" = EXCLUDED."code",
-  "name" = EXCLUDED."name",
-  "description" = EXCLUDED."description",
-  "order" = EXCLUDED."order",
-  "is_active" = EXCLUDED."is_active",
-  "updated_at" = CURRENT_TIMESTAMP;
-
-UPDATE "product"
-SET "category_id" = "category"."id"
-FROM "category"
-WHERE "category"."type" = 'PRODUCT'
-  AND "category"."code" = "product"."category"::text;

@@ -12,7 +12,7 @@ import type {
   UpdateModeratorBody,
   UserAccountSummary,
 } from "@repo/shared";
-import { usersService } from "@/src/services/users.service";
+import { usersService } from "@/src/services/users/users.service";
 
 type StaffListQuery = Omit<ListUsersQuery, "role" | "roles">;
 
