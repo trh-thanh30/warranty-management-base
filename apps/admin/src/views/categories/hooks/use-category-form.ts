@@ -52,22 +52,15 @@ export function useCategoryForm({
   }, [category, reset]);
 
   async function submit(values: CategoryFormValues) {
-    const metadata = parseMetadata(values.metadata, setError, t);
-    if (!metadata.ok) return;
-
     try {
       if (creating) {
-        await createCategory.mutateAsync(
-          toCreateCategoryBody(values, metadata.value),
-        );
+        await createCategory.mutateAsync(toCreateCategoryBody(values));
         toast.success(t("created"));
         onSaved();
         return;
       }
 
-      await updateCategory.mutateAsync(
-        toUpdateCategoryBody(values, metadata.value),
-      );
+      await updateCategory.mutateAsync(toUpdateCategoryBody(values));
       toast.success(t("updated"));
       onSaved();
     } catch (error) {
@@ -102,12 +95,8 @@ function getDefaultValues(
   return {
     code: category?.code ?? "",
     description: category?.description ?? "",
-    icon: category?.icon ?? "",
     imageUrl: category?.imageUrl ?? "",
     isActive: category?.isActive ?? true,
-    metadata: category?.metadata
-      ? JSON.stringify(category.metadata, null, 2)
-      : "",
     name: category?.name ?? "",
     order: category?.order ?? 0,
     parentId: category?.parentId ?? "",
@@ -116,17 +105,12 @@ function getDefaultValues(
   };
 }
 
-function toCreateCategoryBody(
-  values: CategoryFormValues,
-  metadata: Record<string, unknown> | undefined,
-): CreateCategoryBody {
+function toCreateCategoryBody(values: CategoryFormValues): CreateCategoryBody {
   return {
     code: toOptionalValue(values.code)?.toUpperCase(),
-    description: toOptionalValue(values.description),
-    icon: toOptionalValue(values.icon),
+    description: toOptionalRichText(values.description),
     imageUrl: toOptionalValue(values.imageUrl),
     isActive: values.isActive,
-    metadata,
     name: values.name.trim(),
     order: values.order,
     parentId: toOptionalValue(values.parentId),
@@ -135,46 +119,17 @@ function toCreateCategoryBody(
   };
 }
 
-function toUpdateCategoryBody(
-  values: CategoryFormValues,
-  metadata: Record<string, unknown> | null | undefined,
-): UpdateCategoryBody {
+function toUpdateCategoryBody(values: CategoryFormValues): UpdateCategoryBody {
   return {
     code: toNullableValue(values.code)?.toUpperCase() ?? null,
-    description: toNullableValue(values.description),
-    icon: toNullableValue(values.icon),
+    description: toNullableRichText(values.description),
     imageUrl: toNullableValue(values.imageUrl),
     isActive: values.isActive,
-    metadata: metadata ?? null,
     name: values.name.trim(),
     order: values.order,
     parentId: toNullableValue(values.parentId),
     slug: toOptionalValue(values.slug),
   };
-}
-
-function parseMetadata(
-  value: string,
-  setError: UseFormSetError<CategoryFormValues>,
-  t: (key: string) => string,
-):
-  | { ok: true; value: Record<string, unknown> | undefined }
-  | { ok: false; value?: never } {
-  const trimmed = value.trim();
-  if (!trimmed) return { ok: true, value: undefined };
-
-  try {
-    const parsed = JSON.parse(trimmed) as unknown;
-    if (!parsed || Array.isArray(parsed) || typeof parsed !== "object") {
-      setError("metadata", { message: t("metadataObjectRequired") });
-      return { ok: false };
-    }
-
-    return { ok: true, value: parsed as Record<string, unknown> };
-  } catch {
-    setError("metadata", { message: t("metadataInvalid") });
-    return { ok: false };
-  }
 }
 
 function toOptionalValue(value: string) {
@@ -185,6 +140,24 @@ function toOptionalValue(value: string) {
 function toNullableValue(value: string) {
   const trimmed = value.trim();
   return trimmed || null;
+}
+
+function toOptionalRichText(value: string) {
+  return isEmptyRichText(value) ? undefined : value.trim();
+}
+
+function toNullableRichText(value: string) {
+  return isEmptyRichText(value) ? null : value.trim();
+}
+
+function isEmptyRichText(value: string) {
+  const trimmed = value.trim();
+  const text = trimmed
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .trim();
+
+  return !trimmed || trimmed === "<p></p>" || !text;
 }
 
 function handleCategorySaveError(

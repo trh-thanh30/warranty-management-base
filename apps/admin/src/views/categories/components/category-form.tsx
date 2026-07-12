@@ -1,11 +1,13 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Controller } from "react-hook-form";
-import { Loader2 } from "lucide-react";
+import { ImageIcon, Loader2, UploadCloud, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { CategoryResponse } from "@repo/shared";
-import { Button, Input, Label, Switch, Textarea } from "@repo/ui";
+import { Button, Input, Label, Switch } from "@repo/ui";
+import { RichTextEditor } from "@/src/components/common/rich-text-editor";
+import { assetsService } from "@/src/services/assets.service";
 import { CATEGORY_TYPES } from "../categories.constants";
 import {
   clearParentOnTypeChange,
@@ -151,55 +153,36 @@ export function CategoryForm({
         id="category-description"
         label={t("descriptionLabel")}
       >
-        <Textarea
-          id="category-description"
-          placeholder={t("descriptionPlaceholder")}
-          rows={3}
-          {...register("description")}
+        <Controller
+          control={control}
+          name="description"
+          render={({ field }) => (
+            <RichTextEditor
+              disabled={isSubmitting}
+              onChange={field.onChange}
+              value={field.value}
+            />
+          )}
         />
       </Field>
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field
-          error={formatFieldError(errors.icon?.message, t)}
-          id="category-icon"
-          label={t("icon")}
-        >
-          <Input
-            autoComplete="off"
-            id="category-icon"
-            placeholder={t("iconPlaceholder")}
-            {...register("icon")}
-          />
-        </Field>
-
-        <Field
-          error={formatFieldError(errors.imageUrl?.message, t)}
-          id="category-image-url"
-          label={t("imageUrl")}
-        >
-          <Input
-            autoComplete="off"
+      <Controller
+        control={control}
+        name="imageUrl"
+        render={({ field }) => (
+          <Field
+            error={formatFieldError(errors.imageUrl?.message, t)}
             id="category-image-url"
-            placeholder={t("imageUrlPlaceholder")}
-            {...register("imageUrl")}
-          />
-        </Field>
-      </div>
-
-      <Field
-        error={formatFieldError(errors.metadata?.message, t)}
-        id="category-metadata"
-        label={t("metadata")}
-      >
-        <Textarea
-          className="font-mono text-xs"
-          id="category-metadata"
-          placeholder={t("metadataPlaceholder")}
-          rows={6}
-          {...register("metadata")}
-        />
-      </Field>
+            label={t("imageUrl")}
+          >
+            <CategoryImageUpload
+              disabled={isSubmitting}
+              onChange={field.onChange}
+              value={field.value}
+            />
+          </Field>
+        )}
+      />
 
       <Controller
         control={control}
@@ -255,7 +238,6 @@ function formatFieldError(
   const translationKeys = new Set([
     "codeInvalid",
     "descriptionLength",
-    "iconLength",
     "imageUrlLength",
     "nameLength",
     "nameRequired",
@@ -264,6 +246,126 @@ function formatFieldError(
   ]);
 
   return translationKeys.has(message) ? t(message) : message;
+}
+
+function CategoryImageUpload({
+  disabled,
+  onChange,
+  value,
+}: {
+  disabled?: boolean;
+  onChange: (value: string) => void;
+  value: string;
+}) {
+  const t = useTranslations("Categories");
+  const [error, setError] = useState("");
+  const [uploading, setUploading] = useState(false);
+
+  async function uploadImage(file: File | undefined) {
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError(t("imageUploadInvalid"));
+      return;
+    }
+
+    try {
+      setError("");
+      setUploading(true);
+      const asset = await assetsService.uploadAsset(file, {
+        accessType: "PUBLIC",
+        folder: "categories",
+        type: "IMAGE",
+      });
+      onChange(asset.url);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : t("imageUploadFailed"));
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      {value ? (
+        <div className="overflow-hidden rounded-md border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+          <div className="flex h-52 items-center justify-center bg-slate-100 p-3 dark:bg-slate-900">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              alt={t("imagePreviewAlt")}
+              className="max-h-full max-w-full rounded object-contain"
+              src={value}
+            />
+          </div>
+          <div className="flex items-center justify-between gap-3 border-t border-slate-200 px-3 py-2 dark:border-slate-800">
+            <span className="truncate text-xs text-slate-500 dark:text-slate-400">
+              {value}
+            </span>
+            <Button
+              disabled={disabled || uploading}
+              onClick={() => onChange("")}
+              size="sm"
+              type="button"
+              variant="secondary"
+            >
+              <X className="size-4" aria-hidden="true" />
+              {t("clearImage")}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <label
+          className="flex min-h-40 cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center text-sm text-slate-600 transition-colors hover:border-slate-400 hover:bg-slate-100 data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-900"
+          data-disabled={disabled || uploading}
+          htmlFor="category-image-url"
+        >
+          <ImageIcon className="size-6" aria-hidden="true" />
+          <span className="font-medium">{t("chooseImage")}</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            {t("imageUploadHint")}
+          </span>
+        </label>
+      )}
+
+      <input
+        accept="image/*"
+        className="sr-only"
+        disabled={disabled || uploading}
+        id="category-image-url"
+        onChange={(event) => {
+          void uploadImage(event.target.files?.[0]);
+          event.currentTarget.value = "";
+        }}
+        type="file"
+      />
+
+      {value ? (
+        <label
+          className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700 underline-offset-4 hover:underline data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 dark:text-slate-300"
+          data-disabled={disabled || uploading}
+          htmlFor="category-image-url"
+        >
+          {uploading ? (
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+          ) : (
+            <UploadCloud className="size-4" aria-hidden="true" />
+          )}
+          {t("replaceImage")}
+        </label>
+      ) : null}
+
+      {uploading && !value ? (
+        <p className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+          <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+          {t("uploadingImage")}
+        </p>
+      ) : null}
+
+      {error ? (
+        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+      ) : null}
+    </div>
+  );
 }
 
 function Field({
