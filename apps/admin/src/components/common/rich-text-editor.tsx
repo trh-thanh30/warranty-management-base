@@ -50,7 +50,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@repo/ui";
-import { assetsService } from "@/src/services/assets.service";
+import { assetsService } from "@/src/services/assets/assets.service";
 
 const DEFAULT_TEXT_COLOR = "#0f172a";
 const AUTOMATIC_TEXT_COLOR = "#000000";

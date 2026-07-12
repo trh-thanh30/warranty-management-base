@@ -12,7 +12,7 @@ import {
   type UpdateModeratorInput,
   type UserAccountSummary,
 } from "@repo/shared";
-import { usersService } from "@/src/services/users.service";
+import { usersService } from "@/src/services/users/users.service";
 import { useToast } from "@/src/hooks/use-toast";
 
 export function useStaffAccountForm({

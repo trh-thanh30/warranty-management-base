@@ -8,7 +8,7 @@ import {
   ROLE_DEFAULT_PERMISSIONS,
   type PermissionKey,
 } from "@repo/shared/constants";
-import { usersService } from "@/src/services/users.service";
+import { usersService } from "@/src/services/users/users.service";
 import { useToast } from "@/src/hooks/use-toast";
 import { buildModeratorPermissionOverrides } from "../staff.utils";
 import { staffKeys } from "./use-staff";

@@ -13,7 +13,7 @@ import type {
   PaginatedResponse,
   UpdateCustomerBody,
 } from "@repo/shared";
-import { customersService } from "@/src/services/customers.service";
+import { customersService } from "@/src/services/customers/customers.service";
 
 export const customerKeys = {
   all: ["customers"] as const,

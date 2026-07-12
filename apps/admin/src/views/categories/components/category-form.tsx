@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import type { CategoryResponse } from "@repo/shared";
 import { Button, Input, Label, Switch } from "@repo/ui";
 import { RichTextEditor } from "@/src/components/common/rich-text-editor";
-import { assetsService } from "@/src/services/assets.service";
+import { assetsService } from "@/src/services/assets/assets.service";
 import { CATEGORY_TYPES } from "../categories.constants";
 import {
   clearParentOnTypeChange,

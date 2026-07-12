@@ -18,7 +18,7 @@ import {
   setAuthSession,
   subscribeAuthSession,
 } from "@/src/app/stores/auth-session.store";
-import { authService } from "@/src/services/auth.service";
+import { authService } from "@/src/services/auth/auth.service";
 
 type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 

@@ -14,7 +14,7 @@ import type {
   ReorderCategoriesBody,
   UpdateCategoryBody,
 } from "@repo/shared";
-import { categoriesService } from "@/src/services/categories.service";
+import { categoriesService } from "@/src/services/categories/categories.service";
 
 export const categoryKeys = {
   all: ["categories"] as const,
