@@ -67,6 +67,12 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             requiredPermission: PERMISSIONS.PRODUCT_VIEW,
           },
           {
+            title: t("items.warranties"),
+            href: "/warranties",
+            icon: ShieldCheck,
+            requiredPermission: PERMISSIONS.WARRANTY_VIEW,
+          },
+          {
             title: t("items.chats"),
             badge: "3",
             icon: MessageSquare,
@@ -135,6 +141,11 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
         title: t("items.products"),
         href: "/products",
         requiredPermission: PERMISSIONS.PRODUCT_VIEW,
+      },
+      {
+        title: t("items.warranties"),
+        href: "/warranties",
+        requiredPermission: PERMISSIONS.WARRANTY_VIEW,
       },
       {
         title: t("items.bookings"),

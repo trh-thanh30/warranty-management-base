@@ -1,4 +1,10 @@
-import { Product, Warranty } from '@prisma/client';
+import { Customer, Product, ProductOwnership, Warranty } from '@prisma/client';
+
+type WarrantyWithProduct = Warranty & {
+  product: Product & {
+    ownerships?: Array<ProductOwnership & { customer?: Customer }>;
+  };
+};
 
 export function toWarrantyResponse(warranty: Warranty) {
   return {
@@ -35,5 +41,31 @@ export function toWarrantyLookupResponse(input: {
       endDate: input.warranty.end_date,
       status: input.warranty.status,
     },
+  };
+}
+
+export function toWarrantyListItemResponse(warranty: WarrantyWithProduct) {
+  const currentOwnership = warranty.product.ownerships?.find(
+    (ownership) => ownership.is_current_owner,
+  );
+
+  return {
+    ...toWarrantyResponse(warranty),
+    product: {
+      id: warranty.product.id,
+      name: warranty.product.name,
+      brand: warranty.product.brand,
+      model: warranty.product.model,
+      productCode: warranty.product.product_code,
+      serialNumber: warranty.product.serial_number,
+    },
+    owner: currentOwnership
+      ? {
+          customerId: currentOwnership.customer_id,
+          ownerUserId: currentOwnership.owner_user_id,
+          customerCode: currentOwnership.customer?.customer_code,
+          fullName: currentOwnership.customer?.full_name,
+        }
+      : null,
   };
 }
