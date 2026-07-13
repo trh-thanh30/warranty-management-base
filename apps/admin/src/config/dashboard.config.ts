@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   LogOut,
   MessageSquare,
+  Package,
   Settings,
   ShieldCheck,
   Tags,
@@ -58,6 +59,12 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             href: "/categories",
             icon: Tags,
             requiredPermission: PERMISSIONS.CATEGORY_VIEW,
+          },
+          {
+            title: t("items.products"),
+            href: "/products",
+            icon: Package,
+            requiredPermission: PERMISSIONS.PRODUCT_VIEW,
           },
           {
             title: t("items.chats"),
@@ -123,6 +130,11 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
         title: t("items.categories"),
         href: "/categories",
         requiredPermission: PERMISSIONS.CATEGORY_VIEW,
+      },
+      {
+        title: t("items.products"),
+        href: "/products",
+        requiredPermission: PERMISSIONS.PRODUCT_VIEW,
       },
       {
         title: t("items.bookings"),
