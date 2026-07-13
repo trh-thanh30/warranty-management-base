@@ -1,0 +1,101 @@
+"use client";
+
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type UseQueryOptions,
+} from "@tanstack/react-query";
+import type {
+  AssignProductOwnerBody,
+  CreateProductBody,
+  ListProductsQuery,
+  PaginatedResponse,
+  ProductResponse,
+  UpdateProductBody,
+} from "@repo/shared";
+import { productsService } from "@/src/services/products/products.service";
+
+export const productKeys = {
+  all: ["products"] as const,
+  detail: (productId: string | null) =>
+    [...productKeys.details(), productId] as const,
+  details: () => [...productKeys.all, "detail"] as const,
+  list: (query: ListProductsQuery) => [...productKeys.lists(), query] as const,
+  lists: () => [...productKeys.all, "list"] as const,
+};
+
+export function useProducts(
+  query: ListProductsQuery,
+  options?: Pick<
+    UseQueryOptions<PaginatedResponse<ProductResponse>>,
+    "enabled"
+  >,
+) {
+  return useQuery({
+    ...options,
+    queryKey: productKeys.list(query),
+    queryFn: () => productsService.listProducts(query),
+  });
+}
+
+export function useProduct(
+  productId: string | null,
+  options?: Pick<UseQueryOptions<ProductResponse>, "enabled">,
+) {
+  return useQuery({
+    ...options,
+    queryKey: productKeys.detail(productId),
+    queryFn: () => productsService.getProduct(productId ?? ""),
+  });
+}
+
+export function useCreateProduct() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: CreateProductBody) =>
+      productsService.createProduct(body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+    },
+  });
+}
+
+export function useUpdateProduct(productId: string | null) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: UpdateProductBody) =>
+      productsService.updateProduct(productId ?? "", body),
+    onSuccess: (product) => {
+      void queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.setQueryData(productKeys.detail(product.id), product);
+    },
+  });
+}
+
+export function useDeleteProduct() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (productId: string) => productsService.deleteProduct(productId),
+    onSuccess: (product) => {
+      void queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.setQueryData(productKeys.detail(product.id), product);
+    },
+  });
+}
+
+export function useAssignProductOwner(productId: string | null) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: AssignProductOwnerBody) =>
+      productsService.assignOwner(productId ?? "", body),
+    onSuccess: (product) => {
+      void queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.setQueryData(productKeys.detail(product.id), product);
+    },
+  });
+}
