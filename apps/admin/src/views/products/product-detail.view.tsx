@@ -1,6 +1,6 @@
 "use client";
 
-import { PackageSearch, Pencil, UserPlus } from "lucide-react";
+import { PackageSearch, Pencil, ShieldCheck, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
@@ -10,6 +10,7 @@ import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
+import { ActivateProductWarrantyDialog } from "./components/activate-product-warranty-dialog";
 import { AssignOwnerDialog } from "./components/assign-owner-dialog";
 import {
   ProductDetailCard,
@@ -29,8 +30,12 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
     productId,
   });
   const [assignOpen, setAssignOpen] = useState(false);
+  const [activateOpen, setActivateOpen] = useState(false);
   const canEdit = hasPermission(PERMISSIONS.PRODUCT_UPDATE);
   const canAssignOwner = hasPermission(PERMISSIONS.PRODUCT_ASSIGN_OWNER);
+  const canActivateWarranty = hasPermission(PERMISSIONS.WARRANTY_ACTIVATE);
+  const canActivateCurrentWarranty =
+    canActivateWarranty && product?.warranty?.status === "DRAFT";
 
   return (
     <PermissionGuard permissions={[PERMISSIONS.PRODUCT_VIEW]}>
@@ -43,6 +48,17 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
         title={t("detailTitle")}
       >
         <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+          {canActivateCurrentWarranty ? (
+            <Button
+              disabled={!product}
+              onClick={() => setActivateOpen(true)}
+              type="button"
+              variant="secondary"
+            >
+              <ShieldCheck className="size-4" />
+              {t("activateWarranty")}
+            </Button>
+          ) : null}
           {canAssignOwner ? (
             <Button
               disabled={!product}
@@ -96,6 +112,14 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
         <AssignOwnerDialog
           onOpenChange={setAssignOpen}
           open={assignOpen}
+          product={product}
+        />
+        <ActivateProductWarrantyDialog
+          onActivated={() => {
+            void productQuery.refetch();
+          }}
+          onOpenChange={setActivateOpen}
+          open={activateOpen}
           product={product}
         />
       </FormPageShell>

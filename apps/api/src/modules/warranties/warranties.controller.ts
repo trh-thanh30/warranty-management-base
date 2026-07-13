@@ -2,12 +2,14 @@ import { Permissions } from '@/common/decorators/permissions.decorator';
 import { User } from '@/common/decorators/user.decorator';
 import { ActivateWarrantyByCodeDto } from '@/modules/warranties/dto/activate-warranty-by-code.dto';
 import { ActivateWarrantyDto } from '@/modules/warranties/dto/activate-warranty.dto';
+import { ListWarrantiesDto } from '@/modules/warranties/dto/list-warranties.dto';
 import { LookupWarrantyDto } from '@/modules/warranties/dto/lookup-warranty.dto';
 import { ActivateWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/activate-warranty-by-code.use-case';
 import { ActivateWarrantyUseCase } from '@/modules/warranties/use-cases/activate-warranty.use-case';
 import { GetMyProductWarrantyUseCase } from '@/modules/warranties/use-cases/get-my-product-warranty.use-case';
 import { GetWarrantyByProductUseCase } from '@/modules/warranties/use-cases/get-warranty-by-product.use-case';
 import { ListMyProductsUseCase } from '@/modules/warranties/use-cases/list-my-products.use-case';
+import { ListWarrantiesUseCase } from '@/modules/warranties/use-cases/list-warranties.use-case';
 import { LookupWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/lookup-warranty-by-code.use-case';
 import { LookupWarrantyForCustomerUseCase } from '@/modules/warranties/use-cases/lookup-warranty-for-customer.use-case';
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
@@ -23,11 +25,18 @@ export class WarrantiesController {
     private readonly activateWarrantyUseCase: ActivateWarrantyUseCase,
     private readonly activateWarrantyByCodeUseCase: ActivateWarrantyByCodeUseCase,
     private readonly getWarrantyByProductUseCase: GetWarrantyByProductUseCase,
+    private readonly listWarrantiesUseCase: ListWarrantiesUseCase,
     private readonly lookupWarrantyByCodeUseCase: LookupWarrantyByCodeUseCase,
     private readonly lookupWarrantyForCustomerUseCase: LookupWarrantyForCustomerUseCase,
     private readonly listMyProductsUseCase: ListMyProductsUseCase,
     private readonly getMyProductWarrantyUseCase: GetMyProductWarrantyUseCase,
   ) {}
+
+  @Get('warranties')
+  @Permissions([permission_key.WARRANTY_VIEW])
+  listWarranties(@Query() dto: ListWarrantiesDto) {
+    return this.listWarrantiesUseCase.execute(dto);
+  }
 
   @Get('warranties/lookup')
   @Permissions([permission_key.WARRANTY_VIEW])

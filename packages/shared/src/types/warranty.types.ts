@@ -26,3 +26,43 @@ export type WarrantyLookupResult = {
     "warrantyCode" | "startDate" | "endDate" | "status"
   >;
 };
+
+export type WarrantyProductSummary = Pick<
+  ProductSummary,
+  "id" | "name" | "brand" | "model" | "productCode" | "serialNumber"
+>;
+
+export type WarrantyOwnerSummary = {
+  customerId: string;
+  customerCode?: string;
+  fullName?: string;
+  ownerUserId?: string | null;
+};
+
+export type WarrantyListItem = WarrantySummary & {
+  owner: WarrantyOwnerSummary | null;
+  product: WarrantyProductSummary;
+};
+
+export type ListWarrantiesQuery = {
+  limit?: number;
+  page?: number;
+  search?: string;
+  sortBy?: "createdAt" | "endDate" | "startDate" | "updatedAt";
+  sortOrder?: "asc" | "desc";
+  status?: WarrantyStatus;
+};
+
+export type LookupWarrantyQuery = {
+  code: string;
+};
+
+export type ActivateWarrantyBody = {
+  durationMonths?: number;
+  startDate?: string;
+  terms?: string;
+};
+
+export type ActivateWarrantyByCodeBody = ActivateWarrantyBody & {
+  warrantyCode: string;
+};

@@ -1,0 +1,264 @@
+"use client";
+
+import { Eye, MoreHorizontal, ShieldCheck } from "lucide-react";
+import { useTranslations } from "next-intl";
+import type { WarrantyListItem } from "@repo/shared";
+import { PERMISSIONS } from "@repo/shared/constants";
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@repo/ui";
+import { SortableTableHead } from "@/src/components/common/sortable-table-head";
+import { usePermissions } from "@/src/hooks/use-permissions";
+import { Link } from "@/src/i18n/navigation";
+import type { WarrantySortBy } from "../warranties.types";
+import {
+  formatWarrantyDate,
+  formatWarrantyOwner,
+  getWarrantyProductDisplayName,
+} from "../warranties.utils";
+import { WarrantyStatusBadge } from "./warranty-status-badge";
+
+type WarrantiesTableProps = {
+  items: WarrantyListItem[];
+  onActivate: (warranty: WarrantyListItem) => void;
+  onSortChange: (sortBy: WarrantySortBy) => void;
+  sortBy?: WarrantySortBy;
+  sortOrder: "asc" | "desc";
+};
+
+export function WarrantiesTable({
+  items,
+  onActivate,
+  onSortChange,
+  sortBy,
+  sortOrder,
+}: WarrantiesTableProps) {
+  const t = useTranslations("Warranties");
+
+  return (
+    <>
+      <div className="space-y-3 lg:hidden">
+        {items.map((warranty) => (
+          <WarrantyMobileCard
+            key={warranty.id}
+            onActivate={onActivate}
+            warranty={warranty}
+          />
+        ))}
+      </div>
+
+      <div className="hidden overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800 lg:block">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t("product")}</TableHead>
+              <TableHead>{t("owner")}</TableHead>
+              <TableHead>{t("warrantyCode")}</TableHead>
+              <TableHead>{t("status")}</TableHead>
+              <SortableTableHead
+                activeSortBy={sortBy}
+                onSortChange={onSortChange}
+                sortBy="startDate"
+                sortOrder={sortOrder}
+              >
+                {t("startDate")}
+              </SortableTableHead>
+              <SortableTableHead
+                activeSortBy={sortBy}
+                onSortChange={onSortChange}
+                sortBy="endDate"
+                sortOrder={sortOrder}
+              >
+                {t("endDate")}
+              </SortableTableHead>
+              <TableHead>{t("duration")}</TableHead>
+              <SortableTableHead
+                activeSortBy={sortBy}
+                onSortChange={onSortChange}
+                sortBy="createdAt"
+                sortOrder={sortOrder}
+              >
+                {t("createdAt")}
+              </SortableTableHead>
+              <TableHead className="text-right">{t("actions")}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {items.map((warranty) => (
+              <WarrantyTableRow
+                key={warranty.id}
+                onActivate={onActivate}
+                warranty={warranty}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </>
+  );
+}
+
+function WarrantyTableRow({
+  onActivate,
+  warranty,
+}: {
+  onActivate: WarrantiesTableProps["onActivate"];
+  warranty: WarrantyListItem;
+}) {
+  const t = useTranslations("Warranties");
+
+  return (
+    <TableRow>
+      <TableCell>
+        <WarrantyProductName warranty={warranty} />
+      </TableCell>
+      <TableCell>{formatWarrantyOwner(warranty)}</TableCell>
+      <TableCell className="font-mono text-xs">
+        {warranty.warrantyCode}
+      </TableCell>
+      <TableCell>
+        <WarrantyStatusBadge status={warranty.status} />
+      </TableCell>
+      <TableCell>{formatWarrantyDate(warranty.startDate)}</TableCell>
+      <TableCell>{formatWarrantyDate(warranty.endDate)}</TableCell>
+      <TableCell>
+        {t("durationValue", { count: warranty.durationMonths })}
+      </TableCell>
+      <TableCell>{formatWarrantyDate(warranty.createdAt)}</TableCell>
+      <TableCell className="text-right">
+        <WarrantyActions onActivate={onActivate} warranty={warranty} />
+      </TableCell>
+    </TableRow>
+  );
+}
+
+function WarrantyMobileCard({
+  onActivate,
+  warranty,
+}: {
+  onActivate: WarrantiesTableProps["onActivate"];
+  warranty: WarrantyListItem;
+}) {
+  const t = useTranslations("Warranties");
+
+  return (
+    <article className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+      <div className="flex items-start justify-between gap-3">
+        <WarrantyProductName warranty={warranty} />
+        <WarrantyStatusBadge status={warranty.status} />
+      </div>
+      <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+        <WarrantyMobileField
+          label={t("warrantyCode")}
+          value={warranty.warrantyCode}
+        />
+        <WarrantyMobileField
+          label={t("owner")}
+          value={formatWarrantyOwner(warranty)}
+        />
+        <WarrantyMobileField
+          label={t("startDate")}
+          value={formatWarrantyDate(warranty.startDate)}
+        />
+        <WarrantyMobileField
+          label={t("endDate")}
+          value={formatWarrantyDate(warranty.endDate)}
+        />
+      </dl>
+      <div className="mt-4 flex justify-end">
+        <WarrantyActions onActivate={onActivate} warranty={warranty} />
+      </div>
+    </article>
+  );
+}
+
+function WarrantyProductName({ warranty }: { warranty: WarrantyListItem }) {
+  return (
+    <div className="min-w-0">
+      <Link
+        className="truncate font-medium text-slate-950 hover:underline dark:text-slate-50"
+        href={`/products/${warranty.product.id}`}
+      >
+        {warranty.product.name}
+      </Link>
+      <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
+        {getWarrantyProductDisplayName(warranty)}
+      </p>
+    </div>
+  );
+}
+
+function WarrantyMobileField({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="min-w-0">
+      <dt className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+        {label}
+      </dt>
+      <dd className="mt-1 truncate text-slate-950 dark:text-slate-50">
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+function WarrantyActions({
+  onActivate,
+  warranty,
+}: {
+  onActivate: WarrantiesTableProps["onActivate"];
+  warranty: WarrantyListItem;
+}) {
+  const t = useTranslations("Warranties");
+  const { hasPermission } = usePermissions();
+  const canActivate = hasPermission(PERMISSIONS.WARRANTY_ACTIVATE);
+  const canActivateCurrentWarranty = canActivate && warranty.status === "DRAFT";
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          aria-label={t("openActions", { code: warranty.warrantyCode })}
+          className="size-10 md:size-9"
+          size="icon"
+          variant="ghost"
+        >
+          <MoreHorizontal className="size-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem asChild>
+          <Link href={`/products/${warranty.product.id}`}>
+            <Eye className="mr-2 size-4" />
+            {t("viewProduct")}
+          </Link>
+        </DropdownMenuItem>
+        {canActivateCurrentWarranty ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => onActivate(warranty)}>
+              <ShieldCheck className="mr-2 size-4" />
+              {t("activate")}
+            </DropdownMenuItem>
+          </>
+        ) : null}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
