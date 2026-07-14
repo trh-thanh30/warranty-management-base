@@ -1,27 +1,8 @@
-import {
-  Asset,
-  Customer,
-  Product,
-  ServiceCenter,
-  User,
-  Warranty,
-  WarrantyClaim,
-  WarrantyClaimServiceCenterHistory,
-  WarrantyClaimStatusHistory,
-} from '@prisma/client';
-
-export type WarrantyClaimAttachmentResponse = {
-  id: string;
-  originalName: string;
-  filename: string;
-  mimeType: string;
-  size: number;
-  url: string;
-  type: string;
-  accessType: string;
-  uploadedById: string | null;
-  createdAt: Date;
-};
+import type { Asset, User, WarrantyClaimStatusHistory } from '@prisma/client';
+import type {
+  WarrantyClaimAttachmentResponse,
+  WarrantyClaimWithRelations,
+} from '@/modules/warranty-claims/types/warranty-claim.types';
 
 export function toWarrantyClaimAttachmentResponse(
   asset: Asset & { url?: string },
@@ -39,23 +20,6 @@ export function toWarrantyClaimAttachmentResponse(
     createdAt: asset.created_at,
   };
 }
-
-type WarrantyClaimWithRelations = WarrantyClaim & {
-  product?: Product;
-  warranty?: Warranty;
-  customer?: Customer | null;
-  service_center?: ServiceCenter | null;
-  status_history?: Array<
-    WarrantyClaimStatusHistory & {
-      changed_by?: User | null;
-    }
-  >;
-  service_center_history?: Array<
-    WarrantyClaimServiceCenterHistory & {
-      changed_by?: User | null;
-    }
-  >;
-};
 
 function toChangedByResponse(user?: User | null) {
   return user

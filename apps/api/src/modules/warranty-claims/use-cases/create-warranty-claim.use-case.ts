@@ -4,7 +4,7 @@ import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/w
 import { WarrantyClaimNotificationService } from '@/modules/warranty-claims/service/warranty-claim-notification.service';
 import { WarrantyClaimSlaService } from '@/modules/warranty-claims/service/warranty-claim-sla.service';
 import { GenerateWarrantyClaimCodeUseCase } from '@/modules/warranty-claims/use-cases/generate-warranty-claim-code.use-case';
-import { toWarrantyClaimResponse } from '@/modules/warranty-claims/warranty-claims.types';
+import { toWarrantyClaimResponse } from '@/modules/warranty-claims/mappers/warranty-claim.mapper';
 import { Injectable } from '@nestjs/common';
 import {
   Prisma,

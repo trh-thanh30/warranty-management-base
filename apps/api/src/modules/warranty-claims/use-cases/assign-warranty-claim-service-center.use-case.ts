@@ -2,13 +2,10 @@ import { BadRequestError, NotFoundError } from '@/common/response';
 import { AssignWarrantyClaimServiceCenterDto } from '@/modules/warranty-claims/dto/assign-warranty-claim-service-center.dto';
 import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/warranty-claims.repository';
 import { WarrantyClaimNotificationService } from '@/modules/warranty-claims/service/warranty-claim-notification.service';
-import { toWarrantyClaimResponse } from '@/modules/warranty-claims/warranty-claims.types';
+import { toWarrantyClaimResponse } from '@/modules/warranty-claims/mappers/warranty-claim.mapper';
+import type { AssignWarrantyClaimServiceCenterContext } from '@/modules/warranty-claims/types/warranty-claim-context.types';
 import { Injectable } from '@nestjs/common';
 import { warranty_claim_status } from '@prisma/client';
-
-type AssignWarrantyClaimServiceCenterContext = {
-  changedByUserId?: string;
-};
 
 const TERMINAL_CLAIM_STATUSES = new Set<warranty_claim_status>([
   warranty_claim_status.COMPLETED,

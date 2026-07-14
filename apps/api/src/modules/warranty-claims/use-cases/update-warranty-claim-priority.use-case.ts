@@ -2,7 +2,7 @@ import { BadRequestError, NotFoundError } from '@/common/response';
 import { UpdateWarrantyClaimPriorityDto } from '@/modules/warranty-claims/dto/update-warranty-claim-priority.dto';
 import { WarrantyClaimSlaService } from '@/modules/warranty-claims/service/warranty-claim-sla.service';
 import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/warranty-claims.repository';
-import { toWarrantyClaimResponse } from '@/modules/warranty-claims/warranty-claims.types';
+import { toWarrantyClaimResponse } from '@/modules/warranty-claims/mappers/warranty-claim.mapper';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

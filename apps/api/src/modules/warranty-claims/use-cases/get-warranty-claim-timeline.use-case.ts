@@ -1,6 +1,6 @@
 import { NotFoundError } from '@/common/response';
 import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/warranty-claims.repository';
-import { toWarrantyClaimTimeline } from '@/modules/warranty-claims/warranty-claims.types';
+import { toWarrantyClaimTimeline } from '@/modules/warranty-claims/mappers/warranty-claim.mapper';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
