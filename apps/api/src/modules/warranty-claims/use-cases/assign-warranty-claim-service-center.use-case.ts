@@ -4,10 +4,17 @@ import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/w
 import { WarrantyClaimNotificationService } from '@/modules/warranty-claims/service/warranty-claim-notification.service';
 import { toWarrantyClaimResponse } from '@/modules/warranty-claims/warranty-claims.types';
 import { Injectable } from '@nestjs/common';
+import { warranty_claim_status } from '@prisma/client';
 
 type AssignWarrantyClaimServiceCenterContext = {
   changedByUserId?: string;
 };
+
+const TERMINAL_CLAIM_STATUSES = new Set<warranty_claim_status>([
+  warranty_claim_status.COMPLETED,
+  warranty_claim_status.REJECTED,
+  warranty_claim_status.CANCELLED,
+]);
 
 @Injectable()
 export class AssignWarrantyClaimServiceCenterUseCase {
@@ -27,9 +34,23 @@ export class AssignWarrantyClaimServiceCenterUseCase {
       throw new NotFoundError('Warranty claim not found');
     }
 
+    if (TERMINAL_CLAIM_STATUSES.has(existingClaim.status)) {
+      throw new BadRequestError(
+        'A service center cannot be changed for a terminal warranty claim',
+      );
+    }
+
     if (existingClaim.service_center_id === dto.serviceCenterId) {
       throw new BadRequestError(
         'Warranty claim is already assigned to this service center',
+      );
+    }
+
+    const note = dto.note?.trim();
+
+    if (existingClaim.service_center_id && !note) {
+      throw new BadRequestError(
+        'A reason is required when changing the service center',
       );
     }
 
@@ -44,9 +65,9 @@ export class AssignWarrantyClaimServiceCenterUseCase {
 
     const claim = await this.warrantyClaimsRepository.assignServiceCenter({
       id,
+      fromServiceCenterId: existingClaim.service_center_id,
       serviceCenterId: dto.serviceCenterId,
-      status: existingClaim.status,
-      note: dto.note?.trim(),
+      note,
       changedByUserId: context.changedByUserId,
     });
 

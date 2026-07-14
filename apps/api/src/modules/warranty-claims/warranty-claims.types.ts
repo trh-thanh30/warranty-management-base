@@ -6,6 +6,7 @@ import {
   User,
   Warranty,
   WarrantyClaim,
+  WarrantyClaimServiceCenterHistory,
   WarrantyClaimStatusHistory,
 } from '@prisma/client';
 
@@ -49,7 +50,70 @@ type WarrantyClaimWithRelations = WarrantyClaim & {
       changed_by?: User | null;
     }
   >;
+  service_center_history?: Array<
+    WarrantyClaimServiceCenterHistory & {
+      changed_by?: User | null;
+    }
+  >;
 };
+
+function toChangedByResponse(user?: User | null) {
+  return user
+    ? {
+        id: user.id,
+        username: user.username,
+        fullName: user.full_name,
+        email: user.email,
+      }
+    : null;
+}
+
+function toStatusHistoryResponse(
+  history: WarrantyClaimStatusHistory & { changed_by?: User | null },
+) {
+  return {
+    id: history.id,
+    fromStatus: history.from_status,
+    toStatus: history.to_status,
+    note: history.note,
+    changedByUserId: history.changed_by_user_id,
+    changedBy: toChangedByResponse(history.changed_by),
+    createdAt: history.created_at,
+  };
+}
+
+export function toWarrantyClaimTimeline(claim: WarrantyClaimWithRelations) {
+  const statusEvents =
+    claim.status_history?.map((history) => ({
+      ...toStatusHistoryResponse(history),
+      type: 'STATUS_CHANGED' as const,
+    })) ?? [];
+  const serviceCenterEvents =
+    claim.service_center_history?.map((history) => ({
+      id: history.id,
+      type: history.from_service_center_name
+        ? ('SERVICE_CENTER_CHANGED' as const)
+        : ('SERVICE_CENTER_ASSIGNED' as const),
+      fromServiceCenter: history.from_service_center_name
+        ? {
+            id: history.from_service_center_id,
+            name: history.from_service_center_name,
+          }
+        : null,
+      toServiceCenter: {
+        id: history.to_service_center_id,
+        name: history.to_service_center_name,
+      },
+      reason: history.note,
+      changedByUserId: history.changed_by_user_id,
+      changedBy: toChangedByResponse(history.changed_by),
+      createdAt: history.created_at,
+    })) ?? [];
+
+  return [...statusEvents, ...serviceCenterEvents].sort(
+    (left, right) => left.createdAt.getTime() - right.createdAt.getTime(),
+  );
+}
 
 export function toWarrantyClaimResponse(
   claim: WarrantyClaimWithRelations,
@@ -117,23 +181,7 @@ export function toWarrantyClaimResponse(
           isActive: claim.service_center.is_active,
         }
       : null,
-    statusHistory:
-      claim.status_history?.map((history) => ({
-        id: history.id,
-        fromStatus: history.from_status,
-        toStatus: history.to_status,
-        note: history.note,
-        changedByUserId: history.changed_by_user_id,
-        changedBy: history.changed_by
-          ? {
-              id: history.changed_by.id,
-              username: history.changed_by.username,
-              fullName: history.changed_by.full_name,
-              email: history.changed_by.email,
-            }
-          : null,
-        createdAt: history.created_at,
-      })) ?? [],
+    statusHistory: claim.status_history?.map(toStatusHistoryResponse) ?? [],
     attachments,
   };
 }

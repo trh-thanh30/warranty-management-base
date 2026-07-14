@@ -68,8 +68,8 @@ describe('AssignWarrantyClaimServiceCenterUseCase', () => {
 
     expect(warrantyClaimsRepository.assignServiceCenter).toHaveBeenCalledWith({
       id: 'claim-id',
+      fromServiceCenterId: null,
       serviceCenterId: 'service-center-id',
-      status: warranty_claim_status.APPROVED,
       note: 'Chuyen tram Ha Noi',
       changedByUserId: 'admin-id',
     });
@@ -124,5 +124,100 @@ describe('AssignWarrantyClaimServiceCenterUseCase', () => {
         serviceCenterId: 'service-center-id',
       }),
     ).rejects.toBeInstanceOf(BadRequestError);
+  });
+
+  it.each([
+    warranty_claim_status.COMPLETED,
+    warranty_claim_status.REJECTED,
+    warranty_claim_status.CANCELLED,
+  ])('rejects assigning a service center when claim is %s', async (status) => {
+    warrantyClaimsRepository.findById.mockResolvedValue({
+      id: 'claim-id',
+      service_center_id: null,
+      status,
+    });
+    const useCase = new AssignWarrantyClaimServiceCenterUseCase(
+      warrantyClaimsRepository as never,
+    );
+
+    await expect(
+      useCase.execute('claim-id', {
+        serviceCenterId: 'service-center-id',
+      }),
+    ).rejects.toBeInstanceOf(BadRequestError);
+    expect(
+      warrantyClaimsRepository.findActiveServiceCenterById,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('requires a reason when moving a claim from another service center', async () => {
+    warrantyClaimsRepository.findById.mockResolvedValue({
+      id: 'claim-id',
+      service_center_id: 'old-service-center-id',
+      status: warranty_claim_status.IN_REPAIR,
+    });
+    const useCase = new AssignWarrantyClaimServiceCenterUseCase(
+      warrantyClaimsRepository as never,
+    );
+
+    await expect(
+      useCase.execute('claim-id', {
+        serviceCenterId: 'new-service-center-id',
+        note: '   ',
+      }),
+    ).rejects.toBeInstanceOf(BadRequestError);
+    expect(
+      warrantyClaimsRepository.findActiveServiceCenterById,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('records the previous center when reassigning an in-repair claim', async () => {
+    warrantyClaimsRepository.findById.mockResolvedValue({
+      id: 'claim-id',
+      service_center_id: 'old-service-center-id',
+      status: warranty_claim_status.IN_REPAIR,
+    });
+    warrantyClaimsRepository.findActiveServiceCenterById.mockResolvedValue({
+      id: 'new-service-center-id',
+    });
+    warrantyClaimsRepository.assignServiceCenter.mockResolvedValue({
+      id: 'claim-id',
+      claim_code: 'CLM000001',
+      warranty_id: 'warranty-id',
+      product_id: 'product-id',
+      customer_id: null,
+      service_center_id: 'new-service-center-id',
+      warranty_code: 'WM-2026-ABCDEF',
+      requester_name: null,
+      requester_phone: null,
+      issue_title: 'May khong hoat dong',
+      issue_detail: null,
+      status: warranty_claim_status.IN_REPAIR,
+      submitted_at: new Date('2026-07-02T00:00:00.000Z'),
+      resolved_at: null,
+      created_at: new Date('2026-07-02T00:00:00.000Z'),
+      updated_at: new Date('2026-07-03T00:00:00.000Z'),
+      status_history: [],
+    });
+    const useCase = new AssignWarrantyClaimServiceCenterUseCase(
+      warrantyClaimsRepository as never,
+    );
+
+    await useCase.execute(
+      'claim-id',
+      {
+        serviceCenterId: 'new-service-center-id',
+        note: 'Tram cu thieu linh kien',
+      },
+      { changedByUserId: 'admin-id' },
+    );
+
+    expect(warrantyClaimsRepository.assignServiceCenter).toHaveBeenCalledWith({
+      id: 'claim-id',
+      fromServiceCenterId: 'old-service-center-id',
+      serviceCenterId: 'new-service-center-id',
+      note: 'Tram cu thieu linh kien',
+      changedByUserId: 'admin-id',
+    });
   });
 });
