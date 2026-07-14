@@ -21,6 +21,12 @@ const claimInclude = {
     },
     orderBy: { created_at: 'asc' },
   },
+  service_center_history: {
+    include: {
+      changed_by: true,
+    },
+    orderBy: { created_at: 'asc' },
+  },
 } satisfies Prisma.WarrantyClaimInclude;
 
 @Injectable()
@@ -235,24 +241,50 @@ export class WarrantyClaimsRepository {
 
   assignServiceCenter(input: {
     id: string;
+    fromServiceCenterId: string | null;
     serviceCenterId: string;
-    status: warranty_claim_status;
     note?: string;
     changedByUserId?: string;
   }) {
     return this.prismaService.$transaction(async (tx) => {
+      const centers = await tx.serviceCenter.findMany({
+        where: {
+          id: {
+            in: [input.fromServiceCenterId, input.serviceCenterId].filter(
+              (id): id is string => Boolean(id),
+            ),
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+        },
+      });
+      const centerNames = new Map(
+        centers.map((center) => [center.id, center.name]),
+      );
+      const toServiceCenterName = centerNames.get(input.serviceCenterId);
+
+      if (!toServiceCenterName) {
+        throw new Error('Service center not found during assignment');
+      }
+
       await tx.warrantyClaim.update({
         where: { id: input.id },
         data: {
           service_center_id: input.serviceCenterId,
         },
       });
-      await tx.warrantyClaimStatusHistory.create({
+      await tx.warrantyClaimServiceCenterHistory.create({
         data: {
           warranty_claim_id: input.id,
-          from_status: input.status,
-          to_status: input.status,
-          note: input.note ?? 'Assigned service center',
+          from_service_center_id: input.fromServiceCenterId,
+          from_service_center_name: input.fromServiceCenterId
+            ? centerNames.get(input.fromServiceCenterId)
+            : null,
+          to_service_center_id: input.serviceCenterId,
+          to_service_center_name: toServiceCenterName,
+          note: input.note,
           changed_by_user_id: input.changedByUserId,
         },
       });

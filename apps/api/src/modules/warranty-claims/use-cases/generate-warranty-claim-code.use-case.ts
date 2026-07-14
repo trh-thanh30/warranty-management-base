@@ -1,11 +1,6 @@
 import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/warranty-claims.repository';
+import type { IGenerateWarrantyClaimCodeUseCase } from '@/modules/warranty-claims/types/generate-warranty-claim-code.types';
 import { Injectable } from '@nestjs/common';
-
-export interface IGenerateWarrantyClaimCodeUseCase {
-  generateWarrantyClaimCodeBatch(count: number): Promise<string[]>;
-  generateWarrantyClaimCode(): Promise<string>;
-  execute(): Promise<string>;
-}
 
 @Injectable()
 export class GenerateWarrantyClaimCodeUseCase implements IGenerateWarrantyClaimCodeUseCase {

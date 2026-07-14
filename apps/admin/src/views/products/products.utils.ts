@@ -1,9 +1,7 @@
-import type { ProductResponse } from "@repo/shared";
+import { formatDate, type ProductResponse } from "@repo/shared";
 
 export function formatProductCreatedAt(createdAt: string) {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-  }).format(new Date(createdAt));
+  return formatDate(createdAt);
 }
 
 export function formatProductOwner(product: ProductResponse) {

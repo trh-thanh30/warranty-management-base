@@ -1,4 +1,5 @@
 import type { CustomerSummary } from "./customer.types.ts";
+import type { PaginationQuery } from "./pagination.types.ts";
 import type { ProductSummary } from "./product.types.ts";
 import type { ServiceCenterSummary } from "./service-center.types.ts";
 import type { WarrantySummary } from "./warranty.types.ts";
@@ -28,6 +29,37 @@ export type WarrantyClaimStatusHistorySummary = {
   } | null;
   createdAt: string;
 };
+
+export type WarrantyClaimStatusTimelineItem =
+  WarrantyClaimStatusHistorySummary & {
+    type: "STATUS_CHANGED";
+  };
+
+export type WarrantyClaimServiceCenterTimelineItem = {
+  id: string;
+  type: "SERVICE_CENTER_ASSIGNED" | "SERVICE_CENTER_CHANGED";
+  fromServiceCenter: {
+    id: string | null;
+    name: string;
+  } | null;
+  toServiceCenter: {
+    id: string;
+    name: string;
+  };
+  reason: string | null;
+  changedByUserId: string | null;
+  changedBy: {
+    id: string;
+    username: string;
+    fullName: string | null;
+    email: string;
+  } | null;
+  createdAt: string;
+};
+
+export type WarrantyClaimTimelineItem =
+  | WarrantyClaimStatusTimelineItem
+  | WarrantyClaimServiceCenterTimelineItem;
 
 export type WarrantyClaimAttachmentSummary = {
   id: string;
@@ -86,4 +118,71 @@ export type PublicWarrantyClaimSummary = Pick<
     ServiceCenterSummary,
     "name" | "phone" | "email" | "province" | "district" | "address"
   > | null;
+};
+
+export type WarrantyClaimSortBy =
+  | "claimCode"
+  | "warrantyCode"
+  | "status"
+  | "priority"
+  | "dueAt"
+  | "submittedAt"
+  | "resolvedAt"
+  | "createdAt"
+  | "updatedAt";
+
+export type ListWarrantyClaimsQuery = PaginationQuery & {
+  claimCode?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  dueFrom?: string;
+  dueTo?: string;
+  isOverdue?: "true" | "false";
+  priority?: WarrantyClaimPriority;
+  search?: string;
+  serviceCenterId?: string;
+  sortBy?: WarrantyClaimSortBy;
+  status?: WarrantyClaimStatus;
+  warrantyCode?: string;
+};
+
+export type WarrantyClaimMetrics = {
+  total: number;
+  createdToday: number;
+  createdThisMonth: number;
+  overdue: number;
+  averageResolutionHours: number | null;
+  byStatus: Array<{
+    status: WarrantyClaimStatus;
+    count: number;
+  }>;
+  byPriority: Array<{
+    priority: WarrantyClaimPriority;
+    count: number;
+  }>;
+  byServiceCenter: Array<{
+    serviceCenterId: string | null;
+    count: number;
+  }>;
+};
+
+export type WarrantyClaimMetricsQuery = {
+  dateFrom?: string;
+  dateTo?: string;
+  serviceCenterId?: string;
+};
+
+export type UpdateWarrantyClaimStatusBody = {
+  status: WarrantyClaimStatus;
+  note?: string;
+};
+
+export type AssignWarrantyClaimServiceCenterBody = {
+  serviceCenterId: string;
+  note?: string;
+};
+
+export type UpdateWarrantyClaimPriorityBody = {
+  priority?: WarrantyClaimPriority;
+  dueAt?: string;
 };

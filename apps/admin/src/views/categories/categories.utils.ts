@@ -1,9 +1,7 @@
-import type { CategoryResponse } from "@repo/shared";
+import { formatDate, type CategoryResponse } from "@repo/shared";
 
 export function formatCategoryCreatedAt(createdAt: string) {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-  }).format(new Date(createdAt));
+  return formatDate(createdAt);
 }
 
 export function getCategoryParentLabel(

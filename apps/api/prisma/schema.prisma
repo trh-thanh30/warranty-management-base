@@ -21,13 +21,14 @@ model User {
   created_at    DateTime    @default(now())
   updated_at    DateTime    @updatedAt
 
-  assets                  Asset[]
-  created_notifications   Notification[]               @relation("NotificationCreatedBy")
-  notification_recipients NotificationRecipient[]
-  permissions             UserPermission[]
-  customer_profile        Customer?
-  owned_products          ProductOwnership[]
-  warranty_claim_changes  WarrantyClaimStatusHistory[] @relation("WarrantyClaimStatusChangedBy")
+  assets                                Asset[]
+  created_notifications                 Notification[]                      @relation("NotificationCreatedBy")
+  notification_recipients               NotificationRecipient[]
+  permissions                           UserPermission[]
+  customer_profile                      Customer?
+  owned_products                        ProductOwnership[]
+  warranty_claim_changes                WarrantyClaimStatusHistory[]        @relation("WarrantyClaimStatusChangedBy")
+  warranty_claim_service_center_changes WarrantyClaimServiceCenterHistory[] @relation("WarrantyClaimServiceCenterChangedBy")
 
   @@index([role, status])
   @@index([email])
@@ -311,11 +312,12 @@ model WarrantyClaim {
   created_at        DateTime                @default(now())
   updated_at        DateTime                @updatedAt
 
-  warranty       Warranty                     @relation(fields: [warranty_id], references: [id], onDelete: Cascade)
-  product        Product                      @relation(fields: [product_id], references: [id], onDelete: Cascade)
-  customer       Customer?                    @relation(fields: [customer_id], references: [id], onDelete: SetNull)
-  service_center ServiceCenter?               @relation(fields: [service_center_id], references: [id], onDelete: SetNull)
-  status_history WarrantyClaimStatusHistory[]
+  warranty               Warranty                            @relation(fields: [warranty_id], references: [id], onDelete: Cascade)
+  product                Product                             @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  customer               Customer?                           @relation(fields: [customer_id], references: [id], onDelete: SetNull)
+  service_center         ServiceCenter?                      @relation(fields: [service_center_id], references: [id], onDelete: SetNull)
+  status_history         WarrantyClaimStatusHistory[]
+  service_center_history WarrantyClaimServiceCenterHistory[]
 
   @@index([claim_code])
   @@index([warranty_code])
@@ -348,6 +350,29 @@ model WarrantyClaimStatusHistory {
   @@map("warranty_claim_status_history")
 }
 
+model WarrantyClaimServiceCenterHistory {
+  id                       String   @id @default(uuid()) @db.Uuid
+  warranty_claim_id        String   @db.Uuid
+  from_service_center_id   String?  @db.Uuid
+  from_service_center_name String?
+  to_service_center_id     String   @db.Uuid
+  to_service_center_name   String
+  note                     String?
+  changed_by_user_id       String?  @db.Uuid
+  created_at               DateTime @default(now())
+
+  warranty_claim      WarrantyClaim  @relation(fields: [warranty_claim_id], references: [id], onDelete: Cascade)
+  from_service_center ServiceCenter? @relation("WarrantyClaimServiceCenterFrom", fields: [from_service_center_id], references: [id], onDelete: SetNull, map: "warranty_claim_service_center_history_from_service_center_id_fk")
+  to_service_center   ServiceCenter  @relation("WarrantyClaimServiceCenterTo", fields: [to_service_center_id], references: [id], onDelete: Restrict)
+  changed_by          User?          @relation("WarrantyClaimServiceCenterChangedBy", fields: [changed_by_user_id], references: [id], onDelete: SetNull)
+
+  @@index([warranty_claim_id, created_at], map: "warranty_claim_service_center_history_warranty_claim_id_created")
+  @@index([from_service_center_id], map: "warranty_claim_service_center_history_from_service_center_id_id")
+  @@index([to_service_center_id])
+  @@index([changed_by_user_id])
+  @@map("warranty_claim_service_center_history")
+}
+
 model ServiceCenter {
   id         String   @id @default(uuid()) @db.Uuid
   name       String
@@ -361,7 +386,9 @@ model ServiceCenter {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  claims WarrantyClaim[]
+  claims                 WarrantyClaim[]
+  claim_assignments_from WarrantyClaimServiceCenterHistory[] @relation("WarrantyClaimServiceCenterFrom")
+  claim_assignments_to   WarrantyClaimServiceCenterHistory[] @relation("WarrantyClaimServiceCenterTo")
 
   @@index([is_active])
   @@index([province])

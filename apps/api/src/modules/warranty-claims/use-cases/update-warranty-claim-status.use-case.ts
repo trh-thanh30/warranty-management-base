@@ -3,7 +3,8 @@ import { UpdateWarrantyClaimStatusDto } from '@/modules/warranty-claims/dto/upda
 import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/warranty-claims.repository';
 import { WarrantyClaimNotificationService } from '@/modules/warranty-claims/service/warranty-claim-notification.service';
 import { WarrantyClaimSlaService } from '@/modules/warranty-claims/service/warranty-claim-sla.service';
-import { toWarrantyClaimResponse } from '@/modules/warranty-claims/warranty-claims.types';
+import { toWarrantyClaimResponse } from '@/modules/warranty-claims/mappers/warranty-claim.mapper';
+import type { UpdateWarrantyClaimStatusContext } from '@/modules/warranty-claims/types/warranty-claim-context.types';
 import { Injectable } from '@nestjs/common';
 import { warranty_claim_status } from '@prisma/client';
 
@@ -37,10 +38,6 @@ const ALLOWED_STATUS_TRANSITIONS: Record<
   [warranty_claim_status.REJECTED]: [],
   [warranty_claim_status.COMPLETED]: [],
   [warranty_claim_status.CANCELLED]: [],
-};
-
-type UpdateWarrantyClaimStatusContext = {
-  changedByUserId?: string;
 };
 
 @Injectable()

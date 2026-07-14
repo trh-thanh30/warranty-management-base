@@ -1,6 +1,5 @@
 import {
   Activity,
-  CalendarCheck,
   CircleHelp,
   ClipboardList,
   LayoutDashboard,
@@ -37,11 +36,6 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             icon: LayoutDashboard,
           },
           {
-            title: t("items.bookings"),
-            href: "/bookings",
-            icon: CalendarCheck,
-          },
-          {
             title: t("items.users"),
             href: "/users",
             icon: Users,
@@ -71,6 +65,12 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             href: "/warranties",
             icon: ShieldCheck,
             requiredPermission: PERMISSIONS.WARRANTY_VIEW,
+          },
+          {
+            title: t("items.warrantyClaims"),
+            href: "/warranty-claims",
+            icon: ClipboardList,
+            requiredPermission: PERMISSIONS.WARRANTY_CLAIM_VIEW,
           },
           {
             title: t("items.chats"),
@@ -148,8 +148,9 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
         requiredPermission: PERMISSIONS.WARRANTY_VIEW,
       },
       {
-        title: t("items.bookings"),
-        href: "/bookings",
+        title: t("items.warrantyClaims"),
+        href: "/warranty-claims",
+        requiredPermission: PERMISSIONS.WARRANTY_CLAIM_VIEW,
       },
       {
         title: t("items.settings"),

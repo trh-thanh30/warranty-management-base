@@ -6,6 +6,8 @@ import {
   product_status,
   user_role,
   user_status,
+  warranty_claim_priority,
+  warranty_claim_status,
   warranty_status,
 } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
@@ -124,7 +126,7 @@ async function upsertDemoProduct(data: {
   const endDate = new Date(data.purchaseDate);
   endDate.setMonth(endDate.getMonth() + data.durationMonths);
 
-  await prisma.warranty.upsert({
+  const warranty = await prisma.warranty.upsert({
     where: { product_id: product.id },
     update: {
       warranty_code: data.warrantyCode,
@@ -162,7 +164,132 @@ async function upsertDemoProduct(data: {
     },
   });
 
-  return product;
+  return { product, warranty };
+}
+
+async function upsertDemoServiceCenter(data: {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  province: string;
+  district: string;
+  address: string;
+}) {
+  return prisma.serviceCenter.upsert({
+    where: { id: data.id },
+    update: {
+      name: data.name,
+      phone: data.phone,
+      email: data.email,
+      province: data.province,
+      district: data.district,
+      address: data.address,
+      is_active: true,
+    },
+    create: {
+      id: data.id,
+      name: data.name,
+      phone: data.phone,
+      email: data.email,
+      province: data.province,
+      district: data.district,
+      address: data.address,
+      is_active: true,
+    },
+  });
+}
+
+type DemoClaimHistory = {
+  fromStatus: warranty_claim_status | null;
+  toStatus: warranty_claim_status;
+  note: string;
+  changedByUserId: string;
+  createdAt: Date;
+};
+
+async function upsertDemoWarrantyClaim(data: {
+  claimCode: string;
+  warrantyId: string;
+  productId: string;
+  customerId: string;
+  serviceCenterId?: string | null;
+  warrantyCode: string;
+  requesterName: string;
+  requesterPhone: string;
+  issueTitle: string;
+  issueDetail: string;
+  status: warranty_claim_status;
+  priority: warranty_claim_priority;
+  dueAt: Date;
+  slaBreachedAt?: Date | null;
+  submittedAt: Date;
+  history: DemoClaimHistory[];
+}) {
+  const claim = await prisma.warrantyClaim.upsert({
+    where: { claim_code: data.claimCode },
+    update: {
+      warranty_id: data.warrantyId,
+      product_id: data.productId,
+      customer_id: data.customerId,
+      service_center_id: data.serviceCenterId ?? null,
+      warranty_code: data.warrantyCode,
+      requester_name: data.requesterName,
+      requester_phone: data.requesterPhone,
+      issue_title: data.issueTitle,
+      issue_detail: data.issueDetail,
+      status: data.status,
+      priority: data.priority,
+      due_at: data.dueAt,
+      sla_breached_at: data.slaBreachedAt ?? null,
+      submitted_at: data.submittedAt,
+      resolved_at: null,
+    },
+    create: {
+      claim_code: data.claimCode,
+      warranty_id: data.warrantyId,
+      product_id: data.productId,
+      customer_id: data.customerId,
+      service_center_id: data.serviceCenterId ?? null,
+      warranty_code: data.warrantyCode,
+      requester_name: data.requesterName,
+      requester_phone: data.requesterPhone,
+      issue_title: data.issueTitle,
+      issue_detail: data.issueDetail,
+      status: data.status,
+      priority: data.priority,
+      due_at: data.dueAt,
+      sla_breached_at: data.slaBreachedAt ?? null,
+      submitted_at: data.submittedAt,
+    },
+  });
+
+  await prisma.warrantyClaimServiceCenterHistory.deleteMany({
+    where: { warranty_claim_id: claim.id },
+  });
+
+  await prisma.warrantyClaimStatusHistory.deleteMany({
+    where: { warranty_claim_id: claim.id },
+  });
+
+  await prisma.warrantyClaimStatusHistory.createMany({
+    data: data.history.map((history) => ({
+      warranty_claim_id: claim.id,
+      from_status: history.fromStatus,
+      to_status: history.toStatus,
+      note: history.note,
+      changed_by_user_id: history.changedByUserId,
+      created_at: history.createdAt,
+    })),
+  });
+
+  return claim;
+}
+
+function addDays(date: Date, days: number) {
+  const result = new Date(date);
+  result.setUTCDate(result.getUTCDate() + days);
+  return result;
 }
 
 async function seedDefaultCategories() {
@@ -304,7 +431,37 @@ async function main() {
     address: 'Da Nang',
   });
 
-  await upsertDemoProduct({
+  const hanoiServiceCenter = await upsertDemoServiceCenter({
+    id: '00000000-0000-4000-8000-000000000201',
+    name: 'Hanoi Warranty Center',
+    phone: '02473000001',
+    email: 'hanoi.service@example.com',
+    province: 'Ha Noi',
+    district: 'Cau Giay',
+    address: '123 Tran Duy Hung, Cau Giay, Ha Noi',
+  });
+
+  const hcmServiceCenter = await upsertDemoServiceCenter({
+    id: '00000000-0000-4000-8000-000000000202',
+    name: 'Ho Chi Minh Warranty Center',
+    phone: '02873000002',
+    email: 'hcm.service@example.com',
+    province: 'Ho Chi Minh City',
+    district: 'District 7',
+    address: '456 Nguyen Van Linh, District 7, Ho Chi Minh City',
+  });
+
+  const danangServiceCenter = await upsertDemoServiceCenter({
+    id: '00000000-0000-4000-8000-000000000203',
+    name: 'Da Nang Warranty Center',
+    phone: '02367300003',
+    email: 'danang.service@example.com',
+    province: 'Da Nang',
+    district: 'Hai Chau',
+    address: '789 Nguyen Van Linh, Hai Chau, Da Nang',
+  });
+
+  const camryDemo = await upsertDemoProduct({
     productCode: 'PRD-2026-CAMRY',
     warrantyCode: 'WM-2026-CAMRYA',
     serialNumber: 'VIN-CAMRY-A-2026',
@@ -336,7 +493,7 @@ async function main() {
     warrantyStatus: warranty_status.EXPIRED,
   });
 
-  await upsertDemoProduct({
+  const civicDemo = await upsertDemoProduct({
     productCode: 'PRD-2026-CIVIC',
     warrantyCode: 'WM-2026-CIVICB',
     serialNumber: 'VIN-CIVIC-B-2026',
@@ -352,7 +509,7 @@ async function main() {
     warrantyStatus: warranty_status.ACTIVE,
   });
 
-  await upsertDemoProduct({
+  const walkInBatteryDemo = await upsertDemoProduct({
     productCode: 'PRD-2026-WALKIN-BATTERY',
     warrantyCode: 'WM-2026-WALKIN1',
     serialNumber: 'SN-WALKIN-BATTERY-001',
@@ -368,6 +525,121 @@ async function main() {
     warrantyStatus: warranty_status.ACTIVE,
   });
 
+  const seedNow = new Date();
+  const submittedClaimAt = seedNow;
+  const reviewingClaimAt = addDays(seedNow, -3);
+  const repairClaimAt = addDays(seedNow, -10);
+
+  await upsertDemoWarrantyClaim({
+    claimCode: 'CLM-DEMO-SUBMITTED',
+    warrantyId: camryDemo.warranty.id,
+    productId: camryDemo.product.id,
+    customerId: customerA.id,
+    serviceCenterId: null,
+    warrantyCode: camryDemo.warranty.warranty_code,
+    requesterName: customerA.full_name,
+    requesterPhone: customerA.phone ?? '0900000001',
+    issueTitle: 'Abnormal engine warning light',
+    issueDetail:
+      'The engine warning light appeared after startup. The vehicle still operates normally.',
+    status: warranty_claim_status.SUBMITTED,
+    priority: warranty_claim_priority.NORMAL,
+    dueAt: addDays(seedNow, 2),
+    submittedAt: submittedClaimAt,
+    history: [
+      {
+        fromStatus: null,
+        toStatus: warranty_claim_status.SUBMITTED,
+        note: 'Demo claim submitted by customer.',
+        changedByUserId: adminUser.id,
+        createdAt: submittedClaimAt,
+      },
+    ],
+  });
+
+  await upsertDemoWarrantyClaim({
+    claimCode: 'CLM-DEMO-REVIEWING',
+    warrantyId: civicDemo.warranty.id,
+    productId: civicDemo.product.id,
+    customerId: customerB.id,
+    serviceCenterId: hcmServiceCenter.id,
+    warrantyCode: civicDemo.warranty.warranty_code,
+    requesterName: customerB.full_name,
+    requesterPhone: customerB.phone ?? '0900000002',
+    issueTitle: 'Air conditioning cooling performance decreased',
+    issueDetail:
+      'The cabin takes longer than usual to cool down during daytime driving.',
+    status: warranty_claim_status.REVIEWING,
+    priority: warranty_claim_priority.HIGH,
+    dueAt: addDays(seedNow, 1),
+    submittedAt: reviewingClaimAt,
+    history: [
+      {
+        fromStatus: null,
+        toStatus: warranty_claim_status.SUBMITTED,
+        note: 'Claim received through the service hotline.',
+        changedByUserId: adminUser.id,
+        createdAt: reviewingClaimAt,
+      },
+      {
+        fromStatus: warranty_claim_status.SUBMITTED,
+        toStatus: warranty_claim_status.REVIEWING,
+        note: 'Assigned to the Ho Chi Minh service center for review.',
+        changedByUserId: moderatorUser.id,
+        createdAt: addDays(reviewingClaimAt, 1),
+      },
+    ],
+  });
+
+  await upsertDemoWarrantyClaim({
+    claimCode: 'CLM-DEMO-IN-REPAIR',
+    warrantyId: walkInBatteryDemo.warranty.id,
+    productId: walkInBatteryDemo.product.id,
+    customerId: walkInCustomer.id,
+    serviceCenterId: danangServiceCenter.id,
+    warrantyCode: walkInBatteryDemo.warranty.warranty_code,
+    requesterName: walkInCustomer.full_name,
+    requesterPhone: walkInCustomer.phone ?? '0900000003',
+    issueTitle: 'Battery cannot retain charge',
+    issueDetail:
+      'The battery loses charge overnight and requires inspection or replacement.',
+    status: warranty_claim_status.IN_REPAIR,
+    priority: warranty_claim_priority.URGENT,
+    dueAt: addDays(seedNow, -1),
+    slaBreachedAt: addDays(seedNow, -1),
+    submittedAt: repairClaimAt,
+    history: [
+      {
+        fromStatus: null,
+        toStatus: warranty_claim_status.SUBMITTED,
+        note: 'Walk-in claim received at the Da Nang service center.',
+        changedByUserId: adminUser.id,
+        createdAt: repairClaimAt,
+      },
+      {
+        fromStatus: warranty_claim_status.SUBMITTED,
+        toStatus: warranty_claim_status.REVIEWING,
+        note: 'Warranty eligibility verified.',
+        changedByUserId: moderatorUser.id,
+        createdAt: addDays(repairClaimAt, 1),
+      },
+      {
+        fromStatus: warranty_claim_status.REVIEWING,
+        toStatus: warranty_claim_status.APPROVED,
+        note: 'Battery inspection approved under warranty.',
+        changedByUserId: moderatorUser.id,
+        createdAt: addDays(repairClaimAt, 2),
+      },
+      {
+        fromStatus: warranty_claim_status.APPROVED,
+        toStatus: warranty_claim_status.IN_REPAIR,
+        note: 'Replacement battery ordered and repair started.',
+        changedByUserId: moderatorUser.id,
+        createdAt: addDays(repairClaimAt, 3),
+      },
+    ],
+  });
+
   console.log('Base database seed completed successfully.');
   console.log(`Admin: ${adminUser.email} (${adminUser.role})`);
   console.log(`Moderator: ${moderatorUser.email} (${moderatorUser.role})`);
@@ -379,6 +651,12 @@ async function main() {
   console.log('Customer A codes: WM-2026-CAMRYA, WM-2026-DASHAA');
   console.log('Customer B code: WM-2026-CIVICB');
   console.log('Walk-in customer code: WM-2026-WALKIN1');
+  console.log(
+    `Service centers: ${hanoiServiceCenter.name}, ${hcmServiceCenter.name}, ${danangServiceCenter.name}`,
+  );
+  console.log(
+    'Warranty claims: CLM-DEMO-SUBMITTED, CLM-DEMO-REVIEWING, CLM-DEMO-IN-REPAIR',
+  );
   console.log('Default password: password123');
 }
 

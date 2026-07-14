@@ -1,13 +1,11 @@
-import type { CustomerSummary } from "@repo/shared";
+import { formatDate, type CustomerSummary } from "@repo/shared";
 
 export function getCustomerDisplayName(customer: CustomerSummary) {
   return customer.fullName || customer.customerCode;
 }
 
 export function formatCustomerCreatedAt(createdAt: string) {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-  }).format(new Date(createdAt));
+  return formatDate(createdAt);
 }
 
 export function getCustomerContact(customer: CustomerSummary) {

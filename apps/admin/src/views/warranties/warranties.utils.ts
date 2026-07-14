@@ -1,11 +1,7 @@
-import type { WarrantyListItem } from "@repo/shared";
+import { formatDate, type WarrantyListItem } from "@repo/shared";
 
 export function formatWarrantyDate(value: string | null | undefined) {
-  if (!value) return "-";
-
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-  }).format(new Date(value));
+  return formatDate(value);
 }
 
 export function formatWarrantyOwner(warranty: WarrantyListItem) {

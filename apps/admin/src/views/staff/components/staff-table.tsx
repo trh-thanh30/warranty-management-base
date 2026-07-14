@@ -2,7 +2,11 @@
 
 import { MoreHorizontal, Pencil, ShieldCheck, UserRoundX } from "lucide-react";
 import { useTranslations } from "next-intl";
-import type { ListUsersQuery, UserAccountSummary } from "@repo/shared";
+import {
+  formatDate,
+  type ListUsersQuery,
+  type UserAccountSummary,
+} from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
   Avatar,
@@ -303,7 +307,5 @@ function getStaffDisplayName(user: UserAccountSummary) {
 }
 
 function formatStaffCreatedAt(createdAt: string) {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-  }).format(new Date(createdAt));
+  return formatDate(createdAt);
 }

@@ -3,7 +3,7 @@ import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/w
 import {
   toWarrantyClaimAttachmentResponse,
   toWarrantyClaimResponse,
-} from '@/modules/warranty-claims/warranty-claims.types';
+} from '@/modules/warranty-claims/mappers/warranty-claim.mapper';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
