@@ -1,5 +1,6 @@
 import {
   Activity,
+  Building2,
   CircleHelp,
   ClipboardList,
   LayoutDashboard,
@@ -71,6 +72,12 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             href: "/warranty-claims",
             icon: ClipboardList,
             requiredPermission: PERMISSIONS.WARRANTY_CLAIM_VIEW,
+          },
+          {
+            title: t("items.serviceCenters"),
+            href: "/service-centers",
+            icon: Building2,
+            requiredPermission: PERMISSIONS.SERVICE_CENTER_VIEW,
           },
           {
             title: t("items.chats"),
@@ -151,6 +158,11 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
         title: t("items.warrantyClaims"),
         href: "/warranty-claims",
         requiredPermission: PERMISSIONS.WARRANTY_CLAIM_VIEW,
+      },
+      {
+        title: t("items.serviceCenters"),
+        href: "/service-centers",
+        requiredPermission: PERMISSIONS.SERVICE_CENTER_VIEW,
       },
       {
         title: t("items.settings"),

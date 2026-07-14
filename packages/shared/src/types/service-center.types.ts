@@ -1,3 +1,5 @@
+import type { PaginationQuery } from "./pagination.types.ts";
+
 export type ServiceCenterSummary = {
   id: string;
   name: string;
@@ -10,4 +12,31 @@ export type ServiceCenterSummary = {
   metadata: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
+};
+
+export type ServiceCenterSortBy =
+  | "name"
+  | "province"
+  | "createdAt"
+  | "updatedAt"
+  | "isActive";
+
+export type ListServiceCentersQuery = Omit<PaginationQuery, "sortBy"> & {
+  search?: string;
+  province?: string;
+  isActive?: "true" | "false";
+  sortBy?: ServiceCenterSortBy;
+};
+
+export type CreateServiceCenterBody = {
+  name: string;
+  phone?: string;
+  email?: string;
+  province: string;
+  district?: string;
+  address: string;
+};
+
+export type UpdateServiceCenterBody = Partial<CreateServiceCenterBody> & {
+  isActive?: boolean;
 };

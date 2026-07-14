@@ -376,8 +376,8 @@ model WarrantyClaimServiceCenterHistory {
 model ServiceCenter {
   id         String   @id @default(uuid()) @db.Uuid
   name       String
-  phone      String?
-  email      String?
+  phone      String?  @unique
+  email      String?  @unique
   province   String
   district   String?
   address    String

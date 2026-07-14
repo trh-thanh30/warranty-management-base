@@ -2,7 +2,6 @@ import type {
   AssignWarrantyClaimServiceCenterBody,
   ListWarrantyClaimsQuery,
   PaginatedResponse,
-  ServiceCenterSummary,
   UpdateWarrantyClaimPriorityBody,
   UpdateWarrantyClaimStatusBody,
   WarrantyClaimMetrics,
@@ -109,25 +108,6 @@ export function createWarrantyClaimsService(http: WarrantyClaimsHttpClient) {
         await http.patch<WarrantyClaimSummary>(
           `/warranty-claims/${claimId}/priority`,
           body,
-        ),
-      );
-    },
-
-    async listActiveServiceCenters(): Promise<
-      PaginatedResponse<ServiceCenterSummary>
-    > {
-      return unwrap(
-        await http.get<PaginatedResponse<ServiceCenterSummary>>(
-          "/service-centers",
-          {
-            params: {
-              isActive: "true",
-              limit: 100,
-              page: 1,
-              sortBy: "name",
-              sortOrder: "asc",
-            },
-          },
         ),
       );
     },

@@ -3,6 +3,7 @@ import { ServiceCentersRepository } from '@/modules/service-centers/repository/s
 import { ServiceCentersController } from '@/modules/service-centers/service-centers.controller';
 import { CreateServiceCenterUseCase } from '@/modules/service-centers/use-cases/create-service-center.use-case';
 import { GetServiceCenterDetailUseCase } from '@/modules/service-centers/use-cases/get-service-center-detail.use-case';
+import { ListServiceCenterProvincesUseCase } from '@/modules/service-centers/use-cases/list-service-center-provinces.use-case';
 import { ListServiceCentersUseCase } from '@/modules/service-centers/use-cases/list-service-centers.use-case';
 import { UpdateServiceCenterUseCase } from '@/modules/service-centers/use-cases/update-service-center.use-case';
 import { Module } from '@nestjs/common';
@@ -14,6 +15,7 @@ import { Module } from '@nestjs/common';
     ServiceCentersRepository,
     CreateServiceCenterUseCase,
     ListServiceCentersUseCase,
+    ListServiceCenterProvincesUseCase,
     GetServiceCenterDetailUseCase,
     UpdateServiceCenterUseCase,
   ],

@@ -10,7 +10,6 @@ import type {
   AssignWarrantyClaimServiceCenterBody,
   ListWarrantyClaimsQuery,
   PaginatedResponse,
-  ServiceCenterSummary,
   UpdateWarrantyClaimPriorityBody,
   UpdateWarrantyClaimStatusBody,
   WarrantyClaimMetrics,
@@ -30,7 +29,6 @@ export const warrantyClaimKeys = {
   lists: () => [...warrantyClaimKeys.all, "list"] as const,
   metrics: (query: WarrantyClaimMetricsQuery) =>
     [...warrantyClaimKeys.all, "metrics", query] as const,
-  serviceCenters: () => [...warrantyClaimKeys.all, "service-centers"] as const,
   timeline: (claimId: string | null) =>
     [...warrantyClaimKeys.detail(claimId), "timeline"] as const,
 };
@@ -80,19 +78,6 @@ export function useWarrantyClaimMetrics(
     ...options,
     queryKey: warrantyClaimKeys.metrics(query),
     queryFn: () => warrantyClaimsService.getMetrics(query),
-  });
-}
-
-export function useActiveServiceCenters(
-  options?: Pick<
-    UseQueryOptions<PaginatedResponse<ServiceCenterSummary>>,
-    "enabled"
-  >,
-) {
-  return useQuery({
-    ...options,
-    queryKey: warrantyClaimKeys.serviceCenters(),
-    queryFn: () => warrantyClaimsService.listActiveServiceCenters(),
   });
 }
 

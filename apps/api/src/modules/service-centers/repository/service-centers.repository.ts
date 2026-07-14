@@ -14,6 +14,32 @@ export class ServiceCentersRepository {
     });
   }
 
+  findByPhone(phone: string, excludeId?: string) {
+    return this.prismaService.serviceCenter.findFirst({
+      where: {
+        phone,
+        NOT: excludeId ? { id: excludeId } : undefined,
+      },
+    });
+  }
+
+  findByEmail(email: string, excludeId?: string) {
+    return this.prismaService.serviceCenter.findFirst({
+      where: {
+        email: { equals: email, mode: 'insensitive' },
+        NOT: excludeId ? { id: excludeId } : undefined,
+      },
+    });
+  }
+
+  listProvinces() {
+    return this.prismaService.serviceCenter.findMany({
+      distinct: ['province'],
+      orderBy: { province: 'asc' },
+      select: { province: true },
+    });
+  }
+
   list(filters: ListServiceCentersDto) {
     const search = filters.search?.trim();
     const province = filters.province?.trim();
