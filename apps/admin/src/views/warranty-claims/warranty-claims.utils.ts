@@ -1,35 +1,18 @@
-import type {
-  ServiceCenterSummary,
-  WarrantyClaimPriority,
-  WarrantyClaimStatus,
-  WarrantyClaimSummary,
+import {
+  formatDate,
+  type ServiceCenterSummary,
+  type WarrantyClaimPriority,
+  type WarrantyClaimStatus,
+  type WarrantyClaimSummary,
 } from "@repo/shared";
 import { WARRANTY_CLAIM_TERMINAL_STATUSES } from "./warranty-claims.constants";
 
-const dateFormatter = new Intl.DateTimeFormat("vi-VN", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
-
-const dateTimeFormatter = new Intl.DateTimeFormat("vi-VN", {
-  day: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-  month: "short",
-  year: "numeric",
-});
-
 export function formatClaimDate(value: string | null | undefined) {
-  if (!value) return "-";
-
-  return dateFormatter.format(new Date(value));
+  return formatDate(value, { locale: "vi-VN" });
 }
 
 export function formatClaimDateTime(value: string | null | undefined) {
-  if (!value) return "-";
-
-  return dateTimeFormatter.format(new Date(value));
+  return formatDate(value, { locale: "vi-VN", showTime: true });
 }
 
 export function formatResolutionHours(value: number | null | undefined) {
