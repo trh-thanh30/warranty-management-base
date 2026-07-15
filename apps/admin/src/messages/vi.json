@@ -7,19 +7,12 @@
     "brandDescription": "Next + Turborepo",
     "sections": {
       "general": "Tổng quan",
-      "pages": "Trang",
       "other": "Khác"
     },
     "items": {
       "dashboard": "Bảng điều khiển",
       "users": "Nhân viên",
-      "chats": "Trò chuyện",
-      "securedByAuth": "Bảo vệ bởi Auth",
-      "auth": "Xác thực",
-      "errors": "Lỗi",
-      "system": "Hệ thống",
       "settings": "Cài đặt",
-      "helpCenter": "Trung tâm trợ giúp",
       "overview": "Tổng quan",
       "customers": "Khách hàng",
       "categories": "Danh mục",

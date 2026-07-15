@@ -7,19 +7,12 @@
     "brandDescription": "Next + Turborepo",
     "sections": {
       "general": "General",
-      "pages": "Pages",
       "other": "Other"
     },
     "items": {
       "dashboard": "Dashboard",
       "users": "Staff",
-      "chats": "Chats",
-      "securedByAuth": "Secured by Auth",
-      "auth": "Auth",
-      "errors": "Errors",
-      "system": "System",
       "settings": "Settings",
-      "helpCenter": "Help Center",
       "overview": "Overview",
       "customers": "Customers",
       "categories": "Categories",
