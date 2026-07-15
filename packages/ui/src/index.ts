@@ -4,6 +4,7 @@ export * from "./button";
 export * from "./card";
 export * from "./checkbox";
 export * from "./calendar";
+export * from "./chart";
 export * from "./date-picker";
 export * from "./date-range-picker";
 export * from "./dialog";
