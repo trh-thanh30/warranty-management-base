@@ -21,7 +21,6 @@
       "warrantyClaims": "Yêu cầu bảo hành",
       "serviceCenters": "Trạm bảo hành",
       "notifications": "Thông báo",
-      "profile": "Hồ sơ",
       "signOut": "Đăng xuất",
       "signingOut": "Đang đăng xuất..."
     }
@@ -41,7 +40,10 @@
     "loadingSession": "Đang tải phiên đăng nhập",
     "language": "Ngôn ngữ",
     "vietnamese": "Tiếng Việt",
-    "english": "English"
+    "english": "English",
+    "darkMode": "Chế độ tối",
+    "back": "Quay lại",
+    "openUserMenu": "Mở menu tài khoản"
   },
   "Login": {
     "brand": "Warranty Admin",

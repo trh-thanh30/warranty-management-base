@@ -8,7 +8,6 @@ import {
   Settings,
   ShieldCheck,
   Tags,
-  User,
   UserRound,
   Users,
 } from "lucide-react";
@@ -145,11 +144,6 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
       email: "admin@example.com",
       avatarFallback: "AD",
       menuItems: [
-        {
-          label: t("items.profile"),
-          href: "/settings", // or a profile subpage
-          icon: User,
-        },
         {
           label: t("items.settings"),
           href: "/settings",

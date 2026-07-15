@@ -21,7 +21,6 @@
       "warrantyClaims": "Warranty claims",
       "serviceCenters": "Service centers",
       "notifications": "Notifications",
-      "profile": "Profile",
       "signOut": "Sign out",
       "signingOut": "Signing out..."
     }
@@ -41,7 +40,10 @@
     "loadingSession": "Loading session",
     "language": "Language",
     "vietnamese": "Tiếng Việt",
-    "english": "English"
+    "english": "English",
+    "darkMode": "Dark mode",
+    "back": "Back",
+    "openUserMenu": "Open account menu"
   },
   "Login": {
     "brand": "Warranty Admin",

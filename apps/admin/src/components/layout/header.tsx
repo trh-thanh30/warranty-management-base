@@ -5,10 +5,8 @@ import { useTranslations } from "next-intl";
 import { Button } from "@repo/ui";
 import { CommandMenu } from "@/src/components/command-menu";
 import { MobileSidebar } from "@/src/components/layout/mobile-sidebar";
-import { ThemeToggle } from "@/src/components/theme-toggle";
 import { UserMenu } from "@/src/components/user-menu";
 import { useAdminUiStore } from "@/src/app/stores/ui.store";
-import { LanguageSwitcher } from "@/src/components/language-switcher";
 import { NotificationBell } from "@/src/components/notification-bell";
 
 export function Header() {
@@ -53,8 +51,6 @@ export function Header() {
       </div>
       <div className="flex shrink-0 items-center gap-2">
         <NotificationBell />
-        <LanguageSwitcher />
-        <ThemeToggle />
         <UserMenu />
       </div>
       <CommandMenu />
