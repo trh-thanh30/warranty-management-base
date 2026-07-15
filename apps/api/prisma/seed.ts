@@ -1,6 +1,11 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import {
   category_type,
+  notification_delivery_status,
+  notification_read_status,
+  notification_scope,
+  notification_source,
+  Prisma,
   PrismaClient,
   product_category,
   product_status,
@@ -46,6 +51,83 @@ async function upsertSeedUser(data: SeedUserInput) {
   }
 
   return prisma.user.create({ data });
+}
+
+type DemoNotificationRecipient = {
+  userId: string;
+  status: notification_read_status;
+  readAt?: Date | null;
+};
+
+async function upsertDemoNotification(data: {
+  id: string;
+  title: string;
+  content: string;
+  type: string;
+  source: notification_source;
+  scope: notification_scope;
+  deliveryStatus: notification_delivery_status;
+  createdById?: string | null;
+  sentAt?: Date | null;
+  scheduledAt?: Date | null;
+  metadata?: Prisma.InputJsonValue;
+  recipients?: DemoNotificationRecipient[];
+}) {
+  const notification = await prisma.notification.upsert({
+    where: { id: data.id },
+    update: {
+      title: data.title,
+      content: data.content,
+      type: data.type,
+      source: data.source,
+      scope: data.scope,
+      delivery_status: data.deliveryStatus,
+      created_by_id: data.createdById ?? null,
+      sent_at: data.sentAt ?? null,
+      scheduled_at: data.scheduledAt ?? null,
+      metadata: data.metadata,
+    },
+    create: {
+      id: data.id,
+      title: data.title,
+      content: data.content,
+      type: data.type,
+      source: data.source,
+      scope: data.scope,
+      delivery_status: data.deliveryStatus,
+      created_by_id: data.createdById ?? null,
+      sent_at: data.sentAt ?? null,
+      scheduled_at: data.scheduledAt ?? null,
+      metadata: data.metadata,
+    },
+  });
+
+  await Promise.all(
+    (data.recipients ?? []).map((recipient) =>
+      prisma.notificationRecipient.upsert({
+        where: {
+          notification_id_user_id: {
+            notification_id: notification.id,
+            user_id: recipient.userId,
+          },
+        },
+        update: {
+          status: recipient.status,
+          read_at: recipient.readAt ?? null,
+          delivered_at: data.sentAt ?? new Date(),
+        },
+        create: {
+          notification_id: notification.id,
+          user_id: recipient.userId,
+          status: recipient.status,
+          read_at: recipient.readAt ?? null,
+          delivered_at: data.sentAt ?? new Date(),
+        },
+      }),
+    ),
+  );
+
+  return notification;
 }
 
 async function upsertCustomer(data: {
@@ -640,6 +722,88 @@ async function main() {
     ],
   });
 
+  const recentNotificationAt = new Date(seedNow.getTime() - 30 * 60 * 1000);
+  const readNotificationAt = new Date(seedNow.getTime() - 24 * 60 * 60 * 1000);
+
+  await upsertDemoNotification({
+    id: '00000000-0000-4000-8000-000000000301',
+    title: 'New warranty claim assigned',
+    content:
+      'Claim CLM-DEMO-IN-REPAIR requires coordination with the assigned service center.',
+    type: 'WARRANTY_CLAIM_ASSIGNED',
+    source: notification_source.SYSTEM,
+    scope: notification_scope.ROLE,
+    deliveryStatus: notification_delivery_status.SENT,
+    sentAt: recentNotificationAt,
+    metadata: { claimCode: 'CLM-DEMO-IN-REPAIR' },
+    recipients: [
+      {
+        userId: adminUser.id,
+        status: notification_read_status.UNREAD,
+      },
+      {
+        userId: moderatorUser.id,
+        status: notification_read_status.UNREAD,
+      },
+    ],
+  });
+
+  await upsertDemoNotification({
+    id: '00000000-0000-4000-8000-000000000302',
+    title: 'Warranty claim SLA breached',
+    content:
+      'Claim CLM-DEMO-IN-REPAIR has passed its expected handling deadline.',
+    type: 'WARRANTY_CLAIM_SLA_BREACHED',
+    source: notification_source.SYSTEM,
+    scope: notification_scope.ROLE,
+    deliveryStatus: notification_delivery_status.SENT,
+    sentAt: new Date(seedNow.getTime() - 60 * 60 * 1000),
+    metadata: { claimCode: 'CLM-DEMO-IN-REPAIR' },
+    recipients: [
+      {
+        userId: adminUser.id,
+        status: notification_read_status.UNREAD,
+      },
+      {
+        userId: moderatorUser.id,
+        status: notification_read_status.UNREAD,
+      },
+    ],
+  });
+
+  await upsertDemoNotification({
+    id: '00000000-0000-4000-8000-000000000303',
+    title: 'Service center assignment updated',
+    content: 'The demo repair claim was reassigned to Hanoi Warranty Center.',
+    type: 'SERVICE_CENTER_ASSIGNMENT_UPDATED',
+    source: notification_source.ADMIN,
+    scope: notification_scope.USER,
+    deliveryStatus: notification_delivery_status.SENT,
+    createdById: adminUser.id,
+    sentAt: readNotificationAt,
+    metadata: { claimCode: 'CLM-DEMO-IN-REPAIR' },
+    recipients: [
+      {
+        userId: adminUser.id,
+        status: notification_read_status.READ,
+        readAt: readNotificationAt,
+      },
+    ],
+  });
+
+  await upsertDemoNotification({
+    id: '00000000-0000-4000-8000-000000000304',
+    title: 'Scheduled maintenance notice',
+    content:
+      'The warranty management system will undergo scheduled maintenance.',
+    type: 'SYSTEM_MAINTENANCE',
+    source: notification_source.ADMIN,
+    scope: notification_scope.ALL,
+    deliveryStatus: notification_delivery_status.SCHEDULED,
+    createdById: adminUser.id,
+    scheduledAt: addDays(seedNow, 1),
+  });
+
   console.log('Base database seed completed successfully.');
   console.log(`Admin: ${adminUser.email} (${adminUser.role})`);
   console.log(`Moderator: ${moderatorUser.email} (${moderatorUser.role})`);
@@ -657,6 +821,7 @@ async function main() {
   console.log(
     'Warranty claims: CLM-DEMO-SUBMITTED, CLM-DEMO-REVIEWING, CLM-DEMO-IN-REPAIR',
   );
+  console.log('Notifications: 3 sent demo messages and 1 scheduled message');
   console.log('Default password: password123');
 }
 

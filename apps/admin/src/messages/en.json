@@ -27,6 +27,7 @@
       "warranties": "Warranties",
       "warrantyClaims": "Warranty claims",
       "serviceCenters": "Service centers",
+      "notifications": "Notifications",
       "profile": "Profile",
       "signOut": "Sign out",
       "signingOut": "Signing out..."
@@ -803,6 +804,75 @@
       "ALL": "All statuses",
       "ACTIVE": "Active",
       "INACTIVE": "Inactive"
+    }
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "eyebrow": "Inbox",
+    "description": "Review your latest notifications and monitor messages sent across the system.",
+    "openNotifications": "Open notifications, {count} unread",
+    "recentTitle": "Recent notifications",
+    "unreadSummary": "{count} unread",
+    "markAllRead": "Mark all as read",
+    "markRead": "Mark as read",
+    "markedRead": "Notification marked as read.",
+    "allMarkedRead": "All notifications marked as read.",
+    "markReadError": "Unable to mark the notification as read.",
+    "markAllReadError": "Unable to mark all notifications as read.",
+    "loadError": "Unable to load notifications.",
+    "viewAll": "View all notifications",
+    "emptyTitle": "No notifications yet",
+    "emptyDescription": "New system and workflow notifications will appear here.",
+    "myNotifications": "My notifications",
+    "myNotificationsDescription": "Review notifications delivered to your account.",
+    "adminNotifications": "Admin notification list",
+    "adminNotificationsDescription": "Monitor notifications created and delivered across the system.",
+    "searchLabel": "Search notifications",
+    "searchPlaceholder": "Search title or content",
+    "typeFilter": "Notification type",
+    "statusFilter": "Read status",
+    "clearFilters": "Clear filters",
+    "tryAgain": "Try again",
+    "loadErrorTitle": "Unable to load your notifications",
+    "loadErrorDescription": "Check the API connection and try again.",
+    "emptyFilteredTitle": "No matching notifications",
+    "emptyFilteredDescription": "Adjust or clear the current filters.",
+    "adminLoadErrorTitle": "Unable to load admin notifications",
+    "adminLoadErrorDescription": "Check your role, API connection, and try again.",
+    "adminEmptyTitle": "No admin notifications yet",
+    "adminEmptyDescription": "Notifications created by admins or the system will appear here.",
+    "adminEmptyFilteredTitle": "No matching admin notifications",
+    "adminEmptyFilteredDescription": "Adjust or clear the current filters.",
+    "previous": "Previous",
+    "next": "Next",
+    "pageSize": "Rows per page",
+    "countSummary": "{count} notifications",
+    "pagination": "Page {page}/{totalPages} · {total} notifications",
+    "adminPagination": "Page {page}/{totalPages} · {total} admin notifications",
+    "notification": "Notification",
+    "type": "Type",
+    "source": "Source",
+    "scope": "Scope",
+    "deliveryStatus": "Delivery",
+    "recipients": "Recipients",
+    "createdAt": "Created",
+    "statuses": {
+      "ALL": "All statuses",
+      "UNREAD": "Unread",
+      "READ": "Read"
+    },
+    "scopes": {
+      "ALL": "All users",
+      "ROLE": "By role",
+      "USER": "Selected users"
+    },
+    "sources": {
+      "ADMIN": "Admin",
+      "SYSTEM": "System"
+    },
+    "deliveryStatuses": {
+      "SENT": "Sent",
+      "SCHEDULED": "Scheduled"
     }
   },
   "Home": {

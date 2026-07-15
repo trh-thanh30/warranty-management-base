@@ -27,6 +27,7 @@
       "warranties": "Bảo hành",
       "warrantyClaims": "Yêu cầu bảo hành",
       "serviceCenters": "Trạm bảo hành",
+      "notifications": "Thông báo",
       "profile": "Hồ sơ",
       "signOut": "Đăng xuất",
       "signingOut": "Đang đăng xuất..."
@@ -803,6 +804,75 @@
       "ALL": "Tất cả trạng thái",
       "ACTIVE": "Đang hoạt động",
       "INACTIVE": "Ngưng hoạt động"
+    }
+  },
+  "Notifications": {
+    "title": "Thông báo",
+    "eyebrow": "Hộp thư",
+    "description": "Theo dõi thông báo mới nhất của bạn và các thông báo đã gửi trong hệ thống.",
+    "openNotifications": "Mở thông báo, {count} chưa đọc",
+    "recentTitle": "Thông báo gần đây",
+    "unreadSummary": "{count} chưa đọc",
+    "markAllRead": "Đánh dấu tất cả đã đọc",
+    "markRead": "Đánh dấu đã đọc",
+    "markedRead": "Đã đánh dấu thông báo là đã đọc.",
+    "allMarkedRead": "Đã đánh dấu tất cả thông báo là đã đọc.",
+    "markReadError": "Không thể đánh dấu thông báo là đã đọc.",
+    "markAllReadError": "Không thể đánh dấu tất cả thông báo là đã đọc.",
+    "loadError": "Không thể tải thông báo.",
+    "viewAll": "Xem tất cả thông báo",
+    "emptyTitle": "Chưa có thông báo",
+    "emptyDescription": "Thông báo mới từ hệ thống và quy trình sẽ xuất hiện tại đây.",
+    "myNotifications": "Thông báo của tôi",
+    "myNotificationsDescription": "Xem các thông báo được gửi tới tài khoản của bạn.",
+    "adminNotifications": "Danh sách thông báo quản trị",
+    "adminNotificationsDescription": "Theo dõi các thông báo đã tạo và gửi trong toàn hệ thống.",
+    "searchLabel": "Tìm thông báo",
+    "searchPlaceholder": "Tìm theo tiêu đề hoặc nội dung",
+    "typeFilter": "Loại thông báo",
+    "statusFilter": "Trạng thái đọc",
+    "clearFilters": "Xóa bộ lọc",
+    "tryAgain": "Thử lại",
+    "loadErrorTitle": "Không thể tải thông báo của bạn",
+    "loadErrorDescription": "Kiểm tra kết nối API và thử lại.",
+    "emptyFilteredTitle": "Không có thông báo phù hợp",
+    "emptyFilteredDescription": "Điều chỉnh hoặc xóa các bộ lọc hiện tại.",
+    "adminLoadErrorTitle": "Không thể tải thông báo quản trị",
+    "adminLoadErrorDescription": "Kiểm tra vai trò, kết nối API và thử lại.",
+    "adminEmptyTitle": "Chưa có thông báo quản trị",
+    "adminEmptyDescription": "Thông báo do quản trị viên hoặc hệ thống tạo sẽ xuất hiện tại đây.",
+    "adminEmptyFilteredTitle": "Không có thông báo quản trị phù hợp",
+    "adminEmptyFilteredDescription": "Điều chỉnh hoặc xóa các bộ lọc hiện tại.",
+    "previous": "Trước",
+    "next": "Sau",
+    "pageSize": "Số dòng mỗi trang",
+    "countSummary": "{count} thông báo",
+    "pagination": "Trang {page}/{totalPages} · {total} thông báo",
+    "adminPagination": "Trang {page}/{totalPages} · {total} thông báo quản trị",
+    "notification": "Thông báo",
+    "type": "Loại",
+    "source": "Nguồn",
+    "scope": "Phạm vi",
+    "deliveryStatus": "Trạng thái gửi",
+    "recipients": "Người nhận",
+    "createdAt": "Ngày tạo",
+    "statuses": {
+      "ALL": "Tất cả trạng thái",
+      "UNREAD": "Chưa đọc",
+      "READ": "Đã đọc"
+    },
+    "scopes": {
+      "ALL": "Tất cả người dùng",
+      "ROLE": "Theo vai trò",
+      "USER": "Người dùng được chọn"
+    },
+    "sources": {
+      "ADMIN": "Quản trị viên",
+      "SYSTEM": "Hệ thống"
+    },
+    "deliveryStatuses": {
+      "SENT": "Đã gửi",
+      "SCHEDULED": "Đã lên lịch"
     }
   },
   "Home": {
