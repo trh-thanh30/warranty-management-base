@@ -95,6 +95,7 @@ client_has_rt
 - `warranties`: Admin/customer kích hoạt và tra cứu bảo hành.
 - `public`: endpoint guest cho 6 chức năng chính ngoài website.
 - `warranty-claims`: tạo, tra cứu, list, assign trạm và cập nhật trạng thái yêu cầu bảo hành.
+- `analytics`: read model cho Admin Dashboard, gồm KPI, chart và recent activity.
 - `service-centers`: quản lý trạm bảo hành để assign claim và phục vụ trang trạm bảo hành.
 - `content-pages`: quản lý chính sách và hướng dẫn để main FE đọc bản published.
 - `assets`: upload/list/metadata/delete asset.
@@ -149,6 +150,7 @@ Mở từng mục trong sidebar:
 - API Warranties
 - Public APIs
 - API Claims
+- API Analytics
 - API Service Centers
 - API Content Pages
 - API Assets

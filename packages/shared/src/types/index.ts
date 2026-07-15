@@ -1,4 +1,5 @@
 export * from "./admin-user.types.ts";
+export * from "./analytics.types.ts";
 export * from "./api-response.types.ts";
 export * from "./auth.types.ts";
 export * from "./booking.types.ts";
