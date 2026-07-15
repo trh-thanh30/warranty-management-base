@@ -1,4 +1,5 @@
 import { PrismaModule } from '@/database/prisma/prisma.module';
+import { AssetsModule } from '@/modules/assets/assets.module';
 import { NotificationModule } from '@/modules/notification/notification.module';
 import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/warranty-claims.repository';
 import { WarrantyClaimNotificationService } from '@/modules/warranty-claims/service/warranty-claim-notification.service';
@@ -21,7 +22,7 @@ import { WarrantyClaimsController } from '@/modules/warranty-claims/warranty-cla
 import { Module } from '@nestjs/common';
 
 @Module({
-  imports: [PrismaModule, NotificationModule],
+  imports: [AssetsModule, PrismaModule, NotificationModule],
   controllers: [WarrantyClaimsController],
   providers: [
     WarrantyClaimsRepository,

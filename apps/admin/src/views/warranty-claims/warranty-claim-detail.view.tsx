@@ -4,12 +4,14 @@ import { FileSearch } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { Button } from "@repo/ui";
+import { ConfirmActionDialog } from "@/src/components/common/confirm-action-dialog";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
 import { AssignClaimServiceCenterDialog } from "./components/assign-claim-service-center-dialog";
 import { UpdateClaimPriorityDialog } from "./components/update-claim-priority-dialog";
 import { UpdateClaimStatusDialog } from "./components/update-claim-status-dialog";
+import { UploadClaimAttachmentsDialog } from "./components/upload-claim-attachments-dialog";
 import { WarrantyClaimDetailContent } from "./components/warranty-claim-detail-content";
 import { WarrantyClaimDetailHeader } from "./components/warranty-claim-detail-header";
 import { WarrantyClaimDetailSkeleton } from "./components/warranty-claim-detail-skeleton";
@@ -65,8 +67,38 @@ export function WarrantyClaimDetailView({
           />
 
           <WarrantyClaimDetailContent
+            canUpdate={detail.canUpdate}
             claim={detail.claim}
+            onAddAttachments={() => detail.openAction("uploadAttachments")}
+            onRemoveAttachment={detail.openRemoveAttachment}
             timeline={detail.timeline}
+          />
+
+          <UploadClaimAttachmentsDialog
+            onCompleted={detail.completeAttachmentUpload}
+            onOpenChange={(open) => {
+              if (!open) detail.closeAction();
+            }}
+            onUploadFile={detail.uploadAttachment}
+            open={detail.activeAction === "uploadAttachments"}
+          />
+
+          <ConfirmActionDialog
+            cancelLabel={t("cancel")}
+            confirmLabel={t("confirmRemoveAttachment")}
+            description={t("removeAttachmentDescription", {
+              name: detail.attachmentToRemove?.originalName ?? "",
+            })}
+            isLoading={detail.isRemovingAttachment}
+            onConfirm={() => {
+              void detail.removeAttachment();
+            }}
+            onOpenChange={(open) => {
+              if (!open) detail.closeRemoveAttachment();
+            }}
+            open={Boolean(detail.attachmentToRemove)}
+            title={t("removeAttachmentTitle")}
+            variant="destructive"
           />
 
           <UpdateClaimStatusDialog

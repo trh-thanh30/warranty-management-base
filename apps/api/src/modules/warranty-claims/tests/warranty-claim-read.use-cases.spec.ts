@@ -5,6 +5,10 @@ import { LookupWarrantyClaimByCodeUseCase } from '@/modules/warranty-claims/use-
 import { LookupWarrantyClaimsByWarrantyCodeUseCase } from '@/modules/warranty-claims/use-cases/lookup-warranty-claims-by-warranty-code.use-case';
 import { warranty_claim_status } from '@prisma/client';
 
+jest.mock('@/modules/assets/assets.service', () => ({
+  AssetsService: class AssetsService {},
+}));
+
 const claim = {
   id: 'claim-id',
   claim_code: 'CLM-2026-ABC123',
@@ -24,6 +28,9 @@ const claim = {
 };
 
 describe('Warranty claim read use cases', () => {
+  const assetsService = {
+    enrichAssetUrl: jest.fn((asset: object) => asset),
+  };
   const warrantyClaimsRepository = {
     list: jest.fn(),
     findById: jest.fn(),
@@ -69,6 +76,7 @@ describe('Warranty claim read use cases', () => {
     warrantyClaimsRepository.listClaimAssets.mockResolvedValue([]);
     const useCase = new GetWarrantyClaimDetailUseCase(
       warrantyClaimsRepository as never,
+      assetsService as never,
     );
 
     const result = await useCase.execute('claim-id');
@@ -80,6 +88,7 @@ describe('Warranty claim read use cases', () => {
     warrantyClaimsRepository.findById.mockResolvedValue(null);
     const useCase = new GetWarrantyClaimDetailUseCase(
       warrantyClaimsRepository as never,
+      assetsService as never,
     );
 
     await expect(useCase.execute('missing-id')).rejects.toBeInstanceOf(

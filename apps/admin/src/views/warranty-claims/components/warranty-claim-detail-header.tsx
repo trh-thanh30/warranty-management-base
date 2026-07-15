@@ -12,11 +12,7 @@ import type { WarrantyClaimSummary } from "@repo/shared";
 import { Button } from "@repo/ui";
 import { Link } from "@/src/i18n/navigation";
 import { formatClaimDateTime } from "../warranty-claims.utils";
-import {
-  WarrantyClaimOverdueBadge,
-  WarrantyClaimPriorityBadge,
-  WarrantyClaimStatusBadge,
-} from "./warranty-claim-badges";
+import { WarrantyClaimStateSummary } from "./warranty-claim-state-summary";
 
 type WarrantyClaimDetailHeaderProps = {
   canAssignServiceCenter: boolean;
@@ -51,41 +47,45 @@ export function WarrantyClaimDetailHeader({
       </Button>
 
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0">
+        <div className="min-w-0 lg:max-w-2xl lg:flex-1">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
             {t("detailTitle")}
           </p>
-          <h1 className="mt-1 break-all font-mono text-2xl font-semibold tracking-tight text-slate-950 dark:text-slate-50 sm:text-3xl">
+          <h1 className="mt-1 break-words font-mono text-2xl font-semibold tracking-tight text-slate-950 dark:text-slate-50 sm:text-3xl">
             {claim.claimCode}
           </h1>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <WarrantyClaimStatusBadge status={claim.status} />
-            <WarrantyClaimPriorityBadge priority={claim.priority} />
-            <WarrantyClaimOverdueBadge claim={claim} />
-          </div>
-          <p className="mt-3 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+          <p className="mt-2 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
             <CalendarClock className="size-4 shrink-0" />
             {t("submittedAt")}: {formatClaimDateTime(claim.submittedAt)}
           </p>
+          <WarrantyClaimStateSummary claim={claim} />
         </div>
 
-        <div className="grid gap-2 sm:grid-cols-3 lg:flex lg:flex-wrap lg:justify-end">
+        <div className="grid gap-2 sm:grid-cols-3 lg:flex lg:max-w-md lg:flex-wrap lg:justify-end">
+          {canUpdateStatus && hasStatusTransitions ? (
+            <Button className="w-full sm:w-auto" onClick={onUpdateStatus}>
+              <ListTodo className="size-4" />
+              {t("updateStatus")}
+            </Button>
+          ) : null}
           {canAssignServiceCenter ? (
-            <Button onClick={onAssignServiceCenter} variant="secondary">
+            <Button
+              className="w-full sm:w-auto"
+              onClick={onAssignServiceCenter}
+              variant="secondary"
+            >
               <Building2 className="size-4" />
               {t("assignServiceCenter")}
             </Button>
           ) : null}
           {canUpdate ? (
-            <Button onClick={onUpdatePriority} variant="secondary">
+            <Button
+              className="w-full sm:w-auto"
+              onClick={onUpdatePriority}
+              variant="secondary"
+            >
               <SlidersHorizontal className="size-4" />
               {t("updatePriority")}
-            </Button>
-          ) : null}
-          {canUpdateStatus && hasStatusTransitions ? (
-            <Button onClick={onUpdateStatus}>
-              <ListTodo className="size-4" />
-              {t("updateStatus")}
             </Button>
           ) : null}
         </div>

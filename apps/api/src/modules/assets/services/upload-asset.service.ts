@@ -1,6 +1,7 @@
 import { storageConfig } from '@/config';
 import { FileValidatorService } from '@/modules/assets/services/file-validator.service';
 import type { IStorageService } from '@/modules/assets/services/storage.interface';
+import { normalizeUploadFileName } from '@/modules/assets/utils/file-name.utils';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
 import { asset_access_type, asset_type } from '@prisma/client';
@@ -44,6 +45,7 @@ export class UploadAssetService {
     this.fileValidator.validateFile(file);
 
     const { folder, accessType = asset_access_type.PUBLIC } = options;
+    const originalName = normalizeUploadFileName(file.originalname);
 
     const now = new Date();
     const year = now.getFullYear().toString();
@@ -53,7 +55,7 @@ export class UploadAssetService {
     const folderPath = folder
       ? `${year}/${month}/${folder}`
       : `${year}/${month}`;
-    const fileExt = path.extname(file.originalname);
+    const fileExt = path.extname(originalName);
     const uniqueName = `${Date.now()}_${uuidv4()}${fileExt}`;
 
     // 2. Save to Storage
@@ -65,7 +67,7 @@ export class UploadAssetService {
     );
 
     return {
-      originalName: file.originalname,
+      originalName,
       filename: uniqueName,
       path: relativePath,
       size: size,

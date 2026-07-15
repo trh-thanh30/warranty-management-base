@@ -14,6 +14,7 @@ import type {
   UpdateWarrantyClaimStatusBody,
   WarrantyClaimMetrics,
   WarrantyClaimMetricsQuery,
+  WarrantyClaimAttachmentSummary,
   WarrantyClaimSummary,
   WarrantyClaimTimelineItem,
 } from "@repo/shared";
@@ -67,6 +68,34 @@ export function useWarrantyClaimTimeline(
     queryKey: warrantyClaimKeys.timeline(claimId),
     queryFn: () =>
       warrantyClaimsService.getWarrantyClaimTimeline(claimId ?? ""),
+  });
+}
+
+export function useLinkWarrantyClaimAttachment(claimId: string | null) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (assetId: string) =>
+      warrantyClaimsService.linkAttachment(claimId ?? "", assetId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: warrantyClaimKeys.detail(claimId),
+      });
+    },
+  });
+}
+
+export function useUnlinkWarrantyClaimAttachment(claimId: string | null) {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, WarrantyClaimAttachmentSummary["id"]>({
+    mutationFn: (assetId) =>
+      warrantyClaimsService.unlinkAttachment(claimId ?? "", assetId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: warrantyClaimKeys.detail(claimId),
+      });
+    },
   });
 }
 
