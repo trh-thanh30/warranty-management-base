@@ -56,6 +56,7 @@ test("warranty claim directory requests paginated claims with filters", async ()
   const result = await createWarrantyClaimsService(
     http as unknown as WarrantyClaimsHttpClient,
   ).listWarrantyClaims({
+    assignmentStatus: "UNASSIGNED",
     isOverdue: "true",
     page: 1,
     priority: "HIGH",
@@ -70,6 +71,7 @@ test("warranty claim directory requests paginated claims with filters", async ()
       url: "/warranty-claims",
       config: {
         params: {
+          assignmentStatus: "UNASSIGNED",
           isOverdue: "true",
           page: 1,
           priority: "HIGH",
@@ -105,12 +107,12 @@ test("warranty claim metrics calls summary endpoint", async () => {
 
   const result = await createWarrantyClaimsService(
     http as unknown as WarrantyClaimsHttpClient,
-  ).getMetrics({ serviceCenterId: "service-center-id" });
+  ).getMetrics({ assignmentStatus: "UNASSIGNED" });
 
   assert.deepEqual(calls, [
     {
       url: "/warranty-claims/metrics/summary",
-      config: { params: { serviceCenterId: "service-center-id" } },
+      config: { params: { assignmentStatus: "UNASSIGNED" } },
     },
   ]);
   assert.deepEqual(result, response);
