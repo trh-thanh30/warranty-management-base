@@ -4,9 +4,9 @@ import { useDebounce } from "@repo/hooks";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { usePermissions } from "@/src/hooks/use-permissions";
+import { useActiveServiceCenters } from "@/src/hooks/use-service-centers";
 import { useTableControls } from "@/src/hooks/use-table-controls";
 import {
-  useActiveServiceCenters,
   useWarrantyClaimMetrics,
   useWarrantyClaims,
 } from "@/src/hooks/use-warranty-claims";

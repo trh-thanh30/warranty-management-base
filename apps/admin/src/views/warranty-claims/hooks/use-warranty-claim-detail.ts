@@ -9,9 +9,9 @@ import type {
 import { PERMISSIONS } from "@repo/shared/constants";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { usePermissions } from "@/src/hooks/use-permissions";
+import { useActiveServiceCenters } from "@/src/hooks/use-service-centers";
 import { useToast } from "@/src/hooks/use-toast";
 import {
-  useActiveServiceCenters,
   useAssignWarrantyClaimServiceCenter,
   useUpdateWarrantyClaimPriority,
   useUpdateWarrantyClaimStatus,

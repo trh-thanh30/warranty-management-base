@@ -1,6 +1,7 @@
-import { NotFoundError } from '@/common/response';
+import { ConflictError, NotFoundError } from '@/common/response';
 import { CreateServiceCenterUseCase } from '@/modules/service-centers/use-cases/create-service-center.use-case';
 import { GetServiceCenterDetailUseCase } from '@/modules/service-centers/use-cases/get-service-center-detail.use-case';
+import { ListServiceCenterProvincesUseCase } from '@/modules/service-centers/use-cases/list-service-center-provinces.use-case';
 import { ListServiceCentersUseCase } from '@/modules/service-centers/use-cases/list-service-centers.use-case';
 import { UpdateServiceCenterUseCase } from '@/modules/service-centers/use-cases/update-service-center.use-case';
 
@@ -22,11 +23,56 @@ describe('Service center use cases', () => {
     create: jest.fn(),
     list: jest.fn(),
     findById: jest.fn(),
+    findByEmail: jest.fn(),
+    findByPhone: jest.fn(),
+    listProvinces: jest.fn(),
     update: jest.fn(),
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    serviceCentersRepository.findByEmail.mockResolvedValue(null);
+    serviceCentersRepository.findByPhone.mockResolvedValue(null);
+  });
+
+  it('rejects a duplicate service center phone', async () => {
+    serviceCentersRepository.findByPhone.mockResolvedValue(serviceCenter);
+    const useCase = new CreateServiceCenterUseCase(
+      serviceCentersRepository as never,
+    );
+
+    await expect(
+      useCase.execute({
+        name: 'Another Center',
+        phone: '090 123-4567',
+        province: 'Ha Noi',
+        address: '456 Another Street',
+      }),
+    ).rejects.toBeInstanceOf(ConflictError);
+    expect(serviceCentersRepository.findByPhone).toHaveBeenCalledWith(
+      '0901234567',
+    );
+    expect(serviceCentersRepository.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects a duplicate service center email case-insensitively', async () => {
+    serviceCentersRepository.findByEmail.mockResolvedValue(serviceCenter);
+    const useCase = new CreateServiceCenterUseCase(
+      serviceCentersRepository as never,
+    );
+
+    await expect(
+      useCase.execute({
+        name: 'Another Center',
+        email: ' SUPPORT@EXAMPLE.COM ',
+        province: 'Ha Noi',
+        address: '456 Another Street',
+      }),
+    ).rejects.toBeInstanceOf(ConflictError);
+    expect(serviceCentersRepository.findByEmail).toHaveBeenCalledWith(
+      'support@example.com',
+    );
+    expect(serviceCentersRepository.create).not.toHaveBeenCalled();
   });
 
   it('creates a service center with trimmed input', async () => {
@@ -84,6 +130,18 @@ describe('Service center use cases', () => {
     expect(result.meta.total).toBe(1);
   });
 
+  it('lists distinct service center provinces', async () => {
+    serviceCentersRepository.listProvinces.mockResolvedValue([
+      { province: 'Da Nang' },
+      { province: 'Ha Noi' },
+    ]);
+    const useCase = new ListServiceCenterProvincesUseCase(
+      serviceCentersRepository as never,
+    );
+
+    await expect(useCase.execute()).resolves.toEqual(['Da Nang', 'Ha Noi']);
+  });
+
   it('returns service center detail', async () => {
     serviceCentersRepository.findById.mockResolvedValue(serviceCenter);
     const useCase = new GetServiceCenterDetailUseCase(
@@ -126,5 +184,27 @@ describe('Service center use cases', () => {
       expect.objectContaining({ is_active: false }),
     );
     expect(result.isActive).toBe(false);
+  });
+
+  it('rejects updating a service center to another center contact', async () => {
+    serviceCentersRepository.findById.mockResolvedValue(serviceCenter);
+    serviceCentersRepository.findByEmail.mockResolvedValue({
+      ...serviceCenter,
+      id: 'another-service-center-id',
+    });
+    const useCase = new UpdateServiceCenterUseCase(
+      serviceCentersRepository as never,
+    );
+
+    await expect(
+      useCase.execute('service-center-id', {
+        email: 'OTHER@EXAMPLE.COM',
+      }),
+    ).rejects.toBeInstanceOf(ConflictError);
+    expect(serviceCentersRepository.findByEmail).toHaveBeenCalledWith(
+      'other@example.com',
+      'service-center-id',
+    );
+    expect(serviceCentersRepository.update).not.toHaveBeenCalled();
   });
 });

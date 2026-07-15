@@ -4,7 +4,9 @@ import {
   IsOptional,
   IsString,
   Length,
+  Matches,
 } from 'class-validator';
+import { PHONE_NUMBER_PATTERN } from '@repo/shared/constants';
 
 export class UpdateServiceCenterDto {
   @IsOptional()
@@ -14,7 +16,8 @@ export class UpdateServiceCenterDto {
 
   @IsOptional()
   @IsString()
-  @Length(6, 32)
+  @Length(8, 32)
+  @Matches(PHONE_NUMBER_PATTERN)
   phone?: string;
 
   @IsOptional()

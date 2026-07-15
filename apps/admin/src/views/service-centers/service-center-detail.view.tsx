@@ -1,0 +1,118 @@
+"use client";
+
+import { Building2, Pencil, Power } from "lucide-react";
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { PERMISSIONS } from "@repo/shared/constants";
+import { Button } from "@repo/ui";
+import { FormPageShell } from "@/src/components/common/form-page-shell";
+import { StatePanel } from "@/src/components/common/state-panel";
+import { PermissionGuard } from "@/src/components/permission-guard";
+import { usePermissions } from "@/src/hooks/use-permissions";
+import { useDeactivateServiceCenter } from "@/src/hooks/use-service-centers";
+import { useToast } from "@/src/hooks/use-toast";
+import { Link } from "@/src/i18n/navigation";
+import { DeactivateServiceCenterDialog } from "./components/deactivate-service-center-dialog";
+import {
+  ServiceCenterDetailCard,
+  ServiceCenterDetailSkeleton,
+} from "./components/service-center-detail-card";
+import { useServiceCenterDetail } from "./hooks/use-service-center-detail";
+
+export function ServiceCenterDetailView({
+  serviceCenterId,
+}: {
+  serviceCenterId: string;
+}) {
+  const t = useTranslations("ServiceCenters");
+  const toast = useToast();
+  const { hasPermission } = usePermissions();
+  const { serviceCenter, serviceCenterQuery } = useServiceCenterDetail({
+    mode: "detail",
+    serviceCenterId,
+  });
+  const deactivateServiceCenter = useDeactivateServiceCenter();
+  const [deactivateOpen, setDeactivateOpen] = useState(false);
+  const canEdit = hasPermission(PERMISSIONS.SERVICE_CENTER_UPDATE);
+  const canDeactivate =
+    hasPermission(PERMISSIONS.SERVICE_CENTER_DELETE) && serviceCenter?.isActive;
+
+  async function confirmDeactivate() {
+    if (!serviceCenter) return;
+
+    try {
+      await deactivateServiceCenter.mutateAsync(serviceCenter.id);
+      toast.success(t("deactivated"));
+      setDeactivateOpen(false);
+    } catch {
+      toast.error(t("deactivateError"));
+    }
+  }
+
+  return (
+    <PermissionGuard permissions={[PERMISSIONS.SERVICE_CENTER_VIEW]}>
+      <FormPageShell
+        backHref="/service-centers"
+        backLabel={t("backToDirectory")}
+        description={t("detailDescription")}
+        eyebrow={t("eyebrow")}
+        maxWidthClassName="max-w-5xl"
+        title={t("detailTitle")}
+      >
+        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+          {canDeactivate ? (
+            <Button
+              disabled={!serviceCenter}
+              onClick={() => setDeactivateOpen(true)}
+              type="button"
+              variant="destructive"
+            >
+              <Power className="size-4" />
+              {t("deactivate")}
+            </Button>
+          ) : null}
+          {canEdit ? (
+            <Button asChild>
+              <Link href={`/service-centers/${serviceCenterId}/edit`}>
+                <Pencil className="size-4" />
+                {t("edit")}
+              </Link>
+            </Button>
+          ) : null}
+        </div>
+
+        {serviceCenterQuery.isLoading ? (
+          <ServiceCenterDetailSkeleton />
+        ) : serviceCenterQuery.isError || !serviceCenter ? (
+          <StatePanel
+            action={
+              <Button
+                onClick={() => {
+                  void serviceCenterQuery.refetch();
+                }}
+                variant="secondary"
+              >
+                {t("tryAgain")}
+              </Button>
+            }
+            description={t("loadErrorDescription")}
+            icon={Building2}
+            title={t("loadErrorTitle")}
+          />
+        ) : (
+          <ServiceCenterDetailCard serviceCenter={serviceCenter} />
+        )}
+
+        <DeactivateServiceCenterDialog
+          isDeactivating={deactivateServiceCenter.isPending}
+          onConfirm={() => {
+            void confirmDeactivate();
+          }}
+          onOpenChange={setDeactivateOpen}
+          open={deactivateOpen}
+          serviceCenter={serviceCenter}
+        />
+      </FormPageShell>
+    </PermissionGuard>
+  );
+}

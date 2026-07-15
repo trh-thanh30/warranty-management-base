@@ -4,6 +4,7 @@ import { ListServiceCentersDto } from '@/modules/service-centers/dto/list-servic
 import { UpdateServiceCenterDto } from '@/modules/service-centers/dto/update-service-center.dto';
 import { CreateServiceCenterUseCase } from '@/modules/service-centers/use-cases/create-service-center.use-case';
 import { GetServiceCenterDetailUseCase } from '@/modules/service-centers/use-cases/get-service-center-detail.use-case';
+import { ListServiceCenterProvincesUseCase } from '@/modules/service-centers/use-cases/list-service-center-provinces.use-case';
 import { ListServiceCentersUseCase } from '@/modules/service-centers/use-cases/list-service-centers.use-case';
 import { UpdateServiceCenterUseCase } from '@/modules/service-centers/use-cases/update-service-center.use-case';
 import {
@@ -22,6 +23,7 @@ export class ServiceCentersController {
   constructor(
     private readonly createServiceCenterUseCase: CreateServiceCenterUseCase,
     private readonly listServiceCentersUseCase: ListServiceCentersUseCase,
+    private readonly listServiceCenterProvincesUseCase: ListServiceCenterProvincesUseCase,
     private readonly getServiceCenterDetailUseCase: GetServiceCenterDetailUseCase,
     private readonly updateServiceCenterUseCase: UpdateServiceCenterUseCase,
   ) {}
@@ -36,6 +38,12 @@ export class ServiceCentersController {
   @Permissions([permission_key.SERVICE_CENTER_VIEW])
   list(@Query() query: ListServiceCentersDto) {
     return this.listServiceCentersUseCase.execute(query);
+  }
+
+  @Get('provinces')
+  @Permissions([permission_key.SERVICE_CENTER_VIEW])
+  listProvinces() {
+    return this.listServiceCenterProvincesUseCase.execute();
   }
 
   @Get(':id')

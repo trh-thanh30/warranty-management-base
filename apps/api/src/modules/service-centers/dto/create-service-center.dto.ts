@@ -1,4 +1,11 @@
-import { IsEmail, IsOptional, IsString, Length } from 'class-validator';
+import { PHONE_NUMBER_PATTERN } from '@repo/shared/constants';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  Length,
+  Matches,
+} from 'class-validator';
 
 export class CreateServiceCenterDto {
   @IsString()
@@ -7,7 +14,8 @@ export class CreateServiceCenterDto {
 
   @IsOptional()
   @IsString()
-  @Length(6, 32)
+  @Length(8, 32)
+  @Matches(PHONE_NUMBER_PATTERN)
   phone?: string;
 
   @IsOptional()
