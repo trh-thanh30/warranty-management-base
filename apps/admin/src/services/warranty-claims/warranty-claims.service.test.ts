@@ -196,3 +196,55 @@ test("updating claim priority uses priority endpoint", async () => {
     },
   ]);
 });
+
+test("linking an uploaded asset attaches it to the claim", async () => {
+  const calls: unknown[] = [];
+  const attachment = {
+    id: "asset-id",
+    originalName: "invoice.pdf",
+    filename: "stored-invoice.pdf",
+    mimeType: "application/pdf",
+    size: 1024,
+    url: "http://localhost:4100/cdn/invoice.pdf",
+    type: "DOCUMENT",
+    accessType: "PUBLIC",
+    uploadedById: "user-id",
+    createdAt: "2026-07-15T00:00:00.000Z",
+  };
+  const http = {
+    async post(url: string, body?: unknown) {
+      calls.push({ url, body });
+      return { data: { success: true, data: attachment } };
+    },
+  };
+
+  const result = await createWarrantyClaimsService(
+    http as unknown as WarrantyClaimsHttpClient,
+  ).linkAttachment("claim-id", "asset-id");
+
+  assert.deepEqual(calls, [
+    {
+      url: "/warranty-claims/claim-id/assets",
+      body: { assetId: "asset-id" },
+    },
+  ]);
+  assert.deepEqual(result, attachment);
+});
+
+test("unlinking an attachment removes only its claim link", async () => {
+  const calls: unknown[] = [];
+  const http = {
+    async delete(url: string) {
+      calls.push({ url });
+      return { data: { success: true, data: { success: true } } };
+    },
+  };
+
+  await createWarrantyClaimsService(
+    http as unknown as WarrantyClaimsHttpClient,
+  ).unlinkAttachment("claim-id", "asset-id");
+
+  assert.deepEqual(calls, [
+    { url: "/warranty-claims/claim-id/assets/asset-id" },
+  ]);
+});

@@ -5,7 +5,41 @@ import {
   type WarrantyClaimStatus,
   type WarrantyClaimSummary,
 } from "@repo/shared";
-import { WARRANTY_CLAIM_TERMINAL_STATUSES } from "./warranty-claims.constants";
+import {
+  WARRANTY_CLAIM_ATTACHMENT_MAX_SIZE,
+  WARRANTY_CLAIM_ATTACHMENT_MIME_TYPES,
+  WARRANTY_CLAIM_TERMINAL_STATUSES,
+} from "./warranty-claims.constants.ts";
+
+export type WarrantyClaimAttachmentValidationError =
+  | "attachmentTooLarge"
+  | "attachmentTypeInvalid";
+
+export function validateWarrantyClaimAttachment(file: {
+  size: number;
+  type: string;
+}): WarrantyClaimAttachmentValidationError | null {
+  if (
+    !WARRANTY_CLAIM_ATTACHMENT_MIME_TYPES.includes(
+      file.type as (typeof WARRANTY_CLAIM_ATTACHMENT_MIME_TYPES)[number],
+    )
+  ) {
+    return "attachmentTypeInvalid";
+  }
+
+  if (file.size > WARRANTY_CLAIM_ATTACHMENT_MAX_SIZE) {
+    return "attachmentTooLarge";
+  }
+
+  return null;
+}
+
+export function formatAttachmentSize(size: number) {
+  if (size < 1024) return `${size} B`;
+  if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
+
+  return `${Math.round((size / (1024 * 1024)) * 10) / 10} MB`;
+}
 
 export function formatClaimDate(value: string | null | undefined) {
   return formatDate(value, { locale: "vi-VN" });

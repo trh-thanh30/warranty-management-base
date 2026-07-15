@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type {
+  WarrantyClaimAttachmentSummary,
   WarrantyClaimSummary,
   WarrantyClaimTimelineItem,
 } from "@repo/shared";
@@ -20,14 +21,21 @@ import {
   formatClaimProduct,
   formatClaimServiceCenter,
 } from "../warranty-claims.utils";
+import { ClaimAttachmentsSection } from "./claim-attachments-section";
 
 type WarrantyClaimDetailContentProps = {
+  canUpdate: boolean;
   claim: WarrantyClaimSummary;
+  onAddAttachments: () => void;
+  onRemoveAttachment: (attachment: WarrantyClaimAttachmentSummary) => void;
   timeline: WarrantyClaimTimelineItem[];
 };
 
 export function WarrantyClaimDetailContent({
+  canUpdate,
   claim,
+  onAddAttachments,
+  onRemoveAttachment,
   timeline,
 }: WarrantyClaimDetailContentProps) {
   const t = useTranslations("WarrantyClaims");
@@ -102,7 +110,12 @@ export function WarrantyClaimDetailContent({
           />
         </section>
 
-        <AttachmentsSection claim={claim} />
+        <ClaimAttachmentsSection
+          attachments={claim.attachments}
+          canUpdate={canUpdate}
+          onAdd={onAddAttachments}
+          onRemove={onRemoveAttachment}
+        />
       </Card>
     </div>
   );
@@ -239,35 +252,6 @@ function TimelineSection({
         </ol>
       ) : (
         <p className="mt-5 text-sm text-slate-500">{t("noTimeline")}</p>
-      )}
-    </section>
-  );
-}
-
-function AttachmentsSection({ claim }: { claim: WarrantyClaimSummary }) {
-  const t = useTranslations("WarrantyClaims");
-
-  return (
-    <section className="p-5 sm:p-6">
-      <SectionHeading icon={FileText} title={t("attachments")} />
-      {claim.attachments.length > 0 ? (
-        <div className="mt-4 space-y-2">
-          {claim.attachments.map((attachment) => (
-            <a
-              className="block rounded-md border border-slate-200 p-3 text-sm font-medium transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-800 dark:hover:bg-slate-900 dark:focus-visible:ring-slate-100"
-              href={attachment.url}
-              key={attachment.id}
-              rel="noreferrer"
-              target="_blank"
-            >
-              <span className="line-clamp-2 break-all">
-                {attachment.originalName}
-              </span>
-            </a>
-          ))}
-        </div>
-      ) : (
-        <p className="mt-4 text-sm text-slate-500">{t("noAttachments")}</p>
       )}
     </section>
   );

@@ -6,6 +6,7 @@ import type {
   UpdateWarrantyClaimStatusBody,
   WarrantyClaimMetrics,
   WarrantyClaimMetricsQuery,
+  WarrantyClaimAttachmentSummary,
   WarrantyClaimSummary,
   WarrantyClaimTimelineItem,
 } from "@repo/shared";
@@ -24,8 +25,10 @@ type RequestConfig = {
 };
 
 export type WarrantyClaimsHttpClient = {
+  delete<T>(url: string): Promise<HttpResponse<T>>;
   get<T>(url: string, config?: RequestConfig): Promise<HttpResponse<T>>;
   patch<T>(url: string, body?: unknown): Promise<HttpResponse<T>>;
+  post<T>(url: string, body?: unknown): Promise<HttpResponse<T>>;
 };
 
 function unwrap<T>(response: HttpResponse<T>): T {
@@ -34,6 +37,24 @@ function unwrap<T>(response: HttpResponse<T>): T {
 
 export function createWarrantyClaimsService(http: WarrantyClaimsHttpClient) {
   return {
+    async linkAttachment(
+      claimId: string,
+      assetId: string,
+    ): Promise<WarrantyClaimAttachmentSummary> {
+      return unwrap(
+        await http.post<WarrantyClaimAttachmentSummary>(
+          `/warranty-claims/${claimId}/assets`,
+          { assetId },
+        ),
+      );
+    },
+
+    async unlinkAttachment(claimId: string, assetId: string): Promise<void> {
+      await http.delete<{ success: true }>(
+        `/warranty-claims/${claimId}/assets/${assetId}`,
+      );
+    },
+
     async listWarrantyClaims(
       query: ListWarrantyClaimsQuery,
     ): Promise<PaginatedResponse<WarrantyClaimSummary>> {

@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import {
+  cn,
   Pagination,
   PaginationButton,
   PaginationContent,
@@ -14,6 +15,7 @@ import {
 type PaginationPageItem = number | "ellipsis-start" | "ellipsis-end";
 
 type PaginationControlsProps = {
+  className?: string;
   nextLabel: string;
   onPageChange: (page: number) => void;
   onPageSizeChange?: (pageSize: number) => void;
@@ -24,9 +26,11 @@ type PaginationControlsProps = {
   previousLabel: string;
   summary?: ReactNode;
   totalPages: number;
+  variant?: "compact" | "default";
 };
 
 export function PaginationControls({
+  className,
   nextLabel,
   onPageChange,
   onPageSizeChange,
@@ -37,13 +41,63 @@ export function PaginationControls({
   previousLabel,
   summary,
   totalPages,
+  variant = "default",
 }: PaginationControlsProps) {
   const safeTotalPages = Math.max(totalPages, 1);
   const currentPage = Math.min(Math.max(page, 1), safeTotalPages);
   const pages = getPaginationItems(currentPage, safeTotalPages);
 
+  if (variant === "compact") {
+    return (
+      <div
+        className={cn(
+          "mt-4 flex items-center justify-between gap-3",
+          className,
+        )}
+      >
+        {summary ? (
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            {summary}
+          </p>
+        ) : (
+          <span />
+        )}
+        <Pagination className="mx-0 w-auto justify-end">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                aria-label={previousLabel}
+                className="size-9 px-0"
+                disabled={currentPage <= 1}
+                onClick={() => onPageChange(currentPage - 1)}
+              />
+            </PaginationItem>
+            <PaginationItem>
+              <span className="flex h-9 min-w-10 items-center justify-center text-xs font-medium tabular-nums text-slate-700 dark:text-slate-300">
+                {currentPage}/{safeTotalPages}
+              </span>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext
+                aria-label={nextLabel}
+                className="size-9 px-0"
+                disabled={currentPage >= safeTotalPages}
+                onClick={() => onPageChange(currentPage + 1)}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+    );
+  }
+
   return (
-    <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+    <div
+      className={cn(
+        "mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4",
+        className,
+      )}
+    >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
         {summary ? (
           <p className="text-sm text-slate-500 dark:text-slate-400">

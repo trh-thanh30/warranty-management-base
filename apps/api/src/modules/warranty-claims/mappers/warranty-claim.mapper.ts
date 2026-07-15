@@ -4,8 +4,24 @@ import type {
   WarrantyClaimWithRelations,
 } from '@/modules/warranty-claims/types/warranty-claim.types';
 
+type WarrantyClaimAttachmentAsset = Pick<
+  Asset,
+  | 'id'
+  | 'original_name'
+  | 'filename'
+  | 'mime_type'
+  | 'size'
+  | 'path'
+  | 'type'
+  | 'access_type'
+  | 'uploaded_by_id'
+  | 'created_at'
+> & {
+  url?: string;
+};
+
 export function toWarrantyClaimAttachmentResponse(
-  asset: Asset & { url?: string },
+  asset: WarrantyClaimAttachmentAsset,
 ): WarrantyClaimAttachmentResponse {
   return {
     id: asset.id,

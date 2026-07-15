@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import type {
+  WarrantyClaimAttachmentSummary,
   WarrantyClaimSummary,
   WarrantyClaimTimelineItem,
 } from "@repo/shared";
@@ -11,8 +12,11 @@ import { useAuth } from "@/src/app/providers/auth-provider";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { useActiveServiceCenters } from "@/src/hooks/use-service-centers";
 import { useToast } from "@/src/hooks/use-toast";
+import { assetsService } from "@/src/services/assets/assets.service";
 import {
   useAssignWarrantyClaimServiceCenter,
+  useLinkWarrantyClaimAttachment,
+  useUnlinkWarrantyClaimAttachment,
   useUpdateWarrantyClaimPriority,
   useUpdateWarrantyClaimStatus,
   useWarrantyClaim,
@@ -32,6 +36,8 @@ export function useWarrantyClaimDetail(claimId: string) {
   const [activeAction, setActiveAction] = useState<WarrantyClaimAction | null>(
     null,
   );
+  const [attachmentToRemove, setAttachmentToRemove] =
+    useState<WarrantyClaimAttachmentSummary | null>(null);
   const canView = hasPermission(PERMISSIONS.WARRANTY_CLAIM_VIEW);
   const canUpdate = hasPermission(PERMISSIONS.WARRANTY_CLAIM_UPDATE);
   const canUpdateStatus = hasPermission(
@@ -47,6 +53,8 @@ export function useWarrantyClaimDetail(claimId: string) {
   const assignServiceCenterMutation =
     useAssignWarrantyClaimServiceCenter(claimId);
   const updatePriorityMutation = useUpdateWarrantyClaimPriority(claimId);
+  const linkAttachmentMutation = useLinkWarrantyClaimAttachment(claimId);
+  const unlinkAttachmentMutation = useUnlinkWarrantyClaimAttachment(claimId);
   const claim = claimQuery.data ?? null;
   const canAssignServiceCenter =
     canUpdate &&
@@ -111,12 +119,57 @@ export function useWarrantyClaimDetail(claimId: string) {
     }
   }
 
+  async function uploadAttachment(file: File) {
+    let uploadedAssetId: string | null = null;
+
+    try {
+      const asset = await assetsService.uploadAsset(file, {
+        accessType: "PUBLIC",
+        folder: `warranty-claims/${claimId}`,
+      });
+      uploadedAssetId = asset.id;
+      await linkAttachmentMutation.mutateAsync(asset.id);
+    } catch (error) {
+      if (uploadedAssetId) {
+        try {
+          await assetsService.deleteAsset(uploadedAssetId);
+        } catch {
+          // The original upload/link error remains the actionable failure.
+        }
+      }
+      throw error;
+    }
+  }
+
+  async function refreshAttachments() {
+    await claimQuery.refetch();
+  }
+
+  async function completeAttachmentUpload() {
+    await refreshAttachments();
+    toast.success(t("attachmentsUploaded"));
+  }
+
+  async function removeAttachment() {
+    if (!attachmentToRemove) return;
+
+    try {
+      await unlinkAttachmentMutation.mutateAsync(attachmentToRemove.id);
+      await refreshAttachments();
+      toast.success(t("attachmentRemoved"));
+      setAttachmentToRemove(null);
+    } catch {
+      toast.error(t("attachmentRemoveError"));
+    }
+  }
+
   return {
     activeAction,
     allowedStatusTransitions: claim
       ? WARRANTY_CLAIM_STATUS_TRANSITIONS[claim.status]
       : [],
     assignServiceCenter,
+    attachmentToRemove,
     canAssignServiceCenter,
     canUpdate,
     canUpdateStatus,
@@ -124,9 +177,15 @@ export function useWarrantyClaimDetail(claimId: string) {
     claimQuery,
     closeAction,
     isAssigningServiceCenter: assignServiceCenterMutation.isPending,
+    isRemovingAttachment: unlinkAttachmentMutation.isPending,
     isUpdatingPriority: updatePriorityMutation.isPending,
     isUpdatingStatus: updateStatusMutation.isPending,
     openAction,
+    openRemoveAttachment: setAttachmentToRemove,
+    removeAttachment,
+    closeRemoveAttachment: () => setAttachmentToRemove(null),
+    completeAttachmentUpload,
+    refreshAttachments,
     serviceCenters: serviceCentersQuery.data?.items ?? [],
     timeline:
       timelineQuery.data ??
@@ -140,5 +199,6 @@ export function useWarrantyClaimDetail(claimId: string) {
     timelineQuery,
     updatePriority,
     updateStatus,
+    uploadAttachment,
   };
 }

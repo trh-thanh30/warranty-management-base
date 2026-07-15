@@ -4,6 +4,10 @@ import { ListWarrantyClaimAssetsUseCase } from '@/modules/warranty-claims/use-ca
 import { UnlinkWarrantyClaimAssetUseCase } from '@/modules/warranty-claims/use-cases/unlink-warranty-claim-asset.use-case';
 import { asset_access_type, asset_type } from '@prisma/client';
 
+jest.mock('@/modules/assets/assets.service', () => ({
+  AssetsService: class AssetsService {},
+}));
+
 const asset = {
   id: 'asset-id',
   original_name: 'issue.jpg',
@@ -22,6 +26,12 @@ const asset = {
 };
 
 describe('Warranty claim asset use cases', () => {
+  const assetsService = {
+    enrichAssetUrl: jest.fn((value: typeof asset) => ({
+      ...value,
+      url: `http://localhost:4100/cdn/${value.path}`,
+    })),
+  };
   const warrantyClaimsRepository = {
     findById: jest.fn(),
     findAssetById: jest.fn(),
@@ -39,6 +49,7 @@ describe('Warranty claim asset use cases', () => {
     warrantyClaimsRepository.linkAssetToClaim.mockResolvedValue({ asset });
     const useCase = new LinkWarrantyClaimAssetUseCase(
       warrantyClaimsRepository as never,
+      assetsService as never,
     );
 
     const result = await useCase.execute(
@@ -53,7 +64,7 @@ describe('Warranty claim asset use cases', () => {
       note: 'Anh loi',
       linkedByUserId: 'admin-id',
     });
-    expect(result.url).toBe('claims/issue-123.jpg');
+    expect(result.url).toBe('http://localhost:4100/cdn/claims/issue-123.jpg');
   });
 
   it('lists linked claim assets', async () => {
@@ -61,12 +72,16 @@ describe('Warranty claim asset use cases', () => {
     warrantyClaimsRepository.listClaimAssets.mockResolvedValue([{ asset }]);
     const useCase = new ListWarrantyClaimAssetsUseCase(
       warrantyClaimsRepository as never,
+      assetsService as never,
     );
 
     const result = await useCase.execute('claim-id');
 
     expect(result).toHaveLength(1);
     expect(result[0]?.id).toBe('asset-id');
+    expect(result[0]?.url).toBe(
+      'http://localhost:4100/cdn/claims/issue-123.jpg',
+    );
   });
 
   it('throws not found when linking to a missing asset', async () => {
@@ -74,6 +89,7 @@ describe('Warranty claim asset use cases', () => {
     warrantyClaimsRepository.findAssetById.mockResolvedValue(null);
     const useCase = new LinkWarrantyClaimAssetUseCase(
       warrantyClaimsRepository as never,
+      assetsService as never,
     );
 
     await expect(

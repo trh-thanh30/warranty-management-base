@@ -21,7 +21,14 @@ export function WarrantyClaimStatusBadge({
 }) {
   const t = useTranslations("WarrantyClaims.statuses");
 
-  return <Badge variant={getStatusBadgeVariant(status)}>{t(status)}</Badge>;
+  return (
+    <Badge
+      className="whitespace-nowrap"
+      variant={getStatusBadgeVariant(status)}
+    >
+      {t(status)}
+    </Badge>
+  );
 }
 
 export function WarrantyClaimPriorityBadge({
@@ -32,7 +39,12 @@ export function WarrantyClaimPriorityBadge({
   const t = useTranslations("WarrantyClaims.priorities");
 
   return (
-    <Badge variant={getPriorityBadgeVariant(priority)}>{t(priority)}</Badge>
+    <Badge
+      className="whitespace-nowrap"
+      variant={getPriorityBadgeVariant(priority)}
+    >
+      {t(priority)}
+    </Badge>
   );
 }
 
@@ -45,7 +57,10 @@ export function WarrantyClaimOverdueBadge({
   const label = getClaimSlaLabel(claim);
 
   return (
-    <Badge variant={isClaimOverdue(claim) ? "destructive" : "secondary"}>
+    <Badge
+      className="whitespace-nowrap"
+      variant={isClaimOverdue(claim) ? "destructive" : "secondary"}
+    >
       {t(`sla.${label}`)}
     </Badge>
   );

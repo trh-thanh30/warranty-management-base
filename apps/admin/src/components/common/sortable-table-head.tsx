@@ -31,7 +31,7 @@ export function SortableTableHead<TSortBy extends string>({
   return (
     <TableHead>
       <button
-        className="inline-flex items-center gap-1.5 text-left font-medium text-inherit transition-colors hover:text-slate-950 dark:hover:text-slate-50"
+        className="inline-flex items-center gap-1.5 text-left font-medium uppercase text-inherit transition-colors hover:text-slate-950 dark:hover:text-slate-50"
         onClick={() => onSortChange(sortBy)}
         type="button"
       >

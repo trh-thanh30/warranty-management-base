@@ -8,6 +8,7 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import type { WarrantyClaimSortBy, WarrantyClaimSummary } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
@@ -64,7 +65,7 @@ export function WarrantyClaimsTable({
 
   return (
     <>
-      <div className="space-y-3 xl:hidden">
+      <div className="space-y-3 md:hidden">
         {items.map((claim) => (
           <WarrantyClaimMobileCard
             claim={claim}
@@ -74,8 +75,8 @@ export function WarrantyClaimsTable({
         ))}
       </div>
 
-      <div className="hidden overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800 xl:block">
-        <Table>
+      <div className="hidden overflow-x-auto overscroll-x-contain rounded-md border border-slate-200 dark:border-slate-800 md:block">
+        <Table className="min-w-[1360px]">
           <TableHeader>
             <TableRow>
               <SortableTableHead
@@ -159,13 +160,13 @@ function WarrantyClaimTableRow({
         </div>
       </TableCell>
       <TableCell>{formatClaimServiceCenter(claim)}</TableCell>
-      <TableCell>
-        <div className="flex max-w-[9rem] flex-wrap gap-1.5">
+      <TableCell className="min-w-[160px] whitespace-nowrap">
+        <div className="flex flex-nowrap items-center gap-1.5">
           <WarrantyClaimStatusBadge status={claim.status} />
           <WarrantyClaimPriorityBadge priority={claim.priority} />
         </div>
       </TableCell>
-      <TableCell>
+      <TableCell className="min-w-[150px] whitespace-nowrap">
         <div className="space-y-1">
           <WarrantyClaimOverdueBadge claim={claim} />
           <p className="text-xs text-slate-500">
@@ -203,13 +204,19 @@ function WarrantyClaimMobileCard({
         <WarrantyClaimActions claim={claim} onAction={onAction} />
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-2">
-        <WarrantyClaimStatusBadge status={claim.status} />
-        <WarrantyClaimPriorityBadge priority={claim.priority} />
+      <dl className="mt-3 space-y-2">
+        <MobileStatusRow label={t("status")}>
+          <WarrantyClaimStatusBadge status={claim.status} />
+        </MobileStatusRow>
+        <MobileStatusRow label={t("priority")}>
+          <WarrantyClaimPriorityBadge priority={claim.priority} />
+        </MobileStatusRow>
         {isClaimOverdue(claim) ? (
-          <WarrantyClaimOverdueBadge claim={claim} />
+          <MobileStatusRow label={t("slaLabel")}>
+            <WarrantyClaimOverdueBadge claim={claim} />
+          </MobileStatusRow>
         ) : null}
-      </div>
+      </dl>
 
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
         <MobileField label={t("customer")} value={formatClaimCustomer(claim)} />
@@ -224,6 +231,23 @@ function WarrantyClaimMobileCard({
         />
       </dl>
     </article>
+  );
+}
+
+function MobileStatusRow({
+  children,
+  label,
+}: {
+  children: ReactNode;
+  label: string;
+}) {
+  return (
+    <div className="flex min-w-0 items-center gap-2">
+      <dt className="w-20 shrink-0 text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+        {label}
+      </dt>
+      <dd className="min-w-0">{children}</dd>
+    </div>
   );
 }
 

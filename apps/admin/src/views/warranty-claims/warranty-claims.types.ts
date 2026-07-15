@@ -29,7 +29,11 @@ export type WarrantyClaimDirectoryFilters = {
   warrantyCode: string;
 };
 
-export type WarrantyClaimAction = "assignServiceCenter" | "priority" | "status";
+export type WarrantyClaimAction =
+  | "assignServiceCenter"
+  | "priority"
+  | "status"
+  | "uploadAttachments";
 
 export type WarrantyClaimSort = WarrantyClaimSortBy;
 
