@@ -41,6 +41,7 @@ import { IdentityMiddleware } from '@/common/middleware/identity.middleware';
 import { PermissionsModule } from '@/common/permissions/permissions.module';
 import { PrismaModule } from '@/database/prisma/prisma.module';
 import { RedisModule } from '@/database/redis/redis.module';
+import { AnalyticsModule } from '@/modules/analytics/analytics.module';
 import { AssetsModule } from '@/modules/assets/assets.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { CommonModule } from '@/modules/common/common.module';
@@ -140,6 +141,7 @@ const envPath = join(rootDir, envFile);
     ScheduleModule.forRoot(),
     JobsModule,
     HealthModule,
+    AnalyticsModule,
     AssetsModule,
     CommonModule,
     CategoriesModule,

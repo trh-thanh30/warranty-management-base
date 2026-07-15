@@ -84,6 +84,12 @@
     "file": "api-modules/warranty-claims.md"
   },
   {
+    "id": "api-analytics",
+    "title": "API Analytics",
+    "description": "Read model dashboard admin: KPI, chart và recent activity.",
+    "file": "api-modules/analytics.md"
+  },
+  {
     "id": "api-service-centers",
     "title": "API Service Centers",
     "description": "Quản lý trạm bảo hành và dữ liệu assign claim.",
