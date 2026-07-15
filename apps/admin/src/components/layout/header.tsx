@@ -1,6 +1,6 @@
 "use client";
 
-import { PanelLeft, Search, Settings } from "lucide-react";
+import { PanelLeft, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@repo/ui";
 import { CommandMenu } from "@/src/components/command-menu";
@@ -12,6 +12,7 @@ import { getDashboardConfig } from "@/src/config/dashboard.config";
 import { LanguageSwitcher } from "@/src/components/language-switcher";
 import { Link } from "@/src/i18n/navigation";
 import { usePermissions } from "@/src/hooks/use-permissions";
+import { NotificationBell } from "@/src/components/notification-bell";
 
 export function Header() {
   const t = useTranslations("DashboardConfig");
@@ -75,15 +76,9 @@ export function Header() {
         >
           <Search className="h-5 w-5" />
         </Button>
+        <NotificationBell />
         <LanguageSwitcher />
         <ThemeToggle />
-        <Button
-          aria-label={tCommon("openSettings")}
-          size="icon"
-          variant="ghost"
-        >
-          <Settings className="h-4 w-4" />
-        </Button>
         <UserMenu />
       </div>
       <CommandMenu />

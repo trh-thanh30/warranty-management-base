@@ -5,6 +5,7 @@ export * from "./booking.types.ts";
 export * from "./category.types.ts";
 export * from "./content-page.types.ts";
 export * from "./customer.types.ts";
+export * from "./notification.types.ts";
 export * from "./pagination.types.ts";
 export * from "./product.types.ts";
 export * from "./service-center.types.ts";

@@ -1,5 +1,6 @@
 import {
   Activity,
+  Bell,
   Building2,
   CircleHelp,
   ClipboardList,
@@ -78,6 +79,11 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             href: "/service-centers",
             icon: Building2,
             requiredPermission: PERMISSIONS.SERVICE_CENTER_VIEW,
+          },
+          {
+            title: t("items.notifications"),
+            href: "/notifications",
+            icon: Bell,
           },
           {
             title: t("items.chats"),
