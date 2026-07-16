@@ -20,7 +20,12 @@ import {
   type CategoryFormValues,
 } from "../categories.types";
 import { useCreateCategory, useUpdateCategory } from "./use-categories";
-import { toOptionalRichText, toNullableRichText } from "@/src/utils/rich-text";
+import {
+  toOptionalValue,
+  toNullableValue,
+  toOptionalRichText,
+  toNullableRichText,
+} from "@/src/utils";
 
 export function useCategoryForm({
   category,
@@ -131,16 +136,6 @@ function toUpdateCategoryBody(values: CategoryFormValues): UpdateCategoryBody {
     parentId: toNullableValue(values.parentId),
     slug: toOptionalValue(values.slug),
   };
-}
-
-function toOptionalValue(value: string) {
-  const trimmed = value.trim();
-  return trimmed || undefined;
-}
-
-function toNullableValue(value: string) {
-  const trimmed = value.trim();
-  return trimmed || null;
 }
 
 function handleCategorySaveError(

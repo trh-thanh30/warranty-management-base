@@ -6,6 +6,7 @@ import { useDebounce } from "@repo/hooks";
 import type { ProductResponse } from "@repo/shared";
 import { HttpClientError } from "@repo/shared";
 import { useToast } from "@/src/hooks/use-toast";
+import { toOptionalValue } from "@/src/utils";
 import { useCustomers } from "../../customers/hooks/use-customers";
 import { useAssignProductOwner } from "./use-products";
 
@@ -78,9 +79,4 @@ export function useAssignProductOwnerWorkflow({
     setPurchaseDate,
     setSearch,
   };
-}
-
-function toOptionalValue(value: string) {
-  const trimmed = value.trim();
-  return trimmed || undefined;
 }

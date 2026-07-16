@@ -19,6 +19,7 @@ import {
   serviceCenterFormSchema,
   type ServiceCenterFormValues,
 } from "../service-centers.types";
+import { toOptionalValue } from "@/src/utils";
 
 export function useServiceCenterForm({
   onSaved,
@@ -118,11 +119,6 @@ function toCreateBody(
     phone: toOptionalValue(values.phone),
     province: values.province.trim(),
   };
-}
-
-function toOptionalValue(value: string) {
-  const trimmed = value.trim();
-  return trimmed || undefined;
 }
 
 function toUpdateBody(

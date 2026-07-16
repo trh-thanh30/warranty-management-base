@@ -20,7 +20,12 @@ import {
   type ProductFormValues,
 } from "../products.types";
 import { useCreateProduct, useUpdateProduct } from "./use-products";
-import { toOptionalRichText, toNullableRichText } from "@/src/utils/rich-text";
+import {
+  toOptionalValue,
+  toNullableValue,
+  toOptionalRichText,
+  toNullableRichText,
+} from "@/src/utils";
 
 export function useProductForm({
   onSaved,
@@ -166,16 +171,6 @@ function toUpdateProductBody(values: ProductFormValues): UpdateProductBody {
     serialNumber: toNullableValue(values.serialNumber),
     status: values.status,
   };
-}
-
-function toOptionalValue(value: string) {
-  const trimmed = value.trim();
-  return trimmed || undefined;
-}
-
-function toNullableValue(value: string) {
-  const trimmed = value.trim();
-  return trimmed || null;
 }
 
 function handleProductSaveError(

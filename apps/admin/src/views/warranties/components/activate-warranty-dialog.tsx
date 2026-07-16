@@ -17,6 +17,7 @@ import {
 } from "@repo/ui";
 import { useActivateWarranty } from "@/src/hooks/use-warranties";
 import { useToast } from "@/src/hooks/use-toast";
+import { toOptionalValue } from "@/src/utils";
 
 type ActivateWarrantyDialogProps = {
   onActivated?: () => void;
@@ -131,11 +132,6 @@ export function ActivateWarrantyDialog({
       </DialogContent>
     </Dialog>
   );
-}
-
-function toOptionalValue(value: string) {
-  const trimmed = value.trim();
-  return trimmed || undefined;
 }
 
 function toOptionalNumber(value: string) {
