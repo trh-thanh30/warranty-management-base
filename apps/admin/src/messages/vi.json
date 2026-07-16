@@ -191,6 +191,8 @@
     "newPassword": "Mật khẩu mới",
     "passwordUnchanged": "Để trống nếu không đổi mật khẩu",
     "status": "Trạng thái",
+    "activeStatusLabel": "Trạng thái tài khoản",
+    "activeStatusDescription": "Cho phép nhân viên này đăng nhập và thực thi các quyền hạn trên hệ thống.",
     "active": "Đang hoạt động",
     "inactive": "Đã khóa",
     "cancel": "Hủy",

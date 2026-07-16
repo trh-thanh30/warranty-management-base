@@ -191,6 +191,8 @@
     "newPassword": "New password",
     "passwordUnchanged": "Leave blank to keep the current password",
     "status": "Status",
+    "activeStatusLabel": "Account status",
+    "activeStatusDescription": "Allow this staff member to log in and perform actions based on assigned permissions.",
     "active": "Active",
     "inactive": "Inactive",
     "cancel": "Cancel",

@@ -1,10 +1,11 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { Controller } from "react-hook-form";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { UserAccountSummary } from "@repo/shared";
-import { Button, Input, Label } from "@repo/ui";
+import { Button, Input, Label, Switch } from "@repo/ui";
 import { useStaffAccountForm } from "../hooks/use-staff-account-form";
 
 type StaffAccountFormProps = {
@@ -23,7 +24,7 @@ export function StaffAccountForm({
   user,
 }: StaffAccountFormProps) {
   const t = useTranslations("Staff");
-  const { creating, errors, isSubmitting, onSubmit, register } =
+  const { control, creating, errors, isSubmitting, onSubmit, register } =
     useStaffAccountForm({ onSaved, user });
 
   return (
@@ -98,16 +99,27 @@ export function StaffAccountForm({
       ) : null}
 
       {!creating ? (
-        <Field id="staff-status" label={t("status")}>
-          <select
-            className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none focus:border-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50"
-            id="staff-status"
-            {...register("status")}
-          >
-            <option value="ACTIVE">{t("active")}</option>
-            <option value="INACTIVE">{t("inactive")}</option>
-          </select>
-        </Field>
+        <Controller
+          control={control}
+          name="status"
+          render={({ field }) => (
+            <div className="flex items-center justify-between gap-4 rounded-md border border-slate-200 p-4 dark:border-slate-800">
+              <div>
+                <Label htmlFor="staff-status">{t("activeStatusLabel")}</Label>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  {t("activeStatusDescription")}
+                </p>
+              </div>
+              <Switch
+                checked={field.value === "ACTIVE"}
+                id="staff-status"
+                onCheckedChange={(checked) =>
+                  field.onChange(checked ? "ACTIVE" : "INACTIVE")
+                }
+              />
+            </div>
+          )}
+        />
       ) : null}
 
       <div className="grid grid-cols-2 gap-2 border-t border-slate-200 pt-5 dark:border-slate-800 sm:flex sm:justify-end">
