@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { useTranslations } from "next-intl";
 import type { UserAccountSummary } from "@repo/shared";
 import { ConfirmActionDialog } from "@/src/components/common/confirm-action-dialog";
@@ -20,8 +21,15 @@ export function StaffStatusDialog({
   user,
 }: StaffStatusDialogProps) {
   const t = useTranslations("Staff");
-  const isActive = user?.status === "ACTIVE";
-  const displayName = user?.fullName || user?.username || "";
+  const lastUserRef = useRef<UserAccountSummary | null>(null);
+
+  if (user) {
+    lastUserRef.current = user;
+  }
+
+  const currentUser = user ?? lastUserRef.current;
+  const isActive = currentUser?.status === "ACTIVE";
+  const displayName = currentUser?.fullName || currentUser?.username || "";
 
   return (
     <ConfirmActionDialog
