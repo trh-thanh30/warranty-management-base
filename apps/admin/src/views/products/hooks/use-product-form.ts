@@ -20,6 +20,7 @@ import {
   type ProductFormValues,
 } from "../products.types";
 import { useCreateProduct, useUpdateProduct } from "./use-products";
+import { toOptionalRichText, toNullableRichText } from "@/src/utils/rich-text";
 
 export function useProductForm({
   onSaved,
@@ -138,7 +139,7 @@ function toCreateProductBody(values: ProductFormValues): CreateProductBody {
     category: values.category,
     categoryId: toOptionalValue(values.categoryId),
     customerId: toOptionalValue(values.customerId),
-    description: toOptionalValue(values.description),
+    description: toOptionalRichText(values.description),
     durationMonths: values.durationMonths,
     manufactureYear: values.manufactureYear,
     model: toOptionalValue(values.model),
@@ -158,7 +159,7 @@ function toUpdateProductBody(values: ProductFormValues): UpdateProductBody {
     brand: toNullableValue(values.brand),
     category: values.category,
     categoryId: toNullableValue(values.categoryId),
-    description: toNullableValue(values.description),
+    description: toNullableRichText(values.description),
     manufactureYear: values.manufactureYear ?? null,
     model: toNullableValue(values.model),
     name: values.name.trim(),

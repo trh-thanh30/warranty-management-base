@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ProductResponse } from "@repo/shared";
 import { Button, Input, Label, Switch, Textarea } from "@repo/ui";
+import { RichTextEditor } from "@/src/components/common/rich-text-editor";
 import { PRODUCT_CATEGORIES } from "../products.constants";
 import { useProductForm } from "../hooks/use-product-form";
 
@@ -138,10 +139,16 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
         id="product-description"
         label={t("descriptionLabel")}
       >
-        <Textarea
-          id="product-description"
-          rows={4}
-          {...register("description")}
+        <Controller
+          control={control}
+          name="description"
+          render={({ field }) => (
+            <RichTextEditor
+              disabled={isSubmitting}
+              onChange={field.onChange}
+              value={field.value ?? ""}
+            />
+          )}
         />
       </Field>
 

@@ -20,6 +20,7 @@ import {
   type CategoryFormValues,
 } from "../categories.types";
 import { useCreateCategory, useUpdateCategory } from "./use-categories";
+import { toOptionalRichText, toNullableRichText } from "@/src/utils/rich-text";
 
 export function useCategoryForm({
   category,
@@ -140,24 +141,6 @@ function toOptionalValue(value: string) {
 function toNullableValue(value: string) {
   const trimmed = value.trim();
   return trimmed || null;
-}
-
-function toOptionalRichText(value: string) {
-  return isEmptyRichText(value) ? undefined : value.trim();
-}
-
-function toNullableRichText(value: string) {
-  return isEmptyRichText(value) ? null : value.trim();
-}
-
-function isEmptyRichText(value: string) {
-  const trimmed = value.trim();
-  const text = trimmed
-    .replace(/<[^>]*>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .trim();
-
-  return !trimmed || trimmed === "<p></p>" || !text;
 }
 
 function handleCategorySaveError(

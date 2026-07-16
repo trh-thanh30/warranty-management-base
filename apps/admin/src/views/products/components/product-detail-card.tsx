@@ -90,6 +90,18 @@ export function ProductDetailCard({
             }
           />
         </DetailSection>
+
+        {product.description ? (
+          <div className="lg:col-span-2 space-y-3 rounded-md border border-slate-200 p-4 dark:border-slate-800">
+            <h2 className="font-medium text-slate-950 dark:text-slate-50">
+              {t("descriptionLabel")}
+            </h2>
+            <div
+              className="prose prose-slate dark:prose-invert max-w-none text-sm text-slate-950 dark:text-slate-50"
+              dangerouslySetInnerHTML={{ __html: product.description }}
+            />
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );
