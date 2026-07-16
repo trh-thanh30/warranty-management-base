@@ -1,10 +1,11 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { Controller } from "react-hook-form";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ServiceCenterSummary } from "@repo/shared";
-import { Button, Input, Label, Textarea } from "@repo/ui";
+import { Button, Input, Label, Switch, Textarea } from "@repo/ui";
 import { useServiceCenterForm } from "../hooks/use-service-center-form";
 
 type ServiceCenterFormProps = {
@@ -19,7 +20,7 @@ export function ServiceCenterForm({
   serviceCenter,
 }: ServiceCenterFormProps) {
   const t = useTranslations("ServiceCenters");
-  const { creating, errors, isSubmitting, onSubmit, register } =
+  const { control, creating, errors, isSubmitting, onSubmit, register } =
     useServiceCenterForm({ onSaved, serviceCenter });
 
   return (
@@ -115,6 +116,30 @@ export function ServiceCenterForm({
           />
         </Field>
       </div>
+
+      {!creating ? (
+        <Controller
+          control={control}
+          name="isActive"
+          render={({ field }) => (
+            <div className="flex items-center justify-between gap-4 rounded-md border border-slate-200 p-4 dark:border-slate-800">
+              <div>
+                <Label htmlFor="service-center-is-active">
+                  {t("activeStatusLabel")}
+                </Label>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  {t("activeStatusDescription")}
+                </p>
+              </div>
+              <Switch
+                checked={field.value}
+                id="service-center-is-active"
+                onCheckedChange={field.onChange}
+              />
+            </div>
+          )}
+        />
+      ) : null}
 
       <div className="grid grid-cols-2 gap-2 border-t border-slate-200 pt-5 dark:border-slate-800 sm:flex sm:justify-end">
         <Button

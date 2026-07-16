@@ -34,6 +34,7 @@ export function useServiceCenterForm({
   const createServiceCenter = useCreateServiceCenter();
   const updateServiceCenter = useUpdateServiceCenter(serviceCenter?.id ?? null);
   const {
+    control,
     formState: { errors, isSubmitting },
     handleSubmit,
     register,
@@ -87,6 +88,7 @@ export function useServiceCenterForm({
   }
 
   return {
+    control,
     creating,
     errors,
     isSubmitting,
@@ -102,6 +104,7 @@ function getDefaultValues(
     address: serviceCenter?.address ?? "",
     district: serviceCenter?.district ?? "",
     email: serviceCenter?.email ?? "",
+    isActive: serviceCenter?.isActive ?? true,
     name: serviceCenter?.name ?? "",
     phone: serviceCenter?.phone ?? "",
     province: serviceCenter?.province ?? "",
@@ -124,5 +127,8 @@ function toCreateBody(
 function toUpdateBody(
   values: ServiceCenterFormValues,
 ): UpdateServiceCenterBody {
-  return toCreateBody(values);
+  return {
+    ...toCreateBody(values),
+    isActive: values.isActive,
+  };
 }

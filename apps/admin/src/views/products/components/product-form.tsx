@@ -101,16 +101,15 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
             ))}
           </select>
         </Field>
-        <Field id="product-status" label={t("productStatus")}>
-          <select
-            className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none transition-colors focus:border-slate-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:focus:border-slate-300"
-            id="product-status"
-            {...register("status")}
-          >
-            <option value="ACTIVE">{t("statuses.ACTIVE")}</option>
-            <option value="INACTIVE">{t("statuses.INACTIVE")}</option>
-          </select>
-        </Field>
+        {product?.warrantyCode ? (
+          <Field id="product-warranty-code-readonly" label={t("warrantyCode")}>
+            <Input
+              id="product-warranty-code-readonly"
+              readOnly
+              value={product.warrantyCode}
+            />
+          </Field>
+        ) : null}
       </div>
 
       <div className="grid gap-5 sm:grid-cols-3">
@@ -168,6 +167,28 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
           )}
         />
       </Field>
+
+      <Controller
+        control={control}
+        name="status"
+        render={({ field }) => (
+          <div className="flex items-center justify-between gap-4 rounded-md border border-slate-200 p-4 dark:border-slate-800">
+            <div>
+              <Label htmlFor="product-status">{t("activeStatusLabel")}</Label>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                {t("activeStatusDescription")}
+              </p>
+            </div>
+            <Switch
+              checked={field.value === "ACTIVE"}
+              id="product-status"
+              onCheckedChange={(checked) =>
+                field.onChange(checked ? "ACTIVE" : "INACTIVE")
+              }
+            />
+          </div>
+        )}
+      />
 
       {creating ? (
         <section className="space-y-5 rounded-md border border-slate-200 p-4 dark:border-slate-800">
@@ -262,14 +283,6 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
             />
           </Field>
         </section>
-      ) : product?.warrantyCode ? (
-        <Field id="product-warranty-code-readonly" label={t("warrantyCode")}>
-          <Input
-            id="product-warranty-code-readonly"
-            readOnly
-            value={product.warrantyCode}
-          />
-        </Field>
       ) : null}
 
       <div className="grid grid-cols-2 gap-2 border-t border-slate-200 pt-5 dark:border-slate-800 sm:flex sm:justify-end">

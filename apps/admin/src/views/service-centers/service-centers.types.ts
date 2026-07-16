@@ -18,6 +18,7 @@ export const serviceCenterFormSchema = z.object({
       value.length === 0 || z.string().email().safeParse(value).success,
     "emailInvalid",
   ),
+  isActive: z.boolean(),
   name: optionalText.min(2, "nameRequired").max(160, "nameLength"),
   phone: optionalText
     .max(32, "phoneLength")
