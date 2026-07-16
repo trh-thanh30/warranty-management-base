@@ -50,14 +50,22 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
           id="product-name"
           label={t("name")}
         >
-          <Input id="product-name" {...register("name")} />
+          <Input
+            id="product-name"
+            placeholder={t("namePlaceholder")}
+            {...register("name")}
+          />
         </Field>
         <Field
           error={formatFieldError(errors.serialNumber?.message, t)}
           id="product-serial-number"
           label={t("serialNumber")}
         >
-          <Input id="product-serial-number" {...register("serialNumber")} />
+          <Input
+            id="product-serial-number"
+            placeholder={t("serialNumberPlaceholder")}
+            {...register("serialNumber")}
+          />
         </Field>
       </div>
 
@@ -111,14 +119,22 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
           id="product-brand"
           label={t("brand")}
         >
-          <Input id="product-brand" {...register("brand")} />
+          <Input
+            id="product-brand"
+            placeholder={t("brandPlaceholder")}
+            {...register("brand")}
+          />
         </Field>
         <Field
           error={formatFieldError(errors.model?.message, t)}
           id="product-model"
           label={t("model")}
         >
-          <Input id="product-model" {...register("model")} />
+          <Input
+            id="product-model"
+            placeholder={t("modelPlaceholder")}
+            {...register("model")}
+          />
         </Field>
         <Field
           error={formatFieldError(errors.manufactureYear?.message, t)}
@@ -128,6 +144,7 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
           <Input
             id="product-manufacture-year"
             inputMode="numeric"
+            placeholder={t("manufactureYearPlaceholder")}
             type="number"
             {...register("manufactureYear")}
           />
@@ -182,7 +199,11 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
               id="product-warranty-code"
               label={t("warrantyCode")}
             >
-              <Input id="product-warranty-code" {...register("warrantyCode")} />
+              <Input
+                id="product-warranty-code"
+                placeholder={t("warrantyCodePlaceholder")}
+                {...register("warrantyCode")}
+              />
             </Field>
           ) : null}
           <div className="grid gap-5 sm:grid-cols-2">
