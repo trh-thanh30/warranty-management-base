@@ -910,6 +910,15 @@
     "deliveryStatus": "Delivery",
     "recipients": "Recipients",
     "createdAt": "Created",
+    "types": {
+      "ALL": "All notification types",
+      "WARRANTY_CLAIM_CREATED": "Warranty claim created",
+      "WARRANTY_CLAIM_STATUS_CHANGED": "Claim status updated",
+      "WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER": "Service center assigned",
+      "WARRANTY_CLAIM_SLA_BREACHED": "SLA breach warning",
+      "SYSTEM_ALERT": "System alert",
+      "ANNOUNCEMENT": "General announcement"
+    },
     "statuses": {
       "ALL": "All statuses",
       "UNREAD": "Unread",

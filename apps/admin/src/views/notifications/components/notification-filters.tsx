@@ -38,12 +38,28 @@ export function NotificationFilters({
           value={search}
         />
       </label>
-      <Input
+      <select
         aria-label={t("typeFilter")}
+        className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none focus:border-slate-400 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50"
         onChange={(event) => onTypeChange(event.target.value)}
-        placeholder={t("typeFilter")}
         value={type}
-      />
+      >
+        <option value="">{t("types.ALL")}</option>
+        <option value="WARRANTY_CLAIM_CREATED">
+          {t("types.WARRANTY_CLAIM_CREATED")}
+        </option>
+        <option value="WARRANTY_CLAIM_STATUS_CHANGED">
+          {t("types.WARRANTY_CLAIM_STATUS_CHANGED")}
+        </option>
+        <option value="WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER">
+          {t("types.WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER")}
+        </option>
+        <option value="WARRANTY_CLAIM_SLA_BREACHED">
+          {t("types.WARRANTY_CLAIM_SLA_BREACHED")}
+        </option>
+        <option value="SYSTEM_ALERT">{t("types.SYSTEM_ALERT")}</option>
+        <option value="ANNOUNCEMENT">{t("types.ANNOUNCEMENT")}</option>
+      </select>
       {onStatusChange && status ? (
         <select
           aria-label={t("statusFilter")}
