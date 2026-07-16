@@ -28,7 +28,7 @@ export function MobileSidebar() {
       </SheetTrigger>
       <SheetContent>
         <SheetTitle className="sr-only">{t("openNavigation")}</SheetTitle>
-        <AppSidebar collapsedOverride={false} showCollapseButton={false} />
+        <AppSidebar collapsedOverride={false} />
       </SheetContent>
     </Sheet>
   );

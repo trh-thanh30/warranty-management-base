@@ -14,6 +14,12 @@ type TrendMetric =
 
 type TrendInterval = 'day' | 'week' | 'month';
 
+const TREND_INTERVAL_SQL: Record<TrendInterval, Prisma.Sql> = {
+  day: Prisma.sql`'day'`,
+  week: Prisma.sql`'week'`,
+  month: Prisma.sql`'month'`,
+};
+
 type TrendRow = {
   bucket: Date;
   value: bigint | number;
@@ -255,7 +261,7 @@ export class AnalyticsRepository {
     range: AnalyticsDateRange;
     serviceCenterId?: string;
   }) {
-    const interval = Prisma.raw(input.interval);
+    const interval = TREND_INTERVAL_SQL[input.interval];
     const serviceCenterId = input.serviceCenterId ?? null;
     let rows: TrendRow[];
 

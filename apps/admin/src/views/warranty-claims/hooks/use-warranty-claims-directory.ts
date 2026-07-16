@@ -23,7 +23,7 @@ const INITIAL_FILTERS = {
   dateTo: "",
   isOverdue: "ALL",
   priority: "ALL",
-  serviceCenterId: "ALL",
+  serviceCenter: "ALL",
   status: "ALL",
   warrantyCode: "",
 } satisfies WarrantyClaimDirectoryFilters;
@@ -56,6 +56,8 @@ export function useWarrantyClaimsDirectory() {
   const enabled = Boolean(currentUser) && canViewClaims;
   const claimsQuery = useWarrantyClaims(
     {
+      assignmentStatus:
+        filters.serviceCenter === "UNASSIGNED" ? "UNASSIGNED" : undefined,
       claimCode: filters.claimCode.trim().toUpperCase() || undefined,
       dateFrom: filters.dateFrom || undefined,
       dateTo: filters.dateTo || undefined,
@@ -70,7 +72,10 @@ export function useWarrantyClaimsDirectory() {
       priority: filters.priority === "ALL" ? undefined : filters.priority,
       search: debouncedSearch || undefined,
       serviceCenterId:
-        filters.serviceCenterId === "ALL" ? undefined : filters.serviceCenterId,
+        filters.serviceCenter === "ALL" ||
+        filters.serviceCenter === "UNASSIGNED"
+          ? undefined
+          : filters.serviceCenter,
       sortBy,
       sortOrder,
       status: filters.status === "ALL" ? undefined : filters.status,
@@ -80,10 +85,15 @@ export function useWarrantyClaimsDirectory() {
   );
   const metricsQuery = useWarrantyClaimMetrics(
     {
+      assignmentStatus:
+        filters.serviceCenter === "UNASSIGNED" ? "UNASSIGNED" : undefined,
       dateFrom: filters.dateFrom || undefined,
       dateTo: filters.dateTo || undefined,
       serviceCenterId:
-        filters.serviceCenterId === "ALL" ? undefined : filters.serviceCenterId,
+        filters.serviceCenter === "ALL" ||
+        filters.serviceCenter === "UNASSIGNED"
+          ? undefined
+          : filters.serviceCenter,
     },
     { enabled },
   );
@@ -116,7 +126,7 @@ export function useWarrantyClaimsDirectory() {
     updateOverdue: filterHandlers.isOverdue,
     updatePriorityFilter: filterHandlers.priority,
     updateSearch: setSearch,
-    updateServiceCenter: filterHandlers.serviceCenterId,
+    updateServiceCenter: filterHandlers.serviceCenter,
     updateStatusFilter: filterHandlers.status,
     updateWarrantyCode: filterHandlers.warrantyCode,
   };

@@ -24,7 +24,7 @@ export type WarrantyClaimDirectoryFilters = {
   dateTo: string;
   isOverdue: WarrantyClaimOverdueFilter;
   priority: WarrantyClaimPriorityFilter;
-  serviceCenterId: string;
+  serviceCenter: string;
   status: WarrantyClaimStatusFilter;
   warrantyCode: string;
 };

@@ -101,7 +101,7 @@ export function WarrantyClaimsDirectoryCard({
     Boolean(filters.dateTo) ||
     filters.status !== "ALL" ||
     filters.priority !== "ALL" ||
-    filters.serviceCenterId !== "ALL" ||
+    filters.serviceCenter !== "ALL" ||
     filters.isOverdue !== "ALL";
 
   return (
@@ -238,9 +238,10 @@ function WarrantyClaimsFilters({
         aria-label={t("serviceCenterFilter")}
         className="h-10 min-w-0 w-full max-w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none focus:border-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50"
         onChange={(event) => onServiceCenterChange(event.target.value)}
-        value={filters.serviceCenterId}
+        value={filters.serviceCenter}
       >
         <option value="ALL">{t("allServiceCenters")}</option>
+        <option value="UNASSIGNED">{t("unassignedServiceCenter")}</option>
         {serviceCenters.map((serviceCenter) => (
           <option key={serviceCenter.id} value={serviceCenter.id}>
             {formatServiceCenterOption(serviceCenter)}

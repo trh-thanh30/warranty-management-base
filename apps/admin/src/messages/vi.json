@@ -7,19 +7,12 @@
     "brandDescription": "Next + Turborepo",
     "sections": {
       "general": "Tổng quan",
-      "pages": "Trang",
       "other": "Khác"
     },
     "items": {
       "dashboard": "Bảng điều khiển",
       "users": "Nhân viên",
-      "chats": "Trò chuyện",
-      "securedByAuth": "Bảo vệ bởi Auth",
-      "auth": "Xác thực",
-      "errors": "Lỗi",
-      "system": "Hệ thống",
       "settings": "Cài đặt",
-      "helpCenter": "Trung tâm trợ giúp",
       "overview": "Tổng quan",
       "customers": "Khách hàng",
       "categories": "Danh mục",
@@ -28,7 +21,6 @@
       "warrantyClaims": "Yêu cầu bảo hành",
       "serviceCenters": "Trạm bảo hành",
       "notifications": "Thông báo",
-      "profile": "Hồ sơ",
       "signOut": "Đăng xuất",
       "signingOut": "Đang đăng xuất..."
     }
@@ -48,7 +40,10 @@
     "loadingSession": "Đang tải phiên đăng nhập",
     "language": "Ngôn ngữ",
     "vietnamese": "Tiếng Việt",
-    "english": "English"
+    "english": "English",
+    "darkMode": "Chế độ tối",
+    "back": "Quay lại",
+    "openUserMenu": "Mở menu tài khoản"
   },
   "Login": {
     "brand": "Warranty Admin",
@@ -82,32 +77,78 @@
   },
   "Dashboard": {
     "title": "Bảng điều khiển",
-    "download": "Tải xuống",
-    "tabs": {
-      "overview": "Tổng quan",
-      "analytics": "Phân tích",
-      "reports": "Báo cáo",
-      "notifications": "Thông báo"
+    "eyebrow": "Tổng quan vận hành",
+    "description": "Theo dõi yêu cầu bảo hành, khối lượng xử lý, rủi ro hạn xử lý và hoạt động gần đây từ dữ liệu thực tế.",
+    "dateRange": {
+      "ariaLabel": "Chọn khoảng thời gian cho bảng điều khiển",
+      "placeholder": "Tháng hiện tại",
+      "clear": "Dùng khoảng mặc định"
     },
-    "stats": {
-      "totalRevenue": "Tổng doanh thu",
-      "subscriptions": "Gói đăng ký",
-      "sales": "Doanh số",
-      "activeNow": "Đang hoạt động",
-      "fromLastMonth": "+{value} so với tháng trước",
-      "sinceLastHour": "+201 từ giờ trước",
-      "live": "Trực tiếp",
-      "now": "Hiện tại"
+    "kpis": {
+      "total": "Tổng yêu cầu",
+      "totalDescription": "Yêu cầu được gửi trong khoảng đã chọn",
+      "createdToday": "Tạo hôm nay",
+      "createdTodayDescription": "Yêu cầu mới tiếp nhận trong hôm nay",
+      "overdue": "Quá hạn xử lý",
+      "overdueDescription": "Yêu cầu đang mở đã quá hạn xử lý",
+      "averageResolution": "Thời gian xử lý trung bình",
+      "averageResolutionDescription": "Thời gian trung bình để hoàn tất yêu cầu",
+      "noResolvedClaims": "Chưa có yêu cầu hoàn tất trong khoảng này",
+      "hours": "{value} giờ"
     },
-    "overview": "Tổng quan",
-    "recentSales": "Giao dịch gần đây",
-    "recentSalesDescription": "Bạn có 265 giao dịch trong tháng này.",
-    "analyticsTitle": "Phân tích",
-    "analyticsDescription": "Các widget phân tích sẽ được gắn tại đây khi kết nối chỉ số sản phẩm.",
-    "reportsTitle": "Báo cáo",
-    "reportsDescription": "Dùng tab này cho các báo cáo vận hành có thể xuất file.",
-    "notificationsTitle": "Thông báo",
-    "notificationsDescription": "Dùng tab này cho thông báo hệ thống và quy trình gần đây."
+    "charts": {
+      "claims": "Yêu cầu",
+      "claimCount": "Số yêu cầu",
+      "trendTitle": "Xu hướng yêu cầu",
+      "trendDescription": "Số yêu cầu được gửi theo khoảng thời gian đã chọn.",
+      "trendAriaLabel": "Biểu đồ xu hướng yêu cầu bảo hành",
+      "statusTitle": "Yêu cầu theo trạng thái",
+      "statusDescription": "Phân bổ theo quy trình xử lý hiện tại.",
+      "priorityTitle": "Yêu cầu theo ưu tiên",
+      "priorityDescription": "Khối lượng công việc theo mức độ ưu tiên.",
+      "serviceCenterTitle": "Yêu cầu theo trạm bảo hành",
+      "serviceCenterDescription": "Khối lượng yêu cầu đã gán cho từng trạm.",
+      "unassigned": "Chưa phân trạm",
+      "other": "Khác"
+    },
+    "recentClaims": {
+      "title": "Yêu cầu gần đây",
+      "description": "Các yêu cầu mới nhất trong khoảng thời gian đã chọn.",
+      "viewAll": "Xem tất cả",
+      "viewClaim": "Xem yêu cầu",
+      "claim": "Yêu cầu",
+      "issue": "Sự cố",
+      "status": "Trạng thái",
+      "priority": "Ưu tiên",
+      "submitted": "Ngày gửi",
+      "action": "Thao tác",
+      "permissionTitle": "Thông tin yêu cầu bị giới hạn",
+      "permissionDescription": "Bạn được xem chỉ số dashboard nhưng không có quyền mở danh sách yêu cầu.",
+      "errorDescription": "Không tải được danh sách yêu cầu gần đây.",
+      "emptyTitle": "Chưa có yêu cầu gần đây",
+      "emptyDescription": "Không có yêu cầu nào được gửi trong khoảng thời gian này."
+    },
+    "quickActions": {
+      "title": "Thao tác nhanh",
+      "description": "Mở nhanh các nghiệp vụ bảo hành thường dùng.",
+      "createProduct": "Tạo sản phẩm",
+      "createProductDescription": "Đăng ký sản phẩm bảo hành",
+      "lookupWarranty": "Tra cứu bảo hành",
+      "lookupWarrantyDescription": "Tìm kiếm và kích hoạt bảo hành",
+      "manageClaims": "Quản lý yêu cầu",
+      "manageClaimsDescription": "Xem xét và xử lý yêu cầu đã gửi",
+      "serviceCenters": "Trạm bảo hành",
+      "serviceCentersDescription": "Quản lý mạng lưới trạm bảo hành"
+    },
+    "states": {
+      "loading": "Đang tải bảng điều khiển",
+      "loadingDescription": "Đang lấy dữ liệu vận hành mới nhất.",
+      "retry": "Thử lại",
+      "metricsErrorDescription": "Không tải được chỉ số bảng điều khiển.",
+      "chartErrorDescription": "Không tải được biểu đồ này.",
+      "noChartData": "Chưa có dữ liệu biểu đồ",
+      "noChartDataDescription": "Không có dữ liệu trong khoảng thời gian đã chọn."
+    }
   },
   "Staff": {
     "title": "Quản lý nhân viên",
@@ -579,6 +620,7 @@
     "serviceCenterFilter": "Lọc theo trạm",
     "overdueFilter": "Lọc theo hạn xử lý",
     "allServiceCenters": "Tất cả trạm",
+    "unassignedServiceCenter": "Chưa phân trạm",
     "dateFrom": "Từ ngày",
     "dateTo": "Đến ngày",
     "dateRange": "Khoảng ngày gửi",

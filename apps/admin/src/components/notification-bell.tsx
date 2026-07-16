@@ -64,7 +64,7 @@ export function NotificationBell() {
         >
           <Bell className="size-4" />
           {unread > 0 ? (
-            <span className="absolute right-0.5 top-0.5 flex min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-semibold leading-4 text-white">
+            <span className="absolute right-0.5 top-0.5 flex min-w-4 items-center justify-center rounded-full bg-red-400 px-1 text-[10px] font-semibold leading-4 text-white">
               {unread > 99 ? "99+" : unread}
             </span>
           ) : null}
@@ -72,11 +72,12 @@ export function NotificationBell() {
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className="w-[min(24rem,calc(100vw-2rem))] p-0"
+        className="w-[calc(100vw-1rem)] max-w-96 p-0 sm:w-96"
+        collisionPadding={8}
       >
-        <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-slate-800">
-          <div>
-            <h2 className="font-semibold">{t("recentTitle")}</h2>
+        <div className="flex flex-col items-stretch gap-2 border-b border-slate-200 px-3 py-3 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-4">
+          <div className="min-w-0">
+            <h2 className="truncate font-semibold">{t("recentTitle")}</h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               {t("unreadSummary", { count: unread })}
             </p>
@@ -87,6 +88,7 @@ export function NotificationBell() {
               onClick={() => void markAllRead()}
               size="sm"
               variant="ghost"
+              className="w-full justify-center sm:w-auto sm:shrink-0"
             >
               <CheckCheck className="size-4" />
               {t("markAllRead")}
@@ -94,7 +96,7 @@ export function NotificationBell() {
           ) : null}
         </div>
 
-        <div className="max-h-[24rem] overflow-y-auto">
+        <div className="max-h-[min(24rem,calc(100dvh-12rem))] overflow-y-auto overscroll-contain">
           {recentQuery.isLoading ? (
             <div className="space-y-3 p-4">
               {Array.from({ length: 3 }, (_, index) => (
@@ -108,7 +110,7 @@ export function NotificationBell() {
           ) : recentQuery.data?.items.length ? (
             recentQuery.data.items.map((item) => (
               <button
-                className="flex w-full gap-3 border-b border-slate-100 px-4 py-3 text-left transition-colors last:border-0 hover:bg-slate-50 dark:border-slate-900 dark:hover:bg-slate-900/60"
+                className="flex w-full min-w-0 gap-2 border-b border-slate-100 px-3 py-3 text-left transition-colors last:border-0 hover:bg-slate-50 dark:border-slate-900 dark:hover:bg-slate-900/60 sm:gap-3 sm:px-4"
                 disabled={markReadMutation.isPending}
                 key={item.id}
                 onClick={() => {
@@ -126,12 +128,12 @@ export function NotificationBell() {
                   }
                 />
                 <span className="min-w-0 flex-1">
-                  <span className="flex items-start justify-between gap-2">
-                    <span className="truncate text-sm font-medium">
+                  <span className="flex min-w-0 flex-col items-start gap-1 sm:flex-row sm:justify-between sm:gap-2">
+                    <span className="line-clamp-2 min-w-0 text-sm font-medium sm:truncate">
                       {item.notification.title}
                     </span>
                     <Badge
-                      className="shrink-0 whitespace-nowrap"
+                      className="max-w-full shrink-0 truncate"
                       variant="secondary"
                     >
                       {formatNotificationType(item.notification.type)}

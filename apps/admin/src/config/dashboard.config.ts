@@ -1,18 +1,13 @@
 import {
-  Activity,
   Bell,
   Building2,
-  CircleHelp,
   ClipboardList,
   LayoutDashboard,
   LogOut,
-  MessageSquare,
   Package,
   Settings,
   ShieldCheck,
   Tags,
-  TriangleAlert,
-  User,
   UserRound,
   Users,
 } from "lucide-react";
@@ -80,51 +75,20 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             icon: Building2,
             requiredPermission: PERMISSIONS.SERVICE_CENTER_VIEW,
           },
-          {
-            title: t("items.notifications"),
-            href: "/notifications",
-            icon: Bell,
-          },
-          {
-            title: t("items.chats"),
-            badge: "3",
-            icon: MessageSquare,
-          },
-          {
-            title: t("items.securedByAuth"),
-            icon: ShieldCheck,
-          },
-        ],
-      },
-      {
-        label: t("sections.pages"),
-        items: [
-          {
-            title: t("items.auth"),
-            icon: ShieldCheck,
-          },
-          {
-            title: t("items.errors"),
-            icon: TriangleAlert,
-          },
         ],
       },
       {
         label: t("sections.other"),
         items: [
           {
-            title: t("items.system"),
-            href: "/system",
-            icon: Activity,
+            title: t("items.notifications"),
+            href: "/notifications",
+            icon: Bell,
           },
           {
             title: t("items.settings"),
             href: "/settings",
             icon: Settings,
-          },
-          {
-            title: t("items.helpCenter"),
-            icon: CircleHelp,
           },
         ],
       },
@@ -180,11 +144,6 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
       email: "admin@example.com",
       avatarFallback: "AD",
       menuItems: [
-        {
-          label: t("items.profile"),
-          href: "/settings", // or a profile subpage
-          icon: User,
-        },
         {
           label: t("items.settings"),
           href: "/settings",

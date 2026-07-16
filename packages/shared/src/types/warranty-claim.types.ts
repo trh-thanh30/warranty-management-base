@@ -15,6 +15,14 @@ export type WarrantyClaimStatus =
 
 export type WarrantyClaimPriority = "LOW" | "NORMAL" | "HIGH" | "URGENT";
 
+export const WARRANTY_CLAIM_ASSIGNMENT_STATUSES = [
+  "ASSIGNED",
+  "UNASSIGNED",
+] as const;
+
+export type WarrantyClaimAssignmentStatus =
+  (typeof WARRANTY_CLAIM_ASSIGNMENT_STATUSES)[number];
+
 export type WarrantyClaimStatusHistorySummary = {
   id: string;
   fromStatus: WarrantyClaimStatus | null;
@@ -132,6 +140,7 @@ export type WarrantyClaimSortBy =
   | "updatedAt";
 
 export type ListWarrantyClaimsQuery = PaginationQuery & {
+  assignmentStatus?: WarrantyClaimAssignmentStatus;
   claimCode?: string;
   dateFrom?: string;
   dateTo?: string;
@@ -167,6 +176,7 @@ export type WarrantyClaimMetrics = {
 };
 
 export type WarrantyClaimMetricsQuery = {
+  assignmentStatus?: WarrantyClaimAssignmentStatus;
   dateFrom?: string;
   dateTo?: string;
   serviceCenterId?: string;

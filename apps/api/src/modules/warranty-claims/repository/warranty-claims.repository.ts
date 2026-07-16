@@ -7,8 +7,20 @@ import {
   warranty_claim_priority,
   warranty_claim_status,
 } from '@prisma/client';
+import type { WarrantyClaimAssignmentStatus } from '@repo/shared';
 
 export const WARRANTY_CLAIM_ASSET_ENTITY_TYPE = 'warranty_claim';
+
+function getServiceCenterFilter(filters: {
+  assignmentStatus?: WarrantyClaimAssignmentStatus;
+  serviceCenterId?: string;
+}): Prisma.StringNullableFilter | string | null | undefined {
+  if (filters.serviceCenterId) return filters.serviceCenterId;
+  if (filters.assignmentStatus === 'UNASSIGNED') return null;
+  if (filters.assignmentStatus === 'ASSIGNED') return { not: null };
+
+  return undefined;
+}
 
 const claimInclude = {
   product: true,
@@ -130,7 +142,7 @@ export class WarrantyClaimsRepository {
       priority: filters.priority,
       warranty_code: warrantyCode,
       claim_code: claimCode,
-      service_center_id: filters.serviceCenterId,
+      service_center_id: getServiceCenterFilter(filters),
       created_at: hasCreatedAtFilter ? createdAtFilter : undefined,
       due_at:
         filters.isOverdue === 'true'
@@ -369,12 +381,13 @@ export class WarrantyClaimsRepository {
   }
 
   async getMetrics(filters: {
+    assignmentStatus?: WarrantyClaimAssignmentStatus;
     dateFrom?: string;
     dateTo?: string;
     serviceCenterId?: string;
   }) {
     const where: Prisma.WarrantyClaimWhereInput = {
-      service_center_id: filters.serviceCenterId,
+      service_center_id: getServiceCenterFilter(filters),
       created_at:
         filters.dateFrom || filters.dateTo
           ? {

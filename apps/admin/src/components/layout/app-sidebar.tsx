@@ -1,8 +1,8 @@
 "use client";
 
-import { ChevronRight, PanelLeft } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Avatar, AvatarFallback, Badge, Button } from "@repo/ui";
+import { Avatar, AvatarFallback, Badge } from "@repo/ui";
 import { cn } from "@repo/ui/lib/utils";
 import { useAdminUiStore } from "@/src/app/stores/ui.store";
 import { getDashboardConfig } from "@/src/config/dashboard.config";
@@ -104,20 +104,16 @@ function NavGroup({ items, label, pathname, collapsed }: NavGroupProps) {
 
 export function AppSidebar({
   collapsedOverride,
-  showCollapseButton = true,
 }: {
   collapsedOverride?: boolean;
-  showCollapseButton?: boolean;
 }) {
   const t = useTranslations("DashboardConfig");
-  const tCommon = useTranslations("Common");
   const dashboardConfig = getDashboardConfig(t);
   const { hasPermission, hasRole } = usePermissions();
   const pathname = usePathname();
   const BrandLogo = dashboardConfig.brand.logo;
   const user = dashboardConfig.userMenu;
   const storedCollapsed = useAdminUiStore((state) => state.sidebarCollapsed);
-  const toggleSidebar = useAdminUiStore((state) => state.toggleSidebar);
   const collapsed = collapsedOverride ?? storedCollapsed;
 
   return (
@@ -137,27 +133,14 @@ export function AppSidebar({
           <BrandLogo className="h-4 w-4" />
         </div>
         {!collapsed && (
-          <>
-            <div className="min-w-0 flex-1 animate-in fade-in duration-200">
-              <p className="truncate text-sm font-semibold text-slate-950 dark:text-slate-50">
-                {dashboardConfig.brand.name}
-              </p>
-              <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-                {dashboardConfig.brand.description}
-              </p>
-            </div>
-            {showCollapseButton ? (
-              <Button
-                aria-label={tCommon("collapseSidebar")}
-                onClick={toggleSidebar}
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8"
-              >
-                <PanelLeft className="h-4 w-4" />
-              </Button>
-            ) : null}
-          </>
+          <div className="min-w-0 flex-1 animate-in fade-in duration-200">
+            <p className="truncate text-sm font-semibold text-slate-950 dark:text-slate-50">
+              {dashboardConfig.brand.name}
+            </p>
+            <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+              {dashboardConfig.brand.description}
+            </p>
+          </div>
         )}
       </div>
 
@@ -185,7 +168,7 @@ export function AppSidebar({
       <div className="border-t border-slate-200 p-4 dark:border-slate-800">
         <div
           className={cn(
-            "flex items-center rounded-md transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-900 cursor-pointer",
+            "flex items-center rounded-md",
             collapsed
               ? "justify-center p-0 h-9 w-9 mx-auto"
               : "gap-3 px-2 py-2",
@@ -205,7 +188,6 @@ export function AppSidebar({
                   {user.email}
                 </p>
               </div>
-              <ChevronRight className="h-4 w-4 text-slate-400" />
             </>
           )}
         </div>

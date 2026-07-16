@@ -7,19 +7,12 @@
     "brandDescription": "Next + Turborepo",
     "sections": {
       "general": "General",
-      "pages": "Pages",
       "other": "Other"
     },
     "items": {
       "dashboard": "Dashboard",
       "users": "Staff",
-      "chats": "Chats",
-      "securedByAuth": "Secured by Auth",
-      "auth": "Auth",
-      "errors": "Errors",
-      "system": "System",
       "settings": "Settings",
-      "helpCenter": "Help Center",
       "overview": "Overview",
       "customers": "Customers",
       "categories": "Categories",
@@ -28,7 +21,6 @@
       "warrantyClaims": "Warranty claims",
       "serviceCenters": "Service centers",
       "notifications": "Notifications",
-      "profile": "Profile",
       "signOut": "Sign out",
       "signingOut": "Signing out..."
     }
@@ -48,7 +40,10 @@
     "loadingSession": "Loading session",
     "language": "Language",
     "vietnamese": "Tiếng Việt",
-    "english": "English"
+    "english": "English",
+    "darkMode": "Dark mode",
+    "back": "Back",
+    "openUserMenu": "Open account menu"
   },
   "Login": {
     "brand": "Warranty Admin",
@@ -82,32 +77,78 @@
   },
   "Dashboard": {
     "title": "Dashboard",
-    "download": "Download",
-    "tabs": {
-      "overview": "Overview",
-      "analytics": "Analytics",
-      "reports": "Reports",
-      "notifications": "Notifications"
+    "eyebrow": "Operations overview",
+    "description": "Monitor warranty claims, service workload, SLA risk, and recent activity from live operational data.",
+    "dateRange": {
+      "ariaLabel": "Select dashboard date range",
+      "placeholder": "Current month",
+      "clear": "Use default range"
     },
-    "stats": {
-      "totalRevenue": "Total Revenue",
-      "subscriptions": "Subscriptions",
-      "sales": "Sales",
-      "activeNow": "Active Now",
-      "fromLastMonth": "+{value} from last month",
-      "sinceLastHour": "+201 since last hour",
-      "live": "Live",
-      "now": "Now"
+    "kpis": {
+      "total": "Total claims",
+      "totalDescription": "Claims submitted in the selected period",
+      "createdToday": "Created today",
+      "createdTodayDescription": "New claims received today",
+      "overdue": "Overdue claims",
+      "overdueDescription": "Open claims past their due date",
+      "averageResolution": "Average resolution",
+      "averageResolutionDescription": "Average time to resolve completed claims",
+      "noResolvedClaims": "No resolved claims in this period",
+      "hours": "{value}h"
     },
-    "overview": "Overview",
-    "recentSales": "Recent Sales",
-    "recentSalesDescription": "You made 265 sales this month.",
-    "analyticsTitle": "Analytics",
-    "analyticsDescription": "Analytics widgets can be mounted here when product metrics are connected.",
-    "reportsTitle": "Reports",
-    "reportsDescription": "Use this tab for exportable operational reports.",
-    "notificationsTitle": "Notifications",
-    "notificationsDescription": "Use this tab for recent system and workflow notifications."
+    "charts": {
+      "claims": "Claims",
+      "claimCount": "Claim count",
+      "trendTitle": "Claim trend",
+      "trendDescription": "Claims submitted over the selected date range.",
+      "trendAriaLabel": "Warranty claims trend chart",
+      "statusTitle": "Claims by status",
+      "statusDescription": "Current workflow distribution.",
+      "priorityTitle": "Claims by priority",
+      "priorityDescription": "Workload grouped by urgency.",
+      "serviceCenterTitle": "Claims by service center",
+      "serviceCenterDescription": "Assigned claim workload by center.",
+      "unassigned": "Unassigned claims",
+      "other": "Other"
+    },
+    "recentClaims": {
+      "title": "Recent claims",
+      "description": "Latest claims submitted during the selected period.",
+      "viewAll": "View all",
+      "viewClaim": "View claim",
+      "claim": "Claim",
+      "issue": "Issue",
+      "status": "Status",
+      "priority": "Priority",
+      "submitted": "Submitted",
+      "action": "Action",
+      "permissionTitle": "Claim details are restricted",
+      "permissionDescription": "You can view dashboard metrics but do not have permission to open the claim directory.",
+      "errorDescription": "The recent claim list could not be loaded.",
+      "emptyTitle": "No recent claims",
+      "emptyDescription": "No claims were submitted in this date range."
+    },
+    "quickActions": {
+      "title": "Quick actions",
+      "description": "Open common warranty operations.",
+      "createProduct": "Create product",
+      "createProductDescription": "Register a warranty product",
+      "lookupWarranty": "Look up warranty",
+      "lookupWarrantyDescription": "Search and activate a warranty",
+      "manageClaims": "Manage claims",
+      "manageClaimsDescription": "Review and process submitted claims",
+      "serviceCenters": "Service centers",
+      "serviceCentersDescription": "Manage the service network"
+    },
+    "states": {
+      "loading": "Loading dashboard",
+      "loadingDescription": "Fetching the latest operational data.",
+      "retry": "Try again",
+      "metricsErrorDescription": "Dashboard metrics could not be loaded.",
+      "chartErrorDescription": "This chart could not be loaded.",
+      "noChartData": "No chart data",
+      "noChartDataDescription": "There is no data for the selected date range."
+    }
   },
   "Staff": {
     "title": "Staff management",
@@ -579,6 +620,7 @@
     "serviceCenterFilter": "Filter by service center",
     "overdueFilter": "Filter by SLA",
     "allServiceCenters": "All service centers",
+    "unassignedServiceCenter": "Unassigned claims",
     "dateFrom": "From date",
     "dateTo": "To date",
     "dateRange": "Submitted date range",
