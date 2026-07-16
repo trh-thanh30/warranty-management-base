@@ -61,9 +61,13 @@ export function WarrantyClaimDetailHeader({
           <WarrantyClaimStateSummary claim={claim} />
         </div>
 
-        <div className="grid gap-2 sm:grid-cols-3 lg:flex lg:max-w-md lg:flex-wrap lg:justify-end">
+        <div className="flex flex-wrap items-center gap-2 lg:justify-end">
           {canUpdateStatus && hasStatusTransitions ? (
-            <Button className="w-full sm:w-auto" onClick={onUpdateStatus}>
+            <Button
+              className="w-full sm:w-auto"
+              onClick={onUpdateStatus}
+              variant="secondary"
+            >
               <ListTodo className="size-4" />
               {t("updateStatus")}
             </Button>
