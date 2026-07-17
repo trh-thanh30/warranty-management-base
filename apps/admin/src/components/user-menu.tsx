@@ -35,15 +35,15 @@ export function UserMenu() {
   const locale = useLocale() as AppLocale;
   const pathname = usePathname();
   const dashboardConfig = getDashboardConfig(t);
-  const fallbackUser = dashboardConfig.userMenu;
+  const userMenuConfig = dashboardConfig.userMenu;
   const { user, isLoggingOut, logout } = useAuth();
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showLanguages, setShowLanguages] = useState(false);
   const router = useRouter();
-  const displayName = user?.full_name || user?.username || fallbackUser.name;
-  const email = user?.email || fallbackUser.email;
+  const displayName = user?.full_name || user?.username || "Admin";
+  const email = user?.email || "";
   const avatarFallback = getInitials(displayName);
   const darkMode = mounted && resolvedTheme === "dark";
 
@@ -179,7 +179,7 @@ export function UserMenu() {
               />
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            {fallbackUser.menuItems.map((item) => {
+            {userMenuConfig.menuItems.map((item) => {
               const Icon = item.icon;
               const itemClassName = cn(
                 "flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm outline-none transition-colors",

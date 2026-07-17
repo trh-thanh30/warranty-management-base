@@ -28,3 +28,17 @@ export type LoginResponse = {
 export type RefreshResponse = {
   access_token: string;
 };
+
+export type UpdateProfileBody = {
+  username?: string;
+  email?: string;
+  full_name?: string | null;
+  phone?: string | null;
+  avatar_url?: string | null;
+};
+
+export type ChangePasswordBody = {
+  currentPassword: string;
+  password: string;
+  confirmPassword: string;
+};

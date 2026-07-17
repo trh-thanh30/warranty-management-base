@@ -31,6 +31,7 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             title: t("items.dashboard"),
             href: "/dashboard",
             icon: LayoutDashboard,
+            requiredPermission: PERMISSIONS.DASHBOARD_VIEW,
           },
           {
             title: t("items.users"),
@@ -97,6 +98,7 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
       {
         title: t("items.overview"),
         href: "/dashboard",
+        requiredPermission: PERMISSIONS.DASHBOARD_VIEW,
       },
       {
         title: t("items.users"),
@@ -140,9 +142,6 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
       },
     ],
     userMenu: {
-      name: "Admin",
-      email: "admin@example.com",
-      avatarFallback: "AD",
       menuItems: [
         {
           label: t("items.settings"),

@@ -2,13 +2,15 @@
 
 import { ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Avatar, AvatarFallback, Badge } from "@repo/ui";
+import { Avatar, AvatarFallback, AvatarImage, Badge } from "@repo/ui";
 import { cn } from "@repo/ui/lib/utils";
 import { useAdminUiStore } from "@/src/app/stores/ui.store";
 import { getDashboardConfig } from "@/src/config/dashboard.config";
 import type { NavigationItem } from "@/src/config/dashboard.types";
 import { Link, usePathname } from "@/src/i18n/navigation";
 import { usePermissions } from "@/src/hooks/use-permissions";
+import { useAuth } from "@/src/app/providers/auth-provider";
+import { getInitials } from "@/src/utils/get-initials";
 
 type NavGroupProps = {
   items: NavigationItem[];
@@ -112,9 +114,12 @@ export function AppSidebar({
   const { hasPermission, hasRole } = usePermissions();
   const pathname = usePathname();
   const BrandLogo = dashboardConfig.brand.logo;
-  const user = dashboardConfig.userMenu;
+  const { user } = useAuth();
   const storedCollapsed = useAdminUiStore((state) => state.sidebarCollapsed);
   const collapsed = collapsedOverride ?? storedCollapsed;
+  const displayName = user?.full_name || user?.username || "Admin";
+  const email = user?.email || "";
+  const avatarFallback = getInitials(displayName);
 
   return (
     <aside
@@ -173,19 +178,22 @@ export function AppSidebar({
               ? "justify-center p-0 h-9 w-9 mx-auto"
               : "gap-3 px-2 py-2",
           )}
-          title={collapsed ? `${user.name} (${user.email})` : undefined}
+          title={collapsed ? `${displayName} (${email})` : undefined}
         >
           <Avatar className={cn(collapsed ? "h-8 w-8" : "h-10 w-10")}>
-            <AvatarFallback>{user.avatarFallback}</AvatarFallback>
+            {user?.avatar_url ? (
+              <AvatarImage alt={displayName} src={user.avatar_url} />
+            ) : null}
+            <AvatarFallback>{avatarFallback}</AvatarFallback>
           </Avatar>
           {!collapsed && (
             <>
               <div className="min-w-0 flex-1 animate-in fade-in duration-200">
                 <p className="truncate text-sm font-medium text-slate-950 dark:text-slate-50">
-                  {user.name}
+                  {displayName}
                 </p>
                 <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-                  {user.email}
+                  {email}
                 </p>
               </div>
             </>
