@@ -2,6 +2,7 @@ import {
   Bell,
   Building2,
   ClipboardList,
+  FileText,
   LayoutDashboard,
   LogOut,
   Package,
@@ -31,6 +32,7 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             title: t("items.dashboard"),
             href: "/dashboard",
             icon: LayoutDashboard,
+            requiredPermission: PERMISSIONS.DASHBOARD_VIEW,
           },
           {
             title: t("items.users"),
@@ -81,6 +83,12 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
         label: t("sections.other"),
         items: [
           {
+            title: t("items.contentPages"),
+            href: "/content-pages",
+            icon: FileText,
+            requiredPermission: PERMISSIONS.CONTENT_PAGE_VIEW,
+          },
+          {
             title: t("items.notifications"),
             href: "/notifications",
             icon: Bell,
@@ -97,6 +105,7 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
       {
         title: t("items.overview"),
         href: "/dashboard",
+        requiredPermission: PERMISSIONS.DASHBOARD_VIEW,
       },
       {
         title: t("items.users"),
@@ -135,14 +144,16 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
         requiredPermission: PERMISSIONS.SERVICE_CENTER_VIEW,
       },
       {
+        title: t("items.contentPages"),
+        href: "/content-pages",
+        requiredPermission: PERMISSIONS.CONTENT_PAGE_VIEW,
+      },
+      {
         title: t("items.settings"),
         href: "/settings",
       },
     ],
     userMenu: {
-      name: "Admin",
-      email: "admin@example.com",
-      avatarFallback: "AD",
       menuItems: [
         {
           label: t("items.settings"),

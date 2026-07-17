@@ -11,6 +11,11 @@ import {
   setAccessToken,
   setAuthRedirectReason,
 } from "@/src/app/stores/auth-session.store";
+import {
+  isAuthEntryPoint,
+  shouldAttemptTokenRefresh,
+  shouldClearSessionAfterUnauthorized,
+} from "@/src/lib/admin-http-client.utils";
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & {
   _authRetry?: boolean;
@@ -63,16 +68,14 @@ adminHttpClient.interceptors.response.use(
     const axiosError = error as AxiosError;
     const config = axiosError.config as RetryableRequestConfig | undefined;
     const url = config?.url ?? "";
-    const isAuthEntryPoint =
-      url.includes("/auth/login-admin") ||
-      url.includes("/auth/refresh") ||
-      url.includes("/auth/logout");
-
     if (
-      axiosError.response?.status === 401 &&
+      shouldAttemptTokenRefresh(
+        axiosError.response?.status,
+        url,
+        Boolean(config?._authRetry),
+      ) &&
       config &&
-      !config._authRetry &&
-      !isAuthEntryPoint
+      !isAuthEntryPoint(url)
     ) {
       config._authRetry = true;
 
@@ -90,6 +93,13 @@ adminHttpClient.interceptors.response.use(
           cause: error,
         });
       }
+    }
+
+    if (
+      axiosError.response?.status === 401 &&
+      shouldClearSessionAfterUnauthorized(url)
+    ) {
+      clearAuthSession();
     }
 
     throw toHttpClientError(error);

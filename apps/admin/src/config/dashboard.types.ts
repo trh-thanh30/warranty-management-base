@@ -37,10 +37,6 @@ export interface UserMenuItem {
 }
 
 export interface UserMenuConfig {
-  name: string;
-  email: string;
-  avatarFallback: string;
-  avatarUrl?: string;
   menuItems: UserMenuItem[];
 }
 

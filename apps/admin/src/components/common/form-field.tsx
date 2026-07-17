@@ -26,7 +26,11 @@ export function FormField({
         </p>
       ) : null}
       {error ? (
-        <p className="text-xs leading-5 text-red-600 dark:text-red-400">
+        <p
+          className="text-sm leading-5 text-red-600 dark:text-red-400"
+          id={`${htmlFor}-error`}
+          role="alert"
+        >
           {error}
         </p>
       ) : null}
