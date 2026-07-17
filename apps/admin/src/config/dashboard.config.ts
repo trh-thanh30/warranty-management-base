@@ -77,17 +77,17 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             icon: Building2,
             requiredPermission: PERMISSIONS.SERVICE_CENTER_VIEW,
           },
+        ],
+      },
+      {
+        label: t("sections.other"),
+        items: [
           {
             title: t("items.contentPages"),
             href: "/content-pages",
             icon: FileText,
             requiredPermission: PERMISSIONS.CONTENT_PAGE_VIEW,
           },
-        ],
-      },
-      {
-        label: t("sections.other"),
-        items: [
           {
             title: t("items.notifications"),
             href: "/notifications",
