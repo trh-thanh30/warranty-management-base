@@ -16,6 +16,7 @@ import {
   type CustomerFormValues,
 } from "../customers.types";
 import { useCreateCustomer, useUpdateCustomer } from "./use-customers";
+import { toOptionalValue, toRequiredValue } from "@/src/utils";
 
 export function useCustomerForm({
   customer,
@@ -108,15 +109,6 @@ function toUpdateCustomerBody(values: CustomerFormValues): UpdateCustomerBody {
     fullName: values.fullName.trim(),
     phone: toRequiredValue(values.phone),
   };
-}
-
-function toOptionalValue(value: string) {
-  const trimmed = value.trim();
-  return trimmed || undefined;
-}
-
-function toRequiredValue(value: string) {
-  return value.trim();
 }
 
 function handleCustomerSaveError(

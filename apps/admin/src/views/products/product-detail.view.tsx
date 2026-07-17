@@ -71,7 +71,7 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
             </Button>
           ) : null}
           {canEdit ? (
-            <Button asChild disabled={!product}>
+            <Button asChild disabled={!product} variant="secondary">
               <Link href={`/products/${productId}/edit`}>
                 <Pencil className="size-4" />
                 {t("edit")}

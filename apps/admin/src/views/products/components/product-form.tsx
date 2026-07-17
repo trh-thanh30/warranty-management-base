@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ProductResponse } from "@repo/shared";
 import { Button, Input, Label, Switch, Textarea } from "@repo/ui";
+import { RichTextEditor } from "@/src/components/common/rich-text-editor";
 import { PRODUCT_CATEGORIES } from "../products.constants";
 import { useProductForm } from "../hooks/use-product-form";
 
@@ -49,14 +50,22 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
           id="product-name"
           label={t("name")}
         >
-          <Input id="product-name" {...register("name")} />
+          <Input
+            id="product-name"
+            placeholder={t("namePlaceholder")}
+            {...register("name")}
+          />
         </Field>
         <Field
           error={formatFieldError(errors.serialNumber?.message, t)}
           id="product-serial-number"
           label={t("serialNumber")}
         >
-          <Input id="product-serial-number" {...register("serialNumber")} />
+          <Input
+            id="product-serial-number"
+            placeholder={t("serialNumberPlaceholder")}
+            {...register("serialNumber")}
+          />
         </Field>
       </div>
 
@@ -92,16 +101,15 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
             ))}
           </select>
         </Field>
-        <Field id="product-status" label={t("productStatus")}>
-          <select
-            className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none transition-colors focus:border-slate-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:focus:border-slate-300"
-            id="product-status"
-            {...register("status")}
-          >
-            <option value="ACTIVE">{t("statuses.ACTIVE")}</option>
-            <option value="INACTIVE">{t("statuses.INACTIVE")}</option>
-          </select>
-        </Field>
+        {product?.warrantyCode ? (
+          <Field id="product-warranty-code-readonly" label={t("warrantyCode")}>
+            <Input
+              id="product-warranty-code-readonly"
+              readOnly
+              value={product.warrantyCode}
+            />
+          </Field>
+        ) : null}
       </div>
 
       <div className="grid gap-5 sm:grid-cols-3">
@@ -110,14 +118,22 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
           id="product-brand"
           label={t("brand")}
         >
-          <Input id="product-brand" {...register("brand")} />
+          <Input
+            id="product-brand"
+            placeholder={t("brandPlaceholder")}
+            {...register("brand")}
+          />
         </Field>
         <Field
           error={formatFieldError(errors.model?.message, t)}
           id="product-model"
           label={t("model")}
         >
-          <Input id="product-model" {...register("model")} />
+          <Input
+            id="product-model"
+            placeholder={t("modelPlaceholder")}
+            {...register("model")}
+          />
         </Field>
         <Field
           error={formatFieldError(errors.manufactureYear?.message, t)}
@@ -127,6 +143,7 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
           <Input
             id="product-manufacture-year"
             inputMode="numeric"
+            placeholder={t("manufactureYearPlaceholder")}
             type="number"
             {...register("manufactureYear")}
           />
@@ -138,12 +155,40 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
         id="product-description"
         label={t("descriptionLabel")}
       >
-        <Textarea
-          id="product-description"
-          rows={4}
-          {...register("description")}
+        <Controller
+          control={control}
+          name="description"
+          render={({ field }) => (
+            <RichTextEditor
+              disabled={isSubmitting}
+              onChange={field.onChange}
+              value={field.value ?? ""}
+            />
+          )}
         />
       </Field>
+
+      <Controller
+        control={control}
+        name="status"
+        render={({ field }) => (
+          <div className="flex items-center justify-between gap-4 rounded-md border border-slate-200 p-4 dark:border-slate-800">
+            <div>
+              <Label htmlFor="product-status">{t("activeStatusLabel")}</Label>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                {t("activeStatusDescription")}
+              </p>
+            </div>
+            <Switch
+              checked={field.value === "ACTIVE"}
+              id="product-status"
+              onCheckedChange={(checked) =>
+                field.onChange(checked ? "ACTIVE" : "INACTIVE")
+              }
+            />
+          </div>
+        )}
+      />
 
       {creating ? (
         <section className="space-y-5 rounded-md border border-slate-200 p-4 dark:border-slate-800">
@@ -175,7 +220,11 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
               id="product-warranty-code"
               label={t("warrantyCode")}
             >
-              <Input id="product-warranty-code" {...register("warrantyCode")} />
+              <Input
+                id="product-warranty-code"
+                placeholder={t("warrantyCodePlaceholder")}
+                {...register("warrantyCode")}
+              />
             </Field>
           ) : null}
           <div className="grid gap-5 sm:grid-cols-2">
@@ -234,14 +283,6 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
             />
           </Field>
         </section>
-      ) : product?.warrantyCode ? (
-        <Field id="product-warranty-code-readonly" label={t("warrantyCode")}>
-          <Input
-            id="product-warranty-code-readonly"
-            readOnly
-            value={product.warrantyCode}
-          />
-        </Field>
       ) : null}
 
       <div className="grid grid-cols-2 gap-2 border-t border-slate-200 pt-5 dark:border-slate-800 sm:flex sm:justify-end">

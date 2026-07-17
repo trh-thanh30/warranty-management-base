@@ -20,6 +20,12 @@ import {
   type CategoryFormValues,
 } from "../categories.types";
 import { useCreateCategory, useUpdateCategory } from "./use-categories";
+import {
+  toOptionalValue,
+  toNullableValue,
+  toOptionalRichText,
+  toNullableRichText,
+} from "@/src/utils";
 
 export function useCategoryForm({
   category,
@@ -130,34 +136,6 @@ function toUpdateCategoryBody(values: CategoryFormValues): UpdateCategoryBody {
     parentId: toNullableValue(values.parentId),
     slug: toOptionalValue(values.slug),
   };
-}
-
-function toOptionalValue(value: string) {
-  const trimmed = value.trim();
-  return trimmed || undefined;
-}
-
-function toNullableValue(value: string) {
-  const trimmed = value.trim();
-  return trimmed || null;
-}
-
-function toOptionalRichText(value: string) {
-  return isEmptyRichText(value) ? undefined : value.trim();
-}
-
-function toNullableRichText(value: string) {
-  return isEmptyRichText(value) ? null : value.trim();
-}
-
-function isEmptyRichText(value: string) {
-  const trimmed = value.trim();
-  const text = trimmed
-    .replace(/<[^>]*>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .trim();
-
-  return !trimmed || trimmed === "<p></p>" || !text;
 }
 
 function handleCategorySaveError(

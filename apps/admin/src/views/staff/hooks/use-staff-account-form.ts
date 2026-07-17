@@ -30,6 +30,7 @@ export function useStaffAccountForm({
   const toast = useToast();
   const creating = !user;
   const {
+    control,
     formState: { errors, isSubmitting },
     handleSubmit,
     register,
@@ -90,6 +91,7 @@ export function useStaffAccountForm({
   }
 
   return {
+    control,
     creating,
     errors,
     isSubmitting,

@@ -26,6 +26,7 @@ import {
   getCategoryDisplayCode,
   getCategoryParentLabel,
 } from "../categories.utils";
+import { stripHtml } from "@/src/utils/rich-text";
 import { CategoryStatusBadge } from "./category-status-badge";
 import { CategoryTypeBadge } from "./category-type-badge";
 
@@ -152,7 +153,7 @@ function CategoryTableRow({
           </p>
           {category.description ? (
             <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
-              {category.description}
+              {stripHtml(category.description)}
             </p>
           ) : null}
         </div>
