@@ -2,6 +2,7 @@ import {
   Bell,
   Building2,
   ClipboardList,
+  FileText,
   LayoutDashboard,
   LogOut,
   Package,
@@ -76,6 +77,12 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             icon: Building2,
             requiredPermission: PERMISSIONS.SERVICE_CENTER_VIEW,
           },
+          {
+            title: t("items.contentPages"),
+            href: "/content-pages",
+            icon: FileText,
+            requiredPermission: PERMISSIONS.CONTENT_PAGE_VIEW,
+          },
         ],
       },
       {
@@ -135,6 +142,11 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
         title: t("items.serviceCenters"),
         href: "/service-centers",
         requiredPermission: PERMISSIONS.SERVICE_CENTER_VIEW,
+      },
+      {
+        title: t("items.contentPages"),
+        href: "/content-pages",
+        requiredPermission: PERMISSIONS.CONTENT_PAGE_VIEW,
       },
       {
         title: t("items.settings"),
