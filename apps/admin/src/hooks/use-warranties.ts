@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  keepPreviousData,
   useMutation,
   useQuery,
   useQueryClient,
@@ -33,6 +34,7 @@ export function useWarranties(
     ...options,
     queryKey: warrantyKeys.list(query),
     queryFn: () => warrantiesService.listWarranties(query),
+    placeholderData: keepPreviousData,
   });
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  keepPreviousData,
   useMutation,
   useQuery,
   useQueryClient,
@@ -35,6 +36,7 @@ export function useContentPages(
     ...options,
     queryKey: contentPageKeys.list(query),
     queryFn: () => contentPagesService.list(query),
+    placeholderData: keepPreviousData,
   });
 }
 

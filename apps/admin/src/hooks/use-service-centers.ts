@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  keepPreviousData,
   useMutation,
   useQuery,
   useQueryClient,
@@ -47,6 +48,7 @@ export function useServiceCenters(
     ...options,
     queryKey: serviceCenterKeys.list(query),
     queryFn: () => serviceCentersService.listServiceCenters(query),
+    placeholderData: keepPreviousData,
   });
 }
 
