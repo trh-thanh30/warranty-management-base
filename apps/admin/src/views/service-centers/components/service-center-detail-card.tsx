@@ -1,8 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
 import type { ServiceCenterSummary } from "@repo/shared";
-import { ExternalLink } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -11,7 +9,9 @@ import {
   CardTitle,
   Skeleton,
 } from "@repo/ui";
+import { ExternalLink } from "lucide-react";
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import { formatServiceCenterCreatedAt } from "../service-centers.utils";
 import { ServiceCenterStatusBadge } from "./service-center-status-badge";
 
@@ -28,7 +28,7 @@ export function ServiceCenterDetailCard({
         <CardTitle>{serviceCenter.name}</CardTitle>
         <CardDescription>{serviceCenter.address}</CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-6 md:grid-cols-2">
+      <CardContent className="grid gap-6 md:grid-cols-1">
         <DetailSection title={t("locationDetails")}>
           <DetailItem label={t("province")} value={serviceCenter.province} />
           <DetailItem label={t("ward")} value={serviceCenter.district ?? "-"} />
