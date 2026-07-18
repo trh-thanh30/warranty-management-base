@@ -3,6 +3,7 @@ import {
   IsEmail,
   IsOptional,
   IsString,
+  IsUrl,
   Length,
   Matches,
 } from 'class-validator';
@@ -34,4 +35,8 @@ export class CreateServiceCenterDto {
   @IsString()
   @Length(4, 255)
   address: string;
+
+  @IsOptional()
+  @IsUrl({ require_protocol: true })
+  googleMapsUrl?: string;
 }

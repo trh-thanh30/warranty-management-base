@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import type { ServiceCenterSummary } from "@repo/shared";
+import { ExternalLink } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -30,11 +31,29 @@ export function ServiceCenterDetailCard({
       <CardContent className="grid gap-6 md:grid-cols-2">
         <DetailSection title={t("locationDetails")}>
           <DetailItem label={t("province")} value={serviceCenter.province} />
+          <DetailItem label={t("ward")} value={serviceCenter.district ?? "-"} />
           <DetailItem
-            label={t("district")}
-            value={serviceCenter.district ?? "-"}
+            label={t("addressDetail")}
+            value={serviceCenter.address}
           />
-          <DetailItem label={t("address")} value={serviceCenter.address} />
+          {serviceCenter.googleMapsUrl ? (
+            <div className="flex items-start justify-between gap-4">
+              <dt className="shrink-0 text-sm text-slate-500 dark:text-slate-400">
+                {t("googleMapsUrl")}
+              </dt>
+              <dd className="min-w-0 text-right text-sm font-medium">
+                <a
+                  className="inline-flex max-w-full items-center gap-1 break-all text-slate-950 underline underline-offset-4 hover:text-slate-700 dark:text-slate-50 dark:hover:text-slate-300"
+                  href={serviceCenter.googleMapsUrl}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <span className="min-w-0 truncate">{t("openMap")}</span>
+                  <ExternalLink aria-hidden="true" className="size-3.5" />
+                </a>
+              </dd>
+            </div>
+          ) : null}
         </DetailSection>
         <DetailSection title={t("contactDetails")}>
           <DetailItem label={t("phone")} value={serviceCenter.phone ?? "-"} />

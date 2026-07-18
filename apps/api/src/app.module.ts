@@ -24,6 +24,7 @@ import {
   storageConfig,
   telegramConfig,
   validateEnv,
+  vietnamProvincesConfig,
 } from '@/config';
 
 // common
@@ -51,6 +52,7 @@ import { CustomersModule } from '@/modules/customers/customers.module';
 import { EmailModule } from '@/modules/email/email.module';
 import { HealthModule } from '@/modules/health/health.module';
 import { JobsModule } from '@/modules/jobs/jobs.module';
+import { LocationsModule } from '@/modules/locations/locations.module';
 import { NotificationModule } from '@/modules/notification/notification.module';
 import { ProductsModule } from '@/modules/products/products.module';
 import { PublicModule } from '@/modules/public/public.module';
@@ -88,6 +90,7 @@ const envPath = join(rootDir, envFile);
         cookieConfig,
         clientConfig,
         telegramConfig,
+        vietnamProvincesConfig,
       ],
     }),
     BullModule.forRootAsync({
@@ -148,6 +151,7 @@ const envPath = join(rootDir, envFile);
     ContentPagesModule,
     NotificationModule,
     CustomersModule,
+    LocationsModule,
     ProductsModule,
     WarrantiesModule,
     ServiceCentersModule,

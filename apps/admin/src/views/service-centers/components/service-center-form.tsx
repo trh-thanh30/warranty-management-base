@@ -1,11 +1,24 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { Controller } from "react-hook-form";
-import { Loader2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+} from "@/src/components/common";
+import {
+  useVietnamProvinces,
+  useVietnamWards,
+} from "@/src/hooks/use-locations";
 import type { ServiceCenterSummary } from "@repo/shared";
 import { Button, Input, Label, Switch, Textarea } from "@repo/ui";
+import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
+import { Controller } from "react-hook-form";
 import { useServiceCenterForm } from "../hooks/use-service-center-form";
 
 type ServiceCenterFormProps = {
@@ -20,11 +33,25 @@ export function ServiceCenterForm({
   serviceCenter,
 }: ServiceCenterFormProps) {
   const t = useTranslations("ServiceCenters");
-  const { control, creating, errors, isSubmitting, onSubmit, register } =
-    useServiceCenterForm({ onSaved, serviceCenter });
+  const {
+    control,
+    creating,
+    errors,
+    isSubmitting,
+    onSubmit,
+    register,
+    selectedProvince,
+    setValue,
+  } = useServiceCenterForm({ onSaved, serviceCenter });
+  const provincesQuery = useVietnamProvinces();
+  const provinces = provincesQuery.data ?? [];
+  const selectedProvinceItem =
+    provinces.find((province) => province.name === selectedProvince) ?? null;
+  const wardsQuery = useVietnamWards(selectedProvinceItem?.code ?? null);
+  const wards = wardsQuery.data ?? [];
 
   return (
-    <form className="space-y-6" noValidate onSubmit={onSubmit}>
+    <form className="space-y-5" noValidate onSubmit={onSubmit}>
       {errors.root?.message ? (
         <div
           className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300"
@@ -53,31 +80,124 @@ export function ServiceCenterForm({
           id="service-center-province"
           label={t("province")}
         >
-          <Input
-            autoComplete="address-level1"
-            id="service-center-province"
-            placeholder={t("provincePlaceholder")}
-            {...register("province")}
+          <Controller
+            control={control}
+            name="province"
+            render={({ field }) => (
+              <Combobox
+                disabled={provincesQuery.isLoading}
+                onValueChange={(value) => {
+                  setValue("province", value, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  });
+                  setValue("district", "", {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  });
+                }}
+                value={field.value}
+              >
+                <ComboboxTrigger
+                  id="service-center-province"
+                  placeholder={
+                    provincesQuery.isLoading
+                      ? t("loadingProvinces")
+                      : t("provincePlaceholder")
+                  }
+                  selectedLabel={field.value}
+                />
+                <ComboboxContent>
+                  <ComboboxInput showTrigger={false} placeholder="Search" />
+                  <ComboboxList>
+                    <ComboboxEmpty>{t("noLocationResults")}</ComboboxEmpty>
+                    {field.value &&
+                    !provinces.some(
+                      (province) => province.name === field.value,
+                    ) ? (
+                      <ComboboxItem value={field.value}>
+                        {field.value}
+                      </ComboboxItem>
+                    ) : null}
+                    {provinces.map((province) => (
+                      <ComboboxItem key={province.code} value={province.name}>
+                        {province.name}
+                      </ComboboxItem>
+                    ))}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
+            )}
           />
+          {provincesQuery.isError ? (
+            <p className="text-sm text-red-600 dark:text-red-400">
+              {t("provinceLoadError")}
+            </p>
+          ) : null}
         </Field>
+
         <Field
           error={formatFieldError(errors.district?.message, t)}
           id="service-center-district"
-          label={t("district")}
+          label={t("ward")}
         >
-          <Input
-            autoComplete="address-level2"
-            id="service-center-district"
-            placeholder={t("districtPlaceholder")}
-            {...register("district")}
+          <Controller
+            control={control}
+            name="district"
+            render={({ field }) => (
+              <Combobox
+                disabled={!selectedProvinceItem || wardsQuery.isLoading}
+                onValueChange={(value) => {
+                  setValue("district", value, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  });
+                }}
+                value={field.value}
+              >
+                <ComboboxTrigger
+                  id="service-center-district"
+                  placeholder={
+                    !selectedProvinceItem
+                      ? t("selectProvinceFirst")
+                      : wardsQuery.isLoading
+                        ? t("loadingWards")
+                        : t("wardPlaceholder")
+                  }
+                  selectedLabel={field.value}
+                />
+                <ComboboxContent>
+                  <ComboboxInput showTrigger={false} placeholder="Search" />
+                  <ComboboxList>
+                    <ComboboxEmpty>{t("noLocationResults")}</ComboboxEmpty>
+                    {field.value &&
+                    !wards.some((ward) => ward.name === field.value) ? (
+                      <ComboboxItem value={field.value}>
+                        {field.value}
+                      </ComboboxItem>
+                    ) : null}
+                    {wards.map((ward) => (
+                      <ComboboxItem key={ward.code} value={ward.name}>
+                        {ward.name}
+                      </ComboboxItem>
+                    ))}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
+            )}
           />
+          {wardsQuery.isError ? (
+            <p className="text-sm text-red-600 dark:text-red-400">
+              {t("wardLoadError")}
+            </p>
+          ) : null}
         </Field>
       </div>
 
       <Field
         error={formatFieldError(errors.address?.message, t)}
         id="service-center-address"
-        label={t("address")}
+        label={t("addressDetail")}
       >
         <Textarea
           autoComplete="street-address"
@@ -85,6 +205,21 @@ export function ServiceCenterForm({
           placeholder={t("addressPlaceholder")}
           rows={3}
           {...register("address")}
+        />
+      </Field>
+
+      <Field
+        error={formatFieldError(errors.googleMapsUrl?.message, t)}
+        id="service-center-google-maps-url"
+        label={t("googleMapsUrl")}
+      >
+        <Input
+          autoComplete="url"
+          id="service-center-google-maps-url"
+          inputMode="url"
+          placeholder={t("googleMapsUrlPlaceholder")}
+          type="url"
+          {...register("googleMapsUrl")}
         />
       </Field>
 
@@ -200,6 +335,7 @@ function formatFieldError(
     "districtLength",
     "emailExists",
     "emailInvalid",
+    "googleMapsUrlInvalid",
     "nameLength",
     "nameRequired",
     "phoneLength",
@@ -207,6 +343,7 @@ function formatFieldError(
     "phoneExists",
     "provinceLength",
     "provinceRequired",
+    "wardRequired",
   ]);
 
   return translationKeys.has(message) ? t(message) : message;

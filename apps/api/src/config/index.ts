@@ -14,3 +14,4 @@ export { default as rateLimitConfig } from '@/config/rate-limit.config';
 export { default as redisConfig } from '@/config/redis.config';
 export { default as storageConfig } from '@/config/storage.config';
 export { default as telegramConfig } from '@/config/telegram.config';
+export { default as vietnamProvincesConfig } from '@/config/vietnam-provinces.config';

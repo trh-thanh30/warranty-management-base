@@ -134,6 +134,23 @@ export const envSchema = z
 
     // Client Configuration
     POSTCODES_API: z.string().default('https://api.postcodes.io'),
+
+    // Vietnam Provinces Open API v2
+    VIETNAM_PROVINCES_ENABLED: z.coerce.boolean().default(true),
+    VIETNAM_PROVINCES_API_BASE_URL: z
+      .string()
+      .url()
+      .default('https://provinces.open-api.vn/api/v2'),
+    VIETNAM_PROVINCES_API_TIMEOUT_MS: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(5000),
+    VIETNAM_PROVINCES_CACHE_TTL_SECONDS: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(86400),
   })
   .superRefine((env, ctx) => {
     if (env.STORAGE_DRIVER !== 'minio') {

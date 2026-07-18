@@ -8,6 +8,7 @@ export type ServiceCenterSummary = {
   province: string;
   district: string | null;
   address: string;
+  googleMapsUrl: string | null;
   isActive: boolean;
   metadata: Record<string, unknown> | null;
   createdAt: string;
@@ -35,6 +36,7 @@ export type CreateServiceCenterBody = {
   province: string;
   district?: string;
   address: string;
+  googleMapsUrl?: string;
 };
 
 export type UpdateServiceCenterBody = Partial<CreateServiceCenterBody> & {

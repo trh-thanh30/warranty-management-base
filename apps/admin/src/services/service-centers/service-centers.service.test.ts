@@ -13,6 +13,7 @@ const serviceCenter = {
   province: "Da Nang",
   district: "Hai Chau",
   address: "1 Nguyen Van Linh",
+  googleMapsUrl: "https://maps.google.com/?q=1+Nguyen+Van+Linh",
   isActive: true,
   metadata: null,
   createdAt: "2026-07-15T00:00:00.000Z",

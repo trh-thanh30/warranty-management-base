@@ -9,14 +9,15 @@ const optionalText = z.string().trim();
 
 export const serviceCenterFormSchema = z.object({
   address: optionalText.min(4, "addressRequired").max(255, "addressLength"),
-  district: optionalText.refine(
-    (value) => value.length === 0 || (value.length >= 2 && value.length <= 120),
-    "districtLength",
-  ),
+  district: optionalText.min(2, "wardRequired").max(120, "districtLength"),
   email: optionalText.refine(
     (value) =>
       value.length === 0 || z.string().email().safeParse(value).success,
     "emailInvalid",
+  ),
+  googleMapsUrl: optionalText.refine(
+    (value) => value.length === 0 || z.string().url().safeParse(value).success,
+    "googleMapsUrlInvalid",
   ),
   isActive: z.boolean(),
   name: optionalText.min(2, "nameRequired").max(160, "nameLength"),
