@@ -23,7 +23,7 @@ export function useCustomerForm({
   onSaved,
 }: {
   customer: CustomerSummary | null;
-  onSaved: () => void;
+  onSaved: (customer?: CustomerSummary) => void;
 }) {
   const t = useTranslations("Customers");
   const toast = useToast();
@@ -51,15 +51,19 @@ export function useCustomerForm({
   async function submit(values: CustomerFormValues) {
     try {
       if (creating) {
-        await createCustomer.mutateAsync(toCreateCustomerBody(values));
+        const createdCustomer = await createCustomer.mutateAsync(
+          toCreateCustomerBody(values),
+        );
         toast.success(t("created"));
-        onSaved();
+        onSaved(createdCustomer);
         return;
       }
 
-      await updateCustomer.mutateAsync(toUpdateCustomerBody(values));
+      const updatedCustomer = await updateCustomer.mutateAsync(
+        toUpdateCustomerBody(values),
+      );
       toast.success(t("updated"));
-      onSaved();
+      onSaved(updatedCustomer);
     } catch (error) {
       const handledMessage = handleCustomerSaveError(error, setError, t);
       if (handledMessage) {

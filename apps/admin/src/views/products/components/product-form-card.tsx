@@ -14,7 +14,7 @@ import { ProductForm } from "./product-form";
 type ProductFormCardProps = {
   description: string;
   onCancel: () => void;
-  onSaved: () => void;
+  onSaved: (product?: ProductResponse) => void;
   product: ProductResponse | null;
   title: string;
 };

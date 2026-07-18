@@ -12,7 +12,7 @@ import { useProductForm } from "../hooks/use-product-form";
 
 type ProductFormProps = {
   onCancel: () => void;
-  onSaved: () => void;
+  onSaved: (product?: ProductResponse) => void;
   product: ProductResponse | null;
 };
 

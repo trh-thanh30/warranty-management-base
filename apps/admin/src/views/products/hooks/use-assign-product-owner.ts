@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { useDebounce } from "@repo/hooks";
 import type { ProductResponse } from "@repo/shared";
 import { HttpClientError } from "@repo/shared";
 import { useToast } from "@/src/hooks/use-toast";
@@ -24,12 +23,10 @@ export function useAssignProductOwnerWorkflow({
   const [customerId, setCustomerId] = useState("");
   const [purchaseDate, setPurchaseDate] = useState("");
   const [activatedAt, setActivatedAt] = useState("");
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search.trim(), 300);
   const customersQuery = useCustomers(
     {
-      limit: 20,
-      search: debouncedSearch || undefined,
+      limit: 50,
+      sortBy: "createdAt",
     },
     { enabled },
   );
@@ -39,7 +36,6 @@ export function useAssignProductOwnerWorkflow({
     setCustomerId("");
     setPurchaseDate("");
     setActivatedAt("");
-    setSearch("");
   }
 
   async function confirm() {
@@ -73,10 +69,8 @@ export function useAssignProductOwnerWorkflow({
     customersQuery,
     isAssigning: assignOwner.isPending,
     purchaseDate,
-    search,
     setActivatedAt,
     setCustomerId,
     setPurchaseDate,
-    setSearch,
   };
 }

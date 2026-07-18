@@ -25,7 +25,7 @@ import { useCustomerForm } from "../hooks/use-customer-form";
 type CustomerFormProps = {
   customer: CustomerSummary | null;
   onCancel: () => void;
-  onSaved: () => void;
+  onSaved: (customer?: CustomerSummary) => void;
 };
 
 export function CustomerForm({
