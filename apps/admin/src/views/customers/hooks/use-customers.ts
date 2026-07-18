@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  keepPreviousData,
   useMutation,
   useQuery,
   useQueryClient,
@@ -35,6 +36,7 @@ export function useCustomers(
   return useQuery({
     queryKey: customerKeys.list(query),
     queryFn: () => customersService.listCustomers(query),
+    placeholderData: keepPreviousData,
     ...options,
   });
 }

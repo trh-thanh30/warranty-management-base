@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  keepPreviousData,
   useMutation,
   useQuery,
   useQueryClient,
@@ -34,6 +35,7 @@ export function useStaffMembers(
   return useQuery({
     queryKey: staffKeys.list(query),
     queryFn: () => usersService.listModerators(query),
+    placeholderData: keepPreviousData,
     ...options,
   });
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  keepPreviousData,
   useMutation,
   useQuery,
   useQueryClient,
@@ -47,6 +48,7 @@ export function useUserNotifications(
     ...options,
     queryKey: notificationKeys.userList(query),
     queryFn: () => notificationsService.listUser(query),
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -61,6 +63,7 @@ export function useAdminNotifications(
     ...options,
     queryKey: notificationKeys.adminList(query),
     queryFn: () => notificationsService.listAdmin(query),
+    placeholderData: keepPreviousData,
   });
 }
 

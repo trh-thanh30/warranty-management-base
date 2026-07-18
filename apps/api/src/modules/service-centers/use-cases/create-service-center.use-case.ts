@@ -1,7 +1,10 @@
 import { ConflictError } from '@/common/response';
 import { CreateServiceCenterDto } from '@/modules/service-centers/dto/create-service-center.dto';
 import { ServiceCentersRepository } from '@/modules/service-centers/repository/service-centers.repository';
-import { toServiceCenterResponse } from '@/modules/service-centers/service-centers.types';
+import {
+  buildServiceCenterMetadata,
+  toServiceCenterResponse,
+} from '@/modules/service-centers/service-centers.types';
 import {
   mapServiceCenterUniqueConflict,
   normalizeServiceCenterEmail,
@@ -36,6 +39,7 @@ export class CreateServiceCenterUseCase {
         province: dto.province.trim(),
         district: dto.district?.trim(),
         address: dto.address.trim(),
+        metadata: buildServiceCenterMetadata(null, dto.googleMapsUrl),
       });
     } catch (error) {
       throw mapServiceCenterUniqueConflict(error) ?? error;

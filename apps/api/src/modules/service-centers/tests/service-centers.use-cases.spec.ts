@@ -14,6 +14,9 @@ const serviceCenter = {
   district: 'Hai Ba Trung',
   address: '123 Pho Hue',
   is_active: true,
+  metadata: {
+    googleMapsUrl: 'https://maps.google.com/?q=123+Pho+Hue',
+  },
   created_at: new Date('2026-07-03T00:00:00.000Z'),
   updated_at: new Date('2026-07-03T00:00:00.000Z'),
 };
@@ -88,17 +91,24 @@ describe('Service center use cases', () => {
       province: ' Ha Noi ',
       district: ' Hai Ba Trung ',
       address: ' 123 Pho Hue ',
+      googleMapsUrl: ' https://maps.google.com/?q=123+Pho+Hue ',
     });
 
-    expect(serviceCentersRepository.create).toHaveBeenCalledWith({
-      name: 'Tram Bao Hanh Ha Noi',
-      phone: '0901234567',
-      email: 'support@example.com',
-      province: 'Ha Noi',
-      district: 'Hai Ba Trung',
-      address: '123 Pho Hue',
-    });
+    expect(serviceCentersRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Tram Bao Hanh Ha Noi',
+        phone: '0901234567',
+        email: 'support@example.com',
+        province: 'Ha Noi',
+        district: 'Hai Ba Trung',
+        address: '123 Pho Hue',
+        metadata: {
+          googleMapsUrl: 'https://maps.google.com/?q=123+Pho+Hue',
+        },
+      }),
+    );
     expect(result.id).toBe('service-center-id');
+    expect(result.googleMapsUrl).toBe('https://maps.google.com/?q=123+Pho+Hue');
   });
 
   it('lists service centers with filters', async () => {

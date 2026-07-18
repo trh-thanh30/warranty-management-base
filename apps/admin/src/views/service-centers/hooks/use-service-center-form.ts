@@ -40,6 +40,8 @@ export function useServiceCenterForm({
     register,
     reset,
     setError,
+    setValue,
+    watch,
   } = useForm<ServiceCenterFormValues>({
     resolver: zodResolver(serviceCenterFormSchema),
     defaultValues: getDefaultValues(null),
@@ -94,6 +96,8 @@ export function useServiceCenterForm({
     isSubmitting,
     onSubmit: handleSubmit(submit),
     register,
+    selectedProvince: watch("province"),
+    setValue,
   };
 }
 
@@ -104,6 +108,7 @@ function getDefaultValues(
     address: serviceCenter?.address ?? "",
     district: serviceCenter?.district ?? "",
     email: serviceCenter?.email ?? "",
+    googleMapsUrl: serviceCenter?.googleMapsUrl ?? "",
     isActive: serviceCenter?.isActive ?? true,
     name: serviceCenter?.name ?? "",
     phone: serviceCenter?.phone ?? "",
@@ -121,6 +126,7 @@ function toCreateBody(
     name: values.name.trim(),
     phone: toOptionalValue(values.phone),
     province: values.province.trim(),
+    googleMapsUrl: toOptionalValue(values.googleMapsUrl),
   };
 }
 

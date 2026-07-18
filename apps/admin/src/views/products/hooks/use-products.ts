@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  keepPreviousData,
   useMutation,
   useQuery,
   useQueryClient,
@@ -36,6 +37,7 @@ export function useProducts(
     ...options,
     queryKey: productKeys.list(query),
     queryFn: () => productsService.listProducts(query),
+    placeholderData: keepPreviousData,
   });
 }
 
