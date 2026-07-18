@@ -9,9 +9,9 @@ import { useAuth } from "@/src/app/providers/auth-provider";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import {
   useDeactivateServiceCenter,
-  useServiceCenterProvinces,
   useServiceCenters,
 } from "@/src/hooks/use-service-centers";
+import { useVietnamProvinces } from "@/src/hooks/use-locations";
 import { useTableControls } from "@/src/hooks/use-table-controls";
 import { useToast } from "@/src/hooks/use-toast";
 import { SERVICE_CENTERS_PAGE_SIZE } from "../service-centers.constants";
@@ -70,7 +70,7 @@ export function useServiceCentersDirectory() {
     },
     { enabled: Boolean(user) && canView },
   );
-  const provincesQuery = useServiceCenterProvinces({
+  const provincesQuery = useVietnamProvinces({
     enabled: Boolean(user) && canView,
   });
 
@@ -95,7 +95,10 @@ export function useServiceCentersDirectory() {
     openDeactivate: setServiceCenterToDeactivate,
     pageSize,
     province: filters.province,
-    provincesQuery,
+    provincesQuery: {
+      ...provincesQuery,
+      data: provincesQuery.data?.map((province) => province.name) ?? [],
+    },
     search,
     serviceCentersQuery,
     serviceCenterToDeactivate,
