@@ -1,9 +1,12 @@
 "use client";
 
+import { ShieldPlus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
+import { Button } from "@repo/ui";
 import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
+import { Link } from "@/src/i18n/navigation";
 import { ActivateWarrantyDialog } from "./components/activate-warranty-dialog";
 import { WarrantiesDirectoryCard } from "./components/warranties-directory-card";
 import { useWarrantiesDirectory } from "./hooks/use-warranties-directory";
@@ -32,6 +35,14 @@ export function WarrantiesView() {
     <PermissionGuard permissions={[PERMISSIONS.WARRANTY_VIEW]}>
       <div className="space-y-6">
         <PageHeader
+          actions={
+            <Button asChild>
+              <Link href="/warranties/create">
+                <ShieldPlus className="size-4" />
+                {t("manualActivation")}
+              </Link>
+            </Button>
+          }
           description={t("description")}
           eyebrow={t("eyebrow")}
           title={t("title")}
