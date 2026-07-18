@@ -31,11 +31,14 @@ export function useCustomerForm({
   const createCustomer = useCreateCustomer();
   const updateCustomer = useUpdateCustomer(customer?.id ?? null);
   const {
+    control,
     formState: { errors, isSubmitting },
     handleSubmit,
     register,
     reset,
     setError,
+    setValue,
+    watch,
   } = useForm<CustomerFormValues>({
     resolver: zodResolver(customerFormSchema),
     defaultValues: getDefaultValues(null),
@@ -72,11 +75,14 @@ export function useCustomerForm({
   }
 
   return {
+    control,
     creating,
     errors,
     isSubmitting,
     onSubmit: handleSubmit(submit),
     register,
+    setValue,
+    watch,
   };
 }
 
@@ -85,16 +91,21 @@ function getDefaultValues(
 ): CustomerFormValues {
   return {
     address: customer?.address ?? "",
+    addressDetail: customer?.address ?? "",
     customerCode: customer?.customerCode ?? "",
     email: customer?.email ?? "",
     fullName: customer?.fullName ?? "",
     phone: customer?.phone ?? "",
+    provinceCode: "",
+    provinceName: "",
+    wardCode: "",
+    wardName: "",
   };
 }
 
 function toCreateCustomerBody(values: CustomerFormValues): CreateCustomerBody {
   return {
-    address: toRequiredValue(values.address),
+    address: buildCustomerAddress(values),
     customerCode: toOptionalValue(values.customerCode)?.toUpperCase(),
     email: toRequiredValue(values.email),
     fullName: values.fullName.trim(),
@@ -104,11 +115,23 @@ function toCreateCustomerBody(values: CustomerFormValues): CreateCustomerBody {
 
 function toUpdateCustomerBody(values: CustomerFormValues): UpdateCustomerBody {
   return {
-    address: toRequiredValue(values.address),
+    address: buildCustomerAddress(values),
     email: toRequiredValue(values.email),
     fullName: values.fullName.trim(),
     phone: toRequiredValue(values.phone),
   };
+}
+
+function buildCustomerAddress(values: CustomerFormValues) {
+  const parts = [
+    toRequiredValue(values.addressDetail),
+    toOptionalValue(values.wardName),
+    toOptionalValue(values.provinceName),
+  ].filter(Boolean);
+
+  return parts.length > 1
+    ? parts.join(", ")
+    : toRequiredValue(values.addressDetail);
 }
 
 function handleCustomerSaveError(
