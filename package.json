@@ -95,6 +95,9 @@
     "db:seed:dev": "pnpm --filter @repo/api db:seed:dev",
     "db:seed:test": "pnpm --filter @repo/api db:seed:test",
     "db:seed:prod": "pnpm --filter @repo/api db:seed:prod",
+    "db:seed-admin:dev": "pnpm --filter @repo/api db:seed-admin:dev",
+    "db:seed-admin:test": "pnpm --filter @repo/api db:seed-admin:test",
+    "db:seed-admin:prod": "pnpm --filter @repo/api db:seed-admin:prod",
     "db:reset:dev": "pnpm --filter @repo/api prisma:migrate:reset:dev"
   },
   "prisma": {

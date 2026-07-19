@@ -9,49 +9,14 @@ import {
   PrismaClient,
   product_category,
   product_status,
-  user_role,
-  user_status,
   warranty_claim_priority,
   warranty_claim_status,
   warranty_status,
 } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
 import { Pool } from 'pg';
+import { seedAdminUsers } from './seed-admin';
 
 let prisma: PrismaClient;
-
-type SeedUserInput = {
-  email: string;
-  password: string;
-  username: string;
-  role: user_role;
-  status: user_status;
-  is_verified: boolean;
-};
-
-async function upsertSeedUser(data: SeedUserInput) {
-  const [userByEmail, userByUsername] = await Promise.all([
-    prisma.user.findUnique({ where: { email: data.email } }),
-    prisma.user.findUnique({ where: { username: data.username } }),
-  ]);
-
-  if (userByEmail && userByUsername && userByEmail.id !== userByUsername.id) {
-    throw new Error(
-      `Cannot seed user ${data.email}/${data.username}: email and username belong to different existing users.`,
-    );
-  }
-
-  const existingUser = userByEmail ?? userByUsername;
-
-  if (existingUser) {
-    return prisma.user.update({
-      where: { id: existingUser.id },
-      data,
-    });
-  }
-
-  return prisma.user.create({ data });
-}
 
 type DemoNotificationRecipient = {
   userId: string;
@@ -446,45 +411,10 @@ async function main() {
   const adapter = new PrismaPg(pool);
   prisma = new PrismaClient({ adapter });
 
-  const hashedPassword = await bcrypt.hash('password123', 12);
-
   await seedDefaultCategories();
 
-  const adminUser = await upsertSeedUser({
-    email: 'admin@example.com',
-    password: hashedPassword,
-    username: 'admin',
-    role: user_role.ADMIN,
-    status: user_status.ACTIVE,
-    is_verified: true,
-  });
-
-  const moderatorUser = await upsertSeedUser({
-    email: 'moderator@example.com',
-    password: hashedPassword,
-    username: 'moderator',
-    role: user_role.MODERATOR,
-    status: user_status.ACTIVE,
-    is_verified: true,
-  });
-
-  const customerAUser = await upsertSeedUser({
-    email: 'customer.a@example.com',
-    password: hashedPassword,
-    username: 'customer-a',
-    role: user_role.CUSTOMER,
-    status: user_status.ACTIVE,
-    is_verified: true,
-  });
-
-  const customerBUser = await upsertSeedUser({
-    email: 'customer.b@example.com',
-    password: hashedPassword,
-    username: 'customer-b',
-    role: user_role.CUSTOMER,
-    status: user_status.ACTIVE,
-    is_verified: true,
-  });
+  const { adminUser, customerAUser, customerBUser, moderatorUser } =
+    await seedAdminUsers(prisma);
 
   const customerA = await upsertCustomer({
     userId: customerAUser.id,

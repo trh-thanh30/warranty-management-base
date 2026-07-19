@@ -36,6 +36,23 @@ export class ProductsRepository {
     });
   }
 
+  findActivationRequestTargetByWarrantyCode(warrantyCode: string) {
+    return this.prismaService.product.findFirst({
+      where: {
+        deleted_at: null,
+        warranty_code: warrantyCode,
+      },
+      include: {
+        warranty: true,
+        ownerships: {
+          where: { is_current_owner: true },
+          include: { customer: true },
+          orderBy: { created_at: 'desc' },
+        },
+      },
+    });
+  }
+
   findByProductCode(productCode: string) {
     return this.prismaService.product.findUnique({
       where: { product_code: productCode },

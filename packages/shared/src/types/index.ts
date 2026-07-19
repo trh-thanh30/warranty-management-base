@@ -12,5 +12,6 @@ export * from "./product.types.ts";
 export * from "./service-center.types.ts";
 export * from "./system-health.types.ts";
 export * from "./user.types.ts";
+export * from "./warranty-activation-request.types.ts";
 export * from "./warranty-claim.types.ts";
 export * from "./warranty.types.ts";
