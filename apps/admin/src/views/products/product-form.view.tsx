@@ -1,18 +1,32 @@
 "use client";
 
 import { PackageSearch } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import type { ProductResponse, ProductStatus } from "@repo/shared";
+import { HttpClientError } from "@repo/shared";
 import { PERMISSIONS, type PermissionKey } from "@repo/shared/constants";
-import { Button } from "@repo/ui";
+import {
+  Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@repo/ui";
 import { FormPageShell } from "@/src/components/common/form-page-shell";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
+import { useToast } from "@/src/hooks/use-toast";
+import { productsService } from "@/src/services/products/products.service";
 import {
   ProductFormCard,
   ProductFormSkeleton,
 } from "./components/product-form-card";
 import { useProductDetail } from "./hooks/use-product-detail";
 import { useProductFormWorkflow } from "./hooks/use-product-form-workflow";
+import { productKeys } from "./hooks/use-products";
 
 type ProductFormViewProps =
   | {
@@ -46,6 +60,11 @@ export function ProductFormView({ mode, productId }: ProductFormViewProps) {
         eyebrow={t("eyebrow")}
         maxWidthClassName="max-w-5xl"
         title={title}
+        descriptionAccessory={
+          isEditing && product ? (
+            <ProductStatusHeaderSelect product={product} />
+          ) : null
+        }
       >
         {isEditing && productQuery.isLoading ? (
           <ProductFormSkeleton description={description} title={title} />
@@ -77,4 +96,70 @@ export function ProductFormView({ mode, productId }: ProductFormViewProps) {
       </FormPageShell>
     </PermissionGuard>
   );
+}
+
+function ProductStatusHeaderSelect({ product }: { product: ProductResponse }) {
+  const t = useTranslations("Products");
+  const toast = useToast();
+  const queryClient = useQueryClient();
+  const [status, setStatus] = useState<ProductEditableStatus>(
+    toEditableStatus(product.status),
+  );
+  const updateStatus = useMutation({
+    mutationFn: (nextStatus: ProductEditableStatus) =>
+      productsService.updateProduct(product.id, { status: nextStatus }),
+    onError: (error) => {
+      setStatus(toEditableStatus(product.status));
+      const message =
+        error instanceof HttpClientError
+          ? error.message
+          : t("statusUpdateError");
+      toast.error(message);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      toast.success(t("statusUpdated"));
+    },
+  });
+
+  useEffect(() => {
+    setStatus(toEditableStatus(product.status));
+  }, [product.id, product.status]);
+
+  return (
+    <div className="w-full sm:w-56">
+      <label className="sr-only" htmlFor="product-header-status">
+        {t("productStatus")}
+      </label>
+      <Select
+        disabled={updateStatus.isPending}
+        onValueChange={(value) => {
+          const nextStatus = value as ProductEditableStatus;
+          if (nextStatus === status) return;
+
+          setStatus(nextStatus);
+          updateStatus.mutate(nextStatus);
+        }}
+        value={status}
+      >
+        <SelectTrigger
+          aria-label={t("productStatus")}
+          className="font-medium disabled:opacity-60"
+          id="product-header-status"
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="ACTIVE">{t("statuses.ACTIVE")}</SelectItem>
+          <SelectItem value="INACTIVE">{t("statuses.INACTIVE")}</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
+type ProductEditableStatus = Extract<ProductStatus, "ACTIVE" | "INACTIVE">;
+
+function toEditableStatus(status: ProductStatus): ProductEditableStatus {
+  return status === "INACTIVE" ? "INACTIVE" : "ACTIVE";
 }

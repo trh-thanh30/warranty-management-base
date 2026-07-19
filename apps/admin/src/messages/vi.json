@@ -18,7 +18,7 @@
       "categories": "Danh mục",
       "products": "Sản phẩm",
       "warranties": "Bảo hành",
-      "warrantyActivationRequests": "Yêu cầu kích hoạt bảo hành",
+      "warrantyActivationRequests": "Kích hoạt bảo hành điện tử",
       "warrantyClaims": "Yêu cầu bảo hành",
       "serviceCenters": "Trạm bảo hành",
       "contentPages": "Trang nội dung",
@@ -519,6 +519,8 @@
     "deleteDescription": "{name} sẽ bị loại khỏi luồng quản lý sản phẩm đang hoạt động.",
     "deleteError": "Không thể xóa sản phẩm.",
     "saveError": "Không thể lưu sản phẩm.",
+    "statusUpdated": "Đã cập nhật trạng thái sản phẩm.",
+    "statusUpdateError": "Không thể cập nhật trạng thái sản phẩm.",
     "ownerAssigned": "Đã gán chủ sở hữu sản phẩm.",
     "assignOwnerError": "Không thể gán chủ sở hữu sản phẩm.",
     "customerRequired": "Chọn khách hàng.",
@@ -701,7 +703,7 @@
     }
   },
   "WarrantyActivationRequestsAdmin": {
-    "title": "Yêu cầu kích hoạt bảo hành",
+    "title": "Kích hoạt bảo hành điện tử",
     "eyebrow": "Kích hoạt bảo hành điện tử",
     "description": "Quản lý các yêu cầu kích hoạt bảo hành gửi từ khách hàng trước khi duyệt trên hệ thống.",
     "createAction": "Tạo yêu cầu kích hoạt",

@@ -5,7 +5,19 @@ import { Controller } from "react-hook-form";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ProductResponse } from "@repo/shared";
-import { Button, DatePicker, Input, Label, Switch, Textarea } from "@repo/ui";
+import {
+  Button,
+  DatePicker,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Switch,
+  Textarea,
+} from "@repo/ui";
 import { RichTextEditor } from "@/src/components/common/rich-text-editor";
 import { PRODUCT_CATEGORIES } from "../products.constants";
 import { useProductForm } from "../hooks/use-product-form";
@@ -71,36 +83,50 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
 
       <div className="grid gap-5 sm:grid-cols-3">
         <Field id="product-category" label={t("legacyCategory")}>
-          <select
-            className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none transition-colors focus:border-slate-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:focus:border-slate-300"
-            id="product-category"
-            {...register("category")}
-          >
-            {PRODUCT_CATEGORIES.map((category) => (
-              <option key={category} value={category}>
-                {t(`categories.${category}`)}
-              </option>
-            ))}
-          </select>
+          <Controller
+            control={control}
+            name="category"
+            render={({ field }) => (
+              <Select onValueChange={field.onChange} value={field.value}>
+                <SelectTrigger id="product-category">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PRODUCT_CATEGORIES.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {t(`categories.${category}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
         </Field>
         <Field
           error={formatFieldError(errors.categoryId?.message, t)}
           id="product-category-id"
           label={t("dynamicCategory")}
         >
-          <select
-            className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none transition-colors focus:border-slate-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:focus:border-slate-300"
-            id="product-category-id"
-            {...register("categoryId")}
-          >
-            <option value="">{t("noDynamicCategory")}</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+          <Controller
+            control={control}
+            name="categoryId"
+            render={({ field }) => (
+              <NullableSelect
+                id="product-category-id"
+                noneLabel={t("noDynamicCategory")}
+                onValueChange={field.onChange}
+                value={field.value}
+              >
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </NullableSelect>
+            )}
+          />
         </Field>
+        {creating ? <ProductStatusField control={control} t={t} /> : null}
         {product?.warrantyCode ? (
           <Field id="product-warranty-code-readonly" label={t("warrantyCode")}>
             <Input
@@ -168,28 +194,6 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
         />
       </Field>
 
-      <Controller
-        control={control}
-        name="status"
-        render={({ field }) => (
-          <div className="flex items-center justify-between gap-4 rounded-md border border-slate-200 p-4 dark:border-slate-800">
-            <div>
-              <Label htmlFor="product-status">{t("activeStatusLabel")}</Label>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                {t("activeStatusDescription")}
-              </p>
-            </div>
-            <Switch
-              checked={field.value === "ACTIVE"}
-              id="product-status"
-              onCheckedChange={(checked) =>
-                field.onChange(checked ? "ACTIVE" : "INACTIVE")
-              }
-            />
-          </div>
-        )}
-      />
-
       {creating ? (
         <section className="space-y-5 rounded-md border border-slate-200 p-4 dark:border-slate-800">
           <Controller
@@ -229,18 +233,24 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
           ) : null}
           <div className="grid gap-5 sm:grid-cols-2">
             <Field id="product-customer" label={t("customer")}>
-              <select
-                className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none transition-colors focus:border-slate-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:focus:border-slate-300"
-                id="product-customer"
-                {...register("customerId")}
-              >
-                <option value="">{t("noOwner")}</option>
-                {customers.map((customer) => (
-                  <option key={customer.id} value={customer.id}>
-                    {customer.fullName} · {customer.customerCode}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                control={control}
+                name="customerId"
+                render={({ field }) => (
+                  <NullableSelect
+                    id="product-customer"
+                    noneLabel={t("noOwner")}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                  >
+                    {customers.map((customer) => (
+                      <SelectItem key={customer.id} value={customer.id}>
+                        {customer.fullName} · {customer.customerCode}
+                      </SelectItem>
+                    ))}
+                  </NullableSelect>
+                )}
+              />
             </Field>
             <Field
               error={formatFieldError(errors.durationMonths?.message, t)}
@@ -325,6 +335,67 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
     </form>
   );
 }
+
+function ProductStatusField({
+  control,
+  t,
+}: {
+  control: ReturnType<typeof useProductForm>["control"];
+  t: (key: string) => string;
+}) {
+  return (
+    <Field id="product-status" label={t("productStatus")}>
+      <Controller
+        control={control}
+        name="status"
+        render={({ field }) => (
+          <Select onValueChange={field.onChange} value={field.value}>
+            <SelectTrigger id="product-status">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ACTIVE">{t("statuses.ACTIVE")}</SelectItem>
+              <SelectItem value="INACTIVE">{t("statuses.INACTIVE")}</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
+      />
+    </Field>
+  );
+}
+
+function NullableSelect({
+  children,
+  id,
+  noneLabel,
+  onValueChange,
+  value,
+}: {
+  children: ReactNode;
+  id: string;
+  noneLabel: string;
+  onValueChange: (value: string) => void;
+  value?: string;
+}) {
+  return (
+    <Select
+      onValueChange={(nextValue) =>
+        onValueChange(nextValue === SELECT_EMPTY_VALUE ? "" : nextValue)
+      }
+      value={value || SELECT_EMPTY_VALUE}
+    >
+      <SelectTrigger id={id}>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value={SELECT_EMPTY_VALUE}>{noneLabel}</SelectItem>
+        {children}
+      </SelectContent>
+    </Select>
+  );
+}
+
+const SELECT_EMPTY_VALUE = "__empty__";
 
 function formatFieldError(
   message: string | undefined,

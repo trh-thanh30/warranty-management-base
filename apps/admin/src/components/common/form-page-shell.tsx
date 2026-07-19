@@ -11,6 +11,7 @@ type FormPageShellProps = {
   eyebrow?: string;
   maxWidthClassName?: string;
   title: string;
+  descriptionAccessory?: ReactNode;
 };
 
 export function FormPageShell({
@@ -21,6 +22,7 @@ export function FormPageShell({
   eyebrow,
   maxWidthClassName = "max-w-3xl",
   title,
+  descriptionAccessory,
 }: FormPageShellProps) {
   return (
     <div className={`mx-auto space-y-6 ${maxWidthClassName}`}>
@@ -42,9 +44,16 @@ export function FormPageShell({
             {title}
           </h1>
           {description ? (
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-              {description}
-            </p>
+            <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
+                {description}
+              </p>
+              {descriptionAccessory ? (
+                <div className="w-full shrink-0 sm:w-auto">
+                  {descriptionAccessory}
+                </div>
+              ) : null}
+            </div>
           ) : null}
         </div>
       </div>

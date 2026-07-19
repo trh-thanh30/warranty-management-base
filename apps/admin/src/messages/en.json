@@ -519,6 +519,8 @@
     "deleteDescription": "{name} will be removed from active product management.",
     "deleteError": "Unable to delete the product.",
     "saveError": "Unable to save the product.",
+    "statusUpdated": "Product status updated.",
+    "statusUpdateError": "Unable to update product status.",
     "ownerAssigned": "Product owner assigned.",
     "assignOwnerError": "Unable to assign product owner.",
     "customerRequired": "Choose a customer.",

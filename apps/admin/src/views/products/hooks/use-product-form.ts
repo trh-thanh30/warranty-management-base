@@ -173,7 +173,6 @@ function toUpdateProductBody(values: ProductFormValues): UpdateProductBody {
     model: toNullableValue(values.model),
     name: values.name.trim(),
     serialNumber: toNullableValue(values.serialNumber),
-    status: values.status,
   };
 }
 

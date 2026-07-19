@@ -90,7 +90,6 @@ export class ProductsRepository {
     } satisfies Record<string, keyof Prisma.ProductOrderByWithRelationInput>;
     const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
     const where: Prisma.ProductWhereInput = {
-      deleted_at: null,
       category: filters.category as never,
       category_id: filters.categoryId,
       status: filters.status,
