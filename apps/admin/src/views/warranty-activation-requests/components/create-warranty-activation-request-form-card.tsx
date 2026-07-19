@@ -19,6 +19,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  DatePicker,
   Input,
   Label,
   Textarea,
@@ -412,10 +413,18 @@ export function CreateWarrantyActivationRequestFormCard({
                 id="create-activation-request-customer-birthdate"
                 label={t("birthdate")}
               >
-                <Input
-                  id="create-activation-request-customer-birthdate"
-                  type="date"
-                  {...register("customerBirthdate")}
+                <Controller
+                  control={control}
+                  name="customerBirthdate"
+                  render={({ field }) => (
+                    <DatePicker
+                      ariaLabel={t("birthdate")}
+                      id="create-activation-request-customer-birthdate"
+                      onValueChange={field.onChange}
+                      placeholder={t("selectBirthdate")}
+                      value={field.value}
+                    />
+                  )}
                 />
               </Field>
             </div>

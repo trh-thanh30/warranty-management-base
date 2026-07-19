@@ -10,7 +10,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-  Input,
+  DatePicker,
   Label,
 } from "@repo/ui";
 import {
@@ -119,17 +119,22 @@ export function AssignOwnerDialog({
               <CustomerReadonlyCard customer={selectedCustomer} />
             ) : null}
 
+            {product?.warranty?.status === "DRAFT" ? (
+              <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm leading-6 text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200">
+                {t("assignOwnerWarrantyDraftNotice")}
+              </p>
+            ) : null}
+
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="assign-owner-purchase-date">
                   {t("purchaseDate")}
                 </Label>
-                <Input
+                <DatePicker
+                  ariaLabel={t("purchaseDate")}
                   id="assign-owner-purchase-date"
-                  onChange={(event) =>
-                    workflow.setPurchaseDate(event.target.value)
-                  }
-                  type="date"
+                  onValueChange={workflow.setPurchaseDate}
+                  placeholder={t("selectPurchaseDate")}
                   value={workflow.purchaseDate}
                 />
               </div>
@@ -137,12 +142,11 @@ export function AssignOwnerDialog({
                 <Label htmlFor="assign-owner-activated-at">
                   {t("activatedAt")}
                 </Label>
-                <Input
+                <DatePicker
+                  ariaLabel={t("activatedAt")}
                   id="assign-owner-activated-at"
-                  onChange={(event) =>
-                    workflow.setActivatedAt(event.target.value)
-                  }
-                  type="date"
+                  onValueChange={workflow.setActivatedAt}
+                  placeholder={t("selectActivatedAt")}
                   value={workflow.activatedAt}
                 />
               </div>

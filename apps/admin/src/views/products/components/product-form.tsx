@@ -5,7 +5,7 @@ import { Controller } from "react-hook-form";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ProductResponse } from "@repo/shared";
-import { Button, Input, Label, Switch, Textarea } from "@repo/ui";
+import { Button, DatePicker, Input, Label, Switch, Textarea } from "@repo/ui";
 import { RichTextEditor } from "@/src/components/common/rich-text-editor";
 import { PRODUCT_CATEGORIES } from "../products.constants";
 import { useProductForm } from "../hooks/use-product-form";
@@ -257,17 +257,33 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
           </div>
           <div className="grid gap-5 sm:grid-cols-2">
             <Field id="product-purchase-date" label={t("purchaseDate")}>
-              <Input
-                id="product-purchase-date"
-                type="date"
-                {...register("purchaseDate")}
+              <Controller
+                control={control}
+                name="purchaseDate"
+                render={({ field }) => (
+                  <DatePicker
+                    ariaLabel={t("purchaseDate")}
+                    id="product-purchase-date"
+                    onValueChange={field.onChange}
+                    placeholder={t("selectPurchaseDate")}
+                    value={field.value}
+                  />
+                )}
               />
             </Field>
             <Field id="product-activated-at" label={t("activatedAt")}>
-              <Input
-                id="product-activated-at"
-                type="date"
-                {...register("activatedAt")}
+              <Controller
+                control={control}
+                name="activatedAt"
+                render={({ field }) => (
+                  <DatePicker
+                    ariaLabel={t("activatedAt")}
+                    id="product-activated-at"
+                    onValueChange={field.onChange}
+                    placeholder={t("selectActivatedAt")}
+                    value={field.value}
+                  />
+                )}
               />
             </Field>
           </div>

@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  DatePicker,
   Input,
   Label,
   Textarea,
@@ -80,10 +81,11 @@ export function ActivateWarrantyDialog({
             <Label htmlFor="activate-warranty-start-date">
               {t("startDate")}
             </Label>
-            <Input
+            <DatePicker
+              ariaLabel={t("startDate")}
               id="activate-warranty-start-date"
-              onChange={(event) => setStartDate(event.target.value)}
-              type="date"
+              onValueChange={setStartDate}
+              placeholder={t("selectStartDate")}
               value={startDate}
             />
           </div>
