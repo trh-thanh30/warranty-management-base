@@ -7,6 +7,7 @@ import {
   LogOut,
   Package,
   Settings,
+  ShieldPlus,
   ShieldCheck,
   Tags,
   UserRound,
@@ -63,6 +64,12 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             title: t("items.warranties"),
             href: "/warranties",
             icon: ShieldCheck,
+            requiredPermission: PERMISSIONS.WARRANTY_VIEW,
+          },
+          {
+            title: t("items.warrantyActivationRequests"),
+            href: "/warranty-activation-requests",
+            icon: ShieldPlus,
             requiredPermission: PERMISSIONS.WARRANTY_VIEW,
           },
           {
@@ -131,6 +138,11 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
       {
         title: t("items.warranties"),
         href: "/warranties",
+        requiredPermission: PERMISSIONS.WARRANTY_VIEW,
+      },
+      {
+        title: t("items.warrantyActivationRequests"),
+        href: "/warranty-activation-requests",
         requiredPermission: PERMISSIONS.WARRANTY_VIEW,
       },
       {

@@ -10,6 +10,11 @@ import {
   PaginationItem,
   PaginationNext,
   PaginationPrevious,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@repo/ui";
 
 type PaginationPageItem = number | "ellipsis-start" | "ellipsis-end";
@@ -107,17 +112,21 @@ export function PaginationControls({
         {onPageSizeChange && pageSize ? (
           <label className="inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
             <span>{pageSizeLabel}</span>
-            <select
-              className="h-9 rounded-md border border-slate-200 bg-white px-2 text-sm text-slate-950 shadow-sm outline-none focus:border-slate-400 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50"
-              onChange={(event) => onPageSizeChange(Number(event.target.value))}
-              value={pageSize}
+            <Select
+              onValueChange={(value) => onPageSizeChange(Number(value))}
+              value={String(pageSize)}
             >
-              {pageSizeOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="h-9 w-20 border-slate-200 px-2 focus:border-slate-400 dark:border-slate-800">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {pageSizeOptions.map((option) => (
+                  <SelectItem key={option} value={String(option)}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </label>
         ) : null}
       </div>

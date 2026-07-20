@@ -31,7 +31,7 @@ export function useProductForm({
   onSaved,
   product,
 }: {
-  onSaved: () => void;
+  onSaved: (product?: ProductResponse) => void;
   product: ProductResponse | null;
 }) {
   const t = useTranslations("Products");
@@ -78,15 +78,19 @@ export function useProductForm({
   async function submit(values: ProductFormValues) {
     try {
       if (creating) {
-        await createProduct.mutateAsync(toCreateProductBody(values));
+        const createdProduct = await createProduct.mutateAsync(
+          toCreateProductBody(values),
+        );
         toast.success(t("created"));
-        onSaved();
+        onSaved(createdProduct);
         return;
       }
 
-      await updateProduct.mutateAsync(toUpdateProductBody(values));
+      const updatedProduct = await updateProduct.mutateAsync(
+        toUpdateProductBody(values),
+      );
       toast.success(t("updated"));
-      onSaved();
+      onSaved(updatedProduct);
     } catch (error) {
       const handledMessage = handleProductSaveError(error, setError, t);
       if (handledMessage) {
@@ -169,7 +173,6 @@ function toUpdateProductBody(values: ProductFormValues): UpdateProductBody {
     model: toNullableValue(values.model),
     name: values.name.trim(),
     serialNumber: toNullableValue(values.serialNumber),
-    status: values.status,
   };
 }
 

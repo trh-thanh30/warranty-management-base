@@ -1,16 +1,31 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { Controller } from "react-hook-form";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { CustomerSummary } from "@repo/shared";
 import { Button, Input, Label, Textarea } from "@repo/ui";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+} from "@/src/components/common/combobox";
+import {
+  useVietnamProvinces,
+  useVietnamWards,
+} from "@/src/hooks/use-locations";
+import type { VietnamProvince } from "@/src/services/locations/locations.types";
 import { useCustomerForm } from "../hooks/use-customer-form";
 
 type CustomerFormProps = {
   customer: CustomerSummary | null;
   onCancel: () => void;
-  onSaved: () => void;
+  onSaved: (customer?: CustomerSummary) => void;
 };
 
 export function CustomerForm({
@@ -19,8 +34,86 @@ export function CustomerForm({
   onSaved,
 }: CustomerFormProps) {
   const t = useTranslations("Customers");
-  const { creating, errors, isSubmitting, onSubmit, register } =
-    useCustomerForm({ customer, onSaved });
+  const [hydratedAddressKey, setHydratedAddressKey] = useState<string | null>(
+    null,
+  );
+  const [pendingWardName, setPendingWardName] = useState<string | null>(null);
+  const {
+    control,
+    creating,
+    errors,
+    isSubmitting,
+    onSubmit,
+    register,
+    setValue,
+    watch,
+  } = useCustomerForm({ customer, onSaved });
+  const provinceCode = watch("provinceCode");
+  const wardCode = watch("wardCode");
+  const provinceCodeNumber = provinceCode ? Number(provinceCode) : null;
+  const provincesQuery = useVietnamProvinces();
+  const wardsQuery = useVietnamWards(provinceCodeNumber);
+  const provinces = useMemo(
+    () => provincesQuery.data ?? [],
+    [provincesQuery.data],
+  );
+  const wards = useMemo(() => wardsQuery.data ?? [], [wardsQuery.data]);
+  const selectedProvince = provinces.find(
+    (province) => String(province.code) === provinceCode,
+  );
+  const selectedWard = wards.find((ward) => String(ward.code) === wardCode);
+
+  useEffect(() => {
+    if (!customer?.address || provinces.length === 0) return;
+
+    const addressKey = `${customer.id}:${customer.address}`;
+    if (hydratedAddressKey === addressKey) return;
+
+    const parsedAddress = parseCustomerAddress(customer.address, provinces);
+    setValue("addressDetail", parsedAddress.detail, {
+      shouldDirty: false,
+      shouldValidate: true,
+    });
+
+    if (parsedAddress.province) {
+      setValue("provinceCode", String(parsedAddress.province.code), {
+        shouldDirty: false,
+        shouldValidate: true,
+      });
+      setValue("provinceName", parsedAddress.province.name, {
+        shouldDirty: false,
+        shouldValidate: true,
+      });
+      setValue("wardCode", "", {
+        shouldDirty: false,
+        shouldValidate: true,
+      });
+      setValue("wardName", "", {
+        shouldDirty: false,
+        shouldValidate: true,
+      });
+      setPendingWardName(parsedAddress.wardName ?? null);
+    }
+
+    setHydratedAddressKey(addressKey);
+  }, [customer, hydratedAddressKey, provinces, setValue]);
+
+  useEffect(() => {
+    if (!pendingWardName || wards.length === 0) return;
+
+    const ward = wards.find((item) => pendingWardName.includes(item.name));
+    if (!ward) return;
+
+    setValue("wardCode", String(ward.code), {
+      shouldDirty: false,
+      shouldValidate: true,
+    });
+    setValue("wardName", ward.name, {
+      shouldDirty: false,
+      shouldValidate: true,
+    });
+    setPendingWardName(null);
+  }, [pendingWardName, setValue, wards]);
 
   return (
     <form className="space-y-6" noValidate onSubmit={onSubmit}>
@@ -96,16 +189,133 @@ export function CustomerForm({
         </Field>
       </div>
 
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field
+          error={formatFieldError(errors.provinceCode?.message, t)}
+          id="customer-province"
+          label={t("province")}
+        >
+          <Controller
+            control={control}
+            name="provinceCode"
+            render={({ field }) => (
+              <Combobox
+                disabled={provincesQuery.isLoading}
+                onValueChange={(value) => {
+                  const province = provinces.find(
+                    (item) => String(item.code) === value,
+                  );
+                  setValue("provinceCode", value, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  });
+                  setValue("provinceName", province?.name ?? "", {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  });
+                  setValue("wardCode", "", {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  });
+                  setValue("wardName", "", {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  });
+                }}
+                value={field.value}
+              >
+                <ComboboxTrigger
+                  id="customer-province"
+                  placeholder={t("provincePlaceholder")}
+                  selectedLabel={selectedProvince?.name}
+                />
+                <ComboboxContent>
+                  <ComboboxInput
+                    placeholder={t("search")}
+                    showTrigger={false}
+                  />
+                  <ComboboxList>
+                    <ComboboxEmpty>{t("noProvince")}</ComboboxEmpty>
+                    {provinces.map((province) => (
+                      <ComboboxItem
+                        key={province.code}
+                        value={String(province.code)}
+                      >
+                        {province.name}
+                      </ComboboxItem>
+                    ))}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
+            )}
+          />
+        </Field>
+
+        <Field
+          error={formatFieldError(errors.wardCode?.message, t)}
+          id="customer-ward"
+          label={t("ward")}
+        >
+          <Controller
+            control={control}
+            name="wardCode"
+            render={({ field }) => (
+              <Combobox
+                disabled={!provinceCode || wardsQuery.isLoading}
+                onValueChange={(value) => {
+                  const ward = wards.find(
+                    (item) => String(item.code) === value,
+                  );
+                  setValue("wardCode", value, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  });
+                  setValue("wardName", ward?.name ?? "", {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  });
+                }}
+                value={field.value}
+              >
+                <ComboboxTrigger
+                  id="customer-ward"
+                  placeholder={
+                    provinceCode
+                      ? t("wardPlaceholder")
+                      : t("selectProvinceFirst")
+                  }
+                  selectedLabel={selectedWard?.name}
+                />
+                <ComboboxContent>
+                  <ComboboxInput
+                    placeholder={t("search")}
+                    showTrigger={false}
+                  />
+                  <ComboboxList>
+                    <ComboboxEmpty>{t("noWard")}</ComboboxEmpty>
+                    {wards.map((ward) => (
+                      <ComboboxItem key={ward.code} value={String(ward.code)}>
+                        {ward.name}
+                      </ComboboxItem>
+                    ))}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
+            )}
+          />
+        </Field>
+      </div>
+
       <Field
-        error={formatFieldError(errors.address?.message, t)}
+        error={formatFieldError(errors.addressDetail?.message, t)}
         id="customer-address"
-        label={t("address")}
+        label={t("addressDetail")}
       >
         <Textarea
           id="customer-address"
-          placeholder={t("addressPlaceholder")}
+          placeholder={t("addressDetailPlaceholder")}
           rows={4}
-          {...register("address")}
+          {...register("addressDetail")}
         />
       </Field>
 
@@ -148,6 +358,8 @@ function formatFieldError(
     "fullNameRequired",
     "phoneLength",
     "phoneRequired",
+    "provinceRequired",
+    "wardRequired",
   ]);
 
   return translationKeys.has(message) ? t(message) : message;
@@ -173,4 +385,29 @@ function Field({
       ) : null}
     </div>
   );
+}
+
+function parseCustomerAddress(address: string, provinces: VietnamProvince[]) {
+  const province = provinces.find((item) => address.includes(item.name));
+  const parts = address
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const provinceName = province?.name;
+  const provinceIndex = provinceName ? parts.indexOf(provinceName) : -1;
+  const wardName =
+    provinceIndex > 0
+      ? parts[provinceIndex - 1]
+      : parts.length >= 2
+        ? parts.at(-2)
+        : null;
+  const detail = parts
+    .filter((part) => part !== provinceName && part !== wardName)
+    .join(", ");
+
+  return {
+    detail: detail || address,
+    province,
+    wardName,
+  };
 }

@@ -15,7 +15,8 @@ export const PRODUCT_STATUS_FILTERS = [
   "ALL",
   "ACTIVE",
   "INACTIVE",
-] as const satisfies Array<"ALL" | Exclude<ProductStatus, "DELETED">>;
+  "DELETED",
+] as const satisfies Array<"ALL" | ProductStatus>;
 
 export const WARRANTY_STATUS_FILTERS = [
   "ALL",

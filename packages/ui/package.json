@@ -22,6 +22,7 @@
     "./pagination": "./src/pagination.tsx",
     "./popover": "./src/popover.tsx",
     "./separator": "./src/separator.tsx",
+    "./select": "./src/select.tsx",
     "./sheet": "./src/sheet.tsx",
     "./skeleton": "./src/skeleton.tsx",
     "./switch": "./src/switch.tsx",

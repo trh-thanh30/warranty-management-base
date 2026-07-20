@@ -2,6 +2,8 @@ import type {
   ActivateWarrantyBody,
   ActivateWarrantyByCodeBody,
   ListWarrantiesQuery,
+  ManualWarrantyActivationBody,
+  ManualWarrantyActivationResult,
   PaginatedResponse,
   WarrantyListItem,
   WarrantyLookupResult,
@@ -65,6 +67,17 @@ export function createWarrantiesService(http: WarrantiesHttpClient) {
       return unwrap(
         await http.post<WarrantySummary>(
           `/products/${productId}/activate-warranty`,
+          body,
+        ),
+      );
+    },
+
+    async manualActivation(
+      body: ManualWarrantyActivationBody,
+    ): Promise<ManualWarrantyActivationResult> {
+      return unwrap(
+        await http.post<ManualWarrantyActivationResult>(
+          "/warranties/manual-activation",
           body,
         ),
       );

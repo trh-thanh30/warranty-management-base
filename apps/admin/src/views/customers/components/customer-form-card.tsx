@@ -15,7 +15,7 @@ type CustomerFormCardProps = {
   customer: CustomerSummary | null;
   description: string;
   onCancel: () => void;
-  onSaved: () => void;
+  onSaved: (customer?: CustomerSummary) => void;
   title: string;
 };
 

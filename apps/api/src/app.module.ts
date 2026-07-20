@@ -59,6 +59,7 @@ import { PublicModule } from '@/modules/public/public.module';
 import { ServiceCentersModule } from '@/modules/service-centers/service-centers.module';
 import { UsersModule } from '@/modules/user/user.module';
 import { VerificationModule } from '@/modules/verification/verification.module';
+import { WarrantyActivationRequestsModule } from '@/modules/warranty-activation-requests/warranty-activation-requests.module';
 import { WarrantyClaimsModule } from '@/modules/warranty-claims/warranty-claims.module';
 import { WarrantiesModule } from '@/modules/warranties/warranties.module';
 import { MiddlewareConsumer, NestModule } from '@nestjs/common';
@@ -154,6 +155,7 @@ const envPath = join(rootDir, envFile);
     LocationsModule,
     ProductsModule,
     WarrantiesModule,
+    WarrantyActivationRequestsModule,
     ServiceCentersModule,
     WarrantyClaimsModule,
     PublicModule,

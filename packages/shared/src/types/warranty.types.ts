@@ -66,3 +66,59 @@ export type ActivateWarrantyBody = {
 export type ActivateWarrantyByCodeBody = ActivateWarrantyBody & {
   warrantyCode: string;
 };
+
+export type ManualWarrantyActivationCustomerInput = {
+  fullName: string;
+  phone: string;
+  email: string;
+  address: string;
+};
+
+export type ManualWarrantyActivationProductInput = {
+  id?: string;
+  name: string;
+  category: ProductSummary["category"];
+  categoryId?: string;
+  brand?: string;
+  model?: string;
+  manufactureYear?: number;
+  serialNumber?: string;
+  description?: string;
+};
+
+export type ManualWarrantyActivationWarrantyInput = {
+  activatedAt: string;
+  durationMonths: number;
+  purchaseDate?: string;
+  warrantyCode?: string;
+  terms?: string;
+};
+
+export type ManualWarrantyActivationBody = {
+  customer: ManualWarrantyActivationCustomerInput;
+  product: ManualWarrantyActivationProductInput;
+  warranty: ManualWarrantyActivationWarrantyInput;
+};
+
+export type ManualWarrantyActivationResult = {
+  customer: {
+    id: string;
+    customerCode: string;
+    fullName: string;
+    phone: string | null;
+    email: string | null;
+    address: string | null;
+  };
+  product: Pick<
+    ProductSummary,
+    | "id"
+    | "productCode"
+    | "warrantyCode"
+    | "serialNumber"
+    | "name"
+    | "category"
+    | "brand"
+    | "model"
+  >;
+  warranty: WarrantySummary;
+};

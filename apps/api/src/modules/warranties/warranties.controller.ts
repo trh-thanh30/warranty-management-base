@@ -4,6 +4,7 @@ import { ActivateWarrantyByCodeDto } from '@/modules/warranties/dto/activate-war
 import { ActivateWarrantyDto } from '@/modules/warranties/dto/activate-warranty.dto';
 import { ListWarrantiesDto } from '@/modules/warranties/dto/list-warranties.dto';
 import { LookupWarrantyDto } from '@/modules/warranties/dto/lookup-warranty.dto';
+import { ManualWarrantyActivationDto } from '@/modules/warranties/dto/manual-warranty-activation.dto';
 import { ActivateWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/activate-warranty-by-code.use-case';
 import { ActivateWarrantyUseCase } from '@/modules/warranties/use-cases/activate-warranty.use-case';
 import { GetMyProductWarrantyUseCase } from '@/modules/warranties/use-cases/get-my-product-warranty.use-case';
@@ -12,6 +13,7 @@ import { ListMyProductsUseCase } from '@/modules/warranties/use-cases/list-my-pr
 import { ListWarrantiesUseCase } from '@/modules/warranties/use-cases/list-warranties.use-case';
 import { LookupWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/lookup-warranty-by-code.use-case';
 import { LookupWarrantyForCustomerUseCase } from '@/modules/warranties/use-cases/lookup-warranty-for-customer.use-case';
+import { ManualWarrantyActivationUseCase } from '@/modules/warranties/use-cases/manual-warranty-activation.use-case';
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { permission_key } from '@prisma/client';
 
@@ -30,6 +32,7 @@ export class WarrantiesController {
     private readonly lookupWarrantyForCustomerUseCase: LookupWarrantyForCustomerUseCase,
     private readonly listMyProductsUseCase: ListMyProductsUseCase,
     private readonly getMyProductWarrantyUseCase: GetMyProductWarrantyUseCase,
+    private readonly manualWarrantyActivationUseCase: ManualWarrantyActivationUseCase,
   ) {}
 
   @Get('warranties')
@@ -48,6 +51,12 @@ export class WarrantiesController {
   @Permissions([permission_key.WARRANTY_ACTIVATE])
   activateWarrantyByCode(@Body() dto: ActivateWarrantyByCodeDto) {
     return this.activateWarrantyByCodeUseCase.execute(dto);
+  }
+
+  @Post('warranties/manual-activation')
+  @Permissions([permission_key.WARRANTY_ACTIVATE])
+  manualActivation(@Body() dto: ManualWarrantyActivationDto) {
+    return this.manualWarrantyActivationUseCase.execute(dto);
   }
 
   @Post('products/:id/activate-warranty')

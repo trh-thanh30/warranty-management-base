@@ -15,6 +15,7 @@ export * from "./lib/utils";
 export * from "./pagination";
 export * from "./popover";
 export * from "./separator";
+export * from "./select";
 export * from "./sheet";
 export * from "./skeleton";
 export * from "./switch";

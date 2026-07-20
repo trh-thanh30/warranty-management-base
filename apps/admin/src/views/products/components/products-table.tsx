@@ -211,6 +211,19 @@ function ProductMobileCard({
 }
 
 function ProductName({ product }: { product: ProductResponse }) {
+  if (product.status === "DELETED") {
+    return (
+      <div className="min-w-0">
+        <span className="truncate font-medium text-slate-950 dark:text-slate-50">
+          {product.name}
+        </span>
+        <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
+          {getProductDisplayName(product)}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-w-0">
       <Link
@@ -259,8 +272,9 @@ function ProductActionsMenu({
   const canEdit = hasPermission(PERMISSIONS.PRODUCT_UPDATE);
   const canAssignOwner = hasPermission(PERMISSIONS.PRODUCT_ASSIGN_OWNER);
   const canDelete = hasPermission(PERMISSIONS.PRODUCT_DELETE);
+  const isDeleted = product.status === "DELETED";
 
-  if (!canEdit && !canAssignOwner && !canDelete) return null;
+  if (isDeleted || (!canEdit && !canAssignOwner && !canDelete)) return null;
 
   return (
     <DropdownMenu>

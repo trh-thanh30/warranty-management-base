@@ -6,10 +6,12 @@ import { Badge } from "@repo/ui";
 
 export function ProductStatusBadge({ status }: { status: ProductStatus }) {
   const t = useTranslations("Products.statuses");
+  const variant =
+    status === "ACTIVE"
+      ? "success"
+      : status === "DELETED"
+        ? "destructive"
+        : "secondary";
 
-  return (
-    <Badge variant={status === "ACTIVE" ? "success" : "secondary"}>
-      {t(status)}
-    </Badge>
-  );
+  return <Badge variant={variant}>{t(status)}</Badge>;
 }

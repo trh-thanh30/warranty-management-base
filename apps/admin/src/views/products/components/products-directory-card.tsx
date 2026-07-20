@@ -16,6 +16,11 @@ import {
   CardHeader,
   CardTitle,
   Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Skeleton,
 } from "@repo/ui";
 import { PaginationControls } from "@/src/components/common/pagination-controls";
@@ -172,62 +177,69 @@ function ProductsDirectoryFilters({
           value={search}
         />
       </div>
-      <select
-        aria-label={t("legacyCategoryFilter")}
-        className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none focus:border-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50"
-        onChange={(event) =>
-          onCategoryChange(event.target.value as ProductCategoryFilter)
+      <Select
+        onValueChange={(value) =>
+          onCategoryChange(value as ProductCategoryFilter)
         }
         value={filters.category}
       >
-        <option value="ALL">{t("allLegacyCategories")}</option>
-        {PRODUCT_CATEGORIES.map((category) => (
-          <option key={category} value={category}>
-            {t(`categories.${category}`)}
-          </option>
-        ))}
-      </select>
-      <select
-        aria-label={t("dynamicCategoryFilter")}
-        className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none focus:border-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50"
-        onChange={(event) => onCategoryIdChange(event.target.value)}
-        value={filters.categoryId}
-      >
-        <option value="ALL">{t("allDynamicCategories")}</option>
-        {categories.map((category) => (
-          <option key={category.id} value={category.id}>
-            {category.name}
-          </option>
-        ))}
-      </select>
-      <select
-        aria-label={t("statusFilter")}
-        className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none focus:border-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50"
-        onChange={(event) =>
-          onStatusChange(event.target.value as ProductStatusFilter)
-        }
+        <SelectTrigger aria-label={t("legacyCategoryFilter")}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="ALL">{t("allLegacyCategories")}</SelectItem>
+          {PRODUCT_CATEGORIES.map((category) => (
+            <SelectItem key={category} value={category}>
+              {t(`categories.${category}`)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select onValueChange={onCategoryIdChange} value={filters.categoryId}>
+        <SelectTrigger aria-label={t("dynamicCategoryFilter")}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="ALL">{t("allDynamicCategories")}</SelectItem>
+          {categories.map((category) => (
+            <SelectItem key={category.id} value={category.id}>
+              {category.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select
+        onValueChange={(value) => onStatusChange(value as ProductStatusFilter)}
         value={filters.status}
       >
-        {PRODUCT_STATUS_FILTERS.map((status) => (
-          <option key={status} value={status}>
-            {t(`statuses.${status}`)}
-          </option>
-        ))}
-      </select>
-      <select
-        aria-label={t("warrantyStatusFilter")}
-        className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none focus:border-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50"
-        onChange={(event) =>
-          onWarrantyStatusChange(event.target.value as WarrantyStatusFilter)
+        <SelectTrigger aria-label={t("statusFilter")}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {PRODUCT_STATUS_FILTERS.map((status) => (
+            <SelectItem key={status} value={status}>
+              {t(`statuses.${status}`)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select
+        onValueChange={(value) =>
+          onWarrantyStatusChange(value as WarrantyStatusFilter)
         }
         value={filters.warrantyStatus}
       >
-        {WARRANTY_STATUS_FILTERS.map((status) => (
-          <option key={status} value={status}>
-            {t(`warrantyStatuses.${status}`)}
-          </option>
-        ))}
-      </select>
+        <SelectTrigger aria-label={t("warrantyStatusFilter")}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {WARRANTY_STATUS_FILTERS.map((status) => (
+            <SelectItem key={status} value={status}>
+              {t(`warrantyStatuses.${status}`)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

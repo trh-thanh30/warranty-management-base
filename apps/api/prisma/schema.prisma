@@ -29,6 +29,7 @@ model User {
   owned_products                        ProductOwnership[]
   warranty_claim_changes                WarrantyClaimStatusHistory[]        @relation("WarrantyClaimStatusChangedBy")
   warranty_claim_service_center_changes WarrantyClaimServiceCenterHistory[] @relation("WarrantyClaimServiceCenterChangedBy")
+  reviewed_warranty_activation_requests WarrantyActivationRequest[]         @relation("WarrantyActivationRequestReviewedBy")
 
   @@index([role, status])
   @@index([email])
@@ -281,13 +282,57 @@ model Warranty {
   created_at      DateTime        @default(now())
   updated_at      DateTime        @updatedAt
 
-  product Product         @relation(fields: [product_id], references: [id], onDelete: Cascade)
-  claims  WarrantyClaim[]
+  product            Product                    @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  claims             WarrantyClaim[]
+  activation_request WarrantyActivationRequest?
 
   @@index([warranty_code])
   @@index([status])
   @@index([end_date])
   @@map("warranty")
+}
+
+model WarrantyActivationRequest {
+  id                    String                             @id @default(uuid()) @db.Uuid
+  request_code          String                             @unique
+  status                warranty_activation_request_status @default(PENDING)
+  warranty_code         String
+  customer_name         String
+  customer_phone        String
+  customer_email        String
+  customer_birthdate    DateTime?
+  province_code         String
+  province_name         String
+  ward_code             String
+  ward_name             String
+  address_detail        String
+  full_address          String
+  product_name          String?
+  serial_number         String?
+  brand                 String?
+  model                 String?
+  manufacture_year      Int?
+  note                  String?
+  admin_note            String?
+  rejection_reason      String?
+  reviewed_by_id        String?                            @db.Uuid
+  reviewed_at           DateTime?
+  activated_warranty_id String?                            @unique @db.Uuid
+  metadata              Json?
+  created_at            DateTime                           @default(now())
+  updated_at            DateTime                           @updatedAt
+
+  reviewed_by        User?     @relation("WarrantyActivationRequestReviewedBy", fields: [reviewed_by_id], references: [id], onDelete: SetNull)
+  activated_warranty Warranty? @relation(fields: [activated_warranty_id], references: [id], onDelete: SetNull)
+
+  @@index([request_code])
+  @@index([status])
+  @@index([warranty_code])
+  @@index([customer_phone])
+  @@index([customer_email])
+  @@index([created_at])
+  @@index([warranty_code, customer_phone, status], map: "warranty_activation_request_lookup_pending")
+  @@map("warranty_activation_request")
 }
 
 model WarrantyClaim {
@@ -519,6 +564,14 @@ enum warranty_status {
   ACTIVE
   EXPIRED
   VOIDED
+}
+
+enum warranty_activation_request_status {
+  PENDING
+  APPROVED
+  REJECTED
+  ACTIVATED
+  CANCELLED
 }
 
 enum warranty_claim_status {
