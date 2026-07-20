@@ -14,6 +14,7 @@ import {
   Skeleton,
 } from "@repo/ui";
 import { PaginationControls } from "@/src/components/common/pagination-controls";
+import { SelectControl } from "@/src/components/common/select-control";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { WARRANTY_STATUS_FILTERS } from "../warranties.constants";
 import type { WarrantySortBy, WarrantyStatusFilter } from "../warranties.types";
@@ -121,20 +122,15 @@ function WarrantiesDirectoryFilters({
           value={search}
         />
       </div>
-      <select
-        aria-label={t("statusFilter")}
-        className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none focus:border-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50"
-        onChange={(event) =>
-          onStatusChange(event.target.value as WarrantyStatusFilter)
-        }
+      <SelectControl
+        ariaLabel={t("statusFilter")}
+        onValueChange={(value) => onStatusChange(value as WarrantyStatusFilter)}
+        options={WARRANTY_STATUS_FILTERS.map((status) => ({
+          label: t(`statuses.${status}`),
+          value: status,
+        }))}
         value={filters.status}
-      >
-        {WARRANTY_STATUS_FILTERS.map((status) => (
-          <option key={status} value={status}>
-            {t(`statuses.${status}`)}
-          </option>
-        ))}
-      </select>
+      />
     </div>
   );
 }

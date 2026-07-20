@@ -13,6 +13,7 @@ import {
   Label,
   Textarea,
 } from "@repo/ui";
+import { SelectControl } from "@/src/components/common/select-control";
 
 type UpdateClaimStatusDialogProps = {
   allowedStatuses: WarrantyClaimStatus[];
@@ -56,21 +57,20 @@ export function UpdateClaimStatusDialog({
         <div className="mt-5 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="claim-status">{t("nextStatus")}</Label>
-            <select
-              className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none focus:border-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50"
+            <SelectControl
+              disabled={allowedStatuses.length === 0}
               id="claim-status"
-              onChange={(event) => setStatus(event.target.value)}
+              onValueChange={setStatus}
+              options={
+                allowedStatuses.length === 0
+                  ? [{ label: t("noValidTransitions"), value: "" }]
+                  : allowedStatuses.map((statusOption) => ({
+                      label: t(`statuses.${statusOption}`),
+                      value: statusOption,
+                    }))
+              }
               value={status}
-            >
-              {allowedStatuses.length === 0 ? (
-                <option value="">{t("noValidTransitions")}</option>
-              ) : null}
-              {allowedStatuses.map((statusOption) => (
-                <option key={statusOption} value={statusOption}>
-                  {t(`statuses.${statusOption}`)}
-                </option>
-              ))}
-            </select>
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="claim-status-note">{t("note")}</Label>

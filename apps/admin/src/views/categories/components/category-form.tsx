@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import type { CategoryResponse } from "@repo/shared";
 import { Button, Input, Label, Switch } from "@repo/ui";
 import { RichTextEditor } from "@/src/components/common/rich-text-editor";
+import { SelectControl } from "@/src/components/common/select-control";
 import { assetsService } from "@/src/services/assets/assets.service";
 import { CATEGORY_TYPES } from "../categories.constants";
 import {
@@ -57,20 +58,25 @@ export function CategoryForm({
           id="category-type"
           label={t("type")}
         >
-          <select
-            className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none transition-colors focus:border-slate-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:focus:border-slate-300"
-            disabled={!creating}
-            id="category-type"
-            {...register("type", {
-              onChange: () => clearParentOnTypeChange(setValue),
-            })}
-          >
-            {CATEGORY_TYPES.map((categoryType) => (
-              <option key={categoryType} value={categoryType}>
-                {t(`types.${categoryType}`)}
-              </option>
-            ))}
-          </select>
+          <Controller
+            control={control}
+            name="type"
+            render={({ field }) => (
+              <SelectControl
+                disabled={!creating}
+                id="category-type"
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  clearParentOnTypeChange(setValue);
+                }}
+                options={CATEGORY_TYPES.map((categoryType) => ({
+                  label: t(`types.${categoryType}`),
+                  value: categoryType,
+                }))}
+                value={field.value}
+              />
+            )}
+          />
         </Field>
 
         <Field

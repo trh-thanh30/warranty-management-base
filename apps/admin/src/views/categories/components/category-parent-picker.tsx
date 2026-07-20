@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import type { CategoryResponse, CategoryType } from "@repo/shared";
 import { Badge } from "@repo/ui";
+import { SelectControl } from "@/src/components/common/select-control";
 import { useCategories } from "../hooks/use-categories";
 
 type CategoryParentPickerProps = {
@@ -42,19 +43,18 @@ export function CategoryParentPicker({
 
   return (
     <div className="space-y-2">
-      <select
-        className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none transition-colors focus:border-slate-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:focus:border-slate-300"
+      <SelectControl
         disabled={disabled || categoriesQuery.isLoading}
-        onChange={(event) => onChange(event.target.value)}
+        onValueChange={onChange}
+        options={[
+          { label: t("noParent"), value: NO_PARENT_VALUE },
+          ...options.map((category) => ({
+            label: getParentOptionLabel(category, options),
+            value: category.id,
+          })),
+        ]}
         value={value}
-      >
-        <option value={NO_PARENT_VALUE}>{t("noParent")}</option>
-        {options.map((category) => (
-          <option key={category.id} value={category.id}>
-            {getParentOptionLabel(category, options)}
-          </option>
-        ))}
-      </select>
+      />
       {categoriesQuery.isError ? (
         <p className="text-sm text-red-600 dark:text-red-400">
           {t("parentLoadError")}

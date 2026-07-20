@@ -14,6 +14,7 @@ import {
   Label,
   Textarea,
 } from "@repo/ui";
+import { SelectControl } from "@/src/components/common/select-control";
 import { formatServiceCenterOption } from "../warranty-claims.utils";
 
 type AssignClaimServiceCenterDialogProps = {
@@ -98,19 +99,18 @@ export function AssignClaimServiceCenterDialog({
         <div className="mt-5 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="claim-service-center">{t("serviceCenter")}</Label>
-            <select
-              className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none focus:border-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50"
+            <SelectControl
               id="claim-service-center"
-              onChange={(event) => setServiceCenterId(event.target.value)}
+              onValueChange={setServiceCenterId}
+              options={[
+                { label: t("selectServiceCenter"), value: "" },
+                ...availableServiceCenters.map((serviceCenter) => ({
+                  label: formatServiceCenterOption(serviceCenter),
+                  value: serviceCenter.id,
+                })),
+              ]}
               value={serviceCenterId}
-            >
-              <option value="">{t("selectServiceCenter")}</option>
-              {availableServiceCenters.map((serviceCenter) => (
-                <option key={serviceCenter.id} value={serviceCenter.id}>
-                  {formatServiceCenterOption(serviceCenter)}
-                </option>
-              ))}
-            </select>
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="claim-service-center-note">

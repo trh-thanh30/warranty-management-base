@@ -20,6 +20,7 @@ import {
   Skeleton,
 } from "@repo/ui";
 import { PaginationControls } from "@/src/components/common/pagination-controls";
+import { SelectControl } from "@/src/components/common/select-control";
 import { StatePanel } from "@/src/components/common/state-panel";
 import {
   WARRANTY_CLAIM_OVERDUE_FILTERS,
@@ -206,62 +207,56 @@ function WarrantyClaimsFilters({
         placeholder={t("warrantyCodePlaceholder")}
         value={filters.warrantyCode}
       />
-      <select
-        aria-label={t("statusFilter")}
-        className="h-10 min-w-0 w-full max-w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none focus:border-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50"
-        onChange={(event) =>
-          onStatusChange(event.target.value as WarrantyClaimStatusFilter)
+      <SelectControl
+        ariaLabel={t("statusFilter")}
+        onValueChange={(value) =>
+          onStatusChange(value as WarrantyClaimStatusFilter)
         }
+        options={WARRANTY_CLAIM_STATUS_FILTERS.map((status) => ({
+          label: t(`statuses.${status}`),
+          value: status,
+        }))}
+        triggerClassName="min-w-0 w-full max-w-full"
         value={filters.status}
-      >
-        {WARRANTY_CLAIM_STATUS_FILTERS.map((status) => (
-          <option key={status} value={status}>
-            {t(`statuses.${status}`)}
-          </option>
-        ))}
-      </select>
-      <select
-        aria-label={t("priorityFilter")}
-        className="h-10 min-w-0 w-full max-w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none focus:border-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50"
-        onChange={(event) =>
-          onPriorityChange(event.target.value as WarrantyClaimPriorityFilter)
+      />
+      <SelectControl
+        ariaLabel={t("priorityFilter")}
+        onValueChange={(value) =>
+          onPriorityChange(value as WarrantyClaimPriorityFilter)
         }
+        options={WARRANTY_CLAIM_PRIORITY_FILTERS.map((priority) => ({
+          label: t(`priorities.${priority}`),
+          value: priority,
+        }))}
+        triggerClassName="min-w-0 w-full max-w-full"
         value={filters.priority}
-      >
-        {WARRANTY_CLAIM_PRIORITY_FILTERS.map((priority) => (
-          <option key={priority} value={priority}>
-            {t(`priorities.${priority}`)}
-          </option>
-        ))}
-      </select>
-      <select
-        aria-label={t("serviceCenterFilter")}
-        className="h-10 min-w-0 w-full max-w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none focus:border-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50"
-        onChange={(event) => onServiceCenterChange(event.target.value)}
+      />
+      <SelectControl
+        ariaLabel={t("serviceCenterFilter")}
+        onValueChange={onServiceCenterChange}
+        options={[
+          { label: t("allServiceCenters"), value: "ALL" },
+          { label: t("unassignedServiceCenter"), value: "UNASSIGNED" },
+          ...serviceCenters.map((serviceCenter) => ({
+            label: formatServiceCenterOption(serviceCenter),
+            value: serviceCenter.id,
+          })),
+        ]}
+        triggerClassName="min-w-0 w-full max-w-full"
         value={filters.serviceCenter}
-      >
-        <option value="ALL">{t("allServiceCenters")}</option>
-        <option value="UNASSIGNED">{t("unassignedServiceCenter")}</option>
-        {serviceCenters.map((serviceCenter) => (
-          <option key={serviceCenter.id} value={serviceCenter.id}>
-            {formatServiceCenterOption(serviceCenter)}
-          </option>
-        ))}
-      </select>
-      <select
-        aria-label={t("overdueFilter")}
-        className="h-10 min-w-0 w-full max-w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none focus:border-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50"
-        onChange={(event) =>
-          onOverdueChange(event.target.value as WarrantyClaimOverdueFilter)
+      />
+      <SelectControl
+        ariaLabel={t("overdueFilter")}
+        onValueChange={(value) =>
+          onOverdueChange(value as WarrantyClaimOverdueFilter)
         }
+        options={WARRANTY_CLAIM_OVERDUE_FILTERS.map((filter) => ({
+          label: t(`overdueFilters.${filter}`),
+          value: filter,
+        }))}
+        triggerClassName="min-w-0 w-full max-w-full"
         value={filters.isOverdue}
-      >
-        {WARRANTY_CLAIM_OVERDUE_FILTERS.map((filter) => (
-          <option key={filter} value={filter}>
-            {t(`overdueFilters.${filter}`)}
-          </option>
-        ))}
-      </select>
+      />
       <DateRangePicker
         ariaLabel={t("dateRange")}
         className="min-w-0 max-w-full md:col-span-2 xl:col-span-1"

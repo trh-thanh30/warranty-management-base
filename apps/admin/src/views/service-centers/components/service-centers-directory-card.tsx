@@ -18,6 +18,7 @@ import {
   Skeleton,
 } from "@repo/ui";
 import { PaginationControls } from "@/src/components/common/pagination-controls";
+import { SelectControl } from "@/src/components/common/select-control";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { Link } from "@/src/i18n/navigation";
 import { SERVICE_CENTER_STATUS_FILTERS } from "../service-centers.constants";
@@ -99,36 +100,35 @@ function DirectoryFilters({
           value={search}
         />
       </div>
-      <select
+      <SelectControl
         aria-label={t("provinceFilter")}
-        className="h-10 min-w-0 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none transition-colors focus:border-slate-400 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50"
         disabled={provincesAreLoading || provinceOptions.length === 0}
-        onChange={(event) => onProvinceChange(event.target.value)}
+        onValueChange={onProvinceChange}
+        options={[
+          {
+            label: provincesAreLoading
+              ? t("loadingProvinces")
+              : t("allProvinces"),
+            value: "",
+          },
+          ...provinceOptions.map((provinceOption) => ({
+            label: provinceOption,
+            value: provinceOption,
+          })),
+        ]}
         value={province}
-      >
-        <option value="">
-          {provincesAreLoading ? t("loadingProvinces") : t("allProvinces")}
-        </option>
-        {provinceOptions.map((provinceOption) => (
-          <option key={provinceOption} value={provinceOption}>
-            {provinceOption}
-          </option>
-        ))}
-      </select>
-      <select
+      />
+      <SelectControl
         aria-label={t("statusFilter")}
-        className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none transition-colors focus:border-slate-400 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50"
-        onChange={(event) =>
-          onStatusChange(event.target.value as ServiceCenterStatusFilter)
+        onValueChange={(value) =>
+          onStatusChange(value as ServiceCenterStatusFilter)
         }
+        options={SERVICE_CENTER_STATUS_FILTERS.map((statusFilter) => ({
+          label: t(`statuses.${statusFilter}`),
+          value: statusFilter,
+        }))}
         value={status}
-      >
-        {SERVICE_CENTER_STATUS_FILTERS.map((statusFilter) => (
-          <option key={statusFilter} value={statusFilter}>
-            {t(`statuses.${statusFilter}`)}
-          </option>
-        ))}
-      </select>
+      />
     </div>
   );
 }

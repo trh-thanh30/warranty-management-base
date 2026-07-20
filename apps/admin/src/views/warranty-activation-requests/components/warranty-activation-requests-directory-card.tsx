@@ -19,6 +19,7 @@ import {
   Skeleton,
 } from "@repo/ui";
 import { PaginationControls } from "@/src/components/common/pagination-controls";
+import { SelectControl } from "@/src/components/common/select-control";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { WARRANTY_ACTIVATION_REQUEST_STATUS_FILTERS } from "../warranty-activation-requests.constants";
 import type {
@@ -162,22 +163,18 @@ function WarrantyActivationRequestsFilters({
         placeholder={t("warrantyCodePlaceholder")}
         value={filters.warrantyCode}
       />
-      <select
-        aria-label={t("statusFilter")}
-        className="h-10 min-w-0 w-full max-w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none focus:border-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50"
-        onChange={(event) =>
-          onStatusChange(
-            event.target.value as WarrantyActivationRequestStatusFilter,
-          )
+      <SelectControl
+        ariaLabel={t("statusFilter")}
+        onValueChange={(value) =>
+          onStatusChange(value as WarrantyActivationRequestStatusFilter)
         }
+        options={WARRANTY_ACTIVATION_REQUEST_STATUS_FILTERS.map((status) => ({
+          label: t(`statuses.${status}`),
+          value: status,
+        }))}
+        triggerClassName="min-w-0 w-full max-w-full"
         value={filters.status}
-      >
-        {WARRANTY_ACTIVATION_REQUEST_STATUS_FILTERS.map((status) => (
-          <option key={status} value={status}>
-            {t(`statuses.${status}`)}
-          </option>
-        ))}
-      </select>
+      />
       <DateRangePicker
         ariaLabel={t("dateRange")}
         className="min-w-0 max-w-full"

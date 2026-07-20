@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import type { ContentPageSummary } from "@repo/shared";
 import { Button, Input, Label, Textarea } from "@repo/ui";
 import { RichTextEditor } from "@/src/components/common/rich-text-editor";
+import { SelectControl } from "@/src/components/common/select-control";
 import {
   CONTENT_PAGE_KINDS,
   CONTENT_PAGE_STATUSES,
@@ -80,34 +81,44 @@ export function ContentPageForm({
             id="content-page-kind"
             label={t("kindLabel")}
           >
-            <select
-              className="h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-base dark:border-slate-700 dark:bg-slate-950 sm:h-10 sm:text-sm"
-              id="content-page-kind"
-              {...form.register("kind")}
-            >
-              {CONTENT_PAGE_KINDS.map((kind) => (
-                <option key={kind} value={kind}>
-                  {t(`kinds.${kind}`)}
-                </option>
-              ))}
-            </select>
+            <Controller
+              control={form.control}
+              name="kind"
+              render={({ field }) => (
+                <SelectControl
+                  id="content-page-kind"
+                  onValueChange={field.onChange}
+                  options={CONTENT_PAGE_KINDS.map((kind) => ({
+                    label: t(`kinds.${kind}`),
+                    value: kind,
+                  }))}
+                  triggerClassName="h-11 text-base sm:h-10 sm:text-sm"
+                  value={field.value}
+                />
+              )}
+            />
           </Field>
           <Field
             error={translateError(errors.status?.message, t)}
             id="content-page-status"
             label={t("statusLabel")}
           >
-            <select
-              className="h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-base dark:border-slate-700 dark:bg-slate-950 sm:h-10 sm:text-sm"
-              id="content-page-status"
-              {...form.register("status")}
-            >
-              {CONTENT_PAGE_STATUSES.map((status) => (
-                <option key={status} value={status}>
-                  {t(`statuses.${status}`)}
-                </option>
-              ))}
-            </select>
+            <Controller
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <SelectControl
+                  id="content-page-status"
+                  onValueChange={field.onChange}
+                  options={CONTENT_PAGE_STATUSES.map((status) => ({
+                    label: t(`statuses.${status}`),
+                    value: status,
+                  }))}
+                  triggerClassName="h-11 text-base sm:h-10 sm:text-sm"
+                  value={field.value}
+                />
+              )}
+            />
           </Field>
         </div>
         <Field

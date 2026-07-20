@@ -3,6 +3,7 @@
 import { Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button, Input } from "@repo/ui";
+import { SelectControl } from "@/src/components/common/select-control";
 import type { NotificationStatusFilter } from "../notifications.types";
 
 type NotificationFiltersProps = {
@@ -38,41 +39,45 @@ export function NotificationFilters({
           value={search}
         />
       </label>
-      <select
+      <SelectControl
         aria-label={t("typeFilter")}
-        className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none focus:border-slate-400 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50"
-        onChange={(event) => onTypeChange(event.target.value)}
+        onValueChange={onTypeChange}
+        options={[
+          { label: t("types.ALL"), value: "" },
+          {
+            label: t("types.WARRANTY_CLAIM_CREATED"),
+            value: "WARRANTY_CLAIM_CREATED",
+          },
+          {
+            label: t("types.WARRANTY_CLAIM_STATUS_CHANGED"),
+            value: "WARRANTY_CLAIM_STATUS_CHANGED",
+          },
+          {
+            label: t("types.WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER"),
+            value: "WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER",
+          },
+          {
+            label: t("types.WARRANTY_CLAIM_SLA_BREACHED"),
+            value: "WARRANTY_CLAIM_SLA_BREACHED",
+          },
+          { label: t("types.SYSTEM_ALERT"), value: "SYSTEM_ALERT" },
+          { label: t("types.ANNOUNCEMENT"), value: "ANNOUNCEMENT" },
+        ]}
         value={type}
-      >
-        <option value="">{t("types.ALL")}</option>
-        <option value="WARRANTY_CLAIM_CREATED">
-          {t("types.WARRANTY_CLAIM_CREATED")}
-        </option>
-        <option value="WARRANTY_CLAIM_STATUS_CHANGED">
-          {t("types.WARRANTY_CLAIM_STATUS_CHANGED")}
-        </option>
-        <option value="WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER">
-          {t("types.WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER")}
-        </option>
-        <option value="WARRANTY_CLAIM_SLA_BREACHED">
-          {t("types.WARRANTY_CLAIM_SLA_BREACHED")}
-        </option>
-        <option value="SYSTEM_ALERT">{t("types.SYSTEM_ALERT")}</option>
-        <option value="ANNOUNCEMENT">{t("types.ANNOUNCEMENT")}</option>
-      </select>
+      />
       {onStatusChange && status ? (
-        <select
+        <SelectControl
           aria-label={t("statusFilter")}
-          className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none focus:border-slate-400 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50"
-          onChange={(event) =>
-            onStatusChange(event.target.value as NotificationStatusFilter)
+          onValueChange={(value) =>
+            onStatusChange(value as NotificationStatusFilter)
           }
+          options={[
+            { label: t("statuses.ALL"), value: "ALL" },
+            { label: t("statuses.UNREAD"), value: "UNREAD" },
+            { label: t("statuses.READ"), value: "READ" },
+          ]}
           value={status}
-        >
-          <option value="ALL">{t("statuses.ALL")}</option>
-          <option value="UNREAD">{t("statuses.UNREAD")}</option>
-          <option value="READ">{t("statuses.READ")}</option>
-        </select>
+        />
       ) : (
         <span className="hidden lg:block" />
       )}

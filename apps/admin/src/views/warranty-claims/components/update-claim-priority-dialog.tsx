@@ -13,6 +13,7 @@ import {
   DatePicker,
   Label,
 } from "@repo/ui";
+import { SelectControl } from "@/src/components/common/select-control";
 import { WARRANTY_CLAIM_PRIORITY_FILTERS } from "../warranty-claims.constants";
 
 type UpdateClaimPriorityDialogProps = {
@@ -56,22 +57,19 @@ export function UpdateClaimPriorityDialog({
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="claim-priority">{t("priority")}</Label>
-            <select
-              className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none focus:border-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50"
+            <SelectControl
               id="claim-priority"
-              onChange={(event) =>
-                setPriority(event.target.value as WarrantyClaimPriority)
+              onValueChange={(value) =>
+                setPriority(value as WarrantyClaimPriority)
               }
-              value={priority}
-            >
-              {WARRANTY_CLAIM_PRIORITY_FILTERS.filter(
+              options={WARRANTY_CLAIM_PRIORITY_FILTERS.filter(
                 (item) => item !== "ALL",
-              ).map((priorityOption) => (
-                <option key={priorityOption} value={priorityOption}>
-                  {t(`priorities.${priorityOption}`)}
-                </option>
-              ))}
-            </select>
+              ).map((priorityOption) => ({
+                label: t(`priorities.${priorityOption}`),
+                value: priorityOption,
+              }))}
+              value={priority}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="claim-due-at">{t("dueAt")}</Label>

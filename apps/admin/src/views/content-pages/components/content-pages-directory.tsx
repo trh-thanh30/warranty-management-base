@@ -29,6 +29,7 @@ import {
   TableRow,
 } from "@repo/ui";
 import { PaginationControls } from "@/src/components/common/pagination-controls";
+import { SelectControl } from "@/src/components/common/select-control";
 import { SortableTableHead } from "@/src/components/common/sortable-table-head";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { Link } from "@/src/i18n/navigation";
@@ -96,36 +97,36 @@ export function ContentPagesDirectory(props: Props) {
               value={props.search}
             />
           </div>
-          <select
+          <SelectControl
             aria-label={t("kindFilter")}
-            className="h-11 rounded-md border border-slate-300 bg-white px-3 text-base dark:border-slate-700 dark:bg-slate-950 sm:h-10 sm:text-sm"
-            onChange={(e) =>
-              props.onKindChange(e.target.value as ContentPageKindFilter)
+            onValueChange={(value) =>
+              props.onKindChange(value as ContentPageKindFilter)
             }
+            options={[
+              { label: t("allKinds"), value: "ALL" },
+              ...CONTENT_PAGE_KINDS.map((kind) => ({
+                label: t(`kinds.${kind}`),
+                value: kind,
+              })),
+            ]}
+            triggerClassName="h-11 text-base sm:h-10 sm:text-sm"
             value={props.kind}
-          >
-            <option value="ALL">{t("allKinds")}</option>
-            {CONTENT_PAGE_KINDS.map((kind) => (
-              <option key={kind} value={kind}>
-                {t(`kinds.${kind}`)}
-              </option>
-            ))}
-          </select>
-          <select
+          />
+          <SelectControl
             aria-label={t("statusFilter")}
-            className="h-11 rounded-md border border-slate-300 bg-white px-3 text-base dark:border-slate-700 dark:bg-slate-950 sm:h-10 sm:text-sm"
-            onChange={(e) =>
-              props.onStatusChange(e.target.value as ContentPageStatusFilter)
+            onValueChange={(value) =>
+              props.onStatusChange(value as ContentPageStatusFilter)
             }
+            options={[
+              { label: t("allStatuses"), value: "ALL" },
+              ...CONTENT_PAGE_STATUSES.map((status) => ({
+                label: t(`statuses.${status}`),
+                value: status,
+              })),
+            ]}
+            triggerClassName="h-11 text-base sm:h-10 sm:text-sm"
             value={props.status}
-          >
-            <option value="ALL">{t("allStatuses")}</option>
-            {CONTENT_PAGE_STATUSES.map((status) => (
-              <option key={status} value={status}>
-                {t(`statuses.${status}`)}
-              </option>
-            ))}
-          </select>
+          />
         </div>
       </CardHeader>
       <CardContent className="px-3 sm:px-6">

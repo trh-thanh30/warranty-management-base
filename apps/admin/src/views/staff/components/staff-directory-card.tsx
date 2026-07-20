@@ -19,6 +19,7 @@ import {
   Skeleton,
 } from "@repo/ui";
 import { PaginationControls } from "@/src/components/common/pagination-controls";
+import { SelectControl } from "@/src/components/common/select-control";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { Link } from "@/src/i18n/navigation";
 import { StaffTable } from "./staff-table";
@@ -133,18 +134,16 @@ function StaffDirectoryFilters({
           value={search}
         />
       </div>
-      <select
+      <SelectControl
         aria-label={t("statusFilter")}
-        className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm outline-none focus:border-slate-900 dark:border-slate-700 dark:bg-slate-950"
-        onChange={(event) =>
-          onStatusChange(event.target.value as StaffStatusFilter)
-        }
+        onValueChange={(value) => onStatusChange(value as StaffStatusFilter)}
+        options={[
+          { label: t("allStatuses"), value: "ALL" },
+          { label: t("active"), value: "ACTIVE" },
+          { label: t("inactive"), value: "INACTIVE" },
+        ]}
         value={status}
-      >
-        <option value="ALL">{t("allStatuses")}</option>
-        <option value="ACTIVE">{t("active")}</option>
-        <option value="INACTIVE">{t("inactive")}</option>
-      </select>
+      />
     </div>
   );
 }

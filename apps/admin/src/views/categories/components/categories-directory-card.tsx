@@ -18,6 +18,7 @@ import {
   Skeleton,
 } from "@repo/ui";
 import { PaginationControls } from "@/src/components/common/pagination-controls";
+import { SelectControl } from "@/src/components/common/select-control";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { Link } from "@/src/i18n/navigation";
 import {
@@ -147,35 +148,27 @@ function CategoriesDirectoryFilters({
           value={search}
         />
       </div>
-      <select
+      <SelectControl
         aria-label={t("typeFilter")}
-        className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none transition-colors focus:border-slate-400 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50"
-        onChange={(event) =>
-          onTypeChange(event.target.value as CategoryTypeFilter)
-        }
+        onValueChange={(value) => onTypeChange(value as CategoryTypeFilter)}
+        options={[
+          { label: t("allTypes"), value: "ALL" },
+          ...CATEGORY_TYPES.map((categoryType) => ({
+            label: t(`types.${categoryType}`),
+            value: categoryType,
+          })),
+        ]}
         value={type}
-      >
-        <option value="ALL">{t("allTypes")}</option>
-        {CATEGORY_TYPES.map((categoryType) => (
-          <option key={categoryType} value={categoryType}>
-            {t(`types.${categoryType}`)}
-          </option>
-        ))}
-      </select>
-      <select
+      />
+      <SelectControl
         aria-label={t("statusFilter")}
-        className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none transition-colors focus:border-slate-400 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50"
-        onChange={(event) =>
-          onStatusChange(event.target.value as CategoryStatusFilter)
-        }
+        onValueChange={(value) => onStatusChange(value as CategoryStatusFilter)}
+        options={CATEGORY_STATUS_FILTERS.map((statusFilter) => ({
+          label: t(`statuses.${statusFilter}`),
+          value: statusFilter,
+        }))}
         value={status}
-      >
-        {CATEGORY_STATUS_FILTERS.map((statusFilter) => (
-          <option key={statusFilter} value={statusFilter}>
-            {t(`statuses.${statusFilter}`)}
-          </option>
-        ))}
-      </select>
+      />
     </div>
   );
 }
