@@ -4,8 +4,9 @@ import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import { type ConfigType } from '@nestjs/config';
 import { User } from '@prisma/client';
 import * as Sentry from '@sentry/nestjs';
+import { isUUID } from 'class-validator';
 import { NextFunction, Request, Response } from 'express';
-import { validate as isUuid, v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 @Injectable()
 export class IdentityMiddleware implements NestMiddleware {
@@ -44,9 +45,9 @@ export class IdentityMiddleware implements NestMiddleware {
     }
 
     // 2. Resolve or Create Guest ID if not present or invalid
-    const isGuestIdValid = guestId && isUuid(guestId);
+    const isGuestIdValid = guestId && isUUID(guestId);
     if (!isGuestIdValid) {
-      guestId = uuidv4();
+      guestId = randomUUID();
       res.cookie('guest_id', guestId, {
         httpOnly: this.configCookie.httpOnly,
         secure: this.configCookie.secure,

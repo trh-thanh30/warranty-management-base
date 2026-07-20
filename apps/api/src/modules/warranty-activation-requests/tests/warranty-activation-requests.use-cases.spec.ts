@@ -23,6 +23,12 @@ describe('WarrantyActivationRequestsUseCases', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-07-19T03:00:00.000Z'));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it('generates a sequential request code for the current day', async () => {
