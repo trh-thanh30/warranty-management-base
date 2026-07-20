@@ -42,11 +42,11 @@ export default async function LocaleLayout({
             <AuthProvider>
               <QueryProvider>
                 <NextTopLoader
-                  color="#2563eb"
+                  color="var(--admin-route-loader-color)"
                   crawlSpeed={180}
                   easing="ease-out"
                   height={3}
-                  shadow="0 0 10px rgba(37, 99, 235, 0.35)"
+                  shadow="0 0 10px var(--admin-route-loader-shadow)"
                   showSpinner={false}
                   speed={220}
                   zIndex={2147483647}

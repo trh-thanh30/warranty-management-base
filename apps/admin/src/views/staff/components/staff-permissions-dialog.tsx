@@ -172,7 +172,9 @@ function PermissionCheckbox({
   onToggle: (permission: PermissionKey, checked: boolean) => void;
   permission: PermissionKey;
 }) {
+  const t = useTranslations("Staff");
   const id = `permission-${permission}`;
+  const permissionLabelKey = `permissionLabels.${permission}`;
 
   return (
     <div className="flex items-start gap-3">
@@ -187,7 +189,9 @@ function PermissionCheckbox({
         className="cursor-pointer text-sm font-normal leading-4"
         htmlFor={id}
       >
-        {formatPermissionLabel(permission)}
+        {t.has(permissionLabelKey)
+          ? t(permissionLabelKey)
+          : formatPermissionLabel(permission)}
       </Label>
     </div>
   );
