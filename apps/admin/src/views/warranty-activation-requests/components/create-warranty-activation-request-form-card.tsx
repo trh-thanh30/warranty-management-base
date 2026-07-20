@@ -40,6 +40,7 @@ import {
 import { useToast } from "@/src/hooks/use-toast";
 import { useCreateWarrantyActivationRequest } from "@/src/hooks/use-warranty-activation-requests";
 import type { VietnamProvince } from "@/src/services/locations/locations.types";
+import { formatProductSearchOption } from "@/src/utils";
 import { useCustomers } from "../../customers/hooks/use-customers";
 import { useProducts } from "../../products/hooks/use-products";
 import type { WarrantyActivationRequestCreateFormValues } from "../warranty-activation-requests.types";
@@ -276,7 +277,7 @@ export function CreateWarrantyActivationRequestFormCard({
                   placeholder={t("productSearchPlaceholder")}
                   selectedLabel={
                     selectedProduct
-                      ? formatProductOption(selectedProduct)
+                      ? formatProductSearchOption(selectedProduct)
                       : undefined
                   }
                 />
@@ -289,7 +290,7 @@ export function CreateWarrantyActivationRequestFormCard({
                     <ComboboxEmpty>{t("noProduct")}</ComboboxEmpty>
                     {products.map((product) => (
                       <ComboboxItem key={product.id} value={product.id}>
-                        {formatProductOption(product)}
+                        {formatProductSearchOption(product)}
                       </ComboboxItem>
                     ))}
                   </ComboboxList>
@@ -626,17 +627,6 @@ function formatCustomerOption(customer: CustomerSummary) {
     customer.phone,
     customer.email,
     customer.customerCode,
-  ]
-    .filter(Boolean)
-    .join(" · ");
-}
-
-function formatProductOption(product: ProductResponse) {
-  return [
-    product.name,
-    product.warrantyCode,
-    product.serialNumber,
-    product.owner?.fullName,
   ]
     .filter(Boolean)
     .join(" · ");

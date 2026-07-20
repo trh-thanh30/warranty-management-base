@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { validateWarrantyClaimAttachment } from "./warranty-claims.utils.ts";
+import { HttpClientError } from "@repo/shared";
+import {
+  resolveWarrantyClaimCreateError,
+  toCreateWarrantyClaimBody,
+  translateWarrantyClaimCreateFieldError,
+  validateWarrantyClaimAttachment,
+} from "./warranty-claims.utils.ts";
+import { warrantyClaimCreateFormSchema } from "./warranty-claims.types.ts";
 
 test("claim attachment validation rejects unsupported files", () => {
   assert.equal(
@@ -29,5 +36,73 @@ test("claim attachment validation accepts supported files within the limit", () 
       type: "image/jpeg",
     }),
     null,
+  );
+});
+
+test("create claim body trims required requester fields and optional detail", () => {
+  assert.deepEqual(
+    toCreateWarrantyClaimBody({
+      issueDetail: " ",
+      issueTitle: "  Kinh bi bong  ",
+      productId: "product-1",
+      requesterName: " Nguyen Van A ",
+      requesterPhone: " 0901234567 ",
+      warrantyCode: " wm-2026-test ",
+    }),
+    {
+      issueDetail: undefined,
+      issueTitle: "Kinh bi bong",
+      requesterName: "Nguyen Van A",
+      requesterPhone: "0901234567",
+      warrantyCode: "WM-2026-TEST",
+    },
+  );
+});
+
+test("create claim schema requires requester name and phone", () => {
+  const result = warrantyClaimCreateFormSchema.safeParse({
+    issueDetail: "",
+    issueTitle: "Kinh bi bong",
+    productId: "product-1",
+    requesterName: " ",
+    requesterPhone: "",
+    warrantyCode: "WM-2026-TEST",
+  });
+
+  assert.equal(result.success, false);
+  if (result.success) return;
+
+  assert.deepEqual(
+    result.error.issues.map((issue) => issue.message),
+    ["requesterNameRequired", "requesterPhoneRequired"],
+  );
+});
+
+test("create claim field errors translate known validation keys", () => {
+  assert.equal(
+    translateWarrantyClaimCreateFieldError(
+      "productRequired",
+      (key) => `translated:${key}`,
+    ),
+    "translated:productRequired",
+  );
+  assert.equal(
+    translateWarrantyClaimCreateFieldError(
+      "Unexpected validation message",
+      (key) => `translated:${key}`,
+    ),
+    "Unexpected validation message",
+  );
+});
+
+test("create claim errors translate known API messages", () => {
+  const error = new HttpClientError({
+    isNetworkError: false,
+    message: "Warranty not found",
+  });
+
+  assert.equal(
+    resolveWarrantyClaimCreateError(error, (key) => `translated:${key}`),
+    "translated:apiErrors.WARRANTY_CODE_NOT_FOUND",
   );
 });

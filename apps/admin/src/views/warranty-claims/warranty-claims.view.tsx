@@ -1,9 +1,13 @@
 "use client";
 
+import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
+import { usePermissions } from "@/src/hooks/use-permissions";
+import { Link } from "@/src/i18n/navigation";
+import { Button } from "@repo/ui";
 import { AssignClaimServiceCenterDialog } from "./components/assign-claim-service-center-dialog";
 import { UpdateClaimPriorityDialog } from "./components/update-claim-priority-dialog";
 import { UpdateClaimStatusDialog } from "./components/update-claim-status-dialog";
@@ -14,11 +18,22 @@ import { useWarrantyClaimsDirectory } from "./hooks/use-warranty-claims-director
 export function WarrantyClaimsView() {
   const t = useTranslations("WarrantyClaims");
   const directory = useWarrantyClaimsDirectory();
+  const { hasPermission } = usePermissions();
 
   return (
     <PermissionGuard permissions={[PERMISSIONS.WARRANTY_CLAIM_VIEW]}>
       <div className="min-w-0 space-y-6">
         <PageHeader
+          actions={
+            hasPermission(PERMISSIONS.WARRANTY_CLAIM_CREATE) ? (
+              <Button asChild>
+                <Link href="/warranty-claims/create">
+                  <Plus className="size-4" />
+                  {t("createAction")}
+                </Link>
+              </Button>
+            ) : null
+          }
           description={t("description")}
           eyebrow={t("eyebrow")}
           title={t("title")}

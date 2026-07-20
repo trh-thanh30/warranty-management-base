@@ -3,6 +3,7 @@ import type {
   WarrantyClaimSortBy,
   WarrantyClaimStatus,
 } from "@repo/shared";
+import { z } from "zod";
 import type {
   WARRANTY_CLAIM_OVERDUE_FILTERS,
   WARRANTY_CLAIM_PRIORITY_FILTERS,
@@ -40,3 +41,24 @@ export type WarrantyClaimSort = WarrantyClaimSortBy;
 export type WarrantyClaimStatusOption = WarrantyClaimStatus;
 
 export type WarrantyClaimPriorityOption = WarrantyClaimPriority;
+
+export const warrantyClaimCreateFormSchema = z.object({
+  issueDetail: z.string().trim().max(4000, "issueDetailLength"),
+  issueTitle: z.string().trim().min(3, "issueTitleRequired").max(255),
+  productId: z.string().trim().min(1, "productRequired"),
+  requesterName: z
+    .string()
+    .trim()
+    .min(1, "requesterNameRequired")
+    .max(255, "requesterNameLength"),
+  requesterPhone: z
+    .string()
+    .trim()
+    .min(1, "requesterPhoneRequired")
+    .max(32, "requesterPhoneLength"),
+  warrantyCode: z.string().trim().min(1, "warrantyCodeRequired"),
+});
+
+export type WarrantyClaimCreateFormValues = z.infer<
+  typeof warrantyClaimCreateFormSchema
+>;

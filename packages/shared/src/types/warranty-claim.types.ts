@@ -182,6 +182,14 @@ export type WarrantyClaimMetricsQuery = {
   serviceCenterId?: string;
 };
 
+export type CreateWarrantyClaimBody = {
+  warrantyCode: string;
+  requesterName: string;
+  requesterPhone: string;
+  issueTitle: string;
+  issueDetail?: string;
+};
+
 export type UpdateWarrantyClaimStatusBody = {
   status: WarrantyClaimStatus;
   note?: string;

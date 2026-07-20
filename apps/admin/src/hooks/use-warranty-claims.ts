@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-query";
 import type {
   AssignWarrantyClaimServiceCenterBody,
+  CreateWarrantyClaimBody,
   ListWarrantyClaimsQuery,
   PaginatedResponse,
   UpdateWarrantyClaimPriorityBody,
@@ -109,6 +110,19 @@ export function useWarrantyClaimMetrics(
     ...options,
     queryKey: warrantyClaimKeys.metrics(query),
     queryFn: () => warrantyClaimsService.getMetrics(query),
+  });
+}
+
+export function useCreateWarrantyClaim() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: CreateWarrantyClaimBody) =>
+      warrantyClaimsService.createWarrantyClaim(body),
+    onSuccess: (claim) => {
+      void queryClient.invalidateQueries({ queryKey: warrantyClaimKeys.all });
+      queryClient.setQueryData(warrantyClaimKeys.detail(claim.id), claim);
+    },
   });
 }
 

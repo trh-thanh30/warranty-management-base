@@ -25,6 +25,8 @@ export class CreateWarrantyClaimUseCase {
 
   async execute(dto: CreateWarrantyClaimDto) {
     const warrantyCode = dto.warrantyCode.trim().toUpperCase();
+    const requesterName = dto.requesterName.trim();
+    const requesterPhone = dto.requesterPhone.trim();
     const product =
       await this.warrantyClaimsRepository.findWarrantyProductByCode(
         warrantyCode,
@@ -56,8 +58,8 @@ export class CreateWarrantyClaimUseCase {
           claim_code: claimCode,
           warranty_code: product.warranty_code,
           due_at: dueAt,
-          requester_name: dto.requesterName,
-          requester_phone: dto.requesterPhone,
+          requester_name: requesterName,
+          requester_phone: requesterPhone,
           issue_title: dto.issueTitle,
           issue_detail: dto.issueDetail,
           warranty: { connect: { id: product.warranty.id } },

@@ -1,5 +1,7 @@
 import {
   formatDate,
+  HttpClientError,
+  type CreateWarrantyClaimBody,
   type ServiceCenterSummary,
   type WarrantyClaimPriority,
   type WarrantyClaimStatus,
@@ -10,6 +12,26 @@ import {
   WARRANTY_CLAIM_ATTACHMENT_MIME_TYPES,
   WARRANTY_CLAIM_TERMINAL_STATUSES,
 } from "./warranty-claims.constants.ts";
+import type { WarrantyClaimCreateFormValues } from "./warranty-claims.types.ts";
+
+type TranslateWarrantyClaim = (key: string) => string;
+
+const CREATE_FIELD_ERROR_KEYS = [
+  "issueDetailLength",
+  "issueTitleRequired",
+  "productRequired",
+  "requesterNameLength",
+  "requesterNameRequired",
+  "requesterPhoneLength",
+  "requesterPhoneRequired",
+  "warrantyCodeRequired",
+] as const;
+
+const CREATE_ERROR_MESSAGE_KEYS: Record<string, string> = {
+  "could not create warranty claim": "apiErrors.WARRANTY_CLAIM_CREATE_FAILED",
+  "warranty is voided": "apiErrors.WARRANTY_VOIDED",
+  "warranty not found": "apiErrors.WARRANTY_CODE_NOT_FOUND",
+};
 
 export type WarrantyClaimAttachmentValidationError =
   | "attachmentTooLarge"
@@ -80,6 +102,42 @@ export function formatServiceCenterOption(serviceCenter: ServiceCenterSummary) {
   return [serviceCenter.name, serviceCenter.province]
     .filter(Boolean)
     .join(" · ");
+}
+
+export function toCreateWarrantyClaimBody(
+  values: WarrantyClaimCreateFormValues,
+): CreateWarrantyClaimBody {
+  return {
+    issueDetail: values.issueDetail.trim() || undefined,
+    issueTitle: values.issueTitle.trim(),
+    requesterName: values.requesterName.trim(),
+    requesterPhone: values.requesterPhone.trim(),
+    warrantyCode: values.warrantyCode.trim().toUpperCase(),
+  };
+}
+
+export function translateWarrantyClaimCreateFieldError(
+  message: string | undefined,
+  translate: TranslateWarrantyClaim,
+) {
+  if (!message) return undefined;
+
+  return CREATE_FIELD_ERROR_KEYS.includes(
+    message as (typeof CREATE_FIELD_ERROR_KEYS)[number],
+  )
+    ? translate(message)
+    : message;
+}
+
+export function resolveWarrantyClaimCreateError(
+  error: unknown,
+  translate: TranslateWarrantyClaim,
+) {
+  if (!(error instanceof HttpClientError)) return translate("saveError");
+
+  const key = CREATE_ERROR_MESSAGE_KEYS[error.message.trim().toLowerCase()];
+
+  return key ? translate(key) : error.message || translate("saveError");
 }
 
 export function isClaimOverdue(claim: WarrantyClaimSummary) {

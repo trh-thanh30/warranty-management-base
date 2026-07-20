@@ -1,5 +1,6 @@
 import type {
   AssignWarrantyClaimServiceCenterBody,
+  CreateWarrantyClaimBody,
   ListWarrantyClaimsQuery,
   PaginatedResponse,
   UpdateWarrantyClaimPriorityBody,
@@ -37,6 +38,14 @@ function unwrap<T>(response: HttpResponse<T>): T {
 
 export function createWarrantyClaimsService(http: WarrantyClaimsHttpClient) {
   return {
+    async createWarrantyClaim(
+      body: CreateWarrantyClaimBody,
+    ): Promise<WarrantyClaimSummary> {
+      return unwrap(
+        await http.post<WarrantyClaimSummary>("/warranty-claims", body),
+      );
+    },
+
     async linkAttachment(
       claimId: string,
       assetId: string,
