@@ -14,6 +14,11 @@
       "types": "./src/constants/index.ts",
       "require": "./dist-cjs/constants/index.js",
       "default": "./dist/constants/index.js"
+    },
+    "./utils": {
+      "types": "./src/utils/index.ts",
+      "require": "./dist-cjs/utils/index.js",
+      "default": "./dist/utils/index.js"
     }
   },
   "scripts": {

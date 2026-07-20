@@ -11,6 +11,10 @@ import { ReorderCategoriesUseCase } from '@/modules/categories/use-cases/reorder
 import { UpdateCategoryUseCase } from '@/modules/categories/use-cases/update-category.use-case';
 import { category_type } from '@prisma/client';
 
+jest.mock('@/modules/assets/assets.service', () => ({
+  AssetsService: class AssetsService {},
+}));
+
 const category = {
   id: 'category-id',
   type: category_type.PRODUCT,
@@ -159,6 +163,61 @@ describe('Category use cases', () => {
       }),
     );
     expect(result.parentId).toBe('parent-id');
+  });
+
+  it('deletes the previous category image before saving a replacement', async () => {
+    const assetsService = {
+      deleteAssetByUrl: jest.fn().mockResolvedValue(true),
+    };
+    categoriesRepository.findById.mockResolvedValue({
+      ...category,
+      image_url: 'https://cdn.example.com/old.jpg',
+    });
+    categoriesRepository.update.mockResolvedValue({
+      ...category,
+      image_url: 'https://cdn.example.com/new.jpg',
+    });
+    const useCase = new UpdateCategoryUseCase(
+      categoriesRepository as never,
+      assetsService as never,
+    );
+
+    await useCase.execute('category-id', {
+      imageUrl: 'https://cdn.example.com/new.jpg',
+    });
+
+    expect(assetsService.deleteAssetByUrl).toHaveBeenCalledWith(
+      'https://cdn.example.com/old.jpg',
+      expect.objectContaining({ folder: 'categories' }),
+    );
+  });
+
+  it('deletes rich-text media removed from the category description', async () => {
+    const assetsService = {
+      deleteAssetByUrl: jest.fn().mockResolvedValue(true),
+    };
+    categoriesRepository.findById.mockResolvedValue({
+      ...category,
+      description:
+        '<p>Old</p><img src="https://cdn.example.com/rich-text/old.jpg">',
+    });
+    categoriesRepository.update.mockResolvedValue({
+      ...category,
+      description: '<p>New</p>',
+    });
+    const useCase = new UpdateCategoryUseCase(
+      categoriesRepository as never,
+      assetsService as never,
+    );
+
+    await useCase.execute('category-id', {
+      description: '<p>New</p>',
+    });
+
+    expect(assetsService.deleteAssetByUrl).toHaveBeenCalledWith(
+      'https://cdn.example.com/rich-text/old.jpg',
+      expect.objectContaining({ folder: 'rich-text' }),
+    );
   });
 
   it('rejects updating a category under its descendant', async () => {

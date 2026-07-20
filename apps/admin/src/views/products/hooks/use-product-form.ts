@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useDebounce } from "@repo/hooks";
 import { useForm, type UseFormSetError } from "react-hook-form";
 import {
+  getRemovedMediaUrls,
   HttpClientError,
   type CreateProductBody,
   type ProductResponse,
@@ -89,7 +90,15 @@ export function useProductForm({
       const updatedProduct = await updateProduct.mutateAsync(
         toUpdateProductBody(values),
       );
-      toast.success(t("updated"));
+      const removedMediaCount = getRemovedMediaUrls(
+        product.description ?? "",
+        values.description,
+      ).length;
+      toast.success(
+        removedMediaCount > 0
+          ? t("mediaRemoved", { count: removedMediaCount })
+          : t("updated"),
+      );
       onSaved(updatedProduct);
     } catch (error) {
       const handledMessage = handleProductSaveError(error, setError, t);

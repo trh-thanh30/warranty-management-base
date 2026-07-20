@@ -1,9 +1,14 @@
 import { ConflictError, NotFoundError } from '@/common/response';
+import { DeleteContentPageUseCase } from '@/modules/content-pages/use-cases/delete-content-page.use-case';
 import { CreateContentPageUseCase } from '@/modules/content-pages/use-cases/create-content-page.use-case';
 import { GetPublishedContentPageBySlugUseCase } from '@/modules/content-pages/use-cases/get-published-content-page-by-slug.use-case';
 import { ListPublishedContentPagesUseCase } from '@/modules/content-pages/use-cases/list-published-content-pages.use-case';
 import { UpdateContentPageUseCase } from '@/modules/content-pages/use-cases/update-content-page.use-case';
 import { content_page_kind, content_page_status } from '@prisma/client';
+
+jest.mock('@/modules/assets/assets.service', () => ({
+  AssetsService: class AssetsService {},
+}));
 
 const page = {
   id: 'page-id',
@@ -25,6 +30,7 @@ describe('Content page use cases', () => {
     findPublishedBySlug: jest.fn(),
     listPublished: jest.fn(),
     create: jest.fn(),
+    delete: jest.fn(),
     update: jest.fn(),
   };
 
@@ -95,6 +101,56 @@ describe('Content page use cases', () => {
       }),
     );
     expect(result.title).toBe('Huong dan moi');
+  });
+
+  it('deletes rich-text assets removed during content update', async () => {
+    const assetsService = {
+      deleteAssetByUrl: jest.fn().mockResolvedValue(true),
+    };
+    contentPagesRepository.findById.mockResolvedValue({
+      ...page,
+      content:
+        '<p>Old</p><img src="https://cdn.example.com/rich-text/old.jpg">',
+    });
+    contentPagesRepository.update.mockResolvedValue({
+      ...page,
+      content: '<p>New</p>',
+    });
+    const useCase = new UpdateContentPageUseCase(
+      contentPagesRepository as never,
+      assetsService as never,
+    );
+
+    await useCase.execute('page-id', { content: '<p>New</p>' });
+
+    expect(assetsService.deleteAssetByUrl).toHaveBeenCalledWith(
+      'https://cdn.example.com/rich-text/old.jpg',
+      expect.objectContaining({ folder: 'rich-text' }),
+    );
+  });
+
+  it('deletes rich-text assets before deleting a content page', async () => {
+    const assetsService = {
+      deleteAssetByUrl: jest.fn().mockResolvedValue(true),
+    };
+    contentPagesRepository.findById.mockResolvedValue({
+      ...page,
+      content:
+        '<p>Old</p><video src="https://cdn.example.com/rich-text/video.mp4"></video>',
+    });
+    contentPagesRepository.delete.mockResolvedValue(page);
+    const useCase = new DeleteContentPageUseCase(
+      contentPagesRepository as never,
+      assetsService as never,
+    );
+
+    await useCase.execute('page-id');
+
+    expect(assetsService.deleteAssetByUrl).toHaveBeenCalledWith(
+      'https://cdn.example.com/rich-text/video.mp4',
+      expect.objectContaining({ folder: 'rich-text' }),
+    );
+    expect(contentPagesRepository.delete).toHaveBeenCalledWith('page-id');
   });
 
   it('throws not found when reading missing published content', async () => {

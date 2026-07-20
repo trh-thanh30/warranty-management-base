@@ -15,6 +15,7 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import Underline from "@tiptap/extension-underline";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { useTranslations } from "next-intl";
 import { NodeSelection } from "prosemirror-state";
 import {
   AlignCenter,
@@ -50,6 +51,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@repo/ui";
+import { getRemovedMediaUrls } from "@repo/shared";
+import { useToast } from "@/src/hooks/use-toast";
 import { assetsService } from "@/src/services/assets/assets.service";
 
 const DEFAULT_TEXT_COLOR = "#0f172a";
@@ -220,9 +223,12 @@ export function RichTextEditor({
   onChange,
   value,
 }: RichTextEditorProps) {
+  const t = useTranslations("Common");
+  const toast = useToast();
   const colorPickerRef = useRef<HTMLDivElement | null>(null);
   const highlightPickerRef = useRef<HTMLDivElement | null>(null);
   const mediaSelectionRef = useRef<EditorSelectionRange | null>(null);
+  const previousContentRef = useRef(value);
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
   const [fontSizeInputFocused, setFontSizeInputFocused] = useState(false);
   const [fontSizeInput, setFontSizeInput] = useState("");
@@ -297,7 +303,14 @@ export function RichTextEditor({
     ],
     immediatelyRender: false,
     onUpdate: ({ editor: currentEditor }) => {
-      onChange(currentEditor.getHTML());
+      const nextContent = currentEditor.getHTML();
+      if (
+        getRemovedMediaUrls(previousContentRef.current, nextContent).length > 0
+      ) {
+        toast.info(t("mediaRemovalPending"));
+      }
+      previousContentRef.current = nextContent;
+      onChange(nextContent);
     },
   });
 
@@ -305,6 +318,7 @@ export function RichTextEditor({
     if (!editor || editor.getHTML() === value) return;
 
     editor.commands.setContent(value, { emitUpdate: false });
+    previousContentRef.current = value;
   }, [editor, value]);
 
   useEffect(() => {
@@ -785,6 +799,8 @@ function RichTextUrlDialog({
   onSubmit: (urls: string[]) => void;
   open: boolean;
 }) {
+  const t = useTranslations("Common");
+  const toast = useToast();
   const [error, setError] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -830,10 +846,11 @@ function RichTextUrlDialog({
       return;
     }
 
+    const urls: string[] = [];
+
     try {
       setError("");
       setUploading(true);
-      const urls: string[] = [];
 
       for (const file of files) {
         const asset = await assetsService.uploadAsset(file, {
@@ -845,8 +862,15 @@ function RichTextUrlDialog({
       }
 
       onSubmit(urls);
+      toast.success(t("mediaUploadSuccess"));
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Upload failed.");
+      await Promise.allSettled(
+        urls.map((url) => assetsService.deleteAssetByUrl(url)),
+      );
+      const message =
+        error instanceof Error ? error.message : t("mediaUploadError");
+      setError(message);
+      toast.error(message);
     } finally {
       setUploading(false);
     }

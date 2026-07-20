@@ -9,6 +9,7 @@ import {
   type UseFormSetValue,
 } from "react-hook-form";
 import {
+  getRemovedMediaUrls,
   HttpClientError,
   type CategoryResponse,
   type CreateCategoryBody,
@@ -66,8 +67,19 @@ export function useCategoryForm({
         return;
       }
 
+      const imageRemoved = Boolean(
+        category.imageUrl && category.imageUrl !== values.imageUrl,
+      );
+      const removedMediaCount = getRemovedMediaUrls(
+        category.description ?? "",
+        values.description,
+      ).length;
       await updateCategory.mutateAsync(toUpdateCategoryBody(values));
-      toast.success(t("updated"));
+      toast.success(
+        imageRemoved || removedMediaCount > 0
+          ? t("assetsRemoved")
+          : t("updated"),
+      );
       onSaved();
     } catch (error) {
       const handledMessage = handleCategorySaveError(error, setError, t);

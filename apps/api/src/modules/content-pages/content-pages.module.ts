@@ -1,4 +1,5 @@
 import { PrismaModule } from '@/database/prisma/prisma.module';
+import { AssetsModule } from '@/modules/assets/assets.module';
 import { ContentPagesController } from '@/modules/content-pages/content-pages.controller';
 import { ContentPagesRepository } from '@/modules/content-pages/repository/content-pages.repository';
 import { CreateContentPageUseCase } from '@/modules/content-pages/use-cases/create-content-page.use-case';
@@ -11,7 +12,7 @@ import { UpdateContentPageUseCase } from '@/modules/content-pages/use-cases/upda
 import { Module } from '@nestjs/common';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [AssetsModule, PrismaModule],
   controllers: [ContentPagesController],
   providers: [
     ContentPagesRepository,

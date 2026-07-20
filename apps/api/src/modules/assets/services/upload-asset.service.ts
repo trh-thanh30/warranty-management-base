@@ -80,13 +80,7 @@ export class UploadAssetService {
    * Delete file from storage
    */
   async delete(filePath: string): Promise<void> {
-    try {
-      await this.storage.delete(filePath);
-    } catch (error: any) {
-      this.logger.warn(
-        `Failed to delete file on disk at ${filePath}: ${error?.message || 'Unknown error'}`,
-      );
-    }
+    await this.storage.delete(filePath);
   }
 
   public determineAssetType(mime: string): asset_type {

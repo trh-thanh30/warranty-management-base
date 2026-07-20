@@ -4,6 +4,7 @@ import { User } from '@/common/decorators/user.decorator';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { AssetsService } from '@/modules/assets/assets.service';
+import { DeleteAssetByUrlDto } from '@/modules/assets/dto/delete-asset-by-url.dto';
 import { ListAssetsDto } from '@/modules/assets/dto/list-assets.dto';
 import { UploadAssetDto } from '@/modules/assets/dto/upload-asset.dto';
 import {
@@ -65,6 +66,14 @@ export class AssetsController {
   /**
    * Delete an asset
    */
+  @Delete('by-url')
+  async removeByUrl(
+    @User() user: UserEntity,
+    @Query() dto: DeleteAssetByUrlDto,
+  ) {
+    await this.assetsService.deleteAssetByUrl(dto.url, {}, user);
+  }
+
   @Delete(':id')
   async remove(
     @User() user: UserEntity,

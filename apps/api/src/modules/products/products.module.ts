@@ -1,4 +1,5 @@
 import { PrismaModule } from '@/database/prisma/prisma.module';
+import { AssetsModule } from '@/modules/assets/assets.module';
 import { ProductsController } from '@/modules/products/products.controller';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
 import { AssignProductOwnerUseCase } from '@/modules/products/use-cases/assign-product-owner.use-case';
@@ -11,7 +12,7 @@ import { UpdateProductUseCase } from '@/modules/products/use-cases/update-produc
 import { Module } from '@nestjs/common';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, AssetsModule],
   controllers: [ProductsController],
   providers: [
     ProductsRepository,
