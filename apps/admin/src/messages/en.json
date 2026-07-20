@@ -50,6 +50,7 @@
     "mediaUploadError": "Unable to upload media.",
     "mediaRemovalPending": "The media will be deleted from the system when changes are saved.",
     "chooseImage": "Choose image",
+    "closeImagePreview": "Close image preview",
     "clearImage": "Clear image",
     "imageDeleteFailed": "Unable to delete the image from the system.",
     "imageDeleted": "Image deleted from the system.",
@@ -58,6 +59,7 @@
     "imagePreviewAlt": "Image preview",
     "imageRemovalPending": "The image will be deleted from the system when changes are saved.",
     "replaceImage": "Replace image",
+    "previewImage": "Enlarge image",
     "imageUploadFailed": "Image upload failed.",
     "imageUploaded": "Image uploaded.",
     "uploadingImage": "Uploading image..."
