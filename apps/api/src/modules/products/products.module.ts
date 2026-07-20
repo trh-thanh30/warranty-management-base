@@ -2,12 +2,16 @@ import { PrismaModule } from '@/database/prisma/prisma.module';
 import { AssetsModule } from '@/modules/assets/assets.module';
 import { ProductsController } from '@/modules/products/products.controller';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
+import { ProductAssetsRepository } from '@/modules/products/repository/product-assets.repository';
 import { AssignProductOwnerUseCase } from '@/modules/products/use-cases/assign-product-owner.use-case';
+import { AttachProductAssetUseCase } from '@/modules/products/use-cases/attach-product-asset.use-case';
 import { CreateProductUseCase } from '@/modules/products/use-cases/create-product.use-case';
 import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { GetProductDetailUseCase } from '@/modules/products/use-cases/get-product-detail.use-case';
 import { ListProductsUseCase } from '@/modules/products/use-cases/list-products.use-case';
 import { SoftDeleteProductUseCase } from '@/modules/products/use-cases/soft-delete-product.use-case';
+import { RemoveProductAssetUseCase } from '@/modules/products/use-cases/remove-product-asset.use-case';
+import { UpdateProductAssetUseCase } from '@/modules/products/use-cases/update-product-asset.use-case';
 import { UpdateProductUseCase } from '@/modules/products/use-cases/update-product.use-case';
 import { Module } from '@nestjs/common';
 
@@ -16,6 +20,7 @@ import { Module } from '@nestjs/common';
   controllers: [ProductsController],
   providers: [
     ProductsRepository,
+    ProductAssetsRepository,
     GenerateWarrantyCodeUseCase,
     CreateProductUseCase,
     UpdateProductUseCase,
@@ -23,6 +28,9 @@ import { Module } from '@nestjs/common';
     ListProductsUseCase,
     GetProductDetailUseCase,
     AssignProductOwnerUseCase,
+    AttachProductAssetUseCase,
+    UpdateProductAssetUseCase,
+    RemoveProductAssetUseCase,
   ],
   exports: [ProductsRepository],
 })

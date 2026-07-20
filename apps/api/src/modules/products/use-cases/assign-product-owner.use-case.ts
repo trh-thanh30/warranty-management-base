@@ -1,12 +1,16 @@
 import { NotFoundError } from '@/common/response';
 import { PrismaService } from '@/database/prisma/prisma.service';
+import { AssetsService } from '@/modules/assets/assets.service';
 import { AssignProductOwnerDto } from '@/modules/products/dto/assign-product-owner.dto';
 import { toProductResponse } from '@/modules/products/products.types';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AssignProductOwnerUseCase {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly assetsService?: AssetsService,
+  ) {}
 
   async execute(productId: string, dto: AssignProductOwnerDto) {
     const [product, customer] = await Promise.all([
@@ -49,6 +53,10 @@ export class AssignProductOwnerUseCase {
         return tx.product.findUniqueOrThrow({
           where: { id: productId },
           include: {
+            assets: {
+              include: { asset: true },
+              orderBy: [{ role: 'asc' }, { sort_order: 'asc' }],
+            },
             ownerships: {
               include: { customer: true },
               orderBy: { created_at: 'desc' },
@@ -59,6 +67,9 @@ export class AssignProductOwnerUseCase {
       },
     );
 
-    return toProductResponse(productWithOwner);
+    return toProductResponse(
+      productWithOwner,
+      (asset) => this.assetsService?.enrichAssetUrl(asset).url ?? asset.path,
+    );
   }
 }

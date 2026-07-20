@@ -92,4 +92,8 @@ export class CreateProductDto {
   @IsOptional()
   @IsObject()
   metadata?: Record<string, unknown>;
+
+  @IsOptional()
+  @IsUUID()
+  coverAssetId?: string;
 }

@@ -4,12 +4,25 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, product_status, warranty_status } from '@prisma/client';
 
 const productInclude = {
+  assets: {
+    include: { asset: true },
+    orderBy: [{ role: 'asc' as const }, { sort_order: 'asc' as const }],
+  },
   category_ref: true,
   ownerships: {
     include: { customer: true },
     orderBy: { created_at: 'desc' as const },
   },
   warranty: true,
+};
+
+const productListInclude = {
+  ...productInclude,
+  assets: {
+    where: { role: 'COVER' as const },
+    include: { asset: true },
+    orderBy: { sort_order: 'asc' as const },
+  },
 };
 
 @Injectable()
@@ -125,7 +138,7 @@ export class ProductsRepository {
       const [items, total] = await Promise.all([
         tx.product.findMany({
           where,
-          include: productInclude,
+          include: productListInclude,
           orderBy,
           skip,
           take,

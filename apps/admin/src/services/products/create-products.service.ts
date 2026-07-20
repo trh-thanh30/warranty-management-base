@@ -1,10 +1,13 @@
 import type {
   AssignProductOwnerBody,
+  AttachProductAssetBody,
   CreateProductBody,
   ListProductsQuery,
   PaginatedResponse,
   ProductResponse,
+  ProductAssetSummary,
   UpdateProductBody,
+  UpdateProductAssetBody,
 } from "@repo/shared";
 
 type ApiEnvelope<T> = {
@@ -76,6 +79,33 @@ export function createProductsService(http: ProductsHttpClient) {
           body,
         ),
       );
+    },
+
+    async attachAsset(
+      productId: string,
+      body: AttachProductAssetBody,
+    ): Promise<ProductAssetSummary> {
+      return unwrap(
+        await http.post<ProductAssetSummary>(
+          `/products/${productId}/assets`,
+          body,
+        ),
+      );
+    },
+
+    async updateAsset(
+      productId: string,
+      productAssetId: string,
+      body: UpdateProductAssetBody,
+    ): Promise<void> {
+      await http.patch(`/products/${productId}/assets/${productAssetId}`, body);
+    },
+
+    async removeAsset(
+      productId: string,
+      productAssetId: string,
+    ): Promise<void> {
+      await http.delete(`/products/${productId}/assets/${productAssetId}`);
     },
   };
 }

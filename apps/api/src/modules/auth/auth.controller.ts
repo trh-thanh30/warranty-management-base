@@ -215,10 +215,14 @@ export class AuthController {
     });
 
     if (previousAvatarUrl && previousAvatarUrl !== asset.url) {
-      await this.assetsService.deleteAssetByUrl(previousAvatarUrl, {
-        folder: 'avatars',
-        types: [asset_type.IMAGE],
-      });
+      await this.assetsService.removeEntityAssetByUrl(
+        previousAvatarUrl,
+        { id: user.id, type: 'user' },
+        {
+          folder: 'avatars',
+          types: [asset_type.IMAGE],
+        },
+      );
     }
 
     return this.toAuthUser(user.id);

@@ -2,6 +2,7 @@
 
 import { useToast } from "@/src/hooks/use-toast";
 import {
+  type AssetResponse,
   assetsService,
   type UploadAssetOptions,
 } from "@/src/services/assets/assets.service";
@@ -32,6 +33,7 @@ type ImageUploadProps = {
   disabled?: boolean;
   id: string;
   labels?: Partial<ImageUploadLabels>;
+  onAssetChange?: (asset: AssetResponse | null) => void;
   onChange: (value: string) => void;
   persistedValue?: string;
   uploadOptions: Omit<UploadAssetOptions, "folder" | "type"> & {
@@ -44,6 +46,7 @@ export function ImageUpload({
   disabled,
   id,
   labels,
+  onAssetChange,
   onChange,
   persistedValue = "",
   uploadOptions,
@@ -93,6 +96,7 @@ export function ImageUpload({
         type: "IMAGE",
       });
       onChange(asset.url);
+      onAssetChange?.(asset);
       toast.success(copy.uploaded);
 
       if (previousValue && previousValue !== persistedValue) {
@@ -118,6 +122,7 @@ export function ImageUpload({
     if (value === persistedValue) {
       setPreviewOpen(false);
       onChange("");
+      onAssetChange?.(null);
       toast.info(copy.removalPending);
       return;
     }
@@ -127,6 +132,7 @@ export function ImageUpload({
       await assetsService.deleteAssetByUrl(value);
       setPreviewOpen(false);
       onChange("");
+      onAssetChange?.(null);
       toast.success(copy.deleted);
     } catch {
       toast.error(copy.deleteFailed);

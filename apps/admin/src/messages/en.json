@@ -578,6 +578,18 @@
     "detailDescription": "Review product, owner, and warranty information.",
     "created": "Product created.",
     "updated": "Product updated.",
+    "coverImage": "Product cover image",
+    "coverImageHint": "Upload a clear cover image for the product or vehicle.",
+    "coverImageAlt": "Product cover image",
+    "coverAssetNotFound": "The uploaded cover image could not be found.",
+    "images": "Product images",
+    "previewProductImage": "Preview {name}",
+    "assetRoles": {
+      "COVER": "Cover",
+      "GALLERY": "Gallery",
+      "SERIAL": "Serial",
+      "INSTALLATION": "Installation"
+    },
     "mediaRemoved": "Product updated and {count} unused media item(s) deleted.",
     "deleted": "Product deleted.",
     "delete": "Delete product",

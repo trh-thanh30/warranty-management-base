@@ -65,7 +65,10 @@ export class UpdateProductUseCase {
       metadata: dto.metadata as Prisma.InputJsonValue | undefined,
     });
 
-    return toProductResponse(product);
+    return toProductResponse(
+      product,
+      (asset) => this.assetsService?.enrichAssetUrl(asset).url ?? asset.path,
+    );
   }
 
   private async resolveProductCategory(categoryId: string | null | undefined) {

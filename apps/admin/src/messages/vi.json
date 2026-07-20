@@ -578,6 +578,18 @@
     "detailDescription": "Xem thông tin sản phẩm, chủ sở hữu và bảo hành.",
     "created": "Đã tạo sản phẩm.",
     "updated": "Đã cập nhật sản phẩm.",
+    "coverImage": "Ảnh đại diện sản phẩm",
+    "coverImageHint": "Tải ảnh đại diện rõ ràng cho sản phẩm hoặc xe.",
+    "coverImageAlt": "Ảnh đại diện sản phẩm",
+    "coverAssetNotFound": "Không tìm thấy ảnh đại diện đã tải lên.",
+    "images": "Hình ảnh sản phẩm",
+    "previewProductImage": "Xem ảnh {name}",
+    "assetRoles": {
+      "COVER": "Ảnh đại diện",
+      "GALLERY": "Thư viện",
+      "SERIAL": "Số serial",
+      "INSTALLATION": "Lắp đặt"
+    },
     "mediaRemoved": "Đã cập nhật sản phẩm và xóa {count} media không còn sử dụng.",
     "deleted": "Đã xóa sản phẩm.",
     "delete": "Xóa sản phẩm",
