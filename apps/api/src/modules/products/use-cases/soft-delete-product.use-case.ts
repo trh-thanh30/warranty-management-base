@@ -1,4 +1,5 @@
 import { NotFoundError } from '@/common/response';
+import { AssetsService } from '@/modules/assets/assets.service';
 import { toProductResponse } from '@/modules/products/products.types';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
 import { Injectable } from '@nestjs/common';
@@ -6,7 +7,10 @@ import { product_status } from '@prisma/client';
 
 @Injectable()
 export class SoftDeleteProductUseCase {
-  constructor(private readonly productsRepository: ProductsRepository) {}
+  constructor(
+    private readonly productsRepository: ProductsRepository,
+    private readonly assetsService?: AssetsService,
+  ) {}
 
   async execute(id: string) {
     const existingProduct = await this.productsRepository.findById(id);
@@ -19,6 +23,9 @@ export class SoftDeleteProductUseCase {
       deleted_at: new Date(),
     });
 
-    return toProductResponse(product);
+    return toProductResponse(
+      product,
+      (asset) => this.assetsService?.enrichAssetUrl(asset).url ?? asset.path,
+    );
   }
 }

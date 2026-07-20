@@ -19,6 +19,7 @@ import {
   Textarea,
 } from "@repo/ui";
 import { RichTextEditor } from "@/src/components/common/rich-text-editor";
+import { ImageUpload } from "@/src/components/common/image-upload";
 import { PRODUCT_CATEGORIES } from "../products.constants";
 import { useProductForm } from "../hooks/use-product-form";
 
@@ -39,6 +40,7 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
     isSubmitting,
     onSubmit,
     register,
+    setValue,
     watch,
   } = useProductForm({ onSaved, product });
   const autoGenerateWarrantyCode = watch("autoGenerateWarrantyCode");
@@ -137,6 +139,43 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
           </Field>
         ) : null}
       </div>
+
+      <Field
+        error={formatFieldError(errors.coverAssetId?.message, t)}
+        id="product-cover-image"
+        label={t("coverImage")}
+      >
+        <Controller
+          control={control}
+          name="coverImageUrl"
+          render={({ field }) => (
+            <ImageUpload
+              disabled={isSubmitting}
+              id="product-cover-image"
+              labels={{
+                hint: t("coverImageHint"),
+                previewAlt: t("coverImageAlt"),
+              }}
+              onAssetChange={(asset) =>
+                setValue("coverAssetId", asset?.id ?? "", {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                })
+              }
+              onChange={field.onChange}
+              persistedValue={
+                product?.assets.find((asset) => asset.role === "COVER")?.url ??
+                ""
+              }
+              uploadOptions={{
+                accessType: "PUBLIC",
+                folder: "products",
+              }}
+              value={field.value}
+            />
+          )}
+        />
+      </Field>
 
       <div className="grid gap-5 sm:grid-cols-3">
         <Field
@@ -408,6 +447,7 @@ function formatFieldError(
     "categoryNotFound",
     "customerNotFound",
     "customerRequired",
+    "coverAssetNotFound",
     "descriptionLength",
     "duplicateSerialNumber",
     "duplicateWarrantyCode",

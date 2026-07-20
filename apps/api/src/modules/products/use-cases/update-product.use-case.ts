@@ -1,16 +1,19 @@
 import { ConflictError, NotFoundError } from '@/common/response';
 import { PrismaService } from '@/database/prisma/prisma.service';
+import { AssetsService } from '@/modules/assets/assets.service';
 import { UpdateProductDto } from '@/modules/products/dto/update-product.dto';
 import { toProductResponse } from '@/modules/products/products.types';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
 import { Injectable } from '@nestjs/common';
-import { category_type, Prisma } from '@prisma/client';
+import { asset_type, category_type, Prisma } from '@prisma/client';
+import { getRemovedMediaUrls } from '@repo/shared/utils';
 
 @Injectable()
 export class UpdateProductUseCase {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly productsRepository: ProductsRepository,
+    private readonly assetsService?: AssetsService,
   ) {}
 
   async execute(id: string, dto: UpdateProductDto) {
@@ -32,6 +35,18 @@ export class UpdateProductUseCase {
 
     const categoryRef = await this.resolveProductCategory(dto.categoryId);
 
+    if (dto.description !== undefined) {
+      for (const url of getRemovedMediaUrls(
+        existingProduct.description ?? '',
+        dto.description ?? '',
+      )) {
+        await this.assetsService?.deleteAssetByUrl(url, {
+          folder: 'rich-text',
+          types: [asset_type.IMAGE, asset_type.VIDEO],
+        });
+      }
+    }
+
     const product = await this.productsRepository.update(id, {
       name: dto.name,
       category: dto.category,
@@ -50,7 +65,10 @@ export class UpdateProductUseCase {
       metadata: dto.metadata as Prisma.InputJsonValue | undefined,
     });
 
-    return toProductResponse(product);
+    return toProductResponse(
+      product,
+      (asset) => this.assetsService?.enrichAssetUrl(asset).url ?? asset.path,
+    );
   }
 
   private async resolveProductCategory(categoryId: string | null | undefined) {

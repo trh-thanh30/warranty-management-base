@@ -1,4 +1,5 @@
 import { PrismaModule } from '@/database/prisma/prisma.module';
+import { AssetsModule } from '@/modules/assets/assets.module';
 import { CategoriesController } from '@/modules/categories/categories.controller';
 import { CategoriesRepository } from '@/modules/categories/repository/categories.repository';
 import { CreateCategoryUseCase } from '@/modules/categories/use-cases/create-category.use-case';
@@ -10,7 +11,7 @@ import { UpdateCategoryUseCase } from '@/modules/categories/use-cases/update-cat
 import { Module } from '@nestjs/common';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [AssetsModule, PrismaModule],
   controllers: [CategoriesController],
   providers: [
     CategoriesRepository,

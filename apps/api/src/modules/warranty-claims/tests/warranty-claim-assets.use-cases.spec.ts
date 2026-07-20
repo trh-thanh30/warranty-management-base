@@ -31,10 +31,12 @@ describe('Warranty claim asset use cases', () => {
       ...value,
       url: `http://localhost:4100/cdn/${value.path}`,
     })),
+    removeEntityAsset: jest.fn(),
   };
   const warrantyClaimsRepository = {
     findById: jest.fn(),
     findAssetById: jest.fn(),
+    findClaimAssetLink: jest.fn(),
     linkAssetToClaim: jest.fn(),
     listClaimAssets: jest.fn(),
     unlinkAssetFromClaim: jest.fn(),
@@ -99,15 +101,21 @@ describe('Warranty claim asset use cases', () => {
 
   it('unlinks an asset from a claim', async () => {
     warrantyClaimsRepository.findById.mockResolvedValue({ id: 'claim-id' });
-    warrantyClaimsRepository.unlinkAssetFromClaim.mockResolvedValue({
-      count: 1,
+    warrantyClaimsRepository.findClaimAssetLink.mockResolvedValue({
+      id: 'link-id',
     });
+    assetsService.removeEntityAsset.mockResolvedValue('DELETED');
     const useCase = new UnlinkWarrantyClaimAssetUseCase(
       warrantyClaimsRepository as never,
+      assetsService as never,
     );
 
     await expect(useCase.execute('claim-id', 'asset-id')).resolves.toEqual({
       success: true,
+    });
+    expect(assetsService.removeEntityAsset).toHaveBeenCalledWith('asset-id', {
+      id: 'claim-id',
+      type: 'warranty_claim',
     });
   });
 });

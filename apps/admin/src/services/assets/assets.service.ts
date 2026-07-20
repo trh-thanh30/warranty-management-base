@@ -4,6 +4,11 @@ import {
   type AssetsHttpClient,
 } from "./create-assets.service";
 
+export type {
+  AssetResponse,
+  UploadAssetOptions,
+} from "./create-assets.service";
+
 export const assetsService = createAssetsService(
   adminHttpClient as unknown as AssetsHttpClient,
 );

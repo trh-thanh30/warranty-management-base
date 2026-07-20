@@ -370,6 +370,18 @@ export class WarrantyClaimsRepository {
     });
   }
 
+  findClaimAssetLink(claimId: string, assetId: string) {
+    return this.prismaService.assetLink.findUnique({
+      where: {
+        asset_id_entity_id_entity_type: {
+          asset_id: assetId,
+          entity_id: claimId,
+          entity_type: WARRANTY_CLAIM_ASSET_ENTITY_TYPE,
+        },
+      },
+    });
+  }
+
   unlinkAssetFromClaim(claimId: string, assetId: string) {
     return this.prismaService.assetLink.deleteMany({
       where: {

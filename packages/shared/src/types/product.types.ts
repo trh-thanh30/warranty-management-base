@@ -10,6 +10,19 @@ export type ProductCategory =
 
 export type ProductStatus = "ACTIVE" | "INACTIVE" | "DELETED";
 
+export type ProductAssetRole = "COVER" | "GALLERY" | "SERIAL" | "INSTALLATION";
+
+export type ProductAssetSummary = {
+  id: string;
+  assetId: string;
+  role: ProductAssetRole;
+  sortOrder: number;
+  altText: string | null;
+  url: string;
+  mimeType: string;
+  originalName: string;
+};
+
 export type ProductSortBy =
   | "productCode"
   | "warrantyCode"
@@ -59,6 +72,7 @@ export type ProductSummary = {
   deletedAt: string | null;
   owner: ProductOwnerSummary | null;
   warranty: ProductWarrantySummary | null;
+  assets: ProductAssetSummary[];
 };
 
 export type ProductResponse = ProductSummary;
@@ -91,6 +105,7 @@ export type CreateProductBody = {
   durationMonths?: number;
   warrantyTerms?: string;
   metadata?: Record<string, unknown>;
+  coverAssetId?: string;
 };
 
 export type UpdateProductBody = {
@@ -110,4 +125,17 @@ export type AssignProductOwnerBody = {
   customerId: string;
   purchaseDate?: string;
   activatedAt?: string;
+};
+
+export type AttachProductAssetBody = {
+  assetId: string;
+  role: ProductAssetRole;
+  sortOrder?: number;
+  altText?: string;
+};
+
+export type UpdateProductAssetBody = {
+  role?: ProductAssetRole;
+  sortOrder?: number;
+  altText?: string | null;
 };

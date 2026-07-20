@@ -4,6 +4,7 @@ import {
   NotFoundError,
 } from '@/common/response';
 import { PrismaService } from '@/database/prisma/prisma.service';
+import { AssetsService } from '@/modules/assets/assets.service';
 import { CreateProductDto } from '@/modules/products/dto/create-product.dto';
 import { toProductResponse } from '@/modules/products/products.types';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
@@ -11,6 +12,7 @@ import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/genera
 import { Injectable } from '@nestjs/common';
 import {
   category_type,
+  asset_type,
   Prisma,
   product_status,
   warranty_status,
@@ -22,6 +24,7 @@ export class CreateProductUseCase {
     private readonly prismaService: PrismaService,
     private readonly productsRepository: ProductsRepository,
     private readonly generateWarrantyCodeUseCase: GenerateWarrantyCodeUseCase,
+    private readonly assetsService?: AssetsService,
   ) {}
 
   async execute(dto: CreateProductDto) {
@@ -32,6 +35,20 @@ export class CreateProductUseCase {
     const purchaseDate = dto.purchaseDate ? new Date(dto.purchaseDate) : null;
     const startDate = activatedAt ?? purchaseDate;
     const categoryRef = await this.resolveProductCategory(dto.categoryId);
+    const coverAsset = dto.coverAssetId
+      ? await this.prismaService.asset.findUnique({
+          where: { id: dto.coverAssetId },
+        })
+      : null;
+
+    if (
+      dto.coverAssetId &&
+      (!coverAsset ||
+        coverAsset.is_deleted ||
+        coverAsset.type !== asset_type.IMAGE)
+    ) {
+      throw new NotFoundError('Product cover asset not found');
+    }
 
     if (dto.serialNumber) {
       const existingSerial = await this.productsRepository.findBySerialNumber(
@@ -68,6 +85,15 @@ export class CreateProductUseCase {
           ? { connect: { id: categoryRef.id } }
           : undefined,
         metadata: dto.metadata as Prisma.InputJsonObject | undefined,
+        assets: coverAsset
+          ? {
+              create: {
+                asset: { connect: { id: coverAsset.id } },
+                role: 'COVER',
+                alt_text: dto.name,
+              },
+            }
+          : undefined,
         warranty: {
           create: {
             warranty_code: warrantyCode,
@@ -95,6 +121,10 @@ export class CreateProductUseCase {
           : undefined,
       },
       include: {
+        assets: {
+          include: { asset: true },
+          orderBy: [{ role: 'asc' }, { sort_order: 'asc' }],
+        },
         ownerships: {
           include: { customer: true },
           orderBy: { created_at: 'desc' },
@@ -103,7 +133,10 @@ export class CreateProductUseCase {
       },
     });
 
-    return toProductResponse(product);
+    return toProductResponse(
+      product,
+      (asset) => this.assetsService?.enrichAssetUrl(asset).url ?? asset.path,
+    );
   }
 
   private async resolveWarrantyCode(dto: CreateProductDto) {

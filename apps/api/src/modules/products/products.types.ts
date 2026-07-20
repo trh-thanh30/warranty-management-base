@@ -1,12 +1,15 @@
 import {
+  Asset,
   Category,
   Customer,
   Product,
+  ProductAsset,
   ProductOwnership,
   Warranty,
 } from '@prisma/client';
 
 type ProductWithRelations = Product & {
+  assets?: Array<ProductAsset & { asset: Asset }>;
   category_ref?: Category | null;
   ownerships?: Array<ProductOwnership & { customer?: Customer }>;
   warranty?: Warranty | null;
@@ -35,7 +38,10 @@ function toCategorySummary(category: Category | null | undefined) {
   };
 }
 
-export function toProductResponse(product: ProductWithRelations) {
+export function toProductResponse(
+  product: ProductWithRelations,
+  resolveAssetUrl: (asset: Asset) => string = (asset) => asset.path,
+) {
   const currentOwnership = product.ownerships?.find(
     (ownership) => ownership.is_current_owner,
   );
@@ -79,5 +85,16 @@ export function toProductResponse(product: ProductWithRelations) {
           terms: product.warranty.terms,
         }
       : null,
+    assets:
+      product.assets?.map((productAsset) => ({
+        id: productAsset.id,
+        assetId: productAsset.asset_id,
+        role: productAsset.role,
+        sortOrder: productAsset.sort_order,
+        altText: productAsset.alt_text,
+        url: resolveAssetUrl(productAsset.asset),
+        mimeType: productAsset.asset.mime_type,
+        originalName: productAsset.asset.original_name,
+      })) ?? [],
   };
 }

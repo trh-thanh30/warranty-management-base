@@ -1,13 +1,18 @@
 import { Permissions } from '@/common/decorators/permissions.decorator';
+import { AttachProductAssetDto } from '@/modules/products/dto/attach-product-asset.dto';
 import { AssignProductOwnerDto } from '@/modules/products/dto/assign-product-owner.dto';
 import { CreateProductDto } from '@/modules/products/dto/create-product.dto';
 import { ListProductsDto } from '@/modules/products/dto/list-products.dto';
 import { UpdateProductDto } from '@/modules/products/dto/update-product.dto';
+import { UpdateProductAssetDto } from '@/modules/products/dto/update-product-asset.dto';
+import { AttachProductAssetUseCase } from '@/modules/products/use-cases/attach-product-asset.use-case';
 import { AssignProductOwnerUseCase } from '@/modules/products/use-cases/assign-product-owner.use-case';
 import { CreateProductUseCase } from '@/modules/products/use-cases/create-product.use-case';
 import { GetProductDetailUseCase } from '@/modules/products/use-cases/get-product-detail.use-case';
 import { ListProductsUseCase } from '@/modules/products/use-cases/list-products.use-case';
 import { SoftDeleteProductUseCase } from '@/modules/products/use-cases/soft-delete-product.use-case';
+import { RemoveProductAssetUseCase } from '@/modules/products/use-cases/remove-product-asset.use-case';
+import { UpdateProductAssetUseCase } from '@/modules/products/use-cases/update-product-asset.use-case';
 import { UpdateProductUseCase } from '@/modules/products/use-cases/update-product.use-case';
 import {
   Body,
@@ -30,6 +35,9 @@ export class ProductsController {
     private readonly listProductsUseCase: ListProductsUseCase,
     private readonly getProductDetailUseCase: GetProductDetailUseCase,
     private readonly assignProductOwnerUseCase: AssignProductOwnerUseCase,
+    private readonly attachProductAssetUseCase: AttachProductAssetUseCase,
+    private readonly updateProductAssetUseCase: UpdateProductAssetUseCase,
+    private readonly removeProductAssetUseCase: RemoveProductAssetUseCase,
   ) {}
 
   @Get()
@@ -66,5 +74,30 @@ export class ProductsController {
   @Permissions([permission_key.PRODUCT_ASSIGN_OWNER])
   assignOwner(@Param('id') id: string, @Body() dto: AssignProductOwnerDto) {
     return this.assignProductOwnerUseCase.execute(id, dto);
+  }
+
+  @Post(':id/assets')
+  @Permissions([permission_key.PRODUCT_UPDATE])
+  attachAsset(@Param('id') id: string, @Body() dto: AttachProductAssetDto) {
+    return this.attachProductAssetUseCase.execute(id, dto);
+  }
+
+  @Patch(':id/assets/:productAssetId')
+  @Permissions([permission_key.PRODUCT_UPDATE])
+  updateAsset(
+    @Param('id') id: string,
+    @Param('productAssetId') productAssetId: string,
+    @Body() dto: UpdateProductAssetDto,
+  ) {
+    return this.updateProductAssetUseCase.execute(id, productAssetId, dto);
+  }
+
+  @Delete(':id/assets/:productAssetId')
+  @Permissions([permission_key.PRODUCT_UPDATE])
+  removeAsset(
+    @Param('id') id: string,
+    @Param('productAssetId') productAssetId: string,
+  ) {
+    return this.removeProductAssetUseCase.execute(id, productAssetId);
   }
 }

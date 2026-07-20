@@ -52,8 +52,9 @@ model Asset {
   created_at     DateTime          @default(now())
   updated_at     DateTime          @updatedAt
 
-  uploaded_by User?       @relation(fields: [uploaded_by_id], references: [id])
-  links       AssetLink[]
+  uploaded_by    User?          @relation(fields: [uploaded_by_id], references: [id])
+  links          AssetLink[]
+  product_assets ProductAsset[]
 
   @@index([access_type])
   @@index([type])
@@ -237,6 +238,7 @@ model Product {
   ownerships   ProductOwnership[]
   warranty     Warranty?
   claims       WarrantyClaim[]
+  assets       ProductAsset[]
 
   @@index([category])
   @@index([category_id])
@@ -245,6 +247,25 @@ model Product {
   @@index([serial_number])
   @@index([name])
   @@map("product")
+}
+
+model ProductAsset {
+  id         String             @id @default(uuid()) @db.Uuid
+  product_id String             @db.Uuid
+  asset_id   String             @db.Uuid
+  role       product_asset_role @default(GALLERY)
+  sort_order Int                @default(0)
+  alt_text   String?
+  created_at DateTime           @default(now())
+  updated_at DateTime           @updatedAt
+
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  asset   Asset   @relation(fields: [asset_id], references: [id], onDelete: Cascade)
+
+  @@unique([product_id, asset_id])
+  @@index([product_id, role, sort_order])
+  @@index([asset_id])
+  @@map("product_asset")
 }
 
 model ProductOwnership {
@@ -557,6 +578,13 @@ enum product_status {
   ACTIVE
   INACTIVE
   DELETED
+}
+
+enum product_asset_role {
+  COVER
+  GALLERY
+  SERIAL
+  INSTALLATION
 }
 
 enum warranty_status {

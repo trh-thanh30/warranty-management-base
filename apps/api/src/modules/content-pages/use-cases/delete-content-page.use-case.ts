@@ -1,11 +1,15 @@
 import { NotFoundError } from '@/common/response';
+import { AssetsService } from '@/modules/assets/assets.service';
 import { ContentPagesRepository } from '@/modules/content-pages/repository/content-pages.repository';
 import { Injectable } from '@nestjs/common';
+import { asset_type } from '@prisma/client';
+import { extractMediaUrls } from '@repo/shared/utils';
 
 @Injectable()
 export class DeleteContentPageUseCase {
   constructor(
     private readonly contentPagesRepository: ContentPagesRepository,
+    private readonly assetsService?: AssetsService,
   ) {}
 
   async execute(id: string) {
@@ -15,8 +19,14 @@ export class DeleteContentPageUseCase {
       throw new NotFoundError('Content page not found');
     }
 
-    await this.contentPagesRepository.delete(id);
+    for (const url of extractMediaUrls(existingPage.content)) {
+      await this.assetsService?.deleteAssetByUrl(url, {
+        folder: 'rich-text',
+        types: [asset_type.IMAGE, asset_type.VIDEO],
+      });
+    }
 
+    await this.contentPagesRepository.delete(id);
     return { success: true };
   }
 }

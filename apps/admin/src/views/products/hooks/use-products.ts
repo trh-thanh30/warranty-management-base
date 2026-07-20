@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-query";
 import type {
   AssignProductOwnerBody,
+  AttachProductAssetBody,
   CreateProductBody,
   ListProductsQuery,
   PaginatedResponse,
@@ -98,6 +99,36 @@ export function useAssignProductOwner(productId: string | null) {
     onSuccess: (product) => {
       void queryClient.invalidateQueries({ queryKey: productKeys.lists() });
       queryClient.setQueryData(productKeys.detail(product.id), product);
+    },
+  });
+}
+
+export function useAttachProductAsset(productId: string | null) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: AttachProductAssetBody) =>
+      productsService.attachAsset(productId ?? "", body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: productKeys.detail(productId),
+      });
+      void queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+    },
+  });
+}
+
+export function useRemoveProductAsset(productId: string | null) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (productAssetId: string) =>
+      productsService.removeAsset(productId ?? "", productAssetId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: productKeys.detail(productId),
+      });
+      void queryClient.invalidateQueries({ queryKey: productKeys.lists() });
     },
   });
 }

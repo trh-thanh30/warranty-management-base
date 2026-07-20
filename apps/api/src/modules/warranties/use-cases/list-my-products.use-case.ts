@@ -10,6 +10,6 @@ export class ListMyProductsUseCase {
     const products =
       await this.warrantiesRepository.listCurrentProductsForUser(ownerUserId);
 
-    return products.map(toProductResponse);
+    return products.map((product) => toProductResponse(product));
   }
 }

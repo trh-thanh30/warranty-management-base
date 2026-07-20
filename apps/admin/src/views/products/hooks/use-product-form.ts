@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useDebounce } from "@repo/hooks";
 import { useForm, type UseFormSetError } from "react-hook-form";
 import {
+  getRemovedMediaUrls,
   HttpClientError,
   type CreateProductBody,
   type ProductResponse,
@@ -19,7 +20,12 @@ import {
   productFormSchema,
   type ProductFormValues,
 } from "../products.types";
-import { useCreateProduct, useUpdateProduct } from "./use-products";
+import {
+  useAttachProductAsset,
+  useCreateProduct,
+  useRemoveProductAsset,
+  useUpdateProduct,
+} from "./use-products";
 import {
   toOptionalValue,
   toNullableValue,
@@ -39,6 +45,8 @@ export function useProductForm({
   const creating = !product;
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct(product?.id ?? null);
+  const attachProductAsset = useAttachProductAsset(product?.id ?? null);
+  const removeProductAsset = useRemoveProductAsset(product?.id ?? null);
   const {
     control,
     formState: { errors, isSubmitting },
@@ -46,6 +54,7 @@ export function useProductForm({
     register,
     reset,
     setError,
+    setValue,
     watch,
   } = useForm<ProductFormInput, unknown, ProductFormValues>({
     resolver: zodResolver(productFormSchema),
@@ -89,7 +98,29 @@ export function useProductForm({
       const updatedProduct = await updateProduct.mutateAsync(
         toUpdateProductBody(values),
       );
-      toast.success(t("updated"));
+      const existingCover = product.assets.find(
+        (asset) => asset.role === "COVER",
+      );
+      if (values.coverAssetId !== (existingCover?.assetId ?? "")) {
+        if (values.coverAssetId) {
+          await attachProductAsset.mutateAsync({
+            assetId: values.coverAssetId,
+            role: "COVER",
+            altText: values.name,
+          });
+        } else if (existingCover) {
+          await removeProductAsset.mutateAsync(existingCover.id);
+        }
+      }
+      const removedMediaCount = getRemovedMediaUrls(
+        product.description ?? "",
+        values.description,
+      ).length;
+      toast.success(
+        removedMediaCount > 0
+          ? t("mediaRemoved", { count: removedMediaCount })
+          : t("updated"),
+      );
       onSaved(updatedProduct);
     } catch (error) {
       const handledMessage = handleProductSaveError(error, setError, t);
@@ -114,6 +145,7 @@ export function useProductForm({
     isSubmitting,
     onSubmit: handleSubmit(submit),
     register,
+    setValue,
     watch,
   };
 }
@@ -126,6 +158,10 @@ function getDefaultValues(product: ProductResponse | null): ProductFormInput {
     category: product?.category ?? "CAR",
     categoryId: product?.categoryId ?? "",
     customerId: "",
+    coverAssetId:
+      product?.assets.find((asset) => asset.role === "COVER")?.assetId ?? "",
+    coverImageUrl:
+      product?.assets.find((asset) => asset.role === "COVER")?.url ?? "",
     description: product?.description ?? "",
     durationMonths: product?.warranty?.durationMonths ?? undefined,
     manufactureYear: product?.manufactureYear ?? undefined,
@@ -148,6 +184,7 @@ function toCreateProductBody(values: ProductFormValues): CreateProductBody {
     category: values.category,
     categoryId: toOptionalValue(values.categoryId),
     customerId: toOptionalValue(values.customerId),
+    coverAssetId: toOptionalValue(values.coverAssetId),
     description: toOptionalRichText(values.description),
     durationMonths: values.durationMonths,
     manufactureYear: values.manufactureYear,
@@ -185,6 +222,7 @@ function handleProductSaveError(
 
   const messages = {
     "Customer not found": ["customerId", "customerNotFound"],
+    "Product cover asset not found": ["coverAssetId", "coverAssetNotFound"],
     "Product category not found": ["categoryId", "categoryNotFound"],
     "Serial number already exists": ["serialNumber", "duplicateSerialNumber"],
     "Warranty code already exists": ["warrantyCode", "duplicateWarrantyCode"],

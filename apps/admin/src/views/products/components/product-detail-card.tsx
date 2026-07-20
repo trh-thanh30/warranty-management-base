@@ -1,6 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
+import Lightbox from "yet-another-react-lightbox";
 import type { ProductResponse } from "@repo/shared";
 import {
   Card,
@@ -27,6 +28,15 @@ export function ProductDetailCard({
   title,
 }: ProductDetailCardProps) {
   const t = useTranslations("Products");
+  const [previewIndex, setPreviewIndex] = useState(-1);
+  const slides = useMemo(
+    () =>
+      product.assets.map((asset) => ({
+        src: asset.url,
+        alt: asset.altText ?? product.name,
+      })),
+    [product.assets, product.name],
+  );
 
   return (
     <Card>
@@ -35,6 +45,43 @@ export function ProductDetailCard({
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6 lg:grid-cols-2">
+        {product.assets.length ? (
+          <section className="space-y-3 lg:col-span-2">
+            <h2 className="font-medium text-slate-950 dark:text-slate-50">
+              {t("images")}
+            </h2>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              {product.assets.map((asset, index) => (
+                <button
+                  aria-label={t("previewProductImage", {
+                    name: asset.altText ?? product.name,
+                  })}
+                  className="group relative aspect-[4/3] overflow-hidden rounded-md border border-slate-200 bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 dark:border-slate-800 dark:bg-slate-900 dark:focus-visible:ring-slate-50"
+                  key={asset.id}
+                  onClick={() => setPreviewIndex(index)}
+                  type="button"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    alt={asset.altText ?? product.name}
+                    className="size-full object-cover transition-transform group-hover:scale-[1.02]"
+                    src={asset.url}
+                  />
+                  <span className="absolute bottom-2 left-2 rounded bg-slate-950/80 px-2 py-1 text-xs text-white">
+                    {t(`assetRoles.${asset.role}`)}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <Lightbox
+              close={() => setPreviewIndex(-1)}
+              index={Math.max(previewIndex, 0)}
+              open={previewIndex >= 0}
+              slides={slides}
+            />
+          </section>
+        ) : null}
+
         <DetailSection title={t("sections.product")}>
           <DetailItem label={t("name")} value={product.name} />
           <DetailItem label={t("productCode")} value={product.productCode} />
@@ -92,7 +139,7 @@ export function ProductDetailCard({
         </DetailSection>
 
         {product.description ? (
-          <div className="lg:col-span-2 space-y-3 rounded-md border border-slate-200 p-4 dark:border-slate-800">
+          <div className="space-y-3 rounded-md border border-slate-200 p-4 lg:col-span-2 dark:border-slate-800">
             <h2 className="font-medium text-slate-950 dark:text-slate-50">
               {t("descriptionLabel")}
             </h2>

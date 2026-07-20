@@ -8,6 +8,7 @@ import { AuthProvider } from "@/src/app/providers/auth-provider";
 import { ToastProvider } from "@/src/app/providers/toast-provider";
 import { QueryProvider } from "@/src/app/providers/query-provider";
 import { routing } from "@/src/i18n/routing";
+import "yet-another-react-lightbox/styles.css";
 import "../globals.css";
 
 export const metadata: Metadata = {

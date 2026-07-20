@@ -36,7 +36,7 @@ export type UploadAssetOptions = {
 };
 
 export type AssetsHttpClient = {
-  delete<T>(url: string): Promise<HttpResponse<T>>;
+  delete<T>(url: string, config?: RequestConfig): Promise<HttpResponse<T>>;
   post<T>(
     url: string,
     body?: unknown,
@@ -71,6 +71,12 @@ export function createAssetsService(http: AssetsHttpClient) {
   return {
     async deleteAsset(assetId: string): Promise<void> {
       await http.delete<void>(`/assets/${assetId}`);
+    },
+
+    async deleteAssetByUrl(url: string): Promise<void> {
+      await http.delete<void>("/assets/by-url", {
+        params: { url },
+      });
     },
 
     async uploadAsset(

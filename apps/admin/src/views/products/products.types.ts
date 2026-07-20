@@ -37,6 +37,8 @@ export const productFormSchema = z
     category: z.enum(["CAR", "ACCESSORY", "SPARE_PART", "SERVICE_PACKAGE"]),
     categoryId: z.string(),
     customerId: z.string(),
+    coverAssetId: z.string(),
+    coverImageUrl: z.string(),
     description: optionalText.max(5000, "descriptionLength"),
     durationMonths: optionalInteger({
       integer: "durationMonthsInteger",

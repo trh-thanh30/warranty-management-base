@@ -4,7 +4,11 @@ import { useEffect, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { HttpClientError, type ContentPageSummary } from "@repo/shared";
+import {
+  getRemovedMediaUrls,
+  HttpClientError,
+  type ContentPageSummary,
+} from "@repo/shared";
 import { useToast } from "@/src/hooks/use-toast";
 import {
   contentPageFormSchema,
@@ -43,13 +47,20 @@ export function useContentPageForm({
 
   async function submit(values: ContentPageFormValues) {
     try {
+      const removedMediaCount = page
+        ? getRemovedMediaUrls(page.content, values.content).length
+        : 0;
       const body = {
         ...values,
         summary: values.summary || undefined,
       };
       if (page) await updatePage.mutateAsync(body);
       else await createPage.mutateAsync(body);
-      toast.success(t(page ? "updated" : "created"));
+      toast.success(
+        removedMediaCount > 0
+          ? t("mediaRemoved", { count: removedMediaCount })
+          : t(page ? "updated" : "created"),
+      );
       onSaved();
     } catch (error) {
       const mapped = getContentPageSaveError(error);

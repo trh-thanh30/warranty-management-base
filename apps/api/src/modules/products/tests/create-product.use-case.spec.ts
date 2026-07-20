@@ -1,6 +1,10 @@
 import { CreateProductUseCase } from '@/modules/products/use-cases/create-product.use-case';
 import { product_category, warranty_status } from '@prisma/client';
 
+jest.mock('@/modules/assets/assets.service', () => ({
+  AssetsService: class AssetsService {},
+}));
+
 describe('CreateProductUseCase', () => {
   const createProductsRepository = () => ({
     findByProductCode: jest.fn(),
