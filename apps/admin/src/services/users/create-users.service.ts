@@ -3,12 +3,13 @@ import type {
   CreateModeratorResponse,
   ListUsersQuery,
   PaginatedResponse,
+  StaffImportResult,
   UpdateModeratorBody,
   UpdateUserPermissionsBody,
   UserAccountSummary,
   UserPermissionsResponse,
 } from "@repo/shared";
-import { unwrap } from "../service.utils.ts";
+import { unwrap, unwrapBlob } from "../service.utils.ts";
 import type { UsersHttpClient } from "./users.types";
 
 export function createUsersService(http: UsersHttpClient) {
@@ -30,6 +31,34 @@ export function createUsersService(http: UsersHttpClient) {
       body: CreateModeratorBody,
     ): Promise<CreateModeratorResponse> {
       return unwrap(await http.post<CreateModeratorResponse>("/users", body));
+    },
+
+    async downloadStaffImportTemplate(): Promise<Blob> {
+      return unwrapBlob(
+        await http.get<Blob>("/users/staff/import-template", {
+          responseType: "blob",
+        }),
+      );
+    },
+
+    async exportStaff(
+      query: Omit<ListUsersQuery, "role" | "roles">,
+    ): Promise<Blob> {
+      return unwrapBlob(
+        await http.get<Blob>("/users/staff/export", {
+          params: query,
+          responseType: "blob",
+        }),
+      );
+    },
+
+    async importStaff(file: File): Promise<StaffImportResult> {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      return unwrap(
+        await http.post<StaffImportResult>("/users/staff/import", formData),
+      );
     },
 
     async getModerator(userId: string): Promise<UserAccountSummary | null> {

@@ -62,6 +62,22 @@ export type CreateModeratorResponse = {
   user: UserAccountSummary;
 };
 
+export type StaffImportResult = {
+  created: number;
+  updated: number;
+  errors: Array<{
+    field: string;
+    message: string;
+    rowNumber: number;
+  }>;
+  temporaryCredentials: Array<{
+    email: string;
+    fullName: string;
+    temporaryPassword: string;
+    username: string;
+  }>;
+};
+
 export type UpdateModeratorBody = {
   email?: string;
   full_name?: string;

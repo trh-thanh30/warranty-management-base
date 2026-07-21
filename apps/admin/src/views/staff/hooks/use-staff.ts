@@ -10,6 +10,7 @@ import {
 import type {
   ListUsersQuery,
   PaginatedResponse,
+  StaffImportResult,
   UpdateModeratorBody,
   UserAccountSummary,
 } from "@repo/shared";
@@ -53,6 +54,19 @@ export function useUpdateStaffMember() {
     }) => usersService.updateModerator(userId, body),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: staffKeys.lists() });
+    },
+  });
+}
+
+export function useImportStaff() {
+  const queryClient = useQueryClient();
+
+  return useMutation<StaffImportResult, Error, File>({
+    mutationFn: (file) => usersService.importStaff(file),
+    onSuccess: (result) => {
+      if (result.errors.length === 0) {
+        void queryClient.invalidateQueries({ queryKey: staffKeys.lists() });
+      }
     },
   });
 }
