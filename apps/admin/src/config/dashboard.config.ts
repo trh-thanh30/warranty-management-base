@@ -1,3 +1,4 @@
+import { PERMISSIONS } from "@repo/shared/constants";
 import {
   Bell,
   Building2,
@@ -7,14 +8,13 @@ import {
   LogOut,
   Package,
   Settings,
-  ShieldPlus,
   ShieldCheck,
+  ShieldPlus,
   Tags,
   UserRound,
   Users,
 } from "lucide-react";
 import type { DashboardConfig } from "./dashboard.types";
-import { PERMISSIONS } from "@repo/shared/constants";
 
 type Translate = (key: string) => string;
 
@@ -37,7 +37,7 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
           },
           {
             title: t("items.users"),
-            href: "/users",
+            href: "/staffs",
             icon: Users,
             requiredPermission: PERMISSIONS.USER_VIEW,
             requiredRole: "admin",
