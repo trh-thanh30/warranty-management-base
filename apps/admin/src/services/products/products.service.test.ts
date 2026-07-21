@@ -262,3 +262,69 @@ test("previewing product import uploads form data", async () => {
   assert.ok(calls[0]?.body instanceof FormData);
   assert.deepEqual(result, preview);
 });
+
+test("confirming product import posts edited preview rows", async () => {
+  const calls: unknown[] = [];
+  const response = {
+    created: 1,
+    deactivated: 0,
+    errors: [],
+    updated: 0,
+  };
+  const http = {
+    async post(url: string, body?: unknown) {
+      calls.push({ url, body });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  const result = await createProductsService(
+    http as unknown as ProductsHttpClient,
+  ).confirmImport({
+    mode: "upsert",
+    rows: [
+      {
+        brand: "Toyota",
+        category: "SPARE_PART",
+        categoryCode: null,
+        description: null,
+        imageUrl: "https://example.com/product.jpg",
+        manufactureYear: 2026,
+        model: "Battery",
+        name: "SUV Battery",
+        productCode: null,
+        serialNumber: "SN-001",
+        status: "ACTIVE",
+        warrantyDurationMonths: 36,
+        warrantyTerms: null,
+      },
+    ],
+  });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/products/import/confirm",
+      body: {
+        mode: "upsert",
+        rows: [
+          {
+            brand: "Toyota",
+            category: "SPARE_PART",
+            categoryCode: null,
+            description: null,
+            imageUrl: "https://example.com/product.jpg",
+            manufactureYear: 2026,
+            model: "Battery",
+            name: "SUV Battery",
+            productCode: null,
+            serialNumber: "SN-001",
+            status: "ACTIVE",
+            warrantyDurationMonths: 36,
+            warrantyTerms: null,
+          },
+        ],
+      },
+    },
+  ]);
+  assert.deepEqual(result, response);
+});

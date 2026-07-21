@@ -20,11 +20,14 @@ export function toProductExcelRow(
   const imageAsset =
     product.assets?.find((productAsset) => productAsset.role === 'COVER') ??
     product.assets?.[0];
+  const metadata = product.metadata as Record<string, unknown> | null;
+  const metadataImageUrl =
+    typeof metadata?.excelImageUrl === 'string' ? metadata.excelImageUrl : null;
 
   return {
     productCode: product.product_code,
     name: product.name,
-    imageUrl: imageAsset ? resolveAssetUrl(imageAsset.asset) : null,
+    imageUrl: imageAsset ? resolveAssetUrl(imageAsset.asset) : metadataImageUrl,
     category: product.category,
     categoryCode: product.category_ref?.code ?? null,
     brand: product.brand,

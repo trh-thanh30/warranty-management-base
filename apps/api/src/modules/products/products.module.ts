@@ -5,6 +5,7 @@ import { ProductsRepository } from '@/modules/products/repository/products.repos
 import { ProductAssetsRepository } from '@/modules/products/repository/product-assets.repository';
 import { AssignProductOwnerUseCase } from '@/modules/products/use-cases/assign-product-owner.use-case';
 import { AttachProductAssetUseCase } from '@/modules/products/use-cases/attach-product-asset.use-case';
+import { ConfirmProductImportUseCase } from '@/modules/products/use-cases/confirm-product-import.use-case';
 import { CreateProductUseCase } from '@/modules/products/use-cases/create-product.use-case';
 import { DownloadProductImportTemplateUseCase } from '@/modules/products/use-cases/download-product-import-template.use-case';
 import { ExportProductsUseCase } from '@/modules/products/use-cases/export-products.use-case';
@@ -42,6 +43,7 @@ import { memoryStorage } from 'multer';
     AttachProductAssetUseCase,
     UpdateProductAssetUseCase,
     RemoveProductAssetUseCase,
+    ConfirmProductImportUseCase,
     DownloadProductImportTemplateUseCase,
     ExportProductsUseCase,
     PreviewProductImportUseCase,

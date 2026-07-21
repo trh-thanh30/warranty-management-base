@@ -1,12 +1,14 @@
 import { Permissions } from '@/common/decorators/permissions.decorator';
 import { AttachProductAssetDto } from '@/modules/products/dto/attach-product-asset.dto';
 import { AssignProductOwnerDto } from '@/modules/products/dto/assign-product-owner.dto';
+import { ConfirmProductImportDto } from '@/modules/products/dto/confirm-product-import.dto';
 import { CreateProductDto } from '@/modules/products/dto/create-product.dto';
 import { ListProductsDto } from '@/modules/products/dto/list-products.dto';
 import { UpdateProductDto } from '@/modules/products/dto/update-product.dto';
 import { UpdateProductAssetDto } from '@/modules/products/dto/update-product-asset.dto';
 import { AttachProductAssetUseCase } from '@/modules/products/use-cases/attach-product-asset.use-case';
 import { AssignProductOwnerUseCase } from '@/modules/products/use-cases/assign-product-owner.use-case';
+import { ConfirmProductImportUseCase } from '@/modules/products/use-cases/confirm-product-import.use-case';
 import { CreateProductUseCase } from '@/modules/products/use-cases/create-product.use-case';
 import { DownloadProductImportTemplateUseCase } from '@/modules/products/use-cases/download-product-import-template.use-case';
 import { ExportProductsUseCase } from '@/modules/products/use-cases/export-products.use-case';
@@ -46,6 +48,7 @@ export class ProductsController {
     private readonly attachProductAssetUseCase: AttachProductAssetUseCase,
     private readonly updateProductAssetUseCase: UpdateProductAssetUseCase,
     private readonly removeProductAssetUseCase: RemoveProductAssetUseCase,
+    private readonly confirmProductImportUseCase: ConfirmProductImportUseCase,
     private readonly downloadProductImportTemplateUseCase: DownloadProductImportTemplateUseCase,
     private readonly exportProductsUseCase: ExportProductsUseCase,
     private readonly previewProductImportUseCase: PreviewProductImportUseCase,
@@ -79,6 +82,12 @@ export class ProductsController {
   @UseInterceptors(FileInterceptor('file'))
   previewImport(@UploadedFile() file: Express.Multer.File) {
     return this.previewProductImportUseCase.execute(file);
+  }
+
+  @Post('import/confirm')
+  @Permissions([permission_key.PRODUCT_CREATE])
+  confirmImport(@Body() dto: ConfirmProductImportDto) {
+    return this.confirmProductImportUseCase.execute(dto);
   }
 
   @Post()
