@@ -3,18 +3,15 @@
 import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
-import { useDebounce } from "@repo/hooks";
-import { useForm, type UseFormSetError } from "react-hook-form";
+import { useFieldArray, useForm, type UseFormSetError } from "react-hook-form";
 import {
   getRemovedMediaUrls,
   HttpClientError,
-  type CreateProductBody,
   type ProductResponse,
   type UpdateProductBody,
 } from "@repo/shared";
 import { useToast } from "@/src/hooks/use-toast";
 import { useCategories } from "../../categories/hooks/use-categories";
-import { useCustomers } from "../../customers/hooks/use-customers";
 import {
   type ProductFormInput,
   productFormSchema,
@@ -27,11 +24,11 @@ import {
   useUpdateProduct,
 } from "./use-products";
 import {
-  toOptionalValue,
-  toNullableValue,
-  toOptionalRichText,
-  toNullableRichText,
-} from "@/src/utils";
+  getProductSpecifications,
+  mergeProductSpecifications,
+  toCreateProductBody,
+} from "../products.utils";
+import { toNullableValue, toNullableRichText } from "@/src/utils";
 
 export function useProductForm({
   onSaved,
@@ -55,13 +52,19 @@ export function useProductForm({
     reset,
     setError,
     setValue,
-    watch,
   } = useForm<ProductFormInput, unknown, ProductFormValues>({
     resolver: zodResolver(productFormSchema),
     defaultValues: getDefaultValues(null),
   });
-  const customerSearch = watch("customerId");
-  const debouncedCustomerSearch = useDebounce(customerSearch.trim(), 300);
+  const {
+    append: appendSpecification,
+    fields: specificationFields,
+    move: moveSpecification,
+    remove: removeSpecification,
+  } = useFieldArray({
+    control,
+    name: "specifications",
+  });
   const categoriesQuery = useCategories(
     {
       isActive: "true",
@@ -71,13 +74,6 @@ export function useProductForm({
       type: "PRODUCT",
     },
     { enabled: true },
-  );
-  const customersQuery = useCustomers(
-    {
-      limit: 20,
-      search: debouncedCustomerSearch || undefined,
-    },
-    { enabled: creating },
   );
 
   useEffect(() => {
@@ -96,7 +92,7 @@ export function useProductForm({
       }
 
       const updatedProduct = await updateProduct.mutateAsync(
-        toUpdateProductBody(values),
+        toUpdateProductBody(values, product.metadata),
       );
       const existingCover = product.assets.find(
         (asset) => asset.role === "COVER",
@@ -140,73 +136,55 @@ export function useProductForm({
     categoriesQuery,
     control,
     creating,
-    customersQuery,
     errors,
     isSubmitting,
     onSubmit: handleSubmit(submit),
     register,
+    appendSpecification,
+    moveSpecification,
+    removeSpecification,
     setValue,
-    watch,
+    specificationFields,
   };
 }
 
 function getDefaultValues(product: ProductResponse | null): ProductFormInput {
+  const specifications = getProductSpecifications(product?.metadata);
+
   return {
-    activatedAt: "",
-    autoGenerateWarrantyCode: true,
     brand: product?.brand ?? "",
     category: product?.category ?? "CAR",
     categoryId: product?.categoryId ?? "",
-    customerId: "",
     coverAssetId:
       product?.assets.find((asset) => asset.role === "COVER")?.assetId ?? "",
     coverImageUrl:
       product?.assets.find((asset) => asset.role === "COVER")?.url ?? "",
     description: product?.description ?? "",
-    durationMonths: product?.warranty?.durationMonths ?? undefined,
     manufactureYear: product?.manufactureYear ?? undefined,
-    metadata: "",
     model: product?.model ?? "",
     name: product?.name ?? "",
-    purchaseDate: "",
     serialNumber: product?.serialNumber ?? "",
+    specifications: specifications.length
+      ? specifications
+      : [{ key: "", value: "" }],
     status: product?.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
-    warrantyCode: "",
-    warrantyTerms: product?.warranty?.terms ?? "",
   };
 }
 
-function toCreateProductBody(values: ProductFormValues): CreateProductBody {
-  return {
-    activatedAt: toOptionalValue(values.activatedAt),
-    autoGenerateWarrantyCode: values.autoGenerateWarrantyCode,
-    brand: toOptionalValue(values.brand),
-    category: values.category,
-    categoryId: toOptionalValue(values.categoryId),
-    customerId: toOptionalValue(values.customerId),
-    coverAssetId: toOptionalValue(values.coverAssetId),
-    description: toOptionalRichText(values.description),
-    durationMonths: values.durationMonths,
-    manufactureYear: values.manufactureYear,
-    model: toOptionalValue(values.model),
-    name: values.name.trim(),
-    purchaseDate: toOptionalValue(values.purchaseDate),
-    serialNumber: toOptionalValue(values.serialNumber),
-    status: values.status,
-    warrantyCode: values.autoGenerateWarrantyCode
-      ? undefined
-      : values.warrantyCode.trim().toUpperCase(),
-    warrantyTerms: toOptionalValue(values.warrantyTerms),
-  };
-}
-
-function toUpdateProductBody(values: ProductFormValues): UpdateProductBody {
+function toUpdateProductBody(
+  values: ProductFormValues,
+  existingMetadata: Record<string, unknown> | null,
+): UpdateProductBody {
   return {
     brand: toNullableValue(values.brand),
     category: values.category,
     categoryId: toNullableValue(values.categoryId),
     description: toNullableRichText(values.description),
     manufactureYear: values.manufactureYear ?? null,
+    metadata: mergeProductSpecifications(
+      existingMetadata,
+      values.specifications,
+    ),
     model: toNullableValue(values.model),
     name: values.name.trim(),
     serialNumber: toNullableValue(values.serialNumber),
@@ -221,16 +199,9 @@ function handleProductSaveError(
   if (!(error instanceof HttpClientError)) return null;
 
   const messages = {
-    "Customer not found": ["customerId", "customerNotFound"],
     "Product cover asset not found": ["coverAssetId", "coverAssetNotFound"],
     "Product category not found": ["categoryId", "categoryNotFound"],
     "Serial number already exists": ["serialNumber", "duplicateSerialNumber"],
-    "Warranty code already exists": ["warrantyCode", "duplicateWarrantyCode"],
-    "Warranty code is required": ["warrantyCode", "warrantyCodeRequired"],
-    "Warranty code must be 6-64 uppercase letters, numbers, or dashes": [
-      "warrantyCode",
-      "warrantyCodeInvalid",
-    ],
   } as const;
   const match = messages[error.message as keyof typeof messages];
   if (!match) return null;

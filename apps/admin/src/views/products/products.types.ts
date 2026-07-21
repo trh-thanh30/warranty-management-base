@@ -13,6 +13,50 @@ export type ProductCategoryOption = (typeof PRODUCT_CATEGORIES)[number];
 export type ProductDirectorySortBy = ProductSortBy;
 
 const optionalText = z.string().trim();
+const productSpecificationSchema = z
+  .object({
+    key: optionalText.max(160, "specificationKeyLength"),
+    value: optionalText.max(160, "specificationValueLength"),
+  })
+  .superRefine((row, context) => {
+    if (!row.key && row.value) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "specificationKeyRequired",
+        path: ["key"],
+      });
+    }
+
+    if (row.key && !row.value) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "specificationValueRequired",
+        path: ["value"],
+      });
+    }
+  });
+
+export const productSpecificationsSchema = z
+  .array(productSpecificationSchema)
+  .superRefine((rows, context) => {
+    const seenKeys = new Set<string>();
+
+    rows.forEach((row, index) => {
+      if (!row.key) return;
+
+      const normalizedKey = row.key.toLocaleLowerCase();
+      if (seenKeys.has(normalizedKey)) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "specificationKeyDuplicate",
+          path: [index, "key"],
+        });
+        return;
+      }
+
+      seenKeys.add(normalizedKey);
+    });
+  });
 const optionalInteger = (messages: {
   integer: string;
   max: number;
@@ -29,37 +73,32 @@ const optionalInteger = (messages: {
       .optional(),
   );
 
-export const productFormSchema = z
+export const productFormSchema = z.object({
+  brand: optionalText.max(80, "brandLength"),
+  category: z.enum(["CAR", "ACCESSORY", "SPARE_PART", "SERVICE_PACKAGE"]),
+  categoryId: z.string(),
+  coverAssetId: z.string(),
+  coverImageUrl: z.string(),
+  description: optionalText.max(5000, "descriptionLength"),
+  manufactureYear: optionalInteger({
+    integer: "manufactureYearInteger",
+    max: 2100,
+    min: 1900,
+    range: "manufactureYearRange",
+  }),
+  model: optionalText.max(80, "modelLength"),
+  name: optionalText.min(2, "nameRequired").max(160, "nameLength"),
+  serialNumber: optionalText.max(64, "serialNumberLength"),
+  specifications: productSpecificationsSchema,
+  status: z.enum(["ACTIVE", "INACTIVE"]),
+});
+
+export const assignProductOwnerSchema = z
   .object({
-    activatedAt: optionalText,
     autoGenerateWarrantyCode: z.boolean(),
-    brand: optionalText.max(80, "brandLength"),
-    category: z.enum(["CAR", "ACCESSORY", "SPARE_PART", "SERVICE_PACKAGE"]),
-    categoryId: z.string(),
-    customerId: z.string(),
-    coverAssetId: z.string(),
-    coverImageUrl: z.string(),
-    description: optionalText.max(5000, "descriptionLength"),
-    durationMonths: optionalInteger({
-      integer: "durationMonthsInteger",
-      max: 120,
-      min: 1,
-      range: "durationMonthsRange",
-    }),
-    manufactureYear: optionalInteger({
-      integer: "manufactureYearInteger",
-      max: 2100,
-      min: 1900,
-      range: "manufactureYearRange",
-    }),
-    metadata: optionalText,
-    model: optionalText.max(80, "modelLength"),
-    name: optionalText.min(2, "nameRequired").max(160, "nameLength"),
+    customerId: optionalText.min(1, "customerRequired"),
     purchaseDate: optionalText,
-    serialNumber: optionalText.max(64, "serialNumberLength"),
-    status: z.enum(["ACTIVE", "INACTIVE"]),
     warrantyCode: optionalText,
-    warrantyTerms: optionalText.max(2000, "warrantyTermsLength"),
   })
   .superRefine((values, context) => {
     if (values.autoGenerateWarrantyCode) return;
@@ -84,3 +123,9 @@ export const productFormSchema = z
 
 export type ProductFormInput = z.input<typeof productFormSchema>;
 export type ProductFormValues = z.output<typeof productFormSchema>;
+export type AssignProductOwnerFormValues = z.output<
+  typeof assignProductOwnerSchema
+>;
+export type ProductSpecificationRow = z.output<
+  typeof productSpecificationSchema
+>;

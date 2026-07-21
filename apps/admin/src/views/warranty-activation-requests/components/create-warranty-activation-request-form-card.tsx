@@ -126,7 +126,10 @@ export function CreateWarrantyActivationRequestFormCard({
     [customersQuery.data?.items],
   );
   const products = useMemo(
-    () => productsQuery.data?.items ?? [],
+    () =>
+      (productsQuery.data?.items ?? []).filter(
+        (product) => product.warrantyCode !== null,
+      ),
     [productsQuery.data?.items],
   );
   const selectedProvince = provinces.find(
@@ -181,6 +184,8 @@ export function CreateWarrantyActivationRequestFormCard({
   }
 
   function applyProduct(product: ProductResponse) {
+    if (!product.warrantyCode) return;
+
     setSelectedProduct(product);
     setValue("productId", product.id, {
       shouldDirty: true,

@@ -8,6 +8,7 @@ import { ManualWarrantyActivationDto } from '@/modules/warranties/dto/manual-war
 import { ActivateWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/activate-warranty-by-code.use-case';
 import { ActivateWarrantyUseCase } from '@/modules/warranties/use-cases/activate-warranty.use-case';
 import { GetMyProductWarrantyUseCase } from '@/modules/warranties/use-cases/get-my-product-warranty.use-case';
+import { GetWarrantyDetailUseCase } from '@/modules/warranties/use-cases/get-warranty-detail.use-case';
 import { GetWarrantyByProductUseCase } from '@/modules/warranties/use-cases/get-warranty-by-product.use-case';
 import { ListMyProductsUseCase } from '@/modules/warranties/use-cases/list-my-products.use-case';
 import { ListWarrantiesUseCase } from '@/modules/warranties/use-cases/list-warranties.use-case';
@@ -26,6 +27,7 @@ export class WarrantiesController {
   constructor(
     private readonly activateWarrantyUseCase: ActivateWarrantyUseCase,
     private readonly activateWarrantyByCodeUseCase: ActivateWarrantyByCodeUseCase,
+    private readonly getWarrantyDetailUseCase: GetWarrantyDetailUseCase,
     private readonly getWarrantyByProductUseCase: GetWarrantyByProductUseCase,
     private readonly listWarrantiesUseCase: ListWarrantiesUseCase,
     private readonly lookupWarrantyByCodeUseCase: LookupWarrantyByCodeUseCase,
@@ -45,6 +47,12 @@ export class WarrantiesController {
   @Permissions([permission_key.WARRANTY_VIEW])
   lookupWarrantyByCode(@Query() dto: LookupWarrantyDto) {
     return this.lookupWarrantyByCodeUseCase.execute(dto);
+  }
+
+  @Get('warranties/:id')
+  @Permissions([permission_key.WARRANTY_VIEW])
+  getWarrantyDetail(@Param('id') id: string) {
+    return this.getWarrantyDetailUseCase.execute(id);
   }
 
   @Post('warranties/activate-by-code')

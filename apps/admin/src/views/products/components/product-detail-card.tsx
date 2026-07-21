@@ -85,7 +85,10 @@ export function ProductDetailCard({
         <DetailSection title={t("sections.product")}>
           <DetailItem label={t("name")} value={product.name} />
           <DetailItem label={t("productCode")} value={product.productCode} />
-          <DetailItem label={t("warrantyCode")} value={product.warrantyCode} />
+          <DetailItem
+            label={t("warrantyCode")}
+            value={product.warrantyCode ?? "-"}
+          />
           <DetailItem
             label={t("serialNumber")}
             value={product.serialNumber ?? "-"}

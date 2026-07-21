@@ -11,7 +11,9 @@ import {
   DialogDescription,
   DialogTitle,
   DatePicker,
+  Input,
   Label,
+  Switch,
 } from "@repo/ui";
 import {
   Combobox,
@@ -67,7 +69,10 @@ export function AssignOwnerDialog({
       <Dialog
         open={open}
         onOpenChange={(nextOpen) => {
-          if (!nextOpen) setConfirmOpen(false);
+          if (!nextOpen) {
+            setConfirmOpen(false);
+            workflow.reset();
+          }
           onOpenChange(nextOpen);
         }}
       >
@@ -125,7 +130,57 @@ export function AssignOwnerDialog({
               </p>
             ) : null}
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            {product?.warrantyCode ? (
+              <div className="space-y-2">
+                <Label htmlFor="assign-owner-existing-warranty-code">
+                  {t("warrantyCode")}
+                </Label>
+                <Input
+                  id="assign-owner-existing-warranty-code"
+                  readOnly
+                  value={product.warrantyCode}
+                />
+                <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">
+                  {t("existingWarrantyCodeDescription")}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4 rounded-md border border-slate-200 p-4 dark:border-slate-800">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="min-w-0">
+                    <Label htmlFor="assign-owner-auto-warranty-code">
+                      {t("autoGenerateWarrantyCode")}
+                    </Label>
+                    <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                      {t("autoGenerateWarrantyCodeOnAssignmentDescription")}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={workflow.autoGenerateWarrantyCode}
+                    className="shrink-0"
+                    id="assign-owner-auto-warranty-code"
+                    onCheckedChange={workflow.setAutoGenerateWarrantyCode}
+                  />
+                </div>
+                {!workflow.autoGenerateWarrantyCode ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="assign-owner-warranty-code">
+                      {t("warrantyCode")}
+                    </Label>
+                    <Input
+                      id="assign-owner-warranty-code"
+                      onChange={(event) =>
+                        workflow.setWarrantyCode(event.target.value)
+                      }
+                      placeholder={t("warrantyCodePlaceholder")}
+                      value={workflow.warrantyCode}
+                    />
+                  </div>
+                ) : null}
+              </div>
+            )}
+
+            <div className="grid gap-4">
               <div className="space-y-2">
                 <Label htmlFor="assign-owner-purchase-date">
                   {t("purchaseDate")}
@@ -136,18 +191,6 @@ export function AssignOwnerDialog({
                   onValueChange={workflow.setPurchaseDate}
                   placeholder={t("selectPurchaseDate")}
                   value={workflow.purchaseDate}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="assign-owner-activated-at">
-                  {t("activatedAt")}
-                </Label>
-                <DatePicker
-                  ariaLabel={t("activatedAt")}
-                  id="assign-owner-activated-at"
-                  onValueChange={workflow.setActivatedAt}
-                  placeholder={t("selectActivatedAt")}
-                  value={workflow.activatedAt}
                 />
               </div>
             </div>

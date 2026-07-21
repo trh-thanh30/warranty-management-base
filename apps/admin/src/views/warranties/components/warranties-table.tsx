@@ -125,7 +125,7 @@ function WarrantyTableRow({
       </TableCell>
       <TableCell>{formatWarrantyOwner(warranty)}</TableCell>
       <TableCell className="font-mono text-xs">
-        {warranty.warrantyCode}
+        {warranty.warrantyCode ?? "-"}
       </TableCell>
       <TableCell>
         <WarrantyStatusBadge status={warranty.status} />
@@ -161,7 +161,7 @@ function WarrantyMobileCard({
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
         <WarrantyMobileField
           label={t("warrantyCode")}
-          value={warranty.warrantyCode}
+          value={warranty.warrantyCode ?? "-"}
         />
         <WarrantyMobileField
           label={t("owner")}
@@ -188,7 +188,7 @@ function WarrantyProductName({ warranty }: { warranty: WarrantyListItem }) {
     <div className="min-w-0">
       <Link
         className="truncate font-medium text-slate-950 hover:underline dark:text-slate-50"
-        href={`/products/${warranty.product.id}`}
+        href={`/warranties/${warranty.id}`}
       >
         {warranty.product.name}
       </Link>
@@ -228,13 +228,16 @@ function WarrantyActions({
   const t = useTranslations("Warranties");
   const { hasPermission } = usePermissions();
   const canActivate = hasPermission(PERMISSIONS.WARRANTY_ACTIVATE);
-  const canActivateCurrentWarranty = canActivate && warranty.status === "DRAFT";
+  const canActivateCurrentWarranty =
+    canActivate &&
+    warranty.status === "DRAFT" &&
+    Boolean(warranty.warrantyCode);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          aria-label={t("openActions", { code: warranty.warrantyCode })}
+          aria-label={t("openActions", { code: warranty.warrantyCode ?? "-" })}
           className="size-10 md:size-9"
           size="icon"
           variant="ghost"
@@ -244,9 +247,9 @@ function WarrantyActions({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
-          <Link href={`/products/${warranty.product.id}`}>
+          <Link href={`/warranties/${warranty.id}`}>
             <Eye className="mr-2 size-4" />
-            {t("viewProduct")}
+            {t("viewWarranty")}
           </Link>
         </DropdownMenuItem>
         {canActivateCurrentWarranty ? (

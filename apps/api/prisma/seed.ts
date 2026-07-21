@@ -211,7 +211,10 @@ async function upsertDemoProduct(data: {
     },
   });
 
-  return { product, warranty };
+  return {
+    product,
+    warranty: { ...warranty, warranty_code: data.warrantyCode },
+  };
 }
 
 async function upsertDemoServiceCenter(data: {

@@ -1,6 +1,4 @@
 import {
-  IsBoolean,
-  IsDateString,
   IsEnum,
   IsInt,
   IsObject,
@@ -8,7 +6,6 @@ import {
   IsString,
   IsUUID,
   Length,
-  Matches,
   Max,
   Min,
 } from 'class-validator';
@@ -55,39 +52,6 @@ export class CreateProductDto {
   @IsString()
   @Length(1, 64)
   serialNumber?: string;
-
-  @IsOptional()
-  @IsBoolean()
-  autoGenerateWarrantyCode?: boolean;
-
-  @IsOptional()
-  @IsString()
-  @Length(6, 64)
-  @Matches(/^[A-Z0-9-]+$/i)
-  warrantyCode?: string;
-
-  @IsOptional()
-  @IsUUID()
-  customerId?: string;
-
-  @IsOptional()
-  @IsDateString()
-  purchaseDate?: string;
-
-  @IsOptional()
-  @IsDateString()
-  activatedAt?: string;
-
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  @Max(120)
-  durationMonths?: number;
-
-  @IsOptional()
-  @IsString()
-  @Length(0, 2000)
-  warrantyTerms?: string;
 
   @IsOptional()
   @IsObject()
