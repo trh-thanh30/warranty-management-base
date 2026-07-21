@@ -7,7 +7,6 @@ import { Button } from "@repo/ui";
 import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
-import { AssignOwnerDialog } from "./components/assign-owner-dialog";
 import { DeleteProductDialog } from "./components/delete-product-dialog";
 import { ProductsDirectoryCard } from "./components/products-directory-card";
 import { useProductsDirectory } from "./hooks/use-products-directory";
@@ -18,15 +17,12 @@ export function ProductsView() {
     canCreateProducts,
     categories,
     clearFilters,
-    closeAssignOwner,
     closeDelete,
     confirmDelete,
     filters,
     isDeleting,
-    openAssignOwner,
     openDelete,
     pageSize,
-    productToAssign,
     productToDelete,
     productsQuery,
     search,
@@ -68,7 +64,6 @@ export function ProductsView() {
           filters={filters}
           isError={productsQuery.isError}
           isLoading={productsQuery.isLoading}
-          onAssignOwner={openAssignOwner}
           onCategoryChange={updateCategory}
           onCategoryIdChange={updateCategoryId}
           onClearFilters={clearFilters}
@@ -86,14 +81,6 @@ export function ProductsView() {
           search={search}
           sortBy={sortBy}
           sortOrder={sortOrder}
-        />
-
-        <AssignOwnerDialog
-          onOpenChange={(open) => {
-            if (!open) closeAssignOwner();
-          }}
-          open={Boolean(productToAssign)}
-          product={productToAssign}
         />
 
         <DeleteProductDialog

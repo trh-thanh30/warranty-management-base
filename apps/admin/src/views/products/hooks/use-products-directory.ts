@@ -63,8 +63,6 @@ export function useProductsDirectory() {
   });
   const [productToDelete, setProductToDelete] =
     useState<ProductResponse | null>(null);
-  const [productToAssign, setProductToAssign] =
-    useState<ProductResponse | null>(null);
   const debouncedSearch = useDebounce(search.trim(), 300);
   const canViewProducts = hasPermission(PERMISSIONS.PRODUCT_VIEW);
   const canCreateProducts = hasPermission(PERMISSIONS.PRODUCT_CREATE);
@@ -111,14 +109,6 @@ export function useProductsDirectory() {
     setProductToDelete(null);
   }
 
-  function openAssignOwner(product: ProductResponse) {
-    setProductToAssign(product);
-  }
-
-  function closeAssignOwner() {
-    setProductToAssign(null);
-  }
-
   async function confirmDelete() {
     if (!productToDelete) return;
 
@@ -137,15 +127,12 @@ export function useProductsDirectory() {
     categoriesQuery,
     clearFilters,
     closeDelete,
-    closeAssignOwner,
     confirmDelete,
     filters,
     isDeleting: deleteProduct.isPending,
     openDelete,
-    openAssignOwner,
     pageSize,
     productToDelete,
-    productToAssign,
     productsQuery,
     search,
     setPage,
