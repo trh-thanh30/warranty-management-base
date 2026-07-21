@@ -52,6 +52,12 @@ export function createWarrantiesService(http: WarrantiesHttpClient) {
       );
     },
 
+    async getWarrantyDetail(warrantyId: string): Promise<WarrantyListItem> {
+      return unwrap(
+        await http.get<WarrantyListItem>(`/warranties/${warrantyId}`),
+      );
+    },
+
     async activateWarrantyByCode(
       body: ActivateWarrantyByCodeBody,
     ): Promise<WarrantySummary> {

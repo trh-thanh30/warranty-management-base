@@ -188,7 +188,7 @@ function WarrantyProductName({ warranty }: { warranty: WarrantyListItem }) {
     <div className="min-w-0">
       <Link
         className="truncate font-medium text-slate-950 hover:underline dark:text-slate-50"
-        href={`/products/${warranty.product.id}`}
+        href={`/warranties/${warranty.id}`}
       >
         {warranty.product.name}
       </Link>
@@ -247,9 +247,9 @@ function WarrantyActions({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
-          <Link href={`/products/${warranty.product.id}`}>
+          <Link href={`/warranties/${warranty.id}`}>
             <Eye className="mr-2 size-4" />
-            {t("viewProduct")}
+            {t("viewWarranty")}
           </Link>
         </DropdownMenuItem>
         {canActivateCurrentWarranty ? (

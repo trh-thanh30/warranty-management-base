@@ -101,3 +101,20 @@ test("activating a product warranty posts to product activation endpoint", async
     },
   ]);
 });
+
+test("warranty detail requests warranty by id", async () => {
+  const calls: unknown[] = [];
+  const http = {
+    async get(url: string) {
+      calls.push({ url });
+      return { data: { success: true, data: warranty } };
+    },
+  };
+
+  const result = await createWarrantiesService(
+    http as unknown as WarrantiesHttpClient,
+  ).getWarrantyDetail("warranty-id");
+
+  assert.deepEqual(calls, [{ url: "/warranties/warranty-id" }]);
+  assert.deepEqual(result, warranty);
+});

@@ -19,6 +19,9 @@ import { warrantiesService } from "@/src/services/warranties/warranties.service"
 
 export const warrantyKeys = {
   all: ["warranties"] as const,
+  detail: (warrantyId: string | null) =>
+    [...warrantyKeys.details(), warrantyId] as const,
+  details: () => [...warrantyKeys.all, "detail"] as const,
   list: (query: ListWarrantiesQuery) =>
     [...warrantyKeys.lists(), query] as const,
   lists: () => [...warrantyKeys.all, "list"] as const,
@@ -36,6 +39,18 @@ export function useWarranties(
     queryKey: warrantyKeys.list(query),
     queryFn: () => warrantiesService.listWarranties(query),
     placeholderData: keepPreviousData,
+  });
+}
+
+export function useWarrantyDetail(
+  warrantyId: string | null,
+  options?: Pick<UseQueryOptions<WarrantyListItem>, "enabled">,
+) {
+  return useQuery({
+    ...options,
+    enabled: Boolean(warrantyId) && (options?.enabled ?? true),
+    queryKey: warrantyKeys.detail(warrantyId),
+    queryFn: () => warrantiesService.getWarrantyDetail(warrantyId ?? ""),
   });
 }
 

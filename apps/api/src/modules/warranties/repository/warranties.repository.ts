@@ -112,6 +112,18 @@ export class WarrantiesRepository {
     });
   }
 
+  findById(id: string) {
+    return this.prismaService.warranty.findFirst({
+      where: {
+        id,
+        product: {
+          deleted_at: null,
+        },
+      },
+      include: warrantyInclude,
+    });
+  }
+
   findActiveProductByWarrantyCode(code: string) {
     return this.prismaService.product.findFirst({
       where: {
