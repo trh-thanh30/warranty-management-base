@@ -6,94 +6,50 @@ jest.mock('@/modules/assets/assets.service', () => ({
 }));
 
 describe('CreateProductUseCase', () => {
-  const createProductsRepository = () => ({
-    findByProductCode: jest.fn(),
-    findBySerialNumber: jest.fn(),
-    findByWarrantyCode: jest.fn(),
-  });
-
-  const createPrismaService = () => ({
-    category: {
-      findUnique: jest.fn(),
-    },
-    customer: {
-      findUnique: jest.fn(),
-    },
-    product: {
-      create: jest.fn(),
-    },
-  });
-
-  const generateWarrantyCodeUseCase = {
-    execute: jest.fn(),
-  };
-
-  it('creates product ownership for a customer without a login account', async () => {
-    const productsRepository = createProductsRepository();
-    productsRepository.findByProductCode.mockResolvedValue(null);
-    productsRepository.findByWarrantyCode.mockResolvedValue(null);
-    const prismaService = createPrismaService();
-    prismaService.customer.findUnique.mockResolvedValue({
-      id: 'customer-id',
-      user_id: null,
-    });
-    prismaService.product.create.mockResolvedValue({
-      id: 'product-id',
-      product_code: 'PRD-2026-ABCDEF',
-      warranty_code: 'WM-2026-WALKIN1',
-      serial_number: 'SN-WALKIN-BATTERY-001',
-      name: 'Genuine Battery Pack',
-      category: product_category.SPARE_PART,
-      category_id: null,
-      brand: 'Toyota',
-      model: 'Battery Plus',
-      manufacture_year: 2026,
-      description: null,
-      status: 'ACTIVE',
-      metadata: null,
-      created_at: new Date('2026-07-09T00:00:00.000Z'),
-      updated_at: new Date('2026-07-09T00:00:00.000Z'),
-      deleted_at: null,
-      ownerships: [
-        {
-          id: 'ownership-id',
-          product_id: 'product-id',
-          customer_id: 'customer-id',
-          owner_user_id: null,
-          purchase_date: new Date('2026-07-01T00:00:00.000Z'),
-          activated_at: new Date('2026-07-01T00:00:00.000Z'),
-          ended_at: null,
-          is_current_owner: true,
-          created_at: new Date('2026-07-09T00:00:00.000Z'),
-          updated_at: new Date('2026-07-09T00:00:00.000Z'),
-          customer: {
-            id: 'customer-id',
-            user_id: null,
-            customer_code: 'CUS-WALKIN-001',
-            full_name: 'Le Thi Minh',
-            phone: '0900000003',
-            email: 'walkin.customer@example.com',
-            address: 'Da Nang',
+  it('creates an inventory product with a draft warranty and no warranty code', async () => {
+    const productsRepository = {
+      findByProductCode: jest.fn().mockResolvedValue(null),
+      findBySerialNumber: jest.fn().mockResolvedValue(null),
+    };
+    const prismaService = {
+      category: { findUnique: jest.fn() },
+      product: {
+        create: jest.fn().mockResolvedValue({
+          id: 'product-id',
+          product_code: 'PRD-2026-ABCDEF',
+          warranty_code: null,
+          serial_number: 'SN-001',
+          name: 'Genuine Battery Pack',
+          category: product_category.SPARE_PART,
+          category_id: null,
+          brand: 'Toyota',
+          model: 'Battery Plus',
+          manufacture_year: 2026,
+          description: null,
+          status: 'ACTIVE',
+          metadata: null,
+          created_at: new Date('2026-07-21T00:00:00.000Z'),
+          updated_at: new Date('2026-07-21T00:00:00.000Z'),
+          deleted_at: null,
+          assets: [],
+          ownerships: [],
+          warranty: {
+            id: 'warranty-id',
+            product_id: 'product-id',
+            warranty_code: null,
+            start_date: null,
+            end_date: null,
+            duration_months: 36,
+            status: warranty_status.DRAFT,
+            terms: null,
             metadata: null,
-            created_at: new Date('2026-07-09T00:00:00.000Z'),
-            updated_at: new Date('2026-07-09T00:00:00.000Z'),
+            created_at: new Date('2026-07-21T00:00:00.000Z'),
+            updated_at: new Date('2026-07-21T00:00:00.000Z'),
           },
-        },
-      ],
-      warranty: {
-        id: 'warranty-id',
-        product_id: 'product-id',
-        warranty_code: 'WM-2026-WALKIN1',
-        start_date: new Date('2026-07-01T00:00:00.000Z'),
-        end_date: new Date('2028-07-01T00:00:00.000Z'),
-        duration_months: 24,
-        status: warranty_status.ACTIVE,
-        terms: null,
-        metadata: null,
-        created_at: new Date('2026-07-09T00:00:00.000Z'),
-        updated_at: new Date('2026-07-09T00:00:00.000Z'),
+        }),
       },
-    });
+    };
+    const generateWarrantyCodeUseCase = { execute: jest.fn() };
     const useCase = new CreateProductUseCase(
       prismaService as never,
       productsRepository as never,
@@ -101,38 +57,38 @@ describe('CreateProductUseCase', () => {
     );
 
     const result = await useCase.execute({
-      autoGenerateWarrantyCode: false,
       brand: 'Toyota',
       category: product_category.SPARE_PART,
-      customerId: 'customer-id',
-      durationMonths: 24,
       manufactureYear: 2026,
       model: 'Battery Plus',
       name: 'Genuine Battery Pack',
-      purchaseDate: '2026-07-01T00:00:00.000Z',
-      serialNumber: 'SN-WALKIN-BATTERY-001',
-      warrantyCode: 'WM-2026-WALKIN1',
+      serialNumber: 'SN-001',
     });
 
+    expect(generateWarrantyCodeUseCase.execute).not.toHaveBeenCalled();
     expect(prismaService.product.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          ownerships: {
+          warranty_code: null,
+          ownerships: undefined,
+          warranty: {
             create: expect.objectContaining({
-              customer: { connect: { id: 'customer-id' } },
-              owner_user: undefined,
-              is_current_owner: true,
+              warranty_code: null,
+              duration_months: 36,
+              start_date: null,
+              end_date: null,
+              status: warranty_status.DRAFT,
             }),
           },
         }),
       }),
     );
-    expect(result.owner).toEqual(
+    expect(result.warrantyCode).toBeNull();
+    expect(result.owner).toBeNull();
+    expect(result.warranty).toEqual(
       expect.objectContaining({
-        customerId: 'customer-id',
-        ownerUserId: null,
-        customerCode: 'CUS-WALKIN-001',
-        fullName: 'Le Thi Minh',
+        warrantyCode: null,
+        status: warranty_status.DRAFT,
       }),
     );
   });

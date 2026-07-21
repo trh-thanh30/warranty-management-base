@@ -219,7 +219,7 @@ model Category {
 model Product {
   id               String           @id @default(uuid()) @db.Uuid
   product_code     String           @unique
-  warranty_code    String           @unique
+  warranty_code    String?          @unique
   serial_number    String?          @unique
   name             String
   category         product_category
@@ -293,7 +293,7 @@ model ProductOwnership {
 model Warranty {
   id              String          @id @default(uuid()) @db.Uuid
   product_id      String          @unique @db.Uuid
-  warranty_code   String          @unique
+  warranty_code   String?         @unique
   start_date      DateTime?
   end_date        DateTime?
   duration_months Int

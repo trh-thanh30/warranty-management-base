@@ -8,7 +8,6 @@ import { AssetsService } from '@/modules/assets/assets.service';
 import { CreateProductDto } from '@/modules/products/dto/create-product.dto';
 import { toProductResponse } from '@/modules/products/products.types';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
-import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { Injectable } from '@nestjs/common';
 import {
   category_type,
@@ -23,17 +22,11 @@ export class CreateProductUseCase {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly productsRepository: ProductsRepository,
-    private readonly generateWarrantyCodeUseCase: GenerateWarrantyCodeUseCase,
     private readonly assetsService?: AssetsService,
   ) {}
 
   async execute(dto: CreateProductDto) {
-    const warrantyCode = await this.resolveWarrantyCode(dto);
     const productCode = await this.generateProductCode();
-    const durationMonths = dto.durationMonths ?? 36;
-    const activatedAt = dto.activatedAt ? new Date(dto.activatedAt) : null;
-    const purchaseDate = dto.purchaseDate ? new Date(dto.purchaseDate) : null;
-    const startDate = activatedAt ?? purchaseDate;
     const categoryRef = await this.resolveProductCategory(dto.categoryId);
     const coverAsset = dto.coverAssetId
       ? await this.prismaService.asset.findUnique({
@@ -59,20 +52,10 @@ export class CreateProductUseCase {
       }
     }
 
-    const customer = dto.customerId
-      ? await this.prismaService.customer.findUnique({
-          where: { id: dto.customerId },
-        })
-      : null;
-
-    if (dto.customerId && !customer) {
-      throw new NotFoundError('Customer not found');
-    }
-
     const product = await this.prismaService.product.create({
       data: {
         product_code: productCode,
-        warranty_code: warrantyCode,
+        warranty_code: null,
         serial_number: dto.serialNumber,
         name: dto.name,
         category: dto.category,
@@ -96,29 +79,14 @@ export class CreateProductUseCase {
           : undefined,
         warranty: {
           create: {
-            warranty_code: warrantyCode,
-            duration_months: durationMonths,
-            start_date: startDate,
-            end_date: startDate
-              ? this.addMonths(startDate, durationMonths)
-              : null,
-            status: startDate ? warranty_status.ACTIVE : warranty_status.DRAFT,
-            terms: dto.warrantyTerms,
+            warranty_code: null,
+            duration_months: 36,
+            start_date: null,
+            end_date: null,
+            status: warranty_status.DRAFT,
           },
         },
-        ownerships: customer
-          ? {
-              create: {
-                customer: { connect: { id: customer.id } },
-                owner_user: customer.user_id
-                  ? { connect: { id: customer.user_id } }
-                  : undefined,
-                purchase_date: purchaseDate,
-                activated_at: activatedAt,
-                is_current_owner: true,
-              },
-            }
-          : undefined,
+        ownerships: undefined,
       },
       include: {
         assets: {
@@ -137,29 +105,6 @@ export class CreateProductUseCase {
       product,
       (asset) => this.assetsService?.enrichAssetUrl(asset).url ?? asset.path,
     );
-  }
-
-  private async resolveWarrantyCode(dto: CreateProductDto) {
-    if (dto.autoGenerateWarrantyCode !== false && !dto.warrantyCode) {
-      return this.generateWarrantyCodeUseCase.execute();
-    }
-
-    const warrantyCode = dto.warrantyCode?.trim().toUpperCase();
-    if (!warrantyCode) {
-      throw new BadRequestError('Warranty code is required');
-    }
-
-    if (!/^[A-Z0-9-]{6,64}$/.test(warrantyCode)) {
-      throw new BadRequestError('Warranty code format is invalid');
-    }
-
-    const existingWarrantyCode =
-      await this.productsRepository.findByWarrantyCode(warrantyCode);
-    if (existingWarrantyCode) {
-      throw new ConflictError('Warranty code already exists');
-    }
-
-    return warrantyCode;
   }
 
   private async resolveProductCategory(categoryId: string | undefined) {
@@ -191,11 +136,5 @@ export class CreateProductUseCase {
     }
 
     throw new BadRequestError('Could not generate a unique product code');
-  }
-
-  private addMonths(date: Date, months: number) {
-    const nextDate = new Date(date);
-    nextDate.setMonth(nextDate.getMonth() + months);
-    return nextDate;
   }
 }

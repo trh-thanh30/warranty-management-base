@@ -44,7 +44,7 @@ export type ProductOwnerSummary = {
 
 export type ProductWarrantySummary = {
   id: string;
-  warrantyCode: string;
+  warrantyCode: string | null;
   startDate: string;
   endDate: string;
   durationMonths: number;
@@ -55,7 +55,7 @@ export type ProductWarrantySummary = {
 export type ProductSummary = {
   id: string;
   productCode: string;
-  warrantyCode: string;
+  warrantyCode: string | null;
   serialNumber: string | null;
   name: string;
   category: ProductCategory;
@@ -97,13 +97,6 @@ export type CreateProductBody = {
   description?: string;
   status?: ProductStatus;
   serialNumber?: string;
-  autoGenerateWarrantyCode?: boolean;
-  warrantyCode?: string;
-  customerId?: string;
-  purchaseDate?: string;
-  activatedAt?: string;
-  durationMonths?: number;
-  warrantyTerms?: string;
   metadata?: Record<string, unknown>;
   coverAssetId?: string;
 };
@@ -123,8 +116,9 @@ export type UpdateProductBody = {
 
 export type AssignProductOwnerBody = {
   customerId: string;
+  autoGenerateWarrantyCode?: boolean;
+  warrantyCode?: string;
   purchaseDate?: string;
-  activatedAt?: string;
 };
 
 export type AttachProductAssetBody = {

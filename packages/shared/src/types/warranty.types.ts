@@ -5,7 +5,7 @@ export type WarrantyStatus = "DRAFT" | "ACTIVE" | "EXPIRED" | "VOIDED";
 export type WarrantySummary = {
   id: string;
   productId: string;
-  warrantyCode: string;
+  warrantyCode: string | null;
   startDate: string | null;
   endDate: string | null;
   durationMonths: number;
