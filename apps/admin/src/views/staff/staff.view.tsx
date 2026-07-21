@@ -72,7 +72,7 @@ export function StaffView() {
               />
               {canCreateStaff ? (
                 <Button asChild>
-                  <Link href="/users/create">
+                  <Link href="/staffs/create">
                     <Plus className="size-4" />
                     {t("create")}
                   </Link>

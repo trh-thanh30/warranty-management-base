@@ -22,7 +22,7 @@ export function useStaffAccountWorkflow() {
     hasRole("admin") && hasPermission(PERMISSIONS.USER_PERMISSION_MANAGE);
 
   function goBackToDirectory() {
-    router.push("/users");
+    router.push("/staffs");
   }
 
   function handleSaved(

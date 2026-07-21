@@ -116,7 +116,7 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
       },
       {
         title: t("items.users"),
-        href: "/users",
+        href: "/staffs",
         requiredPermission: PERMISSIONS.USER_VIEW,
         requiredRole: "admin",
       },
