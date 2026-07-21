@@ -1,12 +1,13 @@
 import type {
   CategoryResponse,
+  CategoryImportResult,
   CreateCategoryBody,
   ListCategoriesQuery,
   PaginatedResponse,
   ReorderCategoriesBody,
   UpdateCategoryBody,
 } from "@repo/shared";
-import { unwrap } from "../service.utils.ts";
+import { unwrap, unwrapBlob } from "../service.utils.ts";
 import type { CategoriesHttpClient } from "./categories.types";
 
 export function createCategoriesService(http: CategoriesHttpClient) {
@@ -51,6 +52,29 @@ export function createCategoriesService(http: CategoriesHttpClient) {
     ): Promise<CategoryResponse[]> {
       return unwrap(
         await http.patch<CategoryResponse[]>("/categories/reorder", body),
+      );
+    },
+
+    async downloadImportTemplate(): Promise<Blob> {
+      const response = await http.get<Blob>("/categories/import-template", {
+        responseType: "blob",
+      });
+      return unwrapBlob(response);
+    },
+
+    async exportCategories(query: ListCategoriesQuery): Promise<Blob> {
+      const response = await http.get<Blob>("/categories/export", {
+        params: query,
+        responseType: "blob",
+      });
+      return unwrapBlob(response);
+    },
+
+    async importCategories(file: File): Promise<CategoryImportResult> {
+      const formData = new FormData();
+      formData.append("file", file);
+      return unwrap(
+        await http.post<CategoryImportResult>("/categories/import", formData),
       );
     },
   };

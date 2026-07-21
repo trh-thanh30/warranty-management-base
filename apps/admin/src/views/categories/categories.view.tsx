@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { Button } from "@repo/ui";
+import { ExcelImportDialog, ImportExportMenu } from "@/src/components/common";
 import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
@@ -18,10 +19,17 @@ export function CategoriesView() {
     categoriesQuery,
     categoryToDeactivate,
     clearFilters,
+    closeImportDialog,
     closeDeactivate,
     confirmDeactivate,
+    downloadImportTemplate,
+    exportCategories,
+    importCategoryFile,
+    isImportDialogOpen,
+    isImporting,
     isDeactivating,
     openDeactivate,
+    openImportDialog,
     pageSize,
     search,
     setPage,
@@ -41,14 +49,32 @@ export function CategoriesView() {
       <div className="space-y-6">
         <PageHeader
           actions={
-            canCreateCategories ? (
-              <Button asChild>
-                <Link href="/categories/create">
-                  <Plus className="size-4" />
-                  {t("create")}
-                </Link>
-              </Button>
-            ) : null
+            <div className="flex flex-wrap justify-end gap-2">
+              <ImportExportMenu
+                labels={{
+                  downloadTemplate: t("excel.downloadTemplate"),
+                  exportAll: t("excel.exportAll"),
+                  title: t("excel.title"),
+                  upload: t("excel.upload"),
+                }}
+                onDownloadTemplate={() => {
+                  void downloadImportTemplate();
+                }}
+                onExportAll={() => {
+                  void exportCategories();
+                }}
+                onUpload={openImportDialog}
+                uploadDisabled={!canCreateCategories}
+              />
+              {canCreateCategories ? (
+                <Button asChild>
+                  <Link href="/categories/create">
+                    <Plus className="size-4" />
+                    {t("create")}
+                  </Link>
+                </Button>
+              ) : null}
+            </div>
           }
           description={t("description")}
           eyebrow={t("eyebrow")}
@@ -89,6 +115,32 @@ export function CategoriesView() {
             if (!open) closeDeactivate();
           }}
           open={Boolean(categoryToDeactivate)}
+        />
+
+        <ExcelImportDialog
+          description={t("excel.importDescription")}
+          isSubmitting={isImporting}
+          labels={{
+            cancel: t("cancel"),
+            chooseFile: t("excel.chooseFile"),
+            execute: t("excel.execute"),
+            fileHelp: t("excel.fileHelp"),
+            fileLabel: t("excel.fileLabel"),
+            modeLabel: t("excel.modeLabel"),
+            replaceDescription: t("excel.replaceDescription"),
+            replaceLabel: t("excel.replaceLabel"),
+            title: t("excel.importTitle"),
+            upsertDescription: t("excel.upsertDescription"),
+            upsertLabel: t("excel.upsertLabel"),
+          }}
+          onOpenChange={(open) => {
+            if (!open) closeImportDialog();
+          }}
+          onSubmit={(file) => {
+            void importCategoryFile(file);
+          }}
+          open={isImportDialogOpen}
+          showModeSelector={false}
         />
       </div>
     </PermissionGuard>

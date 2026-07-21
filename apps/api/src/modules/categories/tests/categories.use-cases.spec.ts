@@ -6,10 +6,12 @@ import {
 import { CreateCategoryUseCase } from '@/modules/categories/use-cases/create-category.use-case';
 import { DeactivateCategoryUseCase } from '@/modules/categories/use-cases/deactivate-category.use-case';
 import { GetCategoryDetailUseCase } from '@/modules/categories/use-cases/get-category-detail.use-case';
+import { ImportCategoriesUseCase } from '@/modules/categories/use-cases/import-categories.use-case';
 import { ListCategoriesUseCase } from '@/modules/categories/use-cases/list-categories.use-case';
 import { ReorderCategoriesUseCase } from '@/modules/categories/use-cases/reorder-categories.use-case';
 import { UpdateCategoryUseCase } from '@/modules/categories/use-cases/update-category.use-case';
 import { category_type } from '@prisma/client';
+import { createCategoryExportWorkbook } from '@/modules/categories/excel/category-workbook.factory';
 
 jest.mock('@/modules/assets/assets.service', () => ({
   AssetsService: class AssetsService {},
@@ -39,6 +41,9 @@ describe('Category use cases', () => {
     findByIds: jest.fn(),
     findByTypeAndSlug: jest.fn(),
     list: jest.fn(),
+    listAll: jest.fn(),
+    listForExport: jest.fn(),
+    importRows: jest.fn(),
     reorder: jest.fn(),
     update: jest.fn(),
   };
@@ -316,5 +321,90 @@ describe('Category use cases', () => {
       is_active: false,
     });
     expect(result.isActive).toBe(false);
+  });
+
+  it('imports parent and child categories atomically', async () => {
+    const buffer = await createCategoryExportWorkbook([
+      {
+        type: category_type.PRODUCT,
+        code: 'VEHICLE',
+        slug: 'vehicle',
+        name: 'Xe',
+        description: null,
+        parentSlug: null,
+        icon: null,
+        imageUrl: null,
+        order: 10,
+        isActive: true,
+        metadata: null,
+      },
+      {
+        type: category_type.PRODUCT,
+        code: 'SUV',
+        slug: 'suv',
+        name: 'Xe SUV',
+        description: null,
+        parentSlug: 'vehicle',
+        icon: null,
+        imageUrl: null,
+        order: 20,
+        isActive: true,
+        metadata: null,
+      },
+    ]);
+    categoriesRepository.listAll.mockResolvedValue([]);
+    categoriesRepository.importRows.mockResolvedValue({
+      created: 2,
+      updated: 0,
+    });
+    const useCase = new ImportCategoriesUseCase(categoriesRepository as never);
+
+    const result = await useCase.execute({ buffer } as Express.Multer.File);
+
+    expect(result).toEqual({ created: 2, updated: 0, errors: [] });
+    expect(categoriesRepository.importRows).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ slug: 'suv', parentSlug: 'vehicle' }),
+      ]),
+      new Set(),
+    );
+  });
+
+  it('rejects a circular imported hierarchy before writing', async () => {
+    const buffer = await createCategoryExportWorkbook([
+      {
+        type: category_type.PRODUCT,
+        code: null,
+        slug: 'first',
+        name: 'First',
+        description: null,
+        parentSlug: 'second',
+        icon: null,
+        imageUrl: null,
+        order: 10,
+        isActive: true,
+        metadata: null,
+      },
+      {
+        type: category_type.PRODUCT,
+        code: null,
+        slug: 'second',
+        name: 'Second',
+        description: null,
+        parentSlug: 'first',
+        icon: null,
+        imageUrl: null,
+        order: 20,
+        isActive: true,
+        metadata: null,
+      },
+    ]);
+    categoriesRepository.listAll.mockResolvedValue([]);
+    const useCase = new ImportCategoriesUseCase(categoriesRepository as never);
+
+    const result = await useCase.execute({ buffer } as Express.Multer.File);
+
+    expect(result.errors[0]).toMatchObject({ field: 'parentSlug' });
+    expect(categoriesRepository.importRows).not.toHaveBeenCalled();
   });
 });
