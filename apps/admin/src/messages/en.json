@@ -380,7 +380,31 @@
     "provinceRequired": "Select a province or city.",
     "wardRequired": "Select a ward or commune.",
     "emailRequired": "Enter the customer's email address.",
-    "emailInvalid": "Enter a valid email address."
+    "emailInvalid": "Enter a valid email address.",
+    "excel": {
+      "title": "Import/Export Excel",
+      "upload": "Upload file",
+      "downloadTemplate": "Download blank template",
+      "exportAll": "Download all data",
+      "importTitle": "Import Customers",
+      "importDescription": "Upload an Excel file (.xlsx) to import customer profiles immediately. Files with errors will not be written.",
+      "fileLabel": "Data file (Excel)",
+      "chooseFile": "Click to choose file",
+      "fileHelp": "Supports .xlsx, .xls files",
+      "modeLabel": "Processing method",
+      "upsertLabel": "Add & Update",
+      "upsertDescription": "Create customers or update matching customer code, phone, or email.",
+      "replaceLabel": "Refresh data",
+      "replaceDescription": "Not used for customer import.",
+      "execute": "Import now",
+      "templateDownloaded": "Customer template downloaded.",
+      "templateDownloadError": "Unable to download the customer template.",
+      "exported": "Customer export downloaded.",
+      "exportError": "Unable to export customers.",
+      "importSuccess": "Customers imported: {created} created, {updated} updated.",
+      "importHasErrors": "File has {count} error(s), starting at row {row}. No data was written.",
+      "importError": "Unable to import customers."
+    }
   },
   "Categories": {
     "title": "Category management",

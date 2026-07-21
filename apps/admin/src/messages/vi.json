@@ -380,7 +380,31 @@
     "provinceRequired": "Chọn tỉnh hoặc thành phố.",
     "wardRequired": "Chọn phường hoặc xã.",
     "emailRequired": "Nhập email khách hàng.",
-    "emailInvalid": "Nhập email hợp lệ."
+    "emailInvalid": "Nhập email hợp lệ.",
+    "excel": {
+      "title": "Nhập/Xuất Excel",
+      "upload": "Tải lên file (Upload)",
+      "downloadTemplate": "Tải file mẫu trống",
+      "exportAll": "Tải toàn bộ dữ liệu",
+      "importTitle": "Import Khách hàng",
+      "importDescription": "Tải lên file Excel (.xlsx) để import hồ sơ khách hàng ngay. File có lỗi sẽ không được ghi dữ liệu.",
+      "fileLabel": "File dữ liệu (Excel)",
+      "chooseFile": "Click để chọn file",
+      "fileHelp": "Hỗ trợ file .xlsx, .xls",
+      "modeLabel": "Phương thức xử lý",
+      "upsertLabel": "Bổ sung & Cập nhật",
+      "upsertDescription": "Tạo mới khách hàng hoặc cập nhật khi trùng mã, số điện thoại hoặc email.",
+      "replaceLabel": "Làm mới dữ liệu",
+      "replaceDescription": "Không áp dụng cho import khách hàng.",
+      "execute": "Import ngay",
+      "templateDownloaded": "Đã tải file mẫu khách hàng.",
+      "templateDownloadError": "Không thể tải file mẫu khách hàng.",
+      "exported": "Đã tải file dữ liệu khách hàng.",
+      "exportError": "Không thể xuất dữ liệu khách hàng.",
+      "importSuccess": "Đã import khách hàng: tạo mới {created}, cập nhật {updated}.",
+      "importHasErrors": "File có {count} lỗi, bắt đầu từ dòng {row}. Chưa ghi dữ liệu.",
+      "importError": "Không thể import khách hàng."
+    }
   },
   "Categories": {
     "title": "Quản lý danh mục",

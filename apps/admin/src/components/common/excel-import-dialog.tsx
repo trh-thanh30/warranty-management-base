@@ -42,6 +42,7 @@ type ExcelImportDialogProps = {
   open: boolean;
   previewContent?: ReactNode;
   previewSummary?: ReactNode;
+  showModeSelector?: boolean;
 };
 
 export function ExcelImportDialog({
@@ -57,6 +58,7 @@ export function ExcelImportDialog({
   open,
   previewContent,
   previewSummary,
+  showModeSelector = true,
 }: ExcelImportDialogProps) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -178,25 +180,27 @@ export function ExcelImportDialog({
                 />
               </div>
 
-              <div className="space-y-3">
-                <p className="text-sm font-medium text-slate-900">
-                  {labels.modeLabel}
-                </p>
-                <ImportModeOption
-                  checked={mode === "upsert"}
-                  description={labels.upsertDescription}
-                  label={labels.upsertLabel}
-                  onSelect={() => setMode("upsert")}
-                  tone="blue"
-                />
-                <ImportModeOption
-                  checked={mode === "replace"}
-                  description={labels.replaceDescription}
-                  label={labels.replaceLabel}
-                  onSelect={() => setMode("replace")}
-                  tone="red"
-                />
-              </div>
+              {showModeSelector ? (
+                <div className="space-y-3">
+                  <p className="text-sm font-medium text-slate-900">
+                    {labels.modeLabel}
+                  </p>
+                  <ImportModeOption
+                    checked={mode === "upsert"}
+                    description={labels.upsertDescription}
+                    label={labels.upsertLabel}
+                    onSelect={() => setMode("upsert")}
+                    tone="blue"
+                  />
+                  <ImportModeOption
+                    checked={mode === "replace"}
+                    description={labels.replaceDescription}
+                    label={labels.replaceLabel}
+                    onSelect={() => setMode("replace")}
+                    tone="red"
+                  />
+                </div>
+              ) : null}
 
               <div className="flex justify-end gap-2 pt-1">
                 <Button

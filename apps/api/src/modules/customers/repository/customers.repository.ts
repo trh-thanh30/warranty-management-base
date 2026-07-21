@@ -101,6 +101,28 @@ export class CustomersRepository {
     });
   }
 
+  listForExport(filters: ListCustomersDto) {
+    const trimmedSearch = filters.search?.trim();
+    const where: Prisma.CustomerWhereInput = trimmedSearch
+      ? {
+          OR: [
+            {
+              customer_code: { contains: trimmedSearch, mode: 'insensitive' },
+            },
+            { full_name: { contains: trimmedSearch, mode: 'insensitive' } },
+            { phone: { contains: trimmedSearch, mode: 'insensitive' } },
+            { email: { contains: trimmedSearch, mode: 'insensitive' } },
+          ],
+        }
+      : {};
+
+    return this.prismaService.customer.findMany({
+      where,
+      orderBy: { created_at: 'desc' },
+      take: 5000,
+    });
+  }
+
   update(id: string, data: Prisma.CustomerUpdateInput) {
     return this.prismaService.customer.update({
       where: { id },

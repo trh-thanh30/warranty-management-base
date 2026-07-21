@@ -17,6 +17,7 @@ type HttpResponse<T> = {
 
 type RequestConfig = {
   params?: Record<string, unknown>;
+  responseType?: "blob";
 };
 
 export type CustomersHttpClient = {
@@ -59,5 +60,39 @@ export function createCustomersService(http: CustomersHttpClient) {
         await http.patch<CustomerSummary>(`/customers/${customerId}`, body),
       );
     },
+
+    async downloadImportTemplate(): Promise<Blob> {
+      const response = await http.get<Blob>("/customers/import-template", {
+        responseType: "blob",
+      });
+      return response.data as unknown as Blob;
+    },
+
+    async exportCustomers(query: ListCustomersQuery): Promise<Blob> {
+      const response = await http.get<Blob>("/customers/export", {
+        params: query,
+        responseType: "blob",
+      });
+      return response.data as unknown as Blob;
+    },
+
+    async importCustomers(file: File): Promise<CustomerImportResult> {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      return unwrap(
+        await http.post<CustomerImportResult>("/customers/import", formData),
+      );
+    },
   };
 }
+
+export type CustomerImportResult = {
+  created: number;
+  updated: number;
+  errors: Array<{
+    field: string;
+    message: string;
+    rowNumber: number;
+  }>;
+};

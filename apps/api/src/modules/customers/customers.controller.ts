@@ -3,7 +3,10 @@ import { CreateCustomerDto } from '@/modules/customers/dto/create-customer.dto';
 import { ListCustomersDto } from '@/modules/customers/dto/list-customers.dto';
 import { UpdateCustomerDto } from '@/modules/customers/dto/update-customer.dto';
 import { CreateCustomerUseCase } from '@/modules/customers/use-cases/create-customer.use-case';
+import { DownloadCustomerImportTemplateUseCase } from '@/modules/customers/use-cases/download-customer-import-template.use-case';
+import { ExportCustomersUseCase } from '@/modules/customers/use-cases/export-customers.use-case';
 import { GetCustomerDetailUseCase } from '@/modules/customers/use-cases/get-customer-detail.use-case';
+import { ImportCustomersUseCase } from '@/modules/customers/use-cases/import-customers.use-case';
 import { ListCustomersUseCase } from '@/modules/customers/use-cases/list-customers.use-case';
 import { UpdateCustomerUseCase } from '@/modules/customers/use-cases/update-customer.use-case';
 import {
@@ -14,8 +17,13 @@ import {
   Patch,
   Post,
   Query,
+  Res,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { permission_key } from '@prisma/client';
+import express from 'express';
 
 @Controller('customers')
 export class CustomersController {
@@ -24,12 +32,39 @@ export class CustomersController {
     private readonly updateCustomerUseCase: UpdateCustomerUseCase,
     private readonly listCustomersUseCase: ListCustomersUseCase,
     private readonly getCustomerDetailUseCase: GetCustomerDetailUseCase,
+    private readonly downloadCustomerImportTemplateUseCase: DownloadCustomerImportTemplateUseCase,
+    private readonly exportCustomersUseCase: ExportCustomersUseCase,
+    private readonly importCustomersUseCase: ImportCustomersUseCase,
   ) {}
 
   @Get()
   @Permissions([permission_key.CUSTOMER_VIEW])
   list(@Query() query: ListCustomersDto) {
     return this.listCustomersUseCase.execute(query);
+  }
+
+  @Get('export')
+  @Permissions([permission_key.CUSTOMER_VIEW])
+  async exportCustomers(
+    @Query() query: ListCustomersDto,
+    @Res() res: express.Response,
+  ) {
+    const buffer = await this.exportCustomersUseCase.execute(query);
+    this.sendExcelFile(res, buffer, `customers-${this.today()}.xlsx`);
+  }
+
+  @Get('import-template')
+  @Permissions([permission_key.CUSTOMER_VIEW])
+  async downloadImportTemplate(@Res() res: express.Response) {
+    const buffer = await this.downloadCustomerImportTemplateUseCase.execute();
+    this.sendExcelFile(res, buffer, 'customer-import-template.xlsx');
+  }
+
+  @Post('import')
+  @Permissions([permission_key.CUSTOMER_CREATE])
+  @UseInterceptors(FileInterceptor('file'))
+  importCustomers(@UploadedFile() file: Express.Multer.File) {
+    return this.importCustomersUseCase.execute(file);
   }
 
   @Post()
@@ -48,5 +83,22 @@ export class CustomersController {
   @Permissions([permission_key.CUSTOMER_UPDATE])
   update(@Param('id') id: string, @Body() dto: UpdateCustomerDto) {
     return this.updateCustomerUseCase.execute(id, dto);
+  }
+
+  private sendExcelFile(
+    res: express.Response,
+    buffer: Buffer,
+    filename: string,
+  ) {
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(buffer);
+  }
+
+  private today() {
+    return new Date().toISOString().slice(0, 10);
   }
 }

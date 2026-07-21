@@ -130,3 +130,61 @@ test("updating a customer sends required contact fields", async () => {
   ]);
   assert.deepEqual(result, updatedCustomer);
 });
+
+test("customer import uploads form data", async () => {
+  const calls: unknown[] = [];
+  const importResult = {
+    created: 2,
+    updated: 1,
+    errors: [],
+  };
+  const http = {
+    async post(url: string, body?: unknown) {
+      calls.push({ url, body });
+      return { data: { success: true, data: importResult } };
+    },
+  };
+  const file = new File(["excel"], "customers.xlsx");
+
+  const result = await createCustomersService(
+    http as unknown as CustomersHttpClient,
+  ).importCustomers(file);
+
+  assert.equal(calls.length, 1);
+  assert.equal((calls[0] as { url: string }).url, "/customers/import");
+  assert.ok((calls[0] as { body: unknown }).body instanceof FormData);
+  assert.deepEqual(result, importResult);
+});
+
+test("customer export and template downloads request blob responses", async () => {
+  const calls: unknown[] = [];
+  const blob = new Blob(["xlsx"]);
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: blob };
+    },
+  };
+  const service = createCustomersService(
+    http as unknown as CustomersHttpClient,
+  );
+
+  const template = await service.downloadImportTemplate();
+  const exported = await service.exportCustomers({ search: "minh" });
+
+  assert.equal(template, blob);
+  assert.equal(exported, blob);
+  assert.deepEqual(calls, [
+    {
+      url: "/customers/import-template",
+      config: { responseType: "blob" },
+    },
+    {
+      url: "/customers/export",
+      config: {
+        params: { search: "minh" },
+        responseType: "blob",
+      },
+    },
+  ]);
+});
