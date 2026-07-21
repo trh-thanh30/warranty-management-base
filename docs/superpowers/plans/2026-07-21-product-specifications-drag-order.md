@@ -178,14 +178,11 @@ The row uses a mobile-safe grid, a visible focus ring, `touch-none` only on the 
 
 - [ ] **Step 4: Connect DndContext and sensors**
 
-`ProductSpecificationsFields` configures pointer, touch, and keyboard sensors, renders `SortableContext` with `fields.map(({ id }) => id)`, and resolves drops before calling `onMove`.
+`ProductSpecificationsFields` configures pointer and keyboard sensors, renders `SortableContext` with `fields.map(({ id }) => id)`, and resolves drops before calling `onMove`. Pointer events cover mouse, pen, and touch input; `touch-action: none` is limited to the dedicated handle.
 
 ```tsx
 const sensors = useSensors(
   useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-  useSensor(TouchSensor, {
-    activationConstraint: { delay: 180, tolerance: 6 },
-  }),
   useSensor(KeyboardSensor, {
     coordinateGetter: sortableKeyboardCoordinates,
   }),

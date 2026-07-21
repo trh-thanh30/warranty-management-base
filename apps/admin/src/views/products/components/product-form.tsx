@@ -7,7 +7,6 @@ import { useTranslations } from "next-intl";
 import type { ProductResponse } from "@repo/shared";
 import {
   Button,
-  DatePicker,
   Input,
   Label,
   Select,
@@ -15,13 +14,14 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Switch,
-  Textarea,
 } from "@repo/ui";
 import { RichTextEditor } from "@/src/components/common/rich-text-editor";
 import { ImageUpload } from "@/src/components/common/image-upload";
 import { PRODUCT_CATEGORIES } from "../products.constants";
 import { useProductForm } from "../hooks/use-product-form";
+import { ProductSpecificationsFields } from "./product-specifications-fields";
+import { ProductStatusControl } from "./product-status-control";
+import { ProductStatusToggle } from "./product-status-toggle";
 
 type ProductFormProps = {
   onCancel: () => void;
@@ -35,17 +35,17 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
     categoriesQuery,
     control,
     creating,
-    customersQuery,
     errors,
     isSubmitting,
     onSubmit,
     register,
+    appendSpecification,
+    moveSpecification,
+    removeSpecification,
     setValue,
-    watch,
+    specificationFields,
   } = useProductForm({ onSaved, product });
-  const autoGenerateWarrantyCode = watch("autoGenerateWarrantyCode");
   const categories = categoriesQuery.data?.items ?? [];
-  const customers = customersQuery.data?.items ?? [];
 
   return (
     <form className="space-y-6" noValidate onSubmit={onSubmit}>
@@ -83,7 +83,7 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
         </Field>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-2">
         <Field id="product-category" label={t("legacyCategory")}>
           <Controller
             control={control}
@@ -128,7 +128,6 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
             )}
           />
         </Field>
-        {creating ? <ProductStatusField control={control} t={t} /> : null}
         {product?.warrantyCode ? (
           <Field id="product-warranty-code-readonly" label={t("warrantyCode")}>
             <Input
@@ -139,43 +138,6 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
           </Field>
         ) : null}
       </div>
-
-      <Field
-        error={formatFieldError(errors.coverAssetId?.message, t)}
-        id="product-cover-image"
-        label={t("coverImage")}
-      >
-        <Controller
-          control={control}
-          name="coverImageUrl"
-          render={({ field }) => (
-            <ImageUpload
-              disabled={isSubmitting}
-              id="product-cover-image"
-              labels={{
-                hint: t("coverImageHint"),
-                previewAlt: t("coverImageAlt"),
-              }}
-              onAssetChange={(asset) =>
-                setValue("coverAssetId", asset?.id ?? "", {
-                  shouldDirty: true,
-                  shouldValidate: true,
-                })
-              }
-              onChange={field.onChange}
-              persistedValue={
-                product?.assets.find((asset) => asset.role === "COVER")?.url ??
-                ""
-              }
-              uploadOptions={{
-                accessType: "PUBLIC",
-                folder: "products",
-              }}
-              value={field.value}
-            />
-          )}
-        />
-      </Field>
 
       <div className="grid gap-5 sm:grid-cols-3">
         <Field
@@ -216,6 +178,43 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
       </div>
 
       <Field
+        error={formatFieldError(errors.coverAssetId?.message, t)}
+        id="product-cover-image"
+        label={t("coverImage")}
+      >
+        <Controller
+          control={control}
+          name="coverImageUrl"
+          render={({ field }) => (
+            <ImageUpload
+              disabled={isSubmitting}
+              id="product-cover-image"
+              labels={{
+                hint: t("coverImageHint"),
+                previewAlt: t("coverImageAlt"),
+              }}
+              onAssetChange={(asset) =>
+                setValue("coverAssetId", asset?.id ?? "", {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                })
+              }
+              onChange={field.onChange}
+              persistedValue={
+                product?.assets.find((asset) => asset.role === "COVER")?.url ??
+                ""
+              }
+              uploadOptions={{
+                accessType: "PUBLIC",
+                folder: "products",
+              }}
+              value={field.value}
+            />
+          )}
+        />
+      </Field>
+
+      <Field
         error={formatFieldError(errors.description?.message, t)}
         id="product-description"
         label={t("descriptionLabel")}
@@ -233,121 +232,20 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
         />
       </Field>
 
+      <ProductSpecificationsFields
+        disabled={isSubmitting}
+        errors={errors}
+        fields={specificationFields}
+        onAdd={appendSpecification}
+        onMove={moveSpecification}
+        onRemove={removeSpecification}
+        register={register}
+      />
+
       {creating ? (
-        <section className="space-y-5 rounded-md border border-slate-200 p-4 dark:border-slate-800">
-          <Controller
-            control={control}
-            name="autoGenerateWarrantyCode"
-            render={({ field }) => (
-              <div className="flex flex-col gap-3 rounded-md bg-slate-50 p-3 dark:bg-slate-900/60 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0">
-                  <Label htmlFor="product-auto-warranty">
-                    {t("autoGenerateWarrantyCode")}
-                  </Label>
-                  <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500 dark:text-slate-400">
-                    {t("autoGenerateWarrantyCodeDescription")}
-                  </p>
-                </div>
-                <Switch
-                  checked={field.value}
-                  className="shrink-0"
-                  id="product-auto-warranty"
-                  onCheckedChange={field.onChange}
-                />
-              </div>
-            )}
-          />
-          {!autoGenerateWarrantyCode ? (
-            <Field
-              error={formatFieldError(errors.warrantyCode?.message, t)}
-              id="product-warranty-code"
-              label={t("warrantyCode")}
-            >
-              <Input
-                id="product-warranty-code"
-                placeholder={t("warrantyCodePlaceholder")}
-                {...register("warrantyCode")}
-              />
-            </Field>
-          ) : null}
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field id="product-customer" label={t("customer")}>
-              <Controller
-                control={control}
-                name="customerId"
-                render={({ field }) => (
-                  <NullableSelect
-                    id="product-customer"
-                    noneLabel={t("noOwner")}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
-                    {customers.map((customer) => (
-                      <SelectItem key={customer.id} value={customer.id}>
-                        {customer.fullName} · {customer.customerCode}
-                      </SelectItem>
-                    ))}
-                  </NullableSelect>
-                )}
-              />
-            </Field>
-            <Field
-              error={formatFieldError(errors.durationMonths?.message, t)}
-              id="product-duration-months"
-              label={t("durationMonths")}
-            >
-              <Input
-                id="product-duration-months"
-                inputMode="numeric"
-                type="number"
-                {...register("durationMonths")}
-              />
-            </Field>
-          </div>
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field id="product-purchase-date" label={t("purchaseDate")}>
-              <Controller
-                control={control}
-                name="purchaseDate"
-                render={({ field }) => (
-                  <DatePicker
-                    ariaLabel={t("purchaseDate")}
-                    id="product-purchase-date"
-                    onValueChange={field.onChange}
-                    placeholder={t("selectPurchaseDate")}
-                    value={field.value}
-                  />
-                )}
-              />
-            </Field>
-            <Field id="product-activated-at" label={t("activatedAt")}>
-              <Controller
-                control={control}
-                name="activatedAt"
-                render={({ field }) => (
-                  <DatePicker
-                    ariaLabel={t("activatedAt")}
-                    id="product-activated-at"
-                    onValueChange={field.onChange}
-                    placeholder={t("selectActivatedAt")}
-                    value={field.value}
-                  />
-                )}
-              />
-            </Field>
-          </div>
-          <Field
-            error={formatFieldError(errors.warrantyTerms?.message, t)}
-            id="product-warranty-terms"
-            label={t("warrantyTerms")}
-          >
-            <Textarea
-              id="product-warranty-terms"
-              rows={4}
-              {...register("warrantyTerms")}
-            />
-          </Field>
-        </section>
+        <ProductStatusField control={control} disabled={isSubmitting} />
+      ) : product ? (
+        <ProductStatusToggle product={product} />
       ) : null}
 
       <div className="grid grid-cols-2 gap-2 border-t border-slate-200 pt-5 dark:border-slate-800 sm:flex sm:justify-end">
@@ -377,29 +275,24 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
 
 function ProductStatusField({
   control,
-  t,
+  disabled,
 }: {
   control: ReturnType<typeof useProductForm>["control"];
-  t: (key: string) => string;
+  disabled: boolean;
 }) {
   return (
-    <Field id="product-status" label={t("productStatus")}>
-      <Controller
-        control={control}
-        name="status"
-        render={({ field }) => (
-          <Select onValueChange={field.onChange} value={field.value}>
-            <SelectTrigger id="product-status">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ACTIVE">{t("statuses.ACTIVE")}</SelectItem>
-              <SelectItem value="INACTIVE">{t("statuses.INACTIVE")}</SelectItem>
-            </SelectContent>
-          </Select>
-        )}
-      />
-    </Field>
+    <Controller
+      control={control}
+      name="status"
+      render={({ field }) => (
+        <ProductStatusControl
+          disabled={disabled}
+          id="product-status"
+          onStatusChange={field.onChange}
+          status={field.value}
+        />
+      )}
+    />
   );
 }
 

@@ -64,8 +64,7 @@ Use:
 
 Each row receives a dedicated `GripVertical` drag handle on the left. Drag listeners and attributes are attached only to this handle so users can select text, edit inputs, and use the remove action without starting a drag.
 
-- Pointer dragging uses a small activation distance to reduce accidental drags.
-- Touch dragging uses an activation delay and tolerance so vertical page scrolling remains usable.
+- Pointer dragging uses a small activation distance to reduce accidental drags. Pointer events cover mouse, pen, and touch input.
 - Keyboard users can focus the handle, start sorting with Space or Enter, move with arrow keys, cancel with Escape, and finish with Space or Enter.
 - The handle has a translated accessible label that identifies the specification row.
 - The handle and remove action maintain a minimum 44px touch target.
