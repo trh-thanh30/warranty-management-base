@@ -5,29 +5,8 @@ import type {
   ServiceCenterSummary,
   UpdateServiceCenterBody,
 } from "@repo/shared";
-
-type ApiEnvelope<T> = {
-  success: boolean;
-  data: T;
-};
-
-type HttpResponse<T> = {
-  data: ApiEnvelope<T>;
-};
-
-type RequestConfig = {
-  params?: Record<string, unknown>;
-};
-
-export type ServiceCentersHttpClient = {
-  get<T>(url: string, config?: RequestConfig): Promise<HttpResponse<T>>;
-  patch<T>(url: string, body?: unknown): Promise<HttpResponse<T>>;
-  post<T>(url: string, body?: unknown): Promise<HttpResponse<T>>;
-};
-
-function unwrap<T>(response: HttpResponse<T>): T {
-  return response.data.data;
-}
+import { unwrap } from "../service.utils.ts";
+import type { ServiceCentersHttpClient } from "./service-centers.types";
 
 export function createServiceCentersService(http: ServiceCentersHttpClient) {
   return {

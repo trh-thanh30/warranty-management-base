@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  createLocationsService,
-  type LocationsHttpClient,
-} from "./create-locations.service.ts";
+import { createLocationsService } from "./create-locations.service.ts";
+import type { LocationsHttpClient } from "./locations.types.ts";
 
 test("lists Vietnam provinces through the locations API", async () => {
   const calls: unknown[] = [];

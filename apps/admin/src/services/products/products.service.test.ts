@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  createProductsService,
-  type ProductsHttpClient,
-} from "./create-products.service.ts";
+import { createProductsService } from "./create-products.service.ts";
+import type { ProductsHttpClient } from "./products.types.ts";
 
 const product = {
   id: "product-id",

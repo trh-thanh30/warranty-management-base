@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  createServiceCentersService,
-  type ServiceCentersHttpClient,
-} from "./create-service-centers.service.ts";
+import { createServiceCentersService } from "./create-service-centers.service.ts";
+import type { ServiceCentersHttpClient } from "./service-centers.types.ts";
 
 const serviceCenter = {
   id: "service-center-id",

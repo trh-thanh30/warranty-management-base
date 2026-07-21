@@ -9,31 +9,13 @@ import type {
   UpdateProductBody,
   UpdateProductAssetBody,
 } from "@repo/shared";
-
-type ApiEnvelope<T> = {
-  success: boolean;
-  data: T;
-};
-
-type HttpResponse<T> = {
-  data: ApiEnvelope<T>;
-};
-
-type RequestConfig = {
-  params?: Record<string, unknown>;
-  responseType?: "blob";
-};
-
-export type ProductsHttpClient = {
-  delete<T>(url: string): Promise<HttpResponse<T>>;
-  get<T>(url: string, config?: RequestConfig): Promise<HttpResponse<T>>;
-  patch<T>(url: string, body?: unknown): Promise<HttpResponse<T>>;
-  post<T>(url: string, body?: unknown): Promise<HttpResponse<T>>;
-};
-
-function unwrap<T>(response: HttpResponse<T>): T {
-  return response.data.data;
-}
+import { unwrap, unwrapBlob } from "../service.utils.ts";
+import type {
+  ConfirmProductImportBody,
+  ProductImportConfirmResult,
+  ProductImportPreview,
+  ProductsHttpClient,
+} from "./products.types";
 
 export function createProductsService(http: ProductsHttpClient) {
   return {
@@ -113,7 +95,7 @@ export function createProductsService(http: ProductsHttpClient) {
       const response = await http.get<Blob>("/products/import-template", {
         responseType: "blob",
       });
-      return response.data as unknown as Blob;
+      return unwrapBlob(response);
     },
 
     async exportProducts(query: ListProductsQuery): Promise<Blob> {
@@ -121,7 +103,7 @@ export function createProductsService(http: ProductsHttpClient) {
         params: query,
         responseType: "blob",
       });
-      return response.data as unknown as Blob;
+      return unwrapBlob(response);
     },
 
     async previewImport(file: File): Promise<ProductImportPreview> {
@@ -148,49 +130,3 @@ export function createProductsService(http: ProductsHttpClient) {
     },
   };
 }
-
-export type ProductImportRowData = {
-  brand: string | null;
-  category: string;
-  categoryCode: string | null;
-  description: string | null;
-  imageUrl: string | null;
-  manufactureYear: number | null;
-  model: string | null;
-  name: string;
-  productCode: string | null;
-  serialNumber: string | null;
-  status: string;
-  warrantyDurationMonths: number | null;
-  warrantyTerms: string | null;
-};
-
-export type ProductImportRowError = {
-  field: string;
-  message: string;
-  rowNumber: number;
-};
-
-export type ProductImportPreview = {
-  errors: ProductImportRowError[];
-  invalidRows: number;
-  rows: Array<{
-    data: Partial<ProductImportRowData>;
-    errors: ProductImportRowError[];
-    rowNumber: number;
-  }>;
-  totalRows: number;
-  validRows: number;
-};
-
-export type ConfirmProductImportBody = {
-  mode: "replace" | "upsert";
-  rows: ProductImportRowData[];
-};
-
-export type ProductImportConfirmResult = {
-  created: number;
-  deactivated: number;
-  errors: ProductImportRowError[];
-  updated: number;
-};

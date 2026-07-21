@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  createWarrantiesService,
-  type WarrantiesHttpClient,
-} from "./create-warranties.service.ts";
+import { createWarrantiesService } from "./create-warranties.service.ts";
+import type { WarrantiesHttpClient } from "./warranties.types.ts";
 
 const warranty = {
   id: "warranty-id",

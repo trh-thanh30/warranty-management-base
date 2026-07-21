@@ -6,30 +6,8 @@ import type {
   ReorderCategoriesBody,
   UpdateCategoryBody,
 } from "@repo/shared";
-
-type ApiEnvelope<T> = {
-  success: boolean;
-  data: T;
-};
-
-type HttpResponse<T> = {
-  data: ApiEnvelope<T>;
-};
-
-type RequestConfig = {
-  params?: Record<string, unknown>;
-};
-
-export type CategoriesHttpClient = {
-  delete<T>(url: string): Promise<HttpResponse<T>>;
-  get<T>(url: string, config?: RequestConfig): Promise<HttpResponse<T>>;
-  patch<T>(url: string, body?: unknown): Promise<HttpResponse<T>>;
-  post<T>(url: string, body?: unknown): Promise<HttpResponse<T>>;
-};
-
-function unwrap<T>(response: HttpResponse<T>): T {
-  return response.data.data;
-}
+import { unwrap } from "../service.utils.ts";
+import type { CategoriesHttpClient } from "./categories.types";
 
 export function createCategoriesService(http: CategoriesHttpClient) {
   return {

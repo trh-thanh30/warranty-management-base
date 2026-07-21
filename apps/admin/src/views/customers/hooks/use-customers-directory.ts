@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { usePermissions } from "@/src/hooks/use-permissions";
+import { useExcel } from "@/src/hooks/use-excel";
 import { useTableControls } from "@/src/hooks/use-table-controls";
 import { useToast } from "@/src/hooks/use-toast";
 import { customersService } from "@/src/services/customers/customers.service";
@@ -18,6 +19,7 @@ type CustomerSortBy = NonNullable<ListCustomersQuery["sortBy"]>;
 export function useCustomersDirectory() {
   const t = useTranslations("Customers");
   const toast = useToast();
+  const { createDatedFilename, downloadBlob } = useExcel();
   const { user: currentUser } = useAuth();
   const { hasPermission } = usePermissions();
   const {
@@ -66,10 +68,7 @@ export function useCustomersDirectory() {
   async function exportCustomers() {
     try {
       const blob = await customersService.exportCustomers(getExportQuery());
-      downloadBlob(
-        blob,
-        `customers-${new Date().toISOString().slice(0, 10)}.xlsx`,
-      );
+      downloadBlob(blob, createDatedFilename("customers"));
       toast.success(t("excel.exported"));
     } catch {
       toast.error(t("excel.exportError"));
@@ -131,15 +130,4 @@ export function useCustomersDirectory() {
     toggleSort,
     updateSearch: setSearch,
   };
-}
-
-function downloadBlob(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
 }

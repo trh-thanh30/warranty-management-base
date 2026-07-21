@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  createCategoriesService,
-  type CategoriesHttpClient,
-} from "./create-categories.service.ts";
+import { createCategoriesService } from "./create-categories.service.ts";
+import type { CategoriesHttpClient } from "./categories.types.ts";
 
 const category = {
   id: "category-id",

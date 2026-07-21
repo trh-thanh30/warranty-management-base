@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  createAssetsService,
-  type AssetsHttpClient,
-} from "./create-assets.service.ts";
+import { createAssetsService } from "./create-assets.service.ts";
+import type { AssetsHttpClient } from "./assets.types.ts";
 
 test("deleting an uploaded asset calls the asset delete endpoint", async () => {
   const calls: unknown[] = [];

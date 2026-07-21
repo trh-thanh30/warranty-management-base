@@ -1,4 +1,5 @@
 import { Permissions } from '@/common/decorators/permissions.decorator';
+import { createDatedExcelFilename, sendExcelFile } from '@/common/excel';
 import { CreateCustomerDto } from '@/modules/customers/dto/create-customer.dto';
 import { ListCustomersDto } from '@/modules/customers/dto/list-customers.dto';
 import { UpdateCustomerDto } from '@/modules/customers/dto/update-customer.dto';
@@ -50,14 +51,14 @@ export class CustomersController {
     @Res() res: express.Response,
   ) {
     const buffer = await this.exportCustomersUseCase.execute(query);
-    this.sendExcelFile(res, buffer, `customers-${this.today()}.xlsx`);
+    sendExcelFile(res, buffer, createDatedExcelFilename('customers'));
   }
 
   @Get('import-template')
   @Permissions([permission_key.CUSTOMER_VIEW])
   async downloadImportTemplate(@Res() res: express.Response) {
     const buffer = await this.downloadCustomerImportTemplateUseCase.execute();
-    this.sendExcelFile(res, buffer, 'customer-import-template.xlsx');
+    sendExcelFile(res, buffer, 'customer-import-template.xlsx');
   }
 
   @Post('import')
@@ -83,22 +84,5 @@ export class CustomersController {
   @Permissions([permission_key.CUSTOMER_UPDATE])
   update(@Param('id') id: string, @Body() dto: UpdateCustomerDto) {
     return this.updateCustomerUseCase.execute(id, dto);
-  }
-
-  private sendExcelFile(
-    res: express.Response,
-    buffer: Buffer,
-    filename: string,
-  ) {
-    res.setHeader(
-      'Content-Type',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    );
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.send(buffer);
-  }
-
-  private today() {
-    return new Date().toISOString().slice(0, 10);
   }
 }

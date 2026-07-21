@@ -5,30 +5,11 @@ import type {
   PaginatedResponse,
   UpdateCustomerBody,
 } from "@repo/shared";
-
-type ApiEnvelope<T> = {
-  success: boolean;
-  data: T;
-};
-
-type HttpResponse<T> = {
-  data: ApiEnvelope<T>;
-};
-
-type RequestConfig = {
-  params?: Record<string, unknown>;
-  responseType?: "blob";
-};
-
-export type CustomersHttpClient = {
-  get<T>(url: string, config?: RequestConfig): Promise<HttpResponse<T>>;
-  patch<T>(url: string, body?: unknown): Promise<HttpResponse<T>>;
-  post<T>(url: string, body?: unknown): Promise<HttpResponse<T>>;
-};
-
-function unwrap<T>(response: HttpResponse<T>): T {
-  return response.data.data;
-}
+import { unwrap, unwrapBlob } from "../service.utils.ts";
+import type {
+  CustomerImportResult,
+  CustomersHttpClient,
+} from "./customers.types";
 
 export function createCustomersService(http: CustomersHttpClient) {
   return {
@@ -65,7 +46,7 @@ export function createCustomersService(http: CustomersHttpClient) {
       const response = await http.get<Blob>("/customers/import-template", {
         responseType: "blob",
       });
-      return response.data as unknown as Blob;
+      return unwrapBlob(response);
     },
 
     async exportCustomers(query: ListCustomersQuery): Promise<Blob> {
@@ -73,7 +54,7 @@ export function createCustomersService(http: CustomersHttpClient) {
         params: query,
         responseType: "blob",
       });
-      return response.data as unknown as Blob;
+      return unwrapBlob(response);
     },
 
     async importCustomers(file: File): Promise<CustomerImportResult> {
@@ -86,13 +67,3 @@ export function createCustomersService(http: CustomersHttpClient) {
     },
   };
 }
-
-export type CustomerImportResult = {
-  created: number;
-  updated: number;
-  errors: Array<{
-    field: string;
-    message: string;
-    rowNumber: number;
-  }>;
-};

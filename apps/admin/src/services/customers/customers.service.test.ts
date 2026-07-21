@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  createCustomersService,
-  type CustomersHttpClient,
-} from "./create-customers.service.ts";
+import { createCustomersService } from "./create-customers.service.ts";
+import type { CustomersHttpClient } from "./customers.types.ts";
 
 const customer = {
   id: "customer-id",

@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  createUsersService,
-  type UsersHttpClient,
-} from "./create-users.service.ts";
+import { createUsersService } from "./create-users.service.ts";
+import type { UsersHttpClient } from "./users.types.ts";
 
 test("staff directory always requests moderator accounts", async () => {
   const calls: unknown[] = [];

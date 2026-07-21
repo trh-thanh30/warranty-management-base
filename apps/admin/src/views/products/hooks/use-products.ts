@@ -21,7 +21,7 @@ import type {
   ConfirmProductImportBody,
   ProductImportConfirmResult,
   ProductImportPreview,
-} from "@/src/services/products/create-products.service";
+} from "@/src/services/products/products.types";
 
 export const productKeys = {
   all: ["products"] as const,

@@ -6,26 +6,8 @@ import type {
   UpdateProfileBody,
   ChangePasswordBody,
 } from "@repo/shared";
-
-type ApiEnvelope<T> = {
-  success: boolean;
-  data: T;
-  message?: string;
-};
-
-type HttpResponse<T> = {
-  data: ApiEnvelope<T>;
-};
-
-export type AuthHttpClient = {
-  get<T>(url: string): Promise<HttpResponse<T>>;
-  post<T>(url: string, body?: unknown): Promise<HttpResponse<T>>;
-  patch<T>(url: string, body?: unknown): Promise<HttpResponse<T>>;
-};
-
-function unwrap<T>(response: HttpResponse<T>): T {
-  return response.data.data;
-}
+import { unwrap } from "../service.utils.ts";
+import type { AuthHttpClient } from "./auth.types";
 
 export function createAuthService(http: AuthHttpClient) {
   return {

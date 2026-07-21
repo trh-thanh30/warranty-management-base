@@ -12,13 +12,14 @@ import type {
 import { PERMISSIONS } from "@repo/shared/constants";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { usePermissions } from "@/src/hooks/use-permissions";
+import { useExcel } from "@/src/hooks/use-excel";
 import { useTableControls } from "@/src/hooks/use-table-controls";
 import { useToast } from "@/src/hooks/use-toast";
 import { productsService } from "@/src/services/products/products.service";
 import type {
   ProductImportRowData,
   ProductImportRowError,
-} from "@/src/services/products/create-products.service";
+} from "@/src/services/products/products.types";
 import type { ExcelImportMode } from "@/src/components/common/excel-import-dialog";
 import { useCategories } from "../../categories/hooks/use-categories";
 import type { EditableProductImportRow } from "../components/product-import-preview-table";
@@ -57,6 +58,7 @@ const INITIAL_PRODUCT_DIRECTORY_FILTERS = {
 export function useProductsDirectory() {
   const t = useTranslations("Products");
   const toast = useToast();
+  const { createDatedFilename, downloadBlob } = useExcel();
   const { user: currentUser } = useAuth();
   const { hasPermission } = usePermissions();
   const {
@@ -156,10 +158,7 @@ export function useProductsDirectory() {
   async function exportProducts() {
     try {
       const blob = await productsService.exportProducts(getExportQuery());
-      downloadBlob(
-        blob,
-        `products-${new Date().toISOString().slice(0, 10)}.xlsx`,
-      );
+      downloadBlob(blob, createDatedFilename("products"));
       toast.success(t("excel.exported"));
     } catch {
       toast.error(t("excel.exportError"));
@@ -327,17 +326,6 @@ export function useProductsDirectory() {
     updateWarrantyStatus: filterHandlers.warrantyStatus,
     updateImportRowData,
   };
-}
-
-function downloadBlob(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
 }
 
 function normalizePreviewRow(row: {

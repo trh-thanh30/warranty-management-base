@@ -1,4 +1,5 @@
 import { Permissions } from '@/common/decorators/permissions.decorator';
+import { createDatedExcelFilename, sendExcelFile } from '@/common/excel';
 import { User } from '@/common/decorators/user.decorator';
 import { ActivateWarrantyByCodeDto } from '@/modules/warranties/dto/activate-warranty-by-code.dto';
 import { ActivateWarrantyDto } from '@/modules/warranties/dto/activate-warranty.dto';
@@ -68,14 +69,14 @@ export class WarrantiesController {
     @Res() res: express.Response,
   ) {
     const buffer = await this.exportWarrantiesUseCase.execute(dto);
-    this.sendExcelFile(res, buffer, `warranties-${this.today()}.xlsx`);
+    sendExcelFile(res, buffer, createDatedExcelFilename('warranties'));
   }
 
   @Get('warranties/import-template')
   @Permissions([permission_key.WARRANTY_VIEW])
   async downloadImportTemplate(@Res() res: express.Response) {
     const buffer = await this.downloadWarrantyImportTemplateUseCase.execute();
-    this.sendExcelFile(res, buffer, 'warranty-import-template.xlsx');
+    sendExcelFile(res, buffer, 'warranty-import-template.xlsx');
   }
 
   @Post('warranties/import/preview')
@@ -143,22 +144,5 @@ export class WarrantiesController {
     @Param('id') productId: string,
   ) {
     return this.getMyProductWarrantyUseCase.execute(user.id, productId);
-  }
-
-  private sendExcelFile(
-    res: express.Response,
-    buffer: Buffer,
-    filename: string,
-  ) {
-    res.setHeader(
-      'Content-Type',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    );
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.send(buffer);
-  }
-
-  private today() {
-    return new Date().toISOString().slice(0, 10);
   }
 }

@@ -36,7 +36,7 @@ import { useCategories } from "../../categories/hooks/use-categories";
 import type {
   ProductImportRowData,
   ProductImportRowError,
-} from "@/src/services/products/create-products.service";
+} from "@/src/services/products/products.types";
 import {
   PRODUCT_CATEGORIES,
   PRODUCT_STATUS_FILTERS,

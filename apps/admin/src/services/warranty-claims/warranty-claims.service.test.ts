@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  createWarrantyClaimsService,
-  type WarrantyClaimsHttpClient,
-} from "./create-warranty-claims.service.ts";
+import { createWarrantyClaimsService } from "./create-warranty-claims.service.ts";
+import type { WarrantyClaimsHttpClient } from "./warranty-claims.types.ts";
 
 const claim = {
   id: "claim-id",

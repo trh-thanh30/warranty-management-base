@@ -1,25 +1,9 @@
-import type { VietnamProvince, VietnamWard } from "./locations.types";
-
-type ApiEnvelope<T> = {
-  success: boolean;
-  data: T;
-};
-
-type HttpResponse<T> = {
-  data: ApiEnvelope<T>;
-};
-
-type RequestConfig = {
-  params?: Record<string, unknown>;
-};
-
-export type LocationsHttpClient = {
-  get<T>(url: string, config?: RequestConfig): Promise<HttpResponse<T>>;
-};
-
-function unwrap<T>(response: HttpResponse<T>): T {
-  return response.data.data;
-}
+import { unwrap } from "../service.utils.ts";
+import type {
+  LocationsHttpClient,
+  VietnamProvince,
+  VietnamWard,
+} from "./locations.types";
 
 export function createLocationsService(http: LocationsHttpClient) {
   return {

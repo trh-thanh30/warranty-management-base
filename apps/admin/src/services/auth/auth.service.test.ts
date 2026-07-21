@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  createAuthService,
-  type AuthHttpClient,
-} from "./create-auth.service.ts";
+import { createAuthService } from "./create-auth.service.ts";
+import type { AuthHttpClient } from "./auth.types.ts";
 
 test("login uses the admin endpoint and returns the unwrapped auth payload", async () => {
   const calls: unknown[] = [];
