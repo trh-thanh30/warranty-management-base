@@ -76,7 +76,7 @@ test("product directory requests paginated products with filters", async () => {
   assert.deepEqual(result, response);
 });
 
-test("creating a product sends warranty and category fields", async () => {
+test("creating a product sends inventory fields", async () => {
   const calls: unknown[] = [];
   const http = {
     async post(url: string, body?: unknown) {
@@ -88,22 +88,18 @@ test("creating a product sends warranty and category fields", async () => {
   const result = await createProductsService(
     http as unknown as ProductsHttpClient,
   ).createProduct({
-    autoGenerateWarrantyCode: false,
     category: "SPARE_PART",
     categoryId: "category-id",
     name: "SUV Battery",
-    warrantyCode: "WM-2026-ABCDEF",
   });
 
   assert.deepEqual(calls, [
     {
       url: "/products",
       body: {
-        autoGenerateWarrantyCode: false,
         category: "SPARE_PART",
         categoryId: "category-id",
         name: "SUV Battery",
-        warrantyCode: "WM-2026-ABCDEF",
       },
     },
   ]);
@@ -148,16 +144,20 @@ test("assigning an owner posts to product assign-owner endpoint", async () => {
   await createProductsService(
     http as unknown as ProductsHttpClient,
   ).assignOwner("product-id", {
+    autoGenerateWarrantyCode: false,
     customerId: "customer-id",
     purchaseDate: "2026-07-12",
+    warrantyCode: "WM-2026-MANUAL1",
   });
 
   assert.deepEqual(calls, [
     {
       url: "/products/product-id/assign-owner",
       body: {
+        autoGenerateWarrantyCode: false,
         customerId: "customer-id",
         purchaseDate: "2026-07-12",
+        warrantyCode: "WM-2026-MANUAL1",
       },
     },
   ]);
