@@ -56,7 +56,7 @@ export class CreateWarrantyClaimUseCase {
       try {
         const claim = await this.warrantyClaimsRepository.create({
           claim_code: claimCode,
-          warranty_code: product.warranty_code,
+          warranty_code: warrantyCode,
           due_at: dueAt,
           requester_name: requesterName,
           requester_phone: requesterPhone,

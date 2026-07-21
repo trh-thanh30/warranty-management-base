@@ -52,9 +52,13 @@ export function useCreateWarrantyClaimForm({
     sortOrder: "desc",
     status: "ACTIVE",
   });
-  const products = productsQuery.data?.items ?? [];
+  const products = (productsQuery.data?.items ?? []).filter(
+    (product) => product.warrantyCode !== null,
+  );
 
   function selectProduct(product: ProductResponse) {
+    if (!product.warrantyCode) return;
+
     setSelectedProduct(product);
     setValue("productId", product.id, {
       shouldDirty: true,

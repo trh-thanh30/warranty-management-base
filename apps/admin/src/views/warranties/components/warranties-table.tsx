@@ -125,7 +125,7 @@ function WarrantyTableRow({
       </TableCell>
       <TableCell>{formatWarrantyOwner(warranty)}</TableCell>
       <TableCell className="font-mono text-xs">
-        {warranty.warrantyCode}
+        {warranty.warrantyCode ?? "-"}
       </TableCell>
       <TableCell>
         <WarrantyStatusBadge status={warranty.status} />
@@ -161,7 +161,7 @@ function WarrantyMobileCard({
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
         <WarrantyMobileField
           label={t("warrantyCode")}
-          value={warranty.warrantyCode}
+          value={warranty.warrantyCode ?? "-"}
         />
         <WarrantyMobileField
           label={t("owner")}
@@ -228,13 +228,16 @@ function WarrantyActions({
   const t = useTranslations("Warranties");
   const { hasPermission } = usePermissions();
   const canActivate = hasPermission(PERMISSIONS.WARRANTY_ACTIVATE);
-  const canActivateCurrentWarranty = canActivate && warranty.status === "DRAFT";
+  const canActivateCurrentWarranty =
+    canActivate &&
+    warranty.status === "DRAFT" &&
+    Boolean(warranty.warrantyCode);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          aria-label={t("openActions", { code: warranty.warrantyCode })}
+          aria-label={t("openActions", { code: warranty.warrantyCode ?? "-" })}
           className="size-10 md:size-9"
           size="icon"
           variant="ghost"
