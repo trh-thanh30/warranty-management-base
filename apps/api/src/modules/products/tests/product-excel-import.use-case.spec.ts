@@ -11,11 +11,30 @@ import { product_category, product_status } from '@prisma/client';
 import { Readable } from 'stream';
 
 describe('PreviewProductImportUseCase', () => {
+  it('defines Vietnamese product Excel headers with an image URL column', () => {
+    expect(productExcelColumns.map((column) => column.header)).toEqual([
+      'Mã sản phẩm',
+      'Tên sản phẩm',
+      'URL hình ảnh',
+      'Danh mục legacy',
+      'Mã danh mục động',
+      'Thương hiệu',
+      'Mẫu',
+      'Năm sản xuất',
+      'Số serial',
+      'Trạng thái sản phẩm',
+      'Thời hạn bảo hành (tháng)',
+      'Điều khoản bảo hành',
+      'Mô tả',
+    ]);
+  });
+
   it('parses and validates product import rows', async () => {
     const file = await createFileFromRows([
       {
         productCode: 'PRD-2026-ABCDEF',
         name: 'Genuine Battery Pack',
+        imageUrl: 'https://example.com/images/product.jpg',
         category: product_category.SPARE_PART,
         categoryCode: 'BATTERY',
         brand: 'Toyota',
@@ -38,6 +57,7 @@ describe('PreviewProductImportUseCase', () => {
     expect(result.rows[0].data).toEqual(
       expect.objectContaining({
         category: product_category.SPARE_PART,
+        imageUrl: 'https://example.com/images/product.jpg',
         name: 'Genuine Battery Pack',
         productCode: 'PRD-2026-ABCDEF',
         status: product_status.ACTIVE,

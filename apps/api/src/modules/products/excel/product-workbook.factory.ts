@@ -16,7 +16,8 @@ export async function createProductImportTemplateWorkbook() {
     rows: [
       {
         productCode: null,
-        name: 'Genuine Battery Pack',
+        name: 'Bộ pin chính hãng',
+        imageUrl: 'https://example.com/images/product.jpg',
         category: product_category.SPARE_PART,
         categoryCode: 'BATTERY',
         brand: 'Toyota',
@@ -25,8 +26,8 @@ export async function createProductImportTemplateWorkbook() {
         serialNumber: 'SN-001',
         status: product_status.ACTIVE,
         warrantyDurationMonths: 36,
-        warrantyTerms: 'Standard warranty.',
-        description: 'Inventory import row.',
+        warrantyTerms: 'Bảo hành tiêu chuẩn.',
+        description: 'Dòng dữ liệu import sản phẩm.',
       },
     ],
   });

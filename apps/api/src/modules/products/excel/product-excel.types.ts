@@ -3,6 +3,7 @@ import { product_category, product_status } from '@prisma/client';
 export type ProductExcelRow = {
   productCode: string | null;
   name: string;
+  imageUrl: string | null;
   category: product_category;
   categoryCode: string | null;
   brand: string | null;
