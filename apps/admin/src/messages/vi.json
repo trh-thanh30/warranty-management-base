@@ -741,6 +741,30 @@
       "EXPIRED": "Hết hạn",
       "VOIDED": "Đã hủy"
     },
+    "excel": {
+      "title": "Nhập/Xuất Excel",
+      "upload": "Tải lên file (Upload)",
+      "downloadTemplate": "Tải file mẫu trống",
+      "exportAll": "Tải toàn bộ dữ liệu",
+      "importTitle": "Import Sản phẩm",
+      "importDescription": "Tải lên file Excel (.xlsx) để kiểm tra dữ liệu sản phẩm hàng loạt trước khi cập nhật.",
+      "fileLabel": "File dữ liệu (Excel)",
+      "chooseFile": "Click để chọn file",
+      "fileHelp": "Hỗ trợ file .xlsx, .xls",
+      "modeLabel": "Phương thức xử lý",
+      "upsertLabel": "Bổ sung & Cập nhật",
+      "upsertDescription": "Giữ nguyên dữ liệu cũ. Chỉ thêm mới hoặc cập nhật thông tin nếu sản phẩm bị trùng khớp.",
+      "replaceLabel": "Làm mới dữ liệu",
+      "replaceDescription": "Toàn bộ sản phẩm hiện tại không có trong file sẽ bị vô hiệu hoá. Chỉ giữ lại những sản phẩm có trong file mới.",
+      "execute": "Thực hiện",
+      "templateDownloaded": "Đã tải file mẫu sản phẩm.",
+      "templateDownloadError": "Không thể tải file mẫu sản phẩm.",
+      "exported": "Đã tải file dữ liệu sản phẩm.",
+      "exportError": "Không thể xuất dữ liệu sản phẩm.",
+      "importPreviewSuccess": "File hợp lệ: {valid}/{total} dòng sẵn sàng xử lý.",
+      "importPreviewHasErrors": "File có {invalid} dòng lỗi. Hợp lệ {valid}/{total} dòng.",
+      "importPreviewError": "Không thể kiểm tra file import sản phẩm."
+    },
     "sections": {
       "product": "Sản phẩm",
       "ownerWarranty": "Chủ sở hữu và bảo hành"

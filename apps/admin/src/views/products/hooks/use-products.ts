@@ -17,6 +17,7 @@ import type {
   UpdateProductBody,
 } from "@repo/shared";
 import { productsService } from "@/src/services/products/products.service";
+import type { ProductImportPreview } from "@/src/services/products/create-products.service";
 
 export const productKeys = {
   all: ["products"] as const,
@@ -87,6 +88,12 @@ export function useDeleteProduct() {
       void queryClient.invalidateQueries({ queryKey: productKeys.lists() });
       queryClient.setQueryData(productKeys.detail(product.id), product);
     },
+  });
+}
+
+export function usePreviewProductImport() {
+  return useMutation<ProductImportPreview, Error, File>({
+    mutationFn: (file) => productsService.previewImport(file),
   });
 }
 

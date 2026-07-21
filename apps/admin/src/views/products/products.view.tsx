@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { Button } from "@repo/ui";
+import { ExcelImportDialog, ImportExportMenu } from "@/src/components/common";
 import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
@@ -20,9 +21,16 @@ export function ProductsView() {
     closeDelete,
     confirmDelete,
     filters,
+    closeImportDialog,
+    downloadImportTemplate,
+    exportProducts,
     isDeleting,
+    isImportDialogOpen,
+    isImportPreviewing,
     openDelete,
+    openImportDialog,
     pageSize,
+    previewImport,
     productToDelete,
     productsQuery,
     search,
@@ -43,14 +51,32 @@ export function ProductsView() {
       <div className="space-y-6">
         <PageHeader
           actions={
-            canCreateProducts ? (
-              <Button asChild>
-                <Link href="/products/create">
-                  <Plus className="size-4" />
-                  {t("create")}
-                </Link>
-              </Button>
-            ) : null
+            <div className="flex flex-wrap justify-end gap-2">
+              <ImportExportMenu
+                labels={{
+                  downloadTemplate: t("excel.downloadTemplate"),
+                  exportAll: t("excel.exportAll"),
+                  title: t("excel.title"),
+                  upload: t("excel.upload"),
+                }}
+                onDownloadTemplate={() => {
+                  void downloadImportTemplate();
+                }}
+                onExportAll={() => {
+                  void exportProducts();
+                }}
+                onUpload={openImportDialog}
+                uploadDisabled={!canCreateProducts}
+              />
+              {canCreateProducts ? (
+                <Button asChild>
+                  <Link href="/products/create">
+                    <Plus className="size-4" />
+                    {t("create")}
+                  </Link>
+                </Button>
+              ) : null}
+            </div>
           }
           description={t("description")}
           eyebrow={t("eyebrow")}
@@ -93,6 +119,29 @@ export function ProductsView() {
           }}
           open={Boolean(productToDelete)}
           product={productToDelete}
+        />
+
+        <ExcelImportDialog
+          description={t("excel.importDescription")}
+          isSubmitting={isImportPreviewing}
+          labels={{
+            cancel: t("cancel"),
+            chooseFile: t("excel.chooseFile"),
+            execute: t("excel.execute"),
+            fileHelp: t("excel.fileHelp"),
+            fileLabel: t("excel.fileLabel"),
+            modeLabel: t("excel.modeLabel"),
+            replaceDescription: t("excel.replaceDescription"),
+            replaceLabel: t("excel.replaceLabel"),
+            title: t("excel.importTitle"),
+            upsertDescription: t("excel.upsertDescription"),
+            upsertLabel: t("excel.upsertLabel"),
+          }}
+          onOpenChange={(open) => {
+            if (!open) closeImportDialog();
+          }}
+          onSubmit={previewImport}
+          open={isImportDialogOpen}
         />
       </div>
     </PermissionGuard>

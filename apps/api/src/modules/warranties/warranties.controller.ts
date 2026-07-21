@@ -15,8 +15,23 @@ import { ListWarrantiesUseCase } from '@/modules/warranties/use-cases/list-warra
 import { LookupWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/lookup-warranty-by-code.use-case';
 import { LookupWarrantyForCustomerUseCase } from '@/modules/warranties/use-cases/lookup-warranty-for-customer.use-case';
 import { ManualWarrantyActivationUseCase } from '@/modules/warranties/use-cases/manual-warranty-activation.use-case';
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { DownloadWarrantyImportTemplateUseCase } from '@/modules/warranties/use-cases/download-warranty-import-template.use-case';
+import { ExportWarrantiesUseCase } from '@/modules/warranties/use-cases/export-warranties.use-case';
+import { PreviewWarrantyImportUseCase } from '@/modules/warranties/use-cases/preview-warranty-import.use-case';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  Res,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { permission_key } from '@prisma/client';
+import express from 'express';
 
 type RequestUser = {
   id: string;
@@ -35,12 +50,39 @@ export class WarrantiesController {
     private readonly listMyProductsUseCase: ListMyProductsUseCase,
     private readonly getMyProductWarrantyUseCase: GetMyProductWarrantyUseCase,
     private readonly manualWarrantyActivationUseCase: ManualWarrantyActivationUseCase,
+    private readonly downloadWarrantyImportTemplateUseCase: DownloadWarrantyImportTemplateUseCase,
+    private readonly exportWarrantiesUseCase: ExportWarrantiesUseCase,
+    private readonly previewWarrantyImportUseCase: PreviewWarrantyImportUseCase,
   ) {}
 
   @Get('warranties')
   @Permissions([permission_key.WARRANTY_VIEW])
   listWarranties(@Query() dto: ListWarrantiesDto) {
     return this.listWarrantiesUseCase.execute(dto);
+  }
+
+  @Get('warranties/export')
+  @Permissions([permission_key.WARRANTY_VIEW])
+  async exportWarranties(
+    @Query() dto: ListWarrantiesDto,
+    @Res() res: express.Response,
+  ) {
+    const buffer = await this.exportWarrantiesUseCase.execute(dto);
+    this.sendExcelFile(res, buffer, `warranties-${this.today()}.xlsx`);
+  }
+
+  @Get('warranties/import-template')
+  @Permissions([permission_key.WARRANTY_VIEW])
+  async downloadImportTemplate(@Res() res: express.Response) {
+    const buffer = await this.downloadWarrantyImportTemplateUseCase.execute();
+    this.sendExcelFile(res, buffer, 'warranty-import-template.xlsx');
+  }
+
+  @Post('warranties/import/preview')
+  @Permissions([permission_key.WARRANTY_ACTIVATE])
+  @UseInterceptors(FileInterceptor('file'))
+  previewImport(@UploadedFile() file: Express.Multer.File) {
+    return this.previewWarrantyImportUseCase.execute(file);
   }
 
   @Get('warranties/lookup')
@@ -101,5 +143,22 @@ export class WarrantiesController {
     @Param('id') productId: string,
   ) {
     return this.getMyProductWarrantyUseCase.execute(user.id, productId);
+  }
+
+  private sendExcelFile(
+    res: express.Response,
+    buffer: Buffer,
+    filename: string,
+  ) {
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(buffer);
+  }
+
+  private today() {
+    return new Date().toISOString().slice(0, 10);
   }
 }

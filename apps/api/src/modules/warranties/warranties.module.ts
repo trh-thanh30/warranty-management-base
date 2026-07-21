@@ -10,11 +10,21 @@ import { ListWarrantiesUseCase } from '@/modules/warranties/use-cases/list-warra
 import { LookupWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/lookup-warranty-by-code.use-case';
 import { LookupWarrantyForCustomerUseCase } from '@/modules/warranties/use-cases/lookup-warranty-for-customer.use-case';
 import { ManualWarrantyActivationUseCase } from '@/modules/warranties/use-cases/manual-warranty-activation.use-case';
+import { DownloadWarrantyImportTemplateUseCase } from '@/modules/warranties/use-cases/download-warranty-import-template.use-case';
+import { ExportWarrantiesUseCase } from '@/modules/warranties/use-cases/export-warranties.use-case';
+import { PreviewWarrantyImportUseCase } from '@/modules/warranties/use-cases/preview-warranty-import.use-case';
 import { WarrantiesController } from '@/modules/warranties/warranties.controller';
 import { Module } from '@nestjs/common';
+import { MulterModule } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [
+    PrismaModule,
+    MulterModule.register({
+      storage: memoryStorage(),
+    }),
+  ],
   controllers: [WarrantiesController],
   providers: [
     WarrantiesRepository,
@@ -28,6 +38,9 @@ import { Module } from '@nestjs/common';
     ListMyProductsUseCase,
     GetMyProductWarrantyUseCase,
     ManualWarrantyActivationUseCase,
+    DownloadWarrantyImportTemplateUseCase,
+    ExportWarrantiesUseCase,
+    PreviewWarrantyImportUseCase,
   ],
   exports: [
     ActivateWarrantyByCodeUseCase,

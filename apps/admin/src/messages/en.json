@@ -741,6 +741,30 @@
       "EXPIRED": "Expired",
       "VOIDED": "Voided"
     },
+    "excel": {
+      "title": "Import/Export Excel",
+      "upload": "Upload file",
+      "downloadTemplate": "Download blank template",
+      "exportAll": "Download all data",
+      "importTitle": "Import Products",
+      "importDescription": "Upload an Excel file (.xlsx) to validate product data in bulk before updating records.",
+      "fileLabel": "Data file (Excel)",
+      "chooseFile": "Click to choose file",
+      "fileHelp": "Supports .xlsx, .xls files",
+      "modeLabel": "Processing method",
+      "upsertLabel": "Add & Update",
+      "upsertDescription": "Keep existing data. Only add new products or update matching products.",
+      "replaceLabel": "Refresh data",
+      "replaceDescription": "Existing products missing from the file will be deactivated. Only products in the new file are kept.",
+      "execute": "Run",
+      "templateDownloaded": "Product template downloaded.",
+      "templateDownloadError": "Unable to download the product template.",
+      "exported": "Product export downloaded.",
+      "exportError": "Unable to export products.",
+      "importPreviewSuccess": "File is valid: {valid}/{total} rows are ready.",
+      "importPreviewHasErrors": "File has {invalid} invalid rows. Valid rows: {valid}/{total}.",
+      "importPreviewError": "Unable to validate the product import file."
+    },
     "sections": {
       "product": "Product",
       "ownerWarranty": "Owner and warranty"

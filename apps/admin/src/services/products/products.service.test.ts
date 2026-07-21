@@ -178,3 +178,87 @@ test("deleting a product uses the delete endpoint", async () => {
 
   assert.deepEqual(calls, [{ url: "/products/product-id" }]);
 });
+
+test("downloading product template requests a blob", async () => {
+  const calls: unknown[] = [];
+  const blob = new Blob(["template"]);
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: blob };
+    },
+  };
+
+  const result = await createProductsService(
+    http as unknown as ProductsHttpClient,
+  ).downloadImportTemplate();
+
+  assert.deepEqual(calls, [
+    {
+      url: "/products/import-template",
+      config: { responseType: "blob" },
+    },
+  ]);
+  assert.equal(result, blob);
+});
+
+test("exporting products requests a filtered blob", async () => {
+  const calls: unknown[] = [];
+  const blob = new Blob(["export"]);
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: blob };
+    },
+  };
+
+  const result = await createProductsService(
+    http as unknown as ProductsHttpClient,
+  ).exportProducts({
+    category: "SPARE_PART",
+    search: "battery",
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/products/export",
+      config: {
+        params: {
+          category: "SPARE_PART",
+          search: "battery",
+          sortBy: "createdAt",
+          sortOrder: "desc",
+        },
+        responseType: "blob",
+      },
+    },
+  ]);
+  assert.equal(result, blob);
+});
+
+test("previewing product import uploads form data", async () => {
+  const calls: Array<{ body?: unknown; url: string }> = [];
+  const preview = {
+    errors: [],
+    invalidRows: 0,
+    totalRows: 1,
+    validRows: 1,
+  };
+  const http = {
+    async post(url: string, body?: unknown) {
+      calls.push({ url, body });
+      return { data: { success: true, data: preview } };
+    },
+  };
+  const file = new File(["excel"], "products.xlsx");
+
+  const result = await createProductsService(
+    http as unknown as ProductsHttpClient,
+  ).previewImport(file);
+
+  assert.equal(calls[0]?.url, "/products/import/preview");
+  assert.ok(calls[0]?.body instanceof FormData);
+  assert.deepEqual(result, preview);
+});

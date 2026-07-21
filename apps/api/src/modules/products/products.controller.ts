@@ -8,8 +8,11 @@ import { UpdateProductAssetDto } from '@/modules/products/dto/update-product-ass
 import { AttachProductAssetUseCase } from '@/modules/products/use-cases/attach-product-asset.use-case';
 import { AssignProductOwnerUseCase } from '@/modules/products/use-cases/assign-product-owner.use-case';
 import { CreateProductUseCase } from '@/modules/products/use-cases/create-product.use-case';
+import { DownloadProductImportTemplateUseCase } from '@/modules/products/use-cases/download-product-import-template.use-case';
+import { ExportProductsUseCase } from '@/modules/products/use-cases/export-products.use-case';
 import { GetProductDetailUseCase } from '@/modules/products/use-cases/get-product-detail.use-case';
 import { ListProductsUseCase } from '@/modules/products/use-cases/list-products.use-case';
+import { PreviewProductImportUseCase } from '@/modules/products/use-cases/preview-product-import.use-case';
 import { SoftDeleteProductUseCase } from '@/modules/products/use-cases/soft-delete-product.use-case';
 import { RemoveProductAssetUseCase } from '@/modules/products/use-cases/remove-product-asset.use-case';
 import { UpdateProductAssetUseCase } from '@/modules/products/use-cases/update-product-asset.use-case';
@@ -23,8 +26,13 @@ import {
   Patch,
   Post,
   Query,
+  Res,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { permission_key } from '@prisma/client';
+import express from 'express';
 
 @Controller('products')
 export class ProductsController {
@@ -38,12 +46,39 @@ export class ProductsController {
     private readonly attachProductAssetUseCase: AttachProductAssetUseCase,
     private readonly updateProductAssetUseCase: UpdateProductAssetUseCase,
     private readonly removeProductAssetUseCase: RemoveProductAssetUseCase,
+    private readonly downloadProductImportTemplateUseCase: DownloadProductImportTemplateUseCase,
+    private readonly exportProductsUseCase: ExportProductsUseCase,
+    private readonly previewProductImportUseCase: PreviewProductImportUseCase,
   ) {}
 
   @Get()
   @Permissions([permission_key.PRODUCT_VIEW])
   list(@Query() query: ListProductsDto) {
     return this.listProductsUseCase.execute(query);
+  }
+
+  @Get('export')
+  @Permissions([permission_key.PRODUCT_VIEW])
+  async exportProducts(
+    @Query() query: ListProductsDto,
+    @Res() res: express.Response,
+  ) {
+    const buffer = await this.exportProductsUseCase.execute(query);
+    this.sendExcelFile(res, buffer, `products-${this.today()}.xlsx`);
+  }
+
+  @Get('import-template')
+  @Permissions([permission_key.PRODUCT_VIEW])
+  async downloadImportTemplate(@Res() res: express.Response) {
+    const buffer = await this.downloadProductImportTemplateUseCase.execute();
+    this.sendExcelFile(res, buffer, 'product-import-template.xlsx');
+  }
+
+  @Post('import/preview')
+  @Permissions([permission_key.PRODUCT_CREATE])
+  @UseInterceptors(FileInterceptor('file'))
+  previewImport(@UploadedFile() file: Express.Multer.File) {
+    return this.previewProductImportUseCase.execute(file);
   }
 
   @Post()
@@ -99,5 +134,22 @@ export class ProductsController {
     @Param('productAssetId') productAssetId: string,
   ) {
     return this.removeProductAssetUseCase.execute(id, productAssetId);
+  }
+
+  private sendExcelFile(
+    res: express.Response,
+    buffer: Buffer,
+    filename: string,
+  ) {
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(buffer);
+  }
+
+  private today() {
+    return new Date().toISOString().slice(0, 10);
   }
 }

@@ -21,6 +21,7 @@ type HttpResponse<T> = {
 
 type RequestConfig = {
   params?: Record<string, unknown>;
+  responseType?: "blob";
 };
 
 export type ProductsHttpClient = {
@@ -107,5 +108,43 @@ export function createProductsService(http: ProductsHttpClient) {
     ): Promise<void> {
       await http.delete(`/products/${productId}/assets/${productAssetId}`);
     },
+
+    async downloadImportTemplate(): Promise<Blob> {
+      const response = await http.get<Blob>("/products/import-template", {
+        responseType: "blob",
+      });
+      return response.data as unknown as Blob;
+    },
+
+    async exportProducts(query: ListProductsQuery): Promise<Blob> {
+      const response = await http.get<Blob>("/products/export", {
+        params: query,
+        responseType: "blob",
+      });
+      return response.data as unknown as Blob;
+    },
+
+    async previewImport(file: File): Promise<ProductImportPreview> {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      return unwrap(
+        await http.post<ProductImportPreview>(
+          "/products/import/preview",
+          formData,
+        ),
+      );
+    },
   };
 }
+
+export type ProductImportPreview = {
+  errors: Array<{
+    field: string;
+    message: string;
+    rowNumber: number;
+  }>;
+  invalidRows: number;
+  totalRows: number;
+  validRows: number;
+};

@@ -150,6 +150,67 @@ export class ProductsRepository {
     });
   }
 
+  listForExport(filters: {
+    search?: string;
+    category?: string;
+    categoryId?: string;
+    status?: product_status;
+    warrantyStatus?: warranty_status;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) {
+    const search = filters.search?.trim();
+    const sortMap = {
+      productCode: 'product_code',
+      warrantyCode: 'warranty_code',
+      serialNumber: 'serial_number',
+      name: 'name',
+      category: 'category',
+      status: 'status',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+    } satisfies Record<string, keyof Prisma.ProductOrderByWithRelationInput>;
+    const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
+    const where: Prisma.ProductWhereInput = {
+      category: filters.category as never,
+      category_id: filters.categoryId,
+      status: filters.status,
+      warranty: filters.warrantyStatus
+        ? { status: filters.warrantyStatus }
+        : undefined,
+      OR: search
+        ? [
+            { name: { contains: search, mode: 'insensitive' } },
+            { product_code: { contains: search, mode: 'insensitive' } },
+            { warranty_code: { contains: search, mode: 'insensitive' } },
+            { serial_number: { contains: search, mode: 'insensitive' } },
+            { brand: { contains: search, mode: 'insensitive' } },
+            { model: { contains: search, mode: 'insensitive' } },
+            {
+              ownerships: {
+                some: {
+                  is_current_owner: true,
+                  customer: {
+                    full_name: { contains: search, mode: 'insensitive' },
+                  },
+                },
+              },
+            },
+          ]
+        : undefined,
+    };
+    const orderBy: Prisma.ProductOrderByWithRelationInput[] = sortBy
+      ? [{ [sortBy]: filters.sortOrder ?? 'desc' }]
+      : [{ created_at: 'desc' }];
+
+    return this.prismaService.product.findMany({
+      where,
+      include: productInclude,
+      orderBy,
+      take: 5000,
+    });
+  }
+
   update(id: string, data: Prisma.ProductUpdateInput) {
     return this.prismaService.product.update({
       where: { id },
