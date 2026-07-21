@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
-import { Saira_Condensed, Inter } from "next/font/google";
+import { Saira_Condensed, Inter, Maven_Pro } from "next/font/google";
 import { routing } from "@/src/i18n/routing";
 import "../globals.css";
 
@@ -15,6 +15,12 @@ const sairaCondensed = Saira_Condensed({
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+});
+
+const mavenPro = Maven_Pro({
+  subsets: ["latin", "vietnamese"],
+  variable: "--font-maven-pro",
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
@@ -44,7 +50,7 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`scroll-smooth ${sairaCondensed.variable} ${inter.variable}`}
+      className={`scroll-smooth ${sairaCondensed.variable} ${inter.variable} ${mavenPro.variable}`}
     >
       <body>
         <NextIntlClientProvider messages={messages}>

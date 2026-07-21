@@ -8,18 +8,73 @@
 }
 
 @theme {
-  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
-  --font-condensed: var(--font-saira-condensed), sans-serif;
+  --font-sans: var(--font-maven-pro), 'Maven Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-condensed: var(--font-maven-pro), 'Maven Pro', -apple-system, sans-serif;
 
-  --color-brand-blue: #3E6AE1;
-  --color-brand-blue-hover: #2B52BE;
-  --color-charcoal: #171A20;
-  --color-graphite: #393C41;
+  /* Black Label Films - Red Edition (Qwen_markdown_20260721_jrnv5bw4m.md) */
+  /* Primary Colors */
+  --color-deep-black: #040708;
+  --color-pure-black: #000000;
+  --color-off-white: #ffffff;
+
+  /* Accent Colors */
+  --color-premium-red: #C41E1E;
+  --color-warm-red: #A81818;
+  --color-muted-red: #E84040;
+  --color-deep-crimson: #8B0000;
+
+  /* Danger / Error */
+  --color-danger-red: #B20000;
+  --color-deep-red: #C33223;
+
+  /* Interactive */
+  --color-primary-blue: #007CBA;
+  --color-slate-blue: #3A589D;
+  --color-muted-blue: #3B6994;
+  --color-royal-purple: #7A00DF;
+
+  /* Neutral Scale */
+  --color-dark-charcoal: #333333;
+  --color-medium-gray: #4A4A4A;
+  --color-soft-gray: #616163;
+  --color-stone-gray: #596273;
+  --color-almost-black: #111111;
+  --color-deep-gray: #2B2B2B;
+
+  /* Surface & Borders */
+  --color-light-gray: #F1F1F1;
+  --color-border-gray: #DFDFDF;
+  --color-input-border: #D1D1D1;
+
+  /* Brand Overrides for Existing Web Components */
+  --color-brand-blue: #C41E1E;
+  --color-brand-blue-hover: #A81818;
+  --color-brand-red: #C41E1E;
+  --color-brand-red-hover: #A81818;
+  --color-brand-black: #040708;
+  
+  --color-charcoal: #040708;
+  --color-graphite: #111111;
   --color-pewter: #5C5E62;
   --color-silver-fog: #8E8E8E;
-  --color-ash: #F4F4F4;
-  --color-cloud: #EEEEEE;
-  --color-pale-silver: #D0D1D2;
+  --color-ash: #F1F1F1;
+  --color-cloud: #DFDFDF;
+  --color-pale-silver: #D1D1D1;
+
+  /* Slate Scale Overrides */
+  --color-slate-950: #040708;
+  --color-slate-900: #0d1112;
+  --color-slate-800: #161b1d;
+  --color-slate-700: #1e2629;
+  --color-slate-600: #273034;
+  --color-slate-500: #596273;
+
+  --color-red-600: #C41E1E;
+  --color-red-700: #A81818;
+
+  /* Border Radii */
+  --radius-button: 18px;
+  --radius-card: 20px;
 
   --animate-marquee-left: marquee-left 32s linear infinite;
   --animate-marquee-right: marquee-right 36s linear infinite;
