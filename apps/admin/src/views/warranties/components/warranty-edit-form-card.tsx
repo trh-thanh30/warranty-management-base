@@ -17,6 +17,7 @@ import {
   Skeleton,
 } from "@repo/ui";
 import { RichTextEditor } from "@/src/components/common/rich-text-editor";
+import { VndInput } from "@/src/components/common/vnd-input";
 import { useToast } from "@/src/hooks/use-toast";
 import { useUpdateWarranty } from "@/src/hooks/use-warranties";
 import { useRouter } from "@/src/i18n/navigation";
@@ -157,13 +158,10 @@ export function WarrantyEditFormCard({ warranty }: WarrantyEditFormCardProps) {
               id="edit-warranty-coverage-limit"
               label={t("coverageLimitAmount")}
             >
-              <Input
+              <VndInput
                 id="edit-warranty-coverage-limit"
-                min={0}
-                onChange={(event) => setCoverageLimitAmount(event.target.value)}
+                onValueChange={setCoverageLimitAmount}
                 placeholder={t("unlimited")}
-                step="0.01"
-                type="number"
                 value={coverageLimitAmount}
               />
             </FormField>
@@ -171,13 +169,10 @@ export function WarrantyEditFormCard({ warranty }: WarrantyEditFormCardProps) {
               id="edit-warranty-per-claim"
               label={t("maxAmountPerClaim")}
             >
-              <Input
+              <VndInput
                 id="edit-warranty-per-claim"
-                min={0}
-                onChange={(event) => setMaxAmountPerClaim(event.target.value)}
+                onValueChange={setMaxAmountPerClaim}
                 placeholder={t("unlimited")}
-                step="0.01"
-                type="number"
                 value={maxAmountPerClaim}
               />
             </FormField>
