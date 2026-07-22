@@ -1,9 +1,9 @@
 import type { ProductCategory, ProductSortBy } from "@repo/shared";
 import { z } from "zod";
-import type {
+import {
   PRODUCT_CATEGORIES,
-  PRODUCT_STATUS_FILTERS,
-  WARRANTY_STATUS_FILTERS,
+  type PRODUCT_STATUS_FILTERS,
+  type WARRANTY_STATUS_FILTERS,
 } from "./products.constants";
 
 export type ProductCategoryFilter = "ALL" | ProductCategory;
@@ -75,7 +75,7 @@ const optionalInteger = (messages: {
 
 export const productFormSchema = z.object({
   brand: optionalText.max(80, "brandLength"),
-  category: z.enum(["CAR", "ACCESSORY", "SPARE_PART", "SERVICE_PACKAGE"]),
+  category: z.enum(PRODUCT_CATEGORIES),
   categoryId: z.string(),
   coverAssetId: z.string(),
   coverImageUrl: z.string(),

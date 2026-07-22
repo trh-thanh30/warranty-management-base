@@ -1,6 +1,9 @@
 import type { CategoryType } from "@repo/shared";
 import { z } from "zod";
-import type { CATEGORY_STATUS_FILTERS } from "./categories.constants";
+import {
+  CATEGORY_TYPES,
+  type CATEGORY_STATUS_FILTERS,
+} from "./categories.constants";
 
 export type CategoryStatusFilter = (typeof CATEGORY_STATUS_FILTERS)[number];
 
@@ -27,7 +30,7 @@ export const categoryFormSchema = z.object({
       message: "slugInvalid",
     },
   ),
-  type: z.enum(["PRODUCT", "CONTENT_PAGE", "ASSET", "WARRANTY_CLAIM_ISSUE"]),
+  type: z.enum(CATEGORY_TYPES),
 });
 
 export type CategoryFormValues = z.infer<typeof categoryFormSchema>;

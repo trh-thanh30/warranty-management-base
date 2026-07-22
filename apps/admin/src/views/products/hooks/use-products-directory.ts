@@ -9,7 +9,7 @@ import type {
   ProductResponse,
   ProductSortBy,
 } from "@repo/shared";
-import { PERMISSIONS } from "@repo/shared/constants";
+import { isProductCategory, PERMISSIONS } from "@repo/shared/constants";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { useExcel } from "@/src/hooks/use-excel";
@@ -28,10 +28,7 @@ import {
   type ProductStatusFilter,
   type WarrantyStatusFilter,
 } from "../products.types";
-import {
-  PRODUCT_CATEGORIES,
-  PRODUCT_STATUS_FILTERS,
-} from "../products.constants";
+import { PRODUCT_STATUS_FILTERS } from "../products.constants";
 import {
   useConfirmProductImport,
   useDeleteProduct,
@@ -401,7 +398,7 @@ function validateImportRows(rows: EditableProductImportRow[]) {
       });
     }
 
-    if (!PRODUCT_CATEGORIES.includes(row.data.category as never)) {
+    if (!isProductCategory(row.data.category)) {
       errors.push({
         field: "category",
         message: "Chọn danh mục legacy hợp lệ.",

@@ -10,6 +10,7 @@ import {
   type ProductResponse,
   type UpdateProductBody,
 } from "@repo/shared";
+import { isProductCategory } from "@repo/shared/constants";
 import { useToast } from "@/src/hooks/use-toast";
 import type { ProductImportRowData } from "@/src/services/products/products.types";
 import { useCategories } from "../../categories/hooks/use-categories";
@@ -231,9 +232,7 @@ function toImportRowData(values: ProductFormValues): ProductImportRowData {
 }
 
 function normalizeCategory(value: string): ProductFormValues["category"] {
-  return ["CAR", "ACCESSORY", "SPARE_PART", "SERVICE_PACKAGE"].includes(value)
-    ? (value as ProductFormValues["category"])
-    : "CAR";
+  return isProductCategory(value) ? value : "CAR";
 }
 
 function toUpdateProductBody(

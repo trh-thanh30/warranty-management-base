@@ -1,12 +1,7 @@
 import type { CategorySummary } from "./category.types.ts";
 import type { PaginationQuery } from "./pagination.types.ts";
 import type { WarrantyStatus } from "./warranty.types.ts";
-
-export type ProductCategory =
-  | "CAR"
-  | "ACCESSORY"
-  | "SPARE_PART"
-  | "SERVICE_PACKAGE";
+import type { ProductCategory } from "../constants/catalog.ts";
 
 export type ProductStatus = "ACTIVE" | "INACTIVE" | "DELETED";
 
