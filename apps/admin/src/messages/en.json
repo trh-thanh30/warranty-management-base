@@ -699,6 +699,7 @@
     "name": "Name",
     "namePlaceholder": "e.g. VinFast VF 8 Plus, Toyota Camry 2.5Q...",
     "productCode": "Product code",
+    "productCodeLength": "Product code must be 64 characters or fewer.",
     "warrantyCode": "Warranty code",
     "warrantyCodePlaceholder": "e.g. WAR-CAR-2026-01",
     "serialNumber": "Serial number",

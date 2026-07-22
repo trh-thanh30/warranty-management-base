@@ -11,6 +11,7 @@ import {
   type UpdateProductBody,
 } from "@repo/shared";
 import { useToast } from "@/src/hooks/use-toast";
+import type { ProductImportRowData } from "@/src/services/products/products.types";
 import { useCategories } from "../../categories/hooks/use-categories";
 import {
   type ProductFormInput,
@@ -31,9 +32,14 @@ import {
 import { toNullableValue, toNullableRichText } from "@/src/utils";
 
 export function useProductForm({
+  importPreview,
   onSaved,
   product,
 }: {
+  importPreview?: {
+    data: ProductImportRowData;
+    onSaved: (data: ProductImportRowData) => void;
+  };
   onSaved: (product?: ProductResponse) => void;
   product: ProductResponse | null;
 }) {
@@ -75,12 +81,22 @@ export function useProductForm({
     },
     { enabled: true },
   );
+  const importPreviewData = importPreview?.data;
 
   useEffect(() => {
-    reset(getDefaultValues(product));
-  }, [product, reset]);
+    reset(
+      importPreviewData
+        ? getImportPreviewDefaultValues(importPreviewData)
+        : getDefaultValues(product),
+    );
+  }, [importPreviewData, product, reset]);
 
   async function submit(values: ProductFormValues) {
+    if (importPreview) {
+      importPreview.onSaved(toImportRowData(values));
+      return;
+    }
+
     try {
       if (creating) {
         const createdProduct = await createProduct.mutateAsync(
@@ -163,12 +179,61 @@ function getDefaultValues(product: ProductResponse | null): ProductFormInput {
     manufactureYear: product?.manufactureYear ?? undefined,
     model: product?.model ?? "",
     name: product?.name ?? "",
+    productCode: "",
     serialNumber: product?.serialNumber ?? "",
     specifications: specifications.length
       ? specifications
       : [{ key: "", value: "" }],
     status: product?.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
+    warrantyDurationMonths: undefined,
+    warrantyTerms: "",
   };
+}
+
+function getImportPreviewDefaultValues(
+  data: ProductImportRowData,
+): ProductFormInput {
+  return {
+    brand: data.brand ?? "",
+    category: normalizeCategory(data.category),
+    categoryId: data.categoryCode ?? "",
+    coverAssetId: "",
+    coverImageUrl: data.imageUrl ?? "",
+    description: data.description ?? "",
+    manufactureYear: data.manufactureYear ?? undefined,
+    model: data.model ?? "",
+    name: data.name ?? "",
+    productCode: data.productCode ?? "",
+    serialNumber: data.serialNumber ?? "",
+    specifications: [{ key: "", value: "" }],
+    status: data.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
+    warrantyDurationMonths: data.warrantyDurationMonths ?? undefined,
+    warrantyTerms: data.warrantyTerms ?? "",
+  };
+}
+
+function toImportRowData(values: ProductFormValues): ProductImportRowData {
+  return {
+    brand: toNullableValue(values.brand),
+    category: values.category,
+    categoryCode: toNullableValue(values.categoryId),
+    description: toNullableValue(values.description),
+    imageUrl: toNullableValue(values.coverImageUrl),
+    manufactureYear: values.manufactureYear ?? null,
+    model: toNullableValue(values.model),
+    name: values.name.trim(),
+    productCode: toNullableValue(values.productCode),
+    serialNumber: toNullableValue(values.serialNumber),
+    status: values.status,
+    warrantyDurationMonths: values.warrantyDurationMonths ?? null,
+    warrantyTerms: toNullableValue(values.warrantyTerms),
+  };
+}
+
+function normalizeCategory(value: string): ProductFormValues["category"] {
+  return ["CAR", "ACCESSORY", "SPARE_PART", "SERVICE_PACKAGE"].includes(value)
+    ? (value as ProductFormValues["category"])
+    : "CAR";
 }
 
 function toUpdateProductBody(

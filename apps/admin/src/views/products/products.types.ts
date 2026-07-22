@@ -88,9 +88,17 @@ export const productFormSchema = z.object({
   }),
   model: optionalText.max(80, "modelLength"),
   name: optionalText.min(2, "nameRequired").max(160, "nameLength"),
+  productCode: optionalText.max(64, "productCodeLength").optional(),
   serialNumber: optionalText.max(64, "serialNumberLength"),
   specifications: productSpecificationsSchema,
   status: z.enum(["ACTIVE", "INACTIVE"]),
+  warrantyDurationMonths: optionalInteger({
+    integer: "durationMonthsInteger",
+    max: 120,
+    min: 1,
+    range: "durationMonthsRange",
+  }),
+  warrantyTerms: optionalText.max(2000, "warrantyTermsLength").optional(),
 });
 
 export const assignProductOwnerSchema = z

@@ -699,6 +699,7 @@
     "name": "Tên",
     "namePlaceholder": "Ví dụ: VinFast VF 8 Plus, Toyota Camry 2.5Q...",
     "productCode": "Mã sản phẩm",
+    "productCodeLength": "Mã sản phẩm không được quá 64 ký tự.",
     "warrantyCode": "Mã bảo hành",
     "warrantyCodePlaceholder": "Ví dụ: WAR-CAR-2026-01",
     "serialNumber": "Số serial",

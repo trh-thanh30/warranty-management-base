@@ -1,11 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { ReactNode } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Edit3, Trash2 } from "lucide-react";
-import { z } from "zod";
 import {
   Badge,
   Button,
@@ -13,13 +9,6 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-  Input,
-  Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Table,
   TableBody,
   TableCell,
@@ -29,18 +18,13 @@ import {
   Tabs,
   TabsList,
   TabsTrigger,
-  Textarea,
 } from "@repo/ui";
 import { PaginationControls } from "@/src/components/common/pagination-controls";
-import { useCategories } from "../../categories/hooks/use-categories";
 import type {
   ProductImportRowData,
   ProductImportRowError,
 } from "@/src/services/products/products.types";
-import {
-  PRODUCT_CATEGORIES,
-  PRODUCT_STATUS_FILTERS,
-} from "../products.constants";
+import { ProductForm } from "./product-form";
 
 export type EditableProductImportRow = {
   data: ProductImportRowData;
@@ -305,35 +289,6 @@ function ProductImportEditDialog({
   open: boolean;
   row: EditableProductImportRow | null;
 }) {
-  const categoriesQuery = useCategories(
-    {
-      isActive: "true",
-      limit: 100,
-      sortBy: "order",
-      sortOrder: "asc",
-      type: "PRODUCT",
-    },
-    { enabled: open },
-  );
-  const categories = categoriesQuery.data?.items ?? [];
-  const {
-    control,
-    formState: { errors },
-    handleSubmit,
-    register,
-    reset,
-  } = useForm<ProductImportEditFormInput, unknown, ProductImportEditFormValues>(
-    {
-      resolver: zodResolver(productImportEditSchema),
-      values: toImportEditFormValues(row?.data),
-    },
-  );
-
-  function submit(values: ProductImportEditFormValues) {
-    onSave(toImportRowData(values));
-    reset(values);
-  }
-
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent className="max-h-[calc(100vh-3rem)] w-[min(calc(100vw-2rem),56rem)] overflow-y-auto p-6">
@@ -346,298 +301,21 @@ function ProductImportEditDialog({
           </DialogDescription>
         </div>
 
-        <form
-          className="mt-5 space-y-5"
-          noValidate
-          onSubmit={handleSubmit(submit)}
-        >
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field
-              error={errors.productCode?.message}
-              id="import-product-code"
-              label={labels.productCode}
-            >
-              <Input id="import-product-code" {...register("productCode")} />
-            </Field>
-            <Field
-              error={errors.name?.message}
-              id="import-product-name"
-              label={labels.name}
-            >
-              <Input id="import-product-name" {...register("name")} />
-            </Field>
-          </div>
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field
-              error={errors.category?.message}
-              id="import-product-category"
-              label={labels.category}
-            >
-              <Controller
-                control={control}
-                name="category"
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger id="import-product-category">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PRODUCT_CATEGORIES.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </Field>
-            <Field
-              error={errors.categoryCode?.message}
-              id="import-product-category-code"
-              label={labels.dynamicCategory}
-            >
-              <Controller
-                control={control}
-                name="categoryCode"
-                render={({ field }) => (
-                  <NullableSelect
-                    id="import-product-category-code"
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
-                    {categories
-                      .filter((category) => category.code)
-                      .map((category) => (
-                        <SelectItem
-                          key={category.id}
-                          value={category.code ?? ""}
-                        >
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                  </NullableSelect>
-                )}
-              />
-            </Field>
-          </div>
-
-          <div className="grid gap-5 sm:grid-cols-3">
-            <Field
-              error={errors.brand?.message}
-              id="import-product-brand"
-              label={labels.brand}
-            >
-              <Input id="import-product-brand" {...register("brand")} />
-            </Field>
-            <Field
-              error={errors.model?.message}
-              id="import-product-model"
-              label={labels.model}
-            >
-              <Input id="import-product-model" {...register("model")} />
-            </Field>
-            <Field
-              error={errors.manufactureYear?.message}
-              id="import-product-manufacture-year"
-              label={labels.manufactureYear}
-            >
-              <Input
-                id="import-product-manufacture-year"
-                inputMode="numeric"
-                type="number"
-                {...register("manufactureYear")}
-              />
-            </Field>
-          </div>
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field
-              error={errors.serialNumber?.message}
-              id="import-product-serial-number"
-              label={labels.serialNumber}
-            >
-              <Input
-                id="import-product-serial-number"
-                {...register("serialNumber")}
-              />
-            </Field>
-            <Field
-              error={errors.status?.message}
-              id="import-product-status"
-              label={labels.status}
-            >
-              <Controller
-                control={control}
-                name="status"
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger id="import-product-status">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PRODUCT_STATUS_FILTERS.filter(
-                        (status) => status !== "ALL",
-                      ).map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </Field>
-          </div>
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field
-              error={errors.imageUrl?.message}
-              id="import-product-image-url"
-              label={labels.imageUrl}
-            >
-              <Input id="import-product-image-url" {...register("imageUrl")} />
-            </Field>
-            <Field
-              error={errors.warrantyDurationMonths?.message}
-              id="import-product-warranty-duration"
-              label={labels.warrantyDurationMonths}
-            >
-              <Input
-                id="import-product-warranty-duration"
-                inputMode="numeric"
-                min={1}
-                type="number"
-                {...register("warrantyDurationMonths")}
-              />
-            </Field>
-          </div>
-
-          <Field
-            error={errors.description?.message}
-            id="import-product-description"
-            label={labels.description}
-          >
-            <Textarea
-              id="import-product-description"
-              rows={4}
-              {...register("description")}
+        {row ? (
+          <div className="mt-5">
+            <ProductForm
+              initialValues={row.data}
+              key={row.id}
+              mode="import-preview"
+              onCancel={() => onOpenChange(false)}
+              onSaved={onSave}
+              submitLabel={labels.saveChanges}
             />
-          </Field>
-
-          <Field
-            error={errors.warrantyTerms?.message}
-            id="import-product-warranty-terms"
-            label={labels.warrantyTerms}
-          >
-            <Textarea
-              id="import-product-warranty-terms"
-              rows={4}
-              {...register("warrantyTerms")}
-            />
-          </Field>
-
-          <div className="grid grid-cols-2 gap-2 border-t border-slate-200 pt-5 sm:flex sm:justify-end">
-            <Button
-              className="w-full sm:w-auto"
-              onClick={() => onOpenChange(false)}
-              type="button"
-              variant="secondary"
-            >
-              {labels.cancel}
-            </Button>
-            <Button className="w-full sm:w-auto" type="submit">
-              {labels.saveChanges}
-            </Button>
           </div>
-        </form>
+        ) : null}
       </DialogContent>
     </Dialog>
   );
-}
-
-const optionalText = z.string().trim();
-const optionalInteger = z.preprocess(
-  (value) => (value === "" || value === null ? undefined : value),
-  z.coerce.number().int().min(1).max(120).optional(),
-);
-const optionalYear = z.preprocess(
-  (value) => (value === "" || value === null ? undefined : value),
-  z.coerce.number().int().min(1900).max(2100).optional(),
-);
-
-const productImportEditSchema = z.object({
-  brand: optionalText.max(80),
-  category: z.enum(["CAR", "ACCESSORY", "SPARE_PART", "SERVICE_PACKAGE"]),
-  categoryCode: optionalText.max(80),
-  description: optionalText.max(5000),
-  imageUrl: optionalText.max(1000),
-  manufactureYear: optionalYear,
-  model: optionalText.max(80),
-  name: optionalText.min(2).max(160),
-  productCode: optionalText.max(64),
-  serialNumber: optionalText.max(64),
-  status: z.enum(["ACTIVE", "INACTIVE"]),
-  warrantyDurationMonths: optionalInteger,
-  warrantyTerms: optionalText.max(2000),
-});
-
-type ProductImportEditFormValues = z.output<typeof productImportEditSchema>;
-type ProductImportEditFormInput = z.input<typeof productImportEditSchema>;
-
-function toImportEditFormValues(
-  data: ProductImportRowData | undefined,
-): ProductImportEditFormValues {
-  return {
-    brand: data?.brand ?? "",
-    category: normalizeCategory(data?.category),
-    categoryCode: data?.categoryCode ?? "",
-    description: data?.description ?? "",
-    imageUrl: data?.imageUrl ?? "",
-    manufactureYear: data?.manufactureYear ?? undefined,
-    model: data?.model ?? "",
-    name: data?.name ?? "",
-    productCode: data?.productCode ?? "",
-    serialNumber: data?.serialNumber ?? "",
-    status: normalizeStatus(data?.status),
-    warrantyDurationMonths: data?.warrantyDurationMonths ?? undefined,
-    warrantyTerms: data?.warrantyTerms ?? "",
-  };
-}
-
-function toImportRowData(
-  values: ProductImportEditFormValues,
-): ProductImportRowData {
-  return {
-    brand: toNullableValue(values.brand),
-    category: values.category,
-    categoryCode: toNullableValue(values.categoryCode),
-    description: toNullableValue(values.description),
-    imageUrl: toNullableValue(values.imageUrl),
-    manufactureYear: values.manufactureYear ?? null,
-    model: toNullableValue(values.model),
-    name: values.name,
-    productCode: toNullableValue(values.productCode),
-    serialNumber: toNullableValue(values.serialNumber),
-    status: values.status,
-    warrantyDurationMonths: values.warrantyDurationMonths ?? null,
-    warrantyTerms: toNullableValue(values.warrantyTerms),
-  };
-}
-
-function normalizeCategory(value: string | undefined) {
-  return PRODUCT_CATEGORIES.includes(value as never)
-    ? (value as ProductImportEditFormValues["category"])
-    : "CAR";
-}
-
-function normalizeStatus(value: string | undefined) {
-  return value === "INACTIVE" ? "INACTIVE" : "ACTIVE";
-}
-
-function toNullableValue(value: string | null | undefined) {
-  return value?.trim() || null;
 }
 
 function PreviewCell({ value }: { value: number | string | null }) {
@@ -695,54 +373,3 @@ function ImportRowStatus({
     </div>
   );
 }
-
-function Field({
-  children,
-  error,
-  id,
-  label,
-}: {
-  children: ReactNode;
-  error?: string;
-  id: string;
-  label: string;
-}) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      {children}
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
-    </div>
-  );
-}
-
-function NullableSelect({
-  children,
-  id,
-  onValueChange,
-  value,
-}: {
-  children: ReactNode;
-  id: string;
-  onValueChange: (value: string) => void;
-  value?: string;
-}) {
-  return (
-    <Select
-      onValueChange={(nextValue) =>
-        onValueChange(nextValue === SELECT_EMPTY_VALUE ? "" : nextValue)
-      }
-      value={value || SELECT_EMPTY_VALUE}
-    >
-      <SelectTrigger id={id}>
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value={SELECT_EMPTY_VALUE}>-</SelectItem>
-        {children}
-      </SelectContent>
-    </Select>
-  );
-}
-
-const SELECT_EMPTY_VALUE = "__empty__";
