@@ -4,6 +4,8 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, warranty_status } from '@prisma/client';
 
 const warrantyInclude = {
+  activated_by: true,
+  voided_by: true,
   product: {
     include: {
       ownerships: {

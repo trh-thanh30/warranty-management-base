@@ -1,7 +1,23 @@
-import { formatDate, type WarrantyListItem } from "@repo/shared";
+import {
+  formatDate,
+  type WarrantyListItem,
+  type WarrantyUserSummary,
+} from "@repo/shared";
 
-export function formatWarrantyDate(value: string | null | undefined) {
-  return formatDate(value);
+export function formatWarrantyDate(
+  value: string | null | undefined,
+  locale?: string,
+) {
+  return formatDate(value, { locale });
+}
+
+export function formatWarrantyUser(
+  user: WarrantyUserSummary | null | undefined,
+  fallbackId: string | null | undefined,
+) {
+  if (!user) return fallbackId ?? "-";
+
+  return `${user.name || user.email} (${user.email})`;
 }
 
 export function formatWarrantyOwner(warranty: WarrantyListItem) {

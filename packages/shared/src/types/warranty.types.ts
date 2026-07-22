@@ -16,11 +16,19 @@ export type WarrantySummary = {
   terms: string | null;
   metadata: Record<string, unknown> | null;
   activatedByUserId: string | null;
+  activatedByUser: WarrantyUserSummary | null;
   voidedAt: string | null;
   voidedByUserId: string | null;
+  voidedByUser: WarrantyUserSummary | null;
   voidReason: string | null;
   createdAt: string;
   updatedAt: string;
+};
+
+export type WarrantyUserSummary = {
+  id: string;
+  email: string;
+  name: string | null;
 };
 
 export type WarrantyLookupResult = {

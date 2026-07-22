@@ -1,12 +1,25 @@
-import { Customer, Product, ProductOwnership, Warranty } from '@prisma/client';
+import {
+  Customer,
+  Product,
+  ProductOwnership,
+  User,
+  Warranty,
+} from '@prisma/client';
 
 type WarrantyWithProduct = Warranty & {
+  activated_by?: User | null;
+  voided_by?: User | null;
   product: Product & {
     ownerships?: Array<ProductOwnership & { customer?: Customer }>;
   };
 };
 
-export function toWarrantyResponse(warranty: Warranty) {
+type WarrantyWithAuditUsers = Warranty & {
+  activated_by?: User | null;
+  voided_by?: User | null;
+};
+
+export function toWarrantyResponse(warranty: WarrantyWithAuditUsers) {
   return {
     id: warranty.id,
     productId: warranty.product_id,
@@ -21,12 +34,28 @@ export function toWarrantyResponse(warranty: Warranty) {
     terms: warranty.terms,
     metadata: warranty.metadata as Record<string, unknown> | null,
     activatedByUserId: warranty.activated_by_id,
+    activatedByUser: getWarrantyUserSummary(
+      'activated_by' in warranty ? warranty.activated_by : null,
+    ),
     voidedAt: warranty.voided_at,
     voidedByUserId: warranty.voided_by_id,
+    voidedByUser: getWarrantyUserSummary(
+      'voided_by' in warranty ? warranty.voided_by : null,
+    ),
     voidReason: warranty.void_reason,
     createdAt: warranty.created_at,
     updatedAt: warranty.updated_at,
   };
+}
+
+function getWarrantyUserSummary(user: User | null | undefined) {
+  return user
+    ? {
+        id: user.id,
+        email: user.email,
+        name: user.full_name,
+      }
+    : null;
 }
 
 export function toWarrantyLookupResponse(input: {

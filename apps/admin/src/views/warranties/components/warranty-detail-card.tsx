@@ -10,6 +10,7 @@ import {
   formatWarrantyMoneyLimit,
   formatWarrantyDate,
   formatWarrantyOwner,
+  formatWarrantyUser,
   getWarrantyProductDisplayName,
 } from "../warranties.utils";
 import { WarrantyStatusBadge } from "./warranty-status-badge";
@@ -34,11 +35,11 @@ export function WarrantyDetailCard({ warranty }: WarrantyDetailCardProps) {
       },
       {
         label: t("startDate"),
-        value: formatWarrantyDate(warranty.startDate),
+        value: formatWarrantyDate(warranty.startDate, locale),
       },
       {
         label: t("endDate"),
-        value: formatWarrantyDate(warranty.endDate),
+        value: formatWarrantyDate(warranty.endDate, locale),
       },
       {
         label: t("duration"),
@@ -69,19 +70,25 @@ export function WarrantyDetailCard({ warranty }: WarrantyDetailCardProps) {
       },
       {
         label: t("createdAt"),
-        value: formatWarrantyDate(warranty.createdAt),
+        value: formatWarrantyDate(warranty.createdAt, locale),
       },
       {
         label: t("activatedBy"),
-        value: warranty.activatedByUserId ?? "-",
+        value: formatWarrantyUser(
+          warranty.activatedByUser,
+          warranty.activatedByUserId,
+        ),
       },
       {
         label: t("voidedAt"),
-        value: formatWarrantyDate(warranty.voidedAt),
+        value: formatWarrantyDate(warranty.voidedAt, locale),
       },
       {
         label: t("voidedBy"),
-        value: warranty.voidedByUserId ?? "-",
+        value: formatWarrantyUser(
+          warranty.voidedByUser,
+          warranty.voidedByUserId,
+        ),
       },
       {
         label: t("voidReasonValue"),
