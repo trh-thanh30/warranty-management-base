@@ -9,7 +9,7 @@ import type {
   WarrantyLookupResult,
   WarrantySummary,
 } from "@repo/shared";
-import { unwrap } from "../service.utils.ts";
+import { unwrap, unwrapBlob } from "../service.utils.ts";
 import type { WarrantiesHttpClient } from "./warranties.types";
 
 export function createWarrantiesService(http: WarrantiesHttpClient) {
@@ -22,6 +22,14 @@ export function createWarrantiesService(http: WarrantiesHttpClient) {
           params: query,
         }),
       );
+    },
+
+    async exportWarranties(query: ListWarrantiesQuery): Promise<Blob> {
+      const response = await http.get<Blob>("/warranties/export", {
+        params: query,
+        responseType: "blob",
+      });
+      return unwrapBlob(response);
     },
 
     async lookupWarranty(code: string): Promise<WarrantyLookupResult> {

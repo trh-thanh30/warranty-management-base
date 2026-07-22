@@ -11,6 +11,22 @@ import { warranty_status } from '@prisma/client';
 import { Readable } from 'stream';
 
 describe('PreviewWarrantyImportUseCase', () => {
+  it('uses Vietnamese headers for warranty workbooks', () => {
+    expect(warrantyExcelColumns.map((column) => column.header)).toEqual([
+      'Mã bảo hành',
+      'Mã sản phẩm',
+      'Tên sản phẩm',
+      'Số serial',
+      'Mã khách hàng chủ sở hữu',
+      'Tên chủ sở hữu',
+      'Ngày bắt đầu',
+      'Ngày kết thúc',
+      'Thời hạn bảo hành (tháng)',
+      'Trạng thái',
+      'Điều khoản bảo hành',
+    ]);
+  });
+
   it('parses and validates warranty import rows', async () => {
     const file = await createFileFromRows([
       {

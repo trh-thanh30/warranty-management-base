@@ -54,10 +54,13 @@ export function ImportExportMenu({
           <ChevronDown className="size-4 text-slate-500" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 p-1.5">
+      <DropdownMenuContent
+        align="end"
+        className="w-max min-w-64 max-w-[calc(100vw-2rem)] p-1.5"
+      >
         {onUpload && labels.upload ? (
           <DropdownMenuItem
-            className="gap-2.5 px-3 py-2.5"
+            className="gap-2.5 whitespace-nowrap px-3 py-2.5"
             disabled={uploadDisabled}
             onSelect={onUpload}
           >
@@ -68,7 +71,7 @@ export function ImportExportMenu({
         {onUpload && onDownloadTemplate ? <DropdownMenuSeparator /> : null}
         {onDownloadTemplate && labels.downloadTemplate ? (
           <DropdownMenuItem
-            className="gap-2.5 px-3 py-2.5"
+            className="gap-2.5 whitespace-nowrap px-3 py-2.5"
             onSelect={onDownloadTemplate}
           >
             <FileDown className="size-4 text-emerald-600" />
@@ -76,7 +79,7 @@ export function ImportExportMenu({
           </DropdownMenuItem>
         ) : null}
         <DropdownMenuItem
-          className="gap-2.5 px-3 py-2.5"
+          className="gap-2.5 whitespace-nowrap px-3 py-2.5"
           onSelect={onExportAll}
         >
           <Download className="size-4 text-emerald-600" />

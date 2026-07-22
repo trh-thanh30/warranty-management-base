@@ -73,6 +73,42 @@ test("warranty directory requests paginated warranties with filters", async () =
   assert.deepEqual(result, response);
 });
 
+test("exports warranties with the current directory filters", async () => {
+  const calls: unknown[] = [];
+  const blob = new Blob(["export"]);
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: blob };
+    },
+  };
+
+  const result = await createWarrantiesService(
+    http as unknown as WarrantiesHttpClient,
+  ).exportWarranties({
+    search: "battery",
+    sortBy: "createdAt",
+    sortOrder: "desc",
+    status: "ACTIVE",
+  });
+
+  assert.equal(result, blob);
+  assert.deepEqual(calls, [
+    {
+      url: "/warranties/export",
+      config: {
+        params: {
+          search: "battery",
+          sortBy: "createdAt",
+          sortOrder: "desc",
+          status: "ACTIVE",
+        },
+        responseType: "blob",
+      },
+    },
+  ]);
+});
+
 test("activating a product warranty posts to product activation endpoint", async () => {
   const calls: unknown[] = [];
   const http = {

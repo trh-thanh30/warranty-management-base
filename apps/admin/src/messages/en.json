@@ -927,6 +927,12 @@
     "previous": "Previous",
     "next": "Next",
     "notFound": "Warranty not found",
+    "excel": {
+      "title": "Export Excel",
+      "exportAll": "Export warranty list",
+      "exported": "Warranties exported.",
+      "exportError": "Unable to export warranties."
+    },
     "statuses": {
       "ALL": "All warranty statuses",
       "DRAFT": "Draft",
