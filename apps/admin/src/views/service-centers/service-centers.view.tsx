@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { Button } from "@repo/ui";
+import { ExcelImportDialog, ImportExportMenu } from "@/src/components/common";
 import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
@@ -20,15 +21,33 @@ export function ServiceCentersView() {
       <div className="space-y-6">
         <PageHeader
           actions={
-            directory.canCreate ? (
-              <Button asChild className="w-full sm:w-auto">
-                <Link href="/service-centers/create">
-                  <Plus className="size-4" />
-                  <span className="sm:hidden">{t("createShort")}</span>
-                  <span className="hidden sm:inline">{t("create")}</span>
-                </Link>
-              </Button>
-            ) : null
+            <div className="flex w-full flex-wrap justify-end gap-2 sm:w-auto">
+              <ImportExportMenu
+                labels={{
+                  downloadTemplate: t("excel.downloadTemplate"),
+                  exportAll: t("excel.exportAll"),
+                  title: t("excel.title"),
+                  upload: t("excel.upload"),
+                }}
+                onDownloadTemplate={() => {
+                  void directory.downloadImportTemplate();
+                }}
+                onExportAll={() => {
+                  void directory.exportServiceCenters();
+                }}
+                onUpload={directory.openImportDialog}
+                uploadDisabled={!directory.canCreate}
+              />
+              {directory.canCreate ? (
+                <Button asChild className="w-full sm:w-auto">
+                  <Link href="/service-centers/create">
+                    <Plus className="size-4" />
+                    <span className="sm:hidden">{t("createShort")}</span>
+                    <span className="hidden sm:inline">{t("create")}</span>
+                  </Link>
+                </Button>
+              ) : null}
+            </div>
           }
           description={t("description")}
           eyebrow={t("eyebrow")}
@@ -71,6 +90,32 @@ export function ServiceCentersView() {
           }}
           open={Boolean(directory.serviceCenterToDeactivate)}
           serviceCenter={directory.serviceCenterToDeactivate}
+        />
+
+        <ExcelImportDialog
+          description={t("excel.importDescription")}
+          isSubmitting={directory.isImporting}
+          labels={{
+            cancel: t("cancel"),
+            chooseFile: t("excel.chooseFile"),
+            execute: t("excel.execute"),
+            fileHelp: t("excel.fileHelp"),
+            fileLabel: t("excel.fileLabel"),
+            modeLabel: t("excel.modeLabel"),
+            replaceDescription: t("excel.replaceDescription"),
+            replaceLabel: t("excel.replaceLabel"),
+            title: t("excel.importTitle"),
+            upsertDescription: t("excel.upsertDescription"),
+            upsertLabel: t("excel.upsertLabel"),
+          }}
+          onOpenChange={(open) => {
+            if (!open) directory.closeImportDialog();
+          }}
+          onSubmit={(file) => {
+            void directory.importServiceCenterFile(file);
+          }}
+          open={directory.isImportDialogOpen}
+          showModeSelector={false}
         />
       </div>
     </PermissionGuard>

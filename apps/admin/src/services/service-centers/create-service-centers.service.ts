@@ -3,9 +3,10 @@ import type {
   ListServiceCentersQuery,
   PaginatedResponse,
   ServiceCenterSummary,
+  ServiceCenterImportResult,
   UpdateServiceCenterBody,
 } from "@repo/shared";
-import { unwrap } from "../service.utils.ts";
+import { unwrap, unwrapBlob } from "../service.utils.ts";
 import type { ServiceCentersHttpClient } from "./service-centers.types";
 
 export function createServiceCentersService(http: ServiceCentersHttpClient) {
@@ -61,6 +62,33 @@ export function createServiceCentersService(http: ServiceCentersHttpClient) {
       return unwrap(
         await http.patch<ServiceCenterSummary>(
           `/service-centers/${serviceCenterId}/deactivate`,
+        ),
+      );
+    },
+
+    async downloadImportTemplate(): Promise<Blob> {
+      const response = await http.get<Blob>(
+        "/service-centers/import-template",
+        { responseType: "blob" },
+      );
+      return unwrapBlob(response);
+    },
+
+    async exportServiceCenters(query: ListServiceCentersQuery): Promise<Blob> {
+      const response = await http.get<Blob>("/service-centers/export", {
+        params: query,
+        responseType: "blob",
+      });
+      return unwrapBlob(response);
+    },
+
+    async importServiceCenters(file: File): Promise<ServiceCenterImportResult> {
+      const formData = new FormData();
+      formData.append("file", file);
+      return unwrap(
+        await http.post<ServiceCenterImportResult>(
+          "/service-centers/import",
+          formData,
         ),
       );
     },

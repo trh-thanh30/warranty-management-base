@@ -131,3 +131,84 @@ test("creates, updates, and deactivates a service center", async () => {
     },
   ]);
 });
+
+test("downloads the service center import template as a blob", async () => {
+  const calls: unknown[] = [];
+  const blob = new Blob(["template"]);
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: blob };
+    },
+  };
+
+  const result = await createServiceCentersService(
+    http as unknown as ServiceCentersHttpClient,
+  ).downloadImportTemplate();
+
+  assert.equal(result, blob);
+  assert.deepEqual(calls, [
+    {
+      url: "/service-centers/import-template",
+      config: { responseType: "blob" },
+    },
+  ]);
+});
+
+test("exports service centers with the current directory filters", async () => {
+  const calls: unknown[] = [];
+  const blob = new Blob(["export"]);
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: blob };
+    },
+  };
+
+  await createServiceCentersService(
+    http as unknown as ServiceCentersHttpClient,
+  ).exportServiceCenters({
+    isActive: "true",
+    province: "Da Nang",
+    search: "warranty",
+    sortBy: "name",
+    sortOrder: "asc",
+  });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/service-centers/export",
+      config: {
+        params: {
+          isActive: "true",
+          province: "Da Nang",
+          search: "warranty",
+          sortBy: "name",
+          sortOrder: "asc",
+        },
+        responseType: "blob",
+      },
+    },
+  ]);
+});
+
+test("imports service centers using multipart form data", async () => {
+  let request: { url: string; body: unknown } | undefined;
+  const response = { created: 1, updated: 0, errors: [] };
+  const http = {
+    async post(url: string, body?: unknown) {
+      request = { url, body };
+      return { data: { success: true, data: response } };
+    },
+  };
+  const file = new File(["excel"], "service-centers.xlsx");
+
+  const result = await createServiceCentersService(
+    http as unknown as ServiceCentersHttpClient,
+  ).importServiceCenters(file);
+
+  assert.deepEqual(result, response);
+  assert.equal(request?.url, "/service-centers/import");
+  assert.ok(request?.body instanceof FormData);
+  assert.equal((request?.body as FormData).get("file"), file);
+});

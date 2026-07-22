@@ -137,3 +137,22 @@ export function useDeactivateServiceCenter() {
     },
   });
 }
+
+export function useImportServiceCenters() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (file: File) =>
+      serviceCentersService.importServiceCenters(file),
+    onSuccess: (result) => {
+      if (result.errors.length === 0) {
+        void queryClient.invalidateQueries({
+          queryKey: serviceCenterKeys.lists(),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: serviceCenterKeys.provinces(),
+        });
+      }
+    },
+  });
+}

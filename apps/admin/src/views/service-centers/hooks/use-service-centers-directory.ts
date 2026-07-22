@@ -9,11 +9,14 @@ import { useAuth } from "@/src/app/providers/auth-provider";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import {
   useDeactivateServiceCenter,
+  useImportServiceCenters,
   useServiceCenters,
 } from "@/src/hooks/use-service-centers";
+import { useExcel } from "@/src/hooks/use-excel";
 import { useVietnamProvinces } from "@/src/hooks/use-locations";
 import { useTableControls } from "@/src/hooks/use-table-controls";
 import { useToast } from "@/src/hooks/use-toast";
+import { serviceCentersService } from "@/src/services/service-centers/service-centers.service";
 import { SERVICE_CENTERS_PAGE_SIZE } from "../service-centers.constants";
 import type { ServiceCenterStatusFilter } from "../service-centers.types";
 import { toServiceCenterActiveQuery } from "../service-centers.utils";
@@ -31,6 +34,7 @@ const INITIAL_SERVICE_CENTER_FILTERS = {
 export function useServiceCentersDirectory() {
   const t = useTranslations("ServiceCenters");
   const toast = useToast();
+  const { createDatedFilename, downloadBlob } = useExcel();
   const { user } = useAuth();
   const { hasPermission } = usePermissions();
   const {
@@ -56,6 +60,8 @@ export function useServiceCentersDirectory() {
   const canView = hasPermission(PERMISSIONS.SERVICE_CENTER_VIEW);
   const canCreate = hasPermission(PERMISSIONS.SERVICE_CENTER_CREATE);
   const deactivateServiceCenter = useDeactivateServiceCenter();
+  const importServiceCenters = useImportServiceCenters();
+  const [isImportDialogOpen, setImportDialogOpen] = useState(false);
   const [serviceCenterToDeactivate, setServiceCenterToDeactivate] =
     useState<ServiceCenterSummary | null>(null);
   const serviceCentersQuery = useServiceCenters(
@@ -86,13 +92,72 @@ export function useServiceCentersDirectory() {
     }
   }
 
+  async function downloadImportTemplate() {
+    try {
+      const blob = await serviceCentersService.downloadImportTemplate();
+      downloadBlob(blob, "service-center-import-template.xlsx");
+      toast.success(t("excel.templateDownloaded"));
+    } catch {
+      toast.error(t("excel.templateDownloadError"));
+    }
+  }
+
+  async function exportServiceCenters() {
+    try {
+      const blob = await serviceCentersService.exportServiceCenters({
+        isActive: toServiceCenterActiveQuery(filters.status),
+        province: filters.province || undefined,
+        search: debouncedSearch || undefined,
+        sortBy,
+        sortOrder,
+      });
+      downloadBlob(blob, createDatedFilename("service-centers"));
+      toast.success(t("excel.exported"));
+    } catch {
+      toast.error(t("excel.exportError"));
+    }
+  }
+
+  async function importServiceCenterFile(file: File) {
+    try {
+      const result = await importServiceCenters.mutateAsync(file);
+      if (result.errors.length > 0) {
+        toast.error(
+          t("excel.importHasErrors", {
+            count: result.errors.length,
+            row: result.errors[0]?.rowNumber ?? 0,
+          }),
+        );
+        return;
+      }
+
+      toast.success(
+        t("excel.importSuccess", {
+          created: result.created,
+          updated: result.updated,
+        }),
+      );
+      setImportDialogOpen(false);
+      void serviceCentersQuery.refetch();
+    } catch {
+      toast.error(t("excel.importError"));
+    }
+  }
+
   return {
     canCreate,
     clearFilters: resetControls,
+    closeImportDialog: () => setImportDialogOpen(false),
     closeDeactivate: () => setServiceCenterToDeactivate(null),
     confirmDeactivate,
+    downloadImportTemplate,
+    exportServiceCenters,
+    importServiceCenterFile,
+    isImportDialogOpen,
+    isImporting: importServiceCenters.isPending,
     isDeactivating: deactivateServiceCenter.isPending,
     openDeactivate: setServiceCenterToDeactivate,
+    openImportDialog: () => setImportDialogOpen(true),
     pageSize,
     province: filters.province,
     provincesQuery: {

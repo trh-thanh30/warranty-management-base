@@ -1,6 +1,7 @@
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { normalizePagination, paginate } from '@/common/pagination/pagination';
 import { ListServiceCentersDto } from '@/modules/service-centers/dto/list-service-centers.dto';
+import { PreparedServiceCenterImportRow } from '@/modules/service-centers/excel/service-center-excel.types';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
@@ -89,6 +90,89 @@ export class ServiceCentersRepository {
       ]);
 
       return paginate(items, { page, limit, total });
+    });
+  }
+
+  listAll() {
+    return this.prismaService.serviceCenter.findMany();
+  }
+
+  listForExport(filters: ListServiceCentersDto) {
+    const search = filters.search?.trim();
+    const province = filters.province?.trim();
+    const isActive =
+      filters.isActive === undefined ? undefined : filters.isActive === 'true';
+    const sortMap = {
+      name: 'name',
+      province: 'province',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+      isActive: 'is_active',
+    } satisfies Record<
+      string,
+      keyof Prisma.ServiceCenterOrderByWithRelationInput
+    >;
+    const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
+    const where: Prisma.ServiceCenterWhereInput = {
+      is_active: isActive,
+      province: province
+        ? { contains: province, mode: 'insensitive' }
+        : undefined,
+      OR: search
+        ? [
+            { name: { contains: search, mode: 'insensitive' } },
+            { phone: { contains: search, mode: 'insensitive' } },
+            { email: { contains: search, mode: 'insensitive' } },
+            { province: { contains: search, mode: 'insensitive' } },
+            { district: { contains: search, mode: 'insensitive' } },
+            { address: { contains: search, mode: 'insensitive' } },
+          ]
+        : undefined,
+    };
+    const orderBy: Prisma.ServiceCenterOrderByWithRelationInput[] = sortBy
+      ? [{ [sortBy]: filters.sortOrder ?? 'desc' }]
+      : [{ is_active: 'desc' }, { province: 'asc' }, { name: 'asc' }];
+
+    return this.prismaService.serviceCenter.findMany({
+      where,
+      orderBy,
+      take: 5000,
+    });
+  }
+
+  importRows(rows: PreparedServiceCenterImportRow[]) {
+    return this.prismaService.$transaction(async (tx) => {
+      let created = 0;
+      let updated = 0;
+
+      for (const row of rows) {
+        const data = {
+          name: row.name,
+          phone: row.phone,
+          email: row.email,
+          province: row.province,
+          district: row.district,
+          address: row.address,
+          is_active: row.isActive,
+          metadata:
+            row.metadata === null
+              ? Prisma.JsonNull
+              : (row.metadata as Prisma.InputJsonObject),
+        };
+
+        if (row.existingServiceCenterId) {
+          await tx.serviceCenter.update({
+            where: { id: row.existingServiceCenterId },
+            data,
+          });
+          updated += 1;
+        } else {
+          await tx.serviceCenter.create({ data });
+          created += 1;
+        }
+      }
+
+      return { created, updated };
     });
   }
 
