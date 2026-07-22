@@ -23,3 +23,25 @@ export function getWarrantyProductDisplayName(warranty: WarrantyListItem) {
     ? `${warranty.product.name} · ${secondary}`
     : warranty.product.name;
 }
+
+export function formatWarrantyMoneyLimit(
+  value: string | null,
+  locale: string,
+  fallback: string,
+) {
+  if (value === null) return fallback;
+
+  const [integerPart, rawFraction = ""] = value.split(".");
+  const fraction = rawFraction.replace(/0+$/, "");
+  const formatter = new Intl.NumberFormat(locale);
+  const integer = formatter.format(BigInt(integerPart ?? "0"));
+  const decimalSeparator =
+    formatter.formatToParts(1.1).find((part) => part.type === "decimal")
+      ?.value ?? ".";
+
+  return `${integer}${fraction ? `${decimalSeparator}${fraction}` : ""} VND`;
+}
+
+export function isValidWarrantyAmount(value: string | null) {
+  return value === null || /^\d+(\.\d{1,2})?$/.test(value);
+}

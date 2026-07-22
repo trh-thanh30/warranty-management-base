@@ -152,3 +152,41 @@ test("warranty detail requests warranty by id", async () => {
   assert.deepEqual(calls, [{ url: "/warranties/warranty-id" }]);
   assert.deepEqual(result, warranty);
 });
+
+test("updates warranty coverage through the warranty endpoint", async () => {
+  const calls: unknown[] = [];
+  const updatedWarranty = {
+    ...warranty,
+    coverageLimitAmount: "50000000",
+    maxAmountPerClaim: "10000000",
+    maxClaimCount: 3,
+  };
+  const http = {
+    async patch(url: string, body?: unknown) {
+      calls.push({ url, body });
+      return { data: { success: true, data: updatedWarranty } };
+    },
+  };
+
+  const result = await createWarrantiesService(
+    http as unknown as WarrantiesHttpClient,
+  ).updateWarranty("warranty-id", {
+    adjustmentReason: "Updated policy",
+    coverageLimitAmount: "50000000",
+    maxAmountPerClaim: "10000000",
+    maxClaimCount: 3,
+  });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/warranties/warranty-id",
+      body: {
+        adjustmentReason: "Updated policy",
+        coverageLimitAmount: "50000000",
+        maxAmountPerClaim: "10000000",
+        maxClaimCount: 3,
+      },
+    },
+  ]);
+  assert.deepEqual(result, updatedWarranty);
+});

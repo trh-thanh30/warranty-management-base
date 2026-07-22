@@ -6,6 +6,7 @@ import { ActivateWarrantyDto } from '@/modules/warranties/dto/activate-warranty.
 import { ListWarrantiesDto } from '@/modules/warranties/dto/list-warranties.dto';
 import { LookupWarrantyDto } from '@/modules/warranties/dto/lookup-warranty.dto';
 import { ManualWarrantyActivationDto } from '@/modules/warranties/dto/manual-warranty-activation.dto';
+import { UpdateWarrantyDto } from '@/modules/warranties/dto/update-warranty.dto';
 import { ActivateWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/activate-warranty-by-code.use-case';
 import { ActivateWarrantyUseCase } from '@/modules/warranties/use-cases/activate-warranty.use-case';
 import { GetMyProductWarrantyUseCase } from '@/modules/warranties/use-cases/get-my-product-warranty.use-case';
@@ -19,11 +20,13 @@ import { ManualWarrantyActivationUseCase } from '@/modules/warranties/use-cases/
 import { DownloadWarrantyImportTemplateUseCase } from '@/modules/warranties/use-cases/download-warranty-import-template.use-case';
 import { ExportWarrantiesUseCase } from '@/modules/warranties/use-cases/export-warranties.use-case';
 import { PreviewWarrantyImportUseCase } from '@/modules/warranties/use-cases/preview-warranty-import.use-case';
+import { UpdateWarrantyUseCase } from '@/modules/warranties/use-cases/update-warranty.use-case';
 import {
   Body,
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   Res,
@@ -54,6 +57,7 @@ export class WarrantiesController {
     private readonly downloadWarrantyImportTemplateUseCase: DownloadWarrantyImportTemplateUseCase,
     private readonly exportWarrantiesUseCase: ExportWarrantiesUseCase,
     private readonly previewWarrantyImportUseCase: PreviewWarrantyImportUseCase,
+    private readonly updateWarrantyUseCase: UpdateWarrantyUseCase,
   ) {}
 
   @Get('warranties')
@@ -96,6 +100,18 @@ export class WarrantiesController {
   @Permissions([permission_key.WARRANTY_VIEW])
   getWarrantyDetail(@Param('id') id: string) {
     return this.getWarrantyDetailUseCase.execute(id);
+  }
+
+  @Patch('warranties/:id')
+  @Permissions([permission_key.WARRANTY_UPDATE])
+  updateWarranty(
+    @Param('id') id: string,
+    @Body() dto: UpdateWarrantyDto,
+    @User() user: RequestUser,
+  ) {
+    return this.updateWarrantyUseCase.execute(id, dto, {
+      adjustedByUserId: user.id,
+    });
   }
 
   @Post('warranties/activate-by-code')

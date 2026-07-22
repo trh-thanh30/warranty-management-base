@@ -3,10 +3,11 @@
 import { CalendarDays, Package, ShieldCheck, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { WarrantyListItem } from "@repo/shared";
 import { Card, CardContent, CardHeader, CardTitle, Skeleton } from "@repo/ui";
 import {
+  formatWarrantyMoneyLimit,
   formatWarrantyDate,
   formatWarrantyOwner,
   getWarrantyProductDisplayName,
@@ -19,6 +20,7 @@ type WarrantyDetailCardProps = {
 
 export function WarrantyDetailCard({ warranty }: WarrantyDetailCardProps) {
   const t = useTranslations("Warranties");
+  const locale = useLocale();
   const productDisplayName = getWarrantyProductDisplayName(warranty);
   const coverageItems = useMemo(
     () => [
@@ -43,11 +45,34 @@ export function WarrantyDetailCard({ warranty }: WarrantyDetailCardProps) {
         value: t("durationValue", { count: warranty.durationMonths }),
       },
       {
+        label: t("coverageLimitAmount"),
+        value: formatWarrantyMoneyLimit(
+          warranty.coverageLimitAmount,
+          locale,
+          t("unlimited"),
+        ),
+      },
+      {
+        label: t("maxClaimCount"),
+        value:
+          warranty.maxClaimCount === null
+            ? t("unlimited")
+            : t("claimCountValue", { count: warranty.maxClaimCount }),
+      },
+      {
+        label: t("maxAmountPerClaim"),
+        value: formatWarrantyMoneyLimit(
+          warranty.maxAmountPerClaim,
+          locale,
+          t("unlimited"),
+        ),
+      },
+      {
         label: t("createdAt"),
         value: formatWarrantyDate(warranty.createdAt),
       },
     ],
-    [t, warranty],
+    [locale, t, warranty],
   );
 
   return (
@@ -116,9 +141,10 @@ export function WarrantyDetailCard({ warranty }: WarrantyDetailCardProps) {
               </div>
             </CardHeader>
             <CardContent className="p-4">
-              <p className="whitespace-pre-wrap text-sm leading-6 text-slate-700 dark:text-slate-300">
-                {warranty.terms}
-              </p>
+              <div
+                className="prose prose-slate dark:prose-invert max-w-none text-sm text-slate-700 dark:text-slate-300"
+                dangerouslySetInnerHTML={{ __html: warranty.terms }}
+              />
             </CardContent>
           </Card>
         ) : null}

@@ -24,6 +24,9 @@ export function toWarrantyExcelRow(
     startDate: warranty.start_date,
     endDate: warranty.end_date,
     durationMonths: warranty.duration_months,
+    coverageLimitAmount: warranty.coverage_limit_amount?.toString() ?? null,
+    maxClaimCount: warranty.max_claim_count,
+    maxAmountPerClaim: warranty.max_amount_per_claim?.toString() ?? null,
     status: warranty.status,
     terms: warranty.terms,
   };

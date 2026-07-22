@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, MoreHorizontal, ShieldCheck } from "lucide-react";
+import { Eye, MoreHorizontal, Pencil, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { WarrantyListItem } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
@@ -228,6 +228,9 @@ function WarrantyActions({
   const t = useTranslations("Warranties");
   const { hasPermission } = usePermissions();
   const canActivate = hasPermission(PERMISSIONS.WARRANTY_ACTIVATE);
+  const canEdit =
+    hasPermission(PERMISSIONS.WARRANTY_UPDATE) &&
+    (warranty.status === "DRAFT" || warranty.status === "ACTIVE");
   const canActivateCurrentWarranty =
     canActivate &&
     warranty.status === "DRAFT" &&
@@ -252,6 +255,14 @@ function WarrantyActions({
             {t("viewWarranty")}
           </Link>
         </DropdownMenuItem>
+        {canEdit ? (
+          <DropdownMenuItem asChild>
+            <Link href={`/warranties/${warranty.id}/edit`}>
+              <Pencil className="mr-2 size-4" />
+              {t("edit")}
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
         {canActivateCurrentWarranty ? (
           <>
             <DropdownMenuSeparator />

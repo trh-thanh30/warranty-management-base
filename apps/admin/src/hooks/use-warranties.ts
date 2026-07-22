@@ -14,6 +14,7 @@ import type {
   ManualWarrantyActivationBody,
   PaginatedResponse,
   WarrantyListItem,
+  UpdateWarrantyBody,
 } from "@repo/shared";
 import { warrantiesService } from "@/src/services/warranties/warranties.service";
 
@@ -73,6 +74,19 @@ export function useActivateWarranty(productId: string | null) {
   return useMutation({
     mutationFn: (body: ActivateWarrantyBody) =>
       warrantiesService.activateWarranty(productId ?? "", body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: warrantyKeys.all });
+      void queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+  });
+}
+
+export function useUpdateWarranty(warrantyId: string | null) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: UpdateWarrantyBody) =>
+      warrantiesService.updateWarranty(warrantyId ?? "", body),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: warrantyKeys.all });
       void queryClient.invalidateQueries({ queryKey: ["products"] });

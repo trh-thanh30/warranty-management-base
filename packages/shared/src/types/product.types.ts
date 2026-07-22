@@ -48,6 +48,9 @@ export type ProductWarrantySummary = {
   startDate: string;
   endDate: string;
   durationMonths: number;
+  coverageLimitAmount: string | null;
+  maxClaimCount: number | null;
+  maxAmountPerClaim: string | null;
   status: WarrantyStatus;
   terms: string | null;
 };

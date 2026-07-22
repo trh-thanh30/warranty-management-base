@@ -8,6 +8,7 @@ import type {
   WarrantyListItem,
   WarrantyLookupResult,
   WarrantySummary,
+  UpdateWarrantyBody,
 } from "@repo/shared";
 import { unwrap, unwrapBlob } from "../service.utils.ts";
 import type { WarrantiesHttpClient } from "./warranties.types";
@@ -43,6 +44,15 @@ export function createWarrantiesService(http: WarrantiesHttpClient) {
     async getWarrantyDetail(warrantyId: string): Promise<WarrantyListItem> {
       return unwrap(
         await http.get<WarrantyListItem>(`/warranties/${warrantyId}`),
+      );
+    },
+
+    async updateWarranty(
+      warrantyId: string,
+      body: UpdateWarrantyBody,
+    ): Promise<WarrantyListItem> {
+      return unwrap(
+        await http.patch<WarrantyListItem>(`/warranties/${warrantyId}`, body),
       );
     },
 

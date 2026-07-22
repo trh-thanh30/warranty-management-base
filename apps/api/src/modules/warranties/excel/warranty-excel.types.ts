@@ -10,6 +10,9 @@ export type WarrantyExcelRow = {
   startDate: Date | null;
   endDate: Date | null;
   durationMonths: number;
+  coverageLimitAmount: string | null;
+  maxClaimCount: number | null;
+  maxAmountPerClaim: string | null;
   status: warranty_status;
   terms: string | null;
 };

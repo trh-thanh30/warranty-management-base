@@ -291,17 +291,20 @@ model ProductOwnership {
 }
 
 model Warranty {
-  id              String          @id @default(uuid()) @db.Uuid
-  product_id      String          @unique @db.Uuid
-  warranty_code   String?         @unique
-  start_date      DateTime?
-  end_date        DateTime?
-  duration_months Int
-  status          warranty_status @default(DRAFT)
-  terms           String?
-  metadata        Json?
-  created_at      DateTime        @default(now())
-  updated_at      DateTime        @updatedAt
+  id                    String          @id @default(uuid()) @db.Uuid
+  product_id            String          @unique @db.Uuid
+  warranty_code         String?         @unique
+  start_date            DateTime?
+  end_date              DateTime?
+  duration_months       Int
+  coverage_limit_amount Decimal?        @db.Decimal(18, 2)
+  max_claim_count       Int?
+  max_amount_per_claim  Decimal?        @db.Decimal(18, 2)
+  status                warranty_status @default(DRAFT)
+  terms                 String?
+  metadata              Json?
+  created_at            DateTime        @default(now())
+  updated_at            DateTime        @updatedAt
 
   product            Product                    @relation(fields: [product_id], references: [id], onDelete: Cascade)
   claims             WarrantyClaim[]

@@ -13,6 +13,7 @@ import { ManualWarrantyActivationUseCase } from '@/modules/warranties/use-cases/
 import { DownloadWarrantyImportTemplateUseCase } from '@/modules/warranties/use-cases/download-warranty-import-template.use-case';
 import { ExportWarrantiesUseCase } from '@/modules/warranties/use-cases/export-warranties.use-case';
 import { PreviewWarrantyImportUseCase } from '@/modules/warranties/use-cases/preview-warranty-import.use-case';
+import { UpdateWarrantyUseCase } from '@/modules/warranties/use-cases/update-warranty.use-case';
 import { WarrantiesController } from '@/modules/warranties/warranties.controller';
 import { Module } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
@@ -41,6 +42,7 @@ import { memoryStorage } from 'multer';
     DownloadWarrantyImportTemplateUseCase,
     ExportWarrantiesUseCase,
     PreviewWarrantyImportUseCase,
+    UpdateWarrantyUseCase,
   ],
   exports: [
     ActivateWarrantyByCodeUseCase,

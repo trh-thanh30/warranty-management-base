@@ -201,6 +201,14 @@ export class WarrantiesRepository {
     });
   }
 
+  update(id: string, data: Prisma.WarrantyUpdateInput) {
+    return this.prismaService.warranty.update({
+      where: { id },
+      data,
+      include: warrantyInclude,
+    });
+  }
+
   findActiveProductByWarrantyCode(code: string) {
     return this.prismaService.product.findFirst({
       where: {
