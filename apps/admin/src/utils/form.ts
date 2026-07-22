@@ -26,9 +26,10 @@ export function translateFieldError(
 ) {
   if (!message) return undefined;
 
-  const hasTranslation = Array.isArray(translationKeys)
-    ? translationKeys.includes(message)
-    : translationKeys.has(message);
+  const hasTranslation =
+    "has" in translationKeys
+      ? translationKeys.has(message)
+      : translationKeys.includes(message);
 
   return hasTranslation ? translate(message) : message;
 }

@@ -9,7 +9,6 @@ import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
 import { ReviewWarrantyActivationRequestDialog } from "./components/review-warranty-activation-request-dialog";
-import { WarrantyActivationRequestDetailDialog } from "./components/warranty-activation-request-detail-dialog";
 import { WarrantyActivationRequestsDirectoryCard } from "./components/warranty-activation-requests-directory-card";
 import { useWarrantyActivationRequestsDirectory } from "./hooks/use-warranty-activation-requests-directory";
 
@@ -67,14 +66,6 @@ export function WarrantyActivationRequestsView() {
           search={directory.search}
           sortBy={directory.sortBy}
           sortOrder={directory.sortOrder}
-        />
-
-        <WarrantyActivationRequestDetailDialog
-          onOpenChange={(open) => {
-            if (!open) directory.actions.closeAction();
-          }}
-          open={directory.actions.activeAction === "detail"}
-          request={directory.actions.selectedRequest}
         />
 
         <ReviewWarrantyActivationRequestDialog

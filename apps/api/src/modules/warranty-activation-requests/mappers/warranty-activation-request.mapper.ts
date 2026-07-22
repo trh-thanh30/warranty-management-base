@@ -1,4 +1,8 @@
-import type { WarrantyActivationRequest } from '@prisma/client';
+import type {
+  Prisma,
+  WarrantyActivationRequest,
+  warranty_status,
+} from '@prisma/client';
 import type { WarrantyActivationRequestSummary } from '@repo/shared';
 
 export type WarrantyActivationRequestWithRelations =
@@ -9,7 +13,25 @@ export type WarrantyActivationRequestWithRelations =
       full_name: string | null;
       username: string;
     } | null;
+    activated_warranty?: {
+      id: string;
+      warranty_code: string | null;
+      status: warranty_status;
+      start_date: Date | null;
+      end_date: Date | null;
+      duration_months: number;
+    } | null;
   };
+
+function toMetadata(
+  value: Prisma.JsonValue | null,
+): Record<string, unknown> | null {
+  if (!value || Array.isArray(value) || typeof value !== 'object') {
+    return null;
+  }
+
+  return value;
+}
 
 export function toWarrantyActivationRequestResponse(
   request: WarrantyActivationRequestWithRelations,
@@ -38,9 +60,30 @@ export function toWarrantyActivationRequestResponse(
     adminNote: request.admin_note,
     rejectionReason: request.rejection_reason,
     reviewedById: request.reviewed_by_id,
+    reviewedBy: request.reviewed_by
+      ? {
+          id: request.reviewed_by.id,
+          displayName:
+            request.reviewed_by.full_name ?? request.reviewed_by.username,
+          email: request.reviewed_by.email,
+          username: request.reviewed_by.username,
+        }
+      : null,
     reviewedAt: request.reviewed_at?.toISOString() ?? null,
     activatedWarrantyId: request.activated_warranty_id,
-    metadata: request.metadata as Record<string, unknown> | null,
+    activatedWarranty: request.activated_warranty
+      ? {
+          id: request.activated_warranty.id,
+          warrantyCode:
+            request.activated_warranty.warranty_code ?? request.warranty_code,
+          status: request.activated_warranty.status,
+          startDate:
+            request.activated_warranty.start_date?.toISOString() ?? null,
+          endDate: request.activated_warranty.end_date?.toISOString() ?? null,
+          durationMonths: request.activated_warranty.duration_months,
+        }
+      : null,
+    metadata: toMetadata(request.metadata),
     createdAt: request.created_at.toISOString(),
     updatedAt: request.updated_at.toISOString(),
   };

@@ -258,8 +258,22 @@ describe('WarrantyActivationRequestsUseCases', () => {
     repository.findById.mockResolvedValue(baseRequest);
     repository.activateApprovedRequest.mockResolvedValue({
       ...baseRequest,
+      activated_warranty: {
+        duration_months: 36,
+        end_date: new Date('2029-07-19T04:00:00.000Z'),
+        id: 'warranty-id',
+        start_date: new Date('2026-07-19T04:00:00.000Z'),
+        status: warranty_status.ACTIVE,
+        warranty_code: 'WM-2026-ABC123',
+      },
       activated_warranty_id: 'warranty-id',
       reviewed_at: new Date('2026-07-19T04:00:00.000Z'),
+      reviewed_by: {
+        email: 'admin@example.com',
+        full_name: 'Warranty Admin',
+        id: 'admin-id',
+        username: 'warranty.admin',
+      },
       reviewed_by_id: 'admin-id',
       status: warranty_activation_request_status.ACTIVATED,
     });
@@ -283,6 +297,20 @@ describe('WarrantyActivationRequestsUseCases', () => {
     });
     expect(repository.review).not.toHaveBeenCalled();
     expect(result.activatedWarrantyId).toBe('warranty-id');
+    expect(result.activatedWarranty).toEqual({
+      durationMonths: 36,
+      endDate: '2029-07-19T04:00:00.000Z',
+      id: 'warranty-id',
+      startDate: '2026-07-19T04:00:00.000Z',
+      status: warranty_status.ACTIVE,
+      warrantyCode: 'WM-2026-ABC123',
+    });
+    expect(result.reviewedBy).toEqual({
+      displayName: 'Warranty Admin',
+      email: 'admin@example.com',
+      id: 'admin-id',
+      username: 'warranty.admin',
+    });
     expect(result.status).toBe('ACTIVATED');
   });
 

@@ -24,6 +24,7 @@ import {
 } from "@repo/ui";
 import { SortableTableHead } from "@/src/components/common/sortable-table-head";
 import { usePermissions } from "@/src/hooks/use-permissions";
+import { Link } from "@/src/i18n/navigation";
 import type { WarrantyActivationRequestAction } from "../warranty-activation-requests.types";
 import {
   formatActivationRequestCustomer,
@@ -132,7 +133,12 @@ function WarrantyActivationRequestTableRow({
   return (
     <TableRow>
       <TableCell>
-        <div className="font-mono text-xs">{request.requestCode}</div>
+        <Link
+          className="font-mono text-xs font-medium text-slate-950 hover:underline dark:text-slate-50"
+          href={`/warranty-activation-requests/${request.id}`}
+        >
+          {request.requestCode}
+        </Link>
       </TableCell>
       <TableCell>
         <div className="font-mono text-xs">{request.warrantyCode}</div>
@@ -188,9 +194,12 @@ function WarrantyActivationRequestMobileCard({
           <p className="truncate font-medium text-slate-950 dark:text-slate-50">
             {request.customerName}
           </p>
-          <p className="mt-1 font-mono text-xs text-slate-500">
+          <Link
+            className="mt-1 block font-mono text-xs text-slate-500 hover:underline dark:text-slate-400"
+            href={`/warranty-activation-requests/${request.id}`}
+          >
             {request.requestCode}
-          </p>
+          </Link>
         </div>
         <WarrantyActivationRequestActions
           onAction={onAction}
@@ -278,9 +287,11 @@ function WarrantyActivationRequestActions({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={() => onAction(request, "detail")}>
-          <Eye className="mr-2 size-4" />
-          {t("viewDetail")}
+        <DropdownMenuItem asChild>
+          <Link href={`/warranty-activation-requests/${request.id}`}>
+            <Eye className="mr-2 size-4" />
+            {t("viewDetail")}
+          </Link>
         </DropdownMenuItem>
         {canReview ? <DropdownMenuSeparator /> : null}
         {canReview ? (

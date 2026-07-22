@@ -18,7 +18,7 @@ export type WarrantyActivationRequestDirectoryFilters = {
 
 export type WarrantyActivationRequestSort = WarrantyActivationRequestSortBy;
 
-export type WarrantyActivationRequestAction = "approve" | "detail" | "reject";
+export type WarrantyActivationRequestAction = "approve" | "reject";
 
 export type WarrantyActivationRequestCreateFormValues = {
   addressDetail: string;
