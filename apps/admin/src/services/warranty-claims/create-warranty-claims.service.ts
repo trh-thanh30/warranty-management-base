@@ -11,7 +11,7 @@ import type {
   WarrantyClaimSummary,
   WarrantyClaimTimelineItem,
 } from "@repo/shared";
-import { unwrap } from "../service.utils.ts";
+import { unwrap, unwrapBlob } from "../service.utils.ts";
 import type { WarrantyClaimsHttpClient } from "./warranty-claims.types";
 
 export function createWarrantyClaimsService(http: WarrantyClaimsHttpClient) {
@@ -53,6 +53,14 @@ export function createWarrantyClaimsService(http: WarrantyClaimsHttpClient) {
           },
         ),
       );
+    },
+
+    async exportWarrantyClaims(query: ListWarrantyClaimsQuery): Promise<Blob> {
+      const response = await http.get<Blob>("/warranty-claims/export", {
+        params: query,
+        responseType: "blob",
+      });
+      return unwrapBlob(response);
     },
 
     async getWarrantyClaim(claimId: string): Promise<WarrantyClaimSummary> {

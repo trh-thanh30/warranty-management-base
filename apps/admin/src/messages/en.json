@@ -1036,6 +1036,12 @@
     "approved": "Activation request approved and warranty activated.",
     "rejected": "Activation request rejected.",
     "reviewError": "Unable to review activation request.",
+    "excel": {
+      "title": "Export Excel",
+      "exportAll": "Export reconciliation list",
+      "exported": "Activation requests exported.",
+      "exportError": "Unable to export activation requests."
+    },
     "addressRequired": "Enter address detail.",
     "customerNameRequired": "Select a valid customer.",
     "emailInvalid": "Enter a valid email.",
@@ -1135,6 +1141,12 @@
     "previous": "Previous",
     "next": "Next",
     "cancel": "Cancel",
+    "excel": {
+      "title": "Export Excel",
+      "exportAll": "Export claim list",
+      "exported": "Warranty claims exported.",
+      "exportError": "Unable to export warranty claims."
+    },
     "metrics": {
       "total": "Total",
       "createdToday": "Today",

@@ -5,7 +5,7 @@ import type {
   ReviewWarrantyActivationRequestBody,
   WarrantyActivationRequestSummary,
 } from "@repo/shared";
-import { unwrap } from "../service.utils.ts";
+import { unwrap, unwrapBlob } from "../service.utils.ts";
 import type { WarrantyActivationRequestsHttpClient } from "./warranty-activation-requests.types";
 
 export function createWarrantyActivationRequestsService(
@@ -21,6 +21,16 @@ export function createWarrantyActivationRequestsService(
           { params: query },
         ),
       );
+    },
+
+    async exportWarrantyActivationRequests(
+      query: ListWarrantyActivationRequestsQuery,
+    ): Promise<Blob> {
+      const response = await http.get<Blob>(
+        "/warranty-activation-requests/export",
+        { params: query, responseType: "blob" },
+      );
+      return unwrapBlob(response);
     },
 
     async getWarrantyActivationRequest(

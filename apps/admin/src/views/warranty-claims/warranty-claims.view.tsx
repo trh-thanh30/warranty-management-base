@@ -3,6 +3,7 @@
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
+import { ImportExportMenu } from "@/src/components/common";
 import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { usePermissions } from "@/src/hooks/use-permissions";
@@ -25,14 +26,25 @@ export function WarrantyClaimsView() {
       <div className="min-w-0 space-y-6">
         <PageHeader
           actions={
-            hasPermission(PERMISSIONS.WARRANTY_CLAIM_CREATE) ? (
-              <Button asChild>
-                <Link href="/warranty-claims/create">
-                  <Plus className="size-4" />
-                  {t("createAction")}
-                </Link>
-              </Button>
-            ) : null
+            <div className="flex w-full flex-wrap justify-end gap-2 sm:w-auto">
+              <ImportExportMenu
+                labels={{
+                  exportAll: t("excel.exportAll"),
+                  title: t("excel.title"),
+                }}
+                onExportAll={() => {
+                  void directory.exportClaims();
+                }}
+              />
+              {hasPermission(PERMISSIONS.WARRANTY_CLAIM_CREATE) ? (
+                <Button asChild>
+                  <Link href="/warranty-claims/create">
+                    <Plus className="size-4" />
+                    {t("createAction")}
+                  </Link>
+                </Button>
+              ) : null}
+            </div>
           }
           description={t("description")}
           eyebrow={t("eyebrow")}

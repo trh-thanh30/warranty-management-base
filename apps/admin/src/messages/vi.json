@@ -1036,6 +1036,12 @@
     "approved": "Đã duyệt yêu cầu và kích hoạt bảo hành.",
     "rejected": "Đã từ chối yêu cầu kích hoạt.",
     "reviewError": "Không thể xử lý yêu cầu kích hoạt.",
+    "excel": {
+      "title": "Xuất Excel",
+      "exportAll": "Xuất danh sách đối soát",
+      "exported": "Đã xuất danh sách yêu cầu kích hoạt.",
+      "exportError": "Không thể xuất danh sách yêu cầu kích hoạt."
+    },
     "addressRequired": "Nhập địa chỉ chi tiết.",
     "customerNameRequired": "Chọn khách hàng hợp lệ.",
     "emailInvalid": "Email không hợp lệ.",
@@ -1135,6 +1141,12 @@
     "previous": "Trước",
     "next": "Sau",
     "cancel": "Hủy",
+    "excel": {
+      "title": "Xuất Excel",
+      "exportAll": "Xuất danh sách claim",
+      "exported": "Đã xuất danh sách claim.",
+      "exportError": "Không thể xuất danh sách claim."
+    },
     "metrics": {
       "total": "Tổng",
       "createdToday": "Hôm nay",

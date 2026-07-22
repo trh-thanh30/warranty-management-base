@@ -21,6 +21,56 @@ const activationRequestInclude = {
   activated_warranty: true,
 } satisfies Prisma.WarrantyActivationRequestInclude;
 
+function buildWarrantyActivationRequestListQuery(
+  filters: ListWarrantyActivationRequestsDto,
+) {
+  const search = filters.search?.trim();
+  const warrantyCode = filters.warrantyCode?.trim().toUpperCase();
+  const createdAtFilter: Prisma.DateTimeFilter = {
+    gte: filters.dateFrom ? new Date(filters.dateFrom) : undefined,
+    lte: filters.dateTo ? new Date(filters.dateTo) : undefined,
+  };
+  const hasCreatedAtFilter = Boolean(
+    createdAtFilter.gte || createdAtFilter.lte,
+  );
+  const sortMap = {
+    createdAt: 'created_at',
+    customerName: 'customer_name',
+    customerPhone: 'customer_phone',
+    requestCode: 'request_code',
+    reviewedAt: 'reviewed_at',
+    status: 'status',
+    updatedAt: 'updated_at',
+    warrantyCode: 'warranty_code',
+  } satisfies Record<
+    string,
+    keyof Prisma.WarrantyActivationRequestOrderByWithRelationInput
+  >;
+  const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
+  const where: Prisma.WarrantyActivationRequestWhereInput = {
+    status: filters.status,
+    warranty_code: warrantyCode,
+    created_at: hasCreatedAtFilter ? createdAtFilter : undefined,
+    OR: search
+      ? [
+          { request_code: { contains: search, mode: 'insensitive' } },
+          { warranty_code: { contains: search, mode: 'insensitive' } },
+          { customer_name: { contains: search, mode: 'insensitive' } },
+          { customer_phone: { contains: search, mode: 'insensitive' } },
+          { customer_email: { contains: search, mode: 'insensitive' } },
+          { product_name: { contains: search, mode: 'insensitive' } },
+          { serial_number: { contains: search, mode: 'insensitive' } },
+        ]
+      : undefined,
+  };
+  const orderBy: Prisma.WarrantyActivationRequestOrderByWithRelationInput[] =
+    sortBy
+      ? [{ [sortBy]: filters.sortOrder ?? 'desc' }]
+      : [{ created_at: 'desc' }];
+
+  return { orderBy, where };
+}
+
 @Injectable()
 export class WarrantyActivationRequestsRepository {
   constructor(private readonly prismaService: PrismaService) {}
@@ -62,50 +112,8 @@ export class WarrantyActivationRequestsRepository {
   }
 
   list(filters: ListWarrantyActivationRequestsDto) {
-    const search = filters.search?.trim();
-    const warrantyCode = filters.warrantyCode?.trim().toUpperCase();
     const { page, limit, skip, take } = normalizePagination(filters);
-    const createdAtFilter: Prisma.DateTimeFilter = {
-      gte: filters.dateFrom ? new Date(filters.dateFrom) : undefined,
-      lte: filters.dateTo ? new Date(filters.dateTo) : undefined,
-    };
-    const hasCreatedAtFilter = Boolean(
-      createdAtFilter.gte || createdAtFilter.lte,
-    );
-    const sortMap = {
-      createdAt: 'created_at',
-      customerName: 'customer_name',
-      customerPhone: 'customer_phone',
-      requestCode: 'request_code',
-      reviewedAt: 'reviewed_at',
-      status: 'status',
-      updatedAt: 'updated_at',
-      warrantyCode: 'warranty_code',
-    } satisfies Record<
-      string,
-      keyof Prisma.WarrantyActivationRequestOrderByWithRelationInput
-    >;
-    const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
-    const where: Prisma.WarrantyActivationRequestWhereInput = {
-      status: filters.status,
-      warranty_code: warrantyCode,
-      created_at: hasCreatedAtFilter ? createdAtFilter : undefined,
-      OR: search
-        ? [
-            { request_code: { contains: search, mode: 'insensitive' } },
-            { warranty_code: { contains: search, mode: 'insensitive' } },
-            { customer_name: { contains: search, mode: 'insensitive' } },
-            { customer_phone: { contains: search, mode: 'insensitive' } },
-            { customer_email: { contains: search, mode: 'insensitive' } },
-            { product_name: { contains: search, mode: 'insensitive' } },
-            { serial_number: { contains: search, mode: 'insensitive' } },
-          ]
-        : undefined,
-    };
-    const orderBy: Prisma.WarrantyActivationRequestOrderByWithRelationInput[] =
-      sortBy
-        ? [{ [sortBy]: filters.sortOrder ?? 'desc' }]
-        : [{ created_at: 'desc' }];
+    const { orderBy, where } = buildWarrantyActivationRequestListQuery(filters);
 
     return this.prismaService.$transaction(async (tx) => {
       const [items, total] = await Promise.all([
@@ -120,6 +128,17 @@ export class WarrantyActivationRequestsRepository {
       ]);
 
       return paginate(items, { page, limit, total });
+    });
+  }
+
+  listForExport(filters: ListWarrantyActivationRequestsDto) {
+    const { orderBy, where } = buildWarrantyActivationRequestListQuery(filters);
+
+    return this.prismaService.warrantyActivationRequest.findMany({
+      where,
+      include: activationRequestInclude,
+      orderBy,
+      take: 5000,
     });
   }
 

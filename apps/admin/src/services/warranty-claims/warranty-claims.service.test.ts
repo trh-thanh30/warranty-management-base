@@ -116,6 +116,42 @@ test("warranty claim metrics calls summary endpoint", async () => {
   assert.deepEqual(result, response);
 });
 
+test("exports warranty claims with the current directory filters", async () => {
+  const calls: unknown[] = [];
+  const blob = new Blob(["export"]);
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: blob };
+    },
+  };
+
+  const result = await createWarrantyClaimsService(
+    http as unknown as WarrantyClaimsHttpClient,
+  ).exportWarrantyClaims({
+    assignmentStatus: "UNASSIGNED",
+    isOverdue: "true",
+    priority: "HIGH",
+    status: "REVIEWING",
+  });
+
+  assert.equal(result, blob);
+  assert.deepEqual(calls, [
+    {
+      url: "/warranty-claims/export",
+      config: {
+        params: {
+          assignmentStatus: "UNASSIGNED",
+          isOverdue: "true",
+          priority: "HIGH",
+          status: "REVIEWING",
+        },
+        responseType: "blob",
+      },
+    },
+  ]);
+});
+
 test("updating claim status uses status endpoint", async () => {
   const calls: unknown[] = [];
   const http = {

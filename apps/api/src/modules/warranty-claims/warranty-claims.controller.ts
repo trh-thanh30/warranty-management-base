@@ -1,5 +1,6 @@
 import { Permissions } from '@/common/decorators/permissions.decorator';
 import { User } from '@/common/decorators/user.decorator';
+import { createDatedExcelFilename, sendExcelFile } from '@/common/excel';
 import { AssignWarrantyClaimServiceCenterDto } from '@/modules/warranty-claims/dto/assign-warranty-claim-service-center.dto';
 import { CreateWarrantyClaimDto } from '@/modules/warranty-claims/dto/create-warranty-claim.dto';
 import { LinkWarrantyClaimAssetDto } from '@/modules/warranty-claims/dto/link-warranty-claim-asset.dto';
@@ -9,6 +10,7 @@ import { UpdateWarrantyClaimStatusDto } from '@/modules/warranty-claims/dto/upda
 import { WarrantyClaimMetricsDto } from '@/modules/warranty-claims/dto/warranty-claim-metrics.dto';
 import { AssignWarrantyClaimServiceCenterUseCase } from '@/modules/warranty-claims/use-cases/assign-warranty-claim-service-center.use-case';
 import { CreateWarrantyClaimUseCase } from '@/modules/warranty-claims/use-cases/create-warranty-claim.use-case';
+import { ExportWarrantyClaimsUseCase } from '@/modules/warranty-claims/use-cases/export-warranty-claims.use-case';
 import { GetWarrantyClaimDetailUseCase } from '@/modules/warranty-claims/use-cases/get-warranty-claim-detail.use-case';
 import { GetWarrantyClaimMetricsUseCase } from '@/modules/warranty-claims/use-cases/get-warranty-claim-metrics.use-case';
 import { GetWarrantyClaimTimelineUseCase } from '@/modules/warranty-claims/use-cases/get-warranty-claim-timeline.use-case';
@@ -29,8 +31,10 @@ import {
   Patch,
   Post,
   Query,
+  Res,
 } from '@nestjs/common';
 import { permission_key } from '@prisma/client';
+import type { Response } from 'express';
 
 type RequestUser = {
   id?: string;
@@ -40,6 +44,7 @@ type RequestUser = {
 export class WarrantyClaimsController {
   constructor(
     private readonly createWarrantyClaimUseCase: CreateWarrantyClaimUseCase,
+    private readonly exportWarrantyClaimsUseCase: ExportWarrantyClaimsUseCase,
     private readonly listWarrantyClaimsUseCase: ListWarrantyClaimsUseCase,
     private readonly getWarrantyClaimDetailUseCase: GetWarrantyClaimDetailUseCase,
     private readonly getWarrantyClaimMetricsUseCase: GetWarrantyClaimMetricsUseCase,
@@ -64,6 +69,20 @@ export class WarrantyClaimsController {
   @Permissions([permission_key.WARRANTY_CLAIM_VIEW])
   list(@Query() query: ListWarrantyClaimsDto) {
     return this.listWarrantyClaimsUseCase.execute(query);
+  }
+
+  @Get('export')
+  @Permissions([permission_key.WARRANTY_CLAIM_VIEW])
+  async export(
+    @Query() query: ListWarrantyClaimsDto,
+    @Res() response: Response,
+  ) {
+    const buffer = await this.exportWarrantyClaimsUseCase.execute(query);
+    sendExcelFile(
+      response,
+      buffer,
+      createDatedExcelFilename('warranty-claims'),
+    );
   }
 
   @Get('metrics/summary')

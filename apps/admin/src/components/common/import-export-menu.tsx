@@ -17,18 +17,18 @@ import {
 } from "@repo/ui";
 
 type ImportExportMenuLabels = {
-  downloadTemplate: string;
+  downloadTemplate?: string;
   exportAll: string;
   title: string;
-  upload: string;
+  upload?: string;
 };
 
 type ImportExportMenuProps = {
   disabled?: boolean;
   labels: ImportExportMenuLabels;
-  onDownloadTemplate: () => void;
+  onDownloadTemplate?: () => void;
   onExportAll: () => void;
-  onUpload: () => void;
+  onUpload?: () => void;
   uploadDisabled?: boolean;
 };
 
@@ -55,22 +55,26 @@ export function ImportExportMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 p-1.5">
-        <DropdownMenuItem
-          className="gap-2.5 px-3 py-2.5"
-          disabled={uploadDisabled}
-          onSelect={onUpload}
-        >
-          <Upload className="size-4 text-blue-600" />
-          <span>{labels.upload}</span>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          className="gap-2.5 px-3 py-2.5"
-          onSelect={onDownloadTemplate}
-        >
-          <FileDown className="size-4 text-emerald-600" />
-          <span>{labels.downloadTemplate}</span>
-        </DropdownMenuItem>
+        {onUpload && labels.upload ? (
+          <DropdownMenuItem
+            className="gap-2.5 px-3 py-2.5"
+            disabled={uploadDisabled}
+            onSelect={onUpload}
+          >
+            <Upload className="size-4 text-blue-600" />
+            <span>{labels.upload}</span>
+          </DropdownMenuItem>
+        ) : null}
+        {onUpload && onDownloadTemplate ? <DropdownMenuSeparator /> : null}
+        {onDownloadTemplate && labels.downloadTemplate ? (
+          <DropdownMenuItem
+            className="gap-2.5 px-3 py-2.5"
+            onSelect={onDownloadTemplate}
+          >
+            <FileDown className="size-4 text-emerald-600" />
+            <span>{labels.downloadTemplate}</span>
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuItem
           className="gap-2.5 px-3 py-2.5"
           onSelect={onExportAll}

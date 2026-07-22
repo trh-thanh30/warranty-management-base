@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { Button } from "@repo/ui";
+import { ImportExportMenu } from "@/src/components/common";
 import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
@@ -24,12 +25,23 @@ export function WarrantyActivationRequestsView() {
           eyebrow={t("eyebrow")}
           title={t("title")}
           actions={
-            <Button asChild>
-              <Link href="/warranty-activation-requests/create">
-                <Plus className="size-4" aria-hidden="true" />
-                {t("createAction")}
-              </Link>
-            </Button>
+            <div className="flex w-full flex-wrap justify-end gap-2 sm:w-auto">
+              <ImportExportMenu
+                labels={{
+                  exportAll: t("excel.exportAll"),
+                  title: t("excel.title"),
+                }}
+                onExportAll={() => {
+                  void directory.exportRequests();
+                }}
+              />
+              <Button asChild>
+                <Link href="/warranty-activation-requests/create">
+                  <Plus className="size-4" aria-hidden="true" />
+                  {t("createAction")}
+                </Link>
+              </Button>
+            </div>
           }
         />
 

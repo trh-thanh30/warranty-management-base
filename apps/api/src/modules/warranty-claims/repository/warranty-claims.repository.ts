@@ -22,6 +22,81 @@ function getServiceCenterFilter(filters: {
   return undefined;
 }
 
+function buildWarrantyClaimListQuery(filters: ListWarrantyClaimsDto) {
+  const search = filters.search?.trim();
+  const warrantyCode = filters.warrantyCode?.trim().toUpperCase();
+  const claimCode = filters.claimCode?.trim().toUpperCase();
+  const dueFilter: Prisma.DateTimeNullableFilter = {
+    gte: filters.dueFrom ? new Date(filters.dueFrom) : undefined,
+    lte: filters.dueTo ? new Date(filters.dueTo) : undefined,
+  };
+  const hasDueFilter = Boolean(dueFilter.gte || dueFilter.lte);
+  const createdAtFilter: Prisma.DateTimeFilter = {
+    gte: filters.dateFrom ? new Date(filters.dateFrom) : undefined,
+    lte: filters.dateTo ? new Date(filters.dateTo) : undefined,
+  };
+  const hasCreatedAtFilter = Boolean(
+    createdAtFilter.gte || createdAtFilter.lte,
+  );
+  const terminalStatuses = [
+    warranty_claim_status.COMPLETED,
+    warranty_claim_status.REJECTED,
+    warranty_claim_status.CANCELLED,
+  ];
+  const statusFilter =
+    filters.isOverdue === 'true'
+      ? (filters.status ?? { notIn: terminalStatuses })
+      : filters.status;
+  const sortMap = {
+    claimCode: 'claim_code',
+    warrantyCode: 'warranty_code',
+    status: 'status',
+    priority: 'priority',
+    dueAt: 'due_at',
+    submittedAt: 'submitted_at',
+    resolvedAt: 'resolved_at',
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  } satisfies Record<
+    string,
+    keyof Prisma.WarrantyClaimOrderByWithRelationInput
+  >;
+  const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
+  const where: Prisma.WarrantyClaimWhereInput = {
+    status: statusFilter,
+    priority: filters.priority,
+    warranty_code: warrantyCode,
+    claim_code: claimCode,
+    service_center_id: getServiceCenterFilter(filters),
+    created_at: hasCreatedAtFilter ? createdAtFilter : undefined,
+    due_at:
+      filters.isOverdue === 'true'
+        ? { lt: new Date() }
+        : hasDueFilter
+          ? dueFilter
+          : undefined,
+    OR: search
+      ? [
+          { claim_code: { contains: search, mode: 'insensitive' } },
+          { warranty_code: { contains: search, mode: 'insensitive' } },
+          { requester_name: { contains: search, mode: 'insensitive' } },
+          { requester_phone: { contains: search, mode: 'insensitive' } },
+          { issue_title: { contains: search, mode: 'insensitive' } },
+          {
+            product: {
+              name: { contains: search, mode: 'insensitive' },
+            },
+          },
+        ]
+      : undefined,
+  };
+  const orderBy: Prisma.WarrantyClaimOrderByWithRelationInput[] = sortBy
+    ? [{ [sortBy]: filters.sortOrder ?? 'desc' }]
+    : [{ created_at: 'desc' }];
+
+  return { orderBy, where };
+}
+
 const claimInclude = {
   product: true,
   warranty: true,
@@ -97,77 +172,8 @@ export class WarrantyClaimsRepository {
   }
 
   list(filters: ListWarrantyClaimsDto) {
-    const search = filters.search?.trim();
-    const warrantyCode = filters.warrantyCode?.trim().toUpperCase();
-    const claimCode = filters.claimCode?.trim().toUpperCase();
     const { page, limit, skip, take } = normalizePagination(filters);
-    const dueFilter: Prisma.DateTimeNullableFilter = {
-      gte: filters.dueFrom ? new Date(filters.dueFrom) : undefined,
-      lte: filters.dueTo ? new Date(filters.dueTo) : undefined,
-    };
-    const hasDueFilter = Boolean(dueFilter.gte || dueFilter.lte);
-    const createdAtFilter: Prisma.DateTimeFilter = {
-      gte: filters.dateFrom ? new Date(filters.dateFrom) : undefined,
-      lte: filters.dateTo ? new Date(filters.dateTo) : undefined,
-    };
-    const hasCreatedAtFilter = Boolean(
-      createdAtFilter.gte || createdAtFilter.lte,
-    );
-    const terminalStatuses = [
-      warranty_claim_status.COMPLETED,
-      warranty_claim_status.REJECTED,
-      warranty_claim_status.CANCELLED,
-    ];
-    const statusFilter =
-      filters.isOverdue === 'true'
-        ? (filters.status ?? { notIn: terminalStatuses })
-        : filters.status;
-    const sortMap = {
-      claimCode: 'claim_code',
-      warrantyCode: 'warranty_code',
-      status: 'status',
-      priority: 'priority',
-      dueAt: 'due_at',
-      submittedAt: 'submitted_at',
-      resolvedAt: 'resolved_at',
-      createdAt: 'created_at',
-      updatedAt: 'updated_at',
-    } satisfies Record<
-      string,
-      keyof Prisma.WarrantyClaimOrderByWithRelationInput
-    >;
-    const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
-    const where: Prisma.WarrantyClaimWhereInput = {
-      status: statusFilter,
-      priority: filters.priority,
-      warranty_code: warrantyCode,
-      claim_code: claimCode,
-      service_center_id: getServiceCenterFilter(filters),
-      created_at: hasCreatedAtFilter ? createdAtFilter : undefined,
-      due_at:
-        filters.isOverdue === 'true'
-          ? { lt: new Date() }
-          : hasDueFilter
-            ? dueFilter
-            : undefined,
-      OR: search
-        ? [
-            { claim_code: { contains: search, mode: 'insensitive' } },
-            { warranty_code: { contains: search, mode: 'insensitive' } },
-            { requester_name: { contains: search, mode: 'insensitive' } },
-            { requester_phone: { contains: search, mode: 'insensitive' } },
-            { issue_title: { contains: search, mode: 'insensitive' } },
-            {
-              product: {
-                name: { contains: search, mode: 'insensitive' },
-              },
-            },
-          ]
-        : undefined,
-    };
-    const orderBy: Prisma.WarrantyClaimOrderByWithRelationInput[] = sortBy
-      ? [{ [sortBy]: filters.sortOrder ?? 'desc' }]
-      : [{ created_at: 'desc' }];
+    const { orderBy, where } = buildWarrantyClaimListQuery(filters);
 
     return this.prismaService.$transaction(async (tx) => {
       const [items, total] = await Promise.all([
@@ -182,6 +188,17 @@ export class WarrantyClaimsRepository {
       ]);
 
       return paginate(items, { page, limit, total });
+    });
+  }
+
+  listForExport(filters: ListWarrantyClaimsDto) {
+    const { orderBy, where } = buildWarrantyClaimListQuery(filters);
+
+    return this.prismaService.warrantyClaim.findMany({
+      where,
+      include: claimInclude,
+      orderBy,
+      take: 5000,
     });
   }
 
