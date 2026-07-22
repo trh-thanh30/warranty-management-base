@@ -279,7 +279,7 @@ function StaffActionsMenu({
       <DropdownMenuContent align="end">
         {canEdit ? (
           <DropdownMenuItem asChild>
-            <Link href={`/users/${user.id}/edit`}>
+            <Link href={`/staffs/${user.id}/edit`}>
               <Pencil className="mr-2 size-4" />
               {t("edit")}
             </Link>

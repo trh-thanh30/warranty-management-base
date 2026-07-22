@@ -106,6 +106,83 @@ export class WarrantiesRepository {
     });
   }
 
+  listForExport(filters: {
+    search?: string;
+    status?: warranty_status;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) {
+    const search = filters.search?.trim();
+    const sortMap = {
+      createdAt: 'created_at',
+      endDate: 'end_date',
+      startDate: 'start_date',
+      updatedAt: 'updated_at',
+    } satisfies Record<string, keyof Prisma.WarrantyOrderByWithRelationInput>;
+    const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
+    const where: Prisma.WarrantyWhereInput = {
+      status: filters.status,
+      product: {
+        deleted_at: null,
+      },
+      OR: search
+        ? [
+            { warranty_code: { contains: search, mode: 'insensitive' } },
+            {
+              product: {
+                name: { contains: search, mode: 'insensitive' },
+              },
+            },
+            {
+              product: {
+                product_code: { contains: search, mode: 'insensitive' },
+              },
+            },
+            {
+              product: {
+                serial_number: { contains: search, mode: 'insensitive' },
+              },
+            },
+            {
+              product: {
+                ownerships: {
+                  some: {
+                    is_current_owner: true,
+                    customer: {
+                      OR: [
+                        {
+                          full_name: {
+                            contains: search,
+                            mode: 'insensitive',
+                          },
+                        },
+                        {
+                          customer_code: {
+                            contains: search,
+                            mode: 'insensitive',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          ]
+        : undefined,
+    };
+    const orderBy: Prisma.WarrantyOrderByWithRelationInput[] = sortBy
+      ? [{ [sortBy]: filters.sortOrder ?? 'desc' }]
+      : [{ created_at: 'desc' }];
+
+    return this.prismaService.warranty.findMany({
+      where,
+      include: warrantyInclude,
+      orderBy,
+      take: 5000,
+    });
+  }
+
   findByProductId(productId: string) {
     return this.prismaService.warranty.findUnique({
       where: { product_id: productId },

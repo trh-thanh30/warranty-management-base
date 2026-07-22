@@ -10,10 +10,16 @@ import type {
 } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { useAuth } from "@/src/app/providers/auth-provider";
+import { useExcel } from "@/src/hooks/use-excel";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { useTableControls } from "@/src/hooks/use-table-controls";
 import { useToast } from "@/src/hooks/use-toast";
-import { useStaffMembers, useUpdateStaffMember } from "./use-staff";
+import { usersService } from "@/src/services/users/users.service";
+import {
+  useImportStaff,
+  useStaffMembers,
+  useUpdateStaffMember,
+} from "./use-staff";
 
 const STAFF_PAGE_SIZE = 10;
 type StaffSortBy = NonNullable<ListUsersQuery["sortBy"]>;
@@ -29,6 +35,7 @@ const INITIAL_STAFF_DIRECTORY_FILTERS = {
 export function useStaffDirectory() {
   const t = useTranslations("Staff");
   const toast = useToast();
+  const { createDatedFilename, downloadBlob, downloadRowsAsExcel } = useExcel();
   const { user: currentUser } = useAuth();
   const { hasPermission, hasRole } = usePermissions();
   const {
@@ -50,6 +57,7 @@ export function useStaffDirectory() {
     initialSortOrder: "desc",
   });
   const [permissionsOpen, setPermissionsOpen] = useState(false);
+  const [isImportDialogOpen, setImportDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserAccountSummary | null>(
     null,
   );
@@ -74,6 +82,80 @@ export function useStaffDirectory() {
     },
   );
   const statusMutation = useUpdateStaffMember();
+  const importStaff = useImportStaff();
+
+  async function downloadImportTemplate() {
+    try {
+      const blob = await usersService.downloadStaffImportTemplate();
+      downloadBlob(blob, "staff-import-template.xlsx");
+      toast.success(t("excel.templateDownloaded"));
+    } catch {
+      toast.error(t("excel.templateDownloadError"));
+    }
+  }
+
+  async function exportStaff() {
+    try {
+      const blob = await usersService.exportStaff(getExportQuery());
+      downloadBlob(blob, createDatedFilename("staff"));
+      toast.success(t("excel.exported"));
+    } catch {
+      toast.error(t("excel.exportError"));
+    }
+  }
+
+  async function importStaffFile(file: File) {
+    try {
+      const result = await importStaff.mutateAsync(file);
+      if (result.errors.length > 0) {
+        const firstError = result.errors[0];
+        toast.error(
+          t("excel.importHasErrors", {
+            count: result.errors.length,
+            row: firstError?.rowNumber ?? 0,
+          }),
+        );
+        return;
+      }
+
+      if (result.temporaryCredentials.length > 0) {
+        try {
+          await downloadRowsAsExcel(
+            result.temporaryCredentials.map((credential) => ({
+              Email: credential.email,
+              "Họ và tên": credential.fullName,
+              "Mật khẩu tạm thời": credential.temporaryPassword,
+              "Tên đăng nhập": credential.username,
+            })),
+            createDatedFilename("staff-temporary-passwords"),
+            "Mật khẩu tạm",
+          );
+        } catch {
+          toast.error(t("excel.credentialsDownloadError"));
+        }
+      }
+
+      toast.success(
+        t("excel.importSuccess", {
+          created: result.created,
+          updated: result.updated,
+        }),
+      );
+      setImportDialogOpen(false);
+      void staffQuery.refetch();
+    } catch {
+      toast.error(t("excel.importError"));
+    }
+  }
+
+  function getExportQuery(): Omit<ListUsersQuery, "role" | "roles"> {
+    return {
+      search: debouncedSearch || undefined,
+      sortBy,
+      sortOrder,
+      status: status === "ALL" ? undefined : status,
+    };
+  }
 
   function updateStaffStatus(user: UserAccountSummary) {
     statusMutation.mutate(
@@ -112,10 +194,18 @@ export function useStaffDirectory() {
 
   return {
     canCreateStaff,
+    canViewStaff,
     closeStatusConfirm,
+    closeImportDialog: () => setImportDialogOpen(false),
     confirmStatusChange,
     isUpdatingStatus: statusMutation.isPending,
+    isImportDialogOpen,
+    isImporting: importStaff.isPending,
+    downloadImportTemplate,
+    exportStaff,
+    importStaffFile,
     openPermissions,
+    openImportDialog: () => setImportDialogOpen(true),
     openStatusConfirm,
     pageSize,
     permissionsOpen,

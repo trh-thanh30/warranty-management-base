@@ -57,6 +57,7 @@
     "test:api:cov": "pnpm --filter @repo/api test:cov",
     "test:api:e2e": "pnpm --filter @repo/api test:e2e",
     "test:api:debug": "pnpm --filter @repo/api test:debug",
+    "test:admin": "pnpm --filter @repo/admin test",
     "worker:dev": "pnpm worker:email:dev",
     "worker:prod": "pnpm worker:email:prod",
     "worker:email:dev": "pnpm --filter @repo/api start:worker:email",

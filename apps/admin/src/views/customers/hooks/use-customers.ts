@@ -76,3 +76,16 @@ export function useUpdateCustomer(customerId: string | null) {
     },
   });
 }
+
+export function useImportCustomers() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (file: File) => customersService.importCustomers(file),
+    onSuccess: (result) => {
+      if (result.errors.length === 0) {
+        void queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
+      }
+    },
+  });
+}

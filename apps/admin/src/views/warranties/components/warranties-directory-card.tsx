@@ -111,7 +111,7 @@ function WarrantiesDirectoryFilters({
   const t = useTranslations("Warranties");
 
   return (
-    <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px]">
+    <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_260px]">
       <div className="relative">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
         <Input
@@ -129,6 +129,7 @@ function WarrantiesDirectoryFilters({
           label: t(`statuses.${status}`),
           value: status,
         }))}
+        triggerClassName="whitespace-nowrap [&>span]:truncate [&>span]:whitespace-nowrap"
         value={filters.status}
       />
     </div>

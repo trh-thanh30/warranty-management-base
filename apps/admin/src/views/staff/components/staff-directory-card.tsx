@@ -242,7 +242,7 @@ function StaffDirectoryContent({
           </Button>
         ) : canCreate ? (
           <Button asChild>
-            <Link href="/users/create">{t("create")}</Link>
+            <Link href="/staffs/create">{t("create")}</Link>
           </Button>
         ) : null
       }

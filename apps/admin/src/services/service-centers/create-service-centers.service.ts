@@ -3,31 +3,11 @@ import type {
   ListServiceCentersQuery,
   PaginatedResponse,
   ServiceCenterSummary,
+  ServiceCenterImportResult,
   UpdateServiceCenterBody,
 } from "@repo/shared";
-
-type ApiEnvelope<T> = {
-  success: boolean;
-  data: T;
-};
-
-type HttpResponse<T> = {
-  data: ApiEnvelope<T>;
-};
-
-type RequestConfig = {
-  params?: Record<string, unknown>;
-};
-
-export type ServiceCentersHttpClient = {
-  get<T>(url: string, config?: RequestConfig): Promise<HttpResponse<T>>;
-  patch<T>(url: string, body?: unknown): Promise<HttpResponse<T>>;
-  post<T>(url: string, body?: unknown): Promise<HttpResponse<T>>;
-};
-
-function unwrap<T>(response: HttpResponse<T>): T {
-  return response.data.data;
-}
+import { unwrap, unwrapBlob } from "../service.utils.ts";
+import type { ServiceCentersHttpClient } from "./service-centers.types";
 
 export function createServiceCentersService(http: ServiceCentersHttpClient) {
   return {
@@ -82,6 +62,33 @@ export function createServiceCentersService(http: ServiceCentersHttpClient) {
       return unwrap(
         await http.patch<ServiceCenterSummary>(
           `/service-centers/${serviceCenterId}/deactivate`,
+        ),
+      );
+    },
+
+    async downloadImportTemplate(): Promise<Blob> {
+      const response = await http.get<Blob>(
+        "/service-centers/import-template",
+        { responseType: "blob" },
+      );
+      return unwrapBlob(response);
+    },
+
+    async exportServiceCenters(query: ListServiceCentersQuery): Promise<Blob> {
+      const response = await http.get<Blob>("/service-centers/export", {
+        params: query,
+        responseType: "blob",
+      });
+      return unwrapBlob(response);
+    },
+
+    async importServiceCenters(file: File): Promise<ServiceCenterImportResult> {
+      const formData = new FormData();
+      formData.append("file", file);
+      return unwrap(
+        await http.post<ServiceCenterImportResult>(
+          "/service-centers/import",
+          formData,
         ),
       );
     },

@@ -17,6 +17,11 @@ import type {
   UpdateProductBody,
 } from "@repo/shared";
 import { productsService } from "@/src/services/products/products.service";
+import type {
+  ConfirmProductImportBody,
+  ProductImportConfirmResult,
+  ProductImportPreview,
+} from "@/src/services/products/products.types";
 
 export const productKeys = {
   all: ["products"] as const,
@@ -86,6 +91,29 @@ export function useDeleteProduct() {
     onSuccess: (product) => {
       void queryClient.invalidateQueries({ queryKey: productKeys.lists() });
       queryClient.setQueryData(productKeys.detail(product.id), product);
+    },
+  });
+}
+
+export function usePreviewProductImport() {
+  return useMutation<ProductImportPreview, Error, File>({
+    mutationFn: (file) => productsService.previewImport(file),
+  });
+}
+
+export function useConfirmProductImport() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ProductImportConfirmResult,
+    Error,
+    ConfirmProductImportBody
+  >({
+    mutationFn: (body) => productsService.confirmImport(body),
+    onSuccess: (result) => {
+      if (result.errors.length === 0) {
+        void queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      }
     },
   });
 }

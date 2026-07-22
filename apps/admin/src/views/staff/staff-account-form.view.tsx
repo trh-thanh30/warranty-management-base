@@ -44,7 +44,7 @@ export function StaffAccountFormView({
   return (
     <PermissionGuard permissions={[requiredPermission]} requiredRole="admin">
       <FormPageShell
-        backHref="/users"
+        backHref="/staffs"
         backLabel={t("backToDirectory")}
         description={description}
         eyebrow={t("eyebrow")}

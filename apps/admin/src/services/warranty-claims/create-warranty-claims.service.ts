@@ -11,30 +11,8 @@ import type {
   WarrantyClaimSummary,
   WarrantyClaimTimelineItem,
 } from "@repo/shared";
-
-type ApiEnvelope<T> = {
-  success: boolean;
-  data: T;
-};
-
-type HttpResponse<T> = {
-  data: ApiEnvelope<T>;
-};
-
-type RequestConfig = {
-  params?: Record<string, unknown>;
-};
-
-export type WarrantyClaimsHttpClient = {
-  delete<T>(url: string): Promise<HttpResponse<T>>;
-  get<T>(url: string, config?: RequestConfig): Promise<HttpResponse<T>>;
-  patch<T>(url: string, body?: unknown): Promise<HttpResponse<T>>;
-  post<T>(url: string, body?: unknown): Promise<HttpResponse<T>>;
-};
-
-function unwrap<T>(response: HttpResponse<T>): T {
-  return response.data.data;
-}
+import { unwrap, unwrapBlob } from "../service.utils.ts";
+import type { WarrantyClaimsHttpClient } from "./warranty-claims.types";
 
 export function createWarrantyClaimsService(http: WarrantyClaimsHttpClient) {
   return {
@@ -75,6 +53,14 @@ export function createWarrantyClaimsService(http: WarrantyClaimsHttpClient) {
           },
         ),
       );
+    },
+
+    async exportWarrantyClaims(query: ListWarrantyClaimsQuery): Promise<Blob> {
+      const response = await http.get<Blob>("/warranty-claims/export", {
+        params: query,
+        responseType: "blob",
+      });
+      return unwrapBlob(response);
     },
 
     async getWarrantyClaim(claimId: string): Promise<WarrantyClaimSummary> {

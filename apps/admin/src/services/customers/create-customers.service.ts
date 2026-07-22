@@ -5,29 +5,11 @@ import type {
   PaginatedResponse,
   UpdateCustomerBody,
 } from "@repo/shared";
-
-type ApiEnvelope<T> = {
-  success: boolean;
-  data: T;
-};
-
-type HttpResponse<T> = {
-  data: ApiEnvelope<T>;
-};
-
-type RequestConfig = {
-  params?: Record<string, unknown>;
-};
-
-export type CustomersHttpClient = {
-  get<T>(url: string, config?: RequestConfig): Promise<HttpResponse<T>>;
-  patch<T>(url: string, body?: unknown): Promise<HttpResponse<T>>;
-  post<T>(url: string, body?: unknown): Promise<HttpResponse<T>>;
-};
-
-function unwrap<T>(response: HttpResponse<T>): T {
-  return response.data.data;
-}
+import { unwrap, unwrapBlob } from "../service.utils.ts";
+import type {
+  CustomerImportResult,
+  CustomersHttpClient,
+} from "./customers.types";
 
 export function createCustomersService(http: CustomersHttpClient) {
   return {
@@ -57,6 +39,30 @@ export function createCustomersService(http: CustomersHttpClient) {
     ): Promise<CustomerSummary> {
       return unwrap(
         await http.patch<CustomerSummary>(`/customers/${customerId}`, body),
+      );
+    },
+
+    async downloadImportTemplate(): Promise<Blob> {
+      const response = await http.get<Blob>("/customers/import-template", {
+        responseType: "blob",
+      });
+      return unwrapBlob(response);
+    },
+
+    async exportCustomers(query: ListCustomersQuery): Promise<Blob> {
+      const response = await http.get<Blob>("/customers/export", {
+        params: query,
+        responseType: "blob",
+      });
+      return unwrapBlob(response);
+    },
+
+    async importCustomers(file: File): Promise<CustomerImportResult> {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      return unwrap(
+        await http.post<CustomerImportResult>("/customers/import", formData),
       );
     },
   };

@@ -1,3 +1,9 @@
+import type { HttpGet } from "../service.types";
+
+export type LocationsHttpClient = {
+  get: HttpGet;
+};
+
 export type VietnamProvince = {
   code: number;
   codename: string;

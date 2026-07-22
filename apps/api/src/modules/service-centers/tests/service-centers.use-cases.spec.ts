@@ -1,6 +1,8 @@
 import { ConflictError, NotFoundError } from '@/common/response';
 import { CreateServiceCenterUseCase } from '@/modules/service-centers/use-cases/create-service-center.use-case';
+import { createServiceCenterExportWorkbook } from '@/modules/service-centers/excel/service-center-workbook.factory';
 import { GetServiceCenterDetailUseCase } from '@/modules/service-centers/use-cases/get-service-center-detail.use-case';
+import { ImportServiceCentersUseCase } from '@/modules/service-centers/use-cases/import-service-centers.use-case';
 import { ListServiceCenterProvincesUseCase } from '@/modules/service-centers/use-cases/list-service-center-provinces.use-case';
 import { ListServiceCentersUseCase } from '@/modules/service-centers/use-cases/list-service-centers.use-case';
 import { UpdateServiceCenterUseCase } from '@/modules/service-centers/use-cases/update-service-center.use-case';
@@ -25,6 +27,9 @@ describe('Service center use cases', () => {
   const serviceCentersRepository = {
     create: jest.fn(),
     list: jest.fn(),
+    listAll: jest.fn(),
+    listForExport: jest.fn(),
+    importRows: jest.fn(),
     findById: jest.fn(),
     findByEmail: jest.fn(),
     findByPhone: jest.fn(),
@@ -216,5 +221,86 @@ describe('Service center use cases', () => {
       'service-center-id',
     );
     expect(serviceCentersRepository.update).not.toHaveBeenCalled();
+  });
+
+  it('imports new and existing service centers in one transaction', async () => {
+    const buffer = await createServiceCenterExportWorkbook([
+      {
+        name: 'Trạm Hà Nội',
+        phone: '0901234567',
+        email: 'support@example.com',
+        province: 'Hà Nội',
+        district: 'Phường Hai Bà Trưng',
+        address: '123 Phố Huế',
+        googleMapsUrl: 'https://maps.google.com/?q=123+Pho+Hue',
+        isActive: true,
+      },
+      {
+        name: 'Trạm Đà Nẵng',
+        phone: null,
+        email: 'danang@example.com',
+        province: 'Đà Nẵng',
+        district: 'Phường Hải Châu',
+        address: '1 Nguyễn Văn Linh',
+        googleMapsUrl: null,
+        isActive: true,
+      },
+    ]);
+    serviceCentersRepository.listAll.mockResolvedValue([serviceCenter]);
+    serviceCentersRepository.importRows.mockResolvedValue({
+      created: 1,
+      updated: 1,
+    });
+    const useCase = new ImportServiceCentersUseCase(
+      serviceCentersRepository as never,
+    );
+
+    const result = await useCase.execute({ buffer } as Express.Multer.File);
+
+    expect(result).toEqual({ created: 1, updated: 1, errors: [] });
+    expect(serviceCentersRepository.importRows).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          existingServiceCenterId: 'service-center-id',
+          phone: '0901234567',
+        }),
+        expect.objectContaining({
+          existingServiceCenterId: null,
+          email: 'danang@example.com',
+        }),
+      ]),
+    );
+  });
+
+  it('rejects contacts that belong to different service centers', async () => {
+    const buffer = await createServiceCenterExportWorkbook([
+      {
+        name: 'Trạm xung đột',
+        phone: '0901234567',
+        email: 'other@example.com',
+        province: 'Hà Nội',
+        district: null,
+        address: '123 Phố Huế',
+        googleMapsUrl: null,
+        isActive: true,
+      },
+    ]);
+    serviceCentersRepository.listAll.mockResolvedValue([
+      serviceCenter,
+      {
+        ...serviceCenter,
+        id: 'other-service-center-id',
+        phone: '0909999999',
+        email: 'other@example.com',
+      },
+    ]);
+    const useCase = new ImportServiceCentersUseCase(
+      serviceCentersRepository as never,
+    );
+
+    const result = await useCase.execute({ buffer } as Express.Multer.File);
+
+    expect(result.errors[0]).toMatchObject({ field: 'contact' });
+    expect(serviceCentersRepository.importRows).not.toHaveBeenCalled();
   });
 });

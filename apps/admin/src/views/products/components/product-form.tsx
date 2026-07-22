@@ -14,9 +14,11 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Textarea,
 } from "@repo/ui";
 import { RichTextEditor } from "@/src/components/common/rich-text-editor";
 import { ImageUpload } from "@/src/components/common/image-upload";
+import type { ProductImportRowData } from "@/src/services/products/products.types";
 import { PRODUCT_CATEGORIES } from "../products.constants";
 import { useProductForm } from "../hooks/use-product-form";
 import { ProductSpecificationsFields } from "./product-specifications-fields";
@@ -25,12 +27,24 @@ import { ProductStatusToggle } from "./product-status-toggle";
 
 type ProductFormProps = {
   onCancel: () => void;
-  onSaved: (product?: ProductResponse) => void;
-  product: ProductResponse | null;
-};
+} & (
+  | {
+      mode?: "default";
+      onSaved: (product?: ProductResponse) => void;
+      product: ProductResponse | null;
+    }
+  | {
+      initialValues: ProductImportRowData;
+      mode: "import-preview";
+      onSaved: (data: ProductImportRowData) => void;
+      submitLabel: string;
+    }
+);
 
-export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
+export function ProductForm(props: ProductFormProps) {
   const t = useTranslations("Products");
+  const importPreview = props.mode === "import-preview";
+  const product = importPreview ? null : props.product;
   const {
     categoriesQuery,
     control,
@@ -44,7 +58,13 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
     removeSpecification,
     setValue,
     specificationFields,
-  } = useProductForm({ onSaved, product });
+  } = useProductForm({
+    importPreview: importPreview
+      ? { data: props.initialValues, onSaved: props.onSaved }
+      : undefined,
+    onSaved: importPreview ? () => undefined : props.onSaved,
+    product,
+  });
   const categories = categoriesQuery.data?.items ?? [];
 
   return (
@@ -59,6 +79,15 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
       ) : null}
 
       <div className="grid gap-5 sm:grid-cols-2">
+        {importPreview ? (
+          <Field
+            error={formatFieldError(errors.productCode?.message, t)}
+            id="product-code"
+            label={t("productCode")}
+          >
+            <Input id="product-code" {...register("productCode")} />
+          </Field>
+        ) : null}
         <Field
           error={formatFieldError(errors.name?.message, t)}
           id="product-name"
@@ -70,17 +99,19 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
             {...register("name")}
           />
         </Field>
-        <Field
-          error={formatFieldError(errors.serialNumber?.message, t)}
-          id="product-serial-number"
-          label={t("serialNumber")}
-        >
-          <Input
+        {!importPreview ? (
+          <Field
+            error={formatFieldError(errors.serialNumber?.message, t)}
             id="product-serial-number"
-            placeholder={t("serialNumberPlaceholder")}
-            {...register("serialNumber")}
-          />
-        </Field>
+            label={t("serialNumber")}
+          >
+            <Input
+              id="product-serial-number"
+              placeholder={t("serialNumberPlaceholder")}
+              {...register("serialNumber")}
+            />
+          </Field>
+        ) : null}
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
@@ -119,11 +150,18 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
                 onValueChange={field.onChange}
                 value={field.value}
               >
-                {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
+                {categories
+                  .filter((category) => !importPreview || category.code)
+                  .map((category) => (
+                    <SelectItem
+                      key={category.id}
+                      value={
+                        importPreview ? (category.code ?? "") : category.id
+                      }
+                    >
+                      {category.name}
+                    </SelectItem>
+                  ))}
               </NullableSelect>
             )}
           />
@@ -177,42 +215,80 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
         </Field>
       </div>
 
-      <Field
-        error={formatFieldError(errors.coverAssetId?.message, t)}
-        id="product-cover-image"
-        label={t("coverImage")}
-      >
-        <Controller
-          control={control}
-          name="coverImageUrl"
-          render={({ field }) => (
-            <ImageUpload
-              disabled={isSubmitting}
-              id="product-cover-image"
-              labels={{
-                hint: t("coverImageHint"),
-                previewAlt: t("coverImageAlt"),
-              }}
-              onAssetChange={(asset) =>
-                setValue("coverAssetId", asset?.id ?? "", {
-                  shouldDirty: true,
-                  shouldValidate: true,
-                })
-              }
-              onChange={field.onChange}
-              persistedValue={
-                product?.assets.find((asset) => asset.role === "COVER")?.url ??
-                ""
-              }
-              uploadOptions={{
-                accessType: "PUBLIC",
-                folder: "products",
-              }}
-              value={field.value}
+      {importPreview ? (
+        <Field
+          error={formatFieldError(errors.serialNumber?.message, t)}
+          id="product-serial-number"
+          label={t("serialNumber")}
+        >
+          <Input
+            id="product-serial-number"
+            placeholder={t("serialNumberPlaceholder")}
+            {...register("serialNumber")}
+          />
+        </Field>
+      ) : null}
+
+      {importPreview ? (
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field id="product-cover-image-url" label={t("excel.imageUrl")}>
+            <Input
+              id="product-cover-image-url"
+              {...register("coverImageUrl")}
             />
-          )}
-        />
-      </Field>
+          </Field>
+          <Field
+            error={formatFieldError(errors.warrantyDurationMonths?.message, t)}
+            id="product-warranty-duration"
+            label={t("durationMonths")}
+          >
+            <Input
+              id="product-warranty-duration"
+              inputMode="numeric"
+              min={1}
+              type="number"
+              {...register("warrantyDurationMonths")}
+            />
+          </Field>
+        </div>
+      ) : (
+        <Field
+          error={formatFieldError(errors.coverAssetId?.message, t)}
+          id="product-cover-image"
+          label={t("coverImage")}
+        >
+          <Controller
+            control={control}
+            name="coverImageUrl"
+            render={({ field }) => (
+              <ImageUpload
+                disabled={isSubmitting}
+                id="product-cover-image"
+                labels={{
+                  hint: t("coverImageHint"),
+                  previewAlt: t("coverImageAlt"),
+                }}
+                onAssetChange={(asset) =>
+                  setValue("coverAssetId", asset?.id ?? "", {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  })
+                }
+                onChange={field.onChange}
+                persistedValue={
+                  product?.assets.find((asset) => asset.role === "COVER")
+                    ?.url ?? ""
+                }
+                uploadOptions={{
+                  accessType: "PUBLIC",
+                  folder: "products",
+                }}
+                value={field.value}
+              />
+            )}
+          />
+        </Field>
+      )}
 
       <Field
         error={formatFieldError(errors.description?.message, t)}
@@ -232,17 +308,31 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
         />
       </Field>
 
-      <ProductSpecificationsFields
-        disabled={isSubmitting}
-        errors={errors}
-        fields={specificationFields}
-        onAdd={appendSpecification}
-        onMove={moveSpecification}
-        onRemove={removeSpecification}
-        register={register}
-      />
+      {importPreview ? (
+        <Field
+          error={formatFieldError(errors.warrantyTerms?.message, t)}
+          id="product-warranty-terms"
+          label={t("warrantyTerms")}
+        >
+          <Textarea
+            id="product-warranty-terms"
+            rows={4}
+            {...register("warrantyTerms")}
+          />
+        </Field>
+      ) : (
+        <ProductSpecificationsFields
+          disabled={isSubmitting}
+          errors={errors}
+          fields={specificationFields}
+          onAdd={appendSpecification}
+          onMove={moveSpecification}
+          onRemove={removeSpecification}
+          register={register}
+        />
+      )}
 
-      {creating ? (
+      {creating || importPreview ? (
         <ProductStatusField control={control} disabled={isSubmitting} />
       ) : product ? (
         <ProductStatusToggle product={product} />
@@ -252,7 +342,7 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
         <Button
           className="w-full sm:w-auto"
           disabled={isSubmitting}
-          onClick={onCancel}
+          onClick={props.onCancel}
           type="button"
           variant="secondary"
         >
@@ -266,7 +356,11 @@ export function ProductForm({ onCancel, onSaved, product }: ProductFormProps) {
           {isSubmitting ? (
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
           ) : null}
-          {creating ? t("createSubmit") : t("save")}
+          {importPreview
+            ? props.submitLabel
+            : creating
+              ? t("createSubmit")
+              : t("save")}
         </Button>
       </div>
     </form>
@@ -351,6 +445,7 @@ function formatFieldError(
     "modelLength",
     "nameLength",
     "nameRequired",
+    "productCodeLength",
     "serialNumberLength",
     "warrantyCodeInvalid",
     "warrantyCodeRequired",

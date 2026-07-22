@@ -6,6 +6,7 @@ import { WarrantyClaimNotificationService } from '@/modules/warranty-claims/serv
 import { WarrantyClaimSlaService } from '@/modules/warranty-claims/service/warranty-claim-sla.service';
 import { AssignWarrantyClaimServiceCenterUseCase } from '@/modules/warranty-claims/use-cases/assign-warranty-claim-service-center.use-case';
 import { CreateWarrantyClaimUseCase } from '@/modules/warranty-claims/use-cases/create-warranty-claim.use-case';
+import { ExportWarrantyClaimsUseCase } from '@/modules/warranty-claims/use-cases/export-warranty-claims.use-case';
 import { GenerateWarrantyClaimCodeUseCase } from '@/modules/warranty-claims/use-cases/generate-warranty-claim-code.use-case';
 import { GetWarrantyClaimDetailUseCase } from '@/modules/warranty-claims/use-cases/get-warranty-claim-detail.use-case';
 import { GetWarrantyClaimMetricsUseCase } from '@/modules/warranty-claims/use-cases/get-warranty-claim-metrics.use-case';
@@ -30,6 +31,7 @@ import { Module } from '@nestjs/common';
     WarrantyClaimNotificationService,
     GenerateWarrantyClaimCodeUseCase,
     CreateWarrantyClaimUseCase,
+    ExportWarrantyClaimsUseCase,
     ListWarrantyClaimsUseCase,
     GetWarrantyClaimDetailUseCase,
     GetWarrantyClaimMetricsUseCase,

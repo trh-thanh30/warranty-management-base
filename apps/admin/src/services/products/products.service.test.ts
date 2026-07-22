@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  createProductsService,
-  type ProductsHttpClient,
-} from "./create-products.service.ts";
+import { createProductsService } from "./create-products.service.ts";
+import type { ProductsHttpClient } from "./products.types.ts";
 
 const product = {
   id: "product-id",
@@ -177,4 +175,154 @@ test("deleting a product uses the delete endpoint", async () => {
   ).deleteProduct("product-id");
 
   assert.deepEqual(calls, [{ url: "/products/product-id" }]);
+});
+
+test("downloading product template requests a blob", async () => {
+  const calls: unknown[] = [];
+  const blob = new Blob(["template"]);
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: blob };
+    },
+  };
+
+  const result = await createProductsService(
+    http as unknown as ProductsHttpClient,
+  ).downloadImportTemplate();
+
+  assert.deepEqual(calls, [
+    {
+      url: "/products/import-template",
+      config: { responseType: "blob" },
+    },
+  ]);
+  assert.equal(result, blob);
+});
+
+test("exporting products requests a filtered blob", async () => {
+  const calls: unknown[] = [];
+  const blob = new Blob(["export"]);
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: blob };
+    },
+  };
+
+  const result = await createProductsService(
+    http as unknown as ProductsHttpClient,
+  ).exportProducts({
+    category: "SPARE_PART",
+    search: "battery",
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/products/export",
+      config: {
+        params: {
+          category: "SPARE_PART",
+          search: "battery",
+          sortBy: "createdAt",
+          sortOrder: "desc",
+        },
+        responseType: "blob",
+      },
+    },
+  ]);
+  assert.equal(result, blob);
+});
+
+test("previewing product import uploads form data", async () => {
+  const calls: Array<{ body?: unknown; url: string }> = [];
+  const preview = {
+    errors: [],
+    invalidRows: 0,
+    totalRows: 1,
+    validRows: 1,
+  };
+  const http = {
+    async post(url: string, body?: unknown) {
+      calls.push({ url, body });
+      return { data: { success: true, data: preview } };
+    },
+  };
+  const file = new File(["excel"], "products.xlsx");
+
+  const result = await createProductsService(
+    http as unknown as ProductsHttpClient,
+  ).previewImport(file);
+
+  assert.equal(calls[0]?.url, "/products/import/preview");
+  assert.ok(calls[0]?.body instanceof FormData);
+  assert.deepEqual(result, preview);
+});
+
+test("confirming product import posts edited preview rows", async () => {
+  const calls: unknown[] = [];
+  const response = {
+    created: 1,
+    deactivated: 0,
+    errors: [],
+    updated: 0,
+  };
+  const http = {
+    async post(url: string, body?: unknown) {
+      calls.push({ url, body });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  const result = await createProductsService(
+    http as unknown as ProductsHttpClient,
+  ).confirmImport({
+    mode: "upsert",
+    rows: [
+      {
+        brand: "Toyota",
+        category: "SPARE_PART",
+        categoryCode: null,
+        description: null,
+        imageUrl: "https://example.com/product.jpg",
+        manufactureYear: 2026,
+        model: "Battery",
+        name: "SUV Battery",
+        productCode: null,
+        serialNumber: "SN-001",
+        status: "ACTIVE",
+        warrantyDurationMonths: 36,
+        warrantyTerms: null,
+      },
+    ],
+  });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/products/import/confirm",
+      body: {
+        mode: "upsert",
+        rows: [
+          {
+            brand: "Toyota",
+            category: "SPARE_PART",
+            categoryCode: null,
+            description: null,
+            imageUrl: "https://example.com/product.jpg",
+            manufactureYear: 2026,
+            model: "Battery",
+            name: "SUV Battery",
+            productCode: null,
+            serialNumber: "SN-001",
+            status: "ACTIVE",
+            warrantyDurationMonths: 36,
+            warrantyTerms: null,
+          },
+        ],
+      },
+    },
+  ]);
+  assert.deepEqual(result, response);
 });

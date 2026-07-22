@@ -42,3 +42,13 @@ export type CreateServiceCenterBody = {
 export type UpdateServiceCenterBody = Partial<CreateServiceCenterBody> & {
   isActive?: boolean;
 };
+
+export type ServiceCenterImportResult = {
+  created: number;
+  updated: number;
+  errors: Array<{
+    rowNumber: number;
+    field: string;
+    message: string;
+  }>;
+};

@@ -105,3 +105,16 @@ export function useReorderCategories() {
     },
   });
 }
+
+export function useImportCategories() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (file: File) => categoriesService.importCategories(file),
+    onSuccess: (result) => {
+      if (result.errors.length === 0) {
+        void queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+      }
+    },
+  });
+}

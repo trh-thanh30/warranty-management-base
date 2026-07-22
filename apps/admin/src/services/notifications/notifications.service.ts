@@ -8,60 +8,13 @@ import type {
   UserNotificationSummary,
 } from "@repo/shared";
 import { adminHttpClient } from "@/src/lib/admin-http-client";
-
-type ApiResponse<T> = {
-  success: boolean;
-  data: T;
-};
-
-type ApiPagination = {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrev: boolean;
-};
-
-type PaginatedApiResponse<T> = ApiResponse<T[]> & {
-  pagination: ApiPagination;
-};
-
-type RawNotification = {
-  id: string;
-  title: string;
-  content: string;
-  type: string;
-  source: NotificationSummary["source"];
-  scope: NotificationSummary["scope"];
-  delivery_status: NotificationSummary["deliveryStatus"];
-  metadata: Record<string, unknown> | null;
-  scheduled_at: string | null;
-  sent_at: string | null;
-  created_by_id: string | null;
-  created_at: string;
-  updated_at: string;
-};
-
-type RawUserNotification = {
-  id: string;
-  status: UserNotificationSummary["status"];
-  read_at: string | null;
-  delivered_at: string;
-  created_at: string;
-  notification: RawNotification;
-};
-
-type RawAdminNotification = RawNotification & {
-  created_by: {
-    id: string;
-    email: string;
-    username: string;
-    full_name: string | null;
-    role: string;
-  } | null;
-  _count: { recipients: number };
-};
+import type { ApiEnvelope } from "../service.types";
+import type {
+  PaginatedApiResponse,
+  RawAdminNotification,
+  RawNotification,
+  RawUserNotification,
+} from "./notifications.types";
 
 function mapNotification(value: RawNotification): NotificationSummary {
   return {
@@ -101,7 +54,7 @@ function mapPage<TInput, TOutput>(
 export const notificationsService = {
   async countUnread(): Promise<UnreadNotificationCount> {
     const { data } = await adminHttpClient.get<
-      ApiResponse<UnreadNotificationCount>
+      ApiEnvelope<UnreadNotificationCount>
     >("/notifications/unread-count");
 
     return data.data;

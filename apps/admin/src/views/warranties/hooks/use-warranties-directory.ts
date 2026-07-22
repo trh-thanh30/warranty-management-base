@@ -2,12 +2,16 @@
 
 import { useState } from "react";
 import { useDebounce } from "@repo/hooks";
-import type { WarrantyListItem } from "@repo/shared";
+import type { ListWarrantiesQuery, WarrantyListItem } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/src/app/providers/auth-provider";
+import { useExcel } from "@/src/hooks/use-excel";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { useTableControls } from "@/src/hooks/use-table-controls";
+import { useToast } from "@/src/hooks/use-toast";
 import { useWarranties } from "@/src/hooks/use-warranties";
+import { warrantiesService } from "@/src/services/warranties/warranties.service";
 import type { WarrantySortBy, WarrantyStatusFilter } from "../warranties.types";
 
 const WARRANTIES_PAGE_SIZE = 10;
@@ -21,6 +25,9 @@ const INITIAL_WARRANTY_DIRECTORY_FILTERS = {
 } satisfies WarrantyDirectoryFilters;
 
 export function useWarrantiesDirectory() {
+  const t = useTranslations("Warranties");
+  const toast = useToast();
+  const { createDatedFilename, downloadBlob } = useExcel();
   const { user: currentUser } = useAuth();
   const { hasPermission } = usePermissions();
   const {
@@ -46,19 +53,17 @@ export function useWarrantiesDirectory() {
     useState<WarrantyListItem | null>(null);
   const debouncedSearch = useDebounce(search.trim(), 300);
   const canViewWarranties = hasPermission(PERMISSIONS.WARRANTY_VIEW);
-  const warrantiesQuery = useWarranties(
-    {
-      limit: pageSize,
-      page,
-      search: debouncedSearch || undefined,
-      sortBy,
-      sortOrder,
-      status: filters.status === "ALL" ? undefined : filters.status,
-    },
-    {
-      enabled: Boolean(currentUser) && canViewWarranties,
-    },
-  );
+  const listQuery = {
+    limit: pageSize,
+    page,
+    search: debouncedSearch || undefined,
+    sortBy,
+    sortOrder,
+    status: filters.status === "ALL" ? undefined : filters.status,
+  } satisfies ListWarrantiesQuery;
+  const warrantiesQuery = useWarranties(listQuery, {
+    enabled: Boolean(currentUser) && canViewWarranties,
+  });
 
   function clearFilters() {
     setSearch("");
@@ -74,9 +79,20 @@ export function useWarrantiesDirectory() {
     setWarrantyToActivate(null);
   }
 
+  async function exportWarranties() {
+    try {
+      const blob = await warrantiesService.exportWarranties(listQuery);
+      downloadBlob(blob, createDatedFilename("warranties"));
+      toast.success(t("excel.exported"));
+    } catch {
+      toast.error(t("excel.exportError"));
+    }
+  }
+
   return {
     clearFilters,
     closeActivate,
+    exportWarranties,
     filters,
     openActivate,
     pageSize,

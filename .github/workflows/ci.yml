@@ -78,6 +78,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint:admin
       - run: pnpm typecheck:admin
+      - run: pnpm test:admin
       - run: pnpm build:admin
 
   notify:

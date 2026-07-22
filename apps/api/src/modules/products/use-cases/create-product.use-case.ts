@@ -10,8 +10,8 @@ import { toProductResponse } from '@/modules/products/products.types';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
 import { Injectable } from '@nestjs/common';
 import {
-  category_type,
   asset_type,
+  category_type,
   Prisma,
   product_status,
   warranty_status,

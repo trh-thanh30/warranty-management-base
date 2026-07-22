@@ -80,3 +80,13 @@ export type ReorderCategoriesBody = {
   parentId?: string | null;
   items: ReorderCategoryItem[];
 };
+
+export type CategoryImportResult = {
+  created: number;
+  updated: number;
+  errors: Array<{
+    rowNumber: number;
+    field: string;
+    message: string;
+  }>;
+};

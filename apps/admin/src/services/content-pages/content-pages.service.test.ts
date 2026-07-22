@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  createContentPagesService,
-  type ContentPagesHttpClient,
-} from "./create-content-pages.service.ts";
+import { createContentPagesService } from "./create-content-pages.service.ts";
+import type { ContentPagesHttpClient } from "./content-pages.types.ts";
 
 const page = {
   id: "page-1",

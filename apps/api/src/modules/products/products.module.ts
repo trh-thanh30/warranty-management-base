@@ -5,18 +5,30 @@ import { ProductsRepository } from '@/modules/products/repository/products.repos
 import { ProductAssetsRepository } from '@/modules/products/repository/product-assets.repository';
 import { AssignProductOwnerUseCase } from '@/modules/products/use-cases/assign-product-owner.use-case';
 import { AttachProductAssetUseCase } from '@/modules/products/use-cases/attach-product-asset.use-case';
+import { ConfirmProductImportUseCase } from '@/modules/products/use-cases/confirm-product-import.use-case';
 import { CreateProductUseCase } from '@/modules/products/use-cases/create-product.use-case';
+import { DownloadProductImportTemplateUseCase } from '@/modules/products/use-cases/download-product-import-template.use-case';
+import { ExportProductsUseCase } from '@/modules/products/use-cases/export-products.use-case';
 import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { GetProductDetailUseCase } from '@/modules/products/use-cases/get-product-detail.use-case';
 import { ListProductsUseCase } from '@/modules/products/use-cases/list-products.use-case';
+import { PreviewProductImportUseCase } from '@/modules/products/use-cases/preview-product-import.use-case';
 import { SoftDeleteProductUseCase } from '@/modules/products/use-cases/soft-delete-product.use-case';
 import { RemoveProductAssetUseCase } from '@/modules/products/use-cases/remove-product-asset.use-case';
 import { UpdateProductAssetUseCase } from '@/modules/products/use-cases/update-product-asset.use-case';
 import { UpdateProductUseCase } from '@/modules/products/use-cases/update-product.use-case';
 import { Module } from '@nestjs/common';
+import { MulterModule } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 
 @Module({
-  imports: [PrismaModule, AssetsModule],
+  imports: [
+    PrismaModule,
+    AssetsModule,
+    MulterModule.register({
+      storage: memoryStorage(),
+    }),
+  ],
   controllers: [ProductsController],
   providers: [
     ProductsRepository,
@@ -31,6 +43,10 @@ import { Module } from '@nestjs/common';
     AttachProductAssetUseCase,
     UpdateProductAssetUseCase,
     RemoveProductAssetUseCase,
+    ConfirmProductImportUseCase,
+    DownloadProductImportTemplateUseCase,
+    ExportProductsUseCase,
+    PreviewProductImportUseCase,
   ],
   exports: [ProductsRepository],
 })

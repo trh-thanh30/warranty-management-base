@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
+import { ImportExportMenu } from "@/src/components/common";
 import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { ActivateWarrantyDialog } from "./components/activate-warranty-dialog";
@@ -13,6 +14,7 @@ export function WarrantiesView() {
   const {
     clearFilters,
     closeActivate,
+    exportWarranties,
     filters,
     openActivate,
     pageSize,
@@ -32,6 +34,17 @@ export function WarrantiesView() {
     <PermissionGuard permissions={[PERMISSIONS.WARRANTY_VIEW]}>
       <div className="space-y-6">
         <PageHeader
+          actions={
+            <ImportExportMenu
+              labels={{
+                exportAll: t("excel.exportAll"),
+                title: t("excel.title"),
+              }}
+              onExportAll={() => {
+                void exportWarranties();
+              }}
+            />
+          }
           description={t("description")}
           eyebrow={t("eyebrow")}
           title={t("title")}
