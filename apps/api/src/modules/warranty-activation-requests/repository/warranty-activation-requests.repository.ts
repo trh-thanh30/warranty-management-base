@@ -1,7 +1,9 @@
 import { normalizePagination, paginate } from '@/common/pagination/pagination';
 import { BadRequestError } from '@/common/response';
 import { PrismaService } from '@/database/prisma/prisma.service';
+import { GenerateCustomerCodeUseCase } from '@/modules/customers/use-cases/generate-customer-code.use-case';
 import { ListWarrantyActivationRequestsDto } from '@/modules/warranty-activation-requests/dto/list-warranty-activation-requests.dto';
+import { WarrantyLifecycleService } from '@/modules/warranties/services/warranty-lifecycle.service';
 import { Injectable } from '@nestjs/common';
 import {
   Prisma,
@@ -73,7 +75,11 @@ function buildWarrantyActivationRequestListQuery(
 
 @Injectable()
 export class WarrantyActivationRequestsRepository {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly warrantyLifecycleService: WarrantyLifecycleService,
+    private readonly generateCustomerCodeUseCase: GenerateCustomerCodeUseCase,
+  ) {}
 
   create(data: Prisma.WarrantyActivationRequestCreateInput) {
     return this.prismaService.warrantyActivationRequest.create({
@@ -210,41 +216,36 @@ export class WarrantyActivationRequestsRepository {
         fullName: request.customer_name,
         phone: request.customer_phone,
       });
-      const activatedAt = reviewedAt;
-      const durationMonths = product.warranty.duration_months;
-      const updatedWarranty = await tx.warranty.update({
-        where: { id: product.warranty.id },
-        data: {
-          end_date: this.addMonths(activatedAt, durationMonths),
-          metadata: this.mergeWarrantyMetadata(product.warranty.metadata),
-          start_date: activatedAt,
-          status: warranty_status.ACTIVE,
-        },
-      });
-
       await tx.productOwnership.updateMany({
         where: {
           product_id: product.id,
           is_current_owner: true,
         },
         data: {
-          ended_at: activatedAt,
+          ended_at: reviewedAt,
           is_current_owner: false,
         },
       });
 
       await tx.productOwnership.create({
         data: {
-          activated_at: activatedAt,
+          activated_at: null,
           customer: { connect: { id: customer.id } },
           is_current_owner: true,
           owner_user: customer.user_id
             ? { connect: { id: customer.user_id } }
             : undefined,
           product: { connect: { id: product.id } },
-          purchase_date: activatedAt,
+          purchase_date: reviewedAt,
         },
       });
+
+      const updatedWarranty =
+        await this.warrantyLifecycleService.activateDraftWarranty(tx, {
+          activatedByUserId: input.reviewedById,
+          startDate: reviewedAt,
+          warrantyId: product.warranty.id,
+        });
 
       return tx.warrantyActivationRequest.update({
         where: { id: input.id },
@@ -304,46 +305,11 @@ export class WarrantyActivationRequestsRepository {
     return tx.customer.create({
       data: {
         address: input.address,
-        customer_code: await this.generateCustomerCode(tx),
+        customer_code: await this.generateCustomerCodeUseCase.execute(tx),
         email: input.email,
         full_name: input.fullName,
         phone: input.phone,
       },
     });
-  }
-
-  private async generateCustomerCode(tx: Prisma.TransactionClient) {
-    const prefix = 'CUS';
-    const lastCustomer = await tx.customer.findFirst({
-      where: {
-        customer_code: {
-          startsWith: prefix,
-        },
-      },
-      orderBy: { customer_code: 'desc' },
-      select: { customer_code: true },
-    });
-    const currentNumber = Number(
-      lastCustomer?.customer_code.replace(prefix, '') ?? '0',
-    );
-
-    return `${prefix}${(currentNumber + 1).toString().padStart(6, '0')}`;
-  }
-
-  private addMonths(date: Date, months: number) {
-    const nextDate = new Date(date);
-    nextDate.setMonth(nextDate.getMonth() + months);
-    return nextDate;
-  }
-
-  private mergeWarrantyMetadata(value: Prisma.JsonValue) {
-    const metadata =
-      value && typeof value === 'object' && !Array.isArray(value) ? value : {};
-
-    return {
-      ...metadata,
-      activationRequestSource: 'warranty_activation_request',
-      certificateEmailStatus: 'PENDING_TEMPLATE',
-    } satisfies Prisma.InputJsonObject;
   }
 }

@@ -49,11 +49,13 @@ describe('CreateProductUseCase', () => {
         }),
       },
     };
-    const generateWarrantyCodeUseCase = { execute: jest.fn() };
+    const generateProductCodeUseCase = {
+      execute: jest.fn().mockResolvedValue('PRD-2026-ABCDEF'),
+    };
     const useCase = new CreateProductUseCase(
       prismaService as never,
       productsRepository as never,
-      generateWarrantyCodeUseCase as never,
+      generateProductCodeUseCase as never,
     );
 
     const result = await useCase.execute({
@@ -65,7 +67,7 @@ describe('CreateProductUseCase', () => {
       serialNumber: 'SN-001',
     });
 
-    expect(generateWarrantyCodeUseCase.execute).not.toHaveBeenCalled();
+    expect(generateProductCodeUseCase.execute).toHaveBeenCalledTimes(1);
     expect(prismaService.product.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({

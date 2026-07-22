@@ -30,6 +30,8 @@ model User {
   warranty_claim_changes                WarrantyClaimStatusHistory[]        @relation("WarrantyClaimStatusChangedBy")
   warranty_claim_service_center_changes WarrantyClaimServiceCenterHistory[] @relation("WarrantyClaimServiceCenterChangedBy")
   reviewed_warranty_activation_requests WarrantyActivationRequest[]         @relation("WarrantyActivationRequestReviewedBy")
+  activated_warranties                    Warranty[]                          @relation("WarrantyActivatedBy")
+  voided_warranties                       Warranty[]                          @relation("WarrantyVoidedBy")
 
   @@index([role, status])
   @@index([email])
@@ -303,16 +305,25 @@ model Warranty {
   status                warranty_status @default(DRAFT)
   terms                 String?
   metadata              Json?
+  activated_by_id       String?         @db.Uuid
+  voided_at             DateTime?
+  voided_by_id          String?         @db.Uuid
+  void_reason           String?
   created_at            DateTime        @default(now())
   updated_at            DateTime        @updatedAt
 
   product            Product                    @relation(fields: [product_id], references: [id], onDelete: Cascade)
   claims             WarrantyClaim[]
   activation_request WarrantyActivationRequest?
+  activated_by       User?                      @relation("WarrantyActivatedBy", fields: [activated_by_id], references: [id], onDelete: SetNull)
+  voided_by          User?                      @relation("WarrantyVoidedBy", fields: [voided_by_id], references: [id], onDelete: SetNull)
 
   @@index([warranty_code])
   @@index([status])
   @@index([end_date])
+  @@index([activated_by_id])
+  @@index([voided_by_id])
+  @@index([voided_at])
   @@map("warranty")
 }
 
@@ -531,6 +542,7 @@ enum permission_key {
   WARRANTY_CREATE
   WARRANTY_UPDATE
   WARRANTY_ACTIVATE
+  WARRANTY_VOID
   WARRANTY_LOOKUP_OWN
 
   WARRANTY_CLAIM_VIEW

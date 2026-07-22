@@ -1,6 +1,7 @@
 export * from "./combobox";
 export * from "./excel-import-dialog";
 export * from "./form-field";
+export * from "./form-section";
 export * from "./form-page-shell";
 export * from "./image-upload";
 export * from "./import-export-menu";

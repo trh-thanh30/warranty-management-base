@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { Controller } from "react-hook-form";
 import { Eye, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ContentPageSummary } from "@repo/shared";
-import { Button, Input, Label, Textarea } from "@repo/ui";
+import { Button, Input, Textarea } from "@repo/ui";
+import { FormField as Field } from "@/src/components/common/form-field";
 import { RichTextEditor } from "@/src/components/common/rich-text-editor";
 import { SelectControl } from "@/src/components/common/select-control";
 import {
@@ -191,34 +192,6 @@ export function ContentPageForm({
         title={title}
       />
     </>
-  );
-}
-
-function Field({
-  children,
-  error,
-  id,
-  label,
-}: {
-  children: ReactNode;
-  error?: string;
-  id: string;
-  label: string;
-}) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      {children}
-      {error ? (
-        <p
-          className="text-sm text-red-600 dark:text-red-400"
-          id={`${id}-error`}
-          role="alert"
-        >
-          {error}
-        </p>
-      ) : null}
-    </div>
   );
 }
 

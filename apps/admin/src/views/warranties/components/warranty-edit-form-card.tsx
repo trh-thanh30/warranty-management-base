@@ -17,6 +17,7 @@ import {
   Skeleton,
 } from "@repo/ui";
 import { RichTextEditor } from "@/src/components/common/rich-text-editor";
+import { FormField } from "@/src/components/common/form-field";
 import { VndInput } from "@/src/components/common/vnd-input";
 import { useToast } from "@/src/hooks/use-toast";
 import { useUpdateWarranty } from "@/src/hooks/use-warranties";
@@ -221,23 +222,6 @@ export function WarrantyEditFormCard({ warranty }: WarrantyEditFormCardProps) {
         </form>
       </CardContent>
     </Card>
-  );
-}
-
-function FormField({
-  children,
-  id,
-  label,
-}: {
-  children: React.ReactNode;
-  id: string;
-  label: string;
-}) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      {children}
-    </div>
   );
 }
 

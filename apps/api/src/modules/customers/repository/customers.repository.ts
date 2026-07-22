@@ -28,8 +28,10 @@ export class CustomersRepository {
     });
   }
 
-  findLastCustomerCode(prefix: string) {
-    return this.prismaService.customer.findFirst({
+  findLastCustomerCode(prefix: string, tx?: Prisma.TransactionClient) {
+    const client = tx ?? this.prismaService;
+
+    return client.customer.findFirst({
       where: {
         customer_code: {
           startsWith: prefix,

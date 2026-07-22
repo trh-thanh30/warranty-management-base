@@ -1,5 +1,8 @@
 "use client";
 
+import { Button, cn, Popover, PopoverContent, PopoverTrigger } from "@repo/ui";
+import { Command as CommandPrimitive } from "cmdk";
+import { Check, ChevronsUpDown, Loader2, Search } from "lucide-react";
 import {
   createContext,
   useContext,
@@ -7,9 +10,6 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { Command as CommandPrimitive } from "cmdk";
-import { Check, ChevronsUpDown, Search } from "lucide-react";
-import { Button, cn, Popover, PopoverContent, PopoverTrigger } from "@repo/ui";
 
 type ComboboxContextValue = {
   disabled?: boolean;
@@ -25,11 +25,13 @@ export function Combobox({
   children,
   disabled,
   onValueChange,
+  shouldFilter = true,
   value,
 }: {
   children: ReactNode;
   disabled?: boolean;
   onValueChange: (value: string) => void;
+  shouldFilter?: boolean;
   value: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -47,7 +49,9 @@ export function Combobox({
   return (
     <ComboboxContext.Provider value={contextValue}>
       <Popover open={open} onOpenChange={setOpen}>
-        <CommandPrimitive shouldFilter>{children}</CommandPrimitive>
+        <CommandPrimitive shouldFilter={shouldFilter}>
+          {children}
+        </CommandPrimitive>
       </Popover>
     </ComboboxContext.Provider>
   );
@@ -98,7 +102,7 @@ export function ComboboxContent({ children }: { children: ReactNode }) {
   return (
     <PopoverContent
       align="start"
-      className="w-[var(--radix-popover-trigger-width)] p-0"
+      className="w-(--radix-popover-trigger-width) p-0"
     >
       {children}
     </PopoverContent>
@@ -106,11 +110,15 @@ export function ComboboxContent({ children }: { children: ReactNode }) {
 }
 
 export function ComboboxInput({
+  onValueChange,
   placeholder,
   showTrigger = true,
+  value,
 }: {
+  onValueChange?: (value: string) => void;
   placeholder: string;
   showTrigger?: boolean;
+  value?: string;
 }) {
   return (
     <div className="flex items-center border-b border-slate-200 px-3 dark:border-slate-800">
@@ -119,15 +127,31 @@ export function ComboboxInput({
       ) : null}
       <CommandPrimitive.Input
         className="h-10 w-full bg-transparent text-sm outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-50"
+        onValueChange={onValueChange}
         placeholder={placeholder}
+        value={value}
       />
     </div>
   );
 }
 
-export function ComboboxList({ children }: { children: ReactNode }) {
+export function ComboboxList({
+  children,
+  onReachEnd,
+}: {
+  children: ReactNode;
+  onReachEnd?: () => void;
+}) {
   return (
-    <CommandPrimitive.List className="max-h-72 overflow-y-auto p-1">
+    <CommandPrimitive.List
+      className="max-h-72 overflow-y-auto p-1"
+      onScroll={(event) => {
+        const target = event.currentTarget;
+        const distanceToEnd =
+          target.scrollHeight - target.scrollTop - target.clientHeight;
+        if (distanceToEnd <= 32) onReachEnd?.();
+      }}
+    >
       {children}
     </CommandPrimitive.List>
   );
@@ -138,6 +162,18 @@ export function ComboboxEmpty({ children }: { children: ReactNode }) {
     <CommandPrimitive.Empty className="py-6 text-center text-sm text-slate-500 dark:text-slate-400">
       {children}
     </CommandPrimitive.Empty>
+  );
+}
+
+export function ComboboxLoading({ label }: { label: string }) {
+  return (
+    <div
+      className="flex items-center justify-center gap-2 px-3 py-4 text-sm text-slate-500 dark:text-slate-400"
+      role="status"
+    >
+      <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+      {label}
+    </div>
   );
 }
 

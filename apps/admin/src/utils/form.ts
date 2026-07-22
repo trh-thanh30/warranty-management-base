@@ -18,3 +18,24 @@ export function toRequiredValue(value: string | null | undefined): string {
   if (!value) return "";
   return value.trim();
 }
+
+export function translateFieldError(
+  message: string | undefined,
+  translate: (key: string) => string,
+  translationKeys: ReadonlySet<string> | readonly string[],
+) {
+  if (!message) return undefined;
+
+  const hasTranslation = Array.isArray(translationKeys)
+    ? translationKeys.includes(message)
+    : translationKeys.has(message);
+
+  return hasTranslation ? translate(message) : message;
+}
+
+export function createFieldErrorFormatter(
+  translationKeys: ReadonlySet<string> | readonly string[],
+) {
+  return (message: string | undefined, translate: (key: string) => string) =>
+    translateFieldError(message, translate, translationKeys);
+}

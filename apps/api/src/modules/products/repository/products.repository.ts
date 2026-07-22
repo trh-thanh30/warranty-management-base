@@ -43,8 +43,10 @@ export class ProductsRepository {
     });
   }
 
-  findByWarrantyCode(warrantyCode: string) {
-    return this.prismaService.product.findUnique({
+  findByWarrantyCode(warrantyCode: string, tx?: Prisma.TransactionClient) {
+    const client = tx ?? this.prismaService;
+
+    return client.product.findUnique({
       where: { warranty_code: warrantyCode },
     });
   }
@@ -66,8 +68,44 @@ export class ProductsRepository {
     });
   }
 
-  findByProductCode(productCode: string) {
-    return this.prismaService.product.findUnique({
+  findActivationRequestTargetById(productId: string) {
+    return this.prismaService.product.findFirst({
+      where: {
+        deleted_at: null,
+        id: productId,
+      },
+      include: {
+        warranty: true,
+        ownerships: {
+          where: { is_current_owner: true },
+          include: { customer: true },
+          orderBy: { created_at: 'desc' },
+        },
+      },
+    });
+  }
+
+  synchronizeWarrantyCode(input: {
+    productId: string;
+    warrantyCode: string;
+    warrantyId: string;
+  }) {
+    return this.prismaService.$transaction(async (tx) => {
+      await tx.product.update({
+        where: { id: input.productId },
+        data: { warranty_code: input.warrantyCode },
+      });
+      await tx.warranty.update({
+        where: { id: input.warrantyId },
+        data: { warranty_code: input.warrantyCode },
+      });
+    });
+  }
+
+  findByProductCode(productCode: string, tx?: Prisma.TransactionClient) {
+    const client = tx ?? this.prismaService;
+
+    return client.product.findUnique({
       where: { product_code: productCode },
     });
   }

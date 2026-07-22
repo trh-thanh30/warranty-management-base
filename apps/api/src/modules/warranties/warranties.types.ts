@@ -20,6 +20,10 @@ export function toWarrantyResponse(warranty: Warranty) {
     status: warranty.status,
     terms: warranty.terms,
     metadata: warranty.metadata as Record<string, unknown> | null,
+    activatedByUserId: warranty.activated_by_id,
+    voidedAt: warranty.voided_at,
+    voidedByUserId: warranty.voided_by_id,
+    voidReason: warranty.void_reason,
     createdAt: warranty.created_at,
     updatedAt: warranty.updated_at,
   };

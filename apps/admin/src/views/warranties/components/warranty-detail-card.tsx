@@ -71,6 +71,22 @@ export function WarrantyDetailCard({ warranty }: WarrantyDetailCardProps) {
         label: t("createdAt"),
         value: formatWarrantyDate(warranty.createdAt),
       },
+      {
+        label: t("activatedBy"),
+        value: warranty.activatedByUserId ?? "-",
+      },
+      {
+        label: t("voidedAt"),
+        value: formatWarrantyDate(warranty.voidedAt),
+      },
+      {
+        label: t("voidedBy"),
+        value: warranty.voidedByUserId ?? "-",
+      },
+      {
+        label: t("voidReasonValue"),
+        value: warranty.voidReason ?? "-",
+      },
     ],
     [locale, t, warranty],
   );

@@ -28,6 +28,7 @@ type WarrantiesDirectoryCardProps = {
   isError: boolean;
   isLoading: boolean;
   onActivate: (warranty: WarrantyListItem) => void;
+  onVoid: (warranty: WarrantyListItem) => void;
   onClearFilters: () => void;
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
@@ -47,6 +48,7 @@ export function WarrantiesDirectoryCard({
   isError,
   isLoading,
   onActivate,
+  onVoid,
   onClearFilters,
   onPageChange,
   onPageSizeChange,
@@ -85,6 +87,7 @@ export function WarrantiesDirectoryCard({
           isError={isError}
           isLoading={isLoading}
           onActivate={onActivate}
+          onVoid={onVoid}
           onClearFilters={onClearFilters}
           onPageChange={onPageChange}
           onPageSizeChange={onPageSizeChange}
@@ -142,6 +145,7 @@ function WarrantiesDirectoryContent({
   isError,
   isLoading,
   onActivate,
+  onVoid,
   onClearFilters,
   onPageChange,
   onPageSizeChange,
@@ -156,6 +160,7 @@ function WarrantiesDirectoryContent({
   | "isError"
   | "isLoading"
   | "onActivate"
+  | "onVoid"
   | "onClearFilters"
   | "onPageChange"
   | "onPageSizeChange"
@@ -192,6 +197,7 @@ function WarrantiesDirectoryContent({
         <WarrantiesTable
           items={data.items}
           onActivate={onActivate}
+          onVoid={onVoid}
           onSortChange={onSortChange}
           sortBy={sortBy}
           sortOrder={sortOrder}

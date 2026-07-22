@@ -15,6 +15,7 @@ import type {
   PaginatedResponse,
   WarrantyListItem,
   UpdateWarrantyBody,
+  VoidWarrantyBody,
 } from "@repo/shared";
 import { warrantiesService } from "@/src/services/warranties/warranties.service";
 
@@ -68,15 +69,31 @@ export function useActivateWarrantyByCode() {
   });
 }
 
-export function useActivateWarranty(productId: string | null) {
+export function useActivateWarranty(warrantyId: string | null) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (body: ActivateWarrantyBody) =>
-      warrantiesService.activateWarranty(productId ?? "", body),
+      warrantiesService.activateWarranty(warrantyId ?? "", body),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: warrantyKeys.all });
       void queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+  });
+}
+
+export function useVoidWarranty(warrantyId: string | null) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: VoidWarrantyBody) =>
+      warrantiesService.voidWarranty(warrantyId ?? "", body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: warrantyKeys.all });
+      void queryClient.invalidateQueries({ queryKey: ["products"] });
+      void queryClient.invalidateQueries({
+        queryKey: ["warranty-activation-requests"],
+      });
     },
   });
 }

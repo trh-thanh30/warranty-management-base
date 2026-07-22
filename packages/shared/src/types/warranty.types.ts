@@ -15,6 +15,10 @@ export type WarrantySummary = {
   status: WarrantyStatus;
   terms: string | null;
   metadata: Record<string, unknown> | null;
+  activatedByUserId: string | null;
+  voidedAt: string | null;
+  voidedByUserId: string | null;
+  voidReason: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -61,9 +65,7 @@ export type LookupWarrantyQuery = {
 };
 
 export type ActivateWarrantyBody = {
-  durationMonths?: number;
   startDate?: string;
-  terms?: string;
 };
 
 export type ActivateWarrantyByCodeBody = ActivateWarrantyBody & {
@@ -77,6 +79,10 @@ export type UpdateWarrantyBody = {
   maxAmountPerClaim?: string | null;
   maxClaimCount?: number | null;
   terms?: string | null;
+};
+
+export type VoidWarrantyBody = {
+  reason: string;
 };
 
 export type ManualWarrantyActivationCustomerInput = {

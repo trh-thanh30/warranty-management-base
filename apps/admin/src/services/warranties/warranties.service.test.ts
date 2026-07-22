@@ -109,7 +109,7 @@ test("exports warranties with the current directory filters", async () => {
   ]);
 });
 
-test("activating a product warranty posts to product activation endpoint", async () => {
+test("activating a warranty posts to the canonical warranty endpoint", async () => {
   const calls: unknown[] = [];
   const http = {
     async post(url: string, body?: unknown) {
@@ -120,18 +120,42 @@ test("activating a product warranty posts to product activation endpoint", async
 
   await createWarrantiesService(
     http as unknown as WarrantiesHttpClient,
-  ).activateWarranty("product-id", {
-    durationMonths: 12,
+  ).activateWarranty("warranty-id", {
     startDate: "2026-07-13",
   });
 
   assert.deepEqual(calls, [
     {
-      url: "/products/product-id/activate-warranty",
+      url: "/warranties/warranty-id/activate",
       body: {
-        durationMonths: 12,
         startDate: "2026-07-13",
       },
+    },
+  ]);
+});
+
+test("voiding a warranty posts the required reason", async () => {
+  const calls: unknown[] = [];
+  const http = {
+    async post(url: string, body?: unknown) {
+      calls.push({ url, body });
+      return {
+        data: {
+          success: true,
+          data: { ...warranty, status: "VOIDED", voidReason: "Duplicate" },
+        },
+      };
+    },
+  };
+
+  await createWarrantiesService(
+    http as unknown as WarrantiesHttpClient,
+  ).voidWarranty("warranty-id", { reason: "Duplicate" });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/warranties/warranty-id/void",
+      body: { reason: "Duplicate" },
     },
   ]);
 });

@@ -2,6 +2,7 @@
 
 import {
   keepPreviousData,
+  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
@@ -44,6 +45,17 @@ export function useProducts(
     queryKey: productKeys.list(query),
     queryFn: () => productsService.listProducts(query),
     placeholderData: keepPreviousData,
+  });
+}
+
+export function useInfiniteProducts(query: Omit<ListProductsQuery, "page">) {
+  return useInfiniteQuery({
+    queryKey: [...productKeys.lists(), "infinite", query] as const,
+    queryFn: ({ pageParam }) =>
+      productsService.listProducts({ ...query, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.meta.hasNextPage ? lastPage.meta.page + 1 : undefined,
   });
 }
 

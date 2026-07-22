@@ -8,6 +8,7 @@ import {
   ComboboxItem,
   ComboboxList,
   ComboboxTrigger,
+  FormField as Field,
 } from "@/src/components/common";
 import {
   useVietnamProvinces,
@@ -17,9 +18,9 @@ import type { ServiceCenterSummary } from "@repo/shared";
 import { Button, Input, Label, Switch, Textarea } from "@repo/ui";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import type { ReactNode } from "react";
 import { Controller } from "react-hook-form";
 import { useServiceCenterForm } from "../hooks/use-service-center-form";
+import { createFieldErrorFormatter } from "@/src/utils";
 
 type ServiceCenterFormProps = {
   onCancel: () => void;
@@ -301,35 +302,8 @@ export function ServiceCenterForm({
   );
 }
 
-function Field({
-  children,
-  error,
-  id,
-  label,
-}: {
-  children: ReactNode;
-  error?: string;
-  id: string;
-  label: string;
-}) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      {children}
-      {error ? (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      ) : null}
-    </div>
-  );
-}
-
-function formatFieldError(
-  message: string | undefined,
-  t: (key: string) => string,
-) {
-  if (!message) return undefined;
-
-  const translationKeys = new Set([
+const formatFieldError = createFieldErrorFormatter(
+  new Set([
     "addressLength",
     "addressRequired",
     "districtLength",
@@ -344,7 +318,5 @@ function formatFieldError(
     "provinceLength",
     "provinceRequired",
     "wardRequired",
-  ]);
-
-  return translationKeys.has(message) ? t(message) : message;
-}
+  ]),
+);

@@ -1,13 +1,10 @@
-import {
-  BadRequestError,
-  ConflictError,
-  NotFoundError,
-} from '@/common/response';
+import { ConflictError, NotFoundError } from '@/common/response';
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { AssetsService } from '@/modules/assets/assets.service';
 import { CreateProductDto } from '@/modules/products/dto/create-product.dto';
 import { toProductResponse } from '@/modules/products/products.types';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
+import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generate-product-code.use-case';
 import { Injectable } from '@nestjs/common';
 import {
   asset_type,
@@ -22,11 +19,12 @@ export class CreateProductUseCase {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly productsRepository: ProductsRepository,
+    private readonly generateProductCodeUseCase: GenerateProductCodeUseCase,
     private readonly assetsService?: AssetsService,
   ) {}
 
   async execute(dto: CreateProductDto) {
-    const productCode = await this.generateProductCode();
+    const productCode = await this.generateProductCodeUseCase.execute();
     const categoryRef = await this.resolveProductCategory(dto.categoryId);
     const coverAsset = dto.coverAssetId
       ? await this.prismaService.asset.findUnique({
@@ -121,20 +119,5 @@ export class CreateProductUseCase {
     }
 
     return category;
-  }
-
-  private async generateProductCode() {
-    const year = new Date().getFullYear();
-
-    for (let attempt = 0; attempt < 5; attempt += 1) {
-      const suffix = Math.random().toString(36).slice(2, 8).toUpperCase();
-      const code = `PRD-${year}-${suffix}`;
-      const existing = await this.productsRepository.findByProductCode(code);
-      if (!existing) {
-        return code;
-      }
-    }
-
-    throw new BadRequestError('Could not generate a unique product code');
   }
 }

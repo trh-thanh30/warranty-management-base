@@ -1,6 +1,5 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { Controller } from "react-hook-form";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -9,6 +8,8 @@ import { Button, Input, Label, Switch } from "@repo/ui";
 import { RichTextEditor } from "@/src/components/common/rich-text-editor";
 import { ImageUpload } from "@/src/components/common/image-upload";
 import { SelectControl } from "@/src/components/common/select-control";
+import { FormField as Field } from "@/src/components/common/form-field";
+import { createFieldErrorFormatter } from "@/src/utils";
 import { CATEGORY_TYPES } from "../categories.constants";
 import {
   clearParentOnTypeChange,
@@ -245,13 +246,8 @@ export function CategoryForm({
   );
 }
 
-function formatFieldError(
-  message: string | undefined,
-  t: (key: string) => string,
-) {
-  if (!message) return undefined;
-
-  const translationKeys = new Set([
+const formatFieldError = createFieldErrorFormatter(
+  new Set([
     "codeInvalid",
     "descriptionLength",
     "imageUrlLength",
@@ -259,29 +255,5 @@ function formatFieldError(
     "nameRequired",
     "orderInteger",
     "slugInvalid",
-  ]);
-
-  return translationKeys.has(message) ? t(message) : message;
-}
-
-function Field({
-  children,
-  error,
-  id,
-  label,
-}: {
-  children: ReactNode;
-  error?: string;
-  id: string;
-  label: string;
-}) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      {children}
-      {error ? (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      ) : null}
-    </div>
-  );
-}
+  ]),
+);

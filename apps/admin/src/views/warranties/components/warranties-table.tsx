@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, MoreHorizontal, Pencil, ShieldCheck } from "lucide-react";
+import { Ban, Eye, MoreHorizontal, Pencil, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { WarrantyListItem } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
@@ -32,6 +32,7 @@ import { WarrantyStatusBadge } from "./warranty-status-badge";
 type WarrantiesTableProps = {
   items: WarrantyListItem[];
   onActivate: (warranty: WarrantyListItem) => void;
+  onVoid: (warranty: WarrantyListItem) => void;
   onSortChange: (sortBy: WarrantySortBy) => void;
   sortBy?: WarrantySortBy;
   sortOrder: "asc" | "desc";
@@ -40,6 +41,7 @@ type WarrantiesTableProps = {
 export function WarrantiesTable({
   items,
   onActivate,
+  onVoid,
   onSortChange,
   sortBy,
   sortOrder,
@@ -53,6 +55,7 @@ export function WarrantiesTable({
           <WarrantyMobileCard
             key={warranty.id}
             onActivate={onActivate}
+            onVoid={onVoid}
             warranty={warranty}
           />
         ))}
@@ -99,6 +102,7 @@ export function WarrantiesTable({
               <WarrantyTableRow
                 key={warranty.id}
                 onActivate={onActivate}
+                onVoid={onVoid}
                 warranty={warranty}
               />
             ))}
@@ -111,9 +115,11 @@ export function WarrantiesTable({
 
 function WarrantyTableRow({
   onActivate,
+  onVoid,
   warranty,
 }: {
   onActivate: WarrantiesTableProps["onActivate"];
+  onVoid: WarrantiesTableProps["onVoid"];
   warranty: WarrantyListItem;
 }) {
   const t = useTranslations("Warranties");
@@ -137,7 +143,11 @@ function WarrantyTableRow({
       </TableCell>
       <TableCell>{formatWarrantyDate(warranty.createdAt)}</TableCell>
       <TableCell className="text-right">
-        <WarrantyActions onActivate={onActivate} warranty={warranty} />
+        <WarrantyActions
+          onActivate={onActivate}
+          onVoid={onVoid}
+          warranty={warranty}
+        />
       </TableCell>
     </TableRow>
   );
@@ -145,9 +155,11 @@ function WarrantyTableRow({
 
 function WarrantyMobileCard({
   onActivate,
+  onVoid,
   warranty,
 }: {
   onActivate: WarrantiesTableProps["onActivate"];
+  onVoid: WarrantiesTableProps["onVoid"];
   warranty: WarrantyListItem;
 }) {
   const t = useTranslations("Warranties");
@@ -177,7 +189,11 @@ function WarrantyMobileCard({
         />
       </dl>
       <div className="mt-4 flex justify-end">
-        <WarrantyActions onActivate={onActivate} warranty={warranty} />
+        <WarrantyActions
+          onActivate={onActivate}
+          onVoid={onVoid}
+          warranty={warranty}
+        />
       </div>
     </article>
   );
@@ -220,9 +236,11 @@ function WarrantyMobileField({
 
 function WarrantyActions({
   onActivate,
+  onVoid,
   warranty,
 }: {
   onActivate: WarrantiesTableProps["onActivate"];
+  onVoid: WarrantiesTableProps["onVoid"];
   warranty: WarrantyListItem;
 }) {
   const t = useTranslations("Warranties");
@@ -235,6 +253,9 @@ function WarrantyActions({
     canActivate &&
     warranty.status === "DRAFT" &&
     Boolean(warranty.warrantyCode);
+  const canVoid =
+    hasPermission(PERMISSIONS.WARRANTY_VOID) &&
+    (warranty.status === "DRAFT" || warranty.status === "ACTIVE");
 
   return (
     <DropdownMenu>
@@ -269,6 +290,18 @@ function WarrantyActions({
             <DropdownMenuItem onSelect={() => onActivate(warranty)}>
               <ShieldCheck className="mr-2 size-4" />
               {t("activate")}
+            </DropdownMenuItem>
+          </>
+        ) : null}
+        {canVoid ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
+              onSelect={() => onVoid(warranty)}
+            >
+              <Ban className="mr-2 size-4" />
+              {t("void")}
             </DropdownMenuItem>
           </>
         ) : null}
