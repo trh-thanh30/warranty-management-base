@@ -12,9 +12,7 @@ import {
   DialogDescription,
   DialogTitle,
   DatePicker,
-  Input,
   Label,
-  Textarea,
 } from "@repo/ui";
 import { useActivateWarranty } from "@/src/hooks/use-warranties";
 import { useToast } from "@/src/hooks/use-toast";
@@ -35,24 +33,18 @@ export function ActivateWarrantyDialog({
 }: ActivateWarrantyDialogProps) {
   const t = useTranslations("Warranties");
   const toast = useToast();
-  const activateWarranty = useActivateWarranty(warranty?.productId ?? null);
+  const activateWarranty = useActivateWarranty(warranty?.id ?? null);
   const [startDate, setStartDate] = useState("");
-  const [durationMonths, setDurationMonths] = useState("");
-  const [terms, setTerms] = useState("");
 
   async function confirm() {
     if (!warranty) return;
 
     try {
       await activateWarranty.mutateAsync({
-        durationMonths: toOptionalNumber(durationMonths),
         startDate: toOptionalValue(startDate),
-        terms: toOptionalValue(terms),
       });
       toast.success(t("activated"));
       setStartDate("");
-      setDurationMonths("");
-      setTerms("");
       onActivated?.();
       onOpenChange(false);
     } catch (error) {
@@ -76,7 +68,7 @@ export function ActivateWarrantyDialog({
           })}
         </DialogDescription>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+        <div className="mt-5 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="activate-warranty-start-date">
               {t("startDate")}
@@ -89,29 +81,25 @@ export function ActivateWarrantyDialog({
               value={startDate}
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="activate-warranty-duration">
-              {t("durationMonths")}
-            </Label>
-            <Input
-              id="activate-warranty-duration"
-              max={120}
-              min={1}
-              onChange={(event) => setDurationMonths(event.target.value)}
-              placeholder="12"
-              type="number"
-              value={durationMonths}
-            />
-          </div>
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="activate-warranty-terms">{t("terms")}</Label>
-            <Textarea
-              id="activate-warranty-terms"
-              maxLength={2000}
-              onChange={(event) => setTerms(event.target.value)}
-              placeholder={t("termsPlaceholder")}
-              value={terms}
-            />
+          <div className="grid gap-3 rounded-md border border-slate-200 bg-slate-50 p-4 text-sm dark:border-slate-800 dark:bg-slate-900/40 sm:grid-cols-2">
+            <div>
+              <p className="text-slate-500 dark:text-slate-400">
+                {t("durationMonths")}
+              </p>
+              <p className="mt-1 font-medium">
+                {warranty
+                  ? t("durationValue", { count: warranty.durationMonths })
+                  : "-"}
+              </p>
+            </div>
+            <div>
+              <p className="text-slate-500 dark:text-slate-400">{t("terms")}</p>
+              <p className="mt-1 line-clamp-2 font-medium">
+                {warranty?.terms
+                  ? t("termsConfigured")
+                  : t("termsNotConfigured")}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -134,9 +122,4 @@ export function ActivateWarrantyDialog({
       </DialogContent>
     </Dialog>
   );
-}
-
-function toOptionalNumber(value: string) {
-  const trimmed = value.trim();
-  return trimmed ? Number(trimmed) : undefined;
 }

@@ -1,4 +1,6 @@
 import { PrismaModule } from '@/database/prisma/prisma.module';
+import { CustomersModule } from '@/modules/customers/customers.module';
+import { ProductsModule } from '@/modules/products/products.module';
 import { WarrantiesRepository } from '@/modules/warranties/repository/warranties.repository';
 import { ActivateWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/activate-warranty-by-code.use-case';
 import { ActivateWarrantyUseCase } from '@/modules/warranties/use-cases/activate-warranty.use-case';
@@ -13,6 +15,9 @@ import { ManualWarrantyActivationUseCase } from '@/modules/warranties/use-cases/
 import { DownloadWarrantyImportTemplateUseCase } from '@/modules/warranties/use-cases/download-warranty-import-template.use-case';
 import { ExportWarrantiesUseCase } from '@/modules/warranties/use-cases/export-warranties.use-case';
 import { PreviewWarrantyImportUseCase } from '@/modules/warranties/use-cases/preview-warranty-import.use-case';
+import { UpdateWarrantyUseCase } from '@/modules/warranties/use-cases/update-warranty.use-case';
+import { VoidWarrantyUseCase } from '@/modules/warranties/use-cases/void-warranty.use-case';
+import { WarrantyLifecycleService } from '@/modules/warranties/services/warranty-lifecycle.service';
 import { WarrantiesController } from '@/modules/warranties/warranties.controller';
 import { Module } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
@@ -21,6 +26,8 @@ import { memoryStorage } from 'multer';
 @Module({
   imports: [
     PrismaModule,
+    CustomersModule,
+    ProductsModule,
     MulterModule.register({
       storage: memoryStorage(),
     }),
@@ -28,6 +35,7 @@ import { memoryStorage } from 'multer';
   controllers: [WarrantiesController],
   providers: [
     WarrantiesRepository,
+    WarrantyLifecycleService,
     ActivateWarrantyUseCase,
     ActivateWarrantyByCodeUseCase,
     GetWarrantyDetailUseCase,
@@ -41,11 +49,14 @@ import { memoryStorage } from 'multer';
     DownloadWarrantyImportTemplateUseCase,
     ExportWarrantiesUseCase,
     PreviewWarrantyImportUseCase,
+    UpdateWarrantyUseCase,
+    VoidWarrantyUseCase,
   ],
   exports: [
     ActivateWarrantyByCodeUseCase,
     LookupWarrantyByCodeUseCase,
     WarrantiesRepository,
+    WarrantyLifecycleService,
   ],
 })
 export class WarrantiesModule {}

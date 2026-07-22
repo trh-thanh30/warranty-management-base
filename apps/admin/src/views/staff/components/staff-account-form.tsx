@@ -1,11 +1,11 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { Controller } from "react-hook-form";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { UserAccountSummary } from "@repo/shared";
 import { Button, Input, Label, Switch } from "@repo/ui";
+import { FormField as Field } from "@/src/components/common/form-field";
 import { useStaffAccountForm } from "../hooks/use-staff-account-form";
 
 type StaffAccountFormProps = {
@@ -144,27 +144,5 @@ export function StaffAccountForm({
         </Button>
       </div>
     </form>
-  );
-}
-
-function Field({
-  children,
-  error,
-  id,
-  label,
-}: {
-  children: ReactNode;
-  error?: string;
-  id: string;
-  label: string;
-}) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      {children}
-      {error ? (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      ) : null}
-    </div>
   );
 }

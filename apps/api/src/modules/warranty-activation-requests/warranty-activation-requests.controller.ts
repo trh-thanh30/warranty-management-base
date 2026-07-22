@@ -3,9 +3,11 @@ import { Public } from '@/common/decorators/public.decorator';
 import { User } from '@/common/decorators/user.decorator';
 import { createDatedExcelFilename, sendExcelFile } from '@/common/excel';
 import { CreateWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-warranty-activation-request.dto';
+import { CreateAdminWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-admin-warranty-activation-request.dto';
 import { ListWarrantyActivationRequestsDto } from '@/modules/warranty-activation-requests/dto/list-warranty-activation-requests.dto';
 import { ReviewWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/review-warranty-activation-request.dto';
 import { CreateWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-warranty-activation-request.use-case';
+import { CreateAdminWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-admin-warranty-activation-request.use-case';
 import { ExportWarrantyActivationRequestsUseCase } from '@/modules/warranty-activation-requests/use-cases/export-warranty-activation-requests.use-case';
 import { GetWarrantyActivationRequestDetailUseCase } from '@/modules/warranty-activation-requests/use-cases/get-warranty-activation-request-detail.use-case';
 import { ListWarrantyActivationRequestsUseCase } from '@/modules/warranty-activation-requests/use-cases/list-warranty-activation-requests.use-case';
@@ -30,12 +32,19 @@ type RequestUser = {
 @Controller('warranty-activation-requests')
 export class WarrantyActivationRequestsController {
   constructor(
+    private readonly createAdminWarrantyActivationRequestUseCase: CreateAdminWarrantyActivationRequestUseCase,
     private readonly createWarrantyActivationRequestUseCase: CreateWarrantyActivationRequestUseCase,
     private readonly exportWarrantyActivationRequestsUseCase: ExportWarrantyActivationRequestsUseCase,
     private readonly listWarrantyActivationRequestsUseCase: ListWarrantyActivationRequestsUseCase,
     private readonly getWarrantyActivationRequestDetailUseCase: GetWarrantyActivationRequestDetailUseCase,
     private readonly reviewWarrantyActivationRequestUseCase: ReviewWarrantyActivationRequestUseCase,
   ) {}
+
+  @Post('admin')
+  @Permissions([permission_key.WARRANTY_CREATE])
+  createAdmin(@Body() dto: CreateAdminWarrantyActivationRequestDto) {
+    return this.createAdminWarrantyActivationRequestUseCase.execute(dto);
+  }
 
   @Post()
   @Public()

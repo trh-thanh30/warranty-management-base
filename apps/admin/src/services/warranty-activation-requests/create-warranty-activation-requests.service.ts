@@ -1,4 +1,5 @@
 import type {
+  CreateAdminWarrantyActivationRequestBody,
   CreateWarrantyActivationRequestBody,
   ListWarrantyActivationRequestsQuery,
   PaginatedResponse,
@@ -49,6 +50,17 @@ export function createWarrantyActivationRequestsService(
       return unwrap(
         await http.post<WarrantyActivationRequestSummary>(
           "/warranty-activation-requests",
+          body,
+        ),
+      );
+    },
+
+    async createAdminWarrantyActivationRequest(
+      body: CreateAdminWarrantyActivationRequestBody,
+    ): Promise<WarrantyActivationRequestSummary> {
+      return unwrap(
+        await http.post<WarrantyActivationRequestSummary>(
+          "/warranty-activation-requests/admin",
           body,
         ),
       );

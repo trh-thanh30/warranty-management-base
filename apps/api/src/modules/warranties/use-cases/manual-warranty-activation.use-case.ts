@@ -4,7 +4,11 @@ import {
   NotFoundError,
 } from '@/common/response';
 import { PrismaService } from '@/database/prisma/prisma.service';
+import { GenerateCustomerCodeUseCase } from '@/modules/customers/use-cases/generate-customer-code.use-case';
+import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generate-product-code.use-case';
+import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { ManualWarrantyActivationDto } from '@/modules/warranties/dto/manual-warranty-activation.dto';
+import { WarrantyLifecycleService } from '@/modules/warranties/services/warranty-lifecycle.service';
 import { toWarrantyResponse } from '@/modules/warranties/warranties.types';
 import { Injectable } from '@nestjs/common';
 import {
@@ -14,11 +18,32 @@ import {
   warranty_status,
 } from '@prisma/client';
 
+const manualActivationProductInclude = {
+  ownerships: {
+    include: { customer: true },
+    orderBy: { created_at: 'desc' },
+  },
+  warranty: true,
+} satisfies Prisma.ProductInclude;
+
+type ManualActivationProduct = Prisma.ProductGetPayload<{
+  include: typeof manualActivationProductInclude;
+}>;
+
 @Injectable()
 export class ManualWarrantyActivationUseCase {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly warrantyLifecycleService: WarrantyLifecycleService,
+    private readonly generateCustomerCodeUseCase: GenerateCustomerCodeUseCase,
+    private readonly generateProductCodeUseCase: GenerateProductCodeUseCase,
+    private readonly generateWarrantyCodeUseCase: GenerateWarrantyCodeUseCase,
+  ) {}
 
-  async execute(dto: ManualWarrantyActivationDto) {
+  async execute(
+    dto: ManualWarrantyActivationDto,
+    context: { activatedByUserId?: string } = {},
+  ) {
     const email = dto.customer.email.trim().toLowerCase();
     const phone = dto.customer.phone.trim();
     const requestedWarrantyCode = dto.warranty.warrantyCode
@@ -61,13 +86,22 @@ export class ManualWarrantyActivationUseCase {
         const warrantyCode =
           requestedWarrantyCode ??
           existingProduct?.warranty_code ??
-          (await this.generateWarrantyCode(tx));
+          (await this.generateWarrantyCodeUseCase.execute(new Date(), tx));
 
         await this.ensureProductInputsAvailable(tx, dto, warrantyCode);
+
+        let productWithRelations: ManualActivationProduct;
 
         if (existingProduct) {
           if (!existingProduct.warranty) {
             throw new NotFoundError('Warranty not found');
+          }
+          if (existingProduct.warranty.status !== warranty_status.DRAFT) {
+            throw new BadRequestError(
+              'Warranty is not eligible for activation',
+              'BAD_REQUEST',
+              { code: 'WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION' },
+            );
           }
 
           await tx.productOwnership.updateMany({
@@ -78,7 +112,7 @@ export class ManualWarrantyActivationUseCase {
             data: { ended_at: activatedAt, is_current_owner: false },
           });
 
-          return tx.product.update({
+          productWithRelations = await tx.product.update({
             where: { id: existingProduct.id },
             data: {
               warranty_code: warrantyCode,
@@ -98,20 +132,14 @@ export class ManualWarrantyActivationUseCase {
                     ? { connect: { id: customer.user_id } }
                     : undefined,
                   purchase_date: purchaseDate,
-                  activated_at: activatedAt,
+                  activated_at: null,
                   is_current_owner: true,
                 },
               },
               warranty: {
                 update: {
                   warranty_code: warrantyCode,
-                  start_date: activatedAt,
-                  end_date: this.addMonths(
-                    activatedAt,
-                    dto.warranty.durationMonths,
-                  ),
                   duration_months: dto.warranty.durationMonths,
-                  status: warranty_status.ACTIVE,
                   terms: optionalText(dto.warranty.terms),
                   metadata: {
                     source: 'manual_warranty_activation',
@@ -120,71 +148,70 @@ export class ManualWarrantyActivationUseCase {
                 },
               },
             },
-            include: {
+            include: manualActivationProductInclude,
+          });
+        } else {
+          const productCode = await this.generateProductCodeUseCase.execute(
+            new Date(),
+            tx,
+          );
+
+          productWithRelations = await tx.product.create({
+            data: {
+              product_code: productCode,
+              warranty_code: warrantyCode,
+              serial_number: optionalText(dto.product.serialNumber),
+              name: dto.product.name.trim(),
+              category: dto.product.category,
+              category_id: optionalText(dto.product.categoryId),
+              brand: optionalText(dto.product.brand),
+              model: optionalText(dto.product.model),
+              manufacture_year: dto.product.manufactureYear,
+              description: optionalText(dto.product.description),
+              status: product_status.ACTIVE,
+              metadata: {
+                source: 'manual_warranty_activation',
+              } satisfies Prisma.InputJsonObject,
               ownerships: {
-                include: { customer: true },
-                orderBy: { created_at: 'desc' },
+                create: {
+                  customer: { connect: { id: customer.id } },
+                  owner_user: customer.user_id
+                    ? { connect: { id: customer.user_id } }
+                    : undefined,
+                  purchase_date: purchaseDate,
+                  activated_at: null,
+                  is_current_owner: true,
+                },
               },
-              warranty: true,
+              warranty: {
+                create: {
+                  warranty_code: warrantyCode,
+                  duration_months: dto.warranty.durationMonths,
+                  status: warranty_status.DRAFT,
+                  terms: optionalText(dto.warranty.terms),
+                  metadata: {
+                    source: 'manual_warranty_activation',
+                    certificateEmailStatus: 'PENDING_TEMPLATE',
+                  } satisfies Prisma.InputJsonObject,
+                },
+              },
             },
+            include: manualActivationProductInclude,
           });
         }
 
-        const productCode = await this.generateProductCode(tx);
+        if (!productWithRelations.warranty) {
+          throw new NotFoundError('Warranty not found');
+        }
 
-        return tx.product.create({
-          data: {
-            product_code: productCode,
-            warranty_code: warrantyCode,
-            serial_number: optionalText(dto.product.serialNumber),
-            name: dto.product.name.trim(),
-            category: dto.product.category,
-            category_id: optionalText(dto.product.categoryId),
-            brand: optionalText(dto.product.brand),
-            model: optionalText(dto.product.model),
-            manufacture_year: dto.product.manufactureYear,
-            description: optionalText(dto.product.description),
-            status: product_status.ACTIVE,
-            metadata: {
-              source: 'manual_warranty_activation',
-            } satisfies Prisma.InputJsonObject,
-            ownerships: {
-              create: {
-                customer: { connect: { id: customer.id } },
-                owner_user: customer.user_id
-                  ? { connect: { id: customer.user_id } }
-                  : undefined,
-                purchase_date: purchaseDate,
-                activated_at: activatedAt,
-                is_current_owner: true,
-              },
-            },
-            warranty: {
-              create: {
-                warranty_code: warrantyCode,
-                start_date: activatedAt,
-                end_date: this.addMonths(
-                  activatedAt,
-                  dto.warranty.durationMonths,
-                ),
-                duration_months: dto.warranty.durationMonths,
-                status: warranty_status.ACTIVE,
-                terms: optionalText(dto.warranty.terms),
-                metadata: {
-                  source: 'manual_warranty_activation',
-                  certificateEmailStatus: 'PENDING_TEMPLATE',
-                } satisfies Prisma.InputJsonObject,
-              },
-            },
-          },
-          include: {
-            ownerships: {
-              include: { customer: true },
-              orderBy: { created_at: 'desc' },
-            },
-            warranty: true,
-          },
-        });
+        const activatedWarranty =
+          await this.warrantyLifecycleService.activateDraftWarranty(tx, {
+            activatedByUserId: context.activatedByUserId,
+            startDate: activatedAt,
+            warrantyId: productWithRelations.warranty.id,
+          });
+
+        return { ...productWithRelations, warranty: activatedWarranty };
       },
     );
 
@@ -306,75 +333,13 @@ export class ManualWarrantyActivationUseCase {
 
     return tx.customer.create({
       data: {
-        customer_code: await this.generateCustomerCode(tx),
+        customer_code: await this.generateCustomerCodeUseCase.execute(tx),
         full_name: input.fullName,
         phone: input.phone,
         email: input.email,
         address: input.address,
       },
     });
-  }
-
-  private async generateCustomerCode(tx: Prisma.TransactionClient) {
-    const prefix = 'CUS';
-    const padLength = 6;
-    const lastCustomer = await tx.customer.findFirst({
-      where: { customer_code: { startsWith: prefix } },
-      orderBy: { customer_code: 'desc' },
-      select: { customer_code: true },
-    });
-    const nextNumber = this.getNextNumber(
-      lastCustomer?.customer_code,
-      prefix,
-      padLength,
-    );
-    return `${prefix}${nextNumber.toString().padStart(padLength, '0')}`;
-  }
-
-  private async generateProductCode(tx: Prisma.TransactionClient) {
-    const year = new Date().getFullYear();
-
-    for (let attempt = 0; attempt < 5; attempt += 1) {
-      const suffix = Math.random().toString(36).slice(2, 8).toUpperCase();
-      const code = `PRD-${year}-${suffix}`;
-      const existing = await tx.product.findUnique({
-        where: { product_code: code },
-      });
-      if (!existing) return code;
-    }
-
-    throw new BadRequestError('Could not generate a unique product code');
-  }
-
-  private async generateWarrantyCode(tx?: Prisma.TransactionClient) {
-    const year = new Date().getFullYear();
-    const client = tx ?? this.prismaService;
-
-    for (let attempt = 0; attempt < 5; attempt += 1) {
-      const suffix = Math.random().toString(36).slice(2, 8).toUpperCase();
-      const code = `WM-${year}-${suffix}`;
-      const existing = await client.product.findUnique({
-        where: { warranty_code: code },
-      });
-      if (!existing) return code;
-    }
-
-    throw new BadRequestError('Could not generate a unique warranty code');
-  }
-
-  private getNextNumber(code: string | undefined, prefix: string, pad: number) {
-    if (!code) return 1;
-
-    const match = code.match(new RegExp(`^${prefix}(\\d{${pad},})$`));
-    if (!match) return 1;
-
-    return Number.parseInt(match[1], 10) + 1;
-  }
-
-  private addMonths(date: Date, months: number) {
-    const nextDate = new Date(date);
-    nextDate.setMonth(nextDate.getMonth() + months);
-    return nextDate;
   }
 }
 

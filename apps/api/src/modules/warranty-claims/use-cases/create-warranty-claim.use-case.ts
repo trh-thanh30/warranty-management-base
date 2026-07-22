@@ -36,8 +36,41 @@ export class CreateWarrantyClaimUseCase {
       throw new NotFoundError('Warranty not found');
     }
 
-    if (product.warranty.status === warranty_status.VOIDED) {
-      throw new BadRequestError('Warranty is voided');
+    if (product.warranty.status !== warranty_status.ACTIVE) {
+      const errorByStatus = {
+        [warranty_status.DRAFT]: {
+          code: 'WARRANTY_NOT_ACTIVE',
+          message: 'Warranty is not active',
+        },
+        [warranty_status.EXPIRED]: {
+          code: 'WARRANTY_EXPIRED',
+          message: 'Warranty is expired',
+        },
+        [warranty_status.VOIDED]: {
+          code: 'WARRANTY_VOIDED',
+          message: 'Warranty is voided',
+        },
+      } as const;
+      const error = errorByStatus[product.warranty.status];
+      throw new BadRequestError(error.message, 'BAD_REQUEST', {
+        code: error.code,
+      });
+    }
+
+    const hasNotStarted =
+      product.warranty.start_date &&
+      product.warranty.start_date.getTime() > Date.now();
+    const hasExpired =
+      product.warranty.end_date &&
+      product.warranty.end_date.getTime() < Date.now();
+    if (hasNotStarted || hasExpired) {
+      throw new BadRequestError(
+        hasNotStarted ? 'Warranty is not active yet' : 'Warranty is expired',
+        'BAD_REQUEST',
+        {
+          code: hasNotStarted ? 'WARRANTY_NOT_STARTED' : 'WARRANTY_EXPIRED',
+        },
+      );
     }
 
     const currentOwnership = product.ownerships[0];

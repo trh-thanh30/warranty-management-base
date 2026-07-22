@@ -1,8 +1,10 @@
 import { ExcelCellValue, ExcelColumnDefinition } from '@/common/excel';
 import { CategoryExcelRow } from '@/modules/categories/excel/category-excel.types';
 import { category_type } from '@prisma/client';
+import type { CategoryType } from '@repo/shared';
+import { CATEGORY_TYPES } from '@repo/shared/constants';
 
-const CATEGORY_TYPE_LABELS: Record<category_type, string> = {
+const CATEGORY_TYPE_LABELS: Record<CategoryType, string> = {
   PRODUCT: 'Sản phẩm',
   CONTENT_PAGE: 'Trang nội dung',
   ASSET: 'Tài sản',
@@ -20,7 +22,7 @@ export const categoryExcelColumns: Array<
     example: 'Sản phẩm',
     note: 'Sản phẩm, Trang nội dung, Tài sản hoặc Nhóm lỗi bảo hành.',
     parse: parseCategoryType,
-    format: (value) => CATEGORY_TYPE_LABELS[value as category_type],
+    format: getCategoryTypeLabel,
   },
   {
     key: 'code',
@@ -107,13 +109,14 @@ export const categoryExcelColumns: Array<
 
 function parseCategoryType(value: ExcelCellValue) {
   const normalized = String(value).trim().toLowerCase();
-  const match = Object.entries(CATEGORY_TYPE_LABELS).find(
-    ([key, label]) =>
-      key.toLowerCase() === normalized || label.toLowerCase() === normalized,
+  const match = CATEGORY_TYPES.find(
+    (type) =>
+      type.toLowerCase() === normalized ||
+      CATEGORY_TYPE_LABELS[type].toLowerCase() === normalized,
   );
 
   if (!match) throw new Error('Loại danh mục không hợp lệ');
-  return match[0] as category_type;
+  return match;
 }
 
 function parseCode(value: ExcelCellValue) {
@@ -161,10 +164,10 @@ function parseMetadata(value: ExcelCellValue) {
   if (!parsed) return null;
   try {
     const metadata: unknown = JSON.parse(parsed);
-    if (!metadata || Array.isArray(metadata) || typeof metadata !== 'object') {
+    if (!isRecord(metadata)) {
       throw new Error();
     }
-    return metadata as Record<string, unknown>;
+    return metadata;
   } catch {
     throw new Error('Dữ liệu mở rộng phải là JSON object hợp lệ');
   }
@@ -186,4 +189,8 @@ function parseOptionalString(value: ExcelCellValue, maxLength?: number) {
 
 export function getCategoryTypeLabel(type: category_type) {
   return CATEGORY_TYPE_LABELS[type];
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && !Array.isArray(value) && typeof value === 'object';
 }

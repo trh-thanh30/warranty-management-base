@@ -7,6 +7,7 @@ import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { ActivateWarrantyDialog } from "./components/activate-warranty-dialog";
 import { WarrantiesDirectoryCard } from "./components/warranties-directory-card";
+import { VoidWarrantyDialog } from "./components/void-warranty-dialog";
 import { useWarrantiesDirectory } from "./hooks/use-warranties-directory";
 
 export function WarrantiesView() {
@@ -14,9 +15,11 @@ export function WarrantiesView() {
   const {
     clearFilters,
     closeActivate,
+    closeVoid,
     exportWarranties,
     filters,
     openActivate,
+    openVoid,
     pageSize,
     search,
     setPage,
@@ -28,6 +31,7 @@ export function WarrantiesView() {
     updateStatus,
     warrantiesQuery,
     warrantyToActivate,
+    warrantyToVoid,
   } = useWarrantiesDirectory();
 
   return (
@@ -56,6 +60,7 @@ export function WarrantiesView() {
           isError={warrantiesQuery.isError}
           isLoading={warrantiesQuery.isLoading}
           onActivate={openActivate}
+          onVoid={openVoid}
           onClearFilters={clearFilters}
           onPageChange={setPage}
           onPageSizeChange={setPageSize}
@@ -80,6 +85,17 @@ export function WarrantiesView() {
           }}
           open={Boolean(warrantyToActivate)}
           warranty={warrantyToActivate}
+        />
+
+        <VoidWarrantyDialog
+          onOpenChange={(open) => {
+            if (!open) closeVoid();
+          }}
+          onVoided={() => {
+            void warrantiesQuery.refetch();
+          }}
+          open={Boolean(warrantyToVoid)}
+          warranty={warrantyToVoid}
         />
       </div>
     </PermissionGuard>

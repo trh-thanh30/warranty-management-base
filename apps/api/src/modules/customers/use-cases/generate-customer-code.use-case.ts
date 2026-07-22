@@ -1,10 +1,14 @@
 import { CustomersRepository } from '@/modules/customers/repository/customers.repository';
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 
 export interface IGenerateCustomerCodeUseCase {
-  generateCustomerCodeBatch(count: number): Promise<string[]>;
-  generateCustomerCode(): Promise<string>;
-  execute(): Promise<string>;
+  generateCustomerCodeBatch(
+    count: number,
+    tx?: Prisma.TransactionClient,
+  ): Promise<string[]>;
+  generateCustomerCode(tx?: Prisma.TransactionClient): Promise<string>;
+  execute(tx?: Prisma.TransactionClient): Promise<string>;
 }
 
 @Injectable()
@@ -14,9 +18,13 @@ export class GenerateCustomerCodeUseCase implements IGenerateCustomerCodeUseCase
 
   constructor(private readonly customersRepository: CustomersRepository) {}
 
-  async generateCustomerCodeBatch(count: number): Promise<string[]> {
-    const lastCustomerCode =
-      await this.customersRepository.findLastCustomerCode(this.prefix);
+  async generateCustomerCodeBatch(
+    count: number,
+    tx?: Prisma.TransactionClient,
+  ): Promise<string[]> {
+    const lastCustomerCode = tx
+      ? await this.customersRepository.findLastCustomerCode(this.prefix, tx)
+      : await this.customersRepository.findLastCustomerCode(this.prefix);
     const startNumber = this.getNextNumber(lastCustomerCode?.customer_code);
 
     const codes: string[] = [];
@@ -31,13 +39,13 @@ export class GenerateCustomerCodeUseCase implements IGenerateCustomerCodeUseCase
     return codes;
   }
 
-  async generateCustomerCode(): Promise<string> {
-    const codes = await this.generateCustomerCodeBatch(1);
+  async generateCustomerCode(tx?: Prisma.TransactionClient): Promise<string> {
+    const codes = await this.generateCustomerCodeBatch(1, tx);
     return codes[0];
   }
 
-  async execute(): Promise<string> {
-    return this.generateCustomerCode();
+  async execute(tx?: Prisma.TransactionClient): Promise<string> {
+    return this.generateCustomerCode(tx);
   }
 
   private getNextNumber(lastCustomerCode?: string) {

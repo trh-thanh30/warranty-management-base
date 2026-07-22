@@ -81,6 +81,11 @@ export function toProductResponse(
           startDate: product.warranty.start_date,
           endDate: product.warranty.end_date,
           durationMonths: product.warranty.duration_months,
+          coverageLimitAmount:
+            product.warranty.coverage_limit_amount?.toString() ?? null,
+          maxClaimCount: product.warranty.max_claim_count,
+          maxAmountPerClaim:
+            product.warranty.max_amount_per_claim?.toString() ?? null,
           status: product.warranty.status,
           terms: product.warranty.terms,
         }

@@ -1,4 +1,5 @@
 import type { PaginationQuery } from "./pagination.types.ts";
+import type { WarrantyStatus } from "./warranty.types.ts";
 
 export type WarrantyActivationRequestStatus =
   | "PENDING"
@@ -41,8 +42,22 @@ export type WarrantyActivationRequestSummary = {
   adminNote: string | null;
   rejectionReason: string | null;
   reviewedById: string | null;
+  reviewedBy: {
+    id: string;
+    displayName: string;
+    email: string;
+    username: string;
+  } | null;
   reviewedAt: string | null;
   activatedWarrantyId: string | null;
+  activatedWarranty: {
+    id: string;
+    warrantyCode: string;
+    status: WarrantyStatus;
+    startDate: string | null;
+    endDate: string | null;
+    durationMonths: number;
+  } | null;
   metadata: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
@@ -65,6 +80,13 @@ export type CreateWarrantyActivationRequestBody = {
   model?: string;
   manufactureYear?: number;
   note?: string;
+};
+
+export type CreateAdminWarrantyActivationRequestBody = Omit<
+  CreateWarrantyActivationRequestBody,
+  "warrantyCode"
+> & {
+  productId: string;
 };
 
 export type ListWarrantyActivationRequestsQuery = PaginationQuery & {

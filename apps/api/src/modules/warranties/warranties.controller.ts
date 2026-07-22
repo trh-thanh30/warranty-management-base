@@ -6,6 +6,8 @@ import { ActivateWarrantyDto } from '@/modules/warranties/dto/activate-warranty.
 import { ListWarrantiesDto } from '@/modules/warranties/dto/list-warranties.dto';
 import { LookupWarrantyDto } from '@/modules/warranties/dto/lookup-warranty.dto';
 import { ManualWarrantyActivationDto } from '@/modules/warranties/dto/manual-warranty-activation.dto';
+import { UpdateWarrantyDto } from '@/modules/warranties/dto/update-warranty.dto';
+import { VoidWarrantyDto } from '@/modules/warranties/dto/void-warranty.dto';
 import { ActivateWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/activate-warranty-by-code.use-case';
 import { ActivateWarrantyUseCase } from '@/modules/warranties/use-cases/activate-warranty.use-case';
 import { GetMyProductWarrantyUseCase } from '@/modules/warranties/use-cases/get-my-product-warranty.use-case';
@@ -19,11 +21,14 @@ import { ManualWarrantyActivationUseCase } from '@/modules/warranties/use-cases/
 import { DownloadWarrantyImportTemplateUseCase } from '@/modules/warranties/use-cases/download-warranty-import-template.use-case';
 import { ExportWarrantiesUseCase } from '@/modules/warranties/use-cases/export-warranties.use-case';
 import { PreviewWarrantyImportUseCase } from '@/modules/warranties/use-cases/preview-warranty-import.use-case';
+import { UpdateWarrantyUseCase } from '@/modules/warranties/use-cases/update-warranty.use-case';
+import { VoidWarrantyUseCase } from '@/modules/warranties/use-cases/void-warranty.use-case';
 import {
   Body,
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   Res,
@@ -54,6 +59,8 @@ export class WarrantiesController {
     private readonly downloadWarrantyImportTemplateUseCase: DownloadWarrantyImportTemplateUseCase,
     private readonly exportWarrantiesUseCase: ExportWarrantiesUseCase,
     private readonly previewWarrantyImportUseCase: PreviewWarrantyImportUseCase,
+    private readonly updateWarrantyUseCase: UpdateWarrantyUseCase,
+    private readonly voidWarrantyUseCase: VoidWarrantyUseCase,
   ) {}
 
   @Get('warranties')
@@ -98,16 +105,62 @@ export class WarrantiesController {
     return this.getWarrantyDetailUseCase.execute(id);
   }
 
+  @Patch('warranties/:id')
+  @Permissions([permission_key.WARRANTY_UPDATE])
+  updateWarranty(
+    @Param('id') id: string,
+    @Body() dto: UpdateWarrantyDto,
+    @User() user: RequestUser,
+  ) {
+    return this.updateWarrantyUseCase.execute(id, dto, {
+      adjustedByUserId: user.id,
+    });
+  }
+
   @Post('warranties/activate-by-code')
   @Permissions([permission_key.WARRANTY_ACTIVATE])
-  activateWarrantyByCode(@Body() dto: ActivateWarrantyByCodeDto) {
-    return this.activateWarrantyByCodeUseCase.execute(dto);
+  activateWarrantyByCode(
+    @Body() dto: ActivateWarrantyByCodeDto,
+    @User() user: RequestUser,
+  ) {
+    return this.activateWarrantyByCodeUseCase.execute(dto, {
+      activatedByUserId: user.id,
+    });
+  }
+
+  @Post('warranties/:id/activate')
+  @Permissions([permission_key.WARRANTY_ACTIVATE])
+  activateWarrantyById(
+    @Param('id') warrantyId: string,
+    @Body() dto: ActivateWarrantyDto,
+    @User() user: RequestUser,
+  ) {
+    return this.activateWarrantyUseCase.execute(warrantyId, dto, {
+      activatedByUserId: user.id,
+    });
+  }
+
+  @Post('warranties/:id/void')
+  @Permissions([permission_key.WARRANTY_VOID])
+  voidWarranty(
+    @Param('id') warrantyId: string,
+    @Body() dto: VoidWarrantyDto,
+    @User() user: RequestUser,
+  ) {
+    return this.voidWarrantyUseCase.execute(warrantyId, dto, {
+      voidedByUserId: user.id,
+    });
   }
 
   @Post('warranties/manual-activation')
   @Permissions([permission_key.WARRANTY_ACTIVATE])
-  manualActivation(@Body() dto: ManualWarrantyActivationDto) {
-    return this.manualWarrantyActivationUseCase.execute(dto);
+  manualActivation(
+    @Body() dto: ManualWarrantyActivationDto,
+    @User() user: RequestUser,
+  ) {
+    return this.manualWarrantyActivationUseCase.execute(dto, {
+      activatedByUserId: user.id,
+    });
   }
 
   @Post('products/:id/activate-warranty')
@@ -115,8 +168,15 @@ export class WarrantiesController {
   activateWarranty(
     @Param('id') productId: string,
     @Body() dto: ActivateWarrantyDto,
+    @User() user: RequestUser,
   ) {
-    return this.activateWarrantyUseCase.execute(productId, dto);
+    return this.getWarrantyByProductUseCase
+      .execute(productId)
+      .then((warranty) =>
+        this.activateWarrantyUseCase.execute(warranty.id, dto, {
+          activatedByUserId: user.id,
+        }),
+      );
   }
 
   @Get('products/:id/warranty')

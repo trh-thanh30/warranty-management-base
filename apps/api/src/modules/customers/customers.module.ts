@@ -25,6 +25,6 @@ import { Module } from '@nestjs/common';
     GetCustomerDetailUseCase,
     ImportCustomersUseCase,
   ],
-  exports: [CustomersRepository],
+  exports: [CustomersRepository, GenerateCustomerCodeUseCase],
 })
 export class CustomersModule {}

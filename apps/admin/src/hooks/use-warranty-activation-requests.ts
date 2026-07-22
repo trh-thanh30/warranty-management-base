@@ -8,6 +8,7 @@ import {
   type UseQueryOptions,
 } from "@tanstack/react-query";
 import type {
+  CreateAdminWarrantyActivationRequestBody,
   CreateWarrantyActivationRequestBody,
   ListWarrantyActivationRequestsQuery,
   PaginatedResponse,
@@ -70,6 +71,23 @@ export function useCreateWarrantyActivationRequest() {
         warrantyActivationRequestKeys.detail(request.id),
         request,
       );
+    },
+  });
+}
+
+export function useCreateAdminWarrantyActivationRequest() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: CreateAdminWarrantyActivationRequestBody) =>
+      warrantyActivationRequestsService.createAdminWarrantyActivationRequest(
+        body,
+      ),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: warrantyActivationRequestKeys.lists(),
+      });
+      void queryClient.invalidateQueries({ queryKey: ["products"] });
     },
   });
 }

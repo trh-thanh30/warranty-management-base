@@ -23,7 +23,13 @@ describe('ConfirmProductImportUseCase', () => {
       },
       $transaction: jest.fn((callback) => callback(tx)),
     };
-    const useCase = new ConfirmProductImportUseCase(prismaService as never);
+    const generateProductCodeUseCase = {
+      execute: jest.fn().mockResolvedValue('PRD-2026-ABCDEF'),
+    };
+    const useCase = new ConfirmProductImportUseCase(
+      prismaService as never,
+      generateProductCodeUseCase as never,
+    );
 
     const result = await useCase.execute({
       mode: 'upsert',
@@ -61,6 +67,10 @@ describe('ConfirmProductImportUseCase', () => {
           },
         }),
       }),
+    );
+    expect(generateProductCodeUseCase.execute).toHaveBeenCalledWith(
+      expect.any(Date),
+      tx,
     );
     expect(result).toEqual({
       created: 1,

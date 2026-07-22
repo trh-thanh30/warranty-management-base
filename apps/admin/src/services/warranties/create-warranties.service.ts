@@ -8,6 +8,8 @@ import type {
   WarrantyListItem,
   WarrantyLookupResult,
   WarrantySummary,
+  UpdateWarrantyBody,
+  VoidWarrantyBody,
 } from "@repo/shared";
 import { unwrap, unwrapBlob } from "../service.utils.ts";
 import type { WarrantiesHttpClient } from "./warranties.types";
@@ -46,6 +48,15 @@ export function createWarrantiesService(http: WarrantiesHttpClient) {
       );
     },
 
+    async updateWarranty(
+      warrantyId: string,
+      body: UpdateWarrantyBody,
+    ): Promise<WarrantyListItem> {
+      return unwrap(
+        await http.patch<WarrantyListItem>(`/warranties/${warrantyId}`, body),
+      );
+    },
+
     async activateWarrantyByCode(
       body: ActivateWarrantyByCodeBody,
     ): Promise<WarrantySummary> {
@@ -55,12 +66,24 @@ export function createWarrantiesService(http: WarrantiesHttpClient) {
     },
 
     async activateWarranty(
-      productId: string,
+      warrantyId: string,
       body: ActivateWarrantyBody,
     ): Promise<WarrantySummary> {
       return unwrap(
         await http.post<WarrantySummary>(
-          `/products/${productId}/activate-warranty`,
+          `/warranties/${warrantyId}/activate`,
+          body,
+        ),
+      );
+    },
+
+    async voidWarranty(
+      warrantyId: string,
+      body: VoidWarrantyBody,
+    ): Promise<WarrantySummary> {
+      return unwrap(
+        await http.post<WarrantySummary>(
+          `/warranties/${warrantyId}/void`,
           body,
         ),
       );

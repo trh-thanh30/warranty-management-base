@@ -1,6 +1,7 @@
 import { ExcelCellValue, ExcelColumnDefinition } from '@/common/excel';
 import { ProductExcelRow } from '@/modules/products/excel/product-excel.types';
-import { product_category, product_status } from '@prisma/client';
+import { product_status } from '@prisma/client';
+import { isProductCategory, PRODUCT_CATEGORIES } from '@repo/shared/constants';
 
 export const productExcelColumns: Array<
   ExcelColumnDefinition<ProductExcelRow>
@@ -34,8 +35,8 @@ export const productExcelColumns: Array<
     header: 'Danh mục legacy',
     required: true,
     width: 22,
-    example: product_category.SPARE_PART,
-    note: `Giá trị hợp lệ: ${Object.values(product_category).join(', ')}.`,
+    example: PRODUCT_CATEGORIES[2],
+    note: `Giá trị hợp lệ: ${PRODUCT_CATEGORIES.join(', ')}.`,
     parse: parseProductCategory,
   },
   {
@@ -155,24 +156,24 @@ function parseOptionalPositiveInteger(value: ExcelCellValue) {
 
 function parseProductCategory(value: ExcelCellValue) {
   const parsed = String(value).trim().toUpperCase();
-
-  if (!Object.values(product_category).includes(parsed as product_category)) {
-    throw new Error(
-      `Category must be one of ${Object.values(product_category).join(', ')}`,
-    );
+  if (!isProductCategory(parsed)) {
+    throw new Error(`Category must be one of ${PRODUCT_CATEGORIES.join(', ')}`);
   }
 
-  return parsed as product_category;
+  return parsed;
 }
 
 function parseProductStatus(value: ExcelCellValue) {
   const parsed = String(value).trim().toUpperCase();
+  const status = Object.values(product_status).find(
+    (value) => value === parsed,
+  );
 
-  if (!Object.values(product_status).includes(parsed as product_status)) {
+  if (!status) {
     throw new Error(
       `Status must be one of ${Object.values(product_status).join(', ')}`,
     );
   }
 
-  return parsed as product_status;
+  return status;
 }

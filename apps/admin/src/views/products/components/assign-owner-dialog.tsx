@@ -24,6 +24,7 @@ import {
   ComboboxList,
   ComboboxTrigger,
 } from "@/src/components/common/combobox";
+import { formatCustomerSearchOption } from "@/src/utils";
 import { useAssignProductOwnerWorkflow } from "../hooks/use-assign-product-owner";
 
 type AssignOwnerDialogProps = {
@@ -99,7 +100,7 @@ export function AssignOwnerDialog({
                   placeholder={t("customerSearchPlaceholder")}
                   selectedLabel={
                     selectedCustomer
-                      ? formatCustomerOption(selectedCustomer)
+                      ? formatCustomerSearchOption(selectedCustomer)
                       : undefined
                   }
                 />
@@ -112,7 +113,7 @@ export function AssignOwnerDialog({
                     <ComboboxEmpty>{t("noCustomerFound")}</ComboboxEmpty>
                     {customers.map((customer) => (
                       <ComboboxItem key={customer.id} value={customer.id}>
-                        {formatCustomerOption(customer)}
+                        {formatCustomerSearchOption(customer)}
                       </ComboboxItem>
                     ))}
                   </ComboboxList>
@@ -282,15 +283,4 @@ function DetailItem({ label, value }: { label: string; value: string }) {
       </dd>
     </div>
   );
-}
-
-function formatCustomerOption(customer: CustomerSummary) {
-  return [
-    customer.fullName,
-    customer.customerCode,
-    customer.phone,
-    customer.email,
-  ]
-    .filter(Boolean)
-    .join(" · ");
 }

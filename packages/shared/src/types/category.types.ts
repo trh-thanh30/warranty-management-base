@@ -1,10 +1,5 @@
 import type { PaginationQuery } from "./pagination.types.ts";
-
-export type CategoryType =
-  | "PRODUCT"
-  | "CONTENT_PAGE"
-  | "ASSET"
-  | "WARRANTY_CLAIM_ISSUE";
+import type { CategoryType } from "../constants/catalog.ts";
 
 export type CategorySortBy =
   | "name"

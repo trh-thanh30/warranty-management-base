@@ -1,6 +1,6 @@
 "use client";
 
-import { PackageSearch, ShieldCheck } from "lucide-react";
+import { Ban, PackageSearch, Pencil, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
@@ -10,7 +10,9 @@ import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { useWarrantyDetail } from "@/src/hooks/use-warranties";
+import { Link } from "@/src/i18n/navigation";
 import { ActivateWarrantyDialog } from "./components/activate-warranty-dialog";
+import { VoidWarrantyDialog } from "./components/void-warranty-dialog";
 import {
   WarrantyDetailCard,
   WarrantyDetailSkeleton,
@@ -25,11 +27,18 @@ export function WarrantyDetailView({ warrantyId }: WarrantyDetailViewProps) {
   const { hasPermission } = usePermissions();
   const warrantyQuery = useWarrantyDetail(warrantyId);
   const [activateOpen, setActivateOpen] = useState(false);
+  const [voidOpen, setVoidOpen] = useState(false);
   const warranty = warrantyQuery.data;
   const canActivate =
     hasPermission(PERMISSIONS.WARRANTY_ACTIVATE) &&
     warranty?.status === "DRAFT" &&
     Boolean(warranty.warrantyCode);
+  const canEdit =
+    hasPermission(PERMISSIONS.WARRANTY_UPDATE) &&
+    (warranty?.status === "DRAFT" || warranty?.status === "ACTIVE");
+  const canVoid =
+    hasPermission(PERMISSIONS.WARRANTY_VOID) &&
+    (warranty?.status === "DRAFT" || warranty?.status === "ACTIVE");
 
   return (
     <PermissionGuard permissions={[PERMISSIONS.WARRANTY_VIEW]}>
@@ -41,7 +50,15 @@ export function WarrantyDetailView({ warrantyId }: WarrantyDetailViewProps) {
         maxWidthClassName="max-w-5xl"
         title={t("detailTitle")}
       >
-        <div className="flex justify-end">
+        <div className="flex flex-wrap justify-end gap-2">
+          {canEdit ? (
+            <Button asChild variant="secondary">
+              <Link href={`/warranties/${warranty.id}/edit`}>
+                <Pencil className="size-4" />
+                {t("edit")}
+              </Link>
+            </Button>
+          ) : null}
           {canActivate ? (
             <Button
               onClick={() => setActivateOpen(true)}
@@ -50,6 +67,16 @@ export function WarrantyDetailView({ warrantyId }: WarrantyDetailViewProps) {
             >
               <ShieldCheck className="size-4" />
               {t("activate")}
+            </Button>
+          ) : null}
+          {canVoid ? (
+            <Button
+              onClick={() => setVoidOpen(true)}
+              type="button"
+              variant="destructive"
+            >
+              <Ban className="size-4" />
+              {t("void")}
             </Button>
           ) : null}
         </div>
@@ -82,6 +109,14 @@ export function WarrantyDetailView({ warrantyId }: WarrantyDetailViewProps) {
           }}
           onOpenChange={setActivateOpen}
           open={activateOpen}
+          warranty={warranty ?? null}
+        />
+        <VoidWarrantyDialog
+          onOpenChange={setVoidOpen}
+          onVoided={() => {
+            void warrantyQuery.refetch();
+          }}
+          open={voidOpen}
           warranty={warranty ?? null}
         />
       </FormPageShell>

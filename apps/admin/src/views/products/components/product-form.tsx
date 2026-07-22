@@ -8,7 +8,6 @@ import type { ProductResponse } from "@repo/shared";
 import {
   Button,
   Input,
-  Label,
   Select,
   SelectContent,
   SelectItem,
@@ -16,8 +15,10 @@ import {
   SelectValue,
   Textarea,
 } from "@repo/ui";
+import { FormField as Field } from "@/src/components/common/form-field";
 import { RichTextEditor } from "@/src/components/common/rich-text-editor";
 import { ImageUpload } from "@/src/components/common/image-upload";
+import { createFieldErrorFormatter } from "@/src/utils";
 import type { ProductImportRowData } from "@/src/services/products/products.types";
 import { PRODUCT_CATEGORIES } from "../products.constants";
 import { useProductForm } from "../hooks/use-product-form";
@@ -423,13 +424,8 @@ function NullableSelect({
 
 const SELECT_EMPTY_VALUE = "__empty__";
 
-function formatFieldError(
-  message: string | undefined,
-  t: (key: string) => string,
-) {
-  if (!message) return undefined;
-
-  const translationKeys = new Set([
+const formatFieldError = createFieldErrorFormatter(
+  new Set([
     "brandLength",
     "categoryNotFound",
     "customerNotFound",
@@ -450,29 +446,5 @@ function formatFieldError(
     "warrantyCodeInvalid",
     "warrantyCodeRequired",
     "warrantyTermsLength",
-  ]);
-
-  return translationKeys.has(message) ? t(message) : message;
-}
-
-function Field({
-  children,
-  error,
-  id,
-  label,
-}: {
-  children: ReactNode;
-  error?: string;
-  id: string;
-  label: string;
-}) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      {children}
-      {error ? (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      ) : null}
-    </div>
-  );
-}
+  ]),
+);

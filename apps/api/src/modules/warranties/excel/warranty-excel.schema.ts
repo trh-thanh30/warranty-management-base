@@ -78,6 +78,30 @@ export const warrantyExcelColumns: Array<
     parse: parsePositiveInteger,
   },
   {
+    key: 'coverageLimitAmount',
+    header: 'Tổng hạn mức bảo hành (VND)',
+    width: 24,
+    example: '50000000',
+    note: 'Để trống nếu không giới hạn; tối đa 2 chữ số thập phân.',
+    parse: parseOptionalDecimal,
+  },
+  {
+    key: 'maxClaimCount',
+    header: 'Số claim tối đa',
+    width: 18,
+    example: 3,
+    note: 'Để trống nếu không giới hạn.',
+    parse: parseOptionalPositiveInteger,
+  },
+  {
+    key: 'maxAmountPerClaim',
+    header: 'Hạn mức mỗi claim (VND)',
+    width: 24,
+    example: '10000000',
+    note: 'Không được lớn hơn tổng hạn mức bảo hành.',
+    parse: parseOptionalDecimal,
+  },
+  {
     key: 'status',
     header: 'Trạng thái',
     required: true,
@@ -135,6 +159,24 @@ function parsePositiveInteger(value: ExcelCellValue) {
 
   if (!Number.isInteger(parsed) || parsed <= 0) {
     throw new Error('Giá trị phải là số nguyên dương');
+  }
+
+  return parsed;
+}
+
+function parseOptionalPositiveInteger(value: ExcelCellValue) {
+  if (value === null || String(value).trim() === '') return null;
+  return parsePositiveInteger(value);
+}
+
+function parseOptionalDecimal(value: ExcelCellValue) {
+  if (value === null || String(value).trim() === '') return null;
+
+  const parsed = String(value).trim();
+  if (!/^\d+(\.\d{1,2})?$/.test(parsed)) {
+    throw new Error(
+      'Giá trị phải là số không âm với tối đa 2 chữ số thập phân',
+    );
   }
 
   return parsed;

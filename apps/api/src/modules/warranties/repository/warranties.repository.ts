@@ -4,6 +4,8 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, warranty_status } from '@prisma/client';
 
 const warrantyInclude = {
+  activated_by: true,
+  voided_by: true,
   product: {
     include: {
       ownerships: {
@@ -197,6 +199,14 @@ export class WarrantiesRepository {
           deleted_at: null,
         },
       },
+      include: warrantyInclude,
+    });
+  }
+
+  update(id: string, data: Prisma.WarrantyUpdateInput) {
+    return this.prismaService.warranty.update({
+      where: { id },
+      data,
       include: warrantyInclude,
     });
   }

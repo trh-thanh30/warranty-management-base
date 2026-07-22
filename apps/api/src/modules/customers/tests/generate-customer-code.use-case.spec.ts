@@ -22,6 +22,21 @@ describe('GenerateCustomerCodeUseCase', () => {
     );
   });
 
+  it('uses the supplied transaction client to read the last code', async () => {
+    const customersRepository = createCustomersRepository();
+    customersRepository.findLastCustomerCode.mockResolvedValue(null);
+    const tx = { customer: {} };
+    const useCase = new GenerateCustomerCodeUseCase(
+      customersRepository as never,
+    );
+
+    await expect(useCase.execute(tx as never)).resolves.toBe('CUS000001');
+    expect(customersRepository.findLastCustomerCode).toHaveBeenCalledWith(
+      'CUS',
+      tx,
+    );
+  });
+
   it('generates a sequential batch after the last customer code', async () => {
     const customersRepository = createCustomersRepository();
     customersRepository.findLastCustomerCode.mockResolvedValue({

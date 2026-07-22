@@ -183,4 +183,65 @@ describe('CreateWarrantyClaimUseCase', () => {
       }),
     ).rejects.toBeInstanceOf(BadRequestError);
   });
+
+  it.each([
+    ['DRAFT', undefined],
+    ['EXPIRED', undefined],
+    ['ACTIVE', new Date('2026-01-01T00:00:00.000Z')],
+  ])(
+    'rejects a %s warranty that is not currently eligible',
+    async (status, endDate) => {
+      warrantyClaimsRepository.findWarrantyProductByCode.mockResolvedValue({
+        id: 'product-id',
+        warranty_code: 'WM-2026-INELIGIBLE',
+        warranty: {
+          id: 'warranty-id',
+          status,
+          end_date: endDate,
+        },
+        ownerships: [],
+      });
+      const useCase = new CreateWarrantyClaimUseCase(
+        warrantyClaimsRepository as never,
+        generateWarrantyClaimCodeUseCase as never,
+      );
+
+      await expect(
+        useCase.execute({
+          warrantyCode: 'WM-2026-INELIGIBLE',
+          requesterName: 'Nguyen Van A',
+          requesterPhone: '0901234567',
+          issueTitle: 'May khong hoat dong',
+        }),
+      ).rejects.toBeInstanceOf(BadRequestError);
+      expect(warrantyClaimsRepository.create).not.toHaveBeenCalled();
+    },
+  );
+
+  it('rejects an active warranty before its start date', async () => {
+    warrantyClaimsRepository.findWarrantyProductByCode.mockResolvedValue({
+      id: 'product-id',
+      warranty_code: 'WM-2026-FUTURE',
+      warranty: {
+        id: 'warranty-id',
+        status: 'ACTIVE',
+        start_date: new Date('2099-01-01T00:00:00.000Z'),
+      },
+      ownerships: [],
+    });
+    const useCase = new CreateWarrantyClaimUseCase(
+      warrantyClaimsRepository as never,
+      generateWarrantyClaimCodeUseCase as never,
+    );
+
+    await expect(
+      useCase.execute({
+        warrantyCode: 'WM-2026-FUTURE',
+        requesterName: 'Nguyen Van A',
+        requesterPhone: '0901234567',
+        issueTitle: 'May khong hoat dong',
+      }),
+    ).rejects.toBeInstanceOf(BadRequestError);
+    expect(warrantyClaimsRepository.create).not.toHaveBeenCalled();
+  });
 });

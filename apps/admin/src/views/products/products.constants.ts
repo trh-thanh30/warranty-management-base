@@ -1,15 +1,5 @@
-import type {
-  ProductCategory,
-  ProductStatus,
-  WarrantyStatus,
-} from "@repo/shared";
-
-export const PRODUCT_CATEGORIES = [
-  "CAR",
-  "ACCESSORY",
-  "SPARE_PART",
-  "SERVICE_PACKAGE",
-] as const satisfies ProductCategory[];
+import type { ProductStatus, WarrantyStatus } from "@repo/shared";
+export { PRODUCT_CATEGORIES } from "@repo/shared/constants";
 
 export const PRODUCT_STATUS_FILTERS = [
   "ALL",

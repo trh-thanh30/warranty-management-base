@@ -51,6 +51,9 @@ export function useWarrantiesDirectory() {
   });
   const [warrantyToActivate, setWarrantyToActivate] =
     useState<WarrantyListItem | null>(null);
+  const [warrantyToVoid, setWarrantyToVoid] = useState<WarrantyListItem | null>(
+    null,
+  );
   const debouncedSearch = useDebounce(search.trim(), 300);
   const canViewWarranties = hasPermission(PERMISSIONS.WARRANTY_VIEW);
   const listQuery = {
@@ -79,6 +82,14 @@ export function useWarrantiesDirectory() {
     setWarrantyToActivate(null);
   }
 
+  function openVoid(warranty: WarrantyListItem) {
+    setWarrantyToVoid(warranty);
+  }
+
+  function closeVoid() {
+    setWarrantyToVoid(null);
+  }
+
   async function exportWarranties() {
     try {
       const blob = await warrantiesService.exportWarranties(listQuery);
@@ -92,9 +103,11 @@ export function useWarrantiesDirectory() {
   return {
     clearFilters,
     closeActivate,
+    closeVoid,
     exportWarranties,
     filters,
     openActivate,
+    openVoid,
     pageSize,
     search,
     setPage,
@@ -106,5 +119,6 @@ export function useWarrantiesDirectory() {
     updateStatus: filterHandlers.status,
     warrantiesQuery,
     warrantyToActivate,
+    warrantyToVoid,
   };
 }

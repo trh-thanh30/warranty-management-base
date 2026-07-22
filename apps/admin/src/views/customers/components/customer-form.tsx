@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Controller } from "react-hook-form";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { CustomerSummary } from "@repo/shared";
-import { Button, Input, Label, Textarea } from "@repo/ui";
+import { Button, Input, Textarea } from "@repo/ui";
 import {
   Combobox,
   ComboboxContent,
@@ -14,12 +14,13 @@ import {
   ComboboxItem,
   ComboboxList,
   ComboboxTrigger,
-} from "@/src/components/common/combobox";
+  FormField,
+} from "@/src/components/common";
 import {
   useVietnamProvinces,
   useVietnamWards,
 } from "@/src/hooks/use-locations";
-import type { VietnamProvince } from "@/src/services/locations/locations.types";
+import { createFieldErrorFormatter, parseVietnamAddress } from "@/src/utils";
 import { useCustomerForm } from "../hooks/use-customer-form";
 
 type CustomerFormProps = {
@@ -69,7 +70,7 @@ export function CustomerForm({
     const addressKey = `${customer.id}:${customer.address}`;
     if (hydratedAddressKey === addressKey) return;
 
-    const parsedAddress = parseCustomerAddress(customer.address, provinces);
+    const parsedAddress = parseVietnamAddress(customer.address, provinces);
     setValue("addressDetail", parsedAddress.detail, {
       shouldDirty: false,
       shouldValidate: true,
@@ -127,7 +128,7 @@ export function CustomerForm({
       ) : null}
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field
+        <FormField
           error={formatFieldError(errors.fullName?.message, t)}
           id="customer-full-name"
           label={t("fullName")}
@@ -138,9 +139,9 @@ export function CustomerForm({
             placeholder={t("fullNamePlaceholder")}
             {...register("fullName")}
           />
-        </Field>
+        </FormField>
 
-        <Field
+        <FormField
           error={formatFieldError(errors.customerCode?.message, t)}
           id="customer-code"
           label={t("customerCode")}
@@ -156,11 +157,11 @@ export function CustomerForm({
             }
             {...register("customerCode")}
           />
-        </Field>
+        </FormField>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field
+        <FormField
           error={formatFieldError(errors.phone?.message, t)}
           id="customer-phone"
           label={t("phone")}
@@ -172,9 +173,9 @@ export function CustomerForm({
             type="tel"
             {...register("phone")}
           />
-        </Field>
+        </FormField>
 
-        <Field
+        <FormField
           error={formatFieldError(errors.email?.message, t)}
           id="customer-email"
           label={t("email")}
@@ -186,11 +187,11 @@ export function CustomerForm({
             type="email"
             {...register("email")}
           />
-        </Field>
+        </FormField>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field
+        <FormField
           error={formatFieldError(errors.provinceCode?.message, t)}
           id="customer-province"
           label={t("province")}
@@ -249,9 +250,9 @@ export function CustomerForm({
               </Combobox>
             )}
           />
-        </Field>
+        </FormField>
 
-        <Field
+        <FormField
           error={formatFieldError(errors.wardCode?.message, t)}
           id="customer-ward"
           label={t("ward")}
@@ -303,10 +304,10 @@ export function CustomerForm({
               </Combobox>
             )}
           />
-        </Field>
+        </FormField>
       </div>
 
-      <Field
+      <FormField
         error={formatFieldError(errors.addressDetail?.message, t)}
         id="customer-address"
         label={t("addressDetail")}
@@ -317,7 +318,7 @@ export function CustomerForm({
           rows={4}
           {...register("addressDetail")}
         />
-      </Field>
+      </FormField>
 
       <div className="grid grid-cols-2 gap-2 border-t border-slate-200 pt-5 dark:border-slate-800 sm:flex sm:justify-end">
         <Button
@@ -344,13 +345,8 @@ export function CustomerForm({
   );
 }
 
-function formatFieldError(
-  message: string | undefined,
-  t: (key: string) => string,
-) {
-  if (!message) return undefined;
-
-  const translationKeys = new Set([
+const formatFieldError = createFieldErrorFormatter(
+  new Set([
     "customerCodeLength",
     "addressRequired",
     "emailInvalid",
@@ -360,54 +356,5 @@ function formatFieldError(
     "phoneRequired",
     "provinceRequired",
     "wardRequired",
-  ]);
-
-  return translationKeys.has(message) ? t(message) : message;
-}
-
-function Field({
-  children,
-  error,
-  id,
-  label,
-}: {
-  children: ReactNode;
-  error?: string;
-  id: string;
-  label: string;
-}) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      {children}
-      {error ? (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      ) : null}
-    </div>
-  );
-}
-
-function parseCustomerAddress(address: string, provinces: VietnamProvince[]) {
-  const province = provinces.find((item) => address.includes(item.name));
-  const parts = address
-    .split(",")
-    .map((part) => part.trim())
-    .filter(Boolean);
-  const provinceName = province?.name;
-  const provinceIndex = provinceName ? parts.indexOf(provinceName) : -1;
-  const wardName =
-    provinceIndex > 0
-      ? parts[provinceIndex - 1]
-      : parts.length >= 2
-        ? parts.at(-2)
-        : null;
-  const detail = parts
-    .filter((part) => part !== provinceName && part !== wardName)
-    .join(", ");
-
-  return {
-    detail: detail || address,
-    province,
-    wardName,
-  };
-}
+  ]),
+);

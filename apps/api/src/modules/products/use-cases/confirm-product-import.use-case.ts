@@ -5,12 +5,16 @@ import {
   prepareProductImportRows,
   PreparedProductImportRow,
 } from '@/modules/products/excel/product-import.validator';
+import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generate-product-code.use-case';
 import { Injectable } from '@nestjs/common';
 import { Prisma, product_status, warranty_status } from '@prisma/client';
 
 @Injectable()
 export class ConfirmProductImportUseCase {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly generateProductCodeUseCase: GenerateProductCodeUseCase,
+  ) {}
 
   async execute(dto: ConfirmProductImportDto) {
     if (dto.rows.length === 0) {
@@ -50,7 +54,8 @@ export class ConfirmProductImportUseCase {
         }
 
         const productCode =
-          row.productCode?.trim() || (await this.generateProductCode(tx));
+          row.productCode?.trim() ||
+          (await this.generateProductCodeUseCase.execute(new Date(), tx));
         const product = await tx.product.create({
           data: {
             product_code: productCode,
@@ -167,24 +172,5 @@ export class ConfirmProductImportUseCase {
 
   private blankToNull(value: string | null | undefined) {
     return value?.trim() || null;
-  }
-
-  private async generateProductCode(tx: Prisma.TransactionClient) {
-    const year = new Date().getFullYear();
-
-    for (let attempt = 0; attempt < 5; attempt += 1) {
-      const suffix = Math.random().toString(36).slice(2, 8).toUpperCase();
-      const code = `PRD-${year}-${suffix}`;
-      const existing = await tx.product.findUnique({
-        where: { product_code: code },
-        select: { id: true },
-      });
-
-      if (!existing) {
-        return code;
-      }
-    }
-
-    throw new BadRequestError('Could not generate a unique product code');
   }
 }
