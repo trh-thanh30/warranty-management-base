@@ -43,6 +43,7 @@ type ExcelImportDialogProps = {
   previewContent?: ReactNode;
   previewSummary?: ReactNode;
   showModeSelector?: boolean;
+  size?: "default" | "wide";
 };
 
 export function ExcelImportDialog({
@@ -59,6 +60,7 @@ export function ExcelImportDialog({
   previewContent,
   previewSummary,
   showModeSelector = true,
+  size = "default",
 }: ExcelImportDialogProps) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -86,8 +88,15 @@ export function ExcelImportDialog({
         className={cn(
           "max-h-[calc(100vh-2rem)] overflow-hidden p-0",
           hasPreview
-            ? "w-[min(calc(100vw-2rem),72rem)]"
-            : "w-[min(calc(100vw-2rem),36rem)]",
+            ? cn(
+                "max-w-none",
+                size === "wide"
+                  ? "w-[min(calc(100vw-1rem),96rem)]"
+                  : "w-[min(calc(100vw-2rem),72rem)]",
+              )
+            : size === "wide"
+              ? "w-[min(calc(100vw-2rem),48rem)] max-w-none"
+              : "w-[min(calc(100vw-2rem),36rem)]",
         )}
       >
         <div className="flex items-start justify-between gap-4 px-6 pt-6 sm:px-8">

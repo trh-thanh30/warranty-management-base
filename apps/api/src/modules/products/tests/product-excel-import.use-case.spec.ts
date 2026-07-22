@@ -47,7 +47,9 @@ describe('PreviewProductImportUseCase', () => {
         description: 'Inventory import row.',
       },
     ]);
-    const useCase = new PreviewProductImportUseCase();
+    const prismaService = createPrismaMock();
+    prismaService.category.findFirst.mockResolvedValue({ id: 'category-id' });
+    const useCase = new PreviewProductImportUseCase(prismaService as never);
 
     const result = await useCase.execute(file);
 
@@ -71,13 +73,59 @@ describe('PreviewProductImportUseCase', () => {
     const worksheet = workbook.addWorksheet('Products');
     worksheet.addRow(['Wrong Header']);
     const buffer = await workbookToBuffer(workbook);
-    const useCase = new PreviewProductImportUseCase();
+    const useCase = new PreviewProductImportUseCase(
+      createPrismaMock() as never,
+    );
 
     await expect(
       useCase.execute(createMockFile(buffer)),
     ).rejects.toBeInstanceOf(ValidationError);
   });
+
+  it('reports an unknown dynamic category during preview', async () => {
+    const file = await createFileFromRows([
+      {
+        productCode: null,
+        name: 'Battery Pack',
+        imageUrl: null,
+        category: product_category.SPARE_PART,
+        categoryCode: 'UNKNOWN',
+        brand: null,
+        model: null,
+        manufactureYear: null,
+        serialNumber: 'SN-UNKNOWN-CATEGORY',
+        status: product_status.ACTIVE,
+        warrantyDurationMonths: 36,
+        warrantyTerms: null,
+        description: null,
+      },
+    ]);
+    const prismaService = createPrismaMock();
+    prismaService.category.findFirst.mockResolvedValue(null);
+    const useCase = new PreviewProductImportUseCase(prismaService as never);
+
+    const result = await useCase.execute(file);
+
+    expect(result.invalidRows).toBe(1);
+    expect(result.validRows).toBe(0);
+    expect(result.rows[0]?.errors).toContainEqual({
+      field: 'categoryCode',
+      message: 'Không tìm thấy mã danh mục động',
+      rowNumber: 2,
+    });
+  });
 });
+
+function createPrismaMock() {
+  return {
+    category: {
+      findFirst: jest.fn().mockResolvedValue(null),
+    },
+    product: {
+      findUnique: jest.fn().mockResolvedValue(null),
+    },
+  };
+}
 
 async function createFileFromRows(rows: ProductExcelRow[]) {
   const workbook = createExcelWorkbook('Product Import');

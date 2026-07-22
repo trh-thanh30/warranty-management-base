@@ -64,6 +64,7 @@ type ProductImportPreviewTableProps = {
     editDescription: string;
     editTitle: string;
     imageUrl: string;
+    importStatus: string;
     invalidRows: string;
     manufactureYear: string;
     model: string;
@@ -157,21 +158,37 @@ export function ProductImportPreviewTable({
 
       <div className="overflow-hidden rounded-md border border-slate-200">
         <div className="max-h-[27rem] overflow-auto">
-          <Table className="min-w-[72rem]">
+          <Table className="min-w-[90rem] whitespace-nowrap">
             <TableHeader className="sticky top-0 z-10 bg-slate-50">
               <TableRow>
-                <TableHead className="w-24">{labels.row}</TableHead>
-                <TableHead className="w-40">{labels.productCode}</TableHead>
-                <TableHead className="w-56">{labels.name}</TableHead>
-                <TableHead className="w-56">{labels.imageUrl}</TableHead>
-                <TableHead className="w-40">{labels.category}</TableHead>
-                <TableHead className="w-44">{labels.serialNumber}</TableHead>
-                <TableHead className="w-40">{labels.status}</TableHead>
-                <TableHead className="w-40">
+                <TableHead className="w-20 whitespace-nowrap">
+                  {labels.row}
+                </TableHead>
+                <TableHead className="w-40 whitespace-nowrap">
+                  {labels.productCode}
+                </TableHead>
+                <TableHead className="w-56 whitespace-nowrap">
+                  {labels.name}
+                </TableHead>
+                <TableHead className="w-56 whitespace-nowrap">
+                  {labels.imageUrl}
+                </TableHead>
+                <TableHead className="w-40 whitespace-nowrap">
+                  {labels.category}
+                </TableHead>
+                <TableHead className="w-44 whitespace-nowrap">
+                  {labels.serialNumber}
+                </TableHead>
+                <TableHead className="w-40 whitespace-nowrap">
+                  {labels.status}
+                </TableHead>
+                <TableHead className="w-40 whitespace-nowrap">
                   {labels.warrantyDurationMonths}
                 </TableHead>
-                <TableHead className="w-52">{labels.withErrors}</TableHead>
-                <TableHead className="w-28 text-right">
+                <TableHead className="w-[32rem] whitespace-nowrap">
+                  {labels.importStatus}
+                </TableHead>
+                <TableHead className="w-28 whitespace-nowrap text-right">
                   {labels.actions}
                 </TableHead>
               </TableRow>
@@ -180,21 +197,10 @@ export function ProductImportPreviewTable({
               {pagedRows.length > 0 ? (
                 pagedRows.map((row) => (
                   <TableRow key={row.id}>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <span className="text-xs font-medium text-slate-500">
-                          #{row.rowNumber}
-                        </span>
-                        <Badge
-                          variant={
-                            row.errors.length > 0 ? "destructive" : "success"
-                          }
-                        >
-                          {row.errors.length > 0
-                            ? labels.withErrors
-                            : labels.ready}
-                        </Badge>
-                      </div>
+                    <TableCell className="whitespace-nowrap">
+                      <span className="text-xs font-medium text-slate-500">
+                        #{row.rowNumber}
+                      </span>
                     </TableCell>
                     <PreviewCell value={row.data.productCode} />
                     <PreviewCell value={row.data.name} />
@@ -203,8 +209,12 @@ export function ProductImportPreviewTable({
                     <PreviewCell value={row.data.serialNumber} />
                     <PreviewCell value={row.data.status} />
                     <PreviewCell value={row.data.warrantyDurationMonths} />
-                    <TableCell>
-                      <FieldErrors errors={row.errors} />
+                    <TableCell className="w-[32rem] max-w-[32rem] whitespace-normal">
+                      <ImportRowStatus
+                        errors={row.errors}
+                        readyLabel={labels.ready}
+                        withErrorsLabel={labels.withErrors}
+                      />
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="inline-flex items-center gap-1">
@@ -631,31 +641,57 @@ function toNullableValue(value: string | null | undefined) {
 }
 
 function PreviewCell({ value }: { value: number | string | null }) {
+  const displayValue = value ?? "-";
+
   return (
-    <TableCell>
-      <span className="line-clamp-2 break-all text-sm text-slate-700">
-        {value ?? "-"}
+    <TableCell className="whitespace-nowrap">
+      <span
+        className="block max-w-56 truncate whitespace-nowrap text-sm text-slate-700"
+        title={String(displayValue)}
+      >
+        {displayValue}
       </span>
     </TableCell>
   );
 }
 
-function FieldErrors({ errors }: { errors: ProductImportRowError[] }) {
-  if (errors.length === 0) {
-    return <span className="text-xs text-slate-400">-</span>;
-  }
-
+function ImportRowStatus({
+  errors,
+  readyLabel,
+  withErrorsLabel,
+}: {
+  errors: ProductImportRowError[];
+  readyLabel: string;
+  withErrorsLabel: string;
+}) {
   return (
-    <div className="space-y-1">
-      {errors.slice(0, 3).map((error, index) => (
-        <p className="text-xs leading-4 text-red-600" key={index}>
-          {error.field ? `${error.field}: ` : ""}
-          {error.message}
-        </p>
-      ))}
-      {errors.length > 3 ? (
-        <p className="text-xs text-red-600">+{errors.length - 3}</p>
-      ) : null}
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 whitespace-normal">
+      <Badge
+        className="shrink-0 whitespace-nowrap"
+        variant={errors.length > 0 ? "destructive" : "success"}
+      >
+        {errors.length > 0 ? withErrorsLabel : readyLabel}
+      </Badge>
+      {errors.map((error, index) => {
+        const message = error.field
+          ? `${error.field}: ${error.message}`
+          : error.message;
+
+        return (
+          <span
+            className="inline-flex shrink-0 items-center gap-1"
+            key={`${error.field}-${error.message}-${index}`}
+          >
+            <Badge
+              className="whitespace-nowrap"
+              title={message}
+              variant="destructive"
+            >
+              {message}
+            </Badge>
+          </span>
+        );
+      })}
     </div>
   );
 }

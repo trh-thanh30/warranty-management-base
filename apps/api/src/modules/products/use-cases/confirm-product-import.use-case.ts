@@ -1,23 +1,12 @@
-import { ExcelRowError } from '@/common/excel';
 import { BadRequestError } from '@/common/response';
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { ConfirmProductImportDto } from '@/modules/products/dto/confirm-product-import.dto';
-import { Injectable } from '@nestjs/common';
 import {
-  category_type,
-  Prisma,
-  product_status,
-  warranty_status,
-} from '@prisma/client';
-
-type ImportAction = 'create' | 'update';
-
-type PreparedProductImportRow = ConfirmProductImportDto['rows'][number] & {
-  action: ImportAction;
-  categoryId: string | null;
-  existingProductId: string | null;
-  rowNumber: number;
-};
+  prepareProductImportRows,
+  PreparedProductImportRow,
+} from '@/modules/products/excel/product-import.validator';
+import { Injectable } from '@nestjs/common';
+import { Prisma, product_status, warranty_status } from '@prisma/client';
 
 @Injectable()
 export class ConfirmProductImportUseCase {
@@ -28,7 +17,10 @@ export class ConfirmProductImportUseCase {
       throw new BadRequestError('Import rows are required');
     }
 
-    const { errors, rows } = await this.prepareRows(dto.rows);
+    const { errors, rows } = await prepareProductImportRows(
+      this.prismaService,
+      dto.rows.map((data, index) => ({ data, rowNumber: index + 1 })),
+    );
 
     if (errors.length > 0) {
       return {
@@ -113,98 +105,6 @@ export class ConfirmProductImportUseCase {
         errors: [],
       };
     });
-  }
-
-  private async prepareRows(rows: ConfirmProductImportDto['rows']) {
-    const errors: ExcelRowError[] = [];
-    const preparedRows: PreparedProductImportRow[] = [];
-    const seenProductCodes = new Set<string>();
-    const seenSerialNumbers = new Set<string>();
-
-    for (const [index, row] of rows.entries()) {
-      const rowNumber = index + 1;
-      const productCode = row.productCode?.trim() || null;
-      const serialNumber = row.serialNumber?.trim() || null;
-      const categoryCode = row.categoryCode?.trim() || null;
-
-      if (productCode) {
-        if (seenProductCodes.has(productCode)) {
-          errors.push({
-            rowNumber,
-            field: 'productCode',
-            message: 'Mã sản phẩm bị trùng trong file import',
-          });
-        }
-        seenProductCodes.add(productCode);
-      }
-
-      if (serialNumber) {
-        if (seenSerialNumbers.has(serialNumber)) {
-          errors.push({
-            rowNumber,
-            field: 'serialNumber',
-            message: 'Số serial bị trùng trong file import',
-          });
-        }
-        seenSerialNumbers.add(serialNumber);
-      }
-
-      const [existingProduct, productWithSerial, category] = await Promise.all([
-        productCode
-          ? this.prismaService.product.findUnique({
-              where: { product_code: productCode },
-              select: { id: true },
-            })
-          : null,
-        serialNumber
-          ? this.prismaService.product.findUnique({
-              where: { serial_number: serialNumber },
-              select: { id: true, product_code: true },
-            })
-          : null,
-        categoryCode
-          ? this.prismaService.category.findFirst({
-              where: {
-                code: categoryCode,
-                type: category_type.PRODUCT,
-              },
-              select: { id: true },
-            })
-          : null,
-      ]);
-
-      if (
-        productWithSerial &&
-        (!existingProduct || productWithSerial.id !== existingProduct.id)
-      ) {
-        errors.push({
-          rowNumber,
-          field: 'serialNumber',
-          message: `Số serial đã thuộc sản phẩm ${productWithSerial.product_code}`,
-        });
-      }
-
-      if (categoryCode && !category) {
-        errors.push({
-          rowNumber,
-          field: 'categoryCode',
-          message: 'Không tìm thấy mã danh mục động',
-        });
-      }
-
-      preparedRows.push({
-        ...row,
-        action: existingProduct ? 'update' : 'create',
-        categoryId: category?.id ?? null,
-        existingProductId: existingProduct?.id ?? null,
-        rowNumber,
-      });
-    }
-
-    return {
-      errors,
-      rows: preparedRows,
-    };
   }
 
   private toProductUpdateInput(

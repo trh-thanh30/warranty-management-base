@@ -174,6 +174,7 @@ export function ProductsView() {
                   editDescription: t("excel.editRowDescription"),
                   editTitle: t("excel.editRowTitle"),
                   imageUrl: t("excel.imageUrl"),
+                  importStatus: t("excel.importStatus"),
                   invalidRows: t("excel.invalidRows", {
                     count: importSummary.invalidRows,
                   }),
@@ -227,6 +228,7 @@ export function ProductsView() {
               </div>
             ) : null
           }
+          size="wide"
         />
       </div>
     </PermissionGuard>

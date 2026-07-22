@@ -170,13 +170,15 @@ export function useProductsDirectory() {
       const result = await previewProductImport.mutateAsync(file);
       setImportMode(mode);
       setImportRows(
-        result.rows.map((row, index) =>
-          normalizePreviewRow({
-            data: row.data,
-            errors: row.errors,
-            id: `${row.rowNumber}-${index}`,
-            rowNumber: row.rowNumber,
-          }),
+        validateImportRows(
+          result.rows.map((row, index) =>
+            normalizePreviewRow({
+              data: row.data,
+              errors: row.errors,
+              id: `${row.rowNumber}-${index}`,
+              rowNumber: row.rowNumber,
+            }),
+          ),
         ),
       );
       const message =
@@ -209,6 +211,10 @@ export function useProductsDirectory() {
             ? {
                 ...row,
                 data,
+                errors: row.errors.filter(
+                  (error) =>
+                    !hasImportFieldChanged(row.data, data, error.field),
+                ),
               }
             : row,
         ),
@@ -353,7 +359,7 @@ function normalizePreviewRow(row: {
     },
   };
 
-  return validateImportRows([normalizedRow])[0] ?? normalizedRow;
+  return normalizedRow;
 }
 
 function validateImportRows(rows: EditableProductImportRow[]) {
@@ -380,7 +386,9 @@ function validateImportRows(rows: EditableProductImportRow[]) {
   });
 
   return rows.map((row) => {
-    const errors: ProductImportRowError[] = [];
+    const errors = row.errors.filter(
+      (error) => !isRecomputedImportError(error),
+    );
     const productCode = row.data.productCode?.trim();
     const serialNumber = row.data.serialNumber?.trim();
     const duration = row.data.warrantyDurationMonths;
@@ -439,8 +447,40 @@ function validateImportRows(rows: EditableProductImportRow[]) {
 
     return {
       ...row,
-      errors,
+      errors: dedupeImportErrors(errors),
     };
+  });
+}
+
+const RECOMPUTED_IMPORT_ERROR_MESSAGES = new Set([
+  "Mã sản phẩm bị trùng trong file import",
+  "Mã sản phẩm bị trùng trong bảng preview.",
+  "Số serial bị trùng trong file import",
+  "Số serial bị trùng trong bảng preview.",
+]);
+
+function isRecomputedImportError(error: ProductImportRowError) {
+  return RECOMPUTED_IMPORT_ERROR_MESSAGES.has(error.message);
+}
+
+function hasImportFieldChanged(
+  currentData: ProductImportRowData,
+  nextData: ProductImportRowData,
+  field: string,
+) {
+  if (!(field in currentData) || !(field in nextData)) return false;
+
+  const key = field as keyof ProductImportRowData;
+  return currentData[key] !== nextData[key];
+}
+
+function dedupeImportErrors(errors: ProductImportRowError[]) {
+  const seen = new Set<string>();
+  return errors.filter((error) => {
+    const key = `${error.rowNumber}:${error.field}:${error.message}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
   });
 }
 

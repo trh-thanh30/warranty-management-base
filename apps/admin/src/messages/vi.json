@@ -836,6 +836,7 @@
       "imageUrl": "URL hình ảnh",
       "ready": "Sẵn sàng",
       "withErrors": "Có lỗi",
+      "importStatus": "Trạng thái",
       "allRows": "Tất cả",
       "editRow": "Sửa dòng",
       "editRowTitle": "Sửa sản phẩm import",

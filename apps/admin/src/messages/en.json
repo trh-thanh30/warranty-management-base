@@ -836,6 +836,7 @@
       "imageUrl": "Image URL",
       "ready": "Ready",
       "withErrors": "Has errors",
+      "importStatus": "Status",
       "allRows": "All",
       "editRow": "Edit row",
       "editRowTitle": "Edit import product",
