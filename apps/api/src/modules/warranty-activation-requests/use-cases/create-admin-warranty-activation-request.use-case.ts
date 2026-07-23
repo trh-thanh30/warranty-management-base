@@ -4,7 +4,11 @@ import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/genera
 import { CreateAdminWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-admin-warranty-activation-request.dto';
 import { CreateWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-warranty-activation-request.use-case';
 import { Injectable } from '@nestjs/common';
-import { product_status, warranty_status } from '@prisma/client';
+import {
+  product_status,
+  warranty_activation_request_source,
+  warranty_status,
+} from '@prisma/client';
 
 @Injectable()
 export class CreateAdminWarrantyActivationRequestUseCase {
@@ -14,7 +18,10 @@ export class CreateAdminWarrantyActivationRequestUseCase {
     private readonly createWarrantyActivationRequestUseCase: CreateWarrantyActivationRequestUseCase,
   ) {}
 
-  async execute(dto: CreateAdminWarrantyActivationRequestDto) {
+  async execute(
+    dto: CreateAdminWarrantyActivationRequestDto,
+    context: { createdByUserId?: string } = {},
+  ) {
     const product =
       await this.productsRepository.findActivationRequestTargetById(
         dto.productId,
@@ -52,15 +59,21 @@ export class CreateAdminWarrantyActivationRequestUseCase {
       });
     }
 
-    return this.createWarrantyActivationRequestUseCase.execute({
-      ...dto,
-      brand: dto.brand ?? product.brand ?? undefined,
-      manufactureYear:
-        dto.manufactureYear ?? product.manufacture_year ?? undefined,
-      model: dto.model ?? product.model ?? undefined,
-      productName: dto.productName ?? product.name,
-      serialNumber: dto.serialNumber ?? product.serial_number ?? undefined,
-      warrantyCode,
-    });
+    return this.createWarrantyActivationRequestUseCase.execute(
+      {
+        ...dto,
+        brand: dto.brand ?? product.brand ?? undefined,
+        manufactureYear:
+          dto.manufactureYear ?? product.manufacture_year ?? undefined,
+        model: dto.model ?? product.model ?? undefined,
+        productName: dto.productName ?? product.name,
+        serialNumber: dto.serialNumber ?? product.serial_number ?? undefined,
+        warrantyCode,
+      },
+      {
+        createdByUserId: context.createdByUserId,
+        source: warranty_activation_request_source.ADMIN_PORTAL,
+      },
+    );
   }
 }

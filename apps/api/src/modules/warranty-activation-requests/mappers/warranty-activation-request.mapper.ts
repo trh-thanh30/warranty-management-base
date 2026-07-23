@@ -2,11 +2,26 @@ import type {
   Prisma,
   WarrantyActivationRequest,
   warranty_status,
+  warranty_certificate_email_status,
+  warranty_certificate_status,
 } from '@prisma/client';
 import type { WarrantyActivationRequestSummary } from '@repo/shared';
 
 export type WarrantyActivationRequestWithRelations =
   WarrantyActivationRequest & {
+    created_by?: {
+      id: string;
+      email: string;
+      full_name: string | null;
+      username: string;
+    } | null;
+    customer?: {
+      id: string;
+      customer_code: string;
+      email: string | null;
+      full_name: string;
+      phone: string | null;
+    } | null;
     reviewed_by?: {
       id: string;
       email: string;
@@ -20,6 +35,17 @@ export type WarrantyActivationRequestWithRelations =
       start_date: Date | null;
       end_date: Date | null;
       duration_months: number;
+      certificates?: {
+        id: string;
+        certificate_number: string;
+        status: warranty_certificate_status;
+        storage_key: string | null;
+        recipient_email: string;
+        generated_at: Date | null;
+        emailed_at: Date | null;
+        email_status: warranty_certificate_email_status;
+        last_error: string | null;
+      }[];
     } | null;
   };
 
@@ -40,6 +66,7 @@ export function toWarrantyActivationRequestResponse(
     id: request.id,
     requestCode: request.request_code,
     status: request.status,
+    source: request.source,
     warrantyCode: request.warranty_code,
     customerName: request.customer_name,
     customerPhone: request.customer_phone,
@@ -59,6 +86,26 @@ export function toWarrantyActivationRequestResponse(
     note: request.note,
     adminNote: request.admin_note,
     rejectionReason: request.rejection_reason,
+    createdById: request.created_by_id,
+    createdBy: request.created_by
+      ? {
+          id: request.created_by.id,
+          displayName:
+            request.created_by.full_name ?? request.created_by.username,
+          email: request.created_by.email,
+          username: request.created_by.username,
+        }
+      : null,
+    customerId: request.customer_id,
+    customer: request.customer
+      ? {
+          id: request.customer.id,
+          customerCode: request.customer.customer_code,
+          fullName: request.customer.full_name,
+          email: request.customer.email,
+          phone: request.customer.phone,
+        }
+      : null,
     reviewedById: request.reviewed_by_id,
     reviewedBy: request.reviewed_by
       ? {
@@ -83,8 +130,39 @@ export function toWarrantyActivationRequestResponse(
           durationMonths: request.activated_warranty.duration_months,
         }
       : null,
+    certificate: toCertificateSummary(
+      request.activated_warranty?.certificates?.[0] ?? null,
+    ),
     metadata: toMetadata(request.metadata),
     createdAt: request.created_at.toISOString(),
     updatedAt: request.updated_at.toISOString(),
+  };
+}
+
+function toCertificateSummary(
+  certificate: {
+    id: string;
+    certificate_number: string;
+    status: warranty_certificate_status;
+    storage_key: string | null;
+    recipient_email: string;
+    generated_at: Date | null;
+    emailed_at: Date | null;
+    email_status: warranty_certificate_email_status;
+    last_error: string | null;
+  } | null,
+) {
+  if (!certificate) return null;
+
+  return {
+    id: certificate.id,
+    certificateNumber: certificate.certificate_number,
+    status: certificate.status,
+    storageKey: certificate.storage_key,
+    recipientEmail: certificate.recipient_email,
+    generatedAt: certificate.generated_at?.toISOString() ?? null,
+    emailedAt: certificate.emailed_at?.toISOString() ?? null,
+    emailStatus: certificate.email_status,
+    lastError: certificate.last_error,
   };
 }

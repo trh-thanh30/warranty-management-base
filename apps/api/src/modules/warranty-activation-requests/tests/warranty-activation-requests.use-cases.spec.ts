@@ -20,6 +20,9 @@ describe('WarrantyActivationRequestsUseCases', () => {
   const productsRepository = {
     findActivationRequestTargetByWarrantyCode: jest.fn(),
   };
+  const issueWarrantyCertificateUseCase = {
+    execute: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -255,10 +258,10 @@ describe('WarrantyActivationRequestsUseCases', () => {
   });
 
   it('activates warranty and owner when approving a pending activation request', async () => {
-    repository.findById.mockResolvedValue(baseRequest);
-    repository.activateApprovedRequest.mockResolvedValue({
+    const activatedRequest = {
       ...baseRequest,
       activated_warranty: {
+        certificates: [],
         duration_months: 36,
         end_date: new Date('2029-07-19T04:00:00.000Z'),
         id: 'warranty-id',
@@ -276,9 +279,18 @@ describe('WarrantyActivationRequestsUseCases', () => {
       },
       reviewed_by_id: 'admin-id',
       status: warranty_activation_request_status.ACTIVATED,
+    };
+    repository.findById
+      .mockResolvedValueOnce(baseRequest)
+      .mockResolvedValueOnce(activatedRequest);
+    repository.activateApprovedRequest.mockResolvedValue(activatedRequest);
+    issueWarrantyCertificateUseCase.execute.mockResolvedValue({
+      certificate_number: 'CERT-2026-ABC123',
+      id: 'certificate-id',
     });
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
+      issueWarrantyCertificateUseCase as never,
     );
 
     const result = await useCase.execute(
@@ -296,6 +308,11 @@ describe('WarrantyActivationRequestsUseCases', () => {
       reviewedById: 'admin-id',
     });
     expect(repository.review).not.toHaveBeenCalled();
+    expect(issueWarrantyCertificateUseCase.execute).toHaveBeenCalledWith({
+      recipientEmail: 'customer@example.com',
+      requestId: 'request-id',
+      warrantyId: 'warranty-id',
+    });
     expect(result.activatedWarrantyId).toBe('warranty-id');
     expect(result.activatedWarranty).toEqual({
       durationMonths: 36,
@@ -318,6 +335,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     repository.findById.mockResolvedValue(baseRequest);
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
+      issueWarrantyCertificateUseCase as never,
     );
 
     await expect(
@@ -331,6 +349,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     repository.findById.mockResolvedValue(null);
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
+      issueWarrantyCertificateUseCase as never,
     );
 
     await expect(
@@ -346,7 +365,9 @@ const baseRequest = {
   address_detail: '1 Nguyen Trai',
   admin_note: null,
   brand: null,
+  created_by_id: null,
   created_at: new Date('2026-07-19T03:00:00.000Z'),
+  customer_id: null,
   customer_birthdate: null,
   customer_email: 'customer@example.com',
   customer_name: 'Nguyen Van A',
@@ -365,6 +386,7 @@ const baseRequest = {
   reviewed_at: null,
   reviewed_by_id: null,
   serial_number: null,
+  source: 'PUBLIC_WEB',
   status: warranty_activation_request_status.PENDING,
   updated_at: new Date('2026-07-19T03:00:00.000Z'),
   ward_code: '26734',

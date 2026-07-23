@@ -1,6 +1,7 @@
 import { PrismaModule } from '@/database/prisma/prisma.module';
 import { CustomersModule } from '@/modules/customers/customers.module';
 import { ProductsModule } from '@/modules/products/products.module';
+import { WarrantyCertificatesModule } from '@/modules/warranty-certificates/warranty-certificates.module';
 import { WarrantiesModule } from '@/modules/warranties/warranties.module';
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
 import { CreateWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-warranty-activation-request.use-case';
@@ -14,7 +15,13 @@ import { WarrantyActivationRequestsController } from '@/modules/warranty-activat
 import { Module } from '@nestjs/common';
 
 @Module({
-  imports: [CustomersModule, PrismaModule, ProductsModule, WarrantiesModule],
+  imports: [
+    CustomersModule,
+    PrismaModule,
+    ProductsModule,
+    WarrantyCertificatesModule,
+    WarrantiesModule,
+  ],
   controllers: [WarrantyActivationRequestsController],
   providers: [
     WarrantyActivationRequestsRepository,
@@ -26,6 +33,9 @@ import { Module } from '@nestjs/common';
     GetWarrantyActivationRequestDetailUseCase,
     ReviewWarrantyActivationRequestUseCase,
   ],
-  exports: [WarrantyActivationRequestsRepository],
+  exports: [
+    CreateWarrantyActivationRequestUseCase,
+    WarrantyActivationRequestsRepository,
+  ],
 })
 export class WarrantyActivationRequestsModule {}

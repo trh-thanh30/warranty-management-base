@@ -8,6 +8,16 @@ export type WarrantyActivationRequestStatus =
   | "ACTIVATED"
   | "CANCELLED";
 
+export type WarrantyActivationRequestSource = "PUBLIC_WEB" | "ADMIN_PORTAL";
+
+export type WarrantyCertificateStatus = "PENDING" | "GENERATED" | "FAILED";
+
+export type WarrantyCertificateEmailStatus =
+  | "PENDING"
+  | "QUEUED"
+  | "SENT"
+  | "FAILED";
+
 export type WarrantyActivationRequestSortBy =
   | "requestCode"
   | "warrantyCode"
@@ -22,6 +32,7 @@ export type WarrantyActivationRequestSummary = {
   id: string;
   requestCode: string;
   status: WarrantyActivationRequestStatus;
+  source: WarrantyActivationRequestSource;
   warrantyCode: string;
   customerName: string;
   customerPhone: string;
@@ -41,6 +52,21 @@ export type WarrantyActivationRequestSummary = {
   note: string | null;
   adminNote: string | null;
   rejectionReason: string | null;
+  createdById: string | null;
+  createdBy: {
+    id: string;
+    displayName: string;
+    email: string;
+    username: string;
+  } | null;
+  customerId: string | null;
+  customer: {
+    id: string;
+    customerCode: string;
+    fullName: string;
+    email: string | null;
+    phone: string | null;
+  } | null;
   reviewedById: string | null;
   reviewedBy: {
     id: string;
@@ -57,6 +83,17 @@ export type WarrantyActivationRequestSummary = {
     startDate: string | null;
     endDate: string | null;
     durationMonths: number;
+  } | null;
+  certificate: {
+    id: string;
+    certificateNumber: string;
+    status: WarrantyCertificateStatus;
+    storageKey: string | null;
+    recipientEmail: string;
+    generatedAt: string | null;
+    emailedAt: string | null;
+    emailStatus: WarrantyCertificateEmailStatus;
+    lastError: string | null;
   } | null;
   metadata: Record<string, unknown> | null;
   createdAt: string;

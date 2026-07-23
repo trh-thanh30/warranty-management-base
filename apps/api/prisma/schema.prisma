@@ -30,6 +30,7 @@ model User {
   warranty_claim_changes                WarrantyClaimStatusHistory[]        @relation("WarrantyClaimStatusChangedBy")
   warranty_claim_service_center_changes WarrantyClaimServiceCenterHistory[] @relation("WarrantyClaimServiceCenterChangedBy")
   reviewed_warranty_activation_requests WarrantyActivationRequest[]         @relation("WarrantyActivationRequestReviewedBy")
+  created_warranty_activation_requests  WarrantyActivationRequest[]         @relation("WarrantyActivationRequestCreatedBy")
   activated_warranties                    Warranty[]                          @relation("WarrantyActivatedBy")
   voided_warranties                       Warranty[]                          @relation("WarrantyVoidedBy")
 
@@ -184,6 +185,7 @@ model Customer {
   user       User?              @relation(fields: [user_id], references: [id], onDelete: SetNull)
   ownerships ProductOwnership[]
   claims     WarrantyClaim[]
+  warranty_activation_requests WarrantyActivationRequest[]
 
   @@index([customer_code])
   @@index([full_name])
@@ -315,6 +317,7 @@ model Warranty {
   product            Product                    @relation(fields: [product_id], references: [id], onDelete: Cascade)
   claims             WarrantyClaim[]
   activation_request WarrantyActivationRequest?
+  certificates       WarrantyCertificate[]
   activated_by       User?                      @relation("WarrantyActivatedBy", fields: [activated_by_id], references: [id], onDelete: SetNull)
   voided_by          User?                      @relation("WarrantyVoidedBy", fields: [voided_by_id], references: [id], onDelete: SetNull)
 
@@ -331,6 +334,7 @@ model WarrantyActivationRequest {
   id                    String                             @id @default(uuid()) @db.Uuid
   request_code          String                             @unique
   status                warranty_activation_request_status @default(PENDING)
+  source                warranty_activation_request_source @default(PUBLIC_WEB)
   warranty_code         String
   customer_name         String
   customer_phone        String
@@ -350,6 +354,8 @@ model WarrantyActivationRequest {
   note                  String?
   admin_note            String?
   rejection_reason      String?
+  created_by_id         String?                            @db.Uuid
+  customer_id           String?                            @db.Uuid
   reviewed_by_id        String?                            @db.Uuid
   reviewed_at           DateTime?
   activated_warranty_id String?                            @unique @db.Uuid
@@ -357,17 +363,48 @@ model WarrantyActivationRequest {
   created_at            DateTime                           @default(now())
   updated_at            DateTime                           @updatedAt
 
+  created_by         User?     @relation("WarrantyActivationRequestCreatedBy", fields: [created_by_id], references: [id], onDelete: SetNull)
+  customer           Customer? @relation(fields: [customer_id], references: [id], onDelete: SetNull)
   reviewed_by        User?     @relation("WarrantyActivationRequestReviewedBy", fields: [reviewed_by_id], references: [id], onDelete: SetNull)
   activated_warranty Warranty? @relation(fields: [activated_warranty_id], references: [id], onDelete: SetNull)
 
   @@index([request_code])
   @@index([status])
+  @@index([source])
   @@index([warranty_code])
   @@index([customer_phone])
   @@index([customer_email])
+  @@index([created_by_id])
+  @@index([customer_id])
   @@index([created_at])
   @@index([warranty_code, customer_phone, status], map: "warranty_activation_request_lookup_pending")
   @@map("warranty_activation_request")
+}
+
+model WarrantyCertificate {
+  id                 String                            @id @default(uuid()) @db.Uuid
+  warranty_id        String                            @db.Uuid
+  certificate_number String                            @unique
+  version            Int                               @default(1)
+  status             warranty_certificate_status       @default(PENDING)
+  storage_key        String?
+  recipient_email    String
+  generated_at       DateTime?
+  emailed_at         DateTime?
+  email_status       warranty_certificate_email_status @default(PENDING)
+  last_error         String?
+  metadata           Json?
+  created_at         DateTime                          @default(now())
+  updated_at         DateTime                          @updatedAt
+
+  warranty Warranty @relation(fields: [warranty_id], references: [id], onDelete: Cascade)
+
+  @@index([warranty_id])
+  @@index([certificate_number])
+  @@index([status])
+  @@index([email_status])
+  @@index([recipient_email])
+  @@map("warranty_certificate")
 }
 
 model WarrantyClaim {
@@ -615,6 +652,24 @@ enum warranty_activation_request_status {
   REJECTED
   ACTIVATED
   CANCELLED
+}
+
+enum warranty_activation_request_source {
+  PUBLIC_WEB
+  ADMIN_PORTAL
+}
+
+enum warranty_certificate_status {
+  PENDING
+  GENERATED
+  FAILED
+}
+
+enum warranty_certificate_email_status {
+  PENDING
+  QUEUED
+  SENT
+  FAILED
 }
 
 enum warranty_claim_status {

@@ -46,6 +46,7 @@ export function useCreateWarrantyActivationRequestForm({
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const toast = useToast();
   const createMutation = useCreateAdminWarrantyActivationRequest();
+  const [customerSearch, setCustomerSearch] = useState("");
   const [productSearch, setProductSearch] = useState("");
   const [pendingWardName, setPendingWardName] = useState<string | null>(null);
   const [selectedCustomer, setSelectedCustomer] =
@@ -66,19 +67,20 @@ export function useCreateWarrantyActivationRequestForm({
     [provincesQuery.data],
   );
   const wards = useMemo(() => wardsQuery.data ?? [], [wardsQuery.data]);
+  const debouncedCustomerSearch = useDebounce(customerSearch.trim(), 300);
+  const debouncedProductSearch = useDebounce(productSearch.trim(), 300);
   const customersQuery = useCustomers({
-    limit: 100,
+    limit: 20,
+    search: debouncedCustomerSearch || undefined,
     sortBy: "createdAt",
     sortOrder: "desc",
   });
-  const debouncedProductSearch = useDebounce(productSearch.trim(), 300);
   const productsQuery = useInfiniteProducts({
     limit: 20,
     search: debouncedProductSearch || undefined,
     sortBy: "createdAt",
     sortOrder: "desc",
     status: "ACTIVE",
-    warrantyStatus: "DRAFT",
   });
   const customers = useMemo(
     () => customersQuery.data?.items ?? [],
@@ -112,6 +114,7 @@ export function useCreateWarrantyActivationRequestForm({
   function selectCustomer(customer: CustomerSummary) {
     const address = parseVietnamAddress(customer.address ?? "", provinces);
     setSelectedCustomer(customer);
+    setCustomerSearch("");
     setFormValues(form.setValue, {
       addressDetail: address.detail,
       customerEmail: customer.email ?? "",
@@ -128,8 +131,23 @@ export function useCreateWarrantyActivationRequestForm({
     }
   }
 
+  function clearCustomer() {
+    setSelectedCustomer(null);
+    setPendingWardName(null);
+    setFormValues(form.setValue, {
+      addressDetail: "",
+      customerBirthdate: "",
+      customerEmail: "",
+      customerName: "",
+      customerPhone: "",
+      provinceCode: "",
+      wardCode: "",
+    });
+  }
+
   function selectProduct(product: ProductResponse) {
     setSelectedProduct(product);
+    setProductSearch("");
     setFormValues(form.setValue, {
       productId: product.id,
       productName: product.name,
@@ -137,8 +155,21 @@ export function useCreateWarrantyActivationRequestForm({
     });
   }
 
+  function clearProduct() {
+    setSelectedProduct(null);
+    setFormValues(form.setValue, {
+      productId: "",
+      productName: "",
+      warrantyCode: "",
+    });
+  }
+
   function selectProvince(value: string) {
     setFormValues(form.setValue, { provinceCode: value, wardCode: "" });
+  }
+
+  function selectWard(value: string) {
+    setFormValues(form.setValue, { wardCode: value });
   }
 
   function loadMoreProducts() {
@@ -167,7 +198,9 @@ export function useCreateWarrantyActivationRequestForm({
   }
 
   return {
+    clearCustomer,
     control: form.control,
+    customerSearch,
     customers,
     customersQuery,
     errors: form.formState.errors,
@@ -187,6 +220,9 @@ export function useCreateWarrantyActivationRequestForm({
     selectCustomer,
     selectProduct,
     selectProvince,
+    selectWard,
+    clearProduct,
+    setCustomerSearch,
     setProductSearch,
     wardCode,
     wards,

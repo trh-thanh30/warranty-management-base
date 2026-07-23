@@ -7,6 +7,11 @@ export interface SendEmailParams {
   subject: string;
   text: string;
   html?: string;
+  attachments?: Array<{
+    contentBase64: string;
+    contentType: string;
+    filename: string;
+  }>;
 }
 
 @Injectable()
@@ -14,13 +19,14 @@ export class SendEmailUseCase implements BaseUseCase<SendEmailParams, void> {
   constructor(private readonly emailService: EmailService) {}
 
   async execute(params: SendEmailParams): Promise<void> {
-    const { to, subject, text, html } = params;
+    const { to, subject, text, html, attachments } = params;
     const idempotencyKey = `email:${to}:${subject}`;
     await this.emailService.sendJob({
       to,
       subject,
       text,
       html,
+      attachments,
       idempotencyKey,
     });
   }

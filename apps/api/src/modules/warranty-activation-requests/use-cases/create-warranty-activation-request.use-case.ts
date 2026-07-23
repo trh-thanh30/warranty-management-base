@@ -4,8 +4,18 @@ import { CreateWarrantyActivationRequestDto } from '@/modules/warranty-activatio
 import { toWarrantyActivationRequestResponse } from '@/modules/warranty-activation-requests/mappers/warranty-activation-request.mapper';
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
 import { GenerateWarrantyActivationRequestCodeUseCase } from '@/modules/warranty-activation-requests/use-cases/generate-warranty-activation-request-code.use-case';
+import {
+  buildWarrantyActivationRequestFullAddress,
+  normalizePhone,
+  normalizeText,
+  optionalTrim,
+} from '@/modules/warranty-activation-requests/utils/warranty-activation-request-normalization.utils';
 import { Injectable } from '@nestjs/common';
-import { Prisma, warranty_status } from '@prisma/client';
+import {
+  Prisma,
+  warranty_activation_request_source,
+  warranty_status,
+} from '@prisma/client';
 
 const REQUEST_CODE_GENERATION_ATTEMPTS = 3;
 const ACTIVATABLE_WARRANTY_STATUSES = new Set<warranty_status>([
@@ -20,7 +30,13 @@ export class CreateWarrantyActivationRequestUseCase {
     private readonly productsRepository: ProductsRepository,
   ) {}
 
-  async execute(dto: CreateWarrantyActivationRequestDto) {
+  async execute(
+    dto: CreateWarrantyActivationRequestDto,
+    context: {
+      createdByUserId?: string;
+      source?: warranty_activation_request_source;
+    } = {},
+  ) {
     const warrantyCode = dto.warrantyCode.trim().toUpperCase();
     const customerPhone = dto.customerPhone.trim();
     const customerEmail = dto.customerEmail.trim().toLowerCase();
@@ -88,7 +104,12 @@ export class CreateWarrantyActivationRequestUseCase {
       try {
         const request = await this.warrantyActivationRequestsRepository.create({
           request_code: requestCode,
+          source:
+            context.source ?? warranty_activation_request_source.PUBLIC_WEB,
           warranty_code: warrantyCode,
+          created_by: context.createdByUserId
+            ? { connect: { id: context.createdByUserId } }
+            : undefined,
           customer_name: customerName,
           customer_phone: customerPhone,
           customer_email: customerEmail,
@@ -100,7 +121,7 @@ export class CreateWarrantyActivationRequestUseCase {
           ward_code: dto.wardCode.trim(),
           ward_name: dto.wardName.trim(),
           address_detail: dto.addressDetail.trim(),
-          full_address: buildFullAddress(dto),
+          full_address: buildWarrantyActivationRequestFullAddress(dto),
           product_name: optionalTrim(dto.productName) ?? product.name,
           serial_number:
             optionalTrim(dto.serialNumber) ?? product.serial_number,
@@ -110,7 +131,8 @@ export class CreateWarrantyActivationRequestUseCase {
           note: optionalTrim(dto.note),
           metadata: {
             productId: product.id,
-            source: 'public_client_activation_request',
+            source:
+              context.source ?? warranty_activation_request_source.PUBLIC_WEB,
             warrantyId: product.warranty.id,
           },
         });
@@ -171,24 +193,4 @@ export class CreateWarrantyActivationRequestUseCase {
       );
     }
   }
-}
-
-function buildFullAddress(dto: CreateWarrantyActivationRequestDto) {
-  return [dto.addressDetail, dto.wardName, dto.provinceName]
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .join(', ');
-}
-
-function optionalTrim(value?: string) {
-  const trimmed = value?.trim();
-  return trimmed ? trimmed : undefined;
-}
-
-function normalizeText(value?: string | null) {
-  return value?.trim().toLowerCase() ?? '';
-}
-
-function normalizePhone(value?: string | null) {
-  return normalizeText(value).replace(/\D/g, '');
 }

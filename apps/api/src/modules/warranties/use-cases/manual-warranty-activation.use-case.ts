@@ -7,6 +7,7 @@ import { PrismaService } from '@/database/prisma/prisma.service';
 import { GenerateCustomerCodeUseCase } from '@/modules/customers/use-cases/generate-customer-code.use-case';
 import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generate-product-code.use-case';
 import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
+import { IssueWarrantyCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-certificate.use-case';
 import { ManualWarrantyActivationDto } from '@/modules/warranties/dto/manual-warranty-activation.dto';
 import { WarrantyLifecycleService } from '@/modules/warranties/services/warranty-lifecycle.service';
 import { toWarrantyResponse } from '@/modules/warranties/warranties.types';
@@ -38,6 +39,7 @@ export class ManualWarrantyActivationUseCase {
     private readonly generateCustomerCodeUseCase: GenerateCustomerCodeUseCase,
     private readonly generateProductCodeUseCase: GenerateProductCodeUseCase,
     private readonly generateWarrantyCodeUseCase: GenerateWarrantyCodeUseCase,
+    private readonly issueWarrantyCertificateUseCase: IssueWarrantyCertificateUseCase,
   ) {}
 
   async execute(
@@ -224,6 +226,11 @@ export class ManualWarrantyActivationUseCase {
     if (!customer || !warranty) {
       throw new BadRequestError('Manual warranty activation failed');
     }
+
+    await this.issueWarrantyCertificateUseCase.execute({
+      recipientEmail: email,
+      warrantyId: warranty.id,
+    });
 
     return {
       customer: {

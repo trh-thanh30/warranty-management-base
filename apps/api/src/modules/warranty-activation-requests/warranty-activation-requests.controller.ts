@@ -1,5 +1,4 @@
 import { Permissions } from '@/common/decorators/permissions.decorator';
-import { Public } from '@/common/decorators/public.decorator';
 import { User } from '@/common/decorators/user.decorator';
 import { createDatedExcelFilename, sendExcelFile } from '@/common/excel';
 import { CreateWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-warranty-activation-request.dto';
@@ -22,7 +21,10 @@ import {
   Query,
   Res,
 } from '@nestjs/common';
-import { permission_key } from '@prisma/client';
+import {
+  permission_key,
+  warranty_activation_request_source,
+} from '@prisma/client';
 import type { Response } from 'express';
 
 type RequestUser = {
@@ -42,14 +44,25 @@ export class WarrantyActivationRequestsController {
 
   @Post('admin')
   @Permissions([permission_key.WARRANTY_CREATE])
-  createAdmin(@Body() dto: CreateAdminWarrantyActivationRequestDto) {
-    return this.createAdminWarrantyActivationRequestUseCase.execute(dto);
+  createAdmin(
+    @Body() dto: CreateAdminWarrantyActivationRequestDto,
+    @User() user: RequestUser,
+  ) {
+    return this.createAdminWarrantyActivationRequestUseCase.execute(dto, {
+      createdByUserId: user?.id,
+    });
   }
 
   @Post()
-  @Public()
-  create(@Body() dto: CreateWarrantyActivationRequestDto) {
-    return this.createWarrantyActivationRequestUseCase.execute(dto);
+  @Permissions([permission_key.WARRANTY_CREATE])
+  create(
+    @Body() dto: CreateWarrantyActivationRequestDto,
+    @User() user: RequestUser,
+  ) {
+    return this.createWarrantyActivationRequestUseCase.execute(dto, {
+      createdByUserId: user?.id,
+      source: warranty_activation_request_source.ADMIN_PORTAL,
+    });
   }
 
   @Get()

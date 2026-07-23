@@ -16,6 +16,12 @@ type EmailTemplate = {
   engine: 'html' | 'mjml';
 };
 
+type EmailAttachment = {
+  contentBase64: string;
+  contentType: string;
+  filename: string;
+};
+
 @Injectable()
 export class WorkerEmailService implements OnModuleInit {
   private readonly logger = new Logger(WorkerEmailService.name);
@@ -151,6 +157,7 @@ export class WorkerEmailService implements OnModuleInit {
     subject: string,
     text: string,
     html?: string,
+    attachments: EmailAttachment[] = [],
   ): Promise<void> {
     // Validate email
     emailSchema.parse(to);
@@ -162,6 +169,11 @@ export class WorkerEmailService implements OnModuleInit {
         subject,
         text,
         html,
+        attachments: attachments.map((attachment) => ({
+          content: Buffer.from(attachment.contentBase64, 'base64'),
+          contentType: attachment.contentType,
+          filename: attachment.filename,
+        })),
       });
 
       this.logger.log(

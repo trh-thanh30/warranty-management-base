@@ -14,6 +14,7 @@
     "dev:full": "turbo run dev --filter=@repo/api --filter=@repo/web --filter=@repo/admin",
     "dev:api": "pnpm --filter @repo/api start:dev",
     "dev:api:debug": "pnpm --filter @repo/api start:debug",
+    "dev:worker": "pnpm --filter @repo/api start:worker:email",
     "dev:web": "pnpm --filter @repo/web dev",
     "dev:admin": "pnpm --filter @repo/admin dev",
     "dev:docs": "pnpm --filter @repo/docs dev",

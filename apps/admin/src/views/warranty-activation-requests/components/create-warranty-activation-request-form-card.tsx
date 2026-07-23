@@ -1,8 +1,21 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { Controller } from "react-hook-form";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+  FormField,
+  FormSection,
+  SearchDropdown,
+} from "@/src/components/common";
+import {
+  formatCustomerSearchOption,
+  formatProductSearchOption,
+} from "@/src/utils";
 import {
   Button,
   Card,
@@ -14,23 +27,18 @@ import {
   Input,
   Textarea,
 } from "@repo/ui";
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-  ComboboxLoading,
-  ComboboxTrigger,
-  FormField,
-  FormSection,
-} from "@/src/components/common";
-import {
-  formatCustomerSearchOption,
-  formatProductSearchOption,
-} from "@/src/utils";
+import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Controller } from "react-hook-form";
+import { CustomerSearchResult } from "./customer-search-result";
+import { ProductSearchResult } from "./product-search-result";
+import { SelectedCustomerSummaryCard } from "./selected-customer-summary-card";
+import { SelectedProductSummaryCard } from "./selected-product-summary-card";
 import { useCreateWarrantyActivationRequestForm } from "../hooks/use-create-warranty-activation-request-form";
+import {
+  getProductSelectDisabledReason,
+  getProductWarrantyStatusLabel,
+} from "../warranty-activation-request-product.utils";
 import { formatActivationRequestCreateFieldError } from "../warranty-activation-requests.utils";
 
 type CreateWarrantyActivationRequestFormCardProps = {
@@ -45,8 +53,11 @@ export function CreateWarrantyActivationRequestFormCard({
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const {
     control,
+    clearCustomer,
     customers,
     customersQuery,
+    customerSearch,
+    clearProduct,
     errors,
     isSaving,
     loadMoreProducts,
@@ -64,6 +75,8 @@ export function CreateWarrantyActivationRequestFormCard({
     selectCustomer,
     selectProduct,
     selectProvince,
+    selectWard,
+    setCustomerSearch,
     setProductSearch,
     wardCode,
     wards,
@@ -105,88 +118,75 @@ export function CreateWarrantyActivationRequestFormCard({
               id="create-activation-request-product"
               label={t("productSearch")}
             >
-              <Combobox
-                disabled={productsQuery.isLoading}
-                onValueChange={(value) => {
-                  const product = products.find((item) => item.id === value);
-                  if (product) selectProduct(product);
+              <SearchDropdown
+                emptyLabel={t("noProduct")}
+                getItemDisabledReason={(product) =>
+                  getProductSelectDisabledReason(product, t)
+                }
+                getItemKey={(product) => product.id}
+                isLoading={productsQuery.isFetching}
+                items={products}
+                loadingLabel={
+                  productsQuery.isFetchingNextPage
+                    ? t("loadingMoreProducts")
+                    : t("loadingProducts")
+                }
+                onItemSelect={selectProduct}
+                onReachEnd={loadMoreProducts}
+                onSearchChange={(value) => {
+                  if (selectedProduct) clearProduct();
+                  setProductSearch(value);
                 }}
-                value={selectedProduct?.id ?? ""}
-                shouldFilter={false}
-              >
-                <ComboboxTrigger
-                  id="create-activation-request-product"
-                  placeholder={t("productSearchPlaceholder")}
-                  selectedLabel={
-                    selectedProduct
-                      ? formatProductSearchOption(selectedProduct)
-                      : undefined
-                  }
-                />
-                <ComboboxContent>
-                  <ComboboxInput
-                    onValueChange={setProductSearch}
-                    placeholder={t("search")}
-                    showTrigger={false}
-                    value={productSearch}
+                placeholder={t("productSearchPlaceholder")}
+                renderItem={(product) => (
+                  <ProductSearchResult
+                    disabledReason={getProductSelectDisabledReason(product, t)}
+                    ownerName={product.owner?.fullName}
+                    productCode={product.productCode}
+                    productName={product.name}
+                    serialNumber={product.serialNumber}
+                    statusLabel={getProductWarrantyStatusLabel(product, t)}
+                    warrantyCode={product.warrantyCode}
                   />
-                  <ComboboxList onReachEnd={loadMoreProducts}>
-                    {productsQuery.isFetching && products.length === 0 ? (
-                      <ComboboxLoading label={t("loadingProducts")} />
-                    ) : (
-                      <ComboboxEmpty>{t("noProduct")}</ComboboxEmpty>
-                    )}
-                    {productsQuery.isFetching &&
-                    products.length > 0 &&
-                    !productsQuery.isFetchingNextPage ? (
-                      <ComboboxLoading label={t("loadingProducts")} />
-                    ) : null}
-                    {products.map((product) => (
-                      <ComboboxItem key={product.id} value={product.id}>
-                        {formatProductSearchOption(product)}
-                      </ComboboxItem>
-                    ))}
-                    {productsQuery.isFetchingNextPage ? (
-                      <ComboboxLoading label={t("loadingMoreProducts")} />
-                    ) : null}
-                  </ComboboxList>
-                </ComboboxContent>
-              </Combobox>
+                )}
+                searchValue={productSearch}
+                selectedLabel={
+                  selectedProduct
+                    ? formatProductSearchOption(selectedProduct)
+                    : undefined
+                }
+              />
             </FormField>
 
-            <div className="grid gap-5 sm:grid-cols-2">
-              <FormField
-                error={formatActivationRequestCreateFieldError(
-                  errors.warrantyCode?.message,
-                  t,
-                )}
-                id="create-activation-request-warranty-code"
-                label={t("warrantyCode")}
-              >
-                <Input
-                  id="create-activation-request-warranty-code"
-                  placeholder={t("warrantyCodeManualPlaceholder")}
-                  readOnly
-                  className={readOnlyClassName}
-                  {...register("warrantyCode")}
-                />
-              </FormField>
-              <FormField
-                error={formatActivationRequestCreateFieldError(
-                  errors.productName?.message,
-                  t,
-                )}
-                id="create-activation-request-product-name"
-                label={t("product")}
-              >
-                <Input
-                  id="create-activation-request-product-name"
-                  readOnly
-                  className={readOnlyClassName}
-                  {...register("productName")}
-                />
-              </FormField>
-            </div>
+            <input type="hidden" {...register("productId")} />
+            <input type="hidden" {...register("productName")} />
+            <input type="hidden" {...register("warrantyCode")} />
+
+            {selectedProduct ? (
+              <SelectedProductSummaryCard
+                brand={selectedProduct.brand}
+                durationMonths={selectedProduct.warranty?.durationMonths}
+                endDate={selectedProduct.warranty?.endDate ?? null}
+                model={selectedProduct.model}
+                ownerName={selectedProduct.owner?.fullName}
+                productCodeLabel={t("productCode")}
+                productCode={selectedProduct.productCode}
+                productName={selectedProduct.name}
+                serialNumber={selectedProduct.serialNumber}
+                serialNumberLabel={t("serialNumber")}
+                startDate={selectedProduct.warranty?.startDate ?? null}
+                statusLabel={getProductWarrantyStatusLabel(selectedProduct, t)}
+                summaryLabels={{
+                  brandModel: `${t("brand")} / ${t("model")}`,
+                  currentOwner: t("currentOwner"),
+                  durationMonths: t("durationMonths"),
+                  monthUnit: t("monthUnit"),
+                  warrantyPeriod: t("warrantyPeriod"),
+                }}
+                warrantyCode={selectedProduct.warrantyCode}
+                warrantyCodeLabel={t("warrantyCode")}
+              />
+            ) : null}
           </FormSection>
 
           <FormSection
@@ -194,219 +194,193 @@ export function CreateWarrantyActivationRequestFormCard({
             title={t("customerInfo")}
           >
             <FormField
+              error={formatActivationRequestCreateFieldError(
+                errors.customerName?.message ??
+                  errors.customerPhone?.message ??
+                  errors.customerEmail?.message,
+                t,
+              )}
               id="create-activation-request-customer"
               label={t("customerSearch")}
             >
-              <Combobox
-                disabled={customersQuery.isLoading}
-                onValueChange={(value) => {
-                  const customer = customers.find((item) => item.id === value);
-                  if (customer) selectCustomer(customer);
+              <SearchDropdown
+                emptyLabel={t("noCustomer")}
+                getItemKey={(customer) => customer.id}
+                isLoading={customersQuery.isFetching}
+                items={customers}
+                loadingLabel={t("loadingCustomers")}
+                onItemSelect={selectCustomer}
+                onSearchChange={(value) => {
+                  if (selectedCustomer) clearCustomer();
+                  setCustomerSearch(value);
                 }}
-                value={selectedCustomer?.id ?? ""}
-              >
-                <ComboboxTrigger
-                  id="create-activation-request-customer"
-                  placeholder={t("customerSearchPlaceholder")}
-                  selectedLabel={
-                    selectedCustomer
-                      ? formatCustomerSearchOption(selectedCustomer)
-                      : undefined
-                  }
-                />
-                <ComboboxContent>
-                  <ComboboxInput
-                    placeholder={t("search")}
-                    showTrigger={false}
+                placeholder={t("customerSearchPlaceholder")}
+                renderItem={(customer) => (
+                  <CustomerSearchResult
+                    customerCode={customer.customerCode}
+                    email={customer.email}
+                    fullName={customer.fullName}
+                    phone={customer.phone}
                   />
-                  <ComboboxList>
-                    <ComboboxEmpty>{t("noCustomer")}</ComboboxEmpty>
-                    {customers.map((customer) => (
-                      <ComboboxItem key={customer.id} value={customer.id}>
-                        {formatCustomerSearchOption(customer)}
-                      </ComboboxItem>
-                    ))}
-                  </ComboboxList>
-                </ComboboxContent>
-              </Combobox>
-            </FormField>
-
-            <div className="grid gap-5 sm:grid-cols-2">
-              <FormField
-                error={formatActivationRequestCreateFieldError(
-                  errors.customerName?.message,
-                  t,
                 )}
-                id="create-activation-request-customer-name"
-                label={t("customerName")}
-              >
-                <Input
-                  id="create-activation-request-customer-name"
-                  readOnly
-                  className={readOnlyClassName}
-                  {...register("customerName")}
-                />
-              </FormField>
-              <FormField
-                error={formatActivationRequestCreateFieldError(
-                  errors.customerPhone?.message,
-                  t,
-                )}
-                id="create-activation-request-customer-phone"
-                label={t("phone")}
-              >
-                <Input
-                  id="create-activation-request-customer-phone"
-                  readOnly
-                  className={readOnlyClassName}
-                  {...register("customerPhone")}
-                />
-              </FormField>
-            </div>
-
-            <div className="grid gap-5 sm:grid-cols-2">
-              <FormField
-                error={formatActivationRequestCreateFieldError(
-                  errors.customerEmail?.message,
-                  t,
-                )}
-                id="create-activation-request-customer-email"
-                label={t("email")}
-              >
-                <Input
-                  id="create-activation-request-customer-email"
-                  readOnly
-                  className={readOnlyClassName}
-                  type="email"
-                  {...register("customerEmail")}
-                />
-              </FormField>
-              <FormField
-                id="create-activation-request-customer-birthdate"
-                label={t("birthdate")}
-              >
-                <Controller
-                  control={control}
-                  name="customerBirthdate"
-                  render={({ field }) => (
-                    <DatePicker
-                      ariaLabel={t("birthdate")}
-                      id="create-activation-request-customer-birthdate"
-                      onValueChange={field.onChange}
-                      placeholder={t("selectBirthdate")}
-                      value={field.value}
-                    />
-                  )}
-                />
-              </FormField>
-            </div>
-
-            <div className="grid gap-5 sm:grid-cols-2">
-              <FormField
-                error={formatActivationRequestCreateFieldError(
-                  errors.provinceCode?.message,
-                  t,
-                )}
-                id="create-activation-request-province"
-                label={t("province")}
-              >
-                <Controller
-                  control={control}
-                  name="provinceCode"
-                  render={({ field }) => (
-                    <Combobox
-                      disabled={provincesQuery.isLoading}
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        selectProvince(value);
-                      }}
-                      value={field.value}
-                    >
-                      <ComboboxTrigger
-                        id="create-activation-request-province"
-                        placeholder={t("provincePlaceholder")}
-                        selectedLabel={selectedProvince?.name}
-                      />
-                      <ComboboxContent>
-                        <ComboboxInput
-                          placeholder={t("search")}
-                          showTrigger={false}
-                        />
-                        <ComboboxList>
-                          <ComboboxEmpty>{t("noProvince")}</ComboboxEmpty>
-                          {provinces.map((province) => (
-                            <ComboboxItem
-                              key={province.code}
-                              value={String(province.code)}
-                            >
-                              {province.name}
-                            </ComboboxItem>
-                          ))}
-                        </ComboboxList>
-                      </ComboboxContent>
-                    </Combobox>
-                  )}
-                />
-              </FormField>
-              <FormField
-                error={formatActivationRequestCreateFieldError(
-                  errors.wardCode?.message,
-                  t,
-                )}
-                id="create-activation-request-ward"
-                label={t("ward")}
-              >
-                <Controller
-                  control={control}
-                  name="wardCode"
-                  render={({ field }) => (
-                    <Combobox
-                      disabled={!provinceCode || wardsQuery.isLoading}
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
-                      <ComboboxTrigger
-                        id="create-activation-request-ward"
-                        placeholder={t("wardPlaceholder")}
-                        selectedLabel={selectedWard?.name}
-                      />
-                      <ComboboxContent>
-                        <ComboboxInput
-                          placeholder={t("search")}
-                          showTrigger={false}
-                        />
-                        <ComboboxList>
-                          <ComboboxEmpty>{t("noWard")}</ComboboxEmpty>
-                          {wards.map((ward) => (
-                            <ComboboxItem
-                              key={ward.code}
-                              value={String(ward.code)}
-                            >
-                              {ward.name}
-                            </ComboboxItem>
-                          ))}
-                        </ComboboxList>
-                      </ComboboxContent>
-                    </Combobox>
-                  )}
-                />
-              </FormField>
-            </div>
-
-            <FormField
-              error={formatActivationRequestCreateFieldError(
-                errors.addressDetail?.message,
-                t,
-              )}
-              id="create-activation-request-address"
-              label={t("addressDetail")}
-            >
-              <Input
-                id="create-activation-request-address"
-                placeholder={t("addressDetailPlaceholder")}
-                {...register("addressDetail")}
+                searchValue={customerSearch}
+                selectedLabel={
+                  selectedCustomer
+                    ? formatCustomerSearchOption(selectedCustomer)
+                    : undefined
+                }
               />
             </FormField>
+
+            <input type="hidden" {...register("customerName")} />
+            <input type="hidden" {...register("customerPhone")} />
+            <input type="hidden" {...register("customerEmail")} />
+
+            {selectedCustomer ? (
+              <SelectedCustomerSummaryCard
+                address={selectedCustomer.address}
+                customerCode={selectedCustomer.customerCode}
+                email={selectedCustomer.email}
+                fullName={selectedCustomer.fullName}
+                labels={{
+                  address: t("address"),
+                  customerCode: t("customerCode"),
+                  email: t("email"),
+                  phone: t("phone"),
+                  selected: t("customerSelected"),
+                }}
+                phone={selectedCustomer.phone}
+              />
+            ) : null}
+
+            <div className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <FormField
+                  id="create-activation-request-customer-birthdate"
+                  label={t("birthdate")}
+                >
+                  <Controller
+                    control={control}
+                    name="customerBirthdate"
+                    render={({ field }) => (
+                      <DatePicker
+                        ariaLabel={t("birthdate")}
+                        id="create-activation-request-customer-birthdate"
+                        onValueChange={field.onChange}
+                        placeholder={t("selectBirthdate")}
+                        value={field.value}
+                      />
+                    )}
+                  />
+                </FormField>
+                <FormField
+                  error={formatActivationRequestCreateFieldError(
+                    errors.addressDetail?.message,
+                    t,
+                  )}
+                  id="create-activation-request-address"
+                  label={t("addressDetail")}
+                >
+                  <Input
+                    id="create-activation-request-address"
+                    placeholder={t("addressDetailPlaceholder")}
+                    {...register("addressDetail")}
+                  />
+                </FormField>
+              </div>
+
+              <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                <FormField
+                  error={formatActivationRequestCreateFieldError(
+                    errors.provinceCode?.message,
+                    t,
+                  )}
+                  id="create-activation-request-province"
+                  label={t("province")}
+                >
+                  <Controller
+                    control={control}
+                    name="provinceCode"
+                    render={({ field }) => (
+                      <Combobox
+                        disabled={provincesQuery.isLoading}
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          selectProvince(value);
+                        }}
+                        value={field.value}
+                      >
+                        <ComboboxTrigger
+                          id="create-activation-request-province"
+                          placeholder={t("provincePlaceholder")}
+                          selectedLabel={selectedProvince?.name}
+                        />
+                        <ComboboxContent>
+                          <ComboboxInput
+                            placeholder={t("search")}
+                            showTrigger={false}
+                          />
+                          <ComboboxList>
+                            <ComboboxEmpty>{t("noProvince")}</ComboboxEmpty>
+                            {provinces.map((province) => (
+                              <ComboboxItem
+                                key={province.code}
+                                value={String(province.code)}
+                              >
+                                {province.name}
+                              </ComboboxItem>
+                            ))}
+                          </ComboboxList>
+                        </ComboboxContent>
+                      </Combobox>
+                    )}
+                  />
+                </FormField>
+                <FormField
+                  error={formatActivationRequestCreateFieldError(
+                    errors.wardCode?.message,
+                    t,
+                  )}
+                  id="create-activation-request-ward"
+                  label={t("ward")}
+                >
+                  <Controller
+                    control={control}
+                    name="wardCode"
+                    render={({ field }) => (
+                      <Combobox
+                        disabled={!provinceCode || wardsQuery.isLoading}
+                        onValueChange={selectWard}
+                        value={field.value}
+                      >
+                        <ComboboxTrigger
+                          id="create-activation-request-ward"
+                          placeholder={t("wardPlaceholder")}
+                          selectedLabel={selectedWard?.name}
+                        />
+                        <ComboboxContent>
+                          <ComboboxInput
+                            placeholder={t("search")}
+                            showTrigger={false}
+                          />
+                          <ComboboxList>
+                            <ComboboxEmpty>{t("noWard")}</ComboboxEmpty>
+                            {wards.map((ward) => (
+                              <ComboboxItem
+                                key={ward.code}
+                                value={String(ward.code)}
+                              >
+                                {ward.name}
+                              </ComboboxItem>
+                            ))}
+                          </ComboboxList>
+                        </ComboboxContent>
+                      </Combobox>
+                    )}
+                  />
+                </FormField>
+              </div>
+            </div>
           </FormSection>
 
           <FormSection
@@ -456,6 +430,3 @@ export function CreateWarrantyActivationRequestFormCard({
     </Card>
   );
 }
-
-const readOnlyClassName =
-  "bg-slate-50 text-slate-700 focus:border-slate-300 dark:bg-slate-900/60 dark:text-slate-200 dark:focus:border-slate-700";

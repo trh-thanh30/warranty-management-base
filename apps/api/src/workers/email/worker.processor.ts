@@ -8,6 +8,11 @@ export interface EmailJobData {
   subject?: string;
   text?: string;
   html?: string;
+  attachments?: Array<{
+    contentBase64: string;
+    contentType: string;
+    filename: string;
+  }>;
   template?: string;
   context?: Record<string, any>;
   // Idempotency key for deduplication
@@ -25,8 +30,16 @@ export class EmailProcessor extends WorkerHost {
   }
 
   async process(job: Job<EmailJobData>): Promise<void> {
-    const { to, subject, text, html, template, context, idempotencyKey } =
-      job.data;
+    const {
+      to,
+      subject,
+      text,
+      html,
+      attachments,
+      template,
+      context,
+      idempotencyKey,
+    } = job.data;
 
     // Idempotency check - skip if already processed
     if (idempotencyKey && this.processedJobs.has(idempotencyKey)) {
@@ -52,6 +65,7 @@ export class EmailProcessor extends WorkerHost {
           subject || 'No Subject',
           text || '',
           html,
+          attachments,
         );
       }
 

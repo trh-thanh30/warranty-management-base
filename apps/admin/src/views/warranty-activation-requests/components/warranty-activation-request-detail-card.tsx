@@ -20,6 +20,7 @@ export function WarrantyActivationRequestDetailCard({
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const tWarranties = useTranslations("Warranties");
   const activatedWarranty = request.activatedWarranty;
+  const certificate = request.certificate;
 
   return (
     <Card className="min-w-0">
@@ -27,6 +28,14 @@ export function WarrantyActivationRequestDetailCard({
         <DetailSection title={t("requestInfo")}>
           <DetailItem label={t("requestCode")} value={request.requestCode} />
           <DetailItem label={t("warrantyCode")} value={request.warrantyCode} />
+          <DetailItem
+            label={t("source")}
+            value={t(`sources.${request.source}`)}
+          />
+          <DetailItem
+            label={t("createdBy")}
+            value={formatUserSummary(request.createdBy)}
+          />
           <div className="min-w-0 space-y-1.5">
             <dt className={detailLabelClassName}>{t("status")}</dt>
             <dd>
@@ -44,6 +53,14 @@ export function WarrantyActivationRequestDetailCard({
 
         <DetailSection title={t("customerInfo")}>
           <DetailItem label={t("customer")} value={request.customerName} />
+          <DetailItem
+            label={t("resolvedCustomer")}
+            value={
+              request.customer
+                ? `${request.customer.fullName} (${request.customer.customerCode})`
+                : "-"
+            }
+          />
           <DetailItem label={t("phone")} value={request.customerPhone} />
           <DetailItem label={t("email")} value={request.customerEmail} />
           <DetailItem
@@ -83,11 +100,7 @@ export function WarrantyActivationRequestDetailCard({
           />
           <DetailItem
             label={t("reviewedBy")}
-            value={
-              request.reviewedBy
-                ? `${request.reviewedBy.displayName} (${request.reviewedBy.email})`
-                : "-"
-            }
+            value={formatUserSummary(request.reviewedBy)}
           />
           <DetailItem
             label={t("activatedWarranty")}
@@ -143,9 +156,68 @@ export function WarrantyActivationRequestDetailCard({
             value={request.rejectionReason ?? "-"}
           />
         </DetailSection>
+
+        <DetailSection title={t("certificateInfo")}>
+          <DetailItem
+            label={t("certificateNumber")}
+            value={certificate?.certificateNumber ?? "-"}
+          />
+          <DetailItem
+            label={t("certificateEmail")}
+            value={certificate?.recipientEmail ?? "-"}
+          />
+          <DetailItem
+            label={t("certificateStatus")}
+            value={
+              certificate ? (
+                <Badge variant="secondary">
+                  {t(`certificateStatuses.${certificate.status}`)}
+                </Badge>
+              ) : (
+                "-"
+              )
+            }
+          />
+          <DetailItem
+            label={t("certificateEmailStatus")}
+            value={
+              certificate ? (
+                <Badge variant="secondary">
+                  {t(`certificateEmailStatuses.${certificate.emailStatus}`)}
+                </Badge>
+              ) : (
+                "-"
+              )
+            }
+          />
+          <DetailItem
+            label={t("certificateGeneratedAt")}
+            value={formatActivationRequestDate(
+              certificate?.generatedAt ?? null,
+            )}
+          />
+          <DetailItem
+            label={t("certificateEmailedAt")}
+            value={formatActivationRequestDate(certificate?.emailedAt ?? null)}
+          />
+          <DetailItem
+            className="sm:col-span-2"
+            label={t("certificateLastError")}
+            value={certificate?.lastError ?? "-"}
+          />
+        </DetailSection>
       </CardContent>
     </Card>
   );
+}
+
+function formatUserSummary(
+  user: {
+    displayName: string;
+    email: string;
+  } | null,
+) {
+  return user ? `${user.displayName} (${user.email})` : "-";
 }
 
 function DetailSection({
