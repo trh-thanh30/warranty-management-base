@@ -1,9 +1,9 @@
 import { Public } from '@/common/decorators/public.decorator';
 import { ListServiceCentersDto } from '@/modules/service-centers/dto/list-service-centers.dto';
-import { ActivateWarrantyByCodeDto } from '@/modules/warranties/dto/activate-warranty-by-code.dto';
 import { LookupWarrantyDto } from '@/modules/warranties/dto/lookup-warranty.dto';
-import { ActivateWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/activate-warranty-by-code.use-case';
 import { LookupWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/lookup-warranty-by-code.use-case';
+import { CreateWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-warranty-activation-request.dto';
+import { CreateWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-warranty-activation-request.use-case';
 import { CreateWarrantyClaimDto } from '@/modules/warranty-claims/dto/create-warranty-claim.dto';
 import { CreateWarrantyClaimUseCase } from '@/modules/warranty-claims/use-cases/create-warranty-claim.use-case';
 import { PublicListServiceCentersUseCase } from '@/modules/public/use-cases/public-list-service-centers.use-case';
@@ -16,7 +16,7 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 export class PublicController {
   constructor(
     private readonly lookupWarrantyByCodeUseCase: LookupWarrantyByCodeUseCase,
-    private readonly activateWarrantyByCodeUseCase: ActivateWarrantyByCodeUseCase,
+    private readonly createWarrantyActivationRequestUseCase: CreateWarrantyActivationRequestUseCase,
     private readonly createWarrantyClaimUseCase: CreateWarrantyClaimUseCase,
     private readonly publicLookupWarrantyClaimByCodeUseCase: PublicLookupWarrantyClaimByCodeUseCase,
     private readonly publicLookupWarrantyClaimsByWarrantyCodeUseCase: PublicLookupWarrantyClaimsByWarrantyCodeUseCase,
@@ -28,9 +28,11 @@ export class PublicController {
     return this.lookupWarrantyByCodeUseCase.execute(query);
   }
 
-  @Post('warranties/activate-by-code')
-  activateWarranty(@Body() dto: ActivateWarrantyByCodeDto) {
-    return this.activateWarrantyByCodeUseCase.execute(dto);
+  @Post('warranty-activation-requests')
+  createWarrantyActivationRequest(
+    @Body() dto: CreateWarrantyActivationRequestDto,
+  ) {
+    return this.createWarrantyActivationRequestUseCase.execute(dto);
   }
 
   @Post('warranty-claims')

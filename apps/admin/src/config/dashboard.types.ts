@@ -11,6 +11,7 @@ export interface BrandConfig {
 export interface NavigationItem {
   title: string;
   href?: string;
+  activeHrefs?: string[];
   icon: ComponentType<{ className?: string }>;
   badge?: string;
   requiredPermission?: PermissionKey;

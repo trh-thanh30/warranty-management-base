@@ -18,11 +18,25 @@ describe('WarrantyActivationRequestsUseCases', () => {
     review: jest.fn(),
   };
   const productsRepository = {
+    findActivationRequestTargetById: jest.fn(),
     findActivationRequestTargetByWarrantyCode: jest.fn(),
+    synchronizeWarrantyCode: jest.fn(),
+  };
+  const dealersRepository = {
+    create: jest.fn(),
+    findActiveById: jest.fn(),
+    findByPhone: jest.fn(),
+  };
+  const generateWarrantyCodeUseCase = {
+    execute: jest.fn(),
+  };
+  const issueWarrantyCertificateUseCase = {
+    execute: jest.fn(),
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    generateWarrantyCodeUseCase.execute.mockResolvedValue('WM-2026-GENERATED');
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2026-07-19T03:00:00.000Z'));
   });
@@ -65,6 +79,8 @@ describe('WarrantyActivationRequestsUseCases', () => {
       repository as never,
       generateCodeUseCase,
       productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
     );
 
     const result = await useCase.execute({
@@ -97,6 +113,106 @@ describe('WarrantyActivationRequestsUseCases', () => {
     expect(result.requestCode).toBe('WAR-20260719-0001');
   });
 
+  it('creates and connects a quick dealer when dealer fields are provided', async () => {
+    repository.findPendingDuplicate.mockResolvedValue(null);
+    repository.findLastRequestCode.mockResolvedValue(null);
+    productsRepository.findActivationRequestTargetByWarrantyCode.mockResolvedValue(
+      baseDraftProduct,
+    );
+    dealersRepository.findByPhone.mockResolvedValue(null);
+    dealersRepository.create.mockResolvedValue({
+      address: '12 Nguyen Trai',
+      district: 'Phuong Thanh Xuan',
+      id: 'dealer-id',
+      is_active: true,
+      name: 'Lexzenz Ha Noi',
+      phone: '0901234567',
+      province: 'Thanh pho Ha Noi',
+      sales_name: 'Nguyen Van Sale',
+    });
+    repository.create.mockResolvedValue({
+      ...baseRequest,
+      dealer_id: 'dealer-id',
+      request_code: 'WAR-20260719-0001',
+    });
+    const generateCodeUseCase =
+      new GenerateWarrantyActivationRequestCodeUseCase(repository as never);
+    const useCase = new CreateWarrantyActivationRequestUseCase(
+      repository as never,
+      generateCodeUseCase,
+      productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
+    );
+
+    await useCase.execute({
+      addressDetail: '1 Nguyen Trai',
+      customerName: 'Nguyen Van A',
+      customerPhone: '0901234567',
+      dealerAddress: '12 Nguyen Trai',
+      dealerDistrict: 'Phuong Thanh Xuan',
+      dealerName: 'Lexzenz Ha Noi',
+      dealerPhone: '0901234567',
+      dealerProvince: 'Thanh pho Ha Noi',
+      provinceCode: '79',
+      provinceName: 'TP Ho Chi Minh',
+      salesName: 'Nguyen Van Sale',
+      wardCode: '26734',
+      wardName: 'Phuong Ben Thanh',
+      warrantyCode: 'WM-2026-ABC123',
+    });
+
+    expect(dealersRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        address: '12 Nguyen Trai',
+        district: 'Phuong Thanh Xuan',
+        is_active: true,
+        name: 'Lexzenz Ha Noi',
+        phone: '0901234567',
+        province: 'Thanh pho Ha Noi',
+        sales_name: 'Nguyen Van Sale',
+      }),
+    );
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dealer: { connect: { id: 'dealer-id' } },
+      }),
+    );
+  });
+
+  it('rejects product selection when it does not match the selected category', async () => {
+    productsRepository.findActivationRequestTargetByWarrantyCode.mockResolvedValue(
+      baseDraftProduct,
+    );
+    const generateCodeUseCase =
+      new GenerateWarrantyActivationRequestCodeUseCase(repository as never);
+    const useCase = new CreateWarrantyActivationRequestUseCase(
+      repository as never,
+      generateCodeUseCase,
+      productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
+    );
+
+    await expect(
+      useCase.execute({
+        addressDetail: '1 Nguyen Trai',
+        categoryId: 'other-category-id',
+        customerName: 'Nguyen Van A',
+        customerPhone: '0901234567',
+        provinceCode: '79',
+        provinceName: 'TP Ho Chi Minh',
+        wardCode: '26734',
+        wardName: 'Phuong Ben Thanh',
+        warrantyCode: 'WM-2026-ABC123',
+      }),
+    ).rejects.toMatchObject({
+      details: expect.objectContaining({
+        code: 'PRODUCT_CATEGORY_MISMATCH',
+      }),
+    });
+  });
+
   it('rejects duplicate pending activation requests for the same warranty and phone', async () => {
     repository.findPendingDuplicate.mockResolvedValue(baseRequest);
     productsRepository.findActivationRequestTargetByWarrantyCode.mockResolvedValue(
@@ -108,6 +224,8 @@ describe('WarrantyActivationRequestsUseCases', () => {
       repository as never,
       generateCodeUseCase,
       productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
     );
 
     await expect(
@@ -149,6 +267,8 @@ describe('WarrantyActivationRequestsUseCases', () => {
       repository as never,
       generateCodeUseCase,
       productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
     );
 
     const result = await useCase.execute({
@@ -177,6 +297,8 @@ describe('WarrantyActivationRequestsUseCases', () => {
       repository as never,
       generateCodeUseCase,
       productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
     );
 
     await expect(
@@ -210,6 +332,8 @@ describe('WarrantyActivationRequestsUseCases', () => {
       repository as never,
       generateCodeUseCase,
       productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
     );
 
     await expect(
@@ -237,6 +361,8 @@ describe('WarrantyActivationRequestsUseCases', () => {
       repository as never,
       generateCodeUseCase,
       productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
     );
 
     await expect(
@@ -255,10 +381,10 @@ describe('WarrantyActivationRequestsUseCases', () => {
   });
 
   it('activates warranty and owner when approving a pending activation request', async () => {
-    repository.findById.mockResolvedValue(baseRequest);
-    repository.activateApprovedRequest.mockResolvedValue({
+    const activatedRequest = {
       ...baseRequest,
       activated_warranty: {
+        certificates: [],
         duration_months: 36,
         end_date: new Date('2029-07-19T04:00:00.000Z'),
         id: 'warranty-id',
@@ -276,9 +402,18 @@ describe('WarrantyActivationRequestsUseCases', () => {
       },
       reviewed_by_id: 'admin-id',
       status: warranty_activation_request_status.ACTIVATED,
+    };
+    repository.findById
+      .mockResolvedValueOnce(baseRequest)
+      .mockResolvedValueOnce(activatedRequest);
+    repository.activateApprovedRequest.mockResolvedValue(activatedRequest);
+    issueWarrantyCertificateUseCase.execute.mockResolvedValue({
+      certificate_number: 'CERT-2026-ABC123',
+      id: 'certificate-id',
     });
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
+      issueWarrantyCertificateUseCase as never,
     );
 
     const result = await useCase.execute(
@@ -296,6 +431,11 @@ describe('WarrantyActivationRequestsUseCases', () => {
       reviewedById: 'admin-id',
     });
     expect(repository.review).not.toHaveBeenCalled();
+    expect(issueWarrantyCertificateUseCase.execute).toHaveBeenCalledWith({
+      recipientEmail: 'customer@example.com',
+      requestId: 'request-id',
+      warrantyId: 'warranty-id',
+    });
     expect(result.activatedWarrantyId).toBe('warranty-id');
     expect(result.activatedWarranty).toEqual({
       durationMonths: 36,
@@ -318,6 +458,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     repository.findById.mockResolvedValue(baseRequest);
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
+      issueWarrantyCertificateUseCase as never,
     );
 
     await expect(
@@ -331,6 +472,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     repository.findById.mockResolvedValue(null);
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
+      issueWarrantyCertificateUseCase as never,
     );
 
     await expect(
@@ -346,7 +488,9 @@ const baseRequest = {
   address_detail: '1 Nguyen Trai',
   admin_note: null,
   brand: null,
+  created_by_id: null,
   created_at: new Date('2026-07-19T03:00:00.000Z'),
+  customer_id: null,
   customer_birthdate: null,
   customer_email: 'customer@example.com',
   customer_name: 'Nguyen Van A',
@@ -365,6 +509,7 @@ const baseRequest = {
   reviewed_at: null,
   reviewed_by_id: null,
   serial_number: null,
+  source: 'PUBLIC_WEB',
   status: warranty_activation_request_status.PENDING,
   updated_at: new Date('2026-07-19T03:00:00.000Z'),
   ward_code: '26734',
@@ -374,6 +519,7 @@ const baseRequest = {
 
 const baseDraftProduct = {
   brand: 'Black Label',
+  category_id: 'category-id',
   id: 'product-id',
   manufacture_year: 2026,
   model: 'Premium',
@@ -388,8 +534,10 @@ const baseDraftProduct = {
     },
   ],
   serial_number: 'SN-BLF-001',
+  warranty_code: 'WM-2026-ABC123',
   warranty: {
     id: 'warranty-id',
     status: warranty_status.DRAFT,
+    warranty_code: 'WM-2026-ABC123',
   },
 };

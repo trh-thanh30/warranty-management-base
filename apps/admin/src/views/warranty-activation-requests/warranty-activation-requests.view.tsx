@@ -8,6 +8,7 @@ import { ImportExportMenu } from "@/src/components/common";
 import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
+import { WarrantyManagementTabs } from "../warranties/components/warranty-management-tabs";
 import { ReviewWarrantyActivationRequestDialog } from "./components/review-warranty-activation-request-dialog";
 import { WarrantyActivationRequestsDirectoryCard } from "./components/warranty-activation-requests-directory-card";
 import { useWarrantyActivationRequestsDirectory } from "./hooks/use-warranty-activation-requests-directory";
@@ -43,6 +44,8 @@ export function WarrantyActivationRequestsView() {
             </div>
           }
         />
+
+        <WarrantyManagementTabs activeTab="activationRequests" />
 
         <WarrantyActivationRequestsDirectoryCard
           data={directory.requestsQuery.data}

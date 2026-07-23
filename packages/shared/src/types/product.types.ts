@@ -79,6 +79,7 @@ export type ListProductsQuery = PaginationQuery & {
   search?: string;
   category?: ProductCategory;
   categoryId?: string;
+  ownerCustomerId?: string;
   status?: ProductStatus;
   warrantyStatus?: WarrantyStatus;
   sortBy?: ProductSortBy;

@@ -8,8 +8,8 @@ test("content page form accepts backend kinds and trims text", () => {
     title: "  Warranty policy  ",
     summary: "  Summary  ",
     content: "<p>Policy</p>",
+    categoryId: "",
     kind: "POLICY",
-    status: "DRAFT",
   });
 
   assert.equal(result.slug, "warranty-policy");
@@ -23,16 +23,16 @@ test("content page form rejects invalid slugs and empty rich text", () => {
     title: "Warranty policy",
     summary: "",
     content: "<p>Policy</p>",
+    categoryId: "",
     kind: "POLICY",
-    status: "DRAFT",
   });
   const emptyContent = contentPageFormSchema.safeParse({
     slug: "warranty-policy",
     title: "Warranty policy",
     summary: "",
     content: "<p></p>",
+    categoryId: "",
     kind: "POLICY",
-    status: "DRAFT",
   });
 
   assert.equal(invalidSlug.success, false);

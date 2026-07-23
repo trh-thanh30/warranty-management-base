@@ -125,6 +125,12 @@ describe('ManualWarrantyActivationUseCase', () => {
           .fn()
           .mockResolvedValue(createdProduct.warranty),
       },
+      certificateUseCase: {
+        execute: jest.fn().mockResolvedValue({
+          certificate_number: 'CERT-2026-ABC123',
+          id: 'certificate-id',
+        }),
+      },
       tx,
       service: {
         product: {
@@ -136,14 +142,20 @@ describe('ManualWarrantyActivationUseCase', () => {
   }
 
   it('creates customer, product ownership, and active warranty manually', async () => {
-    const { codeGenerators, lifecycleService, service, tx } =
-      createPrismaService();
+    const {
+      certificateUseCase,
+      codeGenerators,
+      lifecycleService,
+      service,
+      tx,
+    } = createPrismaService();
     const useCase = new ManualWarrantyActivationUseCase(
       service as never,
       lifecycleService as never,
       codeGenerators.customer as never,
       codeGenerators.product as never,
       codeGenerators.warranty as never,
+      certificateUseCase as never,
     );
 
     const result = await useCase.execute(dto);
@@ -186,6 +198,10 @@ describe('ManualWarrantyActivationUseCase', () => {
       tx,
     );
     expect(codeGenerators.warranty.execute).not.toHaveBeenCalled();
+    expect(certificateUseCase.execute).toHaveBeenCalledWith({
+      recipientEmail: dto.customer.email,
+      warrantyId: 'warranty-id',
+    });
     expect(result.warranty.status).toBe(warranty_status.ACTIVE);
     expect(result.customer.customerCode).toBe('CUS000001');
   });
@@ -196,16 +212,22 @@ describe('ManualWarrantyActivationUseCase', () => {
       user_id: null,
       customer_code: 'CUS000010',
     };
-    const { codeGenerators, lifecycleService, service, tx } =
-      createPrismaService({
-        customerByEmail: existingCustomer,
-      });
+    const {
+      certificateUseCase,
+      codeGenerators,
+      lifecycleService,
+      service,
+      tx,
+    } = createPrismaService({
+      customerByEmail: existingCustomer,
+    });
     const useCase = new ManualWarrantyActivationUseCase(
       service as never,
       lifecycleService as never,
       codeGenerators.customer as never,
       codeGenerators.product as never,
       codeGenerators.warranty as never,
+      certificateUseCase as never,
     );
 
     await useCase.execute(dto);
@@ -222,16 +244,18 @@ describe('ManualWarrantyActivationUseCase', () => {
   });
 
   it('rejects when email and phone belong to different customers', async () => {
-    const { codeGenerators, lifecycleService, service } = createPrismaService({
-      customerByEmail: { id: 'customer-a' },
-      customerByPhone: { id: 'customer-b' },
-    });
+    const { certificateUseCase, codeGenerators, lifecycleService, service } =
+      createPrismaService({
+        customerByEmail: { id: 'customer-a' },
+        customerByPhone: { id: 'customer-b' },
+      });
     const useCase = new ManualWarrantyActivationUseCase(
       service as never,
       lifecycleService as never,
       codeGenerators.customer as never,
       codeGenerators.product as never,
       codeGenerators.warranty as never,
+      certificateUseCase as never,
     );
 
     await expect(useCase.execute(dto)).rejects.toBeInstanceOf(ConflictError);

@@ -2,7 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDebounce } from "@repo/hooks";
-import type { CustomerSummary, ProductResponse } from "@repo/shared";
+import type {
+  CustomerSummary,
+  DealerResponse,
+  ProductResponse,
+} from "@repo/shared";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { useForm, type UseFormSetValue } from "react-hook-form";
@@ -13,6 +17,9 @@ import {
 import { useToast } from "@/src/hooks/use-toast";
 import { useCreateAdminWarrantyActivationRequest } from "@/src/hooks/use-warranty-activation-requests";
 import { parseVietnamAddress } from "@/src/utils";
+import { getCategoryActivationFields } from "@/src/utils/category-activation-fields";
+import { useDealers } from "@/src/hooks/use-dealers";
+import { useCategories } from "../../categories/hooks/use-categories";
 import { useCustomers } from "../../customers/hooks/use-customers";
 import { useInfiniteProducts } from "../../products/hooks/use-products";
 import {
@@ -26,14 +33,32 @@ import {
 
 const DEFAULT_VALUES: WarrantyActivationRequestCreateFormValues = {
   addressDetail: "",
+  categoryId: "",
+  categoryInputValues: {},
   customerBirthdate: "",
   customerEmail: "",
   customerName: "",
   customerPhone: "",
+  dealerAddress: "",
+  dealerDistrict: "",
+  dealerId: "",
+  dealerName: "",
+  dealerPhone: "",
+  dealerProvince: "",
+  filmFrontLeftSide: "",
+  filmFrontRightSide: "",
+  filmRearGlass: "",
+  filmRearLeftSide: "",
+  filmRearRightSide: "",
+  filmSunroof: "",
+  filmWindshield: "",
   note: "",
   productId: "",
   productName: "",
   provinceCode: "",
+  salesName: "",
+  vehicleModel: "",
+  vehiclePlate: "",
   wardCode: "",
   warrantyCode: "",
 };
@@ -46,18 +71,24 @@ export function useCreateWarrantyActivationRequestForm({
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const toast = useToast();
   const createMutation = useCreateAdminWarrantyActivationRequest();
+  const [customerSearch, setCustomerSearch] = useState("");
   const [productSearch, setProductSearch] = useState("");
+  const [dealerSearch, setDealerSearch] = useState("");
   const [pendingWardName, setPendingWardName] = useState<string | null>(null);
   const [selectedCustomer, setSelectedCustomer] =
     useState<CustomerSummary | null>(null);
   const [selectedProduct, setSelectedProduct] =
     useState<ProductResponse | null>(null);
+  const [selectedDealer, setSelectedDealer] = useState<DealerResponse | null>(
+    null,
+  );
   const form = useForm<WarrantyActivationRequestCreateFormValues>({
     resolver: zodResolver(warrantyActivationRequestCreateFormSchema),
     defaultValues: DEFAULT_VALUES,
   });
   const provinceCode = form.watch("provinceCode");
   const wardCode = form.watch("wardCode");
+  const categoryId = form.watch("categoryId");
   const provinceCodeNumber = provinceCode ? Number(provinceCode) : null;
   const provincesQuery = useVietnamProvinces();
   const wardsQuery = useVietnamWards(provinceCodeNumber);
@@ -66,19 +97,37 @@ export function useCreateWarrantyActivationRequestForm({
     [provincesQuery.data],
   );
   const wards = useMemo(() => wardsQuery.data ?? [], [wardsQuery.data]);
-  const customersQuery = useCustomers({
+  const debouncedCustomerSearch = useDebounce(customerSearch.trim(), 300);
+  const debouncedProductSearch = useDebounce(productSearch.trim(), 300);
+  const debouncedDealerSearch = useDebounce(dealerSearch.trim(), 300);
+  const categoriesQuery = useCategories({
+    isActive: "true",
     limit: 100,
+    type: "PRODUCT",
+  });
+  const customersQuery = useCustomers({
+    limit: 20,
+    search: debouncedCustomerSearch || undefined,
     sortBy: "createdAt",
     sortOrder: "desc",
   });
-  const debouncedProductSearch = useDebounce(productSearch.trim(), 300);
-  const productsQuery = useInfiniteProducts({
+  const productsQuery = useInfiniteProducts(
+    {
+      categoryId: categoryId || undefined,
+      limit: 20,
+      search: debouncedProductSearch || undefined,
+      sortBy: "createdAt",
+      sortOrder: "desc",
+      status: "ACTIVE",
+    },
+    { enabled: Boolean(categoryId) },
+  );
+  const dealersQuery = useDealers({
+    isActive: "true",
     limit: 20,
-    search: debouncedProductSearch || undefined,
-    sortBy: "createdAt",
-    sortOrder: "desc",
-    status: "ACTIVE",
-    warrantyStatus: "DRAFT",
+    search: debouncedDealerSearch || undefined,
+    sortBy: "name",
+    sortOrder: "asc",
   });
   const customers = useMemo(
     () => customersQuery.data?.items ?? [],
@@ -86,14 +135,28 @@ export function useCreateWarrantyActivationRequestForm({
   );
   const products = useMemo(
     () =>
-      Array.from(
-        new Map(
-          (productsQuery.data?.pages ?? [])
-            .flatMap((page) => page.items)
-            .map((product) => [product.id, product]),
-        ).values(),
-      ),
-    [productsQuery.data?.pages],
+      !categoryId
+        ? []
+        : Array.from(
+            new Map(
+              (productsQuery.data?.pages ?? [])
+                .flatMap((page) => page.items)
+                .map((product) => [product.id, product]),
+            ).values(),
+          ),
+    [categoryId, productsQuery.data?.pages],
+  );
+  const categories = useMemo(
+    () => categoriesQuery.data?.items ?? [],
+    [categoriesQuery.data?.items],
+  );
+  const dealers = useMemo(
+    () => dealersQuery.data?.items ?? [],
+    [dealersQuery.data?.items],
+  );
+  const selectedCategory = useMemo(
+    () => categories.find((category) => category.id === categoryId) ?? null,
+    [categories, categoryId],
   );
 
   useEffect(() => {
@@ -112,6 +175,7 @@ export function useCreateWarrantyActivationRequestForm({
   function selectCustomer(customer: CustomerSummary) {
     const address = parseVietnamAddress(customer.address ?? "", provinces);
     setSelectedCustomer(customer);
+    setCustomerSearch("");
     setFormValues(form.setValue, {
       addressDetail: address.detail,
       customerEmail: customer.email ?? "",
@@ -128,8 +192,23 @@ export function useCreateWarrantyActivationRequestForm({
     }
   }
 
+  function clearCustomer() {
+    setSelectedCustomer(null);
+    setPendingWardName(null);
+    setFormValues(form.setValue, {
+      addressDetail: "",
+      customerBirthdate: "",
+      customerEmail: "",
+      customerName: "",
+      customerPhone: "",
+      provinceCode: "",
+      wardCode: "",
+    });
+  }
+
   function selectProduct(product: ProductResponse) {
     setSelectedProduct(product);
+    setProductSearch("");
     setFormValues(form.setValue, {
       productId: product.id,
       productName: product.name,
@@ -137,8 +216,56 @@ export function useCreateWarrantyActivationRequestForm({
     });
   }
 
+  function selectCategory(value: string) {
+    setFormValues(form.setValue, {
+      categoryId: value,
+      categoryInputValues: {},
+    });
+    clearProduct();
+  }
+
+  function clearProduct() {
+    setSelectedProduct(null);
+    setFormValues(form.setValue, {
+      productId: "",
+      productName: "",
+      warrantyCode: "",
+    });
+  }
+
+  function selectDealer(dealer: DealerResponse) {
+    setSelectedDealer(dealer);
+    setDealerSearch("");
+    setFormValues(form.setValue, {
+      dealerAddress: dealer.address,
+      dealerDistrict: dealer.district ?? "",
+      dealerId: dealer.id,
+      dealerName: dealer.name,
+      dealerPhone: dealer.phone ?? "",
+      dealerProvince: dealer.province,
+      salesName: dealer.salesName ?? "",
+    });
+  }
+
+  function clearDealer() {
+    setSelectedDealer(null);
+    setFormValues(form.setValue, {
+      dealerAddress: "",
+      dealerDistrict: "",
+      dealerId: "",
+      dealerName: "",
+      dealerPhone: "",
+      dealerProvince: "",
+      salesName: "",
+    });
+  }
+
   function selectProvince(value: string) {
     setFormValues(form.setValue, { provinceCode: value, wardCode: "" });
+  }
+
+  function selectWard(value: string) {
+    setFormValues(form.setValue, { wardCode: value });
   }
 
   function loadMoreProducts() {
@@ -148,6 +275,22 @@ export function useCreateWarrantyActivationRequestForm({
   }
 
   async function submit(values: WarrantyActivationRequestCreateFormValues) {
+    const missingRequiredField = getCategoryActivationFields(
+      selectedCategory,
+    ).find((field) => {
+      if (!field.required) return false;
+      return !values.categoryInputValues[field.key]?.trim();
+    });
+
+    if (missingRequiredField) {
+      const message = t("activationFieldValueRequired");
+      form.setError(`categoryInputValues.${missingRequiredField.key}`, {
+        message,
+      });
+      toast.error(message);
+      return;
+    }
+
     try {
       await createMutation.mutateAsync(
         toAdminActivationRequestBody({
@@ -167,9 +310,18 @@ export function useCreateWarrantyActivationRequestForm({
   }
 
   return {
+    clearCustomer,
+    clearDealer,
     control: form.control,
+    categories,
+    categoriesQuery,
+    categoryId,
+    customerSearch,
     customers,
     customersQuery,
+    dealerSearch,
+    dealers,
+    dealersQuery,
     errors: form.formState.errors,
     isSaving: form.formState.isSubmitting || createMutation.isPending,
     loadMoreProducts,
@@ -183,10 +335,18 @@ export function useCreateWarrantyActivationRequestForm({
     provinceCode,
     register: form.register,
     selectedCustomer,
+    selectedCategory,
+    selectedDealer,
     selectedProduct,
+    selectCategory,
     selectCustomer,
+    selectDealer,
     selectProduct,
     selectProvince,
+    selectWard,
+    clearProduct,
+    setCustomerSearch,
+    setDealerSearch,
     setProductSearch,
     wardCode,
     wards,

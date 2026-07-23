@@ -1,9 +1,19 @@
 "use client";
 
-import { FileText, MoreHorizontal, Pencil, Search, Trash2 } from "lucide-react";
+import {
+  Archive,
+  FileText,
+  MoreHorizontal,
+  Pencil,
+  RotateCcw,
+  Search,
+  Send,
+  Trash2,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import type {
   ContentPageSortBy,
+  ContentPageStatus,
   ContentPageSummary,
   PaginatedResponse,
 } from "@repo/shared";
@@ -59,6 +69,7 @@ type Props = {
   sortOrder: "asc" | "desc";
   onClear: () => void;
   onDelete: (page: ContentPageSummary) => void;
+  onStatusUpdate: (page: ContentPageSummary, status: ContentPageStatus) => void;
   onKindChange: (value: ContentPageKindFilter) => void;
   onStatusChange: (value: ContentPageStatusFilter) => void;
   onSearchChange: (value: string) => void;
@@ -280,8 +291,9 @@ function Actions({
   canDelete,
   canEdit,
   onDelete,
+  onStatusUpdate,
   page,
-}: Pick<Props, "canDelete" | "canEdit" | "onDelete"> & {
+}: Pick<Props, "canDelete" | "canEdit" | "onDelete" | "onStatusUpdate"> & {
   page: ContentPageSummary;
 }) {
   const t = useTranslations("ContentPages");
@@ -307,6 +319,20 @@ function Actions({
             </Link>
           </DropdownMenuItem>
         ) : null}
+        {canEdit ? (
+          <>
+            <DropdownMenuSeparator />
+            {getStatusActions(page.status).map((action) => (
+              <DropdownMenuItem
+                key={action.status}
+                onSelect={() => onStatusUpdate(page, action.status)}
+              >
+                <action.icon className="mr-2 size-4" />
+                {t(action.labelKey)}
+              </DropdownMenuItem>
+            ))}
+          </>
+        ) : null}
         {canDelete ? (
           <>
             {canEdit ? <DropdownMenuSeparator /> : null}
@@ -322,4 +348,29 @@ function Actions({
       </DropdownMenuContent>
     </DropdownMenu>
   );
+}
+
+function getStatusActions(status: ContentPageStatus): Array<{
+  icon: typeof Send;
+  labelKey: "publish" | "moveToDraft" | "archive";
+  status: ContentPageStatus;
+}> {
+  if (status === "DRAFT") {
+    return [
+      { icon: Send, labelKey: "publish", status: "PUBLISHED" },
+      { icon: Archive, labelKey: "archive", status: "ARCHIVED" },
+    ];
+  }
+
+  if (status === "PUBLISHED") {
+    return [
+      { icon: RotateCcw, labelKey: "moveToDraft", status: "DRAFT" },
+      { icon: Archive, labelKey: "archive", status: "ARCHIVED" },
+    ];
+  }
+
+  return [
+    { icon: RotateCcw, labelKey: "moveToDraft", status: "DRAFT" },
+    { icon: Send, labelKey: "publish", status: "PUBLISHED" },
+  ];
 }

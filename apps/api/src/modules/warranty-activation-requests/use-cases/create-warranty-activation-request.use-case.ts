@@ -1,11 +1,26 @@
 import { BadRequestError, NotFoundError } from '@/common/response';
+import { DealersRepository } from '@/modules/dealers/repository/dealers.repository';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
+import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { CreateWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-warranty-activation-request.dto';
 import { toWarrantyActivationRequestResponse } from '@/modules/warranty-activation-requests/mappers/warranty-activation-request.mapper';
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
 import { GenerateWarrantyActivationRequestCodeUseCase } from '@/modules/warranty-activation-requests/use-cases/generate-warranty-activation-request-code.use-case';
+import {
+  buildWarrantyActivationRequestFullAddress,
+  normalizePhone,
+  normalizeText,
+  optionalTrim,
+} from '@/modules/warranty-activation-requests/utils/warranty-activation-request-normalization.utils';
 import { Injectable } from '@nestjs/common';
-import { Prisma, warranty_status } from '@prisma/client';
+import {
+  Prisma,
+  Product,
+  Customer,
+  Dealer,
+  warranty_activation_request_source,
+  warranty_status,
+} from '@prisma/client';
 
 const REQUEST_CODE_GENERATION_ATTEMPTS = 3;
 const ACTIVATABLE_WARRANTY_STATUSES = new Set<warranty_status>([
@@ -18,22 +33,43 @@ export class CreateWarrantyActivationRequestUseCase {
     private readonly warrantyActivationRequestsRepository: WarrantyActivationRequestsRepository,
     private readonly generateWarrantyActivationRequestCodeUseCase: GenerateWarrantyActivationRequestCodeUseCase,
     private readonly productsRepository: ProductsRepository,
+    private readonly dealersRepository: DealersRepository,
+    private readonly generateWarrantyCodeUseCase: GenerateWarrantyCodeUseCase,
   ) {}
 
-  async execute(dto: CreateWarrantyActivationRequestDto) {
-    const warrantyCode = dto.warrantyCode.trim().toUpperCase();
+  async execute(
+    dto: CreateWarrantyActivationRequestDto,
+    context: {
+      createdByUserId?: string;
+      source?: warranty_activation_request_source;
+    } = {},
+  ) {
+    const dtoWarrantyCode = dto.warrantyCode?.trim().toUpperCase();
     const customerPhone = dto.customerPhone.trim();
-    const customerEmail = dto.customerEmail.trim().toLowerCase();
+    const customerEmail = dto.customerEmail?.trim().toLowerCase() || null;
     const customerName = dto.customerName.trim();
-    const product =
-      await this.productsRepository.findActivationRequestTargetByWarrantyCode(
-        warrantyCode,
-      );
+    const product = await this.resolveActivationProduct(dto, dtoWarrantyCode);
 
     if (!product?.warranty) {
       throw new NotFoundError('Warranty code not found', 'NOT_FOUND', {
         code: 'WARRANTY_CODE_NOT_FOUND',
+        warrantyCode: dtoWarrantyCode,
+      });
+    }
+
+    const warrantyCode =
+      product.warranty_code ??
+      product.warranty.warranty_code ??
+      (await this.generateWarrantyCodeUseCase.execute());
+
+    if (
+      product.warranty_code !== warrantyCode ||
+      product.warranty.warranty_code !== warrantyCode
+    ) {
+      await this.productsRepository.synchronizeWarrantyCode({
+        productId: product.id,
         warrantyCode,
+        warrantyId: product.warranty.id,
       });
     }
 
@@ -49,6 +85,10 @@ export class CreateWarrantyActivationRequestUseCase {
         },
       );
     }
+
+    this.assertProductMatchesCategory(dto.categoryId, product);
+
+    const dealer = await this.resolveDealer(dto);
 
     const currentOwner = product.ownerships[0]?.customer;
     if (currentOwner) {
@@ -88,19 +128,32 @@ export class CreateWarrantyActivationRequestUseCase {
       try {
         const request = await this.warrantyActivationRequestsRepository.create({
           request_code: requestCode,
+          source:
+            context.source ?? warranty_activation_request_source.PUBLIC_WEB,
           warranty_code: warrantyCode,
+          created_by: context.createdByUserId
+            ? { connect: { id: context.createdByUserId } }
+            : undefined,
           customer_name: customerName,
           customer_phone: customerPhone,
           customer_email: customerEmail,
           customer_birthdate: dto.customerBirthdate
             ? new Date(dto.customerBirthdate)
             : undefined,
+          category: this.resolveCategoryConnect(dto.categoryId, product),
+          product: { connect: { id: product.id } },
+          dealer: dealer ? { connect: { id: dealer.id } } : undefined,
+          vehicle_plate: optionalTrim(dto.vehiclePlate),
+          vehicle_model: optionalTrim(dto.vehicleModel),
+          installed_at: dto.installedAt ? new Date(dto.installedAt) : undefined,
+          warranty_duration_months:
+            dto.warrantyDurationMonths ?? product.warranty.duration_months,
           province_code: dto.provinceCode.trim(),
           province_name: dto.provinceName.trim(),
           ward_code: dto.wardCode.trim(),
           ward_name: dto.wardName.trim(),
           address_detail: dto.addressDetail.trim(),
-          full_address: buildFullAddress(dto),
+          full_address: buildWarrantyActivationRequestFullAddress(dto),
           product_name: optionalTrim(dto.productName) ?? product.name,
           serial_number:
             optionalTrim(dto.serialNumber) ?? product.serial_number,
@@ -108,11 +161,14 @@ export class CreateWarrantyActivationRequestUseCase {
           model: optionalTrim(dto.model) ?? product.model,
           manufacture_year: dto.manufactureYear ?? product.manufacture_year,
           note: optionalTrim(dto.note),
-          metadata: {
-            productId: product.id,
-            source: 'public_client_activation_request',
+          metadata: this.buildActivationMetadata({
+            dealer,
+            dto,
+            product,
+            source:
+              context.source ?? warranty_activation_request_source.PUBLIC_WEB,
             warrantyId: product.warranty.id,
-          },
+          }),
         });
 
         return toWarrantyActivationRequestResponse(request);
@@ -144,13 +200,183 @@ export class CreateWarrantyActivationRequestUseCase {
     );
   }
 
-  private assertCustomerMatchesCurrentOwner(input: {
-    currentOwner: {
-      email: string | null;
-      full_name: string;
-      phone: string | null;
+  private async resolveActivationProduct(
+    dto: CreateWarrantyActivationRequestDto,
+    warrantyCode: string | undefined,
+  ) {
+    if (dto.productId) {
+      return this.productsRepository.findActivationRequestTargetById(
+        dto.productId,
+      );
+    }
+
+    if (warrantyCode) {
+      return this.productsRepository.findActivationRequestTargetByWarrantyCode(
+        warrantyCode,
+      );
+    }
+
+    throw new BadRequestError(
+      'Either productId or warrantyCode is required',
+      'BAD_REQUEST',
+      { code: 'ACTIVATION_TARGET_REQUIRED' },
+    );
+  }
+
+  private async resolveDealer(dto: CreateWarrantyActivationRequestDto) {
+    if (!dto.dealerId) {
+      return this.createQuickDealer(dto);
+    }
+
+    const dealer = await this.dealersRepository.findActiveById(dto.dealerId);
+    if (!dealer) {
+      throw new NotFoundError('Active dealer not found', 'NOT_FOUND', {
+        code: 'DEALER_NOT_FOUND',
+      });
+    }
+
+    return dealer;
+  }
+
+  private async createQuickDealer(dto: CreateWarrantyActivationRequestDto) {
+    const name = optionalTrim(dto.dealerName);
+    const address = optionalTrim(dto.dealerAddress);
+    const province = optionalTrim(dto.dealerProvince);
+
+    if (!name && !address && !province && !dto.dealerPhone) return null;
+
+    if (!name || !address || !province) {
+      throw new BadRequestError(
+        'Quick dealer requires name, address and province',
+        'BAD_REQUEST',
+        { code: 'QUICK_DEALER_REQUIRED_FIELDS' },
+      );
+    }
+
+    const phone = optionalTrim(dto.dealerPhone);
+    if (phone) {
+      const existingDealer = await this.dealersRepository.findByPhone(phone);
+      if (existingDealer) {
+        if (existingDealer.is_active) return existingDealer;
+
+        throw new BadRequestError(
+          'Dealer phone already belongs to an inactive dealer',
+          'BAD_REQUEST',
+          { code: 'DEALER_PHONE_INACTIVE' },
+        );
+      }
+    }
+
+    return this.dealersRepository.create({
+      address,
+      district: optionalTrim(dto.dealerDistrict),
+      is_active: true,
+      name,
+      phone,
+      province,
+      sales_name: optionalTrim(dto.salesName),
+      metadata: {
+        createdFrom: 'warrantyActivationRequest',
+      },
+    });
+  }
+
+  private resolveCategoryConnect(
+    categoryId: string | undefined,
+    product: Product & { category_id: string | null },
+  ) {
+    const resolvedCategoryId = categoryId ?? product.category_id;
+    return resolvedCategoryId
+      ? { connect: { id: resolvedCategoryId } }
+      : undefined;
+  }
+
+  private assertProductMatchesCategory(
+    categoryId: string | undefined,
+    product: Product & { category_id: string | null },
+  ) {
+    if (!categoryId) return;
+
+    if (product.category_id !== categoryId) {
+      throw new BadRequestError(
+        'Product does not belong to the selected category',
+        'BAD_REQUEST',
+        {
+          code: 'PRODUCT_CATEGORY_MISMATCH',
+          categoryId,
+          productCategoryId: product.category_id,
+        },
+      );
+    }
+  }
+
+  private buildActivationMetadata(input: {
+    dealer: Dealer | null;
+    dto: CreateWarrantyActivationRequestDto;
+    product: Product;
+    source: warranty_activation_request_source;
+    warrantyId: string;
+  }): Prisma.InputJsonObject {
+    const metadata = {
+      ...(input.dto.metadata ?? {}),
+    } as Record<string, Prisma.InputJsonValue>;
+
+    metadata.productId = input.product.id;
+    metadata.source = input.source;
+    metadata.warrantyId = input.warrantyId;
+
+    const dealerSnapshot = this.buildDealerSnapshot(input.dto, input.dealer);
+    if (dealerSnapshot) {
+      metadata.dealer = dealerSnapshot;
+    }
+
+    const filmItems = this.buildFilmItems(input.dto);
+    if (filmItems) {
+      metadata.filmItems = filmItems;
+    }
+
+    return metadata;
+  }
+
+  private buildDealerSnapshot(
+    dto: CreateWarrantyActivationRequestDto,
+    dealer: Dealer | null,
+  ) {
+    const snapshot = {
+      address: dealer?.address ?? optionalTrim(dto.dealerAddress),
+      id: dealer?.id ?? dto.dealerId,
+      name: dealer?.name ?? optionalTrim(dto.dealerName),
+      phone: dealer?.phone ?? optionalTrim(dto.dealerPhone),
+      province: dealer?.province ?? optionalTrim(dto.dealerProvince),
+      district: dealer?.district ?? optionalTrim(dto.dealerDistrict),
+      salesName: dealer?.sales_name ?? optionalTrim(dto.salesName),
     };
-    customerEmail: string;
+    const compact = Object.fromEntries(
+      Object.entries(snapshot).filter(([, value]) => Boolean(value)),
+    );
+
+    return Object.keys(compact).length > 0
+      ? (compact as Prisma.InputJsonObject)
+      : null;
+  }
+
+  private buildFilmItems(dto: CreateWarrantyActivationRequestDto) {
+    if (!dto.filmItems) return null;
+
+    const compact = Object.fromEntries(
+      Object.entries(dto.filmItems)
+        .map(([key, value]) => [key, optionalTrim(value)])
+        .filter(([, value]) => Boolean(value)),
+    );
+
+    return Object.keys(compact).length > 0
+      ? (compact as Prisma.InputJsonObject)
+      : null;
+  }
+
+  private assertCustomerMatchesCurrentOwner(input: {
+    currentOwner: Pick<Customer, 'email' | 'full_name' | 'phone'>;
+    customerEmail: string | null;
     customerName: string;
     customerPhone: string;
   }) {
@@ -160,7 +386,9 @@ export class CreateWarrantyActivationRequestUseCase {
     const phoneMatches =
       !expectedPhone || expectedPhone === normalizePhone(input.customerPhone);
     const emailMatches =
-      !expectedEmail || expectedEmail === normalizeText(input.customerEmail);
+      !expectedEmail ||
+      !input.customerEmail ||
+      expectedEmail === normalizeText(input.customerEmail);
     const nameMatches = expectedName === normalizeText(input.customerName);
 
     if (!phoneMatches || !emailMatches || !nameMatches) {
@@ -171,24 +399,4 @@ export class CreateWarrantyActivationRequestUseCase {
       );
     }
   }
-}
-
-function buildFullAddress(dto: CreateWarrantyActivationRequestDto) {
-  return [dto.addressDetail, dto.wardName, dto.provinceName]
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .join(', ');
-}
-
-function optionalTrim(value?: string) {
-  const trimmed = value?.trim();
-  return trimmed ? trimmed : undefined;
-}
-
-function normalizeText(value?: string | null) {
-  return value?.trim().toLowerCase() ?? '';
-}
-
-function normalizePhone(value?: string | null) {
-  return normalizeText(value).replace(/\D/g, '');
 }

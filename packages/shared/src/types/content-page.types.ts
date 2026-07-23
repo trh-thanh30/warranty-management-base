@@ -1,4 +1,5 @@
 import type { PaginationQuery } from "./pagination.types.ts";
+import type { CategorySummary } from "./category.types.ts";
 
 export type ContentPageKind = "POLICY" | "GUIDE" | "INTRO" | "FAQ";
 
@@ -11,6 +12,8 @@ export type ContentPageSummary = {
   summary: string | null;
   content: string;
   kind: ContentPageKind;
+  categoryId: string | null;
+  categoryRef: CategorySummary | null;
   status: ContentPageStatus;
   publishedAt: string | null;
   createdAt: string;
@@ -29,6 +32,7 @@ export type ContentPageSortBy =
 export type ListContentPagesQuery = PaginationQuery & {
   search?: string;
   kind?: ContentPageKind;
+  categoryId?: string | null;
   status?: ContentPageStatus;
   sortBy?: ContentPageSortBy;
 };

@@ -31,6 +31,14 @@ export const productExcelColumns: Array<
     parse: parseOptionalString,
   },
   {
+    key: 'installationPosition',
+    header: 'Vị trí gắn',
+    width: 28,
+    example: 'Kính lái',
+    note: 'Vị trí lắp/gắn sản phẩm trên xe hoặc thiết bị.',
+    parse: parseOptionalString,
+  },
+  {
     key: 'category',
     header: 'Danh mục legacy',
     required: true,

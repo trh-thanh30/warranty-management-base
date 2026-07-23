@@ -149,6 +149,7 @@ test("creates an inventory-only product payload", () => {
       coverAssetId: "",
       coverImageUrl: "",
       description: "",
+      installationPosition: " Kính lái ",
       manufactureYear: 2026,
       model: " Camry ",
       name: " Toyota Camry ",
@@ -164,6 +165,7 @@ test("creates an inventory-only product payload", () => {
       description: undefined,
       manufactureYear: 2026,
       metadata: {
+        installationPosition: "Kính lái",
         specifications: [{ key: "Technology", value: "Nano Ceramic" }],
       },
       model: "Camry",

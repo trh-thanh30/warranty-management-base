@@ -1,5 +1,7 @@
 import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
+import { PrismaService } from '@/database/prisma/prisma.service';
+import { warranty_certificate_email_status } from '@prisma/client';
 import { Job } from 'bullmq';
 import { WorkerEmailService } from '@/workers/email/worker.service';
 
@@ -8,8 +10,14 @@ export interface EmailJobData {
   subject?: string;
   text?: string;
   html?: string;
+  attachments?: Array<{
+    contentBase64: string;
+    contentType: string;
+    filename: string;
+  }>;
   template?: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
+  warrantyCertificateId?: string;
   // Idempotency key for deduplication
   idempotencyKey?: string;
 }
@@ -20,13 +28,25 @@ export class EmailProcessor extends WorkerHost {
   private readonly logger = new Logger(EmailProcessor.name);
   private readonly processedJobs = new Set<string>();
 
-  constructor(private readonly emailService: WorkerEmailService) {
+  constructor(
+    private readonly emailService: WorkerEmailService,
+    private readonly prismaService: PrismaService,
+  ) {
     super();
   }
 
   async process(job: Job<EmailJobData>): Promise<void> {
-    const { to, subject, text, html, template, context, idempotencyKey } =
-      job.data;
+    const {
+      to,
+      subject,
+      text,
+      html,
+      attachments,
+      template,
+      context,
+      idempotencyKey,
+      warrantyCertificateId,
+    } = job.data;
 
     // Idempotency check - skip if already processed
     if (idempotencyKey && this.processedJobs.has(idempotencyKey)) {
@@ -44,7 +64,11 @@ export class EmailProcessor extends WorkerHost {
 
       if (template && context) {
         // Send templated email
-        await this.emailService.sendTemplatedEmail(to, template, context);
+        await this.emailService.sendTemplatedEmail(to, template, context, {
+          attachments,
+          subject,
+          text,
+        });
       } else {
         // Send regular email
         await this.emailService.sendEmail(
@@ -52,6 +76,7 @@ export class EmailProcessor extends WorkerHost {
           subject || 'No Subject',
           text || '',
           html,
+          attachments,
         );
       }
 
@@ -69,12 +94,45 @@ export class EmailProcessor extends WorkerHost {
 
       // mark job as completed
       job.updateProgress(100);
+      await this.markWarrantyCertificateEmailSent(warrantyCertificateId);
 
       this.logger.log(`Email job ${job.id} completed successfully`);
     } catch (error) {
+      await this.markWarrantyCertificateEmailFailed(
+        warrantyCertificateId,
+        error instanceof Error ? error.message : 'Unknown email sending error',
+      );
       this.logger.error(`Email job ${job.id} failed: ${error.message}`);
       throw error; // Re-throw to mark job as failed
     }
+  }
+
+  private async markWarrantyCertificateEmailSent(certificateId?: string) {
+    if (!certificateId) return;
+
+    await this.prismaService.warrantyCertificate.update({
+      where: { id: certificateId },
+      data: {
+        email_status: warranty_certificate_email_status.SENT,
+        emailed_at: new Date(),
+        last_error: null,
+      },
+    });
+  }
+
+  private async markWarrantyCertificateEmailFailed(
+    certificateId: string | undefined,
+    message: string,
+  ) {
+    if (!certificateId) return;
+
+    await this.prismaService.warrantyCertificate.update({
+      where: { id: certificateId },
+      data: {
+        email_status: warranty_certificate_email_status.FAILED,
+        last_error: message,
+      },
+    });
   }
 
   @OnWorkerEvent('completed')

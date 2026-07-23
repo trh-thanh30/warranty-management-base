@@ -80,6 +80,7 @@ export const productFormSchema = z.object({
   coverAssetId: z.string(),
   coverImageUrl: z.string(),
   description: optionalText.max(5000, "descriptionLength"),
+  installationPosition: optionalText.max(160, "installationPositionLength"),
   manufactureYear: optionalInteger({
     integer: "manufactureYearInteger",
     max: 2100,

@@ -2,6 +2,7 @@
 
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
+import type { ContentPageStatus, ContentPageSummary } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { Button } from "@repo/ui";
 import { ConfirmActionDialog } from "@/src/components/common/confirm-action-dialog";
@@ -23,6 +24,19 @@ export function ContentPagesView() {
     } catch {
       toast.error(t("deleteError"));
     }
+  }
+  function updateStatus(page: ContentPageSummary, status: ContentPageStatus) {
+    directory.updateStatus(
+      { id: page.id, status },
+      {
+        onError: () => {
+          toast.error(t("statusUpdateError"));
+        },
+        onSuccess: () => {
+          toast.success(t("statusUpdated"));
+        },
+      },
+    );
   }
   return (
     <PermissionGuard permissions={[PERMISSIONS.CONTENT_PAGE_VIEW]}>
@@ -59,6 +73,7 @@ export function ContentPagesView() {
           onSearchChange={directory.setSearch}
           onSortChange={directory.toggleSort}
           onStatusChange={directory.setStatus}
+          onStatusUpdate={updateStatus}
           pageSize={directory.pageSize}
           search={directory.search}
           sortBy={directory.sortBy}

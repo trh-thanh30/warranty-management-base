@@ -9,7 +9,7 @@ import {
   Package,
   Settings,
   ShieldCheck,
-  ShieldPlus,
+  Store,
   Tags,
   UserRound,
   Users,
@@ -63,13 +63,8 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
           {
             title: t("items.warranties"),
             href: "/warranties",
+            activeHrefs: ["/warranty-activation-requests"],
             icon: ShieldCheck,
-            requiredPermission: PERMISSIONS.WARRANTY_VIEW,
-          },
-          {
-            title: t("items.warrantyActivationRequests"),
-            href: "/warranty-activation-requests",
-            icon: ShieldPlus,
             requiredPermission: PERMISSIONS.WARRANTY_VIEW,
           },
           {
@@ -83,6 +78,12 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             href: "/service-centers",
             icon: Building2,
             requiredPermission: PERMISSIONS.SERVICE_CENTER_VIEW,
+          },
+          {
+            title: t("items.dealers"),
+            href: "/dealers",
+            icon: Store,
+            requiredPermission: PERMISSIONS.DEALER_VIEW,
           },
         ],
       },
@@ -141,11 +142,6 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
         requiredPermission: PERMISSIONS.WARRANTY_VIEW,
       },
       {
-        title: t("items.warrantyActivationRequests"),
-        href: "/warranty-activation-requests",
-        requiredPermission: PERMISSIONS.WARRANTY_VIEW,
-      },
-      {
         title: t("items.warrantyClaims"),
         href: "/warranty-claims",
         requiredPermission: PERMISSIONS.WARRANTY_CLAIM_VIEW,
@@ -154,6 +150,11 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
         title: t("items.serviceCenters"),
         href: "/service-centers",
         requiredPermission: PERMISSIONS.SERVICE_CENTER_VIEW,
+      },
+      {
+        title: t("items.dealers"),
+        href: "/dealers",
+        requiredPermission: PERMISSIONS.DEALER_VIEW,
       },
       {
         title: t("items.contentPages"),

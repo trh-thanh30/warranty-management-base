@@ -77,5 +77,16 @@ export function createWarrantyActivationRequestsService(
         ),
       );
     },
+
+    async resendWarrantyActivationRequestCertificateEmail(
+      requestId: string,
+    ): Promise<WarrantyActivationRequestSummary> {
+      return unwrap(
+        await http.post<WarrantyActivationRequestSummary>(
+          `/warranty-activation-requests/${requestId}/certificate/resend-email`,
+          {},
+        ),
+      );
+    },
   };
 }

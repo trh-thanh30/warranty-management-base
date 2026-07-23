@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, FileSearch, XCircle } from "lucide-react";
+import { CheckCircle2, FileSearch, Send, XCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { Button } from "@repo/ui";
@@ -8,7 +8,11 @@ import { FormPageShell } from "@/src/components/common/form-page-shell";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { usePermissions } from "@/src/hooks/use-permissions";
-import { useWarrantyActivationRequest } from "@/src/hooks/use-warranty-activation-requests";
+import {
+  useResendWarrantyActivationRequestCertificateEmail,
+  useWarrantyActivationRequest,
+} from "@/src/hooks/use-warranty-activation-requests";
+import { useToast } from "@/src/hooks/use-toast";
 import { ReviewWarrantyActivationRequestDialog } from "./components/review-warranty-activation-request-dialog";
 import {
   WarrantyActivationRequestDetailCard,
@@ -25,7 +29,10 @@ export function WarrantyActivationRequestDetailView({
 }: WarrantyActivationRequestDetailViewProps) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const { hasPermission } = usePermissions();
+  const toast = useToast();
   const requestQuery = useWarrantyActivationRequest(requestId);
+  const resendCertificateEmailMutation =
+    useResendWarrantyActivationRequestCertificateEmail(requestId);
   const actions = useWarrantyActivationRequestActions();
   const request = requestQuery.data;
   const canReview =
@@ -34,6 +41,23 @@ export function WarrantyActivationRequestDetailView({
     hasPermission(PERMISSIONS.WARRANTY_UPDATE);
   const approveLabel =
     request?.status === "APPROVED" ? t("activate") : t("approve");
+  const canResendCertificateEmail =
+    Boolean(request?.certificate) &&
+    request?.certificate?.emailStatus !== "SENT" &&
+    hasPermission(PERMISSIONS.WARRANTY_UPDATE);
+
+  async function resendCertificateEmail() {
+    try {
+      await resendCertificateEmailMutation.mutateAsync();
+      toast.success(t("resentCertificateEmail"));
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : t("resendCertificateEmailError"),
+      );
+    }
+  }
 
   return (
     <PermissionGuard permissions={[PERMISSIONS.WARRANTY_VIEW]}>
@@ -45,8 +69,23 @@ export function WarrantyActivationRequestDetailView({
         maxWidthClassName="max-w-5xl"
         title={request?.requestCode ?? t("detailTitle")}
       >
-        {canReview && request ? (
+        {(canReview || canResendCertificateEmail) && request ? (
           <div className="flex flex-wrap justify-end gap-2">
+            {canResendCertificateEmail ? (
+              <Button
+                disabled={resendCertificateEmailMutation.isPending}
+                onClick={() => {
+                  void resendCertificateEmail();
+                }}
+                type="button"
+                variant="secondary"
+              >
+                <Send className="size-4" />
+                {resendCertificateEmailMutation.isPending
+                  ? t("resendingCertificateEmail")
+                  : t("resendCertificateEmail")}
+              </Button>
+            ) : null}
             {request.status === "PENDING" ? (
               <Button
                 onClick={() => actions.openAction(request, "reject")}

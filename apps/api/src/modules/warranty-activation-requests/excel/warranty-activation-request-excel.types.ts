@@ -15,7 +15,7 @@ export type WarrantyActivationRequestExcelRow = {
   warrantyCode: string;
   customerName: string;
   customerPhone: string;
-  customerEmail: string;
+  customerEmail: string | null;
   customerBirthdate: Date | null;
   fullAddress: string;
   productName: string | null;

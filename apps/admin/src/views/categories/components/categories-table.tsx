@@ -1,6 +1,6 @@
 "use client";
 
-import { Ban, MoreHorizontal, Pencil } from "lucide-react";
+import { Ban, MoreHorizontal, Pencil, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { CategoryResponse, CategorySortBy } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
@@ -66,14 +66,6 @@ export function CategoriesTable({
             <TableRow>
               <TableHead>{t("type")}</TableHead>
               <TableHead>{t("code")}</TableHead>
-              <SortableTableHead
-                activeSortBy={sortBy}
-                onSortChange={onSortChange}
-                sortBy="slug"
-                sortOrder={sortOrder}
-              >
-                {t("slug")}
-              </SortableTableHead>
               <SortableTableHead
                 activeSortBy={sortBy}
                 onSortChange={onSortChange}
@@ -145,7 +137,6 @@ function CategoryTableRow({
       <TableCell className="font-mono text-xs">
         {getCategoryDisplayCode(category)}
       </TableCell>
-      <TableCell className="font-mono text-xs">{category.slug}</TableCell>
       <TableCell>
         <div className="max-w-[14rem]">
           <p className="truncate font-medium text-slate-950 dark:text-slate-50">
@@ -190,9 +181,11 @@ function CategoryMobileCard({
           <p className="truncate font-medium text-slate-950 dark:text-slate-50">
             {category.name}
           </p>
-          <p className="mt-1 truncate font-mono text-xs text-slate-500 dark:text-slate-400">
-            {category.slug}
-          </p>
+          {category.description ? (
+            <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
+              {stripHtml(category.description)}
+            </p>
+          ) : null}
         </div>
         <div className="flex items-start gap-2">
           <div className="flex flex-wrap gap-2">
@@ -274,12 +267,22 @@ function CategoryActionsMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {canEdit ? (
-          <DropdownMenuItem asChild>
-            <Link href={`/categories/${category.id}/edit`}>
-              <Pencil className="mr-2 size-4" />
-              {t("edit")}
-            </Link>
-          </DropdownMenuItem>
+          <>
+            <DropdownMenuItem asChild>
+              <Link href={`/categories/${category.id}/edit`}>
+                <Pencil className="mr-2 size-4" />
+                {t("edit")}
+              </Link>
+            </DropdownMenuItem>
+            {category.type === "PRODUCT" ? (
+              <DropdownMenuItem asChild>
+                <Link href={`/categories/${category.id}/activation-fields`}>
+                  <SlidersHorizontal className="mr-2 size-4" />
+                  {t("configureActivationFields")}
+                </Link>
+              </DropdownMenuItem>
+            ) : null}
+          </>
         ) : null}
         {canDelete && category.isActive ? (
           <>

@@ -49,6 +49,7 @@ type ProductImportPreviewTableProps = {
     editTitle: string;
     imageUrl: string;
     importStatus: string;
+    installationPosition: string;
     invalidRows: string;
     manufactureYear: string;
     model: string;
@@ -157,6 +158,9 @@ export function ProductImportPreviewTable({
                 <TableHead className="w-56 whitespace-nowrap">
                   {labels.imageUrl}
                 </TableHead>
+                <TableHead className="w-44 whitespace-nowrap">
+                  {labels.installationPosition}
+                </TableHead>
                 <TableHead className="w-40 whitespace-nowrap">
                   {labels.category}
                 </TableHead>
@@ -189,6 +193,7 @@ export function ProductImportPreviewTable({
                     <PreviewCell value={row.data.productCode} />
                     <PreviewCell value={row.data.name} />
                     <PreviewCell value={row.data.imageUrl} />
+                    <PreviewCell value={row.data.installationPosition} />
                     <PreviewCell value={row.data.category} />
                     <PreviewCell value={row.data.serialNumber} />
                     <PreviewCell value={row.data.status} />
@@ -228,7 +233,7 @@ export function ProductImportPreviewTable({
                 <TableRow>
                   <TableCell
                     className="h-24 text-center text-sm text-slate-500"
-                    colSpan={10}
+                    colSpan={11}
                   >
                     {labels.noRows}
                   </TableCell>

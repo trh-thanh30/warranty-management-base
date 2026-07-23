@@ -59,7 +59,7 @@ export const envSchema = z
     SMTP_USER: z.string(),
     SMTP_PASS: z.string(),
     EMAIL_FROM: z.string(),
-    EMAIL_TEMPLATES_PATH: z.string().default('src/module/email/templates'),
+    EMAIL_TEMPLATES_PATH: z.string().default('src/modules/email/templates'),
 
     // Redis Configuration
     REDIS_URL: z.string(),

@@ -1,5 +1,4 @@
 import { Permissions } from '@/common/decorators/permissions.decorator';
-import { Public } from '@/common/decorators/public.decorator';
 import { User } from '@/common/decorators/user.decorator';
 import { createDatedExcelFilename, sendExcelFile } from '@/common/excel';
 import { CreateWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-warranty-activation-request.dto';
@@ -12,6 +11,7 @@ import { ExportWarrantyActivationRequestsUseCase } from '@/modules/warranty-acti
 import { GetWarrantyActivationRequestDetailUseCase } from '@/modules/warranty-activation-requests/use-cases/get-warranty-activation-request-detail.use-case';
 import { ListWarrantyActivationRequestsUseCase } from '@/modules/warranty-activation-requests/use-cases/list-warranty-activation-requests.use-case';
 import { ReviewWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/review-warranty-activation-request.use-case';
+import { ResendWarrantyActivationRequestCertificateEmailUseCase } from '@/modules/warranty-activation-requests/use-cases/resend-warranty-activation-request-certificate-email.use-case';
 import {
   Body,
   Controller,
@@ -22,7 +22,10 @@ import {
   Query,
   Res,
 } from '@nestjs/common';
-import { permission_key } from '@prisma/client';
+import {
+  permission_key,
+  warranty_activation_request_source,
+} from '@prisma/client';
 import type { Response } from 'express';
 
 type RequestUser = {
@@ -38,18 +41,30 @@ export class WarrantyActivationRequestsController {
     private readonly listWarrantyActivationRequestsUseCase: ListWarrantyActivationRequestsUseCase,
     private readonly getWarrantyActivationRequestDetailUseCase: GetWarrantyActivationRequestDetailUseCase,
     private readonly reviewWarrantyActivationRequestUseCase: ReviewWarrantyActivationRequestUseCase,
+    private readonly resendWarrantyActivationRequestCertificateEmailUseCase: ResendWarrantyActivationRequestCertificateEmailUseCase,
   ) {}
 
   @Post('admin')
   @Permissions([permission_key.WARRANTY_CREATE])
-  createAdmin(@Body() dto: CreateAdminWarrantyActivationRequestDto) {
-    return this.createAdminWarrantyActivationRequestUseCase.execute(dto);
+  createAdmin(
+    @Body() dto: CreateAdminWarrantyActivationRequestDto,
+    @User() user: RequestUser,
+  ) {
+    return this.createAdminWarrantyActivationRequestUseCase.execute(dto, {
+      createdByUserId: user?.id,
+    });
   }
 
   @Post()
-  @Public()
-  create(@Body() dto: CreateWarrantyActivationRequestDto) {
-    return this.createWarrantyActivationRequestUseCase.execute(dto);
+  @Permissions([permission_key.WARRANTY_CREATE])
+  create(
+    @Body() dto: CreateWarrantyActivationRequestDto,
+    @User() user: RequestUser,
+  ) {
+    return this.createWarrantyActivationRequestUseCase.execute(dto, {
+      createdByUserId: user?.id,
+      source: warranty_activation_request_source.ADMIN_PORTAL,
+    });
   }
 
   @Get()
@@ -89,5 +104,13 @@ export class WarrantyActivationRequestsController {
     return this.reviewWarrantyActivationRequestUseCase.execute(id, dto, {
       reviewedByUserId: user?.id,
     });
+  }
+
+  @Post(':id/certificate/resend-email')
+  @Permissions([permission_key.WARRANTY_UPDATE])
+  resendCertificateEmail(@Param('id') id: string) {
+    return this.resendWarrantyActivationRequestCertificateEmailUseCase.execute(
+      id,
+    );
   }
 }

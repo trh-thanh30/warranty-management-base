@@ -26,9 +26,13 @@ type NavItemProps = {
 };
 
 function isNavItemActive(item: NavigationItem, pathname: string) {
-  return item.href
-    ? pathname === item.href || pathname.startsWith(`${item.href}/`)
-    : false;
+  const activeHrefs = item.href
+    ? [item.href, ...(item.activeHrefs ?? [])]
+    : (item.activeHrefs ?? []);
+
+  return activeHrefs.some(
+    (href) => pathname === href || pathname.startsWith(`${href}/`),
+  );
 }
 
 function NavItem({ item, pathname, collapsed }: NavItemProps) {

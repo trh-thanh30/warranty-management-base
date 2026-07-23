@@ -12,6 +12,34 @@ import {
 } from '@prisma/client';
 
 const activationRequestInclude = {
+  created_by: {
+    select: {
+      id: true,
+      email: true,
+      full_name: true,
+      username: true,
+    },
+  },
+  customer: {
+    select: {
+      id: true,
+      customer_code: true,
+      email: true,
+      full_name: true,
+      phone: true,
+    },
+  },
+  dealer: {
+    select: {
+      id: true,
+      name: true,
+      phone: true,
+      address: true,
+      province: true,
+      district: true,
+      sales_name: true,
+    },
+  },
   reviewed_by: {
     select: {
       id: true,
@@ -20,7 +48,14 @@ const activationRequestInclude = {
       username: true,
     },
   },
-  activated_warranty: true,
+  activated_warranty: {
+    include: {
+      certificates: {
+        orderBy: { created_at: 'desc' as const },
+        take: 1,
+      },
+    },
+  },
 } satisfies Prisma.WarrantyActivationRequestInclude;
 
 function buildWarrantyActivationRequestListQuery(
@@ -35,20 +70,7 @@ function buildWarrantyActivationRequestListQuery(
   const hasCreatedAtFilter = Boolean(
     createdAtFilter.gte || createdAtFilter.lte,
   );
-  const sortMap = {
-    createdAt: 'created_at',
-    customerName: 'customer_name',
-    customerPhone: 'customer_phone',
-    requestCode: 'request_code',
-    reviewedAt: 'reviewed_at',
-    status: 'status',
-    updatedAt: 'updated_at',
-    warrantyCode: 'warranty_code',
-  } satisfies Record<
-    string,
-    keyof Prisma.WarrantyActivationRequestOrderByWithRelationInput
-  >;
-  const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
+  const sortBy = getWarrantyActivationRequestSortColumn(filters.sortBy);
   const where: Prisma.WarrantyActivationRequestWhereInput = {
     status: filters.status,
     warranty_code: warrantyCode,
@@ -71,6 +93,31 @@ function buildWarrantyActivationRequestListQuery(
       : [{ created_at: 'desc' }];
 
   return { orderBy, where };
+}
+
+function getWarrantyActivationRequestSortColumn(
+  sortBy: string | undefined,
+): keyof Prisma.WarrantyActivationRequestOrderByWithRelationInput | undefined {
+  switch (sortBy) {
+    case 'createdAt':
+      return 'created_at';
+    case 'customerName':
+      return 'customer_name';
+    case 'customerPhone':
+      return 'customer_phone';
+    case 'requestCode':
+      return 'request_code';
+    case 'reviewedAt':
+      return 'reviewed_at';
+    case 'status':
+      return 'status';
+    case 'updatedAt':
+      return 'updated_at';
+    case 'warrantyCode':
+      return 'warranty_code';
+    default:
+      return undefined;
+  }
 }
 
 @Injectable()
@@ -182,10 +229,19 @@ export class WarrantyActivationRequestsRepository {
     return this.prismaService.$transaction(async (tx) => {
       const request = await tx.warrantyActivationRequest.findUnique({
         where: { id: input.id },
+        include: { activated_warranty: true },
       });
 
       if (!request) {
         return null;
+      }
+
+      if (request.activated_warranty_id) {
+        throw new BadRequestError(
+          'Warranty activation request already activated',
+          'BAD_REQUEST',
+          { code: 'ACTIVATION_REQUEST_ALREADY_ACTIVATED' },
+        );
       }
 
       const product = await tx.product.findUnique({
@@ -252,6 +308,7 @@ export class WarrantyActivationRequestsRepository {
         data: {
           activated_warranty: { connect: { id: updatedWarranty.id } },
           admin_note: input.adminNote,
+          customer: { connect: { id: customer.id } },
           reviewed_at: reviewedAt,
           reviewed_by: input.reviewedById
             ? { connect: { id: input.reviewedById } }
@@ -267,14 +324,16 @@ export class WarrantyActivationRequestsRepository {
     tx: Prisma.TransactionClient,
     input: {
       address: string;
-      email: string;
+      email: string | null;
       fullName: string;
       phone: string;
     },
   ) {
     const [phoneCustomer, emailCustomer] = await Promise.all([
       tx.customer.findUnique({ where: { phone: input.phone } }),
-      tx.customer.findUnique({ where: { email: input.email } }),
+      input.email
+        ? tx.customer.findUnique({ where: { email: input.email } })
+        : Promise.resolve(null),
     ]);
 
     const existingCustomer = phoneCustomer ?? emailCustomer;

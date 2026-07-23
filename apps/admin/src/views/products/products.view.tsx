@@ -1,13 +1,16 @@
 "use client";
 
 import { Plus } from "lucide-react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
+import type { ProductResponse } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { Badge, Button } from "@repo/ui";
 import { ExcelImportDialog, ImportExportMenu } from "@/src/components/common";
 import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
+import { AssignOwnerDialog } from "./components/assign-owner-dialog";
 import { DeleteProductDialog } from "./components/delete-product-dialog";
 import { ProductImportPreviewTable } from "./components/product-import-preview-table";
 import { ProductsDirectoryCard } from "./components/products-directory-card";
@@ -15,6 +18,8 @@ import { useProductsDirectory } from "./hooks/use-products-directory";
 
 export function ProductsView() {
   const t = useTranslations("Products");
+  const [productToAssignOwner, setProductToAssignOwner] =
+    useState<ProductResponse | null>(null);
   const {
     canCreateProducts,
     categories,
@@ -101,6 +106,7 @@ export function ProductsView() {
           isLoading={productsQuery.isLoading}
           onCategoryChange={updateCategory}
           onCategoryIdChange={updateCategoryId}
+          onAssignOwner={setProductToAssignOwner}
           onClearFilters={clearFilters}
           onDelete={openDelete}
           onPageChange={setPage}
@@ -128,6 +134,14 @@ export function ProductsView() {
           }}
           open={Boolean(productToDelete)}
           product={productToDelete}
+        />
+
+        <AssignOwnerDialog
+          onOpenChange={(open) => {
+            if (!open) setProductToAssignOwner(null);
+          }}
+          open={Boolean(productToAssignOwner)}
+          product={productToAssignOwner}
         />
 
         <ExcelImportDialog
@@ -175,6 +189,7 @@ export function ProductsView() {
                   editTitle: t("excel.editRowTitle"),
                   imageUrl: t("excel.imageUrl"),
                   importStatus: t("excel.importStatus"),
+                  installationPosition: t("installationPosition"),
                   invalidRows: t("excel.invalidRows", {
                     count: importSummary.invalidRows,
                   }),

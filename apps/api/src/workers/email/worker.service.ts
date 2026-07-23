@@ -16,6 +16,12 @@ type EmailTemplate = {
   engine: 'html' | 'mjml';
 };
 
+type EmailAttachment = {
+  contentBase64: string;
+  contentType: string;
+  filename: string;
+};
+
 @Injectable()
 export class WorkerEmailService implements OnModuleInit {
   private readonly logger = new Logger(WorkerEmailService.name);
@@ -60,12 +66,12 @@ export class WorkerEmailService implements OnModuleInit {
 
   private getCompiledTemplate(templateName: string): EmailTemplate {
     if (!this.templateCache.has(templateName)) {
-      const mjmlTemplatePath = path.join(
+      const sourceMjmlTemplatePath = path.join(
         process.cwd(),
         this.emailConfig.templatesPath,
         `${templateName}.mjml.hbs`,
       );
-      let templatePath = mjmlTemplatePath;
+      let templatePath = sourceMjmlTemplatePath;
       let engine: EmailTemplate['engine'] = 'mjml';
 
       if (!fs.existsSync(templatePath)) {
@@ -79,33 +85,34 @@ export class WorkerEmailService implements OnModuleInit {
 
       if (!fs.existsSync(templatePath)) {
         // Fallback for production where we might be running from dist/workers/email.
-        const fallbackPath = path.join(
+        const distMjmlFallbackPath = path.join(
           __dirname,
           '..',
           '..',
-          'module',
+          'modules',
           'email',
           'templates',
-          `${templateName}.${engine === 'mjml' ? 'mjml.hbs' : 'hbs'}`,
+          `${templateName}.mjml.hbs`,
         );
-        if (fs.existsSync(fallbackPath)) {
-          templatePath = fallbackPath;
+        if (fs.existsSync(distMjmlFallbackPath)) {
+          templatePath = distMjmlFallbackPath;
+          engine = 'mjml';
         } else {
-          const legacyFallbackPath = path.join(
+          const distHtmlFallbackPath = path.join(
             __dirname,
             '..',
             '..',
-            'module',
+            'modules',
             'email',
             'templates',
             `${templateName}.hbs`,
           );
-          if (fs.existsSync(legacyFallbackPath)) {
-            templatePath = legacyFallbackPath;
+          if (fs.existsSync(distHtmlFallbackPath)) {
+            templatePath = distHtmlFallbackPath;
             engine = 'html';
           } else {
             throw new Error(
-              `Email template '${templateName}' not found at ${templatePath}, ${fallbackPath}, or ${legacyFallbackPath}`,
+              `Email template '${templateName}' not found at ${sourceMjmlTemplatePath}, ${templatePath}, ${distMjmlFallbackPath}, or ${distHtmlFallbackPath}`,
             );
           }
         }
@@ -122,7 +129,7 @@ export class WorkerEmailService implements OnModuleInit {
 
   private async renderTemplate(
     template: EmailTemplate,
-    context: Record<string, any>,
+    context: Record<string, unknown>,
   ) {
     const output = template.render(context);
 
@@ -151,6 +158,7 @@ export class WorkerEmailService implements OnModuleInit {
     subject: string,
     text: string,
     html?: string,
+    attachments: EmailAttachment[] = [],
   ): Promise<void> {
     // Validate email
     emailSchema.parse(to);
@@ -162,6 +170,11 @@ export class WorkerEmailService implements OnModuleInit {
         subject,
         text,
         html,
+        attachments: attachments.map((attachment) => ({
+          content: Buffer.from(attachment.contentBase64, 'base64'),
+          contentType: attachment.contentType,
+          filename: attachment.filename,
+        })),
       });
 
       this.logger.log(
@@ -176,7 +189,12 @@ export class WorkerEmailService implements OnModuleInit {
   async sendTemplatedEmail(
     to: string,
     templateName: string,
-    context: Record<string, any>,
+    context: Record<string, unknown>,
+    options: {
+      attachments?: EmailAttachment[];
+      subject?: string;
+      text?: string;
+    } = {},
   ): Promise<void> {
     // Validate email
     emailSchema.parse(to);
@@ -192,9 +210,18 @@ export class WorkerEmailService implements OnModuleInit {
 
       // Generate subject from template or use default
       const subject =
-        context.subject || `Message from ${this.emailConfig.from}`;
+        options.subject ??
+        (typeof context.subject === 'string'
+          ? context.subject
+          : `Message from ${this.emailConfig.from}`);
 
-      await this.sendEmail(to, subject, '', html);
+      await this.sendEmail(
+        to,
+        subject,
+        options.text ?? '',
+        html,
+        options.attachments,
+      );
     } catch (error) {
       this.logger.error(
         `Failed to send templated email to ${to}: ${error.message}`,

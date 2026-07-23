@@ -1,4 +1,5 @@
 import { PrismaService } from '@/database/prisma/prisma.service';
+import { IssueWarrantyCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-certificate.use-case';
 import { ActivateWarrantyDto } from '@/modules/warranties/dto/activate-warranty.dto';
 import { WarrantyLifecycleService } from '@/modules/warranties/services/warranty-lifecycle.service';
 import { toWarrantyResponse } from '@/modules/warranties/warranties.types';
@@ -9,6 +10,7 @@ export class ActivateWarrantyUseCase {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly warrantyLifecycleService: WarrantyLifecycleService,
+    private readonly issueWarrantyCertificateUseCase: IssueWarrantyCertificateUseCase,
   ) {}
 
   async execute(
@@ -23,6 +25,10 @@ export class ActivateWarrantyUseCase {
         warrantyId,
       }),
     );
+
+    await this.issueWarrantyCertificateUseCase.execute({
+      warrantyId: warranty.id,
+    });
 
     return toWarrantyResponse(warranty);
   }

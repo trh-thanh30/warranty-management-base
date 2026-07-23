@@ -23,6 +23,6 @@ export default registerAs('email', () => {
     pass: process.env.SMTP_PASS || '',
     from,
     templatesPath:
-      process.env.EMAIL_TEMPLATES_PATH || 'src/module/email/templates',
+      process.env.EMAIL_TEMPLATES_PATH || 'src/modules/email/templates',
   };
 });

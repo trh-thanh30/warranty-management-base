@@ -1,0 +1,67 @@
+<mjml>
+  <mj-head>
+    <mj-title>{{subject}}</mj-title>
+    <mj-preview>Chứng nhận bảo hành điện tử {{certificateNumber}} đã được tạo.</mj-preview>
+    <mj-attributes>
+      <mj-all font-family="Arial, Helvetica, sans-serif" />
+      <mj-text color="#334155" font-size="15px" line-height="1.6" />
+      <mj-section padding="0" />
+    </mj-attributes>
+  </mj-head>
+  <mj-body background-color="#f8fafc" width="640px">
+    <mj-section background-color="#ffffff" padding="28px 28px 12px">
+      <mj-column>
+        <mj-text color="#0f172a" font-size="22px" font-weight="800" padding="0">Chứng nhận bảo hành điện tử</mj-text>
+        <mj-text color="#64748b" font-size="13px" padding="8px 0 0">Mã chứng nhận: {{certificateNumber}}</mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#2563eb" padding="4px 0">
+      <mj-column><mj-spacer height="1px" /></mj-column>
+    </mj-section>
+
+    <mj-section background-color="#ffffff" padding="28px">
+      <mj-column>
+        <mj-text padding="0 0 14px">Xin chào {{customerName}},</mj-text>
+        <mj-text padding="0 0 18px">
+          Chứng nhận bảo hành điện tử của Quý khách đã được kích hoạt thành công.
+          File PDF chứng nhận được đính kèm trong email này.
+        </mj-text>
+
+        <mj-table padding="0">
+          <tr>
+            <td style="padding:10px 12px;border:1px solid #e2e8f0;background:#f8fafc;color:#64748b;font-size:12px;text-transform:uppercase;">Mã bảo hành</td>
+            <td style="padding:10px 12px;border:1px solid #e2e8f0;color:#0f172a;font-weight:700;">{{warrantyCode}}</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 12px;border:1px solid #e2e8f0;background:#f8fafc;color:#64748b;font-size:12px;text-transform:uppercase;">Sản phẩm</td>
+            <td style="padding:10px 12px;border:1px solid #e2e8f0;color:#0f172a;">{{productName}}</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 12px;border:1px solid #e2e8f0;background:#f8fafc;color:#64748b;font-size:12px;text-transform:uppercase;">Số serial</td>
+            <td style="padding:10px 12px;border:1px solid #e2e8f0;color:#0f172a;">{{serialNumber}}</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 12px;border:1px solid #e2e8f0;background:#f8fafc;color:#64748b;font-size:12px;text-transform:uppercase;">Thời hạn</td>
+            <td style="padding:10px 12px;border:1px solid #e2e8f0;color:#0f172a;">{{startDate}} - {{endDate}}</td>
+          </tr>
+        </mj-table>
+
+        <mj-text color="#64748b" font-size="13px" padding="20px 0 0">
+          Vui lòng lưu email này để đối chiếu khi cần hỗ trợ bảo hành.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#f8fafc" border-top="1px solid #e2e8f0" padding="22px 28px">
+      <mj-column>
+        <mj-text align="center" color="#64748b" font-size="12px" padding="0">
+          Email này được gửi tự động. Vui lòng không trả lời trực tiếp email này.
+        </mj-text>
+        <mj-text align="center" color="#94a3b8" font-size="12px" padding="8px 0 0">
+          &copy; {{year}} Warranty Management.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

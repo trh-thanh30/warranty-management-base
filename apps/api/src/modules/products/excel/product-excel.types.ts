@@ -4,6 +4,7 @@ export type ProductExcelRow = {
   productCode: string | null;
   name: string;
   imageUrl: string | null;
+  installationPosition: string | null;
   category: product_category;
   categoryCode: string | null;
   brand: string | null;

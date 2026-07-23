@@ -3,19 +3,72 @@ import {
   IsDateString,
   IsEmail,
   IsInt,
+  IsObject,
   IsOptional,
   IsString,
+  IsUUID,
   Length,
   Matches,
   Max,
   Min,
+  ValidateNested,
 } from 'class-validator';
 
+export class ActivationFilmItemsDto {
+  @IsOptional()
+  @IsString()
+  @Length(1, 120)
+  windshield?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 120)
+  frontLeftSide?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 120)
+  frontRightSide?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 120)
+  rearLeftSide?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 120)
+  rearRightSide?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 120)
+  sunroof?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 120)
+  rearGlass?: string;
+}
+
 export class CreateWarrantyActivationRequestDto {
+  @IsOptional()
   @IsString()
   @Length(6, 64)
   @Matches(/^[A-Z0-9-]+$/i)
-  warrantyCode: string;
+  warrantyCode?: string;
+
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  productId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  dealerId?: string;
 
   @IsString()
   @Length(2, 120)
@@ -25,13 +78,74 @@ export class CreateWarrantyActivationRequestDto {
   @Length(6, 32)
   customerPhone: string;
 
+  @IsOptional()
   @IsEmail()
   @Length(3, 160)
-  customerEmail: string;
+  customerEmail?: string;
 
   @IsOptional()
   @IsDateString()
   customerBirthdate?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(2, 32)
+  vehiclePlate?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(2, 160)
+  vehicleModel?: string;
+
+  @IsOptional()
+  @IsDateString()
+  installedAt?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(120)
+  warrantyDurationMonths?: number;
+
+  @IsOptional()
+  @IsString()
+  @Length(2, 160)
+  dealerName?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(8, 32)
+  dealerPhone?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(4, 255)
+  dealerAddress?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(2, 120)
+  dealerProvince?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 120)
+  dealerDistrict?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 120)
+  salesName?: string;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ActivationFilmItemsDto)
+  filmItems?: ActivationFilmItemsDto;
+
+  @IsOptional()
+  @IsObject()
+  metadata?: Record<string, unknown>;
 
   @IsString()
   @Length(1, 32)

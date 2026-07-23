@@ -12,7 +12,11 @@ import type {
   ContentPageKindFilter,
   ContentPageStatusFilter,
 } from "../content-pages.types";
-import { useContentPages, useDeleteContentPage } from "./use-content-pages";
+import {
+  useContentPages,
+  useDeleteContentPage,
+  useUpdateContentPageStatus,
+} from "./use-content-pages";
 
 type Filters = { kind: ContentPageKindFilter; status: ContentPageStatusFilter };
 
@@ -29,6 +33,7 @@ export function useContentPagesDirectory() {
     null,
   );
   const removePage = useDeleteContentPage();
+  const updatePageStatus = useUpdateContentPageStatus();
   const debouncedSearch = useDebounce(controls.search.trim(), 300);
   const canView = hasPermission(PERMISSIONS.CONTENT_PAGE_VIEW);
   const query = useContentPages(
@@ -56,6 +61,7 @@ export function useContentPagesDirectory() {
       setPageToDelete(null);
     },
     isDeleting: removePage.isPending,
+    isUpdatingStatus: updatePageStatus.isPending,
     kind: controls.filters.kind,
     openDelete: setPageToDelete,
     pageToDelete,
@@ -63,5 +69,6 @@ export function useContentPagesDirectory() {
     setKind: controls.filterHandlers.kind,
     setStatus: controls.filterHandlers.status,
     status: controls.filters.status,
+    updateStatus: updatePageStatus.mutate,
   };
 }
