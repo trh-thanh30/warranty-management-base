@@ -65,6 +65,7 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
         serialNumber: 'SN-001',
         warrantyCode: 'WM-2026-ABC123',
       }),
+      expect.objectContaining({ source: 'ADMIN_PORTAL' }),
     );
     expect(result).toEqual({ id: 'request-id' });
   });
@@ -95,6 +96,7 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
     expect(productsRepository.synchronizeWarrantyCode).not.toHaveBeenCalled();
     expect(createWarrantyActivationRequestUseCase.execute).toHaveBeenCalledWith(
       expect.objectContaining({ warrantyCode: 'WM-2026-EXISTING' }),
+      expect.objectContaining({ source: 'ADMIN_PORTAL' }),
     );
   });
 

@@ -31,8 +31,8 @@ model User {
   warranty_claim_service_center_changes WarrantyClaimServiceCenterHistory[] @relation("WarrantyClaimServiceCenterChangedBy")
   reviewed_warranty_activation_requests WarrantyActivationRequest[]         @relation("WarrantyActivationRequestReviewedBy")
   created_warranty_activation_requests  WarrantyActivationRequest[]         @relation("WarrantyActivationRequestCreatedBy")
-  activated_warranties                    Warranty[]                          @relation("WarrantyActivatedBy")
-  voided_warranties                       Warranty[]                          @relation("WarrantyVoidedBy")
+  activated_warranties                  Warranty[]                          @relation("WarrantyActivatedBy")
+  voided_warranties                     Warranty[]                          @relation("WarrantyVoidedBy")
 
   @@index([role, status])
   @@index([email])
@@ -182,9 +182,9 @@ model Customer {
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 
-  user       User?              @relation(fields: [user_id], references: [id], onDelete: SetNull)
-  ownerships ProductOwnership[]
-  claims     WarrantyClaim[]
+  user                         User?                       @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  ownerships                   ProductOwnership[]
+  claims                       WarrantyClaim[]
   warranty_activation_requests WarrantyActivationRequest[]
 
   @@index([customer_code])
@@ -210,9 +210,10 @@ model Category {
   created_at  DateTime      @default(now())
   updated_at  DateTime      @updatedAt
 
-  parent   Category?  @relation("CategoryHierarchy", fields: [parent_id], references: [id], onDelete: SetNull)
-  children Category[] @relation("CategoryHierarchy")
-  products Product[]
+  parent                       Category?                   @relation("CategoryHierarchy", fields: [parent_id], references: [id], onDelete: SetNull)
+  children                     Category[]                  @relation("CategoryHierarchy")
+  products                     Product[]
+  warranty_activation_requests WarrantyActivationRequest[]
 
   @@unique([type, slug])
   @@index([type, is_active, order])
@@ -238,11 +239,12 @@ model Product {
   updated_at       DateTime         @updatedAt
   deleted_at       DateTime?
 
-  category_ref Category?          @relation(fields: [category_id], references: [id], onDelete: SetNull)
-  ownerships   ProductOwnership[]
-  warranty     Warranty?
-  claims       WarrantyClaim[]
-  assets       ProductAsset[]
+  category_ref                 Category?                   @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  ownerships                   ProductOwnership[]
+  warranty                     Warranty?
+  claims                       WarrantyClaim[]
+  assets                       ProductAsset[]
+  warranty_activation_requests WarrantyActivationRequest[]
 
   @@index([category])
   @@index([category_id])
@@ -331,40 +333,50 @@ model Warranty {
 }
 
 model WarrantyActivationRequest {
-  id                    String                             @id @default(uuid()) @db.Uuid
-  request_code          String                             @unique
-  status                warranty_activation_request_status @default(PENDING)
-  source                warranty_activation_request_source @default(PUBLIC_WEB)
-  warranty_code         String
-  customer_name         String
-  customer_phone        String
-  customer_email        String
-  customer_birthdate    DateTime?
-  province_code         String
-  province_name         String
-  ward_code             String
-  ward_name             String
-  address_detail        String
-  full_address          String
-  product_name          String?
-  serial_number         String?
-  brand                 String?
-  model                 String?
-  manufacture_year      Int?
-  note                  String?
-  admin_note            String?
-  rejection_reason      String?
-  created_by_id         String?                            @db.Uuid
-  customer_id           String?                            @db.Uuid
-  reviewed_by_id        String?                            @db.Uuid
-  reviewed_at           DateTime?
-  activated_warranty_id String?                            @unique @db.Uuid
-  metadata              Json?
-  created_at            DateTime                           @default(now())
-  updated_at            DateTime                           @updatedAt
+  id                       String                             @id @default(uuid()) @db.Uuid
+  request_code             String                             @unique
+  status                   warranty_activation_request_status @default(PENDING)
+  source                   warranty_activation_request_source @default(PUBLIC_WEB)
+  warranty_code            String
+  customer_name            String
+  customer_phone           String
+  customer_email           String?
+  customer_birthdate       DateTime?
+  category_id              String?                            @db.Uuid
+  product_id               String?                            @db.Uuid
+  dealer_id                String?                            @db.Uuid
+  vehicle_plate            String?
+  vehicle_model            String?
+  installed_at             DateTime?
+  warranty_duration_months Int?
+  province_code            String
+  province_name            String
+  ward_code                String
+  ward_name                String
+  address_detail           String
+  full_address             String
+  product_name             String?
+  serial_number            String?
+  brand                    String?
+  model                    String?
+  manufacture_year         Int?
+  note                     String?
+  admin_note               String?
+  rejection_reason         String?
+  created_by_id            String?                            @db.Uuid
+  customer_id              String?                            @db.Uuid
+  reviewed_by_id           String?                            @db.Uuid
+  reviewed_at              DateTime?
+  activated_warranty_id    String?                            @unique @db.Uuid
+  metadata                 Json?
+  created_at               DateTime                           @default(now())
+  updated_at               DateTime                           @updatedAt
 
   created_by         User?     @relation("WarrantyActivationRequestCreatedBy", fields: [created_by_id], references: [id], onDelete: SetNull)
   customer           Customer? @relation(fields: [customer_id], references: [id], onDelete: SetNull)
+  category           Category? @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  product            Product?  @relation(fields: [product_id], references: [id], onDelete: SetNull)
+  dealer             Dealer?   @relation(fields: [dealer_id], references: [id], onDelete: SetNull)
   reviewed_by        User?     @relation("WarrantyActivationRequestReviewedBy", fields: [reviewed_by_id], references: [id], onDelete: SetNull)
   activated_warranty Warranty? @relation(fields: [activated_warranty_id], references: [id], onDelete: SetNull)
 
@@ -374,6 +386,10 @@ model WarrantyActivationRequest {
   @@index([warranty_code])
   @@index([customer_phone])
   @@index([customer_email])
+  @@index([category_id])
+  @@index([product_id])
+  @@index([dealer_id])
+  @@index([vehicle_plate])
   @@index([created_by_id])
   @@index([customer_id])
   @@index([created_at])
@@ -388,7 +404,7 @@ model WarrantyCertificate {
   version            Int                               @default(1)
   status             warranty_certificate_status       @default(PENDING)
   storage_key        String?
-  recipient_email    String
+  recipient_email    String?
   generated_at       DateTime?
   emailed_at         DateTime?
   email_status       warranty_certificate_email_status @default(PENDING)
@@ -405,6 +421,26 @@ model WarrantyCertificate {
   @@index([email_status])
   @@index([recipient_email])
   @@map("warranty_certificate")
+}
+
+model Dealer {
+  id         String   @id @default(uuid()) @db.Uuid
+  name       String
+  phone      String?  @unique
+  address    String
+  province   String
+  sales_name String?
+  is_active  Boolean  @default(true)
+  metadata   Json?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  warranty_activation_requests WarrantyActivationRequest[]
+
+  @@index([is_active])
+  @@index([province])
+  @@index([name])
+  @@map("dealer")
 }
 
 model WarrantyClaim {
@@ -591,6 +627,11 @@ enum permission_key {
   SERVICE_CENTER_CREATE
   SERVICE_CENTER_UPDATE
   SERVICE_CENTER_DELETE
+
+  DEALER_VIEW
+  DEALER_CREATE
+  DEALER_UPDATE
+  DEALER_DELETE
 
   CONTENT_PAGE_VIEW
   CONTENT_PAGE_CREATE

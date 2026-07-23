@@ -163,11 +163,18 @@ export class ConfirmProductImportUseCase {
 
   private toMetadata(row: PreparedProductImportRow) {
     const imageUrl = this.blankToNull(row.imageUrl);
-    return imageUrl
-      ? {
-          excelImageUrl: imageUrl,
-        }
-      : undefined;
+    const installationPosition = this.blankToNull(row.installationPosition);
+    const metadata: Record<string, string> = {};
+
+    if (imageUrl) {
+      metadata.excelImageUrl = imageUrl;
+    }
+
+    if (installationPosition) {
+      metadata.installationPosition = installationPosition;
+    }
+
+    return Object.keys(metadata).length > 0 ? metadata : undefined;
   }
 
   private blankToNull(value: string | null | undefined) {

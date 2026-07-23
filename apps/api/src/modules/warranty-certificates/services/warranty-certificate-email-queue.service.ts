@@ -46,13 +46,37 @@ export class WarrantyCertificateEmailQueueService {
 
     const currentCustomer =
       certificate.warranty.product.ownerships[0]?.customer;
+    if (!certificate.recipient_email) {
+      throw new Error('Warranty certificate recipient email is required');
+    }
+
+    const requestId = this.getRequestId(certificate.metadata);
+    const request = requestId
+      ? await this.prismaService.warrantyActivationRequest.findUnique({
+          where: { id: requestId },
+          include: { dealer: true },
+        })
+      : null;
     const emailInput = {
       certificateNumber: certificate.certificate_number,
-      customerName: currentCustomer?.full_name ?? 'Quý khách',
+      customerAddress: request?.full_address ?? null,
+      customerEmail: request?.customer_email ?? currentCustomer?.email ?? null,
+      customerName:
+        request?.customer_name ?? currentCustomer?.full_name ?? 'Quý khách',
+      customerPhone: request?.customer_phone ?? currentCustomer?.phone ?? null,
+      dealerName:
+        request?.dealer?.name ?? this.getDealerName(request?.metadata),
       endDate: certificate.warranty.end_date,
+      filmItems: this.getFilmItems(request?.metadata),
+      installedAt: request?.installed_at ?? certificate.warranty.start_date,
       productName: certificate.warranty.product.name,
       serialNumber: certificate.warranty.product.serial_number,
       startDate: certificate.warranty.start_date,
+      vehicleModel: request?.vehicle_model ?? null,
+      vehiclePlate: request?.vehicle_plate ?? null,
+      warrantyDurationMonths:
+        request?.warranty_duration_months ??
+        certificate.warranty.duration_months,
       warrantyCode: certificate.warranty.warranty_code,
     };
 
@@ -98,5 +122,34 @@ export class WarrantyCertificateEmailQueueService {
         },
       });
     }
+  }
+
+  private getRequestId(metadata: unknown) {
+    const record = this.toRecord(metadata);
+    return typeof record?.requestId === 'string' ? record.requestId : null;
+  }
+
+  private getDealerName(metadata: unknown) {
+    const record = this.toRecord(metadata);
+    const dealer = this.toRecord(record?.dealer);
+    return typeof dealer?.name === 'string' ? dealer.name : null;
+  }
+
+  private getFilmItems(metadata: unknown) {
+    const record = this.toRecord(metadata);
+    const filmItems = this.toRecord(record?.filmItems);
+    if (!filmItems) return null;
+
+    return Object.fromEntries(
+      Object.entries(filmItems).filter(
+        ([, value]) => typeof value === 'string',
+      ),
+    ) as Record<string, string>;
+  }
+
+  private toRecord(value: unknown): Record<string, unknown> | null {
+    return value && typeof value === 'object' && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : null;
   }
 }

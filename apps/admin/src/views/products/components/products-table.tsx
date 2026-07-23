@@ -1,6 +1,6 @@
 "use client";
 
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, UserPlus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ProductResponse, ProductSortBy } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
@@ -33,6 +33,7 @@ import { WarrantyStatusBadge } from "./warranty-status-badge";
 type ProductsTableProps = {
   items: ProductResponse[];
   onDelete: (product: ProductResponse) => void;
+  onAssignOwner: (product: ProductResponse) => void;
   onSortChange: (sortBy: ProductSortBy) => void;
   sortBy?: ProductSortBy;
   sortOrder: "asc" | "desc";
@@ -40,6 +41,7 @@ type ProductsTableProps = {
 
 export function ProductsTable({
   items,
+  onAssignOwner,
   onDelete,
   onSortChange,
   sortBy,
@@ -53,6 +55,7 @@ export function ProductsTable({
         {items.map((product) => (
           <ProductMobileCard
             key={product.id}
+            onAssignOwner={onAssignOwner}
             onDelete={onDelete}
             product={product}
           />
@@ -105,6 +108,7 @@ export function ProductsTable({
             {items.map((product) => (
               <ProductTableRow
                 key={product.id}
+                onAssignOwner={onAssignOwner}
                 onDelete={onDelete}
                 product={product}
               />
@@ -117,9 +121,11 @@ export function ProductsTable({
 }
 
 function ProductTableRow({
+  onAssignOwner,
   onDelete,
   product,
 }: {
+  onAssignOwner: ProductsTableProps["onAssignOwner"];
   onDelete: ProductsTableProps["onDelete"];
   product: ProductResponse;
 }) {
@@ -141,16 +147,22 @@ function ProductTableRow({
       </TableCell>
       <TableCell>{formatProductCreatedAt(product.createdAt)}</TableCell>
       <TableCell className="text-right">
-        <ProductActionsMenu onDelete={onDelete} product={product} />
+        <ProductActionsMenu
+          onAssignOwner={onAssignOwner}
+          onDelete={onDelete}
+          product={product}
+        />
       </TableCell>
     </TableRow>
   );
 }
 
 function ProductMobileCard({
+  onAssignOwner,
   onDelete,
   product,
 }: {
+  onAssignOwner: ProductsTableProps["onAssignOwner"];
   onDelete: ProductsTableProps["onDelete"];
   product: ProductResponse;
 }) {
@@ -160,7 +172,11 @@ function ProductMobileCard({
     <article className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
       <div className="flex items-start justify-between gap-3">
         <ProductName product={product} />
-        <ProductActionsMenu onDelete={onDelete} product={product} />
+        <ProductActionsMenu
+          onAssignOwner={onAssignOwner}
+          onDelete={onDelete}
+          product={product}
+        />
       </div>
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
         <ProductMobileField
@@ -234,9 +250,11 @@ function ProductMobileField({
 }
 
 function ProductActionsMenu({
+  onAssignOwner,
   onDelete,
   product,
 }: {
+  onAssignOwner: ProductsTableProps["onAssignOwner"];
   onDelete: ProductsTableProps["onDelete"];
   product: ProductResponse;
 }) {
@@ -244,9 +262,10 @@ function ProductActionsMenu({
   const { hasPermission } = usePermissions();
   const canEdit = hasPermission(PERMISSIONS.PRODUCT_UPDATE);
   const canDelete = hasPermission(PERMISSIONS.PRODUCT_DELETE);
+  const canAssignOwner = hasPermission(PERMISSIONS.PRODUCT_ASSIGN_OWNER);
   const isDeleted = product.status === "DELETED";
 
-  if (isDeleted || (!canEdit && !canDelete)) return null;
+  if (isDeleted || (!canEdit && !canDelete && !canAssignOwner)) return null;
 
   return (
     <DropdownMenu>
@@ -267,6 +286,12 @@ function ProductActionsMenu({
               <Pencil className="mr-2 size-4" />
               {t("edit")}
             </Link>
+          </DropdownMenuItem>
+        ) : null}
+        {canAssignOwner ? (
+          <DropdownMenuItem onSelect={() => onAssignOwner(product)}>
+            <UserPlus className="mr-2 size-4" />
+            {t("assignOwner")}
           </DropdownMenuItem>
         ) : null}
         {canDelete ? (

@@ -27,6 +27,8 @@ import {
 } from "./use-products";
 import {
   getProductSpecifications,
+  getProductInstallationPosition,
+  mergeProductInstallationPosition,
   mergeProductSpecifications,
   toCreateProductBody,
 } from "../products.utils";
@@ -177,6 +179,7 @@ function getDefaultValues(product: ProductResponse | null): ProductFormInput {
     coverImageUrl:
       product?.assets.find((asset) => asset.role === "COVER")?.url ?? "",
     description: product?.description ?? "",
+    installationPosition: getProductInstallationPosition(product?.metadata),
     manufactureYear: product?.manufactureYear ?? undefined,
     model: product?.model ?? "",
     name: product?.name ?? "",
@@ -201,6 +204,7 @@ function getImportPreviewDefaultValues(
     coverAssetId: "",
     coverImageUrl: data.imageUrl ?? "",
     description: data.description ?? "",
+    installationPosition: data.installationPosition ?? "",
     manufactureYear: data.manufactureYear ?? undefined,
     model: data.model ?? "",
     name: data.name ?? "",
@@ -220,6 +224,7 @@ function toImportRowData(values: ProductFormValues): ProductImportRowData {
     categoryCode: toNullableValue(values.categoryId),
     description: toNullableValue(values.description),
     imageUrl: toNullableValue(values.coverImageUrl),
+    installationPosition: toNullableValue(values.installationPosition),
     manufactureYear: values.manufactureYear ?? null,
     model: toNullableValue(values.model),
     name: values.name.trim(),
@@ -245,9 +250,9 @@ function toUpdateProductBody(
     categoryId: toNullableValue(values.categoryId),
     description: toNullableRichText(values.description),
     manufactureYear: values.manufactureYear ?? null,
-    metadata: mergeProductSpecifications(
-      existingMetadata,
-      values.specifications,
+    metadata: mergeProductInstallationPosition(
+      mergeProductSpecifications(existingMetadata, values.specifications),
+      values.installationPosition,
     ),
     model: toNullableValue(values.model),
     name: values.name.trim(),

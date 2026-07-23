@@ -345,6 +345,7 @@ function normalizePreviewRow(row: {
       categoryCode: row.data.categoryCode ?? null,
       description: row.data.description ?? null,
       imageUrl: row.data.imageUrl ?? null,
+      installationPosition: row.data.installationPosition ?? null,
       manufactureYear: row.data.manufactureYear ?? null,
       model: row.data.model ?? null,
       name: row.data.name ?? "",

@@ -29,6 +29,16 @@ const activationRequestInclude = {
       phone: true,
     },
   },
+  dealer: {
+    select: {
+      id: true,
+      name: true,
+      phone: true,
+      address: true,
+      province: true,
+      sales_name: true,
+    },
+  },
   reviewed_by: {
     select: {
       id: true,
@@ -313,14 +323,16 @@ export class WarrantyActivationRequestsRepository {
     tx: Prisma.TransactionClient,
     input: {
       address: string;
-      email: string;
+      email: string | null;
       fullName: string;
       phone: string;
     },
   ) {
     const [phoneCustomer, emailCustomer] = await Promise.all([
       tx.customer.findUnique({ where: { phone: input.phone } }),
-      tx.customer.findUnique({ where: { email: input.email } }),
+      input.email
+        ? tx.customer.findUnique({ where: { email: input.email } })
+        : Promise.resolve(null),
     ]);
 
     const existingCustomer = phoneCustomer ?? emailCustomer;

@@ -83,10 +83,37 @@ export function mergeProductSpecifications(
   return Object.keys(nextMetadata).length > 0 ? nextMetadata : null;
 }
 
+export function getProductInstallationPosition(
+  metadata: Record<string, unknown> | null | undefined,
+) {
+  return typeof metadata?.installationPosition === "string"
+    ? metadata.installationPosition
+    : "";
+}
+
+export function mergeProductInstallationPosition(
+  metadata: Record<string, unknown> | null | undefined,
+  installationPosition: string,
+): Record<string, unknown> | null {
+  const nextMetadata = { ...(metadata ?? {}) };
+  const trimmedPosition = installationPosition.trim();
+
+  if (trimmedPosition) {
+    nextMetadata.installationPosition = trimmedPosition;
+  } else {
+    delete nextMetadata.installationPosition;
+  }
+
+  return Object.keys(nextMetadata).length > 0 ? nextMetadata : null;
+}
+
 export function toCreateProductBody(
   values: ProductFormValues,
 ): CreateProductBody {
-  const metadata = mergeProductSpecifications(null, values.specifications);
+  const metadata = mergeProductInstallationPosition(
+    mergeProductSpecifications(null, values.specifications),
+    values.installationPosition,
+  );
 
   return {
     brand: toOptionalValue(values.brand),

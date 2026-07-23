@@ -23,11 +23,16 @@ export function toProductExcelRow(
   const metadata = product.metadata as Record<string, unknown> | null;
   const metadataImageUrl =
     typeof metadata?.excelImageUrl === 'string' ? metadata.excelImageUrl : null;
+  const installationPosition =
+    typeof metadata?.installationPosition === 'string'
+      ? metadata.installationPosition
+      : null;
 
   return {
     productCode: product.product_code,
     name: product.name,
     imageUrl: imageAsset ? resolveAssetUrl(imageAsset.asset) : metadataImageUrl,
+    installationPosition,
     category: product.category,
     categoryCode: product.category_ref?.code ?? null,
     brand: product.brand,

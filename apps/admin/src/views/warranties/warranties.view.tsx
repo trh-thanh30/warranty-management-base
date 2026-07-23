@@ -7,6 +7,7 @@ import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { ActivateWarrantyDialog } from "./components/activate-warranty-dialog";
 import { WarrantiesDirectoryCard } from "./components/warranties-directory-card";
+import { WarrantyManagementTabs } from "./components/warranty-management-tabs";
 import { VoidWarrantyDialog } from "./components/void-warranty-dialog";
 import { useWarrantiesDirectory } from "./hooks/use-warranties-directory";
 
@@ -53,6 +54,8 @@ export function WarrantiesView() {
           eyebrow={t("eyebrow")}
           title={t("title")}
         />
+
+        <WarrantyManagementTabs activeTab="warranties" />
 
         <WarrantiesDirectoryCard
           data={warrantiesQuery.data}

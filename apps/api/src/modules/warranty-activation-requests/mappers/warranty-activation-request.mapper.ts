@@ -22,6 +22,14 @@ export type WarrantyActivationRequestWithRelations =
       full_name: string;
       phone: string | null;
     } | null;
+    dealer?: {
+      id: string;
+      name: string;
+      phone: string | null;
+      address: string;
+      province: string;
+      sales_name: string | null;
+    } | null;
     reviewed_by?: {
       id: string;
       email: string;
@@ -40,7 +48,7 @@ export type WarrantyActivationRequestWithRelations =
         certificate_number: string;
         status: warranty_certificate_status;
         storage_key: string | null;
-        recipient_email: string;
+        recipient_email: string | null;
         generated_at: Date | null;
         emailed_at: Date | null;
         email_status: warranty_certificate_email_status;
@@ -68,10 +76,27 @@ export function toWarrantyActivationRequestResponse(
     status: request.status,
     source: request.source,
     warrantyCode: request.warranty_code,
+    categoryId: request.category_id,
+    productId: request.product_id,
+    dealerId: request.dealer_id,
+    dealer: request.dealer
+      ? {
+          id: request.dealer.id,
+          name: request.dealer.name,
+          phone: request.dealer.phone,
+          address: request.dealer.address,
+          province: request.dealer.province,
+          salesName: request.dealer.sales_name,
+        }
+      : null,
     customerName: request.customer_name,
     customerPhone: request.customer_phone,
     customerEmail: request.customer_email,
     customerBirthdate: request.customer_birthdate?.toISOString() ?? null,
+    vehiclePlate: request.vehicle_plate,
+    vehicleModel: request.vehicle_model,
+    installedAt: request.installed_at?.toISOString() ?? null,
+    warrantyDurationMonths: request.warranty_duration_months,
     provinceCode: request.province_code,
     provinceName: request.province_name,
     wardCode: request.ward_code,
@@ -145,7 +170,7 @@ function toCertificateSummary(
     certificate_number: string;
     status: warranty_certificate_status;
     storage_key: string | null;
-    recipient_email: string;
+    recipient_email: string | null;
     generated_at: Date | null;
     emailed_at: Date | null;
     email_status: warranty_certificate_email_status;

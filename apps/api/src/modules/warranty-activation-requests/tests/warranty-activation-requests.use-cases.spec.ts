@@ -18,7 +18,15 @@ describe('WarrantyActivationRequestsUseCases', () => {
     review: jest.fn(),
   };
   const productsRepository = {
+    findActivationRequestTargetById: jest.fn(),
     findActivationRequestTargetByWarrantyCode: jest.fn(),
+    synchronizeWarrantyCode: jest.fn(),
+  };
+  const dealersRepository = {
+    findActiveById: jest.fn(),
+  };
+  const generateWarrantyCodeUseCase = {
+    execute: jest.fn(),
   };
   const issueWarrantyCertificateUseCase = {
     execute: jest.fn(),
@@ -26,6 +34,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    generateWarrantyCodeUseCase.execute.mockResolvedValue('WM-2026-GENERATED');
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2026-07-19T03:00:00.000Z'));
   });
@@ -68,6 +77,8 @@ describe('WarrantyActivationRequestsUseCases', () => {
       repository as never,
       generateCodeUseCase,
       productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
     );
 
     const result = await useCase.execute({
@@ -111,6 +122,8 @@ describe('WarrantyActivationRequestsUseCases', () => {
       repository as never,
       generateCodeUseCase,
       productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
     );
 
     await expect(
@@ -152,6 +165,8 @@ describe('WarrantyActivationRequestsUseCases', () => {
       repository as never,
       generateCodeUseCase,
       productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
     );
 
     const result = await useCase.execute({
@@ -180,6 +195,8 @@ describe('WarrantyActivationRequestsUseCases', () => {
       repository as never,
       generateCodeUseCase,
       productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
     );
 
     await expect(
@@ -213,6 +230,8 @@ describe('WarrantyActivationRequestsUseCases', () => {
       repository as never,
       generateCodeUseCase,
       productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
     );
 
     await expect(
@@ -240,6 +259,8 @@ describe('WarrantyActivationRequestsUseCases', () => {
       repository as never,
       generateCodeUseCase,
       productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
     );
 
     await expect(
@@ -410,8 +431,10 @@ const baseDraftProduct = {
     },
   ],
   serial_number: 'SN-BLF-001',
+  warranty_code: 'WM-2026-ABC123',
   warranty: {
     id: 'warranty-id',
     status: warranty_status.DRAFT,
+    warranty_code: 'WM-2026-ABC123',
   },
 };

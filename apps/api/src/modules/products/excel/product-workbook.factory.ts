@@ -18,6 +18,7 @@ export async function createProductImportTemplateWorkbook() {
         productCode: null,
         name: 'Bộ pin chính hãng',
         imageUrl: 'https://example.com/images/product.jpg',
+        installationPosition: 'Khoang động cơ',
         category: product_category.SPARE_PART,
         categoryCode: 'BATTERY',
         brand: 'Toyota',

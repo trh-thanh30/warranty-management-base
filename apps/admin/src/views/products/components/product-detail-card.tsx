@@ -12,7 +12,11 @@ import {
   Skeleton,
 } from "@repo/ui";
 import { useTranslations } from "next-intl";
-import { formatProductCreatedAt, formatProductOwner } from "../products.utils";
+import {
+  formatProductCreatedAt,
+  formatProductOwner,
+  getProductInstallationPosition,
+} from "../products.utils";
 import { ProductStatusBadge } from "./product-status-badge";
 import { WarrantyStatusBadge } from "./warranty-status-badge";
 
@@ -29,6 +33,7 @@ export function ProductDetailCard({
 }: ProductDetailCardProps) {
   const t = useTranslations("Products");
   const [previewIndex, setPreviewIndex] = useState(-1);
+  const installationPosition = getProductInstallationPosition(product.metadata);
   const slides = useMemo(
     () =>
       product.assets.map((asset) => ({
@@ -96,6 +101,10 @@ export function ProductDetailCard({
           <DetailItem
             label={t("dynamicCategory")}
             value={product.categoryRef?.name ?? product.category}
+          />
+          <DetailItem
+            label={t("installationPosition")}
+            value={installationPosition || "-"}
           />
           <div className="flex items-center justify-between gap-4">
             <span className="text-sm text-slate-500 dark:text-slate-400">

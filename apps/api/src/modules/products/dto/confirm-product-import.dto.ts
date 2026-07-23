@@ -26,6 +26,11 @@ export class ConfirmProductImportRowDto {
   @IsString()
   imageUrl?: string | null;
 
+  @IsOptional()
+  @IsString()
+  @Length(0, 160)
+  installationPosition?: string | null;
+
   @IsEnum(product_category)
   category: product_category;
 

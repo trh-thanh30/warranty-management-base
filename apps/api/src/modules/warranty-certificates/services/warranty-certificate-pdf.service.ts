@@ -3,11 +3,20 @@ import { formatWarrantyCertificateDate } from '@/modules/warranty-certificates/u
 
 export type WarrantyCertificatePdfInput = {
   certificateNumber: string;
+  customerAddress?: string | null;
+  customerEmail?: string | null;
   customerName: string;
+  customerPhone?: string | null;
+  dealerName?: string | null;
   endDate: Date | null;
+  filmItems?: Record<string, string> | null;
+  installedAt?: Date | null;
   productName: string;
   serialNumber: string | null;
   startDate: Date | null;
+  vehicleModel?: string | null;
+  vehiclePlate?: string | null;
+  warrantyDurationMonths?: number | null;
   warrantyCode: string | null;
 };
 
@@ -15,13 +24,32 @@ export type WarrantyCertificatePdfInput = {
 export class WarrantyCertificatePdfService {
   createPdfBuffer(input: WarrantyCertificatePdfInput) {
     const lines = [
-      'Electronic Warranty Certificate',
-      `Certificate: ${input.certificateNumber}`,
-      `Warranty code: ${input.warrantyCode ?? '-'}`,
-      `Customer: ${input.customerName}`,
-      `Product: ${input.productName}`,
-      `Serial: ${input.serialNumber ?? '-'}`,
-      `Coverage: ${formatWarrantyCertificateDate(input.startDate)} - ${formatWarrantyCertificateDate(input.endDate)}`,
+      'CHUNG NHAN BAO HANH DIEN TU',
+      `Warranty number: ${input.certificateNumber}`,
+      '',
+      'THONG TIN KHACH HANG',
+      `Bien so xe: ${input.vehiclePlate ?? '-'}`,
+      `Loai xe: ${input.vehicleModel ?? '-'}`,
+      `So serial: ${input.serialNumber ?? '-'}`,
+      `Ten khach hang: ${input.customerName}`,
+      `So dien thoai: ${input.customerPhone ?? '-'}`,
+      `Email: ${input.customerEmail ?? '-'}`,
+      `Dia chi: ${input.customerAddress ?? '-'}`,
+      '',
+      'THONG TIN SAN PHAM',
+      `Dai ly: ${input.dealerName ?? '-'}`,
+      `Ngay lap dat: ${formatWarrantyCertificateDate(input.installedAt ?? input.startDate)}`,
+      `Ten goi dan: ${input.productName}`,
+      `Kinh lai: ${input.filmItems?.windshield ?? '-'}`,
+      `KST - Trai: ${input.filmItems?.frontLeftSide ?? '-'}`,
+      `KST - Phai: ${input.filmItems?.frontRightSide ?? '-'}`,
+      `KSS - Trai: ${input.filmItems?.rearLeftSide ?? '-'}`,
+      `KSS - Phai: ${input.filmItems?.rearRightSide ?? '-'}`,
+      `Cua so troi: ${input.filmItems?.sunroof ?? '-'}`,
+      `Kinh lung: ${input.filmItems?.rearGlass ?? '-'}`,
+      `Thoi gian bao hanh: ${input.warrantyDurationMonths ?? '-'} thang`,
+      `Ngay het han bao hanh: ${formatWarrantyCertificateDate(input.endDate)}`,
+      `Ma bao hanh: ${input.warrantyCode ?? '-'}`,
     ];
     const textCommands = lines
       .map(

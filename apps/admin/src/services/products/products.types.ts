@@ -13,6 +13,7 @@ export type ProductImportRowData = {
   categoryCode: string | null;
   description: string | null;
   imageUrl: string | null;
+  installationPosition: string | null;
   manufactureYear: number | null;
   model: string | null;
   name: string;

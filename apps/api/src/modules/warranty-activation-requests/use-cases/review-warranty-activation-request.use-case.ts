@@ -60,7 +60,7 @@ export class ReviewWarrantyActivationRequestUseCase {
 
       if (activatedRequest.activated_warranty_id) {
         await this.issueWarrantyCertificateUseCase.execute({
-          recipientEmail: activatedRequest.customer_email,
+          recipientEmail: activatedRequest.customer_email ?? undefined,
           requestId: activatedRequest.id,
           warrantyId: activatedRequest.activated_warranty_id,
         });

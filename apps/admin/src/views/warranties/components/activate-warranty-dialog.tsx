@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AlertCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { WarrantyListItem } from "@repo/shared";
 import { HttpClientError } from "@repo/shared";
@@ -16,6 +17,7 @@ import {
 } from "@repo/ui";
 import { useActivateWarranty } from "@/src/hooks/use-warranties";
 import { useToast } from "@/src/hooks/use-toast";
+import { Link } from "@/src/i18n/navigation";
 import { toOptionalValue } from "@/src/utils";
 
 type ActivateWarrantyDialogProps = {
@@ -35,11 +37,17 @@ export function ActivateWarrantyDialog({
   const toast = useToast();
   const activateWarranty = useActivateWarranty(warranty?.id ?? null);
   const [startDate, setStartDate] = useState("");
+  const [ownerRequired, setOwnerRequired] = useState(false);
+  const requiresOwner = Boolean(warranty && !warranty.owner);
 
   async function confirm() {
-    if (!warranty) return;
+    if (!warranty || requiresOwner) {
+      setOwnerRequired(true);
+      return;
+    }
 
     try {
+      setOwnerRequired(false);
       await activateWarranty.mutateAsync({
         startDate: toOptionalValue(startDate),
       });
@@ -48,16 +56,25 @@ export function ActivateWarrantyDialog({
       onActivated?.();
       onOpenChange(false);
     } catch (error) {
-      const message =
-        error instanceof HttpClientError && error.status === 404
-          ? t("notFound")
-          : t("activateError");
+      if (isWarrantyOwnerRequiredError(error)) {
+        setOwnerRequired(true);
+        toast.error(t("activateOwnerRequired"));
+        return;
+      }
+
+      const message = getActivateErrorMessage(error, t);
       toast.error(message);
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) setOwnerRequired(false);
+        onOpenChange(nextOpen);
+      }}
+    >
       <DialogContent>
         <DialogTitle className="text-lg font-semibold">
           {t("activateTitle")}
@@ -69,6 +86,25 @@ export function ActivateWarrantyDialog({
         </DialogDescription>
 
         <div className="mt-5 space-y-4">
+          {(ownerRequired || requiresOwner) && warranty ? (
+            <div
+              className="flex flex-col gap-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-100 sm:flex-row sm:items-start sm:justify-between"
+              role="alert"
+            >
+              <div className="flex gap-2">
+                <AlertCircle
+                  className="mt-0.5 size-4 shrink-0"
+                  aria-hidden="true"
+                />
+                <p className="leading-6">{t("activateOwnerRequiredHelp")}</p>
+              </div>
+              <Button asChild size="sm" type="button" variant="secondary">
+                <Link href={`/products/${warranty.product.id}`}>
+                  {t("goToAssignOwner")}
+                </Link>
+              </Button>
+            </div>
+          ) : null}
           <div className="space-y-2">
             <Label htmlFor="activate-warranty-start-date">
               {t("startDate")}
@@ -110,7 +146,7 @@ export function ActivateWarrantyDialog({
             </Button>
           </DialogClose>
           <Button
-            disabled={!warranty || activateWarranty.isPending}
+            disabled={!warranty || requiresOwner || activateWarranty.isPending}
             onClick={() => {
               void confirm();
             }}
@@ -121,5 +157,28 @@ export function ActivateWarrantyDialog({
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function getActivateErrorMessage(
+  error: unknown,
+  t: ReturnType<typeof useTranslations<"Warranties">>,
+) {
+  if (error instanceof HttpClientError && error.status === 404) {
+    return t("notFound");
+  }
+
+  return t("activateError");
+}
+
+function isWarrantyOwnerRequiredError(error: unknown) {
+  if (!(error instanceof HttpClientError)) return false;
+
+  const details = error.details;
+  return (
+    typeof details === "object" &&
+    details !== null &&
+    "code" in details &&
+    details.code === "WARRANTY_OWNER_REQUIRED"
   );
 }

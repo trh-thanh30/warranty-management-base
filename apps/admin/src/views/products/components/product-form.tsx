@@ -20,7 +20,6 @@ import { RichTextEditor } from "@/src/components/common/rich-text-editor";
 import { ImageUpload } from "@/src/components/common/image-upload";
 import { createFieldErrorFormatter } from "@/src/utils";
 import type { ProductImportRowData } from "@/src/services/products/products.types";
-import { PRODUCT_CATEGORIES } from "../products.constants";
 import { useProductForm } from "../hooks/use-product-form";
 import { ProductSpecificationsFields } from "./product-specifications-fields";
 import { ProductStatusControl } from "./product-status-control";
@@ -116,26 +115,6 @@ export function ProductForm(props: ProductFormProps) {
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field id="product-category" label={t("legacyCategory")}>
-          <Controller
-            control={control}
-            name="category"
-            render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger id="product-category">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PRODUCT_CATEGORIES.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {t(`categories.${category}`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
-        </Field>
         <Field
           error={formatFieldError(errors.categoryId?.message, t)}
           id="product-category-id"
@@ -178,7 +157,7 @@ export function ProductForm(props: ProductFormProps) {
         ) : null}
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-2">
         <Field
           error={formatFieldError(errors.brand?.message, t)}
           id="product-brand"
@@ -199,6 +178,17 @@ export function ProductForm(props: ProductFormProps) {
             id="product-model"
             placeholder={t("modelPlaceholder")}
             {...register("model")}
+          />
+        </Field>
+        <Field
+          error={formatFieldError(errors.installationPosition?.message, t)}
+          id="product-installation-position"
+          label={t("installationPosition")}
+        >
+          <Input
+            id="product-installation-position"
+            placeholder={t("installationPositionPlaceholder")}
+            {...register("installationPosition")}
           />
         </Field>
         <Field
@@ -436,6 +426,7 @@ const formatFieldError = createFieldErrorFormatter(
     "duplicateWarrantyCode",
     "durationMonthsInteger",
     "durationMonthsRange",
+    "installationPositionLength",
     "manufactureYearInteger",
     "manufactureYearRange",
     "modelLength",

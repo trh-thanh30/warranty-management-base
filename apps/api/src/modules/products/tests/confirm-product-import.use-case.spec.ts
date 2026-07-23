@@ -40,6 +40,7 @@ describe('ConfirmProductImportUseCase', () => {
           categoryCode: null,
           description: null,
           imageUrl: 'https://example.com/product.jpg',
+          installationPosition: 'Engine bay',
           manufactureYear: 2026,
           model: 'Battery',
           name: 'SUV Battery',
@@ -56,7 +57,10 @@ describe('ConfirmProductImportUseCase', () => {
       expect.objectContaining({
         data: expect.objectContaining({
           category: product_category.SPARE_PART,
-          metadata: { excelImageUrl: 'https://example.com/product.jpg' },
+          metadata: {
+            excelImageUrl: 'https://example.com/product.jpg',
+            installationPosition: 'Engine bay',
+          },
           name: 'SUV Battery',
           serial_number: 'SN-001',
           status: product_status.ACTIVE,

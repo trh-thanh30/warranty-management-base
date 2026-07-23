@@ -1,5 +1,6 @@
 import { PrismaModule } from '@/database/prisma/prisma.module';
 import { CustomersModule } from '@/modules/customers/customers.module';
+import { DealersModule } from '@/modules/dealers/dealers.module';
 import { ProductsModule } from '@/modules/products/products.module';
 import { WarrantyCertificatesModule } from '@/modules/warranty-certificates/warranty-certificates.module';
 import { WarrantiesModule } from '@/modules/warranties/warranties.module';
@@ -18,6 +19,7 @@ import { Module } from '@nestjs/common';
 @Module({
   imports: [
     CustomersModule,
+    DealersModule,
     PrismaModule,
     ProductsModule,
     WarrantyCertificatesModule,

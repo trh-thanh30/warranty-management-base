@@ -34,10 +34,25 @@ export type WarrantyActivationRequestSummary = {
   status: WarrantyActivationRequestStatus;
   source: WarrantyActivationRequestSource;
   warrantyCode: string;
+  categoryId: string | null;
+  productId: string | null;
+  dealerId: string | null;
+  dealer: {
+    id: string;
+    name: string;
+    phone: string | null;
+    address: string;
+    province: string;
+    salesName: string | null;
+  } | null;
   customerName: string;
   customerPhone: string;
-  customerEmail: string;
+  customerEmail: string | null;
   customerBirthdate: string | null;
+  vehiclePlate: string | null;
+  vehicleModel: string | null;
+  installedAt: string | null;
+  warrantyDurationMonths: number | null;
   provinceCode: string;
   provinceName: string;
   wardCode: string;
@@ -89,7 +104,7 @@ export type WarrantyActivationRequestSummary = {
     certificateNumber: string;
     status: WarrantyCertificateStatus;
     storageKey: string | null;
-    recipientEmail: string;
+    recipientEmail: string | null;
     generatedAt: string | null;
     emailedAt: string | null;
     emailStatus: WarrantyCertificateEmailStatus;
@@ -101,11 +116,33 @@ export type WarrantyActivationRequestSummary = {
 };
 
 export type CreateWarrantyActivationRequestBody = {
-  warrantyCode: string;
+  warrantyCode?: string;
+  categoryId?: string;
+  productId?: string;
+  dealerId?: string;
   customerName: string;
   customerPhone: string;
-  customerEmail: string;
+  customerEmail?: string;
   customerBirthdate?: string;
+  vehiclePlate?: string;
+  vehicleModel?: string;
+  installedAt?: string;
+  warrantyDurationMonths?: number;
+  dealerName?: string;
+  dealerPhone?: string;
+  dealerAddress?: string;
+  dealerProvince?: string;
+  salesName?: string;
+  filmItems?: {
+    windshield?: string;
+    frontLeftSide?: string;
+    frontRightSide?: string;
+    rearLeftSide?: string;
+    rearRightSide?: string;
+    sunroof?: string;
+    rearGlass?: string;
+  };
+  metadata?: Record<string, unknown>;
   provinceCode: string;
   provinceName: string;
   wardCode: string;
