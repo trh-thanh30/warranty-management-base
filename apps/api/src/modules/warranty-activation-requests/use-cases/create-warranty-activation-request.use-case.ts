@@ -86,7 +86,9 @@ export class CreateWarrantyActivationRequestUseCase {
       );
     }
 
-    const dealer = await this.resolveDealer(dto.dealerId);
+    this.assertProductMatchesCategory(dto.categoryId, product);
+
+    const dealer = await this.resolveDealer(dto);
 
     const currentOwner = product.ownerships[0]?.customer;
     if (currentOwner) {
@@ -221,10 +223,12 @@ export class CreateWarrantyActivationRequestUseCase {
     );
   }
 
-  private async resolveDealer(dealerId: string | undefined) {
-    if (!dealerId) return null;
+  private async resolveDealer(dto: CreateWarrantyActivationRequestDto) {
+    if (!dto.dealerId) {
+      return this.createQuickDealer(dto);
+    }
 
-    const dealer = await this.dealersRepository.findActiveById(dealerId);
+    const dealer = await this.dealersRepository.findActiveById(dto.dealerId);
     if (!dealer) {
       throw new NotFoundError('Active dealer not found', 'NOT_FOUND', {
         code: 'DEALER_NOT_FOUND',
@@ -232,6 +236,49 @@ export class CreateWarrantyActivationRequestUseCase {
     }
 
     return dealer;
+  }
+
+  private async createQuickDealer(dto: CreateWarrantyActivationRequestDto) {
+    const name = optionalTrim(dto.dealerName);
+    const address = optionalTrim(dto.dealerAddress);
+    const province = optionalTrim(dto.dealerProvince);
+
+    if (!name && !address && !province && !dto.dealerPhone) return null;
+
+    if (!name || !address || !province) {
+      throw new BadRequestError(
+        'Quick dealer requires name, address and province',
+        'BAD_REQUEST',
+        { code: 'QUICK_DEALER_REQUIRED_FIELDS' },
+      );
+    }
+
+    const phone = optionalTrim(dto.dealerPhone);
+    if (phone) {
+      const existingDealer = await this.dealersRepository.findByPhone(phone);
+      if (existingDealer) {
+        if (existingDealer.is_active) return existingDealer;
+
+        throw new BadRequestError(
+          'Dealer phone already belongs to an inactive dealer',
+          'BAD_REQUEST',
+          { code: 'DEALER_PHONE_INACTIVE' },
+        );
+      }
+    }
+
+    return this.dealersRepository.create({
+      address,
+      district: optionalTrim(dto.dealerDistrict),
+      is_active: true,
+      name,
+      phone,
+      province,
+      sales_name: optionalTrim(dto.salesName),
+      metadata: {
+        createdFrom: 'warrantyActivationRequest',
+      },
+    });
   }
 
   private resolveCategoryConnect(
@@ -242,6 +289,25 @@ export class CreateWarrantyActivationRequestUseCase {
     return resolvedCategoryId
       ? { connect: { id: resolvedCategoryId } }
       : undefined;
+  }
+
+  private assertProductMatchesCategory(
+    categoryId: string | undefined,
+    product: Product & { category_id: string | null },
+  ) {
+    if (!categoryId) return;
+
+    if (product.category_id !== categoryId) {
+      throw new BadRequestError(
+        'Product does not belong to the selected category',
+        'BAD_REQUEST',
+        {
+          code: 'PRODUCT_CATEGORY_MISMATCH',
+          categoryId,
+          productCategoryId: product.category_id,
+        },
+      );
+    }
   }
 
   private buildActivationMetadata(input: {
@@ -282,6 +348,7 @@ export class CreateWarrantyActivationRequestUseCase {
       name: dealer?.name ?? optionalTrim(dto.dealerName),
       phone: dealer?.phone ?? optionalTrim(dto.dealerPhone),
       province: dealer?.province ?? optionalTrim(dto.dealerProvince),
+      district: dealer?.district ?? optionalTrim(dto.dealerDistrict),
       salesName: dealer?.sales_name ?? optionalTrim(dto.salesName),
     };
     const compact = Object.fromEntries(

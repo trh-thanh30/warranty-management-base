@@ -43,6 +43,7 @@ export type WarrantyActivationRequestSummary = {
     phone: string | null;
     address: string;
     province: string;
+    district: string | null;
     salesName: string | null;
   } | null;
   customerName: string;
@@ -132,6 +133,7 @@ export type CreateWarrantyActivationRequestBody = {
   dealerPhone?: string;
   dealerAddress?: string;
   dealerProvince?: string;
+  dealerDistrict?: string;
   salesName?: string;
   filmItems?: {
     windshield?: string;

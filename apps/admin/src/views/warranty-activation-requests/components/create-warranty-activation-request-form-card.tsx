@@ -16,6 +16,7 @@ import {
   formatCustomerSearchOption,
   formatProductSearchOption,
 } from "@/src/utils";
+import { getCategoryActivationFields } from "@/src/utils/category-activation-fields";
 import {
   Button,
   Card,
@@ -29,7 +30,9 @@ import {
 } from "@repo/ui";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
 import { Controller } from "react-hook-form";
+import { CategoryActivationInputFields } from "./category-activation-input-fields";
 import { CustomerSearchResult } from "./customer-search-result";
 import { ProductSearchResult } from "./product-search-result";
 import { SelectedCustomerSummaryCard } from "./selected-customer-summary-card";
@@ -39,7 +42,11 @@ import {
   getProductSelectDisabledReason,
   getProductWarrantyStatusLabel,
 } from "../warranty-activation-request-product.utils";
-import { formatActivationRequestCreateFieldError } from "../warranty-activation-requests.utils";
+import {
+  filterActivationRequestCategories,
+  formatActivationRequestCreateFieldError,
+  formatDealerSearchOption,
+} from "../warranty-activation-requests.utils";
 
 type CreateWarrantyActivationRequestFormCardProps = {
   onCancel: () => void;
@@ -51,12 +58,20 @@ export function CreateWarrantyActivationRequestFormCard({
   onCreated,
 }: CreateWarrantyActivationRequestFormCardProps) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
+  const [categorySearch, setCategorySearch] = useState("");
   const {
     control,
+    categories,
+    categoriesQuery,
+    categoryId,
     clearCustomer,
+    clearDealer,
     customers,
     customersQuery,
     customerSearch,
+    dealerSearch,
+    dealers,
+    dealersQuery,
     clearProduct,
     errors,
     isSaving,
@@ -71,12 +86,17 @@ export function CreateWarrantyActivationRequestFormCard({
     provincesQuery,
     register,
     selectedCustomer,
+    selectedCategory,
+    selectedDealer,
     selectedProduct,
+    selectCategory,
     selectCustomer,
+    selectDealer,
     selectProduct,
     selectProvince,
     selectWard,
     setCustomerSearch,
+    setDealerSearch,
     setProductSearch,
     wardCode,
     wards,
@@ -86,6 +106,11 @@ export function CreateWarrantyActivationRequestFormCard({
     (province) => String(province.code) === provinceCode,
   );
   const selectedWard = wards.find((ward) => String(ward.code) === wardCode);
+  const activationFields = getCategoryActivationFields(selectedCategory);
+  const filteredCategories = useMemo(
+    () => filterActivationRequestCategories(categories, categorySearch),
+    [categories, categorySearch],
+  );
 
   return (
     <Card className="min-w-0 w-full max-w-full">
@@ -112,6 +137,48 @@ export function CreateWarrantyActivationRequestFormCard({
           >
             <FormField
               error={formatActivationRequestCreateFieldError(
+                errors.categoryId?.message,
+                t,
+              )}
+              id="create-activation-request-category"
+              label={t("category")}
+            >
+              <SearchDropdown
+                emptyLabel={t("noCategory")}
+                getItemKey={(category) => category.id}
+                inputClassName="h-11 text-base sm:h-10 sm:text-sm"
+                isLoading={categoriesQuery.isLoading}
+                items={filteredCategories}
+                loadingLabel={t("loadingCategories")}
+                onItemSelect={(category) => {
+                  selectCategory(category.id);
+                  setCategorySearch("");
+                }}
+                onSearchChange={(value) => {
+                  if (selectedCategory) selectCategory("");
+                  setCategorySearch(value);
+                }}
+                placeholder={t("categoryPlaceholder")}
+                renderItem={(category) => (
+                  <div className="min-w-0 space-y-1">
+                    <p className="truncate font-medium text-slate-950 dark:text-slate-50">
+                      {category.name}
+                    </p>
+                    {category.code ? (
+                      <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                        {category.code}
+                      </p>
+                    ) : null}
+                  </div>
+                )}
+                searchValue={categorySearch}
+                selectedLabel={selectedCategory?.name}
+              />
+            </FormField>
+            <input type="hidden" {...register("categoryId")} />
+
+            <FormField
+              error={formatActivationRequestCreateFieldError(
                 errors.productId?.message,
                 t,
               )}
@@ -127,9 +194,11 @@ export function CreateWarrantyActivationRequestFormCard({
                 isLoading={productsQuery.isFetching}
                 items={products}
                 loadingLabel={
-                  productsQuery.isFetchingNextPage
-                    ? t("loadingMoreProducts")
-                    : t("loadingProducts")
+                  !categoryId
+                    ? t("selectCategoryFirst")
+                    : productsQuery.isFetchingNextPage
+                      ? t("loadingMoreProducts")
+                      : t("loadingProducts")
                 }
                 onItemSelect={selectProduct}
                 onReachEnd={loadMoreProducts}
@@ -137,7 +206,11 @@ export function CreateWarrantyActivationRequestFormCard({
                   if (selectedProduct) clearProduct();
                   setProductSearch(value);
                 }}
-                placeholder={t("productSearchPlaceholder")}
+                placeholder={
+                  categoryId
+                    ? t("productSearchPlaceholder")
+                    : t("selectCategoryFirst")
+                }
                 renderItem={(product) => (
                   <ProductSearchResult
                     disabledReason={getProductSelectDisabledReason(product, t)}
@@ -187,6 +260,44 @@ export function CreateWarrantyActivationRequestFormCard({
                 warrantyCodeLabel={t("warrantyCode")}
               />
             ) : null}
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              <FormField
+                error={formatActivationRequestCreateFieldError(
+                  errors.vehiclePlate?.message,
+                  t,
+                )}
+                id="create-activation-request-vehicle-plate"
+                label={t("vehiclePlate")}
+              >
+                <Input
+                  id="create-activation-request-vehicle-plate"
+                  placeholder={t("vehiclePlatePlaceholder")}
+                  {...register("vehiclePlate")}
+                />
+              </FormField>
+              <FormField
+                error={formatActivationRequestCreateFieldError(
+                  errors.vehicleModel?.message,
+                  t,
+                )}
+                id="create-activation-request-vehicle-model"
+                label={t("vehicleModel")}
+              >
+                <Input
+                  id="create-activation-request-vehicle-model"
+                  placeholder={t("vehicleModelPlaceholder")}
+                  {...register("vehicleModel")}
+                />
+              </FormField>
+            </div>
+
+            <CategoryActivationInputFields
+              control={control}
+              errors={errors}
+              fields={activationFields}
+              register={register}
+            />
           </FormSection>
 
           <FormSection
@@ -377,6 +488,120 @@ export function CreateWarrantyActivationRequestFormCard({
                         </ComboboxContent>
                       </Combobox>
                     )}
+                  />
+                </FormField>
+              </div>
+            </div>
+          </FormSection>
+
+          <FormSection
+            description={t("createDealerDescription")}
+            title={t("dealerInfo")}
+          >
+            <FormField
+              id="create-activation-request-dealer"
+              label={t("dealerSearch")}
+            >
+              <SearchDropdown
+                emptyLabel={t("noDealer")}
+                getItemKey={(dealer) => dealer.id}
+                isLoading={dealersQuery.isFetching}
+                items={dealers}
+                loadingLabel={t("loadingDealers")}
+                onItemSelect={selectDealer}
+                onSearchChange={(value) => {
+                  if (selectedDealer) clearDealer();
+                  setDealerSearch(value);
+                }}
+                placeholder={t("dealerSearchPlaceholder")}
+                renderItem={(dealer) => (
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{dealer.name}</p>
+                    <p className="mt-1 truncate text-xs text-slate-500">
+                      {[dealer.province, dealer.district, dealer.phone]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  </div>
+                )}
+                searchValue={dealerSearch}
+                selectedLabel={
+                  selectedDealer
+                    ? formatDealerSearchOption(selectedDealer)
+                    : undefined
+                }
+              />
+            </FormField>
+            <input type="hidden" {...register("dealerId")} />
+
+            <div className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <FormField
+                  id="create-activation-request-dealer-name"
+                  label={t("dealerName")}
+                >
+                  <Input
+                    disabled={Boolean(selectedDealer)}
+                    id="create-activation-request-dealer-name"
+                    placeholder={t("dealerNamePlaceholder")}
+                    {...register("dealerName")}
+                  />
+                </FormField>
+                <FormField
+                  id="create-activation-request-dealer-phone"
+                  label={t("dealerPhone")}
+                >
+                  <Input
+                    disabled={Boolean(selectedDealer)}
+                    id="create-activation-request-dealer-phone"
+                    placeholder={t("dealerPhonePlaceholder")}
+                    {...register("dealerPhone")}
+                  />
+                </FormField>
+                <FormField
+                  id="create-activation-request-dealer-province"
+                  label={t("dealerProvince")}
+                >
+                  <Input
+                    disabled={Boolean(selectedDealer)}
+                    id="create-activation-request-dealer-province"
+                    placeholder={t("dealerProvincePlaceholder")}
+                    {...register("dealerProvince")}
+                  />
+                </FormField>
+                <FormField
+                  id="create-activation-request-dealer-district"
+                  label={t("dealerDistrict")}
+                >
+                  <Input
+                    disabled={Boolean(selectedDealer)}
+                    id="create-activation-request-dealer-district"
+                    placeholder={t("dealerDistrictPlaceholder")}
+                    {...register("dealerDistrict")}
+                  />
+                </FormField>
+              </div>
+              <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                <FormField
+                  id="create-activation-request-dealer-address"
+                  label={t("dealerAddress")}
+                >
+                  <Input
+                    disabled={Boolean(selectedDealer)}
+                    id="create-activation-request-dealer-address"
+                    placeholder={t("dealerAddressPlaceholder")}
+                    {...register("dealerAddress")}
+                  />
+                </FormField>
+                <FormField
+                  id="create-activation-request-sales-name"
+                  label={t("salesName")}
+                >
+                  <Input
+                    disabled={Boolean(selectedDealer)}
+                    id="create-activation-request-sales-name"
+                    placeholder={t("salesNamePlaceholder")}
+                    {...register("salesName")}
                   />
                 </FormField>
               </div>

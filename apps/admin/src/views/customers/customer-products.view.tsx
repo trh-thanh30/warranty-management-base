@@ -106,8 +106,8 @@ export function CustomerProductsView({
             </div>
           </div>
 
-          <div className="mt-5 max-h-[60vh] overflow-x-auto overflow-y-auto rounded-md border border-slate-200 dark:border-slate-800">
-            <Table className="min-w-full whitespace-nowrap">
+          <div className="mt-5 max-h-[60vh] overflow-x-auto overflow-y-scroll rounded-md border border-slate-200 dark:border-slate-800">
+            <Table className="min-w-max whitespace-nowrap">
               <TableHeader className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900">
                 <TableRow>
                   <SortableTableHead
@@ -229,7 +229,7 @@ function CustomerProductRow({ product }: { product: ProductResponse }) {
 
   return (
     <TableRow>
-      <TableCell>
+      <TableCell className="whitespace-nowrap">
         <div className="max-w-52">
           <p className="truncate font-medium text-slate-950 dark:text-slate-50">
             {product.name}
@@ -251,7 +251,7 @@ function CustomerProductRow({ product }: { product: ProductResponse }) {
       <TableCell className="whitespace-nowrap">
         {product.categoryRef?.name ?? product.category}
       </TableCell>
-      <TableCell>
+      <TableCell className="whitespace-nowrap">
         {product.warranty?.status ? (
           <Badge
             variant={
@@ -264,7 +264,7 @@ function CustomerProductRow({ product }: { product: ProductResponse }) {
           "-"
         )}
       </TableCell>
-      <TableCell>
+      <TableCell className="whitespace-nowrap">
         <Badge
           variant={
             product.status === "ACTIVE"
@@ -280,7 +280,7 @@ function CustomerProductRow({ product }: { product: ProductResponse }) {
       <TableCell className="whitespace-nowrap">
         {formatProductCreatedAt(product.createdAt)}
       </TableCell>
-      <TableCell className="text-right">
+      <TableCell className="whitespace-nowrap text-right">
         <Button asChild size="sm" variant="ghost">
           <Link href={`/products/${product.id}`}>
             <ExternalLink className="mr-2 size-4" />

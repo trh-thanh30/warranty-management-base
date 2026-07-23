@@ -23,7 +23,9 @@ describe('WarrantyActivationRequestsUseCases', () => {
     synchronizeWarrantyCode: jest.fn(),
   };
   const dealersRepository = {
+    create: jest.fn(),
     findActiveById: jest.fn(),
+    findByPhone: jest.fn(),
   };
   const generateWarrantyCodeUseCase = {
     execute: jest.fn(),
@@ -109,6 +111,106 @@ describe('WarrantyActivationRequestsUseCases', () => {
       }),
     );
     expect(result.requestCode).toBe('WAR-20260719-0001');
+  });
+
+  it('creates and connects a quick dealer when dealer fields are provided', async () => {
+    repository.findPendingDuplicate.mockResolvedValue(null);
+    repository.findLastRequestCode.mockResolvedValue(null);
+    productsRepository.findActivationRequestTargetByWarrantyCode.mockResolvedValue(
+      baseDraftProduct,
+    );
+    dealersRepository.findByPhone.mockResolvedValue(null);
+    dealersRepository.create.mockResolvedValue({
+      address: '12 Nguyen Trai',
+      district: 'Phuong Thanh Xuan',
+      id: 'dealer-id',
+      is_active: true,
+      name: 'Lexzenz Ha Noi',
+      phone: '0901234567',
+      province: 'Thanh pho Ha Noi',
+      sales_name: 'Nguyen Van Sale',
+    });
+    repository.create.mockResolvedValue({
+      ...baseRequest,
+      dealer_id: 'dealer-id',
+      request_code: 'WAR-20260719-0001',
+    });
+    const generateCodeUseCase =
+      new GenerateWarrantyActivationRequestCodeUseCase(repository as never);
+    const useCase = new CreateWarrantyActivationRequestUseCase(
+      repository as never,
+      generateCodeUseCase,
+      productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
+    );
+
+    await useCase.execute({
+      addressDetail: '1 Nguyen Trai',
+      customerName: 'Nguyen Van A',
+      customerPhone: '0901234567',
+      dealerAddress: '12 Nguyen Trai',
+      dealerDistrict: 'Phuong Thanh Xuan',
+      dealerName: 'Lexzenz Ha Noi',
+      dealerPhone: '0901234567',
+      dealerProvince: 'Thanh pho Ha Noi',
+      provinceCode: '79',
+      provinceName: 'TP Ho Chi Minh',
+      salesName: 'Nguyen Van Sale',
+      wardCode: '26734',
+      wardName: 'Phuong Ben Thanh',
+      warrantyCode: 'WM-2026-ABC123',
+    });
+
+    expect(dealersRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        address: '12 Nguyen Trai',
+        district: 'Phuong Thanh Xuan',
+        is_active: true,
+        name: 'Lexzenz Ha Noi',
+        phone: '0901234567',
+        province: 'Thanh pho Ha Noi',
+        sales_name: 'Nguyen Van Sale',
+      }),
+    );
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dealer: { connect: { id: 'dealer-id' } },
+      }),
+    );
+  });
+
+  it('rejects product selection when it does not match the selected category', async () => {
+    productsRepository.findActivationRequestTargetByWarrantyCode.mockResolvedValue(
+      baseDraftProduct,
+    );
+    const generateCodeUseCase =
+      new GenerateWarrantyActivationRequestCodeUseCase(repository as never);
+    const useCase = new CreateWarrantyActivationRequestUseCase(
+      repository as never,
+      generateCodeUseCase,
+      productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
+    );
+
+    await expect(
+      useCase.execute({
+        addressDetail: '1 Nguyen Trai',
+        categoryId: 'other-category-id',
+        customerName: 'Nguyen Van A',
+        customerPhone: '0901234567',
+        provinceCode: '79',
+        provinceName: 'TP Ho Chi Minh',
+        wardCode: '26734',
+        wardName: 'Phuong Ben Thanh',
+        warrantyCode: 'WM-2026-ABC123',
+      }),
+    ).rejects.toMatchObject({
+      details: expect.objectContaining({
+        code: 'PRODUCT_CATEGORY_MISMATCH',
+      }),
+    });
   });
 
   it('rejects duplicate pending activation requests for the same warranty and phone', async () => {
@@ -417,6 +519,7 @@ const baseRequest = {
 
 const baseDraftProduct = {
   brand: 'Black Label',
+  category_id: 'category-id',
   id: 'product-id',
   manufacture_year: 2026,
   model: 'Premium',

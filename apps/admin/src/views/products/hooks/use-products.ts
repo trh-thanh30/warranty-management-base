@@ -48,8 +48,12 @@ export function useProducts(
   });
 }
 
-export function useInfiniteProducts(query: Omit<ListProductsQuery, "page">) {
+export function useInfiniteProducts(
+  query: Omit<ListProductsQuery, "page">,
+  options?: { enabled?: boolean },
+) {
   return useInfiniteQuery({
+    ...options,
     queryKey: [...productKeys.lists(), "infinite", query] as const,
     queryFn: ({ pageParam }) =>
       productsService.listProducts({ ...query, page: pageParam }),

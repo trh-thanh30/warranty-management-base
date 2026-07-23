@@ -36,6 +36,7 @@ const activationRequestInclude = {
       phone: true,
       address: true,
       province: true,
+      district: true,
       sales_name: true,
     },
   },

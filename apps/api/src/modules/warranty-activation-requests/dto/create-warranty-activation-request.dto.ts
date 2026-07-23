@@ -131,6 +131,11 @@ export class CreateWarrantyActivationRequestDto {
   @IsOptional()
   @IsString()
   @Length(1, 120)
+  dealerDistrict?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 120)
   salesName?: string;
 
   @IsOptional()

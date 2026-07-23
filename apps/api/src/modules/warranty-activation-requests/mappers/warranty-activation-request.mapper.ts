@@ -28,6 +28,7 @@ export type WarrantyActivationRequestWithRelations =
       phone: string | null;
       address: string;
       province: string;
+      district: string | null;
       sales_name: string | null;
     } | null;
     reviewed_by?: {
@@ -86,6 +87,7 @@ export function toWarrantyActivationRequestResponse(
           phone: request.dealer.phone,
           address: request.dealer.address,
           province: request.dealer.province,
+          district: request.dealer.district,
           salesName: request.dealer.sales_name,
         }
       : null,

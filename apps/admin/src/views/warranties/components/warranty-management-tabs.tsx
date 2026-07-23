@@ -48,7 +48,7 @@ export function WarrantyManagementTabs({
               className={cn(
                 "inline-flex h-10 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded px-4 text-sm font-medium transition-colors sm:flex-none",
                 active
-                  ? "bg-white text-slate-950 shadow-sm dark:bg-slate-950 dark:text-slate-50"
+                  ? "bg-slate-950 text-white shadow-sm hover:bg-slate-950 hover:text-white dark:bg-slate-950 dark:text-white dark:hover:bg-slate-950 dark:hover:text-white"
                   : "text-slate-600 hover:bg-white/70 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-950/70 dark:hover:text-slate-50",
               )}
               href={tab.href}

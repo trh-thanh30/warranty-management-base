@@ -1,6 +1,6 @@
 "use client";
 
-import { Ban, MoreHorizontal, Pencil } from "lucide-react";
+import { Ban, MoreHorizontal, Pencil, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { CategoryResponse, CategorySortBy } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
@@ -267,12 +267,22 @@ function CategoryActionsMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {canEdit ? (
-          <DropdownMenuItem asChild>
-            <Link href={`/categories/${category.id}/edit`}>
-              <Pencil className="mr-2 size-4" />
-              {t("edit")}
-            </Link>
-          </DropdownMenuItem>
+          <>
+            <DropdownMenuItem asChild>
+              <Link href={`/categories/${category.id}/edit`}>
+                <Pencil className="mr-2 size-4" />
+                {t("edit")}
+              </Link>
+            </DropdownMenuItem>
+            {category.type === "PRODUCT" ? (
+              <DropdownMenuItem asChild>
+                <Link href={`/categories/${category.id}/activation-fields`}>
+                  <SlidersHorizontal className="mr-2 size-4" />
+                  {t("configureActivationFields")}
+                </Link>
+              </DropdownMenuItem>
+            ) : null}
+          </>
         ) : null}
         {canDelete && category.isActive ? (
           <>
