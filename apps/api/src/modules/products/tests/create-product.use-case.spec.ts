@@ -1,5 +1,9 @@
 import { CreateProductUseCase } from '@/modules/products/use-cases/create-product.use-case';
-import { product_category, warranty_status } from '@prisma/client';
+import {
+  category_type,
+  product_category,
+  warranty_status,
+} from '@prisma/client';
 
 jest.mock('@/modules/assets/assets.service', () => ({
   AssetsService: class AssetsService {},
@@ -12,7 +16,12 @@ describe('CreateProductUseCase', () => {
       findBySerialNumber: jest.fn().mockResolvedValue(null),
     };
     const prismaService = {
-      category: { findUnique: jest.fn() },
+      category: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'category-id',
+          type: category_type.PRODUCT,
+        }),
+      },
       product: {
         create: jest.fn().mockResolvedValue({
           id: 'product-id',
@@ -21,7 +30,23 @@ describe('CreateProductUseCase', () => {
           serial_number: 'SN-001',
           name: 'Genuine Battery Pack',
           category: product_category.SPARE_PART,
-          category_id: null,
+          category_id: 'category-id',
+          category_ref: {
+            id: 'category-id',
+            code: 'BATTERY',
+            created_at: new Date('2026-07-21T00:00:00.000Z'),
+            description: null,
+            icon: null,
+            image_url: null,
+            is_active: true,
+            metadata: null,
+            name: 'Battery',
+            order: 0,
+            parent_id: null,
+            slug: 'battery',
+            type: category_type.PRODUCT,
+            updated_at: new Date('2026-07-21T00:00:00.000Z'),
+          },
           brand: 'Toyota',
           model: 'Battery Plus',
           manufacture_year: 2026,
@@ -61,6 +86,7 @@ describe('CreateProductUseCase', () => {
     const result = await useCase.execute({
       brand: 'Toyota',
       category: product_category.SPARE_PART,
+      categoryId: 'category-id',
       manufactureYear: 2026,
       model: 'Battery Plus',
       name: 'Genuine Battery Pack',
@@ -72,6 +98,7 @@ describe('CreateProductUseCase', () => {
       expect.objectContaining({
         data: expect.objectContaining({
           warranty_code: null,
+          category_ref: { connect: { id: 'category-id' } },
           ownerships: undefined,
           warranty: {
             create: expect.objectContaining({

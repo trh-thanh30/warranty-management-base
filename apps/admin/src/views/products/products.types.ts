@@ -76,7 +76,7 @@ const optionalInteger = (messages: {
 export const productFormSchema = z.object({
   brand: optionalText.max(80, "brandLength"),
   category: z.enum(PRODUCT_CATEGORIES),
-  categoryId: z.string(),
+  categoryId: optionalText.min(1, "categoryRequired"),
   coverAssetId: z.string(),
   coverImageUrl: z.string(),
   description: optionalText.max(5000, "descriptionLength"),

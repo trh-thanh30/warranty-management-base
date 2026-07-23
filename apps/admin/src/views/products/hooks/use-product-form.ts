@@ -247,7 +247,7 @@ function toUpdateProductBody(
   return {
     brand: toNullableValue(values.brand),
     category: values.category,
-    categoryId: toNullableValue(values.categoryId),
+    categoryId: values.categoryId,
     description: toNullableRichText(values.description),
     manufactureYear: values.manufactureYear ?? null,
     metadata: mergeProductInstallationPosition(

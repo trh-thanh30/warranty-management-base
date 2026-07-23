@@ -29,13 +29,13 @@ export function SortableTableHead<TSortBy extends string>({
     : ArrowUpDown;
 
   return (
-    <TableHead>
+    <TableHead className="whitespace-nowrap">
       <button
-        className="inline-flex items-center gap-1.5 text-left font-medium uppercase text-inherit transition-colors hover:text-slate-950 dark:hover:text-slate-50"
+        className="inline-flex items-center gap-1.5 whitespace-nowrap text-left font-medium uppercase text-inherit transition-colors hover:text-slate-950 dark:hover:text-slate-50"
         onClick={() => onSortChange(sortBy)}
         type="button"
       >
-        <span>{children}</span>
+        <span className="whitespace-nowrap">{children}</span>
         <SortIcon
           aria-hidden="true"
           className={isActive ? "size-3.5" : "size-3.5 opacity-50"}

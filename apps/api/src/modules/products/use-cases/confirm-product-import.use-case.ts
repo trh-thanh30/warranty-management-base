@@ -68,9 +68,7 @@ export class ConfirmProductImportUseCase {
             manufacture_year: row.manufactureYear ?? null,
             description: this.blankToNull(row.description),
             status: row.status ?? product_status.ACTIVE,
-            category_ref: row.categoryId
-              ? { connect: { id: row.categoryId } }
-              : undefined,
+            category_ref: { connect: { id: row.categoryId } },
             metadata: this.toMetadata(row),
             warranty: {
               create: {
@@ -124,11 +122,7 @@ export class ConfirmProductImportUseCase {
       description: this.blankToNull(row.description),
       status: row.status,
       serial_number: this.blankToNull(row.serialNumber),
-      category_ref: row.categoryId
-        ? { connect: { id: row.categoryId } }
-        : row.categoryCode
-          ? undefined
-          : { disconnect: true },
+      category_ref: { connect: { id: row.categoryId } },
       metadata: this.toMetadata(row),
     };
   }

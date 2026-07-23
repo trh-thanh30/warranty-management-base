@@ -1,5 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { formatWarrantyCertificateDate } from '@/modules/warranty-certificates/utils/warranty-certificate-date.util';
+import fontkit from '@pdf-lib/fontkit';
+import { PDFDocument, type PDFFont, type PDFPage, rgb } from 'pdf-lib';
+import fs from 'node:fs';
+import path from 'node:path';
+
+const TEMPLATE_FILE_NAME = 'lexzenz-certificate.pdf';
+const FONT_FILE_NAME = 'LiberationSans-Regular.ttf';
 
 export type WarrantyCertificatePdfInput = {
   certificateNumber: string;
@@ -20,75 +27,147 @@ export type WarrantyCertificatePdfInput = {
   warrantyCode: string | null;
 };
 
+type DrawTextOptions = {
+  maxWidth: number;
+  size?: number;
+  x: number;
+  y: number;
+};
+
 @Injectable()
 export class WarrantyCertificatePdfService {
-  createPdfBuffer(input: WarrantyCertificatePdfInput) {
-    const lines = [
-      'CHUNG NHAN BAO HANH DIEN TU',
-      `Warranty number: ${input.certificateNumber}`,
-      '',
-      'THONG TIN KHACH HANG',
-      `Bien so xe: ${input.vehiclePlate ?? '-'}`,
-      `Loai xe: ${input.vehicleModel ?? '-'}`,
-      `So serial: ${input.serialNumber ?? '-'}`,
-      `Ten khach hang: ${input.customerName}`,
-      `So dien thoai: ${input.customerPhone ?? '-'}`,
-      `Email: ${input.customerEmail ?? '-'}`,
-      `Dia chi: ${input.customerAddress ?? '-'}`,
-      '',
-      'THONG TIN SAN PHAM',
-      `Dai ly: ${input.dealerName ?? '-'}`,
-      `Ngay lap dat: ${formatWarrantyCertificateDate(input.installedAt ?? input.startDate)}`,
-      `Ten goi dan: ${input.productName}`,
-      `Kinh lai: ${input.filmItems?.windshield ?? '-'}`,
-      `KST - Trai: ${input.filmItems?.frontLeftSide ?? '-'}`,
-      `KST - Phai: ${input.filmItems?.frontRightSide ?? '-'}`,
-      `KSS - Trai: ${input.filmItems?.rearLeftSide ?? '-'}`,
-      `KSS - Phai: ${input.filmItems?.rearRightSide ?? '-'}`,
-      `Cua so troi: ${input.filmItems?.sunroof ?? '-'}`,
-      `Kinh lung: ${input.filmItems?.rearGlass ?? '-'}`,
-      `Thoi gian bao hanh: ${input.warrantyDurationMonths ?? '-'} thang`,
-      `Ngay het han bao hanh: ${formatWarrantyCertificateDate(input.endDate)}`,
-      `Ma bao hanh: ${input.warrantyCode ?? '-'}`,
-    ];
-    const textCommands = lines
-      .map(
-        (line, index) =>
-          `BT /F1 12 Tf 56 ${760 - index * 24} Td (${escapePdfText(line)}) Tj ET`,
-      )
-      .join('\n');
-    const content = `${textCommands}\n`;
-    const objects = [
-      '1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj',
-      '2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj',
-      '3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >> endobj',
-      '4 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj',
-      `5 0 obj << /Length ${Buffer.byteLength(content, 'utf8')} >> stream\n${content}endstream endobj`,
-    ];
-    let body = '%PDF-1.4\n';
-    const offsets = [0];
+  async createPdfBuffer(input: WarrantyCertificatePdfInput) {
+    const pdfDoc = await PDFDocument.load(
+      fs.readFileSync(resolveTemplateAssetPath(TEMPLATE_FILE_NAME)),
+    );
+    pdfDoc.registerFontkit(fontkit);
 
-    for (const object of objects) {
-      offsets.push(Buffer.byteLength(body, 'utf8'));
-      body += `${object}\n`;
+    const font = await pdfDoc.embedFont(
+      fs.readFileSync(resolveTemplateAssetPath(FONT_FILE_NAME)),
+    );
+    const page = pdfDoc.getPages()[0];
+    if (!page) {
+      throw new Error('Warranty certificate template must have one page');
     }
 
-    const xrefOffset = Buffer.byteLength(body, 'utf8');
-    body += `xref\n0 ${objects.length + 1}\n`;
-    body += '0000000000 65535 f \n';
-    for (const offset of offsets.slice(1)) {
-      body += `${offset.toString().padStart(10, '0')} 00000 n \n`;
-    }
-    body += `trailer << /Size ${objects.length + 1} /Root 1 0 R >>\n`;
-    body += `startxref\n${xrefOffset}\n%%EOF`;
+    const draw = (
+      value: string | number | null | undefined,
+      options: DrawTextOptions,
+    ) => {
+      drawFittedText(page, font, formatValue(value), options);
+    };
 
-    return Buffer.from(body, 'utf8');
+    draw(input.certificateNumber, {
+      maxWidth: 470,
+      size: 30,
+      x: 1510,
+      y: 1778,
+    });
+
+    draw(input.vehiclePlate, { maxWidth: 460, x: 365, y: 1000 });
+    draw(input.vehicleModel, { maxWidth: 460, x: 365, y: 880 });
+    draw(input.serialNumber, { maxWidth: 460, x: 365, y: 760 });
+    draw(input.customerName, { maxWidth: 460, x: 365, y: 635 });
+    draw(input.customerPhone, { maxWidth: 460, x: 365, y: 515 });
+    draw(input.customerEmail, { maxWidth: 460, x: 365, y: 395 });
+    draw(input.customerAddress, { maxWidth: 460, x: 365, y: 275 });
+
+    draw(input.dealerName, { maxWidth: 500, x: 1320, y: 1000 });
+    draw(formatWarrantyCertificateDate(input.installedAt ?? input.startDate), {
+      maxWidth: 500,
+      x: 1320,
+      y: 922,
+    });
+    draw(input.productName, { maxWidth: 500, x: 1320, y: 842 });
+    draw(input.filmItems?.windshield, { maxWidth: 500, x: 1320, y: 762 });
+    draw(input.filmItems?.frontLeftSide, { maxWidth: 500, x: 1320, y: 682 });
+    draw(input.filmItems?.frontRightSide, { maxWidth: 500, x: 1320, y: 602 });
+    draw(input.filmItems?.rearLeftSide, { maxWidth: 500, x: 1320, y: 522 });
+    draw(input.filmItems?.rearRightSide, { maxWidth: 500, x: 1320, y: 442 });
+    draw(input.filmItems?.rearGlass, { maxWidth: 500, x: 1320, y: 362 });
+    draw(formatWarrantyDuration(input.warrantyDurationMonths), {
+      maxWidth: 500,
+      x: 1320,
+      y: 282,
+    });
+    draw(formatWarrantyCertificateDate(input.endDate), {
+      maxWidth: 500,
+      x: 1320,
+      y: 202,
+    });
+
+    return Buffer.from(await pdfDoc.save());
   }
 }
 
-function escapePdfText(value: string) {
-  return value
-    .replaceAll('\\', '\\\\')
-    .replaceAll('(', '\\(')
-    .replaceAll(')', '\\)');
+function resolveTemplateAssetPath(fileName: string) {
+  const candidates = [
+    path.join(__dirname, '..', 'templates', fileName),
+    path.join(
+      process.cwd(),
+      'src',
+      'modules',
+      'warranty-certificates',
+      'templates',
+      fileName,
+    ),
+    path.join(
+      process.cwd(),
+      'dist',
+      'modules',
+      'warranty-certificates',
+      'templates',
+      fileName,
+    ),
+  ];
+  const filePath = candidates.find((candidate) => fs.existsSync(candidate));
+  if (!filePath) {
+    throw new Error(
+      `Warranty certificate template asset '${fileName}' not found at ${candidates.join(', ')}`,
+    );
+  }
+
+  return filePath;
+}
+
+function drawFittedText(
+  page: PDFPage,
+  font: PDFFont,
+  value: string,
+  { maxWidth, size = 28, x, y }: DrawTextOptions,
+) {
+  page.drawText(fitText(value, font, size, maxWidth), {
+    color: rgb(0.05, 0.05, 0.05),
+    font,
+    size,
+    x,
+    y,
+  });
+}
+
+function fitText(value: string, font: PDFFont, size: number, maxWidth: number) {
+  if (font.widthOfTextAtSize(value, size) <= maxWidth) return value;
+
+  let next = value;
+  while (
+    next.length > 1 &&
+    font.widthOfTextAtSize(`${next}...`, size) > maxWidth
+  ) {
+    next = next.slice(0, -1);
+  }
+
+  return `${next.trimEnd()}...`;
+}
+
+function formatValue(value: string | number | null | undefined) {
+  if (value === null || value === undefined) return '-';
+
+  const formatted = String(value).trim();
+  return formatted || '-';
+}
+
+function formatWarrantyDuration(value: number | null | undefined) {
+  return typeof value === 'number' && Number.isFinite(value)
+    ? `${value} tháng`
+    : '-';
 }

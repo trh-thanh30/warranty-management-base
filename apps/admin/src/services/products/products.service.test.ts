@@ -104,7 +104,7 @@ test("creating a product sends inventory fields", async () => {
   assert.deepEqual(result, product);
 });
 
-test("updating a product can clear dynamic category", async () => {
+test("updating a product can change dynamic category", async () => {
   const calls: unknown[] = [];
   const http = {
     async patch(url: string, body?: unknown) {
@@ -116,14 +116,14 @@ test("updating a product can clear dynamic category", async () => {
   const result = await createProductsService(
     http as unknown as ProductsHttpClient,
   ).updateProduct("product-id", {
-    categoryId: null,
+    categoryId: "category-id",
   });
 
   assert.deepEqual(calls, [
     {
       url: "/products/product-id",
       body: {
-        categoryId: null,
+        categoryId: "category-id",
       },
     },
   ]);

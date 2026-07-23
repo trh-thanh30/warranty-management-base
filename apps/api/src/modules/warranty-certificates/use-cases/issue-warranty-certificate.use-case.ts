@@ -131,7 +131,7 @@ export class IssueWarrantyCertificateUseCase {
     ) {
       try {
         const certificateNumber = generateCertificateNumber();
-        const pdfBuffer = this.pdfService.createPdfBuffer({
+        const pdfBuffer = await this.pdfService.createPdfBuffer({
           certificateNumber,
           customerName:
             request?.customer_name ??

@@ -23,7 +23,7 @@ export class UpdateProductDto {
 
   @IsOptional()
   @IsUUID()
-  categoryId?: string | null;
+  categoryId?: string;
 
   @IsOptional()
   @IsString()

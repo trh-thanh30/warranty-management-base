@@ -5,15 +5,22 @@ import { category_type } from '@prisma/client';
 
 export type PreparedProductImportRow = ConfirmProductImportRowDto & {
   action: 'create' | 'update';
-  categoryId: string | null;
+  categoryId: string;
   existingProductId: string | null;
   rowNumber: number;
+};
+
+type ProductImportValidationRow = Omit<
+  ConfirmProductImportRowDto,
+  'categoryCode'
+> & {
+  categoryCode?: string | null;
 };
 
 export async function prepareProductImportRows(
   prismaService: PrismaService,
   rows: Array<{
-    data: ConfirmProductImportRowDto;
+    data: ProductImportValidationRow;
     rowNumber: number;
   }>,
 ) {
@@ -84,7 +91,13 @@ export async function prepareProductImportRows(
       });
     }
 
-    if (categoryCode && !category) {
+    if (!categoryCode) {
+      errors.push({
+        rowNumber: row.rowNumber,
+        field: 'categoryCode',
+        message: 'Mã danh mục động là bắt buộc',
+      });
+    } else if (!category) {
       errors.push({
         rowNumber: row.rowNumber,
         field: 'categoryCode',
@@ -95,7 +108,8 @@ export async function prepareProductImportRows(
     preparedRows.push({
       ...row.data,
       action: existingProduct ? 'update' : 'create',
-      categoryId: category?.id ?? null,
+      categoryCode: categoryCode ?? '',
+      categoryId: category?.id ?? '',
       existingProductId: existingProduct?.id ?? null,
       rowNumber: row.rowNumber,
     });

@@ -118,6 +118,39 @@ describe('PreviewProductImportUseCase', () => {
       rowNumber: 2,
     });
   });
+
+  it('requires a dynamic category code during preview', async () => {
+    const file = await createFileFromRows([
+      {
+        productCode: null,
+        name: 'Battery Pack',
+        imageUrl: null,
+        installationPosition: null,
+        category: product_category.SPARE_PART,
+        categoryCode: null,
+        brand: null,
+        model: null,
+        manufactureYear: null,
+        serialNumber: 'SN-MISSING-CATEGORY',
+        status: product_status.ACTIVE,
+        warrantyDurationMonths: 36,
+        warrantyTerms: null,
+        description: null,
+      },
+    ]);
+    const prismaService = createPrismaMock();
+    const useCase = new PreviewProductImportUseCase(prismaService as never);
+
+    const result = await useCase.execute(file);
+
+    expect(result.invalidRows).toBe(1);
+    expect(result.validRows).toBe(0);
+    expect(result.rows[0]?.errors).toContainEqual({
+      field: 'categoryCode',
+      message: 'Mã danh mục động là bắt buộc',
+      rowNumber: 2,
+    });
+  });
 });
 
 function createPrismaMock() {

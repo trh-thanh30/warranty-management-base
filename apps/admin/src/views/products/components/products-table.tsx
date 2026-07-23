@@ -63,7 +63,7 @@ export function ProductsTable({
       </div>
 
       <div className="hidden overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800 lg:block">
-        <Table>
+        <Table className="min-w-[82rem]">
           <TableHeader>
             <TableRow>
               <SortableTableHead
@@ -82,9 +82,13 @@ export function ProductsTable({
               >
                 {t("warrantyCode")}
               </SortableTableHead>
-              <TableHead>{t("category")}</TableHead>
-              <TableHead>{t("owner")}</TableHead>
-              <TableHead>{t("warrantyStatus")}</TableHead>
+              <TableHead className="whitespace-nowrap">
+                {t("category")}
+              </TableHead>
+              <TableHead className="whitespace-nowrap">{t("owner")}</TableHead>
+              <TableHead className="whitespace-nowrap">
+                {t("warrantyStatus")}
+              </TableHead>
               <SortableTableHead
                 activeSortBy={sortBy}
                 onSortChange={onSortChange}
@@ -101,7 +105,7 @@ export function ProductsTable({
               >
                 {t("createdAt")}
               </SortableTableHead>
-              <TableHead aria-label={t("actions")} />
+              <TableHead aria-label={t("actions")} className="w-12" />
             </TableRow>
           </TableHeader>
           <TableBody>

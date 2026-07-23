@@ -34,9 +34,9 @@ export class ConfirmProductImportRowDto {
   @IsEnum(product_category)
   category: product_category;
 
-  @IsOptional()
   @IsString()
-  categoryCode?: string | null;
+  @Length(1, 64)
+  categoryCode: string;
 
   @IsOptional()
   @IsString()

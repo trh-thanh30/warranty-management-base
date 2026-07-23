@@ -1,4 +1,8 @@
-import { ConflictError, NotFoundError } from '@/common/response';
+import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+} from '@/common/response';
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { AssetsService } from '@/modules/assets/assets.service';
 import { CreateProductDto } from '@/modules/products/dto/create-product.dto';
@@ -62,9 +66,7 @@ export class CreateProductUseCase {
         manufacture_year: dto.manufactureYear,
         description: dto.description,
         status: dto.status ?? product_status.ACTIVE,
-        category_ref: categoryRef
-          ? { connect: { id: categoryRef.id } }
-          : undefined,
+        category_ref: { connect: { id: categoryRef.id } },
         metadata: dto.metadata as Prisma.InputJsonObject | undefined,
         assets: coverAsset
           ? {
@@ -105,9 +107,9 @@ export class CreateProductUseCase {
     );
   }
 
-  private async resolveProductCategory(categoryId: string | undefined) {
+  private async resolveProductCategory(categoryId: string) {
     if (!categoryId) {
-      return null;
+      throw new BadRequestError('Product category is required');
     }
 
     const category = await this.prismaService.category.findUnique({

@@ -145,7 +145,7 @@ test("creates an inventory-only product payload", () => {
     toCreateProductBody({
       brand: " Toyota ",
       category: "CAR",
-      categoryId: "",
+      categoryId: "category-id",
       coverAssetId: "",
       coverImageUrl: "",
       description: "",
@@ -160,7 +160,7 @@ test("creates an inventory-only product payload", () => {
     {
       brand: "Toyota",
       category: "CAR",
-      categoryId: undefined,
+      categoryId: "category-id",
       coverAssetId: undefined,
       description: undefined,
       manufactureYear: 2026,

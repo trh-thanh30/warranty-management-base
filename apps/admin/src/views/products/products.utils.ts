@@ -118,7 +118,7 @@ export function toCreateProductBody(
   return {
     brand: toOptionalValue(values.brand),
     category: values.category,
-    categoryId: toOptionalValue(values.categoryId),
+    categoryId: values.categoryId,
     coverAssetId: toOptionalValue(values.coverAssetId),
     description: toOptionalRichText(values.description),
     manufactureYear: values.manufactureYear,

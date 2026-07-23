@@ -84,9 +84,9 @@ export class WarrantyCertificateEmailQueueService {
       await this.sendEmailUseCase.execute({
         attachments: [
           {
-            contentBase64: this.pdfService
-              .createPdfBuffer(emailInput)
-              .toString('base64'),
+            contentBase64: (
+              await this.pdfService.createPdfBuffer(emailInput)
+            ).toString('base64'),
             contentType: 'application/pdf',
             filename: `${certificate.certificate_number}.pdf`,
           },

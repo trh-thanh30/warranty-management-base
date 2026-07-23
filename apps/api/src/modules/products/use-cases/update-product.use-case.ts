@@ -33,7 +33,10 @@ export class UpdateProductUseCase {
       }
     }
 
-    const categoryRef = await this.resolveProductCategory(dto.categoryId);
+    const categoryRef =
+      dto.categoryId === undefined
+        ? null
+        : await this.resolveProductCategory(dto.categoryId);
 
     if (dto.description !== undefined) {
       for (const url of getRemovedMediaUrls(
@@ -56,12 +59,9 @@ export class UpdateProductUseCase {
       description: dto.description,
       status: dto.status,
       serial_number: dto.serialNumber,
-      category_ref:
-        dto.categoryId === null
-          ? { disconnect: true }
-          : categoryRef
-            ? { connect: { id: categoryRef.id } }
-            : undefined,
+      category_ref: categoryRef
+        ? { connect: { id: categoryRef.id } }
+        : undefined,
       metadata: dto.metadata as Prisma.InputJsonValue | undefined,
     });
 
@@ -71,11 +71,7 @@ export class UpdateProductUseCase {
     );
   }
 
-  private async resolveProductCategory(categoryId: string | null | undefined) {
-    if (!categoryId) {
-      return null;
-    }
-
+  private async resolveProductCategory(categoryId: string) {
     const category = await this.prismaService.category.findUnique({
       where: { id: categoryId },
     });
