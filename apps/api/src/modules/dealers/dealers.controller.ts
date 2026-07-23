@@ -50,10 +50,7 @@ export class DealersController {
   @Get()
   @Public()
   list(@Query() query: ListDealersDto) {
-    return this.listDealersUseCase.execute({
-      ...query,
-      isActive: query.isActive ?? 'true',
-    });
+    return this.listDealersUseCase.execute(query);
   }
 
   @Get('export')

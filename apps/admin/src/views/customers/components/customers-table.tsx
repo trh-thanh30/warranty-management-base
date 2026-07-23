@@ -1,6 +1,6 @@
 "use client";
 
-import { MoreHorizontal, Pencil } from "lucide-react";
+import { MoreHorizontal, PackageSearch, Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { CustomerSummary, ListCustomersQuery } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
@@ -232,6 +232,12 @@ function CustomerActionsMenu({ customer }: { customer: CustomerSummary }) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        <DropdownMenuItem asChild>
+          <Link href={`/customers/${customer.id}/products`}>
+            <PackageSearch className="mr-2 size-4" />
+            {t("viewProducts")}
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href={`/customers/${customer.id}/edit`}>
             <Pencil className="mr-2 size-4" />

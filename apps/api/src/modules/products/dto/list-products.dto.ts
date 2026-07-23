@@ -20,6 +20,10 @@ export class ListProductsDto extends PaginationQueryDto {
   categoryId?: string;
 
   @IsOptional()
+  @IsUUID()
+  ownerCustomerId?: string;
+
+  @IsOptional()
   @IsEnum(product_status)
   status?: product_status;
 

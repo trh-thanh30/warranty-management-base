@@ -120,6 +120,7 @@ export class ProductsRepository {
     search?: string;
     category?: string;
     categoryId?: string;
+    ownerCustomerId?: string;
     status?: product_status;
     warrantyStatus?: warranty_status;
     page?: number;
@@ -143,6 +144,14 @@ export class ProductsRepository {
     const where: Prisma.ProductWhereInput = {
       category: filters.category as never,
       category_id: filters.categoryId,
+      ownerships: filters.ownerCustomerId
+        ? {
+            some: {
+              customer_id: filters.ownerCustomerId,
+              is_current_owner: true,
+            },
+          }
+        : undefined,
       status: filters.status,
       warranty: filters.warrantyStatus
         ? { status: filters.warrantyStatus }
@@ -192,6 +201,7 @@ export class ProductsRepository {
     search?: string;
     category?: string;
     categoryId?: string;
+    ownerCustomerId?: string;
     status?: product_status;
     warrantyStatus?: warranty_status;
     sortBy?: string;
@@ -212,6 +222,14 @@ export class ProductsRepository {
     const where: Prisma.ProductWhereInput = {
       category: filters.category as never,
       category_id: filters.categoryId,
+      ownerships: filters.ownerCustomerId
+        ? {
+            some: {
+              customer_id: filters.ownerCustomerId,
+              is_current_owner: true,
+            },
+          }
+        : undefined,
       status: filters.status,
       warranty: filters.warrantyStatus
         ? { status: filters.warrantyStatus }
