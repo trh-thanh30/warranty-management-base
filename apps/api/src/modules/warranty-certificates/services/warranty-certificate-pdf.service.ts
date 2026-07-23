@@ -6,7 +6,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const TEMPLATE_FILE_NAME = 'lexzenz-certificate.pdf';
-const FONT_FILE_NAME = 'LiberationSans-Regular.ttf';
+const FONT_FILE_NAME = 'LiberationSans-Bold.ttf';
+const FIELD_FONT_SIZE = 24;
 
 export type WarrantyCertificatePdfInput = {
   certificateNumber: string;
@@ -58,42 +59,42 @@ export class WarrantyCertificatePdfService {
     };
 
     draw(input.certificateNumber, {
-      maxWidth: 470,
-      size: 30,
-      x: 1510,
-      y: 1778,
+      maxWidth: 390,
+      size: 28,
+      x: 1535,
+      y: 1874,
     });
 
-    draw(input.vehiclePlate, { maxWidth: 460, x: 365, y: 1000 });
-    draw(input.vehicleModel, { maxWidth: 460, x: 365, y: 880 });
-    draw(input.serialNumber, { maxWidth: 460, x: 365, y: 760 });
-    draw(input.customerName, { maxWidth: 460, x: 365, y: 635 });
-    draw(input.customerPhone, { maxWidth: 460, x: 365, y: 515 });
-    draw(input.customerEmail, { maxWidth: 460, x: 365, y: 395 });
-    draw(input.customerAddress, { maxWidth: 460, x: 365, y: 275 });
+    draw(input.vehiclePlate, { maxWidth: 450, x: 365, y: 1004 });
+    draw(input.vehicleModel, { maxWidth: 450, x: 365, y: 886 });
+    draw(input.serialNumber, { maxWidth: 450, x: 365, y: 766 });
+    draw(input.customerName, { maxWidth: 450, x: 365, y: 641 });
+    draw(input.customerPhone, { maxWidth: 450, x: 365, y: 520 });
+    draw(input.customerEmail, { maxWidth: 450, x: 365, y: 400 });
+    draw(input.customerAddress, { maxWidth: 450, x: 365, y: 280 });
 
-    draw(input.dealerName, { maxWidth: 500, x: 1320, y: 1000 });
+    draw(input.dealerName, { maxWidth: 490, x: 1320, y: 1004 });
     draw(formatWarrantyCertificateDate(input.installedAt ?? input.startDate), {
-      maxWidth: 500,
+      maxWidth: 490,
       x: 1320,
-      y: 922,
+      y: 924,
     });
-    draw(input.productName, { maxWidth: 500, x: 1320, y: 842 });
-    draw(input.filmItems?.windshield, { maxWidth: 500, x: 1320, y: 762 });
-    draw(input.filmItems?.frontLeftSide, { maxWidth: 500, x: 1320, y: 682 });
-    draw(input.filmItems?.frontRightSide, { maxWidth: 500, x: 1320, y: 602 });
-    draw(input.filmItems?.rearLeftSide, { maxWidth: 500, x: 1320, y: 522 });
-    draw(input.filmItems?.rearRightSide, { maxWidth: 500, x: 1320, y: 442 });
-    draw(input.filmItems?.rearGlass, { maxWidth: 500, x: 1320, y: 362 });
+    draw(input.productName, { maxWidth: 490, x: 1320, y: 844 });
+    draw(input.filmItems?.windshield, { maxWidth: 490, x: 1320, y: 764 });
+    draw(input.filmItems?.frontLeftSide, { maxWidth: 490, x: 1320, y: 684 });
+    draw(input.filmItems?.frontRightSide, { maxWidth: 490, x: 1320, y: 604 });
+    draw(input.filmItems?.rearLeftSide, { maxWidth: 490, x: 1320, y: 524 });
+    draw(input.filmItems?.rearRightSide, { maxWidth: 490, x: 1320, y: 444 });
+    draw(input.filmItems?.rearGlass, { maxWidth: 490, x: 1320, y: 364 });
     draw(formatWarrantyDuration(input.warrantyDurationMonths), {
-      maxWidth: 500,
+      maxWidth: 490,
       x: 1320,
-      y: 282,
+      y: 284,
     });
     draw(formatWarrantyCertificateDate(input.endDate), {
-      maxWidth: 500,
+      maxWidth: 490,
       x: 1320,
-      y: 202,
+      y: 204,
     });
 
     return Buffer.from(await pdfDoc.save());
@@ -134,7 +135,7 @@ function drawFittedText(
   page: PDFPage,
   font: PDFFont,
   value: string,
-  { maxWidth, size = 28, x, y }: DrawTextOptions,
+  { maxWidth, size = FIELD_FONT_SIZE, x, y }: DrawTextOptions,
 ) {
   page.drawText(fitText(value, font, size, maxWidth), {
     color: rgb(0.05, 0.05, 0.05),
