@@ -42,6 +42,8 @@ export class UpdateDealerUseCase {
         name: dto.name?.trim(),
         phone,
         province: dto.province?.trim(),
+        district:
+          dto.district === undefined ? undefined : optionalTrim(dto.district),
         sales_name:
           dto.salesName === undefined ? undefined : optionalTrim(dto.salesName),
       });

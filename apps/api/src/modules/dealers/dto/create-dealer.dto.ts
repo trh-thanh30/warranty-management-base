@@ -29,6 +29,11 @@ export class CreateDealerDto {
   @IsOptional()
   @IsString()
   @Length(1, 120)
+  district?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 120)
   salesName?: string;
 
   @IsOptional()

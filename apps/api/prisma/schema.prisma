@@ -429,6 +429,7 @@ model Dealer {
   phone      String?  @unique
   address    String
   province   String
+  district   String?
   sales_name String?
   is_active  Boolean  @default(true)
   metadata   Json?

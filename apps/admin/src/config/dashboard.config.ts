@@ -9,6 +9,7 @@ import {
   Package,
   Settings,
   ShieldCheck,
+  Store,
   Tags,
   UserRound,
   Users,
@@ -78,6 +79,12 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             icon: Building2,
             requiredPermission: PERMISSIONS.SERVICE_CENTER_VIEW,
           },
+          {
+            title: t("items.dealers"),
+            href: "/dealers",
+            icon: Store,
+            requiredPermission: PERMISSIONS.DEALER_VIEW,
+          },
         ],
       },
       {
@@ -143,6 +150,11 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
         title: t("items.serviceCenters"),
         href: "/service-centers",
         requiredPermission: PERMISSIONS.SERVICE_CENTER_VIEW,
+      },
+      {
+        title: t("items.dealers"),
+        href: "/dealers",
+        requiredPermission: PERMISSIONS.DEALER_VIEW,
       },
       {
         title: t("items.contentPages"),

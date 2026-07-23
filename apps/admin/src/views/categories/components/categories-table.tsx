@@ -69,14 +69,6 @@ export function CategoriesTable({
               <SortableTableHead
                 activeSortBy={sortBy}
                 onSortChange={onSortChange}
-                sortBy="slug"
-                sortOrder={sortOrder}
-              >
-                {t("slug")}
-              </SortableTableHead>
-              <SortableTableHead
-                activeSortBy={sortBy}
-                onSortChange={onSortChange}
                 sortBy="name"
                 sortOrder={sortOrder}
               >
@@ -145,7 +137,6 @@ function CategoryTableRow({
       <TableCell className="font-mono text-xs">
         {getCategoryDisplayCode(category)}
       </TableCell>
-      <TableCell className="font-mono text-xs">{category.slug}</TableCell>
       <TableCell>
         <div className="max-w-[14rem]">
           <p className="truncate font-medium text-slate-950 dark:text-slate-50">
@@ -190,9 +181,11 @@ function CategoryMobileCard({
           <p className="truncate font-medium text-slate-950 dark:text-slate-50">
             {category.name}
           </p>
-          <p className="mt-1 truncate font-mono text-xs text-slate-500 dark:text-slate-400">
-            {category.slug}
-          </p>
+          {category.description ? (
+            <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
+              {stripHtml(category.description)}
+            </p>
+          ) : null}
         </div>
         <div className="flex items-start gap-2">
           <div className="flex flex-wrap gap-2">

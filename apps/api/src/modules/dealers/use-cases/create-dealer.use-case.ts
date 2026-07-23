@@ -30,6 +30,7 @@ export class CreateDealerUseCase {
         name: dto.name.trim(),
         phone,
         province: dto.province.trim(),
+        district: optionalTrim(dto.district),
         sales_name: optionalTrim(dto.salesName),
       });
 

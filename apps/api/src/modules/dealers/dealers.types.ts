@@ -7,6 +7,7 @@ export function toDealerResponse(dealer: Dealer) {
     phone: dealer.phone,
     address: dealer.address,
     province: dealer.province,
+    district: dealer.district,
     salesName: dealer.sales_name,
     isActive: dealer.is_active,
     metadata: toMetadata(dealer.metadata),

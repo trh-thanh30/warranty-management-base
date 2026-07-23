@@ -8,6 +8,7 @@ export type DealerSummary = {
   phone: string | null;
   address: string;
   province: string;
+  district: string | null;
   salesName: string | null;
   isActive: boolean;
   metadata: Record<string, unknown> | null;
@@ -30,6 +31,7 @@ export type CreateDealerBody = {
   phone?: string;
   address: string;
   province: string;
+  district?: string;
   salesName?: string;
   metadata?: Record<string, unknown>;
 };
@@ -39,7 +41,18 @@ export type UpdateDealerBody = {
   phone?: string | null;
   address?: string;
   province?: string;
+  district?: string | null;
   salesName?: string | null;
   isActive?: boolean;
   metadata?: Record<string, unknown> | null;
+};
+
+export type DealerImportResult = {
+  created: number;
+  updated: number;
+  errors: Array<{
+    field: string;
+    message: string;
+    rowNumber: number;
+  }>;
 };

@@ -33,6 +33,11 @@ export class UpdateDealerDto {
   @IsOptional()
   @IsString()
   @Length(1, 120)
+  district?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 120)
   salesName?: string | null;
 
   @IsOptional()
