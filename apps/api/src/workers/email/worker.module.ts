@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PrismaModule } from '@/database/prisma/prisma.module';
 import { validateEnv } from '@/config/env.validation';
 import {
   appConfig,
@@ -36,6 +37,7 @@ import { WorkerEmailService } from '@/workers/email/worker.service';
         redisConfig,
       ],
     }),
+    PrismaModule,
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

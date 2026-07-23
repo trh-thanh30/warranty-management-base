@@ -11,6 +11,7 @@ import { ExportWarrantyActivationRequestsUseCase } from '@/modules/warranty-acti
 import { GetWarrantyActivationRequestDetailUseCase } from '@/modules/warranty-activation-requests/use-cases/get-warranty-activation-request-detail.use-case';
 import { ListWarrantyActivationRequestsUseCase } from '@/modules/warranty-activation-requests/use-cases/list-warranty-activation-requests.use-case';
 import { ReviewWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/review-warranty-activation-request.use-case';
+import { ResendWarrantyActivationRequestCertificateEmailUseCase } from '@/modules/warranty-activation-requests/use-cases/resend-warranty-activation-request-certificate-email.use-case';
 import {
   Body,
   Controller,
@@ -40,6 +41,7 @@ export class WarrantyActivationRequestsController {
     private readonly listWarrantyActivationRequestsUseCase: ListWarrantyActivationRequestsUseCase,
     private readonly getWarrantyActivationRequestDetailUseCase: GetWarrantyActivationRequestDetailUseCase,
     private readonly reviewWarrantyActivationRequestUseCase: ReviewWarrantyActivationRequestUseCase,
+    private readonly resendWarrantyActivationRequestCertificateEmailUseCase: ResendWarrantyActivationRequestCertificateEmailUseCase,
   ) {}
 
   @Post('admin')
@@ -102,5 +104,13 @@ export class WarrantyActivationRequestsController {
     return this.reviewWarrantyActivationRequestUseCase.execute(id, dto, {
       reviewedByUserId: user?.id,
     });
+  }
+
+  @Post(':id/certificate/resend-email')
+  @Permissions([permission_key.WARRANTY_UPDATE])
+  resendCertificateEmail(@Param('id') id: string) {
+    return this.resendWarrantyActivationRequestCertificateEmailUseCase.execute(
+      id,
+    );
   }
 }

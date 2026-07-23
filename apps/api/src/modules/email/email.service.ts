@@ -13,7 +13,8 @@ export interface EmailJobData {
     filename: string;
   }>;
   template?: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
+  warrantyCertificateId?: string;
   // Idempotency key for deduplication
   idempotencyKey?: string;
 }

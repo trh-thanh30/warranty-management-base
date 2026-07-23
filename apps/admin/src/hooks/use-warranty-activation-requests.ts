@@ -112,3 +112,25 @@ export function useReviewWarrantyActivationRequest(requestId: string | null) {
     },
   });
 }
+
+export function useResendWarrantyActivationRequestCertificateEmail(
+  requestId: string | null,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () =>
+      warrantyActivationRequestsService.resendWarrantyActivationRequestCertificateEmail(
+        requestId ?? "",
+      ),
+    onSuccess: (request) => {
+      void queryClient.invalidateQueries({
+        queryKey: warrantyActivationRequestKeys.all,
+      });
+      queryClient.setQueryData(
+        warrantyActivationRequestKeys.detail(request.id),
+        request,
+      );
+    },
+  });
+}
