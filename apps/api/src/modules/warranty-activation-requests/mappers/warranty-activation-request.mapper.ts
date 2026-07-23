@@ -158,6 +158,7 @@ export function toWarrantyActivationRequestResponse(
         }
       : null,
     certificate: toCertificateSummary(
+      request.id,
       request.activated_warranty?.certificates?.[0] ?? null,
     ),
     metadata: toMetadata(request.metadata),
@@ -167,6 +168,7 @@ export function toWarrantyActivationRequestResponse(
 }
 
 function toCertificateSummary(
+  requestId: string,
   certificate: {
     id: string;
     certificate_number: string;
@@ -184,8 +186,10 @@ function toCertificateSummary(
   return {
     id: certificate.id,
     certificateNumber: certificate.certificate_number,
+    downloadUrl: `/warranty-activation-requests/${requestId}/certificate/download`,
     status: certificate.status,
     storageKey: certificate.storage_key,
+    viewUrl: `/warranty-activation-requests/${requestId}/certificate/view`,
     recipientEmail: certificate.recipient_email,
     generatedAt: certificate.generated_at?.toISOString() ?? null,
     emailedAt: certificate.emailed_at?.toISOString() ?? null,

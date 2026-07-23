@@ -83,6 +83,10 @@ export class UploadAssetService {
     await this.storage.delete(filePath);
   }
 
+  async getStream(filePath: string) {
+    return this.storage.getStream(filePath);
+  }
+
   public determineAssetType(mime: string): asset_type {
     if (mime.startsWith('image/')) return asset_type.IMAGE;
     if (mime.startsWith('video/')) return asset_type.VIDEO;

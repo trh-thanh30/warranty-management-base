@@ -1,6 +1,13 @@
 "use client";
 
-import { CheckCircle2, FileSearch, Send, XCircle } from "lucide-react";
+import {
+  CheckCircle2,
+  Download,
+  FileSearch,
+  FileText,
+  Send,
+  XCircle,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { Button } from "@repo/ui";
@@ -43,8 +50,10 @@ export function WarrantyActivationRequestDetailView({
     request?.status === "APPROVED" ? t("activate") : t("approve");
   const canResendCertificateEmail =
     Boolean(request?.certificate) &&
+    Boolean(request?.certificate?.recipientEmail) &&
     request?.certificate?.emailStatus !== "SENT" &&
     hasPermission(PERMISSIONS.WARRANTY_UPDATE);
+  const canUseCertificate = Boolean(request?.certificate);
 
   async function resendCertificateEmail() {
     try {
@@ -69,8 +78,33 @@ export function WarrantyActivationRequestDetailView({
         maxWidthClassName="max-w-5xl"
         title={request?.requestCode ?? t("detailTitle")}
       >
-        {(canReview || canResendCertificateEmail) && request ? (
+        {(canReview || canResendCertificateEmail || canUseCertificate) &&
+        request ? (
           <div className="flex flex-wrap justify-end gap-2">
+            {canUseCertificate ? (
+              <>
+                <Button
+                  onClick={() => {
+                    void actions.viewCertificate(request);
+                  }}
+                  type="button"
+                  variant="secondary"
+                >
+                  <FileText className="size-4" />
+                  {t("viewCertificate")}
+                </Button>
+                <Button
+                  onClick={() => {
+                    void actions.downloadCertificate(request);
+                  }}
+                  type="button"
+                  variant="secondary"
+                >
+                  <Download className="size-4" />
+                  {t("downloadCertificate")}
+                </Button>
+              </>
+            ) : null}
             {canResendCertificateEmail ? (
               <Button
                 disabled={resendCertificateEmailMutation.isPending}

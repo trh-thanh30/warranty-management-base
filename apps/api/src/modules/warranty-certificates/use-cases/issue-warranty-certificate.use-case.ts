@@ -85,6 +85,9 @@ export class IssueWarrantyCertificateUseCase {
     });
 
     if (!recipientEmail) {
+      this.logger.log(
+        `Warranty certificate ${certificate.id} generated without recipient email`,
+      );
       return certificate;
     }
 

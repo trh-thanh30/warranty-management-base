@@ -88,5 +88,25 @@ export function createWarrantyActivationRequestsService(
         ),
       );
     },
+
+    async viewWarrantyActivationRequestCertificate(
+      requestId: string,
+    ): Promise<Blob> {
+      const response = await http.get<Blob>(
+        `/warranty-activation-requests/${requestId}/certificate/view`,
+        { responseType: "blob" },
+      );
+      return unwrapBlob(response);
+    },
+
+    async downloadWarrantyActivationRequestCertificate(
+      requestId: string,
+    ): Promise<Blob> {
+      const response = await http.get<Blob>(
+        `/warranty-activation-requests/${requestId}/certificate/download`,
+        { responseType: "blob" },
+      );
+      return unwrapBlob(response);
+    },
   };
 }

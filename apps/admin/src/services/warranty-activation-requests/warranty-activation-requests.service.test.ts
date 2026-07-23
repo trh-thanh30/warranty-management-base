@@ -39,6 +39,29 @@ test("exports activation requests with reconciliation filters", async () => {
   ]);
 });
 
+test("downloads an activation request certificate as a blob", async () => {
+  const calls: unknown[] = [];
+  const blob = new Blob(["pdf"]);
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: blob };
+    },
+  };
+
+  const result = await createWarrantyActivationRequestsService(
+    http as unknown as WarrantyActivationRequestsHttpClient,
+  ).downloadWarrantyActivationRequestCertificate("request-id");
+
+  assert.equal(result, blob);
+  assert.deepEqual(calls, [
+    {
+      url: "/warranty-activation-requests/request-id/certificate/download",
+      config: { responseType: "blob" },
+    },
+  ]);
+});
+
 test("creates an admin activation request from a selected product", async () => {
   const calls: unknown[] = [];
   const body = {
