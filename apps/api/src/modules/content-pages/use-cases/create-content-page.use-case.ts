@@ -26,6 +26,9 @@ export class CreateContentPageUseCase {
       summary: dto.summary?.trim(),
       content: dto.content.trim(),
       kind: dto.kind,
+      category: dto.categoryId
+        ? { connect: { id: dto.categoryId } }
+        : undefined,
       status,
       published_at: this.resolvePublishedAt(status, dto.publishedAt),
     });

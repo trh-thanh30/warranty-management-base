@@ -4,6 +4,7 @@ import {
   IsEnum,
   IsOptional,
   IsString,
+  IsUUID,
   Length,
   Matches,
 } from 'class-validator';
@@ -33,6 +34,10 @@ export class UpdateContentPageDto {
   @IsOptional()
   @IsEnum(content_page_kind)
   kind?: content_page_kind;
+
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string | null;
 
   @IsOptional()
   @IsEnum(content_page_status)

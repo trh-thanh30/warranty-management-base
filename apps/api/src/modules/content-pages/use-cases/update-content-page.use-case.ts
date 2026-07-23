@@ -53,6 +53,12 @@ export class UpdateContentPageUseCase {
       summary: dto.summary?.trim(),
       content: nextContent,
       kind: dto.kind,
+      category:
+        dto.categoryId === undefined
+          ? undefined
+          : dto.categoryId
+            ? { connect: { id: dto.categoryId } }
+            : { disconnect: true },
       status: dto.status,
       published_at: this.resolvePublishedAt(
         nextStatus,

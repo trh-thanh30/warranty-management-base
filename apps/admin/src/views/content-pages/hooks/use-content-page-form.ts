@@ -52,6 +52,7 @@ export function useContentPageForm({
         : 0;
       const body = {
         ...values,
+        categoryId: values.categoryId || null,
         summary: values.summary || undefined,
       };
       if (page) await updatePage.mutateAsync(body);
@@ -102,6 +103,6 @@ function getValues(page: ContentPageSummary | null): ContentPageFormValues {
     summary: page?.summary ?? "",
     content: page?.content ?? "",
     kind: page?.kind ?? "POLICY",
-    status: page?.status ?? "DRAFT",
+    categoryId: page?.categoryId ?? "",
   };
 }

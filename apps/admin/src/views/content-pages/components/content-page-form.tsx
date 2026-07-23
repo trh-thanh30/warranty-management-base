@@ -9,10 +9,8 @@ import { Button, Input, Textarea } from "@repo/ui";
 import { FormField as Field } from "@/src/components/common/form-field";
 import { RichTextEditor } from "@/src/components/common/rich-text-editor";
 import { SelectControl } from "@/src/components/common/select-control";
-import {
-  CONTENT_PAGE_KINDS,
-  CONTENT_PAGE_STATUSES,
-} from "../content-pages.constants";
+import { CONTENT_PAGE_KINDS } from "../content-pages.constants";
+import { useCategories } from "../../categories/hooks/use-categories";
 import { useContentPageForm } from "../hooks/use-content-page-form";
 import { ContentPagePreviewDialog } from "./content-page-preview-dialog";
 
@@ -31,6 +29,11 @@ export function ContentPageForm({
   const errors = form.formState.errors;
   const content = form.watch("content");
   const title = form.watch("title");
+  const categoriesQuery = useCategories({
+    isActive: "true",
+    limit: 100,
+    type: "CONTENT_PAGE",
+  });
 
   return (
     <>
@@ -100,21 +103,25 @@ export function ContentPageForm({
             />
           </Field>
           <Field
-            error={translateError(errors.status?.message, t)}
-            id="content-page-status"
-            label={t("statusLabel")}
+            error={translateError(errors.categoryId?.message, t)}
+            id="content-page-category"
+            label={t("categoryLabel")}
           >
             <Controller
               control={form.control}
-              name="status"
+              name="categoryId"
               render={({ field }) => (
                 <SelectControl
-                  id="content-page-status"
+                  disabled={categoriesQuery.isLoading}
+                  id="content-page-category"
                   onValueChange={field.onChange}
-                  options={CONTENT_PAGE_STATUSES.map((status) => ({
-                    label: t(`statuses.${status}`),
-                    value: status,
-                  }))}
+                  options={[
+                    { label: t("noCategory"), value: "" },
+                    ...(categoriesQuery.data?.items ?? []).map((category) => ({
+                      label: category.name,
+                      value: category.id,
+                    })),
+                  ]}
                   triggerClassName="h-11 text-base sm:h-10 sm:text-sm"
                   value={field.value}
                 />
@@ -208,6 +215,7 @@ function translateError(
     "titleLength",
     "summaryLength",
     "contentRequired",
+    "categoryInvalid",
   ]);
   return keys.has(message) ? t(message) : message;
 }

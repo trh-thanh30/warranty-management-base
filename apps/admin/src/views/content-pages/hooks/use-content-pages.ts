@@ -73,6 +73,23 @@ export function useUpdateContentPage(id: string | null) {
   });
 }
 
+export function useUpdateContentPageStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      status,
+    }: {
+      id: string;
+      status: UpdateContentPageBody["status"];
+    }) => contentPagesService.update(id, { status }),
+    onSuccess: (page) => {
+      void queryClient.invalidateQueries({ queryKey: contentPageKeys.lists() });
+      queryClient.setQueryData(contentPageKeys.detail(page.id), page);
+    },
+  });
+}
+
 export function useDeleteContentPage() {
   const queryClient = useQueryClient();
   return useMutation({

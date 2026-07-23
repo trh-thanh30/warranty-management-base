@@ -9,11 +9,17 @@ export class ContentPagesRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
   findById(id: string) {
-    return this.prismaService.contentPage.findUnique({ where: { id } });
+    return this.prismaService.contentPage.findUnique({
+      where: { id },
+      include: { category: true },
+    });
   }
 
   findBySlug(slug: string) {
-    return this.prismaService.contentPage.findUnique({ where: { slug } });
+    return this.prismaService.contentPage.findUnique({
+      where: { slug },
+      include: { category: true },
+    });
   }
 
   findPublishedBySlug(slug: string) {
@@ -22,6 +28,7 @@ export class ContentPagesRepository {
         slug,
         status: content_page_status.PUBLISHED,
       },
+      include: { category: true },
     });
   }
 
@@ -61,6 +68,7 @@ export class ContentPagesRepository {
       const [items, total] = await Promise.all([
         tx.contentPage.findMany({
           where,
+          include: { category: true },
           orderBy,
           skip,
           take,
@@ -110,6 +118,7 @@ export class ContentPagesRepository {
       const [items, total] = await Promise.all([
         tx.contentPage.findMany({
           where,
+          include: { category: true },
           orderBy,
           skip,
           take,
@@ -122,13 +131,17 @@ export class ContentPagesRepository {
   }
 
   create(data: Prisma.ContentPageCreateInput) {
-    return this.prismaService.contentPage.create({ data });
+    return this.prismaService.contentPage.create({
+      data,
+      include: { category: true },
+    });
   }
 
   update(id: string, data: Prisma.ContentPageUpdateInput) {
     return this.prismaService.contentPage.update({
       where: { id },
       data,
+      include: { category: true },
     });
   }
 

@@ -1,3 +1,4 @@
+import type { ContentPageStatus } from "@repo/shared";
 import { z } from "zod";
 
 const trimmedText = z.string().trim();
@@ -20,9 +21,9 @@ export const contentPageFormSchema = z.object({
     { message: "contentRequired" },
   ),
   kind: z.enum(["POLICY", "GUIDE", "INTRO", "FAQ"]),
-  status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]),
+  categoryId: z.string().uuid("categoryInvalid").or(z.literal("")),
 });
 
 export type ContentPageFormValues = z.infer<typeof contentPageFormSchema>;
 export type ContentPageKindFilter = "ALL" | ContentPageFormValues["kind"];
-export type ContentPageStatusFilter = "ALL" | ContentPageFormValues["status"];
+export type ContentPageStatusFilter = "ALL" | ContentPageStatus;
