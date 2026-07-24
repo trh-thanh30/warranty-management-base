@@ -22,7 +22,7 @@ type Translate = (key: string) => string;
 export function getDashboardConfig(t: Translate): DashboardConfig {
   return {
     brand: {
-      name: "Warranty Admin",
+      name: t("brandName"),
       description: t("brandDescription"),
       logo: ClipboardList,
     },

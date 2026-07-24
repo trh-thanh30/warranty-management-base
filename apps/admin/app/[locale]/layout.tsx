@@ -5,16 +5,28 @@ import { ToastProvider } from "@/src/app/providers/toast-provider";
 import { routing } from "@/src/i18n/routing";
 import type { Metadata } from "next";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import NextTopLoader from "nextjs-toploader";
 import "yet-another-react-lightbox/styles.css";
 import "../globals.css";
 
-export const metadata: Metadata = {
-  title: "Trang quản trị bảo hành điện tử sản phẩm Lexzenz",
-  description: "Operational dashboard for warranty management",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadataLocale = hasLocale(routing.locales, locale)
+    ? locale
+    : routing.defaultLocale;
+  const t = await getTranslations({ locale: metadataLocale, namespace: "App" });
+
+  return {
+    title: t("title"),
+    description: t("description"),
+  };
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
