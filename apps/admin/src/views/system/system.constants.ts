@@ -1,59 +1,52 @@
-import { Activity, Cpu, Database } from "lucide-react";
-import type { ServiceCheckSummary } from "@repo/shared";
+import type { StorageAlertLevel } from "@repo/shared";
+import {
+  CircleCheck,
+  CircleHelp,
+  Globe2,
+  LockKeyhole,
+  ShieldAlert,
+  Siren,
+  TimerReset,
+  TriangleAlert,
+} from "lucide-react";
 
-export const services: ServiceCheckSummary[] = [
-  {
-    latency: "24ms",
-    name: "API",
-    status: "Healthy",
-    target: "http://localhost:4100/health",
-  },
-  {
-    latency: "8ms",
-    name: "PostgreSQL",
-    status: "Healthy",
-    target: "warranty-management-base-db:5432",
-  },
-  {
-    latency: "3ms",
-    name: "Redis",
-    status: "Healthy",
-    target: "warranty-management-base-redis:6379",
-  },
-  {
-    latency: "N/A",
-    name: "Worker",
-    status: "Pending",
-    target: "queue worker",
-  },
-];
+export const storageBuckets = [
+  { icon: Globe2, key: "public" },
+  { icon: LockKeyhole, key: "private" },
+  { icon: TimerReset, key: "temp" },
+] as const;
 
-export const systemStats = [
-  {
-    description: "API availability",
-    icon: Activity,
-    title: "Uptime",
-    trend: "Stable",
-    value: "99.9%",
+export const storageAlertConfig = {
+  UNCONFIGURED: {
+    badgeVariant: "secondary",
+    barClassName: "bg-slate-400 dark:bg-slate-500",
+    icon: CircleHelp,
   },
-  {
-    description: "Database and cache",
-    icon: Database,
-    title: "Data services",
-    trend: "2/2",
-    value: "Online",
+  NORMAL: {
+    badgeVariant: "success",
+    barClassName: "bg-emerald-500",
+    icon: CircleCheck,
   },
-  {
-    description: "Queue worker template",
-    icon: Cpu,
-    title: "Background jobs",
-    trend: "Mock",
-    value: "Ready",
+  WARNING: {
+    badgeVariant: "warning",
+    barClassName: "bg-amber-500",
+    icon: TriangleAlert,
   },
-];
-
-export const connectivityNotes = [
-  "Environment variables loaded",
-  "Docker compose services named consistently",
-  "CI Telegram notification configured",
-];
+  CRITICAL: {
+    badgeVariant: "destructive",
+    barClassName: "bg-orange-600",
+    icon: ShieldAlert,
+  },
+  EMERGENCY: {
+    badgeVariant: "destructive",
+    barClassName: "bg-red-600",
+    icon: Siren,
+  },
+} as const satisfies Record<
+  StorageAlertLevel,
+  {
+    badgeVariant: "secondary" | "success" | "warning" | "destructive";
+    barClassName: string;
+    icon: typeof CircleCheck;
+  }
+>;

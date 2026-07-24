@@ -24,6 +24,7 @@
       "serviceCenters": "Trạm bảo hành",
       "contentPages": "Trang nội dung",
       "notifications": "Thông báo",
+      "system": "Giám sát dung lượng",
       "signOut": "Đăng xuất",
       "signingOut": "Đang đăng xuất..."
     }
@@ -2010,6 +2011,58 @@
     },
     "save": "Lưu thay đổi",
     "saving": "Đang lưu..."
+  },
+  "StorageMonitoring": {
+    "eyebrow": "Vận hành hệ thống",
+    "title": "Giám sát dung lượng",
+    "description": "Theo dõi dung lượng MinIO, mức tăng giấy chứng nhận bảo hành, file tạm và file mồ côi.",
+    "refresh": "Làm mới dữ liệu",
+    "refreshing": "Đang làm mới...",
+    "retry": "Thử lại",
+    "lastUpdated": "Cập nhật lần cuối {value}",
+    "errorTitle": "Không thể tải dữ liệu storage",
+    "errorDescription": "Dashboard không đọc được dung lượng storage. Hãy kiểm tra kết nối API và MinIO rồi thử lại.",
+    "alerts": {
+      "UNCONFIGURED": "Chưa cấu hình hạn mức",
+      "NORMAL": "Bình thường",
+      "WARNING": "Cảnh báo",
+      "CRITICAL": "Nghiêm trọng",
+      "EMERGENCY": "Khẩn cấp"
+    },
+    "capacity": {
+      "title": "Dung lượng storage",
+      "of": "trên {capacity}",
+      "used": "đang sử dụng",
+      "notConfigured": "Chưa có hạn mức",
+      "configuredDescription": "Dung lượng được đánh giá theo hạn mức đã cấu hình. Cảnh báo bắt đầu từ mức 70%.",
+      "unconfiguredDescription": "Chưa thiết lập hạn mức dung lượng. Liên hệ quản trị hệ thống để bật cảnh báo theo phần trăm.",
+      "progressLabel": "Phần trăm dung lượng storage đã sử dụng"
+    },
+    "summary": {
+      "sectionLabel": "Tổng quan dung lượng",
+      "totalObjects": "Tổng số object",
+      "certificates": "Giấy chứng nhận",
+      "averageSize": "Dung lượng PDF trung bình",
+      "perCertificate": "Trên mỗi giấy chứng nhận",
+      "orphaned": "PDF mồ côi"
+    },
+    "buckets": {
+      "title": "Phân bổ theo bucket",
+      "description": "Kiểm tra nơi đang sử dụng dung lượng và chính sách lưu trữ tương ứng.",
+      "objectCount": "{count} object · {share}% dung lượng",
+      "public": {
+        "title": "Công khai",
+        "description": "Ảnh sản phẩm và nội dung công khai được phân phối qua CDN."
+      },
+      "private": {
+        "title": "Riêng tư",
+        "description": "Tài liệu được bảo vệ, bao gồm giấy chứng nhận bảo hành đã tạo."
+      },
+      "temp": {
+        "title": "Tạm thời",
+        "description": "File upload ngắn hạn được lifecycle của MinIO tự động dọn."
+      }
+    }
   },
   "Home": {
     "redirectLabel": "Chuyển đến bảng điều khiển"

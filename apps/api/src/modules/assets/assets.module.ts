@@ -6,6 +6,8 @@ import { FileValidatorService } from '@/modules/assets/services/file-validator.s
 import { LocalStorageService } from '@/modules/assets/services/local-storage.service';
 import { MinioStorageService } from '@/modules/assets/services/minio-storage.service';
 import { UploadAssetService } from '@/modules/assets/services/upload-asset.service';
+import { StorageUsageMonitorSchedulerService } from '@/modules/assets/services/storage-usage-monitor-scheduler.service';
+import { GetStorageUsageUseCase } from '@/modules/assets/use-cases/get-storage-usage.use-case';
 import { AuthTokenService } from '@/modules/auth/service/auth-token.service';
 import { Module } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
@@ -25,6 +27,8 @@ import { memoryStorage } from 'multer';
     AssetsService,
     UploadAssetService,
     FileValidatorService,
+    GetStorageUsageUseCase,
+    StorageUsageMonitorSchedulerService,
     {
       provide: 'IStorageService',
       inject: [storageConfig.KEY],
@@ -34,6 +38,6 @@ import { memoryStorage } from 'multer';
           : new LocalStorageService(config),
     },
   ],
-  exports: [AssetsService, UploadAssetService],
+  exports: [AssetsService, GetStorageUsageUseCase, UploadAssetService],
 })
 export class AssetsModule {}

@@ -1,4 +1,5 @@
 import { unwrap } from "../service.utils.ts";
+import type { StorageUsageSummary } from "@repo/shared";
 import type {
   AssetResponse,
   AssetsHttpClient,
@@ -26,6 +27,12 @@ function resolvePublicAssetUrl(asset: AssetResponse) {
 
 export function createAssetsService(http: AssetsHttpClient) {
   return {
+    async getStorageUsage(): Promise<StorageUsageSummary> {
+      return unwrap(
+        await http.get<StorageUsageSummary>("/assets/storage-usage"),
+      );
+    },
+
     async deleteAsset(assetId: string): Promise<void> {
       await http.delete<void>(`/assets/${assetId}`);
     },

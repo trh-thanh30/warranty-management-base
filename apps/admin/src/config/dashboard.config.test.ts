@@ -10,6 +10,11 @@ test("places content pages first in the other sidebar section", () => {
 
   assert.deepEqual(
     otherSection?.items.map((item) => item.title),
-    ["items.contentPages", "items.notifications", "items.settings"],
+    [
+      "items.contentPages",
+      "items.notifications",
+      "items.system",
+      "items.settings",
+    ],
   );
 });

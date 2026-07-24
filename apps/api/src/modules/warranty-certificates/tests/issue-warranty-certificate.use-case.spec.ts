@@ -92,4 +92,50 @@ describe('IssueWarrantyCertificateUseCase', () => {
       recipient_email: null,
     });
   });
+
+  it('deletes the uploaded PDF when the certificate record cannot be created', async () => {
+    const warranty = {
+      end_date: new Date('2029-07-24T00:00:00.000Z'),
+      id: 'warranty-id',
+      product: {
+        name: 'Lexzenz Film',
+        ownerships: [],
+        serial_number: 'SN-001',
+      },
+      start_date: new Date('2026-07-24T00:00:00.000Z'),
+      duration_months: 36,
+      warranty_code: 'WM-2026-ABC123',
+    };
+    const prismaService = {
+      warranty: {
+        findUnique: jest.fn().mockResolvedValue(warranty),
+      },
+      warrantyActivationRequest: {
+        findUnique: jest.fn().mockResolvedValue(null),
+      },
+      warrantyCertificate: {
+        create: jest.fn().mockRejectedValue(new Error('Database unavailable')),
+        findFirst: jest.fn().mockResolvedValue(null),
+      },
+    };
+    const uploadedPath =
+      'private/2026/07/warranty-certificates/certificate.pdf';
+    const uploadAssetService = {
+      delete: jest.fn().mockResolvedValue(undefined),
+      upload: jest.fn().mockResolvedValue({ path: uploadedPath }),
+    };
+    const useCase = new IssueWarrantyCertificateUseCase(
+      prismaService as never,
+      uploadAssetService as never,
+      { queueEmail: jest.fn() } as never,
+      {
+        createPdfBuffer: jest.fn().mockResolvedValue(Buffer.from('%PDF-')),
+      },
+    );
+
+    await expect(useCase.execute({ warrantyId: warranty.id })).rejects.toThrow(
+      'Database unavailable',
+    );
+    expect(uploadAssetService.delete).toHaveBeenCalledWith(uploadedPath);
+  });
 });

@@ -74,6 +74,8 @@ services:
         mc mb --ignore-existing "minio/$${MINIO_BUCKET_PUBLIC}" &&
         mc mb --ignore-existing "minio/$${MINIO_BUCKET_PRIVATE}" &&
         mc mb --ignore-existing "minio/$${MINIO_BUCKET_TEMP}" &&
+        (mc ilm rule rm --all --force "minio/$${MINIO_BUCKET_TEMP}" || true) &&
+        mc ilm rule add "minio/$${MINIO_BUCKET_TEMP}" --expire-days "$${MINIO_TEMP_RETENTION_DAYS:-7}" &&
         mc anonymous set download "minio/$${MINIO_BUCKET_PUBLIC}"
     depends_on:
       minio:
