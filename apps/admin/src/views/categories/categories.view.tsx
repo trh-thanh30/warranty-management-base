@@ -67,7 +67,7 @@ export function CategoriesView() {
                 uploadDisabled={!canCreateCategories}
               />
               {canCreateCategories ? (
-                <Button asChild>
+                <Button asChild className="min-w-48">
                   <Link href="/categories/create">
                     <Plus className="size-4" />
                     {t("create")}

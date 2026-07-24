@@ -40,15 +40,17 @@ export function WarrantiesView() {
       <div className="space-y-6">
         <PageHeader
           actions={
-            <ImportExportMenu
-              labels={{
-                exportAll: t("excel.exportAll"),
-                title: t("excel.title"),
-              }}
-              onExportAll={() => {
-                void exportWarranties();
-              }}
-            />
+            <div className="flex w-full justify-end sm:w-auto">
+              <ImportExportMenu
+                labels={{
+                  exportAll: t("excel.exportAll"),
+                  title: t("excel.title"),
+                }}
+                onExportAll={() => {
+                  void exportWarranties();
+                }}
+              />
+            </div>
           }
           description={t("description")}
           eyebrow={t("eyebrow")}
