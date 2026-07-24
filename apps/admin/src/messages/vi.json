@@ -1865,6 +1865,7 @@
       "WARRANTY_CLAIM_STATUS_CHANGED": "Cập nhật trạng thái bảo hành",
       "WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER": "Phân công trạm bảo hành",
       "WARRANTY_CLAIM_SLA_BREACHED": "Cảnh báo quá hạn xử lý (SLA)",
+      "WARRANTY_ACTIVATION_REQUEST_CREATED": "Yêu cầu kích hoạt bảo hành mới",
       "SYSTEM_ALERT": "Cảnh báo hệ thống",
       "ANNOUNCEMENT": "Thông báo chung"
     },

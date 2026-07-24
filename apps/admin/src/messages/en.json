@@ -1865,6 +1865,7 @@
       "WARRANTY_CLAIM_STATUS_CHANGED": "Claim status updated",
       "WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER": "Service center assigned",
       "WARRANTY_CLAIM_SLA_BREACHED": "SLA breach warning",
+      "WARRANTY_ACTIVATION_REQUEST_CREATED": "Warranty activation request created",
       "SYSTEM_ALERT": "System alert",
       "ANNOUNCEMENT": "General announcement"
     },

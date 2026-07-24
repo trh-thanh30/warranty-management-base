@@ -1,5 +1,5 @@
 import { CreateSystemNotificationUseCase } from '@/modules/notification/use-cases/create-system-notification.use-case';
-import { Injectable, Logger, Optional } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   notification_scope,
   user_role,
@@ -17,8 +17,7 @@ export class WarrantyClaimNotificationService {
   private readonly logger = new Logger(WarrantyClaimNotificationService.name);
 
   constructor(
-    @Optional()
-    private readonly createSystemNotificationUseCase?: CreateSystemNotificationUseCase,
+    private readonly createSystemNotificationUseCase: CreateSystemNotificationUseCase,
   ) {}
 
   async claimCreated(claim: ClaimNotificationInput) {
@@ -68,10 +67,6 @@ export class WarrantyClaimNotificationService {
     claim: ClaimNotificationInput;
     metadata?: Record<string, unknown>;
   }) {
-    if (!this.createSystemNotificationUseCase) {
-      return;
-    }
-
     try {
       await this.createSystemNotificationUseCase.execute({
         title: input.title,

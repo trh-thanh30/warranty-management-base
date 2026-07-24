@@ -67,6 +67,10 @@ export function NotificationFilters({
             label: t("types.WARRANTY_CLAIM_SLA_BREACHED"),
             value: "WARRANTY_CLAIM_SLA_BREACHED",
           },
+          {
+            label: t("types.WARRANTY_ACTIVATION_REQUEST_CREATED"),
+            value: "WARRANTY_ACTIVATION_REQUEST_CREATED",
+          },
           { label: t("types.SYSTEM_ALERT"), value: "SYSTEM_ALERT" },
           { label: t("types.ANNOUNCEMENT"), value: "ANNOUNCEMENT" },
         ]}
