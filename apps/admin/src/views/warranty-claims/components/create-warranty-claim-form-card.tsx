@@ -12,24 +12,14 @@ import {
   Input,
   Textarea,
 } from "@repo/ui";
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-  ComboboxTrigger,
-} from "@/src/components/common/combobox";
+import { SearchDropdown } from "@/src/components/common/search-dropdown";
 import { FormField } from "@/src/components/common/form-field";
 import { formatProductSearchOption } from "@/src/utils";
 import { useCreateWarrantyClaimForm } from "../hooks/use-create-warranty-claim-form";
 import { translateWarrantyClaimCreateFieldError } from "../warranty-claims.utils";
-import {
-  WarrantyClaimFormSection,
-  WarrantyClaimReadOnlyField,
-  WarrantyClaimReadOnlyInput,
-} from "./warranty-claim-form-layout";
+import { WarrantyClaimFormSection } from "./warranty-claim-form-layout";
+import { SelectedWarrantyClaimProductDetails } from "./selected-warranty-claim-product-details";
+import { WarrantyClaimProductSearchResult } from "./warranty-claim-product-search-result";
 
 type CreateWarrantyClaimFormCardProps = {
   onCancel: () => void;
@@ -42,15 +32,20 @@ export function CreateWarrantyClaimFormCard({
 }: CreateWarrantyClaimFormCardProps) {
   const t = useTranslations("WarrantyClaims");
   const {
+    clearProduct,
+    customer,
+    customerQuery,
     errors,
     isSaving,
     mutationIsPending,
     onSubmit,
+    productSearch,
     products,
     productsQuery,
     register,
     selectedProduct,
     selectProduct,
+    setProductSearch,
   } = useCreateWarrantyClaimForm({ onCreated });
 
   return (
@@ -84,83 +79,50 @@ export function CreateWarrantyClaimFormCard({
               htmlFor="create-warranty-claim-product"
               label={t("productSearch")}
             >
-              <Combobox
-                disabled={productsQuery.isLoading}
-                onValueChange={(value) => {
-                  const product = products.find((item) => item.id === value);
-                  if (product) selectProduct(product);
+              <SearchDropdown
+                emptyLabel={t("noProduct")}
+                getItemKey={(product) => product.id}
+                id="create-warranty-claim-product"
+                inputClassName="h-11 text-base sm:h-10 sm:text-sm"
+                isLoading={productsQuery.isFetching}
+                items={products}
+                loadingLabel={t("loadingProducts")}
+                onItemSelect={selectProduct}
+                onSearchChange={(value) => {
+                  if (selectedProduct) clearProduct();
+                  setProductSearch(value);
                 }}
-                value={selectedProduct?.id ?? ""}
-              >
-                <ComboboxTrigger
-                  id="create-warranty-claim-product"
-                  placeholder={t("productSearchPlaceholder")}
-                  selectedLabel={
-                    selectedProduct
-                      ? formatProductSearchOption(selectedProduct)
-                      : undefined
-                  }
-                />
-                <ComboboxContent>
-                  <ComboboxInput
-                    placeholder={t("search")}
-                    showTrigger={false}
+                placeholder={t("productSearchPlaceholder")}
+                renderItem={(product) => (
+                  <WarrantyClaimProductSearchResult
+                    product={product}
+                    productStatus={t(`productStatuses.${product.status}`)}
+                    warrantyStatus={
+                      product.warranty?.status
+                        ? t(`warrantyStatuses.${product.warranty.status}`)
+                        : "-"
+                    }
                   />
-                  <ComboboxList>
-                    <ComboboxEmpty>{t("noProduct")}</ComboboxEmpty>
-                    {products.map((product) => (
-                      <ComboboxItem key={product.id} value={product.id}>
-                        {formatProductSearchOption(product)}
-                      </ComboboxItem>
-                    ))}
-                  </ComboboxList>
-                </ComboboxContent>
-              </Combobox>
-            </FormField>
-
-            <div className="grid gap-5 sm:grid-cols-2">
-              <FormField
-                error={translateWarrantyClaimCreateFieldError(
-                  errors.warrantyCode?.message,
-                  t,
                 )}
-                htmlFor="create-warranty-claim-warranty-code"
-                label={t("warrantyCode")}
-              >
-                <WarrantyClaimReadOnlyInput
-                  id="create-warranty-claim-warranty-code"
-                  placeholder={t("warrantyCodePlaceholder")}
-                  {...register("warrantyCode")}
-                />
-              </FormField>
-              <WarrantyClaimReadOnlyField
-                id="create-warranty-claim-warranty-status"
-                label={t("warrantyStatus")}
-                value={
-                  selectedProduct?.warranty?.status
-                    ? t(`warrantyStatuses.${selectedProduct.warranty.status}`)
-                    : "-"
+                searchValue={productSearch}
+                selectedLabel={
+                  selectedProduct
+                    ? formatProductSearchOption(selectedProduct)
+                    : undefined
                 }
               />
-            </div>
+            </FormField>
 
-            <div className="grid gap-5 sm:grid-cols-3">
-              <WarrantyClaimReadOnlyField
-                id="create-warranty-claim-product-name"
-                label={t("product")}
-                value={selectedProduct?.name ?? "-"}
+            <input type="hidden" {...register("warrantyCode")} />
+
+            {selectedProduct ? (
+              <SelectedWarrantyClaimProductDetails
+                customer={customer}
+                isCustomerError={customerQuery.isError}
+                isCustomerLoading={customerQuery.isFetching}
+                product={selectedProduct}
               />
-              <WarrantyClaimReadOnlyField
-                id="create-warranty-claim-serial-number"
-                label={t("serialNumber")}
-                value={selectedProduct?.serialNumber ?? "-"}
-              />
-              <WarrantyClaimReadOnlyField
-                id="create-warranty-claim-owner"
-                label={t("owner")}
-                value={selectedProduct?.owner?.fullName ?? "-"}
-              />
-            </div>
+            ) : null}
           </WarrantyClaimFormSection>
 
           <WarrantyClaimFormSection

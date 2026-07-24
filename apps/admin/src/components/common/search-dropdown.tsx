@@ -8,6 +8,7 @@ type SearchDropdownProps<TItem> = {
   emptyLabel: string;
   getItemKey: (item: TItem) => string;
   getItemDisabledReason?: (item: TItem) => string | null | undefined;
+  id?: string;
   inputClassName?: string;
   isLoading?: boolean;
   items: TItem[];
@@ -25,6 +26,7 @@ export function SearchDropdown<TItem>({
   emptyLabel,
   getItemKey,
   getItemDisabledReason,
+  id,
   inputClassName,
   isLoading,
   items,
@@ -70,6 +72,7 @@ export function SearchDropdown<TItem>({
       <Input
         aria-expanded={open}
         className={cn("h-10 pl-9 pr-9", inputClassName)}
+        id={id}
         onChange={(event) => {
           onSearchChange(event.target.value);
           setOpen(true);
