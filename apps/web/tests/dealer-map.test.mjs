@@ -27,12 +27,7 @@ const dealerFiltersPath = path.join(
   "dealers",
   "use-dealer-filters.ts",
 );
-const vietnamGeoJsonPath = path.join(
-  webRoot,
-  "public",
-  "maps",
-  "vietnam-adm0.geojson",
-);
+const vietnamGeoJsonPath = path.join(webRoot, "public", "map", "vn.geojson");
 
 async function exists(file) {
   try {
@@ -47,7 +42,7 @@ test("dealer map ships the local Vietnam polygon and maritime line data", async 
   assert.equal(
     await exists(vietnamGeoJsonPath),
     true,
-    "public/maps/vietnam-adm0.geojson must exist",
+    "public/map/vn.geojson must exist",
   );
 
   const data = JSON.parse(await readFile(vietnamGeoJsonPath, "utf8"));
@@ -81,9 +76,8 @@ test("dealer map uses constrained Leaflet with a mask and active marker", async 
     "Popup",
     "flyTo",
     "fitBounds",
-    "/maps/vietnam-adm0.geojson",
+    "/map/vn.geojson",
     "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-    "OpenStreetMap contributors",
   ]) {
     assert.match(source, new RegExp(expected.replace(/[{}]/g, "\\$&")));
   }

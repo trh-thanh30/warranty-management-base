@@ -212,7 +212,7 @@ export function DealerMap({ activeDealer }: DealerMapProps) {
     <div
       role="region"
       aria-label={t("ariaLabel")}
-      className="relative isolate size-full overflow-hidden bg-surface-muted [&_.leaflet-control-attribution]:hidden"
+      className="relative isolate size-full overflow-hidden bg-surface-muted"
     >
       <MapContainer
         bounds={VIETNAM_MAINLAND_BOUNDS}
@@ -222,12 +222,8 @@ export function DealerMap({ activeDealer }: DealerMapProps) {
         minZoom={5}
         maxZoom={18}
         scrollWheelZoom
-        attributionControl={false}
       >
-        <TileLayer
-          attribution=""
-          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+        <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
         {maskPositions && (
           <Polygon positions={maskPositions} pathOptions={maskStyle} />
