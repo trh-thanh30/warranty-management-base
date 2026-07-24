@@ -1427,6 +1427,7 @@
       "placeholder": "Nhập mã phiếu REQ-... hoặc SĐT...",
       "search": "Kiểm tra",
       "mock": {
+        "customerName": "Nguyễn Văn An",
         "issue": "Bong tróc bọt khí kính sườn trái",
         "status": "Đang tiếp nhận & Lên lịch kỹ thuật",
         "technician": "Trần Văn Bình - Panda Auto Hà Nội"

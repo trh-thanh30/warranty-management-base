@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Input } from "@repo/ui/input";
-import { demoWarrantyCustomer } from "@/src/constants/warranty.constants";
 import { formControlFocusClassName } from "@/src/components/common/form-control.constants";
 import { demoWarrantyTicket } from "./warranty.constants";
 import type { WarrantyTicketResult } from "./warranty.types";
@@ -21,7 +20,7 @@ export function WarrantyTrackView() {
       setTicketData({
         ticketId: ticketQuery,
         ...demoWarrantyTicket,
-        customerName: demoWarrantyCustomer.name,
+        customerName: t("mock.customerName"),
         issue: t("mock.issue"),
         status: t("mock.status"),
         assignedTechnician: t("mock.technician"),

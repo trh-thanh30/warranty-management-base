@@ -1427,6 +1427,7 @@
       "placeholder": "Enter REQ-... ticket or phone number...",
       "search": "Check",
       "mock": {
+        "customerName": "Nguyen Van An",
         "issue": "Bubbles on the left side window",
         "status": "Received & Scheduling a technician",
         "technician": "Tran Van Binh - Panda Auto Hanoi"

@@ -1,8 +1,3 @@
-export const demoWarrantyCustomer = {
-  name: "Nguyễn Văn An",
-  address: "TP. Hồ Chí Minh",
-} as const;
-
 export const warrantyLookupExamples = ["0988123456", "30H-888.88"] as const;
 
 export const warrantyLookupSupportPhone = {
