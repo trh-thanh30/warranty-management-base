@@ -1,11 +1,13 @@
 import { PrismaModule } from '@/database/prisma/prisma.module';
 import { CustomersModule } from '@/modules/customers/customers.module';
 import { DealersModule } from '@/modules/dealers/dealers.module';
+import { NotificationModule } from '@/modules/notification/notification.module';
 import { ProductsModule } from '@/modules/products/products.module';
 import { AssetsModule } from '@/modules/assets/assets.module';
 import { WarrantyCertificatesModule } from '@/modules/warranty-certificates/warranty-certificates.module';
 import { WarrantiesModule } from '@/modules/warranties/warranties.module';
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
+import { WarrantyActivationRequestNotificationService } from '@/modules/warranty-activation-requests/service/warranty-activation-request-notification.service';
 import { CreateWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-warranty-activation-request.use-case';
 import { CreateAdminWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-admin-warranty-activation-request.use-case';
 import { DownloadWarrantyActivationRequestCertificateUseCase } from '@/modules/warranty-activation-requests/use-cases/download-warranty-activation-request-certificate.use-case';
@@ -23,6 +25,7 @@ import { Module } from '@nestjs/common';
     AssetsModule,
     CustomersModule,
     DealersModule,
+    NotificationModule,
     PrismaModule,
     ProductsModule,
     WarrantyCertificatesModule,
@@ -31,6 +34,7 @@ import { Module } from '@nestjs/common';
   controllers: [WarrantyActivationRequestsController],
   providers: [
     WarrantyActivationRequestsRepository,
+    WarrantyActivationRequestNotificationService,
     CreateAdminWarrantyActivationRequestUseCase,
     GenerateWarrantyActivationRequestCodeUseCase,
     CreateWarrantyActivationRequestUseCase,
