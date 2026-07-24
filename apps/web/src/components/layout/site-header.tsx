@@ -5,8 +5,10 @@ import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { HeaderNavLink } from "@/src/components/layout/components/header-nav-link";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { Link, usePathname } from "@/src/i18n/navigation";
+import { isNavigationItemActive } from "@/src/utils/pathname.utils";
 
 const navigationItems = [
   { labelKey: "home", href: APP_ROUTES.home },
@@ -19,40 +21,6 @@ const navigationItems = [
   },
   { labelKey: "contact", href: APP_ROUTES.contact },
 ] as const;
-
-const navigationLinkBaseClassName =
-  "relative inline-flex py-1.5 text-base font-medium uppercase tracking-wide transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-4";
-
-const navigationLinkInactiveClassName =
-  "text-deep-black hover:text-premium-red";
-
-const navigationLinkActiveClassName =
-  "text-premium-red after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-premium-red";
-
-const mobileNavigationLinkBaseClassName =
-  "block rounded-md px-3 py-2.5 text-base font-medium uppercase tracking-wide transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2";
-
-const mobileNavigationLinkInactiveClassName =
-  "text-deep-black hover:text-premium-red";
-
-const mobileNavigationLinkActiveClassName =
-  "bg-premium-red/10 text-premium-red";
-
-const normalizePathname = (pathname: string) => {
-  const withoutLocale = pathname.replace(/^\/(?:vi|en)(?=\/|$)/, "") || "/";
-  return withoutLocale.length > 1
-    ? withoutLocale.replace(/\/$/, "")
-    : withoutLocale;
-};
-
-const isNavigationItemActive = (pathname: string, activePath: string) => {
-  const normalizedPathname = normalizePathname(pathname);
-
-  return activePath === "/"
-    ? normalizedPathname === "/"
-    : normalizedPathname === activePath ||
-        normalizedPathname.startsWith(`${activePath}/`);
-};
 
 export function SiteHeader() {
   const t = useTranslations("SiteHeader");
@@ -101,26 +69,13 @@ export function SiteHeader() {
 
         <nav aria-label={t("desktopNavLabel")} className="hidden xl:block">
           <ul className="flex list-none items-center gap-7 lg:gap-9">
-            {navigationItems.map((item) => {
-              const isActive = isNavigationItemActive(pathname, item.href);
-
-              return (
-                <li key={item.labelKey}>
-                  <Link
-                    href={item.href}
-                    aria-current={isActive ? "page" : undefined}
-                    data-active={isActive ? "true" : undefined}
-                    className={`${navigationLinkBaseClassName} ${
-                      isActive
-                        ? navigationLinkActiveClassName
-                        : navigationLinkInactiveClassName
-                    }`}
-                  >
-                    {t(`nav.${item.labelKey}`)}
-                  </Link>
-                </li>
-              );
-            })}
+            {navigationItems.map((item) => (
+              <li key={item.labelKey}>
+                <HeaderNavLink href={item.href}>
+                  {t(`nav.${item.labelKey}`)}
+                </HeaderNavLink>
+              </li>
+            ))}
           </ul>
         </nav>
 
@@ -172,27 +127,17 @@ export function SiteHeader() {
             className="max-h-[calc(100vh-70px)] overflow-y-auto border-t border-border-gray bg-off-white shadow-xl xl:hidden"
           >
             <ul className="space-y-2 px-6 py-5">
-              {navigationItems.map((item) => {
-                const isActive = isNavigationItemActive(pathname, item.href);
-
-                return (
-                  <li key={item.labelKey}>
-                    <Link
-                      href={item.href}
-                      aria-current={isActive ? "page" : undefined}
-                      data-active={isActive ? "true" : undefined}
-                      onClick={closeMobileMenu}
-                      className={`${mobileNavigationLinkBaseClassName} ${
-                        isActive
-                          ? mobileNavigationLinkActiveClassName
-                          : mobileNavigationLinkInactiveClassName
-                      }`}
-                    >
-                      {t(`nav.${item.labelKey}`)}
-                    </Link>
-                  </li>
-                );
-              })}
+              {navigationItems.map((item) => (
+                <li key={item.labelKey}>
+                  <HeaderNavLink
+                    href={item.href}
+                    isMobile
+                    onClick={closeMobileMenu}
+                  >
+                    {t(`nav.${item.labelKey}`)}
+                  </HeaderNavLink>
+                </li>
+              ))}
               <li className="pt-3">
                 <Link
                   href={APP_ROUTES.dealers}
