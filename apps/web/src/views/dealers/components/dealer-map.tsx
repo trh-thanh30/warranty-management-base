@@ -148,7 +148,7 @@ export function DealerMap({ activeDealer }: DealerMapProps) {
 
     async function loadVietnamBoundary() {
       try {
-        const response = await fetch("/maps/vietnam-adm0.geojson", {
+        const response = await fetch("/map/vn.geojson", {
           signal: controller.signal,
         });
 
