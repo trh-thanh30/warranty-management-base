@@ -86,6 +86,42 @@ GitHub Actions hiện tách job:
 - Admin
 - Telegram notification
 
+Docker images dùng GitHub Container Registry (GHCR) làm registry mặc định:
+
+- `ghcr.io/<owner>/<repo>-api:<commit-sha>`
+- `ghcr.io/<owner>/<repo>-web:<commit-sha>`
+- `ghcr.io/<owner>/<repo>-admin:<commit-sha>`
+
+Workflow `.github/workflows/publish-images.yml` chạy sau khi workflow `CI` xanh trên `main` và build/push image cho API, Web, Admin. Khi chưa có VPS/server, phần này đã đủ để có artifact deploy được.
+
+Khi đã có server, chạy workflow `.github/workflows/deploy.yml` thủ công với input `image_tag`. Server cần có repo hoặc bundle deploy trong `DEPLOY_PATH`, file `.env.production`, Docker, Docker Compose, và quyền pull GHCR image.
+
+Nếu GHCR package để private, đăng nhập registry trên server trước khi deploy:
+
+```bash
+echo "<github-token>" | docker login ghcr.io -u "<github-username>" --password-stdin
+```
+
+Token chỉ cần quyền đọc package/image.
+
+GitHub Actions deployment secrets:
+
+- `DEPLOY_HOST`
+- `DEPLOY_USER`
+- `DEPLOY_SSH_KEY`
+- `DEPLOY_PORT` (optional, mặc định `22`)
+- `DEPLOY_PATH`
+- `DEPLOY_API_HEALTH_URL` (optional)
+- `DEPLOY_WEB_URL` (optional)
+- `DEPLOY_ADMIN_URL` (optional)
+
+Production `.env.production` cần cấu hình image:
+
+- `API_IMAGE=ghcr.io/<owner>/<repo>-api`
+- `WEB_IMAGE=ghcr.io/<owner>/<repo>-web`
+- `ADMIN_IMAGE=ghcr.io/<owner>/<repo>-admin`
+- `IMAGE_TAG=<commit-sha>`
+
 Telegram secrets cần cấu hình trong GitHub Actions:
 
 - `CI_TELEGRAM_BOT_TOKEN`

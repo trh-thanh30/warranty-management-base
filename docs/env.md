@@ -50,6 +50,30 @@ Chỉ cần cấu hình trên GitHub Actions Secrets:
 
 Không cần đưa token thật vào file env local.
 
+### CD / Deployment
+
+Workflow `Publish Images` build và push Docker image lên GitHub Container Registry:
+
+- `API_IMAGE`
+- `WEB_IMAGE`
+- `ADMIN_IMAGE`
+- `IMAGE_TAG`
+
+Khi deploy qua workflow `Deploy` tới VPS/server, cấu hình các GitHub Actions Secrets:
+
+- `DEPLOY_HOST`
+- `DEPLOY_USER`
+- `DEPLOY_SSH_KEY`
+- `DEPLOY_PORT` (optional)
+- `DEPLOY_PATH`
+- `DEPLOY_API_HEALTH_URL` (optional)
+- `DEPLOY_WEB_URL` (optional)
+- `DEPLOY_ADMIN_URL` (optional)
+
+Server cần có `.env.production` chứa app/database/redis/minio secrets và các biến image ở trên.
+
+Nếu GHCR image là private, server cần đăng nhập `ghcr.io` bằng GitHub token có quyền đọc package trước khi chạy `docker compose pull`.
+
 ## Rule
 
 - Biến public cho Next.js phải bắt đầu bằng `NEXT_PUBLIC_`.
