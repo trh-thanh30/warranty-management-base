@@ -6,11 +6,14 @@ import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "@/src/i18n/navigation";
 import { ArrowUp } from "lucide-react";
-import { FaFacebookF, FaTiktok, FaYoutube } from "react-icons/fa6";
-import { SiZalo } from "react-icons/si";
+import { FooterSocialLink } from "@/src/components/layout/components/footer-social-link";
 import {
+  footerContactEmail,
+  footerHotlineItems,
+  footerLogo,
   footerNavigationItems,
   footerPolicyItems,
+  footerSocialItems,
 } from "./site-footer.constants";
 
 export function SiteFooter() {
@@ -44,11 +47,11 @@ export function SiteFooter() {
             <div className="lg:col-span-4 space-y-4">
               <div className="relative h-14 w-[240px]">
                 <Image
-                  src="/logo.png"
+                  src={footerLogo.src}
                   alt={t("logoAlt")}
                   fill
                   priority
-                  sizes="240px"
+                  sizes={`${footerLogo.width}px`}
                   className="object-contain object-left"
                 />
               </div>
@@ -114,33 +117,26 @@ export function SiteFooter() {
 
             {/* Column 4: Hotline & Socials */}
             <div className="lg:col-span-2 space-y-4">
-              <div>
-                <span className="block text-xs sm:text-sm font-medium text-stone-gray uppercase">
-                  {t("hotlines.hcm")}
-                </span>
-                <a
-                  href="tel:0886337733"
-                  className="text-xl sm:text-2xl font-semibold text-premium-red hover:underline block"
-                >
-                  0886 33 77 33
-                </a>
-              </div>
+              {footerHotlineItems.map((item) => (
+                <div key={item.id}>
+                  <span className="block text-xs sm:text-sm font-medium text-stone-gray uppercase">
+                    {t(`hotlines.${item.labelKey}`)}
+                  </span>
+                  <a
+                    href={item.href}
+                    className="text-xl sm:text-2xl font-semibold text-premium-red hover:underline block"
+                  >
+                    {item.displayValue}
+                  </a>
+                </div>
+              ))}
 
-              <div>
-                <span className="block text-xs sm:text-sm font-medium text-stone-gray uppercase">
-                  {t("hotlines.hanoi")}
-                </span>
-                <a
-                  href="tel:0989017999"
-                  className="text-xl sm:text-2xl font-semibold text-premium-red hover:underline block"
-                >
-                  0989 017 999
-                </a>
-              </div>
-
-              <div className="text-xs sm:text-sm text-medium-gray font-medium break-all pt-1">
-                fujitek.lexzenz.vn@gmail.com
-              </div>
+              <a
+                href={footerContactEmail.href}
+                className="block break-all pt-1 text-xs font-medium text-medium-gray sm:text-sm"
+              >
+                {footerContactEmail.displayValue}
+              </a>
 
               <div className="flex items-center gap-2 pt-1 text-sm font-semibold uppercase text-premium-red sm:text-base">
                 <span
@@ -155,38 +151,16 @@ export function SiteFooter() {
 
               {/* Social Buttons */}
               <div className="flex items-center gap-2.5 pt-2">
-                <a
-                  href="#"
-                  className="size-9 rounded-full bg-facebook-blue text-white flex items-center justify-center font-medium text-sm hover:opacity-90 transition-opacity shadow-xs"
-                  title="Facebook"
-                  aria-label="Facebook"
-                >
-                  <FaFacebookF aria-hidden="true" className="size-4" />
-                </a>
-                <a
-                  href="#"
-                  className="size-9 rounded-full bg-zalo-blue text-white flex items-center justify-center font-medium text-sm hover:opacity-90 transition-opacity"
-                  title="Zalo"
-                  aria-label="Zalo"
-                >
-                  <SiZalo aria-hidden="true" className="size-5" />
-                </a>
-                <a
-                  href="#"
-                  className="size-9 rounded-full bg-black text-white flex items-center justify-center font-medium text-sm hover:opacity-90 transition-opacity"
-                  title="TikTok"
-                  aria-label="TikTok"
-                >
-                  <FaTiktok aria-hidden="true" className="size-5" />
-                </a>
-                <a
-                  href="#"
-                  className="size-9 rounded-full bg-danger-red text-white flex items-center justify-center font-medium text-sm hover:opacity-90 transition-opacity"
-                  title="YouTube"
-                  aria-label="YouTube"
-                >
-                  <FaYoutube aria-hidden="true" className="size-5" />
-                </a>
+                {footerSocialItems.map((item) => (
+                  <FooterSocialLink
+                    key={item.id}
+                    href={item.href}
+                    label={item.label}
+                    icon={item.icon}
+                    className={item.className}
+                    iconClassName={item.iconClassName}
+                  />
+                ))}
               </div>
             </div>
           </div>
