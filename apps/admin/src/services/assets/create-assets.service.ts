@@ -6,25 +6,6 @@ import type {
   UploadAssetOptions,
 } from "./assets.types";
 
-function resolvePublicAssetUrl(asset: AssetResponse) {
-  if (asset.access_type !== "PUBLIC") return asset.url;
-
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (!apiBaseUrl) return asset.url;
-
-  try {
-    const apiUrl = new URL(apiBaseUrl);
-    const cleanPath = asset.path
-      .replace(/\\/g, "/")
-      .replace(/^public\//, "")
-      .replace(/^\/+/, "");
-
-    return `${apiUrl.origin}/cdn/${cleanPath}`;
-  } catch {
-    return asset.url;
-  }
-}
-
 export function createAssetsService(http: AssetsHttpClient) {
   return {
     async getStorageUsage(): Promise<StorageUsageSummary> {
@@ -50,16 +31,11 @@ export function createAssetsService(http: AssetsHttpClient) {
       const formData = new FormData();
       formData.append("file", file);
 
-      const asset = unwrap(
+      return unwrap(
         await http.post<AssetResponse>("/assets/upload", formData, {
           params: options,
         }),
       );
-
-      return {
-        ...asset,
-        url: resolvePublicAssetUrl(asset),
-      };
     },
   };
 }
