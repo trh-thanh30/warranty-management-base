@@ -1,9 +1,7 @@
 import { NotFoundError } from '@/common/response';
 import { AssetsService } from '@/modules/assets/assets.service';
-import {
-  WARRANTY_CLAIM_ASSET_ENTITY_TYPE,
-  WarrantyClaimsRepository,
-} from '@/modules/warranty-claims/repository/warranty-claims.repository';
+import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/warranty-claims.repository';
+import { WARRANTY_CLAIM_ASSET_ENTITY_TYPE } from '@/modules/warranty-claims/warranty-claims.constants';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

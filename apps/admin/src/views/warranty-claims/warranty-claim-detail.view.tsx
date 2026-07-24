@@ -15,6 +15,7 @@ import { UploadClaimAttachmentsDialog } from "./components/upload-claim-attachme
 import { WarrantyClaimDetailContent } from "./components/warranty-claim-detail-content";
 import { WarrantyClaimDetailHeader } from "./components/warranty-claim-detail-header";
 import { WarrantyClaimDetailSkeleton } from "./components/warranty-claim-detail-skeleton";
+import { WarrantyClaimStatusStepper } from "./components/warranty-claim-status-stepper";
 import { useWarrantyClaimDetail } from "./hooks/use-warranty-claim-detail";
 
 type WarrantyClaimDetailViewProps = {
@@ -65,6 +66,8 @@ export function WarrantyClaimDetailView({
             onUpdatePriority={() => detail.openAction("priority")}
             onUpdateStatus={() => detail.openAction("status")}
           />
+
+          <WarrantyClaimStatusStepper claim={detail.claim} />
 
           <WarrantyClaimDetailContent
             canUpdate={detail.canUpdate}

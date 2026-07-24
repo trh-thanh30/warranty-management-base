@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { HttpClientError } from "@repo/shared";
 import {
+  getStatusBadgeVariant,
   resolveWarrantyClaimCreateError,
   toCreateWarrantyClaimBody,
   translateWarrantyClaimCreateFieldError,
@@ -105,4 +106,14 @@ test("create claim errors translate known API messages", () => {
     resolveWarrantyClaimCreateError(error, (key) => `translated:${key}`),
     "translated:apiErrors.WARRANTY_CODE_NOT_FOUND",
   );
+});
+
+test("claim statuses use distinct semantic badge colors", () => {
+  assert.equal(getStatusBadgeVariant("SUBMITTED"), "secondary");
+  assert.equal(getStatusBadgeVariant("REVIEWING"), "info");
+  assert.equal(getStatusBadgeVariant("APPROVED"), "accent");
+  assert.equal(getStatusBadgeVariant("IN_REPAIR"), "warning");
+  assert.equal(getStatusBadgeVariant("COMPLETED"), "success");
+  assert.equal(getStatusBadgeVariant("REJECTED"), "destructive");
+  assert.equal(getStatusBadgeVariant("CANCELLED"), "destructive");
 });

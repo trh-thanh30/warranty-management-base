@@ -1,18 +1,18 @@
+import { AuthProvider } from "@/src/app/providers/auth-provider";
+import { QueryProvider } from "@/src/app/providers/query-provider";
+import { ThemeProvider } from "@/src/app/providers/theme-provider";
+import { ToastProvider } from "@/src/app/providers/toast-provider";
+import { routing } from "@/src/i18n/routing";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
+import { notFound } from "next/navigation";
 import NextTopLoader from "nextjs-toploader";
-import { ThemeProvider } from "@/src/app/providers/theme-provider";
-import { AuthProvider } from "@/src/app/providers/auth-provider";
-import { ToastProvider } from "@/src/app/providers/toast-provider";
-import { QueryProvider } from "@/src/app/providers/query-provider";
-import { routing } from "@/src/i18n/routing";
 import "yet-another-react-lightbox/styles.css";
 import "../globals.css";
 
 export const metadata: Metadata = {
-  title: "Warranty Admin",
+  title: "Trang quản trị bảo hành điện tử sản phẩm Lexzenz",
   description: "Operational dashboard for warranty management",
 };
 

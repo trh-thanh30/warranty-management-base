@@ -166,7 +166,9 @@ export function getPriorityBadgeVariant(priority: WarrantyClaimPriority) {
 export function getStatusBadgeVariant(status: WarrantyClaimStatus) {
   if (status === "COMPLETED") return "success";
   if (status === "REJECTED" || status === "CANCELLED") return "destructive";
-  if (status === "APPROVED" || status === "IN_REPAIR") return "warning";
+  if (status === "REVIEWING") return "info";
+  if (status === "APPROVED") return "accent";
+  if (status === "IN_REPAIR") return "warning";
 
   return "secondary";
 }

@@ -19,6 +19,7 @@ export * from "./select";
 export * from "./sheet";
 export * from "./skeleton";
 export * from "./switch";
+export * from "./stepper";
 export * from "./table";
 export * from "./tabs";
 export * from "./textarea";

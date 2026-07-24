@@ -4,6 +4,36 @@ import type { ProductSummary } from "./product.types.ts";
 import type { ServiceCenterSummary } from "./service-center.types.ts";
 import type { WarrantySummary } from "./warranty.types.ts";
 
+export type WarrantyClaimProductSummary = Pick<
+  ProductSummary,
+  | "id"
+  | "productCode"
+  | "warrantyCode"
+  | "serialNumber"
+  | "name"
+  | "category"
+  | "categoryId"
+  | "categoryRef"
+  | "brand"
+  | "model"
+  | "manufactureYear"
+  | "status"
+>;
+
+export type WarrantyClaimWarrantySummary = Pick<
+  WarrantySummary,
+  | "id"
+  | "warrantyCode"
+  | "startDate"
+  | "endDate"
+  | "durationMonths"
+  | "coverageLimitAmount"
+  | "maxClaimCount"
+  | "maxAmountPerClaim"
+  | "status"
+  | "terms"
+>;
+
 export type WarrantyClaimStatus =
   | "SUBMITTED"
   | "REVIEWING"
@@ -102,8 +132,8 @@ export type WarrantyClaimSummary = {
   resolvedAt: string | null;
   createdAt: string;
   updatedAt: string;
-  product: ProductSummary | null;
-  warranty: WarrantySummary | null;
+  product: WarrantyClaimProductSummary | null;
+  warranty: WarrantyClaimWarrantySummary | null;
   customer: CustomerSummary | null;
   serviceCenter: ServiceCenterSummary | null;
   statusHistory: WarrantyClaimStatusHistorySummary[];

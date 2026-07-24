@@ -1,4 +1,10 @@
-import type { Asset, User, WarrantyClaimStatusHistory } from '@prisma/client';
+import type {
+  Asset,
+  Category,
+  Prisma,
+  User,
+  WarrantyClaimStatusHistory,
+} from '@prisma/client';
 import type {
   WarrantyClaimAttachmentResponse,
   WarrantyClaimWithRelations,
@@ -46,6 +52,35 @@ function toChangedByResponse(user?: User | null) {
         email: user.email,
       }
     : null;
+}
+
+function toRecordMetadata(value: Prisma.JsonValue | null) {
+  if (value === null || Array.isArray(value) || typeof value !== 'object') {
+    return null;
+  }
+
+  return Object.fromEntries(Object.entries(value));
+}
+
+function toCategoryResponse(category?: Category | null) {
+  if (!category) return null;
+
+  return {
+    id: category.id,
+    type: category.type,
+    code: category.code,
+    slug: category.slug,
+    name: category.name,
+    description: category.description,
+    parentId: category.parent_id,
+    icon: category.icon,
+    imageUrl: category.image_url,
+    order: category.order,
+    isActive: category.is_active,
+    metadata: toRecordMetadata(category.metadata),
+    createdAt: category.created_at,
+    updatedAt: category.updated_at,
+  };
 }
 
 function toStatusHistoryResponse(
@@ -114,7 +149,7 @@ export function toWarrantyClaimResponse(
     priority: claim.priority,
     dueAt: claim.due_at,
     slaBreachedAt: claim.sla_breached_at,
-    metadata: claim.metadata as Record<string, unknown> | null,
+    metadata: toRecordMetadata(claim.metadata),
     submittedAt: claim.submitted_at,
     resolvedAt: claim.resolved_at,
     createdAt: claim.created_at,
@@ -126,8 +161,12 @@ export function toWarrantyClaimResponse(
           warrantyCode: claim.product.warranty_code,
           serialNumber: claim.product.serial_number,
           name: claim.product.name,
+          category: claim.product.category,
+          categoryId: claim.product.category_id,
+          categoryRef: toCategoryResponse(claim.product.category_ref),
           brand: claim.product.brand,
           model: claim.product.model,
+          manufactureYear: claim.product.manufacture_year,
           status: claim.product.status,
         }
       : null,
@@ -137,7 +176,14 @@ export function toWarrantyClaimResponse(
           warrantyCode: claim.warranty.warranty_code,
           startDate: claim.warranty.start_date,
           endDate: claim.warranty.end_date,
+          durationMonths: claim.warranty.duration_months,
+          coverageLimitAmount:
+            claim.warranty.coverage_limit_amount?.toString() ?? null,
+          maxClaimCount: claim.warranty.max_claim_count,
+          maxAmountPerClaim:
+            claim.warranty.max_amount_per_claim?.toString() ?? null,
           status: claim.warranty.status,
+          terms: claim.warranty.terms,
         }
       : null,
     customer: claim.customer

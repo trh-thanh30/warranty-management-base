@@ -1,4 +1,5 @@
 import type {
+  Category,
   Customer,
   Product,
   ServiceCenter,
@@ -23,7 +24,7 @@ export type WarrantyClaimAttachmentResponse = {
 };
 
 export type WarrantyClaimWithRelations = WarrantyClaim & {
-  product?: Product;
+  product?: (Product & { category_ref?: Category | null }) | null;
   warranty?: Warranty;
   customer?: Customer | null;
   service_center?: ServiceCenter | null;

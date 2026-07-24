@@ -1,120 +1,21 @@
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { normalizePagination, paginate } from '@/common/pagination/pagination';
 import { ListWarrantyClaimsDto } from '@/modules/warranty-claims/dto/list-warranty-claims.dto';
+import { calculateAverageResolutionHours } from '@/modules/warranty-claims/mappers/warranty-claim-metrics.mapper';
+import {
+  buildWarrantyClaimListQuery,
+  buildWarrantyClaimMetricsWhere,
+  buildWarrantyClaimOverdueWhere,
+  type WarrantyClaimMetricsFilters,
+  warrantyClaimInclude,
+} from '@/modules/warranty-claims/repository/warranty-claims.repository.queries';
+import { WARRANTY_CLAIM_ASSET_ENTITY_TYPE } from '@/modules/warranty-claims/warranty-claims.constants';
 import { Injectable } from '@nestjs/common';
 import {
   Prisma,
   warranty_claim_priority,
   warranty_claim_status,
 } from '@prisma/client';
-import type { WarrantyClaimAssignmentStatus } from '@repo/shared';
-
-export const WARRANTY_CLAIM_ASSET_ENTITY_TYPE = 'warranty_claim';
-
-function getServiceCenterFilter(filters: {
-  assignmentStatus?: WarrantyClaimAssignmentStatus;
-  serviceCenterId?: string;
-}): Prisma.StringNullableFilter | string | null | undefined {
-  if (filters.serviceCenterId) return filters.serviceCenterId;
-  if (filters.assignmentStatus === 'UNASSIGNED') return null;
-  if (filters.assignmentStatus === 'ASSIGNED') return { not: null };
-
-  return undefined;
-}
-
-function buildWarrantyClaimListQuery(filters: ListWarrantyClaimsDto) {
-  const search = filters.search?.trim();
-  const warrantyCode = filters.warrantyCode?.trim().toUpperCase();
-  const claimCode = filters.claimCode?.trim().toUpperCase();
-  const dueFilter: Prisma.DateTimeNullableFilter = {
-    gte: filters.dueFrom ? new Date(filters.dueFrom) : undefined,
-    lte: filters.dueTo ? new Date(filters.dueTo) : undefined,
-  };
-  const hasDueFilter = Boolean(dueFilter.gte || dueFilter.lte);
-  const createdAtFilter: Prisma.DateTimeFilter = {
-    gte: filters.dateFrom ? new Date(filters.dateFrom) : undefined,
-    lte: filters.dateTo ? new Date(filters.dateTo) : undefined,
-  };
-  const hasCreatedAtFilter = Boolean(
-    createdAtFilter.gte || createdAtFilter.lte,
-  );
-  const terminalStatuses = [
-    warranty_claim_status.COMPLETED,
-    warranty_claim_status.REJECTED,
-    warranty_claim_status.CANCELLED,
-  ];
-  const statusFilter =
-    filters.isOverdue === 'true'
-      ? (filters.status ?? { notIn: terminalStatuses })
-      : filters.status;
-  const sortMap = {
-    claimCode: 'claim_code',
-    warrantyCode: 'warranty_code',
-    status: 'status',
-    priority: 'priority',
-    dueAt: 'due_at',
-    submittedAt: 'submitted_at',
-    resolvedAt: 'resolved_at',
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-  } satisfies Record<
-    string,
-    keyof Prisma.WarrantyClaimOrderByWithRelationInput
-  >;
-  const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
-  const where: Prisma.WarrantyClaimWhereInput = {
-    status: statusFilter,
-    priority: filters.priority,
-    warranty_code: warrantyCode,
-    claim_code: claimCode,
-    service_center_id: getServiceCenterFilter(filters),
-    created_at: hasCreatedAtFilter ? createdAtFilter : undefined,
-    due_at:
-      filters.isOverdue === 'true'
-        ? { lt: new Date() }
-        : hasDueFilter
-          ? dueFilter
-          : undefined,
-    OR: search
-      ? [
-          { claim_code: { contains: search, mode: 'insensitive' } },
-          { warranty_code: { contains: search, mode: 'insensitive' } },
-          { requester_name: { contains: search, mode: 'insensitive' } },
-          { requester_phone: { contains: search, mode: 'insensitive' } },
-          { issue_title: { contains: search, mode: 'insensitive' } },
-          {
-            product: {
-              name: { contains: search, mode: 'insensitive' },
-            },
-          },
-        ]
-      : undefined,
-  };
-  const orderBy: Prisma.WarrantyClaimOrderByWithRelationInput[] = sortBy
-    ? [{ [sortBy]: filters.sortOrder ?? 'desc' }]
-    : [{ created_at: 'desc' }];
-
-  return { orderBy, where };
-}
-
-const claimInclude = {
-  product: true,
-  warranty: true,
-  customer: true,
-  service_center: true,
-  status_history: {
-    include: {
-      changed_by: true,
-    },
-    orderBy: { created_at: 'asc' },
-  },
-  service_center_history: {
-    include: {
-      changed_by: true,
-    },
-    orderBy: { created_at: 'asc' },
-  },
-} satisfies Prisma.WarrantyClaimInclude;
 
 @Injectable()
 export class WarrantyClaimsRepository {
@@ -140,14 +41,14 @@ export class WarrantyClaimsRepository {
   findById(id: string) {
     return this.prismaService.warrantyClaim.findUnique({
       where: { id },
-      include: claimInclude,
+      include: warrantyClaimInclude,
     });
   }
 
   findByClaimCode(claimCode: string) {
     return this.prismaService.warrantyClaim.findUnique({
       where: { claim_code: claimCode },
-      include: claimInclude,
+      include: warrantyClaimInclude,
     });
   }
 
@@ -166,7 +67,7 @@ export class WarrantyClaimsRepository {
   findByWarrantyCode(warrantyCode: string) {
     return this.prismaService.warrantyClaim.findMany({
       where: { warranty_code: warrantyCode },
-      include: claimInclude,
+      include: warrantyClaimInclude,
       orderBy: { created_at: 'desc' },
     });
   }
@@ -179,7 +80,7 @@ export class WarrantyClaimsRepository {
       const [items, total] = await Promise.all([
         tx.warrantyClaim.findMany({
           where,
-          include: claimInclude,
+          include: warrantyClaimInclude,
           orderBy,
           skip,
           take,
@@ -196,7 +97,7 @@ export class WarrantyClaimsRepository {
 
     return this.prismaService.warrantyClaim.findMany({
       where,
-      include: claimInclude,
+      include: warrantyClaimInclude,
       orderBy,
       take: 5000,
     });
@@ -205,7 +106,7 @@ export class WarrantyClaimsRepository {
   create(data: Prisma.WarrantyClaimCreateInput) {
     return this.prismaService.warrantyClaim.create({
       data,
-      include: claimInclude,
+      include: warrantyClaimInclude,
     });
   }
 
@@ -220,7 +121,7 @@ export class WarrantyClaimsRepository {
         status,
         resolved_at: resolvedAt,
       },
-      include: claimInclude,
+      include: warrantyClaimInclude,
     });
   }
 
@@ -254,7 +155,7 @@ export class WarrantyClaimsRepository {
 
       return tx.warrantyClaim.findUniqueOrThrow({
         where: { id: input.id },
-        include: claimInclude,
+        include: warrantyClaimInclude,
       });
     });
   }
@@ -320,7 +221,7 @@ export class WarrantyClaimsRepository {
 
       return tx.warrantyClaim.findUniqueOrThrow({
         where: { id: input.id },
-        include: claimInclude,
+        include: warrantyClaimInclude,
       });
     });
   }
@@ -338,7 +239,7 @@ export class WarrantyClaimsRepository {
         due_at: input.dueAt,
         sla_breached_at: input.slaBreachedAt,
       },
-      include: claimInclude,
+      include: warrantyClaimInclude,
     });
   }
 
@@ -409,31 +310,12 @@ export class WarrantyClaimsRepository {
     });
   }
 
-  async getMetrics(filters: {
-    assignmentStatus?: WarrantyClaimAssignmentStatus;
-    dateFrom?: string;
-    dateTo?: string;
-    serviceCenterId?: string;
-  }) {
-    const where: Prisma.WarrantyClaimWhereInput = {
-      service_center_id: getServiceCenterFilter(filters),
-      created_at:
-        filters.dateFrom || filters.dateTo
-          ? {
-              gte: filters.dateFrom ? new Date(filters.dateFrom) : undefined,
-              lte: filters.dateTo ? new Date(filters.dateTo) : undefined,
-            }
-          : undefined,
-    };
+  async getMetrics(filters: WarrantyClaimMetricsFilters) {
+    const where = buildWarrantyClaimMetricsWhere(filters);
     const now = new Date();
     const startOfToday = new Date(now);
     startOfToday.setHours(0, 0, 0, 0);
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const terminalStatuses = [
-      warranty_claim_status.COMPLETED,
-      warranty_claim_status.REJECTED,
-      warranty_claim_status.CANCELLED,
-    ];
 
     const [
       total,
@@ -453,11 +335,7 @@ export class WarrantyClaimsRepository {
         where: { ...where, created_at: { gte: startOfMonth } },
       }),
       this.prismaService.warrantyClaim.count({
-        where: {
-          ...where,
-          due_at: { lt: now },
-          status: { notIn: terminalStatuses },
-        },
+        where: buildWarrantyClaimOverdueWhere(where, now),
       }),
       this.prismaService.warrantyClaim.groupBy({
         by: ['status'],
@@ -487,15 +365,7 @@ export class WarrantyClaimsRepository {
     ]);
 
     const averageResolutionHours =
-      resolvedClaims.length === 0
-        ? null
-        : resolvedClaims.reduce((totalHours, claim) => {
-            const resolvedAt = claim.resolved_at ?? claim.created_at;
-            return (
-              totalHours +
-              (resolvedAt.getTime() - claim.created_at.getTime()) / 3_600_000
-            );
-          }, 0) / resolvedClaims.length;
+      calculateAverageResolutionHours(resolvedClaims);
 
     return {
       total,
