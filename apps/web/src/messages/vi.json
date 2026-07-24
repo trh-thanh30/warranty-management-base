@@ -1287,9 +1287,72 @@
       "tryPrefix": "Ví dụ: nhập",
       "or": "hoặc",
       "mock": {
+        "customerName": "Nguyễn Văn An",
+        "address": "TP. Hồ Chí Minh",
         "warrantyYears": "15 năm",
         "dealer": "Panda Auto Showroom Hà Nội",
         "status": "Đang hiệu lực (Chính hãng)"
+      },
+      "registration": {
+        "title": "Mã bảo hành điện tử của Quý khách có thể được đăng ký bằng một trong các dãy số",
+        "description": "Sử dụng một trong 3 phương thức dưới đây để tra cứu thông tin tem E-Warranty",
+        "methods": {
+          "phone": {
+            "label": "Phương thức 01",
+            "title": "Số điện thoại",
+            "description": "SĐT chính chủ đã đăng ký khi dán phim"
+          },
+          "qr": {
+            "label": "Phương thức 02",
+            "title": "Mã QR / Email",
+            "description": "Mã tem bảo hành nhận qua tin nhắn hoặc email"
+          },
+          "serial": {
+            "label": "Phương thức 03",
+            "description": "Mã dạng: BL/BHDT/000199"
+          }
+        }
+      },
+      "searchSection": {
+        "title": "Tra cứu",
+        "description": "Vui lòng nhập đầy đủ thông tin mã hoặc Số Điện Thoại cung cấp trên phiếu bảo hành."
+      },
+      "guide": {
+        "title": "Hướng dẫn tra cứu E-Warranty trong 3 bước",
+        "steps": {
+          "one": {
+            "badge": "Bước 01",
+            "title": "Nhập thông tin",
+            "description": "Nhập Số điện thoại, Biển số xe hoặc Mã tem E-Warranty."
+          },
+          "two": {
+            "badge": "Bước 02",
+            "title": "Nhấn Tra Cứu",
+            "description": "Hệ thống tự động truy xuất dữ liệu bảo hành chính hãng."
+          },
+          "three": {
+            "badge": "Bước 03",
+            "title": "Xem chi tiết",
+            "description": "Xem thông tin chủ xe, gói dán, các vị trí kính & thời hạn 15 năm."
+          }
+        }
+      },
+      "otherActions": {
+        "title": "Dịch vụ bảo hành khác",
+        "activate": "Kích hoạt tem mới",
+        "request": "Gửi yêu cầu sự cố",
+        "dealers": "Tìm trạm thi công"
+      },
+      "support": {
+        "message": "Bất cứ khi nào cần sự hỗ trợ từ FUJITEK, Quý khách vui lòng liên hệ hotline CSKH.",
+        "hotlineLabel": "Hotline",
+        "closing": "FUJITEK Films hân hạnh được phục vụ Quý khách!"
+      },
+      "policyShortcut": {
+        "eyebrow": "Chính sách & Điều khoản",
+        "title": "Bạn muốn tìm hiểu chi tiết về phạm vi & quy định bảo hành?",
+        "description": "Xem quy định thời gian bảo hành (10 - 15 năm), trường hợp được bảo hành & lưu ý sau khi dán phim.",
+        "action": "Xem chính sách bảo hành"
       },
       "result": {
         "code": "Mã E-Warranty",

@@ -1287,9 +1287,72 @@
       "tryPrefix": "For example, enter",
       "or": "or",
       "mock": {
+        "customerName": "Nguyen Van An",
+        "address": "Ho Chi Minh City",
         "warrantyYears": "15 years",
         "dealer": "Panda Auto Hanoi Showroom",
         "status": "Active (Official)"
+      },
+      "registration": {
+        "title": "Your electronic warranty code can be registered through one of these identifiers",
+        "description": "Use one of the 3 methods below to look up E-Warranty label information",
+        "methods": {
+          "phone": {
+            "label": "Method 01",
+            "title": "Phone number",
+            "description": "The owner phone number registered during installation"
+          },
+          "qr": {
+            "label": "Method 02",
+            "title": "QR code / Email",
+            "description": "The warranty label code received by message or email"
+          },
+          "serial": {
+            "label": "Method 03",
+            "description": "Code format: BL/BHDT/000199"
+          }
+        }
+      },
+      "searchSection": {
+        "title": "Lookup",
+        "description": "Enter the code or phone number provided on the warranty document."
+      },
+      "guide": {
+        "title": "How to check E-Warranty in 3 steps",
+        "steps": {
+          "one": {
+            "badge": "Step 01",
+            "title": "Enter information",
+            "description": "Enter a phone number, license plate, or E-Warranty label code."
+          },
+          "two": {
+            "badge": "Step 02",
+            "title": "Press Search",
+            "description": "The system automatically retrieves official warranty data."
+          },
+          "three": {
+            "badge": "Step 03",
+            "title": "View details",
+            "description": "Review owner, film package, glass positions, and 15-year coverage."
+          }
+        }
+      },
+      "otherActions": {
+        "title": "Other warranty services",
+        "activate": "Activate a new label",
+        "request": "Submit an issue",
+        "dealers": "Find an installation center"
+      },
+      "support": {
+        "message": "Whenever you need FUJITEK support, contact the customer service hotline.",
+        "hotlineLabel": "Hotline",
+        "closing": "FUJITEK Films is pleased to serve you."
+      },
+      "policyShortcut": {
+        "eyebrow": "Policy & Terms",
+        "title": "Want to understand warranty scope and terms in detail?",
+        "description": "View warranty duration rules (10 - 15 years), eligible cases, and post-installation notes.",
+        "action": "View warranty policy"
       },
       "result": {
         "code": "E-Warranty code",

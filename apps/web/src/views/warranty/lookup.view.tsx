@@ -22,10 +22,14 @@ import {
 } from "lucide-react";
 import { Input } from "@repo/ui/input";
 import { formControlFocusClassName } from "@/src/components/common/form-control.constants";
-import { demoWarrantyCustomer } from "@/src/constants/warranty.constants";
+import {
+  demoWarrantyLookupRecord,
+  warrantyLookupEmptyValue,
+  warrantyLookupExamples,
+  warrantyLookupSupportPhone,
+} from "@/src/constants/warranty.constants";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { Link } from "@/src/i18n/navigation";
-import { demoWarrantyRecord } from "./warranty.constants";
 import type { WarrantyLookupResult } from "./warranty.types";
 
 function ResultRow({
@@ -51,10 +55,10 @@ function ResultRow({
         <p
           className={`font-semibold text-sm sm:text-base text-deep-black break-words ${valueClassName}`}
         >
-          {value || "—"}
+          {value || warrantyLookupEmptyValue}
         </p>
         {subValue && (
-          <p className="text-xs font-medium text-green-600 mt-0.5">
+          <p className="text-xs font-medium text-premium-red mt-0.5">
             {subValue}
           </p>
         )}
@@ -75,24 +79,34 @@ export function WarrantyLookupView() {
     e.preventDefault();
     setIsSearched(true);
     if (searchQuery.trim().length > 0) {
+      const normalizedQuery = searchQuery.trim();
+
       setSearchResult({
-        ...demoWarrantyRecord,
-        customerName: demoWarrantyCustomer.name,
-        phone: searchQuery.includes("09")
-          ? searchQuery
-          : demoWarrantyRecord.phone,
-        address: "TP. Hồ Chí Minh",
+        serial: demoWarrantyLookupRecord.serial,
+        code: demoWarrantyLookupRecord.code,
+        customerName: t("mock.customerName"),
+        phone: normalizedQuery.includes("09")
+          ? normalizedQuery
+          : demoWarrantyLookupRecord.fallbackPhone,
+        address: t("mock.address"),
+        carPlate: normalizedQuery.includes("30")
+          ? normalizedQuery
+          : demoWarrantyLookupRecord.fallbackCarPlate,
+        carModel: demoWarrantyLookupRecord.carModel,
+        filmType: demoWarrantyLookupRecord.filmType,
         warrantyYears: t("mock.warrantyYears"),
+        installedDate: demoWarrantyLookupRecord.installedDate,
+        expiryDate: demoWarrantyLookupRecord.expiryDate,
         dealer: t("mock.dealer"),
         status: t("mock.status"),
-        windshield: "SP50",
-        frontLeftGlass: "SP30",
-        frontRightGlass: "SP30",
-        rearLeftGlass: "SP30",
-        rearRightGlass: "SP30",
-        sunroof: "",
-        rearGlass: "SP30",
-        notes: "",
+        windshield: demoWarrantyLookupRecord.windshield,
+        frontLeftGlass: demoWarrantyLookupRecord.frontLeftGlass,
+        frontRightGlass: demoWarrantyLookupRecord.frontRightGlass,
+        rearLeftGlass: demoWarrantyLookupRecord.rearLeftGlass,
+        rearRightGlass: demoWarrantyLookupRecord.rearRightGlass,
+        sunroof: demoWarrantyLookupRecord.sunroof,
+        rearGlass: demoWarrantyLookupRecord.rearGlass,
+        notes: demoWarrantyLookupRecord.notes,
       });
     } else {
       setSearchResult(null);
@@ -130,87 +144,82 @@ export function WarrantyLookupView() {
         <section className="space-y-8 text-center max-w-4xl lg:max-w-5xl mx-auto">
           <div className="space-y-3">
             <h2 className="text-xl sm:text-3xl font-condensed font-semibold uppercase tracking-wider text-deep-black">
-              Mã bảo hành điện tử của Quý khách có thể được đăng ký bằng một
-              trong các dãy số
+              {t("registration.title")}
             </h2>
             <p className="text-sm text-stone-gray font-medium max-w-xl mx-auto">
-              Sử dụng một trong 3 phương thức dưới đây để tra cứu thông tin tem
-              E-Warranty
+              {t("registration.description")}
             </p>
             <div className="mt-4 mx-auto h-[3px] w-20 bg-premium-red" />
           </div>
 
           <div className="grid gap-6 sm:grid-cols-3">
-            {/* Card 01 - Phone */}
             <div className="group bg-white rounded-[24px] border border-border-gray shadow-md hover:shadow-xl hover:border-premium-red transition-all p-6 sm:p-7 text-left flex flex-col justify-between h-[230px]">
               <div className="flex items-center justify-between">
                 <div className="flex size-12 items-center justify-center rounded-2xl bg-surface-muted border border-border-gray text-stone-gray group-hover:text-premium-red group-hover:border-premium-red/30 transition-colors">
                   <Phone className="size-6" strokeWidth={1.8} />
                 </div>
-                <span className="text-3xl sm:text-4xl font-condensed font-bold text-stone-gray/20 group-hover:text-premium-red/30 transition-colors">
+                <span className="text-3xl sm:text-4xl font-condensed font-semibold text-stone-gray/20 group-hover:text-premium-red/30 transition-colors">
                   01
                 </span>
               </div>
               <div className="space-y-1.5">
                 <span className="text-xs font-semibold uppercase tracking-wider text-stone-gray">
-                  Phương thức 01
+                  {t("registration.methods.phone.label")}
                 </span>
                 <h3 className="text-lg sm:text-xl font-semibold uppercase text-deep-black group-hover:text-premium-red transition-colors">
-                  Số điện thoại
+                  {t("registration.methods.phone.title")}
                 </h3>
                 <p className="text-xs text-stone-gray font-medium">
-                  SĐT chính chủ đã đăng ký khi dán phim
+                  {t("registration.methods.phone.description")}
                 </p>
               </div>
             </div>
 
-            {/* Card 02 - QR / Email */}
             <div className="group bg-white rounded-[24px] border border-border-gray shadow-md hover:shadow-xl hover:border-premium-red transition-all p-6 sm:p-7 text-left flex flex-col justify-between h-[230px]">
               <div className="flex items-center justify-between">
                 <div className="flex size-12 items-center justify-center rounded-2xl bg-surface-muted border border-border-gray text-stone-gray group-hover:text-premium-red group-hover:border-premium-red/30 transition-colors">
                   <FileText className="size-6" strokeWidth={1.8} />
                 </div>
-                <span className="text-3xl sm:text-4xl font-condensed font-bold text-stone-gray/20 group-hover:text-premium-red/30 transition-colors">
+                <span className="text-3xl sm:text-4xl font-condensed font-semibold text-stone-gray/20 group-hover:text-premium-red/30 transition-colors">
                   02
                 </span>
               </div>
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold uppercase tracking-wider text-stone-gray">
-                    Phương thức 02
+                    {t("registration.methods.qr.label")}
                   </span>
-                  <span className="rounded-full bg-accent-gold px-2.5 py-0.5 text-[10px] font-bold uppercase text-deep-black">
+                  <span className="rounded-full bg-accent-gold px-2.5 py-0.5 text-xs font-semibold uppercase text-deep-black">
                     E-Warranty
                   </span>
                 </div>
                 <h3 className="text-lg sm:text-xl font-semibold uppercase text-deep-black group-hover:text-premium-red transition-colors">
-                  Mã QR / Email
+                  {t("registration.methods.qr.title")}
                 </h3>
                 <p className="text-xs text-stone-gray font-medium">
-                  Mã tem bảo hành nhận qua tin nhắn hoặc email
+                  {t("registration.methods.qr.description")}
                 </p>
               </div>
             </div>
 
-            {/* Card 03 - Serial Number */}
             <div className="group bg-white rounded-[24px] border border-border-gray shadow-md hover:shadow-xl hover:border-premium-red transition-all p-6 sm:p-7 text-left flex flex-col justify-between h-[230px]">
               <div className="flex items-center justify-between">
                 <div className="flex size-12 items-center justify-center rounded-2xl bg-surface-muted border border-border-gray text-stone-gray group-hover:text-premium-red group-hover:border-premium-red/30 transition-colors">
                   <Hash className="size-6" strokeWidth={1.8} />
                 </div>
-                <span className="text-3xl sm:text-4xl font-condensed font-bold text-stone-gray/20 group-hover:text-premium-red/30 transition-colors">
+                <span className="text-3xl sm:text-4xl font-condensed font-semibold text-stone-gray/20 group-hover:text-premium-red/30 transition-colors">
                   03
                 </span>
               </div>
               <div className="space-y-1.5">
                 <span className="text-xs font-semibold uppercase tracking-wider text-stone-gray">
-                  Phương thức 03
+                  {t("registration.methods.serial.label")}
                 </span>
                 <h3 className="text-lg sm:text-xl font-semibold uppercase text-deep-black group-hover:text-premium-red transition-colors">
                   Serial Number
                 </h3>
                 <p className="text-xs font-mono text-stone-gray">
-                  Mã dạng: BL/BHDT/000199
+                  {t("registration.methods.serial.description")}
                 </p>
               </div>
             </div>
@@ -220,71 +229,65 @@ export function WarrantyLookupView() {
         {/* 3. Search Section */}
         <section className="space-y-6 max-w-3xl sm:max-w-4xl lg:max-w-5xl mx-auto">
           <div className="text-center space-y-2">
-            <h2 className="text-2xl sm:text-4xl font-condensed font-bold uppercase tracking-wider text-deep-black">
-              TRA CỨU
+            <h2 className="text-2xl sm:text-4xl font-condensed font-semibold uppercase tracking-wider text-deep-black">
+              {t("searchSection.title")}
             </h2>
             <p className="text-xs sm:text-sm text-stone-gray font-medium max-w-lg mx-auto">
-              Vui lòng nhập đầy đủ thông tin mã hoặc Số Điện Thoại cung cấp trên
-              phiếu bảo hành.
+              {t("searchSection.description")}
             </p>
           </div>
 
-          {/* Unified Search & Result Card */}
           <motion.div
             layout
             className="bg-white rounded-[28px] p-6 sm:p-10 border border-border-gray shadow-xl max-w-3xl sm:max-w-4xl lg:max-w-5xl mx-auto overflow-hidden"
           >
-            {/* Permanent Quick Guide & Trust Badges Section at TOP */}
             <div className="mb-8 pb-8 border-b border-border-gray space-y-8">
-              {/* Steps Guide */}
               <div>
                 <p className="text-center text-xs font-semibold uppercase tracking-wider text-stone-gray mb-6">
-                  Hướng dẫn tra cứu E-Warranty trong 3 bước
+                  {t("guide.title")}
                 </p>
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div className="bg-surface-muted/70 p-4 rounded-2xl border border-border-gray space-y-1 text-center">
-                    <span className="inline-block text-xs font-condensed font-bold text-premium-red uppercase tracking-widest bg-premium-red/10 px-2.5 py-0.5 rounded-full">
-                      Bước 01
+                    <span className="inline-block text-xs font-condensed font-semibold text-premium-red uppercase tracking-widest bg-premium-red/10 px-2.5 py-0.5 rounded-full">
+                      {t("guide.steps.one.badge")}
                     </span>
                     <h4 className="text-sm font-semibold uppercase text-deep-black pt-1">
-                      Nhập thông tin
+                      {t("guide.steps.one.title")}
                     </h4>
                     <p className="text-xs text-stone-gray font-medium">
-                      Nhập Số điện thoại, Biển số xe hoặc Mã tem E-Warranty.
+                      {t("guide.steps.one.description")}
                     </p>
                   </div>
 
                   <div className="bg-surface-muted/70 p-4 rounded-2xl border border-border-gray space-y-1 text-center">
-                    <span className="inline-block text-xs font-condensed font-bold text-premium-red uppercase tracking-widest bg-premium-red/10 px-2.5 py-0.5 rounded-full">
-                      Bước 02
+                    <span className="inline-block text-xs font-condensed font-semibold text-premium-red uppercase tracking-widest bg-premium-red/10 px-2.5 py-0.5 rounded-full">
+                      {t("guide.steps.two.badge")}
                     </span>
                     <h4 className="text-sm font-semibold uppercase text-deep-black pt-1">
-                      Nhấn Tra Cứu
+                      {t("guide.steps.two.title")}
                     </h4>
                     <p className="text-xs text-stone-gray font-medium">
-                      Hệ thống tự động truy xuất dữ liệu bảo hành chính hãng.
+                      {t("guide.steps.two.description")}
                     </p>
                   </div>
 
                   <div className="bg-surface-muted/70 p-4 rounded-2xl border border-border-gray space-y-1 text-center">
-                    <span className="inline-block text-xs font-condensed font-bold text-premium-red uppercase tracking-widest bg-premium-red/10 px-2.5 py-0.5 rounded-full">
-                      Bước 03
+                    <span className="inline-block text-xs font-condensed font-semibold text-premium-red uppercase tracking-widest bg-premium-red/10 px-2.5 py-0.5 rounded-full">
+                      {t("guide.steps.three.badge")}
                     </span>
                     <h4 className="text-sm font-semibold uppercase text-deep-black pt-1">
-                      Xem chi tiết
+                      {t("guide.steps.three.title")}
                     </h4>
                     <p className="text-xs text-stone-gray font-medium">
-                      Xem thông tin chủ xe, gói dán, các vị trí kính & thời hạn
-                      15 năm.
+                      {t("guide.steps.three.description")}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Quick Links / Other Actions */}
               <div className="border-t border-border-gray pt-6">
                 <p className="text-center text-xs font-semibold uppercase tracking-wider text-stone-gray mb-4">
-                  Dịch vụ bảo hành khác
+                  {t("otherActions.title")}
                 </p>
                 <div className="grid gap-3 sm:grid-cols-3 text-xs font-semibold uppercase tracking-wide text-center">
                   <Link
@@ -292,21 +295,21 @@ export function WarrantyLookupView() {
                     className="p-3.5 rounded-xl bg-surface-muted hover:bg-premium-red hover:text-white border border-border-gray transition-colors text-deep-black flex items-center justify-center gap-2"
                   >
                     <ShieldCheck className="size-4 shrink-0" />
-                    <span>Kích hoạt tem mới</span>
+                    <span>{t("otherActions.activate")}</span>
                   </Link>
                   <Link
                     href={APP_ROUTES.warrantyRequest}
                     className="p-3.5 rounded-xl bg-surface-muted hover:bg-premium-red hover:text-white border border-border-gray transition-colors text-deep-black flex items-center justify-center gap-2"
                   >
                     <FileText className="size-4 shrink-0" />
-                    <span>Gửi yêu cầu sự cố</span>
+                    <span>{t("otherActions.request")}</span>
                   </Link>
                   <Link
                     href={APP_ROUTES.dealers}
                     className="p-3.5 rounded-xl bg-surface-muted hover:bg-premium-red hover:text-white border border-border-gray transition-colors text-deep-black flex items-center justify-center gap-2"
                   >
                     <Building2 className="size-4 shrink-0" />
-                    <span>Tìm trạm thi công</span>
+                    <span>{t("otherActions.dealers")}</span>
                   </Link>
                 </div>
               </div>
@@ -334,16 +337,15 @@ export function WarrantyLookupView() {
               <p className="text-xs text-stone-gray font-medium text-center">
                 {t("tryPrefix")}{" "}
                 <code className="bg-light-gray px-2 py-0.5 rounded font-mono text-premium-red">
-                  0988123456
+                  {warrantyLookupExamples[0]}
                 </code>{" "}
                 {t("or")}{" "}
                 <code className="bg-light-gray px-2 py-0.5 rounded font-mono text-premium-red">
-                  30H-888.88
+                  {warrantyLookupExamples[1]}
                 </code>
               </p>
             </form>
 
-            {/* Expanded Result inside the same Card */}
             <AnimatePresence>
               {isSearched && searchResult && (
                 <motion.div
@@ -354,14 +356,13 @@ export function WarrantyLookupView() {
                   transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
                   className="overflow-hidden border-t border-border-gray pt-6"
                 >
-                  {/* Result Status & Code Header */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-border-gray mb-4">
                     <div className="space-y-1">
                       <span className="text-xs font-semibold uppercase text-premium-red tracking-wider flex items-center gap-1.5">
                         <CheckCircle2 className="size-4" />
                         <span>{searchResult.status}</span>
                       </span>
-                      <h3 className="text-xl sm:text-2xl font-condensed font-bold uppercase tracking-wide text-deep-black">
+                      <h3 className="text-xl sm:text-2xl font-condensed font-semibold uppercase tracking-wide text-deep-black">
                         {t("result.code")}: {searchResult.code}
                       </h3>
                     </div>
@@ -370,7 +371,6 @@ export function WarrantyLookupView() {
                     </span>
                   </div>
 
-                  {/* Table — thông tin chính */}
                   <div className="divide-y divide-border-gray">
                     <ResultRow
                       icon={<Hash className="size-4 shrink-0" />}
@@ -430,7 +430,6 @@ export function WarrantyLookupView() {
                     />
                   </div>
 
-                  {/* Glass positions section */}
                   <div className="border-t border-border-gray pt-6 mt-4">
                     <p className="text-xs font-semibold uppercase tracking-wider text-stone-gray mb-2 flex items-center gap-1.5">
                       <Layers className="size-4" />
@@ -472,32 +471,30 @@ export function WarrantyLookupView() {
                     </div>
                   </div>
 
-                  {/* CSKH Support Contact Banner */}
                   <div className="mt-8 border-t border-border-gray pt-6 pb-6 text-center space-y-4 bg-surface-muted/60 rounded-2xl p-6 sm:p-8">
                     <p className="text-sm sm:text-base text-stone-gray font-medium leading-relaxed max-w-lg mx-auto">
-                      Bất cứ khi nào cần sự hỗ trợ từ FUJITEK, Quý khách vui
-                      lòng liên hệ hotline CSKH.
+                      {t("support.message")}
                     </p>
                     <div className="flex justify-center">
                       <a
-                        href="tel:19009169"
+                        href={warrantyLookupSupportPhone.href}
                         className="inline-flex items-center gap-2 bg-premium-red hover:bg-warm-red text-white px-6 py-3.5 rounded-full text-sm font-semibold uppercase tracking-wider transition-all shadow-md hover:shadow-lg hover:scale-105 whitespace-nowrap shrink-0"
                       >
                         <Phone className="size-4 animate-bounce shrink-0" />
                         <span className="whitespace-nowrap">
-                          Hotline: 1900.9169
+                          {t("support.hotlineLabel")}:{" "}
+                          {warrantyLookupSupportPhone.displayValue}
                         </span>
                       </a>
                     </div>
                     <p className="text-xs font-semibold text-deep-black uppercase tracking-wide">
-                      FUJITEK Films hân hạnh được phục vụ Quý khách!
+                      {t("support.closing")}
                     </p>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {/* No result inside same Card */}
             <AnimatePresence>
               {isSearched && !searchResult && (
                 <motion.div
@@ -515,20 +512,18 @@ export function WarrantyLookupView() {
           </motion.div>
         </section>
 
-        {/* 4. Policy Shortcut Banner Section */}
         <section className="max-w-3xl sm:max-w-4xl lg:max-w-5xl mx-auto">
           <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-border-gray">
             <div className="space-y-2 text-center sm:text-left">
               <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-premium-red">
                 <ShieldCheck className="size-4" />
-                <span>Chính sách & Điều khoản</span>
+                <span>{t("policyShortcut.eyebrow")}</span>
               </div>
               <h3 className="text-lg sm:text-xl font-semibold uppercase text-deep-black">
-                Bạn muốn tìm hiểu chi tiết về phạm vi & quy định bảo hành?
+                {t("policyShortcut.title")}
               </h3>
               <p className="text-xs sm:text-sm text-stone-gray font-medium">
-                Xem quy định thời gian bảo hành (10 - 15 năm), trường hợp được
-                bảo hành & lưu ý sau khi dán phim.
+                {t("policyShortcut.description")}
               </p>
             </div>
 
@@ -536,7 +531,7 @@ export function WarrantyLookupView() {
               href={APP_ROUTES.policyWarrantyReturn}
               className="inline-flex items-center gap-2.5 bg-premium-red hover:bg-warm-red text-white px-6 py-3.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors shrink-0 shadow-md"
             >
-              <span>Xem chính sách bảo hành</span>
+              <span>{t("policyShortcut.action")}</span>
               <FileText className="size-4" />
             </Link>
           </div>
