@@ -1,3 +1,8 @@
+import type { StorageUsageSummary } from "@repo/shared";
+import type { StorageBucketKey } from "./system.types";
+
+const STORAGE_BUCKET_KEYS: StorageBucketKey[] = ["public", "private", "temp"];
+
 export function formatBytes(bytes: number, locale: string): string {
   if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
 
@@ -20,4 +25,20 @@ export function formatCount(value: number, locale: string): string {
 export function clampPercentage(value: number | null): number {
   if (value === null || !Number.isFinite(value)) return 0;
   return Math.min(Math.max(value, 0), 100);
+}
+
+export function getStorageBucketDistribution(usage: StorageUsageSummary) {
+  return STORAGE_BUCKET_KEYS.map((key) => {
+    const bucket = usage.buckets[key];
+    const share =
+      usage.totalBytes > 0
+        ? Math.round((bucket.bytes / usage.totalBytes) * 1000) / 10
+        : 0;
+
+    return {
+      ...bucket,
+      key,
+      share,
+    };
+  });
 }

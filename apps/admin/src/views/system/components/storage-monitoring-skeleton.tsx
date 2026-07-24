@@ -24,6 +24,18 @@ export function StorageMonitoringSkeleton() {
           </Card>
         ))}
       </div>
+      <Card>
+        <CardContent className="space-y-4 p-6">
+          <Skeleton className="h-5 w-44" />
+          <Skeleton className="h-4 w-72 max-w-full" />
+          <Skeleton className="h-64 w-full" />
+          <div className="grid gap-3 sm:grid-cols-3">
+            {Array.from({ length: 3 }, (_, index) => (
+              <Skeleton className="h-10 w-full" key={index} />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
       <div className="grid gap-4 lg:grid-cols-3">
         {Array.from({ length: 3 }, (_, index) => (
           <Card key={index}>

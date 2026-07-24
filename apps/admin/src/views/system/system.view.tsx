@@ -10,6 +10,7 @@ import { PermissionGuard } from "@/src/components/permission-guard";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { StorageBucketGrid } from "./components/storage-bucket-grid";
 import { StorageCapacityCard } from "./components/storage-capacity-card";
+import { StorageDistributionChart } from "./components/storage-distribution-chart";
 import { StorageMonitoringSkeleton } from "./components/storage-monitoring-skeleton";
 import { StorageSummaryGrid } from "./components/storage-summary-grid";
 import { useStorageUsage } from "./hooks/use-storage-usage";
@@ -92,6 +93,7 @@ export function SystemView() {
           <>
             <StorageCapacityCard usage={usageQuery.data} />
             <StorageSummaryGrid usage={usageQuery.data} />
+            <StorageDistributionChart usage={usageQuery.data} />
             <StorageBucketGrid usage={usageQuery.data} />
           </>
         ) : null}

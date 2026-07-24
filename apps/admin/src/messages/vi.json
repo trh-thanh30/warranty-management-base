@@ -2046,6 +2046,15 @@
       "perCertificate": "Trên mỗi giấy chứng nhận",
       "orphaned": "PDF mồ côi"
     },
+    "distribution": {
+      "title": "Dung lượng theo bucket",
+      "description": "So sánh dung lượng hiện tại giữa vùng công khai, riêng tư và file tạm.",
+      "ariaLabel": "Phân bổ dung lượng: công khai {publicShare}%, riêng tư {privateShare}%, tạm thời {tempShare}%.",
+      "legendLabel": "Chú giải phân bổ dung lượng",
+      "legendValue": "{bytes} · {share}%",
+      "tooltipValue": "{bytes} · {objects} object · {share}%",
+      "empty": "Chưa có dữ liệu dung lượng để hiển thị."
+    },
     "buckets": {
       "title": "Phân bổ theo bucket",
       "description": "Kiểm tra nơi đang sử dụng dung lượng và chính sách lưu trữ tương ứng.",

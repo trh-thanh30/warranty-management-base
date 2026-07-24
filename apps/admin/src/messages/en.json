@@ -2046,6 +2046,15 @@
       "perCertificate": "Per warranty certificate",
       "orphaned": "Orphaned PDFs"
     },
+    "distribution": {
+      "title": "Storage by bucket",
+      "description": "Compare current usage across public, private, and temporary buckets.",
+      "ariaLabel": "Storage distribution: public {publicShare}%, private {privateShare}%, temporary {tempShare}%.",
+      "legendLabel": "Storage distribution legend",
+      "legendValue": "{bytes} · {share}%",
+      "tooltipValue": "{bytes} · {objects} objects · {share}%",
+      "empty": "No storage usage data to display yet."
+    },
     "buckets": {
       "title": "Bucket distribution",
       "description": "Review where storage is consumed and which retention policy applies.",

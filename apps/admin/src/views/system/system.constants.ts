@@ -16,6 +16,21 @@ export const storageBuckets = [
   { icon: TimerReset, key: "temp" },
 ] as const;
 
+export const storageBucketChartStyles = {
+  public: {
+    dotClassName: "bg-blue-600 dark:bg-blue-400",
+    theme: { dark: "#60a5fa", light: "#2563eb" },
+  },
+  private: {
+    dotClassName: "bg-slate-600 dark:bg-slate-400",
+    theme: { dark: "#94a3b8", light: "#475569" },
+  },
+  temp: {
+    dotClassName: "bg-amber-600 dark:bg-amber-400",
+    theme: { dark: "#fbbf24", light: "#d97706" },
+  },
+} as const;
+
 export const storageAlertConfig = {
   UNCONFIGURED: {
     badgeVariant: "secondary",
