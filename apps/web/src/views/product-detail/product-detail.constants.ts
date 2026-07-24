@@ -9,9 +9,9 @@ const sharedGalleryImages = [
   "/feat2.jpg",
   "/feat3.jpg",
   "/guest/guest_2.jpg",
-  "/sanpham/product_1.jpg",
-  "/sanpham/product_3.jpg",
-  "/sanpham/product_6.jpg",
+  "/product/product_1.jpg",
+  "/product/product_3.jpg",
+  "/product/product_6.jpg",
   "/guest/guest_3.jpg",
   "/guest/guest_4.jpg",
 ] as const;

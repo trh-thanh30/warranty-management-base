@@ -154,7 +154,7 @@ export const productCatalog = {
     detailKey: "l50Cat",
     code: "L50",
     category: "film",
-    image: "/sanpham/product_1.jpg",
+    image: "/product/product_1.jpg",
     warrantyYears: 10,
     highlightSpecs: [
       { id: "irBlock", value: "92%" },
@@ -226,7 +226,7 @@ export const productCatalog = {
     detailKey: "ledMini1",
     code: "LED-MINI-X1",
     category: "ledBulbs",
-    image: "/sanpham/product_1.jpg",
+    image: "/product/product_1.jpg",
     warrantyYears: 3,
     highlightSpecs: [
       { id: "power", value: "55W" },
@@ -239,7 +239,7 @@ export const productCatalog = {
     detailKey: "biledPro1",
     code: "BILED-FOG-PRO",
     category: "biLed",
-    image: "/sanpham/product_3.jpg",
+    image: "/product/product_3.jpg",
     warrantyYears: 3,
     highlightSpecs: [
       { id: "waterResistance", value: "IP68" },
@@ -252,7 +252,7 @@ export const productCatalog = {
     detailKey: "auxLight1",
     code: "AUX-SPOT-40W",
     category: "auxLights",
-    image: "/sanpham/product_6.jpg",
+    image: "/product/product_6.jpg",
     warrantyYears: 2,
     highlightSpecs: [
       { id: "power", value: "40W" },
@@ -265,7 +265,7 @@ export const productCatalog = {
     detailKey: "dashcam4k",
     code: "CAM-4K-GPS",
     category: "dashcam",
-    image: "/sanpham/product_9.jpg",
+    image: "/product/product_9.jpg",
     warrantyYears: 2,
     highlightSpecs: [
       { id: "resolution", value: "4K UHD" },
@@ -278,7 +278,7 @@ export const productCatalog = {
     detailKey: "tpmsSolar",
     code: "TPMS-SOLAR-V2",
     category: "tpms",
-    image: "/sanpham/product_10.jpg",
+    image: "/product/product_10.jpg",
     warrantyYears: 3,
     highlightSpecs: [
       { id: "powerSource", value: "solar", translateValue: true },
@@ -291,7 +291,7 @@ export const productCatalog = {
     detailKey: "androidBoxDx",
     code: "BOX-DX8",
     category: "androidBox",
-    image: "/sanpham/product_13.jpg",
+    image: "/product/product_13.jpg",
     warrantyYears: 2,
     highlightSpecs: [
       { id: "configuration", value: "RAM 8GB / ROM 128GB" },
@@ -304,7 +304,7 @@ export const productCatalog = {
     detailKey: "retroAcc1",
     code: "ACC-MANG-LED",
     category: "retroAccessories",
-    image: "/sanpham/product_14.jpg",
+    image: "/product/product_14.jpg",
     warrantyYears: 1,
     highlightSpecs: [
       { id: "control", value: "Bluetooth" },
@@ -317,7 +317,7 @@ export const productCatalog = {
     detailKey: "biledLaserGt",
     code: "GT-LASER-90W",
     category: "biLed",
-    image: "/sanpham/product_3.jpg",
+    image: "/product/product_3.jpg",
     warrantyYears: 3,
     highlightSpecs: [
       { id: "power", value: "90W" },
@@ -330,7 +330,7 @@ export const productCatalog = {
     detailKey: "dashcamMini2k",
     code: "CAM-2K-MINI",
     category: "dashcam",
-    image: "/sanpham/product_9.jpg",
+    image: "/product/product_9.jpg",
     warrantyYears: 2,
     highlightSpecs: [
       { id: "resolution", value: "2K 1440P" },
@@ -343,7 +343,7 @@ export const productCatalog = {
     detailKey: "tpmsSolarPro",
     code: "TPMS-PRO-EXT",
     category: "tpms",
-    image: "/sanpham/product_10.jpg",
+    image: "/product/product_10.jpg",
     warrantyYears: 2,
     highlightSpecs: [
       { id: "valveType", value: "external", translateValue: true },

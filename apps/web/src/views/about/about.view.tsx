@@ -269,7 +269,7 @@ export function AboutView() {
               </div>
               <div className="absolute -right-4 -bottom-6 hidden aspect-[4/3] w-1/2 overflow-hidden rounded-[21px] border-4 border-white bg-surface-muted shadow-2xl sm:block">
                 <Image
-                  src="/sanpham/product_1.jpg"
+                  src="/product/product_1.jpg"
                   alt={t("hero.imageAlt")}
                   fill
                   sizes="300px"
@@ -709,7 +709,7 @@ export function AboutView() {
               className="relative aspect-[4/3] sm:col-span-2 sm:row-span-2 overflow-hidden rounded-[24px] sm:rounded-[34px] border border-border-gray bg-surface-muted shadow-lg"
             >
               <Image
-                src="/sanpham/product_3.jpg"
+                src="/product/product_3.jpg"
                 alt={t("performance.imageAlt")}
                 fill
                 sizes="(max-width: 1024px) 100vw, 700px"
@@ -851,7 +851,7 @@ export function AboutView() {
               className="relative aspect-[4/3] overflow-hidden rounded-[34px] border border-border-gray bg-surface-muted shadow-xl lg:col-span-6"
             >
               <Image
-                src="/sanpham/product_6.jpg"
+                src="/product/product_6.jpg"
                 alt={t("safety.imageAlt")}
                 fill
                 sizes="(max-width: 1024px) 100vw, 600px"
