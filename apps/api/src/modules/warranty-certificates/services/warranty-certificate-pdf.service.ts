@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { formatWarrantyCertificateDate } from '@/modules/warranty-certificates/utils/warranty-certificate-date.util';
+import {
+  formatWarrantyCertificateValue,
+  formatWarrantyDuration,
+  formatWarrantyPeriod,
+} from '@/modules/warranty-certificates/utils/warranty-certificate-display.util';
 import fontkit from '@pdf-lib/fontkit';
 import { PDFDocument, type PDFFont, type PDFPage, rgb } from 'pdf-lib';
 import fs from 'node:fs';
@@ -8,6 +13,8 @@ import path from 'node:path';
 const TEMPLATE_FILE_NAME = 'lexzenz-certificate.pdf';
 const FONT_FILE_NAME = 'LiberationSans-Bold.ttf';
 const FIELD_FONT_SIZE = 24;
+const CUSTOMER_FIELD_X = 390;
+const CUSTOMER_FIELD_MAX_WIDTH = 425;
 
 export type WarrantyCertificatePdfInput = {
   certificateNumber: string;
@@ -35,6 +42,10 @@ type DrawTextOptions = {
   y: number;
 };
 
+type DrawCenteredTextOptions = DrawTextOptions & {
+  height: number;
+};
+
 @Injectable()
 export class WarrantyCertificatePdfService {
   async createPdfBuffer(input: WarrantyCertificatePdfInput) {
@@ -55,46 +66,85 @@ export class WarrantyCertificatePdfService {
       value: string | number | null | undefined,
       options: DrawTextOptions,
     ) => {
-      drawFittedText(page, font, formatValue(value), options);
+      drawFittedText(
+        page,
+        font,
+        formatWarrantyCertificateValue(value),
+        options,
+      );
     };
 
-    draw(input.certificateNumber, {
-      maxWidth: 390,
-      size: 28,
-      x: 1535,
-      y: 1874,
+    drawCenteredFittedText(
+      page,
+      font,
+      formatWarrantyCertificateValue(input.certificateNumber),
+      {
+        height: 83,
+        maxWidth: 473,
+        size: 28,
+        x: 1500,
+        y: 1871,
+      },
+    );
+
+    draw(input.vehiclePlate, {
+      maxWidth: CUSTOMER_FIELD_MAX_WIDTH,
+      x: CUSTOMER_FIELD_X,
+      y: 1004,
+    });
+    draw(input.vehicleModel, {
+      maxWidth: CUSTOMER_FIELD_MAX_WIDTH,
+      x: CUSTOMER_FIELD_X,
+      y: 886,
+    });
+    draw(input.serialNumber, {
+      maxWidth: CUSTOMER_FIELD_MAX_WIDTH,
+      x: CUSTOMER_FIELD_X,
+      y: 766,
+    });
+    draw(input.customerName, {
+      maxWidth: CUSTOMER_FIELD_MAX_WIDTH,
+      x: CUSTOMER_FIELD_X,
+      y: 641,
+    });
+    draw(input.customerPhone, {
+      maxWidth: CUSTOMER_FIELD_MAX_WIDTH,
+      x: CUSTOMER_FIELD_X,
+      y: 520,
+    });
+    draw(input.customerEmail, {
+      maxWidth: CUSTOMER_FIELD_MAX_WIDTH,
+      x: CUSTOMER_FIELD_X,
+      y: 400,
+    });
+    draw(input.customerAddress, {
+      maxWidth: CUSTOMER_FIELD_MAX_WIDTH,
+      x: CUSTOMER_FIELD_X,
+      y: 280,
     });
 
-    draw(input.vehiclePlate, { maxWidth: 450, x: 365, y: 1004 });
-    draw(input.vehicleModel, { maxWidth: 450, x: 365, y: 886 });
-    draw(input.serialNumber, { maxWidth: 450, x: 365, y: 766 });
-    draw(input.customerName, { maxWidth: 450, x: 365, y: 641 });
-    draw(input.customerPhone, { maxWidth: 450, x: 365, y: 520 });
-    draw(input.customerEmail, { maxWidth: 450, x: 365, y: 400 });
-    draw(input.customerAddress, { maxWidth: 450, x: 365, y: 280 });
-
-    draw(input.dealerName, { maxWidth: 490, x: 1320, y: 1004 });
+    draw(input.dealerName, { maxWidth: 490, x: 1320, y: 1009 });
     draw(formatWarrantyCertificateDate(input.installedAt ?? input.startDate), {
       maxWidth: 490,
       x: 1320,
-      y: 924,
+      y: 937,
     });
-    draw(input.productName, { maxWidth: 490, x: 1320, y: 844 });
-    draw(input.filmItems?.windshield, { maxWidth: 490, x: 1320, y: 764 });
-    draw(input.filmItems?.frontLeftSide, { maxWidth: 490, x: 1320, y: 684 });
-    draw(input.filmItems?.frontRightSide, { maxWidth: 490, x: 1320, y: 604 });
-    draw(input.filmItems?.rearLeftSide, { maxWidth: 490, x: 1320, y: 524 });
-    draw(input.filmItems?.rearRightSide, { maxWidth: 490, x: 1320, y: 444 });
-    draw(input.filmItems?.rearGlass, { maxWidth: 490, x: 1320, y: 364 });
+    draw(input.productName, { maxWidth: 490, x: 1320, y: 864 });
+    draw(input.filmItems?.windshield, { maxWidth: 490, x: 1320, y: 792 });
+    draw(input.filmItems?.frontLeftSide, { maxWidth: 490, x: 1320, y: 719 });
+    draw(input.filmItems?.frontRightSide, { maxWidth: 490, x: 1320, y: 647 });
+    draw(input.filmItems?.rearLeftSide, { maxWidth: 490, x: 1320, y: 574 });
+    draw(input.filmItems?.rearRightSide, { maxWidth: 490, x: 1320, y: 502 });
+    draw(input.filmItems?.rearGlass, { maxWidth: 490, x: 1320, y: 429 });
     draw(formatWarrantyDuration(input.warrantyDurationMonths), {
       maxWidth: 490,
       x: 1320,
-      y: 284,
+      y: 357,
     });
-    draw(formatWarrantyCertificateDate(input.endDate), {
+    draw(formatWarrantyPeriod(input.warrantyDurationMonths, input.endDate), {
       maxWidth: 490,
       x: 1320,
-      y: 204,
+      y: 284,
     });
 
     return Buffer.from(await pdfDoc.save());
@@ -146,6 +196,25 @@ function drawFittedText(
   });
 }
 
+function drawCenteredFittedText(
+  page: PDFPage,
+  font: PDFFont,
+  value: string,
+  { height, maxWidth, size = FIELD_FONT_SIZE, x, y }: DrawCenteredTextOptions,
+) {
+  const fittedValue = fitText(value, font, size, maxWidth);
+  const textWidth = font.widthOfTextAtSize(fittedValue, size);
+  const textHeight = font.heightAtSize(size, { descender: false });
+
+  page.drawText(fittedValue, {
+    color: rgb(0.05, 0.05, 0.05),
+    font,
+    size,
+    x: x + (maxWidth - textWidth) / 2,
+    y: y + (height - textHeight) / 2,
+  });
+}
+
 function fitText(value: string, font: PDFFont, size: number, maxWidth: number) {
   if (font.widthOfTextAtSize(value, size) <= maxWidth) return value;
 
@@ -158,17 +227,4 @@ function fitText(value: string, font: PDFFont, size: number, maxWidth: number) {
   }
 
   return `${next.trimEnd()}...`;
-}
-
-function formatValue(value: string | number | null | undefined) {
-  if (value === null || value === undefined) return '-';
-
-  const formatted = String(value).trim();
-  return formatted || '-';
-}
-
-function formatWarrantyDuration(value: number | null | undefined) {
-  return typeof value === 'number' && Number.isFinite(value)
-    ? `${value} tháng`
-    : '-';
 }
