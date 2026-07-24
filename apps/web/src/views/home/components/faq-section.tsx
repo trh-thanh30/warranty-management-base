@@ -3,25 +3,28 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowDown } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { faqItems } from "../home.constants";
-import { useScrollReveal, viewportOnce } from "@/src/hooks/use-scroll-reveal";
+import { useScrollReveal } from "@/src/hooks/use-scroll-reveal";
+import { revealViewportOnce } from "@/src/constants/motion.constants";
 import { motionDuration, motionEase } from "@/src/constants/motion.constants";
 
 export function FaqSection() {
+  const t = useTranslations("HomePage.faq");
   const { container, fadeUp, scaleIn } = useScrollReveal();
   const [openIdx, setOpenIdx] = useState<number | null>(0);
 
   return (
     <section
       id="faq"
-      className="mx-auto w-full max-w-[1480px] px-5 py-16 sm:px-8 lg:px-12"
-      aria-label="Frequently asked questions"
+      className="mx-auto w-full max-w-[1720px] px-6 py-16 sm:px-10 lg:px-12"
+      aria-label={t("ariaLabel")}
     >
       <motion.div
         variants={container}
         initial="hidden"
         whileInView="show"
-        viewport={viewportOnce}
+        viewport={revealViewportOnce}
         className="lg:min-h-[50vh] text-charcoal"
       >
         <div className="grid gap-12 lg:grid-cols-[0.85fr_1.35fr] lg:items-start">
@@ -30,21 +33,20 @@ export function FaqSection() {
             variants={fadeUp}
             initial="hidden"
             whileInView="show"
-            viewport={viewportOnce}
+            viewport={revealViewportOnce}
             className="flex flex-col gap-6 py-2 lg:pr-8"
           >
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs sm:text-sm font-sans font-bold uppercase tracking-[0.2em] text-brand-blue">
-                  ASK ANYTHING
+                <span className="text-xs sm:text-sm font-sans font-medium uppercase tracking-[0.2em] text-brand-blue">
+                  {t("eyebrow")}
                 </span>
               </div>
-              <h2 className="mt-4 text-4xl sm:text-5xl lg:text-[3.2rem] font-condensed font-bold uppercase leading-[1.1] tracking-wider text-charcoal">
-                Frequently Asked Questions
+              <h2 className="mt-4 text-4xl sm:text-5xl lg:text-5xl font-condensed font-medium uppercase leading-[1.1] tracking-wider text-charcoal">
+                {t("title")}
               </h2>
               <p className="mt-6 max-w-xl text-base sm:text-lg leading-relaxed text-graphite font-sans font-medium">
-                Eligibility, claims, garages, limits, and support are grouped
-                here so the warranty flow stays clear before checkout.
+                {t("description")}
               </p>
             </div>
           </motion.div>
@@ -54,15 +56,15 @@ export function FaqSection() {
             variants={container}
             initial="hidden"
             whileInView="show"
-            viewport={viewportOnce}
+            viewport={revealViewportOnce}
             className="flex min-h-full flex-col justify-between gap-8 lg:pl-8"
           >
             <div className="space-y-4">
-              {faqItems.slice(0, 6).map((item, i) => {
+              {faqItems.map((item, i) => {
                 const isOpen = openIdx === i;
                 return (
                   <motion.div
-                    key={item.question}
+                    key={item}
                     variants={scaleIn}
                     className={`overflow-hidden border transition-all duration-[330ms] ${
                       isOpen
@@ -76,8 +78,8 @@ export function FaqSection() {
                       aria-expanded={isOpen}
                       className="flex w-full cursor-pointer items-center justify-between gap-5 px-8 py-5 text-left focus-visible:outline-none"
                     >
-                      <span className="font-condensed text-base sm:text-lg font-bold uppercase tracking-wider text-charcoal hover:text-brand-blue transition-colors">
-                        {item.question}
+                      <span className="font-condensed text-base sm:text-lg font-medium uppercase tracking-wider text-charcoal hover:text-brand-blue transition-colors">
+                        {t(`items.${item}.question`)}
                       </span>
                       <span
                         className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-blue text-white transition-transform duration-[330ms] ${
@@ -108,7 +110,7 @@ export function FaqSection() {
                         >
                           <div className="px-8 pb-6 pr-16">
                             <p className="text-base leading-relaxed text-graphite font-sans font-medium">
-                              {item.answer}
+                              {t(`items.${item}.answer`)}
                             </p>
                           </div>
                         </motion.div>

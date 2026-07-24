@@ -12,7 +12,7 @@
     "./state": "./src/state/index.ts"
   },
   "scripts": {
-    "build": "tsc --noEmit && mkdir -p dist && touch dist/.build",
+    "build": "tsc --noEmit && node ../../scripts/write-build-marker.mjs",
     "check-types": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0"
   },
