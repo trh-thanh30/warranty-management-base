@@ -8,12 +8,12 @@ const sharedGalleryImages = [
   "/feat1.jpg",
   "/feat2.jpg",
   "/feat3.jpg",
-  "/khachhang/510962789_708623938540711_2735951356818959986_n.jpg",
-  "/sanpham/491785581_659103893492716_3763861878564125633_n.jpg",
-  "/sanpham/660867658_932031392866630_1775108430541815111_n.jpg",
-  "/sanpham/680213145_948050377931398_4658545440541295332_n.jpg",
-  "/khachhang/515494314_715431447859960_9183864286063818207_n.jpg",
-  "/khachhang/518450802_727834709952967_2678400354888596450_n.jpg",
+  "/guest/guest_2.jpg",
+  "/sanpham/product_1.jpg",
+  "/sanpham/product_3.jpg",
+  "/sanpham/product_6.jpg",
+  "/guest/guest_3.jpg",
+  "/guest/guest_4.jpg",
 ] as const;
 
 function createFilmDetail(

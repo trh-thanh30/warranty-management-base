@@ -269,7 +269,7 @@ export function AboutView() {
               </div>
               <div className="absolute -right-4 -bottom-6 hidden aspect-[4/3] w-1/2 overflow-hidden rounded-[21px] border-4 border-white bg-surface-muted shadow-2xl sm:block">
                 <Image
-                  src="/sanpham/491785581_659103893492716_3763861878564125633_n.jpg"
+                  src="/sanpham/product_1.jpg"
                   alt={t("hero.imageAlt")}
                   fill
                   sizes="300px"
@@ -709,7 +709,7 @@ export function AboutView() {
               className="relative aspect-[4/3] sm:col-span-2 sm:row-span-2 overflow-hidden rounded-[24px] sm:rounded-[34px] border border-border-gray bg-surface-muted shadow-lg"
             >
               <Image
-                src="/sanpham/660867658_932031392866630_1775108430541815111_n.jpg"
+                src="/sanpham/product_3.jpg"
                 alt={t("performance.imageAlt")}
                 fill
                 sizes="(max-width: 1024px) 100vw, 700px"
@@ -851,7 +851,7 @@ export function AboutView() {
               className="relative aspect-[4/3] overflow-hidden rounded-[34px] border border-border-gray bg-surface-muted shadow-xl lg:col-span-6"
             >
               <Image
-                src="/sanpham/680213145_948050377931398_4658545440541295332_n.jpg"
+                src="/sanpham/product_6.jpg"
                 alt={t("safety.imageAlt")}
                 fill
                 sizes="(max-width: 1024px) 100vw, 600px"
@@ -911,7 +911,7 @@ export function AboutView() {
               onMouseMove={handleSpotlightMouseMove}
             >
               <Image
-                src="/khachhang/510962789_708623938540711_2735951356818959986_n.jpg"
+                src="/guest/guest_2.jpg"
                 alt={t("customerValue.imageAlt")}
                 fill
                 sizes="(max-width: 1024px) 100vw, 600px"

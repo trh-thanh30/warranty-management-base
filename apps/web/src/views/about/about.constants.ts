@@ -11,12 +11,12 @@ export const aboutGalleryItems = [
   {
     id: "installationOne",
     category: "installation",
-    src: "/khachhang/510962789_708623938540711_2735951356818959986_n.jpg",
+    src: "/guest/guest_2.jpg",
   },
   {
     id: "installationTwo",
     category: "installation",
-    src: "/khachhang/515494314_715431447859960_9183864286063818207_n.jpg",
+    src: "/guest/guest_3.jpg",
   },
   { id: "showroomHanoi", category: "showroom", src: "/hi.jpg" },
   { id: "premiumVehicle", category: "installation", src: "/bg.jpg" },

@@ -154,7 +154,7 @@ export const productCatalog = {
     detailKey: "l50Cat",
     code: "L50",
     category: "film",
-    image: "/sanpham/491785581_659103893492716_3763861878564125633_n.jpg",
+    image: "/sanpham/product_1.jpg",
     warrantyYears: 10,
     highlightSpecs: [
       { id: "irBlock", value: "92%" },
@@ -190,7 +190,7 @@ export const productCatalog = {
     detailKey: "l15Cat",
     code: "L15",
     category: "film",
-    image: "/khachhang/510962789_708623938540711_2735951356818959986_n.jpg",
+    image: "/guest/guest_2.jpg",
     warrantyYears: 10,
     highlightSpecs: [
       { id: "irBlock", value: "85%" },
@@ -226,7 +226,7 @@ export const productCatalog = {
     detailKey: "ledMini1",
     code: "LED-MINI-X1",
     category: "ledBulbs",
-    image: "/sanpham/491785581_659103893492716_3763861878564125633_n.jpg",
+    image: "/sanpham/product_1.jpg",
     warrantyYears: 3,
     highlightSpecs: [
       { id: "power", value: "55W" },
@@ -239,7 +239,7 @@ export const productCatalog = {
     detailKey: "biledPro1",
     code: "BILED-FOG-PRO",
     category: "biLed",
-    image: "/sanpham/660867658_932031392866630_1775108430541815111_n.jpg",
+    image: "/sanpham/product_3.jpg",
     warrantyYears: 3,
     highlightSpecs: [
       { id: "waterResistance", value: "IP68" },
@@ -252,7 +252,7 @@ export const productCatalog = {
     detailKey: "auxLight1",
     code: "AUX-SPOT-40W",
     category: "auxLights",
-    image: "/sanpham/680213145_948050377931398_4658545440541295332_n.jpg",
+    image: "/sanpham/product_6.jpg",
     warrantyYears: 2,
     highlightSpecs: [
       { id: "power", value: "40W" },
@@ -265,7 +265,7 @@ export const productCatalog = {
     detailKey: "dashcam4k",
     code: "CAM-4K-GPS",
     category: "dashcam",
-    image: "/sanpham/708866764_974343475302088_6969437192664409450_n.jpg",
+    image: "/sanpham/product_9.jpg",
     warrantyYears: 2,
     highlightSpecs: [
       { id: "resolution", value: "4K UHD" },
@@ -278,7 +278,7 @@ export const productCatalog = {
     detailKey: "tpmsSolar",
     code: "TPMS-SOLAR-V2",
     category: "tpms",
-    image: "/sanpham/722859751_989791480423954_4718269048704660286_n.jpg",
+    image: "/sanpham/product_10.jpg",
     warrantyYears: 3,
     highlightSpecs: [
       { id: "powerSource", value: "solar", translateValue: true },
@@ -291,7 +291,7 @@ export const productCatalog = {
     detailKey: "androidBoxDx",
     code: "BOX-DX8",
     category: "androidBox",
-    image: "/sanpham/742129847_1011122928290809_2932987533225347117_n.jpg",
+    image: "/sanpham/product_13.jpg",
     warrantyYears: 2,
     highlightSpecs: [
       { id: "configuration", value: "RAM 8GB / ROM 128GB" },
@@ -304,7 +304,7 @@ export const productCatalog = {
     detailKey: "retroAcc1",
     code: "ACC-MANG-LED",
     category: "retroAccessories",
-    image: "/sanpham/750632674_1021370440599391_2260673870932429076_n.jpg",
+    image: "/sanpham/product_14.jpg",
     warrantyYears: 1,
     highlightSpecs: [
       { id: "control", value: "Bluetooth" },
@@ -317,7 +317,7 @@ export const productCatalog = {
     detailKey: "biledLaserGt",
     code: "GT-LASER-90W",
     category: "biLed",
-    image: "/sanpham/660867658_932031392866630_1775108430541815111_n.jpg",
+    image: "/sanpham/product_3.jpg",
     warrantyYears: 3,
     highlightSpecs: [
       { id: "power", value: "90W" },
@@ -330,7 +330,7 @@ export const productCatalog = {
     detailKey: "dashcamMini2k",
     code: "CAM-2K-MINI",
     category: "dashcam",
-    image: "/sanpham/708866764_974343475302088_6969437192664409450_n.jpg",
+    image: "/sanpham/product_9.jpg",
     warrantyYears: 2,
     highlightSpecs: [
       { id: "resolution", value: "2K 1440P" },
@@ -343,7 +343,7 @@ export const productCatalog = {
     detailKey: "tpmsSolarPro",
     code: "TPMS-PRO-EXT",
     category: "tpms",
-    image: "/sanpham/722859751_989791480423954_4718269048704660286_n.jpg",
+    image: "/sanpham/product_10.jpg",
     warrantyYears: 2,
     highlightSpecs: [
       { id: "valveType", value: "external", translateValue: true },
