@@ -234,6 +234,84 @@ export function WarrantyLookupView() {
             layout
             className="bg-white rounded-[28px] p-6 sm:p-10 border border-border-gray shadow-xl max-w-3xl sm:max-w-4xl lg:max-w-5xl mx-auto overflow-hidden"
           >
+            {/* Permanent Quick Guide & Trust Badges Section at TOP */}
+            <div className="mb-8 pb-8 border-b border-border-gray space-y-8">
+              {/* Steps Guide */}
+              <div>
+                <p className="text-center text-xs font-semibold uppercase tracking-wider text-stone-gray mb-6">
+                  Hướng dẫn tra cứu E-Warranty trong 3 bước
+                </p>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="bg-surface-muted/70 p-4 rounded-2xl border border-border-gray space-y-1 text-center">
+                    <span className="inline-block text-xs font-condensed font-bold text-premium-red uppercase tracking-widest bg-premium-red/10 px-2.5 py-0.5 rounded-full">
+                      Bước 01
+                    </span>
+                    <h4 className="text-sm font-semibold uppercase text-deep-black pt-1">
+                      Nhập thông tin
+                    </h4>
+                    <p className="text-xs text-stone-gray font-medium">
+                      Nhập Số điện thoại, Biển số xe hoặc Mã tem E-Warranty.
+                    </p>
+                  </div>
+
+                  <div className="bg-surface-muted/70 p-4 rounded-2xl border border-border-gray space-y-1 text-center">
+                    <span className="inline-block text-xs font-condensed font-bold text-premium-red uppercase tracking-widest bg-premium-red/10 px-2.5 py-0.5 rounded-full">
+                      Bước 02
+                    </span>
+                    <h4 className="text-sm font-semibold uppercase text-deep-black pt-1">
+                      Nhấn Tra Cứu
+                    </h4>
+                    <p className="text-xs text-stone-gray font-medium">
+                      Hệ thống tự động truy xuất dữ liệu bảo hành chính hãng.
+                    </p>
+                  </div>
+
+                  <div className="bg-surface-muted/70 p-4 rounded-2xl border border-border-gray space-y-1 text-center">
+                    <span className="inline-block text-xs font-condensed font-bold text-premium-red uppercase tracking-widest bg-premium-red/10 px-2.5 py-0.5 rounded-full">
+                      Bước 03
+                    </span>
+                    <h4 className="text-sm font-semibold uppercase text-deep-black pt-1">
+                      Xem chi tiết
+                    </h4>
+                    <p className="text-xs text-stone-gray font-medium">
+                      Xem thông tin chủ xe, gói dán, các vị trí kính & thời hạn
+                      15 năm.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Links / Other Actions */}
+              <div className="border-t border-border-gray pt-6">
+                <p className="text-center text-xs font-semibold uppercase tracking-wider text-stone-gray mb-4">
+                  Dịch vụ bảo hành khác
+                </p>
+                <div className="grid gap-3 sm:grid-cols-3 text-xs font-semibold uppercase tracking-wide text-center">
+                  <Link
+                    href={APP_ROUTES.warrantyActivate}
+                    className="p-3.5 rounded-xl bg-surface-muted hover:bg-premium-red hover:text-white border border-border-gray transition-colors text-deep-black flex items-center justify-center gap-2"
+                  >
+                    <ShieldCheck className="size-4 shrink-0" />
+                    <span>Kích hoạt tem mới</span>
+                  </Link>
+                  <Link
+                    href={APP_ROUTES.warrantyRequest}
+                    className="p-3.5 rounded-xl bg-surface-muted hover:bg-premium-red hover:text-white border border-border-gray transition-colors text-deep-black flex items-center justify-center gap-2"
+                  >
+                    <FileText className="size-4 shrink-0" />
+                    <span>Gửi yêu cầu sự cố</span>
+                  </Link>
+                  <Link
+                    href={APP_ROUTES.dealers}
+                    className="p-3.5 rounded-xl bg-surface-muted hover:bg-premium-red hover:text-white border border-border-gray transition-colors text-deep-black flex items-center justify-center gap-2"
+                  >
+                    <Building2 className="size-4 shrink-0" />
+                    <span>Tìm trạm thi công</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
             <form onSubmit={handleSearch} className="space-y-4">
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1">
@@ -277,17 +355,17 @@ export function WarrantyLookupView() {
                   className="overflow-hidden border-t border-border-gray pt-6"
                 >
                   {/* Result Status & Code Header */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5 rounded-2xl bg-surface-muted border border-border-gray mb-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-border-gray mb-4">
                     <div className="space-y-1">
                       <span className="text-xs font-semibold uppercase text-premium-red tracking-wider flex items-center gap-1.5">
                         <CheckCircle2 className="size-4" />
                         <span>{searchResult.status}</span>
                       </span>
-                      <h3 className="text-lg sm:text-xl font-semibold uppercase">
+                      <h3 className="text-xl sm:text-2xl font-condensed font-bold uppercase tracking-wide text-deep-black">
                         {t("result.code")}: {searchResult.code}
                       </h3>
                     </div>
-                    <span className="bg-premium-red text-white px-3.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">
+                    <span className="inline-flex self-start sm:self-center bg-premium-red text-white px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider shadow-sm">
                       {t("result.duration")}: {searchResult.warrantyYears}
                     </span>
                   </div>
@@ -434,90 +512,12 @@ export function WarrantyLookupView() {
                 </motion.div>
               )}
             </AnimatePresence>
-
-            {/* Permanent Quick Guide & Trust Badges Section */}
-            <div className="mt-10 border-t border-border-gray pt-8 space-y-8">
-              {/* Steps Guide */}
-              <div>
-                <p className="text-center text-xs font-semibold uppercase tracking-wider text-stone-gray mb-6">
-                  Hướng dẫn tra cứu E-Warranty trong 3 bước
-                </p>
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <div className="bg-surface-muted/70 p-4 rounded-2xl border border-border-gray space-y-1 text-center">
-                    <span className="inline-block text-xs font-condensed font-bold text-premium-red uppercase tracking-widest bg-premium-red/10 px-2.5 py-0.5 rounded-full">
-                      Bước 01
-                    </span>
-                    <h4 className="text-sm font-semibold uppercase text-deep-black pt-1">
-                      Nhập thông tin
-                    </h4>
-                    <p className="text-xs text-stone-gray font-medium">
-                      Nhập Số điện thoại, Biển số xe hoặc Mã tem E-Warranty.
-                    </p>
-                  </div>
-
-                  <div className="bg-surface-muted/70 p-4 rounded-2xl border border-border-gray space-y-1 text-center">
-                    <span className="inline-block text-xs font-condensed font-bold text-premium-red uppercase tracking-widest bg-premium-red/10 px-2.5 py-0.5 rounded-full">
-                      Bước 02
-                    </span>
-                    <h4 className="text-sm font-semibold uppercase text-deep-black pt-1">
-                      Nhấn Tra Cứu
-                    </h4>
-                    <p className="text-xs text-stone-gray font-medium">
-                      Hệ thống tự động truy xuất dữ liệu bảo hành chính hãng.
-                    </p>
-                  </div>
-
-                  <div className="bg-surface-muted/70 p-4 rounded-2xl border border-border-gray space-y-1 text-center">
-                    <span className="inline-block text-xs font-condensed font-bold text-premium-red uppercase tracking-widest bg-premium-red/10 px-2.5 py-0.5 rounded-full">
-                      Bước 03
-                    </span>
-                    <h4 className="text-sm font-semibold uppercase text-deep-black pt-1">
-                      Xem chi tiết
-                    </h4>
-                    <p className="text-xs text-stone-gray font-medium">
-                      Xem thông tin chủ xe, gói dán, các vị trí kính & thời hạn
-                      15 năm.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Links / Other Actions */}
-              <div className="border-t border-border-gray pt-6">
-                <p className="text-center text-xs font-semibold uppercase tracking-wider text-stone-gray mb-4">
-                  Dịch vụ bảo hành khác
-                </p>
-                <div className="grid gap-3 sm:grid-cols-3 text-xs font-semibold uppercase tracking-wide text-center">
-                  <Link
-                    href={APP_ROUTES.warrantyActivate}
-                    className="p-3.5 rounded-xl bg-surface-muted hover:bg-premium-red hover:text-white border border-border-gray transition-colors text-deep-black flex items-center justify-center gap-2"
-                  >
-                    <ShieldCheck className="size-4 shrink-0" />
-                    <span>Kích hoạt tem mới</span>
-                  </Link>
-                  <Link
-                    href={APP_ROUTES.warrantyRequest}
-                    className="p-3.5 rounded-xl bg-surface-muted hover:bg-premium-red hover:text-white border border-border-gray transition-colors text-deep-black flex items-center justify-center gap-2"
-                  >
-                    <FileText className="size-4 shrink-0" />
-                    <span>Gửi yêu cầu sự cố</span>
-                  </Link>
-                  <Link
-                    href={APP_ROUTES.dealers}
-                    className="p-3.5 rounded-xl bg-surface-muted hover:bg-premium-red hover:text-white border border-border-gray transition-colors text-deep-black flex items-center justify-center gap-2"
-                  >
-                    <Building2 className="size-4 shrink-0" />
-                    <span>Tìm trạm thi công</span>
-                  </Link>
-                </div>
-              </div>
-            </div>
           </motion.div>
         </section>
 
         {/* 4. Policy Shortcut Banner Section */}
         <section className="max-w-3xl sm:max-w-4xl lg:max-w-5xl mx-auto">
-          <div className="bg-white rounded-[24px] border border-border-gray p-6 sm:p-8 shadow-md hover:shadow-xl transition-all flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-border-gray">
             <div className="space-y-2 text-center sm:text-left">
               <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-premium-red">
                 <ShieldCheck className="size-4" />
