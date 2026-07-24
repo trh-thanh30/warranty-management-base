@@ -16,7 +16,7 @@ describe('ConfirmProductImportUseCase', () => {
     };
     const prismaService = {
       category: {
-        findFirst: jest.fn(),
+        findFirst: jest.fn().mockResolvedValue({ id: 'category-id' }),
       },
       product: {
         findUnique: jest.fn().mockResolvedValue(null),
@@ -37,7 +37,7 @@ describe('ConfirmProductImportUseCase', () => {
         {
           brand: 'Toyota',
           category: product_category.SPARE_PART,
-          categoryCode: null,
+          categoryCode: 'BATTERY',
           description: null,
           imageUrl: 'https://example.com/product.jpg',
           installationPosition: 'Engine bay',
@@ -57,6 +57,7 @@ describe('ConfirmProductImportUseCase', () => {
       expect.objectContaining({
         data: expect.objectContaining({
           category: product_category.SPARE_PART,
+          category_ref: { connect: { id: 'category-id' } },
           metadata: {
             excelImageUrl: 'https://example.com/product.jpg',
             installationPosition: 'Engine bay',

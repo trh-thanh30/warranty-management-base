@@ -85,6 +85,9 @@ export class IssueWarrantyCertificateUseCase {
     });
 
     if (!recipientEmail) {
+      this.logger.log(
+        `Warranty certificate ${certificate.id} generated without recipient email`,
+      );
       return certificate;
     }
 
@@ -131,7 +134,7 @@ export class IssueWarrantyCertificateUseCase {
     ) {
       try {
         const certificateNumber = generateCertificateNumber();
-        const pdfBuffer = this.pdfService.createPdfBuffer({
+        const pdfBuffer = await this.pdfService.createPdfBuffer({
           certificateNumber,
           customerName:
             request?.customer_name ??

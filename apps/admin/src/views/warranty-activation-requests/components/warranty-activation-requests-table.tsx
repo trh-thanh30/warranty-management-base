@@ -1,6 +1,13 @@
 "use client";
 
-import { CheckCircle2, Eye, MoreHorizontal, XCircle } from "lucide-react";
+import {
+  CheckCircle2,
+  Download,
+  Eye,
+  FileText,
+  MoreHorizontal,
+  XCircle,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import type {
@@ -39,7 +46,9 @@ type WarrantyActivationRequestsTableProps = {
     request: WarrantyActivationRequestSummary,
     action: WarrantyActivationRequestAction,
   ) => void;
+  onDownloadCertificate: (request: WarrantyActivationRequestSummary) => void;
   onSortChange: (sortBy: WarrantyActivationRequestSortBy) => void;
+  onViewCertificate: (request: WarrantyActivationRequestSummary) => void;
   sortBy?: WarrantyActivationRequestSortBy;
   sortOrder: "asc" | "desc";
 };
@@ -47,7 +56,9 @@ type WarrantyActivationRequestsTableProps = {
 export function WarrantyActivationRequestsTable({
   items,
   onAction,
+  onDownloadCertificate,
   onSortChange,
+  onViewCertificate,
   sortBy,
   sortOrder,
 }: WarrantyActivationRequestsTableProps) {
@@ -60,6 +71,8 @@ export function WarrantyActivationRequestsTable({
           <WarrantyActivationRequestMobileCard
             key={request.id}
             onAction={onAction}
+            onDownloadCertificate={onDownloadCertificate}
+            onViewCertificate={onViewCertificate}
             request={request}
           />
         ))}
@@ -111,6 +124,8 @@ export function WarrantyActivationRequestsTable({
               <WarrantyActivationRequestTableRow
                 key={request.id}
                 onAction={onAction}
+                onDownloadCertificate={onDownloadCertificate}
+                onViewCertificate={onViewCertificate}
                 request={request}
               />
             ))}
@@ -123,9 +138,13 @@ export function WarrantyActivationRequestsTable({
 
 function WarrantyActivationRequestTableRow({
   onAction,
+  onDownloadCertificate,
+  onViewCertificate,
   request,
 }: {
   onAction: WarrantyActivationRequestsTableProps["onAction"];
+  onDownloadCertificate: WarrantyActivationRequestsTableProps["onDownloadCertificate"];
+  onViewCertificate: WarrantyActivationRequestsTableProps["onViewCertificate"];
   request: WarrantyActivationRequestSummary;
 }) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
@@ -171,6 +190,8 @@ function WarrantyActivationRequestTableRow({
       <TableCell className="text-right">
         <WarrantyActivationRequestActions
           onAction={onAction}
+          onDownloadCertificate={onDownloadCertificate}
+          onViewCertificate={onViewCertificate}
           request={request}
         />
       </TableCell>
@@ -180,9 +201,13 @@ function WarrantyActivationRequestTableRow({
 
 function WarrantyActivationRequestMobileCard({
   onAction,
+  onDownloadCertificate,
+  onViewCertificate,
   request,
 }: {
   onAction: WarrantyActivationRequestsTableProps["onAction"];
+  onDownloadCertificate: WarrantyActivationRequestsTableProps["onDownloadCertificate"];
+  onViewCertificate: WarrantyActivationRequestsTableProps["onViewCertificate"];
   request: WarrantyActivationRequestSummary;
 }) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
@@ -203,6 +228,8 @@ function WarrantyActivationRequestMobileCard({
         </div>
         <WarrantyActivationRequestActions
           onAction={onAction}
+          onDownloadCertificate={onDownloadCertificate}
+          onViewCertificate={onViewCertificate}
           request={request}
         />
       </div>
@@ -261,9 +288,13 @@ function MobileField({ label, value }: { label: string; value: string }) {
 
 function WarrantyActivationRequestActions({
   onAction,
+  onDownloadCertificate,
+  onViewCertificate,
   request,
 }: {
   onAction: WarrantyActivationRequestsTableProps["onAction"];
+  onDownloadCertificate: WarrantyActivationRequestsTableProps["onDownloadCertificate"];
+  onViewCertificate: WarrantyActivationRequestsTableProps["onViewCertificate"];
   request: WarrantyActivationRequestSummary;
 }) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
@@ -293,6 +324,19 @@ function WarrantyActivationRequestActions({
             {t("viewDetail")}
           </Link>
         </DropdownMenuItem>
+        {request.certificate ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => onViewCertificate(request)}>
+              <FileText className="mr-2 size-4" />
+              {t("viewCertificate")}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => onDownloadCertificate(request)}>
+              <Download className="mr-2 size-4" />
+              {t("downloadCertificate")}
+            </DropdownMenuItem>
+          </>
+        ) : null}
         {canReview ? <DropdownMenuSeparator /> : null}
         {canReview ? (
           <DropdownMenuItem onSelect={() => onAction(request, "approve")}>

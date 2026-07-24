@@ -56,6 +56,7 @@ export function WarrantyActivationRequestsView() {
           onClearFilters={directory.clearFilters}
           onDateFromChange={directory.updateDateFrom}
           onDateToChange={directory.updateDateTo}
+          onDownloadCertificate={directory.actions.downloadCertificate}
           onPageChange={directory.setPage}
           onPageSizeChange={directory.setPageSize}
           onRetry={() => {
@@ -64,6 +65,7 @@ export function WarrantyActivationRequestsView() {
           onSearchChange={directory.updateSearch}
           onSortChange={directory.toggleSort}
           onStatusChange={directory.updateStatusFilter}
+          onViewCertificate={directory.actions.viewCertificate}
           onWarrantyCodeChange={directory.updateWarrantyCode}
           pageSize={directory.pageSize}
           search={directory.search}

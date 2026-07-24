@@ -1,3 +1,4 @@
+import { product_category, product_status } from '@prisma/client';
 import {
   IsEnum,
   IsInt,
@@ -9,7 +10,6 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { product_category, product_status } from '@prisma/client';
 
 export class CreateProductDto {
   @IsString()
@@ -19,9 +19,8 @@ export class CreateProductDto {
   @IsEnum(product_category)
   category: product_category;
 
-  @IsOptional()
   @IsUUID()
-  categoryId?: string;
+  categoryId: string;
 
   @IsOptional()
   @IsString()

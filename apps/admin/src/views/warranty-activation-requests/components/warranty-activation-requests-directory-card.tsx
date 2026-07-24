@@ -38,6 +38,7 @@ type WarrantyActivationRequestsDirectoryCardProps = {
     request: WarrantyActivationRequestSummary,
     action: WarrantyActivationRequestAction,
   ) => void;
+  onDownloadCertificate: (request: WarrantyActivationRequestSummary) => void;
   onClearFilters: () => void;
   onDateFromChange: (value: string) => void;
   onDateToChange: (value: string) => void;
@@ -46,6 +47,7 @@ type WarrantyActivationRequestsDirectoryCardProps = {
   onRetry: () => void;
   onSearchChange: (value: string) => void;
   onSortChange: (sortBy: WarrantyActivationRequestSortBy) => void;
+  onViewCertificate: (request: WarrantyActivationRequestSummary) => void;
   onStatusChange: (value: WarrantyActivationRequestStatusFilter) => void;
   onWarrantyCodeChange: (value: string) => void;
   pageSize: number;
@@ -60,6 +62,7 @@ export function WarrantyActivationRequestsDirectoryCard({
   isError,
   isLoading,
   onAction,
+  onDownloadCertificate,
   onClearFilters,
   onDateFromChange,
   onDateToChange,
@@ -68,6 +71,7 @@ export function WarrantyActivationRequestsDirectoryCard({
   onRetry,
   onSearchChange,
   onSortChange,
+  onViewCertificate,
   onStatusChange,
   onWarrantyCodeChange,
   pageSize,
@@ -111,10 +115,12 @@ export function WarrantyActivationRequestsDirectoryCard({
           isLoading={isLoading}
           onAction={onAction}
           onClearFilters={onClearFilters}
+          onDownloadCertificate={onDownloadCertificate}
           onPageChange={onPageChange}
           onPageSizeChange={onPageSizeChange}
           onRetry={onRetry}
           onSortChange={onSortChange}
+          onViewCertificate={onViewCertificate}
           pageSize={pageSize}
           sortBy={sortBy}
           sortOrder={sortOrder}
@@ -200,10 +206,12 @@ function WarrantyActivationRequestsContent({
   isLoading,
   onAction,
   onClearFilters,
+  onDownloadCertificate,
   onPageChange,
   onPageSizeChange,
   onRetry,
   onSortChange,
+  onViewCertificate,
   pageSize,
   sortBy,
   sortOrder,
@@ -214,10 +222,12 @@ function WarrantyActivationRequestsContent({
   | "isLoading"
   | "onAction"
   | "onClearFilters"
+  | "onDownloadCertificate"
   | "onPageChange"
   | "onPageSizeChange"
   | "onRetry"
   | "onSortChange"
+  | "onViewCertificate"
   | "pageSize"
   | "sortBy"
   | "sortOrder"
@@ -249,7 +259,9 @@ function WarrantyActivationRequestsContent({
         <WarrantyActivationRequestsTable
           items={data.items}
           onAction={onAction}
+          onDownloadCertificate={onDownloadCertificate}
           onSortChange={onSortChange}
+          onViewCertificate={onViewCertificate}
           sortBy={sortBy}
           sortOrder={sortOrder}
         />

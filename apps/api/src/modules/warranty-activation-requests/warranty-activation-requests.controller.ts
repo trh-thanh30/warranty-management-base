@@ -7,6 +7,7 @@ import { ListWarrantyActivationRequestsDto } from '@/modules/warranty-activation
 import { ReviewWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/review-warranty-activation-request.dto';
 import { CreateWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-warranty-activation-request.use-case';
 import { CreateAdminWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-admin-warranty-activation-request.use-case';
+import { DownloadWarrantyActivationRequestCertificateUseCase } from '@/modules/warranty-activation-requests/use-cases/download-warranty-activation-request-certificate.use-case';
 import { ExportWarrantyActivationRequestsUseCase } from '@/modules/warranty-activation-requests/use-cases/export-warranty-activation-requests.use-case';
 import { GetWarrantyActivationRequestDetailUseCase } from '@/modules/warranty-activation-requests/use-cases/get-warranty-activation-request-detail.use-case';
 import { ListWarrantyActivationRequestsUseCase } from '@/modules/warranty-activation-requests/use-cases/list-warranty-activation-requests.use-case';
@@ -37,6 +38,7 @@ export class WarrantyActivationRequestsController {
   constructor(
     private readonly createAdminWarrantyActivationRequestUseCase: CreateAdminWarrantyActivationRequestUseCase,
     private readonly createWarrantyActivationRequestUseCase: CreateWarrantyActivationRequestUseCase,
+    private readonly downloadWarrantyActivationRequestCertificateUseCase: DownloadWarrantyActivationRequestCertificateUseCase,
     private readonly exportWarrantyActivationRequestsUseCase: ExportWarrantyActivationRequestsUseCase,
     private readonly listWarrantyActivationRequestsUseCase: ListWarrantyActivationRequestsUseCase,
     private readonly getWarrantyActivationRequestDetailUseCase: GetWarrantyActivationRequestDetailUseCase,
@@ -88,6 +90,21 @@ export class WarrantyActivationRequestsController {
     );
   }
 
+  @Get(':id/certificate/view')
+  @Permissions([permission_key.WARRANTY_VIEW])
+  async viewCertificate(@Param('id') id: string, @Res() response: Response) {
+    await this.sendCertificateFile(id, response, 'inline');
+  }
+
+  @Get(':id/certificate/download')
+  @Permissions([permission_key.WARRANTY_VIEW])
+  async downloadCertificate(
+    @Param('id') id: string,
+    @Res() response: Response,
+  ) {
+    await this.sendCertificateFile(id, response, 'attachment');
+  }
+
   @Get(':id')
   @Permissions([permission_key.WARRANTY_VIEW])
   detail(@Param('id') id: string) {
@@ -112,5 +129,23 @@ export class WarrantyActivationRequestsController {
     return this.resendWarrantyActivationRequestCertificateEmailUseCase.execute(
       id,
     );
+  }
+
+  private async sendCertificateFile(
+    id: string,
+    response: Response,
+    disposition: 'attachment' | 'inline',
+  ) {
+    const { filename, stream } =
+      await this.downloadWarrantyActivationRequestCertificateUseCase.execute(
+        id,
+      );
+
+    response.setHeader('Content-Type', 'application/pdf');
+    response.setHeader(
+      'Content-Disposition',
+      `${disposition}; filename="${filename}"`,
+    );
+    stream.pipe(response);
   }
 }

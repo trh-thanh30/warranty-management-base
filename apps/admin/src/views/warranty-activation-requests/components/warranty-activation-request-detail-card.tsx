@@ -164,7 +164,11 @@ export function WarrantyActivationRequestDetailCard({
           />
           <DetailItem
             label={t("certificateEmail")}
-            value={certificate?.recipientEmail ?? "-"}
+            value={
+              certificate
+                ? (certificate.recipientEmail ?? t("certificateNoEmail"))
+                : "-"
+            }
           />
           <DetailItem
             label={t("certificateStatus")}
@@ -183,7 +187,9 @@ export function WarrantyActivationRequestDetailCard({
             value={
               certificate ? (
                 <Badge variant="secondary">
-                  {t(`certificateEmailStatuses.${certificate.emailStatus}`)}
+                  {certificate.recipientEmail
+                    ? t(`certificateEmailStatuses.${certificate.emailStatus}`)
+                    : t("certificateNoEmail")}
                 </Badge>
               ) : (
                 "-"

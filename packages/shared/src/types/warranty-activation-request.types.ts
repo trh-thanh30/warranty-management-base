@@ -103,8 +103,10 @@ export type WarrantyActivationRequestSummary = {
   certificate: {
     id: string;
     certificateNumber: string;
+    downloadUrl: string;
     status: WarrantyCertificateStatus;
     storageKey: string | null;
+    viewUrl: string;
     recipientEmail: string | null;
     generatedAt: string | null;
     emailedAt: string | null;

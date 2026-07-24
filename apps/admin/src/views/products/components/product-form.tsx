@@ -1,6 +1,5 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { Controller } from "react-hook-form";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -15,6 +14,15 @@ import {
   SelectValue,
   Textarea,
 } from "@repo/ui";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+} from "@/src/components/common";
 import { FormField as Field } from "@/src/components/common/form-field";
 import { RichTextEditor } from "@/src/components/common/rich-text-editor";
 import { ImageUpload } from "@/src/components/common/image-upload";
@@ -22,8 +30,6 @@ import { createFieldErrorFormatter } from "@/src/utils";
 import type { ProductImportRowData } from "@/src/services/products/products.types";
 import { useProductForm } from "../hooks/use-product-form";
 import { ProductSpecificationsFields } from "./product-specifications-fields";
-import { ProductStatusControl } from "./product-status-control";
-import { ProductStatusToggle } from "./product-status-toggle";
 
 type ProductFormProps = {
   onCancel: () => void;
@@ -124,38 +130,35 @@ export function ProductForm(props: ProductFormProps) {
             control={control}
             name="categoryId"
             render={({ field }) => (
-              <NullableSelect
+              <ProductCategoryCombobox
+                disabled={categoriesQuery.isLoading}
                 id="product-category-id"
-                noneLabel={t("noDynamicCategory")}
                 onValueChange={field.onChange}
-                value={field.value}
-              >
-                {categories
+                options={categories
                   .filter((category) => !importPreview || category.code)
-                  .map((category) => (
-                    <SelectItem
-                      key={category.id}
-                      value={
-                        importPreview ? (category.code ?? "") : category.id
-                      }
-                    >
-                      {category.name}
-                    </SelectItem>
-                  ))}
-              </NullableSelect>
+                  .map((category) => ({
+                    label: category.name,
+                    value: importPreview ? (category.code ?? "") : category.id,
+                  }))}
+                placeholder={t("dynamicCategory")}
+                searchPlaceholder={t("search")}
+                value={field.value}
+              />
             )}
           />
         </Field>
-        {product?.warrantyCode ? (
-          <Field id="product-warranty-code-readonly" label={t("warrantyCode")}>
-            <Input
-              id="product-warranty-code-readonly"
-              readOnly
-              value={product.warrantyCode}
-            />
-          </Field>
-        ) : null}
+        <ProductStatusField control={control} disabled={isSubmitting} />
       </div>
+
+      {product?.warrantyCode ? (
+        <Field id="product-warranty-code-readonly" label={t("warrantyCode")}>
+          <Input
+            id="product-warranty-code-readonly"
+            readOnly
+            value={product.warrantyCode}
+          />
+        </Field>
+      ) : null}
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field
@@ -323,12 +326,6 @@ export function ProductForm(props: ProductFormProps) {
         />
       )}
 
-      {creating || importPreview ? (
-        <ProductStatusField control={control} disabled={isSubmitting} />
-      ) : product ? (
-        <ProductStatusToggle product={product} />
-      ) : null}
-
       <div className="grid grid-cols-2 gap-2 border-t border-slate-200 pt-5 dark:border-slate-800 sm:flex sm:justify-end">
         <Button
           className="w-full sm:w-auto"
@@ -365,58 +362,87 @@ function ProductStatusField({
   control: ReturnType<typeof useProductForm>["control"];
   disabled: boolean;
 }) {
+  const t = useTranslations("Products");
+
   return (
     <Controller
       control={control}
       name="status"
       render={({ field }) => (
-        <ProductStatusControl
-          disabled={disabled}
-          id="product-status"
-          onStatusChange={field.onChange}
-          status={field.value}
-        />
+        <Field id="product-status" label={t("productStatus")}>
+          <Select
+            disabled={disabled}
+            onValueChange={field.onChange}
+            value={field.value}
+          >
+            <SelectTrigger className="w-full" id="product-status">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PRODUCT_EDITABLE_STATUSES.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {t(`statuses.${status}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
       )}
     />
   );
 }
 
-function NullableSelect({
-  children,
+function ProductCategoryCombobox({
+  disabled,
   id,
-  noneLabel,
   onValueChange,
+  options,
+  placeholder,
+  searchPlaceholder,
   value,
 }: {
-  children: ReactNode;
+  disabled?: boolean;
   id: string;
-  noneLabel: string;
   onValueChange: (value: string) => void;
+  options: Array<{ label: string; value: string }>;
+  placeholder: string;
+  searchPlaceholder: string;
   value?: string;
 }) {
+  const selectedOption = options.find((option) => option.value === value);
+
   return (
-    <Select
-      onValueChange={(nextValue) =>
-        onValueChange(nextValue === SELECT_EMPTY_VALUE ? "" : nextValue)
-      }
-      value={value || SELECT_EMPTY_VALUE}
+    <Combobox
+      disabled={disabled}
+      onValueChange={onValueChange}
+      value={value ?? ""}
     >
-      <SelectTrigger id={id}>
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value={SELECT_EMPTY_VALUE}>{noneLabel}</SelectItem>
-        {children}
-      </SelectContent>
-    </Select>
+      <ComboboxTrigger
+        id={id}
+        placeholder={placeholder}
+        selectedLabel={selectedOption?.label ?? value}
+      />
+      <ComboboxContent>
+        <ComboboxInput placeholder={searchPlaceholder} showTrigger={false} />
+        <ComboboxList>
+          <ComboboxEmpty>{placeholder}</ComboboxEmpty>
+          {options.map((option) => (
+            <ComboboxItem key={option.value} value={option.value}>
+              {option.label}
+            </ComboboxItem>
+          ))}
+        </ComboboxList>
+      </ComboboxContent>
+    </Combobox>
   );
 }
 
-const SELECT_EMPTY_VALUE = "__empty__";
+const PRODUCT_EDITABLE_STATUSES = ["ACTIVE", "INACTIVE"] as const;
 
 const formatFieldError = createFieldErrorFormatter(
   new Set([
     "brandLength",
+    "categoryRequired",
     "categoryNotFound",
     "customerNotFound",
     "customerRequired",

@@ -89,7 +89,7 @@ export type ListProductsQuery = PaginationQuery & {
 export type CreateProductBody = {
   name: string;
   category: ProductCategory;
-  categoryId?: string;
+  categoryId: string;
   brand?: string;
   model?: string;
   manufactureYear?: number;
@@ -103,7 +103,7 @@ export type CreateProductBody = {
 export type UpdateProductBody = {
   name?: string;
   category?: ProductCategory;
-  categoryId?: string | null;
+  categoryId?: string;
   brand?: string | null;
   model?: string | null;
   manufactureYear?: number | null;
