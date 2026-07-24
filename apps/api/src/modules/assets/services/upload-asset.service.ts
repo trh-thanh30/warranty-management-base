@@ -87,6 +87,10 @@ export class UploadAssetService {
     return this.storage.getStream(filePath);
   }
 
+  async list(prefix: string) {
+    return this.storage.list(prefix);
+  }
+
   public determineAssetType(mime: string): asset_type {
     if (mime.startsWith('image/')) return asset_type.IMAGE;
     if (mime.startsWith('video/')) return asset_type.VIDEO;

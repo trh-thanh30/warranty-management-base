@@ -1,7 +1,7 @@
 import { PrismaService } from '@/database/prisma/prisma.service';
+import { UploadAssetService } from '@/modules/assets/services/upload-asset.service';
 import { SendEmailUseCase } from '@/modules/email/use-cases/send-email.usecase';
 import { WarrantyCertificateEmailContentService } from '@/modules/warranty-certificates/services/warranty-certificate-email-content.service';
-import { WarrantyCertificatePdfService } from '@/modules/warranty-certificates/services/warranty-certificate-pdf.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { warranty_certificate_email_status } from '@prisma/client';
 
@@ -15,7 +15,7 @@ export class WarrantyCertificateEmailQueueService {
     private readonly prismaService: PrismaService,
     private readonly sendEmailUseCase: SendEmailUseCase,
     private readonly emailContentService: WarrantyCertificateEmailContentService,
-    private readonly pdfService: WarrantyCertificatePdfService,
+    private readonly uploadAssetService: UploadAssetService,
   ) {}
 
   async queueEmail(certificateId: string) {
@@ -49,6 +49,9 @@ export class WarrantyCertificateEmailQueueService {
     if (!certificate.recipient_email) {
       throw new Error('Warranty certificate recipient email is required');
     }
+    if (!certificate.storage_key) {
+      throw new Error('Warranty certificate PDF is not available in storage');
+    }
 
     const requestId = this.getRequestId(certificate.metadata);
     const request = requestId
@@ -81,12 +84,15 @@ export class WarrantyCertificateEmailQueueService {
     };
 
     try {
+      const pdfStream = await this.uploadAssetService.getStream(
+        certificate.storage_key,
+      );
+      const pdfBuffer = await this.streamToBuffer(pdfStream);
+
       await this.sendEmailUseCase.execute({
         attachments: [
           {
-            contentBase64: (
-              await this.pdfService.createPdfBuffer(emailInput)
-            ).toString('base64'),
+            contentBase64: pdfBuffer.toString('base64'),
             contentType: 'application/pdf',
             filename: `${certificate.certificate_number}.pdf`,
           },
@@ -151,5 +157,13 @@ export class WarrantyCertificateEmailQueueService {
     return value && typeof value === 'object' && !Array.isArray(value)
       ? (value as Record<string, unknown>)
       : null;
+  }
+
+  private async streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
+    const chunks: Buffer[] = [];
+    for await (const chunk of stream) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+    return Buffer.concat(chunks);
   }
 }

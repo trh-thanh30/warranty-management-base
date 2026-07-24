@@ -11,6 +11,12 @@ export interface SaveResult {
   size: number;
 }
 
+export interface StoredObject {
+  path: string;
+  size: number;
+  lastModified: Date;
+}
+
 export interface IStorageService {
   /**
    * Save a file to storage.
@@ -37,4 +43,10 @@ export interface IStorageService {
    * @param relativePath - Path relative to storage root
    */
   getStream(relativePath: string): Promise<Readable>;
+
+  /**
+   * List files below a storage-compatible path prefix.
+   * @param prefix - Access directory and optional key prefix (e.g. "private")
+   */
+  list(prefix: string): Promise<StoredObject[]>;
 }

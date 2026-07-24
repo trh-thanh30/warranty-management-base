@@ -24,6 +24,7 @@
       "serviceCenters": "Service centers",
       "contentPages": "Content pages",
       "notifications": "Notifications",
+      "system": "Storage monitoring",
       "signOut": "Sign out",
       "signingOut": "Signing out..."
     }
@@ -2010,6 +2011,67 @@
     },
     "save": "Save changes",
     "saving": "Saving changes..."
+  },
+  "StorageMonitoring": {
+    "eyebrow": "System operations",
+    "title": "Storage monitoring",
+    "description": "Track MinIO usage, warranty certificate growth, temporary objects, and orphaned files.",
+    "refresh": "Refresh data",
+    "refreshing": "Refreshing...",
+    "retry": "Try again",
+    "lastUpdated": "Last updated {value}",
+    "errorTitle": "Storage data is unavailable",
+    "errorDescription": "The dashboard could not read storage usage. Check the API and MinIO connection, then try again.",
+    "alerts": {
+      "UNCONFIGURED": "Budget not configured",
+      "NORMAL": "Normal",
+      "WARNING": "Warning",
+      "CRITICAL": "Critical",
+      "EMERGENCY": "Emergency"
+    },
+    "capacity": {
+      "title": "Storage capacity",
+      "of": "of {capacity}",
+      "used": "currently used",
+      "notConfigured": "No budget",
+      "configuredDescription": "Usage is evaluated against the configured storage budget. Alerts begin at 70%.",
+      "unconfiguredDescription": "No storage limit has been set. Contact your system administrator to enable percentage-based alerts.",
+      "progressLabel": "Storage capacity used"
+    },
+    "summary": {
+      "sectionLabel": "Storage summary",
+      "totalObjects": "Total objects",
+      "certificates": "Certificates",
+      "averageSize": "Average PDF size",
+      "perCertificate": "Per warranty certificate",
+      "orphaned": "Orphaned PDFs"
+    },
+    "distribution": {
+      "title": "Storage by bucket",
+      "description": "Compare current usage across public, private, and temporary buckets.",
+      "ariaLabel": "Storage distribution: public {publicShare}%, private {privateShare}%, temporary {tempShare}%.",
+      "legendLabel": "Storage distribution legend",
+      "legendValue": "{bytes} · {share}%",
+      "tooltipValue": "{bytes} · {objects} objects · {share}%",
+      "empty": "No storage usage data to display yet."
+    },
+    "buckets": {
+      "title": "Bucket distribution",
+      "description": "Review where storage is consumed and which retention policy applies.",
+      "objectCount": "{count} objects · {share}% of storage",
+      "public": {
+        "title": "Public",
+        "description": "Public product and content assets available through the CDN."
+      },
+      "private": {
+        "title": "Private",
+        "description": "Protected documents, including generated warranty certificates."
+      },
+      "temp": {
+        "title": "Temporary",
+        "description": "Short-lived uploads automatically expired by the MinIO lifecycle rule."
+      }
+    }
   },
   "Home": {
     "redirectLabel": "Go to dashboard"

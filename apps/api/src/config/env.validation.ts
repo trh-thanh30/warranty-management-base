@@ -40,6 +40,16 @@ export const envSchema = z
     EXAMPLE_CRON: z.string().default('0 2 * * *'), // every day at 2:00 AM
     EXAMPLE_JOB_ENABLED: z.coerce.boolean().default(true),
     EXAMPLE_JOB_BATCH_SIZE: z.coerce.number().int().positive().default(500),
+    WARRANTY_CERTIFICATE_CLEANUP_CRON: z.string().default('0 3 * * 0'),
+    WARRANTY_CERTIFICATE_CLEANUP_ENABLED: z.coerce.boolean().default(false),
+    WARRANTY_CERTIFICATE_CLEANUP_DRY_RUN: z.coerce.boolean().default(true),
+    WARRANTY_CERTIFICATE_ORPHAN_RETENTION_DAYS: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(30),
+    STORAGE_USAGE_MONITOR_CRON: z.string().default('0 4 * * *'),
+    STORAGE_USAGE_MONITOR_ENABLED: z.coerce.boolean().default(false),
 
     // Health Check Configuration
     HEALTH_ENDPOINTS_ENABLED: z.coerce.boolean().default(false),
@@ -103,6 +113,7 @@ export const envSchema = z
     STORAGE_PUBLIC_DIR_NAME: z.string().default('public'),
     STORAGE_PRIVATE_DIR_NAME: z.string().default('private'),
     STORAGE_TEMP_DIR_NAME: z.string().default('temp'),
+    STORAGE_CAPACITY_BYTES: z.coerce.number().int().positive().optional(),
     MINIO_ENDPOINT: z.string().default('minio'),
     MINIO_PORT: z.coerce.number().int().min(1).max(65535).default(9000),
     MINIO_USE_SSL: z.coerce.boolean().default(false),
@@ -114,6 +125,7 @@ export const envSchema = z
       .string()
       .default('warranty-management-base-private'),
     MINIO_BUCKET_TEMP: z.string().default('warranty-management-base-temp'),
+    MINIO_TEMP_RETENTION_DAYS: z.coerce.number().int().positive().default(7),
 
     // CDN / Public Access
     ASSET_CDN_URL: z.string().default('http://localhost:4100/cdn'),

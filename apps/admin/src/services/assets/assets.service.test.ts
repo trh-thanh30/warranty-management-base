@@ -3,6 +3,42 @@ import test from "node:test";
 import { createAssetsService } from "./create-assets.service.ts";
 import type { AssetsHttpClient } from "./assets.types.ts";
 
+test("loading storage usage calls the admin storage endpoint", async () => {
+  const calls: unknown[] = [];
+  const usage = {
+    alertLevel: "NORMAL",
+    buckets: {
+      private: { bytes: 0, objects: 0 },
+      public: { bytes: 0, objects: 0 },
+      temp: { bytes: 0, objects: 0 },
+    },
+    capacityBytes: null,
+    certificates: {
+      averageBytes: 0,
+      bytes: 0,
+      objects: 0,
+      orphanedBytes: 0,
+      orphanedObjects: 0,
+    },
+    totalBytes: 0,
+    totalObjects: 0,
+    usagePercent: null,
+  };
+  const http = {
+    async get(url: string) {
+      calls.push({ url });
+      return { data: { success: true, data: usage } };
+    },
+  };
+
+  const result = await createAssetsService(
+    http as unknown as AssetsHttpClient,
+  ).getStorageUsage();
+
+  assert.deepEqual(calls, [{ url: "/assets/storage-usage" }]);
+  assert.deepEqual(result, usage);
+});
+
 test("deleting an uploaded asset calls the asset delete endpoint", async () => {
   const calls: unknown[] = [];
   const http = {

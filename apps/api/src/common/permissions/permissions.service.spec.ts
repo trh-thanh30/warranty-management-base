@@ -49,6 +49,48 @@ describe('PermissionService', () => {
     expect(permissions).not.toContain(permission_key.PRODUCT_CREATE);
   });
 
+  it('ignores stale permission overrides that moderators can no longer use', async () => {
+    prismaService.userPermission.findMany.mockResolvedValue([
+      {
+        permission_key: permission_key.SYSTEM_VIEW,
+        granted: true,
+      },
+      {
+        permission_key: permission_key.PRODUCT_DELETE,
+        granted: true,
+      },
+    ]);
+    const service = new PermissionService(prismaService as never);
+
+    const permissions = await service.getEffectivePermissions(
+      'moderator-id',
+      user_role.MODERATOR,
+    );
+
+    expect(permissions).not.toContain(permission_key.SYSTEM_VIEW);
+    expect(permissions).toContain(permission_key.PRODUCT_DELETE);
+  });
+
+  it('removes legacy dependent permissions when view access is missing', async () => {
+    prismaService.userPermission.findMany.mockResolvedValue([
+      {
+        permission_key: permission_key.PRODUCT_VIEW,
+        granted: false,
+      },
+    ]);
+    const service = new PermissionService(prismaService as never);
+
+    const permissions = await service.getEffectivePermissions(
+      'moderator-id',
+      user_role.MODERATOR,
+    );
+
+    expect(permissions).not.toContain(permission_key.PRODUCT_VIEW);
+    expect(permissions).not.toContain(permission_key.PRODUCT_CREATE);
+    expect(permissions).not.toContain(permission_key.PRODUCT_UPDATE);
+    expect(permissions).not.toContain(permission_key.PRODUCT_ASSIGN_OWNER);
+  });
+
   it('rejects user-management permission overrides for moderators', async () => {
     const service = new PermissionService(prismaService as never);
 
@@ -68,5 +110,20 @@ describe('PermissionService', () => {
     await expect(
       service.setUserPermissionOverrides('customer-id', user_role.CUSTOMER, []),
     ).rejects.toBeInstanceOf(BadRequestError);
+  });
+
+  it('rejects moderator overrides with missing view dependencies', async () => {
+    const service = new PermissionService(prismaService as never);
+
+    await expect(
+      service.setUserPermissionOverrides('moderator-id', user_role.MODERATOR, [
+        {
+          permissionKey: permission_key.PRODUCT_VIEW,
+          granted: false,
+        },
+      ]),
+    ).rejects.toMatchObject({
+      code: 'INVALID_PERMISSION_DEPENDENCY',
+    });
   });
 });

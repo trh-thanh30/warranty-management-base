@@ -18,6 +18,7 @@ jest.mock('@aws-sdk/client-s3', () => {
     PutObjectCommand: MockCommand,
     DeleteObjectCommand: MockCommand,
     GetObjectCommand: MockCommand,
+    ListObjectsV2Command: MockCommand,
   };
 });
 
@@ -112,5 +113,34 @@ describe('MinioStorageService', () => {
     await expect(
       service.getStream('public/2026/06/missing.jpg'),
     ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('lists private objects using local-compatible paths', async () => {
+    sendMock.mockResolvedValue({
+      Contents: [
+        {
+          Key: '2026/07/warranty-certificates/certificate.pdf',
+          LastModified: new Date('2026-07-01T00:00:00.000Z'),
+          Size: 123,
+        },
+      ],
+      IsTruncated: false,
+    });
+    const service = new MinioStorageService(config);
+
+    await expect(service.list('private')).resolves.toEqual([
+      {
+        lastModified: new Date('2026-07-01T00:00:00.000Z'),
+        path: 'private/2026/07/warranty-certificates/certificate.pdf',
+        size: 123,
+      },
+    ]);
+    expect(sendMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({
+          Bucket: 'private-bucket',
+        }),
+      }),
+    );
   });
 });

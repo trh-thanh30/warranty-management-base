@@ -132,6 +132,7 @@ export class IssueWarrantyCertificateUseCase {
       attempt < CERTIFICATE_NUMBER_GENERATION_ATTEMPTS;
       attempt += 1
     ) {
+      let uploadedPdfPath: string | null = null;
       try {
         const certificateNumber = generateCertificateNumber();
         const pdfBuffer = await this.pdfService.createPdfBuffer({
@@ -177,6 +178,7 @@ export class IssueWarrantyCertificateUseCase {
             folder: 'warranty-certificates',
           },
         );
+        uploadedPdfPath = uploadedPdf.path;
 
         return await this.prismaService.warrantyCertificate.create({
           data: {
@@ -194,6 +196,20 @@ export class IssueWarrantyCertificateUseCase {
           },
         });
       } catch (error) {
+        if (uploadedPdfPath) {
+          try {
+            await this.uploadAssetService.delete(uploadedPdfPath);
+          } catch (cleanupError) {
+            this.logger.error(
+              `Failed to rollback uploaded certificate ${uploadedPdfPath}: ${
+                cleanupError instanceof Error
+                  ? cleanupError.message
+                  : String(cleanupError)
+              }`,
+            );
+          }
+        }
+
         if (
           attempt < CERTIFICATE_NUMBER_GENERATION_ATTEMPTS - 1 &&
           isCertificateNumberConflict(error)

@@ -6,6 +6,7 @@ import {
   FileText,
   LayoutDashboard,
   LogOut,
+  HardDrive,
   Package,
   Settings,
   ShieldCheck,
@@ -102,6 +103,13 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             icon: Bell,
           },
           {
+            title: t("items.system"),
+            href: "/system",
+            icon: HardDrive,
+            requiredPermission: PERMISSIONS.SYSTEM_VIEW,
+            requiredRole: "admin",
+          },
+          {
             title: t("items.settings"),
             href: "/settings",
             icon: Settings,
@@ -160,6 +168,12 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
         title: t("items.contentPages"),
         href: "/content-pages",
         requiredPermission: PERMISSIONS.CONTENT_PAGE_VIEW,
+      },
+      {
+        title: t("items.system"),
+        href: "/system",
+        requiredPermission: PERMISSIONS.SYSTEM_VIEW,
+        requiredRole: "admin",
       },
       {
         title: t("items.settings"),

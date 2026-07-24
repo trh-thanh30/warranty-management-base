@@ -1,4 +1,5 @@
 import {
+  MODERATOR_PERMISSION_DEPENDENCIES,
   MODERATOR_MANAGEABLE_PERMISSIONS,
   ROLE_DEFAULT_PERMISSIONS,
   type PermissionKey,
@@ -20,6 +21,33 @@ export function buildModeratorPermissionOverrides(
 
     return [{ permissionKey, granted: selected }];
   });
+}
+
+export function toggleModeratorPermission(
+  selectedPermissions: ReadonlySet<PermissionKey>,
+  permission: PermissionKey,
+  checked: boolean,
+): Set<PermissionKey> {
+  const next = new Set(selectedPermissions);
+
+  if (checked) {
+    next.add(permission);
+    const requiredPermission = MODERATOR_PERMISSION_DEPENDENCIES[permission];
+    if (requiredPermission) next.add(requiredPermission);
+    return next;
+  }
+
+  next.delete(permission);
+
+  for (const [dependentPermission, requiredPermission] of Object.entries(
+    MODERATOR_PERMISSION_DEPENDENCIES,
+  )) {
+    if (requiredPermission === permission) {
+      next.delete(dependentPermission as PermissionKey);
+    }
+  }
+
+  return next;
 }
 
 export function formatPermissionLabel(permission: PermissionKey): string {

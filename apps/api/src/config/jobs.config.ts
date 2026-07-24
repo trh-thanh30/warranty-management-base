@@ -17,4 +17,23 @@ export default registerAs('jobs', () => ({
     enabled: parseBoolean(process.env.EXAMPLE_JOB_ENABLED, true),
     batchSize: parsePositiveInt(process.env.EXAMPLE_JOB_BATCH_SIZE, 500),
   },
+  warrantyCertificateCleanup: {
+    cron: process.env.WARRANTY_CERTIFICATE_CLEANUP_CRON ?? '0 3 * * 0',
+    dryRun: parseBoolean(
+      process.env.WARRANTY_CERTIFICATE_CLEANUP_DRY_RUN,
+      true,
+    ),
+    enabled: parseBoolean(
+      process.env.WARRANTY_CERTIFICATE_CLEANUP_ENABLED,
+      false,
+    ),
+    retentionDays: parsePositiveInt(
+      process.env.WARRANTY_CERTIFICATE_ORPHAN_RETENTION_DAYS,
+      30,
+    ),
+  },
+  storageUsageMonitor: {
+    cron: process.env.STORAGE_USAGE_MONITOR_CRON ?? '0 4 * * *',
+    enabled: parseBoolean(process.env.STORAGE_USAGE_MONITOR_ENABLED, false),
+  },
 }));

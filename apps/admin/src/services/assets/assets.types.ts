@@ -1,4 +1,4 @@
-import type { HttpDelete, HttpWrite } from "../service.types";
+import type { HttpDelete, HttpGet, HttpWrite } from "../service.types";
 
 export type AssetResponse = {
   id: string;
@@ -26,5 +26,6 @@ export type UploadAssetOptions = {
 
 export type AssetsHttpClient = {
   delete: HttpDelete;
+  get: HttpGet;
   post: HttpWrite;
 };

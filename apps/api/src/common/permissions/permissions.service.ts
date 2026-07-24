@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { permission_key, user_role } from '@prisma/client';
 import {
   ALL_PERMISSIONS,
+  getMissingModeratorPermissionDependencies,
   MODERATOR_MANAGEABLE_PERMISSIONS,
   ROLE_DEFAULT_PERMISSIONS,
   normalizeUserRole,
@@ -52,12 +53,28 @@ export class PermissionService {
     for (const override of overrides) {
       const key = override.permission_key;
 
+      if (
+        normalizedRole === 'moderator' &&
+        !MODERATOR_MANAGEABLE_PERMISSIONS.includes(key)
+      ) {
+        continue;
+      }
+
       if (override.granted) {
         effectivePermissions.add(key);
         continue;
       }
 
       effectivePermissions.delete(key);
+    }
+
+    if (normalizedRole === 'moderator') {
+      const missingDependencies =
+        getMissingModeratorPermissionDependencies(effectivePermissions);
+
+      for (const dependency of missingDependencies) {
+        effectivePermissions.delete(dependency.permission);
+      }
     }
 
     return Array.from(effectivePermissions);
@@ -84,6 +101,29 @@ export class PermissionService {
         'One or more permissions cannot be assigned to moderators',
         'INVALID_MODERATOR_PERMISSION',
         { permissions: invalidPermissions },
+      );
+    }
+
+    const effectivePermissions = new Set<PermissionKey>(
+      ROLE_DEFAULT_PERMISSIONS.moderator,
+    );
+
+    for (const override of overrides) {
+      if (override.granted) {
+        effectivePermissions.add(override.permissionKey);
+      } else {
+        effectivePermissions.delete(override.permissionKey);
+      }
+    }
+
+    const missingDependencies =
+      getMissingModeratorPermissionDependencies(effectivePermissions);
+
+    if (missingDependencies.length > 0) {
+      throw new BadRequestError(
+        'One or more permissions require view access',
+        'INVALID_PERMISSION_DEPENDENCY',
+        { dependencies: missingDependencies },
       );
     }
 

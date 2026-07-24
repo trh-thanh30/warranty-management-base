@@ -10,7 +10,10 @@ import {
 } from "@repo/shared/constants";
 import { usersService } from "@/src/services/users/users.service";
 import { useToast } from "@/src/hooks/use-toast";
-import { buildModeratorPermissionOverrides } from "../staff.utils";
+import {
+  buildModeratorPermissionOverrides,
+  toggleModeratorPermission,
+} from "../staff.utils";
 import { staffKeys } from "./use-staff";
 
 export function useStaffPermissions({
@@ -53,12 +56,9 @@ export function useStaffPermissions({
   }, [permissionsQuery.data]);
 
   function toggle(permission: PermissionKey, checked: boolean) {
-    setSelected((current) => {
-      const next = new Set(current);
-      if (checked) next.add(permission);
-      else next.delete(permission);
-      return next;
-    });
+    setSelected((current) =>
+      toggleModeratorPermission(current, permission, checked),
+    );
   }
 
   function restoreDefaults() {
