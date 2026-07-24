@@ -29,11 +29,14 @@
     "tryPrefix": "Try entering",
     "or": "or",
     "mock": {
+      "customerName": "Nguyen Van An",
+      "address": "Ho Chi Minh City",
       "warrantyYears": "15 years",
       "dealer": "Panda Auto Showroom & Hanoi Warranty Center",
       "status": "Active (Official FUJITEK warranty)"
     },
     "supportMessage": "For further support, contact the installation center or FUJITEK hotline.",
+    "supportHotlineLabel": "Hotline",
     "supportClosing": "Thank you for using the FUJITEK E-Warranty system.",
     "result": {
       "serial": "Serial number",

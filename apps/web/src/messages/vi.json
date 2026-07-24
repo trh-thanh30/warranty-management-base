@@ -29,11 +29,14 @@
     "tryPrefix": "Thử tra cứu: nhập",
     "or": "hoặc",
     "mock": {
+      "customerName": "Nguyễn Văn An",
+      "address": "TP. Hồ Chí Minh",
       "warrantyYears": "15 năm",
       "dealer": "Panda Auto Showroom & Trạm Bảo Hành Hà Nội",
       "status": "Đang hiệu lực (Chính hãng FUJITEK)"
     },
     "supportMessage": "Nếu cần hỗ trợ thêm, vui lòng liên hệ đại lý thi công hoặc hotline FUJITEK.",
+    "supportHotlineLabel": "Hotline",
     "supportClosing": "Cảm ơn bạn đã sử dụng hệ thống E-Warranty FUJITEK.",
     "result": {
       "serial": "Số Serial",

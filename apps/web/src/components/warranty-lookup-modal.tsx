@@ -19,8 +19,13 @@ import {
   FileText,
 } from "lucide-react";
 import { Input } from "@repo/ui/input";
-import { demoWarrantyCustomer } from "@/src/constants/warranty.constants";
 import { formControlFocusClassName } from "@/src/components/common/form-control.constants";
+import {
+  demoWarrantyLookupRecord,
+  warrantyLookupEmptyValue,
+  warrantyLookupExamples,
+  warrantyLookupSupportPhone,
+} from "@/src/constants/warranty.constants";
 
 interface WarrantyLookupModalProps {
   isOpen: boolean;
@@ -42,7 +47,6 @@ interface WarrantyLookupResult {
   expiryDate: string;
   dealer: string;
   status: string;
-  // Glass positions
   windshield: string;
   frontLeftGlass: string;
   frontRightGlass: string;
@@ -69,28 +73,34 @@ export function WarrantyLookupModal({
     (query: string) => {
       setIsSearched(true);
       if (query.trim().length > 0) {
+        const normalizedQuery = query.trim();
+
         setSearchResult({
-          serial: "BL/BHDT/000199",
-          code: "FJ-8899-2026",
-          customerName: demoWarrantyCustomer.name,
-          phone: query.includes("09") ? query : "0988 123 456",
-          address: demoWarrantyCustomer.address,
-          carPlate: query.includes("30") ? query : "30H-888.88",
-          carModel: "Lexus RX350 (2025)",
-          filmType: "FUJITEK Sputtering Multi-Layer SP50",
+          serial: demoWarrantyLookupRecord.serial,
+          code: demoWarrantyLookupRecord.code,
+          customerName: t("mock.customerName"),
+          phone: normalizedQuery.includes("09")
+            ? normalizedQuery
+            : demoWarrantyLookupRecord.fallbackPhone,
+          address: t("mock.address"),
+          carPlate: normalizedQuery.includes("30")
+            ? normalizedQuery
+            : demoWarrantyLookupRecord.fallbackCarPlate,
+          carModel: demoWarrantyLookupRecord.carModel,
+          filmType: demoWarrantyLookupRecord.filmType,
           warrantyYears: t("mock.warrantyYears"),
-          installedDate: "15/01/2026",
-          expiryDate: "15/01/2041",
+          installedDate: demoWarrantyLookupRecord.installedDate,
+          expiryDate: demoWarrantyLookupRecord.expiryDate,
           dealer: t("mock.dealer"),
           status: t("mock.status"),
-          windshield: "SP50",
-          frontLeftGlass: "SP30",
-          frontRightGlass: "SP30",
-          rearLeftGlass: "SP30",
-          rearRightGlass: "SP30",
-          sunroof: "",
-          rearGlass: "SP30",
-          notes: "",
+          windshield: demoWarrantyLookupRecord.windshield,
+          frontLeftGlass: demoWarrantyLookupRecord.frontLeftGlass,
+          frontRightGlass: demoWarrantyLookupRecord.frontRightGlass,
+          rearLeftGlass: demoWarrantyLookupRecord.rearLeftGlass,
+          rearRightGlass: demoWarrantyLookupRecord.rearRightGlass,
+          sunroof: demoWarrantyLookupRecord.sunroof,
+          rearGlass: demoWarrantyLookupRecord.rearGlass,
+          notes: demoWarrantyLookupRecord.notes,
         });
       } else {
         setSearchResult(null);
@@ -193,11 +203,11 @@ export function WarrantyLookupModal({
             <p className="text-xs text-stone-gray font-medium text-center">
               {t("tryPrefix")}{" "}
               <code className="bg-light-gray px-2 py-0.5 rounded font-mono text-premium-red font-medium">
-                0988123456
+                {warrantyLookupExamples[0]}
               </code>{" "}
               {t("or")}{" "}
               <code className="bg-light-gray px-2 py-0.5 rounded font-mono text-premium-red font-medium">
-                30H-888.88
+                {warrantyLookupExamples[1]}
               </code>
             </p>
           </form>
@@ -362,7 +372,7 @@ export function WarrantyLookupModal({
                       {t("result.windshield")}
                     </span>
                     <p className="font-semibold text-sm text-deep-black sm:text-right break-words">
-                      {searchResult.windshield || "—"}
+                      {searchResult.windshield || warrantyLookupEmptyValue}
                     </p>
                   </div>
 
@@ -371,7 +381,7 @@ export function WarrantyLookupModal({
                       {t("result.frontLeftGlass")}
                     </span>
                     <p className="font-semibold text-sm text-deep-black sm:text-right break-words">
-                      {searchResult.frontLeftGlass || "—"}
+                      {searchResult.frontLeftGlass || warrantyLookupEmptyValue}
                     </p>
                   </div>
 
@@ -380,7 +390,7 @@ export function WarrantyLookupModal({
                       {t("result.frontRightGlass")}
                     </span>
                     <p className="font-semibold text-sm text-deep-black sm:text-right break-words">
-                      {searchResult.frontRightGlass || "—"}
+                      {searchResult.frontRightGlass || warrantyLookupEmptyValue}
                     </p>
                   </div>
 
@@ -389,7 +399,7 @@ export function WarrantyLookupModal({
                       {t("result.rearLeftGlass")}
                     </span>
                     <p className="font-semibold text-sm text-deep-black sm:text-right break-words">
-                      {searchResult.rearLeftGlass || "—"}
+                      {searchResult.rearLeftGlass || warrantyLookupEmptyValue}
                     </p>
                   </div>
 
@@ -398,7 +408,7 @@ export function WarrantyLookupModal({
                       {t("result.rearRightGlass")}
                     </span>
                     <p className="font-semibold text-sm text-deep-black sm:text-right break-words">
-                      {searchResult.rearRightGlass || "—"}
+                      {searchResult.rearRightGlass || warrantyLookupEmptyValue}
                     </p>
                   </div>
 
@@ -407,7 +417,7 @@ export function WarrantyLookupModal({
                       {t("result.sunroof")}
                     </span>
                     <p className="font-semibold text-sm text-deep-black sm:text-right break-words">
-                      {searchResult.sunroof || "—"}
+                      {searchResult.sunroof || warrantyLookupEmptyValue}
                     </p>
                   </div>
 
@@ -416,7 +426,7 @@ export function WarrantyLookupModal({
                       {t("result.rearGlass")}
                     </span>
                     <p className="font-semibold text-sm text-deep-black sm:text-right break-words">
-                      {searchResult.rearGlass || "—"}
+                      {searchResult.rearGlass || warrantyLookupEmptyValue}
                     </p>
                   </div>
 
@@ -425,7 +435,7 @@ export function WarrantyLookupModal({
                       {t("result.notes")}
                     </span>
                     <p className="font-semibold text-sm text-deep-black sm:text-right break-words">
-                      {searchResult.notes || "—"}
+                      {searchResult.notes || warrantyLookupEmptyValue}
                     </p>
                   </div>
                 </div>
@@ -438,11 +448,14 @@ export function WarrantyLookupModal({
                 </p>
                 <div>
                   <a
-                    href="tel:19009169"
+                    href={warrantyLookupSupportPhone.href}
                     className="inline-flex items-center gap-2 bg-premium-red hover:bg-warm-red text-white px-5 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all shadow-md hover:scale-105"
                   >
                     <Phone className="size-3.5 animate-bounce" />
-                    <span>Hotline: 1900.9169</span>
+                    <span>
+                      {t("supportHotlineLabel")}:{" "}
+                      {warrantyLookupSupportPhone.displayValue}
+                    </span>
                   </a>
                 </div>
                 <p className="text-xs font-semibold text-deep-black uppercase tracking-wide">
