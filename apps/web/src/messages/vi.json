@@ -3,11 +3,1871 @@
     "title": "Web App",
     "description": "Ứng dụng public cho monorepo base"
   },
+  "Metadata": {
+    "title": "FUJITEK - Phim cách nhiệt ô tô cao cấp",
+    "description": "Giải pháp phim cách nhiệt cao cấp FUJITEK – LEXZENZ Việt Nam."
+  },
+  "FloatingQuickAction": {
+    "panelTitle": "Thao tác nhanh",
+    "lookup": "Tra cứu hạn bảo hành",
+    "activate": "Kích hoạt bảo hành",
+    "request": "Gửi yêu cầu bảo hành",
+    "openMenuAriaLabel": "Mở thao tác bảo hành nhanh",
+    "closeMenuAriaLabel": "Đóng thao tác bảo hành nhanh",
+    "mobile": {
+      "lookup": "Tra cứu",
+      "activate": "Kích hoạt",
+      "request": "Yêu cầu"
+    }
+  },
+  "WarrantyLookupModal": {
+    "title": "Tra cứu bảo hành điện tử E-Warranty",
+    "subtitle": "Kiểm tra thông tin tem bảo hành chính hãng FUJITEK",
+    "closeAriaLabel": "Đóng cửa sổ tra cứu bảo hành",
+    "placeholder": "Nhập SĐT / Biển số xe (VD: 30H-888.88) / Mã tem...",
+    "search": "Tra cứu",
+    "tryPrefix": "Thử tra cứu: nhập",
+    "or": "hoặc",
+    "mock": {
+      "warrantyYears": "15 năm",
+      "dealer": "Panda Auto Showroom & Trạm Bảo Hành Hà Nội",
+      "status": "Đang hiệu lực (Chính hãng FUJITEK)"
+    },
+    "supportMessage": "Nếu cần hỗ trợ thêm, vui lòng liên hệ đại lý thi công hoặc hotline FUJITEK.",
+    "supportClosing": "Cảm ơn bạn đã sử dụng hệ thống E-Warranty FUJITEK.",
+    "result": {
+      "serial": "Số Serial",
+      "code": "Mã E-Warranty",
+      "warranty": "Bảo hành",
+      "owner": "Khách hàng",
+      "phone": "Số điện thoại",
+      "address": "Địa chỉ",
+      "carPlate": "Biển số xe",
+      "carModel": "Loại xe",
+      "vehicle": "Biển số & Dòng xe",
+      "film": "Tên gói dán",
+      "warrantyYears": "Thời gian bảo hành (năm)",
+      "installedDate": "Ngày hoàn thành",
+      "expiryDate": "Hạn bảo hành",
+      "dates": "Ngày kích hoạt & Hết hạn",
+      "dealer": "Đơn vị thi công",
+      "glassSection": "Vị trí kính dán phim",
+      "windshield": "Kính lái",
+      "frontLeftGlass": "Kính sườn trước – trái",
+      "frontRightGlass": "Kính sườn trước – phải",
+      "rearLeftGlass": "Kính sườn sau – trái",
+      "rearRightGlass": "Kính sườn sau – phải",
+      "sunroof": "Cửa sổ trời",
+      "rearGlass": "Kính lưng",
+      "notes": "Ghi chú"
+    }
+  },
+  "HomePage": {
+    "hero": {
+      "previousSlideAriaLabel": "Ảnh trình chiếu trước",
+      "nextSlideAriaLabel": "Ảnh trình chiếu tiếp theo",
+      "slides": {
+        "primary": {
+          "alt": "Phim cách nhiệt hiệu suất cao FUJITEK"
+        },
+        "technology": {
+          "alt": "Công nghệ phim cách nhiệt FUJITEK"
+        },
+        "protection": {
+          "alt": "Giải pháp bảo vệ kính xe FUJITEK"
+        }
+      }
+    },
+    "about": {
+      "eyebrow": "Giới thiệu",
+      "title": "Về FUJITEK – LEXZENZ Việt Nam",
+      "mainImageAlt": "FUJITEK – LEXZENZ Việt Nam",
+      "installationImageAlt": "Kỹ thuật viên thi công phim cách nhiệt FUJITEK",
+      "descriptionPrimary": "Với nhiều năm kinh nghiệm trong lĩnh vực nội thất ô tô, Fujitek Auto cung cấp các sản phẩm và dịch vụ nâng cấp xe chất lượng cao, từ thiết bị thông minh đến phim cách nhiệt và phụ kiện cao cấp.",
+      "descriptionSecondary": "FUJITEK Label Films hợp tác cùng các đối tác toàn cầu để mang đến giải pháp phim cách nhiệt công nghệ cao, bảo vệ toàn diện cho xe của bạn.",
+      "learnMore": "Xem thêm",
+      "hotlineLabel": "Hotline tư vấn"
+    },
+    "products": {
+      "eyebrow": "Dòng sản phẩm nổi bật",
+      "title": "PHIM CÁCH NHIỆT CAO CẤP",
+      "description": "Lựa chọn dòng phim cách nhiệt phù hợp với nhu cầu cản nhiệt và vị trí kính xe của bạn.",
+      "bookInstallation": "Chi tiết & Đặt lịch thi công",
+      "viewAll": "Xem tất cả sản phẩm",
+      "specs": {
+        "uv": "Chống tia UV: {value}",
+        "ir": "Cản tia hồng ngoại IR: {value}",
+        "vlt": "Truyền sáng VLT: {value}"
+      },
+      "items": {
+        "sp50": {
+          "badge": "Phun xạ cao cấp",
+          "price": "2.900.000 - 5.800.000 VNĐ",
+          "description": "Dòng phim Multilayer Sputter cao cấp mang lại tầm nhìn trong suốt vượt trội và khả năng chống nóng mạnh mẽ.",
+          "imageAlt": "Phim cách nhiệt FUJITEK SP50"
+        },
+        "sp10": {
+          "badge": "Phun xạ cao cấp",
+          "price": "2.900.000 - 5.800.000 VNĐ",
+          "description": "Tối ưu khả năng chói lóa và cản nhiệt hồng ngoại cho vị trí kính sườn và kính hậu.",
+          "imageAlt": "Phim cách nhiệt FUJITEK SP10"
+        },
+        "b55": {
+          "imageAlt": "Phim cách nhiệt B55 Ultra Nano Ceramic",
+          "price": "3.200.000 VNĐ",
+          "badge": "Phổ biến",
+          "description": "Lựa chọn cho người lái ưu tiên tầm nhìn rõ nét, kết hợp công nghệ Nano Ceramic hiện đại với sắc xanh kim tinh tế."
+        }
+      }
+    },
+    "additionalProducts": {
+      "eyebrow": "Hệ sinh thái sản phẩm & Phụ kiện ô tô",
+      "title": "NGOÀI RA CHÚNG TÔI CÒN CUNG CẤP",
+      "description": "Đa dạng giải pháp độ đèn Bi LED, camera hành trình 4K, cảm biến áp suất lốp, Android Box và phụ kiện ô tô cao cấp chính hãng.",
+      "viewAllCta": "Xem toàn bộ danh mục",
+      "itemCount": "{count} mẫu",
+      "exploreCategory": "Khám phá danh mục",
+      "categories": {
+        "ledBulbs": {
+          "title": "Bóng LED & Bi cầu Mini",
+          "description": "Giải pháp tăng sáng chân cắm zin, cắt sáng chuẩn và hạn chế gây chói."
+        },
+        "biLed": {
+          "title": "Bi LED gầm & Bi LED pha",
+          "description": "Công nghệ chiếu sáng LED hiện đại, tăng tầm quan sát khi di chuyển."
+        },
+        "auxLights": {
+          "title": "Đèn trợ sáng offroad",
+          "description": "Giải pháp trợ sáng cho hành trình đêm, mưa sương và địa hình khó."
+        },
+        "dashcam": {
+          "title": "Camera hành trình 4K",
+          "description": "Ghi hình rõ nét, hỗ trợ lưu trữ hành trình và tăng an toàn sử dụng xe."
+        },
+        "tpms": {
+          "title": "Cảm biến áp suất lốp",
+          "description": "Theo dõi áp suất và nhiệt độ lốp để hỗ trợ vận hành ổn định."
+        },
+        "androidBox": {
+          "title": "Android Box ô tô",
+          "description": "Nâng cấp trải nghiệm giải trí và kết nối trên màn hình nguyên bản."
+        },
+        "retroAccessories": {
+          "title": "Phụ kiện độ đèn",
+          "description": "Bộ phụ kiện hỗ trợ nâng cấp hệ thống chiếu sáng chuyên dụng."
+        }
+      }
+    },
+    "sputter": {
+      "eyebrow": "Công nghệ",
+      "title": "Phún xạ kim loại Sputtering",
+      "descriptionPrimary": "Phát triển theo <brand>FUJITEK Japanese Technology</brand>, quy trình sản xuất hiệu suất cao được kiểm nghiệm trong nhiều năm để đảm bảo độ ổn định và chất lượng film.",
+      "descriptionSecondary": "Công nghệ phún xạ kim loại Sputtering phủ các lớp kim loại cao cấp lên bề mặt film, hình thành lớp phản xạ nhiệt có khả năng phản xạ phần lớn bức xạ hồng ngoại trở lại môi trường bên ngoài, giúp giảm lượng nhiệt truyền vào xe.",
+      "learnMore": "Tìm hiểu công nghệ phim",
+      "chamberImageAlt": "Buồng phún xạ Sputtering theo công nghệ Nhật Bản FUJITEK",
+      "structureImageAlt": "Cấu trúc màng phim Sputtering",
+      "stats": {
+        "warrantyValue": "10 NĂM +",
+        "warrantyLabel": "Bảo hành điện tử",
+        "uvLabel": "Chống tia UV",
+        "irLabel": "Cản tia hồng ngoại"
+      },
+      "details": {
+        "warranty": {
+          "title": "Bảo hành điện tử toàn quốc",
+          "description": "Sự an tâm của khách hàng luôn là ưu tiên hàng đầu. Bên cạnh công nghệ cách nhiệt tiên tiến, hệ thống bảo hành điện tử (E-Warranty) mang đến trải nghiệm quản lý thông tin dễ dàng, minh bạch và đảm bảo quyền lợi lâu dài trong suốt 10 năm sử dụng."
+        },
+        "uv": {
+          "title": "Chống tia UV tối ưu",
+          "description": "Khả năng cản tia UV lên đến 99.9% giúp tạo nên lớp bảo vệ vượt trội, hỗ trợ bảo vệ người dùng và hạn chế tác động của ánh nắng lên nội thất xe, duy trì sự bền đẹp theo thời gian."
+        },
+        "ir": {
+          "title": "Cản tia hồng ngoại IR",
+          "description": "Công nghệ Ceramic Nano thế hệ mới sử dụng các hạt gốm siêu vi điểm trong cấu trúc film, tối ưu khả năng cản tia hồng ngoại mà không ảnh hưởng đến độ trong suốt của kính. Giải pháp này mang lại sự thoải mái, mát mẻ và riêng tư cho người sử dụng."
+        }
+      }
+    },
+    "comparison": {
+      "eyebrow": "Vì sao chọn",
+      "description": "FUJITEK mang đến giải pháp bảo vệ sức khỏe và nâng tầm trải nghiệm trong không gian xe.",
+      "bookNow": "Đặt lịch ngay",
+      "standard": {
+        "title": "Phim thông thường",
+        "items": {
+          "heat": "Cản nhiệt kém, nhanh bay màu sau một năm",
+          "glare": "Gây chói mắt khi đi đêm hoặc trời mưa",
+          "signal": "Kim loại có thể gây nhiễu GPS, E-pass và 4G"
+        }
+      },
+      "fujitek": {
+        "items": {
+          "protection": "Ngăn 99,9% tia UV và 98% tia hồng ngoại IR",
+          "signal": "Công nghệ Sputter tối ưu, không gây nhiễu sóng",
+          "warranty": "Bảo hành điện tử chính hãng lên đến 15 năm"
+        }
+      }
+    },
+    "gallery": {
+      "eyebrow": "Thư viện",
+      "title": "Dự án thực tế",
+      "allCategories": "Tất cả",
+      "previousSlide": "Xem trang ảnh trước",
+      "nextSlide": "Xem trang ảnh tiếp theo",
+      "goToSlide": "Đi tới trang ảnh {index}",
+      "categories": {
+        "ALL": "Tất cả",
+        "SP50": "SP50",
+        "SP10": "SP10",
+        "B55": "B55",
+        "B15": "B15",
+        "L50": "L50",
+        "L15": "L15",
+        "PRODUCTS": "Sản phẩm",
+        "CUSTOMERS": "Khách hàng"
+      },
+      "items": {
+        "lexusSp50": "Lexus RX350 - SP50 kính lái",
+        "vinfastSp10": "VinFast VF8 - SP10 kính sườn",
+        "rangeRoverB55": "Range Rover Velar - B55 Ultra Nano",
+        "mercedesB15": "Mercedes-Benz E300 - B15",
+        "bmwL50": "BMW 530i - L50 Nano Ceramic",
+        "porscheL15": "Porsche Macan - Gói L15 toàn xe"
+      },
+      "uploaded": {
+        "products": {
+          "imageAlt": "Hình ảnh sản phẩm FUJITEK thực tế số {index}",
+          "caption": "Sản phẩm thực tế #{index}"
+        },
+        "customers": {
+          "imageAlt": "Hình ảnh xe khách hàng FUJITEK sau thi công số {index}",
+          "caption": "Khách hàng thực tế #{index}"
+        }
+      }
+    },
+    "faq": {
+      "ariaLabel": "Câu hỏi thường gặp",
+      "eyebrow": "Hỏi đáp",
+      "title": "Câu hỏi thường gặp",
+      "description": "Thông tin về điều kiện, bảo hành, thi công và hỗ trợ được tổng hợp để bạn dễ dàng lựa chọn.",
+      "items": {
+        "warrantyDuration": {
+          "question": "Phim cách nhiệt FUJITEK được bảo hành bao lâu?",
+          "answer": "FUJITEK áp dụng bảo hành điện tử chính hãng lên đến 15 năm cho các lỗi thuộc phạm vi chính sách."
+        },
+        "lookup": {
+          "question": "Tra cứu bảo hành điện tử như thế nào?",
+          "answer": "Nhập số điện thoại, biển số xe hoặc mã E-Warranty để kiểm tra thông tin và thời hạn bảo hành."
+        },
+        "sputterDifference": {
+          "question": "Sputter khác Nano Ceramic thông thường như thế nào?",
+          "answer": "Công nghệ Sputter nâng cao hiệu suất cản nhiệt, duy trì độ trong quang học và được tối ưu để không ảnh hưởng tín hiệu."
+        },
+        "installationTime": {
+          "question": "Thi công phim cách nhiệt mất bao lâu?",
+          "answer": "Thời gian thi công trọn gói thường từ 1,5 đến 2,5 giờ tùy loại xe và gói phim."
+        },
+        "choosePackage": {
+          "question": "Nên chọn gói phim nào cho xe của tôi?",
+          "answer": "Bạn nên chọn theo vị trí kính, nhu cầu cách nhiệt, độ riêng tư và thói quen lái xe. Kính lái thường ưu tiên độ trong, kính sườn và kính hậu có thể chọn mã tối hơn để tăng riêng tư."
+        },
+        "aftercare": {
+          "question": "Sau khi dán phim cần lưu ý gì?",
+          "answer": "Trong vài ngày đầu, nên hạn chế hạ kính, không vệ sinh mạnh bề mặt film và để xe ở môi trường khô thoáng để lớp keo ổn định hoàn toàn."
+        },
+        "signalSafety": {
+          "question": "Phim có ảnh hưởng GPS, ETC hoặc sóng điện thoại không?",
+          "answer": "Các dòng phim FUJITEK được tư vấn theo từng vị trí kính để cân bằng hiệu suất cách nhiệt và khả năng tương thích tín hiệu. Nếu xe dùng nhiều thiết bị thu phát, kỹ thuật viên sẽ đề xuất mã phim phù hợp."
+        },
+        "warrantySupport": {
+          "question": "Khi nào cần gửi yêu cầu bảo hành?",
+          "answer": "Bạn nên gửi yêu cầu khi film có dấu hiệu bong mép, phồng rộp, lỗi bề mặt hoặc thông tin E-Warranty cần được kiểm tra lại trên hệ thống."
+        }
+      }
+    },
+    "brands": {
+      "ariaLabel": "Các thương hiệu xe được hỗ trợ",
+      "title": "Hỗ trợ đa dạng thương hiệu và dòng xe",
+      "brandImageAlt": "Logo {brand}"
+    },
+    "factoryLegacy": {
+      "values": {
+        "title": "Giá trị tạo nên FUJITEK",
+        "description": "Công nghệ chuẩn xác, trải nghiệm cao cấp và cam kết dài hạn.",
+        "items": {
+          "technology": {
+            "title": "Công nghệ",
+            "description": "Nghiên cứu vật liệu và quy trình sản xuất hiện đại để tối ưu hiệu suất phim."
+          },
+          "luxury": {
+            "title": "Trải nghiệm cao cấp",
+            "description": "Độ trong quang học và diện mạo tinh tế phù hợp với nhiều dòng xe."
+          },
+          "commitment": {
+            "title": "Cam kết",
+            "description": "Kiểm soát chất lượng chặt chẽ cùng chính sách bảo hành minh bạch."
+          }
+        }
+      },
+      "factory": {
+        "eyebrow": "Năng lực sản xuất",
+        "title": "Hệ thống nhà máy tiêu chuẩn quốc tế",
+        "facts": {
+          "area": "Dây chuyền sản xuất quy mô lớn, kiểm soát theo từng công đoạn",
+          "countries": "Sản phẩm được phân phối tại nhiều thị trường quốc tế",
+          "quality": "Kiểm định chất lượng trước khi xuất xưởng"
+        }
+      },
+      "metricsTitle": "Chỉ số cam kết",
+      "metrics": {
+        "uv": "Cản tia UV",
+        "ir": "Cản tia hồng ngoại",
+        "clarity": "Độ trong quang học",
+        "warranty": "Bảo hành"
+      },
+      "warrantyValue": "{years} năm",
+      "plants": {
+        "plantOne": {
+          "imageAlt": "Dây chuyền sản xuất phim FUJITEK",
+          "title": "Nhà máy sản xuất",
+          "address": "Hệ thống sản xuất FUJITEK",
+          "description": "Quy trình tự động hóa hỗ trợ kiểm soát độ đồng đều và chất lượng của từng lớp phim."
+        },
+        "plantTwo": {
+          "imageAlt": "Khu vực kiểm định chất lượng FUJITEK",
+          "title": "Trung tâm kiểm định",
+          "address": "Phòng kiểm soát chất lượng FUJITEK",
+          "description": "Các chỉ số quang học, độ bền và khả năng cản nhiệt được kiểm tra trước khi phân phối."
+        }
+      },
+      "research": {
+        "title": "Nghiên cứu và phát triển",
+        "description": "FUJITEK liên tục cải tiến cấu trúc vật liệu để cân bằng hiệu suất cản nhiệt, độ trong và khả năng tương thích tín hiệu."
+      }
+    },
+    "techSlider": {
+      "eyebrow": "Công nghệ phim cách nhiệt",
+      "title": "So sánh ba công nghệ phim ô tô",
+      "description": "Khám phá khác biệt về nguyên lý xử lý nhiệt, độ trong quang học và khả năng tương thích tín hiệu.",
+      "tabsLabel": "Chọn công nghệ phim",
+      "principleLabel": "Nguyên lý hoạt động",
+      "advantagesLabel": "Ưu điểm nổi bật",
+      "notesLabel": "Lưu ý kỹ thuật",
+      "recommendationLabel": "Vị trí dán khuyến nghị",
+      "positions": {
+        "windshield": "Kính lái:",
+        "sideRear": "Kính sườn và kính hậu:",
+        "signal": "Tín hiệu điện tử:"
+      },
+      "metricsTitle": "Thông số {name}",
+      "metrics": {
+        "vlt": "Độ truyền sáng (VLT)",
+        "uv": "Cản tia UV",
+        "ir": "Cản tia hồng ngoại",
+        "tser": "Tổng cản nhiệt (TSER)",
+        "glare": "Độ phản gương"
+      },
+      "previousLabel": "Xem công nghệ trước",
+      "nextLabel": "Xem công nghệ tiếp theo",
+      "items": {
+        "cr": {
+          "name": "Nano Ceramic",
+          "code": "Dòng CR Series",
+          "badge": "Gốm Nano cao cấp",
+          "tagline": "Hấp thụ và phân tán nhiệt hồng ngoại mà không gây nhiễu sóng.",
+          "principle": "Các hạt gốm kích thước nano được phân bố đồng đều để xử lý tia nhiệt hồng ngoại mà không sử dụng kim loại.",
+          "pros": {
+            "0": "Độ phản gương thấp, tầm nhìn tự nhiên cả ngày lẫn đêm",
+            "1": "Không ảnh hưởng GPS, 4G/5G và thẻ ETC",
+            "2": "Màu sắc ổn định, hạn chế oxy hóa theo thời gian"
+          },
+          "notes": {
+            "0": "Bề mặt kính có thể ấm nhẹ sau thời gian dài dưới nắng",
+            "1": "Hiệu quả phụ thuộc vào mật độ hạt Ceramic và chất lượng sản xuất"
+          },
+          "recommendation": {
+            "windshield": "VLT 50%–70% cho tầm nhìn rõ và ít chói",
+            "sideRear": "VLT 15%–35% để tăng riêng tư",
+            "signal": "Phù hợp với thiết bị thông minh và GPS"
+          }
+        },
+        "rf": {
+          "name": "Sputter phản xạ nhiệt",
+          "code": "Dòng RF Sputtered Series",
+          "badge": "Phún xạ kim loại siêu mỏng",
+          "tagline": "Phản xạ nhiệt mặt trời ra ngoài để bề mặt kính mát hơn.",
+          "principle": "Nhiều lớp kim loại quý siêu mỏng được phủ trong môi trường chân không để phản xạ bức xạ nhiệt.",
+          "pros": {
+            "0": "Hiệu suất phản xạ nhiệt cao",
+            "1": "Chỉ số IR và TSER nổi bật",
+            "2": "Độ bền cơ học và tuổi thọ màng phim cao"
+          },
+          "notes": {
+            "0": "Độ phản gương cao hơn Ceramic thuần",
+            "1": "Cần chọn đúng dòng tối ưu tín hiệu ETC và GPS"
+          },
+          "recommendation": {
+            "windshield": "RF50 hoặc RF70 cho kính lái sáng rõ",
+            "sideRear": "RF15 hoặc RF30 để tăng khả năng cản nhiệt",
+            "signal": "Dòng FUJITEK cao cấp được tối ưu để hạn chế ảnh hưởng tín hiệu"
+          }
+        },
+        "hb": {
+          "name": "Hybrid Ceramic",
+          "code": "Dòng HB Hybrid Series",
+          "badge": "Công nghệ lai",
+          "tagline": "Cân bằng giữa Ceramic và lớp phủ phản xạ nhiệt.",
+          "principle": "Lớp hạt Ceramic Nano kết hợp lớp phủ phản quang siêu mỏng để đồng thời hấp thụ và phản xạ nhiệt.",
+          "pros": {
+            "0": "Cân bằng hiệu suất cản nhiệt và tầm nhìn",
+            "1": "Giảm tải hệ thống điều hòa",
+            "2": "Hiệu năng tốt trong mức chi phí hợp lý"
+          },
+          "notes": {
+            "0": "Cần thi công đúng kỹ thuật để duy trì độ bám dính"
+          },
+          "recommendation": {
+            "windshield": "HB50 giúp giảm chói và giữ tầm nhìn rõ",
+            "sideRear": "HB15 hoặc HB20 tăng sự riêng tư",
+            "signal": "Cấu trúc được tinh chỉnh để hạn chế nhiễu GPS"
+          }
+        }
+      },
+      "guide": {
+        "title": "Hướng dẫn đọc chỉ số kỹ thuật",
+        "description": "Hiểu đúng thông số để chọn sản phẩm phù hợp cho từng vị trí kính.",
+        "items": {
+          "vlt": {
+            "title": "Độ truyền sáng (VLT)",
+            "description": "Tỷ lệ ánh sáng đi qua kính. Kính lái thường cần VLT cao hơn để bảo đảm tầm nhìn."
+          },
+          "uv": {
+            "title": "Cản tia UV",
+            "description": "Khả năng hạn chế tia cực tím, hỗ trợ bảo vệ da và nội thất xe."
+          },
+          "ir": {
+            "title": "Cản hồng ngoại (IR)",
+            "description": "Khả năng hạn chế vùng bức xạ hồng ngoại tạo cảm giác nóng."
+          },
+          "tser": {
+            "title": "Tổng cản nhiệt (TSER)",
+            "description": "Tỷ lệ tổng năng lượng mặt trời được phim loại bỏ khỏi khoang xe."
+          }
+        }
+      }
+    },
+    "footer": {
+      "logoAlt": "FUJITEK Window Films",
+      "companyName": "Công ty Cổ phần Vilatek",
+      "navigationTitle": "Về FUJITEK Window Films",
+      "policyTitle": "Chính sách & Quy định",
+      "japan": "FUJITEK JAPAN",
+      "backToTopAriaLabel": "Cuộn lên đầu trang",
+      "copyright": "© {year} FUJITEK Window Films. Đã đăng ký bản quyền.",
+      "offices": {
+        "hcm": {
+          "label": "Trụ sở TP. Hồ Chí Minh:",
+          "address": "7C Nguyễn Ngọc Phương, Phường Thạnh Mỹ Tây, TP. Hồ Chí Minh"
+        },
+        "hanoi": {
+          "label": "Chi nhánh Hà Nội:",
+          "address": "Số 62, Ngõ 20 Nghĩa Đô, Phường Nghĩa Đô, TP. Hà Nội"
+        }
+      },
+      "navigation": {
+        "about": "Về FUJITEK Films",
+        "products": "Sản phẩm",
+        "warranty": "Trung tâm bảo hành",
+        "dealers": "Hệ thống đại lý",
+        "contact": "Liên hệ"
+      },
+      "policy": {
+        "general": "Chính sách & quy định chung",
+        "privacy": "Chính sách bảo mật",
+        "purchasing": "Chính sách mua hàng",
+        "warrantyReturn": "Chính sách bảo hành - Đổi trả",
+        "shipping": "Chính sách giao hàng",
+        "payment": "Chính sách thanh toán"
+      },
+      "hotlines": {
+        "hcm": "Hotline TP. Hồ Chí Minh:",
+        "hanoi": "Hotline Hà Nội:"
+      }
+    }
+  },
+  "ProductsPage": {
+    "hero": {
+      "title": "Sản phẩm",
+      "imageAlt": "Sản phẩm phim cách nhiệt FUJITEK"
+    },
+    "technicalEyebrow": "Dữ liệu kỹ thuật",
+    "technicalTitle": "Thông số kỹ thuật sản phẩm",
+    "officialWarranty": "Thời hạn bảo hành chính hãng",
+    "warrantyYears": "{years} năm",
+    "productImageAlt": "Phim cách nhiệt FUJITEK {code}",
+    "viewDetails": "Xem chi tiết",
+    "structure": "Cấu trúc",
+    "color": "Màu sắc",
+    "categories": {
+      "windshield": "Kính lái",
+      "sideRear": "Sườn/Hậu"
+    },
+    "groups": {
+      "sputter": "Cao cấp nhất",
+      "ultraCeramic": "Cao cấp",
+      "nanoCeramic": "Tiêu chuẩn"
+    },
+    "metrics": {
+      "vlt": "Độ truyền sáng",
+      "internalReflection": "Phản gương trong",
+      "externalReflection": "Phản gương ngoài",
+      "energyTransmission": "Truyền năng lượng",
+      "energyReflection": "Phản xạ năng lượng",
+      "energyAbsorption": "Hấp thụ năng lượng",
+      "uvBlock": "Cản tia UV",
+      "irBlock": "Cản tia IR",
+      "heatTransferCoeff": "Hệ số truyền nhiệt"
+    },
+    "colors": {
+      "skyBlue": "Xanh da trời",
+      "darkCharcoal": "Than đậm",
+      "charcoalBlue": "Xanh than",
+      "smokeGray": "Xám khói",
+      "black": "Đen"
+    },
+    "catalog": {
+      "eyebrow": "Danh mục sản phẩm",
+      "title": "SẢN PHẨM CỦA CHÚNG TÔI",
+      "description": "Đa dạng các giải pháp phim cách nhiệt, hệ thống tăng sáng Bi LED, camera hành trình và phụ kiện ô tô cao cấp.",
+      "categories": {
+        "all": "Tất cả",
+        "film": "Phim cách nhiệt & Decal",
+        "ledBulbs": "Bóng LED & Bi cầu Mini",
+        "biLed": "Bi LED Gầm & Pha",
+        "auxLights": "Đèn trợ sáng",
+        "dashcam": "Camera hành trình",
+        "tpms": "Cảm biến áp suất lốp",
+        "androidBox": "Android Box",
+        "retroAccessories": "Phụ kiện độ đèn"
+      },
+      "specs": {
+        "vlt": "Truyền sáng",
+        "internalReflection": "Phản gương trong",
+        "externalReflection": "Phản gương ngoài",
+        "energyTransmission": "Truyền năng lượng",
+        "energyReflection": "Phản xạ năng lượng",
+        "energyAbsorption": "Hấp thụ năng lượng",
+        "uvBlock": "Cản tia UV",
+        "irBlock": "Cản tia IR",
+        "heatTransferCoeff": "Hệ số truyền nhiệt",
+        "power": "Công suất",
+        "colorTemperature": "Nhiệt màu",
+        "waterResistance": "Chống nước",
+        "luminousFlux": "Quang thông",
+        "beamDistance": "Khoảng cách chiếu",
+        "resolution": "Độ phân giải",
+        "sensor": "Cảm biến",
+        "powerSource": "Nguồn pin",
+        "alertMode": "Cảnh báo",
+        "configuration": "Cấu hình",
+        "operatingSystem": "Hệ điều hành",
+        "control": "Điều khiển",
+        "application": "Ứng dụng",
+        "ledChip": "Chip LED",
+        "connectivity": "Kết nối",
+        "valveType": "Loại van"
+      },
+      "values": {
+        "solar": "Năng lượng mặt trời",
+        "displayAndSound": "Màn hình và âm thanh",
+        "biLedCustomization": "Độ bi pha ô tô",
+        "external": "Van ngoài lắp nhanh"
+      },
+      "items": {
+        "sp50Cat": {
+          "name": "Phim cách nhiệt Multilayer Sputter SP50"
+        },
+        "sp10Cat": {
+          "name": "Phim cách nhiệt Multilayer Sputter SP10"
+        },
+        "b55Cat": {
+          "name": "Phim cách nhiệt Ultra Nano Ceramic B55"
+        },
+        "b15Cat": {
+          "name": "Phim cách nhiệt Ultra Nano Ceramic B15"
+        },
+        "l50Cat": {
+          "name": "Phim cách nhiệt Nano Ceramic L50"
+        },
+        "l15Cat": {
+          "name": "Phim cách nhiệt Nano Ceramic L15"
+        },
+        "ledMini1": {
+          "name": "Bóng LED Bi cầu Mini X1 High Power"
+        },
+        "biledPro1": {
+          "name": "Bi LED Gầm chống nước IP68 Laser Pro"
+        },
+        "auxLight1": {
+          "name": "Đèn trợ sáng Offroad Matrix Spot 40W"
+        },
+        "dashcam4k": {
+          "name": "Camera hành trình 4K trước sau GPS"
+        },
+        "tpmsSolar": {
+          "name": "Cảm biến áp suất lốp năng lượng mặt trời"
+        },
+        "androidBoxDx": {
+          "name": "Android Box ô tô RAM 8GB / 128GB"
+        },
+        "retroAcc1": {
+          "name": "Mắt quỷ đổi màu App và Angel Eyes Matrix"
+        },
+        "biledLaserGt": {
+          "name": "Bi LED Laser GT Ultra 90W"
+        },
+        "dashcamMini2k": {
+          "name": "Camera hành trình Mini 2K WiFi 6"
+        },
+        "tpmsSolarPro": {
+          "name": "Cảm biến áp suất lốp van ngoài Bluetooth"
+        }
+      },
+      "itemCount": "Có {count} sản phẩm",
+      "searchPlaceholder": "Tìm kiếm sản phẩm, mã sản phẩm...",
+      "noResultsTitle": "Không tìm thấy sản phẩm nào",
+      "noResultsDesc": "Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc tìm kiếm.",
+      "clearSearch": "Xóa tìm kiếm",
+      "pageInfo": "Trang {current} / {total}",
+      "prev": "Trang trước",
+      "next": "Trang sau",
+      "itemsPerPageLabel": "Hiển thị",
+      "perPage": "trang"
+    }
+  },
+  "ProductDetailPage": {
+    "breadcrumbs": {
+      "home": "Trang chủ",
+      "products": "Sản phẩm"
+    },
+    "specsTitle": "THÔNG SỐ KỸ THUẬT CHI TIẾT",
+    "featuresTitle": "ĐẶC ĐIỂM NỔI BẬT & CÔNG NGHỆ LÕI",
+    "warrantyLabel": "BẢO HÀNH CHÍNH HÃNG",
+    "warrantyYears": "{years} NĂM BẢO HÀNH E-WARRANTY",
+    "bookInstallationCta": "ĐẶT LỊCH THI CÔNG NGAY",
+    "consultHotline": "TƯ VẤN HOTLINE: 0886.33.77.33",
+    "notFound": "Không tìm thấy sản phẩm yêu cầu.",
+    "backToCatalog": "Quay lại danh mục sản phẩm",
+    "relatedTitle": "SẢN PHẨM LIÊN QUAN",
+    "introductionTitle": "Giới thiệu sản phẩm",
+    "technologyTitle": "Công nghệ & điểm nổi bật",
+    "applicationsTitle": "Ứng dụng phù hợp",
+    "placements": {
+      "windshield": "Kính lái",
+      "sideRear": "Kính sườn / kính hậu"
+    },
+    "colors": {
+      "skyBlue": "Xanh da trời",
+      "darkCharcoal": "Than đậm",
+      "charcoalBlue": "Xanh than",
+      "smokeGray": "Xám khói",
+      "black": "Đen"
+    },
+    "summary": {
+      "color": "Màu sắc: {value}",
+      "vlt": "Độ xuyên sáng (VLT): {value}",
+      "ir": "Cản tia hồng ngoại (IRR): {value}",
+      "uv": "Cản tia cực tím (UVR): {value}",
+      "heatTransfer": "Hệ số truyền nhiệt: {value}"
+    },
+    "specLabels": {
+      "structure": "Cấu trúc",
+      "color": "Màu sắc"
+    },
+    "film": {
+      "overviewEyebrow": "Tổng quan sản phẩm",
+      "technologyEyebrow": "Công nghệ và vật liệu",
+      "technologyTitle": "Cơ chế phim {technology} {code}",
+      "technologyDescription": "Công nghệ phún xạ kim loại Sputtering phủ các lớp kim loại cao cấp lên bề mặt film, hình thành lớp phản xạ nhiệt có khả năng phản xạ phần lớn bức xạ hồng ngoại trở lại môi trường bên ngoài, giúp giảm lượng nhiệt truyền vào xe.",
+      "hotlineLabel": "Hotline hỗ trợ",
+      "onlineLabel": "Trực tuyến 24/7",
+      "zaloCta": "Tư vấn Zalo",
+      "noTint": "Không nhuộm màu",
+      "facts": {
+        "originLabel": "Xuất xứ",
+        "originValue": "Công nghệ Nhật Bản",
+        "technologyLabel": "Công nghệ",
+        "mechanismLabel": "Cơ chế cách nhiệt",
+        "mechanismValue": "Phản xạ nhiệt",
+        "materialLabel": "Vật liệu",
+        "materialValue": "Kim loại cao cấp"
+      },
+      "specsEyebrow": "Thông số đo đạc",
+      "specsTitle": "Thông số kỹ thuật sản phẩm",
+      "metrics": {
+        "vlt": "Độ xuyên sáng",
+        "internalReflection": "Phản gương trong",
+        "externalReflection": "Phản gương ngoài",
+        "energyTransmission": "Truyền năng lượng",
+        "energyReflection": "Phản xạ năng lượng",
+        "energyAbsorption": "Hấp thụ năng lượng",
+        "uvBlock": "Cản tia UV",
+        "irBlock": "Cản tia IR",
+        "heatTransferCoeff": "Hệ số truyền nhiệt"
+      },
+      "spectrumEyebrow": "Biểu đồ quang phổ",
+      "spectrumTitle": "Phân tích quang phổ mã {code}",
+      "spectrumImageAlt": "Biểu đồ quang phổ {index} của mã {code}",
+      "spectrumDescription": "Biểu đồ thể hiện mức truyền sáng và phản xạ theo từng dải bước sóng từ tia cực tím, ánh sáng nhìn thấy đến tia hồng ngoại. Các chỉ số giúp đánh giá đồng thời tầm nhìn, khả năng cản tia UV và hiệu suất phản xạ nhiệt của film.",
+      "mechanismEyebrow": "Cơ chế hoạt động",
+      "mechanismTitle": "Cơ chế phản xạ nhiệt trên {code}",
+      "visibleLightTitle": "Cho phép ánh sáng nhìn thấy đi qua",
+      "visibleLightDescription": "Cấu trúc film được kiểm soát để duy trì độ truyền sáng phù hợp với từng vị trí kính, giúp người lái quan sát rõ ràng vào ban ngày và ban đêm.",
+      "infraredTitle": "Phản xạ tia hồng ngoại",
+      "infraredDescription": "Các lớp vật liệu cao cấp phản xạ phần lớn bức xạ hồng ngoại trở lại môi trường bên ngoài, hạn chế nhiệt truyền qua kính và giúp khoang xe mát hơn.",
+      "reasonsEyebrow": "Lý do lựa chọn",
+      "reasonsTitle": "Vì sao nên lựa chọn phim cách nhiệt FUJITEK?",
+      "reasons": [
+        {
+          "title": "Phản xạ nhiệt hiệu quả",
+          "description": "Giảm lượng nhiệt truyền qua kính và hạn chế bề mặt kính tích nhiệt."
+        },
+        {
+          "title": "Tầm nhìn trong rõ",
+          "description": "Duy trì khả năng quan sát ổn định trong nhiều điều kiện ánh sáng."
+        },
+        {
+          "title": "Bảo hành điện tử dài hạn",
+          "description": "Quản lý quyền lợi minh bạch trên hệ thống E-Warranty."
+        },
+        {
+          "title": "Kết nối ổn định",
+          "description": "Không gây nhiễu GPS, ETC và các thiết bị thông minh trên xe."
+        },
+        {
+          "title": "Giải pháp theo nhu cầu",
+          "description": "Nhiều mã film phù hợp từng vị trí kính và ngân sách sử dụng."
+        }
+      ],
+      "climateEyebrow": "Thích ứng tại Việt Nam",
+      "climateTitle": "Tối ưu cho điều kiện khí hậu Việt Nam",
+      "climateDescription": "Công nghệ Nhật Bản của FUJITEK được tinh chỉnh cho điều kiện nắng nóng và cường độ bức xạ cao tại Việt Nam. Film cân bằng khả năng cách nhiệt, độ trong quang học và sự ổn định lâu dài để đáp ứng nhu cầu sử dụng thực tế.",
+      "galleryEyebrow": "Thư viện thi công",
+      "galleryTitle": "Hình ảnh thực tế",
+      "galleryImageAlt": "Hình ảnh thi công {code} số {index}",
+      "previousImage": "Ảnh trước",
+      "nextImage": "Ảnh tiếp theo"
+    },
+    "products": {
+      "sp50Cat": {
+        "eyebrow": "Phim cách nhiệt cao cấp",
+        "description": "SP50 là dòng phim cách nhiệt Multilayer Sputter dành cho kính lái, cân bằng giữa độ sáng, khả năng cản nhiệt và độ trong quang học.",
+        "introduction": [
+          "Cấu trúc phún xạ đa lớp giúp kiểm soát bức xạ hồng ngoại hiệu quả mà vẫn giữ tầm nhìn rõ ràng cho người lái.",
+          "Tông màu xanh nhẹ tạo cảm giác cao cấp, phù hợp xe cần kính lái sáng nhưng vẫn giảm nóng rõ rệt.",
+          "Hệ thống E-Warranty hỗ trợ bảo hành điện tử minh bạch trong suốt quá trình sử dụng."
+        ],
+        "features": [
+          "Cản tia hồng ngoại đến 98% để giảm cảm giác nóng từ kính lái.",
+          "Cản tia UV 99.9%, hỗ trợ bảo vệ da và nội thất.",
+          "Độ truyền sáng 50.6% phù hợp vị trí kính lái cần quan sát tốt."
+        ],
+        "applications": [
+          "Kính lái xe cá nhân và xe dịch vụ cao cấp.",
+          "Khách hàng ưu tiên tầm nhìn trong, ít phản gương.",
+          "Xe thường xuyên di chuyển ban ngày hoặc trong đô thị nắng nóng."
+        ]
+      },
+      "ledMini1": {
+        "eyebrow": "Nâng cấp ánh sáng",
+        "description": "Bóng LED Bi cầu Mini X1 hỗ trợ tăng sáng gọn gàng cho xe cần cải thiện tầm quan sát mà vẫn giữ layout zin.",
+        "introduction": [
+          "Thiết kế nhỏ gọn giúp tối ưu không gian lắp đặt.",
+          "Nguồn sáng 6000K cho màu ánh sáng hiện đại và dễ quan sát."
+        ],
+        "features": [
+          "Công suất 55W.",
+          "Cắt sáng rõ, hạn chế gây chói khi căn chỉnh đúng kỹ thuật.",
+          "Phù hợp nhiều dòng xe phổ thông."
+        ],
+        "applications": [
+          "Nâng cấp đèn gầm hoặc cụm đèn có không gian hạn chế.",
+          "Xe cần cải thiện ánh sáng khi đi đêm."
+        ]
+      },
+      "biledPro1": {
+        "eyebrow": "Bi LED gầm",
+        "description": "Bi LED Gầm Laser Pro được thiết kế cho nhu cầu tăng sáng mạnh, chống nước tốt và vận hành ổn định trong điều kiện thời tiết phức tạp.",
+        "introduction": [
+          "Chuẩn IP68 hỗ trợ sử dụng trong mưa, sương và môi trường ẩm.",
+          "Quang thông cao giúp mở rộng vùng quan sát phía trước."
+        ],
+        "features": [
+          "Chống nước IP68.",
+          "Quang thông 12,000 LM.",
+          "Hỗ trợ tăng sáng gầm và pha phụ."
+        ],
+        "applications": [
+          "Xe thường xuyên đi tỉnh, đường đèo hoặc thời tiết xấu.",
+          "Khách hàng cần ánh sáng mạnh nhưng vẫn kiểm soát vùng chiếu."
+        ]
+      },
+      "auxLight1": {
+        "eyebrow": "Đèn trợ sáng",
+        "description": "Đèn trợ sáng Matrix Spot 40W hỗ trợ bổ sung vùng chiếu xa cho các hành trình đêm, offroad hoặc cung đường thiếu sáng.",
+        "introduction": [
+          "Thiết kế spot beam tập trung ánh sáng về phía trước.",
+          "Thân đèn phù hợp lắp thêm cho xe cần khả năng quan sát xa."
+        ],
+        "features": [
+          "Công suất 40W.",
+          "Khoảng cách chiếu tham khảo 300m.",
+          "Hỗ trợ điều kiện đường tối và mưa sương."
+        ],
+        "applications": [
+          "Xe bán tải, SUV, xe đi công trình.",
+          "Hành trình đêm, đường trường hoặc địa hình khó."
+        ]
+      },
+      "dashcam4k": {
+        "eyebrow": "Camera hành trình",
+        "description": "Camera hành trình 4K GPS ghi hình rõ nét trước sau, hỗ trợ lưu lại hành trình và tăng tính minh bạch khi vận hành xe.",
+        "introduction": [
+          "Độ phân giải 4K giúp ghi nhận chi tiết biển số và tình huống giao thông tốt hơn.",
+          "GPS hỗ trợ lưu dữ liệu hành trình và tốc độ."
+        ],
+        "features": [
+          "Ghi hình trước sau.",
+          "Cảm biến Sony Starvis 2.",
+          "Hỗ trợ định vị GPS."
+        ],
+        "applications": [
+          "Xe gia đình, xe dịch vụ, xe doanh nghiệp.",
+          "Người dùng cần bằng chứng hành trình rõ ràng."
+        ]
+      },
+      "tpmsSolar": {
+        "eyebrow": "An toàn lốp",
+        "description": "TPMS Solar V2 theo dõi áp suất và nhiệt độ lốp theo thời gian thực, hỗ trợ phát hiện bất thường trước khi gây rủi ro vận hành.",
+        "introduction": [
+          "Nguồn năng lượng mặt trời giúp giảm phụ thuộc sạc thủ công.",
+          "Cảnh báo âm thanh và màn hình riêng giúp người lái nắm tình trạng lốp nhanh hơn."
+        ],
+        "features": [
+          "Cảm biến van trong.",
+          "Nguồn pin năng lượng mặt trời.",
+          "Cảnh báo áp suất và nhiệt độ bất thường."
+        ],
+        "applications": [
+          "Xe đi đường dài.",
+          "Khách hàng ưu tiên an toàn và kiểm soát vận hành."
+        ]
+      },
+      "androidBoxDx": {
+        "eyebrow": "Giải trí thông minh",
+        "description": "Android Box DX8 nâng cấp màn hình zin với cấu hình RAM 8GB / ROM 128GB, hỗ trợ trải nghiệm giải trí và kết nối tiện lợi hơn.",
+        "introduction": [
+          "Giữ màn hình nguyên bản nhưng mở rộng hệ sinh thái ứng dụng.",
+          "Cấu hình cao giúp thao tác mượt hơn khi dùng bản đồ, video và tiện ích."
+        ],
+        "features": [
+          "RAM 8GB / ROM 128GB.",
+          "Android 13.",
+          "Kết nối nhanh với màn hình nguyên bản."
+        ],
+        "applications": [
+          "Xe có màn hình zin cần thêm tính năng thông minh.",
+          "Người dùng thường xuyên dùng bản đồ, nhạc và video."
+        ]
+      },
+      "retroAcc1": {
+        "eyebrow": "Phụ kiện độ đèn",
+        "description": "Bộ phụ kiện mắt quỷ đổi màu App và Angel Eyes Matrix hỗ trợ cá nhân hóa cụm đèn, tạo nhận diện thị giác nổi bật cho xe.",
+        "introduction": [
+          "Điều khiển qua App Bluetooth giúp đổi hiệu ứng linh hoạt.",
+          "Phù hợp các cấu hình độ bi pha chuyên nghiệp."
+        ],
+        "features": [
+          "Điều khiển App Bluetooth.",
+          "Hiệu ứng Angel Eyes Matrix.",
+          "Tăng cá tính cho cụm đèn."
+        ],
+        "applications": [
+          "Xe độ bi pha cần hoàn thiện thẩm mỹ.",
+          "Khách hàng muốn cá nhân hóa ánh sáng nhận diện."
+        ]
+      },
+      "sp10Cat": {
+        "eyebrow": "Phim cách nhiệt cao cấp",
+        "description": "SP10 là phim Multilayer Sputter dành cho kính sườn và kính hậu, ưu tiên riêng tư và hiệu suất cản nhiệt.",
+        "introduction": [
+          "Cấu trúc phún xạ đa lớp kiểm soát bức xạ hồng ngoại trong điều kiện nắng nóng.",
+          "Sắc phim tối hỗ trợ giảm chói và tăng sự riêng tư cho khoang xe."
+        ],
+        "features": [
+          "Cản tia hồng ngoại đến 98%.",
+          "Cản tia UV 99.9%.",
+          "Độ truyền sáng 12.2% phù hợp kính sườn và kính hậu."
+        ],
+        "applications": [
+          "Kính sườn và kính hậu xe cá nhân.",
+          "Khách hàng ưu tiên riêng tư và giảm chói."
+        ]
+      },
+      "b55Cat": {
+        "eyebrow": "Phim Ultra Nano Ceramic",
+        "description": "B55 mang lại độ trong sáng phù hợp kính lái cùng khả năng cản nhiệt cao của công nghệ Ultra Nano Ceramic.",
+        "introduction": [
+          "Hạt gốm nano phân bố trong cấu trúc film giúp cản nhiệt mà không tạo hiệu ứng phản gương mạnh.",
+          "Tông xanh nhẹ giữ vẻ ngoài tinh tế cho kính lái."
+        ],
+        "features": [
+          "Cản tia hồng ngoại đến 99%.",
+          "Cản tia UV 99.9%.",
+          "Độ truyền sáng 59.7% hỗ trợ quan sát rõ."
+        ],
+        "applications": [
+          "Kính lái xe cá nhân và xe dịch vụ.",
+          "Người dùng ưu tiên độ trong và khả năng kết nối ổn định."
+        ]
+      },
+      "b15Cat": {
+        "eyebrow": "Phim Ultra Nano Ceramic",
+        "description": "B15 là lựa chọn Ultra Nano Ceramic tối màu cho kính sườn và kính hậu.",
+        "introduction": [
+          "Cấu trúc gốm nano hỗ trợ cản nhiệt cao và không ảnh hưởng tín hiệu.",
+          "Độ tối cân bằng giữa riêng tư và khả năng quan sát từ trong xe."
+        ],
+        "features": [
+          "Cản tia hồng ngoại đến 99%.",
+          "Cản tia UV 99.9%.",
+          "Độ truyền sáng 16%."
+        ],
+        "applications": [
+          "Kính sườn và kính hậu.",
+          "Xe cần tăng riêng tư cho hành khách."
+        ]
+      },
+      "l50Cat": {
+        "eyebrow": "Phim Nano Ceramic",
+        "description": "L50 là phim Nano Ceramic sáng màu dành cho kính lái, cân bằng hiệu suất và chi phí.",
+        "introduction": [
+          "Công nghệ Nano Ceramic hỗ trợ cản nhiệt ổn định mà không gây nhiễu sóng.",
+          "Mức truyền sáng phù hợp nhu cầu quan sát hàng ngày."
+        ],
+        "features": [
+          "Cản tia hồng ngoại đến 92%.",
+          "Cản tia UV 99.9%.",
+          "Bảo hành điện tử 10 năm."
+        ],
+        "applications": [
+          "Kính lái xe gia đình.",
+          "Khách hàng cần giải pháp Nano Ceramic cân bằng."
+        ]
+      },
+      "l15Cat": {
+        "eyebrow": "Phim Nano Ceramic",
+        "description": "L15 là phim Nano Ceramic tối màu dành cho kính sườn và kính hậu.",
+        "introduction": [
+          "Màu tối hỗ trợ riêng tư và giảm chói cho hành khách.",
+          "Cấu trúc Nano Ceramic duy trì kết nối GPS và điện thoại."
+        ],
+        "features": [
+          "Cản tia hồng ngoại đến 85%.",
+          "Cản tia UV 99.9%.",
+          "Bảo hành điện tử 10 năm."
+        ],
+        "applications": [
+          "Kính sườn và kính hậu.",
+          "Xe gia đình cần tăng riêng tư."
+        ]
+      },
+      "biledLaserGt": {
+        "eyebrow": "Bi LED hiệu suất cao",
+        "description": "GT Ultra Laser 90W tăng cường vùng chiếu xa và độ sáng cho hành trình ban đêm.",
+        "introduction": [
+          "Cấu hình công suất cao dành cho hệ thống đèn pha chuyên nghiệp."
+        ],
+        "features": [
+          "Công suất 90W.",
+          "Chip LED OSRAM.",
+          "Vùng chiếu xa rõ nét."
+        ],
+        "applications": [
+          "Xe thường xuyên đi đêm.",
+          "Cấu hình nâng cấp đèn pha chuyên nghiệp."
+        ]
+      },
+      "dashcamMini2k": {
+        "eyebrow": "Camera hành trình nhỏ gọn",
+        "description": "Camera Mini 2K WiFi 6 ghi hình rõ nét trong thiết kế gọn nhẹ.",
+        "introduction": ["Thiết kế nhỏ gọn hạn chế che khuất tầm nhìn."],
+        "features": [
+          "Độ phân giải 2K.",
+          "Kết nối WiFi 6.",
+          "Truy xuất video thuận tiện."
+        ],
+        "applications": [
+          "Xe cá nhân cần camera nhỏ gọn.",
+          "Người dùng cần kết nối không dây nhanh."
+        ]
+      },
+      "tpmsSolarPro": {
+        "eyebrow": "Giám sát áp suất lốp",
+        "description": "TPMS van ngoài Bluetooth hỗ trợ lắp đặt nhanh và theo dõi tình trạng lốp.",
+        "introduction": [
+          "Cảm biến van ngoài thuận tiện khi lắp đặt và bảo trì."
+        ],
+        "features": [
+          "Van ngoài lắp nhanh.",
+          "Bluetooth 5.0.",
+          "Cảnh báo áp suất bất thường."
+        ],
+        "applications": [
+          "Xe cá nhân cần giải pháp TPMS dễ lắp.",
+          "Người dùng ưu tiên theo dõi lốp chủ động."
+        ]
+      }
+    }
+  },
+  "DealersPage": {
+    "hero": {
+      "imageAlt": "Hệ thống đại lý chính thức FUJITEK",
+      "eyebrow": "Hệ thống đại lý",
+      "title": "Trở thành đại lý chính thức ngay hôm nay",
+      "description": "Tìm trung tâm thi công phim cách nhiệt FUJITEK chính hãng gần bạn trên toàn quốc.",
+      "dealerCta": "Tuyển đại lý"
+    },
+    "filters": {
+      "searchPlaceholder": "Tìm theo tên hoặc địa chỉ...",
+      "cityAriaLabel": "Chọn tỉnh hoặc thành phố",
+      "districtAriaLabel": "Chọn quận hoặc huyện",
+      "allCities": "Toàn quốc",
+      "allDistricts": "Quận/Huyện",
+      "nearMe": "Tìm cửa hàng gần bạn (≤ 20 km)",
+      "resultCount": "Có {count} cửa hàng"
+    },
+    "empty": "Không tìm thấy đại lý phù hợp.",
+    "mainShowroom": "Showroom chính",
+    "viewMore": "Xem thêm",
+    "directions": "Chỉ đường",
+    "hotline": "Hotline",
+    "hours": {
+      "daily": "08:00 - 18:30 (Thứ Hai - Chủ Nhật)",
+      "weekdays": "08:00 - 18:00 (Thứ Hai - Thứ Bảy)"
+    },
+    "map": {
+      "defaultTitle": "Bản đồ đại lý FUJITEK",
+      "iframeTitle": "Bản đồ vị trí đại lý FUJITEK",
+      "ariaLabel": "Bản đồ tương tác vị trí đại lý FUJITEK tại Việt Nam",
+      "loading": "Đang tải ranh giới bản đồ Việt Nam...",
+      "loadError": "Không thể tải ranh giới Việt Nam. Vui lòng thử lại.",
+      "selectedDealer": "Đại lý được chọn",
+      "popupPhone": "Điện thoại",
+      "openGoogleMaps": "Mở Google Maps"
+    },
+    "locations": {
+      "cities": {
+        "hoaBinh": "Hòa Bình",
+        "phuYen": "Phú Yên",
+        "hanoi": "Hà Nội",
+        "hoChiMinhCity": "TP. Hồ Chí Minh",
+        "daNang": "Đà Nẵng",
+        "dakLak": "Đắk Lắk"
+      },
+      "districts": {
+        "tanLac": "Tân Lạc",
+        "dongHoa": "Đông Hòa",
+        "cauGiay": "Cầu Giấy",
+        "haDong": "Hà Đông",
+        "thuDuc": "Thủ Đức",
+        "haiChau": "Hải Châu",
+        "buonMaThuot": "Buôn Ma Thuột"
+      }
+    }
+  },
+  "ContactPage": {
+    "eyebrow": "Liên hệ",
+    "title": "FUJITEK – LEXZENZ Việt Nam",
+    "description": "Đội ngũ FUJITEK – LEXZENZ Việt Nam sẵn sàng tư vấn giải pháp cách nhiệt phù hợp cho xe của bạn.",
+    "contactDetailsTitle": "Hotline & Liên hệ",
+    "emailLabel": "Email:",
+    "websiteLabel": "Website:",
+    "offices": {
+      "title": "Địa chỉ & Văn phòng",
+      "hcm": {
+        "label": "Trụ sở TP. Hồ Chí Minh:",
+        "address": "7C Nguyễn Ngọc Phương, Phường Thạnh Mỹ Tây, TP. Hồ Chí Minh"
+      },
+      "hanoi": {
+        "label": "Chi nhánh Hà Nội:",
+        "address": "Số 62, Ngõ 20 Nghĩa Đô, Phường Nghĩa Đô, TP. Hà Nội"
+      }
+    },
+    "hotlines": {
+      "hcm": "Hotline TP. Hồ Chí Minh:",
+      "hanoi": "Hotline Hà Nội:"
+    },
+    "form": {
+      "eyebrow": "Để lại lời nhắn",
+      "submit": "Gửi",
+      "success": {
+        "title": "Cảm ơn bạn đã liên hệ!",
+        "description": "Chuyên viên FUJITEK Films sẽ phản hồi qua số điện thoại của bạn trong thời gian sớm nhất.",
+        "reset": "Gửi lời nhắn mới"
+      },
+      "fields": {
+        "fullName": {
+          "label": "Họ & tên *",
+          "placeholder": "Nhập họ và tên..."
+        },
+        "phone": {
+          "label": "Điện thoại *",
+          "placeholder": "Nhập số điện thoại..."
+        },
+        "content": {
+          "label": "Nội dung *",
+          "placeholder": "Nhập nội dung cần tư vấn..."
+        }
+      }
+    },
+    "maps": {
+      "hanoi": {
+        "title": "Trụ sở Hà Nội",
+        "iframeTitle": "Bản đồ trụ sở FUJITEK Hà Nội"
+      },
+      "hcm": {
+        "title": "Chi nhánh miền Nam",
+        "iframeTitle": "Bản đồ chi nhánh FUJITEK miền Nam"
+      }
+    }
+  },
+  "PolicyPage": {
+    "eyebrow": "Điều khoản & Chính sách bảo hành",
+    "title": "Chính sách bảo hành chính hãng FUJITEK",
+    "description": "Bảo hành điện tử 10 - 15 năm cho các dòng phim Sputtering và Nano Ceramic đủ điều kiện.",
+    "duration": {
+      "title": "1. Thời hạn bảo hành",
+      "description": "Phim cách nhiệt FUJITEK được bảo hành điện tử chính hãng từ 10 đến 15 năm kể từ ngày kích hoạt E-Warranty thành công."
+    },
+    "conditions": {
+      "title": "2. Điều kiện áp dụng bảo hành",
+      "items": {
+        "material": "Màng phim rạn nứt, bong tróc hoặc nổi bọt khí do lỗi vật liệu hay kỹ thuật sản xuất.",
+        "performance": "Màng phim đổi màu hoặc suy giảm hiệu suất vượt mức cho phép trong chính sách.",
+        "registration": "Thông tin E-Warranty được đăng ký và tra cứu thành công trên hệ thống chính hãng."
+      }
+    }
+  },
+  "GuidePage": {
+    "eyebrow": "Hướng dẫn sử dụng",
+    "title": "Hướng dẫn sử dụng & Tra cứu E-Warranty",
+    "description": "Các bước kích hoạt, tra cứu tem chính hãng và chăm sóc phim cách nhiệt ô tô.",
+    "steps": {
+      "receive": {
+        "title": "Bước 1: Nhận tem E-Warranty sau thi công",
+        "description": "Sau khi hoàn tất thi công, đại lý cung cấp tem E-Warranty chính hãng hoặc phiếu kích hoạt điện tử."
+      },
+      "lookup": {
+        "title": "Bước 2: Truy cập tra cứu trực tuyến",
+        "description": "Mở mục tra cứu bảo hành và nhập số điện thoại hoặc biển số xe để xác minh thông tin."
+      }
+    }
+  },
+  "SupportCentersPage": {
+    "eyebrow": "Mạng lưới dịch vụ FUJITEK",
+    "title": "Hệ thống trạm bảo hành & Đại lý",
+    "description": "Mạng lưới đại lý ủy quyền và trung tâm dịch vụ chính hãng trên toàn quốc.",
+    "centers": {
+      "cauGiay": {
+        "city": "Hà Nội",
+        "name": "Panda Auto Showroom & Trạm bảo hành Cầu Giấy",
+        "address": "Số 18 Cầu Giấy, P. Ngọc Khánh, Q. Cầu Giấy, Hà Nội",
+        "hours": "08:00 - 18:30 (Thứ Hai - Chủ Nhật)"
+      },
+      "haDong": {
+        "city": "Hà Nội",
+        "name": "Trung tâm dán phim FUJITEK Hà Đông",
+        "address": "Số 68 Quang Trung, Q. Hà Đông, Hà Nội",
+        "hours": "08:00 - 18:00 (Thứ Hai - Thứ Bảy)"
+      },
+      "hoChiMinhCity": {
+        "city": "TP. Hồ Chí Minh",
+        "name": "Trạm bảo hành ủy quyền FUJITEK TP. Hồ Chí Minh",
+        "address": "Số 102 Xa Lộ Hà Nội, P. Thảo Điền, TP. Thủ Đức, TP. Hồ Chí Minh",
+        "hours": "08:00 - 18:30 (Thứ Hai - Chủ Nhật)"
+      }
+    }
+  },
+  "Warranty": {
+    "hub": {
+      "title": "Trung tâm dịch vụ bảo hành điện tử",
+      "description": "Hệ thống bảo hành điện tử chính hãng FUJITEK giúp tra cứu, kích hoạt và gửi yêu cầu hỗ trợ trên toàn quốc."
+    },
+    "actions": {
+      "title": "Bạn cần làm gì?",
+      "description": "Chọn thao tác bên dưới để sử dụng dịch vụ bảo hành điện tử FUJITEK.",
+      "items": {
+        "lookup": {
+          "badge": "Tra cứu nhanh",
+          "title": "Tra cứu hạn bảo hành",
+          "description": "Kiểm tra tem E-Warranty và thời hạn bảo hành bằng số điện thoại hoặc biển số xe.",
+          "action": "Tra cứu ngay"
+        },
+        "activate": {
+          "badge": "Kích hoạt mới",
+          "title": "Kích hoạt bảo hành",
+          "description": "Kích hoạt mã bảo hành điện tử chính hãng sau khi hoàn tất thi công.",
+          "action": "Kích hoạt ngay"
+        },
+        "request": {
+          "badge": "Gửi sự cố",
+          "title": "Yêu cầu bảo hành",
+          "description": "Gửi thông tin sự cố để nhận hỗ trợ kỹ thuật và hướng dẫn xử lý.",
+          "action": "Tạo yêu cầu"
+        },
+        "track": {
+          "badge": "Cập nhật 24/7",
+          "title": "Theo dõi tiến độ",
+          "description": "Kiểm tra tình trạng xử lý yêu cầu và lịch hẹn dịch vụ.",
+          "action": "Theo dõi ngay"
+        },
+        "dealers": {
+          "badge": "Toàn quốc",
+          "title": "Trạm bảo hành & Đại lý",
+          "description": "Tìm trung tâm dịch vụ FUJITEK được ủy quyền gần bạn.",
+          "action": "Tìm trạm gần nhất"
+        },
+        "policy": {
+          "badge": "Quy định & Hướng dẫn",
+          "title": "Chính sách bảo hành",
+          "description": "Xem điều khoản, phạm vi bảo hành và hướng dẫn kiểm tra sản phẩm.",
+          "action": "Xem chính sách"
+        }
+      }
+    },
+    "activate": {
+      "eyebrow": "Kích hoạt E-Warranty",
+      "title": "Kích hoạt bảo hành điện tử",
+      "description": "Dành cho khách hàng và đại lý kích hoạt E-Warranty sau khi thi công phim cách nhiệt FUJITEK.",
+      "submit": "Xác nhận kích hoạt E-Warranty",
+      "success": {
+        "title": "Kích hoạt bảo hành thành công!",
+        "description": "Thông tin bảo hành điện tử 15 năm cho xe <plate></plate> đã được lưu trên hệ thống FUJITEK.",
+        "reset": "Kích hoạt tem khác"
+      },
+      "fields": {
+        "customerName": {
+          "label": "Họ và tên chủ xe *",
+          "placeholder": "VD: Nguyễn Văn An"
+        },
+        "phone": {
+          "label": "Số điện thoại *",
+          "placeholder": "VD: 0988 123 456"
+        },
+        "carPlate": {
+          "label": "Biển số xe *",
+          "placeholder": "VD: 30H-888.88"
+        },
+        "stampCode": {
+          "label": "Mã tem E-Warranty *",
+          "placeholder": "VD: FJ-8899-2026"
+        }
+      }
+    },
+    "lookup": {
+      "eyebrow": "Hệ thống E-Warranty",
+      "title": "Tra cứu hạn bảo hành điện tử",
+      "description": "Nhập số điện thoại, biển số xe hoặc mã tem E-Warranty để kiểm tra thông tin chính hãng.",
+      "heroImageAlt": "Tra cứu bảo hành điện tử FUJITEK",
+      "placeholder": "Nhập SĐT / Biển số xe / Mã tem...",
+      "search": "Tra cứu",
+      "tryPrefix": "Ví dụ: nhập",
+      "or": "hoặc",
+      "mock": {
+        "warrantyYears": "15 năm",
+        "dealer": "Panda Auto Showroom Hà Nội",
+        "status": "Đang hiệu lực (Chính hãng)"
+      },
+      "result": {
+        "code": "Mã E-Warranty",
+        "serial": "Số Serial",
+        "duration": "Thời hạn",
+        "owner": "Khách hàng",
+        "phone": "Số điện thoại",
+        "address": "Địa chỉ",
+        "carPlate": "Biển số xe",
+        "carModel": "Loại xe",
+        "vehicle": "Biển số & Dòng xe",
+        "film": "Tên gói dán",
+        "warrantyYears": "Thời gian bảo hành (năm)",
+        "installedDate": "Ngày hoàn thành",
+        "expiryDate": "Hạn bảo hành",
+        "dealer": "Đơn vị thi công",
+        "glassSection": "Vị trí kính dán phim",
+        "windshield": "Kính lái",
+        "frontLeftGlass": "Kính sườn trước – trái",
+        "frontRightGlass": "Kính sườn trước – phải",
+        "rearLeftGlass": "Kính sườn sau – trái",
+        "rearRightGlass": "Kính sườn sau – phải",
+        "sunroof": "Cửa sổ trời",
+        "rearGlass": "Kính lưng",
+        "notes": "Ghi chú"
+      },
+      "noResult": "Không tìm thấy thông tin bảo hành. Vui lòng kiểm tra lại số điện thoại hoặc biển số xe."
+    },
+    "request": {
+      "eyebrow": "Yêu cầu dịch vụ bảo hành",
+      "title": "Gửi yêu cầu bảo hành & Hỗ trợ",
+      "description": "Nhận hỗ trợ cho các vấn đề bong tróc, bọt khí, bay màu hoặc lỗi kỹ thuật thi công.",
+      "submit": "Gửi phiếu yêu cầu hỗ trợ",
+      "success": {
+        "title": "Gửi yêu cầu thành công!",
+        "description": "Mã phiếu hỗ trợ của bạn là <ticket></ticket>. Kỹ thuật viên FUJITEK sẽ liên hệ trong vòng 24 giờ.",
+        "reset": "Gửi yêu cầu khác"
+      },
+      "fields": {
+        "customerName": {
+          "label": "Họ và tên *",
+          "placeholder": "VD: Nguyễn Văn An"
+        },
+        "phone": {
+          "label": "Số điện thoại *",
+          "placeholder": "VD: 0988 123 456"
+        },
+        "reference": {
+          "label": "Biển số xe / Mã E-Warranty *",
+          "placeholder": "VD: 30H-888.88"
+        },
+        "issue": {
+          "label": "Vấn đề gặp phải *",
+          "placeholder": "-- Chọn hiện tượng --",
+          "options": {
+            "bubble": "Bong tróc / Bọt khí màng phim",
+            "fade": "Đổi màu / Bay màu",
+            "scratch": "Trầy xước do va chạm",
+            "other": "Hiện tượng khác"
+          }
+        },
+        "details": {
+          "label": "Mô tả chi tiết sự cố",
+          "placeholder": "Mô tả vị trí kính và hiện tượng cần hỗ trợ..."
+        }
+      }
+    },
+    "track": {
+      "eyebrow": "Theo dõi tiến độ dịch vụ",
+      "title": "Theo dõi xử lý bảo hành",
+      "description": "Nhập mã phiếu yêu cầu hoặc số điện thoại để xem lịch hẹn và tiến độ xử lý.",
+      "placeholder": "Nhập mã phiếu REQ-... hoặc SĐT...",
+      "search": "Kiểm tra",
+      "mock": {
+        "issue": "Bong tróc bọt khí kính sườn trái",
+        "status": "Đang tiếp nhận & Lên lịch kỹ thuật",
+        "technician": "Trần Văn Bình - Panda Auto Hà Nội"
+      },
+      "result": {
+        "ticket": "Mã phiếu",
+        "customer": "Khách hàng",
+        "carPlate": "Biển số xe",
+        "technician": "Kỹ thuật phụ trách"
+      }
+    }
+  },
+  "AboutPage": {
+    "metadata": {
+      "title": "Giới thiệu - FUJITEK Window Films",
+      "description": "Tìm hiểu FUJITEK, công nghệ phún xạ đa lớp và Ultra Nano Ceramic."
+    },
+    "hero": {
+      "eyebrow": "Giới thiệu",
+      "title": "PHIM CÁCH NHIỆT CAO CẤP",
+      "titlePrefix": "PHIM CÁCH NHIỆT",
+      "titleHighlight": "CAO",
+      "titleSuffix": "CẤP",
+      "sub": "Phim cách nhiệt cao cấp thế hệ mới — nơi công nghệ phún xạ đa lớp và nano ceramic định nghĩa lại chuẩn mực bảo vệ & trải nghiệm cho xế cưng của bạn.",
+      "description": "Phim cách nhiệt cao cấp thế hệ mới — nơi công nghệ phún xạ đa lớp và nano ceramic định nghĩa lại chuẩn mực bảo vệ & trải nghiệm cho xế cưng của bạn.",
+      "scrollCue": "Cuộn để khám phá",
+      "brandLabel": "FUJITEK",
+      "originLabel": "FUJITEK JAPANESE TECHNOLOGY",
+      "productLabel": "SPUTTER & CERAMIC",
+      "imageAlt": "Phim cách nhiệt FUJITEK Window Films",
+      "stats": {
+        "uvIrValue": "99%",
+        "uvIr": "Cản UV / IR",
+        "originValue": "JP",
+        "origin": "Công nghệ Nhật Bản",
+        "technologyValue": "2-IN-1",
+        "technology": "Sputtering + Ceramic"
+      }
+    },
+    "labels": {
+      "origin": "Xuất xứ công nghệ",
+      "technology": "Công nghệ lõi",
+      "vision": "Tầm nhìn thương hiệu",
+      "contact": "Nhận tư vấn & báo giá"
+    },
+    "sectionRails": {
+      "intro": "GIỚI THIỆU",
+      "anatomy": "CẤU TRÚC",
+      "origin": "XUẤT XỨ",
+      "coreTech": "CÔNG NGHỆ LÕI",
+      "performance": "HIỆU NĂNG",
+      "safety": "AN TOÀN",
+      "audience": "KHÁCH HÀNG",
+      "vision": "TẦM NHÌN"
+    },
+    "marquee": [
+      "PHIM CÁCH NHIỆT CAO CẤP",
+      "CÔNG NGHỆ NHẬT BẢN",
+      "PHÚN XẠ KIM LOẠI ĐA LỚP",
+      "ULTRA NANO CERAMIC"
+    ],
+    "stats": {
+      "uvIr": "Cản tia UV / IR",
+      "origin": "Công nghệ Nhật Bản",
+      "coreTech": "Công nghệ lõi kết hợp",
+      "signal": "Nhiễu sóng điện từ"
+    },
+    "intro": {
+      "eyebrow": "Giới thiệu",
+      "title": "FUJITEK Window Films",
+      "pullquote": "Không chỉ chống nóng — mà còn nâng tầm trải nghiệm trong không gian di chuyển.",
+      "p1": "FUJITEK không chỉ cung cấp phim cách nhiệt, chúng tôi mang đến giải pháp bảo vệ sức khỏe và nâng tầm không gian sang trọng cho xế cưng của bạn. Với vị thế là thương hiệu tiên phong ứng dụng công nghệ Phún Xạ Đa Lớp kết hợp Ultra Nano Ceramic, chúng tôi tự hào mang lại khả năng chống nóng vượt trội, ngăn chặn 99% tia UV/IR mà vẫn đảm bảo tầm nhìn rõ nét tuyệt đối.",
+      "p2": "Tại FUJITEK, sự minh bạch là tôn chỉ hàng đầu – từ thông số kỹ thuật thực tế đến hệ thống bảo hành điện tử tận tâm.",
+      "mainTag": "Ảnh thực tế: xe dán phim",
+      "insetTag": "Kỹ thuật viên thi công"
+    },
+    "standards": {
+      "title": "Định nghĩa lại chuẩn mực phim cách nhiệt cao cấp tại Việt Nam",
+      "p1": "FUJITEK Window Films là dòng phim cách nhiệt cao cấp thế hệ mới, mang đến một tiêu chuẩn khác biệt: không chỉ chống nóng mà còn nâng tầm trải nghiệm trong không gian di chuyển hiện đại.",
+      "p2": "Được phát triển với công nghệ Nhật Bản, FUJITEK kết hợp hiệu năng kỹ thuật, tư duy thẩm mỹ cao cấp và trách nhiệm bền vững với cộng đồng."
+    },
+    "filmLayers": {
+      "eyebrow": "Giải phẫu tấm phim",
+      "title": "Định nghĩa lại chuẩn mực phim cách nhiệt cao cấp tại Việt Nam",
+      "p1": "FUJITEK – The Ultimate Window Films là dòng phim cách nhiệt cao cấp thế hệ mới, chính thức ra mắt tại thị trường Việt Nam với sứ mệnh mang đến một tiêu chuẩn khác biệt: không chỉ chống nóng, mà còn nâng tầm trải nghiệm trong không gian khi di chuyển trong môi trường đô thị hiện đại.",
+      "p2": "Được phát triển với công nghệ Nhật Bản – FUJITEK là sự kết tinh giữa hiệu năng kỹ thuật vượt trội, tư duy thẩm mỹ cao cấp và trách nhiệm bền vững với cộng đồng.",
+      "instruction": "Rê chuột vào từng lớp ↓",
+      "description": "Mỗi lớp phim đảm nhiệm một vai trò riêng, từ bảo vệ bề mặt, phản xạ nhiệt và duy trì độ trong quang học đến độ bám dính ổn định.",
+      "items": {
+        "scratchCoat": {
+          "title": "Lớp phủ chống xước",
+          "description": "Bảo vệ bề mặt, giữ độ trong quang học lâu dài."
+        },
+        "sputterMetal": {
+          "title": "Lớp phún xạ kim loại",
+          "description": "Phản xạ & kiểm soát nhiệt, giảm tia hồng ngoại (IR)."
+        },
+        "opticalBase": {
+          "title": "Lớp nền quang học",
+          "description": "Đảm bảo tầm nhìn rõ nét, không biến dạng hình ảnh."
+        },
+        "nanoCeramic": {
+          "title": "Lớp Ultra Nano Ceramic",
+          "description": "Cản UV cục bộ, phân bố hạt gốm đồng đều cấp nano."
+        },
+        "adhesive": {
+          "title": "Lớp keo & lót bảo vệ",
+          "description": "Bám dính ổn định, an toàn, không phát thải."
+        }
+      }
+    },
+    "origin": {
+      "eyebrow": "Xuất xứ công nghệ",
+      "title": "Nền tảng của sự tin cậy",
+      "badgeValue": "FUJITEK",
+      "badgeLabel": "CÔNG NGHỆ NHẬT BẢN",
+      "p1": "Công nghệ Nhật Bản không chỉ là nền tảng phát triển, mà còn thể hiện cam kết về chất lượng. FUJITEK được nghiên cứu, sản xuất và kiểm soát theo các tiêu chuẩn nghiêm ngặt của ngành vật liệu kỹ thuật cao, đáp ứng đồng thời yêu cầu khắt khe của thị trường ô tô.",
+      "p2": "Tại Việt Nam, FUJITEK được giới thiệu như một giải pháp lâu dài, hướng đến phân khúc khách hàng đề cao giá trị sử dụng thực tế, độ bền công nghệ và trải nghiệm cao cấp, thay vì chạy theo các thông số quảng cáo ngắn hạn.",
+      "timeline": {
+        "research": {
+          "title": "NGHIÊN CỨU",
+          "description": "Vật liệu kỹ thuật cao, tiêu chuẩn châu Á."
+        },
+        "production": {
+          "title": "SẢN XUẤT",
+          "description": "Phún xạ chân không, kiểm soát từng lớp vi mô."
+        },
+        "qualityControl": {
+          "title": "KIỂM SOÁT",
+          "description": "Đáp ứng yêu cầu khắt khe của ngành ô tô."
+        }
+      }
+    },
+    "coreTech": {
+      "eyebrow": "Công nghệ lõi",
+      "title": "Công nghệ lõi – Trái tim của FUJITEK",
+      "subtitle": "Sự khác biệt cốt lõi nằm ở việc ứng dụng đồng thời hai công nghệ tiên tiến hàng đầu hiện nay.",
+      "sputtering": {
+        "title": "Phun Xạ Đa Lớp (Multi-layer Sputtering)",
+        "description": "Tạo màng bằng cách phun xạ các lớp kim loại và hợp chất đặc biệt trong môi trường chân không, cho phép kiểm soát chính xác cấu trúc từng lớp ở cấp độ vi mô.",
+        "b1": "Phản xạ và kiểm soát nhiệt tối ưu",
+        "b2": "Giảm đáng kể tia hồng ngoại (IR)"
+      },
+      "nanoCeramic": {
+        "title": "Ultra Nano Ceramic",
+        "description": "Sử dụng các hạt gốm siêu mịn cấp độ nano phân bố đồng đều, giúp tăng cường khả năng cản tia UV mà vẫn đảm bảo độ trong quang học tuyệt đối.",
+        "b1": "Hạn chế hấp thụ nhiệt cục bộ",
+        "b2": "Giữ tầm nhìn tự nhiên, dễ chịu"
+      }
+    },
+    "performance": {
+      "eyebrow": "Trải nghiệm thực tế",
+      "title": "Hiệu năng gắn liền với trải nghiệm thực tế",
+      "imageAlt": "Ford Everest thi công phim cách nhiệt FUJITEK",
+      "imageCaption": "Ảnh thực tế: Ford Everest",
+      "description": "FUJITEK không được phát triển để “đẹp trên thông số”, mà để tạo ra giá trị sử dụng rõ ràng cho người dùng:",
+      "b1": "Giảm nhiệt hiệu quả, giúp không gian bên trong mát hơn, ổn định hơn",
+      "b2": "Hạn chế tia UV gây lão hóa da, phai màu nội thất và vật liệu",
+      "b3": "Giảm chói, tăng sự thoải mái khi lái xe hoặc làm việc trong không gian nhiều kính",
+      "footerNote": "Tất cả những giá trị đó được xây dựng dựa trên nguyên tắc: hiệu quả bền vững theo thời gian, không đánh đổi độ trong và không gây khó chịu cho người sử dụng.",
+      "items": {
+        "cool": {
+          "title": "Mát và ổn định",
+          "description": "Giảm nhiệt hiệu quả, giúp không gian cabin duy trì trạng thái dễ chịu."
+        },
+        "uvProtect": {
+          "title": "Bảo vệ khỏi tia UV",
+          "description": "Hỗ trợ bảo vệ người dùng và hạn chế hiện tượng phai màu nội thất."
+        },
+        "glare": {
+          "title": "Giảm chói",
+          "description": "Cải thiện tầm nhìn và sự thoải mái khi di chuyển dưới nắng gắt."
+        },
+        "energy": {
+          "title": "Tối ưu năng lượng",
+          "description": "Giảm tải cho điều hòa và hỗ trợ tối ưu mức tiêu thụ nhiên liệu."
+        }
+      }
+    },
+    "safety": {
+      "eyebrow": "An toàn công nghệ",
+      "title": "Thân thiện với môi trường đô thị",
+      "description": "Trong bối cảnh đô thị hóa nhanh và sự phụ thuộc ngày càng lớn vào các thiết bị kết nối, <brand>FUJITEK</brand> được phát triển với tiêu chí <emphasis>an toàn toàn diện</emphasis>:",
+      "imageAlt": "Nội thất xe sử dụng phim cách nhiệt FUJITEK",
+      "imageCaption": "Ảnh thực tế: nội thất xe",
+      "b1": "Vật liệu không độc hại, thân thiện với môi trường",
+      "b2": "Không gây nhiễu sóng điện từ: GPS, điện thoại, thẻ ETC, hệ thống IoT",
+      "b3": "Phù hợp cho xe hơi thế hệ mới",
+      "footerNote": "Bên cạnh đó, việc giảm hấp thụ nhiệt và tối ưu hiệu quả cách nhiệt còn góp phần <emphasis>giảm tiêu thụ năng lượng</emphasis>, gián tiếp cắt giảm phát thải – một giá trị tích cực mà <brand>FUJITEK</brand> mang lại cho cộng đồng và môi trường sống."
+    },
+    "customerValue": {
+      "eyebrow": "Giá trị dành cho khách hàng",
+      "headline": "Một phần của phong cách sống hiện đại",
+      "title": "Giá trị dành cho khách hàng",
+      "description": "<brand>FUJITEK</brand> hướng đến những khách hàng:",
+      "imageAlt": "Xe Porsche sử dụng sản phẩm FUJITEK",
+      "imageCaption": "Ảnh thực tế: Porsche",
+      "b1": "Đề cao chất lượng sống và trải nghiệm dài hạn",
+      "b2": "Yêu cầu cao về hiệu năng, độ bền và tính thẩm mỹ",
+      "b3": "Mong muốn một giải pháp cách nhiệt an toàn, ổn định và đáng tin cậy",
+      "footerNote": "<brand>FUJITEK</brand> không đơn thuần là một lớp phim, mà là <emphasis>một phần của phong cách sống hiện đại – nơi công nghệ phục vụ con người một cách tinh tế và có trách nhiệm</emphasis>."
+    },
+    "vision": {
+      "eyebrow": "Tầm nhìn thương hiệu",
+      "headline": "Chuẩn mực mới cho phim cách nhiệt cao cấp",
+      "title": "Tầm nhìn thương hiệu",
+      "p1": "<brand>FUJITEK Window Films</brand> được xây dựng với tầm nhìn trở thành <emphasis>chuẩn mực mới cho phim cách nhiệt cao cấp tại Việt Nam</emphasis>, đồng hành cùng sự phát triển của đô thị thông minh, giao thông hiện đại và xu hướng sống bền vững.",
+      "p2": "Chúng tôi tin rằng, một sản phẩm tốt không chỉ giải quyết nhu cầu trước mắt, mà còn tạo ra giá trị tích cực lâu dài cho khách hàng, cộng đồng và xã hội."
+    },
+    "coreValues": {
+      "title": "GIÁ TRỊ CỐT LÕI",
+      "subtitle": "Nền tảng tạo nên niềm tin vững bền",
+      "items": {
+        "technology": {
+          "title": "CÔNG NGHỆ ĐỈNH CAO",
+          "description": "Luôn cập nhật những vật liệu mới nhất từ Gốm Nano giúp ngăn chặn 99% tia hồng ngoại và tử ngoại."
+        },
+        "luxury": {
+          "title": "SỰ SANG TRỌNG",
+          "description": "Màu sắc phim được tinh chỉnh để tạo ra sự riêng tư tối ưu và vẻ ngoài cuốn hút cho mọi dòng xe cao cấp."
+        },
+        "commitment": {
+          "title": "CAM KẾT LÂU DÀI",
+          "description": "Chúng tôi đứng sau mọi tấm phim đã dán bằng hệ thống bảo hành điện tử minh bạch và tận tâm."
+        }
+      }
+    }
+  },
+  "SiteHeader": {
+    "logoAlt": "FUJITEK - The Ultimate Window Films",
+    "homeAriaLabel": "Về trang chủ FUJITEK",
+    "desktopNavLabel": "Điều hướng chính",
+    "mobileNavLabel": "Điều hướng di động",
+    "openMenuAriaLabel": "Mở menu",
+    "closeMenuAriaLabel": "Đóng menu",
+    "warrantyLookupAriaLabel": "Tra cứu bảo hành",
+    "dealerCta": "Tuyển đại lý",
+    "nav": {
+      "home": "Trang chủ",
+      "about": "Giới thiệu",
+      "products": "Sản phẩm",
+      "warranty": "Bảo hành",
+      "dealers": "Hệ thống đại lý",
+      "news": "Tin tức",
+      "contact": "Liên hệ"
+    }
+  },
   "Home": {
     "eyebrow": "Monorepo base",
     "title": "Khung ứng dụng web public",
     "description": "Bắt đầu phần domain từ một vertical slice: API route, shared contract, UI state và verification.",
     "primaryAction": "Hành động chính",
     "apiDocs": "Tài liệu API"
+  },
+  "PolicyDetailPage": {
+    "eyebrow": "FUJITEK – Điều khoản và chính sách",
+    "home": "Trang chủ",
+    "companyName": "Công ty Cổ phần Vilatek",
+    "companyDescription": "Chuyên cung cấp phim cách nhiệt FUJITEK và phụ kiện ô tô cao cấp chính hãng.",
+    "offices": {
+      "hcm": {
+        "label": "Trụ sở TP. Hồ Chí Minh",
+        "address": "7C Nguyễn Ngọc Phương, Phường Thạnh Mỹ Tây, TP. Hồ Chí Minh",
+        "hotline": "Hotline HCM: 0886 33 77 33"
+      },
+      "hanoi": {
+        "label": "Chi nhánh Hà Nội",
+        "address": "Số 62, Ngõ 20 Nghĩa Đô, Phường Nghĩa Đô, TP. Hà Nội",
+        "hotline": "Hotline Hà Nội: 0989 017 999"
+      }
+    },
+    "documents": {
+      "general": {
+        "title": "CHÍNH SÁCH & QUY ĐỊNH CHUNG",
+        "lead": "Chào mừng quý khách đến với hệ thống FUJITEK Việt Nam. Khi quý khách hàng truy cập website, tham khảo sản phẩm hoặc sử dụng dịch vụ dán phim cách nhiệt và phụ kiện ô tô của chúng tôi, đồng nghĩa với việc quý khách đã chấp thuận tuân thủ các quy định và điều khoản dưới đây.",
+        "sections": [
+          {
+            "heading": "I. Quy định hình thức thanh toán",
+            "bullets": [
+              "Khách hàng thanh toán ngay khi nghiệm thu công trình dán phim hoặc nhận hàng phụ kiện bằng tiền mặt.",
+              "Trường hợp quý khách muốn thanh toán trước bằng hình thức chuyển khoản ngân hàng hoặc ví điện tử, vui lòng trao đổi trực tiếp với bộ phận Chăm sóc khách hàng (CSKH) qua Hotline 0886 33 77 33 / 0989 017 999 để được hướng dẫn hỗ trợ."
+            ]
+          },
+          {
+            "heading": "II. Chính sách vận chuyển và giao hàng",
+            "bullets": [
+              "Đối với khách hàng ở gần khu vực có tuyến giao hàng trực tiếp hoặc trạm thi công đại lý của FUJITEK: Nhân viên kỹ thuật sẽ trực tiếp hỗ trợ giao hàng và dán phim tại địa chỉ xe đăng ký.",
+              "Đối với các khu vực khác trên toàn quốc: Công ty thực hiện vận chuyển sản phẩm phụ kiện qua hình thức giao hàng chuyển phát COD thu tiền tận nơi thông qua đối tác bưu điện uy tín."
+            ]
+          },
+          {
+            "heading": "III. Chính sách đổi/trả và bảo hành",
+            "bullets": [
+              "Thời gian nhận và trả bảo hành: Tất cả các ngày trong tuần (trừ Ngày lễ và Chủ nhật), thời gian xử lý không quá 10 ngày làm việc kể từ khi nhận sản phẩm hoặc tiếp nhận thông tin bảo hành.",
+              "Các sản phẩm phim phún xạ Sputter và Nano Ceramic được bảo hành điện tử chính hãng 10 năm đối với mã Nano Ceramic (L15, L50) và 15 năm đối với mã cao cấp (B55, B15, SP50, SP10) đối với lỗi từ nhà sản xuất.",
+              "Sản phẩm đổi mới trong vòng 03 đến 05 ngày kể từ ngày xuất bán nếu gặp sự cố kỹ thuật không thể khắc phục ngay từ nhà sản xuất."
+            ]
+          },
+          {
+            "heading": "IV. Cam kết bảo mật thông tin",
+            "bullets": [
+              "FUJITEK cam kết bảo mật tuyệt đối dữ liệu cá nhân, thông tin phương tiện và lịch sử kích hoạt E-Warranty của quý khách.",
+              "Thông tin chỉ được sử dụng cho mục đích tra cứu bảo hành, hỗ trợ kỹ thuật và thông báo ưu đãi chăm sóc xe định kỳ."
+            ]
+          }
+        ]
+      },
+      "privacy": {
+        "title": "CHÍNH SÁCH BẢO MẬT THÔNG TIN",
+        "lead": "Tại FUJITEK Việt Nam, việc bảo vệ thông tin cá nhân và dữ liệu phương tiện của khách hàng là rất quan trọng. Quý khách hoàn toàn yên tâm khi cung cấp thông tin cho chúng tôi để sử dụng dịch vụ dán phim cách nhiệt và tra cứu E-Warranty.",
+        "sections": [
+          {
+            "heading": "1. Mục đích và phạm vi thu thập",
+            "bullets": [
+              "Để truy cập và sử dụng một số dịch vụ tại website (tra cứu E-Warranty hoặc đăng ký tư vấn), quý khách có thể được yêu cầu cung cấp thông tin cá nhân bao gồm: Email, Họ tên, Số điện thoại liên lạc, Địa chỉ, Công ty, Tên đăng nhập, Mật khẩu.",
+              "Chúng tôi cũng thu thập thông tin về số lần viếng thăm, bao gồm số trang quý khách xem, số liên kết (links) bạn click, những thông tin liên quan đến kết nối và thông tin trình duyệt Web (Browser) quý khách sử dụng mỗi khi truy cập bao gồm: Địa chỉ IP, loại Browser, ngôn ngữ sử dụng, thời gian và những địa chỉ mà Browser truy xuất đến."
+            ]
+          },
+          {
+            "heading": "2. Phạm vi sử dụng thông tin",
+            "bullets": [
+              "Hỗ trợ khách hàng khi mua sản phẩm và dịch vụ dán phim cách nhiệt.",
+              "Giải đáp các thắc mắc và hỗ trợ kỹ thuật cho khách hàng.",
+              "Cung cấp cho khách hàng thông tin mới nhất trên Website của chúng tôi, thực hiện các khảo sát khách hàng, các hoạt động quảng bá liên quan đến sản phẩm và dịch vụ nếu quý khách đăng ký nhận email thông báo."
+            ]
+          },
+          {
+            "heading": "3. Thời gian lưu trữ thông tin",
+            "bullets": [
+              "Dữ liệu cá nhân của Thành viên sẽ được lưu trữ cho đến khi có yêu cầu hủy bỏ hoặc tự Thành viên đăng nhập và thực hiện hủy bỏ.",
+              "Trong mọi trường hợp còn lại, thông tin cá nhân Thành viên sẽ được bảo mật an toàn trên máy chủ của website trong suốt thời hạn bảo hành sản phẩm (từ 10 đến 15 năm)."
+            ]
+          },
+          {
+            "heading": "4. Địa chỉ của đơn vị thu thập và quản lý thông tin cá nhân",
+            "bullets": [
+              "CÔNG TY CỔ PHẦN THƯƠNG MẠI ĐẦU TƯ FUJITEK VIỆT NAM (FUJITEK – THE ULTIMATE WINDOW FILMS).",
+              "Trụ sở Hà Nội: Số 62, Ngõ 20 Nghĩa Đô, Phường Nghĩa Đô, TP. Hà Nội.",
+              "Văn phòng TP. Hồ Chí Minh: 7C Nguyễn Ngọc Phương, Phường Thạnh Mỹ Tây, TP. Hồ Chí Minh.",
+              "Website: https://fujitek.vn | Email: info@fujitek.vn | Hotline CSKH: 0886 33 77 33 / 0989 017 999."
+            ]
+          },
+          {
+            "heading": "5. Phương tiện và công cụ để người dùng tiếp cận và chỉnh sửa dữ liệu",
+            "bullets": [
+              "Thành viên có quyền tự kiểm tra, cập nhật, điều chỉnh hoặc yêu cầu hủy bỏ thông tin cá nhân của mình bằng cách liên hệ với Ban quản trị website.",
+              "Thành viên có quyền gửi khiếu nại về chất lượng dịch vụ hoặc người bán đến Ban quản trị website qua Email: info@fujitek.vn hoặc Hotline 0886 33 77 33. Khi tiếp nhận phản hồi, chúng tôi sẽ xác nhận lại thông tin và có giải pháp xử lý kịp thời."
+            ]
+          },
+          {
+            "heading": "6. Cam kết bảo mật thông tin cá nhân khách hàng",
+            "bullets": [
+              "Thông tin cá nhân của Thành viên trên website được chúng tôi cam kết bảo mật tuyệt đối theo chính sách bảo vệ thông tin cá nhân. Việc thu thập và sử dụng thông tin chỉ được thực hiện khi có sự đồng ý của khách hàng trừ những trường hợp pháp luật có quy định khác.",
+              "Không sử dụng, không chuyển giao, cung cấp hay tiết lộ cho bên thứ 3 nào về thông tin cá nhân của Thành viên khi không có sự cho phép đồng ý từ Thành viên.",
+              "Trong trường hợp máy chủ lưu trữ thông tin bị hacker tấn công dẫn đến mất mát dữ liệu cá nhân Thành viên, website sẽ có trách nhiệm thông báo vụ việc cho cơ quan chức năng điều tra xử lý kịp thời và thông báo cho Thành viên được biết.",
+              "Bảo mật tuyệt đối mọi thông tin giao dịch trực tuyến của Thành viên bao gồm thông tin hóa đơn kế toán chứng từ số hóa tại khu vực dữ liệu trung tâm an toàn cấp 1 của website.",
+              "FUJITEK hiểu rằng quyền lợi của Quý khách trong việc bảo vệ thông tin cá nhân cũng chính là trách nhiệm của chúng tôi. Nếu có bất kỳ thắc mắc nào liên quan đến việc thông tin bị sử dụng sai mục đích, vui lòng liên hệ Hotline 0886 33 77 33 hoặc Email: info@fujitek.vn."
+            ]
+          }
+        ]
+      },
+      "purchasing": {
+        "title": "CHÍNH SÁCH MUA HÀNG VÀ ĐẶT LỊCH THI CÔNG",
+        "lead": "FUJITEK hiện đang cung cấp tất cả các hình thức mua hàng linh hoạt nhằm phục vụ tốt nhất mọi yêu cầu của quý khách hàng trên khắp cả nước.",
+        "sections": [
+          {
+            "heading": "1. Nguồn gốc sản phẩm và Giấy tờ chứng nhận",
+            "bullets": [
+              "Đối với các sản phẩm phim cách nhiệt bán ra, FUJITEK luôn cung cấp đầy đủ giấy tờ, nguồn gốc hàng hóa (CO/CQ) và những chứng nhận hợp quy với tiêu chuẩn Việt Nam.",
+              "Mỗi cuộn phim khi dán lên xe đều được kiểm định chỉ số cản tia UV (99.9%) và cản IR (97-98%) bằng thiết bị đo chuyên dụng."
+            ]
+          },
+          {
+            "heading": "2. Các hình thức đặt mua hàng linh hoạt",
+            "bullets": [
+              "Quý khách hàng có thể đặt mua hàng và dán phim trực tiếp tại các đại lý của FUJITEK trên toàn quốc.",
+              "Đặt mua qua HOTLINE tư vấn 24/7: 0886 33 77 33 (TP. HCM) / 0989 017 999 (Hà Nội).",
+              "Đặt hàng và đặt lịch thi công trực tuyến trên website chính thức: https://fujitek.vn."
+            ]
+          },
+          {
+            "heading": "3. Quy trình nghiệm thu và Kích hoạt E-Warranty",
+            "bullets": [
+              "Sau khi hoàn tất thi công dán phim, kỹ thuật viên sẽ cùng khách hàng kiểm tra mặt kính, thử nghiệm khả năng cản nhiệt và cấp Mã bảo hành điện tử (E-Warranty) chính thức trên hệ thống."
+            ]
+          }
+        ]
+      },
+      "warrantyReturn": {
+        "title": "CHÍNH SÁCH BẢO HÀNH - ĐỔI TRẢ VÀ HOÀN TIỀN",
+        "lead": "Chính sách bảo hành điện tử và đổi trả của Phim phản xạ nhiệt / cách nhiệt FUJITEK chính hãng đảm bảo tối đa quyền lợi khách hàng.",
+        "sections": [
+          {
+            "heading": "1. Phạm vi áp dụng và Thời hạn bảo hành",
+            "bullets": [
+              "Sản phẩm được bảo hành điện tử 10 năm đối với mã Nano Ceramic (L15, L50).",
+              "Sản phẩm được bảo hành điện tử 15 năm đối với các mã cao cấp (B55, B15, SP50, SP10) đối với lỗi nhà sản xuất bao gồm:",
+              "• Phim bị phồng rộp, nổ keo;",
+              "• Phim bong tróc, tách lớp bề mặt phim;",
+              "• Phim cách nhiệt bị bay màu, đổi màu;",
+              "• Phim gây mùi khó chịu trong khoang xe;",
+              "• Phim được chứng minh sụt giảm tác dụng cản nhiệt so với thông số niêm yết.",
+              "Tất cả các sản phẩm FUJITEK để được bảo hành cần đảm bảo điều kiện có mã Bảo hành điện tử (E-Warranty) hợp lệ và trong thời gian bảo hành theo quy định."
+            ]
+          },
+          {
+            "heading": "2. Trường hợp không được bảo hành",
+            "bullets": [
+              "Phim bị rách, trầy xước, kéo dãn, biến đổi hình dạng do tác động ngoại lực, va chạm tai nạn, mưa gió, thiên tai mà không phải do lỗi kỹ thuật dán.",
+              "Phim bị va đập hoặc bị sử dụng hóa chất tẩy rửa mạnh (axit) tác động làm hỏng bề mặt phim.",
+              "Sử dụng sai nội dung hướng dẫn bảo quản sau dán (như hạ kính khi keo chưa ổn định trong 3-5 ngày đầu).",
+              "Sản phẩm quá thời hạn bảo hành E-Warranty.",
+              "Khách hàng tự ý can thiệp vào bề mặt phim hoặc đem xe đến một nơi nào khác sửa chữa không thuộc hệ thống ủy quyền FUJITEK."
+            ]
+          },
+          {
+            "heading": "3. Điều kiện đổi trả hàng hoặc hoàn tiền 100%",
+            "bullets": [
+              "Sản phẩm mới dán/mua trong vòng 03 - 05 ngày kể từ ngày xuất bán.",
+              "Sản phẩm phát hiện bị lỗi kỹ thuật của nhà sản xuất khi nhận bàn giao.",
+              "Sản phẩm không đúng với sản phẩm mà Quý khách đã đặt hàng trên website của FUJITEK.",
+              "Trường hợp không chấp nhận đổi hoặc trả sản phẩm: Quý khách muốn tự ý thay đổi chủng loại, mẫu mã sau khi dán; Lỗi do người sử dụng; Không chấp nhận các lỗi ngoại quan (xước, móp, méo, vỡ, tem rách, ẩm mốc...) sau khi khách hàng đã nghiệm thu và mang xe ra khỏi cửa hàng."
+            ]
+          },
+          {
+            "heading": "4. Lưu ý về chi phí vận chuyển & Khiếu nại",
+            "bullets": [
+              "Khách hàng chịu trách nhiệm cho chi phí vận chuyển sản phẩm đến trung tâm bảo hành (đối với phụ kiện chuyển phát).",
+              "Thời gian nhận và trả bảo hành: Các ngày trong tuần trừ Ngày lễ và Chủ nhật (không quá 10 ngày kể từ khi tiếp nhận). Mọi thắc mắc vui lòng liên hệ Hotline 0886 33 77 33 / 0989 017 999 để được hỗ trợ nhanh nhất!"
+            ]
+          }
+        ]
+      },
+      "shipping": {
+        "title": "CHÍNH SÁCH VẬN CHUYỂN VÀ GIAO HÀNG",
+        "lead": "FUJITEK cung cấp dịch vụ giao hàng tận nơi trên toàn quốc, áp dụng cho khách hàng mua hàng trên website, fanpage, gọi điện thoại và mua trực tiếp tại cửa hàng, đại lý.",
+        "sections": [
+          {
+            "heading": "1. Phương thức giao hàng & Thời hạn ước tính",
+            "bullets": [
+              "Đơn hàng phụ kiện sẽ được giao đến tận địa chỉ khách hàng đã cung cấp thông qua công ty vận chuyển trung gian uy tín (giao hàng COD).",
+              "Thông thường sau khi nhận được thông tin đặt hàng, chúng tôi sẽ xử lý đơn hàng trong vòng 24h và phản hồi lại thông tin cho khách hàng về việc thanh toán và giao nhận.",
+              "Thời gian giao hàng thường trong khoảng từ 3-5 ngày kể từ ngày chốt đơn hàng hoặc theo thỏa thuận với khách khi đặt hàng."
+            ]
+          },
+          {
+            "heading": "2. Các tình huống bất khả kháng gây chậm trễ",
+            "bullets": [
+              "Nhân viên liên lạc với khách hàng qua điện thoại không được nên không thể giao hàng.",
+              "Địa chỉ giao hàng khách hàng cung cấp không chính xác hoặc khó tìm.",
+              "Số lượng đơn hàng tăng đột biến khiến việc xử lý đơn hàng bị chậm.",
+              "Đối tác vận chuyển bưu điện giao hàng bị chậm do sự cố tuyến đường.",
+              "LƯU Ý: Trường hợp phát sinh chậm trễ trong việc giao hàng, chúng tôi sẽ thông tin kịp thời và quý khách hàng có thể lựa chọn giữa việc Hủy đơn hoặc tiếp tục Chờ."
+            ]
+          },
+          {
+            "heading": "3. Phí vận chuyển & Kiểm tra khi nhận hàng",
+            "bullets": [
+              "Chúng tôi sử dụng dịch vụ vận chuyển ngoài nên cước phí vận chuyển sẽ được tính theo phí của các đơn vị vận chuyển tùy vào vị trí và khối lượng đơn hàng. Khi liên hệ xác nhận đơn, nhân viên sẽ báo mức phí cụ thể.",
+              "Để kiểm tra tình trạng đơn hàng, Quý khách xin vui lòng gọi số hotline 0886 33 77 33 / 0989 017 999, cung cấp tên và số điện thoại để được hỗ trợ.",
+              "Khi hàng được giao, Quý khách hàng vui lòng ký kiểm tra lại số lượng cũng như loại hàng hóa xem có chính xác không với nhân viên giao hàng. Vui lòng giữ lại biên lai vận chuyển và hóa đơn mua hàng để đối chiếu kiểm tra."
+            ]
+          },
+          {
+            "heading": "4. Các giới hạn địa lý cho việc giao hàng",
+            "bullets": [
+              "Riêng khách tỉnh có nhu cầu mua số lượng lớn hoặc đại lý đối tác, chúng tôi sẽ sắp xếp dịch vụ giao nhận của các công ty vận chuyển chuyên tuyến và phí sẽ được tính theo thỏa thuận hợp đồng giữa 2 bên."
+            ]
+          }
+        ]
+      },
+      "payment": {
+        "title": "QUY ĐỊNH HÌNH THỨC THANH TOÁN",
+        "lead": "Nhằm mang đến cho Quý khách những trải nghiệm mua hàng tuyệt vời nhất, FUJITEK đưa ra 3 hình thức thanh toán để Quý khách hàng có thể lựa chọn hình thức thuận tiện và phù hợp với mình nhất.",
+        "sections": [
+          {
+            "heading": "1. Thanh toán tiền mặt trực tiếp tại địa chỉ cửa hàng / trạm thi công",
+            "bullets": [
+              "Quý khách có thể thanh toán trực tiếp bằng tiền mặt tại quầy thu ngân sau khi hoàn tất thi công dán phim và nghiệm thu bàn giao xe tại các Trạm đại lý ủy quyền FUJITEK trên toàn quốc."
+            ]
+          },
+          {
+            "heading": "2. Thanh toán khi nhận hàng (COD - Nhận hàng trả tiền)",
+            "bullets": [
+              "Với phương thức thanh toán này, Quý khách hàng nhận hàng – xem hàng tại nhà và thanh toán bằng tiền mặt cho nhân viên giao hàng.",
+              "FUJITEK chấp nhận hình thức thanh toán khi nhận hàng (COD) cho hầu hết các đơn hàng phụ kiện trên toàn quốc."
+            ]
+          },
+          {
+            "heading": "3. Thanh toán chuyển khoản ngân hàng trước",
+            "bullets": [
+              "Trong quá trình đặt hàng, nếu Quý khách hàng không muốn thanh toán bằng tiền mặt hoặc không thể thanh toán trực tiếp, bạn có thể chọn hình thức thanh toán chuyển khoản, sau đó FUJITEK sẽ tiến hành giao hàng theo thỏa thuận hoặc hợp đồng với Quý khách.",
+              "Tài khoản thanh toán chính thức:",
+              "Chủ tài khoản: CÔNG TY CỔ PHẦN THƯƠNG MẠI ĐẦU TƯ FUJITEK VIỆT NAM",
+              "Số tài khoản: 1234567890",
+              "Ngân hàng: Ngân hàng Ngoại Thương Việt Nam (Vietcombank) – Chi nhánh Chương Dương"
+            ]
+          },
+          {
+            "heading": "4. Lưu ý khi lựa chọn hình thức chuyển khoản trước",
+            "bullets": [
+              "Nội dung chuyển khoản phải ghi rõ họ tên và chuyển cho món hàng/dịch vụ nào. Sau khi chuyển khoản, chúng tôi sẽ liên hệ xác nhận và tiến hành giao hàng.",
+              "Đối với khách hàng có nhu cầu mua số lượng lớn để kinh doanh hoặc buôn sỉ vui lòng liên hệ trực tiếp với chúng tôi để có chính sách giá cả hợp lý. Việc thanh toán sẽ được thực hiện theo hợp đồng. Chúng tôi cam kết kinh doanh minh bạch, hợp pháp, bán hàng chất lượng, có nguồn gốc CO/CQ đầy đủ."
+            ]
+          }
+        ]
+      }
+    }
   }
 }

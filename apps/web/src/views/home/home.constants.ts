@@ -1,196 +1,10 @@
-import type {
-  StatItem,
-  Testimonial,
-  HowItWorksStep,
-  MockWarrantyRecord,
-} from "./home.types";
-
-export const carHeroImage = {
-  src: "/service_1.jpg",
-  alt: "Professional vehicle service checkup",
-};
+import { productCatalog } from "@/src/constants/product-catalog.constants";
 
 export const carHeroImages = [
-  {
-    src: "/service_1.jpg",
-    alt: "Professional vehicle service checkup",
-    title: "COMPREHENSIVE VEHICLE WARRANTY COVER",
-    description:
-      "Protect your car against unexpected breakdown and repair costs. Get complete coverage for mechanical and electrical parts with zero hassle.",
-  },
-  {
-    src: "/service_2.jpg",
-    alt: "Vehicle key handover after successful repair",
-    title: "Certified workshop partner network",
-    description:
-      "Access over 350+ certified garages ready to service your vehicle with direct billing.",
-  },
-  {
-    src: "/service_3.jpg",
-    alt: "Expert vehicle diagnostics scanning",
-    title: "Fast claims processed in 24 hours",
-    description:
-      "No paperwork, no upfront payments. We settle approved repair claims directly with workshops.",
-  },
-  {
-    src: "/service_4.jpg",
-    alt: "Certified mechanical workshop repair",
-    title: "Drive with absolute peace of mind",
-    description:
-      "Protect your vehicle against unexpected breakdowns with flexible 12, 24, or 36-month plans.",
-  },
-];
-
-export const navItems = ["Home", "About us", "How it works", "FAQ"];
-
-export const trustItems = [
-  "Certified repair network",
-  "Claims handled in 24h",
-  "No hidden fees",
-];
-
-export const pricingPlans = [
-  {
-    term: "12 months",
-    price: "$40",
-    note: "Flexible cover for short-term ownership",
-  },
-  {
-    term: "24 months",
-    price: "$38",
-    note: "Recommended balance of value and protection",
-    featured: true,
-  },
-  {
-    term: "36 months",
-    price: "$36",
-    note: "Lowest monthly cost for long-term cover",
-  },
-];
-
-export const servicePlans = [
-  {
-    term: "Basic Care",
-    price: "$18",
-    note: "Essential checks & routine oil changes",
-  },
-  {
-    term: "Standard Care",
-    price: "$28",
-    note: "Full diagnostics, fluids & filters cover",
-    featured: true,
-  },
-  {
-    term: "Premium Care",
-    price: "$48",
-    note: "Full package: brakes, plugs & air-con",
-  },
-];
-
-export const footerLinks = ["Coverage", "Claims", "Partners", "Support"];
-
-export const statsItems: StatItem[] = [
-  {
-    value: 12000,
-    suffix: "+",
-    label: "Cars Protected",
-    description: "Vehicles covered across our network",
-  },
-  {
-    value: 24,
-    suffix: "h",
-    label: "Claim Response",
-    description: "Average time to process a claim",
-  },
-  {
-    value: 350,
-    suffix: "+",
-    label: "Certified Workshops",
-    description: "Partner garages nationwide",
-  },
-];
-
-export const howItWorksSteps: HowItWorksStep[] = [
-  {
-    step: 1,
-    title: "Check Eligibility",
-    description:
-      "Enter your plate number or VIN. We instantly verify your car's eligibility for coverage in under 60 seconds.",
-    icon: "search",
-  },
-  {
-    step: 2,
-    title: "Choose Your Plan",
-    description:
-      "Pick from 12, 24, or 36-month plans. All include engine, gearbox and key mechanical components.",
-    icon: "layers",
-  },
-  {
-    step: 3,
-    title: "Drive With Confidence",
-    description:
-      "Your car is covered from day one. If something breaks, call us and we handle the workshop directly.",
-    icon: "shield",
-  },
-  {
-    step: 4,
-    title: "We Pay the Workshop",
-    description:
-      "Approved claims are settled directly with our partner workshops. No upfront costs, no paperwork stress.",
-    icon: "check",
-  },
-];
-
-export const testimonials: Testimonial[] = [
-  {
-    id: "1",
-    name: "Marcus Holden",
-    role: "Small Business Owner",
-    location: "Lyon, France",
-    avatar: "MH",
-    rating: 5,
-    quote:
-      "My gearbox failed three months in. Garanty covered the full repair — €2,400 — without any argument. Best decision I made when buying used.",
-    carModel: "BMW 520d (2019)",
-    claimAmount: "€2,400",
-  },
-  {
-    id: "2",
-    name: "Sophie Laurent",
-    role: "Nurse",
-    location: "Bordeaux, France",
-    avatar: "SL",
-    rating: 5,
-    quote:
-      "I was sceptical at first, but when my turbo went, they sorted everything in 48 hours. The workshop dealt with Garanty directly — I just picked up my car.",
-    carModel: "Renault Megane (2018)",
-    claimAmount: "€1,800",
-  },
-  {
-    id: "3",
-    name: "David Okafor",
-    role: "Freelance Developer",
-    location: "Paris, France",
-    avatar: "DO",
-    rating: 5,
-    quote:
-      "The engine coolant system failed on the motorway. Without Garanty, I'd have been looking at a €3,000 repair bill. It was completely stress-free.",
-    carModel: "Volkswagen Passat (2020)",
-    claimAmount: "€3,100",
-  },
-  {
-    id: "4",
-    name: "Amélie Rousseau",
-    role: "Teacher",
-    location: "Marseille, France",
-    avatar: "AR",
-    rating: 5,
-    quote:
-      "As a single parent, an unexpected repair bill would have been devastating. Garanty gave me the peace of mind I needed for just €38 a month.",
-    carModel: "Peugeot 308 (2017)",
-    claimAmount: "€1,550",
-  },
-];
+  { id: "primary", src: "/bg.jpg" },
+  { id: "technology", src: "/bg_2.jpg" },
+  { id: "protection", src: "/bg_3.jpg" },
+] as const;
 
 export const carBrands = [
   { name: "Audi", src: "/brands/audi.svg" },
@@ -213,168 +27,285 @@ export const carBrands = [
   { name: "Toyota", src: "/brands/toyota.svg" },
   { name: "Volkswagen", src: "/brands/volkswagen.svg" },
   { name: "Volvo", src: "/brands/volvo.svg" },
-];
+] as const;
 
 export const faqItems = [
-  {
-    question: "What types of vehicles are eligible for coverage?",
-    answer:
-      "We cover used petrol and diesel vehicles up to 10 years old with fewer than 150,000 km on the clock. Electric and hybrid vehicles are also eligible on select plans.",
-  },
-  {
-    question: "How does the claim process work?",
-    answer:
-      "Simply call our claims line or submit online. We'll authorise the repair directly with one of our 350+ certified partner workshops — you never pay upfront for covered repairs.",
-  },
-  {
-    question: "Are there any waiting periods before I can claim?",
-    answer:
-      "Coverage starts immediately for mechanical failures that occur after your plan activates. There is no waiting period for plans purchased at the point of sale.",
-  },
-  {
-    question: "What is the maximum claim limit?",
-    answer:
-      "Claim limits depend on your plan: up to €3,000 on our 12-month plan, €4,500 on 24-month, and €5,000 on our 36-month plan. All limits reset annually.",
-  },
-  {
-    question: "Can I use any garage, or must I use a partner workshop?",
-    answer:
-      "Repairs must be carried out at one of our 350+ certified partner workshops to ensure quality and direct billing. You can find your nearest workshop via our app or website.",
-  },
-  {
-    question: "What happens if my vehicle breaks down far from home?",
-    answer:
-      "All plans include roadside assistance and towing to the nearest partner workshop at no extra cost. We also cover overnight accommodation if your vehicle cannot be repaired same-day.",
-  },
-  {
-    question: "How do I activate my warranty after purchase?",
-    answer:
-      "Go to the 'Warranty Service Hub' section on our site, select the 'Activate Warranty' tab, enter the activation code provided by your dealer, along with your vehicle VIN and contact info. Click confirm, and your coverage will start instantly.",
-  },
-  {
-    question: "What is the detailed policy on covered components?",
-    answer:
-      "Depending on your plan level, we cover major mechanical components including the engine block, transmission, drive system, steering, starters, alternators, and advanced electronics. Consumables like brake pads, tires, and oil filters are covered only under scheduled maintenance packages.",
-  },
-  {
-    question: "What is the step-by-step guideline when my vehicle breaks down?",
-    answer:
-      "Step 1: Pull over safely and call our 24/7 hotline. Step 2: Have your vehicle towed or driven to the nearest partner workshop. Step 3: The workshop will submit a diagnostic report to us. Step 4: We approve the claim limit directly, the garage repairs your vehicle, and you drive away with zero out-of-pocket costs.",
-  },
-];
+  "warrantyDuration",
+  "lookup",
+  "sputterDifference",
+  "installationTime",
+  "choosePackage",
+  "aftercare",
+  "signalSafety",
+  "warrantySupport",
+] as const;
 
-export const mockWarrantyDatabase: Record<string, MockWarrantyRecord> = {
-  "WM-2026-AUDIA4": {
-    ownerPhone: "0901234567",
-    ownerEmail: "customer.a@gmail.com",
-    details: {
-      vehicleName: "Audi A4 2.0 TFSI (2023)",
-      vin: "VIN-AUDI-2026-A4",
-      licensePlate: "LN71 DXG",
-      planName: "Gold Warranty Package",
-      status: "Active",
-      startDate: "2026-01-15",
-      endDate: "2029-01-15",
-      claimLimit: "$8,000",
-      claimsUsed: "$600",
-      remainingLimit: "$7,400",
-      daysRemaining: 942,
-      progressPercent: 15,
-      coverageScope: [
-        "Engine & Turbocharger",
-        "Automatic Transmission",
-        "Steering System & Rack",
-        "Air Conditioning & Climate",
-        "Body Electrical Systems",
-      ],
+export const additionalProductCategories = [
+  {
+    id: "ledBulbs",
+    image: "/sanpham/491785581_659103893492716_3763861878564125633_n.jpg",
+    itemCount: "12+",
+  },
+  {
+    id: "biLed",
+    image: "/sanpham/660867658_932031392866630_1775108430541815111_n.jpg",
+    itemCount: "18+",
+  },
+  {
+    id: "auxLights",
+    image: "/sanpham/680213145_948050377931398_4658545440541295332_n.jpg",
+    itemCount: "8+",
+  },
+  {
+    id: "dashcam",
+    image: "/sanpham/708866764_974343475302088_6969437192664409450_n.jpg",
+    itemCount: "10+",
+  },
+  {
+    id: "tpms",
+    image: "/sanpham/722859751_989791480423954_4718269048704660286_n.jpg",
+    itemCount: "6+",
+  },
+  {
+    id: "androidBox",
+    image: "/sanpham/742129847_1011122928290809_2932987533225347117_n.jpg",
+    itemCount: "5+",
+  },
+  {
+    id: "retroAccessories",
+    image: "/sanpham/750632674_1021370440599391_2260673870932429076_n.jpg",
+    itemCount: "15+",
+  },
+] as const;
+
+export const featuredProducts = [
+  {
+    ...productCatalog.sp50,
+    badgeClassName: "bg-premium-red",
+    specs: {
+      uv: productCatalog.sp50.film.uvBlock,
+      ir: productCatalog.sp50.film.irBlock,
+      vlt: productCatalog.sp50.film.vlt,
     },
   },
-  "WM-2026-CAMERA": {
-    ownerPhone: "0901234567",
-    ownerEmail: "customer.a@gmail.com",
-    details: {
-      vehicleName: "Dashcam 4K Pro (Accessory)",
-      vin: "SN-CAM-8899",
-      licensePlate: "Linked to Vehicle LN71 DXG",
-      planName: "Accessory Protection Package",
-      status: "Active",
-      startDate: "2026-02-10",
-      endDate: "2027-02-10",
-      claimLimit: "$200",
-      claimsUsed: "$0",
-      remainingLimit: "$200",
-      daysRemaining: 238,
-      progressPercent: 35,
-      coverageScope: [
-        "Mainboard & Processor",
-        "Image Sensor & Lens Lens",
-        "Internal Battery & Power Supply",
-      ],
+  {
+    ...productCatalog.sp10,
+    badgeClassName: "bg-deep-black",
+    specs: {
+      uv: productCatalog.sp10.film.uvBlock,
+      ir: productCatalog.sp10.film.irBlock,
+      vlt: productCatalog.sp10.film.vlt,
     },
   },
-  "WM-2026-TOYOTA": {
-    ownerPhone: "0987654321",
-    ownerEmail: "customer.b@gmail.com",
-    details: {
-      vehicleName: "Toyota Camry 2.5Q (2021)",
-      vin: "VIN-TOYO-2026-C5",
-      licensePlate: "LO19 KWY",
-      planName: "Standard Warranty Package",
-      status: "Expired",
-      startDate: "2023-05-10",
-      endDate: "2026-05-10",
-      claimLimit: "$6,000",
-      claimsUsed: "$6,000",
-      remainingLimit: "$0",
-      daysRemaining: 0,
-      progressPercent: 100,
-      coverageScope: [
-        "Engine Block & Internals",
-        "Manual/Automatic Gearbox",
-        "Starter Motor & Alternator",
-      ],
+  {
+    ...productCatalog.b55,
+    badgeClassName: "bg-deep-gray",
+    specs: {
+      uv: productCatalog.b55.film.uvBlock,
+      ir: productCatalog.b55.film.irBlock,
+      vlt: productCatalog.b55.film.vlt,
     },
   },
-};
+] as const;
 
-export const leftSolutionsData = [
-  {
-    iconKey: "auto-fixers" as const,
-    title: "AUTO FIXERS",
-    description:
-      "It provides reliable and fast car repair services to get your vehicle back on the road in top condition.",
-  },
-  {
-    iconKey: "mechanic-masters" as const,
-    title: "MECHANIC MASTERS",
-    description:
-      "Delivers expert car repair and maintenance services, ensuring your vehicle performs at its best every time.",
-  },
-  {
-    iconKey: "paint-workshop" as const,
-    title: "PAINT & BODYWORK",
-    description:
-      "Premium exterior paint correction, scratch repairs, and bodywork restoration by certified experts.",
-  },
-];
+export const galleryCategories = [
+  "ALL",
+  "SP50",
+  "SP10",
+  "B55",
+  "B15",
+  "L50",
+  "L15",
+  "PRODUCTS",
+  "CUSTOMERS",
+] as const;
 
-export const rightSolutionsData = [
+export const galleryImages = [
+  { id: "lexusSp50", src: "/bg.jpg", category: "SP50" },
   {
-    iconKey: "precision-auto" as const,
-    title: "PRECISION AUTO",
-    description:
-      "Precision Auto delivers expert car repair and maintenance for flawless performance.",
+    id: "vinfastSp10",
+    src: "/khachhang/510962789_708623938540711_2735951356818959986_n.jpg",
+    category: "SP10",
   },
   {
-    iconKey: "drive-in-garage" as const,
-    title: "DRIVE-IN GARAGE",
-    description:
-      "Offers fast, reliable car repair and maintenance services to keep your vehicle in top shape.",
+    id: "rangeRoverB55",
+    src: "/khachhang/515494314_715431447859960_9183864286063818207_n.jpg",
+    category: "B55",
   },
   {
-    iconKey: "pro-equipments" as const,
-    title: "PRO EQUIPMENTS",
-    description:
-      "Utilizing state-of-the-art diagnostic machinery and certified professional tools.",
+    id: "mercedesB15",
+    src: "/khachhang/518450802_727834709952967_2678400354888596450_n.jpg",
+    category: "B15",
   },
-];
+  {
+    id: "bmwL50",
+    src: "/sanpham/491785581_659103893492716_3763861878564125633_n.jpg",
+    category: "L50",
+  },
+  {
+    id: "porscheL15",
+    src: "/khachhang/509441632_708624408540664_6816446526600313458_n.jpg",
+    category: "L15",
+  },
+  {
+    id: "productOne",
+    src: "/sanpham/491785581_659103893492716_3763861878564125633_n.jpg",
+    category: "PRODUCTS",
+    kind: "products",
+    index: 1,
+  },
+  {
+    id: "productTwo",
+    src: "/sanpham/493207408_666067026129736_5785984494280835462_n.jpg",
+    category: "PRODUCTS",
+    kind: "products",
+    index: 2,
+  },
+  {
+    id: "productThree",
+    src: "/sanpham/660867658_932031392866630_1775108430541815111_n.jpg",
+    category: "PRODUCTS",
+    kind: "products",
+    index: 3,
+  },
+  {
+    id: "productFour",
+    src: "/sanpham/667593305_938070538929382_7923475188557062827_n.jpg",
+    category: "PRODUCTS",
+    kind: "products",
+    index: 4,
+  },
+  {
+    id: "productFive",
+    src: "/sanpham/668735718_935085782561191_912310026927575912_n.jpg",
+    category: "PRODUCTS",
+    kind: "products",
+    index: 5,
+  },
+  {
+    id: "productSix",
+    src: "/sanpham/680213145_948050377931398_4658545440541295332_n.jpg",
+    category: "PRODUCTS",
+    kind: "products",
+    index: 6,
+  },
+  {
+    id: "productSeven",
+    src: "/sanpham/680678136_951462554256847_7236327126217463146_n.jpg",
+    category: "PRODUCTS",
+    kind: "products",
+    index: 7,
+  },
+  {
+    id: "productEight",
+    src: "/sanpham/681996355_951466384256464_1676689774949903356_n.jpg",
+    category: "PRODUCTS",
+    kind: "products",
+    index: 8,
+  },
+  {
+    id: "productNine",
+    src: "/sanpham/708866764_974343475302088_6969437192664409450_n.jpg",
+    category: "PRODUCTS",
+    kind: "products",
+    index: 9,
+  },
+  {
+    id: "productTen",
+    src: "/sanpham/722859751_989791480423954_4718269048704660286_n.jpg",
+    category: "PRODUCTS",
+    kind: "products",
+    index: 10,
+  },
+  {
+    id: "productEleven",
+    src: "/sanpham/733539030_1001552672581168_801810398580059378_n.jpg",
+    category: "PRODUCTS",
+    kind: "products",
+    index: 11,
+  },
+  {
+    id: "productTwelve",
+    src: "/sanpham/739420176_1009465235123245_54772665120959991_n.jpg",
+    category: "PRODUCTS",
+    kind: "products",
+    index: 12,
+  },
+  {
+    id: "productThirteen",
+    src: "/sanpham/742129847_1011122928290809_2932987533225347117_n.jpg",
+    category: "PRODUCTS",
+    kind: "products",
+    index: 13,
+  },
+  {
+    id: "productFourteen",
+    src: "/sanpham/750632674_1021370440599391_2260673870932429076_n.jpg",
+    category: "PRODUCTS",
+    kind: "products",
+    index: 14,
+  },
+  {
+    id: "customerOne",
+    src: "/khachhang/509441632_708624408540664_6816446526600313458_n.jpg",
+    category: "CUSTOMERS",
+    kind: "customers",
+    index: 1,
+  },
+  {
+    id: "customerTwo",
+    src: "/khachhang/510962789_708623938540711_2735951356818959986_n.jpg",
+    category: "CUSTOMERS",
+    kind: "customers",
+    index: 2,
+  },
+  {
+    id: "customerThree",
+    src: "/khachhang/515494314_715431447859960_9183864286063818207_n.jpg",
+    category: "CUSTOMERS",
+    kind: "customers",
+    index: 3,
+  },
+  {
+    id: "customerFour",
+    src: "/khachhang/518450802_727834709952967_2678400354888596450_n.jpg",
+    category: "CUSTOMERS",
+    kind: "customers",
+    index: 4,
+  },
+  {
+    id: "customerFive",
+    src: "/khachhang/519054906_732988929437545_968487580203790719_n.jpg",
+    category: "CUSTOMERS",
+    kind: "customers",
+    index: 5,
+  },
+  {
+    id: "customerSix",
+    src: "/khachhang/523310088_732989089437529_8608938970161132500_n.jpg",
+    category: "CUSTOMERS",
+    kind: "customers",
+    index: 6,
+  },
+  {
+    id: "customerSeven",
+    src: "/khachhang/523326629_732989069437531_3797709217174348137_n.jpg",
+    category: "CUSTOMERS",
+    kind: "customers",
+    index: 7,
+  },
+  {
+    id: "customerEight",
+    src: "/khachhang/524121043_732989086104196_2355143299812590419_n.jpg",
+    category: "CUSTOMERS",
+    kind: "customers",
+    index: 8,
+  },
+  {
+    id: "customerNine",
+    src: "/khachhang/526182504_740849221984849_6142863754935644413_n.jpg",
+    category: "CUSTOMERS",
+    kind: "customers",
+    index: 9,
+  },
+] as const;

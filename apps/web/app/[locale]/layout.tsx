@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+import { getMessages, getTranslations } from "next-intl/server";
 import { Saira_Condensed, Inter, Maven_Pro } from "next/font/google";
 import { routing } from "@/src/i18n/routing";
+import { SiteHeader } from "@/src/components/layout/site-header";
+import { SiteFooter } from "@/src/components/layout/site-footer";
 import "../globals.css";
 
 const sairaCondensed = Saira_Condensed({
@@ -23,10 +25,24 @@ const mavenPro = Maven_Pro({
   weight: ["400", "500", "600", "700", "800", "900"],
 });
 
-export const metadata: Metadata = {
-  title: "Web App",
-  description: "Public app shell for the monorepo base",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+
+  if (!hasLocale(routing.locales, locale)) {
+    return {};
+  }
+
+  const t = await getTranslations({ locale, namespace: "Metadata" });
+
+  return {
+    title: t("title"),
+    description: t("description"),
+  };
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -54,7 +70,9 @@ export default async function LocaleLayout({
     >
       <body>
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <SiteHeader />
+          <div className="pt-[84px]">{children}</div>
+          <SiteFooter />
         </NextIntlClientProvider>
       </body>
     </html>
