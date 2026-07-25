@@ -1,0 +1,80 @@
+[
+  {
+    "offsetDays": 1,
+    "copies": 3,
+    "statuses": ["PENDING", "APPROVED", "ACTIVATED", "REJECTED", "CANCELLED"]
+  },
+  {
+    "offsetDays": 2,
+    "copies": 4,
+    "statuses": [
+      "PENDING",
+      "PENDING",
+      "APPROVED",
+      "ACTIVATED",
+      "REJECTED",
+      "CANCELLED"
+    ]
+  },
+  {
+    "offsetDays": 3,
+    "copies": 2,
+    "statuses": [
+      "PENDING",
+      "APPROVED",
+      "APPROVED",
+      "ACTIVATED",
+      "REJECTED",
+      "CANCELLED"
+    ]
+  },
+  {
+    "offsetDays": 4,
+    "copies": 5,
+    "statuses": [
+      "PENDING",
+      "APPROVED",
+      "ACTIVATED",
+      "ACTIVATED",
+      "REJECTED",
+      "CANCELLED"
+    ]
+  },
+  {
+    "offsetDays": 5,
+    "copies": 3,
+    "statuses": [
+      "PENDING",
+      "PENDING",
+      "APPROVED",
+      "ACTIVATED",
+      "REJECTED",
+      "REJECTED",
+      "CANCELLED"
+    ]
+  },
+  {
+    "offsetDays": 6,
+    "copies": 2,
+    "statuses": [
+      "PENDING",
+      "APPROVED",
+      "ACTIVATED",
+      "REJECTED",
+      "CANCELLED",
+      "CANCELLED"
+    ]
+  },
+  {
+    "offsetDays": 7,
+    "copies": 4,
+    "statuses": [
+      "PENDING",
+      "APPROVED",
+      "APPROVED",
+      "ACTIVATED",
+      "REJECTED",
+      "CANCELLED"
+    ]
+  }
+]

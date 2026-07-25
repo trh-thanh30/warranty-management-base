@@ -1,0 +1,37 @@
+[
+  {
+    "offsetDays": 1,
+    "copies": 4,
+    "statuses": ["DRAFT", "ACTIVE", "ACTIVE", "EXPIRED", "VOIDED"]
+  },
+  {
+    "offsetDays": 2,
+    "copies": 3,
+    "statuses": ["DRAFT", "ACTIVE", "ACTIVE", "EXPIRED", "EXPIRED", "VOIDED"]
+  },
+  {
+    "offsetDays": 3,
+    "copies": 5,
+    "statuses": ["DRAFT", "DRAFT", "ACTIVE", "EXPIRED", "VOIDED"]
+  },
+  {
+    "offsetDays": 4,
+    "copies": 2,
+    "statuses": ["DRAFT", "ACTIVE", "ACTIVE", "EXPIRED", "VOIDED", "VOIDED"]
+  },
+  {
+    "offsetDays": 5,
+    "copies": 4,
+    "statuses": ["DRAFT", "ACTIVE", "EXPIRED", "EXPIRED", "VOIDED"]
+  },
+  {
+    "offsetDays": 6,
+    "copies": 3,
+    "statuses": ["DRAFT", "ACTIVE", "ACTIVE", "EXPIRED", "VOIDED"]
+  },
+  {
+    "offsetDays": 7,
+    "copies": 5,
+    "statuses": ["DRAFT", "ACTIVE", "EXPIRED", "VOIDED"]
+  }
+]

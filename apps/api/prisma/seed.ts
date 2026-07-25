@@ -9,12 +9,98 @@ import {
   PrismaClient,
   product_category,
   product_status,
+  warranty_activation_request_source,
+  warranty_activation_request_status,
   warranty_claim_priority,
   warranty_claim_status,
   warranty_status,
 } from '@prisma/client';
 import { Pool } from 'pg';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { seedAdminUsers } from './seed-admin';
+
+type DashboardWarrantyChartSeed = {
+  offsetDays: number;
+  copies: number;
+  statuses: Array<keyof typeof warranty_status>;
+};
+
+type DashboardActivationRequestChartSeed = {
+  offsetDays: number;
+  copies: number;
+  statuses: Array<keyof typeof warranty_activation_request_status>;
+};
+
+const parsedDashboardWarrantyChartSeed: unknown = JSON.parse(
+  readFileSync(join(__dirname, 'dashboard-warranty-chart.seed.json'), 'utf8'),
+);
+
+const parsedDashboardActivationRequestChartSeed: unknown = JSON.parse(
+  readFileSync(
+    join(__dirname, 'dashboard-activation-request-chart.seed.json'),
+    'utf8',
+  ),
+);
+
+function isDashboardWarrantyChartSeed(
+  value: unknown,
+): value is DashboardWarrantyChartSeed {
+  if (!value || typeof value !== 'object') return false;
+  const offsetDays: unknown = Reflect.get(value, 'offsetDays');
+  const copies: unknown = Reflect.get(value, 'copies');
+  const statuses: unknown = Reflect.get(value, 'statuses');
+
+  return (
+    typeof offsetDays === 'number' &&
+    typeof copies === 'number' &&
+    copies > 0 &&
+    Array.isArray(statuses) &&
+    statuses.every(
+      (status) =>
+        typeof status === 'string' &&
+        Object.prototype.hasOwnProperty.call(warranty_status, status),
+    )
+  );
+}
+
+function isDashboardActivationRequestChartSeed(
+  value: unknown,
+): value is DashboardActivationRequestChartSeed {
+  if (!value || typeof value !== 'object') return false;
+  const offsetDays: unknown = Reflect.get(value, 'offsetDays');
+  const copies: unknown = Reflect.get(value, 'copies');
+  const statuses: unknown = Reflect.get(value, 'statuses');
+
+  return (
+    typeof offsetDays === 'number' &&
+    typeof copies === 'number' &&
+    copies > 0 &&
+    Array.isArray(statuses) &&
+    statuses.every(
+      (status) =>
+        typeof status === 'string' &&
+        Object.prototype.hasOwnProperty.call(
+          warranty_activation_request_status,
+          status,
+        ),
+    )
+  );
+}
+
+const dashboardWarrantyChartSeed = Array.isArray(
+  parsedDashboardWarrantyChartSeed,
+)
+  ? parsedDashboardWarrantyChartSeed.filter(isDashboardWarrantyChartSeed)
+  : [];
+
+const dashboardActivationRequestChartSeed = Array.isArray(
+  parsedDashboardActivationRequestChartSeed,
+)
+  ? parsedDashboardActivationRequestChartSeed.filter(
+      isDashboardActivationRequestChartSeed,
+    )
+  : [];
 
 let prisma: PrismaClient;
 
@@ -250,6 +336,145 @@ async function upsertDemoServiceCenter(data: {
   });
 }
 
+async function upsertDemoDealer(data: {
+  id: string;
+  name: string;
+  phone: string;
+  province: string;
+  district: string;
+  address: string;
+  salesName?: string | null;
+}) {
+  return prisma.dealer.upsert({
+    where: { id: data.id },
+    update: {
+      name: data.name,
+      phone: data.phone,
+      province: data.province,
+      district: data.district,
+      address: data.address,
+      sales_name: data.salesName ?? null,
+      is_active: true,
+    },
+    create: {
+      id: data.id,
+      name: data.name,
+      phone: data.phone,
+      province: data.province,
+      district: data.district,
+      address: data.address,
+      sales_name: data.salesName ?? null,
+      is_active: true,
+    },
+  });
+}
+
+async function upsertDemoWarrantyActivationRequest(data: {
+  requestCode: string;
+  status: warranty_activation_request_status;
+  source: warranty_activation_request_source;
+  warrantyCode: string;
+  customerName: string;
+  customerPhone: string;
+  customerEmail?: string | null;
+  customerId?: string | null;
+  categoryId?: string | null;
+  productId?: string | null;
+  dealerId?: string | null;
+  vehiclePlate?: string | null;
+  vehicleModel?: string | null;
+  installedAt?: Date | null;
+  warrantyDurationMonths?: number | null;
+  productName?: string | null;
+  serialNumber?: string | null;
+  brand?: string | null;
+  model?: string | null;
+  manufactureYear?: number | null;
+  note?: string | null;
+  adminNote?: string | null;
+  rejectionReason?: string | null;
+  createdById?: string | null;
+  reviewedById?: string | null;
+  reviewedAt?: Date | null;
+  activatedWarrantyId?: string | null;
+  createdAt: Date;
+}) {
+  return prisma.warrantyActivationRequest.upsert({
+    where: { request_code: data.requestCode },
+    update: {
+      status: data.status,
+      source: data.source,
+      warranty_code: data.warrantyCode,
+      customer_name: data.customerName,
+      customer_phone: data.customerPhone,
+      customer_email: data.customerEmail ?? null,
+      customer_id: data.customerId ?? null,
+      category_id: data.categoryId ?? null,
+      product_id: data.productId ?? null,
+      dealer_id: data.dealerId ?? null,
+      vehicle_plate: data.vehiclePlate ?? null,
+      vehicle_model: data.vehicleModel ?? null,
+      installed_at: data.installedAt ?? null,
+      warranty_duration_months: data.warrantyDurationMonths ?? null,
+      province_code: '01',
+      province_name: 'Ha Noi',
+      ward_code: '001',
+      ward_name: 'Phuong Cau Giay',
+      address_detail: '123 Tran Duy Hung',
+      full_address: '123 Tran Duy Hung, Phuong Cau Giay, Ha Noi',
+      product_name: data.productName ?? null,
+      serial_number: data.serialNumber ?? null,
+      brand: data.brand ?? null,
+      model: data.model ?? null,
+      manufacture_year: data.manufactureYear ?? null,
+      note: data.note ?? null,
+      admin_note: data.adminNote ?? null,
+      rejection_reason: data.rejectionReason ?? null,
+      created_by_id: data.createdById ?? null,
+      reviewed_by_id: data.reviewedById ?? null,
+      reviewed_at: data.reviewedAt ?? null,
+      activated_warranty_id: data.activatedWarrantyId ?? null,
+      created_at: data.createdAt,
+    },
+    create: {
+      request_code: data.requestCode,
+      status: data.status,
+      source: data.source,
+      warranty_code: data.warrantyCode,
+      customer_name: data.customerName,
+      customer_phone: data.customerPhone,
+      customer_email: data.customerEmail ?? null,
+      customer_id: data.customerId ?? null,
+      category_id: data.categoryId ?? null,
+      product_id: data.productId ?? null,
+      dealer_id: data.dealerId ?? null,
+      vehicle_plate: data.vehiclePlate ?? null,
+      vehicle_model: data.vehicleModel ?? null,
+      installed_at: data.installedAt ?? null,
+      warranty_duration_months: data.warrantyDurationMonths ?? null,
+      province_code: '01',
+      province_name: 'Ha Noi',
+      ward_code: '001',
+      ward_name: 'Phuong Cau Giay',
+      address_detail: '123 Tran Duy Hung',
+      full_address: '123 Tran Duy Hung, Phuong Cau Giay, Ha Noi',
+      product_name: data.productName ?? null,
+      serial_number: data.serialNumber ?? null,
+      brand: data.brand ?? null,
+      model: data.model ?? null,
+      manufacture_year: data.manufactureYear ?? null,
+      note: data.note ?? null,
+      admin_note: data.adminNote ?? null,
+      rejection_reason: data.rejectionReason ?? null,
+      created_by_id: data.createdById ?? null,
+      reviewed_by_id: data.reviewedById ?? null,
+      reviewed_at: data.reviewedAt ?? null,
+      activated_warranty_id: data.activatedWarrantyId ?? null,
+      created_at: data.createdAt,
+    },
+  });
+}
+
 type DemoClaimHistory = {
   fromStatus: warranty_claim_status | null;
   toStatus: warranty_claim_status;
@@ -476,6 +701,40 @@ async function main() {
     address: '789 Nguyen Van Linh, Hai Chau, Da Nang',
   });
 
+  const lexzenzHanoiDealer = await upsertDemoDealer({
+    id: '00000000-0000-4000-8000-000000000401',
+    name: 'Lexzenz Hanoi Dealer',
+    phone: '02473001001',
+    province: 'Ha Noi',
+    district: 'Cau Giay',
+    address: '88 Dich Vong Hau, Cau Giay, Ha Noi',
+    salesName: 'Pham Minh Quan',
+  });
+
+  const lexzenzHcmDealer = await upsertDemoDealer({
+    id: '00000000-0000-4000-8000-000000000402',
+    name: 'Lexzenz Ho Chi Minh Dealer',
+    phone: '02873001002',
+    province: 'Ho Chi Minh City',
+    district: 'District 7',
+    address: '99 Nguyen Thi Thap, District 7, Ho Chi Minh City',
+    salesName: 'Nguyen Hoang Lam',
+  });
+
+  const carCategory = await prisma.category.findFirst({
+    where: { type: category_type.PRODUCT, code: product_category.CAR },
+  });
+
+  const accessoryCategory = await prisma.category.findFirst({
+    where: { type: category_type.PRODUCT, code: product_category.ACCESSORY },
+  });
+
+  const sparePartCategory = await prisma.category.findFirst({
+    where: { type: category_type.PRODUCT, code: product_category.SPARE_PART },
+  });
+
+  const seedNow = new Date();
+
   const camryDemo = await upsertDemoProduct({
     productCode: 'PRD-2026-CAMRY',
     warrantyCode: 'WM-2026-CAMRYA',
@@ -540,7 +799,401 @@ async function main() {
     warrantyStatus: warranty_status.ACTIVE,
   });
 
-  const seedNow = new Date();
+  const expiringSoonDemo = await upsertDemoProduct({
+    productCode: 'PRD-2026-EXPIRING-7D',
+    warrantyCode: 'WM-2026-EXP7D',
+    serialNumber: 'SN-EXPIRING-7D-001',
+    name: 'Lexzenz Parking Sensor Kit',
+    category: product_category.ACCESSORY,
+    brand: 'Lexzenz',
+    model: 'ParkSense 360',
+    manufactureYear: 2026,
+    customerId: customerA.id,
+    ownerUserId: customerAUser.id,
+    purchaseDate: addDays(seedNow, -25),
+    durationMonths: 1,
+    warrantyStatus: warranty_status.ACTIVE,
+  });
+
+  const expiringMonthDemo = await upsertDemoProduct({
+    productCode: 'PRD-2026-EXPIRING-30D',
+    warrantyCode: 'WM-2026-EXP30D',
+    serialNumber: 'SN-EXPIRING-30D-001',
+    name: 'Lexzenz Tire Pressure Monitor',
+    category: product_category.ACCESSORY,
+    brand: 'Lexzenz',
+    model: 'TPMS Pro',
+    manufactureYear: 2026,
+    customerId: customerB.id,
+    ownerUserId: customerBUser.id,
+    purchaseDate: addDays(seedNow, -5),
+    durationMonths: 1,
+    warrantyStatus: warranty_status.ACTIVE,
+  });
+
+  await upsertDemoProduct({
+    productCode: 'PRD-2026-DRAFT-CAMERA',
+    warrantyCode: 'WM-2026-DRAFT1',
+    serialNumber: 'SN-DRAFT-CAMERA-001',
+    name: 'Lexzenz Rear Camera Draft',
+    category: product_category.ACCESSORY,
+    brand: 'Lexzenz',
+    model: 'RearCam Lite',
+    manufactureYear: 2026,
+    customerId: walkInCustomer.id,
+    ownerUserId: null,
+    purchaseDate: seedNow,
+    durationMonths: 12,
+    warrantyStatus: warranty_status.DRAFT,
+  });
+
+  await upsertDemoProduct({
+    productCode: 'PRD-2026-VOIDED-GPS',
+    warrantyCode: 'WM-2026-VOID1',
+    serialNumber: 'SN-VOIDED-GPS-001',
+    name: 'Lexzenz GPS Tracker Voided',
+    category: product_category.ACCESSORY,
+    brand: 'Lexzenz',
+    model: 'TrackOne',
+    manufactureYear: 2026,
+    customerId: walkInCustomer.id,
+    ownerUserId: null,
+    purchaseDate: addDays(seedNow, -60),
+    durationMonths: 12,
+    warrantyStatus: warranty_status.VOIDED,
+  });
+
+  // Keep one record for every warranty status inside the recent date ranges
+  // so the dashboard grouped trend chart can be verified after seeding.
+  const chartDemoDate = addDays(seedNow, -10);
+
+  await upsertDemoProduct({
+    productCode: 'PRD-2026-CHART-DRAFT',
+    warrantyCode: 'WM-2026-CHART-DRAFT',
+    serialNumber: 'SN-CHART-DRAFT-001',
+    name: 'Lexzenz Chart Demo Draft',
+    category: product_category.ACCESSORY,
+    brand: 'Lexzenz',
+    model: 'Chart Draft',
+    manufactureYear: 2026,
+    customerId: customerA.id,
+    ownerUserId: customerAUser.id,
+    purchaseDate: chartDemoDate,
+    durationMonths: 12,
+    warrantyStatus: warranty_status.DRAFT,
+  });
+
+  await upsertDemoProduct({
+    productCode: 'PRD-2026-CHART-ACTIVE',
+    warrantyCode: 'WM-2026-CHART-ACTIVE',
+    serialNumber: 'SN-CHART-ACTIVE-001',
+    name: 'Lexzenz Chart Demo Active',
+    category: product_category.ACCESSORY,
+    brand: 'Lexzenz',
+    model: 'Chart Active',
+    manufactureYear: 2026,
+    customerId: customerB.id,
+    ownerUserId: customerBUser.id,
+    purchaseDate: chartDemoDate,
+    durationMonths: 12,
+    warrantyStatus: warranty_status.ACTIVE,
+  });
+
+  await upsertDemoProduct({
+    productCode: 'PRD-2026-CHART-EXPIRED',
+    warrantyCode: 'WM-2026-CHART-EXPIRED',
+    serialNumber: 'SN-CHART-EXPIRED-001',
+    name: 'Lexzenz Chart Demo Expired',
+    category: product_category.ACCESSORY,
+    brand: 'Lexzenz',
+    model: 'Chart Expired',
+    manufactureYear: 2026,
+    customerId: walkInCustomer.id,
+    ownerUserId: null,
+    purchaseDate: chartDemoDate,
+    durationMonths: 1,
+    warrantyStatus: warranty_status.EXPIRED,
+  });
+
+  await upsertDemoProduct({
+    productCode: 'PRD-2026-CHART-VOIDED',
+    warrantyCode: 'WM-2026-CHART-VOIDED',
+    serialNumber: 'SN-CHART-VOIDED-001',
+    name: 'Lexzenz Chart Demo Voided',
+    category: product_category.ACCESSORY,
+    brand: 'Lexzenz',
+    model: 'Chart Voided',
+    manufactureYear: 2026,
+    customerId: customerA.id,
+    ownerUserId: customerAUser.id,
+    purchaseDate: chartDemoDate,
+    durationMonths: 12,
+    warrantyStatus: warranty_status.VOIDED,
+  });
+
+  // Add nearby dates with the same status set from a compact JSON fixture.
+  for (const chartDate of dashboardWarrantyChartSeed) {
+    for (const [statusIndex, statusName] of chartDate.statuses.entries()) {
+      const status = warranty_status[statusName];
+      const offset = chartDate.offsetDays;
+      for (let copy = 1; copy <= chartDate.copies; copy += 1) {
+        const statusKey = status.toLowerCase();
+        const suffix = `${statusKey}-${offset}d-${statusIndex + 1}-${copy}`;
+
+        await upsertDemoProduct({
+          productCode: `PRD-2026-CHART-${suffix}`,
+          warrantyCode: `WM-2026-CHART-${suffix}`,
+          serialNumber: `SN-CHART-${suffix}`,
+          name: `Lexzenz Chart ${statusKey} ${offset}d #${copy}`,
+          category: product_category.ACCESSORY,
+          brand: 'Lexzenz',
+          model: `Chart ${statusKey}`,
+          manufactureYear: 2026,
+          customerId:
+            status === warranty_status.VOIDED ? customerA.id : customerB.id,
+          ownerUserId:
+            status === warranty_status.VOIDED
+              ? customerAUser.id
+              : customerBUser.id,
+          purchaseDate: addDays(seedNow, -offset),
+          durationMonths: status === warranty_status.EXPIRED ? 1 : 12,
+          warrantyStatus: status,
+        });
+      }
+    }
+  }
+
+  await upsertDemoWarrantyActivationRequest({
+    requestCode: 'WAR-DEMO-PENDING',
+    status: warranty_activation_request_status.PENDING,
+    source: warranty_activation_request_source.PUBLIC_WEB,
+    warrantyCode: 'WM-REQ-PENDING',
+    customerName: 'Pham Thi Lan',
+    customerPhone: '0900000101',
+    customerEmail: 'lan.activation@example.com',
+    categoryId: carCategory?.id,
+    dealerId: lexzenzHanoiDealer.id,
+    vehiclePlate: '30A-12345',
+    vehicleModel: 'Toyota Corolla Cross',
+    installedAt: addDays(seedNow, -1),
+    warrantyDurationMonths: 36,
+    productName: 'Toyota Corolla Cross',
+    serialNumber: 'VIN-REQ-PENDING-001',
+    brand: 'Toyota',
+    model: 'Corolla Cross',
+    manufactureYear: 2026,
+    note: 'Customer submitted from public activation form.',
+    createdAt: addDays(seedNow, -1),
+  });
+
+  await upsertDemoWarrantyActivationRequest({
+    requestCode: 'WAR-DEMO-APPROVED',
+    status: warranty_activation_request_status.APPROVED,
+    source: warranty_activation_request_source.ADMIN_PORTAL,
+    warrantyCode: 'WM-REQ-APPROVED',
+    customerName: customerB.full_name,
+    customerPhone: customerB.phone ?? '0900000002',
+    customerEmail: customerB.email,
+    customerId: customerB.id,
+    categoryId: accessoryCategory?.id,
+    productId: expiringMonthDemo.product.id,
+    dealerId: lexzenzHcmDealer.id,
+    vehiclePlate: '51F-67890',
+    vehicleModel: 'Honda Civic RS',
+    installedAt: addDays(seedNow, -8),
+    warrantyDurationMonths: 12,
+    productName: expiringMonthDemo.product.name,
+    serialNumber: expiringMonthDemo.product.serial_number,
+    brand: expiringMonthDemo.product.brand,
+    model: expiringMonthDemo.product.model,
+    manufactureYear: expiringMonthDemo.product.manufacture_year,
+    adminNote: 'Approved by demo admin, awaiting warranty activation.',
+    createdById: adminUser.id,
+    reviewedById: moderatorUser.id,
+    reviewedAt: addDays(seedNow, -6),
+    createdAt: addDays(seedNow, -7),
+  });
+
+  await upsertDemoWarrantyActivationRequest({
+    requestCode: 'WAR-DEMO-REJECTED',
+    status: warranty_activation_request_status.REJECTED,
+    source: warranty_activation_request_source.PUBLIC_WEB,
+    warrantyCode: 'WM-REQ-REJECTED',
+    customerName: 'Do Van Khoa',
+    customerPhone: '0900000103',
+    customerEmail: 'khoa.activation@example.com',
+    categoryId: sparePartCategory?.id,
+    dealerId: lexzenzHanoiDealer.id,
+    productName: 'Unknown Battery Pack',
+    serialNumber: 'SN-REQ-REJECTED-001',
+    brand: 'Unknown',
+    model: 'Battery',
+    manufactureYear: 2024,
+    rejectionReason: 'Serial number does not match eligible product records.',
+    reviewedById: moderatorUser.id,
+    reviewedAt: addDays(seedNow, -4),
+    createdAt: addDays(seedNow, -5),
+  });
+
+  await upsertDemoWarrantyActivationRequest({
+    requestCode: 'WAR-DEMO-ACTIVATED',
+    status: warranty_activation_request_status.ACTIVATED,
+    source: warranty_activation_request_source.PUBLIC_WEB,
+    warrantyCode: camryDemo.warranty.warranty_code,
+    customerName: customerA.full_name,
+    customerPhone: customerA.phone ?? '0900000001',
+    customerEmail: customerA.email,
+    customerId: customerA.id,
+    categoryId: carCategory?.id,
+    productId: camryDemo.product.id,
+    dealerId: lexzenzHanoiDealer.id,
+    vehiclePlate: '30G-24680',
+    vehicleModel: camryDemo.product.name,
+    installedAt: camryDemo.warranty.start_date,
+    warrantyDurationMonths: camryDemo.warranty.duration_months,
+    productName: camryDemo.product.name,
+    serialNumber: camryDemo.product.serial_number,
+    brand: camryDemo.product.brand,
+    model: camryDemo.product.model,
+    manufactureYear: camryDemo.product.manufacture_year,
+    reviewedById: adminUser.id,
+    reviewedAt: addDays(seedNow, -2),
+    activatedWarrantyId: camryDemo.warranty.id,
+    createdAt: addDays(seedNow, -3),
+  });
+
+  await upsertDemoWarrantyActivationRequest({
+    requestCode: 'WAR-DEMO-CANCELLED',
+    status: warranty_activation_request_status.CANCELLED,
+    source: warranty_activation_request_source.ADMIN_PORTAL,
+    warrantyCode: 'WM-REQ-CANCELLED',
+    customerName: walkInCustomer.full_name,
+    customerPhone: walkInCustomer.phone ?? '0900000003',
+    customerEmail: walkInCustomer.email,
+    customerId: walkInCustomer.id,
+    categoryId: accessoryCategory?.id,
+    productId: expiringSoonDemo.product.id,
+    dealerId: lexzenzHanoiDealer.id,
+    productName: expiringSoonDemo.product.name,
+    serialNumber: expiringSoonDemo.product.serial_number,
+    brand: expiringSoonDemo.product.brand,
+    model: expiringSoonDemo.product.model,
+    manufactureYear: expiringSoonDemo.product.manufacture_year,
+    adminNote: 'Cancelled after customer created a replacement request.',
+    createdById: adminUser.id,
+    reviewedById: adminUser.id,
+    reviewedAt: addDays(seedNow, -1),
+    createdAt: addDays(seedNow, -2),
+  });
+
+  const activationRequestChartTargets = [
+    {
+      categoryId: carCategory?.id,
+      customerId: customerA.id,
+      customerName: customerA.full_name,
+      customerPhone: customerA.phone ?? '0900000001',
+      customerEmail: customerA.email,
+      dealerId: lexzenzHanoiDealer.id,
+      productId: camryDemo.product.id,
+      productName: camryDemo.product.name,
+      serialNumber: camryDemo.product.serial_number,
+      brand: camryDemo.product.brand,
+      model: camryDemo.product.model,
+      manufactureYear: camryDemo.product.manufacture_year,
+    },
+    {
+      categoryId: accessoryCategory?.id,
+      customerId: customerB.id,
+      customerName: customerB.full_name,
+      customerPhone: customerB.phone ?? '0900000002',
+      customerEmail: customerB.email,
+      dealerId: lexzenzHcmDealer.id,
+      productId: expiringMonthDemo.product.id,
+      productName: expiringMonthDemo.product.name,
+      serialNumber: expiringMonthDemo.product.serial_number,
+      brand: expiringMonthDemo.product.brand,
+      model: expiringMonthDemo.product.model,
+      manufactureYear: expiringMonthDemo.product.manufacture_year,
+    },
+    {
+      categoryId: accessoryCategory?.id,
+      customerId: walkInCustomer.id,
+      customerName: walkInCustomer.full_name,
+      customerPhone: walkInCustomer.phone ?? '0900000003',
+      customerEmail: walkInCustomer.email,
+      dealerId: lexzenzHanoiDealer.id,
+      productId: expiringSoonDemo.product.id,
+      productName: expiringSoonDemo.product.name,
+      serialNumber: expiringSoonDemo.product.serial_number,
+      brand: expiringSoonDemo.product.brand,
+      model: expiringSoonDemo.product.model,
+      manufactureYear: expiringSoonDemo.product.manufacture_year,
+    },
+  ];
+  const activationRequestSources = [
+    warranty_activation_request_source.PUBLIC_WEB,
+    warranty_activation_request_source.ADMIN_PORTAL,
+  ];
+
+  for (const chartDate of dashboardActivationRequestChartSeed) {
+    for (const [statusIndex, statusName] of chartDate.statuses.entries()) {
+      const status = warranty_activation_request_status[statusName];
+      const offset = chartDate.offsetDays;
+
+      for (let copy = 1; copy <= chartDate.copies; copy += 1) {
+        const target =
+          activationRequestChartTargets[
+            (offset + statusIndex + copy) % activationRequestChartTargets.length
+          ];
+        const createdAt = addDays(seedNow, -offset);
+        const statusKey = status.toLowerCase();
+        const suffix = `${statusKey}-${offset}d-${statusIndex + 1}-${copy}`;
+
+        await upsertDemoWarrantyActivationRequest({
+          requestCode: `WAR-CHART-${suffix}`,
+          status,
+          source:
+            activationRequestSources[
+              (offset + statusIndex + copy) % activationRequestSources.length
+            ],
+          warrantyCode: `WM-ACT-CHART-${suffix}`,
+          customerName: target.customerName,
+          customerPhone: target.customerPhone,
+          customerEmail: target.customerEmail,
+          customerId: target.customerId,
+          categoryId: target.categoryId,
+          productId: target.productId,
+          dealerId: target.dealerId,
+          installedAt: createdAt,
+          warrantyDurationMonths: 12,
+          productName: target.productName,
+          serialNumber: `SN-ACT-CHART-${suffix}`,
+          brand: target.brand,
+          model: target.model,
+          manufactureYear: target.manufactureYear,
+          note: 'Synthetic dashboard data for activation request status chart.',
+          createdById:
+            status === warranty_activation_request_status.PENDING
+              ? null
+              : adminUser.id,
+          reviewedById:
+            status === warranty_activation_request_status.PENDING
+              ? null
+              : moderatorUser.id,
+          reviewedAt:
+            status === warranty_activation_request_status.PENDING
+              ? null
+              : createdAt,
+          rejectionReason:
+            status === warranty_activation_request_status.REJECTED
+              ? 'Demo rejection reason for dashboard chart.'
+              : null,
+          createdAt,
+        });
+      }
+    }
+  }
+
   const submittedClaimAt = seedNow;
   const reviewingClaimAt = addDays(seedNow, -3);
   const repairClaimAt = addDays(seedNow, -10);
