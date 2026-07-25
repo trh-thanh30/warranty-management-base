@@ -104,7 +104,10 @@
     "dateRange": {
       "ariaLabel": "Select dashboard date range",
       "placeholder": "Current month",
-      "clear": "Use default range"
+      "clear": "Use default range",
+      "quickFilterAriaLabel": "Quick dashboard date filters",
+      "last7Days": "7 days",
+      "last30Days": "30 days"
     },
     "kpis": {
       "total": "Total claims",
@@ -132,6 +135,51 @@
       "serviceCenterDescription": "Assigned claim workload by center.",
       "unassigned": "Unassigned claims",
       "other": "Other"
+    },
+    "warranties": {
+      "title": "Warranty coverage",
+      "description": "Track warranty stock, activation volume, and upcoming expirations.",
+      "total": "Total warranties",
+      "totalDescription": "All warranty records in the system",
+      "activatedInRange": "Activated in range",
+      "activatedInRangeDescription": "Warranties activated in the selected period",
+      "next7Days": "Expiring 7 days",
+      "next7DaysDescription": "Active warranties ending within 7 days",
+      "next30Days": "Expiring 30 days",
+      "next30DaysDescription": "Active warranties ending within 30 days",
+      "next90Days": "Expiring 90 days",
+      "next90DaysDescription": "Active warranties ending within 90 days",
+      "statusChart": "Warranty activations by date",
+      "warrantyCount": "Warranty count",
+      "loading": "Loading warranty analytics",
+      "loadingDescription": "Fetching warranty coverage data.",
+      "retry": "Try again",
+      "errorDescription": "Warranty analytics could not be loaded.",
+      "emptyTitle": "No warranty data",
+      "emptyDescription": "No warranties are available for this view."
+    },
+    "activationRequests": {
+      "title": "Electronic activation requests",
+      "description": "Monitor customer-submitted activation requests and review outcomes.",
+      "createdInRange": "Created in range",
+      "createdInRangeDescription": "Requests submitted in the selected period",
+      "pending": "Pending review",
+      "pendingDescription": "Requests waiting for admin review",
+      "activated": "Activated",
+      "activatedDescription": "Requests that completed warranty activation",
+      "rejected": "Rejected",
+      "rejectedDescription": "Requests rejected during review",
+      "statusChart": "Requests by status",
+      "sourceChart": "Requests by source",
+      "requestCount": "Request count",
+      "publicWebDescription": "Created from website",
+      "adminPortalDescription": "Created by admin users",
+      "loading": "Loading activation analytics",
+      "loadingDescription": "Fetching electronic activation request data.",
+      "retry": "Try again",
+      "errorDescription": "Activation request analytics could not be loaded.",
+      "emptyTitle": "No activation request data",
+      "emptyDescription": "No activation requests are available for this view."
     },
     "recentClaims": {
       "title": "Recent claims",
