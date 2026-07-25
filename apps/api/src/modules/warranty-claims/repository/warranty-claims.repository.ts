@@ -28,6 +28,7 @@ export class WarrantyClaimsRepository {
         deleted_at: null,
       },
       include: {
+        category_ref: true,
         warranty: true,
         template: { include: { category_ref: true } },
         ownerships: {

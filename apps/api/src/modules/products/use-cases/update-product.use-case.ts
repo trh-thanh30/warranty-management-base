@@ -30,7 +30,20 @@ export class UpdateProductUseCase {
       }
     }
 
+    if (dto.categoryId && dto.categoryId !== existingProduct.category_id) {
+      const category =
+        await this.productsRepository.findActiveProductCategoryById(
+          dto.categoryId,
+        );
+      if (!category) {
+        throw new NotFoundError('Product category not found');
+      }
+    }
+
     const product = await this.productsRepository.update(id, {
+      category_ref: dto.categoryId
+        ? { connect: { id: dto.categoryId } }
+        : undefined,
       display_name:
         dto.displayName === undefined
           ? undefined

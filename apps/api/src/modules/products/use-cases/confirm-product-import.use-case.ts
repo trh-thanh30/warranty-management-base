@@ -60,6 +60,7 @@ export class ConfirmProductImportUseCase {
           data: {
             product_code: productCode,
             template: { connect: { id: row.templateId } },
+            category_ref: { connect: { id: row.templateCategoryId } },
             serial_number: this.blankToNull(row.serialNumber),
             display_name: this.blankToNull(row.displayName),
             status: row.status ?? product_status.ACTIVE,
@@ -109,6 +110,7 @@ export class ConfirmProductImportUseCase {
   ): Prisma.ProductUpdateInput {
     return {
       template: { connect: { id: row.templateId } },
+      category_ref: { connect: { id: row.templateCategoryId } },
       display_name: this.blankToNull(row.displayName),
       status: row.status,
       serial_number: this.blankToNull(row.serialNumber),

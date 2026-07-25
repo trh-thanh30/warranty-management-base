@@ -262,6 +262,7 @@ async function upsertDemoProduct(data: {
     update: {
       serial_number: data.serialNumber,
       template_id: template.id,
+      category_id: template.category_id,
       status: product_status.ACTIVE,
       deleted_at: null,
     },
@@ -269,6 +270,7 @@ async function upsertDemoProduct(data: {
       product_code: data.productCode,
       serial_number: data.serialNumber,
       template_id: template.id,
+      category_id: template.category_id,
       status: product_status.ACTIVE,
     },
     include: { template: true },

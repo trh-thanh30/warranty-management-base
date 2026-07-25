@@ -109,6 +109,36 @@ describe('ProductsRepository.list', () => {
     });
   });
 
+  it('filters products by the editable product category', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const count = jest.fn().mockResolvedValue(0);
+    const prismaService = {
+      $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
+        callback({
+          product: {
+            count,
+            findMany,
+          },
+        }),
+      ),
+    };
+    const repository = new ProductsRepository(prismaService as never);
+
+    await repository.list({
+      categoryId: 'override-category-id',
+      limit: 10,
+      page: 1,
+    });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          AND: [{ category_id: 'override-category-id' }],
+        }),
+      }),
+    );
+  });
+
   it('filters the admin product list by publication state', async () => {
     const findMany = jest.fn().mockResolvedValue([]);
     const count = jest.fn().mockResolvedValue(0);
@@ -162,12 +192,12 @@ describe('ProductsRepository.list', () => {
     await repository.listPublic({ limit: 12, page: 1 });
 
     const visibilityFilter = {
+      category_id: undefined,
+      category_ref: { is_active: true },
       deleted_at: null,
       status: 'ACTIVE',
       template: {
         is: {
-          category_id: undefined,
-          category_ref: { is_active: true },
           is_published: true,
         },
       },

@@ -30,6 +30,8 @@ describe('CreateProductUseCase', () => {
       id: 'product-id',
       template_id: template.id,
       template: { ...template, assets: [], category_ref: null },
+      category_id: template.category_id,
+      category_ref: null,
       product_code: 'PRD-2026-ABCDEF',
       serial_number: 'SN-001',
       display_name: 'Camera cổng chính',
@@ -66,6 +68,7 @@ describe('CreateProductUseCase', () => {
     expect(productCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
+          category_ref: { connect: { id: template.category_id } },
           display_name: 'Camera cổng chính',
           template: { connect: { id: template.id } },
         }),
@@ -73,5 +76,67 @@ describe('CreateProductUseCase', () => {
     );
     expect(result.displayName).toBe('Camera cổng chính');
     expect(result.name).toBe(template.name);
+  });
+
+  it('allows an active product category to override the template category', async () => {
+    const template = {
+      id: 'template-id',
+      category_id: 'template-category-id',
+      default_warranty_duration_months: 24,
+      default_warranty_terms: null,
+    };
+    const productCreate = jest.fn().mockResolvedValue({
+      id: 'product-id',
+      template_id: template.id,
+      category_id: 'override-category-id',
+      product_code: 'PRD-2026-ABCDEF',
+      status: 'ACTIVE',
+      metadata: null,
+      assets: [],
+      ownerships: [],
+      warranty: null,
+      template: {
+        ...template,
+        name: 'Camera AI 4K',
+        assets: [],
+        category_ref: null,
+      },
+      category_ref: {
+        id: 'override-category-id',
+        name: 'Camera chuyên dụng',
+      },
+    });
+    const productsRepository = {
+      findBySerialNumber: jest.fn(),
+      findActiveProductCategoryById: jest.fn().mockResolvedValue({
+        id: 'override-category-id',
+      }),
+    };
+    const useCase = new CreateProductUseCase(
+      {
+        $transaction: jest.fn((callback) =>
+          callback({ product: { create: productCreate } }),
+        ),
+      } as never,
+      productsRepository as never,
+      { execute: jest.fn().mockResolvedValue('PRD-2026-ABCDEF') } as never,
+      { findActiveById: jest.fn().mockResolvedValue(template) } as never,
+    );
+
+    await useCase.execute({
+      templateId: template.id,
+      categoryId: 'override-category-id',
+    });
+
+    expect(
+      productsRepository.findActiveProductCategoryById,
+    ).toHaveBeenCalledWith('override-category-id');
+    expect(productCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          category_ref: { connect: { id: 'override-category-id' } },
+        }),
+      }),
+    );
   });
 });

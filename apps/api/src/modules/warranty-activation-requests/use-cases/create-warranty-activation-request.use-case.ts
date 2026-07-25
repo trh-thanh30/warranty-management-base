@@ -290,7 +290,7 @@ export class CreateWarrantyActivationRequestUseCase {
     categoryId: string | undefined,
     product: Product & { template: ProductTemplate },
   ) {
-    const resolvedCategoryId = categoryId ?? product.template.category_id;
+    const resolvedCategoryId = categoryId ?? product.category_id;
     return resolvedCategoryId
       ? { connect: { id: resolvedCategoryId } }
       : undefined;
@@ -302,14 +302,14 @@ export class CreateWarrantyActivationRequestUseCase {
   ) {
     if (!categoryId) return;
 
-    if (product.template.category_id !== categoryId) {
+    if (product.category_id !== categoryId) {
       throw new BadRequestError(
         'Product does not belong to the selected category',
         'BAD_REQUEST',
         {
           code: 'PRODUCT_CATEGORY_MISMATCH',
           categoryId,
-          productCategoryId: product.template.category_id,
+          productCategoryId: product.category_id,
         },
       );
     }

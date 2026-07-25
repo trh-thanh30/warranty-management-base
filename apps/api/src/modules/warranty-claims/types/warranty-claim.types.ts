@@ -27,6 +27,7 @@ export type WarrantyClaimAttachmentResponse = {
 export type WarrantyClaimWithRelations = WarrantyClaim & {
   product?:
     | (Product & {
+        category_ref?: Category | null;
         template?:
           | (ProductTemplate & { category_ref?: Category | null })
           | null;

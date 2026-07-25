@@ -1,8 +1,9 @@
-import { PrismaService } from '@/database/prisma/prisma.service';
 import { normalizePagination, paginate } from '@/common/pagination/pagination';
+import { PrismaService } from '@/database/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import {
   asset_access_type,
+  category_type,
   Prisma,
   product_status,
   warranty_status,
@@ -27,6 +28,7 @@ const productInclude = {
     orderBy: { created_at: 'desc' as const },
   },
   warranty: true,
+  category_ref: true,
 };
 
 const productListInclude = {
@@ -39,6 +41,7 @@ const productListInclude = {
 };
 
 const publicProductListInclude = {
+  category_ref: true,
   template: {
     include: {
       category_ref: true,
@@ -66,6 +69,16 @@ export class ProductsRepository {
     return this.prismaService.product.create({
       data,
       include: productInclude,
+    });
+  }
+
+  findActiveProductCategoryById(id: string) {
+    return this.prismaService.category.findFirst({
+      where: {
+        id,
+        type: category_type.PRODUCT,
+        is_active: true,
+      },
     });
   }
 
@@ -262,12 +275,12 @@ export class ProductsRepository {
     };
     const sortBy = filters.sortBy ? sortMap[filters.sortBy] : 'published_at';
     const where: Prisma.ProductWhereInput = {
+      category_id: filters.categoryId,
+      category_ref: { is_active: true },
       deleted_at: null,
       status: product_status.ACTIVE,
       template: {
         is: {
-          category_id: filters.categoryId,
-          category_ref: { is_active: true },
           is_published: true,
         },
       },
@@ -413,7 +426,7 @@ function buildEffectiveCatalogueFilters(filters: {
 }): Prisma.ProductWhereInput[] | undefined {
   const clauses: Prisma.ProductWhereInput[] = [];
   if (filters.categoryId) {
-    clauses.push({ template: { is: { category_id: filters.categoryId } } });
+    clauses.push({ category_id: filters.categoryId });
   }
   return clauses.length > 0 ? clauses : undefined;
 }

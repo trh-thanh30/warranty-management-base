@@ -6,6 +6,7 @@ export type PreparedProductImportRow = ConfirmProductImportRowDto & {
   action: 'create' | 'update';
   existingProductId: string | null;
   rowNumber: number;
+  templateCategoryId: string;
   templateId: string;
   templateWarrantyDurationMonths: number;
   templateWarrantyTerms: string | null;
@@ -71,6 +72,7 @@ export async function prepareProductImportRows(
               sku: templateSku,
             },
             select: {
+              category_id: true,
               id: true,
               is_active: true,
               default_warranty_duration_months: true,
@@ -111,6 +113,7 @@ export async function prepareProductImportRows(
       existingProductId: existingProduct?.id ?? null,
       rowNumber: row.rowNumber,
       templateSku: templateSku ?? '',
+      templateCategoryId: template?.category_id ?? '',
       templateId: template?.id ?? '',
       templateWarrantyDurationMonths:
         template?.default_warranty_duration_months ?? 36,

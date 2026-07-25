@@ -157,6 +157,7 @@ export class ManualWarrantyActivationUseCase {
               serial_number: optionalText(dto.product.serialNumber),
               display_name: optionalText(dto.product.displayName),
               template: { connect: { id: template.id } },
+              category_ref: { connect: { id: template.category_id } },
               status: product_status.ACTIVE,
               metadata: {
                 source: 'manual_warranty_activation',

@@ -55,6 +55,7 @@ describe('ManualWarrantyActivationUseCase', () => {
       deleted_at: null,
       template: {
         id: 'template-id',
+        category_id: 'category-id',
         name: 'Black Label Ceramic Film',
         brand: 'Black Label',
         model: 'Premium',
@@ -111,6 +112,7 @@ describe('ManualWarrantyActivationUseCase', () => {
       },
       productTemplate: {
         findFirst: jest.fn().mockResolvedValue({
+          category_id: 'category-id',
           id: 'template-id',
           is_active: true,
         }),
@@ -177,6 +179,7 @@ describe('ManualWarrantyActivationUseCase', () => {
     expect(tx.product.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
+          category_ref: { connect: { id: 'category-id' } },
           template: { connect: { id: 'template-id' } },
           display_name: dto.product.displayName,
           ownerships: {

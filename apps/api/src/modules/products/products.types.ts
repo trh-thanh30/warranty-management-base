@@ -1,11 +1,13 @@
 import {
   Asset,
+  Category,
   Customer,
   Product,
   ProductAsset,
   ProductOwnership,
   Warranty,
 } from '@prisma/client';
+import { toCategoryResponse } from '@/modules/categories/categories.types';
 import {
   ProductTemplateWithRelations,
   toProductTemplateResponse,
@@ -16,6 +18,7 @@ type ProductWithRelations = Product & {
   ownerships?: Array<ProductOwnership & { customer?: Customer }>;
   warranty?: Warranty | null;
   template?: ProductTemplateWithRelations | null;
+  category_ref?: Category;
 };
 
 export function toProductResponse(
@@ -55,8 +58,10 @@ export function toProductResponse(
     displayName: product.display_name,
     name:
       templateResponse?.name ?? product.display_name ?? product.product_code,
-    categoryId: templateResponse?.categoryId ?? null,
-    categoryRef: templateResponse?.categoryRef ?? null,
+    categoryId: product.category_id,
+    categoryRef: product.category_ref
+      ? toCategoryResponse(product.category_ref)
+      : null,
     brand: templateResponse?.brand ?? null,
     model: templateResponse?.model ?? null,
     modelYear: templateResponse?.modelYear ?? null,
@@ -153,12 +158,12 @@ export function toPublicProductSummary(
     productCode: product.product_code,
     slug: template?.slug ?? '',
     name: template?.name ?? product.display_name ?? product.product_code,
-    categoryId: template?.category_id ?? null,
-    category: template?.category_ref
+    categoryId: product.category_id,
+    category: product.category_ref
       ? {
-          id: template.category_ref.id,
-          slug: template.category_ref.slug,
-          name: template.category_ref.name,
+          id: product.category_ref.id,
+          slug: product.category_ref.slug,
+          name: product.category_ref.name,
         }
       : null,
     brand: template?.brand ?? null,

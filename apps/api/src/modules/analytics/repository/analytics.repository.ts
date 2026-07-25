@@ -514,11 +514,11 @@ export class AnalyticsRepository {
       where: { deleted_at: null },
       select: {
         status: true,
+        category_id: true,
+        category_ref: { select: { name: true } },
         template: {
           select: {
             brand: true,
-            category_id: true,
-            category_ref: { select: { name: true } },
           },
         },
       },
@@ -534,9 +534,9 @@ export class AnalyticsRepository {
         product.status,
         (statusCounts.get(product.status) ?? 0) + 1,
       );
-      const categoryId = product.template.category_id;
+      const categoryId = product.category_id;
       categoryCounts.set(categoryId, {
-        categoryName: product.template.category_ref.name,
+        categoryName: product.category_ref.name,
         count: (categoryCounts.get(categoryId)?.count ?? 0) + 1,
       });
       const brand = product.template.brand ?? 'Unknown';

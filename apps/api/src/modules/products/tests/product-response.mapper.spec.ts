@@ -6,6 +6,23 @@ describe('toProductResponse', () => {
     const response = toProductResponse({
       id: 'product-id',
       template_id: 'template-id',
+      category_id: 'override-category-id',
+      category_ref: {
+        id: 'override-category-id',
+        code: 'SPECIAL_CAMERA',
+        slug: 'special-camera',
+        name: 'Camera chuyên dụng',
+        description: null,
+        icon: null,
+        image_url: null,
+        type: category_type.PRODUCT,
+        parent_id: null,
+        order: 0,
+        is_active: true,
+        metadata: null,
+        created_at: new Date('2026-07-25T00:00:00.000Z'),
+        updated_at: new Date('2026-07-25T00:00:00.000Z'),
+      },
       product_code: 'PRD-001',
       serial_number: 'SERIAL-001',
       display_name: null,
@@ -60,7 +77,11 @@ describe('toProductResponse', () => {
     expect(response).toEqual(
       expect.objectContaining({
         name: 'PPF X10',
-        categoryId: 'category-id',
+        categoryId: 'override-category-id',
+        categoryRef: expect.objectContaining({
+          id: 'override-category-id',
+          name: 'Camera chuyên dụng',
+        }),
         brand: 'Demo',
         model: 'X10',
         description: 'Shared description',

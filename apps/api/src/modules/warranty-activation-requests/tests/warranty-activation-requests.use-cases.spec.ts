@@ -576,6 +576,7 @@ const baseRequest = {
 };
 
 const baseDraftProduct = {
+  category_id: 'category-id',
   id: 'product-id',
   display_name: null,
   template: {

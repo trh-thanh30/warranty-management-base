@@ -75,4 +75,54 @@ describe('UpdateProductUseCase', () => {
     );
     expect(result.displayName).toBe('Camera kho hàng');
   });
+
+  it('updates the product category after validating the override', async () => {
+    const existing = {
+      id: 'product-id',
+      category_id: 'template-category-id',
+      serial_number: null,
+      metadata: null,
+      deleted_at: null,
+    };
+    const repository = {
+      findById: jest.fn().mockResolvedValue(existing),
+      findActiveProductCategoryById: jest.fn().mockResolvedValue({
+        id: 'override-category-id',
+      }),
+      update: jest.fn().mockResolvedValue({
+        ...existing,
+        category_id: 'override-category-id',
+        category_ref: {
+          id: 'override-category-id',
+          name: 'Camera chuyên dụng',
+        },
+        product_code: 'PRD-001',
+        status: 'ACTIVE',
+        assets: [],
+        ownerships: [],
+        warranty: null,
+        template: {
+          id: 'template-id',
+          name: 'Camera AI 4K',
+          assets: [],
+          category_ref: null,
+        },
+      }),
+    };
+    const useCase = new UpdateProductUseCase(repository as never);
+
+    await useCase.execute('product-id', {
+      categoryId: 'override-category-id',
+    });
+
+    expect(repository.findActiveProductCategoryById).toHaveBeenCalledWith(
+      'override-category-id',
+    );
+    expect(repository.update).toHaveBeenCalledWith(
+      'product-id',
+      expect.objectContaining({
+        category_ref: { connect: { id: 'override-category-id' } },
+      }),
+    );
+  });
 });

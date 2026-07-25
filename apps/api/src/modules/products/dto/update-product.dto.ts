@@ -3,11 +3,16 @@ import {
   IsObject,
   IsOptional,
   IsString,
+  IsUUID,
   Length,
 } from 'class-validator';
 import { product_status } from '@prisma/client';
 
 export class UpdateProductDto {
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;
+
   @IsOptional()
   @IsString()
   @Length(2, 160)

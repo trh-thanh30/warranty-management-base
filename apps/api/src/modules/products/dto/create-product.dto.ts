@@ -13,6 +13,10 @@ export class CreateProductDto {
   templateId: string;
 
   @IsOptional()
+  @IsUUID()
+  categoryId?: string;
+
+  @IsOptional()
   @IsString()
   @Length(0, 160)
   displayName?: string;

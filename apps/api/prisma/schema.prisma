@@ -218,6 +218,7 @@ model Category {
   parent                       Category?                   @relation("CategoryHierarchy", fields: [parent_id], references: [id], onDelete: SetNull)
   children                     Category[]                  @relation("CategoryHierarchy")
   product_templates            ProductTemplate[]
+  products                     Product[]
   content_pages                ContentPage[]
   warranty_activation_requests WarrantyActivationRequest[]
 
@@ -230,6 +231,7 @@ model Category {
 model Product {
   id            String         @id @default(uuid()) @db.Uuid
   template_id   String         @db.Uuid
+  category_id   String         @db.Uuid
   product_code  String         @unique
   serial_number String?        @unique
   display_name  String?
@@ -240,6 +242,7 @@ model Product {
   deleted_at    DateTime?
 
   template                     ProductTemplate             @relation(fields: [template_id], references: [id], onDelete: Restrict)
+  category_ref                 Category                    @relation(fields: [category_id], references: [id], onDelete: Restrict)
   ownerships                   ProductOwnership[]
   warranty                     Warranty?
   claims                       WarrantyClaim[]
@@ -247,6 +250,7 @@ model Product {
   warranty_activation_requests WarrantyActivationRequest[]
 
   @@index([template_id])
+  @@index([category_id])
   @@index([status])
   @@index([serial_number])
   @@index([display_name])

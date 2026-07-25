@@ -36,6 +36,15 @@ export class CreateProductUseCase {
       }
     }
 
+    const categoryId = dto.categoryId ?? selectedTemplate.category_id;
+    if (dto.categoryId) {
+      const category =
+        await this.productsRepository.findActiveProductCategoryById(categoryId);
+      if (!category) {
+        throw new NotFoundError('Product category not found');
+      }
+    }
+
     const product = await this.prismaService.$transaction(async (tx) => {
       return tx.product.create({
         data: {
@@ -44,6 +53,7 @@ export class CreateProductUseCase {
           display_name: dto.displayName?.trim() || null,
           status: dto.status ?? product_status.ACTIVE,
           template: { connect: { id: selectedTemplate.id } },
+          category_ref: { connect: { id: categoryId } },
           metadata: toPhysicalProductMetadata(dto.metadata),
           warranty: {
             create: {
@@ -72,6 +82,7 @@ export class CreateProductUseCase {
               category_ref: true,
             },
           },
+          category_ref: true,
           ownerships: {
             include: { customer: true },
             orderBy: { created_at: 'desc' },

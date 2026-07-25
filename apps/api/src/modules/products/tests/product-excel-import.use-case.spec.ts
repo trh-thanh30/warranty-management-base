@@ -35,6 +35,7 @@ describe('PreviewProductImportUseCase', () => {
     ]);
     const prismaService = createPrismaMock();
     prismaService.productTemplate.findUnique.mockResolvedValue({
+      category_id: 'category-id',
       id: 'template-id',
       is_active: true,
       default_warranty_duration_months: 36,

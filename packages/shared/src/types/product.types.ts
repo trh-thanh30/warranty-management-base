@@ -124,8 +124,8 @@ export type ProductSummary = {
   serialNumber: string | null;
   displayName: string | null;
   name: string;
-  categoryId: string | null;
-  categoryRef: CategorySummary | null;
+  categoryId: string;
+  categoryRef: CategorySummary;
   brand: string | null;
   model: string | null;
   modelYear: number | null;
@@ -158,6 +158,7 @@ export type ListProductsQuery = PaginationQuery & {
 
 export type CreateProductBody = {
   templateId: string;
+  categoryId?: string;
   displayName?: string;
   status?: ProductStatus;
   serialNumber?: string;
@@ -165,6 +166,7 @@ export type CreateProductBody = {
 };
 
 export type UpdateProductBody = {
+  categoryId?: string;
   displayName?: string | null;
   status?: ProductStatus;
   serialNumber?: string | null;
