@@ -16,6 +16,7 @@ import {
   warranty_status,
 } from '@prisma/client';
 import { Pool } from 'pg';
+import { NOTIFICATION_TYPES } from '@repo/shared/constants';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { seedAdminUsers } from './seed-admin';
@@ -1315,7 +1316,7 @@ async function main() {
     id: '00000000-0000-4000-8000-000000000305',
     title: `New warranty claim ${submittedClaim.claim_code}`,
     content: `Warranty claim ${submittedClaim.claim_code} has been submitted.`,
-    type: 'WARRANTY_CLAIM_CREATED',
+    type: NOTIFICATION_TYPES.WARRANTY_CLAIM_CREATED,
     source: notification_source.SYSTEM,
     scope: notification_scope.ROLE,
     deliveryStatus: notification_delivery_status.SENT,
@@ -1342,7 +1343,7 @@ async function main() {
     id: '00000000-0000-4000-8000-000000000306',
     title: `New warranty activation request ${pendingActivationRequest.request_code}`,
     content: `Warranty activation request ${pendingActivationRequest.request_code} has been submitted.`,
-    type: 'WARRANTY_ACTIVATION_REQUEST_CREATED',
+    type: NOTIFICATION_TYPES.WARRANTY_ACTIVATION_REQUEST_CREATED,
     source: notification_source.SYSTEM,
     scope: notification_scope.ROLE,
     deliveryStatus: notification_delivery_status.SENT,
@@ -1396,7 +1397,7 @@ async function main() {
     title: 'Warranty claim SLA breached',
     content:
       'Claim CLM-DEMO-IN-REPAIR has passed its expected handling deadline.',
-    type: 'WARRANTY_CLAIM_SLA_BREACHED',
+    type: NOTIFICATION_TYPES.WARRANTY_CLAIM_SLA_BREACHED,
     source: notification_source.SYSTEM,
     scope: notification_scope.ROLE,
     deliveryStatus: notification_delivery_status.SENT,

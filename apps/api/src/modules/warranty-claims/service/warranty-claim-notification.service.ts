@@ -1,5 +1,7 @@
 import { CreateSystemNotificationUseCase } from '@/modules/notification/use-cases/create-system-notification.use-case';
 import { Injectable, Logger } from '@nestjs/common';
+import type { NotificationType } from '@repo/shared';
+import { NOTIFICATION_TYPES } from '@repo/shared/constants';
 import {
   notification_scope,
   user_role,
@@ -24,7 +26,7 @@ export class WarrantyClaimNotificationService {
     await this.notifyAdmins({
       title: `New warranty claim ${claim.claim_code}`,
       content: `Warranty claim ${claim.claim_code} has been submitted.`,
-      type: 'WARRANTY_CLAIM_CREATED',
+      type: NOTIFICATION_TYPES.WARRANTY_CLAIM_CREATED,
       claim,
     });
   }
@@ -36,7 +38,7 @@ export class WarrantyClaimNotificationService {
     await this.notifyAdmins({
       title: `Warranty claim ${claim.claim_code} status updated`,
       content: `Warranty claim ${claim.claim_code} moved from ${fromStatus} to ${claim.status}.`,
-      type: 'WARRANTY_CLAIM_STATUS_CHANGED',
+      type: NOTIFICATION_TYPES.WARRANTY_CLAIM_STATUS_CHANGED,
       claim,
       metadata: { fromStatus, toStatus: claim.status },
     });
@@ -46,7 +48,7 @@ export class WarrantyClaimNotificationService {
     await this.notifyAdmins({
       title: `Warranty claim ${claim.claim_code} assigned`,
       content: `Warranty claim ${claim.claim_code} has been assigned to a service center.`,
-      type: 'WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER',
+      type: NOTIFICATION_TYPES.WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER,
       claim,
     });
   }
@@ -55,7 +57,7 @@ export class WarrantyClaimNotificationService {
     await this.notifyAdmins({
       title: `Warranty claim ${claim.claim_code} is overdue`,
       content: `Warranty claim ${claim.claim_code} has breached its SLA.`,
-      type: 'WARRANTY_CLAIM_SLA_BREACHED',
+      type: NOTIFICATION_TYPES.WARRANTY_CLAIM_SLA_BREACHED,
       claim,
     });
   }
@@ -63,7 +65,7 @@ export class WarrantyClaimNotificationService {
   private async notifyAdmins(input: {
     title: string;
     content: string;
-    type: string;
+    type: NotificationType;
     claim: ClaimNotificationInput;
     metadata?: Record<string, unknown>;
   }) {

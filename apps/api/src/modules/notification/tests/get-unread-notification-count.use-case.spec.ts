@@ -1,6 +1,7 @@
 import { GetUnreadNotificationCountUseCase } from '@/modules/notification/use-cases/get-unread-notification-count.use-case';
 import { NotificationRepository } from '@/modules/notification/repository/notification.repository';
 import { Test } from '@nestjs/testing';
+import { NOTIFICATION_TYPES } from '@repo/shared/constants';
 
 function makeRepository(types: string[]) {
   return {
@@ -31,11 +32,11 @@ describe('GetUnreadNotificationCountUseCase', () => {
 
   it('counts only newly created requests in sidebar counters', async () => {
     const useCase = await makeUseCase([
-      'WARRANTY_CLAIM_CREATED',
-      'WARRANTY_CLAIM_STATUS_CHANGED',
-      'WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER',
-      'WARRANTY_CLAIM_SLA_BREACHED',
-      'WARRANTY_ACTIVATION_REQUEST_CREATED',
+      NOTIFICATION_TYPES.WARRANTY_CLAIM_CREATED,
+      NOTIFICATION_TYPES.WARRANTY_CLAIM_STATUS_CHANGED,
+      NOTIFICATION_TYPES.WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER,
+      NOTIFICATION_TYPES.WARRANTY_CLAIM_SLA_BREACHED,
+      NOTIFICATION_TYPES.WARRANTY_ACTIVATION_REQUEST_CREATED,
       'GENERAL',
     ]);
 

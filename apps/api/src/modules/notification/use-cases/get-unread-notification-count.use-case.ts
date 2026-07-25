@@ -1,6 +1,7 @@
 import { NotificationRepository } from '@/modules/notification/repository/notification.repository';
 import { Injectable } from '@nestjs/common';
 import type { UnreadNotificationCount } from '@repo/shared';
+import { NOTIFICATION_TYPES } from '@repo/shared/constants';
 
 @Injectable()
 export class GetUnreadNotificationCountUseCase {
@@ -15,11 +16,11 @@ export class GetUnreadNotificationCountUseCase {
       (counts, type) => {
         counts.unread += 1;
 
-        if (type === 'WARRANTY_ACTIVATION_REQUEST_CREATED') {
+        if (type === NOTIFICATION_TYPES.WARRANTY_ACTIVATION_REQUEST_CREATED) {
           counts.warranties += 1;
         }
 
-        if (type === 'WARRANTY_CLAIM_CREATED') {
+        if (type === NOTIFICATION_TYPES.WARRANTY_CLAIM_CREATED) {
           counts.warrantyClaims += 1;
         }
 
