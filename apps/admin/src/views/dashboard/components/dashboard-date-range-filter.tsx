@@ -3,6 +3,7 @@
 import type { DateRangeValue } from "@repo/ui/date-range-picker";
 import { Button } from "@repo/ui";
 import { DateRangePicker } from "@repo/ui/date-range-picker";
+import type { ComponentProps } from "react";
 import {
   DASHBOARD_QUICK_RANGE_OPTIONS,
   type DashboardQuickRangeDays,
@@ -13,7 +14,7 @@ type DashboardDateRangeFilterProps = {
   ariaLabel: string;
   className?: string;
   clearLabel: string;
-  disabledDates?: { after?: Date; before?: Date };
+  disabledDates?: ComponentProps<typeof DateRangePicker>["disabledDates"];
   onQuickRangeChange: (days: DashboardQuickRangeDays) => void;
   onRangeChange: (range: DateRangeValue) => void;
   placeholder: string;
