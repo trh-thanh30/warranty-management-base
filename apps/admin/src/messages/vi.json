@@ -6,6 +6,7 @@
   "DashboardConfig": {
     "brandName": "Quản trị bảo hành Lexzenz",
     "brandDescription": "",
+    "unreadNotifications": "{count} thông báo chưa đọc",
     "sections": {
       "general": "Tổng quan",
       "other": "Khác"

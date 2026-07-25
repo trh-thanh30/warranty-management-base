@@ -6,6 +6,7 @@
   "DashboardConfig": {
     "brandName": "Lexzenz Warranty Admin",
     "brandDescription": "",
+    "unreadNotifications": "{count} unread notifications",
     "sections": {
       "general": "General",
       "other": "Other"
