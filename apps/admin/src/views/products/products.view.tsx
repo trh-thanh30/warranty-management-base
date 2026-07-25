@@ -1,41 +1,25 @@
 "use client";
 
-import { ChevronDown, Layers3, PackagePlus } from "lucide-react";
+import { PackagePlus } from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import type { ProductResponse } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
-import {
-  Badge,
-  Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@repo/ui";
+import { Badge, Button } from "@repo/ui";
 import { ExcelImportDialog, ImportExportMenu } from "@/src/components/common";
 import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
 import { AssignOwnerDialog } from "./components/assign-owner-dialog";
-import { CreateTemplateFromProductDialog } from "./components/create-template-from-product-dialog";
 import { DeleteProductDialog } from "./components/delete-product-dialog";
 import { ProductImportPreviewTable } from "./components/product-import-preview-table";
 import { ProductManagementTabs } from "../product-management/components/product-management-tabs";
 import { ProductsDirectoryCard } from "./components/products-directory-card";
 import { useProductsDirectory } from "./hooks/use-products-directory";
-import { useCreateProductTemplateFromProduct } from "@/src/hooks/use-product-templates";
-import { useToast } from "@/src/hooks/use-toast";
-import { useRouter } from "@/src/i18n/navigation";
 
 export function ProductsView() {
   const t = useTranslations("Products");
-  const toast = useToast();
-  const router = useRouter();
-  const createTemplate = useCreateProductTemplateFromProduct();
   const [productToAssignOwner, setProductToAssignOwner] =
-    useState<ProductResponse | null>(null);
-  const [productToCreateTemplate, setProductToCreateTemplate] =
     useState<ProductResponse | null>(null);
   const {
     canCreateProducts,
@@ -69,26 +53,11 @@ export function ProductsView() {
     resetImportPreview,
     toggleSort,
     updateCategoryId,
-    updatePublication,
     updateSearch,
     updateStatus,
     updateImportRowData,
   } = useProductsDirectory();
   const hasImportErrors = importSummary.invalidRows > 0;
-
-  async function confirmCreateTemplate() {
-    if (!productToCreateTemplate) return;
-    try {
-      const template = await createTemplate.mutateAsync(
-        productToCreateTemplate.id,
-      );
-      setProductToCreateTemplate(null);
-      toast.success(t("templateCreatedFromProduct"));
-      router.push(`/product-templates/${template.id}/edit`);
-    } catch {
-      toast.error(t("createTemplateFromProductError"));
-    }
-  }
 
   return (
     <PermissionGuard permissions={[PERMISSIONS.PRODUCT_VIEW]}>
@@ -112,7 +81,14 @@ export function ProductsView() {
                 onUpload={openImportDialog}
                 uploadDisabled={!canCreateProducts}
               />
-              {canCreateProducts ? <CreateProductMenu /> : null}
+              {canCreateProducts ? (
+                <Button asChild>
+                  <Link href="/products/create">
+                    <PackagePlus className="size-4" />
+                    {t("create")}
+                  </Link>
+                </Button>
+              ) : null}
             </div>
           }
           description={t("description")}
@@ -133,10 +109,8 @@ export function ProductsView() {
           onAssignOwner={setProductToAssignOwner}
           onClearFilters={clearFilters}
           onDelete={openDelete}
-          onCreateTemplate={setProductToCreateTemplate}
           onPageChange={setPage}
           onPageSizeChange={setPageSize}
-          onPublicationChange={updatePublication}
           onRetry={() => {
             void productsQuery.refetch();
           }}
@@ -167,16 +141,6 @@ export function ProductsView() {
           }}
           open={Boolean(productToAssignOwner)}
           product={productToAssignOwner}
-        />
-
-        <CreateTemplateFromProductDialog
-          isCreating={createTemplate.isPending}
-          onConfirm={() => void confirmCreateTemplate()}
-          onOpenChange={(open) => {
-            if (!open) setProductToCreateTemplate(null);
-          }}
-          open={Boolean(productToCreateTemplate)}
-          product={productToCreateTemplate}
         />
 
         <ExcelImportDialog
@@ -214,23 +178,16 @@ export function ProductsView() {
                 labels={{
                   actions: t("actions"),
                   allRows: t("excel.allRows"),
-                  brand: t("brand"),
                   cancel: t("cancel"),
-                  category: t("category"),
-                  description: t("descriptionLabel"),
-                  dynamicCategory: t("dynamicCategory"),
+                  displayName: t("displayName"),
                   edit: t("excel.editRow"),
                   editDescription: t("excel.editRowDescription"),
                   editTitle: t("excel.editRowTitle"),
-                  imageUrl: t("excel.imageUrl"),
                   importStatus: t("excel.importStatus"),
                   installationPosition: t("installationPosition"),
                   invalidRows: t("excel.invalidRows", {
                     count: importSummary.invalidRows,
                   }),
-                  manufactureYear: t("manufactureYear"),
-                  model: t("model"),
-                  name: t("name"),
                   next: t("next"),
                   noRows: t("excel.noPreviewRows"),
                   pageSize: t("pageSize"),
@@ -243,11 +200,10 @@ export function ProductsView() {
                   saveChanges: t("excel.saveRowChanges"),
                   serialNumber: t("serialNumber"),
                   status: t("productStatus"),
+                  templateSku: t("templateSku"),
                   validRows: t("excel.validRows", {
                     count: importSummary.validRows,
                   }),
-                  warrantyDurationMonths: t("durationMonths"),
-                  warrantyTerms: t("warrantyTerms"),
                   withErrors: t("excel.withErrors"),
                 }}
                 onEdit={updateImportRowData}
@@ -282,51 +238,5 @@ export function ProductsView() {
         />
       </div>
     </PermissionGuard>
-  );
-}
-
-function CreateProductMenu() {
-  const t = useTranslations("Products");
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button>
-          <PackagePlus className="size-4" />
-          {t("create")}
-          <ChevronDown className="size-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="w-[22rem] max-w-[calc(100vw-2rem)] p-1.5"
-      >
-        <DropdownMenuItem asChild className="items-start rounded-md p-3">
-          <Link className="gap-3" href="/product-templates">
-            <Layers3 className="mt-0.5 size-4 shrink-0" />
-            <span className="min-w-0">
-              <span className="block font-medium leading-5">
-                {t("createFromTemplate")}
-              </span>
-              <span className="mt-1 block whitespace-normal text-xs leading-5 text-slate-500 dark:text-slate-400">
-                {t("createFromTemplateMenuDescription")}
-              </span>
-            </span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild className="items-start rounded-md p-3">
-          <Link className="gap-3" href="/products/create?mode=independent">
-            <PackagePlus className="mt-0.5 size-4 shrink-0" />
-            <span className="min-w-0">
-              <span className="block font-medium leading-5">
-                {t("createIndependent")}
-              </span>
-              <span className="mt-1 block whitespace-normal text-xs leading-5 text-slate-500 dark:text-slate-400">
-                {t("createIndependentMenuDescription")}
-              </span>
-            </span>
-          </Link>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
   );
 }

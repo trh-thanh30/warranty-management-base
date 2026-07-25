@@ -5,7 +5,7 @@ import type { ProductTemplatesHttpClient } from "./product-templates.types.ts";
 
 const template = { id: "template-id", name: "PPF X10" };
 
-test("product template service maps CRUD and create-from-product endpoints", async () => {
+test("product template service maps CRUD endpoints", async () => {
   const calls: unknown[] = [];
   const response = { data: { success: true, data: template } };
   const http = {
@@ -30,22 +30,20 @@ test("product template service maps CRUD and create-from-product endpoints", asy
     http as unknown as ProductTemplatesHttpClient,
   );
 
-  await service.list({ page: 1, search: "PPF" });
+  await service.list({ isPublished: true, page: 1, search: "PPF" });
   await service.detail("template-id");
   await service.create({
     name: "PPF X10",
-    category: "ACCESSORY",
     categoryId: "category-id",
   });
   await service.update("template-id", { model: "X10 Pro" });
   await service.deactivate("template-id");
-  await service.createFromProduct("product-id");
 
   assert.deepEqual(calls, [
     {
       method: "get",
       url: "/product-templates",
-      config: { params: { page: 1, search: "PPF" } },
+      config: { params: { isPublished: true, page: 1, search: "PPF" } },
     },
     {
       method: "get",
@@ -57,7 +55,6 @@ test("product template service maps CRUD and create-from-product endpoints", asy
       url: "/product-templates",
       body: {
         name: "PPF X10",
-        category: "ACCESSORY",
         categoryId: "category-id",
       },
     },
@@ -69,11 +66,6 @@ test("product template service maps CRUD and create-from-product endpoints", asy
     {
       method: "delete",
       url: "/product-templates/template-id",
-    },
-    {
-      method: "post",
-      url: "/product-templates/from-product/product-id",
-      body: {},
     },
   ]);
 });

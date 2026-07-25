@@ -20,12 +20,16 @@ export class CreateProductUseCase {
   ) {}
 
   async execute(dto: CreateProductDto) {
-    const productCode = await this.generateProductCodeUseCase.execute();
     const selectedTemplate =
       await this.productTemplatesRepository.findActiveById(dto.templateId);
     if (!selectedTemplate) {
       throw new NotFoundError('Product template not found');
     }
+
+    const requestedProductCode = dto.productCode?.trim() || null;
+    const productCode = requestedProductCode
+      ? await this.resolveRequestedProductCode(requestedProductCode)
+      : await this.generateProductCodeUseCase.execute();
 
     if (dto.serialNumber) {
       const existingSerial = await this.productsRepository.findBySerialNumber(
@@ -96,6 +100,15 @@ export class CreateProductUseCase {
       product,
       (asset) => this.assetsService?.enrichAssetUrl(asset).url ?? asset.path,
     );
+  }
+
+  private async resolveRequestedProductCode(productCode: string) {
+    const existing =
+      await this.productsRepository.findByProductCode(productCode);
+    if (existing) {
+      throw new ConflictError('Product code already exists');
+    }
+    return productCode;
   }
 }
 

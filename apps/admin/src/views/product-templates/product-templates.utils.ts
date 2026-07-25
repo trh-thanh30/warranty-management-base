@@ -37,16 +37,18 @@ export function toCreateTemplateBody(
   values: ProductTemplateFormValues,
 ): CreateProductTemplateBody {
   return {
+    sku: toOptionalValue(values.sku),
+    slug: toOptionalValue(values.slug),
     name: values.name.trim(),
-    category: values.category,
     categoryId: values.categoryId,
     brand: toOptionalValue(values.brand),
     model: toOptionalValue(values.model),
-    manufactureYear: values.manufactureYear,
+    modelYear: values.modelYear,
     description: toOptionalRichText(values.description),
     defaultWarrantyDurationMonths: values.defaultWarrantyDurationMonths,
     defaultWarrantyTerms: toOptionalValue(values.defaultWarrantyTerms),
     metadata: toMetadata(values),
+    isPublished: values.isPublished,
     coverAssetId: toOptionalValue(values.coverAssetId),
     galleryAssetIds: values.galleryImages
       .map((image) => image.assetId)
@@ -58,17 +60,19 @@ export function toUpdateTemplateBody(
   values: ProductTemplateFormValues,
 ): UpdateProductTemplateBody {
   return {
+    sku: toOptionalValue(values.sku),
+    slug: toOptionalValue(values.slug),
     name: values.name.trim(),
-    category: values.category,
     categoryId: values.categoryId,
     brand: toOptionalValue(values.brand) ?? null,
     model: toOptionalValue(values.model) ?? null,
-    manufactureYear: values.manufactureYear ?? null,
+    modelYear: values.modelYear ?? null,
     description: toNullableRichText(values.description),
     defaultWarrantyDurationMonths: values.defaultWarrantyDurationMonths,
     defaultWarrantyTerms: toOptionalValue(values.defaultWarrantyTerms) ?? null,
     metadata: toMetadata(values) ?? null,
     isActive: values.isActive,
+    isPublished: values.isPublished,
     coverAssetId: toOptionalValue(values.coverAssetId) ?? null,
     galleryAssetIds: values.galleryImages
       .map((image) => image.assetId)
@@ -86,12 +90,13 @@ export function getProductTemplateDefaults(
       .map((asset) => ({ assetId: asset.assetId, url: asset.url })) ?? [];
   const specifications = getTemplateSpecifications(template?.metadata);
   return {
+    sku: template?.sku ?? "",
+    slug: template?.slug ?? "",
     name: template?.name ?? "",
-    category: template?.category ?? "ACCESSORY",
     categoryId: template?.categoryId ?? "",
     brand: template?.brand ?? "",
     model: template?.model ?? "",
-    manufactureYear: template?.manufactureYear ?? undefined,
+    modelYear: template?.modelYear ?? undefined,
     description: template?.description ?? "",
     defaultWarrantyDurationMonths:
       template?.defaultWarrantyDurationMonths ?? 36,
@@ -103,5 +108,6 @@ export function getProductTemplateDefaults(
       ? specifications
       : [{ key: "", value: "" }],
     isActive: template?.isActive ?? true,
+    isPublished: template?.isPublished ?? false,
   };
 }

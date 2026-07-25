@@ -86,13 +86,3 @@ export function useDeactivateProductTemplate() {
       queryClient.invalidateQueries({ queryKey: productTemplateKeys.all }),
   });
 }
-
-export function useCreateProductTemplateFromProduct() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (productId: string) =>
-      productTemplatesService.createFromProduct(productId),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: productTemplateKeys.all }),
-  });
-}

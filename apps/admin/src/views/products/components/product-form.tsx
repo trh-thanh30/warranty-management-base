@@ -1,10 +1,11 @@
 "use client";
 
 import { Controller } from "react-hook-form";
-import { Layers3, Loader2 } from "lucide-react";
+import { Layers3, Loader2, Plus, RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ProductResponse, ProductTemplateSummary } from "@repo/shared";
-import { Button, Input, Textarea } from "@repo/ui";
+import { PERMISSIONS } from "@repo/shared/constants";
+import { Badge, Button, Input } from "@repo/ui";
 import {
   Combobox,
   ComboboxContent,
@@ -15,385 +16,284 @@ import {
   ComboboxTrigger,
 } from "@/src/components/common";
 import { FormField as Field } from "@/src/components/common/form-field";
-import { RichTextEditor } from "@/src/components/common/rich-text-editor";
-import { ImageUpload } from "@/src/components/common/image-upload";
+import { usePermissions } from "@/src/hooks/use-permissions";
+import { Link } from "@/src/i18n/navigation";
 import { createFieldErrorFormatter } from "@/src/utils";
-import type { ProductImportRowData } from "@/src/services/products/products.types";
 import { useProductForm } from "../hooks/use-product-form";
-import { ProductSpecificationsFields } from "./product-specifications-fields";
-import { ProductPublicationControl } from "./product-publication-control";
 import { ProductStatusControl } from "./product-status-control";
 
-type ProductFormProps = {
+export function ProductForm({
+  initialTemplate,
+  onCancel,
+  onSaved,
+  product,
+}: {
+  initialTemplate?: ProductTemplateSummary | null;
   onCancel: () => void;
-} & (
-  | {
-      mode?: "default";
-      onSaved: (product?: ProductResponse) => void;
-      product: ProductResponse | null;
-      createMode?: "from-template" | "independent";
-      productTemplate?: ProductTemplateSummary | null;
-    }
-  | {
-      initialValues: ProductImportRowData;
-      mode: "import-preview";
-      onSaved: (data: ProductImportRowData) => void;
-      submitLabel: string;
-    }
-);
-
-export function ProductForm(props: ProductFormProps) {
+  onSaved: (product?: ProductResponse) => void;
+  product: ProductResponse | null;
+}) {
   const t = useTranslations("Products");
-  const importPreview = props.mode === "import-preview";
-  const product = importPreview ? null : props.product;
-  const {
-    categoriesQuery,
-    control,
-    creating,
-    errors,
-    isSubmitting,
-    onSubmit,
-    register,
-    appendSpecification,
-    moveSpecification,
-    removeSpecification,
-    selectedTemplateId,
-    setValue,
-    specificationFields,
-  } = useProductForm({
-    importPreview: importPreview
-      ? { data: props.initialValues, onSaved: props.onSaved }
-      : undefined,
-    onSaved: importPreview ? () => undefined : props.onSaved,
+  const { hasPermission } = usePermissions();
+  const form = useProductForm({
+    initialTemplate,
+    onSaved,
     product,
-    createMode: importPreview ? undefined : props.createMode,
-    productTemplate: importPreview ? null : props.productTemplate,
   });
-  const categories = categoriesQuery.data?.items ?? [];
-  const sharedFieldsDisabled = Boolean(selectedTemplateId) || isSubmitting;
-  const selectedTemplate =
-    (!importPreview && props.productTemplate) || product?.template;
-  const fromTemplateCreation = creating && Boolean(selectedTemplate);
+  const categories = form.categoriesQuery.data?.items ?? [];
+  const isSubmitting = form.formState.isSubmitting;
 
   return (
-    <form className="space-y-6" noValidate onSubmit={onSubmit}>
-      {errors.root?.message ? (
+    <form className="space-y-6" noValidate onSubmit={form.onSubmit}>
+      {form.formState.errors.root?.message ? (
         <div
           className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300"
           role="alert"
         >
-          {errors.root.message}
+          {form.formState.errors.root.message}
         </div>
       ) : null}
 
-      {creating && !importPreview ? (
-        <div className="rounded-lg border border-blue-200 bg-blue-50/70 p-4 dark:border-blue-900 dark:bg-blue-950/30">
-          <div className="flex gap-3">
-            <Layers3
-              className="mt-0.5 size-5 shrink-0 text-blue-600 dark:text-blue-400"
-              aria-hidden="true"
-            />
-            <div>
-              <p className="text-sm font-semibold text-slate-950 dark:text-slate-50">
-                {t("templateSectionTitle")}
-              </p>
-              <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                {selectedTemplate
-                  ? t("selectedTemplateSummary", {
-                      name: selectedTemplate.name,
-                    })
-                  : t("independentProductDescription")}
-              </p>
-            </div>
+      <section className="space-y-4 rounded-lg border border-blue-200 bg-blue-50/70 p-4 dark:border-blue-900 dark:bg-blue-950/30">
+        <div className="flex gap-3">
+          <Layers3
+            aria-hidden="true"
+            className="mt-0.5 size-5 shrink-0 text-blue-600 dark:text-blue-400"
+          />
+          <div>
+            <h2 className="text-sm font-semibold text-slate-950 dark:text-slate-50">
+              {t("templateSectionTitle")}
+            </h2>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+              {t("templateRequiredDescription")}
+            </p>
           </div>
         </div>
-      ) : null}
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        {importPreview ? (
-          <Field
-            error={formatFieldError(errors.productCode?.message, t)}
-            id="product-code"
-            label={t("productCode")}
-          >
-            <Input id="product-code" {...register("productCode")} />
-          </Field>
-        ) : null}
-        {!fromTemplateCreation ? (
-          <Field
-            error={formatFieldError(errors.name?.message, t)}
-            id="product-name"
-            label={t("name")}
-          >
-            <Input
-              disabled={sharedFieldsDisabled}
-              id="product-name"
-              placeholder={t("namePlaceholder")}
-              {...register("name")}
-            />
-          </Field>
-        ) : null}
         <Field
-          error={formatFieldError(errors.slug?.message, t)}
-          id="product-slug"
-          label={t("slug")}
+          error={formatFieldError(form.formState.errors.templateId?.message, t)}
+          id="product-template"
+          label={t("productTemplate")}
         >
-          <Input
-            autoCapitalize="none"
-            autoCorrect="off"
-            id="product-slug"
-            placeholder={t("slugPlaceholder")}
-            spellCheck={false}
-            {...register("slug")}
-          />
-        </Field>
-      </div>
-
-      <div className="grid gap-5 sm:grid-cols-2">
-        {!importPreview ? (
-          <Field
-            error={formatFieldError(errors.serialNumber?.message, t)}
-            id="product-serial-number"
-            label={t("serialNumber")}
-          >
-            <Input
-              id="product-serial-number"
-              placeholder={t("serialNumberPlaceholder")}
-              {...register("serialNumber")}
-            />
-          </Field>
-        ) : null}
-        {!fromTemplateCreation ? (
-          <Field
-            error={formatFieldError(errors.categoryId?.message, t)}
-            id="product-category-id"
-            label={t("dynamicCategory")}
-          >
-            <Controller
-              control={control}
-              name="categoryId"
-              render={({ field }) => (
-                <ProductCategoryCombobox
-                  disabled={categoriesQuery.isLoading || sharedFieldsDisabled}
-                  id="product-category-id"
-                  onValueChange={field.onChange}
-                  options={categories
-                    .filter((category) => !importPreview || category.code)
-                    .map((category) => ({
-                      label: category.name,
-                      value: importPreview
-                        ? (category.code ?? "")
-                        : category.id,
-                    }))}
-                  placeholder={t("dynamicCategory")}
-                  searchPlaceholder={t("search")}
-                  value={field.value}
+          {form.creating ? (
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+              <div className="min-w-0 flex-1">
+                <Controller
+                  control={form.control}
+                  name="templateId"
+                  render={({ field }) => (
+                    <ProductTemplateCombobox
+                      disabled={form.templatesQuery.isLoading || isSubmitting}
+                      id="product-template"
+                      onValueChange={field.onChange}
+                      options={form.templates}
+                      placeholder={t("selectTemplate")}
+                      searchPlaceholder={t("searchTemplate")}
+                      value={field.value}
+                    />
+                  )}
                 />
-              )}
+              </div>
+              {hasPermission(PERMISSIONS.PRODUCT_TEMPLATE_CREATE) ? (
+                <Button asChild className="shrink-0" variant="secondary">
+                  <Link href="/product-templates/create">
+                    <Plus aria-hidden="true" className="size-4" />
+                    {t("createProductTemplate")}
+                  </Link>
+                </Button>
+              ) : null}
+            </div>
+          ) : (
+            <Input
+              id="product-template"
+              readOnly
+              value={
+                form.selectedTemplate
+                  ? `${form.selectedTemplate.name} · ${form.selectedTemplate.sku}`
+                  : "-"
+              }
             />
-          </Field>
-        ) : null}
-      </div>
-
-      {product?.warrantyCode ? (
-        <Field id="product-warranty-code-readonly" label={t("warrantyCode")}>
-          <Input
-            id="product-warranty-code-readonly"
-            readOnly
-            value={product.warrantyCode}
-          />
+          )}
         </Field>
-      ) : null}
+
+        {form.selectedTemplate ? (
+          <dl className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+            <TemplateDetail
+              label={t("templateSku")}
+              value={form.selectedTemplate.sku}
+            />
+            <TemplateDetail
+              label={t("brand")}
+              value={form.selectedTemplate.brand ?? "-"}
+            />
+            <TemplateDetail
+              label={t("model")}
+              value={form.selectedTemplate.model ?? "-"}
+            />
+            <TemplateDetail
+              label={t("modelYear")}
+              value={String(form.selectedTemplate.modelYear ?? "-")}
+            />
+          </dl>
+        ) : null}
+      </section>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        {!fromTemplateCreation ? (
-          <Field
-            error={formatFieldError(errors.brand?.message, t)}
-            id="product-brand"
-            label={t("brand")}
-          >
-            <Input
-              disabled={sharedFieldsDisabled}
-              id="product-brand"
-              placeholder={t("brandPlaceholder")}
-              {...register("brand")}
-            />
-          </Field>
-        ) : null}
-        {!fromTemplateCreation ? (
-          <Field
-            error={formatFieldError(errors.model?.message, t)}
-            id="product-model"
-            label={t("model")}
-          >
-            <Input
-              disabled={sharedFieldsDisabled}
-              id="product-model"
-              placeholder={t("modelPlaceholder")}
-              {...register("model")}
-            />
-          </Field>
-        ) : null}
         <Field
-          error={formatFieldError(errors.installationPosition?.message, t)}
-          id="product-installation-position"
-          label={t("installationPosition")}
+          description={t("displayNameDescription")}
+          error={formatFieldError(
+            form.formState.errors.displayName?.message,
+            t,
+          )}
+          id="product-display-name"
+          label={t("displayName")}
         >
           <Input
-            id="product-installation-position"
-            placeholder={t("installationPositionPlaceholder")}
-            {...register("installationPosition")}
+            id="product-display-name"
+            placeholder={
+              form.selectedTemplate?.name ?? t("displayNamePlaceholder")
+            }
+            {...form.register("displayName")}
           />
         </Field>
-        {!fromTemplateCreation ? (
-          <Field
-            error={formatFieldError(errors.manufactureYear?.message, t)}
-            id="product-manufacture-year"
-            label={t("manufactureYear")}
-          >
-            <Input
-              disabled={sharedFieldsDisabled}
-              id="product-manufacture-year"
-              inputMode="numeric"
-              placeholder={t("manufactureYearPlaceholder")}
-              type="number"
-              {...register("manufactureYear")}
-            />
-          </Field>
-        ) : null}
-      </div>
-
-      {importPreview ? (
         <Field
-          error={formatFieldError(errors.serialNumber?.message, t)}
+          error={formatFieldError(
+            form.formState.errors.serialNumber?.message,
+            t,
+          )}
           id="product-serial-number"
           label={t("serialNumber")}
         >
           <Input
             id="product-serial-number"
             placeholder={t("serialNumberPlaceholder")}
-            {...register("serialNumber")}
+            {...form.register("serialNumber")}
           />
         </Field>
-      ) : null}
-
-      {importPreview ? (
-        <div className="grid gap-5 sm:grid-cols-2">
-          <Field id="product-cover-image-url" label={t("excel.imageUrl")}>
-            <Input
-              id="product-cover-image-url"
-              {...register("coverImageUrl")}
-            />
-          </Field>
-          <Field
-            error={formatFieldError(errors.warrantyDurationMonths?.message, t)}
-            id="product-warranty-duration"
-            label={t("durationMonths")}
-          >
-            <Input
-              id="product-warranty-duration"
-              inputMode="numeric"
-              min={1}
-              type="number"
-              {...register("warrantyDurationMonths")}
-            />
-          </Field>
-        </div>
-      ) : !fromTemplateCreation ? (
-        <Field
-          error={formatFieldError(errors.coverAssetId?.message, t)}
-          id="product-cover-image"
-          label={t("coverImage")}
-        >
-          <Controller
-            control={control}
-            name="coverImageUrl"
-            render={({ field }) => (
-              <ImageUpload
-                disabled={sharedFieldsDisabled}
-                id="product-cover-image"
-                labels={{
-                  hint: t("coverImageHint"),
-                  previewAlt: t("coverImageAlt"),
-                }}
-                onAssetChange={(asset) =>
-                  setValue("coverAssetId", asset?.id ?? "", {
-                    shouldDirty: true,
-                    shouldValidate: true,
-                  })
-                }
-                onChange={field.onChange}
-                persistedValue={
-                  product?.assets.find((asset) => asset.role === "COVER")
-                    ?.url ?? ""
-                }
-                uploadOptions={{
-                  accessType: "PUBLIC",
-                  folder: "products",
-                }}
-                value={field.value}
-              />
-            )}
-          />
-        </Field>
-      ) : null}
-
-      {!fromTemplateCreation ? (
-        <Field
-          error={formatFieldError(errors.description?.message, t)}
-          id="product-description"
-          label={t("descriptionLabel")}
-        >
-          <Controller
-            control={control}
-            name="description"
-            render={({ field }) => (
-              <RichTextEditor
-                disabled={sharedFieldsDisabled}
-                onChange={field.onChange}
-                value={field.value ?? ""}
-              />
-            )}
-          />
-        </Field>
-      ) : null}
-
-      {importPreview ? (
-        <Field
-          error={formatFieldError(errors.warrantyTerms?.message, t)}
-          id="product-warranty-terms"
-          label={t("warrantyTerms")}
-        >
-          <Textarea
-            id="product-warranty-terms"
-            rows={4}
-            {...register("warrantyTerms")}
-          />
-        </Field>
-      ) : !fromTemplateCreation ? (
-        <ProductSpecificationsFields
-          disabled={sharedFieldsDisabled}
-          errors={errors}
-          fields={specificationFields}
-          onAdd={appendSpecification}
-          onMove={moveSpecification}
-          onRemove={removeSpecification}
-          register={register}
-        />
-      ) : null}
-
-      <div className="flex flex-col gap-4 border-t border-slate-200 pt-5 dark:border-slate-800">
-        <ProductStatusField control={control} disabled={isSubmitting} />
-        {!importPreview ? (
-          <ProductPublicationField control={control} disabled={isSubmitting} />
-        ) : null}
       </div>
 
-      <div className="grid grid-cols-2 gap-2 border-t border-slate-200 pt-5 dark:border-slate-800 sm:flex sm:justify-end">
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field
+          description={t("categoryOverrideDescription")}
+          error={formatFieldError(form.formState.errors.categoryId?.message, t)}
+          id="product-category-id"
+          label={t("dynamicCategory")}
+        >
+          <div className="space-y-2">
+            <Controller
+              control={form.control}
+              name="categoryId"
+              render={({ field }) => (
+                <ProductCategoryCombobox
+                  disabled={
+                    !form.selectedTemplate ||
+                    form.categoriesQuery.isLoading ||
+                    isSubmitting
+                  }
+                  id="product-category-id"
+                  onValueChange={field.onChange}
+                  options={categories.map((category) => ({
+                    label: category.name,
+                    value: category.id,
+                  }))}
+                  placeholder={t("dynamicCategory")}
+                  searchPlaceholder={t("search")}
+                  value={field.value}
+                />
+              )}
+            />
+            {form.selectedTemplate ? (
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <Badge
+                  variant={form.isCategoryOverridden ? "warning" : "secondary"}
+                >
+                  {form.isCategoryOverridden
+                    ? t("categoryOverridden")
+                    : t("categoryFromTemplate")}
+                </Badge>
+                {form.isCategoryOverridden ? (
+                  <Button
+                    onClick={form.restoreTemplateCategory}
+                    size="sm"
+                    type="button"
+                    variant="ghost"
+                  >
+                    <RotateCcw aria-hidden="true" className="size-4" />
+                    {t("restoreTemplateCategory")}
+                  </Button>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        </Field>
+        <Field
+          description={form.creating ? t("productCodeDescription") : undefined}
+          error={formatFieldError(
+            form.formState.errors.productCode?.message,
+            t,
+          )}
+          id="product-code"
+          label={t("productCode")}
+        >
+          <Input
+            id="product-code"
+            placeholder={t("productCodePlaceholder")}
+            readOnly={!form.creating}
+            {...form.register("productCode")}
+          />
+        </Field>
+      </div>
+
+      <Field
+        error={formatFieldError(
+          form.formState.errors.installationPosition?.message,
+          t,
+        )}
+        id="product-installation-position"
+        label={t("installationPosition")}
+      >
+        <Input
+          id="product-installation-position"
+          placeholder={t("installationPositionPlaceholder")}
+          {...form.register("installationPosition")}
+        />
+      </Field>
+
+      {product ? (
+        <div className="grid gap-5 sm:grid-cols-2">
+          {product.warrantyCode ? (
+            <Field
+              id="product-warranty-code-readonly"
+              label={t("warrantyCode")}
+            >
+              <Input
+                id="product-warranty-code-readonly"
+                readOnly
+                value={product.warrantyCode}
+              />
+            </Field>
+          ) : null}
+        </div>
+      ) : null}
+
+      <Controller
+        control={form.control}
+        name="status"
+        render={({ field }) => (
+          <ProductStatusControl
+            disabled={isSubmitting}
+            id="product-status"
+            onStatusChange={field.onChange}
+            status={field.value}
+          />
+        )}
+      />
+
+      <div className="grid grid-cols-2 gap-2 border-t border-slate-200 pt-5 sm:flex sm:justify-end dark:border-slate-800">
         <Button
           className="w-full sm:w-auto"
           disabled={isSubmitting}
-          onClick={props.onCancel}
+          onClick={onCancel}
           type="button"
           variant="secondary"
         >
@@ -405,62 +305,69 @@ export function ProductForm(props: ProductFormProps) {
           type="submit"
         >
           {isSubmitting ? (
-            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            <Loader2 aria-hidden="true" className="size-4 animate-spin" />
           ) : null}
-          {importPreview
-            ? props.submitLabel
-            : creating
-              ? t("createSubmit")
-              : t("save")}
+          {form.creating ? t("createSubmit") : t("save")}
         </Button>
       </div>
     </form>
   );
 }
 
-function ProductStatusField({
-  control,
-  disabled,
-}: {
-  control: ReturnType<typeof useProductForm>["control"];
-  disabled: boolean;
-}) {
+function TemplateDetail({ label, value }: { label: string; value: string }) {
   return (
-    <Controller
-      control={control}
-      name="status"
-      render={({ field }) => (
-        <ProductStatusControl
-          disabled={disabled}
-          id="product-status"
-          onStatusChange={field.onChange}
-          status={field.value}
-        />
-      )}
-    />
+    <div>
+      <dt className="text-slate-500 dark:text-slate-400">{label}</dt>
+      <dd className="mt-1 font-medium text-slate-950 dark:text-slate-50">
+        {value}
+      </dd>
+    </div>
   );
 }
 
-function ProductPublicationField({
-  control,
+function ProductTemplateCombobox({
   disabled,
+  id,
+  onValueChange,
+  options,
+  placeholder,
+  searchPlaceholder,
+  value,
 }: {
-  control: ReturnType<typeof useProductForm>["control"];
-  disabled: boolean;
+  disabled?: boolean;
+  id: string;
+  onValueChange: (value: string) => void;
+  options: ProductTemplateSummary[];
+  placeholder: string;
+  searchPlaceholder: string;
+  value?: string;
 }) {
+  const selected = options.find((option) => option.id === value);
   return (
-    <Controller
-      control={control}
-      name="isPublished"
-      render={({ field }) => (
-        <ProductPublicationControl
-          disabled={disabled}
-          id="product-publication"
-          isPublished={field.value}
-          onPublishedChange={field.onChange}
-        />
-      )}
-    />
+    <Combobox
+      disabled={disabled}
+      onValueChange={onValueChange}
+      value={value ?? ""}
+    >
+      <ComboboxTrigger
+        id={id}
+        placeholder={placeholder}
+        selectedLabel={
+          selected ? `${selected.name} · ${selected.sku}` : undefined
+        }
+      />
+      <ComboboxContent>
+        <ComboboxInput placeholder={searchPlaceholder} showTrigger={false} />
+        <ComboboxList>
+          <ComboboxEmpty>{placeholder}</ComboboxEmpty>
+          {options.map((option) => (
+            <ComboboxItem key={option.id} value={option.id}>
+              {option.name} · {option.sku}
+            </ComboboxItem>
+          ))}
+        </ComboboxList>
+      </ComboboxContent>
+    </Combobox>
   );
 }
 
@@ -482,7 +389,6 @@ function ProductCategoryCombobox({
   value?: string;
 }) {
   const selectedOption = options.find((option) => option.value === value);
-
   return (
     <Combobox
       disabled={disabled}
@@ -511,29 +417,15 @@ function ProductCategoryCombobox({
 
 const formatFieldError = createFieldErrorFormatter(
   new Set([
-    "brandLength",
-    "categoryRequired",
     "categoryNotFound",
-    "customerNotFound",
-    "customerRequired",
-    "coverAssetNotFound",
-    "descriptionLength",
+    "categoryRequired",
+    "displayNameLength",
+    "duplicateProductCode",
     "duplicateSerialNumber",
-    "duplicateWarrantyCode",
-    "durationMonthsInteger",
-    "durationMonthsRange",
     "installationPositionLength",
-    "manufactureYearInteger",
-    "manufactureYearRange",
-    "modelLength",
-    "nameLength",
-    "nameRequired",
     "productCodeLength",
     "serialNumberLength",
-    "slugInvalid",
-    "slugLength",
-    "warrantyCodeInvalid",
-    "warrantyCodeRequired",
-    "warrantyTermsLength",
+    "templateNotFound",
+    "templateRequired",
   ]),
 );

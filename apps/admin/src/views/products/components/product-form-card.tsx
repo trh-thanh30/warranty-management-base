@@ -16,8 +16,7 @@ type ProductFormCardProps = {
   onCancel: () => void;
   onSaved: (product?: ProductResponse) => void;
   product: ProductResponse | null;
-  createMode?: "from-template" | "independent";
-  productTemplate?: ProductTemplateSummary | null;
+  initialTemplate?: ProductTemplateSummary | null;
   title: string;
 };
 
@@ -26,8 +25,7 @@ export function ProductFormCard({
   onCancel,
   onSaved,
   product,
-  createMode,
-  productTemplate,
+  initialTemplate,
   title,
 }: ProductFormCardProps) {
   return (
@@ -38,11 +36,10 @@ export function ProductFormCard({
       </CardHeader>
       <CardContent>
         <ProductForm
-          createMode={createMode}
+          initialTemplate={initialTemplate}
           onCancel={onCancel}
           onSaved={onSaved}
           product={product}
-          productTemplate={productTemplate}
         />
       </CardContent>
     </Card>

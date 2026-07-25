@@ -139,4 +139,60 @@ describe('CreateProductUseCase', () => {
       }),
     );
   });
+
+  it('keeps an explicit unique product code instead of generating one', async () => {
+    const template = {
+      id: 'template-id',
+      category_id: 'category-id',
+      default_warranty_duration_months: 24,
+      default_warranty_terms: null,
+    };
+    const productCreate = jest.fn().mockResolvedValue({
+      id: 'product-id',
+      template_id: template.id,
+      category_id: template.category_id,
+      product_code: 'CUSTOM-001',
+      status: 'ACTIVE',
+      metadata: null,
+      assets: [],
+      ownerships: [],
+      warranty: null,
+      template: {
+        ...template,
+        name: 'Camera AI 4K',
+        assets: [],
+        category_ref: null,
+      },
+      category_ref: { id: 'category-id', name: 'Camera' },
+    });
+    const generateProductCodeUseCase = { execute: jest.fn() };
+    const productsRepository = {
+      findByProductCode: jest.fn().mockResolvedValue(null),
+    };
+    const useCase = new CreateProductUseCase(
+      {
+        $transaction: jest.fn((callback) =>
+          callback({ product: { create: productCreate } }),
+        ),
+      } as never,
+      productsRepository as never,
+      generateProductCodeUseCase as never,
+      { findActiveById: jest.fn().mockResolvedValue(template) } as never,
+    );
+
+    await useCase.execute({
+      productCode: ' CUSTOM-001 ',
+      templateId: template.id,
+    });
+
+    expect(productsRepository.findByProductCode).toHaveBeenCalledWith(
+      'CUSTOM-001',
+    );
+    expect(generateProductCodeUseCase.execute).not.toHaveBeenCalled();
+    expect(productCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ product_code: 'CUSTOM-001' }),
+      }),
+    );
+  });
 });

@@ -1,220 +1,103 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  getProductSpecifications,
-  mergeProductSpecifications,
-  resolveSpecificationMove,
+  resolveProductCategoryId,
   toCreateProductBody,
   toProductActiveStatus,
-  toProductSlugPreview,
+  toUpdateProductBody,
 } from "./products.utils.ts";
-import {
-  assignProductOwnerSchema,
-  productSpecificationsSchema,
-} from "./products.types.ts";
-
-test("reads valid product specifications from metadata", () => {
-  assert.deepEqual(
-    getProductSpecifications({
-      source: "admin",
-      specifications: {
-        "Công nghệ": "Nano Ceramic",
-        "Độ truyền sáng": "54,4%",
-      },
-    }),
-    [
-      { key: "Công nghệ", value: "Nano Ceramic" },
-      { key: "Độ truyền sáng", value: "54,4%" },
-    ],
-  );
-});
-
-test("ignores malformed historical product specifications", () => {
-  assert.deepEqual(
-    getProductSpecifications({
-      specifications: {
-        valid: "value",
-        nested: { value: "unsupported" },
-        missing: null,
-      },
-    }),
-    [{ key: "valid", value: "value" }],
-  );
-  assert.deepEqual(getProductSpecifications({ specifications: [] }), []);
-  assert.deepEqual(getProductSpecifications(null), []);
-});
-
-test("reads ordered product specifications from metadata", () => {
-  assert.deepEqual(
-    getProductSpecifications({
-      specifications: [
-        { key: "UV rejection", value: "99.9%" },
-        { key: "Technology", value: "Nano Ceramic" },
-      ],
-    }),
-    [
-      { key: "UV rejection", value: "99.9%" },
-      { key: "Technology", value: "Nano Ceramic" },
-    ],
-  );
-});
-
-test("merges trimmed specifications without removing other metadata", () => {
-  assert.deepEqual(
-    mergeProductSpecifications({ source: "admin", version: 1 }, [
-      { key: " Công nghệ ", value: " Nano Ceramic " },
-      { key: "Độ truyền sáng", value: "54,4%" },
-      { key: "", value: "" },
-    ]),
-    {
-      source: "admin",
-      version: 1,
-      specifications: [
-        { key: "Công nghệ", value: "Nano Ceramic" },
-        { key: "Độ truyền sáng", value: "54,4%" },
-      ],
-    },
-  );
-});
-
-test("clears only specifications when all rows are empty", () => {
-  assert.deepEqual(
-    mergeProductSpecifications(
-      { source: "admin", specifications: { legacy: "value" } },
-      [{ key: "", value: "" }],
-    ),
-    { source: "admin" },
-  );
-  assert.equal(
-    mergeProductSpecifications({ specifications: { legacy: "value" } }, []),
-    null,
-  );
-});
-
-test("accepts complete and fully empty specification rows", () => {
-  assert.equal(
-    productSpecificationsSchema.safeParse([
-      { key: "Công nghệ", value: "Nano Ceramic" },
-      { key: "", value: "" },
-    ]).success,
-    true,
-  );
-});
-
-test("rejects partially completed specification rows", () => {
-  const result = productSpecificationsSchema.safeParse([
-    { key: "Công nghệ", value: "" },
-  ]);
-
-  assert.equal(result.success, false);
-  if (!result.success) {
-    assert.equal(result.error.issues[0]?.message, "specificationValueRequired");
-  }
-});
-
-test("rejects duplicate trimmed specification keys", () => {
-  const result = productSpecificationsSchema.safeParse([
-    { key: "Công nghệ", value: "Nano Ceramic" },
-    { key: " Công nghệ ", value: "SPUTTER" },
-  ]);
-
-  assert.equal(result.success, false);
-  if (!result.success) {
-    assert.equal(result.error.issues[0]?.message, "specificationKeyDuplicate");
-  }
-});
+import { assignProductOwnerSchema } from "./products.types.ts";
 
 test("maps the edit status toggle to an active product status", () => {
   assert.equal(toProductActiveStatus(true), "ACTIVE");
   assert.equal(toProductActiveStatus(false), "INACTIVE");
 });
 
-test("resolves a sortable field move and ignores invalid drops", () => {
-  const fields = [{ id: "first" }, { id: "second" }, { id: "third" }];
+test("resets category to the new template default after a template change", () => {
+  assert.equal(
+    resolveProductCategoryId({
+      currentCategoryId: "overridden-category",
+      templateCategoryId: "new-template-category",
+      templateChanged: true,
+    }),
+    "new-template-category",
+  );
+});
 
-  assert.deepEqual(resolveSpecificationMove(fields, "third", "first"), {
-    from: 2,
-    to: 0,
-  });
-  assert.equal(resolveSpecificationMove(fields, "first", "first"), null);
-  assert.equal(resolveSpecificationMove(fields, "missing", "first"), null);
-  assert.equal(resolveSpecificationMove(fields, "first", undefined), null);
+test("preserves an existing category when the template did not change", () => {
+  assert.equal(
+    resolveProductCategoryId({
+      currentCategoryId: "overridden-category",
+      templateCategoryId: "template-category",
+      templateChanged: false,
+    }),
+    "overridden-category",
+  );
 });
 
 test("creates an inventory-only product payload", () => {
   assert.deepEqual(
     toCreateProductBody({
-      brand: " Toyota ",
-      category: "CAR",
       categoryId: "category-id",
-      coverAssetId: "",
-      coverImageUrl: "",
-      description: "",
+      displayName: " Toyota Camry - showroom ",
       installationPosition: " Kính lái ",
-      isPublished: true,
-      manufactureYear: 2026,
-      model: " Camry ",
-      name: " Toyota Camry ",
+      productCode: "",
       serialNumber: " VIN-001 ",
-      slug: "toyota-camry",
-      specifications: [{ key: "Technology", value: "Nano Ceramic" }],
       status: "ACTIVE",
-      templateId: "",
-      createTemplate: true,
+      templateId: "template-id",
     }),
     {
-      brand: "Toyota",
-      category: "CAR",
       categoryId: "category-id",
-      coverAssetId: undefined,
-      description: undefined,
-      isPublished: true,
-      manufactureYear: 2026,
+      displayName: "Toyota Camry - showroom",
       metadata: {
         installationPosition: "Kính lái",
-        specifications: [{ key: "Technology", value: "Nano Ceramic" }],
       },
-      model: "Camry",
-      name: "Toyota Camry",
       serialNumber: "VIN-001",
-      slug: "toyota-camry",
       status: "ACTIVE",
-      templateId: undefined,
-      createTemplate: true,
+      templateId: "template-id",
     },
   );
 });
 
-test("keeps only unit metadata when creating a product from a template", () => {
-  const body = toCreateProductBody({
-    brand: "3M",
-    category: "ACCESSORY",
-    categoryId: "category-id",
-    coverAssetId: "template-cover-id",
-    coverImageUrl: "https://cdn.example.com/template.jpg",
-    description: "Shared description",
-    installationPosition: " Kính lái ",
-    manufactureYear: 2026,
-    model: "CR70",
-    name: "Decal 3M",
-    serialNumber: " SN-002 ",
-    slug: "decal-3m",
-    specifications: [{ key: "UV", value: "99%" }],
-    status: "ACTIVE",
-    templateId: "template-id",
-    createTemplate: false,
-    isPublished: false,
-  });
-
-  assert.deepEqual(body.metadata, {
-    installationPosition: "Kính lái",
-  });
+test("sends an explicitly entered product code", () => {
+  assert.equal(
+    toCreateProductBody({
+      categoryId: "category-id",
+      displayName: "",
+      installationPosition: "",
+      productCode: " CUSTOM-001 ",
+      serialNumber: "",
+      status: "ACTIVE",
+      templateId: "template-id",
+    }).productCode,
+    "CUSTOM-001",
+  );
 });
 
-test("creates a Vietnamese-safe slug preview from the product name", () => {
-  assert.equal(
-    toProductSlugPreview("  Phim cách nhiệt Đặc Biệt  "),
-    "phim-cach-nhiet-dac-biet",
+test("updates only physical product fields and preserves unrelated metadata", () => {
+  assert.deepEqual(
+    toUpdateProductBody(
+      {
+        categoryId: "overridden-category-id",
+        displayName: " ",
+        installationPosition: " Cửa trước ",
+        productCode: "",
+        serialNumber: "",
+        status: "INACTIVE",
+        templateId: "template-id",
+      },
+      { source: "import", installationPosition: "Old" },
+    ),
+    {
+      categoryId: "overridden-category-id",
+      displayName: null,
+      metadata: {
+        source: "import",
+        installationPosition: "Cửa trước",
+      },
+      serialNumber: null,
+      status: "INACTIVE",
+    },
   );
 });
 

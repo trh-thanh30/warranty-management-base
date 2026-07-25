@@ -36,7 +36,10 @@ describe('ListProductTemplatesUseCase', () => {
       assetsService as never,
     );
 
-    const result = await useCase.execute({ isActive: 'true' });
+    const result = await useCase.execute({
+      isActive: 'true',
+      isPublished: 'true',
+    });
 
     expect(result.items[0]).toEqual(
       expect.objectContaining({
@@ -46,5 +49,9 @@ describe('ListProductTemplatesUseCase', () => {
       }),
     );
     expect(result.meta.total).toBe(1);
+    expect(repository.list).toHaveBeenCalledWith({
+      isActive: 'true',
+      isPublished: 'true',
+    });
   });
 });

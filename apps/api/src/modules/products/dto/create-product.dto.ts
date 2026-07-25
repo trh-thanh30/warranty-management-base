@@ -9,6 +9,11 @@ import {
 } from 'class-validator';
 
 export class CreateProductDto {
+  @IsOptional()
+  @IsString()
+  @Length(1, 64)
+  productCode?: string;
+
   @IsUUID()
   templateId: string;
 

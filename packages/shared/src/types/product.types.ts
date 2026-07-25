@@ -44,6 +44,7 @@ export type ProductTemplateSummary = {
 export type ListProductTemplatesQuery = PaginationQuery & {
   search?: string;
   isActive?: boolean;
+  isPublished?: boolean;
 };
 
 export type CreateProductTemplateBody = {
@@ -158,6 +159,7 @@ export type ListProductsQuery = PaginationQuery & {
 
 export type CreateProductBody = {
   templateId: string;
+  productCode?: string;
   categoryId?: string;
   displayName?: string;
   status?: ProductStatus;

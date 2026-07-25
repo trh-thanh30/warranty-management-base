@@ -128,9 +128,14 @@ export class ProductTemplatesRepository {
     const search = filters.search?.trim();
     const isActive =
       filters.isActive === undefined ? undefined : filters.isActive === 'true';
+    const isPublished =
+      filters.isPublished === undefined
+        ? undefined
+        : filters.isPublished === 'true';
     const { page, limit, skip, take } = normalizePagination(filters);
     const where: Prisma.ProductTemplateWhereInput = {
       is_active: isActive,
+      is_published: isPublished,
       OR: search
         ? [
             { sku: { contains: search, mode: 'insensitive' } },

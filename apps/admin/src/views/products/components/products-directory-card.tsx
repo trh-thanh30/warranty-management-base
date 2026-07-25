@@ -26,14 +26,8 @@ import {
 import { PaginationControls } from "@/src/components/common/pagination-controls";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { Link } from "@/src/i18n/navigation";
-import {
-  PRODUCT_PUBLICATION_FILTERS,
-  PRODUCT_STATUS_FILTERS,
-} from "../products.constants";
-import type {
-  ProductPublicationFilter,
-  ProductStatusFilter,
-} from "../products.types";
+import { PRODUCT_STATUS_FILTERS } from "../products.constants";
+import type { ProductStatusFilter } from "../products.types";
 import { ProductsTable } from "./products-table";
 
 type ProductsDirectoryCardProps = {
@@ -42,7 +36,6 @@ type ProductsDirectoryCardProps = {
   data?: PaginatedResponse<ProductResponse>;
   filters: {
     categoryId: string;
-    publication: ProductPublicationFilter;
     status: ProductStatusFilter;
   };
   isError: boolean;
@@ -50,11 +43,9 @@ type ProductsDirectoryCardProps = {
   onCategoryIdChange: (categoryId: string) => void;
   onClearFilters: () => void;
   onAssignOwner: (product: ProductResponse) => void;
-  onCreateTemplate: (product: ProductResponse) => void;
   onDelete: (product: ProductResponse) => void;
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
-  onPublicationChange: (publication: ProductPublicationFilter) => void;
   onRetry: () => void;
   onSearchChange: (search: string) => void;
   onSortChange: (sortBy: ProductSortBy) => void;
@@ -75,11 +66,9 @@ export function ProductsDirectoryCard({
   onCategoryIdChange,
   onClearFilters,
   onAssignOwner,
-  onCreateTemplate,
   onDelete,
   onPageChange,
   onPageSizeChange,
-  onPublicationChange,
   onRetry,
   onSearchChange,
   onSortChange,
@@ -93,7 +82,6 @@ export function ProductsDirectoryCard({
   const hasFilters =
     Boolean(search.trim()) ||
     filters.categoryId !== "ALL" ||
-    filters.publication !== "ALL" ||
     filters.status !== "ALL";
 
   return (
@@ -110,7 +98,6 @@ export function ProductsDirectoryCard({
           filters={filters}
           onCategoryIdChange={onCategoryIdChange}
           onSearchChange={onSearchChange}
-          onPublicationChange={onPublicationChange}
           onStatusChange={onStatusChange}
           search={search}
         />
@@ -124,7 +111,6 @@ export function ProductsDirectoryCard({
           isLoading={isLoading}
           onClearFilters={onClearFilters}
           onAssignOwner={onAssignOwner}
-          onCreateTemplate={onCreateTemplate}
           onDelete={onDelete}
           onPageChange={onPageChange}
           onPageSizeChange={onPageSizeChange}
@@ -144,7 +130,6 @@ function ProductsDirectoryFilters({
   filters,
   onCategoryIdChange,
   onSearchChange,
-  onPublicationChange,
   onStatusChange,
   search,
 }: Pick<
@@ -153,15 +138,14 @@ function ProductsDirectoryFilters({
   | "filters"
   | "onCategoryIdChange"
   | "onSearchChange"
-  | "onPublicationChange"
   | "onStatusChange"
   | "search"
 >) {
   const t = useTranslations("Products");
 
   return (
-    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-      <div className="relative md:col-span-2 xl:col-span-1">
+    <div className="grid gap-3 md:grid-cols-3">
+      <div className="relative">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
         <Input
           aria-label={t("searchLabel")}
@@ -171,23 +155,6 @@ function ProductsDirectoryFilters({
           value={search}
         />
       </div>
-      <Select
-        onValueChange={(value) =>
-          onPublicationChange(value as ProductPublicationFilter)
-        }
-        value={filters.publication}
-      >
-        <SelectTrigger aria-label={t("publicationFilter")}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {PRODUCT_PUBLICATION_FILTERS.map((status) => (
-            <SelectItem key={status} value={status}>
-              {t(`publicationStatuses.${status}`)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
       <Select onValueChange={onCategoryIdChange} value={filters.categoryId}>
         <SelectTrigger aria-label={t("dynamicCategoryFilter")}>
           <SelectValue />
@@ -228,7 +195,6 @@ function ProductsDirectoryContent({
   isLoading,
   onClearFilters,
   onAssignOwner,
-  onCreateTemplate,
   onDelete,
   onPageChange,
   onPageSizeChange,
@@ -245,7 +211,6 @@ function ProductsDirectoryContent({
   | "isLoading"
   | "onClearFilters"
   | "onAssignOwner"
-  | "onCreateTemplate"
   | "onDelete"
   | "onPageChange"
   | "onPageSizeChange"
@@ -282,7 +247,6 @@ function ProductsDirectoryContent({
         <ProductsTable
           items={data.items}
           onAssignOwner={onAssignOwner}
-          onCreateTemplate={onCreateTemplate}
           onDelete={onDelete}
           onSortChange={onSortChange}
           sortBy={sortBy}

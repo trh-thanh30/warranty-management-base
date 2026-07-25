@@ -47,6 +47,7 @@ export function ProductTemplatesTable({
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
               <TemplateStatus template={template} />
+              <TemplatePublication template={template} />
               <Badge variant="secondary">
                 {t("productCount", { count: template.productCount })}
               </Badge>
@@ -59,6 +60,7 @@ export function ProductTemplatesTable({
           <TableHeader>
             <TableRow>
               <TableHead>{t("name")}</TableHead>
+              <TableHead>{t("sku")}</TableHead>
               <TableHead>{t("category")}</TableHead>
               <TableHead>{t("defaultWarrantyDuration")}</TableHead>
               <TableHead>{t("products")}</TableHead>
@@ -72,9 +74,10 @@ export function ProductTemplatesTable({
                 <TableCell>
                   <TemplateIdentity template={template} />
                 </TableCell>
-                <TableCell>
-                  {template.categoryRef?.name ?? template.category}
+                <TableCell className="font-mono text-xs">
+                  {template.sku}
                 </TableCell>
+                <TableCell>{template.categoryRef?.name ?? "-"}</TableCell>
                 <TableCell>
                   {t("durationValue", {
                     count: template.defaultWarrantyDurationMonths,
@@ -82,7 +85,10 @@ export function ProductTemplatesTable({
                 </TableCell>
                 <TableCell>{template.productCount}</TableCell>
                 <TableCell>
-                  <TemplateStatus template={template} />
+                  <div className="flex flex-wrap gap-2">
+                    <TemplateStatus template={template} />
+                    <TemplatePublication template={template} />
+                  </div>
                 </TableCell>
                 <TableCell className="text-right">
                   <TemplateActions
@@ -121,6 +127,19 @@ function TemplateStatus({ template }: { template: ProductTemplateSummary }) {
   );
 }
 
+function TemplatePublication({
+  template,
+}: {
+  template: ProductTemplateSummary;
+}) {
+  const t = useTranslations("ProductTemplates");
+  return (
+    <Badge variant={template.isPublished ? "default" : "secondary"}>
+      {template.isPublished ? t("published") : t("hidden")}
+    </Badge>
+  );
+}
+
 function TemplateActions({
   onDeactivate,
   template,
@@ -153,9 +172,7 @@ function TemplateActions({
         </DropdownMenuItem>
         {canCreateProduct && template.isActive ? (
           <DropdownMenuItem asChild>
-            <Link
-              href={`/products/create?mode=from-template&templateId=${template.id}`}
-            >
+            <Link href={`/products/create?templateId=${template.id}`}>
               <PlusCircle className="mr-2 size-4" />
               {t("createProductFromTemplate")}
             </Link>

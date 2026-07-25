@@ -13,12 +13,15 @@ import { useToast } from "@/src/hooks/use-toast";
 import { useTranslations } from "next-intl";
 
 export type TemplateStatusFilter = "ALL" | "ACTIVE" | "INACTIVE";
+export type TemplatePublicationFilter = "ALL" | "PUBLISHED" | "HIDDEN";
 
 export function useProductTemplatesDirectory() {
   const t = useTranslations("ProductTemplates");
   const toast = useToast();
   const { hasPermission } = usePermissions();
   const [search, setSearch] = useState("");
+  const [publication, setPublication] =
+    useState<TemplatePublicationFilter>("ALL");
   const [status, setStatus] = useState<TemplateStatusFilter>("ACTIVE");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -30,6 +33,8 @@ export function useProductTemplatesDirectory() {
     limit: pageSize,
     search: debouncedSearch || undefined,
     isActive: status === "ALL" ? undefined : status === "ACTIVE",
+    isPublished:
+      publication === "ALL" ? undefined : publication === "PUBLISHED",
     sortBy: "name",
     sortOrder: "asc",
   });
@@ -52,6 +57,7 @@ export function useProductTemplatesDirectory() {
     isDeactivating: deactivate.isPending,
     page,
     pageSize,
+    publication,
     search,
     setPage,
     setPageSize: (value: number) => {
@@ -60,6 +66,10 @@ export function useProductTemplatesDirectory() {
     },
     setSearch: (value: string) => {
       setSearch(value);
+      setPage(1);
+    },
+    setPublication: (value: TemplatePublicationFilter) => {
+      setPublication(value);
       setPage(1);
     },
     setStatus: (value: TemplateStatusFilter) => {

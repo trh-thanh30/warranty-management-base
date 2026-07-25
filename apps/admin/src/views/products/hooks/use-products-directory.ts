@@ -9,7 +9,7 @@ import type {
   ProductResponse,
   ProductSortBy,
 } from "@repo/shared";
-import { isProductCategory, PERMISSIONS } from "@repo/shared/constants";
+import { PERMISSIONS } from "@repo/shared/constants";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { useExcel } from "@/src/hooks/use-excel";
@@ -23,11 +23,7 @@ import type {
 import type { ExcelImportMode } from "@/src/components/common/excel-import-dialog";
 import { useCategories } from "../../categories/hooks/use-categories";
 import type { EditableProductImportRow } from "../components/product-import-preview-table";
-import {
-  type ProductPublicationFilter,
-  type ProductStatusFilter,
-} from "../products.types";
-import { PRODUCT_STATUS_FILTERS } from "../products.constants";
+import { type ProductStatusFilter } from "../products.types";
 import {
   useConfirmProductImport,
   useDeleteProduct,
@@ -39,13 +35,11 @@ const PRODUCTS_PAGE_SIZE = 10;
 
 type ProductDirectoryFilters = {
   categoryId: string;
-  publication: ProductPublicationFilter;
   status: ProductStatusFilter;
 };
 
 const INITIAL_PRODUCT_DIRECTORY_FILTERS = {
   categoryId: "ALL",
-  publication: "ALL",
   status: "ALL",
 } satisfies ProductDirectoryFilters;
 
@@ -88,12 +82,6 @@ export function useProductsDirectory() {
       limit: pageSize,
       page,
       search: debouncedSearch || undefined,
-      isPublished:
-        filters.publication === "ALL"
-          ? undefined
-          : filters.publication === "PUBLISHED"
-            ? "true"
-            : "false",
       sortBy,
       sortOrder,
       status: filters.status === "ALL" ? undefined : filters.status,
@@ -276,12 +264,6 @@ export function useProductsDirectory() {
   function getExportQuery(): ListProductsQuery {
     return {
       categoryId: filters.categoryId === "ALL" ? undefined : filters.categoryId,
-      isPublished:
-        filters.publication === "ALL"
-          ? undefined
-          : filters.publication === "PUBLISHED"
-            ? "true"
-            : "false",
       search: debouncedSearch || undefined,
       sortBy,
       sortOrder,
@@ -326,7 +308,6 @@ export function useProductsDirectory() {
     resetImportPreview,
     toggleSort,
     updateCategoryId: filterHandlers.categoryId,
-    updatePublication: filterHandlers.publication,
     updateSearch: setSearch,
     updateStatus: filterHandlers.status,
     updateImportRowData,
@@ -342,20 +323,12 @@ function normalizePreviewRow(row: {
   const normalizedRow: EditableProductImportRow = {
     ...row,
     data: {
-      brand: row.data.brand ?? null,
-      category: row.data.category ?? "",
-      categoryCode: row.data.categoryCode ?? null,
-      description: row.data.description ?? null,
-      imageUrl: row.data.imageUrl ?? null,
+      displayName: row.data.displayName ?? null,
       installationPosition: row.data.installationPosition ?? null,
-      manufactureYear: row.data.manufactureYear ?? null,
-      model: row.data.model ?? null,
-      name: row.data.name ?? "",
       productCode: row.data.productCode ?? null,
       serialNumber: row.data.serialNumber ?? null,
-      status: row.data.status ?? "",
-      warrantyDurationMonths: row.data.warrantyDurationMonths ?? null,
-      warrantyTerms: row.data.warrantyTerms ?? null,
+      status: row.data.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
+      templateSku: row.data.templateSku ?? "",
     },
   };
 
@@ -391,29 +364,15 @@ function validateImportRows(rows: EditableProductImportRow[]) {
     );
     const productCode = row.data.productCode?.trim();
     const serialNumber = row.data.serialNumber?.trim();
-    const duration = row.data.warrantyDurationMonths;
-
-    if (!row.data.name.trim()) {
+    if (!row.data.templateSku.trim()) {
       errors.push({
-        field: "name",
-        message: "Nhập tên sản phẩm.",
+        field: "templateSku",
+        message: "SKU của product template là bắt buộc.",
         rowNumber: row.rowNumber,
       });
     }
 
-    if (!isProductCategory(row.data.category)) {
-      errors.push({
-        field: "category",
-        message: "Chọn danh mục legacy hợp lệ.",
-        rowNumber: row.rowNumber,
-      });
-    }
-
-    if (
-      !PRODUCT_STATUS_FILTERS.filter((status) => status !== "ALL").includes(
-        row.data.status as never,
-      )
-    ) {
+    if (!["ACTIVE", "INACTIVE"].includes(row.data.status)) {
       errors.push({
         field: "status",
         message: "Chọn trạng thái sản phẩm hợp lệ.",
@@ -433,14 +392,6 @@ function validateImportRows(rows: EditableProductImportRow[]) {
       errors.push({
         field: "serialNumber",
         message: "Số serial bị trùng trong bảng preview.",
-        rowNumber: row.rowNumber,
-      });
-    }
-
-    if (duration !== null && (!Number.isInteger(duration) || duration < 1)) {
-      errors.push({
-        field: "warrantyDurationMonths",
-        message: "Thời hạn bảo hành phải là số nguyên dương.",
         rowNumber: row.rowNumber,
       });
     }

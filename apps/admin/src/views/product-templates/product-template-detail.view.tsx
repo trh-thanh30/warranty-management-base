@@ -78,9 +78,7 @@ export function ProductTemplateDetailView({
               {hasPermission(PERMISSIONS.PRODUCT_CREATE) &&
               template.isActive ? (
                 <Button asChild variant="secondary">
-                  <Link
-                    href={`/products/create?mode=from-template&templateId=${template.id}`}
-                  >
+                  <Link href={`/products/create?templateId=${template.id}`}>
                     <PlusCircle className="size-4" />
                     {t("createProductFromTemplate")}
                   </Link>
@@ -106,18 +104,29 @@ export function ProductTemplateDetailView({
                         .join(" · ") || "-"}
                     </p>
                   </div>
-                  <Badge variant={template.isActive ? "success" : "secondary"}>
-                    {template.isActive ? t("active") : t("inactive")}
-                  </Badge>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge
+                      variant={template.isActive ? "success" : "secondary"}
+                    >
+                      {template.isActive ? t("active") : t("inactive")}
+                    </Badge>
+                    <Badge
+                      variant={template.isPublished ? "default" : "secondary"}
+                    >
+                      {template.isPublished ? t("published") : t("hidden")}
+                    </Badge>
+                  </div>
                 </div>
                 <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <Detail label={t("sku")} value={template.sku} />
+                  <Detail label={t("slug")} value={template.slug} />
                   <Detail
                     label={t("category")}
-                    value={template.categoryRef?.name ?? template.category}
+                    value={template.categoryRef?.name ?? "-"}
                   />
                   <Detail
-                    label={t("manufactureYear")}
-                    value={String(template.manufactureYear ?? "-")}
+                    label={t("modelYear")}
+                    value={String(template.modelYear ?? "-")}
                   />
                   <Detail
                     label={t("defaultWarrantyDuration")}

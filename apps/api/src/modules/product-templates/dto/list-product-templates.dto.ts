@@ -7,6 +7,10 @@ export class ListProductTemplatesDto extends PaginationQueryDto {
   isActive?: string;
 
   @IsOptional()
+  @IsBooleanString()
+  isPublished?: string;
+
+  @IsOptional()
   @IsString()
   @Length(1, 160)
   search?: string;

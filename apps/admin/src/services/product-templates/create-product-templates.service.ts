@@ -58,16 +58,5 @@ export function createProductTemplatesService(
         ),
       );
     },
-
-    async createFromProduct(
-      productId: string,
-    ): Promise<ProductTemplateSummary> {
-      return unwrap(
-        await http.post<ProductTemplateSummary>(
-          `/product-templates/from-product/${productId}`,
-          {},
-        ),
-      );
-    },
   };
 }

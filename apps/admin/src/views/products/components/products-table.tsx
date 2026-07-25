@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Boxes,
   Layers3,
   MoreHorizontal,
   Pencil,
@@ -35,7 +34,6 @@ import {
   getProductCategoryLabel,
   getProductDisplayName,
 } from "../products.utils";
-import { ProductPublicationBadge } from "./product-publication-badge";
 import { ProductStatusBadge } from "./product-status-badge";
 import { WarrantyStatusBadge } from "./warranty-status-badge";
 
@@ -43,7 +41,6 @@ type ProductsTableProps = {
   items: ProductResponse[];
   onDelete: (product: ProductResponse) => void;
   onAssignOwner: (product: ProductResponse) => void;
-  onCreateTemplate: (product: ProductResponse) => void;
   onSortChange: (sortBy: ProductSortBy) => void;
   sortBy?: ProductSortBy;
   sortOrder: "asc" | "desc";
@@ -52,7 +49,6 @@ type ProductsTableProps = {
 export function ProductsTable({
   items,
   onAssignOwner,
-  onCreateTemplate,
   onDelete,
   onSortChange,
   sortBy,
@@ -67,7 +63,6 @@ export function ProductsTable({
           <ProductMobileCard
             key={product.id}
             onAssignOwner={onAssignOwner}
-            onCreateTemplate={onCreateTemplate}
             onDelete={onDelete}
             product={product}
           />
@@ -75,7 +70,7 @@ export function ProductsTable({
       </div>
 
       <div className="transparent-scrollbar hidden overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800 lg:block">
-        <Table className="min-w-328">
+        <Table className="min-w-288">
           <TableHeader>
             <TableRow>
               <SortableTableHead
@@ -112,14 +107,6 @@ export function ProductsTable({
               <SortableTableHead
                 activeSortBy={sortBy}
                 onSortChange={onSortChange}
-                sortBy="publishedAt"
-                sortOrder={sortOrder}
-              >
-                {t("websiteVisibility")}
-              </SortableTableHead>
-              <SortableTableHead
-                activeSortBy={sortBy}
-                onSortChange={onSortChange}
                 sortBy="createdAt"
                 sortOrder={sortOrder}
               >
@@ -133,7 +120,6 @@ export function ProductsTable({
               <ProductTableRow
                 key={product.id}
                 onAssignOwner={onAssignOwner}
-                onCreateTemplate={onCreateTemplate}
                 onDelete={onDelete}
                 product={product}
               />
@@ -147,12 +133,10 @@ export function ProductsTable({
 
 function ProductTableRow({
   onAssignOwner,
-  onCreateTemplate,
   onDelete,
   product,
 }: {
   onAssignOwner: ProductsTableProps["onAssignOwner"];
-  onCreateTemplate: ProductsTableProps["onCreateTemplate"];
   onDelete: ProductsTableProps["onDelete"];
   product: ProductResponse;
 }) {
@@ -172,14 +156,10 @@ function ProductTableRow({
       <TableCell>
         <ProductStatusBadge status={product.status} />
       </TableCell>
-      <TableCell>
-        <ProductPublicationBadge isPublished={product.isPublished} />
-      </TableCell>
       <TableCell>{formatProductCreatedAt(product.createdAt)}</TableCell>
       <TableCell className="text-right">
         <ProductActionsMenu
           onAssignOwner={onAssignOwner}
-          onCreateTemplate={onCreateTemplate}
           onDelete={onDelete}
           product={product}
         />
@@ -190,12 +170,10 @@ function ProductTableRow({
 
 function ProductMobileCard({
   onAssignOwner,
-  onCreateTemplate,
   onDelete,
   product,
 }: {
   onAssignOwner: ProductsTableProps["onAssignOwner"];
-  onCreateTemplate: ProductsTableProps["onCreateTemplate"];
   onDelete: ProductsTableProps["onDelete"];
   product: ProductResponse;
 }) {
@@ -207,7 +185,6 @@ function ProductMobileCard({
         <ProductName product={product} />
         <ProductActionsMenu
           onAssignOwner={onAssignOwner}
-          onCreateTemplate={onCreateTemplate}
           onDelete={onDelete}
           product={product}
         />
@@ -233,40 +210,19 @@ function ProductMobileCard({
             <ProductStatusBadge status={product.status} />
           </dd>
         </div>
-        <div>
-          <dt className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-            {t("websiteVisibility")}
-          </dt>
-          <dd className="mt-1">
-            <ProductPublicationBadge isPublished={product.isPublished} />
-          </dd>
-        </div>
       </dl>
     </article>
   );
 }
 
 function ProductName({ product }: { product: ProductResponse }) {
-  if (product.status === "DELETED") {
-    return (
-      <div className="min-w-0">
-        <span className="truncate font-medium text-slate-950 dark:text-slate-50">
-          {product.name}
-        </span>
-        <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
-          {getProductDisplayName(product)}
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="min-w-0">
       <span className="truncate font-medium text-slate-950 dark:text-slate-50">
-        {product.name}
+        {getProductDisplayName(product)}
       </span>
       <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
-        {getProductDisplayName(product)}
+        {product.name} · {product.template.sku}
       </p>
     </div>
   );
@@ -293,12 +249,10 @@ function ProductMobileField({
 
 function ProductActionsMenu({
   onAssignOwner,
-  onCreateTemplate,
   onDelete,
   product,
 }: {
   onAssignOwner: ProductsTableProps["onAssignOwner"];
-  onCreateTemplate: ProductsTableProps["onCreateTemplate"];
   onDelete: ProductsTableProps["onDelete"];
   product: ProductResponse;
 }) {
@@ -308,13 +262,11 @@ function ProductActionsMenu({
   const canDelete = hasPermission(PERMISSIONS.PRODUCT_DELETE);
   const canAssignOwner = hasPermission(PERMISSIONS.PRODUCT_ASSIGN_OWNER);
   const canCreateProduct = hasPermission(PERMISSIONS.PRODUCT_CREATE);
-  const canCreateTemplate = hasPermission(PERMISSIONS.PRODUCT_TEMPLATE_CREATE);
   const canViewTemplate = hasPermission(PERMISSIONS.PRODUCT_TEMPLATE_VIEW);
   const isDeleted = product.status === "DELETED";
 
-  const hasTemplateAction = product.template
-    ? canViewTemplate || (canCreateProduct && product.template.isActive)
-    : canCreateTemplate;
+  const hasTemplateAction =
+    canViewTemplate || (canCreateProduct && product.template.isActive);
   if (
     isDeleted ||
     (!canEdit && !canDelete && !canAssignOwner && !hasTemplateAction)
@@ -343,28 +295,20 @@ function ProductActionsMenu({
             </Link>
           </DropdownMenuItem>
         ) : null}
-        {product.template && canCreateProduct && product.template.isActive ? (
+        {canCreateProduct && product.template.isActive ? (
           <DropdownMenuItem asChild>
-            <Link
-              href={`/products/create?mode=from-template&templateId=${product.template.id}`}
-            >
+            <Link href={`/products/create?templateId=${product.template.id}`}>
               <PlusCircle className="mr-2 size-4" />
               {t("createAnotherFromTemplate")}
             </Link>
           </DropdownMenuItem>
         ) : null}
-        {product.template && canViewTemplate ? (
+        {canViewTemplate ? (
           <DropdownMenuItem asChild>
             <Link href={`/product-templates/${product.template.id}`}>
               <Layers3 className="mr-2 size-4" />
               {t("viewProductTemplate")}
             </Link>
-          </DropdownMenuItem>
-        ) : null}
-        {!product.template && canCreateTemplate ? (
-          <DropdownMenuItem onSelect={() => onCreateTemplate(product)}>
-            <Boxes className="mr-2 size-4" />
-            {t("createTemplateFromProduct")}
           </DropdownMenuItem>
         ) : null}
         {canAssignOwner ? (

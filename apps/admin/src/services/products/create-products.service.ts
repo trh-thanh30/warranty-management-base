@@ -7,7 +7,6 @@ import type {
   ProductResponse,
   ProductAssetSummary,
   UpdateProductBody,
-  UpdateProductPublicationBody,
   UpdateProductAssetBody,
 } from "@repo/shared";
 import { unwrap, unwrapBlob } from "../service.utils.ts";
@@ -44,18 +43,6 @@ export function createProductsService(http: ProductsHttpClient) {
     ): Promise<ProductResponse> {
       return unwrap(
         await http.patch<ProductResponse>(`/products/${productId}`, body),
-      );
-    },
-
-    async updatePublication(
-      productId: string,
-      body: UpdateProductPublicationBody,
-    ): Promise<ProductResponse> {
-      return unwrap(
-        await http.patch<ProductResponse>(
-          `/products/${productId}/publication`,
-          body,
-        ),
       );
     },
 

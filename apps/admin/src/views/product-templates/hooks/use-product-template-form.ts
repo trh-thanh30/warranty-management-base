@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
-import type { ProductTemplateSummary } from "@repo/shared";
+import { HttpClientError, type ProductTemplateSummary } from "@repo/shared";
 import {
   useCreateProductTemplate,
   useUpdateProductTemplate,
@@ -73,6 +73,18 @@ export function useProductTemplateForm({
       toast.success(template ? t("updated") : t("created"));
       onSaved(saved);
     } catch (error) {
+      if (error instanceof HttpClientError) {
+        if (error.message === "Product template SKU already exists") {
+          form.setError("sku", { message: "duplicateSku" });
+          toast.error(t("duplicateSku"));
+          return;
+        }
+        if (error.message === "Product template slug already exists") {
+          form.setError("slug", { message: "duplicateSlug" });
+          toast.error(t("duplicateSlug"));
+          return;
+        }
+      }
       const message = error instanceof Error ? error.message : t("saveError");
       form.setError("root", { message });
       toast.error(message);

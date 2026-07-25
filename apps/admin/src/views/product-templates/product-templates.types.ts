@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { PRODUCT_CATEGORIES } from "../products/products.constants";
 
 const optionalText = z.string().trim();
 const optionalInteger = (min: number, max: number, message: string) =>
@@ -14,12 +13,23 @@ const optionalInteger = (min: number, max: number, message: string) =>
   );
 
 export const productTemplateFormSchema = z.object({
+  sku: optionalText
+    .max(64, "skuLength")
+    .refine(
+      (value) => !value || /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value),
+      "skuInvalid",
+    ),
+  slug: optionalText
+    .max(180, "slugLength")
+    .refine(
+      (value) => !value || /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value),
+      "slugInvalid",
+    ),
   name: optionalText.min(2, "nameRequired").max(160, "nameLength"),
-  category: z.enum(PRODUCT_CATEGORIES),
   categoryId: optionalText.min(1, "categoryRequired"),
   brand: optionalText.max(80, "brandLength"),
   model: optionalText.max(80, "modelLength"),
-  manufactureYear: optionalInteger(1900, 2100, "manufactureYearRange"),
+  modelYear: optionalInteger(1900, 2100, "modelYearRange"),
   description: optionalText.max(5000, "descriptionLength"),
   defaultWarrantyDurationMonths: z.coerce
     .number()
@@ -42,6 +52,7 @@ export const productTemplateFormSchema = z.object({
     }),
   ),
   isActive: z.boolean(),
+  isPublished: z.boolean(),
 });
 
 export type ProductTemplateFormInput = z.input<

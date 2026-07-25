@@ -19,7 +19,6 @@ import {
 import { FormField as Field } from "@/src/components/common/form-field";
 import { ImageUpload } from "@/src/components/common/image-upload";
 import { RichTextEditor } from "@/src/components/common/rich-text-editor";
-import { PRODUCT_CATEGORIES } from "../../products/products.constants";
 import { useProductTemplateForm } from "../hooks/use-product-template-form";
 
 export function ProductTemplateForm({
@@ -61,6 +60,32 @@ export function ProductTemplateForm({
           />
         </Field>
         <Field
+          description={t("skuDescription")}
+          error={translateError(form.formState.errors.sku?.message, t)}
+          id="template-sku"
+          label={t("sku")}
+        >
+          <Input
+            autoCapitalize="characters"
+            id="template-sku"
+            placeholder={t("skuPlaceholder")}
+            {...form.register("sku")}
+          />
+        </Field>
+        <Field
+          description={t("slugDescription")}
+          error={translateError(form.formState.errors.slug?.message, t)}
+          id="template-slug"
+          label={t("slug")}
+        >
+          <Input
+            autoCapitalize="none"
+            id="template-slug"
+            placeholder={t("slugPlaceholder")}
+            {...form.register("slug")}
+          />
+        </Field>
+        <Field
           error={translateError(form.formState.errors.categoryId?.message, t)}
           id="template-category-id"
           label={t("category")}
@@ -87,26 +112,6 @@ export function ProductTemplateForm({
       </div>
 
       <div className="grid gap-5 sm:grid-cols-3">
-        <Field id="template-legacy-category" label={t("legacyCategory")}>
-          <Controller
-            control={form.control}
-            name="category"
-            render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger className="w-full" id="template-legacy-category">
-                  <SelectValue placeholder={t("legacyCategoryPlaceholder")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {PRODUCT_CATEGORIES.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {t(`categories.${category}`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
-        </Field>
         <Field
           error={translateError(form.formState.errors.brand?.message, t)}
           id="template-brand"
@@ -133,19 +138,16 @@ export function ProductTemplateForm({
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field
-          error={translateError(
-            form.formState.errors.manufactureYear?.message,
-            t,
-          )}
-          id="template-manufacture-year"
-          label={t("manufactureYear")}
+          error={translateError(form.formState.errors.modelYear?.message, t)}
+          id="template-model-year"
+          label={t("modelYear")}
         >
           <Input
-            id="template-manufacture-year"
+            id="template-model-year"
             inputMode="numeric"
-            placeholder={t("manufactureYearPlaceholder")}
+            placeholder={t("modelYearPlaceholder")}
             type="number"
-            {...form.register("manufactureYear")}
+            {...form.register("modelYear")}
           />
         </Field>
         <Field
@@ -332,25 +334,46 @@ export function ProductTemplateForm({
         ))}
       </section>
 
-      <Controller
-        control={form.control}
-        name="isActive"
-        render={({ field }) => (
-          <div className="flex items-center justify-between gap-4 rounded-md border border-slate-200 p-4 dark:border-slate-800">
-            <div>
-              <Label htmlFor="template-active">{t("active")}</Label>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                {t("activeDescription")}
-              </p>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Controller
+          control={form.control}
+          name="isActive"
+          render={({ field }) => (
+            <div className="flex items-center justify-between gap-4 rounded-md border border-slate-200 p-4 dark:border-slate-800">
+              <div>
+                <Label htmlFor="template-active">{t("active")}</Label>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  {t("activeDescription")}
+                </p>
+              </div>
+              <Switch
+                checked={field.value}
+                id="template-active"
+                onCheckedChange={field.onChange}
+              />
             </div>
-            <Switch
-              checked={field.value}
-              id="template-active"
-              onCheckedChange={field.onChange}
-            />
-          </div>
-        )}
-      />
+          )}
+        />
+        <Controller
+          control={form.control}
+          name="isPublished"
+          render={({ field }) => (
+            <div className="flex items-center justify-between gap-4 rounded-md border border-slate-200 p-4 dark:border-slate-800">
+              <div>
+                <Label htmlFor="template-published">{t("published")}</Label>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  {t("publishedDescription")}
+                </p>
+              </div>
+              <Switch
+                checked={field.value}
+                id="template-published"
+                onCheckedChange={field.onChange}
+              />
+            </div>
+          )}
+        />
+      </div>
 
       <div className="grid grid-cols-2 gap-2 border-t border-slate-200 pt-5 sm:flex sm:justify-end dark:border-slate-800">
         <Button

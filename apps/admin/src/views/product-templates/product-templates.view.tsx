@@ -27,6 +27,7 @@ import { ProductManagementTabs } from "../product-management/components/product-
 import { DeactivateProductTemplateDialog } from "./components/deactivate-product-template-dialog";
 import { ProductTemplatesTable } from "./components/product-templates-table";
 import {
+  type TemplatePublicationFilter,
   type TemplateStatusFilter,
   useProductTemplatesDirectory,
 } from "./hooks/use-product-templates-directory";
@@ -64,7 +65,7 @@ export function ProductTemplatesView() {
                 {t("directoryDescription")}
               </CardDescription>
             </div>
-            <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_14rem]">
+            <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_14rem_14rem]">
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
                 <Input
@@ -75,6 +76,23 @@ export function ProductTemplatesView() {
                   value={directory.search}
                 />
               </div>
+              <Select
+                onValueChange={(value) =>
+                  directory.setPublication(value as TemplatePublicationFilter)
+                }
+                value={directory.publication}
+              >
+                <SelectTrigger aria-label={t("publicationFilter")}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">
+                    {t("allPublicationStatuses")}
+                  </SelectItem>
+                  <SelectItem value="PUBLISHED">{t("published")}</SelectItem>
+                  <SelectItem value="HIDDEN">{t("hidden")}</SelectItem>
+                </SelectContent>
+              </Select>
               <Select
                 onValueChange={(value) =>
                   directory.setStatus(value as TemplateStatusFilter)
