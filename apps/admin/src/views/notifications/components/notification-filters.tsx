@@ -4,10 +4,15 @@ import { Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button, Input } from "@repo/ui";
 import { SelectControl } from "@/src/components/common/select-control";
-import type { NotificationStatusFilter } from "../notifications.types";
+import type {
+  NotificationDeliveryStatusFilter,
+  NotificationStatusFilter,
+} from "../notifications.types";
 
 type NotificationFiltersProps = {
+  deliveryStatus?: NotificationDeliveryStatusFilter;
   onClear: () => void;
+  onDeliveryStatusChange?: (value: NotificationDeliveryStatusFilter) => void;
   onSearchChange: (value: string) => void;
   onStatusChange?: (value: NotificationStatusFilter) => void;
   onTypeChange: (value: string) => void;
@@ -17,7 +22,9 @@ type NotificationFiltersProps = {
 };
 
 export function NotificationFilters({
+  deliveryStatus,
   onClear,
+  onDeliveryStatusChange,
   onSearchChange,
   onStatusChange,
   onTypeChange,
@@ -60,6 +67,10 @@ export function NotificationFilters({
             label: t("types.WARRANTY_CLAIM_SLA_BREACHED"),
             value: "WARRANTY_CLAIM_SLA_BREACHED",
           },
+          {
+            label: t("types.WARRANTY_ACTIVATION_REQUEST_CREATED"),
+            value: "WARRANTY_ACTIVATION_REQUEST_CREATED",
+          },
           { label: t("types.SYSTEM_ALERT"), value: "SYSTEM_ALERT" },
           { label: t("types.ANNOUNCEMENT"), value: "ANNOUNCEMENT" },
         ]}
@@ -77,6 +88,19 @@ export function NotificationFilters({
             { label: t("statuses.READ"), value: "READ" },
           ]}
           value={status}
+        />
+      ) : onDeliveryStatusChange && deliveryStatus ? (
+        <SelectControl
+          aria-label={t("statusFilter")}
+          onValueChange={(value) =>
+            onDeliveryStatusChange(value as NotificationDeliveryStatusFilter)
+          }
+          options={[
+            { label: t("statuses.ALL"), value: "ALL" },
+            { label: t("deliveryStatuses.SENT"), value: "SENT" },
+            { label: t("deliveryStatuses.SCHEDULED"), value: "SCHEDULED" },
+          ]}
+          value={deliveryStatus}
         />
       ) : (
         <span className="hidden lg:block" />

@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Avatar, AvatarFallback, AvatarImage, Badge } from "@repo/ui";
 import { cn } from "@repo/ui/lib/utils";
@@ -117,7 +118,6 @@ export function AppSidebar({
   const dashboardConfig = getDashboardConfig(t);
   const { hasPermission, hasRole } = usePermissions();
   const pathname = usePathname();
-  const BrandLogo = dashboardConfig.brand.logo;
   const { user } = useAuth();
   const storedCollapsed = useAdminUiStore((state) => state.sidebarCollapsed);
   const collapsed = collapsedOverride ?? storedCollapsed;
@@ -135,21 +135,28 @@ export function AppSidebar({
       <div
         className={cn(
           "flex h-16 items-center gap-3 px-5",
+          !collapsed && "justify-center",
           collapsed && "justify-center px-0",
         )}
       >
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-950 text-sm font-semibold text-white dark:bg-slate-50 dark:text-slate-950">
-          <BrandLogo className="h-4 w-4" />
-        </div>
-        {!collapsed && (
-          <div className="min-w-0 flex-1 animate-in fade-in duration-200">
-            <p className="truncate text-sm font-semibold text-slate-950 dark:text-slate-50">
-              {dashboardConfig.brand.name}
-            </p>
-            <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-              {dashboardConfig.brand.description}
-            </p>
-          </div>
+        {collapsed ? (
+          <Image
+            alt={dashboardConfig.brand.name}
+            className="h-8 w-8 object-contain animate-in fade-in duration-200"
+            height={32}
+            priority
+            src="/logo.png"
+            width={32}
+          />
+        ) : (
+          <Image
+            alt={dashboardConfig.brand.name}
+            className="h-11 w-auto max-w-[210px] object-contain animate-in fade-in duration-200"
+            height={44}
+            priority
+            src="/logo.png"
+            width={210}
+          />
         )}
       </div>
 

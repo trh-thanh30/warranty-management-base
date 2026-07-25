@@ -1,10 +1,11 @@
 {
   "App": {
-    "title": "Warranty Admin",
-    "description": "Bảng điều hành quản lý bảo hành"
+    "title": "Quản trị bảo hành Lexzenz",
+    "description": "Quản trị bảo hành Lexzenz"
   },
   "DashboardConfig": {
-    "brandDescription": "Next + Turborepo",
+    "brandName": "Quản trị bảo hành Lexzenz",
+    "brandDescription": "",
     "sections": {
       "general": "Tổng quan",
       "other": "Khác"
@@ -67,8 +68,8 @@
     "uploadingImage": "Đang tải hình ảnh..."
   },
   "Login": {
-    "brand": "Warranty Admin",
-    "brandDescription": "Không gian vận hành",
+    "brand": "Quản trị bảo hành Lexzenz",
+    "brandDescription": "",
     "eyebrow": "Trung tâm điều hành",
     "heroTitle": "Theo sát mọi yêu cầu bảo hành.",
     "heroDescription": "Không gian tập trung để đội ngũ vận hành xử lý yêu cầu, phối hợp trung tâm bảo hành và cập nhật thông tin cho khách hàng.",
@@ -1815,6 +1816,7 @@
     "recentTitle": "Thông báo gần đây",
     "unreadSummary": "{count} chưa đọc",
     "markAllRead": "Đánh dấu tất cả đã đọc",
+    "refresh": "Tải lại thông báo",
     "markRead": "Đánh dấu đã đọc",
     "markedRead": "Đã đánh dấu thông báo là đã đọc.",
     "allMarkedRead": "Đã đánh dấu tất cả thông báo là đã đọc.",
@@ -1863,6 +1865,7 @@
       "WARRANTY_CLAIM_STATUS_CHANGED": "Cập nhật trạng thái bảo hành",
       "WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER": "Phân công trạm bảo hành",
       "WARRANTY_CLAIM_SLA_BREACHED": "Cảnh báo quá hạn xử lý (SLA)",
+      "WARRANTY_ACTIVATION_REQUEST_CREATED": "Yêu cầu kích hoạt bảo hành mới",
       "SYSTEM_ALERT": "Cảnh báo hệ thống",
       "ANNOUNCEMENT": "Thông báo chung"
     },

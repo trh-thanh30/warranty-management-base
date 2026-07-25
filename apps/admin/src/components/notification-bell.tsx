@@ -1,6 +1,7 @@
 "use client";
 
-import { Bell, CheckCheck, Inbox } from "lucide-react";
+import { Bell, CheckCheck, Inbox, RefreshCw } from "lucide-react";
+import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
   Badge,
@@ -35,6 +36,22 @@ export function NotificationBell() {
   const markReadMutation = useMarkNotificationRead();
   const markAllMutation = useMarkAllNotificationsRead();
   const unread = unreadQuery.data?.unread ?? 0;
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const isNotificationFetching =
+    isRefreshing || unreadQuery.isFetching || recentQuery.isFetching;
+
+  async function refreshNotifications() {
+    if (!enabled) return;
+
+    setIsRefreshing(true);
+    try {
+      await Promise.all([unreadQuery.refetch(), recentQuery.refetch()]);
+    } catch {
+      toast.error(t("loadError"));
+    } finally {
+      setIsRefreshing(false);
+    }
+  }
 
   async function markRead(notificationId: string) {
     try {
@@ -54,7 +71,13 @@ export function NotificationBell() {
   }
 
   return (
-    <Popover>
+    <Popover
+      onOpenChange={(open) => {
+        if (open) {
+          void refreshNotifications();
+        }
+      }}
+    >
       <PopoverTrigger asChild>
         <Button
           aria-label={t("openNotifications", { count: unread })}
@@ -82,18 +105,35 @@ export function NotificationBell() {
               {t("unreadSummary", { count: unread })}
             </p>
           </div>
-          {unread > 0 ? (
+          <div className="flex w-full items-center gap-2 sm:w-auto">
             <Button
-              disabled={markAllMutation.isPending}
-              onClick={() => void markAllRead()}
-              size="sm"
+              aria-label={t("refresh")}
+              className="shrink-0"
+              disabled={isNotificationFetching}
+              onClick={() => void refreshNotifications()}
+              size="icon"
               variant="ghost"
-              className="w-full justify-center sm:w-auto sm:shrink-0"
             >
-              <CheckCheck className="size-4" />
-              {t("markAllRead")}
+              <RefreshCw
+                aria-hidden="true"
+                className={
+                  isNotificationFetching ? "size-4 animate-spin" : "size-4"
+                }
+              />
             </Button>
-          ) : null}
+            {unread > 0 ? (
+              <Button
+                className="w-full justify-center sm:w-auto sm:shrink-0"
+                disabled={markAllMutation.isPending}
+                onClick={() => void markAllRead()}
+                size="sm"
+                variant="ghost"
+              >
+                <CheckCheck className="size-4" />
+                {t("markAllRead")}
+              </Button>
+            ) : null}
+          </div>
         </div>
 
         <div className="max-h-[min(24rem,calc(100dvh-12rem))] overflow-y-auto overscroll-contain">

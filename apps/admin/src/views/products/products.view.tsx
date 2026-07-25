@@ -83,7 +83,7 @@ export function ProductsView() {
                 uploadDisabled={!canCreateProducts}
               />
               {canCreateProducts ? (
-                <Button asChild>
+                <Button asChild className="min-w-44">
                   <Link href="/products/create">
                     <Plus className="size-4" />
                     {t("create")}

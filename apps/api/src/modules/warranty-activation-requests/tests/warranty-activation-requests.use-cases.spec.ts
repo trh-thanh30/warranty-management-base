@@ -30,6 +30,9 @@ describe('WarrantyActivationRequestsUseCases', () => {
   const generateWarrantyCodeUseCase = {
     execute: jest.fn(),
   };
+  const warrantyActivationRequestNotificationService = {
+    requestCreated: jest.fn(),
+  };
   const issueWarrantyCertificateUseCase = {
     execute: jest.fn(),
   };
@@ -81,6 +84,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
       productsRepository as never,
       dealersRepository as never,
       generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
     );
 
     const result = await useCase.execute({
@@ -113,6 +117,53 @@ describe('WarrantyActivationRequestsUseCases', () => {
     expect(result.requestCode).toBe('WAR-20260719-0001');
   });
 
+  it('publishes an admin notification when a public activation request is created', async () => {
+    const notificationService = {
+      requestCreated: jest.fn(),
+    };
+    repository.findPendingDuplicate.mockResolvedValue(null);
+    repository.findLastRequestCode.mockResolvedValue(null);
+    productsRepository.findActivationRequestTargetByWarrantyCode.mockResolvedValue(
+      baseDraftProduct,
+    );
+    repository.create.mockResolvedValue({
+      ...baseRequest,
+      request_code: 'WAR-20260719-0001',
+      warranty_code: 'WM-2026-ABC123',
+    });
+    const generateCodeUseCase =
+      new GenerateWarrantyActivationRequestCodeUseCase(repository as never);
+    const useCase = new CreateWarrantyActivationRequestUseCase(
+      repository as never,
+      generateCodeUseCase,
+      productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
+      notificationService as never,
+    );
+
+    await useCase.execute({
+      addressDetail: '1 Nguyen Trai',
+      customerEmail: 'CUSTOMER@EXAMPLE.COM',
+      customerName: 'Nguyen Van A',
+      customerPhone: '0901234567',
+      provinceCode: '79',
+      provinceName: 'TP Ho Chi Minh',
+      wardCode: '26734',
+      wardName: 'Phuong Ben Thanh',
+      warrantyCode: 'wm-2026-abc123',
+    });
+
+    expect(notificationService.requestCreated).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'request-id',
+        request_code: 'WAR-20260719-0001',
+        warranty_code: 'WM-2026-ABC123',
+        status: warranty_activation_request_status.PENDING,
+      }),
+    );
+  });
+
   it('creates and connects a quick dealer when dealer fields are provided', async () => {
     repository.findPendingDuplicate.mockResolvedValue(null);
     repository.findLastRequestCode.mockResolvedValue(null);
@@ -143,6 +194,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
       productsRepository as never,
       dealersRepository as never,
       generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
     );
 
     await useCase.execute({
@@ -192,6 +244,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
       productsRepository as never,
       dealersRepository as never,
       generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
     );
 
     await expect(
@@ -226,6 +279,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
       productsRepository as never,
       dealersRepository as never,
       generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
     );
 
     await expect(
@@ -269,6 +323,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
       productsRepository as never,
       dealersRepository as never,
       generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
     );
 
     const result = await useCase.execute({
@@ -299,6 +354,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
       productsRepository as never,
       dealersRepository as never,
       generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
     );
 
     await expect(
@@ -334,6 +390,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
       productsRepository as never,
       dealersRepository as never,
       generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
     );
 
     await expect(
@@ -363,6 +420,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
       productsRepository as never,
       dealersRepository as never,
       generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
     );
 
     await expect(

@@ -1,10 +1,11 @@
 {
   "App": {
-    "title": "Warranty Admin",
-    "description": "Operational dashboard for warranty management"
+    "title": "Lexzenz Warranty Admin",
+    "description": "Lexzenz warranty administration"
   },
   "DashboardConfig": {
-    "brandDescription": "Next + Turborepo",
+    "brandName": "Lexzenz Warranty Admin",
+    "brandDescription": "",
     "sections": {
       "general": "General",
       "other": "Other"
@@ -67,8 +68,8 @@
     "uploadingImage": "Uploading image..."
   },
   "Login": {
-    "brand": "Warranty Admin",
-    "brandDescription": "Operations workspace",
+    "brand": "Lexzenz Warranty Admin",
+    "brandDescription": "",
     "eyebrow": "Control center",
     "heroTitle": "Keep every warranty case moving.",
     "heroDescription": "A focused workspace for your operations team to review claims, coordinate service centers, and keep customers informed.",
@@ -1815,6 +1816,7 @@
     "recentTitle": "Recent notifications",
     "unreadSummary": "{count} unread",
     "markAllRead": "Mark all as read",
+    "refresh": "Refresh notifications",
     "markRead": "Mark as read",
     "markedRead": "Notification marked as read.",
     "allMarkedRead": "All notifications marked as read.",
@@ -1863,6 +1865,7 @@
       "WARRANTY_CLAIM_STATUS_CHANGED": "Claim status updated",
       "WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER": "Service center assigned",
       "WARRANTY_CLAIM_SLA_BREACHED": "SLA breach warning",
+      "WARRANTY_ACTIVATION_REQUEST_CREATED": "Warranty activation request created",
       "SYSTEM_ALERT": "System alert",
       "ANNOUNCEMENT": "General announcement"
     },
