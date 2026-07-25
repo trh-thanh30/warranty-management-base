@@ -33,6 +33,15 @@ export class UpdateProductUseCase {
       }
     }
 
+    if (dto.slug && dto.slug !== existingProduct.slug) {
+      const productWithSlug = await this.productsRepository.findBySlug(
+        dto.slug,
+      );
+      if (productWithSlug && productWithSlug.id !== id) {
+        throw new ConflictError('Product slug already exists');
+      }
+    }
+
     const categoryRef =
       dto.categoryId === undefined
         ? null
@@ -52,6 +61,7 @@ export class UpdateProductUseCase {
 
     const product = await this.productsRepository.update(id, {
       name: dto.name,
+      slug: dto.slug,
       category: dto.category,
       brand: dto.brand,
       model: dto.model,

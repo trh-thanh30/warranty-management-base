@@ -51,11 +51,10 @@ export function ProductsView() {
     removeImportRow,
     resetImportPreview,
     toggleSort,
-    updateCategory,
     updateCategoryId,
+    updatePublication,
     updateSearch,
     updateStatus,
-    updateWarrantyStatus,
     updateImportRowData,
   } = useProductsDirectory();
   const hasImportErrors = importSummary.invalidRows > 0;
@@ -104,20 +103,19 @@ export function ProductsView() {
           filters={filters}
           isError={productsQuery.isError}
           isLoading={productsQuery.isLoading}
-          onCategoryChange={updateCategory}
           onCategoryIdChange={updateCategoryId}
           onAssignOwner={setProductToAssignOwner}
           onClearFilters={clearFilters}
           onDelete={openDelete}
           onPageChange={setPage}
           onPageSizeChange={setPageSize}
+          onPublicationChange={updatePublication}
           onRetry={() => {
             void productsQuery.refetch();
           }}
           onSearchChange={updateSearch}
           onSortChange={toggleSort}
           onStatusChange={updateStatus}
-          onWarrantyStatusChange={updateWarrantyStatus}
           pageSize={pageSize}
           search={search}
           sortBy={sortBy}

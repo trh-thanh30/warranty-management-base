@@ -27,14 +27,12 @@ import { PaginationControls } from "@/src/components/common/pagination-controls"
 import { StatePanel } from "@/src/components/common/state-panel";
 import { Link } from "@/src/i18n/navigation";
 import {
-  PRODUCT_CATEGORIES,
+  PRODUCT_PUBLICATION_FILTERS,
   PRODUCT_STATUS_FILTERS,
-  WARRANTY_STATUS_FILTERS,
 } from "../products.constants";
 import type {
-  ProductCategoryFilter,
+  ProductPublicationFilter,
   ProductStatusFilter,
-  WarrantyStatusFilter,
 } from "../products.types";
 import { ProductsTable } from "./products-table";
 
@@ -43,25 +41,23 @@ type ProductsDirectoryCardProps = {
   categories: CategoryResponse[];
   data?: PaginatedResponse<ProductResponse>;
   filters: {
-    category: ProductCategoryFilter;
     categoryId: string;
+    publication: ProductPublicationFilter;
     status: ProductStatusFilter;
-    warrantyStatus: WarrantyStatusFilter;
   };
   isError: boolean;
   isLoading: boolean;
-  onCategoryChange: (category: ProductCategoryFilter) => void;
   onCategoryIdChange: (categoryId: string) => void;
   onClearFilters: () => void;
   onAssignOwner: (product: ProductResponse) => void;
   onDelete: (product: ProductResponse) => void;
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
+  onPublicationChange: (publication: ProductPublicationFilter) => void;
   onRetry: () => void;
   onSearchChange: (search: string) => void;
   onSortChange: (sortBy: ProductSortBy) => void;
   onStatusChange: (status: ProductStatusFilter) => void;
-  onWarrantyStatusChange: (status: WarrantyStatusFilter) => void;
   pageSize: number;
   search: string;
   sortBy?: ProductSortBy;
@@ -75,18 +71,17 @@ export function ProductsDirectoryCard({
   filters,
   isError,
   isLoading,
-  onCategoryChange,
   onCategoryIdChange,
   onClearFilters,
   onAssignOwner,
   onDelete,
   onPageChange,
   onPageSizeChange,
+  onPublicationChange,
   onRetry,
   onSearchChange,
   onSortChange,
   onStatusChange,
-  onWarrantyStatusChange,
   pageSize,
   search,
   sortBy,
@@ -95,10 +90,9 @@ export function ProductsDirectoryCard({
   const t = useTranslations("Products");
   const hasFilters =
     Boolean(search.trim()) ||
-    filters.category !== "ALL" ||
     filters.categoryId !== "ALL" ||
-    filters.status !== "ALL" ||
-    filters.warrantyStatus !== "ALL";
+    filters.publication !== "ALL" ||
+    filters.status !== "ALL";
 
   return (
     <Card>
@@ -112,11 +106,10 @@ export function ProductsDirectoryCard({
         <ProductsDirectoryFilters
           categories={categories}
           filters={filters}
-          onCategoryChange={onCategoryChange}
           onCategoryIdChange={onCategoryIdChange}
           onSearchChange={onSearchChange}
+          onPublicationChange={onPublicationChange}
           onStatusChange={onStatusChange}
-          onWarrantyStatusChange={onWarrantyStatusChange}
           search={search}
         />
       </CardHeader>
@@ -146,27 +139,25 @@ export function ProductsDirectoryCard({
 function ProductsDirectoryFilters({
   categories,
   filters,
-  onCategoryChange,
   onCategoryIdChange,
   onSearchChange,
+  onPublicationChange,
   onStatusChange,
-  onWarrantyStatusChange,
   search,
 }: Pick<
   ProductsDirectoryCardProps,
   | "categories"
   | "filters"
-  | "onCategoryChange"
   | "onCategoryIdChange"
   | "onSearchChange"
+  | "onPublicationChange"
   | "onStatusChange"
-  | "onWarrantyStatusChange"
   | "search"
 >) {
   const t = useTranslations("Products");
 
   return (
-    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
       <div className="relative md:col-span-2 xl:col-span-1">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
         <Input
@@ -179,18 +170,17 @@ function ProductsDirectoryFilters({
       </div>
       <Select
         onValueChange={(value) =>
-          onCategoryChange(value as ProductCategoryFilter)
+          onPublicationChange(value as ProductPublicationFilter)
         }
-        value={filters.category}
+        value={filters.publication}
       >
-        <SelectTrigger aria-label={t("legacyCategoryFilter")}>
+        <SelectTrigger aria-label={t("publicationFilter")}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="ALL">{t("allLegacyCategories")}</SelectItem>
-          {PRODUCT_CATEGORIES.map((category) => (
-            <SelectItem key={category} value={category}>
-              {t(`categories.${category}`)}
+          {PRODUCT_PUBLICATION_FILTERS.map((status) => (
+            <SelectItem key={status} value={status}>
+              {t(`publicationStatuses.${status}`)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -219,23 +209,6 @@ function ProductsDirectoryFilters({
           {PRODUCT_STATUS_FILTERS.map((status) => (
             <SelectItem key={status} value={status}>
               {t(`statuses.${status}`)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Select
-        onValueChange={(value) =>
-          onWarrantyStatusChange(value as WarrantyStatusFilter)
-        }
-        value={filters.warrantyStatus}
-      >
-        <SelectTrigger aria-label={t("warrantyStatusFilter")}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {WARRANTY_STATUS_FILTERS.map((status) => (
-            <SelectItem key={status} value={status}>
-              {t(`warrantyStatuses.${status}`)}
             </SelectItem>
           ))}
         </SelectContent>

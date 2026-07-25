@@ -14,6 +14,7 @@ describe('CreateProductUseCase', () => {
     const productsRepository = {
       findByProductCode: jest.fn().mockResolvedValue(null),
       findBySerialNumber: jest.fn().mockResolvedValue(null),
+      findBySlug: jest.fn().mockResolvedValue(null),
     };
     const prismaService = {
       category: {
@@ -26,6 +27,7 @@ describe('CreateProductUseCase', () => {
         create: jest.fn().mockResolvedValue({
           id: 'product-id',
           product_code: 'PRD-2026-ABCDEF',
+          slug: 'genuine-battery-pack-prd-2026-abcdef',
           warranty_code: null,
           serial_number: 'SN-001',
           name: 'Genuine Battery Pack',
@@ -52,6 +54,8 @@ describe('CreateProductUseCase', () => {
           manufacture_year: 2026,
           description: null,
           status: 'ACTIVE',
+          is_published: true,
+          published_at: new Date('2026-07-25T00:00:00.000Z'),
           metadata: null,
           created_at: new Date('2026-07-21T00:00:00.000Z'),
           updated_at: new Date('2026-07-21T00:00:00.000Z'),
@@ -87,6 +91,7 @@ describe('CreateProductUseCase', () => {
       brand: 'Toyota',
       category: product_category.SPARE_PART,
       categoryId: 'category-id',
+      isPublished: true,
       manufactureYear: 2026,
       model: 'Battery Plus',
       name: 'Genuine Battery Pack',
@@ -98,8 +103,11 @@ describe('CreateProductUseCase', () => {
       expect.objectContaining({
         data: expect.objectContaining({
           warranty_code: null,
+          slug: 'genuine-battery-pack-prd-2026-abcdef',
           category_ref: { connect: { id: 'category-id' } },
+          is_published: true,
           ownerships: undefined,
+          published_at: expect.any(Date),
           warranty: {
             create: expect.objectContaining({
               warranty_code: null,

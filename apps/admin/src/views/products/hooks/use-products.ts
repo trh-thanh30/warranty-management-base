@@ -16,6 +16,7 @@ import type {
   PaginatedResponse,
   ProductResponse,
   UpdateProductBody,
+  UpdateProductPublicationBody,
 } from "@repo/shared";
 import { productsService } from "@/src/services/products/products.service";
 import type {
@@ -92,6 +93,19 @@ export function useUpdateProduct(productId: string | null) {
   return useMutation({
     mutationFn: (body: UpdateProductBody) =>
       productsService.updateProduct(productId ?? "", body),
+    onSuccess: (product) => {
+      void queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.setQueryData(productKeys.detail(product.id), product);
+    },
+  });
+}
+
+export function useUpdateProductPublication(productId: string | null) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: UpdateProductPublicationBody) =>
+      productsService.updatePublication(productId ?? "", body),
     onSuccess: (product) => {
       void queryClient.invalidateQueries({ queryKey: productKeys.lists() });
       queryClient.setQueryData(productKeys.detail(product.id), product);

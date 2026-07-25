@@ -1,5 +1,6 @@
 import { product_category, product_status } from '@prisma/client';
 import {
+  IsBoolean,
   IsEnum,
   IsInt,
   IsObject,
@@ -7,6 +8,7 @@ import {
   IsString,
   IsUUID,
   Length,
+  Matches,
   Max,
   Min,
 } from 'class-validator';
@@ -15,6 +17,16 @@ export class CreateProductDto {
   @IsString()
   @Length(2, 160)
   name: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(2, 180)
+  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+  slug?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isPublished?: boolean;
 
   @IsEnum(product_category)
   category: product_category;

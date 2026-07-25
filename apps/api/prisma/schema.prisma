@@ -229,6 +229,7 @@ model Category {
 model Product {
   id               String           @id @default(uuid()) @db.Uuid
   product_code     String           @unique
+  slug             String           @unique
   warranty_code    String?          @unique
   serial_number    String?          @unique
   name             String
@@ -239,6 +240,8 @@ model Product {
   manufacture_year Int?
   description      String?
   status           product_status   @default(ACTIVE)
+  is_published     Boolean          @default(false)
+  published_at     DateTime?
   metadata         Json?
   created_at       DateTime         @default(now())
   updated_at       DateTime         @updatedAt
@@ -254,6 +257,7 @@ model Product {
   @@index([category])
   @@index([category_id])
   @@index([status])
+  @@index([is_published, status, deleted_at])
   @@index([warranty_code])
   @@index([serial_number])
   @@index([name])

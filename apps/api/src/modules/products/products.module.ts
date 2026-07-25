@@ -13,11 +13,13 @@ import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/genera
 import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generate-product-code.use-case';
 import { GetProductDetailUseCase } from '@/modules/products/use-cases/get-product-detail.use-case';
 import { ListProductsUseCase } from '@/modules/products/use-cases/list-products.use-case';
+import { ListPublicProductsUseCase } from '@/modules/products/use-cases/list-public-products.use-case';
 import { PreviewProductImportUseCase } from '@/modules/products/use-cases/preview-product-import.use-case';
 import { SoftDeleteProductUseCase } from '@/modules/products/use-cases/soft-delete-product.use-case';
 import { RemoveProductAssetUseCase } from '@/modules/products/use-cases/remove-product-asset.use-case';
 import { UpdateProductAssetUseCase } from '@/modules/products/use-cases/update-product-asset.use-case';
 import { UpdateProductUseCase } from '@/modules/products/use-cases/update-product.use-case';
+import { UpdateProductPublicationUseCase } from '@/modules/products/use-cases/update-product-publication.use-case';
 import { Module } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
@@ -38,8 +40,10 @@ import { memoryStorage } from 'multer';
     GenerateWarrantyCodeUseCase,
     CreateProductUseCase,
     UpdateProductUseCase,
+    UpdateProductPublicationUseCase,
     SoftDeleteProductUseCase,
     ListProductsUseCase,
+    ListPublicProductsUseCase,
     GetProductDetailUseCase,
     AssignProductOwnerUseCase,
     AttachProductAssetUseCase,
@@ -54,6 +58,7 @@ import { memoryStorage } from 'multer';
     GenerateProductCodeUseCase,
     GenerateWarrantyCodeUseCase,
     ProductsRepository,
+    ListPublicProductsUseCase,
   ],
 })
 export class ProductsModule {}
