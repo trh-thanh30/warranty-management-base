@@ -1,7 +1,8 @@
 "use client";
 
-import { MoreHorizontal, Pencil, Trash2, UserPlus } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { SortableTableHead } from "@/src/components/common/sortable-table-head";
+import { usePermissions } from "@/src/hooks/use-permissions";
+import { Link } from "@/src/i18n/navigation";
 import type { ProductResponse, ProductSortBy } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
@@ -18,17 +19,16 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui";
-import { SortableTableHead } from "@/src/components/common/sortable-table-head";
-import { usePermissions } from "@/src/hooks/use-permissions";
-import { Link } from "@/src/i18n/navigation";
+import { MoreHorizontal, Pencil, Trash2, UserPlus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   formatProductCreatedAt,
   formatProductOwner,
   getProductCategoryLabel,
   getProductDisplayName,
 } from "../products.utils";
-import { ProductStatusBadge } from "./product-status-badge";
 import { ProductPublicationBadge } from "./product-publication-badge";
+import { ProductStatusBadge } from "./product-status-badge";
 import { WarrantyStatusBadge } from "./warranty-status-badge";
 
 type ProductsTableProps = {
@@ -63,8 +63,8 @@ export function ProductsTable({
         ))}
       </div>
 
-      <div className="hidden overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800 lg:block">
-        <Table className="min-w-[82rem]">
+      <div className="transparent-scrollbar hidden overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800 lg:block">
+        <Table className="min-w-328">
           <TableHeader>
             <TableRow>
               <SortableTableHead
