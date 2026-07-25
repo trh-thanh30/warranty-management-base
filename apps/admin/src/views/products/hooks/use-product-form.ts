@@ -3,7 +3,12 @@
 import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
-import { useFieldArray, useForm, type UseFormSetError } from "react-hook-form";
+import {
+  useFieldArray,
+  useForm,
+  useWatch,
+  type UseFormSetError,
+} from "react-hook-form";
 import {
   getRemovedMediaUrls,
   HttpClientError,
@@ -24,6 +29,7 @@ import {
   useCreateProduct,
   useRemoveProductAsset,
   useUpdateProduct,
+  useUpdateProductPublication,
 } from "./use-products";
 import {
   getProductSpecifications,
@@ -31,8 +37,13 @@ import {
   mergeProductInstallationPosition,
   mergeProductSpecifications,
   toCreateProductBody,
+  toProductSlugPreview,
 } from "../products.utils";
-import { toNullableValue, toNullableRichText } from "@/src/utils";
+import {
+  toNullableRichText,
+  toNullableValue,
+  toOptionalValue,
+} from "@/src/utils";
 
 export function useProductForm({
   importPreview,
@@ -51,11 +62,12 @@ export function useProductForm({
   const creating = !product;
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct(product?.id ?? null);
+  const updatePublication = useUpdateProductPublication(product?.id ?? null);
   const attachProductAsset = useAttachProductAsset(product?.id ?? null);
   const removeProductAsset = useRemoveProductAsset(product?.id ?? null);
   const {
     control,
-    formState: { errors, isSubmitting },
+    formState: { dirtyFields, errors, isSubmitting },
     handleSubmit,
     register,
     reset,
@@ -74,6 +86,7 @@ export function useProductForm({
     control,
     name: "specifications",
   });
+  const productName = useWatch({ control, name: "name" });
   const categoriesQuery = useCategories(
     {
       isActive: "true",
@@ -94,6 +107,14 @@ export function useProductForm({
     );
   }, [importPreviewData, product, reset]);
 
+  useEffect(() => {
+    if (!creating || importPreview || dirtyFields.slug) return;
+
+    setValue("slug", toProductSlugPreview(productName ?? ""), {
+      shouldValidate: Boolean(productName),
+    });
+  }, [creating, dirtyFields.slug, importPreview, productName, setValue]);
+
   async function submit(values: ProductFormValues) {
     if (importPreview) {
       importPreview.onSaved(toImportRowData(values));
@@ -110,7 +131,7 @@ export function useProductForm({
         return;
       }
 
-      const updatedProduct = await updateProduct.mutateAsync(
+      let updatedProduct = await updateProduct.mutateAsync(
         toUpdateProductBody(values, product.metadata),
       );
       const existingCover = product.assets.find(
@@ -126,6 +147,11 @@ export function useProductForm({
         } else if (existingCover) {
           await removeProductAsset.mutateAsync(existingCover.id);
         }
+      }
+      if (values.isPublished !== product.isPublished) {
+        updatedProduct = await updatePublication.mutateAsync({
+          isPublished: values.isPublished,
+        });
       }
       const removedMediaCount = getRemovedMediaUrls(
         product.description ?? "",
@@ -180,11 +206,13 @@ function getDefaultValues(product: ProductResponse | null): ProductFormInput {
       product?.assets.find((asset) => asset.role === "COVER")?.url ?? "",
     description: product?.description ?? "",
     installationPosition: getProductInstallationPosition(product?.metadata),
+    isPublished: product?.isPublished ?? false,
     manufactureYear: product?.manufactureYear ?? undefined,
     model: product?.model ?? "",
     name: product?.name ?? "",
     productCode: "",
     serialNumber: product?.serialNumber ?? "",
+    slug: product?.slug ?? "",
     specifications: specifications.length
       ? specifications
       : [{ key: "", value: "" }],
@@ -205,11 +233,13 @@ function getImportPreviewDefaultValues(
     coverImageUrl: data.imageUrl ?? "",
     description: data.description ?? "",
     installationPosition: data.installationPosition ?? "",
+    isPublished: false,
     manufactureYear: data.manufactureYear ?? undefined,
     model: data.model ?? "",
     name: data.name ?? "",
     productCode: data.productCode ?? "",
     serialNumber: data.serialNumber ?? "",
+    slug: "",
     specifications: [{ key: "", value: "" }],
     status: data.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
     warrantyDurationMonths: data.warrantyDurationMonths ?? undefined,
@@ -257,6 +287,7 @@ function toUpdateProductBody(
     model: toNullableValue(values.model),
     name: values.name.trim(),
     serialNumber: toNullableValue(values.serialNumber),
+    slug: toOptionalValue(values.slug),
   };
 }
 
@@ -270,6 +301,7 @@ function handleProductSaveError(
   const messages = {
     "Product cover asset not found": ["coverAssetId", "coverAssetNotFound"],
     "Product category not found": ["categoryId", "categoryNotFound"],
+    "Product slug already exists": ["slug", "duplicateSlug"],
     "Serial number already exists": ["serialNumber", "duplicateSerialNumber"],
   } as const;
   const match = messages[error.message as keyof typeof messages];

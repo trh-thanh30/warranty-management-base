@@ -146,6 +146,7 @@ async function upsertDemoProduct(data: {
     where: { warranty_code: data.warrantyCode },
     update: {
       product_code: data.productCode,
+      slug: data.productCode.toLowerCase(),
       serial_number: data.serialNumber,
       name: data.name,
       category: data.category,
@@ -158,6 +159,7 @@ async function upsertDemoProduct(data: {
     },
     create: {
       product_code: data.productCode,
+      slug: data.productCode.toLowerCase(),
       warranty_code: data.warrantyCode,
       serial_number: data.serialNumber,
       name: data.name,

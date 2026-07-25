@@ -8,6 +8,7 @@ import { AssetsService } from '@/modules/assets/assets.service';
 import { CreateProductDto } from '@/modules/products/dto/create-product.dto';
 import { toProductResponse } from '@/modules/products/products.types';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
+import { createProductSlug } from '@/modules/products/product-slug.utils';
 import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generate-product-code.use-case';
 import { Injectable } from '@nestjs/common';
 import {
@@ -29,6 +30,11 @@ export class CreateProductUseCase {
 
   async execute(dto: CreateProductDto) {
     const productCode = await this.generateProductCodeUseCase.execute();
+    const slug = dto.slug?.trim() || createProductSlug(dto.name, productCode);
+    const productWithSlug = await this.productsRepository.findBySlug(slug);
+    if (productWithSlug) {
+      throw new ConflictError('Product slug already exists');
+    }
     const categoryRef = await this.resolveProductCategory(dto.categoryId);
     const coverAsset = dto.coverAssetId
       ? await this.prismaService.asset.findUnique({
@@ -57,6 +63,7 @@ export class CreateProductUseCase {
     const product = await this.prismaService.product.create({
       data: {
         product_code: productCode,
+        slug,
         warranty_code: null,
         serial_number: dto.serialNumber,
         name: dto.name,
@@ -66,6 +73,8 @@ export class CreateProductUseCase {
         manufacture_year: dto.manufactureYear,
         description: dto.description,
         status: dto.status ?? product_status.ACTIVE,
+        is_published: dto.isPublished ?? false,
+        published_at: dto.isPublished ? new Date() : null,
         category_ref: { connect: { id: categoryRef.id } },
         metadata: dto.metadata as Prisma.InputJsonObject | undefined,
         assets: coverAsset

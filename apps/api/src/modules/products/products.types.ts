@@ -49,6 +49,7 @@ export function toProductResponse(
   return {
     id: product.id,
     productCode: product.product_code,
+    slug: product.slug,
     warrantyCode: product.warranty_code,
     serialNumber: product.serial_number,
     name: product.name,
@@ -60,6 +61,8 @@ export function toProductResponse(
     manufactureYear: product.manufacture_year,
     description: product.description,
     status: product.status,
+    isPublished: product.is_published,
+    publishedAt: product.published_at,
     metadata: product.metadata as Record<string, unknown> | null,
     createdAt: product.created_at,
     updatedAt: product.updated_at,
@@ -102,4 +105,49 @@ export function toProductResponse(
         originalName: productAsset.asset.original_name,
       })) ?? [],
   };
+}
+
+export function toPublicProductSummary(
+  product: ProductWithRelations,
+  resolveAssetUrl: (asset: Asset) => string = (asset) => asset.path,
+) {
+  const cover = product.assets?.find((asset) => asset.role === 'COVER');
+  const metadata = product.metadata as Record<string, unknown> | null;
+
+  return {
+    id: product.id,
+    productCode: product.product_code,
+    slug: product.slug,
+    name: product.name,
+    categoryId: product.category_id,
+    category: product.category_ref
+      ? {
+          id: product.category_ref.id,
+          slug: product.category_ref.slug,
+          name: product.category_ref.name,
+        }
+      : null,
+    brand: product.brand,
+    model: product.model,
+    description: product.description,
+    coverImageUrl: cover ? resolveAssetUrl(cover.asset) : null,
+    specifications: toPublicSpecifications(metadata?.specifications),
+    warrantyDurationMonths: product.warranty?.duration_months ?? null,
+    publishedAt: product.published_at!,
+  };
+}
+
+function toPublicSpecifications(value: unknown) {
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((item) => {
+    if (!item || typeof item !== 'object') return [];
+    const key = 'key' in item ? item.key : undefined;
+    const specificationValue = 'value' in item ? item.value : undefined;
+    if (typeof key !== 'string' || typeof specificationValue !== 'string') {
+      return [];
+    }
+
+    return [{ key, value: specificationValue }];
+  });
 }

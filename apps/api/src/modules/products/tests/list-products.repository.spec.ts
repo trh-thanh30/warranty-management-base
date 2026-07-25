@@ -73,4 +73,72 @@ describe('ProductsRepository.list', () => {
       }),
     });
   });
+
+  it('filters the admin product list by publication state', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const count = jest.fn().mockResolvedValue(0);
+    const prismaService = {
+      $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
+        callback({
+          product: {
+            count,
+            findMany,
+          },
+        }),
+      ),
+    };
+    const repository = new ProductsRepository(prismaService as never);
+
+    await repository.list({
+      isPublished: 'true',
+      limit: 10,
+      page: 1,
+    });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          is_published: true,
+        }),
+      }),
+    );
+    expect(count).toHaveBeenCalledWith({
+      where: expect.objectContaining({
+        is_published: true,
+      }),
+    });
+  });
+
+  it('always limits the public list to visible active products', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const count = jest.fn().mockResolvedValue(0);
+    const prismaService = {
+      $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
+        callback({
+          product: {
+            count,
+            findMany,
+          },
+        }),
+      ),
+    };
+    const repository = new ProductsRepository(prismaService as never);
+
+    await repository.listPublic({ limit: 12, page: 1 });
+
+    const visibilityFilter = {
+      category_ref: { is_active: true },
+      deleted_at: null,
+      is_published: true,
+      status: 'ACTIVE',
+    };
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining(visibilityFilter),
+      }),
+    );
+    expect(count).toHaveBeenCalledWith({
+      where: expect.objectContaining(visibilityFilter),
+    });
+  });
 });

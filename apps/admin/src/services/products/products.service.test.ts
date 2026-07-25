@@ -130,6 +130,29 @@ test("updating a product can change dynamic category", async () => {
   assert.deepEqual(result, product);
 });
 
+test("updating product publication uses the dedicated endpoint", async () => {
+  const calls: unknown[] = [];
+  const http = {
+    async patch(url: string, body?: unknown) {
+      calls.push({ url, body });
+      return { data: { success: true, data: product } };
+    },
+  };
+
+  await createProductsService(
+    http as unknown as ProductsHttpClient,
+  ).updatePublication("product-id", {
+    isPublished: true,
+  });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/products/product-id/publication",
+      body: { isPublished: true },
+    },
+  ]);
+});
+
 test("assigning an owner posts to product assign-owner endpoint", async () => {
   const calls: unknown[] = [];
   const http = {

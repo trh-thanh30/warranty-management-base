@@ -24,9 +24,8 @@ import type { ExcelImportMode } from "@/src/components/common/excel-import-dialo
 import { useCategories } from "../../categories/hooks/use-categories";
 import type { EditableProductImportRow } from "../components/product-import-preview-table";
 import {
-  type ProductCategoryFilter,
+  type ProductPublicationFilter,
   type ProductStatusFilter,
-  type WarrantyStatusFilter,
 } from "../products.types";
 import { PRODUCT_STATUS_FILTERS } from "../products.constants";
 import {
@@ -39,17 +38,15 @@ import {
 const PRODUCTS_PAGE_SIZE = 10;
 
 type ProductDirectoryFilters = {
-  category: ProductCategoryFilter;
   categoryId: string;
+  publication: ProductPublicationFilter;
   status: ProductStatusFilter;
-  warrantyStatus: WarrantyStatusFilter;
 };
 
 const INITIAL_PRODUCT_DIRECTORY_FILTERS = {
-  category: "ALL",
   categoryId: "ALL",
+  publication: "ALL",
   status: "ALL",
-  warrantyStatus: "ALL",
 } satisfies ProductDirectoryFilters;
 
 export function useProductsDirectory() {
@@ -87,16 +84,19 @@ export function useProductsDirectory() {
   const canCreateProducts = hasPermission(PERMISSIONS.PRODUCT_CREATE);
   const productsQuery = useProducts(
     {
-      category: filters.category === "ALL" ? undefined : filters.category,
       categoryId: filters.categoryId === "ALL" ? undefined : filters.categoryId,
       limit: pageSize,
       page,
       search: debouncedSearch || undefined,
+      isPublished:
+        filters.publication === "ALL"
+          ? undefined
+          : filters.publication === "PUBLISHED"
+            ? "true"
+            : "false",
       sortBy,
       sortOrder,
       status: filters.status === "ALL" ? undefined : filters.status,
-      warrantyStatus:
-        filters.warrantyStatus === "ALL" ? undefined : filters.warrantyStatus,
     },
     {
       enabled: Boolean(currentUser) && canViewProducts,
@@ -275,14 +275,17 @@ export function useProductsDirectory() {
 
   function getExportQuery(): ListProductsQuery {
     return {
-      category: filters.category === "ALL" ? undefined : filters.category,
       categoryId: filters.categoryId === "ALL" ? undefined : filters.categoryId,
+      isPublished:
+        filters.publication === "ALL"
+          ? undefined
+          : filters.publication === "PUBLISHED"
+            ? "true"
+            : "false",
       search: debouncedSearch || undefined,
       sortBy,
       sortOrder,
       status: filters.status === "ALL" ? undefined : filters.status,
-      warrantyStatus:
-        filters.warrantyStatus === "ALL" ? undefined : filters.warrantyStatus,
     };
   }
 
@@ -322,11 +325,10 @@ export function useProductsDirectory() {
     removeImportRow,
     resetImportPreview,
     toggleSort,
-    updateCategory: filterHandlers.category,
     updateCategoryId: filterHandlers.categoryId,
+    updatePublication: filterHandlers.publication,
     updateSearch: setSearch,
     updateStatus: filterHandlers.status,
-    updateWarrantyStatus: filterHandlers.warrantyStatus,
     updateImportRowData,
   };
 }

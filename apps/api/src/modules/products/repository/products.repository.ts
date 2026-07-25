@@ -1,7 +1,12 @@
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { normalizePagination, paginate } from '@/common/pagination/pagination';
 import { Injectable } from '@nestjs/common';
-import { Prisma, product_status, warranty_status } from '@prisma/client';
+import {
+  asset_access_type,
+  Prisma,
+  product_status,
+  warranty_status,
+} from '@prisma/client';
 
 const productInclude = {
   assets: {
@@ -23,6 +28,22 @@ const productListInclude = {
     include: { asset: true },
     orderBy: { sort_order: 'asc' as const },
   },
+};
+
+const publicProductListInclude = {
+  assets: {
+    where: {
+      role: 'COVER' as const,
+      asset: {
+        access_type: asset_access_type.PUBLIC,
+        is_deleted: false,
+      },
+    },
+    include: { asset: true },
+    orderBy: { sort_order: 'asc' as const },
+  },
+  category_ref: true,
+  warranty: true,
 };
 
 @Injectable()
@@ -110,6 +131,12 @@ export class ProductsRepository {
     });
   }
 
+  findBySlug(slug: string) {
+    return this.prismaService.product.findUnique({
+      where: { slug },
+    });
+  }
+
   findBySerialNumber(serialNumber: string) {
     return this.prismaService.product.findUnique({
       where: { serial_number: serialNumber },
@@ -122,6 +149,7 @@ export class ProductsRepository {
     categoryId?: string;
     ownerCustomerId?: string;
     status?: product_status;
+    isPublished?: string;
     warrantyStatus?: warranty_status;
     page?: number;
     limit?: number;
@@ -137,6 +165,7 @@ export class ProductsRepository {
       name: 'name',
       category: 'category',
       status: 'status',
+      publishedAt: 'published_at',
       createdAt: 'created_at',
       updatedAt: 'updated_at',
     } satisfies Record<string, keyof Prisma.ProductOrderByWithRelationInput>;
@@ -153,6 +182,10 @@ export class ProductsRepository {
           }
         : undefined,
       status: filters.status,
+      is_published:
+        filters.isPublished === undefined
+          ? undefined
+          : filters.isPublished === 'true',
       warranty: filters.warrantyStatus
         ? { status: filters.warrantyStatus }
         : undefined,
@@ -197,12 +230,63 @@ export class ProductsRepository {
     });
   }
 
+  listPublic(filters: {
+    search?: string;
+    categoryId?: string;
+    page?: number;
+    limit?: number;
+    sortBy?: 'name' | 'publishedAt';
+    sortOrder?: 'asc' | 'desc';
+  }) {
+    const search = filters.search?.trim();
+    const { page, limit, skip, take } = normalizePagination(filters);
+    const sortMap = {
+      name: 'name',
+      publishedAt: 'published_at',
+    } satisfies Record<string, keyof Prisma.ProductOrderByWithRelationInput>;
+    const sortBy = filters.sortBy ? sortMap[filters.sortBy] : 'published_at';
+    const where: Prisma.ProductWhereInput = {
+      category_id: filters.categoryId,
+      category_ref: { is_active: true },
+      deleted_at: null,
+      is_published: true,
+      status: product_status.ACTIVE,
+      OR: search
+        ? [
+            { name: { contains: search, mode: 'insensitive' } },
+            { product_code: { contains: search, mode: 'insensitive' } },
+            { brand: { contains: search, mode: 'insensitive' } },
+            { model: { contains: search, mode: 'insensitive' } },
+          ]
+        : undefined,
+    };
+    const orderBy: Prisma.ProductOrderByWithRelationInput[] = [
+      { [sortBy]: filters.sortOrder ?? 'desc' },
+    ];
+
+    return this.prismaService.$transaction(async (tx) => {
+      const [items, total] = await Promise.all([
+        tx.product.findMany({
+          where,
+          include: publicProductListInclude,
+          orderBy,
+          skip,
+          take,
+        }),
+        tx.product.count({ where }),
+      ]);
+
+      return paginate(items, { page, limit, total });
+    });
+  }
+
   listForExport(filters: {
     search?: string;
     category?: string;
     categoryId?: string;
     ownerCustomerId?: string;
     status?: product_status;
+    isPublished?: string;
     warrantyStatus?: warranty_status;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
@@ -215,6 +299,7 @@ export class ProductsRepository {
       name: 'name',
       category: 'category',
       status: 'status',
+      publishedAt: 'published_at',
       createdAt: 'created_at',
       updatedAt: 'updated_at',
     } satisfies Record<string, keyof Prisma.ProductOrderByWithRelationInput>;
@@ -231,6 +316,10 @@ export class ProductsRepository {
           }
         : undefined,
       status: filters.status,
+      is_published:
+        filters.isPublished === undefined
+          ? undefined
+          : filters.isPublished === 'true',
       warranty: filters.warrantyStatus
         ? { status: filters.warrantyStatus }
         : undefined,

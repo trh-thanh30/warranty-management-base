@@ -6,6 +6,7 @@ import {
   resolveSpecificationMove,
   toCreateProductBody,
   toProductActiveStatus,
+  toProductSlugPreview,
 } from "./products.utils.ts";
 import {
   assignProductOwnerSchema,
@@ -150,10 +151,12 @@ test("creates an inventory-only product payload", () => {
       coverImageUrl: "",
       description: "",
       installationPosition: " Kính lái ",
+      isPublished: true,
       manufactureYear: 2026,
       model: " Camry ",
       name: " Toyota Camry ",
       serialNumber: " VIN-001 ",
+      slug: "toyota-camry",
       specifications: [{ key: "Technology", value: "Nano Ceramic" }],
       status: "ACTIVE",
     }),
@@ -163,6 +166,7 @@ test("creates an inventory-only product payload", () => {
       categoryId: "category-id",
       coverAssetId: undefined,
       description: undefined,
+      isPublished: true,
       manufactureYear: 2026,
       metadata: {
         installationPosition: "Kính lái",
@@ -171,8 +175,16 @@ test("creates an inventory-only product payload", () => {
       model: "Camry",
       name: "Toyota Camry",
       serialNumber: "VIN-001",
+      slug: "toyota-camry",
       status: "ACTIVE",
     },
+  );
+});
+
+test("creates a Vietnamese-safe slug preview from the product name", () => {
+  assert.equal(
+    toProductSlugPreview("  Phim cách nhiệt Đặc Biệt  "),
+    "phim-cach-nhiet-dac-biet",
   );
 });
 

@@ -26,7 +26,7 @@ export function ProductStatusControl({
   const t = useTranslations("Products");
 
   return (
-    <div className="flex items-center justify-between gap-4 rounded-md border border-slate-200 p-4 dark:border-slate-800">
+    <div className="flex h-full items-center justify-between gap-4 rounded-md border border-slate-200 p-4 dark:border-slate-800">
       <div className="min-w-0">
         <Label htmlFor={id}>{t(`statuses.${status}`)}</Label>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

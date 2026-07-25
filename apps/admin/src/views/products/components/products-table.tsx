@@ -28,6 +28,7 @@ import {
   getProductDisplayName,
 } from "../products.utils";
 import { ProductStatusBadge } from "./product-status-badge";
+import { ProductPublicationBadge } from "./product-publication-badge";
 import { WarrantyStatusBadge } from "./warranty-status-badge";
 
 type ProductsTableProps = {
@@ -100,6 +101,14 @@ export function ProductsTable({
               <SortableTableHead
                 activeSortBy={sortBy}
                 onSortChange={onSortChange}
+                sortBy="publishedAt"
+                sortOrder={sortOrder}
+              >
+                {t("websiteVisibility")}
+              </SortableTableHead>
+              <SortableTableHead
+                activeSortBy={sortBy}
+                onSortChange={onSortChange}
                 sortBy="createdAt"
                 sortOrder={sortOrder}
               >
@@ -148,6 +157,9 @@ function ProductTableRow({
       </TableCell>
       <TableCell>
         <ProductStatusBadge status={product.status} />
+      </TableCell>
+      <TableCell>
+        <ProductPublicationBadge isPublished={product.isPublished} />
       </TableCell>
       <TableCell>{formatProductCreatedAt(product.createdAt)}</TableCell>
       <TableCell className="text-right">
@@ -201,6 +213,14 @@ function ProductMobileCard({
           </dt>
           <dd className="mt-1">
             <ProductStatusBadge status={product.status} />
+          </dd>
+        </div>
+        <div>
+          <dt className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+            {t("websiteVisibility")}
+          </dt>
+          <dd className="mt-1">
+            <ProductPublicationBadge isPublished={product.isPublished} />
           </dd>
         </div>
       </dl>
