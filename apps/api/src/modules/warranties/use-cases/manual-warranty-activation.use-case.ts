@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { GenerateCustomerCodeUseCase } from '@/modules/customers/use-cases/generate-customer-code.use-case';
 import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generate-product-code.use-case';
+import { createProductSlug } from '@/modules/products/product-slug.utils';
 import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { IssueWarrantyCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-certificate.use-case';
 import { ManualWarrantyActivationDto } from '@/modules/warranties/dto/manual-warranty-activation.dto';
@@ -161,6 +162,7 @@ export class ManualWarrantyActivationUseCase {
           productWithRelations = await tx.product.create({
             data: {
               product_code: productCode,
+              slug: createProductSlug(dto.product.name, productCode),
               warranty_code: warrantyCode,
               serial_number: optionalText(dto.product.serialNumber),
               name: dto.product.name.trim(),

@@ -15,6 +15,7 @@ import { useTableControls } from "@/src/hooks/use-table-controls";
 import { useToast } from "@/src/hooks/use-toast";
 import type {
   NotificationCenterTab,
+  NotificationDeliveryStatusFilter,
   NotificationStatusFilter,
 } from "../notifications.types";
 
@@ -25,7 +26,15 @@ type UserNotificationFilters = {
 };
 
 const USER_FILTERS: UserNotificationFilters = { status: "ALL", type: "" };
-const ADMIN_FILTERS = { type: "" };
+type AdminNotificationFilters = {
+  deliveryStatus: NotificationDeliveryStatusFilter;
+  type: string;
+};
+
+const ADMIN_FILTERS: AdminNotificationFilters = {
+  deliveryStatus: "ALL",
+  type: "",
+};
 
 export function useNotificationsDirectory() {
   const t = useTranslations("Notifications");
@@ -63,6 +72,10 @@ export function useNotificationsDirectory() {
       limit: adminControls.pageSize,
       q: adminSearch || undefined,
       type: adminControls.filters.type.trim() || undefined,
+      deliveryStatus:
+        adminControls.filters.deliveryStatus === "ALL"
+          ? undefined
+          : adminControls.filters.deliveryStatus,
     },
     { enabled: Boolean(user) && canViewAdmin && tab === "admin" },
   );

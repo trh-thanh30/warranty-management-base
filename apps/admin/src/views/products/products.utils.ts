@@ -124,11 +124,13 @@ export function toCreateProductBody(
     categoryId: values.categoryId,
     coverAssetId: toOptionalValue(values.coverAssetId),
     description: toOptionalRichText(values.description),
+    isPublished: values.isPublished,
     manufactureYear: values.manufactureYear,
     metadata: metadata ?? undefined,
     model: toOptionalValue(values.model),
     name: values.name.trim(),
     serialNumber: toOptionalValue(values.serialNumber),
+    slug: toOptionalValue(values.slug),
     status: values.status,
     templateId: toOptionalValue(values.templateId),
     createTemplate: values.createTemplate,
@@ -141,6 +143,17 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 export function toProductActiveStatus(checked: boolean) {
   return checked ? ("ACTIVE" as const) : ("INACTIVE" as const);
+}
+
+export function toProductSlugPreview(value: string) {
+  return value
+    .trim()
+    .toLocaleLowerCase("vi")
+    .replaceAll("đ", "d")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 export function resolveSpecificationMove(

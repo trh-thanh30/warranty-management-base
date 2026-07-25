@@ -6,6 +6,7 @@ import {
   PreparedProductImportRow,
 } from '@/modules/products/excel/product-import.validator';
 import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generate-product-code.use-case';
+import { createProductSlug } from '@/modules/products/product-slug.utils';
 import { Injectable } from '@nestjs/common';
 import { Prisma, product_status, warranty_status } from '@prisma/client';
 
@@ -59,6 +60,7 @@ export class ConfirmProductImportUseCase {
         const product = await tx.product.create({
           data: {
             product_code: productCode,
+            slug: createProductSlug(row.name, productCode),
             warranty_code: null,
             serial_number: this.blankToNull(row.serialNumber),
             name: row.name.trim(),

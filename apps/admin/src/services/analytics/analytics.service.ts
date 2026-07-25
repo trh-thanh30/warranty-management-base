@@ -1,5 +1,6 @@
 import type {
   AnalyticsDashboardClaims,
+  AnalyticsDashboardActivationRequests,
   AnalyticsDashboardOverview,
   AnalyticsDashboardProducts,
   AnalyticsDashboardTrends,
@@ -22,6 +23,13 @@ async function getData<T>(path: string, params?: Record<string, unknown>) {
 export const analyticsService = {
   claims(query?: AnalyticsRangeQuery) {
     return getData<AnalyticsDashboardClaims>(`${BASE_PATH}/claims`, query);
+  },
+
+  activationRequests(query?: AnalyticsRangeQuery) {
+    return getData<AnalyticsDashboardActivationRequests>(
+      `${BASE_PATH}/activation-requests`,
+      query,
+    );
   },
 
   overview(query?: AnalyticsRangeQuery) {

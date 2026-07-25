@@ -2,6 +2,8 @@ import type { ComponentType } from "react";
 import type { PermissionKey } from "@repo/shared/constants";
 import type { AuthUserRole } from "@repo/shared";
 
+export type NotificationBadgeKey = "warranties" | "warrantyClaims";
+
 export interface BrandConfig {
   name: string;
   description: string;
@@ -14,6 +16,7 @@ export interface NavigationItem {
   activeHrefs?: string[];
   icon: ComponentType<{ className?: string }>;
   badge?: string;
+  notificationBadgeKey?: NotificationBadgeKey;
   requiredPermission?: PermissionKey;
   permissionHrefs?: Array<{ permission: PermissionKey; href: string }>;
   requiredAnyPermissions?: PermissionKey[];

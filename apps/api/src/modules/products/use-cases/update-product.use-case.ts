@@ -34,6 +34,15 @@ export class UpdateProductUseCase {
     }
 
     const ownsSharedFields = !existingProduct.template_id;
+    if (dto.slug && dto.slug !== existingProduct.slug) {
+      const productWithSlug = await this.productsRepository.findBySlug(
+        dto.slug,
+      );
+      if (productWithSlug && productWithSlug.id !== id) {
+        throw new ConflictError('Product slug already exists');
+      }
+    }
+
     const categoryRef =
       ownsSharedFields && dto.categoryId !== undefined
         ? await this.resolveProductCategory(dto.categoryId)
@@ -53,6 +62,7 @@ export class UpdateProductUseCase {
 
     const product = await this.productsRepository.update(id, {
       name: ownsSharedFields ? dto.name : undefined,
+      slug: dto.slug,
       category: ownsSharedFields ? dto.category : undefined,
       brand: ownsSharedFields ? dto.brand : undefined,
       model: ownsSharedFields ? dto.model : undefined,

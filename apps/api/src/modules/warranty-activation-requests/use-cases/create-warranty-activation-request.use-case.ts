@@ -5,6 +5,7 @@ import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/genera
 import { CreateWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-warranty-activation-request.dto';
 import { toWarrantyActivationRequestResponse } from '@/modules/warranty-activation-requests/mappers/warranty-activation-request.mapper';
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
+import { WarrantyActivationRequestNotificationService } from '@/modules/warranty-activation-requests/service/warranty-activation-request-notification.service';
 import { GenerateWarrantyActivationRequestCodeUseCase } from '@/modules/warranty-activation-requests/use-cases/generate-warranty-activation-request-code.use-case';
 import {
   buildWarrantyActivationRequestFullAddress,
@@ -35,6 +36,7 @@ export class CreateWarrantyActivationRequestUseCase {
     private readonly productsRepository: ProductsRepository,
     private readonly dealersRepository: DealersRepository,
     private readonly generateWarrantyCodeUseCase: GenerateWarrantyCodeUseCase,
+    private readonly warrantyActivationRequestNotificationService: WarrantyActivationRequestNotificationService,
   ) {}
 
   async execute(
@@ -170,6 +172,10 @@ export class CreateWarrantyActivationRequestUseCase {
             warrantyId: product.warranty.id,
           }),
         });
+
+        await this.warrantyActivationRequestNotificationService.requestCreated(
+          request,
+        );
 
         return toWarrantyActivationRequestResponse(request);
       } catch (error) {

@@ -3,6 +3,7 @@ import type {
   AnalyticsTrendMetric,
 } from "@repo/shared";
 import type { DateRangeValue } from "@repo/ui/date-range-picker";
+import type { DashboardQuickRangeDays } from "./dashboard.constants";
 
 function toDateInputValue(date: Date) {
   const year = date.getFullYear();
@@ -21,6 +22,52 @@ export function getDefaultDashboardRange(
   return {
     from: toDateInputValue(from),
     to: toDateInputValue(to),
+  };
+}
+
+export function getDashboardQuickRange(
+  days: DashboardQuickRangeDays,
+  currentDate = new Date(),
+): DateRangeValue {
+  const to = new Date(currentDate);
+  const from = new Date(to);
+  from.setDate(to.getDate() - days + 1);
+
+  return {
+    from: toDateInputValue(from),
+    to: toDateInputValue(to),
+  };
+}
+
+export function getActiveDashboardQuickRange(
+  range: DateRangeValue,
+  currentDate = new Date(),
+): DashboardQuickRangeDays | null {
+  const quickRanges: DashboardQuickRangeDays[] = [7, 30];
+
+  return (
+    quickRanges.find((days) => {
+      const quickRange = getDashboardQuickRange(days, currentDate);
+
+      return range.from === quickRange.from && range.to === quickRange.to;
+    }) ?? null
+  );
+}
+
+export function resolveDashboardWidgetRange(
+  widgetRange: DateRangeValue | null,
+  dashboardRange: DateRangeValue,
+): DateRangeValue {
+  return widgetRange ?? dashboardRange;
+}
+
+export function resolveDashboardRangeStateOnGlobalChange(
+  range: DateRangeValue,
+) {
+  return {
+    activationRequestRange: null,
+    range,
+    warrantyRange: null,
   };
 }
 

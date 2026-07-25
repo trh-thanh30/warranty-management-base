@@ -1,5 +1,9 @@
 import type { ProductStatus } from "./product.types.ts";
 import type {
+  WarrantyActivationRequestSource,
+  WarrantyActivationRequestStatus,
+} from "./warranty-activation-request.types.ts";
+import type {
   WarrantyClaimPriority,
   WarrantyClaimStatus,
 } from "./warranty-claim.types.ts";
@@ -57,6 +61,7 @@ export type AnalyticsTrendMetric =
   | "claim_overdue"
   | "warranties"
   | "warranty_activated"
+  | "warranty_activation_requests"
   | "products"
   | "customers";
 
@@ -68,6 +73,10 @@ export type AnalyticsDashboardTrends = {
   points: Array<{
     date: string;
     value: number;
+    breakdown?: Array<{
+      key: string;
+      value: number;
+    }>;
   }>;
 };
 
@@ -83,6 +92,24 @@ export type AnalyticsDashboardWarranties = {
     next90Days: number;
   };
   activatedInRange: number;
+};
+
+export type AnalyticsDashboardActivationRequests = {
+  total: number;
+  createdInRange: number;
+  pending: number;
+  approved: number;
+  rejected: number;
+  activated: number;
+  cancelled: number;
+  byStatus: Array<{
+    status: WarrantyActivationRequestStatus;
+    count: number;
+  }>;
+  bySource: Array<{
+    source: WarrantyActivationRequestSource;
+    count: number;
+  }>;
 };
 
 export type AnalyticsDashboardProducts = {

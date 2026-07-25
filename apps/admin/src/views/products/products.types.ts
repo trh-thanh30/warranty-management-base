@@ -1,14 +1,12 @@
-import type { ProductCategory, ProductSortBy } from "@repo/shared";
+import type { ProductSortBy } from "@repo/shared";
 import { z } from "zod";
 import {
   PRODUCT_CATEGORIES,
   type PRODUCT_STATUS_FILTERS,
-  type WARRANTY_STATUS_FILTERS,
 } from "./products.constants";
 
-export type ProductCategoryFilter = "ALL" | ProductCategory;
 export type ProductStatusFilter = (typeof PRODUCT_STATUS_FILTERS)[number];
-export type WarrantyStatusFilter = (typeof WARRANTY_STATUS_FILTERS)[number];
+export type ProductPublicationFilter = "ALL" | "PUBLISHED" | "HIDDEN";
 export type ProductCategoryOption = (typeof PRODUCT_CATEGORIES)[number];
 export type ProductDirectorySortBy = ProductSortBy;
 
@@ -81,6 +79,7 @@ export const productFormSchema = z.object({
   coverImageUrl: z.string(),
   description: optionalText.max(5000, "descriptionLength"),
   installationPosition: optionalText.max(160, "installationPositionLength"),
+  isPublished: z.boolean(),
   manufactureYear: optionalInteger({
     integer: "manufactureYearInteger",
     max: 2100,
@@ -91,6 +90,12 @@ export const productFormSchema = z.object({
   name: optionalText.min(2, "nameRequired").max(160, "nameLength"),
   productCode: optionalText.max(64, "productCodeLength").optional(),
   serialNumber: optionalText.max(64, "serialNumberLength"),
+  slug: optionalText
+    .max(180, "slugLength")
+    .refine(
+      (value) => !value || /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value),
+      "slugInvalid",
+    ),
   specifications: productSpecificationsSchema,
   status: z.enum(["ACTIVE", "INACTIVE"]),
   templateId: z.string(),

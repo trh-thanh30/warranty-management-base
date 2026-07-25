@@ -6,6 +6,7 @@ import {
   IsString,
   IsUUID,
   Length,
+  Matches,
   Max,
   Min,
 } from 'class-validator';
@@ -16,6 +17,12 @@ export class UpdateProductDto {
   @IsString()
   @Length(2, 160)
   name?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(2, 180)
+  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+  slug?: string;
 
   @IsOptional()
   @IsEnum(product_category)

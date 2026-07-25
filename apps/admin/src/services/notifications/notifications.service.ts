@@ -82,7 +82,13 @@ export const notificationsService = {
   ): Promise<PaginatedResponse<AdminNotificationSummary>> {
     const { data } = await adminHttpClient.get<
       PaginatedApiResponse<RawAdminNotification>
-    >("/notifications/admin", { params: query });
+    >("/notifications/admin", {
+      params: {
+        ...query,
+        deliveryStatus: undefined,
+        delivery_status: query.deliveryStatus,
+      },
+    });
 
     return mapPage(data, (item) => ({
       ...mapNotification(item),

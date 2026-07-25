@@ -8,6 +8,7 @@ import { NotificationRepository } from '@/modules/notification/repository/notifi
 import { CreateAdminNotificationUseCase } from '@/modules/notification/use-cases/create-admin-notification.use-case';
 import { CreateSystemNotificationUseCase } from '@/modules/notification/use-cases/create-system-notification.use-case';
 import { GetUserNotificationUseCase } from '@/modules/notification/use-cases/get-user-notification.use-case';
+import { GetUnreadNotificationCountUseCase } from '@/modules/notification/use-cases/get-unread-notification-count.use-case';
 import { ListUserNotificationsUseCase } from '@/modules/notification/use-cases/list-user-notifications.use-case';
 import { MarkAllNotificationsReadUseCase } from '@/modules/notification/use-cases/mark-all-notifications-read.use-case';
 import { MarkNotificationReadUseCase } from '@/modules/notification/use-cases/mark-notification-read.use-case';
@@ -22,6 +23,7 @@ export class NotificationService {
     private readonly createSystemNotificationUseCase: CreateSystemNotificationUseCase,
     private readonly listUserNotificationsUseCase: ListUserNotificationsUseCase,
     private readonly getUserNotificationUseCase: GetUserNotificationUseCase,
+    private readonly getUnreadNotificationCountUseCase: GetUnreadNotificationCountUseCase,
     private readonly markNotificationReadUseCase: MarkNotificationReadUseCase,
     private readonly markAllNotificationsReadUseCase: MarkAllNotificationsReadUseCase,
     private readonly publishScheduledNotificationsUseCase: PublishScheduledNotificationsUseCase,
@@ -52,7 +54,7 @@ export class NotificationService {
   }
 
   countUnread(userId: string) {
-    return this.notificationRepository.countUnread(userId);
+    return this.getUnreadNotificationCountUseCase.execute(userId);
   }
 
   listAdmin(query: ListAdminNotificationsDto) {

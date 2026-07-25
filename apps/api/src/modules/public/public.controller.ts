@@ -7,6 +7,8 @@ import { CreateWarrantyActivationRequestUseCase } from '@/modules/warranty-activ
 import { CreateWarrantyClaimDto } from '@/modules/warranty-claims/dto/create-warranty-claim.dto';
 import { CreateWarrantyClaimUseCase } from '@/modules/warranty-claims/use-cases/create-warranty-claim.use-case';
 import { PublicListServiceCentersUseCase } from '@/modules/public/use-cases/public-list-service-centers.use-case';
+import { ListPublicProductsDto } from '@/modules/products/dto/list-public-products.dto';
+import { ListPublicProductsUseCase } from '@/modules/products/use-cases/list-public-products.use-case';
 import { PublicLookupWarrantyClaimByCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claim-by-code.use-case';
 import { PublicLookupWarrantyClaimsByWarrantyCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claims-by-warranty-code.use-case';
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
@@ -21,6 +23,7 @@ export class PublicController {
     private readonly publicLookupWarrantyClaimByCodeUseCase: PublicLookupWarrantyClaimByCodeUseCase,
     private readonly publicLookupWarrantyClaimsByWarrantyCodeUseCase: PublicLookupWarrantyClaimsByWarrantyCodeUseCase,
     private readonly publicListServiceCentersUseCase: PublicListServiceCentersUseCase,
+    private readonly listPublicProductsUseCase: ListPublicProductsUseCase,
   ) {}
 
   @Get('warranties/lookup')
@@ -57,5 +60,10 @@ export class PublicController {
   @Get('service-centers')
   listServiceCenters(@Query() query: ListServiceCentersDto) {
     return this.publicListServiceCentersUseCase.execute(query);
+  }
+
+  @Get('products')
+  listProducts(@Query() query: ListPublicProductsDto) {
+    return this.listPublicProductsUseCase.execute(query);
   }
 }

@@ -31,13 +31,15 @@ export function WarrantyClaimStatusStepper({
   const activeStep = getClaimProgressActiveStep(claim.status);
 
   return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-4 sm:p-6">
+    <Card className="min-w-0 overflow-hidden">
+      <CardContent className="min-w-0 p-4 sm:p-5">
         <h2 className="sr-only">{t("statusProgress.title")}</h2>
-        <div className="-mx-1 overflow-x-auto px-1 pb-1">
+
+        {/* Desktop View (lg+): Horizontal Stepper with connecting lines (StepperSeparator) stretching 100% width */}
+        <div className="hidden min-w-0 w-full lg:block">
           <Stepper
             aria-label={t("statusProgress.ariaLabel")}
-            className="min-w-2xl"
+            className="min-w-0 w-full"
             indicators={{
               active: <CircleDot aria-hidden="true" className="size-4" />,
               completed: <Check aria-hidden="true" className="size-4" />,
@@ -46,7 +48,7 @@ export function WarrantyClaimStatusStepper({
             role="list"
             value={activeStep}
           >
-            <StepperNav className="items-start">
+            <StepperNav className="min-w-0 w-full items-start justify-between">
               {WARRANTY_CLAIM_PROGRESS_STATUSES.map((status, index) => {
                 const state = getClaimProgressStepState({
                   currentStatus: claim.status,
@@ -57,7 +59,7 @@ export function WarrantyClaimStatusStepper({
                 return (
                   <StepperItem
                     aria-current={state === "active" ? "step" : undefined}
-                    className="min-w-0 items-start"
+                    className="min-w-0 flex-1 items-start"
                     completed={state === "completed"}
                     key={status}
                     role="listitem"
@@ -109,6 +111,70 @@ export function WarrantyClaimStatusStepper({
               })}
             </StepperNav>
           </Stepper>
+        </div>
+
+        {/* Mobile / Tablet View (< lg): Responsive Grid layout fitting 100% screen width without scroll or text overlap */}
+        <div className="grid min-w-0 grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-3 lg:hidden">
+          {WARRANTY_CLAIM_PROGRESS_STATUSES.map((status, index) => {
+            const state = getClaimProgressStepState({
+              currentStatus: claim.status,
+              history: claim.statusHistory,
+              stepStatus: status,
+            });
+
+            return (
+              <div
+                className={cn(
+                  "relative flex min-w-0 items-center gap-3 rounded-lg border p-3 transition-colors",
+                  state === "completed" &&
+                    "border-emerald-200 bg-emerald-50/50 text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-300",
+                  state === "active" &&
+                    "border-blue-300 bg-blue-50/80 ring-2 ring-blue-500/20 dark:border-blue-800 dark:bg-blue-950/40 dark:ring-blue-400/20",
+                  state === "upcoming" &&
+                    "border-slate-200 bg-slate-50/50 text-slate-500 dark:border-slate-800 dark:bg-slate-900/30 dark:text-slate-400",
+                )}
+                key={status}
+              >
+                <div
+                  className={cn(
+                    "flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
+                    state === "completed" &&
+                      "bg-emerald-600 text-white dark:bg-emerald-500",
+                    state === "active" &&
+                      "bg-blue-600 text-white dark:bg-blue-500",
+                    state === "upcoming" &&
+                      "bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400",
+                  )}
+                >
+                  {state === "completed" ? (
+                    <Check className="size-4" />
+                  ) : state === "active" ? (
+                    <CircleDot className="size-4 animate-pulse" />
+                  ) : (
+                    index + 1
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    {index + 1}. {t(`statusProgress.states.${state}`)}
+                  </p>
+                  <p
+                    className={cn(
+                      "truncate text-sm font-medium",
+                      state === "completed" &&
+                        "text-emerald-950 dark:text-emerald-200",
+                      state === "active" &&
+                        "font-semibold text-blue-950 dark:text-blue-100",
+                      state === "upcoming" &&
+                        "text-slate-600 dark:text-slate-400",
+                    )}
+                  >
+                    {t(`statuses.${status}`)}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </CardContent>
     </Card>

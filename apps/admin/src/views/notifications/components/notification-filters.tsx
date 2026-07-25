@@ -2,12 +2,18 @@
 
 import { Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { NOTIFICATION_TYPES } from "@repo/shared/constants";
 import { Button, Input } from "@repo/ui";
 import { SelectControl } from "@/src/components/common/select-control";
-import type { NotificationStatusFilter } from "../notifications.types";
+import type {
+  NotificationDeliveryStatusFilter,
+  NotificationStatusFilter,
+} from "../notifications.types";
 
 type NotificationFiltersProps = {
+  deliveryStatus?: NotificationDeliveryStatusFilter;
   onClear: () => void;
+  onDeliveryStatusChange?: (value: NotificationDeliveryStatusFilter) => void;
   onSearchChange: (value: string) => void;
   onStatusChange?: (value: NotificationStatusFilter) => void;
   onTypeChange: (value: string) => void;
@@ -17,7 +23,9 @@ type NotificationFiltersProps = {
 };
 
 export function NotificationFilters({
+  deliveryStatus,
   onClear,
+  onDeliveryStatusChange,
   onSearchChange,
   onStatusChange,
   onTypeChange,
@@ -46,22 +54,32 @@ export function NotificationFilters({
           { label: t("types.ALL"), value: "" },
           {
             label: t("types.WARRANTY_CLAIM_CREATED"),
-            value: "WARRANTY_CLAIM_CREATED",
+            value: NOTIFICATION_TYPES.WARRANTY_CLAIM_CREATED,
           },
           {
             label: t("types.WARRANTY_CLAIM_STATUS_CHANGED"),
-            value: "WARRANTY_CLAIM_STATUS_CHANGED",
+            value: NOTIFICATION_TYPES.WARRANTY_CLAIM_STATUS_CHANGED,
           },
           {
             label: t("types.WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER"),
-            value: "WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER",
+            value: NOTIFICATION_TYPES.WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER,
           },
           {
             label: t("types.WARRANTY_CLAIM_SLA_BREACHED"),
-            value: "WARRANTY_CLAIM_SLA_BREACHED",
+            value: NOTIFICATION_TYPES.WARRANTY_CLAIM_SLA_BREACHED,
           },
-          { label: t("types.SYSTEM_ALERT"), value: "SYSTEM_ALERT" },
-          { label: t("types.ANNOUNCEMENT"), value: "ANNOUNCEMENT" },
+          {
+            label: t("types.WARRANTY_ACTIVATION_REQUEST_CREATED"),
+            value: NOTIFICATION_TYPES.WARRANTY_ACTIVATION_REQUEST_CREATED,
+          },
+          {
+            label: t("types.SYSTEM_ALERT"),
+            value: NOTIFICATION_TYPES.SYSTEM_ALERT,
+          },
+          {
+            label: t("types.ANNOUNCEMENT"),
+            value: NOTIFICATION_TYPES.ANNOUNCEMENT,
+          },
         ]}
         value={type}
       />
@@ -77,6 +95,19 @@ export function NotificationFilters({
             { label: t("statuses.READ"), value: "READ" },
           ]}
           value={status}
+        />
+      ) : onDeliveryStatusChange && deliveryStatus ? (
+        <SelectControl
+          aria-label={t("statusFilter")}
+          onValueChange={(value) =>
+            onDeliveryStatusChange(value as NotificationDeliveryStatusFilter)
+          }
+          options={[
+            { label: t("statuses.ALL"), value: "ALL" },
+            { label: t("deliveryStatuses.SENT"), value: "SENT" },
+            { label: t("deliveryStatuses.SCHEDULED"), value: "SCHEDULED" },
+          ]}
+          value={deliveryStatus}
         />
       ) : (
         <span className="hidden lg:block" />

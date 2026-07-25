@@ -67,8 +67,7 @@ export function ProductFormSkeleton({
           <Skeleton className="h-16 w-full" />
           <Skeleton className="h-16 w-full" />
         </div>
-        <div className="grid gap-5 sm:grid-cols-3">
-          <Skeleton className="h-16 w-full" />
+        <div className="grid gap-5 sm:grid-cols-2">
           <Skeleton className="h-16 w-full" />
           <Skeleton className="h-16 w-full" />
         </div>

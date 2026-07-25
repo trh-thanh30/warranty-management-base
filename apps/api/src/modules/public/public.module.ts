@@ -1,4 +1,5 @@
 import { ServiceCentersModule } from '@/modules/service-centers/service-centers.module';
+import { ProductsModule } from '@/modules/products/products.module';
 import { PublicController } from '@/modules/public/public.controller';
 import { PublicListServiceCentersUseCase } from '@/modules/public/use-cases/public-list-service-centers.use-case';
 import { PublicLookupWarrantyClaimByCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claim-by-code.use-case';
@@ -14,6 +15,7 @@ import { Module } from '@nestjs/common';
     WarrantyActivationRequestsModule,
     WarrantyClaimsModule,
     ServiceCentersModule,
+    ProductsModule,
   ],
   controllers: [PublicController],
   providers: [

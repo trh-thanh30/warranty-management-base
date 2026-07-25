@@ -1,7 +1,9 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
+import type { UnreadNotificationCount } from "@repo/shared";
 import { Avatar, AvatarFallback, AvatarImage, Badge } from "@repo/ui";
 import { cn } from "@repo/ui/lib/utils";
 import { useAdminUiStore } from "@/src/app/stores/ui.store";
@@ -13,20 +15,26 @@ import {
   canAccessNavigationItem,
   resolveNavigationHref,
 } from "@/src/config/navigation-permissions";
+import { useUnreadNotificationCount } from "@/src/hooks/use-notifications";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { getInitials } from "@/src/utils/get-initials";
+import { getNavigationBadge } from "./app-sidebar.utils";
 
 type NavGroupProps = {
   items: NavigationItem[];
   label: string;
   pathname: string;
   collapsed: boolean;
+  notificationCounts?: UnreadNotificationCount;
+  notificationCountsError: boolean;
 };
 
 type NavItemProps = {
   item: NavigationItem;
   pathname: string;
   collapsed: boolean;
+  notificationCounts?: UnreadNotificationCount;
+  notificationCountsError: boolean;
 };
 
 function isNavItemActive(item: NavigationItem, pathname: string) {
@@ -39,11 +47,25 @@ function isNavItemActive(item: NavigationItem, pathname: string) {
   );
 }
 
-function NavItem({ item, pathname, collapsed }: NavItemProps) {
+function NavItem({
+  item,
+  pathname,
+  collapsed,
+  notificationCounts,
+  notificationCountsError,
+}: NavItemProps) {
+  const t = useTranslations("DashboardConfig");
   const Icon = item.icon;
   const active = isNavItemActive(item, pathname);
+  const notificationCount = item.notificationBadgeKey
+    ? (notificationCounts?.[item.notificationBadgeKey] ?? 0)
+    : 0;
+  const notificationBadge = item.notificationBadgeKey
+    ? getNavigationBadge(notificationCount, notificationCountsError)
+    : null;
+  const badge = item.badge ?? notificationBadge;
   const className = cn(
-    "flex h-9 items-center rounded-md text-sm font-medium transition-all duration-200",
+    "relative flex h-9 items-center rounded-md text-sm font-medium transition-all duration-200",
     collapsed ? "justify-center w-9 h-9 mx-auto px-0" : "w-full gap-3 px-3",
     active
       ? "bg-slate-200 text-slate-950 dark:bg-slate-800 dark:text-slate-50"
@@ -57,12 +79,21 @@ function NavItem({ item, pathname, collapsed }: NavItemProps) {
           <span className="min-w-0 flex-1 truncate text-left">
             {item.title}
           </span>
-          {item.badge ? <Badge variant="secondary">{item.badge}</Badge> : null}
-          {!item.href && !item.badge ? (
+          {badge ? (
+            <Badge className="h-4 min-w-4 justify-center rounded-full bg-red-500 px-1 py-0 text-[10px] leading-none text-white hover:bg-red-500 dark:bg-red-500">
+              {badge}
+            </Badge>
+          ) : null}
+          {!item.href && !badge ? (
             <ChevronRight className="h-4 w-4 text-slate-400" />
           ) : null}
         </>
       )}
+      {collapsed && badge ? (
+        <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold leading-none text-white">
+          {badge}
+        </span>
+      ) : null}
     </>
   );
 
@@ -70,6 +101,13 @@ function NavItem({ item, pathname, collapsed }: NavItemProps) {
     return (
       <Link
         aria-current={active ? "page" : undefined}
+        aria-label={
+          notificationBadge
+            ? `${item.title}. ${t("unreadNotifications", {
+                count: notificationCount,
+              })}`
+            : item.title
+        }
         className={className}
         href={item.href}
         title={collapsed ? item.title : undefined}
@@ -90,7 +128,14 @@ function NavItem({ item, pathname, collapsed }: NavItemProps) {
   );
 }
 
-function NavGroup({ items, label, pathname, collapsed }: NavGroupProps) {
+function NavGroup({
+  items,
+  label,
+  pathname,
+  collapsed,
+  notificationCounts,
+  notificationCountsError,
+}: NavGroupProps) {
   return (
     <div className="space-y-1">
       {!collapsed ? (
@@ -106,6 +151,8 @@ function NavGroup({ items, label, pathname, collapsed }: NavGroupProps) {
           item={item}
           key={item.title}
           pathname={pathname}
+          notificationCounts={notificationCounts}
+          notificationCountsError={notificationCountsError}
         />
       ))}
     </div>
@@ -121,8 +168,10 @@ export function AppSidebar({
   const dashboardConfig = getDashboardConfig(t);
   const { hasPermission, hasRole } = usePermissions();
   const pathname = usePathname();
-  const BrandLogo = dashboardConfig.brand.logo;
   const { user } = useAuth();
+  const notificationCountsQuery = useUnreadNotificationCount({
+    enabled: Boolean(user),
+  });
   const storedCollapsed = useAdminUiStore((state) => state.sidebarCollapsed);
   const collapsed = collapsedOverride ?? storedCollapsed;
   const displayName = user?.full_name || user?.username || "Admin";
@@ -139,21 +188,28 @@ export function AppSidebar({
       <div
         className={cn(
           "flex h-16 items-center gap-3 px-5",
+          !collapsed && "justify-center",
           collapsed && "justify-center px-0",
         )}
       >
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-950 text-sm font-semibold text-white dark:bg-slate-50 dark:text-slate-950">
-          <BrandLogo className="h-4 w-4" />
-        </div>
-        {!collapsed && (
-          <div className="min-w-0 flex-1 animate-in fade-in duration-200">
-            <p className="truncate text-sm font-semibold text-slate-950 dark:text-slate-50">
-              {dashboardConfig.brand.name}
-            </p>
-            <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-              {dashboardConfig.brand.description}
-            </p>
-          </div>
+        {collapsed ? (
+          <Image
+            alt={dashboardConfig.brand.name}
+            className="h-8 w-8 object-contain animate-in fade-in duration-200"
+            height={32}
+            priority
+            src="/logo.png"
+            width={32}
+          />
+        ) : (
+          <Image
+            alt={dashboardConfig.brand.name}
+            className="h-11 w-auto max-w-[210px] object-contain animate-in fade-in duration-200"
+            height={44}
+            priority
+            src="/logo.png"
+            width={210}
+          />
         )}
       </div>
 
@@ -177,6 +233,8 @@ export function AppSidebar({
               label={section.label}
               pathname={pathname}
               collapsed={collapsed}
+              notificationCounts={notificationCountsQuery.data}
+              notificationCountsError={notificationCountsQuery.isError}
             />
           ) : null;
         })}

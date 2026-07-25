@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCheck } from "lucide-react";
+import { CheckCheck, RefreshCw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   Button,
@@ -45,7 +45,9 @@ export function NotificationsDirectoryCard({
     userControls.filters.status !== "ALL",
   );
   const hasAdminFilters = Boolean(
-    adminControls.search || adminControls.filters.type,
+    adminControls.search ||
+    adminControls.filters.type ||
+    adminControls.filters.deliveryStatus !== "ALL",
   );
 
   return (
@@ -80,15 +82,30 @@ export function NotificationsDirectoryCard({
                 {t("myNotificationsDescription")}
               </CardDescription>
             </div>
-            <Button
-              className="w-full sm:w-auto"
-              disabled={isMarkingAll}
-              onClick={() => void markAllRead()}
-              variant="secondary"
-            >
-              <CheckCheck className="size-4" />
-              {t("markAllRead")}
-            </Button>
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+              <Button
+                className="w-full sm:w-auto"
+                disabled={userQuery.isFetching}
+                onClick={() => void userQuery.refetch()}
+                variant="secondary"
+              >
+                <RefreshCw
+                  className={
+                    userQuery.isFetching ? "size-4 animate-spin" : "size-4"
+                  }
+                />
+                {t("refresh")}
+              </Button>
+              <Button
+                className="w-full sm:w-auto"
+                disabled={isMarkingAll}
+                onClick={() => void markAllRead()}
+                variant="secondary"
+              >
+                <CheckCheck className="size-4" />
+                {t("markAllRead")}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-5 p-4 pt-0 sm:p-5 sm:pt-0">
             <NotificationFilters
@@ -120,15 +137,34 @@ export function NotificationsDirectoryCard({
       {canViewAdmin ? (
         <TabsContent value="admin">
           <Card>
-            <CardHeader className="p-4 sm:p-5">
-              <CardTitle>{t("adminNotifications")}</CardTitle>
-              <CardDescription>
-                {t("adminNotificationsDescription")}
-              </CardDescription>
+            <CardHeader className="gap-4 p-4 sm:p-5 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <CardTitle>{t("adminNotifications")}</CardTitle>
+                <CardDescription className="mt-1.5">
+                  {t("adminNotificationsDescription")}
+                </CardDescription>
+              </div>
+              <Button
+                className="w-full sm:w-auto"
+                disabled={adminQuery.isFetching}
+                onClick={() => void adminQuery.refetch()}
+                variant="secondary"
+              >
+                <RefreshCw
+                  className={
+                    adminQuery.isFetching ? "size-4 animate-spin" : "size-4"
+                  }
+                />
+                {t("refresh")}
+              </Button>
             </CardHeader>
             <CardContent className="space-y-5 p-4 pt-0 sm:p-5 sm:pt-0">
               <NotificationFilters
+                deliveryStatus={adminControls.filters.deliveryStatus}
                 onClear={clearAdminFilters}
+                onDeliveryStatusChange={
+                  adminControls.filterHandlers.deliveryStatus
+                }
                 onSearchChange={adminControls.setSearch}
                 onTypeChange={adminControls.filterHandlers.type}
                 search={adminControls.search}

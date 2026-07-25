@@ -56,7 +56,7 @@ export function CustomersView() {
                 uploadDisabled={!canCreateCustomers}
               />
               {canCreateCustomers ? (
-                <Button asChild>
+                <Button asChild className="min-w-44">
                   <Link href="/customers/create">
                     <Plus className="size-4" />
                     {t("create")}

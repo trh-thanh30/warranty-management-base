@@ -4,16 +4,7 @@ import { Controller } from "react-hook-form";
 import { Layers3, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ProductResponse, ProductTemplateSummary } from "@repo/shared";
-import {
-  Button,
-  Input,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Textarea,
-} from "@repo/ui";
+import { Button, Input, Textarea } from "@repo/ui";
 import {
   Combobox,
   ComboboxContent,
@@ -30,6 +21,8 @@ import { createFieldErrorFormatter } from "@/src/utils";
 import type { ProductImportRowData } from "@/src/services/products/products.types";
 import { useProductForm } from "../hooks/use-product-form";
 import { ProductSpecificationsFields } from "./product-specifications-fields";
+import { ProductPublicationControl } from "./product-publication-control";
+import { ProductStatusControl } from "./product-status-control";
 
 type ProductFormProps = {
   onCancel: () => void;
@@ -140,6 +133,23 @@ export function ProductForm(props: ProductFormProps) {
             />
           </Field>
         ) : null}
+        <Field
+          error={formatFieldError(errors.slug?.message, t)}
+          id="product-slug"
+          label={t("slug")}
+        >
+          <Input
+            autoCapitalize="none"
+            autoCorrect="off"
+            id="product-slug"
+            placeholder={t("slugPlaceholder")}
+            spellCheck={false}
+            {...register("slug")}
+          />
+        </Field>
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2">
         {!importPreview ? (
           <Field
             error={formatFieldError(errors.serialNumber?.message, t)}
@@ -153,9 +163,6 @@ export function ProductForm(props: ProductFormProps) {
             />
           </Field>
         ) : null}
-      </div>
-
-      <div className="grid gap-5 sm:grid-cols-2">
         {!fromTemplateCreation ? (
           <Field
             error={formatFieldError(errors.categoryId?.message, t)}
@@ -186,7 +193,6 @@ export function ProductForm(props: ProductFormProps) {
             />
           </Field>
         ) : null}
-        <ProductStatusField control={control} disabled={isSubmitting} />
       </div>
 
       {product?.warrantyCode ? (
@@ -376,6 +382,13 @@ export function ProductForm(props: ProductFormProps) {
         />
       ) : null}
 
+      <div className="flex flex-col gap-4 border-t border-slate-200 pt-5 dark:border-slate-800">
+        <ProductStatusField control={control} disabled={isSubmitting} />
+        {!importPreview ? (
+          <ProductPublicationField control={control} disabled={isSubmitting} />
+        ) : null}
+      </div>
+
       <div className="grid grid-cols-2 gap-2 border-t border-slate-200 pt-5 dark:border-slate-800 sm:flex sm:justify-end">
         <Button
           className="w-full sm:w-auto"
@@ -412,31 +425,40 @@ function ProductStatusField({
   control: ReturnType<typeof useProductForm>["control"];
   disabled: boolean;
 }) {
-  const t = useTranslations("Products");
-
   return (
     <Controller
       control={control}
       name="status"
       render={({ field }) => (
-        <Field id="product-status" label={t("productStatus")}>
-          <Select
-            disabled={disabled}
-            onValueChange={field.onChange}
-            value={field.value}
-          >
-            <SelectTrigger className="w-full" id="product-status">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {PRODUCT_EDITABLE_STATUSES.map((status) => (
-                <SelectItem key={status} value={status}>
-                  {t(`statuses.${status}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
+        <ProductStatusControl
+          disabled={disabled}
+          id="product-status"
+          onStatusChange={field.onChange}
+          status={field.value}
+        />
+      )}
+    />
+  );
+}
+
+function ProductPublicationField({
+  control,
+  disabled,
+}: {
+  control: ReturnType<typeof useProductForm>["control"];
+  disabled: boolean;
+}) {
+  return (
+    <Controller
+      control={control}
+      name="isPublished"
+      render={({ field }) => (
+        <ProductPublicationControl
+          disabled={disabled}
+          id="product-publication"
+          isPublished={field.value}
+          onPublishedChange={field.onChange}
+        />
       )}
     />
   );
@@ -487,7 +509,6 @@ function ProductCategoryCombobox({
   );
 }
 
-const PRODUCT_EDITABLE_STATUSES = ["ACTIVE", "INACTIVE"] as const;
 const formatFieldError = createFieldErrorFormatter(
   new Set([
     "brandLength",
@@ -509,6 +530,8 @@ const formatFieldError = createFieldErrorFormatter(
     "nameRequired",
     "productCodeLength",
     "serialNumberLength",
+    "slugInvalid",
+    "slugLength",
     "warrantyCodeInvalid",
     "warrantyCodeRequired",
     "warrantyTermsLength",

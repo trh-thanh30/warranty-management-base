@@ -71,7 +71,7 @@ export function StaffView() {
                 uploadDisabled={!canCreateStaff}
               />
               {canCreateStaff ? (
-                <Button asChild>
+                <Button asChild className="min-w-44">
                   <Link href="/staffs/create">
                     <Plus className="size-4" />
                     {t("create")}

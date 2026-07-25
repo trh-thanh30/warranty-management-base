@@ -82,6 +82,7 @@ export type ProductSortBy =
   | "name"
   | "category"
   | "status"
+  | "publishedAt"
   | "createdAt"
   | "updatedAt";
 
@@ -112,6 +113,7 @@ export type ProductSummary = {
   templateId: string | null;
   template: ProductTemplateSummary | null;
   productCode: string;
+  slug: string;
   warrantyCode: string | null;
   serialNumber: string | null;
   name: string;
@@ -123,6 +125,8 @@ export type ProductSummary = {
   manufactureYear: number | null;
   description: string | null;
   status: ProductStatus;
+  isPublished: boolean;
+  publishedAt: string | null;
   metadata: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
@@ -141,6 +145,7 @@ export type ListProductsQuery = PaginationQuery & {
   templateId?: string;
   ownerCustomerId?: string;
   status?: ProductStatus;
+  isPublished?: "true" | "false";
   warrantyStatus?: WarrantyStatus;
   sortBy?: ProductSortBy;
   sortOrder?: "asc" | "desc";
@@ -150,6 +155,8 @@ export type CreateProductBody = {
   templateId?: string;
   createTemplate?: boolean;
   name?: string;
+  slug?: string;
+  isPublished?: boolean;
   category?: ProductCategory;
   categoryId?: string;
   brand?: string;
@@ -164,6 +171,7 @@ export type CreateProductBody = {
 
 export type UpdateProductBody = {
   name?: string;
+  slug?: string;
   category?: ProductCategory;
   categoryId?: string;
   brand?: string | null;
@@ -173,6 +181,36 @@ export type UpdateProductBody = {
   status?: ProductStatus;
   serialNumber?: string | null;
   metadata?: Record<string, unknown> | null;
+};
+
+export type UpdateProductPublicationBody = {
+  isPublished: boolean;
+};
+
+export type PublicProductSummary = {
+  id: string;
+  productCode: string;
+  slug: string;
+  name: string;
+  categoryId: string | null;
+  category: Pick<CategorySummary, "id" | "slug" | "name"> | null;
+  brand: string | null;
+  model: string | null;
+  description: string | null;
+  coverImageUrl: string | null;
+  specifications: Array<{
+    key: string;
+    value: string;
+  }>;
+  warrantyDurationMonths: number | null;
+  publishedAt: string;
+};
+
+export type ListPublicProductsQuery = PaginationQuery & {
+  search?: string;
+  categoryId?: string;
+  sortBy?: Extract<ProductSortBy, "name" | "publishedAt">;
+  sortOrder?: "asc" | "desc";
 };
 
 export type AssignProductOwnerBody = {

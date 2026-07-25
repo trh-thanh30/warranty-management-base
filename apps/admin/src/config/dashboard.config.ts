@@ -22,7 +22,7 @@ type Translate = (key: string) => string;
 export function getDashboardConfig(t: Translate): DashboardConfig {
   return {
     brand: {
-      name: "Warranty Admin",
+      name: t("brandName"),
       description: t("brandDescription"),
       logo: ClipboardList,
     },
@@ -80,12 +80,14 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             href: "/warranties",
             activeHrefs: ["/warranty-activation-requests"],
             icon: ShieldCheck,
+            notificationBadgeKey: "warranties",
             requiredPermission: PERMISSIONS.WARRANTY_VIEW,
           },
           {
             title: t("items.warrantyClaims"),
             href: "/warranty-claims",
             icon: ClipboardList,
+            notificationBadgeKey: "warrantyClaims",
             requiredPermission: PERMISSIONS.WARRANTY_CLAIM_VIEW,
           },
           {

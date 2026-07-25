@@ -9,6 +9,7 @@ import { ProductTemplatesRepository } from '@/modules/product-templates/reposito
 import { CreateProductDto } from '@/modules/products/dto/create-product.dto';
 import { toProductResponse } from '@/modules/products/products.types';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
+import { createProductSlug } from '@/modules/products/product-slug.utils';
 import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generate-product-code.use-case';
 import { Injectable } from '@nestjs/common';
 import {
@@ -45,6 +46,14 @@ export class CreateProductUseCase {
     }
     if (!selectedTemplate && (!dto.name || !dto.category || !dto.categoryId)) {
       throw new BadRequestError('Product shared information is required');
+    }
+
+    const effectiveName = selectedTemplate?.name ?? dto.name!;
+    const slug =
+      dto.slug?.trim() || createProductSlug(effectiveName, productCode);
+    const productWithSlug = await this.productsRepository.findBySlug(slug);
+    if (productWithSlug) {
+      throw new ConflictError('Product slug already exists');
     }
 
     const categoryRef = await this.resolveProductCategory(
@@ -106,6 +115,7 @@ export class CreateProductUseCase {
       return tx.product.create({
         data: {
           product_code: productCode,
+          slug,
           warranty_code: null,
           serial_number: dto.serialNumber,
           name: template?.name ?? dto.name!,
@@ -115,6 +125,8 @@ export class CreateProductUseCase {
           manufacture_year: template?.manufacture_year ?? dto.manufactureYear,
           description: template?.description ?? dto.description,
           status: dto.status ?? product_status.ACTIVE,
+          is_published: dto.isPublished ?? false,
+          published_at: dto.isPublished ? new Date() : null,
           category_ref: { connect: { id: categoryRef.id } },
           template: template ? { connect: { id: template.id } } : undefined,
           metadata: template

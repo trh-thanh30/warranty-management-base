@@ -8,6 +8,7 @@ import {
   IsString,
   IsUUID,
   Length,
+  Matches,
   Max,
   Min,
   ValidateIf,
@@ -26,6 +27,16 @@ export class CreateProductDto {
   @IsString()
   @Length(2, 160)
   name?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(2, 180)
+  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+  slug?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isPublished?: boolean;
 
   @ValidateIf((dto: CreateProductDto) => !dto.templateId)
   @IsEnum(product_category)
