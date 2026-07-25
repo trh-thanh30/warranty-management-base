@@ -9,6 +9,7 @@ export class DashboardTrendsDto extends AnalyticsRangeDto {
     'claim_overdue',
     'warranties',
     'warranty_activated',
+    'warranty_activation_requests',
     'products',
     'customers',
   ])
@@ -18,6 +19,7 @@ export class DashboardTrendsDto extends AnalyticsRangeDto {
     | 'claim_overdue'
     | 'warranties'
     | 'warranty_activated'
+    | 'warranty_activation_requests'
     | 'products'
     | 'customers';
 
