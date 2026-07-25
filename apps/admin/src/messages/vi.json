@@ -6,6 +6,7 @@
   "DashboardConfig": {
     "brandName": "Quản trị bảo hành Lexzenz",
     "brandDescription": "",
+    "unreadNotifications": "{count} thông báo chưa đọc",
     "sections": {
       "general": "Tổng quan",
       "other": "Khác"
@@ -104,7 +105,10 @@
     "dateRange": {
       "ariaLabel": "Chọn khoảng thời gian cho bảng điều khiển",
       "placeholder": "Tháng hiện tại",
-      "clear": "Dùng khoảng mặc định"
+      "clear": "Dùng khoảng mặc định",
+      "quickFilterAriaLabel": "Bộ lọc nhanh theo ngày cho bảng điều khiển",
+      "last7Days": "7 ngày",
+      "last30Days": "30 ngày"
     },
     "kpis": {
       "total": "Tổng yêu cầu",
@@ -132,6 +136,51 @@
       "serviceCenterDescription": "Khối lượng yêu cầu đã gán cho từng trạm.",
       "unassigned": "Chưa phân trạm",
       "other": "Khác"
+    },
+    "warranties": {
+      "title": "Bảo hành",
+      "description": "Theo dõi số lượng bảo hành, lượt kích hoạt và các bảo hành sắp hết hạn.",
+      "total": "Tổng bảo hành",
+      "totalDescription": "Tất cả hồ sơ bảo hành trong hệ thống",
+      "activatedInRange": "Kích hoạt trong khoảng",
+      "activatedInRangeDescription": "Bảo hành được kích hoạt trong khoảng đã chọn",
+      "next7Days": "Hết hạn 7 ngày",
+      "next7DaysDescription": "Bảo hành đang hiệu lực sẽ hết hạn trong 7 ngày",
+      "next30Days": "Hết hạn 30 ngày",
+      "next30DaysDescription": "Bảo hành đang hiệu lực sẽ hết hạn trong 30 ngày",
+      "next90Days": "Hết hạn 90 ngày",
+      "next90DaysDescription": "Bảo hành đang hiệu lực sẽ hết hạn trong 90 ngày",
+      "statusChart": "Kích hoạt bảo hành theo ngày",
+      "warrantyCount": "Số bảo hành",
+      "loading": "Đang tải phân tích bảo hành",
+      "loadingDescription": "Đang lấy dữ liệu bảo hành.",
+      "retry": "Thử lại",
+      "errorDescription": "Không tải được phân tích bảo hành.",
+      "emptyTitle": "Chưa có dữ liệu bảo hành",
+      "emptyDescription": "Không có bảo hành nào cho chế độ xem này."
+    },
+    "activationRequests": {
+      "title": "Yêu cầu kích hoạt điện tử",
+      "description": "Theo dõi yêu cầu kích hoạt do khách hàng gửi và kết quả duyệt.",
+      "createdInRange": "Tạo trong khoảng",
+      "createdInRangeDescription": "Yêu cầu được gửi trong khoảng đã chọn",
+      "pending": "Chờ duyệt",
+      "pendingDescription": "Yêu cầu đang chờ quản trị viên xử lý",
+      "activated": "Đã kích hoạt",
+      "activatedDescription": "Yêu cầu đã hoàn tất kích hoạt bảo hành",
+      "rejected": "Từ chối",
+      "rejectedDescription": "Yêu cầu bị từ chối khi duyệt",
+      "statusChart": "Yêu cầu theo trạng thái",
+      "sourceChart": "Yêu cầu theo nguồn",
+      "requestCount": "Số yêu cầu",
+      "publicWebDescription": "Tạo từ website",
+      "adminPortalDescription": "Tạo bởi quản trị viên",
+      "loading": "Đang tải phân tích kích hoạt",
+      "loadingDescription": "Đang lấy dữ liệu yêu cầu kích hoạt điện tử.",
+      "retry": "Thử lại",
+      "errorDescription": "Không tải được phân tích yêu cầu kích hoạt.",
+      "emptyTitle": "Chưa có dữ liệu kích hoạt",
+      "emptyDescription": "Không có yêu cầu kích hoạt nào cho chế độ xem này."
     },
     "recentClaims": {
       "title": "Yêu cầu gần đây",

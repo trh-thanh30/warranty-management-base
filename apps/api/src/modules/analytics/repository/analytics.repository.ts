@@ -1,7 +1,12 @@
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { AnalyticsDateRange } from '@/modules/analytics/analytics.utils';
 import { Injectable } from '@nestjs/common';
-import { Prisma, warranty_claim_status, warranty_status } from '@prisma/client';
+import {
+  Prisma,
+  warranty_activation_request_status,
+  warranty_claim_status,
+  warranty_status,
+} from '@prisma/client';
 
 type TrendMetric =
   | 'claims'
@@ -9,6 +14,7 @@ type TrendMetric =
   | 'claim_overdue'
   | 'warranties'
   | 'warranty_activated'
+  | 'warranty_activation_requests'
   | 'products'
   | 'customers';
 
@@ -264,6 +270,11 @@ export class AnalyticsRepository {
     const interval = TREND_INTERVAL_SQL[input.interval];
     const serviceCenterId = input.serviceCenterId ?? null;
     let rows: TrendRow[];
+    let breakdownRows: Array<{
+      bucket: Date;
+      key: string;
+      value: bigint | number;
+    }> = [];
 
     switch (input.metric) {
       case 'claims':
@@ -315,16 +326,51 @@ export class AnalyticsRepository {
         `;
         break;
       case 'warranty_activated':
-        rows = await this.prismaService.$queryRaw<TrendRow[]>`
-          SELECT date_trunc(${interval}, start_date) AS bucket, COUNT(*) AS value
+        breakdownRows = await this.prismaService.$queryRaw`
+          SELECT date_trunc(${interval}, start_date) AS bucket,
+            status::text AS key,
+            COUNT(*) AS value
           FROM warranty
           WHERE start_date IS NOT NULL
             AND start_date >= ${input.range.from}
             AND start_date <= ${input.range.to}
-            AND status = 'ACTIVE'::warranty_status
-          GROUP BY bucket
-          ORDER BY bucket ASC
+          GROUP BY bucket, status
+          ORDER BY bucket ASC, status ASC
         `;
+        rows = breakdownRows.reduce<TrendRow[]>((result, row) => {
+          const existing = result.find(
+            (item) => item.bucket.getTime() === row.bucket.getTime(),
+          );
+          if (existing) {
+            existing.value = Number(existing.value) + Number(row.value);
+          } else {
+            result.push({ bucket: row.bucket, value: row.value });
+          }
+          return result;
+        }, []);
+        break;
+      case 'warranty_activation_requests':
+        breakdownRows = await this.prismaService.$queryRaw`
+          SELECT date_trunc(${interval}, created_at) AS bucket,
+            status::text AS key,
+            COUNT(*) AS value
+          FROM warranty_activation_request
+          WHERE created_at >= ${input.range.from}
+            AND created_at <= ${input.range.to}
+          GROUP BY bucket, status
+          ORDER BY bucket ASC, status ASC
+        `;
+        rows = breakdownRows.reduce<TrendRow[]>((result, row) => {
+          const existing = result.find(
+            (item) => item.bucket.getTime() === row.bucket.getTime(),
+          );
+          if (existing) {
+            existing.value = Number(existing.value) + Number(row.value);
+          } else {
+            result.push({ bucket: row.bucket, value: row.value });
+          }
+          return result;
+        }, []);
         break;
       case 'products':
         rows = await this.prismaService.$queryRaw<TrendRow[]>`
@@ -349,10 +395,18 @@ export class AnalyticsRepository {
         break;
     }
 
-    return rows.map((row) => ({
-      date: row.bucket.toISOString(),
-      value: Number(row.value),
-    }));
+    return rows.map((row) => {
+      const date = row.bucket.toISOString();
+      const breakdown = breakdownRows
+        .filter((item) => item.bucket.getTime() === row.bucket.getTime())
+        .map((item) => ({ key: item.key, value: Number(item.value) }));
+
+      return {
+        date,
+        value: Number(row.value),
+        ...(breakdown.length > 0 ? { breakdown } : {}),
+      };
+    });
   }
 
   async getWarranties(input: { range: AnalyticsDateRange }) {
@@ -398,6 +452,60 @@ export class AnalyticsRepository {
         next90Days: expiringNext90Days,
       },
       activatedInRange,
+    };
+  }
+
+  async getActivationRequests(input: { range: AnalyticsDateRange }) {
+    const createdInRangeWhere = {
+      created_at: this.dateRangeFilter(input.range),
+    };
+
+    const [total, createdInRange, byStatus, bySource] =
+      await this.prismaService.$transaction([
+        this.prismaService.warrantyActivationRequest.count({
+          where: createdInRangeWhere,
+        }),
+        this.prismaService.warrantyActivationRequest.count({
+          where: createdInRangeWhere,
+        }),
+        this.prismaService.warrantyActivationRequest.groupBy({
+          by: ['status'],
+          where: createdInRangeWhere,
+          orderBy: { status: 'asc' },
+          _count: { _all: true },
+        }),
+        this.prismaService.warrantyActivationRequest.groupBy({
+          by: ['source'],
+          where: createdInRangeWhere,
+          orderBy: { source: 'asc' },
+          _count: { _all: true },
+        }),
+      ]);
+    const statusCounts = new Map(
+      byStatus.map((item) => [item.status, this.getGroupCount(item)]),
+    );
+
+    return {
+      total,
+      createdInRange,
+      pending:
+        statusCounts.get(warranty_activation_request_status.PENDING) ?? 0,
+      approved:
+        statusCounts.get(warranty_activation_request_status.APPROVED) ?? 0,
+      rejected:
+        statusCounts.get(warranty_activation_request_status.REJECTED) ?? 0,
+      activated:
+        statusCounts.get(warranty_activation_request_status.ACTIVATED) ?? 0,
+      cancelled:
+        statusCounts.get(warranty_activation_request_status.CANCELLED) ?? 0,
+      byStatus: byStatus.map((item) => ({
+        status: item.status,
+        count: this.getGroupCount(item),
+      })),
+      bySource: bySource.map((item) => ({
+        source: item.source,
+        count: this.getGroupCount(item),
+      })),
     };
   }
 

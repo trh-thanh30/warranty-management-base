@@ -1,5 +1,6 @@
 import { CreateSystemNotificationUseCase } from '@/modules/notification/use-cases/create-system-notification.use-case';
 import { Injectable, Logger } from '@nestjs/common';
+import { NOTIFICATION_TYPES } from '@repo/shared/constants';
 import {
   notification_scope,
   user_role,
@@ -32,7 +33,7 @@ export class WarrantyActivationRequestNotificationService {
       await this.createSystemNotificationUseCase.execute({
         title: `New warranty activation request ${request.request_code}`,
         content: `Warranty activation request ${request.request_code} has been submitted.`,
-        type: 'WARRANTY_ACTIVATION_REQUEST_CREATED',
+        type: NOTIFICATION_TYPES.WARRANTY_ACTIVATION_REQUEST_CREATED,
         scope: notification_scope.ROLE,
         target_roles: [user_role.ADMIN, user_role.MODERATOR],
         metadata: {

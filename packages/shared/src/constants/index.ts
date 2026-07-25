@@ -4,3 +4,4 @@ export * from "./catalog.ts";
 export * from "./roles.ts";
 export * from "./permissions.ts";
 export * from "./warranty-domain.ts";
+export * from "./notification.ts";

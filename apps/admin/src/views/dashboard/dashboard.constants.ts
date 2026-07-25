@@ -1,11 +1,25 @@
 import { ClipboardList, PackagePlus, SearchCheck, Wrench } from "lucide-react";
-import type { WarrantyClaimPriority, WarrantyClaimStatus } from "@repo/shared";
+import type {
+  WarrantyActivationRequestSource,
+  WarrantyActivationRequestStatus,
+  WarrantyClaimPriority,
+  WarrantyClaimStatus,
+  WarrantyStatus,
+} from "@repo/shared";
 import { PERMISSIONS, type PermissionKey } from "@repo/shared/constants";
 
 type Translate = (
   key: string,
   values?: Record<string, string | number>,
 ) => string;
+
+export const DASHBOARD_QUICK_RANGE_OPTIONS = [
+  { days: 7, labelKey: "last7Days" },
+  { days: 30, labelKey: "last30Days" },
+] as const;
+
+export type DashboardQuickRangeDays =
+  (typeof DASHBOARD_QUICK_RANGE_OPTIONS)[number]["days"];
 
 export function getDashboardQuickActions(t: Translate): Array<{
   description: string;
@@ -99,3 +113,43 @@ export const DASHBOARD_SERVICE_CENTER_COLORS = [
 
 export const DASHBOARD_UNASSIGNED_SERVICE_CENTER_COLOR = "#64748b";
 export const DASHBOARD_OTHER_SERVICE_CENTER_COLOR = "#a855f7";
+
+export const DASHBOARD_WARRANTY_STATUS_ORDER: WarrantyStatus[] = [
+  "DRAFT",
+  "ACTIVE",
+  "EXPIRED",
+  "VOIDED",
+];
+
+export const DASHBOARD_WARRANTY_STATUS_COLORS: Record<WarrantyStatus, string> =
+  {
+    DRAFT: "#64748b",
+    ACTIVE: "#22c55e",
+    EXPIRED: "#f59e0b",
+    VOIDED: "#ef4444",
+  };
+
+export const DASHBOARD_ACTIVATION_REQUEST_STATUS_ORDER: WarrantyActivationRequestStatus[] =
+  ["PENDING", "APPROVED", "ACTIVATED", "REJECTED", "CANCELLED"];
+
+export const DASHBOARD_ACTIVATION_REQUEST_STATUS_COLORS: Record<
+  WarrantyActivationRequestStatus,
+  string
+> = {
+  PENDING: "#3b82f6",
+  APPROVED: "#14b8a6",
+  ACTIVATED: "#22c55e",
+  REJECTED: "#ef4444",
+  CANCELLED: "#64748b",
+};
+
+export const DASHBOARD_ACTIVATION_REQUEST_SOURCE_ORDER: WarrantyActivationRequestSource[] =
+  ["PUBLIC_WEB", "ADMIN_PORTAL"];
+
+export const DASHBOARD_ACTIVATION_REQUEST_SOURCE_COLORS: Record<
+  WarrantyActivationRequestSource,
+  string
+> = {
+  PUBLIC_WEB: "#2563eb",
+  ADMIN_PORTAL: "#8b5cf6",
+};

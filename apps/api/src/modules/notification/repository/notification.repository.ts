@@ -190,14 +190,21 @@ export class NotificationRepository {
     });
   }
 
-  async countUnread(userId: string) {
-    return this.prisma.notificationRecipient.count({
+  async listUnreadTypes(userId: string) {
+    const recipients = await this.prisma.notificationRecipient.findMany({
       where: {
         user_id: userId,
         status: notification_read_status.UNREAD,
         notification: { delivery_status: notification_delivery_status.SENT },
       },
+      select: {
+        notification: {
+          select: { type: true },
+        },
+      },
     });
+
+    return recipients.map(({ notification }) => notification.type);
   }
 
   async listAdmin(query: ListAdminNotificationsQuery) {

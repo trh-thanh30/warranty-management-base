@@ -3,6 +3,7 @@
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import type { UnreadNotificationCount } from "@repo/shared";
 import { Avatar, AvatarFallback, AvatarImage, Badge } from "@repo/ui";
 import { cn } from "@repo/ui/lib/utils";
 import { useAdminUiStore } from "@/src/app/stores/ui.store";
@@ -10,20 +11,26 @@ import { getDashboardConfig } from "@/src/config/dashboard.config";
 import type { NavigationItem } from "@/src/config/dashboard.types";
 import { Link, usePathname } from "@/src/i18n/navigation";
 import { usePermissions } from "@/src/hooks/use-permissions";
+import { useUnreadNotificationCount } from "@/src/hooks/use-notifications";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { getInitials } from "@/src/utils/get-initials";
+import { getNavigationBadge } from "./app-sidebar.utils";
 
 type NavGroupProps = {
   items: NavigationItem[];
   label: string;
   pathname: string;
   collapsed: boolean;
+  notificationCounts?: UnreadNotificationCount;
+  notificationCountsError: boolean;
 };
 
 type NavItemProps = {
   item: NavigationItem;
   pathname: string;
   collapsed: boolean;
+  notificationCounts?: UnreadNotificationCount;
+  notificationCountsError: boolean;
 };
 
 function isNavItemActive(item: NavigationItem, pathname: string) {
@@ -36,11 +43,25 @@ function isNavItemActive(item: NavigationItem, pathname: string) {
   );
 }
 
-function NavItem({ item, pathname, collapsed }: NavItemProps) {
+function NavItem({
+  item,
+  pathname,
+  collapsed,
+  notificationCounts,
+  notificationCountsError,
+}: NavItemProps) {
+  const t = useTranslations("DashboardConfig");
   const Icon = item.icon;
   const active = isNavItemActive(item, pathname);
+  const notificationCount = item.notificationBadgeKey
+    ? (notificationCounts?.[item.notificationBadgeKey] ?? 0)
+    : 0;
+  const notificationBadge = item.notificationBadgeKey
+    ? getNavigationBadge(notificationCount, notificationCountsError)
+    : null;
+  const badge = item.badge ?? notificationBadge;
   const className = cn(
-    "flex h-9 items-center rounded-md text-sm font-medium transition-all duration-200",
+    "relative flex h-9 items-center rounded-md text-sm font-medium transition-all duration-200",
     collapsed ? "justify-center w-9 h-9 mx-auto px-0" : "w-full gap-3 px-3",
     active
       ? "bg-slate-200 text-slate-950 dark:bg-slate-800 dark:text-slate-50"
@@ -54,12 +75,21 @@ function NavItem({ item, pathname, collapsed }: NavItemProps) {
           <span className="min-w-0 flex-1 truncate text-left">
             {item.title}
           </span>
-          {item.badge ? <Badge variant="secondary">{item.badge}</Badge> : null}
-          {!item.href && !item.badge ? (
+          {badge ? (
+            <Badge className="h-4 min-w-4 justify-center rounded-full bg-red-500 px-1 py-0 text-[10px] leading-none text-white hover:bg-red-500 dark:bg-red-500">
+              {badge}
+            </Badge>
+          ) : null}
+          {!item.href && !badge ? (
             <ChevronRight className="h-4 w-4 text-slate-400" />
           ) : null}
         </>
       )}
+      {collapsed && badge ? (
+        <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold leading-none text-white">
+          {badge}
+        </span>
+      ) : null}
     </>
   );
 
@@ -67,6 +97,13 @@ function NavItem({ item, pathname, collapsed }: NavItemProps) {
     return (
       <Link
         aria-current={active ? "page" : undefined}
+        aria-label={
+          notificationBadge
+            ? `${item.title}. ${t("unreadNotifications", {
+                count: notificationCount,
+              })}`
+            : item.title
+        }
         className={className}
         href={item.href}
         title={collapsed ? item.title : undefined}
@@ -87,7 +124,14 @@ function NavItem({ item, pathname, collapsed }: NavItemProps) {
   );
 }
 
-function NavGroup({ items, label, pathname, collapsed }: NavGroupProps) {
+function NavGroup({
+  items,
+  label,
+  pathname,
+  collapsed,
+  notificationCounts,
+  notificationCountsError,
+}: NavGroupProps) {
   return (
     <div className="space-y-1">
       {!collapsed ? (
@@ -103,6 +147,8 @@ function NavGroup({ items, label, pathname, collapsed }: NavGroupProps) {
           item={item}
           key={item.title}
           pathname={pathname}
+          notificationCounts={notificationCounts}
+          notificationCountsError={notificationCountsError}
         />
       ))}
     </div>
@@ -119,6 +165,9 @@ export function AppSidebar({
   const { hasPermission, hasRole } = usePermissions();
   const pathname = usePathname();
   const { user } = useAuth();
+  const notificationCountsQuery = useUnreadNotificationCount({
+    enabled: Boolean(user),
+  });
   const storedCollapsed = useAdminUiStore((state) => state.sidebarCollapsed);
   const collapsed = collapsedOverride ?? storedCollapsed;
   const displayName = user?.full_name || user?.username || "Admin";
@@ -176,6 +225,8 @@ export function AppSidebar({
               label={section.label}
               pathname={pathname}
               collapsed={collapsed}
+              notificationCounts={notificationCountsQuery.data}
+              notificationCountsError={notificationCountsQuery.isError}
             />
           ) : null;
         })}

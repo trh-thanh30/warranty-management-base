@@ -1,4 +1,5 @@
 import { AnalyticsRepository } from '@/modules/analytics/repository/analytics.repository';
+import { GetDashboardActivationRequestsUseCase } from '@/modules/analytics/use-cases/get-dashboard-activation-requests.use-case';
 import { GetDashboardClaimsUseCase } from '@/modules/analytics/use-cases/get-dashboard-claims.use-case';
 import { GetDashboardOverviewUseCase } from '@/modules/analytics/use-cases/get-dashboard-overview.use-case';
 import { GetDashboardProductsUseCase } from '@/modules/analytics/use-cases/get-dashboard-products.use-case';
@@ -12,6 +13,7 @@ type AnalyticsRepositoryMock = {
   getTrends: jest.Mock;
   getWarranties: jest.Mock;
   getProducts: jest.Mock;
+  getActivationRequests: jest.Mock;
   getRecentActivity: jest.Mock;
 };
 
@@ -37,6 +39,7 @@ describe('Analytics use cases', () => {
       getTrends: jest.fn(),
       getWarranties: jest.fn(),
       getProducts: jest.fn(),
+      getActivationRequests: jest.fn(),
       getRecentActivity: jest.fn(),
     }) satisfies AnalyticsRepositoryMock;
 
@@ -238,6 +241,36 @@ describe('Analytics use cases', () => {
 
     expect(analyticsRepository.getProducts).toHaveBeenCalledWith();
     expect(result).toBe(products);
+  });
+
+  it('loads activation request analytics for the resolved range', async () => {
+    const analyticsRepository = createAnalyticsRepository();
+    const dateRangeService = createDateRangeService();
+    const activationRequests = {
+      total: 12,
+      createdInRange: 5,
+      pending: 2,
+      approved: 3,
+      rejected: 1,
+      activated: 4,
+      cancelled: 2,
+      byStatus: [{ status: 'PENDING' as const, count: 2 }],
+      bySource: [{ source: 'PUBLIC_WEB' as const, count: 7 }],
+    };
+    analyticsRepository.getActivationRequests.mockResolvedValue(
+      activationRequests,
+    );
+    const useCase = new GetDashboardActivationRequestsUseCase(
+      analyticsRepository as unknown as AnalyticsRepository,
+      dateRangeService,
+    );
+
+    const result = await useCase.execute({ to: '2026-07-31' });
+
+    expect(analyticsRepository.getActivationRequests).toHaveBeenCalledWith({
+      range,
+    });
+    expect(result).toBe(activationRequests);
   });
 
   it('serializes recent activity timestamps for API clients', async () => {

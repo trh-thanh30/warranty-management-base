@@ -55,9 +55,8 @@ export class NotificationController {
   }
 
   @Get('unread-count')
-  async countUnread(@User() user: AuthUser) {
-    const unread = await this.notificationService.countUnread(user.id);
-    return { unread };
+  countUnread(@User() user: AuthUser) {
+    return this.notificationService.countUnread(user.id);
   }
 
   @Get()

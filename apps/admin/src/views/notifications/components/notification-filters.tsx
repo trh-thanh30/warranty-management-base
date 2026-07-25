@@ -2,6 +2,7 @@
 
 import { Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { NOTIFICATION_TYPES } from "@repo/shared/constants";
 import { Button, Input } from "@repo/ui";
 import { SelectControl } from "@/src/components/common/select-control";
 import type {
@@ -53,26 +54,32 @@ export function NotificationFilters({
           { label: t("types.ALL"), value: "" },
           {
             label: t("types.WARRANTY_CLAIM_CREATED"),
-            value: "WARRANTY_CLAIM_CREATED",
+            value: NOTIFICATION_TYPES.WARRANTY_CLAIM_CREATED,
           },
           {
             label: t("types.WARRANTY_CLAIM_STATUS_CHANGED"),
-            value: "WARRANTY_CLAIM_STATUS_CHANGED",
+            value: NOTIFICATION_TYPES.WARRANTY_CLAIM_STATUS_CHANGED,
           },
           {
             label: t("types.WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER"),
-            value: "WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER",
+            value: NOTIFICATION_TYPES.WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER,
           },
           {
             label: t("types.WARRANTY_CLAIM_SLA_BREACHED"),
-            value: "WARRANTY_CLAIM_SLA_BREACHED",
+            value: NOTIFICATION_TYPES.WARRANTY_CLAIM_SLA_BREACHED,
           },
           {
             label: t("types.WARRANTY_ACTIVATION_REQUEST_CREATED"),
-            value: "WARRANTY_ACTIVATION_REQUEST_CREATED",
+            value: NOTIFICATION_TYPES.WARRANTY_ACTIVATION_REQUEST_CREATED,
           },
-          { label: t("types.SYSTEM_ALERT"), value: "SYSTEM_ALERT" },
-          { label: t("types.ANNOUNCEMENT"), value: "ANNOUNCEMENT" },
+          {
+            label: t("types.SYSTEM_ALERT"),
+            value: NOTIFICATION_TYPES.SYSTEM_ALERT,
+          },
+          {
+            label: t("types.ANNOUNCEMENT"),
+            value: NOTIFICATION_TYPES.ANNOUNCEMENT,
+          },
         ]}
         value={type}
       />

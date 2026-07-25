@@ -2,6 +2,7 @@ import { Permissions } from '@/common/decorators/permissions.decorator';
 import { AnalyticsRangeDto } from '@/modules/analytics/dto/analytics-range.dto';
 import { DashboardTrendsDto } from '@/modules/analytics/dto/dashboard-trends.dto';
 import { RecentActivityDto } from '@/modules/analytics/dto/recent-activity.dto';
+import { GetDashboardActivationRequestsUseCase } from '@/modules/analytics/use-cases/get-dashboard-activation-requests.use-case';
 import { GetDashboardClaimsUseCase } from '@/modules/analytics/use-cases/get-dashboard-claims.use-case';
 import { GetDashboardOverviewUseCase } from '@/modules/analytics/use-cases/get-dashboard-overview.use-case';
 import { GetDashboardProductsUseCase } from '@/modules/analytics/use-cases/get-dashboard-products.use-case';
@@ -16,6 +17,7 @@ export class AnalyticsController {
   constructor(
     private readonly getDashboardOverviewUseCase: GetDashboardOverviewUseCase,
     private readonly getDashboardClaimsUseCase: GetDashboardClaimsUseCase,
+    private readonly getDashboardActivationRequestsUseCase: GetDashboardActivationRequestsUseCase,
     private readonly getDashboardTrendsUseCase: GetDashboardTrendsUseCase,
     private readonly getDashboardWarrantiesUseCase: GetDashboardWarrantiesUseCase,
     private readonly getDashboardProductsUseCase: GetDashboardProductsUseCase,
@@ -32,6 +34,12 @@ export class AnalyticsController {
   @Permissions([permission_key.DASHBOARD_VIEW])
   claims(@Query() query: AnalyticsRangeDto) {
     return this.getDashboardClaimsUseCase.execute(query);
+  }
+
+  @Get('dashboard/activation-requests')
+  @Permissions([permission_key.DASHBOARD_VIEW])
+  activationRequests(@Query() query: AnalyticsRangeDto) {
+    return this.getDashboardActivationRequestsUseCase.execute(query);
   }
 
   @Get('dashboard/trends')

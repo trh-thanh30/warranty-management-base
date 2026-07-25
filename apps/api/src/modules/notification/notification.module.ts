@@ -6,6 +6,7 @@ import { NotificationService } from '@/modules/notification/service/notification
 import { CreateAdminNotificationUseCase } from '@/modules/notification/use-cases/create-admin-notification.use-case';
 import { CreateSystemNotificationUseCase } from '@/modules/notification/use-cases/create-system-notification.use-case';
 import { GetUserNotificationUseCase } from '@/modules/notification/use-cases/get-user-notification.use-case';
+import { GetUnreadNotificationCountUseCase } from '@/modules/notification/use-cases/get-unread-notification-count.use-case';
 import { ListUserNotificationsUseCase } from '@/modules/notification/use-cases/list-user-notifications.use-case';
 import { MarkAllNotificationsReadUseCase } from '@/modules/notification/use-cases/mark-all-notifications-read.use-case';
 import { MarkNotificationReadUseCase } from '@/modules/notification/use-cases/mark-notification-read.use-case';
@@ -23,6 +24,7 @@ import { Module } from '@nestjs/common';
     CreateSystemNotificationUseCase,
     ListUserNotificationsUseCase,
     GetUserNotificationUseCase,
+    GetUnreadNotificationCountUseCase,
     MarkNotificationReadUseCase,
     MarkAllNotificationsReadUseCase,
     PublishScheduledNotificationsUseCase,
