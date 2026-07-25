@@ -1,25 +1,32 @@
-import { product_category } from '@prisma/client';
 import {
   ArrayUnique,
   IsArray,
-  IsEnum,
+  IsBoolean,
   IsInt,
   IsObject,
   IsOptional,
   IsString,
   IsUUID,
   Length,
+  Matches,
   Max,
   Min,
 } from 'class-validator';
 
 export class CreateProductTemplateDto {
   @IsString()
+  @Length(1, 64)
+  @Matches(/^[A-Za-z0-9][A-Za-z0-9._-]*$/)
+  sku: string;
+
+  @IsString()
+  @Length(2, 180)
+  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+  slug: string;
+
+  @IsString()
   @Length(2, 160)
   name: string;
-
-  @IsEnum(product_category)
-  category: product_category;
 
   @IsUUID()
   categoryId: string;
@@ -38,7 +45,7 @@ export class CreateProductTemplateDto {
   @IsInt()
   @Min(1900)
   @Max(2100)
-  manufactureYear?: number;
+  modelYear?: number;
 
   @IsOptional()
   @IsString()
@@ -59,6 +66,10 @@ export class CreateProductTemplateDto {
   @IsOptional()
   @IsObject()
   metadata?: Record<string, unknown>;
+
+  @IsOptional()
+  @IsBoolean()
+  isPublished?: boolean;
 
   @IsOptional()
   @IsUUID()

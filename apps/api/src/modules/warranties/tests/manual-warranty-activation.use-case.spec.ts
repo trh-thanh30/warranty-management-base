@@ -1,6 +1,6 @@
 import { ConflictError } from '@/common/response';
 import { ManualWarrantyActivationUseCase } from '@/modules/warranties/use-cases/manual-warranty-activation.use-case';
-import { product_category, warranty_status } from '@prisma/client';
+import { warranty_status } from '@prisma/client';
 
 describe('ManualWarrantyActivationUseCase', () => {
   const dto = {
@@ -11,10 +11,8 @@ describe('ManualWarrantyActivationUseCase', () => {
       address: '1 Nguyen Van Linh, Da Nang',
     },
     product: {
-      name: 'Black Label Ceramic Film',
-      category: product_category.CAR,
-      brand: 'Black Label',
-      model: 'Premium',
+      templateId: 'template-id',
+      displayName: 'Film xe Nguyen Van A',
       serialNumber: 'SN-BLF-001',
     },
     warranty: {
@@ -46,21 +44,21 @@ describe('ManualWarrantyActivationUseCase', () => {
     };
     const createdProduct = {
       id: 'product-id',
+      template_id: 'template-id',
       product_code: 'PRD-2026-ABCDEF',
-      warranty_code: dto.warranty.warrantyCode,
       serial_number: dto.product.serialNumber,
-      name: dto.product.name,
-      category: dto.product.category,
-      category_id: null,
-      brand: dto.product.brand,
-      model: dto.product.model,
-      manufacture_year: null,
-      description: null,
+      display_name: dto.product.displayName,
       status: 'ACTIVE',
       metadata: { source: 'manual_warranty_activation' },
       created_at: new Date('2026-07-19T00:00:00.000Z'),
       updated_at: new Date('2026-07-19T00:00:00.000Z'),
       deleted_at: null,
+      template: {
+        id: 'template-id',
+        name: 'Black Label Ceramic Film',
+        brand: 'Black Label',
+        model: 'Premium',
+      },
       ownerships: [
         {
           id: 'ownership-id',
@@ -94,7 +92,6 @@ describe('ManualWarrantyActivationUseCase', () => {
       },
     };
     const tx = {
-      category: { findUnique: jest.fn() },
       customer: {
         create: jest.fn().mockResolvedValue(createdCustomer),
         findFirst: jest.fn().mockResolvedValue(null),
@@ -111,6 +108,15 @@ describe('ManualWarrantyActivationUseCase', () => {
           .mockResolvedValueOnce(overrides?.existingWarranty ?? null)
           .mockResolvedValueOnce(overrides?.existingSerial ?? null)
           .mockResolvedValue(null),
+      },
+      productTemplate: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'template-id',
+          is_active: true,
+        }),
+      },
+      warranty: {
+        findUnique: jest.fn().mockResolvedValue(null),
       },
     };
 
@@ -171,7 +177,8 @@ describe('ManualWarrantyActivationUseCase', () => {
     expect(tx.product.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          warranty_code: dto.warranty.warrantyCode,
+          template: { connect: { id: 'template-id' } },
+          display_name: dto.product.displayName,
           ownerships: {
             create: expect.objectContaining({
               customer: { connect: { id: 'customer-id' } },

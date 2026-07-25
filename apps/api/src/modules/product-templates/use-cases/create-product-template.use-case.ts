@@ -2,6 +2,7 @@ import { PrismaService } from '@/database/prisma/prisma.service';
 import { AssetsService } from '@/modules/assets/assets.service';
 import { CreateProductTemplateDto } from '@/modules/product-templates/dto/create-product-template.dto';
 import {
+  normalizeSku,
   resolveProductTemplateCategory,
   toTemplateJson,
   validateProductTemplateAssets,
@@ -9,6 +10,7 @@ import {
 import { toProductTemplateResponse } from '@/modules/product-templates/product-templates.types';
 import { ProductTemplatesRepository } from '@/modules/product-templates/repository/product-templates.repository';
 import { Injectable } from '@nestjs/common';
+import { ConflictError } from '@/common/response';
 
 @Injectable()
 export class CreateProductTemplateUseCase {
@@ -19,6 +21,17 @@ export class CreateProductTemplateUseCase {
   ) {}
 
   async execute(dto: CreateProductTemplateDto) {
+    const sku = normalizeSku(dto.sku);
+    const [skuConflict, slugConflict] = await Promise.all([
+      this.productTemplatesRepository.findBySku(sku),
+      this.productTemplatesRepository.findBySlug(dto.slug),
+    ]);
+    if (skuConflict) {
+      throw new ConflictError('Product template SKU already exists');
+    }
+    if (slugConflict) {
+      throw new ConflictError('Product template slug already exists');
+    }
     const category = await resolveProductTemplateCategory(
       this.prismaService,
       dto.categoryId,
@@ -50,16 +63,19 @@ export class CreateProductTemplateUseCase {
       })),
     ];
     const template = await this.productTemplatesRepository.create({
+      sku,
+      slug: dto.slug,
       name: dto.name,
-      category: dto.category,
       category_ref: { connect: { id: category.id } },
       brand: dto.brand,
       model: dto.model,
-      manufacture_year: dto.manufactureYear,
+      model_year: dto.modelYear,
       description: dto.description,
       default_warranty_duration_months: dto.defaultWarrantyDurationMonths ?? 36,
       default_warranty_terms: dto.defaultWarrantyTerms,
       metadata: toTemplateJson(dto.metadata),
+      is_published: dto.isPublished ?? false,
+      published_at: dto.isPublished ? new Date() : null,
       assets: assetCreates.length > 0 ? { create: assetCreates } : undefined,
     });
 

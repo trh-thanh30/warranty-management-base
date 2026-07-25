@@ -20,7 +20,6 @@ import { SoftDeleteProductUseCase } from '@/modules/products/use-cases/soft-dele
 import { RemoveProductAssetUseCase } from '@/modules/products/use-cases/remove-product-asset.use-case';
 import { UpdateProductAssetUseCase } from '@/modules/products/use-cases/update-product-asset.use-case';
 import { UpdateProductUseCase } from '@/modules/products/use-cases/update-product.use-case';
-import { UpdateProductPublicationUseCase } from '@/modules/products/use-cases/update-product-publication.use-case';
 import { Module } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
@@ -42,7 +41,6 @@ import { memoryStorage } from 'multer';
     GenerateWarrantyCodeUseCase,
     CreateProductUseCase,
     UpdateProductUseCase,
-    UpdateProductPublicationUseCase,
     SoftDeleteProductUseCase,
     ListProductsUseCase,
     ListPublicProductsUseCase,

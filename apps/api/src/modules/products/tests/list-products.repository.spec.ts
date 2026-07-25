@@ -133,13 +133,13 @@ describe('ProductsRepository.list', () => {
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          is_published: true,
+          template: { is: { is_published: true } },
         }),
       }),
     );
     expect(count).toHaveBeenCalledWith({
       where: expect.objectContaining({
-        is_published: true,
+        template: { is: { is_published: true } },
       }),
     });
   });
@@ -162,10 +162,15 @@ describe('ProductsRepository.list', () => {
     await repository.listPublic({ limit: 12, page: 1 });
 
     const visibilityFilter = {
-      category_ref: { is_active: true },
       deleted_at: null,
-      is_published: true,
       status: 'ACTIVE',
+      template: {
+        is: {
+          category_id: undefined,
+          category_ref: { is_active: true },
+          is_published: true,
+        },
+      },
     };
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({

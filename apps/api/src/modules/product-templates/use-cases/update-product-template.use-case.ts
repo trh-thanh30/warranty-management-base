@@ -1,9 +1,10 @@
-import { NotFoundError } from '@/common/response';
+import { ConflictError, NotFoundError } from '@/common/response';
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { AssetsService } from '@/modules/assets/assets.service';
 import { UpdateProductTemplateDto } from '@/modules/product-templates/dto/update-product-template.dto';
 import {
   resolveProductTemplateCategory,
+  normalizeSku,
   toTemplateJson,
   validateProductTemplateAssets,
 } from '@/modules/product-templates/product-template-input';
@@ -22,6 +23,20 @@ export class UpdateProductTemplateUseCase {
   async execute(id: string, dto: UpdateProductTemplateDto) {
     const existing = await this.productTemplatesRepository.findById(id);
     if (!existing) throw new NotFoundError('Product template not found');
+    const sku = dto.sku ? normalizeSku(dto.sku) : undefined;
+    if (sku && sku !== existing.sku) {
+      const conflict = await this.productTemplatesRepository.findBySku(sku);
+      if (conflict)
+        throw new ConflictError('Product template SKU already exists');
+    }
+    if (dto.slug && dto.slug !== existing.slug) {
+      const conflict = await this.productTemplatesRepository.findBySlug(
+        dto.slug,
+      );
+      if (conflict) {
+        throw new ConflictError('Product template slug already exists');
+      }
+    }
 
     const category = dto.categoryId
       ? await resolveProductTemplateCategory(this.prismaService, dto.categoryId)
@@ -38,17 +53,25 @@ export class UpdateProductTemplateUseCase {
     const template = await this.productTemplatesRepository.update(
       id,
       {
+        sku,
+        slug: dto.slug,
         name: dto.name,
-        category: dto.category,
         category_ref: category ? { connect: { id: category.id } } : undefined,
         brand: dto.brand,
         model: dto.model,
-        manufacture_year: dto.manufactureYear,
+        model_year: dto.modelYear,
         description: dto.description,
         default_warranty_duration_months: dto.defaultWarrantyDurationMonths,
         default_warranty_terms: dto.defaultWarrantyTerms,
         metadata: toTemplateJson(dto.metadata),
         is_active: dto.isActive,
+        is_published: dto.isPublished,
+        published_at:
+          dto.isPublished === undefined
+            ? undefined
+            : dto.isPublished
+              ? (existing.published_at ?? new Date())
+              : null,
       },
       {
         ...(dto.coverAssetId !== undefined

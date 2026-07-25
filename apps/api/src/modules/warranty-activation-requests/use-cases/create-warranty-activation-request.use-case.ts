@@ -17,6 +17,7 @@ import { Injectable } from '@nestjs/common';
 import {
   Prisma,
   Product,
+  ProductTemplate,
   Customer,
   Dealer,
   warranty_activation_request_source,
@@ -60,16 +61,11 @@ export class CreateWarrantyActivationRequestUseCase {
     }
 
     const warrantyCode =
-      product.warranty_code ??
       product.warranty.warranty_code ??
       (await this.generateWarrantyCodeUseCase.execute());
 
-    if (
-      product.warranty_code !== warrantyCode ||
-      product.warranty.warranty_code !== warrantyCode
-    ) {
+    if (product.warranty.warranty_code !== warrantyCode) {
       await this.productsRepository.synchronizeWarrantyCode({
-        productId: product.id,
         warrantyCode,
         warrantyId: product.warranty.id,
       });
@@ -156,12 +152,15 @@ export class CreateWarrantyActivationRequestUseCase {
           ward_name: dto.wardName.trim(),
           address_detail: dto.addressDetail.trim(),
           full_address: buildWarrantyActivationRequestFullAddress(dto),
-          product_name: optionalTrim(dto.productName) ?? product.name,
+          product_name:
+            optionalTrim(dto.productName) ??
+            product.display_name ??
+            product.template.name,
           serial_number:
             optionalTrim(dto.serialNumber) ?? product.serial_number,
-          brand: optionalTrim(dto.brand) ?? product.brand,
-          model: optionalTrim(dto.model) ?? product.model,
-          manufacture_year: dto.manufactureYear ?? product.manufacture_year,
+          brand: optionalTrim(dto.brand) ?? product.template.brand,
+          model: optionalTrim(dto.model) ?? product.template.model,
+          manufacture_year: dto.manufactureYear ?? product.template.model_year,
           note: optionalTrim(dto.note),
           metadata: this.buildActivationMetadata({
             dealer,
@@ -289,9 +288,9 @@ export class CreateWarrantyActivationRequestUseCase {
 
   private resolveCategoryConnect(
     categoryId: string | undefined,
-    product: Product & { category_id: string | null },
+    product: Product & { template: ProductTemplate },
   ) {
-    const resolvedCategoryId = categoryId ?? product.category_id;
+    const resolvedCategoryId = categoryId ?? product.template.category_id;
     return resolvedCategoryId
       ? { connect: { id: resolvedCategoryId } }
       : undefined;
@@ -299,18 +298,18 @@ export class CreateWarrantyActivationRequestUseCase {
 
   private assertProductMatchesCategory(
     categoryId: string | undefined,
-    product: Product & { category_id: string | null },
+    product: Product & { template: ProductTemplate },
   ) {
     if (!categoryId) return;
 
-    if (product.category_id !== categoryId) {
+    if (product.template.category_id !== categoryId) {
       throw new BadRequestError(
         'Product does not belong to the selected category',
         'BAD_REQUEST',
         {
           code: 'PRODUCT_CATEGORY_MISMATCH',
           categoryId,
-          productCategoryId: product.category_id,
+          productCategoryId: product.template.category_id,
         },
       );
     }

@@ -45,21 +45,16 @@ export class AssignProductOwnerUseCase {
     const warrantyCode = await this.resolveWarrantyCode(
       {
         id: product.id,
-        warranty_code: product.warranty_code ?? product.warranty.warranty_code,
+        warrantyCode: product.warranty.warranty_code,
       },
       dto,
     );
     const shouldSynchronizeWarrantyCode =
-      product.warranty_code !== warrantyCode ||
       warranty.warranty_code !== warrantyCode;
 
     const productWithOwner = await this.prismaService.$transaction(
       async (tx) => {
         if (shouldSynchronizeWarrantyCode) {
-          await tx.product.update({
-            where: { id: productId },
-            data: { warranty_code: warrantyCode },
-          });
           await tx.warranty.update({
             where: { id: warranty.id },
             data: { warranty_code: warrantyCode },
@@ -100,6 +95,12 @@ export class AssignProductOwnerUseCase {
               orderBy: { created_at: 'desc' },
             },
             warranty: true,
+            template: {
+              include: {
+                category_ref: true,
+                assets: { include: { asset: true } },
+              },
+            },
           },
         });
       },
@@ -112,10 +113,10 @@ export class AssignProductOwnerUseCase {
   }
 
   private async resolveWarrantyCode(
-    product: { id: string; warranty_code: string | null },
+    product: { id: string; warrantyCode: string | null },
     dto: AssignProductOwnerDto,
   ) {
-    if (product.warranty_code) return product.warranty_code;
+    if (product.warrantyCode) return product.warrantyCode;
 
     if (dto.autoGenerateWarrantyCode !== false) {
       return this.generateWarrantyCodeUseCase.execute();

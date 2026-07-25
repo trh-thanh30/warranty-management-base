@@ -6,7 +6,6 @@ import {
   PreparedProductImportRow,
 } from '@/modules/products/excel/product-import.validator';
 import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generate-product-code.use-case';
-import { createProductSlug } from '@/modules/products/product-slug.utils';
 import { Injectable } from '@nestjs/common';
 import { Prisma, product_status, warranty_status } from '@prisma/client';
 
@@ -60,26 +59,19 @@ export class ConfirmProductImportUseCase {
         const product = await tx.product.create({
           data: {
             product_code: productCode,
-            slug: createProductSlug(row.name, productCode),
-            warranty_code: null,
+            template: { connect: { id: row.templateId } },
             serial_number: this.blankToNull(row.serialNumber),
-            name: row.name.trim(),
-            category: row.category,
-            brand: this.blankToNull(row.brand),
-            model: this.blankToNull(row.model),
-            manufacture_year: row.manufactureYear ?? null,
-            description: this.blankToNull(row.description),
+            display_name: this.blankToNull(row.displayName),
             status: row.status ?? product_status.ACTIVE,
-            category_ref: { connect: { id: row.categoryId } },
             metadata: this.toMetadata(row),
             warranty: {
               create: {
                 warranty_code: null,
-                duration_months: row.warrantyDurationMonths ?? 36,
+                duration_months: row.templateWarrantyDurationMonths,
                 start_date: null,
                 end_date: null,
                 status: warranty_status.DRAFT,
-                terms: this.blankToNull(row.warrantyTerms),
+                terms: row.templateWarrantyTerms,
               },
             },
           },
@@ -116,15 +108,10 @@ export class ConfirmProductImportUseCase {
     row: PreparedProductImportRow,
   ): Prisma.ProductUpdateInput {
     return {
-      name: row.name.trim(),
-      category: row.category,
-      brand: this.blankToNull(row.brand),
-      model: this.blankToNull(row.model),
-      manufacture_year: row.manufactureYear ?? null,
-      description: this.blankToNull(row.description),
+      template: { connect: { id: row.templateId } },
+      display_name: this.blankToNull(row.displayName),
       status: row.status,
       serial_number: this.blankToNull(row.serialNumber),
-      category_ref: { connect: { id: row.categoryId } },
       metadata: this.toMetadata(row),
     };
   }
@@ -134,37 +121,22 @@ export class ConfirmProductImportUseCase {
     productId: string,
     row: PreparedProductImportRow,
   ) {
-    if (!row.warrantyDurationMonths && !row.warrantyTerms) {
-      return;
-    }
-
     await tx.warranty.upsert({
       where: { product_id: productId },
       create: {
         product_id: productId,
         warranty_code: null,
-        duration_months: row.warrantyDurationMonths ?? 36,
+        duration_months: row.templateWarrantyDurationMonths,
         status: warranty_status.DRAFT,
-        terms: this.blankToNull(row.warrantyTerms),
+        terms: row.templateWarrantyTerms,
       },
-      update: {
-        duration_months: row.warrantyDurationMonths ?? undefined,
-        terms:
-          row.warrantyTerms === undefined
-            ? undefined
-            : this.blankToNull(row.warrantyTerms),
-      },
+      update: {},
     });
   }
 
   private toMetadata(row: PreparedProductImportRow) {
-    const imageUrl = this.blankToNull(row.imageUrl);
     const installationPosition = this.blankToNull(row.installationPosition);
     const metadata: Record<string, string> = {};
-
-    if (imageUrl) {
-      metadata.excelImageUrl = imageUrl;
-    }
 
     if (installationPosition) {
       metadata.installationPosition = installationPosition;

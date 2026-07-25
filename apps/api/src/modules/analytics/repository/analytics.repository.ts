@@ -510,63 +510,50 @@ export class AnalyticsRepository {
   }
 
   async getProducts() {
-    const [total, byStatus, byCategory, topBrands] =
-      await this.prismaService.$transaction([
-        this.prismaService.product.count({ where: { deleted_at: null } }),
-        this.prismaService.product.groupBy({
-          by: ['status'],
-          where: { deleted_at: null },
-          orderBy: { status: 'asc' },
-          _count: { _all: true },
-        }),
-        this.prismaService.product.groupBy({
-          by: ['category_id'],
-          where: { deleted_at: null },
-          orderBy: { category_id: 'asc' },
-          _count: { _all: true },
-        }),
-        this.prismaService.product.groupBy({
-          by: ['brand'],
-          where: {
-            deleted_at: null,
-            brand: { not: null },
+    const products = await this.prismaService.product.findMany({
+      where: { deleted_at: null },
+      select: {
+        status: true,
+        template: {
+          select: {
+            brand: true,
+            category_id: true,
+            category_ref: { select: { name: true } },
           },
-          _count: { _all: true },
-          orderBy: { _count: { brand: 'desc' } },
-          take: 10,
-        }),
-      ]);
-
-    const categoryIds = byCategory
-      .map((item) => item.category_id)
-      .filter((id): id is string => Boolean(id));
-    const categories = categoryIds.length
-      ? await this.prismaService.category.findMany({
-          where: { id: { in: categoryIds } },
-          select: { id: true, name: true },
-        })
-      : [];
-    const categoryNames = new Map(
-      categories.map((category) => [category.id, category.name]),
-    );
+        },
+      },
+    });
+    const statusCounts = new Map<string, number>();
+    const categoryCounts = new Map<
+      string,
+      { categoryName: string; count: number }
+    >();
+    const brandCounts = new Map<string, number>();
+    for (const product of products) {
+      statusCounts.set(
+        product.status,
+        (statusCounts.get(product.status) ?? 0) + 1,
+      );
+      const categoryId = product.template.category_id;
+      categoryCounts.set(categoryId, {
+        categoryName: product.template.category_ref.name,
+        count: (categoryCounts.get(categoryId)?.count ?? 0) + 1,
+      });
+      const brand = product.template.brand ?? 'Unknown';
+      brandCounts.set(brand, (brandCounts.get(brand) ?? 0) + 1);
+    }
 
     return {
-      total,
-      byStatus: byStatus.map((item) => ({
-        status: item.status,
-        count: this.getGroupCount(item),
+      total: products.length,
+      byStatus: [...statusCounts].map(([status, count]) => ({ status, count })),
+      byCategory: [...categoryCounts].map(([categoryId, value]) => ({
+        categoryId,
+        ...value,
       })),
-      byCategory: byCategory.map((item) => ({
-        categoryId: item.category_id,
-        categoryName: item.category_id
-          ? (categoryNames.get(item.category_id) ?? null)
-          : null,
-        count: this.getGroupCount(item),
-      })),
-      topBrands: topBrands.map((item) => ({
-        brand: item.brand ?? 'Unknown',
-        count: this.getGroupCount(item),
-      })),
+      topBrands: [...brandCounts]
+        .sort((left, right) => right[1] - left[1])
+        .slice(0, 10)
+        .map(([brand, count]) => ({ brand, count })),
     };
   }
 

@@ -3,7 +3,6 @@ import { ListProductTemplatesDto } from '@/modules/product-templates/dto/list-pr
 import { CreateProductTemplateDto } from '@/modules/product-templates/dto/create-product-template.dto';
 import { UpdateProductTemplateDto } from '@/modules/product-templates/dto/update-product-template.dto';
 import { CreateProductTemplateUseCase } from '@/modules/product-templates/use-cases/create-product-template.use-case';
-import { CreateProductTemplateFromProductUseCase } from '@/modules/product-templates/use-cases/create-product-template-from-product.use-case';
 import { DeactivateProductTemplateUseCase } from '@/modules/product-templates/use-cases/deactivate-product-template.use-case';
 import { GetProductTemplateDetailUseCase } from '@/modules/product-templates/use-cases/get-product-template-detail.use-case';
 import { ListProductTemplatesUseCase } from '@/modules/product-templates/use-cases/list-product-templates.use-case';
@@ -28,22 +27,12 @@ export class ProductTemplatesController {
     private readonly createProductTemplateUseCase: CreateProductTemplateUseCase,
     private readonly updateProductTemplateUseCase: UpdateProductTemplateUseCase,
     private readonly deactivateProductTemplateUseCase: DeactivateProductTemplateUseCase,
-    private readonly createProductTemplateFromProductUseCase: CreateProductTemplateFromProductUseCase,
   ) {}
 
   @Get()
   @Permissions([permission_key.PRODUCT_TEMPLATE_VIEW])
   list(@Query() query: ListProductTemplatesDto) {
     return this.listProductTemplatesUseCase.execute(query);
-  }
-
-  @Post('from-product/:productId')
-  @Permissions([
-    permission_key.PRODUCT_TEMPLATE_CREATE,
-    permission_key.PRODUCT_UPDATE,
-  ])
-  createFromProduct(@Param('productId') productId: string) {
-    return this.createProductTemplateFromProductUseCase.execute(productId);
   }
 
   @Post()

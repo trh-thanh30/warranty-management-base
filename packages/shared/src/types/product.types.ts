@@ -1,7 +1,6 @@
 import type { CategorySummary } from "./category.types.ts";
 import type { PaginationQuery } from "./pagination.types.ts";
 import type { WarrantyStatus } from "./warranty.types.ts";
-import type { ProductCategory } from "../constants/catalog.ts";
 
 export type ProductStatus = "ACTIVE" | "INACTIVE" | "DELETED";
 
@@ -21,18 +20,21 @@ export type ProductAssetSummary = {
 
 export type ProductTemplateSummary = {
   id: string;
+  sku: string;
+  slug: string;
   name: string;
-  category: ProductCategory;
-  categoryId: string | null;
+  categoryId: string;
   categoryRef: CategorySummary | null;
   brand: string | null;
   model: string | null;
-  manufactureYear: number | null;
+  modelYear: number | null;
   description: string | null;
   defaultWarrantyDurationMonths: number;
   defaultWarrantyTerms: string | null;
   metadata: Record<string, unknown> | null;
   isActive: boolean;
+  isPublished: boolean;
+  publishedAt: string | null;
   productCount: number;
   assets: ProductAssetSummary[];
   createdAt: string;
@@ -45,32 +47,36 @@ export type ListProductTemplatesQuery = PaginationQuery & {
 };
 
 export type CreateProductTemplateBody = {
+  sku: string;
+  slug: string;
   name: string;
-  category: ProductCategory;
   categoryId: string;
   brand?: string;
   model?: string;
-  manufactureYear?: number;
+  modelYear?: number;
   description?: string;
   defaultWarrantyDurationMonths?: number;
   defaultWarrantyTerms?: string;
   metadata?: Record<string, unknown>;
+  isPublished?: boolean;
   coverAssetId?: string;
   galleryAssetIds?: string[];
 };
 
 export type UpdateProductTemplateBody = {
+  sku?: string;
+  slug?: string;
   name?: string;
-  category?: ProductCategory;
   categoryId?: string;
   brand?: string | null;
   model?: string | null;
-  manufactureYear?: number | null;
+  modelYear?: number | null;
   description?: string | null;
   defaultWarrantyDurationMonths?: number;
   defaultWarrantyTerms?: string | null;
   metadata?: Record<string, unknown> | null;
   isActive?: boolean;
+  isPublished?: boolean;
   coverAssetId?: string | null;
   galleryAssetIds?: string[];
 };
@@ -110,19 +116,19 @@ export type ProductWarrantySummary = {
 
 export type ProductSummary = {
   id: string;
-  templateId: string | null;
-  template: ProductTemplateSummary | null;
+  templateId: string;
+  template: ProductTemplateSummary;
   productCode: string;
   slug: string;
   warrantyCode: string | null;
   serialNumber: string | null;
+  displayName: string | null;
   name: string;
-  category: ProductCategory;
   categoryId: string | null;
   categoryRef: CategorySummary | null;
   brand: string | null;
   model: string | null;
-  manufactureYear: number | null;
+  modelYear: number | null;
   description: string | null;
   status: ProductStatus;
   isPublished: boolean;
@@ -140,7 +146,6 @@ export type ProductResponse = ProductSummary;
 
 export type ListProductsQuery = PaginationQuery & {
   search?: string;
-  category?: ProductCategory;
   categoryId?: string;
   templateId?: string;
   ownerCustomerId?: string;
@@ -152,39 +157,18 @@ export type ListProductsQuery = PaginationQuery & {
 };
 
 export type CreateProductBody = {
-  templateId?: string;
-  createTemplate?: boolean;
-  name?: string;
-  slug?: string;
-  isPublished?: boolean;
-  category?: ProductCategory;
-  categoryId?: string;
-  brand?: string;
-  model?: string;
-  manufactureYear?: number;
-  description?: string;
+  templateId: string;
+  displayName?: string;
   status?: ProductStatus;
   serialNumber?: string;
   metadata?: Record<string, unknown>;
-  coverAssetId?: string;
 };
 
 export type UpdateProductBody = {
-  name?: string;
-  slug?: string;
-  category?: ProductCategory;
-  categoryId?: string;
-  brand?: string | null;
-  model?: string | null;
-  manufactureYear?: number | null;
-  description?: string | null;
+  displayName?: string | null;
   status?: ProductStatus;
   serialNumber?: string | null;
   metadata?: Record<string, unknown> | null;
-};
-
-export type UpdateProductPublicationBody = {
-  isPublished: boolean;
 };
 
 export type PublicProductSummary = {

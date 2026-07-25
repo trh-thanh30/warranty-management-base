@@ -8,6 +8,7 @@ const warrantyInclude = {
   voided_by: true,
   product: {
     include: {
+      template: { include: { category_ref: true } },
       ownerships: {
         include: { customer: true },
         orderBy: { created_at: 'desc' as const },
@@ -47,7 +48,9 @@ export class WarrantiesRepository {
             { warranty_code: { contains: search, mode: 'insensitive' } },
             {
               product: {
-                name: { contains: search, mode: 'insensitive' },
+                template: {
+                  name: { contains: search, mode: 'insensitive' },
+                },
               },
             },
             {
@@ -132,7 +135,9 @@ export class WarrantiesRepository {
             { warranty_code: { contains: search, mode: 'insensitive' } },
             {
               product: {
-                name: { contains: search, mode: 'insensitive' },
+                template: {
+                  name: { contains: search, mode: 'insensitive' },
+                },
               },
             },
             {
@@ -214,11 +219,12 @@ export class WarrantiesRepository {
   findActiveProductByWarrantyCode(code: string) {
     return this.prismaService.product.findFirst({
       where: {
-        warranty_code: code,
+        warranty: { warranty_code: code },
         deleted_at: null,
       },
       include: {
         warranty: true,
+        template: true,
       },
     });
   }
@@ -226,7 +232,7 @@ export class WarrantiesRepository {
   findLookupMatchForCustomer(code: string, ownerUserId: string) {
     return this.prismaService.product.findFirst({
       where: {
-        warranty_code: code,
+        warranty: { warranty_code: code },
         deleted_at: null,
         ownerships: {
           some: {
@@ -237,6 +243,7 @@ export class WarrantiesRepository {
       },
       include: {
         warranty: true,
+        template: true,
       },
     });
   }
@@ -258,6 +265,7 @@ export class WarrantiesRepository {
           orderBy: { created_at: 'desc' },
         },
         warranty: true,
+        template: true,
       },
       orderBy: { created_at: 'desc' },
     });
@@ -277,6 +285,7 @@ export class WarrantiesRepository {
       },
       include: {
         warranty: true,
+        template: true,
       },
     });
   }

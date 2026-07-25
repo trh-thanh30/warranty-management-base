@@ -11,12 +11,11 @@ export type WarrantyClaimProductSummary = Pick<
   | "warrantyCode"
   | "serialNumber"
   | "name"
-  | "category"
   | "categoryId"
   | "categoryRef"
   | "brand"
   | "model"
-  | "manufactureYear"
+  | "modelYear"
   | "status"
 >;
 

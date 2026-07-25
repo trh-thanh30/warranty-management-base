@@ -1,5 +1,5 @@
 import { ConfirmProductImportUseCase } from '@/modules/products/use-cases/confirm-product-import.use-case';
-import { product_category, product_status } from '@prisma/client';
+import { product_status } from '@prisma/client';
 
 describe('ConfirmProductImportUseCase', () => {
   it('creates products from validated import rows', async () => {
@@ -15,8 +15,13 @@ describe('ConfirmProductImportUseCase', () => {
       },
     };
     const prismaService = {
-      category: {
-        findFirst: jest.fn().mockResolvedValue({ id: 'category-id' }),
+      productTemplate: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'template-id',
+          is_active: true,
+          default_warranty_duration_months: 36,
+          default_warranty_terms: 'Template terms',
+        }),
       },
       product: {
         findUnique: jest.fn().mockResolvedValue(null),
@@ -35,20 +40,12 @@ describe('ConfirmProductImportUseCase', () => {
       mode: 'upsert',
       rows: [
         {
-          brand: 'Toyota',
-          category: product_category.SPARE_PART,
-          categoryCode: 'BATTERY',
-          description: null,
-          imageUrl: 'https://example.com/product.jpg',
+          templateSku: 'BATTERY-PLUS',
+          displayName: 'SUV Battery',
           installationPosition: 'Engine bay',
-          manufactureYear: 2026,
-          model: 'Battery',
-          name: 'SUV Battery',
           productCode: null,
           serialNumber: 'SN-001',
           status: product_status.ACTIVE,
-          warrantyDurationMonths: 36,
-          warrantyTerms: null,
         },
       ],
     });
@@ -56,18 +53,17 @@ describe('ConfirmProductImportUseCase', () => {
     expect(tx.product.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          category: product_category.SPARE_PART,
-          category_ref: { connect: { id: 'category-id' } },
+          template: { connect: { id: 'template-id' } },
+          display_name: 'SUV Battery',
           metadata: {
-            excelImageUrl: 'https://example.com/product.jpg',
             installationPosition: 'Engine bay',
           },
-          name: 'SUV Battery',
           serial_number: 'SN-001',
           status: product_status.ACTIVE,
           warranty: {
             create: expect.objectContaining({
               duration_months: 36,
+              terms: 'Template terms',
             }),
           },
         }),

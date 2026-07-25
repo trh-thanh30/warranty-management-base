@@ -3,6 +3,10 @@ import { PrismaService } from '@/database/prisma/prisma.service';
 import { ProductTemplatesRepository } from '@/modules/product-templates/repository/product-templates.repository';
 import { category_type, Prisma } from '@prisma/client';
 
+export function normalizeSku(value: string) {
+  return value.trim().toUpperCase();
+}
+
 export async function resolveProductTemplateCategory(
   prismaService: PrismaService,
   categoryId: string,

@@ -1,7 +1,6 @@
 import { ExcelCellValue, ExcelColumnDefinition } from '@/common/excel';
 import { ProductExcelRow } from '@/modules/products/excel/product-excel.types';
 import { product_status } from '@prisma/client';
-import { isProductCategory, PRODUCT_CATEGORIES } from '@repo/shared/constants';
 
 export const productExcelColumns: Array<
   ExcelColumnDefinition<ProductExcelRow>
@@ -15,19 +14,20 @@ export const productExcelColumns: Array<
     parse: parseOptionalString,
   },
   {
-    key: 'name',
-    header: 'Tên sản phẩm',
+    key: 'templateSku',
+    header: 'SKU product template',
     required: true,
-    width: 34,
-    example: 'Bộ pin chính hãng',
+    width: 26,
+    example: 'BATTERY-PLUS',
+    note: 'SKU của product template đã tồn tại và đang hoạt động.',
     parse: parseRequiredString,
   },
   {
-    key: 'imageUrl',
-    header: 'URL hình ảnh',
-    width: 48,
-    example: 'https://example.com/images/product.jpg',
-    note: 'URL ảnh đại diện hoặc ảnh đầu tiên của sản phẩm. Hiện dùng để xuất dữ liệu; import ảnh từ URL sẽ xử lý ở bước confirm sau.',
+    key: 'displayName',
+    header: 'Tên hiển thị thiết bị',
+    width: 34,
+    example: 'Pin xe khách Nguyễn Văn A',
+    note: 'Không bắt buộc. Chỉ dùng khi thiết bị cụ thể cần tên hiển thị riêng.',
     parse: parseOptionalString,
   },
   {
@@ -37,44 +37,6 @@ export const productExcelColumns: Array<
     example: 'Kính lái',
     note: 'Vị trí lắp/gắn sản phẩm trên xe hoặc thiết bị.',
     parse: parseOptionalString,
-  },
-  {
-    key: 'category',
-    header: 'Danh mục legacy',
-    required: true,
-    width: 22,
-    example: PRODUCT_CATEGORIES[2],
-    note: `Giá trị hợp lệ: ${PRODUCT_CATEGORIES.join(', ')}.`,
-    parse: parseProductCategory,
-  },
-  {
-    key: 'categoryCode',
-    header: 'Mã danh mục động',
-    width: 24,
-    example: 'BATTERY',
-    note: 'Không bắt buộc. Dùng mã trong taxonomy danh mục sản phẩm.',
-    parse: parseOptionalString,
-  },
-  {
-    key: 'brand',
-    header: 'Thương hiệu',
-    width: 20,
-    example: 'Toyota',
-    parse: parseOptionalString,
-  },
-  {
-    key: 'model',
-    header: 'Mẫu',
-    width: 22,
-    example: 'Battery Plus',
-    parse: parseOptionalString,
-  },
-  {
-    key: 'manufactureYear',
-    header: 'Năm sản xuất',
-    width: 18,
-    example: 2026,
-    parse: parseOptionalYear,
   },
   {
     key: 'serialNumber',
@@ -91,28 +53,6 @@ export const productExcelColumns: Array<
     example: product_status.ACTIVE,
     note: `Giá trị hợp lệ: ${Object.values(product_status).join(', ')}.`,
     parse: parseProductStatus,
-  },
-  {
-    key: 'warrantyDurationMonths',
-    header: 'Thời hạn bảo hành (tháng)',
-    width: 24,
-    example: 36,
-    note: 'Không bắt buộc. Dùng khi bảo hành nháp cần thời hạn mặc định.',
-    parse: parseOptionalPositiveInteger,
-  },
-  {
-    key: 'warrantyTerms',
-    header: 'Điều khoản bảo hành',
-    width: 42,
-    example: 'Bảo hành tiêu chuẩn.',
-    parse: parseOptionalString,
-  },
-  {
-    key: 'description',
-    header: 'Mô tả',
-    width: 48,
-    example: 'Dòng dữ liệu import sản phẩm.',
-    parse: parseOptionalString,
   },
 ];
 
@@ -131,44 +71,6 @@ function parseOptionalString(value: ExcelCellValue) {
   }
 
   return String(value).trim() || null;
-}
-
-function parseOptionalYear(value: ExcelCellValue) {
-  if (value === null) {
-    return null;
-  }
-
-  const parsed = Number(value);
-  const currentYear = new Date().getFullYear() + 1;
-
-  if (!Number.isInteger(parsed) || parsed < 1900 || parsed > currentYear) {
-    throw new Error(`Year must be between 1900 and ${currentYear}`);
-  }
-
-  return parsed;
-}
-
-function parseOptionalPositiveInteger(value: ExcelCellValue) {
-  if (value === null) {
-    return null;
-  }
-
-  const parsed = Number(value);
-
-  if (!Number.isInteger(parsed) || parsed <= 0) {
-    throw new Error('Value must be a positive integer');
-  }
-
-  return parsed;
-}
-
-function parseProductCategory(value: ExcelCellValue) {
-  const parsed = String(value).trim().toUpperCase();
-  if (!isProductCategory(parsed)) {
-    throw new Error(`Category must be one of ${PRODUCT_CATEGORIES.join(', ')}`);
-  }
-
-  return parsed;
 }
 
 function parseProductStatus(value: ExcelCellValue) {

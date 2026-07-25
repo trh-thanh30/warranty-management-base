@@ -1,14 +1,14 @@
 import type {
+  WarrantyClaimAttachmentResponse,
+  WarrantyClaimWithRelations,
+} from '@/modules/warranty-claims/types/warranty-claim.types';
+import type {
   Asset,
   Category,
   Prisma,
   User,
   WarrantyClaimStatusHistory,
 } from '@prisma/client';
-import type {
-  WarrantyClaimAttachmentResponse,
-  WarrantyClaimWithRelations,
-} from '@/modules/warranty-claims/types/warranty-claim.types';
 
 type WarrantyClaimAttachmentAsset = Pick<
   Asset,
@@ -158,15 +158,15 @@ export function toWarrantyClaimResponse(
       ? {
           id: claim.product.id,
           productCode: claim.product.product_code,
-          warrantyCode: claim.product.warranty_code,
+          warrantyCode: claim.warranty?.warranty_code ?? null,
           serialNumber: claim.product.serial_number,
-          name: claim.product.name,
-          category: claim.product.category,
-          categoryId: claim.product.category_id,
-          categoryRef: toCategoryResponse(claim.product.category_ref),
-          brand: claim.product.brand,
-          model: claim.product.model,
-          manufactureYear: claim.product.manufacture_year,
+          displayName: claim.product.display_name,
+          name: claim.product.template?.name ?? claim.product.product_code,
+          categoryId: claim.product.template?.category_id ?? null,
+          categoryRef: toCategoryResponse(claim.product.template?.category_ref),
+          brand: claim.product.template?.brand ?? null,
+          model: claim.product.template?.model ?? null,
+          modelYear: claim.product.template?.model_year ?? null,
           status: claim.product.status,
         }
       : null,

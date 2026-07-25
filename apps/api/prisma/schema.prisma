@@ -217,7 +217,6 @@ model Category {
 
   parent                       Category?                   @relation("CategoryHierarchy", fields: [parent_id], references: [id], onDelete: SetNull)
   children                     Category[]                  @relation("CategoryHierarchy")
-  products                     Product[]
   product_templates            ProductTemplate[]
   content_pages                ContentPage[]
   warranty_activation_requests WarrantyActivationRequest[]
@@ -229,69 +228,57 @@ model Category {
 }
 
 model Product {
-  id               String           @id @default(uuid()) @db.Uuid
-  template_id      String?          @db.Uuid
-  product_code     String           @unique
-  slug             String           @unique
-  warranty_code    String?          @unique
-  serial_number    String?          @unique
-  name             String
-  category         product_category
-  category_id      String?          @db.Uuid
-  brand            String?
-  model            String?
-  manufacture_year Int?
-  description      String?
-  status           product_status   @default(ACTIVE)
-  is_published     Boolean          @default(false)
-  published_at     DateTime?
-  metadata         Json?
-  created_at       DateTime         @default(now())
-  updated_at       DateTime         @updatedAt
-  deleted_at       DateTime?
+  id            String         @id @default(uuid()) @db.Uuid
+  template_id   String         @db.Uuid
+  product_code  String         @unique
+  serial_number String?        @unique
+  display_name  String?
+  status        product_status @default(ACTIVE)
+  metadata      Json?
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+  deleted_at    DateTime?
 
-  category_ref                 Category?                   @relation(fields: [category_id], references: [id], onDelete: SetNull)
-  template                     ProductTemplate?            @relation(fields: [template_id], references: [id], onDelete: SetNull)
+  template                     ProductTemplate             @relation(fields: [template_id], references: [id], onDelete: Restrict)
   ownerships                   ProductOwnership[]
   warranty                     Warranty?
   claims                       WarrantyClaim[]
   assets                       ProductAsset[]
   warranty_activation_requests WarrantyActivationRequest[]
 
-  @@index([category])
-  @@index([category_id])
   @@index([template_id])
   @@index([status])
-  @@index([is_published, status, deleted_at])
-  @@index([warranty_code])
   @@index([serial_number])
-  @@index([name])
+  @@index([display_name])
   @@map("product")
 }
 
 model ProductTemplate {
-  id                               String           @id @default(uuid()) @db.Uuid
+  id                               String    @id @default(uuid()) @db.Uuid
+  sku                              String    @unique
+  slug                             String    @unique
   name                             String
-  category                         product_category
-  category_id                      String?          @db.Uuid
+  category_id                      String    @db.Uuid
   brand                            String?
   model                            String?
-  manufacture_year                 Int?
+  model_year                       Int?
   description                      String?
-  default_warranty_duration_months Int              @default(36)
+  default_warranty_duration_months Int       @default(36)
   default_warranty_terms           String?
   metadata                         Json?
-  is_active                        Boolean          @default(true)
-  created_at                       DateTime         @default(now())
-  updated_at                       DateTime         @updatedAt
+  is_active                        Boolean   @default(true)
+  is_published                     Boolean   @default(false)
+  published_at                     DateTime?
+  created_at                       DateTime  @default(now())
+  updated_at                       DateTime  @updatedAt
 
-  category_ref Category?              @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  category_ref Category               @relation(fields: [category_id], references: [id], onDelete: Restrict)
   products     Product[]
   assets       ProductTemplateAsset[]
 
-  @@index([category])
   @@index([category_id])
   @@index([is_active, name])
+  @@index([is_published, published_at])
   @@index([brand, model])
   @@map("product_template")
 }

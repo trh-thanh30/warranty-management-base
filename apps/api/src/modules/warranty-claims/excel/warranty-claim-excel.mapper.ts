@@ -35,7 +35,7 @@ export function toWarrantyClaimExcelRow(
     claimCode: claim.claim_code,
     warrantyCode: claim.warranty_code,
     productCode: claim.product?.product_code ?? null,
-    productName: claim.product?.name ?? null,
+    productName: claim.product?.template?.name ?? null,
     serialNumber: claim.product?.serial_number ?? null,
     requesterName: claim.requester_name,
     requesterPhone: claim.requester_phone,

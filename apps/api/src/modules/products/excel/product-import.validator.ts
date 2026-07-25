@@ -1,21 +1,17 @@
 import { ExcelRowError } from '@/common/excel';
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { ConfirmProductImportRowDto } from '@/modules/products/dto/confirm-product-import.dto';
-import { category_type } from '@prisma/client';
 
 export type PreparedProductImportRow = ConfirmProductImportRowDto & {
   action: 'create' | 'update';
-  categoryId: string;
   existingProductId: string | null;
   rowNumber: number;
+  templateId: string;
+  templateWarrantyDurationMonths: number;
+  templateWarrantyTerms: string | null;
 };
 
-type ProductImportValidationRow = Omit<
-  ConfirmProductImportRowDto,
-  'categoryCode'
-> & {
-  categoryCode?: string | null;
-};
+type ProductImportValidationRow = ConfirmProductImportRowDto;
 
 export async function prepareProductImportRows(
   prismaService: PrismaService,
@@ -32,7 +28,7 @@ export async function prepareProductImportRows(
   for (const row of rows) {
     const productCode = row.data.productCode?.trim() || null;
     const serialNumber = row.data.serialNumber?.trim() || null;
-    const categoryCode = row.data.categoryCode?.trim() || null;
+    const templateSku = row.data.templateSku?.trim().toUpperCase() || null;
 
     if (productCode) {
       if (seenProductCodes.has(productCode)) {
@@ -56,7 +52,7 @@ export async function prepareProductImportRows(
       seenSerialNumbers.add(serialNumber);
     }
 
-    const [existingProduct, productWithSerial, category] = await Promise.all([
+    const [existingProduct, productWithSerial, template] = await Promise.all([
       productCode
         ? prismaService.product.findUnique({
             where: { product_code: productCode },
@@ -69,13 +65,17 @@ export async function prepareProductImportRows(
             select: { id: true, product_code: true },
           })
         : null,
-      categoryCode
-        ? prismaService.category.findFirst({
+      templateSku
+        ? prismaService.productTemplate.findUnique({
             where: {
-              code: categoryCode,
-              type: category_type.PRODUCT,
+              sku: templateSku,
             },
-            select: { id: true },
+            select: {
+              id: true,
+              is_active: true,
+              default_warranty_duration_months: true,
+              default_warranty_terms: true,
+            },
           })
         : null,
     ]);
@@ -91,27 +91,30 @@ export async function prepareProductImportRows(
       });
     }
 
-    if (!categoryCode) {
+    if (!templateSku) {
       errors.push({
         rowNumber: row.rowNumber,
-        field: 'categoryCode',
-        message: 'Mã danh mục động là bắt buộc',
+        field: 'templateSku',
+        message: 'SKU của product template là bắt buộc',
       });
-    } else if (!category) {
+    } else if (!template || !template.is_active) {
       errors.push({
         rowNumber: row.rowNumber,
-        field: 'categoryCode',
-        message: 'Không tìm thấy mã danh mục động',
+        field: 'templateSku',
+        message: 'Không tìm thấy product template đang hoạt động',
       });
     }
 
     preparedRows.push({
       ...row.data,
       action: existingProduct ? 'update' : 'create',
-      categoryCode: categoryCode ?? '',
-      categoryId: category?.id ?? '',
       existingProductId: existingProduct?.id ?? null,
       rowNumber: row.rowNumber,
+      templateSku: templateSku ?? '',
+      templateId: template?.id ?? '',
+      templateWarrantyDurationMonths:
+        template?.default_warranty_duration_months ?? 36,
+      templateWarrantyTerms: template?.default_warranty_terms ?? null,
     });
   }
 

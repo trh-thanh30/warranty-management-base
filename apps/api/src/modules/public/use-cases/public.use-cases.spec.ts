@@ -44,9 +44,12 @@ describe('Public use cases', () => {
       submitted_at: new Date('2026-07-03T00:00:00.000Z'),
       resolved_at: null,
       product: {
-        name: 'May bom',
-        brand: 'UKG',
-        model: 'A1',
+        display_name: null,
+        template: {
+          name: 'May bom',
+          brand: 'UKG',
+          model: 'A1',
+        },
       },
       service_center: null,
     });

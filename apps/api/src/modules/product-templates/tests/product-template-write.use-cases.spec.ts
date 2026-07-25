@@ -1,7 +1,6 @@
 import { CreateProductTemplateUseCase } from '@/modules/product-templates/use-cases/create-product-template.use-case';
-import { CreateProductTemplateFromProductUseCase } from '@/modules/product-templates/use-cases/create-product-template-from-product.use-case';
 import { UpdateProductTemplateUseCase } from '@/modules/product-templates/use-cases/update-product-template.use-case';
-import { category_type, product_category } from '@prisma/client';
+import { category_type } from '@prisma/client';
 
 jest.mock('@/modules/assets/assets.service', () => ({
   AssetsService: class AssetsService {},
@@ -9,18 +8,21 @@ jest.mock('@/modules/assets/assets.service', () => ({
 
 const templateRecord = {
   id: 'template-id',
+  sku: 'PPF-X10',
+  slug: 'ppf-x10',
   name: 'PPF X10',
-  category: product_category.ACCESSORY,
   category_id: 'category-id',
   category_ref: null,
   brand: '3M',
   model: 'X10',
-  manufacture_year: null,
+  model_year: null,
   description: null,
   default_warranty_duration_months: 36,
   default_warranty_terms: null,
   metadata: null,
   is_active: true,
+  is_published: false,
+  published_at: null,
   created_at: new Date('2026-07-25T00:00:00.000Z'),
   updated_at: new Date('2026-07-25T00:00:00.000Z'),
   assets: [],
@@ -30,6 +32,8 @@ const templateRecord = {
 describe('ProductTemplate write use cases', () => {
   it('creates a reusable template with validated image assets', async () => {
     const repository = {
+      findBySku: jest.fn().mockResolvedValue(null),
+      findBySlug: jest.fn().mockResolvedValue(null),
       findImageAssets: jest
         .fn()
         .mockResolvedValue([{ id: 'cover-id' }, { id: 'gallery-id' }]),
@@ -49,8 +53,9 @@ describe('ProductTemplate write use cases', () => {
     );
 
     await useCase.execute({
+      sku: ' ppf-x10 ',
+      slug: 'ppf-x10',
       name: 'PPF X10',
-      category: product_category.ACCESSORY,
       categoryId: 'category-id',
       coverAssetId: 'cover-id',
       galleryAssetIds: ['gallery-id'],
@@ -58,6 +63,7 @@ describe('ProductTemplate write use cases', () => {
 
     expect(repository.create).toHaveBeenCalledWith(
       expect.objectContaining({
+        sku: 'PPF-X10',
         assets: {
           create: [
             expect.objectContaining({ role: 'COVER' }),
@@ -105,23 +111,5 @@ describe('ProductTemplate write use cases', () => {
     expect(assetsService.deleteAssetIfUnreferenced).toHaveBeenCalledWith(
       'old-cover-id',
     );
-  });
-
-  it('creates and links a template from a legacy product snapshot', async () => {
-    const repository = {
-      findProductTemplateSource: jest.fn().mockResolvedValue({
-        id: 'product-id',
-        template_id: null,
-      }),
-      createFromProduct: jest.fn().mockResolvedValue(templateRecord),
-    };
-    const useCase = new CreateProductTemplateFromProductUseCase(
-      repository as never,
-      { enrichAssetUrl: jest.fn() } as never,
-    );
-
-    await useCase.execute('product-id');
-
-    expect(repository.createFromProduct).toHaveBeenCalledWith('product-id');
   });
 });

@@ -1,6 +1,5 @@
 import {
   Asset,
-  Category,
   Customer,
   Product,
   ProductAsset,
@@ -14,34 +13,10 @@ import {
 
 type ProductWithRelations = Product & {
   assets?: Array<ProductAsset & { asset: Asset }>;
-  category_ref?: Category | null;
   ownerships?: Array<ProductOwnership & { customer?: Customer }>;
   warranty?: Warranty | null;
   template?: ProductTemplateWithRelations | null;
 };
-
-function toCategorySummary(category: Category | null | undefined) {
-  if (!category) {
-    return null;
-  }
-
-  return {
-    id: category.id,
-    type: category.type,
-    code: category.code,
-    slug: category.slug,
-    name: category.name,
-    description: category.description,
-    parentId: category.parent_id,
-    icon: category.icon,
-    imageUrl: category.image_url,
-    order: category.order,
-    isActive: category.is_active,
-    metadata: category.metadata as Record<string, unknown> | null,
-    createdAt: category.created_at,
-    updatedAt: category.updated_at,
-  };
-}
 
 export function toProductResponse(
   product: ProductWithRelations,
@@ -74,23 +49,22 @@ export function toProductResponse(
     templateId: product.template_id,
     template: templateResponse,
     productCode: product.product_code,
-    slug: product.slug,
-    warrantyCode: product.warranty_code,
+    slug: templateResponse?.slug ?? '',
+    warrantyCode: product.warranty?.warranty_code ?? null,
     serialNumber: product.serial_number,
-    name: templateResponse?.name ?? product.name,
-    category: templateResponse?.category ?? product.category,
-    categoryId: templateResponse?.categoryId ?? product.category_id,
-    categoryRef:
-      templateResponse?.categoryRef ?? toCategorySummary(product.category_ref),
-    brand: templateResponse?.brand ?? product.brand,
-    model: templateResponse?.model ?? product.model,
-    manufactureYear:
-      templateResponse?.manufactureYear ?? product.manufacture_year,
-    description: templateResponse?.description ?? product.description,
+    displayName: product.display_name,
+    name:
+      templateResponse?.name ?? product.display_name ?? product.product_code,
+    categoryId: templateResponse?.categoryId ?? null,
+    categoryRef: templateResponse?.categoryRef ?? null,
+    brand: templateResponse?.brand ?? null,
+    model: templateResponse?.model ?? null,
+    modelYear: templateResponse?.modelYear ?? null,
+    description: templateResponse?.description ?? null,
     status: product.status,
     metadata: effectiveMetadata,
-    isPublished: product.is_published,
-    publishedAt: product.published_at,
+    isPublished: templateResponse?.isPublished ?? false,
+    publishedAt: templateResponse?.publishedAt ?? null,
     createdAt: product.created_at,
     updatedAt: product.updated_at,
     deletedAt: product.deleted_at,
@@ -170,29 +144,30 @@ export function toPublicProductSummary(
   product: ProductWithRelations,
   resolveAssetUrl: (asset: Asset) => string = (asset) => asset.path,
 ) {
-  const cover = product.assets?.find((asset) => asset.role === 'COVER');
-  const metadata = product.metadata as Record<string, unknown> | null;
+  const template = product.template;
+  const cover = template?.assets?.find((asset) => asset.role === 'COVER');
+  const metadata = template?.metadata as Record<string, unknown> | null;
 
   return {
-    id: product.id,
+    id: template?.id ?? product.id,
     productCode: product.product_code,
-    slug: product.slug,
-    name: product.name,
-    categoryId: product.category_id,
-    category: product.category_ref
+    slug: template?.slug ?? '',
+    name: template?.name ?? product.display_name ?? product.product_code,
+    categoryId: template?.category_id ?? null,
+    category: template?.category_ref
       ? {
-          id: product.category_ref.id,
-          slug: product.category_ref.slug,
-          name: product.category_ref.name,
+          id: template.category_ref.id,
+          slug: template.category_ref.slug,
+          name: template.category_ref.name,
         }
       : null,
-    brand: product.brand,
-    model: product.model,
-    description: product.description,
+    brand: template?.brand ?? null,
+    model: template?.model ?? null,
+    description: template?.description ?? null,
     coverImageUrl: cover ? resolveAssetUrl(cover.asset) : null,
     specifications: toPublicSpecifications(metadata?.specifications),
     warrantyDurationMonths: product.warranty?.duration_months ?? null,
-    publishedAt: product.published_at!,
+    publishedAt: template?.published_at ?? product.created_at,
   };
 }
 

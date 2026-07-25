@@ -17,8 +17,9 @@ export function toProductTemplateResponse(
 ) {
   return {
     id: template.id,
+    sku: template.sku,
+    slug: template.slug,
     name: template.name,
-    category: template.category,
     categoryId: template.category_id,
     categoryRef: template.category_ref
       ? {
@@ -43,12 +44,14 @@ export function toProductTemplateResponse(
       : null,
     brand: template.brand,
     model: template.model,
-    manufactureYear: template.manufacture_year,
+    modelYear: template.model_year,
     description: template.description,
     defaultWarrantyDurationMonths: template.default_warranty_duration_months,
     defaultWarrantyTerms: template.default_warranty_terms,
     metadata: template.metadata as Record<string, unknown> | null,
     isActive: template.is_active,
+    isPublished: template.is_published,
+    publishedAt: template.published_at,
     productCount: template._count?.products ?? 0,
     assets:
       template.assets?.map((templateAsset) => ({

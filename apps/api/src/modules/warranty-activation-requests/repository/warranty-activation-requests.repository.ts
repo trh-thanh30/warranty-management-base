@@ -244,8 +244,10 @@ export class WarrantyActivationRequestsRepository {
         );
       }
 
-      const product = await tx.product.findUnique({
-        where: { warranty_code: request.warranty_code },
+      const product = await tx.product.findFirst({
+        where: {
+          warranty: { warranty_code: request.warranty_code },
+        },
         include: { warranty: true },
       });
 

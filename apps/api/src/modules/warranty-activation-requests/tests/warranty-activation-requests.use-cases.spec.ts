@@ -576,12 +576,15 @@ const baseRequest = {
 };
 
 const baseDraftProduct = {
-  brand: 'Black Label',
-  category_id: 'category-id',
   id: 'product-id',
-  manufacture_year: 2026,
-  model: 'Premium',
-  name: 'Black Label Films',
+  display_name: null,
+  template: {
+    brand: 'Black Label',
+    category_id: 'category-id',
+    model: 'Premium',
+    model_year: 2026,
+    name: 'Black Label Films',
+  },
   ownerships: [
     {
       customer: {
@@ -592,7 +595,6 @@ const baseDraftProduct = {
     },
   ],
   serial_number: 'SN-BLF-001',
-  warranty_code: 'WM-2026-ABC123',
   warranty: {
     id: 'warranty-id',
     status: warranty_status.DRAFT,

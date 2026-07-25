@@ -6,19 +6,13 @@ import {
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { GenerateCustomerCodeUseCase } from '@/modules/customers/use-cases/generate-customer-code.use-case';
 import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generate-product-code.use-case';
-import { createProductSlug } from '@/modules/products/product-slug.utils';
 import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { IssueWarrantyCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-certificate.use-case';
 import { ManualWarrantyActivationDto } from '@/modules/warranties/dto/manual-warranty-activation.dto';
 import { WarrantyLifecycleService } from '@/modules/warranties/services/warranty-lifecycle.service';
 import { toWarrantyResponse } from '@/modules/warranties/warranties.types';
 import { Injectable } from '@nestjs/common';
-import {
-  category_type,
-  Prisma,
-  product_status,
-  warranty_status,
-} from '@prisma/client';
+import { Prisma, product_status, warranty_status } from '@prisma/client';
 
 const manualActivationProductInclude = {
   ownerships: {
@@ -26,6 +20,7 @@ const manualActivationProductInclude = {
     orderBy: { created_at: 'desc' },
   },
   warranty: true,
+  template: true,
 } satisfies Prisma.ProductInclude;
 
 type ManualActivationProduct = Prisma.ProductGetPayload<{
@@ -63,8 +58,6 @@ export class ManualWarrantyActivationUseCase {
 
     const productWithRelations = await this.prismaService.$transaction(
       async (tx) => {
-        await this.ensureCategoryExists(tx, dto.product.categoryId);
-
         const customer = await this.resolveCustomer(tx, {
           address: dto.customer.address.trim(),
           email,
@@ -75,7 +68,7 @@ export class ManualWarrantyActivationUseCase {
         const existingProduct = dto.product.id
           ? await tx.product.findUnique({
               where: { id: dto.product.id },
-              include: { warranty: true },
+              include: { warranty: true, template: true },
             })
           : null;
 
@@ -88,7 +81,7 @@ export class ManualWarrantyActivationUseCase {
 
         const warrantyCode =
           requestedWarrantyCode ??
-          existingProduct?.warranty_code ??
+          existingProduct?.warranty?.warranty_code ??
           (await this.generateWarrantyCodeUseCase.execute(new Date(), tx));
 
         await this.ensureProductInputsAvailable(tx, dto, warrantyCode);
@@ -118,15 +111,8 @@ export class ManualWarrantyActivationUseCase {
           productWithRelations = await tx.product.update({
             where: { id: existingProduct.id },
             data: {
-              warranty_code: warrantyCode,
               serial_number: optionalText(dto.product.serialNumber),
-              name: dto.product.name.trim(),
-              category: dto.product.category,
-              category_id: optionalText(dto.product.categoryId),
-              brand: optionalText(dto.product.brand),
-              model: optionalText(dto.product.model),
-              manufacture_year: dto.product.manufactureYear,
-              description: optionalText(dto.product.description),
+              display_name: optionalText(dto.product.displayName),
               status: product_status.ACTIVE,
               ownerships: {
                 create: {
@@ -154,6 +140,12 @@ export class ManualWarrantyActivationUseCase {
             include: manualActivationProductInclude,
           });
         } else {
+          const template = await tx.productTemplate.findFirst({
+            where: { id: dto.product.templateId, is_active: true },
+          });
+          if (!template) {
+            throw new NotFoundError('Product template not found');
+          }
           const productCode = await this.generateProductCodeUseCase.execute(
             new Date(),
             tx,
@@ -162,16 +154,9 @@ export class ManualWarrantyActivationUseCase {
           productWithRelations = await tx.product.create({
             data: {
               product_code: productCode,
-              slug: createProductSlug(dto.product.name, productCode),
-              warranty_code: warrantyCode,
               serial_number: optionalText(dto.product.serialNumber),
-              name: dto.product.name.trim(),
-              category: dto.product.category,
-              category_id: optionalText(dto.product.categoryId),
-              brand: optionalText(dto.product.brand),
-              model: optionalText(dto.product.model),
-              manufacture_year: dto.product.manufactureYear,
-              description: optionalText(dto.product.description),
+              display_name: optionalText(dto.product.displayName),
+              template: { connect: { id: template.id } },
               status: product_status.ACTIVE,
               metadata: {
                 source: 'manual_warranty_activation',
@@ -246,12 +231,12 @@ export class ManualWarrantyActivationUseCase {
       product: {
         id: productWithRelations.id,
         productCode: productWithRelations.product_code,
-        warrantyCode: productWithRelations.warranty_code,
+        warrantyCode: warranty.warranty_code,
+        displayName: productWithRelations.display_name,
         serialNumber: productWithRelations.serial_number,
-        name: productWithRelations.name,
-        category: productWithRelations.category,
-        brand: productWithRelations.brand,
-        model: productWithRelations.model,
+        name: productWithRelations.template.name,
+        brand: productWithRelations.template.brand,
+        model: productWithRelations.template.model,
       },
       warranty: toWarrantyResponse(warranty),
     };
@@ -263,7 +248,7 @@ export class ManualWarrantyActivationUseCase {
     warrantyCode: string,
   ) {
     const [existingWarrantyCode, existingSerial] = await Promise.all([
-      tx.product.findUnique({
+      tx.warranty.findUnique({
         where: { warranty_code: warrantyCode },
       }),
       optionalText(dto.product.serialNumber)
@@ -275,7 +260,7 @@ export class ManualWarrantyActivationUseCase {
 
     if (
       existingWarrantyCode &&
-      (!dto.product.id || existingWarrantyCode.id !== dto.product.id)
+      (!dto.product.id || existingWarrantyCode.product_id !== dto.product.id)
     ) {
       throw new ConflictError('Warranty code already exists');
     }
@@ -285,21 +270,6 @@ export class ManualWarrantyActivationUseCase {
       (!dto.product.id || existingSerial.id !== dto.product.id)
     ) {
       throw new ConflictError('Serial number already exists');
-    }
-  }
-
-  private async ensureCategoryExists(
-    tx: Prisma.TransactionClient,
-    categoryId?: string,
-  ) {
-    if (!categoryId) return;
-
-    const category = await tx.category.findUnique({
-      where: { id: categoryId },
-    });
-
-    if (!category || category.type !== category_type.PRODUCT) {
-      throw new NotFoundError('Product category not found');
     }
   }
 
