@@ -23,6 +23,9 @@ describe('AssetsService deletion', () => {
     productAsset: {
       count: jest.fn(),
     },
+    productTemplateAsset: {
+      count: jest.fn(),
+    },
   };
   const uploadAssetService = {
     delete: jest.fn(),
@@ -39,6 +42,7 @@ describe('AssetsService deletion', () => {
     prisma.asset.delete.mockResolvedValue(asset);
     prisma.assetLink.count.mockResolvedValue(0);
     prisma.productAsset.count.mockResolvedValue(0);
+    prisma.productTemplateAsset.count.mockResolvedValue(0);
   });
 
   it('deletes an entity asset when it has no other references', async () => {
@@ -110,6 +114,20 @@ describe('AssetsService deletion', () => {
 
   it('refuses direct deletion while an asset is linked to a product', async () => {
     prisma.productAsset.count.mockResolvedValue(1);
+    const service = new AssetsService(
+      prisma as never,
+      uploadAssetService as never,
+    );
+
+    await expect(service.deleteAsset(asset.id, user as never)).rejects.toThrow(
+      'Asset is currently in use',
+    );
+
+    expect(uploadAssetService.delete).not.toHaveBeenCalled();
+  });
+
+  it('refuses deletion while an asset is linked to a product template', async () => {
+    prisma.productTemplateAsset.count.mockResolvedValue(1);
     const service = new AssetsService(
       prisma as never,
       uploadAssetService as never,

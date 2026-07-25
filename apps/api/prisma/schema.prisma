@@ -55,9 +55,10 @@ model Asset {
   created_at     DateTime          @default(now())
   updated_at     DateTime          @updatedAt
 
-  uploaded_by    User?          @relation(fields: [uploaded_by_id], references: [id])
-  links          AssetLink[]
-  product_assets ProductAsset[]
+  uploaded_by             User?                  @relation(fields: [uploaded_by_id], references: [id])
+  links                   AssetLink[]
+  product_assets          ProductAsset[]
+  product_template_assets ProductTemplateAsset[]
 
   @@index([access_type])
   @@index([type])
@@ -217,6 +218,7 @@ model Category {
   parent                       Category?                   @relation("CategoryHierarchy", fields: [parent_id], references: [id], onDelete: SetNull)
   children                     Category[]                  @relation("CategoryHierarchy")
   products                     Product[]
+  product_templates            ProductTemplate[]
   content_pages                ContentPage[]
   warranty_activation_requests WarrantyActivationRequest[]
 
@@ -228,6 +230,7 @@ model Category {
 
 model Product {
   id               String           @id @default(uuid()) @db.Uuid
+  template_id      String?          @db.Uuid
   product_code     String           @unique
   warranty_code    String?          @unique
   serial_number    String?          @unique
@@ -245,6 +248,7 @@ model Product {
   deleted_at       DateTime?
 
   category_ref                 Category?                   @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  template                     ProductTemplate?            @relation(fields: [template_id], references: [id], onDelete: SetNull)
   ownerships                   ProductOwnership[]
   warranty                     Warranty?
   claims                       WarrantyClaim[]
@@ -253,11 +257,58 @@ model Product {
 
   @@index([category])
   @@index([category_id])
+  @@index([template_id])
   @@index([status])
   @@index([warranty_code])
   @@index([serial_number])
   @@index([name])
   @@map("product")
+}
+
+model ProductTemplate {
+  id                               String           @id @default(uuid()) @db.Uuid
+  name                             String
+  category                         product_category
+  category_id                      String?          @db.Uuid
+  brand                            String?
+  model                            String?
+  manufacture_year                 Int?
+  description                      String?
+  default_warranty_duration_months Int              @default(36)
+  default_warranty_terms           String?
+  metadata                         Json?
+  is_active                        Boolean          @default(true)
+  created_at                       DateTime         @default(now())
+  updated_at                       DateTime         @updatedAt
+
+  category_ref Category?              @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  products     Product[]
+  assets       ProductTemplateAsset[]
+
+  @@index([category])
+  @@index([category_id])
+  @@index([is_active, name])
+  @@index([brand, model])
+  @@map("product_template")
+}
+
+model ProductTemplateAsset {
+  id                  String             @id @default(uuid()) @db.Uuid
+  product_template_id String             @db.Uuid
+  asset_id            String             @db.Uuid
+  role                product_asset_role @default(GALLERY)
+  sort_order          Int                @default(0)
+  alt_text            String?
+  created_at          DateTime           @default(now())
+  updated_at          DateTime           @updatedAt
+
+  product_template ProductTemplate @relation(fields: [product_template_id], references: [id], onDelete: Cascade)
+  asset            Asset           @relation(fields: [asset_id], references: [id], onDelete: Cascade)
+
+  @@unique([product_template_id, asset_id])
+  @@index([product_template_id, role, sort_order])
+  @@index([asset_id])
+  @@map("product_template_asset")
 }
 
 model ProductAsset {
@@ -616,6 +667,10 @@ enum permission_key {
   PRODUCT_UPDATE
   PRODUCT_DELETE
   PRODUCT_ASSIGN_OWNER
+
+  PRODUCT_TEMPLATE_VIEW
+  PRODUCT_TEMPLATE_CREATE
+  PRODUCT_TEMPLATE_UPDATE
 
   WARRANTY_VIEW
   WARRANTY_CREATE

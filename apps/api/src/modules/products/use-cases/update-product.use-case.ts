@@ -33,12 +33,13 @@ export class UpdateProductUseCase {
       }
     }
 
+    const ownsSharedFields = !existingProduct.template_id;
     const categoryRef =
-      dto.categoryId === undefined
-        ? null
-        : await this.resolveProductCategory(dto.categoryId);
+      ownsSharedFields && dto.categoryId !== undefined
+        ? await this.resolveProductCategory(dto.categoryId)
+        : null;
 
-    if (dto.description !== undefined) {
+    if (ownsSharedFields && dto.description !== undefined) {
       for (const url of getRemovedMediaUrls(
         existingProduct.description ?? '',
         dto.description ?? '',
@@ -51,18 +52,20 @@ export class UpdateProductUseCase {
     }
 
     const product = await this.productsRepository.update(id, {
-      name: dto.name,
-      category: dto.category,
-      brand: dto.brand,
-      model: dto.model,
-      manufacture_year: dto.manufactureYear,
-      description: dto.description,
+      name: ownsSharedFields ? dto.name : undefined,
+      category: ownsSharedFields ? dto.category : undefined,
+      brand: ownsSharedFields ? dto.brand : undefined,
+      model: ownsSharedFields ? dto.model : undefined,
+      manufacture_year: ownsSharedFields ? dto.manufactureYear : undefined,
+      description: ownsSharedFields ? dto.description : undefined,
       status: dto.status,
       serial_number: dto.serialNumber,
       category_ref: categoryRef
         ? { connect: { id: categoryRef.id } }
         : undefined,
-      metadata: dto.metadata as Prisma.InputJsonValue | undefined,
+      metadata: ownsSharedFields
+        ? (dto.metadata as Prisma.InputJsonValue | undefined)
+        : toPhysicalProductMetadata(existingProduct.metadata, dto.metadata),
     });
 
     return toProductResponse(
@@ -82,4 +85,27 @@ export class UpdateProductUseCase {
 
     return category;
   }
+}
+
+function toPhysicalProductMetadata(
+  existingMetadata: Prisma.JsonValue,
+  requestedMetadata: Record<string, unknown> | null | undefined,
+): Prisma.InputJsonValue | undefined {
+  if (requestedMetadata === undefined) return undefined;
+
+  const next = isRecord(existingMetadata) ? { ...existingMetadata } : {};
+  const installationPosition = requestedMetadata?.installationPosition;
+  if (
+    typeof installationPosition === 'string' &&
+    installationPosition.trim().length > 0
+  ) {
+    next.installationPosition = installationPosition.trim();
+  } else {
+    delete next.installationPosition;
+  }
+  return next;
+}
+
+function isRecord(value: unknown): value is Record<string, Prisma.JsonValue> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }

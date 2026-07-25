@@ -11,6 +11,7 @@ describe('AttachProductAssetUseCase', () => {
       findProduct: jest.fn().mockResolvedValue({
         id: 'product-id',
         deleted_at: null,
+        template_id: null,
       }),
       findAsset: jest.fn().mockResolvedValue({
         id: 'new-asset-id',
@@ -56,5 +57,35 @@ describe('AttachProductAssetUseCase', () => {
         url: 'https://cdn.example.com/products/cover.jpg',
       }),
     );
+  });
+
+  it('rejects shared media on a product linked to a template', async () => {
+    const repository = {
+      findProduct: jest.fn().mockResolvedValue({
+        id: 'product-id',
+        deleted_at: null,
+        template_id: 'template-id',
+      }),
+      findAsset: jest.fn().mockResolvedValue({
+        id: 'asset-id',
+        type: asset_type.IMAGE,
+        is_deleted: false,
+      }),
+      attach: jest.fn(),
+    };
+    const useCase = new AttachProductAssetUseCase(
+      repository as never,
+      {} as never,
+    );
+
+    await expect(
+      useCase.execute('product-id', {
+        assetId: 'asset-id',
+        role: product_asset_role.COVER,
+      }),
+    ).rejects.toThrow(
+      'Template-owned product media must be updated on the product template',
+    );
+    expect(repository.attach).not.toHaveBeenCalled();
   });
 });

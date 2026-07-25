@@ -15,6 +15,8 @@ export interface NavigationItem {
   icon: ComponentType<{ className?: string }>;
   badge?: string;
   requiredPermission?: PermissionKey;
+  permissionHrefs?: Array<{ permission: PermissionKey; href: string }>;
+  requiredAnyPermissions?: PermissionKey[];
   requiredRole?: Exclude<AuthUserRole, null>;
 }
 
@@ -27,6 +29,8 @@ export interface TopNavigationItem {
   title: string;
   href: string;
   requiredPermission?: PermissionKey;
+  permissionHrefs?: Array<{ permission: PermissionKey; href: string }>;
+  requiredAnyPermissions?: PermissionKey[];
   requiredRole?: Exclude<AuthUserRole, null>;
 }
 

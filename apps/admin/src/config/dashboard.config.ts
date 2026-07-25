@@ -58,8 +58,22 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
           {
             title: t("items.products"),
             href: "/products",
+            activeHrefs: ["/product-templates"],
             icon: Package,
-            requiredPermission: PERMISSIONS.PRODUCT_VIEW,
+            permissionHrefs: [
+              {
+                permission: PERMISSIONS.PRODUCT_VIEW,
+                href: "/products",
+              },
+              {
+                permission: PERMISSIONS.PRODUCT_TEMPLATE_VIEW,
+                href: "/product-templates",
+              },
+            ],
+            requiredAnyPermissions: [
+              PERMISSIONS.PRODUCT_VIEW,
+              PERMISSIONS.PRODUCT_TEMPLATE_VIEW,
+            ],
           },
           {
             title: t("items.warranties"),
@@ -142,7 +156,20 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
       {
         title: t("items.products"),
         href: "/products",
-        requiredPermission: PERMISSIONS.PRODUCT_VIEW,
+        permissionHrefs: [
+          {
+            permission: PERMISSIONS.PRODUCT_VIEW,
+            href: "/products",
+          },
+          {
+            permission: PERMISSIONS.PRODUCT_TEMPLATE_VIEW,
+            href: "/product-templates",
+          },
+        ],
+        requiredAnyPermissions: [
+          PERMISSIONS.PRODUCT_VIEW,
+          PERMISSIONS.PRODUCT_TEMPLATE_VIEW,
+        ],
       },
       {
         title: t("items.warranties"),

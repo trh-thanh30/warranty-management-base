@@ -9,6 +9,15 @@ const productInclude = {
     orderBy: [{ role: 'asc' as const }, { sort_order: 'asc' as const }],
   },
   category_ref: true,
+  template: {
+    include: {
+      assets: {
+        include: { asset: true },
+        orderBy: [{ role: 'asc' as const }, { sort_order: 'asc' as const }],
+      },
+      category_ref: true,
+    },
+  },
   ownerships: {
     include: { customer: true },
     orderBy: { created_at: 'desc' as const },
@@ -120,6 +129,7 @@ export class ProductsRepository {
     search?: string;
     category?: string;
     categoryId?: string;
+    templateId?: string;
     ownerCustomerId?: string;
     status?: product_status;
     warrantyStatus?: warranty_status;
@@ -142,8 +152,8 @@ export class ProductsRepository {
     } satisfies Record<string, keyof Prisma.ProductOrderByWithRelationInput>;
     const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
     const where: Prisma.ProductWhereInput = {
-      category: filters.category as never,
-      category_id: filters.categoryId,
+      AND: buildEffectiveCatalogueFilters(filters),
+      template_id: filters.templateId,
       ownerships: filters.ownerCustomerId
         ? {
             some: {
@@ -164,6 +174,17 @@ export class ProductsRepository {
             { serial_number: { contains: search, mode: 'insensitive' } },
             { brand: { contains: search, mode: 'insensitive' } },
             { model: { contains: search, mode: 'insensitive' } },
+            {
+              template: {
+                is: {
+                  OR: [
+                    { name: { contains: search, mode: 'insensitive' } },
+                    { brand: { contains: search, mode: 'insensitive' } },
+                    { model: { contains: search, mode: 'insensitive' } },
+                  ],
+                },
+              },
+            },
             {
               ownerships: {
                 some: {
@@ -201,6 +222,7 @@ export class ProductsRepository {
     search?: string;
     category?: string;
     categoryId?: string;
+    templateId?: string;
     ownerCustomerId?: string;
     status?: product_status;
     warrantyStatus?: warranty_status;
@@ -220,8 +242,8 @@ export class ProductsRepository {
     } satisfies Record<string, keyof Prisma.ProductOrderByWithRelationInput>;
     const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
     const where: Prisma.ProductWhereInput = {
-      category: filters.category as never,
-      category_id: filters.categoryId,
+      AND: buildEffectiveCatalogueFilters(filters),
+      template_id: filters.templateId,
       ownerships: filters.ownerCustomerId
         ? {
             some: {
@@ -242,6 +264,17 @@ export class ProductsRepository {
             { serial_number: { contains: search, mode: 'insensitive' } },
             { brand: { contains: search, mode: 'insensitive' } },
             { model: { contains: search, mode: 'insensitive' } },
+            {
+              template: {
+                is: {
+                  OR: [
+                    { name: { contains: search, mode: 'insensitive' } },
+                    { brand: { contains: search, mode: 'insensitive' } },
+                    { model: { contains: search, mode: 'insensitive' } },
+                  ],
+                },
+              },
+            },
             {
               ownerships: {
                 some: {
@@ -274,4 +307,42 @@ export class ProductsRepository {
       include: productInclude,
     });
   }
+}
+
+function buildEffectiveCatalogueFilters(filters: {
+  category?: string;
+  categoryId?: string;
+}): Prisma.ProductWhereInput[] | undefined {
+  const clauses: Prisma.ProductWhereInput[] = [];
+  if (filters.category) {
+    clauses.push({
+      OR: [
+        {
+          template: {
+            is: { category: filters.category as never },
+          },
+        },
+        {
+          template_id: null,
+          category: filters.category as never,
+        },
+      ],
+    });
+  }
+  if (filters.categoryId) {
+    clauses.push({
+      OR: [
+        {
+          template: {
+            is: { category_id: filters.categoryId },
+          },
+        },
+        {
+          template_id: null,
+          category_id: filters.categoryId,
+        },
+      ],
+    });
+  }
+  return clauses.length > 0 ? clauses : undefined;
 }

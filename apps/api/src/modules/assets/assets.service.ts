@@ -225,20 +225,24 @@ export class AssetsService {
       throw new NotFoundException('Asset not found');
     }
 
-    const [otherLinks, productAssets] = await Promise.all([
-      this.prisma.assetLink.count({
-        where: {
-          asset_id: assetId,
-          NOT: {
-            entity_id: entity.id,
-            entity_type: entity.type,
+    const [otherLinks, productAssets, productTemplateAssets] =
+      await Promise.all([
+        this.prisma.assetLink.count({
+          where: {
+            asset_id: assetId,
+            NOT: {
+              entity_id: entity.id,
+              entity_type: entity.type,
+            },
           },
-        },
-      }),
-      this.prisma.productAsset.count({ where: { asset_id: assetId } }),
-    ]);
+        }),
+        this.prisma.productAsset.count({ where: { asset_id: assetId } }),
+        this.prisma.productTemplateAsset.count({
+          where: { asset_id: assetId },
+        }),
+      ]);
 
-    if (otherLinks + productAssets > 0) {
+    if (otherLinks + productAssets + productTemplateAssets > 0) {
       await this.prisma.assetLink.deleteMany({
         where: {
           asset_id: assetId,
@@ -298,12 +302,16 @@ export class AssetsService {
       return false;
     }
 
-    const [assetLinks, productAssets] = await Promise.all([
-      this.prisma.assetLink.count({ where: { asset_id: assetId } }),
-      this.prisma.productAsset.count({ where: { asset_id: assetId } }),
-    ]);
+    const [assetLinks, productAssets, productTemplateAssets] =
+      await Promise.all([
+        this.prisma.assetLink.count({ where: { asset_id: assetId } }),
+        this.prisma.productAsset.count({ where: { asset_id: assetId } }),
+        this.prisma.productTemplateAsset.count({
+          where: { asset_id: assetId },
+        }),
+      ]);
 
-    if (assetLinks + productAssets > 0) {
+    if (assetLinks + productAssets + productTemplateAssets > 0) {
       return false;
     }
 
@@ -343,12 +351,16 @@ export class AssetsService {
   }
 
   private async assertAssetIsNotReferenced(assetId: string) {
-    const [assetLinks, productAssets] = await Promise.all([
-      this.prisma.assetLink.count({ where: { asset_id: assetId } }),
-      this.prisma.productAsset.count({ where: { asset_id: assetId } }),
-    ]);
+    const [assetLinks, productAssets, productTemplateAssets] =
+      await Promise.all([
+        this.prisma.assetLink.count({ where: { asset_id: assetId } }),
+        this.prisma.productAsset.count({ where: { asset_id: assetId } }),
+        this.prisma.productTemplateAsset.count({
+          where: { asset_id: assetId },
+        }),
+      ]);
 
-    if (assetLinks + productAssets > 0) {
+    if (assetLinks + productAssets + productTemplateAssets > 0) {
       throw new ConflictException('Asset is currently in use');
     }
   }

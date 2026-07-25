@@ -1,6 +1,14 @@
 "use client";
 
-import { MoreHorizontal, Pencil, Trash2, UserPlus } from "lucide-react";
+import {
+  Boxes,
+  Layers3,
+  MoreHorizontal,
+  Pencil,
+  PlusCircle,
+  Trash2,
+  UserPlus,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ProductResponse, ProductSortBy } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
@@ -34,6 +42,7 @@ type ProductsTableProps = {
   items: ProductResponse[];
   onDelete: (product: ProductResponse) => void;
   onAssignOwner: (product: ProductResponse) => void;
+  onCreateTemplate: (product: ProductResponse) => void;
   onSortChange: (sortBy: ProductSortBy) => void;
   sortBy?: ProductSortBy;
   sortOrder: "asc" | "desc";
@@ -42,6 +51,7 @@ type ProductsTableProps = {
 export function ProductsTable({
   items,
   onAssignOwner,
+  onCreateTemplate,
   onDelete,
   onSortChange,
   sortBy,
@@ -56,6 +66,7 @@ export function ProductsTable({
           <ProductMobileCard
             key={product.id}
             onAssignOwner={onAssignOwner}
+            onCreateTemplate={onCreateTemplate}
             onDelete={onDelete}
             product={product}
           />
@@ -113,6 +124,7 @@ export function ProductsTable({
               <ProductTableRow
                 key={product.id}
                 onAssignOwner={onAssignOwner}
+                onCreateTemplate={onCreateTemplate}
                 onDelete={onDelete}
                 product={product}
               />
@@ -126,10 +138,12 @@ export function ProductsTable({
 
 function ProductTableRow({
   onAssignOwner,
+  onCreateTemplate,
   onDelete,
   product,
 }: {
   onAssignOwner: ProductsTableProps["onAssignOwner"];
+  onCreateTemplate: ProductsTableProps["onCreateTemplate"];
   onDelete: ProductsTableProps["onDelete"];
   product: ProductResponse;
 }) {
@@ -153,6 +167,7 @@ function ProductTableRow({
       <TableCell className="text-right">
         <ProductActionsMenu
           onAssignOwner={onAssignOwner}
+          onCreateTemplate={onCreateTemplate}
           onDelete={onDelete}
           product={product}
         />
@@ -163,10 +178,12 @@ function ProductTableRow({
 
 function ProductMobileCard({
   onAssignOwner,
+  onCreateTemplate,
   onDelete,
   product,
 }: {
   onAssignOwner: ProductsTableProps["onAssignOwner"];
+  onCreateTemplate: ProductsTableProps["onCreateTemplate"];
   onDelete: ProductsTableProps["onDelete"];
   product: ProductResponse;
 }) {
@@ -178,6 +195,7 @@ function ProductMobileCard({
         <ProductName product={product} />
         <ProductActionsMenu
           onAssignOwner={onAssignOwner}
+          onCreateTemplate={onCreateTemplate}
           onDelete={onDelete}
           product={product}
         />
@@ -255,10 +273,12 @@ function ProductMobileField({
 
 function ProductActionsMenu({
   onAssignOwner,
+  onCreateTemplate,
   onDelete,
   product,
 }: {
   onAssignOwner: ProductsTableProps["onAssignOwner"];
+  onCreateTemplate: ProductsTableProps["onCreateTemplate"];
   onDelete: ProductsTableProps["onDelete"];
   product: ProductResponse;
 }) {
@@ -267,9 +287,20 @@ function ProductActionsMenu({
   const canEdit = hasPermission(PERMISSIONS.PRODUCT_UPDATE);
   const canDelete = hasPermission(PERMISSIONS.PRODUCT_DELETE);
   const canAssignOwner = hasPermission(PERMISSIONS.PRODUCT_ASSIGN_OWNER);
+  const canCreateProduct = hasPermission(PERMISSIONS.PRODUCT_CREATE);
+  const canCreateTemplate = hasPermission(PERMISSIONS.PRODUCT_TEMPLATE_CREATE);
+  const canViewTemplate = hasPermission(PERMISSIONS.PRODUCT_TEMPLATE_VIEW);
   const isDeleted = product.status === "DELETED";
 
-  if (isDeleted || (!canEdit && !canDelete && !canAssignOwner)) return null;
+  const hasTemplateAction = product.template
+    ? canViewTemplate || (canCreateProduct && product.template.isActive)
+    : canCreateTemplate;
+  if (
+    isDeleted ||
+    (!canEdit && !canDelete && !canAssignOwner && !hasTemplateAction)
+  ) {
+    return null;
+  }
 
   return (
     <DropdownMenu>
@@ -290,6 +321,30 @@ function ProductActionsMenu({
               <Pencil className="mr-2 size-4" />
               {t("edit")}
             </Link>
+          </DropdownMenuItem>
+        ) : null}
+        {product.template && canCreateProduct && product.template.isActive ? (
+          <DropdownMenuItem asChild>
+            <Link
+              href={`/products/create?mode=from-template&templateId=${product.template.id}`}
+            >
+              <PlusCircle className="mr-2 size-4" />
+              {t("createAnotherFromTemplate")}
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
+        {product.template && canViewTemplate ? (
+          <DropdownMenuItem asChild>
+            <Link href={`/product-templates/${product.template.id}`}>
+              <Layers3 className="mr-2 size-4" />
+              {t("viewProductTemplate")}
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
+        {!product.template && canCreateTemplate ? (
+          <DropdownMenuItem onSelect={() => onCreateTemplate(product)}>
+            <Boxes className="mr-2 size-4" />
+            {t("createTemplateFromProduct")}
           </DropdownMenuItem>
         ) : null}
         {canAssignOwner ? (

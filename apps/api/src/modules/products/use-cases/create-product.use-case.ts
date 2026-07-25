@@ -5,6 +5,7 @@ import {
 } from '@/common/response';
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { AssetsService } from '@/modules/assets/assets.service';
+import { ProductTemplatesRepository } from '@/modules/product-templates/repository/product-templates.repository';
 import { CreateProductDto } from '@/modules/products/dto/create-product.dto';
 import { toProductResponse } from '@/modules/products/products.types';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
@@ -24,19 +25,40 @@ export class CreateProductUseCase {
     private readonly prismaService: PrismaService,
     private readonly productsRepository: ProductsRepository,
     private readonly generateProductCodeUseCase: GenerateProductCodeUseCase,
+    private readonly productTemplatesRepository: ProductTemplatesRepository,
     private readonly assetsService?: AssetsService,
   ) {}
 
   async execute(dto: CreateProductDto) {
+    if (dto.templateId && dto.createTemplate) {
+      throw new BadRequestError(
+        'Choose an existing product template or create a new one',
+      );
+    }
+
     const productCode = await this.generateProductCodeUseCase.execute();
-    const categoryRef = await this.resolveProductCategory(dto.categoryId);
-    const coverAsset = dto.coverAssetId
-      ? await this.prismaService.asset.findUnique({
-          where: { id: dto.coverAssetId },
-        })
+    const selectedTemplate = dto.templateId
+      ? await this.productTemplatesRepository.findActiveById(dto.templateId)
       : null;
+    if (dto.templateId && !selectedTemplate) {
+      throw new NotFoundError('Product template not found');
+    }
+    if (!selectedTemplate && (!dto.name || !dto.category || !dto.categoryId)) {
+      throw new BadRequestError('Product shared information is required');
+    }
+
+    const categoryRef = await this.resolveProductCategory(
+      selectedTemplate?.category_id ?? dto.categoryId ?? '',
+    );
+    const coverAsset =
+      !selectedTemplate && dto.coverAssetId
+        ? await this.prismaService.asset.findUnique({
+            where: { id: dto.coverAssetId },
+          })
+        : null;
 
     if (
+      !selectedTemplate &&
       dto.coverAssetId &&
       (!coverAsset ||
         coverAsset.is_deleted ||
@@ -54,51 +76,94 @@ export class CreateProductUseCase {
       }
     }
 
-    const product = await this.prismaService.product.create({
-      data: {
-        product_code: productCode,
-        warranty_code: null,
-        serial_number: dto.serialNumber,
-        name: dto.name,
-        category: dto.category,
-        brand: dto.brand,
-        model: dto.model,
-        manufacture_year: dto.manufactureYear,
-        description: dto.description,
-        status: dto.status ?? product_status.ACTIVE,
-        category_ref: { connect: { id: categoryRef.id } },
-        metadata: dto.metadata as Prisma.InputJsonObject | undefined,
-        assets: coverAsset
-          ? {
-              create: {
-                asset: { connect: { id: coverAsset.id } },
-                role: 'COVER',
-                alt_text: dto.name,
+    const product = await this.prismaService.$transaction(async (tx) => {
+      const template =
+        selectedTemplate ??
+        (dto.createTemplate
+          ? await this.productTemplatesRepository.create(
+              {
+                name: dto.name!,
+                category: dto.category!,
+                brand: dto.brand,
+                model: dto.model,
+                manufacture_year: dto.manufactureYear,
+                description: dto.description,
+                category_ref: { connect: { id: categoryRef.id } },
+                metadata: toTemplateMetadata(dto.metadata),
+                assets: coverAsset
+                  ? {
+                      create: {
+                        asset: { connect: { id: coverAsset.id } },
+                        role: 'COVER',
+                        alt_text: dto.name!,
+                      },
+                    }
+                  : undefined,
               },
-            }
-          : undefined,
-        warranty: {
-          create: {
-            warranty_code: null,
-            duration_months: 36,
-            start_date: null,
-            end_date: null,
-            status: warranty_status.DRAFT,
+              tx,
+            )
+          : null);
+      return tx.product.create({
+        data: {
+          product_code: productCode,
+          warranty_code: null,
+          serial_number: dto.serialNumber,
+          name: template?.name ?? dto.name!,
+          category: template?.category ?? dto.category!,
+          brand: template?.brand ?? dto.brand,
+          model: template?.model ?? dto.model,
+          manufacture_year: template?.manufacture_year ?? dto.manufactureYear,
+          description: template?.description ?? dto.description,
+          status: dto.status ?? product_status.ACTIVE,
+          category_ref: { connect: { id: categoryRef.id } },
+          template: template ? { connect: { id: template.id } } : undefined,
+          metadata: template
+            ? toPhysicalProductMetadata(dto.metadata)
+            : (dto.metadata as Prisma.InputJsonObject | undefined),
+          assets:
+            !template && coverAsset
+              ? {
+                  create: {
+                    asset: { connect: { id: coverAsset.id } },
+                    role: 'COVER',
+                    alt_text: dto.name,
+                  },
+                }
+              : undefined,
+          warranty: {
+            create: {
+              warranty_code: null,
+              duration_months: template?.default_warranty_duration_months ?? 36,
+              terms: template?.default_warranty_terms,
+              start_date: null,
+              end_date: null,
+              status: warranty_status.DRAFT,
+            },
           },
+          ownerships: undefined,
         },
-        ownerships: undefined,
-      },
-      include: {
-        assets: {
-          include: { asset: true },
-          orderBy: [{ role: 'asc' }, { sort_order: 'asc' }],
+        include: {
+          assets: {
+            include: { asset: true },
+            orderBy: [{ role: 'asc' }, { sort_order: 'asc' }],
+          },
+          category_ref: true,
+          template: {
+            include: {
+              assets: {
+                include: { asset: true },
+                orderBy: [{ role: 'asc' }, { sort_order: 'asc' }],
+              },
+              category_ref: true,
+            },
+          },
+          ownerships: {
+            include: { customer: true },
+            orderBy: { created_at: 'desc' },
+          },
+          warranty: true,
         },
-        ownerships: {
-          include: { customer: true },
-          orderBy: { created_at: 'desc' },
-        },
-        warranty: true,
-      },
+      });
     });
 
     return toProductResponse(
@@ -122,4 +187,28 @@ export class CreateProductUseCase {
 
     return category;
   }
+}
+
+function toTemplateMetadata(
+  metadata: Record<string, unknown> | undefined,
+): Prisma.InputJsonObject | undefined {
+  if (!metadata) return undefined;
+  const templateMetadata = { ...metadata };
+  delete templateMetadata.installationPosition;
+  return Object.keys(templateMetadata).length > 0
+    ? (templateMetadata as Prisma.InputJsonObject)
+    : undefined;
+}
+
+function toPhysicalProductMetadata(
+  metadata: Record<string, unknown> | undefined,
+): Prisma.InputJsonObject | undefined {
+  const installationPosition = metadata?.installationPosition;
+  if (
+    typeof installationPosition !== 'string' ||
+    installationPosition.trim().length === 0
+  ) {
+    return undefined;
+  }
+  return { installationPosition: installationPosition.trim() };
 }

@@ -18,3 +18,16 @@ test("places content pages first in the other sidebar section", () => {
     ],
   );
 });
+
+test("groups products and product templates under one navigation item", () => {
+  const config = getDashboardConfig((key) => key);
+  const generalSection = config.sidebarSections.find(
+    (section) => section.label === "sections.general",
+  );
+  const productItems = generalSection?.items.filter((item) =>
+    ["/products", "/product-templates"].includes(item.href ?? ""),
+  );
+
+  assert.equal(productItems?.length, 1);
+  assert.deepEqual(productItems?.[0]?.activeHrefs, ["/product-templates"]);
+});

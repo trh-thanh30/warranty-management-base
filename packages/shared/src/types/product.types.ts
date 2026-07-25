@@ -16,6 +16,63 @@ export type ProductAssetSummary = {
   url: string;
   mimeType: string;
   originalName: string;
+  source?: "PRODUCT" | "TEMPLATE";
+};
+
+export type ProductTemplateSummary = {
+  id: string;
+  name: string;
+  category: ProductCategory;
+  categoryId: string | null;
+  categoryRef: CategorySummary | null;
+  brand: string | null;
+  model: string | null;
+  manufactureYear: number | null;
+  description: string | null;
+  defaultWarrantyDurationMonths: number;
+  defaultWarrantyTerms: string | null;
+  metadata: Record<string, unknown> | null;
+  isActive: boolean;
+  productCount: number;
+  assets: ProductAssetSummary[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ListProductTemplatesQuery = PaginationQuery & {
+  search?: string;
+  isActive?: boolean;
+};
+
+export type CreateProductTemplateBody = {
+  name: string;
+  category: ProductCategory;
+  categoryId: string;
+  brand?: string;
+  model?: string;
+  manufactureYear?: number;
+  description?: string;
+  defaultWarrantyDurationMonths?: number;
+  defaultWarrantyTerms?: string;
+  metadata?: Record<string, unknown>;
+  coverAssetId?: string;
+  galleryAssetIds?: string[];
+};
+
+export type UpdateProductTemplateBody = {
+  name?: string;
+  category?: ProductCategory;
+  categoryId?: string;
+  brand?: string | null;
+  model?: string | null;
+  manufactureYear?: number | null;
+  description?: string | null;
+  defaultWarrantyDurationMonths?: number;
+  defaultWarrantyTerms?: string | null;
+  metadata?: Record<string, unknown> | null;
+  isActive?: boolean;
+  coverAssetId?: string | null;
+  galleryAssetIds?: string[];
 };
 
 export type ProductSortBy =
@@ -52,6 +109,8 @@ export type ProductWarrantySummary = {
 
 export type ProductSummary = {
   id: string;
+  templateId: string | null;
+  template: ProductTemplateSummary | null;
   productCode: string;
   warrantyCode: string | null;
   serialNumber: string | null;
@@ -79,6 +138,7 @@ export type ListProductsQuery = PaginationQuery & {
   search?: string;
   category?: ProductCategory;
   categoryId?: string;
+  templateId?: string;
   ownerCustomerId?: string;
   status?: ProductStatus;
   warrantyStatus?: WarrantyStatus;
@@ -87,9 +147,11 @@ export type ListProductsQuery = PaginationQuery & {
 };
 
 export type CreateProductBody = {
-  name: string;
-  category: ProductCategory;
-  categoryId: string;
+  templateId?: string;
+  createTemplate?: boolean;
+  name?: string;
+  category?: ProductCategory;
+  categoryId?: string;
   brand?: string;
   model?: string;
   manufactureYear?: number;

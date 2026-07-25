@@ -9,6 +9,10 @@ import { getDashboardConfig } from "@/src/config/dashboard.config";
 import type { NavigationItem } from "@/src/config/dashboard.types";
 import { Link, usePathname } from "@/src/i18n/navigation";
 import { usePermissions } from "@/src/hooks/use-permissions";
+import {
+  canAccessNavigationItem,
+  resolveNavigationHref,
+} from "@/src/config/navigation-permissions";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { getInitials } from "@/src/utils/get-initials";
 
@@ -155,12 +159,16 @@ export function AppSidebar({
 
       <nav className="flex-1 overflow-y-auto px-3 pb-3">
         {dashboardConfig.sidebarSections.map((section) => {
-          const items = section.items.filter(
-            (item) =>
-              (!item.requiredRole || hasRole(item.requiredRole)) &&
-              (!item.requiredPermission ||
-                hasPermission(item.requiredPermission)),
-          );
+          const items = section.items
+            .filter(
+              (item) =>
+                (!item.requiredRole || hasRole(item.requiredRole)) &&
+                canAccessNavigationItem(item, hasPermission),
+            )
+            .map((item) => ({
+              ...item,
+              href: resolveNavigationHref(item, hasPermission),
+            }));
 
           return items.length > 0 ? (
             <NavGroup

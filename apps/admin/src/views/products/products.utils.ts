@@ -110,8 +110,11 @@ export function mergeProductInstallationPosition(
 export function toCreateProductBody(
   values: ProductFormValues,
 ): CreateProductBody {
+  const sharedMetadata = values.templateId
+    ? null
+    : mergeProductSpecifications(null, values.specifications);
   const metadata = mergeProductInstallationPosition(
-    mergeProductSpecifications(null, values.specifications),
+    sharedMetadata,
     values.installationPosition,
   );
 
@@ -127,6 +130,8 @@ export function toCreateProductBody(
     name: values.name.trim(),
     serialNumber: toOptionalValue(values.serialNumber),
     status: values.status,
+    templateId: toOptionalValue(values.templateId),
+    createTemplate: values.createTemplate,
   };
 }
 

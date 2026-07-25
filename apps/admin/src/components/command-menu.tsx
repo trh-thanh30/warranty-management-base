@@ -14,6 +14,10 @@ import { useAdminUiStore } from "@/src/app/stores/ui.store";
 import { getDashboardConfig } from "@/src/config/dashboard.config";
 import { Link } from "@/src/i18n/navigation";
 import { usePermissions } from "@/src/hooks/use-permissions";
+import {
+  canAccessNavigationItem,
+  resolveNavigationHref,
+} from "@/src/config/navigation-permissions";
 
 export function CommandMenu() {
   const t = useTranslations("DashboardConfig");
@@ -51,11 +55,13 @@ export function CommandMenu() {
       if (
         item.href &&
         (!item.requiredRole || hasRole(item.requiredRole)) &&
-        (!item.requiredPermission || hasPermission(item.requiredPermission))
+        canAccessNavigationItem(item, hasPermission)
       ) {
-        itemsMap.set(item.href, {
+        const href = resolveNavigationHref(item, hasPermission);
+        if (!href) return;
+        itemsMap.set(href, {
           title: item.title,
-          href: item.href,
+          href,
           icon: item.icon,
         });
       }
@@ -67,11 +73,13 @@ export function CommandMenu() {
       item.href &&
       !itemsMap.has(item.href) &&
       (!item.requiredRole || hasRole(item.requiredRole)) &&
-      (!item.requiredPermission || hasPermission(item.requiredPermission))
+      canAccessNavigationItem(item, hasPermission)
     ) {
-      itemsMap.set(item.href, {
+      const href = resolveNavigationHref(item, hasPermission);
+      if (!href) return;
+      itemsMap.set(href, {
         title: item.title,
-        href: item.href,
+        href,
         icon: LayoutDashboard, // fallback icon
       });
     }

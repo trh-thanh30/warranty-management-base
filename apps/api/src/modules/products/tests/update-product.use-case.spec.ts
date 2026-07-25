@@ -56,4 +56,66 @@ describe('UpdateProductUseCase', () => {
     );
     expect(productsRepository.update).toHaveBeenCalled();
   });
+
+  it('updates only physical-unit fields when the product uses a template', async () => {
+    const product = {
+      id: 'product-id',
+      template_id: 'template-id',
+      serial_number: 'OLD-SERIAL',
+      description: '<p>Template snapshot</p>',
+      metadata: { source: 'legacy', installationPosition: 'Old position' },
+      deleted_at: null,
+    };
+    const productsRepository = {
+      findById: jest.fn().mockResolvedValue(product),
+      findBySerialNumber: jest.fn().mockResolvedValue(null),
+      update: jest.fn().mockResolvedValue({
+        ...product,
+        serial_number: 'NEW-SERIAL',
+        status: product_status.INACTIVE,
+        ownerships: [],
+      }),
+    };
+    const prismaService = {
+      category: { findUnique: jest.fn() },
+    };
+    const assetsService = {
+      deleteAssetByUrl: jest.fn(),
+    };
+    const useCase = new UpdateProductUseCase(
+      prismaService as never,
+      productsRepository as never,
+      assetsService as never,
+    );
+
+    await useCase.execute('product-id', {
+      name: 'Must not overwrite template-owned data',
+      category: product_category.SPARE_PART,
+      categoryId: 'category-id',
+      description: '<p>Must not be persisted</p>',
+      serialNumber: 'NEW-SERIAL',
+      status: product_status.INACTIVE,
+      metadata: {
+        specifications: [{ key: 'Shared', value: 'Ignored' }],
+        installationPosition: ' New position ',
+      },
+    });
+
+    expect(prismaService.category.findUnique).not.toHaveBeenCalled();
+    expect(assetsService.deleteAssetByUrl).not.toHaveBeenCalled();
+    expect(productsRepository.update).toHaveBeenCalledWith(
+      'product-id',
+      expect.objectContaining({
+        name: undefined,
+        category: undefined,
+        description: undefined,
+        serial_number: 'NEW-SERIAL',
+        status: product_status.INACTIVE,
+        metadata: {
+          source: 'legacy',
+          installationPosition: 'New position',
+        },
+      }),
+    );
+  });
 });

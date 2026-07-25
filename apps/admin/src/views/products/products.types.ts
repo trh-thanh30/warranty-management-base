@@ -93,6 +93,8 @@ export const productFormSchema = z.object({
   serialNumber: optionalText.max(64, "serialNumberLength"),
   specifications: productSpecificationsSchema,
   status: z.enum(["ACTIVE", "INACTIVE"]),
+  templateId: z.string(),
+  createTemplate: z.boolean(),
   warrantyDurationMonths: optionalInteger({
     integer: "durationMonthsInteger",
     max: 120,

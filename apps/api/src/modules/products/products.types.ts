@@ -7,12 +7,17 @@ import {
   ProductOwnership,
   Warranty,
 } from '@prisma/client';
+import {
+  ProductTemplateWithRelations,
+  toProductTemplateResponse,
+} from '@/modules/product-templates/product-templates.types';
 
 type ProductWithRelations = Product & {
   assets?: Array<ProductAsset & { asset: Asset }>;
   category_ref?: Category | null;
   ownerships?: Array<ProductOwnership & { customer?: Customer }>;
   warranty?: Warranty | null;
+  template?: ProductTemplateWithRelations | null;
 };
 
 function toCategorySummary(category: Category | null | undefined) {
@@ -45,22 +50,44 @@ export function toProductResponse(
   const currentOwnership = product.ownerships?.find(
     (ownership) => ownership.is_current_owner,
   );
+  const templateResponse = product.template
+    ? toProductTemplateResponse(product.template, resolveAssetUrl)
+    : null;
+  const effectiveMetadata = templateResponse
+    ? mergeEffectiveMetadata(templateResponse.metadata, product.metadata)
+    : (product.metadata as Record<string, unknown> | null);
+  const productAssets =
+    product.assets?.map((productAsset) => ({
+      id: productAsset.id,
+      assetId: productAsset.asset_id,
+      role: productAsset.role,
+      sortOrder: productAsset.sort_order,
+      altText: productAsset.alt_text,
+      url: resolveAssetUrl(productAsset.asset),
+      mimeType: productAsset.asset.mime_type,
+      originalName: productAsset.asset.original_name,
+      source: 'PRODUCT' as const,
+    })) ?? [];
 
   return {
     id: product.id,
+    templateId: product.template_id,
+    template: templateResponse,
     productCode: product.product_code,
     warrantyCode: product.warranty_code,
     serialNumber: product.serial_number,
-    name: product.name,
-    category: product.category,
-    categoryId: product.category_id,
-    categoryRef: toCategorySummary(product.category_ref),
-    brand: product.brand,
-    model: product.model,
-    manufactureYear: product.manufacture_year,
-    description: product.description,
+    name: templateResponse?.name ?? product.name,
+    category: templateResponse?.category ?? product.category,
+    categoryId: templateResponse?.categoryId ?? product.category_id,
+    categoryRef:
+      templateResponse?.categoryRef ?? toCategorySummary(product.category_ref),
+    brand: templateResponse?.brand ?? product.brand,
+    model: templateResponse?.model ?? product.model,
+    manufactureYear:
+      templateResponse?.manufactureYear ?? product.manufacture_year,
+    description: templateResponse?.description ?? product.description,
     status: product.status,
-    metadata: product.metadata as Record<string, unknown> | null,
+    metadata: effectiveMetadata,
     createdAt: product.created_at,
     updatedAt: product.updated_at,
     deletedAt: product.deleted_at,
@@ -90,16 +117,48 @@ export function toProductResponse(
           terms: product.warranty.terms,
         }
       : null,
-    assets:
-      product.assets?.map((productAsset) => ({
-        id: productAsset.id,
-        assetId: productAsset.asset_id,
-        role: productAsset.role,
-        sortOrder: productAsset.sort_order,
-        altText: productAsset.alt_text,
-        url: resolveAssetUrl(productAsset.asset),
-        mimeType: productAsset.asset.mime_type,
-        originalName: productAsset.asset.original_name,
-      })) ?? [],
+    assets: mergeEffectiveProductAssets(
+      templateResponse?.assets ?? [],
+      productAssets,
+    ),
   };
+}
+
+function mergeEffectiveMetadata(
+  templateMetadata: Record<string, unknown> | null,
+  productMetadata: unknown,
+) {
+  const physicalMetadata = isRecord(productMetadata) ? productMetadata : {};
+  const sharedMetadata = templateMetadata ?? {};
+  const merged = { ...sharedMetadata, ...physicalMetadata };
+  return Object.keys(merged).length > 0 ? merged : null;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function mergeEffectiveProductAssets<
+  TTemplate extends {
+    assetId: string;
+    role: string;
+    source?: 'PRODUCT' | 'TEMPLATE';
+  },
+  TProduct extends {
+    assetId: string;
+    role: string;
+    source?: 'PRODUCT' | 'TEMPLATE';
+  },
+>(
+  templateAssets: TTemplate[],
+  productAssets: TProduct[],
+): Array<TTemplate | TProduct> {
+  const productHasCover = productAssets.some((asset) => asset.role === 'COVER');
+  const seenAssetIds = new Set(productAssets.map((asset) => asset.assetId));
+  const inheritedAssets = templateAssets.filter(
+    (asset) =>
+      !seenAssetIds.has(asset.assetId) &&
+      !(asset.role === 'COVER' && productHasCover),
+  );
+  return [...inheritedAssets, ...productAssets];
 }

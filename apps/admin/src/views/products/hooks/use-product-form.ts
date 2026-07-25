@@ -8,6 +8,7 @@ import {
   getRemovedMediaUrls,
   HttpClientError,
   type ProductResponse,
+  type ProductTemplateSummary,
   type UpdateProductBody,
 } from "@repo/shared";
 import { isProductCategory } from "@repo/shared/constants";
@@ -38,6 +39,8 @@ export function useProductForm({
   importPreview,
   onSaved,
   product,
+  productTemplate,
+  createMode,
 }: {
   importPreview?: {
     data: ProductImportRowData;
@@ -45,6 +48,8 @@ export function useProductForm({
   };
   onSaved: (product?: ProductResponse) => void;
   product: ProductResponse | null;
+  productTemplate?: ProductTemplateSummary | null;
+  createMode?: "from-template" | "independent";
 }) {
   const t = useTranslations("Products");
   const toast = useToast();
@@ -63,7 +68,7 @@ export function useProductForm({
     setValue,
   } = useForm<ProductFormInput, unknown, ProductFormValues>({
     resolver: zodResolver(productFormSchema),
-    defaultValues: getDefaultValues(null),
+    defaultValues: getDefaultValues(null, productTemplate, createMode),
   });
   const {
     append: appendSpecification,
@@ -84,15 +89,16 @@ export function useProductForm({
     },
     { enabled: true },
   );
+  const selectedTemplateId = product?.templateId ?? productTemplate?.id ?? "";
   const importPreviewData = importPreview?.data;
 
   useEffect(() => {
     reset(
       importPreviewData
         ? getImportPreviewDefaultValues(importPreviewData)
-        : getDefaultValues(product),
+        : getDefaultValues(product, productTemplate, createMode),
     );
-  }, [importPreviewData, product, reset]);
+  }, [createMode, importPreviewData, product, productTemplate, reset]);
 
   async function submit(values: ProductFormValues) {
     if (importPreview) {
@@ -163,34 +169,47 @@ export function useProductForm({
     moveSpecification,
     removeSpecification,
     setValue,
+    selectedTemplateId,
     specificationFields,
   };
 }
 
-function getDefaultValues(product: ProductResponse | null): ProductFormInput {
-  const specifications = getProductSpecifications(product?.metadata);
+function getDefaultValues(
+  product: ProductResponse | null,
+  productTemplate?: ProductTemplateSummary | null,
+  createMode?: "from-template" | "independent",
+): ProductFormInput {
+  const sourceTemplate =
+    !product && createMode === "from-template" ? productTemplate : null;
+  const metadata = product?.metadata ?? sourceTemplate?.metadata;
+  const specifications = getProductSpecifications(metadata);
+  const cover =
+    sourceTemplate?.assets.find((asset) => asset.role === "COVER") ??
+    product?.assets.find((asset) => asset.role === "COVER");
 
   return {
-    brand: product?.brand ?? "",
-    category: product?.category ?? "CAR",
-    categoryId: product?.categoryId ?? "",
-    coverAssetId:
-      product?.assets.find((asset) => asset.role === "COVER")?.assetId ?? "",
-    coverImageUrl:
-      product?.assets.find((asset) => asset.role === "COVER")?.url ?? "",
-    description: product?.description ?? "",
+    brand: product?.brand ?? sourceTemplate?.brand ?? "",
+    category: product?.category ?? sourceTemplate?.category ?? "CAR",
+    categoryId: product?.categoryId ?? sourceTemplate?.categoryId ?? "",
+    coverAssetId: cover?.assetId ?? "",
+    coverImageUrl: cover?.url ?? "",
+    description: product?.description ?? sourceTemplate?.description ?? "",
     installationPosition: getProductInstallationPosition(product?.metadata),
-    manufactureYear: product?.manufactureYear ?? undefined,
-    model: product?.model ?? "",
-    name: product?.name ?? "",
+    manufactureYear:
+      product?.manufactureYear ?? sourceTemplate?.manufactureYear ?? undefined,
+    model: product?.model ?? sourceTemplate?.model ?? "",
+    name: product?.name ?? sourceTemplate?.name ?? "",
     productCode: "",
     serialNumber: product?.serialNumber ?? "",
     specifications: specifications.length
       ? specifications
       : [{ key: "", value: "" }],
     status: product?.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
-    warrantyDurationMonths: undefined,
-    warrantyTerms: "",
+    templateId: product?.templateId ?? sourceTemplate?.id ?? "",
+    createTemplate: false,
+    warrantyDurationMonths:
+      sourceTemplate?.defaultWarrantyDurationMonths ?? undefined,
+    warrantyTerms: sourceTemplate?.defaultWarrantyTerms ?? "",
   };
 }
 
@@ -212,6 +231,8 @@ function getImportPreviewDefaultValues(
     serialNumber: data.serialNumber ?? "",
     specifications: [{ key: "", value: "" }],
     status: data.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
+    templateId: "",
+    createTemplate: false,
     warrantyDurationMonths: data.warrantyDurationMonths ?? undefined,
     warrantyTerms: data.warrantyTerms ?? "",
   };
@@ -270,6 +291,7 @@ function handleProductSaveError(
   const messages = {
     "Product cover asset not found": ["coverAssetId", "coverAssetNotFound"],
     "Product category not found": ["categoryId", "categoryNotFound"],
+    "Product template not found": ["templateId", "templateNotFound"],
     "Serial number already exists": ["serialNumber", "duplicateSerialNumber"],
   } as const;
   const match = messages[error.message as keyof typeof messages];

@@ -21,6 +21,10 @@ export class ListProductsDto extends PaginationQueryDto {
 
   @IsOptional()
   @IsUUID()
+  templateId?: string;
+
+  @IsOptional()
+  @IsUUID()
   ownerCustomerId?: string;
 
   @IsOptional()

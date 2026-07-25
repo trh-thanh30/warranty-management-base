@@ -1,9 +1,9 @@
 "use client";
 
 import { Controller } from "react-hook-form";
-import { Loader2 } from "lucide-react";
+import { Layers3, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import type { ProductResponse } from "@repo/shared";
+import type { ProductResponse, ProductTemplateSummary } from "@repo/shared";
 import {
   Button,
   Input,
@@ -38,6 +38,8 @@ type ProductFormProps = {
       mode?: "default";
       onSaved: (product?: ProductResponse) => void;
       product: ProductResponse | null;
+      createMode?: "from-template" | "independent";
+      productTemplate?: ProductTemplateSummary | null;
     }
   | {
       initialValues: ProductImportRowData;
@@ -62,6 +64,7 @@ export function ProductForm(props: ProductFormProps) {
     appendSpecification,
     moveSpecification,
     removeSpecification,
+    selectedTemplateId,
     setValue,
     specificationFields,
   } = useProductForm({
@@ -70,8 +73,14 @@ export function ProductForm(props: ProductFormProps) {
       : undefined,
     onSaved: importPreview ? () => undefined : props.onSaved,
     product,
+    createMode: importPreview ? undefined : props.createMode,
+    productTemplate: importPreview ? null : props.productTemplate,
   });
   const categories = categoriesQuery.data?.items ?? [];
+  const sharedFieldsDisabled = Boolean(selectedTemplateId) || isSubmitting;
+  const selectedTemplate =
+    (!importPreview && props.productTemplate) || product?.template;
+  const fromTemplateCreation = creating && Boolean(selectedTemplate);
 
   return (
     <form className="space-y-6" noValidate onSubmit={onSubmit}>
@@ -81,6 +90,29 @@ export function ProductForm(props: ProductFormProps) {
           role="alert"
         >
           {errors.root.message}
+        </div>
+      ) : null}
+
+      {creating && !importPreview ? (
+        <div className="rounded-lg border border-blue-200 bg-blue-50/70 p-4 dark:border-blue-900 dark:bg-blue-950/30">
+          <div className="flex gap-3">
+            <Layers3
+              className="mt-0.5 size-5 shrink-0 text-blue-600 dark:text-blue-400"
+              aria-hidden="true"
+            />
+            <div>
+              <p className="text-sm font-semibold text-slate-950 dark:text-slate-50">
+                {t("templateSectionTitle")}
+              </p>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                {selectedTemplate
+                  ? t("selectedTemplateSummary", {
+                      name: selectedTemplate.name,
+                    })
+                  : t("independentProductDescription")}
+              </p>
+            </div>
+          </div>
         </div>
       ) : null}
 
@@ -94,17 +126,20 @@ export function ProductForm(props: ProductFormProps) {
             <Input id="product-code" {...register("productCode")} />
           </Field>
         ) : null}
-        <Field
-          error={formatFieldError(errors.name?.message, t)}
-          id="product-name"
-          label={t("name")}
-        >
-          <Input
+        {!fromTemplateCreation ? (
+          <Field
+            error={formatFieldError(errors.name?.message, t)}
             id="product-name"
-            placeholder={t("namePlaceholder")}
-            {...register("name")}
-          />
-        </Field>
+            label={t("name")}
+          >
+            <Input
+              disabled={sharedFieldsDisabled}
+              id="product-name"
+              placeholder={t("namePlaceholder")}
+              {...register("name")}
+            />
+          </Field>
+        ) : null}
         {!importPreview ? (
           <Field
             error={formatFieldError(errors.serialNumber?.message, t)}
@@ -121,32 +156,36 @@ export function ProductForm(props: ProductFormProps) {
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field
-          error={formatFieldError(errors.categoryId?.message, t)}
-          id="product-category-id"
-          label={t("dynamicCategory")}
-        >
-          <Controller
-            control={control}
-            name="categoryId"
-            render={({ field }) => (
-              <ProductCategoryCombobox
-                disabled={categoriesQuery.isLoading}
-                id="product-category-id"
-                onValueChange={field.onChange}
-                options={categories
-                  .filter((category) => !importPreview || category.code)
-                  .map((category) => ({
-                    label: category.name,
-                    value: importPreview ? (category.code ?? "") : category.id,
-                  }))}
-                placeholder={t("dynamicCategory")}
-                searchPlaceholder={t("search")}
-                value={field.value}
-              />
-            )}
-          />
-        </Field>
+        {!fromTemplateCreation ? (
+          <Field
+            error={formatFieldError(errors.categoryId?.message, t)}
+            id="product-category-id"
+            label={t("dynamicCategory")}
+          >
+            <Controller
+              control={control}
+              name="categoryId"
+              render={({ field }) => (
+                <ProductCategoryCombobox
+                  disabled={categoriesQuery.isLoading || sharedFieldsDisabled}
+                  id="product-category-id"
+                  onValueChange={field.onChange}
+                  options={categories
+                    .filter((category) => !importPreview || category.code)
+                    .map((category) => ({
+                      label: category.name,
+                      value: importPreview
+                        ? (category.code ?? "")
+                        : category.id,
+                    }))}
+                  placeholder={t("dynamicCategory")}
+                  searchPlaceholder={t("search")}
+                  value={field.value}
+                />
+              )}
+            />
+          </Field>
+        ) : null}
         <ProductStatusField control={control} disabled={isSubmitting} />
       </div>
 
@@ -161,28 +200,34 @@ export function ProductForm(props: ProductFormProps) {
       ) : null}
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field
-          error={formatFieldError(errors.brand?.message, t)}
-          id="product-brand"
-          label={t("brand")}
-        >
-          <Input
+        {!fromTemplateCreation ? (
+          <Field
+            error={formatFieldError(errors.brand?.message, t)}
             id="product-brand"
-            placeholder={t("brandPlaceholder")}
-            {...register("brand")}
-          />
-        </Field>
-        <Field
-          error={formatFieldError(errors.model?.message, t)}
-          id="product-model"
-          label={t("model")}
-        >
-          <Input
+            label={t("brand")}
+          >
+            <Input
+              disabled={sharedFieldsDisabled}
+              id="product-brand"
+              placeholder={t("brandPlaceholder")}
+              {...register("brand")}
+            />
+          </Field>
+        ) : null}
+        {!fromTemplateCreation ? (
+          <Field
+            error={formatFieldError(errors.model?.message, t)}
             id="product-model"
-            placeholder={t("modelPlaceholder")}
-            {...register("model")}
-          />
-        </Field>
+            label={t("model")}
+          >
+            <Input
+              disabled={sharedFieldsDisabled}
+              id="product-model"
+              placeholder={t("modelPlaceholder")}
+              {...register("model")}
+            />
+          </Field>
+        ) : null}
         <Field
           error={formatFieldError(errors.installationPosition?.message, t)}
           id="product-installation-position"
@@ -194,19 +239,22 @@ export function ProductForm(props: ProductFormProps) {
             {...register("installationPosition")}
           />
         </Field>
-        <Field
-          error={formatFieldError(errors.manufactureYear?.message, t)}
-          id="product-manufacture-year"
-          label={t("manufactureYear")}
-        >
-          <Input
+        {!fromTemplateCreation ? (
+          <Field
+            error={formatFieldError(errors.manufactureYear?.message, t)}
             id="product-manufacture-year"
-            inputMode="numeric"
-            placeholder={t("manufactureYearPlaceholder")}
-            type="number"
-            {...register("manufactureYear")}
-          />
-        </Field>
+            label={t("manufactureYear")}
+          >
+            <Input
+              disabled={sharedFieldsDisabled}
+              id="product-manufacture-year"
+              inputMode="numeric"
+              placeholder={t("manufactureYearPlaceholder")}
+              type="number"
+              {...register("manufactureYear")}
+            />
+          </Field>
+        ) : null}
       </div>
 
       {importPreview ? (
@@ -245,7 +293,7 @@ export function ProductForm(props: ProductFormProps) {
             />
           </Field>
         </div>
-      ) : (
+      ) : !fromTemplateCreation ? (
         <Field
           error={formatFieldError(errors.coverAssetId?.message, t)}
           id="product-cover-image"
@@ -256,7 +304,7 @@ export function ProductForm(props: ProductFormProps) {
             name="coverImageUrl"
             render={({ field }) => (
               <ImageUpload
-                disabled={isSubmitting}
+                disabled={sharedFieldsDisabled}
                 id="product-cover-image"
                 labels={{
                   hint: t("coverImageHint"),
@@ -282,25 +330,27 @@ export function ProductForm(props: ProductFormProps) {
             )}
           />
         </Field>
-      )}
+      ) : null}
 
-      <Field
-        error={formatFieldError(errors.description?.message, t)}
-        id="product-description"
-        label={t("descriptionLabel")}
-      >
-        <Controller
-          control={control}
-          name="description"
-          render={({ field }) => (
-            <RichTextEditor
-              disabled={isSubmitting}
-              onChange={field.onChange}
-              value={field.value ?? ""}
-            />
-          )}
-        />
-      </Field>
+      {!fromTemplateCreation ? (
+        <Field
+          error={formatFieldError(errors.description?.message, t)}
+          id="product-description"
+          label={t("descriptionLabel")}
+        >
+          <Controller
+            control={control}
+            name="description"
+            render={({ field }) => (
+              <RichTextEditor
+                disabled={sharedFieldsDisabled}
+                onChange={field.onChange}
+                value={field.value ?? ""}
+              />
+            )}
+          />
+        </Field>
+      ) : null}
 
       {importPreview ? (
         <Field
@@ -314,9 +364,9 @@ export function ProductForm(props: ProductFormProps) {
             {...register("warrantyTerms")}
           />
         </Field>
-      ) : (
+      ) : !fromTemplateCreation ? (
         <ProductSpecificationsFields
-          disabled={isSubmitting}
+          disabled={sharedFieldsDisabled}
           errors={errors}
           fields={specificationFields}
           onAdd={appendSpecification}
@@ -324,7 +374,7 @@ export function ProductForm(props: ProductFormProps) {
           onRemove={removeSpecification}
           register={register}
         />
-      )}
+      ) : null}
 
       <div className="grid grid-cols-2 gap-2 border-t border-slate-200 pt-5 dark:border-slate-800 sm:flex sm:justify-end">
         <Button
@@ -438,7 +488,6 @@ function ProductCategoryCombobox({
 }
 
 const PRODUCT_EDITABLE_STATUSES = ["ACTIVE", "INACTIVE"] as const;
-
 const formatFieldError = createFieldErrorFormatter(
   new Set([
     "brandLength",

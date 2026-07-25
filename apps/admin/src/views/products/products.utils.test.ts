@@ -156,6 +156,8 @@ test("creates an inventory-only product payload", () => {
       serialNumber: " VIN-001 ",
       specifications: [{ key: "Technology", value: "Nano Ceramic" }],
       status: "ACTIVE",
+      templateId: "",
+      createTemplate: true,
     }),
     {
       brand: "Toyota",
@@ -172,8 +174,34 @@ test("creates an inventory-only product payload", () => {
       name: "Toyota Camry",
       serialNumber: "VIN-001",
       status: "ACTIVE",
+      templateId: undefined,
+      createTemplate: true,
     },
   );
+});
+
+test("keeps only unit metadata when creating a product from a template", () => {
+  const body = toCreateProductBody({
+    brand: "3M",
+    category: "ACCESSORY",
+    categoryId: "category-id",
+    coverAssetId: "template-cover-id",
+    coverImageUrl: "https://cdn.example.com/template.jpg",
+    description: "Shared description",
+    installationPosition: " Kính lái ",
+    manufactureYear: 2026,
+    model: "CR70",
+    name: "Decal 3M",
+    serialNumber: " SN-002 ",
+    specifications: [{ key: "UV", value: "99%" }],
+    status: "ACTIVE",
+    templateId: "template-id",
+    createTemplate: false,
+  });
+
+  assert.deepEqual(body.metadata, {
+    installationPosition: "Kính lái",
+  });
 });
 
 test("requires a valid manual warranty code when auto generation is disabled", () => {
