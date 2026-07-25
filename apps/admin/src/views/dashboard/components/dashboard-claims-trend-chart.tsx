@@ -50,7 +50,7 @@ export function DashboardClaimsTrendChart({
     })) ?? [];
 
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <CardHeader>
         <CardTitle>{t("charts.trendTitle")}</CardTitle>
         <CardDescription>{t("charts.trendDescription")}</CardDescription>
@@ -74,58 +74,63 @@ export function DashboardClaimsTrendChart({
             title={t("states.noChartData")}
           />
         ) : (
-          <ChartContainer
-            aria-label={t("charts.trendAriaLabel")}
-            className="aspect-auto h-72 w-full"
-            config={chartConfig}
-            role="img"
-          >
-            <AreaChart
-              accessibilityLayer
-              data={points}
-              margin={{ left: 4, right: 12 }}
+          <div className="w-full overflow-x-auto">
+            <ChartContainer
+              aria-label={t("charts.trendAriaLabel")}
+              config={chartConfig}
+              role="img"
+              style={{
+                height: 288,
+                width: `max(100%, ${points.length * 50 + 48}px)`,
+              }}
             >
-              <defs>
-                <linearGradient id="claims-fill" x1="0" x2="0" y1="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor="var(--color-value)"
-                    stopOpacity={0.28}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor="var(--color-value)"
-                    stopOpacity={0.03}
-                  />
-                </linearGradient>
-              </defs>
-              <CartesianGrid vertical={false} />
-              <XAxis
-                axisLine={false}
-                dataKey="label"
-                tickLine={false}
-                tickMargin={10}
-              />
-              <YAxis
-                allowDecimals={false}
-                axisLine={false}
-                tick={{ dx: -20, textAnchor: "start" }}
-                tickLine={false}
-                width={32}
-              />
-              <ChartTooltip
-                content={<ChartTooltipContent indicator="line" />}
-                cursor={false}
-              />
-              <Area
-                dataKey="value"
-                fill="url(#claims-fill)"
-                stroke="var(--color-value)"
-                strokeWidth={2}
-                type="monotone"
-              />
-            </AreaChart>
-          </ChartContainer>
+              <AreaChart
+                accessibilityLayer
+                data={points}
+                margin={{ left: 4, right: 12 }}
+              >
+                <defs>
+                  <linearGradient id="claims-fill" x1="0" x2="0" y1="0" y2="1">
+                    <stop
+                      offset="5%"
+                      stopColor="var(--color-value)"
+                      stopOpacity={0.28}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor="var(--color-value)"
+                      stopOpacity={0.03}
+                    />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  axisLine={false}
+                  dataKey="label"
+                  tickLine={false}
+                  tickMargin={10}
+                />
+                <YAxis
+                  allowDecimals={false}
+                  axisLine={false}
+                  tick={{ dx: -20, textAnchor: "start" }}
+                  tickLine={false}
+                  width={32}
+                />
+                <ChartTooltip
+                  content={<ChartTooltipContent indicator="line" />}
+                  cursor={false}
+                />
+                <Area
+                  dataKey="value"
+                  fill="url(#claims-fill)"
+                  stroke="var(--color-value)"
+                  strokeWidth={2}
+                  type="monotone"
+                />
+              </AreaChart>
+            </ChartContainer>
+          </div>
         )}
       </CardContent>
     </Card>

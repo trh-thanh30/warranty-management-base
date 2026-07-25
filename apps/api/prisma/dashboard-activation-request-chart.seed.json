@@ -76,5 +76,230 @@
       "REJECTED",
       "CANCELLED"
     ]
+  },
+  {
+    "offsetDays": 8,
+    "copies": 6,
+    "statuses": [
+      "PENDING",
+      "PENDING",
+      "APPROVED",
+      "ACTIVATED",
+      "REJECTED",
+      "CANCELLED"
+    ]
+  },
+  {
+    "offsetDays": 9,
+    "copies": 2,
+    "statuses": ["PENDING", "APPROVED", "ACTIVATED", "ACTIVATED", "REJECTED"]
+  },
+  {
+    "offsetDays": 10,
+    "copies": 5,
+    "statuses": [
+      "PENDING",
+      "APPROVED",
+      "ACTIVATED",
+      "REJECTED",
+      "REJECTED",
+      "CANCELLED"
+    ]
+  },
+  {
+    "offsetDays": 11,
+    "copies": 3,
+    "statuses": ["PENDING", "PENDING", "APPROVED", "ACTIVATED", "CANCELLED"]
+  },
+  {
+    "offsetDays": 12,
+    "copies": 4,
+    "statuses": [
+      "PENDING",
+      "APPROVED",
+      "APPROVED",
+      "ACTIVATED",
+      "REJECTED",
+      "CANCELLED"
+    ]
+  },
+  {
+    "offsetDays": 13,
+    "copies": 7,
+    "statuses": [
+      "PENDING",
+      "PENDING",
+      "APPROVED",
+      "ACTIVATED",
+      "ACTIVATED",
+      "REJECTED",
+      "CANCELLED"
+    ]
+  },
+  {
+    "offsetDays": 14,
+    "copies": 2,
+    "statuses": ["PENDING", "APPROVED", "ACTIVATED", "REJECTED", "CANCELLED"]
+  },
+  {
+    "offsetDays": 15,
+    "copies": 5,
+    "statuses": [
+      "PENDING",
+      "APPROVED",
+      "APPROVED",
+      "ACTIVATED",
+      "REJECTED",
+      "CANCELLED",
+      "CANCELLED"
+    ]
+  },
+  {
+    "offsetDays": 16,
+    "copies": 3,
+    "statuses": ["PENDING", "APPROVED", "ACTIVATED", "REJECTED"]
+  },
+  {
+    "offsetDays": 17,
+    "copies": 4,
+    "statuses": [
+      "PENDING",
+      "PENDING",
+      "APPROVED",
+      "ACTIVATED",
+      "REJECTED",
+      "CANCELLED"
+    ]
+  },
+  {
+    "offsetDays": 18,
+    "copies": 6,
+    "statuses": [
+      "PENDING",
+      "APPROVED",
+      "APPROVED",
+      "ACTIVATED",
+      "ACTIVATED",
+      "REJECTED",
+      "CANCELLED"
+    ]
+  },
+  {
+    "offsetDays": 19,
+    "copies": 2,
+    "statuses": ["PENDING", "APPROVED", "ACTIVATED", "REJECTED", "CANCELLED"]
+  },
+  {
+    "offsetDays": 20,
+    "copies": 5,
+    "statuses": [
+      "PENDING",
+      "PENDING",
+      "APPROVED",
+      "ACTIVATED",
+      "REJECTED",
+      "REJECTED",
+      "CANCELLED"
+    ]
+  },
+  {
+    "offsetDays": 21,
+    "copies": 3,
+    "statuses": ["PENDING", "APPROVED", "ACTIVATED", "CANCELLED"]
+  },
+  {
+    "offsetDays": 22,
+    "copies": 4,
+    "statuses": [
+      "PENDING",
+      "APPROVED",
+      "APPROVED",
+      "ACTIVATED",
+      "REJECTED",
+      "CANCELLED"
+    ]
+  },
+  {
+    "offsetDays": 23,
+    "copies": 8,
+    "statuses": [
+      "PENDING",
+      "PENDING",
+      "APPROVED",
+      "ACTIVATED",
+      "ACTIVATED",
+      "REJECTED",
+      "CANCELLED"
+    ]
+  },
+  {
+    "offsetDays": 24,
+    "copies": 2,
+    "statuses": ["PENDING", "APPROVED", "ACTIVATED", "REJECTED"]
+  },
+  {
+    "offsetDays": 25,
+    "copies": 5,
+    "statuses": [
+      "PENDING",
+      "APPROVED",
+      "ACTIVATED",
+      "REJECTED",
+      "CANCELLED",
+      "CANCELLED"
+    ]
+  },
+  {
+    "offsetDays": 26,
+    "copies": 3,
+    "statuses": [
+      "PENDING",
+      "PENDING",
+      "APPROVED",
+      "ACTIVATED",
+      "REJECTED",
+      "CANCELLED"
+    ]
+  },
+  {
+    "offsetDays": 27,
+    "copies": 4,
+    "statuses": [
+      "PENDING",
+      "APPROVED",
+      "APPROVED",
+      "ACTIVATED",
+      "REJECTED",
+      "CANCELLED"
+    ]
+  },
+  {
+    "offsetDays": 28,
+    "copies": 6,
+    "statuses": [
+      "PENDING",
+      "APPROVED",
+      "ACTIVATED",
+      "ACTIVATED",
+      "REJECTED",
+      "CANCELLED"
+    ]
+  },
+  {
+    "offsetDays": 29,
+    "copies": 2,
+    "statuses": ["PENDING", "PENDING", "APPROVED", "ACTIVATED", "REJECTED"]
+  },
+  {
+    "offsetDays": 30,
+    "copies": 5,
+    "statuses": [
+      "PENDING",
+      "APPROVED",
+      "APPROVED",
+      "ACTIVATED",
+      "REJECTED",
+      "CANCELLED"
+    ]
   }
 ]

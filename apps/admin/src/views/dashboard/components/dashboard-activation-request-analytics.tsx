@@ -92,7 +92,7 @@ export function DashboardActivationRequestAnalytics({
   );
 
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <CardTitle>{t("title")}</CardTitle>
@@ -136,7 +136,7 @@ export function DashboardActivationRequestAnalytics({
           ))}
         </div>
 
-        <div className="grid gap-4">
+        <div className="grid gap-4 overflow-hidden">
           <ActivationStatusTrendChart
             emptyDescription={t("emptyDescription")}
             emptyTitle={t("emptyTitle")}
@@ -234,57 +234,61 @@ function ActivationStatusTrendChart({
           </span>
         ))}
       </div>
-      <ChartContainer
-        aria-label={title}
-        className="aspect-auto w-full"
-        config={chartConfig}
-        role="img"
-        style={{ height: 300 }}
-      >
-        <BarChart
-          accessibilityLayer
-          barCategoryGap={10}
-          barGap={2}
-          data={chartData}
-          margin={{ bottom: 8, left: 0, right: 12, top: 24 }}
+      <div className="w-full overflow-x-auto">
+        <ChartContainer
+          aria-label={title}
+          config={chartConfig}
+          role="img"
+          style={{
+            height: 300,
+            width: `max(100%, ${chartData.length * 60 + 48}px)`,
+          }}
         >
-          <XAxis
-            axisLine={false}
-            dataKey="label"
-            interval={0}
-            tickFormatter={formatChartAxisLabel}
-            tickMargin={8}
-            tickLine={false}
-            type="category"
-          />
-          <YAxis
-            allowDecimals={false}
-            axisLine={false}
-            tickLine={false}
-            type="number"
-            width={32}
-          />
-          <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
-          {DASHBOARD_ACTIVATION_REQUEST_STATUS_ORDER.map((status) => (
-            <Bar
-              barSize={28}
-              dataKey={status}
-              fill={DASHBOARD_ACTIVATION_REQUEST_STATUS_COLORS[status]}
-              key={status}
-              maxBarSize={38}
-              minPointSize={4}
-              name={statusT(status)}
-              radius={[4, 4, 0, 0]}
-            >
-              <LabelList
-                className="fill-slate-600 text-[10px] dark:fill-slate-300"
+          <BarChart
+            accessibilityLayer
+            barCategoryGap={10}
+            barGap={2}
+            data={chartData}
+            margin={{ bottom: 8, left: 0, right: 12, top: 24 }}
+          >
+            <XAxis
+              axisLine={false}
+              dataKey="label"
+              interval={0}
+              tickFormatter={formatChartAxisLabel}
+              tickMargin={8}
+              tickLine={false}
+              type="category"
+            />
+            <YAxis
+              allowDecimals={false}
+              axisLine={false}
+              tickLine={false}
+              type="number"
+              width={32}
+            />
+            <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
+            {DASHBOARD_ACTIVATION_REQUEST_STATUS_ORDER.map((status) => (
+              <Bar
+                barSize={28}
                 dataKey={status}
-                position="top"
-              />
-            </Bar>
-          ))}
-        </BarChart>
-      </ChartContainer>
+                fill={DASHBOARD_ACTIVATION_REQUEST_STATUS_COLORS[status]}
+                key={status}
+                maxBarSize={38}
+                minPointSize={4}
+                name={statusT(status)}
+                radius={[4, 4, 0, 0]}
+              >
+                <LabelList
+                  className="fill-slate-600 text-[10px] dark:fill-slate-300"
+                  dataKey={status}
+                  position="top"
+                />
+              </Bar>
+            ))}
+          </BarChart>
+        </ChartContainer>
+      </div>
     </div>
   );
 }

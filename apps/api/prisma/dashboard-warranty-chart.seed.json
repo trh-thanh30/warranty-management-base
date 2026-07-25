@@ -33,5 +33,136 @@
     "offsetDays": 7,
     "copies": 5,
     "statuses": ["DRAFT", "ACTIVE", "EXPIRED", "VOIDED"]
+  },
+  {
+    "offsetDays": 8,
+    "copies": 6,
+    "statuses": ["DRAFT", "DRAFT", "ACTIVE", "ACTIVE", "EXPIRED", "VOIDED"]
+  },
+  {
+    "offsetDays": 9,
+    "copies": 2,
+    "statuses": ["DRAFT", "ACTIVE", "ACTIVE", "EXPIRED", "EXPIRED", "VOIDED"]
+  },
+  {
+    "offsetDays": 10,
+    "copies": 5,
+    "statuses": ["DRAFT", "ACTIVE", "EXPIRED", "VOIDED", "VOIDED"]
+  },
+  {
+    "offsetDays": 11,
+    "copies": 3,
+    "statuses": ["DRAFT", "DRAFT", "ACTIVE", "EXPIRED", "VOIDED"]
+  },
+  {
+    "offsetDays": 12,
+    "copies": 4,
+    "statuses": ["DRAFT", "ACTIVE", "ACTIVE", "ACTIVE", "EXPIRED", "VOIDED"]
+  },
+  {
+    "offsetDays": 13,
+    "copies": 7,
+    "statuses": [
+      "DRAFT",
+      "DRAFT",
+      "ACTIVE",
+      "ACTIVE",
+      "EXPIRED",
+      "EXPIRED",
+      "VOIDED"
+    ]
+  },
+  {
+    "offsetDays": 14,
+    "copies": 2,
+    "statuses": ["DRAFT", "ACTIVE", "EXPIRED", "VOIDED"]
+  },
+  {
+    "offsetDays": 15,
+    "copies": 5,
+    "statuses": ["DRAFT", "ACTIVE", "ACTIVE", "EXPIRED", "VOIDED", "VOIDED"]
+  },
+  {
+    "offsetDays": 16,
+    "copies": 3,
+    "statuses": ["DRAFT", "ACTIVE", "EXPIRED", "VOIDED"]
+  },
+  {
+    "offsetDays": 17,
+    "copies": 4,
+    "statuses": ["DRAFT", "DRAFT", "ACTIVE", "ACTIVE", "EXPIRED", "VOIDED"]
+  },
+  {
+    "offsetDays": 18,
+    "copies": 6,
+    "statuses": ["DRAFT", "ACTIVE", "ACTIVE", "EXPIRED", "EXPIRED", "VOIDED"]
+  },
+  {
+    "offsetDays": 19,
+    "copies": 2,
+    "statuses": ["DRAFT", "ACTIVE", "EXPIRED", "VOIDED"]
+  },
+  {
+    "offsetDays": 20,
+    "copies": 5,
+    "statuses": ["DRAFT", "DRAFT", "ACTIVE", "EXPIRED", "VOIDED", "VOIDED"]
+  },
+  {
+    "offsetDays": 21,
+    "copies": 3,
+    "statuses": ["DRAFT", "ACTIVE", "ACTIVE", "EXPIRED", "VOIDED"]
+  },
+  {
+    "offsetDays": 22,
+    "copies": 4,
+    "statuses": ["DRAFT", "ACTIVE", "EXPIRED", "EXPIRED", "VOIDED"]
+  },
+  {
+    "offsetDays": 23,
+    "copies": 8,
+    "statuses": [
+      "DRAFT",
+      "DRAFT",
+      "ACTIVE",
+      "ACTIVE",
+      "ACTIVE",
+      "EXPIRED",
+      "VOIDED"
+    ]
+  },
+  {
+    "offsetDays": 24,
+    "copies": 2,
+    "statuses": ["DRAFT", "ACTIVE", "EXPIRED", "VOIDED"]
+  },
+  {
+    "offsetDays": 25,
+    "copies": 5,
+    "statuses": ["DRAFT", "ACTIVE", "ACTIVE", "EXPIRED", "VOIDED", "VOIDED"]
+  },
+  {
+    "offsetDays": 26,
+    "copies": 3,
+    "statuses": ["DRAFT", "DRAFT", "ACTIVE", "EXPIRED", "VOIDED"]
+  },
+  {
+    "offsetDays": 27,
+    "copies": 4,
+    "statuses": ["DRAFT", "ACTIVE", "ACTIVE", "EXPIRED", "EXPIRED", "VOIDED"]
+  },
+  {
+    "offsetDays": 28,
+    "copies": 6,
+    "statuses": ["DRAFT", "ACTIVE", "ACTIVE", "EXPIRED", "VOIDED", "VOIDED"]
+  },
+  {
+    "offsetDays": 29,
+    "copies": 2,
+    "statuses": ["DRAFT", "DRAFT", "ACTIVE", "EXPIRED", "VOIDED"]
+  },
+  {
+    "offsetDays": 30,
+    "copies": 5,
+    "statuses": ["DRAFT", "ACTIVE", "ACTIVE", "EXPIRED", "VOIDED"]
   }
 ]
