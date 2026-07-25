@@ -963,7 +963,7 @@ async function main() {
     }
   }
 
-  await upsertDemoWarrantyActivationRequest({
+  const pendingActivationRequest = await upsertDemoWarrantyActivationRequest({
     requestCode: 'WAR-DEMO-PENDING',
     status: warranty_activation_request_status.PENDING,
     source: warranty_activation_request_source.PUBLIC_WEB,
@@ -1198,7 +1198,7 @@ async function main() {
   const reviewingClaimAt = addDays(seedNow, -3);
   const repairClaimAt = addDays(seedNow, -10);
 
-  await upsertDemoWarrantyClaim({
+  const submittedClaim = await upsertDemoWarrantyClaim({
     claimCode: 'CLM-DEMO-SUBMITTED',
     warrantyId: camryDemo.warranty.id,
     productId: camryDemo.product.id,
@@ -1312,6 +1312,63 @@ async function main() {
   const readNotificationAt = new Date(seedNow.getTime() - 24 * 60 * 60 * 1000);
 
   await upsertDemoNotification({
+    id: '00000000-0000-4000-8000-000000000305',
+    title: `New warranty claim ${submittedClaim.claim_code}`,
+    content: `Warranty claim ${submittedClaim.claim_code} has been submitted.`,
+    type: 'WARRANTY_CLAIM_CREATED',
+    source: notification_source.SYSTEM,
+    scope: notification_scope.ROLE,
+    deliveryStatus: notification_delivery_status.SENT,
+    sentAt: new Date(seedNow.getTime() - 10 * 60 * 1000),
+    metadata: {
+      claimId: submittedClaim.id,
+      claimCode: submittedClaim.claim_code,
+      warrantyCode: submittedClaim.warranty_code,
+      status: submittedClaim.status,
+    },
+    recipients: [
+      {
+        userId: adminUser.id,
+        status: notification_read_status.UNREAD,
+      },
+      {
+        userId: moderatorUser.id,
+        status: notification_read_status.UNREAD,
+      },
+    ],
+  });
+
+  await upsertDemoNotification({
+    id: '00000000-0000-4000-8000-000000000306',
+    title: `New warranty activation request ${pendingActivationRequest.request_code}`,
+    content: `Warranty activation request ${pendingActivationRequest.request_code} has been submitted.`,
+    type: 'WARRANTY_ACTIVATION_REQUEST_CREATED',
+    source: notification_source.SYSTEM,
+    scope: notification_scope.ROLE,
+    deliveryStatus: notification_delivery_status.SENT,
+    sentAt: new Date(seedNow.getTime() - 20 * 60 * 1000),
+    metadata: {
+      requestId: pendingActivationRequest.id,
+      requestCode: pendingActivationRequest.request_code,
+      warrantyCode: pendingActivationRequest.warranty_code,
+      customerName: pendingActivationRequest.customer_name,
+      customerPhone: pendingActivationRequest.customer_phone,
+      source: pendingActivationRequest.source,
+      status: pendingActivationRequest.status,
+    },
+    recipients: [
+      {
+        userId: adminUser.id,
+        status: notification_read_status.UNREAD,
+      },
+      {
+        userId: moderatorUser.id,
+        status: notification_read_status.UNREAD,
+      },
+    ],
+  });
+
+  await upsertDemoNotification({
     id: '00000000-0000-4000-8000-000000000301',
     title: 'New warranty claim assigned',
     content:
@@ -1407,7 +1464,7 @@ async function main() {
   console.log(
     'Warranty claims: CLM-DEMO-SUBMITTED, CLM-DEMO-REVIEWING, CLM-DEMO-IN-REPAIR',
   );
-  console.log('Notifications: 3 sent demo messages and 1 scheduled message');
+  console.log('Notifications: 5 sent demo messages and 1 scheduled message');
   console.log('Default password: password123');
 }
 
