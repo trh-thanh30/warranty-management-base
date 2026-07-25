@@ -9,6 +9,8 @@ import {
 } from '@/modules/product-templates/product-template-input';
 import { toProductTemplateResponse } from '@/modules/product-templates/product-templates.types';
 import { ProductTemplatesRepository } from '@/modules/product-templates/repository/product-templates.repository';
+import { GenerateProductTemplateSkuUseCase } from '@/modules/product-templates/use-cases/generate-product-template-sku.use-case';
+import { GenerateProductTemplateSlugUseCase } from '@/modules/product-templates/use-cases/generate-product-template-slug.use-case';
 import { Injectable } from '@nestjs/common';
 import { ConflictError } from '@/common/response';
 
@@ -18,13 +20,24 @@ export class CreateProductTemplateUseCase {
     private readonly prismaService: PrismaService,
     private readonly productTemplatesRepository: ProductTemplatesRepository,
     private readonly assetsService: AssetsService,
+    private readonly generateProductTemplateSkuUseCase: GenerateProductTemplateSkuUseCase,
+    private readonly generateProductTemplateSlugUseCase: GenerateProductTemplateSlugUseCase,
   ) {}
 
   async execute(dto: CreateProductTemplateDto) {
-    const sku = normalizeSku(dto.sku);
+    const requestedSku = dto.sku?.trim();
+    const requestedSlug = dto.slug?.trim();
+    const [sku, slug] = await Promise.all([
+      requestedSku
+        ? Promise.resolve(normalizeSku(requestedSku))
+        : this.generateProductTemplateSkuUseCase.execute(dto.name),
+      requestedSlug
+        ? Promise.resolve(requestedSlug)
+        : this.generateProductTemplateSlugUseCase.execute(dto.name),
+    ]);
     const [skuConflict, slugConflict] = await Promise.all([
-      this.productTemplatesRepository.findBySku(sku),
-      this.productTemplatesRepository.findBySlug(dto.slug),
+      requestedSku ? this.productTemplatesRepository.findBySku(sku) : null,
+      requestedSlug ? this.productTemplatesRepository.findBySlug(slug) : null,
     ]);
     if (skuConflict) {
       throw new ConflictError('Product template SKU already exists');
@@ -64,7 +77,7 @@ export class CreateProductTemplateUseCase {
     ];
     const template = await this.productTemplatesRepository.create({
       sku,
-      slug: dto.slug,
+      slug,
       name: dto.name,
       category_ref: { connect: { id: category.id } },
       brand: dto.brand,

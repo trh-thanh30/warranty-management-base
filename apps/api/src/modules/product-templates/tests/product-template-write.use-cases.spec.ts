@@ -30,6 +30,43 @@ const templateRecord = {
 };
 
 describe('ProductTemplate write use cases', () => {
+  it('auto-generates SKU and slug when both fields are blank', async () => {
+    const repository = {
+      findImageAssets: jest.fn().mockResolvedValue([]),
+      create: jest.fn().mockResolvedValue(templateRecord),
+    };
+    const skuGenerator = { execute: jest.fn().mockResolvedValue('PPF-X10') };
+    const slugGenerator = { execute: jest.fn().mockResolvedValue('ppf-x10') };
+    const useCase = new CreateProductTemplateUseCase(
+      {
+        category: {
+          findUnique: jest.fn().mockResolvedValue({
+            id: 'category-id',
+            type: category_type.PRODUCT,
+          }),
+        },
+      } as never,
+      repository as never,
+      { enrichAssetUrl: jest.fn() } as never,
+      skuGenerator as never,
+      slugGenerator as never,
+    );
+
+    await useCase.execute({
+      name: 'PPF X10',
+      categoryId: 'category-id',
+    });
+
+    expect(skuGenerator.execute).toHaveBeenCalledWith('PPF X10');
+    expect(slugGenerator.execute).toHaveBeenCalledWith('PPF X10');
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sku: 'PPF-X10',
+        slug: 'ppf-x10',
+      }),
+    );
+  });
+
   it('creates a reusable template with validated image assets', async () => {
     const repository = {
       findBySku: jest.fn().mockResolvedValue(null),
@@ -50,6 +87,8 @@ describe('ProductTemplate write use cases', () => {
       } as never,
       repository as never,
       { enrichAssetUrl: jest.fn() } as never,
+      { execute: jest.fn() } as never,
+      { execute: jest.fn() } as never,
     );
 
     await useCase.execute({

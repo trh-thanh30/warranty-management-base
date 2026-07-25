@@ -24,15 +24,14 @@ export class UpdateProductTemplateUseCase {
     const existing = await this.productTemplatesRepository.findById(id);
     if (!existing) throw new NotFoundError('Product template not found');
     const sku = dto.sku ? normalizeSku(dto.sku) : undefined;
+    const slug = dto.slug?.trim() || undefined;
     if (sku && sku !== existing.sku) {
       const conflict = await this.productTemplatesRepository.findBySku(sku);
       if (conflict)
         throw new ConflictError('Product template SKU already exists');
     }
-    if (dto.slug && dto.slug !== existing.slug) {
-      const conflict = await this.productTemplatesRepository.findBySlug(
-        dto.slug,
-      );
+    if (slug && slug !== existing.slug) {
+      const conflict = await this.productTemplatesRepository.findBySlug(slug);
       if (conflict) {
         throw new ConflictError('Product template slug already exists');
       }
@@ -54,7 +53,7 @@ export class UpdateProductTemplateUseCase {
       id,
       {
         sku,
-        slug: dto.slug,
+        slug,
         name: dto.name,
         category_ref: category ? { connect: { id: category.id } } : undefined,
         brand: dto.brand,

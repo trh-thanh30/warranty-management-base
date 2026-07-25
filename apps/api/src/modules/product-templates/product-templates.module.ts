@@ -7,6 +7,8 @@ import { CreateProductTemplateUseCase } from '@/modules/product-templates/use-ca
 import { DeactivateProductTemplateUseCase } from '@/modules/product-templates/use-cases/deactivate-product-template.use-case';
 import { GetProductTemplateDetailUseCase } from '@/modules/product-templates/use-cases/get-product-template-detail.use-case';
 import { UpdateProductTemplateUseCase } from '@/modules/product-templates/use-cases/update-product-template.use-case';
+import { GenerateProductTemplateSkuUseCase } from '@/modules/product-templates/use-cases/generate-product-template-sku.use-case';
+import { GenerateProductTemplateSlugUseCase } from '@/modules/product-templates/use-cases/generate-product-template-slug.use-case';
 import { Module } from '@nestjs/common';
 
 @Module({
@@ -19,6 +21,8 @@ import { Module } from '@nestjs/common';
     CreateProductTemplateUseCase,
     UpdateProductTemplateUseCase,
     DeactivateProductTemplateUseCase,
+    GenerateProductTemplateSkuUseCase,
+    GenerateProductTemplateSlugUseCase,
   ],
   exports: [ProductTemplatesRepository],
 })

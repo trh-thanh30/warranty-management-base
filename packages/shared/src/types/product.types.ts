@@ -47,8 +47,8 @@ export type ListProductTemplatesQuery = PaginationQuery & {
 };
 
 export type CreateProductTemplateBody = {
-  sku: string;
-  slug: string;
+  sku?: string;
+  slug?: string;
   name: string;
   categoryId: string;
   brand?: string;

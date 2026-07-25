@@ -45,4 +45,22 @@ describe('GenerateProductCodeUseCase', () => {
     ).rejects.toBeInstanceOf(BadRequestError);
     expect(productsRepository.findByProductCode).toHaveBeenCalledTimes(5);
   });
+
+  it('generates distinct codes for a batch even when randomness repeats', async () => {
+    productsRepository.findByProductCode.mockResolvedValue(null);
+    jest.spyOn(Math, 'random').mockReturnValue(0);
+    const useCase = new GenerateProductCodeUseCase(productsRepository as never);
+
+    const codes = await useCase.executeBatch(
+      3,
+      new Date('2026-06-14T00:00:00.000Z'),
+    );
+
+    expect(codes).toEqual([
+      'PRD-2026-AAAAAA',
+      'PRD-2026-AAAAAB',
+      'PRD-2026-AAAAAC',
+    ]);
+    expect(new Set(codes).size).toBe(3);
+  });
 });

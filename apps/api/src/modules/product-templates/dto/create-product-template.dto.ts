@@ -11,18 +11,27 @@ import {
   Matches,
   Max,
   Min,
+  ValidateIf,
 } from 'class-validator';
 
 export class CreateProductTemplateDto {
+  @IsOptional()
+  @ValidateIf(
+    (_, value) => typeof value !== 'string' || value.trim().length > 0,
+  )
   @IsString()
   @Length(1, 64)
   @Matches(/^[A-Za-z0-9][A-Za-z0-9._-]*$/)
-  sku: string;
+  sku?: string;
 
+  @IsOptional()
+  @ValidateIf(
+    (_, value) => typeof value !== 'string' || value.trim().length > 0,
+  )
   @IsString()
   @Length(2, 180)
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
-  slug: string;
+  slug?: string;
 
   @IsString()
   @Length(2, 160)
