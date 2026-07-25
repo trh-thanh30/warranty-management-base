@@ -90,7 +90,7 @@ export function UpdateClaimStatusDialog({
             </Button>
           </DialogClose>
           <Button
-            disabled={isUpdating || !status || !note.trim()}
+            disabled={isUpdating || !status}
             onClick={() => onConfirm(status, note)}
             type="button"
           >

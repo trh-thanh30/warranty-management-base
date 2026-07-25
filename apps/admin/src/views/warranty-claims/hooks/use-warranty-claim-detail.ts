@@ -77,7 +77,7 @@ export function useWarrantyClaimDetail(claimId: string) {
     try {
       await updateStatusMutation.mutateAsync({
         status: status as WarrantyClaimSummary["status"],
-        note: note.trim(),
+        note: note.trim() || undefined,
       });
       await refreshDetail();
       toast.success(t("statusUpdated"));

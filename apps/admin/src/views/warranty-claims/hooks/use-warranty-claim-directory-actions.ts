@@ -49,7 +49,7 @@ export function useWarrantyClaimDirectoryActions() {
     try {
       await updateStatusMutation.mutateAsync({
         status: status as WarrantyClaimSummary["status"],
-        note: note.trim(),
+        note: note.trim() || undefined,
       });
       toast.success(t("statusUpdated"));
       closeAction();
