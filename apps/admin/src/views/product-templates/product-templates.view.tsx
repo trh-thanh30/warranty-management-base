@@ -131,7 +131,10 @@ export function ProductTemplatesView() {
                 title={t("loadErrorTitle")}
               />
             ) : data && data.items.length > 0 ? (
-              <div className="space-y-4">
+              <div
+                className="scroll-mt-24 space-y-4"
+                id="product-templates-directory-results"
+              >
                 <ProductTemplatesTable
                   items={data.items}
                   onDeactivate={directory.openDeactivate}
@@ -144,6 +147,7 @@ export function ProductTemplatesView() {
                   pageSize={data.meta.limit}
                   pageSizeLabel={t("pageSize")}
                   previousLabel={t("previous")}
+                  scrollTargetId="product-templates-directory-results"
                   summary={t("pagination", {
                     page: data.meta.page,
                     total: data.meta.total,

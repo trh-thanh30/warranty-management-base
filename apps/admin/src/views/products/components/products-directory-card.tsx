@@ -243,7 +243,7 @@ function ProductsDirectoryContent({
 
   if (data && data.items.length > 0) {
     return (
-      <>
+      <div className="scroll-mt-24" id="products-directory-results">
         <ProductsTable
           items={data.items}
           onAssignOwner={onAssignOwner}
@@ -258,7 +258,7 @@ function ProductsDirectoryContent({
           onPageSizeChange={onPageSizeChange}
           pageSize={pageSize}
         />
-      </>
+      </div>
     );
   }
 
@@ -316,6 +316,7 @@ function ProductsPagination({
       pageSize={pageSize}
       pageSizeLabel={t("pageSize")}
       previousLabel={t("previous")}
+      scrollTargetId="products-directory-results"
       summary={t("pagination", {
         page: data.meta.page,
         total: data.meta.total,
