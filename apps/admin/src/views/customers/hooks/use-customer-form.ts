@@ -15,6 +15,7 @@ import {
   customerFormSchema,
   type CustomerFormValues,
 } from "../customers.types";
+import { buildCustomerAddress } from "../customers.utils";
 import { useCreateCustomer, useUpdateCustomer } from "./use-customers";
 import { toOptionalValue, toRequiredValue } from "@/src/utils";
 
@@ -124,18 +125,6 @@ function toUpdateCustomerBody(values: CustomerFormValues): UpdateCustomerBody {
     fullName: values.fullName.trim(),
     phone: toRequiredValue(values.phone),
   };
-}
-
-function buildCustomerAddress(values: CustomerFormValues) {
-  const parts = [
-    toRequiredValue(values.addressDetail),
-    toOptionalValue(values.wardName),
-    toOptionalValue(values.provinceName),
-  ].filter(Boolean);
-
-  return parts.length > 1
-    ? parts.join(", ")
-    : toRequiredValue(values.addressDetail);
 }
 
 function handleCustomerSaveError(

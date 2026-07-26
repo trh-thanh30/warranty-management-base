@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Controller } from "react-hook-form";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -22,6 +22,10 @@ import {
 } from "@/src/hooks/use-locations";
 import { createFieldErrorFormatter, parseVietnamAddress } from "@/src/utils";
 import { useCustomerForm } from "../hooks/use-customer-form";
+import {
+  fillCustomerAddressSelection,
+  getCustomerAddressSelection,
+} from "../customers.utils";
 
 type CustomerFormProps = {
   customer: CustomerSummary | null;
@@ -39,6 +43,7 @@ export function CustomerForm({
     null,
   );
   const [pendingWardName, setPendingWardName] = useState<string | null>(null);
+  const previousAddressSelectionRef = useRef("");
   const {
     control,
     creating,
@@ -51,6 +56,9 @@ export function CustomerForm({
   } = useCustomerForm({ customer, onSaved });
   const provinceCode = watch("provinceCode");
   const wardCode = watch("wardCode");
+  const provinceName = watch("provinceName");
+  const wardName = watch("wardName");
+  const addressDetail = watch("addressDetail");
   const provinceCodeNumber = provinceCode ? Number(provinceCode) : null;
   const provincesQuery = useVietnamProvinces();
   const wardsQuery = useVietnamWards(provinceCodeNumber);
@@ -115,6 +123,28 @@ export function CustomerForm({
     });
     setPendingWardName(null);
   }, [pendingWardName, setValue, wards]);
+
+  useEffect(() => {
+    const nextSelection = getCustomerAddressSelection({
+      provinceName,
+      wardName,
+    });
+    if (!nextSelection) return;
+
+    const nextAddress = fillCustomerAddressSelection({
+      currentAddress: addressDetail,
+      previousSelection: previousAddressSelectionRef.current,
+      provinceName,
+      wardName,
+    });
+    previousAddressSelectionRef.current = nextSelection;
+    if (nextAddress === addressDetail) return;
+
+    setValue("addressDetail", nextAddress, {
+      shouldDirty: creating,
+      shouldValidate: true,
+    });
+  }, [addressDetail, creating, provinceName, setValue, wardName]);
 
   return (
     <form className="space-y-6" noValidate onSubmit={onSubmit}>
