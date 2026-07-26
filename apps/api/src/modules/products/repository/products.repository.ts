@@ -6,6 +6,7 @@ import {
   category_type,
   Prisma,
   product_status,
+  warranty_activation_request_status,
   warranty_status,
 } from '@prisma/client';
 
@@ -28,6 +29,18 @@ const productInclude = {
     orderBy: { created_at: 'desc' as const },
   },
   warranty: true,
+  warranty_activation_requests: {
+    where: {
+      status: {
+        in: [
+          warranty_activation_request_status.PENDING,
+          warranty_activation_request_status.APPROVED,
+        ],
+      },
+    },
+    select: { id: true },
+    take: 1,
+  },
   category_ref: true,
 };
 

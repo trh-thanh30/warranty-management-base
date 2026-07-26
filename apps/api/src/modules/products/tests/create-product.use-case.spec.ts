@@ -44,19 +44,22 @@ describe('CreateProductUseCase', () => {
       ownerships: [],
       warranty: {
         id: 'warranty-id',
-        warranty_code: null,
+        warranty_code: 'WM-2026-CREATE',
         status: warranty_status.DRAFT,
       },
     });
+    const tx = { product: { create: productCreate } };
+    const generateWarrantyCodeUseCase = {
+      execute: jest.fn().mockResolvedValue('WM-2026-CREATE'),
+    };
     const useCase = new CreateProductUseCase(
       {
-        $transaction: jest.fn((callback) =>
-          callback({ product: { create: productCreate } }),
-        ),
+        $transaction: jest.fn((callback) => callback(tx)),
       } as never,
       { findBySerialNumber: jest.fn().mockResolvedValue(null) } as never,
       { execute: jest.fn().mockResolvedValue('PRD-2026-ABCDEF') } as never,
       { findActiveById: jest.fn().mockResolvedValue(template) } as never,
+      generateWarrantyCodeUseCase as never,
     );
 
     const result = await useCase.execute({
@@ -71,8 +74,18 @@ describe('CreateProductUseCase', () => {
           category_ref: { connect: { id: template.category_id } },
           display_name: 'Camera cổng chính',
           template: { connect: { id: template.id } },
+          warranty: {
+            create: expect.objectContaining({
+              warranty_code: 'WM-2026-CREATE',
+              status: warranty_status.DRAFT,
+            }),
+          },
         }),
       }),
+    );
+    expect(generateWarrantyCodeUseCase.execute).toHaveBeenCalledWith(
+      expect.any(Date),
+      tx,
     );
     expect(result.displayName).toBe('Camera cổng chính');
     expect(result.name).toBe(template.name);
@@ -121,6 +134,7 @@ describe('CreateProductUseCase', () => {
       productsRepository as never,
       { execute: jest.fn().mockResolvedValue('PRD-2026-ABCDEF') } as never,
       { findActiveById: jest.fn().mockResolvedValue(template) } as never,
+      { execute: jest.fn().mockResolvedValue('WM-2026-CREATE') } as never,
     );
 
     await useCase.execute({
@@ -178,6 +192,7 @@ describe('CreateProductUseCase', () => {
       productsRepository as never,
       generateProductCodeUseCase as never,
       { findActiveById: jest.fn().mockResolvedValue(template) } as never,
+      { execute: jest.fn().mockResolvedValue('WM-2026-CREATE') } as never,
     );
 
     await useCase.execute({

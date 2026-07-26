@@ -6,7 +6,10 @@ import {
   toProductActiveStatus,
   toUpdateProductBody,
 } from "./products.utils.ts";
-import { assignProductOwnerSchema } from "./products.types.ts";
+import {
+  assignProductOwnerSchema,
+  productFormSchema,
+} from "./products.types.ts";
 
 test("maps the edit status toggle to an active product status", () => {
   assert.equal(toProductActiveStatus(true), "ACTIVE");
@@ -85,6 +88,7 @@ test("updates only physical product fields and preserves unrelated metadata", ()
         serialNumber: "",
         status: "INACTIVE",
         templateId: "template-id",
+        warrantyCode: " wm-2026-new001 ",
       },
       { source: "import", installationPosition: "Old" },
     ),
@@ -97,7 +101,42 @@ test("updates only physical product fields and preserves unrelated metadata", ()
       },
       serialNumber: null,
       status: "INACTIVE",
+      warrantyCode: "wm-2026-new001",
     },
+  );
+});
+
+test("allows a blank warranty code but rejects an invalid non-empty code", () => {
+  const baseValues = {
+    categoryId: "category-id",
+    displayName: "",
+    installationPosition: "",
+    productCode: "",
+    serialNumber: "",
+    status: "ACTIVE" as const,
+    templateId: "template-id",
+  };
+
+  assert.equal(
+    productFormSchema.safeParse({
+      ...baseValues,
+      warrantyCode: "",
+    }).success,
+    true,
+  );
+  assert.equal(
+    productFormSchema.safeParse({
+      ...baseValues,
+      warrantyCode: "bad code!",
+    }).success,
+    false,
+  );
+  assert.equal(
+    productFormSchema.safeParse({
+      ...baseValues,
+      warrantyCode: "wm-2026-new001",
+    }).success,
+    true,
   );
 });
 

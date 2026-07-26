@@ -14,6 +14,13 @@ export const productFormSchema = z.object({
   serialNumber: optionalText.max(64, "serialNumberLength"),
   status: z.enum(["ACTIVE", "INACTIVE"]),
   templateId: optionalText.min(1, "templateRequired"),
+  warrantyCode: optionalText
+    .max(64, "warrantyCodeInvalid")
+    .refine(
+      (value) => !value || /^[A-Z0-9-]{6,64}$/i.test(value),
+      "warrantyCodeInvalid",
+    )
+    .optional(),
 });
 
 export const assignProductOwnerSchema = z

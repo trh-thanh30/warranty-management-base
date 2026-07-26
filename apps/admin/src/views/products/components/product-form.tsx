@@ -261,18 +261,29 @@ export function ProductForm({
 
       {product ? (
         <div className="grid gap-5 sm:grid-cols-2">
-          {product.warrantyCode ? (
-            <Field
-              id="product-warranty-code-readonly"
-              label={t("warrantyCode")}
-            >
-              <Input
-                id="product-warranty-code-readonly"
-                readOnly
-                value={product.warrantyCode}
-              />
-            </Field>
-          ) : null}
+          <Field
+            description={
+              product.warrantyCodeEditLockedReason === "WARRANTY_NOT_DRAFT"
+                ? t("warrantyCodeNotDraftDescription")
+                : product.warrantyCodeEditLockedReason ===
+                    "OPEN_ACTIVATION_REQUEST"
+                  ? t("warrantyCodeOpenRequestDescription")
+                  : t("warrantyCodeEditableDescription")
+            }
+            error={formatFieldError(
+              form.formState.errors.warrantyCode?.message,
+              t,
+            )}
+            id="product-warranty-code"
+            label={t("warrantyCode")}
+          >
+            <Input
+              disabled={!product.canEditWarrantyCode || isSubmitting}
+              id="product-warranty-code"
+              placeholder={t("warrantyCodePlaceholder")}
+              {...form.register("warrantyCode")}
+            />
+          </Field>
         </div>
       ) : null}
 
@@ -427,5 +438,8 @@ const formatFieldError = createFieldErrorFormatter(
     "serialNumberLength",
     "templateNotFound",
     "templateRequired",
+    "warrantyCodeInvalid",
+    "warrantyCodeNotDraft",
+    "warrantyCodeOpenRequest",
   ]),
 );

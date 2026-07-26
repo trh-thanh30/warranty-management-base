@@ -6,6 +6,7 @@ import {
   ProductAsset,
   ProductOwnership,
   Warranty,
+  warranty_status,
 } from '@prisma/client';
 import { toCategoryResponse } from '@/modules/categories/categories.types';
 import {
@@ -17,6 +18,7 @@ type ProductWithRelations = Product & {
   assets?: Array<ProductAsset & { asset: Asset }>;
   ownerships?: Array<ProductOwnership & { customer?: Customer }>;
   warranty?: Warranty | null;
+  warranty_activation_requests?: Array<{ id: string }>;
   template?: ProductTemplateWithRelations | null;
   category_ref?: Category;
 };
@@ -46,6 +48,12 @@ export function toProductResponse(
       originalName: productAsset.asset.original_name,
       source: 'PRODUCT' as const,
     })) ?? [];
+  const warrantyCodeEditLockedReason =
+    product.warranty && product.warranty.status !== warranty_status.DRAFT
+      ? ('WARRANTY_NOT_DRAFT' as const)
+      : product.warranty_activation_requests?.length
+        ? ('OPEN_ACTIVATION_REQUEST' as const)
+        : null;
 
   return {
     id: product.id,
@@ -54,6 +62,8 @@ export function toProductResponse(
     productCode: product.product_code,
     slug: templateResponse?.slug ?? '',
     warrantyCode: product.warranty?.warranty_code ?? null,
+    canEditWarrantyCode: warrantyCodeEditLockedReason === null,
+    warrantyCodeEditLockedReason,
     serialNumber: product.serial_number,
     displayName: product.display_name,
     name:

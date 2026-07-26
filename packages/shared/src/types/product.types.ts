@@ -115,6 +115,10 @@ export type ProductWarrantySummary = {
   terms: string | null;
 };
 
+export type WarrantyCodeEditLockedReason =
+  | "WARRANTY_NOT_DRAFT"
+  | "OPEN_ACTIVATION_REQUEST";
+
 export type ProductSummary = {
   id: string;
   templateId: string;
@@ -122,6 +126,8 @@ export type ProductSummary = {
   productCode: string;
   slug: string;
   warrantyCode: string | null;
+  canEditWarrantyCode: boolean;
+  warrantyCodeEditLockedReason: WarrantyCodeEditLockedReason | null;
   serialNumber: string | null;
   displayName: string | null;
   name: string;
@@ -173,6 +179,7 @@ export type UpdateProductBody = {
   status?: ProductStatus;
   serialNumber?: string | null;
   metadata?: Record<string, unknown> | null;
+  warrantyCode?: string;
 };
 
 export type PublicProductSummary = {

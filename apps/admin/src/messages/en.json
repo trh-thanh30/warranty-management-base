@@ -875,6 +875,9 @@
     "duplicateProductCode": "This product code already exists.",
     "warrantyCode": "Warranty code",
     "warrantyCodePlaceholder": "e.g. WAR-CAR-2026-01",
+    "warrantyCodeEditableDescription": "You can replace this code before activation. Clearing the input keeps the current code.",
+    "warrantyCodeNotDraftDescription": "The code is locked because this warranty is no longer in draft.",
+    "warrantyCodeOpenRequestDescription": "The code is locked while an activation request is pending or approved.",
     "serialNumber": "Serial number",
     "serialNumberPlaceholder": "e.g. VIN-VF8-2026-8899",
     "category": "Category",
@@ -986,6 +989,8 @@
     "slugInvalid": "The slug may contain lowercase letters, numbers, and hyphens only.",
     "slugLength": "The product slug must be 180 characters or fewer.",
     "warrantyCodeInvalid": "Warranty code must be 6 to 64 letters, numbers, or dashes.",
+    "warrantyCodeNotDraft": "The warranty code cannot be changed after activation.",
+    "warrantyCodeOpenRequest": "The warranty code cannot be changed while an activation request is open.",
     "warrantyCodeRequired": "Enter the warranty code or enable auto-generation.",
     "warrantyTermsLength": "Warranty terms must be 2000 characters or fewer.",
     "categories": {

@@ -6,6 +6,7 @@ import { CreateProductDto } from '@/modules/products/dto/create-product.dto';
 import { toProductResponse } from '@/modules/products/products.types';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
 import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generate-product-code.use-case';
+import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { Injectable } from '@nestjs/common';
 import { Prisma, product_status, warranty_status } from '@prisma/client';
 
@@ -16,6 +17,7 @@ export class CreateProductUseCase {
     private readonly productsRepository: ProductsRepository,
     private readonly generateProductCodeUseCase: GenerateProductCodeUseCase,
     private readonly productTemplatesRepository: ProductTemplatesRepository,
+    private readonly generateWarrantyCodeUseCase: GenerateWarrantyCodeUseCase,
     private readonly assetsService?: AssetsService,
   ) {}
 
@@ -50,6 +52,11 @@ export class CreateProductUseCase {
     }
 
     const product = await this.prismaService.$transaction(async (tx) => {
+      const warrantyCode = await this.generateWarrantyCodeUseCase.execute(
+        new Date(),
+        tx,
+      );
+
       return tx.product.create({
         data: {
           product_code: productCode,
@@ -61,7 +68,7 @@ export class CreateProductUseCase {
           metadata: toPhysicalProductMetadata(dto.metadata),
           warranty: {
             create: {
-              warranty_code: null,
+              warranty_code: warrantyCode,
               duration_months:
                 selectedTemplate.default_warranty_duration_months,
               terms: selectedTemplate.default_warranty_terms,

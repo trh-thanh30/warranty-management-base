@@ -875,6 +875,9 @@
     "duplicateProductCode": "Mã sản phẩm này đã tồn tại.",
     "warrantyCode": "Mã bảo hành",
     "warrantyCodePlaceholder": "Ví dụ: WAR-CAR-2026-01",
+    "warrantyCodeEditableDescription": "Có thể đổi mã trước khi kích hoạt. Nếu xóa trắng, hệ thống vẫn giữ mã hiện tại.",
+    "warrantyCodeNotDraftDescription": "Mã đã bị khóa vì bảo hành không còn ở trạng thái nháp.",
+    "warrantyCodeOpenRequestDescription": "Mã đã bị khóa khi có yêu cầu kích hoạt đang chờ hoặc đã duyệt.",
     "serialNumber": "Số serial",
     "serialNumberPlaceholder": "Ví dụ: VIN-VF8-2026-8899",
     "category": "Danh mục",
@@ -986,6 +989,8 @@
     "slugInvalid": "Đường dẫn chỉ gồm chữ thường không dấu, số và dấu gạch ngang.",
     "slugLength": "Đường dẫn sản phẩm không được quá 180 ký tự.",
     "warrantyCodeInvalid": "Mã bảo hành phải từ 6 đến 64 ký tự chữ, số hoặc dấu gạch ngang.",
+    "warrantyCodeNotDraft": "Không thể đổi mã bảo hành sau khi đã kích hoạt.",
+    "warrantyCodeOpenRequest": "Không thể đổi mã bảo hành khi đang có yêu cầu kích hoạt.",
     "warrantyCodeRequired": "Nhập mã bảo hành hoặc bật tự sinh mã.",
     "warrantyTermsLength": "Điều khoản bảo hành không được quá 2000 ký tự.",
     "categories": {

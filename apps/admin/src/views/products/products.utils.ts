@@ -86,6 +86,7 @@ export function toUpdateProductBody(
     ),
     serialNumber: toNullableValue(values.serialNumber),
     status: values.status,
+    warrantyCode: values.warrantyCode?.trim() ?? "",
   };
 }
 

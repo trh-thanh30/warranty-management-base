@@ -161,6 +161,7 @@ function getDefaultValues(
     serialNumber: product?.serialNumber ?? "",
     status: product?.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
     templateId: product?.templateId ?? template?.id ?? "",
+    warrantyCode: product?.warrantyCode ?? "",
   };
 }
 
@@ -176,6 +177,16 @@ function handleProductSaveError(
     "Product category not found": ["categoryId", "categoryNotFound"],
     "Product template not found": ["templateId", "templateNotFound"],
     "Serial number already exists": ["serialNumber", "duplicateSerialNumber"],
+    "Warranty code already exists": ["warrantyCode", "duplicateWarrantyCode"],
+    "Warranty code is invalid": ["warrantyCode", "warrantyCodeInvalid"],
+    "Warranty code can only be changed while warranty is draft": [
+      "warrantyCode",
+      "warrantyCodeNotDraft",
+    ],
+    "Warranty code cannot be changed while an activation request is open": [
+      "warrantyCode",
+      "warrantyCodeOpenRequest",
+    ],
   } as const;
   const match = messages[error.message as keyof typeof messages];
   if (!match) return null;
