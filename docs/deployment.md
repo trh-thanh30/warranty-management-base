@@ -225,6 +225,19 @@ Docker images dùng GitHub Container Registry (GHCR) làm registry mặc định
 
 Workflow `.github/workflows/publish-images.yml` chạy sau khi workflow `CI` xanh trên `main` hoặc `develop` và build/push image cho API, Web, Admin. Khi chưa có VPS/server, phần này đã đủ để có artifact deploy được.
 
+Mỗi image có một tag commit bất biến và một tag theo nhánh:
+
+| Nhánh     | Tag được push                   |
+| --------- | ------------------------------- |
+| `main`    | `<commit-sha>` và `main`        |
+| `develop` | `<commit-sha>` và `develop`     |
+| Thủ công  | `<image_tag>` và tên nhánh chạy |
+
+Build từ `develop` không ghi đè tag `main`. Workflow được trigger bằng
+`workflow_run`, nên cấu hình cho `develop` phải tồn tại trên default branch của
+repository. Default branch hiện là `develop`, nên chỉ cần commit và push thay
+đổi workflow lên `develop`; không cần merge vào `main` trước khi build image.
+
 Khi đã có server, chạy workflow `.github/workflows/deploy.yml` thủ công với input `image_tag`. Server cần có repo hoặc bundle deploy trong `DEPLOY_PATH`, file `.env.production`, Docker, Docker Compose, và quyền pull GHCR image.
 
 Nếu GHCR package để private, đăng nhập registry trên server trước khi deploy:

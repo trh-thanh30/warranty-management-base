@@ -32,6 +32,8 @@ jobs:
     outputs:
       image-prefix: ${{ steps.metadata.outputs.image_prefix }}
       image-tag: ${{ steps.metadata.outputs.image_tag }}
+      image_channel: ${{ steps.metadata.outputs.image_channel }}
+      source_branch: ${{ steps.metadata.outputs.source_branch }}
       api-image: ${{ steps.metadata.outputs.api_image }}
       web-image: ${{ steps.metadata.outputs.web_image }}
       admin-image: ${{ steps.metadata.outputs.admin_image }}
@@ -44,12 +46,23 @@ jobs:
         id: metadata
         env:
           DISPATCH_IMAGE_TAG: ${{ inputs.image_tag }}
+          WORKFLOW_RUN_BRANCH: ${{ github.event.workflow_run.head_branch }}
           WORKFLOW_RUN_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           set -eu
 
           image_prefix="${REGISTRY}/${GITHUB_REPOSITORY}"
           image_prefix="$(printf '%s' "$image_prefix" | tr '[:upper:]' '[:lower:]')"
+          source_branch="${WORKFLOW_RUN_BRANCH:-$GITHUB_REF_NAME}"
+          image_channel="$(printf '%s' "$source_branch" \
+            | tr '[:upper:]' '[:lower:]' \
+            | sed -E 's/[^a-z0-9_.-]+/-/g; s/^-+//; s/-+$//' \
+            | cut -c1-128)"
+
+          if [ -z "$image_channel" ]; then
+            echo "Unable to resolve a valid Docker tag from branch: $source_branch"
+            exit 1
+          fi
 
           if [ -n "$DISPATCH_IMAGE_TAG" ]; then
             image_tag="$DISPATCH_IMAGE_TAG"
@@ -61,6 +74,8 @@ jobs:
 
           echo "image_prefix=$image_prefix" >> "$GITHUB_OUTPUT"
           echo "image_tag=$image_tag" >> "$GITHUB_OUTPUT"
+          echo "image_channel=$image_channel" >> "$GITHUB_OUTPUT"
+          echo "source_branch=$source_branch" >> "$GITHUB_OUTPUT"
           echo "api_image=$image_prefix-api" >> "$GITHUB_OUTPUT"
           echo "web_image=$image_prefix-web" >> "$GITHUB_OUTPUT"
           echo "admin_image=$image_prefix-admin" >> "$GITHUB_OUTPUT"
@@ -82,7 +97,7 @@ jobs:
           push: true
           tags: |
             ${{ steps.metadata.outputs.api_image }}:${{ steps.metadata.outputs.image_tag }}
-            ${{ steps.metadata.outputs.api_image }}:main
+            ${{ steps.metadata.outputs.api_image }}:${{ steps.metadata.outputs.image_channel }}
           cache-from: type=gha,scope=api
           cache-to: type=gha,mode=max,scope=api
 
@@ -94,7 +109,7 @@ jobs:
           push: true
           tags: |
             ${{ steps.metadata.outputs.web_image }}:${{ steps.metadata.outputs.image_tag }}
-            ${{ steps.metadata.outputs.web_image }}:main
+            ${{ steps.metadata.outputs.web_image }}:${{ steps.metadata.outputs.image_channel }}
           cache-from: type=gha,scope=web
           cache-to: type=gha,mode=max,scope=web
 
@@ -106,7 +121,7 @@ jobs:
           push: true
           tags: |
             ${{ steps.metadata.outputs.admin_image }}:${{ steps.metadata.outputs.image_tag }}
-            ${{ steps.metadata.outputs.admin_image }}:main
+            ${{ steps.metadata.outputs.admin_image }}:${{ steps.metadata.outputs.image_channel }}
           cache-from: type=gha,scope=admin
           cache-to: type=gha,mode=max,scope=admin
 
@@ -151,10 +166,10 @@ jobs:
             --mode text \
             --project "${{ github.event.repository.name }}" \
             --environment registry \
-            --branch "${{ github.ref_name }}" \
+            --branch "${{ needs.publish.outputs.source_branch }}" \
             --repository "${{ github.repository }}" \
             --commit "${{ needs.publish.outputs.image-tag }}" \
-            --message "Images pushed: api, web, admin" \
+            --message "Images pushed: api, web, admin (${{ needs.publish.outputs.image_channel }})" \
             --author "${{ github.actor }}" \
             --workflow "${{ github.workflow }}" \
             --job "Build and Push Images" \
