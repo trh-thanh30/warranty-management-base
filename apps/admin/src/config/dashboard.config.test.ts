@@ -19,15 +19,36 @@ test("places content pages first in the other sidebar section", () => {
   );
 });
 
-test("groups products and product templates under one navigation item", () => {
+test("orders product templates before physical products", () => {
   const config = getDashboardConfig((key) => key);
-  const generalSection = config.sidebarSections.find(
-    (section) => section.label === "sections.general",
-  );
-  const productItems = generalSection?.items.filter((item) =>
-    ["/products", "/product-templates"].includes(item.href ?? ""),
-  );
+  const products = config.sidebarSections
+    .flatMap((section) => section.items)
+    .find((item) => item.title === "items.products");
 
-  assert.equal(productItems?.length, 1);
-  assert.deepEqual(productItems?.[0]?.activeHrefs, ["/product-templates"]);
+  assert.equal(products?.href, undefined);
+  assert.deepEqual(
+    products?.children?.map((item) => [item.title, item.href]),
+    [
+      ["items.productTemplates", "/product-templates"],
+      ["items.products", "/products"],
+    ],
+  );
+});
+
+test("groups warranties while keeping claims independent", () => {
+  const config = getDashboardConfig((key) => key);
+  const items = config.sidebarSections.flatMap((section) => section.items);
+  const warranties = items.find((item) => item.title === "items.warranties");
+
+  assert.deepEqual(
+    warranties?.children?.map((item) => [item.title, item.href]),
+    [
+      ["items.warranties", "/warranties"],
+      ["items.warrantyActivationRequests", "/warranty-activation-requests"],
+    ],
+  );
+  assert.equal(
+    items.find((item) => item.title === "items.warrantyClaims")?.href,
+    "/warranty-claims",
+  );
 });

@@ -1,10 +1,13 @@
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
   Bell,
+  Boxes,
   Building2,
   ClipboardList,
+  FileCheck2,
   FileText,
   LayoutDashboard,
+  Layers3,
   LogOut,
   HardDrive,
   Package,
@@ -57,31 +60,40 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
           },
           {
             title: t("items.products"),
-            href: "/products",
-            activeHrefs: ["/product-templates"],
             icon: Package,
-            permissionHrefs: [
+            children: [
               {
-                permission: PERMISSIONS.PRODUCT_VIEW,
-                href: "/products",
-              },
-              {
-                permission: PERMISSIONS.PRODUCT_TEMPLATE_VIEW,
+                title: t("items.productTemplates"),
                 href: "/product-templates",
+                icon: Layers3,
+                requiredPermission: PERMISSIONS.PRODUCT_TEMPLATE_VIEW,
               },
-            ],
-            requiredAnyPermissions: [
-              PERMISSIONS.PRODUCT_VIEW,
-              PERMISSIONS.PRODUCT_TEMPLATE_VIEW,
+              {
+                title: t("items.products"),
+                href: "/products",
+                icon: Boxes,
+                requiredPermission: PERMISSIONS.PRODUCT_VIEW,
+              },
             ],
           },
           {
             title: t("items.warranties"),
-            href: "/warranties",
-            activeHrefs: ["/warranty-activation-requests"],
             icon: ShieldCheck,
-            notificationBadgeKey: "warranties",
-            requiredPermission: PERMISSIONS.WARRANTY_VIEW,
+            children: [
+              {
+                title: t("items.warranties"),
+                href: "/warranties",
+                icon: ShieldCheck,
+                requiredPermission: PERMISSIONS.WARRANTY_VIEW,
+              },
+              {
+                title: t("items.warrantyActivationRequests"),
+                href: "/warranty-activation-requests",
+                icon: FileCheck2,
+                notificationBadgeKey: "warranties",
+                requiredPermission: PERMISSIONS.WARRANTY_VIEW,
+              },
+            ],
           },
           {
             title: t("items.warrantyClaims"),

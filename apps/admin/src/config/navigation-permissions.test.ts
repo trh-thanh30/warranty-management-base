@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { Boxes, Layers3, Package } from "lucide-react";
 import { PERMISSIONS, type PermissionKey } from "@repo/shared/constants";
 import {
   canAccessNavigationItem,
+  getAccessibleNavigationItems,
   resolveNavigationHref,
 } from "./navigation-permissions.ts";
 
@@ -33,5 +35,72 @@ test("hides grouped navigation without either product permission", () => {
   assert.equal(
     canAccessNavigationItem(item, () => false),
     false,
+  );
+});
+
+test("keeps only accessible children and hides an empty parent", () => {
+  const items = [
+    {
+      title: "Products",
+      icon: Package,
+      children: [
+        {
+          title: "Templates",
+          href: "/product-templates",
+          icon: Layers3,
+          requiredPermission: PERMISSIONS.PRODUCT_TEMPLATE_VIEW,
+        },
+        {
+          title: "Products",
+          href: "/products",
+          icon: Boxes,
+          requiredPermission: PERMISSIONS.PRODUCT_VIEW,
+        },
+      ],
+    },
+  ];
+  const templateOnly = getAccessibleNavigationItems(
+    items,
+    (permission) => permission === PERMISSIONS.PRODUCT_TEMPLATE_VIEW,
+    () => true,
+  );
+
+  assert.deepEqual(
+    templateOnly[0]?.children?.map((child) => child.href),
+    ["/product-templates"],
+  );
+  assert.deepEqual(
+    getAccessibleNavigationItems(
+      items,
+      () => false,
+      () => true,
+    ),
+    [],
+  );
+});
+
+test("filters role-restricted navigation recursively", () => {
+  const items = [
+    {
+      title: "Products",
+      icon: Package,
+      children: [
+        {
+          title: "Admin products",
+          href: "/products",
+          icon: Boxes,
+          requiredRole: "admin" as const,
+        },
+      ],
+    },
+  ];
+
+  assert.deepEqual(
+    getAccessibleNavigationItems(
+      items,
+      () => true,
+      () => false,
+    ),
+    [],
   );
 });

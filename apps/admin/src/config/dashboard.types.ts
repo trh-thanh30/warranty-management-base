@@ -13,6 +13,7 @@ export interface BrandConfig {
 export interface NavigationItem {
   title: string;
   href?: string;
+  children?: NavigationItem[];
   activeHrefs?: string[];
   icon: ComponentType<{ className?: string }>;
   badge?: string;
