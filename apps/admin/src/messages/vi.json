@@ -1084,6 +1084,10 @@
     "editDescription": "Thay đổi được phản ánh trên sản phẩm liên kết; bảo hành đã phát hành không bị thay đổi.",
     "detailTitle": "Chi tiết mẫu sản phẩm",
     "detailDescription": "Xem thông tin dùng chung, hình ảnh và số sản phẩm đang liên kết.",
+    "detailSections": {
+      "catalog": "Thông tin mẫu",
+      "warrantyAndProducts": "Bảo hành và sản phẩm"
+    },
     "created": "Đã tạo mẫu sản phẩm.",
     "updated": "Đã cập nhật mẫu sản phẩm.",
     "save": "Lưu mẫu",

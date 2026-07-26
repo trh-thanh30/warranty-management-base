@@ -1084,6 +1084,10 @@
     "editDescription": "Changes appear on linked products; issued warranties are not modified.",
     "detailTitle": "Product template detail",
     "detailDescription": "Review shared information, media, and linked product count.",
+    "detailSections": {
+      "catalog": "Template information",
+      "warrantyAndProducts": "Warranty and products"
+    },
     "created": "Product template created.",
     "updated": "Product template updated.",
     "save": "Save template",

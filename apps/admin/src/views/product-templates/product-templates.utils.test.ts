@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  getProductTemplateDetailSections,
   getProductTemplateDefaults,
   toCreateTemplateBody,
   toUpdateTemplateBody,
@@ -103,4 +104,37 @@ test("uses API-generated SKU, slug and model year as edit defaults", () => {
   assert.equal(defaults.slug, "template");
   assert.equal(defaults.modelYear, 2025);
   assert.equal(defaults.isPublished, false);
+});
+
+test("groups product template summary details for quick scanning", () => {
+  assert.deepEqual(
+    getProductTemplateDetailSections({
+      categoryRef: {
+        name: "Window film",
+      },
+      defaultWarrantyDurationMonths: 36,
+      modelYear: 2026,
+      productCount: 50,
+      sku: "FILM-CACH-NHIET-O-TO",
+      slug: "film-cach-nhiet-o-to",
+    }),
+    [
+      {
+        key: "catalog",
+        items: [
+          { key: "sku", value: "FILM-CACH-NHIET-O-TO" },
+          { key: "slug", value: "film-cach-nhiet-o-to" },
+          { key: "category", value: "Window film" },
+          { key: "modelYear", value: "2026" },
+        ],
+      },
+      {
+        key: "warrantyAndProducts",
+        items: [
+          { key: "defaultWarrantyDuration", value: "36" },
+          { key: "products", value: "50" },
+        ],
+      },
+    ],
+  );
 });

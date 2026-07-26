@@ -10,6 +10,55 @@ import type {
   ProductTemplateFormValues,
 } from "./product-templates.types";
 
+type ProductTemplateDetailSource = {
+  categoryRef: { name: string } | null;
+  defaultWarrantyDurationMonths: number;
+  modelYear: number | null;
+  productCount: number;
+  sku: string;
+  slug: string;
+};
+
+export type ProductTemplateDetailSection = {
+  key: "catalog" | "warrantyAndProducts";
+  items: Array<{
+    key:
+      | "category"
+      | "defaultWarrantyDuration"
+      | "modelYear"
+      | "products"
+      | "sku"
+      | "slug";
+    value: string;
+  }>;
+};
+
+export function getProductTemplateDetailSections(
+  template: ProductTemplateDetailSource,
+): ProductTemplateDetailSection[] {
+  return [
+    {
+      key: "catalog",
+      items: [
+        { key: "sku", value: template.sku },
+        { key: "slug", value: template.slug },
+        { key: "category", value: template.categoryRef?.name ?? "-" },
+        { key: "modelYear", value: String(template.modelYear ?? "-") },
+      ],
+    },
+    {
+      key: "warrantyAndProducts",
+      items: [
+        {
+          key: "defaultWarrantyDuration",
+          value: String(template.defaultWarrantyDurationMonths),
+        },
+        { key: "products", value: String(template.productCount) },
+      ],
+    },
+  ];
+}
+
 export function getTemplateSpecifications(
   metadata: Record<string, unknown> | null | undefined,
 ) {

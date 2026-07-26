@@ -5,7 +5,6 @@ import { Layers3, PackageOpen, Pencil, PlusCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
-  Badge,
   Button,
   Card,
   CardContent,
@@ -21,9 +20,9 @@ import { PermissionGuard } from "@/src/components/permission-guard";
 import { useProductTemplate } from "@/src/hooks/use-product-templates";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
-import { stripHtml } from "@/src/utils/rich-text";
 import { useProducts } from "../products/hooks/use-products";
 import { LinkedProductsTable } from "./components/linked-products-table";
+import { ProductTemplateSummaryCard } from "./components/product-template-summary-card";
 
 export function ProductTemplateDetailView({
   templateId,
@@ -93,84 +92,7 @@ export function ProductTemplateDetailView({
                 </Button>
               ) : null}
             </div>
-            <Card>
-              <CardContent className="space-y-6 p-6">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <h2 className="text-xl font-semibold">{template.name}</h2>
-                    <p className="mt-1 text-sm text-slate-500">
-                      {[template.brand, template.model]
-                        .filter(Boolean)
-                        .join(" · ") || "-"}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge
-                      variant={template.isActive ? "success" : "secondary"}
-                    >
-                      {template.isActive ? t("active") : t("inactive")}
-                    </Badge>
-                    <Badge
-                      variant={template.isPublished ? "default" : "secondary"}
-                    >
-                      {template.isPublished ? t("published") : t("hidden")}
-                    </Badge>
-                  </div>
-                </div>
-                <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  <Detail label={t("sku")} value={template.sku} />
-                  <Detail label={t("slug")} value={template.slug} />
-                  <Detail
-                    label={t("category")}
-                    value={template.categoryRef?.name ?? "-"}
-                  />
-                  <Detail
-                    label={t("modelYear")}
-                    value={String(template.modelYear ?? "-")}
-                  />
-                  <Detail
-                    label={t("defaultWarrantyDuration")}
-                    value={t("durationValue", {
-                      count: template.defaultWarrantyDurationMonths,
-                    })}
-                  />
-                  <Detail
-                    label={t("products")}
-                    value={String(template.productCount)}
-                  />
-                </dl>
-                {template.description ? (
-                  <div>
-                    <h3 className="text-sm font-medium">
-                      {t("descriptionLabel")}
-                    </h3>
-                    <p className="mt-2 whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">
-                      {stripHtml(template.description)}
-                    </p>
-                  </div>
-                ) : null}
-                {template.assets.length > 0 ? (
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {template.assets.map((asset) => (
-                      <figure
-                        className="overflow-hidden rounded-md border border-slate-200 dark:border-slate-800"
-                        key={asset.id}
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          alt={asset.altText ?? template.name}
-                          className="aspect-video w-full object-cover"
-                          src={asset.url}
-                        />
-                        <figcaption className="p-2 text-xs text-slate-500">
-                          {t(`assetRoles.${asset.role}`)}
-                        </figcaption>
-                      </figure>
-                    ))}
-                  </div>
-                ) : null}
-              </CardContent>
-            </Card>
+            <ProductTemplateSummaryCard template={template} />
             {canViewProducts ? (
               <Card>
                 <CardHeader>
@@ -236,16 +158,5 @@ export function ProductTemplateDetailView({
         )}
       </FormPageShell>
     </PermissionGuard>
-  );
-}
-
-function Detail({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <dt className="text-xs font-medium uppercase text-slate-500">{label}</dt>
-      <dd className="mt-1 text-sm text-slate-950 dark:text-slate-50">
-        {value}
-      </dd>
-    </div>
   );
 }
