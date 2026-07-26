@@ -92,7 +92,7 @@ Docker images dùng GitHub Container Registry (GHCR) làm registry mặc định
 - `ghcr.io/<owner>/<repo>-web:<commit-sha>`
 - `ghcr.io/<owner>/<repo>-admin:<commit-sha>`
 
-Workflow `.github/workflows/publish-images.yml` chạy sau khi workflow `CI` xanh trên `main` và build/push image cho API, Web, Admin. Khi chưa có VPS/server, phần này đã đủ để có artifact deploy được.
+Workflow `.github/workflows/publish-images.yml` chạy sau khi workflow `CI` xanh trên `main` hoặc `develop` và build/push image cho API, Web, Admin. Khi chưa có VPS/server, phần này đã đủ để có artifact deploy được.
 
 Khi đã có server, chạy workflow `.github/workflows/deploy.yml` thủ công với input `image_tag`. Server cần có repo hoặc bundle deploy trong `DEPLOY_PATH`, file `.env.production`, Docker, Docker Compose, và quyền pull GHCR image.
 

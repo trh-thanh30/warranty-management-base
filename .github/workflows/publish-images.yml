@@ -6,6 +6,7 @@ on:
       - CI
     branches:
       - main
+      - develop
     types:
       - completed
   workflow_dispatch:
