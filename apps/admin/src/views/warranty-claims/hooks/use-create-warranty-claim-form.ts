@@ -3,8 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDebounce } from "@repo/hooks";
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { ProductResponse } from "@repo/shared";
 import { useToast } from "@/src/hooks/use-toast";
@@ -13,9 +12,11 @@ import { useCustomer } from "../../customers/hooks/use-customers";
 import { useProducts } from "../../products/hooks/use-products";
 import {
   type WarrantyClaimCreateFormValues,
+  type WarrantyClaimRequesterSource,
   warrantyClaimCreateFormSchema,
 } from "../warranty-claims.types";
 import {
+  getWarrantyClaimRequesterValues,
   resolveWarrantyClaimCreateError,
   toCreateWarrantyClaimBody,
 } from "../warranty-claims.utils";
@@ -40,6 +41,7 @@ export function useCreateWarrantyClaimForm({
   const [productSearch, setProductSearch] = useState("");
   const [selectedProduct, setSelectedProduct] =
     useState<ProductResponse | null>(null);
+  const requesterPrefillCustomerIdRef = useRef<string | null>(null);
   const debouncedProductSearch = useDebounce(productSearch.trim(), 300);
   const {
     formState: { errors, isSubmitting },
@@ -69,10 +71,44 @@ export function useCreateWarrantyClaimForm({
     selectedProduct?.owner?.customerId ?? null,
     { enabled: Boolean(selectedProduct?.owner?.customerId) },
   );
+  const setRequesterValues = useCallback(
+    (source: WarrantyClaimRequesterSource | null | undefined) => {
+      const values = getWarrantyClaimRequesterValues(source);
+      setValue("requesterName", values.requesterName, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      setValue("requesterPhone", values.requesterPhone, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    },
+    [setValue],
+  );
+
+  useEffect(() => {
+    const customer = customerQuery.data;
+    const ownerCustomerId = selectedProduct?.owner?.customerId;
+    if (
+      !customer ||
+      customer.id !== ownerCustomerId ||
+      requesterPrefillCustomerIdRef.current === customer.id
+    ) {
+      return;
+    }
+
+    setRequesterValues(customer);
+    requesterPrefillCustomerIdRef.current = customer.id;
+  }, [
+    customerQuery.data,
+    selectedProduct?.owner?.customerId,
+    setRequesterValues,
+  ]);
 
   function selectProduct(product: ProductResponse) {
     if (!product.warrantyCode) return;
 
+    requesterPrefillCustomerIdRef.current = null;
     setSelectedProduct(product);
     setProductSearch("");
     setValue("productId", product.id, {
@@ -84,13 +120,11 @@ export function useCreateWarrantyClaimForm({
       shouldValidate: true,
     });
 
-    setValue("requesterName", product.owner?.fullName ?? "", {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
+    setRequesterValues(product.owner);
   }
 
   function clearProduct() {
+    requesterPrefillCustomerIdRef.current = null;
     setSelectedProduct(null);
     setValue("productId", "", {
       shouldDirty: true,
@@ -100,6 +134,7 @@ export function useCreateWarrantyClaimForm({
       shouldDirty: true,
       shouldValidate: true,
     });
+    setRequesterValues(null);
   }
 
   async function submit(values: WarrantyClaimCreateFormValues) {

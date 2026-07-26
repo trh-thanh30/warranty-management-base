@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { HttpClientError } from "@repo/shared";
 import {
+  getWarrantyClaimRequesterValues,
   getStatusBadgeVariant,
   resolveWarrantyClaimCreateError,
   toCreateWarrantyClaimBody,
@@ -58,6 +59,30 @@ test("create claim body trims required requester fields and optional detail", ()
       warrantyCode: "WM-2026-TEST",
     },
   );
+});
+
+test("maps the selected product owner or customer to requester fields", () => {
+  assert.deepEqual(
+    getWarrantyClaimRequesterValues({
+      fullName: "Nguyen Van A",
+      phone: "0901234567",
+    }),
+    {
+      requesterName: "Nguyen Van A",
+      requesterPhone: "0901234567",
+    },
+  );
+  assert.deepEqual(
+    getWarrantyClaimRequesterValues({ fullName: "Nguyen Van B" }),
+    {
+      requesterName: "Nguyen Van B",
+      requesterPhone: "",
+    },
+  );
+  assert.deepEqual(getWarrantyClaimRequesterValues(null), {
+    requesterName: "",
+    requesterPhone: "",
+  });
 });
 
 test("create claim schema requires requester name and phone", () => {
