@@ -3,6 +3,7 @@ import { BadRequestError } from '@/common/response';
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { GenerateCustomerCodeUseCase } from '@/modules/customers/use-cases/generate-customer-code.use-case';
 import { ListWarrantyActivationRequestsDto } from '@/modules/warranty-activation-requests/dto/list-warranty-activation-requests.dto';
+import { OPEN_WARRANTY_ACTIVATION_REQUEST_STATUSES } from '@/modules/warranty-activation-requests/warranty-activation-requests.constants';
 import { WarrantyLifecycleService } from '@/modules/warranties/services/warranty-lifecycle.service';
 import { Injectable } from '@nestjs/common';
 import {
@@ -142,12 +143,19 @@ export class WarrantyActivationRequestsRepository {
     });
   }
 
-  findPendingDuplicate(input: { warrantyCode: string; customerPhone: string }) {
+  findOpenByProductId(productId: string) {
     return this.prismaService.warrantyActivationRequest.findFirst({
       where: {
-        warranty_code: input.warrantyCode,
-        customer_phone: input.customerPhone,
-        status: warranty_activation_request_status.PENDING,
+        product_id: productId,
+        status: {
+          in: OPEN_WARRANTY_ACTIVATION_REQUEST_STATUSES,
+        },
+      },
+      orderBy: { created_at: 'desc' },
+      select: {
+        id: true,
+        request_code: true,
+        status: true,
       },
     });
   }

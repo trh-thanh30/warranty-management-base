@@ -14,7 +14,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     create: jest.fn(),
     findById: jest.fn(),
     findLastRequestCode: jest.fn(),
-    findPendingDuplicate: jest.fn(),
+    findOpenByProductId: jest.fn(),
     review: jest.fn(),
   };
   const productsRepository = {
@@ -38,7 +38,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
     generateWarrantyCodeUseCase.execute.mockResolvedValue('WM-2026-GENERATED');
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2026-07-19T03:00:00.000Z'));
@@ -65,7 +65,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
   });
 
   it('creates a pending activation request from public client input', async () => {
-    repository.findPendingDuplicate.mockResolvedValue(null);
+    repository.findOpenByProductId.mockResolvedValue(null);
     repository.findLastRequestCode.mockResolvedValue(null);
     productsRepository.findActivationRequestTargetByWarrantyCode.mockResolvedValue(
       baseDraftProduct,
@@ -102,10 +102,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     expect(
       productsRepository.findActivationRequestTargetByWarrantyCode,
     ).toHaveBeenCalledWith('WM-2026-ABC123');
-    expect(repository.findPendingDuplicate).toHaveBeenCalledWith({
-      customerPhone: '0901234567',
-      warrantyCode: 'WM-2026-ABC123',
-    });
+    expect(repository.findOpenByProductId).toHaveBeenCalledWith('product-id');
     expect(repository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         customer_email: 'customer@example.com',
@@ -121,7 +118,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     const notificationService = {
       requestCreated: jest.fn(),
     };
-    repository.findPendingDuplicate.mockResolvedValue(null);
+    repository.findOpenByProductId.mockResolvedValue(null);
     repository.findLastRequestCode.mockResolvedValue(null);
     productsRepository.findActivationRequestTargetByWarrantyCode.mockResolvedValue(
       baseDraftProduct,
@@ -165,7 +162,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
   });
 
   it('creates and connects a quick dealer when dealer fields are provided', async () => {
-    repository.findPendingDuplicate.mockResolvedValue(null);
+    repository.findOpenByProductId.mockResolvedValue(null);
     repository.findLastRequestCode.mockResolvedValue(null);
     productsRepository.findActivationRequestTargetByWarrantyCode.mockResolvedValue(
       baseDraftProduct,
@@ -266,8 +263,61 @@ describe('WarrantyActivationRequestsUseCases', () => {
     });
   });
 
-  it('rejects duplicate pending activation requests for the same warranty and phone', async () => {
-    repository.findPendingDuplicate.mockResolvedValue(baseRequest);
+  it('rejects a second pending request for the same product even when the phone changes', async () => {
+    repository.findOpenByProductId.mockResolvedValue({
+      id: 'existing-request-id',
+      request_code: 'WAR-20260727-0001',
+      status: warranty_activation_request_status.PENDING,
+    });
+    productsRepository.findActivationRequestTargetByWarrantyCode.mockResolvedValue(
+      baseDraftProduct,
+    );
+    const generateCodeUseCase =
+      new GenerateWarrantyActivationRequestCodeUseCase(repository as never);
+    const useCase = new CreateWarrantyActivationRequestUseCase(
+      repository as never,
+      generateCodeUseCase,
+      productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
+    );
+
+    await expect(
+      useCase.execute({
+        addressDetail: '1 Nguyen Trai',
+        customerEmail: 'customer@example.com',
+        customerName: 'Nguyen Van A',
+        customerPhone: '0988888888',
+        provinceCode: '79',
+        provinceName: 'TP Ho Chi Minh',
+        wardCode: '26734',
+        wardName: 'Phuong Ben Thanh',
+        warrantyCode: 'WM-2026-ABC123',
+      }),
+    ).rejects.toMatchObject({
+      details: {
+        code: 'ACTIVATION_REQUEST_ALREADY_OPEN',
+        currentStatus: warranty_activation_request_status.PENDING,
+        productId: 'product-id',
+        requestCode: 'WAR-20260727-0001',
+      },
+    });
+
+    expect(repository.findOpenByProductId).toHaveBeenCalledWith('product-id');
+    expect(dealersRepository.create).not.toHaveBeenCalled();
+    expect(repository.create).not.toHaveBeenCalled();
+    expect(
+      warrantyActivationRequestNotificationService.requestCreated,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('rejects a second request while the existing request is approved', async () => {
+    repository.findOpenByProductId.mockResolvedValue({
+      id: 'existing-request-id',
+      request_code: 'WAR-20260727-0001',
+      status: warranty_activation_request_status.APPROVED,
+    });
     productsRepository.findActivationRequestTargetByWarrantyCode.mockResolvedValue(
       baseDraftProduct,
     );
@@ -294,11 +344,18 @@ describe('WarrantyActivationRequestsUseCases', () => {
         wardName: 'Phuong Ben Thanh',
         warrantyCode: 'WM-2026-ABC123',
       }),
-    ).rejects.toBeInstanceOf(BadRequestError);
+    ).rejects.toMatchObject({
+      details: {
+        code: 'ACTIVATION_REQUEST_ALREADY_OPEN',
+        currentStatus: warranty_activation_request_status.APPROVED,
+        productId: 'product-id',
+        requestCode: 'WAR-20260727-0001',
+      },
+    });
   });
 
   it('retries when generated request code collides', async () => {
-    repository.findPendingDuplicate.mockResolvedValue(null);
+    repository.findOpenByProductId.mockResolvedValue(null);
     repository.findLastRequestCode.mockResolvedValue(null);
     productsRepository.findActivationRequestTargetByWarrantyCode.mockResolvedValue(
       baseDraftProduct,
@@ -340,6 +397,108 @@ describe('WarrantyActivationRequestsUseCases', () => {
 
     expect(repository.create).toHaveBeenCalledTimes(2);
     expect(result.requestCode).toBe('WAR-20260719-0001');
+  });
+
+  it('maps a concurrent open-request conflict to the product-scoped domain error', async () => {
+    repository.findOpenByProductId
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        id: 'winning-request-id',
+        request_code: 'WAR-20260727-0002',
+        status: warranty_activation_request_status.PENDING,
+      });
+    repository.findLastRequestCode.mockResolvedValue(null);
+    productsRepository.findActivationRequestTargetByWarrantyCode.mockResolvedValue(
+      baseDraftProduct,
+    );
+    repository.create.mockRejectedValueOnce(
+      new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+        clientVersion: 'test',
+        code: 'P2002',
+        meta: {
+          target: ['warranty_activation_request_one_open_per_product'],
+        },
+      }),
+    );
+    const generateCodeUseCase =
+      new GenerateWarrantyActivationRequestCodeUseCase(repository as never);
+    const useCase = new CreateWarrantyActivationRequestUseCase(
+      repository as never,
+      generateCodeUseCase,
+      productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
+    );
+
+    await expect(
+      useCase.execute({
+        addressDetail: '1 Nguyen Trai',
+        customerEmail: 'customer@example.com',
+        customerName: 'Nguyen Van A',
+        customerPhone: '0901234567',
+        provinceCode: '79',
+        provinceName: 'TP Ho Chi Minh',
+        wardCode: '26734',
+        wardName: 'Phuong Ben Thanh',
+        warrantyCode: 'WM-2026-ABC123',
+      }),
+    ).rejects.toMatchObject({
+      details: {
+        code: 'ACTIVATION_REQUEST_ALREADY_OPEN',
+        currentStatus: warranty_activation_request_status.PENDING,
+        productId: 'product-id',
+        requestCode: 'WAR-20260727-0002',
+      },
+    });
+
+    expect(repository.findOpenByProductId).toHaveBeenCalledTimes(2);
+    expect(
+      warrantyActivationRequestNotificationService.requestCreated,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('rethrows a unique conflict when no open request exists for the product', async () => {
+    const uniqueConflict = new Prisma.PrismaClientKnownRequestError(
+      'Unique constraint failed',
+      {
+        clientVersion: 'test',
+        code: 'P2002',
+        meta: { target: ['another_unique_index'] },
+      },
+    );
+    repository.findOpenByProductId.mockResolvedValue(null);
+    repository.findLastRequestCode.mockResolvedValue(null);
+    productsRepository.findActivationRequestTargetByWarrantyCode.mockResolvedValue(
+      baseDraftProduct,
+    );
+    repository.create.mockRejectedValueOnce(uniqueConflict);
+    const generateCodeUseCase =
+      new GenerateWarrantyActivationRequestCodeUseCase(repository as never);
+    const useCase = new CreateWarrantyActivationRequestUseCase(
+      repository as never,
+      generateCodeUseCase,
+      productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
+    );
+
+    await expect(
+      useCase.execute({
+        addressDetail: '1 Nguyen Trai',
+        customerEmail: 'customer@example.com',
+        customerName: 'Nguyen Van A',
+        customerPhone: '0901234567',
+        provinceCode: '79',
+        provinceName: 'TP Ho Chi Minh',
+        wardCode: '26734',
+        wardName: 'Phuong Ben Thanh',
+        warrantyCode: 'WM-2026-ABC123',
+      }),
+    ).rejects.toBe(uniqueConflict);
+
+    expect(repository.findOpenByProductId).toHaveBeenCalledTimes(2);
   });
 
   it('rejects activation requests when the warranty code does not exist', async () => {

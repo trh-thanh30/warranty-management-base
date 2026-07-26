@@ -1182,7 +1182,7 @@ async function main() {
           customerEmail: target.customerEmail,
           customerId: target.customerId,
           categoryId: target.categoryId,
-          productId: target.productId,
+          productId: null,
           dealerId: target.dealerId,
           installedAt: createdAt,
           warrantyDurationMonths: 12,

@@ -21,6 +21,7 @@ import {
   Customer,
   Dealer,
   warranty_activation_request_source,
+  warranty_activation_request_status,
   warranty_status,
 } from '@prisma/client';
 
@@ -86,7 +87,14 @@ export class CreateWarrantyActivationRequestUseCase {
 
     this.assertProductMatchesCategory(dto.categoryId, product);
 
-    const dealer = await this.resolveDealer(dto);
+    const openRequest =
+      await this.warrantyActivationRequestsRepository.findOpenByProductId(
+        product.id,
+      );
+
+    if (openRequest) {
+      this.throwAlreadyOpenRequest(product.id, openRequest);
+    }
 
     const currentOwner = product.ownerships[0]?.customer;
     if (currentOwner) {
@@ -98,22 +106,7 @@ export class CreateWarrantyActivationRequestUseCase {
       });
     }
 
-    const pendingDuplicate =
-      await this.warrantyActivationRequestsRepository.findPendingDuplicate({
-        warrantyCode,
-        customerPhone,
-      });
-
-    if (pendingDuplicate) {
-      throw new BadRequestError(
-        'Warranty activation request already pending',
-        'BAD_REQUEST',
-        {
-          code: 'ACTIVATION_REQUEST_ALREADY_PENDING',
-          warrantyCode,
-        },
-      );
-    }
+    const dealer = await this.resolveDealer(dto);
 
     for (
       let attempt = 0;
@@ -185,6 +178,17 @@ export class CreateWarrantyActivationRequestUseCase {
           continue;
         }
 
+        if (this.isUniqueConstraintConflict(error)) {
+          const concurrentOpenRequest =
+            await this.warrantyActivationRequestsRepository.findOpenByProductId(
+              product.id,
+            );
+
+          if (concurrentOpenRequest) {
+            this.throwAlreadyOpenRequest(product.id, concurrentOpenRequest);
+          }
+        }
+
         throw error;
       }
     }
@@ -202,6 +206,32 @@ export class CreateWarrantyActivationRequestUseCase {
       error.code === 'P2002' &&
       Array.isArray(error.meta?.target) &&
       error.meta.target.includes('request_code')
+    );
+  }
+
+  private isUniqueConstraintConflict(error: unknown) {
+    return (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    );
+  }
+
+  private throwAlreadyOpenRequest(
+    productId: string,
+    openRequest: {
+      request_code: string;
+      status: warranty_activation_request_status;
+    },
+  ): never {
+    throw new BadRequestError(
+      'Product already has an open warranty activation request',
+      'BAD_REQUEST',
+      {
+        code: 'ACTIVATION_REQUEST_ALREADY_OPEN',
+        currentStatus: openRequest.status,
+        productId,
+        requestCode: openRequest.request_code,
+      },
     );
   }
 
