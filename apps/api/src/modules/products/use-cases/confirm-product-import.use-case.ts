@@ -6,6 +6,7 @@ import {
   PreparedProductImportRow,
 } from '@/modules/products/excel/product-import.validator';
 import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generate-product-code.use-case';
+import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { Injectable } from '@nestjs/common';
 import { Prisma, product_status, warranty_status } from '@prisma/client';
 
@@ -14,6 +15,7 @@ export class ConfirmProductImportUseCase {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly generateProductCodeUseCase: GenerateProductCodeUseCase,
+    private readonly generateWarrantyCodeUseCase: GenerateWarrantyCodeUseCase,
   ) {}
 
   async execute(dto: ConfirmProductImportDto) {
@@ -36,6 +38,7 @@ export class ConfirmProductImportUseCase {
     }
 
     return this.prismaService.$transaction(async (tx) => {
+      const importDate = new Date();
       let created = 0;
       let updated = 0;
       const importedProductIds: string[] = [];
@@ -47,7 +50,7 @@ export class ConfirmProductImportUseCase {
             data: this.toProductUpdateInput(row),
             select: { id: true },
           });
-          await this.upsertDraftWarranty(tx, product.id, row);
+          await this.ensureDraftWarrantyCode(tx, product.id, row, importDate);
           importedProductIds.push(product.id);
           updated += 1;
           continue;
@@ -55,7 +58,11 @@ export class ConfirmProductImportUseCase {
 
         const productCode =
           row.productCode?.trim() ||
-          (await this.generateProductCodeUseCase.execute(new Date(), tx));
+          (await this.generateProductCodeUseCase.execute(importDate, tx));
+        const warrantyCode = await this.generateWarrantyCodeUseCase.execute(
+          importDate,
+          tx,
+        );
         const product = await tx.product.create({
           data: {
             product_code: productCode,
@@ -67,7 +74,7 @@ export class ConfirmProductImportUseCase {
             metadata: this.toMetadata(row),
             warranty: {
               create: {
-                warranty_code: null,
+                warranty_code: warrantyCode,
                 duration_months: row.templateWarrantyDurationMonths,
                 start_date: null,
                 end_date: null,
@@ -118,21 +125,42 @@ export class ConfirmProductImportUseCase {
     };
   }
 
-  private async upsertDraftWarranty(
+  private async ensureDraftWarrantyCode(
     tx: Prisma.TransactionClient,
     productId: string,
     row: PreparedProductImportRow,
+    importDate: Date,
   ) {
-    await tx.warranty.upsert({
+    const warranty = await tx.warranty.findUnique({
       where: { product_id: productId },
-      create: {
+      select: { id: true, warranty_code: true },
+    });
+
+    if (warranty?.warranty_code) return;
+
+    const warrantyCode = await this.generateWarrantyCodeUseCase.execute(
+      importDate,
+      tx,
+    );
+
+    if (warranty) {
+      await tx.warranty.update({
+        where: { id: warranty.id },
+        data: { warranty_code: warrantyCode },
+      });
+      return;
+    }
+
+    await tx.warranty.create({
+      data: {
         product_id: productId,
-        warranty_code: null,
+        warranty_code: warrantyCode,
         duration_months: row.templateWarrantyDurationMonths,
+        start_date: null,
+        end_date: null,
         status: warranty_status.DRAFT,
         terms: row.templateWarrantyTerms,
       },
-      update: {},
     });
   }
 
