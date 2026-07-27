@@ -23,7 +23,7 @@
 
 @theme {
   --font-sans: var(--font-maven-pro), 'Maven Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-condensed: var(--font-maven-pro), 'Maven Pro', -apple-system, sans-serif;
+  --font-condensed: var(--font-saira-condensed), var(--font-maven-pro), 'Maven Pro', -apple-system, sans-serif;
 
   /* PRIMITIVE: brand core */
   --color-deep-black: #040708;
@@ -60,7 +60,7 @@
 
   /* SEMANTIC: surfaces and borders */
   --color-light-gray: #F1F1F1;
-  --color-surface-muted: #F8F9FA;
+  --color-surface-muted: #F9FAFB;
   --color-border-gray: #DFDFDF;
   --color-input-border: #D1D1D1;
 

@@ -19,7 +19,7 @@ export const aboutGalleryItems = [
     src: "/guest/guest_3.jpg",
   },
   { id: "showroomHanoi", category: "showroom", src: "/hi.jpg" },
-  { id: "premiumVehicle", category: "installation", src: "/bg.jpg" },
+  { id: "premiumVehicle", category: "installation", src: "/bg_1.jpg" },
 ] as const;
 
 export const aboutValues = ["technology", "luxury", "commitment"] as const;

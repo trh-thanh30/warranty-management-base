@@ -13,7 +13,7 @@ export function WarrantyHubView() {
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-condensed font-semibold uppercase tracking-wider">
             {t("title")}
           </h1>
-          <p className="text-base sm:text-lg text-white/70 font-medium max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-white/70 font-normal max-w-2xl mx-auto">
             {t("description")}
           </p>
         </div>

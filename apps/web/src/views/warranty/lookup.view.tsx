@@ -114,7 +114,7 @@ export function WarrantyLookupView() {
   };
 
   return (
-    <main className="min-h-screen bg-surface-muted text-deep-black pb-16 sm:pb-24">
+    <main className="min-h-screen bg-gray-50 text-deep-black pb-16 sm:pb-24">
       {/* 1. Hero Banner matching Dealers & About pages */}
       <section className="relative w-full h-[260px] sm:h-[360px] bg-deep-black overflow-hidden flex items-center">
         <Image

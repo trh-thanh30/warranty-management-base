@@ -119,7 +119,7 @@ export function AboutView() {
                 {t("hero.titleSuffix")}
               </span>
             </h1>
-            <p className="max-w-xl text-base font-medium leading-relaxed text-stone-gray sm:text-lg lg:text-xl text-left text-pretty">
+            <p className="max-w-xl text-base font-normal text-stone-gray sm:text-lg lg:text-xl text-left text-pretty">
               {t("hero.description")}
             </p>
             <div className="flex flex-col sm:flex-row sm:gap-8 border-t border-border-gray pt-4 sm:pt-6 text-xs font-semibold uppercase tracking-widest text-stone-gray">
@@ -535,7 +535,7 @@ export function AboutView() {
                 </h2>
               </div>
             </div>
-            <p className="mt-4 text-base sm:text-lg font-medium leading-relaxed text-stone-gray max-w-2xl text-left text-pretty">
+            <p className="mt-4 text-base sm:text-lg font-normal text-stone-gray max-w-2xl text-left text-pretty">
               {t("coreTech.subtitle")}
             </p>
           </motion.div>
@@ -583,7 +583,7 @@ export function AboutView() {
                       <h3 className="font-condensed text-xl xs:text-2xl sm:text-3xl font-semibold uppercase tracking-wider text-deep-black leading-snug">
                         {t("coreTech.sputtering.title")}
                       </h3>
-                      <p className="text-base sm:text-lg font-medium leading-relaxed text-stone-gray text-left text-pretty">
+                      <p className="text-base sm:text-lg font-normal text-stone-gray text-left text-pretty">
                         {t("coreTech.sputtering.description")}
                       </p>
                       <ul className="space-y-2 text-sm sm:text-base font-semibold text-deep-black pt-2">
@@ -614,7 +614,7 @@ export function AboutView() {
                       <h3 className="font-condensed text-xl xs:text-2xl sm:text-3xl font-semibold uppercase tracking-wider text-deep-black leading-snug">
                         {t("coreTech.nanoCeramic.title")}
                       </h3>
-                      <p className="text-base sm:text-lg font-medium leading-relaxed text-stone-gray text-left text-pretty">
+                      <p className="text-base sm:text-lg font-normal text-stone-gray text-left text-pretty">
                         {t("coreTech.nanoCeramic.description")}
                       </p>
                       <ul className="space-y-2 text-sm sm:text-base font-semibold text-deep-black pt-2">
@@ -783,7 +783,7 @@ export function AboutView() {
               transition={{ duration: 0.8 }}
               className="space-y-4 lg:col-span-6"
             >
-              <p className="text-base sm:text-lg font-medium leading-relaxed text-stone-gray text-left text-pretty">
+              <p className="text-base sm:text-lg font-normal text-stone-gray text-left text-pretty">
                 {t.rich("safety.description", {
                   brand: (chunks) => (
                     <strong className="font-semibold text-premium-red">
@@ -827,7 +827,7 @@ export function AboutView() {
                 </div>
               </div>
 
-              <p className="mt-3 text-base sm:text-lg font-medium leading-relaxed text-stone-gray text-left text-pretty">
+              <p className="mt-3 text-base sm:text-lg font-normal text-stone-gray text-left text-pretty">
                 {t.rich("safety.footerNote", {
                   brand: (chunks) => (
                     <strong className="font-semibold text-premium-red">

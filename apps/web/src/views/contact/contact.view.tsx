@@ -29,7 +29,7 @@ export function ContactView() {
   };
 
   return (
-    <main className="min-h-screen bg-white text-deep-black font-sans">
+    <main className="min-h-screen bg-white text-deep-black">
       <div className="mx-auto max-w-[1400px] px-6 sm:px-10 lg:px-12 py-12 lg:py-20 space-y-16">
         {/* Top 2 Columns Section */}
         <div className="grid gap-12 lg:grid-cols-12 items-start">
@@ -43,7 +43,7 @@ export function ContactView() {
               {t("title")}
             </h1>
 
-            <p className="text-base sm:text-lg text-stone-gray font-medium leading-relaxed">
+            <p className="text-base sm:text-lg text-stone-gray font-normal">
               {t("description")}
             </p>
 

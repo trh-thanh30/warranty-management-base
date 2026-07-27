@@ -42,7 +42,7 @@ export function WarrantyActionCards() {
           <h2 className="text-2xl sm:text-4xl lg:text-5xl font-condensed font-semibold uppercase tracking-wider text-deep-black">
             {t("title")}
           </h2>
-          <p className="text-base sm:text-lg text-stone-gray font-medium max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-stone-gray font-normal max-w-2xl mx-auto">
             {t("description")}
           </p>
           <div className="mt-4 mx-auto h-[3px] w-20 bg-premium-red" />

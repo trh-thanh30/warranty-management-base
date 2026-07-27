@@ -92,11 +92,29 @@
       "hotlineLabel": "Consultation hotline"
     },
     "products": {
-      "eyebrow": "Featured Products",
-      "title": "PREMIUM WINDOW FILMS",
-      "description": "Select the ideal window film range tailored to your heat rejection and vehicle glass positions.",
-      "bookInstallation": "Details & Book installation",
-      "viewAll": "View all products",
+      "eyebrow": "Automotive Products & Accessories Ecosystem",
+      "title": "PRODUCT CATEGORIES",
+      "description": "Comprehensive automotive solutions including window films, LED lighting systems, 4K dashcams, and TPMS sensors from Lexzenz & Fujitek.",
+      "explore": "Explore category",
+      "viewAll": "View all product categories",
+      "categories": {
+        "film": {
+          "title": "Lexzenz Reflex Korea Automotive Window Film",
+          "description": "Multilayer Sputter & Ultra Nano Ceramic technology imported from Korea, blocking 99% UV/IR rays with superior heat protection."
+        },
+        "lighting": {
+          "title": "Lexzenz Led Fujitek Car & Motorcycle Lighting",
+          "description": "Bi-LED headlights, fog lights, and Offroad auxiliary lights featuring sharp beam cutoff and superior road illumination."
+        },
+        "dashcam": {
+          "title": "Lexzenz Dashcam Smart Dash Cameras",
+          "description": "4K Ultra HD recording with night vision, voice traffic alert alerts, and mobile Wi-Fi app connectivity."
+        },
+        "tpms": {
+          "title": "Lexzenz TPMS Tire Pressure Monitoring Sensors",
+          "description": "Real-time tire pressure & temperature monitoring displaying on Android screens or OEM gauges for maximum driving safety."
+        }
+      },
       "specs": {
         "uv": "UV Block: {value}",
         "ir": "IR Rejection: {value}",

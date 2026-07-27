@@ -34,10 +34,10 @@ export function BrandsSection() {
   return (
     <section
       aria-label={t("ariaLabel")}
-      className="overflow-hidden border-y border-cloud/60 bg-ash/50 py-10"
+      className="overflow-hidden bg-white py-10"
     >
       {/* Label */}
-      <p className="mb-6 text-center text-xs font-semibold uppercase tracking-[0.2em] text-premium-red font-sans leading-relaxed">
+      <p className="mb-6 text-center text-xs font-semibold uppercase tracking-[0.2em] text-premium-red">
         {t("title")}
       </p>
 

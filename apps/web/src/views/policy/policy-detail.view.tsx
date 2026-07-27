@@ -16,10 +16,10 @@ export function PolicyDetailView({
   const content = t.raw(`documents.${policyKey}`) as PolicyDocument;
 
   return (
-    <main className="min-h-screen bg-white font-sans text-deep-black">
+    <main className="min-h-screen bg-white text-deep-black">
       <section className="relative flex h-[220px] w-full items-center justify-center overflow-hidden bg-deep-black sm:h-[300px]">
         <Image
-          src="/bg.jpg"
+          src="/bg_1.jpg"
           alt={content.title}
           fill
           priority
