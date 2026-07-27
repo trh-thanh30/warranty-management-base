@@ -21,6 +21,7 @@ test("content page form accepts backend kinds and trims text", () => {
     title: "  Warranty policy  ",
     summary: "  Summary  ",
     content: "<p>Policy</p>",
+    faqItems: [],
     categoryId: "",
     kind: "GENERAL_POLICY",
   });
@@ -37,6 +38,7 @@ test("content page form rejects removed guide and introduction kinds", () => {
       title: "Warranty policy",
       summary: "",
       content: "<p>Policy</p>",
+      faqItems: [],
       categoryId: "",
       kind,
     });
@@ -51,6 +53,7 @@ test("content page form rejects invalid slugs and empty rich text", () => {
     title: "Warranty policy",
     summary: "",
     content: "<p>Policy</p>",
+    faqItems: [],
     categoryId: "",
     kind: "GENERAL_POLICY",
   });
@@ -59,10 +62,31 @@ test("content page form rejects invalid slugs and empty rich text", () => {
     title: "Warranty policy",
     summary: "",
     content: "<p></p>",
+    faqItems: [],
     categoryId: "",
     kind: "GENERAL_POLICY",
   });
 
   assert.equal(invalidSlug.success, false);
   assert.equal(emptyContent.success, false);
+});
+
+test("FAQ form validates independent question and answer items", () => {
+  const result = contentPageFormSchema.safeParse({
+    slug: "cau-hoi-thuong-gap",
+    title: "Câu hỏi thường gặp",
+    summary: "",
+    content: "",
+    categoryId: "",
+    kind: "FAQ",
+    faqItems: [
+      {
+        question: "Bảo hành trong bao lâu?",
+        answer: "<p>Tối đa 15 năm.</p>",
+        isActive: true,
+      },
+    ],
+  });
+
+  assert.equal(result.success, true);
 });

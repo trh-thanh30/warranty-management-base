@@ -1,10 +1,19 @@
-import { ConflictError, NotFoundError } from '@/common/response';
+import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+} from '@/common/response';
 import { AssetsService } from '@/modules/assets/assets.service';
 import { UpdateContentPageDto } from '@/modules/content-pages/dto/update-content-page.dto';
 import { ContentPagesRepository } from '@/modules/content-pages/repository/content-pages.repository';
 import { toContentPageResponse } from '@/modules/content-pages/content-pages.types';
 import { Injectable } from '@nestjs/common';
-import { asset_type, content_page_status, Prisma } from '@prisma/client';
+import {
+  asset_type,
+  content_page_kind,
+  content_page_status,
+  Prisma,
+} from '@prisma/client';
 import { getRemovedMediaUrls } from '@repo/shared/utils';
 
 @Injectable()
@@ -33,11 +42,30 @@ export class UpdateContentPageUseCase {
 
     const nextStatus = dto.status ?? existingPage.status;
     const nextContent = dto.content?.trim();
+    const nextKind = dto.kind ?? existingPage.kind;
+    const effectiveContent = nextContent ?? existingPage.content;
+    const effectiveFaqItems = dto.faqItems ?? existingPage.faq_items;
 
-    if (nextContent !== undefined) {
-      const removedMediaUrls = getRemovedMediaUrls(
+    this.validateContent(
+      nextKind,
+      nextStatus,
+      effectiveContent,
+      effectiveFaqItems,
+    );
+
+    if (nextContent !== undefined || dto.faqItems !== undefined) {
+      const previousRichText = [
         existingPage.content,
-        nextContent,
+        ...existingPage.faq_items.map((item) => item.answer),
+      ].join('');
+      const nextRichText = [
+        nextContent ?? existingPage.content,
+        ...(dto.faqItems?.map((item) => item.answer) ??
+          existingPage.faq_items.map((item) => item.answer)),
+      ].join('');
+      const removedMediaUrls = getRemovedMediaUrls(
+        previousRichText,
+        nextRichText,
       );
       for (const url of removedMediaUrls) {
         await this.assetsService?.deleteAssetByUrl(url, {
@@ -53,6 +81,20 @@ export class UpdateContentPageUseCase {
       summary: dto.summary?.trim(),
       content: nextContent,
       kind: dto.kind,
+      faq_items:
+        nextKind === content_page_kind.FAQ
+          ? dto.faqItems
+            ? {
+                deleteMany: {},
+                create: dto.faqItems.map((item, index) => ({
+                  answer: item.answer.trim(),
+                  is_active: item.isActive ?? true,
+                  question: item.question.trim(),
+                  sort_order: index,
+                })),
+              }
+            : undefined
+          : { deleteMany: {} },
       category:
         dto.categoryId === undefined
           ? undefined
@@ -69,6 +111,29 @@ export class UpdateContentPageUseCase {
     const page = await this.contentPagesRepository.update(id, data);
 
     return toContentPageResponse(page);
+  }
+
+  private validateContent(
+    kind: content_page_kind,
+    status: content_page_status,
+    content: string,
+    faqItems: Array<{ isActive?: boolean; is_active?: boolean }>,
+  ) {
+    if (kind !== content_page_kind.FAQ && !content) {
+      throw new BadRequestError('Content is required for policy pages');
+    }
+
+    if (
+      kind === content_page_kind.FAQ &&
+      status === content_page_status.PUBLISHED &&
+      !faqItems.some(
+        (item) => item.isActive !== false && item.is_active !== false,
+      )
+    ) {
+      throw new BadRequestError(
+        'At least one active FAQ item is required before publishing',
+      );
+    }
   }
 
   private resolvePublishedAt(

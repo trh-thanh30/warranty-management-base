@@ -6,32 +6,27 @@ import { asset_type } from '@prisma/client';
 import { extractMediaUrls } from '@repo/shared/utils';
 
 @Injectable()
-export class DeleteContentPageUseCase {
+export class DeleteContentPageFaqItemUseCase {
   constructor(
     private readonly contentPagesRepository: ContentPagesRepository,
-    private readonly assetsService?: AssetsService,
+    private readonly assetsService: AssetsService,
   ) {}
 
-  async execute(id: string) {
-    const existingPage = await this.contentPagesRepository.findById(id);
+  async execute(contentPageId: string, itemId: string) {
+    const existingItem = await this.contentPagesRepository.findFaqItem(
+      contentPageId,
+      itemId,
+    );
+    if (!existingItem) throw new NotFoundError('FAQ item not found');
 
-    if (!existingPage) {
-      throw new NotFoundError('Content page not found');
-    }
-
-    const richText = [
-      existingPage.content,
-      ...existingPage.faq_items.map((item) => item.answer),
-    ].join('');
-
-    for (const url of extractMediaUrls(richText)) {
-      await this.assetsService?.deleteAssetByUrl(url, {
+    for (const url of extractMediaUrls(existingItem.answer)) {
+      await this.assetsService.deleteAssetByUrl(url, {
         folder: 'rich-text',
         types: [asset_type.IMAGE, asset_type.VIDEO],
       });
     }
 
-    await this.contentPagesRepository.delete(id);
+    await this.contentPagesRepository.deleteFaqItem(contentPageId, itemId);
     return { success: true };
   }
 }

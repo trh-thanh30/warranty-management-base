@@ -20,7 +20,7 @@ import { NOTIFICATION_TYPES } from '@repo/shared/constants';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { seedAdminUsers } from './seed-admin';
-import { seedPolicyContentPages } from './seed-content-pages';
+import { seedContentPages } from './seed-content-pages';
 import { seedWebsiteSiteSettings } from './seed-website-config';
 
 type DashboardWarrantyChartSeed = {
@@ -662,7 +662,7 @@ async function main() {
   prisma = new PrismaClient({ adapter });
 
   await seedWebsiteSiteSettings(prisma);
-  await seedPolicyContentPages(prisma);
+  await seedContentPages(prisma);
   await seedDefaultCategories();
 
   const { adminUser, customerAUser, customerBUser, moderatorUser } =

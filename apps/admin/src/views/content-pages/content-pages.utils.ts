@@ -9,6 +9,13 @@ export function getContentPageFormValues(
     title: page?.title ?? "",
     summary: page?.summary ?? "",
     content: page?.content ?? "",
+    faqItems:
+      page?.faqItems.map((item) => ({
+        answer: item.answer,
+        id: item.id,
+        isActive: item.isActive,
+        question: item.question,
+      })) ?? [],
     kind: page?.kind ?? "GENERAL_POLICY",
     categoryId: page?.categoryId ?? "",
   };

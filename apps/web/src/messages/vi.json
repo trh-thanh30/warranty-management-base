@@ -269,41 +269,8 @@
       "ariaLabel": "Câu hỏi thường gặp",
       "eyebrow": "Hỏi đáp",
       "title": "Câu hỏi thường gặp",
-      "description": "Thông tin về điều kiện, bảo hành, thi công và hỗ trợ được tổng hợp để bạn dễ dàng lựa chọn.",
-      "items": {
-        "warrantyDuration": {
-          "question": "Phim cách nhiệt FUJITEK được bảo hành bao lâu?",
-          "answer": "FUJITEK áp dụng bảo hành điện tử chính hãng lên đến 15 năm cho các lỗi thuộc phạm vi chính sách."
-        },
-        "lookup": {
-          "question": "Tra cứu bảo hành điện tử như thế nào?",
-          "answer": "Nhập số điện thoại, biển số xe hoặc mã E-Warranty để kiểm tra thông tin và thời hạn bảo hành."
-        },
-        "sputterDifference": {
-          "question": "Sputter khác Nano Ceramic thông thường như thế nào?",
-          "answer": "Công nghệ Sputter nâng cao hiệu suất cản nhiệt, duy trì độ trong quang học và được tối ưu để không ảnh hưởng tín hiệu."
-        },
-        "installationTime": {
-          "question": "Thi công phim cách nhiệt mất bao lâu?",
-          "answer": "Thời gian thi công trọn gói thường từ 1,5 đến 2,5 giờ tùy loại xe và gói phim."
-        },
-        "choosePackage": {
-          "question": "Nên chọn gói phim nào cho xe của tôi?",
-          "answer": "Bạn nên chọn theo vị trí kính, nhu cầu cách nhiệt, độ riêng tư và thói quen lái xe. Kính lái thường ưu tiên độ trong, kính sườn và kính hậu có thể chọn mã tối hơn để tăng riêng tư."
-        },
-        "aftercare": {
-          "question": "Sau khi dán phim cần lưu ý gì?",
-          "answer": "Trong vài ngày đầu, nên hạn chế hạ kính, không vệ sinh mạnh bề mặt film và để xe ở môi trường khô thoáng để lớp keo ổn định hoàn toàn."
-        },
-        "signalSafety": {
-          "question": "Phim có ảnh hưởng GPS, ETC hoặc sóng điện thoại không?",
-          "answer": "Các dòng phim FUJITEK được tư vấn theo từng vị trí kính để cân bằng hiệu suất cách nhiệt và khả năng tương thích tín hiệu. Nếu xe dùng nhiều thiết bị thu phát, kỹ thuật viên sẽ đề xuất mã phim phù hợp."
-        },
-        "warrantySupport": {
-          "question": "Khi nào cần gửi yêu cầu bảo hành?",
-          "answer": "Bạn nên gửi yêu cầu khi film có dấu hiệu bong mép, phồng rộp, lỗi bề mặt hoặc thông tin E-Warranty cần được kiểm tra lại trên hệ thống."
-        }
-      }
+      "emptyTitle": "Chưa có câu hỏi thường gặp",
+      "emptyDescription": "Nội dung hỏi đáp chưa được xuất bản. Vui lòng quay lại sau."
     },
     "brands": {
       "ariaLabel": "Các thương hiệu xe được hỗ trợ",

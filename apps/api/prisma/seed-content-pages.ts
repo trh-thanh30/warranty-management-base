@@ -12,7 +12,7 @@ type PolicySection = {
   paragraphs?: string[];
 };
 
-type PolicySeed = {
+type ContentPageSeed = {
   kind: content_page_kind;
   sections: PolicySection[];
   slug: string;
@@ -26,7 +26,7 @@ const contactItems = [
   'Email: fujitek.lexzenz.vn@gmail.com. Khách hàng cũng có thể gửi yêu cầu qua website hoặc fanpage chính thức FUJITEK - LEXZENZ VIỆT NAM.',
 ];
 
-const policySeeds: PolicySeed[] = [
+const contentPageSeeds: ContentPageSeed[] = [
   {
     kind: content_page_kind.GENERAL_POLICY,
     slug: 'chinh-sach-quy-dinh-chung',
@@ -456,6 +456,63 @@ const policySeeds: PolicySeed[] = [
       },
     ],
   },
+  {
+    kind: content_page_kind.FAQ,
+    slug: 'cau-hoi-thuong-gap',
+    title: 'Câu hỏi thường gặp',
+    summary:
+      'Thông tin về điều kiện, bảo hành, thi công và hỗ trợ được tổng hợp để khách hàng dễ dàng lựa chọn.',
+    sections: [
+      {
+        heading: 'Phim cách nhiệt FUJITEK được bảo hành bao lâu?',
+        paragraphs: [
+          'FUJITEK áp dụng bảo hành điện tử chính hãng lên đến 15 năm cho các lỗi thuộc phạm vi chính sách.',
+        ],
+      },
+      {
+        heading: 'Tra cứu bảo hành điện tử như thế nào?',
+        paragraphs: [
+          'Nhập số điện thoại, biển số xe hoặc mã E-Warranty để kiểm tra thông tin và thời hạn bảo hành.',
+        ],
+      },
+      {
+        heading: 'Sputter khác Nano Ceramic thông thường như thế nào?',
+        paragraphs: [
+          'Công nghệ Sputter nâng cao hiệu suất cản nhiệt, duy trì độ trong quang học và được tối ưu để không ảnh hưởng tín hiệu.',
+        ],
+      },
+      {
+        heading: 'Thi công phim cách nhiệt mất bao lâu?',
+        paragraphs: [
+          'Thời gian thi công trọn gói thường từ 1,5 đến 2,5 giờ tùy loại xe và gói phim.',
+        ],
+      },
+      {
+        heading: 'Nên chọn gói phim nào cho xe của tôi?',
+        paragraphs: [
+          'Bạn nên chọn theo vị trí kính, nhu cầu cách nhiệt, độ riêng tư và thói quen lái xe. Kính lái thường ưu tiên độ trong, kính sườn và kính hậu có thể chọn mã tối hơn để tăng riêng tư.',
+        ],
+      },
+      {
+        heading: 'Sau khi dán phim cần lưu ý gì?',
+        paragraphs: [
+          'Trong vài ngày đầu, nên hạn chế hạ kính, không vệ sinh mạnh bề mặt film và để xe ở môi trường khô thoáng để lớp keo ổn định hoàn toàn.',
+        ],
+      },
+      {
+        heading: 'Phim có ảnh hưởng GPS, ETC hoặc sóng điện thoại không?',
+        paragraphs: [
+          'Các dòng phim FUJITEK được tư vấn theo từng vị trí kính để cân bằng hiệu suất cách nhiệt và khả năng tương thích tín hiệu. Nếu xe dùng nhiều thiết bị thu phát, kỹ thuật viên sẽ đề xuất mã phim phù hợp.',
+        ],
+      },
+      {
+        heading: 'Khi nào cần gửi yêu cầu bảo hành?',
+        paragraphs: [
+          'Bạn nên gửi yêu cầu khi film có dấu hiệu bong mép, phồng rộp, lỗi bề mặt hoặc thông tin E-Warranty cần được kiểm tra lại trên hệ thống.',
+        ],
+      },
+    ],
+  },
 ];
 
 function escapeHtml(value: string): string {
@@ -484,33 +541,69 @@ function renderPolicyContent(sections: PolicySection[]): string {
     .join('');
 }
 
-export async function seedPolicyContentPages(client: PrismaClient) {
-  for (const policy of policySeeds) {
-    const content = renderPolicyContent(policy.sections);
+export async function seedContentPages(client: PrismaClient) {
+  for (const page of contentPageSeeds) {
+    const content =
+      page.kind === content_page_kind.FAQ
+        ? ''
+        : renderPolicyContent(page.sections);
 
-    await client.contentPage.upsert({
-      where: { slug: policy.slug },
-      update: {
-        content,
-        kind: policy.kind,
-        published_at: new Date('2026-07-27T00:00:00.000Z'),
-        status: content_page_status.PUBLISHED,
-        summary: policy.summary,
-        title: policy.title,
-      },
-      create: {
-        content,
-        kind: policy.kind,
-        published_at: new Date('2026-07-27T00:00:00.000Z'),
-        slug: policy.slug,
-        status: content_page_status.PUBLISHED,
-        summary: policy.summary,
-        title: policy.title,
-      },
+    await client.$transaction(async (tx) => {
+      const seededPage = await tx.contentPage.upsert({
+        where: { slug: page.slug },
+        update: {
+          content,
+          kind: page.kind,
+          published_at: new Date('2026-07-27T00:00:00.000Z'),
+          status: content_page_status.PUBLISHED,
+          summary: page.summary,
+          title: page.title,
+        },
+        create: {
+          content,
+          kind: page.kind,
+          published_at: new Date('2026-07-27T00:00:00.000Z'),
+          slug: page.slug,
+          status: content_page_status.PUBLISHED,
+          summary: page.summary,
+          title: page.title,
+        },
+      });
+
+      await tx.contentPageFaqItem.deleteMany({
+        where: { content_page_id: seededPage.id },
+      });
+
+      if (page.kind === content_page_kind.FAQ) {
+        await tx.contentPageFaqItem.createMany({
+          data: page.sections.map((section, index) => ({
+            answer: renderFaqAnswer(section),
+            content_page_id: seededPage.id,
+            is_active: true,
+            question: section.heading,
+            sort_order: index,
+          })),
+        });
+      }
     });
   }
 
-  console.log(`Seeded ${policySeeds.length} Vietnamese policy content pages.`);
+  console.log(
+    `Seeded ${contentPageSeeds.length} Vietnamese content pages (policies and FAQ).`,
+  );
+}
+
+function renderFaqAnswer(section: PolicySection): string {
+  const paragraphs = (section.paragraphs ?? [])
+    .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
+    .join('');
+  const items = section.items?.length
+    ? `<ul>${section.items
+        .map((item) => `<li>${escapeHtml(item)}</li>`)
+        .join('')}</ul>`
+    : '';
+
+  return `${paragraphs}${items}`;
 }
 
 let prisma: PrismaClient | undefined;
@@ -525,7 +618,7 @@ async function main() {
   const adapter = new PrismaPg(pool);
   prisma = new PrismaClient({ adapter });
 
-  await seedPolicyContentPages(prisma);
+  await seedContentPages(prisma);
 }
 
 if (require.main === module) {
