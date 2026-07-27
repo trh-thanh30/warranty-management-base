@@ -98,3 +98,9 @@ export function useDeleteContentPage() {
       void queryClient.invalidateQueries({ queryKey: contentPageKeys.lists() }),
   });
 }
+
+export function useParseContentDocument() {
+  return useMutation({
+    mutationFn: (file: File) => contentPagesService.parseDocument(file),
+  });
+}

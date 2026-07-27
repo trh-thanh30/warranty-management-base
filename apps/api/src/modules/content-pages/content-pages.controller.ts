@@ -9,6 +9,7 @@ import { GetContentPageDetailUseCase } from '@/modules/content-pages/use-cases/g
 import { GetPublishedContentPageBySlugUseCase } from '@/modules/content-pages/use-cases/get-published-content-page-by-slug.use-case';
 import { ListContentPagesUseCase } from '@/modules/content-pages/use-cases/list-content-pages.use-case';
 import { ListPublishedContentPagesUseCase } from '@/modules/content-pages/use-cases/list-published-content-pages.use-case';
+import { ParseContentDocumentUseCase } from '@/modules/content-pages/use-cases/parse-content-document.use-case';
 import { UpdateContentPageUseCase } from '@/modules/content-pages/use-cases/update-content-page.use-case';
 import {
   Body,
@@ -19,7 +20,11 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Throttle } from '@nestjs/throttler';
 import { permission_key } from '@prisma/client';
 
 @Controller()
@@ -32,6 +37,7 @@ export class ContentPagesController {
     private readonly deleteContentPageUseCase: DeleteContentPageUseCase,
     private readonly listPublishedContentPagesUseCase: ListPublishedContentPagesUseCase,
     private readonly getPublishedContentPageBySlugUseCase: GetPublishedContentPageBySlugUseCase,
+    private readonly parseContentDocumentUseCase: ParseContentDocumentUseCase,
   ) {}
 
   @Get('content-pages')
@@ -44,6 +50,18 @@ export class ContentPagesController {
   @Permissions([permission_key.CONTENT_PAGE_CREATE])
   create(@Body() dto: CreateContentPageDto) {
     return this.createContentPageUseCase.execute(dto);
+  }
+
+  @Post('content-pages/parse-document')
+  @Permissions([permission_key.CONTENT_PAGE_VIEW])
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 10 * 1024 * 1024 },
+    }),
+  )
+  parseDocument(@UploadedFile() file?: Express.Multer.File) {
+    return this.parseContentDocumentUseCase.execute(file);
   }
 
   @Get('content-pages/:id')

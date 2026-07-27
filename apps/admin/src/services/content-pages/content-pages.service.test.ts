@@ -121,3 +121,38 @@ test("deletes a content page", async () => {
 
   assert.deepEqual(calls, ["/content-pages/page-1"]);
 });
+
+test("parses a PDF or DOCX document using multipart form data", async () => {
+  const calls: unknown[] = [];
+  const http = {
+    async post(url: string, body?: unknown, config?: unknown) {
+      calls.push({ body, config, url });
+      return {
+        data: {
+          success: true,
+          data: { content: "<p>Imported document</p>" },
+        },
+      };
+    },
+  };
+  const service = createContentPagesService(
+    http as unknown as ContentPagesHttpClient,
+  );
+  const file = new File(["document"], "policy.docx", {
+    type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  });
+
+  const result = await service.parseDocument(file);
+
+  assert.deepEqual(result, { content: "<p>Imported document</p>" });
+  assert.equal(calls.length, 1);
+  const call = calls[0] as {
+    body: FormData;
+    config?: unknown;
+    url: string;
+  };
+  assert.equal(call.url, "/content-pages/parse-document");
+  assert.ok(call.body instanceof FormData);
+  assert.equal(call.body.get("file"), file);
+  assert.equal(call.config, undefined);
+});

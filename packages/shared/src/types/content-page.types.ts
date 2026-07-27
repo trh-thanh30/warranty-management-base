@@ -48,3 +48,7 @@ export type CreateContentPageBody = {
 };
 
 export type UpdateContentPageBody = Partial<CreateContentPageBody>;
+
+export type ParseContentDocumentResult = {
+  content: string;
+};
