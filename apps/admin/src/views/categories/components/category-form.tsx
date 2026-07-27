@@ -10,7 +10,7 @@ import { ImageUpload } from "@/src/components/common/image-upload";
 import { SelectControl } from "@/src/components/common/select-control";
 import { FormField as Field } from "@/src/components/common/form-field";
 import { createFieldErrorFormatter } from "@/src/utils";
-import { CATEGORY_TYPES } from "../categories.constants";
+import { MANAGEABLE_CATEGORY_TYPES } from "../categories.constants";
 import {
   clearParentOnTypeChange,
   useCategoryForm,
@@ -70,10 +70,12 @@ export function CategoryForm({
                   field.onChange(value);
                   clearParentOnTypeChange(setValue);
                 }}
-                options={CATEGORY_TYPES.map((categoryType) => ({
-                  label: t(`types.${categoryType}`),
-                  value: categoryType,
-                }))}
+                options={getCategoryTypeOptions(category).map(
+                  (categoryType) => ({
+                    label: t(`types.${categoryType}`),
+                    value: categoryType,
+                  }),
+                )}
                 value={field.value}
               />
             )}
@@ -244,6 +246,17 @@ export function CategoryForm({
       </div>
     </form>
   );
+}
+
+function getCategoryTypeOptions(category: CategoryResponse | null) {
+  if (
+    category &&
+    !MANAGEABLE_CATEGORY_TYPES.some((type) => type === category.type)
+  ) {
+    return [category.type];
+  }
+
+  return MANAGEABLE_CATEGORY_TYPES;
 }
 
 const formatFieldError = createFieldErrorFormatter(

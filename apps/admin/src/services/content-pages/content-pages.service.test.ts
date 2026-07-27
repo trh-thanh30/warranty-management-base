@@ -9,7 +9,7 @@ const page = {
   title: "Warranty policy",
   summary: "Warranty terms",
   content: "<p>Policy content</p>",
-  kind: "POLICY",
+  kind: "GENERAL_POLICY",
   status: "DRAFT",
   publishedAt: null,
   createdAt: "2026-07-17T00:00:00.000Z",
@@ -38,13 +38,23 @@ test("lists content pages with directory filters", async () => {
 
   const result = await createContentPagesService(
     http as unknown as ContentPagesHttpClient,
-  ).list({ kind: "POLICY", page: 1, search: "policy", status: "DRAFT" });
+  ).list({
+    kind: "GENERAL_POLICY",
+    page: 1,
+    search: "policy",
+    status: "DRAFT",
+  });
 
   assert.deepEqual(calls, [
     {
       url: "/content-pages",
       config: {
-        params: { kind: "POLICY", page: 1, search: "policy", status: "DRAFT" },
+        params: {
+          kind: "GENERAL_POLICY",
+          page: 1,
+          search: "policy",
+          status: "DRAFT",
+        },
       },
     },
   ]);
@@ -89,7 +99,7 @@ test("creates and updates content pages", async () => {
     slug: page.slug,
     title: page.title,
     content: page.content,
-    kind: "POLICY" as const,
+    kind: "GENERAL_POLICY" as const,
     status: "DRAFT" as const,
   };
 

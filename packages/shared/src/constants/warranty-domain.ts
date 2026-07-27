@@ -35,9 +35,12 @@ export const WARRANTY_CLAIM_PRIORITY_LABELS: Record<
 };
 
 export const CONTENT_PAGE_KIND_LABELS: Record<ContentPageKind, string> = {
-  POLICY: "Chinh sach",
-  GUIDE: "Huong dan",
-  INTRO: "Gioi thieu",
+  GENERAL_POLICY: "Chinh sach & quy dinh chung",
+  PRIVACY_POLICY: "Chinh sach bao mat",
+  PURCHASE_POLICY: "Chinh sach mua hang",
+  WARRANTY_RETURN_POLICY: "Chinh sach bao hanh - Doi tra",
+  SHIPPING_POLICY: "Chinh sach giao hang",
+  PAYMENT_POLICY: "Chinh sach thanh toan",
   FAQ: "Cau hoi thuong gap",
 };
 

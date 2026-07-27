@@ -1,13 +1,13 @@
-import type { CategoryType } from "@repo/shared";
 import { z } from "zod";
 import {
   CATEGORY_TYPES,
+  type ManageableCategoryType,
   type CATEGORY_STATUS_FILTERS,
 } from "./categories.constants";
 
 export type CategoryStatusFilter = (typeof CATEGORY_STATUS_FILTERS)[number];
 
-export type CategoryTypeFilter = "ALL" | CategoryType;
+export type CategoryTypeFilter = ManageableCategoryType;
 
 const optionalText = z.string().trim();
 

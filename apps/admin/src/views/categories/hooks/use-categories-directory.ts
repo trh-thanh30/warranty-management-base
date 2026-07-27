@@ -29,7 +29,7 @@ type CategoryDirectoryFilters = {
 
 const INITIAL_CATEGORY_DIRECTORY_FILTERS = {
   status: "ALL",
-  type: "ALL",
+  type: "PRODUCT",
 } satisfies CategoryDirectoryFilters;
 
 export function useCategoriesDirectory() {
@@ -74,7 +74,7 @@ export function useCategoriesDirectory() {
       search: debouncedSearch || undefined,
       sortBy,
       sortOrder,
-      type: type === "ALL" ? undefined : type,
+      type,
     },
     {
       enabled: Boolean(currentUser) && canViewCategories,
@@ -118,7 +118,7 @@ export function useCategoriesDirectory() {
         search: debouncedSearch || undefined,
         sortBy,
         sortOrder,
-        type: type === "ALL" ? undefined : type,
+        type,
       });
       downloadBlob(blob, createDatedFilename("categories"));
       toast.success(t("excel.exported"));

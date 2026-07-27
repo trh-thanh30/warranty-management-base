@@ -102,7 +102,7 @@ function getValues(page: ContentPageSummary | null): ContentPageFormValues {
     title: page?.title ?? "",
     summary: page?.summary ?? "",
     content: page?.content ?? "",
-    kind: page?.kind ?? "POLICY",
+    kind: page?.kind ?? "GENERAL_POLICY",
     categoryId: page?.categoryId ?? "",
   };
 }

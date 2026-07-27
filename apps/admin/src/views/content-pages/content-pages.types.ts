@@ -20,7 +20,15 @@ export const contentPageFormSchema = z.object({
     },
     { message: "contentRequired" },
   ),
-  kind: z.enum(["POLICY", "GUIDE", "INTRO", "FAQ"]),
+  kind: z.enum([
+    "GENERAL_POLICY",
+    "PRIVACY_POLICY",
+    "PURCHASE_POLICY",
+    "WARRANTY_RETURN_POLICY",
+    "SHIPPING_POLICY",
+    "PAYMENT_POLICY",
+    "FAQ",
+  ]),
   categoryId: z.string().uuid("categoryInvalid").or(z.literal("")),
 });
 

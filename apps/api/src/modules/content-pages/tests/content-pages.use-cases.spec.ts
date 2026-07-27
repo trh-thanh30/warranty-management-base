@@ -16,7 +16,7 @@ const page = {
   title: 'Chinh sach bao hanh',
   summary: 'Tom tat',
   content: 'Noi dung',
-  kind: content_page_kind.POLICY,
+  kind: content_page_kind.GENERAL_POLICY,
   status: content_page_status.PUBLISHED,
   published_at: new Date('2026-07-03T00:00:00.000Z'),
   created_at: new Date('2026-07-03T00:00:00.000Z'),
@@ -181,11 +181,11 @@ describe('Content page use cases', () => {
     );
 
     const result = await useCase.execute({
-      kind: content_page_kind.POLICY,
+      kind: content_page_kind.GENERAL_POLICY,
     });
 
     expect(contentPagesRepository.listPublished).toHaveBeenCalledWith({
-      kind: content_page_kind.POLICY,
+      kind: content_page_kind.GENERAL_POLICY,
     });
     expect(result.items).toHaveLength(1);
     expect(result.meta.total).toBe(1);

@@ -23,7 +23,7 @@ import { StatePanel } from "@/src/components/common/state-panel";
 import { Link } from "@/src/i18n/navigation";
 import {
   CATEGORY_STATUS_FILTERS,
-  CATEGORY_TYPES,
+  MANAGEABLE_CATEGORY_TYPES,
 } from "../categories.constants";
 import type {
   CategoryStatusFilter,
@@ -76,7 +76,7 @@ export function CategoriesDirectoryCard({
 }: CategoriesDirectoryCardProps) {
   const t = useTranslations("Categories");
   const hasFilters =
-    Boolean(search.trim()) || status !== "ALL" || type !== "ALL";
+    Boolean(search.trim()) || status !== "ALL" || type !== "PRODUCT";
 
   return (
     <Card>
@@ -151,13 +151,10 @@ function CategoriesDirectoryFilters({
       <SelectControl
         aria-label={t("typeFilter")}
         onValueChange={(value) => onTypeChange(value as CategoryTypeFilter)}
-        options={[
-          { label: t("allTypes"), value: "ALL" },
-          ...CATEGORY_TYPES.map((categoryType) => ({
-            label: t(`types.${categoryType}`),
-            value: categoryType,
-          })),
-        ]}
+        options={MANAGEABLE_CATEGORY_TYPES.map((categoryType) => ({
+          label: t(`types.${categoryType}`),
+          value: categoryType,
+        }))}
         value={type}
       />
       <SelectControl
