@@ -1,7 +1,10 @@
-import { Category, ContentPage } from '@prisma/client';
+import { Category, ContentPage, ContentPageFaqItem } from '@prisma/client';
 
 export function toContentPageResponse(
-  page: ContentPage & { category?: Category | null },
+  page: ContentPage & {
+    category?: Category | null;
+    faq_items?: ContentPageFaqItem[];
+  },
 ) {
   return {
     id: page.id,
@@ -9,6 +12,15 @@ export function toContentPageResponse(
     title: page.title,
     summary: page.summary,
     content: page.content,
+    faqItems: (page.faq_items ?? []).map((item) => ({
+      id: item.id,
+      question: item.question,
+      answer: item.answer,
+      sortOrder: item.sort_order,
+      isActive: item.is_active,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at,
+    })),
     kind: page.kind,
     categoryId: page.category_id,
     categoryRef: page.category ? toCategorySummary(page.category) : null,

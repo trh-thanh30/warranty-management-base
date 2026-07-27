@@ -4,6 +4,7 @@ import type {
   ListContentPagesQuery,
   PaginatedResponse,
   ParseContentDocumentResult,
+  ReorderContentPageFaqItemsBody,
   UpdateContentPageBody,
 } from "@repo/shared";
 import { unwrap } from "../service.utils.ts";
@@ -32,6 +33,14 @@ export function createContentPagesService(http: ContentPagesHttpClient) {
     async update(id: string, body: UpdateContentPageBody) {
       return unwrap(
         await http.patch<ContentPageSummary>(`/content-pages/${id}`, body),
+      );
+    },
+    async reorderFaqItems(id: string, body: ReorderContentPageFaqItemsBody) {
+      return unwrap(
+        await http.patch<ContentPageSummary>(
+          `/content-pages/${id}/faq-items/reorder`,
+          body,
+        ),
       );
     },
     async delete(id: string) {

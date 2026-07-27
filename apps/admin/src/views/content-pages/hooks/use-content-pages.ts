@@ -73,6 +73,13 @@ export function useUpdateContentPage(id: string | null) {
   });
 }
 
+export function useReorderContentPageFaqItems(id: string | null) {
+  return useMutation({
+    mutationFn: (itemIds: string[]) =>
+      contentPagesService.reorderFaqItems(id ?? "", { itemIds }),
+  });
+}
+
 export function useUpdateContentPageStatus() {
   const queryClient = useQueryClient();
   return useMutation({

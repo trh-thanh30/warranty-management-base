@@ -25,6 +25,7 @@ test("maps every supported content-page kind into edit form values", () => {
       title: kind,
       summary: null,
       content: "<p>Policy</p>",
+      faqItems: [],
       kind,
       categoryId: null,
       categoryRef: null,

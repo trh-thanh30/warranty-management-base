@@ -132,6 +132,31 @@ test("deletes a content page", async () => {
   assert.deepEqual(calls, ["/content-pages/page-1"]);
 });
 
+test("reorders FAQ items through the dedicated endpoint", async () => {
+  const calls: unknown[] = [];
+  const http = {
+    async patch(url: string, body?: unknown) {
+      calls.push({ body, url });
+      return { data: { success: true, data: page } };
+    },
+  };
+  const itemIds = [
+    "1c4dfd2c-46e4-49db-a5f4-ffef569712c4",
+    "c6a95189-721a-4c98-a8c6-cf0db911489b",
+  ];
+
+  await createContentPagesService(
+    http as unknown as ContentPagesHttpClient,
+  ).reorderFaqItems("page-1", { itemIds });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/content-pages/page-1/faq-items/reorder",
+      body: { itemIds },
+    },
+  ]);
+});
+
 test("parses a PDF or DOCX document using multipart form data", async () => {
   const calls: unknown[] = [];
   const http = {

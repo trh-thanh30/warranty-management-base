@@ -11,14 +11,20 @@ export class ContentPagesRepository {
   findById(id: string) {
     return this.prismaService.contentPage.findUnique({
       where: { id },
-      include: { category: true },
+      include: {
+        category: true,
+        faq_items: { orderBy: { sort_order: 'asc' } },
+      },
     });
   }
 
   findBySlug(slug: string) {
     return this.prismaService.contentPage.findUnique({
       where: { slug },
-      include: { category: true },
+      include: {
+        category: true,
+        faq_items: { orderBy: { sort_order: 'asc' } },
+      },
     });
   }
 
@@ -28,7 +34,13 @@ export class ContentPagesRepository {
         slug,
         status: content_page_status.PUBLISHED,
       },
-      include: { category: true },
+      include: {
+        category: true,
+        faq_items: {
+          where: { is_active: true },
+          orderBy: { sort_order: 'asc' },
+        },
+      },
     });
   }
 
@@ -57,6 +69,16 @@ export class ContentPagesRepository {
             { title: { contains: search, mode: 'insensitive' } },
             { summary: { contains: search, mode: 'insensitive' } },
             { content: { contains: search, mode: 'insensitive' } },
+            {
+              faq_items: {
+                some: {
+                  OR: [
+                    { question: { contains: search, mode: 'insensitive' } },
+                    { answer: { contains: search, mode: 'insensitive' } },
+                  ],
+                },
+              },
+            },
           ]
         : undefined,
     };
@@ -107,6 +129,16 @@ export class ContentPagesRepository {
             { title: { contains: search, mode: 'insensitive' } },
             { summary: { contains: search, mode: 'insensitive' } },
             { content: { contains: search, mode: 'insensitive' } },
+            {
+              faq_items: {
+                some: {
+                  OR: [
+                    { question: { contains: search, mode: 'insensitive' } },
+                    { answer: { contains: search, mode: 'insensitive' } },
+                  ],
+                },
+              },
+            },
           ]
         : undefined,
     };
@@ -133,7 +165,10 @@ export class ContentPagesRepository {
   create(data: Prisma.ContentPageCreateInput) {
     return this.prismaService.contentPage.create({
       data,
-      include: { category: true },
+      include: {
+        category: true,
+        faq_items: { orderBy: { sort_order: 'asc' } },
+      },
     });
   }
 
@@ -141,7 +176,29 @@ export class ContentPagesRepository {
     return this.prismaService.contentPage.update({
       where: { id },
       data,
-      include: { category: true },
+      include: {
+        category: true,
+        faq_items: { orderBy: { sort_order: 'asc' } },
+      },
+    });
+  }
+
+  async reorderFaqItems(contentPageId: string, itemIds: string[]) {
+    await this.prismaService.$transaction(
+      itemIds.map((id, sortOrder) =>
+        this.prismaService.contentPageFaqItem.update({
+          where: { id },
+          data: { sort_order: sortOrder },
+        }),
+      ),
+    );
+
+    return this.prismaService.contentPage.findUniqueOrThrow({
+      where: { id: contentPageId },
+      include: {
+        category: true,
+        faq_items: { orderBy: { sort_order: 'asc' } },
+      },
     });
   }
 

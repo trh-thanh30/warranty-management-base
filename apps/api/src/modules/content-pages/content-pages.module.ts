@@ -11,6 +11,7 @@ import { ListContentPagesUseCase } from '@/modules/content-pages/use-cases/list-
 import { ListPublishedContentPagesUseCase } from '@/modules/content-pages/use-cases/list-published-content-pages.use-case';
 import { ParseContentDocumentUseCase } from '@/modules/content-pages/use-cases/parse-content-document.use-case';
 import { UpdateContentPageUseCase } from '@/modules/content-pages/use-cases/update-content-page.use-case';
+import { ReorderContentPageFaqItemsUseCase } from '@/modules/content-pages/use-cases/reorder-content-page-faq-items.use-case';
 import { Module } from '@nestjs/common';
 
 @Module({
@@ -27,6 +28,7 @@ import { Module } from '@nestjs/common';
     GetPublishedContentPageBySlugUseCase,
     PdfToHtmlConverter,
     ParseContentDocumentUseCase,
+    ReorderContentPageFaqItemsUseCase,
   ],
 })
 export class ContentPagesModule {}

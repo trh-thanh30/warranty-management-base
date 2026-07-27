@@ -3,6 +3,7 @@ import { Public } from '@/common/decorators/public.decorator';
 import { CreateContentPageDto } from '@/modules/content-pages/dto/create-content-page.dto';
 import { ListContentPagesDto } from '@/modules/content-pages/dto/list-content-pages.dto';
 import { UpdateContentPageDto } from '@/modules/content-pages/dto/update-content-page.dto';
+import { ReorderContentPageFaqItemsDto } from '@/modules/content-pages/dto/reorder-content-page-faq-items.dto';
 import { CreateContentPageUseCase } from '@/modules/content-pages/use-cases/create-content-page.use-case';
 import { DeleteContentPageUseCase } from '@/modules/content-pages/use-cases/delete-content-page.use-case';
 import { GetContentPageDetailUseCase } from '@/modules/content-pages/use-cases/get-content-page-detail.use-case';
@@ -11,6 +12,7 @@ import { ListContentPagesUseCase } from '@/modules/content-pages/use-cases/list-
 import { ListPublishedContentPagesUseCase } from '@/modules/content-pages/use-cases/list-published-content-pages.use-case';
 import { ParseContentDocumentUseCase } from '@/modules/content-pages/use-cases/parse-content-document.use-case';
 import { UpdateContentPageUseCase } from '@/modules/content-pages/use-cases/update-content-page.use-case';
+import { ReorderContentPageFaqItemsUseCase } from '@/modules/content-pages/use-cases/reorder-content-page-faq-items.use-case';
 import {
   Body,
   Controller,
@@ -38,6 +40,7 @@ export class ContentPagesController {
     private readonly listPublishedContentPagesUseCase: ListPublishedContentPagesUseCase,
     private readonly getPublishedContentPageBySlugUseCase: GetPublishedContentPageBySlugUseCase,
     private readonly parseContentDocumentUseCase: ParseContentDocumentUseCase,
+    private readonly reorderContentPageFaqItemsUseCase: ReorderContentPageFaqItemsUseCase,
   ) {}
 
   @Get('content-pages')
@@ -74,6 +77,15 @@ export class ContentPagesController {
   @Permissions([permission_key.CONTENT_PAGE_UPDATE])
   update(@Param('id') id: string, @Body() dto: UpdateContentPageDto) {
     return this.updateContentPageUseCase.execute(id, dto);
+  }
+
+  @Patch('content-pages/:id/faq-items/reorder')
+  @Permissions([permission_key.CONTENT_PAGE_UPDATE])
+  reorderFaqItems(
+    @Param('id') id: string,
+    @Body() dto: ReorderContentPageFaqItemsDto,
+  ) {
+    return this.reorderContentPageFaqItemsUseCase.execute(id, dto);
   }
 
   @Delete('content-pages/:id')

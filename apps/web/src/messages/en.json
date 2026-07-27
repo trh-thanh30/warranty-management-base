@@ -269,41 +269,8 @@
       "ariaLabel": "Frequently asked questions",
       "eyebrow": "Questions & answers",
       "title": "Frequently asked questions",
-      "description": "Coverage, installation, and support information is grouped here to help you choose confidently.",
-      "items": {
-        "warrantyDuration": {
-          "question": "How long is FUJITEK window film covered?",
-          "answer": "FUJITEK provides an official electronic warranty of up to 15 years for eligible defects."
-        },
-        "lookup": {
-          "question": "How do I check an electronic warranty?",
-          "answer": "Enter the phone number, license plate, or E-Warranty code to view coverage details and expiry."
-        },
-        "sputterDifference": {
-          "question": "How does Sputter differ from conventional Nano Ceramic film?",
-          "answer": "Sputter technology improves heat rejection and optical clarity while being optimized to avoid signal interference."
-        },
-        "installationTime": {
-          "question": "How long does installation take?",
-          "answer": "A full installation usually takes 1.5 to 2.5 hours depending on the vehicle and selected package."
-        },
-        "choosePackage": {
-          "question": "Which film package should I choose for my vehicle?",
-          "answer": "Choose by glass position, heat-rejection needs, privacy preference, and driving habits. Windshields usually prioritize clarity, while side and rear glass can use darker shades for more privacy."
-        },
-        "aftercare": {
-          "question": "What should I note after installation?",
-          "answer": "During the first few days, avoid lowering the windows, do not clean the film surface aggressively, and keep the vehicle in a dry, ventilated environment so the adhesive can fully stabilize."
-        },
-        "signalSafety": {
-          "question": "Does the film affect GPS, ETC, or phone signals?",
-          "answer": "FUJITEK films are recommended by glass position to balance heat-rejection performance and signal compatibility. If your vehicle uses multiple transmitting or receiving devices, technicians will recommend a suitable film code."
-        },
-        "warrantySupport": {
-          "question": "When should I submit a warranty request?",
-          "answer": "Submit a request when the film shows edge peeling, bubbling, surface defects, or when E-Warranty information needs to be checked again in the system."
-        }
-      }
+      "emptyTitle": "No frequently asked questions yet",
+      "emptyDescription": "FAQ content has not been published. Please check back later."
     },
     "brands": {
       "ariaLabel": "Supported vehicle brands",

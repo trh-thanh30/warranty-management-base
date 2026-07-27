@@ -48,11 +48,28 @@ export function useContentPageForm({
 
   async function submit(values: ContentPageFormValues) {
     try {
+      const previousRichText = [
+        page?.content ?? "",
+        ...(page?.faqItems.map((item) => item.answer) ?? []),
+      ].join("");
+      const nextRichText = [
+        values.content,
+        ...values.faqItems.map((item) => item.answer),
+      ].join("");
       const removedMediaCount = page
-        ? getRemovedMediaUrls(page.content, values.content).length
+        ? getRemovedMediaUrls(previousRichText, nextRichText).length
         : 0;
       const body = {
         ...values,
+        content: values.kind === "FAQ" ? "" : values.content,
+        faqItems:
+          values.kind === "FAQ"
+            ? values.faqItems.map(({ answer, isActive, question }) => ({
+                answer,
+                isActive,
+                question,
+              }))
+            : [],
         categoryId: values.categoryId || null,
         summary: values.summary || undefined,
       };
