@@ -2,9 +2,6 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { motion } from "framer-motion";
-import { useScrollReveal } from "@/src/hooks/use-scroll-reveal";
-import { revealViewportOnce } from "@/src/constants/motion.constants";
 import { ArrowRight } from "lucide-react";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { Link } from "@/src/i18n/navigation";
@@ -33,22 +30,20 @@ const mainCategories = [
 ] as const;
 
 import { Container } from "@/src/components/common/container";
+import {
+  StaggerGroup,
+  StaggerItem,
+} from "@/src/components/animation/stagger-group";
+import { FadeIn } from "@/src/components/animation/fade-in";
 
 export function ProductsSection() {
   const t = useTranslations("HomePage.products");
-  const { container, fadeUp } = useScrollReveal();
 
   return (
     <section id="products" className="w-full bg-gray-50 py-12 lg:py-16">
       <Container>
-        {/* Section Header */}
-        <motion.div
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="show"
-          viewport={revealViewportOnce}
-          className="text-center pb-8 lg:pb-12"
-        >
+        {/* Section Header with FadeIn */}
+        <FadeIn direction="up" className="text-center pb-8 lg:pb-12">
           <span className="block text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-premium-red mb-2">
             {t("eyebrow")}
           </span>
@@ -58,21 +53,14 @@ export function ProductsSection() {
           <p className="mt-3 text-base sm:text-lg text-stone-gray max-w-2xl mx-auto">
             {t("description")}
           </p>
-        </motion.div>
+        </FadeIn>
 
-        {/* 4 Main Categories Grid */}
-        <motion.div
-          variants={container}
-          initial="hidden"
-          whileInView="show"
-          viewport={revealViewportOnce}
-          className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-4"
-        >
+        {/* 4 Main Categories Grid with Staggered Entrance & Hover Lift Animations */}
+        <StaggerGroup className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-4">
           {mainCategories.map((cat) => (
-            <motion.div
+            <StaggerItem
               key={cat.key}
-              variants={fadeUp}
-              className="group flex flex-col justify-between rounded-md bg-white border border-border-gray overflow-hidden shadow-sm transition-all duration-300 hover:shadow-md hover:border-premium-red"
+              className="group flex flex-col justify-between rounded-md bg-white border border-border-gray overflow-hidden shadow-sm hover:shadow-xl hover:border-premium-red/50 hover:-translate-y-1.5 transition-all duration-300"
             >
               {/* Category Image */}
               <Link
@@ -115,9 +103,9 @@ export function ProductsSection() {
                   </Link>
                 </div>
               </div>
-            </motion.div>
+            </StaggerItem>
           ))}
-        </motion.div>
+        </StaggerGroup>
 
         {/* View All Categories Button */}
         <div className="text-center pt-8">
