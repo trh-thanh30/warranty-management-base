@@ -255,7 +255,10 @@ function WarrantyActivationRequestsContent({
 
   if (data && data.items.length > 0) {
     return (
-      <>
+      <div
+        className="scroll-mt-24"
+        id="warranty-activation-requests-directory-results"
+      >
         <WarrantyActivationRequestsTable
           items={data.items}
           onAction={onAction}
@@ -273,6 +276,7 @@ function WarrantyActivationRequestsContent({
           pageSize={pageSize}
           pageSizeLabel={t("pageSize")}
           previousLabel={t("previous")}
+          scrollTargetId="warranty-activation-requests-directory-results"
           summary={t("pagination", {
             page: data.meta.page,
             total: data.meta.total,
@@ -280,7 +284,7 @@ function WarrantyActivationRequestsContent({
           })}
           totalPages={data.meta.totalPages}
         />
-      </>
+      </div>
     );
   }
 

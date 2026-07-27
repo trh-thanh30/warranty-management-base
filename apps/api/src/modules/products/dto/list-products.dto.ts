@@ -1,9 +1,5 @@
 import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
-import {
-  product_category,
-  product_status,
-  warranty_status,
-} from '@prisma/client';
+import { product_status, warranty_status } from '@prisma/client';
 import {
   IsBooleanString,
   IsEnum,
@@ -18,12 +14,12 @@ export class ListProductsDto extends PaginationQueryDto {
   search?: string;
 
   @IsOptional()
-  @IsEnum(product_category)
-  category?: product_category;
+  @IsUUID()
+  categoryId?: string;
 
   @IsOptional()
   @IsUUID()
-  categoryId?: string;
+  templateId?: string;
 
   @IsOptional()
   @IsUUID()

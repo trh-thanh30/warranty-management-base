@@ -15,7 +15,8 @@ describe('WarrantyCertificateEmailQueueService', () => {
         duration_months: 36,
         end_date: new Date('2029-07-24T00:00:00.000Z'),
         product: {
-          name: 'Lexzenz Film',
+          display_name: null,
+          template: { name: 'Lexzenz Film' },
           ownerships: [],
           serial_number: 'SN-001',
         },

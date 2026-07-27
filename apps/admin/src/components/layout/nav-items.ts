@@ -1,12 +1,18 @@
-import type { DashboardConfig } from "@/src/config/dashboard.types";
-import type { NavigationItem } from "@/src/config/dashboard.types";
+import type {
+  DashboardConfig,
+  NavigationItem,
+} from "@/src/config/dashboard.types";
 
-function flattenItems(items: NavigationItem[]): NavigationItem[] {
-  return items.flatMap((item) => [item, ...flattenItems(item.children ?? [])]);
+export function flattenNavigationItems(
+  items: NavigationItem[],
+): NavigationItem[] {
+  return items.flatMap((item) =>
+    item.children?.length ? flattenNavigationItems(item.children) : [item],
+  );
 }
 
 export function getNavItems(dashboardConfig: DashboardConfig) {
-  return flattenItems(
+  return flattenNavigationItems(
     dashboardConfig.sidebarSections.flatMap((section) => section.items),
   )
     .filter((item) => !!item.href)

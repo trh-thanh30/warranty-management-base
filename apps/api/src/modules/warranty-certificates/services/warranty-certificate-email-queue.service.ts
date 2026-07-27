@@ -27,6 +27,7 @@ export class WarrantyCertificateEmailQueueService {
             include: {
               product: {
                 include: {
+                  template: true,
                   ownerships: {
                     where: { is_current_owner: true },
                     include: { customer: true },
@@ -72,7 +73,9 @@ export class WarrantyCertificateEmailQueueService {
       endDate: certificate.warranty.end_date,
       filmItems: this.getFilmItems(request?.metadata),
       installedAt: request?.installed_at ?? certificate.warranty.start_date,
-      productName: certificate.warranty.product.name,
+      productName:
+        certificate.warranty.product.display_name ??
+        certificate.warranty.product.template.name,
       serialNumber: certificate.warranty.product.serial_number,
       startDate: certificate.warranty.start_date,
       vehicleModel: request?.vehicle_model ?? null,

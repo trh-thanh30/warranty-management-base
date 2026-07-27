@@ -14,7 +14,10 @@ export function WarrantyStatusBadge({
   if (!status) return <span>-</span>;
 
   return (
-    <Badge variant={status === "ACTIVE" ? "success" : "secondary"}>
+    <Badge
+      className="whitespace-nowrap"
+      variant={status === "ACTIVE" ? "success" : "secondary"}
+    >
       {t(status)}
     </Badge>
   );

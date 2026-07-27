@@ -2,6 +2,7 @@ import {
   Customer,
   Product,
   ProductOwnership,
+  ProductTemplate,
   User,
   Warranty,
 } from '@prisma/client';
@@ -10,6 +11,7 @@ type WarrantyWithProduct = Warranty & {
   activated_by?: User | null;
   voided_by?: User | null;
   product: Product & {
+    template: ProductTemplate;
     ownerships?: Array<ProductOwnership & { customer?: Customer }>;
   };
 };
@@ -59,17 +61,18 @@ function getWarrantyUserSummary(user: User | null | undefined) {
 }
 
 export function toWarrantyLookupResponse(input: {
-  product: Product;
+  product: Product & { template: ProductTemplate };
   warranty: Warranty;
 }) {
   return {
     product: {
       id: input.product.id,
-      name: input.product.name,
-      brand: input.product.brand,
-      model: input.product.model,
+      name: input.product.template.name,
+      displayName: input.product.display_name,
+      brand: input.product.template.brand,
+      model: input.product.template.model,
       serialNumber: input.product.serial_number,
-      warrantyCode: input.product.warranty_code,
+      warrantyCode: input.warranty.warranty_code,
     },
     warranty: {
       warrantyCode: input.warranty.warranty_code,
@@ -89,9 +92,10 @@ export function toWarrantyListItemResponse(warranty: WarrantyWithProduct) {
     ...toWarrantyResponse(warranty),
     product: {
       id: warranty.product.id,
-      name: warranty.product.name,
-      brand: warranty.product.brand,
-      model: warranty.product.model,
+      name: warranty.product.template.name,
+      displayName: warranty.product.display_name,
+      brand: warranty.product.template.brand,
+      model: warranty.product.template.model,
       productCode: warranty.product.product_code,
       serialNumber: warranty.product.serial_number,
     },

@@ -1,59 +1,489 @@
+import { AssetsService } from '@/modules/assets/assets.service';
+import { ProductsRepository } from '@/modules/products/repository/products.repository';
+import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { UpdateProductUseCase } from '@/modules/products/use-cases/update-product.use-case';
-import { product_category, product_status } from '@prisma/client';
-
-jest.mock('@/modules/assets/assets.service', () => ({
-  AssetsService: class AssetsService {},
-}));
+import { Test } from '@nestjs/testing';
+import { warranty_status } from '@prisma/client';
 
 describe('UpdateProductUseCase', () => {
-  it('deletes rich-text media removed from the product description', async () => {
-    const product = {
+  it('can be resolved by the Nest dependency injection container', async () => {
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        UpdateProductUseCase,
+        { provide: ProductsRepository, useValue: {} },
+        { provide: GenerateWarrantyCodeUseCase, useValue: {} },
+        { provide: AssetsService, useValue: {} },
+      ],
+    }).compile();
+
+    expect(moduleRef.get(UpdateProductUseCase)).toBeInstanceOf(
+      UpdateProductUseCase,
+    );
+  });
+
+  it('updates only physical product fields including display name', async () => {
+    const existing = {
       id: 'product-id',
-      product_code: 'PRD-001',
-      warranty_code: 'WM-001',
-      serial_number: null,
-      name: 'Product',
-      category: product_category.CAR,
-      category_id: null,
-      brand: null,
-      model: null,
-      manufacture_year: null,
-      description:
-        '<p>Old</p><img src="https://cdn.example.com/rich-text/old.jpg">',
-      status: product_status.ACTIVE,
+      template_id: 'template-id',
+      serial_number: 'SN-001',
+      display_name: null,
       metadata: null,
-      created_at: new Date('2026-07-21T00:00:00.000Z'),
-      updated_at: new Date('2026-07-21T00:00:00.000Z'),
       deleted_at: null,
-      ownerships: [],
-      warranty: null,
+      warranty: {
+        id: 'warranty-id',
+        warranty_code: 'WM-2026-EXISTING',
+        status: warranty_status.DRAFT,
+      },
+      warranty_activation_requests: [],
     };
-    const productsRepository = {
-      findById: jest.fn().mockResolvedValue(product),
+    const repository = {
+      findById: jest.fn().mockResolvedValue(existing),
       findBySerialNumber: jest.fn(),
       update: jest.fn().mockResolvedValue({
-        ...product,
-        description: '<p>New</p>',
+        ...existing,
+        display_name: 'Camera kho hàng',
+        product_code: 'PRD-001',
+        status: 'ACTIVE',
+        created_at: new Date(),
+        updated_at: new Date(),
+        assets: [],
+        ownerships: [],
+        warranty: null,
+        template: {
+          id: 'template-id',
+          sku: 'CAM-4K',
+          slug: 'camera-ai-4k',
+          name: 'Camera AI 4K',
+          category_id: 'category-id',
+          category_ref: null,
+          brand: null,
+          model: null,
+          model_year: null,
+          description: null,
+          default_warranty_duration_months: 24,
+          default_warranty_terms: null,
+          metadata: null,
+          is_active: true,
+          is_published: false,
+          published_at: null,
+          created_at: new Date(),
+          updated_at: new Date(),
+          assets: [],
+        },
       }),
     };
-    const prismaService = {
-      category: { findUnique: jest.fn() },
+    const useCase = new UpdateProductUseCase(
+      repository as never,
+      { execute: jest.fn() } as never,
+    );
+
+    const result = await useCase.execute('product-id', {
+      displayName: ' Camera kho hàng ',
+    });
+
+    expect(repository.update).toHaveBeenCalledWith(
+      'product-id',
+      expect.objectContaining({ display_name: 'Camera kho hàng' }),
+    );
+    expect(result.displayName).toBe('Camera kho hàng');
+  });
+
+  it('updates the product category after validating the override', async () => {
+    const existing = {
+      id: 'product-id',
+      category_id: 'template-category-id',
+      serial_number: null,
+      metadata: null,
+      deleted_at: null,
+      warranty: {
+        id: 'warranty-id',
+        warranty_code: 'WM-2026-EXISTING',
+        status: warranty_status.DRAFT,
+      },
+      warranty_activation_requests: [],
     };
-    const assetsService = {
-      deleteAssetByUrl: jest.fn().mockResolvedValue(true),
+    const repository = {
+      findById: jest.fn().mockResolvedValue(existing),
+      findActiveProductCategoryById: jest.fn().mockResolvedValue({
+        id: 'override-category-id',
+      }),
+      update: jest.fn().mockResolvedValue({
+        ...existing,
+        category_id: 'override-category-id',
+        category_ref: {
+          id: 'override-category-id',
+          name: 'Camera chuyên dụng',
+        },
+        product_code: 'PRD-001',
+        status: 'ACTIVE',
+        assets: [],
+        ownerships: [],
+        warranty: null,
+        template: {
+          id: 'template-id',
+          name: 'Camera AI 4K',
+          assets: [],
+          category_ref: null,
+        },
+      }),
     };
     const useCase = new UpdateProductUseCase(
-      prismaService as never,
-      productsRepository as never,
-      assetsService as never,
+      repository as never,
+      { execute: jest.fn() } as never,
     );
 
-    await useCase.execute('product-id', { description: '<p>New</p>' });
+    await useCase.execute('product-id', {
+      categoryId: 'override-category-id',
+    });
 
-    expect(assetsService.deleteAssetByUrl).toHaveBeenCalledWith(
-      'https://cdn.example.com/rich-text/old.jpg',
-      expect.objectContaining({ folder: 'rich-text' }),
+    expect(repository.findActiveProductCategoryById).toHaveBeenCalledWith(
+      'override-category-id',
     );
-    expect(productsRepository.update).toHaveBeenCalled();
+    expect(repository.update).toHaveBeenCalledWith(
+      'product-id',
+      expect.objectContaining({
+        category_ref: { connect: { id: 'override-category-id' } },
+      }),
+    );
+  });
+
+  it('generates a code when the existing warranty code is missing', async () => {
+    const existing = createExistingProduct({
+      id: 'warranty-id',
+      warranty_code: null,
+    });
+    const repository = {
+      findById: jest.fn().mockResolvedValue(existing),
+      update: jest.fn().mockResolvedValue(
+        createUpdatedProduct(existing, {
+          id: 'warranty-id',
+          warranty_code: 'WM-2026-UPDATE',
+          status: warranty_status.DRAFT,
+        }),
+      ),
+    };
+    const generateWarrantyCodeUseCase = {
+      execute: jest.fn().mockResolvedValue('WM-2026-UPDATE'),
+    };
+    const useCase = new UpdateProductUseCase(
+      repository as never,
+      generateWarrantyCodeUseCase as never,
+    );
+
+    await useCase.execute('product-id', { displayName: 'Camera updated' });
+
+    expect(generateWarrantyCodeUseCase.execute).toHaveBeenCalledTimes(1);
+    expect(repository.update).toHaveBeenCalledWith(
+      'product-id',
+      expect.objectContaining({
+        warranty: {
+          update: { warranty_code: 'WM-2026-UPDATE' },
+        },
+      }),
+    );
+  });
+
+  it('preserves an existing warranty code without generating a new one', async () => {
+    const existing = createExistingProduct({
+      id: 'warranty-id',
+      warranty_code: 'WM-2026-EXISTING',
+    });
+    const repository = {
+      findById: jest.fn().mockResolvedValue(existing),
+      update: jest
+        .fn()
+        .mockResolvedValue(createUpdatedProduct(existing, existing.warranty)),
+    };
+    const generateWarrantyCodeUseCase = { execute: jest.fn() };
+    const useCase = new UpdateProductUseCase(
+      repository as never,
+      generateWarrantyCodeUseCase as never,
+    );
+
+    await useCase.execute('product-id', { displayName: 'Camera updated' });
+
+    expect(generateWarrantyCodeUseCase.execute).not.toHaveBeenCalled();
+    expect(repository.update).toHaveBeenCalledWith(
+      'product-id',
+      expect.objectContaining({ warranty: undefined }),
+    );
+  });
+
+  it('creates a coded draft warranty when the product has no warranty', async () => {
+    const existing = createExistingProduct(null);
+    const createdWarranty = {
+      id: 'warranty-id',
+      warranty_code: 'WM-2026-UPDATE',
+      status: warranty_status.DRAFT,
+    };
+    const repository = {
+      findById: jest.fn().mockResolvedValue(existing),
+      update: jest
+        .fn()
+        .mockResolvedValue(createUpdatedProduct(existing, createdWarranty)),
+    };
+    const generateWarrantyCodeUseCase = {
+      execute: jest.fn().mockResolvedValue('WM-2026-UPDATE'),
+    };
+    const useCase = new UpdateProductUseCase(
+      repository as never,
+      generateWarrantyCodeUseCase as never,
+    );
+
+    await useCase.execute('product-id', { displayName: 'Camera updated' });
+
+    expect(generateWarrantyCodeUseCase.execute).toHaveBeenCalledTimes(1);
+    expect(repository.update).toHaveBeenCalledWith(
+      'product-id',
+      expect.objectContaining({
+        warranty: {
+          create: {
+            warranty_code: 'WM-2026-UPDATE',
+            duration_months: 24,
+            terms: 'Template terms',
+            start_date: null,
+            end_date: null,
+            status: warranty_status.DRAFT,
+          },
+        },
+      }),
+    );
+  });
+
+  it('preserves the existing warranty code when the submitted value is blank', async () => {
+    const existing = createExistingProduct({
+      id: 'warranty-id',
+      warranty_code: 'WM-2026-EXISTING',
+    });
+    const repository = createRepository(existing);
+    const generateWarrantyCodeUseCase = { execute: jest.fn() };
+    const useCase = new UpdateProductUseCase(
+      repository as never,
+      generateWarrantyCodeUseCase as never,
+    );
+
+    await useCase.execute('product-id', { warrantyCode: '   ' });
+
+    expect(repository.findByWarrantyCode).not.toHaveBeenCalled();
+    expect(repository.update).toHaveBeenCalledWith(
+      'product-id',
+      expect.objectContaining({ warranty: undefined }),
+    );
+  });
+
+  it('treats the normalized current warranty code as a no-op', async () => {
+    const existing = createExistingProduct({
+      id: 'warranty-id',
+      warranty_code: 'WM-2026-EXISTING',
+    });
+    const repository = createRepository(existing);
+    const generateWarrantyCodeUseCase = { execute: jest.fn() };
+    const useCase = new UpdateProductUseCase(
+      repository as never,
+      generateWarrantyCodeUseCase as never,
+    );
+
+    await useCase.execute('product-id', {
+      warrantyCode: ' wm-2026-existing ',
+    });
+
+    expect(repository.findByWarrantyCode).not.toHaveBeenCalled();
+    expect(repository.update).toHaveBeenCalledWith(
+      'product-id',
+      expect.objectContaining({ warranty: undefined }),
+    );
+  });
+
+  it('normalizes and stores a valid unique replacement warranty code', async () => {
+    const existing = createExistingProduct({
+      id: 'warranty-id',
+      warranty_code: 'WM-2026-EXISTING',
+    });
+    const repository = createRepository(existing);
+    const generateWarrantyCodeUseCase = { execute: jest.fn() };
+    const useCase = new UpdateProductUseCase(
+      repository as never,
+      generateWarrantyCodeUseCase as never,
+    );
+
+    await useCase.execute('product-id', {
+      warrantyCode: ' wm-2026-replace1 ',
+    });
+
+    expect(repository.findByWarrantyCode).toHaveBeenCalledWith(
+      'WM-2026-REPLACE1',
+    );
+    expect(generateWarrantyCodeUseCase.execute).not.toHaveBeenCalled();
+    expect(repository.update).toHaveBeenCalledWith(
+      'product-id',
+      expect.objectContaining({
+        warranty: {
+          update: { warranty_code: 'WM-2026-REPLACE1' },
+        },
+      }),
+    );
+  });
+
+  it('rejects a duplicate replacement warranty code', async () => {
+    const existing = createExistingProduct({
+      id: 'warranty-id',
+      warranty_code: 'WM-2026-EXISTING',
+    });
+    const repository = createRepository(existing);
+    repository.findByWarrantyCode.mockResolvedValue({ id: 'other-product' });
+    const useCase = new UpdateProductUseCase(
+      repository as never,
+      { execute: jest.fn() } as never,
+    );
+
+    await expect(
+      useCase.execute('product-id', {
+        warrantyCode: 'WM-2026-DUPLICATE',
+      }),
+    ).rejects.toThrow('Warranty code already exists');
+
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    warranty_status.ACTIVE,
+    warranty_status.EXPIRED,
+    warranty_status.VOIDED,
+  ])('rejects a replacement for a %s warranty', async (status) => {
+    const existing = createExistingProduct({
+      id: 'warranty-id',
+      status,
+      warranty_code: 'WM-2026-EXISTING',
+    });
+    const repository = createRepository(existing);
+    const useCase = new UpdateProductUseCase(
+      repository as never,
+      { execute: jest.fn() } as never,
+    );
+
+    await expect(
+      useCase.execute('product-id', {
+        warrantyCode: 'WM-2026-REPLACE1',
+      }),
+    ).rejects.toThrow(
+      'Warranty code can only be changed while warranty is draft',
+    );
+
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects a replacement while an activation request is open', async () => {
+    const existing = createExistingProduct(
+      {
+        id: 'warranty-id',
+        warranty_code: 'WM-2026-EXISTING',
+      },
+      [{ id: 'request-id' }],
+    );
+    const repository = createRepository(existing);
+    const useCase = new UpdateProductUseCase(
+      repository as never,
+      { execute: jest.fn() } as never,
+    );
+
+    await expect(
+      useCase.execute('product-id', {
+        warrantyCode: 'WM-2026-REPLACE1',
+      }),
+    ).rejects.toThrow(
+      'Warranty code cannot be changed while an activation request is open',
+    );
+
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('creates a draft warranty with a submitted code for a legacy product', async () => {
+    const existing = createExistingProduct(null);
+    const repository = createRepository(existing);
+    const useCase = new UpdateProductUseCase(
+      repository as never,
+      { execute: jest.fn() } as never,
+    );
+
+    await useCase.execute('product-id', {
+      warrantyCode: ' wm-2026-manual1 ',
+    });
+
+    expect(repository.update).toHaveBeenCalledWith(
+      'product-id',
+      expect.objectContaining({
+        warranty: {
+          create: expect.objectContaining({
+            status: warranty_status.DRAFT,
+            warranty_code: 'WM-2026-MANUAL1',
+          }),
+        },
+      }),
+    );
   });
 });
+
+function createExistingProduct(
+  warranty: {
+    id: string;
+    status?: warranty_status;
+    warranty_code: string | null;
+  } | null,
+  openRequests: Array<{ id: string }> = [],
+) {
+  return {
+    id: 'product-id',
+    template_id: 'template-id',
+    category_id: 'category-id',
+    serial_number: 'SN-001',
+    display_name: null,
+    metadata: null,
+    deleted_at: null,
+    warranty: warranty
+      ? { ...warranty, status: warranty.status ?? warranty_status.DRAFT }
+      : null,
+    warranty_activation_requests: openRequests,
+    template: {
+      id: 'template-id',
+      default_warranty_duration_months: 24,
+      default_warranty_terms: 'Template terms',
+    },
+  };
+}
+
+function createRepository(existing: ReturnType<typeof createExistingProduct>) {
+  return {
+    findById: jest.fn().mockResolvedValue(existing),
+    findByWarrantyCode: jest.fn().mockResolvedValue(null),
+    update: jest
+      .fn()
+      .mockResolvedValue(createUpdatedProduct(existing, existing.warranty)),
+  };
+}
+
+function createUpdatedProduct(
+  existing: ReturnType<typeof createExistingProduct>,
+  warranty: {
+    id: string;
+    warranty_code: string | null;
+    status?: warranty_status;
+  } | null,
+) {
+  return {
+    ...existing,
+    product_code: 'PRD-001',
+    status: 'ACTIVE',
+    created_at: new Date(),
+    updated_at: new Date(),
+    assets: [],
+    ownerships: [],
+    category_ref: null,
+    warranty,
+    template: {
+      ...existing.template,
+      name: 'Camera AI 4K',
+      assets: [],
+      category_ref: null,
+    },
+  };
+}

@@ -45,13 +45,15 @@ export function ImportExportMenu({
       <DropdownMenuTrigger asChild>
         <Button
           aria-label={labels.title}
-          className="h-10 border-slate-200 bg-white px-3 text-slate-800 shadow-sm hover:bg-slate-50"
+          className="h-10 w-full justify-center border-slate-200 bg-white px-3 text-slate-800 shadow-sm hover:bg-slate-50 sm:w-auto"
           disabled={disabled}
           variant="secondary"
         >
-          <FileSpreadsheet className="size-4 text-slate-700" />
-          <span>{labels.title}</span>
-          <ChevronDown className="size-4 text-slate-500" />
+          <div className="inline-flex items-center justify-center gap-2 sm:w-auto">
+            <FileSpreadsheet className="size-4 shrink-0 text-slate-700" />
+            <span>{labels.title}</span>
+            <ChevronDown className="size-4 shrink-0 text-slate-500" />
+          </div>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent

@@ -1,10 +1,12 @@
-import { PrismaService } from '@/database/prisma/prisma.service';
 import { normalizePagination, paginate } from '@/common/pagination/pagination';
+import { PrismaService } from '@/database/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import {
   asset_access_type,
+  category_type,
   Prisma,
   product_status,
+  warranty_activation_request_status,
   warranty_status,
 } from '@prisma/client';
 
@@ -13,12 +15,33 @@ const productInclude = {
     include: { asset: true },
     orderBy: [{ role: 'asc' as const }, { sort_order: 'asc' as const }],
   },
-  category_ref: true,
+  template: {
+    include: {
+      assets: {
+        include: { asset: true },
+        orderBy: [{ role: 'asc' as const }, { sort_order: 'asc' as const }],
+      },
+      category_ref: true,
+    },
+  },
   ownerships: {
     include: { customer: true },
     orderBy: { created_at: 'desc' as const },
   },
   warranty: true,
+  warranty_activation_requests: {
+    where: {
+      status: {
+        in: [
+          warranty_activation_request_status.PENDING,
+          warranty_activation_request_status.APPROVED,
+        ],
+      },
+    },
+    select: { id: true },
+    take: 1,
+  },
+  category_ref: true,
 };
 
 const productListInclude = {
@@ -31,18 +54,23 @@ const productListInclude = {
 };
 
 const publicProductListInclude = {
-  assets: {
-    where: {
-      role: 'COVER' as const,
-      asset: {
-        access_type: asset_access_type.PUBLIC,
-        is_deleted: false,
+  category_ref: true,
+  template: {
+    include: {
+      category_ref: true,
+      assets: {
+        where: {
+          role: 'COVER' as const,
+          asset: {
+            access_type: asset_access_type.PUBLIC,
+            is_deleted: false,
+          },
+        },
+        include: { asset: true },
+        orderBy: { sort_order: 'asc' as const },
       },
     },
-    include: { asset: true },
-    orderBy: { sort_order: 'asc' as const },
   },
-  category_ref: true,
   warranty: true,
 };
 
@@ -57,6 +85,16 @@ export class ProductsRepository {
     });
   }
 
+  findActiveProductCategoryById(id: string) {
+    return this.prismaService.category.findFirst({
+      where: {
+        id,
+        type: category_type.PRODUCT,
+        is_active: true,
+      },
+    });
+  }
+
   findById(id: string) {
     return this.prismaService.product.findUnique({
       where: { id },
@@ -67,8 +105,9 @@ export class ProductsRepository {
   findByWarrantyCode(warrantyCode: string, tx?: Prisma.TransactionClient) {
     const client = tx ?? this.prismaService;
 
-    return client.product.findUnique({
-      where: { warranty_code: warrantyCode },
+    return client.product.findFirst({
+      where: { warranty: { warranty_code: warrantyCode } },
+      include: productInclude,
     });
   }
 
@@ -76,10 +115,11 @@ export class ProductsRepository {
     return this.prismaService.product.findFirst({
       where: {
         deleted_at: null,
-        warranty_code: warrantyCode,
+        warranty: { warranty_code: warrantyCode },
       },
       include: {
         warranty: true,
+        template: true,
         ownerships: {
           where: { is_current_owner: true },
           include: { customer: true },
@@ -97,6 +137,7 @@ export class ProductsRepository {
       },
       include: {
         warranty: true,
+        template: true,
         ownerships: {
           where: { is_current_owner: true },
           include: { customer: true },
@@ -106,16 +147,8 @@ export class ProductsRepository {
     });
   }
 
-  synchronizeWarrantyCode(input: {
-    productId: string;
-    warrantyCode: string;
-    warrantyId: string;
-  }) {
+  synchronizeWarrantyCode(input: { warrantyCode: string; warrantyId: string }) {
     return this.prismaService.$transaction(async (tx) => {
-      await tx.product.update({
-        where: { id: input.productId },
-        data: { warranty_code: input.warrantyCode },
-      });
       await tx.warranty.update({
         where: { id: input.warrantyId },
         data: { warranty_code: input.warrantyCode },
@@ -128,12 +161,7 @@ export class ProductsRepository {
 
     return client.product.findUnique({
       where: { product_code: productCode },
-    });
-  }
-
-  findBySlug(slug: string) {
-    return this.prismaService.product.findUnique({
-      where: { slug },
+      include: productInclude,
     });
   }
 
@@ -147,6 +175,7 @@ export class ProductsRepository {
     search?: string;
     category?: string;
     categoryId?: string;
+    templateId?: string;
     ownerCustomerId?: string;
     status?: product_status;
     isPublished?: string;
@@ -160,19 +189,15 @@ export class ProductsRepository {
     const { page, limit, skip, take } = normalizePagination(filters);
     const sortMap = {
       productCode: 'product_code',
-      warrantyCode: 'warranty_code',
       serialNumber: 'serial_number',
-      name: 'name',
-      category: 'category',
       status: 'status',
-      publishedAt: 'published_at',
       createdAt: 'created_at',
       updatedAt: 'updated_at',
     } satisfies Record<string, keyof Prisma.ProductOrderByWithRelationInput>;
     const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
     const where: Prisma.ProductWhereInput = {
-      category: filters.category as never,
-      category_id: filters.categoryId,
+      AND: buildEffectiveCatalogueFilters(filters),
+      template_id: filters.templateId,
       ownerships: filters.ownerCustomerId
         ? {
             some: {
@@ -182,21 +207,38 @@ export class ProductsRepository {
           }
         : undefined,
       status: filters.status,
-      is_published:
-        filters.isPublished === undefined
-          ? undefined
-          : filters.isPublished === 'true',
+      template: {
+        is: {
+          ...(filters.isPublished === undefined
+            ? {}
+            : { is_published: filters.isPublished === 'true' }),
+        },
+      },
       warranty: filters.warrantyStatus
         ? { status: filters.warrantyStatus }
         : undefined,
       OR: search
         ? [
-            { name: { contains: search, mode: 'insensitive' } },
             { product_code: { contains: search, mode: 'insensitive' } },
-            { warranty_code: { contains: search, mode: 'insensitive' } },
+            {
+              warranty: {
+                warranty_code: { contains: search, mode: 'insensitive' },
+              },
+            },
             { serial_number: { contains: search, mode: 'insensitive' } },
-            { brand: { contains: search, mode: 'insensitive' } },
-            { model: { contains: search, mode: 'insensitive' } },
+            { display_name: { contains: search, mode: 'insensitive' } },
+            {
+              template: {
+                is: {
+                  OR: [
+                    { name: { contains: search, mode: 'insensitive' } },
+                    { sku: { contains: search, mode: 'insensitive' } },
+                    { brand: { contains: search, mode: 'insensitive' } },
+                    { model: { contains: search, mode: 'insensitive' } },
+                  ],
+                },
+              },
+            },
             {
               ownerships: {
                 some: {
@@ -243,25 +285,38 @@ export class ProductsRepository {
     const sortMap = {
       name: 'name',
       publishedAt: 'published_at',
-    } satisfies Record<string, keyof Prisma.ProductOrderByWithRelationInput>;
+    };
     const sortBy = filters.sortBy ? sortMap[filters.sortBy] : 'published_at';
     const where: Prisma.ProductWhereInput = {
       category_id: filters.categoryId,
       category_ref: { is_active: true },
       deleted_at: null,
-      is_published: true,
       status: product_status.ACTIVE,
+      template: {
+        is: {
+          is_published: true,
+        },
+      },
       OR: search
         ? [
-            { name: { contains: search, mode: 'insensitive' } },
             { product_code: { contains: search, mode: 'insensitive' } },
-            { brand: { contains: search, mode: 'insensitive' } },
-            { model: { contains: search, mode: 'insensitive' } },
+            {
+              template: {
+                is: {
+                  OR: [
+                    { name: { contains: search, mode: 'insensitive' } },
+                    { sku: { contains: search, mode: 'insensitive' } },
+                    { brand: { contains: search, mode: 'insensitive' } },
+                    { model: { contains: search, mode: 'insensitive' } },
+                  ],
+                },
+              },
+            },
           ]
         : undefined,
     };
     const orderBy: Prisma.ProductOrderByWithRelationInput[] = [
-      { [sortBy]: filters.sortOrder ?? 'desc' },
+      { template: { [sortBy]: filters.sortOrder ?? 'desc' } },
     ];
 
     return this.prismaService.$transaction(async (tx) => {
@@ -284,6 +339,7 @@ export class ProductsRepository {
     search?: string;
     category?: string;
     categoryId?: string;
+    templateId?: string;
     ownerCustomerId?: string;
     status?: product_status;
     isPublished?: string;
@@ -294,19 +350,15 @@ export class ProductsRepository {
     const search = filters.search?.trim();
     const sortMap = {
       productCode: 'product_code',
-      warrantyCode: 'warranty_code',
       serialNumber: 'serial_number',
-      name: 'name',
-      category: 'category',
       status: 'status',
-      publishedAt: 'published_at',
       createdAt: 'created_at',
       updatedAt: 'updated_at',
     } satisfies Record<string, keyof Prisma.ProductOrderByWithRelationInput>;
     const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
     const where: Prisma.ProductWhereInput = {
-      category: filters.category as never,
-      category_id: filters.categoryId,
+      AND: buildEffectiveCatalogueFilters(filters),
+      template_id: filters.templateId,
       ownerships: filters.ownerCustomerId
         ? {
             some: {
@@ -316,21 +368,38 @@ export class ProductsRepository {
           }
         : undefined,
       status: filters.status,
-      is_published:
-        filters.isPublished === undefined
-          ? undefined
-          : filters.isPublished === 'true',
+      template: {
+        is: {
+          ...(filters.isPublished === undefined
+            ? {}
+            : { is_published: filters.isPublished === 'true' }),
+        },
+      },
       warranty: filters.warrantyStatus
         ? { status: filters.warrantyStatus }
         : undefined,
       OR: search
         ? [
-            { name: { contains: search, mode: 'insensitive' } },
             { product_code: { contains: search, mode: 'insensitive' } },
-            { warranty_code: { contains: search, mode: 'insensitive' } },
+            {
+              warranty: {
+                warranty_code: { contains: search, mode: 'insensitive' },
+              },
+            },
             { serial_number: { contains: search, mode: 'insensitive' } },
-            { brand: { contains: search, mode: 'insensitive' } },
-            { model: { contains: search, mode: 'insensitive' } },
+            { display_name: { contains: search, mode: 'insensitive' } },
+            {
+              template: {
+                is: {
+                  OR: [
+                    { name: { contains: search, mode: 'insensitive' } },
+                    { sku: { contains: search, mode: 'insensitive' } },
+                    { brand: { contains: search, mode: 'insensitive' } },
+                    { model: { contains: search, mode: 'insensitive' } },
+                  ],
+                },
+              },
+            },
             {
               ownerships: {
                 some: {
@@ -363,4 +432,14 @@ export class ProductsRepository {
       include: productInclude,
     });
   }
+}
+
+function buildEffectiveCatalogueFilters(filters: {
+  categoryId?: string;
+}): Prisma.ProductWhereInput[] | undefined {
+  const clauses: Prisma.ProductWhereInput[] = [];
+  if (filters.categoryId) {
+    clauses.push({ category_id: filters.categoryId });
+  }
+  return clauses.length > 0 ? clauses : undefined;
 }

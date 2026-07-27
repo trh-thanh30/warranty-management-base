@@ -60,6 +60,14 @@ html {
   scrollbar-gutter: stable;
 }
 
+/*
+ * Radix overlays already lock body scrolling. Since the root reserves the
+ * scrollbar gutter, its additional margin compensation would shift the page.
+ */
+html body[data-scroll-locked] {
+  margin-right: 0 !important;
+}
+
 body {
   margin: 0;
   background: #f8fafc;

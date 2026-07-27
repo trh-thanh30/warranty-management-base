@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { FileCheck2, ShieldCheck } from "lucide-react";
 import {
   getActiveNavigationHref,
   getNavigationBadge,
+  getNavigationItemBadge,
+  hasActiveNavigationDescendant,
   isNavigationItemActive,
 } from "./app-sidebar.utils.ts";
 
@@ -53,4 +56,57 @@ test("keeps configured alternate routes active", () => {
 
   assert.equal(activeHref, "/warranty-activation-requests");
   assert.equal(isNavigationItemActive(warranties, activeHref), true);
+});
+
+const warrantyGroup = {
+  title: "Warranties",
+  icon: ShieldCheck,
+  children: [
+    {
+      title: "Warranty list",
+      href: "/warranties",
+      icon: ShieldCheck,
+    },
+    {
+      title: "Activation requests",
+      href: "/warranty-activation-requests",
+      icon: FileCheck2,
+      notificationBadgeKey: "warranties" as const,
+    },
+  ],
+};
+
+test("marks a navigation group active for nested detail routes", () => {
+  const activeHref = getActiveNavigationHref(
+    [warrantyGroup],
+    "/warranty-activation-requests/request-id",
+  );
+
+  assert.equal(hasActiveNavigationDescendant(warrantyGroup, activeHref), true);
+  assert.equal(
+    hasActiveNavigationDescendant(
+      warrantyGroup,
+      getActiveNavigationHref([warrantyGroup], "/products"),
+    ),
+    false,
+  );
+});
+
+test("surfaces a child notification badge on its parent group", () => {
+  assert.equal(
+    getNavigationItemBadge(
+      warrantyGroup,
+      { unread: 4, warranties: 4, warrantyClaims: 0 },
+      false,
+    ),
+    "4",
+  );
+  assert.equal(
+    getNavigationItemBadge(
+      warrantyGroup,
+      { unread: 4, warranties: 4, warrantyClaims: 0 },
+      true,
+    ),
+    null,
+  );
 });

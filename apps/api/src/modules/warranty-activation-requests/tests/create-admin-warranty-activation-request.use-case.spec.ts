@@ -28,13 +28,15 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
   it('generates and synchronizes a missing warranty code before creating the request', async () => {
     productsRepository.findActivationRequestTargetById.mockResolvedValue({
       id: dto.productId,
-      brand: 'Toyota',
-      manufacture_year: 2026,
-      model: 'Battery Plus',
-      name: 'Bo pin chinh hang',
+      display_name: null,
       serial_number: 'SN-001',
       status: product_status.ACTIVE,
-      warranty_code: null,
+      template: {
+        brand: 'Toyota',
+        model_year: 2026,
+        model: 'Battery Plus',
+        name: 'Bo pin chinh hang',
+      },
       warranty: {
         id: 'warranty-id',
         status: warranty_status.DRAFT,
@@ -54,7 +56,6 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
     const result = await useCase.execute(dto);
 
     expect(productsRepository.synchronizeWarrantyCode).toHaveBeenCalledWith({
-      productId: dto.productId,
       warrantyCode: 'WM-2026-ABC123',
       warrantyId: 'warranty-id',
     });
@@ -73,8 +74,14 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
   it('reuses an existing warranty code without synchronizing it', async () => {
     productsRepository.findActivationRequestTargetById.mockResolvedValue({
       id: dto.productId,
+      display_name: null,
       status: product_status.ACTIVE,
-      warranty_code: 'WM-2026-EXISTING',
+      template: {
+        brand: null,
+        model_year: null,
+        model: null,
+        name: 'Bo pin chinh hang',
+      },
       warranty: {
         id: 'warranty-id',
         status: warranty_status.DRAFT,
@@ -103,8 +110,14 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
   it('rejects products whose warranty is not draft', async () => {
     productsRepository.findActivationRequestTargetById.mockResolvedValue({
       id: dto.productId,
+      display_name: null,
       status: product_status.ACTIVE,
-      warranty_code: 'WM-2026-ACTIVE1',
+      template: {
+        brand: null,
+        model_year: null,
+        model: null,
+        name: 'Bo pin chinh hang',
+      },
       warranty: {
         id: 'warranty-id',
         status: warranty_status.ACTIVE,

@@ -10,6 +10,8 @@
 - **Permission override**: an Admin-controlled grant or revocation applied to one Staff account relative to the Moderator role defaults. Only differences from the role defaults are persisted.
 - **Category taxonomy**: shared, admin-managed classification records for domain data. Product categories now use dynamic `Category` records while the legacy product category enum remains for backward compatibility.
 - **Metadata field**: nullable JSON extension data for low-query-frequency integration or display attributes. Business-critical fields that drive filtering, sorting, permissions, status transitions, or reports must remain first-class columns.
+- **Product Template**: reusable catalog definition for a product type, including shared descriptive data, technical specifications, default warranty policy, and reusable media.
+- **Product**: one physical warrantable unit created from an optional Product Template. It owns unit-specific identity and lifecycle data such as product code, serial number, owner, warranty, claim history, and installation context.
 
 ## Architecture Principles
 

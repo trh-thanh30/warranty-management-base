@@ -2,13 +2,10 @@ import {
   formatDate,
   type CreateProductBody,
   type ProductResponse,
+  type UpdateProductBody,
 } from "@repo/shared";
-import { toOptionalValue } from "../../utils/form.ts";
-import { toOptionalRichText } from "../../utils/rich-text.ts";
-import type {
-  ProductFormValues,
-  ProductSpecificationRow,
-} from "./products.types";
+import { toNullableValue, toOptionalValue } from "../../utils/form.ts";
+import type { ProductFormValues } from "./products.types";
 
 export function formatProductCreatedAt(createdAt: string) {
   return formatDate(createdAt);
@@ -25,62 +22,11 @@ export function formatProductOwner(product: ProductResponse) {
 }
 
 export function getProductCategoryLabel(product: ProductResponse) {
-  return product.categoryRef?.name ?? product.category;
+  return product.categoryRef.name;
 }
 
 export function getProductDisplayName(product: ProductResponse) {
-  const secondary = [product.brand, product.model].filter(Boolean).join(" ");
-  return secondary ? `${product.name} · ${secondary}` : product.name;
-}
-
-export function getProductSpecifications(
-  metadata: Record<string, unknown> | null | undefined,
-): ProductSpecificationRow[] {
-  const specifications = metadata?.specifications;
-  if (Array.isArray(specifications)) {
-    return specifications.flatMap((specification) => {
-      if (!isRecord(specification)) return [];
-
-      const { key, value } = specification;
-      if (typeof key !== "string" || typeof value !== "string") return [];
-
-      const trimmedKey = key.trim();
-      const trimmedValue = value.trim();
-      if (!trimmedKey || !trimmedValue) return [];
-
-      return [{ key: trimmedKey, value: trimmedValue }];
-    });
-  }
-
-  if (!isRecord(specifications)) return [];
-
-  return Object.entries(specifications).flatMap(([key, value]) => {
-    if (typeof value !== "string") return [];
-
-    const trimmedKey = key.trim();
-    const trimmedValue = value.trim();
-    if (!trimmedKey || !trimmedValue) return [];
-
-    return [{ key: trimmedKey, value: trimmedValue }];
-  });
-}
-
-export function mergeProductSpecifications(
-  metadata: Record<string, unknown> | null | undefined,
-  rows: ProductSpecificationRow[],
-): Record<string, unknown> | null {
-  const nextMetadata = { ...(metadata ?? {}) };
-  delete nextMetadata.specifications;
-
-  const specifications = rows
-    .map((row) => ({ key: row.key.trim(), value: row.value.trim() }))
-    .filter(({ key, value }) => key && value);
-
-  if (specifications.length > 0) {
-    nextMetadata.specifications = specifications;
-  }
-
-  return Object.keys(nextMetadata).length > 0 ? nextMetadata : null;
+  return product.displayName?.trim() || product.name;
 }
 
 export function getProductInstallationPosition(
@@ -111,54 +57,53 @@ export function toCreateProductBody(
   values: ProductFormValues,
 ): CreateProductBody {
   const metadata = mergeProductInstallationPosition(
-    mergeProductSpecifications(null, values.specifications),
+    null,
     values.installationPosition,
   );
+  const productCode = toOptionalValue(values.productCode);
 
   return {
-    brand: toOptionalValue(values.brand),
-    category: values.category,
     categoryId: values.categoryId,
-    coverAssetId: toOptionalValue(values.coverAssetId),
-    description: toOptionalRichText(values.description),
-    isPublished: values.isPublished,
-    manufactureYear: values.manufactureYear,
+    displayName: toOptionalValue(values.displayName),
     metadata: metadata ?? undefined,
-    model: toOptionalValue(values.model),
-    name: values.name.trim(),
+    ...(productCode ? { productCode } : {}),
     serialNumber: toOptionalValue(values.serialNumber),
-    slug: toOptionalValue(values.slug),
     status: values.status,
+    templateId: values.templateId,
   };
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+export function toUpdateProductBody(
+  values: ProductFormValues,
+  existingMetadata: Record<string, unknown> | null,
+): UpdateProductBody {
+  return {
+    categoryId: values.categoryId,
+    displayName: toNullableValue(values.displayName),
+    metadata: mergeProductInstallationPosition(
+      existingMetadata,
+      values.installationPosition,
+    ),
+    serialNumber: toNullableValue(values.serialNumber),
+    status: values.status,
+    warrantyCode: values.warrantyCode?.trim() ?? "",
+  };
 }
 
 export function toProductActiveStatus(checked: boolean) {
   return checked ? ("ACTIVE" as const) : ("INACTIVE" as const);
 }
 
-export function toProductSlugPreview(value: string) {
-  return value
-    .trim()
-    .toLocaleLowerCase("vi")
-    .replaceAll("đ", "d")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
-export function resolveSpecificationMove(
-  items: Array<{ id: string }>,
-  activeId: string,
-  overId: string | undefined,
-) {
-  if (!overId || activeId === overId) return null;
-
-  const from = items.findIndex((item) => item.id === activeId);
-  const to = items.findIndex((item) => item.id === overId);
-  return from >= 0 && to >= 0 ? { from, to } : null;
+export function resolveProductCategoryId({
+  currentCategoryId,
+  templateCategoryId,
+  templateChanged,
+}: {
+  currentCategoryId: string;
+  templateCategoryId: string;
+  templateChanged: boolean;
+}) {
+  return templateChanged
+    ? templateCategoryId
+    : currentCategoryId || templateCategoryId;
 }

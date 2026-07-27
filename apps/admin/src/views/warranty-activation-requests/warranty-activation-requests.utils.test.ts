@@ -56,11 +56,11 @@ test("admin activation request body combines form and selected product data", ()
   const product = {
     brand: "Black Label",
     id: "product-1",
-    manufactureYear: 2026,
+    modelYear: 2026,
     model: "Premium",
     name: "Film cach nhiet",
     serialNumber: "SN-001",
-  } as ProductResponse;
+  } as unknown as ProductResponse;
 
   assert.deepEqual(
     toAdminActivationRequestBody({

@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { PackagePlus } from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import type { ProductResponse } from "@repo/shared";
@@ -13,6 +13,7 @@ import { Link } from "@/src/i18n/navigation";
 import { AssignOwnerDialog } from "./components/assign-owner-dialog";
 import { DeleteProductDialog } from "./components/delete-product-dialog";
 import { ProductImportPreviewTable } from "./components/product-import-preview-table";
+import { ProductManagementTabs } from "../product-management/components/product-management-tabs";
 import { ProductsDirectoryCard } from "./components/products-directory-card";
 import { useProductsDirectory } from "./hooks/use-products-directory";
 
@@ -52,7 +53,6 @@ export function ProductsView() {
     resetImportPreview,
     toggleSort,
     updateCategoryId,
-    updatePublication,
     updateSearch,
     updateStatus,
     updateImportRowData,
@@ -64,7 +64,7 @@ export function ProductsView() {
       <div className="space-y-6">
         <PageHeader
           actions={
-            <div className="flex flex-wrap justify-end gap-2">
+            <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2 sm:justify-end">
               <ImportExportMenu
                 labels={{
                   downloadTemplate: t("excel.downloadTemplate"),
@@ -82,10 +82,12 @@ export function ProductsView() {
                 uploadDisabled={!canCreateProducts}
               />
               {canCreateProducts ? (
-                <Button asChild className="min-w-44">
+                <Button asChild className="w-full justify-center sm:w-auto">
                   <Link href="/products/create">
-                    <Plus className="size-4" />
-                    {t("create")}
+                    <div className="inline-flex items-center justify-center gap-2 pr-[22px] sm:pr-0">
+                      <PackagePlus className="size-4 shrink-0" />
+                      <span>{t("create")}</span>
+                    </div>
                   </Link>
                 </Button>
               ) : null}
@@ -95,6 +97,8 @@ export function ProductsView() {
           eyebrow={t("eyebrow")}
           title={t("title")}
         />
+
+        <ProductManagementTabs activeTab="products" />
 
         <ProductsDirectoryCard
           canCreate={canCreateProducts}
@@ -109,7 +113,6 @@ export function ProductsView() {
           onDelete={openDelete}
           onPageChange={setPage}
           onPageSizeChange={setPageSize}
-          onPublicationChange={updatePublication}
           onRetry={() => {
             void productsQuery.refetch();
           }}
@@ -177,23 +180,16 @@ export function ProductsView() {
                 labels={{
                   actions: t("actions"),
                   allRows: t("excel.allRows"),
-                  brand: t("brand"),
                   cancel: t("cancel"),
-                  category: t("category"),
-                  description: t("descriptionLabel"),
-                  dynamicCategory: t("dynamicCategory"),
+                  displayName: t("displayName"),
                   edit: t("excel.editRow"),
                   editDescription: t("excel.editRowDescription"),
                   editTitle: t("excel.editRowTitle"),
-                  imageUrl: t("excel.imageUrl"),
                   importStatus: t("excel.importStatus"),
                   installationPosition: t("installationPosition"),
                   invalidRows: t("excel.invalidRows", {
                     count: importSummary.invalidRows,
                   }),
-                  manufactureYear: t("manufactureYear"),
-                  model: t("model"),
-                  name: t("name"),
                   next: t("next"),
                   noRows: t("excel.noPreviewRows"),
                   pageSize: t("pageSize"),
@@ -206,11 +202,10 @@ export function ProductsView() {
                   saveChanges: t("excel.saveRowChanges"),
                   serialNumber: t("serialNumber"),
                   status: t("productStatus"),
+                  templateSku: t("templateSku"),
                   validRows: t("excel.validRows", {
                     count: importSummary.validRows,
                   }),
-                  warrantyDurationMonths: t("durationMonths"),
-                  warrantyTerms: t("warrantyTerms"),
                   withErrors: t("excel.withErrors"),
                 }}
                 onEdit={updateImportRowData}

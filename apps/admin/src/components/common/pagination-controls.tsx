@@ -29,6 +29,7 @@ type PaginationControlsProps = {
   pageSizeLabel?: string;
   pageSizeOptions?: number[];
   previousLabel: string;
+  scrollTargetId?: string;
   summary?: ReactNode;
   totalPages: number;
   variant?: "compact" | "default";
@@ -44,6 +45,7 @@ export function PaginationControls({
   pageSizeLabel,
   pageSizeOptions = [10, 20, 50],
   previousLabel,
+  scrollTargetId,
   summary,
   totalPages,
   variant = "default",
@@ -51,6 +53,26 @@ export function PaginationControls({
   const safeTotalPages = Math.max(totalPages, 1);
   const currentPage = Math.min(Math.max(page, 1), safeTotalPages);
   const pages = getPaginationItems(currentPage, safeTotalPages);
+  const changePage = (nextPage: number) => {
+    if (nextPage === currentPage) return;
+
+    onPageChange(nextPage);
+
+    if (!scrollTargetId) return;
+
+    window.requestAnimationFrame(() => {
+      const scrollTarget = document.getElementById(scrollTargetId);
+      if (!scrollTarget) return;
+
+      const reduceMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      scrollTarget.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "start",
+      });
+    });
+  };
 
   if (variant === "compact") {
     return (
@@ -74,7 +96,7 @@ export function PaginationControls({
                 aria-label={previousLabel}
                 className="size-9 px-0"
                 disabled={currentPage <= 1}
-                onClick={() => onPageChange(currentPage - 1)}
+                onClick={() => changePage(currentPage - 1)}
               />
             </PaginationItem>
             <PaginationItem>
@@ -87,7 +109,7 @@ export function PaginationControls({
                 aria-label={nextLabel}
                 className="size-9 px-0"
                 disabled={currentPage >= safeTotalPages}
-                onClick={() => onPageChange(currentPage + 1)}
+                onClick={() => changePage(currentPage + 1)}
               />
             </PaginationItem>
           </PaginationContent>
@@ -99,11 +121,11 @@ export function PaginationControls({
   return (
     <div
       className={cn(
-        "mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4",
+        "mt-4 flex min-w-0 max-w-full flex-col gap-3 xl:flex-row xl:items-center xl:justify-between xl:gap-4",
         className,
       )}
     >
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+      <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
         {summary ? (
           <p className="text-sm text-slate-500 dark:text-slate-400">
             {summary}
@@ -130,12 +152,41 @@ export function PaginationControls({
           </label>
         ) : null}
       </div>
-      <Pagination className="mx-0 w-auto justify-start sm:justify-end">
-        <PaginationContent>
+      <Pagination className="mx-0 min-w-0 max-w-full justify-start sm:hidden">
+        <PaginationContent className="w-full justify-between">
+          <PaginationItem className="flex min-w-0 flex-1">
+            <PaginationPrevious
+              aria-label={previousLabel}
+              className="h-11 w-full min-w-0 px-2"
+              disabled={currentPage <= 1}
+              onClick={() => changePage(currentPage - 1)}
+            >
+              {previousLabel}
+            </PaginationPrevious>
+          </PaginationItem>
+          <PaginationItem className="shrink-0">
+            <span className="flex h-11 min-w-14 items-center justify-center text-sm font-medium tabular-nums text-slate-700 dark:text-slate-300">
+              {currentPage}/{safeTotalPages}
+            </span>
+          </PaginationItem>
+          <PaginationItem className="flex min-w-0 flex-1">
+            <PaginationNext
+              aria-label={nextLabel}
+              className="h-11 w-full min-w-0 px-2"
+              disabled={currentPage >= safeTotalPages}
+              onClick={() => changePage(currentPage + 1)}
+            >
+              {nextLabel}
+            </PaginationNext>
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+      <Pagination className="mx-0 hidden min-w-0 max-w-full justify-start overflow-x-auto pb-1 sm:flex xl:w-auto xl:justify-end">
+        <PaginationContent className="min-w-max">
           <PaginationItem>
             <PaginationPrevious
               disabled={currentPage <= 1}
-              onClick={() => onPageChange(currentPage - 1)}
+              onClick={() => changePage(currentPage - 1)}
             >
               {previousLabel}
             </PaginationPrevious>
@@ -145,7 +196,7 @@ export function PaginationControls({
               {typeof item === "number" ? (
                 <PaginationButton
                   isActive={item === currentPage}
-                  onClick={() => onPageChange(item)}
+                  onClick={() => changePage(item)}
                 >
                   {item}
                 </PaginationButton>
@@ -157,7 +208,7 @@ export function PaginationControls({
           <PaginationItem>
             <PaginationNext
               disabled={currentPage >= safeTotalPages}
-              onClick={() => onPageChange(currentPage + 1)}
+              onClick={() => changePage(currentPage + 1)}
             >
               {nextLabel}
             </PaginationNext>

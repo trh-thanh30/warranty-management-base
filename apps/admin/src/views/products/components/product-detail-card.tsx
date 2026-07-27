@@ -89,6 +89,11 @@ export function ProductDetailCard({
 
         <DetailSection title={t("sections.product")}>
           <DetailItem label={t("name")} value={product.name} />
+          <DetailItem
+            label={t("displayName")}
+            value={product.displayName ?? "-"}
+          />
+          <DetailItem label={t("templateSku")} value={product.template.sku} />
           <DetailItem label={t("productCode")} value={product.productCode} />
           <DetailItem label={t("slug")} value={product.slug} />
           <DetailItem
@@ -101,7 +106,17 @@ export function ProductDetailCard({
           />
           <DetailItem
             label={t("dynamicCategory")}
-            value={product.categoryRef?.name ?? product.category}
+            value={product.categoryRef.name}
+          />
+          {product.categoryId !== product.template.categoryId ? (
+            <DetailItem
+              label={t("templateCategory")}
+              value={product.template.categoryRef?.name ?? "-"}
+            />
+          ) : null}
+          <DetailItem
+            label={t("modelYear")}
+            value={String(product.modelYear ?? "-")}
           />
           <DetailItem
             label={t("installationPosition")}

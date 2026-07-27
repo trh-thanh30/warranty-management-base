@@ -6,37 +6,22 @@ import {
   ProductAsset,
   ProductOwnership,
   Warranty,
+  warranty_status,
 } from '@prisma/client';
+import { toCategoryResponse } from '@/modules/categories/categories.types';
+import {
+  ProductTemplateWithRelations,
+  toProductTemplateResponse,
+} from '@/modules/product-templates/product-templates.types';
 
 type ProductWithRelations = Product & {
   assets?: Array<ProductAsset & { asset: Asset }>;
-  category_ref?: Category | null;
   ownerships?: Array<ProductOwnership & { customer?: Customer }>;
   warranty?: Warranty | null;
+  warranty_activation_requests?: Array<{ id: string }>;
+  template?: ProductTemplateWithRelations | null;
+  category_ref?: Category;
 };
-
-function toCategorySummary(category: Category | null | undefined) {
-  if (!category) {
-    return null;
-  }
-
-  return {
-    id: category.id,
-    type: category.type,
-    code: category.code,
-    slug: category.slug,
-    name: category.name,
-    description: category.description,
-    parentId: category.parent_id,
-    icon: category.icon,
-    imageUrl: category.image_url,
-    order: category.order,
-    isActive: category.is_active,
-    metadata: category.metadata as Record<string, unknown> | null,
-    createdAt: category.created_at,
-    updatedAt: category.updated_at,
-  };
-}
 
 export function toProductResponse(
   product: ProductWithRelations,
@@ -45,25 +30,56 @@ export function toProductResponse(
   const currentOwnership = product.ownerships?.find(
     (ownership) => ownership.is_current_owner,
   );
+  const templateResponse = product.template
+    ? toProductTemplateResponse(product.template, resolveAssetUrl)
+    : null;
+  const effectiveMetadata = templateResponse
+    ? mergeEffectiveMetadata(templateResponse.metadata, product.metadata)
+    : (product.metadata as Record<string, unknown> | null);
+  const productAssets =
+    product.assets?.map((productAsset) => ({
+      id: productAsset.id,
+      assetId: productAsset.asset_id,
+      role: productAsset.role,
+      sortOrder: productAsset.sort_order,
+      altText: productAsset.alt_text,
+      url: resolveAssetUrl(productAsset.asset),
+      mimeType: productAsset.asset.mime_type,
+      originalName: productAsset.asset.original_name,
+      source: 'PRODUCT' as const,
+    })) ?? [];
+  const warrantyCodeEditLockedReason =
+    product.warranty && product.warranty.status !== warranty_status.DRAFT
+      ? ('WARRANTY_NOT_DRAFT' as const)
+      : product.warranty_activation_requests?.length
+        ? ('OPEN_ACTIVATION_REQUEST' as const)
+        : null;
 
   return {
     id: product.id,
+    templateId: product.template_id,
+    template: templateResponse,
     productCode: product.product_code,
-    slug: product.slug,
-    warrantyCode: product.warranty_code,
+    slug: templateResponse?.slug ?? '',
+    warrantyCode: product.warranty?.warranty_code ?? null,
+    canEditWarrantyCode: warrantyCodeEditLockedReason === null,
+    warrantyCodeEditLockedReason,
     serialNumber: product.serial_number,
-    name: product.name,
-    category: product.category,
+    displayName: product.display_name,
+    name:
+      templateResponse?.name ?? product.display_name ?? product.product_code,
     categoryId: product.category_id,
-    categoryRef: toCategorySummary(product.category_ref),
-    brand: product.brand,
-    model: product.model,
-    manufactureYear: product.manufacture_year,
-    description: product.description,
+    categoryRef: product.category_ref
+      ? toCategoryResponse(product.category_ref)
+      : null,
+    brand: templateResponse?.brand ?? null,
+    model: templateResponse?.model ?? null,
+    modelYear: templateResponse?.modelYear ?? null,
+    description: templateResponse?.description ?? null,
     status: product.status,
-    isPublished: product.is_published,
-    publishedAt: product.published_at,
-    metadata: product.metadata as Record<string, unknown> | null,
+    metadata: effectiveMetadata,
+    isPublished: templateResponse?.isPublished ?? false,
+    publishedAt: templateResponse?.publishedAt ?? null,
     createdAt: product.created_at,
     updatedAt: product.updated_at,
     deletedAt: product.deleted_at,
@@ -93,32 +109,65 @@ export function toProductResponse(
           terms: product.warranty.terms,
         }
       : null,
-    assets:
-      product.assets?.map((productAsset) => ({
-        id: productAsset.id,
-        assetId: productAsset.asset_id,
-        role: productAsset.role,
-        sortOrder: productAsset.sort_order,
-        altText: productAsset.alt_text,
-        url: resolveAssetUrl(productAsset.asset),
-        mimeType: productAsset.asset.mime_type,
-        originalName: productAsset.asset.original_name,
-      })) ?? [],
+    assets: mergeEffectiveProductAssets(
+      templateResponse?.assets ?? [],
+      productAssets,
+    ),
   };
+}
+
+function mergeEffectiveMetadata(
+  templateMetadata: Record<string, unknown> | null,
+  productMetadata: unknown,
+) {
+  const physicalMetadata = isRecord(productMetadata) ? productMetadata : {};
+  const sharedMetadata = templateMetadata ?? {};
+  const merged = { ...sharedMetadata, ...physicalMetadata };
+  return Object.keys(merged).length > 0 ? merged : null;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function mergeEffectiveProductAssets<
+  TTemplate extends {
+    assetId: string;
+    role: string;
+    source?: 'PRODUCT' | 'TEMPLATE';
+  },
+  TProduct extends {
+    assetId: string;
+    role: string;
+    source?: 'PRODUCT' | 'TEMPLATE';
+  },
+>(
+  templateAssets: TTemplate[],
+  productAssets: TProduct[],
+): Array<TTemplate | TProduct> {
+  const productHasCover = productAssets.some((asset) => asset.role === 'COVER');
+  const seenAssetIds = new Set(productAssets.map((asset) => asset.assetId));
+  const inheritedAssets = templateAssets.filter(
+    (asset) =>
+      !seenAssetIds.has(asset.assetId) &&
+      !(asset.role === 'COVER' && productHasCover),
+  );
+  return [...inheritedAssets, ...productAssets];
 }
 
 export function toPublicProductSummary(
   product: ProductWithRelations,
   resolveAssetUrl: (asset: Asset) => string = (asset) => asset.path,
 ) {
-  const cover = product.assets?.find((asset) => asset.role === 'COVER');
-  const metadata = product.metadata as Record<string, unknown> | null;
+  const template = product.template;
+  const cover = template?.assets?.find((asset) => asset.role === 'COVER');
+  const metadata = template?.metadata as Record<string, unknown> | null;
 
   return {
-    id: product.id,
+    id: template?.id ?? product.id,
     productCode: product.product_code,
-    slug: product.slug,
-    name: product.name,
+    slug: template?.slug ?? '',
+    name: template?.name ?? product.display_name ?? product.product_code,
     categoryId: product.category_id,
     category: product.category_ref
       ? {
@@ -127,13 +176,13 @@ export function toPublicProductSummary(
           name: product.category_ref.name,
         }
       : null,
-    brand: product.brand,
-    model: product.model,
-    description: product.description,
+    brand: template?.brand ?? null,
+    model: template?.model ?? null,
+    description: template?.description ?? null,
     coverImageUrl: cover ? resolveAssetUrl(cover.asset) : null,
     specifications: toPublicSpecifications(metadata?.specifications),
     warrantyDurationMonths: product.warranty?.duration_months ?? null,
-    publishedAt: product.published_at!,
+    publishedAt: template?.published_at ?? product.created_at,
   };
 }
 

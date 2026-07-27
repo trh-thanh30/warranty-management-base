@@ -26,11 +26,7 @@ describe('toWarrantyClaimResponse', () => {
       updated_at: now,
       product: {
         id: 'product-id',
-        product_code: 'PRD-2026-TEST',
-        warranty_code: 'WM-2026-TEST',
-        serial_number: 'SERIAL-1',
-        name: 'Test product',
-        category: 'OTHER',
+        template_id: 'template-id',
         category_id: 'category-id',
         category_ref: {
           id: 'category-id',
@@ -48,10 +44,32 @@ describe('toWarrantyClaimResponse', () => {
           created_at: now,
           updated_at: now,
         },
-        brand: 'Brand',
-        model: 'Model',
-        manufacture_year: 2026,
-        description: null,
+        product_code: 'PRD-2026-TEST',
+        display_name: null,
+        serial_number: 'SERIAL-1',
+        template: {
+          name: 'Test product',
+          brand: 'Brand',
+          model: 'Model',
+          model_year: 2026,
+          category_id: 'category-id',
+          category_ref: {
+            id: 'category-id',
+            type: 'PRODUCT',
+            code: 'FILM',
+            slug: 'film',
+            name: 'Phim cách nhiệt',
+            description: null,
+            parent_id: null,
+            icon: null,
+            image_url: null,
+            order: 1,
+            is_active: true,
+            metadata: null,
+            created_at: now,
+            updated_at: now,
+          },
+        },
         status: 'ACTIVE',
         metadata: null,
         created_at: now,
@@ -79,13 +97,12 @@ describe('toWarrantyClaimResponse', () => {
 
     expect(result.product).toEqual(
       expect.objectContaining({
-        category: 'OTHER',
         categoryId: 'category-id',
         categoryRef: expect.objectContaining({
           id: 'category-id',
           name: 'Phim cách nhiệt',
         }),
-        manufactureYear: 2026,
+        modelYear: 2026,
       }),
     );
     expect(result.warranty).toEqual(

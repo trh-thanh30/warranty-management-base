@@ -31,9 +31,12 @@ export function toPublicWarrantyClaimResponse(claim: {
   submitted_at: Date;
   resolved_at?: Date | null;
   product?: {
-    name: string;
-    brand: string | null;
-    model: string | null;
+    display_name?: string | null;
+    template: {
+      name: string;
+      brand: string | null;
+      model: string | null;
+    };
   } | null;
   service_center?: {
     name: string;
@@ -55,9 +58,9 @@ export function toPublicWarrantyClaimResponse(claim: {
     resolvedAt: claim.resolved_at,
     product: claim.product
       ? {
-          name: claim.product.name,
-          brand: claim.product.brand,
-          model: claim.product.model,
+          name: claim.product.display_name ?? claim.product.template.name,
+          brand: claim.product.template.brand,
+          model: claim.product.template.model,
         }
       : null,
     serviceCenter: claim.service_center

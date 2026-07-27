@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Edit3, Trash2 } from "lucide-react";
 import {
   Badge,
@@ -9,6 +9,13 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Table,
   TableBody,
   TableCell,
@@ -24,7 +31,6 @@ import type {
   ProductImportRowData,
   ProductImportRowError,
 } from "@/src/services/products/products.types";
-import { ProductForm } from "./product-form";
 
 export type EditableProductImportRow = {
   data: ProductImportRowData;
@@ -39,21 +45,14 @@ type ProductImportPreviewTableProps = {
   labels: {
     actions: string;
     allRows: string;
-    brand: string;
     cancel: string;
-    category: string;
-    dynamicCategory: string;
-    description: string;
+    displayName: string;
     edit: string;
     editDescription: string;
     editTitle: string;
-    imageUrl: string;
     importStatus: string;
     installationPosition: string;
     invalidRows: string;
-    manufactureYear: string;
-    model: string;
-    name: string;
     next: string;
     noRows: string;
     pageSize: string;
@@ -70,9 +69,8 @@ type ProductImportPreviewTableProps = {
     saveChanges: string;
     serialNumber: string;
     status: string;
+    templateSku: string;
     validRows: string;
-    warrantyDurationMonths: string;
-    warrantyTerms: string;
     withErrors: string;
   };
   onEdit: (rowId: string, data: ProductImportRowData) => void;
@@ -143,7 +141,7 @@ export function ProductImportPreviewTable({
 
       <div className="overflow-hidden rounded-md border border-slate-200">
         <div className="max-h-[27rem] overflow-auto">
-          <Table className="min-w-[90rem] whitespace-nowrap">
+          <Table className="min-w-[70rem] whitespace-nowrap">
             <TableHeader className="sticky top-0 z-10 bg-slate-50">
               <TableRow>
                 <TableHead className="w-20 whitespace-nowrap">
@@ -153,25 +151,19 @@ export function ProductImportPreviewTable({
                   {labels.productCode}
                 </TableHead>
                 <TableHead className="w-56 whitespace-nowrap">
-                  {labels.name}
+                  {labels.templateSku}
                 </TableHead>
                 <TableHead className="w-56 whitespace-nowrap">
-                  {labels.imageUrl}
+                  {labels.displayName}
                 </TableHead>
                 <TableHead className="w-44 whitespace-nowrap">
                   {labels.installationPosition}
-                </TableHead>
-                <TableHead className="w-40 whitespace-nowrap">
-                  {labels.category}
                 </TableHead>
                 <TableHead className="w-44 whitespace-nowrap">
                   {labels.serialNumber}
                 </TableHead>
                 <TableHead className="w-40 whitespace-nowrap">
                   {labels.status}
-                </TableHead>
-                <TableHead className="w-40 whitespace-nowrap">
-                  {labels.warrantyDurationMonths}
                 </TableHead>
                 <TableHead className="w-[32rem] whitespace-nowrap">
                   {labels.importStatus}
@@ -191,13 +183,11 @@ export function ProductImportPreviewTable({
                       </span>
                     </TableCell>
                     <PreviewCell value={row.data.productCode} />
-                    <PreviewCell value={row.data.name} />
-                    <PreviewCell value={row.data.imageUrl} />
+                    <PreviewCell value={row.data.templateSku} />
+                    <PreviewCell value={row.data.displayName} />
                     <PreviewCell value={row.data.installationPosition} />
-                    <PreviewCell value={row.data.category} />
                     <PreviewCell value={row.data.serialNumber} />
                     <PreviewCell value={row.data.status} />
-                    <PreviewCell value={row.data.warrantyDurationMonths} />
                     <TableCell className="w-[32rem] max-w-[32rem] whitespace-normal">
                       <ImportRowStatus
                         errors={row.errors}
@@ -233,7 +223,7 @@ export function ProductImportPreviewTable({
                 <TableRow>
                   <TableCell
                     className="h-24 text-center text-sm text-slate-500"
-                    colSpan={11}
+                    colSpan={9}
                   >
                     {labels.noRows}
                   </TableCell>
@@ -308,18 +298,135 @@ function ProductImportEditDialog({
 
         {row ? (
           <div className="mt-5">
-            <ProductForm
-              initialValues={row.data}
+            <ProductImportEditForm
+              cancelLabel={labels.cancel}
+              data={row.data}
               key={row.id}
-              mode="import-preview"
               onCancel={() => onOpenChange(false)}
-              onSaved={onSave}
+              onSave={onSave}
+              labels={labels}
               submitLabel={labels.saveChanges}
             />
           </div>
         ) : null}
       </DialogContent>
     </Dialog>
+  );
+}
+
+function ProductImportEditForm({
+  cancelLabel,
+  data,
+  labels,
+  onCancel,
+  onSave,
+  submitLabel,
+}: {
+  cancelLabel: string;
+  data: ProductImportRowData;
+  labels: ProductImportPreviewTableProps["labels"];
+  onCancel: () => void;
+  onSave: (data: ProductImportRowData) => void;
+  submitLabel: string;
+}) {
+  const [values, setValues] = useState(data);
+  const setText = (
+    key: Exclude<keyof ProductImportRowData, "status">,
+    value: string,
+  ) => {
+    setValues((current) => ({
+      ...current,
+      [key]: key === "templateSku" ? value : value || null,
+    }));
+  };
+
+  return (
+    <form
+      className="space-y-5"
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSave({
+          ...values,
+          templateSku: values.templateSku.trim(),
+        });
+      }}
+    >
+      <div className="grid gap-5 sm:grid-cols-2">
+        <ImportField label={labels.productCode}>
+          <Input
+            onChange={(event) => setText("productCode", event.target.value)}
+            value={values.productCode ?? ""}
+          />
+        </ImportField>
+        <ImportField label={labels.templateSku}>
+          <Input
+            onChange={(event) => setText("templateSku", event.target.value)}
+            required
+            value={values.templateSku}
+          />
+        </ImportField>
+        <ImportField label={labels.displayName}>
+          <Input
+            onChange={(event) => setText("displayName", event.target.value)}
+            value={values.displayName ?? ""}
+          />
+        </ImportField>
+        <ImportField label={labels.serialNumber}>
+          <Input
+            onChange={(event) => setText("serialNumber", event.target.value)}
+            value={values.serialNumber ?? ""}
+          />
+        </ImportField>
+        <ImportField label={labels.installationPosition}>
+          <Input
+            onChange={(event) =>
+              setText("installationPosition", event.target.value)
+            }
+            value={values.installationPosition ?? ""}
+          />
+        </ImportField>
+        <ImportField label={labels.status}>
+          <Select
+            onValueChange={(status) =>
+              setValues((current) => ({
+                ...current,
+                status: status as ProductImportRowData["status"],
+              }))
+            }
+            value={values.status}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ACTIVE">ACTIVE</SelectItem>
+              <SelectItem value="INACTIVE">INACTIVE</SelectItem>
+            </SelectContent>
+          </Select>
+        </ImportField>
+      </div>
+      <div className="flex justify-end gap-2 border-t pt-5">
+        <Button onClick={onCancel} type="button" variant="secondary">
+          {cancelLabel}
+        </Button>
+        <Button type="submit">{submitLabel}</Button>
+      </div>
+    </form>
+  );
+}
+
+function ImportField({
+  children,
+  label,
+}: {
+  children: ReactNode;
+  label: string;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      {children}
+    </div>
   );
 }
 

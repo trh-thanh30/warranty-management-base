@@ -193,7 +193,7 @@ function WarrantiesDirectoryContent({
 
   if (data && data.items.length > 0) {
     return (
-      <>
+      <div className="scroll-mt-24" id="warranties-directory-results">
         <WarrantiesTable
           items={data.items}
           onActivate={onActivate}
@@ -208,7 +208,7 @@ function WarrantiesDirectoryContent({
           onPageSizeChange={onPageSizeChange}
           pageSize={pageSize}
         />
-      </>
+      </div>
     );
   }
 
@@ -262,6 +262,7 @@ function WarrantiesPagination({
       pageSize={pageSize}
       pageSizeLabel={t("pageSize")}
       previousLabel={t("previous")}
+      scrollTargetId="warranties-directory-results"
       summary={t("pagination", {
         page: data.meta.page,
         total: data.meta.total,

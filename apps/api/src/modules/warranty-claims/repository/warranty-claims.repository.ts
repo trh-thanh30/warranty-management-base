@@ -24,11 +24,13 @@ export class WarrantyClaimsRepository {
   findWarrantyProductByCode(warrantyCode: string) {
     return this.prismaService.product.findFirst({
       where: {
-        warranty_code: warrantyCode,
+        warranty: { warranty_code: warrantyCode },
         deleted_at: null,
       },
       include: {
+        category_ref: true,
         warranty: true,
+        template: { include: { category_ref: true } },
         ownerships: {
           where: { is_current_owner: true },
           include: { customer: true },

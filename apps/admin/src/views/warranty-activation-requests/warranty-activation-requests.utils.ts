@@ -167,7 +167,7 @@ export function toAdminActivationRequestBody({
     dealerPhone: values.dealerPhone.trim() || undefined,
     dealerProvince: values.dealerProvince.trim() || undefined,
     filmItems: buildFilmItems(values, activationInputValues),
-    manufactureYear: product?.manufactureYear ?? undefined,
+    manufactureYear: product?.modelYear ?? undefined,
     model: product?.model ?? undefined,
     metadata: activationMetadata,
     note: values.note.trim() || undefined,

@@ -17,9 +17,11 @@ import { Injectable } from '@nestjs/common';
 import {
   Prisma,
   Product,
+  ProductTemplate,
   Customer,
   Dealer,
   warranty_activation_request_source,
+  warranty_activation_request_status,
   warranty_status,
 } from '@prisma/client';
 
@@ -60,16 +62,11 @@ export class CreateWarrantyActivationRequestUseCase {
     }
 
     const warrantyCode =
-      product.warranty_code ??
       product.warranty.warranty_code ??
       (await this.generateWarrantyCodeUseCase.execute());
 
-    if (
-      product.warranty_code !== warrantyCode ||
-      product.warranty.warranty_code !== warrantyCode
-    ) {
+    if (product.warranty.warranty_code !== warrantyCode) {
       await this.productsRepository.synchronizeWarrantyCode({
-        productId: product.id,
         warrantyCode,
         warrantyId: product.warranty.id,
       });
@@ -90,7 +87,14 @@ export class CreateWarrantyActivationRequestUseCase {
 
     this.assertProductMatchesCategory(dto.categoryId, product);
 
-    const dealer = await this.resolveDealer(dto);
+    const openRequest =
+      await this.warrantyActivationRequestsRepository.findOpenByProductId(
+        product.id,
+      );
+
+    if (openRequest) {
+      this.throwAlreadyOpenRequest(product.id, openRequest);
+    }
 
     const currentOwner = product.ownerships[0]?.customer;
     if (currentOwner) {
@@ -102,22 +106,7 @@ export class CreateWarrantyActivationRequestUseCase {
       });
     }
 
-    const pendingDuplicate =
-      await this.warrantyActivationRequestsRepository.findPendingDuplicate({
-        warrantyCode,
-        customerPhone,
-      });
-
-    if (pendingDuplicate) {
-      throw new BadRequestError(
-        'Warranty activation request already pending',
-        'BAD_REQUEST',
-        {
-          code: 'ACTIVATION_REQUEST_ALREADY_PENDING',
-          warrantyCode,
-        },
-      );
-    }
+    const dealer = await this.resolveDealer(dto);
 
     for (
       let attempt = 0;
@@ -156,12 +145,15 @@ export class CreateWarrantyActivationRequestUseCase {
           ward_name: dto.wardName.trim(),
           address_detail: dto.addressDetail.trim(),
           full_address: buildWarrantyActivationRequestFullAddress(dto),
-          product_name: optionalTrim(dto.productName) ?? product.name,
+          product_name:
+            optionalTrim(dto.productName) ??
+            product.display_name ??
+            product.template.name,
           serial_number:
             optionalTrim(dto.serialNumber) ?? product.serial_number,
-          brand: optionalTrim(dto.brand) ?? product.brand,
-          model: optionalTrim(dto.model) ?? product.model,
-          manufacture_year: dto.manufactureYear ?? product.manufacture_year,
+          brand: optionalTrim(dto.brand) ?? product.template.brand,
+          model: optionalTrim(dto.model) ?? product.template.model,
+          manufacture_year: dto.manufactureYear ?? product.template.model_year,
           note: optionalTrim(dto.note),
           metadata: this.buildActivationMetadata({
             dealer,
@@ -186,6 +178,17 @@ export class CreateWarrantyActivationRequestUseCase {
           continue;
         }
 
+        if (this.isUniqueConstraintConflict(error)) {
+          const concurrentOpenRequest =
+            await this.warrantyActivationRequestsRepository.findOpenByProductId(
+              product.id,
+            );
+
+          if (concurrentOpenRequest) {
+            this.throwAlreadyOpenRequest(product.id, concurrentOpenRequest);
+          }
+        }
+
         throw error;
       }
     }
@@ -203,6 +206,32 @@ export class CreateWarrantyActivationRequestUseCase {
       error.code === 'P2002' &&
       Array.isArray(error.meta?.target) &&
       error.meta.target.includes('request_code')
+    );
+  }
+
+  private isUniqueConstraintConflict(error: unknown) {
+    return (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    );
+  }
+
+  private throwAlreadyOpenRequest(
+    productId: string,
+    openRequest: {
+      request_code: string;
+      status: warranty_activation_request_status;
+    },
+  ): never {
+    throw new BadRequestError(
+      'Product already has an open warranty activation request',
+      'BAD_REQUEST',
+      {
+        code: 'ACTIVATION_REQUEST_ALREADY_OPEN',
+        currentStatus: openRequest.status,
+        productId,
+        requestCode: openRequest.request_code,
+      },
     );
   }
 
@@ -289,7 +318,7 @@ export class CreateWarrantyActivationRequestUseCase {
 
   private resolveCategoryConnect(
     categoryId: string | undefined,
-    product: Product & { category_id: string | null },
+    product: Product & { template: ProductTemplate },
   ) {
     const resolvedCategoryId = categoryId ?? product.category_id;
     return resolvedCategoryId
@@ -299,7 +328,7 @@ export class CreateWarrantyActivationRequestUseCase {
 
   private assertProductMatchesCategory(
     categoryId: string | undefined,
-    product: Product & { category_id: string | null },
+    product: Product & { template: ProductTemplate },
   ) {
     if (!categoryId) return;
 

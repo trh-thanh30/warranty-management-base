@@ -1,4 +1,4 @@
-import { NotFoundError } from '@/common/response';
+import { BadRequestError, NotFoundError } from '@/common/response';
 import { AssetsService } from '@/modules/assets/assets.service';
 import { AttachProductAssetDto } from '@/modules/products/dto/attach-product-asset.dto';
 import { ProductAssetsRepository } from '@/modules/products/repository/product-assets.repository';
@@ -24,6 +24,14 @@ export class AttachProductAssetUseCase {
 
     if (!asset || asset.is_deleted || asset.type !== asset_type.IMAGE) {
       throw new NotFoundError('Product image asset not found');
+    }
+    if (
+      product.template_id &&
+      (dto.role === 'COVER' || dto.role === 'GALLERY')
+    ) {
+      throw new BadRequestError(
+        'Template-owned product media must be updated on the product template',
+      );
     }
 
     const { productAsset, replacedCoverAssetIds } =

@@ -21,7 +21,7 @@ export function DealersView() {
       <div className="space-y-6">
         <PageHeader
           actions={
-            <div className="flex w-full flex-wrap justify-end gap-2 sm:w-auto">
+            <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2 sm:justify-end">
               <ImportExportMenu
                 labels={{
                   downloadTemplate: t("excel.downloadTemplate"),
@@ -39,11 +39,12 @@ export function DealersView() {
                 uploadDisabled={!directory.canCreate}
               />
               {directory.canCreate ? (
-                <Button asChild className="w-full sm:w-auto">
+                <Button asChild className="w-full justify-center sm:w-auto">
                   <Link href="/dealers/create">
-                    <Plus className="size-4" />
-                    <span className="sm:hidden">{t("createShort")}</span>
-                    <span className="hidden sm:inline">{t("create")}</span>
+                    <div className="inline-flex items-center justify-center gap-2 pr-[22px] sm:pr-0">
+                      <Plus className="size-4 shrink-0" />
+                      <span>{t("create")}</span>
+                    </div>
                   </Link>
                 </Button>
               ) : null}
