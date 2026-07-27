@@ -63,13 +63,13 @@ export function useContentPageForm({
         ...values,
         content: values.kind === "FAQ" ? "" : values.content,
         faqItems:
-          values.kind === "FAQ"
+          !page && values.kind === "FAQ"
             ? values.faqItems.map(({ answer, isActive, question }) => ({
                 answer,
                 isActive,
                 question,
               }))
-            : [],
+            : undefined,
         categoryId: values.categoryId || null,
         summary: values.summary || undefined,
       };

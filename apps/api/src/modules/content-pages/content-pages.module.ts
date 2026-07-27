@@ -12,6 +12,9 @@ import { ListPublishedContentPagesUseCase } from '@/modules/content-pages/use-ca
 import { ParseContentDocumentUseCase } from '@/modules/content-pages/use-cases/parse-content-document.use-case';
 import { UpdateContentPageUseCase } from '@/modules/content-pages/use-cases/update-content-page.use-case';
 import { ReorderContentPageFaqItemsUseCase } from '@/modules/content-pages/use-cases/reorder-content-page-faq-items.use-case';
+import { CreateContentPageFaqItemUseCase } from '@/modules/content-pages/use-cases/create-content-page-faq-item.use-case';
+import { UpdateContentPageFaqItemUseCase } from '@/modules/content-pages/use-cases/update-content-page-faq-item.use-case';
+import { DeleteContentPageFaqItemUseCase } from '@/modules/content-pages/use-cases/delete-content-page-faq-item.use-case';
 import { Module } from '@nestjs/common';
 
 @Module({
@@ -29,6 +32,9 @@ import { Module } from '@nestjs/common';
     PdfToHtmlConverter,
     ParseContentDocumentUseCase,
     ReorderContentPageFaqItemsUseCase,
+    CreateContentPageFaqItemUseCase,
+    UpdateContentPageFaqItemUseCase,
+    DeleteContentPageFaqItemUseCase,
   ],
 })
 export class ContentPagesModule {}

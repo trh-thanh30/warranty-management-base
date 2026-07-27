@@ -19,15 +19,25 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Controller, useFieldArray, type UseFormReturn } from "react-hook-form";
-import { ChevronDown, GripVertical, Plus, Trash2 } from "lucide-react";
+import {
+  ChevronDown,
+  GripVertical,
+  Loader2,
+  Plus,
+  Save,
+  Trash2,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button, Input, Label, Switch } from "@repo/ui";
 import { RichTextEditor } from "@/src/components/common/rich-text-editor";
+import { ConfirmActionDialog } from "@/src/components/common/confirm-action-dialog";
 import { useToast } from "@/src/hooks/use-toast";
 import type { ContentPageFormValues } from "../content-pages.types";
 import {
   useParseContentDocument,
+  useDeleteContentPageFaqItem,
   useReorderContentPageFaqItems,
+  useSaveContentPageFaqItem,
 } from "../hooks/use-content-pages";
 
 type FaqField = ContentPageFormValues["faqItems"][number] & {
@@ -45,7 +55,15 @@ export function ContentPageFaqItemsEditor({
   const toast = useToast();
   const parseDocument = useParseContentDocument();
   const reorderFaqItems = useReorderContentPageFaqItems(pageId);
-  const { fields, append, move, remove } = useFieldArray({
+  const saveFaqItem = useSaveContentPageFaqItem(pageId);
+  const deleteFaqItem = useDeleteContentPageFaqItem(pageId);
+  const [savingIndex, setSavingIndex] = useState<number | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    fieldKey: string;
+    itemId?: string;
+    question: string;
+  } | null>(null);
+  const { fields, append, move, remove, update } = useFieldArray({
     control: form.control,
     keyName: "fieldKey",
     name: "faqItems",
@@ -80,6 +98,71 @@ export function ContentPageFaqItemsEditor({
     } catch {
       move(newIndex, oldIndex);
       toast.error(t("faqReorderError"));
+    }
+  }
+
+  async function handleSave(index: number) {
+    if (!pageId) {
+      toast.info(t("faqSavePageFirst"));
+      return;
+    }
+
+    const isValid = await form.trigger([
+      `faqItems.${index}.question`,
+      `faqItems.${index}.answer`,
+    ]);
+    if (!isValid) return;
+
+    const item = form.getValues(`faqItems.${index}`);
+    setSavingIndex(index);
+    try {
+      const savedItem = await saveFaqItem.mutateAsync({
+        body: {
+          answer: item.answer,
+          isActive: item.isActive,
+          question: item.question,
+        },
+        itemId: item.id,
+      });
+      update(index, {
+        answer: savedItem.answer,
+        id: savedItem.id,
+        isActive: savedItem.isActive,
+        question: savedItem.question,
+      });
+      toast.success(t(item.id ? "faqUpdated" : "faqCreated"));
+    } catch {
+      toast.error(t("faqSaveError"));
+    } finally {
+      setSavingIndex(null);
+    }
+  }
+
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    const index = fields.findIndex(
+      (field) => field.fieldKey === deleteTarget.fieldKey,
+    );
+    if (index < 0) {
+      setDeleteTarget(null);
+      return;
+    }
+
+    try {
+      if (deleteTarget.itemId) {
+        if (!pageId) {
+          toast.error(t("faqDeleteError"));
+          return;
+        }
+        await deleteFaqItem.mutateAsync(deleteTarget.itemId);
+      }
+      remove(index);
+      setDeleteTarget(null);
+      toast.success(
+        t(deleteTarget.itemId ? "faqDeleted" : "faqRemovedUnsaved"),
+      );
+    } catch {
+      toast.error(t("faqDeleteError"));
     }
   }
 
@@ -132,13 +215,36 @@ export function ContentPageFaqItemsEditor({
                 form={form}
                 index={index}
                 key={field.fieldKey}
-                onRemove={() => remove(index)}
+                isSaving={savingIndex === index}
+                onRemove={() =>
+                  setDeleteTarget({
+                    fieldKey: field.fieldKey,
+                    itemId: field.id,
+                    question: form.getValues(`faqItems.${index}.question`),
+                  })
+                }
+                onSave={() => void handleSave(index)}
                 parseDocument={parseDocument.mutateAsync}
               />
             ))}
           </div>
         </SortableContext>
       </DndContext>
+      <ConfirmActionDialog
+        cancelLabel={t("cancel")}
+        confirmLabel={t("faqDeleteConfirm")}
+        description={t("faqDeleteDescription", {
+          question: deleteTarget?.question || t("faqItemUntitled"),
+        })}
+        isLoading={deleteFaqItem.isPending}
+        onConfirm={() => void handleDelete()}
+        onOpenChange={(open) => {
+          if (!open && !deleteFaqItem.isPending) setDeleteTarget(null);
+        }}
+        open={Boolean(deleteTarget)}
+        title={t("faqDeleteTitle")}
+        variant="destructive"
+      />
     </div>
   );
 }
@@ -148,14 +254,18 @@ function SortableFaqItem({
   field,
   form,
   index,
+  isSaving,
   onRemove,
+  onSave,
   parseDocument,
 }: {
   disabled: boolean;
   field: FaqField;
   form: UseFormReturn<ContentPageFormValues>;
   index: number;
+  isSaving: boolean;
   onRemove: () => void;
+  onSave: () => void;
   parseDocument: (file: File) => Promise<{ content: string }>;
 }) {
   const t = useTranslations("ContentPages");
@@ -288,6 +398,21 @@ function SortableFaqItem({
           {answerError?.message ? (
             <p className="text-sm text-red-600">{t(answerError.message)}</p>
           ) : null}
+        </div>
+        <div className="flex justify-end border-t border-slate-200 pt-4 dark:border-slate-800">
+          <Button
+            className="h-10"
+            disabled={isSaving}
+            onClick={onSave}
+            type="button"
+          >
+            {isSaving ? (
+              <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+            ) : (
+              <Save aria-hidden="true" className="size-4" />
+            )}
+            {t("faqSaveItem")}
+          </Button>
         </div>
       </div>
     </section>

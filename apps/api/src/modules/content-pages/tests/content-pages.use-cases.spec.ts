@@ -5,6 +5,9 @@ import { GetPublishedContentPageBySlugUseCase } from '@/modules/content-pages/us
 import { ListPublishedContentPagesUseCase } from '@/modules/content-pages/use-cases/list-published-content-pages.use-case';
 import { UpdateContentPageUseCase } from '@/modules/content-pages/use-cases/update-content-page.use-case';
 import { ReorderContentPageFaqItemsUseCase } from '@/modules/content-pages/use-cases/reorder-content-page-faq-items.use-case';
+import { CreateContentPageFaqItemUseCase } from '@/modules/content-pages/use-cases/create-content-page-faq-item.use-case';
+import { UpdateContentPageFaqItemUseCase } from '@/modules/content-pages/use-cases/update-content-page-faq-item.use-case';
+import { DeleteContentPageFaqItemUseCase } from '@/modules/content-pages/use-cases/delete-content-page-faq-item.use-case';
 import { content_page_kind, content_page_status } from '@prisma/client';
 
 jest.mock('@/modules/assets/assets.service', () => ({
@@ -35,6 +38,10 @@ describe('Content page use cases', () => {
     delete: jest.fn(),
     update: jest.fn(),
     reorderFaqItems: jest.fn(),
+    findFaqItem: jest.fn(),
+    createFaqItem: jest.fn(),
+    updateFaqItem: jest.fn(),
+    deleteFaqItem: jest.fn(),
   };
 
   beforeEach(() => {
@@ -292,5 +299,61 @@ describe('Content page use cases', () => {
       itemIds,
     );
     expect(result.faqItems.map((item) => item.id)).toEqual(itemIds);
+  });
+
+  it('creates, updates, and deletes one FAQ item independently', async () => {
+    const faqPage = { ...page, kind: content_page_kind.FAQ };
+    const faqItem = {
+      id: '1c4dfd2c-46e4-49db-a5f4-ffef569712c4',
+      content_page_id: page.id,
+      question: 'Câu hỏi?',
+      answer: '<p>Câu trả lời.</p>',
+      sort_order: 0,
+      is_active: true,
+      created_at: page.created_at,
+      updated_at: page.updated_at,
+    };
+    const assetsService = {
+      deleteAssetByUrl: jest.fn().mockResolvedValue(true),
+    };
+    contentPagesRepository.findById.mockResolvedValue(faqPage);
+    contentPagesRepository.createFaqItem.mockResolvedValue(faqItem);
+    contentPagesRepository.findFaqItem.mockResolvedValue({
+      ...faqItem,
+      content_page: faqPage,
+    });
+    contentPagesRepository.updateFaqItem.mockResolvedValue({
+      ...faqItem,
+      question: 'Câu hỏi mới?',
+    });
+    contentPagesRepository.deleteFaqItem.mockResolvedValue(faqItem);
+
+    const created = await new CreateContentPageFaqItemUseCase(
+      contentPagesRepository as never,
+    ).execute(page.id, {
+      question: faqItem.question,
+      answer: faqItem.answer,
+      isActive: true,
+    });
+    const updated = await new UpdateContentPageFaqItemUseCase(
+      contentPagesRepository as never,
+      assetsService as never,
+    ).execute(page.id, faqItem.id, {
+      question: 'Câu hỏi mới?',
+      answer: faqItem.answer,
+      isActive: true,
+    });
+    const deleted = await new DeleteContentPageFaqItemUseCase(
+      contentPagesRepository as never,
+      assetsService as never,
+    ).execute(page.id, faqItem.id);
+
+    expect(created.id).toBe(faqItem.id);
+    expect(updated.question).toBe('Câu hỏi mới?');
+    expect(contentPagesRepository.deleteFaqItem).toHaveBeenCalledWith(
+      page.id,
+      faqItem.id,
+    );
+    expect(deleted).toEqual({ success: true });
   });
 });

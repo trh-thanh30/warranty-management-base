@@ -78,6 +78,8 @@ export type ReorderContentPageFaqItemsBody = {
   itemIds: string[];
 };
 
+export type SaveContentPageFaqItemBody = ContentPageFaqItemInput;
+
 export type ParseContentDocumentResult = {
   content: string;
 };

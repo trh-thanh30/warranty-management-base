@@ -58,3 +58,14 @@ test("FAQ card heading includes its current question text", () => {
   assert.match(faqEditorSource, /title=\{heading\}/);
   assert.match(faqEditorSource, /className="line-clamp-2/);
 });
+
+test("FAQ cards save individually and confirm before deleting", () => {
+  assert.match(faqEditorSource, /saveFaqItem\.mutateAsync/);
+  assert.match(faqEditorSource, /deleteFaqItem\.mutateAsync/);
+  assert.match(faqEditorSource, /<ConfirmActionDialog/);
+  assert.match(faqEditorSource, /t\("faqSaveItem"\)/);
+  assert.ok(
+    faqEditorSource.indexOf('t("faqAnswerLabel")') <
+      faqEditorSource.indexOf('t("faqSaveItem")'),
+  );
+});

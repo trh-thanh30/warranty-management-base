@@ -157,6 +157,62 @@ test("reorders FAQ items through the dedicated endpoint", async () => {
   ]);
 });
 
+test("creates, updates, and deletes individual FAQ items", async () => {
+  const calls: unknown[] = [];
+  const faqItem = {
+    id: "1c4dfd2c-46e4-49db-a5f4-ffef569712c4",
+    question: "Warranty?",
+    answer: "<p>15 years.</p>",
+    sortOrder: 0,
+    isActive: true,
+    createdAt: "2026-07-28T00:00:00.000Z",
+    updatedAt: "2026-07-28T00:00:00.000Z",
+  };
+  const http = {
+    async post(url: string, body?: unknown) {
+      calls.push({ body, method: "post", url });
+      return { data: { success: true, data: faqItem } };
+    },
+    async patch(url: string, body?: unknown) {
+      calls.push({ body, method: "patch", url });
+      return { data: { success: true, data: faqItem } };
+    },
+    async delete(url: string) {
+      calls.push({ method: "delete", url });
+      return { data: { success: true } };
+    },
+  };
+  const service = createContentPagesService(
+    http as unknown as ContentPagesHttpClient,
+  );
+  const body = {
+    question: faqItem.question,
+    answer: faqItem.answer,
+    isActive: true,
+  };
+
+  await service.createFaqItem("page-1", body);
+  await service.updateFaqItem("page-1", faqItem.id, body);
+  await service.deleteFaqItem("page-1", faqItem.id);
+
+  assert.deepEqual(calls, [
+    {
+      method: "post",
+      url: "/content-pages/page-1/faq-items",
+      body,
+    },
+    {
+      method: "patch",
+      url: `/content-pages/page-1/faq-items/${faqItem.id}`,
+      body,
+    },
+    {
+      method: "delete",
+      url: `/content-pages/page-1/faq-items/${faqItem.id}`,
+    },
+  ]);
+});
+
 test("parses a PDF or DOCX document using multipart form data", async () => {
   const calls: unknown[] = [];
   const http = {

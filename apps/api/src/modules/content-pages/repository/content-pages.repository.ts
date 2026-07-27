@@ -202,6 +202,66 @@ export class ContentPagesRepository {
     });
   }
 
+  findFaqItem(contentPageId: string, itemId: string) {
+    return this.prismaService.contentPageFaqItem.findFirst({
+      where: { content_page_id: contentPageId, id: itemId },
+      include: { content_page: true },
+    });
+  }
+
+  async createFaqItem(
+    contentPageId: string,
+    data: Pick<
+      Prisma.ContentPageFaqItemCreateInput,
+      'answer' | 'is_active' | 'question'
+    >,
+  ) {
+    return this.prismaService.$transaction(async (tx) => {
+      const lastItem = await tx.contentPageFaqItem.findFirst({
+        where: { content_page_id: contentPageId },
+        orderBy: { sort_order: 'desc' },
+        select: { sort_order: true },
+      });
+
+      return tx.contentPageFaqItem.create({
+        data: {
+          ...data,
+          content_page: { connect: { id: contentPageId } },
+          sort_order: (lastItem?.sort_order ?? -1) + 1,
+        },
+      });
+    });
+  }
+
+  updateFaqItem(itemId: string, data: Prisma.ContentPageFaqItemUpdateInput) {
+    return this.prismaService.contentPageFaqItem.update({
+      where: { id: itemId },
+      data,
+    });
+  }
+
+  async deleteFaqItem(contentPageId: string, itemId: string) {
+    return this.prismaService.$transaction(async (tx) => {
+      const deletedItem = await tx.contentPageFaqItem.delete({
+        where: { id: itemId },
+      });
+      const remainingItems = await tx.contentPageFaqItem.findMany({
+        where: { content_page_id: contentPageId },
+        orderBy: { sort_order: 'asc' },
+        select: { id: true },
+      });
+      await Promise.all(
+        remainingItems.map((item, sortOrder) =>
+          tx.contentPageFaqItem.update({
+            where: { id: item.id },
+            data: { sort_order: sortOrder },
+          }),
+        ),
+      );
+      return deletedItem;
+    });
+  }
+
   delete(id: string) {
     return this.prismaService.contentPage.delete({ where: { id } });
   }

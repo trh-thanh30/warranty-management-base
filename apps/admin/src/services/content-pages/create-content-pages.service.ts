@@ -1,10 +1,12 @@
 import type {
+  ContentPageFaqItem,
   ContentPageSummary,
   CreateContentPageBody,
   ListContentPagesQuery,
   PaginatedResponse,
   ParseContentDocumentResult,
   ReorderContentPageFaqItemsBody,
+  SaveContentPageFaqItemBody,
   UpdateContentPageBody,
 } from "@repo/shared";
 import { unwrap } from "../service.utils.ts";
@@ -42,6 +44,29 @@ export function createContentPagesService(http: ContentPagesHttpClient) {
           body,
         ),
       );
+    },
+    async createFaqItem(id: string, body: SaveContentPageFaqItemBody) {
+      return unwrap(
+        await http.post<ContentPageFaqItem>(
+          `/content-pages/${id}/faq-items`,
+          body,
+        ),
+      );
+    },
+    async updateFaqItem(
+      id: string,
+      itemId: string,
+      body: SaveContentPageFaqItemBody,
+    ) {
+      return unwrap(
+        await http.patch<ContentPageFaqItem>(
+          `/content-pages/${id}/faq-items/${itemId}`,
+          body,
+        ),
+      );
+    },
+    async deleteFaqItem(id: string, itemId: string) {
+      await http.delete<void>(`/content-pages/${id}/faq-items/${itemId}`);
     },
     async delete(id: string) {
       await http.delete<void>(`/content-pages/${id}`);
