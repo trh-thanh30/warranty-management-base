@@ -7,9 +7,9 @@ export interface HeroImageItem {
 }
 
 export const carHeroImages: HeroImageItem[] = [
-  { id: "primary", src: "/bg_1.jpg", srcMobile: undefined },
-  { id: "technology", src: "/bg_2.jpg", srcMobile: undefined },
-  { id: "protection", src: "/bg_3.jpg", srcMobile: undefined },
+  { id: "primary", src: "/bg_1.jpg", srcMobile: "/mobile_1.jpg" },
+  { id: "technology", src: "/bg_2.jpg", srcMobile: "/mobile_2.jpg" },
+  { id: "protection", src: "/bg_3.jpg", srcMobile: "/mobile_3.jpg" },
 ];
 
 export const carBrands = [

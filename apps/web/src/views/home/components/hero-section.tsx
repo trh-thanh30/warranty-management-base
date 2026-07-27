@@ -38,7 +38,7 @@ export function HeroSection() {
   return (
     <section
       id="home"
-      className="relative flex h-[calc(100dvh-84px)] flex-col overflow-hidden"
+      className="relative flex aspect-[4/5] h-auto flex-col overflow-hidden sm:aspect-auto sm:h-[calc(100dvh-84px)]"
     >
       {/* Background image slider */}
       <div className="absolute inset-0 z-0 overflow-hidden">
