@@ -23,7 +23,7 @@ export async function PolicyView() {
               {t("eyebrow")}
             </p>
           </div>
-          <h1 className="mt-5 max-w-3xl font-serif text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
+          <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
             {t("title")}
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-stone-gray sm:text-lg">
@@ -47,7 +47,7 @@ export async function PolicyView() {
                   <FileText aria-hidden="true" className="size-4" />
                   <span>{t(`labels.${config.key}`)}</span>
                 </div>
-                <h2 className="mt-3 font-serif text-2xl font-semibold text-deep-black">
+                <h2 className="mt-3 text-2xl font-semibold text-deep-black">
                   {page?.title ?? t(`titles.${config.key}`)}
                 </h2>
                 <p className="mt-2 line-clamp-2 text-sm leading-6 text-stone-gray">

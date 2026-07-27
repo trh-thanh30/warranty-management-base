@@ -2385,10 +2385,10 @@
     }
   },
   "WebsiteConfig": {
-    "eyebrow": "Nội dung public website",
+    "eyebrow": "Nội dung website công khai",
     "overview": {
       "title": "Tổng quan cấu hình",
-      "description": "Theo dõi draft và phiên bản đang hiển thị công khai của website.",
+      "description": "Theo dõi bản nháp và phiên bản đang hiển thị công khai của website.",
       "site": "Thông tin website",
       "siteDescription": "Nhận diện, liên hệ, văn phòng, mạng xã hội và SEO mặc định.",
       "navigation": "Điều hướng",
@@ -2398,20 +2398,20 @@
       "viewStatus": "Xem trạng thái",
       "warnings": "{count} cảnh báo",
       "summaryLabel": "Tình trạng cấu hình website",
-      "publishedDomains": "Khu vực đã publish",
-      "pendingDrafts": "Draft cần xử lý",
+      "publishedDomains": "Khu vực đã xuất bản",
+      "pendingDrafts": "Bản nháp cần xử lý",
       "validationWarnings": "Cảnh báo dữ liệu",
       "domainCount": "{count}/{total}",
       "domainsTitle": "Khu vực cấu hình",
-      "domainsDescription": "Mỗi khu vực có draft và lịch publish độc lập.",
+      "domainsDescription": "Mỗi khu vực có bản nháp và lịch xuất bản độc lập.",
       "draftLabel": "Bản nháp",
-      "publicLabel": "Bản public",
-      "lastPublished": "Publish gần nhất: {value}",
+      "publicLabel": "Bản công khai",
+      "lastPublished": "Xuất bản gần nhất: {value}",
       "publishedBy": "Bởi {name}"
     },
     "site": {
       "title": "Thông tin website",
-      "description": "Chỉnh sửa thông tin dùng chung trên public website.",
+      "description": "Chỉnh sửa thông tin dùng chung trên website công khai.",
       "media": "Hình ảnh website",
       "mediaDescription": "Quản lý logo dùng ở header, footer và ảnh đại diện mặc định khi chia sẻ website.",
       "tabs": {
@@ -2435,7 +2435,7 @@
       "ogImage": "OG image mặc định",
       "thumbnails": "Thumbnails",
       "thumbnailUploadTitle": "Thư viện thumbnail",
-      "thumbnailUploadDescription": "Thumbnail được lưu dưới dạng public asset và hiển thị qua API thumbnails. Chọn hoặc kéo ảnh vào vùng upload bên dưới.",
+      "thumbnailUploadDescription": "Thumbnail được lưu dưới dạng tài nguyên công khai và hiển thị qua API thumbnails. Chọn hoặc kéo ảnh vào vùng upload bên dưới.",
       "thumbnailChoose": "Chọn thumbnail",
       "thumbnailUploadHint": "PNG, JPG hoặc WebP.",
       "thumbnailUploaded": "Đã upload thumbnail.",
@@ -2482,21 +2482,21 @@
       "updatingDescription": "Trang quản trị điều hướng chưa khả dụng trong giai đoạn này. Bạn vẫn có thể cấu hình thông tin website tại mục Thông tin website."
     },
     "status": {
-      "published": "Đồng bộ với bản public",
-      "unpublishedChanges": "Có thay đổi chưa publish",
-      "draftVersion": "Draft v{version}",
-      "publishedVersion": "Public v{version}",
-      "neverPublished": "Chưa từng publish",
+      "published": "Đồng bộ với bản công khai",
+      "unpublishedChanges": "Có thay đổi chưa xuất bản",
+      "draftVersion": "Bản nháp v{version}",
+      "publishedVersion": "Bản công khai v{version}",
+      "neverPublished": "Chưa từng xuất bản",
       "notConfigured": "Chưa cấu hình",
-      "draft": "Draft",
-      "lastPublished": "Publish gần nhất {value}"
+      "draft": "Bản nháp",
+      "lastPublished": "Xuất bản gần nhất {value}"
     },
     "actions": {
-      "saveDraft": "Lưu draft",
+      "saveDraft": "Lưu nháp",
       "preview": "Xem trước dữ liệu",
       "saving": "Đang lưu...",
-      "publish": "Publish",
-      "publishing": "Đang publish...",
+      "publish": "Xuất bản",
+      "publishing": "Đang xuất bản...",
       "cancel": "Hủy",
       "retry": "Thử lại",
       "remove": "Xóa",
@@ -2505,25 +2505,26 @@
       "reload": "Tải lại phiên bản mới"
     },
     "publish": {
-      "title": "Publish cấu hình?",
-      "description": "Dữ liệu draft hợp lệ sẽ thay thế phiên bản public hiện tại."
+      "title": "Xuất bản cấu hình?",
+      "description": "Bản nháp hợp lệ sẽ thay thế phiên bản công khai hiện tại.",
+      "saveBeforePublish": "Hãy lưu nháp trước khi xuất bản."
     },
     "preview": {
       "title": "Dữ liệu preview",
-      "description": "Đây là public-shaped response được dựng từ draft hiện tại."
+      "description": "Đây là dữ liệu xem trước được dựng từ bản nháp hiện tại."
     },
     "states": {
       "loading": "Đang tải cấu hình",
-      "loadingDescription": "Đang đọc draft và phiên bản public gần nhất.",
+      "loadingDescription": "Đang đọc bản nháp và phiên bản công khai gần nhất.",
       "error": "Không thể tải cấu hình",
       "errorDescription": "Kiểm tra kết nối API và thử lại.",
-      "conflict": "Draft đã được người khác cập nhật",
+      "conflict": "Bản nháp đã được người khác cập nhật",
       "conflictDescription": "Tải lại phiên bản mới trước khi tiếp tục để tránh ghi đè thay đổi."
     },
     "toast": {
-      "saved": "Đã lưu draft.",
-      "published": "Đã publish cấu hình.",
-      "deleted": "Đã xóa khỏi draft.",
+      "saved": "Đã lưu bản nháp.",
+      "published": "Đã xuất bản cấu hình.",
+      "deleted": "Đã xóa khỏi bản nháp.",
       "updated": "Đã cập nhật.",
       "error": "Không thể hoàn tất thao tác."
     }

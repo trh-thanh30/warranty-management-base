@@ -21,7 +21,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { seedAdminUsers } from './seed-admin';
 import { seedPolicyContentPages } from './seed-content-pages';
-import { seedWebsiteConfigDrafts } from './seed-website-config';
+import { seedWebsiteSiteSettings } from './seed-website-config';
 
 type DashboardWarrantyChartSeed = {
   offsetDays: number;
@@ -661,7 +661,7 @@ async function main() {
   const adapter = new PrismaPg(pool);
   prisma = new PrismaClient({ adapter });
 
-  await seedWebsiteConfigDrafts(prisma);
+  await seedWebsiteSiteSettings(prisma);
   await seedPolicyContentPages(prisma);
   await seedDefaultCategories();
 

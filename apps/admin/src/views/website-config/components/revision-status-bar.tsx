@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Clock3, Send } from "lucide-react";
+import { CheckCircle2, Clock3, Save, Send } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { WebsiteRevisionMeta } from "@repo/shared";
 import { Badge, Button, Card, CardContent } from "@repo/ui";
@@ -9,23 +9,39 @@ import { ConfirmActionDialog } from "@/src/components/common/confirm-action-dial
 
 type RevisionStatusBarProps = {
   canPublish: boolean;
+  canSave: boolean;
+  hasUnsavedChanges: boolean;
   isPublishing: boolean;
+  isSaving: boolean;
   onPublish: () => Promise<void> | void;
+  onSave: () => Promise<void> | void;
   revision: WebsiteRevisionMeta;
 };
 
 export function RevisionStatusBar({
   canPublish,
+  canSave,
+  hasUnsavedChanges,
   isPublishing,
+  isSaving,
   onPublish,
+  onSave,
   revision,
 }: RevisionStatusBarProps) {
   const t = useTranslations("WebsiteConfig");
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const publishDisabled =
+    hasUnsavedChanges ||
+    isSaving ||
+    isPublishing ||
+    !revision.hasUnpublishedChanges;
+  const publishDescriptionId = hasUnsavedChanges
+    ? "website-config-publish-requirement"
+    : undefined;
 
   return (
     <>
-      <Card>
+      <Card className="sticky top-20 z-30 border-slate-200 bg-white/95 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">
         <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-3">
             <Badge
@@ -54,17 +70,44 @@ export function RevisionStatusBar({
                 : t("status.neverPublished")}
             </span>
           </div>
-          {canPublish ? (
-            <Button
-              className="min-h-11 sm:min-h-9"
-              disabled={isPublishing}
-              onClick={() => setConfirmOpen(true)}
-              type="button"
-            >
-              <Send aria-hidden="true" className="size-4" />
-              {isPublishing ? t("actions.publishing") : t("actions.publish")}
-            </Button>
-          ) : null}
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:items-end">
+            <div className="flex w-full gap-2 sm:w-auto">
+              {canSave ? (
+                <Button
+                  className="min-h-11 flex-1 sm:min-h-9 sm:flex-none"
+                  disabled={!hasUnsavedChanges || isSaving || isPublishing}
+                  onClick={() => void onSave()}
+                  type="button"
+                  variant="outline"
+                >
+                  <Save aria-hidden="true" className="size-4" />
+                  {isSaving ? t("actions.saving") : t("actions.saveDraft")}
+                </Button>
+              ) : null}
+              {canPublish ? (
+                <Button
+                  aria-describedby={publishDescriptionId}
+                  className="min-h-11 flex-1 sm:min-h-9 sm:flex-none"
+                  disabled={publishDisabled}
+                  onClick={() => setConfirmOpen(true)}
+                  type="button"
+                >
+                  <Send aria-hidden="true" className="size-4" />
+                  {isPublishing
+                    ? t("actions.publishing")
+                    : t("actions.publish")}
+                </Button>
+              ) : null}
+            </div>
+            {hasUnsavedChanges && canPublish ? (
+              <p
+                className="text-xs text-amber-700 dark:text-amber-300"
+                id="website-config-publish-requirement"
+              >
+                {t("publish.saveBeforePublish")}
+              </p>
+            ) : null}
+          </div>
         </CardContent>
       </Card>
       <ConfirmActionDialog

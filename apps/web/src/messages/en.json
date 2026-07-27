@@ -484,16 +484,6 @@
       "japan": "FUJITEK JAPAN",
       "backToTopAriaLabel": "Scroll to top",
       "copyright": "© {year} FUJITEK Window Films. All rights reserved.",
-      "offices": {
-        "hcm": {
-          "label": "Ho Chi Minh City headquarters:",
-          "address": "7C Nguyen Ngoc Phuong Street, Thanh My Tay Ward, Ho Chi Minh City"
-        },
-        "hanoi": {
-          "label": "Hanoi branch:",
-          "address": "62, Alley 20 Nghia Do, Nghia Do Ward, Hanoi"
-        }
-      },
       "navigation": {
         "about": "About FUJITEK Films",
         "products": "Products",
@@ -509,10 +499,7 @@
         "shipping": "Shipping Policy",
         "payment": "Payment Policy"
       },
-      "hotlines": {
-        "hcm": "Ho Chi Minh City hotline:",
-        "hanoi": "Hanoi hotline:"
-      }
+      "hotline": "{office} hotline:"
     }
   },
   "ProductsPage": {

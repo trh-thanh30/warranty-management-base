@@ -484,16 +484,6 @@
       "japan": "FUJITEK JAPAN",
       "backToTopAriaLabel": "Cuộn lên đầu trang",
       "copyright": "© {year} FUJITEK Window Films. Đã đăng ký bản quyền.",
-      "offices": {
-        "hcm": {
-          "label": "Trụ sở TP. Hồ Chí Minh:",
-          "address": "7C Nguyễn Ngọc Phương, Phường Thạnh Mỹ Tây, TP. Hồ Chí Minh"
-        },
-        "hanoi": {
-          "label": "Chi nhánh Hà Nội:",
-          "address": "Số 62, Ngõ 20 Nghĩa Đô, Phường Nghĩa Đô, TP. Hà Nội"
-        }
-      },
       "navigation": {
         "about": "Về FUJITEK Films",
         "products": "Sản phẩm",
@@ -509,10 +499,7 @@
         "shipping": "Chính sách giao hàng",
         "payment": "Chính sách thanh toán"
       },
-      "hotlines": {
-        "hcm": "Hotline TP. Hồ Chí Minh:",
-        "hanoi": "Hotline Hà Nội:"
-      }
+      "hotline": "Hotline {office}:"
     }
   },
   "ProductsPage": {

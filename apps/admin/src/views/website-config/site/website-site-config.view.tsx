@@ -16,15 +16,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import {
-  Image,
-  Images,
-  MapPin,
-  Plus,
-  Save,
-  Share2,
-  Trash2,
-} from "lucide-react";
+import { Image, Images, MapPin, Plus, Share2, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { IconType } from "react-icons";
 import {
@@ -222,26 +214,10 @@ export function WebsiteSiteConfigView() {
       <div className="space-y-6">
         <PageHeader
           actions={
-            <div className="flex flex-wrap gap-2">
-              <PreviewDataDialog
-                load={websiteConfigService.previewSite}
-                locale={locale}
-              />
-              {canUpdate ? (
-                <Button
-                  className="min-h-11 sm:min-h-9"
-                  disabled={!dirty || saveMutation.isPending}
-                  onClick={() => void saveDraft()}
-                  type="button"
-                  variant="outline"
-                >
-                  <Save aria-hidden="true" className="size-4" />
-                  {saveMutation.isPending
-                    ? t("actions.saving")
-                    : t("actions.saveDraft")}
-                </Button>
-              ) : null}
-            </div>
+            <PreviewDataDialog
+              load={websiteConfigService.previewSite}
+              locale={locale}
+            />
           }
           description={t("site.description")}
           eyebrow={t("eyebrow")}
@@ -254,9 +230,13 @@ export function WebsiteSiteConfigView() {
         />
         {query.data ? (
           <RevisionStatusBar
+            canSave={canUpdate}
             canPublish={canPublish}
+            hasUnsavedChanges={dirty}
             isPublishing={publishMutation.isPending}
+            isSaving={saveMutation.isPending}
             onPublish={publish}
+            onSave={saveDraft}
             revision={query.data.revision}
           />
         ) : null}

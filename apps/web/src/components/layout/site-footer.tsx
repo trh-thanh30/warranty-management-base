@@ -1,28 +1,41 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Container } from "@/src/components/common/container";
 import { motion, AnimatePresence } from "framer-motion";
+import type { PublicWebsiteSiteSetting } from "@repo/shared";
 import { cn } from "@repo/ui/lib/utils";
 import { Link, usePathname } from "@/src/i18n/navigation";
 import { ArrowUp } from "lucide-react";
 import { FooterSocialLink } from "@/src/components/layout/components/footer-social-link";
+import { SiteLogo } from "@/src/components/layout/components/site-logo";
+import {
+  displayWebsite,
+  normalizeExternalUrl,
+  toTelephoneHref,
+} from "@/src/utils/link.utils";
 import { isNavigationItemActive } from "@/src/utils/pathname.utils";
 import {
-  footerContactEmail,
-  footerHotlineItems,
-  footerLogo,
   footerNavigationItems,
   footerPolicyItems,
   footerSocialItems,
 } from "./site-footer.constants";
 
-export function SiteFooter() {
+export function SiteFooter({
+  siteSettings,
+}: {
+  siteSettings?: PublicWebsiteSiteSetting | null;
+}) {
   const t = useTranslations("HomePage.footer");
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(false);
+  const offices = [...(siteSettings?.offices ?? [])]
+    .filter((office) => office.isActive)
+    .sort((left, right) => left.sortOrder - right.sortOrder);
+  const socialLinks = siteSettings?.socialLinks ?? [];
+  const contactEmail = siteSettings?.contactEmail.trim();
+  const websiteHref = normalizeExternalUrl(siteSettings?.websiteUrl);
 
   useEffect(() => {
     const toggleVisibility = () => {
@@ -48,14 +61,13 @@ export function SiteFooter() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
             {/* Column 1: Logo & Company Address */}
             <div className="lg:col-span-4 space-y-4">
-              <div className="relative h-14 w-[240px]">
-                <Image
-                  src={footerLogo.src}
+              <div className="h-14 w-[240px]">
+                <SiteLogo
+                  src={siteSettings?.footerLogo?.url}
                   alt={t("logoAlt")}
-                  fill
-                  priority
-                  sizes={`${footerLogo.width}px`}
-                  className="object-contain object-left"
+                  width={240}
+                  height={56}
+                  className="h-14 w-auto max-w-[240px] object-contain object-left"
                 />
               </div>
 
@@ -63,21 +75,18 @@ export function SiteFooter() {
                 {t("companyName")}
               </h4>
 
-              <div className="space-y-3 text-sm sm:text-base text-dark-charcoal font-medium leading-relaxed">
-                <div>
-                  <span className="block font-medium text-deep-black uppercase">
-                    {t("offices.hcm.label")}
-                  </span>
-                  <span>{t("offices.hcm.address")}</span>
+              {offices.length > 0 && (
+                <div className="space-y-3 text-sm sm:text-base text-dark-charcoal font-medium leading-relaxed">
+                  {offices.map((office) => (
+                    <div key={office.id}>
+                      <span className="block font-medium text-deep-black uppercase">
+                        {office.label}
+                      </span>
+                      <span>{office.address}</span>
+                    </div>
+                  ))}
                 </div>
-
-                <div>
-                  <span className="block font-medium text-deep-black uppercase">
-                    {t("offices.hanoi.label")}
-                  </span>
-                  <span>{t("offices.hanoi.address")}</span>
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Column 2: Navigation Links */}
@@ -132,26 +141,41 @@ export function SiteFooter() {
 
             {/* Column 4: Hotline & Socials */}
             <div className="lg:col-span-2 space-y-4">
-              {footerHotlineItems.map((item) => (
-                <div key={item.id}>
-                  <span className="block text-xs sm:text-sm font-medium text-stone-gray uppercase">
-                    {t(`hotlines.${item.labelKey}`)}
-                  </span>
-                  <a
-                    href={item.href}
-                    className="text-xl sm:text-2xl font-semibold text-premium-red hover:underline block"
-                  >
-                    {item.displayValue}
-                  </a>
-                </div>
-              ))}
+              {offices
+                .filter((office) => office.phone?.trim())
+                .map((office) => (
+                  <div key={office.id}>
+                    <span className="block text-xs sm:text-sm font-medium text-stone-gray uppercase">
+                      {t("hotline", { office: office.label })}
+                    </span>
+                    <a
+                      href={`tel:${toTelephoneHref(office.phone ?? "")}`}
+                      className="text-xl sm:text-2xl font-semibold text-premium-red hover:underline block"
+                    >
+                      {office.phone}
+                    </a>
+                  </div>
+                ))}
 
-              <a
-                href={footerContactEmail.href}
-                className="block break-all pt-1 text-xs font-medium text-medium-gray sm:text-sm"
-              >
-                {footerContactEmail.displayValue}
-              </a>
+              {contactEmail && (
+                <a
+                  href={`mailto:${contactEmail}`}
+                  className="block break-all pt-1 text-xs font-medium text-medium-gray sm:text-sm hover:text-premium-red"
+                >
+                  {contactEmail}
+                </a>
+              )}
+
+              {websiteHref && (
+                <a
+                  href={websiteHref}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  className="block break-all text-xs font-medium text-medium-gray sm:text-sm hover:text-premium-red"
+                >
+                  {displayWebsite(siteSettings?.websiteUrl ?? websiteHref)}
+                </a>
+              )}
 
               <div className="flex items-center gap-2 pt-1 text-sm font-semibold uppercase text-premium-red sm:text-base">
                 <svg
@@ -167,16 +191,25 @@ export function SiteFooter() {
 
               {/* Social Buttons */}
               <div className="flex items-center gap-2.5 pt-2">
-                {footerSocialItems.map((item) => (
-                  <FooterSocialLink
-                    key={item.id}
-                    href={item.href}
-                    label={item.label}
-                    icon={item.icon}
-                    className={item.className}
-                    iconClassName={item.iconClassName}
-                  />
-                ))}
+                {footerSocialItems.map((item) => {
+                  const configuredLink = socialLinks.find(
+                    (social) =>
+                      social.isActive &&
+                      social.platform === item.platform &&
+                      social.url.startsWith("https://"),
+                  );
+
+                  return (
+                    <FooterSocialLink
+                      key={item.id}
+                      href={configuredLink?.url}
+                      label={configuredLink?.label || item.label}
+                      icon={item.icon}
+                      className={item.className}
+                      iconClassName={item.iconClassName}
+                    />
+                  );
+                })}
               </div>
             </div>
           </div>
