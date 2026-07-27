@@ -49,3 +49,12 @@ test("each FAQ card can collapse without unmounting its form", () => {
   assert.match(faqEditorSource, /aria-expanded=\{isExpanded\}/);
   assert.match(faqEditorSource, /hidden=\{!isExpanded\}/);
 });
+
+test("FAQ card heading includes its current question text", () => {
+  assert.match(
+    faqEditorSource,
+    /t\("faqItemHeading", \{ number: index \+ 1, question \}\)/,
+  );
+  assert.match(faqEditorSource, /title=\{heading\}/);
+  assert.match(faqEditorSource, /className="line-clamp-2/);
+});

@@ -731,6 +731,7 @@
     "faqEmptyTitle": "No questions yet",
     "faqEmptyDescription": "Add the first question to build the FAQ section.",
     "faqItemNumber": "Question {number}",
+    "faqItemHeading": "Question {number}: {question}",
     "faqActive": "Visible",
     "faqDragHandle": "Drag to reorder question",
     "faqCollapseItem": "Collapse question form",

@@ -169,6 +169,10 @@ function SortableFaqItem({
     transform,
     transition,
   } = useSortable({ disabled, id: field.fieldKey });
+  const question = form.watch(`faqItems.${index}.question`).trim();
+  const heading = question
+    ? t("faqItemHeading", { number: index + 1, question })
+    : t("faqItemNumber", { number: index + 1 });
   const questionError = form.formState.errors.faqItems?.[index]?.question;
   const answerError = form.formState.errors.faqItems?.[index]?.answer;
 
@@ -194,8 +198,11 @@ function SortableFaqItem({
         >
           <GripVertical aria-hidden="true" className="size-5" />
         </button>
-        <span className="mr-auto text-sm font-semibold text-slate-700 dark:text-slate-200">
-          {t("faqItemNumber", { number: index + 1 })}
+        <span
+          className="line-clamp-2 min-w-0 flex-1 text-sm font-semibold leading-5 text-slate-700 dark:text-slate-200"
+          title={heading}
+        >
+          {heading}
         </span>
         <Controller
           control={form.control}
