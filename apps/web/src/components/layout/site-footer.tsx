@@ -4,9 +4,11 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "@/src/i18n/navigation";
+import { cn } from "@repo/ui/lib/utils";
+import { Link, usePathname } from "@/src/i18n/navigation";
 import { ArrowUp } from "lucide-react";
 import { FooterSocialLink } from "@/src/components/layout/components/footer-social-link";
+import { isNavigationItemActive } from "@/src/utils/pathname.utils";
 import {
   footerContactEmail,
   footerHotlineItems,
@@ -18,6 +20,7 @@ import {
 
 export function SiteFooter() {
   const t = useTranslations("HomePage.footer");
+  const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -83,16 +86,22 @@ export function SiteFooter() {
                 {t("navigationTitle")}
               </h4>
               <ul className="space-y-2.5 text-sm sm:text-base font-medium text-medium-gray">
-                {footerNavigationItems.map((item) => (
-                  <li key={item.id}>
-                    <Link
-                      href={item.href}
-                      className="hover:text-premium-red transition-colors"
-                    >
-                      {t(`navigation.${item.id}`)}
-                    </Link>
-                  </li>
-                ))}
+                {footerNavigationItems.map((item) => {
+                  const isActive = isNavigationItemActive(pathname, item.href);
+
+                  return (
+                    <li key={item.id}>
+                      <Link
+                        aria-current={isActive ? "page" : undefined}
+                        data-active={isActive ? "true" : undefined}
+                        href={item.href}
+                        className={footerLinkClassName(isActive)}
+                      >
+                        {t(`navigation.${item.id}`)}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 
@@ -102,16 +111,22 @@ export function SiteFooter() {
                 {t("policyTitle")}
               </h4>
               <ul className="space-y-2.5 text-sm sm:text-base font-medium text-medium-gray">
-                {footerPolicyItems.map((item) => (
-                  <li key={item.id}>
-                    <Link
-                      href={item.href}
-                      className="hover:text-premium-red transition-colors"
-                    >
-                      {t(`policy.${item.id}`)}
-                    </Link>
-                  </li>
-                ))}
+                {footerPolicyItems.map((item) => {
+                  const isActive = isNavigationItemActive(pathname, item.href);
+
+                  return (
+                    <li key={item.id}>
+                      <Link
+                        aria-current={isActive ? "page" : undefined}
+                        data-active={isActive ? "true" : undefined}
+                        href={item.href}
+                        className={footerLinkClassName(isActive)}
+                      >
+                        {t(`policy.${item.id}`)}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 
@@ -190,5 +205,14 @@ export function SiteFooter() {
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+function footerLinkClassName(isActive: boolean) {
+  return cn(
+    "relative inline-flex py-0.5 transition-colors duration-200 focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2",
+    isActive
+      ? "font-semibold text-premium-red after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:rounded-full after:bg-premium-red"
+      : "text-medium-gray hover:text-premium-red",
   );
 }
