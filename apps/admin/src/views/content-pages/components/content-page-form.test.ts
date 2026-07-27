@@ -37,8 +37,15 @@ test("FAQ items use drag and drop and persist order through the API", () => {
   assert.match(faqEditorSource, /<SortableContext/);
   assert.match(faqEditorSource, /useSortable/);
   assert.match(faqEditorSource, /reorderFaqItems\.mutateAsync\(persistedIds\)/);
+  assert.match(faqEditorSource, /toast\.success\(t\("faqReorderSuccess"\)\)/);
   assert.doesNotMatch(
     faqEditorSource,
     /ArrowUp|ArrowDown|faqMoveUp|faqMoveDown/,
   );
+});
+
+test("each FAQ card can collapse without unmounting its form", () => {
+  assert.match(faqEditorSource, /const \[isExpanded, setIsExpanded\]/);
+  assert.match(faqEditorSource, /aria-expanded=\{isExpanded\}/);
+  assert.match(faqEditorSource, /hidden=\{!isExpanded\}/);
 });

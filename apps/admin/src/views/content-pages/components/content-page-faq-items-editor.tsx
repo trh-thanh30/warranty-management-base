@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   closestCenter,
   DndContext,
@@ -18,7 +19,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Controller, useFieldArray, type UseFormReturn } from "react-hook-form";
-import { GripVertical, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, GripVertical, Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button, Input, Label, Switch } from "@repo/ui";
 import { RichTextEditor } from "@/src/components/common/rich-text-editor";
@@ -75,6 +76,7 @@ export function ContentPageFaqItemsEditor({
 
     try {
       await reorderFaqItems.mutateAsync(persistedIds);
+      toast.success(t("faqReorderSuccess"));
     } catch {
       move(newIndex, oldIndex);
       toast.error(t("faqReorderError"));
@@ -157,6 +159,8 @@ function SortableFaqItem({
   parseDocument: (file: File) => Promise<{ content: string }>;
 }) {
   const t = useTranslations("ContentPages");
+  const [isExpanded, setIsExpanded] = useState(true);
+  const contentId = `faq-item-${field.fieldKey}-content`;
   const {
     attributes,
     isDragging,
@@ -213,6 +217,22 @@ function SortableFaqItem({
           )}
         />
         <Button
+          aria-controls={contentId}
+          aria-expanded={isExpanded}
+          aria-label={t(isExpanded ? "faqCollapseItem" : "faqExpandItem")}
+          onClick={() => setIsExpanded((current) => !current)}
+          size="icon"
+          type="button"
+          variant="ghost"
+        >
+          <ChevronDown
+            aria-hidden="true"
+            className={`size-4 transition-transform duration-200 ${
+              isExpanded ? "rotate-180" : ""
+            }`}
+          />
+        </Button>
+        <Button
           aria-label={t("faqRemoveItem")}
           className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/40"
           onClick={onRemove}
@@ -224,7 +244,7 @@ function SortableFaqItem({
         </Button>
       </header>
 
-      <div className="space-y-4 p-4">
+      <div className="space-y-4 p-4" hidden={!isExpanded} id={contentId}>
         <div className="space-y-1.5">
           <Label htmlFor={`faq-item-${index}-question`}>
             {t("faqQuestionLabel")}
