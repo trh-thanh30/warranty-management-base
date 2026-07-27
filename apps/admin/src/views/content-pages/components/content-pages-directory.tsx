@@ -87,15 +87,15 @@ export function ContentPagesDirectory(props: Props) {
     props.status !== "ALL";
   return (
     <Card>
-      <CardHeader className="gap-4 xl:flex-row xl:items-end xl:justify-between">
+      <CardHeader className="gap-4">
         <div>
           <CardTitle>{t("directoryTitle")}</CardTitle>
           <CardDescription className="mt-1.5">
             {t("directoryDescription")}
           </CardDescription>
         </div>
-        <div className="grid w-full gap-3 sm:grid-cols-2 xl:w-auto xl:grid-cols-[18rem_12rem_12rem]">
-          <div className="relative sm:col-span-2 xl:col-span-1">
+        <div className="grid w-full gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_12rem_12rem]">
+          <div className="relative sm:col-span-2 lg:col-span-1">
             <Search
               aria-hidden="true"
               className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
