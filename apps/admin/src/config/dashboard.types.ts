@@ -14,6 +14,7 @@ export interface NavigationItem {
   title: string;
   href?: string;
   activeHrefs?: string[];
+  children?: NavigationItem[];
   icon: ComponentType<{ className?: string }>;
   badge?: string;
   notificationBadgeKey?: NotificationBadgeKey;

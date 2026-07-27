@@ -55,6 +55,40 @@ test("deleting an uploaded asset calls the asset delete endpoint", async () => {
   assert.deepEqual(calls, [{ url: "/assets/asset-id" }]);
 });
 
+test("listing website thumbnails filters public thumbnail assets", async () => {
+  const calls: unknown[] = [];
+  const response = {
+    data: [],
+    pagination: { limit: 50, page: 1, total: 0, totalPages: 0 },
+  };
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ config, url });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  const result = await createAssetsService(
+    http as unknown as AssetsHttpClient,
+  ).listThumbnails();
+
+  assert.deepEqual(result, response);
+  assert.deepEqual(calls, [
+    {
+      config: {
+        params: {
+          accessType: "PUBLIC",
+          folder: "website-thumbnails",
+          limit: 50,
+          page: 1,
+          type: "THUMBNAIL",
+        },
+      },
+      url: "/assets",
+    },
+  ]);
+});
+
 test("deleting an uploaded asset by URL calls the URL cleanup endpoint", async () => {
   const calls: unknown[] = [];
   const http = {

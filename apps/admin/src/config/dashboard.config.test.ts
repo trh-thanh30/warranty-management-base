@@ -18,3 +18,18 @@ test("places content pages first in the other sidebar section", () => {
     ],
   );
 });
+
+test("groups website configuration routes under one sidebar parent", () => {
+  const config = getDashboardConfig((key) => key);
+  const websiteSection = config.sidebarSections.find(
+    (section) => section.label === "sections.website",
+  );
+  const websiteConfig = websiteSection?.items[0];
+
+  assert.equal(websiteSection?.items.length, 1);
+  assert.equal(websiteConfig?.title, "items.websiteConfig");
+  assert.deepEqual(
+    websiteConfig?.children?.map((item) => item.href),
+    ["/website-config", "/website-config/site", "/website-config/navigation"],
+  );
+});

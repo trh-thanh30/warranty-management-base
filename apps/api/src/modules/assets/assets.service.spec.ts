@@ -23,6 +23,9 @@ describe('AssetsService deletion', () => {
     productAsset: {
       count: jest.fn(),
     },
+    websiteSiteRevision: {
+      count: jest.fn(),
+    },
   };
   const uploadAssetService = {
     delete: jest.fn(),
@@ -39,6 +42,7 @@ describe('AssetsService deletion', () => {
     prisma.asset.delete.mockResolvedValue(asset);
     prisma.assetLink.count.mockResolvedValue(0);
     prisma.productAsset.count.mockResolvedValue(0);
+    prisma.websiteSiteRevision.count.mockResolvedValue(0);
   });
 
   it('deletes an entity asset when it has no other references', async () => {

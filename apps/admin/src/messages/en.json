@@ -9,6 +9,7 @@
     "unreadNotifications": "{count} unread notifications",
     "sections": {
       "general": "General",
+      "website": "Website",
       "other": "Other"
     },
     "items": {
@@ -27,6 +28,10 @@
       "contentPages": "Content pages",
       "notifications": "Notifications",
       "system": "Storage monitoring",
+      "websiteConfig": "Website configuration",
+      "websiteOverview": "Overview",
+      "websiteSite": "Website information",
+      "websiteNavigation": "Navigation",
       "signOut": "Sign out",
       "signingOut": "Signing out..."
     }
@@ -389,7 +394,10 @@
       "USER_DELETE": "Delete users",
       "USER_PERMISSION_MANAGE": "Manage user permissions",
       "SYSTEM_VIEW": "View system settings",
-      "AUDIT_LOG_VIEW": "View audit logs"
+      "AUDIT_LOG_VIEW": "View audit logs",
+      "WEBSITE_CONFIG_VIEW": "View website configuration",
+      "WEBSITE_CONFIG_UPDATE": "Update website configuration",
+      "WEBSITE_CONFIG_PUBLISH": "Publish website configuration"
     }
   },
   "Customers": {
@@ -2076,7 +2084,10 @@
         "USER_DELETE": "Delete users",
         "USER_PERMISSION_MANAGE": "Manage user permissions",
         "SYSTEM_VIEW": "View system settings",
-        "AUDIT_LOG_VIEW": "View audit logs"
+        "AUDIT_LOG_VIEW": "View audit logs",
+        "WEBSITE_CONFIG_VIEW": "View website configuration",
+        "WEBSITE_CONFIG_UPDATE": "Update website configuration",
+        "WEBSITE_CONFIG_PUBLISH": "Publish website configuration"
       }
     },
     "save": "Save changes",
@@ -2141,6 +2152,148 @@
         "title": "Temporary",
         "description": "Short-lived uploads automatically expired by the MinIO lifecycle rule."
       }
+    }
+  },
+  "WebsiteConfig": {
+    "eyebrow": "Public website content",
+    "overview": {
+      "title": "Configuration overview",
+      "description": "Track drafts and the versions currently visible on the public website.",
+      "site": "Website information",
+      "siteDescription": "Identity, contact details, offices, social links and default SEO.",
+      "navigation": "Navigation",
+      "navigationDescription": "Header, footer, policy and CTA links.",
+      "open": "Open configuration",
+      "warnings": "{count} warnings",
+      "summaryLabel": "Website configuration health",
+      "publishedDomains": "Published areas",
+      "pendingDrafts": "Drafts requiring attention",
+      "validationWarnings": "Data warnings",
+      "domainCount": "{count}/{total}",
+      "domainsTitle": "Configuration areas",
+      "domainsDescription": "Each area has an independent draft and publishing history.",
+      "draftLabel": "Draft",
+      "publicLabel": "Public",
+      "lastPublished": "Last published: {value}",
+      "publishedBy": "By {name}"
+    },
+    "site": {
+      "title": "Website information",
+      "description": "Edit shared information used across the public website.",
+      "media": "Website images",
+      "mediaDescription": "Manage the header logo, footer logo, and the default image used when the website is shared.",
+      "tabs": {
+        "identity": "Identity",
+        "thumbnails": "Thumbnails",
+        "contact": "Contact",
+        "socials": "Social links"
+      },
+      "addressOffices": "Addresses & Offices",
+      "addressOfficesDescription": "Configure the name, address, and hotline for each office. This order is also used publicly.",
+      "hotlineContact": "Hotlines & Contact",
+      "hotlineContactDescription": "Each hotline follows its matching office in the same order, followed by email and website.",
+      "contactDetails": "General contact",
+      "contactDetailsDescription": "The email address and website URL shown after the hotline list.",
+      "socials": "Social links",
+      "socialsDescription": "Add links, control visibility, and drag items to change their public order.",
+      "contactEmail": "Email",
+      "websiteUrl": "Website",
+      "headerLogo": "Header logo",
+      "footerLogo": "Footer logo",
+      "ogImage": "Default OG image",
+      "thumbnails": "Thumbnails",
+      "thumbnailUploadTitle": "Thumbnail library",
+      "thumbnailUploadDescription": "Thumbnails are stored as public assets and exposed through the thumbnails API. Choose or drag an image into the upload area below.",
+      "thumbnailChoose": "Choose thumbnail",
+      "thumbnailUploadHint": "PNG, JPG, or WebP.",
+      "thumbnailUploaded": "Thumbnail uploaded.",
+      "thumbnailCount": "{count} images",
+      "thumbnailEmpty": "No thumbnails have been uploaded.",
+      "thumbnailLoadFailed": "Unable to load thumbnails.",
+      "thumbnailRemove": "Delete thumbnail",
+      "thumbnailDeleted": "Thumbnail deleted.",
+      "thumbnailDeleteFailed": "Unable to delete thumbnail.",
+      "addOffice": "Add office",
+      "officeLabel": "Display name",
+      "officeLabelPlaceholder": "For example: Ho Chi Minh City headquarters",
+      "officeAddress": "Address",
+      "officeAddressPlaceholder": "For example: 7C Nguyen Ngoc Phuong Street, Thanh My Tay Ward, Ho Chi Minh City",
+      "officePhone": "Hotline",
+      "officeFallback": "Office {index}",
+      "officeEmpty": "No offices yet. Select “Add office” to start configuring one.",
+      "moveOffice": "Drag to reorder office {index}",
+      "sortOfficeInstructions": "To move an office, press Space or Enter on its drag handle. Use the arrow keys to change its position, then press Space or Enter again to drop it. Press Escape to cancel.",
+      "hotlineFor": "{office} hotline",
+      "inactiveOfficeHint": "This office is inactive, so its hotline will not be shown publicly.",
+      "hotlineEmpty": "Add an office first to configure its hotline.",
+      "addSocial": "Add social link",
+      "socialLabel": "Label",
+      "socialUrl": "HTTPS URL",
+      "socialEmpty": "No social links yet. Select “Add social link” to create the first one.",
+      "moveSocial": "Drag to reorder social link {index}",
+      "sortSocialInstructions": "To move a social link, press Space or Enter on its drag handle. Use the arrow keys to change its position, then press Space or Enter again to drop it. Press Escape to cancel.",
+      "platform": "Platform",
+      "platforms": {
+        "facebook": "Facebook",
+        "zalo": "Zalo",
+        "tiktok": "TikTok",
+        "youtube": "YouTube",
+        "other": "Other"
+      },
+      "active": "Active"
+    },
+    "navigation": {
+      "title": "Website navigation",
+      "description": "The configuration area for website menus and navigation links.",
+      "updatingBadge": "Under development",
+      "updatingTitle": "Navigation management is being completed",
+      "updatingDescription": "Navigation management is unavailable in this phase. You can continue configuring shared website information under Website information."
+    },
+    "status": {
+      "published": "Matches public version",
+      "unpublishedChanges": "Unpublished changes",
+      "draftVersion": "Draft v{version}",
+      "publishedVersion": "Public v{version}",
+      "neverPublished": "Never published",
+      "notConfigured": "Not configured",
+      "draft": "Draft",
+      "lastPublished": "Last published {value}"
+    },
+    "actions": {
+      "saveDraft": "Save draft",
+      "preview": "Preview data",
+      "saving": "Saving...",
+      "publish": "Publish",
+      "publishing": "Publishing...",
+      "cancel": "Cancel",
+      "retry": "Retry",
+      "remove": "Remove",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "reload": "Load latest version"
+    },
+    "publish": {
+      "title": "Publish configuration?",
+      "description": "The valid draft will replace the current public version."
+    },
+    "preview": {
+      "title": "Preview data",
+      "description": "This is the public-shaped response projected from the current draft."
+    },
+    "states": {
+      "loading": "Loading configuration",
+      "loadingDescription": "Reading the latest draft and public version.",
+      "error": "Configuration is unavailable",
+      "errorDescription": "Check the API connection and try again.",
+      "conflict": "The draft was updated by someone else",
+      "conflictDescription": "Load the latest version before continuing to avoid overwriting their changes."
+    },
+    "toast": {
+      "saved": "Draft saved.",
+      "published": "Configuration published.",
+      "deleted": "Removed from draft.",
+      "updated": "Updated.",
+      "error": "The action could not be completed."
     }
   },
   "Home": {

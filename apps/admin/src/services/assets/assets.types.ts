@@ -8,7 +8,14 @@ export type AssetResponse = {
   size: number;
   path: string;
   access_type: "PUBLIC" | "PRIVATE" | "TEMP";
-  type: "IMAGE" | "VIDEO" | "AUDIO" | "DOCUMENT" | "OTHER";
+  type:
+    | "IMAGE"
+    | "VIDEO"
+    | "AUDIO"
+    | "DOCUMENT"
+    | "OTHER"
+    | "THUMBNAIL"
+    | "BANNER";
   folder: string | null;
   metadata: Record<string, unknown> | null;
   is_deleted: boolean;
@@ -21,7 +28,24 @@ export type AssetResponse = {
 export type UploadAssetOptions = {
   accessType?: "PUBLIC" | "PRIVATE" | "TEMP";
   folder?: string;
-  type?: "IMAGE" | "VIDEO" | "AUDIO" | "DOCUMENT" | "OTHER";
+  type?:
+    | "IMAGE"
+    | "VIDEO"
+    | "AUDIO"
+    | "DOCUMENT"
+    | "OTHER"
+    | "THUMBNAIL"
+    | "BANNER";
+};
+
+export type AssetListResponse = {
+  data: AssetResponse[];
+  pagination: {
+    limit: number;
+    page: number;
+    total: number;
+    totalPages: number;
+  };
 };
 
 export type AssetsHttpClient = {

@@ -67,10 +67,11 @@ export class AssetsController {
   }
 
   /**
-   * List all assets (Admin only)
+   * List assets for Admin and website-config editors.
    */
   @Get()
-  @Roles(['ADMIN'])
+  @Roles(['ADMIN', 'MODERATOR'])
+  @Permissions([permission_key.WEBSITE_CONFIG_VIEW])
   async findAll(@Query() dto: ListAssetsDto) {
     return this.assetsService.listAssets(dto);
   }

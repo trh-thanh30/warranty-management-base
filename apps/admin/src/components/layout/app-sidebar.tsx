@@ -3,8 +3,18 @@
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import type { UnreadNotificationCount } from "@repo/shared";
-import { Avatar, AvatarFallback, AvatarImage, Badge } from "@repo/ui";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Badge,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@repo/ui";
 import { cn } from "@repo/ui/lib/utils";
 import { useAdminUiStore } from "@/src/app/stores/ui.store";
 import { getDashboardConfig } from "@/src/config/dashboard.config";
@@ -14,12 +24,17 @@ import { usePermissions } from "@/src/hooks/use-permissions";
 import { useUnreadNotificationCount } from "@/src/hooks/use-notifications";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { getInitials } from "@/src/utils/get-initials";
-import { getNavigationBadge } from "./app-sidebar.utils";
+import {
+  getActiveNavigationHref,
+  getNavigationBadge,
+  hasActiveNavigationDescendant,
+  isNavigationItemActive,
+} from "./app-sidebar.utils";
 
 type NavGroupProps = {
   items: NavigationItem[];
   label: string;
-  pathname: string;
+  activeHref?: string;
   collapsed: boolean;
   notificationCounts?: UnreadNotificationCount;
   notificationCountsError: boolean;
@@ -27,32 +42,35 @@ type NavGroupProps = {
 
 type NavItemProps = {
   item: NavigationItem;
-  pathname: string;
+  activeHref?: string;
   collapsed: boolean;
   notificationCounts?: UnreadNotificationCount;
   notificationCountsError: boolean;
 };
 
-function isNavItemActive(item: NavigationItem, pathname: string) {
-  const activeHrefs = item.href
-    ? [item.href, ...(item.activeHrefs ?? [])]
-    : (item.activeHrefs ?? []);
-
-  return activeHrefs.some(
-    (href) => pathname === href || pathname.startsWith(`${href}/`),
-  );
-}
-
 function NavItem({
   item,
-  pathname,
+  activeHref,
   collapsed,
   notificationCounts,
   notificationCountsError,
 }: NavItemProps) {
   const t = useTranslations("DashboardConfig");
+
+  if (item.children?.length) {
+    return (
+      <NavParentItem
+        activeHref={activeHref}
+        collapsed={collapsed}
+        item={item}
+        notificationCounts={notificationCounts}
+        notificationCountsError={notificationCountsError}
+      />
+    );
+  }
+
   const Icon = item.icon;
-  const active = isNavItemActive(item, pathname);
+  const active = isNavigationItemActive(item, activeHref);
   const notificationCount = item.notificationBadgeKey
     ? (notificationCounts?.[item.notificationBadgeKey] ?? 0)
     : 0;
@@ -124,10 +142,110 @@ function NavItem({
   );
 }
 
+function NavParentItem({
+  item,
+  activeHref,
+  collapsed,
+  notificationCounts,
+  notificationCountsError,
+}: NavItemProps) {
+  const Icon = item.icon;
+  const childActive = hasActiveNavigationDescendant(item, activeHref);
+  const [open, setOpen] = useState(childActive);
+
+  useEffect(() => {
+    if (childActive) setOpen(true);
+  }, [childActive]);
+
+  const triggerClassName = cn(
+    "relative flex h-9 items-center rounded-md text-sm font-medium transition-colors duration-200",
+    collapsed ? "mx-auto h-9 w-9 justify-center px-0" : "w-full gap-3 px-3",
+    childActive
+      ? "bg-slate-50 text-slate-950 dark:bg-slate-900/60 dark:text-slate-50"
+      : "text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-50",
+  );
+
+  if (collapsed) {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            aria-label={item.title}
+            className={triggerClassName}
+            title={item.title}
+            type="button"
+          >
+            <Icon className="size-4 shrink-0" />
+            {childActive ? (
+              <span className="absolute -right-0.5 top-1 size-1.5 rounded-full bg-slate-900 dark:bg-slate-100" />
+            ) : null}
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="min-w-56" side="right">
+          {item.children?.map((child) => {
+            const ChildIcon = child.icon;
+            const active = isNavigationItemActive(child, activeHref);
+            return (
+              <DropdownMenuItem asChild key={child.title}>
+                <Link
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "flex w-full items-center gap-2",
+                    active && "bg-slate-100 font-medium dark:bg-slate-800",
+                  )}
+                  href={child.href ?? "/website-config"}
+                >
+                  <ChildIcon className="size-4" />
+                  {child.title}
+                </Link>
+              </DropdownMenuItem>
+            );
+          })}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+
+  return (
+    <div>
+      <button
+        aria-expanded={open}
+        className={triggerClassName}
+        onClick={() => setOpen((current) => !current)}
+        type="button"
+      >
+        <Icon className="size-4 shrink-0" />
+        <span className="min-w-0 flex-1 truncate text-left">{item.title}</span>
+        <ChevronRight
+          aria-hidden="true"
+          className={cn(
+            "size-4 text-slate-400 transition-transform duration-200",
+            open && "rotate-90",
+          )}
+        />
+      </button>
+      {open ? (
+        <div className="ml-4 mt-1 space-y-1 border-l border-slate-200 pl-2 dark:border-slate-800">
+          {item.children?.map((child) => (
+            <NavItem
+              activeHref={activeHref}
+              collapsed={false}
+              item={child}
+              key={child.title}
+              notificationCounts={notificationCounts}
+              notificationCountsError={notificationCountsError}
+            />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function NavGroup({
   items,
   label,
-  pathname,
+  activeHref,
   collapsed,
   notificationCounts,
   notificationCountsError,
@@ -146,7 +264,7 @@ function NavGroup({
           collapsed={collapsed}
           item={item}
           key={item.title}
-          pathname={pathname}
+          activeHref={activeHref}
           notificationCounts={notificationCounts}
           notificationCountsError={notificationCountsError}
         />
@@ -173,6 +291,25 @@ export function AppSidebar({
   const displayName = user?.full_name || user?.username || "Admin";
   const email = user?.email || "";
   const avatarFallback = getInitials(displayName);
+  const canAccess = (item: NavigationItem) =>
+    (!item.requiredRole || hasRole(item.requiredRole)) &&
+    (!item.requiredPermission || hasPermission(item.requiredPermission));
+  const visibleSections = dashboardConfig.sidebarSections
+    .map((section) => ({
+      ...section,
+      items: section.items
+        .filter(canAccess)
+        .map((item) => ({
+          ...item,
+          children: item.children?.filter(canAccess),
+        }))
+        .filter((item) => item.href || !item.children || item.children.length),
+    }))
+    .filter((section) => section.items.length > 0);
+  const activeHref = getActiveNavigationHref(
+    visibleSections.flatMap((section) => section.items),
+    pathname,
+  );
 
   return (
     <aside
@@ -210,26 +347,17 @@ export function AppSidebar({
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 pb-3">
-        {dashboardConfig.sidebarSections.map((section) => {
-          const items = section.items.filter(
-            (item) =>
-              (!item.requiredRole || hasRole(item.requiredRole)) &&
-              (!item.requiredPermission ||
-                hasPermission(item.requiredPermission)),
-          );
-
-          return items.length > 0 ? (
-            <NavGroup
-              items={items}
-              key={section.label}
-              label={section.label}
-              pathname={pathname}
-              collapsed={collapsed}
-              notificationCounts={notificationCountsQuery.data}
-              notificationCountsError={notificationCountsQuery.isError}
-            />
-          ) : null;
-        })}
+        {visibleSections.map((section) => (
+          <NavGroup
+            activeHref={activeHref}
+            collapsed={collapsed}
+            items={section.items}
+            key={section.label}
+            label={section.label}
+            notificationCounts={notificationCountsQuery.data}
+            notificationCountsError={notificationCountsQuery.isError}
+          />
+        ))}
       </nav>
 
       <div className="border-t border-slate-200 p-4 dark:border-slate-800">
