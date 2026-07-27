@@ -42,6 +42,11 @@ export type WarrantyClaimStatusOption = WarrantyClaimStatus;
 
 export type WarrantyClaimPriorityOption = WarrantyClaimPriority;
 
+export type WarrantyClaimRequesterSource = {
+  fullName?: string | null;
+  phone?: string | null;
+};
+
 export const warrantyClaimCreateFormSchema = z.object({
   issueDetail: z.string().trim().max(4000, "issueDetailLength"),
   issueTitle: z.string().trim().min(3, "issueTitleRequired").max(255),

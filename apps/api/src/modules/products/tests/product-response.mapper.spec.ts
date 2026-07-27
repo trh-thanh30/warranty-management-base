@@ -1,0 +1,208 @@
+import { toProductResponse } from '@/modules/products/products.types';
+import { category_type, product_status, warranty_status } from '@prisma/client';
+
+describe('toProductResponse', () => {
+  it('projects template-owned catalogue fields while preserving physical metadata', () => {
+    const response = toProductResponse({
+      id: 'product-id',
+      template_id: 'template-id',
+      category_id: 'override-category-id',
+      category_ref: {
+        id: 'override-category-id',
+        code: 'SPECIAL_CAMERA',
+        slug: 'special-camera',
+        name: 'Camera chuyên dụng',
+        description: null,
+        icon: null,
+        image_url: null,
+        type: category_type.PRODUCT,
+        parent_id: null,
+        order: 0,
+        is_active: true,
+        metadata: null,
+        created_at: new Date('2026-07-25T00:00:00.000Z'),
+        updated_at: new Date('2026-07-25T00:00:00.000Z'),
+      },
+      product_code: 'PRD-001',
+      serial_number: 'SERIAL-001',
+      display_name: null,
+      status: product_status.ACTIVE,
+      metadata: { installationPosition: 'Windshield' },
+      created_at: new Date('2026-07-25T00:00:00.000Z'),
+      updated_at: new Date('2026-07-25T00:00:00.000Z'),
+      deleted_at: null,
+      ownerships: [],
+      assets: [],
+      warranty: null,
+      template: {
+        id: 'template-id',
+        sku: 'PPF-X10',
+        slug: 'ppf-x10',
+        name: 'PPF X10',
+        category_id: 'category-id',
+        category_ref: {
+          id: 'category-id',
+          code: 'ACCESSORY',
+          slug: 'accessory',
+          name: 'Accessory',
+          description: null,
+          icon: null,
+          image_url: null,
+          type: category_type.PRODUCT,
+          parent_id: null,
+          order: 0,
+          is_active: true,
+          metadata: null,
+          created_at: new Date('2026-07-25T00:00:00.000Z'),
+          updated_at: new Date('2026-07-25T00:00:00.000Z'),
+        },
+        brand: 'Demo',
+        model: 'X10',
+        model_year: 2026,
+        description: 'Shared description',
+        default_warranty_duration_months: 36,
+        default_warranty_terms: null,
+        metadata: {
+          specifications: [{ key: 'Thickness', value: '10 mil' }],
+        },
+        is_active: true,
+        is_published: true,
+        published_at: new Date('2026-07-25T00:00:00.000Z'),
+        created_at: new Date('2026-07-25T00:00:00.000Z'),
+        updated_at: new Date('2026-07-25T00:00:00.000Z'),
+        assets: [],
+      },
+    });
+
+    expect(response).toEqual(
+      expect.objectContaining({
+        name: 'PPF X10',
+        categoryId: 'override-category-id',
+        categoryRef: expect.objectContaining({
+          id: 'override-category-id',
+          name: 'Camera chuyên dụng',
+        }),
+        brand: 'Demo',
+        model: 'X10',
+        description: 'Shared description',
+        isPublished: true,
+        publishedAt: new Date('2026-07-25T00:00:00.000Z'),
+        metadata: {
+          specifications: [{ key: 'Thickness', value: '10 mil' }],
+          installationPosition: 'Windshield',
+        },
+      }),
+    );
+  });
+
+  it.each([
+    {
+      expectedCanEdit: true,
+      expectedReason: null,
+      openRequests: [],
+      status: warranty_status.DRAFT,
+    },
+    {
+      expectedCanEdit: false,
+      expectedReason: 'WARRANTY_NOT_DRAFT',
+      openRequests: [],
+      status: warranty_status.ACTIVE,
+    },
+    {
+      expectedCanEdit: false,
+      expectedReason: 'OPEN_ACTIVATION_REQUEST',
+      openRequests: [{ id: 'request-id' }],
+      status: warranty_status.DRAFT,
+    },
+  ])(
+    'maps warranty-code edit capability for $status with $openRequests.length open requests',
+    ({ expectedCanEdit, expectedReason, openRequests, status }) => {
+      const response = toProductResponse({
+        ...createProductFixture(),
+        warranty: {
+          id: 'warranty-id',
+          product_id: 'product-id',
+          warranty_code: 'WM-2026-ABCDEF',
+          start_date: null,
+          end_date: null,
+          duration_months: 24,
+          coverage_limit_amount: null,
+          max_claim_count: null,
+          max_amount_per_claim: null,
+          status,
+          terms: null,
+          metadata: null,
+          activated_by_id: null,
+          voided_at: null,
+          voided_by_id: null,
+          void_reason: null,
+          created_at: new Date('2026-07-25T00:00:00.000Z'),
+          updated_at: new Date('2026-07-25T00:00:00.000Z'),
+        },
+        warranty_activation_requests: openRequests,
+      });
+
+      expect(response).toEqual(
+        expect.objectContaining({
+          canEditWarrantyCode: expectedCanEdit,
+          warrantyCodeEditLockedReason: expectedReason,
+        }),
+      );
+    },
+  );
+});
+
+function createProductFixture() {
+  return {
+    id: 'product-id',
+    template_id: 'template-id',
+    category_id: 'category-id',
+    product_code: 'PRD-001',
+    serial_number: 'SERIAL-001',
+    display_name: null,
+    status: product_status.ACTIVE,
+    metadata: null,
+    created_at: new Date('2026-07-25T00:00:00.000Z'),
+    updated_at: new Date('2026-07-25T00:00:00.000Z'),
+    deleted_at: null,
+    ownerships: [],
+    assets: [],
+    category_ref: {
+      id: 'category-id',
+      code: 'ACCESSORY',
+      slug: 'accessory',
+      name: 'Accessory',
+      description: null,
+      icon: null,
+      image_url: null,
+      type: category_type.PRODUCT,
+      parent_id: null,
+      order: 0,
+      is_active: true,
+      metadata: null,
+      created_at: new Date('2026-07-25T00:00:00.000Z'),
+      updated_at: new Date('2026-07-25T00:00:00.000Z'),
+    },
+    template: {
+      id: 'template-id',
+      sku: 'PPF-X10',
+      slug: 'ppf-x10',
+      name: 'PPF X10',
+      category_id: 'category-id',
+      category_ref: null,
+      brand: 'Demo',
+      model: 'X10',
+      model_year: 2026,
+      description: null,
+      default_warranty_duration_months: 24,
+      default_warranty_terms: null,
+      metadata: null,
+      is_active: true,
+      is_published: true,
+      published_at: new Date('2026-07-25T00:00:00.000Z'),
+      created_at: new Date('2026-07-25T00:00:00.000Z'),
+      updated_at: new Date('2026-07-25T00:00:00.000Z'),
+      assets: [],
+    },
+  };
+}

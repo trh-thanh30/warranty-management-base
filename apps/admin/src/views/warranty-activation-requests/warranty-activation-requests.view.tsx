@@ -25,7 +25,7 @@ export function WarrantyActivationRequestsView() {
           eyebrow={t("eyebrow")}
           title={t("title")}
           actions={
-            <div className="flex w-full flex-wrap justify-end gap-2 sm:w-auto">
+            <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2 sm:justify-end">
               <ImportExportMenu
                 labels={{
                   exportAll: t("excel.exportAll"),
@@ -35,10 +35,12 @@ export function WarrantyActivationRequestsView() {
                   void directory.exportRequests();
                 }}
               />
-              <Button asChild>
+              <Button asChild className="w-full justify-center sm:w-auto">
                 <Link href="/warranty-activation-requests/create">
-                  <Plus className="size-4" aria-hidden="true" />
-                  {t("createAction")}
+                  <div className="inline-flex items-center justify-center gap-2 pr-[22px] sm:pr-0">
+                    <Plus className="size-4 shrink-0" aria-hidden="true" />
+                    <span>{t("createAction")}</span>
+                  </div>
                 </Link>
               </Button>
             </div>

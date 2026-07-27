@@ -38,6 +38,7 @@ export class IssueWarrantyCertificateUseCase {
       include: {
         product: {
           include: {
+            template: true,
             ownerships: {
               where: { is_current_owner: true },
               include: { customer: true },
@@ -106,6 +107,7 @@ export class IssueWarrantyCertificateUseCase {
         include: {
           product: {
             include: {
+              template: true,
               ownerships: {
                 where: { is_current_owner: true },
                 include: { customer: true },
@@ -151,7 +153,8 @@ export class IssueWarrantyCertificateUseCase {
           endDate: warranty.end_date,
           filmItems: this.resolveFilmItems(request),
           installedAt: request?.installed_at ?? warranty.start_date,
-          productName: warranty.product.name,
+          productName:
+            warranty.product.display_name ?? warranty.product.template.name,
           serialNumber: warranty.product.serial_number,
           startDate: warranty.start_date,
           vehicleModel: request?.vehicle_model ?? null,

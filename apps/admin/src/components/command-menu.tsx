@@ -14,6 +14,12 @@ import { useAdminUiStore } from "@/src/app/stores/ui.store";
 import { getDashboardConfig } from "@/src/config/dashboard.config";
 import { Link } from "@/src/i18n/navigation";
 import { usePermissions } from "@/src/hooks/use-permissions";
+import {
+  canAccessNavigationItem,
+  getAccessibleNavigationItems,
+  resolveNavigationHref,
+} from "@/src/config/navigation-permissions";
+import { flattenNavigationItems } from "@/src/components/layout/nav-items";
 
 export function CommandMenu() {
   const t = useTranslations("DashboardConfig");
@@ -47,18 +53,19 @@ export function CommandMenu() {
   >();
 
   dashboardConfig.sidebarSections.forEach((section) => {
-    section.items.forEach((item) => {
-      if (
-        item.href &&
-        (!item.requiredRole || hasRole(item.requiredRole)) &&
-        (!item.requiredPermission || hasPermission(item.requiredPermission))
-      ) {
-        itemsMap.set(item.href, {
-          title: item.title,
-          href: item.href,
-          icon: item.icon,
-        });
-      }
+    const accessibleItems = getAccessibleNavigationItems(
+      section.items,
+      hasPermission,
+      hasRole,
+    );
+
+    flattenNavigationItems(accessibleItems).forEach((item) => {
+      if (!item.href) return;
+      itemsMap.set(item.href, {
+        title: item.title,
+        href: item.href,
+        icon: item.icon,
+      });
     });
   });
 
@@ -67,11 +74,13 @@ export function CommandMenu() {
       item.href &&
       !itemsMap.has(item.href) &&
       (!item.requiredRole || hasRole(item.requiredRole)) &&
-      (!item.requiredPermission || hasPermission(item.requiredPermission))
+      canAccessNavigationItem(item, hasPermission)
     ) {
-      itemsMap.set(item.href, {
+      const href = resolveNavigationHref(item, hasPermission);
+      if (!href) return;
+      itemsMap.set(href, {
         title: item.title,
-        href: item.href,
+        href,
         icon: LayoutDashboard, // fallback icon
       });
     }

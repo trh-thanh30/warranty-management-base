@@ -6,7 +6,7 @@ import {
 } from '@/common/excel';
 import { productExcelColumns } from '@/modules/products/excel/product-excel.schema';
 import { ProductExcelRow } from '@/modules/products/excel/product-excel.types';
-import { product_category, product_status } from '@prisma/client';
+import { product_status } from '@prisma/client';
 
 export async function createProductImportTemplateWorkbook() {
   const workbook = createExcelWorkbook('Product Import Template');
@@ -16,19 +16,11 @@ export async function createProductImportTemplateWorkbook() {
     rows: [
       {
         productCode: null,
-        name: 'Bộ pin chính hãng',
-        imageUrl: 'https://example.com/images/product.jpg',
+        templateSku: 'BATTERY-PLUS',
+        displayName: 'Pin xe khách Nguyễn Văn A',
         installationPosition: 'Khoang động cơ',
-        category: product_category.SPARE_PART,
-        categoryCode: 'BATTERY',
-        brand: 'Toyota',
-        model: 'Battery Plus',
-        manufactureYear: 2026,
         serialNumber: 'SN-001',
         status: product_status.ACTIVE,
-        warrantyDurationMonths: 36,
-        warrantyTerms: 'Bảo hành tiêu chuẩn.',
-        description: 'Dòng dữ liệu import sản phẩm.',
       },
     ],
   });

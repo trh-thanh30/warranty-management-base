@@ -14,10 +14,7 @@ describe('AssignProductOwnerUseCase', () => {
     });
 
     expect(context.generateWarrantyCode.execute).toHaveBeenCalledTimes(1);
-    expect(context.tx.product.update).toHaveBeenCalledWith({
-      where: { id: 'product-id' },
-      data: { warranty_code: 'WM-2026-GENERATED' },
-    });
+    expect(context.tx.product.update).not.toHaveBeenCalled();
     expect(context.tx.warranty.update).toHaveBeenCalledWith({
       where: { id: 'warranty-id' },
       data: { warranty_code: 'WM-2026-GENERATED' },
@@ -46,11 +43,10 @@ describe('AssignProductOwnerUseCase', () => {
     expect(context.productsRepository.findByWarrantyCode).toHaveBeenCalledWith(
       'WM-2026-MANUAL1',
     );
-    expect(context.tx.product.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: { warranty_code: 'WM-2026-MANUAL1' },
-      }),
-    );
+    expect(context.tx.warranty.update).toHaveBeenCalledWith({
+      where: { id: 'warranty-id' },
+      data: { warranty_code: 'WM-2026-MANUAL1' },
+    });
   });
 
   it('rejects a manually entered warranty code owned by another product', async () => {
@@ -115,16 +111,16 @@ function createContext({
   const resolvedWarrantyCode = warrantyCode ?? 'WM-2026-GENERATED';
   const productResponse = {
     id: 'product-id',
+    template_id: 'template-id',
     product_code: 'PRD-2026-ABC',
-    warranty_code: resolvedWarrantyCode,
+    display_name: null,
     serial_number: null,
-    name: 'Toyota Camry',
-    category: 'CAR',
-    category_id: null,
-    brand: 'Toyota',
-    model: 'Camry',
-    manufacture_year: 2026,
-    description: null,
+    template: {
+      id: 'template-id',
+      name: 'Toyota Camry',
+      brand: 'Toyota',
+      model: 'Camry',
+    },
     status: 'ACTIVE',
     metadata: null,
     created_at: new Date('2026-07-21T00:00:00.000Z'),
@@ -164,7 +160,6 @@ function createContext({
       findUnique: jest.fn().mockResolvedValue({
         id: 'product-id',
         deleted_at: null,
-        warranty_code: warrantyCode,
         warranty: { id: 'warranty-id', warranty_code: warrantyCode },
       }),
     },

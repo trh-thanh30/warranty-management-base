@@ -8,20 +8,12 @@ export type ProductsHttpClient = {
 };
 
 export type ProductImportRowData = {
-  brand: string | null;
-  category: string;
-  categoryCode: string | null;
-  description: string | null;
-  imageUrl: string | null;
-  installationPosition: string | null;
-  manufactureYear: number | null;
-  model: string | null;
-  name: string;
   productCode: string | null;
+  templateSku: string;
+  displayName: string | null;
+  installationPosition: string | null;
   serialNumber: string | null;
-  status: string;
-  warrantyDurationMonths: number | null;
-  warrantyTerms: string | null;
+  status: "ACTIVE" | "INACTIVE";
 };
 
 export type ProductImportRowError = {

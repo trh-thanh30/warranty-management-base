@@ -7,9 +7,3 @@ export const PRODUCT_STATUS_FILTERS = [
   "INACTIVE",
   "DELETED",
 ] as const satisfies Array<"ALL" | ProductStatus>;
-
-export const PRODUCT_PUBLICATION_FILTERS = [
-  "ALL",
-  "PUBLISHED",
-  "HIDDEN",
-] as const;

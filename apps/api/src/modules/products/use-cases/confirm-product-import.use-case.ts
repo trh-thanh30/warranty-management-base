@@ -6,7 +6,7 @@ import {
   PreparedProductImportRow,
 } from '@/modules/products/excel/product-import.validator';
 import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generate-product-code.use-case';
-import { createProductSlug } from '@/modules/products/product-slug.utils';
+import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { Injectable } from '@nestjs/common';
 import { Prisma, product_status, warranty_status } from '@prisma/client';
 
@@ -15,6 +15,7 @@ export class ConfirmProductImportUseCase {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly generateProductCodeUseCase: GenerateProductCodeUseCase,
+    private readonly generateWarrantyCodeUseCase: GenerateWarrantyCodeUseCase,
   ) {}
 
   async execute(dto: ConfirmProductImportDto) {
@@ -37,6 +38,7 @@ export class ConfirmProductImportUseCase {
     }
 
     return this.prismaService.$transaction(async (tx) => {
+      const importDate = new Date();
       let created = 0;
       let updated = 0;
       const importedProductIds: string[] = [];
@@ -48,7 +50,7 @@ export class ConfirmProductImportUseCase {
             data: this.toProductUpdateInput(row),
             select: { id: true },
           });
-          await this.upsertDraftWarranty(tx, product.id, row);
+          await this.ensureDraftWarrantyCode(tx, product.id, row, importDate);
           importedProductIds.push(product.id);
           updated += 1;
           continue;
@@ -56,30 +58,28 @@ export class ConfirmProductImportUseCase {
 
         const productCode =
           row.productCode?.trim() ||
-          (await this.generateProductCodeUseCase.execute(new Date(), tx));
+          (await this.generateProductCodeUseCase.execute(importDate, tx));
+        const warrantyCode = await this.generateWarrantyCodeUseCase.execute(
+          importDate,
+          tx,
+        );
         const product = await tx.product.create({
           data: {
             product_code: productCode,
-            slug: createProductSlug(row.name, productCode),
-            warranty_code: null,
+            template: { connect: { id: row.templateId } },
+            category_ref: { connect: { id: row.templateCategoryId } },
             serial_number: this.blankToNull(row.serialNumber),
-            name: row.name.trim(),
-            category: row.category,
-            brand: this.blankToNull(row.brand),
-            model: this.blankToNull(row.model),
-            manufacture_year: row.manufactureYear ?? null,
-            description: this.blankToNull(row.description),
+            display_name: this.blankToNull(row.displayName),
             status: row.status ?? product_status.ACTIVE,
-            category_ref: { connect: { id: row.categoryId } },
             metadata: this.toMetadata(row),
             warranty: {
               create: {
-                warranty_code: null,
-                duration_months: row.warrantyDurationMonths ?? 36,
+                warranty_code: warrantyCode,
+                duration_months: row.templateWarrantyDurationMonths,
                 start_date: null,
                 end_date: null,
                 status: warranty_status.DRAFT,
-                terms: this.blankToNull(row.warrantyTerms),
+                terms: row.templateWarrantyTerms,
               },
             },
           },
@@ -116,55 +116,57 @@ export class ConfirmProductImportUseCase {
     row: PreparedProductImportRow,
   ): Prisma.ProductUpdateInput {
     return {
-      name: row.name.trim(),
-      category: row.category,
-      brand: this.blankToNull(row.brand),
-      model: this.blankToNull(row.model),
-      manufacture_year: row.manufactureYear ?? null,
-      description: this.blankToNull(row.description),
+      template: { connect: { id: row.templateId } },
+      category_ref: { connect: { id: row.templateCategoryId } },
+      display_name: this.blankToNull(row.displayName),
       status: row.status,
       serial_number: this.blankToNull(row.serialNumber),
-      category_ref: { connect: { id: row.categoryId } },
       metadata: this.toMetadata(row),
     };
   }
 
-  private async upsertDraftWarranty(
+  private async ensureDraftWarrantyCode(
     tx: Prisma.TransactionClient,
     productId: string,
     row: PreparedProductImportRow,
+    importDate: Date,
   ) {
-    if (!row.warrantyDurationMonths && !row.warrantyTerms) {
+    const warranty = await tx.warranty.findUnique({
+      where: { product_id: productId },
+      select: { id: true, warranty_code: true },
+    });
+
+    if (warranty?.warranty_code) return;
+
+    const warrantyCode = await this.generateWarrantyCodeUseCase.execute(
+      importDate,
+      tx,
+    );
+
+    if (warranty) {
+      await tx.warranty.update({
+        where: { id: warranty.id },
+        data: { warranty_code: warrantyCode },
+      });
       return;
     }
 
-    await tx.warranty.upsert({
-      where: { product_id: productId },
-      create: {
+    await tx.warranty.create({
+      data: {
         product_id: productId,
-        warranty_code: null,
-        duration_months: row.warrantyDurationMonths ?? 36,
+        warranty_code: warrantyCode,
+        duration_months: row.templateWarrantyDurationMonths,
+        start_date: null,
+        end_date: null,
         status: warranty_status.DRAFT,
-        terms: this.blankToNull(row.warrantyTerms),
-      },
-      update: {
-        duration_months: row.warrantyDurationMonths ?? undefined,
-        terms:
-          row.warrantyTerms === undefined
-            ? undefined
-            : this.blankToNull(row.warrantyTerms),
+        terms: row.templateWarrantyTerms,
       },
     });
   }
 
   private toMetadata(row: PreparedProductImportRow) {
-    const imageUrl = this.blankToNull(row.imageUrl);
     const installationPosition = this.blankToNull(row.installationPosition);
     const metadata: Record<string, string> = {};
-
-    if (imageUrl) {
-      metadata.excelImageUrl = imageUrl;
-    }
 
     if (installationPosition) {
       metadata.installationPosition = installationPosition;

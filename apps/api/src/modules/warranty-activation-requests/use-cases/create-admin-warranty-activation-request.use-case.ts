@@ -44,16 +44,11 @@ export class CreateAdminWarrantyActivationRequestUseCase {
     }
 
     const warrantyCode =
-      product.warranty_code ??
       product.warranty.warranty_code ??
       (await this.generateWarrantyCodeUseCase.execute());
 
-    if (
-      product.warranty_code !== warrantyCode ||
-      product.warranty.warranty_code !== warrantyCode
-    ) {
+    if (product.warranty.warranty_code !== warrantyCode) {
       await this.productsRepository.synchronizeWarrantyCode({
-        productId: product.id,
         warrantyCode,
         warrantyId: product.warranty.id,
       });
@@ -62,11 +57,12 @@ export class CreateAdminWarrantyActivationRequestUseCase {
     return this.createWarrantyActivationRequestUseCase.execute(
       {
         ...dto,
-        brand: dto.brand ?? product.brand ?? undefined,
+        brand: dto.brand ?? product.template.brand ?? undefined,
         manufactureYear:
-          dto.manufactureYear ?? product.manufacture_year ?? undefined,
-        model: dto.model ?? product.model ?? undefined,
-        productName: dto.productName ?? product.name,
+          dto.manufactureYear ?? product.template.model_year ?? undefined,
+        model: dto.model ?? product.template.model ?? undefined,
+        productName:
+          dto.productName ?? product.display_name ?? product.template.name,
         serialNumber: dto.serialNumber ?? product.serial_number ?? undefined,
         warrantyCode,
       },

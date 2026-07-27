@@ -1,6 +1,6 @@
 "use client";
 
-import type { ProductResponse } from "@repo/shared";
+import type { ProductResponse, ProductTemplateSummary } from "@repo/shared";
 import {
   Card,
   CardContent,
@@ -16,6 +16,7 @@ type ProductFormCardProps = {
   onCancel: () => void;
   onSaved: (product?: ProductResponse) => void;
   product: ProductResponse | null;
+  initialTemplate?: ProductTemplateSummary | null;
   title: string;
 };
 
@@ -24,6 +25,7 @@ export function ProductFormCard({
   onCancel,
   onSaved,
   product,
+  initialTemplate,
   title,
 }: ProductFormCardProps) {
   return (
@@ -33,7 +35,12 @@ export function ProductFormCard({
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <ProductForm onCancel={onCancel} onSaved={onSaved} product={product} />
+        <ProductForm
+          initialTemplate={initialTemplate}
+          onCancel={onCancel}
+          onSaved={onSaved}
+          product={product}
+        />
       </CardContent>
     </Card>
   );

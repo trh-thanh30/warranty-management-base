@@ -16,7 +16,6 @@ import {
   ProductDetailSkeleton,
 } from "./components/product-detail-card";
 import { useProductDetail } from "./hooks/use-product-detail";
-import { ProductPublicationToggle } from "./components/product-publication-toggle";
 
 type ProductDetailViewProps = {
   productId: string;
@@ -87,14 +86,11 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
             title={t("loadErrorTitle")}
           />
         ) : (
-          <>
-            {canEdit ? <ProductPublicationToggle product={product} /> : null}
-            <ProductDetailCard
-              description={t("detailDescription")}
-              product={product}
-              title={t("detailTitle")}
-            />
-          </>
+          <ProductDetailCard
+            description={t("detailDescription")}
+            product={product}
+            title={t("detailTitle")}
+          />
         )}
 
         <AssignOwnerDialog

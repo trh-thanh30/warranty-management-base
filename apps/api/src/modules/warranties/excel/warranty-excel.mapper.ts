@@ -1,8 +1,15 @@
 import { WarrantyExcelRow } from '@/modules/warranties/excel/warranty-excel.types';
-import { Customer, Product, ProductOwnership, Warranty } from '@prisma/client';
+import {
+  Customer,
+  Product,
+  ProductOwnership,
+  ProductTemplate,
+  Warranty,
+} from '@prisma/client';
 
 type WarrantyWithProduct = Warranty & {
   product: Product & {
+    template?: ProductTemplate;
     ownerships?: Array<ProductOwnership & { customer?: Customer }>;
   };
 };
@@ -17,7 +24,8 @@ export function toWarrantyExcelRow(
   return {
     warrantyCode: warranty.warranty_code,
     productCode: warranty.product.product_code,
-    productName: warranty.product.name,
+    productName:
+      warranty.product.template?.name ?? warranty.product.product_code,
     serialNumber: warranty.product.serial_number,
     ownerCustomerCode: currentOwnership?.customer?.customer_code ?? null,
     ownerFullName: currentOwnership?.customer?.full_name ?? null,

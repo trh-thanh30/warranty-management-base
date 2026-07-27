@@ -7,26 +7,18 @@ import { ValidationError } from '@/common/response';
 import { productExcelColumns } from '@/modules/products/excel/product-excel.schema';
 import { ProductExcelRow } from '@/modules/products/excel/product-excel.types';
 import { PreviewProductImportUseCase } from '@/modules/products/use-cases/preview-product-import.use-case';
-import { product_category, product_status } from '@prisma/client';
+import { product_status } from '@prisma/client';
 import { Readable } from 'stream';
 
 describe('PreviewProductImportUseCase', () => {
   it('defines Vietnamese product Excel headers with an image URL column', () => {
     expect(productExcelColumns.map((column) => column.header)).toEqual([
       'Mã sản phẩm',
-      'Tên sản phẩm',
-      'URL hình ảnh',
+      'SKU product template',
+      'Tên hiển thị thiết bị',
       'Vị trí gắn',
-      'Danh mục legacy',
-      'Mã danh mục động',
-      'Thương hiệu',
-      'Mẫu',
-      'Năm sản xuất',
       'Số serial',
       'Trạng thái sản phẩm',
-      'Thời hạn bảo hành (tháng)',
-      'Điều khoản bảo hành',
-      'Mô tả',
     ]);
   });
 
@@ -34,23 +26,21 @@ describe('PreviewProductImportUseCase', () => {
     const file = await createFileFromRows([
       {
         productCode: 'PRD-2026-ABCDEF',
-        name: 'Genuine Battery Pack',
-        imageUrl: 'https://example.com/images/product.jpg',
+        templateSku: 'BATTERY-PLUS',
+        displayName: 'Genuine Battery Pack',
         installationPosition: 'Engine bay',
-        category: product_category.SPARE_PART,
-        categoryCode: 'BATTERY',
-        brand: 'Toyota',
-        model: 'Battery Plus',
-        manufactureYear: 2026,
         serialNumber: 'SN-001',
         status: product_status.ACTIVE,
-        warrantyDurationMonths: 36,
-        warrantyTerms: 'Standard warranty.',
-        description: 'Inventory import row.',
       },
     ]);
     const prismaService = createPrismaMock();
-    prismaService.category.findFirst.mockResolvedValue({ id: 'category-id' });
+    prismaService.productTemplate.findUnique.mockResolvedValue({
+      category_id: 'category-id',
+      id: 'template-id',
+      is_active: true,
+      default_warranty_duration_months: 36,
+      default_warranty_terms: null,
+    });
     const useCase = new PreviewProductImportUseCase(prismaService as never);
 
     const result = await useCase.execute(file);
@@ -60,13 +50,11 @@ describe('PreviewProductImportUseCase', () => {
     expect(result.invalidRows).toBe(0);
     expect(result.rows[0].data).toEqual(
       expect.objectContaining({
-        category: product_category.SPARE_PART,
-        imageUrl: 'https://example.com/images/product.jpg',
+        templateSku: 'BATTERY-PLUS',
+        displayName: 'Genuine Battery Pack',
         installationPosition: 'Engine bay',
-        name: 'Genuine Battery Pack',
         productCode: 'PRD-2026-ABCDEF',
         status: product_status.ACTIVE,
-        warrantyDurationMonths: 36,
       }),
     );
   });
@@ -85,27 +73,19 @@ describe('PreviewProductImportUseCase', () => {
     ).rejects.toBeInstanceOf(ValidationError);
   });
 
-  it('reports an unknown dynamic category during preview', async () => {
+  it('reports an unknown product template SKU during preview', async () => {
     const file = await createFileFromRows([
       {
         productCode: null,
-        name: 'Battery Pack',
-        imageUrl: null,
+        templateSku: 'UNKNOWN',
+        displayName: 'Battery Pack',
         installationPosition: null,
-        category: product_category.SPARE_PART,
-        categoryCode: 'UNKNOWN',
-        brand: null,
-        model: null,
-        manufactureYear: null,
         serialNumber: 'SN-UNKNOWN-CATEGORY',
         status: product_status.ACTIVE,
-        warrantyDurationMonths: 36,
-        warrantyTerms: null,
-        description: null,
       },
     ]);
     const prismaService = createPrismaMock();
-    prismaService.category.findFirst.mockResolvedValue(null);
+    prismaService.productTemplate.findUnique.mockResolvedValue(null);
     const useCase = new PreviewProductImportUseCase(prismaService as never);
 
     const result = await useCase.execute(file);
@@ -113,29 +93,21 @@ describe('PreviewProductImportUseCase', () => {
     expect(result.invalidRows).toBe(1);
     expect(result.validRows).toBe(0);
     expect(result.rows[0]?.errors).toContainEqual({
-      field: 'categoryCode',
-      message: 'Không tìm thấy mã danh mục động',
+      field: 'templateSku',
+      message: 'Không tìm thấy product template đang hoạt động',
       rowNumber: 2,
     });
   });
 
-  it('requires a dynamic category code during preview', async () => {
+  it('requires a product template SKU during preview', async () => {
     const file = await createFileFromRows([
       {
         productCode: null,
-        name: 'Battery Pack',
-        imageUrl: null,
+        templateSku: '',
+        displayName: 'Battery Pack',
         installationPosition: null,
-        category: product_category.SPARE_PART,
-        categoryCode: null,
-        brand: null,
-        model: null,
-        manufactureYear: null,
         serialNumber: 'SN-MISSING-CATEGORY',
         status: product_status.ACTIVE,
-        warrantyDurationMonths: 36,
-        warrantyTerms: null,
-        description: null,
       },
     ]);
     const prismaService = createPrismaMock();
@@ -146,8 +118,8 @@ describe('PreviewProductImportUseCase', () => {
     expect(result.invalidRows).toBe(1);
     expect(result.validRows).toBe(0);
     expect(result.rows[0]?.errors).toContainEqual({
-      field: 'categoryCode',
-      message: 'Mã danh mục động là bắt buộc',
+      field: 'templateSku',
+      message: 'SKU product template is required',
       rowNumber: 2,
     });
   });
@@ -155,8 +127,8 @@ describe('PreviewProductImportUseCase', () => {
 
 function createPrismaMock() {
   return {
-    category: {
-      findFirst: jest.fn().mockResolvedValue(null),
+    productTemplate: {
+      findUnique: jest.fn().mockResolvedValue(null),
     },
     product: {
       findUnique: jest.fn().mockResolvedValue(null),

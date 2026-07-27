@@ -12,7 +12,10 @@ import {
   WARRANTY_CLAIM_ATTACHMENT_MIME_TYPES,
   WARRANTY_CLAIM_TERMINAL_STATUSES,
 } from "./warranty-claims.constants.ts";
-import type { WarrantyClaimCreateFormValues } from "./warranty-claims.types.ts";
+import type {
+  WarrantyClaimCreateFormValues,
+  WarrantyClaimRequesterSource,
+} from "./warranty-claims.types.ts";
 
 type TranslateWarrantyClaim = (key: string) => string;
 
@@ -36,6 +39,15 @@ const CREATE_ERROR_MESSAGE_KEYS: Record<string, string> = {
 export type WarrantyClaimAttachmentValidationError =
   | "attachmentTooLarge"
   | "attachmentTypeInvalid";
+
+export function getWarrantyClaimRequesterValues(
+  source: WarrantyClaimRequesterSource | null | undefined,
+): Pick<WarrantyClaimCreateFormValues, "requesterName" | "requesterPhone"> {
+  return {
+    requesterName: source?.fullName ?? "",
+    requesterPhone: source?.phone ?? "",
+  };
+}
 
 export function validateWarrantyClaimAttachment(file: {
   size: number;

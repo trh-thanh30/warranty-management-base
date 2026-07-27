@@ -1,5 +1,14 @@
 "use client";
 
+import {
+  Layers3,
+  MoreHorizontal,
+  Pencil,
+  PlusCircle,
+  Trash2,
+  UserPlus,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
 import { SortableTableHead } from "@/src/components/common/sortable-table-head";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
@@ -19,15 +28,12 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui";
-import { MoreHorizontal, Pencil, Trash2, UserPlus } from "lucide-react";
-import { useTranslations } from "next-intl";
 import {
   formatProductCreatedAt,
   formatProductOwner,
   getProductCategoryLabel,
   getProductDisplayName,
 } from "../products.utils";
-import { ProductPublicationBadge } from "./product-publication-badge";
 import { ProductStatusBadge } from "./product-status-badge";
 import { WarrantyStatusBadge } from "./warranty-status-badge";
 
@@ -64,7 +70,7 @@ export function ProductsTable({
       </div>
 
       <div className="transparent-scrollbar hidden overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800 lg:block">
-        <Table className="min-w-328">
+        <Table className="min-w-288">
           <TableHeader>
             <TableRow>
               <SortableTableHead
@@ -97,14 +103,6 @@ export function ProductsTable({
                 sortOrder={sortOrder}
               >
                 {t("productStatus")}
-              </SortableTableHead>
-              <SortableTableHead
-                activeSortBy={sortBy}
-                onSortChange={onSortChange}
-                sortBy="publishedAt"
-                sortOrder={sortOrder}
-              >
-                {t("websiteVisibility")}
               </SortableTableHead>
               <SortableTableHead
                 activeSortBy={sortBy}
@@ -157,9 +155,6 @@ function ProductTableRow({
       </TableCell>
       <TableCell>
         <ProductStatusBadge status={product.status} />
-      </TableCell>
-      <TableCell>
-        <ProductPublicationBadge isPublished={product.isPublished} />
       </TableCell>
       <TableCell>{formatProductCreatedAt(product.createdAt)}</TableCell>
       <TableCell className="text-right">
@@ -215,40 +210,19 @@ function ProductMobileCard({
             <ProductStatusBadge status={product.status} />
           </dd>
         </div>
-        <div>
-          <dt className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-            {t("websiteVisibility")}
-          </dt>
-          <dd className="mt-1">
-            <ProductPublicationBadge isPublished={product.isPublished} />
-          </dd>
-        </div>
       </dl>
     </article>
   );
 }
 
 function ProductName({ product }: { product: ProductResponse }) {
-  if (product.status === "DELETED") {
-    return (
-      <div className="min-w-0">
-        <span className="truncate font-medium text-slate-950 dark:text-slate-50">
-          {product.name}
-        </span>
-        <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
-          {getProductDisplayName(product)}
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="min-w-0">
       <span className="truncate font-medium text-slate-950 dark:text-slate-50">
-        {product.name}
+        {getProductDisplayName(product)}
       </span>
       <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
-        {getProductDisplayName(product)}
+        {product.name} · {product.template.sku}
       </p>
     </div>
   );
@@ -287,9 +261,18 @@ function ProductActionsMenu({
   const canEdit = hasPermission(PERMISSIONS.PRODUCT_UPDATE);
   const canDelete = hasPermission(PERMISSIONS.PRODUCT_DELETE);
   const canAssignOwner = hasPermission(PERMISSIONS.PRODUCT_ASSIGN_OWNER);
+  const canCreateProduct = hasPermission(PERMISSIONS.PRODUCT_CREATE);
+  const canViewTemplate = hasPermission(PERMISSIONS.PRODUCT_TEMPLATE_VIEW);
   const isDeleted = product.status === "DELETED";
 
-  if (isDeleted || (!canEdit && !canDelete && !canAssignOwner)) return null;
+  const hasTemplateAction =
+    canViewTemplate || (canCreateProduct && product.template.isActive);
+  if (
+    isDeleted ||
+    (!canEdit && !canDelete && !canAssignOwner && !hasTemplateAction)
+  ) {
+    return null;
+  }
 
   return (
     <DropdownMenu>
@@ -309,6 +292,22 @@ function ProductActionsMenu({
             <Link href={`/products/${product.id}/edit`}>
               <Pencil className="mr-2 size-4" />
               {t("edit")}
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
+        {canCreateProduct && product.template.isActive ? (
+          <DropdownMenuItem asChild>
+            <Link href={`/products/create?templateId=${product.template.id}`}>
+              <PlusCircle className="mr-2 size-4" />
+              {t("createAnotherFromTemplate")}
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
+        {canViewTemplate ? (
+          <DropdownMenuItem asChild>
+            <Link href={`/product-templates/${product.template.id}`}>
+              <Layers3 className="mr-2 size-4" />
+              {t("viewProductTemplate")}
             </Link>
           </DropdownMenuItem>
         ) : null}

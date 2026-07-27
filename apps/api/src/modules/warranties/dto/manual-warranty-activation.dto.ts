@@ -2,7 +2,6 @@ import { Type } from 'class-transformer';
 import {
   IsDateString,
   IsEmail,
-  IsEnum,
   IsInt,
   IsOptional,
   IsString,
@@ -11,9 +10,9 @@ import {
   Matches,
   Max,
   Min,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
-import { product_category } from '@prisma/client';
 
 export class ManualWarrantyActivationCustomerDto {
   @IsString()
@@ -37,42 +36,19 @@ export class ManualWarrantyActivationProductDto {
   @IsUUID()
   id?: string;
 
-  @IsString()
-  @Length(2, 160)
-  name: string;
-
-  @IsEnum(product_category)
-  category: product_category;
-
-  @IsOptional()
+  @ValidateIf((dto: ManualWarrantyActivationProductDto) => !dto.id)
   @IsUUID()
-  categoryId?: string;
+  templateId?: string;
 
   @IsOptional()
   @IsString()
-  @Length(0, 80)
-  brand?: string;
-
-  @IsOptional()
-  @IsString()
-  @Length(0, 80)
-  model?: string;
-
-  @IsOptional()
-  @IsInt()
-  @Min(1900)
-  @Max(2100)
-  manufactureYear?: number;
+  @Length(0, 160)
+  displayName?: string;
 
   @IsOptional()
   @IsString()
   @Length(1, 64)
   serialNumber?: string;
-
-  @IsOptional()
-  @IsString()
-  @Length(0, 1000)
-  description?: string;
 }
 
 export class ManualWarrantyActivationWarrantyDto {

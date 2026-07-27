@@ -13,11 +13,14 @@ export interface BrandConfig {
 export interface NavigationItem {
   title: string;
   href?: string;
+  children?: NavigationItem[];
   activeHrefs?: string[];
   icon: ComponentType<{ className?: string }>;
   badge?: string;
   notificationBadgeKey?: NotificationBadgeKey;
   requiredPermission?: PermissionKey;
+  permissionHrefs?: Array<{ permission: PermissionKey; href: string }>;
+  requiredAnyPermissions?: PermissionKey[];
   requiredRole?: Exclude<AuthUserRole, null>;
 }
 
@@ -30,6 +33,8 @@ export interface TopNavigationItem {
   title: string;
   href: string;
   requiredPermission?: PermissionKey;
+  permissionHrefs?: Array<{ permission: PermissionKey; href: string }>;
+  requiredAnyPermissions?: PermissionKey[];
   requiredRole?: Exclude<AuthUserRole, null>;
 }
 

@@ -8,13 +8,13 @@ const product = {
   productCode: "PRD-000001",
   warrantyCode: "WM-2026-ABCDEF",
   serialNumber: "SN-001",
+  displayName: "SUV Battery",
   name: "SUV Battery",
-  category: "SPARE_PART",
   categoryId: "category-id",
-  categoryRef: null,
+  categoryRef: { id: "category-id", name: "Spare parts" },
   brand: "Demo",
   model: "Battery",
-  manufactureYear: 2026,
+  modelYear: 2026,
   description: null,
   status: "ACTIVE",
   metadata: null,
@@ -48,7 +48,6 @@ test("product directory requests paginated products with filters", async () => {
   const result = await createProductsService(
     http as unknown as ProductsHttpClient,
   ).listProducts({
-    category: "SPARE_PART",
     categoryId: "category-id",
     page: 1,
     search: "battery",
@@ -61,7 +60,6 @@ test("product directory requests paginated products with filters", async () => {
       url: "/products",
       config: {
         params: {
-          category: "SPARE_PART",
           categoryId: "category-id",
           page: 1,
           search: "battery",
@@ -86,18 +84,18 @@ test("creating a product sends inventory fields", async () => {
   const result = await createProductsService(
     http as unknown as ProductsHttpClient,
   ).createProduct({
-    category: "SPARE_PART",
     categoryId: "category-id",
-    name: "SUV Battery",
+    displayName: "SUV Battery",
+    templateId: "template-id",
   });
 
   assert.deepEqual(calls, [
     {
       url: "/products",
       body: {
-        category: "SPARE_PART",
         categoryId: "category-id",
-        name: "SUV Battery",
+        displayName: "SUV Battery",
+        templateId: "template-id",
       },
     },
   ]);
@@ -128,29 +126,6 @@ test("updating a product can change dynamic category", async () => {
     },
   ]);
   assert.deepEqual(result, product);
-});
-
-test("updating product publication uses the dedicated endpoint", async () => {
-  const calls: unknown[] = [];
-  const http = {
-    async patch(url: string, body?: unknown) {
-      calls.push({ url, body });
-      return { data: { success: true, data: product } };
-    },
-  };
-
-  await createProductsService(
-    http as unknown as ProductsHttpClient,
-  ).updatePublication("product-id", {
-    isPublished: true,
-  });
-
-  assert.deepEqual(calls, [
-    {
-      url: "/products/product-id/publication",
-      body: { isPublished: true },
-    },
-  ]);
 });
 
 test("assigning an owner posts to product assign-owner endpoint", async () => {
@@ -236,7 +211,7 @@ test("exporting products requests a filtered blob", async () => {
   const result = await createProductsService(
     http as unknown as ProductsHttpClient,
   ).exportProducts({
-    category: "SPARE_PART",
+    categoryId: "category-id",
     search: "battery",
     sortBy: "createdAt",
     sortOrder: "desc",
@@ -247,7 +222,7 @@ test("exporting products requests a filtered blob", async () => {
       url: "/products/export",
       config: {
         params: {
-          category: "SPARE_PART",
+          categoryId: "category-id",
           search: "battery",
           sortBy: "createdAt",
           sortOrder: "desc",
@@ -305,20 +280,12 @@ test("confirming product import posts edited preview rows", async () => {
     mode: "upsert",
     rows: [
       {
-        brand: "Toyota",
-        category: "SPARE_PART",
-        categoryCode: null,
-        description: null,
-        imageUrl: "https://example.com/product.jpg",
+        displayName: "SUV Battery",
         installationPosition: "Khoang động cơ",
-        manufactureYear: 2026,
-        model: "Battery",
-        name: "SUV Battery",
         productCode: null,
         serialNumber: "SN-001",
         status: "ACTIVE",
-        warrantyDurationMonths: 36,
-        warrantyTerms: null,
+        templateSku: "BATTERY-PLUS",
       },
     ],
   });
@@ -330,20 +297,12 @@ test("confirming product import posts edited preview rows", async () => {
         mode: "upsert",
         rows: [
           {
-            brand: "Toyota",
-            category: "SPARE_PART",
-            categoryCode: null,
-            description: null,
-            imageUrl: "https://example.com/product.jpg",
+            displayName: "SUV Battery",
             installationPosition: "Khoang động cơ",
-            manufactureYear: 2026,
-            model: "Battery",
-            name: "SUV Battery",
             productCode: null,
             serialNumber: "SN-001",
             status: "ACTIVE",
-            warrantyDurationMonths: 36,
-            warrantyTerms: null,
+            templateSku: "BATTERY-PLUS",
           },
         ],
       },

@@ -64,10 +64,7 @@ export function WarrantyClaimDetailContent({
                 [t("product"), product?.name ?? "-"],
                 [t("productCode"), product?.productCode ?? "-"],
                 [t("serialNumber"), product?.serialNumber ?? "-"],
-                [
-                  t("category"),
-                  product?.categoryRef?.name ?? product?.category ?? "-",
-                ],
+                [t("category"), product?.categoryRef.name ?? "-"],
                 [
                   t("brandModel"),
                   [product?.brand, product?.model]
@@ -75,10 +72,8 @@ export function WarrantyClaimDetailContent({
                     .join(" / ") || "-",
                 ],
                 [
-                  t("manufactureYear"),
-                  product?.manufactureYear
-                    ? String(product.manufactureYear)
-                    : "-",
+                  t("modelYear"),
+                  product?.modelYear ? String(product.modelYear) : "-",
                 ],
                 [
                   t("productStatus"),

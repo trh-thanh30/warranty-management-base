@@ -102,14 +102,9 @@ export type ManualWarrantyActivationCustomerInput = {
 
 export type ManualWarrantyActivationProductInput = {
   id?: string;
-  name: string;
-  category: ProductSummary["category"];
-  categoryId?: string;
-  brand?: string;
-  model?: string;
-  manufactureYear?: number;
+  templateId?: string;
+  displayName?: string;
   serialNumber?: string;
-  description?: string;
 };
 
 export type ManualWarrantyActivationWarrantyInput = {
@@ -142,7 +137,6 @@ export type ManualWarrantyActivationResult = {
     | "warrantyCode"
     | "serialNumber"
     | "name"
-    | "category"
     | "brand"
     | "model"
   >;

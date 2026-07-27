@@ -49,7 +49,7 @@ export function CategoriesView() {
       <div className="space-y-6">
         <PageHeader
           actions={
-            <div className="flex flex-wrap justify-end gap-2">
+            <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2 sm:justify-end">
               <ImportExportMenu
                 labels={{
                   downloadTemplate: t("excel.downloadTemplate"),
@@ -67,10 +67,15 @@ export function CategoriesView() {
                 uploadDisabled={!canCreateCategories}
               />
               {canCreateCategories ? (
-                <Button asChild className="min-w-48">
+                <Button
+                  asChild
+                  className="w-full justify-center sm:w-auto sm:min-w-48"
+                >
                   <Link href="/categories/create">
-                    <Plus className="size-4" />
-                    {t("create")}
+                    <div className="inline-flex items-center justify-center gap-2 pr-[22px] sm:pr-0">
+                      <Plus className="size-4 shrink-0" />
+                      <span>{t("create")}</span>
+                    </div>
                   </Link>
                 </Button>
               ) : null}

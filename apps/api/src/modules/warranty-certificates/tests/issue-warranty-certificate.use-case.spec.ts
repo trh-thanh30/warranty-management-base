@@ -10,7 +10,10 @@ describe('IssueWarrantyCertificateUseCase', () => {
       end_date: new Date('2029-07-24T00:00:00.000Z'),
       id: 'warranty-id',
       product: {
-        name: 'Film cách nhiệt ô tô Lexzenz Reflex Korea Film',
+        display_name: null,
+        template: {
+          name: 'Film cách nhiệt ô tô Lexzenz Reflex Korea Film',
+        },
         ownerships: [
           {
             customer: {
@@ -98,7 +101,8 @@ describe('IssueWarrantyCertificateUseCase', () => {
       end_date: new Date('2029-07-24T00:00:00.000Z'),
       id: 'warranty-id',
       product: {
-        name: 'Lexzenz Film',
+        display_name: null,
+        template: { name: 'Lexzenz Film' },
         ownerships: [],
         serial_number: 'SN-001',
       },

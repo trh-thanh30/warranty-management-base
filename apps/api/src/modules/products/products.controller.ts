@@ -6,7 +6,6 @@ import { ConfirmProductImportDto } from '@/modules/products/dto/confirm-product-
 import { CreateProductDto } from '@/modules/products/dto/create-product.dto';
 import { ListProductsDto } from '@/modules/products/dto/list-products.dto';
 import { UpdateProductDto } from '@/modules/products/dto/update-product.dto';
-import { UpdateProductPublicationDto } from '@/modules/products/dto/update-product-publication.dto';
 import { UpdateProductAssetDto } from '@/modules/products/dto/update-product-asset.dto';
 import { AttachProductAssetUseCase } from '@/modules/products/use-cases/attach-product-asset.use-case';
 import { AssignProductOwnerUseCase } from '@/modules/products/use-cases/assign-product-owner.use-case';
@@ -21,7 +20,6 @@ import { SoftDeleteProductUseCase } from '@/modules/products/use-cases/soft-dele
 import { RemoveProductAssetUseCase } from '@/modules/products/use-cases/remove-product-asset.use-case';
 import { UpdateProductAssetUseCase } from '@/modules/products/use-cases/update-product-asset.use-case';
 import { UpdateProductUseCase } from '@/modules/products/use-cases/update-product.use-case';
-import { UpdateProductPublicationUseCase } from '@/modules/products/use-cases/update-product-publication.use-case';
 import {
   Body,
   Controller,
@@ -44,7 +42,6 @@ export class ProductsController {
   constructor(
     private readonly createProductUseCase: CreateProductUseCase,
     private readonly updateProductUseCase: UpdateProductUseCase,
-    private readonly updateProductPublicationUseCase: UpdateProductPublicationUseCase,
     private readonly softDeleteProductUseCase: SoftDeleteProductUseCase,
     private readonly listProductsUseCase: ListProductsUseCase,
     private readonly getProductDetailUseCase: GetProductDetailUseCase,
@@ -110,15 +107,6 @@ export class ProductsController {
   @Permissions([permission_key.PRODUCT_UPDATE])
   update(@Param('id') id: string, @Body() dto: UpdateProductDto) {
     return this.updateProductUseCase.execute(id, dto);
-  }
-
-  @Patch(':id/publication')
-  @Permissions([permission_key.PRODUCT_UPDATE])
-  updatePublication(
-    @Param('id') id: string,
-    @Body() dto: UpdateProductPublicationDto,
-  ) {
-    return this.updateProductPublicationUseCase.execute(id, dto);
   }
 
   @Delete(':id')

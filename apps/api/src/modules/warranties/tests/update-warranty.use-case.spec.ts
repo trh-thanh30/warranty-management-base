@@ -142,11 +142,13 @@ function createWarrantyBase() {
     product: {
       id: 'product-id',
       product_code: 'PRD-2026-ABCDEF',
-      warranty_code: 'WM-2026-ABCDEF',
+      display_name: null,
       serial_number: 'SN-001',
-      name: 'San pham bao hanh',
-      brand: null,
-      model: null,
+      template: {
+        name: 'San pham bao hanh',
+        brand: null,
+        model: null,
+      },
       ownerships: [],
     },
   };

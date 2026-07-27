@@ -1,5 +1,6 @@
 import { PrismaModule } from '@/database/prisma/prisma.module';
 import { AssetsModule } from '@/modules/assets/assets.module';
+import { ProductTemplatesModule } from '@/modules/product-templates/product-templates.module';
 import { ProductsController } from '@/modules/products/products.controller';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
 import { ProductAssetsRepository } from '@/modules/products/repository/product-assets.repository';
@@ -19,7 +20,6 @@ import { SoftDeleteProductUseCase } from '@/modules/products/use-cases/soft-dele
 import { RemoveProductAssetUseCase } from '@/modules/products/use-cases/remove-product-asset.use-case';
 import { UpdateProductAssetUseCase } from '@/modules/products/use-cases/update-product-asset.use-case';
 import { UpdateProductUseCase } from '@/modules/products/use-cases/update-product.use-case';
-import { UpdateProductPublicationUseCase } from '@/modules/products/use-cases/update-product-publication.use-case';
 import { Module } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
@@ -28,6 +28,7 @@ import { memoryStorage } from 'multer';
   imports: [
     PrismaModule,
     AssetsModule,
+    ProductTemplatesModule,
     MulterModule.register({
       storage: memoryStorage(),
     }),
@@ -40,7 +41,6 @@ import { memoryStorage } from 'multer';
     GenerateWarrantyCodeUseCase,
     CreateProductUseCase,
     UpdateProductUseCase,
-    UpdateProductPublicationUseCase,
     SoftDeleteProductUseCase,
     ListProductsUseCase,
     ListPublicProductsUseCase,
