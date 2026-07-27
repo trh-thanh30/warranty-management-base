@@ -37,7 +37,7 @@ export function AboutSection() {
           <span className="block text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-premium-red mb-1.5">
             {t("eyebrow")}
           </span>
-          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold uppercase tracking-wide text-deep-black leading-snug text-center">
+          <h2 className="font-condensed text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold uppercase tracking-wide text-deep-black leading-snug text-center">
             {t("title")}
           </h2>
         </motion.div>
@@ -73,10 +73,10 @@ export function AboutSection() {
             className="lg:col-span-5 flex flex-col justify-start pt-1 sm:pt-2"
           >
             {/* Description */}
-            <p className="text-base sm:text-lg text-stone-gray leading-relaxed">
+            <p className="text-base sm:text-lg text-stone-gray leading-relaxed font-sans">
               {t("descriptionPrimary")}
             </p>
-            <p className="mt-4 text-base sm:text-lg text-stone-gray leading-relaxed">
+            <p className="mt-4 text-base sm:text-lg text-stone-gray leading-relaxed font-sans">
               {t("descriptionSecondary")}
             </p>
 

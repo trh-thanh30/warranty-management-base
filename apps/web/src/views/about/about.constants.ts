@@ -1,32 +1,45 @@
-export const aboutGalleryCategories = [
-  "all",
-  "technology",
-  "installation",
-  "showroom",
+import type {
+  EcosystemProductItem,
+  FilmLayerDetail,
+  MilestoneItem,
+  CorePillarItem,
+  TestimonialItem,
+} from "./about.types";
+
+export const aboutHeroBorderStats = [
+  { id: "uvIr", value: "99%" },
+  { id: "origin", value: "100%" },
+  { id: "warranty", value: "10 NĂM" },
 ] as const;
 
-export const aboutGalleryItems = [
-  { id: "technologyLab", category: "technology", src: "/feat1.jpg" },
-  { id: "filmStructure", category: "technology", src: "/feat2.jpg" },
+export const aboutEcosystemProducts: readonly EcosystemProductItem[] = [
   {
-    id: "installationOne",
-    category: "installation",
-    src: "/guest/guest_2.jpg",
+    id: "film",
+    badge: "Sputtering & Nano Ceramic",
+    image: "/feat1.jpg",
+    iconName: "Shield",
   },
   {
-    id: "installationTwo",
-    category: "installation",
-    src: "/guest/guest_3.jpg",
+    id: "lighting",
+    badge: "Bi LED & LED Gầm Fujitek",
+    image: "/feat2.jpg",
+    iconName: "Zap",
   },
-  { id: "showroomHanoi", category: "showroom", src: "/hi.jpg" },
-  { id: "premiumVehicle", category: "installation", src: "/bg_1.jpg" },
+  {
+    id: "dashcam",
+    badge: "Ghi Hình 4K Đêm Sắc Nét",
+    image: "/guest/guest_2.jpg",
+    iconName: "Camera",
+  },
+  {
+    id: "tpms",
+    badge: "Cảnh Báo Áp Suất Realtime",
+    image: "/guest/guest_3.jpg",
+    iconName: "Gauge",
+  },
 ] as const;
 
-export const aboutValues = ["technology", "luxury", "commitment"] as const;
-
-export const aboutFactoryFacts = ["area", "countries", "quality"] as const;
-
-export const aboutFilmLayerDetails = [
+export const aboutFilmLayerDetails: readonly FilmLayerDetail[] = [
   { id: "scratchCoat", color: "var(--color-slate-blue)", zOffset: 120 },
   { id: "sputterMetal", color: "var(--color-danger-red)", zOffset: 80 },
   { id: "opticalBase", color: "var(--color-silver-fog)", zOffset: 40 },
@@ -42,30 +55,78 @@ export const aboutFilmLayerIds = [
   "adhesive",
 ] as const;
 
-export const aboutOriginTimelineIds = [
-  "research",
-  "production",
-  "qualityControl",
+export const aboutMilestones: readonly MilestoneItem[] = [
+  { id: "rdJapan", year: "2015" },
+  { id: "launchVietnam", year: "2018" },
+  { id: "ewarrantyRelease", year: "2021" },
+  { id: "networkExpansion", year: "2024" },
 ] as const;
 
-export const aboutStatItems = [
-  { id: "uvIr", value: "99%", target: 99, suffix: "%" },
-  { id: "origin", value: "100%", target: 100, suffix: "%" },
-  { id: "coreTech", value: "2", target: 2, suffix: "" },
-  { id: "signal", value: "0", target: 0, suffix: "" },
+export const aboutCorePillars: readonly CorePillarItem[] = [
+  {
+    id: "pioneerTech",
+    iconName: "Cpu",
+    checkKeys: ["nanoTech", "sputterTech", "signalFriendly"],
+  },
+  {
+    id: "japaneseQuality",
+    iconName: "ShieldCheck",
+    checkKeys: ["cleanroomClass", "qaQc100", "isoStandard"],
+  },
+  {
+    id: "dedicatedService",
+    iconName: "HeartHandshake",
+    checkKeys: ["ewarrantyDigital", "support247", "dealerNetwork"],
+  },
+] as const;
+
+export const aboutCraftsmanshipSpecs = [
+  "research",
+  "cleanroom",
+  "inspection",
+] as const;
+
+export const aboutCraftsmanshipStats = [
+  { id: "qaQc", value: "100%" },
+  { id: "cleanroom", value: "Class 1000" },
+  { id: "iso", value: "ISO 9001" },
+  { id: "experience", value: "10+" },
+] as const;
+
+export const aboutNetworkStats = [
+  { id: "dealers", value: "200+" },
+  { id: "provinces", value: "63" },
+  { id: "warrantyYears", value: "10 NĂM" },
+  { id: "support", value: "24/7" },
 ] as const;
 
 export const aboutPerformanceItems = [
-  "cool",
-  "uvProtect",
-  "glare",
-  "energy",
+  "heatRejection",
+  "uvProtection",
+  "clarity",
+  "durability",
 ] as const;
 
-export const aboutSafetyItems = ["b1", "b2", "b3"] as const;
+export const aboutB2BBenefits = [
+  "discount",
+  "training",
+  "marketing",
+  "warranty",
+] as const;
 
-export const aboutCustomerValueItems = ["b1", "b2", "b3"] as const;
-
-export const aboutCompassNeedleVariants = {
-  hover: { rotate: 360 },
-} as const;
+export const aboutTestimonials: readonly TestimonialItem[] = [
+  {
+    id: "dealerHanoi",
+    author: "Anh Trần Đức Thành",
+    role: "Giám đốc Panda Auto Showroom Hà Nội",
+    avatar: "/guest/guest_2.jpg",
+    rating: 5,
+  },
+  {
+    id: "dealerSaigon",
+    author: "Anh Nguyễn Quốc Huy",
+    role: "Chủ Trung tâm Auto Care Sài Gòn",
+    avatar: "/guest/guest_3.jpg",
+    rating: 5,
+  },
+] as const;
