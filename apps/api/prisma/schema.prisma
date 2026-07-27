@@ -21,20 +21,20 @@ model User {
   created_at    DateTime    @default(now())
   updated_at    DateTime    @updatedAt
 
-  assets                                 Asset[]
-  created_notifications                  Notification[]                      @relation("NotificationCreatedBy")
-  notification_recipients                NotificationRecipient[]
-  permissions                            UserPermission[]
-  customer_profile                       Customer?
-  owned_products                         ProductOwnership[]
-  warranty_claim_changes                 WarrantyClaimStatusHistory[]        @relation("WarrantyClaimStatusChangedBy")
-  warranty_claim_service_center_changes  WarrantyClaimServiceCenterHistory[] @relation("WarrantyClaimServiceCenterChangedBy")
-  reviewed_warranty_activation_requests  WarrantyActivationRequest[]         @relation("WarrantyActivationRequestReviewedBy")
-  created_warranty_activation_requests   WarrantyActivationRequest[]         @relation("WarrantyActivationRequestCreatedBy")
-  activated_warranties                   Warranty[]                          @relation("WarrantyActivatedBy")
-  voided_warranties                      Warranty[]                          @relation("WarrantyVoidedBy")
-  published_website_site_revisions WebsiteSiteRevision[] @relation("WebsiteSitePublishedBy")
-  website_config_audits            WebsiteConfigAudit[]
+  assets                                Asset[]
+  created_notifications                 Notification[]                      @relation("NotificationCreatedBy")
+  notification_recipients               NotificationRecipient[]
+  permissions                           UserPermission[]
+  customer_profile                      Customer?
+  owned_products                        ProductOwnership[]
+  warranty_claim_changes                WarrantyClaimStatusHistory[]        @relation("WarrantyClaimStatusChangedBy")
+  warranty_claim_service_center_changes WarrantyClaimServiceCenterHistory[] @relation("WarrantyClaimServiceCenterChangedBy")
+  reviewed_warranty_activation_requests WarrantyActivationRequest[]         @relation("WarrantyActivationRequestReviewedBy")
+  created_warranty_activation_requests  WarrantyActivationRequest[]         @relation("WarrantyActivationRequestCreatedBy")
+  activated_warranties                  Warranty[]                          @relation("WarrantyActivatedBy")
+  voided_warranties                     Warranty[]                          @relation("WarrantyVoidedBy")
+  published_website_site_revisions      WebsiteSiteRevision[]               @relation("WebsiteSitePublishedBy")
+  website_config_audits                 WebsiteConfigAudit[]
 
   @@index([role, status])
   @@index([email])

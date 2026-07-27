@@ -32,7 +32,7 @@ export function WebsiteNavigationUpdatingState() {
 
           <Badge
             className="mb-4 border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/60 dark:text-amber-300"
-            variant="outline"
+            variant="warning"
           >
             {t("updatingBadge")}
           </Badge>

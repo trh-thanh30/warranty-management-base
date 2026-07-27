@@ -32,8 +32,7 @@ export type WebsiteConfigErrorCode =
   | "WEBSITE_CONFIG_PUBLISH_INVALID"
   | "WEBSITE_CONFIG_REQUIRED_LOCALE_MISSING"
   | "WEBSITE_CONFIG_ASSET_INVALID"
-  | "WEBSITE_CONFIG_URL_INVALID"
-  | "WEBSITE_CONFIG_REFERENCE_CONFLICT";
+  | "WEBSITE_CONFIG_URL_INVALID";
 
 export type WebsiteValidationIssue = {
   code: WebsiteConfigErrorCode;

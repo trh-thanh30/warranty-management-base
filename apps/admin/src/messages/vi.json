@@ -2161,8 +2161,6 @@
       "description": "Theo dõi draft và phiên bản đang hiển thị công khai của website.",
       "site": "Thông tin website",
       "siteDescription": "Nhận diện, liên hệ, văn phòng, mạng xã hội và SEO mặc định.",
-      "navigation": "Điều hướng",
-      "navigationDescription": "Menu header, footer, policy và các liên kết CTA.",
       "open": "Mở cấu hình",
       "warnings": "{count} cảnh báo",
       "summaryLabel": "Tình trạng cấu hình website",
