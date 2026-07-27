@@ -22,8 +22,9 @@
 }
 
 @theme {
-  --font-sans: var(--font-maven-pro), 'Maven Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-condensed: var(--font-saira-condensed), var(--font-maven-pro), 'Maven Pro', -apple-system, sans-serif;
+  --font-sans: var(--font-maven-pro), "Maven Pro", sans-serif;
+  --font-serif: var(--font-maven-pro), "Maven Pro", sans-serif;
+  --font-condensed: var(--font-maven-pro), "Maven Pro", sans-serif;
 
   /* PRIMITIVE: brand core */
   --color-deep-black: #040708;
@@ -31,53 +32,53 @@
   --color-off-white: #ffffff;
 
   /* PRIMITIVE: brand red scale */
-  --color-premium-red: #DB2114;
-  --color-warm-red: #B81B10;
-  --color-muted-red: #E84040;
-  --color-deep-crimson: #8B0000;
-  --color-danger-red: #B20000;
-  --color-deep-red: #C33223;
+  --color-premium-red: #db2114;
+  --color-warm-red: #b81b10;
+  --color-muted-red: #e84040;
+  --color-deep-crimson: #8b0000;
+  --color-danger-red: #b20000;
+  --color-deep-red: #c33223;
 
   /* PRIMITIVE: supporting accents */
-  --color-primary-blue: #007CBA;
-  --color-slate-blue: #3A589D;
-  --color-muted-blue: #3B6994;
-  --color-royal-purple: #7A00DF;
-  --color-accent-gold: #EAB308;
-  --color-accent-gold-hover: #D9A207;
-  --color-steel-blue: #25394B;
-  --color-facebook-blue: #1877F2;
-  --color-zalo-blue: #0068FF;
+  --color-primary-blue: #007cba;
+  --color-slate-blue: #3a589d;
+  --color-muted-blue: #3b6994;
+  --color-royal-purple: #7a00df;
+  --color-accent-gold: #eab308;
+  --color-accent-gold-hover: #d9a207;
+  --color-steel-blue: #25394b;
+  --color-facebook-blue: #1877f2;
+  --color-zalo-blue: #0068ff;
 
   /* PRIMITIVE: neutral scale */
   --color-dark-charcoal: #333333;
-  --color-medium-gray: #4A4A4A;
+  --color-medium-gray: #4a4a4a;
   --color-soft-gray: #616163;
   --color-stone-gray: #596273;
   --color-almost-black: #111111;
-  --color-deep-gray: #2B2B2B;
+  --color-deep-gray: #2b2b2b;
   --color-ink-black: #222222;
 
   /* SEMANTIC: surfaces and borders */
-  --color-light-gray: #F1F1F1;
-  --color-surface-muted: #F9FAFB;
-  --color-border-gray: #DFDFDF;
-  --color-input-border: #D1D1D1;
+  --color-light-gray: #f1f1f1;
+  --color-surface-muted: #f9fafb;
+  --color-border-gray: #dfdfdf;
+  --color-input-border: #d1d1d1;
 
   /* SEMANTIC: compatibility aliases used by existing app UI */
-  --color-brand-blue: #DB2114;
-  --color-brand-blue-hover: #B81B10;
-  --color-brand-red: #DB2114;
-  --color-brand-red-hover: #B81B10;
+  --color-brand-blue: #db2114;
+  --color-brand-blue-hover: #b81b10;
+  --color-brand-red: #db2114;
+  --color-brand-red-hover: #b81b10;
   --color-brand-black: #040708;
 
   --color-charcoal: #040708;
   --color-graphite: #111111;
-  --color-pewter: #5C5E62;
-  --color-silver-fog: #8E8E8E;
-  --color-ash: #F1F1F1;
-  --color-cloud: #DFDFDF;
-  --color-pale-silver: #D1D1D1;
+  --color-pewter: #5c5e62;
+  --color-silver-fog: #8e8e8e;
+  --color-ash: #f1f1f1;
+  --color-cloud: #dfdfdf;
+  --color-pale-silver: #d1d1d1;
 
   /* Slate Scale Overrides */
   --color-slate-950: #040708;
@@ -87,8 +88,8 @@
   --color-slate-600: #273034;
   --color-slate-500: #596273;
 
-  --color-red-600: #DB2114;
-  --color-red-700: #B81B10;
+  --color-red-600: #db2114;
+  --color-red-700: #b81b10;
 
   /* Border Radii */
   --radius-button: 18px;
@@ -150,7 +151,6 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   *,
   *::before,
   *::after {

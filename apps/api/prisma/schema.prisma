@@ -244,7 +244,7 @@ model ContentPage {
   title        String
   summary      String?
   content      String
-  kind         content_page_kind   @default(POLICY)
+  kind         content_page_kind   @default(GENERAL_POLICY)
   status       content_page_status @default(DRAFT)
   published_at DateTime?
   created_at   DateTime            @default(now())
@@ -918,9 +918,12 @@ enum warranty_claim_priority {
 }
 
 enum content_page_kind {
-  POLICY
-  GUIDE
-  INTRO
+  GENERAL_POLICY
+  PRIVACY_POLICY
+  PURCHASE_POLICY
+  WARRANTY_RETURN_POLICY
+  SHIPPING_POLICY
+  PAYMENT_POLICY
   FAQ
 }
 

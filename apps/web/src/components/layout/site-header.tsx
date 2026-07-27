@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Container } from "@/src/components/common/container";
 import { HeaderNavLink } from "@/src/components/layout/components/header-nav-link";
+import { SiteLogo } from "@/src/components/layout/components/site-logo";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { Link, usePathname } from "@/src/i18n/navigation";
 import { isNavigationItemActive } from "@/src/utils/pathname.utils";
@@ -23,7 +23,7 @@ const navigationItems = [
   { labelKey: "contact", href: APP_ROUTES.contact },
 ] as const;
 
-export function SiteHeader() {
+export function SiteHeader({ logoUrl }: { logoUrl?: string | null }) {
   const t = useTranslations("SiteHeader");
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -68,8 +68,8 @@ export function SiteHeader() {
           className="flex shrink-0 items-center gap-3 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-4"
           onClick={closeMobileMenu}
         >
-          <Image
-            src="/logo_2.png"
+          <SiteLogo
+            src={logoUrl}
             alt={t("logoAlt")}
             width={260}
             height={70}

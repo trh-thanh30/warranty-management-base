@@ -12,6 +12,7 @@ import { SelectControl } from "@/src/components/common/select-control";
 import { CONTENT_PAGE_KINDS } from "../content-pages.constants";
 import { useCategories } from "../../categories/hooks/use-categories";
 import { useContentPageForm } from "../hooks/use-content-page-form";
+import { useParseContentDocument } from "../hooks/use-content-pages";
 import { ContentPagePreviewDialog } from "./content-page-preview-dialog";
 
 export function ContentPageForm({
@@ -26,8 +27,10 @@ export function ContentPageForm({
   const t = useTranslations("ContentPages");
   const [previewOpen, setPreviewOpen] = useState(false);
   const form = useContentPageForm({ page, onSaved });
+  const parseDocument = useParseContentDocument();
   const errors = form.formState.errors;
   const content = form.watch("content");
+  const summary = form.watch("summary");
   const title = form.watch("title");
   const categoriesQuery = useCategories({
     isActive: "true",
@@ -154,7 +157,12 @@ export function ContentPageForm({
             render={({ field }) => (
               <RichTextEditor
                 disabled={form.isSubmitting}
+                maxLength={20_000}
                 onChange={field.onChange}
+                onImportDocument={async (file) => {
+                  const result = await parseDocument.mutateAsync(file);
+                  return result.content;
+                }}
                 value={field.value}
               />
             )}
@@ -196,6 +204,7 @@ export function ContentPageForm({
         content={content}
         onOpenChange={setPreviewOpen}
         open={previewOpen}
+        summary={summary}
         title={title}
       />
     </>

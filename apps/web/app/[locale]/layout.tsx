@@ -7,6 +7,7 @@ import { routing } from "@/src/i18n/routing";
 import { SiteHeader } from "@/src/components/layout/site-header";
 import { SiteFooter } from "@/src/components/layout/site-footer";
 import { LenisProvider } from "@/src/components/providers/lenis-provider";
+import { getPublicSiteSettings } from "@/src/services/site-settings.service";
 import "../globals.css";
 
 const sairaCondensed = Saira_Condensed({
@@ -62,7 +63,10 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  const messages = await getMessages();
+  const [messages, siteSettings] = await Promise.all([
+    getMessages(),
+    getPublicSiteSettings(locale),
+  ]);
 
   return (
     <html
@@ -72,9 +76,9 @@ export default async function LocaleLayout({
       <body>
         <NextIntlClientProvider messages={messages}>
           <LenisProvider>
-            <SiteHeader />
+            <SiteHeader logoUrl={siteSettings?.headerLogo?.url} />
             <div className="pt-[84px]">{children}</div>
-            <SiteFooter />
+            <SiteFooter siteSettings={siteSettings} />
           </LenisProvider>
         </NextIntlClientProvider>
       </body>

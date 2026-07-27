@@ -484,16 +484,6 @@
       "japan": "FUJITEK JAPAN",
       "backToTopAriaLabel": "Cuộn lên đầu trang",
       "copyright": "© {year} FUJITEK Window Films. Đã đăng ký bản quyền.",
-      "offices": {
-        "hcm": {
-          "label": "Trụ sở TP. Hồ Chí Minh:",
-          "address": "7C Nguyễn Ngọc Phương, Phường Thạnh Mỹ Tây, TP. Hồ Chí Minh"
-        },
-        "hanoi": {
-          "label": "Chi nhánh Hà Nội:",
-          "address": "Số 62, Ngõ 20 Nghĩa Đô, Phường Nghĩa Đô, TP. Hà Nội"
-        }
-      },
       "navigation": {
         "about": "Về FUJITEK Films",
         "products": "Sản phẩm",
@@ -509,10 +499,7 @@
         "shipping": "Chính sách giao hàng",
         "payment": "Chính sách thanh toán"
       },
-      "hotlines": {
-        "hcm": "Hotline TP. Hồ Chí Minh:",
-        "hanoi": "Hotline Hà Nội:"
-      }
+      "hotline": "Hotline {office}:"
     }
   },
   "ProductsPage": {
@@ -1163,9 +1150,28 @@
     }
   },
   "PolicyPage": {
-    "eyebrow": "Điều khoản & Chính sách bảo hành",
-    "title": "Chính sách bảo hành chính hãng FUJITEK",
-    "description": "Bảo hành điện tử 10 - 15 năm cho các dòng phim Sputtering và Nano Ceramic đủ điều kiện.",
+    "eyebrow": "Pháp lý & Chính sách",
+    "title": "Chính sách minh bạch, quyền lợi rõ ràng",
+    "description": "Tra cứu các điều khoản áp dụng cho việc sử dụng website, mua hàng, thanh toán, giao nhận, bảo mật và bảo hành sản phẩm FUJITEK.",
+    "available": "Đã có nội dung",
+    "unavailable": "Chưa có nội dung",
+    "missingCard": "Nội dung chính sách này chưa được cập nhật.",
+    "labels": {
+      "general": "Điều khoản chung",
+      "privacy": "Bảo mật",
+      "purchasing": "Mua hàng",
+      "warrantyReturn": "Bảo hành & Đổi trả",
+      "shipping": "Giao hàng",
+      "payment": "Thanh toán"
+    },
+    "titles": {
+      "general": "Chính sách & quy định chung",
+      "privacy": "Chính sách bảo mật",
+      "purchasing": "Chính sách mua hàng",
+      "warrantyReturn": "Chính sách bảo hành - Đổi trả",
+      "shipping": "Chính sách giao hàng",
+      "payment": "Chính sách thanh toán"
+    },
     "duration": {
       "title": "1. Thời hạn bảo hành",
       "description": "Phim cách nhiệt FUJITEK được bảo hành điện tử chính hãng từ 10 đến 15 năm kể từ ngày kích hoạt E-Warranty thành công."
@@ -1701,7 +1707,18 @@
     "apiDocs": "Tài liệu API"
   },
   "PolicyDetailPage": {
-    "eyebrow": "FUJITEK – Điều khoản và chính sách",
+    "eyebrow": "Pháp lý & Chính sách",
+    "lastUpdated": "Cập nhật lần cuối: {date}",
+    "emptyTitle": "Chưa có nội dung",
+    "emptyDescription": "Chính sách này chưa được xuất bản. Vui lòng quay lại sau hoặc liên hệ FUJITEK để được hỗ trợ.",
+    "titles": {
+      "general": "Chính sách & quy định chung",
+      "privacy": "Chính sách bảo mật",
+      "purchasing": "Chính sách mua hàng",
+      "warrantyReturn": "Chính sách bảo hành - Đổi trả",
+      "shipping": "Chính sách giao hàng",
+      "payment": "Chính sách thanh toán"
+    },
     "home": "Trang chủ",
     "companyName": "Công ty Cổ phần Vilatek",
     "companyDescription": "Chuyên cung cấp phim cách nhiệt FUJITEK và phụ kiện ô tô cao cấp chính hãng.",

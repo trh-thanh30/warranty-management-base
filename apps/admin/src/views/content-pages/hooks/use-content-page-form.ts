@@ -15,6 +15,7 @@ import {
   type ContentPageFormValues,
 } from "../content-pages.types";
 import {
+  getContentPageFormValues,
   getContentPageSaveError,
   slugifyContentPageTitle,
 } from "../content-pages.utils";
@@ -37,12 +38,12 @@ export function useContentPageForm({
   const slugEdited = useRef(Boolean(page));
   const form = useForm<ContentPageFormValues>({
     resolver: zodResolver(contentPageFormSchema),
-    defaultValues: getValues(null),
+    defaultValues: getContentPageFormValues(page),
   });
 
   useEffect(() => {
     slugEdited.current = Boolean(page);
-    form.reset(getValues(page));
+    form.reset(getContentPageFormValues(page));
   }, [form, page]);
 
   async function submit(values: ContentPageFormValues) {
@@ -93,16 +94,5 @@ export function useContentPageForm({
     markSlugEdited: () => {
       slugEdited.current = true;
     },
-  };
-}
-
-function getValues(page: ContentPageSummary | null): ContentPageFormValues {
-  return {
-    slug: page?.slug ?? "",
-    title: page?.title ?? "",
-    summary: page?.summary ?? "",
-    content: page?.content ?? "",
-    kind: page?.kind ?? "POLICY",
-    categoryId: page?.categoryId ?? "",
   };
 }

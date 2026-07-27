@@ -23,6 +23,7 @@ import {
   AlignRight,
   Bold,
   Code,
+  FileText,
   Heading2,
   Highlighter,
   ImageIcon,
@@ -122,7 +123,9 @@ type ColorSelectOptions = {
 
 type RichTextEditorProps = {
   disabled?: boolean;
+  maxLength?: number;
   onChange: (html: string) => void;
+  onImportDocument?: (file: File) => Promise<string>;
   value: string;
 };
 
@@ -132,6 +135,53 @@ type EditorSelectionRange = {
   from: number;
   to: number;
 };
+
+function normalizeImportedDocumentHtml(html: string): string {
+  if (!html || typeof document === "undefined") return html.trim();
+
+  const template = document.createElement("template");
+  template.innerHTML = html;
+
+  template.content
+    .querySelectorAll("script, style, meta, link, iframe, object, embed")
+    .forEach((element) => element.remove());
+
+  template.content.querySelectorAll("table").forEach((table) => {
+    const fragment = document.createDocumentFragment();
+
+    table.querySelectorAll("tr").forEach((row) => {
+      const cells = Array.from(row.querySelectorAll("th, td"))
+        .map((cell) => cell.textContent?.replace(/\s+/g, " ").trim())
+        .filter(Boolean);
+      if (!cells.length) return;
+
+      const paragraph = document.createElement("p");
+      paragraph.textContent = cells.join(" - ");
+      fragment.appendChild(paragraph);
+    });
+
+    table.replaceWith(fragment);
+  });
+
+  template.content.querySelectorAll("*").forEach((element) => {
+    for (const attribute of Array.from(element.attributes)) {
+      if (
+        element.tagName === "A" &&
+        ["href", "target", "rel"].includes(attribute.name)
+      ) {
+        continue;
+      }
+      element.removeAttribute(attribute.name);
+    }
+  });
+
+  template.content.querySelectorAll("p, div, li, span").forEach((element) => {
+    const text = element.textContent?.replace(/\u00a0/g, " ").trim() ?? "";
+    if (!text && !element.querySelector("img, video")) element.remove();
+  });
+
+  return template.innerHTML.trim();
+}
 
 const Video = Node.create({
   name: "video",
@@ -220,19 +270,24 @@ const FontSize = Extension.create({
 
 export function RichTextEditor({
   disabled = false,
+  maxLength,
   onChange,
+  onImportDocument,
   value,
 }: RichTextEditorProps) {
   const t = useTranslations("Common");
   const toast = useToast();
   const colorPickerRef = useRef<HTMLDivElement | null>(null);
   const highlightPickerRef = useRef<HTMLDivElement | null>(null);
+  const documentInputRef = useRef<HTMLInputElement | null>(null);
+  const documentSelectionRef = useRef<EditorSelectionRange | null>(null);
   const mediaSelectionRef = useRef<EditorSelectionRange | null>(null);
   const previousContentRef = useRef(value);
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
   const [fontSizeInputFocused, setFontSizeInputFocused] = useState(false);
   const [fontSizeInput, setFontSizeInput] = useState("");
   const [highlightPickerOpen, setHighlightPickerOpen] = useState(false);
+  const [importingDocument, setImportingDocument] = useState(false);
   const [urlDialogMode, setUrlDialogMode] =
     useState<RichTextUrlDialogMode | null>(null);
   const editor = useEditor({
@@ -433,6 +488,65 @@ export function RichTextEditor({
       setUrlDialogMode(null);
     },
     [editor, urlDialogMode],
+  );
+
+  const openDocumentPicker = useCallback(() => {
+    if (!editor || !onImportDocument) return;
+    const { from, to } = editor.state.selection;
+    documentSelectionRef.current = { from, to };
+    documentInputRef.current?.click();
+  }, [editor, onImportDocument]);
+
+  const importDocument = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const input = event.currentTarget;
+      const file = input.files?.[0];
+      if (!file || !editor || !onImportDocument) return;
+
+      const extension = file.name.split(".").pop()?.toLowerCase();
+      if (extension !== "pdf" && extension !== "docx") {
+        toast.error(t("documentImportInvalidType"));
+        input.value = "";
+        return;
+      }
+
+      try {
+        setImportingDocument(true);
+        const importedHtml = normalizeImportedDocumentHtml(
+          await onImportDocument(file),
+        );
+        if (!importedHtml) {
+          throw new Error(t("documentImportEmpty"));
+        }
+        if (
+          maxLength &&
+          editor.getHTML().length + importedHtml.length > maxLength
+        ) {
+          throw new Error(t("documentImportTooLong", { max: maxLength }));
+        }
+
+        const selection = documentSelectionRef.current;
+        const chain = editor.chain().focus();
+        if (selection) {
+          const docSize = editor.state.doc.content.size;
+          chain.setTextSelection({
+            from: Math.min(selection.from, docSize),
+            to: Math.min(selection.to, docSize),
+          });
+        }
+        chain.insertContent(importedHtml).run();
+        toast.success(t("documentImportSuccess"));
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : t("documentImportError"),
+        );
+      } finally {
+        documentSelectionRef.current = null;
+        input.value = "";
+        setImportingDocument(false);
+      }
+    },
+    [editor, maxLength, onImportDocument, t, toast],
   );
 
   const setTextColor = useCallback(
@@ -755,6 +869,21 @@ export function RichTextEditor({
           >
             <VideoIcon className="size-4" />
           </ToolbarButton>
+          {onImportDocument ? (
+            <ToolbarButton
+              disabled={disabled || importingDocument}
+              label={t(
+                importingDocument ? "documentImporting" : "documentImport",
+              )}
+              onClick={openDocumentPicker}
+            >
+              {importingDocument ? (
+                <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+              ) : (
+                <FileText aria-hidden="true" className="size-4" />
+              )}
+            </ToolbarButton>
+          ) : null}
           <ToolbarDivider />
           <ToolbarButton
             disabled={disabled || !editor.can().undo()}
@@ -776,6 +905,16 @@ export function RichTextEditor({
         className="prose prose-slate max-h-[28rem] max-w-none overflow-y-auto dark:prose-invert [&_.ProseMirror_a]:cursor-pointer [&_.ProseMirror_blockquote]:border-l-4 [&_.ProseMirror_blockquote]:border-slate-300 [&_.ProseMirror_blockquote]:pl-4 [&_.ProseMirror_code]:rounded [&_.ProseMirror_code]:bg-slate-100 [&_.ProseMirror_code]:px-1 [&_.ProseMirror_code]:py-0.5 [&_.ProseMirror_code]:font-mono [&_.ProseMirror_code]:text-[0.85em] [&_.ProseMirror_h1]:mb-3 [&_.ProseMirror_h1]:mt-4 [&_.ProseMirror_h1]:text-3xl [&_.ProseMirror_h1]:font-bold [&_.ProseMirror_h2]:mb-2 [&_.ProseMirror_h2]:mt-4 [&_.ProseMirror_h2]:text-2xl [&_.ProseMirror_h2]:font-semibold [&_.ProseMirror_h3]:mb-2 [&_.ProseMirror_h3]:mt-3 [&_.ProseMirror_h3]:text-xl [&_.ProseMirror_h3]:font-semibold [&_.ProseMirror_img.ProseMirror-selectednode]:outline [&_.ProseMirror_img.ProseMirror-selectednode]:outline-2 [&_.ProseMirror_img.ProseMirror-selectednode]:outline-offset-4 [&_.ProseMirror_img.ProseMirror-selectednode]:outline-blue-600 [&_.ProseMirror_img]:max-w-full [&_.ProseMirror_img]:cursor-pointer [&_.ProseMirror_ol]:my-3 [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_pre]:my-4 [&_.ProseMirror_pre]:overflow-x-auto [&_.ProseMirror_pre]:rounded-md [&_.ProseMirror_pre]:bg-slate-950 [&_.ProseMirror_pre]:p-4 [&_.ProseMirror_pre]:text-sm [&_.ProseMirror_pre]:text-slate-50 [&_.ProseMirror_pre_code]:bg-transparent [&_.ProseMirror_pre_code]:p-0 [&_.ProseMirror_pre_code]:text-inherit [&_.ProseMirror_ul]:my-3 [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6 [&_.ProseMirror_video.ProseMirror-selectednode]:outline [&_.ProseMirror_video.ProseMirror-selectednode]:outline-2 [&_.ProseMirror_video.ProseMirror-selectednode]:outline-offset-4 [&_.ProseMirror_video.ProseMirror-selectednode]:outline-blue-600 [&_.ProseMirror_video]:cursor-pointer dark:[&_.ProseMirror_code]:bg-slate-800"
         editor={editor}
       />
+      {onImportDocument ? (
+        <input
+          accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          className="hidden"
+          disabled={disabled || importingDocument}
+          onChange={(event) => void importDocument(event)}
+          ref={documentInputRef}
+          type="file"
+        />
+      ) : null}
       <RichTextUrlDialog
         mode={urlDialogMode}
         onOpenChange={(open) => {

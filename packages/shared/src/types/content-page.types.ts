@@ -1,7 +1,14 @@
 import type { PaginationQuery } from "./pagination.types.ts";
 import type { CategorySummary } from "./category.types.ts";
 
-export type ContentPageKind = "POLICY" | "GUIDE" | "INTRO" | "FAQ";
+export type ContentPageKind =
+  | "GENERAL_POLICY"
+  | "PRIVACY_POLICY"
+  | "PURCHASE_POLICY"
+  | "WARRANTY_RETURN_POLICY"
+  | "SHIPPING_POLICY"
+  | "PAYMENT_POLICY"
+  | "FAQ";
 
 export type ContentPageStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
 
@@ -48,3 +55,7 @@ export type CreateContentPageBody = {
 };
 
 export type UpdateContentPageBody = Partial<CreateContentPageBody>;
+
+export type ParseContentDocumentResult = {
+  content: string;
+};

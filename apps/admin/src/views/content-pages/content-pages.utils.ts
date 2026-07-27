@@ -1,4 +1,18 @@
-import { HttpClientError } from "@repo/shared";
+import { HttpClientError, type ContentPageSummary } from "@repo/shared";
+import type { ContentPageFormValues } from "./content-pages.types";
+
+export function getContentPageFormValues(
+  page: ContentPageSummary | null,
+): ContentPageFormValues {
+  return {
+    slug: page?.slug ?? "",
+    title: page?.title ?? "",
+    summary: page?.summary ?? "",
+    content: page?.content ?? "",
+    kind: page?.kind ?? "GENERAL_POLICY",
+    categoryId: page?.categoryId ?? "",
+  };
+}
 
 export function slugifyContentPageTitle(title: string) {
   return title

@@ -3,6 +3,7 @@ import type {
   CreateContentPageBody,
   ListContentPagesQuery,
   PaginatedResponse,
+  ParseContentDocumentResult,
   UpdateContentPageBody,
 } from "@repo/shared";
 import { unwrap } from "../service.utils.ts";
@@ -35,6 +36,17 @@ export function createContentPagesService(http: ContentPagesHttpClient) {
     },
     async delete(id: string) {
       await http.delete<void>(`/content-pages/${id}`);
+    },
+    async parseDocument(file: File) {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      return unwrap(
+        await http.post<ParseContentDocumentResult>(
+          "/content-pages/parse-document",
+          formData,
+        ),
+      );
     },
   };
 }
