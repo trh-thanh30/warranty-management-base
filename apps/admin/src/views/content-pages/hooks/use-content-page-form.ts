@@ -61,7 +61,7 @@ export function useContentPageForm({
         : 0;
       const body = {
         ...values,
-        content: values.kind === "FAQ" ? "" : values.content,
+        content: values.kind === "FAQ" ? undefined : values.content,
         faqItems:
           !page && values.kind === "FAQ"
             ? values.faqItems.map(({ answer, isActive, question }) => ({

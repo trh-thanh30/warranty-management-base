@@ -10,3 +10,10 @@ const source = readFileSync(
 test("edit form initializes from the loaded page instead of the general-policy fallback", () => {
   assert.match(source, /defaultValues:\s*getContentPageFormValues\(page\)/);
 });
+
+test("FAQ page metadata save omits legacy content from the API payload", () => {
+  assert.match(
+    source,
+    /content:\s*values\.kind === "FAQ" \? undefined : values\.content/,
+  );
+});
