@@ -42,7 +42,7 @@ export function ProductTemplatesView() {
         <PageHeader
           actions={
             directory.canCreate ? (
-              <Button asChild>
+              <Button asChild className="w-full sm:w-auto">
                 <Link href="/product-templates/create">
                   <Plus className="size-4" />
                   {t("create")}

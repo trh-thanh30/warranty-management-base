@@ -2,6 +2,7 @@
 
 import { Ban, Eye, MoreHorizontal, Pencil, PlusCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import type { ProductTemplateSummary } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
@@ -45,12 +46,18 @@ export function ProductTemplatesTable({
                 template={template}
               />
             </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <TemplateStatus template={template} />
-              <TemplatePublication template={template} />
-              <Badge variant="secondary">
-                {t("productCount", { count: template.productCount })}
-              </Badge>
+            <div className="mt-4 grid grid-cols-[max-content_minmax(0,1fr)] items-center gap-x-2 gap-y-2">
+              <TemplateMobileField label={t("status")}>
+                <TemplateStatus template={template} />
+              </TemplateMobileField>
+              <TemplateMobileField label={t("visibility")}>
+                <TemplatePublication template={template} />
+              </TemplateMobileField>
+              <TemplateMobileField label={t("linkedProduct")}>
+                <Badge className="whitespace-nowrap" variant="secondary">
+                  {t("productCount", { count: template.productCount })}
+                </Badge>
+              </TemplateMobileField>
             </div>
           </article>
         ))}
@@ -105,6 +112,23 @@ export function ProductTemplatesTable({
   );
 }
 
+function TemplateMobileField({
+  children,
+  label,
+}: {
+  children: ReactNode;
+  label: string;
+}) {
+  return (
+    <div className="contents">
+      <span className="shrink-0 text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+        {label}
+      </span>
+      <div className="min-w-0 justify-self-start">{children}</div>
+    </div>
+  );
+}
+
 function TemplateIdentity({ template }: { template: ProductTemplateSummary }) {
   return (
     <div className="min-w-0">
@@ -121,7 +145,10 @@ function TemplateIdentity({ template }: { template: ProductTemplateSummary }) {
 function TemplateStatus({ template }: { template: ProductTemplateSummary }) {
   const t = useTranslations("ProductTemplates");
   return (
-    <Badge variant={template.isActive ? "success" : "secondary"}>
+    <Badge
+      className="whitespace-nowrap"
+      variant={template.isActive ? "success" : "secondary"}
+    >
       {template.isActive ? t("active") : t("inactive")}
     </Badge>
   );
@@ -134,7 +161,10 @@ function TemplatePublication({
 }) {
   const t = useTranslations("ProductTemplates");
   return (
-    <Badge variant={template.isPublished ? "default" : "secondary"}>
+    <Badge
+      className="whitespace-nowrap"
+      variant={template.isPublished ? "default" : "secondary"}
+    >
       {template.isPublished ? t("published") : t("hidden")}
     </Badge>
   );

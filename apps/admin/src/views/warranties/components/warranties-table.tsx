@@ -166,8 +166,11 @@ function WarrantyMobileCard({
 
   return (
     <article className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
-      <div className="flex items-start justify-between gap-3">
-        <WarrantyProductName warranty={warranty} />
+      <WarrantyProductName warranty={warranty} />
+      <div className="mt-4 flex items-center gap-2">
+        <p className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+          {t("status")}
+        </p>
         <WarrantyStatusBadge status={warranty.status} />
       </div>
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
@@ -203,7 +206,7 @@ function WarrantyProductName({ warranty }: { warranty: WarrantyListItem }) {
   return (
     <div className="min-w-0">
       <Link
-        className="truncate font-medium text-slate-950 hover:underline dark:text-slate-50"
+        className="block truncate font-medium text-slate-950 hover:underline dark:text-slate-50"
         href={`/warranties/${warranty.id}`}
       >
         {warranty.product.name}

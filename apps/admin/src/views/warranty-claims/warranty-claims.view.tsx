@@ -26,7 +26,7 @@ export function WarrantyClaimsView() {
       <div className="min-w-0 space-y-6">
         <PageHeader
           actions={
-            <div className="flex w-full flex-wrap justify-end gap-2 sm:w-auto">
+            <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2 sm:justify-end">
               <ImportExportMenu
                 labels={{
                   exportAll: t("excel.exportAll"),
@@ -37,10 +37,12 @@ export function WarrantyClaimsView() {
                 }}
               />
               {hasPermission(PERMISSIONS.WARRANTY_CLAIM_CREATE) ? (
-                <Button asChild>
+                <Button asChild className="w-full justify-center sm:w-auto">
                   <Link href="/warranty-claims/create">
-                    <Plus className="size-4" />
-                    {t("createAction")}
+                    <div className="inline-flex items-center justify-center gap-2 pr-[22px] sm:pr-0">
+                      <Plus className="size-4 shrink-0" />
+                      <span>{t("createAction")}</span>
+                    </div>
                   </Link>
                 </Button>
               ) : null}
