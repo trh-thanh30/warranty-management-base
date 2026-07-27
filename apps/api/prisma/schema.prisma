@@ -33,6 +33,8 @@ model User {
   created_warranty_activation_requests  WarrantyActivationRequest[]         @relation("WarrantyActivationRequestCreatedBy")
   activated_warranties                  Warranty[]                          @relation("WarrantyActivatedBy")
   voided_warranties                     Warranty[]                          @relation("WarrantyVoidedBy")
+  published_website_site_revisions      WebsiteSiteRevision[]               @relation("WebsiteSitePublishedBy")
+  website_config_audits                 WebsiteConfigAudit[]
 
   @@index([role, status])
   @@index([email])
@@ -55,10 +57,13 @@ model Asset {
   created_at     DateTime          @default(now())
   updated_at     DateTime          @updatedAt
 
-  uploaded_by             User?                  @relation(fields: [uploaded_by_id], references: [id])
-  links                   AssetLink[]
-  product_assets          ProductAsset[]
-  product_template_assets ProductTemplateAsset[]
+  uploaded_by               User?                  @relation(fields: [uploaded_by_id], references: [id])
+  links                     AssetLink[]
+  product_assets            ProductAsset[]
+  product_template_assets   ProductTemplateAsset[]
+  website_site_header_logos WebsiteSiteRevision[]  @relation("WebsiteSiteHeaderLogo")
+  website_site_footer_logos WebsiteSiteRevision[]  @relation("WebsiteSiteFooterLogo")
+  website_site_og_images    WebsiteSiteRevision[]  @relation("WebsiteSiteOgImage")
 
   @@index([access_type])
   @@index([type])
@@ -136,6 +141,100 @@ model ActivityLog {
 
   @@index([created_at])
   @@map("activity_log")
+}
+
+model WebsiteSiteRevision {
+  id                   String                 @id @default(uuid()) @db.Uuid
+  site_key             String                 @default("main")
+  state                website_revision_state @default(DRAFT)
+  revision_number      Int                    @default(1)
+  lock_version         Int                    @default(1)
+  contact_email        String                 @default("")
+  website_url          String                 @default("")
+  header_logo_asset_id String?                @db.Uuid
+  footer_logo_asset_id String?                @db.Uuid
+  og_image_asset_id    String?                @db.Uuid
+  published_at         DateTime?
+  published_by_id      String?                @db.Uuid
+  created_at           DateTime               @default(now())
+  updated_at           DateTime               @updatedAt
+
+  header_logo  Asset? @relation("WebsiteSiteHeaderLogo", fields: [header_logo_asset_id], references: [id], onDelete: Restrict)
+  footer_logo  Asset? @relation("WebsiteSiteFooterLogo", fields: [footer_logo_asset_id], references: [id], onDelete: Restrict)
+  og_image     Asset? @relation("WebsiteSiteOgImage", fields: [og_image_asset_id], references: [id], onDelete: Restrict)
+  published_by User?  @relation("WebsiteSitePublishedBy", fields: [published_by_id], references: [id], onDelete: SetNull)
+
+  offices      WebsiteOffice[]
+  social_links WebsiteSocialLink[]
+
+  @@index([site_key, state])
+  @@index([site_key, revision_number])
+  @@map("website_site_revision")
+}
+
+model WebsiteOffice {
+  id          String   @id @default(uuid()) @db.Uuid
+  revision_id String   @db.Uuid
+  phone       String?
+  is_active   Boolean  @default(true)
+  sort_order  Int      @default(0)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  revision     WebsiteSiteRevision        @relation(fields: [revision_id], references: [id], onDelete: Cascade)
+  translations WebsiteOfficeTranslation[]
+
+  @@index([revision_id, is_active, sort_order])
+  @@map("website_office")
+}
+
+model WebsiteOfficeTranslation {
+  id        String         @id @default(uuid()) @db.Uuid
+  office_id String         @db.Uuid
+  locale    website_locale
+  label     String         @default("")
+  address   String         @default("")
+
+  office WebsiteOffice @relation(fields: [office_id], references: [id], onDelete: Cascade)
+
+  @@unique([office_id, locale])
+  @@map("website_office_translation")
+}
+
+model WebsiteSocialLink {
+  id          String                  @id @default(uuid()) @db.Uuid
+  revision_id String                  @db.Uuid
+  platform    website_social_platform
+  label       String
+  url         String
+  is_active   Boolean                 @default(true)
+  sort_order  Int                     @default(0)
+  created_at  DateTime                @default(now())
+  updated_at  DateTime                @updatedAt
+
+  revision WebsiteSiteRevision @relation(fields: [revision_id], references: [id], onDelete: Cascade)
+
+  @@index([revision_id, is_active, sort_order])
+  @@map("website_social_link")
+}
+
+model WebsiteConfigAudit {
+  id             String                      @id @default(uuid()) @db.Uuid
+  actor_id       String?                     @db.Uuid
+  domain         website_config_domain
+  entity_id      String?
+  site_key       String                      @default("main")
+  action         website_config_audit_action
+  before_version Int?
+  after_version  Int?
+  change_summary Json?
+  created_at     DateTime                    @default(now())
+
+  actor User? @relation(fields: [actor_id], references: [id], onDelete: SetNull)
+
+  @@index([domain, site_key, created_at])
+  @@index([actor_id])
+  @@map("website_config_audit")
 }
 
 model ContentPage {
@@ -694,6 +793,10 @@ enum permission_key {
   CONTENT_PAGE_UPDATE
   CONTENT_PAGE_DELETE
 
+  WEBSITE_CONFIG_VIEW
+  WEBSITE_CONFIG_UPDATE
+  WEBSITE_CONFIG_PUBLISH
+
   CATEGORY_VIEW
   CATEGORY_CREATE
   CATEGORY_UPDATE
@@ -707,6 +810,34 @@ enum permission_key {
 
   SYSTEM_VIEW
   AUDIT_LOG_VIEW
+}
+
+enum website_locale {
+  VI
+  EN
+}
+
+enum website_revision_state {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum website_social_platform {
+  FACEBOOK
+  ZALO
+  TIKTOK
+  YOUTUBE
+  OTHER
+}
+
+enum website_config_domain {
+  SITE
+}
+
+enum website_config_audit_action {
+  SAVE_DRAFT
+  PUBLISH
 }
 
 enum product_category {

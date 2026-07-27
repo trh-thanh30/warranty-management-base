@@ -63,6 +63,7 @@ import { VerificationModule } from '@/modules/verification/verification.module';
 import { WarrantyActivationRequestsModule } from '@/modules/warranty-activation-requests/warranty-activation-requests.module';
 import { WarrantyClaimsModule } from '@/modules/warranty-claims/warranty-claims.module';
 import { WarrantiesModule } from '@/modules/warranties/warranties.module';
+import { WebsiteConfigModule } from '@/modules/website-config/website-config.module';
 import { MiddlewareConsumer, NestModule } from '@nestjs/common';
 
 const rootDir = join(__dirname, '..', '..', '..');
@@ -163,6 +164,7 @@ const envPath = join(rootDir, envFile);
     PublicModule,
     UsersModule,
     VerificationModule,
+    WebsiteConfigModule,
   ],
   providers: [
     HttpLogInterceptor,

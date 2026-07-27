@@ -6,21 +6,42 @@ export function getNavigationBadge(count: number, hasError: boolean) {
   return count > 99 ? "99+" : String(count);
 }
 
+function navigationHrefs(item: NavigationItem) {
+  return [...(item.href ? [item.href] : []), ...(item.activeHrefs ?? [])];
+}
+
+function flattenNavigationItems(items: NavigationItem[]): NavigationItem[] {
+  return items.flatMap((item) => [
+    item,
+    ...flattenNavigationItems(item.children ?? []),
+  ]);
+}
+
+export function getActiveNavigationHref(
+  items: NavigationItem[],
+  pathname: string,
+) {
+  return flattenNavigationItems(items)
+    .flatMap(navigationHrefs)
+    .filter((href) => pathname === href || pathname.startsWith(`${href}/`))
+    .sort((left, right) => right.length - left.length)[0];
+}
+
 export function isNavigationItemActive(
   item: NavigationItem,
-  pathname: string,
-): boolean {
-  const activeHrefs = item.href
-    ? [item.href, ...(item.activeHrefs ?? [])]
-    : (item.activeHrefs ?? []);
-  const directlyActive = activeHrefs.some(
-    (href) => pathname === href || pathname.startsWith(`${href}/`),
-  );
+  activeHref: string | undefined,
+) {
+  return Boolean(activeHref && navigationHrefs(item).includes(activeHref));
+}
 
-  return (
-    directlyActive ||
-    (item.children?.some((child) => isNavigationItemActive(child, pathname)) ??
-      false)
+export function hasActiveNavigationDescendant(
+  item: NavigationItem,
+  activeHref: string | undefined,
+): boolean {
+  return (item.children ?? []).some(
+    (child) =>
+      isNavigationItemActive(child, activeHref) ||
+      hasActiveNavigationDescendant(child, activeHref),
   );
 }
 

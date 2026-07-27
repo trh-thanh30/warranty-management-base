@@ -27,14 +27,16 @@ import { useUnreadNotificationCount } from "@/src/hooks/use-notifications";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { getInitials } from "@/src/utils/get-initials";
 import {
+  getActiveNavigationHref,
   getNavigationItemBadge,
+  hasActiveNavigationDescendant,
   isNavigationItemActive,
 } from "./app-sidebar.utils";
 
 type NavGroupProps = {
   items: NavigationItem[];
   label: string;
-  pathname: string;
+  activeHref?: string;
   collapsed: boolean;
   notificationCounts?: UnreadNotificationCount;
   notificationCountsError: boolean;
@@ -42,7 +44,7 @@ type NavGroupProps = {
 
 type NavItemProps = {
   item: NavigationItem;
-  pathname: string;
+  activeHref?: string;
   collapsed: boolean;
   isChild?: boolean;
   notificationCounts?: UnreadNotificationCount;
@@ -51,15 +53,16 @@ type NavItemProps = {
 
 function NavItemLink({
   item,
-  pathname,
+  activeHref,
   collapsed,
   isChild = false,
   notificationCounts,
   notificationCountsError,
 }: NavItemProps) {
   const t = useTranslations("DashboardConfig");
+
   const Icon = item.icon;
-  const active = isNavigationItemActive(item, pathname);
+  const active = isNavigationItemActive(item, activeHref);
   const notificationCount = item.notificationBadgeKey
     ? (notificationCounts?.[item.notificationBadgeKey] ?? 0)
     : 0;
@@ -73,7 +76,7 @@ function NavItemLink({
     collapsed
       ? "mx-auto h-9 w-9 justify-center px-0"
       : isChild
-        ? "w-full gap-3 pl-3 pr-2 text-[13px]"
+        ? "w-full gap-3 pl-3 pr-2"
         : "w-full gap-3 px-3",
     active
       ? "bg-slate-200 text-slate-950 dark:bg-slate-800 dark:text-slate-50"
@@ -96,10 +99,7 @@ function NavItemLink({
       href={item.href}
       title={collapsed ? item.title : undefined}
     >
-      <Icon
-        aria-hidden="true"
-        className={cn("shrink-0", isChild ? "h-3.5 w-3.5" : "h-4 w-4")}
-      />
+      <Icon aria-hidden="true" className="h-4 w-4 shrink-0" />
       {!collapsed ? (
         <>
           <span className="min-w-0 flex-1 truncate text-left">
@@ -123,17 +123,15 @@ function NavItemLink({
 
 function NavItemGroup({
   item,
-  pathname,
+  activeHref,
   collapsed,
   notificationCounts,
   notificationCountsError,
 }: NavItemProps) {
-  const [expanded, setExpanded] = useState(() =>
-    isNavigationItemActive(item, pathname),
-  );
+  const childActive = hasActiveNavigationDescendant(item, activeHref);
+  const [expanded, setExpanded] = useState(childActive);
   const submenuId = useId();
   const Icon = item.icon;
-  const active = isNavigationItemActive(item, pathname);
   const badge = getNavigationItemBadge(
     item,
     notificationCounts,
@@ -141,13 +139,13 @@ function NavItemGroup({
   );
 
   useEffect(() => {
-    if (active) setExpanded(true);
-  }, [active, pathname]);
+    if (childActive) setExpanded(true);
+  }, [childActive, activeHref]);
 
   const parentClassName = cn(
     "relative flex h-9 items-center rounded-md text-sm font-medium transition-all duration-200",
     collapsed ? "mx-auto h-9 w-9 justify-center px-0" : "w-full gap-3 px-3",
-    active
+    childActive
       ? "bg-slate-200 text-slate-950 dark:bg-slate-800 dark:text-slate-50"
       : "text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-50",
   );
@@ -163,6 +161,10 @@ function NavItemGroup({
             type="button"
           >
             <Icon aria-hidden="true" className="h-4 w-4 shrink-0" />
+            <span
+              aria-hidden="true"
+              className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-slate-500 dark:bg-slate-400"
+            />
             {badge ? (
               <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold leading-none text-white">
                 {badge}
@@ -180,7 +182,7 @@ function NavItemGroup({
             if (!child.href) return null;
 
             const ChildIcon = child.icon;
-            const childActive = isNavigationItemActive(child, pathname);
+            const childActive = isNavigationItemActive(child, activeHref);
             const childBadge = getNavigationItemBadge(
               child,
               notificationCounts,
@@ -280,7 +282,7 @@ function NavItemGroup({
                 key={child.title}
                 notificationCounts={notificationCounts}
                 notificationCountsError={notificationCountsError}
-                pathname={pathname}
+                activeHref={activeHref}
               />
             ))}
           </div>
@@ -301,7 +303,7 @@ function NavItem(props: NavItemProps) {
 function NavGroup({
   items,
   label,
-  pathname,
+  activeHref,
   collapsed,
   notificationCounts,
   notificationCountsError,
@@ -320,7 +322,7 @@ function NavGroup({
           collapsed={collapsed}
           item={item}
           key={item.title}
-          pathname={pathname}
+          activeHref={activeHref}
           notificationCounts={notificationCounts}
           notificationCountsError={notificationCountsError}
         />
@@ -347,6 +349,20 @@ export function AppSidebar({
   const displayName = user?.full_name || user?.username || "Admin";
   const email = user?.email || "";
   const avatarFallback = getInitials(displayName);
+  const visibleSections = dashboardConfig.sidebarSections
+    .map((section) => ({
+      ...section,
+      items: getAccessibleNavigationItems(
+        section.items,
+        hasPermission,
+        hasRole,
+      ),
+    }))
+    .filter((section) => section.items.length > 0);
+  const activeHref = getActiveNavigationHref(
+    visibleSections.flatMap((section) => section.items),
+    pathname,
+  );
 
   return (
     <aside
@@ -384,25 +400,17 @@ export function AppSidebar({
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 pb-3">
-        {dashboardConfig.sidebarSections.map((section) => {
-          const items = getAccessibleNavigationItems(
-            section.items,
-            hasPermission,
-            hasRole,
-          );
-
-          return items.length > 0 ? (
-            <NavGroup
-              items={items}
-              key={section.label}
-              label={section.label}
-              pathname={pathname}
-              collapsed={collapsed}
-              notificationCounts={notificationCountsQuery.data}
-              notificationCountsError={notificationCountsQuery.isError}
-            />
-          ) : null;
-        })}
+        {visibleSections.map((section) => (
+          <NavGroup
+            activeHref={activeHref}
+            collapsed={collapsed}
+            items={section.items}
+            key={section.label}
+            label={section.label}
+            notificationCounts={notificationCountsQuery.data}
+            notificationCountsError={notificationCountsQuery.isError}
+          />
+        ))}
       </nav>
 
       <div className="border-t border-slate-200 p-4 dark:border-slate-800">

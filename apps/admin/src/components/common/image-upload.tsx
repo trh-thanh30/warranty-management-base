@@ -6,7 +6,7 @@ import {
   assetsService,
   type UploadAssetOptions,
 } from "@/src/services/assets/assets.service";
-import { Button } from "@repo/ui";
+import { Button, cn } from "@repo/ui";
 import { Eye, ImageIcon, Loader2, UploadCloud, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
@@ -30,19 +30,21 @@ export type ImageUploadLabels = {
 };
 
 type ImageUploadProps = {
+  compact?: boolean;
   disabled?: boolean;
   id: string;
   labels?: Partial<ImageUploadLabels>;
   onAssetChange?: (asset: AssetResponse | null) => void;
   onChange: (value: string) => void;
   persistedValue?: string;
-  uploadOptions: Omit<UploadAssetOptions, "folder" | "type"> & {
+  uploadOptions: Omit<UploadAssetOptions, "folder"> & {
     folder: string;
   };
   value: string;
 };
 
 export function ImageUpload({
+  compact = false,
   disabled,
   id,
   labels,
@@ -93,7 +95,7 @@ export function ImageUpload({
       const previousValue = value;
       const asset = await assetsService.uploadAsset(file, {
         ...uploadOptions,
-        type: "IMAGE",
+        type: uploadOptions.type ?? "IMAGE",
       });
       onChange(asset.url);
       onAssetChange?.(asset);
@@ -145,7 +147,12 @@ export function ImageUpload({
     <div className="space-y-3">
       {value ? (
         <div className="overflow-hidden rounded-md border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
-          <div className="group relative flex h-52 items-center justify-center bg-slate-100 p-3 dark:bg-slate-900">
+          <div
+            className={cn(
+              "group relative flex items-center justify-center bg-slate-100 p-3 dark:bg-slate-900",
+              compact ? "h-36" : "h-52",
+            )}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               alt={copy.previewAlt}
@@ -155,7 +162,7 @@ export function ImageUpload({
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-slate-950/0 transition-colors duration-300 group-hover:bg-slate-950/30 group-focus-within:bg-slate-950/30">
               <Button
                 aria-label={copy.previewImage}
-                className="pointer-events-auto size-11  bg-white rounded-full  text-slate-950 opacity-100 shadow-md transition-opacity hover:bg-white focus-visible:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+                className="pointer-events-auto size-11 rounded-full bg-white text-slate-950 opacity-100 shadow-md transition-opacity hover:bg-white focus-visible:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
                 onClick={() => setPreviewOpen(true)}
                 size="icon"
                 title={copy.previewImage}
@@ -184,7 +191,10 @@ export function ImageUpload({
         </div>
       ) : (
         <label
-          className="flex min-h-40 cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center text-sm text-slate-600 transition-colors hover:border-slate-400 hover:bg-slate-100 data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-900"
+          className={cn(
+            "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 text-center text-sm text-slate-600 transition-colors hover:border-slate-400 hover:bg-slate-100 data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-900",
+            compact ? "min-h-32 py-4" : "min-h-40 py-6",
+          )}
           data-disabled={disabled || uploading}
           htmlFor={id}
         >

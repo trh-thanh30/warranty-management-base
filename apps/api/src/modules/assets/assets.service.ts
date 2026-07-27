@@ -225,24 +225,43 @@ export class AssetsService {
       throw new NotFoundException('Asset not found');
     }
 
-    const [otherLinks, productAssets, productTemplateAssets] =
-      await Promise.all([
-        this.prisma.assetLink.count({
-          where: {
-            asset_id: assetId,
-            NOT: {
-              entity_id: entity.id,
-              entity_type: entity.type,
-            },
+    const [
+      otherLinks,
+      productAssets,
+      productTemplateAssets,
+      websiteSiteReferences,
+    ] = await Promise.all([
+      this.prisma.assetLink.count({
+        where: {
+          asset_id: assetId,
+          NOT: {
+            entity_id: entity.id,
+            entity_type: entity.type,
           },
-        }),
-        this.prisma.productAsset.count({ where: { asset_id: assetId } }),
-        this.prisma.productTemplateAsset.count({
-          where: { asset_id: assetId },
-        }),
-      ]);
+        },
+      }),
+      this.prisma.productAsset.count({ where: { asset_id: assetId } }),
+      this.prisma.productTemplateAsset.count({
+        where: { asset_id: assetId },
+      }),
+      this.prisma.websiteSiteRevision.count({
+        where: {
+          OR: [
+            { header_logo_asset_id: assetId },
+            { footer_logo_asset_id: assetId },
+            { og_image_asset_id: assetId },
+          ],
+        },
+      }),
+    ]);
 
-    if (otherLinks + productAssets + productTemplateAssets > 0) {
+    if (
+      otherLinks +
+        productAssets +
+        productTemplateAssets +
+        websiteSiteReferences >
+      0
+    ) {
       await this.prisma.assetLink.deleteMany({
         where: {
           asset_id: assetId,
@@ -302,16 +321,7 @@ export class AssetsService {
       return false;
     }
 
-    const [assetLinks, productAssets, productTemplateAssets] =
-      await Promise.all([
-        this.prisma.assetLink.count({ where: { asset_id: assetId } }),
-        this.prisma.productAsset.count({ where: { asset_id: assetId } }),
-        this.prisma.productTemplateAsset.count({
-          where: { asset_id: assetId },
-        }),
-      ]);
-
-    if (assetLinks + productAssets + productTemplateAssets > 0) {
+    if ((await this.countAssetReferences(assetId)) > 0) {
       return false;
     }
 
@@ -351,18 +361,36 @@ export class AssetsService {
   }
 
   private async assertAssetIsNotReferenced(assetId: string) {
-    const [assetLinks, productAssets, productTemplateAssets] =
-      await Promise.all([
-        this.prisma.assetLink.count({ where: { asset_id: assetId } }),
-        this.prisma.productAsset.count({ where: { asset_id: assetId } }),
-        this.prisma.productTemplateAsset.count({
-          where: { asset_id: assetId },
-        }),
-      ]);
-
-    if (assetLinks + productAssets + productTemplateAssets > 0) {
+    if ((await this.countAssetReferences(assetId)) > 0) {
       throw new ConflictException('Asset is currently in use');
     }
+  }
+
+  private async countAssetReferences(assetId: string) {
+    const [
+      assetLinks,
+      productAssets,
+      productTemplateAssets,
+      websiteSiteReferences,
+    ] = await Promise.all([
+      this.prisma.assetLink.count({ where: { asset_id: assetId } }),
+      this.prisma.productAsset.count({ where: { asset_id: assetId } }),
+      this.prisma.productTemplateAsset.count({
+        where: { asset_id: assetId },
+      }),
+      this.prisma.websiteSiteRevision.count({
+        where: {
+          OR: [
+            { header_logo_asset_id: assetId },
+            { footer_logo_asset_id: assetId },
+            { og_image_asset_id: assetId },
+          ],
+        },
+      }),
+    ]);
+    return (
+      assetLinks + productAssets + productTemplateAssets + websiteSiteReferences
+    );
   }
 
   /**

@@ -6,11 +6,14 @@ import {
   ClipboardList,
   FileCheck2,
   FileText,
+  Globe2,
   LayoutDashboard,
   Layers3,
   LogOut,
   HardDrive,
+  Navigation,
   Package,
+  PanelsTopLeft,
   Settings,
   ShieldCheck,
   Store,
@@ -117,6 +120,36 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
         ],
       },
       {
+        label: t("sections.website"),
+        items: [
+          {
+            title: t("items.websiteConfig"),
+            icon: Globe2,
+            requiredPermission: PERMISSIONS.WEBSITE_CONFIG_VIEW,
+            children: [
+              {
+                title: t("items.websiteOverview"),
+                href: "/website-config",
+                icon: LayoutDashboard,
+                requiredPermission: PERMISSIONS.WEBSITE_CONFIG_VIEW,
+              },
+              {
+                title: t("items.websiteSite"),
+                href: "/website-config/site",
+                icon: PanelsTopLeft,
+                requiredPermission: PERMISSIONS.WEBSITE_CONFIG_VIEW,
+              },
+              {
+                title: t("items.websiteNavigation"),
+                href: "/website-config/navigation",
+                icon: Navigation,
+                requiredPermission: PERMISSIONS.WEBSITE_CONFIG_VIEW,
+              },
+            ],
+          },
+        ],
+      },
+      {
         label: t("sections.other"),
         items: [
           {
@@ -209,6 +242,11 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
         title: t("items.contentPages"),
         href: "/content-pages",
         requiredPermission: PERMISSIONS.CONTENT_PAGE_VIEW,
+      },
+      {
+        title: t("items.websiteOverview"),
+        href: "/website-config",
+        requiredPermission: PERMISSIONS.WEBSITE_CONFIG_VIEW,
       },
       {
         title: t("items.system"),

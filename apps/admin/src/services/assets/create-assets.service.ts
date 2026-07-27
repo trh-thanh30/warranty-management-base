@@ -2,6 +2,7 @@ import { unwrap } from "../service.utils.ts";
 import type { StorageUsageSummary } from "@repo/shared";
 import type {
   AssetResponse,
+  AssetListResponse,
   AssetsHttpClient,
   UploadAssetOptions,
 } from "./assets.types";
@@ -11,6 +12,20 @@ export function createAssetsService(http: AssetsHttpClient) {
     async getStorageUsage(): Promise<StorageUsageSummary> {
       return unwrap(
         await http.get<StorageUsageSummary>("/assets/storage-usage"),
+      );
+    },
+
+    async listThumbnails(): Promise<AssetListResponse> {
+      return unwrap(
+        await http.get<AssetListResponse>("/assets", {
+          params: {
+            accessType: "PUBLIC",
+            folder: "website-thumbnails",
+            limit: 50,
+            page: 1,
+            type: "THUMBNAIL",
+          },
+        }),
       );
     },
 

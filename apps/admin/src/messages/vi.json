@@ -9,6 +9,7 @@
     "unreadNotifications": "{count} thông báo chưa đọc",
     "sections": {
       "general": "Tổng quan",
+      "website": "Website",
       "other": "Khác"
     },
     "items": {
@@ -28,6 +29,10 @@
       "contentPages": "Trang nội dung",
       "notifications": "Thông báo",
       "system": "Giám sát dung lượng",
+      "websiteConfig": "Cấu hình website",
+      "websiteOverview": "Tổng quan",
+      "websiteSite": "Thông tin website",
+      "websiteNavigation": "Điều hướng",
       "signOut": "Đăng xuất",
       "signingOut": "Đang đăng xuất..."
     }
@@ -394,7 +399,10 @@
       "USER_DELETE": "Xóa người dùng",
       "USER_PERMISSION_MANAGE": "Quản lý quyền người dùng",
       "SYSTEM_VIEW": "Xem cài đặt hệ thống",
-      "AUDIT_LOG_VIEW": "Xem nhật ký kiểm toán"
+      "AUDIT_LOG_VIEW": "Xem nhật ký kiểm toán",
+      "WEBSITE_CONFIG_VIEW": "Xem cấu hình website",
+      "WEBSITE_CONFIG_UPDATE": "Chỉnh sửa cấu hình website",
+      "WEBSITE_CONFIG_PUBLISH": "Xuất bản cấu hình website"
     }
   },
   "Customers": {
@@ -2292,7 +2300,10 @@
         "USER_DELETE": "Xóa người dùng",
         "USER_PERMISSION_MANAGE": "Quản lý quyền người dùng",
         "SYSTEM_VIEW": "Xem cài đặt hệ thống",
-        "AUDIT_LOG_VIEW": "Xem nhật ký kiểm toán"
+        "AUDIT_LOG_VIEW": "Xem nhật ký kiểm toán",
+        "WEBSITE_CONFIG_VIEW": "Xem cấu hình website",
+        "WEBSITE_CONFIG_UPDATE": "Chỉnh sửa cấu hình website",
+        "WEBSITE_CONFIG_PUBLISH": "Xuất bản cấu hình website"
       }
     },
     "save": "Lưu thay đổi",
@@ -2357,6 +2368,150 @@
         "title": "Tạm thời",
         "description": "File upload ngắn hạn được lifecycle của MinIO tự động dọn."
       }
+    }
+  },
+  "WebsiteConfig": {
+    "eyebrow": "Nội dung public website",
+    "overview": {
+      "title": "Tổng quan cấu hình",
+      "description": "Theo dõi draft và phiên bản đang hiển thị công khai của website.",
+      "site": "Thông tin website",
+      "siteDescription": "Nhận diện, liên hệ, văn phòng, mạng xã hội và SEO mặc định.",
+      "navigation": "Điều hướng",
+      "navigationDescription": "Menu header, footer, chính sách và các liên kết CTA.",
+      "navigationUpdatingDescription": "Tính năng quản lý điều hướng đang được hoàn thiện và chưa sử dụng dữ liệu từ API.",
+      "open": "Mở cấu hình",
+      "viewStatus": "Xem trạng thái",
+      "warnings": "{count} cảnh báo",
+      "summaryLabel": "Tình trạng cấu hình website",
+      "publishedDomains": "Khu vực đã publish",
+      "pendingDrafts": "Draft cần xử lý",
+      "validationWarnings": "Cảnh báo dữ liệu",
+      "domainCount": "{count}/{total}",
+      "domainsTitle": "Khu vực cấu hình",
+      "domainsDescription": "Mỗi khu vực có draft và lịch publish độc lập.",
+      "draftLabel": "Bản nháp",
+      "publicLabel": "Bản public",
+      "lastPublished": "Publish gần nhất: {value}",
+      "publishedBy": "Bởi {name}"
+    },
+    "site": {
+      "title": "Thông tin website",
+      "description": "Chỉnh sửa thông tin dùng chung trên public website.",
+      "media": "Hình ảnh website",
+      "mediaDescription": "Quản lý logo dùng ở header, footer và ảnh đại diện mặc định khi chia sẻ website.",
+      "tabs": {
+        "identity": "Nhận diện",
+        "thumbnails": "Thumbnails",
+        "contact": "Liên hệ",
+        "socials": "Mạng xã hội"
+      },
+      "addressOffices": "Địa chỉ & Văn phòng",
+      "addressOfficesDescription": "Cấu hình tên, địa chỉ và hotline của từng văn phòng. Thứ tự tại đây cũng là thứ tự hiển thị công khai.",
+      "hotlineContact": "Hotline & Liên hệ",
+      "hotlineContactDescription": "Hotline được ghép với từng văn phòng theo cùng thứ tự; sau đó website hiển thị email và địa chỉ web.",
+      "contactDetails": "Liên hệ chung",
+      "contactDetailsDescription": "Thông tin email và địa chỉ website hiển thị sau danh sách hotline.",
+      "socials": "Mạng xã hội",
+      "socialsDescription": "Thêm liên kết, bật hoặc tắt hiển thị và kéo thả để thay đổi thứ tự.",
+      "contactEmail": "Email",
+      "websiteUrl": "Website",
+      "headerLogo": "Logo header",
+      "footerLogo": "Logo footer",
+      "ogImage": "OG image mặc định",
+      "thumbnails": "Thumbnails",
+      "thumbnailUploadTitle": "Thư viện thumbnail",
+      "thumbnailUploadDescription": "Thumbnail được lưu dưới dạng public asset và hiển thị qua API thumbnails. Chọn hoặc kéo ảnh vào vùng upload bên dưới.",
+      "thumbnailChoose": "Chọn thumbnail",
+      "thumbnailUploadHint": "PNG, JPG hoặc WebP.",
+      "thumbnailUploaded": "Đã upload thumbnail.",
+      "thumbnailCount": "{count} ảnh",
+      "thumbnailEmpty": "Chưa có thumbnail nào.",
+      "thumbnailLoadFailed": "Không thể tải danh sách thumbnail.",
+      "thumbnailRemove": "Xóa thumbnail",
+      "thumbnailDeleted": "Đã xóa thumbnail.",
+      "thumbnailDeleteFailed": "Không thể xóa thumbnail.",
+      "addOffice": "Thêm văn phòng",
+      "officeLabel": "Tên hiển thị",
+      "officeLabelPlaceholder": "Ví dụ: Trụ sở TP. Hồ Chí Minh",
+      "officeAddress": "Địa chỉ",
+      "officeAddressPlaceholder": "Ví dụ: 7C Nguyễn Ngọc Phương, Phường Thạnh Mỹ Tây, TP. Hồ Chí Minh",
+      "officePhone": "Hotline",
+      "officeFallback": "Văn phòng {index}",
+      "officeEmpty": "Chưa có văn phòng. Chọn “Thêm văn phòng” để bắt đầu cấu hình.",
+      "moveOffice": "Kéo để đổi vị trí văn phòng {index}",
+      "sortOfficeInstructions": "Để di chuyển văn phòng, nhấn Space hoặc Enter trên nút kéo. Dùng phím mũi tên để đổi vị trí, sau đó nhấn Space hoặc Enter lần nữa để thả. Nhấn Escape để hủy.",
+      "hotlineFor": "Hotline {office}",
+      "inactiveOfficeHint": "Văn phòng đang tắt nên hotline này sẽ không hiển thị công khai.",
+      "hotlineEmpty": "Thêm văn phòng trước để cấu hình hotline tương ứng.",
+      "addSocial": "Thêm mạng xã hội",
+      "socialLabel": "Nhãn",
+      "socialUrl": "HTTPS URL",
+      "socialEmpty": "Chưa có mạng xã hội. Chọn “Thêm mạng xã hội” để tạo liên kết đầu tiên.",
+      "moveSocial": "Kéo để đổi vị trí mạng xã hội {index}",
+      "sortSocialInstructions": "Để di chuyển mạng xã hội, nhấn Space hoặc Enter trên nút kéo. Dùng phím mũi tên để đổi vị trí, sau đó nhấn Space hoặc Enter lần nữa để thả. Nhấn Escape để hủy.",
+      "platform": "Nền tảng",
+      "platforms": {
+        "facebook": "Facebook",
+        "zalo": "Zalo",
+        "tiktok": "TikTok",
+        "youtube": "YouTube",
+        "other": "Khác"
+      },
+      "active": "Đang hoạt động"
+    },
+    "navigation": {
+      "title": "Điều hướng website",
+      "description": "Khu vực cấu hình menu và liên kết điều hướng của website.",
+      "updatingBadge": "Đang cập nhật",
+      "updatingTitle": "Tính năng điều hướng đang được hoàn thiện",
+      "updatingDescription": "Trang quản trị điều hướng chưa khả dụng trong giai đoạn này. Bạn vẫn có thể cấu hình thông tin website tại mục Thông tin website."
+    },
+    "status": {
+      "published": "Đồng bộ với bản public",
+      "unpublishedChanges": "Có thay đổi chưa publish",
+      "draftVersion": "Draft v{version}",
+      "publishedVersion": "Public v{version}",
+      "neverPublished": "Chưa từng publish",
+      "notConfigured": "Chưa cấu hình",
+      "draft": "Draft",
+      "lastPublished": "Publish gần nhất {value}"
+    },
+    "actions": {
+      "saveDraft": "Lưu draft",
+      "preview": "Xem trước dữ liệu",
+      "saving": "Đang lưu...",
+      "publish": "Publish",
+      "publishing": "Đang publish...",
+      "cancel": "Hủy",
+      "retry": "Thử lại",
+      "remove": "Xóa",
+      "moveUp": "Di chuyển lên",
+      "moveDown": "Di chuyển xuống",
+      "reload": "Tải lại phiên bản mới"
+    },
+    "publish": {
+      "title": "Publish cấu hình?",
+      "description": "Dữ liệu draft hợp lệ sẽ thay thế phiên bản public hiện tại."
+    },
+    "preview": {
+      "title": "Dữ liệu preview",
+      "description": "Đây là public-shaped response được dựng từ draft hiện tại."
+    },
+    "states": {
+      "loading": "Đang tải cấu hình",
+      "loadingDescription": "Đang đọc draft và phiên bản public gần nhất.",
+      "error": "Không thể tải cấu hình",
+      "errorDescription": "Kiểm tra kết nối API và thử lại.",
+      "conflict": "Draft đã được người khác cập nhật",
+      "conflictDescription": "Tải lại phiên bản mới trước khi tiếp tục để tránh ghi đè thay đổi."
+    },
+    "toast": {
+      "saved": "Đã lưu draft.",
+      "published": "Đã publish cấu hình.",
+      "deleted": "Đã xóa khỏi draft.",
+      "updated": "Đã cập nhật.",
+      "error": "Không thể hoàn tất thao tác."
     }
   },
   "Home": {
