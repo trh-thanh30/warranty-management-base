@@ -51,13 +51,24 @@ export function HeroSection() {
             transition={{ duration: 0.8, ease: "easeInOut" }}
             className="absolute inset-0 h-full w-full"
           >
+            {/* Desktop Hero Image */}
             <Image
               src={activeImage.src}
               alt={t(`slides.${activeImage.id}.alt`)}
               fill
               priority
               sizes="100vw"
-              className="object-cover object-center"
+              className="hidden sm:block object-cover object-center"
+            />
+
+            {/* Mobile Hero Image (fallback to Desktop src if srcMobile is not provided) */}
+            <Image
+              src={activeImage.srcMobile || activeImage.src}
+              alt={t(`slides.${activeImage.id}.alt`)}
+              fill
+              priority
+              sizes="100vw"
+              className="block sm:hidden object-cover object-center"
             />
           </motion.div>
         </AnimatePresence>

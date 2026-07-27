@@ -17,7 +17,7 @@ export function SupportCentersView() {
           <h1 className="text-3xl sm:text-5xl font-condensed font-semibold uppercase tracking-wider">
             {t("title")}
           </h1>
-          <p className="text-base sm:text-lg text-stone-gray font-medium max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-stone-gray font-normal max-w-2xl mx-auto">
             {t("description")}
           </p>
         </div>

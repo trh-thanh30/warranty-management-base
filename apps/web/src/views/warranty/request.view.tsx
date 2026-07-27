@@ -19,7 +19,7 @@ export function WarrantyClaimRequestView() {
   };
 
   return (
-    <main className="min-h-screen bg-surface-muted py-12 sm:py-20 text-deep-black">
+    <main className="min-h-screen bg-gray-50 py-12 sm:py-20 text-deep-black">
       <div className="mx-auto max-w-[1000px] px-6 space-y-12">
         <div className="text-center space-y-4">
           <span className="inline-block bg-premium-red/10 text-premium-red border border-premium-red/30 px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-[0.25em]">
@@ -28,7 +28,7 @@ export function WarrantyClaimRequestView() {
           <h1 className="text-3xl sm:text-5xl font-condensed font-semibold uppercase tracking-wider">
             {t("title")}
           </h1>
-          <p className="text-base sm:text-lg text-stone-gray font-medium max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-stone-gray font-normal max-w-2xl mx-auto">
             {t("description")}
           </p>
         </div>
@@ -41,7 +41,7 @@ export function WarrantyClaimRequestView() {
             <h2 className="text-2xl sm:text-3xl font-semibold uppercase text-deep-black">
               {t("success.title")}
             </h2>
-            <p className="text-base text-stone-gray font-medium max-w-lg mx-auto">
+            <p className="text-base text-stone-gray font-normal max-w-lg mx-auto">
               {t.rich("success.description", {
                 ticket: () => (
                   <strong className="text-premium-red font-mono text-xl">

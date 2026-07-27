@@ -14,12 +14,12 @@ export function GuideView() {
           <h1 className="text-3xl sm:text-5xl font-condensed font-semibold uppercase tracking-wider">
             {t("title")}
           </h1>
-          <p className="text-base sm:text-lg text-stone-gray font-medium max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-stone-gray font-normal max-w-2xl mx-auto">
             {t("description")}
           </p>
         </div>
 
-        <div className="bg-white rounded-[28px] p-8 sm:p-12 border border-border-gray shadow-xl space-y-8 text-sm leading-relaxed text-stone-gray font-medium">
+        <div className="bg-white rounded-[28px] p-8 sm:p-12 border border-border-gray shadow-xl space-y-8 text-sm text-stone-gray font-normal">
           <div className="space-y-4">
             <h2 className="text-xl font-semibold uppercase text-deep-black">
               {t("steps.receive.title")}

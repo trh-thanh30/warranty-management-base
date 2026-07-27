@@ -1,10 +1,16 @@
 import { productCatalog } from "@/src/constants/product-catalog.constants";
 
-export const carHeroImages = [
-  { id: "primary", src: "/bg.jpg" },
-  { id: "technology", src: "/bg_2.jpg" },
-  { id: "protection", src: "/bg_3.jpg" },
-] as const;
+export interface HeroImageItem {
+  id: string;
+  src: string;
+  srcMobile?: string;
+}
+
+export const carHeroImages: HeroImageItem[] = [
+  { id: "primary", src: "/bg_1.jpg", srcMobile: undefined },
+  { id: "technology", src: "/bg_2.jpg", srcMobile: undefined },
+  { id: "protection", src: "/bg_3.jpg", srcMobile: undefined },
+];
 
 export const carBrands = [
   { name: "Audi", src: "/brands/audi.svg" },
@@ -121,7 +127,7 @@ export const galleryCategories = [
 ] as const;
 
 export const galleryImages = [
-  { id: "lexusSp50", src: "/bg.jpg", category: "SP50" },
+  { id: "lexusSp50", src: "/bg_1.jpg", category: "SP50" },
   {
     id: "vinfastSp10",
     src: "/guest/guest_2.jpg",

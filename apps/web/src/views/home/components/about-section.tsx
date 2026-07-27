@@ -10,6 +10,8 @@ import { revealViewportOnce } from "@/src/constants/motion.constants";
 import { Link } from "@/src/i18n/navigation";
 import { BrandsSection } from "./brands-section";
 
+import { Container } from "@/src/components/common/container";
+
 export function AboutSection() {
   const t = useTranslations("HomePage.about");
   const { container, fadeUp } = useScrollReveal();
@@ -17,13 +19,13 @@ export function AboutSection() {
   return (
     <section
       id="about-us"
-      className="w-full bg-white py-8 lg:py-10 border-b border-border-gray relative overflow-hidden flex flex-col justify-between items-center"
+      className="w-full bg-white py-8 lg:py-10 relative overflow-hidden flex flex-col justify-between items-center"
     >
       {/* Decorative Background Blob */}
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-brand-blue/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-brand-blue/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-premium-red/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-premium-red/5 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="mx-auto max-w-[1640px] px-4 sm:px-6 lg:px-8 w-full">
+      <Container>
         {/* Centered Section Header */}
         <motion.div
           variants={fadeUp}
@@ -32,13 +34,12 @@ export function AboutSection() {
           viewport={revealViewportOnce}
           className="text-center pb-4 lg:pb-6"
         >
-          <span className="block text-xs sm:text-sm font-sans font-semibold uppercase tracking-[0.25em] text-premium-red mb-1.5">
+          <span className="block text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-premium-red mb-1.5">
             {t("eyebrow")}
           </span>
-          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-condensed font-semibold uppercase tracking-wide text-deep-black leading-snug text-center">
+          <h2 className="font-condensed text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold uppercase tracking-wide text-deep-black leading-snug text-center">
             {t("title")}
           </h2>
-          <div className="mt-3 mx-auto h-[3px] w-20 bg-premium-red" />
         </motion.div>
 
         <motion.div
@@ -51,28 +52,17 @@ export function AboutSection() {
           {/* Left Column: Premium Image Collage (7 cols for larger display) */}
           <motion.div
             variants={fadeUp}
-            className="lg:col-span-7 relative flex justify-center items-center pb-10 sm:pb-12"
+            className="lg:col-span-7 relative flex justify-center items-center"
           >
             {/* Main Large Image */}
-            <div className="relative w-full aspect-[16/10] sm:aspect-[16/10] rounded-[28px] overflow-hidden shadow-2xl border-4 border-white">
+            <div className="relative w-full aspect-[16/10] sm:aspect-[16/10] rounded-md overflow-hidden border border-border-gray">
               <Image
-                src="/hi.jpg"
+                src="/hero/hero_3.jpg"
                 alt={t("mainImageAlt")}
                 fill
                 priority
                 sizes="(max-width: 1024px) 100vw, 950px"
                 className="object-cover transition-transform duration-[600ms] hover:scale-105"
-              />
-            </div>
-
-            {/* Secondary Overlapping Floating Image at Bottom Right */}
-            <div className="absolute -bottom-8 -right-2 sm:-right-6 w-56 sm:w-72 aspect-[4/3] rounded-[22px] overflow-hidden shadow-2xl border-4 border-white hidden sm:block z-10">
-              <Image
-                src="/708986914_976804048389364_3900113787497783781_n.jpg"
-                alt={t("installationImageAlt")}
-                fill
-                sizes="300px"
-                className="object-cover"
               />
             </div>
           </motion.div>
@@ -83,10 +73,10 @@ export function AboutSection() {
             className="lg:col-span-5 flex flex-col justify-start pt-1 sm:pt-2"
           >
             {/* Description */}
-            <p className="text-lg sm:text-xl leading-relaxed text-ink-black font-sans font-medium">
+            <p className="text-base sm:text-lg text-stone-gray leading-relaxed font-sans">
               {t("descriptionPrimary")}
             </p>
-            <p className="mt-4 text-lg sm:text-xl leading-relaxed text-ink-black font-sans font-medium">
+            <p className="mt-4 text-base sm:text-lg text-stone-gray leading-relaxed font-sans">
               {t("descriptionSecondary")}
             </p>
 
@@ -94,7 +84,7 @@ export function AboutSection() {
             <div className="mt-6 sm:mt-8 flex items-center gap-3.5 sm:gap-6">
               <Link
                 href={APP_ROUTES.about}
-                className="group/btn relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-[14px] bg-premium-red hover:bg-warm-red px-5 py-3 sm:px-8 sm:py-3.5 text-xs sm:text-sm font-semibold uppercase tracking-wider text-white shadow-md shadow-premium-red/20 transition-all duration-300 cursor-pointer"
+                className="group/btn relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-md bg-premium-red hover:bg-warm-red px-5 py-3 sm:px-8 sm:py-3.5 text-xs sm:text-sm font-semibold uppercase tracking-wider text-white shadow-md shadow-premium-red/20 transition-all duration-300 cursor-pointer"
               >
                 <span className="relative z-10 text-white">
                   {t("learnMore")}
@@ -121,7 +111,7 @@ export function AboutSection() {
             </div>
           </motion.div>
         </motion.div>
-      </div>
+      </Container>
 
       {/* Brand Logo Marquee Slider (Full-width edge-to-edge) */}
       <motion.div
