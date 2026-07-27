@@ -3,8 +3,10 @@
 import {
   ArrowRight,
   CircleCheckBig,
+  Construction,
   FilePenLine,
   Globe2,
+  Navigation,
   TriangleAlert,
 } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
@@ -68,10 +70,11 @@ export function WebsiteConfigOverviewView() {
                   {t("overview.domainsDescription")}
                 </p>
               </div>
-              <div className="grid max-w-2xl gap-4">
+              <div className="grid gap-4 lg:grid-cols-2">
                 {query.data.items.map((item) => (
                   <OverviewCard item={item} key={item.key} />
                 ))}
+                <NavigationOverviewCard />
               </div>
             </section>
           </>
@@ -145,6 +148,47 @@ function OverviewSummary({ items }: { items: WebsiteConfigOverviewItem[] }) {
         );
       })}
     </section>
+  );
+}
+
+function NavigationOverviewCard() {
+  const t = useTranslations("WebsiteConfig");
+
+  return (
+    <Card className="flex flex-col">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex size-10 items-center justify-center rounded-lg bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-200">
+            <Navigation aria-hidden="true" className="size-5" />
+          </div>
+          <Badge variant="warning">{t("navigation.updatingBadge")}</Badge>
+        </div>
+        <CardTitle className="pt-2">{t("overview.navigation")}</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-1 flex-col gap-4">
+        <p className="min-h-10 text-sm leading-5 text-slate-500 dark:text-slate-400">
+          {t("overview.navigationDescription")}
+        </p>
+        <div className="flex min-h-28 items-center gap-3 rounded-md border border-amber-200 bg-amber-50 p-4 text-amber-800 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-300">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-white/80 dark:bg-amber-950">
+            <Construction aria-hidden="true" className="size-4" />
+          </div>
+          <p className="text-sm leading-5">
+            {t("overview.navigationUpdatingDescription")}
+          </p>
+        </div>
+        <Button
+          asChild
+          className="mt-auto min-h-11 sm:min-h-9"
+          variant="outline"
+        >
+          <Link href="/website-config/navigation">
+            {t("overview.viewStatus")}
+            <ArrowRight aria-hidden="true" className="size-4" />
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
 

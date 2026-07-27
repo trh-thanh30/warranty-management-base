@@ -63,7 +63,7 @@ export function PreviewDataDialog({ load, locale }: PreviewDataDialogProps) {
               {t("states.errorDescription")}
             </p>
           ) : (
-            <pre className="overflow-x-auto rounded-lg bg-slate-950 p-4 text-xs leading-6 text-slate-100">
+            <pre className="overflow-x-auto rounded-lg border border-slate-200 bg-white p-4 text-xs leading-6 text-slate-950 shadow-inner">
               {JSON.stringify(data, null, 2)}
             </pre>
           )}
