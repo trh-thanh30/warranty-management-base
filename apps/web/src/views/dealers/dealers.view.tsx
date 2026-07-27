@@ -50,7 +50,7 @@ export function DealersView() {
   } = useDealerFilters();
 
   return (
-    <main className="min-h-screen bg-surface-muted text-deep-black font-sans">
+    <main className="min-h-screen bg-surface-muted text-deep-black">
       <section className="relative w-full h-[320px] sm:h-[420px] bg-deep-black overflow-hidden flex items-center">
         <Image
           src="/708986914_976804048389364_3900113787497783781_n.jpg"
@@ -70,7 +70,7 @@ export function DealersView() {
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-condensed font-semibold uppercase text-white tracking-wider leading-tight">
               {t("hero.title")}
             </h1>
-            <p className="text-sm sm:text-base text-white/80 font-medium">
+            <p className="text-sm sm:text-base text-white/80 font-normal">
               {t("hero.description")}
             </p>
           </div>

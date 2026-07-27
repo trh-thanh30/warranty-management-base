@@ -8,131 +8,128 @@ import { revealViewportOnce } from "@/src/constants/motion.constants";
 import { ArrowRight } from "lucide-react";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { Link } from "@/src/i18n/navigation";
-import { featuredProducts } from "../home.constants";
+
+const mainCategories = [
+  {
+    key: "film",
+    image: "/product/product_1.jpg",
+    badgeKey: "Hàn Quốc",
+  },
+  {
+    key: "lighting",
+    image: "/product/product_3.jpg",
+    badgeKey: "Công nghệ Nhật",
+  },
+  {
+    key: "dashcam",
+    image: "/product/product_9.jpg",
+    badgeKey: "Ghi hình 4K",
+  },
+  {
+    key: "tpms",
+    image: "/product/product_10.jpg",
+    badgeKey: "An toàn",
+  },
+] as const;
+
+import { Container } from "@/src/components/common/container";
 
 export function ProductsSection() {
   const t = useTranslations("HomePage.products");
-  const productsT = useTranslations("ProductsPage");
   const { container, fadeUp } = useScrollReveal();
 
   return (
-    <section
-      id="products"
-      className="w-full bg-light-gray py-10 lg:py-14 border-b border-border-gray"
-    >
-      <div className="mx-auto max-w-[1640px] px-4 sm:px-6 lg:px-8 w-full">
+    <section id="products" className="w-full bg-gray-50 py-12 lg:py-16">
+      <Container>
         {/* Section Header */}
         <motion.div
           variants={fadeUp}
           initial="hidden"
           whileInView="show"
           viewport={revealViewportOnce}
-          className="text-center pb-6 lg:pb-8"
+          className="text-center pb-8 lg:pb-12"
         >
-          <span className="block text-xs sm:text-sm font-sans font-semibold uppercase tracking-[0.25em] text-premium-red mb-1.5">
+          <span className="block text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-premium-red mb-2">
             {t("eyebrow")}
           </span>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-condensed font-semibold uppercase tracking-wide text-deep-black leading-snug text-center">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-semibold uppercase tracking-wide text-deep-black leading-snug text-center">
             {t("title")}
           </h2>
-          <p className="mt-3 text-base sm:text-lg text-stone-gray font-sans font-medium max-w-2xl mx-auto">
+          <p className="mt-3 text-base sm:text-lg text-stone-gray max-w-2xl mx-auto">
             {t("description")}
           </p>
-          <div className="mt-4 mx-auto h-[3px] w-20 bg-premium-red" />
         </motion.div>
 
-        {/* Products Grid */}
+        {/* 4 Main Categories Grid */}
         <motion.div
           variants={container}
           initial="hidden"
           whileInView="show"
           viewport={revealViewportOnce}
-          className="grid gap-8 md:grid-cols-2 lg:grid-cols-3"
+          className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-4"
         >
-          {featuredProducts.map((product) => (
+          {mainCategories.map((cat) => (
             <motion.div
-              key={product.id}
+              key={cat.key}
               variants={fadeUp}
-              className="group flex flex-col justify-between rounded-[20px] bg-white border border-border-gray overflow-hidden shadow-md transition-all duration-300 hover:shadow-xl hover:border-premium-red"
+              className="group flex flex-col justify-between rounded-md bg-white border border-border-gray overflow-hidden shadow-sm transition-all duration-300 hover:shadow-md hover:border-premium-red"
             >
-              {/* Product Image */}
+              {/* Category Image */}
               <Link
-                href={APP_ROUTES.product(product.slug)}
-                className="relative w-full aspect-[4/3] bg-black/5 overflow-hidden block"
+                href={APP_ROUTES.products}
+                className="relative w-full aspect-[16/9] bg-black/5 overflow-hidden block"
               >
                 <Image
-                  src={product.image}
-                  alt={t(`items.${product.id}.imageAlt`)}
+                  src={cat.image}
+                  alt={t(`categories.${cat.key}.title`)}
                   fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <span
-                  className={`absolute top-4 left-4 ${product.badgeClassName} text-white px-3.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider shadow-sm`}
-                >
-                  {t(`items.${product.id}.badge`)}
+                <span className="absolute top-2.5 left-2.5 bg-deep-black/80 backdrop-blur-xs text-white px-2.5 py-0.5 rounded text-xs font-semibold uppercase tracking-wider shadow-sm transition-colors duration-300 group-hover:bg-premium-red group-hover:text-white">
+                  {cat.badgeKey}
                 </span>
               </Link>
 
-              {/* Product Info */}
-              <div className="flex flex-col justify-between p-6 sm:p-7 flex-1">
+              {/* Category Content */}
+              <div className="flex flex-col justify-between p-4 sm:p-5 flex-1">
                 <div>
-                  <h3 className="text-xl font-semibold uppercase text-deep-black tracking-tight group-hover:text-premium-red transition-colors">
-                    <Link href={APP_ROUTES.product(product.slug)}>
-                      {productsT(`catalog.items.${product.detailKey}.name`)}
+                  <h3 className="text-sm sm:text-base font-semibold uppercase text-deep-black tracking-tight leading-snug group-hover:text-premium-red transition-colors min-h-[2.75rem] sm:min-h-[3rem]">
+                    <Link href={APP_ROUTES.products}>
+                      {t(`categories.${cat.key}.title`)}
                     </Link>
                   </h3>
-                  <div className="mt-2 text-lg font-semibold text-premium-red">
-                    {t(`items.${product.id}.price`)}
-                  </div>
-                  <p className="mt-3 text-sm leading-relaxed text-stone-gray font-sans">
-                    {t(`items.${product.id}.description`)}
+                  <p className="mt-2.5 text-sm text-stone-gray leading-relaxed">
+                    {t(`categories.${cat.key}.description`)}
                   </p>
-
-                  {/* Specs List */}
-                  <div className="mt-5 pt-4 border-t border-border-gray space-y-2">
-                    {(["uv", "ir", "vlt"] as const).map((spec) => (
-                      <div
-                        key={spec}
-                        className="flex items-center gap-2 text-xs font-medium text-deep-black"
-                      >
-                        <span
-                          aria-hidden="true"
-                          className="size-1.5 shrink-0 rounded-full bg-premium-red"
-                        />
-                        <span>
-                          {t(`specs.${spec}`, { value: product.specs[spec] })}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
                 </div>
 
-                {/* CTA Action */}
-                <div className="mt-7">
+                {/* Explore CTA */}
+                <div className="mt-5 pt-3.5 border-t border-border-gray">
                   <Link
-                    href={APP_ROUTES.product(product.id)}
-                    className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase text-deep-black group-hover:text-premium-red transition-colors"
+                    href={APP_ROUTES.products}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase text-deep-black group-hover:text-premium-red transition-colors"
                   >
-                    <span>{t("bookInstallation")}</span>
-                    <ArrowRight className="size-4 text-premium-red" />
+                    <span>{t("explore")}</span>
+                    <ArrowRight className="size-3.5 text-premium-red transition-transform duration-300 group-hover:translate-x-1" />
                   </Link>
                 </div>
               </div>
             </motion.div>
           ))}
         </motion.div>
-        {/* View All Products Button */}
+
+        {/* View All Categories Button */}
         <div className="text-center pt-8">
           <Link
             href={APP_ROUTES.products}
-            className="inline-flex items-center gap-2 bg-premium-red sm:bg-deep-black sm:hover:bg-premium-red active:scale-95 text-white px-8 py-4 rounded-[14px] text-xs sm:text-sm font-semibold uppercase tracking-wider transition-all duration-300 shadow-lg cursor-pointer"
+            className="inline-flex items-center gap-2 bg-premium-red sm:bg-deep-black sm:hover:bg-premium-red active:scale-95 text-white px-7 py-3 rounded-md text-xs sm:text-sm font-semibold uppercase tracking-wider transition-all duration-300 shadow-md cursor-pointer"
           >
             <span>{t("viewAll")}</span>
             <ArrowRight className="size-4" />
           </Link>
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

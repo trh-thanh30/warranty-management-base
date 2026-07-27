@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { Container } from "@/src/components/common/container";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@repo/ui/lib/utils";
 import { Link, usePathname } from "@/src/i18n/navigation";
@@ -25,13 +26,12 @@ export function SiteFooter() {
 
   useEffect(() => {
     const toggleVisibility = () => {
-      if (window.scrollY > 300) {
+      if (window.scrollY > 400) {
         setIsVisible(true);
       } else {
         setIsVisible(false);
       }
     };
-    toggleVisibility();
     window.addEventListener("scroll", toggleVisibility);
     return () => window.removeEventListener("scroll", toggleVisibility);
   }, []);
@@ -41,10 +41,10 @@ export function SiteFooter() {
       {/* ── Footer ── */}
       <footer
         id="contact"
-        className="w-full scroll-mt-[84px] border-t border-border-gray bg-white font-sans text-deep-black"
+        className="w-full scroll-mt-[84px] bg-gray-50 text-deep-black"
       >
         {/* Main Footer Container */}
-        <div className="mx-auto max-w-[1720px] px-6 sm:px-10 lg:px-12 py-12 lg:py-16">
+        <Container className="py-12 lg:py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
             {/* Column 1: Logo & Company Address */}
             <div className="lg:col-span-4 space-y-4">
@@ -154,13 +154,14 @@ export function SiteFooter() {
               </a>
 
               <div className="flex items-center gap-2 pt-1 text-sm font-semibold uppercase text-premium-red sm:text-base">
-                <span
-                  data-footer-japan-flag
+                <svg
+                  className="h-3.5 w-5 shrink-0 rounded-xs overflow-hidden border border-border-gray"
+                  viewBox="0 0 900 600"
                   aria-hidden="true"
-                  className="inline-flex size-6 shrink-0 items-center justify-center rounded-full border border-border-gray bg-white shadow-xs"
                 >
-                  <span className="size-2.5 rounded-full bg-premium-red" />
-                </span>
+                  <rect width="900" height="600" fill="#ffffff" />
+                  <circle cx="450" cy="300" r="180" fill="#DB2114" />
+                </svg>
                 <span>{t("japan")}</span>
               </div>
 
@@ -179,13 +180,13 @@ export function SiteFooter() {
               </div>
             </div>
           </div>
-        </div>
+        </Container>
 
         {/* Bottom Copyright Bar */}
-        <div className="w-full border-t border-border-gray bg-surface-muted py-4">
-          <div className="mx-auto max-w-[1720px] px-6 text-center text-xs sm:text-sm text-deep-black font-base">
+        <div className="w-full border-t-2 border-t-premium-red bg-gray-100 py-4">
+          <Container className="text-center text-xs sm:text-sm text-deep-black font-base">
             {t("copyright", { year: new Date().getFullYear() })}
-          </div>
+          </Container>
         </div>
       </footer>
 

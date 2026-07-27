@@ -6,10 +6,11 @@ import { Saira_Condensed, Inter, Maven_Pro } from "next/font/google";
 import { routing } from "@/src/i18n/routing";
 import { SiteHeader } from "@/src/components/layout/site-header";
 import { SiteFooter } from "@/src/components/layout/site-footer";
+import { LenisProvider } from "@/src/components/providers/lenis-provider";
 import "../globals.css";
 
 const sairaCondensed = Saira_Condensed({
-  subsets: ["latin"],
+  subsets: ["latin", "vietnamese"],
   weight: ["300", "400", "500", "600", "700", "800", "900"],
   variable: "--font-saira-condensed",
 });
@@ -66,13 +67,15 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`scroll-smooth ${sairaCondensed.variable} ${inter.variable} ${mavenPro.variable}`}
+      className={`${sairaCondensed.variable} ${inter.variable} ${mavenPro.variable}`}
     >
       <body>
         <NextIntlClientProvider messages={messages}>
-          <SiteHeader />
-          <div className="pt-[84px]">{children}</div>
-          <SiteFooter />
+          <LenisProvider>
+            <SiteHeader />
+            <div className="pt-[84px]">{children}</div>
+            <SiteFooter />
+          </LenisProvider>
         </NextIntlClientProvider>
       </body>
     </html>

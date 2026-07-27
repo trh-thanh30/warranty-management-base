@@ -92,11 +92,29 @@
       "hotlineLabel": "Hotline tư vấn"
     },
     "products": {
-      "eyebrow": "Dòng sản phẩm nổi bật",
-      "title": "PHIM CÁCH NHIỆT CAO CẤP",
-      "description": "Lựa chọn dòng phim cách nhiệt phù hợp với nhu cầu cản nhiệt và vị trí kính xe của bạn.",
-      "bookInstallation": "Chi tiết & Đặt lịch thi công",
-      "viewAll": "Xem tất cả sản phẩm",
+      "eyebrow": "Hệ sinh thái sản phẩm & Phụ kiện ô tô",
+      "title": "DANH MỤC SẢN PHẨM",
+      "description": "Giải pháp toàn diện về phim cách nhiệt, hệ thống chiếu sáng, camera hành trình và cảm biến áp suất lốp chính hãng từ Lexzenz & Fujitek.",
+      "explore": "Khám phá danh mục",
+      "viewAll": "Xem toàn bộ danh mục sản phẩm",
+      "categories": {
+        "film": {
+          "title": "Film cách nhiệt ô tô Lexzenz Reflex Korea Film",
+          "description": "Công nghệ phim cách nhiệt Phún Xạ Đa Lớp (Multilayer Sputter) & Ultra Nano Ceramic nhập khẩu từ Hàn Quốc, cản 99% tia UV/IR, cản nhiệt vượt trội."
+        },
+        "lighting": {
+          "title": "Đèn tăng sáng ô tô, xe máy Lexzenz Led Fujitek",
+          "description": "Hệ thống Bi LED, LED gầm, trợ sáng Offroad bám đường vượt trội, đường cắt ánh sáng gom tụ sắc nét không gây chói mắt xe ngược chiều."
+        },
+        "dashcam": {
+          "title": "Camera hành trình Lexzenz Dashcam",
+          "description": "Camera ghi hình 4K sắc nét, quay đêm rõ nét, tích hợp cảnh báo biển báo giao thông bằng giọng nói & kết nối Wi-Fi app di động."
+        },
+        "tpms": {
+          "title": "Cảm biến Áp suất lốp TPMS Lexzenz",
+          "description": "Cảm biến đo áp suất & nhiệt độ lốp theo thời gian thực, hiển thị trực tiếp màn hình Android hoặc đồng hồ zin, đảm bảo an toàn tuyệt đối."
+        }
+      },
       "specs": {
         "uv": "Chống tia UV: {value}",
         "ir": "Cản tia hồng ngoại IR: {value}",
@@ -1964,6 +1982,260 @@
             ]
           }
         ]
+      }
+    }
+  },
+  "AboutPage": {
+    "metadata": {
+      "title": "Giới thiệu FUJITEK Việt Nam - Phân Phối Phim Cách Nhiệt Ô Tô Nhật Bản",
+      "description": "FUJITEK Việt Nam - Hệ thống phân phối phim cách nhiệt cao cấp công nghệ Nhật Bản, bảo hành điện tử E-Warranty chính hãng."
+    },
+    "hero": {
+      "eyebrow": "Hệ Sinh Thái Công Nghệ Ô Tô",
+      "titlePrefix": "Giải pháp bảo vệ &",
+      "titleHighlight": "Hệ sinh thái",
+      "titleSuffix": "phụ kiện ô tô cao cấp",
+      "description": "Fujitek không chỉ cung cấp các dòng phim cách nhiệt cao cấp công nghệ Nhật Bản, mà còn mang đến giải pháp toàn diện cho xe ô tô với hệ thống Đèn tăng sáng LED Fujitek, Camera hành trình Lexzenz 4K và Cảm biến áp suất lốp TPMS thông minh.",
+      "exploreCta": "Khám phá sản phẩm",
+      "contactCta": "Liên hệ tư vấn",
+      "exploreProductsCta": "Khám phá sản phẩm",
+      "dealerNetworkCta": "Mạng lưới đại lý",
+      "brandBadge": "Công Nghệ Nhật Bản",
+      "cardTitle": "Phim Cách Nhiệt & Phụ Kiện Cao Cấp",
+      "cardSubtitle": "Tiêu chuẩn quốc tế ISO 9001",
+      "stats": {
+        "uvIr": "Cản tia UV & Hồng ngoại",
+        "origin": "Xuất xứ Nhật Bản",
+        "warranty": "Bảo hành chính hãng"
+      }
+    },
+    "milestones": {
+      "eyebrow": "Hành trình phát triển",
+      "title": "Cột mốc quan trọng",
+      "description": "Hành trình hơn 10 năm đồng hành cùng hàng triệu chủ xe Việt Nam",
+      "items": {
+        "rdJapan": {
+          "title": "Nghiên cứu & Phát triển",
+          "description": "Thành lập trung tâm R&D tại Nhật Bản, phát triển công nghệ Nano Ceramic độc quyền."
+        },
+        "launchVietnam": {
+          "title": "Ra mắt thị trường Việt Nam",
+          "description": "Chính thức giới thiệu sản phẩm phim cách nhiệt cao cấp tại Việt Nam."
+        },
+        "ewarrantyRelease": {
+          "title": "E-Warranty ra mắt",
+          "description": "Triển khai hệ thống bảo hành điện tử, minh bạch và tiện lợi."
+        },
+        "networkExpansion": {
+          "title": "Mở rộng mạng lưới",
+          "description": "Hơn 200 đại lý trên toàn quốc, phủ sóng 63 tỉnh thành."
+        }
+      }
+    },
+    "ecosystem": {
+      "eyebrow": "Hệ sinh thái sản phẩm",
+      "title": "Giải pháp bảo vệ & Phụ kiện cao cấp LEXZENZ - FUJITEK",
+      "description": "Cung cấp hệ sinh thái thiết bị và vật liệu ô tô chính hãng, dẫn đầu về công nghệ cản nhiệt, tăng sáng và an toàn lái xe.",
+      "viewAllCta": "Khám phá tất cả sản phẩm",
+      "productDetailCta": "Chi tiết dòng sản phẩm",
+      "items": {
+        "film": {
+          "title": "Film cách nhiệt ô tô Lexzenz Reflex Korea Film",
+          "description": "Công nghệ Phún xạ kim loại & Nano Ceramic cản 99% UV/IR, bảo vệ nội thất và làm mát cabin vượt trội."
+        },
+        "lighting": {
+          "title": "Đèn tăng sáng ô tô, xe máy Lexzenz Led Fujitek",
+          "description": "Hệ thống đèn Bi-LED & LED gầm công suất cao, cắt sáng chuẩn không lóa mắt người đối diện."
+        },
+        "dashcam": {
+          "title": "Camera hành trình Lexzenz Dashcam",
+          "description": "Ghi hình 4K siêu nét ban đêm, tích hợp cảnh báo giao thông và cảm biến va chạm thông minh."
+        },
+        "tpms": {
+          "title": "Cảm biến Áp suất lốp TPMS Lexzenz",
+          "description": "Giám sát áp suất & nhiệt độ lốp xe tức thời, cảnh báo rò rỉ khí qua màn hình Android và ứng dụng."
+        }
+      }
+    },
+    "filmLayers": {
+      "eyebrow": "Cấu trúc đa tầng",
+      "title": "Giải phẫu 5 lớp phim đỉnh cao",
+      "instruction": "Di chuột vào các lớp để xem chi tiết cấu trúc:",
+      "items": {
+        "scratchCoat": {
+          "title": "Lớp phủ chống trầy (Scratch Resistant)",
+          "description": "Lớp bảo vệ bề mặt cứng đạt chuẩn 2H, chống trầy xước trong quá trình vệ sinh và kéo kính."
+        },
+        "sputterMetal": {
+          "title": "Lớp phủ phún xạ kim loại (Sputter Layer)",
+          "description": "Ứng dụng hạt nguyên tử kim loại quý phản xạ bức xạ nhiệt mặt trời tối đa."
+        },
+        "opticalBase": {
+          "title": "Lớp màng PET quang học (Optical PET)",
+          "description": "Màng PET siêu trong suốt đảm bảo độ rõ nét tầm nhìn ban đêm và trời mưa."
+        },
+        "nanoCeramic": {
+          "title": "Lớp Nano Ceramic cách nhiệt",
+          "description": "Hạt gốm kích thước nanomet chặn dải tia hồng ngoại gây nóng sinh nhiệt."
+        },
+        "adhesive": {
+          "title": "Lớp keo dán nhạy áp lực (PSA Adhesive)",
+          "description": "Keo nhập khẩu không mùi, bám dính cực cao và không tạo bong bóng khí."
+        }
+      }
+    },
+    "brandHeritage": {
+      "eyebrow": "Định nghĩa lại chuẩn mực",
+      "row1Title": "Định nghĩa lại chuẩn mực phim cách nhiệt cao cấp tại Việt Nam",
+      "row1Desc1": "Fujitek mang đến dòng phim cách nhiệt thế hệ mới với sứ mệnh mang đến tiêu chuẩn khác biệt: không chỉ chống nóng, mà còn nâng tầm trải nghiệm không gian khi di chuyển trong môi trường đô thị hiện đại.",
+      "row1Desc2": "Được phát triển và sản xuất tại Nhật Bản - cái nôi của các công nghệ vật liệu tiên tiến châu Á - Fujitek là sự kết tinh giữa hiệu năng kỹ thuật vượt trội, tư duy thẩm mỹ cao cấp và trách nhiệm bền vững.",
+      "row2Title": "Xuất xứ công nghệ – Nền tảng của sự tin cậy",
+      "row2Desc1": "“Made in Japan” không chỉ là xuất xứ, mà là lời cam kết về chất lượng. Fujitek được nghiên cứu, sản xuất và kiểm soát theo các tiêu chuẩn nghiêm ngặt của ngành vật liệu kỹ thuật cao.",
+      "row2Desc2": "Tại Việt Nam, Fujitek được giới thiệu như một giải pháp lâu dài, hướng đến phân khúc khách hàng đề cao giá trị sử dụng thực tế, độ bền công nghệ và trải nghiệm cao cấp."
+    },
+    "coreTech": {
+      "eyebrow": "Công nghệ cốt lõi",
+      "title": "Hai nền tảng công nghệ dẫn đầu",
+      "subtitle": "Khám phá sức mạnh của công nghệ Phún xạ kim loại và Nano Ceramic tiên tiến.",
+      "comparisonTitle": "So sánh thông số hiệu năng",
+      "fujitekLabel": "Công nghệ Fujitek",
+      "standardLabel": "Phim thường",
+      "metrics": {
+        "tser": {
+          "name": "Khả năng cản nhiệt TSER",
+          "fujitek": "70% TSER vượt trội",
+          "standard": "Chỉ đạt ~30% TSER"
+        },
+        "durability": {
+          "name": "Độ bền màu sắc",
+          "fujitek": "10 - 15 Năm bền màu",
+          "standard": "Phai màu sau 2 Năm"
+        },
+        "signal": {
+          "name": "Tín hiệu vô tuyến (GPS/4G/VETC)",
+          "fujitek": "100% Thông suốt",
+          "standard": "Bị suy giảm / nhiễu"
+        },
+        "glare": {
+          "name": "Độ phản gương nội thất",
+          "fujitek": "Thấp <8% chống lóa",
+          "standard": "Lóa mắt >20%"
+        }
+      },
+      "sputtering": {
+        "title": "Công nghệ Phún Xạ (Sputtering)",
+        "description": "Công nghệ bắn phá nguyên tử kim loại quý (Titanium, Bạc, Vàng) lên màng PET trong môi trường chân không cao, tạo ra lớp phản xạ nhiệt vượt trội mà vẫn giữ màng phim mỏng nhẹ.",
+        "b1": "Cản nhiệt phản xạ vượt trội đến 70% TSER",
+        "b2": "Màu sắc tự nhiên, bền màu trên 10 năm"
+      },
+      "nanoCeramic": {
+        "title": "Công nghệ Nano Ceramic",
+        "description": "Phủ hạt gốm siêu mịn kích thước <10nm hấp thụ bức xạ hồng ngoại bức sóng ngắn mà hoàn toàn không cản sóng GPS, 4G/5G, RFID hay thẻ VETC.",
+        "b1": "100% Không cản sóng vô tuyến và tín hiệu xe",
+        "b2": "Giảm lóa ban đêm và độ phản gương thấp"
+      }
+    },
+    "pillars": {
+      "eyebrow": "Tầm nhìn & Giá trị cốt lõi",
+      "title": "Sứ mệnh của chúng tôi",
+      "items": {
+        "pioneerTech": {
+          "title": "Công Nghệ Tiên Phong",
+          "description": "Liên tục nghiên cứu và ứng dụng công nghệ mới nhất từ Nhật Bản, mang đến giải pháp cách nhiệt vượt trội cho xe ô tô.",
+          "checks": {
+            "nanoTech": "Công nghệ Nano Ceramic",
+            "sputterTech": "Phún xạ kim loại Sputtering",
+            "signalFriendly": "Không cản sóng GPS, 4G/5G"
+          }
+        },
+        "japaneseQuality": {
+          "title": "Chất Lượng Nhật Bản",
+          "description": "100% sản xuất tại Nhật Bản với quy trình kiểm soát chất lượng nghiêm ngặt theo tiêu chuẩn ISO 9001.",
+          "checks": {
+            "cleanroomClass": "Phòng sạch Class 1000",
+            "qaQc100": "Kiểm tra QA/QC 100%",
+            "isoStandard": "Chứng nhận quốc tế"
+          }
+        },
+        "dedicatedService": {
+          "title": "Dịch Vụ Tận Tâm",
+          "description": "Đồng hành cùng khách hàng với chế độ bảo hành 10 năm và mạng lưới đại lý phủ sóng toàn quốc.",
+          "checks": {
+            "ewarrantyDigital": "Bảo hành điện tử E-Warranty",
+            "support247": "Hỗ trợ 24/7",
+            "dealerNetwork": "200+ đại lý toàn quốc"
+          }
+        }
+      }
+    },
+    "craftsmanship": {
+      "eyebrow": "Tiêu chuẩn sản xuất",
+      "titlePrefix": "Công nghệ sản xuất",
+      "titleSuffix": "từ Nhật Bản",
+      "description": "Mọi sản phẩm phim cách nhiệt Fujitek đều được sản xuất trên dây chuyền tự động hóa khép kín đạt chuẩn chất lượng nghiêm ngặt của Nhật Bản.",
+      "research": {
+        "title": "Nghiên cứu R&D",
+        "description": "Phát triển công thức hạt gốm Nano độc quyền với kích thước <10nm."
+      },
+      "cleanroom": {
+        "title": "Sản xuất chuẩn sạch",
+        "description": "Phòng sạch Class 1000 kiểm soát bụi tuyệt đối."
+      },
+      "inspection": {
+        "title": "Kiểm định CO/CQ",
+        "description": "Chứng nhận xuất xứ và chất lượng quốc tế."
+      },
+      "stats": {
+        "qaQc": "Kiểm soát chất lượng",
+        "cleanroom": "Phòng sạch",
+        "iso": "Chứng nhận",
+        "experience": "Năm kinh nghiệm"
+      }
+    },
+    "network": {
+      "eyebrow": "Mạng lưới toàn quốc",
+      "titlePrefix": "Hệ thống đại lý",
+      "titleSuffix": "phủ sóng 63 tỉnh thành",
+      "description": "Với hơn 200 đại lý trên toàn quốc, Fujitek cam kết mang đến dịch vụ lắp đặt chuyên nghiệp và chế độ bảo hành E-Warranty minh bạch.",
+      "viewDealersCta": "Tìm Đại lý gần nhất",
+      "mapTitle": "Bản đồ mạng lưới đại lý",
+      "mapSubtitle": "Hệ thống trạm lắp đặt ủy quyền rộng khắp",
+      "legendDealer": "Đại lý ủy quyền",
+      "legendCenter": "Trung tâm lắp đặt",
+      "stats": {
+        "dealers": "Đại lý toàn quốc",
+        "provinces": "Tỉnh thành",
+        "warrantyYears": "Bảo hành điện tử",
+        "support": "Hỗ trợ khách hàng"
+      }
+    },
+    "testimonials": {
+      "eyebrow": "Đánh giá từ đối tác",
+      "title": "Khách hàng nói gì về chúng tôi",
+      "items": {
+        "dealerHanoi": {
+          "quote": "Tôi đã hợp tác với Fujitek từ 2019. Sản phẩm chất lượng cao, khả năng cách nhiệt vượt trội và chế độ bảo hành rất tốt. Khách hàng của tôi rất hài lòng.",
+          "author": "Anh Trần Đức Thành",
+          "role": "Giám đốc Panda Auto Showroom Hà Nội"
+        },
+        "dealerSaigon": {
+          "quote": "Công nghệ Nano Ceramic của Fujitek thực sự ấn tượng. Không cản sóng GPS, cách nhiệt tốt và độ bền cao. Đây là lựa chọn hàng đầu cho trung tâm của tôi.",
+          "author": "Anh Nguyễn Quốc Huy",
+          "role": "Chủ Trung tâm Auto Care Sài Gòn"
+        }
+      }
+    },
+    "b2bCta": {
+      "eyebrow": "Hợp tác phát triển",
+      "title": "Trở thành Đại lý FUJITEK",
+      "description": "Tham gia mạng lưới đại lý của chúng tôi để nhận được chính sách ưu đãi hấp dẫn, hỗ trợ đào tạo và marketing toàn diện.",
+      "partnerBtn": "Đăng ký làm Đại lý",
+      "hotlineBtn": "Hotline 1900 633 826",
+      "benefits": {
+        "discount": "Chiết khấu hấp dẫn",
+        "training": "Đào tạo chuyên sâu",
+        "marketing": "Hỗ trợ marketing",
+        "warranty": "Bảo hành 10 năm"
       }
     }
   }

@@ -3,7 +3,7 @@ import { FaFacebookF, FaTiktok, FaYoutube } from "react-icons/fa6";
 import { SiZalo } from "react-icons/si";
 
 export const footerLogo = {
-  src: "/logo.png",
+  src: "/logo_2.png",
   width: 240,
 } as const;
 

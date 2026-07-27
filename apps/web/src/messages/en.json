@@ -92,11 +92,29 @@
       "hotlineLabel": "Consultation hotline"
     },
     "products": {
-      "eyebrow": "Featured Products",
-      "title": "PREMIUM WINDOW FILMS",
-      "description": "Select the ideal window film range tailored to your heat rejection and vehicle glass positions.",
-      "bookInstallation": "Details & Book installation",
-      "viewAll": "View all products",
+      "eyebrow": "Automotive Products & Accessories Ecosystem",
+      "title": "PRODUCT CATEGORIES",
+      "description": "Comprehensive automotive solutions including window films, LED lighting systems, 4K dashcams, and TPMS sensors from Lexzenz & Fujitek.",
+      "explore": "Explore category",
+      "viewAll": "View all product categories",
+      "categories": {
+        "film": {
+          "title": "Lexzenz Reflex Korea Automotive Window Film",
+          "description": "Multilayer Sputter & Ultra Nano Ceramic technology imported from Korea, blocking 99% UV/IR rays with superior heat protection."
+        },
+        "lighting": {
+          "title": "Lexzenz Led Fujitek Car & Motorcycle Lighting",
+          "description": "Bi-LED headlights, fog lights, and Offroad auxiliary lights featuring sharp beam cutoff and superior road illumination."
+        },
+        "dashcam": {
+          "title": "Lexzenz Dashcam Smart Dash Cameras",
+          "description": "4K Ultra HD recording with night vision, voice traffic alert alerts, and mobile Wi-Fi app connectivity."
+        },
+        "tpms": {
+          "title": "Lexzenz TPMS Tire Pressure Monitoring Sensors",
+          "description": "Real-time tire pressure & temperature monitoring displaying on Android screens or OEM gauges for maximum driving safety."
+        }
+      },
       "specs": {
         "uv": "UV Block: {value}",
         "ir": "IR Rejection: {value}",
@@ -1924,6 +1942,260 @@
             ]
           }
         ]
+      }
+    }
+  },
+  "AboutPage": {
+    "metadata": {
+      "title": "About FUJITEK Vietnam - Japanese Automotive Window Film Distribution",
+      "description": "FUJITEK Vietnam - High-performance Japanese automotive window film distribution network with genuine E-Warranty coverage."
+    },
+    "hero": {
+      "eyebrow": "Automotive Tech Ecosystem",
+      "titlePrefix": "Comprehensive protection &",
+      "titleHighlight": "Ecosystem",
+      "titleSuffix": "for premium vehicles",
+      "description": "Fujitek not only delivers premium Japanese window film solutions, but also provides a complete automotive tech ecosystem featuring Fujitek High-Power LED Lighting, Lexzenz 4K Dashcams, and Smart TPMS Sensors.",
+      "exploreCta": "Explore Products",
+      "contactCta": "Contact Sales",
+      "exploreProductsCta": "Explore Products",
+      "dealerNetworkCta": "Dealer Network",
+      "brandBadge": "Japanese Tech",
+      "cardTitle": "Thermal Film & Premium Accessories",
+      "cardSubtitle": "ISO 9001 International Standard",
+      "stats": {
+        "uvIr": "UV & IR Rejection",
+        "origin": "Japan Origin",
+        "warranty": "Genuine Warranty"
+      }
+    },
+    "milestones": {
+      "eyebrow": "Growth Journey",
+      "title": "Major Milestones",
+      "description": "Over 10 years of accompanying millions of Vietnamese car owners",
+      "items": {
+        "rdJapan": {
+          "title": "Research & Development",
+          "description": "Established R&D center in Japan, developing proprietary Nano Ceramic technology."
+        },
+        "launchVietnam": {
+          "title": "Vietnam Market Entry",
+          "description": "Officially launched premium window film products in Vietnam."
+        },
+        "ewarrantyRelease": {
+          "title": "E-Warranty Launch",
+          "description": "Rolled out digital warranty system, transparent and convenient."
+        },
+        "networkExpansion": {
+          "title": "Network Expansion",
+          "description": "Over 200 dealers nationwide, covering 63 provinces."
+        }
+      }
+    },
+    "ecosystem": {
+      "eyebrow": "Product Ecosystem",
+      "title": "LEXZENZ - FUJITEK Protection Solutions & Premium Accessories",
+      "description": "Delivering genuine automotive devices and materials, leading in heat rejection, brightness enhancement, and driving safety.",
+      "viewAllCta": "Explore All Products",
+      "productDetailCta": "Product Details",
+      "items": {
+        "film": {
+          "title": "Lexzenz Reflex Korea Automotive Window Film",
+          "description": "Metal Sputtering & Nano Ceramic technology rejecting 99% UV/IR, protecting interior and cooling cabin."
+        },
+        "lighting": {
+          "title": "Lexzenz Led Fujitek Car & Motorcycle Headlights",
+          "description": "High-output Bi-LED & fog lamp systems with precise light cutoff preventing oncoming glare."
+        },
+        "dashcam": {
+          "title": "Lexzenz Dashcam Camera",
+          "description": "4K ultra-clear night video recording with integrated traffic alerts and smart G-sensors."
+        },
+        "tpms": {
+          "title": "Lexzenz TPMS Tire Pressure Monitoring System",
+          "description": "Real-time tire pressure & temperature monitoring with instant leak alerts to Android screens and mobile app."
+        }
+      }
+    },
+    "filmLayers": {
+      "eyebrow": "Multilayer Structure",
+      "title": "Anatomy of 5 High-Tech Film Layers",
+      "instruction": "Hover over layers to inspect detailed structure:",
+      "items": {
+        "scratchCoat": {
+          "title": "Scratch Resistant Coating",
+          "description": "2H hardness surface layer protecting against scratches during glass operation and cleaning."
+        },
+        "sputterMetal": {
+          "title": "Sputter Metal Layer",
+          "description": "Utilizes precious metal atomic particles to reflect maximum solar infrared radiation."
+        },
+        "opticalBase": {
+          "title": "Optical Base PET Film",
+          "description": "Ultra-clear optical PET film ensuring crystal-clear night and rainy driving vision."
+        },
+        "nanoCeramic": {
+          "title": "Nano Ceramic Thermal Layer",
+          "description": "Nanometer-sized ceramic particles blocking heat-generating infrared spectrum."
+        },
+        "adhesive": {
+          "title": "Pressure-Sensitive Adhesive (PSA)",
+          "description": "Odorless imported adhesive with extreme bond strength and zero air bubbles."
+        }
+      }
+    },
+    "brandHeritage": {
+      "eyebrow": "Redefining Standards",
+      "row1Title": "Redefining Premium Automotive Window Film Standards in Vietnam",
+      "row1Desc1": "Fujitek introduces a new generation of window films with a mission to set a distinct standard: not only rejecting heat, but elevating the driving experience in modern urban environments.",
+      "row1Desc2": "Developed and manufactured in Japan - the cradle of advanced Asian materials technology - Fujitek represents the crystallization of engineering performance, aesthetic design, and sustainable value.",
+      "row2Title": "Tech Origin – The Foundation of Trust",
+      "row2Desc1": "“Made in Japan” is not just an origin label; it is a quality promise. Fujitek is researched, manufactured, and inspected according to strict high-tech materials engineering standards.",
+      "row2Desc2": "In Vietnam, Fujitek is introduced as a long-term solution, catering to discerning customers who value real-world performance, technological durability, and premium driving comfort."
+    },
+    "coreTech": {
+      "eyebrow": "Core Technology",
+      "title": "Two Leading Tech Platforms",
+      "subtitle": "Discover the power of advanced Metal Sputtering and Nano Ceramic technology.",
+      "comparisonTitle": "Performance Metrics Comparison",
+      "fujitekLabel": "Fujitek Tech",
+      "standardLabel": "Standard Film",
+      "metrics": {
+        "tser": {
+          "name": "Total Solar Energy Rejected (TSER)",
+          "fujitek": "70% Superior TSER",
+          "standard": "Only ~30% TSER"
+        },
+        "durability": {
+          "name": "Color Durability",
+          "fujitek": "10 - 15 Years Colorfast",
+          "standard": "Fades after 2 Years"
+        },
+        "signal": {
+          "name": "Radio Signal (GPS/4G/VETC)",
+          "fujitek": "100% Unhindered",
+          "standard": "Attenuated / Interference"
+        },
+        "glare": {
+          "name": "Interior Reflection",
+          "fujitek": "Low <8% Anti-Glare",
+          "standard": "Glare >20%"
+        }
+      },
+      "sputtering": {
+        "title": "Sputtering Technology",
+        "description": "Bombarding precious metal atoms (Titanium, Silver, Gold) onto PET film in high vacuum, creating a superior heat-reflecting layer while keeping film thin.",
+        "b1": "Superior reflective heat rejection up to 70% TSER",
+        "b2": "Natural tone, color-fast for over 10 years"
+      },
+      "nanoCeramic": {
+        "title": "Nano Ceramic Technology",
+        "description": "Coating ultra-fine ceramic particles (<10nm) absorbing shortwave IR without interfering with GPS, 4G/5G, RFID, or VETC signals.",
+        "b1": "100% Zero interference with radio and car signals",
+        "b2": "Night anti-glare and low interior reflection"
+      }
+    },
+    "pillars": {
+      "eyebrow": "Vision & Core Values",
+      "title": "Our Mission",
+      "items": {
+        "pioneerTech": {
+          "title": "Pioneer Technology",
+          "description": "Continuously researching and applying the latest technologies from Japan to deliver superior heat rejection solutions.",
+          "checks": {
+            "nanoTech": "Nano Ceramic Technology",
+            "sputterTech": "Sputtering Metal Deposition",
+            "signalFriendly": "Zero GPS, 4G/5G Signal Interference"
+          }
+        },
+        "japaneseQuality": {
+          "title": "Japanese Quality",
+          "description": "100% manufactured in Japan with strict quality control adhering to ISO 9001 standards.",
+          "checks": {
+            "cleanroomClass": "Class 1000 Cleanroom",
+            "qaQc100": "100% QA/QC Inspection",
+            "isoStandard": "International Certification"
+          }
+        },
+        "dedicatedService": {
+          "title": "Dedicated Service",
+          "description": "Accompanying customers with 10-year warranty protection and nationwide dealer network coverage.",
+          "checks": {
+            "ewarrantyDigital": "E-Warranty Digital Registration",
+            "support247": "24/7 Support",
+            "dealerNetwork": "200+ Dealers Nationwide"
+          }
+        }
+      }
+    },
+    "craftsmanship": {
+      "eyebrow": "Manufacturing Standards",
+      "titlePrefix": "Manufacturing Technology",
+      "titleSuffix": "from Japan",
+      "description": "All Fujitek window film products are manufactured on fully automated production lines meeting Japan's strict quality standards.",
+      "research": {
+        "title": "R&D Research",
+        "description": "Developing proprietary Nano ceramic particle formulas (<10nm)."
+      },
+      "cleanroom": {
+        "title": "Cleanroom Production",
+        "description": "Class 1000 cleanroom ensuring zero dust contamination."
+      },
+      "inspection": {
+        "title": "CO/CQ Testing",
+        "description": "International origin and quality certification."
+      },
+      "stats": {
+        "qaQc": "Quality Control",
+        "cleanroom": "Cleanroom",
+        "iso": "Certification",
+        "experience": "Years Experience"
+      }
+    },
+    "network": {
+      "eyebrow": "Nationwide Network",
+      "titlePrefix": "Dealer System",
+      "titleSuffix": "covering 63 provinces",
+      "description": "With over 200 dealers nationwide, Fujitek is committed to providing professional installation services and transparent E-Warranty coverage.",
+      "viewDealersCta": "Find Nearest Dealer",
+      "mapTitle": "Dealer Network Map",
+      "mapSubtitle": "Widespread authorized installation stations",
+      "legendDealer": "Authorized Dealer",
+      "legendCenter": "Installation Center",
+      "stats": {
+        "dealers": "Dealers Nationwide",
+        "provinces": "Provinces",
+        "warrantyYears": "Digital Warranty",
+        "support": "Customer Support"
+      }
+    },
+    "testimonials": {
+      "eyebrow": "Partner Reviews",
+      "title": "What Customers Say About Us",
+      "items": {
+        "dealerHanoi": {
+          "quote": "I have partnered with Fujitek since 2019. High quality products, superior heat rejection, and excellent warranty policy. My customers are extremely satisfied.",
+          "author": "Mr. Tran Duc Thanh",
+          "role": "Director of Panda Auto Showroom Hanoi"
+        },
+        "dealerSaigon": {
+          "quote": "Fujitek's Nano Ceramic technology is truly impressive. Zero GPS signal interference, excellent heat rejection, and high durability. It's the #1 choice for my center.",
+          "author": "Mr. Nguyen Quoc Huy",
+          "role": "Owner of Auto Care Center Saigon"
+        }
+      }
+    },
+    "b2bCta": {
+      "eyebrow": "Growth Partnership",
+      "title": "Become a FUJITEK Dealer",
+      "description": "Join our dealer network to receive attractive discount policies, comprehensive training, and marketing support.",
+      "partnerBtn": "Apply for Dealership",
+      "hotlineBtn": "Hotline 1900 633 826",
+      "benefits": {
+        "discount": "Attractive Margins",
+        "training": "In-Depth Training",
+        "marketing": "Marketing Support",
+        "warranty": "10-Year Warranty"
       }
     }
   }

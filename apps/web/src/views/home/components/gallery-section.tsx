@@ -79,7 +79,7 @@ export function GallerySection() {
   };
 
   return (
-    <section className="w-full border-b border-border-gray bg-surface-muted py-16 lg:py-24">
+    <section className="w-full bg-gray-50 py-16 lg:py-24">
       <div className="mx-auto max-w-[1720px] space-y-12 px-6 text-center sm:px-10 lg:px-12">
         <motion.div
           variants={fadeUp}
@@ -87,10 +87,10 @@ export function GallerySection() {
           whileInView="show"
           viewport={revealViewportOnce}
         >
-          <span className="mb-1.5 block font-sans text-xs font-medium uppercase tracking-[0.25em] text-premium-red sm:text-sm">
+          <span className="mb-1.5 block text-xs font-medium uppercase tracking-[0.25em] text-premium-red sm:text-sm">
             {t("eyebrow")}
           </span>
-          <h2 className="font-condensed text-3xl font-medium uppercase tracking-wider text-deep-black sm:text-4xl lg:text-5xl">
+          <h2 className="text-3xl font-medium uppercase tracking-wider text-deep-black sm:text-4xl lg:text-5xl">
             {t("title")}
           </h2>
           <div className="mx-auto mt-3 h-[3px] w-20 bg-premium-red" />

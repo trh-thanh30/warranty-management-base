@@ -5,6 +5,7 @@ import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Container } from "@/src/components/common/container";
 import { HeaderNavLink } from "@/src/components/layout/components/header-nav-link";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { Link, usePathname } from "@/src/i18n/navigation";
@@ -29,6 +30,16 @@ export function SiteHeader() {
   const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1280) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -50,7 +61,7 @@ export function SiteHeader() {
       data-site-header
       className="fixed inset-x-0 top-0 z-50 w-full border-b border-border-gray bg-off-white py-3 shadow-sm"
     >
-      <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-6 px-6 sm:px-8">
+      <Container className="flex items-center justify-between gap-6">
         <Link
           href={APP_ROUTES.home}
           aria-label={t("homeAriaLabel")}
@@ -58,7 +69,7 @@ export function SiteHeader() {
           onClick={closeMobileMenu}
         >
           <Image
-            src="/logo.png"
+            src="/logo_2.png"
             alt={t("logoAlt")}
             width={260}
             height={70}
@@ -84,7 +95,7 @@ export function SiteHeader() {
             href={APP_ROUTES.dealers}
             aria-current={isDealerRouteActive ? "page" : undefined}
             data-active={isDealerRouteActive ? "true" : undefined}
-            className="rounded-[14px] bg-premium-red px-7 py-3 text-xs font-medium uppercase tracking-wide text-off-white shadow-md shadow-premium-red/20 transition-colors duration-200 hover:bg-warm-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2 sm:text-sm"
+            className="rounded-md bg-premium-red px-7 py-3 text-xs font-medium uppercase tracking-wide text-off-white shadow-md shadow-premium-red/20 transition-colors duration-200 hover:bg-warm-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2 sm:text-sm"
           >
             {t("dealerCta")}
           </Link>
@@ -111,7 +122,7 @@ export function SiteHeader() {
             />
           </span>
         </button>
-      </div>
+      </Container>
 
       <AnimatePresence initial={false}>
         {isMobileMenuOpen && (
@@ -144,7 +155,7 @@ export function SiteHeader() {
                   aria-current={isDealerRouteActive ? "page" : undefined}
                   data-active={isDealerRouteActive ? "true" : undefined}
                   onClick={closeMobileMenu}
-                  className="block rounded-[14px] bg-premium-red py-3.5 text-center text-sm font-medium uppercase tracking-wide text-off-white shadow-md shadow-premium-red/20 transition-colors duration-200 hover:bg-warm-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2"
+                  className="block rounded-md bg-premium-red py-3.5 text-center text-sm font-medium uppercase tracking-wide text-off-white shadow-md shadow-premium-red/20 transition-colors duration-200 hover:bg-warm-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2"
                 >
                   {t("dealerCta")}
                 </Link>

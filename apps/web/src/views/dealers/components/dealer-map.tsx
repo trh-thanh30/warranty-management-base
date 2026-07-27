@@ -249,7 +249,7 @@ export function DealerMap({ activeDealer }: DealerMapProps) {
             title={activeDealer.name}
           >
             <Popup>
-              <div className="min-w-52 space-y-2 font-sans">
+              <div className="min-w-52 space-y-2">
                 <span className="inline-flex rounded-md bg-premium-red px-2 py-1 text-xs font-semibold uppercase tracking-wider text-white">
                   {t("selectedDealer")}
                 </span>

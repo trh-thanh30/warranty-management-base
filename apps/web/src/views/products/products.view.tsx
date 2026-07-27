@@ -165,7 +165,7 @@ export function ProductsView() {
       {/* HERO SECTION */}
       <section className="relative flex min-h-[200px] sm:h-[300px] items-center justify-center overflow-hidden bg-deep-black py-10 sm:py-0">
         <Image
-          src="/bg.jpg"
+          src="/bg_1.jpg"
           alt={t("hero.imageAlt")}
           fill
           priority
@@ -180,7 +180,7 @@ export function ProductsView() {
           <h1 className="mt-2 sm:mt-3 font-condensed text-2xl xs:text-3xl font-semibold uppercase tracking-widest text-white sm:text-5xl">
             {t("hero.title")}
           </h1>
-          <p className="mt-3 text-base font-medium leading-relaxed text-white/80 max-w-xl mx-auto text-pretty">
+          <p className="mt-3 text-base font-normal leading-relaxed text-white/80 max-w-xl mx-auto text-pretty">
             {t("catalog.description")}
           </p>
         </div>
