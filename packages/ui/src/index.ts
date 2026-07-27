@@ -13,6 +13,7 @@ export * from "./input";
 export * from "./label";
 export * from "./lib/utils";
 export * from "./pagination";
+export * from "./policy-document";
 export * from "./popover";
 export * from "./separator";
 export * from "./select";

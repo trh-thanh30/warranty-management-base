@@ -20,6 +20,7 @@
     "./label": "./src/label.tsx",
     "./lib/utils": "./src/lib/utils.ts",
     "./pagination": "./src/pagination.tsx",
+    "./policy-document": "./src/policy-document.tsx",
     "./popover": "./src/popover.tsx",
     "./separator": "./src/separator.tsx",
     "./select": "./src/select.tsx",

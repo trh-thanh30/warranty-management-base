@@ -3,6 +3,7 @@ import { PrismaClient, user_role, user_status } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { Pool } from 'pg';
 import { seedLexzenzProductCategories } from './seed-categories';
+import { seedPolicyContentPages } from './seed-content-pages';
 import { seedWebsiteConfigDrafts } from './seed-website-config';
 
 let prisma: PrismaClient | undefined;
@@ -21,6 +22,7 @@ async function main() {
 
   await seedProductionAdmin(prisma);
   await seedLexzenzProductCategories(prisma);
+  await seedPolicyContentPages(prisma);
   await seedWebsiteConfigDrafts(prisma);
 
   console.log('Production database seed completed successfully.');

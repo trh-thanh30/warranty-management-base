@@ -4,32 +4,63 @@ import path from "node:path";
 import process from "node:process";
 import test from "node:test";
 
-test("policy contact hotlines follow their matching office address", async () => {
+const webRoot = path.join(process.cwd(), "apps", "web");
+
+test("public policy detail loads published admin content", async () => {
   const source = await readFile(
+    path.join(webRoot, "src", "views", "policy", "policy-detail.view.tsx"),
+    "utf8",
+  );
+
+  assert.match(source, /getPublishedContentPage/);
+  assert.match(source, /config\.slugs\[policyLocale\]/);
+  assert.match(source, /<PolicyDocument/);
+  assert.match(source, /emptyTitle=\{t\("emptyTitle"\)\}/);
+});
+
+test("policy routes map both locales to admin content slugs", async () => {
+  const source = await readFile(
+    path.join(webRoot, "src", "views", "policy", "policy.constants.ts"),
+    "utf8",
+  );
+
+  const vietnameseSlugs = [
+    "chinh-sach-quy-dinh-chung",
+    "chinh-sach-bao-mat",
+    "chinh-sach-mua-hang",
+    "chinh-sach-bao-hanh-doi-tra",
+    "chinh-sach-giao-hang",
+    "chinh-sach-thanh-toan",
+  ];
+  const englishSlugs = [
+    "policies-general",
+    "policies-privacy",
+    "policies-purchasing",
+    "policies-warranty-return",
+    "policies-shipping",
+    "policies-payment",
+  ];
+
+  for (const slug of [...vietnameseSlugs, ...englishSlugs]) {
+    assert.ok(source.includes(`"${slug}"`), `missing policy slug ${slug}`);
+  }
+});
+
+test("admin preview and public web share the policy document component", async () => {
+  const previewSource = await readFile(
     path.join(
       process.cwd(),
       "apps",
-      "web",
+      "admin",
       "src",
       "views",
-      "policy",
-      "policy-detail.view.tsx",
+      "content-pages",
+      "components",
+      "content-page-preview-dialog.tsx",
     ),
     "utf8",
   );
 
-  const contactBlock = source.slice(
-    source.indexOf("Company Contact Info Footer Block"),
-  );
-  const hcmAddress = contactBlock.indexOf("7C Nguyễn Ngọc Phương");
-  const hcmHotline = contactBlock.indexOf('href="tel:0886337733"');
-  const hanoiAddress = contactBlock.indexOf("Số 62, Ngõ 20 Nghĩa Đô");
-  const hanoiHotline = contactBlock.indexOf('href="tel:0989017999"');
-
-  assert.ok(
-    hcmAddress < hcmHotline &&
-      hcmHotline < hanoiAddress &&
-      hanoiAddress < hanoiHotline,
-    "each office address should be immediately followed by its own hotline",
-  );
+  assert.match(previewSource, /PolicyDocument/);
+  assert.doesNotMatch(previewSource, /<iframe/);
 });

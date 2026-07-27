@@ -1145,9 +1145,28 @@
     }
   },
   "PolicyPage": {
-    "eyebrow": "Warranty terms & Policy",
-    "title": "Official FUJITEK warranty policy",
-    "description": "Electronic warranty coverage of 10 to 15 years for eligible Sputtering and Nano Ceramic films.",
+    "eyebrow": "Legal & Policies",
+    "title": "Transparent policies, clearly stated rights",
+    "description": "Review the terms governing website use, purchases, payments, delivery, privacy, and FUJITEK product warranties.",
+    "available": "Content available",
+    "unavailable": "Not available yet",
+    "missingCard": "This policy has not been published yet.",
+    "labels": {
+      "general": "General terms",
+      "privacy": "Privacy",
+      "purchasing": "Purchasing",
+      "warrantyReturn": "Warranty & Returns",
+      "shipping": "Shipping",
+      "payment": "Payment"
+    },
+    "titles": {
+      "general": "General terms & conditions",
+      "privacy": "Privacy policy",
+      "purchasing": "Purchase policy",
+      "warrantyReturn": "Warranty & returns policy",
+      "shipping": "Shipping policy",
+      "payment": "Payment policy"
+    },
     "duration": {
       "title": "1. Warranty duration",
       "description": "FUJITEK automotive window film receives an official electronic warranty of 10 to 15 years from successful E-Warranty activation."
@@ -1683,7 +1702,18 @@
     "apiDocs": "API docs"
   },
   "PolicyDetailPage": {
-    "eyebrow": "FUJITEK – Legal and policies",
+    "eyebrow": "Legal & Policies",
+    "lastUpdated": "Last updated: {date}",
+    "emptyTitle": "Content not available",
+    "emptyDescription": "This policy has not been published yet. Please check back later or contact FUJITEK for support.",
+    "titles": {
+      "general": "General terms & conditions",
+      "privacy": "Privacy policy",
+      "purchasing": "Purchase policy",
+      "warrantyReturn": "Warranty & returns policy",
+      "shipping": "Shipping policy",
+      "payment": "Payment policy"
+    },
     "home": "Home",
     "companyName": "Vilatek Joint Stock Company",
     "companyDescription": "Official supplier of FUJITEK automotive window films and premium automotive accessories.",

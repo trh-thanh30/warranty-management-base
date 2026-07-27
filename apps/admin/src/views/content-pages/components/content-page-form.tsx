@@ -30,6 +30,7 @@ export function ContentPageForm({
   const parseDocument = useParseContentDocument();
   const errors = form.formState.errors;
   const content = form.watch("content");
+  const summary = form.watch("summary");
   const title = form.watch("title");
   const categoriesQuery = useCategories({
     isActive: "true",
@@ -203,6 +204,7 @@ export function ContentPageForm({
         content={content}
         onOpenChange={setPreviewOpen}
         open={previewOpen}
+        summary={summary}
         title={title}
       />
     </>
