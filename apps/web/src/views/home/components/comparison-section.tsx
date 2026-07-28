@@ -19,7 +19,7 @@ export function ComparisonSection() {
         <div className="grid gap-12 lg:grid-cols-12 items-center">
           {/* Left Summary with FadeIn */}
           <FadeIn direction="right" className="lg:col-span-5 space-y-4">
-            <span className="block text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-premium-red">
+            <span className="block text-xs sm:text-sm font-semibold uppercase text-premium-red">
               {t("eyebrow")}
             </span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold uppercase text-deep-black">

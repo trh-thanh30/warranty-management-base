@@ -21,7 +21,7 @@ export function SputterSection() {
         <div className="grid gap-12 lg:grid-cols-12 items-center">
           {/* Left Description with FadeIn */}
           <FadeIn direction="right" className="lg:col-span-6 space-y-5">
-            <span className="block text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-premium-red">
+            <span className="block text-xs sm:text-sm font-semibold uppercase text-premium-red">
               {t("eyebrow")}
             </span>
             <h2 className="text-2xl sm:text-4xl lg:text-5xl font-semibold uppercase tracking-wide text-deep-black leading-tight">

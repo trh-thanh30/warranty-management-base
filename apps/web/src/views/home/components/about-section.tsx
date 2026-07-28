@@ -25,10 +25,10 @@ export function AboutSection() {
       <Container>
         {/* Centered Section Header with FadeIn */}
         <FadeIn direction="up" className="text-center pb-4 lg:pb-6">
-          <span className="block text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-premium-red mb-1.5">
+          <span className="block text-xs sm:text-sm font-semibold uppercase text-premium-red mb-1.5">
             {t("eyebrow")}
           </span>
-          <h2 className="font-condensed text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold uppercase tracking-wide text-deep-black leading-snug text-center">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold uppercase tracking-wide text-deep-black leading-snug text-center">
             {t("title")}
           </h2>
         </FadeIn>
