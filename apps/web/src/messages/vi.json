@@ -1107,6 +1107,11 @@
           "label": "Nội dung *",
           "placeholder": "Nhập nội dung cần tư vấn..."
         }
+      },
+      "validation": {
+        "fullNameMin": "Vui lòng nhập họ tên tối thiểu 2 ký tự.",
+        "phoneInvalid": "Vui lòng nhập số điện thoại hợp lệ.",
+        "contentMin": "Vui lòng nhập nội dung tối thiểu 10 ký tự."
       }
     },
     "maps": {

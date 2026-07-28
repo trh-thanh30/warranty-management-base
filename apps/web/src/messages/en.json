@@ -1107,6 +1107,11 @@
           "label": "Message *",
           "placeholder": "Tell us what you need help with..."
         }
+      },
+      "validation": {
+        "fullNameMin": "Enter a full name with at least 2 characters.",
+        "phoneInvalid": "Enter a valid phone number.",
+        "contentMin": "Enter a message with at least 10 characters."
       }
     },
     "maps": {

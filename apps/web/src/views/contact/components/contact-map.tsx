@@ -31,7 +31,7 @@ export default function ContactMap({ lat, lng, title }: ContactMapProps) {
   );
 
   return (
-    <div className="relative isolate size-full overflow-hidden rounded-[24px]">
+    <div className="relative isolate size-full overflow-hidden rounded-md">
       <MapContainer
         center={[lat, lng]}
         zoom={15}
