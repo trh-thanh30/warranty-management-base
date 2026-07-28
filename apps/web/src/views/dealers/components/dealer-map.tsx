@@ -25,6 +25,8 @@ const VIETNAM_INTERACTION_BOUNDS: LatLngBoundsExpression = [
   [6.95331046340264, 102.118655233],
   [23.3662751270001, 116.947319489797],
 ];
+const OSM_TILE_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 const WORLD_RING: LatLngTuple[] = [
   [-90, -180],
@@ -223,7 +225,10 @@ export function DealerMap({ activeDealer }: DealerMapProps) {
         maxZoom={18}
         scrollWheelZoom
       >
-        <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <TileLayer
+          attribution={OSM_TILE_ATTRIBUTION}
+          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
 
         {maskPositions && (
           <Polygon positions={maskPositions} pathOptions={maskStyle} />

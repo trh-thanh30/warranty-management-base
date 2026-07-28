@@ -2,16 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { MapPin } from "lucide-react";
+import { SharedMap } from "@repo/ui/map";
 import { divIcon } from "leaflet";
 import type { LatLngTuple, PathOptions } from "leaflet";
-import {
-  GeoJSON,
-  MapContainer,
-  Marker,
-  Polygon,
-  Popup,
-  TileLayer,
-} from "react-leaflet";
+import { useTranslations } from "next-intl";
+import { GeoJSON, Marker, Polygon, Popup } from "react-leaflet";
 
 const WORLD_RING: LatLngTuple[] = [
   [-90, -180],
@@ -133,15 +128,12 @@ const dealerPinLocations = [
 ];
 
 const VIETNAM_CENTER: LatLngTuple = [16.0, 107.0];
+const VIETNAM_INITIAL_ZOOM = 6.25;
 
 export function AboutNetworkMap() {
-  const [isMounted, setIsMounted] = useState(false);
+  const t = useTranslations("AboutPage.network");
   const [vietnamBoundary, setVietnamBoundary] =
     useState<VietnamBoundary | null>(null);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   useEffect(() => {
     fetch("/map/vn.geojson")
@@ -180,32 +172,19 @@ export function AboutNetworkMap() {
       popupAnchor: [0, -10],
     });
 
-  if (!isMounted) {
-    return (
-      <div
-        aria-hidden="true"
-        className="w-full h-full min-h-[500px] animate-pulse bg-surface-muted"
-      />
-    );
-  }
-
   return (
     <div className="relative w-full h-full bg-surface-muted isolate overflow-hidden">
-      {/* React Leaflet Map Container with OSM Tiles */}
-      <MapContainer
-        center={VIETNAM_CENTER}
-        zoom={6.25}
+      <SharedMap
+        activateLabel={t("activateMap")}
+        initialCenter={VIETNAM_CENTER}
+        initialZoom={VIETNAM_INITIAL_ZOOM}
+        resetLabel={t("resetMap")}
         zoomSnap={0.25}
         minZoom={5}
         maxZoom={12}
-        scrollWheelZoom={true}
         className="w-full h-full z-0"
+        loadingClassName="w-full h-full min-h-[500px] animate-pulse bg-surface-muted"
       >
-        <TileLayer
-          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-
         {/* Outer Mask: Hides everywhere except Vietnam mainland */}
         {maskPositions && (
           <Polygon positions={maskPositions} pathOptions={maskStyle} />
@@ -247,7 +226,7 @@ export function AboutNetworkMap() {
             </Popup>
           </Marker>
         ))}
-      </MapContainer>
+      </SharedMap>
     </div>
   );
 }

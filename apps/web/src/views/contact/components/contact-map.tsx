@@ -10,6 +10,9 @@ interface ContactMapProps {
   title: string;
 }
 
+const OSM_TILE_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
 export default function ContactMap({ lat, lng, title }: ContactMapProps) {
   const redPinIcon = useMemo(
     () =>
@@ -34,10 +37,9 @@ export default function ContactMap({ lat, lng, title }: ContactMapProps) {
         zoom={15}
         className="size-full"
         scrollWheelZoom={false}
-        attributionControl={false}
       >
         <TileLayer
-          attribution=""
+          attribution={OSM_TILE_ATTRIBUTION}
           url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <Marker position={[lat, lng]} icon={redPinIcon} title={title} />

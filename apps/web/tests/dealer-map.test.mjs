@@ -76,6 +76,8 @@ test("dealer map uses constrained Leaflet with a mask and active marker", async 
     "Popup",
     "flyTo",
     "fitBounds",
+    "OSM_TILE_ATTRIBUTION",
+    "attribution={OSM_TILE_ATTRIBUTION}",
     "/map/vn.geojson",
     "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
   ]) {
