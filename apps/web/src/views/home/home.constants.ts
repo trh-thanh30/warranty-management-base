@@ -45,16 +45,7 @@ export const carBrands = [
   { name: "Volvo", src: "/brands/volvo.svg" },
 ] as const;
 
-export const faqItems = [
-  "warrantyDuration",
-  "lookup",
-  "sputterDifference",
-  "installationTime",
-  "choosePackage",
-  "aftercare",
-  "signalSafety",
-  "warrantySupport",
-] as const;
+export const FAQ_CONTENT_PAGE_SLUG = "cau-hoi-thuong-gap";
 
 export const additionalProductCategories = [
   {

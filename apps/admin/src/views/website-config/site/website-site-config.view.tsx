@@ -22,7 +22,6 @@ import {
   House,
   MapPin,
   Plus,
-  Save,
   Share2,
   Trash2,
 } from "lucide-react";
@@ -249,26 +248,10 @@ export function WebsiteSiteConfigView() {
       <div className="space-y-6">
         <PageHeader
           actions={
-            <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto">
-              <PreviewDataDialog
-                load={websiteConfigService.previewSite}
-                locale={locale}
-              />
-              {canUpdate ? (
-                <Button
-                  className="min-h-11 w-full sm:min-h-9 sm:w-auto"
-                  disabled={!dirty || saveMutation.isPending}
-                  onClick={() => void saveDraft()}
-                  type="button"
-                  variant="outline"
-                >
-                  <Save aria-hidden="true" className="size-4" />
-                  {saveMutation.isPending
-                    ? t("actions.saving")
-                    : t("actions.saveDraft")}
-                </Button>
-              ) : null}
-            </div>
+            <PreviewDataDialog
+              load={websiteConfigService.previewSite}
+              locale={locale}
+            />
           }
           description={t("site.description")}
           eyebrow={t("eyebrow")}
@@ -281,9 +264,13 @@ export function WebsiteSiteConfigView() {
         />
         {query.data ? (
           <RevisionStatusBar
+            canSave={canUpdate}
             canPublish={canPublish}
+            hasUnsavedChanges={dirty}
             isPublishing={publishMutation.isPending}
+            isSaving={saveMutation.isPending}
             onPublish={publish}
+            onSave={saveDraft}
             revision={query.data.revision}
           />
         ) : null}

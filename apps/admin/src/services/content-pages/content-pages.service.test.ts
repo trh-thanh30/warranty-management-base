@@ -9,7 +9,7 @@ const page = {
   title: "Warranty policy",
   summary: "Warranty terms",
   content: "<p>Policy content</p>",
-  kind: "POLICY",
+  kind: "GENERAL_POLICY",
   status: "DRAFT",
   publishedAt: null,
   createdAt: "2026-07-17T00:00:00.000Z",
@@ -38,13 +38,23 @@ test("lists content pages with directory filters", async () => {
 
   const result = await createContentPagesService(
     http as unknown as ContentPagesHttpClient,
-  ).list({ kind: "POLICY", page: 1, search: "policy", status: "DRAFT" });
+  ).list({
+    kind: "GENERAL_POLICY",
+    page: 1,
+    search: "policy",
+    status: "DRAFT",
+  });
 
   assert.deepEqual(calls, [
     {
       url: "/content-pages",
       config: {
-        params: { kind: "POLICY", page: 1, search: "policy", status: "DRAFT" },
+        params: {
+          kind: "GENERAL_POLICY",
+          page: 1,
+          search: "policy",
+          status: "DRAFT",
+        },
       },
     },
   ]);
@@ -89,7 +99,7 @@ test("creates and updates content pages", async () => {
     slug: page.slug,
     title: page.title,
     content: page.content,
-    kind: "POLICY" as const,
+    kind: "GENERAL_POLICY" as const,
     status: "DRAFT" as const,
   };
 
@@ -120,4 +130,120 @@ test("deletes a content page", async () => {
   ).delete("page-1");
 
   assert.deepEqual(calls, ["/content-pages/page-1"]);
+});
+
+test("reorders FAQ items through the dedicated endpoint", async () => {
+  const calls: unknown[] = [];
+  const http = {
+    async patch(url: string, body?: unknown) {
+      calls.push({ body, url });
+      return { data: { success: true, data: page } };
+    },
+  };
+  const itemIds = [
+    "1c4dfd2c-46e4-49db-a5f4-ffef569712c4",
+    "c6a95189-721a-4c98-a8c6-cf0db911489b",
+  ];
+
+  await createContentPagesService(
+    http as unknown as ContentPagesHttpClient,
+  ).reorderFaqItems("page-1", { itemIds });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/content-pages/page-1/faq-items/reorder",
+      body: { itemIds },
+    },
+  ]);
+});
+
+test("creates, updates, and deletes individual FAQ items", async () => {
+  const calls: unknown[] = [];
+  const faqItem = {
+    id: "1c4dfd2c-46e4-49db-a5f4-ffef569712c4",
+    question: "Warranty?",
+    answer: "<p>15 years.</p>",
+    sortOrder: 0,
+    isActive: true,
+    createdAt: "2026-07-28T00:00:00.000Z",
+    updatedAt: "2026-07-28T00:00:00.000Z",
+  };
+  const http = {
+    async post(url: string, body?: unknown) {
+      calls.push({ body, method: "post", url });
+      return { data: { success: true, data: faqItem } };
+    },
+    async patch(url: string, body?: unknown) {
+      calls.push({ body, method: "patch", url });
+      return { data: { success: true, data: faqItem } };
+    },
+    async delete(url: string) {
+      calls.push({ method: "delete", url });
+      return { data: { success: true } };
+    },
+  };
+  const service = createContentPagesService(
+    http as unknown as ContentPagesHttpClient,
+  );
+  const body = {
+    question: faqItem.question,
+    answer: faqItem.answer,
+    isActive: true,
+  };
+
+  await service.createFaqItem("page-1", body);
+  await service.updateFaqItem("page-1", faqItem.id, body);
+  await service.deleteFaqItem("page-1", faqItem.id);
+
+  assert.deepEqual(calls, [
+    {
+      method: "post",
+      url: "/content-pages/page-1/faq-items",
+      body,
+    },
+    {
+      method: "patch",
+      url: `/content-pages/page-1/faq-items/${faqItem.id}`,
+      body,
+    },
+    {
+      method: "delete",
+      url: `/content-pages/page-1/faq-items/${faqItem.id}`,
+    },
+  ]);
+});
+
+test("parses a PDF or DOCX document using multipart form data", async () => {
+  const calls: unknown[] = [];
+  const http = {
+    async post(url: string, body?: unknown, config?: unknown) {
+      calls.push({ body, config, url });
+      return {
+        data: {
+          success: true,
+          data: { content: "<p>Imported document</p>" },
+        },
+      };
+    },
+  };
+  const service = createContentPagesService(
+    http as unknown as ContentPagesHttpClient,
+  );
+  const file = new File(["document"], "policy.docx", {
+    type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  });
+
+  const result = await service.parseDocument(file);
+
+  assert.deepEqual(result, { content: "<p>Imported document</p>" });
+  assert.equal(calls.length, 1);
+  const call = calls[0] as {
+    body: FormData;
+    config?: unknown;
+    url: string;
+  };
+  assert.equal(call.url, "/content-pages/parse-document");
+  assert.ok(call.body instanceof FormData);
+  assert.equal(call.body.get("file"), file);
+  assert.equal(call.config, undefined);
 });

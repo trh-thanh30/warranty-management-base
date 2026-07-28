@@ -15,6 +15,7 @@ import {
   type ContentPageFormValues,
 } from "../content-pages.types";
 import {
+  getContentPageFormValues,
   getContentPageSaveError,
   slugifyContentPageTitle,
 } from "../content-pages.utils";
@@ -37,21 +38,38 @@ export function useContentPageForm({
   const slugEdited = useRef(Boolean(page));
   const form = useForm<ContentPageFormValues>({
     resolver: zodResolver(contentPageFormSchema),
-    defaultValues: getValues(null),
+    defaultValues: getContentPageFormValues(page),
   });
 
   useEffect(() => {
     slugEdited.current = Boolean(page);
-    form.reset(getValues(page));
+    form.reset(getContentPageFormValues(page));
   }, [form, page]);
 
   async function submit(values: ContentPageFormValues) {
     try {
+      const previousRichText = [
+        page?.content ?? "",
+        ...(page?.faqItems.map((item) => item.answer) ?? []),
+      ].join("");
+      const nextRichText = [
+        values.content,
+        ...values.faqItems.map((item) => item.answer),
+      ].join("");
       const removedMediaCount = page
-        ? getRemovedMediaUrls(page.content, values.content).length
+        ? getRemovedMediaUrls(previousRichText, nextRichText).length
         : 0;
       const body = {
         ...values,
+        content: values.kind === "FAQ" ? undefined : values.content,
+        faqItems:
+          !page && values.kind === "FAQ"
+            ? values.faqItems.map(({ answer, isActive, question }) => ({
+                answer,
+                isActive,
+                question,
+              }))
+            : undefined,
         categoryId: values.categoryId || null,
         summary: values.summary || undefined,
       };
@@ -93,16 +111,5 @@ export function useContentPageForm({
     markSlugEdited: () => {
       slugEdited.current = true;
     },
-  };
-}
-
-function getValues(page: ContentPageSummary | null): ContentPageFormValues {
-  return {
-    slug: page?.slug ?? "",
-    title: page?.title ?? "",
-    summary: page?.summary ?? "",
-    content: page?.content ?? "",
-    kind: page?.kind ?? "POLICY",
-    categoryId: page?.categoryId ?? "",
   };
 }

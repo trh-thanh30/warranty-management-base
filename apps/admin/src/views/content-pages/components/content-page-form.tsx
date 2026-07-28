@@ -12,6 +12,8 @@ import { SelectControl } from "@/src/components/common/select-control";
 import { CONTENT_PAGE_KINDS } from "../content-pages.constants";
 import { useCategories } from "../../categories/hooks/use-categories";
 import { useContentPageForm } from "../hooks/use-content-page-form";
+import { useParseContentDocument } from "../hooks/use-content-pages";
+import { ContentPageFaqItemsEditor } from "./content-page-faq-items-editor";
 import { ContentPagePreviewDialog } from "./content-page-preview-dialog";
 
 export function ContentPageForm({
@@ -26,8 +28,12 @@ export function ContentPageForm({
   const t = useTranslations("ContentPages");
   const [previewOpen, setPreviewOpen] = useState(false);
   const form = useContentPageForm({ page, onSaved });
+  const parseDocument = useParseContentDocument();
   const errors = form.formState.errors;
   const content = form.watch("content");
+  const faqItems = form.watch("faqItems");
+  const kind = form.watch("kind");
+  const summary = form.watch("summary");
   const title = form.watch("title");
   const categoriesQuery = useCategories({
     isActive: "true",
@@ -144,21 +150,35 @@ export function ContentPageForm({
           />
         </Field>
         <Field
-          error={translateError(errors.content?.message, t)}
-          id="content-page-content"
-          label={t("contentLabel")}
+          error={translateError(
+            kind === "FAQ" ? errors.faqItems?.message : errors.content?.message,
+            t,
+          )}
+          id={
+            kind === "FAQ" ? "content-page-faq-items" : "content-page-content"
+          }
+          label={kind === "FAQ" ? t("faqItemsLabel") : t("contentLabel")}
         >
-          <Controller
-            control={form.control}
-            name="content"
-            render={({ field }) => (
-              <RichTextEditor
-                disabled={form.isSubmitting}
-                onChange={field.onChange}
-                value={field.value}
-              />
-            )}
-          />
+          {kind === "FAQ" ? (
+            <ContentPageFaqItemsEditor form={form} pageId={page?.id ?? null} />
+          ) : (
+            <Controller
+              control={form.control}
+              name="content"
+              render={({ field }) => (
+                <RichTextEditor
+                  disabled={form.isSubmitting}
+                  maxLength={20_000}
+                  onChange={field.onChange}
+                  onImportDocument={async (file) => {
+                    const result = await parseDocument.mutateAsync(file);
+                    return result.content;
+                  }}
+                  value={field.value}
+                />
+              )}
+            />
+          )}
         </Field>
         <div className="grid gap-2 border-t border-slate-200 pt-5 dark:border-slate-800 sm:flex sm:justify-end">
           <Button
@@ -172,7 +192,7 @@ export function ContentPageForm({
           </Button>
           <Button
             className="h-11 w-full sm:h-10 sm:w-auto"
-            disabled={!content.trim()}
+            disabled={kind === "FAQ" ? faqItems.length === 0 : !content.trim()}
             onClick={() => setPreviewOpen(true)}
             type="button"
             variant="outline"
@@ -194,8 +214,11 @@ export function ContentPageForm({
       </form>
       <ContentPagePreviewDialog
         content={content}
+        faqItems={faqItems}
+        kind={kind}
         onOpenChange={setPreviewOpen}
         open={previewOpen}
+        summary={summary}
         title={title}
       />
     </>
@@ -215,6 +238,11 @@ function translateError(
     "titleLength",
     "summaryLength",
     "contentRequired",
+    "faqItemsRequired",
+    "faqItemsLength",
+    "faqQuestionRequired",
+    "faqQuestionLength",
+    "faqAnswerRequired",
     "categoryInvalid",
   ]);
   return keys.has(message) ? t(message) : message;

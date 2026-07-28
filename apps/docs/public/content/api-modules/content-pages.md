@@ -27,7 +27,14 @@ Public:
 ## Enums
 
 ```ts
-type ContentPageKind = "POLICY" | "GUIDE" | "INTRO" | "FAQ";
+type ContentPageKind =
+  | "GENERAL_POLICY"
+  | "PRIVACY_POLICY"
+  | "PURCHASE_POLICY"
+  | "WARRANTY_RETURN_POLICY"
+  | "SHIPPING_POLICY"
+  | "PAYMENT_POLICY"
+  | "FAQ";
 type ContentPageStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
 ```
 
@@ -153,7 +160,8 @@ Error:
 
 ## FE triển khai chuẩn
 
-- Trang “Chính sách và hướng dẫn” nên gọi list public với `kind=POLICY` hoặc `kind=GUIDE`.
+- Trang chính sách nên gọi list public với loại chính sách tương ứng; ví dụ
+  `kind=PRIVACY_POLICY`. Trang câu hỏi thường gặp dùng `kind=FAQ`.
 - Detail page dùng slug thay vì id.
 - Admin nên có preview content và trạng thái draft/published/archived.
 - Không render trang `DRAFT` ngoài main FE.

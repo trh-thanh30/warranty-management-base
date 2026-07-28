@@ -1,9 +1,12 @@
 import type { ContentPageKind, ContentPageStatus } from "@repo/shared";
 
 export const CONTENT_PAGE_KINDS: ContentPageKind[] = [
-  "POLICY",
-  "GUIDE",
-  "INTRO",
+  "GENERAL_POLICY",
+  "PRIVACY_POLICY",
+  "PURCHASE_POLICY",
+  "WARRANTY_RETURN_POLICY",
+  "SHIPPING_POLICY",
+  "PAYMENT_POLICY",
   "FAQ",
 ];
 

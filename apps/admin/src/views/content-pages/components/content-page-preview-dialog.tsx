@@ -1,39 +1,114 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { ChevronDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
+  PolicyDocument,
 } from "@repo/ui";
+import type { ContentPageFormValues } from "../content-pages.types";
 
 export function ContentPagePreviewDialog({
   content,
+  faqItems,
+  kind,
   open,
   onOpenChange,
+  summary,
   title,
 }: {
   content: string;
+  faqItems: ContentPageFormValues["faqItems"];
+  kind: ContentPageFormValues["kind"];
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  summary: string;
   title: string;
 }) {
   const t = useTranslations("ContentPages");
-  const document = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:system-ui,sans-serif;max-width:760px;margin:0 auto;padding:24px;color:#0f172a;line-height:1.7}img,video{max-width:100%;height:auto}h1,h2,h3{line-height:1.25}pre{white-space:pre-wrap;background:#f1f5f9;padding:12px;border-radius:8px}</style></head><body>${content}</body></html>`;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[min(calc(100vw-2rem),60rem)] max-w-none p-4 sm:p-6">
-        <DialogTitle>{title || t("previewUntitled")}</DialogTitle>
-        <DialogDescription>{t("previewDescription")}</DialogDescription>
-        <iframe
-          className="h-[65dvh] w-full rounded-md border border-slate-200 bg-white dark:border-slate-800"
-          sandbox=""
-          srcDoc={document}
-          title={t("previewFrameTitle")}
-        />
+      <DialogContent className="w-[min(calc(100vw-1rem),70rem)] max-w-none overflow-hidden border-0 bg-white p-0 sm:w-[min(calc(100vw-2rem),70rem)]">
+        <DialogTitle className="sr-only">
+          {title || t("previewUntitled")}
+        </DialogTitle>
+        <DialogDescription className="sr-only">
+          {t("previewDescription")}
+        </DialogDescription>
+        <div className="max-h-[85dvh] overflow-y-auto">
+          {kind === "FAQ" ? (
+            <FaqPreview
+              items={faqItems}
+              summary={summary}
+              title={title || t("previewUntitled")}
+            />
+          ) : (
+            <PolicyDocument
+              content={content}
+              emptyDescription={t("previewEmptyDescription")}
+              emptyTitle={t("previewEmptyTitle")}
+              eyebrow={t("previewEyebrow")}
+              summary={summary}
+              title={title || t("previewUntitled")}
+              updatedText={t("previewDraftLabel")}
+            />
+          )}
+        </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function FaqPreview({
+  items,
+  summary,
+  title,
+}: {
+  items: ContentPageFormValues["faqItems"];
+  summary: string;
+  title: string;
+}) {
+  const t = useTranslations("ContentPages");
+  const activeItems = items.filter((item) => item.isActive);
+
+  return (
+    <article className="mx-auto max-w-5xl px-5 py-10 sm:px-10">
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-red-700">
+        {t("previewFaqEyebrow")}
+      </p>
+      <h1 className="mt-3 text-3xl font-semibold text-slate-950 sm:text-4xl">
+        {title}
+      </h1>
+      {summary ? (
+        <p className="mt-4 max-w-3xl leading-7 text-slate-600">{summary}</p>
+      ) : null}
+      <div className="mt-8 space-y-3">
+        {activeItems.map((item, index) => (
+          <details
+            className="group rounded-lg border border-slate-200 bg-white"
+            key={`${item.question}-${index}`}
+            open={index === 0}
+          >
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-semibold text-slate-900">
+              {item.question}
+              <ChevronDown className="size-5 shrink-0 text-blue-700 transition-transform group-open:rotate-180" />
+            </summary>
+            <div
+              className="border-t border-slate-100 px-5 py-4 leading-7 text-slate-600 [&_a]:text-blue-700 [&_li]:my-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-2 [&_ul]:list-disc [&_ul]:pl-5"
+              dangerouslySetInnerHTML={{ __html: item.answer }}
+            />
+          </details>
+        ))}
+        {activeItems.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-slate-300 px-5 py-10 text-center text-slate-500">
+            {t("previewFaqEmpty")}
+          </p>
+        ) : null}
+      </div>
+    </article>
   );
 }

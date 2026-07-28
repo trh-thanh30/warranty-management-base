@@ -6,9 +6,13 @@ import { SputterSection } from "./components/sputter-section";
 import { ComparisonSection } from "./components/comparison-section";
 import { websiteConfigService } from "@/src/services/website-config/website-config.service";
 import { productCategoriesService } from "@/src/services/product-categories/product-categories.service";
+import { getPublishedContentPage } from "@/src/services/content-pages.service";
 import type { WebsiteLocale } from "@repo/shared";
 import { resolveWebsiteHeroSlides } from "@repo/shared/utils";
-import { HOME_PRODUCT_CATEGORY_BATCH_SIZE } from "./home.constants";
+import {
+  FAQ_CONTENT_PAGE_SLUG,
+  HOME_PRODUCT_CATEGORY_BATCH_SIZE,
+} from "./home.constants";
 
 export async function HomeView({
   params,
@@ -16,7 +20,7 @@ export async function HomeView({
   params: Promise<{ locale: WebsiteLocale }>;
 }) {
   const { locale } = await params;
-  const [site, productCategories] = await Promise.all([
+  const [site, productCategories, faqPage] = await Promise.all([
     websiteConfigService.getSiteSetting(locale).catch(() => null),
     productCategoriesService
       .listProductCategories({
@@ -25,6 +29,7 @@ export async function HomeView({
         hasImage: true,
       })
       .catch(() => null),
+    getPublishedContentPage(FAQ_CONTENT_PAGE_SLUG),
   ]);
   const heroSlides = resolveWebsiteHeroSlides(site?.heroSlides);
   const desktopHeroImages = heroSlides.desktop.map((slide) => ({
@@ -48,7 +53,7 @@ export async function HomeView({
       <ComparisonSection />
 
       <div className="flex min-h-screen flex-col justify-center bg-white">
-        <FaqSection />
+        <FaqSection page={faqPage} />
       </div>
     </main>
   );

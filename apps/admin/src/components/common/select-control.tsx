@@ -14,6 +14,13 @@ export type SelectControlOption = {
   value: string;
 };
 
+export function resolveSelectControlLabel(
+  options: SelectControlOption[],
+  value: string,
+) {
+  return options.find((option) => option.value === value)?.label;
+}
+
 type SelectControlProps = {
   ariaLabel?: string;
   className?: string;
@@ -42,6 +49,7 @@ export function SelectControl({
   value,
 }: SelectControlProps) {
   const normalizedValue = value === "" ? EMPTY_SELECT_VALUE : value;
+  const selectedLabel = resolveSelectControlLabel(options, value);
 
   return (
     <Select
@@ -56,7 +64,7 @@ export function SelectControl({
         className={triggerClassName ?? className}
         id={id}
       >
-        <SelectValue placeholder={placeholder} />
+        <SelectValue placeholder={placeholder}>{selectedLabel}</SelectValue>
       </SelectTrigger>
       <SelectContent className={contentClassName}>
         {options.map((option) => (

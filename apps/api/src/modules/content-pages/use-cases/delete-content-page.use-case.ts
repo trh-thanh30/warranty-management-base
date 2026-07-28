@@ -19,7 +19,12 @@ export class DeleteContentPageUseCase {
       throw new NotFoundError('Content page not found');
     }
 
-    for (const url of extractMediaUrls(existingPage.content)) {
+    const richText = [
+      existingPage.content,
+      ...existingPage.faq_items.map((item) => item.answer),
+    ].join('');
+
+    for (const url of extractMediaUrls(richText)) {
       await this.assetsService?.deleteAssetByUrl(url, {
         folder: 'rich-text',
         types: [asset_type.IMAGE, asset_type.VIDEO],

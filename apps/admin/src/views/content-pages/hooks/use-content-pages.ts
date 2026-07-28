@@ -73,6 +73,39 @@ export function useUpdateContentPage(id: string | null) {
   });
 }
 
+export function useReorderContentPageFaqItems(id: string | null) {
+  return useMutation({
+    mutationFn: (itemIds: string[]) =>
+      contentPagesService.reorderFaqItems(id ?? "", { itemIds }),
+  });
+}
+
+export function useSaveContentPageFaqItem(id: string | null) {
+  return useMutation({
+    mutationFn: ({
+      body,
+      itemId,
+    }: {
+      body: {
+        answer: string;
+        isActive?: boolean;
+        question: string;
+      };
+      itemId?: string;
+    }) =>
+      itemId
+        ? contentPagesService.updateFaqItem(id ?? "", itemId, body)
+        : contentPagesService.createFaqItem(id ?? "", body),
+  });
+}
+
+export function useDeleteContentPageFaqItem(id: string | null) {
+  return useMutation({
+    mutationFn: (itemId: string) =>
+      contentPagesService.deleteFaqItem(id ?? "", itemId),
+  });
+}
+
 export function useUpdateContentPageStatus() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -96,5 +129,11 @@ export function useDeleteContentPage() {
     mutationFn: (id: string) => contentPagesService.delete(id),
     onSuccess: () =>
       void queryClient.invalidateQueries({ queryKey: contentPageKeys.lists() }),
+  });
+}
+
+export function useParseContentDocument() {
+  return useMutation({
+    mutationFn: (file: File) => contentPagesService.parseDocument(file),
   });
 }

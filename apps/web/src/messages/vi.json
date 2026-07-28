@@ -273,41 +273,8 @@
       "ariaLabel": "Câu hỏi thường gặp",
       "eyebrow": "Hỏi đáp",
       "title": "Câu hỏi thường gặp",
-      "description": "Thông tin về điều kiện, bảo hành, thi công và hỗ trợ được tổng hợp để bạn dễ dàng lựa chọn.",
-      "items": {
-        "warrantyDuration": {
-          "question": "Phim cách nhiệt FUJITEK được bảo hành bao lâu?",
-          "answer": "FUJITEK áp dụng bảo hành điện tử chính hãng lên đến 15 năm cho các lỗi thuộc phạm vi chính sách."
-        },
-        "lookup": {
-          "question": "Tra cứu bảo hành điện tử như thế nào?",
-          "answer": "Nhập số điện thoại, biển số xe hoặc mã E-Warranty để kiểm tra thông tin và thời hạn bảo hành."
-        },
-        "sputterDifference": {
-          "question": "Sputter khác Nano Ceramic thông thường như thế nào?",
-          "answer": "Công nghệ Sputter nâng cao hiệu suất cản nhiệt, duy trì độ trong quang học và được tối ưu để không ảnh hưởng tín hiệu."
-        },
-        "installationTime": {
-          "question": "Thi công phim cách nhiệt mất bao lâu?",
-          "answer": "Thời gian thi công trọn gói thường từ 1,5 đến 2,5 giờ tùy loại xe và gói phim."
-        },
-        "choosePackage": {
-          "question": "Nên chọn gói phim nào cho xe của tôi?",
-          "answer": "Bạn nên chọn theo vị trí kính, nhu cầu cách nhiệt, độ riêng tư và thói quen lái xe. Kính lái thường ưu tiên độ trong, kính sườn và kính hậu có thể chọn mã tối hơn để tăng riêng tư."
-        },
-        "aftercare": {
-          "question": "Sau khi dán phim cần lưu ý gì?",
-          "answer": "Trong vài ngày đầu, nên hạn chế hạ kính, không vệ sinh mạnh bề mặt film và để xe ở môi trường khô thoáng để lớp keo ổn định hoàn toàn."
-        },
-        "signalSafety": {
-          "question": "Phim có ảnh hưởng GPS, ETC hoặc sóng điện thoại không?",
-          "answer": "Các dòng phim FUJITEK được tư vấn theo từng vị trí kính để cân bằng hiệu suất cách nhiệt và khả năng tương thích tín hiệu. Nếu xe dùng nhiều thiết bị thu phát, kỹ thuật viên sẽ đề xuất mã phim phù hợp."
-        },
-        "warrantySupport": {
-          "question": "Khi nào cần gửi yêu cầu bảo hành?",
-          "answer": "Bạn nên gửi yêu cầu khi film có dấu hiệu bong mép, phồng rộp, lỗi bề mặt hoặc thông tin E-Warranty cần được kiểm tra lại trên hệ thống."
-        }
-      }
+      "emptyTitle": "Chưa có câu hỏi thường gặp",
+      "emptyDescription": "Nội dung hỏi đáp chưa được xuất bản. Vui lòng quay lại sau."
     },
     "brands": {
       "ariaLabel": "Các thương hiệu xe được hỗ trợ",
@@ -488,16 +455,6 @@
       "japan": "FUJITEK JAPAN",
       "backToTopAriaLabel": "Cuộn lên đầu trang",
       "copyright": "© {year} FUJITEK Window Films. Đã đăng ký bản quyền.",
-      "offices": {
-        "hcm": {
-          "label": "Trụ sở TP. Hồ Chí Minh:",
-          "address": "7C Nguyễn Ngọc Phương, Phường Thạnh Mỹ Tây, TP. Hồ Chí Minh"
-        },
-        "hanoi": {
-          "label": "Chi nhánh Hà Nội:",
-          "address": "Số 62, Ngõ 20 Nghĩa Đô, Phường Nghĩa Đô, TP. Hà Nội"
-        }
-      },
       "navigation": {
         "about": "Về FUJITEK Films",
         "products": "Sản phẩm",
@@ -513,10 +470,7 @@
         "shipping": "Chính sách giao hàng",
         "payment": "Chính sách thanh toán"
       },
-      "hotlines": {
-        "hcm": "Hotline TP. Hồ Chí Minh:",
-        "hanoi": "Hotline Hà Nội:"
-      }
+      "hotline": "Hotline {office}:"
     }
   },
   "ProductsPage": {
@@ -1167,9 +1121,28 @@
     }
   },
   "PolicyPage": {
-    "eyebrow": "Điều khoản & Chính sách bảo hành",
-    "title": "Chính sách bảo hành chính hãng FUJITEK",
-    "description": "Bảo hành điện tử 10 - 15 năm cho các dòng phim Sputtering và Nano Ceramic đủ điều kiện.",
+    "eyebrow": "Pháp lý & Chính sách",
+    "title": "Chính sách minh bạch, quyền lợi rõ ràng",
+    "description": "Tra cứu các điều khoản áp dụng cho việc sử dụng website, mua hàng, thanh toán, giao nhận, bảo mật và bảo hành sản phẩm FUJITEK.",
+    "available": "Đã có nội dung",
+    "unavailable": "Chưa có nội dung",
+    "missingCard": "Nội dung chính sách này chưa được cập nhật.",
+    "labels": {
+      "general": "Điều khoản chung",
+      "privacy": "Bảo mật",
+      "purchasing": "Mua hàng",
+      "warrantyReturn": "Bảo hành & Đổi trả",
+      "shipping": "Giao hàng",
+      "payment": "Thanh toán"
+    },
+    "titles": {
+      "general": "Chính sách & quy định chung",
+      "privacy": "Chính sách bảo mật",
+      "purchasing": "Chính sách mua hàng",
+      "warrantyReturn": "Chính sách bảo hành - Đổi trả",
+      "shipping": "Chính sách giao hàng",
+      "payment": "Chính sách thanh toán"
+    },
     "duration": {
       "title": "1. Thời hạn bảo hành",
       "description": "Phim cách nhiệt FUJITEK được bảo hành điện tử chính hãng từ 10 đến 15 năm kể từ ngày kích hoạt E-Warranty thành công."
@@ -1705,7 +1678,18 @@
     "apiDocs": "Tài liệu API"
   },
   "PolicyDetailPage": {
-    "eyebrow": "FUJITEK – Điều khoản và chính sách",
+    "eyebrow": "Pháp lý & Chính sách",
+    "lastUpdated": "Cập nhật lần cuối: {date}",
+    "emptyTitle": "Chưa có nội dung",
+    "emptyDescription": "Chính sách này chưa được xuất bản. Vui lòng quay lại sau hoặc liên hệ FUJITEK để được hỗ trợ.",
+    "titles": {
+      "general": "Chính sách & quy định chung",
+      "privacy": "Chính sách bảo mật",
+      "purchasing": "Chính sách mua hàng",
+      "warrantyReturn": "Chính sách bảo hành - Đổi trả",
+      "shipping": "Chính sách giao hàng",
+      "payment": "Chính sách thanh toán"
+    },
     "home": "Trang chủ",
     "companyName": "Công ty Cổ phần Vilatek",
     "companyDescription": "Chuyên cung cấp phim cách nhiệt FUJITEK và phụ kiện ô tô cao cấp chính hãng.",

@@ -269,19 +269,36 @@ model ContentPage {
   title        String
   summary      String?
   content      String
-  kind         content_page_kind   @default(POLICY)
+  kind         content_page_kind   @default(GENERAL_POLICY)
   status       content_page_status @default(DRAFT)
   published_at DateTime?
   created_at   DateTime            @default(now())
   updated_at   DateTime            @updatedAt
 
-  category Category? @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  category  Category?            @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  faq_items ContentPageFaqItem[]
 
   @@index([category_id])
   @@index([kind])
   @@index([status])
   @@index([published_at])
   @@map("content_page")
+}
+
+model ContentPageFaqItem {
+  id              String   @id @default(uuid()) @db.Uuid
+  content_page_id String   @db.Uuid
+  question        String
+  answer          String
+  sort_order      Int      @default(0)
+  is_active       Boolean  @default(true)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  content_page ContentPage @relation(fields: [content_page_id], references: [id], onDelete: Cascade)
+
+  @@index([content_page_id, is_active, sort_order])
+  @@map("content_page_faq_item")
 }
 
 model UserPermission {
@@ -943,9 +960,12 @@ enum warranty_claim_priority {
 }
 
 enum content_page_kind {
-  POLICY
-  GUIDE
-  INTRO
+  GENERAL_POLICY
+  PRIVACY_POLICY
+  PURCHASE_POLICY
+  WARRANTY_RETURN_POLICY
+  SHIPPING_POLICY
+  PAYMENT_POLICY
   FAQ
 }
 
