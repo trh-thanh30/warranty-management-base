@@ -49,7 +49,7 @@ export function ComparisonSection() {
                   {t("standard.title")}
                 </h3>
               </div>
-              <ul className="space-y-3.5 text-xs sm:text-sm text-stone-gray font-semibold">
+              <ul className="space-y-3.5 text-sm text-stone-gray font-semibold">
                 <li className="flex items-start gap-2">
                   <span className="text-premium-red font-medium">•</span>
                   <span>{t("standard.items.heat")}</span>
@@ -73,7 +73,7 @@ export function ComparisonSection() {
                   FUJITEK Films
                 </h3>
               </div>
-              <ul className="space-y-3.5 text-xs sm:text-sm text-deep-black font-medium">
+              <ul className="space-y-3.5 text-sm text-deep-black font-medium">
                 <li className="flex items-start gap-2">
                   <span className="text-premium-red font-medium">•</span>
                   <span>{t("fujitek.items.protection")}</span>

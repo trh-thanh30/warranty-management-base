@@ -113,7 +113,7 @@ export function SputterSection() {
               <h4 className="text-base sm:text-lg font-semibold uppercase text-deep-black">
                 {t("details.warranty.title")}
               </h4>
-              <p className="text-sm text-stone-gray leading-relaxed">
+              <p className="text-base text-stone-gray leading-relaxed">
                 {t("details.warranty.description")}
               </p>
             </StaggerItem>
@@ -121,7 +121,7 @@ export function SputterSection() {
               <h4 className="text-base sm:text-lg font-semibold uppercase text-deep-black">
                 {t("details.uv.title")}
               </h4>
-              <p className="text-sm text-stone-gray leading-relaxed">
+              <p className="text-base text-stone-gray leading-relaxed">
                 {t("details.uv.description")}
               </p>
             </StaggerItem>
@@ -129,7 +129,7 @@ export function SputterSection() {
               <h4 className="text-base sm:text-lg font-semibold uppercase text-deep-black">
                 {t("details.ir.title")}
               </h4>
-              <p className="text-sm text-stone-gray leading-relaxed">
+              <p className="text-base text-stone-gray leading-relaxed">
                 {t("details.ir.description")}
               </p>
             </StaggerItem>
