@@ -469,3 +469,33 @@ test("@repo/hooks build produces the Turbo-declared dist artifact", async () => 
 
   assert.match(packageJson.scripts.build, /write-build-marker\.mjs/);
 });
+
+test("frontend Docker builds retain root build helpers after Turbo prune", async () => {
+  for (const app of ["web", "admin"]) {
+    const dockerfile = await readFile(
+      path.join(repoRoot, "apps", app, "Dockerfile"),
+      "utf8",
+    );
+
+    assert.match(
+      dockerfile,
+      /COPY --from=pruner \/app\/scripts \.\/scripts[\s\S]*RUN pnpm --filter @repo\/(?:web|admin)\.\.\. build/,
+      `${app} Dockerfile must copy root build helpers before package builds run`,
+    );
+  }
+});
+
+test("container ports match the production ports documented for deployment", async () => {
+  const ports = { api: 4100, web: 4101, admin: 4102 };
+
+  for (const [app, port] of Object.entries(ports)) {
+    const dockerfile = await readFile(
+      path.join(repoRoot, "apps", app, "Dockerfile"),
+      "utf8",
+    );
+
+    assert.match(dockerfile, new RegExp(`ENV PORT=${port}`));
+    assert.doesNotMatch(dockerfile, /EXPOSE 300[012]/);
+    assert.match(dockerfile, new RegExp(`EXPOSE ${port}`));
+  }
+});

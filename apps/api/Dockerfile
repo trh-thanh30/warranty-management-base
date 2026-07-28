@@ -32,7 +32,7 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=4100
 
 RUN addgroup --system --gid 1001 nodejs \
   && adduser --system --uid 1001 nestjs
@@ -44,13 +44,15 @@ RUN mkdir -p logs storage \
 
 USER nestjs
 
-EXPOSE 3000
+EXPOSE 4100
 
 CMD ["node", "dist/main.js"]
 
 FROM base AS development
 WORKDIR /app
 
-EXPOSE 3000
+ENV PORT=4100
+
+EXPOSE 4100
 
 CMD ["pnpm", "--filter", "@repo/api", "start:dev"]
