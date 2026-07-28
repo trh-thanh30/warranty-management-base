@@ -1,11 +1,13 @@
 import { PHONE_NUMBER_PATTERN } from '@repo/shared/constants';
 import {
   IsEmail,
+  IsNumber,
   IsOptional,
   IsString,
-  IsUrl,
   Length,
   Matches,
+  Max,
+  Min,
 } from 'class-validator';
 
 export class CreateServiceCenterDto {
@@ -36,7 +38,13 @@ export class CreateServiceCenterDto {
   @Length(4, 255)
   address: string;
 
-  @IsOptional()
-  @IsUrl({ require_protocol: true })
-  googleMapsUrl?: string;
+  @IsNumber({ maxDecimalPlaces: 8 })
+  @Min(-90)
+  @Max(90)
+  latitude: number;
+
+  @IsNumber({ maxDecimalPlaces: 8 })
+  @Min(-180)
+  @Max(180)
+  longitude: number;
 }

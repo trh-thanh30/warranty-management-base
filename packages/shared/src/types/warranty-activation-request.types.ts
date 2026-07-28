@@ -136,6 +136,8 @@ export type CreateWarrantyActivationRequestBody = {
   dealerAddress?: string;
   dealerProvince?: string;
   dealerDistrict?: string;
+  dealerLatitude?: number;
+  dealerLongitude?: number;
   salesName?: string;
   filmItems?: {
     windshield?: string;

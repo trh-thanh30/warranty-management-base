@@ -21,6 +21,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { seedAdminUsers } from './seed-admin';
 import { seedContentPages } from './seed-content-pages';
+import { seedLexzenzDealers } from './seed-dealers';
 import { seedWebsiteSiteSettings } from './seed-website-config';
 
 type DashboardWarrantyChartSeed = {
@@ -333,6 +334,8 @@ async function upsertDemoServiceCenter(data: {
   province: string;
   district: string;
   address: string;
+  latitude: number;
+  longitude: number;
 }) {
   return prisma.serviceCenter.upsert({
     where: { id: data.id },
@@ -343,6 +346,8 @@ async function upsertDemoServiceCenter(data: {
       province: data.province,
       district: data.district,
       address: data.address,
+      latitude: data.latitude,
+      longitude: data.longitude,
       is_active: true,
     },
     create: {
@@ -353,6 +358,8 @@ async function upsertDemoServiceCenter(data: {
       province: data.province,
       district: data.district,
       address: data.address,
+      latitude: data.latitude,
+      longitude: data.longitude,
       is_active: true,
     },
   });
@@ -365,6 +372,8 @@ async function upsertDemoDealer(data: {
   province: string;
   district: string;
   address: string;
+  latitude: number;
+  longitude: number;
   salesName?: string | null;
 }) {
   return prisma.dealer.upsert({
@@ -375,6 +384,8 @@ async function upsertDemoDealer(data: {
       province: data.province,
       district: data.district,
       address: data.address,
+      latitude: data.latitude,
+      longitude: data.longitude,
       sales_name: data.salesName ?? null,
       is_active: true,
     },
@@ -385,6 +396,8 @@ async function upsertDemoDealer(data: {
       province: data.province,
       district: data.district,
       address: data.address,
+      latitude: data.latitude,
+      longitude: data.longitude,
       sales_name: data.salesName ?? null,
       is_active: true,
     },
@@ -663,6 +676,7 @@ async function main() {
 
   await seedWebsiteSiteSettings(prisma);
   await seedContentPages(prisma);
+  await seedLexzenzDealers(prisma);
   await seedDefaultCategories();
 
   const { adminUser, customerAUser, customerBUser, moderatorUser } =
@@ -703,6 +717,8 @@ async function main() {
     province: 'Ha Noi',
     district: 'Cau Giay',
     address: '123 Tran Duy Hung, Cau Giay, Ha Noi',
+    latitude: 21.0134,
+    longitude: 105.7994,
   });
 
   const hcmServiceCenter = await upsertDemoServiceCenter({
@@ -713,6 +729,8 @@ async function main() {
     province: 'Ho Chi Minh City',
     district: 'District 7',
     address: '456 Nguyen Van Linh, District 7, Ho Chi Minh City',
+    latitude: 10.7297,
+    longitude: 106.7217,
   });
 
   const danangServiceCenter = await upsertDemoServiceCenter({
@@ -723,6 +741,8 @@ async function main() {
     province: 'Da Nang',
     district: 'Hai Chau',
     address: '789 Nguyen Van Linh, Hai Chau, Da Nang',
+    latitude: 16.0544,
+    longitude: 108.2022,
   });
 
   const lexzenzHanoiDealer = await upsertDemoDealer({
@@ -732,6 +752,8 @@ async function main() {
     province: 'Ha Noi',
     district: 'Cau Giay',
     address: '88 Dich Vong Hau, Cau Giay, Ha Noi',
+    latitude: 21.0364,
+    longitude: 105.7906,
     salesName: 'Pham Minh Quan',
   });
 
@@ -742,6 +764,8 @@ async function main() {
     province: 'Ho Chi Minh City',
     district: 'District 7',
     address: '99 Nguyen Thi Thap, District 7, Ho Chi Minh City',
+    latitude: 10.7382,
+    longitude: 106.7146,
     salesName: 'Nguyen Hoang Lam',
   });
 

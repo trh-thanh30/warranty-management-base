@@ -34,6 +34,7 @@ export class WebsiteSiteConfigUseCase {
   }
 
   async save(input: UpdateWebsiteSiteSettingBody, actorId: string) {
+    this.policy.assertSiteDraftValid(input);
     const draft = await this.repository.saveSiteDraft(input, actorId);
     const published = await this.repository.findSitePublished();
     return this.mapSite(draft, published);
@@ -84,6 +85,7 @@ export class WebsiteSiteConfigUseCase {
       offices: draft.offices.map((office) => ({
         id: office.id,
         isActive: office.is_active,
+        isHeadquarters: office.is_headquarters,
         phone: office.phone,
         sortOrder: office.sort_order,
         translations: office.translations.map((translation) => ({
@@ -124,6 +126,7 @@ export class WebsiteSiteConfigUseCase {
       offices: draft.offices.map((office) => ({
         id: office.id,
         isActive: office.is_active,
+        isHeadquarters: office.is_headquarters,
         phone: office.phone,
         sortOrder: office.sort_order,
         translations: office.translations.map((translation) => ({
@@ -180,6 +183,7 @@ export class WebsiteSiteConfigUseCase {
             address: translation?.address ?? '',
             id: office.id,
             isActive: office.is_active,
+            isHeadquarters: office.is_headquarters,
             label: translation?.label ?? '',
             phone: office.phone,
             sortOrder: office.sort_order,

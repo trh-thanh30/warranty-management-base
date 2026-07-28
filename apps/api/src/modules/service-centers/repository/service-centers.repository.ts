@@ -97,6 +97,23 @@ export class ServiceCentersRepository {
     return this.prismaService.serviceCenter.findMany();
   }
 
+  listActiveForNetwork() {
+    return this.prismaService.serviceCenter.findMany({
+      where: { is_active: true },
+      orderBy: [{ province: 'asc' }, { name: 'asc' }],
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        address: true,
+        province: true,
+        district: true,
+        latitude: true,
+        longitude: true,
+      },
+    });
+  }
+
   listForExport(filters: ListServiceCentersDto) {
     const search = filters.search?.trim();
     const province = filters.province?.trim();
@@ -153,11 +170,9 @@ export class ServiceCentersRepository {
           province: row.province,
           district: row.district,
           address: row.address,
+          latitude: row.latitude,
+          longitude: row.longitude,
           is_active: row.isActive,
-          metadata:
-            row.metadata === null
-              ? Prisma.JsonNull
-              : (row.metadata as Prisma.InputJsonObject),
         };
 
         if (row.existingServiceCenterId) {

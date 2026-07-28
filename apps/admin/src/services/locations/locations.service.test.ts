@@ -59,3 +59,33 @@ test("lists Vietnam wards filtered by province code", async () => {
   ]);
   assert.deepEqual(result, wards);
 });
+
+test("geocodes a structured Vietnam address through the API", async () => {
+  const calls: unknown[] = [];
+  const body = {
+    address: "1 Nguyễn Văn Linh",
+    province: "Thành phố Đà Nẵng",
+    ward: "Phường Hải Châu",
+  };
+  const candidates = [
+    {
+      formattedAddress:
+        "1 Nguyễn Văn Linh, Phường Hải Châu, Thành phố Đà Nẵng, Việt Nam",
+      latitude: 16.054407,
+      longitude: 108.202164,
+    },
+  ];
+  const http = {
+    async post(url: string, requestBody?: unknown) {
+      calls.push({ url, body: requestBody });
+      return { data: { success: true, data: candidates } };
+    },
+  };
+
+  const result = await createLocationsService(
+    http as unknown as LocationsHttpClient,
+  ).geocodeVietnamAddress(body);
+
+  assert.deepEqual(calls, [{ url: "/locations/vietnam/geocode", body }]);
+  assert.deepEqual(result, candidates);
+});

@@ -1,10 +1,7 @@
 import { ConflictError, NotFoundError } from '@/common/response';
 import { UpdateServiceCenterDto } from '@/modules/service-centers/dto/update-service-center.dto';
 import { ServiceCentersRepository } from '@/modules/service-centers/repository/service-centers.repository';
-import {
-  buildServiceCenterMetadata,
-  toServiceCenterResponse,
-} from '@/modules/service-centers/service-centers.types';
+import { toServiceCenterResponse } from '@/modules/service-centers/service-centers.types';
 import {
   mapServiceCenterUniqueConflict,
   normalizeServiceCenterEmail,
@@ -45,11 +42,9 @@ export class UpdateServiceCenterUseCase {
       province: dto.province?.trim(),
       district: dto.district?.trim(),
       address: dto.address?.trim(),
+      latitude: dto.latitude,
+      longitude: dto.longitude,
       is_active: dto.isActive,
-      metadata: buildServiceCenterMetadata(
-        existingServiceCenter.metadata as Record<string, unknown> | null,
-        dto.googleMapsUrl,
-      ),
     };
     let serviceCenter;
     try {

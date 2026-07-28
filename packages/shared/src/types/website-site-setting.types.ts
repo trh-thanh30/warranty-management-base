@@ -36,6 +36,7 @@ export type WebsiteOfficeText = {
 export type WebsiteOffice = {
   id: string;
   isActive: boolean;
+  isHeadquarters: boolean;
   phone: string | null;
   sortOrder: number;
   translations: Array<WebsiteTranslation<WebsiteOfficeText>>;

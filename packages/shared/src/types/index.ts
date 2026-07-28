@@ -8,6 +8,7 @@ export * from "./category-activation-field.types.ts";
 export * from "./content-page.types.ts";
 export * from "./customer.types.ts";
 export * from "./dealer.types.ts";
+export * from "./geo.types.ts";
 export * from "./notification.types.ts";
 export * from "./pagination.types.ts";
 export * from "./product.types.ts";

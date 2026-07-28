@@ -96,6 +96,10 @@ export function useServiceCenterForm({
     isSubmitting,
     onSubmit: handleSubmit(submit),
     register,
+    selectedAddress: watch("address"),
+    selectedDistrict: watch("district"),
+    selectedLatitude: watch("latitude"),
+    selectedLongitude: watch("longitude"),
     selectedProvince: watch("province"),
     setValue,
   };
@@ -108,8 +112,9 @@ function getDefaultValues(
     address: serviceCenter?.address ?? "",
     district: serviceCenter?.district ?? "",
     email: serviceCenter?.email ?? "",
-    googleMapsUrl: serviceCenter?.googleMapsUrl ?? "",
     isActive: serviceCenter?.isActive ?? true,
+    latitude: serviceCenter?.latitude ?? Number.NaN,
+    longitude: serviceCenter?.longitude ?? Number.NaN,
     name: serviceCenter?.name ?? "",
     phone: serviceCenter?.phone ?? "",
     province: serviceCenter?.province ?? "",
@@ -123,10 +128,11 @@ function toCreateBody(
     address: values.address.trim(),
     district: toOptionalValue(values.district),
     email: toOptionalValue(values.email),
+    latitude: values.latitude,
+    longitude: values.longitude,
     name: values.name.trim(),
     phone: toOptionalValue(values.phone),
     province: values.province.trim(),
-    googleMapsUrl: toOptionalValue(values.googleMapsUrl),
   };
 }
 

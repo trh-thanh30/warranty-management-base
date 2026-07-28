@@ -147,6 +147,20 @@ export const envSchema = z
     // Client Configuration
     POSTCODES_API: z.string().default('https://api.postcodes.io'),
 
+    // Geoapify forward geocoding
+    GEOAPIFY_API_KEY: z.string().optional(),
+    GEOAPIFY_API_BASE_URL: z
+      .string()
+      .url()
+      .default('https://api.geoapify.com/v1'),
+    GEOAPIFY_TIMEOUT_MS: z.coerce.number().int().positive().default(5000),
+    GEOAPIFY_CACHE_TTL_SECONDS: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(2592000),
+    GEOAPIFY_MAX_RESULTS: z.coerce.number().int().min(1).max(10).default(5),
+
     // Vietnam Provinces Open API v2
     VIETNAM_PROVINCES_ENABLED: z.coerce.boolean().default(true),
     VIETNAM_PROVINCES_API_BASE_URL: z

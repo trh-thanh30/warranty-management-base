@@ -9,6 +9,8 @@ describe('Service center DTO validation', () => {
       phone: 'danangservice@examplecom',
       province: 'Da Nang',
       address: '789 Nguyen Van Linh',
+      latitude: 16.0544,
+      longitude: 108.2022,
     });
 
     const errors = await validate(dto);
@@ -22,10 +24,26 @@ describe('Service center DTO validation', () => {
       phone: '+84 (90) 123-4567',
       province: 'Da Nang',
       address: '789 Nguyen Van Linh',
+      latitude: 16.0544,
+      longitude: 108.2022,
     });
 
     const errors = await validate(dto);
 
     expect(errors).toHaveLength(0);
+  });
+
+  it('requires coordinates when creating a service center', async () => {
+    const dto = plainToInstance(CreateServiceCenterDto, {
+      name: 'Da Nang Warranty Center',
+      province: 'Da Nang',
+      address: '789 Nguyen Van Linh',
+    });
+
+    const errors = await validate(dto);
+
+    expect(errors.map((error) => error.property)).toEqual(
+      expect.arrayContaining(['latitude', 'longitude']),
+    );
   });
 });

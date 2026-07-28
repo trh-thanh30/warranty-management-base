@@ -52,11 +52,22 @@ export const serviceCenterExcelColumns: Array<
     parse: (value) => parseRequiredString(value, 255, 4),
   },
   {
-    key: 'googleMapsUrl',
-    header: 'Link Google Maps',
-    width: 46,
-    example: 'https://maps.google.com/?q=1+Nguyen+Van+Linh',
-    parse: parseUrl,
+    key: 'latitude',
+    header: 'Vĩ độ',
+    required: true,
+    width: 18,
+    example: 16.0544,
+    note: 'Giá trị từ -90 đến 90.',
+    parse: (value) => parseCoordinate(value, -90, 90, 'Vĩ độ'),
+  },
+  {
+    key: 'longitude',
+    header: 'Kinh độ',
+    required: true,
+    width: 18,
+    example: 108.2022,
+    note: 'Giá trị từ -180 đến 180.',
+    parse: (value) => parseCoordinate(value, -180, 180, 'Kinh độ'),
   },
   {
     key: 'isActive',
@@ -87,16 +98,17 @@ function parseEmail(value: ExcelCellValue) {
   return parsed;
 }
 
-function parseUrl(value: ExcelCellValue) {
-  const parsed = parseOptionalString(value);
-  if (!parsed) return null;
-  try {
-    const url = new URL(parsed);
-    if (!['http:', 'https:'].includes(url.protocol)) throw new Error();
-    return parsed;
-  } catch {
-    throw new Error('Link Google Maps không hợp lệ');
+function parseCoordinate(
+  value: ExcelCellValue,
+  min: number,
+  max: number,
+  label: string,
+) {
+  const parsed = Number(String(value ?? '').trim());
+  if (!Number.isFinite(parsed) || parsed < min || parsed > max) {
+    throw new Error(`${label} phải nằm trong khoảng ${min} đến ${max}`);
   }
+  return parsed;
 }
 
 function parseStatus(value: ExcelCellValue) {

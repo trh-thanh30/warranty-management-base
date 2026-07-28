@@ -13,12 +13,16 @@ export class LocationsCacheService {
     private readonly provincesCfg: ConfigType<typeof vietnamProvincesConfig>,
   ) {}
 
-  async remember<T>(key: string, load: () => Promise<T>): Promise<T> {
+  async remember<T>(
+    key: string,
+    load: () => Promise<T>,
+    ttlSeconds = this.provincesCfg.cacheTtlSeconds,
+  ): Promise<T> {
     const cached = await this.get<T>(key);
     if (cached !== null) return cached;
 
     const fresh = await load();
-    await this.set(key, fresh);
+    await this.set(key, fresh, ttlSeconds);
     return fresh;
   }
 
@@ -34,13 +38,13 @@ export class LocationsCacheService {
     }
   }
 
-  private async set<T>(key: string, value: T): Promise<void> {
+  private async set<T>(
+    key: string,
+    value: T,
+    ttlSeconds: number,
+  ): Promise<void> {
     try {
-      await this.redisService.set(
-        key,
-        JSON.stringify(value),
-        this.provincesCfg.cacheTtlSeconds,
-      );
+      await this.redisService.set(key, JSON.stringify(value), ttlSeconds);
     } catch (error) {
       this.logger.warn(`Location cache write failed: ${this.message(error)}`);
     }

@@ -1,13 +1,14 @@
+import { SiteSettingsProvider } from "@/src/app/providers/site-settings-provider";
+import { SiteFooter } from "@/src/components/layout/site-footer";
+import { SiteHeader } from "@/src/components/layout/site-header";
+import { LenisProvider } from "@/src/components/providers/lenis-provider";
+import { routing } from "@/src/i18n/routing";
+import { getPublicSiteSettings } from "@/src/services/site-settings.service";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
-import { Saira_Condensed, Inter, Maven_Pro } from "next/font/google";
-import { routing } from "@/src/i18n/routing";
-import { SiteHeader } from "@/src/components/layout/site-header";
-import { SiteFooter } from "@/src/components/layout/site-footer";
-import { LenisProvider } from "@/src/components/providers/lenis-provider";
-import { getPublicSiteSettings } from "@/src/services/site-settings.service";
+import { Inter, Maven_Pro, Saira_Condensed } from "next/font/google";
+import { notFound } from "next/navigation";
 import "../globals.css";
 
 const sairaCondensed = Saira_Condensed({
@@ -75,11 +76,13 @@ export default async function LocaleLayout({
     >
       <body>
         <NextIntlClientProvider messages={messages}>
-          <LenisProvider>
-            <SiteHeader logoUrl={siteSettings?.headerLogo?.url} />
-            <div className="pt-[84px]">{children}</div>
-            <SiteFooter siteSettings={siteSettings} />
-          </LenisProvider>
+          <SiteSettingsProvider siteSettings={siteSettings}>
+            <LenisProvider>
+              <SiteHeader logoUrl={siteSettings?.headerLogo?.url} />
+              <div className="pt-[84px]">{children}</div>
+              <SiteFooter siteSettings={siteSettings} />
+            </LenisProvider>
+          </SiteSettingsProvider>
         </NextIntlClientProvider>
       </body>
     </html>

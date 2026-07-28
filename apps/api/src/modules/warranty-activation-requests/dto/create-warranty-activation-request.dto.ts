@@ -3,6 +3,7 @@ import {
   IsDateString,
   IsEmail,
   IsInt,
+  IsNumber,
   IsObject,
   IsOptional,
   IsString,
@@ -132,6 +133,18 @@ export class CreateWarrantyActivationRequestDto {
   @IsString()
   @Length(1, 120)
   dealerDistrict?: string;
+
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 8 })
+  @Min(-90)
+  @Max(90)
+  dealerLatitude?: number;
+
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 8 })
+  @Min(-180)
+  @Max(180)
+  dealerLongitude?: number;
 
   @IsOptional()
   @IsString()

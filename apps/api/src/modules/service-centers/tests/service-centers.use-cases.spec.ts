@@ -15,10 +15,10 @@ const serviceCenter = {
   province: 'Ha Noi',
   district: 'Hai Ba Trung',
   address: '123 Pho Hue',
+  latitude: 21.0091,
+  longitude: 105.8504,
   is_active: true,
-  metadata: {
-    googleMapsUrl: 'https://maps.google.com/?q=123+Pho+Hue',
-  },
+  metadata: null,
   created_at: new Date('2026-07-03T00:00:00.000Z'),
   updated_at: new Date('2026-07-03T00:00:00.000Z'),
 };
@@ -55,6 +55,8 @@ describe('Service center use cases', () => {
         phone: '090 123-4567',
         province: 'Ha Noi',
         address: '456 Another Street',
+        latitude: 21.0285,
+        longitude: 105.8542,
       }),
     ).rejects.toBeInstanceOf(ConflictError);
     expect(serviceCentersRepository.findByPhone).toHaveBeenCalledWith(
@@ -75,6 +77,8 @@ describe('Service center use cases', () => {
         email: ' SUPPORT@EXAMPLE.COM ',
         province: 'Ha Noi',
         address: '456 Another Street',
+        latitude: 21.0285,
+        longitude: 105.8542,
       }),
     ).rejects.toBeInstanceOf(ConflictError);
     expect(serviceCentersRepository.findByEmail).toHaveBeenCalledWith(
@@ -96,7 +100,8 @@ describe('Service center use cases', () => {
       province: ' Ha Noi ',
       district: ' Hai Ba Trung ',
       address: ' 123 Pho Hue ',
-      googleMapsUrl: ' https://maps.google.com/?q=123+Pho+Hue ',
+      latitude: 21.0091,
+      longitude: 105.8504,
     });
 
     expect(serviceCentersRepository.create).toHaveBeenCalledWith(
@@ -107,13 +112,14 @@ describe('Service center use cases', () => {
         province: 'Ha Noi',
         district: 'Hai Ba Trung',
         address: '123 Pho Hue',
-        metadata: {
-          googleMapsUrl: 'https://maps.google.com/?q=123+Pho+Hue',
-        },
+        latitude: 21.0091,
+        longitude: 105.8504,
       }),
     );
     expect(result.id).toBe('service-center-id');
-    expect(result.googleMapsUrl).toBe('https://maps.google.com/?q=123+Pho+Hue');
+    expect(result.googleMapsUrl).toBe(
+      'https://www.google.com/maps/search/?api=1&query=21.0091%2C105.8504',
+    );
   });
 
   it('lists service centers with filters', async () => {
@@ -232,7 +238,8 @@ describe('Service center use cases', () => {
         province: 'Hà Nội',
         district: 'Phường Hai Bà Trưng',
         address: '123 Phố Huế',
-        googleMapsUrl: 'https://maps.google.com/?q=123+Pho+Hue',
+        latitude: 21.0091,
+        longitude: 105.8504,
         isActive: true,
       },
       {
@@ -242,7 +249,8 @@ describe('Service center use cases', () => {
         province: 'Đà Nẵng',
         district: 'Phường Hải Châu',
         address: '1 Nguyễn Văn Linh',
-        googleMapsUrl: null,
+        latitude: 16.0544,
+        longitude: 108.2022,
         isActive: true,
       },
     ]);
@@ -281,7 +289,8 @@ describe('Service center use cases', () => {
         province: 'Hà Nội',
         district: null,
         address: '123 Phố Huế',
-        googleMapsUrl: null,
+        latitude: 21.0091,
+        longitude: 105.8504,
         isActive: true,
       },
     ]);

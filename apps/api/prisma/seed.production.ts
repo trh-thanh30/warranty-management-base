@@ -4,6 +4,7 @@ import * as bcrypt from 'bcryptjs';
 import { Pool } from 'pg';
 import { seedLexzenzProductCategories } from './seed-categories';
 import { seedContentPages } from './seed-content-pages';
+import { seedLexzenzDealers } from './seed-dealers';
 import { seedWebsiteSiteSettings } from './seed-website-config';
 
 let prisma: PrismaClient | undefined;
@@ -22,6 +23,7 @@ async function main() {
 
   await seedProductionAdmin(prisma);
   await seedLexzenzProductCategories(prisma);
+  await seedLexzenzDealers(prisma);
   await seedContentPages(prisma);
   await seedWebsiteSiteSettings(prisma);
 

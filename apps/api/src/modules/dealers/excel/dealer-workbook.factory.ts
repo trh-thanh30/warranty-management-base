@@ -21,6 +21,8 @@ export async function createDealerImportTemplateWorkbook() {
         phone: '0901234567',
         province: 'Thành phố Hà Nội',
         district: 'Phường Thanh Xuân',
+        latitude: 21.0285,
+        longitude: 105.8542,
         salesName: 'Nguyễn Văn A',
       },
     ],
@@ -57,6 +59,6 @@ function configureDataWorksheet(
     error: 'Chọn một trạng thái trong danh sách.',
   };
   for (let row = 2; row <= 1000; row += 1) {
-    worksheet.getCell(`G${row}`).dataValidation = validation;
+    worksheet.getCell(`I${row}`).dataValidation = validation;
   }
 }

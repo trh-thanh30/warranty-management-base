@@ -87,6 +87,23 @@ export class DealersRepository {
     return this.prismaService.dealer.findMany();
   }
 
+  listActiveForNetwork() {
+    return this.prismaService.dealer.findMany({
+      where: { is_active: true },
+      orderBy: [{ province: 'asc' }, { name: 'asc' }],
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        address: true,
+        province: true,
+        district: true,
+        latitude: true,
+        longitude: true,
+      },
+    });
+  }
+
   listForExport(filters: ListDealersDto) {
     const search = filters.search?.trim();
     const province = filters.province?.trim();
@@ -138,6 +155,8 @@ export class DealersRepository {
           phone: row.phone,
           province: row.province,
           district: row.district,
+          latitude: row.latitude,
+          longitude: row.longitude,
           sales_name: row.salesName,
         };
 

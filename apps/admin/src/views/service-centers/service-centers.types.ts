@@ -6,6 +6,15 @@ export type ServiceCenterStatusFilter =
   (typeof SERVICE_CENTER_STATUS_FILTERS)[number];
 
 const optionalText = z.string().trim();
+const requiredCoordinate = (minimum: number, maximum: number) =>
+  z
+    .union([z.number(), z.nan()])
+    .refine(Number.isFinite, "locationRequired")
+    .refine(
+      (value) =>
+        !Number.isFinite(value) || (value >= minimum && value <= maximum),
+      "coordinateInvalid",
+    );
 
 export const serviceCenterFormSchema = z.object({
   address: optionalText.min(4, "addressRequired").max(255, "addressLength"),
@@ -15,11 +24,9 @@ export const serviceCenterFormSchema = z.object({
       value.length === 0 || z.string().email().safeParse(value).success,
     "emailInvalid",
   ),
-  googleMapsUrl: optionalText.refine(
-    (value) => value.length === 0 || z.string().url().safeParse(value).success,
-    "googleMapsUrlInvalid",
-  ),
   isActive: z.boolean(),
+  latitude: requiredCoordinate(-90, 90),
+  longitude: requiredCoordinate(-180, 180),
   name: optionalText.min(2, "nameRequired").max(160, "nameLength"),
   phone: optionalText
     .max(32, "phoneLength")

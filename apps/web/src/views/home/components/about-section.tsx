@@ -9,9 +9,11 @@ import { BrandsSection } from "./brands-section";
 
 import { Container } from "@/src/components/common/container";
 import { FadeIn } from "@/src/components/animation/fade-in";
+import { usePrimaryWebsiteHotline } from "@/src/app/providers/site-settings-provider";
 
 export function AboutSection() {
   const t = useTranslations("HomePage.about");
+  const hotline = usePrimaryWebsiteHotline();
 
   return (
     <section
@@ -76,23 +78,24 @@ export function AboutSection() {
                 </span>
               </Link>
 
-              {/* Call Us Link */}
-              <a
-                href="tel:1800123456"
-                className="flex shrink-0 items-center gap-2 sm:gap-3 text-deep-black hover:text-premium-red transition-colors duration-300 group/phone"
-              >
-                <div className="relative flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-light-gray border border-border-gray text-premium-red">
-                  <PhoneCall className="relative h-4 w-4 sm:h-5 sm:w-5 z-10" />
-                </div>
-                <div>
-                  <span className="block text-xs sm:text-xs font-semibold text-soft-gray uppercase tracking-wider leading-none">
-                    {t("hotlineLabel")}
-                  </span>
-                  <span className="block text-sm sm:text-lg font-semibold text-deep-black group-hover/phone:text-premium-red transition-colors mt-1 leading-none whitespace-nowrap">
-                    1800 123 456
-                  </span>
-                </div>
-              </a>
+              {hotline && (
+                <a
+                  href={hotline.href}
+                  className="flex shrink-0 items-center gap-2 sm:gap-3 text-deep-black hover:text-premium-red transition-colors duration-300 group/phone"
+                >
+                  <div className="relative flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-light-gray border border-border-gray text-premium-red">
+                    <PhoneCall className="relative h-4 w-4 sm:h-5 sm:w-5 z-10" />
+                  </div>
+                  <div>
+                    <span className="block text-xs sm:text-xs font-semibold text-soft-gray uppercase tracking-wider leading-none">
+                      {t("hotlineLabel")}
+                    </span>
+                    <span className="block text-sm sm:text-lg font-semibold text-deep-black group-hover/phone:text-premium-red transition-colors mt-1 leading-none whitespace-nowrap">
+                      {hotline.displayValue}
+                    </span>
+                  </div>
+                </a>
+              )}
             </div>
           </FadeIn>
         </div>

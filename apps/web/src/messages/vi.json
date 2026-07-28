@@ -2190,7 +2190,7 @@
       "title": "Trở thành Đại lý FUJITEK",
       "description": "Tham gia mạng lưới đại lý của chúng tôi để nhận được chính sách ưu đãi hấp dẫn, hỗ trợ đào tạo và marketing toàn diện.",
       "partnerBtn": "Đăng ký làm Đại lý",
-      "hotlineBtn": "Hotline 1900 633 826",
+      "hotlineBtn": "Hotline {phone}",
       "benefits": {
         "discount": "Chiết khấu hấp dẫn",
         "training": "Đào tạo chuyên sâu",

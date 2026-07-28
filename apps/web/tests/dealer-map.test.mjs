@@ -28,6 +28,14 @@ const dealerFiltersPath = path.join(
   "use-dealer-filters.ts",
 );
 const vietnamGeoJsonPath = path.join(webRoot, "public", "map", "vn.geojson");
+const vietnamOverlayPath = path.join(
+  process.cwd(),
+  "packages",
+  "ui",
+  "src",
+  "map",
+  "vietnam-map-overlay.tsx",
+);
 
 async function exists(file) {
   try {
@@ -59,34 +67,33 @@ test("dealer map ships the local Vietnam polygon and maritime line data", async 
   );
 });
 
-test("dealer map uses constrained Leaflet with a mask and active marker", async () => {
+test("dealer map uses the shared constrained Vietnam overlay and active marker", async () => {
   assert.equal(
     await exists(dealerMapPath),
     true,
     "dealers/components/dealer-map.tsx must exist",
   );
 
-  const source = await readFile(dealerMapPath, "utf8");
+  const [source, overlaySource] = await Promise.all([
+    readFile(dealerMapPath, "utf8"),
+    readFile(vietnamOverlayPath, "utf8"),
+  ]);
   for (const expected of [
-    "MapContainer",
-    "TileLayer",
-    "GeoJSON",
-    "Polygon",
+    "SharedMap",
+    "VietnamMapOverlay",
+    "VIETNAM_INTERACTION_BOUNDS",
     "Marker",
     "Popup",
     "flyTo",
     "fitBounds",
-    "OSM_TILE_ATTRIBUTION",
-    "attribution={OSM_TILE_ATTRIBUTION}",
-    "/map/vn.geojson",
-    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
   ]) {
     assert.match(source, new RegExp(expected.replace(/[{}]/g, "\\$&")));
   }
 
   assert.match(source, /maxBoundsViscosity=\{1\}/);
-  assert.match(source, /fillRule:\s*"evenodd"/);
-  assert.doesNotMatch(source, /<iframe/);
+  assert.match(overlaySource, /fillRule:\s*"evenodd"/);
+  assert.match(overlaySource, /\/map\/vn\.geojson/);
+  assert.doesNotMatch(source, /<TileLayer|<iframe/);
   assert.doesNotMatch(source, /🇻🇳|📍/u);
 });
 

@@ -12,6 +12,7 @@
 - **Metadata field**: nullable JSON extension data for low-query-frequency integration or display attributes. Business-critical fields that drive filtering, sorting, permissions, status transitions, or reports must remain first-class columns.
 - **Product Template**: reusable catalog definition for a product type, including shared descriptive data, technical specifications, default warranty policy, and reusable media.
 - **Product**: one physical warrantable unit created from an optional Product Template. It owns unit-specific identity and lifecycle data such as product code, serial number, owner, warranty, claim history, and installation context.
+- **Network location**: an active Dealer or Service Center with first-class latitude and longitude, suitable for public map display. Coordinates are authoritative; Google Maps URLs are derived values.
 
 ## Architecture Principles
 
@@ -20,6 +21,7 @@
 - Shared packages must not import from apps.
 - Apps may import from packages through workspace dependencies.
 - Add tests around behavior and module contracts, not implementation details.
+- Store coordinates that drive map display as first-class columns, not metadata or provider-specific URLs.
 - Frontend i18n uses locale-prefixed routes with `vi` as the default locale and
   `en` as the secondary locale. Next.js apps own their `src/messages` catalogs
   and use app-local `src/i18n/navigation.ts` helpers for locale-aware links.

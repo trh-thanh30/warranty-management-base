@@ -2150,7 +2150,7 @@
       "title": "Become a FUJITEK Dealer",
       "description": "Join our dealer network to receive attractive discount policies, comprehensive training, and marketing support.",
       "partnerBtn": "Apply for Dealership",
-      "hotlineBtn": "Hotline 1900 633 826",
+      "hotlineBtn": "Hotline {phone}",
       "benefits": {
         "discount": "Attractive Margins",
         "training": "In-Depth Training",

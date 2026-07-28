@@ -1,17 +1,15 @@
 "use client";
 
 import { useMemo } from "react";
+import { SharedMap } from "@repo/ui/map";
 import { divIcon } from "leaflet";
-import { MapContainer, Marker, TileLayer } from "react-leaflet";
+import { Marker } from "react-leaflet";
 
 interface ContactMapProps {
   lat: number;
   lng: number;
   title: string;
 }
-
-const OSM_TILE_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 export default function ContactMap({ lat, lng, title }: ContactMapProps) {
   const redPinIcon = useMemo(
@@ -32,18 +30,15 @@ export default function ContactMap({ lat, lng, title }: ContactMapProps) {
 
   return (
     <div className="relative isolate size-full overflow-hidden rounded-[24px]">
-      <MapContainer
-        center={[lat, lng]}
-        zoom={15}
+      <SharedMap
+        activationMode="disabled"
         className="size-full"
-        scrollWheelZoom={false}
+        initialCenter={[lat, lng]}
+        initialZoom={15}
+        showResetControl={false}
       >
-        <TileLayer
-          attribution={OSM_TILE_ATTRIBUTION}
-          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
         <Marker position={[lat, lng]} icon={redPinIcon} title={title} />
-      </MapContainer>
+      </SharedMap>
     </div>
   );
 }

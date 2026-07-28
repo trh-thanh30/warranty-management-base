@@ -137,7 +137,6 @@ export class ImportServiceCentersUseCase {
         phone,
         email,
         existingServiceCenterId: existing?.id ?? null,
-        metadata: buildMetadata(existing?.metadata, row.googleMapsUrl),
       });
     }
 
@@ -163,19 +162,4 @@ export class ImportServiceCentersUseCase {
   private failure(errors: ExcelRowError[]): ServiceCenterImportResult {
     return { created: 0, updated: 0, errors };
   }
-}
-
-function buildMetadata(
-  current: ServiceCenter['metadata'] | undefined,
-  googleMapsUrl: string | null,
-) {
-  const metadata =
-    current && typeof current === 'object' && !Array.isArray(current)
-      ? { ...current }
-      : {};
-
-  if (googleMapsUrl) metadata.googleMapsUrl = googleMapsUrl;
-  else delete metadata.googleMapsUrl;
-
-  return Object.keys(metadata).length > 0 ? metadata : null;
 }

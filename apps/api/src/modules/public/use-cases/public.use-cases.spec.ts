@@ -1,7 +1,60 @@
 import { PublicListServiceCentersUseCase } from '@/modules/public/use-cases/public-list-service-centers.use-case';
+import { PublicListNetworkLocationsUseCase } from '@/modules/public/use-cases/public-list-network-locations.use-case';
 import { toPublicWarrantyClaimResponse } from '@/modules/public/use-cases/public-lookup-warranty-claim-by-code.use-case';
 
 describe('Public use cases', () => {
+  it('combines active dealers and service centers into network locations', async () => {
+    const dealersRepository = {
+      listActiveForNetwork: jest.fn().mockResolvedValue([
+        {
+          id: 'dealer-id',
+          name: 'Ha Noi Dealer',
+          phone: '0901234567',
+          address: '1 Nguyen Trai',
+          province: 'Ha Noi',
+          district: 'Thanh Xuan',
+          latitude: 21.0285,
+          longitude: 105.8542,
+        },
+      ]),
+    };
+    const serviceCentersRepository = {
+      listActiveForNetwork: jest.fn().mockResolvedValue([
+        {
+          id: 'service-center-id',
+          name: 'Da Nang Warranty Center',
+          phone: null,
+          address: '1 Nguyen Van Linh',
+          province: 'Da Nang',
+          district: 'Hai Chau',
+          latitude: 16.0544,
+          longitude: 108.2022,
+        },
+      ]),
+    };
+    const useCase = new PublicListNetworkLocationsUseCase(
+      dealersRepository as never,
+      serviceCentersRepository as never,
+    );
+
+    const result = await useCase.execute();
+
+    expect(result).toEqual([
+      expect.objectContaining({
+        id: 'dealer-id',
+        kind: 'DEALER',
+        googleMapsUrl:
+          'https://www.google.com/maps/search/?api=1&query=21.0285%2C105.8542',
+      }),
+      expect.objectContaining({
+        id: 'service-center-id',
+        kind: 'SERVICE_CENTER',
+        googleMapsUrl:
+          'https://www.google.com/maps/search/?api=1&query=16.0544%2C108.2022',
+      }),
+    ]);
+  });
+
   it('forces service centers to active only', async () => {
     const serviceCentersRepository = {
       list: jest.fn().mockResolvedValue({

@@ -3,115 +3,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { ExternalLink, Phone } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { divIcon } from "leaflet";
-import type { LatLngBoundsExpression, LatLngTuple, PathOptions } from "leaflet";
 import {
-  GeoJSON,
-  MapContainer,
-  Marker,
-  Polygon,
-  Popup,
-  TileLayer,
-  useMap,
-} from "react-leaflet";
+  SharedMap,
+  useVietnamBoundary,
+  VIETNAM_INTERACTION_BOUNDS,
+  VIETNAM_MAINLAND_BOUNDS,
+  VietnamMapOverlay,
+} from "@repo/ui/map";
+import { divIcon } from "leaflet";
+import { Marker, Popup, useMap } from "react-leaflet";
 import type { Dealer } from "../dealers.types";
-
-const VIETNAM_MAINLAND_BOUNDS: LatLngBoundsExpression = [
-  [8.56557851800005, 102.118655233],
-  [23.3662751270001, 109.472422722],
-];
-
-const VIETNAM_INTERACTION_BOUNDS: LatLngBoundsExpression = [
-  [6.95331046340264, 102.118655233],
-  [23.3662751270001, 116.947319489797],
-];
-const OSM_TILE_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-
-const WORLD_RING: LatLngTuple[] = [
-  [-90, -180],
-  [-90, 180],
-  [90, 180],
-  [90, -180],
-  [-90, -180],
-];
-
-const maskStyle: PathOptions = {
-  color: "transparent",
-  fillColor: "var(--color-surface-muted)",
-  fillOpacity: 1,
-  fillRule: "evenodd",
-  interactive: false,
-  stroke: false,
-};
-
-const vietnamOutlineStyle: PathOptions = {
-  color: "var(--color-premium-red)",
-  fillOpacity: 0,
-  interactive: false,
-  opacity: 0.75,
-  weight: 1,
-};
-
-interface VietnamBoundary {
-  type: "FeatureCollection";
-  features: Array<{
-    type: "Feature";
-    properties: Record<string, unknown> | null;
-    geometry:
-      | {
-          type: "MultiPolygon";
-          coordinates: number[][][][];
-        }
-      | {
-          type: "MultiLineString";
-          coordinates: number[][][];
-        };
-  }>;
-}
 
 interface DealerMapProps {
   activeDealer: Dealer | null;
-}
-
-function isVietnamBoundary(value: unknown): value is VietnamBoundary {
-  if (!value || typeof value !== "object") return false;
-
-  const featureCollection = value as Partial<VietnamBoundary>;
-
-  return (
-    featureCollection.type === "FeatureCollection" &&
-    Array.isArray(featureCollection.features) &&
-    featureCollection.features.length > 0 &&
-    featureCollection.features.every(
-      (feature) =>
-        feature.geometry?.type === "MultiPolygon" ||
-        feature.geometry?.type === "MultiLineString",
-    ) &&
-    featureCollection.features.some(
-      (feature) => feature.geometry?.type === "MultiPolygon",
-    )
-  );
-}
-
-function getMaskPositions(boundary: VietnamBoundary): LatLngTuple[][] {
-  const vietnamRings = boundary.features.flatMap((feature) => {
-    if (feature.geometry.type !== "MultiPolygon") return [];
-
-    return feature.geometry.coordinates.flatMap((polygon) => {
-      const outerRing = polygon[0];
-
-      if (!outerRing) return [];
-
-      return [
-        outerRing.map(
-          ([longitude, latitude]) => [latitude, longitude] as LatLngTuple,
-        ),
-      ];
-    });
-  });
-
-  return [WORLD_RING, ...vietnamRings];
 }
 
 function MapCamera({ activeDealer }: DealerMapProps) {
@@ -137,52 +41,11 @@ function MapCamera({ activeDealer }: DealerMapProps) {
 export function DealerMap({ activeDealer }: DealerMapProps) {
   const t = useTranslations("DealersPage.map");
   const [isMounted, setIsMounted] = useState(false);
-  const [vietnamBoundary, setVietnamBoundary] =
-    useState<VietnamBoundary | null>(null);
-  const [loadError, setLoadError] = useState(false);
+  const { boundary, status } = useVietnamBoundary();
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    async function loadVietnamBoundary() {
-      try {
-        const response = await fetch("/map/vn.geojson", {
-          signal: controller.signal,
-        });
-
-        if (!response.ok) {
-          throw new Error(`GeoJSON request failed with ${response.status}`);
-        }
-
-        const data: unknown = await response.json();
-
-        if (!isVietnamBoundary(data)) {
-          throw new Error("Invalid Vietnam GeoJSON");
-        }
-
-        setVietnamBoundary(data);
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          return;
-        }
-
-        setLoadError(true);
-      }
-    }
-
-    void loadVietnamBoundary();
-
-    return () => controller.abort();
-  }, []);
-
-  const maskPositions = useMemo(
-    () => (vietnamBoundary ? getMaskPositions(vietnamBoundary) : null),
-    [vietnamBoundary],
-  );
 
   const dealerIcon = useMemo(
     () =>
@@ -216,34 +79,26 @@ export function DealerMap({ activeDealer }: DealerMapProps) {
       aria-label={t("ariaLabel")}
       className="relative isolate size-full overflow-hidden bg-surface-muted"
     >
-      <MapContainer
-        bounds={VIETNAM_MAINLAND_BOUNDS}
+      <SharedMap
+        activationMode="direct"
+        initialBounds={VIETNAM_MAINLAND_BOUNDS}
         className="size-full"
         maxBounds={VIETNAM_INTERACTION_BOUNDS}
         maxBoundsViscosity={1}
         minZoom={5}
         maxZoom={18}
-        scrollWheelZoom
+        showResetControl={false}
       >
-        <TileLayer
-          attribution={OSM_TILE_ATTRIBUTION}
-          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-
-        {maskPositions && (
-          <Polygon positions={maskPositions} pathOptions={maskStyle} />
-        )}
-
-        {vietnamBoundary && (
-          <GeoJSON
-            data={vietnamBoundary}
-            style={(feature) =>
-              feature?.geometry.type === "MultiLineString"
-                ? { ...vietnamOutlineStyle, opacity: 0.65 }
-                : vietnamOutlineStyle
-            }
+        {boundary ? (
+          <VietnamMapOverlay
+            boundary={boundary}
+            maskFillColor="var(--color-surface-muted)"
+            maskFillOpacity={1}
+            outlineColor="var(--color-premium-red)"
+            outlineOpacity={0.75}
+            outlineWeight={1}
           />
-        )}
+        ) : null}
 
         <MapCamera activeDealer={activeDealer} />
 
@@ -283,14 +138,14 @@ export function DealerMap({ activeDealer }: DealerMapProps) {
             </Popup>
           </Marker>
         )}
-      </MapContainer>
+      </SharedMap>
 
-      {!vietnamBoundary && (
+      {!boundary && (
         <div
           role="status"
           className="pointer-events-none absolute inset-x-4 top-4 z-[500] rounded-xl border border-border-gray bg-white/95 px-4 py-3 text-center text-xs font-medium text-stone-gray shadow-md backdrop-blur-sm"
         >
-          {loadError ? t("loadError") : t("loading")}
+          {status === "error" ? t("loadError") : t("loading")}
         </div>
       )}
     </div>
