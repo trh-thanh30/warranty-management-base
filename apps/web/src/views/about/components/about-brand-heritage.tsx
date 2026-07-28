@@ -66,7 +66,7 @@ export function AboutBrandHeritage() {
 
                 <div className="space-y-1">
                   <div className="text-3xl sm:text-4xl font-bold tracking-tight text-deep-black leading-none">
-                    <Counter value={200} suffix="+" />
+                    <Counter value={100} suffix="+" />
                   </div>
                   <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-stone-gray leading-tight mt-1.5">
                     Đại lý toàn quốc

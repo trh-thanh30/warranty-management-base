@@ -1986,7 +1986,7 @@
         },
         "networkExpansion": {
           "title": "Mở rộng mạng lưới",
-          "description": "Hơn 200 đại lý trên toàn quốc, phủ sóng 63 tỉnh thành."
+          "description": "Hơn 100 đại lý trên toàn quốc, phủ sóng 34 tỉnh thành."
         }
       }
     },
@@ -2121,7 +2121,7 @@
           "checks": {
             "ewarrantyDigital": "Bảo hành điện tử E-Warranty",
             "support247": "Hỗ trợ 24/7",
-            "dealerNetwork": "200+ đại lý toàn quốc"
+            "dealerNetwork": "100+ đại lý toàn quốc"
           }
         }
       }
@@ -2153,15 +2153,24 @@
     "network": {
       "eyebrow": "Mạng lưới toàn quốc",
       "titlePrefix": "Hệ thống đại lý",
-      "titleSuffix": "phủ sóng 63 tỉnh thành",
-      "description": "Với hơn 200 đại lý trên toàn quốc, Fujitek cam kết mang đến dịch vụ lắp đặt chuyên nghiệp và chế độ bảo hành E-Warranty minh bạch.",
+      "titleSuffix": "phủ sóng 34 tỉnh thành",
+      "description": "Với hơn 100 đại lý trên toàn quốc, Fujitek cam kết mang đến dịch vụ lắp đặt chuyên nghiệp và chế độ bảo hành E-Warranty minh bạch.",
       "viewDealersCta": "Tìm Đại lý gần nhất",
       "mapTitle": "Bản đồ mạng lưới đại lý",
       "mapSubtitle": "Hệ thống trạm lắp đặt ủy quyền rộng khắp",
       "activateMap": "Nhấp để tương tác với bản đồ",
       "resetMap": "Đặt lại bản đồ",
       "legendDealer": "Đại lý ủy quyền",
-      "legendCenter": "Trung tâm lắp đặt",
+      "legendCenter": "Trung tâm bảo hành",
+      "loading": "Đang tải hệ thống đại lý và trung tâm bảo hành...",
+      "error": "Không thể tải dữ liệu mạng lưới.",
+      "retry": "Thử lại",
+      "empty": "Chưa có địa điểm hoạt động để hiển thị.",
+      "directions": "Xem chỉ đường",
+      "locationType": {
+        "dealer": "Đại lý ủy quyền",
+        "serviceCenter": "Trung tâm bảo hành"
+      },
       "stats": {
         "dealers": "Đại lý toàn quốc",
         "provinces": "Tỉnh thành",

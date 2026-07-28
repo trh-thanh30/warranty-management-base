@@ -1,5 +1,5 @@
-import { PrismaPg } from '@prisma/adapter-pg';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { PrismaPg } from '@prisma/adapter-pg';
 import {
   asset_access_type,
   asset_type,
@@ -16,7 +16,7 @@ import { Pool } from 'pg';
 
 const SITE_KEY = 'main';
 const CONTACT_EMAIL = 'admin@lexzenz.vn';
-const WEBSITE_URL = 'https://fujitekvietnam.com';
+const WEBSITE_URL = 'https://lexzenz.com/';
 const WEBSITE_LOGO_FILE_NAME = 'logo_2.png';
 const WEBSITE_LOGO_SOURCE_PATH = resolve(
   __dirname,

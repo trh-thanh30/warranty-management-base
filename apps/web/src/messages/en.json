@@ -1946,7 +1946,7 @@
         },
         "networkExpansion": {
           "title": "Network Expansion",
-          "description": "Over 200 dealers nationwide, covering 63 provinces."
+          "description": "Over 100 dealers nationwide, covering 34 provinces."
         }
       }
     },
@@ -2081,7 +2081,7 @@
           "checks": {
             "ewarrantyDigital": "E-Warranty Digital Registration",
             "support247": "24/7 Support",
-            "dealerNetwork": "200+ Dealers Nationwide"
+            "dealerNetwork": "100+ Dealers Nationwide"
           }
         }
       }
@@ -2113,15 +2113,24 @@
     "network": {
       "eyebrow": "Nationwide Network",
       "titlePrefix": "Dealer System",
-      "titleSuffix": "covering 63 provinces",
-      "description": "With over 200 dealers nationwide, Fujitek is committed to providing professional installation services and transparent E-Warranty coverage.",
+      "titleSuffix": "covering 34 provinces",
+      "description": "With over 100 dealers nationwide, Fujitek is committed to providing professional installation services and transparent E-Warranty coverage.",
       "viewDealersCta": "Find Nearest Dealer",
       "mapTitle": "Dealer Network Map",
       "mapSubtitle": "Widespread authorized installation stations",
       "activateMap": "Click to interact with the map",
       "resetMap": "Reset map",
       "legendDealer": "Authorized Dealer",
-      "legendCenter": "Installation Center",
+      "legendCenter": "Warranty Center",
+      "loading": "Loading dealers and warranty centers...",
+      "error": "Unable to load network locations.",
+      "retry": "Try again",
+      "empty": "There are no active locations to display yet.",
+      "directions": "Get directions",
+      "locationType": {
+        "dealer": "Authorized Dealer",
+        "serviceCenter": "Warranty Center"
+      },
       "stats": {
         "dealers": "Dealers Nationwide",
         "provinces": "Provinces",

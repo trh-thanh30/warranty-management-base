@@ -56,7 +56,7 @@ export function AboutNetworkBanner() {
             <div className="grid grid-cols-2 gap-6 pt-2">
               <div className="border-l-2 border-premium-red pl-4 space-y-1">
                 <div className="text-2xl sm:text-4xl font-bold text-premium-red tracking-tight">
-                  <Counter value={200} suffix="+" />
+                  <Counter value={100} suffix="+" />
                 </div>
                 <div className="text-xs font-bold uppercase tracking-wider text-stone-gray">
                   {t("network.stats.dealers")}
@@ -65,7 +65,7 @@ export function AboutNetworkBanner() {
 
               <div className="border-l-2 border-premium-red pl-4 space-y-1">
                 <div className="text-2xl sm:text-4xl font-bold text-premium-red tracking-tight">
-                  <Counter value={63} />
+                  <Counter value={34} />
                 </div>
                 <div className="text-xs font-bold uppercase tracking-wider text-stone-gray">
                   {t("network.stats.provinces")}

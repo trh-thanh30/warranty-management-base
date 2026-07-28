@@ -81,3 +81,17 @@ test("about map composes feature layers inside the shared map", async () => {
   assert.doesNotMatch(source, /<MapContainer/);
   assert.doesNotMatch(source, /function MapInteractionController/);
 });
+
+test("about map renders dealer and service-center locations from the public API", async () => {
+  const source = await readFile(aboutMapPath, "utf8");
+
+  assert.match(source, /useNetworkLocations/);
+  assert.match(source, /locations\.map/);
+  assert.match(
+    source,
+    /position=\{\[location\.latitude,\s*location\.longitude\]\}/,
+  );
+  assert.match(source, /MAP_MARKER_COLORS\.dealer/);
+  assert.match(source, /MAP_MARKER_COLORS\.serviceCenter/);
+  assert.doesNotMatch(source, /dealerPinLocations/);
+});
