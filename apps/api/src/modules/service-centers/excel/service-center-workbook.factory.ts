@@ -21,7 +21,8 @@ export async function createServiceCenterImportTemplateWorkbook() {
         province: 'Đà Nẵng',
         district: 'Phường Hải Châu',
         address: '1 Nguyễn Văn Linh',
-        googleMapsUrl: 'https://maps.google.com/?q=1+Nguyen+Van+Linh',
+        latitude: 16.0544,
+        longitude: 108.2022,
         isActive: true,
       },
     ],
@@ -60,6 +61,6 @@ function configureDataWorksheet(
     error: 'Chọn một trạng thái trong danh sách.',
   };
   for (let row = 2; row <= 1000; row += 1) {
-    worksheet.getCell(`H${row}`).dataValidation = validation;
+    worksheet.getCell(`I${row}`).dataValidation = validation;
   }
 }

@@ -164,6 +164,31 @@ Response:
 type Response = PaginatedResponse<ServiceCenterResponse>;
 ```
 
+## GET /api/v1/public/network-locations
+
+Dùng cho: bản đồ “Hệ thống trạm bảo hành & Đại lý”.
+
+Endpoint không yêu cầu query và chỉ trả Dealer/Service Center đang hoạt động.
+
+Response:
+
+```ts
+type Response = Array<{
+  id: string;
+  kind: "DEALER" | "SERVICE_CENTER";
+  name: string;
+  phone: string | null;
+  address: string;
+  province: string;
+  district: string | null;
+  latitude: number;
+  longitude: number;
+  googleMapsUrl: string;
+}>;
+```
+
+`googleMapsUrl` được sinh từ tọa độ và không được lưu trong metadata.
+
 ## Content public APIs
 
 Chính sách và hướng dẫn dùng module `content-pages`:
@@ -179,4 +204,5 @@ Xem thêm: API Content Pages.
 
 - Public claim lookup không trả `requesterName`, `requesterPhone`, `customer`, `statusHistory`, `attachments`.
 - Public service centers chỉ trả trạm active.
+- Public network locations chỉ trả đại lý và trạm bảo hành active.
 - Các endpoint public đang chịu global throttler của API.

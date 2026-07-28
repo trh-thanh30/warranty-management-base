@@ -3,17 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { ExternalLink, Phone } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { SharedMap } from "@repo/ui/map";
 import { divIcon } from "leaflet";
 import type { LatLngBoundsExpression, LatLngTuple, PathOptions } from "leaflet";
-import {
-  GeoJSON,
-  MapContainer,
-  Marker,
-  Polygon,
-  Popup,
-  TileLayer,
-  useMap,
-} from "react-leaflet";
+import { GeoJSON, Marker, Polygon, Popup, useMap } from "react-leaflet";
 import type { Dealer } from "../dealers.types";
 
 const VIETNAM_MAINLAND_BOUNDS: LatLngBoundsExpression = [
@@ -25,9 +18,6 @@ const VIETNAM_INTERACTION_BOUNDS: LatLngBoundsExpression = [
   [6.95331046340264, 102.118655233],
   [23.3662751270001, 116.947319489797],
 ];
-const OSM_TILE_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-
 const WORLD_RING: LatLngTuple[] = [
   [-90, -180],
   [-90, 180],
@@ -216,20 +206,16 @@ export function DealerMap({ activeDealer }: DealerMapProps) {
       aria-label={t("ariaLabel")}
       className="relative isolate size-full overflow-hidden bg-surface-muted"
     >
-      <MapContainer
-        bounds={VIETNAM_MAINLAND_BOUNDS}
+      <SharedMap
+        activationMode="direct"
+        initialBounds={VIETNAM_MAINLAND_BOUNDS}
         className="size-full"
         maxBounds={VIETNAM_INTERACTION_BOUNDS}
         maxBoundsViscosity={1}
         minZoom={5}
         maxZoom={18}
-        scrollWheelZoom
+        showResetControl={false}
       >
-        <TileLayer
-          attribution={OSM_TILE_ATTRIBUTION}
-          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-
         {maskPositions && (
           <Polygon positions={maskPositions} pathOptions={maskStyle} />
         )}
@@ -283,7 +269,7 @@ export function DealerMap({ activeDealer }: DealerMapProps) {
             </Popup>
           </Marker>
         )}
-      </MapContainer>
+      </SharedMap>
 
       {!vietnamBoundary && (
         <div

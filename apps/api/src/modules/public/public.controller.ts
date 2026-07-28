@@ -7,6 +7,7 @@ import { CreateWarrantyActivationRequestUseCase } from '@/modules/warranty-activ
 import { CreateWarrantyClaimDto } from '@/modules/warranty-claims/dto/create-warranty-claim.dto';
 import { CreateWarrantyClaimUseCase } from '@/modules/warranty-claims/use-cases/create-warranty-claim.use-case';
 import { PublicListServiceCentersUseCase } from '@/modules/public/use-cases/public-list-service-centers.use-case';
+import { PublicListNetworkLocationsUseCase } from '@/modules/public/use-cases/public-list-network-locations.use-case';
 import { ListPublicProductsDto } from '@/modules/products/dto/list-public-products.dto';
 import { ListPublicProductsUseCase } from '@/modules/products/use-cases/list-public-products.use-case';
 import { ListPublicProductCategoriesUseCase } from '@/modules/categories/use-cases/list-public-product-categories.use-case';
@@ -25,6 +26,7 @@ export class PublicController {
     private readonly publicLookupWarrantyClaimByCodeUseCase: PublicLookupWarrantyClaimByCodeUseCase,
     private readonly publicLookupWarrantyClaimsByWarrantyCodeUseCase: PublicLookupWarrantyClaimsByWarrantyCodeUseCase,
     private readonly publicListServiceCentersUseCase: PublicListServiceCentersUseCase,
+    private readonly publicListNetworkLocationsUseCase: PublicListNetworkLocationsUseCase,
     private readonly listPublicProductsUseCase: ListPublicProductsUseCase,
     private readonly listPublicProductCategoriesUseCase: ListPublicProductCategoriesUseCase,
   ) {}
@@ -63,6 +65,11 @@ export class PublicController {
   @Get('service-centers')
   listServiceCenters(@Query() query: ListServiceCentersDto) {
     return this.publicListServiceCentersUseCase.execute(query);
+  }
+
+  @Get('network-locations')
+  listNetworkLocations() {
+    return this.publicListNetworkLocationsUseCase.execute();
   }
 
   @Get('products')

@@ -5,12 +5,12 @@ export type ServiceCenterExcelRow = {
   province: string;
   district: string | null;
   address: string;
-  googleMapsUrl: string | null;
+  latitude: number;
+  longitude: number;
   isActive: boolean;
 };
 
 export type PreparedServiceCenterImportRow = ServiceCenterExcelRow & {
   existingServiceCenterId: string | null;
-  metadata: Record<string, unknown> | null;
   rowNumber: number;
 };

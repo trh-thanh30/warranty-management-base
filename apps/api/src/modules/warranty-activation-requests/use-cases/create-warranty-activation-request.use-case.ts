@@ -280,9 +280,15 @@ export class CreateWarrantyActivationRequestUseCase {
 
     if (!name && !address && !province && !dto.dealerPhone) return null;
 
-    if (!name || !address || !province) {
+    if (
+      !name ||
+      !address ||
+      !province ||
+      dto.dealerLatitude === undefined ||
+      dto.dealerLongitude === undefined
+    ) {
       throw new BadRequestError(
-        'Quick dealer requires name, address and province',
+        'Quick dealer requires name, address, province and coordinates',
         'BAD_REQUEST',
         { code: 'QUICK_DEALER_REQUIRED_FIELDS' },
       );
@@ -309,6 +315,8 @@ export class CreateWarrantyActivationRequestUseCase {
       name,
       phone,
       province,
+      latitude: dto.dealerLatitude,
+      longitude: dto.dealerLongitude,
       sales_name: optionalTrim(dto.salesName),
       metadata: {
         createdFrom: 'warrantyActivationRequest',

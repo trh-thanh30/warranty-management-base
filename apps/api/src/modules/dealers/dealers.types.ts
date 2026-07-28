@@ -1,4 +1,5 @@
 import { Dealer, Prisma } from '@prisma/client';
+import { createGoogleMapsUrl } from '@repo/shared/utils';
 
 export function toDealerResponse(dealer: Dealer) {
   return {
@@ -8,6 +9,9 @@ export function toDealerResponse(dealer: Dealer) {
     address: dealer.address,
     province: dealer.province,
     district: dealer.district,
+    googleMapsUrl: createGoogleMapsUrl(dealer),
+    latitude: dealer.latitude,
+    longitude: dealer.longitude,
     salesName: dealer.sales_name,
     isActive: dealer.is_active,
     metadata: toMetadata(dealer.metadata),

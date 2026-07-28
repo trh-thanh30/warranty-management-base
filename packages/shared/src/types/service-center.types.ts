@@ -1,4 +1,5 @@
 import type { PaginationQuery } from "./pagination.types.ts";
+import type { GeoPoint, OptionalGeoPoint } from "./geo.types.ts";
 
 export type ServiceCenterSummary = {
   id: string;
@@ -8,7 +9,9 @@ export type ServiceCenterSummary = {
   province: string;
   district: string | null;
   address: string;
-  googleMapsUrl: string | null;
+  googleMapsUrl: string;
+  latitude: number;
+  longitude: number;
   isActive: boolean;
   metadata: Record<string, unknown> | null;
   createdAt: string;
@@ -29,19 +32,19 @@ export type ListServiceCentersQuery = Omit<PaginationQuery, "sortBy"> & {
   sortBy?: ServiceCenterSortBy;
 };
 
-export type CreateServiceCenterBody = {
+export type CreateServiceCenterBody = GeoPoint & {
   name: string;
   phone?: string;
   email?: string;
   province: string;
   district?: string;
   address: string;
-  googleMapsUrl?: string;
 };
 
-export type UpdateServiceCenterBody = Partial<CreateServiceCenterBody> & {
-  isActive?: boolean;
-};
+export type UpdateServiceCenterBody = OptionalGeoPoint &
+  Partial<Omit<CreateServiceCenterBody, keyof GeoPoint>> & {
+    isActive?: boolean;
+  };
 
 export type ServiceCenterImportResult = {
   created: number;

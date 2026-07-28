@@ -68,25 +68,21 @@ test("dealer map uses constrained Leaflet with a mask and active marker", async 
 
   const source = await readFile(dealerMapPath, "utf8");
   for (const expected of [
-    "MapContainer",
-    "TileLayer",
+    "SharedMap",
     "GeoJSON",
     "Polygon",
     "Marker",
     "Popup",
     "flyTo",
     "fitBounds",
-    "OSM_TILE_ATTRIBUTION",
-    "attribution={OSM_TILE_ATTRIBUTION}",
     "/map/vn.geojson",
-    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
   ]) {
     assert.match(source, new RegExp(expected.replace(/[{}]/g, "\\$&")));
   }
 
   assert.match(source, /maxBoundsViscosity=\{1\}/);
   assert.match(source, /fillRule:\s*"evenodd"/);
-  assert.doesNotMatch(source, /<iframe/);
+  assert.doesNotMatch(source, /<TileLayer|<iframe/);
   assert.doesNotMatch(source, /🇻🇳|📍/u);
 });
 

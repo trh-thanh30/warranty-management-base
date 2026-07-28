@@ -10,6 +10,9 @@ const baseDealer = {
   phone: '0901234567',
   address: '1 Nguyen Trai',
   province: 'Ha Noi',
+  district: null,
+  latitude: 21.0285,
+  longitude: 105.8542,
   sales_name: 'Thanh',
   is_active: true,
   metadata: null,
@@ -41,6 +44,8 @@ describe('Dealers use cases', () => {
       phone: '0901234567',
       province: ' Ha Noi ',
       salesName: ' Thanh ',
+      latitude: 21.0285,
+      longitude: 105.8542,
     });
 
     expect(repository.create).toHaveBeenCalledWith(
@@ -49,6 +54,8 @@ describe('Dealers use cases', () => {
         name: 'Lexzenz Ha Noi',
         phone: '0901234567',
         province: 'Ha Noi',
+        latitude: 21.0285,
+        longitude: 105.8542,
         sales_name: 'Thanh',
       }),
     );
@@ -65,6 +72,8 @@ describe('Dealers use cases', () => {
         name: 'Lexzenz Ha Noi',
         phone: '0901234567',
         province: 'Ha Noi',
+        latitude: 21.0285,
+        longitude: 105.8542,
       }),
     ).rejects.toBeInstanceOf(ConflictError);
   });
@@ -114,6 +123,8 @@ describe('Dealers use cases', () => {
       address: undefined,
       is_active: false,
       metadata: undefined,
+      latitude: undefined,
+      longitude: undefined,
       name: undefined,
       phone: undefined,
       province: undefined,

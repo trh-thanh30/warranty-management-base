@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { MousePointerClick, RotateCcw } from "lucide-react";
-import type { LatLngExpression } from "leaflet";
+import type { LatLngBoundsExpression, LatLngExpression } from "leaflet";
 import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
-
-const DEFAULT_TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-const DEFAULT_TILE_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+import { OPEN_STREET_MAP_TILE_PROVIDER } from "./map.constants";
+import type {
+  MapActivationMode,
+  MapTileProvider,
+  SharedMapInitialView,
+} from "./map.types";
 
 interface MapInteractionControllerProps {
   onInteractionChange: (enabled: boolean) => void;
@@ -90,13 +92,15 @@ function MapActivationControl({
 }
 
 interface MapResetControlProps {
-  initialCenter: LatLngExpression;
-  initialZoom: number;
+  initialBounds?: LatLngBoundsExpression;
+  initialCenter?: LatLngExpression;
+  initialZoom?: number;
   onInteractionChange: (enabled: boolean) => void;
   resetLabel: string;
 }
 
 function MapResetControl({
+  initialBounds,
   initialCenter,
   initialZoom,
   onInteractionChange,
@@ -107,7 +111,11 @@ function MapResetControl({
   const handleReset = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     map.closePopup();
-    map.setView(initialCenter, initialZoom);
+    if (initialBounds) {
+      map.fitBounds(initialBounds);
+    } else if (initialCenter && initialZoom !== undefined) {
+      map.setView(initialCenter, initialZoom);
+    }
     map.scrollWheelZoom.disable();
     onInteractionChange(false);
   };
@@ -125,33 +133,40 @@ function MapResetControl({
   );
 }
 
-export interface SharedMapProps {
-  activateLabel: string;
+type SharedMapBaseProps = {
+  activateLabel?: string;
+  activationMode?: MapActivationMode;
   children?: ReactNode;
   className?: string;
-  initialCenter: LatLngExpression;
-  initialZoom: number;
   loadingClassName?: string;
+  maxBounds?: LatLngBoundsExpression;
+  maxBoundsViscosity?: number;
   maxZoom?: number;
   minZoom?: number;
-  resetLabel: string;
-  tileAttribution?: string;
-  tileUrl?: string;
+  resetLabel?: string;
+  showResetControl?: boolean;
+  tileProvider?: MapTileProvider;
   zoomSnap?: number;
-}
+};
+
+export type SharedMapProps = SharedMapBaseProps & SharedMapInitialView;
 
 export function SharedMap({
   activateLabel,
+  activationMode = "overlay",
   children,
   className = "size-full",
+  initialBounds,
   initialCenter,
   initialZoom,
   loadingClassName = "size-full animate-pulse bg-surface-muted",
+  maxBounds,
+  maxBoundsViscosity,
   maxZoom,
   minZoom,
   resetLabel,
-  tileAttribution = DEFAULT_TILE_ATTRIBUTION,
-  tileUrl = DEFAULT_TILE_URL,
+  showResetControl = true,
+  tileProvider = OPEN_STREET_MAP_TILE_PROVIDER,
   zoomSnap,
 }: SharedMapProps) {
   const [isMounted, setIsMounted] = useState(false);
@@ -167,28 +182,41 @@ export function SharedMap({
 
   return (
     <MapContainer
+      bounds={initialBounds}
       center={initialCenter}
       zoom={initialZoom}
       zoomSnap={zoomSnap}
       minZoom={minZoom}
       maxZoom={maxZoom}
+      maxBounds={maxBounds}
+      maxBoundsViscosity={maxBoundsViscosity}
       scrollWheelZoom={false}
       className={className}
     >
-      <MapInteractionController onInteractionChange={setIsWheelZoomEnabled} />
-      <MapActivationControl
-        activateLabel={activateLabel}
-        isWheelZoomEnabled={isWheelZoomEnabled}
-        onInteractionChange={setIsWheelZoomEnabled}
-      />
-      <MapResetControl
-        initialCenter={initialCenter}
-        initialZoom={initialZoom}
-        resetLabel={resetLabel}
-        onInteractionChange={setIsWheelZoomEnabled}
-      />
+      {activationMode !== "disabled" ? (
+        <MapInteractionController onInteractionChange={setIsWheelZoomEnabled} />
+      ) : null}
+      {activationMode === "overlay" && activateLabel ? (
+        <MapActivationControl
+          activateLabel={activateLabel}
+          isWheelZoomEnabled={isWheelZoomEnabled}
+          onInteractionChange={setIsWheelZoomEnabled}
+        />
+      ) : null}
+      {showResetControl && resetLabel ? (
+        <MapResetControl
+          initialBounds={initialBounds}
+          initialCenter={initialCenter}
+          initialZoom={initialZoom}
+          resetLabel={resetLabel}
+          onInteractionChange={setIsWheelZoomEnabled}
+        />
+      ) : null}
 
-      <TileLayer url={tileUrl} attribution={tileAttribution} />
+      <TileLayer
+        url={tileProvider.url}
+        attribution={tileProvider.attribution}
+      />
       {children}
     </MapContainer>
   );
