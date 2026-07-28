@@ -30,6 +30,25 @@ export type CategoryResponse = CategorySummary & {
   children?: CategorySummary[];
 };
 
+export type PublicProductCategory = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  parentId: string | null;
+  icon: string | null;
+  imageUrl: string | null;
+  order: number;
+  productCount: number;
+};
+
+export type ListPublicProductCategoriesQuery = Pick<
+  PaginationQuery,
+  "page" | "limit"
+> & {
+  hasImage?: boolean;
+};
+
 export type ListCategoriesQuery = PaginationQuery & {
   type?: CategoryType;
   parentId?: string;

@@ -78,6 +78,30 @@ class WebsiteSocialLinkDto {
   sortOrder: number;
 }
 
+class WebsiteHeroSlideDto {
+  @IsUUID()
+  id: string;
+
+  @IsString()
+  @IsNotEmpty()
+  key: string;
+
+  @IsOptional()
+  @IsUUID()
+  desktopAssetId: string | null;
+
+  @IsOptional()
+  @IsUUID()
+  mobileAssetId: string | null;
+
+  @IsBoolean()
+  isActive: boolean;
+
+  @IsInt()
+  @Min(0)
+  sortOrder: number;
+}
+
 export class UpdateWebsiteSiteSettingDto extends WebsiteVersionedDto {
   @IsEmail()
   contactEmail: string;
@@ -97,6 +121,11 @@ export class UpdateWebsiteSiteSettingDto extends WebsiteVersionedDto {
   @IsOptional()
   @IsUUID()
   ogImageAssetId: string | null;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => WebsiteHeroSlideDto)
+  heroSlides: WebsiteHeroSlideDto[];
 
   @IsArray()
   @ValidateNested({ each: true })

@@ -17,6 +17,18 @@ export class WebsiteConfigPolicyService {
 
     this.assertHttpsUrl(site.websiteUrl);
 
+    const heroKeys = site.heroSlides.map((slide) => slide.key.trim());
+    if (
+      heroKeys.some((key) => !key) ||
+      new Set(heroKeys).size !== heroKeys.length
+    ) {
+      throw new ValidationError(
+        'Homepage hero slide keys must be non-empty and unique',
+        'WEBSITE_CONFIG_PUBLISH_INVALID',
+        { field: 'heroSlides' },
+      );
+    }
+
     for (const office of site.offices.filter((item) => item.isActive)) {
       const vi = office.translations.find(
         (translation) => translation.locale === 'vi',

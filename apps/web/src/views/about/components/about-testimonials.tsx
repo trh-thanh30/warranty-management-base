@@ -18,7 +18,7 @@ export function AboutTestimonials() {
     <section className="w-full bg-white py-16 lg:py-24">
       <Container>
         <FadeIn direction="up" className="text-center max-w-4xl mx-auto mb-16">
-          <span className="block text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-premium-red mb-2">
+          <span className="block text-xs sm:text-sm font-semibold uppercase text-premium-red mb-2">
             {t("testimonials.eyebrow")}
           </span>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold uppercase tracking-wide text-deep-black leading-tight sm:whitespace-nowrap">

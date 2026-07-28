@@ -9,6 +9,7 @@ import { ExportCategoriesUseCase } from '@/modules/categories/use-cases/export-c
 import { GetCategoryDetailUseCase } from '@/modules/categories/use-cases/get-category-detail.use-case';
 import { ImportCategoriesUseCase } from '@/modules/categories/use-cases/import-categories.use-case';
 import { ListCategoriesUseCase } from '@/modules/categories/use-cases/list-categories.use-case';
+import { ListPublicProductCategoriesUseCase } from '@/modules/categories/use-cases/list-public-product-categories.use-case';
 import { ReorderCategoriesUseCase } from '@/modules/categories/use-cases/reorder-categories.use-case';
 import { UpdateCategoryUseCase } from '@/modules/categories/use-cases/update-category.use-case';
 import { Module } from '@nestjs/common';
@@ -20,6 +21,7 @@ import { Module } from '@nestjs/common';
     CategoriesRepository,
     CreateCategoryUseCase,
     ListCategoriesUseCase,
+    ListPublicProductCategoriesUseCase,
     GetCategoryDetailUseCase,
     ReorderCategoriesUseCase,
     UpdateCategoryUseCase,
@@ -28,6 +30,6 @@ import { Module } from '@nestjs/common';
     ExportCategoriesUseCase,
     ImportCategoriesUseCase,
   ],
-  exports: [CategoriesRepository],
+  exports: [CategoriesRepository, ListPublicProductCategoriesUseCase],
 })
 export class CategoriesModule {}

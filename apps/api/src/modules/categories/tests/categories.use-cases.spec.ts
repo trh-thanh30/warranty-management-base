@@ -8,6 +8,7 @@ import { DeactivateCategoryUseCase } from '@/modules/categories/use-cases/deacti
 import { GetCategoryDetailUseCase } from '@/modules/categories/use-cases/get-category-detail.use-case';
 import { ImportCategoriesUseCase } from '@/modules/categories/use-cases/import-categories.use-case';
 import { ListCategoriesUseCase } from '@/modules/categories/use-cases/list-categories.use-case';
+import { ListPublicProductCategoriesUseCase } from '@/modules/categories/use-cases/list-public-product-categories.use-case';
 import { ReorderCategoriesUseCase } from '@/modules/categories/use-cases/reorder-categories.use-case';
 import { UpdateCategoryUseCase } from '@/modules/categories/use-cases/update-category.use-case';
 import { category_type } from '@prisma/client';
@@ -41,6 +42,7 @@ describe('Category use cases', () => {
     findByIds: jest.fn(),
     findByTypeAndSlug: jest.fn(),
     list: jest.fn(),
+    listPublicProductCategories: jest.fn(),
     listAll: jest.fn(),
     listForExport: jest.fn(),
     importRows: jest.fn(),
@@ -126,6 +128,69 @@ describe('Category use cases', () => {
       type: category_type.PRODUCT,
     });
     expect(result.items[0]?.slug).toBe('car');
+  });
+
+  it('lists public product categories without admin-only fields', async () => {
+    categoriesRepository.listPublicProductCategories.mockResolvedValue({
+      items: [
+        {
+          ...category,
+          image_url: 'https://cdn.example.com/categories/car.jpg',
+          _count: { product_templates: 3 },
+        },
+      ],
+      meta: {
+        page: 1,
+        limit: 4,
+        total: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+    });
+    const useCase = new ListPublicProductCategoriesUseCase(
+      categoriesRepository as never,
+    );
+
+    const result = await useCase.execute({
+      page: 1,
+      limit: 4,
+      hasImage: 'true',
+    });
+
+    expect(
+      categoriesRepository.listPublicProductCategories,
+    ).toHaveBeenCalledWith({
+      page: 1,
+      limit: 4,
+      hasImage: 'true',
+    });
+    expect(result).toEqual({
+      items: [
+        {
+          id: 'category-id',
+          slug: 'car',
+          name: 'Car',
+          description: 'Vehicles',
+          parentId: null,
+          icon: 'Car',
+          imageUrl: 'https://cdn.example.com/categories/car.jpg',
+          order: 10,
+          productCount: 3,
+        },
+      ],
+      meta: {
+        page: 1,
+        limit: 4,
+        total: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+    });
+    expect(result.items[0]).not.toHaveProperty('isActive');
+    expect(result.items[0]).not.toHaveProperty('metadata');
+    expect(result.items[0]).not.toHaveProperty('createdAt');
   });
 
   it('returns category detail', async () => {

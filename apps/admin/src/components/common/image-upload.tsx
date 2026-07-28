@@ -30,6 +30,7 @@ export type ImageUploadLabels = {
 };
 
 type ImageUploadProps = {
+  allowClear?: boolean;
   compact?: boolean;
   disabled?: boolean;
   id: string;
@@ -44,6 +45,7 @@ type ImageUploadProps = {
 };
 
 export function ImageUpload({
+  allowClear = true,
   compact = false,
   disabled,
   id,
@@ -144,9 +146,9 @@ export function ImageUpload({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="min-w-0 max-w-full space-y-3">
       {value ? (
-        <div className="overflow-hidden rounded-md border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+        <div className="min-w-0 max-w-full overflow-hidden rounded-md border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
           <div
             className={cn(
               "group relative flex items-center justify-center bg-slate-100 p-3 dark:bg-slate-900",
@@ -173,20 +175,22 @@ export function ImageUpload({
               </Button>
             </div>
           </div>
-          <div className="flex items-center justify-between gap-3 border-t border-slate-200 px-3 py-2 dark:border-slate-800">
-            <span className="truncate text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex min-w-0 items-center justify-between gap-3 border-t border-slate-200 px-3 py-2 dark:border-slate-800">
+            <span className="min-w-0 flex-1 truncate text-xs text-slate-500 dark:text-slate-400">
               {value}
             </span>
-            <Button
-              disabled={disabled || uploading}
-              onClick={() => void clearImage()}
-              size="sm"
-              type="button"
-              variant="secondary"
-            >
-              <X aria-hidden="true" className="size-4" />
-              {copy.clear}
-            </Button>
+            {allowClear ? (
+              <Button
+                disabled={disabled || uploading}
+                onClick={() => void clearImage()}
+                size="sm"
+                type="button"
+                variant="secondary"
+              >
+                <X aria-hidden="true" className="size-4" />
+                {copy.clear}
+              </Button>
+            ) : null}
           </div>
         </div>
       ) : (

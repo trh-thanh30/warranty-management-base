@@ -2,19 +2,16 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { motion } from "framer-motion";
 import { PhoneCall } from "lucide-react";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
-import { useScrollReveal } from "@/src/hooks/use-scroll-reveal";
-import { revealViewportOnce } from "@/src/constants/motion.constants";
 import { Link } from "@/src/i18n/navigation";
 import { BrandsSection } from "./brands-section";
 
 import { Container } from "@/src/components/common/container";
+import { FadeIn } from "@/src/components/animation/fade-in";
 
 export function AboutSection() {
   const t = useTranslations("HomePage.about");
-  const { container, fadeUp } = useScrollReveal();
 
   return (
     <section
@@ -26,32 +23,20 @@ export function AboutSection() {
       <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-premium-red/5 rounded-full blur-3xl pointer-events-none" />
 
       <Container>
-        {/* Centered Section Header */}
-        <motion.div
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="show"
-          viewport={revealViewportOnce}
-          className="text-center pb-4 lg:pb-6"
-        >
-          <span className="block text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-premium-red mb-1.5">
+        {/* Centered Section Header with FadeIn */}
+        <FadeIn direction="up" className="text-center pb-4 lg:pb-6">
+          <span className="block text-xs sm:text-sm font-semibold uppercase text-premium-red mb-1.5">
             {t("eyebrow")}
           </span>
-          <h2 className="font-condensed text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold uppercase tracking-wide text-deep-black leading-snug text-center">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold uppercase tracking-wide text-deep-black leading-snug text-center">
             {t("title")}
           </h2>
-        </motion.div>
+        </FadeIn>
 
-        <motion.div
-          variants={container}
-          initial="hidden"
-          whileInView="show"
-          viewport={revealViewportOnce}
-          className="grid gap-8 lg:gap-12 lg:grid-cols-12 lg:items-start pt-1"
-        >
+        <div className="grid gap-8 lg:gap-12 lg:grid-cols-12 lg:items-start pt-1">
           {/* Left Column: Premium Image Collage (7 cols for larger display) */}
-          <motion.div
-            variants={fadeUp}
+          <FadeIn
+            direction="right"
             className="lg:col-span-7 relative flex justify-center items-center"
           >
             {/* Main Large Image */}
@@ -65,11 +50,11 @@ export function AboutSection() {
                 className="object-cover transition-transform duration-[600ms] hover:scale-105"
               />
             </div>
-          </motion.div>
+          </FadeIn>
 
           {/* Right Column: Content Block (5 cols) */}
-          <motion.div
-            variants={fadeUp}
+          <FadeIn
+            direction="left"
             className="lg:col-span-5 flex flex-col justify-start pt-1 sm:pt-2"
           >
             {/* Description */}
@@ -109,20 +94,14 @@ export function AboutSection() {
                 </div>
               </a>
             </div>
-          </motion.div>
-        </motion.div>
+          </FadeIn>
+        </div>
       </Container>
 
       {/* Brand Logo Marquee Slider (Full-width edge-to-edge) */}
-      <motion.div
-        variants={fadeUp}
-        initial="hidden"
-        whileInView="show"
-        viewport={revealViewportOnce}
-        className="mt-16 w-full"
-      >
+      <FadeIn direction="up" className="mt-16 w-full">
         <BrandsSection />
-      </motion.div>
+      </FadeIn>
     </section>
   );
 }

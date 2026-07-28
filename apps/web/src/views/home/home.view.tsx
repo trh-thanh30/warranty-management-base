@@ -4,17 +4,51 @@ import { AboutSection } from "./components/about-section";
 import { ProductsSection } from "./components/products-section";
 import { SputterSection } from "./components/sputter-section";
 import { ComparisonSection } from "./components/comparison-section";
+import { websiteConfigService } from "@/src/services/website-config/website-config.service";
+import { productCategoriesService } from "@/src/services/product-categories/product-categories.service";
 import { getPublishedContentPage } from "@/src/services/content-pages.service";
-import { FAQ_CONTENT_PAGE_SLUG } from "./home.constants";
+import type { WebsiteLocale } from "@repo/shared";
+import { resolveWebsiteHeroSlides } from "@repo/shared/utils";
+import {
+  FAQ_CONTENT_PAGE_SLUG,
+  HOME_PRODUCT_CATEGORY_BATCH_SIZE,
+} from "./home.constants";
 
-export async function HomeView() {
-  const faqPage = await getPublishedContentPage(FAQ_CONTENT_PAGE_SLUG);
+export async function HomeView({
+  params,
+}: {
+  params: Promise<{ locale: WebsiteLocale }>;
+}) {
+  const { locale } = await params;
+  const [site, productCategories, faqPage] = await Promise.all([
+    websiteConfigService.getSiteSetting(locale).catch(() => null),
+    productCategoriesService
+      .listProductCategories({
+        page: 1,
+        limit: HOME_PRODUCT_CATEGORY_BATCH_SIZE,
+        hasImage: true,
+      })
+      .catch(() => null),
+    getPublishedContentPage(FAQ_CONTENT_PAGE_SLUG),
+  ]);
+  const heroSlides = resolveWebsiteHeroSlides(site?.heroSlides);
+  const desktopHeroImages = heroSlides.desktop.map((slide) => ({
+    id: slide.key,
+    src: slide.url,
+  }));
+  const mobileHeroImages = heroSlides.mobile.map((slide) => ({
+    id: slide.key,
+    src: slide.url,
+  }));
 
   return (
     <main className="overflow-x-hidden bg-gray-50 text-charcoal">
-      <HeroSection />
+      <HeroSection
+        desktopImages={desktopHeroImages}
+        mobileImages={mobileHeroImages}
+      />
       <AboutSection />
-      <ProductsSection />
+      <ProductsSection initialPage={productCategories} />
       <SputterSection />
       <ComparisonSection />
 

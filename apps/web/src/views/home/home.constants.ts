@@ -1,16 +1,26 @@
 import { productCatalog } from "@/src/constants/product-catalog.constants";
+import { DEFAULT_HOME_HERO_SLIDES } from "@repo/shared/constants";
+
+export const HOME_PRODUCT_CATEGORY_BATCH_SIZE = 30;
 
 export interface HeroImageItem {
   id: string;
   src: string;
-  srcMobile?: string;
 }
 
-export const carHeroImages: HeroImageItem[] = [
-  { id: "primary", src: "/bg_1.jpg", srcMobile: undefined },
-  { id: "technology", src: "/bg_2.jpg", srcMobile: undefined },
-  { id: "protection", src: "/bg_3.jpg", srcMobile: undefined },
-];
+export const desktopHeroImages: HeroImageItem[] = DEFAULT_HOME_HERO_SLIDES.map(
+  (slide) => ({
+    id: slide.key,
+    src: slide.desktopUrl,
+  }),
+);
+
+export const mobileHeroImages: HeroImageItem[] = DEFAULT_HOME_HERO_SLIDES.map(
+  (slide) => ({
+    id: slide.key,
+    src: slide.mobileUrl,
+  }),
+);
 
 export const carBrands = [
   { name: "Audi", src: "/brands/audi.svg" },

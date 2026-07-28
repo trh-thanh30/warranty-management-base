@@ -69,6 +69,7 @@
     "hero": {
       "previousSlideAriaLabel": "Previous slide",
       "nextSlideAriaLabel": "Next slide",
+      "slideAlt": "FUJITEK homepage showcase",
       "slides": {
         "primary": {
           "alt": "FUJITEK high-performance window film"
@@ -96,6 +97,9 @@
       "title": "PRODUCT CATEGORIES",
       "description": "Comprehensive automotive solutions including window films, LED lighting systems, 4K dashcams, and TPMS sensors from Lexzenz & Fujitek.",
       "explore": "Explore category",
+      "itemCount": "{count} products",
+      "previousCategories": "Previous categories",
+      "nextCategories": "Next categories",
       "viewAll": "View all product categories",
       "categories": {
         "film": {

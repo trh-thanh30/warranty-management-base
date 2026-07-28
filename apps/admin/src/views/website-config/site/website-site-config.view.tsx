@@ -16,7 +16,15 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { Image, Images, MapPin, Plus, Share2, Trash2 } from "lucide-react";
+import {
+  Image,
+  Images,
+  House,
+  MapPin,
+  Plus,
+  Share2,
+  Trash2,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { IconType } from "react-icons";
 import {
@@ -33,6 +41,7 @@ import type {
   WebsiteSiteSetting,
   WebsiteSocialLink,
 } from "@repo/shared";
+import { HttpClientError } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
   Button,
@@ -71,6 +80,10 @@ import { RevisionStatusBar } from "../components/revision-status-bar";
 import { WebsiteConfigQueryState } from "../components/website-config-query-state";
 import { ThumbnailUploadPanel } from "./thumbnail-upload-panel";
 import { SortableConfigItem } from "./sortable-config-item";
+import {
+  createDefaultHeroSlideDrafts,
+  HomepageHeroEditor,
+} from "./homepage-hero-editor";
 
 type SiteDraft = Omit<UpdateWebsiteSiteSettingBody, "expectedVersion">;
 type SocialPlatform = WebsiteSocialLink["platform"];
@@ -191,8 +204,8 @@ export function WebsiteSiteConfigView() {
       });
       setDirty(false);
       toast.success(t("toast.saved"));
-    } catch {
-      toast.error(t("toast.error"));
+    } catch (error) {
+      showMutationError(error);
     }
   }
 
@@ -204,9 +217,30 @@ export function WebsiteSiteConfigView() {
       });
       setDirty(false);
       toast.success(t("toast.published"));
-    } catch {
-      toast.error(t("toast.error"));
+    } catch (error) {
+      showMutationError(error);
     }
+  }
+
+  function showMutationError(error: unknown) {
+    const field =
+      error instanceof HttpClientError &&
+      error.details &&
+      typeof error.details === "object" &&
+      "field" in error.details
+        ? error.details.field
+        : undefined;
+
+    if (field === "contactEmail") {
+      toast.error(t("toast.contactEmailInvalid"));
+      return;
+    }
+
+    toast.error(
+      error instanceof Error && error.message
+        ? error.message
+        : t("toast.error"),
+    );
   }
 
   return (
@@ -265,13 +299,20 @@ export function WebsiteSiteConfigView() {
           <Tabs className="space-y-5" defaultValue="identity">
             <Card>
               <CardContent className="p-2">
-                <TabsList className="grid h-auto w-full grid-cols-2 gap-1 bg-transparent p-0 lg:grid-cols-4">
+                <TabsList className="grid h-auto w-full grid-cols-2 gap-1 bg-transparent p-0 lg:grid-cols-5">
                   <TabsTrigger
                     className="min-h-12 gap-2 px-4 data-[state=active]:bg-slate-950 data-[state=active]:text-white dark:data-[state=active]:bg-slate-50 dark:data-[state=active]:text-slate-950"
                     value="identity"
                   >
                     <Image aria-hidden="true" className="size-4" />
                     {t("site.tabs.identity")}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    className="min-h-12 gap-2 px-4 data-[state=active]:bg-slate-950 data-[state=active]:text-white dark:data-[state=active]:bg-slate-50 dark:data-[state=active]:text-slate-950"
+                    value="homepage"
+                  >
+                    <House aria-hidden="true" className="size-4" />
+                    {t("site.tabs.homepage")}
                   </TabsTrigger>
                   <TabsTrigger
                     className="min-h-12 gap-2 px-4 data-[state=active]:bg-slate-950 data-[state=active]:text-white dark:data-[state=active]:bg-slate-50 dark:data-[state=active]:text-slate-950"
@@ -363,6 +404,21 @@ export function WebsiteSiteConfigView() {
               </Card>
             </TabsContent>
 
+            <TabsContent className="mt-0" value="homepage">
+              <Card>
+                <CardContent className="p-5 sm:p-6">
+                  <HomepageHeroEditor
+                    configuredSlides={query.data.heroSlides}
+                    disabled={!canUpdate}
+                    onChange={(heroSlides) =>
+                      change((current) => ({ ...current, heroSlides }))
+                    }
+                    slides={form.heroSlides}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
             <TabsContent className="mt-0" value="thumbnails">
               <Card>
                 <CardContent className="p-5 sm:p-6">
@@ -413,6 +469,17 @@ function toDraft(site: WebsiteSiteSetting): SiteDraft {
     contactEmail: site.contactEmail,
     footerLogoAssetId: site.footerLogo?.id ?? null,
     headerLogoAssetId: site.headerLogo?.id ?? null,
+    heroSlides:
+      site.heroSlides.length > 0
+        ? site.heroSlides.map((slide) => ({
+            desktopAssetId: slide.desktopImage?.id ?? null,
+            id: slide.id,
+            isActive: slide.isActive,
+            key: slide.key,
+            mobileAssetId: slide.mobileImage?.id ?? null,
+            sortOrder: slide.sortOrder,
+          }))
+        : createDefaultHeroSlideDrafts(),
     offices: structuredClone(site.offices),
     ogImageAssetId: site.ogImage?.id ?? null,
     socialLinks: structuredClone(site.socialLinks),

@@ -3,29 +3,25 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { ChevronRight } from "lucide-react";
-import { useScrollReveal } from "@/src/hooks/use-scroll-reveal";
-import { revealViewportOnce } from "@/src/constants/motion.constants";
-import { motion } from "framer-motion";
 
 import { Container } from "@/src/components/common/container";
+import { FadeIn } from "@/src/components/animation/fade-in";
+import { Counter } from "@/src/components/animation/counter";
+import {
+  StaggerGroup,
+  StaggerItem,
+} from "@/src/components/animation/stagger-group";
 
 export function SputterSection() {
   const t = useTranslations("HomePage.sputter");
-  const { fadeUp } = useScrollReveal();
 
   return (
     <section className="w-full py-16 lg:py-24 bg-white">
       <Container className="space-y-16">
-        <motion.div
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="show"
-          viewport={revealViewportOnce}
-          className="grid gap-12 lg:grid-cols-12 items-center"
-        >
-          {/* Left Description */}
-          <div className="lg:col-span-6 space-y-5">
-            <span className="block text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-premium-red">
+        <div className="grid gap-12 lg:grid-cols-12 items-center">
+          {/* Left Description with FadeIn */}
+          <FadeIn direction="right" className="lg:col-span-6 space-y-5">
+            <span className="block text-xs sm:text-sm font-semibold uppercase text-premium-red">
               {t("eyebrow")}
             </span>
             <h2 className="text-2xl sm:text-4xl lg:text-5xl font-semibold uppercase tracking-wide text-deep-black leading-tight">
@@ -51,22 +47,25 @@ export function SputterSection() {
                 <ChevronRight className="size-4" />
               </a>
             </div>
-          </div>
+          </FadeIn>
 
-          {/* Right Chamber Diagram */}
-          <div className="lg:col-span-6 relative aspect-square sm:aspect-[4/3] rounded-md overflow-hidden border border-border-gray bg-deep-black flex items-center justify-center">
+          {/* Right Chamber Diagram with FadeIn */}
+          <FadeIn
+            direction="left"
+            className="lg:col-span-6 relative aspect-square sm:aspect-[4/3] rounded-md overflow-hidden border border-border-gray bg-deep-black flex items-center justify-center"
+          >
             <Image
               src="/hero/hero_2.jpg"
               alt={t("chamberImageAlt")}
               fill
-              sizes="(max-width: 1024px) 100vw, 800px"
+              sizes="(max-width: 1024px) 100vw, 650px"
               className="object-cover"
             />
-          </div>
-        </motion.div>
+          </FadeIn>
+        </div>
 
-        {/* Sputter Structure & Stat Counters Row */}
-        <div className="space-y-10 pt-4">
+        {/* Structure Diagram & Stats Block */}
+        <div className="space-y-10 pt-6 border-t border-border-gray/60">
           {/* Full Viewport Width Banner Image */}
           <div className="relative w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] aspect-[21/9] sm:aspect-[24/9] lg:aspect-[32/10] overflow-hidden bg-white shadow-sm">
             <Image
@@ -78,11 +77,11 @@ export function SputterSection() {
             />
           </div>
 
-          {/* 3 Stat Counter Cards (Full-Width 3 Columns Row Underneath Image) */}
+          {/* 3 Stat Counter Cards with Animated Count-up Numbers */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
             <div className="p-6 sm:p-8 rounded-md bg-white border border-border-gray shadow-sm hover:shadow-md transition-shadow">
               <span className="block text-4xl sm:text-6xl font-semibold text-premium-red">
-                {t("stats.warrantyValue")}
+                <Counter value={10} suffix=" NĂM" />
               </span>
               <span className="block text-xs sm:text-sm font-semibold text-deep-black uppercase tracking-wider mt-2.5">
                 {t("stats.warrantyLabel")}
@@ -91,7 +90,7 @@ export function SputterSection() {
 
             <div className="p-6 sm:p-8 rounded-md bg-white border border-border-gray shadow-sm hover:shadow-md transition-shadow">
               <span className="block text-4xl sm:text-6xl font-semibold text-premium-red">
-                99%
+                <Counter value={99} suffix="%" />
               </span>
               <span className="block text-xs sm:text-sm font-semibold text-deep-black uppercase tracking-wider mt-2.5">
                 {t("stats.uvLabel")}
@@ -100,7 +99,7 @@ export function SputterSection() {
 
             <div className="p-6 sm:p-8 rounded-md bg-white border border-border-gray shadow-sm hover:shadow-md transition-shadow">
               <span className="block text-4xl sm:text-6xl font-semibold text-premium-red">
-                98%
+                <Counter value={98} suffix="%" />
               </span>
               <span className="block text-xs sm:text-sm font-semibold text-deep-black uppercase tracking-wider mt-2.5">
                 {t("stats.irLabel")}
@@ -108,33 +107,33 @@ export function SputterSection() {
             </div>
           </div>
 
-          {/* 3 Detail Columns */}
-          <div className="grid gap-8 md:grid-cols-3 pt-6 border-t border-border-gray">
-            <div className="space-y-2">
+          {/* 3 Detail Columns with Staggered Entrance Animation */}
+          <StaggerGroup className="grid gap-8 md:grid-cols-3 pt-6 border-t border-border-gray">
+            <StaggerItem className="space-y-2">
               <h4 className="text-base sm:text-lg font-semibold uppercase text-deep-black">
                 {t("details.warranty.title")}
               </h4>
-              <p className="text-sm text-stone-gray leading-relaxed">
+              <p className="text-base text-stone-gray leading-relaxed">
                 {t("details.warranty.description")}
               </p>
-            </div>
-            <div className="space-y-2">
+            </StaggerItem>
+            <StaggerItem className="space-y-2">
               <h4 className="text-base sm:text-lg font-semibold uppercase text-deep-black">
                 {t("details.uv.title")}
               </h4>
-              <p className="text-sm text-stone-gray leading-relaxed">
+              <p className="text-base text-stone-gray leading-relaxed">
                 {t("details.uv.description")}
               </p>
-            </div>
-            <div className="space-y-2">
+            </StaggerItem>
+            <StaggerItem className="space-y-2">
               <h4 className="text-base sm:text-lg font-semibold uppercase text-deep-black">
                 {t("details.ir.title")}
               </h4>
-              <p className="text-sm text-stone-gray leading-relaxed">
+              <p className="text-base text-stone-gray leading-relaxed">
                 {t("details.ir.description")}
               </p>
-            </div>
-          </div>
+            </StaggerItem>
+          </StaggerGroup>
         </div>
       </Container>
     </section>

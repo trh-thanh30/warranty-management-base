@@ -2,29 +2,24 @@
 
 import { CheckCircle2, XCircle, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useScrollReveal } from "@/src/hooks/use-scroll-reveal";
-import { revealViewportOnce } from "@/src/constants/motion.constants";
-import { motion } from "framer-motion";
 
 import { Container } from "@/src/components/common/container";
+import { FadeIn } from "@/src/components/animation/fade-in";
+import {
+  StaggerGroup,
+  StaggerItem,
+} from "@/src/components/animation/stagger-group";
 
 export function ComparisonSection() {
   const t = useTranslations("HomePage.comparison");
-  const { fadeUp } = useScrollReveal();
 
   return (
     <section className="w-full py-16 lg:py-24 bg-gray-50">
       <Container>
-        <motion.div
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="show"
-          viewport={revealViewportOnce}
-          className="grid gap-12 lg:grid-cols-12 items-center"
-        >
-          {/* Left Summary */}
-          <div className="lg:col-span-5 space-y-4">
-            <span className="block text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-premium-red">
+        <div className="grid gap-12 lg:grid-cols-12 items-center">
+          {/* Left Summary with FadeIn */}
+          <FadeIn direction="right" className="lg:col-span-5 space-y-4">
+            <span className="block text-xs sm:text-sm font-semibold uppercase text-premium-red">
               {t("eyebrow")}
             </span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold uppercase text-deep-black">
@@ -42,19 +37,19 @@ export function ComparisonSection() {
                 <ChevronRight className="size-4" />
               </a>
             </div>
-          </div>
+          </FadeIn>
 
-          {/* Right Comparison Columns */}
-          <div className="lg:col-span-7 grid gap-6 sm:grid-cols-2">
+          {/* Right Comparison Columns with Staggered Entrance */}
+          <StaggerGroup className="lg:col-span-7 grid gap-6 sm:grid-cols-2">
             {/* Common Film (❌) */}
-            <div className="p-7 sm:p-8 rounded-md bg-premium-red/5 border border-premium-red/20 space-y-4">
+            <StaggerItem className="p-7 sm:p-8 rounded-md bg-premium-red/5 border border-premium-red/20 space-y-4">
               <div className="flex items-center gap-3">
                 <XCircle className="size-8 text-premium-red shrink-0" />
                 <h3 className="text-lg sm:text-xl font-semibold uppercase text-deep-black">
                   {t("standard.title")}
                 </h3>
               </div>
-              <ul className="space-y-3.5 text-xs sm:text-sm text-stone-gray font-semibold">
+              <ul className="space-y-3.5 text-sm text-stone-gray font-semibold">
                 <li className="flex items-start gap-2">
                   <span className="text-premium-red font-medium">•</span>
                   <span>{t("standard.items.heat")}</span>
@@ -68,17 +63,17 @@ export function ComparisonSection() {
                   <span>{t("standard.items.signal")}</span>
                 </li>
               </ul>
-            </div>
+            </StaggerItem>
 
             {/* FUJITEK Film (✅) */}
-            <div className="p-7 sm:p-8 rounded-md bg-gray-100/60 border-2 border-premium-red space-y-4 shadow-lg relative">
+            <StaggerItem className="p-7 sm:p-8 rounded-md bg-gray-100/60 border-2 border-premium-red space-y-4 shadow-lg relative">
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="size-8 text-premium-red shrink-0" />
                 <h3 className="text-lg sm:text-xl font-semibold uppercase text-deep-black">
                   FUJITEK Films
                 </h3>
               </div>
-              <ul className="space-y-3.5 text-xs sm:text-sm text-deep-black font-medium">
+              <ul className="space-y-3.5 text-sm text-deep-black font-medium">
                 <li className="flex items-start gap-2">
                   <span className="text-premium-red font-medium">•</span>
                   <span>{t("fujitek.items.protection")}</span>
@@ -92,9 +87,9 @@ export function ComparisonSection() {
                   <span>{t("fujitek.items.warranty")}</span>
                 </li>
               </ul>
-            </div>
-          </div>
-        </motion.div>
+            </StaggerItem>
+          </StaggerGroup>
+        </div>
       </Container>
     </section>
   );

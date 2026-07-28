@@ -40,7 +40,7 @@ export function FaqSection({ page }: { page: ContentPageSummary | null }) {
             >
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs sm:text-sm font-medium uppercase tracking-[0.2em] text-premium-red">
+                  <span className="text-xs sm:text-sm font-medium uppercase text-premium-red">
                     {t("eyebrow")}
                   </span>
                 </div>

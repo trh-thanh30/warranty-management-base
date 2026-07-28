@@ -11,6 +11,23 @@ export type WebsiteAssetReference = {
   url: string;
 };
 
+export type WebsiteHeroSlide = {
+  desktopImage: WebsiteAssetReference | null;
+  id: string;
+  isActive: boolean;
+  key: string;
+  mobileImage: WebsiteAssetReference | null;
+  sortOrder: number;
+};
+
+export type WebsiteHeroFallbackSlide = {
+  desktopUrl: string;
+  id: string;
+  key: string;
+  mobileUrl: string;
+  sortOrder: number;
+};
+
 export type WebsiteOfficeText = {
   address: string;
   label: string;
@@ -44,6 +61,7 @@ export type WebsiteSiteSetting = {
   contactEmail: string;
   footerLogo: WebsiteAssetReference | null;
   headerLogo: WebsiteAssetReference | null;
+  heroSlides: WebsiteHeroSlide[];
   offices: WebsiteOffice[];
   ogImage: WebsiteAssetReference | null;
   revision: WebsiteRevisionMeta;
@@ -56,6 +74,14 @@ export type UpdateWebsiteSiteSettingBody = WebsiteVersionedMutation & {
   contactEmail: string;
   footerLogoAssetId: string | null;
   headerLogoAssetId: string | null;
+  heroSlides: Array<{
+    desktopAssetId: string | null;
+    id: string;
+    isActive: boolean;
+    key: string;
+    mobileAssetId: string | null;
+    sortOrder: number;
+  }>;
   offices: WebsiteOffice[];
   ogImageAssetId: string | null;
   socialLinks: WebsiteSocialLink[];
@@ -66,6 +92,7 @@ export type PublicWebsiteSiteSetting = {
   contactEmail: string;
   footerLogo: WebsiteAssetReference | null;
   headerLogo: WebsiteAssetReference | null;
+  heroSlides: WebsiteHeroSlide[];
   locale: WebsiteLocale;
   offices: Array<Omit<WebsiteOffice, "translations"> & WebsiteOfficeText>;
   ogImage: WebsiteAssetReference | null;
