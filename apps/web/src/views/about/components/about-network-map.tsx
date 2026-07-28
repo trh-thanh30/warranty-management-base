@@ -1,80 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import { MapPin } from "lucide-react";
-import { SharedMap } from "@repo/ui/map";
+import {
+  SharedMap,
+  useVietnamBoundary,
+  VIETNAM_CENTER,
+  VIETNAM_INITIAL_ZOOM,
+  VietnamMapOverlay,
+} from "@repo/ui/map";
 import { divIcon } from "leaflet";
-import type { LatLngTuple, PathOptions } from "leaflet";
 import { useTranslations } from "next-intl";
-import { GeoJSON, Marker, Polygon, Popup } from "react-leaflet";
-
-const WORLD_RING: LatLngTuple[] = [
-  [-90, -180],
-  [-90, 180],
-  [90, 180],
-  [90, -180],
-  [-90, -180],
-];
-
-const maskStyle: PathOptions = {
-  color: "transparent",
-  fillColor: "#f4f4f5",
-  fillOpacity: 0.96,
-  fillRule: "evenodd",
-  interactive: false,
-  stroke: false,
-};
-
-const vietnamOutlineStyle: PathOptions = {
-  color: "var(--color-premium-red)",
-  fillOpacity: 0,
-  interactive: false,
-  opacity: 0.8,
-  weight: 1.5,
-};
-
-interface VietnamBoundary {
-  type: "FeatureCollection";
-  features: Array<{
-    type: "Feature";
-    properties: Record<string, unknown> | null;
-    geometry:
-      | {
-          type: "MultiPolygon";
-          coordinates: number[][][][];
-        }
-      | {
-          type: "MultiLineString";
-          coordinates: number[][][];
-        };
-  }>;
-}
-
-function isVietnamBoundary(value: unknown): value is VietnamBoundary {
-  if (!value || typeof value !== "object") return false;
-  const fc = value as Partial<VietnamBoundary>;
-  return (
-    fc.type === "FeatureCollection" &&
-    Array.isArray(fc.features) &&
-    fc.features.length > 0
-  );
-}
-
-function getMaskPositions(boundary: VietnamBoundary): LatLngTuple[][] {
-  const vietnamRings = boundary.features.flatMap((feature) => {
-    if (feature.geometry.type !== "MultiPolygon") return [];
-    return feature.geometry.coordinates.flatMap((polygon) => {
-      const outerRing = polygon[0];
-      if (!outerRing) return [];
-      return [
-        outerRing.map(
-          ([longitude, latitude]) => [latitude, longitude] as LatLngTuple,
-        ),
-      ];
-    });
-  });
-  return [WORLD_RING, ...vietnamRings];
-}
+import { Marker, Popup } from "react-leaflet";
 
 const dealerPinLocations = [
   {
@@ -127,29 +63,9 @@ const dealerPinLocations = [
   },
 ];
 
-const VIETNAM_CENTER: LatLngTuple = [16.0, 107.0];
-const VIETNAM_INITIAL_ZOOM = 6.25;
-
 export function AboutNetworkMap() {
   const t = useTranslations("AboutPage.network");
-  const [vietnamBoundary, setVietnamBoundary] =
-    useState<VietnamBoundary | null>(null);
-
-  useEffect(() => {
-    fetch("/map/vn.geojson")
-      .then((res) => res.json())
-      .then((data: unknown) => {
-        if (isVietnamBoundary(data)) {
-          setVietnamBoundary(data);
-        }
-      })
-      .catch((err) => console.error("Failed to load vn.geojson", err));
-  }, []);
-
-  const maskPositions = useMemo(
-    () => (vietnamBoundary ? getMaskPositions(vietnamBoundary) : null),
-    [vietnamBoundary],
-  );
+  const { boundary } = useVietnamBoundary();
 
   const createCustomIcon = (label: string, isMain: boolean) =>
     divIcon({
@@ -185,22 +101,7 @@ export function AboutNetworkMap() {
         className="w-full h-full z-0"
         loadingClassName="w-full h-full min-h-[500px] animate-pulse bg-surface-muted"
       >
-        {/* Outer Mask: Hides everywhere except Vietnam mainland */}
-        {maskPositions && (
-          <Polygon positions={maskPositions} pathOptions={maskStyle} />
-        )}
-
-        {/* Red outline for Vietnam mainland */}
-        {vietnamBoundary && (
-          <GeoJSON
-            data={vietnamBoundary}
-            style={(feature) =>
-              feature?.geometry.type === "MultiLineString"
-                ? { ...vietnamOutlineStyle, opacity: 0.65 }
-                : vietnamOutlineStyle
-            }
-          />
-        )}
+        {boundary ? <VietnamMapOverlay boundary={boundary} /> : null}
 
         {dealerPinLocations.map((pin) => (
           <Marker

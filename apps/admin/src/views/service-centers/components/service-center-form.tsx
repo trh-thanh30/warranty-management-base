@@ -9,6 +9,7 @@ import {
   ComboboxList,
   ComboboxTrigger,
   FormField as Field,
+  LocationPickerField,
 } from "@/src/components/common";
 import {
   useVietnamProvinces,
@@ -41,6 +42,8 @@ export function ServiceCenterForm({
     isSubmitting,
     onSubmit,
     register,
+    selectedLatitude,
+    selectedLongitude,
     selectedProvince,
     setValue,
   } = useServiceCenterForm({ onSaved, serviceCenter });
@@ -209,20 +212,47 @@ export function ServiceCenterForm({
         />
       </Field>
 
-      <Field
-        error={formatFieldError(errors.googleMapsUrl?.message, t)}
-        id="service-center-google-maps-url"
-        label={t("googleMapsUrl")}
-      >
-        <Input
-          autoComplete="url"
-          id="service-center-google-maps-url"
-          inputMode="url"
-          placeholder={t("googleMapsUrlPlaceholder")}
-          type="url"
-          {...register("googleMapsUrl")}
-        />
-      </Field>
+      <LocationPickerField
+        coordinateError={formatFieldError(
+          errors.latitude?.message ?? errors.longitude?.message,
+          t,
+        )}
+        description={t("locationPickerDescription")}
+        googleMapsLabel={t("googleMapsUrl")}
+        googleMapsPlaceholder={t("googleMapsUrlPlaceholder")}
+        latitude={selectedLatitude}
+        latitudeLabel={t("latitude")}
+        latitudePlaceholder={t("latitudePlaceholder")}
+        longitude={selectedLongitude}
+        longitudeLabel={t("longitude")}
+        longitudePlaceholder={t("longitudePlaceholder")}
+        mapAriaLabel={t("locationPickerAriaLabel")}
+        mapBoundaryErrorLabel={t("mapBoundaryError")}
+        mapBoundaryLoadingLabel={t("mapBoundaryLoading")}
+        onLatitudeChange={(value) =>
+          setValue("latitude", value, {
+            shouldDirty: true,
+            shouldValidate: true,
+          })
+        }
+        onLocationChange={(value) => {
+          setValue("latitude", value.latitude, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+          setValue("longitude", value.longitude, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+        }}
+        onLongitudeChange={(value) =>
+          setValue("longitude", value, {
+            shouldDirty: true,
+            shouldValidate: true,
+          })
+        }
+        title={t("locationPickerTitle")}
+      />
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field
@@ -307,9 +337,10 @@ const formatFieldError = createFieldErrorFormatter(
     "addressLength",
     "addressRequired",
     "districtLength",
+    "coordinateInvalid",
     "emailExists",
     "emailInvalid",
-    "googleMapsUrlInvalid",
+    "locationRequired",
     "nameLength",
     "nameRequired",
     "phoneLength",

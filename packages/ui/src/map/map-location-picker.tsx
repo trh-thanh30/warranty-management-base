@@ -1,40 +1,42 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { divIcon } from "leaflet";
 import type { LatLngExpression } from "leaflet";
-import { Marker, useMap, useMapEvents } from "react-leaflet";
+import { Marker, useMapEvents } from "react-leaflet";
 import { SharedMap } from "./shared-map";
 import type { GeoPoint, MapTileProvider } from "./map.types";
-
-const VIETNAM_CENTER: LatLngExpression = [15.9031, 105.8067];
+import {
+  isPointInVietnam,
+  useVietnamBoundary,
+  VIETNAM_CENTER,
+  VIETNAM_INITIAL_ZOOM,
+  VIETNAM_INTERACTION_BOUNDS,
+  VietnamMapOverlay,
+} from "./vietnam-map-overlay";
+import type { VietnamBoundary } from "./vietnam-map-overlay";
 
 interface LocationSelectionControllerProps {
+  boundary: VietnamBoundary;
   onChange: (value: GeoPoint) => void;
 }
 
 function LocationSelectionController({
+  boundary,
   onChange,
 }: LocationSelectionControllerProps) {
   useMapEvents({
     click: ({ latlng }) => {
-      onChange({
+      const point = {
         latitude: latlng.lat,
         longitude: latlng.lng,
-      });
+      };
+
+      if (isPointInVietnam(point, boundary)) {
+        onChange(point);
+      }
     },
   });
-
-  return null;
-}
-
-function SelectedLocationCamera({ value }: { value: GeoPoint | null }) {
-  const map = useMap();
-
-  useEffect(() => {
-    if (!value) return;
-    map.panTo([value.latitude, value.longitude]);
-  }, [map, value]);
 
   return null;
 }
@@ -42,6 +44,9 @@ function SelectedLocationCamera({ value }: { value: GeoPoint | null }) {
 export interface MapLocationPickerProps {
   activateLabel?: string;
   ariaLabel: string;
+  boundaryErrorLabel?: string;
+  boundaryLoadingLabel?: string;
+  boundaryUrl?: string;
   className?: string;
   initialCenter?: LatLngExpression;
   initialZoom?: number;
@@ -56,9 +61,12 @@ export interface MapLocationPickerProps {
 export function MapLocationPicker({
   activateLabel,
   ariaLabel,
+  boundaryErrorLabel,
+  boundaryLoadingLabel,
+  boundaryUrl,
   className = "h-80 w-full overflow-hidden rounded-md",
   initialCenter = VIETNAM_CENTER,
-  initialZoom = 5,
+  initialZoom = VIETNAM_INITIAL_ZOOM,
   maxZoom = 18,
   minZoom = 5,
   onChange,
@@ -66,6 +74,7 @@ export function MapLocationPicker({
   tileProvider,
   value,
 }: MapLocationPickerProps) {
+  const { boundary, status } = useVietnamBoundary(boundaryUrl);
   const markerIcon = useMemo(
     () =>
       divIcon({
@@ -81,28 +90,43 @@ export function MapLocationPicker({
 
   return (
     <div aria-label={ariaLabel} className={className} role="region">
-      <SharedMap
-        activateLabel={activateLabel}
-        activationMode="direct"
-        initialCenter={
-          value ? [value.latitude, value.longitude] : initialCenter
-        }
-        initialZoom={value ? Math.max(initialZoom, 15) : initialZoom}
-        maxZoom={maxZoom}
-        minZoom={minZoom}
-        resetLabel={resetLabel}
-        showResetControl={Boolean(resetLabel)}
-        tileProvider={tileProvider}
-      >
-        <LocationSelectionController onChange={onChange} />
-        <SelectedLocationCamera value={value} />
-        {value ? (
-          <Marker
-            icon={markerIcon}
-            position={[value.latitude, value.longitude]}
+      {boundary ? (
+        <SharedMap
+          activateLabel={activateLabel}
+          activationMode="direct"
+          initialCenter={initialCenter}
+          initialZoom={initialZoom}
+          maxBounds={VIETNAM_INTERACTION_BOUNDS}
+          maxBoundsViscosity={1}
+          maxZoom={maxZoom}
+          minZoom={minZoom}
+          resetLabel={resetLabel}
+          showResetControl={Boolean(resetLabel)}
+          tileProvider={tileProvider}
+          zoomSnap={0.25}
+        >
+          <VietnamMapOverlay boundary={boundary} />
+          <LocationSelectionController
+            boundary={boundary}
+            onChange={onChange}
           />
-        ) : null}
-      </SharedMap>
+          {value ? (
+            <Marker
+              icon={markerIcon}
+              position={[value.latitude, value.longitude]}
+            />
+          ) : null}
+        </SharedMap>
+      ) : (
+        <div
+          className="grid size-full place-items-center bg-slate-100 px-4 text-center text-sm text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+          role="status"
+        >
+          {status === "error"
+            ? (boundaryErrorLabel ?? ariaLabel)
+            : (boundaryLoadingLabel ?? ariaLabel)}
+        </div>
+      )}
     </div>
   );
 }

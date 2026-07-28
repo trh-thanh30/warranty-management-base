@@ -14,6 +14,7 @@ import {
   ComboboxList,
   ComboboxTrigger,
   FormField as Field,
+  LocationPickerField,
 } from "@/src/components/common";
 import { useVietnamProvinces } from "@/src/hooks/use-locations";
 import { useVietnamWards } from "@/src/hooks/use-locations";
@@ -35,6 +36,8 @@ export function DealerForm({ dealer, onCancel, onSaved }: DealerFormProps) {
     isSubmitting,
     onSubmit,
     register,
+    selectedLatitude,
+    selectedLongitude,
     selectedProvince,
     setValue,
   } = useDealerForm({ dealer, onSaved });
@@ -222,6 +225,48 @@ export function DealerForm({ dealer, onCancel, onSaved }: DealerFormProps) {
         />
       </Field>
 
+      <LocationPickerField
+        coordinateError={formatFieldError(
+          errors.latitude?.message ?? errors.longitude?.message,
+          t,
+        )}
+        description={t("locationPickerDescription")}
+        googleMapsLabel={t("googleMapsUrl")}
+        googleMapsPlaceholder={t("googleMapsUrlPlaceholder")}
+        latitude={selectedLatitude}
+        latitudeLabel={t("latitude")}
+        latitudePlaceholder={t("latitudePlaceholder")}
+        longitude={selectedLongitude}
+        longitudeLabel={t("longitude")}
+        longitudePlaceholder={t("longitudePlaceholder")}
+        mapAriaLabel={t("locationPickerAriaLabel")}
+        mapBoundaryErrorLabel={t("mapBoundaryError")}
+        mapBoundaryLoadingLabel={t("mapBoundaryLoading")}
+        onLatitudeChange={(value) =>
+          setValue("latitude", value, {
+            shouldDirty: true,
+            shouldValidate: true,
+          })
+        }
+        onLocationChange={(value) => {
+          setValue("latitude", value.latitude, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+          setValue("longitude", value.longitude, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+        }}
+        onLongitudeChange={(value) =>
+          setValue("longitude", value, {
+            shouldDirty: true,
+            shouldValidate: true,
+          })
+        }
+        title={t("locationPickerTitle")}
+      />
+
       {!creating ? (
         <Controller
           control={control}
@@ -274,6 +319,8 @@ const formatFieldError = createFieldErrorFormatter(
     "addressLength",
     "addressRequired",
     "districtLength",
+    "coordinateInvalid",
+    "locationRequired",
     "nameLength",
     "nameRequired",
     "phoneExists",

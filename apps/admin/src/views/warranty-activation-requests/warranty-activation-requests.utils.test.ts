@@ -188,8 +188,12 @@ test("activation request dealer option combines useful search labels", () => {
       address: "12 Nguyen Trai",
       createdAt: "2026-07-24T00:00:00.000Z",
       district: null,
+      googleMapsUrl:
+        "https://www.google.com/maps/search/?api=1&query=21.028511%2C105.804817",
       id: "dealer-1",
       isActive: true,
+      latitude: 21.028511,
+      longitude: 105.804817,
       metadata: null,
       name: "Đại lý Hà Nội",
       phone: "0901234567",

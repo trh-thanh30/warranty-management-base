@@ -6,8 +6,9 @@ const validForm = {
   address: "123 Tran Duy Hung",
   district: "Phuong Hai Chau",
   email: "center@example.com",
-  googleMapsUrl: "https://maps.google.com/?q=123+Tran+Duy+Hung",
   isActive: true,
+  latitude: 16.054407,
+  longitude: 108.202164,
   name: "Hanoi Warranty Center",
   phone: "0901234567",
   province: "Ha Noi",
@@ -40,11 +41,26 @@ test("service center form requires a ward or commune", () => {
   assert.equal(result.success, false);
 });
 
-test("service center form rejects invalid Google Maps links", () => {
+test("service center form requires a map location", () => {
   const result = serviceCenterFormSchema.safeParse({
     ...validForm,
-    googleMapsUrl: "maps dot google",
+    latitude: Number.NaN,
+    longitude: Number.NaN,
   });
 
   assert.equal(result.success, false);
+});
+
+test("service center form rejects coordinates outside their valid ranges", () => {
+  const result = serviceCenterFormSchema.safeParse({
+    ...validForm,
+    latitude: -91,
+    longitude: 181,
+  });
+
+  assert.equal(result.success, false);
+});
+
+test("service center form accepts valid coordinates", () => {
+  assert.equal(serviceCenterFormSchema.safeParse(validForm).success, true);
 });

@@ -5,6 +5,7 @@ export * from "./form-section";
 export * from "./form-page-shell";
 export * from "./image-upload";
 export * from "./import-export-menu";
+export * from "./location-picker-field";
 export * from "./page-header";
 export * from "./pagination-controls";
 export * from "./search-dropdown";
