@@ -74,6 +74,48 @@ export class CategoriesRepository {
     return this.prismaService.category.findMany();
   }
 
+  listPublicProductCategories(filters: {
+    page?: number;
+    limit?: number;
+    hasImage?: string;
+  }) {
+    const { page, limit, skip, take } = normalizePagination(filters);
+    const hasImage =
+      filters.hasImage === undefined ? undefined : filters.hasImage === 'true';
+    const where: Prisma.CategoryWhereInput = {
+      type: category_type.PRODUCT,
+      is_active: true,
+      image_url:
+        hasImage === undefined ? undefined : hasImage ? { not: null } : null,
+    };
+
+    return this.prismaService.$transaction(async (tx) => {
+      const [items, total] = await Promise.all([
+        tx.category.findMany({
+          where,
+          orderBy: [{ order: 'asc' }, { name: 'asc' }],
+          skip,
+          take,
+          include: {
+            _count: {
+              select: {
+                product_templates: {
+                  where: {
+                    is_active: true,
+                    is_published: true,
+                  },
+                },
+              },
+            },
+          },
+        }),
+        tx.category.count({ where }),
+      ]);
+
+      return paginate(items, { page, limit, total });
+    });
+  }
+
   listForExport(filters: ListCategoriesDto) {
     const search = filters.search?.trim();
     const isActive =
