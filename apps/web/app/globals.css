@@ -13,14 +13,6 @@
   border: 0 !important;
 }
 
-.leaflet-control-attribution,
-.leaflet-container .leaflet-control-attribution {
-  display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
 @theme {
   --font-sans: var(--font-maven-pro), "Maven Pro", sans-serif;
   --font-serif: var(--font-maven-pro), "Maven Pro", sans-serif;

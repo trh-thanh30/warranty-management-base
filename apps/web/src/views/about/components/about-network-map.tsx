@@ -1,20 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { MapPin, MousePointerClick, RotateCcw } from "lucide-react";
+import { MapPin } from "lucide-react";
+import { SharedMap } from "@repo/ui/map";
 import { divIcon } from "leaflet";
 import type { LatLngTuple, PathOptions } from "leaflet";
 import { useTranslations } from "next-intl";
-import {
-  GeoJSON,
-  MapContainer,
-  Marker,
-  Polygon,
-  Popup,
-  TileLayer,
-  useMap,
-  useMapEvents,
-} from "react-leaflet";
+import { GeoJSON, Marker, Polygon, Popup } from "react-leaflet";
 
 const WORLD_RING: LatLngTuple[] = [
   [-90, -180],
@@ -138,127 +130,10 @@ const dealerPinLocations = [
 const VIETNAM_CENTER: LatLngTuple = [16.0, 107.0];
 const VIETNAM_INITIAL_ZOOM = 6.25;
 
-interface MapInteractionControllerProps {
-  onInteractionChange: (enabled: boolean) => void;
-}
-
-function MapInteractionController({
-  onInteractionChange,
-}: MapInteractionControllerProps) {
-  const map = useMap();
-
-  useMapEvents({
-    click: () => {
-      map.scrollWheelZoom.enable();
-      onInteractionChange(true);
-    },
-  });
-
-  useEffect(() => {
-    const container = map.getContainer();
-    const disableWheelZoom = () => {
-      map.scrollWheelZoom.disable();
-      onInteractionChange(false);
-    };
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      disableWheelZoom();
-    };
-
-    container.addEventListener("mouseleave", disableWheelZoom);
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      container.removeEventListener("mouseleave", disableWheelZoom);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [map, onInteractionChange]);
-
-  return null;
-}
-
-interface MapActivationControlProps {
-  activateLabel: string;
-  isWheelZoomEnabled: boolean;
-  onInteractionChange: (enabled: boolean) => void;
-}
-
-function MapActivationControl({
-  activateLabel,
-  isWheelZoomEnabled,
-  onInteractionChange,
-}: MapActivationControlProps) {
-  const map = useMap();
-
-  const handleActivate = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-    map.scrollWheelZoom.enable();
-    onInteractionChange(true);
-  };
-
-  return (
-    <button
-      type="button"
-      aria-hidden={isWheelZoomEnabled}
-      aria-label={activateLabel}
-      tabIndex={isWheelZoomEnabled ? -1 : 0}
-      className={`group absolute inset-0 z-[900] grid items-start justify-end p-3 transition-[background-color,opacity] duration-200 focus-visible:outline-none motion-reduce:transition-none sm:p-4 ${
-        isWheelZoomEnabled
-          ? "pointer-events-none bg-transparent opacity-0"
-          : "pointer-events-auto bg-transparent opacity-100"
-      }`}
-      onClick={handleActivate}
-    >
-      <span className="inline-flex min-h-11 items-center gap-1.5 px-2 py-1.5 text-xs font-medium text-premium-red drop-shadow-[0_1px_1px_rgba(255,255,255,0.95)] transition-opacity group-hover:opacity-100 group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-premium-red">
-        <MousePointerClick aria-hidden="true" className="size-3.5 shrink-0" />
-        <span>{activateLabel}</span>
-      </span>
-    </button>
-  );
-}
-
-interface MapResetControlProps {
-  onInteractionChange: (enabled: boolean) => void;
-  resetLabel: string;
-}
-
-function MapResetControl({
-  onInteractionChange,
-  resetLabel,
-}: MapResetControlProps) {
-  const map = useMap();
-
-  const handleReset = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-    map.closePopup();
-    map.setView(VIETNAM_CENTER, VIETNAM_INITIAL_ZOOM);
-    map.scrollWheelZoom.disable();
-    onInteractionChange(false);
-  };
-
-  return (
-    <button
-      type="button"
-      aria-label={resetLabel}
-      title={resetLabel}
-      className="leaflet-control absolute left-2.5 top-[75px] z-[1000] grid size-[34px] place-items-center rounded-[4px] border-2 border-black/20 bg-white text-deep-black shadow-sm transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2"
-      onClick={handleReset}
-    >
-      <RotateCcw aria-hidden="true" className="size-4" />
-    </button>
-  );
-}
-
 export function AboutNetworkMap() {
   const t = useTranslations("AboutPage.network");
-  const [isMounted, setIsMounted] = useState(false);
-  const [isWheelZoomEnabled, setIsWheelZoomEnabled] = useState(false);
   const [vietnamBoundary, setVietnamBoundary] =
     useState<VietnamBoundary | null>(null);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   useEffect(() => {
     fetch("/map/vn.geojson")
@@ -297,43 +172,19 @@ export function AboutNetworkMap() {
       popupAnchor: [0, -10],
     });
 
-  if (!isMounted) {
-    return (
-      <div
-        aria-hidden="true"
-        className="w-full h-full min-h-[500px] animate-pulse bg-surface-muted"
-      />
-    );
-  }
-
   return (
     <div className="relative w-full h-full bg-surface-muted isolate overflow-hidden">
-      {/* React Leaflet Map Container with OSM Tiles */}
-      <MapContainer
-        center={VIETNAM_CENTER}
-        zoom={VIETNAM_INITIAL_ZOOM}
+      <SharedMap
+        activateLabel={t("activateMap")}
+        initialCenter={VIETNAM_CENTER}
+        initialZoom={VIETNAM_INITIAL_ZOOM}
+        resetLabel={t("resetMap")}
         zoomSnap={0.25}
         minZoom={5}
         maxZoom={12}
-        scrollWheelZoom={false}
         className="w-full h-full z-0"
+        loadingClassName="w-full h-full min-h-[500px] animate-pulse bg-surface-muted"
       >
-        <MapInteractionController onInteractionChange={setIsWheelZoomEnabled} />
-        <MapActivationControl
-          activateLabel={t("activateMap")}
-          isWheelZoomEnabled={isWheelZoomEnabled}
-          onInteractionChange={setIsWheelZoomEnabled}
-        />
-        <MapResetControl
-          resetLabel={t("resetMap")}
-          onInteractionChange={setIsWheelZoomEnabled}
-        />
-
-        <TileLayer
-          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-
         {/* Outer Mask: Hides everywhere except Vietnam mainland */}
         {maskPositions && (
           <Polygon positions={maskPositions} pathOptions={maskStyle} />
@@ -375,7 +226,7 @@ export function AboutNetworkMap() {
             </Popup>
           </Marker>
         ))}
-      </MapContainer>
+      </SharedMap>
     </div>
   );
 }

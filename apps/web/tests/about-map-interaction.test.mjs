@@ -15,8 +15,17 @@ const aboutMapPath = path.join(
   "about-network-map.tsx",
 );
 
-test("about map requires an intentional click before wheel zoom", async () => {
-  const source = await readFile(aboutMapPath, "utf8");
+const sharedMapPath = path.join(
+  process.cwd(),
+  "packages",
+  "ui",
+  "src",
+  "map",
+  "shared-map.tsx",
+);
+
+test("shared map requires an intentional click before wheel zoom", async () => {
+  const source = await readFile(sharedMapPath, "utf8");
 
   assert.match(source, /scrollWheelZoom=\{false\}/);
   assert.match(source, /useMapEvents\(\{\s*click:/);
@@ -26,12 +35,11 @@ test("about map requires an intentional click before wheel zoom", async () => {
   assert.match(source, /scrollWheelZoom\.disable\(\)/);
 });
 
-test("about map exposes a visible control for activating wheel zoom", async () => {
-  const source = await readFile(aboutMapPath, "utf8");
+test("shared map exposes a visible control for activating wheel zoom", async () => {
+  const source = await readFile(sharedMapPath, "utf8");
 
   assert.match(source, /const \[isWheelZoomEnabled, setIsWheelZoomEnabled\]/);
   assert.match(source, /<MousePointerClick/);
-  assert.match(source, /activateLabel=\{t\("activateMap"\)\}/);
   assert.match(source, /aria-label=\{activateLabel\}/);
   assert.match(source, /isWheelZoomEnabled\s*\?\s*"[^"]*opacity-0/);
   assert.match(source, /"pointer-events-auto bg-transparent opacity-100"/);
@@ -43,14 +51,10 @@ test("about map exposes a visible control for activating wheel zoom", async () =
   assert.match(source, /onInteractionChange=\{setIsWheelZoomEnabled\}/);
 });
 
-test("about map reset restores its initial view and interaction state", async () => {
-  const source = await readFile(aboutMapPath, "utf8");
+test("shared map reset restores its initial view and interaction state", async () => {
+  const source = await readFile(sharedMapPath, "utf8");
 
-  assert.match(source, /const VIETNAM_INITIAL_ZOOM = 6\.25/);
-  assert.match(
-    source,
-    /map\.setView\(VIETNAM_CENTER,\s*VIETNAM_INITIAL_ZOOM\)/,
-  );
+  assert.match(source, /map\.setView\(initialCenter,\s*initialZoom\)/);
   assert.match(source, /map\.closePopup\(\)/);
   assert.match(source, /map\.scrollWheelZoom\.disable\(\)/);
   assert.match(source, /<RotateCcw/);
@@ -60,4 +64,17 @@ test("about map reset restores its initial view and interaction state", async ()
     source,
     /left-2\.5 top-\[75px\].*size-\[34px\].*rounded-\[4px\]/,
   );
+});
+
+test("about map composes feature layers inside the shared map", async () => {
+  const source = await readFile(aboutMapPath, "utf8");
+
+  assert.match(source, /import \{ SharedMap \} from "@repo\/ui\/map"/);
+  assert.match(source, /<SharedMap/);
+  assert.match(source, /activateLabel=\{t\("activateMap"\)\}/);
+  assert.match(source, /initialCenter=\{VIETNAM_CENTER\}/);
+  assert.match(source, /initialZoom=\{VIETNAM_INITIAL_ZOOM\}/);
+  assert.match(source, /<Marker/);
+  assert.doesNotMatch(source, /<MapContainer/);
+  assert.doesNotMatch(source, /function MapInteractionController/);
 });
