@@ -17,6 +17,8 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import {
+  ChevronDown,
+  ChevronUp,
   Image,
   Images,
   House,
@@ -554,6 +556,9 @@ function OfficeEditor({
 }) {
   const t = useTranslations("WebsiteConfig");
   const sensors = useConfigDndSensors();
+  const [collapsedOfficeIds, setCollapsedOfficeIds] = useState<Set<string>>(
+    () => new Set(),
+  );
   const updateOffices = (offices: WebsiteOffice[]) =>
     onChange((current) => ({ ...current, offices }));
   const sortingDisabled = disabled || form.offices.length < 2;
@@ -578,6 +583,7 @@ function OfficeEditor({
             {
               id: crypto.randomUUID(),
               isActive: true,
+              isHeadquarters: false,
               phone: null,
               sortOrder: form.offices.length,
               translations: [
@@ -612,6 +618,11 @@ function OfficeEditor({
               const translation = office.translations.find(
                 (item) => item.locale === locale,
               );
+              const isCollapsed = collapsedOfficeIds.has(office.id);
+              const contentId = `website-office-content-${office.id}`;
+              const officeLabel =
+                translation?.label ||
+                t("site.officeFallback", { index: index + 1 });
               return (
                 <SortableConfigItem
                   disabled={sortingDisabled}
@@ -626,12 +637,45 @@ function OfficeEditor({
                           <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                             {index + 1}
                           </span>
-                          <p className="font-medium text-slate-900 dark:text-slate-100">
-                            {translation?.label ||
-                              t("site.officeFallback", { index: index + 1 })}
-                          </p>
+                          <div className="flex min-w-0 flex-wrap items-center gap-2">
+                            <p className="truncate font-medium text-slate-900 dark:text-slate-100">
+                              {officeLabel}
+                            </p>
+                            {office.isHeadquarters ? (
+                              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 dark:bg-amber-950 dark:text-amber-200">
+                                {t("site.headquartersBadge")}
+                              </span>
+                            ) : null}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-2">
+                          <label className="flex min-h-10 items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                            <Switch
+                              checked={office.isHeadquarters}
+                              disabled={disabled}
+                              onCheckedChange={(checked) =>
+                                updateOffices(
+                                  form.offices.map((item) => {
+                                    if (!checked) {
+                                      return item.id === office.id
+                                        ? { ...item, isHeadquarters: false }
+                                        : item;
+                                    }
+
+                                    return {
+                                      ...item,
+                                      isActive:
+                                        item.id === office.id
+                                          ? true
+                                          : item.isActive,
+                                      isHeadquarters: item.id === office.id,
+                                    };
+                                  }),
+                                )
+                              }
+                            />
+                            {t("site.headquarters")}
+                          </label>
                           <label className="flex min-h-10 items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
                             <Switch
                               checked={office.isActive}
@@ -640,7 +684,13 @@ function OfficeEditor({
                                 updateOffices(
                                   form.offices.map((item) =>
                                     item.id === office.id
-                                      ? { ...item, isActive: checked }
+                                      ? {
+                                          ...item,
+                                          isActive: checked,
+                                          isHeadquarters: checked
+                                            ? item.isHeadquarters
+                                            : false,
+                                        }
                                       : item,
                                   ),
                                 )
@@ -648,6 +698,52 @@ function OfficeEditor({
                             />
                             {t("site.active")}
                           </label>
+                          <Button
+                            aria-controls={contentId}
+                            aria-expanded={!isCollapsed}
+                            aria-label={
+                              isCollapsed
+                                ? t("site.expandOffice", {
+                                    office: officeLabel,
+                                  })
+                                : t("site.collapseOffice", {
+                                    office: officeLabel,
+                                  })
+                            }
+                            className="size-10"
+                            onClick={() =>
+                              setCollapsedOfficeIds((current) => {
+                                const next = new Set(current);
+                                if (isCollapsed) next.delete(office.id);
+                                else next.add(office.id);
+                                return next;
+                              })
+                            }
+                            size="icon"
+                            title={
+                              isCollapsed
+                                ? t("site.expandOffice", {
+                                    office: officeLabel,
+                                  })
+                                : t("site.collapseOffice", {
+                                    office: officeLabel,
+                                  })
+                            }
+                            type="button"
+                            variant="ghost"
+                          >
+                            {isCollapsed ? (
+                              <ChevronDown
+                                aria-hidden="true"
+                                className="size-4"
+                              />
+                            ) : (
+                              <ChevronUp
+                                aria-hidden="true"
+                                className="size-4"
+                              />
+                            )}
+                          </Button>
                           <Button
                             aria-label={t("actions.remove")}
                             className="bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600"
@@ -667,7 +763,11 @@ function OfficeEditor({
                           </Button>
                         </div>
                       </div>
-                      <div className="grid gap-5 p-4 lg:grid-cols-2">
+                      <div
+                        className="grid gap-5 p-4 lg:grid-cols-2"
+                        hidden={isCollapsed}
+                        id={contentId}
+                      >
                         <FormField
                           htmlFor={`website-office-label-${office.id}-${locale}`}
                           label={t("site.officeLabel")}

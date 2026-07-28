@@ -11,9 +11,11 @@ import { FadeIn } from "@/src/components/animation/fade-in";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { Link } from "@/src/i18n/navigation";
 import { aboutB2BBenefits } from "../about.constants";
+import { usePrimaryWebsiteHotline } from "@/src/app/providers/site-settings-provider";
 
 export function AboutB2BCta() {
   const t = useTranslations("AboutPage");
+  const hotline = usePrimaryWebsiteHotline();
 
   return (
     <section className="w-full bg-surface-muted py-16 sm:py-20 lg:py-24">
@@ -48,13 +50,19 @@ export function AboutB2BCta() {
               <ArrowRight className="size-4 text-white" />
             </Link>
 
-            <a
-              href="tel:1900xxxx"
-              className="inline-flex items-center justify-center gap-2.5 rounded-md bg-white hover:bg-stone-100 border border-border-gray px-8 py-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-deep-black transition-all cursor-pointer"
-            >
-              <Phone className="size-4 text-premium-red" />
-              <span>{t("b2bCta.hotlineBtn")}</span>
-            </a>
+            {hotline && (
+              <a
+                href={hotline.href}
+                className="inline-flex items-center justify-center gap-2.5 rounded-md bg-white hover:bg-stone-100 border border-border-gray px-8 py-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-deep-black transition-all cursor-pointer"
+              >
+                <Phone className="size-4 text-premium-red" />
+                <span>
+                  {t("b2bCta.hotlineBtn", {
+                    phone: hotline.displayValue,
+                  })}
+                </span>
+              </a>
+            )}
           </div>
 
           {/* Checkmark Bullet Points (Single Line Layout with Staggered Animation) */}

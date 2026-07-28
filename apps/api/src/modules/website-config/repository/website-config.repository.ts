@@ -125,6 +125,7 @@ export class WebsiteConfigRepository {
             create: input.offices.map((office) => ({
               id: office.id,
               is_active: office.isActive,
+              is_headquarters: office.isHeadquarters,
               phone: office.phone?.trim() || null,
               sort_order: office.sortOrder,
               translations: {
@@ -303,6 +304,7 @@ export class WebsiteConfigRepository {
       offices: {
         create: source.offices.map((office) => ({
           is_active: office.is_active,
+          is_headquarters: office.is_headquarters,
           phone: office.phone,
           sort_order: office.sort_order,
           translations: {
