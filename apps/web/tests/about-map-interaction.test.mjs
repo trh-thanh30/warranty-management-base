@@ -39,6 +39,7 @@ test("overlay maps require an intentional click before wheel zoom", async () => 
 test("shared map exposes a visible control for activating wheel zoom", async () => {
   const source = await readFile(sharedMapPath, "utf8");
 
+  assert.match(source, /cn\("isolate z-0", className\)/);
   assert.match(source, /const \[isWheelZoomEnabled, setIsWheelZoomEnabled\]/);
   assert.match(source, /<MousePointerClick/);
   assert.match(source, /aria-label=\{activateLabel\}/);

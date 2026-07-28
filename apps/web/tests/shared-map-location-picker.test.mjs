@@ -7,13 +7,39 @@ import test from "node:test";
 const mapRoot = path.join(process.cwd(), "packages", "ui", "src", "map");
 
 test("map package exports a controlled location picker and tile provider", async () => {
-  const [indexSource, pickerSource, constantsSource, overlaySource] =
-    await Promise.all([
-      readFile(path.join(mapRoot, "index.ts"), "utf8"),
-      readFile(path.join(mapRoot, "map-location-picker.tsx"), "utf8"),
-      readFile(path.join(mapRoot, "map.constants.ts"), "utf8"),
-      readFile(path.join(mapRoot, "vietnam-map-overlay.tsx"), "utf8"),
-    ]);
+  const adminRoot = path.join(process.cwd(), "apps", "admin", "src");
+  const [
+    indexSource,
+    pickerSource,
+    constantsSource,
+    overlaySource,
+    locationFieldSource,
+    dealerFormSource,
+    serviceCenterFormSource,
+  ] = await Promise.all([
+    readFile(path.join(mapRoot, "index.ts"), "utf8"),
+    readFile(path.join(mapRoot, "map-location-picker.tsx"), "utf8"),
+    readFile(path.join(mapRoot, "map.constants.ts"), "utf8"),
+    readFile(path.join(mapRoot, "vietnam-map-overlay.tsx"), "utf8"),
+    readFile(
+      path.join(adminRoot, "components", "common", "location-picker-field.tsx"),
+      "utf8",
+    ),
+    readFile(
+      path.join(adminRoot, "views", "dealers", "components", "dealer-form.tsx"),
+      "utf8",
+    ),
+    readFile(
+      path.join(
+        adminRoot,
+        "views",
+        "service-centers",
+        "components",
+        "service-center-form.tsx",
+      ),
+      "utf8",
+    ),
+  ]);
 
   assert.match(indexSource, /map-location-picker/);
   assert.match(indexSource, /map\.constants/);
@@ -23,6 +49,14 @@ test("map package exports a controlled location picker and tile provider", async
   assert.match(pickerSource, /MapFocusController/);
   assert.match(pickerSource, /flyTo/);
   assert.match(pickerSource, /<Marker/);
+  assert.match(pickerSource, /markerColor/);
+  assert.match(pickerSource, /\[markerColor\]/);
+  assert.match(constantsSource, /MAP_MARKER_COLORS/);
+  assert.match(constantsSource, /dealer:\s*"#[a-fA-F0-9]{6}"/);
+  assert.match(constantsSource, /serviceCenter:\s*"#[a-fA-F0-9]{6}"/);
+  assert.match(locationFieldSource, /markerColor/);
+  assert.match(dealerFormSource, /MAP_MARKER_COLORS\.dealer/);
+  assert.match(serviceCenterFormSource, /MAP_MARKER_COLORS\.serviceCenter/);
   assert.match(pickerSource, /VIETNAM_PICKER_INTERACTION_BOUNDS/);
   assert.match(overlaySource, /VIETNAM_PICKER_INTERACTION_BOUNDS/);
   const pickerBounds = overlaySource.match(

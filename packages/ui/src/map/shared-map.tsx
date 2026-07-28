@@ -11,6 +11,7 @@ import type {
   MapTileProvider,
   SharedMapInitialView,
 } from "./map.types";
+import { cn } from "../lib/utils";
 
 interface MapInteractionControllerProps {
   onInteractionChange: (enabled: boolean) => void;
@@ -191,7 +192,7 @@ export function SharedMap({
       maxBounds={maxBounds}
       maxBoundsViscosity={maxBoundsViscosity}
       scrollWheelZoom={activationMode === "direct"}
-      className={className}
+      className={cn("isolate z-0", className)}
     >
       {activationMode === "overlay" ? (
         <MapInteractionController onInteractionChange={setIsWheelZoomEnabled} />

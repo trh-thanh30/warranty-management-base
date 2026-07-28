@@ -4,6 +4,7 @@ import { useEffect, useMemo } from "react";
 import { divIcon } from "leaflet";
 import type { LatLngExpression } from "leaflet";
 import { Marker, useMap, useMapEvents } from "react-leaflet";
+import { MAP_MARKER_COLORS } from "./map.constants";
 import { SharedMap } from "./shared-map";
 import type { GeoPoint, MapTileProvider } from "./map.types";
 import {
@@ -65,6 +66,7 @@ export interface MapLocationPickerProps {
   focusValue?: GeoPoint | null;
   initialCenter?: LatLngExpression;
   initialZoom?: number;
+  markerColor?: string;
   maxZoom?: number;
   minZoom?: number;
   onChange: (value: GeoPoint) => void;
@@ -83,6 +85,7 @@ export function MapLocationPicker({
   focusValue = null,
   initialCenter = VIETNAM_CENTER,
   initialZoom = VIETNAM_INITIAL_ZOOM,
+  markerColor = MAP_MARKER_COLORS.dealer,
   maxZoom = 18,
   minZoom = 5,
   onChange,
@@ -96,12 +99,12 @@ export function MapLocationPicker({
       divIcon({
         className: "shared-location-picker-marker",
         html: `
-          <span style="display:block;width:24px;height:24px;border-radius:9999px;background:#dc2626;border:4px solid white;box-shadow:0 2px 8px rgb(15 23 42 / 0.35)" aria-hidden="true"></span>
+          <span style="display:block;width:24px;height:24px;border-radius:9999px;background:${markerColor};border:4px solid white;box-shadow:0 2px 8px rgb(15 23 42 / 0.35)" aria-hidden="true"></span>
         `,
         iconAnchor: [12, 12],
         iconSize: [24, 24],
       }),
-    [],
+    [markerColor],
   );
 
   return (

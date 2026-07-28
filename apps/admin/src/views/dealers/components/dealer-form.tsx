@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { DealerResponse } from "@repo/shared";
 import { Button, Input, Label, Switch, Textarea } from "@repo/ui";
+import { MAP_MARKER_COLORS } from "@repo/ui/map";
 import {
   Combobox,
   ComboboxContent,
@@ -281,6 +282,7 @@ export function DealerForm({ dealer, onCancel, onSaved }: DealerFormProps) {
         mapAriaLabel={t("locationPickerAriaLabel")}
         mapBoundaryErrorLabel={t("mapBoundaryError")}
         mapBoundaryLoadingLabel={t("mapBoundaryLoading")}
+        markerColor={MAP_MARKER_COLORS.dealer}
         onLatitudeChange={(value) =>
           setValue("latitude", value, {
             shouldDirty: true,

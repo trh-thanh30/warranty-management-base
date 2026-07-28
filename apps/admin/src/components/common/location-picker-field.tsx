@@ -41,6 +41,7 @@ type LocationPickerFieldProps = {
   mapAriaLabel: string;
   mapBoundaryErrorLabel: string;
   mapBoundaryLoadingLabel: string;
+  markerColor: string;
   onLatitudeChange: (value: number) => void;
   onLocationChange: (value: GeoPoint) => void;
   onLongitudeChange: (value: number) => void;
@@ -64,6 +65,7 @@ export function LocationPickerField({
   mapAriaLabel,
   mapBoundaryErrorLabel,
   mapBoundaryLoadingLabel,
+  markerColor,
   onLatitudeChange,
   onLocationChange,
   onLongitudeChange,
@@ -174,6 +176,7 @@ export function LocationPickerField({
         boundaryLoadingLabel={mapBoundaryLoadingLabel}
         className="h-[26rem] w-full overflow-hidden rounded-md sm:h-[32rem] lg:h-[36rem]"
         focusValue={focusValue}
+        markerColor={markerColor}
         onChange={onLocationChange}
         value={value}
       />

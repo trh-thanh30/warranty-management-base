@@ -17,6 +17,7 @@ import {
 } from "@/src/hooks/use-locations";
 import type { ServiceCenterSummary } from "@repo/shared";
 import { Button, Input, Label, Switch, Textarea } from "@repo/ui";
+import { MAP_MARKER_COLORS } from "@repo/ui/map";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Controller } from "react-hook-form";
@@ -268,6 +269,7 @@ export function ServiceCenterForm({
         mapAriaLabel={t("locationPickerAriaLabel")}
         mapBoundaryErrorLabel={t("mapBoundaryError")}
         mapBoundaryLoadingLabel={t("mapBoundaryLoading")}
+        markerColor={MAP_MARKER_COLORS.serviceCenter}
         onLatitudeChange={(value) =>
           setValue("latitude", value, {
             shouldDirty: true,
