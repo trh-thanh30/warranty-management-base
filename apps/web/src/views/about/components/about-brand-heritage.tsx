@@ -154,7 +154,7 @@ export function AboutBrandHeritage() {
                 {t("brandHeritage.row2Desc1")}
               </p>
 
-              <p className="text-sm sm:text-base text-stone-gray leading-relaxed text-pretty max-w-xl">
+              <p className="text-base sm:text-lg text-stone-gray leading-relaxed text-pretty max-w-xl">
                 {t("brandHeritage.row2Desc2")}
               </p>
             </motion.div>
