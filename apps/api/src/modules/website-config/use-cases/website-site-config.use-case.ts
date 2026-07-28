@@ -73,6 +73,14 @@ export class WebsiteSiteConfigUseCase {
       contactEmail: draft.contact_email,
       footerLogoAssetId: draft.footer_logo_asset_id,
       headerLogoAssetId: draft.header_logo_asset_id,
+      heroSlides: draft.hero_slides.map((slide) => ({
+        desktopAssetId: slide.desktop_asset_id,
+        id: slide.id,
+        isActive: slide.is_active,
+        key: slide.key,
+        mobileAssetId: slide.mobile_asset_id,
+        sortOrder: slide.sort_order,
+      })),
       offices: draft.offices.map((office) => ({
         id: office.id,
         isActive: office.is_active,
@@ -105,6 +113,14 @@ export class WebsiteSiteConfigUseCase {
       contactEmail: draft.contact_email,
       footerLogo: this.asset(draft.footer_logo),
       headerLogo: this.asset(draft.header_logo),
+      heroSlides: draft.hero_slides.map((slide) => ({
+        desktopImage: this.asset(slide.desktop_image),
+        id: slide.id,
+        isActive: slide.is_active,
+        key: slide.key,
+        mobileImage: this.asset(slide.mobile_image),
+        sortOrder: slide.sort_order,
+      })),
       offices: draft.offices.map((office) => ({
         id: office.id,
         isActive: office.is_active,
@@ -139,6 +155,16 @@ export class WebsiteSiteConfigUseCase {
       contactEmail: revision.contact_email,
       footerLogo: this.asset(revision.footer_logo),
       headerLogo: this.asset(revision.header_logo),
+      heroSlides: revision.hero_slides
+        .filter((slide) => slide.is_active)
+        .map((slide) => ({
+          desktopImage: this.asset(slide.desktop_image),
+          id: slide.id,
+          isActive: slide.is_active,
+          key: slide.key,
+          mobileImage: this.asset(slide.mobile_image),
+          sortOrder: slide.sort_order,
+        })),
       locale,
       offices: revision.offices
         .filter((office) => office.is_active)

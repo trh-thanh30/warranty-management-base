@@ -2402,10 +2402,23 @@
       "mediaDescription": "Quản lý logo dùng ở header, footer và ảnh đại diện mặc định khi chia sẻ website.",
       "tabs": {
         "identity": "Nhận diện",
+        "homepage": "Trang chủ",
         "thumbnails": "Thumbnails",
         "contact": "Liên hệ",
         "socials": "Mạng xã hội"
       },
+      "heroTitle": "Hero trang chủ",
+      "heroDescription": "Cấu hình ảnh desktop và mobile riêng cho từng slide hero trên trang chủ.",
+      "heroSlide": "Slide {index}",
+      "heroDesktop": "Ảnh desktop",
+      "heroMobile": "Ảnh mobile",
+      "heroUsingDefault": "Đang dùng ảnh mặc định",
+      "heroSlideActive": "Bật slide {index}",
+      "heroAdd": "Thêm slide",
+      "heroMoveUp": "Di chuyển slide {index} lên",
+      "heroMoveDown": "Di chuyển slide {index} xuống",
+      "heroRemove": "Xóa slide {index}",
+      "heroRemovalPending": "Ảnh sẽ được gỡ khỏi slide này khi bạn lưu draft.",
       "addressOffices": "Địa chỉ & Văn phòng",
       "addressOfficesDescription": "Cấu hình tên, địa chỉ và hotline của từng văn phòng. Thứ tự tại đây cũng là thứ tự hiển thị công khai.",
       "hotlineContact": "Hotline & Liên hệ",
@@ -2511,6 +2524,7 @@
       "published": "Đã publish cấu hình.",
       "deleted": "Đã xóa khỏi draft.",
       "updated": "Đã cập nhật.",
+      "contactEmailInvalid": "Hãy nhập email liên hệ hợp lệ trước khi Publish.",
       "error": "Không thể hoàn tất thao tác."
     }
   },

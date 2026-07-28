@@ -69,6 +69,7 @@
     "hero": {
       "previousSlideAriaLabel": "Previous slide",
       "nextSlideAriaLabel": "Next slide",
+      "slideAlt": "FUJITEK homepage showcase",
       "slides": {
         "primary": {
           "alt": "FUJITEK high-performance window film"

@@ -40,6 +40,7 @@ export function PreviewDataDialog({ load, locale }: PreviewDataDialogProps) {
   return (
     <>
       <Button
+        className="w-full sm:w-auto"
         onClick={() => void showPreview()}
         type="button"
         variant="outline"

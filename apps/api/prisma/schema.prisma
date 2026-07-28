@@ -57,13 +57,15 @@ model Asset {
   created_at     DateTime          @default(now())
   updated_at     DateTime          @updatedAt
 
-  uploaded_by               User?                  @relation(fields: [uploaded_by_id], references: [id])
-  links                     AssetLink[]
-  product_assets            ProductAsset[]
-  product_template_assets   ProductTemplateAsset[]
-  website_site_header_logos WebsiteSiteRevision[]  @relation("WebsiteSiteHeaderLogo")
-  website_site_footer_logos WebsiteSiteRevision[]  @relation("WebsiteSiteFooterLogo")
-  website_site_og_images    WebsiteSiteRevision[]  @relation("WebsiteSiteOgImage")
+  uploaded_by                 User?                  @relation(fields: [uploaded_by_id], references: [id])
+  links                       AssetLink[]
+  product_assets              ProductAsset[]
+  product_template_assets     ProductTemplateAsset[]
+  website_site_header_logos   WebsiteSiteRevision[]  @relation("WebsiteSiteHeaderLogo")
+  website_site_footer_logos   WebsiteSiteRevision[]  @relation("WebsiteSiteFooterLogo")
+  website_site_og_images      WebsiteSiteRevision[]  @relation("WebsiteSiteOgImage")
+  website_hero_desktop_images WebsiteHeroSlide[]     @relation("WebsiteHeroDesktopImage")
+  website_hero_mobile_images  WebsiteHeroSlide[]     @relation("WebsiteHeroMobileImage")
 
   @@index([access_type])
   @@index([type])
@@ -166,10 +168,33 @@ model WebsiteSiteRevision {
 
   offices      WebsiteOffice[]
   social_links WebsiteSocialLink[]
+  hero_slides  WebsiteHeroSlide[]
 
   @@index([site_key, state])
   @@index([site_key, revision_number])
   @@map("website_site_revision")
+}
+
+model WebsiteHeroSlide {
+  id               String   @id @default(uuid()) @db.Uuid
+  revision_id      String   @db.Uuid
+  key              String
+  desktop_asset_id String?  @db.Uuid
+  mobile_asset_id  String?  @db.Uuid
+  is_active        Boolean  @default(true)
+  sort_order       Int      @default(0)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  revision      WebsiteSiteRevision @relation(fields: [revision_id], references: [id], onDelete: Cascade)
+  desktop_image Asset?              @relation("WebsiteHeroDesktopImage", fields: [desktop_asset_id], references: [id], onDelete: Restrict)
+  mobile_image  Asset?              @relation("WebsiteHeroMobileImage", fields: [mobile_asset_id], references: [id], onDelete: Restrict)
+
+  @@unique([revision_id, key])
+  @@index([revision_id, is_active, sort_order])
+  @@index([desktop_asset_id])
+  @@index([mobile_asset_id])
+  @@map("website_hero_slide")
 }
 
 model WebsiteOffice {

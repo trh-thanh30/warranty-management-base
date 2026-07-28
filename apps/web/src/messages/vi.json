@@ -69,6 +69,7 @@
     "hero": {
       "previousSlideAriaLabel": "Ảnh trình chiếu trước",
       "nextSlideAriaLabel": "Ảnh trình chiếu tiếp theo",
+      "slideAlt": "Hình ảnh nổi bật trên trang chủ FUJITEK",
       "slides": {
         "primary": {
           "alt": "Phim cách nhiệt hiệu suất cao FUJITEK"

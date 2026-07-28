@@ -19,6 +19,10 @@ export const websiteSiteRevisionInclude = {
   footer_logo: true,
   header_logo: true,
   og_image: true,
+  hero_slides: {
+    include: { desktop_image: true, mobile_image: true },
+    orderBy: { sort_order: 'asc' },
+  },
   offices: {
     include: { translations: true },
     orderBy: { sort_order: 'asc' },
@@ -88,7 +92,15 @@ export class WebsiteConfigRepository {
       await Promise.all([
         tx.websiteOffice.deleteMany({ where: { revision_id: draft.id } }),
         tx.websiteSocialLink.deleteMany({ where: { revision_id: draft.id } }),
+        tx.websiteHeroSlide.deleteMany({ where: { revision_id: draft.id } }),
       ]);
+      await this.assertPublicImageAssets(
+        tx,
+        input.heroSlides.flatMap((slide) => [
+          slide.desktopAssetId,
+          slide.mobileAssetId,
+        ]),
+      );
 
       const updated = await tx.websiteSiteRevision.update({
         where: { id: draft.id },
@@ -99,6 +111,16 @@ export class WebsiteConfigRepository {
           lock_version: { increment: 1 },
           og_image_asset_id: input.ogImageAssetId,
           website_url: input.websiteUrl.trim(),
+          hero_slides: {
+            create: input.heroSlides.map((slide) => ({
+              id: slide.id,
+              key: slide.key.trim(),
+              desktop_asset_id: slide.desktopAssetId,
+              mobile_asset_id: slide.mobileAssetId,
+              is_active: slide.isActive,
+              sort_order: slide.sortOrder,
+            })),
+          },
           offices: {
             create: input.offices.map((office) => ({
               id: office.id,
@@ -170,6 +192,10 @@ export class WebsiteConfigRepository {
         draft.header_logo_asset_id,
         draft.footer_logo_asset_id,
         draft.og_image_asset_id,
+        ...draft.hero_slides.flatMap((slide) => [
+          slide.desktop_asset_id,
+          slide.mobile_asset_id,
+        ]),
       ]);
 
       const previous = await tx.websiteSiteRevision.findFirst({
@@ -261,6 +287,19 @@ export class WebsiteConfigRepository {
         ? { connect: { id: source.header_logo.id } }
         : undefined,
       lock_version: 1,
+      hero_slides: {
+        create: source.hero_slides.map((slide) => ({
+          key: slide.key,
+          desktop_image: slide.desktop_image
+            ? { connect: { id: slide.desktop_image.id } }
+            : undefined,
+          mobile_image: slide.mobile_image
+            ? { connect: { id: slide.mobile_image.id } }
+            : undefined,
+          is_active: slide.is_active,
+          sort_order: slide.sort_order,
+        })),
+      },
       offices: {
         create: source.offices.map((office) => ({
           is_active: office.is_active,

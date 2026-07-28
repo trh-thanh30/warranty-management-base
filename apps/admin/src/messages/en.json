@@ -2402,10 +2402,23 @@
       "mediaDescription": "Manage the header logo, footer logo, and the default image used when the website is shared.",
       "tabs": {
         "identity": "Identity",
+        "homepage": "Homepage",
         "thumbnails": "Thumbnails",
         "contact": "Contact",
         "socials": "Social links"
       },
+      "heroTitle": "Homepage hero",
+      "heroDescription": "Configure separate desktop and mobile images for each homepage hero slide.",
+      "heroSlide": "Slide {index}",
+      "heroDesktop": "Desktop image",
+      "heroMobile": "Mobile image",
+      "heroUsingDefault": "Using default",
+      "heroSlideActive": "Enable slide {index}",
+      "heroAdd": "Add slide",
+      "heroMoveUp": "Move slide {index} up",
+      "heroMoveDown": "Move slide {index} down",
+      "heroRemove": "Remove slide {index}",
+      "heroRemovalPending": "The image will be removed from this slide when you save the draft.",
       "addressOffices": "Addresses & Offices",
       "addressOfficesDescription": "Configure the name, address, and hotline for each office. This order is also used publicly.",
       "hotlineContact": "Hotlines & Contact",
@@ -2511,6 +2524,7 @@
       "published": "Configuration published.",
       "deleted": "Removed from draft.",
       "updated": "Updated.",
+      "contactEmailInvalid": "Enter a valid contact email before publishing.",
       "error": "The action could not be completed."
     }
   },

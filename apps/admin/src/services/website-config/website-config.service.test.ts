@@ -24,6 +24,7 @@ test("uses the protected site draft and publish endpoints", async () => {
     expectedVersion: 1,
     footerLogoAssetId: null,
     headerLogoAssetId: null,
+    heroSlides: [],
     offices: [],
     socialLinks: [],
     ogImageAssetId: null,

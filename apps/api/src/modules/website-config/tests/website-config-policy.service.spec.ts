@@ -10,6 +10,7 @@ describe('WebsiteConfigPolicyService', () => {
         contactEmail: 'contact@example.com',
         footerLogoAssetId: null,
         headerLogoAssetId: null,
+        heroSlides: [],
         offices: [
           {
             id: 'c20b9c36-b839-4e47-9dd1-a75b43a34bca',
@@ -39,6 +40,7 @@ describe('WebsiteConfigPolicyService', () => {
         contactEmail: 'contact@example.com',
         footerLogoAssetId: null,
         headerLogoAssetId: null,
+        heroSlides: [],
         offices: [],
         socialLinks: [],
         ogImageAssetId: null,
@@ -57,6 +59,7 @@ describe('WebsiteConfigPolicyService', () => {
         contactEmail: 'contact@example.com',
         footerLogoAssetId: null,
         headerLogoAssetId: null,
+        heroSlides: [],
         offices: [],
         socialLinks: [
           {
@@ -76,5 +79,65 @@ describe('WebsiteConfigPolicyService', () => {
         code: 'WEBSITE_CONFIG_URL_INVALID',
       }) as ValidationError,
     );
+  });
+
+  it('rejects duplicate homepage hero slide keys', () => {
+    expect(() =>
+      policy.assertSitePublishable({
+        contactEmail: 'contact@example.com',
+        footerLogoAssetId: null,
+        headerLogoAssetId: null,
+        heroSlides: [
+          {
+            desktopAssetId: null,
+            id: '10000000-0000-4000-8000-000000000001',
+            isActive: true,
+            key: 'primary',
+            mobileAssetId: null,
+            sortOrder: 0,
+          },
+          {
+            desktopAssetId: null,
+            id: '10000000-0000-4000-8000-000000000002',
+            isActive: true,
+            key: 'primary',
+            mobileAssetId: null,
+            sortOrder: 1,
+          },
+        ],
+        offices: [],
+        socialLinks: [],
+        ogImageAssetId: null,
+        websiteUrl: 'https://example.com',
+      }),
+    ).toThrow(
+      expect.objectContaining({
+        code: 'WEBSITE_CONFIG_PUBLISH_INVALID',
+      }) as ValidationError,
+    );
+  });
+
+  it('allows empty active custom slides so the public hero can use fallback', () => {
+    expect(() =>
+      policy.assertSitePublishable({
+        contactEmail: 'contact@example.com',
+        footerLogoAssetId: null,
+        headerLogoAssetId: null,
+        heroSlides: [
+          {
+            desktopAssetId: null,
+            id: '20000000-0000-4000-8000-000000000001',
+            isActive: true,
+            key: 'custom-slide',
+            mobileAssetId: null,
+            sortOrder: 0,
+          },
+        ],
+        offices: [],
+        socialLinks: [],
+        ogImageAssetId: null,
+        websiteUrl: 'https://example.com',
+      }),
+    ).not.toThrow();
   });
 });
