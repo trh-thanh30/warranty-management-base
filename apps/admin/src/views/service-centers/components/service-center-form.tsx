@@ -21,7 +21,11 @@ import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Controller } from "react-hook-form";
 import { useServiceCenterForm } from "../hooks/use-service-center-form";
-import { createFieldErrorFormatter } from "@/src/utils";
+import {
+  createFieldErrorFormatter,
+  fillVietnamAddressSelection,
+  getVietnamAddressSelection,
+} from "@/src/utils";
 
 type ServiceCenterFormProps = {
   onCancel: () => void;
@@ -42,6 +46,8 @@ export function ServiceCenterForm({
     isSubmitting,
     onSubmit,
     register,
+    selectedAddress,
+    selectedDistrict,
     selectedLatitude,
     selectedLongitude,
     selectedProvince,
@@ -91,6 +97,22 @@ export function ServiceCenterForm({
               <Combobox
                 disabled={provincesQuery.isLoading}
                 onValueChange={(value) => {
+                  setValue(
+                    "address",
+                    fillVietnamAddressSelection({
+                      currentAddress: selectedAddress,
+                      previousSelection: getVietnamAddressSelection({
+                        province: selectedProvince,
+                        ward: selectedDistrict,
+                      }),
+                      province: value,
+                      ward: "",
+                    }),
+                    {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    },
+                  );
                   setValue("province", value, {
                     shouldDirty: true,
                     shouldValidate: true,
@@ -152,6 +174,22 @@ export function ServiceCenterForm({
               <Combobox
                 disabled={!selectedProvinceItem || wardsQuery.isLoading}
                 onValueChange={(value) => {
+                  setValue(
+                    "address",
+                    fillVietnamAddressSelection({
+                      currentAddress: selectedAddress,
+                      previousSelection: getVietnamAddressSelection({
+                        province: selectedProvince,
+                        ward: selectedDistrict,
+                      }),
+                      province: selectedProvince,
+                      ward: value,
+                    }),
+                    {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    },
+                  );
                   setValue("district", value, {
                     shouldDirty: true,
                     shouldValidate: true,
@@ -213,6 +251,7 @@ export function ServiceCenterForm({
       </Field>
 
       <LocationPickerField
+        address={selectedAddress}
         coordinateError={formatFieldError(
           errors.latitude?.message ?? errors.longitude?.message,
           t,
@@ -251,7 +290,9 @@ export function ServiceCenterForm({
             shouldValidate: true,
           })
         }
+        province={selectedProvince}
         title={t("locationPickerTitle")}
+        ward={selectedDistrict}
       />
 
       <div className="grid gap-5 sm:grid-cols-2">

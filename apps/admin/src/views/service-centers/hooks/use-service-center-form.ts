@@ -96,6 +96,8 @@ export function useServiceCenterForm({
     isSubmitting,
     onSubmit: handleSubmit(submit),
     register,
+    selectedAddress: watch("address"),
+    selectedDistrict: watch("district"),
     selectedLatitude: watch("latitude"),
     selectedLongitude: watch("longitude"),
     selectedProvince: watch("province"),

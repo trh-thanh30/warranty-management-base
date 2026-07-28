@@ -2603,6 +2603,18 @@
       "error": "Không thể hoàn tất thao tác."
     }
   },
+  "LocationPicker": {
+    "searchDescription": "Tìm tọa độ từ địa chỉ đã nhập, sau đó có thể nhấp bản đồ để điều chỉnh.",
+    "searchButton": "Tìm trên bản đồ",
+    "searching": "Đang tìm...",
+    "selectProvinceFirst": "Chọn tỉnh hoặc thành phố trước khi tìm.",
+    "noResults": "Không tìm thấy vị trí phù hợp. Hãy kiểm tra địa chỉ hoặc chọn trực tiếp trên bản đồ.",
+    "searchError": "Không thể tìm địa chỉ lúc này. Vui lòng thử lại hoặc chọn trực tiếp trên bản đồ.",
+    "notConfigured": "Dịch vụ tìm địa chỉ chưa được cấu hình. Hãy thêm GEOAPIFY_API_KEY trên API.",
+    "resultsLabel": "Các vị trí tìm thấy",
+    "chooseResult": "Có nhiều kết quả. Chọn vị trí phù hợp:",
+    "poweredBy": "Powered by Geoapify"
+  },
   "Home": {
     "redirectLabel": "Chuyển đến bảng điều khiển"
   },

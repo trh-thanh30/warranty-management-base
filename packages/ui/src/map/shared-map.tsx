@@ -190,10 +190,10 @@ export function SharedMap({
       maxZoom={maxZoom}
       maxBounds={maxBounds}
       maxBoundsViscosity={maxBoundsViscosity}
-      scrollWheelZoom={false}
+      scrollWheelZoom={activationMode === "direct"}
       className={className}
     >
-      {activationMode !== "disabled" ? (
+      {activationMode === "overlay" ? (
         <MapInteractionController onInteractionChange={setIsWheelZoomEnabled} />
       ) : null}
       {activationMode === "overlay" && activateLabel ? (

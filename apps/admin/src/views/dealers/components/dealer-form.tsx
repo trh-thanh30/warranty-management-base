@@ -18,7 +18,11 @@ import {
 } from "@/src/components/common";
 import { useVietnamProvinces } from "@/src/hooks/use-locations";
 import { useVietnamWards } from "@/src/hooks/use-locations";
-import { createFieldErrorFormatter } from "@/src/utils";
+import {
+  createFieldErrorFormatter,
+  fillVietnamAddressSelection,
+  getVietnamAddressSelection,
+} from "@/src/utils";
 import { useDealerForm } from "../hooks/use-dealer-form";
 
 type DealerFormProps = {
@@ -36,6 +40,8 @@ export function DealerForm({ dealer, onCancel, onSaved }: DealerFormProps) {
     isSubmitting,
     onSubmit,
     register,
+    selectedAddress,
+    selectedDistrict,
     selectedLatitude,
     selectedLongitude,
     selectedProvince,
@@ -85,6 +91,22 @@ export function DealerForm({ dealer, onCancel, onSaved }: DealerFormProps) {
               <Combobox
                 disabled={provincesQuery.isLoading}
                 onValueChange={(value) => {
+                  setValue(
+                    "address",
+                    fillVietnamAddressSelection({
+                      currentAddress: selectedAddress,
+                      previousSelection: getVietnamAddressSelection({
+                        province: selectedProvince,
+                        ward: selectedDistrict,
+                      }),
+                      province: value,
+                      ward: "",
+                    }),
+                    {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    },
+                  );
                   setValue("province", value, {
                     shouldDirty: true,
                     shouldValidate: true,
@@ -141,6 +163,22 @@ export function DealerForm({ dealer, onCancel, onSaved }: DealerFormProps) {
               <Combobox
                 disabled={!selectedProvinceItem || wardsQuery.isLoading}
                 onValueChange={(value) => {
+                  setValue(
+                    "address",
+                    fillVietnamAddressSelection({
+                      currentAddress: selectedAddress,
+                      previousSelection: getVietnamAddressSelection({
+                        province: selectedProvince,
+                        ward: selectedDistrict,
+                      }),
+                      province: selectedProvince,
+                      ward: value,
+                    }),
+                    {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    },
+                  );
                   setValue("district", value, {
                     shouldDirty: true,
                     shouldValidate: true,
@@ -226,6 +264,7 @@ export function DealerForm({ dealer, onCancel, onSaved }: DealerFormProps) {
       </Field>
 
       <LocationPickerField
+        address={selectedAddress}
         coordinateError={formatFieldError(
           errors.latitude?.message ?? errors.longitude?.message,
           t,
@@ -264,7 +303,9 @@ export function DealerForm({ dealer, onCancel, onSaved }: DealerFormProps) {
             shouldValidate: true,
           })
         }
+        province={selectedProvince}
         title={t("locationPickerTitle")}
+        ward={selectedDistrict}
       />
 
       {!creating ? (

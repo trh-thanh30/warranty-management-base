@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { divIcon } from "leaflet";
 import type { LatLngExpression } from "leaflet";
-import { Marker, useMapEvents } from "react-leaflet";
+import { Marker, useMap, useMapEvents } from "react-leaflet";
 import { SharedMap } from "./shared-map";
 import type { GeoPoint, MapTileProvider } from "./map.types";
 import {
@@ -11,7 +11,7 @@ import {
   useVietnamBoundary,
   VIETNAM_CENTER,
   VIETNAM_INITIAL_ZOOM,
-  VIETNAM_INTERACTION_BOUNDS,
+  VIETNAM_PICKER_INTERACTION_BOUNDS,
   VietnamMapOverlay,
 } from "./vietnam-map-overlay";
 import type { VietnamBoundary } from "./vietnam-map-overlay";
@@ -41,6 +41,20 @@ function LocationSelectionController({
   return null;
 }
 
+function MapFocusController({ value }: { value: GeoPoint | null }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!value) return;
+
+    map.flyTo([value.latitude, value.longitude], 15, {
+      duration: 0.8,
+    });
+  }, [map, value]);
+
+  return null;
+}
+
 export interface MapLocationPickerProps {
   activateLabel?: string;
   ariaLabel: string;
@@ -48,6 +62,7 @@ export interface MapLocationPickerProps {
   boundaryLoadingLabel?: string;
   boundaryUrl?: string;
   className?: string;
+  focusValue?: GeoPoint | null;
   initialCenter?: LatLngExpression;
   initialZoom?: number;
   maxZoom?: number;
@@ -65,6 +80,7 @@ export function MapLocationPicker({
   boundaryLoadingLabel,
   boundaryUrl,
   className = "h-80 w-full overflow-hidden rounded-md",
+  focusValue = null,
   initialCenter = VIETNAM_CENTER,
   initialZoom = VIETNAM_INITIAL_ZOOM,
   maxZoom = 18,
@@ -96,7 +112,7 @@ export function MapLocationPicker({
           activationMode="direct"
           initialCenter={initialCenter}
           initialZoom={initialZoom}
-          maxBounds={VIETNAM_INTERACTION_BOUNDS}
+          maxBounds={VIETNAM_PICKER_INTERACTION_BOUNDS}
           maxBoundsViscosity={1}
           maxZoom={maxZoom}
           minZoom={minZoom}
@@ -110,6 +126,7 @@ export function MapLocationPicker({
             boundary={boundary}
             onChange={onChange}
           />
+          <MapFocusController value={focusValue} />
           {value ? (
             <Marker
               icon={markerIcon}

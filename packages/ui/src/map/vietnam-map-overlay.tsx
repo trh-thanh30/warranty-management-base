@@ -15,6 +15,10 @@ export const VIETNAM_INTERACTION_BOUNDS: LatLngBoundsExpression = [
   [6.95331046340264, 102.118655233],
   [23.3662751270001, 116.947319489797],
 ];
+export const VIETNAM_PICKER_INTERACTION_BOUNDS: LatLngBoundsExpression = [
+  [0, 80],
+  [32, 130],
+];
 
 const WORLD_RING: LatLngTuple[] = [
   [-90, -180],

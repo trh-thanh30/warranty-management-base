@@ -1,7 +1,8 @@
-import type { HttpGet } from "../service.types";
+import type { HttpGet, HttpWrite } from "../service.types";
 
 export type LocationsHttpClient = {
   get: HttpGet;
+  post: HttpWrite;
 };
 
 export type VietnamProvince = {

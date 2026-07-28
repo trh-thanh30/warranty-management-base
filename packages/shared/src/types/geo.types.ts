@@ -22,3 +22,15 @@ export type PublicNetworkLocation = GeoPoint & {
   phone: string | null;
   province: string;
 };
+
+export type GeocodeVietnamAddressBody = {
+  address?: string;
+  province: string;
+  ward?: string;
+};
+
+export type GeocodeVietnamAddressCandidate = GeoPoint & {
+  confidence?: number;
+  formattedAddress: string;
+  resultType?: string;
+};

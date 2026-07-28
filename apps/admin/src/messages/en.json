@@ -2603,6 +2603,18 @@
       "error": "The action could not be completed."
     }
   },
+  "LocationPicker": {
+    "searchDescription": "Find coordinates from the entered address, then click the map if the point needs adjustment.",
+    "searchButton": "Find on map",
+    "searching": "Searching...",
+    "selectProvinceFirst": "Select a province or city before searching.",
+    "noResults": "No matching location was found. Check the address or select a point directly on the map.",
+    "searchError": "The address could not be found right now. Try again or select a point directly on the map.",
+    "notConfigured": "Address search is not configured. Add GEOAPIFY_API_KEY to the API environment.",
+    "resultsLabel": "Location search results",
+    "chooseResult": "Multiple results were found. Choose the matching location:",
+    "poweredBy": "Powered by Geoapify"
+  },
   "Home": {
     "redirectLabel": "Go to dashboard"
   },

@@ -24,15 +24,16 @@ const sharedMapPath = path.join(
   "shared-map.tsx",
 );
 
-test("shared map requires an intentional click before wheel zoom", async () => {
+test("overlay maps require an intentional click before wheel zoom", async () => {
   const source = await readFile(sharedMapPath, "utf8");
 
-  assert.match(source, /scrollWheelZoom=\{false\}/);
+  assert.match(source, /scrollWheelZoom=\{activationMode === "direct"\}/);
   assert.match(source, /useMapEvents\(\{\s*click:/);
   assert.match(source, /scrollWheelZoom\.enable\(\)/);
   assert.match(source, /mouseleave/);
   assert.match(source, /event\.key !== "Escape"/);
   assert.match(source, /scrollWheelZoom\.disable\(\)/);
+  assert.match(source, /activationMode === "overlay"\s*\?\s*\(/);
 });
 
 test("shared map exposes a visible control for activating wheel zoom", async () => {
@@ -69,7 +70,8 @@ test("shared map reset restores its initial view and interaction state", async (
 test("about map composes feature layers inside the shared map", async () => {
   const source = await readFile(aboutMapPath, "utf8");
 
-  assert.match(source, /import \{ SharedMap \} from "@repo\/ui\/map"/);
+  assert.match(source, /SharedMap,/);
+  assert.match(source, /from "@repo\/ui\/map"/);
   assert.match(source, /<SharedMap/);
   assert.match(source, /activateLabel=\{t\("activateMap"\)\}/);
   assert.match(source, /initialCenter=\{VIETNAM_CENTER\}/);
