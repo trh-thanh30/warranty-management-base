@@ -2158,6 +2158,8 @@
       "viewDealersCta": "Tìm Đại lý gần nhất",
       "mapTitle": "Bản đồ mạng lưới đại lý",
       "mapSubtitle": "Hệ thống trạm lắp đặt ủy quyền rộng khắp",
+      "activateMap": "Nhấp để tương tác với bản đồ",
+      "resetMap": "Đặt lại bản đồ",
       "legendDealer": "Đại lý ủy quyền",
       "legendCenter": "Trung tâm lắp đặt",
       "stats": {
