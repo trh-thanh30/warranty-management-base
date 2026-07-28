@@ -97,6 +97,9 @@
       "title": "DANH MỤC SẢN PHẨM",
       "description": "Giải pháp toàn diện về phim cách nhiệt, hệ thống chiếu sáng, camera hành trình và cảm biến áp suất lốp chính hãng từ Lexzenz & Fujitek.",
       "explore": "Khám phá danh mục",
+      "itemCount": "{count} sản phẩm",
+      "previousCategories": "Danh mục trước",
+      "nextCategories": "Danh mục tiếp theo",
       "viewAll": "Xem toàn bộ danh mục sản phẩm",
       "categories": {
         "film": {

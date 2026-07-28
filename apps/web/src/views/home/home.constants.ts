@@ -1,6 +1,8 @@
 import { productCatalog } from "@/src/constants/product-catalog.constants";
 import { DEFAULT_HOME_HERO_SLIDES } from "@repo/shared/constants";
 
+export const HOME_PRODUCT_CATEGORY_BATCH_SIZE = 30;
+
 export interface HeroImageItem {
   id: string;
   src: string;

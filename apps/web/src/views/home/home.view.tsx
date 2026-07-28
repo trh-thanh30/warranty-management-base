@@ -4,9 +4,11 @@ import { AboutSection } from "./components/about-section";
 import { ProductsSection } from "./components/products-section";
 import { SputterSection } from "./components/sputter-section";
 import { ComparisonSection } from "./components/comparison-section";
-import { getPublicWebsiteSiteSetting } from "@/src/services/website-config.service";
+import { websiteConfigService } from "@/src/services/website-config/website-config.service";
+import { productCategoriesService } from "@/src/services/product-categories/product-categories.service";
 import type { WebsiteLocale } from "@repo/shared";
 import { resolveWebsiteHeroSlides } from "@repo/shared/utils";
+import { HOME_PRODUCT_CATEGORY_BATCH_SIZE } from "./home.constants";
 
 export async function HomeView({
   params,
@@ -14,7 +16,16 @@ export async function HomeView({
   params: Promise<{ locale: WebsiteLocale }>;
 }) {
   const { locale } = await params;
-  const site = await getPublicWebsiteSiteSetting(locale);
+  const [site, productCategories] = await Promise.all([
+    websiteConfigService.getSiteSetting(locale).catch(() => null),
+    productCategoriesService
+      .listProductCategories({
+        page: 1,
+        limit: HOME_PRODUCT_CATEGORY_BATCH_SIZE,
+        hasImage: true,
+      })
+      .catch(() => null),
+  ]);
   const heroSlides = resolveWebsiteHeroSlides(site?.heroSlides);
   const desktopHeroImages = heroSlides.desktop.map((slide) => ({
     id: slide.key,
@@ -32,7 +43,7 @@ export async function HomeView({
         mobileImages={mobileHeroImages}
       />
       <AboutSection />
-      <ProductsSection />
+      <ProductsSection initialPage={productCategories} />
       <SputterSection />
       <ComparisonSection />
 
