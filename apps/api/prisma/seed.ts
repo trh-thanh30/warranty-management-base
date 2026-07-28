@@ -21,6 +21,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { seedAdminUsers } from './seed-admin';
 import { seedContentPages } from './seed-content-pages';
+import { seedLexzenzDealers } from './seed-dealers';
 import { seedWebsiteSiteSettings } from './seed-website-config';
 
 type DashboardWarrantyChartSeed = {
@@ -675,6 +676,7 @@ async function main() {
 
   await seedWebsiteSiteSettings(prisma);
   await seedContentPages(prisma);
+  await seedLexzenzDealers(prisma);
   await seedDefaultCategories();
 
   const { adminUser, customerAUser, customerBUser, moderatorUser } =

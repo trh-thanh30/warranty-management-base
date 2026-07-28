@@ -15,7 +15,7 @@ import { dirname, resolve } from 'node:path';
 import { Pool } from 'pg';
 
 const SITE_KEY = 'main';
-const CONTACT_EMAIL = 'fujitek.lexzenz.vn@gmail.com';
+const CONTACT_EMAIL = 'admin@lexzenz.vn';
 const WEBSITE_URL = 'https://fujitekvietnam.com';
 const WEBSITE_LOGO_FILE_NAME = 'logo_2.png';
 const WEBSITE_LOGO_SOURCE_PATH = resolve(
