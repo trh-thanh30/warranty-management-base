@@ -17,7 +17,7 @@ on:
         type: string
 
 permissions:
-  actions: read
+  actions: write
   contents: read
   packages: write
 
@@ -124,6 +124,19 @@ jobs:
             ${{ steps.metadata.outputs.admin_image }}:${{ steps.metadata.outputs.image_channel }}
           cache-from: type=gha,scope=admin
           cache-to: type=gha,mode=max,scope=admin
+
+      - name: Trigger production deployment
+        if: ${{ steps.metadata.outputs.source_branch == 'main' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE_TAG: ${{ steps.metadata.outputs.image_tag }}
+        run: |
+          set -eu
+
+          gh workflow run deploy.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref main \
+            --field image_tag="$IMAGE_TAG"
 
   notify:
     name: Send Publish Notification
