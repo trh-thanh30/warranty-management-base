@@ -18,6 +18,7 @@ jobs:
   deploy:
     name: Deploy with Docker Compose
     runs-on: ubuntu-latest
+    if: ${{ github.ref_name == 'main' }}
     environment: production
     outputs:
       image-tag: ${{ steps.metadata.outputs.image_tag }}
@@ -166,7 +167,12 @@ jobs:
     needs:
       - deploy
       - health-check
-    if: ${{ always() }}
+    if: >-
+      ${{
+        always() &&
+        github.ref_name == 'main' &&
+        needs.deploy.result != 'skipped'
+      }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
