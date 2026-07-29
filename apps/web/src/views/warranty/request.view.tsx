@@ -23,7 +23,7 @@ export function WarrantyClaimRequestView() {
     <main className="min-h-screen bg-surface-muted py-12 sm:py-20 text-deep-black">
       <Container className="max-w-250 space-y-12">
         <div className="text-center space-y-4">
-          <span className="inline-block bg-premium-red/10 text-premium-red border border-premium-red/30 px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-[0.25em]">
+          <span className="inline-block rounded-md border border-premium-red/30 bg-premium-red/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-premium-red">
             {t("eyebrow")}
           </span>
           <h1 className="text-3xl sm:text-5xl font-condensed font-semibold uppercase tracking-wider">
@@ -35,8 +35,8 @@ export function WarrantyClaimRequestView() {
         </div>
 
         {isSubmitted ? (
-          <div className="bg-white rounded-[28px] p-8 sm:p-12 border-2 border-premium-red text-center space-y-6 shadow-2xl animate-in zoom-in-95 duration-300">
-            <div className="size-20 bg-premium-red/10 text-premium-red rounded-full flex items-center justify-center mx-auto">
+          <div className="animate-in space-y-6 rounded-md border-2 border-premium-red bg-white p-8 text-center shadow-2xl duration-300 zoom-in-95 sm:p-12">
+            <div className="mx-auto flex size-20 items-center justify-center rounded-md bg-premium-red/10 text-premium-red">
               <CheckCircle2 className="size-10" />
             </div>
             <h2 className="text-2xl sm:text-3xl font-semibold uppercase text-deep-black">
@@ -54,13 +54,13 @@ export function WarrantyClaimRequestView() {
             <button
               type="button"
               onClick={() => setIsSubmitted(false)}
-              className="bg-deep-black hover:bg-premium-red text-white px-8 py-3.5 rounded-[14px] text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer"
+              className="cursor-pointer rounded-md bg-deep-black px-8 py-3.5 text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:bg-premium-red"
             >
               {t("success.reset")}
             </button>
           </div>
         ) : (
-          <div className="bg-white rounded-[28px] p-6 sm:p-10 border border-border-gray shadow-xl">
+          <div className="rounded-md border border-border-gray bg-white p-6 shadow-xl sm:p-10">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid gap-6 sm:grid-cols-2">
                 <div className="space-y-2">
@@ -70,7 +70,7 @@ export function WarrantyClaimRequestView() {
                   <Input
                     required
                     placeholder={t("fields.customerName.placeholder")}
-                    className={`h-12 rounded-[12px] border-border-gray ${formControlFocusClassName}`}
+                    className={`h-12 rounded-md border-border-gray ${formControlFocusClassName}`}
                   />
                 </div>
                 <div className="space-y-2">
@@ -80,7 +80,7 @@ export function WarrantyClaimRequestView() {
                   <Input
                     required
                     placeholder={t("fields.phone.placeholder")}
-                    className={`h-12 rounded-[12px] border-border-gray ${formControlFocusClassName}`}
+                    className={`h-12 rounded-md border-border-gray ${formControlFocusClassName}`}
                   />
                 </div>
                 <div className="space-y-2">
@@ -90,7 +90,7 @@ export function WarrantyClaimRequestView() {
                   <Input
                     required
                     placeholder={t("fields.reference.placeholder")}
-                    className={`h-12 rounded-[12px] border-border-gray ${formControlFocusClassName}`}
+                    className={`h-12 rounded-md border-border-gray ${formControlFocusClassName}`}
                   />
                 </div>
                 <div className="space-y-2">
@@ -99,7 +99,7 @@ export function WarrantyClaimRequestView() {
                   </label>
                   <select
                     required
-                    className={`w-full h-12 rounded-[12px] border border-border-gray px-3 text-sm font-medium outline-none ${formControlFocusClassName}`}
+                    className={`h-12 w-full rounded-md border border-border-gray px-3 text-sm font-medium outline-none ${formControlFocusClassName}`}
                   >
                     <option value="">{t("fields.issue.placeholder")}</option>
                     {warrantyIssueOptions.map((issue) => (
@@ -118,13 +118,13 @@ export function WarrantyClaimRequestView() {
                 <textarea
                   rows={4}
                   placeholder={t("fields.details.placeholder")}
-                  className={`w-full p-4 rounded-[14px] border border-border-gray text-sm outline-none ${formControlFocusClassName}`}
+                  className={`w-full rounded-md border border-border-gray p-4 text-sm outline-none ${formControlFocusClassName}`}
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-premium-red hover:bg-warm-red text-white py-4 rounded-[16px] text-sm font-semibold uppercase tracking-wider transition-colors shadow-lg cursor-pointer"
+                className="w-full cursor-pointer rounded-md bg-premium-red py-4 text-sm font-semibold uppercase tracking-wider text-white shadow-lg transition-colors hover:bg-warm-red"
               >
                 {t("submit")}
               </button>
