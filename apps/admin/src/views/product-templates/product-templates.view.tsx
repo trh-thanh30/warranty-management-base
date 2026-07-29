@@ -25,6 +25,7 @@ import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
 import { ProductManagementTabs } from "../product-management/components/product-management-tabs";
 import { DeactivateProductTemplateDialog } from "./components/deactivate-product-template-dialog";
+import { ProductTemplateUsageGuideDialog } from "./components/product-template-usage-guide-dialog";
 import { ProductTemplatesTable } from "./components/product-templates-table";
 import {
   type TemplatePublicationFilter,
@@ -41,14 +42,17 @@ export function ProductTemplatesView() {
       <div className="space-y-6">
         <PageHeader
           actions={
-            directory.canCreate ? (
-              <Button asChild className="w-full sm:w-auto">
-                <Link href="/product-templates/create">
-                  <Plus className="size-4" />
-                  {t("create")}
-                </Link>
-              </Button>
-            ) : null
+            <>
+              <ProductTemplateUsageGuideDialog />
+              {directory.canCreate ? (
+                <Button asChild className="w-full sm:w-auto">
+                  <Link href="/product-templates/create">
+                    <Plus className="size-4" />
+                    {t("create")}
+                  </Link>
+                </Button>
+              ) : null}
+            </>
           }
           description={t("description")}
           eyebrow={t("eyebrow")}

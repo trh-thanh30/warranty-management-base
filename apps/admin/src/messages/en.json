@@ -1132,6 +1132,69 @@
     "title": "Product templates",
     "eyebrow": "Product catalogue",
     "description": "Manage shared details and media for multiple physical product units.",
+    "usageGuide": {
+      "trigger": "Usage guide",
+      "title": "Template and product creation workflow",
+      "description": "Create reusable catalogue information first, then use the template to create physical products with their own codes and serial numbers.",
+      "templateStep": {
+        "badge": "Step 1",
+        "title": "Create a product template",
+        "description": "A template stores information reused across multiple products in the same range.",
+        "fields": {
+          "name": "Use a clear template name based on the brand and model.",
+          "category": "Select the correct product category.",
+          "identity": "Enter the SKU, brand, and model for easier lookup.",
+          "media": "Add a cover image, image gallery, and specifications.",
+          "warranty": "Set the default warranty duration and terms."
+        }
+      },
+      "productStep": {
+        "badge": "Step 2",
+        "title": "Create a physical product",
+        "description": "Each product represents a real unit that can be stocked, sold, or registered for warranty.",
+        "fields": {
+          "template": "Open Products, choose Create product, and select the new template.",
+          "identity": "Enter a unique product code and serial number for each unit.",
+          "owner": "Assign an owner when customer information is available.",
+          "warranty": "Review the warranty duration inherited from the template before saving."
+        }
+      },
+      "example": {
+        "title": "Practical example",
+        "description": "One catalogue template can create multiple physical products without re-entering shared information.",
+        "labels": {
+          "name": "Template name",
+          "sku": "SKU",
+          "brandModel": "Brand / Model",
+          "warranty": "Default warranty",
+          "productOne": "Product 1",
+          "productTwo": "Product 2",
+          "result": "Result"
+        },
+        "template": {
+          "badge": "Product template",
+          "name": "3M Crystalline CR70 Window Film",
+          "sku": "3M-CR70",
+          "brandModel": "3M / CR70",
+          "warranty": "120 months"
+        },
+        "products": {
+          "badge": "Physical products",
+          "first": "Code CR70-0001 · Serial SN-CR70-0001",
+          "second": "Code CR70-0002 · Serial SN-CR70-0002",
+          "result": "Both inherit media, specifications, and warranty defaults from template 3M-CR70."
+        }
+      },
+      "notes": {
+        "title": "Key points",
+        "items": {
+          "shared": "A product template contains shared catalogue data.",
+          "unique": "Product codes and serial numbers must be unique to each physical unit.",
+          "updates": "Template updates affect linked products but do not modify issued warranties."
+        }
+      },
+      "close": "Got it"
+    },
     "directoryTitle": "Product template directory",
     "directoryDescription": "Find templates by SKU, name, brand, or model and create physical products from them.",
     "backToDirectory": "Back to product templates",

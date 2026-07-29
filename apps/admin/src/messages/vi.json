@@ -1132,6 +1132,69 @@
     "title": "Mẫu sản phẩm",
     "eyebrow": "Danh mục sản phẩm",
     "description": "Quản lý thông tin và hình ảnh dùng chung cho nhiều đơn vị sản phẩm vật lý.",
+    "usageGuide": {
+      "trigger": "Hướng dẫn sử dụng",
+      "title": "Quy trình tạo mẫu và sản phẩm",
+      "description": "Tạo thông tin catalogue dùng chung trước, sau đó dùng mẫu để tạo từng sản phẩm vật lý có mã và serial riêng.",
+      "templateStep": {
+        "badge": "Bước 1",
+        "title": "Tạo mẫu sản phẩm",
+        "description": "Mẫu lưu các thông tin được tái sử dụng cho nhiều sản phẩm cùng dòng.",
+        "fields": {
+          "name": "Đặt tên mẫu rõ ràng theo thương hiệu và model.",
+          "category": "Chọn đúng danh mục sản phẩm.",
+          "identity": "Nhập SKU, thương hiệu và model để dễ tìm kiếm.",
+          "media": "Thêm ảnh đại diện, thư viện ảnh và thông số kỹ thuật.",
+          "warranty": "Thiết lập thời hạn và điều khoản bảo hành mặc định."
+        }
+      },
+      "productStep": {
+        "badge": "Bước 2",
+        "title": "Tạo sản phẩm vật lý",
+        "description": "Mỗi sản phẩm đại diện cho một đơn vị thực tế được nhập kho, bán hoặc kích hoạt bảo hành.",
+        "fields": {
+          "template": "Vào Sản phẩm, chọn Tạo sản phẩm và chọn mẫu vừa tạo.",
+          "identity": "Nhập mã sản phẩm và serial riêng của từng đơn vị.",
+          "owner": "Gán chủ sở hữu khi đã có thông tin khách hàng.",
+          "warranty": "Kiểm tra thời hạn bảo hành được kế thừa từ mẫu trước khi lưu."
+        }
+      },
+      "example": {
+        "title": "Ví dụ thực tế",
+        "description": "Một mẫu catalogue có thể tạo nhiều sản phẩm vật lý mà không phải nhập lại thông tin dùng chung.",
+        "labels": {
+          "name": "Tên mẫu",
+          "sku": "SKU",
+          "brandModel": "Thương hiệu / Model",
+          "warranty": "Bảo hành mặc định",
+          "productOne": "Sản phẩm 1",
+          "productTwo": "Sản phẩm 2",
+          "result": "Kết quả"
+        },
+        "template": {
+          "badge": "Mẫu sản phẩm",
+          "name": "Phim cách nhiệt 3M Crystalline CR70",
+          "sku": "3M-CR70",
+          "brandModel": "3M / CR70",
+          "warranty": "120 tháng"
+        },
+        "products": {
+          "badge": "Sản phẩm vật lý",
+          "first": "Mã CR70-0001 · Serial SN-CR70-0001",
+          "second": "Mã CR70-0002 · Serial SN-CR70-0002",
+          "result": "Cùng kế thừa hình ảnh, thông số và bảo hành từ mẫu 3M-CR70."
+        }
+      },
+      "notes": {
+        "title": "Điểm cần nhớ",
+        "items": {
+          "shared": "Mẫu sản phẩm chứa dữ liệu catalogue dùng chung.",
+          "unique": "Mã sản phẩm và serial phải riêng cho từng sản phẩm vật lý.",
+          "updates": "Cập nhật mẫu ảnh hưởng sản phẩm liên kết, nhưng không thay đổi bảo hành đã phát hành."
+        }
+      },
+      "close": "Đã hiểu"
+    },
     "directoryTitle": "Danh sách mẫu sản phẩm",
     "directoryDescription": "Tìm mẫu theo SKU, tên, thương hiệu hoặc model rồi tạo sản phẩm vật lý từ mẫu.",
     "backToDirectory": "Quay về mẫu sản phẩm",
