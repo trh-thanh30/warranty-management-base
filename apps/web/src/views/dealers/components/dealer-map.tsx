@@ -91,6 +91,8 @@ export function DealerMap({ activeLocation }: DealerMapProps) {
     >
       <SharedMap
         activateLabel={t("activateMap")}
+        exitFullscreenLabel={t("exitFullscreenMap")}
+        fullscreenLabel={t("fullscreenMap")}
         initialCenter={VIETNAM_CENTER}
         initialZoom={VIETNAM_INITIAL_ZOOM}
         className="size-full"

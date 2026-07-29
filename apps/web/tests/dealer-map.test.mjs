@@ -111,6 +111,8 @@ test("dealer map uses the shared Vietnam overlay without locking horizontal pann
   assert.match(source, /initialCenter=\{VIETNAM_CENTER\}/);
   assert.match(source, /initialZoom=\{VIETNAM_INITIAL_ZOOM\}/);
   assert.match(source, /resetLabel=\{t\("resetMap"\)\}/);
+  assert.match(source, /fullscreenLabel=\{t\("fullscreenMap"\)\}/);
+  assert.match(source, /exitFullscreenLabel=\{t\("exitFullscreenMap"\)\}/);
   assert.match(overlaySource, /fillRule:\s*"evenodd"/);
   assert.match(overlaySource, /\/map\/vn\.geojson/);
   assert.doesNotMatch(source, /VIETNAM_INTERACTION_BOUNDS/);
@@ -283,6 +285,8 @@ test("dealer map messages resolve in every locale", async () => {
     "ariaLabel",
     "activateMap",
     "resetMap",
+    "fullscreenMap",
+    "exitFullscreenMap",
     "loading",
     "loadError",
     "selectedDealer",

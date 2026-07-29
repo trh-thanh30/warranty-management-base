@@ -45,6 +45,8 @@ export function AboutNetworkMap() {
     <div className="relative w-full h-full bg-surface-muted isolate overflow-hidden">
       <SharedMap
         activateLabel={t("activateMap")}
+        exitFullscreenLabel={t("exitFullscreenMap")}
+        fullscreenLabel={t("fullscreenMap")}
         initialCenter={VIETNAM_CENTER}
         initialZoom={VIETNAM_INITIAL_ZOOM}
         resetLabel={t("resetMap")}

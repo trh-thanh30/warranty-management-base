@@ -68,6 +68,33 @@ test("shared map reset restores its initial view and interaction state", async (
   );
 });
 
+test("shared map exposes an accessible fullscreen control and redraws Leaflet", async () => {
+  const [sharedMapSource, aboutMapSource] = await Promise.all([
+    readFile(sharedMapPath, "utf8"),
+    readFile(aboutMapPath, "utf8"),
+  ]);
+
+  assert.match(sharedMapSource, /<Maximize2/);
+  assert.match(sharedMapSource, /<Minimize2/);
+  assert.match(sharedMapSource, /requestFullscreen\(\)/);
+  assert.match(sharedMapSource, /document\.exitFullscreen\(\)/);
+  assert.match(sharedMapSource, /"fullscreenchange"/);
+  assert.match(sharedMapSource, /map\.invalidateSize\(\)/);
+  assert.match(
+    sharedMapSource,
+    /aria-label=\{isFullscreen \? exitFullscreenLabel : fullscreenLabel\}/,
+  );
+  assert.match(
+    sharedMapSource,
+    /left-2\.5 top-\[115px\].*size-\[34px\].*rounded-\[4px\]/,
+  );
+  assert.match(aboutMapSource, /fullscreenLabel=\{t\("fullscreenMap"\)\}/);
+  assert.match(
+    aboutMapSource,
+    /exitFullscreenLabel=\{t\("exitFullscreenMap"\)\}/,
+  );
+});
+
 test("about map composes feature layers inside the shared map", async () => {
   const source = await readFile(aboutMapPath, "utf8");
 
