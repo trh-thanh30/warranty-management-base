@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@repo/ui/select";
 import { MapPin, Search } from "lucide-react";
+import { formControlFocusClassName } from "@/src/components/common/form-control.constants";
 import type { NearbyDealerStatus } from "../dealers.types";
 import { dealerFilterAll } from "../dealers.utils";
 
@@ -56,7 +57,7 @@ export function DealerFilters({
   translations,
 }: DealerFiltersProps) {
   return (
-    <div className="space-y-4 border-b border-border-gray bg-surface-muted p-6">
+    <div className="space-y-4 border-b border-border-gray  p-5">
       <div className="relative flex items-center">
         <label className="sr-only" htmlFor="dealer-search">
           {translations.searchAriaLabel}
@@ -67,7 +68,7 @@ export function DealerFilters({
           placeholder={translations.searchPlaceholder}
           value={searchQuery}
           onChange={(event) => onSearchChange(event.target.value)}
-          className="h-12 rounded-[14px] border-border-gray bg-white pr-10 text-sm focus-visible:ring-premium-red"
+          className={`h-12 rounded-sm border-border-gray bg-white pr-10 text-sm ${formControlFocusClassName}`}
         />
         <Search
           aria-hidden="true"
@@ -79,7 +80,7 @@ export function DealerFilters({
         <Select value={selectedProvince} onValueChange={onProvinceChange}>
           <SelectTrigger
             aria-label={translations.provinceAriaLabel}
-            className="h-11 rounded-[12px] border-border-gray bg-white text-xs font-medium text-deep-black focus:ring-2 focus:ring-premium-red sm:text-sm"
+            className={`h-11 rounded-sm border-border-gray bg-white text-xs font-medium text-deep-black sm:text-sm ${formControlFocusClassName}`}
           >
             <SelectValue />
           </SelectTrigger>
@@ -102,7 +103,7 @@ export function DealerFilters({
         >
           <SelectTrigger
             aria-label={translations.districtAriaLabel}
-            className="h-11 rounded-[12px] border-border-gray bg-white text-xs font-medium text-deep-black focus:ring-2 focus:ring-premium-red sm:text-sm"
+            className={`h-11 rounded-sm border-border-gray bg-white text-xs font-medium text-deep-black sm:text-sm ${formControlFocusClassName}`}
           >
             <SelectValue />
           </SelectTrigger>
@@ -124,14 +125,10 @@ export function DealerFilters({
         aria-pressed={nearMeOnly}
         disabled={nearbyStatus === "loading"}
         onClick={() => onNearMeChange(!nearMeOnly)}
-        className={
-          nearMeOnly
-            ? "min-h-11 w-full rounded-[12px] bg-premium-red text-xs font-semibold uppercase tracking-wider text-white hover:bg-warm-red"
-            : "min-h-11 w-full rounded-[12px] bg-accent-gold text-xs font-semibold uppercase tracking-wider text-deep-black hover:bg-accent-gold-hover"
-        }
+        className="h-auto min-h-11 w-full whitespace-normal rounded-sm bg-premium-red px-3 py-3 text-center text-[11px] font-semibold uppercase leading-snug tracking-[0.08em] text-white hover:bg-warm-red sm:px-4 sm:text-xs sm:tracking-wider"
       >
         <MapPin aria-hidden="true" className="size-4 shrink-0" />
-        <span>{translations.nearMe}</span>
+        <span className="min-w-0 text-balance">{translations.nearMe}</span>
       </Button>
 
       {nearbyStatus === "loading" ||

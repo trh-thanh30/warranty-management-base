@@ -1016,6 +1016,12 @@
       "description": "Find an official FUJITEK automotive window-film installation center near you.",
       "dealerCta": "Become a dealer"
     },
+    "recruitment": {
+      "eyebrow": "Partnership opportunity",
+      "title": "Grow your business with FUJITEK",
+      "description": "Become an authorized dealer and gain access to genuine products, dedicated partner support, and a transparent warranty network.",
+      "cta": "Apply to become a dealer"
+    },
     "filters": {
       "searchPlaceholder": "Search by name or address...",
       "searchAriaLabel": "Search dealers by name, address, or phone number",
@@ -1023,28 +1029,45 @@
       "districtAriaLabel": "Select a district",
       "allCities": "Nationwide",
       "allDistricts": "All districts",
-      "nearMe": "Find stores near you (≤ 20 km)",
+      "nearMe": "Find dealers and warranty centers near you (≤ 20 km)",
       "nearMeLoading": "Finding your location...",
       "nearMeError": "Unable to access your location. Please check location permissions.",
       "nearMeUnsupported": "Your browser does not support geolocation.",
-      "resultCount": "{count} stores found"
+      "resultCount": "{count} dealers and warranty centers found"
     },
     "states": {
-      "loading": "Loading dealers...",
-      "error": "Unable to load dealers. Please try again.",
+      "loading": "Loading dealers and warranty centers...",
+      "loadingMore": "Loading more locations...",
+      "loadMoreError": "Unable to load more locations.",
+      "error": "Unable to load dealers and warranty centers. Please try again.",
       "retry": "Try again"
     },
-    "empty": "No matching dealers found.",
+    "empty": "No matching dealers or warranty centers found.",
+    "locationType": {
+      "dealer": "Dealer",
+      "serviceCenter": "Warranty center"
+    },
     "viewMore": "View more",
     "directions": "Directions",
     "hotline": "Hotline",
     "map": {
-      "defaultTitle": "FUJITEK dealer map",
-      "iframeTitle": "FUJITEK dealer location map",
-      "ariaLabel": "Interactive map of FUJITEK dealers in Vietnam",
+      "defaultTitle": "FUJITEK dealer and warranty center map",
+      "iframeTitle": "FUJITEK dealer and warranty center location map",
+      "ariaLabel": "Interactive map of FUJITEK dealers and warranty centers in Vietnam",
+      "activateMap": "Click to interact with the map",
+      "resetMap": "Reset map",
+      "fullscreenMap": "Open map in fullscreen",
+      "exitFullscreenMap": "Exit fullscreen",
       "loading": "Loading the Vietnam map boundary...",
       "loadError": "Unable to load the Vietnam boundary. Please try again.",
+      "networkLoading": "Loading dealers and warranty centers...",
+      "networkError": "Unable to load dealers and warranty centers.",
+      "retry": "Try again",
       "selectedDealer": "Selected dealer",
+      "locationType": {
+        "dealer": "Authorized dealer",
+        "serviceCenter": "Warranty center"
+      },
       "popupPhone": "Phone",
       "openGoogleMaps": "Open Google Maps"
     }
@@ -2105,12 +2128,15 @@
       "mapSubtitle": "Widespread authorized installation stations",
       "activateMap": "Click to interact with the map",
       "resetMap": "Reset map",
+      "fullscreenMap": "Open map in fullscreen",
+      "exitFullscreenMap": "Exit fullscreen",
       "legendDealer": "Authorized Dealer",
       "legendCenter": "Warranty Center",
       "loading": "Loading dealers and warranty centers...",
       "error": "Unable to load network locations.",
       "retry": "Try again",
       "empty": "There are no active locations to display yet.",
+      "phone": "Phone",
       "directions": "Get directions",
       "locationType": {
         "dealer": "Authorized Dealer",

@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { MousePointerClick, RotateCcw } from "lucide-react";
+import {
+  Maximize2,
+  Minimize2,
+  MousePointerClick,
+  RotateCcw,
+} from "lucide-react";
 import type { LatLngBoundsExpression, LatLngExpression } from "leaflet";
 import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import { OPEN_STREET_MAP_TILE_PROVIDER } from "./map.constants";
@@ -134,11 +139,80 @@ function MapResetControl({
   );
 }
 
+interface MapFullscreenControlProps {
+  exitFullscreenLabel: string;
+  fullscreenLabel: string;
+}
+
+function MapFullscreenControl({
+  exitFullscreenLabel,
+  fullscreenLabel,
+}: MapFullscreenControlProps) {
+  const map = useMap();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isSupported, setIsSupported] = useState(false);
+
+  useEffect(() => {
+    const container = map.getContainer();
+    const handleFullscreenChange = () => {
+      setIsFullscreen(document.fullscreenElement === container);
+      window.requestAnimationFrame(() => map.invalidateSize());
+    };
+
+    setIsSupported(
+      document.fullscreenEnabled &&
+        typeof container.requestFullscreen === "function",
+    );
+    handleFullscreenChange();
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, [map]);
+
+  if (!isSupported) return null;
+
+  const handleToggle = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+
+    try {
+      if (document.fullscreenElement === map.getContainer()) {
+        await document.exitFullscreen();
+      } else {
+        await map.getContainer().requestFullscreen();
+      }
+    } catch {
+      setIsFullscreen(false);
+    }
+  };
+
+  const label = isFullscreen ? exitFullscreenLabel : fullscreenLabel;
+
+  return (
+    <button
+      type="button"
+      aria-label={isFullscreen ? exitFullscreenLabel : fullscreenLabel}
+      title={label}
+      className="leaflet-control absolute left-2.5 top-[115px] z-[1000] grid size-[34px] place-items-center rounded-[4px] border-2 border-black/20 bg-white text-deep-black shadow-sm transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2"
+      onClick={handleToggle}
+    >
+      {isFullscreen ? (
+        <Minimize2 aria-hidden="true" className="size-4" />
+      ) : (
+        <Maximize2 aria-hidden="true" className="size-4" />
+      )}
+    </button>
+  );
+}
+
 type SharedMapBaseProps = {
   activateLabel?: string;
   activationMode?: MapActivationMode;
   children?: ReactNode;
   className?: string;
+  exitFullscreenLabel?: string;
+  fullscreenLabel?: string;
   loadingClassName?: string;
   maxBounds?: LatLngBoundsExpression;
   maxBoundsViscosity?: number;
@@ -157,6 +231,8 @@ export function SharedMap({
   activationMode = "overlay",
   children,
   className = "size-full",
+  exitFullscreenLabel,
+  fullscreenLabel,
   initialBounds,
   initialCenter,
   initialZoom,
@@ -211,6 +287,12 @@ export function SharedMap({
           initialZoom={initialZoom}
           resetLabel={resetLabel}
           onInteractionChange={setIsWheelZoomEnabled}
+        />
+      ) : null}
+      {fullscreenLabel && exitFullscreenLabel ? (
+        <MapFullscreenControl
+          exitFullscreenLabel={exitFullscreenLabel}
+          fullscreenLabel={fullscreenLabel}
         />
       ) : null}
 

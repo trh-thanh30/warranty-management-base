@@ -23,6 +23,42 @@ export type PublicNetworkLocation = GeoPoint & {
   province: string;
 };
 
+export type PublicDealerLocation = PublicNetworkLocation & {
+  kind: "DEALER";
+};
+
+export type ListPublicDealersQuery = {
+  district?: string;
+  latitude?: number;
+  limit?: number;
+  longitude?: number;
+  page?: number;
+  province?: string;
+  radiusKm?: number;
+  search?: string;
+};
+
+export type PublicDealerFilterOptions = {
+  districts: string[];
+  provinces: string[];
+};
+
+export type ListPublicNetworkDirectoryQuery = {
+  district?: string;
+  latitude?: number;
+  limit?: number;
+  longitude?: number;
+  page?: number;
+  province?: string;
+  radiusKm?: number;
+  search?: string;
+};
+
+export type PublicNetworkDirectoryFilterOptions = {
+  districts: string[];
+  provinces: string[];
+};
+
 export type GeocodeVietnamAddressBody = {
   address?: string;
   province: string;

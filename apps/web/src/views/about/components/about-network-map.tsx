@@ -1,9 +1,6 @@
 "use client";
 
-import type {
-  PublicNetworkLocation,
-  PublicNetworkLocationKind,
-} from "@repo/shared";
+import type { PublicNetworkLocationKind } from "@repo/shared";
 import {
   MAP_MARKER_COLORS,
   SharedMap,
@@ -13,9 +10,9 @@ import {
   VietnamMapOverlay,
 } from "@repo/ui/map";
 import { divIcon } from "leaflet";
-import { MapPin, Navigation, Phone } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Marker, Popup, Tooltip } from "react-leaflet";
+import { Marker, Tooltip } from "react-leaflet";
+import { NetworkLocationPopup } from "@/src/components/common/network-location-popup";
 import { useNetworkLocations } from "@/src/hooks/use-network-locations";
 
 const markerColorByKind: Record<PublicNetworkLocationKind, string> = {
@@ -44,15 +41,12 @@ export function AboutNetworkMap() {
       popupAnchor: [0, -14],
     });
 
-  const locationTypeLabel = (location: PublicNetworkLocation) =>
-    location.kind === "DEALER"
-      ? t("locationType.dealer")
-      : t("locationType.serviceCenter");
-
   return (
     <div className="relative w-full h-full bg-surface-muted isolate overflow-hidden">
       <SharedMap
         activateLabel={t("activateMap")}
+        exitFullscreenLabel={t("exitFullscreenMap")}
+        fullscreenLabel={t("fullscreenMap")}
         initialCenter={VIETNAM_CENTER}
         initialZoom={VIETNAM_INITIAL_ZOOM}
         resetLabel={t("resetMap")}
@@ -73,48 +67,15 @@ export function AboutNetworkMap() {
             <Tooltip direction="top" offset={[0, -10]} opacity={0.95}>
               {location.name}
             </Tooltip>
-            <Popup className="fujitek-map-popup">
-              <div className="min-w-[190px] space-y-2 p-1">
-                <div className="space-y-1">
-                  <div
-                    className="text-[10px] font-bold uppercase tracking-wider"
-                    style={{ color: markerColorByKind[location.kind] }}
-                  >
-                    {locationTypeLabel(location)}
-                  </div>
-                  <div className="flex items-start gap-1.5">
-                    <MapPin
-                      aria-hidden="true"
-                      className="mt-0.5 size-3.5 shrink-0 text-premium-red"
-                    />
-                    <span className="text-xs font-bold text-deep-black">
-                      {location.name}
-                    </span>
-                  </div>
-                </div>
-                <p className="text-[11px] text-stone-gray m-0 leading-tight">
-                  {location.address}
-                </p>
-                {location.phone ? (
-                  <a
-                    href={`tel:${location.phone}`}
-                    className="flex items-center gap-1.5 text-[11px] font-semibold text-deep-black hover:text-premium-red"
-                  >
-                    <Phone aria-hidden="true" className="size-3.5" />
-                    <span>{location.phone}</span>
-                  </a>
-                ) : null}
-                <a
-                  href={location.googleMapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-8 items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-premium-red hover:underline"
-                >
-                  <Navigation aria-hidden="true" className="size-3.5" />
-                  <span>{t("directions")}</span>
-                </a>
-              </div>
-            </Popup>
+            <NetworkLocationPopup
+              location={location}
+              translations={{
+                dealer: t("locationType.dealer"),
+                serviceCenter: t("locationType.serviceCenter"),
+                phone: t("phone"),
+                directions: t("directions"),
+              }}
+            />
           </Marker>
         ))}
       </SharedMap>
