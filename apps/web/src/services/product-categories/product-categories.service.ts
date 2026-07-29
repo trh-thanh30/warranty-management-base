@@ -12,10 +12,11 @@ export class ProductCategoriesService {
 
   async listProductCategories(
     query: ListPublicProductCategoriesQuery,
+    signal?: AbortSignal,
   ): Promise<PaginatedResponse<PublicProductCategory>> {
     const response = await this.http.get<
       ApiResponse<PaginatedResponse<PublicProductCategory>>
-    >("/public/product-categories", { params: query });
+    >("/public/product-categories", { params: query, signal });
     return response.data;
   }
 }

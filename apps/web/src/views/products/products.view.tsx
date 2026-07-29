@@ -4,11 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  AlertCircle,
   Check,
   Filter,
   LayoutGrid,
   List,
+  PackageOpen,
   PhoneCall,
+  RefreshCw,
   Search,
   SlidersHorizontal,
   X,
@@ -19,6 +22,7 @@ import { Button } from "@repo/ui/button";
 import { Input } from "@repo/ui/input";
 import { Label } from "@repo/ui/label";
 import { PaginationControls } from "@repo/ui/pagination-controls";
+import { Skeleton } from "@repo/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -30,32 +34,61 @@ import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { Container } from "@/src/components/common/container";
 import { useLenis } from "@/src/components/providers/lenis-provider";
 import { Link } from "@/src/i18n/navigation";
-import {
-  catalogCategories,
-  expandedProductsCatalog,
-} from "./products.constants";
-import type { CatalogCategory } from "./products.types";
 import { FadeIn } from "@/src/components/animation/fade-in";
 import {
   StaggerGroup,
   StaggerItem,
 } from "@/src/components/animation/stagger-group";
-
-type SortOption = "newest" | "name-asc" | "name-desc";
+import { ProductCoverImage } from "./components/product-cover-image";
+import { PRODUCTS_PAGE_SIZE } from "./products.constants";
+import type { ProductViewMode } from "./products.types";
+import {
+  ALL_PRODUCT_CATEGORIES,
+  buildPublicProductsQuery,
+  type ProductSortOption,
+} from "./products.utils";
+import { useProductsCatalog } from "./use-products-catalog";
 
 const PRODUCT_RESULTS_ID = "product-results";
 
 export function ProductsView() {
   const t = useTranslations("ProductsPage");
   const { scrollTo } = useLenis();
-  const [activeCategory, setActiveCategory] = useState<CatalogCategory>("all");
+  const [activeCategoryId, setActiveCategoryId] = useState(
+    ALL_PRODUCT_CATEGORIES,
+  );
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<SortOption>("newest");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [itemsPerPage] = useState<number>(6);
+  const [sortBy, setSortBy] = useState<ProductSortOption>("newest");
+  const [viewMode, setViewMode] = useState<ProductViewMode>("grid");
   const [currentPage, setCurrentPage] = useState(1);
   const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
   const debouncedSearchQuery = useDebounce(searchQuery.trim(), 300);
+  const publicProductsQuery = useMemo(
+    () =>
+      buildPublicProductsQuery({
+        categoryId: activeCategoryId,
+        limit: PRODUCTS_PAGE_SIZE,
+        page: currentPage,
+        search: debouncedSearchQuery,
+        sort: sortBy,
+      }),
+    [activeCategoryId, currentPage, debouncedSearchQuery, sortBy],
+  );
+  const { categoriesQuery, productsQuery } =
+    useProductsCatalog(publicProductsQuery);
+  const categories = categoriesQuery.data?.items ?? [];
+  const products = productsQuery.data?.items ?? [];
+  const productTotal = productsQuery.data?.meta.total ?? 0;
+  const totalPages = productsQuery.data?.meta.totalPages ?? 0;
+  const allCategoryCount =
+    categories.length > 0
+      ? categories.reduce((total, category) => total + category.productCount, 0)
+      : activeCategoryId === ALL_PRODUCT_CATEGORIES
+        ? productTotal
+        : 0;
+  const hasActiveFilters =
+    Boolean(debouncedSearchQuery) ||
+    activeCategoryId !== ALL_PRODUCT_CATEGORIES;
 
   // Lock body scroll when mobile drawer is open
   useEffect(() => {
@@ -72,62 +105,7 @@ export function ProductsView() {
   // Reset page number on filter/search/sort change
   useEffect(() => {
     setCurrentPage(1);
-  }, [activeCategory, debouncedSearchQuery, sortBy, itemsPerPage]);
-
-  const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = {
-      all: expandedProductsCatalog.length,
-    };
-    catalogCategories.forEach((category) => {
-      if (category !== "all") {
-        counts[category] = expandedProductsCatalog.filter(
-          (item) => item.category === category,
-        ).length;
-      }
-    });
-    return counts;
-  }, []);
-
-  const filteredCatalog = useMemo(() => {
-    let list = [...expandedProductsCatalog];
-
-    // Filter by Category
-    if (activeCategory !== "all") {
-      list = list.filter((item) => item.category === activeCategory);
-    }
-
-    // Filter by Search Query
-    if (debouncedSearchQuery) {
-      const query = debouncedSearchQuery.toLowerCase();
-      list = list.filter(
-        (item) =>
-          t(`catalog.items.${item.detailKey}.name`)
-            .toLowerCase()
-            .includes(query) ||
-          item.code.toLowerCase().includes(query) ||
-          item.category.toLowerCase().includes(query),
-      );
-    }
-
-    if (sortBy === "name-asc" || sortBy === "name-desc") {
-      const direction = sortBy === "name-asc" ? 1 : -1;
-      list.sort(
-        (a, b) =>
-          t(`catalog.items.${a.detailKey}.name`).localeCompare(
-            t(`catalog.items.${b.detailKey}.name`),
-          ) * direction,
-      );
-    }
-
-    return list;
-  }, [activeCategory, debouncedSearchQuery, sortBy, t]);
-
-  const totalPages = Math.ceil(filteredCatalog.length / itemsPerPage) || 1;
-
-  const paginatedCatalog = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredCatalog.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredCatalog, currentPage, itemsPerPage]);
+  }, [activeCategoryId, debouncedSearchQuery, sortBy]);
 
   return (
     <main className="min-h-screen bg-white text-deep-black">
@@ -201,15 +179,39 @@ export function ProductsView() {
                       {t("catalog.categoriesTitle")}
                     </span>
                     <nav className="space-y-1.5 overflow-y-auto max-h-[40vh]">
-                      {catalogCategories.map((category) => {
-                        const isActive = activeCategory === category;
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => {
+                          setActiveCategoryId(ALL_PRODUCT_CATEGORIES);
+                          setIsCategoryDrawerOpen(false);
+                        }}
+                        className={`h-auto min-h-10 w-full justify-between whitespace-normal px-3.5 py-2.5 text-left text-sm font-medium ${
+                          activeCategoryId === ALL_PRODUCT_CATEGORIES
+                            ? "bg-premium-red font-semibold text-white shadow-sm hover:bg-warm-red hover:text-white"
+                            : "text-deep-black hover:bg-surface-muted hover:text-premium-red"
+                        }`}
+                      >
+                        <span>{t("catalog.categories.all")}</span>
+                        <span
+                          className={`rounded-md px-2 py-0.5 text-xs font-semibold ${
+                            activeCategoryId === ALL_PRODUCT_CATEGORIES
+                              ? "bg-white/20 text-white"
+                              : "bg-surface-muted text-stone-gray"
+                          }`}
+                        >
+                          {allCategoryCount}
+                        </span>
+                      </Button>
+                      {categories.map((category) => {
+                        const isActive = activeCategoryId === category.id;
                         return (
                           <Button
-                            key={category}
+                            key={category.id}
                             type="button"
                             variant="ghost"
                             onClick={() => {
-                              setActiveCategory(category);
+                              setActiveCategoryId(category.id);
                               setIsCategoryDrawerOpen(false);
                             }}
                             className={`h-auto min-h-10 w-full justify-between whitespace-normal px-3.5 py-2.5 text-left text-sm font-medium ${
@@ -218,7 +220,7 @@ export function ProductsView() {
                                 : "text-deep-black hover:bg-surface-muted hover:text-premium-red"
                             }`}
                           >
-                            <span>{t(`catalog.categories.${category}`)}</span>
+                            <span>{category.name}</span>
                             <span
                               className={`rounded-md px-2 py-0.5 text-xs font-semibold ${
                                 isActive
@@ -226,11 +228,33 @@ export function ProductsView() {
                                   : "bg-surface-muted text-stone-gray"
                               }`}
                             >
-                              {categoryCounts[category] ?? 0}
+                              {category.productCount}
                             </span>
                           </Button>
                         );
                       })}
+                      {categoriesQuery.isPending &&
+                        Array.from({ length: 4 }).map((_, index) => (
+                          <Skeleton
+                            aria-hidden="true"
+                            className="h-10 w-full"
+                            key={index}
+                          />
+                        ))}
+                      {categoriesQuery.isError && (
+                        <div className="px-3 py-2 text-sm text-stone-gray">
+                          <p>{t("catalog.categoryLoadError")}</p>
+                          <Button
+                            className="mt-1 h-auto p-0 text-xs font-semibold text-premium-red hover:bg-transparent hover:text-warm-red"
+                            type="button"
+                            variant="ghost"
+                            onClick={() => void categoriesQuery.refetch()}
+                          >
+                            <RefreshCw className="size-3.5" />
+                            {t("catalog.retry")}
+                          </Button>
+                        </div>
+                      )}
                     </nav>
                   </div>
                 </div>
@@ -312,31 +336,74 @@ export function ProductsView() {
                   {t("catalog.categoriesTitle")}
                 </span>
                 <nav className="max-h-[40vh] space-y-1 overflow-y-auto overscroll-contain pr-1">
-                  {catalogCategories.map((category) => {
-                    const isActive = activeCategory === category;
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setActiveCategoryId(ALL_PRODUCT_CATEGORIES)}
+                    className={`relative h-auto min-h-10 w-full justify-between overflow-hidden whitespace-normal px-3 py-2.5 text-left text-sm font-medium leading-5 ${
+                      activeCategoryId === ALL_PRODUCT_CATEGORIES
+                        ? "bg-premium-red/10 text-premium-red before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-premium-red"
+                        : "text-deep-black hover:bg-surface-muted/70 hover:text-premium-red"
+                    }`}
+                  >
+                    <span>{t("catalog.categories.all")}</span>
+                    <span
+                      className={`min-w-6 text-right text-sm font-medium leading-5 tabular-nums ${
+                        activeCategoryId === ALL_PRODUCT_CATEGORIES
+                          ? "text-premium-red"
+                          : "text-stone-gray"
+                      }`}
+                    >
+                      {allCategoryCount}
+                    </span>
+                  </Button>
+                  {categories.map((category) => {
+                    const isActive = activeCategoryId === category.id;
                     return (
                       <Button
-                        key={category}
+                        key={category.id}
                         type="button"
                         variant="ghost"
-                        onClick={() => setActiveCategory(category)}
+                        onClick={() => setActiveCategoryId(category.id)}
                         className={`relative h-auto min-h-10 w-full justify-between overflow-hidden whitespace-normal px-3 py-2.5 text-left text-sm font-medium leading-5 ${
                           isActive
                             ? "bg-premium-red/10 text-premium-red before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-premium-red"
                             : "text-deep-black hover:bg-surface-muted/70 hover:text-premium-red"
                         }`}
                       >
-                        <span>{t(`catalog.categories.${category}`)}</span>
+                        <span>{category.name}</span>
                         <span
                           className={`min-w-6 text-right text-sm font-medium leading-5 tabular-nums ${
                             isActive ? "text-premium-red" : "text-stone-gray"
                           }`}
                         >
-                          {categoryCounts[category] ?? 0}
+                          {category.productCount}
                         </span>
                       </Button>
                     );
                   })}
+                  {categoriesQuery.isPending &&
+                    Array.from({ length: 4 }).map((_, index) => (
+                      <Skeleton
+                        aria-hidden="true"
+                        className="h-10 w-full"
+                        key={index}
+                      />
+                    ))}
+                  {categoriesQuery.isError && (
+                    <div className="px-3 py-2 text-sm text-stone-gray">
+                      <p>{t("catalog.categoryLoadError")}</p>
+                      <Button
+                        className="mt-1 h-auto p-0 text-xs font-semibold text-premium-red hover:bg-transparent hover:text-warm-red"
+                        type="button"
+                        variant="ghost"
+                        onClick={() => void categoriesQuery.refetch()}
+                      >
+                        <RefreshCw className="size-3.5" />
+                        {t("catalog.retry")}
+                      </Button>
+                    </div>
+                  )}
                 </nav>
               </div>
             </div>
@@ -362,7 +429,7 @@ export function ProductsView() {
                 </Button>
                 <span className="justify-self-end whitespace-nowrap text-right text-sm font-medium text-stone-gray">
                   {t.rich("catalog.itemCount", {
-                    count: filteredCatalog.length,
+                    count: productTotal,
                     highlight: (chunks) => (
                       <strong className="font-semibold text-premium-red">
                         {chunks}
@@ -375,7 +442,7 @@ export function ProductsView() {
               {/* DESKTOP ITEM COUNT */}
               <div className="hidden text-sm font-medium text-stone-gray sm:block">
                 {t.rich("catalog.itemCount", {
-                  count: filteredCatalog.length,
+                  count: productTotal,
                   highlight: (chunks) => (
                     <strong className="font-semibold text-premium-red">
                       {chunks}
@@ -396,7 +463,9 @@ export function ProductsView() {
                   </Label>
                   <Select
                     value={sortBy}
-                    onValueChange={(value) => setSortBy(value as SortOption)}
+                    onValueChange={(value) =>
+                      setSortBy(value as ProductSortOption)
+                    }
                   >
                     <SelectTrigger
                       className="h-9 w-full min-w-0 border-border-gray bg-white text-xs font-medium text-charcoal shadow-none focus:border-premium-red sm:w-auto sm:min-w-36 sm:text-sm"
@@ -457,84 +526,101 @@ export function ProductsView() {
             </div>
 
             {/* PRODUCT CATALOG LISTING */}
-            {paginatedCatalog.length > 0 ? (
+            {productsQuery.isPending ? (
+              <ProductCatalogSkeleton
+                label={t("catalog.loadingProducts")}
+                viewMode={viewMode}
+              />
+            ) : productsQuery.isError ? (
+              <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-border-gray bg-white px-6 py-16 text-center shadow-2xs">
+                <AlertCircle className="size-10 text-premium-red" />
+                <h3 className="mt-4 text-lg font-semibold uppercase text-deep-black">
+                  {t("catalog.loadErrorTitle")}
+                </h3>
+                <p className="mt-2 max-w-md text-sm text-stone-gray">
+                  {t("catalog.loadErrorDesc")}
+                </p>
+                <Button
+                  className="mt-5 bg-premium-red px-5 text-xs font-semibold uppercase text-white shadow-sm hover:bg-warm-red"
+                  type="button"
+                  onClick={() => void productsQuery.refetch()}
+                >
+                  <RefreshCw className="size-4" />
+                  {t("catalog.retry")}
+                </Button>
+              </div>
+            ) : products.length > 0 ? (
               <>
                 <StaggerGroup
-                  key={`${activeCategory}-${currentPage}-${debouncedSearchQuery}-${sortBy}-${viewMode}`}
+                  key={`${activeCategoryId}-${currentPage}-${debouncedSearchQuery}-${sortBy}-${viewMode}`}
                   className={
                     viewMode === "grid"
                       ? "grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
                       : "space-y-4"
                   }
                 >
-                  {paginatedCatalog.map((item) => {
+                  {products.map((product) => {
                     if (viewMode === "list") {
                       return (
                         <StaggerItem
-                          key={item.id}
+                          key={product.id}
                           className="group flex flex-col justify-between gap-3 overflow-hidden rounded-md border border-border-gray/80 bg-white p-3 shadow-xs transition-all duration-300 hover:border-premium-red/50 hover:shadow-lg sm:flex-row sm:items-center sm:gap-6 sm:p-4"
                         >
                           <div className="flex w-full flex-row items-start gap-3 sm:items-center sm:gap-5">
                             <div className="relative aspect-[4/3] w-28 shrink-0 overflow-hidden rounded-md border border-border-gray/60 bg-surface-muted sm:w-48">
-                              <Image
-                                src={item.image}
-                                alt={t("productImageAlt", { code: item.code })}
-                                fill
-                                sizes="(max-width: 640px) 112px, 200px"
+                              <ProductCoverImage
+                                alt={t("productImageAlt", {
+                                  code: product.sku,
+                                })}
                                 className="object-contain p-2 transition-transform duration-500 group-hover:scale-105"
+                                sizes="(max-width: 640px) 112px, 200px"
+                                src={product.coverImageUrl}
                               />
                             </div>
 
                             <div className="min-w-0 flex-1 space-y-1.5 sm:space-y-2">
                               <span className="line-clamp-1 text-sm font-semibold uppercase text-premium-red">
-                                {t(`catalog.categories.${item.category}`)}
+                                {product.category?.name ??
+                                  t("catalog.uncategorized")}
                               </span>
                               <h3 className="line-clamp-3 text-base font-semibold uppercase text-deep-black transition-colors group-hover:text-premium-red">
-                                {t(`catalog.items.${item.detailKey}.name`)}
+                                {product.name}
                               </h3>
 
                               <div className="hidden space-y-1 pt-1 text-xs sm:block">
-                                {item.highlightSpecs.map((spec) => (
-                                  <div
-                                    key={spec.id}
-                                    className="flex items-center gap-1.5 font-medium"
-                                  >
-                                    <Check className="size-3.5 text-premium-red shrink-0" />
-                                    <span className="text-stone-gray font-medium">
-                                      {spec.id === "irBlock"
-                                        ? "IR Block"
-                                        : spec.id === "uvBlock"
-                                          ? "UV Block"
-                                          : spec.id === "vlt"
-                                            ? "VLT"
-                                            : spec.id.toUpperCase()}
-                                      :
-                                    </span>
-                                    <span className="font-semibold text-deep-black">
-                                      {"translateValue" in spec &&
-                                      spec.translateValue
-                                        ? t(`catalog.values.${spec.value}`)
-                                        : spec.value}
-                                    </span>
-                                  </div>
-                                ))}
+                                {product.specifications
+                                  .slice(0, 3)
+                                  .map((specification) => (
+                                    <div
+                                      key={`${specification.key}-${specification.value}`}
+                                      className="flex items-center gap-1.5 font-medium"
+                                    >
+                                      <Check className="size-3.5 shrink-0 text-premium-red" />
+                                      <span className="font-medium text-stone-gray">
+                                        {specification.key}:
+                                      </span>
+                                      <span className="font-semibold text-deep-black">
+                                        {specification.value}
+                                      </span>
+                                    </div>
+                                  ))}
                               </div>
                             </div>
                           </div>
 
-                          <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 w-full sm:w-auto border-t sm:border-t-0 border-border-gray/60 pt-3 sm:pt-0 shrink-0">
+                          <div className="grid w-full shrink-0 grid-cols-2 gap-2 border-t border-border-gray/60 pt-3 sm:w-auto sm:grid-cols-1 sm:border-t-0 sm:pt-0">
+                            <Link
+                              className="inline-flex min-h-9 items-center justify-center rounded-md bg-deep-black px-3 py-2 text-xs font-semibold uppercase text-white transition-colors hover:bg-premium-red"
+                              href={APP_ROUTES.product(product.slug)}
+                            >
+                              {t("viewDetails")}
+                            </Link>
                             <Link
                               className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-md border border-premium-red bg-white px-3 py-2 text-xs font-semibold uppercase text-premium-red transition-colors hover:bg-premium-red hover:text-white"
                               href={APP_ROUTES.contact}
                             >
                               <PhoneCall className="size-3.5" />
                               {t("catalog.contactForPrice")}
-                            </Link>
-                            <Link
-                              href={APP_ROUTES.product(item.slug)}
-                              className="inline-flex items-center justify-center rounded-md bg-deep-black px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:bg-premium-red cursor-pointer shadow-xs"
-                            >
-                              {t("viewDetails")}
                             </Link>
                           </div>
                         </StaggerItem>
@@ -543,64 +629,62 @@ export function ProductsView() {
 
                     return (
                       <StaggerItem
-                        key={item.id}
-                        className="group flex flex-col justify-between overflow-hidden rounded-md border border-border-gray/80 bg-white shadow-xs transition-all duration-300 hover:border-premium-red/50 hover:shadow-xl hover:-translate-y-1"
+                        key={product.id}
+                        className="group flex flex-col justify-between overflow-hidden rounded-md border border-border-gray/80 bg-white shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-premium-red/50 hover:shadow-xl"
                       >
                         <div>
-                          {/* CARD TOP IMAGE */}
-                          <div className="relative aspect-[4/3] w-full overflow-hidden bg-surface-muted border-b border-border-gray/60">
-                            <Image
-                              src={item.image}
-                              alt={t("productImageAlt", { code: item.code })}
-                              fill
-                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          <div className="relative aspect-[4/3] w-full overflow-hidden border-b border-border-gray/60 bg-surface-muted">
+                            <ProductCoverImage
+                              alt={t("productImageAlt", {
+                                code: product.sku,
+                              })}
                               className="object-contain p-3 transition-transform duration-500 group-hover:scale-105"
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                              src={product.coverImageUrl}
                             />
                           </div>
 
-                          {/* CARD CONTENT BODY */}
                           <div className="space-y-3 p-5">
                             <div>
                               <span className="mb-1 block text-sm font-semibold uppercase text-premium-red">
-                                {t(`catalog.categories.${item.category}`)}
+                                {product.category?.name ??
+                                  t("catalog.uncategorized")}
                               </span>
                               <h3 className="line-clamp-2 min-h-[2.5rem] text-base font-semibold uppercase text-deep-black transition-colors group-hover:text-premium-red">
-                                {t(`catalog.items.${item.detailKey}.name`)}
+                                {product.name}
                               </h3>
                             </div>
 
-                            {/* HIGHLIGHT SPECS LIST WITH CHECKMARKS */}
-                            <div className="space-y-1.5 border-t border-border-gray/50 pt-2 text-xs">
-                              {item.highlightSpecs.map((spec) => (
-                                <div
-                                  key={spec.id}
-                                  className="flex items-center gap-1.5 font-medium"
-                                >
-                                  <Check className="size-3.5 text-premium-red shrink-0" />
-                                  <span className="text-stone-gray font-medium">
-                                    {spec.id === "irBlock"
-                                      ? "IR Block"
-                                      : spec.id === "uvBlock"
-                                        ? "UV Block"
-                                        : spec.id === "vlt"
-                                          ? "VLT"
-                                          : spec.id.toUpperCase()}
-                                    :
-                                  </span>
-                                  <span className="font-semibold text-deep-black">
-                                    {"translateValue" in spec &&
-                                    spec.translateValue
-                                      ? t(`catalog.values.${spec.value}`)
-                                      : spec.value}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
+                            {product.specifications.length > 0 && (
+                              <div className="space-y-1.5 border-t border-border-gray/50 pt-2 text-xs">
+                                {product.specifications
+                                  .slice(0, 3)
+                                  .map((specification) => (
+                                    <div
+                                      key={`${specification.key}-${specification.value}`}
+                                      className="flex items-center gap-1.5 font-medium"
+                                    >
+                                      <Check className="size-3.5 shrink-0 text-premium-red" />
+                                      <span className="font-medium text-stone-gray">
+                                        {specification.key}:
+                                      </span>
+                                      <span className="font-semibold text-deep-black">
+                                        {specification.value}
+                                      </span>
+                                    </div>
+                                  ))}
+                              </div>
+                            )}
                           </div>
                         </div>
 
-                        {/* CARD FOOTER */}
-                        <div className="flex items-center justify-between border-t border-border-gray/60 p-5 pt-3.5">
+                        <div className="grid grid-cols-2 gap-2 border-t border-border-gray/60 p-5 pt-3.5">
+                          <Link
+                            className="inline-flex min-h-9 items-center justify-center rounded-md bg-deep-black px-3 py-2 text-xs font-semibold uppercase text-white transition-colors hover:bg-premium-red"
+                            href={APP_ROUTES.product(product.slug)}
+                          >
+                            {t("viewDetails")}
+                          </Link>
                           <Link
                             className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-md border border-premium-red bg-white px-3 py-2 text-xs font-semibold uppercase text-premium-red transition-colors hover:bg-premium-red hover:text-white"
                             href={APP_ROUTES.contact}
@@ -608,20 +692,12 @@ export function ProductsView() {
                             <PhoneCall className="size-3.5" />
                             {t("catalog.contactForPrice")}
                           </Link>
-
-                          <Link
-                            href={APP_ROUTES.product(item.slug)}
-                            className="inline-flex items-center justify-center rounded-md bg-deep-black px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:bg-premium-red cursor-pointer shadow-xs"
-                          >
-                            {t("viewDetails")}
-                          </Link>
                         </div>
                       </StaggerItem>
                     );
                   })}
                 </StaggerGroup>
 
-                {/* PAGINATION BAR */}
                 {totalPages > 1 && (
                   <PaginationControls
                     className="mt-8 items-center xl:flex-col xl:items-center"
@@ -660,29 +736,94 @@ export function ProductsView() {
                 )}
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-border-gray bg-white py-16 px-6 text-center shadow-2xs">
-                <Search className="size-10 text-stone-gray/40" />
-                <h3 className="mt-4 font-semibold uppercase tracking-wider text-lg text-deep-black">
-                  {t("catalog.noResultsTitle")}
+              <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-border-gray bg-white px-6 py-16 text-center shadow-2xs">
+                {hasActiveFilters ? (
+                  <Search className="size-10 text-stone-gray/40" />
+                ) : (
+                  <PackageOpen className="size-10 text-stone-gray/40" />
+                )}
+                <h3 className="mt-4 text-lg font-semibold uppercase text-deep-black">
+                  {t(
+                    hasActiveFilters
+                      ? "catalog.noResultsTitle"
+                      : "catalog.noProductsTitle",
+                  )}
                 </h3>
-                <p className="mt-1 text-xs text-stone-gray max-w-md">
-                  {t("catalog.noResultsDesc")}
+                <p className="mt-2 max-w-md text-sm text-stone-gray">
+                  {t(
+                    hasActiveFilters
+                      ? "catalog.noResultsDesc"
+                      : "catalog.noProductsDesc",
+                  )}
                 </p>
-                <Button
-                  type="button"
-                  onClick={() => {
-                    setSearchQuery("");
-                    setActiveCategory("all");
-                  }}
-                  className="mt-5 bg-premium-red px-5 text-xs font-semibold uppercase tracking-wider text-white shadow-sm hover:bg-warm-red"
-                >
-                  {t("catalog.clearFilters")}
-                </Button>
+                {hasActiveFilters && (
+                  <Button
+                    className="mt-5 bg-premium-red px-5 text-xs font-semibold uppercase text-white shadow-sm hover:bg-warm-red"
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setActiveCategoryId(ALL_PRODUCT_CATEGORIES);
+                    }}
+                  >
+                    {t("catalog.clearFilters")}
+                  </Button>
+                )}
               </div>
             )}
           </div>
         </Container>
       </section>
     </main>
+  );
+}
+
+function ProductCatalogSkeleton({
+  label,
+  viewMode,
+}: {
+  label: string;
+  viewMode: ProductViewMode;
+}) {
+  return (
+    <div
+      aria-busy="true"
+      aria-label={label}
+      className={
+        viewMode === "grid"
+          ? "grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          : "space-y-4"
+      }
+    >
+      {Array.from({ length: PRODUCTS_PAGE_SIZE }).map((_, index) =>
+        viewMode === "grid" ? (
+          <div
+            className="overflow-hidden rounded-md border border-border-gray/80 bg-white"
+            key={index}
+          >
+            <Skeleton className="aspect-[4/3] w-full rounded-none" />
+            <div className="space-y-3 p-5">
+              <Skeleton className="h-4 w-2/5" />
+              <Skeleton className="h-5 w-4/5" />
+              <Skeleton className="h-4 w-3/5" />
+            </div>
+            <div className="border-t border-border-gray/60 p-5">
+              <Skeleton className="h-9 w-full" />
+            </div>
+          </div>
+        ) : (
+          <div
+            className="flex gap-4 rounded-md border border-border-gray/80 bg-white p-3 sm:p-4"
+            key={index}
+          >
+            <Skeleton className="aspect-[4/3] w-28 shrink-0 sm:w-48" />
+            <div className="flex-1 space-y-3 py-1">
+              <Skeleton className="h-4 w-2/5" />
+              <Skeleton className="h-5 w-4/5" />
+              <Skeleton className="h-4 w-3/5" />
+            </div>
+          </div>
+        ),
+      )}
+    </div>
   );
 }

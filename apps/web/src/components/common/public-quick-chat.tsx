@@ -8,6 +8,7 @@ import { cn } from "@repo/ui/lib/utils";
 import type { PublicWebsiteSiteSetting } from "@repo/shared";
 import { ContactMessageForm } from "./contact-message-form";
 import { PublicContactActions } from "./public-contact-actions";
+import { PUBLIC_QUICK_CHAT_OPEN_EVENT } from "./public-quick-chat.events";
 
 export function PublicQuickChat({
   siteSettings,
@@ -26,8 +27,6 @@ export function PublicQuickChat({
     const updateTriggerVisibility = () => {
       const nextIsVisible = window.scrollY > 400;
       setIsTriggerVisible(nextIsVisible);
-
-      if (!nextIsVisible) setIsOpen(false);
     };
 
     updateTriggerVisibility();
@@ -36,6 +35,14 @@ export function PublicQuickChat({
     });
 
     return () => window.removeEventListener("scroll", updateTriggerVisibility);
+  }, []);
+
+  useEffect(() => {
+    const openQuickChat = () => setIsOpen(true);
+
+    window.addEventListener(PUBLIC_QUICK_CHAT_OPEN_EVENT, openQuickChat);
+    return () =>
+      window.removeEventListener(PUBLIC_QUICK_CHAT_OPEN_EVENT, openQuickChat);
   }, []);
 
   useEffect(() => {
@@ -102,7 +109,7 @@ export function PublicQuickChat({
       <PublicContactActions isVisible={isOpen} siteSettings={siteSettings} />
 
       <AnimatePresence>
-        {isTriggerVisible ? (
+        {isTriggerVisible || isOpen ? (
           <motion.button
             animate={{ opacity: 1, scale: 1, y: 0 }}
             aria-controls={panelId}
