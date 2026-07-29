@@ -390,6 +390,36 @@ test("frontend Docker builds retain root build helpers after Turbo prune", async
   }
 });
 
+test("frontend images bake the public API URL into browser bundles", async () => {
+  for (const app of ["web", "admin"]) {
+    const dockerfile = await readFile(
+      path.join(repoRoot, "apps", app, "Dockerfile"),
+      "utf8",
+    );
+
+    assert.match(
+      dockerfile,
+      /ARG NEXT_PUBLIC_API_URL[\s\S]*ENV NEXT_PUBLIC_API_URL=\$NEXT_PUBLIC_API_URL[\s\S]*RUN pnpm --filter @repo\/(?:web|admin)\.\.\. build/,
+      `${app} Dockerfile must expose NEXT_PUBLIC_API_URL before the Next.js build`,
+    );
+  }
+
+  const publishWorkflow = await readFile(
+    path.join(repoRoot, ".github", "workflows", "publish-images.yml"),
+    "utf8",
+  );
+  const buildArgMatches =
+    publishWorkflow.match(
+      /NEXT_PUBLIC_API_URL=\$\{\{\s*vars\.NEXT_PUBLIC_API_URL\s*\}\}/g,
+    ) ?? [];
+
+  assert.equal(
+    buildArgMatches.length,
+    2,
+    "Web and Admin image builds must both receive the public API URL",
+  );
+});
+
 test("container ports match the production ports documented for deployment", async () => {
   const ports = { api: 4100, web: 4101, admin: 4102 };
 
