@@ -10,7 +10,7 @@ export const lexzenzProductCategories = [
     slug: 'lexzenz-reflex-korea-film',
     name: 'Film cách nhiệt ô tô Lexzenz Reflex Korea Film',
     description:
-      'Nhóm sản phẩm film cách nhiệt ô tô Lexzenz Reflex Korea Film.',
+      'Công nghệ phim cách nhiệt Phún Xạ Đa Lớp (Multilayer Sputter) & Ultra Nano Ceramic nhập khẩu từ Hàn Quốc, cản 99% tia UV/IR, cản nhiệt vượt trội.',
     imageUrl: '/product/product_1.jpg',
     order: 10,
     metadata: {
@@ -23,7 +23,7 @@ export const lexzenzProductCategories = [
     slug: 'lexzenz-led-fujitek',
     name: 'Đèn tăng sáng ô tô, xe máy Lexzenz Led Fujitek',
     description:
-      'Nhóm sản phẩm đèn tăng sáng ô tô, xe máy Lexzenz Led Fujitek.',
+      'Hệ thống Bi LED, LED gầm, trợ sáng Offroad bám đường vượt trội, đường cắt ánh sáng gom tụ sắc nét không gây chói mắt xe ngược chiều.',
     imageUrl: '/product/product_3.jpg',
     order: 20,
     metadata: {
@@ -35,7 +35,8 @@ export const lexzenzProductCategories = [
     code: 'LEXZENZ_DASHCAM',
     slug: 'lexzenz-dashcam',
     name: 'Camera hành trình Lexzenz Dashcam',
-    description: 'Nhóm sản phẩm camera hành trình Lexzenz Dashcam.',
+    description:
+      'Camera ghi hình 4K sắc nét, quay đêm rõ nét, tích hợp cảnh báo biển báo giao thông bằng giọng nói & kết nối Wi-Fi app di động.',
     imageUrl: '/product/product_9.jpg',
     order: 30,
     metadata: {
@@ -47,7 +48,8 @@ export const lexzenzProductCategories = [
     code: 'LEXZENZ_TPMS',
     slug: 'lexzenz-tpms',
     name: 'Cảm biến Áp suất lốp TPMS Lexzenz',
-    description: 'Nhóm sản phẩm cảm biến áp suất lốp TPMS Lexzenz.',
+    description:
+      'Cảm biến đo áp suất & nhiệt độ lốp theo thời gian thực, hiển thị trực tiếp màn hình Android hoặc đồng hồ zin, đảm bảo an toàn tuyệt đối.',
     imageUrl: '/product/product_10.jpg',
     order: 40,
     metadata: {
