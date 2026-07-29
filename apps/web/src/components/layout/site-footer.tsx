@@ -179,6 +179,7 @@ export function SiteFooter({
 
               <div className="flex items-center gap-2 pt-1 text-sm font-semibold uppercase text-premium-red sm:text-base">
                 <svg
+                  data-footer-japan-flag
                   className="h-3.5 w-5 shrink-0 rounded-xs overflow-hidden border border-border-gray"
                   viewBox="0 0 900 600"
                   aria-hidden="true"

@@ -26,7 +26,7 @@ export function AboutBrandHeritage() {
               {/* Red Line + Eyebrow Tag */}
               <div className="flex items-center gap-3">
                 <span className="w-12 h-[2px] bg-premium-red shrink-0" />
-                <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-premium-red">
+                <span className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-premium-red">
                   FUJITEK VIETNAM
                 </span>
               </div>
@@ -59,7 +59,7 @@ export function AboutBrandHeritage() {
                   <div className="text-3xl sm:text-4xl font-bold tracking-tight text-deep-black leading-none">
                     <Counter value={10} suffix="+" />
                   </div>
-                  <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-stone-gray leading-tight mt-1.5">
+                  <p className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-stone-gray leading-tight mt-1.5">
                     Năm kinh nghiệm
                   </p>
                 </div>
@@ -68,7 +68,7 @@ export function AboutBrandHeritage() {
                   <div className="text-3xl sm:text-4xl font-bold tracking-tight text-deep-black leading-none">
                     <Counter value={100} suffix="+" />
                   </div>
-                  <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-stone-gray leading-tight mt-1.5">
+                  <p className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-stone-gray leading-tight mt-1.5">
                     Đại lý toàn quốc
                   </p>
                 </div>
@@ -77,7 +77,7 @@ export function AboutBrandHeritage() {
                   <div className="text-3xl sm:text-4xl font-bold tracking-tight text-premium-red leading-none">
                     <Counter value={99} suffix="%" />
                   </div>
-                  <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-stone-gray leading-tight mt-1.5">
+                  <p className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-stone-gray leading-tight mt-1.5">
                     Cản tia UV
                   </p>
                 </div>
@@ -141,7 +141,7 @@ export function AboutBrandHeritage() {
               {/* Red Line + Eyebrow Tag */}
               <div className="flex items-center gap-3">
                 <span className="w-12 h-[2px] bg-premium-red shrink-0" />
-                <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-premium-red">
+                <span className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-premium-red">
                   XUẤT XỨ CÔNG NGHỆ
                 </span>
               </div>

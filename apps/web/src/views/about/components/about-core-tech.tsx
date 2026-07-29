@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
-import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, XCircle, Zap, Cpu, BarChart3 } from "lucide-react";
 import { FadeIn } from "@/src/components/animation/fade-in";
+import { AnimatePresence, motion } from "framer-motion";
+import { BarChart3, CheckCircle2, Cpu, XCircle, Zap } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
 
 const comparisonMetricKeys = ["tser", "durability", "signal", "glare"] as const;
 
@@ -23,8 +23,8 @@ export function AboutCoreTech() {
           <div className="space-y-3">
             {/* Clean Eyebrow with Red Line */}
             <div className="flex items-center gap-3">
-              <span className="w-8 h-[2px] bg-premium-red shrink-0" />
-              <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-premium-red">
+              <span className="w-8 h-0.5 bg-premium-red shrink-0" />
+              <span className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-premium-red">
                 {t("coreTech.eyebrow")}
               </span>
             </div>
@@ -42,7 +42,7 @@ export function AboutCoreTech() {
           <div className="flex flex-col gap-3 pt-2">
             <button
               onClick={() => setActiveTab("sputtering")}
-              className={`flex items-center gap-3 rounded-md px-5 py-3.5 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all cursor-pointer text-left ${
+              className={`flex items-center gap-3 rounded-md px-5 py-3.5 text-xs sm:text-sm font-semibold uppercase tracking-wider transition-all cursor-pointer text-left ${
                 activeTab === "sputtering"
                   ? "bg-premium-red text-white shadow-lg shadow-premium-red/20 border border-premium-red"
                   : "bg-white border border-border-gray/80 text-stone-gray hover:text-deep-black hover:border-premium-red/40 hover:bg-surface-muted/60"
@@ -54,7 +54,7 @@ export function AboutCoreTech() {
 
             <button
               onClick={() => setActiveTab("nanoCeramic")}
-              className={`flex items-center gap-3 rounded-md px-5 py-3.5 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all cursor-pointer text-left ${
+              className={`flex items-center gap-3 rounded-md px-5 py-3.5 text-xs sm:text-sm font-semibold uppercase tracking-wider transition-all cursor-pointer text-left ${
                 activeTab === "nanoCeramic"
                   ? "bg-premium-red text-white shadow-lg shadow-premium-red/20 border border-premium-red"
                   : "bg-white border border-border-gray/80 text-stone-gray hover:text-deep-black hover:border-premium-red/40 hover:bg-surface-muted/60"
@@ -66,7 +66,7 @@ export function AboutCoreTech() {
 
             <button
               onClick={() => setActiveTab("comparison")}
-              className={`flex items-center gap-3 rounded-md px-5 py-3.5 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all cursor-pointer text-left ${
+              className={`flex items-center gap-3 rounded-md px-5 py-3.5 text-xs sm:text-sm font-semibold uppercase tracking-wider transition-all cursor-pointer text-left ${
                 activeTab === "comparison"
                   ? "bg-premium-red text-white shadow-lg shadow-premium-red/20 border border-premium-red"
                   : "bg-white border border-border-gray/80 text-stone-gray hover:text-deep-black hover:border-premium-red/40 hover:bg-surface-muted/60"
@@ -93,7 +93,7 @@ export function AboutCoreTech() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
                     <span className="w-8 h-[2px] bg-premium-red shrink-0" />
-                    <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-premium-red">
+                    <span className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-premium-red">
                       CÔNG NGHỆ ĐẮT GIÁ NHẤT HÀNG ĐẦU
                     </span>
                   </div>
@@ -128,7 +128,7 @@ export function AboutCoreTech() {
                     <span className="text-2xl sm:text-3xl font-bold text-premium-red block leading-none">
                       70% TSER
                     </span>
-                    <span className="text-xs font-bold uppercase text-stone-gray block">
+                    <span className="text-xs font-semibold uppercase text-stone-gray block">
                       Khả năng cản nhiệt phản xạ
                     </span>
                   </div>
@@ -137,7 +137,7 @@ export function AboutCoreTech() {
                     <span className="text-2xl sm:text-3xl font-bold text-deep-black block leading-none">
                       10-15 NĂM
                     </span>
-                    <span className="text-xs font-bold uppercase text-stone-gray block">
+                    <span className="text-xs font-semibold uppercase text-stone-gray block">
                       Độ bền màu sắc chuẩn Nhật
                     </span>
                   </div>
@@ -157,7 +157,7 @@ export function AboutCoreTech() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
                     <span className="w-8 h-[2px] bg-premium-red shrink-0" />
-                    <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-premium-red">
+                    <span className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-premium-red">
                       CÔNG NGHỆ GỐM SIÊU MỊN NANO
                     </span>
                   </div>
@@ -192,7 +192,7 @@ export function AboutCoreTech() {
                     <span className="text-2xl sm:text-3xl font-bold text-premium-red block leading-none">
                       100% PASS
                     </span>
-                    <span className="text-xs font-bold uppercase text-stone-gray block">
+                    <span className="text-xs font-semibold uppercase text-stone-gray block">
                       Thông suốt GPS / 4G / VETC
                     </span>
                   </div>
@@ -201,7 +201,7 @@ export function AboutCoreTech() {
                     <span className="text-2xl sm:text-3xl font-bold text-deep-black block leading-none">
                       &lt; 8% GLARE
                     </span>
-                    <span className="text-xs font-bold uppercase text-stone-gray block">
+                    <span className="text-xs font-semibold uppercase text-stone-gray block">
                       Phản gương nội thất siêu thấp
                     </span>
                   </div>
@@ -221,7 +221,7 @@ export function AboutCoreTech() {
                 <div className="space-y-2 border-b border-border-gray pb-3">
                   <div className="flex items-center gap-3">
                     <span className="w-8 h-[2px] bg-premium-red shrink-0" />
-                    <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-premium-red">
+                    <span className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-premium-red">
                       SO SÁNH THÔNG SỐ TRỰC QUAN
                     </span>
                   </div>
@@ -234,9 +234,9 @@ export function AboutCoreTech() {
                 {/* Clean Minimal Unboxed Table Rows */}
                 <div className="divide-y divide-border-gray/60">
                   {/* Table Header Row */}
-                  <div className="grid grid-cols-12 gap-3 py-2 text-xs font-bold uppercase tracking-wider text-stone-gray">
+                  <div className="grid grid-cols-12 gap-3 py-2 text-xs font-semibold uppercase tracking-wider text-stone-gray">
                     <div className="col-span-5">TIÊU CHÍ HIỆU NĂNG</div>
-                    <div className="col-span-4 text-premium-red font-bold">
+                    <div className="col-span-4 text-premium-red font-semibold">
                       CÔNG NGHỆ FUJITEK
                     </div>
                     <div className="col-span-3 text-stone-400">PHIM THƯỜNG</div>
@@ -248,14 +248,14 @@ export function AboutCoreTech() {
                       className="grid grid-cols-12 gap-3 py-4 items-center hover:bg-surface-muted/60 transition-colors rounded-sm px-1"
                     >
                       {/* Metric Name */}
-                      <div className="col-span-5 text-xs sm:text-sm font-bold text-deep-black uppercase tracking-wide">
+                      <div className="col-span-5 text-xs sm:text-sm font-semibold text-deep-black uppercase tracking-wide">
                         {t(`coreTech.metrics.${metricKey}.name`)}
                       </div>
 
                       {/* Fujitek Performance */}
                       <div className="col-span-4 flex items-center gap-2">
                         <CheckCircle2 className="size-4 shrink-0 text-premium-red" />
-                        <span className="text-xs sm:text-sm font-bold text-premium-red">
+                        <span className="text-xs sm:text-sm font-semibold text-premium-red">
                           {t(`coreTech.metrics.${metricKey}.fujitek`)}
                         </span>
                       </div>

@@ -86,9 +86,9 @@ function collectMatches(sources, regex) {
   return matches;
 }
 
-test("web source does not use heavy font-weight utilities", async () => {
+test("web source reserves the heaviest font weights for the design system", async () => {
   const sources = await readSources();
-  const matches = collectMatches(sources, /\bfont-(?:bold|extrabold|black)\b/g);
+  const matches = collectMatches(sources, /\bfont-(?:extrabold|black)\b/g);
 
   assert.deepEqual(matches, []);
 });

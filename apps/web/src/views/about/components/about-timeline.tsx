@@ -76,7 +76,7 @@ export function AboutTimeline() {
         >
           <div className="flex items-center justify-center gap-3">
             <span className="w-8 h-[2px] bg-premium-red shrink-0" />
-            <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-premium-red">
+            <span className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-premium-red">
               {t("milestones.eyebrow")}
             </span>
             <span className="w-8 h-[2px] bg-premium-red shrink-0" />
@@ -108,7 +108,7 @@ export function AboutTimeline() {
                       {item.year}
                     </span>
                   </div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-premium-red block pl-6">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-premium-red block pl-6">
                     {item.isCurrent ? "HIỆN TẠI" : item.phase}
                   </span>
                 </div>
@@ -128,7 +128,7 @@ export function AboutTimeline() {
                     {item.tags.map((tag) => (
                       <div key={tag} className="flex items-center gap-2">
                         <span className="size-1.5 rounded-full bg-premium-red shrink-0" />
-                        <span className="text-xs font-bold uppercase tracking-wider text-stone-600">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-stone-600">
                           {tag}
                         </span>
                       </div>
@@ -143,7 +143,7 @@ export function AboutTimeline() {
                       <div className="text-xl sm:text-2xl font-bold tracking-tight text-premium-red leading-none">
                         {stat.value}
                       </div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block leading-tight">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-500 block leading-tight">
                         {stat.label}
                       </span>
                     </div>

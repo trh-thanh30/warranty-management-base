@@ -25,7 +25,7 @@ export function NetworkLocationPopup({
     <Popup className="fujitek-map-popup">
       <div className="min-w-56 max-w-72 space-y-3 p-1">
         <Badge
-          className={`rounded-sm px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-white ${
+          className={`rounded-sm px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-white ${
             isDealer ? "bg-premium-red" : "bg-blue-600"
           }`}
         >
@@ -68,7 +68,7 @@ export function NetworkLocationPopup({
           href={location.googleMapsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex min-h-8 items-center gap-1.5 text-xs font-bold uppercase text-premium-red transition-colors hover:text-warm-red hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2"
+          className="inline-flex min-h-8 items-center gap-1.5 text-xs font-semibold uppercase text-premium-red transition-colors hover:text-warm-red hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2"
         >
           <span>{translations.directions}</span>
           <ExternalLink aria-hidden="true" className="size-3.5" />

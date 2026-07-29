@@ -22,7 +22,7 @@ export function AboutVisionValues() {
         >
           <div className="flex items-center justify-center gap-3">
             <span className="w-8 h-[2px] bg-premium-red shrink-0" />
-            <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-premium-red">
+            <span className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-premium-red">
               {t("pillars.eyebrow")}
             </span>
             <span className="w-8 h-[2px] bg-premium-red shrink-0" />
