@@ -8,6 +8,7 @@ import {
   Filter,
   LayoutGrid,
   List,
+  PhoneCall,
   Search,
   SlidersHorizontal,
   X,
@@ -18,7 +19,6 @@ import { Button } from "@repo/ui/button";
 import { Input } from "@repo/ui/input";
 import { Label } from "@repo/ui/label";
 import { PaginationControls } from "@repo/ui/pagination-controls";
-import { RadioGroup, RadioGroupItem } from "@repo/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -41,75 +41,7 @@ import {
   StaggerItem,
 } from "@/src/components/animation/stagger-group";
 
-// Helper Meta for Concept Redesign (Badges, Prices & Specs)
-const PRODUCT_META: Record<
-  string,
-  {
-    badge?: { label: string; color: string };
-    priceRaw: number;
-    priceFormatted: string;
-  }
-> = {
-  sp50: {
-    badge: { label: "HOT", color: "bg-premium-red text-white" },
-    priceRaw: 5200000,
-    priceFormatted: "5.200.000",
-  },
-  sp10: {
-    badge: { label: "NEW", color: "bg-primary-blue text-white" },
-    priceRaw: 4800000,
-    priceFormatted: "4.800.000",
-  },
-  b55: {
-    badge: { label: "BEST", color: "bg-accent-gold text-deep-black" },
-    priceRaw: 6500000,
-    priceFormatted: "6.500.000",
-  },
-  b15: {
-    badge: { label: "HOT", color: "bg-premium-red text-white" },
-    priceRaw: 5800000,
-    priceFormatted: "5.800.000",
-  },
-  r70: {
-    badge: { label: "NEW", color: "bg-primary-blue text-white" },
-    priceRaw: 7200000,
-    priceFormatted: "7.200.000",
-  },
-  r15: {
-    priceRaw: 6800000,
-    priceFormatted: "6.800.000",
-  },
-  fltrio3: {
-    badge: { label: "HOT", color: "bg-premium-red text-white" },
-    priceRaw: 8500000,
-    priceFormatted: "8.500.000",
-  },
-  g3lazer: {
-    badge: { label: "NEW", color: "bg-primary-blue text-white" },
-    priceRaw: 12500000,
-    priceFormatted: "12.500.000",
-  },
-  g44k: {
-    badge: { label: "BEST", color: "bg-accent-gold text-deep-black" },
-    priceRaw: 4500000,
-    priceFormatted: "4.500.000",
-  },
-  tpms1: {
-    priceRaw: 2800000,
-    priceFormatted: "2.800.000",
-  },
-};
-
-const PRICE_RANGE_OPTIONS = [
-  { id: "all", min: 0, max: Infinity },
-  { id: "under5", min: 0, max: 5000000 },
-  { id: "5to10", min: 5000000, max: 10000000 },
-  { id: "10to20", min: 10000000, max: 20000000 },
-  { id: "over20", min: 20000000, max: Infinity },
-] as const;
-
-type PriceRangeId = (typeof PRICE_RANGE_OPTIONS)[number]["id"];
-type SortOption = "newest" | "price-asc" | "price-desc";
+type SortOption = "newest" | "name-asc" | "name-desc";
 
 const PRODUCT_RESULTS_ID = "product-results";
 
@@ -118,8 +50,6 @@ export function ProductsView() {
   const { scrollTo } = useLenis();
   const [activeCategory, setActiveCategory] = useState<CatalogCategory>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedPriceRange, setSelectedPriceRange] =
-    useState<PriceRangeId>("all");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [itemsPerPage] = useState<number>(6);
@@ -142,13 +72,7 @@ export function ProductsView() {
   // Reset page number on filter/search/sort change
   useEffect(() => {
     setCurrentPage(1);
-  }, [
-    activeCategory,
-    debouncedSearchQuery,
-    selectedPriceRange,
-    sortBy,
-    itemsPerPage,
-  ]);
+  }, [activeCategory, debouncedSearchQuery, sortBy, itemsPerPage]);
 
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {
@@ -185,36 +109,18 @@ export function ProductsView() {
       );
     }
 
-    // Filter by Price Range
-    if (selectedPriceRange !== "all") {
-      const rangeOption = PRICE_RANGE_OPTIONS.find(
-        (opt) => opt.id === selectedPriceRange,
+    if (sortBy === "name-asc" || sortBy === "name-desc") {
+      const direction = sortBy === "name-asc" ? 1 : -1;
+      list.sort(
+        (a, b) =>
+          t(`catalog.items.${a.detailKey}.name`).localeCompare(
+            t(`catalog.items.${b.detailKey}.name`),
+          ) * direction,
       );
-      if (rangeOption) {
-        list = list.filter((item) => {
-          const price = PRODUCT_META[item.id]?.priceRaw ?? 5000000;
-          return price >= rangeOption.min && price <= rangeOption.max;
-        });
-      }
-    }
-
-    // Sorting
-    if (sortBy === "price-asc") {
-      list.sort((a, b) => {
-        const pA = PRODUCT_META[a.id]?.priceRaw ?? 0;
-        const pB = PRODUCT_META[b.id]?.priceRaw ?? 0;
-        return pA - pB;
-      });
-    } else if (sortBy === "price-desc") {
-      list.sort((a, b) => {
-        const pA = PRODUCT_META[a.id]?.priceRaw ?? 0;
-        const pB = PRODUCT_META[b.id]?.priceRaw ?? 0;
-        return pB - pA;
-      });
     }
 
     return list;
-  }, [activeCategory, debouncedSearchQuery, selectedPriceRange, sortBy, t]);
+  }, [activeCategory, debouncedSearchQuery, sortBy, t]);
 
   const totalPages = Math.ceil(filteredCatalog.length / itemsPerPage) || 1;
 
@@ -327,39 +233,6 @@ export function ProductsView() {
                       })}
                     </nav>
                   </div>
-
-                  {/* PRICE RANGES */}
-                  <div className="border-t border-border-gray pt-4">
-                    <span className="mb-3 block text-sm font-semibold uppercase tracking-wider text-stone-gray">
-                      {t("catalog.priceTitle")}
-                    </span>
-                    <RadioGroup
-                      className="gap-2"
-                      value={selectedPriceRange}
-                      onValueChange={(value) =>
-                        setSelectedPriceRange(value as PriceRangeId)
-                      }
-                    >
-                      {PRICE_RANGE_OPTIONS.map((range) => (
-                        <div
-                          className="flex items-center gap-2.5"
-                          key={range.id}
-                        >
-                          <RadioGroupItem
-                            className="border-border-gray text-premium-red focus-visible:ring-premium-red data-[state=checked]:border-premium-red"
-                            id={`price-range-mobile-${range.id}`}
-                            value={range.id}
-                          />
-                          <Label
-                            className="cursor-pointer text-sm font-medium text-deep-black transition-colors hover:text-premium-red"
-                            htmlFor={`price-range-mobile-${range.id}`}
-                          >
-                            {t(`catalog.priceRanges.${range.id}`)}
-                          </Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                  </div>
                 </div>
               </div>
             </motion.aside>
@@ -466,36 +339,6 @@ export function ProductsView() {
                   })}
                 </nav>
               </div>
-
-              {/* PRICE RANGE CHECKBOXES */}
-              <div className="pt-2">
-                <span className="mb-3 block text-sm font-semibold uppercase tracking-wider text-stone-gray">
-                  {t("catalog.priceTitle")}
-                </span>
-                <RadioGroup
-                  className="gap-2.5"
-                  value={selectedPriceRange}
-                  onValueChange={(value) =>
-                    setSelectedPriceRange(value as PriceRangeId)
-                  }
-                >
-                  {PRICE_RANGE_OPTIONS.map((range) => (
-                    <div className="flex items-center gap-2.5" key={range.id}>
-                      <RadioGroupItem
-                        className="border-border-gray text-premium-red focus-visible:ring-premium-red data-[state=checked]:border-premium-red"
-                        id={`price-range-desktop-${range.id}`}
-                        value={range.id}
-                      />
-                      <Label
-                        className="cursor-pointer text-sm font-medium text-deep-black transition-colors hover:text-premium-red"
-                        htmlFor={`price-range-desktop-${range.id}`}
-                      >
-                        {t(`catalog.priceRanges.${range.id}`)}
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              </div>
             </div>
           </aside>
 
@@ -565,11 +408,11 @@ export function ProductsView() {
                       <SelectItem value="newest">
                         {t("catalog.sortOptions.newest")}
                       </SelectItem>
-                      <SelectItem value="price-asc">
-                        {t("catalog.sortOptions.priceAsc")}
+                      <SelectItem value="name-asc">
+                        {t("catalog.sortOptions.nameAsc")}
                       </SelectItem>
-                      <SelectItem value="price-desc">
-                        {t("catalog.sortOptions.priceDesc")}
+                      <SelectItem value="name-desc">
+                        {t("catalog.sortOptions.nameDesc")}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -617,7 +460,7 @@ export function ProductsView() {
             {paginatedCatalog.length > 0 ? (
               <>
                 <StaggerGroup
-                  key={`${activeCategory}-${currentPage}-${debouncedSearchQuery}-${selectedPriceRange}-${sortBy}-${viewMode}`}
+                  key={`${activeCategory}-${currentPage}-${debouncedSearchQuery}-${sortBy}-${viewMode}`}
                   className={
                     viewMode === "grid"
                       ? "grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
@@ -625,11 +468,6 @@ export function ProductsView() {
                   }
                 >
                   {paginatedCatalog.map((item) => {
-                    const meta = PRODUCT_META[item.id] ?? {
-                      priceRaw: 5200000,
-                      priceFormatted: "5.200.000",
-                    };
-
                     if (viewMode === "list") {
                       return (
                         <StaggerItem
@@ -645,20 +483,13 @@ export function ProductsView() {
                                 sizes="(max-width: 640px) 112px, 200px"
                                 className="object-contain p-2 transition-transform duration-500 group-hover:scale-105"
                               />
-                              {meta.badge && (
-                                <span
-                                  className={`absolute left-2.5 top-2.5 rounded px-2 py-0.5 text-xs font-semibold uppercase tracking-wider shadow-2xs ${meta.badge.color}`}
-                                >
-                                  {meta.badge.label}
-                                </span>
-                              )}
                             </div>
 
                             <div className="min-w-0 flex-1 space-y-1.5 sm:space-y-2">
-                              <span className="line-clamp-1 text-xs font-semibold text-premium-red">
+                              <span className="line-clamp-1 text-sm font-semibold uppercase text-premium-red">
                                 {t(`catalog.categories.${item.category}`)}
                               </span>
-                              <h3 className="line-clamp-3 text-sm font-semibold uppercase text-deep-black transition-colors group-hover:text-premium-red sm:text-base">
+                              <h3 className="line-clamp-3 text-base font-semibold uppercase text-deep-black transition-colors group-hover:text-premium-red">
                                 {t(`catalog.items.${item.detailKey}.name`)}
                               </h3>
 
@@ -692,14 +523,13 @@ export function ProductsView() {
                           </div>
 
                           <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 w-full sm:w-auto border-t sm:border-t-0 border-border-gray/60 pt-3 sm:pt-0 shrink-0">
-                            <div className="text-left sm:text-right">
-                              <span className="text-xs text-stone-gray font-normal">
-                                {t("catalog.priceFrom")}
-                              </span>
-                              <span className="block text-lg font-semibold text-premium-red">
-                                {meta.priceFormatted}₫
-                              </span>
-                            </div>
+                            <Link
+                              className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-md border border-premium-red bg-white px-3 py-2 text-xs font-semibold uppercase text-premium-red transition-colors hover:bg-premium-red hover:text-white"
+                              href={APP_ROUTES.contact}
+                            >
+                              <PhoneCall className="size-3.5" />
+                              {t("catalog.contactForPrice")}
+                            </Link>
                             <Link
                               href={APP_ROUTES.product(item.slug)}
                               className="inline-flex items-center justify-center rounded-md bg-deep-black px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:bg-premium-red cursor-pointer shadow-xs"
@@ -717,7 +547,7 @@ export function ProductsView() {
                         className="group flex flex-col justify-between overflow-hidden rounded-md border border-border-gray/80 bg-white shadow-xs transition-all duration-300 hover:border-premium-red/50 hover:shadow-xl hover:-translate-y-1"
                       >
                         <div>
-                          {/* CARD TOP IMAGE WITH BADGE */}
+                          {/* CARD TOP IMAGE */}
                           <div className="relative aspect-[4/3] w-full overflow-hidden bg-surface-muted border-b border-border-gray/60">
                             <Image
                               src={item.image}
@@ -726,22 +556,15 @@ export function ProductsView() {
                               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                               className="object-contain p-3 transition-transform duration-500 group-hover:scale-105"
                             />
-                            {meta.badge && (
-                              <span
-                                className={`absolute left-3.5 top-3.5 rounded px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider shadow-2xs ${meta.badge.color}`}
-                              >
-                                {meta.badge.label}
-                              </span>
-                            )}
                           </div>
 
                           {/* CARD CONTENT BODY */}
                           <div className="space-y-3 p-5">
                             <div>
-                              <span className="mb-1 block text-xs font-semibold text-premium-red">
+                              <span className="mb-1 block text-sm font-semibold uppercase text-premium-red">
                                 {t(`catalog.categories.${item.category}`)}
                               </span>
-                              <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-semibold uppercase text-deep-black transition-colors group-hover:text-premium-red sm:text-base">
+                              <h3 className="line-clamp-2 min-h-[2.5rem] text-base font-semibold uppercase text-deep-black transition-colors group-hover:text-premium-red">
                                 {t(`catalog.items.${item.detailKey}.name`)}
                               </h3>
                             </div>
@@ -776,16 +599,15 @@ export function ProductsView() {
                           </div>
                         </div>
 
-                        {/* CARD FOOTER: PRICE & CTA */}
+                        {/* CARD FOOTER */}
                         <div className="flex items-center justify-between border-t border-border-gray/60 p-5 pt-3.5">
-                          <div>
-                            <span className="text-xs text-stone-gray font-normal">
-                              {t("catalog.priceFrom")}
-                            </span>
-                            <span className="text-base sm:text-lg font-semibold text-premium-red ml-1">
-                              {meta.priceFormatted}₫
-                            </span>
-                          </div>
+                          <Link
+                            className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-md border border-premium-red bg-white px-3 py-2 text-xs font-semibold uppercase text-premium-red transition-colors hover:bg-premium-red hover:text-white"
+                            href={APP_ROUTES.contact}
+                          >
+                            <PhoneCall className="size-3.5" />
+                            {t("catalog.contactForPrice")}
+                          </Link>
 
                           <Link
                             href={APP_ROUTES.product(item.slug)}
@@ -850,7 +672,6 @@ export function ProductsView() {
                   type="button"
                   onClick={() => {
                     setSearchQuery("");
-                    setSelectedPriceRange("all");
                     setActiveCategory("all");
                   }}
                   className="mt-5 bg-premium-red px-5 text-xs font-semibold uppercase tracking-wider text-white shadow-sm hover:bg-warm-red"

@@ -630,24 +630,16 @@
       "searchLabel": "Search products",
       "searchPlaceholder": "Search products, model code...",
       "categoriesTitle": "Categories",
-      "priceTitle": "Price",
-      "priceRanges": {
-        "all": "All prices",
-        "under5": "Under 5 million",
-        "5to10": "5 - 10 million",
-        "10to20": "10 - 20 million",
-        "over20": "Over 20 million"
-      },
       "mobileFilterTrigger": "Filters",
       "sortLabel": "Sort:",
       "sortOptions": {
         "newest": "Newest",
-        "priceAsc": "Price: Low to High",
-        "priceDesc": "Price: High to Low"
+        "nameAsc": "Name: A - Z",
+        "nameDesc": "Name: Z - A"
       },
       "viewGrid": "Grid view",
       "viewList": "List view",
-      "priceFrom": "From",
+      "contactForPrice": "Contact",
       "noResultsTitle": "No products found",
       "noResultsDesc": "Try searching with different keywords or clear your search filter.",
       "clearSearch": "Clear search",
