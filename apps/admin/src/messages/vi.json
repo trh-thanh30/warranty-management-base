@@ -33,6 +33,7 @@
       "websiteOverview": "Tổng quan",
       "websiteSite": "Thông tin website",
       "websiteNavigation": "Điều hướng",
+      "contactSubmissions": "Lời nhắn liên hệ",
       "signOut": "Đăng xuất",
       "signingOut": "Đang đăng xuất..."
     }
@@ -2419,6 +2420,80 @@
         "title": "Tạm thời",
         "description": "File upload ngắn hạn được lifecycle của MinIO tự động dọn."
       }
+    }
+  },
+  "ContactSubmissions": {
+    "eyebrow": "Liên hệ website",
+    "title": "Lời nhắn liên hệ",
+    "description": "Quản lý các lời nhắn khách hàng gửi từ form liên hệ trên website công khai.",
+    "directory": {
+      "title": "Lời nhắn từ form liên hệ",
+      "description": "Theo dõi yêu cầu tư vấn khách hàng gửi từ website công khai.",
+      "searchLabel": "Tìm lời nhắn",
+      "searchPlaceholder": "Tìm theo tên, số điện thoại, nội dung...",
+      "statusFilterLabel": "Lọc trạng thái",
+      "retry": "Thử lại",
+      "loadErrorDescription": "Không tải được danh sách lời nhắn.",
+      "loadErrorTitle": "Không thể tải dữ liệu",
+      "next": "Sau",
+      "previous": "Trước",
+      "pageSize": "Số dòng",
+      "pagination": "Trang {page}/{totalPages} - {total} lời nhắn",
+      "clearFilters": "Xóa bộ lọc",
+      "noResultsDescription": "Không có lời nhắn nào khớp bộ lọc hiện tại.",
+      "emptyDescription": "Chưa có khách hàng nào gửi form liên hệ.",
+      "noResultsTitle": "Không có kết quả",
+      "emptyTitle": "Chưa có lời nhắn",
+      "customer": "Khách hàng",
+      "consultationTopic": "Hỗ trợ tư vấn",
+      "province": "Tỉnh / Thành phố",
+      "content": "Nội dung",
+      "status": "Trạng thái",
+      "createdAt": "Ngày gửi",
+      "actionsLabel": "Thao tác",
+      "openActions": "Mở thao tác lời nhắn",
+      "viewDetail": "Xem chi tiết"
+    },
+    "detail": {
+      "title": "Chi tiết lời nhắn",
+      "description": "Xem thông tin khách hàng gửi từ form liên hệ trên website công khai.",
+      "loadError": "Không thể tải bản mới nhất. Dữ liệu trong danh sách đang được hiển thị.",
+      "fullName": "Họ & tên",
+      "phone": "Điện thoại",
+      "consultationTopic": "Nhu cầu tư vấn",
+      "province": "Tỉnh / Thành phố",
+      "source": "Nguồn",
+      "createdAt": "Ngày gửi",
+      "updatedAt": "Cập nhật lần cuối",
+      "status": "Trạng thái",
+      "message": "Nội dung",
+      "backToDirectory": "Quay lại lời nhắn",
+      "tryAgain": "Thử lại",
+      "loadErrorTitle": "Không thể tải lời nhắn"
+    },
+    "consultationTopics": {
+      "PRODUCT_CONSULTATION": "Tư vấn sản phẩm",
+      "FIND_DEALER": "Tìm đại lý",
+      "WARRANTY": "Bảo hành",
+      "DEALER_REGISTRATION": "Đăng ký đại lý",
+      "OTHER": "Khác"
+    },
+    "statuses": {
+      "NEW": "Mới",
+      "IN_PROGRESS": "Đang xử lý",
+      "RESOLVED": "Đã xử lý",
+      "ARCHIVED": "Đã lưu trữ"
+    },
+    "filters": {
+      "ALL": "Tất cả trạng thái"
+    },
+    "actions": {
+      "changeStatus": "Đổi trạng thái",
+      "moveTo": "Chuyển sang {status}"
+    },
+    "toasts": {
+      "updateSuccess": "Đã cập nhật trạng thái lời nhắn.",
+      "updateError": "Không thể cập nhật trạng thái lời nhắn."
     }
   },
   "WebsiteConfig": {

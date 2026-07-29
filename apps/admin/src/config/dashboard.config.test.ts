@@ -34,6 +34,19 @@ test("groups website configuration routes under one sidebar parent", () => {
   );
 });
 
+test("places contact submissions after dealers in the general sidebar section", () => {
+  const config = getDashboardConfig((key) => key);
+  const generalSection = config.sidebarSections.find(
+    (section) => section.label === "sections.general",
+  );
+  const itemHrefs = generalSection?.items.map((item) => item.href);
+
+  assert.equal(
+    itemHrefs?.indexOf("/contact-submissions"),
+    (itemHrefs?.indexOf("/dealers") ?? -2) + 1,
+  );
+});
+
 test("orders product templates before physical products", () => {
   const config = getDashboardConfig((key) => key);
   const products = config.sidebarSections

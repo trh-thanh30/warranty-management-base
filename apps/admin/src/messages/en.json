@@ -33,6 +33,7 @@
       "websiteOverview": "Overview",
       "websiteSite": "Website information",
       "websiteNavigation": "Navigation",
+      "contactSubmissions": "Contact messages",
       "signOut": "Sign out",
       "signingOut": "Signing out..."
     }
@@ -2419,6 +2420,80 @@
         "title": "Temporary",
         "description": "Short-lived uploads automatically expired by the MinIO lifecycle rule."
       }
+    }
+  },
+  "ContactSubmissions": {
+    "eyebrow": "Website contact",
+    "title": "Contact messages",
+    "description": "Manage messages customers submit through the public website contact form.",
+    "directory": {
+      "title": "Contact form messages",
+      "description": "Track consultation requests submitted from the public website.",
+      "searchLabel": "Search messages",
+      "searchPlaceholder": "Search by name, phone number, or content...",
+      "statusFilterLabel": "Filter by status",
+      "retry": "Try again",
+      "loadErrorDescription": "The contact message list could not be loaded.",
+      "loadErrorTitle": "Unable to load data",
+      "next": "Next",
+      "previous": "Previous",
+      "pageSize": "Rows",
+      "pagination": "Page {page}/{totalPages} - {total} messages",
+      "clearFilters": "Clear filters",
+      "noResultsDescription": "No messages match the current filters.",
+      "emptyDescription": "No customers have submitted the contact form yet.",
+      "noResultsTitle": "No results",
+      "emptyTitle": "No contact messages",
+      "customer": "Customer",
+      "consultationTopic": "Consultation topic",
+      "province": "Province / City",
+      "content": "Message",
+      "status": "Status",
+      "createdAt": "Submitted",
+      "actionsLabel": "Actions",
+      "openActions": "Open message actions",
+      "viewDetail": "View details"
+    },
+    "detail": {
+      "title": "Contact message details",
+      "description": "Review information submitted through the public website contact form.",
+      "loadError": "The latest record could not be loaded. Data from the list is shown instead.",
+      "fullName": "Full name",
+      "phone": "Phone",
+      "consultationTopic": "Consultation topic",
+      "province": "Province / City",
+      "source": "Source",
+      "createdAt": "Submitted",
+      "updatedAt": "Last updated",
+      "status": "Status",
+      "message": "Message",
+      "backToDirectory": "Back to messages",
+      "tryAgain": "Try again",
+      "loadErrorTitle": "Unable to load message"
+    },
+    "consultationTopics": {
+      "PRODUCT_CONSULTATION": "Product consultation",
+      "FIND_DEALER": "Find a dealer",
+      "WARRANTY": "Warranty",
+      "DEALER_REGISTRATION": "Dealer registration",
+      "OTHER": "Other"
+    },
+    "statuses": {
+      "NEW": "New",
+      "IN_PROGRESS": "In progress",
+      "RESOLVED": "Resolved",
+      "ARCHIVED": "Archived"
+    },
+    "filters": {
+      "ALL": "All statuses"
+    },
+    "actions": {
+      "changeStatus": "Change status",
+      "moveTo": "Move to {status}"
+    },
+    "toasts": {
+      "updateSuccess": "Contact message status updated.",
+      "updateError": "Contact message status could not be updated."
     }
   },
   "WebsiteConfig": {
