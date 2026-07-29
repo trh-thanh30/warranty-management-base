@@ -65,6 +65,81 @@ test("category directory requests paginated categories with filters", async () =
   assert.deepEqual(result, response);
 });
 
+test("category hierarchy uses the dedicated tree endpoint", async () => {
+  const calls: unknown[] = [];
+  const response = {
+    items: [{ ...category, children: [] }],
+    meta: {
+      page: 1,
+      limit: 10,
+      totalRoots: 1,
+      totalCategories: 1,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    },
+  };
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  const result = await createCategoriesService(
+    http as unknown as CategoriesHttpClient,
+  ).listCategoryTree({ limit: 10, page: 1, type: "PRODUCT" });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/categories/tree",
+      config: { params: { limit: 10, page: 1, type: "PRODUCT" } },
+    },
+  ]);
+  assert.deepEqual(result, response);
+});
+
+test("parent options request eligible categories for the edited category", async () => {
+  const calls: unknown[] = [];
+  const response = [
+    {
+      id: "parent-id",
+      isActive: true,
+      name: "Parent",
+      order: 10,
+      parentId: null,
+      depth: 0,
+      path: ["Parent"],
+    },
+  ];
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  const result = await createCategoriesService(
+    http as unknown as CategoriesHttpClient,
+  ).listCategoryParentOptions({
+    currentCategoryId: "category-id",
+    type: "PRODUCT",
+  });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/categories/parent-options",
+      config: {
+        params: {
+          currentCategoryId: "category-id",
+          type: "PRODUCT",
+        },
+      },
+    },
+  ]);
+  assert.deepEqual(result, response);
+});
+
 test("creating a category sends taxonomy fields", async () => {
   const calls: unknown[] = [];
   const http = {

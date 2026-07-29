@@ -111,7 +111,7 @@ export function ProductTemplateForm({
         </Field>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-2">
         <Field
           error={translateError(form.formState.errors.brand?.message, t)}
           id="template-brand"

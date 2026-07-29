@@ -2,6 +2,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient, user_role, user_status } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { Pool } from 'pg';
+import { requireSeedPassword } from './seed-env';
 
 type SeedUserInput = {
   email: string;
@@ -34,9 +35,17 @@ async function upsertSeedUser(prisma: PrismaClient, data: SeedUserInput) {
   const existingUser = userByEmail ?? userByUsername;
 
   if (existingUser) {
+    const updateData: Omit<SeedUserInput, 'password'> = {
+      email: data.email,
+      is_verified: data.is_verified,
+      role: data.role,
+      status: data.status,
+      username: data.username,
+    };
+
     return prisma.user.update({
       where: { id: existingUser.id },
-      data,
+      data: updateData,
     });
   }
 
@@ -45,8 +54,9 @@ async function upsertSeedUser(prisma: PrismaClient, data: SeedUserInput) {
 
 export async function seedAdminUsers(
   prisma: PrismaClient,
+  password: string,
 ): Promise<SeedAdminUsersResult> {
-  const hashedPassword = await bcrypt.hash('password123', 12);
+  const hashedPassword = await bcrypt.hash(password, 12);
 
   const adminUser = await upsertSeedUser(prisma, {
     email: 'admin@example.com',
@@ -106,7 +116,8 @@ async function main() {
   const adapter = new PrismaPg(pool);
   prisma = new PrismaClient({ adapter });
 
-  const result = await seedAdminUsers(prisma);
+  const seedPassword = requireSeedPassword('SEED_DEMO_USER_PASSWORD');
+  const result = await seedAdminUsers(prisma, seedPassword);
 
   console.log('Admin and demo login users seeded successfully.');
   console.log(`Admin: ${result.adminUser.email} (${result.adminUser.role})`);
@@ -119,7 +130,7 @@ async function main() {
   console.log(
     `Customer B: ${result.customerBUser.email} (${result.customerBUser.role})`,
   );
-  console.log('Default password: password123');
+  console.log('Login password was loaded from SEED_DEMO_USER_PASSWORD.');
 }
 
 if (require.main === module) {

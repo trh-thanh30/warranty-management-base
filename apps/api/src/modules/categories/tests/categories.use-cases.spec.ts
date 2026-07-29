@@ -8,9 +8,12 @@ import { DeactivateCategoryUseCase } from '@/modules/categories/use-cases/deacti
 import { GetCategoryDetailUseCase } from '@/modules/categories/use-cases/get-category-detail.use-case';
 import { ImportCategoriesUseCase } from '@/modules/categories/use-cases/import-categories.use-case';
 import { ListCategoriesUseCase } from '@/modules/categories/use-cases/list-categories.use-case';
+import { ListCategoryParentOptionsUseCase } from '@/modules/categories/use-cases/list-category-parent-options.use-case';
+import { ListCategoryTreeUseCase } from '@/modules/categories/use-cases/list-category-tree.use-case';
 import { ListPublicProductCategoriesUseCase } from '@/modules/categories/use-cases/list-public-product-categories.use-case';
 import { ReorderCategoriesUseCase } from '@/modules/categories/use-cases/reorder-categories.use-case';
 import { UpdateCategoryUseCase } from '@/modules/categories/use-cases/update-category.use-case';
+import { CategoryHierarchyService } from '@/modules/categories/service/category-hierarchy.service';
 import { category_type } from '@prisma/client';
 import { createCategoryExportWorkbook } from '@/modules/categories/excel/category-workbook.factory';
 
@@ -42,6 +45,7 @@ describe('Category use cases', () => {
     findByIds: jest.fn(),
     findByTypeAndSlug: jest.fn(),
     list: jest.fn(),
+    listByType: jest.fn(),
     listPublicProductCategories: jest.fn(),
     listAll: jest.fn(),
     listForExport: jest.fn(),
@@ -49,6 +53,11 @@ describe('Category use cases', () => {
     reorder: jest.fn(),
     update: jest.fn(),
   };
+  const assetsService = {
+    deleteAssetByUrl: jest.fn().mockResolvedValue(true),
+  };
+  const hierarchyService = () =>
+    new CategoryHierarchyService(categoriesRepository as never);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -57,7 +66,10 @@ describe('Category use cases', () => {
   it('creates a category with generated slug', async () => {
     categoriesRepository.findByTypeAndSlug.mockResolvedValue(null);
     categoriesRepository.create.mockResolvedValue(category);
-    const useCase = new CreateCategoryUseCase(categoriesRepository as never);
+    const useCase = new CreateCategoryUseCase(
+      categoriesRepository as never,
+      hierarchyService(),
+    );
 
     const result = await useCase.execute({
       type: category_type.PRODUCT,
@@ -80,7 +92,10 @@ describe('Category use cases', () => {
 
   it('rejects duplicate slug in the same type', async () => {
     categoriesRepository.findByTypeAndSlug.mockResolvedValue(category);
-    const useCase = new CreateCategoryUseCase(categoriesRepository as never);
+    const useCase = new CreateCategoryUseCase(
+      categoriesRepository as never,
+      hierarchyService(),
+    );
 
     await expect(
       useCase.execute({
@@ -97,7 +112,10 @@ describe('Category use cases', () => {
       ...category,
       type: category_type.ASSET,
     });
-    const useCase = new CreateCategoryUseCase(categoriesRepository as never);
+    const useCase = new CreateCategoryUseCase(
+      categoriesRepository as never,
+      hierarchyService(),
+    );
 
     await expect(
       useCase.execute({
@@ -106,6 +124,35 @@ describe('Category use cases', () => {
         name: 'Car',
       }),
     ).rejects.toBeInstanceOf(ConflictError);
+  });
+
+  it('creates a category under one valid parent', async () => {
+    categoriesRepository.findByTypeAndSlug.mockResolvedValue(null);
+    categoriesRepository.findById.mockResolvedValue({
+      ...category,
+      id: 'parent-id',
+    });
+    categoriesRepository.create.mockResolvedValue({
+      ...category,
+      id: 'child-id',
+      parent_id: 'parent-id',
+    });
+    const useCase = new CreateCategoryUseCase(
+      categoriesRepository as never,
+      hierarchyService(),
+    );
+
+    await useCase.execute({
+      type: category_type.PRODUCT,
+      name: 'Child',
+      parentId: 'parent-id',
+    });
+
+    expect(categoriesRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        parent: { connect: { id: 'parent-id' } },
+      }),
+    );
   });
 
   it('lists categories', async () => {
@@ -128,6 +175,159 @@ describe('Category use cases', () => {
       type: category_type.PRODUCT,
     });
     expect(result.items[0]?.slug).toBe('car');
+  });
+
+  it('lists category roots with their descendants kept together', async () => {
+    categoriesRepository.listByType.mockResolvedValue([
+      category,
+      {
+        ...category,
+        id: 'child-id',
+        name: 'Child',
+        slug: 'child',
+        parent_id: category.id,
+        order: 20,
+      },
+    ]);
+    const useCase = new ListCategoryTreeUseCase(categoriesRepository as never);
+
+    const result = await useCase.execute({
+      type: category_type.PRODUCT,
+      page: 1,
+      limit: 10,
+    });
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.children[0]?.id).toBe('child-id');
+    expect(result.meta).toMatchObject({
+      totalCategories: 2,
+      totalRoots: 1,
+    });
+  });
+
+  it('paginates complete category branches instead of individual rows', async () => {
+    const secondRoot = {
+      ...category,
+      id: 'second-root-id',
+      name: 'Second root',
+      slug: 'second-root',
+      order: 30,
+    };
+    categoriesRepository.listByType.mockResolvedValue([
+      category,
+      {
+        ...category,
+        id: 'child-id',
+        name: 'Child',
+        slug: 'child',
+        parent_id: category.id,
+        order: 20,
+      },
+      secondRoot,
+      {
+        ...category,
+        id: 'second-child-id',
+        name: 'Second child',
+        slug: 'second-child',
+        parent_id: secondRoot.id,
+        order: 40,
+      },
+    ]);
+    const useCase = new ListCategoryTreeUseCase(categoriesRepository as never);
+
+    const firstPage = await useCase.execute({
+      type: category_type.PRODUCT,
+      page: 1,
+      limit: 1,
+    });
+    const secondPage = await useCase.execute({
+      type: category_type.PRODUCT,
+      page: 2,
+      limit: 1,
+    });
+
+    expect(firstPage.items.map((item) => item.id)).toEqual([category.id]);
+    expect(firstPage.items[0]?.children.map((item) => item.id)).toEqual([
+      'child-id',
+    ]);
+    expect(secondPage.items.map((item) => item.id)).toEqual(['second-root-id']);
+    expect(secondPage.items[0]?.children.map((item) => item.id)).toEqual([
+      'second-child-id',
+    ]);
+  });
+
+  it('keeps ancestors as context when a child matches tree search', async () => {
+    categoriesRepository.listByType.mockResolvedValue([
+      category,
+      {
+        ...category,
+        id: 'child-id',
+        name: 'Special child',
+        slug: 'special-child',
+        parent_id: category.id,
+      },
+    ]);
+    const useCase = new ListCategoryTreeUseCase(categoriesRepository as never);
+
+    const result = await useCase.execute({
+      type: category_type.PRODUCT,
+      search: 'special',
+    });
+
+    expect(result.items[0]).toMatchObject({
+      id: category.id,
+      isContextOnly: true,
+    });
+    expect(result.items[0]?.children[0]?.id).toBe('child-id');
+    expect(result.items[0]?.children[0]).not.toHaveProperty('isContextOnly');
+  });
+
+  it('excludes the edited category and its descendants from parent options', async () => {
+    categoriesRepository.listByType.mockResolvedValue([
+      category,
+      {
+        ...category,
+        id: 'child-id',
+        name: 'Child',
+        slug: 'child',
+        parent_id: category.id,
+      },
+      {
+        ...category,
+        id: 'other-root-id',
+        name: 'Other',
+        slug: 'other',
+      },
+    ]);
+    const useCase = new ListCategoryParentOptionsUseCase(
+      categoriesRepository as never,
+    );
+
+    const result = await useCase.execute({
+      currentCategoryId: category.id,
+      type: category_type.PRODUCT,
+    });
+
+    expect(result.map((option) => option.id)).toEqual(['other-root-id']);
+  });
+
+  it('returns parent options without the paginated 100 category limit', async () => {
+    categoriesRepository.listByType.mockResolvedValue(
+      Array.from({ length: 101 }, (_, index) => ({
+        ...category,
+        id: `category-${index}`,
+        name: `Category ${index}`,
+        slug: `category-${index}`,
+        order: index,
+      })),
+    );
+    const useCase = new ListCategoryParentOptionsUseCase(
+      categoriesRepository as never,
+    );
+
+    const result = await useCase.execute({ type: category_type.PRODUCT });
+
+    expect(result).toHaveLength(101);
   });
 
   it('lists public product categories without admin-only fields', async () => {
@@ -220,7 +420,11 @@ describe('Category use cases', () => {
       ...category,
       parent_id: 'parent-id',
     });
-    const useCase = new UpdateCategoryUseCase(categoriesRepository as never);
+    const useCase = new UpdateCategoryUseCase(
+      categoriesRepository as never,
+      hierarchyService(),
+      assetsService as never,
+    );
 
     const result = await useCase.execute('category-id', {
       parentId: 'parent-id',
@@ -235,10 +439,40 @@ describe('Category use cases', () => {
     expect(result.parentId).toBe('parent-id');
   });
 
+  it('clears a category parent connection', async () => {
+    categoriesRepository.findById.mockResolvedValue({
+      ...category,
+      parent_id: 'parent-id',
+    });
+    categoriesRepository.update.mockResolvedValue(category);
+    const useCase = new UpdateCategoryUseCase(
+      categoriesRepository as never,
+      hierarchyService(),
+      assetsService as never,
+    );
+
+    await useCase.execute('category-id', { parentId: null });
+
+    expect(categoriesRepository.update).toHaveBeenCalledWith(
+      'category-id',
+      expect.objectContaining({ parent: { disconnect: true } }),
+    );
+  });
+
+  it('rejects selecting the edited category as its own parent', async () => {
+    categoriesRepository.findById.mockResolvedValue(category);
+    const useCase = new UpdateCategoryUseCase(
+      categoriesRepository as never,
+      hierarchyService(),
+      assetsService as never,
+    );
+
+    await expect(
+      useCase.execute('category-id', { parentId: 'category-id' }),
+    ).rejects.toBeInstanceOf(ConflictError);
+  });
+
   it('deletes the previous category image before saving a replacement', async () => {
-    const assetsService = {
-      deleteAssetByUrl: jest.fn().mockResolvedValue(true),
-    };
     categoriesRepository.findById.mockResolvedValue({
       ...category,
       image_url: 'https://cdn.example.com/old.jpg',
@@ -249,6 +483,7 @@ describe('Category use cases', () => {
     });
     const useCase = new UpdateCategoryUseCase(
       categoriesRepository as never,
+      hierarchyService(),
       assetsService as never,
     );
 
@@ -263,9 +498,6 @@ describe('Category use cases', () => {
   });
 
   it('deletes rich-text media removed from the category description', async () => {
-    const assetsService = {
-      deleteAssetByUrl: jest.fn().mockResolvedValue(true),
-    };
     categoriesRepository.findById.mockResolvedValue({
       ...category,
       description:
@@ -277,6 +509,7 @@ describe('Category use cases', () => {
     });
     const useCase = new UpdateCategoryUseCase(
       categoriesRepository as never,
+      hierarchyService(),
       assetsService as never,
     );
 
@@ -299,7 +532,11 @@ describe('Category use cases', () => {
         parent_id: 'category-id',
       })
       .mockResolvedValueOnce(category);
-    const useCase = new UpdateCategoryUseCase(categoriesRepository as never);
+    const useCase = new UpdateCategoryUseCase(
+      categoriesRepository as never,
+      hierarchyService(),
+      assetsService as never,
+    );
 
     await expect(
       useCase.execute('category-id', {
@@ -309,7 +546,10 @@ describe('Category use cases', () => {
   });
 
   it('rejects duplicate reorder items', async () => {
-    const useCase = new ReorderCategoriesUseCase(categoriesRepository as never);
+    const useCase = new ReorderCategoriesUseCase(
+      categoriesRepository as never,
+      hierarchyService(),
+    );
 
     await expect(
       useCase.execute({
@@ -331,7 +571,10 @@ describe('Category use cases', () => {
       { ...firstChild, parent_id: 'parent-id', order: 10 },
       { ...secondChild, parent_id: 'parent-id', order: 20 },
     ]);
-    const useCase = new ReorderCategoriesUseCase(categoriesRepository as never);
+    const useCase = new ReorderCategoriesUseCase(
+      categoriesRepository as never,
+      hierarchyService(),
+    );
 
     const result = await useCase.execute({
       parentId: 'parent-id',
@@ -360,7 +603,10 @@ describe('Category use cases', () => {
         parent_id: 'category-id',
       })
       .mockResolvedValueOnce(category);
-    const useCase = new ReorderCategoriesUseCase(categoriesRepository as never);
+    const useCase = new ReorderCategoriesUseCase(
+      categoriesRepository as never,
+      hierarchyService(),
+    );
 
     await expect(
       useCase.execute({

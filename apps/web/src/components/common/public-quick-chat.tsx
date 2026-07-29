@@ -67,7 +67,7 @@ export function PublicQuickChat({
         aria-hidden={!isOpen}
         aria-labelledby={titleId}
         className={cn(
-          "fixed inset-x-4 bottom-24 z-[60] flex max-h-[80dvh] origin-bottom-right flex-col overflow-hidden rounded-md border border-red-200 bg-white shadow-2xl sm:left-auto sm:right-6 sm:w-[400px]",
+          "fixed inset-x-4 bottom-24 z-[60] flex max-h-[80dvh] origin-bottom-right flex-col overflow-hidden rounded-md border border-premium-red/20 bg-white shadow-2xl sm:left-auto sm:right-6 sm:w-[400px]",
           !isOpen && "pointer-events-none",
         )}
         id={panelId}

@@ -5,12 +5,17 @@ import {
   useMutation,
   useQuery,
   useQueryClient,
+  type QueryClient,
   type UseQueryOptions,
 } from "@tanstack/react-query";
 import type {
   CategoryResponse,
+  CategoryParentOption,
+  CategoryTreeResponse,
   CreateCategoryBody,
   ListCategoriesQuery,
+  ListCategoryParentOptionsQuery,
+  ListCategoryTreeQuery,
   PaginatedResponse,
   ReorderCategoriesBody,
   UpdateCategoryBody,
@@ -25,6 +30,12 @@ export const categoryKeys = {
   list: (query: ListCategoriesQuery) =>
     [...categoryKeys.lists(), query] as const,
   lists: () => [...categoryKeys.all, "list"] as const,
+  parentOptionLists: () => [...categoryKeys.all, "parent-options"] as const,
+  parentOptions: (query: ListCategoryParentOptionsQuery) =>
+    [...categoryKeys.all, "parent-options", query] as const,
+  tree: (query: ListCategoryTreeQuery) =>
+    [...categoryKeys.all, "tree", query] as const,
+  trees: () => [...categoryKeys.all, "tree"] as const,
 };
 
 export function useCategories(
@@ -39,6 +50,29 @@ export function useCategories(
     queryKey: categoryKeys.list(query),
     queryFn: () => categoriesService.listCategories(query),
     placeholderData: keepPreviousData,
+  });
+}
+
+export function useCategoryTree(
+  query: ListCategoryTreeQuery,
+  options?: Pick<UseQueryOptions<CategoryTreeResponse>, "enabled">,
+) {
+  return useQuery<CategoryTreeResponse>({
+    ...options,
+    queryKey: categoryKeys.tree(query),
+    queryFn: () => categoriesService.listCategoryTree(query),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useCategoryParentOptions(
+  query: ListCategoryParentOptionsQuery,
+  options?: Pick<UseQueryOptions<CategoryParentOption[]>, "enabled">,
+) {
+  return useQuery({
+    ...options,
+    queryKey: categoryKeys.parentOptions(query),
+    queryFn: () => categoriesService.listCategoryParentOptions(query),
   });
 }
 
@@ -60,7 +94,7 @@ export function useCreateCategory() {
     mutationFn: (body: CreateCategoryBody) =>
       categoriesService.createCategory(body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+      invalidateCategoryCollections(queryClient);
     },
   });
 }
@@ -72,7 +106,7 @@ export function useUpdateCategory(categoryId: string | null) {
     mutationFn: (body: UpdateCategoryBody) =>
       categoriesService.updateCategory(categoryId ?? "", body),
     onSuccess: (category) => {
-      void queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+      invalidateCategoryCollections(queryClient);
       queryClient.setQueryData(categoryKeys.detail(category.id), category);
     },
   });
@@ -85,7 +119,7 @@ export function useDeactivateCategory() {
     mutationFn: (categoryId: string) =>
       categoriesService.deactivateCategory(categoryId),
     onSuccess: (category) => {
-      void queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+      invalidateCategoryCollections(queryClient);
       queryClient.setQueryData(categoryKeys.detail(category.id), category);
     },
   });
@@ -98,7 +132,7 @@ export function useReorderCategories() {
     mutationFn: (body: ReorderCategoriesBody) =>
       categoriesService.reorderCategories(body),
     onSuccess: (categories) => {
-      void queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+      invalidateCategoryCollections(queryClient);
       for (const category of categories) {
         queryClient.setQueryData(categoryKeys.detail(category.id), category);
       }
@@ -113,8 +147,16 @@ export function useImportCategories() {
     mutationFn: (file: File) => categoriesService.importCategories(file),
     onSuccess: (result) => {
       if (result.errors.length === 0) {
-        void queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+        invalidateCategoryCollections(queryClient);
       }
     },
+  });
+}
+
+function invalidateCategoryCollections(queryClient: QueryClient) {
+  void queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+  void queryClient.invalidateQueries({ queryKey: categoryKeys.trees() });
+  void queryClient.invalidateQueries({
+    queryKey: categoryKeys.parentOptionLists(),
   });
 }

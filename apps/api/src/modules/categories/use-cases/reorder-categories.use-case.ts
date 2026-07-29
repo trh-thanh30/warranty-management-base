@@ -6,12 +6,15 @@ import {
 import { toCategoryResponse } from '@/modules/categories/categories.types';
 import { ReorderCategoriesDto } from '@/modules/categories/dto/reorder-categories.dto';
 import { CategoriesRepository } from '@/modules/categories/repository/categories.repository';
+import { CategoryHierarchyService } from '@/modules/categories/service/category-hierarchy.service';
 import { Injectable } from '@nestjs/common';
-import { Category } from '@prisma/client';
 
 @Injectable()
 export class ReorderCategoriesUseCase {
-  constructor(private readonly categoriesRepository: CategoriesRepository) {}
+  constructor(
+    private readonly categoriesRepository: CategoriesRepository,
+    private readonly categoryHierarchyService: CategoryHierarchyService,
+  ) {}
 
   async execute(dto: ReorderCategoriesDto) {
     const uniqueIds = new Set(dto.items.map((item) => item.id));
@@ -34,21 +37,11 @@ export class ReorderCategoriesUseCase {
       );
     }
 
-    const parent = dto.parentId
-      ? await this.categoriesRepository.findById(dto.parentId)
-      : null;
-
-    if (dto.parentId && !parent) {
-      throw new NotFoundError('Parent category not found');
-    }
-
-    if (parent && parent.type !== type) {
-      throw new ConflictError('Parent category must have the same type');
-    }
-
-    for (const category of categories) {
-      await this.assertParentDoesNotCreateCycle(category.id, parent);
-    }
+    await this.categoryHierarchyService.validateParentAssignment({
+      categoryIds: [...uniqueIds],
+      parentId: dto.parentId,
+      type,
+    });
 
     const updatedCategories = await this.categoriesRepository.reorder({
       parentId: dto.parentId ?? null,
@@ -56,31 +49,5 @@ export class ReorderCategoriesUseCase {
     });
 
     return updatedCategories.map(toCategoryResponse);
-  }
-
-  private async assertParentDoesNotCreateCycle(
-    categoryId: string,
-    parent: Category | null,
-  ) {
-    let cursor = parent;
-    const visited = new Set<string>();
-
-    while (cursor) {
-      if (cursor.id === categoryId) {
-        throw new ConflictError('Category parent would create a cycle');
-      }
-
-      if (visited.has(cursor.id)) {
-        throw new ConflictError('Existing category hierarchy contains a cycle');
-      }
-
-      visited.add(cursor.id);
-
-      if (!cursor.parent_id) {
-        return;
-      }
-
-      cursor = await this.categoriesRepository.findById(cursor.parent_id);
-    }
   }
 }
