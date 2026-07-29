@@ -1,118 +1,26 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  Search,
-  CheckCircle2,
-  Car,
-  Calendar,
-  Phone,
-  User,
-  Building2,
-  Hash,
-  MapPin,
-  Clock,
-  ShieldCheck,
-  Sparkles,
-  FileText,
-  Layers,
-} from "lucide-react";
-import { Input } from "@repo/ui/input";
-import { formControlFocusClassName } from "@/src/components/common/form-control.constants";
-import {
-  demoWarrantyLookupRecord,
-  warrantyLookupEmptyValue,
-  warrantyLookupExamples,
-  warrantyLookupSupportPhone,
-} from "@/src/constants/warranty.constants";
+import { Phone, Building2, Hash, ShieldCheck, FileText } from "lucide-react";
+import { warrantyLookupSupportPhone } from "@/src/constants/warranty.constants";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { Link } from "@/src/i18n/navigation";
 import { Container } from "@/src/components/common/container";
-import type { WarrantyLookupResult } from "./warranty.types";
-
-function ResultRow({
-  icon,
-  label,
-  value,
-  valueClassName = "",
-  subValue,
-}: {
-  icon?: React.ReactNode;
-  label: string;
-  value: string;
-  valueClassName?: string;
-  subValue?: string;
-}) {
-  return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-4 py-3.5 border-b border-border-gray last:border-b-0">
-      <span className="flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-wide text-stone-gray shrink-0 sm:min-w-[180px]">
-        {icon}
-        {label}
-      </span>
-      <div className="sm:text-right">
-        <p
-          className={`font-semibold text-sm sm:text-base text-deep-black break-words ${valueClassName}`}
-        >
-          {value || warrantyLookupEmptyValue}
-        </p>
-        {subValue && (
-          <p className="text-xs font-medium text-premium-red mt-0.5">
-            {subValue}
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}
+import { WarrantyLookupForm } from "@/src/components/common/warranty-lookup-form";
+import { WarrantyLookupResultDetails } from "@/src/components/warranty-lookup-result";
+import { useWarrantyLookup } from "@/src/hooks/use-warranty-lookup";
 
 export function WarrantyLookupView() {
   const t = useTranslations("Warranty.lookup");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResult, setSearchResult] = useState<WarrantyLookupResult | null>(
-    null,
-  );
-  const [isSearched, setIsSearched] = useState(false);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSearched(true);
-    if (searchQuery.trim().length > 0) {
-      const normalizedQuery = searchQuery.trim();
-
-      setSearchResult({
-        serial: demoWarrantyLookupRecord.serial,
-        code: demoWarrantyLookupRecord.code,
-        customerName: t("mock.customerName"),
-        phone: normalizedQuery.includes("09")
-          ? normalizedQuery
-          : demoWarrantyLookupRecord.fallbackPhone,
-        address: t("mock.address"),
-        carPlate: normalizedQuery.includes("30")
-          ? normalizedQuery
-          : demoWarrantyLookupRecord.fallbackCarPlate,
-        carModel: demoWarrantyLookupRecord.carModel,
-        filmType: demoWarrantyLookupRecord.filmType,
-        warrantyYears: t("mock.warrantyYears"),
-        installedDate: demoWarrantyLookupRecord.installedDate,
-        expiryDate: demoWarrantyLookupRecord.expiryDate,
-        dealer: t("mock.dealer"),
-        status: t("mock.status"),
-        windshield: demoWarrantyLookupRecord.windshield,
-        frontLeftGlass: demoWarrantyLookupRecord.frontLeftGlass,
-        frontRightGlass: demoWarrantyLookupRecord.frontRightGlass,
-        rearLeftGlass: demoWarrantyLookupRecord.rearLeftGlass,
-        rearRightGlass: demoWarrantyLookupRecord.rearRightGlass,
-        sunroof: demoWarrantyLookupRecord.sunroof,
-        rearGlass: demoWarrantyLookupRecord.rearGlass,
-        notes: demoWarrantyLookupRecord.notes,
-      });
-    } else {
-      setSearchResult(null);
-    }
-  };
+  const {
+    data: searchResult,
+    errorKind,
+    isPending,
+    lookup,
+    reset,
+  } = useWarrantyLookup();
 
   return (
     <main className="min-h-screen bg-surface-muted text-deep-black pb-16 sm:pb-24">
@@ -316,39 +224,14 @@ export function WarrantyLookupView() {
               </div>
             </div>
 
-            <form onSubmit={handleSearch} className="space-y-4">
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-stone-gray" />
-                  <Input
-                    type="text"
-                    placeholder={t("placeholder")}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className={`pl-12 h-14 rounded-[16px] text-base border-border-gray ${formControlFocusClassName}`}
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="w-full sm:w-auto px-8 bg-premium-red hover:bg-warm-red text-white h-14 rounded-[16px] text-base font-semibold uppercase tracking-wider transition-colors cursor-pointer shrink-0 shadow-md"
-                >
-                  {t("search")}
-                </button>
-              </div>
-              <p className="text-xs text-stone-gray font-medium text-center">
-                {t("tryPrefix")}{" "}
-                <code className="bg-light-gray px-2 py-0.5 rounded font-mono text-premium-red">
-                  {warrantyLookupExamples[0]}
-                </code>{" "}
-                {t("or")}{" "}
-                <code className="bg-light-gray px-2 py-0.5 rounded font-mono text-premium-red">
-                  {warrantyLookupExamples[1]}
-                </code>
-              </p>
-            </form>
+            <WarrantyLookupForm
+              isPending={isPending}
+              onSubmit={lookup}
+              onValueChange={reset}
+            />
 
-            <AnimatePresence>
-              {isSearched && searchResult && (
+            <AnimatePresence mode="wait">
+              {searchResult && (
                 <motion.div
                   key="result"
                   initial={{ opacity: 0, height: 0, marginTop: 0 }}
@@ -357,120 +240,7 @@ export function WarrantyLookupView() {
                   transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
                   className="overflow-hidden border-t border-border-gray pt-6"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-border-gray mb-4">
-                    <div className="space-y-1">
-                      <span className="text-xs font-semibold uppercase text-premium-red tracking-wider flex items-center gap-1.5">
-                        <CheckCircle2 className="size-4" />
-                        <span>{searchResult.status}</span>
-                      </span>
-                      <h3 className="text-xl sm:text-2xl font-condensed font-semibold uppercase tracking-wide text-deep-black">
-                        {t("result.code")}: {searchResult.code}
-                      </h3>
-                    </div>
-                    <span className="inline-flex self-start sm:self-center bg-premium-red text-white px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider shadow-sm">
-                      {t("result.duration")}: {searchResult.warrantyYears}
-                    </span>
-                  </div>
-
-                  <div className="divide-y divide-border-gray">
-                    <ResultRow
-                      icon={<Hash className="size-4 shrink-0" />}
-                      label={t("result.serial")}
-                      value={searchResult.serial}
-                    />
-                    <ResultRow
-                      icon={<Car className="size-4 shrink-0" />}
-                      label={t("result.carPlate")}
-                      value={searchResult.carPlate}
-                    />
-                    <ResultRow
-                      icon={<Car className="size-4 shrink-0" />}
-                      label={t("result.carModel")}
-                      value={searchResult.carModel}
-                    />
-                    <ResultRow
-                      icon={<User className="size-4 shrink-0" />}
-                      label={t("result.owner")}
-                      value={searchResult.customerName}
-                    />
-                    <ResultRow
-                      icon={<Phone className="size-4 shrink-0" />}
-                      label={t("result.phone")}
-                      value={searchResult.phone}
-                    />
-                    <ResultRow
-                      icon={<MapPin className="size-4 shrink-0" />}
-                      label={t("result.address")}
-                      value={searchResult.address}
-                    />
-                    <ResultRow
-                      icon={<Building2 className="size-4 shrink-0" />}
-                      label={t("result.dealer")}
-                      value={searchResult.dealer}
-                    />
-                    <ResultRow
-                      icon={<Calendar className="size-4 shrink-0" />}
-                      label={t("result.installedDate")}
-                      value={searchResult.installedDate}
-                    />
-                    <ResultRow
-                      icon={<Sparkles className="size-4 shrink-0" />}
-                      label={t("result.film")}
-                      value={searchResult.filmType}
-                    />
-                    <ResultRow
-                      icon={<Clock className="size-4 shrink-0" />}
-                      label={t("result.warrantyYears")}
-                      value={searchResult.warrantyYears}
-                    />
-                    <ResultRow
-                      icon={<ShieldCheck className="size-4 shrink-0" />}
-                      label={t("result.expiryDate")}
-                      value={searchResult.expiryDate}
-                      subValue={searchResult.status}
-                    />
-                  </div>
-
-                  <div className="border-t border-border-gray pt-6 mt-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-stone-gray mb-2 flex items-center gap-1.5">
-                      <Layers className="size-4" />
-                      {t("result.glassSection")}
-                    </p>
-                    <div className="divide-y divide-border-gray">
-                      <ResultRow
-                        label={t("result.windshield")}
-                        value={searchResult.windshield}
-                      />
-                      <ResultRow
-                        label={t("result.frontLeftGlass")}
-                        value={searchResult.frontLeftGlass}
-                      />
-                      <ResultRow
-                        label={t("result.frontRightGlass")}
-                        value={searchResult.frontRightGlass}
-                      />
-                      <ResultRow
-                        label={t("result.rearLeftGlass")}
-                        value={searchResult.rearLeftGlass}
-                      />
-                      <ResultRow
-                        label={t("result.rearRightGlass")}
-                        value={searchResult.rearRightGlass}
-                      />
-                      <ResultRow
-                        label={t("result.sunroof")}
-                        value={searchResult.sunroof}
-                      />
-                      <ResultRow
-                        label={t("result.rearGlass")}
-                        value={searchResult.rearGlass}
-                      />
-                      <ResultRow
-                        label={t("result.notes")}
-                        value={searchResult.notes}
-                      />
-                    </div>
-                  </div>
+                  <WarrantyLookupResultDetails result={searchResult} />
 
                   <div className="mt-8 border-t border-border-gray pt-6 pb-6 text-center space-y-4 bg-surface-muted/60 rounded-2xl p-6 sm:p-8">
                     <p className="text-sm sm:text-base text-stone-gray font-medium leading-relaxed max-w-lg mx-auto">
@@ -494,19 +264,17 @@ export function WarrantyLookupView() {
                   </div>
                 </motion.div>
               )}
-            </AnimatePresence>
-
-            <AnimatePresence>
-              {isSearched && !searchResult && (
+              {errorKind && (
                 <motion.div
-                  key="no-result"
+                  key={errorKind}
+                  role="alert"
                   initial={{ opacity: 0, height: 0, marginTop: 0 }}
                   animate={{ opacity: 1, height: "auto", marginTop: 24 }}
                   exit={{ opacity: 0, height: 0, marginTop: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="overflow-hidden border-t border-border-gray pt-6 text-center text-stone-gray font-medium"
+                  className="overflow-hidden border-t border-border-gray pt-6 text-center text-sm font-medium text-premium-red"
                 >
-                  {t("noResult")}
+                  {t(`errors.${errorKind}`)}
                 </motion.div>
               )}
             </AnimatePresence>

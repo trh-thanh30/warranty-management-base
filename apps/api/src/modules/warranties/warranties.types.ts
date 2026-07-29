@@ -1,10 +1,12 @@
 import {
+  Category,
   Customer,
   Product,
   ProductOwnership,
   ProductTemplate,
   User,
   Warranty,
+  WarrantyActivationRequest,
 } from '@prisma/client';
 
 type WarrantyWithProduct = Warranty & {
@@ -61,26 +63,102 @@ function getWarrantyUserSummary(user: User | null | undefined) {
 }
 
 export function toWarrantyLookupResponse(input: {
-  product: Product & { template: ProductTemplate };
-  warranty: Warranty;
+  product: Product & {
+    template: ProductTemplate & { category_ref?: Category | null };
+  };
+  warranty: Warranty & {
+    activation_request?: WarrantyActivationRequest | null;
+  };
 }) {
+  const activationRequest = input.warranty.activation_request;
+
   return {
     product: {
       id: input.product.id,
+      productCode: input.product.product_code,
       name: input.product.template.name,
       displayName: input.product.display_name,
       brand: input.product.template.brand,
       model: input.product.template.model,
       serialNumber: input.product.serial_number,
       warrantyCode: input.warranty.warranty_code,
+      category: input.product.template.category_ref
+        ? {
+            id: input.product.template.category_ref.id,
+            name: input.product.template.category_ref.name,
+            slug: input.product.template.category_ref.slug,
+          }
+        : null,
     },
     warranty: {
       warrantyCode: input.warranty.warranty_code,
       startDate: input.warranty.start_date,
       endDate: input.warranty.end_date,
+      durationMonths: input.warranty.duration_months,
+      terms: input.warranty.terms,
       status: input.warranty.status,
     },
+    installation: activationRequest
+      ? {
+          installedAt: activationRequest.installed_at,
+          vehicleModel: activationRequest.vehicle_model,
+          dealer: getPublicDealer(activationRequest.metadata),
+          filmItems: getPublicFilmItems(activationRequest.metadata),
+        }
+      : null,
   };
+}
+
+const FILM_ITEM_KEYS = [
+  'windshield',
+  'frontLeftSide',
+  'frontRightSide',
+  'rearLeftSide',
+  'rearRightSide',
+  'sunroof',
+  'rearGlass',
+] as const;
+
+function getPublicDealer(metadata: unknown) {
+  const dealer = toRecord(toRecord(metadata)?.dealer);
+  if (!dealer) return null;
+
+  const result = {
+    id: toOptionalString(dealer.id),
+    name: toOptionalString(dealer.name),
+    phone: toOptionalString(dealer.phone),
+    address: toOptionalString(dealer.address),
+    province: toOptionalString(dealer.province),
+    district: toOptionalString(dealer.district),
+  };
+
+  return Object.values(result).some(Boolean) ? result : null;
+}
+
+function getPublicFilmItems(metadata: unknown) {
+  const filmItems = toRecord(toRecord(metadata)?.filmItems);
+  if (!filmItems) return null;
+
+  const result = Object.fromEntries(
+    FILM_ITEM_KEYS.flatMap((key) => {
+      const value = toOptionalString(filmItems[key]);
+      return value ? [[key, value]] : [];
+    }),
+  );
+
+  return Object.keys(result).length > 0 ? result : null;
+}
+
+function toRecord(value: unknown): Record<string, unknown> | null {
+  return isRecord(value) ? value : null;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function toOptionalString(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
 }
 
 export function toWarrantyListItemResponse(warranty: WarrantyWithProduct) {

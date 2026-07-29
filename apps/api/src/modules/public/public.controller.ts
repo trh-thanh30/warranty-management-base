@@ -24,6 +24,7 @@ import { ListPublicProductCategoriesDto } from '@/modules/categories/dto/list-pu
 import { PublicLookupWarrantyClaimByCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claim-by-code.use-case';
 import { PublicLookupWarrantyClaimsByWarrantyCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claims-by-warranty-code.use-case';
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 
 @Public()
 @Controller('public')
@@ -45,6 +46,7 @@ export class PublicController {
     private readonly listPublicProductCategoriesUseCase: ListPublicProductCategoriesUseCase,
   ) {}
 
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Get('warranties/lookup')
   lookupWarranty(@Query() query: LookupWarrantyDto) {
     return this.lookupWarrantyByCodeUseCase.execute(query);

@@ -28,47 +28,65 @@
   },
   "WarrantyLookupModal": {
     "title": "E-Warranty lookup",
-    "subtitle": "Verify an official FUJITEK warranty label",
+    "subtitle": "Verify official FUJITEK coverage using an E-Warranty code",
     "closeAriaLabel": "Close warranty lookup dialog",
-    "placeholder": "Enter phone / license plate (e.g. 30H-888.88) / label code...",
-    "search": "Search",
-    "tryPrefix": "Try entering",
-    "or": "or",
-    "mock": {
-      "customerName": "Nguyen Van An",
-      "address": "Ho Chi Minh City",
-      "warrantyYears": "15 years",
-      "dealer": "Panda Auto Showroom & Hanoi Warranty Center",
-      "status": "Active (Official FUJITEK warranty)"
-    },
     "supportMessage": "For further support, contact the installation center or FUJITEK hotline.",
     "supportHotlineLabel": "Hotline",
     "supportClosing": "Thank you for using the FUJITEK E-Warranty system.",
-    "result": {
-      "serial": "Serial number",
-      "code": "E-Warranty code",
-      "warranty": "Warranty",
-      "owner": "Owner",
-      "phone": "Phone number",
-      "address": "Address",
-      "carPlate": "License plate",
-      "carModel": "Vehicle model",
-      "vehicle": "License plate & Vehicle",
-      "film": "Window-film package",
-      "warrantyYears": "Warranty period (years)",
-      "installedDate": "Completion date",
-      "expiryDate": "Warranty expiry",
-      "dates": "Activation & Expiry",
-      "dealer": "Installation center",
-      "glassSection": "Filmed glass positions",
+    "errors": {
+      "invalid": "The E-Warranty code is invalid. Check it and try again.",
+      "notFound": "No warranty information was found for this E-Warranty code.",
+      "rateLimit": "You have made too many lookup attempts. Try again in one minute.",
+      "request": "Warranty lookup is unavailable right now. Please try again later."
+    }
+  },
+  "WarrantyLookupForm": {
+    "ariaLabel": "E-Warranty code",
+    "placeholder": "Enter an E-Warranty code...",
+    "submit": "Search",
+    "submitting": "Searching...",
+    "tryPrefix": "For example, enter",
+    "or": "or",
+    "validation": {
+      "required": "Enter an E-Warranty code.",
+      "minLength": "The E-Warranty code must contain at least 6 characters.",
+      "maxLength": "The E-Warranty code must not exceed 64 characters.",
+      "format": "The E-Warranty code may contain only letters, numbers, and hyphens."
+    }
+  },
+  "WarrantyLookupResult": {
+    "product": "Product",
+    "productCode": "Product code",
+    "category": "Category",
+    "brandModel": "Brand / Model",
+    "serial": "Serial number",
+    "warrantyCode": "E-Warranty code",
+    "startDate": "Start date",
+    "endDate": "Expiry date",
+    "duration": "Coverage period",
+    "durationValue": "{count, plural, one {# month} other {# months}}",
+    "terms": "Terms",
+    "installation": "Installation information",
+    "installedAt": "Installation date",
+    "vehicleModel": "Vehicle model",
+    "dealer": "Installation dealer",
+    "dealerPhone": "Dealer phone",
+    "dealerAddress": "Dealer address",
+    "filmPositions": "Filmed glass positions",
+    "positions": {
       "windshield": "Windshield",
-      "frontLeftGlass": "Front left window",
-      "frontRightGlass": "Front right window",
-      "rearLeftGlass": "Rear left window",
-      "rearRightGlass": "Rear right window",
+      "frontLeftSide": "Front left window",
+      "frontRightSide": "Front right window",
+      "rearLeftSide": "Rear left window",
+      "rearRightSide": "Rear right window",
       "sunroof": "Sunroof",
-      "rearGlass": "Rear window",
-      "notes": "Notes"
+      "rearGlass": "Rear window"
+    },
+    "statuses": {
+      "DRAFT": "Not activated",
+      "ACTIVE": "Active",
+      "EXPIRED": "Expired",
+      "VOIDED": "Voided"
     }
   },
   "HomePage": {
@@ -1371,50 +1389,39 @@
     "lookup": {
       "eyebrow": "E-Warranty system",
       "title": "Check electronic warranty coverage",
-      "description": "Enter a phone number, license plate, or E-Warranty label code to verify official coverage.",
+      "description": "Enter an E-Warranty code to verify official product and coverage information.",
       "heroImageAlt": "FUJITEK electronic warranty lookup",
-      "placeholder": "Enter phone / License plate / Label code...",
-      "search": "Search",
-      "tryPrefix": "For example, enter",
-      "or": "or",
-      "mock": {
-        "customerName": "Nguyen Van An",
-        "address": "Ho Chi Minh City",
-        "warrantyYears": "15 years",
-        "dealer": "Panda Auto Hanoi Showroom",
-        "status": "Active (Official)"
-      },
       "registration": {
-        "title": "Your electronic warranty code can be registered through one of these identifiers",
-        "description": "Use one of the 3 methods below to look up E-Warranty label information",
+        "title": "Find your E-Warranty code",
+        "description": "Your lookup code may be provided through one of these channels",
         "methods": {
           "phone": {
-            "label": "Method 01",
-            "title": "Phone number",
-            "description": "The owner phone number registered during installation"
+            "label": "Source 01",
+            "title": "Warranty document",
+            "description": "The E-Warranty code printed on the product warranty document"
           },
           "qr": {
-            "label": "Method 02",
-            "title": "QR code / Email",
-            "description": "The warranty label code received by message or email"
+            "label": "Source 02",
+            "title": "Message / Email",
+            "description": "The warranty code sent after product activation"
           },
           "serial": {
-            "label": "Method 03",
-            "description": "Code format: BL/BHDT/000199"
+            "label": "Code format",
+            "description": "Examples: WM-2026-ABCDEF or FJ-8899-2026"
           }
         }
       },
       "searchSection": {
         "title": "Lookup",
-        "description": "Enter the code or phone number provided on the warranty document."
+        "description": "Enter the complete E-Warranty code shown on the warranty document."
       },
       "guide": {
         "title": "How to check E-Warranty in 3 steps",
         "steps": {
           "one": {
             "badge": "Step 01",
-            "title": "Enter information",
-            "description": "Enter a phone number, license plate, or E-Warranty label code."
+            "title": "Enter the code",
+            "description": "Enter the exact E-Warranty code from the warranty document."
           },
           "two": {
             "badge": "Step 02",
@@ -1424,7 +1431,7 @@
           "three": {
             "badge": "Step 03",
             "title": "View details",
-            "description": "Review owner, film package, glass positions, and 15-year coverage."
+            "description": "Review product, serial number, status, and coverage dates."
           }
         }
       },
@@ -1445,32 +1452,12 @@
         "description": "View warranty duration rules (10 - 15 years), eligible cases, and post-installation notes.",
         "action": "View warranty policy"
       },
-      "result": {
-        "code": "E-Warranty code",
-        "serial": "Serial number",
-        "duration": "Coverage",
-        "owner": "Owner",
-        "phone": "Phone number",
-        "address": "Address",
-        "carPlate": "License plate",
-        "carModel": "Vehicle model",
-        "vehicle": "License plate & Vehicle",
-        "film": "Window-film range",
-        "warrantyYears": "Warranty period (years)",
-        "installedDate": "Installation date",
-        "expiryDate": "Expiry date",
-        "dealer": "Installation center",
-        "glassSection": "Filmed glass positions",
-        "windshield": "Windshield",
-        "frontLeftGlass": "Front left window",
-        "frontRightGlass": "Front right window",
-        "rearLeftGlass": "Rear left window",
-        "rearRightGlass": "Rear right window",
-        "sunroof": "Sunroof",
-        "rearGlass": "Rear window",
-        "notes": "Notes"
-      },
-      "noResult": "No warranty record was found. Check the phone number or license plate and try again."
+      "errors": {
+        "invalid": "The E-Warranty code is invalid. Check it and try again.",
+        "notFound": "No warranty information was found for this E-Warranty code.",
+        "rateLimit": "You have made too many lookup attempts. Try again in one minute.",
+        "request": "Warranty lookup is unavailable right now. Please try again later."
+      }
     },
     "request": {
       "eyebrow": "Warranty service request",

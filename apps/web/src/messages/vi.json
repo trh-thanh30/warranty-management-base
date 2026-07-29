@@ -28,47 +28,65 @@
   },
   "WarrantyLookupModal": {
     "title": "Tra cứu bảo hành điện tử E-Warranty",
-    "subtitle": "Kiểm tra thông tin tem bảo hành chính hãng FUJITEK",
+    "subtitle": "Kiểm tra thông tin bảo hành chính hãng FUJITEK bằng mã E-Warranty",
     "closeAriaLabel": "Đóng cửa sổ tra cứu bảo hành",
-    "placeholder": "Nhập SĐT / Biển số xe (VD: 30H-888.88) / Mã tem...",
-    "search": "Tra cứu",
-    "tryPrefix": "Thử tra cứu: nhập",
-    "or": "hoặc",
-    "mock": {
-      "customerName": "Nguyễn Văn An",
-      "address": "TP. Hồ Chí Minh",
-      "warrantyYears": "15 năm",
-      "dealer": "Panda Auto Showroom & Trạm Bảo Hành Hà Nội",
-      "status": "Đang hiệu lực (Chính hãng FUJITEK)"
-    },
     "supportMessage": "Nếu cần hỗ trợ thêm, vui lòng liên hệ đại lý thi công hoặc hotline FUJITEK.",
     "supportHotlineLabel": "Hotline",
     "supportClosing": "Cảm ơn bạn đã sử dụng hệ thống E-Warranty FUJITEK.",
-    "result": {
-      "serial": "Số Serial",
-      "code": "Mã E-Warranty",
-      "warranty": "Bảo hành",
-      "owner": "Khách hàng",
-      "phone": "Số điện thoại",
-      "address": "Địa chỉ",
-      "carPlate": "Biển số xe",
-      "carModel": "Loại xe",
-      "vehicle": "Biển số & Dòng xe",
-      "film": "Tên gói dán",
-      "warrantyYears": "Thời gian bảo hành (năm)",
-      "installedDate": "Ngày hoàn thành",
-      "expiryDate": "Hạn bảo hành",
-      "dates": "Ngày kích hoạt & Hết hạn",
-      "dealer": "Đơn vị thi công",
-      "glassSection": "Vị trí kính dán phim",
+    "errors": {
+      "invalid": "Mã E-Warranty không hợp lệ. Vui lòng kiểm tra và nhập lại.",
+      "notFound": "Không tìm thấy thông tin bảo hành cho mã E-Warranty này.",
+      "rateLimit": "Bạn đã tra cứu quá nhiều lần. Vui lòng thử lại sau một phút.",
+      "request": "Không thể tra cứu bảo hành lúc này. Vui lòng thử lại sau."
+    }
+  },
+  "WarrantyLookupForm": {
+    "ariaLabel": "Mã E-Warranty",
+    "placeholder": "Nhập mã E-Warranty...",
+    "submit": "Tra cứu",
+    "submitting": "Đang tra cứu...",
+    "tryPrefix": "Ví dụ: nhập",
+    "or": "hoặc",
+    "validation": {
+      "required": "Vui lòng nhập mã E-Warranty.",
+      "minLength": "Mã E-Warranty phải có ít nhất 6 ký tự.",
+      "maxLength": "Mã E-Warranty không được vượt quá 64 ký tự.",
+      "format": "Mã E-Warranty chỉ được chứa chữ cái, số và dấu gạch ngang."
+    }
+  },
+  "WarrantyLookupResult": {
+    "product": "Sản phẩm",
+    "productCode": "Mã sản phẩm",
+    "category": "Danh mục",
+    "brandModel": "Thương hiệu / Model",
+    "serial": "Số Serial",
+    "warrantyCode": "Mã E-Warranty",
+    "startDate": "Ngày bắt đầu",
+    "endDate": "Ngày hết hạn",
+    "duration": "Thời hạn",
+    "durationValue": "{count} tháng",
+    "terms": "Điều khoản",
+    "installation": "Thông tin lắp đặt",
+    "installedAt": "Ngày lắp đặt",
+    "vehicleModel": "Model xe",
+    "dealer": "Đại lý thi công",
+    "dealerPhone": "Điện thoại đại lý",
+    "dealerAddress": "Địa chỉ đại lý",
+    "filmPositions": "Vị trí kính dán phim",
+    "positions": {
       "windshield": "Kính lái",
-      "frontLeftGlass": "Kính sườn trước – trái",
-      "frontRightGlass": "Kính sườn trước – phải",
-      "rearLeftGlass": "Kính sườn sau – trái",
-      "rearRightGlass": "Kính sườn sau – phải",
+      "frontLeftSide": "Kính sườn trước - trái",
+      "frontRightSide": "Kính sườn trước - phải",
+      "rearLeftSide": "Kính sườn sau - trái",
+      "rearRightSide": "Kính sườn sau - phải",
       "sunroof": "Cửa sổ trời",
-      "rearGlass": "Kính lưng",
-      "notes": "Ghi chú"
+      "rearGlass": "Kính lưng"
+    },
+    "statuses": {
+      "DRAFT": "Chưa kích hoạt",
+      "ACTIVE": "Đang hiệu lực",
+      "EXPIRED": "Đã hết hạn",
+      "VOIDED": "Đã hủy"
     }
   },
   "HomePage": {
@@ -1371,50 +1389,39 @@
     "lookup": {
       "eyebrow": "Hệ thống E-Warranty",
       "title": "Tra cứu hạn bảo hành điện tử",
-      "description": "Nhập số điện thoại, biển số xe hoặc mã tem E-Warranty để kiểm tra thông tin chính hãng.",
+      "description": "Nhập mã E-Warranty để kiểm tra thông tin sản phẩm và thời hạn bảo hành chính hãng.",
       "heroImageAlt": "Tra cứu bảo hành điện tử FUJITEK",
-      "placeholder": "Nhập SĐT / Biển số xe / Mã tem...",
-      "search": "Tra cứu",
-      "tryPrefix": "Ví dụ: nhập",
-      "or": "hoặc",
-      "mock": {
-        "customerName": "Nguyễn Văn An",
-        "address": "TP. Hồ Chí Minh",
-        "warrantyYears": "15 năm",
-        "dealer": "Panda Auto Showroom Hà Nội",
-        "status": "Đang hiệu lực (Chính hãng)"
-      },
       "registration": {
-        "title": "Mã bảo hành điện tử của Quý khách có thể được đăng ký bằng một trong các dãy số",
-        "description": "Sử dụng một trong 3 phương thức dưới đây để tra cứu thông tin tem E-Warranty",
+        "title": "Tìm mã E-Warranty của Quý khách",
+        "description": "Mã tra cứu có thể được cung cấp qua một trong các kênh dưới đây",
         "methods": {
           "phone": {
-            "label": "Phương thức 01",
-            "title": "Số điện thoại",
-            "description": "SĐT chính chủ đã đăng ký khi dán phim"
+            "label": "Nguồn 01",
+            "title": "Phiếu bảo hành",
+            "description": "Mã E-Warranty được in trên phiếu bảo hành của sản phẩm"
           },
           "qr": {
-            "label": "Phương thức 02",
-            "title": "Mã QR / Email",
-            "description": "Mã tem bảo hành nhận qua tin nhắn hoặc email"
+            "label": "Nguồn 02",
+            "title": "Tin nhắn / Email",
+            "description": "Mã bảo hành được gửi sau khi sản phẩm được kích hoạt"
           },
           "serial": {
-            "label": "Phương thức 03",
-            "description": "Mã dạng: BL/BHDT/000199"
+            "label": "Định dạng mã",
+            "description": "Ví dụ: WM-2026-ABCDEF hoặc FJ-8899-2026"
           }
         }
       },
       "searchSection": {
         "title": "Tra cứu",
-        "description": "Vui lòng nhập đầy đủ thông tin mã hoặc Số Điện Thoại cung cấp trên phiếu bảo hành."
+        "description": "Vui lòng nhập đầy đủ mã E-Warranty được cung cấp trên phiếu bảo hành."
       },
       "guide": {
         "title": "Hướng dẫn tra cứu E-Warranty trong 3 bước",
         "steps": {
           "one": {
             "badge": "Bước 01",
-            "title": "Nhập thông tin",
-            "description": "Nhập Số điện thoại, Biển số xe hoặc Mã tem E-Warranty."
+            "title": "Nhập mã",
+            "description": "Nhập chính xác mã E-Warranty trên phiếu bảo hành."
           },
           "two": {
             "badge": "Bước 02",
@@ -1424,7 +1431,7 @@
           "three": {
             "badge": "Bước 03",
             "title": "Xem chi tiết",
-            "description": "Xem thông tin chủ xe, gói dán, các vị trí kính & thời hạn 15 năm."
+            "description": "Xem sản phẩm, số serial, trạng thái và thời hạn bảo hành."
           }
         }
       },
@@ -1445,32 +1452,12 @@
         "description": "Xem quy định thời gian bảo hành (10 - 15 năm), trường hợp được bảo hành & lưu ý sau khi dán phim.",
         "action": "Xem chính sách bảo hành"
       },
-      "result": {
-        "code": "Mã E-Warranty",
-        "serial": "Số Serial",
-        "duration": "Thời hạn",
-        "owner": "Khách hàng",
-        "phone": "Số điện thoại",
-        "address": "Địa chỉ",
-        "carPlate": "Biển số xe",
-        "carModel": "Loại xe",
-        "vehicle": "Biển số & Dòng xe",
-        "film": "Tên gói dán",
-        "warrantyYears": "Thời gian bảo hành (năm)",
-        "installedDate": "Ngày hoàn thành",
-        "expiryDate": "Hạn bảo hành",
-        "dealer": "Đơn vị thi công",
-        "glassSection": "Vị trí kính dán phim",
-        "windshield": "Kính lái",
-        "frontLeftGlass": "Kính sườn trước – trái",
-        "frontRightGlass": "Kính sườn trước – phải",
-        "rearLeftGlass": "Kính sườn sau – trái",
-        "rearRightGlass": "Kính sườn sau – phải",
-        "sunroof": "Cửa sổ trời",
-        "rearGlass": "Kính lưng",
-        "notes": "Ghi chú"
-      },
-      "noResult": "Không tìm thấy thông tin bảo hành. Vui lòng kiểm tra lại số điện thoại hoặc biển số xe."
+      "errors": {
+        "invalid": "Mã E-Warranty không hợp lệ. Vui lòng kiểm tra và nhập lại.",
+        "notFound": "Không tìm thấy thông tin bảo hành cho mã E-Warranty này.",
+        "rateLimit": "Bạn đã tra cứu quá nhiều lần. Vui lòng thử lại sau một phút.",
+        "request": "Không thể tra cứu bảo hành lúc này. Vui lòng thử lại sau."
+      }
     },
     "request": {
       "eyebrow": "Yêu cầu dịch vụ bảo hành",

@@ -17,6 +17,19 @@ const warrantyInclude = {
   },
 };
 
+const warrantyLookupInclude = {
+  warranty: {
+    include: {
+      activation_request: true,
+    },
+  },
+  template: {
+    include: {
+      category_ref: true,
+    },
+  },
+} satisfies Prisma.ProductInclude;
+
 @Injectable()
 export class WarrantiesRepository {
   constructor(private readonly prismaService: PrismaService) {}
@@ -222,10 +235,7 @@ export class WarrantiesRepository {
         warranty: { warranty_code: code },
         deleted_at: null,
       },
-      include: {
-        warranty: true,
-        template: true,
-      },
+      include: warrantyLookupInclude,
     });
   }
 
@@ -241,10 +251,7 @@ export class WarrantiesRepository {
           },
         },
       },
-      include: {
-        warranty: true,
-        template: true,
-      },
+      include: warrantyLookupInclude,
     });
   }
 
@@ -260,12 +267,11 @@ export class WarrantiesRepository {
         },
       },
       include: {
+        ...warrantyLookupInclude,
         ownerships: {
           include: { customer: true },
           orderBy: { created_at: 'desc' },
         },
-        warranty: true,
-        template: true,
       },
       orderBy: { created_at: 'desc' },
     });
@@ -283,10 +289,7 @@ export class WarrantiesRepository {
           },
         },
       },
-      include: {
-        warranty: true,
-        template: true,
-      },
+      include: warrantyLookupInclude,
     });
   }
 }

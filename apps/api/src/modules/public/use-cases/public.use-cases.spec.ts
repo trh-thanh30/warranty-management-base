@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { PublicListServiceCentersUseCase } from '@/modules/public/use-cases/public-list-service-centers.use-case';
 import { PublicListNetworkLocationsUseCase } from '@/modules/public/use-cases/public-list-network-locations.use-case';
 import { PublicListNetworkDirectoryUseCase } from '@/modules/public/use-cases/public-list-network-directory.use-case';
@@ -377,5 +378,18 @@ describe('Public use cases', () => {
     });
     expect(result).not.toHaveProperty('requesterName');
     expect(result).not.toHaveProperty('customer');
+  });
+});
+
+describe('Public warranty lookup endpoint', () => {
+  it('uses a stricter read rate limit than the global API limit', () => {
+    const controllerSource = readFileSync(
+      require.resolve('@/modules/public/public.controller'),
+      'utf8',
+    );
+
+    expect(controllerSource).toMatch(
+      /@Throttle\(\{\s*default:\s*\{\s*limit:\s*10,\s*ttl:\s*60_000\s*\}\s*\}\)\s*@Get\('warranties\/lookup'\)/,
+    );
   });
 });
