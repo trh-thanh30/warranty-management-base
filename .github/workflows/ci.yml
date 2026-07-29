@@ -91,7 +91,7 @@ jobs:
       - api
       - web
       - admin
-    if: always()
+    if: ${{ always() }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
