@@ -1,141 +1,89 @@
 "use client";
 
-import { useState } from "react";
+import { Button } from "@repo/ui/button";
+import { CheckCircle2, Clock3 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { CheckCircle2 } from "lucide-react";
-import { Input } from "@repo/ui/input";
 import { Container } from "@/src/components/common/container";
-import { formControlFocusClassName } from "@/src/components/common/form-control.constants";
+import { useWarrantyActivationRequest } from "@/src/hooks/use-warranty-activation-request";
+import { WarrantyActivationRequestForm } from "./components/warranty-activation-request-form";
 
 export function WarrantyActivateView() {
   const t = useTranslations("Warranty.activate");
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [formData, setFormData] = useState({
-    customerName: "",
-    phone: "",
-    carPlate: "",
-    carBrand: "",
-    stampCode: "",
-    dealerName: "",
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSuccess(true);
-  };
+  const {
+    data: request,
+    errorKind,
+    isPending,
+    reset,
+    submit,
+  } = useWarrantyActivationRequest();
 
   return (
-    <main className="min-h-screen bg-surface-muted py-12 sm:py-20 text-deep-black">
+    <main className="min-h-screen bg-surface-muted py-12 text-deep-black sm:py-20">
       <Container className="max-w-[1000px] space-y-12">
-        <div className="text-center space-y-4">
-          <span className="inline-block bg-surface-muted0/10 text-premium-red border border-premium-red/30 px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-[0.25em]">
+        <div className="space-y-4 text-center">
+          <span className="inline-block rounded-md border border-premium-red/30 bg-premium-red/5 px-4 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-premium-red">
             {t("eyebrow")}
           </span>
-          <h1 className="text-3xl sm:text-5xl font-condensed font-semibold uppercase tracking-wider">
+          <h1 className="font-condensed text-3xl font-semibold uppercase tracking-wider sm:text-5xl">
             {t("title")}
           </h1>
-          <p className="text-base sm:text-lg text-stone-gray font-normal max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-base font-normal text-stone-gray sm:text-lg">
             {t("description")}
           </p>
         </div>
 
-        {isSuccess ? (
-          <div className="bg-white rounded-[28px] p-8 sm:p-12 border-2 border-premium-red text-center space-y-6 shadow-2xl animate-in zoom-in-95 duration-300">
-            <div className="size-20 bg-premium-red/10 text-premium-red rounded-full flex items-center justify-center mx-auto">
-              <CheckCircle2 className="size-10" />
+        {request ? (
+          <div className="animate-in space-y-6 rounded-md border border-premium-red/30 bg-white p-8 text-center shadow-xl zoom-in-95 sm:p-12">
+            <div className="mx-auto flex size-16 items-center justify-center rounded-md bg-premium-red/10 text-premium-red">
+              <CheckCircle2 className="size-8" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-semibold uppercase text-deep-black">
-              {t("success.title")}
-            </h2>
-            <p className="text-base text-stone-gray font-normal max-w-lg mx-auto">
-              {t.rich("success.description", {
-                plate: () => (
-                  <strong className="text-deep-black">
-                    {formData.carPlate}
-                  </strong>
-                ),
-              })}
-            </p>
-            <button
+            <div className="space-y-2">
+              <h2 className="text-2xl font-semibold uppercase text-deep-black sm:text-3xl">
+                {t("success.title")}
+              </h2>
+              <p className="mx-auto max-w-xl text-base font-normal text-stone-gray">
+                {t("success.description")}
+              </p>
+            </div>
+
+            <div className="mx-auto grid max-w-lg gap-3 rounded-md bg-surface-muted p-5 text-left sm:grid-cols-2">
+              <div>
+                <p className="text-xs font-semibold uppercase text-stone-gray">
+                  {t("success.requestCodeLabel")}
+                </p>
+                <p className="mt-1 font-mono text-base font-semibold text-deep-black">
+                  {request.requestCode}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase text-stone-gray">
+                  {t("success.statusLabel")}
+                </p>
+                <p className="mt-1 inline-flex items-center gap-2 text-sm font-semibold text-premium-red">
+                  <Clock3 className="size-4" />
+                  {request.status === "PENDING"
+                    ? t("success.pendingStatus")
+                    : request.status}
+                </p>
+              </div>
+            </div>
+
+            <Button
+              className="rounded-md bg-deep-black px-8 py-3.5 text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:bg-premium-red"
+              onClick={reset}
               type="button"
-              onClick={() => setIsSuccess(false)}
-              className="bg-deep-black hover:bg-premium-red text-white px-8 py-3.5 rounded-[14px] text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer"
             >
               {t("success.reset")}
-            </button>
+            </Button>
           </div>
         ) : (
-          <div className="bg-white rounded-[28px] p-6 sm:p-10 border border-border-gray shadow-xl">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid gap-6 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase text-deep-black">
-                    {t("fields.customerName.label")}
-                  </label>
-                  <Input
-                    required
-                    placeholder={t("fields.customerName.placeholder")}
-                    value={formData.customerName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, customerName: e.target.value })
-                    }
-                    className={`h-12 rounded-[12px] border-border-gray ${formControlFocusClassName}`}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase text-deep-black">
-                    {t("fields.phone.label")}
-                  </label>
-                  <Input
-                    required
-                    placeholder={t("fields.phone.placeholder")}
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    className={`h-12 rounded-[12px] border-border-gray ${formControlFocusClassName}`}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase text-deep-black">
-                    {t("fields.carPlate.label")}
-                  </label>
-                  <Input
-                    required
-                    placeholder={t("fields.carPlate.placeholder")}
-                    value={formData.carPlate}
-                    onChange={(e) =>
-                      setFormData({ ...formData, carPlate: e.target.value })
-                    }
-                    className={`h-12 rounded-[12px] border-border-gray ${formControlFocusClassName}`}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase text-deep-black">
-                    {t("fields.stampCode.label")}
-                  </label>
-                  <Input
-                    required
-                    placeholder={t("fields.stampCode.placeholder")}
-                    value={formData.stampCode}
-                    onChange={(e) =>
-                      setFormData({ ...formData, stampCode: e.target.value })
-                    }
-                    className={`h-12 rounded-[12px] border-border-gray ${formControlFocusClassName}`}
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-premium-red hover:bg-warm-red text-white py-4 rounded-[16px] text-sm font-semibold uppercase tracking-wider transition-colors shadow-lg cursor-pointer"
-              >
-                {t("submit")}
-              </button>
-            </form>
+          <div className="rounded-md border border-border-gray bg-white p-6 shadow-xl sm:p-10">
+            <WarrantyActivationRequestForm
+              errorKind={errorKind}
+              isPending={isPending}
+              onResetError={reset}
+              onSubmit={submit}
+            />
           </div>
         )}
       </Container>

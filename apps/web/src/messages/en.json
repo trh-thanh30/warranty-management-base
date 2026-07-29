@@ -1358,14 +1358,18 @@
       }
     },
     "activate": {
-      "eyebrow": "E-Warranty activation",
-      "title": "Activate electronic warranty",
-      "description": "For customers and dealers activating E-Warranty after FUJITEK window-film installation.",
-      "submit": "Confirm E-Warranty activation",
+      "eyebrow": "E-Warranty activation request",
+      "title": "Request electronic warranty activation",
+      "description": "Submit your E-Warranty information for FUJITEK to verify and approve before activation.",
+      "submit": "Submit activation request",
+      "submitting": "Submitting request...",
       "success": {
-        "title": "Warranty activated!",
-        "description": "The 15-year electronic warranty for vehicle <plate></plate> has been saved in the FUJITEK system.",
-        "reset": "Activate another label"
+        "title": "Request received",
+        "description": "Your request is awaiting FUJITEK verification and approval. Keep the request code for future support.",
+        "requestCodeLabel": "Request code",
+        "statusLabel": "Status",
+        "pendingStatus": "Pending review",
+        "reset": "Submit another request"
       },
       "fields": {
         "customerName": {
@@ -1376,6 +1380,10 @@
           "label": "Phone number *",
           "placeholder": "E.g. 0988 123 456"
         },
+        "customerEmail": {
+          "label": "Email *",
+          "placeholder": "E.g. alex@example.com"
+        },
         "carPlate": {
           "label": "License plate *",
           "placeholder": "E.g. 30H-888.88"
@@ -1383,7 +1391,43 @@
         "stampCode": {
           "label": "E-Warranty label code *",
           "placeholder": "E.g. FJ-8899-2026"
-        }
+        },
+        "province": {
+          "label": "Province / City *",
+          "placeholder": "Select a province or city",
+          "loading": "Loading provinces...",
+          "loadError": "Could not load provinces."
+        },
+        "ward": {
+          "label": "Ward *",
+          "placeholder": "Select a ward",
+          "loading": "Loading wards...",
+          "loadError": "Could not load wards."
+        },
+        "addressDetail": {
+          "label": "Address details *",
+          "placeholder": "Street number and street name..."
+        },
+        "retry": "Retry"
+      },
+      "validation": {
+        "addressRequired": "Enter the address details.",
+        "customerEmailInvalid": "Enter a valid email address.",
+        "customerEmailRequired": "Enter an email address to receive the warranty certificate.",
+        "customerNameInvalid": "The owner name must contain 2 to 120 characters.",
+        "customerPhoneInvalid": "Enter a valid phone number.",
+        "provinceRequired": "Select a province or city.",
+        "vehiclePlateInvalid": "Enter a valid license plate.",
+        "wardRequired": "Select a ward.",
+        "warrantyCodeInvalid": "Enter a valid E-Warranty code."
+      },
+      "errors": {
+        "alreadyOpen": "This product already has an activation request awaiting review.",
+        "invalid": "Some submitted information is invalid. Check the form and try again.",
+        "notEligible": "This E-Warranty code is not eligible for a new activation request.",
+        "notFound": "The E-Warranty code was not found.",
+        "rateLimit": "Too many requests were submitted. Try again later.",
+        "request": "The activation request could not be submitted. Try again."
       }
     },
     "lookup": {

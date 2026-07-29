@@ -6,6 +6,9 @@ import { PublicListNetworkDirectoryFilterOptionsUseCase } from '@/modules/public
 import { PublicListDealersUseCase } from '@/modules/public/use-cases/public-list-dealers.use-case';
 import { PublicListDealerFilterOptionsUseCase } from '@/modules/public/use-cases/public-list-dealer-filter-options.use-case';
 import { toPublicWarrantyClaimResponse } from '@/modules/public/use-cases/public-lookup-warranty-claim-by-code.use-case';
+import { CreatePublicWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-public-warranty-activation-request.dto';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 
 describe('Public use cases', () => {
   it('combines, filters, and paginates active dealers and service centers for the public directory', async () => {
@@ -390,6 +393,42 @@ describe('Public warranty lookup endpoint', () => {
 
     expect(controllerSource).toMatch(
       /@Throttle\(\{\s*default:\s*\{\s*limit:\s*10,\s*ttl:\s*60_000\s*\}\s*\}\)\s*@Get\('warranties\/lookup'\)/,
+    );
+  });
+});
+
+describe('Public warranty activation request endpoint', () => {
+  it('rate limits public activation submissions', () => {
+    const controllerSource = readFileSync(
+      require.resolve('@/modules/public/public.controller'),
+      'utf8',
+    );
+
+    expect(controllerSource).toMatch(
+      /@Throttle\(\{\s*default:\s*\{\s*limit:\s*5,\s*ttl:\s*60_000\s*\}\s*\}\)\s*@Post\('warranty-activation-requests'\)/,
+    );
+  });
+
+  it('requires a customer email in the public activation contract', async () => {
+    const dto = plainToInstance(CreatePublicWarrantyActivationRequestDto, {
+      addressDetail: '7C Nguyen Ngoc Phuong',
+      customerName: 'Nguyen Van An',
+      customerPhone: '0886337733',
+      provinceCode: '79',
+      provinceName: 'Thanh pho Ho Chi Minh',
+      wardCode: '26734',
+      wardName: 'Phuong Thanh My Tay',
+      warrantyCode: 'FJ-8899-2026',
+    });
+
+    const errors = await validate(dto);
+
+    expect(errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          property: 'customerEmail',
+        }),
+      ]),
     );
   });
 });

@@ -1358,14 +1358,18 @@
       }
     },
     "activate": {
-      "eyebrow": "Kích hoạt E-Warranty",
-      "title": "Kích hoạt bảo hành điện tử",
-      "description": "Dành cho khách hàng và đại lý kích hoạt E-Warranty sau khi thi công phim cách nhiệt FUJITEK.",
-      "submit": "Xác nhận kích hoạt E-Warranty",
+      "eyebrow": "Yêu cầu kích hoạt E-Warranty",
+      "title": "Đăng ký kích hoạt bảo hành điện tử",
+      "description": "Gửi thông tin E-Warranty để FUJITEK kiểm tra và xác nhận trước khi kích hoạt bảo hành.",
+      "submit": "Gửi yêu cầu kích hoạt",
+      "submitting": "Đang gửi yêu cầu...",
       "success": {
-        "title": "Kích hoạt bảo hành thành công!",
-        "description": "Thông tin bảo hành điện tử 15 năm cho xe <plate></plate> đã được lưu trên hệ thống FUJITEK.",
-        "reset": "Kích hoạt tem khác"
+        "title": "Đã tiếp nhận yêu cầu",
+        "description": "Yêu cầu đang chờ FUJITEK kiểm tra và phê duyệt. Vui lòng lưu mã yêu cầu để đối chiếu khi cần hỗ trợ.",
+        "requestCodeLabel": "Mã yêu cầu",
+        "statusLabel": "Trạng thái",
+        "pendingStatus": "Chờ xử lý",
+        "reset": "Gửi yêu cầu khác"
       },
       "fields": {
         "customerName": {
@@ -1376,6 +1380,10 @@
           "label": "Số điện thoại *",
           "placeholder": "VD: 0988 123 456"
         },
+        "customerEmail": {
+          "label": "Email *",
+          "placeholder": "VD: nguyenvanan@email.com"
+        },
         "carPlate": {
           "label": "Biển số xe *",
           "placeholder": "VD: 30H-888.88"
@@ -1383,7 +1391,43 @@
         "stampCode": {
           "label": "Mã tem E-Warranty *",
           "placeholder": "VD: FJ-8899-2026"
-        }
+        },
+        "province": {
+          "label": "Tỉnh / Thành phố *",
+          "placeholder": "Chọn tỉnh hoặc thành phố",
+          "loading": "Đang tải tỉnh thành...",
+          "loadError": "Không thể tải danh sách tỉnh thành."
+        },
+        "ward": {
+          "label": "Phường / Xã *",
+          "placeholder": "Chọn phường hoặc xã",
+          "loading": "Đang tải phường xã...",
+          "loadError": "Không thể tải danh sách phường xã."
+        },
+        "addressDetail": {
+          "label": "Địa chỉ chi tiết *",
+          "placeholder": "Số nhà, tên đường..."
+        },
+        "retry": "Thử lại"
+      },
+      "validation": {
+        "addressRequired": "Vui lòng nhập địa chỉ chi tiết.",
+        "customerEmailInvalid": "Email không hợp lệ.",
+        "customerEmailRequired": "Vui lòng nhập email để nhận giấy bảo hành.",
+        "customerNameInvalid": "Họ và tên phải có từ 2 đến 120 ký tự.",
+        "customerPhoneInvalid": "Số điện thoại không hợp lệ.",
+        "provinceRequired": "Vui lòng chọn tỉnh hoặc thành phố.",
+        "vehiclePlateInvalid": "Biển số xe không hợp lệ.",
+        "wardRequired": "Vui lòng chọn phường hoặc xã.",
+        "warrantyCodeInvalid": "Mã E-Warranty không hợp lệ."
+      },
+      "errors": {
+        "alreadyOpen": "Sản phẩm này đã có yêu cầu kích hoạt đang chờ xử lý.",
+        "invalid": "Thông tin gửi lên chưa hợp lệ. Vui lòng kiểm tra lại.",
+        "notEligible": "Mã E-Warranty này không còn đủ điều kiện tạo yêu cầu kích hoạt.",
+        "notFound": "Không tìm thấy mã E-Warranty trên hệ thống.",
+        "rateLimit": "Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau.",
+        "request": "Không thể gửi yêu cầu kích hoạt. Vui lòng thử lại."
       }
     },
     "lookup": {

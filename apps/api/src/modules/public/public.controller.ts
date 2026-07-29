@@ -2,7 +2,7 @@ import { Public } from '@/common/decorators/public.decorator';
 import { ListServiceCentersDto } from '@/modules/service-centers/dto/list-service-centers.dto';
 import { LookupWarrantyDto } from '@/modules/warranties/dto/lookup-warranty.dto';
 import { LookupWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/lookup-warranty-by-code.use-case';
-import { CreateWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-warranty-activation-request.dto';
+import { CreatePublicWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-public-warranty-activation-request.dto';
 import { CreateWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-warranty-activation-request.use-case';
 import { CreateWarrantyClaimDto } from '@/modules/warranty-claims/dto/create-warranty-claim.dto';
 import { CreateWarrantyClaimUseCase } from '@/modules/warranty-claims/use-cases/create-warranty-claim.use-case';
@@ -52,9 +52,10 @@ export class PublicController {
     return this.lookupWarrantyByCodeUseCase.execute(query);
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('warranty-activation-requests')
   createWarrantyActivationRequest(
-    @Body() dto: CreateWarrantyActivationRequestDto,
+    @Body() dto: CreatePublicWarrantyActivationRequestDto,
   ) {
     return this.createWarrantyActivationRequestUseCase.execute(dto);
   }
