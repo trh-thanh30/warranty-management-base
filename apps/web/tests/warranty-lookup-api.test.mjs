@@ -178,3 +178,22 @@ test("warranty page and modal share API lookup state without mock fallback", asy
   assert.doesNotMatch(pageSource, /demoWarrantyLookupRecord|mock\./);
   assert.doesNotMatch(modalSource, /demoWarrantyLookupRecord|mock\./);
 });
+
+test("warranty support hotline comes from public site settings", async () => {
+  const [pageSource, modalSource] = await Promise.all([
+    readFile(
+      new URL("../src/views/warranty/lookup.view.tsx", import.meta.url),
+      "utf8",
+    ),
+    readFile(
+      new URL("../src/components/warranty-lookup-modal.tsx", import.meta.url),
+      "utf8",
+    ),
+  ]);
+
+  for (const source of [pageSource, modalSource]) {
+    assert.match(source, /usePrimaryWebsiteHotline/);
+    assert.match(source, /hotline &&/);
+    assert.doesNotMatch(source, /warrantyLookupSupportPhone/);
+  }
+});

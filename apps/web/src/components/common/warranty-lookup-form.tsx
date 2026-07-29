@@ -121,7 +121,7 @@ export function WarrantyLookupForm({
           </Button>
         </div>
 
-        <p className="text-center text-xs font-medium text-stone-gray">
+        <p className="text-center text-sm font-medium text-stone-gray">
           {t("tryPrefix")}{" "}
           <code className="rounded-md bg-light-gray px-2 py-0.5 font-mono text-premium-red">
             {warrantyLookupExamples[0]}

@@ -3,9 +3,9 @@
 import { useCallback, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Phone, ShieldCheck, X } from "lucide-react";
+import { usePrimaryWebsiteHotline } from "@/src/app/providers/site-settings-provider";
 import { WarrantyLookupForm } from "@/src/components/common/warranty-lookup-form";
 import { WarrantyLookupResultDetails } from "@/src/components/warranty-lookup-result";
-import { warrantyLookupSupportPhone } from "@/src/constants/warranty.constants";
 import { useWarrantyLookup } from "@/src/hooks/use-warranty-lookup";
 
 interface WarrantyLookupModalProps {
@@ -20,6 +20,7 @@ export function WarrantyLookupModal({
   initialQuery = "",
 }: WarrantyLookupModalProps) {
   const t = useTranslations("WarrantyLookupModal");
+  const hotline = usePrimaryWebsiteHotline();
   const {
     data: searchResult,
     errorKind,
@@ -123,16 +124,17 @@ export function WarrantyLookupModal({
                 <p className="mx-auto max-w-md text-xs font-medium leading-relaxed text-stone-gray">
                   {t("supportMessage")}
                 </p>
-                <a
-                  href={warrantyLookupSupportPhone.href}
-                  className="inline-flex items-center gap-2 rounded-full bg-premium-red px-5 py-2.5 text-xs font-semibold uppercase text-white shadow-md transition-colors hover:bg-warm-red"
-                >
-                  <Phone className="size-3.5" />
-                  <span>
-                    {t("supportHotlineLabel")}:{" "}
-                    {warrantyLookupSupportPhone.displayValue}
-                  </span>
-                </a>
+                {hotline && (
+                  <a
+                    href={hotline.href}
+                    className="inline-flex items-center gap-2 rounded-full bg-premium-red px-5 py-2.5 text-xs font-semibold uppercase text-white shadow-md transition-colors hover:bg-warm-red"
+                  >
+                    <Phone className="size-3.5" />
+                    <span>
+                      {t("supportHotlineLabel")}: {hotline.displayValue}
+                    </span>
+                  </a>
+                )}
                 <p className="text-xs font-semibold uppercase text-deep-black">
                   {t("supportClosing")}
                 </p>

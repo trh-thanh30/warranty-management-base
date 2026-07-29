@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
 import { Phone, Building2, Hash, ShieldCheck, FileText } from "lucide-react";
-import { warrantyLookupSupportPhone } from "@/src/constants/warranty.constants";
+import { usePrimaryWebsiteHotline } from "@/src/app/providers/site-settings-provider";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { Link } from "@/src/i18n/navigation";
 import { Container } from "@/src/components/common/container";
@@ -14,6 +14,7 @@ import { useWarrantyLookup } from "@/src/hooks/use-warranty-lookup";
 
 export function WarrantyLookupView() {
   const t = useTranslations("Warranty.lookup");
+  const hotline = usePrimaryWebsiteHotline();
   const {
     data: searchResult,
     errorKind,
@@ -52,10 +53,10 @@ export function WarrantyLookupView() {
         {/* 2. Registration Methods Section */}
         <section className="space-y-8 text-center max-w-4xl lg:max-w-5xl mx-auto">
           <div className="space-y-3">
-            <h2 className="text-xl sm:text-3xl font-condensed font-semibold uppercase tracking-wider text-deep-black">
+            <h2 className="text-xl sm:text-3xl font-semibold uppercase text-deep-black">
               {t("registration.title")}
             </h2>
-            <p className="text-sm text-stone-gray font-medium max-w-xl mx-auto">
+            <p className="text-base text-stone-gray font-medium max-w-xl mx-auto">
               {t("registration.description")}
             </p>
             <div className="mt-4 mx-auto h-[3px] w-20 bg-premium-red" />
@@ -78,7 +79,7 @@ export function WarrantyLookupView() {
                 <h3 className="text-lg sm:text-xl font-semibold uppercase text-deep-black group-hover:text-premium-red transition-colors">
                   {t("registration.methods.phone.title")}
                 </h3>
-                <p className="text-xs text-stone-gray font-medium">
+                <p className="text-sm text-stone-gray font-medium">
                   {t("registration.methods.phone.description")}
                 </p>
               </div>
@@ -105,7 +106,7 @@ export function WarrantyLookupView() {
                 <h3 className="text-lg sm:text-xl font-semibold uppercase text-deep-black group-hover:text-premium-red transition-colors">
                   {t("registration.methods.qr.title")}
                 </h3>
-                <p className="text-xs text-stone-gray font-medium">
+                <p className="text-sm text-stone-gray font-medium">
                   {t("registration.methods.qr.description")}
                 </p>
               </div>
@@ -127,7 +128,7 @@ export function WarrantyLookupView() {
                 <h3 className="text-lg sm:text-xl font-semibold uppercase text-deep-black group-hover:text-premium-red transition-colors">
                   Serial Number
                 </h3>
-                <p className="text-xs font-mono text-stone-gray">
+                <p className="text-sm font-medium text-stone-gray">
                   {t("registration.methods.serial.description")}
                 </p>
               </div>
@@ -138,10 +139,10 @@ export function WarrantyLookupView() {
         {/* 3. Search Section */}
         <section className="space-y-6 max-w-3xl sm:max-w-4xl lg:max-w-5xl mx-auto">
           <div className="text-center space-y-2">
-            <h2 className="text-2xl sm:text-4xl font-condensed font-semibold uppercase tracking-wider text-deep-black">
+            <h2 className="text-xl sm:text-3xl font-semibold uppercase text-deep-black">
               {t("searchSection.title")}
             </h2>
-            <p className="text-xs sm:text-sm text-stone-gray font-medium max-w-lg mx-auto">
+            <p className="text-base text-stone-gray font-medium max-w-xl mx-auto">
               {t("searchSection.description")}
             </p>
           </div>
@@ -152,7 +153,7 @@ export function WarrantyLookupView() {
           >
             <div className="mb-8 pb-8 border-b border-border-gray space-y-8">
               <div>
-                <p className="text-center text-xs font-semibold uppercase tracking-wider text-stone-gray mb-6">
+                <p className="text-center text-base font-semibold uppercase tracking-wider text-stone-gray mb-6">
                   {t("guide.title")}
                 </p>
                 <div className="grid gap-4 sm:grid-cols-3">
@@ -163,7 +164,7 @@ export function WarrantyLookupView() {
                     <h4 className="text-sm font-semibold uppercase text-deep-black pt-1">
                       {t("guide.steps.one.title")}
                     </h4>
-                    <p className="text-xs text-stone-gray font-medium">
+                    <p className="text-sm text-stone-gray font-medium">
                       {t("guide.steps.one.description")}
                     </p>
                   </div>
@@ -175,7 +176,7 @@ export function WarrantyLookupView() {
                     <h4 className="text-sm font-semibold uppercase text-deep-black pt-1">
                       {t("guide.steps.two.title")}
                     </h4>
-                    <p className="text-xs text-stone-gray font-medium">
+                    <p className="text-sm text-stone-gray font-medium">
                       {t("guide.steps.two.description")}
                     </p>
                   </div>
@@ -187,7 +188,7 @@ export function WarrantyLookupView() {
                     <h4 className="text-sm font-semibold uppercase text-deep-black pt-1">
                       {t("guide.steps.three.title")}
                     </h4>
-                    <p className="text-xs text-stone-gray font-medium">
+                    <p className="text-sm text-stone-gray font-medium">
                       {t("guide.steps.three.description")}
                     </p>
                   </div>
@@ -195,7 +196,7 @@ export function WarrantyLookupView() {
               </div>
 
               <div className="border-t border-border-gray pt-6">
-                <p className="text-center text-xs font-semibold uppercase tracking-wider text-stone-gray mb-4">
+                <p className="text-center text-sm font-semibold uppercase tracking-wider text-stone-gray mb-4">
                   {t("otherActions.title")}
                 </p>
                 <div className="grid gap-3 sm:grid-cols-3 text-xs font-semibold uppercase tracking-wide text-center">
@@ -246,18 +247,19 @@ export function WarrantyLookupView() {
                     <p className="text-sm sm:text-base text-stone-gray font-medium leading-relaxed max-w-lg mx-auto">
                       {t("support.message")}
                     </p>
-                    <div className="flex justify-center">
-                      <a
-                        href={warrantyLookupSupportPhone.href}
-                        className="inline-flex items-center gap-2 bg-premium-red hover:bg-warm-red text-white px-6 py-3.5 rounded-md text-sm font-semibold uppercase tracking-wider transition-all shadow-md hover:shadow-lg hover:scale-105 whitespace-nowrap shrink-0"
-                      >
-                        <Phone className="size-4 animate-bounce shrink-0" />
-                        <span className="whitespace-nowrap">
-                          {t("support.hotlineLabel")}:{" "}
-                          {warrantyLookupSupportPhone.displayValue}
-                        </span>
-                      </a>
-                    </div>
+                    {hotline && (
+                      <div className="flex justify-center">
+                        <a
+                          href={hotline.href}
+                          className="inline-flex items-center gap-2 bg-premium-red hover:bg-warm-red text-white px-6 py-3.5 rounded-md text-sm font-semibold uppercase tracking-wider transition-all shadow-md hover:shadow-lg hover:scale-105 whitespace-nowrap shrink-0"
+                        >
+                          <Phone className="size-4 animate-bounce shrink-0" />
+                          <span className="whitespace-nowrap">
+                            {t("support.hotlineLabel")}: {hotline.displayValue}
+                          </span>
+                        </a>
+                      </div>
+                    )}
                     <p className="text-xs font-semibold text-deep-black uppercase tracking-wide">
                       {t("support.closing")}
                     </p>
