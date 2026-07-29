@@ -5,6 +5,7 @@ import type {
   PublicWebsiteSiteSetting,
   WebsiteLocale,
 } from "@repo/shared";
+import { cache } from "react";
 
 export class WebsiteConfigService {
   constructor(private readonly http: Pick<HttpClient, "get">) {}
@@ -21,3 +22,7 @@ export class WebsiteConfigService {
 }
 
 export const websiteConfigService = new WebsiteConfigService(publicHttpClient);
+
+export const getCachedSiteSetting = cache((locale: WebsiteLocale) =>
+  websiteConfigService.getSiteSetting(locale),
+);

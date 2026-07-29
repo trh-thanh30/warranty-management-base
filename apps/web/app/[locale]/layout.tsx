@@ -3,7 +3,7 @@ import { SiteFooter } from "@/src/components/layout/site-footer";
 import { SiteHeader } from "@/src/components/layout/site-header";
 import { LenisProvider } from "@/src/components/providers/lenis-provider";
 import { routing } from "@/src/i18n/routing";
-import { getPublicSiteSettings } from "@/src/services/site-settings.service";
+import { getCachedSiteSetting } from "@/src/services/website-config/website-config.service";
 import type { Metadata } from "next";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
@@ -66,7 +66,7 @@ export default async function LocaleLayout({
 
   const [messages, siteSettings] = await Promise.all([
     getMessages(),
-    getPublicSiteSettings(locale),
+    getCachedSiteSetting(locale).catch(() => null),
   ]);
 
   return (
