@@ -1,4 +1,5 @@
 import {
+  ArrayMaxSize,
   ArrayUnique,
   IsArray,
   IsBoolean,
@@ -10,9 +11,50 @@ import {
   Length,
   Matches,
   Max,
+  MaxLength,
   Min,
+  ValidateNested,
   ValidateIf,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class ProductTemplateSpecificationDto {
+  @IsString()
+  @Length(1, 160)
+  key: string;
+
+  @IsString()
+  @Length(1, 160)
+  value: string;
+}
+
+export class ProductTemplateMetadataDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  shortDescription?: string | null;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(50)
+  @IsString({ each: true })
+  @MaxLength(300, { each: true })
+  features?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(50)
+  @IsString({ each: true })
+  @MaxLength(300, { each: true })
+  applications?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(100)
+  @ValidateNested({ each: true })
+  @Type(() => ProductTemplateSpecificationDto)
+  specifications?: ProductTemplateSpecificationDto[];
+}
 
 export class CreateProductTemplateDto {
   @IsOptional()
@@ -74,7 +116,9 @@ export class CreateProductTemplateDto {
 
   @IsOptional()
   @IsObject()
-  metadata?: Record<string, unknown>;
+  @ValidateNested()
+  @Type(() => ProductTemplateMetadataDto)
+  metadata?: ProductTemplateMetadataDto;
 
   @IsOptional()
   @IsBoolean()

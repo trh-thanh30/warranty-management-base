@@ -6,6 +6,8 @@ import {
   ProductAsset,
   ProductOwnership,
   Warranty,
+  ProductTemplate,
+  ProductTemplateAsset,
   warranty_status,
 } from '@prisma/client';
 import { toCategoryResponse } from '@/modules/categories/categories.types';
@@ -156,33 +158,84 @@ function mergeEffectiveProductAssets<
 }
 
 export function toPublicProductSummary(
-  product: ProductWithRelations,
+  template: PublicProductTemplateWithRelations,
   resolveAssetUrl: (asset: Asset) => string = (asset) => asset.path,
 ) {
-  const template = product.template;
-  const cover = template?.assets?.find((asset) => asset.role === 'COVER');
-  const metadata = template?.metadata as Record<string, unknown> | null;
+  const cover = template.assets.find((asset) => asset.role === 'COVER');
+  const metadata = isRecord(template.metadata) ? template.metadata : {};
 
   return {
-    id: template?.id ?? product.id,
-    productCode: product.product_code,
-    slug: template?.slug ?? '',
-    name: template?.name ?? product.display_name ?? product.product_code,
-    categoryId: product.category_id,
-    category: product.category_ref
-      ? {
-          id: product.category_ref.id,
-          slug: product.category_ref.slug,
-          name: product.category_ref.name,
-        }
-      : null,
-    brand: template?.brand ?? null,
-    model: template?.model ?? null,
-    description: template?.description ?? null,
+    id: template.id,
+    sku: template.sku,
+    slug: template.slug,
+    name: template.name,
+    categoryId: template.category_id,
+    category: {
+      id: template.category_ref.id,
+      slug: template.category_ref.slug,
+      name: template.category_ref.name,
+    },
+    brand: template.brand,
+    model: template.model,
+    description: template.description,
     coverImageUrl: cover ? resolveAssetUrl(cover.asset) : null,
-    specifications: toPublicSpecifications(metadata?.specifications),
-    warrantyDurationMonths: product.warranty?.duration_months ?? null,
-    publishedAt: template?.published_at ?? product.created_at,
+    specifications: toPublicSpecifications(metadata.specifications),
+    warrantyDurationMonths: template.default_warranty_duration_months,
+    publishedAt: template.published_at ?? template.created_at,
+  };
+}
+
+type PublicProductTemplateWithRelations = ProductTemplate & {
+  assets: Array<ProductTemplateAsset & { asset: Asset }>;
+  category_ref: Category;
+};
+
+export function toPublicProductDetail(
+  template: PublicProductTemplateWithRelations,
+  resolveAssetUrl: (asset: Asset) => string = (asset) => asset.path,
+) {
+  const metadata = isRecord(template.metadata) ? template.metadata : {};
+  const images = template.assets.map((templateAsset) => ({
+    id: templateAsset.id,
+    url: resolveAssetUrl(templateAsset.asset),
+    altText: templateAsset.alt_text,
+    sortOrder: templateAsset.sort_order,
+  }));
+  const coverIndex = template.assets.findIndex(
+    (templateAsset) => templateAsset.role === 'COVER',
+  );
+
+  return {
+    id: template.id,
+    sku: template.sku,
+    slug: template.slug,
+    name: template.name,
+    category: {
+      id: template.category_ref.id,
+      slug: template.category_ref.slug,
+      name: template.category_ref.name,
+    },
+    brand: template.brand,
+    model: template.model,
+    modelYear: template.model_year,
+    shortDescription:
+      typeof metadata.shortDescription === 'string'
+        ? metadata.shortDescription
+        : null,
+    description: template.description,
+    coverImage: coverIndex >= 0 ? images[coverIndex] : null,
+    galleryImages: images.filter(
+      (_, index) =>
+        index !== coverIndex && template.assets[index]?.role === 'GALLERY',
+    ),
+    specifications: toPublicSpecifications(metadata.specifications),
+    features: toPublicStringList(metadata.features),
+    applications: toPublicStringList(metadata.applications),
+    warranty: {
+      durationMonths: template.default_warranty_duration_months,
+      terms: template.default_warranty_terms,
+    },
+    publishedAt: template.published_at,
   };
 }
 
@@ -190,13 +243,26 @@ function toPublicSpecifications(value: unknown) {
   if (!Array.isArray(value)) return [];
 
   return value.flatMap((item) => {
-    if (!item || typeof item !== 'object') return [];
-    const key = 'key' in item ? item.key : undefined;
-    const specificationValue = 'value' in item ? item.value : undefined;
+    if (!isRecord(item)) return [];
+    const key = item.key;
+    const specificationValue = item.value;
     if (typeof key !== 'string' || typeof specificationValue !== 'string') {
       return [];
     }
+    const group = item.group;
 
-    return [{ key, value: specificationValue }];
+    return [
+      {
+        key,
+        value: specificationValue,
+        ...(typeof group === 'string' ? { group } : {}),
+      },
+    ];
   });
+}
+
+function toPublicStringList(value: unknown) {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string')
+    : [];
 }

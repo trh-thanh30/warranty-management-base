@@ -151,4 +151,52 @@ describe('ProductTemplate write use cases', () => {
       'old-cover-id',
     );
   });
+
+  it('merges supported metadata updates with existing extension keys', async () => {
+    const existingTemplate = {
+      ...templateRecord,
+      metadata: {
+        integrationCode: 'legacy-value',
+        features: ['Old feature'],
+      },
+    };
+    const repository = {
+      findById: jest.fn().mockResolvedValue(existingTemplate),
+      findImageAssets: jest.fn().mockResolvedValue([]),
+      update: jest.fn().mockResolvedValue(templateRecord),
+    };
+    const useCase = new UpdateProductTemplateUseCase(
+      {
+        category: { findUnique: jest.fn() },
+      } as never,
+      repository as never,
+      {
+        deleteAssetIfUnreferenced: jest.fn(),
+        enrichAssetUrl: jest.fn(),
+      } as never,
+    );
+
+    await useCase.execute('template-id', {
+      metadata: {
+        applications: ['Windshield'],
+        features: ['New feature'],
+        shortDescription: 'Short summary',
+        specifications: [{ key: 'UV', value: '99%' }],
+      },
+    });
+
+    expect(repository.update).toHaveBeenCalledWith(
+      'template-id',
+      expect.objectContaining({
+        metadata: {
+          applications: ['Windshield'],
+          features: ['New feature'],
+          integrationCode: 'legacy-value',
+          shortDescription: 'Short summary',
+          specifications: [{ key: 'UV', value: '99%' }],
+        },
+      }),
+      {},
+    );
+  });
 });

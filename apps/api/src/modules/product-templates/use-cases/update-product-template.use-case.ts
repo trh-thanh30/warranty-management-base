@@ -4,6 +4,7 @@ import { AssetsService } from '@/modules/assets/assets.service';
 import { UpdateProductTemplateDto } from '@/modules/product-templates/dto/update-product-template.dto';
 import {
   resolveProductTemplateCategory,
+  mergeProductTemplateMetadata,
   normalizeSku,
   toTemplateJson,
   validateProductTemplateAssets,
@@ -62,7 +63,9 @@ export class UpdateProductTemplateUseCase {
         description: dto.description,
         default_warranty_duration_months: dto.defaultWarrantyDurationMonths,
         default_warranty_terms: dto.defaultWarrantyTerms,
-        metadata: toTemplateJson(dto.metadata),
+        metadata: toTemplateJson(
+          mergeProductTemplateMetadata(existing.metadata, dto.metadata),
+        ),
         is_active: dto.isActive,
         is_published: dto.isPublished,
         published_at:

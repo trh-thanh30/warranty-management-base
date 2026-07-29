@@ -1,5 +1,8 @@
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
-import { warranty_activation_request_status } from '@prisma/client';
+import {
+  asset_access_type,
+  warranty_activation_request_status,
+} from '@prisma/client';
 
 describe('ProductsRepository', () => {
   it('loads at most one open activation request with a product', async () => {
@@ -29,5 +32,36 @@ describe('ProductsRepository', () => {
         where: { id: 'product-id' },
       }),
     );
+  });
+
+  it('finds public detail by published template slug', async () => {
+    const findFirst = jest.fn().mockResolvedValue(null);
+    const repository = new ProductsRepository({
+      productTemplate: { findFirst },
+    } as never);
+
+    await repository.findPublicTemplateBySlug('lex-sp50');
+
+    expect(findFirst).toHaveBeenCalledWith({
+      where: {
+        slug: 'lex-sp50',
+        is_active: true,
+        is_published: true,
+        category_ref: { is_active: true },
+      },
+      include: {
+        category_ref: true,
+        assets: {
+          where: {
+            asset: {
+              access_type: asset_access_type.PUBLIC,
+              is_deleted: false,
+            },
+          },
+          include: { asset: true },
+          orderBy: [{ role: 'asc' }, { sort_order: 'asc' }],
+        },
+      },
+    });
   });
 });

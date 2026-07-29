@@ -18,6 +18,30 @@ export type ProductAssetSummary = {
   source?: "PRODUCT" | "TEMPLATE";
 };
 
+export type ProductTemplateSpecificationInput = {
+  key: string;
+  value: string;
+};
+
+export type ProductTemplateSpecification = ProductTemplateSpecificationInput & {
+  group?: string;
+};
+
+export type ProductTemplateMetadataInput = {
+  applications?: string[];
+  features?: string[];
+  shortDescription?: string | null;
+  specifications?: ProductTemplateSpecificationInput[];
+};
+
+export type ProductTemplateMetadata = {
+  applications?: string[];
+  features?: string[];
+  shortDescription?: string | null;
+  specifications?: ProductTemplateSpecification[];
+  [key: string]: unknown;
+};
+
 export type ProductTemplateSummary = {
   id: string;
   sku: string;
@@ -31,7 +55,7 @@ export type ProductTemplateSummary = {
   description: string | null;
   defaultWarrantyDurationMonths: number;
   defaultWarrantyTerms: string | null;
-  metadata: Record<string, unknown> | null;
+  metadata: ProductTemplateMetadata | null;
   isActive: boolean;
   isPublished: boolean;
   publishedAt: string | null;
@@ -58,7 +82,7 @@ export type CreateProductTemplateBody = {
   description?: string;
   defaultWarrantyDurationMonths?: number;
   defaultWarrantyTerms?: string;
-  metadata?: Record<string, unknown>;
+  metadata?: ProductTemplateMetadataInput;
   isPublished?: boolean;
   coverAssetId?: string;
   galleryAssetIds?: string[];
@@ -75,7 +99,7 @@ export type UpdateProductTemplateBody = {
   description?: string | null;
   defaultWarrantyDurationMonths?: number;
   defaultWarrantyTerms?: string | null;
-  metadata?: Record<string, unknown> | null;
+  metadata?: ProductTemplateMetadataInput | null;
   isActive?: boolean;
   isPublished?: boolean;
   coverAssetId?: string | null;
@@ -184,21 +208,48 @@ export type UpdateProductBody = {
 
 export type PublicProductSummary = {
   id: string;
-  productCode: string;
+  sku: string;
   slug: string;
   name: string;
-  categoryId: string | null;
-  category: Pick<CategorySummary, "id" | "slug" | "name"> | null;
+  categoryId: string;
+  category: Pick<CategorySummary, "id" | "slug" | "name">;
   brand: string | null;
   model: string | null;
   description: string | null;
   coverImageUrl: string | null;
-  specifications: Array<{
-    key: string;
-    value: string;
-  }>;
-  warrantyDurationMonths: number | null;
+  specifications: ProductTemplateSpecification[];
+  warrantyDurationMonths: number;
   publishedAt: string;
+};
+
+export type PublicProductImage = {
+  id: string;
+  url: string;
+  altText: string | null;
+  sortOrder: number;
+};
+
+export type PublicProductDetail = {
+  id: string;
+  sku: string;
+  slug: string;
+  name: string;
+  category: Pick<CategorySummary, "id" | "slug" | "name">;
+  brand: string | null;
+  model: string | null;
+  modelYear: number | null;
+  shortDescription: string | null;
+  description: string | null;
+  coverImage: PublicProductImage | null;
+  galleryImages: PublicProductImage[];
+  specifications: ProductTemplateSpecification[];
+  features: string[];
+  applications: string[];
+  warranty: {
+    durationMonths: number;
+    terms: string | null;
+  };
+  publishedAt: string | null;
 };
 
 export type ListPublicProductsQuery = PaginationQuery & {

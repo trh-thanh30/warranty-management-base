@@ -18,6 +18,7 @@ import { PublicListNetworkDirectoryUseCase } from '@/modules/public/use-cases/pu
 import { PublicListNetworkDirectoryFilterOptionsUseCase } from '@/modules/public/use-cases/public-list-network-directory-filter-options.use-case';
 import { ListPublicProductsDto } from '@/modules/products/dto/list-public-products.dto';
 import { ListPublicProductsUseCase } from '@/modules/products/use-cases/list-public-products.use-case';
+import { GetPublicProductDetailUseCase } from '@/modules/products/use-cases/get-public-product-detail.use-case';
 import { ListPublicProductCategoriesUseCase } from '@/modules/categories/use-cases/list-public-product-categories.use-case';
 import { ListPublicProductCategoriesDto } from '@/modules/categories/dto/list-public-product-categories.dto';
 import { PublicLookupWarrantyClaimByCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claim-by-code.use-case';
@@ -40,6 +41,7 @@ export class PublicController {
     private readonly publicListNetworkDirectoryUseCase: PublicListNetworkDirectoryUseCase,
     private readonly publicListNetworkDirectoryFilterOptionsUseCase: PublicListNetworkDirectoryFilterOptionsUseCase,
     private readonly listPublicProductsUseCase: ListPublicProductsUseCase,
+    private readonly getPublicProductDetailUseCase: GetPublicProductDetailUseCase,
     private readonly listPublicProductCategoriesUseCase: ListPublicProductCategoriesUseCase,
   ) {}
 
@@ -111,6 +113,11 @@ export class PublicController {
   @Get('products')
   listProducts(@Query() query: ListPublicProductsDto) {
     return this.listPublicProductsUseCase.execute(query);
+  }
+
+  @Get('products/:slug')
+  getProductDetail(@Param('slug') slug: string) {
+    return this.getPublicProductDetailUseCase.execute(slug);
   }
 
   @Get('product-categories')
