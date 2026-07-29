@@ -1,8 +1,12 @@
 import type {
   CategoryResponse,
+  CategoryParentOption,
+  CategoryTreeResponse,
   CategoryImportResult,
   CreateCategoryBody,
   ListCategoriesQuery,
+  ListCategoryParentOptionsQuery,
+  ListCategoryTreeQuery,
   PaginatedResponse,
   ReorderCategoriesBody,
   UpdateCategoryBody,
@@ -17,6 +21,26 @@ export function createCategoriesService(http: CategoriesHttpClient) {
     ): Promise<PaginatedResponse<CategoryResponse>> {
       return unwrap(
         await http.get<PaginatedResponse<CategoryResponse>>("/categories", {
+          params: query,
+        }),
+      );
+    },
+
+    async listCategoryTree(
+      query: ListCategoryTreeQuery,
+    ): Promise<CategoryTreeResponse> {
+      return unwrap(
+        await http.get<CategoryTreeResponse>("/categories/tree", {
+          params: query,
+        }),
+      );
+    },
+
+    async listCategoryParentOptions(
+      query: ListCategoryParentOptionsQuery,
+    ): Promise<CategoryParentOption[]> {
+      return unwrap(
+        await http.get<CategoryParentOption[]>("/categories/parent-options", {
           params: query,
         }),
       );

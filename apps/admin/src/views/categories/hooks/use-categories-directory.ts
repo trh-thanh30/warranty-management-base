@@ -17,7 +17,7 @@ import type {
   CategoryTypeFilter,
 } from "../categories.types";
 import {
-  useCategories,
+  useCategoryTree,
   useDeactivateCategory,
   useImportCategories,
 } from "./use-categories";
@@ -66,7 +66,7 @@ export function useCategoriesDirectory() {
   const canCreateCategories = hasPermission(PERMISSIONS.CATEGORY_CREATE);
   const deactivateCategory = useDeactivateCategory();
   const importCategories = useImportCategories();
-  const categoriesQuery = useCategories(
+  const categoriesQuery = useCategoryTree(
     {
       isActive: toIsActiveQuery(status),
       limit: pageSize,
