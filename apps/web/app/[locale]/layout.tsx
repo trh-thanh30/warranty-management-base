@@ -7,6 +7,8 @@ import { routing } from "@/src/i18n/routing";
 import { SiteHeader } from "@/src/components/layout/site-header";
 import { SiteFooter } from "@/src/components/layout/site-footer";
 import { LenisProvider } from "@/src/components/providers/lenis-provider";
+import { QueryProvider } from "@/src/components/providers/query-provider";
+import { PublicQuickChat } from "@/src/components/common/public-quick-chat";
 import { getPublicSiteSettings } from "@/src/services/site-settings.service";
 import "../globals.css";
 
@@ -75,11 +77,14 @@ export default async function LocaleLayout({
     >
       <body>
         <NextIntlClientProvider messages={messages}>
-          <LenisProvider>
-            <SiteHeader logoUrl={siteSettings?.headerLogo?.url} />
-            <div className="pt-[84px]">{children}</div>
-            <SiteFooter siteSettings={siteSettings} />
-          </LenisProvider>
+          <QueryProvider>
+            <LenisProvider>
+              <SiteHeader logoUrl={siteSettings?.headerLogo?.url} />
+              <div className="pt-[84px]">{children}</div>
+              <SiteFooter siteSettings={siteSettings} />
+              <PublicQuickChat siteSettings={siteSettings} />
+            </LenisProvider>
+          </QueryProvider>
         </NextIntlClientProvider>
       </body>
     </html>

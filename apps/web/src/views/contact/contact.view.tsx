@@ -8,7 +8,7 @@ import {
   normalizeExternalUrl,
   toTelephoneHref,
 } from "@/src/utils/link.utils";
-import { ContactMessageForm } from "./components/contact-message-form";
+import { ContactMessageForm } from "@/src/components/common/contact-message-form";
 import {
   getPublishedContactOffices,
   stripTrailingColon,
@@ -60,7 +60,7 @@ export function ContactView({ siteSettings }: ContactViewProps) {
 
             <div className="grid gap-8 sm:grid-cols-2 pt-4 border-t border-border-gray">
               <div className="space-y-3">
-                <h3 className="text-base font-semibold uppercase text-deep-black">
+                <h3 className="text-base font-semibold uppercase text-premium-red">
                   {t("offices.title")}
                 </h3>
                 <ul className="space-y-3 text-xs sm:text-sm text-stone-gray font-medium leading-relaxed">
@@ -81,7 +81,7 @@ export function ContactView({ siteSettings }: ContactViewProps) {
               </div>
 
               <div className="space-y-3">
-                <h3 className="text-base font-semibold uppercase text-deep-black">
+                <h3 className="text-base font-semibold uppercase text-premium-red">
                   {t("contactDetailsTitle")}
                 </h3>
                 <ul className="space-y-3 text-xs sm:text-sm text-stone-gray font-medium leading-relaxed">
@@ -147,9 +147,14 @@ export function ContactView({ siteSettings }: ContactViewProps) {
           </div>
 
           <div className="lg:col-span-6 bg-surface-muted rounded-md p-6 sm:p-10 border border-border-gray shadow-xl">
-            <span className="inline-block bg-accent-gold text-deep-black px-4 py-1.5 rounded-md text-sm font-medium uppercase tracking-wide mb-8">
-              {t("form.eyebrow")}
-            </span>
+            <div className="mb-8 space-y-2">
+              <h2 className="text-2xl font-semibold text-premium-red uppercase">
+                {t("form.title")}
+              </h2>
+              <p className="max-w-xl text-base leading-6 text-stone-gray">
+                {t("form.description")}
+              </p>
+            </div>
 
             <ContactMessageForm />
           </div>
