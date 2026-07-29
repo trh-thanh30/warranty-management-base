@@ -22,6 +22,7 @@ import { join } from 'node:path';
 import { seedAdminUsers } from './seed-admin';
 import { seedContentPages } from './seed-content-pages';
 import { seedLexzenzDealers } from './seed-dealers';
+import { requireSeedPassword } from './seed-env';
 import { seedWebsiteSiteSettings } from './seed-website-config';
 
 type DashboardWarrantyChartSeed = {
@@ -679,8 +680,9 @@ async function main() {
   await seedLexzenzDealers(prisma);
   await seedDefaultCategories();
 
+  const seedPassword = requireSeedPassword('SEED_DEMO_USER_PASSWORD');
   const { adminUser, customerAUser, customerBUser, moderatorUser } =
-    await seedAdminUsers(prisma);
+    await seedAdminUsers(prisma, seedPassword);
 
   const customerA = await upsertCustomer({
     userId: customerAUser.id,
@@ -1513,7 +1515,6 @@ async function main() {
     'Warranty claims: CLM-DEMO-SUBMITTED, CLM-DEMO-REVIEWING, CLM-DEMO-IN-REPAIR',
   );
   console.log('Notifications: 5 sent demo messages and 1 scheduled message');
-  console.log('Default password: password123');
 }
 
 main()

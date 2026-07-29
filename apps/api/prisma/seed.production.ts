@@ -5,6 +5,7 @@ import { Pool } from 'pg';
 import { seedLexzenzProductCategories } from './seed-categories';
 import { seedContentPages } from './seed-content-pages';
 import { seedLexzenzDealers } from './seed-dealers';
+import { requireSeedPassword } from './seed-env';
 import { seedWebsiteSiteSettings } from './seed-website-config';
 
 let prisma: PrismaClient | undefined;
@@ -33,7 +34,7 @@ async function main() {
 async function seedProductionAdmin(client: PrismaClient) {
   const email = process.env.SEED_ADMIN_EMAIL ?? 'admin@example.com';
   const username = process.env.SEED_ADMIN_USERNAME ?? 'admin';
-  const password = process.env.SEED_ADMIN_PASSWORD ?? 'password123';
+  const password = requireSeedPassword('SEED_ADMIN_PASSWORD');
   const hashedPassword = await bcrypt.hash(password, 12);
 
   const [userByEmail, userByUsername] = await Promise.all([
@@ -48,10 +49,9 @@ async function seedProductionAdmin(client: PrismaClient) {
   }
 
   const existingUser = userByEmail ?? userByUsername;
-  const data = {
+  const accountData = {
     email,
     is_verified: true,
-    password: hashedPassword,
     role: user_role.ADMIN,
     status: user_status.ACTIVE,
     username,
@@ -60,9 +60,14 @@ async function seedProductionAdmin(client: PrismaClient) {
   const admin = existingUser
     ? await client.user.update({
         where: { id: existingUser.id },
-        data,
+        data: accountData,
       })
-    : await client.user.create({ data });
+    : await client.user.create({
+        data: {
+          ...accountData,
+          password: hashedPassword,
+        },
+      });
 
   console.log(`Seeded production admin: ${admin.email}`);
 }
