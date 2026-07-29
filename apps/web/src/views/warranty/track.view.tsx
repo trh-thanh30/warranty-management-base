@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
-import { Input } from "@repo/ui/input";
+import { Container } from "@/src/components/common/container";
 import { formControlFocusClassName } from "@/src/components/common/form-control.constants";
+import { Input } from "@repo/ui/input";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { demoWarrantyTicket } from "./warranty.constants";
 import type { WarrantyTicketResult } from "./warranty.types";
 
@@ -30,7 +31,7 @@ export function WarrantyTrackView() {
 
   return (
     <main className="min-h-screen bg-surface-muted py-12 sm:py-20 text-deep-black">
-      <div className="mx-auto max-w-[1000px] px-6 space-y-12">
+      <Container className="max-w-250 space-y-12">
         <div className="text-center space-y-4">
           <span className="inline-block bg-accent-gold/10 text-accent-gold border border-accent-gold/30 px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-[0.25em]">
             {t("eyebrow")}
@@ -100,7 +101,7 @@ export function WarrantyTrackView() {
             </div>
           </div>
         )}
-      </div>
+      </Container>
     </main>
   );
 }

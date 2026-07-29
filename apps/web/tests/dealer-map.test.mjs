@@ -28,6 +28,7 @@ const dealerFiltersPath = path.join(
   "use-dealer-filters.ts",
 );
 const vietnamGeoJsonPath = path.join(webRoot, "public", "map", "vn.geojson");
+const globalsPath = path.join(webRoot, "app", "globals.css");
 const vietnamOverlayPath = path.join(
   process.cwd(),
   "packages",
@@ -97,10 +98,11 @@ test("dealer map uses the shared constrained Vietnam overlay and active marker",
   assert.doesNotMatch(source, /🇻🇳|📍/u);
 });
 
-test("dealer page starts unselected and dynamically renders the Leaflet map", async () => {
-  const [filtersSource, viewSource] = await Promise.all([
+test("dealer page loads public network dealers and dynamically renders the Leaflet map", async () => {
+  const [filtersSource, viewSource, mapSource] = await Promise.all([
     readFile(dealerFiltersPath, "utf8"),
     readFile(dealersViewPath, "utf8"),
+    readFile(dealerMapPath, "utf8"),
   ]);
 
   assert.match(filtersSource, /useState<string \| null>\(null\)/);
@@ -108,10 +110,59 @@ test("dealer page starts unselected and dynamically renders the Leaflet map", as
     filtersSource,
     /dealers\.find\(\(dealer\) => dealer\.id === selectedDealerId\) \?\? null/,
   );
+  assert.match(viewSource, /useNetworkLocations/);
+  assert.match(viewSource, /selectDealerLocations\(locations\)/);
   assert.match(viewSource, /dynamic\(/);
   assert.match(viewSource, /ssr:\s*false/);
   assert.match(viewSource, /<DealerMap activeDealer=\{activeDealer\}/);
+  assert.match(mapSource, /activeDealer\.latitude/);
+  assert.match(mapSource, /activeDealer\.longitude/);
+  assert.match(mapSource, /href=\{activeDealer\.googleMapsUrl\}/);
   assert.doesNotMatch(viewSource, /openstreetmap\.org\/export\/embed/);
+});
+
+test("dealer directory composes shared UI controls instead of native form controls", async () => {
+  const filtersPath = path.join(
+    webRoot,
+    "src",
+    "views",
+    "dealers",
+    "components",
+    "dealer-filters.tsx",
+  );
+  const listPath = path.join(
+    webRoot,
+    "src",
+    "views",
+    "dealers",
+    "components",
+    "dealer-list.tsx",
+  );
+  const [filtersSource, listSource] = await Promise.all([
+    readFile(filtersPath, "utf8"),
+    readFile(listPath, "utf8"),
+  ]);
+
+  assert.match(filtersSource, /from "@repo\/ui\/input"/);
+  assert.match(filtersSource, /from "@repo\/ui\/select"/);
+  assert.match(filtersSource, /from "@repo\/ui\/button"/);
+  assert.match(listSource, /from "@repo\/ui\/button"/);
+  assert.match(listSource, /from "@repo\/ui\/skeleton"/);
+  assert.match(listSource, /data-lenis-prevent/);
+  assert.match(listSource, /min-h-0/);
+  assert.match(listSource, /overscroll-y-contain/);
+  assert.doesNotMatch(filtersSource, /<select|<input|<button/);
+  assert.doesNotMatch(listSource, /<button/);
+});
+
+test("public Web keeps shared UI controls in the light theme regardless of OS preference", async () => {
+  const source = await readFile(globalsPath, "utf8");
+
+  assert.match(source, /:root\s*\{\s*color-scheme:\s*light;/);
+  assert.match(
+    source,
+    /@custom-variant dark \(&:where\(\.dark,\s*\.dark \*\)\);/,
+  );
 });
 
 test("dealer map messages resolve in every locale", async () => {

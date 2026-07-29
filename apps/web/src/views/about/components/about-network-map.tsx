@@ -16,7 +16,7 @@ import { divIcon } from "leaflet";
 import { MapPin, Navigation, Phone } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Marker, Popup, Tooltip } from "react-leaflet";
-import { useNetworkLocations } from "../use-network-locations";
+import { useNetworkLocations } from "@/src/hooks/use-network-locations";
 
 const markerColorByKind: Record<PublicNetworkLocationKind, string> = {
   DEALER: MAP_MARKER_COLORS.dealer,

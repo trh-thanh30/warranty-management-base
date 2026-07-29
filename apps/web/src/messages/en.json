@@ -1010,7 +1010,7 @@
   },
   "DealersPage": {
     "hero": {
-      "imageAlt": "Official FUJITEK dealer network",
+      "imageAlt": "LEXZENZ Korea Reflex Film automotive window film banner",
       "eyebrow": "Dealer network",
       "title": "Become an authorized dealer today",
       "description": "Find an official FUJITEK automotive window-film installation center near you.",
@@ -1018,22 +1018,26 @@
     },
     "filters": {
       "searchPlaceholder": "Search by name or address...",
+      "searchAriaLabel": "Search dealers by name, address, or phone number",
       "cityAriaLabel": "Select a province or city",
       "districtAriaLabel": "Select a district",
       "allCities": "Nationwide",
       "allDistricts": "All districts",
       "nearMe": "Find stores near you (≤ 20 km)",
+      "nearMeLoading": "Finding your location...",
+      "nearMeError": "Unable to access your location. Please check location permissions.",
+      "nearMeUnsupported": "Your browser does not support geolocation.",
       "resultCount": "{count} stores found"
     },
+    "states": {
+      "loading": "Loading dealers...",
+      "error": "Unable to load dealers. Please try again.",
+      "retry": "Try again"
+    },
     "empty": "No matching dealers found.",
-    "mainShowroom": "Main showroom",
     "viewMore": "View more",
     "directions": "Directions",
     "hotline": "Hotline",
-    "hours": {
-      "daily": "08:00 - 18:30 (Monday - Sunday)",
-      "weekdays": "08:00 - 18:00 (Monday - Saturday)"
-    },
     "map": {
       "defaultTitle": "FUJITEK dealer map",
       "iframeTitle": "FUJITEK dealer location map",
@@ -1043,25 +1047,6 @@
       "selectedDealer": "Selected dealer",
       "popupPhone": "Phone",
       "openGoogleMaps": "Open Google Maps"
-    },
-    "locations": {
-      "cities": {
-        "hoaBinh": "Hoa Binh",
-        "phuYen": "Phu Yen",
-        "hanoi": "Hanoi",
-        "hoChiMinhCity": "Ho Chi Minh City",
-        "daNang": "Da Nang",
-        "dakLak": "Dak Lak"
-      },
-      "districts": {
-        "tanLac": "Tan Lac",
-        "dongHoa": "Dong Hoa",
-        "cauGiay": "Cau Giay",
-        "haDong": "Ha Dong",
-        "thuDuc": "Thu Duc",
-        "haiChau": "Hai Chau",
-        "buonMaThuot": "Buon Ma Thuot"
-      }
     }
   },
   "ContactPage": {

@@ -1010,7 +1010,7 @@
   },
   "DealersPage": {
     "hero": {
-      "imageAlt": "Hệ thống đại lý chính thức FUJITEK",
+      "imageAlt": "Banner phim cách nhiệt LEXZENZ Korea Reflex Film",
       "eyebrow": "Hệ thống đại lý",
       "title": "Trở thành đại lý chính thức ngay hôm nay",
       "description": "Tìm trung tâm thi công phim cách nhiệt FUJITEK chính hãng gần bạn trên toàn quốc.",
@@ -1018,22 +1018,26 @@
     },
     "filters": {
       "searchPlaceholder": "Tìm theo tên hoặc địa chỉ...",
+      "searchAriaLabel": "Tìm đại lý theo tên, địa chỉ hoặc số điện thoại",
       "cityAriaLabel": "Chọn tỉnh hoặc thành phố",
       "districtAriaLabel": "Chọn quận hoặc huyện",
       "allCities": "Toàn quốc",
       "allDistricts": "Quận/Huyện",
       "nearMe": "Tìm cửa hàng gần bạn (≤ 20 km)",
+      "nearMeLoading": "Đang xác định vị trí của bạn...",
+      "nearMeError": "Không thể lấy vị trí. Hãy kiểm tra quyền truy cập vị trí.",
+      "nearMeUnsupported": "Trình duyệt không hỗ trợ định vị.",
       "resultCount": "Có {count} cửa hàng"
     },
+    "states": {
+      "loading": "Đang tải danh sách đại lý...",
+      "error": "Không thể tải danh sách đại lý. Vui lòng thử lại.",
+      "retry": "Thử lại"
+    },
     "empty": "Không tìm thấy đại lý phù hợp.",
-    "mainShowroom": "Showroom chính",
     "viewMore": "Xem thêm",
     "directions": "Chỉ đường",
     "hotline": "Hotline",
-    "hours": {
-      "daily": "08:00 - 18:30 (Thứ Hai - Chủ Nhật)",
-      "weekdays": "08:00 - 18:00 (Thứ Hai - Thứ Bảy)"
-    },
     "map": {
       "defaultTitle": "Bản đồ đại lý FUJITEK",
       "iframeTitle": "Bản đồ vị trí đại lý FUJITEK",
@@ -1043,25 +1047,6 @@
       "selectedDealer": "Đại lý được chọn",
       "popupPhone": "Điện thoại",
       "openGoogleMaps": "Mở Google Maps"
-    },
-    "locations": {
-      "cities": {
-        "hoaBinh": "Hòa Bình",
-        "phuYen": "Phú Yên",
-        "hanoi": "Hà Nội",
-        "hoChiMinhCity": "TP. Hồ Chí Minh",
-        "daNang": "Đà Nẵng",
-        "dakLak": "Đắk Lắk"
-      },
-      "districts": {
-        "tanLac": "Tân Lạc",
-        "dongHoa": "Đông Hòa",
-        "cauGiay": "Cầu Giấy",
-        "haDong": "Hà Đông",
-        "thuDuc": "Thủ Đức",
-        "haiChau": "Hải Châu",
-        "buonMaThuot": "Buôn Ma Thuột"
-      }
     }
   },
   "ContactPage": {

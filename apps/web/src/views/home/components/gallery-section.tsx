@@ -9,6 +9,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { useScrollReveal } from "@/src/hooks/use-scroll-reveal";
 import { revealViewportOnce } from "@/src/constants/motion.constants";
+import { Container } from "@/src/components/common/container";
 import { galleryCategories, galleryImages } from "../home.constants";
 
 type GalleryImage = (typeof galleryImages)[number];
@@ -80,7 +81,7 @@ export function GallerySection() {
 
   return (
     <section className="w-full bg-gray-50 py-16 lg:py-24">
-      <div className="mx-auto max-w-[1720px] space-y-12 px-6 text-center sm:px-10 lg:px-12">
+      <Container className="space-y-12 text-center">
         <motion.div
           variants={fadeUp}
           initial="hidden"
@@ -175,7 +176,7 @@ export function GallerySection() {
             </button>
           </div>
         ) : null}
-      </div>
+      </Container>
     </section>
   );
 }

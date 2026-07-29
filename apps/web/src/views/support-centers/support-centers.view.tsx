@@ -1,7 +1,8 @@
 "use client";
 
+import { Container } from "@/src/components/common/container";
+import { Clock, MapPin, Phone } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { MapPin, Phone, Clock } from "lucide-react";
 import { supportCenters } from "./support-centers.constants";
 
 export function SupportCentersView() {
@@ -9,7 +10,7 @@ export function SupportCentersView() {
 
   return (
     <main className="min-h-screen bg-surface-muted py-12 sm:py-20 text-deep-black">
-      <div className="mx-auto max-w-[1200px] px-6 space-y-12">
+      <Container className="max-w-300 space-y-12">
         <div className="text-center space-y-4">
           <span className="inline-block bg-premium-red/10 text-premium-red border border-premium-red/30 px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-[0.25em]">
             {t("eyebrow")}
@@ -53,7 +54,7 @@ export function SupportCentersView() {
             </div>
           ))}
         </div>
-      </div>
+      </Container>
     </main>
   );
 }

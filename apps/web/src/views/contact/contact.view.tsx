@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Send, CheckCircle2 } from "lucide-react";
 import { Input } from "@repo/ui/input";
+import { Container } from "@/src/components/common/container";
 import { formControlFocusClassName } from "@/src/components/common/form-control.constants";
 
 const ContactMap = dynamic(() => import("./components/contact-map"), {
@@ -30,7 +31,7 @@ export function ContactView() {
 
   return (
     <main className="min-h-screen bg-white text-deep-black">
-      <div className="mx-auto max-w-[1400px] px-6 sm:px-10 lg:px-12 py-12 lg:py-20 space-y-16">
+      <Container className="max-w-[1400px] space-y-16 py-12 lg:py-20">
         {/* Top 2 Columns Section */}
         <div className="grid gap-12 lg:grid-cols-12 items-start">
           {/* Left Column: Contact Information */}
@@ -263,7 +264,7 @@ export function ContactView() {
             </div>
           </div>
         </div>
-      </div>
+      </Container>
     </main>
   );
 }

@@ -1,72 +1,121 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { dealerFilterAll, dealers } from "./dealers.constants";
+import type { GeoPoint } from "@repo/shared";
+import { useCallback, useMemo, useRef, useState } from "react";
+import type { DealerLocation, NearbyDealerStatus } from "./dealers.types";
+import {
+  dealerFilterAll,
+  filterDealerLocations,
+  filterDealerLocationsWithinRadius,
+  getDealerDistricts,
+  getDealerProvinces,
+} from "./dealers.utils";
 
-export function useDealerFilters() {
+export function useDealerFilters(dealers: readonly DealerLocation[]) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCity, setSelectedCity] = useState<string>(dealerFilterAll);
+  const [selectedProvince, setSelectedProvince] =
+    useState<string>(dealerFilterAll);
   const [selectedDistrict, setSelectedDistrict] =
     useState<string>(dealerFilterAll);
   const [nearMeOnly, setNearMeOnly] = useState(false);
+  const [nearbyStatus, setNearbyStatus] = useState<NearbyDealerStatus>("idle");
+  const [userPosition, setUserPosition] = useState<GeoPoint | null>(null);
   const [selectedDealerId, setSelectedDealerId] = useState<string | null>(null);
+  const nearbyRequestVersion = useRef(0);
 
-  const cities = useMemo(
-    () => Array.from(new Set(dealers.map((dealer) => dealer.cityId))),
-    [],
+  const provinces = useMemo(() => getDealerProvinces(dealers), [dealers]);
+
+  const districts = useMemo(
+    () => getDealerDistricts(dealers, selectedProvince),
+    [dealers, selectedProvince],
   );
 
-  const districts = useMemo(() => {
-    if (selectedCity === dealerFilterAll) return [];
-
-    return Array.from(
-      new Set(
-        dealers
-          .filter((dealer) => dealer.cityId === selectedCity)
-          .map((dealer) => dealer.districtId),
-      ),
-    );
-  }, [selectedCity]);
-
   const filteredDealers = useMemo(() => {
-    const normalizedQuery = searchQuery.trim().toLocaleLowerCase("vi");
-
-    return dealers.filter((dealer) => {
-      const matchesQuery =
-        !normalizedQuery ||
-        dealer.name.toLocaleLowerCase("vi").includes(normalizedQuery) ||
-        dealer.address.toLocaleLowerCase("vi").includes(normalizedQuery);
-      const matchesCity =
-        selectedCity === dealerFilterAll || dealer.cityId === selectedCity;
-      const matchesDistrict =
-        selectedDistrict === dealerFilterAll ||
-        dealer.districtId === selectedDistrict;
-
-      return matchesQuery && matchesCity && matchesDistrict;
+    const filtered = filterDealerLocations(dealers, {
+      searchQuery,
+      selectedDistrict,
+      selectedProvince,
     });
-  }, [searchQuery, selectedCity, selectedDistrict]);
+
+    return nearMeOnly && userPosition
+      ? filterDealerLocationsWithinRadius(filtered, userPosition, 20)
+      : filtered;
+  }, [
+    dealers,
+    nearMeOnly,
+    searchQuery,
+    selectedDistrict,
+    selectedProvince,
+    userPosition,
+  ]);
 
   const activeDealer = useMemo(
     () => dealers.find((dealer) => dealer.id === selectedDealerId) ?? null,
-    [selectedDealerId],
+    [dealers, selectedDealerId],
   );
 
-  const selectCity = (cityId: string) => {
-    setSelectedCity(cityId);
+  const selectProvince = (province: string) => {
+    setSelectedProvince(province);
     setSelectedDistrict(dealerFilterAll);
   };
 
+  const changeNearMeOnly = useCallback((enabled: boolean) => {
+    nearbyRequestVersion.current += 1;
+    const requestVersion = nearbyRequestVersion.current;
+
+    if (!enabled) {
+      setNearMeOnly(false);
+      setNearbyStatus("idle");
+      setUserPosition(null);
+      return;
+    }
+
+    if (typeof navigator === "undefined" || !("geolocation" in navigator)) {
+      setNearMeOnly(false);
+      setNearbyStatus("unsupported");
+      return;
+    }
+
+    setNearMeOnly(true);
+    setNearbyStatus("loading");
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        if (nearbyRequestVersion.current !== requestVersion) return;
+
+        setUserPosition({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+        setNearbyStatus("active");
+      },
+      () => {
+        if (nearbyRequestVersion.current !== requestVersion) return;
+
+        setNearMeOnly(false);
+        setUserPosition(null);
+        setNearbyStatus("error");
+      },
+      {
+        enableHighAccuracy: false,
+        maximumAge: 300_000,
+        timeout: 10_000,
+      },
+    );
+  }, []);
+
   return {
     activeDealer,
-    cities,
     districts,
     filteredDealers,
     nearMeOnly,
+    nearbyStatus,
+    provinces,
     searchQuery,
-    selectedCity,
     selectedDistrict,
-    selectCity,
-    setNearMeOnly,
+    selectedProvince,
+    selectProvince,
+    setNearMeOnly: changeNearMeOnly,
     setSearchQuery,
     setSelectedDealerId,
     setSelectedDistrict,

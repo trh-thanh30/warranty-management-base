@@ -1,6 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Container } from "@/src/components/common/container";
+import { findProductBySlug } from "@/src/constants/product-catalog.constants";
+import { APP_ROUTES } from "@/src/constants/routes.constants";
+import { Link } from "@/src/i18n/navigation";
+import type { ProductCatalogItem } from "@/src/types/product-catalog.types";
 import useEmblaCarousel from "embla-carousel-react";
 import {
   ArrowLeft,
@@ -10,13 +14,10 @@ import {
   ShieldAlert,
   Sun,
 } from "lucide-react";
-import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
+import Image from "next/image";
 import type { ReactNode } from "react";
-import { findProductBySlug } from "@/src/constants/product-catalog.constants";
-import { APP_ROUTES } from "@/src/constants/routes.constants";
-import { Link } from "@/src/i18n/navigation";
-import type { ProductCatalogItem } from "@/src/types/product-catalog.types";
+import { useCallback, useEffect, useState } from "react";
 import {
   defaultFilmProductId,
   filmCatalogMap,
@@ -56,7 +57,7 @@ function AccessoryProductDetail({ product }: { product: ProductCatalogItem }) {
   return (
     <main className="min-h-screen bg-surface-muted text-deep-black">
       <section className="border-b border-border-gray bg-white py-10 sm:py-16">
-        <div className="mx-auto grid max-w-[1200px] gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:items-center">
+        <Container className="grid max-w-[1200px] gap-8 lg:grid-cols-2 lg:items-center">
           <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-border-gray bg-surface-muted">
             <Image
               src={product.image}
@@ -106,11 +107,11 @@ function AccessoryProductDetail({ product }: { product: ProductCatalogItem }) {
               {t("bookInstallationCta")}
             </Link>
           </div>
-        </div>
+        </Container>
       </section>
 
       <section className="py-12 sm:py-16">
-        <div className="mx-auto grid max-w-[1200px] gap-8 px-4 sm:px-6 lg:grid-cols-3">
+        <Container className="grid max-w-300 gap-8 lg:grid-cols-3">
           {[
             { title: t("introductionTitle"), items: introduction },
             { title: t("technologyTitle"), items: features },
@@ -133,7 +134,7 @@ function AccessoryProductDetail({ product }: { product: ProductCatalogItem }) {
               </ul>
             </article>
           ))}
-        </div>
+        </Container>
       </section>
     </main>
   );
@@ -222,30 +223,32 @@ function FilmProductDetail({ slug }: ProductDetailViewProps) {
   return (
     <main className="min-h-screen bg-white text-deep-black">
       <div className="border-b border-border-gray bg-white py-3">
-        <nav className="mx-auto flex max-w-[1400px] items-center gap-2 px-4 text-xs font-medium text-stone-gray sm:px-6">
-          <Link
-            href={APP_ROUTES.home}
-            className="transition-colors hover:text-premium-red"
-          >
-            {t("breadcrumbs.home")}
-          </Link>
-          <ChevronRight className="size-3.5 text-stone-gray/50" />
-          <Link
-            href={APP_ROUTES.products}
-            className="transition-colors hover:text-premium-red"
-          >
-            {t("breadcrumbs.products")}
-          </Link>
-          <ChevronRight className="size-3.5 text-stone-gray/50" />
-          <span className="truncate font-semibold text-deep-black">
-            <span className="sm:hidden">{filmData.code}</span>
-            <span className="hidden sm:inline">{activeName}</span>
-          </span>
-        </nav>
+        <Container className="max-w-[1400px]">
+          <nav className="flex items-center gap-2 text-xs font-medium text-stone-gray">
+            <Link
+              href={APP_ROUTES.home}
+              className="transition-colors hover:text-premium-red"
+            >
+              {t("breadcrumbs.home")}
+            </Link>
+            <ChevronRight className="size-3.5 text-stone-gray/50" />
+            <Link
+              href={APP_ROUTES.products}
+              className="transition-colors hover:text-premium-red"
+            >
+              {t("breadcrumbs.products")}
+            </Link>
+            <ChevronRight className="size-3.5 text-stone-gray/50" />
+            <span className="truncate font-semibold text-deep-black">
+              <span className="sm:hidden">{filmData.code}</span>
+              <span className="hidden sm:inline">{activeName}</span>
+            </span>
+          </nav>
+        </Container>
       </div>
 
       <section className="py-10 sm:py-16">
-        <div className="mx-auto max-w-[1400px] px-4 sm:px-6">
+        <Container className="max-w-[1400px]">
           <SectionHeading
             number="01"
             eyebrow={t("film.overviewEyebrow")}
@@ -325,11 +328,11 @@ function FilmProductDetail({ slug }: ProductDetailViewProps) {
               </div>
             </div>
           </div>
-        </div>
+        </Container>
       </section>
 
       <section className="border-y border-border-gray bg-surface-muted py-12 sm:py-16">
-        <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
+        <Container className="max-w-[1200px]">
           <SectionHeading
             number="02"
             eyebrow={t("film.technologyEyebrow")}
@@ -361,11 +364,11 @@ function FilmProductDetail({ slug }: ProductDetailViewProps) {
           <p className="mx-auto mt-8 max-w-4xl text-base leading-relaxed text-stone-gray sm:text-lg">
             {t("film.technologyDescription")}
           </p>
-        </div>
+        </Container>
       </section>
 
       <section className="py-12 sm:py-16">
-        <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
+        <Container className="max-w-[1200px]">
           <SectionHeading
             number="03"
             eyebrow={t("film.specsEyebrow")}
@@ -397,11 +400,11 @@ function FilmProductDetail({ slug }: ProductDetailViewProps) {
           <div className="mt-6 rounded-2xl bg-deep-black px-5 py-4 text-center text-sm font-semibold uppercase tracking-wider text-white">
             {t("warrantyYears", { years: filmData.warrantyYears })}
           </div>
-        </div>
+        </Container>
       </section>
 
       <section className="border-y border-border-gray bg-surface-muted py-12 sm:py-16">
-        <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
+        <Container className="max-w-[1200px]">
           <SectionHeading
             number="04"
             eyebrow={t("film.spectrumEyebrow")}
@@ -429,11 +432,11 @@ function FilmProductDetail({ slug }: ProductDetailViewProps) {
           <p className="mt-6 text-base leading-relaxed text-stone-gray">
             {t("film.spectrumDescription")}
           </p>
-        </div>
+        </Container>
       </section>
 
       <section className="py-12 sm:py-16">
-        <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
+        <Container className="max-w-[1200px]">
           <SectionHeading
             number="05"
             eyebrow={t("film.mechanismEyebrow")}
@@ -468,11 +471,11 @@ function FilmProductDetail({ slug }: ProductDetailViewProps) {
               </article>
             ))}
           </div>
-        </div>
+        </Container>
       </section>
 
       <section className="border-y border-border-gray bg-surface-muted py-12 sm:py-16">
-        <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
+        <Container className="max-w-[1200px]">
           <SectionHeading
             number="06"
             eyebrow={t("film.reasonsEyebrow")}
@@ -494,11 +497,11 @@ function FilmProductDetail({ slug }: ProductDetailViewProps) {
               </article>
             ))}
           </div>
-        </div>
+        </Container>
       </section>
 
       <section className="py-12 sm:py-16">
-        <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
+        <Container className="max-w-[1200px]">
           <SectionHeading
             number="07"
             eyebrow={t("film.climateEyebrow")}
@@ -507,11 +510,11 @@ function FilmProductDetail({ slug }: ProductDetailViewProps) {
           <p className="mt-8 rounded-3xl border border-border-gray bg-surface-muted p-6 text-base leading-relaxed text-stone-gray sm:p-10 sm:text-lg">
             {t("film.climateDescription")}
           </p>
-        </div>
+        </Container>
       </section>
 
       <section className="border-y border-border-gray bg-surface-muted py-12 sm:py-16">
-        <div className="mx-auto max-w-[1400px] px-4 sm:px-6">
+        <Container className="max-w-[1400px]">
           <SectionHeading
             number="08"
             eyebrow={t("film.galleryEyebrow")}
@@ -577,7 +580,7 @@ function FilmProductDetail({ slug }: ProductDetailViewProps) {
               </div>
             ))}
           </div>
-        </div>
+        </Container>
       </section>
 
       <section className="py-12 text-center sm:py-16">

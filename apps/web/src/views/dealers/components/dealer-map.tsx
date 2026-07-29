@@ -12,10 +12,10 @@ import {
 } from "@repo/ui/map";
 import { divIcon } from "leaflet";
 import { Marker, Popup, useMap } from "react-leaflet";
-import type { Dealer } from "../dealers.types";
+import type { DealerLocation } from "../dealers.types";
 
 interface DealerMapProps {
-  activeDealer: Dealer | null;
+  activeDealer: DealerLocation | null;
 }
 
 function MapCamera({ activeDealer }: DealerMapProps) {
@@ -23,7 +23,7 @@ function MapCamera({ activeDealer }: DealerMapProps) {
 
   useEffect(() => {
     if (activeDealer) {
-      map.flyTo([activeDealer.lat, activeDealer.lng], 13, {
+      map.flyTo([activeDealer.latitude, activeDealer.longitude], 13, {
         duration: 1.1,
       });
       return;
@@ -104,7 +104,7 @@ export function DealerMap({ activeDealer }: DealerMapProps) {
 
         {activeDealer && (
           <Marker
-            position={[activeDealer.lat, activeDealer.lng]}
+            position={[activeDealer.latitude, activeDealer.longitude]}
             icon={dealerIcon}
             title={activeDealer.name}
           >
@@ -119,14 +119,19 @@ export function DealerMap({ activeDealer }: DealerMapProps) {
                 <p className="m-0 text-xs leading-relaxed text-stone-gray">
                   {activeDealer.address}
                 </p>
-                <div className="flex items-center gap-1.5 text-xs font-medium text-deep-black">
-                  <Phone className="size-3.5 text-premium-red" />
-                  <span>
-                    {t("popupPhone")}: {activeDealer.phone}
-                  </span>
-                </div>
+                {activeDealer.phone ? (
+                  <a
+                    href={`tel:${activeDealer.phone}`}
+                    className="flex items-center gap-1.5 text-xs font-medium text-deep-black hover:text-premium-red"
+                  >
+                    <Phone className="size-3.5 text-premium-red" />
+                    <span>
+                      {t("popupPhone")}: {activeDealer.phone}
+                    </span>
+                  </a>
+                ) : null}
                 <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${activeDealer.name} ${activeDealer.address}`)}`}
+                  href={activeDealer.googleMapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-xs font-semibold uppercase text-premium-red hover:underline"
