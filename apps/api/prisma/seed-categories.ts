@@ -11,6 +11,7 @@ export const lexzenzProductCategories = [
     name: 'Film cách nhiệt ô tô Lexzenz Reflex Korea Film',
     description:
       'Nhóm sản phẩm film cách nhiệt ô tô Lexzenz Reflex Korea Film.',
+    imageUrl: '/product/product_1.jpg',
     order: 10,
     metadata: {
       brand: 'Lexzenz',
@@ -23,6 +24,7 @@ export const lexzenzProductCategories = [
     name: 'Đèn tăng sáng ô tô, xe máy Lexzenz Led Fujitek',
     description:
       'Nhóm sản phẩm đèn tăng sáng ô tô, xe máy Lexzenz Led Fujitek.',
+    imageUrl: '/product/product_3.jpg',
     order: 20,
     metadata: {
       brand: 'Lexzenz',
@@ -34,6 +36,7 @@ export const lexzenzProductCategories = [
     slug: 'lexzenz-dashcam',
     name: 'Camera hành trình Lexzenz Dashcam',
     description: 'Nhóm sản phẩm camera hành trình Lexzenz Dashcam.',
+    imageUrl: '/product/product_9.jpg',
     order: 30,
     metadata: {
       brand: 'Lexzenz',
@@ -45,6 +48,7 @@ export const lexzenzProductCategories = [
     slug: 'lexzenz-tpms',
     name: 'Cảm biến Áp suất lốp TPMS Lexzenz',
     description: 'Nhóm sản phẩm cảm biến áp suất lốp TPMS Lexzenz.',
+    imageUrl: '/product/product_10.jpg',
     order: 40,
     metadata: {
       brand: 'Lexzenz',
@@ -54,6 +58,7 @@ export const lexzenzProductCategories = [
 ] satisfies Array<{
   code: string;
   description: string;
+  imageUrl: string;
   metadata: Prisma.InputJsonObject;
   name: string;
   order: number;
@@ -72,6 +77,7 @@ export async function seedLexzenzProductCategories(client: PrismaClient) {
       update: {
         code: category.code,
         description: category.description,
+        image_url: category.imageUrl,
         is_active: true,
         metadata: category.metadata,
         name: category.name,
@@ -80,6 +86,7 @@ export async function seedLexzenzProductCategories(client: PrismaClient) {
       create: {
         code: category.code,
         description: category.description,
+        image_url: category.imageUrl,
         is_active: true,
         metadata: category.metadata,
         name: category.name,
