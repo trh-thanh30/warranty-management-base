@@ -20,12 +20,19 @@ const dealersViewPath = path.join(
   "dealers",
   "dealers.view.tsx",
 );
-const dealerFiltersPath = path.join(
+const dealerDirectoryHookPath = path.join(
   webRoot,
   "src",
   "views",
   "dealers",
-  "use-dealer-filters.ts",
+  "use-dealer-directory.ts",
+);
+const publicDealersServicePath = path.join(
+  webRoot,
+  "src",
+  "services",
+  "dealers",
+  "public-dealers.service.ts",
 );
 const vietnamGeoJsonPath = path.join(webRoot, "public", "map", "vn.geojson");
 const globalsPath = path.join(webRoot, "app", "globals.css");
@@ -68,7 +75,7 @@ test("dealer map ships the local Vietnam polygon and maritime line data", async 
   );
 });
 
-test("dealer map uses the shared constrained Vietnam overlay and active marker", async () => {
+test("dealer map uses the shared Vietnam overlay without locking horizontal panning", async () => {
   assert.equal(
     await exists(dealerMapPath),
     true,
@@ -82,42 +89,65 @@ test("dealer map uses the shared constrained Vietnam overlay and active marker",
   for (const expected of [
     "SharedMap",
     "VietnamMapOverlay",
-    "VIETNAM_INTERACTION_BOUNDS",
     "Marker",
     "Popup",
     "flyTo",
-    "fitBounds",
+    "setView",
+    "VIETNAM_CENTER",
+    "VIETNAM_INITIAL_ZOOM",
   ]) {
     assert.match(source, new RegExp(expected.replace(/[{}]/g, "\\$&")));
   }
 
-  assert.match(source, /maxBoundsViscosity=\{1\}/);
+  assert.match(source, /activateLabel=\{t\("activateMap"\)\}/);
+  assert.match(source, /initialCenter=\{VIETNAM_CENTER\}/);
+  assert.match(source, /initialZoom=\{VIETNAM_INITIAL_ZOOM\}/);
+  assert.match(source, /resetLabel=\{t\("resetMap"\)\}/);
   assert.match(overlaySource, /fillRule:\s*"evenodd"/);
   assert.match(overlaySource, /\/map\/vn\.geojson/);
+  assert.doesNotMatch(source, /VIETNAM_INTERACTION_BOUNDS/);
+  assert.doesNotMatch(source, /maxBounds=/);
+  assert.doesNotMatch(source, /maxBoundsViscosity=/);
+  assert.doesNotMatch(source, /activationMode="direct"/);
+  assert.doesNotMatch(source, /showResetControl=\{false\}/);
+  assert.doesNotMatch(source, /setIsMounted|isMounted/);
   assert.doesNotMatch(source, /<TileLayer|<iframe/);
   assert.doesNotMatch(source, /🇻🇳|📍/u);
 });
 
 test("dealer page loads public network dealers and dynamically renders the Leaflet map", async () => {
-  const [filtersSource, viewSource, mapSource] = await Promise.all([
-    readFile(dealerFiltersPath, "utf8"),
-    readFile(dealersViewPath, "utf8"),
-    readFile(dealerMapPath, "utf8"),
-  ]);
+  const [directorySource, viewSource, mapSource, serviceSource] =
+    await Promise.all([
+      readFile(dealerDirectoryHookPath, "utf8"),
+      readFile(dealersViewPath, "utf8"),
+      readFile(dealerMapPath, "utf8"),
+      readFile(publicDealersServicePath, "utf8"),
+    ]);
 
-  assert.match(filtersSource, /useState<string \| null>\(null\)/);
-  assert.match(
-    filtersSource,
-    /dealers\.find\(\(dealer\) => dealer\.id === selectedDealerId\) \?\? null/,
-  );
-  assert.match(viewSource, /useNetworkLocations/);
-  assert.match(viewSource, /selectDealerLocations\(locations\)/);
+  assert.match(directorySource, /useDebounce\(searchQuery\.trim\(\), 300\)/);
+  assert.match(directorySource, /hasNextPage/);
+  assert.match(directorySource, /isLoadingMore/);
+  assert.match(directorySource, /loadMore/);
+  assert.match(serviceSource, /"\/public\/dealers"/);
+  assert.match(serviceSource, /params:\s*query/);
+  assert.match(viewSource, /useDealerDirectory/);
   assert.match(viewSource, /dynamic\(/);
   assert.match(viewSource, /ssr:\s*false/);
   assert.match(viewSource, /<DealerMap activeDealer=\{activeDealer\}/);
-  assert.match(mapSource, /activeDealer\.latitude/);
-  assert.match(mapSource, /activeDealer\.longitude/);
-  assert.match(mapSource, /href=\{activeDealer\.googleMapsUrl\}/);
+  assert.equal(
+    (viewSource.match(/<Card className="[^"]*\brounded-sm\b/g) ?? []).length,
+    2,
+    "both dealer directory cards should use rounded-sm",
+  );
+  assert.match(mapSource, /useNetworkLocations/);
+  assert.match(mapSource, /locations\.map/);
+  assert.match(
+    mapSource,
+    /position=\{\[location\.latitude,\s*location\.longitude\]\}/,
+  );
+  assert.match(mapSource, /MAP_MARKER_COLORS\.dealer/);
+  assert.match(mapSource, /MAP_MARKER_COLORS\.serviceCenter/);
+  assert.match(mapSource, /href=\{location\.googleMapsUrl\}/);
   assert.doesNotMatch(viewSource, /openstreetmap\.org\/export\/embed/);
 });
 
@@ -146,11 +176,39 @@ test("dealer directory composes shared UI controls instead of native form contro
   assert.match(filtersSource, /from "@repo\/ui\/input"/);
   assert.match(filtersSource, /from "@repo\/ui\/select"/);
   assert.match(filtersSource, /from "@repo\/ui\/button"/);
+  assert.match(
+    filtersSource,
+    /from "@\/src\/components\/common\/form-control\.constants"/,
+  );
+  assert.equal(
+    (filtersSource.match(/formControlFocusClassName/g) ?? []).length,
+    4,
+    "search and both selects should share the premium-red focus style",
+  );
+  assert.equal(
+    (filtersSource.match(/\brounded-sm\b/g) ?? []).length,
+    4,
+    "search, both selects, and nearby button should use rounded-sm",
+  );
+  assert.match(
+    filtersSource,
+    /className="[^"]*rounded-sm[^"]*bg-premium-red[^"]*text-white[^"]*"/,
+  );
+  assert.doesNotMatch(filtersSource, /rounded-\[\d+px\]/);
+  assert.doesNotMatch(filtersSource, /bg-accent-gold/);
   assert.match(listSource, /from "@repo\/ui\/button"/);
   assert.match(listSource, /from "@repo\/ui\/skeleton"/);
   assert.match(listSource, /data-lenis-prevent/);
   assert.match(listSource, /min-h-0/);
   assert.match(listSource, /overscroll-y-contain/);
+  assert.match(listSource, /IntersectionObserver/);
+  assert.match(listSource, /isLoadingMore/);
+  assert.match(listSource, /onLoadMore/);
+  assert.match(
+    listSource,
+    /className="[^"]*rounded-sm[^"]*bg-premium-red[^"]*text-white[^"]*"/,
+  );
+  assert.doesNotMatch(listSource, /bg-accent-gold/);
   assert.doesNotMatch(filtersSource, /<select|<input|<button/);
   assert.doesNotMatch(listSource, /<button/);
 });
@@ -169,6 +227,8 @@ test("dealer map messages resolve in every locale", async () => {
   const requiredKeys = [
     "defaultTitle",
     "ariaLabel",
+    "activateMap",
+    "resetMap",
     "loading",
     "loadError",
     "selectedDealer",

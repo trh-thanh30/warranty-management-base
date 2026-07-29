@@ -1031,6 +1031,8 @@
     },
     "states": {
       "loading": "Đang tải danh sách đại lý...",
+      "loadingMore": "Đang tải thêm đại lý...",
+      "loadMoreError": "Không thể tải thêm đại lý.",
       "error": "Không thể tải danh sách đại lý. Vui lòng thử lại.",
       "retry": "Thử lại"
     },
@@ -1042,9 +1044,18 @@
       "defaultTitle": "Bản đồ đại lý FUJITEK",
       "iframeTitle": "Bản đồ vị trí đại lý FUJITEK",
       "ariaLabel": "Bản đồ tương tác vị trí đại lý FUJITEK tại Việt Nam",
+      "activateMap": "Nhấp để tương tác với bản đồ",
+      "resetMap": "Đặt lại bản đồ",
       "loading": "Đang tải ranh giới bản đồ Việt Nam...",
       "loadError": "Không thể tải ranh giới Việt Nam. Vui lòng thử lại.",
+      "networkLoading": "Đang tải đại lý và trung tâm bảo hành...",
+      "networkError": "Không thể tải dữ liệu đại lý và trung tâm bảo hành.",
+      "retry": "Thử lại",
       "selectedDealer": "Đại lý được chọn",
+      "locationType": {
+        "dealer": "Đại lý ủy quyền",
+        "serviceCenter": "Trung tâm bảo hành"
+      },
       "popupPhone": "Điện thoại",
       "openGoogleMaps": "Mở Google Maps"
     }

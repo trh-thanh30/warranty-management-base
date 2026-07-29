@@ -1,17 +1,14 @@
 "use client";
 
-import { useNetworkLocations } from "@/src/hooks/use-network-locations";
 import { Container } from "@/src/components/common/container";
 import { Card } from "@repo/ui/card";
 import { MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useMemo } from "react";
 import { DealerFilters } from "./components/dealer-filters";
 import { DealerList } from "./components/dealer-list";
-import { selectDealerLocations } from "./dealers.utils";
-import { useDealerFilters } from "./use-dealer-filters";
+import { useDealerDirectory } from "./use-dealer-directory";
 
 const DealerMap = dynamic(
   () =>
@@ -31,15 +28,21 @@ const DealerMap = dynamic(
 
 export function DealersView() {
   const t = useTranslations("DealersPage");
-  const { error, loading, locations, retry } = useNetworkLocations();
-  const dealers = useMemo(() => selectDealerLocations(locations), [locations]);
   const {
     activeDealer,
+    dealers,
     districts,
-    filteredDealers,
+    error,
+    hasNextPage,
+    isLoadingMore,
+    loadMore,
+    loadMoreError,
+    loading,
     nearMeOnly,
     nearbyStatus,
     provinces,
+    resultCount,
+    retry,
     searchQuery,
     selectedDistrict,
     selectedProvince,
@@ -48,7 +51,7 @@ export function DealersView() {
     setSearchQuery,
     setSelectedDealerId,
     setSelectedDistrict,
-  } = useDealerFilters(dealers);
+  } = useDealerDirectory();
 
   return (
     <main className="min-h-screen bg-surface-muted text-deep-black">
@@ -67,7 +70,7 @@ export function DealersView() {
       <section className="w-full py-10 lg:py-16 bg-white">
         <Container>
           <div className="grid gap-6 lg:grid-cols-12 items-start">
-            <Card className="flex h-[620px] flex-col overflow-hidden rounded-[28px] border-border-gray shadow-xl lg:col-span-5 lg:h-[750px]">
+            <Card className="flex h-155 flex-col overflow-hidden rounded-sm border-border-gray shadow-xs lg:col-span-5 lg:h-187.5">
               <DealerFilters
                 districts={districts}
                 nearMeOnly={nearMeOnly}
@@ -78,7 +81,7 @@ export function DealersView() {
                 onSearchChange={setSearchQuery}
                 provinces={provinces}
                 resultCountLabel={t("filters.resultCount", {
-                  count: filteredDealers.length,
+                  count: resultCount,
                 })}
                 searchQuery={searchQuery}
                 selectedDistrict={selectedDistrict}
@@ -98,9 +101,13 @@ export function DealersView() {
               />
               <DealerList
                 activeDealerId={activeDealer?.id ?? null}
-                dealers={filteredDealers}
+                dealers={dealers}
                 error={error}
+                hasNextPage={hasNextPage}
+                isLoadingMore={isLoadingMore}
+                loadMoreError={loadMoreError}
                 loading={loading}
+                onLoadMore={loadMore}
                 onRetry={retry}
                 onSelectDealer={setSelectedDealerId}
                 translations={{
@@ -108,13 +115,15 @@ export function DealersView() {
                   empty: t("empty"),
                   error: t("states.error"),
                   loading: t("states.loading"),
+                  loadingMore: t("states.loadingMore"),
+                  loadMoreError: t("states.loadMoreError"),
                   retry: t("states.retry"),
                   viewMore: t("viewMore"),
                 }}
               />
             </Card>
 
-            <Card className="isolate relative flex h-[520px] flex-col overflow-hidden rounded-[28px] border-border-gray shadow-xl sm:h-[620px] lg:col-span-7 lg:h-[750px]">
+            <Card className="isolate relative flex h-[520px] flex-col overflow-hidden rounded-sm border-border-gray shadow-xs sm:h-[620px] lg:col-span-7 lg:h-[750px]">
               <div className="bg-white text-deep-black p-4 px-6 flex items-center justify-between z-10 border-b border-border-gray">
                 <div className="flex items-center gap-2">
                   <MapPin

@@ -1,21 +1,54 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { ExternalLink, Phone } from "lucide-react";
-import { useTranslations } from "next-intl";
+import type {
+  PublicNetworkLocation,
+  PublicNetworkLocationKind,
+} from "@repo/shared";
 import {
+  MAP_MARKER_COLORS,
   SharedMap,
   useVietnamBoundary,
-  VIETNAM_INTERACTION_BOUNDS,
-  VIETNAM_MAINLAND_BOUNDS,
+  VIETNAM_CENTER,
+  VIETNAM_INITIAL_ZOOM,
   VietnamMapOverlay,
 } from "@repo/ui/map";
+import { Button } from "@repo/ui/button";
 import { divIcon } from "leaflet";
-import { Marker, Popup, useMap } from "react-leaflet";
+import { ExternalLink, Phone } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useMemo } from "react";
+import { Marker, Popup, Tooltip, useMap } from "react-leaflet";
+import { useNetworkLocations } from "@/src/hooks/use-network-locations";
 import type { DealerLocation } from "../dealers.types";
 
 interface DealerMapProps {
   activeDealer: DealerLocation | null;
+}
+
+const markerColorByKind: Record<PublicNetworkLocationKind, string> = {
+  DEALER: MAP_MARKER_COLORS.dealer,
+  SERVICE_CENTER: MAP_MARKER_COLORS.serviceCenter,
+};
+
+function createLocationIcon(kind: PublicNetworkLocationKind, selected = false) {
+  const size = selected ? 38 : 28;
+  const coreSize = selected ? 22 : 16;
+  const color = markerColorByKind[kind];
+
+  return divIcon({
+    className: "fujitek-network-marker",
+    html: `
+      <div style="width:${size}px;height:${size}px;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer">
+        <span style="position:absolute;inset:0;border-radius:9999px;background:${color};opacity:${selected ? 0.25 : 0.18}"></span>
+        <span style="position:relative;width:${coreSize}px;height:${coreSize}px;border-radius:9999px;border:3px solid white;background:${color};box-shadow:0 2px 8px rgba(0,0,0,.28);display:flex;align-items:center;justify-content:center">
+          <span style="width:5px;height:5px;border-radius:9999px;background:white"></span>
+        </span>
+      </div>
+    `,
+    iconAnchor: [size / 2, size / 2],
+    iconSize: [size, size],
+    popupAnchor: [0, -(size / 2)],
+  });
 }
 
 function MapCamera({ activeDealer }: DealerMapProps) {
@@ -29,10 +62,7 @@ function MapCamera({ activeDealer }: DealerMapProps) {
       return;
     }
 
-    map.fitBounds(VIETNAM_MAINLAND_BOUNDS, {
-      animate: true,
-      padding: [24, 24],
-    });
+    map.setView(VIETNAM_CENTER, VIETNAM_INITIAL_ZOOM, { animate: true });
   }, [activeDealer, map]);
 
   return null;
@@ -40,38 +70,25 @@ function MapCamera({ activeDealer }: DealerMapProps) {
 
 export function DealerMap({ activeDealer }: DealerMapProps) {
   const t = useTranslations("DealersPage.map");
-  const [isMounted, setIsMounted] = useState(false);
   const { boundary, status } = useVietnamBoundary();
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  const dealerIcon = useMemo(
-    () =>
-      divIcon({
-        className: "fujitek-dealer-marker",
-        html: `
-          <svg width="40" height="48" viewBox="0 0 40 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M20 1.5C9.51 1.5 1 10.01 1 20.5C1 34.75 20 46.5 20 46.5C20 46.5 39 34.75 39 20.5C39 10.01 30.49 1.5 20 1.5Z" fill="var(--color-premium-red)" stroke="white" stroke-width="3"/>
-            <circle cx="20" cy="20.5" r="7" fill="white"/>
-          </svg>
-        `,
-        iconAnchor: [20, 46],
-        iconSize: [40, 48],
-        popupAnchor: [0, -42],
-      }),
+  const {
+    error: locationsError,
+    loading: locationsLoading,
+    locations,
+    retry,
+  } = useNetworkLocations();
+  const markerIcons = useMemo(
+    () => ({
+      DEALER: createLocationIcon("DEALER"),
+      SERVICE_CENTER: createLocationIcon("SERVICE_CENTER"),
+      selectedDealer: createLocationIcon("DEALER", true),
+    }),
     [],
   );
-
-  if (!isMounted) {
-    return (
-      <div
-        aria-hidden="true"
-        className="size-full animate-pulse bg-surface-muted"
-      />
-    );
-  }
+  const locationTypeLabel = (location: PublicNetworkLocation) =>
+    location.kind === "DEALER"
+      ? t("locationType.dealer")
+      : t("locationType.serviceCenter");
 
   return (
     <div
@@ -80,14 +97,14 @@ export function DealerMap({ activeDealer }: DealerMapProps) {
       className="relative isolate size-full overflow-hidden bg-surface-muted"
     >
       <SharedMap
-        activationMode="direct"
-        initialBounds={VIETNAM_MAINLAND_BOUNDS}
+        activateLabel={t("activateMap")}
+        initialCenter={VIETNAM_CENTER}
+        initialZoom={VIETNAM_INITIAL_ZOOM}
         className="size-full"
-        maxBounds={VIETNAM_INTERACTION_BOUNDS}
-        maxBoundsViscosity={1}
         minZoom={5}
         maxZoom={18}
-        showResetControl={false}
+        resetLabel={t("resetMap")}
+        zoomSnap={0.25}
       >
         {boundary ? (
           <VietnamMapOverlay
@@ -102,57 +119,101 @@ export function DealerMap({ activeDealer }: DealerMapProps) {
 
         <MapCamera activeDealer={activeDealer} />
 
-        {activeDealer && (
-          <Marker
-            position={[activeDealer.latitude, activeDealer.longitude]}
-            icon={dealerIcon}
-            title={activeDealer.name}
-          >
-            <Popup>
-              <div className="min-w-52 space-y-2">
-                <span className="inline-flex rounded-md bg-premium-red px-2 py-1 text-xs font-semibold uppercase tracking-wider text-white">
-                  {t("selectedDealer")}
-                </span>
-                <p className="m-0 text-sm font-semibold uppercase leading-snug text-deep-black">
-                  {activeDealer.name}
-                </p>
-                <p className="m-0 text-xs leading-relaxed text-stone-gray">
-                  {activeDealer.address}
-                </p>
-                {activeDealer.phone ? (
-                  <a
-                    href={`tel:${activeDealer.phone}`}
-                    className="flex items-center gap-1.5 text-xs font-medium text-deep-black hover:text-premium-red"
+        {locations.map((location) => {
+          const isSelectedDealer =
+            location.kind === "DEALER" && location.id === activeDealer?.id;
+
+          return (
+            <Marker
+              key={`${location.kind}-${location.id}`}
+              position={[location.latitude, location.longitude]}
+              icon={
+                isSelectedDealer
+                  ? markerIcons.selectedDealer
+                  : markerIcons[location.kind]
+              }
+              title={location.name}
+            >
+              <Tooltip direction="top" offset={[0, -10]} opacity={0.95}>
+                {location.name}
+              </Tooltip>
+              <Popup>
+                <div className="min-w-52 space-y-2">
+                  <span
+                    className="inline-flex rounded-sm px-2 py-1 text-xs font-semibold uppercase tracking-wider text-white"
+                    style={{
+                      backgroundColor: markerColorByKind[location.kind],
+                    }}
                   >
-                    <Phone className="size-3.5 text-premium-red" />
-                    <span>
-                      {t("popupPhone")}: {activeDealer.phone}
-                    </span>
+                    {isSelectedDealer
+                      ? t("selectedDealer")
+                      : locationTypeLabel(location)}
+                  </span>
+                  <p className="m-0 text-sm font-semibold uppercase leading-snug text-deep-black">
+                    {location.name}
+                  </p>
+                  <p className="m-0 text-xs leading-relaxed text-stone-gray">
+                    {location.address}
+                  </p>
+                  {location.phone ? (
+                    <a
+                      href={`tel:${location.phone}`}
+                      className="flex items-center gap-1.5 text-xs font-medium text-deep-black hover:text-premium-red"
+                    >
+                      <Phone
+                        aria-hidden="true"
+                        className="size-3.5 text-premium-red"
+                      />
+                      <span>
+                        {t("popupPhone")}: {location.phone}
+                      </span>
+                    </a>
+                  ) : null}
+                  <a
+                    href={location.googleMapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-semibold uppercase text-premium-red hover:underline"
+                  >
+                    <span>{t("openGoogleMaps")}</span>
+                    <ExternalLink aria-hidden="true" className="size-3" />
                   </a>
-                ) : null}
-                <a
-                  href={activeDealer.googleMapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs font-semibold uppercase text-premium-red hover:underline"
-                >
-                  <span>{t("openGoogleMaps")}</span>
-                  <ExternalLink className="size-3" />
-                </a>
-              </div>
-            </Popup>
-          </Marker>
-        )}
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
       </SharedMap>
 
-      {!boundary && (
+      {(!boundary || locationsLoading) && !locationsError ? (
         <div
           role="status"
           className="pointer-events-none absolute inset-x-4 top-4 z-[500] rounded-xl border border-border-gray bg-white/95 px-4 py-3 text-center text-xs font-medium text-stone-gray shadow-md backdrop-blur-sm"
         >
-          {status === "error" ? t("loadError") : t("loading")}
+          {status === "error"
+            ? t("loadError")
+            : locationsLoading
+              ? t("networkLoading")
+              : t("loading")}
         </div>
-      )}
+      ) : null}
+
+      {locationsError ? (
+        <div
+          role="alert"
+          className="absolute inset-x-4 top-4 z-[500] flex items-center justify-between gap-3 rounded-sm border border-premium-red/30 bg-white/95 px-4 py-3 text-xs font-semibold text-deep-black shadow-md"
+        >
+          <span>{t("networkError")}</span>
+          <Button
+            type="button"
+            size="sm"
+            onClick={retry}
+            className="min-h-9 shrink-0 rounded-sm bg-premium-red px-3 text-xs font-semibold uppercase text-white transition-colors hover:bg-warm-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2"
+          >
+            {t("retry")}
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }

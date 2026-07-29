@@ -5,6 +5,8 @@ import { CategoriesModule } from '@/modules/categories/categories.module';
 import { PublicController } from '@/modules/public/public.controller';
 import { PublicListServiceCentersUseCase } from '@/modules/public/use-cases/public-list-service-centers.use-case';
 import { PublicListNetworkLocationsUseCase } from '@/modules/public/use-cases/public-list-network-locations.use-case';
+import { PublicListDealersUseCase } from '@/modules/public/use-cases/public-list-dealers.use-case';
+import { PublicListDealerFilterOptionsUseCase } from '@/modules/public/use-cases/public-list-dealer-filter-options.use-case';
 import { PublicLookupWarrantyClaimByCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claim-by-code.use-case';
 import { PublicLookupWarrantyClaimsByWarrantyCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claims-by-warranty-code.use-case';
 import { WarrantyClaimsModule } from '@/modules/warranty-claims/warranty-claims.module';
@@ -26,6 +28,8 @@ import { Module } from '@nestjs/common';
   providers: [
     PublicListServiceCentersUseCase,
     PublicListNetworkLocationsUseCase,
+    PublicListDealersUseCase,
+    PublicListDealerFilterOptionsUseCase,
     PublicLookupWarrantyClaimByCodeUseCase,
     PublicLookupWarrantyClaimsByWarrantyCodeUseCase,
   ],

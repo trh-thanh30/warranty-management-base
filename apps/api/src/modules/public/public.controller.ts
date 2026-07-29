@@ -8,6 +8,10 @@ import { CreateWarrantyClaimDto } from '@/modules/warranty-claims/dto/create-war
 import { CreateWarrantyClaimUseCase } from '@/modules/warranty-claims/use-cases/create-warranty-claim.use-case';
 import { PublicListServiceCentersUseCase } from '@/modules/public/use-cases/public-list-service-centers.use-case';
 import { PublicListNetworkLocationsUseCase } from '@/modules/public/use-cases/public-list-network-locations.use-case';
+import { PublicListDealersUseCase } from '@/modules/public/use-cases/public-list-dealers.use-case';
+import { ListPublicDealersDto } from '@/modules/public/dto/list-public-dealers.dto';
+import { ListPublicDealerFilterOptionsDto } from '@/modules/public/dto/list-public-dealer-filter-options.dto';
+import { PublicListDealerFilterOptionsUseCase } from '@/modules/public/use-cases/public-list-dealer-filter-options.use-case';
 import { ListPublicProductsDto } from '@/modules/products/dto/list-public-products.dto';
 import { ListPublicProductsUseCase } from '@/modules/products/use-cases/list-public-products.use-case';
 import { ListPublicProductCategoriesUseCase } from '@/modules/categories/use-cases/list-public-product-categories.use-case';
@@ -27,6 +31,8 @@ export class PublicController {
     private readonly publicLookupWarrantyClaimsByWarrantyCodeUseCase: PublicLookupWarrantyClaimsByWarrantyCodeUseCase,
     private readonly publicListServiceCentersUseCase: PublicListServiceCentersUseCase,
     private readonly publicListNetworkLocationsUseCase: PublicListNetworkLocationsUseCase,
+    private readonly publicListDealersUseCase: PublicListDealersUseCase,
+    private readonly publicListDealerFilterOptionsUseCase: PublicListDealerFilterOptionsUseCase,
     private readonly listPublicProductsUseCase: ListPublicProductsUseCase,
     private readonly listPublicProductCategoriesUseCase: ListPublicProductCategoriesUseCase,
   ) {}
@@ -70,6 +76,16 @@ export class PublicController {
   @Get('network-locations')
   listNetworkLocations() {
     return this.publicListNetworkLocationsUseCase.execute();
+  }
+
+  @Get('dealers')
+  listDealers(@Query() query: ListPublicDealersDto) {
+    return this.publicListDealersUseCase.execute(query);
+  }
+
+  @Get('dealers/filter-options')
+  listDealerFilterOptions(@Query() query: ListPublicDealerFilterOptionsDto) {
+    return this.publicListDealerFilterOptionsUseCase.execute(query.province);
   }
 
   @Get('products')

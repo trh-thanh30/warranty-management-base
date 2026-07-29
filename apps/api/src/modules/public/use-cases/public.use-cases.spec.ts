@@ -1,8 +1,127 @@
 import { PublicListServiceCentersUseCase } from '@/modules/public/use-cases/public-list-service-centers.use-case';
 import { PublicListNetworkLocationsUseCase } from '@/modules/public/use-cases/public-list-network-locations.use-case';
+import { PublicListDealersUseCase } from '@/modules/public/use-cases/public-list-dealers.use-case';
+import { PublicListDealerFilterOptionsUseCase } from '@/modules/public/use-cases/public-list-dealer-filter-options.use-case';
 import { toPublicWarrantyClaimResponse } from '@/modules/public/use-cases/public-lookup-warranty-claim-by-code.use-case';
 
 describe('Public use cases', () => {
+  it('returns a paginated active-only public dealer projection', async () => {
+    const dealersRepository = {
+      listActivePublic: jest.fn().mockResolvedValue({
+        items: [
+          {
+            id: 'dealer-id',
+            name: 'Ha Noi Dealer',
+            phone: '0901234567',
+            address: '1 Nguyen Trai',
+            province: 'Ha Noi',
+            district: 'Thanh Xuan',
+            latitude: 21.0285,
+            longitude: 105.8542,
+          },
+        ],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 11,
+          totalPages: 2,
+          hasNextPage: true,
+          hasPreviousPage: false,
+        },
+      }),
+    };
+    const useCase = new PublicListDealersUseCase(dealersRepository as never);
+
+    const result = await useCase.execute({
+      page: 1,
+      limit: 10,
+      search: 'Ha Noi',
+    });
+
+    expect(dealersRepository.listActivePublic).toHaveBeenCalledWith({
+      page: 1,
+      limit: 10,
+      search: 'Ha Noi',
+    });
+    expect(result).toEqual({
+      items: [
+        expect.objectContaining({
+          id: 'dealer-id',
+          kind: 'DEALER',
+          googleMapsUrl:
+            'https://www.google.com/maps/search/?api=1&query=21.0285%2C105.8542',
+        }),
+      ],
+      meta: expect.objectContaining({
+        page: 1,
+        hasNextPage: true,
+      }),
+    });
+  });
+
+  it('filters and paginates nearby dealers by distance', async () => {
+    const dealersRepository = {
+      listActiveForNetwork: jest.fn().mockResolvedValue([
+        {
+          id: 'near',
+          name: 'Nearby Dealer',
+          phone: null,
+          address: 'Near address',
+          province: 'Ha Noi',
+          district: null,
+          latitude: 21.0285,
+          longitude: 105.8542,
+        },
+        {
+          id: 'far',
+          name: 'Far Dealer',
+          phone: null,
+          address: 'Far address',
+          province: 'Da Nang',
+          district: null,
+          latitude: 16.0544,
+          longitude: 108.2022,
+        },
+      ]),
+      listActivePublic: jest.fn(),
+    };
+    const useCase = new PublicListDealersUseCase(dealersRepository as never);
+
+    const result = await useCase.execute({
+      latitude: 21.0285,
+      longitude: 105.8542,
+      radiusKm: 20,
+      page: 1,
+      limit: 10,
+    });
+
+    expect(result.items.map((dealer) => dealer.id)).toEqual(['near']);
+    expect(result.meta.total).toBe(1);
+    expect(dealersRepository.listActivePublic).not.toHaveBeenCalled();
+  });
+
+  it('returns active dealer filter options for the selected province', async () => {
+    const dealersRepository = {
+      listActiveFilterOptions: jest.fn().mockResolvedValue({
+        provinces: [{ province: 'Ha Noi' }, { province: 'Bac Ninh' }],
+        districts: [{ district: 'Tien Du' }, { district: 'Gia Binh' }],
+      }),
+    };
+    const useCase = new PublicListDealerFilterOptionsUseCase(
+      dealersRepository as never,
+    );
+
+    const result = await useCase.execute('Bac Ninh');
+
+    expect(dealersRepository.listActiveFilterOptions).toHaveBeenCalledWith(
+      'Bac Ninh',
+    );
+    expect(result).toEqual({
+      provinces: ['Bac Ninh', 'Ha Noi'],
+      districts: ['Gia Binh', 'Tien Du'],
+    });
+  });
+
   it('combines active dealers and service centers into network locations', async () => {
     const dealersRepository = {
       listActiveForNetwork: jest.fn().mockResolvedValue([

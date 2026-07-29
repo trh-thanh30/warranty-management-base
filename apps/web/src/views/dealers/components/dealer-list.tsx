@@ -2,14 +2,19 @@
 
 import { Button } from "@repo/ui/button";
 import { Skeleton } from "@repo/ui/skeleton";
-import { MapPin, Navigation, Phone } from "lucide-react";
+import { LoaderCircle, MapPin, Navigation, Phone } from "lucide-react";
+import { useEffect, useRef } from "react";
 import type { DealerLocation } from "../dealers.types";
 
 type DealerListProps = {
   activeDealerId: string | null;
   dealers: readonly DealerLocation[];
   error: boolean;
+  hasNextPage: boolean;
+  isLoadingMore: boolean;
+  loadMoreError: boolean;
   loading: boolean;
+  onLoadMore: () => void;
   onRetry: () => void;
   onSelectDealer: (dealerId: string) => void;
   translations: {
@@ -17,6 +22,8 @@ type DealerListProps = {
     empty: string;
     error: string;
     loading: string;
+    loadingMore: string;
+    loadMoreError: string;
     retry: string;
     viewMore: string;
   };
@@ -41,11 +48,40 @@ export function DealerList({
   activeDealerId,
   dealers,
   error,
+  hasNextPage,
+  isLoadingMore,
+  loadMoreError,
   loading,
+  onLoadMore,
   onRetry,
   onSelectDealer,
   translations,
 }: DealerListProps) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const loadMoreSentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const root = scrollContainerRef.current;
+    const sentinel = loadMoreSentinelRef.current;
+
+    if (!root || !sentinel || !hasNextPage || isLoadingMore || loadMoreError) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) onLoadMore();
+      },
+      {
+        root,
+        rootMargin: "0px 0px 160px",
+      },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasNextPage, isLoadingMore, loadMoreError, onLoadMore]);
+
   if (loading) {
     return (
       <div className="flex-1 overflow-hidden" role="status">
@@ -88,6 +124,7 @@ export function DealerList({
 
   return (
     <div
+      ref={scrollContainerRef}
       data-lenis-prevent
       className="min-h-0 flex-1 touch-pan-y space-y-4 divide-y divide-border-gray/60 overflow-y-auto overscroll-y-contain p-4 [scrollbar-gutter:stable]"
     >
@@ -142,7 +179,7 @@ export function DealerList({
                 type="button"
                 size="sm"
                 onClick={() => onSelectDealer(dealer.id)}
-                className="min-h-9 rounded-[8px] bg-accent-gold text-xs font-semibold uppercase tracking-wider text-deep-black hover:bg-accent-gold-hover"
+                className="min-h-9 rounded-sm bg-premium-red text-xs font-semibold uppercase tracking-wider text-white hover:bg-warm-red"
               >
                 {translations.viewMore}
               </Button>
@@ -165,6 +202,43 @@ export function DealerList({
           </article>
         );
       })}
+      {hasNextPage || isLoadingMore || loadMoreError ? (
+        <div
+          ref={loadMoreSentinelRef}
+          className="flex min-h-14 items-center justify-center py-3"
+        >
+          {isLoadingMore ? (
+            <div
+              role="status"
+              className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-stone-gray"
+            >
+              <LoaderCircle
+                aria-hidden="true"
+                className="size-4 animate-spin text-premium-red"
+              />
+              <span>{translations.loadingMore}</span>
+            </div>
+          ) : loadMoreError ? (
+            <div
+              role="alert"
+              className="flex flex-wrap items-center justify-center gap-2 text-center"
+            >
+              <span className="text-xs font-medium text-stone-gray">
+                {translations.loadMoreError}
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={onLoadMore}
+                className="min-h-9 text-xs font-semibold uppercase text-premium-red hover:bg-premium-red/5 hover:text-premium-red"
+              >
+                {translations.retry}
+              </Button>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }
