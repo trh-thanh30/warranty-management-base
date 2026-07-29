@@ -122,6 +122,7 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             title: t("items.contactSubmissions"),
             href: "/contact-submissions",
             icon: MessageSquareText,
+            notificationBadgeKey: "contactSubmissions",
             requiredPermission: PERMISSIONS.CONTACT_SUBMISSION_VIEW,
           },
         ],

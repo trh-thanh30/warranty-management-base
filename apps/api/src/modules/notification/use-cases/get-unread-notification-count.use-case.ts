@@ -24,9 +24,14 @@ export class GetUnreadNotificationCountUseCase {
           counts.warrantyClaims += 1;
         }
 
+        if (type === NOTIFICATION_TYPES.CONTACT_SUBMISSION_CREATED) {
+          counts.contactSubmissions += 1;
+        }
+
         return counts;
       },
       {
+        contactSubmissions: 0,
         unread: 0,
         warranties: 0,
         warrantyClaims: 0,

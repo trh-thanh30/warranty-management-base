@@ -40,11 +40,15 @@ test("places contact submissions after dealers in the general sidebar section", 
     (section) => section.label === "sections.general",
   );
   const itemHrefs = generalSection?.items.map((item) => item.href);
+  const contactSubmissions = generalSection?.items.find(
+    (item) => item.href === "/contact-submissions",
+  );
 
   assert.equal(
     itemHrefs?.indexOf("/contact-submissions"),
     (itemHrefs?.indexOf("/dealers") ?? -2) + 1,
   );
+  assert.equal(contactSubmissions?.notificationBadgeKey, "contactSubmissions");
 });
 
 test("orders product templates before physical products", () => {

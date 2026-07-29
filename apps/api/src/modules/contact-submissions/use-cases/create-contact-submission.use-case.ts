@@ -1,5 +1,6 @@
 import { BadRequestError, ConflictError } from '@/common/response';
 import { GetVietnamProvinceUseCase } from '@/modules/locations/use-cases/get-vietnam-province.use-case';
+import { ContactSubmissionNotificationService } from '@/modules/contact-submissions/service/contact-submission-notification.service';
 import type { CreateContactSubmissionBody } from '@repo/shared';
 import {
   CONTACT_CONSULTATION_TOPICS,
@@ -17,6 +18,7 @@ export class CreateContactSubmissionUseCase {
   constructor(
     private readonly repository: ContactSubmissionsRepository,
     private readonly getVietnamProvinceUseCase: GetVietnamProvinceUseCase,
+    private readonly contactSubmissionNotificationService: ContactSubmissionNotificationService,
   ) {}
 
   async execute(input: CreateContactSubmissionBody) {
@@ -112,6 +114,10 @@ export class CreateContactSubmissionUseCase {
 
       throw error;
     }
+
+    await this.contactSubmissionNotificationService.submissionCreated(
+      submission,
+    );
 
     return toContactSubmissionResponse(submission);
   }

@@ -37,11 +37,13 @@ describe('GetUnreadNotificationCountUseCase', () => {
       NOTIFICATION_TYPES.WARRANTY_CLAIM_ASSIGNED_SERVICE_CENTER,
       NOTIFICATION_TYPES.WARRANTY_CLAIM_SLA_BREACHED,
       NOTIFICATION_TYPES.WARRANTY_ACTIVATION_REQUEST_CREATED,
+      NOTIFICATION_TYPES.CONTACT_SUBMISSION_CREATED,
       'GENERAL',
     ]);
 
     await expect(useCase.execute('user-1')).resolves.toEqual({
-      unread: 6,
+      contactSubmissions: 1,
+      unread: 7,
       warranties: 1,
       warrantyClaims: 1,
     });
@@ -51,6 +53,7 @@ describe('GetUnreadNotificationCountUseCase', () => {
     const useCase = await makeUseCase([]);
 
     await expect(useCase.execute('user-1')).resolves.toEqual({
+      contactSubmissions: 0,
       unread: 0,
       warranties: 0,
       warrantyClaims: 0,

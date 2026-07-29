@@ -7,8 +7,10 @@ import { CreateContactSubmissionUseCase } from '@/modules/contact-submissions/us
 import { GetContactSubmissionUseCase } from '@/modules/contact-submissions/use-cases/get-contact-submission.use-case';
 import { ListContactSubmissionsUseCase } from '@/modules/contact-submissions/use-cases/list-contact-submissions.use-case';
 import { ContactSubmissionsRepository } from '@/modules/contact-submissions/repository/contact-submissions.repository';
+import { ContactSubmissionNotificationService } from '@/modules/contact-submissions/service/contact-submission-notification.service';
 import { UpdateContactSubmissionStatusUseCase } from '@/modules/contact-submissions/use-cases/update-contact-submission-status.use-case';
-import { Prisma } from '@prisma/client';
+import { NOTIFICATION_TYPES } from '@repo/shared/constants';
+import { notification_scope, Prisma, user_role } from '@prisma/client';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -54,6 +56,9 @@ describe('Contact submission use cases', () => {
   const getVietnamProvinceUseCase = {
     execute: jest.fn(),
   };
+  const contactSubmissionNotificationService = {
+    submissionCreated: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -61,12 +66,16 @@ describe('Contact submission use cases', () => {
       code: 79,
       name: ' Thành phố Hồ Chí Minh ',
     });
+    contactSubmissionNotificationService.submissionCreated.mockResolvedValue(
+      undefined,
+    );
   });
 
   function createSubmissionUseCase() {
     return new CreateContactSubmissionUseCase(
       repository as never,
       getVietnamProvinceUseCase as never,
+      contactSubmissionNotificationService as never,
     );
   }
 
@@ -94,6 +103,9 @@ describe('Contact submission use cases', () => {
       province_name: 'Thành phố Hồ Chí Minh',
       source_path: '/vi/lien-he',
     });
+    expect(
+      contactSubmissionNotificationService.submissionCreated,
+    ).toHaveBeenCalledWith(baseSubmission);
     expect(result).toMatchObject({
       consultationTopic: 'PRODUCT_CONSULTATION',
       content: 'Toi can tu van phim cach nhiet cho xe.',
@@ -122,6 +134,9 @@ describe('Contact submission use cases', () => {
     expect(getVietnamProvinceUseCase.execute).not.toHaveBeenCalled();
     expect(repository.findPendingByPhone).not.toHaveBeenCalled();
     expect(repository.create).not.toHaveBeenCalled();
+    expect(
+      contactSubmissionNotificationService.submissionCreated,
+    ).not.toHaveBeenCalled();
   });
 
   it('rejects a contact submission when the normalized phone already has a pending message', async () => {
@@ -141,6 +156,9 @@ describe('Contact submission use cases', () => {
     });
     expect(repository.findPendingByPhone).toHaveBeenCalledWith('0886337733');
     expect(repository.create).not.toHaveBeenCalled();
+    expect(
+      contactSubmissionNotificationService.submissionCreated,
+    ).not.toHaveBeenCalled();
   });
 
   it('maps a concurrent pending-phone unique collision to the domain conflict', async () => {
@@ -166,6 +184,9 @@ describe('Contact submission use cases', () => {
       code: 'CONTACT_SUBMISSION_PHONE_PENDING',
       details: { phone: '0886337733' },
     });
+    expect(
+      contactSubmissionNotificationService.submissionCreated,
+    ).not.toHaveBeenCalled();
   });
 
   it('rejects too-short contact message content', async () => {
@@ -182,6 +203,9 @@ describe('Contact submission use cases', () => {
     ).rejects.toBeInstanceOf(BadRequestError);
     expect(repository.findPendingByPhone).not.toHaveBeenCalled();
     expect(repository.create).not.toHaveBeenCalled();
+    expect(
+      contactSubmissionNotificationService.submissionCreated,
+    ).not.toHaveBeenCalled();
   });
 
   it('lists contact submissions with pagination and filters', async () => {
@@ -297,6 +321,55 @@ describe('Contact submission use cases', () => {
       }),
     ).rejects.toBeInstanceOf(BadRequestError);
     expect(repository.updateStatus).not.toHaveBeenCalled();
+  });
+});
+
+describe('Contact submission notification service', () => {
+  const createSystemNotificationUseCase = {
+    execute: jest.fn(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('publishes new submissions to active admin roles', async () => {
+    createSystemNotificationUseCase.execute.mockResolvedValue(undefined);
+    const service = new ContactSubmissionNotificationService(
+      createSystemNotificationUseCase as never,
+    );
+
+    await service.submissionCreated(baseSubmission);
+
+    expect(createSystemNotificationUseCase.execute).toHaveBeenCalledWith({
+      content: 'A new consultation request has been submitted by Nguyen Van A.',
+      metadata: {
+        consultationTopic: baseSubmission.consultation_topic,
+        fullName: baseSubmission.full_name,
+        phone: baseSubmission.phone,
+        provinceCode: baseSubmission.province_code,
+        provinceName: baseSubmission.province_name,
+        status: baseSubmission.status,
+        submissionId: baseSubmission.id,
+      },
+      scope: notification_scope.ROLE,
+      target_roles: [user_role.ADMIN, user_role.MODERATOR],
+      title: 'New contact submission from Nguyen Van A',
+      type: NOTIFICATION_TYPES.CONTACT_SUBMISSION_CREATED,
+    });
+  });
+
+  it('does not fail the public request when notification publishing fails', async () => {
+    createSystemNotificationUseCase.execute.mockRejectedValue(
+      new Error('notification unavailable'),
+    );
+    const service = new ContactSubmissionNotificationService(
+      createSystemNotificationUseCase as never,
+    );
+
+    await expect(
+      service.submissionCreated(baseSubmission),
+    ).resolves.toBeUndefined();
   });
 });
 
