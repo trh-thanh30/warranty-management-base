@@ -26,5 +26,6 @@ import { Module } from '@nestjs/common';
     LookupVietnamLegacyWardUseCase,
     ListVietnamLegacyWardsUseCase,
   ],
+  exports: [GetVietnamProvinceUseCase],
 })
 export class LocationsModule {}
