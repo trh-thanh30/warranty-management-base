@@ -293,7 +293,7 @@ export function WarrantyLookupView() {
               <h3 className="text-lg sm:text-xl font-semibold uppercase text-deep-black">
                 {t("policyShortcut.title")}
               </h3>
-              <p className="text-xs sm:text-sm text-stone-gray font-medium">
+              <p className="text-sm text-stone-gray font-medium">
                 {t("policyShortcut.description")}
               </p>
             </div>

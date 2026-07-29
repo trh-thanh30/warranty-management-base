@@ -127,7 +127,7 @@ export function WarrantyLookupModal({
                 {hotline && (
                   <a
                     href={hotline.href}
-                    className="inline-flex items-center gap-2 rounded-full bg-premium-red px-5 py-2.5 text-xs font-semibold uppercase text-white shadow-md transition-colors hover:bg-warm-red"
+                    className="inline-flex items-center gap-2 rounded-md bg-premium-red px-5 py-2.5 text-xs font-semibold uppercase text-white shadow-md transition-colors hover:bg-warm-red"
                   >
                     <Phone className="size-3.5" />
                     <span>

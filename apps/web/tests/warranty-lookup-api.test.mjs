@@ -197,3 +197,23 @@ test("warranty support hotline comes from public site settings", async () => {
     assert.doesNotMatch(source, /warrantyLookupSupportPhone/);
   }
 });
+
+test("warranty support hotline actions use the shared medium radius", async () => {
+  const [pageSource, modalSource] = await Promise.all([
+    readFile(
+      new URL("../src/views/warranty/lookup.view.tsx", import.meta.url),
+      "utf8",
+    ),
+    readFile(
+      new URL("../src/components/warranty-lookup-modal.tsx", import.meta.url),
+      "utf8",
+    ),
+  ]);
+
+  for (const source of [pageSource, modalSource]) {
+    assert.match(
+      source,
+      /href=\{hotline\.href\}[\s\S]*?className="[^"]*rounded-md[^"]*"/,
+    );
+  }
+});
