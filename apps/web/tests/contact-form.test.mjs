@@ -153,16 +153,25 @@ test("contact page delegates message form behavior to a shadcn-style form compon
 });
 
 test("contact page renders published site settings with local fallback data", async () => {
-  const [pageSource, viewSource, utilsSource] = await Promise.all([
-    readFile(contactPagePath, "utf8"),
-    readFile(contactViewPath, "utf8"),
-    readFile(contactUtilsPath, "utf8"),
-  ]);
+  const [pageSource, layoutSource, viewSource, utilsSource] = await Promise.all(
+    [
+      readFile(contactPagePath, "utf8"),
+      readFile(localeLayoutPath, "utf8"),
+      readFile(contactViewPath, "utf8"),
+      readFile(contactUtilsPath, "utf8"),
+    ],
+  );
 
-  assert.match(pageSource, /getPublicSiteSettings\(locale\)/);
-  assert.match(pageSource, /<ContactView siteSettings=\{siteSettings\} \/>/);
+  assert.match(pageSource, /<ContactView \/>/);
+  assert.doesNotMatch(pageSource, /get(?:Cached|Public)SiteSetting/);
 
-  assert.match(viewSource, /siteSettings\?: PublicWebsiteSiteSetting \| null/);
+  assert.match(layoutSource, /getCachedSiteSetting\(locale\)/);
+  assert.match(
+    layoutSource,
+    /<SiteSettingsProvider siteSettings=\{siteSettings\}>/,
+  );
+
+  assert.match(viewSource, /const siteSettings = useSiteSettings\(\)/);
   assert.match(viewSource, /getPublishedContactOffices\(siteSettings\)/);
   assert.match(viewSource, /siteSettings\?\.contactEmail/);
   assert.match(viewSource, /siteSettings\?\.websiteUrl/);
