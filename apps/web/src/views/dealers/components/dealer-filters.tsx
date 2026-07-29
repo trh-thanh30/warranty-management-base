@@ -125,7 +125,7 @@ export function DealerFilters({
         aria-pressed={nearMeOnly}
         disabled={nearbyStatus === "loading"}
         onClick={() => onNearMeChange(!nearMeOnly)}
-        className="h-auto min-h-11 w-full whitespace-normal rounded-sm bg-premium-red px-3 py-3 text-center text-[11px] font-semibold uppercase leading-snug tracking-[0.08em] text-white hover:bg-warm-red sm:px-4 sm:text-xs sm:tracking-wider"
+        className="h-auto min-h-11 w-full whitespace-normal rounded-sm bg-premium-red px-3 py-3 text-center text-xs font-semibold uppercase leading-snug tracking-[0.08em] text-white hover:bg-warm-red sm:px-4 sm:tracking-wider"
       >
         <MapPin aria-hidden="true" className="size-4 shrink-0" />
         <span className="min-w-0 text-balance">{translations.nearMe}</span>

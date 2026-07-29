@@ -80,7 +80,7 @@ export function GallerySection() {
   };
 
   return (
-    <section className="w-full bg-gray-50 py-16 lg:py-24">
+    <section className="w-full bg-surface-muted py-16 lg:py-24">
       <Container className="space-y-12 text-center">
         <motion.div
           variants={fadeUp}

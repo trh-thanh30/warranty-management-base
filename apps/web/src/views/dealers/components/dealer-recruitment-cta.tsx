@@ -31,7 +31,7 @@ export function DealerRecruitmentCta() {
             <div className="max-w-3xl">
               <div className="mb-4 flex items-center gap-3 text-premium-red">
                 <Handshake aria-hidden="true" className="size-5 shrink-0" />
-                <span className="text-xs font-bold uppercase tracking-[0.2em]">
+                <span className="text-xs font-semibold uppercase tracking-[0.2em]">
                   {t("eyebrow")}
                 </span>
               </div>
@@ -50,7 +50,7 @@ export function DealerRecruitmentCta() {
             <Button
               asChild
               size="md"
-              className="min-h-12 w-full rounded-sm bg-premium-red px-6 text-xs font-bold uppercase tracking-wider text-white shadow-md transition-colors hover:bg-warm-red focus-visible:ring-premium-red focus-visible:ring-offset-white sm:w-fit"
+              className="min-h-12 w-full rounded-sm bg-premium-red px-6 text-xs font-semibold uppercase tracking-wider text-white shadow-md transition-colors hover:bg-warm-red focus-visible:ring-premium-red focus-visible:ring-offset-white sm:w-fit"
             >
               <Link href={APP_ROUTES.contact}>
                 <span>{t("cta")}</span>

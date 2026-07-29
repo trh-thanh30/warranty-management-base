@@ -58,7 +58,7 @@ export function AdditionalProductsSection() {
   }, [emblaApi, onSelect]);
 
   return (
-    <section className="w-full bg-gray-50 py-16 lg:py-24">
+    <section className="w-full bg-surface-muted py-16 lg:py-24">
       <Container className="space-y-10">
         <motion.div
           variants={fadeUp}

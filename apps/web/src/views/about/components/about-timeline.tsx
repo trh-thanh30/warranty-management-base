@@ -8,57 +8,45 @@ const timelineData = [
   {
     id: "rdJapan",
     year: "2015",
-    phase: "GIAI ĐOẠN 01/04",
-    titleKey: "rdJapanTitle",
-    descKey: "rdJapanDesc",
     isCurrent: false,
-    tags: ["Nano Ceramic", "R&D Japan", "50+ Patents"],
+    tags: ["technology", "research", "patents"],
     stats: [
-      { value: "50+", label: "BẰNG SÁNG CHẾ" },
-      { value: "3 NĂM", label: "NGHIÊN CỨU & TEST" },
-      { value: "ISO 9001", label: "CHỨNG NHẬN QUỐC TẾ" },
+      { id: "patents", value: "50+" },
+      { id: "research", value: "3" },
+      { id: "certification", value: "ISO 9001" },
     ],
   },
   {
     id: "launchVietnam",
     year: "2018",
-    phase: "GIAI ĐOẠN 02/04",
-    titleKey: "launchVietnamTitle",
-    descKey: "launchVietnamDesc",
     isCurrent: false,
-    tags: ["Vietnam Launch", "50+ Dealers", "10K+ Customers"],
+    tags: ["launch", "dealers", "customers"],
     stats: [
-      { value: "50+", label: "ĐẠI LÝ ĐẦU TIÊN" },
-      { value: "10K+", label: "KHÁCH HÀNG TIN DÙNG" },
-      { value: "99%", label: "TỶ LỆ HÀI LÒNG" },
+      { id: "dealers", value: "50+" },
+      { id: "customers", value: "10K+" },
+      { id: "satisfaction", value: "99%" },
     ],
   },
   {
     id: "ewarrantyRelease",
     year: "2021",
-    phase: "GIAI ĐOẠN 03/04",
-    titleKey: "ewarrantyTitle",
-    descKey: "ewarrantyDesc",
     isCurrent: false,
-    tags: ["E-Warranty", "Digital App", "100K+ Records"],
+    tags: ["ewarranty", "digitalApp", "records"],
     stats: [
-      { value: "100K+", label: "BẢO HÀNH ĐIỆN TỬ" },
-      { value: "24/7", label: "TRA CỨU BẢO HÀNH" },
-      { value: "10 NĂM", label: "CAM KẾT CHẤT LƯỢNG" },
+      { id: "warranties", value: "100K+" },
+      { id: "lookup", value: "24/7" },
+      { id: "commitment", value: "10" },
     ],
   },
   {
     id: "networkExpansion",
     year: "2024",
-    phase: "GIAI ĐOẠN 04/04",
-    titleKey: "networkTitle",
-    descKey: "networkDesc",
     isCurrent: true,
-    tags: ["100+ Dealers", "34 Provinces", "Market Leader"],
+    tags: ["dealers", "provinces", "leader"],
     stats: [
-      { value: "100+", label: "ĐẠI LÝ TOÀN QUỐC" },
-      { value: "34", label: "TỈNH THÀNH PHỦ SÓNG" },
-      { value: "#1", label: "THƯƠNG HIỆU UY TÍN" },
+      { id: "dealers", value: "100+" },
+      { id: "provinces", value: "34" },
+      { id: "brand", value: "#1" },
     ],
   },
 ] as const;
@@ -76,18 +64,18 @@ export function AboutTimeline() {
         >
           <div className="flex items-center justify-center gap-3">
             <span className="w-8 h-[2px] bg-premium-red shrink-0" />
-            <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-premium-red">
+            <span className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-premium-red">
               {t("milestones.eyebrow")}
             </span>
             <span className="w-8 h-[2px] bg-premium-red shrink-0" />
           </div>
 
           <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold uppercase tracking-wide text-deep-black leading-tight">
-            CỘT MỐC <span className="text-premium-red">QUAN TRỌNG</span>
+            {t("milestones.title")}
           </h2>
 
           <p className="text-sm sm:text-base text-stone-gray text-pretty">
-            Hành trình hơn 10 năm đồng hành cùng hàng triệu chủ xe Việt Nam
+            {t("milestones.description")}
           </p>
         </FadeIn>
 
@@ -108,8 +96,10 @@ export function AboutTimeline() {
                       {item.year}
                     </span>
                   </div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-premium-red block pl-6">
-                    {item.isCurrent ? "HIỆN TẠI" : item.phase}
+                  <span className="text-xs font-semibold uppercase tracking-wider text-premium-red block pl-6">
+                    {item.isCurrent
+                      ? t("milestones.current")
+                      : t(`milestones.items.${item.id}.phase`)}
                   </span>
                 </div>
 
@@ -128,8 +118,8 @@ export function AboutTimeline() {
                     {item.tags.map((tag) => (
                       <div key={tag} className="flex items-center gap-2">
                         <span className="size-1.5 rounded-full bg-premium-red shrink-0" />
-                        <span className="text-xs font-bold uppercase tracking-wider text-stone-600">
-                          {tag}
+                        <span className="text-xs font-semibold uppercase tracking-wider text-soft-gray">
+                          {t(`milestones.items.${item.id}.tags.${tag}`)}
                         </span>
                       </div>
                     ))}
@@ -139,12 +129,17 @@ export function AboutTimeline() {
                 {/* Column 3: Stats Row (4 Cols) */}
                 <div className="lg:col-span-4 grid grid-cols-3 gap-4 pt-2 lg:pt-0 border-t lg:border-t-0 lg:border-l lg:border-border-gray/60 lg:pl-8">
                   {item.stats.map((stat) => (
-                    <div key={stat.label} className="space-y-1">
+                    <div key={stat.id} className="space-y-1">
                       <div className="text-xl sm:text-2xl font-bold tracking-tight text-premium-red leading-none">
-                        {stat.value}
+                        {t(
+                          `milestones.items.${item.id}.stats.${stat.id}.value`,
+                          { value: stat.value },
+                        )}
                       </div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block leading-tight">
-                        {stat.label}
+                      <span className="text-xs font-semibold uppercase tracking-wider text-stone-gray block leading-tight">
+                        {t(
+                          `milestones.items.${item.id}.stats.${stat.id}.label`,
+                        )}
                       </span>
                     </div>
                   ))}

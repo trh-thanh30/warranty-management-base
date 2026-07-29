@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
-import { CheckCircle2 } from "lucide-react";
-import { Input } from "@repo/ui/input";
 import { Container } from "@/src/components/common/container";
 import { formControlFocusClassName } from "@/src/components/common/form-control.constants";
+import { Input } from "@repo/ui/input";
+import { CheckCircle2 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { warrantyIssueOptions } from "./warranty.constants";
 
 export function WarrantyClaimRequestView() {
@@ -20,8 +20,8 @@ export function WarrantyClaimRequestView() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 py-12 sm:py-20 text-deep-black">
-      <Container className="max-w-[1000px] space-y-12">
+    <main className="min-h-screen bg-surface-muted py-12 sm:py-20 text-deep-black">
+      <Container className="max-w-250 space-y-12">
         <div className="text-center space-y-4">
           <span className="inline-block bg-premium-red/10 text-premium-red border border-premium-red/30 px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-[0.25em]">
             {t("eyebrow")}

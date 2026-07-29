@@ -27,7 +27,7 @@ export function AboutB2BCta() {
           {/* Clean Red Line Eyebrow Tag */}
           <div className="flex items-center justify-center gap-3">
             <span className="w-8 h-[2px] bg-premium-red shrink-0" />
-            <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-premium-red">
+            <span className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-premium-red">
               {t("b2bCta.eyebrow")}
             </span>
             <span className="w-8 h-[2px] bg-premium-red shrink-0" />
@@ -44,7 +44,7 @@ export function AboutB2BCta() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2 pb-4">
             <Link
               href={APP_ROUTES.dealers}
-              className="inline-flex items-center justify-center gap-2.5 rounded-md bg-premium-red hover:bg-warm-red px-8 py-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-white shadow-md transition-all cursor-pointer"
+              className="inline-flex items-center justify-center gap-2.5 rounded-md bg-premium-red hover:bg-warm-red px-8 py-4 text-xs sm:text-sm font-semibold uppercase tracking-wider text-white shadow-md transition-all cursor-pointer"
             >
               <span>{t("b2bCta.partnerBtn")}</span>
               <ArrowRight className="size-4 text-white" />
@@ -53,7 +53,7 @@ export function AboutB2BCta() {
             {hotline && (
               <a
                 href={hotline.href}
-                className="inline-flex items-center justify-center gap-2.5 rounded-md bg-white hover:bg-stone-100 border border-border-gray px-8 py-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-deep-black transition-all cursor-pointer"
+                className="inline-flex items-center justify-center gap-2.5 rounded-md bg-white hover:bg-light-gray border border-border-gray px-8 py-4 text-xs sm:text-sm font-semibold uppercase tracking-wider text-deep-black transition-all cursor-pointer"
               >
                 <Phone className="size-4 text-premium-red" />
                 <span>

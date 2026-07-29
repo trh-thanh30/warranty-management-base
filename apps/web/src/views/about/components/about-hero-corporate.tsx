@@ -60,7 +60,7 @@ export function AboutHeroCorporate() {
 
             <div className="border-l-2 border-premium-red pl-4 space-y-1">
               <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-premium-red tracking-tight whitespace-nowrap">
-                <Counter value={10} suffix=" NĂM" />
+                <Counter value={10} suffix={t("hero.stats.yearsSuffix")} />
               </div>
               <p className="text-xs sm:text-xs font-semibold uppercase tracking-wider text-stone-gray leading-snug">
                 {t("hero.stats.warranty")}
@@ -80,7 +80,7 @@ export function AboutHeroCorporate() {
 
             <Link
               href={APP_ROUTES.dealers}
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-white hover:bg-gray-100 border border-border-gray px-7 py-3.5 text-xs sm:text-sm font-semibold uppercase tracking-wider text-deep-black shadow-sm transition-all cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-white hover:bg-light-gray border border-border-gray px-7 py-3.5 text-xs sm:text-sm font-semibold uppercase tracking-wider text-deep-black shadow-sm transition-all cursor-pointer"
             >
               <span>{t("hero.dealerNetworkCta")}</span>
             </Link>

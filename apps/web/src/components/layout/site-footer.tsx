@@ -1,21 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
 import { Container } from "@/src/components/common/container";
-import { motion, AnimatePresence } from "framer-motion";
-import type { PublicWebsiteSiteSetting } from "@repo/shared";
-import { cn } from "@repo/ui/lib/utils";
-import { Link, usePathname } from "@/src/i18n/navigation";
-import { ArrowUp } from "lucide-react";
 import { FooterSocialLink } from "@/src/components/layout/components/footer-social-link";
 import { SiteLogo } from "@/src/components/layout/components/site-logo";
+import { Link, usePathname } from "@/src/i18n/navigation";
 import {
   displayWebsite,
   normalizeExternalUrl,
   toTelephoneHref,
 } from "@/src/utils/link.utils";
 import { isNavigationItemActive } from "@/src/utils/pathname.utils";
+import type { PublicWebsiteSiteSetting } from "@repo/shared";
+import { cn } from "@repo/ui/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowUp } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import {
   footerNavigationItems,
   footerPolicyItems,
@@ -54,7 +54,7 @@ export function SiteFooter({
       {/* ── Footer ── */}
       <footer
         id="contact"
-        className="w-full scroll-mt-[84px] bg-gray-50 text-deep-black"
+        className="w-full scroll-mt-21 bg-surface-muted text-deep-black"
       >
         {/* Main Footer Container */}
         <Container className="py-12 lg:py-16">
@@ -179,6 +179,7 @@ export function SiteFooter({
 
               <div className="flex items-center gap-2 pt-1 text-sm font-semibold uppercase text-premium-red sm:text-base">
                 <svg
+                  data-footer-japan-flag
                   className="h-3.5 w-5 shrink-0 rounded-xs overflow-hidden border border-border-gray"
                   viewBox="0 0 900 600"
                   aria-hidden="true"
@@ -216,7 +217,7 @@ export function SiteFooter({
         </Container>
 
         {/* Bottom Copyright Bar */}
-        <div className="w-full border-t-2 border-t-premium-red bg-gray-100 py-4">
+        <div className="w-full border-t-2 border-t-premium-red bg-light-gray py-4">
           <Container className="text-center text-xs sm:text-sm text-deep-black font-base">
             {t("copyright", { year: new Date().getFullYear() })}
           </Container>

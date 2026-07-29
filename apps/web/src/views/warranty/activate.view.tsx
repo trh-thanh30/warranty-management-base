@@ -25,7 +25,7 @@ export function WarrantyActivateView() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 py-12 sm:py-20 text-deep-black">
+    <main className="min-h-screen bg-surface-muted py-12 sm:py-20 text-deep-black">
       <Container className="max-w-[1000px] space-y-12">
         <div className="text-center space-y-4">
           <span className="inline-block bg-surface-muted0/10 text-premium-red border border-premium-red/30 px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-[0.25em]">

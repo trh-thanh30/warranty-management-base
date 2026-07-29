@@ -25,8 +25,8 @@ export function NetworkLocationPopup({
     <Popup className="fujitek-map-popup">
       <div className="min-w-56 max-w-72 space-y-3 p-1">
         <Badge
-          className={`rounded-sm px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-white ${
-            isDealer ? "bg-premium-red" : "bg-blue-600"
+          className={`rounded-sm px-2 py-1 text-xs font-semibold uppercase tracking-wider text-white ${
+            isDealer ? "bg-premium-red" : "bg-service-center"
           }`}
         >
           {isDealer ? translations.dealer : translations.serviceCenter}
@@ -37,7 +37,7 @@ export function NetworkLocationPopup({
             <MapPin
               aria-hidden="true"
               className={`mt-0.5 size-4 shrink-0 ${
-                isDealer ? "text-premium-red" : "text-blue-600"
+                isDealer ? "text-premium-red" : "text-service-center"
               }`}
             />
             <h3 className="m-0 text-sm font-bold uppercase leading-snug text-deep-black">
@@ -68,7 +68,7 @@ export function NetworkLocationPopup({
           href={location.googleMapsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex min-h-8 items-center gap-1.5 text-xs font-bold uppercase text-premium-red transition-colors hover:text-warm-red hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2"
+          className="inline-flex min-h-8 items-center gap-1.5 text-xs font-semibold uppercase text-premium-red transition-colors hover:text-warm-red hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2"
         >
           <span>{translations.directions}</span>
           <ExternalLink aria-hidden="true" className="size-3.5" />

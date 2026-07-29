@@ -35,7 +35,7 @@ export function AboutNetworkBanner() {
               {/* Clean Red Line Eyebrow Tag */}
               <div className="flex items-center gap-3">
                 <span className="w-8 h-[2px] bg-premium-red shrink-0" />
-                <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-premium-red">
+                <span className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-premium-red">
                   {t("network.eyebrow")}
                 </span>
               </div>
@@ -58,7 +58,7 @@ export function AboutNetworkBanner() {
                 <div className="text-2xl sm:text-4xl font-bold text-premium-red tracking-tight">
                   <Counter value={100} suffix="+" />
                 </div>
-                <div className="text-xs font-bold uppercase tracking-wider text-stone-gray">
+                <div className="text-xs font-semibold uppercase tracking-wider text-stone-gray">
                   {t("network.stats.dealers")}
                 </div>
               </div>
@@ -67,16 +67,16 @@ export function AboutNetworkBanner() {
                 <div className="text-2xl sm:text-4xl font-bold text-premium-red tracking-tight">
                   <Counter value={34} />
                 </div>
-                <div className="text-xs font-bold uppercase tracking-wider text-stone-gray">
+                <div className="text-xs font-semibold uppercase tracking-wider text-stone-gray">
                   {t("network.stats.provinces")}
                 </div>
               </div>
 
               <div className="border-l-2 border-premium-red pl-4 space-y-1">
                 <div className="text-2xl sm:text-4xl font-bold text-premium-red tracking-tight">
-                  <Counter value={10} suffix=" NĂM" />
+                  <Counter value={10} suffix={t("network.stats.yearsSuffix")} />
                 </div>
-                <div className="text-xs font-bold uppercase tracking-wider text-stone-gray">
+                <div className="text-xs font-semibold uppercase tracking-wider text-stone-gray">
                   {t("network.stats.warrantyYears")}
                 </div>
               </div>
@@ -85,7 +85,7 @@ export function AboutNetworkBanner() {
                 <div className="text-2xl sm:text-4xl font-bold text-premium-red tracking-tight">
                   24/7
                 </div>
-                <div className="text-xs font-bold uppercase tracking-wider text-stone-gray">
+                <div className="text-xs font-semibold uppercase tracking-wider text-stone-gray">
                   {t("network.stats.support")}
                 </div>
               </div>
@@ -94,7 +94,7 @@ export function AboutNetworkBanner() {
             <div className="pt-2">
               <Link
                 href={APP_ROUTES.dealers}
-                className="inline-flex items-center justify-center gap-2.5 rounded-md bg-premium-red hover:bg-warm-red px-8 py-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-white shadow-md transition-all cursor-pointer"
+                className="inline-flex items-center justify-center gap-2.5 rounded-md bg-premium-red hover:bg-warm-red px-8 py-4 text-xs sm:text-sm font-semibold uppercase tracking-wider text-white shadow-md transition-all cursor-pointer"
               >
                 <span>{t("network.viewDealersCta")}</span>
                 <ArrowRight className="size-4" />

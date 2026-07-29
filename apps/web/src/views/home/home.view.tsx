@@ -44,7 +44,7 @@ export async function HomeView({
   }));
 
   return (
-    <main className="overflow-x-hidden bg-gray-50 text-charcoal">
+    <main className="overflow-x-hidden bg-surface-muted text-charcoal">
       <HeroSection
         desktopImages={desktopHeroImages}
         mobileImages={mobileHeroImages}

@@ -11,16 +11,15 @@ test("footer social buttons use maintained brand icon components", async () => {
       "apps",
       "web",
       "src",
-      "views",
-      "home",
       "components",
-      "cta-section.tsx",
+      "layout",
+      "site-footer.constants.ts",
     ),
     "utf8",
   );
 
   for (const icon of ["FaFacebookF", "FaTiktok", "FaYoutube", "SiZalo"]) {
-    assert.match(source, new RegExp(`<${icon}\\b`));
+    assert.match(source, new RegExp(`icon:\\s*${icon}\\b`));
   }
 
   assert.doesNotMatch(
@@ -37,10 +36,9 @@ test("footer identifies FUJITEK Japan with an accessible decorative flag", async
         "apps",
         "web",
         "src",
-        "views",
-        "home",
         "components",
-        "cta-section.tsx",
+        "layout",
+        "site-footer.tsx",
       ),
       "utf8",
     ),
