@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowLeft, Check, ChevronRight, Languages, Moon } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  ChevronRight,
+  ChevronsUpDown,
+  Languages,
+  Moon,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import {
@@ -29,7 +36,15 @@ const localeLabels: Record<AppLocale, "vietnamese" | "english"> = {
   en: "english",
 };
 
-export function UserMenu() {
+type UserMenuProps = {
+  collapsed?: boolean;
+  variant?: "header" | "sidebar";
+};
+
+export function UserMenu({
+  collapsed = false,
+  variant = "header",
+}: UserMenuProps = {}) {
   const t = useTranslations("DashboardConfig");
   const tCommon = useTranslations("Common");
   const locale = useLocale() as AppLocale;
@@ -46,6 +61,7 @@ export function UserMenu() {
   const email = user?.email || "";
   const avatarFallback = getInitials(displayName);
   const darkMode = mounted && resolvedTheme === "dark";
+  const sidebarVariant = variant === "sidebar";
 
   useEffect(() => {
     setMounted(true);
@@ -73,21 +89,57 @@ export function UserMenu() {
       <DropdownMenuTrigger asChild>
         <Button
           aria-label={tCommon("openUserMenu")}
-          className="size-10 p-1"
-          size="icon"
+          className={cn(
+            sidebarVariant
+              ? collapsed
+                ? "mx-auto size-10 p-1"
+                : "h-auto w-full justify-start gap-3 px-2 py-2 text-left"
+              : "size-10 p-1",
+          )}
+          size={collapsed || !sidebarVariant ? "icon" : undefined}
+          title={
+            sidebarVariant && collapsed
+              ? `${displayName} (${email})`
+              : undefined
+          }
           variant="ghost"
         >
-          <Avatar className="h-8 w-8">
+          <Avatar
+            className={cn(sidebarVariant && !collapsed ? "size-10" : "size-8")}
+          >
             {user?.avatar_url ? (
               <AvatarImage alt={displayName} src={user.avatar_url} />
             ) : null}
             <AvatarFallback>{avatarFallback}</AvatarFallback>
           </Avatar>
+          {sidebarVariant && !collapsed ? (
+            <>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-medium text-slate-950 dark:text-slate-50">
+                  {displayName}
+                </span>
+                <span className="mt-0.5 block truncate text-xs font-normal text-slate-500 dark:text-slate-400">
+                  {email}
+                </span>
+              </span>
+              <ChevronsUpDown
+                aria-hidden="true"
+                className="size-4 shrink-0 text-slate-400"
+              />
+            </>
+          ) : null}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-[calc(100vw-1rem)] max-w-64 sm:w-64"
+        align={sidebarVariant ? "start" : "end"}
+        className={cn(
+          "w-[calc(100vw-1rem)] max-w-64 duration-150 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[side=bottom]:data-[state=closed]:slide-out-to-top-2 data-[side=bottom]:data-[state=open]:slide-in-from-top-2 data-[side=left]:data-[state=closed]:slide-out-to-right-2 data-[side=left]:data-[state=open]:slide-in-from-right-2 data-[side=right]:data-[state=closed]:slide-out-to-left-2 data-[side=right]:data-[state=open]:slide-in-from-left-2 data-[side=top]:data-[state=closed]:slide-out-to-bottom-2 data-[side=top]:data-[state=open]:slide-in-from-bottom-2 motion-reduce:animate-none sm:w-64",
+          sidebarVariant &&
+            !collapsed &&
+            "w-[calc(18rem-2rem)] max-w-[calc(100vw-1rem)]",
+        )}
         collisionPadding={8}
+        side={sidebarVariant ? (collapsed ? "right" : "top") : "bottom"}
       >
         {showLanguages ? (
           <>
