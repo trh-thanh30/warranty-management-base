@@ -50,6 +50,14 @@ export function useProductTemplateForm({
     control: form.control,
     name: "specifications",
   });
+  const features = useFieldArray({
+    control: form.control,
+    name: "features",
+  });
+  const applications = useFieldArray({
+    control: form.control,
+    name: "applications",
+  });
   const categoriesQuery = useCategories(
     {
       isActive: "true",
@@ -95,6 +103,8 @@ export function useProductTemplateForm({
     ...form,
     categoriesQuery,
     gallery,
+    features,
+    applications,
     specifications,
     creating: !template,
     onSubmit: form.handleSubmit(submit),

@@ -75,11 +75,30 @@ export function getTemplateSpecifications(
   });
 }
 
+function getTemplateTextList(
+  metadata: Record<string, unknown> | null | undefined,
+  key: "applications" | "features",
+) {
+  const values = metadata?.[key];
+  if (!Array.isArray(values)) return [];
+  return values.flatMap((value) =>
+    typeof value === "string" && value.trim() ? [{ value: value.trim() }] : [],
+  );
+}
+
 function toMetadata(values: ProductTemplateFormValues) {
   const specifications = values.specifications
     .map(({ key, value }) => ({ key: key.trim(), value: value.trim() }))
     .filter(({ key, value }) => key && value);
-  return specifications.length > 0 ? { specifications } : undefined;
+  const toTextList = (items: Array<{ value: string }>) =>
+    items.map(({ value }) => value.trim()).filter(Boolean);
+
+  return {
+    applications: toTextList(values.applications),
+    features: toTextList(values.features),
+    shortDescription: toOptionalValue(values.shortDescription) ?? null,
+    specifications,
+  };
 }
 
 export function toCreateTemplateBody(
@@ -138,6 +157,12 @@ export function getProductTemplateDefaults(
       .filter((asset) => asset.role === "GALLERY")
       .map((asset) => ({ assetId: asset.assetId, url: asset.url })) ?? [];
   const specifications = getTemplateSpecifications(template?.metadata);
+  const features = getTemplateTextList(template?.metadata, "features");
+  const applications = getTemplateTextList(template?.metadata, "applications");
+  const shortDescription =
+    typeof template?.metadata?.shortDescription === "string"
+      ? template.metadata.shortDescription
+      : "";
   return {
     sku: template?.sku ?? "",
     slug: template?.slug ?? "",
@@ -147,6 +172,7 @@ export function getProductTemplateDefaults(
     model: template?.model ?? "",
     modelYear: template?.modelYear ?? undefined,
     description: template?.description ?? "",
+    shortDescription,
     defaultWarrantyDurationMonths:
       template?.defaultWarrantyDurationMonths ?? 36,
     defaultWarrantyTerms: template?.defaultWarrantyTerms ?? "",
@@ -156,6 +182,8 @@ export function getProductTemplateDefaults(
     specifications: specifications.length
       ? specifications
       : [{ key: "", value: "" }],
+    features: features.length ? features : [{ value: "" }],
+    applications: applications.length ? applications : [{ value: "" }],
     isActive: template?.isActive ?? true,
     isPublished: template?.isPublished ?? false,
   };
