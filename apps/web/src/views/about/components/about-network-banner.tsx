@@ -74,7 +74,7 @@ export function AboutNetworkBanner() {
 
               <div className="border-l-2 border-premium-red pl-4 space-y-1">
                 <div className="text-2xl sm:text-4xl font-bold text-premium-red tracking-tight">
-                  <Counter value={10} suffix=" NĂM" />
+                  <Counter value={10} suffix={t("network.stats.yearsSuffix")} />
                 </div>
                 <div className="text-xs font-semibold uppercase tracking-wider text-stone-gray">
                   {t("network.stats.warrantyYears")}

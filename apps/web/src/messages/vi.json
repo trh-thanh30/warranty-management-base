@@ -143,6 +143,12 @@
           "badge": "Phổ biến",
           "description": "Lựa chọn cho người lái ưu tiên tầm nhìn rõ nét, kết hợp công nghệ Nano Ceramic hiện đại với sắc xanh kim tinh tế."
         }
+      },
+      "badges": {
+        "korea": "Hàn Quốc",
+        "japaneseTech": "Công nghệ Nhật",
+        "recording4k": "Ghi hình 4K",
+        "safety": "An toàn"
       }
     },
     "additionalProducts": {
@@ -195,7 +201,8 @@
         "warrantyValue": "10 NĂM +",
         "warrantyLabel": "Bảo hành điện tử",
         "uvLabel": "Chống tia UV",
-        "irLabel": "Cản tia hồng ngoại"
+        "irLabel": "Cản tia hồng ngoại",
+        "yearsSuffix": " năm"
       },
       "details": {
         "warranty": {
@@ -1443,222 +1450,6 @@
       }
     }
   },
-  "AboutPage": {
-    "metadata": {
-      "title": "Giới thiệu - FUJITEK Window Films",
-      "description": "Tìm hiểu FUJITEK, công nghệ phún xạ đa lớp và Ultra Nano Ceramic."
-    },
-    "hero": {
-      "eyebrow": "Giới thiệu",
-      "title": "PHIM CÁCH NHIỆT CAO CẤP",
-      "titlePrefix": "PHIM CÁCH NHIỆT",
-      "titleHighlight": "CAO",
-      "titleSuffix": "CẤP",
-      "sub": "Phim cách nhiệt cao cấp thế hệ mới — nơi công nghệ phún xạ đa lớp và nano ceramic định nghĩa lại chuẩn mực bảo vệ & trải nghiệm cho xế cưng của bạn.",
-      "description": "Phim cách nhiệt cao cấp thế hệ mới — nơi công nghệ phún xạ đa lớp và nano ceramic định nghĩa lại chuẩn mực bảo vệ & trải nghiệm cho xế cưng của bạn.",
-      "scrollCue": "Cuộn để khám phá",
-      "brandLabel": "FUJITEK",
-      "originLabel": "FUJITEK JAPANESE TECHNOLOGY",
-      "productLabel": "SPUTTER & CERAMIC",
-      "imageAlt": "Phim cách nhiệt FUJITEK Window Films",
-      "stats": {
-        "uvIrValue": "99%",
-        "uvIr": "Cản UV / IR",
-        "originValue": "JP",
-        "origin": "Công nghệ Nhật Bản",
-        "technologyValue": "2-IN-1",
-        "technology": "Sputtering + Ceramic"
-      }
-    },
-    "labels": {
-      "origin": "Xuất xứ công nghệ",
-      "technology": "Công nghệ lõi",
-      "vision": "Tầm nhìn thương hiệu",
-      "contact": "Nhận tư vấn & báo giá"
-    },
-    "sectionRails": {
-      "intro": "GIỚI THIỆU",
-      "anatomy": "CẤU TRÚC",
-      "origin": "XUẤT XỨ",
-      "coreTech": "CÔNG NGHỆ LÕI",
-      "performance": "HIỆU NĂNG",
-      "safety": "AN TOÀN",
-      "audience": "KHÁCH HÀNG",
-      "vision": "TẦM NHÌN"
-    },
-    "marquee": [
-      "PHIM CÁCH NHIỆT CAO CẤP",
-      "CÔNG NGHỆ NHẬT BẢN",
-      "PHÚN XẠ KIM LOẠI ĐA LỚP",
-      "ULTRA NANO CERAMIC"
-    ],
-    "stats": {
-      "uvIr": "Cản tia UV / IR",
-      "origin": "Công nghệ Nhật Bản",
-      "coreTech": "Công nghệ lõi kết hợp",
-      "signal": "Nhiễu sóng điện từ"
-    },
-    "intro": {
-      "eyebrow": "Giới thiệu",
-      "title": "FUJITEK Window Films",
-      "pullquote": "Không chỉ chống nóng — mà còn nâng tầm trải nghiệm trong không gian di chuyển.",
-      "p1": "FUJITEK không chỉ cung cấp phim cách nhiệt, chúng tôi mang đến giải pháp bảo vệ sức khỏe và nâng tầm không gian sang trọng cho xế cưng của bạn. Với vị thế là thương hiệu tiên phong ứng dụng công nghệ Phún Xạ Đa Lớp kết hợp Ultra Nano Ceramic, chúng tôi tự hào mang lại khả năng chống nóng vượt trội, ngăn chặn 99% tia UV/IR mà vẫn đảm bảo tầm nhìn rõ nét tuyệt đối.",
-      "p2": "Tại FUJITEK, sự minh bạch là tôn chỉ hàng đầu – từ thông số kỹ thuật thực tế đến hệ thống bảo hành điện tử tận tâm.",
-      "mainTag": "Ảnh thực tế: xe dán phim",
-      "insetTag": "Kỹ thuật viên thi công"
-    },
-    "standards": {
-      "title": "Định nghĩa lại chuẩn mực phim cách nhiệt cao cấp tại Việt Nam",
-      "p1": "FUJITEK Window Films là dòng phim cách nhiệt cao cấp thế hệ mới, mang đến một tiêu chuẩn khác biệt: không chỉ chống nóng mà còn nâng tầm trải nghiệm trong không gian di chuyển hiện đại.",
-      "p2": "Được phát triển với công nghệ Nhật Bản, FUJITEK kết hợp hiệu năng kỹ thuật, tư duy thẩm mỹ cao cấp và trách nhiệm bền vững với cộng đồng."
-    },
-    "filmLayers": {
-      "eyebrow": "Giải phẫu tấm phim",
-      "title": "Định nghĩa lại chuẩn mực phim cách nhiệt cao cấp tại Việt Nam",
-      "p1": "FUJITEK – The Ultimate Window Films là dòng phim cách nhiệt cao cấp thế hệ mới, chính thức ra mắt tại thị trường Việt Nam với sứ mệnh mang đến một tiêu chuẩn khác biệt: không chỉ chống nóng, mà còn nâng tầm trải nghiệm trong không gian khi di chuyển trong môi trường đô thị hiện đại.",
-      "p2": "Được phát triển với công nghệ Nhật Bản – FUJITEK là sự kết tinh giữa hiệu năng kỹ thuật vượt trội, tư duy thẩm mỹ cao cấp và trách nhiệm bền vững với cộng đồng.",
-      "instruction": "Rê chuột vào từng lớp ↓",
-      "description": "Mỗi lớp phim đảm nhiệm một vai trò riêng, từ bảo vệ bề mặt, phản xạ nhiệt và duy trì độ trong quang học đến độ bám dính ổn định.",
-      "items": {
-        "scratchCoat": {
-          "title": "Lớp phủ chống xước",
-          "description": "Bảo vệ bề mặt, giữ độ trong quang học lâu dài."
-        },
-        "sputterMetal": {
-          "title": "Lớp phún xạ kim loại",
-          "description": "Phản xạ & kiểm soát nhiệt, giảm tia hồng ngoại (IR)."
-        },
-        "opticalBase": {
-          "title": "Lớp nền quang học",
-          "description": "Đảm bảo tầm nhìn rõ nét, không biến dạng hình ảnh."
-        },
-        "nanoCeramic": {
-          "title": "Lớp Ultra Nano Ceramic",
-          "description": "Cản UV cục bộ, phân bố hạt gốm đồng đều cấp nano."
-        },
-        "adhesive": {
-          "title": "Lớp keo & lót bảo vệ",
-          "description": "Bám dính ổn định, an toàn, không phát thải."
-        }
-      }
-    },
-    "origin": {
-      "eyebrow": "Xuất xứ công nghệ",
-      "title": "Nền tảng của sự tin cậy",
-      "badgeValue": "FUJITEK",
-      "badgeLabel": "CÔNG NGHỆ NHẬT BẢN",
-      "p1": "Công nghệ Nhật Bản không chỉ là nền tảng phát triển, mà còn thể hiện cam kết về chất lượng. FUJITEK được nghiên cứu, sản xuất và kiểm soát theo các tiêu chuẩn nghiêm ngặt của ngành vật liệu kỹ thuật cao, đáp ứng đồng thời yêu cầu khắt khe của thị trường ô tô.",
-      "p2": "Tại Việt Nam, FUJITEK được giới thiệu như một giải pháp lâu dài, hướng đến phân khúc khách hàng đề cao giá trị sử dụng thực tế, độ bền công nghệ và trải nghiệm cao cấp, thay vì chạy theo các thông số quảng cáo ngắn hạn.",
-      "timeline": {
-        "research": {
-          "title": "NGHIÊN CỨU",
-          "description": "Vật liệu kỹ thuật cao, tiêu chuẩn châu Á."
-        },
-        "production": {
-          "title": "SẢN XUẤT",
-          "description": "Phún xạ chân không, kiểm soát từng lớp vi mô."
-        },
-        "qualityControl": {
-          "title": "KIỂM SOÁT",
-          "description": "Đáp ứng yêu cầu khắt khe của ngành ô tô."
-        }
-      }
-    },
-    "coreTech": {
-      "eyebrow": "Công nghệ lõi",
-      "title": "Công nghệ lõi – Trái tim của FUJITEK",
-      "subtitle": "Sự khác biệt cốt lõi nằm ở việc ứng dụng đồng thời hai công nghệ tiên tiến hàng đầu hiện nay.",
-      "sputtering": {
-        "title": "Phun Xạ Đa Lớp (Multi-layer Sputtering)",
-        "description": "Tạo màng bằng cách phun xạ các lớp kim loại và hợp chất đặc biệt trong môi trường chân không, cho phép kiểm soát chính xác cấu trúc từng lớp ở cấp độ vi mô.",
-        "b1": "Phản xạ và kiểm soát nhiệt tối ưu",
-        "b2": "Giảm đáng kể tia hồng ngoại (IR)"
-      },
-      "nanoCeramic": {
-        "title": "Ultra Nano Ceramic",
-        "description": "Sử dụng các hạt gốm siêu mịn cấp độ nano phân bố đồng đều, giúp tăng cường khả năng cản tia UV mà vẫn đảm bảo độ trong quang học tuyệt đối.",
-        "b1": "Hạn chế hấp thụ nhiệt cục bộ",
-        "b2": "Giữ tầm nhìn tự nhiên, dễ chịu"
-      }
-    },
-    "performance": {
-      "eyebrow": "Trải nghiệm thực tế",
-      "title": "Hiệu năng gắn liền với trải nghiệm thực tế",
-      "imageAlt": "Ford Everest thi công phim cách nhiệt FUJITEK",
-      "imageCaption": "Ảnh thực tế: Ford Everest",
-      "description": "FUJITEK không được phát triển để “đẹp trên thông số”, mà để tạo ra giá trị sử dụng rõ ràng cho người dùng:",
-      "b1": "Giảm nhiệt hiệu quả, giúp không gian bên trong mát hơn, ổn định hơn",
-      "b2": "Hạn chế tia UV gây lão hóa da, phai màu nội thất và vật liệu",
-      "b3": "Giảm chói, tăng sự thoải mái khi lái xe hoặc làm việc trong không gian nhiều kính",
-      "footerNote": "Tất cả những giá trị đó được xây dựng dựa trên nguyên tắc: hiệu quả bền vững theo thời gian, không đánh đổi độ trong và không gây khó chịu cho người sử dụng.",
-      "items": {
-        "cool": {
-          "title": "Mát và ổn định",
-          "description": "Giảm nhiệt hiệu quả, giúp không gian cabin duy trì trạng thái dễ chịu."
-        },
-        "uvProtect": {
-          "title": "Bảo vệ khỏi tia UV",
-          "description": "Hỗ trợ bảo vệ người dùng và hạn chế hiện tượng phai màu nội thất."
-        },
-        "glare": {
-          "title": "Giảm chói",
-          "description": "Cải thiện tầm nhìn và sự thoải mái khi di chuyển dưới nắng gắt."
-        },
-        "energy": {
-          "title": "Tối ưu năng lượng",
-          "description": "Giảm tải cho điều hòa và hỗ trợ tối ưu mức tiêu thụ nhiên liệu."
-        }
-      }
-    },
-    "safety": {
-      "eyebrow": "An toàn công nghệ",
-      "title": "Thân thiện với môi trường đô thị",
-      "description": "Trong bối cảnh đô thị hóa nhanh và sự phụ thuộc ngày càng lớn vào các thiết bị kết nối, <brand>FUJITEK</brand> được phát triển với tiêu chí <emphasis>an toàn toàn diện</emphasis>:",
-      "imageAlt": "Nội thất xe sử dụng phim cách nhiệt FUJITEK",
-      "imageCaption": "Ảnh thực tế: nội thất xe",
-      "b1": "Vật liệu không độc hại, thân thiện với môi trường",
-      "b2": "Không gây nhiễu sóng điện từ: GPS, điện thoại, thẻ ETC, hệ thống IoT",
-      "b3": "Phù hợp cho xe hơi thế hệ mới",
-      "footerNote": "Bên cạnh đó, việc giảm hấp thụ nhiệt và tối ưu hiệu quả cách nhiệt còn góp phần <emphasis>giảm tiêu thụ năng lượng</emphasis>, gián tiếp cắt giảm phát thải – một giá trị tích cực mà <brand>FUJITEK</brand> mang lại cho cộng đồng và môi trường sống."
-    },
-    "customerValue": {
-      "eyebrow": "Giá trị dành cho khách hàng",
-      "headline": "Một phần của phong cách sống hiện đại",
-      "title": "Giá trị dành cho khách hàng",
-      "description": "<brand>FUJITEK</brand> hướng đến những khách hàng:",
-      "imageAlt": "Xe Porsche sử dụng sản phẩm FUJITEK",
-      "imageCaption": "Ảnh thực tế: Porsche",
-      "b1": "Đề cao chất lượng sống và trải nghiệm dài hạn",
-      "b2": "Yêu cầu cao về hiệu năng, độ bền và tính thẩm mỹ",
-      "b3": "Mong muốn một giải pháp cách nhiệt an toàn, ổn định và đáng tin cậy",
-      "footerNote": "<brand>FUJITEK</brand> không đơn thuần là một lớp phim, mà là <emphasis>một phần của phong cách sống hiện đại – nơi công nghệ phục vụ con người một cách tinh tế và có trách nhiệm</emphasis>."
-    },
-    "vision": {
-      "eyebrow": "Tầm nhìn thương hiệu",
-      "headline": "Chuẩn mực mới cho phim cách nhiệt cao cấp",
-      "title": "Tầm nhìn thương hiệu",
-      "p1": "<brand>FUJITEK Window Films</brand> được xây dựng với tầm nhìn trở thành <emphasis>chuẩn mực mới cho phim cách nhiệt cao cấp tại Việt Nam</emphasis>, đồng hành cùng sự phát triển của đô thị thông minh, giao thông hiện đại và xu hướng sống bền vững.",
-      "p2": "Chúng tôi tin rằng, một sản phẩm tốt không chỉ giải quyết nhu cầu trước mắt, mà còn tạo ra giá trị tích cực lâu dài cho khách hàng, cộng đồng và xã hội."
-    },
-    "coreValues": {
-      "title": "GIÁ TRỊ CỐT LÕI",
-      "subtitle": "Nền tảng tạo nên niềm tin vững bền",
-      "items": {
-        "technology": {
-          "title": "CÔNG NGHỆ ĐỈNH CAO",
-          "description": "Luôn cập nhật những vật liệu mới nhất từ Gốm Nano giúp ngăn chặn 99% tia hồng ngoại và tử ngoại."
-        },
-        "luxury": {
-          "title": "SỰ SANG TRỌNG",
-          "description": "Màu sắc phim được tinh chỉnh để tạo ra sự riêng tư tối ưu và vẻ ngoài cuốn hút cho mọi dòng xe cao cấp."
-        },
-        "commitment": {
-          "title": "CAM KẾT LÂU DÀI",
-          "description": "Chúng tôi đứng sau mọi tấm phim đã dán bằng hệ thống bảo hành điện tử minh bạch và tận tâm."
-        }
-      }
-    }
-  },
   "SiteHeader": {
     "logoAlt": "FUJITEK - The Ultimate Window Films",
     "homeAriaLabel": "Về trang chủ FUJITEK",
@@ -1972,7 +1763,8 @@
       "stats": {
         "uvIr": "Cản tia UV & Hồng ngoại",
         "origin": "Xuất xứ Nhật Bản",
-        "warranty": "Bảo hành chính hãng"
+        "warranty": "Bảo hành chính hãng",
+        "yearsSuffix": " năm"
       }
     },
     "milestones": {
@@ -1982,21 +1774,102 @@
       "items": {
         "rdJapan": {
           "title": "Nghiên cứu & Phát triển",
-          "description": "Thành lập trung tâm R&D tại Nhật Bản, phát triển công nghệ Nano Ceramic độc quyền."
+          "description": "Thành lập trung tâm R&D tại Nhật Bản, phát triển công nghệ Nano Ceramic độc quyền.",
+          "phase": "Giai đoạn 01/04",
+          "tags": {
+            "technology": "Nano Ceramic",
+            "research": "R&D Nhật Bản",
+            "patents": "50+ bằng sáng chế"
+          },
+          "stats": {
+            "patents": {
+              "value": "{value}",
+              "label": "Bằng sáng chế"
+            },
+            "research": {
+              "value": "{value} năm",
+              "label": "Nghiên cứu & kiểm thử"
+            },
+            "certification": {
+              "value": "{value}",
+              "label": "Chứng nhận quốc tế"
+            }
+          }
         },
         "launchVietnam": {
           "title": "Ra mắt thị trường Việt Nam",
-          "description": "Chính thức giới thiệu sản phẩm phim cách nhiệt cao cấp tại Việt Nam."
+          "description": "Chính thức giới thiệu sản phẩm phim cách nhiệt cao cấp tại Việt Nam.",
+          "phase": "Giai đoạn 02/04",
+          "tags": {
+            "launch": "Ra mắt tại Việt Nam",
+            "dealers": "50+ đại lý",
+            "customers": "10K+ khách hàng"
+          },
+          "stats": {
+            "dealers": {
+              "value": "{value}",
+              "label": "Đại lý đầu tiên"
+            },
+            "customers": {
+              "value": "{value}",
+              "label": "Khách hàng tin dùng"
+            },
+            "satisfaction": {
+              "value": "{value}",
+              "label": "Tỷ lệ hài lòng"
+            }
+          }
         },
         "ewarrantyRelease": {
           "title": "E-Warranty ra mắt",
-          "description": "Triển khai hệ thống bảo hành điện tử, minh bạch và tiện lợi."
+          "description": "Triển khai hệ thống bảo hành điện tử, minh bạch và tiện lợi.",
+          "phase": "Giai đoạn 03/04",
+          "tags": {
+            "ewarranty": "E-Warranty",
+            "digitalApp": "Ứng dụng số",
+            "records": "100K+ hồ sơ"
+          },
+          "stats": {
+            "warranties": {
+              "value": "{value}",
+              "label": "Bảo hành điện tử"
+            },
+            "lookup": {
+              "value": "{value}",
+              "label": "Tra cứu bảo hành"
+            },
+            "commitment": {
+              "value": "{value} năm",
+              "label": "Cam kết chất lượng"
+            }
+          }
         },
         "networkExpansion": {
           "title": "Mở rộng mạng lưới",
-          "description": "Hơn 100 đại lý trên toàn quốc, phủ sóng 34 tỉnh thành."
+          "description": "Hơn 100 đại lý trên toàn quốc, phủ sóng 34 tỉnh thành.",
+          "phase": "Giai đoạn 04/04",
+          "tags": {
+            "dealers": "100+ đại lý",
+            "provinces": "34 tỉnh thành",
+            "leader": "Thương hiệu dẫn đầu"
+          },
+          "stats": {
+            "dealers": {
+              "value": "{value}",
+              "label": "Đại lý toàn quốc"
+            },
+            "provinces": {
+              "value": "{value}",
+              "label": "Tỉnh thành phủ sóng"
+            },
+            "brand": {
+              "value": "{value}",
+              "label": "Thương hiệu uy tín"
+            }
+          }
         }
-      }
+      },
+      "current": "Hiện tại"
     },
     "ecosystem": {
       "eyebrow": "Hệ sinh thái sản phẩm",
@@ -2057,7 +1930,16 @@
       "row1Desc2": "Được phát triển và sản xuất tại Nhật Bản - cái nôi của các công nghệ vật liệu tiên tiến châu Á - Fujitek là sự kết tinh giữa hiệu năng kỹ thuật vượt trội, tư duy thẩm mỹ cao cấp và trách nhiệm bền vững.",
       "row2Title": "Xuất xứ công nghệ – Nền tảng của sự tin cậy",
       "row2Desc1": "“Made in Japan” không chỉ là xuất xứ, mà là lời cam kết về chất lượng. Fujitek được nghiên cứu, sản xuất và kiểm soát theo các tiêu chuẩn nghiêm ngặt của ngành vật liệu kỹ thuật cao.",
-      "row2Desc2": "Tại Việt Nam, Fujitek được giới thiệu như một giải pháp lâu dài, hướng đến phân khúc khách hàng đề cao giá trị sử dụng thực tế, độ bền công nghệ và trải nghiệm cao cấp."
+      "row2Desc2": "Tại Việt Nam, Fujitek được giới thiệu như một giải pháp lâu dài, hướng đến phân khúc khách hàng đề cao giá trị sử dụng thực tế, độ bền công nghệ và trải nghiệm cao cấp.",
+      "brandLabel": "FUJITEK VIỆT NAM",
+      "headlineLine1": "Định nghĩa",
+      "headlineLine2Prefix": "lại",
+      "headlineHighlight": "chuẩn mực",
+      "headlineLine3": "phim cách nhiệt",
+      "experienceLabel": "Năm kinh nghiệm",
+      "dealersLabel": "Đại lý toàn quốc",
+      "uvLabel": "Cản tia UV",
+      "originEyebrow": "Xuất xứ công nghệ"
     },
     "coreTech": {
       "eyebrow": "Công nghệ cốt lõi",
@@ -2092,14 +1974,25 @@
         "title": "Công nghệ Phún Xạ (Sputtering)",
         "description": "Công nghệ bắn phá nguyên tử kim loại quý (Titanium, Bạc, Vàng) lên màng PET trong môi trường chân không cao, tạo ra lớp phản xạ nhiệt vượt trội mà vẫn giữ màng phim mỏng nhẹ.",
         "b1": "Cản nhiệt phản xạ vượt trội đến 70% TSER",
-        "b2": "Màu sắc tự nhiên, bền màu trên 10 năm"
+        "b2": "Màu sắc tự nhiên, bền màu trên 10 năm",
+        "eyebrow": "Công nghệ đắt giá hàng đầu",
+        "displayTitle": "Multi-layer Sputtering (Phún xạ đa lớp kim loại)",
+        "heatReflectionLabel": "Khả năng cản nhiệt phản xạ",
+        "durabilityValue": "10-15 năm",
+        "durabilityLabel": "Độ bền màu sắc chuẩn Nhật"
       },
       "nanoCeramic": {
         "title": "Công nghệ Nano Ceramic",
         "description": "Phủ hạt gốm siêu mịn kích thước <10nm hấp thụ bức xạ hồng ngoại bức sóng ngắn mà hoàn toàn không cản sóng GPS, 4G/5G, RFID hay thẻ VETC.",
         "b1": "100% Không cản sóng vô tuyến và tín hiệu xe",
-        "b2": "Giảm lóa ban đêm và độ phản gương thấp"
-      }
+        "b2": "Giảm lóa ban đêm và độ phản gương thấp",
+        "eyebrow": "Công nghệ gốm siêu mịn Nano",
+        "displayTitle": "Ultra Nano Ceramic (Gốm Nano siêu trong thấu phụ)",
+        "signalLabel": "Thông suốt GPS / 4G / VETC",
+        "glareLabel": "Phản gương nội thất siêu thấp"
+      },
+      "comparisonEyebrow": "So sánh thông số trực quan",
+      "metricHeader": "Tiêu chí hiệu năng"
     },
     "pillars": {
       "eyebrow": "Tầm nhìn & Giá trị cốt lõi",
@@ -2186,7 +2079,8 @@
         "dealers": "Đại lý toàn quốc",
         "provinces": "Tỉnh thành",
         "warrantyYears": "Bảo hành điện tử",
-        "support": "Hỗ trợ khách hàng"
+        "support": "Hỗ trợ khách hàng",
+        "yearsSuffix": " năm"
       }
     },
     "testimonials": {

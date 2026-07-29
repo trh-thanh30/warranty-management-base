@@ -68,7 +68,7 @@ export function AboutProductEcosystem() {
                       sizes="(max-width: 768px) 100vw, 300px"
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
-                    <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-deep-black/80 backdrop-blur-md px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white font-sans">
+                    <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-deep-black/80 backdrop-blur-md px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white font-sans">
                       <IconComponent className="size-3.5 text-premium-red" />
                       <span>{product.badge}</span>
                     </div>

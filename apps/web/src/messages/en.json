@@ -143,6 +143,12 @@
           "badge": "Popular",
           "description": "A clear-view choice combining modern Nano Ceramic technology with a refined metallic-blue tone."
         }
+      },
+      "badges": {
+        "korea": "Korean technology",
+        "japaneseTech": "Japanese technology",
+        "recording4k": "4K recording",
+        "safety": "Safety"
       }
     },
     "additionalProducts": {
@@ -195,7 +201,8 @@
         "warrantyValue": "10 years +",
         "warrantyLabel": "Electronic warranty",
         "uvLabel": "UV blocking",
-        "irLabel": "Infrared rejection"
+        "irLabel": "Infrared rejection",
+        "yearsSuffix": " years"
       },
       "details": {
         "warranty": {
@@ -1443,222 +1450,6 @@
       }
     }
   },
-  "AboutPage": {
-    "metadata": {
-      "title": "About Us - FUJITEK Window Films",
-      "description": "Learn about FUJITEK Japanese Technology, Multilayer Sputtering, and Ultra Nano Ceramic."
-    },
-    "hero": {
-      "eyebrow": "About Us",
-      "title": "THE ULTIMATE WINDOW FILMS",
-      "titlePrefix": "THE ULTIMATE",
-      "titleHighlight": "WINDOW",
-      "titleSuffix": "FILMS",
-      "sub": "Next-generation premium window film where multilayer sputtering and nano ceramic technology redefine protection and comfort.",
-      "scrollCue": "Scroll to explore",
-      "description": "High-performance window film technology built around transparency, performance, and long-term satisfaction.",
-      "imageAlt": "FUJITEK Window Films brand environment",
-      "brandLabel": "FUJITEK",
-      "originLabel": "FUJITEK JAPANESE TECHNOLOGY",
-      "productLabel": "SPUTTER & CERAMIC",
-      "stats": {
-        "uvIrValue": "99%",
-        "uvIr": "UV / IR",
-        "originValue": "JP",
-        "origin": "Japanese Technology",
-        "technologyValue": "2-IN-1",
-        "technology": "Sputtering + Ceramic"
-      }
-    },
-    "intro": {
-      "eyebrow": "About Us",
-      "title": "FUJITEK Window Films",
-      "pullquote": "More than heat rejection — a more refined experience in every journey.",
-      "mainTag": "Real installation",
-      "insetTag": "Installation technician",
-      "p1": "FUJITEK doesn't just supply window film; we deliver health protection and elevate the luxury environment of your car. As a pioneer in combining Multilayer Sputtering and Ultra Nano Ceramic technologies, we take pride in delivering superior heat rejection, blocking 99% of UV/IR rays while ensuring crystal-clear optical visibility.",
-      "p2": "At FUJITEK, transparency is our highest priority – from verified technical specs to dedicated electronic warranty systems."
-    },
-    "standards": {
-      "title": "Redefining High-End Window Film Standards in Vietnam",
-      "p1": "FUJITEK Window Films is a next-generation premium window film brand, launched in Vietnam with a distinct mission: not only to reject heat, but also to elevate cabin comfort when traveling in modern urban environments.",
-      "p2": "Developed with Japanese technology, FUJITEK represents the fusion of technical performance, refined aesthetic thinking, and sustainable responsibility."
-    },
-    "origin": {
-      "eyebrow": "Technology origin",
-      "title": "Technology Origin – The Foundation of Trust",
-      "badgeValue": "FUJITEK",
-      "badgeLabel": "JAPANESE TECHNOLOGY",
-      "p1": "Japanese technology is more than a development foundation; it represents a commitment to quality. FUJITEK is researched, manufactured, and controlled under rigorous high-tech material standards, fulfilling the strict demands of the automotive market.",
-      "p2": "In Vietnam, FUJITEK is introduced as a long-term solution, designed for customers who value practical performance, technology durability, and premium experience rather than short-term advertising figures.",
-      "timeline": {
-        "research": {
-          "title": "Research",
-          "description": "High-tech materials developed to Asian quality standards."
-        },
-        "production": {
-          "title": "Production",
-          "description": "Vacuum sputtering with microscopic layer control."
-        },
-        "qualityControl": {
-          "title": "Quality control",
-          "description": "Built to meet demanding automotive requirements."
-        }
-      }
-    },
-    "coreTech": {
-      "eyebrow": "Core technology",
-      "title": "Core Technology – The Heart of FUJITEK",
-      "subtitle": "The fundamental difference lies in combining two leading advanced technologies simultaneously.",
-      "sputtering": {
-        "title": "Multilayer Sputtering",
-        "description": "Creates film layers by sputtering metals and special alloys in a vacuum environment, allowing precise microscopic control of each structural layer.",
-        "b1": "Optimal thermal reflection and heat control",
-        "b2": "Significant reduction of Infrared (IR) rays"
-      },
-      "nanoCeramic": {
-        "title": "Ultra Nano Ceramic",
-        "description": "Uses ultra-fine nano-scale ceramic particles distributed evenly, enhancing UV rejection while maintaining absolute optical clarity.",
-        "b1": "Prevents localized heat absorption",
-        "b2": "Maintains a natural, pleasant driving view"
-      }
-    },
-    "performance": {
-      "eyebrow": "Real-world experience",
-      "title": "Performance Grounded in Real Driving Experience",
-      "imageAlt": "Ford Everest fitted with FUJITEK window film",
-      "imageCaption": "Real project: Ford Everest",
-      "description": "FUJITEK is not engineered just to look good on spec sheets, but to create tangible value for drivers:",
-      "b1": "Effective temperature reduction for a cooler, more stable interior",
-      "b2": "Limits UV rays that cause skin aging, interior fading, and material degradation",
-      "b3": "Reduces glare for improved comfort when driving or working in high-glass environments",
-      "footerNote": "These values are built around long-term sustainable performance without sacrificing clarity or user comfort.",
-      "items": {
-        "cool": {
-          "title": "Cool and stable",
-          "description": "Effectively reduces heat to maintain a more comfortable cabin."
-        },
-        "uvProtect": {
-          "title": "UV protection",
-          "description": "Helps protect occupants and limits fading across interior materials."
-        },
-        "glare": {
-          "title": "Glare reduction",
-          "description": "Improves visibility and comfort while driving under harsh sunlight."
-        },
-        "energy": {
-          "title": "Energy efficiency",
-          "description": "Reduces air-conditioning load and supports efficient fuel use."
-        }
-      }
-    },
-    "safety": {
-      "eyebrow": "Technology safety",
-      "title": "Technological Safety – Urban Friendly",
-      "description": "With rapid urbanization and growing reliance on connected devices, <brand>FUJITEK</brand> is engineered around <emphasis>comprehensive safety</emphasis>:",
-      "imageAlt": "Vehicle interior protected by FUJITEK window film",
-      "imageCaption": "Real project: vehicle interior",
-      "b1": "Non-toxic, environmentally friendly materials",
-      "b2": "No electromagnetic interference: GPS, cell phones, ETC toll cards, IoT systems",
-      "b3": "Designed for modern vehicles",
-      "footerNote": "Lower heat absorption and improved insulation also <emphasis>reduce energy use</emphasis> and indirectly cut emissions, creating positive value that <brand>FUJITEK</brand> brings to communities and the environment."
-    },
-    "customerValue": {
-      "eyebrow": "Value for customers",
-      "headline": "Part of a modern lifestyle",
-      "title": "Value for Customers",
-      "description": "<brand>FUJITEK</brand> caters to customers who:",
-      "imageAlt": "Porsche using FUJITEK products",
-      "imageCaption": "Real project: Porsche",
-      "b1": "Value quality of life and long-term ownership experience",
-      "b2": "Demand high performance, durability, and refined aesthetics",
-      "b3": "Desire a safe, stable, and dependable window film solution",
-      "footerNote": "<brand>FUJITEK</brand> is not merely a film layer; it is <emphasis>an integral part of a modern lifestyle where technology serves human needs with care and responsibility</emphasis>."
-    },
-    "vision": {
-      "eyebrow": "Brand vision",
-      "headline": "A new benchmark for premium window films",
-      "title": "Brand Vision",
-      "p1": "<brand>FUJITEK Window Films</brand> is established with a vision to become <emphasis>the benchmark for premium window films in Vietnam</emphasis>, supporting smart cities, modern transportation, and sustainable living trends.",
-      "p2": "We believe a great product solves immediate needs while creating long-lasting value for customers and society."
-    },
-    "coreValues": {
-      "title": "CORE VALUES",
-      "subtitle": "The foundation of sustainable trust",
-      "items": {
-        "technology": {
-          "title": "CUTTING-EDGE TECH",
-          "description": "Constantly updating the latest Nano Ceramic materials to block 99% of infrared and ultraviolet rays."
-        },
-        "luxury": {
-          "title": "LUXURY & PRIVACY",
-          "description": "Film colors are calibrated to deliver optimal privacy and attractive aesthetics for all premium vehicles."
-        },
-        "commitment": {
-          "title": "LONG-TERM COMMITMENT",
-          "description": "We stand behind every installed film with transparent electronic warranty and dedicated service."
-        }
-      }
-    },
-    "labels": {
-      "origin": "Japanese Technology",
-      "technology": "Technology",
-      "vision": "Vision",
-      "contact": "Contact"
-    },
-    "sectionRails": {
-      "intro": "INTRO",
-      "anatomy": "ANATOMY",
-      "origin": "ORIGIN",
-      "coreTech": "CORE TECH",
-      "performance": "PERFORMANCE",
-      "safety": "SAFETY",
-      "audience": "AUDIENCE",
-      "vision": "VISION"
-    },
-    "marquee": [
-      "THE ULTIMATE WINDOW FILMS",
-      "JAPANESE TECHNOLOGY",
-      "MULTI-LAYER SPUTTERING",
-      "ULTRA NANO CERAMIC"
-    ],
-    "filmLayers": {
-      "eyebrow": "Film structure",
-      "title": "Multilayer structure for heat control",
-      "instruction": "Hover over each layer to explore the 3D structure ↓",
-      "description": "Each film layer plays a specific role, from surface protection to heat reflection, optical clarity, and stable adhesion.",
-      "p1": "FUJITEK – The Ultimate Window Films is a next-generation premium window film created to reject heat and elevate comfort in modern urban mobility.",
-      "p2": "Developed with Japanese technology, FUJITEK combines technical performance, refined aesthetics, and sustainable responsibility.",
-      "items": {
-        "scratchCoat": {
-          "title": "Scratch-resistant coating",
-          "description": "Protects the surface and preserves long-term optical clarity."
-        },
-        "sputterMetal": {
-          "title": "Metal sputtering layer",
-          "description": "Reflects and controls heat while reducing infrared radiation."
-        },
-        "opticalBase": {
-          "title": "Optical base layer",
-          "description": "Maintains clear visibility and limits image distortion."
-        },
-        "nanoCeramic": {
-          "title": "Ultra Nano Ceramic layer",
-          "description": "Distributes nano ceramic particles to support UV rejection and stable performance."
-        },
-        "adhesive": {
-          "title": "Adhesive & release liner",
-          "description": "Provides stable bonding, safer installation, and long-term durability."
-        }
-      }
-    },
-    "stats": {
-      "uvIr": "UV / IR rejection",
-      "origin": "Japanese technology",
-      "coreTech": "Core technologies combined",
-      "signal": "Signal interference"
-    }
-  },
   "SiteHeader": {
     "logoAlt": "FUJITEK - The Ultimate Window Films",
     "homeAriaLabel": "Go to FUJITEK home page",
@@ -1932,7 +1723,8 @@
       "stats": {
         "uvIr": "UV & IR Rejection",
         "origin": "Japan Origin",
-        "warranty": "Genuine Warranty"
+        "warranty": "Genuine Warranty",
+        "yearsSuffix": " years"
       }
     },
     "milestones": {
@@ -1942,21 +1734,102 @@
       "items": {
         "rdJapan": {
           "title": "Research & Development",
-          "description": "Established R&D center in Japan, developing proprietary Nano Ceramic technology."
+          "description": "Established R&D center in Japan, developing proprietary Nano Ceramic technology.",
+          "phase": "Phase 01/04",
+          "tags": {
+            "technology": "Nano Ceramic",
+            "research": "R&D Japan",
+            "patents": "50+ patents"
+          },
+          "stats": {
+            "patents": {
+              "value": "{value}",
+              "label": "Patents"
+            },
+            "research": {
+              "value": "{value} years",
+              "label": "Research & testing"
+            },
+            "certification": {
+              "value": "{value}",
+              "label": "International certification"
+            }
+          }
         },
         "launchVietnam": {
           "title": "Vietnam Market Entry",
-          "description": "Officially launched premium window film products in Vietnam."
+          "description": "Officially launched premium window film products in Vietnam.",
+          "phase": "Phase 02/04",
+          "tags": {
+            "launch": "Vietnam launch",
+            "dealers": "50+ dealers",
+            "customers": "10K+ customers"
+          },
+          "stats": {
+            "dealers": {
+              "value": "{value}",
+              "label": "Initial dealers"
+            },
+            "customers": {
+              "value": "{value}",
+              "label": "Trusted customers"
+            },
+            "satisfaction": {
+              "value": "{value}",
+              "label": "Satisfaction rate"
+            }
+          }
         },
         "ewarrantyRelease": {
           "title": "E-Warranty Launch",
-          "description": "Rolled out digital warranty system, transparent and convenient."
+          "description": "Rolled out digital warranty system, transparent and convenient.",
+          "phase": "Phase 03/04",
+          "tags": {
+            "ewarranty": "E-Warranty",
+            "digitalApp": "Digital app",
+            "records": "100K+ records"
+          },
+          "stats": {
+            "warranties": {
+              "value": "{value}",
+              "label": "Digital warranties"
+            },
+            "lookup": {
+              "value": "{value}",
+              "label": "Warranty lookup"
+            },
+            "commitment": {
+              "value": "{value} years",
+              "label": "Quality commitment"
+            }
+          }
         },
         "networkExpansion": {
           "title": "Network Expansion",
-          "description": "Over 100 dealers nationwide, covering 34 provinces."
+          "description": "Over 100 dealers nationwide, covering 34 provinces.",
+          "phase": "Phase 04/04",
+          "tags": {
+            "dealers": "100+ dealers",
+            "provinces": "34 provinces",
+            "leader": "Market leader"
+          },
+          "stats": {
+            "dealers": {
+              "value": "{value}",
+              "label": "Dealers nationwide"
+            },
+            "provinces": {
+              "value": "{value}",
+              "label": "Provinces covered"
+            },
+            "brand": {
+              "value": "{value}",
+              "label": "Trusted brand"
+            }
+          }
         }
-      }
+      },
+      "current": "Present"
     },
     "ecosystem": {
       "eyebrow": "Product Ecosystem",
@@ -2017,7 +1890,16 @@
       "row1Desc2": "Developed and manufactured in Japan - the cradle of advanced Asian materials technology - Fujitek represents the crystallization of engineering performance, aesthetic design, and sustainable value.",
       "row2Title": "Tech Origin – The Foundation of Trust",
       "row2Desc1": "“Made in Japan” is not just an origin label; it is a quality promise. Fujitek is researched, manufactured, and inspected according to strict high-tech materials engineering standards.",
-      "row2Desc2": "In Vietnam, Fujitek is introduced as a long-term solution, catering to discerning customers who value real-world performance, technological durability, and premium driving comfort."
+      "row2Desc2": "In Vietnam, Fujitek is introduced as a long-term solution, catering to discerning customers who value real-world performance, technological durability, and premium driving comfort.",
+      "brandLabel": "FUJITEK VIETNAM",
+      "headlineLine1": "Redefining",
+      "headlineLine2Prefix": "the",
+      "headlineHighlight": "standard",
+      "headlineLine3": "of window film",
+      "experienceLabel": "Years of experience",
+      "dealersLabel": "Dealers nationwide",
+      "uvLabel": "UV rejection",
+      "originEyebrow": "Technology origin"
     },
     "coreTech": {
       "eyebrow": "Core Technology",
@@ -2052,14 +1934,25 @@
         "title": "Sputtering Technology",
         "description": "Bombarding precious metal atoms (Titanium, Silver, Gold) onto PET film in high vacuum, creating a superior heat-reflecting layer while keeping film thin.",
         "b1": "Superior reflective heat rejection up to 70% TSER",
-        "b2": "Natural tone, color-fast for over 10 years"
+        "b2": "Natural tone, color-fast for over 10 years",
+        "eyebrow": "Leading premium technology",
+        "displayTitle": "Multi-layer Sputtering",
+        "heatReflectionLabel": "Reflective heat rejection",
+        "durabilityValue": "10-15 years",
+        "durabilityLabel": "Japanese-standard color durability"
       },
       "nanoCeramic": {
         "title": "Nano Ceramic Technology",
         "description": "Coating ultra-fine ceramic particles (<10nm) absorbing shortwave IR without interfering with GPS, 4G/5G, RFID, or VETC signals.",
         "b1": "100% Zero interference with radio and car signals",
-        "b2": "Night anti-glare and low interior reflection"
-      }
+        "b2": "Night anti-glare and low interior reflection",
+        "eyebrow": "Ultra-fine Nano Ceramic technology",
+        "displayTitle": "Ultra Nano Ceramic",
+        "signalLabel": "Unhindered GPS / 4G / VETC",
+        "glareLabel": "Ultra-low interior reflection"
+      },
+      "comparisonEyebrow": "Visual performance comparison",
+      "metricHeader": "Performance metric"
     },
     "pillars": {
       "eyebrow": "Vision & Core Values",
@@ -2146,7 +2039,8 @@
         "dealers": "Dealers Nationwide",
         "provinces": "Provinces",
         "warrantyYears": "Digital Warranty",
-        "support": "Customer Support"
+        "support": "Customer Support",
+        "yearsSuffix": " years"
       }
     },
     "testimonials": {

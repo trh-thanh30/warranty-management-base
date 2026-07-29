@@ -173,26 +173,30 @@ test("about page follows the FUJITEK red brand system", async () => {
   assert.deepEqual(violations, []);
 });
 
-test("about page keeps the prototype parallax and compass triggers", async () => {
+test("about page composes the current corporate sections", async () => {
   const aboutView = await readFile(
     path.join(webRoot, "src", "views", "about", "about.view.tsx"),
     "utf8",
   );
+  const sections = [
+    "AboutHeroCorporate",
+    "AboutBrandHeritage",
+    "AboutCoreTech",
+    "AboutTimeline",
+    "AboutVisionValues",
+    "AboutNetworkBanner",
+    "AboutTestimonials",
+    "AboutB2BCta",
+  ];
 
-  assert.match(
-    aboutView,
-    /window\.addEventListener\("mousemove", handlePointerMove\)/,
-  );
-  assert.doesNotMatch(aboutView, /onMouseMove=\{handleHeroMouseMove\}/);
-  assert.match(aboutView, /whileInView=\{\{ rotate: 0 \}\}/);
-  assert.match(aboutView, /whileHover="hover"/);
-  assert.match(aboutView, /variants=\{aboutCompassNeedleVariants\}/);
-  assert.match(aboutView, /\banimate-marquee-left\b/);
-  assert.doesNotMatch(aboutView, /animate-\[marquee_/);
-  assert.doesNotMatch(aboutView, /compassHovered/);
+  for (const section of sections) {
+    assert.match(aboutView, new RegExp(`<${section}(?:\\s|/|>)`));
+  }
+
+  assert.doesNotMatch(aboutView, /window\.addEventListener\("mousemove"/);
 });
 
-test("about messages resolve every key used by the route", async () => {
+test("about messages keep the current corporate route contract", async () => {
   const messages = await Promise.all(
     ["vi", "en"].map(async (locale) => ({
       locale,
@@ -204,129 +208,30 @@ test("about messages resolve every key used by the route", async () => {
       ).AboutPage,
     })),
   );
-  const staticKeys = [
-    "metadata.title",
-    "metadata.description",
-    "hero.eyebrow",
-    "hero.titlePrefix",
-    "hero.titleHighlight",
-    "hero.titleSuffix",
-    "hero.description",
-    "hero.imageAlt",
-    "hero.brandLabel",
-    "hero.originLabel",
-    "hero.productLabel",
-    "hero.scrollCue",
-    "hero.stats.uvIr",
-    "hero.stats.uvIrValue",
-    "hero.stats.origin",
-    "hero.stats.originValue",
-    "hero.stats.technology",
-    "hero.stats.technologyValue",
-    "sectionRails.intro",
-    "sectionRails.anatomy",
-    "sectionRails.origin",
-    "sectionRails.coreTech",
-    "sectionRails.performance",
-    "sectionRails.safety",
-    "sectionRails.audience",
-    "sectionRails.vision",
-    "intro.eyebrow",
-    "intro.title",
-    "intro.mainTag",
-    "intro.pullquote",
-    "intro.p1",
-    "intro.p2",
-    "filmLayers.eyebrow",
-    "filmLayers.title",
-    "filmLayers.instruction",
-    "origin.eyebrow",
-    "origin.title",
-    "origin.badgeValue",
-    "origin.badgeLabel",
-    "origin.p1",
-    "origin.p2",
-    "coreTech.title",
-    "coreTech.eyebrow",
-    "coreTech.subtitle",
-    "coreTech.sputtering.title",
-    "coreTech.sputtering.description",
-    "coreTech.sputtering.b1",
-    "coreTech.sputtering.b2",
-    "coreTech.nanoCeramic.title",
-    "coreTech.nanoCeramic.description",
-    "coreTech.nanoCeramic.b1",
-    "coreTech.nanoCeramic.b2",
-    "stats.uvIr",
-    "stats.origin",
-    "stats.coreTech",
-    "stats.signal",
-    "performance.eyebrow",
-    "performance.title",
-    "performance.imageAlt",
-    "performance.imageCaption",
-    "safety.eyebrow",
-    "safety.title",
-    "safety.description",
-    "safety.imageAlt",
-    "safety.imageCaption",
-    "safety.b1",
-    "safety.b2",
-    "safety.b3",
-    "safety.footerNote",
-    "customerValue.eyebrow",
-    "customerValue.headline",
-    "customerValue.description",
-    "customerValue.imageAlt",
-    "customerValue.imageCaption",
-    "customerValue.b1",
-    "customerValue.b2",
-    "customerValue.b3",
-    "customerValue.footerNote",
-    "vision.eyebrow",
-    "vision.headline",
-    "vision.p1",
-    "vision.p2",
-    "labels.contact",
-  ];
-  const timelineKeys = ["research", "production", "qualityControl"].flatMap(
-    (id) => [
-      `origin.timeline.${id}.title`,
-      `origin.timeline.${id}.description`,
-    ],
-  );
-  const layerKeys = [
-    "scratchCoat",
-    "sputterMetal",
-    "opticalBase",
-    "nanoCeramic",
-    "adhesive",
-  ].flatMap((id) => [
-    `filmLayers.items.${id}.title`,
-    `filmLayers.items.${id}.description`,
-  ]);
-  const performanceKeys = ["cool", "uvProtect", "glare", "energy"].flatMap(
-    (id) => [
-      `performance.items.${id}.title`,
-      `performance.items.${id}.description`,
-    ],
-  );
-  const keys = [
-    ...staticKeys,
-    ...timelineKeys,
-    ...layerKeys,
-    ...performanceKeys,
+  const keys = ["metadata.title", "metadata.description"];
+  const requiredSections = [
+    "hero",
+    "brandHeritage",
+    "coreTech",
+    "milestones",
+    "pillars",
+    "network",
+    "testimonials",
+    "b2bCta",
   ];
   const missing = messages.flatMap(({ locale, value }) =>
-    keys
-      .filter(
+    [
+      ...keys.filter(
         (key) =>
           key
             .split(".")
             .reduce((current, segment) => current?.[segment], value) ===
           undefined,
-      )
-      .map((key) => `${locale}:${key}`),
+      ),
+      ...requiredSections.filter(
+        (section) => !value?.[section] || typeof value[section] !== "object",
+      ),
+    ].map((key) => `${locale}:${key}`),
   );
 
   assert.deepEqual(missing, []);

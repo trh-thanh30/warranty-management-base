@@ -94,12 +94,12 @@ export function AboutCoreTech() {
                   <div className="flex items-center gap-3">
                     <span className="w-8 h-[2px] bg-premium-red shrink-0" />
                     <span className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-premium-red">
-                      CÔNG NGHỆ ĐẮT GIÁ NHẤT HÀNG ĐẦU
+                      {t("coreTech.sputtering.eyebrow")}
                     </span>
                   </div>
 
                   <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold uppercase tracking-wide text-deep-black">
-                    Multi-layer Sputtering (Phún Xạ Đa Lớp Kim Loại)
+                    {t("coreTech.sputtering.displayTitle")}
                   </h3>
                 </div>
 
@@ -129,16 +129,16 @@ export function AboutCoreTech() {
                       70% TSER
                     </span>
                     <span className="text-xs font-semibold uppercase text-stone-gray block">
-                      Khả năng cản nhiệt phản xạ
+                      {t("coreTech.sputtering.heatReflectionLabel")}
                     </span>
                   </div>
 
                   <div className="rounded-md bg-surface-muted p-5 border border-border-gray/60 space-y-1">
                     <span className="text-2xl sm:text-3xl font-bold text-deep-black block leading-none">
-                      10-15 NĂM
+                      {t("coreTech.sputtering.durabilityValue")}
                     </span>
                     <span className="text-xs font-semibold uppercase text-stone-gray block">
-                      Độ bền màu sắc chuẩn Nhật
+                      {t("coreTech.sputtering.durabilityLabel")}
                     </span>
                   </div>
                 </div>
@@ -158,12 +158,12 @@ export function AboutCoreTech() {
                   <div className="flex items-center gap-3">
                     <span className="w-8 h-[2px] bg-premium-red shrink-0" />
                     <span className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-premium-red">
-                      CÔNG NGHỆ GỐM SIÊU MỊN NANO
+                      {t("coreTech.nanoCeramic.eyebrow")}
                     </span>
                   </div>
 
                   <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold uppercase tracking-wide text-deep-black">
-                    Ultra Nano Ceramic (Gốm Nano Siêu Trong Thấu Phụ)
+                    {t("coreTech.nanoCeramic.displayTitle")}
                   </h3>
                 </div>
 
@@ -193,7 +193,7 @@ export function AboutCoreTech() {
                       100% PASS
                     </span>
                     <span className="text-xs font-semibold uppercase text-stone-gray block">
-                      Thông suốt GPS / 4G / VETC
+                      {t("coreTech.nanoCeramic.signalLabel")}
                     </span>
                   </div>
 
@@ -202,7 +202,7 @@ export function AboutCoreTech() {
                       &lt; 8% GLARE
                     </span>
                     <span className="text-xs font-semibold uppercase text-stone-gray block">
-                      Phản gương nội thất siêu thấp
+                      {t("coreTech.nanoCeramic.glareLabel")}
                     </span>
                   </div>
                 </div>
@@ -222,12 +222,12 @@ export function AboutCoreTech() {
                   <div className="flex items-center gap-3">
                     <span className="w-8 h-[2px] bg-premium-red shrink-0" />
                     <span className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-premium-red">
-                      SO SÁNH THÔNG SỐ TRỰC QUAN
+                      {t("coreTech.comparisonEyebrow")}
                     </span>
                   </div>
 
                   <h4 className="text-xl sm:text-2xl lg:text-3xl font-bold uppercase tracking-wide text-deep-black">
-                    Fujitek Technology vs Standard Film
+                    {t("coreTech.comparisonTitle")}
                   </h4>
                 </div>
 
@@ -235,11 +235,15 @@ export function AboutCoreTech() {
                 <div className="divide-y divide-border-gray/60">
                   {/* Table Header Row */}
                   <div className="grid grid-cols-12 gap-3 py-2 text-xs font-semibold uppercase tracking-wider text-stone-gray">
-                    <div className="col-span-5">TIÊU CHÍ HIỆU NĂNG</div>
-                    <div className="col-span-4 text-premium-red font-semibold">
-                      CÔNG NGHỆ FUJITEK
+                    <div className="col-span-5">
+                      {t("coreTech.metricHeader")}
                     </div>
-                    <div className="col-span-3 text-stone-400">PHIM THƯỜNG</div>
+                    <div className="col-span-4 text-premium-red font-semibold">
+                      {t("coreTech.fujitekLabel")}
+                    </div>
+                    <div className="col-span-3 text-silver-fog">
+                      {t("coreTech.standardLabel")}
+                    </div>
                   </div>
 
                   {comparisonMetricKeys.map((metricKey) => (
@@ -261,9 +265,9 @@ export function AboutCoreTech() {
                       </div>
 
                       {/* Standard Film Performance */}
-                      <div className="col-span-3 flex items-center gap-2 text-stone-500">
-                        <XCircle className="size-4 shrink-0 text-stone-300" />
-                        <span className="text-xs sm:text-sm font-medium text-stone-500">
+                      <div className="col-span-3 flex items-center gap-2 text-stone-gray">
+                        <XCircle className="size-4 shrink-0 text-pale-silver" />
+                        <span className="text-xs sm:text-sm font-medium text-stone-gray">
                           {t(`coreTech.standardLabel`)}
                         </span>
                       </div>

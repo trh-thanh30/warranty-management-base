@@ -27,17 +27,24 @@ export function AboutBrandHeritage() {
               <div className="flex items-center gap-3">
                 <span className="w-12 h-[2px] bg-premium-red shrink-0" />
                 <span className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-premium-red">
-                  FUJITEK VIETNAM
+                  {t("brandHeritage.brandLabel")}
                 </span>
               </div>
 
               {/* Headline matching Home Page typography standard */}
               <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold uppercase tracking-wide text-deep-black leading-tight">
-                <span className="block">ĐỊNH NGHĨA</span>
                 <span className="block">
-                  LẠI <span className="text-premium-red">CHUẨN MỰC</span>
+                  {t("brandHeritage.headlineLine1")}
                 </span>
-                <span className="block">PHIM CÁCH NHIỆT</span>
+                <span className="block">
+                  {t("brandHeritage.headlineLine2Prefix")}{" "}
+                  <span className="text-premium-red">
+                    {t("brandHeritage.headlineHighlight")}
+                  </span>
+                </span>
+                <span className="block">
+                  {t("brandHeritage.headlineLine3")}
+                </span>
               </h2>
 
               <div className="max-w-xl space-y-4 pt-2">
@@ -60,7 +67,7 @@ export function AboutBrandHeritage() {
                     <Counter value={10} suffix="+" />
                   </div>
                   <p className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-stone-gray leading-tight mt-1.5">
-                    Năm kinh nghiệm
+                    {t("brandHeritage.experienceLabel")}
                   </p>
                 </div>
 
@@ -69,7 +76,7 @@ export function AboutBrandHeritage() {
                     <Counter value={100} suffix="+" />
                   </div>
                   <p className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-stone-gray leading-tight mt-1.5">
-                    Đại lý toàn quốc
+                    {t("brandHeritage.dealersLabel")}
                   </p>
                 </div>
 
@@ -78,7 +85,7 @@ export function AboutBrandHeritage() {
                     <Counter value={99} suffix="%" />
                   </div>
                   <p className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-stone-gray leading-tight mt-1.5">
-                    Cản tia UV
+                    {t("brandHeritage.uvLabel")}
                   </p>
                 </div>
               </div>
@@ -142,7 +149,7 @@ export function AboutBrandHeritage() {
               <div className="flex items-center gap-3">
                 <span className="w-12 h-[2px] bg-premium-red shrink-0" />
                 <span className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-premium-red">
-                  XUẤT XỨ CÔNG NGHỆ
+                  {t("brandHeritage.originEyebrow")}
                 </span>
               </div>
 

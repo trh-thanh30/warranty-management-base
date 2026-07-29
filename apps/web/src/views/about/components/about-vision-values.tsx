@@ -43,7 +43,7 @@ export function AboutVisionValues() {
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-4xl sm:text-5xl font-bold text-stone-300 group-hover:text-premium-red transition-colors duration-300 leading-none">
+                <span className="text-4xl sm:text-5xl font-bold text-pale-silver group-hover:text-premium-red transition-colors duration-300 leading-none">
                   0{index + 1}
                 </span>
                 <span className="w-8 group-hover:w-14 h-[2px] bg-premium-red/30 group-hover:bg-premium-red transition-all duration-300" />

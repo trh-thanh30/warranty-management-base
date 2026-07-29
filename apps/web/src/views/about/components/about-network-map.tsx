@@ -117,7 +117,7 @@ export function AboutNetworkMap() {
           <button
             type="button"
             onClick={retry}
-            className="min-h-9 shrink-0 rounded bg-premium-red px-3 text-[10px] font-semibold uppercase tracking-wide text-white transition-colors hover:bg-warm-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2"
+            className="min-h-9 shrink-0 rounded bg-premium-red px-3 text-xs font-semibold uppercase tracking-wide text-white transition-colors hover:bg-warm-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2"
           >
             {t("retry")}
           </button>

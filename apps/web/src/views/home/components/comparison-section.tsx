@@ -14,7 +14,7 @@ export function ComparisonSection() {
   const t = useTranslations("HomePage.comparison");
 
   return (
-    <section className="w-full py-16 lg:py-24 bg-gray-50">
+    <section className="w-full py-16 lg:py-24 bg-surface-muted">
       <Container>
         <div className="grid gap-12 lg:grid-cols-12 items-center">
           {/* Left Summary with FadeIn */}
@@ -66,7 +66,7 @@ export function ComparisonSection() {
             </StaggerItem>
 
             {/* FUJITEK Film (✅) */}
-            <StaggerItem className="p-7 sm:p-8 rounded-md bg-gray-100/60 border-2 border-premium-red space-y-4 shadow-lg relative">
+            <StaggerItem className="p-7 sm:p-8 rounded-md bg-light-gray/60 border-2 border-premium-red space-y-4 shadow-lg relative">
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="size-8 text-premium-red shrink-0" />
                 <h3 className="text-lg sm:text-xl font-semibold uppercase text-deep-black">

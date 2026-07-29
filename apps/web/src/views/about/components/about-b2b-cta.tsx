@@ -53,7 +53,7 @@ export function AboutB2BCta() {
             {hotline && (
               <a
                 href={hotline.href}
-                className="inline-flex items-center justify-center gap-2.5 rounded-md bg-white hover:bg-stone-100 border border-border-gray px-8 py-4 text-xs sm:text-sm font-semibold uppercase tracking-wider text-deep-black transition-all cursor-pointer"
+                className="inline-flex items-center justify-center gap-2.5 rounded-md bg-white hover:bg-light-gray border border-border-gray px-8 py-4 text-xs sm:text-sm font-semibold uppercase tracking-wider text-deep-black transition-all cursor-pointer"
               >
                 <Phone className="size-4 text-premium-red" />
                 <span>

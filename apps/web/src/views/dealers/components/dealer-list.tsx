@@ -144,7 +144,7 @@ export function DealerList({
               isSelected
                 ? isDealer
                   ? "border-premium-red bg-premium-red/5"
-                  : "border-blue-600 bg-blue-50/60"
+                  : "border-service-center bg-service-center-soft/60"
                 : "border-transparent hover:bg-surface-muted"
             }`}
           >
@@ -161,7 +161,7 @@ export function DealerList({
                   className={`rounded-sm text-xs font-semibold uppercase tracking-wider ${
                     isDealer
                       ? "bg-premium-red/10 text-premium-red"
-                      : "bg-blue-50 text-blue-700"
+                      : "bg-service-center-soft text-service-center-text"
                   }`}
                 >
                   {isDealer

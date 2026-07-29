@@ -15,22 +15,22 @@ const mainCategories = [
   {
     key: "film",
     image: "/product/product_1.jpg",
-    badgeKey: "Hàn Quốc",
+    badgeKey: "korea",
   },
   {
     key: "lighting",
     image: "/product/product_3.jpg",
-    badgeKey: "Công nghệ Nhật",
+    badgeKey: "japaneseTech",
   },
   {
     key: "dashcam",
     image: "/product/product_9.jpg",
-    badgeKey: "Ghi hình 4K",
+    badgeKey: "recording4k",
   },
   {
     key: "tpms",
     image: "/product/product_10.jpg",
-    badgeKey: "An toàn",
+    badgeKey: "safety",
   },
 ] as const;
 
@@ -71,7 +71,7 @@ export function ProductsSection({
           image: category.image,
           title: t(`categories.${category.key}.title`),
           description: t(`categories.${category.key}.description`),
-          badge: category.badgeKey,
+          badge: t(`badges.${category.badgeKey}`),
         }));
   const syncCarouselState = useCallback(() => {
     if (!emblaApi) return;
@@ -103,7 +103,7 @@ export function ProductsSection({
   }, [emblaApi]);
 
   return (
-    <section id="products" className="w-full bg-gray-50 py-12 lg:py-16">
+    <section id="products" className="w-full bg-surface-muted py-12 lg:py-16">
       <Container>
         {/* Section Header with FadeIn */}
         <FadeIn direction="up" className="text-center pb-8 lg:pb-12">

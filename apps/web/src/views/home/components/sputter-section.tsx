@@ -81,7 +81,7 @@ export function SputterSection() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
             <div className="p-6 sm:p-8 rounded-md bg-white border border-border-gray shadow-sm hover:shadow-md transition-shadow">
               <span className="block text-4xl sm:text-6xl font-semibold text-premium-red">
-                <Counter value={10} suffix=" NĂM" />
+                <Counter value={10} suffix={t("stats.yearsSuffix")} />
               </span>
               <span className="block text-xs sm:text-sm font-semibold text-deep-black uppercase tracking-wider mt-2.5">
                 {t("stats.warrantyLabel")}
