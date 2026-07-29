@@ -3,9 +3,9 @@
 import { FolderTree, Search, Tags } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type {
-  CategoryResponse,
   CategorySortBy,
-  PaginatedResponse,
+  CategoryTreeNode,
+  CategoryTreeResponse,
 } from "@repo/shared";
 import {
   Button,
@@ -33,11 +33,11 @@ import { CategoriesTable } from "./categories-table";
 
 type CategoriesDirectoryCardProps = {
   canCreate: boolean;
-  data?: PaginatedResponse<CategoryResponse>;
+  data?: CategoryTreeResponse;
   isError: boolean;
   isLoading: boolean;
   onClearFilters: () => void;
-  onDeactivate: (category: CategoryResponse) => void;
+  onDeactivate: (category: CategoryTreeNode) => void;
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
   onRetry: () => void;
@@ -282,7 +282,7 @@ function CategoriesPagination({
   onPageSizeChange,
   pageSize,
 }: {
-  data: PaginatedResponse<CategoryResponse>;
+  data: CategoryTreeResponse;
   onPageChange: CategoriesDirectoryCardProps["onPageChange"];
   onPageSizeChange: CategoriesDirectoryCardProps["onPageSizeChange"];
   pageSize: CategoriesDirectoryCardProps["pageSize"];
@@ -296,11 +296,12 @@ function CategoriesPagination({
       onPageSizeChange={onPageSizeChange}
       page={data.meta.page}
       pageSize={pageSize}
-      pageSizeLabel={t("pageSize")}
+      pageSizeLabel={t("rootPageSize")}
       previousLabel={t("previous")}
-      summary={t("pagination", {
+      summary={t("treePagination", {
+        categories: data.meta.totalCategories,
         page: data.meta.page,
-        total: data.meta.total,
+        roots: data.meta.totalRoots,
         totalPages: Math.max(data.meta.totalPages, 1),
       })}
       totalPages={data.meta.totalPages}

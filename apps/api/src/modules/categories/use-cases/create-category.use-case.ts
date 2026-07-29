@@ -1,13 +1,17 @@
-import { ConflictError, NotFoundError } from '@/common/response';
+import { ConflictError } from '@/common/response';
 import { CreateCategoryDto } from '@/modules/categories/dto/create-category.dto';
 import { CategoriesRepository } from '@/modules/categories/repository/categories.repository';
+import { CategoryHierarchyService } from '@/modules/categories/service/category-hierarchy.service';
 import { toCategoryResponse } from '@/modules/categories/categories.types';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class CreateCategoryUseCase {
-  constructor(private readonly categoriesRepository: CategoriesRepository) {}
+  constructor(
+    private readonly categoriesRepository: CategoriesRepository,
+    private readonly categoryHierarchyService: CategoryHierarchyService,
+  ) {}
 
   async execute(dto: CreateCategoryDto) {
     const slug = dto.slug?.trim() ?? this.slugify(dto.name);
@@ -20,16 +24,11 @@ export class CreateCategoryUseCase {
       throw new ConflictError('Category slug already exists for this type');
     }
 
-    if (dto.parentId) {
-      const parent = await this.categoriesRepository.findById(dto.parentId);
-      if (!parent) {
-        throw new NotFoundError('Parent category not found');
-      }
-
-      if (parent.type !== dto.type) {
-        throw new ConflictError('Parent category must have the same type');
-      }
-    }
+    await this.categoryHierarchyService.validateParentAssignment({
+      categoryIds: [],
+      parentId: dto.parentId,
+      type: dto.type,
+    });
 
     const metadata = dto.metadata as Prisma.InputJsonObject | undefined;
     const category = await this.categoriesRepository.create({

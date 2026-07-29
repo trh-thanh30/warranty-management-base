@@ -2,6 +2,8 @@ import { Permissions } from '@/common/decorators/permissions.decorator';
 import { createDatedExcelFilename, sendExcelFile } from '@/common/excel';
 import { CreateCategoryDto } from '@/modules/categories/dto/create-category.dto';
 import { ListCategoriesDto } from '@/modules/categories/dto/list-categories.dto';
+import { ListCategoryTreeDto } from '@/modules/categories/dto/list-category-tree.dto';
+import { ListCategoryParentOptionsDto } from '@/modules/categories/dto/list-category-parent-options.dto';
 import { ReorderCategoriesDto } from '@/modules/categories/dto/reorder-categories.dto';
 import { UpdateCategoryDto } from '@/modules/categories/dto/update-category.dto';
 import { CreateCategoryUseCase } from '@/modules/categories/use-cases/create-category.use-case';
@@ -11,6 +13,8 @@ import { ExportCategoriesUseCase } from '@/modules/categories/use-cases/export-c
 import { GetCategoryDetailUseCase } from '@/modules/categories/use-cases/get-category-detail.use-case';
 import { ImportCategoriesUseCase } from '@/modules/categories/use-cases/import-categories.use-case';
 import { ListCategoriesUseCase } from '@/modules/categories/use-cases/list-categories.use-case';
+import { ListCategoryTreeUseCase } from '@/modules/categories/use-cases/list-category-tree.use-case';
+import { ListCategoryParentOptionsUseCase } from '@/modules/categories/use-cases/list-category-parent-options.use-case';
 import { ReorderCategoriesUseCase } from '@/modules/categories/use-cases/reorder-categories.use-case';
 import { UpdateCategoryUseCase } from '@/modules/categories/use-cases/update-category.use-case';
 import {
@@ -34,6 +38,8 @@ import express from 'express';
 export class CategoriesController {
   constructor(
     private readonly listCategoriesUseCase: ListCategoriesUseCase,
+    private readonly listCategoryTreeUseCase: ListCategoryTreeUseCase,
+    private readonly listCategoryParentOptionsUseCase: ListCategoryParentOptionsUseCase,
     private readonly getCategoryDetailUseCase: GetCategoryDetailUseCase,
     private readonly createCategoryUseCase: CreateCategoryUseCase,
     private readonly reorderCategoriesUseCase: ReorderCategoriesUseCase,
@@ -48,6 +54,18 @@ export class CategoriesController {
   @Permissions([permission_key.CATEGORY_VIEW])
   list(@Query() query: ListCategoriesDto) {
     return this.listCategoriesUseCase.execute(query);
+  }
+
+  @Get('tree')
+  @Permissions([permission_key.CATEGORY_VIEW])
+  tree(@Query() query: ListCategoryTreeDto) {
+    return this.listCategoryTreeUseCase.execute(query);
+  }
+
+  @Get('parent-options')
+  @Permissions([permission_key.CATEGORY_VIEW])
+  parentOptions(@Query() query: ListCategoryParentOptionsDto) {
+    return this.listCategoryParentOptionsUseCase.execute(query);
   }
 
   @Get('export')

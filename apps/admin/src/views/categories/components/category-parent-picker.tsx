@@ -1,10 +1,19 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import type { CategoryResponse, CategoryType } from "@repo/shared";
+import type { CategoryParentOption, CategoryType } from "@repo/shared";
 import { Badge } from "@repo/ui";
-import { SelectControl } from "@/src/components/common/select-control";
-import { useCategories } from "../hooks/use-categories";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxLoading,
+  ComboboxTrigger,
+} from "@/src/components/common";
+import { useCategoryParentOptions } from "../hooks/use-categories";
 
 type CategoryParentPickerProps = {
   currentCategoryId?: string;
@@ -14,7 +23,7 @@ type CategoryParentPickerProps = {
   value: string;
 };
 
-const NO_PARENT_VALUE = "";
+const NO_PARENT_VALUE = "__no_parent__";
 
 export function CategoryParentPicker({
   currentCategoryId,
@@ -24,87 +33,69 @@ export function CategoryParentPicker({
   value,
 }: CategoryParentPickerProps) {
   const t = useTranslations("Categories");
-  const categoriesQuery = useCategories(
+  const categoriesQuery = useCategoryParentOptions(
     {
-      limit: 100,
-      page: 1,
-      sortBy: "order",
-      sortOrder: "asc",
+      currentCategoryId,
       type,
     },
     {
       enabled: !disabled,
     },
   );
-  const options =
-    categoriesQuery.data?.items.filter(
-      (category) => category.id !== currentCategoryId,
-    ) ?? [];
+  const options = categoriesQuery.data ?? [];
+  const selected = options.find((category) => category.id === value);
+  const comboboxValue = value || NO_PARENT_VALUE;
 
   return (
     <div className="space-y-2">
-      <SelectControl
+      <Combobox
         disabled={disabled || categoriesQuery.isLoading}
-        onValueChange={onChange}
-        options={[
-          { label: t("noParent"), value: NO_PARENT_VALUE },
-          ...options.map((category) => ({
-            label: getParentOptionLabel(category, options),
-            value: category.id,
-          })),
-        ]}
-        value={value}
-      />
+        onValueChange={(nextValue) =>
+          onChange(nextValue === NO_PARENT_VALUE ? "" : nextValue)
+        }
+        value={comboboxValue}
+      >
+        <ComboboxTrigger
+          id="category-parent"
+          placeholder={t("noParent")}
+          selectedLabel={selected ? formatParentPath(selected) : t("noParent")}
+        />
+        <ComboboxContent>
+          <ComboboxInput placeholder={t("parentSearchPlaceholder")} />
+          <ComboboxList>
+            <ComboboxItem value={NO_PARENT_VALUE}>{t("noParent")}</ComboboxItem>
+            {categoriesQuery.isLoading ? (
+              <ComboboxLoading label={t("parentLoading")} />
+            ) : null}
+            <ComboboxEmpty>{t("parentEmpty")}</ComboboxEmpty>
+            {options.map((option) => (
+              <ComboboxItem key={option.id} value={option.id}>
+                <span className="inline-flex min-w-0 items-center gap-2">
+                  <span className="truncate">{formatParentPath(option)}</span>
+                  {!option.isActive ? (
+                    <Badge className="shrink-0" variant="warning">
+                      {t("inactive")}
+                    </Badge>
+                  ) : null}
+                </span>
+              </ComboboxItem>
+            ))}
+          </ComboboxList>
+        </ComboboxContent>
+      </Combobox>
+
       {categoriesQuery.isError ? (
-        <p className="text-sm text-red-600 dark:text-red-400">
+        <p className="text-sm text-red-600 dark:text-red-400" role="alert">
           {t("parentLoadError")}
         </p>
       ) : null}
-      {value ? (
-        <SelectedParentStatus categoryId={value} options={options} />
+      {selected && !selected.isActive ? (
+        <Badge variant="warning">{t("parentInactive")}</Badge>
       ) : null}
     </div>
   );
 }
 
-function SelectedParentStatus({
-  categoryId,
-  options,
-}: {
-  categoryId: string;
-  options: CategoryResponse[];
-}) {
-  const t = useTranslations("Categories");
-  const selected = options.find((category) => category.id === categoryId);
-
-  if (!selected || selected.isActive) return null;
-
-  return <Badge variant="warning">{t("parentInactive")}</Badge>;
-}
-
-function getParentOptionLabel(
-  category: CategoryResponse,
-  categories: CategoryResponse[],
-) {
-  const path = buildParentPath(category, categories);
-  return path.length > 0 ? path.join(" / ") : category.name;
-}
-
-function buildParentPath(
-  category: CategoryResponse,
-  categories: CategoryResponse[],
-) {
-  const path = [category.name];
-  let cursor = category;
-  const visited = new Set<string>([category.id]);
-
-  while (cursor.parentId) {
-    const parent = categories.find((item) => item.id === cursor.parentId);
-    if (!parent || visited.has(parent.id)) break;
-    path.unshift(parent.name);
-    visited.add(parent.id);
-    cursor = parent;
-  }
-
-  return path;
+function formatParentPath(category: CategoryParentOption) {
+  return category.path.join(" / ");
 }

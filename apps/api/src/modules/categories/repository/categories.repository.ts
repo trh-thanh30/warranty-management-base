@@ -74,6 +74,13 @@ export class CategoriesRepository {
     return this.prismaService.category.findMany();
   }
 
+  listByType(type: category_type) {
+    return this.prismaService.category.findMany({
+      where: { type },
+      orderBy: [{ order: 'asc' }, { name: 'asc' }],
+    });
+  }
+
   listPublicProductCategories(filters: {
     page?: number;
     limit?: number;

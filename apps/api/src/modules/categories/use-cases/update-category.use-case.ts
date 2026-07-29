@@ -3,15 +3,17 @@ import { AssetsService } from '@/modules/assets/assets.service';
 import { toCategoryResponse } from '@/modules/categories/categories.types';
 import { UpdateCategoryDto } from '@/modules/categories/dto/update-category.dto';
 import { CategoriesRepository } from '@/modules/categories/repository/categories.repository';
+import { CategoryHierarchyService } from '@/modules/categories/service/category-hierarchy.service';
 import { Injectable } from '@nestjs/common';
-import { asset_type, Category, Prisma } from '@prisma/client';
+import { asset_type, Prisma } from '@prisma/client';
 import { getRemovedMediaUrls } from '@repo/shared/utils';
 
 @Injectable()
 export class UpdateCategoryUseCase {
   constructor(
     private readonly categoriesRepository: CategoriesRepository,
-    private readonly assetsService?: AssetsService,
+    private readonly categoryHierarchyService: CategoryHierarchyService,
+    private readonly assetsService: AssetsService,
   ) {}
 
   async execute(id: string, dto: UpdateCategoryDto) {
@@ -31,22 +33,11 @@ export class UpdateCategoryUseCase {
       }
     }
 
-    if (dto.parentId) {
-      if (dto.parentId === id) {
-        throw new ConflictError('Category cannot be its own parent');
-      }
-
-      const parent = await this.categoriesRepository.findById(dto.parentId);
-      if (!parent) {
-        throw new NotFoundError('Parent category not found');
-      }
-
-      if (parent.type !== existingCategory.type) {
-        throw new ConflictError('Parent category must have the same type');
-      }
-
-      await this.assertParentDoesNotCreateCycle(id, parent);
-    }
+    await this.categoryHierarchyService.validateParentAssignment({
+      categoryIds: [id],
+      parentId: dto.parentId,
+      type: existingCategory.type,
+    });
 
     const metadata = dto.metadata as Prisma.InputJsonValue | undefined;
     const nextImageUrl =
@@ -57,7 +48,7 @@ export class UpdateCategoryUseCase {
       existingCategory.image_url &&
       existingCategory.image_url !== nextImageUrl
     ) {
-      await this.assetsService?.deleteAssetByUrl(existingCategory.image_url, {
+      await this.assetsService.deleteAssetByUrl(existingCategory.image_url, {
         folder: 'categories',
         types: [asset_type.IMAGE],
       });
@@ -73,7 +64,7 @@ export class UpdateCategoryUseCase {
         existingCategory.description ?? '',
         nextDescription,
       )) {
-        await this.assetsService?.deleteAssetByUrl(url, {
+        await this.assetsService.deleteAssetByUrl(url, {
           folder: 'rich-text',
           types: [asset_type.IMAGE, asset_type.VIDEO],
         });
@@ -105,31 +96,5 @@ export class UpdateCategoryUseCase {
     });
 
     return toCategoryResponse(category);
-  }
-
-  private async assertParentDoesNotCreateCycle(
-    categoryId: string,
-    parent: Category,
-  ) {
-    let cursor: Category | null = parent;
-    const visited = new Set<string>();
-
-    while (cursor) {
-      if (cursor.id === categoryId) {
-        throw new ConflictError('Category parent would create a cycle');
-      }
-
-      if (visited.has(cursor.id)) {
-        throw new ConflictError('Existing category hierarchy contains a cycle');
-      }
-
-      visited.add(cursor.id);
-
-      if (!cursor.parent_id) {
-        return;
-      }
-
-      cursor = await this.categoriesRepository.findById(cursor.parent_id);
-    }
   }
 }

@@ -1,11 +1,20 @@
 "use client";
 
-import { Ban, MoreHorizontal, Pencil, SlidersHorizontal } from "lucide-react";
+import { useMemo, useState } from "react";
+import {
+  Ban,
+  ChevronRight,
+  CornerDownRight,
+  MoreHorizontal,
+  Pencil,
+  SlidersHorizontal,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
-import type { CategoryResponse, CategorySortBy } from "@repo/shared";
+import type { CategorySortBy, CategoryTreeNode } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
   Button,
+  cn,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -21,18 +30,18 @@ import {
 import { SortableTableHead } from "@/src/components/common/sortable-table-head";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
+import { stripHtml } from "@/src/utils/rich-text";
 import {
   formatCategoryCreatedAt,
   getCategoryDisplayCode,
-  getCategoryParentLabel,
+  groupVisibleCategoryBranches,
 } from "../categories.utils";
-import { stripHtml } from "@/src/utils/rich-text";
 import { CategoryStatusBadge } from "./category-status-badge";
 import { CategoryTypeBadge } from "./category-type-badge";
 
 type CategoriesTableProps = {
-  items: CategoryResponse[];
-  onDeactivate: (category: CategoryResponse) => void;
+  items: CategoryTreeNode[];
+  onDeactivate: (category: CategoryTreeNode) => void;
   onSortChange: (sortBy: CategorySortBy) => void;
   sortBy?: CategorySortBy;
   sortOrder: "asc" | "desc";
@@ -46,17 +55,44 @@ export function CategoriesTable({
   sortOrder,
 }: CategoriesTableProps) {
   const t = useTranslations("Categories");
+  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const visibleBranches = useMemo(
+    () => groupVisibleCategoryBranches(items, collapsedIds),
+    [collapsedIds, items],
+  );
+
+  function toggleCategory(categoryId: string) {
+    setCollapsedIds((current) => {
+      const next = new Set(current);
+      if (next.has(categoryId)) next.delete(categoryId);
+      else next.add(categoryId);
+      return next;
+    });
+  }
 
   return (
     <>
       <div className="space-y-3 lg:hidden">
-        {items.map((category) => (
-          <CategoryMobileCard
-            category={category}
-            items={items}
-            key={category.id}
-            onDeactivate={onDeactivate}
-          />
+        {visibleBranches.map((branch) => (
+          <section
+            aria-label={branch[0]?.category.name}
+            className="space-y-3"
+            key={branch[0]?.category.id}
+          >
+            {branch.map(({ category, depth, parentName }) => (
+              <CategoryMobileCard
+                category={category}
+                collapsed={collapsedIds.has(category.id)}
+                depth={depth}
+                key={category.id}
+                onDeactivate={onDeactivate}
+                onToggle={toggleCategory}
+                parentName={parentName}
+              />
+            ))}
+          </section>
         ))}
       </div>
 
@@ -64,8 +100,6 @@ export function CategoriesTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t("type")}</TableHead>
-              <TableHead>{t("code")}</TableHead>
               <SortableTableHead
                 activeSortBy={sortBy}
                 onSortChange={onSortChange}
@@ -74,7 +108,8 @@ export function CategoriesTable({
               >
                 {t("name")}
               </SortableTableHead>
-              <TableHead>{t("parent")}</TableHead>
+              <TableHead>{t("code")}</TableHead>
+              <TableHead>{t("type")}</TableHead>
               <SortableTableHead
                 activeSortBy={sortBy}
                 onSortChange={onSortChange}
@@ -102,16 +137,24 @@ export function CategoriesTable({
               <TableHead aria-label={t("actions")} />
             </TableRow>
           </TableHeader>
-          <TableBody>
-            {items.map((category) => (
-              <CategoryTableRow
-                category={category}
-                items={items}
-                key={category.id}
-                onDeactivate={onDeactivate}
-              />
-            ))}
-          </TableBody>
+          {visibleBranches.map((branch) => (
+            <TableBody
+              className="border-b border-slate-300 last:border-b-0 dark:border-slate-700"
+              key={branch[0]?.category.id}
+            >
+              {branch.map(({ category, depth, parentName }) => (
+                <CategoryTableRow
+                  category={category}
+                  collapsed={collapsedIds.has(category.id)}
+                  depth={depth}
+                  key={category.id}
+                  onDeactivate={onDeactivate}
+                  onToggle={toggleCategory}
+                  parentName={parentName}
+                />
+              ))}
+            </TableBody>
+          ))}
         </Table>
       </div>
     </>
@@ -120,36 +163,36 @@ export function CategoriesTable({
 
 function CategoryTableRow({
   category,
-  items,
+  collapsed,
+  depth,
   onDeactivate,
+  onToggle,
+  parentName,
 }: {
-  category: CategoryResponse;
-  items: CategoryResponse[];
+  category: CategoryTreeNode;
+  collapsed: boolean;
+  depth: number;
   onDeactivate: CategoriesTableProps["onDeactivate"];
+  onToggle: (categoryId: string) => void;
+  parentName: string | null;
 }) {
-  const parentLabel = getCategoryParentLabel(category, items);
-
   return (
-    <TableRow>
+    <TableRow className={cn(category.isContextOnly && "bg-slate-50/70")}>
       <TableCell>
-        <CategoryTypeBadge type={category.type} />
+        <CategoryTreeName
+          category={category}
+          collapsed={collapsed}
+          depth={depth}
+          onToggle={onToggle}
+          parentName={parentName}
+        />
       </TableCell>
       <TableCell className="font-mono text-xs">
         {getCategoryDisplayCode(category)}
       </TableCell>
       <TableCell>
-        <div className="max-w-[14rem]">
-          <p className="truncate font-medium text-slate-950 dark:text-slate-50">
-            {category.name}
-          </p>
-          {category.description ? (
-            <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
-              {stripHtml(category.description)}
-            </p>
-          ) : null}
-        </div>
+        <CategoryTypeBadge type={category.type} />
       </TableCell>
-      <TableCell>{parentLabel ?? "-"}</TableCell>
       <TableCell>{category.order}</TableCell>
       <TableCell>
         <CategoryStatusBadge isActive={category.isActive} />
@@ -162,41 +205,145 @@ function CategoryTableRow({
   );
 }
 
-function CategoryMobileCard({
+function CategoryTreeName({
   category,
-  items,
-  onDeactivate,
+  collapsed,
+  depth,
+  onToggle,
+  parentName,
 }: {
-  category: CategoryResponse;
-  items: CategoryResponse[];
-  onDeactivate: CategoriesTableProps["onDeactivate"];
+  category: CategoryTreeNode;
+  collapsed: boolean;
+  depth: number;
+  onToggle: (categoryId: string) => void;
+  parentName: string | null;
 }) {
   const t = useTranslations("Categories");
-  const parentLabel = getCategoryParentLabel(category, items);
+  const hasChildren = category.children.length > 0;
 
   return (
-    <article className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="truncate font-medium text-slate-950 dark:text-slate-50">
-            {category.name}
-          </p>
-          {category.description ? (
-            <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
-              {stripHtml(category.description)}
-            </p>
-          ) : null}
-        </div>
-        <div className="flex items-start gap-2">
-          <div className="flex flex-wrap gap-2">
-            <CategoryTypeBadge type={category.type} />
-            <CategoryStatusBadge isActive={category.isActive} />
-          </div>
-          <CategoryActionsMenu
-            category={category}
-            onDeactivate={onDeactivate}
+    <div
+      className="flex min-w-52 items-start gap-1"
+      style={{ paddingInlineStart: `${Math.min(depth, 5) * 20}px` }}
+    >
+      {hasChildren ? (
+        <Button
+          aria-expanded={!collapsed}
+          aria-label={t(collapsed ? "expandCategory" : "collapseCategory", {
+            name: category.name,
+          })}
+          className="mt-0.5 size-8 shrink-0"
+          onClick={() => onToggle(category.id)}
+          size="icon"
+          variant="ghost"
+        >
+          <ChevronRight
+            aria-hidden="true"
+            className={cn(
+              "size-4 transition-transform duration-150 motion-reduce:transition-none",
+              !collapsed && "rotate-90",
+            )}
           />
+        </Button>
+      ) : (
+        <span className="flex size-8 shrink-0 items-center justify-center">
+          {depth > 0 ? (
+            <CornerDownRight
+              aria-hidden="true"
+              className="size-4 text-slate-300 dark:text-slate-700"
+            />
+          ) : null}
+        </span>
+      )}
+
+      <div className="min-w-0 max-w-[20rem] pt-1">
+        <p
+          className={cn(
+            "truncate font-medium text-slate-950 dark:text-slate-50",
+            category.isContextOnly && "text-slate-500 dark:text-slate-400",
+          )}
+        >
+          {category.name}
+        </p>
+        {parentName ? (
+          <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+            {t("belongsTo", { name: parentName })}
+          </p>
+        ) : category.description ? (
+          <p className="mt-0.5 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
+            {stripHtml(category.description)}
+          </p>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function CategoryMobileCard({
+  category,
+  collapsed,
+  depth,
+  onDeactivate,
+  onToggle,
+  parentName,
+}: {
+  category: CategoryTreeNode;
+  collapsed: boolean;
+  depth: number;
+  onDeactivate: CategoriesTableProps["onDeactivate"];
+  onToggle: (categoryId: string) => void;
+  parentName: string | null;
+}) {
+  const t = useTranslations("Categories");
+  const hasChildren = category.children.length > 0;
+
+  return (
+    <article
+      className={cn(
+        "rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950",
+        category.isContextOnly && "bg-slate-50/70 dark:bg-slate-900/50",
+      )}
+      style={{ marginInlineStart: `${Math.min(depth, 3) * 12}px` }}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-start gap-1">
+          {hasChildren ? (
+            <Button
+              aria-expanded={!collapsed}
+              aria-label={t(collapsed ? "expandCategory" : "collapseCategory", {
+                name: category.name,
+              })}
+              className="-ml-2 size-10 shrink-0"
+              onClick={() => onToggle(category.id)}
+              size="icon"
+              variant="ghost"
+            >
+              <ChevronRight
+                aria-hidden="true"
+                className={cn(
+                  "size-4 transition-transform duration-150 motion-reduce:transition-none",
+                  !collapsed && "rotate-90",
+                )}
+              />
+            </Button>
+          ) : null}
+          <div className="min-w-0 pt-2">
+            <p className="truncate font-medium text-slate-950 dark:text-slate-50">
+              {category.name}
+            </p>
+            {parentName ? (
+              <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
+                {t("belongsTo", { name: parentName })}
+              </p>
+            ) : null}
+          </div>
         </div>
+        <CategoryActionsMenu category={category} onDeactivate={onDeactivate} />
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        <CategoryTypeBadge type={category.type} />
+        <CategoryStatusBadge isActive={category.isActive} />
       </div>
 
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
@@ -204,7 +351,6 @@ function CategoryMobileCard({
           label={t("code")}
           value={getCategoryDisplayCode(category)}
         />
-        <CategoryMobileField label={t("parent")} value={parentLabel ?? "-"} />
         <CategoryMobileField
           label={t("order")}
           value={String(category.order)}
@@ -241,7 +387,7 @@ function CategoryActionsMenu({
   category,
   onDeactivate,
 }: {
-  category: CategoryResponse;
+  category: CategoryTreeNode;
   onDeactivate: CategoriesTableProps["onDeactivate"];
 }) {
   const t = useTranslations("Categories");
@@ -249,9 +395,7 @@ function CategoryActionsMenu({
   const canEdit = hasPermission(PERMISSIONS.CATEGORY_UPDATE);
   const canDelete = hasPermission(PERMISSIONS.CATEGORY_DELETE);
 
-  if (!canEdit && !canDelete) {
-    return null;
-  }
+  if (!canEdit && !canDelete) return null;
 
   return (
     <DropdownMenu>

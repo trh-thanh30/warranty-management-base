@@ -30,6 +30,32 @@ export type CategoryResponse = CategorySummary & {
   children?: CategorySummary[];
 };
 
+export type CategoryTreeNode = CategorySummary & {
+  children: CategoryTreeNode[];
+  isContextOnly?: boolean;
+};
+
+export type CategoryTreeResponse = {
+  items: CategoryTreeNode[];
+  meta: {
+    page: number;
+    limit: number;
+    totalRoots: number;
+    totalCategories: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+};
+
+export type CategoryParentOption = Pick<
+  CategorySummary,
+  "id" | "isActive" | "name" | "order" | "parentId"
+> & {
+  depth: number;
+  path: string[];
+};
+
 export type PublicProductCategory = {
   id: string;
   slug: string;
@@ -56,6 +82,19 @@ export type ListCategoriesQuery = PaginationQuery & {
   search?: string;
   sortBy?: CategorySortBy;
   sortOrder?: "asc" | "desc";
+};
+
+export type ListCategoryTreeQuery = PaginationQuery & {
+  type: CategoryType;
+  isActive?: "true" | "false";
+  search?: string;
+  sortBy?: CategorySortBy;
+  sortOrder?: "asc" | "desc";
+};
+
+export type ListCategoryParentOptionsQuery = {
+  type: CategoryType;
+  currentCategoryId?: string;
 };
 
 export type CreateCategoryBody = {

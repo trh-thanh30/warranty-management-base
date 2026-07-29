@@ -6,9 +6,6 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import type { UnreadNotificationCount } from "@repo/shared";
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
   Badge,
   DropdownMenu,
   DropdownMenuContent,
@@ -25,7 +22,7 @@ import { usePermissions } from "@/src/hooks/use-permissions";
 import { getAccessibleNavigationItems } from "@/src/config/navigation-permissions";
 import { useUnreadNotificationCount } from "@/src/hooks/use-notifications";
 import { useAuth } from "@/src/app/providers/auth-provider";
-import { getInitials } from "@/src/utils/get-initials";
+import { UserMenu } from "@/src/components/user-menu";
 import {
   getActiveNavigationHref,
   getNavigationItemBadge,
@@ -346,9 +343,6 @@ export function AppSidebar({
   });
   const storedCollapsed = useAdminUiStore((state) => state.sidebarCollapsed);
   const collapsed = collapsedOverride ?? storedCollapsed;
-  const displayName = user?.full_name || user?.username || "Admin";
-  const email = user?.email || "";
-  const avatarFallback = getInitials(displayName);
   const visibleSections = dashboardConfig.sidebarSections
     .map((section) => ({
       ...section,
@@ -414,34 +408,7 @@ export function AppSidebar({
       </nav>
 
       <div className="border-t border-slate-200 p-4 dark:border-slate-800">
-        <div
-          className={cn(
-            "flex items-center rounded-md",
-            collapsed
-              ? "justify-center p-0 h-9 w-9 mx-auto"
-              : "gap-3 px-2 py-2",
-          )}
-          title={collapsed ? `${displayName} (${email})` : undefined}
-        >
-          <Avatar className={cn(collapsed ? "h-8 w-8" : "h-10 w-10")}>
-            {user?.avatar_url ? (
-              <AvatarImage alt={displayName} src={user.avatar_url} />
-            ) : null}
-            <AvatarFallback>{avatarFallback}</AvatarFallback>
-          </Avatar>
-          {!collapsed && (
-            <>
-              <div className="min-w-0 flex-1 animate-in fade-in duration-200">
-                <p className="truncate text-sm font-medium text-slate-950 dark:text-slate-50">
-                  {displayName}
-                </p>
-                <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-                  {email}
-                </p>
-              </div>
-            </>
-          )}
-        </div>
+        <UserMenu collapsed={collapsed} variant="sidebar" />
       </div>
     </aside>
   );
