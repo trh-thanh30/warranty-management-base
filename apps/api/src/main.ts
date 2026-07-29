@@ -1,8 +1,8 @@
+import { loadEnv } from '@/load-env';
 import * as fs from 'fs';
 import * as path from 'path';
 import 'reflect-metadata';
 import './instrument';
-import { loadEnv } from '@/load-env';
 
 // Load environment variables and log which file was used
 const loadedEnvPath = loadEnv() ?? '(none found)';
@@ -60,6 +60,7 @@ async function bootstrap() {
       process.env.CORS_ORIGINS?.split(',').map((o) =>
         o.trim().replace(/\/$/, ''),
       ) || '*';
+
     app.enableCors({
       origin: origins,
       credentials: true,

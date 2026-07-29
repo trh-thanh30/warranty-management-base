@@ -43,6 +43,7 @@ export function DealersView() {
     nearMeOnly,
     nearbyStatus,
     provinces,
+    provincesLoading,
     resultCount,
     retry,
     searchQuery,
@@ -53,6 +54,7 @@ export function DealersView() {
     setSearchQuery,
     setSelectedLocation,
     setSelectedDistrict,
+    wardsLoading,
   } = useDealerDirectory();
 
   return (
@@ -82,12 +84,14 @@ export function DealersView() {
                 onProvinceChange={selectProvince}
                 onSearchChange={setSearchQuery}
                 provinces={provinces}
+                provincesLoading={provincesLoading}
                 resultCountLabel={t("filters.resultCount", {
                   count: resultCount,
                 })}
                 searchQuery={searchQuery}
                 selectedDistrict={selectedDistrict}
                 selectedProvince={selectedProvince}
+                wardsLoading={wardsLoading}
                 translations={{
                   allDistricts: t("filters.allDistricts"),
                   allProvinces: t("filters.allCities"),

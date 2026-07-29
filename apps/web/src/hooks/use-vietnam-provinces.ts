@@ -13,6 +13,9 @@ type UseVietnamProvincesOptions = {
   enabled?: boolean;
 };
 
+const vietnamWardsQueryKey = (provinceCode: number | null) =>
+  ["locations", "vietnam", "wards", provinceCode] as const;
+
 export function useVietnamProvinces({
   enabled = true,
 }: UseVietnamProvincesOptions = {}) {
@@ -20,6 +23,23 @@ export function useVietnamProvinces({
     enabled,
     queryFn: () => locationsService.listVietnamProvinces(),
     queryKey: VIETNAM_PROVINCES_QUERY_KEY,
+    staleTime: 24 * 60 * 60 * 1000,
+  });
+
+  return {
+    ...query,
+    data: query.data ?? [],
+  };
+}
+
+export function useVietnamWards(
+  provinceCode: number | null,
+  { enabled = true }: UseVietnamProvincesOptions = {},
+) {
+  const query = useQuery({
+    enabled: Boolean(provinceCode) && enabled,
+    queryFn: () => locationsService.listVietnamWards(provinceCode ?? 0),
+    queryKey: vietnamWardsQueryKey(provinceCode),
     staleTime: 24 * 60 * 60 * 1000,
   });
 

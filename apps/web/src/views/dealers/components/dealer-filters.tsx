@@ -23,10 +23,12 @@ type DealerFiltersProps = {
   onDistrictChange: (value: string) => void;
   onSearchChange: (value: string) => void;
   provinces: readonly string[];
+  provincesLoading: boolean;
   resultCountLabel: string;
   searchQuery: string;
   selectedDistrict: string;
   selectedProvince: string;
+  wardsLoading: boolean;
   translations: {
     allDistricts: string;
     allProvinces: string;
@@ -50,11 +52,13 @@ export function DealerFilters({
   onProvinceChange,
   onSearchChange,
   provinces,
+  provincesLoading,
   resultCountLabel,
   searchQuery,
   selectedDistrict,
   selectedProvince,
   translations,
+  wardsLoading,
 }: DealerFiltersProps) {
   return (
     <div className="space-y-4 border-b border-border-gray  p-5">
@@ -77,14 +81,18 @@ export function DealerFilters({
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <Select value={selectedProvince} onValueChange={onProvinceChange}>
+        <Select
+          disabled={provincesLoading}
+          value={selectedProvince}
+          onValueChange={onProvinceChange}
+        >
           <SelectTrigger
             aria-label={translations.provinceAriaLabel}
             className={`h-11 rounded-sm border-border-gray bg-white text-xs font-medium text-deep-black sm:text-sm ${formControlFocusClassName}`}
           >
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent viewportClassName="h-auto max-h-72 overflow-y-auto">
             <SelectItem value={dealerFilterAll}>
               {translations.allProvinces}
             </SelectItem>
@@ -97,7 +105,7 @@ export function DealerFilters({
         </Select>
 
         <Select
-          disabled={selectedProvince === dealerFilterAll}
+          disabled={selectedProvince === dealerFilterAll || wardsLoading}
           value={selectedDistrict}
           onValueChange={onDistrictChange}
         >
@@ -107,7 +115,7 @@ export function DealerFilters({
           >
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent viewportClassName="h-auto max-h-72 overflow-y-auto">
             <SelectItem value={dealerFilterAll}>
               {translations.allDistricts}
             </SelectItem>

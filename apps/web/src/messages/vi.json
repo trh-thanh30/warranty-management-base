@@ -1039,9 +1039,9 @@
       "searchPlaceholder": "Tìm theo tên hoặc địa chỉ...",
       "searchAriaLabel": "Tìm đại lý theo tên, địa chỉ hoặc số điện thoại",
       "cityAriaLabel": "Chọn tỉnh hoặc thành phố",
-      "districtAriaLabel": "Chọn quận hoặc huyện",
+      "districtAriaLabel": "Chọn phường hoặc xã",
       "allCities": "Toàn quốc",
-      "allDistricts": "Quận/Huyện",
+      "allDistricts": "Tất cả phường/xã",
       "nearMe": "Tìm đại lý và trung tâm bảo hành gần bạn (≤ 20 km)",
       "nearMeLoading": "Đang xác định vị trí của bạn...",
       "nearMeError": "Không thể lấy vị trí. Hãy kiểm tra quyền truy cập vị trí.",
@@ -1504,6 +1504,11 @@
     "closeMenuAriaLabel": "Đóng menu",
     "warrantyLookupAriaLabel": "Tra cứu bảo hành",
     "dealerCta": "Tuyển đại lý",
+    "languageMenuAriaLabel": "Chọn ngôn ngữ",
+    "languages": {
+      "vietnamese": "Tiếng Việt",
+      "english": "Tiếng Anh"
+    },
     "nav": {
       "home": "Trang chủ",
       "about": "Giới thiệu",

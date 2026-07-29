@@ -35,6 +35,14 @@ const dealerDirectoryHookPath = path.join(
   "dealers",
   "use-dealer-directory.ts",
 );
+const dealerFiltersPath = path.join(
+  webRoot,
+  "src",
+  "views",
+  "dealers",
+  "components",
+  "dealer-filters.tsx",
+);
 const publicNetworkDirectoryServicePath = path.join(
   webRoot,
   "src",
@@ -138,8 +146,10 @@ test("dealer page loads the combined public network directory and dynamically re
   assert.match(directorySource, /hasNextPage/);
   assert.match(directorySource, /isLoadingMore/);
   assert.match(directorySource, /loadMore/);
+  assert.match(directorySource, /useVietnamProvinces/);
+  assert.match(directorySource, /useVietnamWards/);
+  assert.doesNotMatch(directorySource, /listFilterOptions/);
   assert.match(serviceSource, /"\/public\/network-directory"/);
-  assert.match(serviceSource, /"\/public\/network-directory\/filter-options"/);
   assert.match(serviceSource, /params:\s*query/);
   assert.match(viewSource, /useDealerDirectory/);
   assert.match(viewSource, /dynamic\(/);
@@ -160,6 +170,21 @@ test("dealer page loads the combined public network directory and dynamically re
   assert.match(mapSource, /MAP_MARKER_COLORS\.serviceCenter/);
   assert.match(mapSource, /<NetworkLocationPopup/);
   assert.doesNotMatch(viewSource, /openstreetmap\.org\/export\/embed/);
+});
+
+test("dealer location filters use scrollable province and ward selects", async () => {
+  const filtersSource = await readFile(dealerFiltersPath, "utf8");
+
+  assert.equal(
+    (
+      filtersSource.match(
+        /viewportClassName="h-auto max-h-72 overflow-y-auto"/g,
+      ) ?? []
+    ).length,
+    2,
+  );
+  assert.match(filtersSource, /provincesLoading/);
+  assert.match(filtersSource, /wardsLoading/);
 });
 
 test("dealer page presents a localized recruitment CTA linked to Contact", async () => {
