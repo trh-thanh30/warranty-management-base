@@ -96,7 +96,12 @@ test("surfaces a child notification badge on its parent group", () => {
   assert.equal(
     getNavigationItemBadge(
       warrantyGroup,
-      { unread: 4, warranties: 4, warrantyClaims: 0 },
+      {
+        contactSubmissions: 0,
+        unread: 4,
+        warranties: 4,
+        warrantyClaims: 0,
+      },
       false,
     ),
     "4",
@@ -104,9 +109,35 @@ test("surfaces a child notification badge on its parent group", () => {
   assert.equal(
     getNavigationItemBadge(
       warrantyGroup,
-      { unread: 4, warranties: 4, warrantyClaims: 0 },
+      {
+        contactSubmissions: 0,
+        unread: 4,
+        warranties: 4,
+        warrantyClaims: 0,
+      },
       true,
     ),
     null,
+  );
+});
+
+test("shows unread contact submissions on their navigation item", () => {
+  assert.equal(
+    getNavigationItemBadge(
+      {
+        href: "/contact-submissions",
+        icon,
+        notificationBadgeKey: "contactSubmissions",
+        title: "Contact submissions",
+      },
+      {
+        contactSubmissions: 3,
+        unread: 3,
+        warranties: 0,
+        warrantyClaims: 0,
+      },
+      false,
+    ),
+    "3",
   );
 });

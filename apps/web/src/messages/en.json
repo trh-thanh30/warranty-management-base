@@ -7,6 +7,12 @@
     "title": "FUJITEK - Premium automotive window films",
     "description": "Premium FUJITEK – LEXZENZ automotive window-film solutions in Vietnam."
   },
+  "QuickContact": {
+    "navigationLabel": "Quick contact",
+    "zalo": "Contact us on Zalo",
+    "phone": "Call {phone}",
+    "facebook": "Contact us on Facebook"
+  },
   "FloatingQuickAction": {
     "panelTitle": "Quick actions",
     "lookup": "Check warranty coverage",
@@ -1079,6 +1085,13 @@
       "openGoogleMaps": "Open Google Maps"
     }
   },
+  "QuickChat": {
+    "helpPrompt": "Need help?",
+    "title": "Request a consultation",
+    "description": "Leave your information and FUJITEK will contact you as soon as possible.",
+    "openAriaLabel": "Open quick consultation form",
+    "closeAriaLabel": "Close quick consultation form"
+  },
   "ContactPage": {
     "eyebrow": "Contact",
     "title": "FUJITEK – LEXZENZ Vietnam",
@@ -1102,14 +1115,20 @@
       "hanoi": "Hanoi hotline:"
     },
     "form": {
-      "eyebrow": "Leave a message",
+      "title": "Register for a consultation",
+      "description": "Leave your contact information and we will respond and assist you as soon as possible.",
       "submit": "Send",
+      "submitting": "Sending...",
       "success": {
         "title": "Thank you for contacting us!",
         "description": "A FUJITEK Films consultant will respond by phone as soon as possible.",
         "reset": "Send another message"
       },
       "fields": {
+        "consultationTopic": {
+          "label": "Consultation topic *",
+          "placeholder": "Choose a consultation topic"
+        },
         "fullName": {
           "label": "Full name *",
           "placeholder": "Enter your full name..."
@@ -1121,7 +1140,33 @@
         "content": {
           "label": "Message *",
           "placeholder": "Tell us what you need help with..."
+        },
+        "province": {
+          "label": "Province / City *",
+          "placeholder": "Choose your support area",
+          "loading": "Loading provinces and cities...",
+          "loadError": "Unable to load provinces and cities.",
+          "retry": "Reload"
         }
+      },
+      "consultationTopics": {
+        "PRODUCT_CONSULTATION": "Product consultation",
+        "FIND_DEALER": "Find a dealer",
+        "WARRANTY": "Warranty",
+        "DEALER_REGISTRATION": "Dealer registration",
+        "OTHER": "Other"
+      },
+      "validation": {
+        "consultationTopicRequired": "Select a consultation topic.",
+        "fullNameMin": "Enter a full name with at least 2 characters.",
+        "fullNameMax": "Full name must not exceed 120 characters.",
+        "phoneInvalid": "Enter a valid phone number.",
+        "contentMin": "Enter a message with at least 10 characters.",
+        "contentMax": "Message must not exceed 2000 characters.",
+        "phonePending": "This phone number already has a message being processed. Please wait for a response before sending another.",
+        "provinceRequired": "Select a province or city.",
+        "rateLimit": "You have sent too many requests. Please wait a moment and try again.",
+        "submitError": "We could not send your message. Please try again."
       }
     },
     "maps": {

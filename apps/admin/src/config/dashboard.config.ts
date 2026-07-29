@@ -11,6 +11,7 @@ import {
   Layers3,
   LogOut,
   HardDrive,
+  MessageSquareText,
   Navigation,
   Package,
   PanelsTopLeft,
@@ -116,6 +117,13 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             href: "/dealers",
             icon: Store,
             requiredPermission: PERMISSIONS.DEALER_VIEW,
+          },
+          {
+            title: t("items.contactSubmissions"),
+            href: "/contact-submissions",
+            icon: MessageSquareText,
+            notificationBadgeKey: "contactSubmissions",
+            requiredPermission: PERMISSIONS.CONTACT_SUBMISSION_VIEW,
           },
         ],
       },
@@ -247,6 +255,11 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
         title: t("items.websiteOverview"),
         href: "/website-config",
         requiredPermission: PERMISSIONS.WEBSITE_CONFIG_VIEW,
+      },
+      {
+        title: t("items.contactSubmissions"),
+        href: "/contact-submissions",
+        requiredPermission: PERMISSIONS.CONTACT_SUBMISSION_VIEW,
       },
       {
         title: t("items.system"),

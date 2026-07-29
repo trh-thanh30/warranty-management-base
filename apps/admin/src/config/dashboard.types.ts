@@ -2,7 +2,10 @@ import type { ComponentType } from "react";
 import type { PermissionKey } from "@repo/shared/constants";
 import type { AuthUserRole } from "@repo/shared";
 
-export type NotificationBadgeKey = "warranties" | "warrantyClaims";
+export type NotificationBadgeKey =
+  | "contactSubmissions"
+  | "warranties"
+  | "warrantyClaims";
 
 export interface BrandConfig {
   name: string;

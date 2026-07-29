@@ -49,6 +49,7 @@ import { AuthModule } from '@/modules/auth/auth.module';
 import { CommonModule } from '@/modules/common/common.module';
 import { CategoriesModule } from '@/modules/categories/categories.module';
 import { ContentPagesModule } from '@/modules/content-pages/content-pages.module';
+import { ContactSubmissionsModule } from '@/modules/contact-submissions/contact-submissions.module';
 import { CustomersModule } from '@/modules/customers/customers.module';
 import { DealersModule } from '@/modules/dealers/dealers.module';
 import { EmailModule } from '@/modules/email/email.module';
@@ -154,6 +155,7 @@ const envPath = join(rootDir, envFile);
     CommonModule,
     CategoriesModule,
     ContentPagesModule,
+    ContactSubmissionsModule,
     NotificationModule,
     CustomersModule,
     DealersModule,

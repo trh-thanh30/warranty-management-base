@@ -58,6 +58,7 @@ export type ListAdminNotificationsQuery = PaginationQuery & {
 };
 
 export type UnreadNotificationCount = {
+  contactSubmissions: number;
   unread: number;
   warranties: number;
   warrantyClaims: number;

@@ -1,7 +1,9 @@
 import { SiteSettingsProvider } from "@/src/app/providers/site-settings-provider";
+import { PublicQuickChat } from "@/src/components/common/public-quick-chat";
 import { SiteFooter } from "@/src/components/layout/site-footer";
 import { SiteHeader } from "@/src/components/layout/site-header";
 import { LenisProvider } from "@/src/components/providers/lenis-provider";
+import { QueryProvider } from "@/src/components/providers/query-provider";
 import { routing } from "@/src/i18n/routing";
 import { getCachedSiteSetting } from "@/src/services/website-config/website-config.service";
 import type { Metadata } from "next";
@@ -76,13 +78,16 @@ export default async function LocaleLayout({
     >
       <body>
         <NextIntlClientProvider messages={messages}>
-          <SiteSettingsProvider siteSettings={siteSettings}>
-            <LenisProvider>
-              <SiteHeader logoUrl={siteSettings?.headerLogo?.url} />
-              <div className="pt-[84px]">{children}</div>
-              <SiteFooter siteSettings={siteSettings} />
-            </LenisProvider>
-          </SiteSettingsProvider>
+          <QueryProvider>
+            <SiteSettingsProvider siteSettings={siteSettings}>
+              <LenisProvider>
+                <SiteHeader logoUrl={siteSettings?.headerLogo?.url} />
+                <div className="pt-[84px]">{children}</div>
+                <SiteFooter siteSettings={siteSettings} />
+                <PublicQuickChat siteSettings={siteSettings} />
+              </LenisProvider>
+            </SiteSettingsProvider>
+          </QueryProvider>
         </NextIntlClientProvider>
       </body>
     </html>

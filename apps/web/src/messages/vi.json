@@ -7,6 +7,12 @@
     "title": "FUJITEK - Phim cách nhiệt ô tô cao cấp",
     "description": "Giải pháp phim cách nhiệt cao cấp FUJITEK – LEXZENZ Việt Nam."
   },
+  "QuickContact": {
+    "navigationLabel": "Liên hệ nhanh",
+    "zalo": "Liên hệ qua Zalo",
+    "phone": "Gọi {phone}",
+    "facebook": "Liên hệ qua Facebook"
+  },
   "FloatingQuickAction": {
     "panelTitle": "Thao tác nhanh",
     "lookup": "Tra cứu hạn bảo hành",
@@ -1079,6 +1085,13 @@
       "openGoogleMaps": "Mở Google Maps"
     }
   },
+  "QuickChat": {
+    "helpPrompt": "Bạn cần hỗ trợ?",
+    "title": "Đăng ký nhận tư vấn",
+    "description": "Để lại thông tin, FUJITEK sẽ liên hệ hỗ trợ bạn trong thời gian sớm nhất.",
+    "openAriaLabel": "Mở form tư vấn nhanh",
+    "closeAriaLabel": "Đóng form tư vấn nhanh"
+  },
   "ContactPage": {
     "eyebrow": "Liên hệ",
     "title": "FUJITEK – LEXZENZ Việt Nam",
@@ -1102,14 +1115,20 @@
       "hanoi": "Hotline Hà Nội:"
     },
     "form": {
-      "eyebrow": "Để lại lời nhắn",
+      "title": "Đăng ký nhận tư vấn",
+      "description": "Hãy để lại thông tin liên hệ, chúng tôi sẽ phản hồi và hỗ trợ trong thời gian sớm nhất!",
       "submit": "Gửi",
+      "submitting": "Đang gửi...",
       "success": {
         "title": "Cảm ơn bạn đã liên hệ!",
         "description": "Chuyên viên FUJITEK Films sẽ phản hồi qua số điện thoại của bạn trong thời gian sớm nhất.",
         "reset": "Gửi lời nhắn mới"
       },
       "fields": {
+        "consultationTopic": {
+          "label": "Hỗ trợ tư vấn *",
+          "placeholder": "Chọn vấn đề tư vấn"
+        },
         "fullName": {
           "label": "Họ & tên *",
           "placeholder": "Nhập họ và tên..."
@@ -1121,7 +1140,33 @@
         "content": {
           "label": "Nội dung *",
           "placeholder": "Nhập nội dung cần tư vấn..."
+        },
+        "province": {
+          "label": "Tỉnh / Thành phố *",
+          "placeholder": "Chọn khu vực cần hỗ trợ",
+          "loading": "Đang tải tỉnh/thành phố...",
+          "loadError": "Không thể tải danh sách tỉnh/thành phố.",
+          "retry": "Tải lại"
         }
+      },
+      "consultationTopics": {
+        "PRODUCT_CONSULTATION": "Tư vấn sản phẩm",
+        "FIND_DEALER": "Tìm đại lý",
+        "WARRANTY": "Bảo hành",
+        "DEALER_REGISTRATION": "Đăng ký đại lý",
+        "OTHER": "Khác"
+      },
+      "validation": {
+        "consultationTopicRequired": "Vui lòng chọn vấn đề cần tư vấn.",
+        "fullNameMin": "Vui lòng nhập họ tên tối thiểu 2 ký tự.",
+        "fullNameMax": "Họ tên không được vượt quá 120 ký tự.",
+        "phoneInvalid": "Vui lòng nhập số điện thoại hợp lệ.",
+        "contentMin": "Vui lòng nhập nội dung tối thiểu 10 ký tự.",
+        "contentMax": "Nội dung không được vượt quá 2000 ký tự.",
+        "phonePending": "Số điện thoại này đã có lời nhắn đang được xử lý. Vui lòng chờ phản hồi trước khi gửi lời nhắn mới.",
+        "provinceRequired": "Vui lòng chọn tỉnh/thành phố.",
+        "rateLimit": "Bạn đã gửi quá nhiều yêu cầu. Vui lòng chờ một lúc rồi thử lại.",
+        "submitError": "Không thể gửi lời nhắn. Vui lòng thử lại."
       }
     },
     "maps": {

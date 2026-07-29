@@ -145,6 +145,25 @@ model ActivityLog {
   @@map("activity_log")
 }
 
+model ContactSubmission {
+  id                 String                    @id @default(uuid()) @db.Uuid
+  full_name          String
+  phone              String
+  content            String
+  consultation_topic String?
+  province_code      String?
+  province_name      String?
+  status             contact_submission_status @default(NEW)
+  source_path        String?
+  created_at         DateTime                  @default(now())
+  updated_at         DateTime                  @updatedAt
+
+  @@index([phone, status, created_at])
+  @@index([status, created_at])
+  @@index([created_at])
+  @@map("contact_submissions")
+}
+
 model WebsiteSiteRevision {
   id                   String                 @id @default(uuid()) @db.Uuid
   site_key             String                 @default("main")
@@ -844,6 +863,9 @@ enum permission_key {
   WEBSITE_CONFIG_UPDATE
   WEBSITE_CONFIG_PUBLISH
 
+  CONTACT_SUBMISSION_VIEW
+  CONTACT_SUBMISSION_UPDATE
+
   CATEGORY_VIEW
   CATEGORY_CREATE
   CATEGORY_UPDATE
@@ -862,6 +884,13 @@ enum permission_key {
 enum website_locale {
   VI
   EN
+}
+
+enum contact_submission_status {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  ARCHIVED
 }
 
 enum website_revision_state {

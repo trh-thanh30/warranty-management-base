@@ -120,6 +120,10 @@ html {
   scrollbar-gutter: stable;
 }
 
+html body[data-scroll-locked] {
+  margin-right: 0 !important;
+}
+
 body {
   margin: 0;
   background: var(--color-off-white);
