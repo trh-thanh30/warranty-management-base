@@ -1,12 +1,18 @@
 import { content_page_kind, content_page_status } from '@prisma/client';
+import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
+  IsArray,
   IsDateString,
   IsEnum,
   IsOptional,
   IsString,
+  IsUUID,
   Length,
   Matches,
+  ValidateNested,
 } from 'class-validator';
+import { ContentPageFaqItemDto } from './content-page-faq-item.dto';
 
 export class UpdateContentPageDto {
   @IsOptional()
@@ -31,8 +37,19 @@ export class UpdateContentPageDto {
   content?: string;
 
   @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(100)
+  @ValidateNested({ each: true })
+  @Type(() => ContentPageFaqItemDto)
+  faqItems?: ContentPageFaqItemDto[];
+
+  @IsOptional()
   @IsEnum(content_page_kind)
   kind?: content_page_kind;
+
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string | null;
 
   @IsOptional()
   @IsEnum(content_page_status)

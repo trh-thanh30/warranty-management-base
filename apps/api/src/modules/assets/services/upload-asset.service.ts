@@ -1,11 +1,12 @@
 import { storageConfig } from '@/config';
 import { FileValidatorService } from '@/modules/assets/services/file-validator.service';
 import type { IStorageService } from '@/modules/assets/services/storage.interface';
+import { normalizeUploadFileName } from '@/modules/assets/utils/file-name.utils';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
 import { asset_access_type, asset_type } from '@prisma/client';
+import { randomUUID } from 'node:crypto';
 import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid';
 
 export interface UploadResult {
   originalName: string;
@@ -44,6 +45,7 @@ export class UploadAssetService {
     this.fileValidator.validateFile(file);
 
     const { folder, accessType = asset_access_type.PUBLIC } = options;
+    const originalName = normalizeUploadFileName(file.originalname);
 
     const now = new Date();
     const year = now.getFullYear().toString();
@@ -53,8 +55,8 @@ export class UploadAssetService {
     const folderPath = folder
       ? `${year}/${month}/${folder}`
       : `${year}/${month}`;
-    const fileExt = path.extname(file.originalname);
-    const uniqueName = `${Date.now()}_${uuidv4()}${fileExt}`;
+    const fileExt = path.extname(originalName);
+    const uniqueName = `${Date.now()}_${randomUUID()}${fileExt}`;
 
     // 2. Save to Storage
     const { path: relativePath, size } = await this.storage.save(
@@ -65,7 +67,7 @@ export class UploadAssetService {
     );
 
     return {
-      originalName: file.originalname,
+      originalName,
       filename: uniqueName,
       path: relativePath,
       size: size,
@@ -78,13 +80,15 @@ export class UploadAssetService {
    * Delete file from storage
    */
   async delete(filePath: string): Promise<void> {
-    try {
-      await this.storage.delete(filePath);
-    } catch (error: any) {
-      this.logger.warn(
-        `Failed to delete file on disk at ${filePath}: ${error?.message || 'Unknown error'}`,
-      );
-    }
+    await this.storage.delete(filePath);
+  }
+
+  async getStream(filePath: string) {
+    return this.storage.getStream(filePath);
+  }
+
+  async list(prefix: string) {
+    return this.storage.list(prefix);
   }
 
   public determineAssetType(mime: string): asset_type {

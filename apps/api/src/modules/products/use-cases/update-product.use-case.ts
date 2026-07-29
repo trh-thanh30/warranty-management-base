@@ -1,12 +1,23 @@
-import { ConflictError, NotFoundError } from '@/common/response';
+import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+} from '@/common/response';
+import { AssetsService } from '@/modules/assets/assets.service';
 import { UpdateProductDto } from '@/modules/products/dto/update-product.dto';
 import { toProductResponse } from '@/modules/products/products.types';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
+import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { Injectable } from '@nestjs/common';
+import { Prisma, warranty_status } from '@prisma/client';
 
 @Injectable()
 export class UpdateProductUseCase {
-  constructor(private readonly productsRepository: ProductsRepository) {}
+  constructor(
+    private readonly productsRepository: ProductsRepository,
+    private readonly generateWarrantyCodeUseCase: GenerateWarrantyCodeUseCase,
+    private readonly assetsService?: AssetsService,
+  ) {}
 
   async execute(id: string, dto: UpdateProductDto) {
     const existingProduct = await this.productsRepository.findById(id);
@@ -25,17 +36,113 @@ export class UpdateProductUseCase {
       }
     }
 
+    if (dto.categoryId && dto.categoryId !== existingProduct.category_id) {
+      const category =
+        await this.productsRepository.findActiveProductCategoryById(
+          dto.categoryId,
+        );
+      if (!category) {
+        throw new NotFoundError('Product category not found');
+      }
+    }
+
+    const currentWarrantyCode = existingProduct.warranty?.warranty_code ?? null;
+    const requestedWarrantyCode =
+      dto.warrantyCode?.trim().toUpperCase() || null;
+    const isWarrantyCodeReplacement =
+      requestedWarrantyCode !== null &&
+      requestedWarrantyCode !== currentWarrantyCode;
+
+    let nextWarrantyCode: string | null = null;
+    if (isWarrantyCodeReplacement) {
+      if (
+        existingProduct.warranty &&
+        existingProduct.warranty.status !== warranty_status.DRAFT
+      ) {
+        throw new ConflictError(
+          'Warranty code can only be changed while warranty is draft',
+        );
+      }
+      if (existingProduct.warranty_activation_requests.length > 0) {
+        throw new ConflictError(
+          'Warranty code cannot be changed while an activation request is open',
+        );
+      }
+      if (!/^[A-Z0-9-]{6,64}$/.test(requestedWarrantyCode)) {
+        throw new BadRequestError('Warranty code is invalid');
+      }
+
+      const duplicate = await this.productsRepository.findByWarrantyCode(
+        requestedWarrantyCode,
+      );
+      if (duplicate && duplicate.id !== id) {
+        throw new ConflictError('Warranty code already exists');
+      }
+      nextWarrantyCode = requestedWarrantyCode;
+    } else if (!currentWarrantyCode) {
+      nextWarrantyCode = await this.generateWarrantyCodeUseCase.execute();
+    }
+
+    let warranty: Prisma.ProductUpdateInput['warranty'];
+    if (nextWarrantyCode) {
+      warranty = existingProduct.warranty
+        ? { update: { warranty_code: nextWarrantyCode } }
+        : {
+            create: {
+              warranty_code: nextWarrantyCode,
+              duration_months:
+                existingProduct.template.default_warranty_duration_months,
+              terms: existingProduct.template.default_warranty_terms,
+              start_date: null,
+              end_date: null,
+              status: warranty_status.DRAFT,
+            },
+          };
+    }
+
     const product = await this.productsRepository.update(id, {
-      name: dto.name,
-      category: dto.category,
-      brand: dto.brand,
-      model: dto.model,
-      manufacture_year: dto.manufactureYear,
-      description: dto.description,
+      category_ref: dto.categoryId
+        ? { connect: { id: dto.categoryId } }
+        : undefined,
+      display_name:
+        dto.displayName === undefined
+          ? undefined
+          : dto.displayName?.trim() || null,
       status: dto.status,
       serial_number: dto.serialNumber,
+      metadata: toPhysicalProductMetadata(
+        existingProduct.metadata,
+        dto.metadata,
+      ),
+      warranty,
     });
 
-    return toProductResponse(product);
+    return toProductResponse(
+      product,
+      (asset) => this.assetsService?.enrichAssetUrl(asset).url ?? asset.path,
+    );
   }
+}
+
+function toPhysicalProductMetadata(
+  existingMetadata: Prisma.JsonValue,
+  requestedMetadata: Record<string, unknown> | null | undefined,
+): Prisma.InputJsonValue | undefined {
+  if (requestedMetadata === undefined) return undefined;
+
+  const next = isRecord(existingMetadata) ? { ...existingMetadata } : {};
+  const installationPosition = requestedMetadata?.installationPosition;
+  if (
+    typeof installationPosition === 'string' &&
+    installationPosition.trim().length > 0
+  ) {
+    next.installationPosition = installationPosition.trim();
+  } else {
+    delete next.installationPosition;
+  }
+  return next;
+}
+
+function isRecord(value: unknown): value is Record<string, Prisma.JsonValue> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }

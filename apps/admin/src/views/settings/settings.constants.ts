@@ -14,7 +14,7 @@ export const settingsTabs = [
 ] as const;
 
 export const notificationSettings = [
-  "Booking status changes",
+  "Warranty claim status changes",
   "Failed system checks",
   "New user invitations",
 ];

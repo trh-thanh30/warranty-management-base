@@ -1,31 +1,37 @@
-import {
-  BadRequestError,
-  ConflictError,
-  NotFoundError,
-} from '@/common/response';
+import { ConflictError, NotFoundError } from '@/common/response';
 import { PrismaService } from '@/database/prisma/prisma.service';
+import { AssetsService } from '@/modules/assets/assets.service';
+import { ProductTemplatesRepository } from '@/modules/product-templates/repository/product-templates.repository';
 import { CreateProductDto } from '@/modules/products/dto/create-product.dto';
 import { toProductResponse } from '@/modules/products/products.types';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
+import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generate-product-code.use-case';
 import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { Injectable } from '@nestjs/common';
-import { product_status, warranty_status } from '@prisma/client';
+import { Prisma, product_status, warranty_status } from '@prisma/client';
 
 @Injectable()
 export class CreateProductUseCase {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly productsRepository: ProductsRepository,
+    private readonly generateProductCodeUseCase: GenerateProductCodeUseCase,
+    private readonly productTemplatesRepository: ProductTemplatesRepository,
     private readonly generateWarrantyCodeUseCase: GenerateWarrantyCodeUseCase,
+    private readonly assetsService?: AssetsService,
   ) {}
 
   async execute(dto: CreateProductDto) {
-    const warrantyCode = await this.resolveWarrantyCode(dto);
-    const productCode = await this.generateProductCode();
-    const durationMonths = dto.durationMonths ?? 36;
-    const activatedAt = dto.activatedAt ? new Date(dto.activatedAt) : null;
-    const purchaseDate = dto.purchaseDate ? new Date(dto.purchaseDate) : null;
-    const startDate = activatedAt ?? purchaseDate;
+    const selectedTemplate =
+      await this.productTemplatesRepository.findActiveById(dto.templateId);
+    if (!selectedTemplate) {
+      throw new NotFoundError('Product template not found');
+    }
+
+    const requestedProductCode = dto.productCode?.trim() || null;
+    const productCode = requestedProductCode
+      ? await this.resolveRequestedProductCode(requestedProductCode)
+      : await this.generateProductCodeUseCase.execute();
 
     if (dto.serialNumber) {
       const existingSerial = await this.productsRepository.findBySerialNumber(
@@ -36,105 +42,92 @@ export class CreateProductUseCase {
       }
     }
 
-    const customer = dto.customerId
-      ? await this.prismaService.customer.findUnique({
-          where: { id: dto.customerId },
-        })
-      : null;
-
-    if (dto.customerId && !customer) {
-      throw new NotFoundError('Customer not found');
-    }
-
-    const product = await this.prismaService.product.create({
-      data: {
-        product_code: productCode,
-        warranty_code: warrantyCode,
-        serial_number: dto.serialNumber,
-        name: dto.name,
-        category: dto.category,
-        brand: dto.brand,
-        model: dto.model,
-        manufacture_year: dto.manufactureYear,
-        description: dto.description,
-        status: dto.status ?? product_status.ACTIVE,
-        warranty: {
-          create: {
-            warranty_code: warrantyCode,
-            duration_months: durationMonths,
-            start_date: startDate,
-            end_date: startDate
-              ? this.addMonths(startDate, durationMonths)
-              : null,
-            status: startDate ? warranty_status.ACTIVE : warranty_status.DRAFT,
-            terms: dto.warrantyTerms,
-          },
-        },
-        ownerships: customer
-          ? {
-              create: {
-                customer: { connect: { id: customer.id } },
-                owner_user: { connect: { id: customer.user_id } },
-                purchase_date: purchaseDate,
-                activated_at: activatedAt,
-                is_current_owner: true,
-              },
-            }
-          : undefined,
-      },
-      include: {
-        ownerships: {
-          include: { customer: true },
-          orderBy: { created_at: 'desc' },
-        },
-        warranty: true,
-      },
-    });
-
-    return toProductResponse(product);
-  }
-
-  private async resolveWarrantyCode(dto: CreateProductDto) {
-    if (dto.autoGenerateWarrantyCode !== false && !dto.warrantyCode) {
-      return this.generateWarrantyCodeUseCase.execute();
-    }
-
-    const warrantyCode = dto.warrantyCode?.trim().toUpperCase();
-    if (!warrantyCode) {
-      throw new BadRequestError('Warranty code is required');
-    }
-
-    if (!/^[A-Z0-9-]{6,64}$/.test(warrantyCode)) {
-      throw new BadRequestError('Warranty code format is invalid');
-    }
-
-    const existingWarrantyCode =
-      await this.productsRepository.findByWarrantyCode(warrantyCode);
-    if (existingWarrantyCode) {
-      throw new ConflictError('Warranty code already exists');
-    }
-
-    return warrantyCode;
-  }
-
-  private async generateProductCode() {
-    const year = new Date().getFullYear();
-
-    for (let attempt = 0; attempt < 5; attempt += 1) {
-      const suffix = Math.random().toString(36).slice(2, 8).toUpperCase();
-      const code = `PRD-${year}-${suffix}`;
-      const existing = await this.productsRepository.findByProductCode(code);
-      if (!existing) {
-        return code;
+    const categoryId = dto.categoryId ?? selectedTemplate.category_id;
+    if (dto.categoryId) {
+      const category =
+        await this.productsRepository.findActiveProductCategoryById(categoryId);
+      if (!category) {
+        throw new NotFoundError('Product category not found');
       }
     }
 
-    throw new BadRequestError('Could not generate a unique product code');
+    const product = await this.prismaService.$transaction(async (tx) => {
+      const warrantyCode = await this.generateWarrantyCodeUseCase.execute(
+        new Date(),
+        tx,
+      );
+
+      return tx.product.create({
+        data: {
+          product_code: productCode,
+          serial_number: dto.serialNumber,
+          display_name: dto.displayName?.trim() || null,
+          status: dto.status ?? product_status.ACTIVE,
+          template: { connect: { id: selectedTemplate.id } },
+          category_ref: { connect: { id: categoryId } },
+          metadata: toPhysicalProductMetadata(dto.metadata),
+          warranty: {
+            create: {
+              warranty_code: warrantyCode,
+              duration_months:
+                selectedTemplate.default_warranty_duration_months,
+              terms: selectedTemplate.default_warranty_terms,
+              start_date: null,
+              end_date: null,
+              status: warranty_status.DRAFT,
+            },
+          },
+          ownerships: undefined,
+        },
+        include: {
+          assets: {
+            include: { asset: true },
+            orderBy: [{ role: 'asc' }, { sort_order: 'asc' }],
+          },
+          template: {
+            include: {
+              assets: {
+                include: { asset: true },
+                orderBy: [{ role: 'asc' }, { sort_order: 'asc' }],
+              },
+              category_ref: true,
+            },
+          },
+          category_ref: true,
+          ownerships: {
+            include: { customer: true },
+            orderBy: { created_at: 'desc' },
+          },
+          warranty: true,
+        },
+      });
+    });
+
+    return toProductResponse(
+      product,
+      (asset) => this.assetsService?.enrichAssetUrl(asset).url ?? asset.path,
+    );
   }
 
-  private addMonths(date: Date, months: number) {
-    const nextDate = new Date(date);
-    nextDate.setMonth(nextDate.getMonth() + months);
-    return nextDate;
+  private async resolveRequestedProductCode(productCode: string) {
+    const existing =
+      await this.productsRepository.findByProductCode(productCode);
+    if (existing) {
+      throw new ConflictError('Product code already exists');
+    }
+    return productCode;
   }
+}
+
+function toPhysicalProductMetadata(
+  metadata: Record<string, unknown> | undefined,
+): Prisma.InputJsonObject | undefined {
+  const installationPosition = metadata?.installationPosition;
+  if (
+    typeof installationPosition !== 'string' ||
+    installationPosition.trim().length === 0
+  ) {
+    return undefined;
+  }
+  return { installationPosition: installationPosition.trim() };
 }

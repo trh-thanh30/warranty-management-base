@@ -610,6 +610,18 @@ git commit -m "fix: enforce customer ownership on warranty lookup"
 git commit -m "docs: update automotive warranty demo readme"
 ```
 
+## Bản Quyền Và Cấp Phép
+
+Copyright © 2026 Trần Hữu Thành. Bảo lưu mọi quyền.
+
+Đây là phần mềm độc quyền. Việc truy cập hoặc xem repository này không cấp
+quyền sao chép, sửa đổi, phân phối, cấp phép lại hoặc khai thác thương mại mã
+nguồn và các tài liệu thuộc sở hữu của Trần Hữu Thành.
+
+Các thành phần bên thứ ba vẫn tuân theo giấy phép và thông báo bản quyền riêng
+của từng thành phần. Xem [LICENSE](LICENSE) và [NOTICE](NOTICE) để biết chi
+tiết. Liên hệ cấp phép: [tranhuuthanhcp@gmail.com](mailto:tranhuuthanhcp@gmail.com).
+
 ## Liên Kết Hữu Ích
 
 - [AGENTS.md](AGENTS.md) - điểm bắt đầu cho quy trình AI agent.

@@ -1,44 +1,22 @@
 import {
   IsEnum,
-  IsInt,
+  IsObject,
   IsOptional,
   IsString,
+  IsUUID,
   Length,
-  Max,
-  Min,
 } from 'class-validator';
-import { product_category, product_status } from '@prisma/client';
+import { product_status } from '@prisma/client';
 
 export class UpdateProductDto {
   @IsOptional()
+  @IsUUID()
+  categoryId?: string;
+
+  @IsOptional()
   @IsString()
   @Length(2, 160)
-  name?: string;
-
-  @IsOptional()
-  @IsEnum(product_category)
-  category?: product_category;
-
-  @IsOptional()
-  @IsString()
-  @Length(0, 80)
-  brand?: string | null;
-
-  @IsOptional()
-  @IsString()
-  @Length(0, 80)
-  model?: string | null;
-
-  @IsOptional()
-  @IsInt()
-  @Min(1900)
-  @Max(2100)
-  manufactureYear?: number | null;
-
-  @IsOptional()
-  @IsString()
-  @Length(0, 1000)
-  description?: string | null;
+  displayName?: string | null;
 
   @IsOptional()
   @IsEnum(product_status)
@@ -48,4 +26,13 @@ export class UpdateProductDto {
   @IsString()
   @Length(1, 64)
   serialNumber?: string | null;
+
+  @IsOptional()
+  @IsObject()
+  metadata?: Record<string, unknown> | null;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 64)
+  warrantyCode?: string;
 }

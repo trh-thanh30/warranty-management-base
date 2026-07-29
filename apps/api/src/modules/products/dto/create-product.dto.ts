@@ -1,46 +1,30 @@
+import { product_status } from '@prisma/client';
 import {
-  IsBoolean,
-  IsDateString,
   IsEnum,
-  IsInt,
+  IsObject,
   IsOptional,
   IsString,
-  IsUUID,
   Length,
-  Matches,
-  Max,
-  Min,
+  IsUUID,
 } from 'class-validator';
-import { product_category, product_status } from '@prisma/client';
 
 export class CreateProductDto {
+  @IsOptional()
   @IsString()
-  @Length(2, 160)
-  name: string;
+  @Length(1, 64)
+  productCode?: string;
 
-  @IsEnum(product_category)
-  category: product_category;
+  @IsUUID()
+  templateId: string;
+
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;
 
   @IsOptional()
   @IsString()
-  @Length(0, 80)
-  brand?: string;
-
-  @IsOptional()
-  @IsString()
-  @Length(0, 80)
-  model?: string;
-
-  @IsOptional()
-  @IsInt()
-  @Min(1900)
-  @Max(2100)
-  manufactureYear?: number;
-
-  @IsOptional()
-  @IsString()
-  @Length(0, 1000)
-  description?: string;
+  @Length(0, 160)
+  displayName?: string;
 
   @IsOptional()
   @IsEnum(product_status)
@@ -52,35 +36,6 @@ export class CreateProductDto {
   serialNumber?: string;
 
   @IsOptional()
-  @IsBoolean()
-  autoGenerateWarrantyCode?: boolean;
-
-  @IsOptional()
-  @IsString()
-  @Length(6, 64)
-  @Matches(/^[A-Z0-9-]+$/i)
-  warrantyCode?: string;
-
-  @IsOptional()
-  @IsUUID()
-  customerId?: string;
-
-  @IsOptional()
-  @IsDateString()
-  purchaseDate?: string;
-
-  @IsOptional()
-  @IsDateString()
-  activatedAt?: string;
-
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  @Max(120)
-  durationMonths?: number;
-
-  @IsOptional()
-  @IsString()
-  @Length(0, 2000)
-  warrantyTerms?: string;
+  @IsObject()
+  metadata?: Record<string, unknown>;
 }

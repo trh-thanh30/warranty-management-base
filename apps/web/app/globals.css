@@ -1,5 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "leaflet/dist/leaflet.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 @source "../../../packages/ui/src/**/*.{ts,tsx}";
 
@@ -7,19 +10,87 @@
   color-scheme: light;
 }
 
-@theme {
-  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
-  --font-condensed: var(--font-saira-condensed), sans-serif;
+.fujitek-dealer-marker {
+  background: transparent !important;
+  border: 0 !important;
+}
 
-  --color-brand-blue: #3E6AE1;
-  --color-brand-blue-hover: #2B52BE;
-  --color-charcoal: #171A20;
-  --color-graphite: #393C41;
-  --color-pewter: #5C5E62;
-  --color-silver-fog: #8E8E8E;
-  --color-ash: #F4F4F4;
-  --color-cloud: #EEEEEE;
-  --color-pale-silver: #D0D1D2;
+@theme {
+  --font-sans: var(--font-maven-pro), "Maven Pro", sans-serif;
+  --font-serif: var(--font-maven-pro), "Maven Pro", sans-serif;
+  --font-condensed: var(--font-maven-pro), "Maven Pro", sans-serif;
+
+  /* PRIMITIVE: brand core */
+  --color-deep-black: #040708;
+  --color-pure-black: #000000;
+  --color-off-white: #ffffff;
+
+  /* PRIMITIVE: brand red scale */
+  --color-premium-red: #db2114;
+  --color-warm-red: #b81b10;
+  --color-muted-red: #e84040;
+  --color-deep-crimson: #8b0000;
+  --color-danger-red: #b20000;
+  --color-deep-red: #c33223;
+
+  /* PRIMITIVE: supporting accents */
+  --color-primary-blue: #007cba;
+  --color-slate-blue: #3a589d;
+  --color-muted-blue: #3b6994;
+  --color-royal-purple: #7a00df;
+  --color-accent-gold: #eab308;
+  --color-accent-gold-hover: #d9a207;
+  --color-steel-blue: #25394b;
+  --color-facebook-blue: #1877f2;
+  --color-zalo-blue: #0068ff;
+  --color-service-center: #2563eb;
+  --color-service-center-soft: #eff6ff;
+  --color-service-center-text: #1d4ed8;
+
+  /* PRIMITIVE: neutral scale */
+  --color-dark-charcoal: #333333;
+  --color-medium-gray: #4a4a4a;
+  --color-soft-gray: #616163;
+  --color-stone-gray: #596273;
+  --color-almost-black: #111111;
+  --color-deep-gray: #2b2b2b;
+  --color-ink-black: #222222;
+
+  /* SEMANTIC: surfaces and borders */
+  --color-light-gray: #f1f1f1;
+  --color-surface-muted: #f9fafb;
+  --color-border-gray: #dfdfdf;
+  --color-input-border: #d1d1d1;
+
+  /* SEMANTIC: compatibility aliases used by existing app UI */
+  --color-brand-blue: #db2114;
+  --color-brand-blue-hover: #b81b10;
+  --color-brand-red: #db2114;
+  --color-brand-red-hover: #b81b10;
+  --color-brand-black: #040708;
+
+  --color-charcoal: #040708;
+  --color-graphite: #111111;
+  --color-pewter: #5c5e62;
+  --color-silver-fog: #8e8e8e;
+  --color-ash: #f1f1f1;
+  --color-cloud: #dfdfdf;
+  --color-pale-silver: #d1d1d1;
+
+  /* Slate Scale Overrides */
+  --color-slate-950: #040708;
+  --color-slate-900: #0d1112;
+  --color-slate-800: #161b1d;
+  --color-slate-700: #1e2629;
+  --color-slate-600: #273034;
+  --color-slate-500: #596273;
+
+  --color-red-600: #db2114;
+  --color-red-700: #b81b10;
+
+  /* Border Radii */
+  --radius-button: 18px;
+  --radius-card: 20px;
 
   --animate-marquee-left: marquee-left 32s linear infinite;
   --animate-marquee-right: marquee-right 36s linear infinite;
@@ -49,11 +120,17 @@ html {
   scrollbar-gutter: stable;
 }
 
+html body[data-scroll-locked] {
+  margin-right: 0 !important;
+}
+
 body {
   margin: 0;
-  background: #ffffff;
+  background: var(--color-off-white);
   color: var(--color-charcoal);
   font-family: var(--font-sans);
+  font-weight: 400;
+  font-synthesis-weight: none;
 }
 
 /* ── Scroll & Touch Utilities ── */
@@ -75,7 +152,6 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   *,
   *::before,
   *::after {

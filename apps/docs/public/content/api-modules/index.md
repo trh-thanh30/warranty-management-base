@@ -91,9 +91,11 @@ client_has_rt
 - `users`: Admin quản trị user và permission override.
 - `customers`: Admin quản lý hồ sơ customer.
 - `products`: Admin quản lý sản phẩm, warranty code và owner.
+- `categories`: Admin quản lý taxonomy/danh mục dùng chung, trước mắt dùng cho product category động.
 - `warranties`: Admin/customer kích hoạt và tra cứu bảo hành.
 - `public`: endpoint guest cho 6 chức năng chính ngoài website.
 - `warranty-claims`: tạo, tra cứu, list, assign trạm và cập nhật trạng thái yêu cầu bảo hành.
+- `analytics`: read model cho Admin Dashboard, gồm KPI, chart và recent activity.
 - `service-centers`: quản lý trạm bảo hành để assign claim và phục vụ trang trạm bảo hành.
 - `content-pages`: quản lý chính sách và hướng dẫn để main FE đọc bản published.
 - `assets`: upload/list/metadata/delete asset.
@@ -144,9 +146,11 @@ Mở từng mục trong sidebar:
 - API Users
 - API Customers
 - API Products
+- API Categories
 - API Warranties
 - Public APIs
 - API Claims
+- API Analytics
 - API Service Centers
 - API Content Pages
 - API Assets

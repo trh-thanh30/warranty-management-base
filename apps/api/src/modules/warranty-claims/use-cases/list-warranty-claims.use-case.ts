@@ -1,6 +1,6 @@
 import { ListWarrantyClaimsDto } from '@/modules/warranty-claims/dto/list-warranty-claims.dto';
 import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/warranty-claims.repository';
-import { toWarrantyClaimResponse } from '@/modules/warranty-claims/warranty-claims.types';
+import { toWarrantyClaimResponse } from '@/modules/warranty-claims/mappers/warranty-claim.mapper';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

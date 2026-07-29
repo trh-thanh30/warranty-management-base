@@ -95,9 +95,3 @@ export function useScrollReveal() {
 
   return { container, fadeUp, fadeIn, scaleIn, slideLeft, slideRight };
 }
-
-/** Standard viewport config for whileInView */
-export const viewportOnce = {
-  once: false,
-  margin: "0px 0px -120px 0px",
-} as const;

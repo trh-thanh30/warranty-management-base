@@ -1,4 +1,10 @@
-import { IsOptional, IsString, Length, Matches } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Length,
+  Matches,
+} from 'class-validator';
 
 export class CreateWarrantyClaimDto {
   @IsString()
@@ -6,15 +12,17 @@ export class CreateWarrantyClaimDto {
   @Matches(/^[A-Z0-9-]+$/i)
   warrantyCode: string;
 
-  @IsOptional()
   @IsString()
+  @IsNotEmpty()
   @Length(1, 255)
-  requesterName?: string;
+  @Matches(/\S/)
+  requesterName: string;
 
-  @IsOptional()
   @IsString()
+  @IsNotEmpty()
   @Length(1, 32)
-  requesterPhone?: string;
+  @Matches(/\S/)
+  requesterPhone: string;
 
   @IsString()
   @Length(3, 255)

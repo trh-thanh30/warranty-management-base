@@ -20,3 +20,13 @@ export const motionSpring = {
   snappy: { type: "spring", stiffness: 300, damping: 30 } satisfies Transition,
   tilt: { stiffness: 140, damping: 22 },
 } as const;
+
+export const revealViewportOnce = {
+  once: true,
+  margin: "0px 0px -80px 0px",
+} as const;
+
+export const revealViewportRepeat = {
+  once: false,
+  margin: "0px 0px -80px 0px",
+} as const;

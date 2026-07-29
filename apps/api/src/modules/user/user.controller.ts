@@ -1,4 +1,5 @@
 import { Permissions } from '@/common/decorators/permissions.decorator';
+import { createDatedExcelFilename, sendExcelFile } from '@/common/excel';
 import { PermissionService } from '@/common/permissions/permissions.service';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
@@ -8,6 +9,9 @@ import { CreateUserDto } from '@/modules/user/dto/create-user.dto';
 import { ListUsersDto } from '@/modules/user/dto/list-users.dto';
 import { UpdateUserPermissionsDto } from '@/modules/user/dto/update-user-permissions.dto';
 import { UpdateUserDto } from '@/modules/user/dto/update-user.dto';
+import { DownloadStaffImportTemplateUseCase } from '@/modules/user/use-cases/download-staff-import-template.use-case';
+import { ExportStaffUseCase } from '@/modules/user/use-cases/export-staff.use-case';
+import { ImportStaffUseCase } from '@/modules/user/use-cases/import-staff.use-case';
 import { UsersService } from '@/modules/user/user.service';
 import {
   Body,
@@ -18,10 +22,15 @@ import {
   Post,
   Put,
   Query,
+  Res,
+  UploadedFile,
+  UseInterceptors,
   UseGuards,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { normalizeUserRole } from '@repo/shared/constants';
 import { permission_key } from '@prisma/client';
+import express from 'express';
 
 /**
  * Controller for user management endpoints
@@ -32,6 +41,9 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly permissionService: PermissionService,
+    private readonly downloadStaffImportTemplateUseCase: DownloadStaffImportTemplateUseCase,
+    private readonly exportStaffUseCase: ExportStaffUseCase,
+    private readonly importStaffUseCase: ImportStaffUseCase,
   ) {}
 
   /**
@@ -55,6 +67,33 @@ export class UsersController {
   @Permissions([permission_key.USER_VIEW])
   async findAll(@Query() query: ListUsersDto) {
     return this.usersService.findAll(query);
+  }
+
+  @Get('staff/export')
+  @Roles(['ADMIN'])
+  @Permissions([permission_key.USER_VIEW])
+  async exportStaff(
+    @Query() query: ListUsersDto,
+    @Res() response: express.Response,
+  ) {
+    const buffer = await this.exportStaffUseCase.execute(query);
+    sendExcelFile(response, buffer, createDatedExcelFilename('staff'));
+  }
+
+  @Get('staff/import-template')
+  @Roles(['ADMIN'])
+  @Permissions([permission_key.USER_VIEW])
+  async downloadStaffImportTemplate(@Res() response: express.Response) {
+    const buffer = await this.downloadStaffImportTemplateUseCase.execute();
+    sendExcelFile(response, buffer, 'staff-import-template.xlsx');
+  }
+
+  @Post('staff/import')
+  @Roles(['ADMIN'])
+  @Permissions([permission_key.USER_CREATE])
+  @UseInterceptors(FileInterceptor('file'))
+  importStaff(@UploadedFile() file: Express.Multer.File) {
+    return this.importStaffUseCase.execute(file);
   }
 
   @Get(':id/permissions')
@@ -82,11 +121,12 @@ export class UsersController {
     @Param('id') id: string,
     @Body() dto: UpdateUserPermissionsDto,
   ) {
+    const user = await this.findRequiredUser(id);
     const overrides = await this.permissionService.setUserPermissionOverrides(
       id,
+      user.role,
       dto.overrides,
     );
-    const user = await this.findRequiredUser(id);
     const effectivePermissions =
       await this.permissionService.getEffectivePermissions(id, user.role);
 
@@ -107,7 +147,7 @@ export class UsersController {
   @Roles(['ADMIN'])
   @Permissions([permission_key.USER_VIEW])
   async findOne(@Param('id') id: string) {
-    return this.usersService.findById(id);
+    return this.usersService.findAccountById(id);
   }
 
   /**
@@ -136,7 +176,7 @@ export class UsersController {
   }
 
   private async findRequiredUser(id: string) {
-    const user = await this.usersService.findById(id);
+    const user = await this.usersService.findAccountById(id);
 
     if (!user) {
       throw new NotFoundError('User not found');

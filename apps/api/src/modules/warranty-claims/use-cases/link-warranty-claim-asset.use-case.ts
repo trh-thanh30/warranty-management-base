@@ -1,17 +1,16 @@
 import { NotFoundError } from '@/common/response';
+import { AssetsService } from '@/modules/assets/assets.service';
 import { LinkWarrantyClaimAssetDto } from '@/modules/warranty-claims/dto/link-warranty-claim-asset.dto';
 import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/warranty-claims.repository';
-import { toWarrantyClaimAttachmentResponse } from '@/modules/warranty-claims/warranty-claims.types';
+import { toWarrantyClaimAttachmentResponse } from '@/modules/warranty-claims/mappers/warranty-claim.mapper';
+import type { LinkWarrantyClaimAssetContext } from '@/modules/warranty-claims/types/warranty-claim-context.types';
 import { Injectable } from '@nestjs/common';
-
-type LinkWarrantyClaimAssetContext = {
-  linkedByUserId?: string;
-};
 
 @Injectable()
 export class LinkWarrantyClaimAssetUseCase {
   constructor(
     private readonly warrantyClaimsRepository: WarrantyClaimsRepository,
+    private readonly assetsService: AssetsService,
   ) {}
 
   async execute(
@@ -40,6 +39,8 @@ export class LinkWarrantyClaimAssetUseCase {
       linkedByUserId: context.linkedByUserId,
     });
 
-    return toWarrantyClaimAttachmentResponse(link.asset);
+    return toWarrantyClaimAttachmentResponse(
+      this.assetsService.enrichAssetUrl(link.asset),
+    );
   }
 }

@@ -1,6 +1,6 @@
 import { NotFoundError } from '@/common/response';
 import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/warranty-claims.repository';
-import { toWarrantyClaimResponse } from '@/modules/warranty-claims/warranty-claims.types';
+import { toWarrantyClaimTimeline } from '@/modules/warranty-claims/mappers/warranty-claim.mapper';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -16,6 +16,6 @@ export class GetWarrantyClaimTimelineUseCase {
       throw new NotFoundError('Warranty claim not found');
     }
 
-    return toWarrantyClaimResponse(claim).statusHistory;
+    return toWarrantyClaimTimeline(claim);
   }
 }

@@ -1,0 +1,221 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { createServiceCentersService } from "./create-service-centers.service.ts";
+import type { ServiceCentersHttpClient } from "./service-centers.types.ts";
+
+const serviceCenter = {
+  id: "service-center-id",
+  name: "Da Nang Warranty Center",
+  phone: "0900000001",
+  email: "danang@example.com",
+  province: "Da Nang",
+  district: "Hai Chau",
+  address: "1 Nguyen Van Linh",
+  googleMapsUrl:
+    "https://www.google.com/maps/search/?api=1&query=16.054407%2C108.202164",
+  latitude: 16.054407,
+  longitude: 108.202164,
+  isActive: true,
+  metadata: null,
+  createdAt: "2026-07-15T00:00:00.000Z",
+  updatedAt: "2026-07-15T00:00:00.000Z",
+};
+
+test("lists service centers with directory filters", async () => {
+  const calls: unknown[] = [];
+  const response = {
+    items: [serviceCenter],
+    meta: {
+      page: 1,
+      limit: 10,
+      total: 1,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    },
+  };
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  const result = await createServiceCentersService(
+    http as unknown as ServiceCentersHttpClient,
+  ).listServiceCenters({
+    isActive: "true",
+    page: 1,
+    province: "Da Nang",
+    search: "warranty",
+    sortBy: "name",
+    sortOrder: "asc",
+  });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/service-centers",
+      config: {
+        params: {
+          isActive: "true",
+          page: 1,
+          province: "Da Nang",
+          search: "warranty",
+          sortBy: "name",
+          sortOrder: "asc",
+        },
+      },
+    },
+  ]);
+  assert.deepEqual(result, response);
+});
+
+test("lists provinces currently used by service centers", async () => {
+  const calls: unknown[] = [];
+  const provinces = ["Da Nang", "Ha Noi"];
+  const http = {
+    async get(url: string) {
+      calls.push({ url });
+      return { data: { success: true, data: provinces } };
+    },
+  };
+
+  const result = await createServiceCentersService(
+    http as unknown as ServiceCentersHttpClient,
+  ).listProvinces();
+
+  assert.deepEqual(calls, [{ url: "/service-centers/provinces" }]);
+  assert.deepEqual(result, provinces);
+});
+
+test("creates, updates, and deactivates a service center", async () => {
+  const calls: unknown[] = [];
+  const http = {
+    async post(url: string, body?: unknown) {
+      calls.push({ method: "post", url, body });
+      return { data: { success: true, data: serviceCenter } };
+    },
+    async patch(url: string, body?: unknown) {
+      calls.push({ method: "patch", url, body });
+      return { data: { success: true, data: serviceCenter } };
+    },
+  };
+  const service = createServiceCentersService(
+    http as unknown as ServiceCentersHttpClient,
+  );
+
+  await service.createServiceCenter({
+    address: serviceCenter.address,
+    latitude: serviceCenter.latitude,
+    longitude: serviceCenter.longitude,
+    name: serviceCenter.name,
+    province: serviceCenter.province,
+  });
+  await service.updateServiceCenter(serviceCenter.id, { name: "New name" });
+  await service.deactivateServiceCenter(serviceCenter.id);
+
+  assert.deepEqual(calls, [
+    {
+      method: "post",
+      url: "/service-centers",
+      body: {
+        address: serviceCenter.address,
+        latitude: serviceCenter.latitude,
+        longitude: serviceCenter.longitude,
+        name: serviceCenter.name,
+        province: serviceCenter.province,
+      },
+    },
+    {
+      method: "patch",
+      url: "/service-centers/service-center-id",
+      body: { name: "New name" },
+    },
+    {
+      method: "patch",
+      url: "/service-centers/service-center-id/deactivate",
+      body: undefined,
+    },
+  ]);
+});
+
+test("downloads the service center import template as a blob", async () => {
+  const calls: unknown[] = [];
+  const blob = new Blob(["template"]);
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: blob };
+    },
+  };
+
+  const result = await createServiceCentersService(
+    http as unknown as ServiceCentersHttpClient,
+  ).downloadImportTemplate();
+
+  assert.equal(result, blob);
+  assert.deepEqual(calls, [
+    {
+      url: "/service-centers/import-template",
+      config: { responseType: "blob" },
+    },
+  ]);
+});
+
+test("exports service centers with the current directory filters", async () => {
+  const calls: unknown[] = [];
+  const blob = new Blob(["export"]);
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: blob };
+    },
+  };
+
+  await createServiceCentersService(
+    http as unknown as ServiceCentersHttpClient,
+  ).exportServiceCenters({
+    isActive: "true",
+    province: "Da Nang",
+    search: "warranty",
+    sortBy: "name",
+    sortOrder: "asc",
+  });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/service-centers/export",
+      config: {
+        params: {
+          isActive: "true",
+          province: "Da Nang",
+          search: "warranty",
+          sortBy: "name",
+          sortOrder: "asc",
+        },
+        responseType: "blob",
+      },
+    },
+  ]);
+});
+
+test("imports service centers using multipart form data", async () => {
+  let request: { url: string; body: unknown } | undefined;
+  const response = { created: 1, updated: 0, errors: [] };
+  const http = {
+    async post(url: string, body?: unknown) {
+      request = { url, body };
+      return { data: { success: true, data: response } };
+    },
+  };
+  const file = new File(["excel"], "service-centers.xlsx");
+
+  const result = await createServiceCentersService(
+    http as unknown as ServiceCentersHttpClient,
+  ).importServiceCenters(file);
+
+  assert.deepEqual(result, response);
+  assert.equal(request?.url, "/service-centers/import");
+  assert.ok(request?.body instanceof FormData);
+  assert.equal((request?.body as FormData).get("file"), file);
+});

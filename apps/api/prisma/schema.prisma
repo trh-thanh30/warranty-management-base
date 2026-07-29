@@ -21,13 +21,20 @@ model User {
   created_at    DateTime    @default(now())
   updated_at    DateTime    @updatedAt
 
-  assets                  Asset[]
-  created_notifications   Notification[]               @relation("NotificationCreatedBy")
-  notification_recipients NotificationRecipient[]
-  permissions             UserPermission[]
-  customer_profile        Customer?
-  owned_products          ProductOwnership[]
-  warranty_claim_changes  WarrantyClaimStatusHistory[] @relation("WarrantyClaimStatusChangedBy")
+  assets                                Asset[]
+  created_notifications                 Notification[]                      @relation("NotificationCreatedBy")
+  notification_recipients               NotificationRecipient[]
+  permissions                           UserPermission[]
+  customer_profile                      Customer?
+  owned_products                        ProductOwnership[]
+  warranty_claim_changes                WarrantyClaimStatusHistory[]        @relation("WarrantyClaimStatusChangedBy")
+  warranty_claim_service_center_changes WarrantyClaimServiceCenterHistory[] @relation("WarrantyClaimServiceCenterChangedBy")
+  reviewed_warranty_activation_requests WarrantyActivationRequest[]         @relation("WarrantyActivationRequestReviewedBy")
+  created_warranty_activation_requests  WarrantyActivationRequest[]         @relation("WarrantyActivationRequestCreatedBy")
+  activated_warranties                  Warranty[]                          @relation("WarrantyActivatedBy")
+  voided_warranties                     Warranty[]                          @relation("WarrantyVoidedBy")
+  published_website_site_revisions      WebsiteSiteRevision[]               @relation("WebsiteSitePublishedBy")
+  website_config_audits                 WebsiteConfigAudit[]
 
   @@index([role, status])
   @@index([email])
@@ -50,8 +57,15 @@ model Asset {
   created_at     DateTime          @default(now())
   updated_at     DateTime          @updatedAt
 
-  uploaded_by User?       @relation(fields: [uploaded_by_id], references: [id])
-  links       AssetLink[]
+  uploaded_by                 User?                  @relation(fields: [uploaded_by_id], references: [id])
+  links                       AssetLink[]
+  product_assets              ProductAsset[]
+  product_template_assets     ProductTemplateAsset[]
+  website_site_header_logos   WebsiteSiteRevision[]  @relation("WebsiteSiteHeaderLogo")
+  website_site_footer_logos   WebsiteSiteRevision[]  @relation("WebsiteSiteFooterLogo")
+  website_site_og_images      WebsiteSiteRevision[]  @relation("WebsiteSiteOgImage")
+  website_hero_desktop_images WebsiteHeroSlide[]     @relation("WebsiteHeroDesktopImage")
+  website_hero_mobile_images  WebsiteHeroSlide[]     @relation("WebsiteHeroMobileImage")
 
   @@index([access_type])
   @@index([type])
@@ -131,22 +145,180 @@ model ActivityLog {
   @@map("activity_log")
 }
 
+model ContactSubmission {
+  id                 String                    @id @default(uuid()) @db.Uuid
+  full_name          String
+  phone              String
+  content            String
+  consultation_topic String?
+  province_code      String?
+  province_name      String?
+  status             contact_submission_status @default(NEW)
+  source_path        String?
+  created_at         DateTime                  @default(now())
+  updated_at         DateTime                  @updatedAt
+
+  @@index([phone, status, created_at])
+  @@index([status, created_at])
+  @@index([created_at])
+  @@map("contact_submissions")
+}
+
+model WebsiteSiteRevision {
+  id                   String                 @id @default(uuid()) @db.Uuid
+  site_key             String                 @default("main")
+  state                website_revision_state @default(DRAFT)
+  revision_number      Int                    @default(1)
+  lock_version         Int                    @default(1)
+  contact_email        String                 @default("")
+  website_url          String                 @default("")
+  header_logo_asset_id String?                @db.Uuid
+  footer_logo_asset_id String?                @db.Uuid
+  og_image_asset_id    String?                @db.Uuid
+  published_at         DateTime?
+  published_by_id      String?                @db.Uuid
+  created_at           DateTime               @default(now())
+  updated_at           DateTime               @updatedAt
+
+  header_logo  Asset? @relation("WebsiteSiteHeaderLogo", fields: [header_logo_asset_id], references: [id], onDelete: Restrict)
+  footer_logo  Asset? @relation("WebsiteSiteFooterLogo", fields: [footer_logo_asset_id], references: [id], onDelete: Restrict)
+  og_image     Asset? @relation("WebsiteSiteOgImage", fields: [og_image_asset_id], references: [id], onDelete: Restrict)
+  published_by User?  @relation("WebsiteSitePublishedBy", fields: [published_by_id], references: [id], onDelete: SetNull)
+
+  offices      WebsiteOffice[]
+  social_links WebsiteSocialLink[]
+  hero_slides  WebsiteHeroSlide[]
+
+  @@index([site_key, state])
+  @@index([site_key, revision_number])
+  @@map("website_site_revision")
+}
+
+model WebsiteHeroSlide {
+  id               String   @id @default(uuid()) @db.Uuid
+  revision_id      String   @db.Uuid
+  key              String
+  desktop_asset_id String?  @db.Uuid
+  mobile_asset_id  String?  @db.Uuid
+  is_active        Boolean  @default(true)
+  sort_order       Int      @default(0)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  revision      WebsiteSiteRevision @relation(fields: [revision_id], references: [id], onDelete: Cascade)
+  desktop_image Asset?              @relation("WebsiteHeroDesktopImage", fields: [desktop_asset_id], references: [id], onDelete: Restrict)
+  mobile_image  Asset?              @relation("WebsiteHeroMobileImage", fields: [mobile_asset_id], references: [id], onDelete: Restrict)
+
+  @@unique([revision_id, key])
+  @@index([revision_id, is_active, sort_order])
+  @@index([desktop_asset_id])
+  @@index([mobile_asset_id])
+  @@map("website_hero_slide")
+}
+
+model WebsiteOffice {
+  id              String   @id @default(uuid()) @db.Uuid
+  revision_id     String   @db.Uuid
+  phone           String?
+  is_active       Boolean  @default(true)
+  is_headquarters Boolean  @default(false)
+  sort_order      Int      @default(0)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  revision     WebsiteSiteRevision        @relation(fields: [revision_id], references: [id], onDelete: Cascade)
+  translations WebsiteOfficeTranslation[]
+
+  @@index([revision_id, is_active, sort_order])
+  @@map("website_office")
+}
+
+model WebsiteOfficeTranslation {
+  id        String         @id @default(uuid()) @db.Uuid
+  office_id String         @db.Uuid
+  locale    website_locale
+  label     String         @default("")
+  address   String         @default("")
+
+  office WebsiteOffice @relation(fields: [office_id], references: [id], onDelete: Cascade)
+
+  @@unique([office_id, locale])
+  @@map("website_office_translation")
+}
+
+model WebsiteSocialLink {
+  id          String                  @id @default(uuid()) @db.Uuid
+  revision_id String                  @db.Uuid
+  platform    website_social_platform
+  label       String
+  url         String
+  is_active   Boolean                 @default(true)
+  sort_order  Int                     @default(0)
+  created_at  DateTime                @default(now())
+  updated_at  DateTime                @updatedAt
+
+  revision WebsiteSiteRevision @relation(fields: [revision_id], references: [id], onDelete: Cascade)
+
+  @@index([revision_id, is_active, sort_order])
+  @@map("website_social_link")
+}
+
+model WebsiteConfigAudit {
+  id             String                      @id @default(uuid()) @db.Uuid
+  actor_id       String?                     @db.Uuid
+  domain         website_config_domain
+  entity_id      String?
+  site_key       String                      @default("main")
+  action         website_config_audit_action
+  before_version Int?
+  after_version  Int?
+  change_summary Json?
+  created_at     DateTime                    @default(now())
+
+  actor User? @relation(fields: [actor_id], references: [id], onDelete: SetNull)
+
+  @@index([domain, site_key, created_at])
+  @@index([actor_id])
+  @@map("website_config_audit")
+}
+
 model ContentPage {
   id           String              @id @default(uuid()) @db.Uuid
+  category_id  String?             @db.Uuid
   slug         String              @unique
   title        String
   summary      String?
   content      String
-  kind         content_page_kind   @default(POLICY)
+  kind         content_page_kind   @default(GENERAL_POLICY)
   status       content_page_status @default(DRAFT)
   published_at DateTime?
   created_at   DateTime            @default(now())
   updated_at   DateTime            @updatedAt
 
+  category  Category?            @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  faq_items ContentPageFaqItem[]
+
+  @@index([category_id])
   @@index([kind])
   @@index([status])
   @@index([published_at])
   @@map("content_page")
+}
+
+model ContentPageFaqItem {
+  id              String   @id @default(uuid()) @db.Uuid
+  content_page_id String   @db.Uuid
+  question        String
+  answer          String
+  sort_order      Int      @default(0)
+  is_active       Boolean  @default(true)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  content_page ContentPage @relation(fields: [content_page_id], references: [id], onDelete: Cascade)
+
+  @@index([content_page_id, is_active, sort_order])
+  @@map("content_page_faq_item")
 }
 
 model UserPermission {
@@ -166,18 +338,20 @@ model UserPermission {
 
 model Customer {
   id            String   @id @default(uuid()) @db.Uuid
-  user_id       String   @unique @db.Uuid
+  user_id       String?  @unique @db.Uuid
   customer_code String   @unique
   full_name     String
-  phone         String?
-  email         String?
+  phone         String?  @unique
+  email         String?  @unique
   address       String?
+  metadata      Json?
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 
-  user       User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  ownerships ProductOwnership[]
-  claims     WarrantyClaim[]
+  user                         User?                       @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  ownerships                   ProductOwnership[]
+  claims                       WarrantyClaim[]
+  warranty_activation_requests WarrantyActivationRequest[]
 
   @@index([customer_code])
   @@index([full_name])
@@ -186,39 +360,137 @@ model Customer {
   @@map("customer")
 }
 
+model Category {
+  id          String        @id @default(uuid()) @db.Uuid
+  type        category_type
+  code        String?
+  slug        String
+  name        String
+  description String?
+  parent_id   String?       @db.Uuid
+  icon        String?
+  image_url   String?
+  order       Int           @default(0)
+  is_active   Boolean       @default(true)
+  metadata    Json?
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
+
+  parent                       Category?                   @relation("CategoryHierarchy", fields: [parent_id], references: [id], onDelete: SetNull)
+  children                     Category[]                  @relation("CategoryHierarchy")
+  product_templates            ProductTemplate[]
+  products                     Product[]
+  content_pages                ContentPage[]
+  warranty_activation_requests WarrantyActivationRequest[]
+
+  @@unique([type, slug])
+  @@index([type, is_active, order])
+  @@index([parent_id])
+  @@map("category")
+}
+
 model Product {
-  id               String           @id @default(uuid()) @db.Uuid
-  product_code     String           @unique
-  warranty_code    String           @unique
-  serial_number    String?          @unique
-  name             String
-  category         product_category
-  brand            String?
-  model            String?
-  manufacture_year Int?
-  description      String?
-  status           product_status   @default(ACTIVE)
-  created_at       DateTime         @default(now())
-  updated_at       DateTime         @updatedAt
-  deleted_at       DateTime?
+  id            String         @id @default(uuid()) @db.Uuid
+  template_id   String         @db.Uuid
+  category_id   String         @db.Uuid
+  product_code  String         @unique
+  serial_number String?        @unique
+  display_name  String?
+  status        product_status @default(ACTIVE)
+  metadata      Json?
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+  deleted_at    DateTime?
 
-  ownerships ProductOwnership[]
-  warranty   Warranty?
-  claims     WarrantyClaim[]
+  template                     ProductTemplate             @relation(fields: [template_id], references: [id], onDelete: Restrict)
+  category_ref                 Category                    @relation(fields: [category_id], references: [id], onDelete: Restrict)
+  ownerships                   ProductOwnership[]
+  warranty                     Warranty?
+  claims                       WarrantyClaim[]
+  assets                       ProductAsset[]
+  warranty_activation_requests WarrantyActivationRequest[]
 
-  @@index([category])
+  @@index([template_id])
+  @@index([category_id])
   @@index([status])
-  @@index([warranty_code])
   @@index([serial_number])
-  @@index([name])
+  @@index([display_name])
   @@map("product")
+}
+
+model ProductTemplate {
+  id                               String    @id @default(uuid()) @db.Uuid
+  sku                              String    @unique
+  slug                             String    @unique
+  name                             String
+  category_id                      String    @db.Uuid
+  brand                            String?
+  model                            String?
+  model_year                       Int?
+  description                      String?
+  default_warranty_duration_months Int       @default(36)
+  default_warranty_terms           String?
+  metadata                         Json?
+  is_active                        Boolean   @default(true)
+  is_published                     Boolean   @default(false)
+  published_at                     DateTime?
+  created_at                       DateTime  @default(now())
+  updated_at                       DateTime  @updatedAt
+
+  category_ref Category               @relation(fields: [category_id], references: [id], onDelete: Restrict)
+  products     Product[]
+  assets       ProductTemplateAsset[]
+
+  @@index([category_id])
+  @@index([is_active, name])
+  @@index([is_published, published_at])
+  @@index([brand, model])
+  @@map("product_template")
+}
+
+model ProductTemplateAsset {
+  id                  String             @id @default(uuid()) @db.Uuid
+  product_template_id String             @db.Uuid
+  asset_id            String             @db.Uuid
+  role                product_asset_role @default(GALLERY)
+  sort_order          Int                @default(0)
+  alt_text            String?
+  created_at          DateTime           @default(now())
+  updated_at          DateTime           @updatedAt
+
+  product_template ProductTemplate @relation(fields: [product_template_id], references: [id], onDelete: Cascade)
+  asset            Asset           @relation(fields: [asset_id], references: [id], onDelete: Cascade)
+
+  @@unique([product_template_id, asset_id])
+  @@index([product_template_id, role, sort_order])
+  @@index([asset_id])
+  @@map("product_template_asset")
+}
+
+model ProductAsset {
+  id         String             @id @default(uuid()) @db.Uuid
+  product_id String             @db.Uuid
+  asset_id   String             @db.Uuid
+  role       product_asset_role @default(GALLERY)
+  sort_order Int                @default(0)
+  alt_text   String?
+  created_at DateTime           @default(now())
+  updated_at DateTime           @updatedAt
+
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  asset   Asset   @relation(fields: [asset_id], references: [id], onDelete: Cascade)
+
+  @@unique([product_id, asset_id])
+  @@index([product_id, role, sort_order])
+  @@index([asset_id])
+  @@map("product_asset")
 }
 
 model ProductOwnership {
   id               String    @id @default(uuid()) @db.Uuid
   product_id       String    @db.Uuid
   customer_id      String    @db.Uuid
-  owner_user_id    String    @db.Uuid
+  owner_user_id    String?   @db.Uuid
   purchase_date    DateTime?
   activated_at     DateTime?
   ended_at         DateTime?
@@ -228,7 +500,7 @@ model ProductOwnership {
 
   product    Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
   customer   Customer @relation(fields: [customer_id], references: [id], onDelete: Cascade)
-  owner_user User     @relation(fields: [owner_user_id], references: [id], onDelete: Cascade)
+  owner_user User?    @relation(fields: [owner_user_id], references: [id], onDelete: SetNull)
 
   @@index([product_id, is_current_owner])
   @@index([customer_id, is_current_owner])
@@ -237,24 +509,153 @@ model ProductOwnership {
 }
 
 model Warranty {
-  id              String          @id @default(uuid()) @db.Uuid
-  product_id      String          @unique @db.Uuid
-  warranty_code   String          @unique
-  start_date      DateTime?
-  end_date        DateTime?
-  duration_months Int
-  status          warranty_status @default(DRAFT)
-  terms           String?
-  created_at      DateTime        @default(now())
-  updated_at      DateTime        @updatedAt
+  id                    String          @id @default(uuid()) @db.Uuid
+  product_id            String          @unique @db.Uuid
+  warranty_code         String?         @unique
+  start_date            DateTime?
+  end_date              DateTime?
+  duration_months       Int
+  coverage_limit_amount Decimal?        @db.Decimal(18, 2)
+  max_claim_count       Int?
+  max_amount_per_claim  Decimal?        @db.Decimal(18, 2)
+  status                warranty_status @default(DRAFT)
+  terms                 String?
+  metadata              Json?
+  activated_by_id       String?         @db.Uuid
+  voided_at             DateTime?
+  voided_by_id          String?         @db.Uuid
+  void_reason           String?
+  created_at            DateTime        @default(now())
+  updated_at            DateTime        @updatedAt
 
-  product Product         @relation(fields: [product_id], references: [id], onDelete: Cascade)
-  claims  WarrantyClaim[]
+  product            Product                    @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  claims             WarrantyClaim[]
+  activation_request WarrantyActivationRequest?
+  certificates       WarrantyCertificate[]
+  activated_by       User?                      @relation("WarrantyActivatedBy", fields: [activated_by_id], references: [id], onDelete: SetNull)
+  voided_by          User?                      @relation("WarrantyVoidedBy", fields: [voided_by_id], references: [id], onDelete: SetNull)
 
   @@index([warranty_code])
   @@index([status])
   @@index([end_date])
+  @@index([activated_by_id])
+  @@index([voided_by_id])
+  @@index([voided_at])
   @@map("warranty")
+}
+
+model WarrantyActivationRequest {
+  id                       String                             @id @default(uuid()) @db.Uuid
+  request_code             String                             @unique
+  status                   warranty_activation_request_status @default(PENDING)
+  source                   warranty_activation_request_source @default(PUBLIC_WEB)
+  warranty_code            String
+  customer_name            String
+  customer_phone           String
+  customer_email           String?
+  customer_birthdate       DateTime?
+  category_id              String?                            @db.Uuid
+  product_id               String?                            @db.Uuid
+  dealer_id                String?                            @db.Uuid
+  vehicle_plate            String?
+  vehicle_model            String?
+  installed_at             DateTime?
+  warranty_duration_months Int?
+  province_code            String
+  province_name            String
+  ward_code                String
+  ward_name                String
+  address_detail           String
+  full_address             String
+  product_name             String?
+  serial_number            String?
+  brand                    String?
+  model                    String?
+  manufacture_year         Int?
+  note                     String?
+  admin_note               String?
+  rejection_reason         String?
+  created_by_id            String?                            @db.Uuid
+  customer_id              String?                            @db.Uuid
+  reviewed_by_id           String?                            @db.Uuid
+  reviewed_at              DateTime?
+  activated_warranty_id    String?                            @unique @db.Uuid
+  metadata                 Json?
+  created_at               DateTime                           @default(now())
+  updated_at               DateTime                           @updatedAt
+
+  created_by         User?     @relation("WarrantyActivationRequestCreatedBy", fields: [created_by_id], references: [id], onDelete: SetNull)
+  customer           Customer? @relation(fields: [customer_id], references: [id], onDelete: SetNull)
+  category           Category? @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  product            Product?  @relation(fields: [product_id], references: [id], onDelete: SetNull)
+  dealer             Dealer?   @relation(fields: [dealer_id], references: [id], onDelete: SetNull)
+  reviewed_by        User?     @relation("WarrantyActivationRequestReviewedBy", fields: [reviewed_by_id], references: [id], onDelete: SetNull)
+  activated_warranty Warranty? @relation(fields: [activated_warranty_id], references: [id], onDelete: SetNull)
+
+  @@index([request_code])
+  @@index([status])
+  @@index([source])
+  @@index([warranty_code])
+  @@index([customer_phone])
+  @@index([customer_email])
+  @@index([category_id])
+  @@index([product_id])
+  @@index([dealer_id])
+  @@index([vehicle_plate])
+  @@index([created_by_id])
+  @@index([customer_id])
+  @@index([created_at])
+  @@index([warranty_code, customer_phone, status], map: "warranty_activation_request_lookup_pending")
+  @@map("warranty_activation_request")
+}
+
+model WarrantyCertificate {
+  id                 String                            @id @default(uuid()) @db.Uuid
+  warranty_id        String                            @db.Uuid
+  certificate_number String                            @unique
+  version            Int                               @default(1)
+  status             warranty_certificate_status       @default(PENDING)
+  storage_key        String?
+  recipient_email    String?
+  generated_at       DateTime?
+  emailed_at         DateTime?
+  email_status       warranty_certificate_email_status @default(PENDING)
+  last_error         String?
+  metadata           Json?
+  created_at         DateTime                          @default(now())
+  updated_at         DateTime                          @updatedAt
+
+  warranty Warranty @relation(fields: [warranty_id], references: [id], onDelete: Cascade)
+
+  @@index([warranty_id])
+  @@index([certificate_number])
+  @@index([status])
+  @@index([email_status])
+  @@index([recipient_email])
+  @@map("warranty_certificate")
+}
+
+model Dealer {
+  id         String   @id @default(uuid()) @db.Uuid
+  name       String
+  phone      String?  @unique
+  address    String
+  province   String
+  district   String?
+  sales_name String?
+  latitude   Float
+  longitude  Float
+  is_active  Boolean  @default(true)
+  metadata   Json?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  warranty_activation_requests WarrantyActivationRequest[]
+
+  @@index([is_active])
+  @@index([province])
+  @@index([name])
+  @@map("dealer")
 }
 
 model WarrantyClaim {
@@ -273,16 +674,18 @@ model WarrantyClaim {
   priority          warranty_claim_priority @default(NORMAL)
   due_at            DateTime?
   sla_breached_at   DateTime?
+  metadata          Json?
   submitted_at      DateTime                @default(now())
   resolved_at       DateTime?
   created_at        DateTime                @default(now())
   updated_at        DateTime                @updatedAt
 
-  warranty       Warranty                     @relation(fields: [warranty_id], references: [id], onDelete: Cascade)
-  product        Product                      @relation(fields: [product_id], references: [id], onDelete: Cascade)
-  customer       Customer?                    @relation(fields: [customer_id], references: [id], onDelete: SetNull)
-  service_center ServiceCenter?               @relation(fields: [service_center_id], references: [id], onDelete: SetNull)
-  status_history WarrantyClaimStatusHistory[]
+  warranty               Warranty                            @relation(fields: [warranty_id], references: [id], onDelete: Cascade)
+  product                Product                             @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  customer               Customer?                           @relation(fields: [customer_id], references: [id], onDelete: SetNull)
+  service_center         ServiceCenter?                      @relation(fields: [service_center_id], references: [id], onDelete: SetNull)
+  status_history         WarrantyClaimStatusHistory[]
+  service_center_history WarrantyClaimServiceCenterHistory[]
 
   @@index([claim_code])
   @@index([warranty_code])
@@ -315,19 +718,47 @@ model WarrantyClaimStatusHistory {
   @@map("warranty_claim_status_history")
 }
 
+model WarrantyClaimServiceCenterHistory {
+  id                       String   @id @default(uuid()) @db.Uuid
+  warranty_claim_id        String   @db.Uuid
+  from_service_center_id   String?  @db.Uuid
+  from_service_center_name String?
+  to_service_center_id     String   @db.Uuid
+  to_service_center_name   String
+  note                     String?
+  changed_by_user_id       String?  @db.Uuid
+  created_at               DateTime @default(now())
+
+  warranty_claim      WarrantyClaim  @relation(fields: [warranty_claim_id], references: [id], onDelete: Cascade)
+  from_service_center ServiceCenter? @relation("WarrantyClaimServiceCenterFrom", fields: [from_service_center_id], references: [id], onDelete: SetNull, map: "warranty_claim_service_center_history_from_service_center_id_fk")
+  to_service_center   ServiceCenter  @relation("WarrantyClaimServiceCenterTo", fields: [to_service_center_id], references: [id], onDelete: Restrict)
+  changed_by          User?          @relation("WarrantyClaimServiceCenterChangedBy", fields: [changed_by_user_id], references: [id], onDelete: SetNull)
+
+  @@index([warranty_claim_id, created_at], map: "warranty_claim_service_center_history_warranty_claim_id_created")
+  @@index([from_service_center_id], map: "warranty_claim_service_center_history_from_service_center_id_id")
+  @@index([to_service_center_id])
+  @@index([changed_by_user_id])
+  @@map("warranty_claim_service_center_history")
+}
+
 model ServiceCenter {
   id         String   @id @default(uuid()) @db.Uuid
   name       String
-  phone      String?
-  email      String?
+  phone      String?  @unique
+  email      String?  @unique
   province   String
   district   String?
   address    String
+  latitude   Float
+  longitude  Float
   is_active  Boolean  @default(true)
+  metadata   Json?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  claims WarrantyClaim[]
+  claims                 WarrantyClaim[]
+  claim_assignments_from WarrantyClaimServiceCenterHistory[] @relation("WarrantyClaimServiceCenterFrom")
+  claim_assignments_to   WarrantyClaimServiceCenterHistory[] @relation("WarrantyClaimServiceCenterTo")
 
   @@index([is_active])
   @@index([province])
@@ -397,10 +828,15 @@ enum permission_key {
   PRODUCT_DELETE
   PRODUCT_ASSIGN_OWNER
 
+  PRODUCT_TEMPLATE_VIEW
+  PRODUCT_TEMPLATE_CREATE
+  PRODUCT_TEMPLATE_UPDATE
+
   WARRANTY_VIEW
   WARRANTY_CREATE
   WARRANTY_UPDATE
   WARRANTY_ACTIVATE
+  WARRANTY_VOID
   WARRANTY_LOOKUP_OWN
 
   WARRANTY_CLAIM_VIEW
@@ -413,10 +849,27 @@ enum permission_key {
   SERVICE_CENTER_UPDATE
   SERVICE_CENTER_DELETE
 
+  DEALER_VIEW
+  DEALER_CREATE
+  DEALER_UPDATE
+  DEALER_DELETE
+
   CONTENT_PAGE_VIEW
   CONTENT_PAGE_CREATE
   CONTENT_PAGE_UPDATE
   CONTENT_PAGE_DELETE
+
+  WEBSITE_CONFIG_VIEW
+  WEBSITE_CONFIG_UPDATE
+  WEBSITE_CONFIG_PUBLISH
+
+  CONTACT_SUBMISSION_VIEW
+  CONTACT_SUBMISSION_UPDATE
+
+  CATEGORY_VIEW
+  CATEGORY_CREATE
+  CATEGORY_UPDATE
+  CATEGORY_DELETE
 
   USER_VIEW
   USER_CREATE
@@ -428,11 +881,53 @@ enum permission_key {
   AUDIT_LOG_VIEW
 }
 
+enum website_locale {
+  VI
+  EN
+}
+
+enum contact_submission_status {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  ARCHIVED
+}
+
+enum website_revision_state {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum website_social_platform {
+  FACEBOOK
+  ZALO
+  TIKTOK
+  YOUTUBE
+  OTHER
+}
+
+enum website_config_domain {
+  SITE
+}
+
+enum website_config_audit_action {
+  SAVE_DRAFT
+  PUBLISH
+}
+
 enum product_category {
   CAR
   ACCESSORY
   SPARE_PART
   SERVICE_PACKAGE
+}
+
+enum category_type {
+  PRODUCT
+  CONTENT_PAGE
+  ASSET
+  WARRANTY_CLAIM_ISSUE
 }
 
 enum product_status {
@@ -441,11 +936,44 @@ enum product_status {
   DELETED
 }
 
+enum product_asset_role {
+  COVER
+  GALLERY
+  SERIAL
+  INSTALLATION
+}
+
 enum warranty_status {
   DRAFT
   ACTIVE
   EXPIRED
   VOIDED
+}
+
+enum warranty_activation_request_status {
+  PENDING
+  APPROVED
+  REJECTED
+  ACTIVATED
+  CANCELLED
+}
+
+enum warranty_activation_request_source {
+  PUBLIC_WEB
+  ADMIN_PORTAL
+}
+
+enum warranty_certificate_status {
+  PENDING
+  GENERATED
+  FAILED
+}
+
+enum warranty_certificate_email_status {
+  PENDING
+  QUEUED
+  SENT
+  FAILED
 }
 
 enum warranty_claim_status {
@@ -466,9 +994,12 @@ enum warranty_claim_priority {
 }
 
 enum content_page_kind {
-  POLICY
-  GUIDE
-  INTRO
+  GENERAL_POLICY
+  PRIVACY_POLICY
+  PURCHASE_POLICY
+  WARRANTY_RETURN_POLICY
+  SHIPPING_POLICY
+  PAYMENT_POLICY
   FAQ
 }
 

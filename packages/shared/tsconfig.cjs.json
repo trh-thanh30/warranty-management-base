@@ -9,5 +9,5 @@
     "outDir": "dist-cjs",
     "sourceMap": false
   },
-  "include": ["src/constants/**/*.ts"]
+  "include": ["src/constants/**/*.ts", "src/utils/**/*.ts"]
 }

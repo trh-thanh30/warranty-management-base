@@ -2,6 +2,7 @@ import { storageConfig } from '@/config';
 import type {
   IStorageService,
   SaveResult,
+  StoredObject,
 } from '@/modules/assets/services/storage.interface';
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
@@ -77,6 +78,15 @@ export class LocalStorageService implements IStorageService {
     return Promise.resolve(fs.createReadStream(absolutePath));
   }
 
+  async list(prefix: string): Promise<StoredObject[]> {
+    const absolutePrefix = path.join(this.rootDir, prefix);
+    if (!fs.existsSync(absolutePrefix)) return [];
+
+    const objects: StoredObject[] = [];
+    await this.collectFiles(absolutePrefix, objects);
+    return objects;
+  }
+
   // ─── Private Helpers ───────────────────────────────────────────────────────
 
   private getBaseDir(accessType: 'PUBLIC' | 'PRIVATE' | 'TEMP'): string {
@@ -96,6 +106,31 @@ export class LocalStorageService implements IStorageService {
         fs.mkdirSync(dir, { recursive: true });
         this.logger.log(`Created storage directory: ${dir}`);
       }
+    }
+  }
+
+  private async collectFiles(
+    directory: string,
+    objects: StoredObject[],
+  ): Promise<void> {
+    const entries = await fs.promises.readdir(directory, {
+      withFileTypes: true,
+    });
+
+    for (const entry of entries) {
+      const absolutePath = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        await this.collectFiles(absolutePath, objects);
+        continue;
+      }
+      if (!entry.isFile()) continue;
+
+      const stats = await fs.promises.stat(absolutePath);
+      objects.push({
+        lastModified: stats.mtime,
+        path: path.relative(this.rootDir, absolutePath).replace(/\\/g, '/'),
+        size: stats.size,
+      });
     }
   }
 }

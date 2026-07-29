@@ -4,6 +4,7 @@ import { ListAssetsDto } from '@/modules/assets/dto/list-assets.dto';
 import { UploadAssetDto } from '@/modules/assets/dto/upload-asset.dto';
 import { UploadAssetService } from '@/modules/assets/services/upload-asset.service';
 import {
+  ConflictException,
   ForbiddenException,
   Injectable,
   Logger,
@@ -193,7 +194,7 @@ export class AssetsService {
   }
 
   /**
-   * Delete asset (Soft Delete)
+   * Delete an asset and its storage object.
    */
   async deleteAsset(id: string, user: User): Promise<void> {
     const asset = await this.prisma.asset.findUnique({ where: { id } });
@@ -208,29 +209,124 @@ export class AssetsService {
       );
     }
 
-    await this.uploadAssetService.delete(asset.path);
+    await this.assertAssetIsNotReferenced(id);
+    await this.removeAsset(asset);
+  }
 
-    await this.prisma.asset.update({
-      where: { id },
-      data: { is_deleted: true },
+  async removeEntityAsset(
+    assetId: string,
+    entity: { id: string; type: string },
+  ): Promise<'DELETED' | 'UNLINKED'> {
+    const asset = await this.prisma.asset.findUnique({
+      where: { id: assetId },
     });
+
+    if (!asset || asset.is_deleted) {
+      throw new NotFoundException('Asset not found');
+    }
+
+    const [
+      otherLinks,
+      productAssets,
+      productTemplateAssets,
+      websiteSiteReferences,
+    ] = await Promise.all([
+      this.prisma.assetLink.count({
+        where: {
+          asset_id: assetId,
+          NOT: {
+            entity_id: entity.id,
+            entity_type: entity.type,
+          },
+        },
+      }),
+      this.prisma.productAsset.count({ where: { asset_id: assetId } }),
+      this.prisma.productTemplateAsset.count({
+        where: { asset_id: assetId },
+      }),
+      this.prisma.websiteSiteRevision.count({
+        where: {
+          OR: [
+            { header_logo_asset_id: assetId },
+            { footer_logo_asset_id: assetId },
+            { og_image_asset_id: assetId },
+          ],
+        },
+      }),
+    ]);
+
+    if (
+      otherLinks +
+        productAssets +
+        productTemplateAssets +
+        websiteSiteReferences >
+      0
+    ) {
+      await this.prisma.assetLink.deleteMany({
+        where: {
+          asset_id: assetId,
+          entity_id: entity.id,
+          entity_type: entity.type,
+        },
+      });
+      return 'UNLINKED';
+    }
+
+    await this.removeAsset(asset);
+    return 'DELETED';
   }
 
   async deleteAssetByUrl(
     url: string,
     options: { folder?: string; types?: asset_type[] } = {},
-  ): Promise<void> {
+    user?: User,
+  ): Promise<boolean> {
     const asset = await this.findAssetByUrl(url, options);
 
     if (!asset) {
-      return;
+      return false;
     }
 
-    await this.uploadAssetService.delete(asset.path);
+    if (user && asset.uploaded_by_id !== user.id && user.role !== 'ADMIN') {
+      throw new ForbiddenException(
+        'You do not have permission to delete this asset',
+      );
+    }
 
-    await this.prisma.asset.delete({
-      where: { id: asset.id },
+    await this.assertAssetIsNotReferenced(asset.id);
+    await this.removeAsset(asset);
+    return true;
+  }
+
+  async removeEntityAssetByUrl(
+    url: string,
+    entity: { id: string; type: string },
+    options: { folder?: string; types?: asset_type[] } = {},
+  ): Promise<boolean> {
+    const asset = await this.findAssetByUrl(url, options);
+    if (!asset) {
+      return false;
+    }
+
+    await this.removeEntityAsset(asset.id, entity);
+    return true;
+  }
+
+  async deleteAssetIfUnreferenced(assetId: string): Promise<boolean> {
+    const asset = await this.prisma.asset.findUnique({
+      where: { id: assetId },
     });
+
+    if (!asset || asset.is_deleted) {
+      return false;
+    }
+
+    if ((await this.countAssetReferences(assetId)) > 0) {
+      return false;
+    }
+
+    await this.removeAsset(asset);
+    return true;
   }
 
   private async findAssetByUrl(
@@ -256,6 +352,44 @@ export class AssetsService {
         const assetUrl = this.enrichAssetUrl(asset).url;
         return assetUrl === normalizedUrl || asset.path === normalizedUrl;
       }) ?? null
+    );
+  }
+
+  private async removeAsset(asset: Asset): Promise<void> {
+    await this.uploadAssetService.delete(asset.path);
+    await this.prisma.asset.delete({ where: { id: asset.id } });
+  }
+
+  private async assertAssetIsNotReferenced(assetId: string) {
+    if ((await this.countAssetReferences(assetId)) > 0) {
+      throw new ConflictException('Asset is currently in use');
+    }
+  }
+
+  private async countAssetReferences(assetId: string) {
+    const [
+      assetLinks,
+      productAssets,
+      productTemplateAssets,
+      websiteSiteReferences,
+    ] = await Promise.all([
+      this.prisma.assetLink.count({ where: { asset_id: assetId } }),
+      this.prisma.productAsset.count({ where: { asset_id: assetId } }),
+      this.prisma.productTemplateAsset.count({
+        where: { asset_id: assetId },
+      }),
+      this.prisma.websiteSiteRevision.count({
+        where: {
+          OR: [
+            { header_logo_asset_id: assetId },
+            { footer_logo_asset_id: assetId },
+            { og_image_asset_id: assetId },
+          ],
+        },
+      }),
+    ]);
+    return (
+      assetLinks + productAssets + productTemplateAssets + websiteSiteReferences
     );
   }
 

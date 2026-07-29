@@ -1,6 +1,7 @@
 import {
   DeleteObjectCommand,
   GetObjectCommand,
+  ListObjectsV2Command,
   PutObjectCommand,
   S3Client,
   type S3ClientConfig,
@@ -12,6 +13,7 @@ import { Readable } from 'stream';
 import type {
   IStorageService,
   SaveResult,
+  StoredObject,
 } from '@/modules/assets/services/storage.interface';
 
 type AccessType = 'PUBLIC' | 'PRIVATE' | 'TEMP';
@@ -115,6 +117,40 @@ export class MinioStorageService implements IStorageService {
 
       throw error;
     }
+  }
+
+  async list(prefix: string): Promise<StoredObject[]> {
+    const normalizedPath = this.normalizeKey(prefix);
+    const [dirName, ...keyParts] = normalizedPath.split('/');
+    const bucket = this.getBucketByDirName(dirName);
+    const keyPrefix = keyParts.join('/');
+    const objects: StoredObject[] = [];
+    let continuationToken: string | undefined;
+
+    do {
+      const response = await this.client.send(
+        new ListObjectsV2Command({
+          Bucket: bucket,
+          ContinuationToken: continuationToken,
+          Prefix: keyPrefix || undefined,
+        }),
+      );
+
+      for (const object of response.Contents ?? []) {
+        if (!object.Key || !object.LastModified) continue;
+        objects.push({
+          lastModified: object.LastModified,
+          path: `${dirName}/${object.Key}`,
+          size: object.Size ?? 0,
+        });
+      }
+
+      continuationToken = response.IsTruncated
+        ? response.NextContinuationToken
+        : undefined;
+    } while (continuationToken);
+
+    return objects;
   }
 
   private resolveObjectLocation(relativePath: string): ObjectLocation {

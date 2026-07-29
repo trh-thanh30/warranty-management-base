@@ -1,4 +1,14 @@
-import { IsEmail, IsOptional, IsString, Length } from 'class-validator';
+import { PHONE_NUMBER_PATTERN } from '@repo/shared/constants';
+import {
+  IsEmail,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Length,
+  Matches,
+  Max,
+  Min,
+} from 'class-validator';
 
 export class CreateServiceCenterDto {
   @IsString()
@@ -7,7 +17,8 @@ export class CreateServiceCenterDto {
 
   @IsOptional()
   @IsString()
-  @Length(6, 32)
+  @Length(8, 32)
+  @Matches(PHONE_NUMBER_PATTERN)
   phone?: string;
 
   @IsOptional()
@@ -26,4 +37,14 @@ export class CreateServiceCenterDto {
   @IsString()
   @Length(4, 255)
   address: string;
+
+  @IsNumber({ maxDecimalPlaces: 8 })
+  @Min(-90)
+  @Max(90)
+  latitude: number;
+
+  @IsNumber({ maxDecimalPlaces: 8 })
+  @Min(-180)
+  @Max(180)
+  longitude: number;
 }

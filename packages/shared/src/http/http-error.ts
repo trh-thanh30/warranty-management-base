@@ -6,6 +6,7 @@ function resolveMessage(error: HttpClientAxiosError): string {
 
   if (typeof data?.message === "string") return data.message;
   if (typeof data?.error === "string") return data.error;
+  if (typeof data?.error?.message === "string") return data.error.message;
   if (error.message) return error.message;
 
   return "Request failed";
@@ -20,8 +21,16 @@ export function toHttpClientError(error: unknown): HttpClientError {
     return new HttpClientError({
       message: resolveMessage(axiosError),
       status: axiosError.response?.status,
-      code: axiosError.code,
-      details: axiosError.response?.data?.details ?? axiosError.response?.data,
+      code:
+        typeof axiosError.response?.data?.error === "object"
+          ? axiosError.response.data.error.code
+          : axiosError.code,
+      details:
+        (typeof axiosError.response?.data?.error === "object"
+          ? axiosError.response.data.error.details
+          : undefined) ??
+        axiosError.response?.data?.details ??
+        axiosError.response?.data,
       isNetworkError: !axiosError.response,
       cause: error,
     });

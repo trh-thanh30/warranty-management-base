@@ -17,6 +17,7 @@ import {
   cookieConfig,
   databaseConfig,
   emailConfig,
+  geoapifyConfig,
   jobsConfig,
   jwtConfig,
   rateLimitConfig,
@@ -24,6 +25,7 @@ import {
   storageConfig,
   telegramConfig,
   validateEnv,
+  vietnamProvincesConfig,
 } from '@/config';
 
 // common
@@ -41,22 +43,29 @@ import { IdentityMiddleware } from '@/common/middleware/identity.middleware';
 import { PermissionsModule } from '@/common/permissions/permissions.module';
 import { PrismaModule } from '@/database/prisma/prisma.module';
 import { RedisModule } from '@/database/redis/redis.module';
+import { AnalyticsModule } from '@/modules/analytics/analytics.module';
 import { AssetsModule } from '@/modules/assets/assets.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { CommonModule } from '@/modules/common/common.module';
+import { CategoriesModule } from '@/modules/categories/categories.module';
 import { ContentPagesModule } from '@/modules/content-pages/content-pages.module';
+import { ContactSubmissionsModule } from '@/modules/contact-submissions/contact-submissions.module';
 import { CustomersModule } from '@/modules/customers/customers.module';
+import { DealersModule } from '@/modules/dealers/dealers.module';
 import { EmailModule } from '@/modules/email/email.module';
 import { HealthModule } from '@/modules/health/health.module';
 import { JobsModule } from '@/modules/jobs/jobs.module';
+import { LocationsModule } from '@/modules/locations/locations.module';
 import { NotificationModule } from '@/modules/notification/notification.module';
 import { ProductsModule } from '@/modules/products/products.module';
 import { PublicModule } from '@/modules/public/public.module';
 import { ServiceCentersModule } from '@/modules/service-centers/service-centers.module';
 import { UsersModule } from '@/modules/user/user.module';
 import { VerificationModule } from '@/modules/verification/verification.module';
+import { WarrantyActivationRequestsModule } from '@/modules/warranty-activation-requests/warranty-activation-requests.module';
 import { WarrantyClaimsModule } from '@/modules/warranty-claims/warranty-claims.module';
 import { WarrantiesModule } from '@/modules/warranties/warranties.module';
+import { WebsiteConfigModule } from '@/modules/website-config/website-config.module';
 import { MiddlewareConsumer, NestModule } from '@nestjs/common';
 
 const rootDir = join(__dirname, '..', '..', '..');
@@ -77,6 +86,7 @@ const envPath = join(rootDir, envFile);
         appConfig,
         databaseConfig,
         emailConfig,
+        geoapifyConfig,
         jobsConfig,
         jwtConfig,
         rateLimitConfig,
@@ -86,6 +96,7 @@ const envPath = join(rootDir, envFile);
         cookieConfig,
         clientConfig,
         telegramConfig,
+        vietnamProvincesConfig,
       ],
     }),
     BullModule.forRootAsync({
@@ -139,18 +150,25 @@ const envPath = join(rootDir, envFile);
     ScheduleModule.forRoot(),
     JobsModule,
     HealthModule,
+    AnalyticsModule,
     AssetsModule,
     CommonModule,
+    CategoriesModule,
     ContentPagesModule,
+    ContactSubmissionsModule,
     NotificationModule,
     CustomersModule,
+    DealersModule,
+    LocationsModule,
     ProductsModule,
     WarrantiesModule,
+    WarrantyActivationRequestsModule,
     ServiceCentersModule,
     WarrantyClaimsModule,
     PublicModule,
     UsersModule,
     VerificationModule,
+    WebsiteConfigModule,
   ],
   providers: [
     HttpLogInterceptor,

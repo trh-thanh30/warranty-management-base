@@ -1,4 +1,4 @@
-import type { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
+import type { AxiosError, AxiosRequestConfig } from "axios";
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -20,9 +20,27 @@ export type CreateHttpClientOptions = {
   onUnauthorized?: UnauthorizedHandler;
 };
 
-export type HttpClient = AxiosInstance;
-
 export type HttpRequestConfig = AxiosRequestConfig;
+
+export type HttpClient = {
+  delete<T = unknown>(url: string, config?: HttpRequestConfig): Promise<T>;
+  get<T = unknown>(url: string, config?: HttpRequestConfig): Promise<T>;
+  patch<T = unknown>(
+    url: string,
+    data?: unknown,
+    config?: HttpRequestConfig,
+  ): Promise<T>;
+  post<T = unknown>(
+    url: string,
+    data?: unknown,
+    config?: HttpRequestConfig,
+  ): Promise<T>;
+  put<T = unknown>(
+    url: string,
+    data?: unknown,
+    config?: HttpRequestConfig,
+  ): Promise<T>;
+};
 
 export type HttpClientErrorPayload = {
   message: string;
@@ -56,6 +74,12 @@ export class HttpClientError extends Error {
 
 export type HttpClientAxiosError = AxiosError<{
   message?: string;
-  error?: string;
+  error?:
+    | string
+    | {
+        code?: string;
+        message?: string;
+        details?: unknown;
+      };
   details?: unknown;
 }>;

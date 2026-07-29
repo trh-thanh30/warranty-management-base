@@ -3,11 +3,2124 @@
     "title": "Web App",
     "description": "Public app shell for the monorepo base"
   },
+  "Metadata": {
+    "title": "FUJITEK - Premium automotive window films",
+    "description": "Premium FUJITEK – LEXZENZ automotive window-film solutions in Vietnam."
+  },
+  "QuickContact": {
+    "navigationLabel": "Quick contact",
+    "zalo": "Contact us on Zalo",
+    "phone": "Call {phone}",
+    "facebook": "Contact us on Facebook"
+  },
+  "FloatingQuickAction": {
+    "panelTitle": "Quick actions",
+    "lookup": "Check warranty coverage",
+    "activate": "Activate warranty",
+    "request": "Submit a warranty request",
+    "openMenuAriaLabel": "Open quick warranty actions",
+    "closeMenuAriaLabel": "Close quick warranty actions",
+    "mobile": {
+      "lookup": "Lookup",
+      "activate": "Activate",
+      "request": "Request"
+    }
+  },
+  "WarrantyLookupModal": {
+    "title": "E-Warranty lookup",
+    "subtitle": "Verify an official FUJITEK warranty label",
+    "closeAriaLabel": "Close warranty lookup dialog",
+    "placeholder": "Enter phone / license plate (e.g. 30H-888.88) / label code...",
+    "search": "Search",
+    "tryPrefix": "Try entering",
+    "or": "or",
+    "mock": {
+      "customerName": "Nguyen Van An",
+      "address": "Ho Chi Minh City",
+      "warrantyYears": "15 years",
+      "dealer": "Panda Auto Showroom & Hanoi Warranty Center",
+      "status": "Active (Official FUJITEK warranty)"
+    },
+    "supportMessage": "For further support, contact the installation center or FUJITEK hotline.",
+    "supportHotlineLabel": "Hotline",
+    "supportClosing": "Thank you for using the FUJITEK E-Warranty system.",
+    "result": {
+      "serial": "Serial number",
+      "code": "E-Warranty code",
+      "warranty": "Warranty",
+      "owner": "Owner",
+      "phone": "Phone number",
+      "address": "Address",
+      "carPlate": "License plate",
+      "carModel": "Vehicle model",
+      "vehicle": "License plate & Vehicle",
+      "film": "Window-film package",
+      "warrantyYears": "Warranty period (years)",
+      "installedDate": "Completion date",
+      "expiryDate": "Warranty expiry",
+      "dates": "Activation & Expiry",
+      "dealer": "Installation center",
+      "glassSection": "Filmed glass positions",
+      "windshield": "Windshield",
+      "frontLeftGlass": "Front left window",
+      "frontRightGlass": "Front right window",
+      "rearLeftGlass": "Rear left window",
+      "rearRightGlass": "Rear right window",
+      "sunroof": "Sunroof",
+      "rearGlass": "Rear window",
+      "notes": "Notes"
+    }
+  },
+  "HomePage": {
+    "hero": {
+      "previousSlideAriaLabel": "Previous slide",
+      "nextSlideAriaLabel": "Next slide",
+      "slideAlt": "FUJITEK homepage showcase",
+      "slides": {
+        "primary": {
+          "alt": "FUJITEK high-performance window film"
+        },
+        "technology": {
+          "alt": "FUJITEK automotive window-film technology"
+        },
+        "protection": {
+          "alt": "FUJITEK vehicle-glass protection solution"
+        }
+      }
+    },
+    "about": {
+      "eyebrow": "About",
+      "title": "FUJITEK – LEXZENZ Vietnam",
+      "mainImageAlt": "FUJITEK – LEXZENZ Vietnam",
+      "installationImageAlt": "Technician installing FUJITEK automotive window film",
+      "descriptionPrimary": "With years of automotive-interior experience, Panda Auto supplies high-quality vehicle upgrades ranging from smart devices to window film and premium accessories.",
+      "descriptionSecondary": "FUJITEK Label Films works with global partners to deliver advanced window-film solutions that protect your vehicle comprehensively.",
+      "learnMore": "Learn more",
+      "hotlineLabel": "Consultation hotline"
+    },
+    "products": {
+      "eyebrow": "Automotive Products & Accessories Ecosystem",
+      "title": "PRODUCT CATEGORIES",
+      "description": "Comprehensive automotive solutions including window films, LED lighting systems, 4K dashcams, and TPMS sensors from Lexzenz & Fujitek.",
+      "explore": "Explore category",
+      "itemCount": "{count} products",
+      "previousCategories": "Previous categories",
+      "nextCategories": "Next categories",
+      "viewAll": "View all product categories",
+      "categories": {
+        "film": {
+          "title": "Lexzenz Reflex Korea Automotive Window Film",
+          "description": "Multilayer Sputter & Ultra Nano Ceramic technology imported from Korea, blocking 99% UV/IR rays with superior heat protection."
+        },
+        "lighting": {
+          "title": "Lexzenz Led Fujitek Car & Motorcycle Lighting",
+          "description": "Bi-LED headlights, fog lights, and Offroad auxiliary lights featuring sharp beam cutoff and superior road illumination."
+        },
+        "dashcam": {
+          "title": "Lexzenz Dashcam Smart Dash Cameras",
+          "description": "4K Ultra HD recording with night vision, voice traffic alert alerts, and mobile Wi-Fi app connectivity."
+        },
+        "tpms": {
+          "title": "Lexzenz TPMS Tire Pressure Monitoring Sensors",
+          "description": "Real-time tire pressure & temperature monitoring displaying on Android screens or OEM gauges for maximum driving safety."
+        }
+      },
+      "specs": {
+        "uv": "UV Block: {value}",
+        "ir": "IR Rejection: {value}",
+        "vlt": "VLT: {value}"
+      },
+      "items": {
+        "sp50": {
+          "price": "VND 2,900,000 - 5,800,000",
+          "badge": "Premium",
+          "description": "Premium Multilayer Sputter film combines exceptional clarity with powerful heat rejection.",
+          "imageAlt": "Phim cách nhiệt FUJITEK SP50"
+        },
+        "sp10": {
+          "imageAlt": "SP10 Multilayer Sputter automotive window film",
+          "price": "VND 2,900,000 - 3,900,000",
+          "badge": "Best seller",
+          "description": "Carefully balanced light transmission makes this range suitable for both windshields and side windows."
+        },
+        "b55": {
+          "imageAlt": "B55 Ultra Nano Ceramic automotive window film",
+          "price": "VND 3,200,000",
+          "badge": "Popular",
+          "description": "A clear-view choice combining modern Nano Ceramic technology with a refined metallic-blue tone."
+        }
+      },
+      "badges": {
+        "korea": "Korean technology",
+        "japaneseTech": "Japanese technology",
+        "recording4k": "4K recording",
+        "safety": "Safety"
+      }
+    },
+    "additionalProducts": {
+      "eyebrow": "Automotive Products & Accessories Ecosystem",
+      "title": "BESIDES, WE ALSO PROVIDE",
+      "description": "Comprehensive range of Bi-LED lighting systems, 4K dashcams, TPMS tire sensors, Android Boxes, and premium car accessories.",
+      "viewAllCta": "View all category products",
+      "itemCount": "{count} models",
+      "exploreCategory": "Explore category",
+      "categories": {
+        "ledBulbs": {
+          "title": "LED bulbs & mini projectors",
+          "description": "Plug-and-play lighting upgrades with controlled beam output."
+        },
+        "biLed": {
+          "title": "Fog and headlight projectors",
+          "description": "Modern LED lighting technology for stronger night visibility."
+        },
+        "auxLights": {
+          "title": "Off-road auxiliary lights",
+          "description": "Auxiliary lighting for night driving, fog, rain, and rough terrain."
+        },
+        "dashcam": {
+          "title": "4K dash cameras",
+          "description": "Clear journey recording for safer and more transparent driving."
+        },
+        "tpms": {
+          "title": "Tire pressure monitoring",
+          "description": "Pressure and temperature monitoring for stable vehicle operation."
+        },
+        "androidBox": {
+          "title": "Automotive Android Box",
+          "description": "Upgrade original screens with smarter entertainment and connectivity."
+        },
+        "retroAccessories": {
+          "title": "Lighting retrofit accessories",
+          "description": "Specialized accessories for professional lighting upgrades."
+        }
+      }
+    },
+    "sputter": {
+      "eyebrow": "Technology",
+      "title": "Metal sputtering technology",
+      "descriptionPrimary": "Developed with <brand>FUJITEK Japanese Technology</brand>, the high-performance production process is validated through years of testing to ensure stable film quality.",
+      "descriptionSecondary": "Metal Sputtering technology coats premium metal layers onto the film surface, forming a heat-reflective layer that reflects most infrared radiation back outside and helps reduce heat transfer into the vehicle.",
+      "learnMore": "Explore the technology",
+      "chamberImageAlt": "FUJITEK Japanese technology sputtering chamber",
+      "structureImageAlt": "Sputtering window-film structure",
+      "stats": {
+        "warrantyValue": "10 years +",
+        "warrantyLabel": "Electronic warranty",
+        "uvLabel": "UV blocking",
+        "irLabel": "Infrared rejection",
+        "yearsSuffix": " years"
+      },
+      "details": {
+        "warranty": {
+          "title": "Nationwide electronic warranty",
+          "description": "Customer peace of mind is always the top priority. Alongside advanced heat-rejection technology, the E-Warranty system makes warranty information easy to manage, transparent, and protected throughout 10 years of use."
+        },
+        "uv": {
+          "title": "Optimized UV protection",
+          "description": "UV rejection of up to 99.9% creates a superior protective layer, helping protect users and limit sunlight impact on the vehicle interior to maintain lasting appearance over time."
+        },
+        "ir": {
+          "title": "Infrared heat rejection",
+          "description": "New-generation Ceramic Nano technology uses microscopic ceramic particles within the film structure to optimize infrared rejection without affecting glass clarity. This solution delivers a cooler, more comfortable, and more private experience for users."
+        }
+      }
+    },
+    "comparison": {
+      "eyebrow": "Why choose",
+      "description": "FUJITEK delivers a solution that protects occupants and elevates the in-car experience.",
+      "bookNow": "Book now",
+      "standard": {
+        "title": "Conventional film",
+        "items": {
+          "heat": "Limited heat rejection and early color fading",
+          "glare": "Distracting glare at night and in the rain",
+          "signal": "Metal content may interfere with GPS, toll tags, and 4G"
+        }
+      },
+      "fujitek": {
+        "items": {
+          "protection": "Blocks 99.9% of UV and 98% of infrared radiation",
+          "signal": "Optimized Sputter technology without signal interference",
+          "warranty": "Official electronic warranty for up to 15 years"
+        }
+      }
+    },
+    "gallery": {
+      "eyebrow": "Gallery",
+      "title": "Completed installations",
+      "allCategories": "All",
+      "previousSlide": "View previous image page",
+      "nextSlide": "View next image page",
+      "goToSlide": "Go to image page {index}",
+      "categories": {
+        "ALL": "All",
+        "SP50": "SP50",
+        "SP10": "SP10",
+        "B55": "B55",
+        "B15": "B15",
+        "L50": "L50",
+        "L15": "L15",
+        "PRODUCTS": "Products",
+        "CUSTOMERS": "Customers"
+      },
+      "items": {
+        "lexusSp50": "Lexus RX350 - SP50 windshield",
+        "vinfastSp10": "VinFast VF8 - SP10 side windows",
+        "rangeRoverB55": "Range Rover Velar - B55 Ultra Nano",
+        "mercedesB15": "Mercedes-Benz E300 - B15",
+        "bmwL50": "BMW 530i - L50 Nano Ceramic",
+        "porscheL15": "Porsche Macan - Full L15 package"
+      },
+      "uploaded": {
+        "products": {
+          "imageAlt": "Real FUJITEK product image {index}",
+          "caption": "Real product #{index}"
+        },
+        "customers": {
+          "imageAlt": "FUJITEK customer vehicle after installation image {index}",
+          "caption": "Real customer #{index}"
+        }
+      }
+    },
+    "faq": {
+      "ariaLabel": "Frequently asked questions",
+      "eyebrow": "Questions & answers",
+      "title": "Frequently asked questions",
+      "emptyTitle": "No frequently asked questions yet",
+      "emptyDescription": "FAQ content has not been published. Please check back later."
+    },
+    "brands": {
+      "ariaLabel": "Supported vehicle brands",
+      "title": "Coverage for a wide range of makes and models",
+      "brandImageAlt": "{brand} logo"
+    },
+    "factoryLegacy": {
+      "values": {
+        "title": "What defines FUJITEK",
+        "description": "Precise technology, a premium experience, and lasting commitment.",
+        "items": {
+          "technology": {
+            "title": "Technology",
+            "description": "Modern material research and production processes optimize film performance."
+          },
+          "luxury": {
+            "title": "Premium experience",
+            "description": "Optical clarity and a refined finish designed for a wide range of vehicles."
+          },
+          "commitment": {
+            "title": "Commitment",
+            "description": "Rigorous quality control backed by a transparent warranty policy."
+          }
+        }
+      },
+      "factory": {
+        "eyebrow": "Manufacturing capability",
+        "title": "International-standard production system",
+        "facts": {
+          "area": "Large-scale production lines with control at every stage",
+          "countries": "Products distributed across multiple international markets",
+          "quality": "Quality inspection before every shipment"
+        }
+      },
+      "metricsTitle": "Performance commitments",
+      "metrics": {
+        "uv": "UV rejection",
+        "ir": "Infrared rejection",
+        "clarity": "Optical clarity",
+        "warranty": "Warranty"
+      },
+      "warrantyValue": "{years} years",
+      "plants": {
+        "plantOne": {
+          "imageAlt": "FUJITEK film production line",
+          "title": "Production plant",
+          "address": "FUJITEK production system",
+          "description": "Automated processes help control uniformity and quality across every film layer."
+        },
+        "plantTwo": {
+          "imageAlt": "FUJITEK quality inspection area",
+          "title": "Inspection center",
+          "address": "FUJITEK quality control laboratory",
+          "description": "Optical performance, durability, and heat rejection are tested before distribution."
+        }
+      },
+      "research": {
+        "title": "Research and development",
+        "description": "FUJITEK continuously improves material structures to balance heat rejection, clarity, and signal compatibility."
+      }
+    },
+    "techSlider": {
+      "eyebrow": "Window-film technology",
+      "title": "Compare three automotive film technologies",
+      "description": "Explore their differences in heat management, optical clarity, and electronic-signal compatibility.",
+      "tabsLabel": "Select a film technology",
+      "principleLabel": "How it works",
+      "advantagesLabel": "Key advantages",
+      "notesLabel": "Technical notes",
+      "recommendationLabel": "Recommended installation positions",
+      "positions": {
+        "windshield": "Windshield:",
+        "sideRear": "Side and rear windows:",
+        "signal": "Electronic signals:"
+      },
+      "metricsTitle": "{name} specifications",
+      "metrics": {
+        "vlt": "Visible light transmission (VLT)",
+        "uv": "UV rejection",
+        "ir": "Infrared rejection",
+        "tser": "Total solar energy rejection",
+        "glare": "Reflectivity"
+      },
+      "previousLabel": "View previous technology",
+      "nextLabel": "View next technology",
+      "items": {
+        "cr": {
+          "name": "Nano Ceramic",
+          "code": "CR Series",
+          "badge": "Advanced Nano Ceramic",
+          "tagline": "Absorbs and disperses infrared heat without signal interference.",
+          "principle": "Nano-scale ceramic particles are distributed evenly to manage infrared heat without using metal.",
+          "pros": {
+            "0": "Low reflectivity and natural visibility by day or night",
+            "1": "Does not affect GPS, 4G/5G, or ETC tags",
+            "2": "Stable color with strong oxidation resistance"
+          },
+          "notes": {
+            "0": "The glass surface may feel slightly warm after prolonged sun exposure",
+            "1": "Performance depends on ceramic-particle density and manufacturing quality"
+          },
+          "recommendation": {
+            "windshield": "50%–70% VLT for clear, low-glare visibility",
+            "sideRear": "15%–35% VLT for greater privacy",
+            "signal": "Compatible with smart devices and GPS"
+          }
+        },
+        "rf": {
+          "name": "Heat-reflective Sputter",
+          "code": "RF Sputtered Series",
+          "badge": "Ultra-thin metal sputtering",
+          "tagline": "Reflects solar heat outward to keep the glass surface cooler.",
+          "principle": "Multiple ultra-thin precious-metal layers are deposited in a vacuum to reflect thermal radiation.",
+          "pros": {
+            "0": "High heat-reflection performance",
+            "1": "Strong IR and TSER ratings",
+            "2": "High mechanical durability and service life"
+          },
+          "notes": {
+            "0": "Slightly more reflective than pure Ceramic film",
+            "1": "Select a signal-optimized line for ETC and GPS compatibility"
+          },
+          "recommendation": {
+            "windshield": "RF50 or RF70 for a bright, clear windshield",
+            "sideRear": "RF15 or RF30 for stronger heat rejection",
+            "signal": "Premium FUJITEK variants are optimized to reduce signal impact"
+          }
+        },
+        "hb": {
+          "name": "Hybrid Ceramic",
+          "code": "HB Hybrid Series",
+          "badge": "Hybrid technology",
+          "tagline": "Balances Ceramic material with a heat-reflective coating.",
+          "principle": "Nano Ceramic particles combine with an ultra-thin reflective layer to absorb and reflect heat together.",
+          "pros": {
+            "0": "Balanced heat rejection and optical visibility",
+            "1": "Reduces the load on vehicle air conditioning",
+            "2": "Strong performance at an accessible price point"
+          },
+          "notes": {
+            "0": "Correct installation is essential for long-term adhesion"
+          },
+          "recommendation": {
+            "windshield": "HB50 reduces glare while retaining clear visibility",
+            "sideRear": "HB15 or HB20 provides greater privacy",
+            "signal": "The structure is tuned to minimize GPS interference"
+          }
+        }
+      },
+      "guide": {
+        "title": "Understanding technical ratings",
+        "description": "Use the specifications to choose the right product for each window position.",
+        "items": {
+          "vlt": {
+            "title": "Visible light transmission",
+            "description": "The share of visible light passing through the glass. Windshields generally need a higher VLT for safe visibility."
+          },
+          "uv": {
+            "title": "UV rejection",
+            "description": "The ability to reduce ultraviolet exposure and help protect occupants and vehicle interiors."
+          },
+          "ir": {
+            "title": "Infrared rejection",
+            "description": "The ability to reduce infrared radiation associated with the sensation of heat."
+          },
+          "tser": {
+            "title": "Total solar energy rejection",
+            "description": "The percentage of total solar energy the film keeps out of the vehicle cabin."
+          }
+        }
+      }
+    },
+    "footer": {
+      "logoAlt": "FUJITEK Window Films",
+      "companyName": "Công ty Cổ phần Vilatek",
+      "navigationTitle": "About FUJITEK Window Films",
+      "policyTitle": "Policies & Terms",
+      "japan": "FUJITEK JAPAN",
+      "backToTopAriaLabel": "Scroll to top",
+      "copyright": "© {year} FUJITEK Window Films. All rights reserved.",
+      "navigation": {
+        "about": "About FUJITEK Films",
+        "products": "Products",
+        "warranty": "Warranty center",
+        "dealers": "Dealer network",
+        "contact": "Contact"
+      },
+      "policy": {
+        "general": "Terms & Regulations",
+        "privacy": "Privacy Policy",
+        "purchasing": "Purchase Policy",
+        "warrantyReturn": "Warranty & Return Policy",
+        "shipping": "Shipping Policy",
+        "payment": "Payment Policy"
+      },
+      "hotline": "{office} hotline:"
+    }
+  },
+  "ProductsPage": {
+    "hero": {
+      "title": "Products",
+      "imageAlt": "FUJITEK automotive window-film products"
+    },
+    "technicalEyebrow": "Technical data",
+    "technicalTitle": "Product specifications",
+    "officialWarranty": "Official warranty period",
+    "warrantyYears": "{years} years",
+    "productImageAlt": "FUJITEK {code} automotive window film",
+    "viewDetails": "View details",
+    "structure": "Structure",
+    "color": "Color",
+    "categories": {
+      "windshield": "Windshield",
+      "sideRear": "Side/Rear"
+    },
+    "groups": {
+      "sputter": "Flagship",
+      "ultraCeramic": "Premium",
+      "nanoCeramic": "Standard"
+    },
+    "metrics": {
+      "vlt": "Visible light transmission",
+      "internalReflection": "Interior reflectance",
+      "externalReflection": "Exterior reflectance",
+      "energyTransmission": "Solar transmission",
+      "energyReflection": "Solar reflectance",
+      "energyAbsorption": "Solar absorption",
+      "uvBlock": "UV blocking",
+      "irBlock": "IR rejection",
+      "heatTransferCoeff": "Heat transfer coefficient"
+    },
+    "colors": {
+      "skyBlue": "Sky blue",
+      "darkCharcoal": "Dark charcoal",
+      "charcoalBlue": "Charcoal blue",
+      "smokeGray": "Smoke gray",
+      "black": "Black"
+    },
+    "catalog": {
+      "eyebrow": "Product catalog",
+      "title": "OUR PRODUCTS",
+      "description": "Comprehensive range of window films, Bi-LED lighting systems, dashcams, and premium automotive accessories.",
+      "categories": {
+        "all": "All",
+        "film": "Window Film & Decals",
+        "ledBulbs": "LED Bulbs & Mini Projectors",
+        "biLed": "Fog & Headlight Bi-LEDs",
+        "auxLights": "Auxiliary Lights",
+        "dashcam": "Dashcams",
+        "tpms": "Tire Pressure Sensors (TPMS)",
+        "androidBox": "Android Box",
+        "retroAccessories": "Headlight Retrofit Accessories"
+      },
+      "specs": {
+        "vlt": "Visible light transmission",
+        "internalReflection": "Internal reflection",
+        "externalReflection": "External reflection",
+        "energyTransmission": "Energy transmission",
+        "energyReflection": "Energy reflection",
+        "energyAbsorption": "Energy absorption",
+        "uvBlock": "UV rejection",
+        "irBlock": "IR rejection",
+        "heatTransferCoeff": "Heat transfer coefficient",
+        "power": "Power",
+        "colorTemperature": "Color temperature",
+        "waterResistance": "Water resistance",
+        "luminousFlux": "Luminous flux",
+        "beamDistance": "Beam distance",
+        "resolution": "Resolution",
+        "sensor": "Sensor",
+        "powerSource": "Power source",
+        "alertMode": "Alert mode",
+        "configuration": "Configuration",
+        "operatingSystem": "Operating system",
+        "control": "Control",
+        "application": "Application",
+        "ledChip": "LED chip",
+        "connectivity": "Connectivity",
+        "valveType": "Valve type"
+      },
+      "values": {
+        "solar": "Solar powered",
+        "displayAndSound": "Display and sound",
+        "biLedCustomization": "Bi-LED customization",
+        "external": "Quick-fit external valve"
+      },
+      "items": {
+        "sp50Cat": {
+          "name": "SP50 Multilayer Sputter Window Film"
+        },
+        "sp10Cat": {
+          "name": "SP10 Multilayer Sputter Window Film"
+        },
+        "b55Cat": {
+          "name": "B55 Ultra Nano Ceramic Window Film"
+        },
+        "b15Cat": {
+          "name": "B15 Ultra Nano Ceramic Window Film"
+        },
+        "l50Cat": {
+          "name": "L50 Nano Ceramic Window Film"
+        },
+        "l15Cat": {
+          "name": "L15 Nano Ceramic Window Film"
+        },
+        "ledMini1": {
+          "name": "Mini X1 High-Power Bi-LED Bulb"
+        },
+        "biledPro1": {
+          "name": "IP68 Laser Pro Fog Bi-LED"
+        },
+        "auxLight1": {
+          "name": "40W Matrix Spot Offroad Light"
+        },
+        "dashcam4k": {
+          "name": "4K Front and Rear GPS Dashcam"
+        },
+        "tpmsSolar": {
+          "name": "Solar Tire Pressure Monitoring System"
+        },
+        "androidBoxDx": {
+          "name": "8GB / 128GB Automotive Android Box"
+        },
+        "retroAcc1": {
+          "name": "App-Controlled Demon Eye and Matrix Angel Eyes"
+        },
+        "biledLaserGt": {
+          "name": "90W GT Ultra Laser Bi-LED"
+        },
+        "dashcamMini2k": {
+          "name": "Mini 2K WiFi 6 Dashcam"
+        },
+        "tpmsSolarPro": {
+          "name": "Bluetooth External-Valve TPMS"
+        }
+      },
+      "itemCount": "{count} items",
+      "searchPlaceholder": "Search products, model code...",
+      "noResultsTitle": "No products found",
+      "noResultsDesc": "Try searching with different keywords or clear your search filter.",
+      "clearSearch": "Clear search",
+      "pageInfo": "Page {current} of {total}",
+      "prev": "Previous",
+      "next": "Next",
+      "itemsPerPageLabel": "Show",
+      "perPage": "page"
+    }
+  },
+  "ProductDetailPage": {
+    "breadcrumbs": {
+      "home": "Home",
+      "products": "Products"
+    },
+    "specsTitle": "DETAILED TECHNICAL SPECIFICATIONS",
+    "featuresTitle": "KEY FEATURES & CORE TECHNOLOGY",
+    "warrantyLabel": "OFFICIAL WARRANTY",
+    "warrantyYears": "{years} YEARS E-WARRANTY",
+    "bookInstallationCta": "BOOK INSTALLATION NOW",
+    "consultHotline": "HOTLINE CONSULTATION: 0886.33.77.33",
+    "notFound": "Requested product could not be found.",
+    "backToCatalog": "Back to product catalog",
+    "relatedTitle": "RELATED PRODUCTS",
+    "introductionTitle": "Product introduction",
+    "technologyTitle": "Technology & highlights",
+    "applicationsTitle": "Recommended applications",
+    "placements": {
+      "windshield": "Windshield",
+      "sideRear": "Side / rear windows"
+    },
+    "colors": {
+      "skyBlue": "Sky blue",
+      "darkCharcoal": "Dark charcoal",
+      "charcoalBlue": "Charcoal blue",
+      "smokeGray": "Smoke gray",
+      "black": "Black"
+    },
+    "summary": {
+      "color": "Color: {value}",
+      "vlt": "Visible light transmission (VLT): {value}",
+      "ir": "Infrared rejection (IRR): {value}",
+      "uv": "Ultraviolet rejection (UVR): {value}",
+      "heatTransfer": "Heat transfer coefficient: {value}"
+    },
+    "specLabels": {
+      "structure": "Structure",
+      "color": "Color"
+    },
+    "film": {
+      "overviewEyebrow": "Product overview",
+      "technologyEyebrow": "Technology and materials",
+      "technologyTitle": "{technology} film mechanism — {code}",
+      "technologyDescription": "Metal sputtering deposits premium metallic layers onto the film surface. These layers reflect a large portion of infrared radiation back outside, reducing the amount of heat transferred into the vehicle.",
+      "hotlineLabel": "Support hotline",
+      "onlineLabel": "Online 24/7",
+      "zaloCta": "Chat on Zalo",
+      "noTint": "Dye-free",
+      "facts": {
+        "originLabel": "Origin",
+        "originValue": "Japanese technology",
+        "technologyLabel": "Technology",
+        "mechanismLabel": "Heat-control mechanism",
+        "mechanismValue": "Heat reflection",
+        "materialLabel": "Material",
+        "materialValue": "Premium metals"
+      },
+      "specsEyebrow": "Measured data",
+      "specsTitle": "Product technical specifications",
+      "metrics": {
+        "vlt": "Visible light transmission",
+        "internalReflection": "Internal reflection",
+        "externalReflection": "External reflection",
+        "energyTransmission": "Energy transmission",
+        "energyReflection": "Energy reflection",
+        "energyAbsorption": "Energy absorption",
+        "uvBlock": "UV rejection",
+        "irBlock": "IR rejection",
+        "heatTransferCoeff": "Heat-transfer coefficient"
+      },
+      "spectrumEyebrow": "Spectrum chart",
+      "spectrumTitle": "Spectrum analysis for {code}",
+      "spectrumImageAlt": "Spectrum chart {index} for {code}",
+      "spectrumDescription": "The chart shows transmission and reflection across ultraviolet, visible-light, and infrared wavelengths. These readings help assess visibility, UV rejection, and the film's heat-reflection performance together.",
+      "mechanismEyebrow": "How it works",
+      "mechanismTitle": "Heat-reflection mechanism of {code}",
+      "visibleLightTitle": "Allows visible light through",
+      "visibleLightDescription": "The film structure is calibrated to maintain suitable visible-light transmission for each glass position, supporting a clear view by day and night.",
+      "infraredTitle": "Reflects infrared radiation",
+      "infraredDescription": "Premium material layers reflect much of the infrared radiation back outside, limiting heat transfer through the glass and keeping the cabin cooler.",
+      "reasonsEyebrow": "Why choose it",
+      "reasonsTitle": "Why choose FUJITEK automotive window film?",
+      "reasons": [
+        {
+          "title": "Effective heat reflection",
+          "description": "Reduces heat transfer through the glass and limits surface heat buildup."
+        },
+        {
+          "title": "Clear visibility",
+          "description": "Maintains stable visibility across changing light conditions."
+        },
+        {
+          "title": "Long-term e-warranty",
+          "description": "Keeps warranty benefits transparent through the E-Warranty system."
+        },
+        {
+          "title": "Stable connectivity",
+          "description": "Does not interfere with GPS, ETC, or in-car smart devices."
+        },
+        {
+          "title": "Options for every need",
+          "description": "Multiple film codes suit different glass positions and budgets."
+        }
+      ],
+      "climateEyebrow": "Adapted for Vietnam",
+      "climateTitle": "Optimized for Vietnam's climate",
+      "climateDescription": "FUJITEK's Japanese technology is calibrated for Vietnam's strong sunlight and high radiant heat. The film balances heat control, optical clarity, and long-term stability for real-world driving conditions.",
+      "galleryEyebrow": "Installation gallery",
+      "galleryTitle": "Real-world images",
+      "galleryImageAlt": "{code} installation image {index}",
+      "previousImage": "Previous image",
+      "nextImage": "Next image"
+    },
+    "products": {
+      "sp50Cat": {
+        "eyebrow": "Premium window film",
+        "description": "SP50 is a Multilayer Sputter window film for windshields, balancing brightness, heat rejection, and optical clarity.",
+        "introduction": [
+          "Its multilayer sputtering structure helps control infrared radiation while preserving clear driver visibility.",
+          "A subtle blue tone creates a premium look for vehicles that need a bright windshield with clear heat reduction.",
+          "E-Warranty support keeps warranty information transparent throughout use."
+        ],
+        "features": [
+          "Rejects up to 98% infrared radiation to reduce windshield heat.",
+          "Blocks 99.9% UV to help protect occupants and interiors.",
+          "50.6% visible light transmission suits windshield visibility needs."
+        ],
+        "applications": [
+          "Windshields for personal and premium service vehicles.",
+          "Customers who prioritize clarity and low reflection.",
+          "Vehicles frequently used in daytime or hot urban conditions."
+        ]
+      },
+      "ledMini1": {
+        "eyebrow": "Lighting upgrade",
+        "description": "Mini X1 Bi-LED bulbs provide a compact lighting upgrade for vehicles that need better visibility while keeping an OEM-style layout.",
+        "introduction": [
+          "Compact design helps fit limited installation spaces.",
+          "6000K light color delivers a modern and easy-to-read beam."
+        ],
+        "features": [
+          "55W power output.",
+          "Controlled cut-off when installed and adjusted correctly.",
+          "Suitable for many mainstream vehicle models."
+        ],
+        "applications": [
+          "Fog-light or compact lighting upgrades.",
+          "Vehicles that need improved night visibility."
+        ]
+      },
+      "biledPro1": {
+        "eyebrow": "Fog Bi-LED",
+        "description": "Laser Pro Fog Bi-LED is designed for strong lighting, water resistance, and stable operation in demanding weather.",
+        "introduction": [
+          "IP68 rating supports use in rain, fog, and humid environments.",
+          "High lumen output expands forward visibility."
+        ],
+        "features": [
+          "IP68 water resistance.",
+          "12,000 LM light output.",
+          "Supports fog-light and auxiliary high-beam upgrades."
+        ],
+        "applications": [
+          "Vehicles frequently driven on highways, mountain roads, or bad weather.",
+          "Customers who need stronger light with controlled beam output."
+        ]
+      },
+      "auxLight1": {
+        "eyebrow": "Auxiliary lighting",
+        "description": "Matrix Spot 40W auxiliary lights add long-range lighting for night trips, offroad use, and poorly lit roads.",
+        "introduction": [
+          "Spot-beam design focuses light forward.",
+          "Lamp body is suitable for add-on installs where long-distance visibility is needed."
+        ],
+        "features": [
+          "40W power output.",
+          "Reference throw distance of 300m.",
+          "Supports dark roads, rain, and fog."
+        ],
+        "applications": [
+          "Pickup trucks, SUVs, and work vehicles.",
+          "Night travel, highways, and rough terrain."
+        ]
+      },
+      "dashcam4k": {
+        "eyebrow": "Dash camera",
+        "description": "4K GPS dashcam records clear front and rear footage, helping preserve trip evidence and operational transparency.",
+        "introduction": [
+          "4K resolution captures license plates and road situations more clearly.",
+          "GPS records route and speed data."
+        ],
+        "features": [
+          "Front and rear recording.",
+          "Sony Starvis 2 sensor.",
+          "GPS positioning support."
+        ],
+        "applications": [
+          "Family cars, service vehicles, and company fleets.",
+          "Drivers who need clear journey evidence."
+        ]
+      },
+      "tpmsSolar": {
+        "eyebrow": "Tire safety",
+        "description": "TPMS Solar V2 tracks tire pressure and temperature in real time, helping detect abnormalities before they become driving risks.",
+        "introduction": [
+          "Solar power reduces dependence on manual charging.",
+          "Sound alerts and a dedicated display help drivers read tire status quickly."
+        ],
+        "features": [
+          "Internal valve sensors.",
+          "Solar-powered display.",
+          "Pressure and temperature alerts."
+        ],
+        "applications": [
+          "Long-distance vehicles.",
+          "Customers who prioritize safety and operating control."
+        ]
+      },
+      "androidBoxDx": {
+        "eyebrow": "Smart entertainment",
+        "description": "Android Box DX8 upgrades the factory screen with 8GB RAM / 128GB storage for smarter entertainment and connectivity.",
+        "introduction": [
+          "Keeps the original screen while expanding app capabilities.",
+          "High configuration supports smoother maps, video, and utilities."
+        ],
+        "features": [
+          "8GB RAM / 128GB storage.",
+          "Android 13.",
+          "Fast connection with factory displays."
+        ],
+        "applications": [
+          "Vehicles with factory screens needing smart features.",
+          "Users who regularly use maps, music, and video."
+        ]
+      },
+      "retroAcc1": {
+        "eyebrow": "Lighting accessories",
+        "description": "App-controlled demon-eye and Matrix Angel Eyes accessories personalize the headlamp cluster and create a distinctive light signature.",
+        "introduction": [
+          "Bluetooth app control allows flexible lighting effects.",
+          "Suitable for professional projector-retrofit configurations."
+        ],
+        "features": [
+          "Bluetooth app control.",
+          "Matrix Angel Eyes effects.",
+          "Adds personality to the headlamp cluster."
+        ],
+        "applications": [
+          "Projector-retrofit vehicles needing aesthetic completion.",
+          "Customers who want a personalized lighting signature."
+        ]
+      },
+      "sp10Cat": {
+        "eyebrow": "Premium window film",
+        "description": "SP10 is a Multilayer Sputter film for side and rear windows, prioritizing privacy and heat rejection.",
+        "introduction": [
+          "Its multilayer sputtering structure controls infrared radiation in hot conditions.",
+          "The dark shade reduces glare and improves cabin privacy."
+        ],
+        "features": [
+          "Rejects up to 98% infrared radiation.",
+          "Blocks 99.9% UV.",
+          "12.2% visible light transmission suits side and rear windows."
+        ],
+        "applications": [
+          "Side and rear windows for personal vehicles.",
+          "Customers prioritizing privacy and glare reduction."
+        ]
+      },
+      "b55Cat": {
+        "eyebrow": "Ultra Nano Ceramic film",
+        "description": "B55 combines windshield clarity with the high heat rejection of Ultra Nano Ceramic technology.",
+        "introduction": [
+          "Nano ceramic particles reject heat without creating strong mirror reflection.",
+          "A subtle blue shade maintains a refined windshield appearance."
+        ],
+        "features": [
+          "Rejects up to 99% infrared radiation.",
+          "Blocks 99.9% UV.",
+          "59.7% visible light transmission supports clear vision."
+        ],
+        "applications": [
+          "Windshields for personal and service vehicles.",
+          "Drivers prioritizing clarity and stable connectivity."
+        ]
+      },
+      "b15Cat": {
+        "eyebrow": "Ultra Nano Ceramic film",
+        "description": "B15 is a dark Ultra Nano Ceramic option for side and rear windows.",
+        "introduction": [
+          "Its nano ceramic structure provides high heat rejection without signal interference.",
+          "The shade balances privacy with visibility from inside the vehicle."
+        ],
+        "features": [
+          "Rejects up to 99% infrared radiation.",
+          "Blocks 99.9% UV.",
+          "16% visible light transmission."
+        ],
+        "applications": [
+          "Side and rear windows.",
+          "Vehicles requiring greater passenger privacy."
+        ]
+      },
+      "l50Cat": {
+        "eyebrow": "Nano Ceramic film",
+        "description": "L50 is a light Nano Ceramic windshield film balancing performance and cost.",
+        "introduction": [
+          "Nano Ceramic technology provides stable heat rejection without signal interference.",
+          "Its light transmission suits everyday visibility."
+        ],
+        "features": [
+          "Rejects up to 92% infrared radiation.",
+          "Blocks 99.9% UV.",
+          "10-year electronic warranty."
+        ],
+        "applications": [
+          "Family-vehicle windshields.",
+          "Customers seeking a balanced Nano Ceramic solution."
+        ]
+      },
+      "l15Cat": {
+        "eyebrow": "Nano Ceramic film",
+        "description": "L15 is a dark Nano Ceramic film for side and rear windows.",
+        "introduction": [
+          "The dark shade improves privacy and reduces passenger glare.",
+          "Its Nano Ceramic structure preserves GPS and mobile connectivity."
+        ],
+        "features": [
+          "Rejects up to 85% infrared radiation.",
+          "Blocks 99.9% UV.",
+          "10-year electronic warranty."
+        ],
+        "applications": [
+          "Side and rear windows.",
+          "Family vehicles requiring greater privacy."
+        ]
+      },
+      "biledLaserGt": {
+        "eyebrow": "High-performance Bi-LED",
+        "description": "The 90W GT Ultra Laser expands long-range lighting for night journeys.",
+        "introduction": [
+          "High-output configuration for professional headlight systems."
+        ],
+        "features": [
+          "90W power output.",
+          "OSRAM LED chip.",
+          "Clear long-range beam."
+        ],
+        "applications": [
+          "Vehicles frequently driven at night.",
+          "Professional headlight upgrades."
+        ]
+      },
+      "dashcamMini2k": {
+        "eyebrow": "Compact dash camera",
+        "description": "The Mini 2K WiFi 6 dashcam records clear footage in a compact body.",
+        "introduction": ["Compact design minimizes windshield obstruction."],
+        "features": [
+          "2K resolution.",
+          "WiFi 6 connectivity.",
+          "Convenient video access."
+        ],
+        "applications": [
+          "Personal vehicles needing a compact camera.",
+          "Users prioritizing fast wireless access."
+        ]
+      },
+      "tpmsSolarPro": {
+        "eyebrow": "Tire pressure monitoring",
+        "description": "Bluetooth external-valve TPMS supports quick installation and active tire monitoring.",
+        "introduction": [
+          "External sensors simplify installation and maintenance."
+        ],
+        "features": [
+          "Quick-fit external valves.",
+          "Bluetooth 5.0.",
+          "Abnormal-pressure alerts."
+        ],
+        "applications": [
+          "Personal vehicles needing easy TPMS installation.",
+          "Drivers prioritizing proactive tire monitoring."
+        ]
+      }
+    }
+  },
+  "DealersPage": {
+    "hero": {
+      "imageAlt": "LEXZENZ Korea Reflex Film automotive window film banner",
+      "eyebrow": "Dealer network",
+      "title": "Become an authorized dealer today",
+      "description": "Find an official FUJITEK automotive window-film installation center near you.",
+      "dealerCta": "Become a dealer"
+    },
+    "recruitment": {
+      "eyebrow": "Partnership opportunity",
+      "title": "Grow your business with FUJITEK",
+      "description": "Become an authorized dealer and gain access to genuine products, dedicated partner support, and a transparent warranty network.",
+      "cta": "Apply to become a dealer"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by name or address...",
+      "searchAriaLabel": "Search dealers by name, address, or phone number",
+      "cityAriaLabel": "Select a province or city",
+      "districtAriaLabel": "Select a ward",
+      "allCities": "Nationwide",
+      "allDistricts": "All wards",
+      "nearMe": "Find dealers and warranty centers near you (≤ 20 km)",
+      "nearMeLoading": "Finding your location...",
+      "nearMeError": "Unable to access your location. Please check location permissions.",
+      "nearMeUnsupported": "Your browser does not support geolocation.",
+      "resultCount": "{count} dealers and warranty centers found"
+    },
+    "states": {
+      "loading": "Loading dealers and warranty centers...",
+      "loadingMore": "Loading more locations...",
+      "loadMoreError": "Unable to load more locations.",
+      "error": "Unable to load dealers and warranty centers. Please try again.",
+      "retry": "Try again"
+    },
+    "empty": "No matching dealers or warranty centers found.",
+    "locationType": {
+      "dealer": "Dealer",
+      "serviceCenter": "Warranty center"
+    },
+    "viewMore": "View more",
+    "directions": "Directions",
+    "hotline": "Hotline",
+    "map": {
+      "defaultTitle": "FUJITEK dealer and warranty center map",
+      "iframeTitle": "FUJITEK dealer and warranty center location map",
+      "ariaLabel": "Interactive map of FUJITEK dealers and warranty centers in Vietnam",
+      "activateMap": "Click to interact with the map",
+      "resetMap": "Reset map",
+      "fullscreenMap": "Open map in fullscreen",
+      "exitFullscreenMap": "Exit fullscreen",
+      "loading": "Loading the Vietnam map boundary...",
+      "loadError": "Unable to load the Vietnam boundary. Please try again.",
+      "networkLoading": "Loading dealers and warranty centers...",
+      "networkError": "Unable to load dealers and warranty centers.",
+      "retry": "Try again",
+      "selectedDealer": "Selected dealer",
+      "locationType": {
+        "dealer": "Authorized dealer",
+        "serviceCenter": "Warranty center"
+      },
+      "popupPhone": "Phone",
+      "openGoogleMaps": "Open Google Maps"
+    }
+  },
+  "QuickChat": {
+    "helpPrompt": "Need help?",
+    "title": "Request a consultation",
+    "description": "Leave your information and FUJITEK will contact you as soon as possible.",
+    "openAriaLabel": "Open quick consultation form",
+    "closeAriaLabel": "Close quick consultation form"
+  },
+  "ContactPage": {
+    "eyebrow": "Contact",
+    "title": "FUJITEK – LEXZENZ Vietnam",
+    "description": "The FUJITEK – LEXZENZ Vietnam team is ready to recommend the right heat-rejection solution for your vehicle.",
+    "contactDetailsTitle": "Hotlines & Contact",
+    "emailLabel": "Email:",
+    "websiteLabel": "Website:",
+    "offices": {
+      "title": "Addresses & Offices",
+      "hcm": {
+        "label": "Ho Chi Minh City headquarters:",
+        "address": "7C Nguyen Ngoc Phuong Street, Thanh My Tay Ward, Ho Chi Minh City"
+      },
+      "hanoi": {
+        "label": "Hanoi branch:",
+        "address": "62, Alley 20 Nghia Do, Nghia Do Ward, Hanoi"
+      }
+    },
+    "hotlines": {
+      "hcm": "Ho Chi Minh City hotline:",
+      "hanoi": "Hanoi hotline:"
+    },
+    "form": {
+      "title": "Register for a consultation",
+      "description": "Leave your contact information and we will respond and assist you as soon as possible.",
+      "submit": "Send",
+      "submitting": "Sending...",
+      "success": {
+        "title": "Thank you for contacting us!",
+        "description": "A FUJITEK Films consultant will respond by phone as soon as possible.",
+        "reset": "Send another message"
+      },
+      "fields": {
+        "consultationTopic": {
+          "label": "Consultation topic *",
+          "placeholder": "Choose a consultation topic"
+        },
+        "fullName": {
+          "label": "Full name *",
+          "placeholder": "Enter your full name..."
+        },
+        "phone": {
+          "label": "Phone number *",
+          "placeholder": "Enter your phone number..."
+        },
+        "content": {
+          "label": "Message *",
+          "placeholder": "Tell us what you need help with..."
+        },
+        "province": {
+          "label": "Province / City *",
+          "placeholder": "Choose your support area",
+          "loading": "Loading provinces and cities...",
+          "loadError": "Unable to load provinces and cities.",
+          "retry": "Reload"
+        }
+      },
+      "consultationTopics": {
+        "PRODUCT_CONSULTATION": "Product consultation",
+        "FIND_DEALER": "Find a dealer",
+        "WARRANTY": "Warranty",
+        "DEALER_REGISTRATION": "Dealer registration",
+        "OTHER": "Other"
+      },
+      "validation": {
+        "consultationTopicRequired": "Select a consultation topic.",
+        "fullNameMin": "Enter a full name with at least 2 characters.",
+        "fullNameMax": "Full name must not exceed 120 characters.",
+        "phoneInvalid": "Enter a valid phone number.",
+        "contentMin": "Enter a message with at least 10 characters.",
+        "contentMax": "Message must not exceed 2000 characters.",
+        "phonePending": "This phone number already has a message being processed. Please wait for a response before sending another.",
+        "provinceRequired": "Select a province or city.",
+        "rateLimit": "You have sent too many requests. Please wait a moment and try again.",
+        "submitError": "We could not send your message. Please try again."
+      }
+    },
+    "maps": {
+      "hanoi": {
+        "title": "Hanoi office",
+        "iframeTitle": "Map of FUJITEK Hanoi office"
+      },
+      "hcm": {
+        "title": "Southern branch",
+        "iframeTitle": "Map of FUJITEK southern branch"
+      }
+    }
+  },
+  "PolicyPage": {
+    "eyebrow": "Legal & Policies",
+    "title": "Transparent policies, clearly stated rights",
+    "description": "Review the terms governing website use, purchases, payments, delivery, privacy, and FUJITEK product warranties.",
+    "available": "Content available",
+    "unavailable": "Not available yet",
+    "missingCard": "This policy has not been published yet.",
+    "labels": {
+      "general": "General terms",
+      "privacy": "Privacy",
+      "purchasing": "Purchasing",
+      "warrantyReturn": "Warranty & Returns",
+      "shipping": "Shipping",
+      "payment": "Payment"
+    },
+    "titles": {
+      "general": "General terms & conditions",
+      "privacy": "Privacy policy",
+      "purchasing": "Purchase policy",
+      "warrantyReturn": "Warranty & returns policy",
+      "shipping": "Shipping policy",
+      "payment": "Payment policy"
+    },
+    "duration": {
+      "title": "1. Warranty duration",
+      "description": "FUJITEK automotive window film receives an official electronic warranty of 10 to 15 years from successful E-Warranty activation."
+    },
+    "conditions": {
+      "title": "2. Warranty eligibility",
+      "items": {
+        "material": "Film cracking, peeling, or bubbling caused by eligible material or manufacturing defects.",
+        "performance": "Film discoloration or performance loss beyond the limits defined by the policy.",
+        "registration": "E-Warranty information is registered and can be verified in the official system."
+      }
+    }
+  },
+  "GuidePage": {
+    "eyebrow": "User guide",
+    "title": "Using & Checking E-Warranty",
+    "description": "Simple steps for activation, official-label lookup, and automotive window-film care.",
+    "steps": {
+      "receive": {
+        "title": "Step 1: Receive an E-Warranty label",
+        "description": "After installation, the dealer provides an official E-Warranty label or electronic activation record."
+      },
+      "lookup": {
+        "title": "Step 2: Open online lookup",
+        "description": "Open warranty lookup and enter the phone number or license plate to verify coverage."
+      }
+    }
+  },
+  "SupportCentersPage": {
+    "eyebrow": "FUJITEK service network",
+    "title": "Warranty centers & Dealer network",
+    "description": "A nationwide network of authorized dealers and official service centers.",
+    "centers": {
+      "cauGiay": {
+        "city": "Hanoi",
+        "name": "Panda Auto Showroom & Cau Giay Warranty Center",
+        "address": "18 Cau Giay Street, Ngoc Khanh Ward, Cau Giay District, Hanoi",
+        "hours": "08:00 - 18:30 (Monday - Sunday)"
+      },
+      "haDong": {
+        "city": "Hanoi",
+        "name": "FUJITEK Ha Dong Installation Center",
+        "address": "68 Quang Trung Street, Ha Dong District, Hanoi",
+        "hours": "08:00 - 18:00 (Monday - Saturday)"
+      },
+      "hoChiMinhCity": {
+        "city": "Ho Chi Minh City",
+        "name": "FUJITEK Authorized Warranty Center, Ho Chi Minh City",
+        "address": "102 Hanoi Highway, Thao Dien Ward, Thu Duc City, Ho Chi Minh City",
+        "hours": "08:00 - 18:30 (Monday - Sunday)"
+      }
+    }
+  },
+  "Warranty": {
+    "hub": {
+      "title": "Electronic warranty service center",
+      "description": "FUJITEK's official electronic warranty system supports nationwide lookup, activation, and service requests."
+    },
+    "actions": {
+      "title": "How can we help?",
+      "description": "Choose an action below to use FUJITEK electronic warranty services.",
+      "items": {
+        "lookup": {
+          "badge": "Quick lookup",
+          "title": "Check warranty coverage",
+          "description": "Verify an E-Warranty label and coverage period by phone number or license plate.",
+          "action": "Look up now"
+        },
+        "activate": {
+          "badge": "New activation",
+          "title": "Activate warranty",
+          "description": "Activate an official electronic warranty after installation is complete.",
+          "action": "Activate now"
+        },
+        "request": {
+          "badge": "Report an issue",
+          "title": "Warranty request",
+          "description": "Submit issue details to receive technical support and resolution guidance.",
+          "action": "Create request"
+        },
+        "track": {
+          "badge": "24/7 updates",
+          "title": "Track progress",
+          "description": "Check request status and service appointment information.",
+          "action": "Track now"
+        },
+        "dealers": {
+          "badge": "Nationwide",
+          "title": "Warranty centers & Dealers",
+          "description": "Find the nearest authorized FUJITEK service center.",
+          "action": "Find a center"
+        },
+        "policy": {
+          "badge": "Terms & Guides",
+          "title": "Warranty policy",
+          "description": "Review warranty terms, coverage, and product verification guidance.",
+          "action": "View policy"
+        }
+      }
+    },
+    "activate": {
+      "eyebrow": "E-Warranty activation",
+      "title": "Activate electronic warranty",
+      "description": "For customers and dealers activating E-Warranty after FUJITEK window-film installation.",
+      "submit": "Confirm E-Warranty activation",
+      "success": {
+        "title": "Warranty activated!",
+        "description": "The 15-year electronic warranty for vehicle <plate></plate> has been saved in the FUJITEK system.",
+        "reset": "Activate another label"
+      },
+      "fields": {
+        "customerName": {
+          "label": "Vehicle owner *",
+          "placeholder": "E.g. Alex Nguyen"
+        },
+        "phone": {
+          "label": "Phone number *",
+          "placeholder": "E.g. 0988 123 456"
+        },
+        "carPlate": {
+          "label": "License plate *",
+          "placeholder": "E.g. 30H-888.88"
+        },
+        "stampCode": {
+          "label": "E-Warranty label code *",
+          "placeholder": "E.g. FJ-8899-2026"
+        }
+      }
+    },
+    "lookup": {
+      "eyebrow": "E-Warranty system",
+      "title": "Check electronic warranty coverage",
+      "description": "Enter a phone number, license plate, or E-Warranty label code to verify official coverage.",
+      "heroImageAlt": "FUJITEK electronic warranty lookup",
+      "placeholder": "Enter phone / License plate / Label code...",
+      "search": "Search",
+      "tryPrefix": "For example, enter",
+      "or": "or",
+      "mock": {
+        "customerName": "Nguyen Van An",
+        "address": "Ho Chi Minh City",
+        "warrantyYears": "15 years",
+        "dealer": "Panda Auto Hanoi Showroom",
+        "status": "Active (Official)"
+      },
+      "registration": {
+        "title": "Your electronic warranty code can be registered through one of these identifiers",
+        "description": "Use one of the 3 methods below to look up E-Warranty label information",
+        "methods": {
+          "phone": {
+            "label": "Method 01",
+            "title": "Phone number",
+            "description": "The owner phone number registered during installation"
+          },
+          "qr": {
+            "label": "Method 02",
+            "title": "QR code / Email",
+            "description": "The warranty label code received by message or email"
+          },
+          "serial": {
+            "label": "Method 03",
+            "description": "Code format: BL/BHDT/000199"
+          }
+        }
+      },
+      "searchSection": {
+        "title": "Lookup",
+        "description": "Enter the code or phone number provided on the warranty document."
+      },
+      "guide": {
+        "title": "How to check E-Warranty in 3 steps",
+        "steps": {
+          "one": {
+            "badge": "Step 01",
+            "title": "Enter information",
+            "description": "Enter a phone number, license plate, or E-Warranty label code."
+          },
+          "two": {
+            "badge": "Step 02",
+            "title": "Press Search",
+            "description": "The system automatically retrieves official warranty data."
+          },
+          "three": {
+            "badge": "Step 03",
+            "title": "View details",
+            "description": "Review owner, film package, glass positions, and 15-year coverage."
+          }
+        }
+      },
+      "otherActions": {
+        "title": "Other warranty services",
+        "activate": "Activate a new label",
+        "request": "Submit an issue",
+        "dealers": "Find an installation center"
+      },
+      "support": {
+        "message": "Whenever you need FUJITEK support, contact the customer service hotline.",
+        "hotlineLabel": "Hotline",
+        "closing": "FUJITEK Films is pleased to serve you."
+      },
+      "policyShortcut": {
+        "eyebrow": "Policy & Terms",
+        "title": "Want to understand warranty scope and terms in detail?",
+        "description": "View warranty duration rules (10 - 15 years), eligible cases, and post-installation notes.",
+        "action": "View warranty policy"
+      },
+      "result": {
+        "code": "E-Warranty code",
+        "serial": "Serial number",
+        "duration": "Coverage",
+        "owner": "Owner",
+        "phone": "Phone number",
+        "address": "Address",
+        "carPlate": "License plate",
+        "carModel": "Vehicle model",
+        "vehicle": "License plate & Vehicle",
+        "film": "Window-film range",
+        "warrantyYears": "Warranty period (years)",
+        "installedDate": "Installation date",
+        "expiryDate": "Expiry date",
+        "dealer": "Installation center",
+        "glassSection": "Filmed glass positions",
+        "windshield": "Windshield",
+        "frontLeftGlass": "Front left window",
+        "frontRightGlass": "Front right window",
+        "rearLeftGlass": "Rear left window",
+        "rearRightGlass": "Rear right window",
+        "sunroof": "Sunroof",
+        "rearGlass": "Rear window",
+        "notes": "Notes"
+      },
+      "noResult": "No warranty record was found. Check the phone number or license plate and try again."
+    },
+    "request": {
+      "eyebrow": "Warranty service request",
+      "title": "Submit a warranty & Support request",
+      "description": "Get help with peeling, bubbles, discoloration, or installation-related issues.",
+      "submit": "Submit support request",
+      "success": {
+        "title": "Request submitted!",
+        "description": "Your support ticket is <ticket></ticket>. A FUJITEK technician will contact you within 24 hours.",
+        "reset": "Submit another request"
+      },
+      "fields": {
+        "customerName": {
+          "label": "Full name *",
+          "placeholder": "E.g. Alex Nguyen"
+        },
+        "phone": {
+          "label": "Phone number *",
+          "placeholder": "E.g. 0988 123 456"
+        },
+        "reference": {
+          "label": "License plate / E-Warranty code *",
+          "placeholder": "E.g. 30H-888.88"
+        },
+        "issue": {
+          "label": "Issue *",
+          "placeholder": "-- Select an issue --",
+          "options": {
+            "bubble": "Peeling / Film bubbles",
+            "fade": "Discoloration / Fading",
+            "scratch": "Impact scratches",
+            "other": "Other issue"
+          }
+        },
+        "details": {
+          "label": "Issue details",
+          "placeholder": "Describe the affected window and the issue..."
+        }
+      }
+    },
+    "track": {
+      "eyebrow": "Track service progress",
+      "title": "Track warranty processing",
+      "description": "Enter a request ID or phone number to view appointments and processing progress.",
+      "placeholder": "Enter REQ-... ticket or phone number...",
+      "search": "Check",
+      "mock": {
+        "customerName": "Nguyen Van An",
+        "issue": "Bubbles on the left side window",
+        "status": "Received & Scheduling a technician",
+        "technician": "Tran Van Binh - Panda Auto Hanoi"
+      },
+      "result": {
+        "ticket": "Ticket ID",
+        "customer": "Customer",
+        "carPlate": "License plate",
+        "technician": "Assigned technician"
+      }
+    }
+  },
+  "SiteHeader": {
+    "logoAlt": "FUJITEK - The Ultimate Window Films",
+    "homeAriaLabel": "Go to FUJITEK home page",
+    "desktopNavLabel": "Primary navigation",
+    "mobileNavLabel": "Mobile navigation",
+    "openMenuAriaLabel": "Open menu",
+    "closeMenuAriaLabel": "Close menu",
+    "warrantyLookupAriaLabel": "Look up warranty",
+    "dealerCta": "Become a dealer",
+    "languageMenuAriaLabel": "Choose language",
+    "languages": {
+      "vietnamese": "Vietnamese",
+      "english": "English"
+    },
+    "nav": {
+      "home": "Home",
+      "about": "About",
+      "products": "Products",
+      "warranty": "Warranty",
+      "dealers": "Dealer network",
+      "news": "News",
+      "contact": "Contact"
+    }
+  },
   "Home": {
     "eyebrow": "Monorepo base",
     "title": "Public web app shell",
     "description": "Start domain work from a vertical slice: API route, shared contract, UI state, and verification.",
     "primaryAction": "Primary action",
     "apiDocs": "API docs"
+  },
+  "PolicyDetailPage": {
+    "eyebrow": "Legal & Policies",
+    "lastUpdated": "Last updated: {date}",
+    "emptyTitle": "Content not available",
+    "emptyDescription": "This policy has not been published yet. Please check back later or contact FUJITEK for support.",
+    "titles": {
+      "general": "General terms & conditions",
+      "privacy": "Privacy policy",
+      "purchasing": "Purchase policy",
+      "warrantyReturn": "Warranty & returns policy",
+      "shipping": "Shipping policy",
+      "payment": "Payment policy"
+    },
+    "home": "Home",
+    "companyName": "Vilatek Joint Stock Company",
+    "companyDescription": "Official supplier of FUJITEK automotive window films and premium automotive accessories.",
+    "offices": {
+      "hcm": {
+        "label": "Ho Chi Minh City office",
+        "address": "7C Nguyen Ngoc Phuong Street, Thanh My Tay Ward, Ho Chi Minh City",
+        "hotline": "HCM hotline: 0886 33 77 33"
+      },
+      "hanoi": {
+        "label": "Hanoi branch",
+        "address": "62, Alley 20 Nghia Do, Nghia Do Ward, Hanoi",
+        "hotline": "Hanoi hotline: 0989 017 999"
+      }
+    },
+    "documents": {
+      "general": {
+        "title": "GENERAL TERMS AND POLICIES",
+        "lead": "By visiting the FUJITEK website, reviewing products, or using our automotive window-film and accessory services, customers agree to the following terms.",
+        "sections": [
+          {
+            "heading": "I. Payment",
+            "bullets": [
+              "Customers may pay in cash after installation acceptance or accessory delivery.",
+              "Bank transfer and electronic payment instructions are available through customer support."
+            ]
+          },
+          {
+            "heading": "II. Shipping and delivery",
+            "bullets": [
+              "Direct delivery and installation may be arranged near authorized FUJITEK service locations.",
+              "Accessories for other regions are delivered nationwide through established COD carriers."
+            ]
+          },
+          {
+            "heading": "III. Returns and warranty",
+            "bullets": [
+              "Eligible warranty requests are normally processed within ten working days.",
+              "Qualifying films receive a 10- or 15-year electronic warranty depending on product range.",
+              "Manufacturing defects reported shortly after purchase may qualify for replacement."
+            ]
+          },
+          {
+            "heading": "IV. Information protection",
+            "bullets": [
+              "Customer, vehicle, and E-Warranty data is protected and used only for service, support, and relevant customer care."
+            ]
+          }
+        ]
+      },
+      "privacy": {
+        "title": "PRIVACY POLICY",
+        "lead": "FUJITEK protects personal and vehicle information supplied for consultation, installation, and E-Warranty services.",
+        "sections": [
+          {
+            "heading": "1. Information collected",
+            "bullets": [
+              "Contact, account, vehicle, and warranty information needed to provide requested services.",
+              "Technical visit data such as IP address, browser type, language, and pages viewed."
+            ]
+          },
+          {
+            "heading": "2. How information is used",
+            "bullets": [
+              "To fulfill purchases, provide technical support, answer inquiries, and deliver opted-in service updates."
+            ]
+          },
+          {
+            "heading": "3. Retention",
+            "bullets": [
+              "Information is retained while required for customer service, warranty administration, or applicable legal obligations."
+            ]
+          },
+          {
+            "heading": "4. Data controller",
+            "bullets": [
+              "Vilatek Joint Stock Company manages customer information through its Ho Chi Minh City and Hanoi offices."
+            ]
+          },
+          {
+            "heading": "5. Access and correction",
+            "bullets": [
+              "Customers may request access, correction, or deletion of their information through FUJITEK support channels."
+            ]
+          },
+          {
+            "heading": "6. Security commitment",
+            "bullets": [
+              "FUJITEK does not disclose personal information without authorization except where required by law."
+            ]
+          }
+        ]
+      },
+      "purchasing": {
+        "title": "PURCHASING AND INSTALLATION BOOKING POLICY",
+        "lead": "FUJITEK supports direct, telephone, and online purchasing and installation booking throughout Vietnam.",
+        "sections": [
+          {
+            "heading": "1. Product origin and certification",
+            "bullets": [
+              "Qualifying products are supplied with origin and conformity documentation.",
+              "Window-film performance can be checked using dedicated measurement equipment."
+            ]
+          },
+          {
+            "heading": "2. Ordering options",
+            "bullets": [
+              "Customers may order through authorized dealers, the FUJITEK hotline, or the official website."
+            ]
+          },
+          {
+            "heading": "3. Acceptance and E-Warranty activation",
+            "bullets": [
+              "After installation, the vehicle glass is inspected with the customer before electronic warranty activation."
+            ]
+          }
+        ]
+      },
+      "warrantyReturn": {
+        "title": "WARRANTY, RETURN, AND REFUND POLICY",
+        "lead": "FUJITEK electronic warranty and return terms protect customers purchasing qualifying official products.",
+        "sections": [
+          {
+            "heading": "1. Coverage and duration",
+            "bullets": [
+              "Nano Ceramic L15 and L50 products receive a 10-year electronic warranty.",
+              "B55, B15, SP50, and SP10 products receive a 15-year electronic warranty for eligible manufacturing defects.",
+              "A valid E-Warranty registration is required."
+            ]
+          },
+          {
+            "heading": "2. Exclusions",
+            "bullets": [
+              "Damage caused by impact, accidents, misuse, harsh chemicals, unauthorized repair, or expired coverage is excluded."
+            ]
+          },
+          {
+            "heading": "3. Returns and refunds",
+            "bullets": [
+              "Products reported within the stated initial period may qualify when a verified manufacturing defect or incorrect supply is confirmed."
+            ]
+          },
+          {
+            "heading": "4. Shipping and claims",
+            "bullets": [
+              "Accessory shipping costs and claim handling follow the conditions communicated by customer support."
+            ]
+          }
+        ]
+      },
+      "shipping": {
+        "title": "SHIPPING AND DELIVERY POLICY",
+        "lead": "FUJITEK provides nationwide delivery for eligible website, social, telephone, and in-store orders.",
+        "sections": [
+          {
+            "heading": "1. Method and estimated time",
+            "bullets": [
+              "Accessories are delivered through established carriers, including COD where available.",
+              "Orders are normally confirmed within 24 hours and delivery commonly takes three to five days."
+            ]
+          },
+          {
+            "heading": "2. Possible delays",
+            "bullets": [
+              "Incorrect contact details, difficult addresses, demand spikes, weather, or carrier disruption may delay delivery."
+            ]
+          },
+          {
+            "heading": "3. Fees and inspection",
+            "bullets": [
+              "Shipping fees depend on destination and parcel size and are confirmed before dispatch."
+            ]
+          },
+          {
+            "heading": "4. Geographic limitations",
+            "bullets": [
+              "Large provincial or dealer orders may use specialist carriers under separately agreed commercial terms."
+            ]
+          }
+        ]
+      },
+      "payment": {
+        "title": "PAYMENT POLICY",
+        "lead": "FUJITEK offers cash, COD, and bank-transfer options so customers can choose a suitable payment method.",
+        "sections": [
+          {
+            "heading": "1. Cash payment",
+            "bullets": [
+              "Cash payment is accepted at authorized locations after installation and vehicle handover."
+            ]
+          },
+          {
+            "heading": "2. Cash on delivery",
+            "bullets": [
+              "COD is available for many accessory orders delivered nationwide."
+            ]
+          },
+          {
+            "heading": "3. Bank transfer",
+            "bullets": [
+              "Customers may transfer payment to the official account confirmed by FUJITEK before delivery."
+            ]
+          },
+          {
+            "heading": "4. Transfer notes",
+            "bullets": [
+              "Transfer references should identify the customer and order. Wholesale arrangements follow the signed agreement."
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "AboutPage": {
+    "metadata": {
+      "title": "About FUJITEK Vietnam - Japanese Automotive Window Film Distribution",
+      "description": "FUJITEK Vietnam - High-performance Japanese automotive window film distribution network with genuine E-Warranty coverage."
+    },
+    "hero": {
+      "eyebrow": "Automotive Tech Ecosystem",
+      "titlePrefix": "Comprehensive protection &",
+      "titleHighlight": "Ecosystem",
+      "titleSuffix": "for premium vehicles",
+      "description": "Fujitek not only delivers premium Japanese window film solutions, but also provides a complete automotive tech ecosystem featuring Fujitek High-Power LED Lighting, Lexzenz 4K Dashcams, and Smart TPMS Sensors.",
+      "exploreCta": "Explore Products",
+      "contactCta": "Contact Sales",
+      "exploreProductsCta": "Explore Products",
+      "dealerNetworkCta": "Dealer Network",
+      "brandBadge": "Japanese Tech",
+      "cardTitle": "Thermal Film & Premium Accessories",
+      "cardSubtitle": "ISO 9001 International Standard",
+      "stats": {
+        "uvIr": "UV & IR Rejection",
+        "origin": "Japan Origin",
+        "warranty": "Genuine Warranty",
+        "yearsSuffix": " years"
+      }
+    },
+    "milestones": {
+      "eyebrow": "Growth Journey",
+      "title": "Major Milestones",
+      "description": "Over 10 years of accompanying millions of Vietnamese car owners",
+      "items": {
+        "rdJapan": {
+          "title": "Research & Development",
+          "description": "Established R&D center in Japan, developing proprietary Nano Ceramic technology.",
+          "phase": "Phase 01/04",
+          "tags": {
+            "technology": "Nano Ceramic",
+            "research": "R&D Japan",
+            "patents": "50+ patents"
+          },
+          "stats": {
+            "patents": {
+              "value": "{value}",
+              "label": "Patents"
+            },
+            "research": {
+              "value": "{value} years",
+              "label": "Research & testing"
+            },
+            "certification": {
+              "value": "{value}",
+              "label": "International certification"
+            }
+          }
+        },
+        "launchVietnam": {
+          "title": "Vietnam Market Entry",
+          "description": "Officially launched premium window film products in Vietnam.",
+          "phase": "Phase 02/04",
+          "tags": {
+            "launch": "Vietnam launch",
+            "dealers": "50+ dealers",
+            "customers": "10K+ customers"
+          },
+          "stats": {
+            "dealers": {
+              "value": "{value}",
+              "label": "Initial dealers"
+            },
+            "customers": {
+              "value": "{value}",
+              "label": "Trusted customers"
+            },
+            "satisfaction": {
+              "value": "{value}",
+              "label": "Satisfaction rate"
+            }
+          }
+        },
+        "ewarrantyRelease": {
+          "title": "E-Warranty Launch",
+          "description": "Rolled out digital warranty system, transparent and convenient.",
+          "phase": "Phase 03/04",
+          "tags": {
+            "ewarranty": "E-Warranty",
+            "digitalApp": "Digital app",
+            "records": "100K+ records"
+          },
+          "stats": {
+            "warranties": {
+              "value": "{value}",
+              "label": "Digital warranties"
+            },
+            "lookup": {
+              "value": "{value}",
+              "label": "Warranty lookup"
+            },
+            "commitment": {
+              "value": "{value} years",
+              "label": "Quality commitment"
+            }
+          }
+        },
+        "networkExpansion": {
+          "title": "Network Expansion",
+          "description": "Over 100 dealers nationwide, covering 34 provinces.",
+          "phase": "Phase 04/04",
+          "tags": {
+            "dealers": "100+ dealers",
+            "provinces": "34 provinces",
+            "leader": "Market leader"
+          },
+          "stats": {
+            "dealers": {
+              "value": "{value}",
+              "label": "Dealers nationwide"
+            },
+            "provinces": {
+              "value": "{value}",
+              "label": "Provinces covered"
+            },
+            "brand": {
+              "value": "{value}",
+              "label": "Trusted brand"
+            }
+          }
+        }
+      },
+      "current": "Present"
+    },
+    "ecosystem": {
+      "eyebrow": "Product Ecosystem",
+      "title": "LEXZENZ - FUJITEK Protection Solutions & Premium Accessories",
+      "description": "Delivering genuine automotive devices and materials, leading in heat rejection, brightness enhancement, and driving safety.",
+      "viewAllCta": "Explore All Products",
+      "productDetailCta": "Product Details",
+      "items": {
+        "film": {
+          "title": "Lexzenz Reflex Korea Automotive Window Film",
+          "description": "Metal Sputtering & Nano Ceramic technology rejecting 99% UV/IR, protecting interior and cooling cabin."
+        },
+        "lighting": {
+          "title": "Lexzenz Led Fujitek Car & Motorcycle Headlights",
+          "description": "High-output Bi-LED & fog lamp systems with precise light cutoff preventing oncoming glare."
+        },
+        "dashcam": {
+          "title": "Lexzenz Dashcam Camera",
+          "description": "4K ultra-clear night video recording with integrated traffic alerts and smart G-sensors."
+        },
+        "tpms": {
+          "title": "Lexzenz TPMS Tire Pressure Monitoring System",
+          "description": "Real-time tire pressure & temperature monitoring with instant leak alerts to Android screens and mobile app."
+        }
+      }
+    },
+    "filmLayers": {
+      "eyebrow": "Multilayer Structure",
+      "title": "Anatomy of 5 High-Tech Film Layers",
+      "instruction": "Hover over layers to inspect detailed structure:",
+      "items": {
+        "scratchCoat": {
+          "title": "Scratch Resistant Coating",
+          "description": "2H hardness surface layer protecting against scratches during glass operation and cleaning."
+        },
+        "sputterMetal": {
+          "title": "Sputter Metal Layer",
+          "description": "Utilizes precious metal atomic particles to reflect maximum solar infrared radiation."
+        },
+        "opticalBase": {
+          "title": "Optical Base PET Film",
+          "description": "Ultra-clear optical PET film ensuring crystal-clear night and rainy driving vision."
+        },
+        "nanoCeramic": {
+          "title": "Nano Ceramic Thermal Layer",
+          "description": "Nanometer-sized ceramic particles blocking heat-generating infrared spectrum."
+        },
+        "adhesive": {
+          "title": "Pressure-Sensitive Adhesive (PSA)",
+          "description": "Odorless imported adhesive with extreme bond strength and zero air bubbles."
+        }
+      }
+    },
+    "brandHeritage": {
+      "eyebrow": "Redefining Standards",
+      "row1Title": "Redefining Premium Automotive Window Film Standards in Vietnam",
+      "row1Desc1": "Fujitek introduces a new generation of window films with a mission to set a distinct standard: not only rejecting heat, but elevating the driving experience in modern urban environments.",
+      "row1Desc2": "Developed and manufactured in Japan - the cradle of advanced Asian materials technology - Fujitek represents the crystallization of engineering performance, aesthetic design, and sustainable value.",
+      "row2Title": "Tech Origin – The Foundation of Trust",
+      "row2Desc1": "“Made in Japan” is not just an origin label; it is a quality promise. Fujitek is researched, manufactured, and inspected according to strict high-tech materials engineering standards.",
+      "row2Desc2": "In Vietnam, Fujitek is introduced as a long-term solution, catering to discerning customers who value real-world performance, technological durability, and premium driving comfort.",
+      "brandLabel": "FUJITEK VIETNAM",
+      "headlineLine1": "Redefining",
+      "headlineLine2Prefix": "the",
+      "headlineHighlight": "standard",
+      "headlineLine3": "of window film",
+      "experienceLabel": "Years of experience",
+      "dealersLabel": "Dealers nationwide",
+      "uvLabel": "UV rejection",
+      "originEyebrow": "Technology origin"
+    },
+    "coreTech": {
+      "eyebrow": "Core Technology",
+      "title": "Two Leading Tech Platforms",
+      "subtitle": "Discover the power of advanced Metal Sputtering and Nano Ceramic technology.",
+      "comparisonTitle": "Performance Metrics Comparison",
+      "fujitekLabel": "Fujitek Tech",
+      "standardLabel": "Standard Film",
+      "metrics": {
+        "tser": {
+          "name": "Total Solar Energy Rejected (TSER)",
+          "fujitek": "70% Superior TSER",
+          "standard": "Only ~30% TSER"
+        },
+        "durability": {
+          "name": "Color Durability",
+          "fujitek": "10 - 15 Years Colorfast",
+          "standard": "Fades after 2 Years"
+        },
+        "signal": {
+          "name": "Radio Signal (GPS/4G/VETC)",
+          "fujitek": "100% Unhindered",
+          "standard": "Attenuated / Interference"
+        },
+        "glare": {
+          "name": "Interior Reflection",
+          "fujitek": "Low <8% Anti-Glare",
+          "standard": "Glare >20%"
+        }
+      },
+      "sputtering": {
+        "title": "Sputtering Technology",
+        "description": "Bombarding precious metal atoms (Titanium, Silver, Gold) onto PET film in high vacuum, creating a superior heat-reflecting layer while keeping film thin.",
+        "b1": "Superior reflective heat rejection up to 70% TSER",
+        "b2": "Natural tone, color-fast for over 10 years",
+        "eyebrow": "Leading premium technology",
+        "displayTitle": "Multi-layer Sputtering",
+        "heatReflectionLabel": "Reflective heat rejection",
+        "durabilityValue": "10-15 years",
+        "durabilityLabel": "Japanese-standard color durability"
+      },
+      "nanoCeramic": {
+        "title": "Nano Ceramic Technology",
+        "description": "Coating ultra-fine ceramic particles (<10nm) absorbing shortwave IR without interfering with GPS, 4G/5G, RFID, or VETC signals.",
+        "b1": "100% Zero interference with radio and car signals",
+        "b2": "Night anti-glare and low interior reflection",
+        "eyebrow": "Ultra-fine Nano Ceramic technology",
+        "displayTitle": "Ultra Nano Ceramic",
+        "signalLabel": "Unhindered GPS / 4G / VETC",
+        "glareLabel": "Ultra-low interior reflection"
+      },
+      "comparisonEyebrow": "Visual performance comparison",
+      "metricHeader": "Performance metric"
+    },
+    "pillars": {
+      "eyebrow": "Vision & Core Values",
+      "title": "Our Mission",
+      "items": {
+        "pioneerTech": {
+          "title": "Pioneer Technology",
+          "description": "Continuously researching and applying the latest technologies from Japan to deliver superior heat rejection solutions.",
+          "checks": {
+            "nanoTech": "Nano Ceramic Technology",
+            "sputterTech": "Sputtering Metal Deposition",
+            "signalFriendly": "Zero GPS, 4G/5G Signal Interference"
+          }
+        },
+        "japaneseQuality": {
+          "title": "Japanese Quality",
+          "description": "100% manufactured in Japan with strict quality control adhering to ISO 9001 standards.",
+          "checks": {
+            "cleanroomClass": "Class 1000 Cleanroom",
+            "qaQc100": "100% QA/QC Inspection",
+            "isoStandard": "International Certification"
+          }
+        },
+        "dedicatedService": {
+          "title": "Dedicated Service",
+          "description": "Accompanying customers with 10-year warranty protection and nationwide dealer network coverage.",
+          "checks": {
+            "ewarrantyDigital": "E-Warranty Digital Registration",
+            "support247": "24/7 Support",
+            "dealerNetwork": "100+ Dealers Nationwide"
+          }
+        }
+      }
+    },
+    "craftsmanship": {
+      "eyebrow": "Manufacturing Standards",
+      "titlePrefix": "Manufacturing Technology",
+      "titleSuffix": "from Japan",
+      "description": "All Fujitek window film products are manufactured on fully automated production lines meeting Japan's strict quality standards.",
+      "research": {
+        "title": "R&D Research",
+        "description": "Developing proprietary Nano ceramic particle formulas (<10nm)."
+      },
+      "cleanroom": {
+        "title": "Cleanroom Production",
+        "description": "Class 1000 cleanroom ensuring zero dust contamination."
+      },
+      "inspection": {
+        "title": "CO/CQ Testing",
+        "description": "International origin and quality certification."
+      },
+      "stats": {
+        "qaQc": "Quality Control",
+        "cleanroom": "Cleanroom",
+        "iso": "Certification",
+        "experience": "Years Experience"
+      }
+    },
+    "network": {
+      "eyebrow": "Nationwide Network",
+      "titlePrefix": "Dealer System",
+      "titleSuffix": "covering 34 provinces",
+      "description": "With over 100 dealers nationwide, Fujitek is committed to providing professional installation services and transparent E-Warranty coverage.",
+      "viewDealersCta": "Find Nearest Dealer",
+      "mapTitle": "Dealer Network Map",
+      "mapSubtitle": "Widespread authorized installation stations",
+      "activateMap": "Click to interact with the map",
+      "resetMap": "Reset map",
+      "fullscreenMap": "Open map in fullscreen",
+      "exitFullscreenMap": "Exit fullscreen",
+      "legendDealer": "Authorized Dealer",
+      "legendCenter": "Warranty Center",
+      "loading": "Loading dealers and warranty centers...",
+      "error": "Unable to load network locations.",
+      "retry": "Try again",
+      "empty": "There are no active locations to display yet.",
+      "phone": "Phone",
+      "directions": "Get directions",
+      "locationType": {
+        "dealer": "Authorized Dealer",
+        "serviceCenter": "Warranty Center"
+      },
+      "stats": {
+        "dealers": "Dealers Nationwide",
+        "provinces": "Provinces",
+        "warrantyYears": "Digital Warranty",
+        "support": "Customer Support",
+        "yearsSuffix": " years"
+      }
+    },
+    "testimonials": {
+      "eyebrow": "Partner Reviews",
+      "title": "What Customers Say About Us",
+      "items": {
+        "dealerHanoi": {
+          "quote": "I have partnered with Fujitek since 2019. High quality products, superior heat rejection, and excellent warranty policy. My customers are extremely satisfied.",
+          "author": "Mr. Tran Duc Thanh",
+          "role": "Director of Panda Auto Showroom Hanoi"
+        },
+        "dealerSaigon": {
+          "quote": "Fujitek's Nano Ceramic technology is truly impressive. Zero GPS signal interference, excellent heat rejection, and high durability. It's the #1 choice for my center.",
+          "author": "Mr. Nguyen Quoc Huy",
+          "role": "Owner of Auto Care Center Saigon"
+        }
+      }
+    },
+    "b2bCta": {
+      "eyebrow": "Growth Partnership",
+      "title": "Become a FUJITEK Dealer",
+      "description": "Join our dealer network to receive attractive discount policies, comprehensive training, and marketing support.",
+      "partnerBtn": "Apply for Dealership",
+      "hotlineBtn": "Hotline {phone}",
+      "benefits": {
+        "discount": "Attractive Margins",
+        "training": "In-Depth Training",
+        "marketing": "Marketing Support",
+        "warranty": "10-Year Warranty"
+      }
+    }
   }
 }

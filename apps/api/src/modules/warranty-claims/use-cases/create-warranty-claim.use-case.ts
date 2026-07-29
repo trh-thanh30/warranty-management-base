@@ -4,7 +4,7 @@ import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/w
 import { WarrantyClaimNotificationService } from '@/modules/warranty-claims/service/warranty-claim-notification.service';
 import { WarrantyClaimSlaService } from '@/modules/warranty-claims/service/warranty-claim-sla.service';
 import { GenerateWarrantyClaimCodeUseCase } from '@/modules/warranty-claims/use-cases/generate-warranty-claim-code.use-case';
-import { toWarrantyClaimResponse } from '@/modules/warranty-claims/warranty-claims.types';
+import { toWarrantyClaimResponse } from '@/modules/warranty-claims/mappers/warranty-claim.mapper';
 import { Injectable } from '@nestjs/common';
 import {
   Prisma,
@@ -25,6 +25,8 @@ export class CreateWarrantyClaimUseCase {
 
   async execute(dto: CreateWarrantyClaimDto) {
     const warrantyCode = dto.warrantyCode.trim().toUpperCase();
+    const requesterName = dto.requesterName.trim();
+    const requesterPhone = dto.requesterPhone.trim();
     const product =
       await this.warrantyClaimsRepository.findWarrantyProductByCode(
         warrantyCode,
@@ -34,8 +36,41 @@ export class CreateWarrantyClaimUseCase {
       throw new NotFoundError('Warranty not found');
     }
 
-    if (product.warranty.status === warranty_status.VOIDED) {
-      throw new BadRequestError('Warranty is voided');
+    if (product.warranty.status !== warranty_status.ACTIVE) {
+      const errorByStatus = {
+        [warranty_status.DRAFT]: {
+          code: 'WARRANTY_NOT_ACTIVE',
+          message: 'Warranty is not active',
+        },
+        [warranty_status.EXPIRED]: {
+          code: 'WARRANTY_EXPIRED',
+          message: 'Warranty is expired',
+        },
+        [warranty_status.VOIDED]: {
+          code: 'WARRANTY_VOIDED',
+          message: 'Warranty is voided',
+        },
+      } as const;
+      const error = errorByStatus[product.warranty.status];
+      throw new BadRequestError(error.message, 'BAD_REQUEST', {
+        code: error.code,
+      });
+    }
+
+    const hasNotStarted =
+      product.warranty.start_date &&
+      product.warranty.start_date.getTime() > Date.now();
+    const hasExpired =
+      product.warranty.end_date &&
+      product.warranty.end_date.getTime() < Date.now();
+    if (hasNotStarted || hasExpired) {
+      throw new BadRequestError(
+        hasNotStarted ? 'Warranty is not active yet' : 'Warranty is expired',
+        'BAD_REQUEST',
+        {
+          code: hasNotStarted ? 'WARRANTY_NOT_STARTED' : 'WARRANTY_EXPIRED',
+        },
+      );
     }
 
     const currentOwnership = product.ownerships[0];
@@ -54,10 +89,10 @@ export class CreateWarrantyClaimUseCase {
       try {
         const claim = await this.warrantyClaimsRepository.create({
           claim_code: claimCode,
-          warranty_code: product.warranty_code,
+          warranty_code: warrantyCode,
           due_at: dueAt,
-          requester_name: dto.requesterName,
-          requester_phone: dto.requesterPhone,
+          requester_name: requesterName,
+          requester_phone: requesterPhone,
           issue_title: dto.issueTitle,
           issue_detail: dto.issueDetail,
           warranty: { connect: { id: product.warranty.id } },

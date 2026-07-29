@@ -1,9 +1,14 @@
 import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
 import { warranty_claim_priority, warranty_claim_status } from '@prisma/client';
 import {
+  WARRANTY_CLAIM_ASSIGNMENT_STATUSES,
+  type WarrantyClaimAssignmentStatus,
+} from '@repo/shared';
+import {
   IsBooleanString,
   IsDateString,
   IsEnum,
+  IsIn,
   IsOptional,
   IsString,
   IsUUID,
@@ -12,6 +17,10 @@ import {
 } from 'class-validator';
 
 export class ListWarrantyClaimsDto extends PaginationQueryDto {
+  @IsOptional()
+  @IsIn(WARRANTY_CLAIM_ASSIGNMENT_STATUSES)
+  assignmentStatus?: WarrantyClaimAssignmentStatus;
+
   @IsOptional()
   @IsString()
   search?: string;

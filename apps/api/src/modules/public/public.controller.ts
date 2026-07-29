@@ -1,12 +1,25 @@
 import { Public } from '@/common/decorators/public.decorator';
 import { ListServiceCentersDto } from '@/modules/service-centers/dto/list-service-centers.dto';
-import { ActivateWarrantyByCodeDto } from '@/modules/warranties/dto/activate-warranty-by-code.dto';
 import { LookupWarrantyDto } from '@/modules/warranties/dto/lookup-warranty.dto';
-import { ActivateWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/activate-warranty-by-code.use-case';
 import { LookupWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/lookup-warranty-by-code.use-case';
+import { CreateWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-warranty-activation-request.dto';
+import { CreateWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-warranty-activation-request.use-case';
 import { CreateWarrantyClaimDto } from '@/modules/warranty-claims/dto/create-warranty-claim.dto';
 import { CreateWarrantyClaimUseCase } from '@/modules/warranty-claims/use-cases/create-warranty-claim.use-case';
 import { PublicListServiceCentersUseCase } from '@/modules/public/use-cases/public-list-service-centers.use-case';
+import { PublicListNetworkLocationsUseCase } from '@/modules/public/use-cases/public-list-network-locations.use-case';
+import { PublicListDealersUseCase } from '@/modules/public/use-cases/public-list-dealers.use-case';
+import { ListPublicDealersDto } from '@/modules/public/dto/list-public-dealers.dto';
+import { ListPublicDealerFilterOptionsDto } from '@/modules/public/dto/list-public-dealer-filter-options.dto';
+import { PublicListDealerFilterOptionsUseCase } from '@/modules/public/use-cases/public-list-dealer-filter-options.use-case';
+import { ListPublicNetworkDirectoryDto } from '@/modules/public/dto/list-public-network-directory.dto';
+import { ListPublicNetworkDirectoryFilterOptionsDto } from '@/modules/public/dto/list-public-network-directory-filter-options.dto';
+import { PublicListNetworkDirectoryUseCase } from '@/modules/public/use-cases/public-list-network-directory.use-case';
+import { PublicListNetworkDirectoryFilterOptionsUseCase } from '@/modules/public/use-cases/public-list-network-directory-filter-options.use-case';
+import { ListPublicProductsDto } from '@/modules/products/dto/list-public-products.dto';
+import { ListPublicProductsUseCase } from '@/modules/products/use-cases/list-public-products.use-case';
+import { ListPublicProductCategoriesUseCase } from '@/modules/categories/use-cases/list-public-product-categories.use-case';
+import { ListPublicProductCategoriesDto } from '@/modules/categories/dto/list-public-product-categories.dto';
 import { PublicLookupWarrantyClaimByCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claim-by-code.use-case';
 import { PublicLookupWarrantyClaimsByWarrantyCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claims-by-warranty-code.use-case';
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
@@ -16,11 +29,18 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 export class PublicController {
   constructor(
     private readonly lookupWarrantyByCodeUseCase: LookupWarrantyByCodeUseCase,
-    private readonly activateWarrantyByCodeUseCase: ActivateWarrantyByCodeUseCase,
+    private readonly createWarrantyActivationRequestUseCase: CreateWarrantyActivationRequestUseCase,
     private readonly createWarrantyClaimUseCase: CreateWarrantyClaimUseCase,
     private readonly publicLookupWarrantyClaimByCodeUseCase: PublicLookupWarrantyClaimByCodeUseCase,
     private readonly publicLookupWarrantyClaimsByWarrantyCodeUseCase: PublicLookupWarrantyClaimsByWarrantyCodeUseCase,
     private readonly publicListServiceCentersUseCase: PublicListServiceCentersUseCase,
+    private readonly publicListNetworkLocationsUseCase: PublicListNetworkLocationsUseCase,
+    private readonly publicListDealersUseCase: PublicListDealersUseCase,
+    private readonly publicListDealerFilterOptionsUseCase: PublicListDealerFilterOptionsUseCase,
+    private readonly publicListNetworkDirectoryUseCase: PublicListNetworkDirectoryUseCase,
+    private readonly publicListNetworkDirectoryFilterOptionsUseCase: PublicListNetworkDirectoryFilterOptionsUseCase,
+    private readonly listPublicProductsUseCase: ListPublicProductsUseCase,
+    private readonly listPublicProductCategoriesUseCase: ListPublicProductCategoriesUseCase,
   ) {}
 
   @Get('warranties/lookup')
@@ -28,9 +48,11 @@ export class PublicController {
     return this.lookupWarrantyByCodeUseCase.execute(query);
   }
 
-  @Post('warranties/activate-by-code')
-  activateWarranty(@Body() dto: ActivateWarrantyByCodeDto) {
-    return this.activateWarrantyByCodeUseCase.execute(dto);
+  @Post('warranty-activation-requests')
+  createWarrantyActivationRequest(
+    @Body() dto: CreateWarrantyActivationRequestDto,
+  ) {
+    return this.createWarrantyActivationRequestUseCase.execute(dto);
   }
 
   @Post('warranty-claims')
@@ -55,5 +77,44 @@ export class PublicController {
   @Get('service-centers')
   listServiceCenters(@Query() query: ListServiceCentersDto) {
     return this.publicListServiceCentersUseCase.execute(query);
+  }
+
+  @Get('network-locations')
+  listNetworkLocations() {
+    return this.publicListNetworkLocationsUseCase.execute();
+  }
+
+  @Get('network-directory')
+  listNetworkDirectory(@Query() query: ListPublicNetworkDirectoryDto) {
+    return this.publicListNetworkDirectoryUseCase.execute(query);
+  }
+
+  @Get('network-directory/filter-options')
+  listNetworkDirectoryFilterOptions(
+    @Query() query: ListPublicNetworkDirectoryFilterOptionsDto,
+  ) {
+    return this.publicListNetworkDirectoryFilterOptionsUseCase.execute(
+      query.province,
+    );
+  }
+
+  @Get('dealers')
+  listDealers(@Query() query: ListPublicDealersDto) {
+    return this.publicListDealersUseCase.execute(query);
+  }
+
+  @Get('dealers/filter-options')
+  listDealerFilterOptions(@Query() query: ListPublicDealerFilterOptionsDto) {
+    return this.publicListDealerFilterOptionsUseCase.execute(query.province);
+  }
+
+  @Get('products')
+  listProducts(@Query() query: ListPublicProductsDto) {
+    return this.listPublicProductsUseCase.execute(query);
+  }
+
+  @Get('product-categories')
+  listProductCategories(@Query() query: ListPublicProductCategoriesDto) {
+    return this.listPublicProductCategoriesUseCase.execute(query);
   }
 }

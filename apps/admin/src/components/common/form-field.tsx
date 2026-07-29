@@ -5,7 +5,8 @@ type FormFieldProps = {
   children: ReactNode;
   description?: string;
   error?: string;
-  htmlFor: string;
+  htmlFor?: string;
+  id?: string;
   label: string;
 };
 
@@ -14,11 +15,18 @@ export function FormField({
   description,
   error,
   htmlFor,
+  id,
   label,
 }: FormFieldProps) {
+  const controlId = htmlFor ?? id;
+
+  if (!controlId) {
+    throw new Error("FormField requires either an id or htmlFor prop");
+  }
+
   return (
     <div className="space-y-2">
-      <Label htmlFor={htmlFor}>{label}</Label>
+      <Label htmlFor={controlId}>{label}</Label>
       {children}
       {description ? (
         <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">
@@ -26,7 +34,11 @@ export function FormField({
         </p>
       ) : null}
       {error ? (
-        <p className="text-xs leading-5 text-red-600 dark:text-red-400">
+        <p
+          className="text-sm leading-5 text-red-600 dark:text-red-400"
+          id={`${controlId}-error`}
+          role="alert"
+        >
           {error}
         </p>
       ) : null}

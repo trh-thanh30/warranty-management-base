@@ -1,12 +1,77 @@
 import { BcryptService } from '@/common/helpers/bcrypt.util';
 import { normalizePagination, paginate } from '@/common/pagination/pagination';
-import { BadRequestError } from '@/common/response';
+import { BadRequestError, ConflictError } from '@/common/response';
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { CreateUserDto } from '@/modules/user/dto/create-user.dto';
 import { ListUsersDto } from '@/modules/user/dto/list-users.dto';
 import { UpdateUserDto } from '@/modules/user/dto/update-user.dto';
+import { generateTemporaryPassword } from '@/modules/user/temporary-password';
 import { Injectable } from '@nestjs/common';
-import { Prisma, User, user_role } from '@prisma/client';
+import { Prisma, User, user_role, user_status } from '@prisma/client';
+import type { CreateModeratorResponse, UserAccountSummary } from '@repo/shared';
+
+const userAccountSelect = {
+  id: true,
+  email: true,
+  username: true,
+  full_name: true,
+  phone: true,
+  avatar_url: true,
+  role: true,
+  status: true,
+  is_verified: true,
+  created_at: true,
+  updated_at: true,
+} satisfies Prisma.UserSelect;
+
+type UserAccountRecord = Prisma.UserGetPayload<{
+  select: typeof userAccountSelect;
+}>;
+
+function toUserAccountSummary(user: UserAccountRecord): UserAccountSummary {
+  return {
+    id: user.id,
+    email: user.email,
+    username: user.username,
+    fullName: user.full_name,
+    phone: user.phone,
+    avatarUrl: user.avatar_url,
+    role: user.role,
+    status: user.status,
+    isVerified: user.is_verified,
+    createdAt: user.created_at.toISOString(),
+    updatedAt: user.updated_at.toISOString(),
+  };
+}
+
+function getUniqueUserFields(error: Prisma.PrismaClientKnownRequestError) {
+  const target = error.meta?.target;
+  const values = Array.isArray(target)
+    ? target.map(String)
+    : typeof target === 'string'
+      ? [target]
+      : [];
+  const fields = ['email', 'username', 'phone'].filter((field) =>
+    values.some((value) => value.toLowerCase().includes(field)),
+  );
+
+  return fields.length > 0 ? fields : ['account'];
+}
+
+function mapUniqueUserConflict(error: unknown): ConflictError | null {
+  if (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === 'P2002'
+  ) {
+    return new ConflictError(
+      'A user account with these details already exists',
+      'USER_ACCOUNT_EXISTS',
+      { fields: getUniqueUserFields(error) },
+    );
+  }
+
+  return null;
+}
 
 /**
  * Service for handling user-related operations
@@ -73,6 +138,15 @@ export class UsersService {
     });
   }
 
+  async findAccountById(id: string): Promise<UserAccountSummary | null> {
+    const user = await this.prismaService.user.findUnique({
+      where: { id },
+      select: userAccountSelect,
+    });
+
+    return user ? toUserAccountSummary(user) : null;
+  }
+
   async findAuthProfileById(id: string) {
     return this.prismaService.user.findUnique({
       where: { id },
@@ -84,14 +158,58 @@ export class UsersService {
    * @param dto - User creation data
    * @returns Created user
    */
-  async create(dto: CreateUserDto): Promise<User> {
-    const hashedPassword = await this.bcryptService.hashPassword(dto.password);
-    return this.prismaService.user.create({
-      data: {
-        ...dto,
-        password: hashedPassword,
-      },
-    });
+  async create(
+    dto: CreateUserDto,
+  ): Promise<UserAccountSummary | CreateModeratorResponse> {
+    if (dto.role === user_role.MODERATOR && !dto.full_name?.trim()) {
+      throw new BadRequestError(
+        'Full name is required for moderator accounts',
+        'MODERATOR_FULL_NAME_REQUIRED',
+      );
+    }
+
+    const temporaryPassword =
+      dto.role === user_role.MODERATOR
+        ? generateTemporaryPassword()
+        : dto.password;
+
+    if (!temporaryPassword) {
+      throw new BadRequestError(
+        'Password is required for this account type',
+        'PASSWORD_REQUIRED',
+      );
+    }
+
+    const hashedPassword =
+      await this.bcryptService.hashPassword(temporaryPassword);
+    let user: UserAccountRecord;
+    try {
+      user = await this.prismaService.user.create({
+        data: {
+          ...dto,
+          full_name: dto.full_name?.trim(),
+          phone: dto.phone?.trim() || undefined,
+          is_verified: dto.role === user_role.MODERATOR ? true : undefined,
+          password: hashedPassword,
+          status:
+            dto.role === user_role.MODERATOR
+              ? (dto.status ?? user_status.ACTIVE)
+              : dto.status,
+        },
+        select: userAccountSelect,
+      });
+    } catch (error) {
+      const conflict = mapUniqueUserConflict(error);
+      if (conflict) throw conflict;
+
+      throw error;
+    }
+
+    const userSummary = toUserAccountSummary(user);
+
+    return dto.role === user_role.MODERATOR
+      ? { temporaryPassword, user: userSummary }
+      : userSummary;
   }
 
   /**
@@ -100,14 +218,25 @@ export class UsersService {
    * @param dto - Update data
    * @returns Updated user
    */
-  async update(id: string, dto: UpdateUserDto): Promise<User> {
+  async update(id: string, dto: UpdateUserDto): Promise<UserAccountSummary> {
     if (dto.password) {
       dto.password = await this.bcryptService.hashPassword(dto.password);
     }
-    return this.prismaService.user.update({
-      where: { id },
-      data: dto,
-    });
+    let user: UserAccountRecord;
+    try {
+      user = await this.prismaService.user.update({
+        where: { id },
+        data: dto,
+        select: userAccountSelect,
+      });
+    } catch (error) {
+      const conflict = mapUniqueUserConflict(error);
+      if (conflict) throw conflict;
+
+      throw error;
+    }
+
+    return toUserAccountSummary(user);
   }
 
   /**
@@ -152,11 +281,16 @@ export class UsersService {
           orderBy,
           skip,
           take,
+          select: userAccountSelect,
         }),
         tx.user.count({ where }),
       ]);
 
-      return paginate(items, { page, limit, total });
+      return paginate(items.map(toUserAccountSummary), {
+        page,
+        limit,
+        total,
+      });
     });
   }
 
@@ -187,9 +321,12 @@ export class UsersService {
    * @param id - User's ID
    * @returns Deleted user
    */
-  async delete(id: string): Promise<User> {
-    return this.prismaService.user.delete({
+  async delete(id: string): Promise<UserAccountSummary> {
+    const user = await this.prismaService.user.delete({
       where: { id },
+      select: userAccountSelect,
     });
+
+    return toUserAccountSummary(user);
   }
 }

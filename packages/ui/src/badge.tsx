@@ -10,6 +10,9 @@ const badgeVariants = cva(
         default: "bg-slate-950 text-white dark:bg-slate-50 dark:text-slate-950",
         secondary:
           "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+        info: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+        accent:
+          "bg-violet-50 text-violet-700 dark:bg-violet-950 dark:text-violet-300",
         success:
           "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
         warning:

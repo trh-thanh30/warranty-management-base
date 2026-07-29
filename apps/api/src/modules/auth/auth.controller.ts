@@ -45,7 +45,11 @@ import {
 import { type ConfigType } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { normalizeUserRole } from '@repo/shared/constants';
-import { user_role, type User as CurrentUser } from '@prisma/client';
+import {
+  asset_type,
+  user_role,
+  type User as CurrentUser,
+} from '@prisma/client';
 import express from 'express';
 
 type AuthRequestUser = CurrentUser;
@@ -198,6 +202,7 @@ export class AuthController {
       throw new BadRequestError('Avatar file is required');
     }
 
+    const previousAvatarUrl = user.avatar_url;
     const asset = await this.assetsService.uploadFile(user, file, {
       folder: 'avatars',
       type: 'IMAGE',
@@ -208,6 +213,17 @@ export class AuthController {
     await this.usersService.update(user.id, {
       avatar_url: asset.url,
     });
+
+    if (previousAvatarUrl && previousAvatarUrl !== asset.url) {
+      await this.assetsService.removeEntityAssetByUrl(
+        previousAvatarUrl,
+        { id: user.id, type: 'user' },
+        {
+          folder: 'avatars',
+          types: [asset_type.IMAGE],
+        },
+      );
+    }
 
     return this.toAuthUser(user.id);
   }

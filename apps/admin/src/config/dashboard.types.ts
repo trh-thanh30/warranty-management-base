@@ -1,4 +1,11 @@
 import type { ComponentType } from "react";
+import type { PermissionKey } from "@repo/shared/constants";
+import type { AuthUserRole } from "@repo/shared";
+
+export type NotificationBadgeKey =
+  | "contactSubmissions"
+  | "warranties"
+  | "warrantyClaims";
 
 export interface BrandConfig {
   name: string;
@@ -9,8 +16,15 @@ export interface BrandConfig {
 export interface NavigationItem {
   title: string;
   href?: string;
+  children?: NavigationItem[];
+  activeHrefs?: string[];
   icon: ComponentType<{ className?: string }>;
   badge?: string;
+  notificationBadgeKey?: NotificationBadgeKey;
+  requiredPermission?: PermissionKey;
+  permissionHrefs?: Array<{ permission: PermissionKey; href: string }>;
+  requiredAnyPermissions?: PermissionKey[];
+  requiredRole?: Exclude<AuthUserRole, null>;
 }
 
 export interface NavigationSection {
@@ -21,6 +35,10 @@ export interface NavigationSection {
 export interface TopNavigationItem {
   title: string;
   href: string;
+  requiredPermission?: PermissionKey;
+  permissionHrefs?: Array<{ permission: PermissionKey; href: string }>;
+  requiredAnyPermissions?: PermissionKey[];
+  requiredRole?: Exclude<AuthUserRole, null>;
 }
 
 export interface UserMenuItem {
@@ -31,10 +49,6 @@ export interface UserMenuItem {
 }
 
 export interface UserMenuConfig {
-  name: string;
-  email: string;
-  avatarFallback: string;
-  avatarUrl?: string;
   menuItems: UserMenuItem[];
 }
 

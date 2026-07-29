@@ -13,11 +13,13 @@ describe('LookupWarrantyForCustomerUseCase', () => {
   it('returns warranty details when the product belongs to the customer', async () => {
     warrantiesRepository.findLookupMatchForCustomer.mockResolvedValue({
       id: 'product-id',
-      name: 'Toyota Camry',
-      brand: 'Toyota',
-      model: 'Camry',
+      display_name: null,
+      template: {
+        name: 'Toyota Camry',
+        brand: 'Toyota',
+        model: 'Camry',
+      },
       serial_number: 'VIN123',
-      warranty_code: 'WM-2026-ABCDEF',
       warranty: {
         warranty_code: 'WM-2026-ABCDEF',
         start_date: new Date('2026-06-14T00:00:00.000Z'),

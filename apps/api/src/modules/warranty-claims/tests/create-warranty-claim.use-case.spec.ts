@@ -61,8 +61,8 @@ describe('CreateWarrantyClaimUseCase', () => {
 
     const result = await useCase.execute({
       warrantyCode: 'wm-2026-abcdef',
-      requesterName: 'Nguyen Van A',
-      requesterPhone: '0901234567',
+      requesterName: ' Nguyen Van A ',
+      requesterPhone: ' 0901234567 ',
       issueTitle: 'May khong hoat dong',
       issueDetail: 'Mo ta loi',
     });
@@ -77,6 +77,8 @@ describe('CreateWarrantyClaimUseCase', () => {
         warranty: { connect: { id: 'warranty-id' } },
         product: { connect: { id: 'product-id' } },
         customer: { connect: { id: 'customer-id' } },
+        requester_name: 'Nguyen Van A',
+        requester_phone: '0901234567',
       }),
     );
     expect(result.claimCode).toBe('CLM-2026-ABC123');
@@ -110,8 +112,8 @@ describe('CreateWarrantyClaimUseCase', () => {
         product_id: 'product-id',
         customer_id: null,
         warranty_code: 'WM-2026-ABCDEF',
-        requester_name: undefined,
-        requester_phone: undefined,
+        requester_name: 'Nguyen Van A',
+        requester_phone: '0901234567',
         issue_title: 'May khong hoat dong',
         issue_detail: undefined,
         status: 'SUBMITTED',
@@ -130,6 +132,8 @@ describe('CreateWarrantyClaimUseCase', () => {
 
     const result = await useCase.execute({
       warrantyCode: 'WM-2026-ABCDEF',
+      requesterName: 'Nguyen Van A',
+      requesterPhone: '0901234567',
       issueTitle: 'May khong hoat dong',
     });
 
@@ -148,6 +152,8 @@ describe('CreateWarrantyClaimUseCase', () => {
     await expect(
       useCase.execute({
         warrantyCode: 'WM-2026-MISSING',
+        requesterName: 'Nguyen Van A',
+        requesterPhone: '0901234567',
         issueTitle: 'May khong hoat dong',
       }),
     ).rejects.toBeInstanceOf(NotFoundError);
@@ -171,8 +177,71 @@ describe('CreateWarrantyClaimUseCase', () => {
     await expect(
       useCase.execute({
         warrantyCode: 'WM-2026-VOIDED',
+        requesterName: 'Nguyen Van A',
+        requesterPhone: '0901234567',
         issueTitle: 'May khong hoat dong',
       }),
     ).rejects.toBeInstanceOf(BadRequestError);
+  });
+
+  it.each([
+    ['DRAFT', undefined],
+    ['EXPIRED', undefined],
+    ['ACTIVE', new Date('2026-01-01T00:00:00.000Z')],
+  ])(
+    'rejects a %s warranty that is not currently eligible',
+    async (status, endDate) => {
+      warrantyClaimsRepository.findWarrantyProductByCode.mockResolvedValue({
+        id: 'product-id',
+        warranty_code: 'WM-2026-INELIGIBLE',
+        warranty: {
+          id: 'warranty-id',
+          status,
+          end_date: endDate,
+        },
+        ownerships: [],
+      });
+      const useCase = new CreateWarrantyClaimUseCase(
+        warrantyClaimsRepository as never,
+        generateWarrantyClaimCodeUseCase as never,
+      );
+
+      await expect(
+        useCase.execute({
+          warrantyCode: 'WM-2026-INELIGIBLE',
+          requesterName: 'Nguyen Van A',
+          requesterPhone: '0901234567',
+          issueTitle: 'May khong hoat dong',
+        }),
+      ).rejects.toBeInstanceOf(BadRequestError);
+      expect(warrantyClaimsRepository.create).not.toHaveBeenCalled();
+    },
+  );
+
+  it('rejects an active warranty before its start date', async () => {
+    warrantyClaimsRepository.findWarrantyProductByCode.mockResolvedValue({
+      id: 'product-id',
+      warranty_code: 'WM-2026-FUTURE',
+      warranty: {
+        id: 'warranty-id',
+        status: 'ACTIVE',
+        start_date: new Date('2099-01-01T00:00:00.000Z'),
+      },
+      ownerships: [],
+    });
+    const useCase = new CreateWarrantyClaimUseCase(
+      warrantyClaimsRepository as never,
+      generateWarrantyClaimCodeUseCase as never,
+    );
+
+    await expect(
+      useCase.execute({
+        warrantyCode: 'WM-2026-FUTURE',
+        requesterName: 'Nguyen Van A',
+        requesterPhone: '0901234567',
+        issueTitle: 'May khong hoat dong',
+      }),
+    ).rejects.toBeInstanceOf(BadRequestError);
+    expect(warrantyClaimsRepository.create).not.toHaveBeenCalled();
   });
 });

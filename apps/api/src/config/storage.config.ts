@@ -1,5 +1,8 @@
+import {
+  parseOptionalPositiveInt,
+  resolveFromWorkingDirectory,
+} from '@/config/config.utils';
 import { registerAs } from '@nestjs/config';
-import { isAbsolute, resolve } from 'node:path';
 
 /**
  * Storage & Asset configuration
@@ -7,7 +10,8 @@ import { isAbsolute, resolve } from 'node:path';
  */
 export default registerAs('storage', () => ({
   driver: process.env.STORAGE_DRIVER ?? 'local',
-  rootDir: resolveStorageRootDir(
+  capacityBytes: parseOptionalPositiveInt(process.env.STORAGE_CAPACITY_BYTES),
+  rootDir: resolveFromWorkingDirectory(
     process.env.STORAGE_ROOT_DIR ?? '/app/storage',
   ),
   publicDirName: process.env.STORAGE_PUBLIC_DIR_NAME ?? 'public',
@@ -37,7 +41,3 @@ export default registerAs('storage', () => ({
       process.env.MINIO_BUCKET_TEMP ?? 'warranty-management-base-temp',
   },
 }));
-
-function resolveStorageRootDir(rootDir: string): string {
-  return isAbsolute(rootDir) ? rootDir : resolve(process.cwd(), rootDir);
-}

@@ -36,4 +36,22 @@ describe('GenerateWarrantyCodeUseCase', () => {
     ).rejects.toBeInstanceOf(BadRequestError);
     expect(productsRepository.findByWarrantyCode).toHaveBeenCalledTimes(5);
   });
+
+  it('uses the supplied transaction client for collision checks', async () => {
+    productsRepository.findByWarrantyCode.mockResolvedValue(null);
+    const tx = { product: {} };
+    const useCase = new GenerateWarrantyCodeUseCase(
+      productsRepository as never,
+    );
+
+    const code = await useCase.execute(
+      new Date('2026-06-14T00:00:00.000Z'),
+      tx as never,
+    );
+
+    expect(productsRepository.findByWarrantyCode).toHaveBeenCalledWith(
+      code,
+      tx,
+    );
+  });
 });

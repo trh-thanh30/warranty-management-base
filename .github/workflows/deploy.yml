@@ -1,16 +1,15 @@
 name: Deploy
 
 on:
+  workflow_run:
+    workflows:
+      - Publish Images
+    branches:
+      - main
+    types:
+      - completed
   workflow_dispatch:
     inputs:
-      environment:
-        description: Deployment environment.
-        required: true
-        type: choice
-        default: staging
-        options:
-          - staging
-          - production
       image_tag:
         description: Image tag to deploy, usually a commit SHA already published to GHCR.
         required: true
@@ -26,21 +25,44 @@ jobs:
   deploy:
     name: Deploy with Docker Compose
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
+    if: >-
+      ${{
+        github.event_name == 'workflow_dispatch' ||
+        (
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event == 'workflow_run'
+        )
+      }}
+    environment: production
     outputs:
       image-tag: ${{ steps.metadata.outputs.image_tag }}
+      deployment-environment: ${{ steps.metadata.outputs.deployment_environment }}
+      source-branch: ${{ steps.metadata.outputs.source_branch }}
     steps:
       - name: Resolve image metadata
         id: metadata
         env:
-          IMAGE_TAG: ${{ inputs.image_tag }}
+          MANUAL_IMAGE_TAG: ${{ inputs.image_tag }}
+          PUBLISHED_IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
+          PUBLISHED_SOURCE_BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
           set -eu
 
           image_prefix="${REGISTRY}/${GITHUB_REPOSITORY}"
           image_prefix="$(printf '%s' "$image_prefix" | tr '[:upper:]' '[:lower:]')"
+          image_tag="${MANUAL_IMAGE_TAG:-$PUBLISHED_IMAGE_TAG}"
+          source_branch="${PUBLISHED_SOURCE_BRANCH:-$GITHUB_REF_NAME}"
 
-          echo "image_tag=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+          if [ -z "$image_tag" ]; then
+            echo "Unable to resolve the published image tag."
+            exit 1
+          fi
+
+          deployment_environment="production"
+
+          echo "image_tag=$image_tag" >> "$GITHUB_OUTPUT"
+          echo "deployment_environment=$deployment_environment" >> "$GITHUB_OUTPUT"
+          echo "source_branch=$source_branch" >> "$GITHUB_OUTPUT"
           echo "api_image=$image_prefix-api" >> "$GITHUB_OUTPUT"
           echo "web_image=$image_prefix-web" >> "$GITHUB_OUTPUT"
           echo "admin_image=$image_prefix-admin" >> "$GITHUB_OUTPUT"
@@ -124,6 +146,7 @@ jobs:
     name: Health Check
     runs-on: ubuntu-latest
     needs: deploy
+    environment: ${{ needs.deploy.outputs.deployment-environment }}
     steps:
       - name: Check deployment endpoints
         env:
@@ -197,8 +220,8 @@ jobs:
             --status "$status" \
             --mode text \
             --project "${{ github.event.repository.name }}" \
-            --environment "${{ inputs.environment }}" \
-            --branch "${{ github.ref_name }}" \
+            --environment "${{ needs.deploy.outputs.deployment-environment }}" \
+            --branch "${{ needs.deploy.outputs.source-branch }}" \
             --repository "${{ github.repository }}" \
             --commit "${{ needs.deploy.outputs.image-tag }}" \
             --message "Deployed image tag ${{ needs.deploy.outputs.image-tag }}" \

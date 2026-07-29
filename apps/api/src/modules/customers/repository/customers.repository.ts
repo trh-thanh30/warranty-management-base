@@ -28,6 +28,38 @@ export class CustomersRepository {
     });
   }
 
+  findLastCustomerCode(prefix: string, tx?: Prisma.TransactionClient) {
+    const client = tx ?? this.prismaService;
+
+    return client.customer.findFirst({
+      where: {
+        customer_code: {
+          startsWith: prefix,
+        },
+      },
+      orderBy: { customer_code: 'desc' },
+      select: { customer_code: true },
+    });
+  }
+
+  findByPhone(phone: string, excludeId?: string) {
+    return this.prismaService.customer.findFirst({
+      where: {
+        phone,
+        NOT: excludeId ? { id: excludeId } : undefined,
+      },
+    });
+  }
+
+  findByEmail(email: string, excludeId?: string) {
+    return this.prismaService.customer.findFirst({
+      where: {
+        email,
+        NOT: excludeId ? { id: excludeId } : undefined,
+      },
+    });
+  }
+
   list(filters: ListCustomersDto) {
     const trimmedSearch = filters.search?.trim();
     const { page, limit, skip, take } = normalizePagination(filters);
@@ -68,6 +100,28 @@ export class CustomersRepository {
       ]);
 
       return paginate(items, { page, limit, total });
+    });
+  }
+
+  listForExport(filters: ListCustomersDto) {
+    const trimmedSearch = filters.search?.trim();
+    const where: Prisma.CustomerWhereInput = trimmedSearch
+      ? {
+          OR: [
+            {
+              customer_code: { contains: trimmedSearch, mode: 'insensitive' },
+            },
+            { full_name: { contains: trimmedSearch, mode: 'insensitive' } },
+            { phone: { contains: trimmedSearch, mode: 'insensitive' } },
+            { email: { contains: trimmedSearch, mode: 'insensitive' } },
+          ],
+        }
+      : {};
+
+    return this.prismaService.customer.findMany({
+      where,
+      orderBy: { created_at: 'desc' },
+      take: 5000,
     });
   }
 

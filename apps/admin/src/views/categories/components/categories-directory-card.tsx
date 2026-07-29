@@ -1,0 +1,310 @@
+"use client";
+
+import { FolderTree, Search, Tags } from "lucide-react";
+import { useTranslations } from "next-intl";
+import type {
+  CategorySortBy,
+  CategoryTreeNode,
+  CategoryTreeResponse,
+} from "@repo/shared";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Input,
+  Skeleton,
+} from "@repo/ui";
+import { PaginationControls } from "@/src/components/common/pagination-controls";
+import { SelectControl } from "@/src/components/common/select-control";
+import { StatePanel } from "@/src/components/common/state-panel";
+import { Link } from "@/src/i18n/navigation";
+import {
+  CATEGORY_STATUS_FILTERS,
+  MANAGEABLE_CATEGORY_TYPES,
+} from "../categories.constants";
+import type {
+  CategoryStatusFilter,
+  CategoryTypeFilter,
+} from "../categories.types";
+import { CategoriesTable } from "./categories-table";
+
+type CategoriesDirectoryCardProps = {
+  canCreate: boolean;
+  data?: CategoryTreeResponse;
+  isError: boolean;
+  isLoading: boolean;
+  onClearFilters: () => void;
+  onDeactivate: (category: CategoryTreeNode) => void;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (pageSize: number) => void;
+  onRetry: () => void;
+  onSearchChange: (search: string) => void;
+  onStatusChange: (status: CategoryStatusFilter) => void;
+  onSortChange: (sortBy: CategorySortBy) => void;
+  onTypeChange: (type: CategoryTypeFilter) => void;
+  pageSize: number;
+  search: string;
+  sortBy?: CategorySortBy;
+  sortOrder: "asc" | "desc";
+  status: CategoryStatusFilter;
+  type: CategoryTypeFilter;
+};
+
+export function CategoriesDirectoryCard({
+  canCreate,
+  data,
+  isError,
+  isLoading,
+  onClearFilters,
+  onDeactivate,
+  onPageChange,
+  onPageSizeChange,
+  onRetry,
+  onSearchChange,
+  onSortChange,
+  onStatusChange,
+  onTypeChange,
+  pageSize,
+  search,
+  sortBy,
+  sortOrder,
+  status,
+  type,
+}: CategoriesDirectoryCardProps) {
+  const t = useTranslations("Categories");
+  const hasFilters =
+    Boolean(search.trim()) || status !== "ALL" || type !== "PRODUCT";
+
+  return (
+    <Card>
+      <CardHeader className="gap-4 xl:flex-row xl:items-end xl:justify-between">
+        <div>
+          <CardTitle>{t("directoryTitle")}</CardTitle>
+          <CardDescription className="mt-1.5">
+            {t("directoryDescription")}
+          </CardDescription>
+        </div>
+        <CategoriesDirectoryFilters
+          onSearchChange={onSearchChange}
+          onStatusChange={onStatusChange}
+          onTypeChange={onTypeChange}
+          search={search}
+          status={status}
+          type={type}
+        />
+      </CardHeader>
+      <CardContent className="px-3 sm:px-6">
+        <CategoriesDirectoryContent
+          data={data}
+          canCreate={canCreate}
+          hasFilters={hasFilters}
+          isError={isError}
+          isLoading={isLoading}
+          onClearFilters={onClearFilters}
+          onDeactivate={onDeactivate}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
+          onRetry={onRetry}
+          onSortChange={onSortChange}
+          pageSize={pageSize}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+        />
+      </CardContent>
+    </Card>
+  );
+}
+
+function CategoriesDirectoryFilters({
+  onSearchChange,
+  onStatusChange,
+  onTypeChange,
+  search,
+  status,
+  type,
+}: Pick<
+  CategoriesDirectoryCardProps,
+  | "onSearchChange"
+  | "onStatusChange"
+  | "onTypeChange"
+  | "search"
+  | "status"
+  | "type"
+>) {
+  const t = useTranslations("Categories");
+
+  return (
+    <div className="grid w-full gap-3 sm:grid-cols-2 xl:w-auto xl:grid-cols-[18rem_13rem_12rem]">
+      <div className="relative sm:col-span-2 xl:col-span-1">
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+        <Input
+          aria-label={t("searchLabel")}
+          className="pl-9"
+          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder={t("searchPlaceholder")}
+          value={search}
+        />
+      </div>
+      <SelectControl
+        aria-label={t("typeFilter")}
+        onValueChange={(value) => onTypeChange(value as CategoryTypeFilter)}
+        options={MANAGEABLE_CATEGORY_TYPES.map((categoryType) => ({
+          label: t(`types.${categoryType}`),
+          value: categoryType,
+        }))}
+        value={type}
+      />
+      <SelectControl
+        aria-label={t("statusFilter")}
+        onValueChange={(value) => onStatusChange(value as CategoryStatusFilter)}
+        options={CATEGORY_STATUS_FILTERS.map((statusFilter) => ({
+          label: t(`statuses.${statusFilter}`),
+          value: statusFilter,
+        }))}
+        value={status}
+      />
+    </div>
+  );
+}
+
+function CategoriesDirectoryContent({
+  data,
+  canCreate,
+  hasFilters,
+  isError,
+  isLoading,
+  onClearFilters,
+  onDeactivate,
+  onPageChange,
+  onPageSizeChange,
+  onRetry,
+  onSortChange,
+  pageSize,
+  sortBy,
+  sortOrder,
+}: Pick<
+  CategoriesDirectoryCardProps,
+  | "data"
+  | "isError"
+  | "isLoading"
+  | "onPageChange"
+  | "onPageSizeChange"
+  | "onRetry"
+  | "onSortChange"
+  | "pageSize"
+  | "sortBy"
+  | "sortOrder"
+> & {
+  canCreate: CategoriesDirectoryCardProps["canCreate"];
+  hasFilters: boolean;
+  onClearFilters: CategoriesDirectoryCardProps["onClearFilters"];
+  onDeactivate: CategoriesDirectoryCardProps["onDeactivate"];
+}) {
+  const t = useTranslations("Categories");
+
+  if (isLoading) {
+    return <CategoriesDirectorySkeleton />;
+  }
+
+  if (isError) {
+    return (
+      <StatePanel
+        action={
+          <Button onClick={onRetry} variant="secondary">
+            {t("tryAgain")}
+          </Button>
+        }
+        description={t("loadErrorDescription")}
+        icon={FolderTree}
+        title={t("loadErrorTitle")}
+      />
+    );
+  }
+
+  if (data && data.items.length > 0) {
+    return (
+      <>
+        <CategoriesTable
+          items={data.items}
+          onDeactivate={onDeactivate}
+          onSortChange={onSortChange}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+        />
+        <CategoriesPagination
+          data={data}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
+          pageSize={pageSize}
+        />
+      </>
+    );
+  }
+
+  return (
+    <StatePanel
+      action={
+        hasFilters ? (
+          <Button onClick={onClearFilters} variant="secondary">
+            {t("clearFilters")}
+          </Button>
+        ) : canCreate ? (
+          <Button asChild>
+            <Link href="/categories/create">{t("create")}</Link>
+          </Button>
+        ) : null
+      }
+      description={
+        hasFilters ? t("emptyFilteredDescription") : t("emptyDescription")
+      }
+      icon={Tags}
+      title={hasFilters ? t("emptyFilteredTitle") : t("emptyTitle")}
+    />
+  );
+}
+
+function CategoriesDirectorySkeleton() {
+  return (
+    <div className="space-y-2">
+      {Array.from({ length: 6 }, (_, index) => (
+        <Skeleton className="h-16 w-full" key={index} />
+      ))}
+    </div>
+  );
+}
+
+function CategoriesPagination({
+  data,
+  onPageChange,
+  onPageSizeChange,
+  pageSize,
+}: {
+  data: CategoryTreeResponse;
+  onPageChange: CategoriesDirectoryCardProps["onPageChange"];
+  onPageSizeChange: CategoriesDirectoryCardProps["onPageSizeChange"];
+  pageSize: CategoriesDirectoryCardProps["pageSize"];
+}) {
+  const t = useTranslations("Categories");
+
+  return (
+    <PaginationControls
+      nextLabel={t("next")}
+      onPageChange={onPageChange}
+      onPageSizeChange={onPageSizeChange}
+      page={data.meta.page}
+      pageSize={pageSize}
+      pageSizeLabel={t("rootPageSize")}
+      previousLabel={t("previous")}
+      summary={t("treePagination", {
+        categories: data.meta.totalCategories,
+        page: data.meta.page,
+        roots: data.meta.totalRoots,
+        totalPages: Math.max(data.meta.totalPages, 1),
+      })}
+      totalPages={data.meta.totalPages}
+    />
+  );
+}

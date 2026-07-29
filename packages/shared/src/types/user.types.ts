@@ -1,4 +1,9 @@
-import type { ApiUserRole, UserRole } from "../constants/index.ts";
+import type {
+  ApiUserRole,
+  PermissionKey,
+  UserRole,
+} from "../constants/index.ts";
+import type { PaginationQuery } from "./pagination.types.ts";
 
 export type UserSummary = {
   id: string;
@@ -24,7 +29,7 @@ export type UserAccountSummary = {
   updatedAt: string;
 };
 
-export type ListUsersQuery = {
+export type ListUsersQuery = PaginationQuery & {
   page?: number;
   limit?: number;
   search?: string;
@@ -41,4 +46,59 @@ export type ListUsersQuery = {
     | "createdAt"
     | "updatedAt";
   sortOrder?: "asc" | "desc";
+};
+
+export type CreateModeratorBody = {
+  email: string;
+  full_name: string;
+  phone?: string;
+  role: "MODERATOR";
+  status?: ApiUserStatus;
+  username: string;
+};
+
+export type CreateModeratorResponse = {
+  temporaryPassword: string;
+  user: UserAccountSummary;
+};
+
+export type StaffImportResult = {
+  created: number;
+  updated: number;
+  errors: Array<{
+    field: string;
+    message: string;
+    rowNumber: number;
+  }>;
+  temporaryCredentials: Array<{
+    email: string;
+    fullName: string;
+    temporaryPassword: string;
+    username: string;
+  }>;
+};
+
+export type UpdateModeratorBody = {
+  email?: string;
+  full_name?: string;
+  password?: string;
+  phone?: string | null;
+  status?: ApiUserStatus;
+  username?: string;
+};
+
+export type UserPermissionOverride = {
+  permissionKey: PermissionKey;
+  granted: boolean;
+};
+
+export type UserPermissionsResponse = {
+  userId: string;
+  role: UserRole | null;
+  effectivePermissions: PermissionKey[];
+  overrides: UserPermissionOverride[];
+};
+
+export type UpdateUserPermissionsBody = {
+  overrides: UserPermissionOverride[];
 };

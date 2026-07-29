@@ -40,6 +40,10 @@ Repo dùng nhiều file env theo môi trường. File mẫu là `.env.example`.
 - `ASSET_CDN_URL`: base URL dùng để trả public asset URL. Khi dùng MinIO local, có thể đặt là `http://localhost:19000/warranty-management-base-public`.
 - `MINIO_ENDPOINT`, `MINIO_PORT`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY`.
 - `MINIO_BUCKET_PUBLIC`, `MINIO_BUCKET_PRIVATE`, `MINIO_BUCKET_TEMP`.
+- `MINIO_TEMP_RETENTION_DAYS`: số ngày giữ object trong bucket temp; `minio-init` cấu hình lifecycle tự động, mặc định 7 ngày.
+- `STORAGE_CAPACITY_BYTES`: ngân sách dung lượng storage dùng để tính cảnh báo 70/85/95%; bỏ trống nếu chưa xác định.
+- `STORAGE_USAGE_MONITOR_ENABLED`, `STORAGE_USAGE_MONITOR_CRON`: bật và đặt lịch job thống kê dung lượng.
+- `WARRANTY_CERTIFICATE_CLEANUP_ENABLED`, `WARRANTY_CERTIFICATE_CLEANUP_DRY_RUN`, `WARRANTY_CERTIFICATE_CLEANUP_CRON`, `WARRANTY_CERTIFICATE_ORPHAN_RETENTION_DAYS`: cấu hình job dọn PDF chứng nhận mồ côi.
 
 ### Telegram CI
 

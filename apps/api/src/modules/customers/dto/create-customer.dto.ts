@@ -1,8 +1,9 @@
 import { IsEmail, IsOptional, IsString, IsUUID, Length } from 'class-validator';
 
 export class CreateCustomerDto {
+  @IsOptional()
   @IsUUID()
-  userId: string;
+  userId?: string;
 
   @IsOptional()
   @IsString()
@@ -13,17 +14,14 @@ export class CreateCustomerDto {
   @Length(2, 120)
   fullName: string;
 
-  @IsOptional()
   @IsString()
   @Length(6, 32)
-  phone?: string;
+  phone: string;
 
-  @IsOptional()
   @IsEmail()
-  email?: string;
+  email: string;
 
-  @IsOptional()
   @IsString()
-  @Length(0, 255)
-  address?: string;
+  @Length(1, 255)
+  address: string;
 }

@@ -2,6 +2,7 @@
   "name": "@repo/shared",
   "version": "0.0.0",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./src/index.ts",
@@ -14,6 +15,11 @@
       "types": "./src/constants/index.ts",
       "require": "./dist-cjs/constants/index.js",
       "default": "./dist/constants/index.js"
+    },
+    "./utils": {
+      "types": "./src/utils/index.ts",
+      "require": "./dist-cjs/utils/index.js",
+      "default": "./dist/utils/index.js"
     }
   },
   "scripts": {

@@ -13,11 +13,19 @@ import {
 import { useAdminUiStore } from "@/src/app/stores/ui.store";
 import { getDashboardConfig } from "@/src/config/dashboard.config";
 import { Link } from "@/src/i18n/navigation";
+import { usePermissions } from "@/src/hooks/use-permissions";
+import {
+  canAccessNavigationItem,
+  getAccessibleNavigationItems,
+  resolveNavigationHref,
+} from "@/src/config/navigation-permissions";
+import { flattenNavigationItems } from "@/src/components/layout/nav-items";
 
 export function CommandMenu() {
   const t = useTranslations("DashboardConfig");
   const tCommon = useTranslations("Common");
   const dashboardConfig = getDashboardConfig(t);
+  const { hasPermission, hasRole } = usePermissions();
   const open = useAdminUiStore((state) => state.commandOpen);
   const setOpen = useAdminUiStore((state) => state.setCommandOpen);
 
@@ -45,22 +53,34 @@ export function CommandMenu() {
   >();
 
   dashboardConfig.sidebarSections.forEach((section) => {
-    section.items.forEach((item) => {
-      if (item.href) {
-        itemsMap.set(item.href, {
-          title: item.title,
-          href: item.href,
-          icon: item.icon,
-        });
-      }
+    const accessibleItems = getAccessibleNavigationItems(
+      section.items,
+      hasPermission,
+      hasRole,
+    );
+
+    flattenNavigationItems(accessibleItems).forEach((item) => {
+      if (!item.href) return;
+      itemsMap.set(item.href, {
+        title: item.title,
+        href: item.href,
+        icon: item.icon,
+      });
     });
   });
 
   dashboardConfig.topNavigation.forEach((item) => {
-    if (item.href && !itemsMap.has(item.href)) {
-      itemsMap.set(item.href, {
+    if (
+      item.href &&
+      !itemsMap.has(item.href) &&
+      (!item.requiredRole || hasRole(item.requiredRole)) &&
+      canAccessNavigationItem(item, hasPermission)
+    ) {
+      const href = resolveNavigationHref(item, hasPermission);
+      if (!href) return;
+      itemsMap.set(href, {
         title: item.title,
-        href: item.href,
+        href,
         icon: LayoutDashboard, // fallback icon
       });
     }

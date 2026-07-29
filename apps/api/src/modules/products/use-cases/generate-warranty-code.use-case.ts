@@ -1,6 +1,7 @@
 import { BadRequestError } from '@/common/response';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 
 const WARRANTY_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
@@ -8,7 +9,7 @@ const WARRANTY_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 export class GenerateWarrantyCodeUseCase {
   constructor(private readonly productsRepository: ProductsRepository) {}
 
-  async execute(date = new Date()) {
+  async execute(date = new Date(), tx?: Prisma.TransactionClient) {
     const year = date.getFullYear();
 
     for (let attempt = 0; attempt < 5; attempt += 1) {
@@ -18,7 +19,9 @@ export class GenerateWarrantyCodeUseCase {
         ),
       ).join('');
       const code = `WM-${year}-${suffix}`;
-      const existing = await this.productsRepository.findByWarrantyCode(code);
+      const existing = tx
+        ? await this.productsRepository.findByWarrantyCode(code, tx)
+        : await this.productsRepository.findByWarrantyCode(code);
 
       if (!existing) {
         return code;
