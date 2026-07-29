@@ -6,19 +6,10 @@ on:
       - Publish Images
     branches:
       - main
-      - develop
     types:
       - completed
   workflow_dispatch:
     inputs:
-      environment:
-        description: Deployment environment.
-        required: true
-        type: choice
-        default: staging
-        options:
-          - staging
-          - production
       image_tag:
         description: Image tag to deploy, usually a commit SHA already published to GHCR.
         required: true
@@ -42,16 +33,7 @@ jobs:
           github.event.workflow_run.event == 'workflow_run'
         )
       }}
-    environment: >-
-      ${{
-        github.event_name == 'workflow_dispatch' &&
-        inputs.environment ||
-        (
-          github.event.workflow_run.head_branch == 'main' &&
-          'production' ||
-          'staging'
-        )
-      }}
+    environment: production
     outputs:
       image-tag: ${{ steps.metadata.outputs.image_tag }}
       deployment-environment: ${{ steps.metadata.outputs.deployment_environment }}
@@ -62,7 +44,6 @@ jobs:
         env:
           MANUAL_IMAGE_TAG: ${{ inputs.image_tag }}
           PUBLISHED_IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
-          MANUAL_ENVIRONMENT: ${{ inputs.environment }}
           PUBLISHED_SOURCE_BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
           set -eu
@@ -77,13 +58,7 @@ jobs:
             exit 1
           fi
 
-          if [ -n "$MANUAL_ENVIRONMENT" ]; then
-            deployment_environment="$MANUAL_ENVIRONMENT"
-          elif [ "$source_branch" = "main" ]; then
-            deployment_environment="production"
-          else
-            deployment_environment="staging"
-          fi
+          deployment_environment="production"
 
           echo "image_tag=$image_tag" >> "$GITHUB_OUTPUT"
           echo "deployment_environment=$deployment_environment" >> "$GITHUB_OUTPUT"
