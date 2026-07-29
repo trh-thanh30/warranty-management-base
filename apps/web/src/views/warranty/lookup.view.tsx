@@ -62,9 +62,9 @@ export function WarrantyLookupView() {
           </div>
 
           <div className="grid gap-6 sm:grid-cols-3">
-            <div className="group bg-white rounded-[24px] border border-border-gray shadow-md hover:shadow-xl hover:border-premium-red transition-all p-6 sm:p-7 text-left flex flex-col justify-between h-[230px]">
+            <div className="group bg-white rounded-md border border-border-gray shadow-md hover:shadow-xl hover:border-premium-red transition-all p-6 sm:p-7 text-left flex flex-col justify-between h-[230px]">
               <div className="flex items-center justify-between">
-                <div className="flex size-12 items-center justify-center rounded-2xl bg-surface-muted border border-border-gray text-stone-gray group-hover:text-premium-red group-hover:border-premium-red/30 transition-colors">
+                <div className="flex size-12 items-center justify-center rounded-md bg-surface-muted border border-border-gray text-stone-gray group-hover:text-premium-red group-hover:border-premium-red/30 transition-colors">
                   <Phone className="size-6" strokeWidth={1.8} />
                 </div>
                 <span className="text-3xl sm:text-4xl font-condensed font-semibold text-stone-gray/20 group-hover:text-premium-red/30 transition-colors">
@@ -84,9 +84,9 @@ export function WarrantyLookupView() {
               </div>
             </div>
 
-            <div className="group bg-white rounded-[24px] border border-border-gray shadow-md hover:shadow-xl hover:border-premium-red transition-all p-6 sm:p-7 text-left flex flex-col justify-between h-[230px]">
+            <div className="group bg-white rounded-md border border-border-gray shadow-md hover:shadow-xl hover:border-premium-red transition-all p-6 sm:p-7 text-left flex flex-col justify-between h-[230px]">
               <div className="flex items-center justify-between">
-                <div className="flex size-12 items-center justify-center rounded-2xl bg-surface-muted border border-border-gray text-stone-gray group-hover:text-premium-red group-hover:border-premium-red/30 transition-colors">
+                <div className="flex size-12 items-center justify-center rounded-md bg-surface-muted border border-border-gray text-stone-gray group-hover:text-premium-red group-hover:border-premium-red/30 transition-colors">
                   <FileText className="size-6" strokeWidth={1.8} />
                 </div>
                 <span className="text-3xl sm:text-4xl font-condensed font-semibold text-stone-gray/20 group-hover:text-premium-red/30 transition-colors">
@@ -98,7 +98,7 @@ export function WarrantyLookupView() {
                   <span className="text-xs font-semibold uppercase tracking-wider text-stone-gray">
                     {t("registration.methods.qr.label")}
                   </span>
-                  <span className="rounded-full bg-accent-gold px-2.5 py-0.5 text-xs font-semibold uppercase text-deep-black">
+                  <span className="rounded-md bg-accent-gold px-2.5 py-0.5 text-xs font-semibold uppercase text-deep-black">
                     E-Warranty
                   </span>
                 </div>
@@ -111,9 +111,9 @@ export function WarrantyLookupView() {
               </div>
             </div>
 
-            <div className="group bg-white rounded-[24px] border border-border-gray shadow-md hover:shadow-xl hover:border-premium-red transition-all p-6 sm:p-7 text-left flex flex-col justify-between h-[230px]">
+            <div className="group bg-white rounded-md border border-border-gray shadow-md hover:shadow-xl hover:border-premium-red transition-all p-6 sm:p-7 text-left flex flex-col justify-between h-[230px]">
               <div className="flex items-center justify-between">
-                <div className="flex size-12 items-center justify-center rounded-2xl bg-surface-muted border border-border-gray text-stone-gray group-hover:text-premium-red group-hover:border-premium-red/30 transition-colors">
+                <div className="flex size-12 items-center justify-center rounded-md bg-surface-muted border border-border-gray text-stone-gray group-hover:text-premium-red group-hover:border-premium-red/30 transition-colors">
                   <Hash className="size-6" strokeWidth={1.8} />
                 </div>
                 <span className="text-3xl sm:text-4xl font-condensed font-semibold text-stone-gray/20 group-hover:text-premium-red/30 transition-colors">
@@ -148,7 +148,7 @@ export function WarrantyLookupView() {
 
           <motion.div
             layout
-            className="bg-white rounded-[28px] p-6 sm:p-10 border border-border-gray shadow-xl max-w-3xl sm:max-w-4xl lg:max-w-5xl mx-auto overflow-hidden"
+            className="bg-white rounded-md p-6 sm:p-10 border border-border-gray shadow-xl max-w-3xl sm:max-w-4xl lg:max-w-5xl mx-auto overflow-hidden"
           >
             <div className="mb-8 pb-8 border-b border-border-gray space-y-8">
               <div>
@@ -156,8 +156,8 @@ export function WarrantyLookupView() {
                   {t("guide.title")}
                 </p>
                 <div className="grid gap-4 sm:grid-cols-3">
-                  <div className="bg-surface-muted/70 p-4 rounded-2xl border border-border-gray space-y-1 text-center">
-                    <span className="inline-block text-xs font-condensed font-semibold text-premium-red uppercase tracking-widest bg-premium-red/10 px-2.5 py-0.5 rounded-full">
+                  <div className="bg-surface-muted/70 p-4 rounded-md border border-border-gray space-y-1 text-center">
+                    <span className="inline-block text-xs font-condensed font-semibold text-premium-red uppercase tracking-widest bg-premium-red/10 px-2.5 py-0.5 rounded-md">
                       {t("guide.steps.one.badge")}
                     </span>
                     <h4 className="text-sm font-semibold uppercase text-deep-black pt-1">
@@ -168,8 +168,8 @@ export function WarrantyLookupView() {
                     </p>
                   </div>
 
-                  <div className="bg-surface-muted/70 p-4 rounded-2xl border border-border-gray space-y-1 text-center">
-                    <span className="inline-block text-xs font-condensed font-semibold text-premium-red uppercase tracking-widest bg-premium-red/10 px-2.5 py-0.5 rounded-full">
+                  <div className="bg-surface-muted/70 p-4 rounded-md border border-border-gray space-y-1 text-center">
+                    <span className="inline-block text-xs font-condensed font-semibold text-premium-red uppercase tracking-widest bg-premium-red/10 px-2.5 py-0.5 rounded-md">
                       {t("guide.steps.two.badge")}
                     </span>
                     <h4 className="text-sm font-semibold uppercase text-deep-black pt-1">
@@ -180,8 +180,8 @@ export function WarrantyLookupView() {
                     </p>
                   </div>
 
-                  <div className="bg-surface-muted/70 p-4 rounded-2xl border border-border-gray space-y-1 text-center">
-                    <span className="inline-block text-xs font-condensed font-semibold text-premium-red uppercase tracking-widest bg-premium-red/10 px-2.5 py-0.5 rounded-full">
+                  <div className="bg-surface-muted/70 p-4 rounded-md border border-border-gray space-y-1 text-center">
+                    <span className="inline-block text-xs font-condensed font-semibold text-premium-red uppercase tracking-widest bg-premium-red/10 px-2.5 py-0.5 rounded-md">
                       {t("guide.steps.three.badge")}
                     </span>
                     <h4 className="text-sm font-semibold uppercase text-deep-black pt-1">
@@ -201,21 +201,21 @@ export function WarrantyLookupView() {
                 <div className="grid gap-3 sm:grid-cols-3 text-xs font-semibold uppercase tracking-wide text-center">
                   <Link
                     href={APP_ROUTES.warrantyActivate}
-                    className="p-3.5 rounded-xl bg-surface-muted hover:bg-premium-red hover:text-white border border-border-gray transition-colors text-deep-black flex items-center justify-center gap-2"
+                    className="p-3.5 rounded-md bg-surface-muted hover:bg-premium-red hover:text-white border border-border-gray transition-colors text-deep-black flex items-center justify-center gap-2"
                   >
                     <ShieldCheck className="size-4 shrink-0" />
                     <span>{t("otherActions.activate")}</span>
                   </Link>
                   <Link
                     href={APP_ROUTES.warrantyRequest}
-                    className="p-3.5 rounded-xl bg-surface-muted hover:bg-premium-red hover:text-white border border-border-gray transition-colors text-deep-black flex items-center justify-center gap-2"
+                    className="p-3.5 rounded-md bg-surface-muted hover:bg-premium-red hover:text-white border border-border-gray transition-colors text-deep-black flex items-center justify-center gap-2"
                   >
                     <FileText className="size-4 shrink-0" />
                     <span>{t("otherActions.request")}</span>
                   </Link>
                   <Link
                     href={APP_ROUTES.dealers}
-                    className="p-3.5 rounded-xl bg-surface-muted hover:bg-premium-red hover:text-white border border-border-gray transition-colors text-deep-black flex items-center justify-center gap-2"
+                    className="p-3.5 rounded-md bg-surface-muted hover:bg-premium-red hover:text-white border border-border-gray transition-colors text-deep-black flex items-center justify-center gap-2"
                   >
                     <Building2 className="size-4 shrink-0" />
                     <span>{t("otherActions.dealers")}</span>
@@ -242,14 +242,14 @@ export function WarrantyLookupView() {
                 >
                   <WarrantyLookupResultDetails result={searchResult} />
 
-                  <div className="mt-8 border-t border-border-gray pt-6 pb-6 text-center space-y-4 bg-surface-muted/60 rounded-2xl p-6 sm:p-8">
+                  <div className="mt-8 border-t border-border-gray pt-6 pb-6 text-center space-y-4 bg-surface-muted/60 rounded-md p-6 sm:p-8">
                     <p className="text-sm sm:text-base text-stone-gray font-medium leading-relaxed max-w-lg mx-auto">
                       {t("support.message")}
                     </p>
                     <div className="flex justify-center">
                       <a
                         href={warrantyLookupSupportPhone.href}
-                        className="inline-flex items-center gap-2 bg-premium-red hover:bg-warm-red text-white px-6 py-3.5 rounded-full text-sm font-semibold uppercase tracking-wider transition-all shadow-md hover:shadow-lg hover:scale-105 whitespace-nowrap shrink-0"
+                        className="inline-flex items-center gap-2 bg-premium-red hover:bg-warm-red text-white px-6 py-3.5 rounded-md text-sm font-semibold uppercase tracking-wider transition-all shadow-md hover:shadow-lg hover:scale-105 whitespace-nowrap shrink-0"
                       >
                         <Phone className="size-4 animate-bounce shrink-0" />
                         <span className="whitespace-nowrap">
@@ -298,7 +298,7 @@ export function WarrantyLookupView() {
 
             <Link
               href={APP_ROUTES.policyWarrantyReturn}
-              className="inline-flex items-center gap-2.5 bg-premium-red hover:bg-warm-red text-white px-6 py-3.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors shrink-0 shadow-md"
+              className="inline-flex items-center gap-2.5 bg-premium-red hover:bg-warm-red text-white px-6 py-3.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors shrink-0 shadow-md"
             >
               <span>{t("policyShortcut.action")}</span>
               <FileText className="size-4" />

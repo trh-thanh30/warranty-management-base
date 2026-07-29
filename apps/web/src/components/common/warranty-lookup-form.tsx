@@ -97,9 +97,7 @@ export function WarrantyLookupForm({
                       className={cn(
                         "border-border-gray bg-white pl-12 text-base aria-invalid:border-premium-red",
                         formControlFocusClassName,
-                        isPage
-                          ? "h-14 rounded-[16px]"
-                          : "h-12 rounded-xl sm:h-14",
+                        isPage ? "h-14 rounded-md" : "h-12 rounded-xl sm:h-14",
                       )}
                     />
                   </FormControl>
@@ -115,7 +113,7 @@ export function WarrantyLookupForm({
             className={cn(
               "w-full shrink-0 cursor-pointer bg-premium-red font-semibold uppercase text-white shadow-md hover:bg-warm-red disabled:cursor-wait disabled:opacity-70 focus-visible:ring-premium-red",
               isPage
-                ? "h-14 rounded-[16px] px-8 text-base tracking-wider sm:w-auto"
+                ? "h-14 rounded-md px-8 text-base tracking-wider sm:w-auto"
                 : "h-12 rounded-xl px-6 text-sm sm:h-14",
             )}
           >
@@ -125,11 +123,11 @@ export function WarrantyLookupForm({
 
         <p className="text-center text-xs font-medium text-stone-gray">
           {t("tryPrefix")}{" "}
-          <code className="rounded bg-light-gray px-2 py-0.5 font-mono text-premium-red">
+          <code className="rounded-md bg-light-gray px-2 py-0.5 font-mono text-premium-red">
             {warrantyLookupExamples[0]}
           </code>{" "}
           {t("or")}{" "}
-          <code className="rounded bg-light-gray px-2 py-0.5 font-mono text-premium-red">
+          <code className="rounded-md bg-light-gray px-2 py-0.5 font-mono text-premium-red">
             {warrantyLookupExamples[1]}
           </code>
         </p>
