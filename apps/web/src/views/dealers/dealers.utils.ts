@@ -3,6 +3,10 @@ import type { DealerLocation } from "./dealers.types";
 
 export const dealerFilterAll = "all" as const;
 
+export function getNetworkLocationKey(location: PublicNetworkLocation) {
+  return `${location.kind}:${location.id}`;
+}
+
 type DealerFilters = {
   searchQuery: string;
   selectedDistrict: string;

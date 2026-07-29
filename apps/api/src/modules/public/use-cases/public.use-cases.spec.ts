@@ -1,10 +1,152 @@
 import { PublicListServiceCentersUseCase } from '@/modules/public/use-cases/public-list-service-centers.use-case';
 import { PublicListNetworkLocationsUseCase } from '@/modules/public/use-cases/public-list-network-locations.use-case';
+import { PublicListNetworkDirectoryUseCase } from '@/modules/public/use-cases/public-list-network-directory.use-case';
+import { PublicListNetworkDirectoryFilterOptionsUseCase } from '@/modules/public/use-cases/public-list-network-directory-filter-options.use-case';
 import { PublicListDealersUseCase } from '@/modules/public/use-cases/public-list-dealers.use-case';
 import { PublicListDealerFilterOptionsUseCase } from '@/modules/public/use-cases/public-list-dealer-filter-options.use-case';
 import { toPublicWarrantyClaimResponse } from '@/modules/public/use-cases/public-lookup-warranty-claim-by-code.use-case';
 
 describe('Public use cases', () => {
+  it('combines, filters, and paginates active dealers and service centers for the public directory', async () => {
+    const dealersRepository = {
+      listActiveForNetwork: jest.fn().mockResolvedValue([
+        {
+          id: 'dealer-id',
+          name: 'Ha Noi Dealer',
+          phone: '0901234567',
+          address: '1 Nguyen Trai',
+          province: 'Ha Noi',
+          district: 'Thanh Xuan',
+          latitude: 21.0285,
+          longitude: 105.8542,
+        },
+      ]),
+    };
+    const serviceCentersRepository = {
+      listActiveForNetwork: jest.fn().mockResolvedValue([
+        {
+          id: 'service-center-id',
+          name: 'Ha Noi Warranty Center',
+          phone: null,
+          address: '2 Nguyen Trai',
+          province: 'Ha Noi',
+          district: 'Thanh Xuan',
+          latitude: 21.03,
+          longitude: 105.85,
+        },
+      ]),
+    };
+    const useCase = new PublicListNetworkDirectoryUseCase(
+      dealersRepository as never,
+      serviceCentersRepository as never,
+    );
+
+    const result = await useCase.execute({
+      page: 1,
+      limit: 10,
+      province: 'Ha Noi',
+      search: 'nguyen trai',
+    });
+
+    expect(result.items).toEqual([
+      expect.objectContaining({ id: 'dealer-id', kind: 'DEALER' }),
+      expect.objectContaining({
+        id: 'service-center-id',
+        kind: 'SERVICE_CENTER',
+      }),
+    ]);
+    expect(result.meta).toEqual(
+      expect.objectContaining({ page: 1, limit: 10, total: 2 }),
+    );
+  });
+
+  it('returns filter options from both active dealers and service centers', async () => {
+    const dealersRepository = {
+      listActiveForNetwork: jest.fn().mockResolvedValue([
+        {
+          province: 'Ha Noi',
+          district: 'Thanh Xuan',
+        },
+      ]),
+    };
+    const serviceCentersRepository = {
+      listActiveForNetwork: jest.fn().mockResolvedValue([
+        {
+          province: 'Bac Ninh',
+          district: 'Tien Du',
+        },
+        {
+          province: 'Ha Noi',
+          district: 'Cau Giay',
+        },
+      ]),
+    };
+    const useCase = new PublicListNetworkDirectoryFilterOptionsUseCase(
+      dealersRepository as never,
+      serviceCentersRepository as never,
+    );
+
+    await expect(useCase.execute()).resolves.toEqual({
+      provinces: ['Bac Ninh', 'Ha Noi'],
+      districts: [],
+    });
+    await expect(useCase.execute('Ha Noi')).resolves.toEqual({
+      provinces: ['Bac Ninh', 'Ha Noi'],
+      districts: ['Cau Giay', 'Thanh Xuan'],
+    });
+  });
+
+  it('includes nearby service centers when filtering the public directory by distance', async () => {
+    const dealersRepository = {
+      listActiveForNetwork: jest.fn().mockResolvedValue([
+        {
+          id: 'far-dealer',
+          name: 'Far Dealer',
+          phone: null,
+          address: 'Da Nang',
+          province: 'Da Nang',
+          district: null,
+          latitude: 16.0544,
+          longitude: 108.2022,
+        },
+      ]),
+    };
+    const serviceCentersRepository = {
+      listActiveForNetwork: jest.fn().mockResolvedValue([
+        {
+          id: 'near-center',
+          name: 'Nearby Warranty Center',
+          phone: null,
+          address: 'Ha Noi',
+          province: 'Ha Noi',
+          district: null,
+          latitude: 21.0285,
+          longitude: 105.8542,
+        },
+      ]),
+    };
+    const useCase = new PublicListNetworkDirectoryUseCase(
+      dealersRepository as never,
+      serviceCentersRepository as never,
+    );
+
+    const result = await useCase.execute({
+      latitude: 21.0285,
+      longitude: 105.8542,
+      radiusKm: 20,
+      page: 1,
+      limit: 10,
+    });
+
+    expect(result.items).toEqual([
+      expect.objectContaining({
+        id: 'near-center',
+        kind: 'SERVICE_CENTER',
+      }),
+    ]);
+    expect(result.meta.total).toBe(1);
+  });
+
   it('returns a paginated active-only public dealer projection', async () => {
     const dealersRepository = {
       listActivePublic: jest.fn().mockResolvedValue({

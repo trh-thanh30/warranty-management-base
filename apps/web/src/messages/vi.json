@@ -1023,27 +1023,31 @@
       "districtAriaLabel": "Chọn quận hoặc huyện",
       "allCities": "Toàn quốc",
       "allDistricts": "Quận/Huyện",
-      "nearMe": "Tìm cửa hàng gần bạn (≤ 20 km)",
+      "nearMe": "Tìm đại lý và trung tâm bảo hành gần bạn (≤ 20 km)",
       "nearMeLoading": "Đang xác định vị trí của bạn...",
       "nearMeError": "Không thể lấy vị trí. Hãy kiểm tra quyền truy cập vị trí.",
       "nearMeUnsupported": "Trình duyệt không hỗ trợ định vị.",
-      "resultCount": "Có {count} cửa hàng"
+      "resultCount": "Có {count} đại lý và trung tâm bảo hành"
     },
     "states": {
-      "loading": "Đang tải danh sách đại lý...",
-      "loadingMore": "Đang tải thêm đại lý...",
-      "loadMoreError": "Không thể tải thêm đại lý.",
-      "error": "Không thể tải danh sách đại lý. Vui lòng thử lại.",
+      "loading": "Đang tải đại lý và trung tâm bảo hành...",
+      "loadingMore": "Đang tải thêm địa điểm...",
+      "loadMoreError": "Không thể tải thêm địa điểm.",
+      "error": "Không thể tải đại lý và trung tâm bảo hành. Vui lòng thử lại.",
       "retry": "Thử lại"
     },
-    "empty": "Không tìm thấy đại lý phù hợp.",
+    "empty": "Không tìm thấy đại lý hoặc trung tâm bảo hành phù hợp.",
+    "locationType": {
+      "dealer": "Đại lý",
+      "serviceCenter": "Trung tâm bảo hành"
+    },
     "viewMore": "Xem thêm",
     "directions": "Chỉ đường",
     "hotline": "Hotline",
     "map": {
-      "defaultTitle": "Bản đồ đại lý FUJITEK",
-      "iframeTitle": "Bản đồ vị trí đại lý FUJITEK",
-      "ariaLabel": "Bản đồ tương tác vị trí đại lý FUJITEK tại Việt Nam",
+      "defaultTitle": "Bản đồ đại lý và trung tâm bảo hành FUJITEK",
+      "iframeTitle": "Bản đồ vị trí đại lý và trung tâm bảo hành FUJITEK",
+      "ariaLabel": "Bản đồ tương tác vị trí đại lý và trung tâm bảo hành FUJITEK tại Việt Nam",
       "activateMap": "Nhấp để tương tác với bản đồ",
       "resetMap": "Đặt lại bản đồ",
       "loading": "Đang tải ranh giới bản đồ Việt Nam...",

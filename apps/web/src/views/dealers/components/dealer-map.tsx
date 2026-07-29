@@ -19,10 +19,10 @@ import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
 import { Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import { useNetworkLocations } from "@/src/hooks/use-network-locations";
-import type { DealerLocation } from "../dealers.types";
+import type { NetworkDirectoryLocation } from "../dealers.types";
 
 interface DealerMapProps {
-  activeDealer: DealerLocation | null;
+  activeLocation: NetworkDirectoryLocation | null;
 }
 
 const markerColorByKind: Record<PublicNetworkLocationKind, string> = {
@@ -51,24 +51,24 @@ function createLocationIcon(kind: PublicNetworkLocationKind, selected = false) {
   });
 }
 
-function MapCamera({ activeDealer }: DealerMapProps) {
+function MapCamera({ activeLocation }: DealerMapProps) {
   const map = useMap();
 
   useEffect(() => {
-    if (activeDealer) {
-      map.flyTo([activeDealer.latitude, activeDealer.longitude], 13, {
+    if (activeLocation) {
+      map.flyTo([activeLocation.latitude, activeLocation.longitude], 13, {
         duration: 1.1,
       });
       return;
     }
 
     map.setView(VIETNAM_CENTER, VIETNAM_INITIAL_ZOOM, { animate: true });
-  }, [activeDealer, map]);
+  }, [activeLocation, map]);
 
   return null;
 }
 
-export function DealerMap({ activeDealer }: DealerMapProps) {
+export function DealerMap({ activeLocation }: DealerMapProps) {
   const t = useTranslations("DealersPage.map");
   const { boundary, status } = useVietnamBoundary();
   const {
@@ -82,6 +82,7 @@ export function DealerMap({ activeDealer }: DealerMapProps) {
       DEALER: createLocationIcon("DEALER"),
       SERVICE_CENTER: createLocationIcon("SERVICE_CENTER"),
       selectedDealer: createLocationIcon("DEALER", true),
+      selectedServiceCenter: createLocationIcon("SERVICE_CENTER", true),
     }),
     [],
   );
@@ -117,19 +118,23 @@ export function DealerMap({ activeDealer }: DealerMapProps) {
           />
         ) : null}
 
-        <MapCamera activeDealer={activeDealer} />
+        <MapCamera activeLocation={activeLocation} />
 
         {locations.map((location) => {
-          const isSelectedDealer =
-            location.kind === "DEALER" && location.id === activeDealer?.id;
+          const isSelectedLocation =
+            activeLocation !== null &&
+            location.kind === activeLocation.kind &&
+            location.id === activeLocation.id;
 
           return (
             <Marker
               key={`${location.kind}-${location.id}`}
               position={[location.latitude, location.longitude]}
               icon={
-                isSelectedDealer
-                  ? markerIcons.selectedDealer
+                isSelectedLocation
+                  ? location.kind === "DEALER"
+                    ? markerIcons.selectedDealer
+                    : markerIcons.selectedServiceCenter
                   : markerIcons[location.kind]
               }
               title={location.name}
@@ -145,9 +150,7 @@ export function DealerMap({ activeDealer }: DealerMapProps) {
                       backgroundColor: markerColorByKind[location.kind],
                     }}
                   >
-                    {isSelectedDealer
-                      ? t("selectedDealer")
-                      : locationTypeLabel(location)}
+                    {locationTypeLabel(location)}
                   </span>
                   <p className="m-0 text-sm font-semibold uppercase leading-snug text-deep-black">
                     {location.name}

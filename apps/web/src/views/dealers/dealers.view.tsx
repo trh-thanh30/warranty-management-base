@@ -8,6 +8,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { DealerFilters } from "./components/dealer-filters";
 import { DealerList } from "./components/dealer-list";
+import { getNetworkLocationKey } from "./dealers.utils";
 import { useDealerDirectory } from "./use-dealer-directory";
 
 const DealerMap = dynamic(
@@ -29,8 +30,7 @@ const DealerMap = dynamic(
 export function DealersView() {
   const t = useTranslations("DealersPage");
   const {
-    activeDealer,
-    dealers,
+    activeLocation,
     districts,
     error,
     hasNextPage,
@@ -38,6 +38,7 @@ export function DealersView() {
     loadMore,
     loadMoreError,
     loading,
+    locations,
     nearMeOnly,
     nearbyStatus,
     provinces,
@@ -49,7 +50,7 @@ export function DealersView() {
     selectProvince,
     setNearMeOnly,
     setSearchQuery,
-    setSelectedDealerId,
+    setSelectedLocation,
     setSelectedDistrict,
   } = useDealerDirectory();
 
@@ -100,17 +101,20 @@ export function DealersView() {
                 }}
               />
               <DealerList
-                activeDealerId={activeDealer?.id ?? null}
-                dealers={dealers}
+                activeLocationKey={
+                  activeLocation ? getNetworkLocationKey(activeLocation) : null
+                }
                 error={error}
                 hasNextPage={hasNextPage}
                 isLoadingMore={isLoadingMore}
                 loadMoreError={loadMoreError}
                 loading={loading}
+                locations={locations}
                 onLoadMore={loadMore}
                 onRetry={retry}
-                onSelectDealer={setSelectedDealerId}
+                onSelectLocation={setSelectedLocation}
                 translations={{
+                  dealerBadge: t("locationType.dealer"),
                   directions: t("directions"),
                   empty: t("empty"),
                   error: t("states.error"),
@@ -118,6 +122,7 @@ export function DealersView() {
                   loadingMore: t("states.loadingMore"),
                   loadMoreError: t("states.loadMoreError"),
                   retry: t("states.retry"),
+                  serviceCenterBadge: t("locationType.serviceCenter"),
                   viewMore: t("viewMore"),
                 }}
               />
@@ -131,16 +136,16 @@ export function DealersView() {
                     className="size-5 text-premium-red"
                   />
                   <span className="text-sm font-semibold uppercase tracking-wider">
-                    {activeDealer?.name ?? t("map.defaultTitle")}
+                    {activeLocation?.name ?? t("map.defaultTitle")}
                   </span>
                 </div>
                 <span className="text-xs text-stone-gray font-mono font-medium">
-                  {activeDealer?.province ?? null}
+                  {activeLocation?.province ?? null}
                 </span>
               </div>
 
               <div className="flex-1 w-full relative bg-light-gray">
-                <DealerMap activeDealer={activeDealer} />
+                <DealerMap activeLocation={activeLocation} />
               </div>
             </Card>
           </div>

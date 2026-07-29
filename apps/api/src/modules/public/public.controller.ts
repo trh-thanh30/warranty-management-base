@@ -12,6 +12,10 @@ import { PublicListDealersUseCase } from '@/modules/public/use-cases/public-list
 import { ListPublicDealersDto } from '@/modules/public/dto/list-public-dealers.dto';
 import { ListPublicDealerFilterOptionsDto } from '@/modules/public/dto/list-public-dealer-filter-options.dto';
 import { PublicListDealerFilterOptionsUseCase } from '@/modules/public/use-cases/public-list-dealer-filter-options.use-case';
+import { ListPublicNetworkDirectoryDto } from '@/modules/public/dto/list-public-network-directory.dto';
+import { ListPublicNetworkDirectoryFilterOptionsDto } from '@/modules/public/dto/list-public-network-directory-filter-options.dto';
+import { PublicListNetworkDirectoryUseCase } from '@/modules/public/use-cases/public-list-network-directory.use-case';
+import { PublicListNetworkDirectoryFilterOptionsUseCase } from '@/modules/public/use-cases/public-list-network-directory-filter-options.use-case';
 import { ListPublicProductsDto } from '@/modules/products/dto/list-public-products.dto';
 import { ListPublicProductsUseCase } from '@/modules/products/use-cases/list-public-products.use-case';
 import { ListPublicProductCategoriesUseCase } from '@/modules/categories/use-cases/list-public-product-categories.use-case';
@@ -33,6 +37,8 @@ export class PublicController {
     private readonly publicListNetworkLocationsUseCase: PublicListNetworkLocationsUseCase,
     private readonly publicListDealersUseCase: PublicListDealersUseCase,
     private readonly publicListDealerFilterOptionsUseCase: PublicListDealerFilterOptionsUseCase,
+    private readonly publicListNetworkDirectoryUseCase: PublicListNetworkDirectoryUseCase,
+    private readonly publicListNetworkDirectoryFilterOptionsUseCase: PublicListNetworkDirectoryFilterOptionsUseCase,
     private readonly listPublicProductsUseCase: ListPublicProductsUseCase,
     private readonly listPublicProductCategoriesUseCase: ListPublicProductCategoriesUseCase,
   ) {}
@@ -76,6 +82,20 @@ export class PublicController {
   @Get('network-locations')
   listNetworkLocations() {
     return this.publicListNetworkLocationsUseCase.execute();
+  }
+
+  @Get('network-directory')
+  listNetworkDirectory(@Query() query: ListPublicNetworkDirectoryDto) {
+    return this.publicListNetworkDirectoryUseCase.execute(query);
+  }
+
+  @Get('network-directory/filter-options')
+  listNetworkDirectoryFilterOptions(
+    @Query() query: ListPublicNetworkDirectoryFilterOptionsDto,
+  ) {
+    return this.publicListNetworkDirectoryFilterOptionsUseCase.execute(
+      query.province,
+    );
   }
 
   @Get('dealers')

@@ -27,12 +27,12 @@ const dealerDirectoryHookPath = path.join(
   "dealers",
   "use-dealer-directory.ts",
 );
-const publicDealersServicePath = path.join(
+const publicNetworkDirectoryServicePath = path.join(
   webRoot,
   "src",
   "services",
-  "dealers",
-  "public-dealers.service.ts",
+  "network-directory",
+  "public-network-directory.service.ts",
 );
 const vietnamGeoJsonPath = path.join(webRoot, "public", "map", "vn.geojson");
 const globalsPath = path.join(webRoot, "app", "globals.css");
@@ -115,25 +115,26 @@ test("dealer map uses the shared Vietnam overlay without locking horizontal pann
   assert.doesNotMatch(source, /🇻🇳|📍/u);
 });
 
-test("dealer page loads public network dealers and dynamically renders the Leaflet map", async () => {
+test("dealer page loads the combined public network directory and dynamically renders the Leaflet map", async () => {
   const [directorySource, viewSource, mapSource, serviceSource] =
     await Promise.all([
       readFile(dealerDirectoryHookPath, "utf8"),
       readFile(dealersViewPath, "utf8"),
       readFile(dealerMapPath, "utf8"),
-      readFile(publicDealersServicePath, "utf8"),
+      readFile(publicNetworkDirectoryServicePath, "utf8"),
     ]);
 
   assert.match(directorySource, /useDebounce\(searchQuery\.trim\(\), 300\)/);
   assert.match(directorySource, /hasNextPage/);
   assert.match(directorySource, /isLoadingMore/);
   assert.match(directorySource, /loadMore/);
-  assert.match(serviceSource, /"\/public\/dealers"/);
+  assert.match(serviceSource, /"\/public\/network-directory"/);
+  assert.match(serviceSource, /"\/public\/network-directory\/filter-options"/);
   assert.match(serviceSource, /params:\s*query/);
   assert.match(viewSource, /useDealerDirectory/);
   assert.match(viewSource, /dynamic\(/);
   assert.match(viewSource, /ssr:\s*false/);
-  assert.match(viewSource, /<DealerMap activeDealer=\{activeDealer\}/);
+  assert.match(viewSource, /<DealerMap activeLocation=\{activeLocation\}/);
   assert.equal(
     (viewSource.match(/<Card className="[^"]*\brounded-sm\b/g) ?? []).length,
     2,
@@ -197,7 +198,11 @@ test("dealer directory composes shared UI controls instead of native form contro
   assert.doesNotMatch(filtersSource, /rounded-\[\d+px\]/);
   assert.doesNotMatch(filtersSource, /bg-accent-gold/);
   assert.match(listSource, /from "@repo\/ui\/button"/);
+  assert.match(listSource, /from "@repo\/ui\/badge"/);
   assert.match(listSource, /from "@repo\/ui\/skeleton"/);
+  assert.match(listSource, /location\.kind === "DEALER"/);
+  assert.match(listSource, /translations\.dealerBadge/);
+  assert.match(listSource, /translations\.serviceCenterBadge/);
   assert.match(listSource, /data-lenis-prevent/);
   assert.match(listSource, /min-h-0/);
   assert.match(listSource, /overscroll-y-contain/);
@@ -253,4 +258,25 @@ test("dealer map messages resolve in every locale", async () => {
   }
 
   assert.deepEqual(missing, []);
+});
+
+test("directory result labels describe dealers and warranty centers instead of stores", async () => {
+  for (const locale of ["vi", "en"]) {
+    const messages = JSON.parse(
+      await readFile(
+        path.join(webRoot, "src", "messages", `${locale}.json`),
+        "utf8",
+      ),
+    );
+    const resultCount = messages.DealersPage?.filters?.resultCount;
+
+    assert.equal(typeof resultCount, "string");
+    assert.match(resultCount, /\{count\}/);
+    assert.doesNotMatch(resultCount, /cửa hàng|stores?/i);
+    assert.equal(typeof messages.DealersPage?.locationType?.dealer, "string");
+    assert.equal(
+      typeof messages.DealersPage?.locationType?.serviceCenter,
+      "string",
+    );
+  }
 });

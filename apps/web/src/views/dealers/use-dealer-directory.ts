@@ -3,18 +3,21 @@
 import { useDebounce } from "@repo/hooks";
 import type {
   GeoPoint,
-  ListPublicDealersQuery,
+  ListPublicNetworkDirectoryQuery,
   PaginationMeta,
 } from "@repo/shared";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { publicDealersService } from "@/src/services/dealers/public-dealers.service";
-import type { DealerLocation, NearbyDealerStatus } from "./dealers.types";
-import { dealerFilterAll } from "./dealers.utils";
+import { publicNetworkDirectoryService } from "@/src/services/network-directory/public-network-directory.service";
+import type {
+  NearbyDealerStatus,
+  NetworkDirectoryLocation,
+} from "./dealers.types";
+import { dealerFilterAll, getNetworkLocationKey } from "./dealers.utils";
 
 const dealerPageSize = 10;
 
 export function useDealerDirectory() {
-  const [dealers, setDealers] = useState<DealerLocation[]>([]);
+  const [locations, setLocations] = useState<NetworkDirectoryLocation[]>([]);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProvince, setSelectedProvince] =
@@ -23,7 +26,9 @@ export function useDealerDirectory() {
     useState<string>(dealerFilterAll);
   const [provinces, setProvinces] = useState<string[]>([]);
   const [districts, setDistricts] = useState<string[]>([]);
-  const [selectedDealerId, setSelectedDealerId] = useState<string | null>(null);
+  const [selectedLocationKey, setSelectedLocationKey] = useState<string | null>(
+    null,
+  );
   const [userPosition, setUserPosition] = useState<GeoPoint | null>(null);
   const [nearMeOnly, setNearMeOnly] = useState(false);
   const [nearbyStatus, setNearbyStatus] = useState<NearbyDealerStatus>("idle");
@@ -37,7 +42,7 @@ export function useDealerDirectory() {
   const loadingMoreRef = useRef(false);
   const debouncedSearch = useDebounce(searchQuery.trim(), 300);
 
-  const baseQuery = useMemo<ListPublicDealersQuery>(
+  const baseQuery = useMemo<ListPublicNetworkDirectoryQuery>(
     () => ({
       district:
         selectedDistrict === dealerFilterAll ? undefined : selectedDistrict,
@@ -70,14 +75,18 @@ export function useDealerDirectory() {
     setError(false);
     setLoadMoreError(false);
 
-    void publicDealersService
-      .listDealers({ ...baseQuery, page: 1 }, controller.signal)
+    void publicNetworkDirectoryService
+      .listLocations({ ...baseQuery, page: 1 }, controller.signal)
       .then((result) => {
         if (controller.signal.aborted) return;
-        setDealers(result.items);
+        setLocations(result.items);
         setMeta(result.meta);
-        setSelectedDealerId((current) =>
-          result.items.some((dealer) => dealer.id === current) ? current : null,
+        setSelectedLocationKey((current) =>
+          result.items.some(
+            (location) => getNetworkLocationKey(location) === current,
+          )
+            ? current
+            : null,
         );
       })
       .catch(() => {
@@ -95,7 +104,7 @@ export function useDealerDirectory() {
     const province =
       selectedProvince === dealerFilterAll ? undefined : selectedProvince;
 
-    void publicDealersService
+    void publicNetworkDirectoryService
       .listFilterOptions(province, controller.signal)
       .then((options) => {
         if (controller.signal.aborted) return;
@@ -127,18 +136,21 @@ export function useDealerDirectory() {
     setLoadMoreError(false);
 
     try {
-      const result = await publicDealersService.listDealers({
+      const result = await publicNetworkDirectoryService.listLocations({
         ...baseQuery,
         page: meta.page + 1,
       });
 
       if (queryVersion.current !== currentQueryVersion) return;
 
-      setDealers((current) => {
-        const dealerById = new Map(
-          [...current, ...result.items].map((dealer) => [dealer.id, dealer]),
+      setLocations((current) => {
+        const locationByKey = new Map(
+          [...current, ...result.items].map((location) => [
+            getNetworkLocationKey(location),
+            location,
+          ]),
         );
-        return Array.from(dealerById.values());
+        return Array.from(locationByKey.values());
       });
       setMeta(result.meta);
     } catch {
@@ -204,14 +216,16 @@ export function useDealerDirectory() {
     setRequestVersion((version) => version + 1);
   }, []);
 
-  const activeDealer = useMemo(
-    () => dealers.find((dealer) => dealer.id === selectedDealerId) ?? null,
-    [dealers, selectedDealerId],
+  const activeLocation = useMemo(
+    () =>
+      locations.find(
+        (location) => getNetworkLocationKey(location) === selectedLocationKey,
+      ) ?? null,
+    [locations, selectedLocationKey],
   );
 
   return {
-    activeDealer,
-    dealers,
+    activeLocation,
     districts,
     error,
     hasNextPage: meta?.hasNextPage ?? false,
@@ -219,6 +233,7 @@ export function useDealerDirectory() {
     loadMore,
     loadMoreError,
     loading,
+    locations,
     nearMeOnly,
     nearbyStatus,
     provinces,
@@ -230,7 +245,8 @@ export function useDealerDirectory() {
     selectProvince: changeProvince,
     setNearMeOnly: changeNearMeOnly,
     setSearchQuery,
-    setSelectedDealerId,
+    setSelectedLocation: (location: NetworkDirectoryLocation) =>
+      setSelectedLocationKey(getNetworkLocationKey(location)),
     setSelectedDistrict,
   };
 }

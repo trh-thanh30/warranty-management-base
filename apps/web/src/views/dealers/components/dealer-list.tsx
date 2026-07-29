@@ -1,23 +1,26 @@
 "use client";
 
+import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
 import { Skeleton } from "@repo/ui/skeleton";
 import { LoaderCircle, MapPin, Navigation, Phone } from "lucide-react";
 import { useEffect, useRef } from "react";
-import type { DealerLocation } from "../dealers.types";
+import type { NetworkDirectoryLocation } from "../dealers.types";
+import { getNetworkLocationKey } from "../dealers.utils";
 
 type DealerListProps = {
-  activeDealerId: string | null;
-  dealers: readonly DealerLocation[];
+  activeLocationKey: string | null;
   error: boolean;
   hasNextPage: boolean;
   isLoadingMore: boolean;
   loadMoreError: boolean;
   loading: boolean;
+  locations: readonly NetworkDirectoryLocation[];
   onLoadMore: () => void;
   onRetry: () => void;
-  onSelectDealer: (dealerId: string) => void;
+  onSelectLocation: (location: NetworkDirectoryLocation) => void;
   translations: {
+    dealerBadge: string;
     directions: string;
     empty: string;
     error: string;
@@ -25,6 +28,7 @@ type DealerListProps = {
     loadingMore: string;
     loadMoreError: string;
     retry: string;
+    serviceCenterBadge: string;
     viewMore: string;
   };
 };
@@ -45,16 +49,16 @@ function DealerListSkeleton() {
 }
 
 export function DealerList({
-  activeDealerId,
-  dealers,
+  activeLocationKey,
   error,
   hasNextPage,
   isLoadingMore,
   loadMoreError,
   loading,
+  locations,
   onLoadMore,
   onRetry,
-  onSelectDealer,
+  onSelectLocation,
   translations,
 }: DealerListProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -111,7 +115,7 @@ export function DealerList({
     );
   }
 
-  if (dealers.length === 0) {
+  if (locations.length === 0) {
     return (
       <div
         className="flex flex-1 items-center justify-center p-8 text-center text-sm font-medium text-stone-gray"
@@ -128,15 +132,19 @@ export function DealerList({
       data-lenis-prevent
       className="min-h-0 flex-1 touch-pan-y space-y-4 divide-y divide-border-gray/60 overflow-y-auto overscroll-y-contain p-4 [scrollbar-gutter:stable]"
     >
-      {dealers.map((dealer) => {
-        const isSelected = activeDealerId === dealer.id;
+      {locations.map((location) => {
+        const locationKey = getNetworkLocationKey(location);
+        const isDealer = location.kind === "DEALER";
+        const isSelected = activeLocationKey === locationKey;
 
         return (
           <article
-            key={dealer.id}
+            key={locationKey}
             className={`space-y-3 rounded-[20px] border p-4 pt-4 transition-colors first:pt-4 ${
               isSelected
-                ? "border-premium-red bg-premium-red/5"
+                ? isDealer
+                  ? "border-premium-red bg-premium-red/5"
+                  : "border-blue-600 bg-blue-50/60"
                 : "border-transparent hover:bg-surface-muted"
             }`}
           >
@@ -144,12 +152,24 @@ export function DealerList({
               type="button"
               variant="ghost"
               aria-pressed={isSelected}
-              onClick={() => onSelectDealer(dealer.id)}
+              onClick={() => onSelectLocation(location)}
               className="h-auto min-h-11 w-full items-start justify-start whitespace-normal p-0 text-left hover:bg-transparent"
             >
               <span className="w-full space-y-3">
+                <Badge
+                  variant="secondary"
+                  className={`rounded-sm text-xs font-semibold uppercase tracking-wider ${
+                    isDealer
+                      ? "bg-premium-red/10 text-premium-red"
+                      : "bg-blue-50 text-blue-700"
+                  }`}
+                >
+                  {isDealer
+                    ? translations.dealerBadge
+                    : translations.serviceCenterBadge}
+                </Badge>
                 <span className="block text-sm font-semibold uppercase leading-snug text-deep-black sm:text-base">
-                  {dealer.name}
+                  {location.name}
                 </span>
                 <span className="block space-y-1.5 text-xs font-medium text-stone-gray">
                   <span className="flex items-start gap-2">
@@ -157,16 +177,16 @@ export function DealerList({
                       aria-hidden="true"
                       className="mt-0.5 size-4 shrink-0 text-premium-red"
                     />
-                    <span>{dealer.address}</span>
+                    <span>{location.address}</span>
                   </span>
-                  {dealer.phone ? (
+                  {location.phone ? (
                     <span className="flex items-center gap-2">
                       <Phone
                         aria-hidden="true"
                         className="size-4 shrink-0 text-premium-red"
                       />
                       <span className="font-medium text-deep-black">
-                        {dealer.phone}
+                        {location.phone}
                       </span>
                     </span>
                   ) : null}
@@ -178,7 +198,7 @@ export function DealerList({
               <Button
                 type="button"
                 size="sm"
-                onClick={() => onSelectDealer(dealer.id)}
+                onClick={() => onSelectLocation(location)}
                 className="min-h-9 rounded-sm bg-premium-red text-xs font-semibold uppercase tracking-wider text-white hover:bg-warm-red"
               >
                 {translations.viewMore}
@@ -190,7 +210,7 @@ export function DealerList({
                 className="min-h-9 px-2 text-xs font-semibold uppercase text-premium-red hover:bg-premium-red/5 hover:text-premium-red"
               >
                 <a
-                  href={dealer.googleMapsUrl}
+                  href={location.googleMapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
