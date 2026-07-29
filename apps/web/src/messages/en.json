@@ -1016,6 +1016,12 @@
       "description": "Find an official FUJITEK automotive window-film installation center near you.",
       "dealerCta": "Become a dealer"
     },
+    "recruitment": {
+      "eyebrow": "Partnership opportunity",
+      "title": "Grow your business with FUJITEK",
+      "description": "Become an authorized dealer and gain access to genuine products, dedicated partner support, and a transparent warranty network.",
+      "cta": "Apply to become a dealer"
+    },
     "filters": {
       "searchPlaceholder": "Search by name or address...",
       "searchAriaLabel": "Search dealers by name, address, or phone number",

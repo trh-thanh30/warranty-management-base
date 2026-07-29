@@ -20,6 +20,14 @@ const dealersViewPath = path.join(
   "dealers",
   "dealers.view.tsx",
 );
+const dealerRecruitmentCtaPath = path.join(
+  webRoot,
+  "src",
+  "views",
+  "dealers",
+  "components",
+  "dealer-recruitment-cta.tsx",
+);
 const dealerDirectoryHookPath = path.join(
   webRoot,
   "src",
@@ -152,6 +160,43 @@ test("dealer page loads the combined public network directory and dynamically re
   assert.doesNotMatch(viewSource, /openstreetmap\.org\/export\/embed/);
 });
 
+test("dealer page presents a localized recruitment CTA linked to Contact", async () => {
+  const [viewSource, ctaSource] = await Promise.all([
+    readFile(dealersViewPath, "utf8"),
+    readFile(dealerRecruitmentCtaPath, "utf8"),
+  ]);
+
+  assert.match(viewSource, /<DealerRecruitmentCta/);
+  assert.match(ctaSource, /from "@repo\/ui\/button"/);
+  assert.match(ctaSource, /from "@\/src\/components\/common\/container"/);
+  assert.match(ctaSource, /href=\{APP_ROUTES\.contact\}/);
+  assert.match(ctaSource, /useTranslations\("DealersPage\.recruitment"\)/);
+  assert.match(
+    ctaSource,
+    /className="[^"]*border-border-gray[^"]*bg-white[^"]*text-deep-black[^"]*"/,
+  );
+  assert.doesNotMatch(ctaSource, /\bbg-deep-black\b/);
+
+  const missing = [];
+
+  for (const locale of ["vi", "en"]) {
+    const messages = JSON.parse(
+      await readFile(
+        path.join(webRoot, "src", "messages", `${locale}.json`),
+        "utf8",
+      ),
+    );
+
+    for (const key of ["eyebrow", "title", "description", "cta"]) {
+      if (typeof messages.DealersPage?.recruitment?.[key] !== "string") {
+        missing.push(`${locale}:DealersPage.recruitment.${key}`);
+      }
+    }
+  }
+
+  assert.deepEqual(missing, []);
+});
+
 test("dealer directory composes shared UI controls instead of native form controls", async () => {
   const filtersPath = path.join(
     webRoot,
@@ -194,6 +239,10 @@ test("dealer directory composes shared UI controls instead of native form contro
   assert.match(
     filtersSource,
     /className="[^"]*rounded-sm[^"]*bg-premium-red[^"]*text-white[^"]*"/,
+  );
+  assert.match(
+    filtersSource,
+    /className="[^"]*h-auto[^"]*whitespace-normal[^"]*"/,
   );
   assert.doesNotMatch(filtersSource, /rounded-\[\d+px\]/);
   assert.doesNotMatch(filtersSource, /bg-accent-gold/);

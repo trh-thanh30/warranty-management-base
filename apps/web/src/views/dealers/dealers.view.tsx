@@ -8,6 +8,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { DealerFilters } from "./components/dealer-filters";
 import { DealerList } from "./components/dealer-list";
+import { DealerRecruitmentCta } from "./components/dealer-recruitment-cta";
 import { getNetworkLocationKey } from "./dealers.utils";
 import { useDealerDirectory } from "./use-dealer-directory";
 
@@ -151,6 +152,8 @@ export function DealersView() {
           </div>
         </Container>
       </section>
+
+      <DealerRecruitmentCta />
     </main>
   );
 }

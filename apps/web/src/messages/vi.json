@@ -1016,6 +1016,12 @@
       "description": "Tìm trung tâm thi công phim cách nhiệt FUJITEK chính hãng gần bạn trên toàn quốc.",
       "dealerCta": "Tuyển đại lý"
     },
+    "recruitment": {
+      "eyebrow": "Cơ hội hợp tác",
+      "title": "Mở rộng kinh doanh cùng FUJITEK",
+      "description": "Trở thành đại lý chính thức để tiếp cận sản phẩm chính hãng, chính sách hỗ trợ đồng hành và hệ thống bảo hành minh bạch.",
+      "cta": "Đăng ký trở thành đại lý"
+    },
     "filters": {
       "searchPlaceholder": "Tìm theo tên hoặc địa chỉ...",
       "searchAriaLabel": "Tìm đại lý theo tên, địa chỉ hoặc số điện thoại",
