@@ -1,298 +1,184 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { ExternalLink, Phone } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { divIcon } from "leaflet";
-import type { LatLngBoundsExpression, LatLngTuple, PathOptions } from "leaflet";
+import type { PublicNetworkLocationKind } from "@repo/shared";
 import {
-  GeoJSON,
-  MapContainer,
-  Marker,
-  Polygon,
-  Popup,
-  TileLayer,
-  useMap,
-} from "react-leaflet";
-import type { Dealer } from "../dealers.types";
-
-const VIETNAM_MAINLAND_BOUNDS: LatLngBoundsExpression = [
-  [8.56557851800005, 102.118655233],
-  [23.3662751270001, 109.472422722],
-];
-
-const VIETNAM_INTERACTION_BOUNDS: LatLngBoundsExpression = [
-  [6.95331046340264, 102.118655233],
-  [23.3662751270001, 116.947319489797],
-];
-const OSM_TILE_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-
-const WORLD_RING: LatLngTuple[] = [
-  [-90, -180],
-  [-90, 180],
-  [90, 180],
-  [90, -180],
-  [-90, -180],
-];
-
-const maskStyle: PathOptions = {
-  color: "transparent",
-  fillColor: "var(--color-surface-muted)",
-  fillOpacity: 1,
-  fillRule: "evenodd",
-  interactive: false,
-  stroke: false,
-};
-
-const vietnamOutlineStyle: PathOptions = {
-  color: "var(--color-premium-red)",
-  fillOpacity: 0,
-  interactive: false,
-  opacity: 0.75,
-  weight: 1,
-};
-
-interface VietnamBoundary {
-  type: "FeatureCollection";
-  features: Array<{
-    type: "Feature";
-    properties: Record<string, unknown> | null;
-    geometry:
-      | {
-          type: "MultiPolygon";
-          coordinates: number[][][][];
-        }
-      | {
-          type: "MultiLineString";
-          coordinates: number[][][];
-        };
-  }>;
-}
+  MAP_MARKER_COLORS,
+  SharedMap,
+  useVietnamBoundary,
+  VIETNAM_CENTER,
+  VIETNAM_INITIAL_ZOOM,
+  VietnamMapOverlay,
+} from "@repo/ui/map";
+import { Button } from "@repo/ui/button";
+import { divIcon } from "leaflet";
+import { useTranslations } from "next-intl";
+import { useEffect, useMemo } from "react";
+import { Marker, Tooltip, useMap } from "react-leaflet";
+import { NetworkLocationPopup } from "@/src/components/common/network-location-popup";
+import { useNetworkLocations } from "@/src/hooks/use-network-locations";
+import type { NetworkDirectoryLocation } from "../dealers.types";
 
 interface DealerMapProps {
-  activeDealer: Dealer | null;
+  activeLocation: NetworkDirectoryLocation | null;
 }
 
-function isVietnamBoundary(value: unknown): value is VietnamBoundary {
-  if (!value || typeof value !== "object") return false;
+const markerColorByKind: Record<PublicNetworkLocationKind, string> = {
+  DEALER: MAP_MARKER_COLORS.dealer,
+  SERVICE_CENTER: MAP_MARKER_COLORS.serviceCenter,
+};
 
-  const featureCollection = value as Partial<VietnamBoundary>;
+function createLocationIcon(kind: PublicNetworkLocationKind, selected = false) {
+  const size = selected ? 38 : 28;
+  const coreSize = selected ? 22 : 16;
+  const color = markerColorByKind[kind];
 
-  return (
-    featureCollection.type === "FeatureCollection" &&
-    Array.isArray(featureCollection.features) &&
-    featureCollection.features.length > 0 &&
-    featureCollection.features.every(
-      (feature) =>
-        feature.geometry?.type === "MultiPolygon" ||
-        feature.geometry?.type === "MultiLineString",
-    ) &&
-    featureCollection.features.some(
-      (feature) => feature.geometry?.type === "MultiPolygon",
-    )
-  );
-}
-
-function getMaskPositions(boundary: VietnamBoundary): LatLngTuple[][] {
-  const vietnamRings = boundary.features.flatMap((feature) => {
-    if (feature.geometry.type !== "MultiPolygon") return [];
-
-    return feature.geometry.coordinates.flatMap((polygon) => {
-      const outerRing = polygon[0];
-
-      if (!outerRing) return [];
-
-      return [
-        outerRing.map(
-          ([longitude, latitude]) => [latitude, longitude] as LatLngTuple,
-        ),
-      ];
-    });
+  return divIcon({
+    className: "fujitek-network-marker",
+    html: `
+      <div style="width:${size}px;height:${size}px;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer">
+        <span style="position:absolute;inset:0;border-radius:9999px;background:${color};opacity:${selected ? 0.25 : 0.18}"></span>
+        <span style="position:relative;width:${coreSize}px;height:${coreSize}px;border-radius:9999px;border:3px solid white;background:${color};box-shadow:0 2px 8px rgba(0,0,0,.28);display:flex;align-items:center;justify-content:center">
+          <span style="width:5px;height:5px;border-radius:9999px;background:white"></span>
+        </span>
+      </div>
+    `,
+    iconAnchor: [size / 2, size / 2],
+    iconSize: [size, size],
+    popupAnchor: [0, -(size / 2)],
   });
-
-  return [WORLD_RING, ...vietnamRings];
 }
 
-function MapCamera({ activeDealer }: DealerMapProps) {
+function MapCamera({ activeLocation }: DealerMapProps) {
   const map = useMap();
 
   useEffect(() => {
-    if (activeDealer) {
-      map.flyTo([activeDealer.lat, activeDealer.lng], 13, {
+    if (activeLocation) {
+      map.flyTo([activeLocation.latitude, activeLocation.longitude], 13, {
         duration: 1.1,
       });
       return;
     }
 
-    map.fitBounds(VIETNAM_MAINLAND_BOUNDS, {
-      animate: true,
-      padding: [24, 24],
-    });
-  }, [activeDealer, map]);
+    map.setView(VIETNAM_CENTER, VIETNAM_INITIAL_ZOOM, { animate: true });
+  }, [activeLocation, map]);
 
   return null;
 }
 
-export function DealerMap({ activeDealer }: DealerMapProps) {
+export function DealerMap({ activeLocation }: DealerMapProps) {
   const t = useTranslations("DealersPage.map");
-  const [isMounted, setIsMounted] = useState(false);
-  const [vietnamBoundary, setVietnamBoundary] =
-    useState<VietnamBoundary | null>(null);
-  const [loadError, setLoadError] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    async function loadVietnamBoundary() {
-      try {
-        const response = await fetch("/map/vn.geojson", {
-          signal: controller.signal,
-        });
-
-        if (!response.ok) {
-          throw new Error(`GeoJSON request failed with ${response.status}`);
-        }
-
-        const data: unknown = await response.json();
-
-        if (!isVietnamBoundary(data)) {
-          throw new Error("Invalid Vietnam GeoJSON");
-        }
-
-        setVietnamBoundary(data);
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          return;
-        }
-
-        setLoadError(true);
-      }
-    }
-
-    void loadVietnamBoundary();
-
-    return () => controller.abort();
-  }, []);
-
-  const maskPositions = useMemo(
-    () => (vietnamBoundary ? getMaskPositions(vietnamBoundary) : null),
-    [vietnamBoundary],
-  );
-
-  const dealerIcon = useMemo(
-    () =>
-      divIcon({
-        className: "fujitek-dealer-marker",
-        html: `
-          <svg width="40" height="48" viewBox="0 0 40 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M20 1.5C9.51 1.5 1 10.01 1 20.5C1 34.75 20 46.5 20 46.5C20 46.5 39 34.75 39 20.5C39 10.01 30.49 1.5 20 1.5Z" fill="var(--color-premium-red)" stroke="white" stroke-width="3"/>
-            <circle cx="20" cy="20.5" r="7" fill="white"/>
-          </svg>
-        `,
-        iconAnchor: [20, 46],
-        iconSize: [40, 48],
-        popupAnchor: [0, -42],
-      }),
+  const { boundary, status } = useVietnamBoundary();
+  const {
+    error: locationsError,
+    loading: locationsLoading,
+    locations,
+    retry,
+  } = useNetworkLocations();
+  const markerIcons = useMemo(
+    () => ({
+      DEALER: createLocationIcon("DEALER"),
+      SERVICE_CENTER: createLocationIcon("SERVICE_CENTER"),
+      selectedDealer: createLocationIcon("DEALER", true),
+      selectedServiceCenter: createLocationIcon("SERVICE_CENTER", true),
+    }),
     [],
   );
-
-  if (!isMounted) {
-    return (
-      <div
-        aria-hidden="true"
-        className="size-full animate-pulse bg-surface-muted"
-      />
-    );
-  }
-
   return (
     <div
       role="region"
       aria-label={t("ariaLabel")}
       className="relative isolate size-full overflow-hidden bg-surface-muted"
     >
-      <MapContainer
-        bounds={VIETNAM_MAINLAND_BOUNDS}
+      <SharedMap
+        activateLabel={t("activateMap")}
+        exitFullscreenLabel={t("exitFullscreenMap")}
+        fullscreenLabel={t("fullscreenMap")}
+        initialCenter={VIETNAM_CENTER}
+        initialZoom={VIETNAM_INITIAL_ZOOM}
         className="size-full"
-        maxBounds={VIETNAM_INTERACTION_BOUNDS}
-        maxBoundsViscosity={1}
         minZoom={5}
         maxZoom={18}
-        scrollWheelZoom
+        resetLabel={t("resetMap")}
+        zoomSnap={0.25}
       >
-        <TileLayer
-          attribution={OSM_TILE_ATTRIBUTION}
-          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-
-        {maskPositions && (
-          <Polygon positions={maskPositions} pathOptions={maskStyle} />
-        )}
-
-        {vietnamBoundary && (
-          <GeoJSON
-            data={vietnamBoundary}
-            style={(feature) =>
-              feature?.geometry.type === "MultiLineString"
-                ? { ...vietnamOutlineStyle, opacity: 0.65 }
-                : vietnamOutlineStyle
-            }
+        {boundary ? (
+          <VietnamMapOverlay
+            boundary={boundary}
+            maskFillColor="var(--color-surface-muted)"
+            maskFillOpacity={1}
+            outlineColor="var(--color-premium-red)"
+            outlineOpacity={0.75}
+            outlineWeight={1}
           />
-        )}
+        ) : null}
 
-        <MapCamera activeDealer={activeDealer} />
+        <MapCamera activeLocation={activeLocation} />
 
-        {activeDealer && (
-          <Marker
-            position={[activeDealer.lat, activeDealer.lng]}
-            icon={dealerIcon}
-            title={activeDealer.name}
-          >
-            <Popup>
-              <div className="min-w-52 space-y-2">
-                <span className="inline-flex rounded-md bg-premium-red px-2 py-1 text-xs font-semibold uppercase tracking-wider text-white">
-                  {t("selectedDealer")}
-                </span>
-                <p className="m-0 text-sm font-semibold uppercase leading-snug text-deep-black">
-                  {activeDealer.name}
-                </p>
-                <p className="m-0 text-xs leading-relaxed text-stone-gray">
-                  {activeDealer.address}
-                </p>
-                <div className="flex items-center gap-1.5 text-xs font-medium text-deep-black">
-                  <Phone className="size-3.5 text-premium-red" />
-                  <span>
-                    {t("popupPhone")}: {activeDealer.phone}
-                  </span>
-                </div>
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${activeDealer.name} ${activeDealer.address}`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs font-semibold uppercase text-premium-red hover:underline"
-                >
-                  <span>{t("openGoogleMaps")}</span>
-                  <ExternalLink className="size-3" />
-                </a>
-              </div>
-            </Popup>
-          </Marker>
-        )}
-      </MapContainer>
+        {locations.map((location) => {
+          const isSelectedLocation =
+            activeLocation !== null &&
+            location.kind === activeLocation.kind &&
+            location.id === activeLocation.id;
 
-      {!vietnamBoundary && (
+          return (
+            <Marker
+              key={`${location.kind}-${location.id}`}
+              position={[location.latitude, location.longitude]}
+              icon={
+                isSelectedLocation
+                  ? location.kind === "DEALER"
+                    ? markerIcons.selectedDealer
+                    : markerIcons.selectedServiceCenter
+                  : markerIcons[location.kind]
+              }
+              title={location.name}
+            >
+              <Tooltip direction="top" offset={[0, -10]} opacity={0.95}>
+                {location.name}
+              </Tooltip>
+              <NetworkLocationPopup
+                location={location}
+                translations={{
+                  dealer: t("locationType.dealer"),
+                  serviceCenter: t("locationType.serviceCenter"),
+                  phone: t("popupPhone"),
+                  directions: t("openGoogleMaps"),
+                }}
+              />
+            </Marker>
+          );
+        })}
+      </SharedMap>
+
+      {(!boundary || locationsLoading) && !locationsError ? (
         <div
           role="status"
           className="pointer-events-none absolute inset-x-4 top-4 z-[500] rounded-xl border border-border-gray bg-white/95 px-4 py-3 text-center text-xs font-medium text-stone-gray shadow-md backdrop-blur-sm"
         >
-          {loadError ? t("loadError") : t("loading")}
+          {status === "error"
+            ? t("loadError")
+            : locationsLoading
+              ? t("networkLoading")
+              : t("loading")}
         </div>
-      )}
+      ) : null}
+
+      {locationsError ? (
+        <div
+          role="alert"
+          className="absolute inset-x-4 top-4 z-[500] flex items-center justify-between gap-3 rounded-sm border border-premium-red/30 bg-white/95 px-4 py-3 text-xs font-semibold text-deep-black shadow-md"
+        >
+          <span>{t("networkError")}</span>
+          <Button
+            type="button"
+            size="sm"
+            onClick={retry}
+            className="min-h-9 shrink-0 rounded-sm bg-premium-red px-3 text-xs font-semibold uppercase text-white transition-colors hover:bg-warm-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2"
+          >
+            {t("retry")}
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }

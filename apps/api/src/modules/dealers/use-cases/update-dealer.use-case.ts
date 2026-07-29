@@ -44,6 +44,8 @@ export class UpdateDealerUseCase {
         province: dto.province?.trim(),
         district:
           dto.district === undefined ? undefined : optionalTrim(dto.district),
+        latitude: dto.latitude,
+        longitude: dto.longitude,
         sales_name:
           dto.salesName === undefined ? undefined : optionalTrim(dto.salesName),
       });

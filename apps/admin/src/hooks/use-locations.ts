@@ -1,6 +1,11 @@
 "use client";
 
-import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  type UseQueryOptions,
+} from "@tanstack/react-query";
+import type { GeocodeVietnamAddressBody } from "@repo/shared";
 import type {
   VietnamProvince,
   VietnamWard,
@@ -14,6 +19,13 @@ export const locationKeys = {
   vietnamWards: (provinceCode: number | null) =>
     [...locationKeys.vietnam(), "wards", provinceCode] as const,
 };
+
+export function useGeocodeVietnamAddress() {
+  return useMutation({
+    mutationFn: (body: GeocodeVietnamAddressBody) =>
+      locationsService.geocodeVietnamAddress(body),
+  });
+}
 
 export function useVietnamProvinces(
   options?: Pick<UseQueryOptions<VietnamProvince[]>, "enabled">,

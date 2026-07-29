@@ -2,13 +2,14 @@
 
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
-import type { PublicWebsiteSiteSetting } from "@repo/shared";
+import { useSiteSettings } from "@/src/app/providers/site-settings-provider";
+import { ContactMessageForm } from "@/src/components/common/contact-message-form";
+import { Container } from "@/src/components/common/container";
 import {
   displayWebsite,
   normalizeExternalUrl,
   toTelephoneHref,
 } from "@/src/utils/link.utils";
-import { ContactMessageForm } from "@/src/components/common/contact-message-form";
 import {
   getPublishedContactOffices,
   stripTrailingColon,
@@ -22,12 +23,9 @@ const ContactMap = dynamic(() => import("./components/contact-map"), {
   ),
 });
 
-type ContactViewProps = {
-  siteSettings?: PublicWebsiteSiteSetting | null;
-};
-
-export function ContactView({ siteSettings }: ContactViewProps) {
+export function ContactView() {
   const t = useTranslations("ContactPage");
+  const siteSettings = useSiteSettings();
   const publishedOffices = getPublishedContactOffices(siteSettings);
   const offices =
     publishedOffices.length > 0
@@ -43,7 +41,7 @@ export function ContactView({ siteSettings }: ContactViewProps) {
 
   return (
     <main className="min-h-screen bg-white text-deep-black">
-      <div className="mx-auto max-w-[1400px] px-6 sm:px-10 lg:px-12 py-12 lg:py-20 space-y-16">
+      <Container className="max-w-[1400px] space-y-16 py-12 lg:py-20">
         <div className="grid gap-12 lg:grid-cols-12 items-start">
           <div className="lg:col-span-6 space-y-6">
             <span className="inline-block bg-accent-gold text-deep-black px-4 py-1.5 rounded-md text-sm font-medium uppercase tracking-wide">
@@ -189,7 +187,7 @@ export function ContactView({ siteSettings }: ContactViewProps) {
             </div>
           </div>
         </div>
-      </div>
+      </Container>
     </main>
   );
 }

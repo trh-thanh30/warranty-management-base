@@ -33,12 +33,12 @@ Status: `implemented`
 - Deactivate service center bằng soft state `isActive = false`.
 - Permission riêng cho service center.
 - Public guest endpoint chỉ trả trạm active.
+- Tọa độ bắt buộc và Google Maps URL được sinh từ tọa độ.
 
 Chưa có:
 
 - Delete cứng.
 - Pagination.
-- Tọa độ bản đồ.
 - Giờ làm việc.
 
 ## Base route
@@ -84,6 +84,9 @@ type ServiceCenterResponse = {
   province: string;
   district: string | null;
   address: string;
+  latitude: number;
+  longitude: number;
+  googleMapsUrl: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -110,6 +113,8 @@ type CreateServiceCenterBody = {
   province: string;
   district?: string;
   address: string;
+  latitude: number;
+  longitude: number;
 };
 ```
 
@@ -121,6 +126,8 @@ Validation:
 - `province`: required, 2 đến 120 ký tự.
 - `district`: optional, 2 đến 120 ký tự.
 - `address`: required, 4 đến 255 ký tự.
+- `latitude`: required, từ -90 đến 90.
+- `longitude`: required, từ -180 đến 180.
 
 BE behavior:
 
@@ -135,7 +142,8 @@ type Response = ServiceCenterResponse;
 
 FE triển khai chuẩn:
 
-- Form create nên có `name`, `province`, `district`, `address`, `phone`, `email`.
+- Form create nên có `name`, `province`, `district`, `address`, `phone`,
+  `email` và map location picker.
 - Sau success, refetch list hoặc insert item vào cache.
 - Không gửi `isActive` trong create form hiện tại.
 
@@ -251,6 +259,8 @@ type UpdateServiceCenterBody = {
   province?: string;
   district?: string;
   address?: string;
+  latitude?: number;
+  longitude?: number;
   isActive?: boolean;
 };
 ```
@@ -259,6 +269,7 @@ Validation:
 
 - Các field string cùng rule với create nếu gửi.
 - `isActive`: optional boolean.
+- Nếu cập nhật vị trí thì phải gửi đồng thời `latitude` và `longitude`.
 
 Response:
 

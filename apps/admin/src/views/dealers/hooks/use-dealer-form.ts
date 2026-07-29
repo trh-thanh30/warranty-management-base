@@ -81,6 +81,10 @@ export function useDealerForm({
     isSubmitting,
     onSubmit: handleSubmit(submit),
     register,
+    selectedAddress: watch("address"),
+    selectedDistrict: watch("district"),
+    selectedLatitude: watch("latitude"),
+    selectedLongitude: watch("longitude"),
     selectedProvince: watch("province"),
     setValue,
   };
@@ -91,6 +95,8 @@ function getDefaultValues(dealer: DealerResponse | null): DealerFormValues {
     address: dealer?.address ?? "",
     district: dealer?.district ?? "",
     isActive: dealer?.isActive ?? true,
+    latitude: dealer?.latitude ?? Number.NaN,
+    longitude: dealer?.longitude ?? Number.NaN,
     name: dealer?.name ?? "",
     phone: dealer?.phone ?? "",
     province: dealer?.province ?? "",
@@ -105,6 +111,8 @@ function toCreateBody(values: DealerFormValues): CreateDealerBody {
     phone: toOptionalValue(values.phone),
     province: values.province.trim(),
     district: toOptionalValue(values.district),
+    latitude: values.latitude,
+    longitude: values.longitude,
     salesName: toOptionalValue(values.salesName),
   };
 }

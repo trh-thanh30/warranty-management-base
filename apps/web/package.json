@@ -2,6 +2,7 @@
   "name": "@repo/web",
   "version": "0.0.0",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "scripts": {
     "dev": "node ../../scripts/next-port.mjs dev WEB_PORT 4101",

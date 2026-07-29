@@ -1,12 +1,13 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Container } from "@/src/components/common/container";
 
 export function GuideView() {
   const t = useTranslations("GuidePage");
   return (
     <main className="min-h-screen bg-surface-muted py-12 sm:py-20 text-deep-black">
-      <div className="mx-auto max-w-[1000px] px-6 space-y-12">
+      <Container className="max-w-[1000px] space-y-12">
         <div className="text-center space-y-4">
           <span className="inline-block bg-deep-black/10 text-deep-black border border-deep-black/30 px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-[0.25em]">
             {t("eyebrow")}
@@ -33,7 +34,7 @@ export function GuideView() {
             <p>{t("steps.lookup.description")}</p>
           </div>
         </div>
-      </div>
+      </Container>
     </main>
   );
 }

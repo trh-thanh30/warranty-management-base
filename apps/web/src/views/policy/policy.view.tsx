@@ -1,14 +1,14 @@
 import { ArrowUpRight, Clock3, FileText } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/src/i18n/navigation";
-import { listPublishedContentPages } from "@/src/services/content-pages.service";
+import { contentPagesService } from "@/src/services/content-pages/content-pages.service";
 import { POLICY_CONFIGS, toPolicyLocale } from "./policy.constants";
 
 export async function PolicyView() {
   const [locale, t, pages] = await Promise.all([
     getLocale(),
     getTranslations("PolicyPage"),
-    listPublishedContentPages(),
+    contentPagesService.listPublishedContentPages().catch(() => []),
   ]);
   const policyLocale = toPolicyLocale(locale);
   const pagesBySlug = new Map(pages.map((page) => [page.slug, page]));

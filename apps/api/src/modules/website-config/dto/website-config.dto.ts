@@ -47,6 +47,9 @@ class WebsiteOfficeDto {
   @IsBoolean()
   isActive: boolean;
 
+  @IsBoolean()
+  isHeadquarters: boolean;
+
   @IsInt()
   @Min(0)
   sortOrder: number;

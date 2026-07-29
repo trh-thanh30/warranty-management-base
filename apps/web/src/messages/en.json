@@ -1016,58 +1016,66 @@
   },
   "DealersPage": {
     "hero": {
-      "imageAlt": "Official FUJITEK dealer network",
+      "imageAlt": "LEXZENZ Korea Reflex Film automotive window film banner",
       "eyebrow": "Dealer network",
       "title": "Become an authorized dealer today",
       "description": "Find an official FUJITEK automotive window-film installation center near you.",
       "dealerCta": "Become a dealer"
     },
+    "recruitment": {
+      "eyebrow": "Partnership opportunity",
+      "title": "Grow your business with FUJITEK",
+      "description": "Become an authorized dealer and gain access to genuine products, dedicated partner support, and a transparent warranty network.",
+      "cta": "Apply to become a dealer"
+    },
     "filters": {
       "searchPlaceholder": "Search by name or address...",
+      "searchAriaLabel": "Search dealers by name, address, or phone number",
       "cityAriaLabel": "Select a province or city",
       "districtAriaLabel": "Select a district",
       "allCities": "Nationwide",
       "allDistricts": "All districts",
-      "nearMe": "Find stores near you (≤ 20 km)",
-      "resultCount": "{count} stores found"
+      "nearMe": "Find dealers and warranty centers near you (≤ 20 km)",
+      "nearMeLoading": "Finding your location...",
+      "nearMeError": "Unable to access your location. Please check location permissions.",
+      "nearMeUnsupported": "Your browser does not support geolocation.",
+      "resultCount": "{count} dealers and warranty centers found"
     },
-    "empty": "No matching dealers found.",
-    "mainShowroom": "Main showroom",
+    "states": {
+      "loading": "Loading dealers and warranty centers...",
+      "loadingMore": "Loading more locations...",
+      "loadMoreError": "Unable to load more locations.",
+      "error": "Unable to load dealers and warranty centers. Please try again.",
+      "retry": "Try again"
+    },
+    "empty": "No matching dealers or warranty centers found.",
+    "locationType": {
+      "dealer": "Dealer",
+      "serviceCenter": "Warranty center"
+    },
     "viewMore": "View more",
     "directions": "Directions",
     "hotline": "Hotline",
-    "hours": {
-      "daily": "08:00 - 18:30 (Monday - Sunday)",
-      "weekdays": "08:00 - 18:00 (Monday - Saturday)"
-    },
     "map": {
-      "defaultTitle": "FUJITEK dealer map",
-      "iframeTitle": "FUJITEK dealer location map",
-      "ariaLabel": "Interactive map of FUJITEK dealers in Vietnam",
+      "defaultTitle": "FUJITEK dealer and warranty center map",
+      "iframeTitle": "FUJITEK dealer and warranty center location map",
+      "ariaLabel": "Interactive map of FUJITEK dealers and warranty centers in Vietnam",
+      "activateMap": "Click to interact with the map",
+      "resetMap": "Reset map",
+      "fullscreenMap": "Open map in fullscreen",
+      "exitFullscreenMap": "Exit fullscreen",
       "loading": "Loading the Vietnam map boundary...",
       "loadError": "Unable to load the Vietnam boundary. Please try again.",
+      "networkLoading": "Loading dealers and warranty centers...",
+      "networkError": "Unable to load dealers and warranty centers.",
+      "retry": "Try again",
       "selectedDealer": "Selected dealer",
+      "locationType": {
+        "dealer": "Authorized dealer",
+        "serviceCenter": "Warranty center"
+      },
       "popupPhone": "Phone",
       "openGoogleMaps": "Open Google Maps"
-    },
-    "locations": {
-      "cities": {
-        "hoaBinh": "Hoa Binh",
-        "phuYen": "Phu Yen",
-        "hanoi": "Hanoi",
-        "hoChiMinhCity": "Ho Chi Minh City",
-        "daNang": "Da Nang",
-        "dakLak": "Dak Lak"
-      },
-      "districts": {
-        "tanLac": "Tan Lac",
-        "dongHoa": "Dong Hoa",
-        "cauGiay": "Cau Giay",
-        "haDong": "Ha Dong",
-        "thuDuc": "Thu Duc",
-        "haiChau": "Hai Chau",
-        "buonMaThuot": "Buon Ma Thuot"
-      }
     }
   },
   "QuickChat": {
@@ -1991,7 +1999,7 @@
         },
         "networkExpansion": {
           "title": "Network Expansion",
-          "description": "Over 200 dealers nationwide, covering 63 provinces."
+          "description": "Over 100 dealers nationwide, covering 34 provinces."
         }
       }
     },
@@ -2126,7 +2134,7 @@
           "checks": {
             "ewarrantyDigital": "E-Warranty Digital Registration",
             "support247": "24/7 Support",
-            "dealerNetwork": "200+ Dealers Nationwide"
+            "dealerNetwork": "100+ Dealers Nationwide"
           }
         }
       }
@@ -2158,15 +2166,27 @@
     "network": {
       "eyebrow": "Nationwide Network",
       "titlePrefix": "Dealer System",
-      "titleSuffix": "covering 63 provinces",
-      "description": "With over 200 dealers nationwide, Fujitek is committed to providing professional installation services and transparent E-Warranty coverage.",
+      "titleSuffix": "covering 34 provinces",
+      "description": "With over 100 dealers nationwide, Fujitek is committed to providing professional installation services and transparent E-Warranty coverage.",
       "viewDealersCta": "Find Nearest Dealer",
       "mapTitle": "Dealer Network Map",
       "mapSubtitle": "Widespread authorized installation stations",
       "activateMap": "Click to interact with the map",
       "resetMap": "Reset map",
+      "fullscreenMap": "Open map in fullscreen",
+      "exitFullscreenMap": "Exit fullscreen",
       "legendDealer": "Authorized Dealer",
-      "legendCenter": "Installation Center",
+      "legendCenter": "Warranty Center",
+      "loading": "Loading dealers and warranty centers...",
+      "error": "Unable to load network locations.",
+      "retry": "Try again",
+      "empty": "There are no active locations to display yet.",
+      "phone": "Phone",
+      "directions": "Get directions",
+      "locationType": {
+        "dealer": "Authorized Dealer",
+        "serviceCenter": "Warranty Center"
+      },
       "stats": {
         "dealers": "Dealers Nationwide",
         "provinces": "Provinces",
@@ -2195,7 +2215,7 @@
       "title": "Become a FUJITEK Dealer",
       "description": "Join our dealer network to receive attractive discount policies, comprehensive training, and marketing support.",
       "partnerBtn": "Apply for Dealership",
-      "hotlineBtn": "Hotline 1900 633 826",
+      "hotlineBtn": "Hotline {phone}",
       "benefits": {
         "discount": "Attractive Margins",
         "training": "In-Depth Training",

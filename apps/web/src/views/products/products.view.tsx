@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
+import { Container } from "@/src/components/common/container";
 import { Link } from "@/src/i18n/navigation";
 import {
   catalogCategories,
@@ -188,7 +189,7 @@ export function ProductsView() {
 
       {/* CATALOG SECTION */}
       <section className="w-full py-6 sm:py-10 lg:py-16">
-        <div className="mx-auto grid max-w-[1640px] gap-6 sm:gap-8 px-4 sm:px-10 lg:grid-cols-12 lg:px-12">
+        <Container className="grid gap-6 sm:gap-8 lg:grid-cols-12">
           {/* DESKTOP SIDEBAR */}
           <aside className="hidden lg:block lg:col-span-3">
             <div className="sticky top-24 rounded-[24px] border border-border-gray bg-white p-6 shadow-md">
@@ -504,7 +505,7 @@ export function ProductsView() {
               </div>
             )}
           </div>
-        </div>
+        </Container>
       </section>
     </main>
   );

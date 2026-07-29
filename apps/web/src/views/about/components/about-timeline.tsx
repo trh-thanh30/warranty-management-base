@@ -54,10 +54,10 @@ const timelineData = [
     titleKey: "networkTitle",
     descKey: "networkDesc",
     isCurrent: true,
-    tags: ["200+ Dealers", "63 Provinces", "Market Leader"],
+    tags: ["100+ Dealers", "34 Provinces", "Market Leader"],
     stats: [
-      { value: "200+", label: "ĐẠI LÝ TOÀN QUỐC" },
-      { value: "63", label: "TỈNH THÀNH PHỦ SÓNG" },
+      { value: "100+", label: "ĐẠI LÝ TOÀN QUỐC" },
+      { value: "34", label: "TỈNH THÀNH PHỦ SÓNG" },
       { value: "#1", label: "THƯƠNG HIỆU UY TÍN" },
     ],
   },

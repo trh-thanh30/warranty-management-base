@@ -1,6 +1,10 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { Container } from "@/src/components/common/container";
+import { revealViewportOnce } from "@/src/constants/motion.constants";
+import { useScrollReveal } from "@/src/hooks/use-scroll-reveal";
+import { Link } from "@/src/i18n/navigation";
+import { motion } from "framer-motion";
 import {
   ChevronRight,
   Clock,
@@ -10,10 +14,7 @@ import {
   Search,
   ShieldCheck,
 } from "lucide-react";
-import { motion } from "framer-motion";
-import { Link } from "@/src/i18n/navigation";
-import { useScrollReveal } from "@/src/hooks/use-scroll-reveal";
-import { revealViewportOnce } from "@/src/constants/motion.constants";
+import { useTranslations } from "next-intl";
 import { warrantyActions } from "../warranty.constants";
 
 const actionIcons = {
@@ -31,7 +32,7 @@ export function WarrantyActionCards() {
 
   return (
     <section className="w-full py-16 lg:py-24 bg-surface-muted border-b border-border-gray">
-      <div className="mx-auto max-w-[1720px] px-6 sm:px-10 lg:px-12 space-y-12">
+      <Container className="space-y-12">
         <motion.div
           variants={fadeUp}
           initial="hidden"
@@ -45,7 +46,7 @@ export function WarrantyActionCards() {
           <p className="text-base sm:text-lg text-stone-gray font-normal max-w-2xl mx-auto">
             {t("description")}
           </p>
-          <div className="mt-4 mx-auto h-[3px] w-20 bg-premium-red" />
+          <div className="mt-4 mx-auto h-0.75 w-20 bg-premium-red" />
         </motion.div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -89,7 +90,7 @@ export function WarrantyActionCards() {
             );
           })}
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

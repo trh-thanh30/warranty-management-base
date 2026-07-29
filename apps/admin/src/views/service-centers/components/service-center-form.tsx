@@ -9,6 +9,7 @@ import {
   ComboboxList,
   ComboboxTrigger,
   FormField as Field,
+  LocationPickerField,
 } from "@/src/components/common";
 import {
   useVietnamProvinces,
@@ -16,11 +17,16 @@ import {
 } from "@/src/hooks/use-locations";
 import type { ServiceCenterSummary } from "@repo/shared";
 import { Button, Input, Label, Switch, Textarea } from "@repo/ui";
+import { MAP_MARKER_COLORS } from "@repo/ui/map";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Controller } from "react-hook-form";
 import { useServiceCenterForm } from "../hooks/use-service-center-form";
-import { createFieldErrorFormatter } from "@/src/utils";
+import {
+  createFieldErrorFormatter,
+  fillVietnamAddressSelection,
+  getVietnamAddressSelection,
+} from "@/src/utils";
 
 type ServiceCenterFormProps = {
   onCancel: () => void;
@@ -41,6 +47,10 @@ export function ServiceCenterForm({
     isSubmitting,
     onSubmit,
     register,
+    selectedAddress,
+    selectedDistrict,
+    selectedLatitude,
+    selectedLongitude,
     selectedProvince,
     setValue,
   } = useServiceCenterForm({ onSaved, serviceCenter });
@@ -88,6 +98,22 @@ export function ServiceCenterForm({
               <Combobox
                 disabled={provincesQuery.isLoading}
                 onValueChange={(value) => {
+                  setValue(
+                    "address",
+                    fillVietnamAddressSelection({
+                      currentAddress: selectedAddress,
+                      previousSelection: getVietnamAddressSelection({
+                        province: selectedProvince,
+                        ward: selectedDistrict,
+                      }),
+                      province: value,
+                      ward: "",
+                    }),
+                    {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    },
+                  );
                   setValue("province", value, {
                     shouldDirty: true,
                     shouldValidate: true,
@@ -149,6 +175,22 @@ export function ServiceCenterForm({
               <Combobox
                 disabled={!selectedProvinceItem || wardsQuery.isLoading}
                 onValueChange={(value) => {
+                  setValue(
+                    "address",
+                    fillVietnamAddressSelection({
+                      currentAddress: selectedAddress,
+                      previousSelection: getVietnamAddressSelection({
+                        province: selectedProvince,
+                        ward: selectedDistrict,
+                      }),
+                      province: selectedProvince,
+                      ward: value,
+                    }),
+                    {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    },
+                  );
                   setValue("district", value, {
                     shouldDirty: true,
                     shouldValidate: true,
@@ -209,20 +251,51 @@ export function ServiceCenterForm({
         />
       </Field>
 
-      <Field
-        error={formatFieldError(errors.googleMapsUrl?.message, t)}
-        id="service-center-google-maps-url"
-        label={t("googleMapsUrl")}
-      >
-        <Input
-          autoComplete="url"
-          id="service-center-google-maps-url"
-          inputMode="url"
-          placeholder={t("googleMapsUrlPlaceholder")}
-          type="url"
-          {...register("googleMapsUrl")}
-        />
-      </Field>
+      <LocationPickerField
+        address={selectedAddress}
+        coordinateError={formatFieldError(
+          errors.latitude?.message ?? errors.longitude?.message,
+          t,
+        )}
+        description={t("locationPickerDescription")}
+        googleMapsLabel={t("googleMapsUrl")}
+        googleMapsPlaceholder={t("googleMapsUrlPlaceholder")}
+        latitude={selectedLatitude}
+        latitudeLabel={t("latitude")}
+        latitudePlaceholder={t("latitudePlaceholder")}
+        longitude={selectedLongitude}
+        longitudeLabel={t("longitude")}
+        longitudePlaceholder={t("longitudePlaceholder")}
+        mapAriaLabel={t("locationPickerAriaLabel")}
+        mapBoundaryErrorLabel={t("mapBoundaryError")}
+        mapBoundaryLoadingLabel={t("mapBoundaryLoading")}
+        markerColor={MAP_MARKER_COLORS.serviceCenter}
+        onLatitudeChange={(value) =>
+          setValue("latitude", value, {
+            shouldDirty: true,
+            shouldValidate: true,
+          })
+        }
+        onLocationChange={(value) => {
+          setValue("latitude", value.latitude, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+          setValue("longitude", value.longitude, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+        }}
+        onLongitudeChange={(value) =>
+          setValue("longitude", value, {
+            shouldDirty: true,
+            shouldValidate: true,
+          })
+        }
+        province={selectedProvince}
+        title={t("locationPickerTitle")}
+        ward={selectedDistrict}
+      />
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field
@@ -307,9 +380,10 @@ const formatFieldError = createFieldErrorFormatter(
     "addressLength",
     "addressRequired",
     "districtLength",
+    "coordinateInvalid",
     "emailExists",
     "emailInvalid",
-    "googleMapsUrlInvalid",
+    "locationRequired",
     "nameLength",
     "nameRequired",
     "phoneLength",

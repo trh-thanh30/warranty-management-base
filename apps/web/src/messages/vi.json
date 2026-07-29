@@ -1016,58 +1016,66 @@
   },
   "DealersPage": {
     "hero": {
-      "imageAlt": "Hệ thống đại lý chính thức FUJITEK",
+      "imageAlt": "Banner phim cách nhiệt LEXZENZ Korea Reflex Film",
       "eyebrow": "Hệ thống đại lý",
       "title": "Trở thành đại lý chính thức ngay hôm nay",
       "description": "Tìm trung tâm thi công phim cách nhiệt FUJITEK chính hãng gần bạn trên toàn quốc.",
       "dealerCta": "Tuyển đại lý"
     },
+    "recruitment": {
+      "eyebrow": "Cơ hội hợp tác",
+      "title": "Mở rộng kinh doanh cùng FUJITEK",
+      "description": "Trở thành đại lý chính thức để tiếp cận sản phẩm chính hãng, chính sách hỗ trợ đồng hành và hệ thống bảo hành minh bạch.",
+      "cta": "Đăng ký trở thành đại lý"
+    },
     "filters": {
       "searchPlaceholder": "Tìm theo tên hoặc địa chỉ...",
+      "searchAriaLabel": "Tìm đại lý theo tên, địa chỉ hoặc số điện thoại",
       "cityAriaLabel": "Chọn tỉnh hoặc thành phố",
       "districtAriaLabel": "Chọn quận hoặc huyện",
       "allCities": "Toàn quốc",
       "allDistricts": "Quận/Huyện",
-      "nearMe": "Tìm cửa hàng gần bạn (≤ 20 km)",
-      "resultCount": "Có {count} cửa hàng"
+      "nearMe": "Tìm đại lý và trung tâm bảo hành gần bạn (≤ 20 km)",
+      "nearMeLoading": "Đang xác định vị trí của bạn...",
+      "nearMeError": "Không thể lấy vị trí. Hãy kiểm tra quyền truy cập vị trí.",
+      "nearMeUnsupported": "Trình duyệt không hỗ trợ định vị.",
+      "resultCount": "Có {count} đại lý và trung tâm bảo hành"
     },
-    "empty": "Không tìm thấy đại lý phù hợp.",
-    "mainShowroom": "Showroom chính",
+    "states": {
+      "loading": "Đang tải đại lý và trung tâm bảo hành...",
+      "loadingMore": "Đang tải thêm địa điểm...",
+      "loadMoreError": "Không thể tải thêm địa điểm.",
+      "error": "Không thể tải đại lý và trung tâm bảo hành. Vui lòng thử lại.",
+      "retry": "Thử lại"
+    },
+    "empty": "Không tìm thấy đại lý hoặc trung tâm bảo hành phù hợp.",
+    "locationType": {
+      "dealer": "Đại lý",
+      "serviceCenter": "Trung tâm bảo hành"
+    },
     "viewMore": "Xem thêm",
     "directions": "Chỉ đường",
     "hotline": "Hotline",
-    "hours": {
-      "daily": "08:00 - 18:30 (Thứ Hai - Chủ Nhật)",
-      "weekdays": "08:00 - 18:00 (Thứ Hai - Thứ Bảy)"
-    },
     "map": {
-      "defaultTitle": "Bản đồ đại lý FUJITEK",
-      "iframeTitle": "Bản đồ vị trí đại lý FUJITEK",
-      "ariaLabel": "Bản đồ tương tác vị trí đại lý FUJITEK tại Việt Nam",
+      "defaultTitle": "Bản đồ đại lý và trung tâm bảo hành FUJITEK",
+      "iframeTitle": "Bản đồ vị trí đại lý và trung tâm bảo hành FUJITEK",
+      "ariaLabel": "Bản đồ tương tác vị trí đại lý và trung tâm bảo hành FUJITEK tại Việt Nam",
+      "activateMap": "Nhấp để tương tác với bản đồ",
+      "resetMap": "Đặt lại bản đồ",
+      "fullscreenMap": "Mở bản đồ toàn màn hình",
+      "exitFullscreenMap": "Thoát chế độ toàn màn hình",
       "loading": "Đang tải ranh giới bản đồ Việt Nam...",
       "loadError": "Không thể tải ranh giới Việt Nam. Vui lòng thử lại.",
+      "networkLoading": "Đang tải đại lý và trung tâm bảo hành...",
+      "networkError": "Không thể tải dữ liệu đại lý và trung tâm bảo hành.",
+      "retry": "Thử lại",
       "selectedDealer": "Đại lý được chọn",
+      "locationType": {
+        "dealer": "Đại lý ủy quyền",
+        "serviceCenter": "Trung tâm bảo hành"
+      },
       "popupPhone": "Điện thoại",
       "openGoogleMaps": "Mở Google Maps"
-    },
-    "locations": {
-      "cities": {
-        "hoaBinh": "Hòa Bình",
-        "phuYen": "Phú Yên",
-        "hanoi": "Hà Nội",
-        "hoChiMinhCity": "TP. Hồ Chí Minh",
-        "daNang": "Đà Nẵng",
-        "dakLak": "Đắk Lắk"
-      },
-      "districts": {
-        "tanLac": "Tân Lạc",
-        "dongHoa": "Đông Hòa",
-        "cauGiay": "Cầu Giấy",
-        "haDong": "Hà Đông",
-        "thuDuc": "Thủ Đức",
-        "haiChau": "Hải Châu",
-        "buonMaThuot": "Buôn Ma Thuột"
-      }
     }
   },
   "QuickChat": {
@@ -2031,7 +2039,7 @@
         },
         "networkExpansion": {
           "title": "Mở rộng mạng lưới",
-          "description": "Hơn 200 đại lý trên toàn quốc, phủ sóng 63 tỉnh thành."
+          "description": "Hơn 100 đại lý trên toàn quốc, phủ sóng 34 tỉnh thành."
         }
       }
     },
@@ -2166,7 +2174,7 @@
           "checks": {
             "ewarrantyDigital": "Bảo hành điện tử E-Warranty",
             "support247": "Hỗ trợ 24/7",
-            "dealerNetwork": "200+ đại lý toàn quốc"
+            "dealerNetwork": "100+ đại lý toàn quốc"
           }
         }
       }
@@ -2198,15 +2206,27 @@
     "network": {
       "eyebrow": "Mạng lưới toàn quốc",
       "titlePrefix": "Hệ thống đại lý",
-      "titleSuffix": "phủ sóng 63 tỉnh thành",
-      "description": "Với hơn 200 đại lý trên toàn quốc, Fujitek cam kết mang đến dịch vụ lắp đặt chuyên nghiệp và chế độ bảo hành E-Warranty minh bạch.",
+      "titleSuffix": "phủ sóng 34 tỉnh thành",
+      "description": "Với hơn 100 đại lý trên toàn quốc, Fujitek cam kết mang đến dịch vụ lắp đặt chuyên nghiệp và chế độ bảo hành E-Warranty minh bạch.",
       "viewDealersCta": "Tìm Đại lý gần nhất",
       "mapTitle": "Bản đồ mạng lưới đại lý",
       "mapSubtitle": "Hệ thống trạm lắp đặt ủy quyền rộng khắp",
       "activateMap": "Nhấp để tương tác với bản đồ",
       "resetMap": "Đặt lại bản đồ",
+      "fullscreenMap": "Mở bản đồ toàn màn hình",
+      "exitFullscreenMap": "Thoát chế độ toàn màn hình",
       "legendDealer": "Đại lý ủy quyền",
-      "legendCenter": "Trung tâm lắp đặt",
+      "legendCenter": "Trung tâm bảo hành",
+      "loading": "Đang tải hệ thống đại lý và trung tâm bảo hành...",
+      "error": "Không thể tải dữ liệu mạng lưới.",
+      "retry": "Thử lại",
+      "empty": "Chưa có địa điểm hoạt động để hiển thị.",
+      "phone": "Điện thoại",
+      "directions": "Xem chỉ đường",
+      "locationType": {
+        "dealer": "Đại lý ủy quyền",
+        "serviceCenter": "Trung tâm bảo hành"
+      },
       "stats": {
         "dealers": "Đại lý toàn quốc",
         "provinces": "Tỉnh thành",
@@ -2235,7 +2255,7 @@
       "title": "Trở thành Đại lý FUJITEK",
       "description": "Tham gia mạng lưới đại lý của chúng tôi để nhận được chính sách ưu đãi hấp dẫn, hỗ trợ đào tạo và marketing toàn diện.",
       "partnerBtn": "Đăng ký làm Đại lý",
-      "hotlineBtn": "Hotline 1900 633 826",
+      "hotlineBtn": "Hotline {phone}",
       "benefits": {
         "discount": "Chiết khấu hấp dẫn",
         "training": "Đào tạo chuyên sâu",

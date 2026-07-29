@@ -2,6 +2,7 @@
   "name": "warranty-management-base",
   "private": true,
   "version": "0.1.0",
+  "license": "UNLICENSED",
   "type": "module",
   "packageManager": "pnpm@9.0.0",
   "engines": {
@@ -65,6 +66,9 @@
     "seed:content-pages:dev": "pnpm --filter @repo/api db:seed-content-pages:dev",
     "seed:content-pages:test": "pnpm --filter @repo/api db:seed-content-pages:test",
     "seed:content-pages:prod": "pnpm --filter @repo/api db:seed-content-pages:prod",
+    "seed:dealers:dev": "pnpm --filter @repo/api db:seed-dealers:dev",
+    "seed:dealers:test": "pnpm --filter @repo/api db:seed-dealers:test",
+    "seed:dealers:prod": "pnpm --filter @repo/api db:seed-dealers:prod",
     "seed:website-config:dev": "pnpm --filter @repo/api db:seed-website-config:dev",
     "seed:website-config:test": "pnpm --filter @repo/api db:seed-website-config:test",
     "seed:website-config:prod": "pnpm --filter @repo/api db:seed-website-config:prod",

@@ -4,6 +4,7 @@ import { ListDealersDto } from '@/modules/dealers/dto/list-dealers.dto';
 import { PreparedDealerImportRow } from '@/modules/dealers/excel/dealer-excel.types';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import type { ListPublicDealersQuery } from '@repo/shared';
 
 @Injectable()
 export class DealersRepository {
@@ -87,6 +88,103 @@ export class DealersRepository {
     return this.prismaService.dealer.findMany();
   }
 
+  listActiveForNetwork() {
+    return this.prismaService.dealer.findMany({
+      where: { is_active: true },
+      orderBy: [{ province: 'asc' }, { name: 'asc' }],
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        address: true,
+        province: true,
+        district: true,
+        latitude: true,
+        longitude: true,
+      },
+    });
+  }
+
+  listActivePublic(filters: ListPublicDealersQuery) {
+    const search = filters.search?.trim();
+    const province = filters.province?.trim();
+    const district = filters.district?.trim();
+    const { page, limit, skip, take } = normalizePagination(filters);
+    const where: Prisma.DealerWhereInput = {
+      is_active: true,
+      province: province
+        ? { equals: province, mode: 'insensitive' }
+        : undefined,
+      district: district
+        ? { equals: district, mode: 'insensitive' }
+        : undefined,
+      OR: search
+        ? [
+            { name: { contains: search, mode: 'insensitive' } },
+            { phone: { contains: search, mode: 'insensitive' } },
+            { province: { contains: search, mode: 'insensitive' } },
+            { district: { contains: search, mode: 'insensitive' } },
+            { address: { contains: search, mode: 'insensitive' } },
+          ]
+        : undefined,
+    };
+    const select = {
+      id: true,
+      name: true,
+      phone: true,
+      address: true,
+      province: true,
+      district: true,
+      latitude: true,
+      longitude: true,
+    } satisfies Prisma.DealerSelect;
+
+    return this.prismaService.$transaction(async (tx) => {
+      const [items, total] = await Promise.all([
+        tx.dealer.findMany({
+          where,
+          orderBy: [{ province: 'asc' }, { name: 'asc' }, { id: 'asc' }],
+          select,
+          skip,
+          take,
+        }),
+        tx.dealer.count({ where }),
+      ]);
+
+      return paginate(items, { page, limit, total });
+    });
+  }
+
+  listActiveFilterOptions(province?: string): Promise<{
+    districts: Array<{ district: string | null }>;
+    provinces: Array<{ province: string }>;
+  }> {
+    return this.prismaService.$transaction(async (tx) => {
+      const [provinces, districts] = await Promise.all([
+        tx.dealer.findMany({
+          distinct: ['province'],
+          orderBy: { province: 'asc' },
+          select: { province: true },
+          where: { is_active: true },
+        }),
+        province
+          ? tx.dealer.findMany({
+              distinct: ['district'],
+              orderBy: { district: 'asc' },
+              select: { district: true },
+              where: {
+                is_active: true,
+                province: { equals: province, mode: 'insensitive' },
+                district: { not: null },
+              },
+            })
+          : Promise.resolve([]),
+      ]);
+
+      return { provinces, districts };
+    });
+  }
+
   listForExport(filters: ListDealersDto) {
     const search = filters.search?.trim();
     const province = filters.province?.trim();
@@ -138,6 +236,8 @@ export class DealersRepository {
           phone: row.phone,
           province: row.province,
           district: row.district,
+          latitude: row.latitude,
+          longitude: row.longitude,
           sales_name: row.salesName,
         };
 

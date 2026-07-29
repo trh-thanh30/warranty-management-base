@@ -1,5 +1,5 @@
-import { PrismaPg } from '@prisma/adapter-pg';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { PrismaPg } from '@prisma/adapter-pg';
 import {
   asset_access_type,
   asset_type,
@@ -15,8 +15,8 @@ import { dirname, resolve } from 'node:path';
 import { Pool } from 'pg';
 
 const SITE_KEY = 'main';
-const CONTACT_EMAIL = 'fujitek.lexzenz.vn@gmail.com';
-const WEBSITE_URL = 'https://fujitekvietnam.com';
+const CONTACT_EMAIL = 'admin@lexzenz.vn';
+const WEBSITE_URL = 'https://lexzenz.com/';
 const WEBSITE_LOGO_FILE_NAME = 'logo_2.png';
 const WEBSITE_LOGO_SOURCE_PATH = resolve(
   __dirname,
@@ -30,6 +30,7 @@ const WEBSITE_LOGO_MIME_TYPE = 'image/png';
 const offices = [
   {
     isActive: true,
+    isHeadquarters: true,
     phone: '0886 33 77 33',
     sortOrder: 0,
     address: '7C Nguyễn Ngọc Phương, Phường Thạnh Mỹ Tây, TP. Hồ Chí Minh',
@@ -37,6 +38,7 @@ const offices = [
   },
   {
     isActive: true,
+    isHeadquarters: false,
     phone: '0989 017 999',
     sortOrder: 1,
     address: 'Số 62, Ngõ 20 Nghĩa Đô, Phường Nghĩa Đô, TP. Hà Nội',
@@ -257,6 +259,7 @@ async function uploadWebsiteLogo(logoBuffer: Buffer) {
 function officeCreateInputs(): Prisma.WebsiteOfficeCreateWithoutRevisionInput[] {
   return offices.map((office) => ({
     is_active: office.isActive,
+    is_headquarters: office.isHeadquarters,
     phone: office.phone,
     sort_order: office.sortOrder,
     translations: {

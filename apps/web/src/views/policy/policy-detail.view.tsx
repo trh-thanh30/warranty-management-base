@@ -1,6 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { PolicyDocument } from "@repo/ui";
-import { getPublishedContentPage } from "@/src/services/content-pages.service";
+import { contentPagesService } from "@/src/services/content-pages/content-pages.service";
 import { getPolicyConfig, toPolicyLocale } from "./policy.constants";
 import type { PolicyKey } from "./policy.types";
 
@@ -17,7 +17,9 @@ export async function PolicyDetailView({
   ]);
   const policyLocale = toPolicyLocale(locale);
   const config = getPolicyConfig(policyKey);
-  const page = await getPublishedContentPage(config.slugs[policyLocale]);
+  const page = await contentPagesService
+    .getPublishedContentPage(config.slugs[policyLocale])
+    .catch(() => null);
   const title = page?.title ?? t(`titles.${policyKey}`);
 
   return (

@@ -30,6 +30,7 @@ import {
 } from "@/src/constants/warranty.constants";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { Link } from "@/src/i18n/navigation";
+import { Container } from "@/src/components/common/container";
 import type { WarrantyLookupResult } from "./warranty.types";
 
 function ResultRow({
@@ -126,7 +127,7 @@ export function WarrantyLookupView() {
           className="object-cover opacity-35"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-deep-black via-deep-black/80 to-transparent z-10" />
-        <div className="relative z-20 mx-auto max-w-[1400px] px-6 sm:px-10 lg:px-12 w-full space-y-3">
+        <Container className="relative z-20 max-w-[1400px] space-y-3">
           <span className="inline-block bg-premium-red text-white px-4 py-1 rounded-md text-xs font-semibold uppercase tracking-[0.25em]">
             {t("eyebrow")}
           </span>
@@ -136,10 +137,10 @@ export function WarrantyLookupView() {
           <p className="text-sm sm:text-base text-white/80 font-medium max-w-xl">
             {t("description")}
           </p>
-        </div>
+        </Container>
       </section>
 
-      <div className="mx-auto max-w-[1400px] px-6 sm:px-10 lg:px-12 space-y-16 mt-12 sm:mt-16">
+      <Container className="mt-12 max-w-[1400px] space-y-16 sm:mt-16">
         {/* 2. Registration Methods Section */}
         <section className="space-y-8 text-center max-w-4xl lg:max-w-5xl mx-auto">
           <div className="space-y-3">
@@ -536,7 +537,7 @@ export function WarrantyLookupView() {
             </Link>
           </div>
         </section>
-      </div>
+      </Container>
     </main>
   );
 }

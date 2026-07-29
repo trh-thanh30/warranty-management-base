@@ -1,20 +1,14 @@
-export type DealerCityId =
-  | "hoaBinh"
-  | "phuYen"
-  | "hanoi"
-  | "hoChiMinhCity"
-  | "daNang"
-  | "dakLak";
+import type { PublicNetworkLocation } from "@repo/shared";
 
-export interface Dealer {
-  id: string;
-  name: string;
-  address: string;
-  phone: string;
-  hoursKey: "daily" | "weekdays";
-  cityId: DealerCityId;
-  districtId: string;
-  lat: number;
-  lng: number;
-  isMainShowroom?: boolean;
-}
+export type NetworkDirectoryLocation = PublicNetworkLocation;
+
+export type DealerLocation = PublicNetworkLocation & {
+  kind: "DEALER";
+};
+
+export type NearbyDealerStatus =
+  | "idle"
+  | "loading"
+  | "active"
+  | "error"
+  | "unsupported";

@@ -217,13 +217,14 @@ model WebsiteHeroSlide {
 }
 
 model WebsiteOffice {
-  id          String   @id @default(uuid()) @db.Uuid
-  revision_id String   @db.Uuid
-  phone       String?
-  is_active   Boolean  @default(true)
-  sort_order  Int      @default(0)
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  id              String   @id @default(uuid()) @db.Uuid
+  revision_id     String   @db.Uuid
+  phone           String?
+  is_active       Boolean  @default(true)
+  is_headquarters Boolean  @default(false)
+  sort_order      Int      @default(0)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 
   revision     WebsiteSiteRevision        @relation(fields: [revision_id], references: [id], onDelete: Cascade)
   translations WebsiteOfficeTranslation[]
@@ -642,6 +643,8 @@ model Dealer {
   province   String
   district   String?
   sales_name String?
+  latitude   Float
+  longitude  Float
   is_active  Boolean  @default(true)
   metadata   Json?
   created_at DateTime @default(now())
@@ -746,6 +749,8 @@ model ServiceCenter {
   province   String
   district   String?
   address    String
+  latitude   Float
+  longitude  Float
   is_active  Boolean  @default(true)
   metadata   Json?
   created_at DateTime @default(now())

@@ -39,9 +39,9 @@ test("OSM attribution remains configured and visible in web maps", async () => {
     readFile(contactMapPath, "utf8"),
   ]);
 
-  assert.match(sharedMap, /OpenStreetMap/);
-  assert.match(sharedMap, /contributors/);
-  assert.match(sharedMap, /attribution=\{tileAttribution\}/);
+  assert.match(sharedMap, /OPEN_STREET_MAP_TILE_PROVIDER/);
+  assert.match(sharedMap, /attribution=\{tileProvider\.attribution\}/);
+  assert.match(sharedMap, /url=\{tileProvider\.url\}/);
 
   assert.doesNotMatch(
     globals,
@@ -52,11 +52,9 @@ test("OSM attribution remains configured and visible in web maps", async () => {
     /\.leaflet-control-attribution[\s\S]*visibility:\s*hidden/,
   );
 
-  assert.match(dealerMap, /OpenStreetMap/);
-  assert.match(dealerMap, /attribution=\{OSM_TILE_ATTRIBUTION\}/);
+  assert.match(dealerMap, /SharedMap/);
+  assert.doesNotMatch(dealerMap, /<TileLayer/);
 
-  assert.match(contactMap, /OpenStreetMap/);
-  assert.match(contactMap, /attribution=\{OSM_TILE_ATTRIBUTION\}/);
-  assert.doesNotMatch(contactMap, /attributionControl=\{false\}/);
-  assert.doesNotMatch(contactMap, /attribution=""/);
+  assert.match(contactMap, /SharedMap/);
+  assert.doesNotMatch(contactMap, /<TileLayer/);
 });

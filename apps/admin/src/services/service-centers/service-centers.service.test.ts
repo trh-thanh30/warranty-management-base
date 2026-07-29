@@ -11,7 +11,10 @@ const serviceCenter = {
   province: "Da Nang",
   district: "Hai Chau",
   address: "1 Nguyen Van Linh",
-  googleMapsUrl: "https://maps.google.com/?q=1+Nguyen+Van+Linh",
+  googleMapsUrl:
+    "https://www.google.com/maps/search/?api=1&query=16.054407%2C108.202164",
+  latitude: 16.054407,
+  longitude: 108.202164,
   isActive: true,
   metadata: null,
   createdAt: "2026-07-15T00:00:00.000Z",
@@ -103,6 +106,8 @@ test("creates, updates, and deactivates a service center", async () => {
 
   await service.createServiceCenter({
     address: serviceCenter.address,
+    latitude: serviceCenter.latitude,
+    longitude: serviceCenter.longitude,
     name: serviceCenter.name,
     province: serviceCenter.province,
   });
@@ -115,6 +120,8 @@ test("creates, updates, and deactivates a service center", async () => {
       url: "/service-centers",
       body: {
         address: serviceCenter.address,
+        latitude: serviceCenter.latitude,
+        longitude: serviceCenter.longitude,
         name: serviceCenter.name,
         province: serviceCenter.province,
       },

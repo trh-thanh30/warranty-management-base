@@ -2,6 +2,7 @@
   "name": "@repo/admin",
   "version": "0.0.0",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "scripts": {
     "dev": "node ../../scripts/next-port.mjs dev ADMIN_PORT 4102",

@@ -9,6 +9,8 @@ export function toDealerExcelRow(dealer: Dealer): DealerExcelRow {
     phone: dealer.phone,
     province: dealer.province,
     district: dealer.district,
+    latitude: dealer.latitude,
+    longitude: dealer.longitude,
     salesName: dealer.sales_name,
   };
 }

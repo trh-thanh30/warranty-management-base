@@ -50,6 +50,24 @@ export const dealerExcelColumns: Array<ExcelColumnDefinition<DealerExcelRow>> =
       parse: (value) => parseOptionalString(value, 120),
     },
     {
+      key: 'latitude',
+      header: 'Vĩ độ',
+      required: true,
+      width: 18,
+      example: 21.0285,
+      note: 'Giá trị từ -90 đến 90.',
+      parse: (value) => parseCoordinate(value, -90, 90, 'Vĩ độ'),
+    },
+    {
+      key: 'longitude',
+      header: 'Kinh độ',
+      required: true,
+      width: 18,
+      example: 105.8542,
+      note: 'Giá trị từ -180 đến 180.',
+      parse: (value) => parseCoordinate(value, -180, 180, 'Kinh độ'),
+    },
+    {
       key: 'isActive',
       header: 'Trạng thái',
       required: true,
@@ -61,6 +79,19 @@ export const dealerExcelColumns: Array<ExcelColumnDefinition<DealerExcelRow>> =
         value === true ? 'Đang hoạt động' : 'Ngưng hoạt động',
     },
   ];
+
+function parseCoordinate(
+  value: ExcelCellValue,
+  min: number,
+  max: number,
+  label: string,
+) {
+  const parsed = Number(String(value ?? '').trim());
+  if (!Number.isFinite(parsed) || parsed < min || parsed > max) {
+    throw new Error(`${label} phải nằm trong khoảng ${min} đến ${max}`);
+  }
+  return parsed;
+}
 
 function parsePhone(value: ExcelCellValue) {
   const parsed =

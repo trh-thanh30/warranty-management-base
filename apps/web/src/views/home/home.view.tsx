@@ -4,9 +4,9 @@ import { AboutSection } from "./components/about-section";
 import { ProductsSection } from "./components/products-section";
 import { SputterSection } from "./components/sputter-section";
 import { ComparisonSection } from "./components/comparison-section";
-import { websiteConfigService } from "@/src/services/website-config/website-config.service";
+import { getCachedSiteSetting } from "@/src/services/website-config/website-config.service";
 import { productCategoriesService } from "@/src/services/product-categories/product-categories.service";
-import { getPublishedContentPage } from "@/src/services/content-pages.service";
+import { contentPagesService } from "@/src/services/content-pages/content-pages.service";
 import type { WebsiteLocale } from "@repo/shared";
 import { resolveWebsiteHeroSlides } from "@repo/shared/utils";
 import {
@@ -21,7 +21,7 @@ export async function HomeView({
 }) {
   const { locale } = await params;
   const [site, productCategories, faqPage] = await Promise.all([
-    websiteConfigService.getSiteSetting(locale).catch(() => null),
+    getCachedSiteSetting(locale).catch(() => null),
     productCategoriesService
       .listProductCategories({
         page: 1,
@@ -29,7 +29,9 @@ export async function HomeView({
         hasImage: true,
       })
       .catch(() => null),
-    getPublishedContentPage(FAQ_CONTENT_PAGE_SLUG),
+    contentPagesService
+      .getPublishedContentPage(FAQ_CONTENT_PAGE_SLUG)
+      .catch(() => null),
   ]);
   const heroSlides = resolveWebsiteHeroSlides(site?.heroSlides);
   const desktopHeroImages = heroSlides.desktop.map((slide) => ({

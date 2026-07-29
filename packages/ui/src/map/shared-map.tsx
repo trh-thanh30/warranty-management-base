@@ -2,13 +2,21 @@
 
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { MousePointerClick, RotateCcw } from "lucide-react";
-import type { LatLngExpression } from "leaflet";
+import {
+  Maximize2,
+  Minimize2,
+  MousePointerClick,
+  RotateCcw,
+} from "lucide-react";
+import type { LatLngBoundsExpression, LatLngExpression } from "leaflet";
 import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
-
-const DEFAULT_TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-const DEFAULT_TILE_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+import { OPEN_STREET_MAP_TILE_PROVIDER } from "./map.constants";
+import type {
+  MapActivationMode,
+  MapTileProvider,
+  SharedMapInitialView,
+} from "./map.types";
+import { cn } from "../lib/utils";
 
 interface MapInteractionControllerProps {
   onInteractionChange: (enabled: boolean) => void;
@@ -90,13 +98,15 @@ function MapActivationControl({
 }
 
 interface MapResetControlProps {
-  initialCenter: LatLngExpression;
-  initialZoom: number;
+  initialBounds?: LatLngBoundsExpression;
+  initialCenter?: LatLngExpression;
+  initialZoom?: number;
   onInteractionChange: (enabled: boolean) => void;
   resetLabel: string;
 }
 
 function MapResetControl({
+  initialBounds,
   initialCenter,
   initialZoom,
   onInteractionChange,
@@ -107,7 +117,11 @@ function MapResetControl({
   const handleReset = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     map.closePopup();
-    map.setView(initialCenter, initialZoom);
+    if (initialBounds) {
+      map.fitBounds(initialBounds);
+    } else if (initialCenter && initialZoom !== undefined) {
+      map.setView(initialCenter, initialZoom);
+    }
     map.scrollWheelZoom.disable();
     onInteractionChange(false);
   };
@@ -125,33 +139,111 @@ function MapResetControl({
   );
 }
 
-export interface SharedMapProps {
-  activateLabel: string;
+interface MapFullscreenControlProps {
+  exitFullscreenLabel: string;
+  fullscreenLabel: string;
+}
+
+function MapFullscreenControl({
+  exitFullscreenLabel,
+  fullscreenLabel,
+}: MapFullscreenControlProps) {
+  const map = useMap();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isSupported, setIsSupported] = useState(false);
+
+  useEffect(() => {
+    const container = map.getContainer();
+    const handleFullscreenChange = () => {
+      setIsFullscreen(document.fullscreenElement === container);
+      window.requestAnimationFrame(() => map.invalidateSize());
+    };
+
+    setIsSupported(
+      document.fullscreenEnabled &&
+        typeof container.requestFullscreen === "function",
+    );
+    handleFullscreenChange();
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, [map]);
+
+  if (!isSupported) return null;
+
+  const handleToggle = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+
+    try {
+      if (document.fullscreenElement === map.getContainer()) {
+        await document.exitFullscreen();
+      } else {
+        await map.getContainer().requestFullscreen();
+      }
+    } catch {
+      setIsFullscreen(false);
+    }
+  };
+
+  const label = isFullscreen ? exitFullscreenLabel : fullscreenLabel;
+
+  return (
+    <button
+      type="button"
+      aria-label={isFullscreen ? exitFullscreenLabel : fullscreenLabel}
+      title={label}
+      className="leaflet-control absolute left-2.5 top-[115px] z-[1000] grid size-[34px] place-items-center rounded-[4px] border-2 border-black/20 bg-white text-deep-black shadow-sm transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2"
+      onClick={handleToggle}
+    >
+      {isFullscreen ? (
+        <Minimize2 aria-hidden="true" className="size-4" />
+      ) : (
+        <Maximize2 aria-hidden="true" className="size-4" />
+      )}
+    </button>
+  );
+}
+
+type SharedMapBaseProps = {
+  activateLabel?: string;
+  activationMode?: MapActivationMode;
   children?: ReactNode;
   className?: string;
-  initialCenter: LatLngExpression;
-  initialZoom: number;
+  exitFullscreenLabel?: string;
+  fullscreenLabel?: string;
   loadingClassName?: string;
+  maxBounds?: LatLngBoundsExpression;
+  maxBoundsViscosity?: number;
   maxZoom?: number;
   minZoom?: number;
-  resetLabel: string;
-  tileAttribution?: string;
-  tileUrl?: string;
+  resetLabel?: string;
+  showResetControl?: boolean;
+  tileProvider?: MapTileProvider;
   zoomSnap?: number;
-}
+};
+
+export type SharedMapProps = SharedMapBaseProps & SharedMapInitialView;
 
 export function SharedMap({
   activateLabel,
+  activationMode = "overlay",
   children,
   className = "size-full",
+  exitFullscreenLabel,
+  fullscreenLabel,
+  initialBounds,
   initialCenter,
   initialZoom,
   loadingClassName = "size-full animate-pulse bg-surface-muted",
+  maxBounds,
+  maxBoundsViscosity,
   maxZoom,
   minZoom,
   resetLabel,
-  tileAttribution = DEFAULT_TILE_ATTRIBUTION,
-  tileUrl = DEFAULT_TILE_URL,
+  showResetControl = true,
+  tileProvider = OPEN_STREET_MAP_TILE_PROVIDER,
   zoomSnap,
 }: SharedMapProps) {
   const [isMounted, setIsMounted] = useState(false);
@@ -167,28 +259,47 @@ export function SharedMap({
 
   return (
     <MapContainer
+      bounds={initialBounds}
       center={initialCenter}
       zoom={initialZoom}
       zoomSnap={zoomSnap}
       minZoom={minZoom}
       maxZoom={maxZoom}
-      scrollWheelZoom={false}
-      className={className}
+      maxBounds={maxBounds}
+      maxBoundsViscosity={maxBoundsViscosity}
+      scrollWheelZoom={activationMode === "direct"}
+      className={cn("isolate z-0", className)}
     >
-      <MapInteractionController onInteractionChange={setIsWheelZoomEnabled} />
-      <MapActivationControl
-        activateLabel={activateLabel}
-        isWheelZoomEnabled={isWheelZoomEnabled}
-        onInteractionChange={setIsWheelZoomEnabled}
-      />
-      <MapResetControl
-        initialCenter={initialCenter}
-        initialZoom={initialZoom}
-        resetLabel={resetLabel}
-        onInteractionChange={setIsWheelZoomEnabled}
-      />
+      {activationMode === "overlay" ? (
+        <MapInteractionController onInteractionChange={setIsWheelZoomEnabled} />
+      ) : null}
+      {activationMode === "overlay" && activateLabel ? (
+        <MapActivationControl
+          activateLabel={activateLabel}
+          isWheelZoomEnabled={isWheelZoomEnabled}
+          onInteractionChange={setIsWheelZoomEnabled}
+        />
+      ) : null}
+      {showResetControl && resetLabel ? (
+        <MapResetControl
+          initialBounds={initialBounds}
+          initialCenter={initialCenter}
+          initialZoom={initialZoom}
+          resetLabel={resetLabel}
+          onInteractionChange={setIsWheelZoomEnabled}
+        />
+      ) : null}
+      {fullscreenLabel && exitFullscreenLabel ? (
+        <MapFullscreenControl
+          exitFullscreenLabel={exitFullscreenLabel}
+          fullscreenLabel={fullscreenLabel}
+        />
+      ) : null}
 
-      <TileLayer url={tileUrl} attribution={tileAttribution} />
+      <TileLayer
+        url={tileProvider.url}
+        attribution={tileProvider.attribution}
+      />
       {children}
     </MapContainer>
   );

@@ -6,7 +6,20 @@ type SiteDraft = Omit<UpdateWebsiteSiteSettingBody, 'expectedVersion'>;
 
 @Injectable()
 export class WebsiteConfigPolicyService {
+  assertSiteDraftValid(site: SiteDraft) {
+    const headquarters = site.offices.filter((office) => office.isHeadquarters);
+    if (headquarters.length > 1) {
+      throw new ValidationError(
+        'Only one headquarters office can be configured',
+        'WEBSITE_CONFIG_MULTIPLE_HEADQUARTERS',
+        { officeIds: headquarters.map((office) => office.id) },
+      );
+    }
+  }
+
   assertSitePublishable(site: SiteDraft) {
+    this.assertSiteDraftValid(site);
+
     if (!this.isEmail(site.contactEmail)) {
       throw new ValidationError(
         'Contact email is invalid',

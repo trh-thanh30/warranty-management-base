@@ -21,6 +21,7 @@ COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 RUN pnpm install --frozen-lockfile
 
 COPY --from=pruner /app/out/full/ .
+COPY --from=pruner /app/scripts ./scripts
 
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm --filter @repo/admin... build
@@ -31,16 +32,17 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV HOSTNAME=0.0.0.0
-ENV PORT=3002
+ENV PORT=4102
 
 RUN addgroup --system --gid 1001 nodejs \
   && adduser --system --uid 1001 nextjs
 
 COPY --from=builder --chown=nextjs:nodejs /app/apps/admin/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/admin/.next/static ./apps/admin/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/admin/public ./apps/admin/public
 
 USER nextjs
 
-EXPOSE 3002
+EXPOSE 4102
 
 CMD ["node", "apps/admin/server.js"]

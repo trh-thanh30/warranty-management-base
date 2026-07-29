@@ -31,6 +31,8 @@ export class CreateDealerUseCase {
         phone,
         province: dto.province.trim(),
         district: optionalTrim(dto.district),
+        latitude: dto.latitude,
+        longitude: dto.longitude,
         sales_name: optionalTrim(dto.salesName),
       });
 

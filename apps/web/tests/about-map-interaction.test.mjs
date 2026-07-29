@@ -24,20 +24,22 @@ const sharedMapPath = path.join(
   "shared-map.tsx",
 );
 
-test("shared map requires an intentional click before wheel zoom", async () => {
+test("overlay maps require an intentional click before wheel zoom", async () => {
   const source = await readFile(sharedMapPath, "utf8");
 
-  assert.match(source, /scrollWheelZoom=\{false\}/);
+  assert.match(source, /scrollWheelZoom=\{activationMode === "direct"\}/);
   assert.match(source, /useMapEvents\(\{\s*click:/);
   assert.match(source, /scrollWheelZoom\.enable\(\)/);
   assert.match(source, /mouseleave/);
   assert.match(source, /event\.key !== "Escape"/);
   assert.match(source, /scrollWheelZoom\.disable\(\)/);
+  assert.match(source, /activationMode === "overlay"\s*\?\s*\(/);
 });
 
 test("shared map exposes a visible control for activating wheel zoom", async () => {
   const source = await readFile(sharedMapPath, "utf8");
 
+  assert.match(source, /cn\("isolate z-0", className\)/);
   assert.match(source, /const \[isWheelZoomEnabled, setIsWheelZoomEnabled\]/);
   assert.match(source, /<MousePointerClick/);
   assert.match(source, /aria-label=\{activateLabel\}/);
@@ -66,10 +68,38 @@ test("shared map reset restores its initial view and interaction state", async (
   );
 });
 
+test("shared map exposes an accessible fullscreen control and redraws Leaflet", async () => {
+  const [sharedMapSource, aboutMapSource] = await Promise.all([
+    readFile(sharedMapPath, "utf8"),
+    readFile(aboutMapPath, "utf8"),
+  ]);
+
+  assert.match(sharedMapSource, /<Maximize2/);
+  assert.match(sharedMapSource, /<Minimize2/);
+  assert.match(sharedMapSource, /requestFullscreen\(\)/);
+  assert.match(sharedMapSource, /document\.exitFullscreen\(\)/);
+  assert.match(sharedMapSource, /"fullscreenchange"/);
+  assert.match(sharedMapSource, /map\.invalidateSize\(\)/);
+  assert.match(
+    sharedMapSource,
+    /aria-label=\{isFullscreen \? exitFullscreenLabel : fullscreenLabel\}/,
+  );
+  assert.match(
+    sharedMapSource,
+    /left-2\.5 top-\[115px\].*size-\[34px\].*rounded-\[4px\]/,
+  );
+  assert.match(aboutMapSource, /fullscreenLabel=\{t\("fullscreenMap"\)\}/);
+  assert.match(
+    aboutMapSource,
+    /exitFullscreenLabel=\{t\("exitFullscreenMap"\)\}/,
+  );
+});
+
 test("about map composes feature layers inside the shared map", async () => {
   const source = await readFile(aboutMapPath, "utf8");
 
-  assert.match(source, /import \{ SharedMap \} from "@repo\/ui\/map"/);
+  assert.match(source, /SharedMap,/);
+  assert.match(source, /from "@repo\/ui\/map"/);
   assert.match(source, /<SharedMap/);
   assert.match(source, /activateLabel=\{t\("activateMap"\)\}/);
   assert.match(source, /initialCenter=\{VIETNAM_CENTER\}/);
@@ -77,4 +107,18 @@ test("about map composes feature layers inside the shared map", async () => {
   assert.match(source, /<Marker/);
   assert.doesNotMatch(source, /<MapContainer/);
   assert.doesNotMatch(source, /function MapInteractionController/);
+});
+
+test("about map renders dealer and service-center locations from the public API", async () => {
+  const source = await readFile(aboutMapPath, "utf8");
+
+  assert.match(source, /useNetworkLocations/);
+  assert.match(source, /locations\.map/);
+  assert.match(
+    source,
+    /position=\{\[location\.latitude,\s*location\.longitude\]\}/,
+  );
+  assert.match(source, /MAP_MARKER_COLORS\.dealer/);
+  assert.match(source, /MAP_MARKER_COLORS\.serviceCenter/);
+  assert.doesNotMatch(source, /dealerPinLocations/);
 });

@@ -35,7 +35,7 @@ test("header and footer use the published Admin site configuration", async () =>
       readFile(
         path.join(
           process.cwd(),
-          "apps/web/src/services/site-settings.service.ts",
+          "apps/web/src/services/website-config/website-config.service.ts",
         ),
         "utf8",
       ),
@@ -55,8 +55,9 @@ test("header and footer use the published Admin site configuration", async () =>
       ),
     ]);
 
-  assert.match(service, /\/public\/site-settings\?locale=/);
-  assert.match(layout, /getPublicSiteSettings\(locale\)/);
+  assert.match(service, /"\/public\/site-settings"/);
+  assert.match(service, /params:\s*\{\s*locale\s*\}/);
+  assert.match(layout, /getCachedSiteSetting\(locale\)/);
   assert.match(
     layout,
     /<SiteHeader logoUrl=\{siteSettings\?\.headerLogo\?\.url\}/,

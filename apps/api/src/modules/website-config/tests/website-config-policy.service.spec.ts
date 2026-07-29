@@ -15,6 +15,7 @@ describe('WebsiteConfigPolicyService', () => {
           {
             id: 'c20b9c36-b839-4e47-9dd1-a75b43a34bca',
             isActive: true,
+            isHeadquarters: false,
             phone: null,
             sortOrder: 0,
             translations: [
@@ -30,6 +31,42 @@ describe('WebsiteConfigPolicyService', () => {
     ).toThrow(
       expect.objectContaining({
         code: 'WEBSITE_CONFIG_REQUIRED_LOCALE_MISSING',
+      }) as ValidationError,
+    );
+  });
+
+  it('rejects more than one headquarters office', () => {
+    expect(() =>
+      policy.assertSiteDraftValid({
+        contactEmail: 'contact@example.com',
+        footerLogoAssetId: null,
+        headerLogoAssetId: null,
+        heroSlides: [],
+        offices: [
+          {
+            id: '10000000-0000-4000-8000-000000000001',
+            isActive: true,
+            isHeadquarters: true,
+            phone: '0886 33 77 33',
+            sortOrder: 0,
+            translations: [],
+          },
+          {
+            id: '10000000-0000-4000-8000-000000000002',
+            isActive: true,
+            isHeadquarters: true,
+            phone: '0989 017 999',
+            sortOrder: 1,
+            translations: [],
+          },
+        ],
+        socialLinks: [],
+        ogImageAssetId: null,
+        websiteUrl: 'https://example.com',
+      }),
+    ).toThrow(
+      expect.objectContaining({
+        code: 'WEBSITE_CONFIG_MULTIPLE_HEADQUARTERS',
       }) as ValidationError,
     );
   });
