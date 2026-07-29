@@ -23,7 +23,7 @@ import {
   SelectValue,
   Skeleton,
 } from "@repo/ui";
-import { PaginationControls } from "@/src/components/common/pagination-controls";
+import { PaginationControls } from "@repo/ui/pagination-controls";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { Link } from "@/src/i18n/navigation";
 import { PRODUCT_STATUS_FILTERS } from "../products.constants";

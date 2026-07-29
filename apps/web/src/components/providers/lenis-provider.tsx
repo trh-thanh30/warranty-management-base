@@ -1,15 +1,43 @@
 "use client";
 
-import { Suspense, useEffect, useRef } from "react";
+import {
+  createContext,
+  Suspense,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
 import { usePathname } from "@/src/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import Lenis from "lenis";
 import "lenis/dist/lenis.css";
 
+type LenisScrollTo = Lenis["scrollTo"];
+
+const LenisContext = createContext<{ scrollTo: LenisScrollTo }>({
+  scrollTo(target, options) {
+    if (typeof window === "undefined") return;
+
+    const behavior = options?.immediate ? "auto" : "smooth";
+    if (typeof target === "number") {
+      window.scrollTo({ behavior, top: target });
+      return;
+    }
+
+    const element =
+      typeof target === "string" ? document.querySelector(target) : target;
+    element?.scrollIntoView({ behavior, block: "start" });
+  },
+});
+
 function LenisInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const lenisRef = useRef<Lenis | null>(null);
+  const scrollTo = useCallback<LenisScrollTo>((target, options) => {
+    lenisRef.current?.scrollTo(target, options);
+  }, []);
 
   useEffect(() => {
     const lenis = new Lenis({
@@ -42,7 +70,11 @@ function LenisInner({ children }: { children: React.ReactNode }) {
     }
   }, [pathname, searchParams]);
 
-  return <>{children}</>;
+  return (
+    <LenisContext.Provider value={{ scrollTo }}>
+      {children}
+    </LenisContext.Provider>
+  );
 }
 
 export function LenisProvider({ children }: { children: React.ReactNode }) {
@@ -51,4 +83,8 @@ export function LenisProvider({ children }: { children: React.ReactNode }) {
       <LenisInner>{children}</LenisInner>
     </Suspense>
   );
+}
+
+export function useLenis() {
+  return useContext(LenisContext);
 }

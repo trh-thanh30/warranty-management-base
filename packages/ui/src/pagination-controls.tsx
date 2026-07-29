@@ -1,8 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { cn } from "./lib/utils";
 import {
-  cn,
   Pagination,
   PaginationButton,
   PaginationContent,
@@ -10,26 +10,40 @@ import {
   PaginationItem,
   PaginationNext,
   PaginationPrevious,
+} from "./pagination";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@repo/ui";
+} from "./select";
 
-type PaginationPageItem = number | "ellipsis-start" | "ellipsis-end";
+export type PaginationPageItem = number | "ellipsis-start" | "ellipsis-end";
 
-type PaginationControlsProps = {
+export type PaginationControlsClassNames = {
+  activePageButton?: string;
+  directionButton?: string;
+  pageButton?: string;
+  pageStatus?: string;
+};
+
+export type PaginationControlsProps = {
   className?: string;
+  classNames?: PaginationControlsClassNames;
   nextLabel: string;
   onPageChange: (page: number) => void;
   onPageSizeChange?: (pageSize: number) => void;
+  onScrollToTarget?: (targetId: string) => void;
   page: number;
+  pageLabel?: (page: number) => string;
   pageSize?: number;
   pageSizeLabel?: string;
   pageSizeOptions?: number[];
+  paginationLabel?: string;
   previousLabel: string;
   scrollTargetId?: string;
+  showDesktopDirectionLabels?: boolean;
   summary?: ReactNode;
   totalPages: number;
   variant?: "compact" | "default";
@@ -37,15 +51,20 @@ type PaginationControlsProps = {
 
 export function PaginationControls({
   className,
+  classNames,
   nextLabel,
   onPageChange,
   onPageSizeChange,
+  onScrollToTarget,
   page,
+  pageLabel,
   pageSize,
   pageSizeLabel,
   pageSizeOptions = [10, 20, 50],
+  paginationLabel,
   previousLabel,
   scrollTargetId,
+  showDesktopDirectionLabels = true,
   summary,
   totalPages,
   variant = "default",
@@ -61,6 +80,11 @@ export function PaginationControls({
     if (!scrollTargetId) return;
 
     window.requestAnimationFrame(() => {
+      if (onScrollToTarget) {
+        onScrollToTarget(scrollTargetId);
+        return;
+      }
+
       const scrollTarget = document.getElementById(scrollTargetId);
       if (!scrollTarget) return;
 
@@ -89,25 +113,33 @@ export function PaginationControls({
         ) : (
           <span />
         )}
-        <Pagination className="mx-0 w-auto justify-end">
+        <Pagination
+          aria-label={paginationLabel}
+          className="mx-0 w-auto justify-end"
+        >
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
                 aria-label={previousLabel}
-                className="size-9 px-0"
+                className={cn("size-9 px-0", classNames?.directionButton)}
                 disabled={currentPage <= 1}
                 onClick={() => changePage(currentPage - 1)}
               />
             </PaginationItem>
             <PaginationItem>
-              <span className="flex h-9 min-w-10 items-center justify-center text-xs font-medium tabular-nums text-slate-700 dark:text-slate-300">
+              <span
+                className={cn(
+                  "flex h-9 min-w-10 items-center justify-center text-xs font-medium tabular-nums text-slate-700 dark:text-slate-300",
+                  classNames?.pageStatus,
+                )}
+              >
                 {currentPage}/{safeTotalPages}
               </span>
             </PaginationItem>
             <PaginationItem>
               <PaginationNext
                 aria-label={nextLabel}
-                className="size-9 px-0"
+                className={cn("size-9 px-0", classNames?.directionButton)}
                 disabled={currentPage >= safeTotalPages}
                 onClick={() => changePage(currentPage + 1)}
               />
@@ -152,12 +184,19 @@ export function PaginationControls({
           </label>
         ) : null}
       </div>
-      <Pagination className="mx-0 min-w-0 max-w-full justify-start sm:hidden">
-        <PaginationContent className="w-full justify-between">
+
+      <Pagination
+        aria-label={paginationLabel}
+        className="mx-0 min-w-0 max-w-full justify-start sm:hidden"
+      >
+        <PaginationContent className="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-1">
           <PaginationItem className="flex min-w-0 flex-1">
             <PaginationPrevious
               aria-label={previousLabel}
-              className="h-11 w-full min-w-0 px-2"
+              className={cn(
+                "h-11 w-full min-w-0 whitespace-nowrap px-1 text-xs",
+                classNames?.directionButton,
+              )}
               disabled={currentPage <= 1}
               onClick={() => changePage(currentPage - 1)}
             >
@@ -165,14 +204,22 @@ export function PaginationControls({
             </PaginationPrevious>
           </PaginationItem>
           <PaginationItem className="shrink-0">
-            <span className="flex h-11 min-w-14 items-center justify-center text-sm font-medium tabular-nums text-slate-700 dark:text-slate-300">
+            <span
+              className={cn(
+                "flex h-11 min-w-10 items-center justify-center px-1 text-xs font-medium tabular-nums text-slate-700 dark:text-slate-300",
+                classNames?.pageStatus,
+              )}
+            >
               {currentPage}/{safeTotalPages}
             </span>
           </PaginationItem>
           <PaginationItem className="flex min-w-0 flex-1">
             <PaginationNext
               aria-label={nextLabel}
-              className="h-11 w-full min-w-0 px-2"
+              className={cn(
+                "h-11 w-full min-w-0 whitespace-nowrap px-1 text-xs",
+                classNames?.directionButton,
+              )}
               disabled={currentPage >= safeTotalPages}
               onClick={() => changePage(currentPage + 1)}
             >
@@ -181,20 +228,34 @@ export function PaginationControls({
           </PaginationItem>
         </PaginationContent>
       </Pagination>
-      <Pagination className="mx-0 hidden min-w-0 max-w-full justify-start overflow-x-auto pb-1 sm:flex xl:w-auto xl:justify-end">
+
+      <Pagination
+        aria-label={paginationLabel}
+        className="mx-0 hidden min-w-0 max-w-full justify-start overflow-x-auto pb-1 sm:flex xl:w-auto xl:justify-end"
+      >
         <PaginationContent className="min-w-max">
           <PaginationItem>
             <PaginationPrevious
+              aria-label={previousLabel}
+              className={cn(
+                !showDesktopDirectionLabels && "size-9 px-0",
+                classNames?.directionButton,
+              )}
               disabled={currentPage <= 1}
               onClick={() => changePage(currentPage - 1)}
             >
-              {previousLabel}
+              {showDesktopDirectionLabels ? previousLabel : null}
             </PaginationPrevious>
           </PaginationItem>
           {pages.map((item) => (
             <PaginationItem key={item}>
               {typeof item === "number" ? (
                 <PaginationButton
+                  aria-label={pageLabel?.(item)}
+                  className={cn(
+                    classNames?.pageButton,
+                    item === currentPage && classNames?.activePageButton,
+                  )}
                   isActive={item === currentPage}
                   onClick={() => changePage(item)}
                 >
@@ -207,10 +268,15 @@ export function PaginationControls({
           ))}
           <PaginationItem>
             <PaginationNext
+              aria-label={nextLabel}
+              className={cn(
+                !showDesktopDirectionLabels && "size-9 px-0",
+                classNames?.directionButton,
+              )}
               disabled={currentPage >= safeTotalPages}
               onClick={() => changePage(currentPage + 1)}
             >
-              {nextLabel}
+              {showDesktopDirectionLabels ? nextLabel : null}
             </PaginationNext>
           </PaginationItem>
         </PaginationContent>
@@ -219,37 +285,43 @@ export function PaginationControls({
   );
 }
 
-function getPaginationItems(
+export function getPaginationItems(
   currentPage: number,
   totalPages: number,
 ): PaginationPageItem[] {
-  if (totalPages <= 7) {
-    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  const safeTotalPages = Math.max(1, Math.trunc(totalPages));
+  const safeCurrentPage = Math.min(
+    Math.max(1, Math.trunc(currentPage)),
+    safeTotalPages,
+  );
+
+  if (safeTotalPages <= 7) {
+    return Array.from({ length: safeTotalPages }, (_, index) => index + 1);
   }
 
-  if (currentPage <= 4) {
-    return [1, 2, 3, 4, 5, "ellipsis-end", totalPages];
+  if (safeCurrentPage <= 4) {
+    return [1, 2, 3, 4, 5, "ellipsis-end", safeTotalPages];
   }
 
-  if (currentPage >= totalPages - 3) {
+  if (safeCurrentPage >= safeTotalPages - 3) {
     return [
       1,
       "ellipsis-start",
-      totalPages - 4,
-      totalPages - 3,
-      totalPages - 2,
-      totalPages - 1,
-      totalPages,
+      safeTotalPages - 4,
+      safeTotalPages - 3,
+      safeTotalPages - 2,
+      safeTotalPages - 1,
+      safeTotalPages,
     ];
   }
 
   return [
     1,
     "ellipsis-start",
-    currentPage - 1,
-    currentPage,
-    currentPage + 1,
+    safeCurrentPage - 1,
+    safeCurrentPage,
+    safeCurrentPage + 1,
     "ellipsis-end",
-    totalPages,
+    safeTotalPages,
   ];
 }

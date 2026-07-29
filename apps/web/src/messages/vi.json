@@ -624,12 +624,37 @@
           "name": "Cảm biến áp suất lốp van ngoài Bluetooth"
         }
       },
-      "itemCount": "Có {count} sản phẩm",
+      "itemCount": "Có <highlight>{count}</highlight> sản phẩm",
+      "filterTitle": "Bộ lọc",
+      "closeFilter": "Đóng bộ lọc",
+      "searchLabel": "Tìm sản phẩm",
       "searchPlaceholder": "Tìm kiếm sản phẩm, mã sản phẩm...",
+      "categoriesTitle": "Danh mục",
+      "priceTitle": "Mức giá",
+      "priceRanges": {
+        "all": "Tất cả mức giá",
+        "under5": "Dưới 5 triệu",
+        "5to10": "5 - 10 triệu",
+        "10to20": "10 - 20 triệu",
+        "over20": "Trên 20 triệu"
+      },
+      "mobileFilterTrigger": "Bộ lọc",
+      "sortLabel": "Sắp xếp:",
+      "sortOptions": {
+        "newest": "Mới nhất",
+        "priceAsc": "Giá: Thấp đến Cao",
+        "priceDesc": "Giá: Cao đến Thấp"
+      },
+      "viewGrid": "Chế độ xem dạng lưới",
+      "viewList": "Chế độ xem dạng danh sách",
+      "priceFrom": "Từ",
       "noResultsTitle": "Không tìm thấy sản phẩm nào",
       "noResultsDesc": "Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc tìm kiếm.",
       "clearSearch": "Xóa tìm kiếm",
+      "clearFilters": "Xóa bộ lọc",
       "pageInfo": "Trang {current} / {total}",
+      "paginationLabel": "Phân trang sản phẩm",
+      "goToPage": "Đến trang {page}",
       "prev": "Trang trước",
       "next": "Trang sau",
       "itemsPerPageLabel": "Hiển thị",

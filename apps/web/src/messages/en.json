@@ -624,12 +624,37 @@
           "name": "Bluetooth External-Valve TPMS"
         }
       },
-      "itemCount": "{count} items",
+      "itemCount": "<highlight>{count}</highlight> items",
+      "filterTitle": "Filters",
+      "closeFilter": "Close filters",
+      "searchLabel": "Search products",
       "searchPlaceholder": "Search products, model code...",
+      "categoriesTitle": "Categories",
+      "priceTitle": "Price",
+      "priceRanges": {
+        "all": "All prices",
+        "under5": "Under 5 million",
+        "5to10": "5 - 10 million",
+        "10to20": "10 - 20 million",
+        "over20": "Over 20 million"
+      },
+      "mobileFilterTrigger": "Filters",
+      "sortLabel": "Sort:",
+      "sortOptions": {
+        "newest": "Newest",
+        "priceAsc": "Price: Low to High",
+        "priceDesc": "Price: High to Low"
+      },
+      "viewGrid": "Grid view",
+      "viewList": "List view",
+      "priceFrom": "From",
       "noResultsTitle": "No products found",
       "noResultsDesc": "Try searching with different keywords or clear your search filter.",
       "clearSearch": "Clear search",
+      "clearFilters": "Clear filters",
       "pageInfo": "Page {current} of {total}",
+      "paginationLabel": "Product pagination",
+      "goToPage": "Go to page {page}",
       "prev": "Previous",
       "next": "Next",
       "itemsPerPageLabel": "Show",
