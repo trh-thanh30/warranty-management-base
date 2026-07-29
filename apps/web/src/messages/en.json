@@ -2126,6 +2126,7 @@
       "error": "Unable to load network locations.",
       "retry": "Try again",
       "empty": "There are no active locations to display yet.",
+      "phone": "Phone",
       "directions": "Get directions",
       "locationType": {
         "dealer": "Authorized Dealer",

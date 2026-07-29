@@ -2166,6 +2166,7 @@
       "error": "Không thể tải dữ liệu mạng lưới.",
       "retry": "Thử lại",
       "empty": "Chưa có địa điểm hoạt động để hiển thị.",
+      "phone": "Điện thoại",
       "directions": "Xem chỉ đường",
       "locationType": {
         "dealer": "Đại lý ủy quyền",

@@ -1,9 +1,6 @@
 "use client";
 
-import type {
-  PublicNetworkLocation,
-  PublicNetworkLocationKind,
-} from "@repo/shared";
+import type { PublicNetworkLocationKind } from "@repo/shared";
 import {
   MAP_MARKER_COLORS,
   SharedMap,
@@ -14,10 +11,10 @@ import {
 } from "@repo/ui/map";
 import { Button } from "@repo/ui/button";
 import { divIcon } from "leaflet";
-import { ExternalLink, Phone } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
-import { Marker, Popup, Tooltip, useMap } from "react-leaflet";
+import { Marker, Tooltip, useMap } from "react-leaflet";
+import { NetworkLocationPopup } from "@/src/components/common/network-location-popup";
 import { useNetworkLocations } from "@/src/hooks/use-network-locations";
 import type { NetworkDirectoryLocation } from "../dealers.types";
 
@@ -86,11 +83,6 @@ export function DealerMap({ activeLocation }: DealerMapProps) {
     }),
     [],
   );
-  const locationTypeLabel = (location: PublicNetworkLocation) =>
-    location.kind === "DEALER"
-      ? t("locationType.dealer")
-      : t("locationType.serviceCenter");
-
   return (
     <div
       role="region"
@@ -142,47 +134,15 @@ export function DealerMap({ activeLocation }: DealerMapProps) {
               <Tooltip direction="top" offset={[0, -10]} opacity={0.95}>
                 {location.name}
               </Tooltip>
-              <Popup>
-                <div className="min-w-52 space-y-2">
-                  <span
-                    className="inline-flex rounded-sm px-2 py-1 text-xs font-semibold uppercase tracking-wider text-white"
-                    style={{
-                      backgroundColor: markerColorByKind[location.kind],
-                    }}
-                  >
-                    {locationTypeLabel(location)}
-                  </span>
-                  <p className="m-0 text-sm font-semibold uppercase leading-snug text-deep-black">
-                    {location.name}
-                  </p>
-                  <p className="m-0 text-xs leading-relaxed text-stone-gray">
-                    {location.address}
-                  </p>
-                  {location.phone ? (
-                    <a
-                      href={`tel:${location.phone}`}
-                      className="flex items-center gap-1.5 text-xs font-medium text-deep-black hover:text-premium-red"
-                    >
-                      <Phone
-                        aria-hidden="true"
-                        className="size-3.5 text-premium-red"
-                      />
-                      <span>
-                        {t("popupPhone")}: {location.phone}
-                      </span>
-                    </a>
-                  ) : null}
-                  <a
-                    href={location.googleMapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-semibold uppercase text-premium-red hover:underline"
-                  >
-                    <span>{t("openGoogleMaps")}</span>
-                    <ExternalLink aria-hidden="true" className="size-3" />
-                  </a>
-                </div>
-              </Popup>
+              <NetworkLocationPopup
+                location={location}
+                translations={{
+                  dealer: t("locationType.dealer"),
+                  serviceCenter: t("locationType.serviceCenter"),
+                  phone: t("popupPhone"),
+                  directions: t("openGoogleMaps"),
+                }}
+              />
             </Marker>
           );
         })}

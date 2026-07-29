@@ -90,7 +90,7 @@ test("dealer map uses the shared Vietnam overlay without locking horizontal pann
     "SharedMap",
     "VietnamMapOverlay",
     "Marker",
-    "Popup",
+    "NetworkLocationPopup",
     "flyTo",
     "setView",
     "VIETNAM_CENTER",
@@ -148,7 +148,7 @@ test("dealer page loads the combined public network directory and dynamically re
   );
   assert.match(mapSource, /MAP_MARKER_COLORS\.dealer/);
   assert.match(mapSource, /MAP_MARKER_COLORS\.serviceCenter/);
-  assert.match(mapSource, /href=\{location\.googleMapsUrl\}/);
+  assert.match(mapSource, /<NetworkLocationPopup/);
   assert.doesNotMatch(viewSource, /openstreetmap\.org\/export\/embed/);
 });
 
