@@ -516,8 +516,14 @@ test("API runtime excludes migration and unused build tooling", async () => {
     "brace-expansion@1": "1.1.16",
     "brace-expansion@2": "2.1.2",
     "brace-expansion@5": "5.0.8",
+    "cross-spawn@7": "7.0.6",
+    "fast-uri@3": "3.1.4",
     "form-data": "4.0.6",
+    "glob@10": "10.5.0",
+    hono: "4.12.25",
     "js-yaml": "4.3.0",
+    "minimatch@3": "3.1.4",
+    "minimatch@9": "9.0.7",
     multer: "2.2.0",
     picomatch: "4.0.4",
     postcss: "8.5.18",
@@ -528,23 +534,44 @@ test("API runtime excludes migration and unused build tooling", async () => {
   }
 });
 
+test("API lint scripts avoid brace globs that are unstable across minimatch versions", async () => {
+  const apiPackage = JSON.parse(
+    await readFile(path.join(repoRoot, "apps", "api", "package.json"), "utf8"),
+  );
+
+  for (const scriptName of ["lint", "lint:fix", "lint:strict"]) {
+    const lintScript = apiPackage.scripts[scriptName];
+
+    assert.doesNotMatch(
+      lintScript,
+      /\{src,apps,libs,test\}/,
+      `${scriptName} must use explicit source globs`,
+    );
+    assert.match(lintScript, /src\/\*\*\/\*\.ts/);
+    assert.match(lintScript, /test\/\*\*\/\*\.ts/);
+  }
+});
+
 test("database migrations use a dedicated disposable image", async () => {
-  const [migratorDockerfile, compose, deployWorkflow, publishWorkflow] =
-    await Promise.all([
-      readFile(
-        path.join(repoRoot, "apps", "api-migrator", "Dockerfile"),
-        "utf8",
-      ),
-      readFile(path.join(repoRoot, "docker-compose.prod.yml"), "utf8"),
-      readFile(
-        path.join(repoRoot, ".github", "workflows", "deploy.yml"),
-        "utf8",
-      ),
-      readFile(
-        path.join(repoRoot, ".github", "workflows", "publish-images.yml"),
-        "utf8",
-      ),
-    ]);
+  const [
+    migratorDockerfile,
+    migratorPackage,
+    compose,
+    deployWorkflow,
+    publishWorkflow,
+  ] = await Promise.all([
+    readFile(path.join(repoRoot, "apps", "api-migrator", "Dockerfile"), "utf8"),
+    readFile(
+      path.join(repoRoot, "apps", "api-migrator", "package.json"),
+      "utf8",
+    ),
+    readFile(path.join(repoRoot, "docker-compose.prod.yml"), "utf8"),
+    readFile(path.join(repoRoot, ".github", "workflows", "deploy.yml"), "utf8"),
+    readFile(
+      path.join(repoRoot, ".github", "workflows", "publish-images.yml"),
+      "utf8",
+    ),
+  ]);
 
   assert.match(
     migratorDockerfile,
@@ -558,6 +585,17 @@ test("database migrations use a dedicated disposable image", async () => {
     migratorDockerfile,
     /pnpm --filter @repo\/api-migrator rebuild @prisma\/engines prisma/,
   );
+  assert.match(migratorDockerfile, /FROM node:22-alpine AS builder/);
+  assert.match(migratorDockerfile, /FROM node:22-alpine AS runner/);
+  assert.match(
+    migratorDockerfile,
+    /COPY --from=builder .*\/app\/node_modules .*\/node_modules/,
+  );
+  assert.match(
+    migratorDockerfile,
+    /rm -rf \/usr\/local\/lib\/node_modules\/npm \/usr\/local\/lib\/node_modules\/corepack/,
+  );
+  assert.match(JSON.parse(migratorPackage).dependencies.prisma, /^\^7\.9\./);
   assert.match(compose, /^\s{2}migrate:\s*$/m);
   assert.match(compose, /image: \$\{MIGRATOR_IMAGE[^}]*\}:\$\{IMAGE_TAG/);
   assert.match(deployWorkflow, /docker compose .* run --rm migrate/);

@@ -4,6 +4,6 @@
   "private": true,
   "license": "UNLICENSED",
   "dependencies": {
-    "prisma": "^7.4.1"
+    "prisma": "^7.9.1"
   }
 }
