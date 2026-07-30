@@ -77,6 +77,20 @@ jobs:
             exit 1
           fi
 
+      - name: Check out deployment configuration
+        uses: actions/checkout@v4
+
+      - name: Synchronize production Compose file
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          source: docker-compose.prod.yml
+          target: ${{ secrets.DEPLOY_PATH }}
+          overwrite: true
+
       - name: Deploy over SSH
         uses: appleboy/ssh-action@v1.2.0
         env:
@@ -131,6 +145,11 @@ jobs:
               sed -i "s#^IMAGE_TAG=.*#IMAGE_TAG=$IMAGE_TAG#" .env.production
             else
               printf 'IMAGE_TAG=%s\n' "$IMAGE_TAG" >> .env.production
+            fi
+
+            if ! docker compose -f docker-compose.prod.yml --env-file .env.production config --services | grep -qx migrate; then
+              echo "The synchronized production Compose file does not define the migrate service."
+              exit 1
             fi
 
             docker compose -f docker-compose.prod.yml --env-file .env.production pull migrate api worker-email web admin
