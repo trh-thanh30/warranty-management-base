@@ -6,9 +6,11 @@ import { MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import { useState } from "react";
 import { DealerFilters } from "./components/dealer-filters";
 import { DealerList } from "./components/dealer-list";
 import { DealerRecruitmentCta } from "./components/dealer-recruitment-cta";
+import type { NetworkDirectoryLocation } from "./dealers.types";
 import { getNetworkLocationKey } from "./dealers.utils";
 import { useDealerDirectory } from "./use-dealer-directory";
 
@@ -30,6 +32,7 @@ const DealerMap = dynamic(
 
 export function DealersView() {
   const t = useTranslations("DealersPage");
+  const [mapSelectionRequestId, setMapSelectionRequestId] = useState(0);
   const {
     activeLocation,
     districts,
@@ -56,6 +59,11 @@ export function DealersView() {
     setSelectedDistrict,
     wardsLoading,
   } = useDealerDirectory();
+
+  const handleSelectLocation = (location: NetworkDirectoryLocation) => {
+    setSelectedLocation(location);
+    setMapSelectionRequestId((requestId) => requestId + 1);
+  };
 
   return (
     <main className="min-h-screen bg-surface-muted text-deep-black">
@@ -117,7 +125,7 @@ export function DealersView() {
                 locations={locations}
                 onLoadMore={loadMore}
                 onRetry={retry}
-                onSelectLocation={setSelectedLocation}
+                onSelectLocation={handleSelectLocation}
                 translations={{
                   dealerBadge: t("locationType.dealer"),
                   directions: t("directions"),
@@ -150,7 +158,10 @@ export function DealersView() {
               </div>
 
               <div className="flex-1 w-full relative bg-light-gray">
-                <DealerMap activeLocation={activeLocation} />
+                <DealerMap
+                  activeLocation={activeLocation}
+                  selectionRequestId={mapSelectionRequestId}
+                />
               </div>
             </Card>
           </div>

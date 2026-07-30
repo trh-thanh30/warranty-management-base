@@ -159,20 +159,22 @@ export function DealerList({
                 className="h-auto min-h-11 w-full items-start justify-start whitespace-normal p-0 text-left hover:bg-transparent"
               >
                 <span className="w-full space-y-3">
-                  <Badge
-                    variant="secondary"
-                    className={`rounded-sm text-xs font-semibold uppercase tracking-wider ${
-                      isDealer
-                        ? "bg-premium-red/10 text-premium-red"
-                        : "bg-service-center-soft text-service-center-text"
-                    }`}
-                  >
-                    {isDealer
-                      ? translations.dealerBadge
-                      : translations.serviceCenterBadge}
-                  </Badge>
-                  <span className="block text-sm font-semibold uppercase leading-snug text-deep-black sm:text-base">
-                    {location.name}
+                  <span className="flex items-center justify-between gap-3">
+                    <span className="min-w-0 text-sm font-semibold uppercase leading-snug text-deep-black sm:text-base">
+                      {location.name}
+                    </span>
+                    <Badge
+                      variant="secondary"
+                      className={`shrink-0 rounded-sm text-xs font-semibold uppercase tracking-wider ${
+                        isDealer
+                          ? "bg-premium-red/10 text-premium-red"
+                          : "bg-service-center-soft text-service-center-text"
+                      }`}
+                    >
+                      {isDealer
+                        ? translations.dealerBadge
+                        : translations.serviceCenterBadge}
+                    </Badge>
                   </span>
                   <span className="block space-y-1.5 text-xs font-medium text-stone-gray">
                     <span className="flex items-start gap-2">

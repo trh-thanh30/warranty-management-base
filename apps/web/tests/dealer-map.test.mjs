@@ -171,6 +171,24 @@ test("network locations have list separators and accessible pulsing map markers"
   );
 });
 
+test("selecting a directory card flies to its marker and opens the shared popup", async () => {
+  const [viewSource, mapSource] = await Promise.all([
+    readFile(dealersViewPath, "utf8"),
+    readFile(dealerMapPath, "utf8"),
+  ]);
+
+  assert.match(viewSource, /mapSelectionRequestId/);
+  assert.match(viewSource, /handleSelectLocation/);
+  assert.match(
+    viewSource,
+    /<DealerMap[\s\S]*selectionRequestId=\{mapSelectionRequestId\}/,
+  );
+  assert.match(mapSource, /selectionRequestId/);
+  assert.match(mapSource, /markerRef\.current\?\.openPopup\(\)/);
+  assert.match(mapSource, /map\.flyTo/);
+  assert.match(mapSource, /<NetworkLocationPopup/);
+});
+
 test("dealer page loads the combined public network directory and dynamically renders the Leaflet map", async () => {
   const [directorySource, viewSource, mapSource, serviceSource] =
     await Promise.all([
@@ -192,7 +210,7 @@ test("dealer page loads the combined public network directory and dynamically re
   assert.match(viewSource, /useDealerDirectory/);
   assert.match(viewSource, /dynamic\(/);
   assert.match(viewSource, /ssr:\s*false/);
-  assert.match(viewSource, /<DealerMap activeLocation=\{activeLocation\}/);
+  assert.match(viewSource, /<DealerMap\s+activeLocation=\{activeLocation\}/);
   assert.equal(
     (viewSource.match(/<Card className="[^"]*\brounded-sm\b/g) ?? []).length,
     2,
@@ -317,6 +335,10 @@ test("dealer directory composes shared UI controls instead of native form contro
   assert.match(listSource, /location\.kind === "DEALER"/);
   assert.match(listSource, /translations\.dealerBadge/);
   assert.match(listSource, /translations\.serviceCenterBadge/);
+  assert.match(
+    listSource,
+    /flex items-center justify-between gap-3[\s\S]*location\.name[\s\S]*shrink-0 rounded-sm/,
+  );
   assert.match(listSource, /data-lenis-prevent/);
   assert.match(listSource, /min-h-0/);
   assert.match(listSource, /overscroll-y-contain/);
