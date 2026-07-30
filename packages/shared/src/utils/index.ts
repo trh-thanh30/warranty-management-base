@@ -5,3 +5,4 @@ export * from "./geo.ts";
 export * from "./invariant.ts";
 export * from "./media.ts";
 export * from "./object.ts";
+export * from "./phone.ts";

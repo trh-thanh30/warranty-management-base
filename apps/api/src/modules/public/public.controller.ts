@@ -5,7 +5,7 @@ import { LookupWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/look
 import { CreatePublicWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-public-warranty-activation-request.dto';
 import { CreateWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-warranty-activation-request.use-case';
 import { CreateWarrantyClaimDto } from '@/modules/warranty-claims/dto/create-warranty-claim.dto';
-import { CreateWarrantyClaimUseCase } from '@/modules/warranty-claims/use-cases/create-warranty-claim.use-case';
+import { CreatePublicWarrantyClaimUseCase } from '@/modules/public/use-cases/create-public-warranty-claim.use-case';
 import { PublicListServiceCentersUseCase } from '@/modules/public/use-cases/public-list-service-centers.use-case';
 import { PublicListNetworkLocationsUseCase } from '@/modules/public/use-cases/public-list-network-locations.use-case';
 import { PublicListDealersUseCase } from '@/modules/public/use-cases/public-list-dealers.use-case';
@@ -32,7 +32,7 @@ export class PublicController {
   constructor(
     private readonly lookupWarrantyByCodeUseCase: LookupWarrantyByCodeUseCase,
     private readonly createWarrantyActivationRequestUseCase: CreateWarrantyActivationRequestUseCase,
-    private readonly createWarrantyClaimUseCase: CreateWarrantyClaimUseCase,
+    private readonly createPublicWarrantyClaimUseCase: CreatePublicWarrantyClaimUseCase,
     private readonly publicLookupWarrantyClaimByCodeUseCase: PublicLookupWarrantyClaimByCodeUseCase,
     private readonly publicLookupWarrantyClaimsByWarrantyCodeUseCase: PublicLookupWarrantyClaimsByWarrantyCodeUseCase,
     private readonly publicListServiceCentersUseCase: PublicListServiceCentersUseCase,
@@ -60,9 +60,10 @@ export class PublicController {
     return this.createWarrantyActivationRequestUseCase.execute(dto);
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('warranty-claims')
   createWarrantyClaim(@Body() dto: CreateWarrantyClaimDto) {
-    return this.createWarrantyClaimUseCase.execute(dto);
+    return this.createPublicWarrantyClaimUseCase.execute(dto);
   }
 
   @Get('warranty-claims/by-code/:claimCode')

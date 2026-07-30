@@ -1,0 +1,257 @@
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  isWarrantyClaimIssueOption,
+  WARRANTY_CLAIM_ISSUE_OPTIONS,
+} from "@repo/shared/constants";
+import type {
+  CreateWarrantyClaimBody,
+  PublicWarrantyClaimSummary,
+  WarrantyClaimIssueOption,
+} from "@repo/shared";
+import { Button } from "@repo/ui/button";
+import { Input } from "@repo/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@repo/ui/select";
+import { Textarea } from "@repo/ui/textarea";
+import { Send } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useMemo } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/src/components/common/form";
+import { formControlFocusClassName } from "@/src/components/common/form-control.constants";
+import {
+  getWarrantyClaimRequestErrorKind,
+  type WarrantyClaimRequestErrorKind,
+} from "@/src/hooks/use-warranty-claim-request";
+import {
+  createWarrantyClaimRequestFormSchema,
+  type WarrantyClaimRequestFormValues,
+} from "../warranty-claim-request-form.schema";
+import { toWarrantyClaimRequestBody } from "../warranty-claim-request.utils";
+
+type WarrantyClaimRequestFormProps = {
+  errorKind: WarrantyClaimRequestErrorKind | null;
+  isPending: boolean;
+  onResetError: () => void;
+  onSubmit: (
+    body: CreateWarrantyClaimBody,
+  ) => Promise<PublicWarrantyClaimSummary>;
+};
+
+export function WarrantyClaimRequestForm({
+  errorKind,
+  isPending,
+  onResetError,
+  onSubmit,
+}: WarrantyClaimRequestFormProps) {
+  const t = useTranslations("Warranty.request");
+  const schema = useMemo(
+    () =>
+      createWarrantyClaimRequestFormSchema({
+        detailsInvalid: t("validation.detailsInvalid"),
+        issueRequired: t("validation.issueRequired"),
+        nameInvalid: t("validation.nameInvalid"),
+        phoneInvalid: t("validation.phoneInvalid"),
+        warrantyCodeInvalid: t("validation.warrantyCodeInvalid"),
+      }),
+    [t],
+  );
+  const form = useForm<WarrantyClaimRequestFormValues>({
+    defaultValues: {
+      issue: undefined,
+      issueDetail: "",
+      requesterName: "",
+      requesterPhone: "",
+      warrantyCode: "",
+    },
+    resolver: zodResolver(schema),
+  });
+  const issueTitles = {
+    bubble: t("fields.issue.options.bubble"),
+    fade: t("fields.issue.options.fade"),
+    other: t("fields.issue.options.other"),
+    scratch: t("fields.issue.options.scratch"),
+  } satisfies Record<WarrantyClaimIssueOption, string>;
+
+  useEffect(() => {
+    const subscription = form.watch(() => {
+      if (errorKind) onResetError();
+    });
+
+    return () => subscription.unsubscribe();
+  }, [errorKind, form, onResetError]);
+
+  const handleSubmit = async (values: WarrantyClaimRequestFormValues) => {
+    try {
+      await onSubmit(toWarrantyClaimRequestBody(values, issueTitles));
+      toast.success(t("success.title"));
+      form.reset();
+    } catch (error) {
+      toast.error(t(`errors.${getWarrantyClaimRequestErrorKind(error)}`));
+    }
+  };
+
+  return (
+    <Form {...form}>
+      <form className="space-y-6" onSubmit={form.handleSubmit(handleSubmit)}>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="requesterName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-semibold uppercase text-deep-black">
+                  {t("fields.customerName.label")}
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    autoComplete="name"
+                    className={`h-12 rounded-md border-border-gray bg-white ${formControlFocusClassName}`}
+                    maxLength={255}
+                    placeholder={t("fields.customerName.placeholder")}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="requesterPhone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-semibold uppercase text-deep-black">
+                  {t("fields.phone.label")}
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    autoComplete="tel"
+                    className={`h-12 rounded-md border-border-gray bg-white ${formControlFocusClassName}`}
+                    inputMode="tel"
+                    maxLength={32}
+                    placeholder={t("fields.phone.placeholder")}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="warrantyCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-semibold uppercase text-deep-black">
+                  {t("fields.reference.label")}
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    autoComplete="off"
+                    className={`h-12 rounded-md border-border-gray bg-white font-mono uppercase ${formControlFocusClassName}`}
+                    maxLength={64}
+                    placeholder={t("fields.reference.placeholder")}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="issue"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-semibold uppercase text-deep-black">
+                  {t("fields.issue.label")}
+                </FormLabel>
+                <Select
+                  onValueChange={(value) => {
+                    if (isWarrantyClaimIssueOption(value)) {
+                      field.onChange(value);
+                    }
+                  }}
+                  value={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger
+                      className={`h-12 rounded-md border-border-gray bg-white ${formControlFocusClassName}`}
+                    >
+                      <SelectValue
+                        placeholder={t("fields.issue.placeholder")}
+                      />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {WARRANTY_CLAIM_ISSUE_OPTIONS.map((issue) => (
+                      <SelectItem key={issue} value={issue}>
+                        {issueTitles[issue]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="issueDetail"
+            render={({ field }) => (
+              <FormItem className="sm:col-span-2">
+                <FormLabel className="text-sm font-semibold uppercase text-deep-black">
+                  {t("fields.details.label")}
+                </FormLabel>
+                <FormControl>
+                  <Textarea
+                    className={`min-h-32 resize-y rounded-md border-border-gray bg-white ${formControlFocusClassName}`}
+                    maxLength={4000}
+                    placeholder={t("fields.details.placeholder")}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <Button
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-md bg-premium-red text-sm font-semibold uppercase text-white shadow-md transition-colors hover:bg-warm-red"
+          disabled={isPending}
+          type="submit"
+        >
+          <span>{isPending ? t("submitting") : t("submit")}</span>
+          <Send className="size-4" aria-hidden="true" />
+        </Button>
+
+        {errorKind ? (
+          <p role="alert" className="text-sm font-medium text-premium-red">
+            {t(`errors.${errorKind}`)}
+          </p>
+        ) : null}
+      </form>
+    </Form>
+  );
+}

@@ -432,3 +432,16 @@ describe('Public warranty activation request endpoint', () => {
     );
   });
 });
+
+describe('Public warranty claim endpoint', () => {
+  it('rate limits public warranty claim submissions', () => {
+    const controllerSource = readFileSync(
+      require.resolve('@/modules/public/public.controller'),
+      'utf8',
+    );
+
+    expect(controllerSource).toMatch(
+      /@Throttle\(\{\s*default:\s*\{\s*limit:\s*5,\s*ttl:\s*60_000\s*\}\s*\}\)\s*@Post\('warranty-claims'\)/,
+    );
+  });
+});

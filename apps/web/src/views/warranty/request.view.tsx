@@ -1,134 +1,134 @@
 "use client";
 
-import { Container } from "@/src/components/common/container";
-import { formControlFocusClassName } from "@/src/components/common/form-control.constants";
-import { Input } from "@repo/ui/input";
-import { CheckCircle2 } from "lucide-react";
+import { Badge } from "@repo/ui/badge";
+import { Button } from "@repo/ui/button";
+import { Check, CheckCircle2, Clock3, Copy } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { warrantyIssueOptions } from "./warranty.constants";
+import { Container } from "@/src/components/common/container";
+import { useWarrantyClaimRequest } from "@/src/hooks/use-warranty-claim-request";
+import { WarrantyClaimRequestForm } from "./components/warranty-claim-request-form";
 
 export function WarrantyClaimRequestView() {
   const t = useTranslations("Warranty.request");
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [ticketId, setTicketId] = useState("");
+  const [isCodeCopied, setIsCodeCopied] = useState(false);
+  const {
+    data: claim,
+    errorKind,
+    isPending,
+    reset,
+    submit,
+  } = useWarrantyClaimRequest();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setTicketId(`REQ-${Math.floor(100000 + Math.random() * 900000)}`);
-    setIsSubmitted(true);
+  const copyClaimCode = async () => {
+    if (!claim) return;
+
+    try {
+      await navigator.clipboard.writeText(claim.claimCode);
+      setIsCodeCopied(true);
+      window.setTimeout(() => setIsCodeCopied(false), 2000);
+    } catch {
+      setIsCodeCopied(false);
+    }
+  };
+
+  const resetForm = () => {
+    setIsCodeCopied(false);
+    reset();
   };
 
   return (
-    <main className="min-h-screen bg-surface-muted py-12 sm:py-20 text-deep-black">
-      <Container className="max-w-250 space-y-12">
-        <div className="text-center space-y-4">
-          <span className="inline-block rounded-md border border-premium-red/30 bg-premium-red/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-premium-red">
+    <main className="min-h-screen bg-white py-12 text-deep-black sm:py-20">
+      <Container className="max-w-[1000px] space-y-10">
+        <div className="space-y-4 text-center">
+          <span className="text-sm font-semibold uppercase text-premium-red">
             {t("eyebrow")}
           </span>
-          <h1 className="text-3xl sm:text-5xl font-condensed font-semibold uppercase tracking-wider">
+          <h1 className="font-condensed text-3xl font-semibold uppercase sm:text-4xl">
             {t("title")}
           </h1>
-          <p className="text-base sm:text-lg text-stone-gray font-normal max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-base font-normal text-stone-gray sm:text-lg">
             {t("description")}
           </p>
         </div>
 
-        {isSubmitted ? (
-          <div className="animate-in space-y-6 rounded-md border-2 border-premium-red bg-white p-8 text-center shadow-2xl duration-300 zoom-in-95 sm:p-12">
-            <div className="mx-auto flex size-20 items-center justify-center rounded-md bg-premium-red/10 text-premium-red">
-              <CheckCircle2 className="size-10" />
+        {claim ? (
+          <section className="animate-in mx-auto max-w-2xl space-y-7 text-center zoom-in-95">
+            <div className="mx-auto flex size-14 items-center justify-center rounded-md bg-premium-red/10 text-premium-red">
+              <CheckCircle2 className="size-7" aria-hidden="true" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-semibold uppercase text-deep-black">
-              {t("success.title")}
-            </h2>
-            <p className="text-base text-stone-gray font-normal max-w-lg mx-auto">
-              {t.rich("success.description", {
-                ticket: () => (
-                  <strong className="text-premium-red font-mono text-xl">
-                    {ticketId}
-                  </strong>
-                ),
-              })}
-            </p>
-            <button
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold uppercase text-deep-black sm:text-2xl">
+                {t("success.title")}
+              </h2>
+              <p className="mx-auto max-w-xl text-base font-normal text-stone-gray">
+                {t("success.description")}
+              </p>
+            </div>
+
+            <div className="grid gap-5 border-y border-border-gray py-5 text-left sm:grid-cols-2 sm:gap-8">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase text-stone-gray">
+                  {t("success.claimCodeLabel")}
+                </p>
+                <div className="mt-2 flex items-center gap-2">
+                  <p className="min-w-0 break-all font-mono text-base font-semibold text-deep-black">
+                    {claim.claimCode}
+                  </p>
+                  <Button
+                    aria-label={
+                      isCodeCopied ? t("success.copied") : t("success.copyCode")
+                    }
+                    className="size-9 shrink-0 rounded-md border-border-gray p-0 text-stone-gray hover:border-premium-red hover:bg-premium-red/5 hover:text-premium-red"
+                    onClick={() => void copyClaimCode()}
+                    title={
+                      isCodeCopied ? t("success.copied") : t("success.copyCode")
+                    }
+                    type="button"
+                    variant="outline"
+                  >
+                    {isCodeCopied ? (
+                      <Check className="size-4" aria-hidden="true" />
+                    ) : (
+                      <Copy className="size-4" aria-hidden="true" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold uppercase text-stone-gray">
+                  {t("success.statusLabel")}
+                </p>
+                <Badge
+                  className="mt-2 gap-2 bg-premium-red/10 px-3 py-1.5 text-premium-red"
+                  variant="destructive"
+                >
+                  <Clock3 className="size-4" aria-hidden="true" />
+                  {claim.status === "SUBMITTED"
+                    ? t("success.submittedStatus")
+                    : claim.status}
+                </Badge>
+              </div>
+            </div>
+
+            <Button
+              className="w-full rounded-md border-premium-red px-8 text-xs font-semibold uppercase text-premium-red transition-colors hover:bg-premium-red hover:text-white sm:w-auto"
+              onClick={resetForm}
               type="button"
-              onClick={() => setIsSubmitted(false)}
-              className="cursor-pointer rounded-md bg-deep-black px-8 py-3.5 text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:bg-premium-red"
+              variant="outline"
             >
               {t("success.reset")}
-            </button>
-          </div>
+            </Button>
+          </section>
         ) : (
           <div className="rounded-md border border-border-gray bg-white p-6 shadow-xl sm:p-10">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid gap-6 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase text-deep-black">
-                    {t("fields.customerName.label")}
-                  </label>
-                  <Input
-                    required
-                    placeholder={t("fields.customerName.placeholder")}
-                    className={`h-12 rounded-md border-border-gray ${formControlFocusClassName}`}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase text-deep-black">
-                    {t("fields.phone.label")}
-                  </label>
-                  <Input
-                    required
-                    placeholder={t("fields.phone.placeholder")}
-                    className={`h-12 rounded-md border-border-gray ${formControlFocusClassName}`}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase text-deep-black">
-                    {t("fields.reference.label")}
-                  </label>
-                  <Input
-                    required
-                    placeholder={t("fields.reference.placeholder")}
-                    className={`h-12 rounded-md border-border-gray ${formControlFocusClassName}`}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase text-deep-black">
-                    {t("fields.issue.label")}
-                  </label>
-                  <select
-                    required
-                    className={`h-12 w-full rounded-md border border-border-gray px-3 text-sm font-medium outline-none ${formControlFocusClassName}`}
-                  >
-                    <option value="">{t("fields.issue.placeholder")}</option>
-                    {warrantyIssueOptions.map((issue) => (
-                      <option key={issue} value={issue}>
-                        {t(`fields.issue.options.${issue}`)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase text-deep-black">
-                  {t("fields.details.label")}
-                </label>
-                <textarea
-                  rows={4}
-                  placeholder={t("fields.details.placeholder")}
-                  className={`w-full rounded-md border border-border-gray p-4 text-sm outline-none ${formControlFocusClassName}`}
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full cursor-pointer rounded-md bg-premium-red py-4 text-sm font-semibold uppercase tracking-wider text-white shadow-lg transition-colors hover:bg-warm-red"
-              >
-                {t("submit")}
-              </button>
-            </form>
+            <WarrantyClaimRequestForm
+              errorKind={errorKind}
+              isPending={isPending}
+              onResetError={reset}
+              onSubmit={submit}
+            />
           </div>
         )}
       </Container>

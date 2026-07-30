@@ -1510,10 +1510,32 @@
       "title": "Submit a warranty & Support request",
       "description": "Get help with peeling, bubbles, discoloration, or installation-related issues.",
       "submit": "Submit support request",
+      "submitting": "Submitting request...",
       "success": {
-        "title": "Request submitted!",
-        "description": "Your support ticket is <ticket></ticket>. A FUJITEK technician will contact you within 24 hours.",
+        "title": "Request received",
+        "description": "Your request is awaiting FUJITEK review and processing. Keep the request code for tracking or future support.",
+        "claimCodeLabel": "Request code",
+        "statusLabel": "Status",
+        "submittedStatus": "Submitted",
+        "copyCode": "Copy request code",
+        "copied": "Request code copied",
         "reset": "Submit another request"
+      },
+      "errors": {
+        "alreadyOpen": "This E-Warranty code already has a warranty request being processed.",
+        "invalid": "The request information is invalid. Check it and try again.",
+        "notEligible": "This warranty is inactive, expired, or no longer eligible.",
+        "notFound": "This E-Warranty code was not found.",
+        "ownerMismatch": "The phone number does not match the current warranty owner.",
+        "rateLimit": "You have submitted too many requests. Try again in one minute.",
+        "request": "The warranty request could not be submitted. Please try again later."
+      },
+      "validation": {
+        "detailsInvalid": "Issue details must not exceed 4000 characters.",
+        "issueRequired": "Select the issue you are experiencing.",
+        "nameInvalid": "Enter a valid full name.",
+        "phoneInvalid": "Enter a valid phone number.",
+        "warrantyCodeInvalid": "Enter a valid E-Warranty code."
       },
       "fields": {
         "customerName": {
@@ -1525,8 +1547,8 @@
           "placeholder": "E.g. 0988 123 456"
         },
         "reference": {
-          "label": "License plate / E-Warranty code *",
-          "placeholder": "E.g. 30H-888.88"
+          "label": "E-Warranty code *",
+          "placeholder": "E.g. WM-2026-ABCDEF"
         },
         "issue": {
           "label": "Issue *",

@@ -1510,10 +1510,32 @@
       "title": "Gửi yêu cầu bảo hành & Hỗ trợ",
       "description": "Nhận hỗ trợ cho các vấn đề bong tróc, bọt khí, bay màu hoặc lỗi kỹ thuật thi công.",
       "submit": "Gửi phiếu yêu cầu hỗ trợ",
+      "submitting": "Đang gửi yêu cầu...",
       "success": {
-        "title": "Gửi yêu cầu thành công!",
-        "description": "Mã phiếu hỗ trợ của bạn là <ticket></ticket>. Kỹ thuật viên FUJITEK sẽ liên hệ trong vòng 24 giờ.",
+        "title": "Đã tiếp nhận yêu cầu",
+        "description": "Yêu cầu đang chờ FUJITEK kiểm tra và xử lý. Vui lòng lưu mã yêu cầu để tra cứu hoặc đối chiếu khi cần hỗ trợ.",
+        "claimCodeLabel": "Mã yêu cầu",
+        "statusLabel": "Trạng thái",
+        "submittedStatus": "Đã gửi",
+        "copyCode": "Sao chép mã yêu cầu",
+        "copied": "Đã sao chép mã yêu cầu",
         "reset": "Gửi yêu cầu khác"
+      },
+      "errors": {
+        "alreadyOpen": "Mã E-Warranty này đã có một yêu cầu bảo hành đang được xử lý.",
+        "invalid": "Thông tin yêu cầu chưa hợp lệ. Vui lòng kiểm tra và thử lại.",
+        "notEligible": "Bảo hành này chưa kích hoạt, đã hết hạn hoặc không còn hiệu lực.",
+        "notFound": "Không tìm thấy mã E-Warranty trong hệ thống.",
+        "ownerMismatch": "Số điện thoại không khớp với chủ sở hữu hiện tại của bảo hành.",
+        "rateLimit": "Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau một phút.",
+        "request": "Không thể gửi yêu cầu bảo hành lúc này. Vui lòng thử lại sau."
+      },
+      "validation": {
+        "detailsInvalid": "Mô tả sự cố không được vượt quá 4000 ký tự.",
+        "issueRequired": "Vui lòng chọn vấn đề gặp phải.",
+        "nameInvalid": "Vui lòng nhập họ tên hợp lệ.",
+        "phoneInvalid": "Vui lòng nhập số điện thoại hợp lệ.",
+        "warrantyCodeInvalid": "Vui lòng nhập mã E-Warranty hợp lệ."
       },
       "fields": {
         "customerName": {
@@ -1525,8 +1547,8 @@
           "placeholder": "VD: 0988 123 456"
         },
         "reference": {
-          "label": "Biển số xe / Mã E-Warranty *",
-          "placeholder": "VD: 30H-888.88"
+          "label": "Mã E-Warranty *",
+          "placeholder": "VD: WM-2026-ABCDEF"
         },
         "issue": {
           "label": "Vấn đề gặp phải *",

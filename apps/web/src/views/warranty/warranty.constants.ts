@@ -39,13 +39,6 @@ export const warrantyActions = [
   },
 ] as const;
 
-export const warrantyIssueOptions = [
-  "bubble",
-  "fade",
-  "scratch",
-  "other",
-] as const;
-
 export const demoWarrantyRecord = {
   serial: "BL/BHDT/000199",
   code: "FJ-8899-2026",

@@ -2,6 +2,7 @@ import { BadRequestError, ConflictError } from '@/common/response';
 import { GetVietnamProvinceUseCase } from '@/modules/locations/use-cases/get-vietnam-province.use-case';
 import { ContactSubmissionNotificationService } from '@/modules/contact-submissions/service/contact-submission-notification.service';
 import type { CreateContactSubmissionBody } from '@repo/shared';
+import { normalizePhoneNumber } from '@repo/shared/utils';
 import {
   CONTACT_CONSULTATION_TOPICS,
   CONTACT_SUBMISSION_ERROR_CODES,
@@ -24,7 +25,7 @@ export class CreateContactSubmissionUseCase {
   async execute(input: CreateContactSubmissionBody) {
     const fullName = input.fullName.trim();
     const rawPhone = input.phone.trim();
-    const phone = normalizeContactPhone(rawPhone);
+    const phone = normalizePhoneNumber(rawPhone);
     const content = input.content.trim();
     const consultationTopic = input.consultationTopic;
     const provinceCode = input.provinceCode.trim();
@@ -121,10 +122,6 @@ export class CreateContactSubmissionUseCase {
 
     return toContactSubmissionResponse(submission);
   }
-}
-
-function normalizeContactPhone(phone: string) {
-  return phone.replace(/\D/g, '');
 }
 
 function createPhonePendingError(phone: string) {
