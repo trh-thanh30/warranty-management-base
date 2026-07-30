@@ -1522,6 +1522,8 @@
         "title": "Request received",
         "description": "Your request is awaiting FUJITEK review and processing. Keep the request code for tracking or future support.",
         "claimCodeLabel": "Request code",
+        "issueLabel": "Support issue",
+        "submittedAtLabel": "Submitted at",
         "statusLabel": "Status",
         "submittedStatus": "Submitted",
         "copyCode": "Copy request code",

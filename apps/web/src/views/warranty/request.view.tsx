@@ -1,17 +1,28 @@
 "use client";
 
-import { Badge } from "@repo/ui/badge";
-import { Button } from "@repo/ui/button";
-import { Check, CheckCircle2, Clock3, Copy } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
 import { Container } from "@/src/components/common/container";
+import { WarrantyResultRow } from "@/src/components/common/warranty-result-row";
 import { useWarrantyClaimRequest } from "@/src/hooks/use-warranty-claim-request";
 import { Link } from "@/src/i18n/navigation";
+import { formatDate } from "@repo/shared";
+import { Badge } from "@repo/ui/badge";
+import { Button } from "@repo/ui/button";
+import {
+  Calendar,
+  Check,
+  CheckCircle2,
+  CircleAlert,
+  Clock3,
+  Copy,
+  Hash,
+} from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { useState } from "react";
 import { WarrantyClaimRequestForm } from "./components/warranty-claim-request-form";
 
 export function WarrantyClaimRequestView() {
   const t = useTranslations("Warranty.request");
+  const locale = useLocale();
   const [isCodeCopied, setIsCodeCopied] = useState(false);
   const {
     data: claim,
@@ -54,69 +65,92 @@ export function WarrantyClaimRequestView() {
         </div>
 
         {claim ? (
-          <section className="animate-in mx-auto max-w-2xl space-y-7 text-center zoom-in-95">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-md bg-premium-red/10 text-premium-red">
-              <CheckCircle2 className="size-7" aria-hidden="true" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-xl font-semibold uppercase text-deep-black sm:text-2xl">
-                {t("success.title")}
-              </h2>
-              <p className="mx-auto max-w-xl text-base font-normal text-stone-gray">
-                {t("success.description")}
-              </p>
+          <section
+            aria-live="polite"
+            className="animate-in mx-auto max-w-3xl zoom-in-95"
+          >
+            <div className="border-b border-border-gray pb-6 text-center">
+              <span className="mx-auto flex size-11 items-center justify-center rounded-full bg-premium-red/10 text-premium-red">
+                <CheckCircle2 className="size-6" aria-hidden="true" />
+              </span>
+              <div className="mt-4 min-w-0">
+                <h2 className="text-xl font-semibold uppercase text-deep-black sm:text-2xl">
+                  {t("success.title")}
+                </h2>
+                <p className="mt-2 max-w-2xl text-base leading-7 text-stone-gray">
+                  {t("success.description")}
+                </p>
+              </div>
             </div>
 
-            <div className="grid gap-5 border-y border-border-gray py-5 text-left sm:grid-cols-2 sm:gap-8">
-              <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase text-stone-gray">
-                  {t("success.claimCodeLabel")}
-                </p>
-                <div className="mt-2 flex items-center gap-2">
-                  <p className="min-w-0 break-all font-mono text-base font-semibold text-deep-black">
-                    {claim.claimCode}
-                  </p>
-                  <Button
-                    aria-label={
-                      isCodeCopied ? t("success.copied") : t("success.copyCode")
-                    }
-                    className="size-9 shrink-0 rounded-md border-border-gray p-0 text-stone-gray hover:border-premium-red hover:bg-premium-red/5 hover:text-premium-red"
-                    onClick={() => void copyClaimCode()}
-                    title={
-                      isCodeCopied ? t("success.copied") : t("success.copyCode")
-                    }
-                    type="button"
-                    variant="outline"
+            <div className="divide-y divide-border-gray">
+              <WarrantyResultRow
+                icon={<Hash className="size-4" aria-hidden="true" />}
+                label={t("success.claimCodeLabel")}
+                value={
+                  <div className="flex items-center justify-start gap-2 sm:justify-end">
+                    <p className="min-w-0 break-all font-mono text-base font-semibold text-deep-black">
+                      {claim.claimCode}
+                    </p>
+                    <Button
+                      aria-label={
+                        isCodeCopied
+                          ? t("success.copied")
+                          : t("success.copyCode")
+                      }
+                      className="size-9 shrink-0 rounded-md border-border-gray p-0 text-stone-gray hover:border-premium-red hover:bg-premium-red/5 hover:text-premium-red"
+                      onClick={() => void copyClaimCode()}
+                      title={
+                        isCodeCopied
+                          ? t("success.copied")
+                          : t("success.copyCode")
+                      }
+                      type="button"
+                      variant="outline"
+                    >
+                      {isCodeCopied ? (
+                        <Check className="size-4" aria-hidden="true" />
+                      ) : (
+                        <Copy className="size-4" aria-hidden="true" />
+                      )}
+                    </Button>
+                  </div>
+                }
+              />
+              <WarrantyResultRow
+                icon={<CircleAlert className="size-4" aria-hidden="true" />}
+                label={t("success.issueLabel")}
+                value={claim.issueTitle}
+              />
+              <WarrantyResultRow
+                icon={<Calendar className="size-4" aria-hidden="true" />}
+                label={t("success.submittedAtLabel")}
+                value={formatDate(claim.submittedAt, {
+                  locale,
+                  showTime: true,
+                })}
+              />
+              <WarrantyResultRow
+                icon={<Clock3 className="size-4" aria-hidden="true" />}
+                label={t("success.statusLabel")}
+                value={
+                  <Badge
+                    className="gap-2 bg-premium-red/10 px-3 py-1.5 text-premium-red"
+                    variant="destructive"
                   >
-                    {isCodeCopied ? (
-                      <Check className="size-4" aria-hidden="true" />
-                    ) : (
-                      <Copy className="size-4" aria-hidden="true" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-xs font-semibold uppercase text-stone-gray">
-                  {t("success.statusLabel")}
-                </p>
-                <Badge
-                  className="mt-2 gap-2 bg-premium-red/10 px-3 py-1.5 text-premium-red"
-                  variant="destructive"
-                >
-                  <Clock3 className="size-4" aria-hidden="true" />
-                  {claim.status === "SUBMITTED"
-                    ? t("success.submittedStatus")
-                    : claim.status}
-                </Badge>
-              </div>
+                    <Clock3 className="size-4" aria-hidden="true" />
+                    {claim.status === "SUBMITTED"
+                      ? t("success.submittedStatus")
+                      : claim.status}
+                  </Badge>
+                }
+              />
             </div>
 
-            <div className="flex flex-col justify-center gap-3 sm:flex-row">
+            <div className="mt-7 grid gap-3 sm:grid-cols-2">
               <Button
                 asChild
-                className="w-full rounded-md bg-premium-red px-8 text-xs font-semibold uppercase text-white hover:bg-warm-red sm:w-auto"
+                className="h-12 w-full rounded-md bg-premium-red px-8 text-xs font-semibold uppercase text-white hover:bg-warm-red"
               >
                 <Link
                   href={{
@@ -128,7 +162,7 @@ export function WarrantyClaimRequestView() {
                 </Link>
               </Button>
               <Button
-                className="w-full rounded-md border-premium-red px-8 text-xs font-semibold uppercase text-premium-red transition-colors hover:bg-premium-red hover:text-white sm:w-auto"
+                className="h-12 w-full rounded-md border-premium-red px-8 text-xs font-semibold uppercase text-premium-red transition-colors hover:bg-premium-red hover:text-white"
                 onClick={resetForm}
                 type="button"
                 variant="outline"

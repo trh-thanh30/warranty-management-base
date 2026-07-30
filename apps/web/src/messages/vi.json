@@ -1522,6 +1522,8 @@
         "title": "Đã tiếp nhận yêu cầu",
         "description": "Yêu cầu đang chờ FUJITEK kiểm tra và xử lý. Vui lòng lưu mã yêu cầu để tra cứu hoặc đối chiếu khi cần hỗ trợ.",
         "claimCodeLabel": "Mã yêu cầu",
+        "issueLabel": "Vấn đề cần hỗ trợ",
+        "submittedAtLabel": "Ngày gửi",
         "statusLabel": "Trạng thái",
         "submittedStatus": "Đã gửi",
         "copyCode": "Sao chép mã yêu cầu",
