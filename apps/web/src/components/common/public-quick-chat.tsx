@@ -27,6 +27,7 @@ export function PublicQuickChat({
     const updateTriggerVisibility = () => {
       const nextIsVisible = window.scrollY > 400;
       setIsTriggerVisible(nextIsVisible);
+      setIsTriggerHovered(false);
     };
 
     updateTriggerVisibility();
@@ -117,18 +118,28 @@ export function PublicQuickChat({
             aria-label={t(isOpen ? "closeAriaLabel" : "openAriaLabel")}
             className={cn(
               "group fixed bottom-6 right-6 z-[60] isolate h-12 w-12 cursor-pointer rounded-full border border-white/20 bg-premium-red text-white shadow-xl transition-[width,background-color,border-color] duration-300 ease-out hover:bg-warm-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2",
-              !isOpen && "sm:hover:w-44 sm:focus-visible:w-44",
+              !isOpen && "sm:focus-visible:w-44",
+              !isOpen && isTriggerHovered && "sm:w-44",
             )}
             exit={{ opacity: 0, scale: 0.8, y: 10 }}
             initial={{ opacity: 0, scale: 0.8, y: 10 }}
             onClick={() => setIsOpen((current) => !current)}
-            onHoverEnd={() => setIsTriggerHovered(false)}
-            onHoverStart={() => setIsTriggerHovered(true)}
+            onPointerLeave={() => setIsTriggerHovered(false)}
+            onPointerMove={(event) => {
+              if (event.pointerType === "mouse") {
+                setIsTriggerHovered(true);
+              }
+            }}
             transition={shouldReduceMotion ? { duration: 0 } : undefined}
             type="button"
           >
             {!isOpen ? (
-              <span className="pointer-events-none absolute inset-y-0 left-0 right-12 hidden items-center justify-center whitespace-nowrap pl-4 text-sm font-medium uppercase text-white opacity-0 transition-opacity delay-0 duration-150 group-hover:opacity-100 group-hover:delay-100 group-focus-visible:opacity-100 group-focus-visible:delay-100 sm:flex">
+              <span
+                className={cn(
+                  "pointer-events-none absolute inset-y-0 left-0 right-12 hidden items-center justify-center whitespace-nowrap pl-4 text-sm font-medium uppercase text-white opacity-0 transition-opacity delay-0 duration-150 group-focus-visible:opacity-100 group-focus-visible:delay-100 sm:flex",
+                  isTriggerHovered && "sm:delay-100 sm:opacity-100",
+                )}
+              >
                 {t("helpPrompt")}
               </span>
             ) : null}

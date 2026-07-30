@@ -423,6 +423,16 @@ test("public layout mounts one accessible responsive quick chat", async () => {
   assert.match(quickChatSource, /data-lenis-prevent/);
 });
 
+test("quick chat only expands after deliberate mouse movement", async () => {
+  const quickChatSource = await readFile(quickChatPath, "utf8");
+
+  assert.match(quickChatSource, /onPointerMove/);
+  assert.match(quickChatSource, /event\.pointerType === "mouse"/);
+  assert.match(quickChatSource, /isTriggerHovered && "sm:w-44"/);
+  assert.doesNotMatch(quickChatSource, /sm:hover:w-44/);
+  assert.doesNotMatch(quickChatSource, /group-hover:opacity-100/);
+});
+
 test("public layout renders configured quick contact actions", async () => {
   const [actionsSource, quickChatSource] = await Promise.all([
     readFile(quickContactActionsPath, "utf8"),
