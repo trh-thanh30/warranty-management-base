@@ -390,6 +390,47 @@ test("frontend Docker builds retain root build helpers after Turbo prune", async
   }
 });
 
+test("frontend runtimes retain patched framework and image-processing dependencies", async () => {
+  const rootPackage = JSON.parse(
+    await readFile(path.join(repoRoot, "package.json"), "utf8"),
+  );
+  const minimumNextVersion = [16, 2, 11];
+
+  for (const app of ["web", "admin"]) {
+    const [appPackage, dockerfile] = await Promise.all([
+      readFile(path.join(repoRoot, "apps", app, "package.json"), "utf8").then(
+        JSON.parse,
+      ),
+      readFile(path.join(repoRoot, "apps", app, "Dockerfile"), "utf8"),
+    ]);
+    const nextVersion = appPackage.dependencies.next
+      .replace(/^[^\d]*/, "")
+      .split(".")
+      .map(Number);
+
+    assert.ok(
+      nextVersion.some(
+        (part, index) =>
+          part > minimumNextVersion[index] &&
+          nextVersion
+            .slice(0, index)
+            .every(
+              (value, prefixIndex) => value === minimumNextVersion[prefixIndex],
+            ),
+      ) ||
+        nextVersion.every((part, index) => part === minimumNextVersion[index]),
+      `${app} must use Next.js 16.2.11 or newer`,
+    );
+    assert.match(
+      dockerfile,
+      /rm -rf \/usr\/local\/lib\/node_modules\/npm \/usr\/local\/lib\/node_modules\/corepack/,
+      `${app} runtime must not retain npm or Corepack`,
+    );
+  }
+
+  assert.equal(rootPackage.pnpm?.overrides?.sharp, "0.35.0");
+});
+
 test("frontend images bake the public API URL into browser bundles", async () => {
   for (const app of ["web", "admin"]) {
     const dockerfile = await readFile(
