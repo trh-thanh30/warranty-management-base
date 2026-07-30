@@ -135,6 +135,7 @@ test("dealer map uses the shared Vietnam overlay without locking horizontal pann
   assert.match(source, /initialCenter=\{VIETNAM_CENTER\}/);
   assert.match(source, /initialZoom=\{VIETNAM_INITIAL_ZOOM\}/);
   assert.match(source, /resetLabel=\{t\("resetMap"\)\}/);
+  assert.match(source, /fullscreenControlPosition="right"/);
   assert.match(source, /fullscreenLabel=\{t\("fullscreenMap"\)\}/);
   assert.match(source, /exitFullscreenLabel=\{t\("exitFullscreenMap"\)\}/);
   assert.match(overlaySource, /fillRule:\s*"evenodd"/);
@@ -187,6 +188,16 @@ test("selecting a directory card flies to its marker and opens the shared popup"
   assert.match(mapSource, /markerRef\.current\?\.openPopup\(\)/);
   assert.match(mapSource, /map\.flyTo/);
   assert.match(mapSource, /<NetworkLocationPopup/);
+});
+
+test("selecting a location scrolls the stacked directory to the map", async () => {
+  const source = await readFile(dealersViewPath, "utf8");
+
+  assert.match(source, /mapCardRef/);
+  assert.match(source, /window\.matchMedia\("\(max-width: 1023px\)"\)/);
+  assert.match(source, /scrollIntoView\(\{/);
+  assert.match(source, /behavior: prefersReducedMotion \? "auto" : "smooth"/);
+  assert.match(source, /block: "start"/);
 });
 
 test("dealer page loads the combined public network directory and dynamically renders the Leaflet map", async () => {

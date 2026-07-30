@@ -142,11 +142,13 @@ function MapResetControl({
 interface MapFullscreenControlProps {
   exitFullscreenLabel: string;
   fullscreenLabel: string;
+  position: "left" | "right";
 }
 
 function MapFullscreenControl({
   exitFullscreenLabel,
   fullscreenLabel,
+  position,
 }: MapFullscreenControlProps) {
   const map = useMap();
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -194,7 +196,10 @@ function MapFullscreenControl({
       type="button"
       aria-label={isFullscreen ? exitFullscreenLabel : fullscreenLabel}
       title={label}
-      className="leaflet-control absolute left-2.5 top-[115px] z-[1000] grid size-[34px] place-items-center rounded-[4px] border-2 border-black/20 bg-white text-deep-black shadow-sm transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2"
+      className={cn(
+        "leaflet-control absolute top-[115px] z-[1000] grid size-[34px] place-items-center rounded-[4px] border-2 border-black/20 bg-white text-deep-black shadow-sm transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2",
+        position === "right" ? "right-2.5" : "left-2.5",
+      )}
       onClick={handleToggle}
     >
       {isFullscreen ? (
@@ -212,6 +217,7 @@ type SharedMapBaseProps = {
   children?: ReactNode;
   className?: string;
   exitFullscreenLabel?: string;
+  fullscreenControlPosition?: "left" | "right";
   fullscreenLabel?: string;
   loadingClassName?: string;
   maxBounds?: LatLngBoundsExpression;
@@ -232,6 +238,7 @@ export function SharedMap({
   children,
   className = "size-full",
   exitFullscreenLabel,
+  fullscreenControlPosition = "left",
   fullscreenLabel,
   initialBounds,
   initialCenter,
@@ -293,6 +300,7 @@ export function SharedMap({
         <MapFullscreenControl
           exitFullscreenLabel={exitFullscreenLabel}
           fullscreenLabel={fullscreenLabel}
+          position={fullscreenControlPosition}
         />
       ) : null}
 

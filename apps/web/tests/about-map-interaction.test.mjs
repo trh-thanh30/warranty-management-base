@@ -86,7 +86,11 @@ test("shared map exposes an accessible fullscreen control and redraws Leaflet", 
   );
   assert.match(
     sharedMapSource,
-    /left-2\.5 top-\[115px\].*size-\[34px\].*rounded-\[4px\]/,
+    /top-\[115px\].*size-\[34px\].*rounded-\[4px\]/,
+  );
+  assert.match(
+    sharedMapSource,
+    /position === "right" \? "right-2\.5" : "left-2\.5"/,
   );
   assert.match(aboutMapSource, /fullscreenLabel=\{t\("fullscreenMap"\)\}/);
   assert.match(

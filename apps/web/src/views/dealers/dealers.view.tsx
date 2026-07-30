@@ -6,7 +6,7 @@ import { MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { DealerFilters } from "./components/dealer-filters";
 import { DealerList } from "./components/dealer-list";
 import { DealerRecruitmentCta } from "./components/dealer-recruitment-cta";
@@ -33,6 +33,7 @@ const DealerMap = dynamic(
 export function DealersView() {
   const t = useTranslations("DealersPage");
   const [mapSelectionRequestId, setMapSelectionRequestId] = useState(0);
+  const mapCardRef = useRef<HTMLDivElement>(null);
   const {
     activeLocation,
     districts,
@@ -63,6 +64,19 @@ export function DealersView() {
   const handleSelectLocation = (location: NetworkDirectoryLocation) => {
     setSelectedLocation(location);
     setMapSelectionRequestId((requestId) => requestId + 1);
+
+    if (!window.matchMedia("(max-width: 1023px)").matches) return;
+
+    window.requestAnimationFrame(() => {
+      const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+
+      mapCardRef.current?.scrollIntoView({
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+        block: "start",
+      });
+    });
   };
 
   return (
@@ -141,29 +155,34 @@ export function DealersView() {
               />
             </Card>
 
-            <Card className="isolate relative flex h-[520px] flex-col overflow-hidden rounded-sm border-border-gray shadow-xs sm:h-[620px] lg:col-span-7 lg:h-[750px]">
-              <div className="bg-white text-deep-black p-4 px-6 flex items-center justify-between z-10 border-b border-border-gray">
-                <div className="flex items-center gap-2">
-                  <MapPin
-                    aria-hidden="true"
-                    className="size-5 text-premium-red"
-                  />
-                  <span className="text-sm font-semibold uppercase tracking-wider">
-                    {activeLocation?.name ?? t("map.defaultTitle")}
+            <div
+              ref={mapCardRef}
+              className="scroll-mt-20 lg:col-span-7 lg:scroll-mt-0"
+            >
+              <Card className="isolate relative flex h-[520px] flex-col overflow-hidden rounded-sm border-border-gray shadow-xs sm:h-[620px] lg:h-[750px]">
+                <div className="bg-white text-deep-black p-4 px-6 flex items-center justify-between z-10 border-b border-border-gray">
+                  <div className="flex items-center gap-2">
+                    <MapPin
+                      aria-hidden="true"
+                      className="size-5 text-premium-red"
+                    />
+                    <span className="text-sm font-semibold uppercase tracking-wider">
+                      {activeLocation?.name ?? t("map.defaultTitle")}
+                    </span>
+                  </div>
+                  <span className="text-xs text-stone-gray font-mono font-medium">
+                    {activeLocation?.province ?? null}
                   </span>
                 </div>
-                <span className="text-xs text-stone-gray font-mono font-medium">
-                  {activeLocation?.province ?? null}
-                </span>
-              </div>
 
-              <div className="flex-1 w-full relative bg-light-gray">
-                <DealerMap
-                  activeLocation={activeLocation}
-                  selectionRequestId={mapSelectionRequestId}
-                />
-              </div>
-            </Card>
+                <div className="flex-1 w-full relative bg-light-gray">
+                  <DealerMap
+                    activeLocation={activeLocation}
+                    selectionRequestId={mapSelectionRequestId}
+                  />
+                </div>
+              </Card>
+            </div>
           </div>
         </Container>
       </section>

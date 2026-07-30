@@ -1,13 +1,16 @@
 "use client";
 
-import { useId, useState } from "react";
+import {
+  motionDuration,
+  motionEase,
+  revealViewportOnce,
+} from "@/src/constants/motion.constants";
+import { useScrollReveal } from "@/src/hooks/use-scroll-reveal";
+import type { ContentPageSummary } from "@repo/shared";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowDown, FileQuestion } from "lucide-react";
 import { useTranslations } from "next-intl";
-import type { ContentPageSummary } from "@repo/shared";
-import { useScrollReveal } from "@/src/hooks/use-scroll-reveal";
-import { revealViewportOnce } from "@/src/constants/motion.constants";
-import { motionDuration, motionEase } from "@/src/constants/motion.constants";
+import { useId, useState } from "react";
 
 import { Container } from "@/src/components/common/container";
 
@@ -20,7 +23,11 @@ export function FaqSection({ page }: { page: ContentPageSummary | null }) {
   const sectionTitle = page?.title || t("title");
 
   return (
-    <section id="faq" className="w-full py-16" aria-label={sectionTitle}>
+    <section
+      id="faq"
+      className="w-full md:py-16 py-10"
+      aria-label={sectionTitle}
+    >
       <Container>
         <motion.div
           variants={container}
