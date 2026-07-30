@@ -1,0 +1,9 @@
+{
+  "name": "@repo/api-migrator",
+  "version": "0.0.1",
+  "private": true,
+  "license": "UNLICENSED",
+  "dependencies": {
+    "prisma": "^7.4.1"
+  }
+}

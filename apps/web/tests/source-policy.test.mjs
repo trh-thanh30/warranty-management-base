@@ -420,6 +420,146 @@ test("frontend images bake the public API URL into browser bundles", async () =>
   );
 });
 
+test("published images pass Trivy vulnerability gates before deployment", async () => {
+  const publishWorkflow = await readFile(
+    path.join(repoRoot, ".github", "workflows", "publish-images.yml"),
+    "utf8",
+  );
+
+  assert.equal(
+    (publishWorkflow.match(/uses: aquasecurity\/trivy-action@v0\.36\.0/g) ?? [])
+      .length,
+    4,
+    "API, Migrator, Web, and Admin images must each be scanned",
+  );
+  assert.equal(
+    (publishWorkflow.match(/severity: CRITICAL,HIGH/g) ?? []).length,
+    4,
+  );
+  assert.equal((publishWorkflow.match(/exit-code: "1"/g) ?? []).length, 4);
+
+  const finalScanIndex = publishWorkflow.indexOf("- name: Scan Admin image");
+  const deploymentIndex = publishWorkflow.indexOf(
+    "- name: Trigger production deployment",
+  );
+
+  assert.ok(finalScanIndex >= 0);
+  assert.ok(
+    deploymentIndex > finalScanIndex,
+    "deployment must only be triggered after every image scan passes",
+  );
+});
+
+test("API runtime excludes migration and unused build tooling", async () => {
+  const apiPackage = JSON.parse(
+    await readFile(path.join(repoRoot, "apps", "api", "package.json"), "utf8"),
+  );
+  const apiDockerfile = await readFile(
+    path.join(repoRoot, "apps", "api", "Dockerfile"),
+    "utf8",
+  );
+
+  for (const dependency of [
+    "prisma",
+    "@prisma/config",
+    "puppeteer-core",
+    "@tailwindcss/cli",
+    "tailwindcss",
+  ]) {
+    assert.equal(
+      apiPackage.dependencies?.[dependency],
+      undefined,
+      `${dependency} must not ship as an API runtime dependency`,
+    );
+  }
+
+  for (const buildDependency of ["prisma", "@tailwindcss/cli", "tailwindcss"]) {
+    assert.ok(
+      apiPackage.devDependencies?.[buildDependency],
+      `${buildDependency} must remain available to API builds`,
+    );
+  }
+
+  assert.match(
+    apiDockerfile,
+    /deploy --prod --no-optional --ignore-scripts \/prod\/api/,
+  );
+  assert.match(
+    apiDockerfile,
+    /cd \/prod\/api && \/app\/node_modules\/\.bin\/prisma generate/,
+  );
+});
+
+test("database migrations use a dedicated disposable image", async () => {
+  const [migratorDockerfile, compose, deployWorkflow, publishWorkflow] =
+    await Promise.all([
+      readFile(
+        path.join(repoRoot, "apps", "api-migrator", "Dockerfile"),
+        "utf8",
+      ),
+      readFile(path.join(repoRoot, "docker-compose.prod.yml"), "utf8"),
+      readFile(
+        path.join(repoRoot, ".github", "workflows", "deploy.yml"),
+        "utf8",
+      ),
+      readFile(
+        path.join(repoRoot, ".github", "workflows", "publish-images.yml"),
+        "utf8",
+      ),
+    ]);
+
+  assert.match(
+    migratorDockerfile,
+    /CMD \[[^\n]*prisma[^\n]*"migrate"[^\n]*"deploy"/,
+  );
+  assert.match(compose, /^\s{2}migrate:\s*$/m);
+  assert.match(compose, /image: \$\{MIGRATOR_IMAGE[^}]*\}:\$\{IMAGE_TAG/);
+  assert.match(deployWorkflow, /docker compose .* run --rm migrate/);
+  assert.doesNotMatch(deployWorkflow, /run --rm api npx prisma migrate deploy/);
+  assert.match(
+    publishWorkflow,
+    /file: apps\/api-migrator\/Dockerfile[\s\S]*migrator_image/,
+  );
+});
+
+test("production deployment safely cleans only stale project images", async () => {
+  const deployWorkflow = await readFile(
+    path.join(repoRoot, ".github", "workflows", "deploy.yml"),
+    "utf8",
+  );
+
+  assert.match(
+    deployWorkflow,
+    /cleanup-images:[\s\S]*needs:\s*\n\s*- deploy\s*\n\s*- health-check/,
+    "image cleanup must wait for deployment health checks",
+  );
+  assert.match(
+    deployWorkflow,
+    /previous_tag=.*\.deploy\/previous-image-tag/,
+    "cleanup must preserve the previously deployed image tag for rollback",
+  );
+  assert.match(
+    deployWorkflow,
+    /for repository in "\$API_IMAGE" "\$WEB_IMAGE" "\$ADMIN_IMAGE"/,
+    "cleanup must be scoped to this project's application repositories",
+  );
+  assert.match(
+    deployWorkflow,
+    /\[ "\$image" = "\$repository:\$IMAGE_TAG" \] && continue/,
+    "cleanup must preserve the currently deployed image tag",
+  );
+  assert.match(
+    deployWorkflow,
+    /\[ "\$image" = "\$repository:\$previous_tag" \] && continue/,
+    "cleanup must preserve the previous image tag",
+  );
+  assert.doesNotMatch(
+    deployWorkflow,
+    /docker (?:system|volume) prune|docker image prune\s+-a/,
+    "deployment must not run host-wide or volume cleanup on a shared VPS",
+  );
+});
+
 test("container ports match the production ports documented for deployment", async () => {
   const ports = { api: 4100, web: 4101, admin: 4102 };
 

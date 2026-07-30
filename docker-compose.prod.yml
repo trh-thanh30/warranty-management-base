@@ -81,6 +81,22 @@ services:
       minio:
         condition: service_started
 
+  migrate:
+    image: ${MIGRATOR_IMAGE:-warranty-management-base-api-migrator}:${IMAGE_TAG:-latest}
+    profiles: ["tools"]
+    init: true
+    env_file:
+      - path: .env.production
+        required: false
+    environment:
+      NODE_ENV: production
+      DB_HOST: db
+      DB_PORT: 5432
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${DB_USER:-warranty_management_base_user}:${DB_PASSWORD:-warranty_management_base_password}@db:5432/${DB_NAME:-warranty_management_base}?schema=${DB_SCHEMA:-public}}
+    depends_on:
+      db:
+        condition: service_healthy
+
   api:
     image: ${API_IMAGE:-warranty-management-base-api}:${IMAGE_TAG:-latest}
     container_name: warranty-management-base-api
