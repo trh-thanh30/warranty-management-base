@@ -428,7 +428,7 @@ test("frontend runtimes retain patched framework and image-processing dependenci
     );
   }
 
-  assert.equal(rootPackage.pnpm?.overrides?.sharp, "0.35.0");
+  assert.equal(rootPackage.pnpm?.overrides?.["next@16.2.11>sharp"], "0.35.0");
 });
 
 test("frontend images bake the public API URL into browser bundles", async () => {
