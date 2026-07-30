@@ -22,6 +22,7 @@ Repo dùng nhiều file env theo môi trường. File mẫu là `.env.example`.
 ### Database
 
 - `DATABASE_URL`
+- `DOCKER_DATABASE_URL`: tùy chọn ghi đè URL nội bộ cho container; để trống để Compose dùng service `db:5432`.
 - `DIRECT_URL`
 - `DEV_DB_PORT`
 - `POSTGRES_DB`

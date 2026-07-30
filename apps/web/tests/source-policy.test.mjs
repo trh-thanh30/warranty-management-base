@@ -639,6 +639,20 @@ test("database migrations use a dedicated disposable image", async () => {
   assert.match(JSON.parse(migratorPackage).dependencies.prisma, /^\^7\.9\./);
   assert.match(compose, /^\s{2}migrate:\s*$/m);
   assert.match(compose, /image: \$\{MIGRATOR_IMAGE[^}]*\}:\$\{IMAGE_TAG/);
+  assert.doesNotMatch(
+    compose,
+    /DATABASE_URL:\s*\$\{DATABASE_URL:-/,
+    "host DATABASE_URL must not leak into production containers",
+  );
+  assert.equal(
+    (
+      compose.match(
+        /DATABASE_URL:\s*\$\{DOCKER_DATABASE_URL:-postgresql:\/\/[^\n]*@db:5432\/[^\n]*\}/g,
+      ) ?? []
+    ).length,
+    3,
+    "migrate, API, and email worker must use the Docker-internal database address",
+  );
   assert.match(
     deployWorkflow,
     /actions\/checkout@v4[\s\S]*appleboy\/scp-action@v1[\s\S]*source: docker-compose\.prod\.yml[\s\S]*target: \$\{\{ secrets\.DEPLOY_PATH \}\}[\s\S]*Deploy over SSH/,
