@@ -220,8 +220,74 @@ test("warranty activation view submits a request and shows its pending code", as
   );
 
   assert.match(source, /WarrantyActivationRequestForm/);
+  assert.match(source, /WarrantyActivationSuccess/);
   assert.match(source, /useWarrantyActivationRequest/);
-  assert.match(source, /requestCode/);
-  assert.match(source, /status/);
   assert.doesNotMatch(source, /setIsSuccess\(true\)/);
+});
+
+test("warranty activation success keeps a receipt and static process timeline inside the page", async () => {
+  const source = await readFile(
+    new URL(
+      "../src/views/warranty/components/warranty-activation-success.tsx",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+  const [vi, en] = await Promise.all([
+    import("../src/messages/vi.json", { with: { type: "json" } }),
+    import("../src/messages/en.json", { with: { type: "json" } }),
+  ]);
+
+  assert.match(source, /request\.requestCode/);
+  assert.match(source, /request\.status/);
+  assert.match(source, /request\.createdAt/);
+  assert.match(source, /formatDate\(request\.createdAt/);
+  assert.match(source, /framer-motion/);
+  assert.match(source, /timelineTitle/);
+  assert.doesNotMatch(source, /function formatRequestDateTime/);
+  assert.doesNotMatch(source, /1-2/);
+
+  for (const messages of [vi.default, en.default]) {
+    const success = messages.Warranty.activate.success;
+    assert.equal(typeof success.timelineTitle, "string");
+    assert.equal(typeof success.submittedStep, "string");
+    assert.equal(typeof success.reviewStep, "string");
+    assert.equal(typeof success.activationStep, "string");
+  }
+});
+
+test("warranty activation reports submit and clipboard results through localized toasts", async () => {
+  const [formSource, successSource, vi, en] = await Promise.all([
+    readFile(
+      new URL(
+        "../src/views/warranty/components/warranty-activation-request-form.tsx",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+    readFile(
+      new URL(
+        "../src/views/warranty/components/warranty-activation-success.tsx",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+    import("../src/messages/vi.json", { with: { type: "json" } }),
+    import("../src/messages/en.json", { with: { type: "json" } }),
+  ]);
+
+  assert.match(formSource, /toast\.success\(t\("success\.title"\)\)/);
+  assert.match(
+    formSource,
+    /toast\.error\(t\(`errors\.\$\{getWarrantyActivationErrorKind\(error\)\}`\)\)/,
+  );
+  assert.match(successSource, /toast\.success\(t\("copied"\)\)/);
+  assert.match(successSource, /toast\.error\(t\("copyFailed"\)\)/);
+
+  for (const messages of [vi.default, en.default]) {
+    assert.equal(
+      typeof messages.Warranty.activate.success.copyFailed,
+      "string",
+    );
+  }
 });

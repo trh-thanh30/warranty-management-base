@@ -18,6 +18,7 @@ import { Send } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, type WheelEvent } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import {
   Form,
   FormControl,
@@ -27,7 +28,10 @@ import {
   FormMessage,
 } from "@/src/components/common/form";
 import { formControlFocusClassName } from "@/src/components/common/form-control.constants";
-import type { WarrantyActivationErrorKind } from "@/src/hooks/use-warranty-activation-request";
+import {
+  getWarrantyActivationErrorKind,
+  type WarrantyActivationErrorKind,
+} from "@/src/hooks/use-warranty-activation-request";
 import { useVietnamProvinces } from "@/src/hooks/use-vietnam-provinces";
 import { useVietnamWards } from "@/src/hooks/use-vietnam-wards";
 import {
@@ -125,9 +129,10 @@ export function WarrantyActivationRequestForm({
           wards: wardsQuery.data,
         }),
       );
+      toast.success(t("success.title"));
       form.reset();
-    } catch {
-      // The mutation exposes the localized error state to the parent view.
+    } catch (error) {
+      toast.error(t(`errors.${getWarrantyActivationErrorKind(error)}`));
     }
   };
 

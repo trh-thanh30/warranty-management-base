@@ -1371,6 +1371,13 @@
         "pendingStatus": "Pending review",
         "copyCode": "Copy request code",
         "copied": "Request code copied",
+        "copyFailed": "The request code could not be copied. Try again.",
+        "timelineTitle": "Processing timeline",
+        "submittedStep": "Request submitted",
+        "reviewStep": "FUJITEK reviews the request",
+        "reviewDescription": "Waiting for the FUJITEK team to receive and review the request.",
+        "activationStep": "Warranty activation",
+        "activationDescription": "Completed after the request has been approved.",
         "reset": "Submit another request"
       },
       "fields": {

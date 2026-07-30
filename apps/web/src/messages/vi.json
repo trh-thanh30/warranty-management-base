@@ -1371,6 +1371,13 @@
         "pendingStatus": "Chờ xử lý",
         "copyCode": "Sao chép mã yêu cầu",
         "copied": "Đã sao chép mã yêu cầu",
+        "copyFailed": "Không thể sao chép mã yêu cầu. Vui lòng thử lại.",
+        "timelineTitle": "Tiến trình xử lý",
+        "submittedStep": "Yêu cầu đã được gửi",
+        "reviewStep": "FUJITEK kiểm tra yêu cầu",
+        "reviewDescription": "Đang chờ bộ phận FUJITEK tiếp nhận và kiểm tra.",
+        "activationStep": "Kích hoạt bảo hành",
+        "activationDescription": "Được thực hiện sau khi yêu cầu được phê duyệt.",
         "reset": "Gửi yêu cầu khác"
       },
       "fields": {
