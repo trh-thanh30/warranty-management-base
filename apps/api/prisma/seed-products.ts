@@ -1,5 +1,11 @@
 import { PrismaPg } from '@prisma/adapter-pg';
-import { category_type, Prisma, PrismaClient } from '@prisma/client';
+import {
+  category_type,
+  Prisma,
+  PrismaClient,
+  product_status,
+  warranty_status,
+} from '@prisma/client';
 import { Pool } from 'pg';
 
 type LexzenzProductSeed = {
@@ -22,6 +28,12 @@ export type LexzenzProductSeedClient = {
   };
   productTemplate: {
     upsert(args: Prisma.ProductTemplateUpsertArgs): PromiseLike<{ id: string }>;
+  };
+  product: {
+    upsert(args: Prisma.ProductUpsertArgs): PromiseLike<{ id: string }>;
+  };
+  warranty: {
+    upsert(args: Prisma.WarrantyUpsertArgs): PromiseLike<{ id: string }>;
   };
 };
 
@@ -479,6 +491,24 @@ const requiredCategoryCodes = [
   TPMS_CATEGORY,
 ] as const;
 
+const PHYSICAL_PRODUCTS_PER_TEMPLATE = 2;
+const SEEDED_WARRANTY_YEAR = 2026;
+const WARRANTY_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+function createSeedWarrantyCode(templateIndex: number, productIndex: number) {
+  let value = templateIndex * PHYSICAL_PRODUCTS_PER_TEMPLATE + productIndex;
+  let suffix = '';
+
+  for (let index = 0; index < 5; index += 1) {
+    suffix =
+      WARRANTY_CODE_ALPHABET.charAt(value % WARRANTY_CODE_ALPHABET.length) +
+      suffix;
+    value = Math.floor(value / WARRANTY_CODE_ALPHABET.length);
+  }
+
+  return `WM-${SEEDED_WARRANTY_YEAR}-S${suffix}`;
+}
+
 export async function seedLexzenzProducts(client: LexzenzProductSeedClient) {
   const categories = await client.category.findMany({
     where: {
@@ -518,7 +548,7 @@ export async function seedLexzenzProducts(client: LexzenzProductSeedClient) {
       shortDescription: productSeed.description,
       specifications: productSeed.specifications,
     };
-    await client.productTemplate.upsert({
+    const template = await client.productTemplate.upsert({
       where: { sku: productSeed.sku },
       update: {
         brand: productSeed.brand,
@@ -548,10 +578,63 @@ export async function seedLexzenzProducts(client: LexzenzProductSeedClient) {
         slug: productSeed.slug,
       },
     });
+
+    for (
+      let productIndex = 0;
+      productIndex < PHYSICAL_PRODUCTS_PER_TEMPLATE;
+      productIndex += 1
+    ) {
+      const sequence = String(productIndex + 1).padStart(2, '0');
+      const productCode = `PRD-${productSeed.sku}-${sequence}`;
+      const serialNumber = `SN-${productSeed.sku}-${sequence}`;
+      const warrantyCode = createSeedWarrantyCode(index, productIndex);
+      const displayName = `${productSeed.name} #${sequence}`;
+
+      const product = await client.product.upsert({
+        where: { product_code: productCode },
+        update: {
+          category_id: categoryId,
+          deleted_at: null,
+          display_name: displayName,
+          serial_number: serialNumber,
+          status: product_status.ACTIVE,
+          template_id: template.id,
+        },
+        create: {
+          category_id: categoryId,
+          display_name: displayName,
+          product_code: productCode,
+          serial_number: serialNumber,
+          status: product_status.ACTIVE,
+          template_id: template.id,
+        },
+      });
+
+      await client.warranty.upsert({
+        where: { product_id: product.id },
+        update: {
+          duration_months: productSeed.warrantyDurationMonths,
+          end_date: null,
+          start_date: null,
+          status: warranty_status.DRAFT,
+          terms: null,
+          warranty_code: warrantyCode,
+        },
+        create: {
+          duration_months: productSeed.warrantyDurationMonths,
+          end_date: null,
+          product_id: product.id,
+          start_date: null,
+          status: warranty_status.DRAFT,
+          terms: null,
+          warranty_code: warrantyCode,
+        },
+      });
+    }
   }
 
   console.log(
-    `Seeded ${lexzenzProductSeeds.length} Lexzenz product templates.`,
+    `Seeded ${lexzenzProductSeeds.length} Lexzenz product templates and ${lexzenzProductSeeds.length * PHYSICAL_PRODUCTS_PER_TEMPLATE} physical products.`,
   );
 }
 

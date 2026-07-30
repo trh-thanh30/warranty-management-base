@@ -1,14 +1,5 @@
 "use client";
 
-import {
-  Layers3,
-  MoreHorizontal,
-  Pencil,
-  PlusCircle,
-  Trash2,
-  UserPlus,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
 import { SortableTableHead } from "@/src/components/common/sortable-table-head";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
@@ -28,6 +19,15 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui";
+import {
+  Layers3,
+  MoreHorizontal,
+  Pencil,
+  PlusCircle,
+  Trash2,
+  UserPlus,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   formatProductCreatedAt,
   formatProductOwner,
@@ -69,9 +69,9 @@ export function ProductsTable({
         ))}
       </div>
 
-      <div className="transparent-scrollbar hidden overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800 lg:block">
-        <Table className="min-w-288">
-          <TableHeader>
+      <div className="hidden max-h-144 overflow-x-auto overflow-y-scroll rounded-md border border-slate-200 dark:border-slate-800 lg:block">
+        <Table className="min-w-6xl [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
+          <TableHeader className="sticky top-0 z-10 bg-white dark:bg-slate-950">
             <TableRow>
               <SortableTableHead
                 activeSortBy={sortBy}

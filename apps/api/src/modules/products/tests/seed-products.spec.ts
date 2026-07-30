@@ -27,10 +27,16 @@ describe('Lexzenz product seed', () => {
     }
   });
 
-  it('upserts published catalog templates without physical products', async () => {
+  it('upserts published catalog templates and two draft physical products for each template', async () => {
     const productTemplateUpsert = jest.fn(
       ({ where }: Prisma.ProductTemplateUpsertArgs) =>
         Promise.resolve({ id: `template-${where.sku}` }),
+    );
+    const productUpsert = jest.fn(({ where }: Prisma.ProductUpsertArgs) =>
+      Promise.resolve({ id: `product-${where.product_code}` }),
+    );
+    const warrantyUpsert = jest.fn(({ where }: Prisma.WarrantyUpsertArgs) =>
+      Promise.resolve({ id: `warranty-${where.product_id}` }),
     );
     const client = {
       category: {
@@ -41,11 +47,15 @@ describe('Lexzenz product seed', () => {
         ),
       },
       productTemplate: { upsert: productTemplateUpsert },
+      product: { upsert: productUpsert },
+      warranty: { upsert: warrantyUpsert },
     };
 
     await seedLexzenzProducts(client);
 
     expect(productTemplateUpsert).toHaveBeenCalledTimes(24);
+    expect(productUpsert).toHaveBeenCalledTimes(48);
+    expect(warrantyUpsert).toHaveBeenCalledTimes(48);
 
     for (const call of productTemplateUpsert.mock.calls) {
       const input = call[0];
@@ -70,6 +80,64 @@ describe('Lexzenz product seed', () => {
         }),
       );
     }
+
+    const productCodes = productUpsert.mock.calls.map(
+      ([input]) => input.create.product_code,
+    );
+    const serialNumbers = productUpsert.mock.calls.map(
+      ([input]) => input.create.serial_number,
+    );
+    const warrantyCodes = warrantyUpsert.mock.calls.map(
+      ([input]) => input.create.warranty_code,
+    );
+
+    expect(new Set(productCodes).size).toBe(48);
+    expect(new Set(serialNumbers).size).toBe(48);
+    expect(new Set(warrantyCodes).size).toBe(48);
+
+    for (const [input] of productUpsert.mock.calls) {
+      const templateSku = input.create.product_code
+        .replace(/^PRD-/, '')
+        .replace(/-\d{2}$/, '');
+
+      expect(input.create).toMatchObject({
+        category_id: categoryIds.get(
+          lexzenzProductSeeds.find((seed) => seed.sku === templateSku)!
+            .categoryCode,
+        ),
+        display_name: expect.any(String),
+        status: 'ACTIVE',
+        template_id: `template-${templateSku}`,
+      });
+      expect(input.update).toMatchObject({
+        category_id: input.create.category_id,
+        deleted_at: null,
+        display_name: input.create.display_name,
+        serial_number: input.create.serial_number,
+        status: 'ACTIVE',
+        template_id: input.create.template_id,
+      });
+    }
+
+    for (const [input] of warrantyUpsert.mock.calls) {
+      expect(input.create).toMatchObject({
+        duration_months: expect.any(Number),
+        end_date: null,
+        product_id: expect.stringMatching(/^product-PRD-/),
+        start_date: null,
+        status: 'DRAFT',
+        warranty_code: expect.stringMatching(
+          /^WM-2026-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/,
+        ),
+      });
+      expect(input.update).toMatchObject({
+        duration_months: input.create.duration_months,
+        end_date: null,
+        start_date: null,
+        status: 'DRAFT',
+        warranty_code: input.create.warranty_code,
+      });
+    }
   });
 
   it('fails before writing when a required category is missing', async () => {
@@ -85,6 +153,8 @@ describe('Lexzenz product seed', () => {
         ),
       },
       productTemplate: { upsert: jest.fn() },
+      product: { upsert: jest.fn() },
+      warranty: { upsert: jest.fn() },
     };
 
     await expect(seedLexzenzProducts(client)).rejects.toThrow(
