@@ -421,10 +421,13 @@ test("frontend images bake the public API URL into browser bundles", async () =>
 });
 
 test("published images pass Trivy vulnerability gates before deployment", async () => {
-  const publishWorkflow = await readFile(
-    path.join(repoRoot, ".github", "workflows", "publish-images.yml"),
-    "utf8",
-  );
+  const [publishWorkflow, trivyIgnore] = await Promise.all([
+    readFile(
+      path.join(repoRoot, ".github", "workflows", "publish-images.yml"),
+      "utf8",
+    ),
+    readFile(path.join(repoRoot, ".trivyignore.yaml"), "utf8"),
+  ]);
 
   assert.equal(
     (publishWorkflow.match(/uses: aquasecurity\/trivy-action@v0\.36\.0/g) ?? [])
@@ -437,6 +440,15 @@ test("published images pass Trivy vulnerability gates before deployment", async 
     4,
   );
   assert.equal((publishWorkflow.match(/exit-code: "1"/g) ?? []).length, 4);
+  assert.equal(
+    (publishWorkflow.match(/trivyignores: \.trivyignore\.yaml/g) ?? []).length,
+    1,
+    "only the API scan should use the documented runtime exception",
+  );
+  assert.match(trivyIgnore, /id: CVE-2026-14257/);
+  assert.match(trivyIgnore, /pkg:npm\/brace-expansion@1\.1\.16/);
+  assert.match(trivyIgnore, /pkg:npm\/brace-expansion@2\.1\.2/);
+  assert.match(trivyIgnore, /expired_at: 2026-10-30/);
 
   const finalScanIndex = publishWorkflow.indexOf("- name: Scan Admin image");
   const deploymentIndex = publishWorkflow.indexOf(
@@ -451,6 +463,9 @@ test("published images pass Trivy vulnerability gates before deployment", async 
 });
 
 test("API runtime excludes migration and unused build tooling", async () => {
+  const rootPackage = JSON.parse(
+    await readFile(path.join(repoRoot, "package.json"), "utf8"),
+  );
   const apiPackage = JSON.parse(
     await readFile(path.join(repoRoot, "apps", "api", "package.json"), "utf8"),
   );
@@ -482,12 +497,35 @@ test("API runtime excludes migration and unused build tooling", async () => {
 
   assert.match(
     apiDockerfile,
-    /deploy --prod --no-optional --ignore-scripts \/prod\/api/,
+    /--config\.auto-install-peers=false --filter @repo\/api deploy --prod --no-optional --ignore-scripts \/prod\/api/,
   );
   assert.match(
     apiDockerfile,
     /cd \/prod\/api && \/app\/apps\/api\/node_modules\/\.bin\/prisma generate/,
   );
+  assert.match(
+    apiDockerfile,
+    /rm -rf \/usr\/local\/lib\/node_modules\/npm \/usr\/local\/lib\/node_modules\/corepack/,
+  );
+
+  assert.match(apiPackage.dependencies.axios, /^\^1\.(?:1[89]|[2-9]\d)\./);
+  assert.match(apiPackage.dependencies.multer, /^\^2\.[2-9]\./);
+  assert.match(apiPackage.dependencies.nodemailer, /^\^9\./);
+
+  for (const [dependency, safeVersion] of Object.entries({
+    "brace-expansion@1": "1.1.16",
+    "brace-expansion@2": "2.1.2",
+    "brace-expansion@5": "5.0.8",
+    "form-data": "4.0.6",
+    "js-yaml": "4.3.0",
+    multer: "2.2.0",
+    picomatch: "4.0.4",
+    postcss: "8.5.18",
+    svgo: "4.0.2",
+    "undici@6": "6.27.0",
+  })) {
+    assert.equal(rootPackage.pnpm?.overrides?.[dependency], safeVersion);
+  }
 });
 
 test("database migrations use a dedicated disposable image", async () => {

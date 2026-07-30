@@ -24,7 +24,7 @@ RUN pnpm install --frozen-lockfile
 COPY --from=pruner /app/out/full/ .
 
 RUN pnpm --filter @repo/api... build
-RUN pnpm --filter @repo/api deploy --prod --no-optional --ignore-scripts /prod/api
+RUN pnpm --config.auto-install-peers=false --filter @repo/api deploy --prod --no-optional --ignore-scripts /prod/api
 
 RUN cd /prod/api && /app/apps/api/node_modules/.bin/prisma generate
 
@@ -35,7 +35,9 @@ ENV NODE_ENV=production
 ENV PORT=4100
 
 RUN addgroup --system --gid 1001 nodejs \
-  && adduser --system --uid 1001 nestjs
+  && adduser --system --uid 1001 nestjs \
+  && rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+  && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /usr/local/bin/pnpm /usr/local/bin/pnpx
 
 COPY --from=builder --chown=nestjs:nodejs /prod/api ./
 
