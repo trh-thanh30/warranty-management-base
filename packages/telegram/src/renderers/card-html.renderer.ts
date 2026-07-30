@@ -1,10 +1,19 @@
 import type { CiCdNotificationPayload } from "@/telegram.types.js";
-import { statusColors, statusLabels, statusSymbols } from "@/templates/shared.js";
+import {
+  statusColors,
+  statusLabels,
+  statusSymbols,
+} from "@/templates/shared.js";
 import { escapeHtml } from "@/utils/escape-html.js";
 
 export function renderCardHtml(payload: CiCdNotificationPayload): string {
   const colors = statusColors[payload.status];
-  const title = payload.event === "deploy" ? "Deployment" : "CI Pipeline";
+  const title =
+    payload.event === "deploy"
+      ? "Deployment"
+      : payload.event === "publish"
+        ? "Build & Push Images"
+        : "CI Pipeline";
 
   return `<!doctype html>
 <html>

@@ -1,6 +1,6 @@
 export type TelegramNotifyMode = "text" | "image" | "both";
 
-export type TelegramEventType = "ci" | "deploy";
+export type TelegramEventType = "ci" | "deploy" | "publish";
 
 export type TelegramStatus = "success" | "failed" | "running" | "cancelled";
 
@@ -30,6 +30,7 @@ export type CiCdNotificationPayload = {
   status: TelegramStatus;
   project: string;
   environment: string;
+  channel?: string;
   branch?: string;
   repository?: string;
   commitSha?: string;

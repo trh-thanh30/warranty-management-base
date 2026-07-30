@@ -43,7 +43,11 @@ function parseArgs(argv: string[]): CliOptions {
   return options;
 }
 
-function stringOption(options: CliOptions, key: string, fallback?: string): string | undefined {
+function stringOption(
+  options: CliOptions,
+  key: string,
+  fallback?: string,
+): string | undefined {
   const value = options[key];
   return typeof value === "string" ? value : fallback;
 }
@@ -54,15 +58,19 @@ function modeOption(value: string | undefined): TelegramNotifyMode {
 }
 
 function statusOption(value: string | undefined): TelegramStatus {
-  if (value === "failed" || value === "running" || value === "cancelled") return value;
+  if (value === "failed" || value === "running" || value === "cancelled")
+    return value;
   return "success";
 }
 
 function eventOption(value: string | undefined): TelegramEventType {
-  return value === "deploy" ? "deploy" : "ci";
+  if (value === "deploy" || value === "publish") return value;
+  return "ci";
 }
 
-function parseJobs(value: string | undefined): TelegramJobSummary[] | undefined {
+function parseJobs(
+  value: string | undefined,
+): TelegramJobSummary[] | undefined {
   if (!value) return undefined;
 
   const parsed = JSON.parse(value) as TelegramJobSummary[];
@@ -76,25 +84,40 @@ function parseJobs(value: string | undefined): TelegramJobSummary[] | undefined 
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   const mode = modeOption(stringOption(options, "mode"));
-  const repository = stringOption(options, "repository", process.env.GITHUB_REPOSITORY);
+  const repository = stringOption(
+    options,
+    "repository",
+    process.env.GITHUB_REPOSITORY,
+  );
   const repositoryUrl =
     stringOption(options, "repository-url") ??
-    (repository ? `${process.env.GITHUB_SERVER_URL ?? "https://github.com"}/${repository}` : undefined);
+    (repository
+      ? `${process.env.GITHUB_SERVER_URL ?? "https://github.com"}/${repository}`
+      : undefined);
   const commitSha = stringOption(options, "commit", process.env.GITHUB_SHA);
   const author = stringOption(options, "author", process.env.GITHUB_ACTOR);
   const payload: CiCdNotificationPayload = {
     event: eventOption(stringOption(options, "event")),
     status: statusOption(stringOption(options, "status")),
-    project: stringOption(options, "project") ?? repository ?? "unknown-project",
+    project:
+      stringOption(options, "project") ?? repository ?? "unknown-project",
     environment: stringOption(options, "environment") ?? "ci",
+    channel: stringOption(options, "channel"),
     branch: stringOption(options, "branch", process.env.GITHUB_REF_NAME),
     repository,
     repositoryUrl,
     commitSha,
-    commitUrl: commitSha && repositoryUrl ? `${repositoryUrl}/commit/${commitSha}` : undefined,
+    commitUrl:
+      commitSha && repositoryUrl
+        ? `${repositoryUrl}/commit/${commitSha}`
+        : undefined,
     commitMessage: stringOption(options, "message"),
     author,
-    actorUrl: stringOption(options, "actor-url") ?? (author ? `${process.env.GITHUB_SERVER_URL ?? "https://github.com"}/${author}` : undefined),
+    actorUrl:
+      stringOption(options, "actor-url") ??
+      (author
+        ? `${process.env.GITHUB_SERVER_URL ?? "https://github.com"}/${author}`
+        : undefined),
     workflow: stringOption(options, "workflow", process.env.GITHUB_WORKFLOW),
     job: stringOption(options, "job", process.env.GITHUB_JOB),
     jobs: parseJobs(stringOption(options, "jobs-json")),
@@ -115,9 +138,17 @@ async function main() {
 
     if (mode === "image" || mode === "both") {
       const previewDir = process.env.INIT_CWD ?? process.cwd();
-      await writeFile(join(previewDir, "telegram-notification.preview.html"), renderCardHtml(payload));
-      await writeFile(join(previewDir, "telegram-notification.preview.png"), await renderCardPng(payload));
-      console.log("Wrote telegram-notification.preview.html and telegram-notification.preview.png");
+      await writeFile(
+        join(previewDir, "telegram-notification.preview.html"),
+        renderCardHtml(payload),
+      );
+      await writeFile(
+        join(previewDir, "telegram-notification.preview.png"),
+        await renderCardPng(payload),
+      );
+      console.log(
+        "Wrote telegram-notification.preview.html and telegram-notification.preview.png",
+      );
     }
 
     return;

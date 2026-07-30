@@ -275,15 +275,16 @@ jobs:
           fi
 
           pnpm notify:telegram \
-            --event deploy \
+            --event publish \
             --status "$status" \
             --mode text \
             --project "${{ github.event.repository.name }}" \
-            --environment registry \
+            --environment "${{ env.REGISTRY }}" \
+            --channel "${{ needs.publish.outputs.image_channel }}" \
             --branch "${{ needs.publish.outputs.source_branch }}" \
             --repository "${{ github.repository }}" \
             --commit "${{ needs.publish.outputs.image-tag }}" \
-            --message "Images pushed: api, api-migrator, web, admin (${{ needs.publish.outputs.image_channel }})" \
+            --message "api, api-migrator, web, admin" \
             --author "${{ github.actor }}" \
             --workflow "${{ github.workflow }}" \
             --job "Build and Push Images" \
