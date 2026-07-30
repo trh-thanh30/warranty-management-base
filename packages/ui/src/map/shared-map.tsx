@@ -98,6 +98,7 @@ function MapActivationControl({
 }
 
 interface MapResetControlProps {
+  attachFullscreen?: boolean;
   initialBounds?: LatLngBoundsExpression;
   initialCenter?: LatLngExpression;
   initialZoom?: number;
@@ -106,6 +107,7 @@ interface MapResetControlProps {
 }
 
 function MapResetControl({
+  attachFullscreen = false,
   initialBounds,
   initialCenter,
   initialZoom,
@@ -131,7 +133,10 @@ function MapResetControl({
       type="button"
       aria-label={resetLabel}
       title={resetLabel}
-      className="leaflet-control absolute left-2.5 top-[75px] z-[1000] grid size-[34px] place-items-center rounded-[4px] border-2 border-black/20 bg-white text-deep-black shadow-sm transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2"
+      className={cn(
+        "absolute left-2.5 top-[75px] z-[1000] grid size-[34px] place-items-center border-2 border-black/20 bg-white text-deep-black shadow-sm transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2",
+        attachFullscreen ? "rounded-t-[4px]" : "rounded-[4px]",
+      )}
       onClick={handleReset}
     >
       <RotateCcw aria-hidden="true" className="size-4" />
@@ -197,8 +202,10 @@ function MapFullscreenControl({
       aria-label={isFullscreen ? exitFullscreenLabel : fullscreenLabel}
       title={label}
       className={cn(
-        "leaflet-control absolute top-[115px] z-[1000] grid size-[34px] place-items-center rounded-[4px] border-2 border-black/20 bg-white text-deep-black shadow-sm transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2",
-        position === "right" ? "right-2.5" : "left-2.5",
+        "absolute z-[1000] grid size-[34px] place-items-center border-2 border-black/20 bg-white text-deep-black shadow-sm transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2",
+        position === "right"
+          ? "right-2.5 top-[115px] rounded-[4px]"
+          : "left-2.5 top-[109px] rounded-b-[4px] border-t-0",
       )}
       onClick={handleToggle}
     >
@@ -289,6 +296,11 @@ export function SharedMap({
       ) : null}
       {showResetControl && resetLabel ? (
         <MapResetControl
+          attachFullscreen={Boolean(
+            fullscreenLabel &&
+            exitFullscreenLabel &&
+            fullscreenControlPosition === "left",
+          )}
           initialBounds={initialBounds}
           initialCenter={initialCenter}
           initialZoom={initialZoom}

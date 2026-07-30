@@ -62,10 +62,8 @@ test("shared map reset restores its initial view and interaction state", async (
   assert.match(source, /<RotateCcw/);
   assert.match(source, /aria-label=\{resetLabel\}/);
   assert.match(source, /title=\{resetLabel\}/);
-  assert.match(
-    source,
-    /left-2\.5 top-\[75px\].*size-\[34px\].*rounded-\[4px\]/,
-  );
+  assert.match(source, /left-2\.5 top-\[75px\].*size-\[34px\]/);
+  assert.doesNotMatch(source, /leaflet-control absolute left-2\.5/);
 });
 
 test("shared map exposes an accessible fullscreen control and redraws Leaflet", async () => {
@@ -86,12 +84,9 @@ test("shared map exposes an accessible fullscreen control and redraws Leaflet", 
   );
   assert.match(
     sharedMapSource,
-    /top-\[115px\].*size-\[34px\].*rounded-\[4px\]/,
+    /position === "right"\s*\?\s*"right-2\.5 top-\[115px\] rounded-\[4px\]"\s*:\s*"left-2\.5 top-\[109px\] rounded-b-\[4px\] border-t-0"/,
   );
-  assert.match(
-    sharedMapSource,
-    /position === "right" \? "right-2\.5" : "left-2\.5"/,
-  );
+  assert.doesNotMatch(sharedMapSource, /leaflet-control absolute top-/);
   assert.match(aboutMapSource, /fullscreenLabel=\{t\("fullscreenMap"\)\}/);
   assert.match(
     aboutMapSource,
