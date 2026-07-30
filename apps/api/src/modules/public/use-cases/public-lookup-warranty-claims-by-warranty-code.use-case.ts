@@ -1,6 +1,6 @@
 import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/warranty-claims.repository';
 import { Injectable } from '@nestjs/common';
-import { toPublicWarrantyClaimResponse } from '@/modules/public/use-cases/public-lookup-warranty-claim-by-code.use-case';
+import { toPublicWarrantyClaimResponse } from '@/modules/public/mappers/public-warranty-claim.mapper';
 
 @Injectable()
 export class PublicLookupWarrantyClaimsByWarrantyCodeUseCase {

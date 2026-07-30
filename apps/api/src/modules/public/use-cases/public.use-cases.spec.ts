@@ -5,7 +5,9 @@ import { PublicListNetworkDirectoryUseCase } from '@/modules/public/use-cases/pu
 import { PublicListNetworkDirectoryFilterOptionsUseCase } from '@/modules/public/use-cases/public-list-network-directory-filter-options.use-case';
 import { PublicListDealersUseCase } from '@/modules/public/use-cases/public-list-dealers.use-case';
 import { PublicListDealerFilterOptionsUseCase } from '@/modules/public/use-cases/public-list-dealer-filter-options.use-case';
-import { toPublicWarrantyClaimResponse } from '@/modules/public/use-cases/public-lookup-warranty-claim-by-code.use-case';
+import { toPublicWarrantyClaimResponse } from '@/modules/public/mappers/public-warranty-claim.mapper';
+import { CreatePublicWarrantyClaimUseCase } from '@/modules/public/use-cases/create-public-warranty-claim.use-case';
+import { PublicLookupWarrantyClaimByCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claim-by-code.use-case';
 import { CreatePublicWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-public-warranty-activation-request.dto';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
@@ -353,7 +355,7 @@ describe('Public use cases', () => {
 
   it('maps warranty claims without requester or customer fields', () => {
     const result = toPublicWarrantyClaimResponse({
-      claim_code: 'CLM000001',
+      claim_code: 'CLM-0123456789ABCDEFABCD',
       warranty_code: 'WM-2026-ABCDEF',
       issue_title: 'May khong hoat dong',
       status: 'REVIEWING',
@@ -361,6 +363,40 @@ describe('Public use cases', () => {
       due_at: new Date('2026-07-06T00:00:00.000Z'),
       submitted_at: new Date('2026-07-03T00:00:00.000Z'),
       resolved_at: null,
+      status_history: [
+        {
+          id: 'status-history-id',
+          from_status: 'SUBMITTED',
+          to_status: 'REVIEWING',
+          note: 'Internal eligibility note',
+          changed_by_user_id: 'admin-id',
+          changed_by: {
+            id: 'admin-id',
+            username: 'admin',
+            full_name: 'Admin User',
+            email: 'admin@example.com',
+          },
+          created_at: new Date('2026-07-03T08:00:00.000Z'),
+        },
+      ],
+      service_center_history: [
+        {
+          id: 'service-center-history-id',
+          from_service_center_id: null,
+          from_service_center_name: null,
+          to_service_center_id: 'service-center-id',
+          to_service_center_name: 'Hanoi Warranty Center',
+          note: 'Internal assignment reason',
+          changed_by_user_id: 'admin-id',
+          changed_by: {
+            id: 'admin-id',
+            username: 'admin',
+            full_name: 'Admin User',
+            email: 'admin@example.com',
+          },
+          created_at: new Date('2026-07-03T09:00:00.000Z'),
+        },
+      ],
       product: {
         display_name: null,
         template: {
@@ -370,17 +406,66 @@ describe('Public use cases', () => {
         },
       },
       service_center: null,
-    });
+    } as never);
 
     expect(result).toMatchObject({
-      claimCode: 'CLM000001',
+      claimCode: 'CLM-0123456789ABCDEFABCD',
       warrantyCode: 'WM-2026-ABCDEF',
       product: {
         name: 'May bom',
       },
     });
+    expect(result.timeline).toEqual([
+      {
+        type: 'STATUS_CHANGED',
+        status: 'SUBMITTED',
+        createdAt: '2026-07-03T00:00:00.000Z',
+      },
+      {
+        type: 'STATUS_CHANGED',
+        status: 'REVIEWING',
+        createdAt: '2026-07-03T08:00:00.000Z',
+      },
+      {
+        type: 'SERVICE_CENTER_ASSIGNED',
+        serviceCenterName: 'Hanoi Warranty Center',
+        createdAt: '2026-07-03T09:00:00.000Z',
+      },
+    ]);
+    expect(JSON.stringify(result.timeline)).not.toContain('admin');
+    expect(JSON.stringify(result.timeline)).not.toContain('Internal');
     expect(result).not.toHaveProperty('requesterName');
     expect(result).not.toHaveProperty('customer');
+  });
+
+  it('returns an initial public timeline when a warranty claim is created', async () => {
+    const createWarrantyClaimUseCase = {
+      execute: jest.fn().mockResolvedValue({
+        claimCode: 'CLM-0123456789ABCDEFABCD',
+        warrantyCode: 'WM-2026-ABCDEF',
+        issueTitle: 'May khong hoat dong',
+        status: 'SUBMITTED',
+        priority: 'NORMAL',
+        dueAt: new Date('2026-07-06T00:00:00.000Z'),
+        submittedAt: new Date('2026-07-03T00:00:00.000Z'),
+        resolvedAt: null,
+        product: null,
+        serviceCenter: null,
+      }),
+    };
+    const useCase = new CreatePublicWarrantyClaimUseCase(
+      createWarrantyClaimUseCase as never,
+    );
+
+    const result = await useCase.execute({} as never);
+
+    expect(result.timeline).toEqual([
+      {
+        type: 'STATUS_CHANGED',
+        status: 'SUBMITTED',
+        createdAt: '2026-07-03T00:00:00.000Z',
+      },
+    ]);
   });
 });
 
@@ -394,6 +479,42 @@ describe('Public warranty lookup endpoint', () => {
     expect(controllerSource).toMatch(
       /@Throttle\(\{\s*default:\s*\{\s*limit:\s*10,\s*ttl:\s*60_000\s*\}\s*\}\)\s*@Get\('warranties\/lookup'\)/,
     );
+  });
+});
+
+describe('Public warranty claim tracking', () => {
+  const warrantyClaimsRepository = {
+    findByClaimCode: jest.fn(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('normalizes random claim codes before lookup', async () => {
+    warrantyClaimsRepository.findByClaimCode.mockResolvedValue(null);
+    const useCase = new PublicLookupWarrantyClaimByCodeUseCase(
+      warrantyClaimsRepository as never,
+    );
+
+    await expect(
+      useCase.execute(' clm-0123456789abcdefabcd '),
+    ).rejects.toMatchObject({ statusCode: 404 });
+    expect(warrantyClaimsRepository.findByClaimCode).toHaveBeenCalledWith(
+      'CLM-0123456789ABCDEFABCD',
+    );
+  });
+
+  it('rejects malformed claim codes before querying storage', async () => {
+    const useCase = new PublicLookupWarrantyClaimByCodeUseCase(
+      warrantyClaimsRepository as never,
+    );
+
+    await expect(useCase.execute('CLM-')).rejects.toMatchObject({
+      code: 'WARRANTY_CLAIM_CODE_INVALID',
+      statusCode: 400,
+    });
+    expect(warrantyClaimsRepository.findByClaimCode).not.toHaveBeenCalled();
   });
 });
 
@@ -442,6 +563,20 @@ describe('Public warranty claim endpoint', () => {
 
     expect(controllerSource).toMatch(
       /@Throttle\(\{\s*default:\s*\{\s*limit:\s*5,\s*ttl:\s*60_000\s*\}\s*\}\)\s*@Post\('warranty-claims'\)/,
+    );
+  });
+
+  it('rate limits public warranty claim tracking reads', () => {
+    const controllerSource = readFileSync(
+      require.resolve('@/modules/public/public.controller'),
+      'utf8',
+    );
+
+    expect(controllerSource).toMatch(
+      /@Throttle\(\{\s*default:\s*\{\s*limit:\s*10,\s*ttl:\s*60_000\s*\}\s*\}\)\s*@Get\('warranty-claims\/by-code\/:claimCode'\)/,
+    );
+    expect(controllerSource).toMatch(
+      /@Throttle\(\{\s*default:\s*\{\s*limit:\s*10,\s*ttl:\s*60_000\s*\}\s*\}\)\s*@Get\('warranty-claims\/by-warranty-code\/:warrantyCode'\)/,
     );
   });
 });

@@ -55,18 +55,6 @@ export class WarrantyClaimsRepository {
     });
   }
 
-  findLastClaimCode(prefix: string) {
-    return this.prismaService.warrantyClaim.findFirst({
-      where: {
-        claim_code: {
-          startsWith: prefix,
-        },
-      },
-      orderBy: { claim_code: 'desc' },
-      select: { claim_code: true },
-    });
-  }
-
   findByWarrantyCode(warrantyCode: string) {
     return this.prismaService.warrantyClaim.findMany({
       where: { warranty_code: warrantyCode },

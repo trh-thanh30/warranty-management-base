@@ -39,6 +39,13 @@ export class CreatePublicWarrantyClaimUseCase {
             address: claim.serviceCenter.address,
           }
         : null,
+      timeline: [
+        {
+          type: 'STATUS_CHANGED' as const,
+          status: claim.status,
+          createdAt: claim.submittedAt.toISOString(),
+        },
+      ],
     };
   }
 }

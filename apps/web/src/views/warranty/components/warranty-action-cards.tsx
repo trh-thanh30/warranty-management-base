@@ -59,7 +59,7 @@ export function WarrantyActionCards() {
                 initial="hidden"
                 whileInView="show"
                 viewport={revealViewportOnce}
-                className="group bg-white rounded-[24px] border border-border-gray shadow-md hover:shadow-xl hover:border-premium-red transition-all"
+                className="group rounded-md border border-border-gray bg-white shadow-md transition-all hover:border-premium-red hover:shadow-xl"
               >
                 <Link
                   href={action.href}
@@ -69,7 +69,7 @@ export function WarrantyActionCards() {
                     <div className="flex size-12 items-center justify-center text-stone-gray transition-colors group-hover:text-deep-black">
                       <Icon className="size-7" strokeWidth={1.6} />
                     </div>
-                    <span className="rounded-full bg-light-gray px-3 py-1 text-xs font-medium uppercase text-stone-gray">
+                    <span className="rounded-md bg-light-gray px-3 py-1 text-xs font-medium uppercase text-stone-gray">
                       {t(`items.${action.id}.badge`)}
                     </span>
                   </div>

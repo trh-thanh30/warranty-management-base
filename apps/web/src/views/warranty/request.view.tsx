@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Container } from "@/src/components/common/container";
 import { useWarrantyClaimRequest } from "@/src/hooks/use-warranty-claim-request";
+import { Link } from "@/src/i18n/navigation";
 import { WarrantyClaimRequestForm } from "./components/warranty-claim-request-form";
 
 export function WarrantyClaimRequestView() {
@@ -112,14 +113,29 @@ export function WarrantyClaimRequestView() {
               </div>
             </div>
 
-            <Button
-              className="w-full rounded-md border-premium-red px-8 text-xs font-semibold uppercase text-premium-red transition-colors hover:bg-premium-red hover:text-white sm:w-auto"
-              onClick={resetForm}
-              type="button"
-              variant="outline"
-            >
-              {t("success.reset")}
-            </Button>
+            <div className="flex flex-col justify-center gap-3 sm:flex-row">
+              <Button
+                asChild
+                className="w-full rounded-md bg-premium-red px-8 text-xs font-semibold uppercase text-white hover:bg-warm-red sm:w-auto"
+              >
+                <Link
+                  href={{
+                    pathname: "/warranty/track",
+                    query: { claimCode: claim.claimCode },
+                  }}
+                >
+                  {t("success.track")}
+                </Link>
+              </Button>
+              <Button
+                className="w-full rounded-md border-premium-red px-8 text-xs font-semibold uppercase text-premium-red transition-colors hover:bg-premium-red hover:text-white sm:w-auto"
+                onClick={resetForm}
+                type="button"
+                variant="outline"
+              >
+                {t("success.reset")}
+              </Button>
+            </div>
           </section>
         ) : (
           <div className="rounded-md border border-border-gray bg-white p-6 shadow-xl sm:p-10">

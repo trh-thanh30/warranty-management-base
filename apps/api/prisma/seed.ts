@@ -1249,7 +1249,7 @@ async function main() {
   const repairClaimAt = addDays(seedNow, -10);
 
   const submittedClaim = await upsertDemoWarrantyClaim({
-    claimCode: 'CLM-DEMO-SUBMITTED',
+    claimCode: 'CLM-00000000000000000001',
     warrantyId: camryDemo.warranty.id,
     productId: camryDemo.product.id,
     customerId: customerA.id,
@@ -1276,7 +1276,7 @@ async function main() {
   });
 
   await upsertDemoWarrantyClaim({
-    claimCode: 'CLM-DEMO-REVIEWING',
+    claimCode: 'CLM-00000000000000000002',
     warrantyId: civicDemo.warranty.id,
     productId: civicDemo.product.id,
     customerId: customerB.id,
@@ -1310,7 +1310,7 @@ async function main() {
   });
 
   await upsertDemoWarrantyClaim({
-    claimCode: 'CLM-DEMO-IN-REPAIR',
+    claimCode: 'CLM-00000000000000000003',
     warrantyId: walkInBatteryDemo.warranty.id,
     productId: walkInBatteryDemo.product.id,
     customerId: walkInCustomer.id,
@@ -1422,13 +1422,13 @@ async function main() {
     id: '00000000-0000-4000-8000-000000000301',
     title: 'New warranty claim assigned',
     content:
-      'Claim CLM-DEMO-IN-REPAIR requires coordination with the assigned service center.',
+      'Claim CLM-00000000000000000003 requires coordination with the assigned service center.',
     type: 'WARRANTY_CLAIM_ASSIGNED',
     source: notification_source.SYSTEM,
     scope: notification_scope.ROLE,
     deliveryStatus: notification_delivery_status.SENT,
     sentAt: recentNotificationAt,
-    metadata: { claimCode: 'CLM-DEMO-IN-REPAIR' },
+    metadata: { claimCode: 'CLM-00000000000000000003' },
     recipients: [
       {
         userId: adminUser.id,
@@ -1445,13 +1445,13 @@ async function main() {
     id: '00000000-0000-4000-8000-000000000302',
     title: 'Warranty claim SLA breached',
     content:
-      'Claim CLM-DEMO-IN-REPAIR has passed its expected handling deadline.',
+      'Claim CLM-00000000000000000003 has passed its expected handling deadline.',
     type: NOTIFICATION_TYPES.WARRANTY_CLAIM_SLA_BREACHED,
     source: notification_source.SYSTEM,
     scope: notification_scope.ROLE,
     deliveryStatus: notification_delivery_status.SENT,
     sentAt: new Date(seedNow.getTime() - 60 * 60 * 1000),
-    metadata: { claimCode: 'CLM-DEMO-IN-REPAIR' },
+    metadata: { claimCode: 'CLM-00000000000000000003' },
     recipients: [
       {
         userId: adminUser.id,
@@ -1474,7 +1474,7 @@ async function main() {
     deliveryStatus: notification_delivery_status.SENT,
     createdById: adminUser.id,
     sentAt: readNotificationAt,
-    metadata: { claimCode: 'CLM-DEMO-IN-REPAIR' },
+    metadata: { claimCode: 'CLM-00000000000000000003' },
     recipients: [
       {
         userId: adminUser.id,
@@ -1512,7 +1512,7 @@ async function main() {
     `Service centers: ${hanoiServiceCenter.name}, ${hcmServiceCenter.name}, ${danangServiceCenter.name}`,
   );
   console.log(
-    'Warranty claims: CLM-DEMO-SUBMITTED, CLM-DEMO-REVIEWING, CLM-DEMO-IN-REPAIR',
+    'Warranty claims: CLM-00000000000000000001, CLM-00000000000000000002, CLM-00000000000000000003',
   );
   console.log('Notifications: 5 sent demo messages and 1 scheduled message');
 }

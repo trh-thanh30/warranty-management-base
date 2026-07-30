@@ -1,64 +1,29 @@
 import { GenerateWarrantyClaimCodeUseCase } from '@/modules/warranty-claims/use-cases/generate-warranty-claim-code.use-case';
 
 describe('GenerateWarrantyClaimCodeUseCase', () => {
-  const warrantyClaimsRepository = {
-    findLastClaimCode: jest.fn(),
-  };
+  it('generates an 80-bit random public tracking code', async () => {
+    const useCase = new GenerateWarrantyClaimCodeUseCase();
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('starts at CLM000001 when no prior claim code exists', async () => {
-    warrantyClaimsRepository.findLastClaimCode.mockResolvedValue(null);
-    const useCase = new GenerateWarrantyClaimCodeUseCase(
-      warrantyClaimsRepository as never,
-    );
-
-    await expect(useCase.generateWarrantyClaimCode()).resolves.toBe(
-      'CLM000001',
-    );
-    expect(warrantyClaimsRepository.findLastClaimCode).toHaveBeenCalledWith(
-      'CLM',
+    await expect(useCase.generateWarrantyClaimCode()).resolves.toMatch(
+      /^CLM-[A-F0-9]{20}$/,
     );
   });
 
-  it('generates a sequential batch after the last claim code', async () => {
-    warrantyClaimsRepository.findLastClaimCode.mockResolvedValue({
-      claim_code: 'CLM000099',
-    });
-    const useCase = new GenerateWarrantyClaimCodeUseCase(
-      warrantyClaimsRepository as never,
-    );
+  it('generates a unique random batch', async () => {
+    const useCase = new GenerateWarrantyClaimCodeUseCase();
 
-    await expect(useCase.generateWarrantyClaimCodeBatch(3)).resolves.toEqual([
-      'CLM000100',
-      'CLM000101',
-      'CLM000102',
-    ]);
+    const codes = await useCase.generateWarrantyClaimCodeBatch(100);
+
+    expect(codes).toHaveLength(100);
+    expect(new Set(codes).size).toBe(100);
+    expect(codes).toEqual(
+      expect.arrayContaining([expect.stringMatching(/^CLM-[A-F0-9]{20}$/)]),
+    );
   });
 
   it('keeps execute as a compatibility alias for single code generation', async () => {
-    warrantyClaimsRepository.findLastClaimCode.mockResolvedValue({
-      claim_code: 'CLM000001',
-    });
-    const useCase = new GenerateWarrantyClaimCodeUseCase(
-      warrantyClaimsRepository as never,
-    );
+    const useCase = new GenerateWarrantyClaimCodeUseCase();
 
-    await expect(useCase.execute()).resolves.toBe('CLM000002');
-  });
-
-  it('starts a new sequential range when the last matching code is legacy format', async () => {
-    warrantyClaimsRepository.findLastClaimCode.mockResolvedValue({
-      claim_code: 'CLM-2026-ABC123',
-    });
-    const useCase = new GenerateWarrantyClaimCodeUseCase(
-      warrantyClaimsRepository as never,
-    );
-
-    await expect(useCase.generateWarrantyClaimCode()).resolves.toBe(
-      'CLM000001',
-    );
+    await expect(useCase.execute()).resolves.toMatch(/^CLM-[A-F0-9]{20}$/);
   });
 });

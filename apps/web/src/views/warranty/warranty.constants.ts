@@ -58,9 +58,3 @@ export const demoWarrantyRecord = {
   rearGlass: "SP30",
   notes: "",
 } as const;
-
-export const demoWarrantyTicket = {
-  carPlate: "30H-888.88",
-  createdDate: "21/07/2026",
-  step: 2,
-} as const;

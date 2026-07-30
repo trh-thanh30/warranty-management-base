@@ -5,9 +5,23 @@ import type {
   HttpClient,
   PublicWarrantyClaimSummary,
 } from "@repo/shared";
+import { normalizeWarrantyClaimCode } from "@repo/shared/utils";
 
 export class WarrantyClaimsService {
-  constructor(private readonly http: Pick<HttpClient, "post">) {}
+  constructor(private readonly http: Pick<HttpClient, "get" | "post">) {}
+
+  async getWarrantyClaimByCode(
+    claimCode: string,
+  ): Promise<PublicWarrantyClaimSummary> {
+    const normalizedClaimCode = normalizeWarrantyClaimCode(claimCode);
+    const response = await this.http.get<
+      ApiResponse<PublicWarrantyClaimSummary>
+    >(
+      `/public/warranty-claims/by-code/${encodeURIComponent(normalizedClaimCode)}`,
+    );
+
+    return response.data;
+  }
 
   async createWarrantyClaim(
     body: CreateWarrantyClaimBody,

@@ -5,7 +5,7 @@ describe('CreatePublicWarrantyClaimUseCase', () => {
     const createWarrantyClaimUseCase = {
       execute: jest.fn().mockResolvedValue({
         id: 'claim-id',
-        claimCode: 'CLM-2026-ABC123',
+        claimCode: 'CLM-0123456789ABCDEFABCD',
         warrantyId: 'warranty-id',
         productId: 'product-id',
         customerId: 'customer-id',
@@ -56,7 +56,7 @@ describe('CreatePublicWarrantyClaimUseCase', () => {
       requireOwnerMatch: true,
     });
     expect(result).toMatchObject({
-      claimCode: 'CLM-2026-ABC123',
+      claimCode: 'CLM-0123456789ABCDEFABCD',
       warrantyCode: 'WM-2026-ABCDEF',
       issueTitle: 'Bubble',
       status: 'SUBMITTED',

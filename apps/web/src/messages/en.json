@@ -1526,6 +1526,7 @@
         "submittedStatus": "Submitted",
         "copyCode": "Copy request code",
         "copied": "Request code copied",
+        "track": "Track progress",
         "reset": "Submit another request"
       },
       "errors": {
@@ -1576,20 +1577,53 @@
     "track": {
       "eyebrow": "Track service progress",
       "title": "Track warranty processing",
-      "description": "Enter a request ID or phone number to view appointments and processing progress.",
-      "placeholder": "Enter REQ-... ticket or phone number...",
-      "search": "Check",
-      "mock": {
-        "customerName": "Nguyen Van An",
-        "issue": "Bubbles on the left side window",
-        "status": "Received & Scheduling a technician",
-        "technician": "Tran Van Binh - Panda Auto Hanoi"
+      "description": "Enter your CLM request code to view its current status and actual processing history.",
+      "form": {
+        "claimCodeLabel": "Warranty claim code",
+        "placeholder": "For example: CLM-0123456789ABCDEFABCD",
+        "submit": "Check",
+        "submitting": "Checking...",
+        "help": "The CLM code is issued after you submit a warranty support request."
+      },
+      "validation": {
+        "claimCodeInvalid": "Enter a valid CLM request code."
+      },
+      "errors": {
+        "notFound": "No warranty request was found for this code.",
+        "rateLimit": "You have made too many lookups. Please try again later.",
+        "request": "Unable to track this warranty request. Please try again."
       },
       "result": {
-        "ticket": "Ticket ID",
-        "customer": "Customer",
-        "carPlate": "License plate",
-        "technician": "Assigned technician"
+        "claimCode": "Request code",
+        "warrantyCode": "E-Warranty code",
+        "issue": "Reported issue",
+        "priority": "Priority",
+        "submittedAt": "Submitted",
+        "dueAt": "Expected due date",
+        "resolvedAt": "Completed",
+        "product": "Product",
+        "serviceCenter": "Warranty service center"
+      },
+      "statuses": {
+        "SUBMITTED": "Submitted",
+        "REVIEWING": "Under review",
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected",
+        "IN_REPAIR": "In repair",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled"
+      },
+      "priorities": {
+        "LOW": "Low",
+        "NORMAL": "Normal",
+        "HIGH": "High",
+        "URGENT": "Urgent"
+      },
+      "timeline": {
+        "title": "Processing history",
+        "statusChanged": "Status: {status}",
+        "serviceCenterAssigned": "Assigned to {name}",
+        "serviceCenterChanged": "Transferred to {name}"
       }
     }
   },

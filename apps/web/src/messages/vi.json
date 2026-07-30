@@ -1526,6 +1526,7 @@
         "submittedStatus": "Đã gửi",
         "copyCode": "Sao chép mã yêu cầu",
         "copied": "Đã sao chép mã yêu cầu",
+        "track": "Theo dõi tiến độ",
         "reset": "Gửi yêu cầu khác"
       },
       "errors": {
@@ -1576,20 +1577,53 @@
     "track": {
       "eyebrow": "Theo dõi tiến độ dịch vụ",
       "title": "Theo dõi xử lý bảo hành",
-      "description": "Nhập mã phiếu yêu cầu hoặc số điện thoại để xem lịch hẹn và tiến độ xử lý.",
-      "placeholder": "Nhập mã phiếu REQ-... hoặc SĐT...",
-      "search": "Kiểm tra",
-      "mock": {
-        "customerName": "Nguyễn Văn An",
-        "issue": "Bong tróc bọt khí kính sườn trái",
-        "status": "Đang tiếp nhận & Lên lịch kỹ thuật",
-        "technician": "Trần Văn Bình - Panda Auto Hà Nội"
+      "description": "Nhập mã yêu cầu CLM để xem trạng thái hiện tại và lịch sử xử lý thực tế.",
+      "form": {
+        "claimCodeLabel": "Mã yêu cầu bảo hành",
+        "placeholder": "Ví dụ: CLM-0123456789ABCDEFABCD",
+        "submit": "Kiểm tra",
+        "submitting": "Đang kiểm tra...",
+        "help": "Mã CLM được cấp sau khi bạn gửi yêu cầu bảo hành."
+      },
+      "validation": {
+        "claimCodeInvalid": "Vui lòng nhập đúng mã yêu cầu CLM."
+      },
+      "errors": {
+        "notFound": "Không tìm thấy yêu cầu bảo hành với mã này.",
+        "rateLimit": "Bạn đã tra cứu quá nhiều lần. Vui lòng thử lại sau.",
+        "request": "Không thể tra cứu tiến độ bảo hành. Vui lòng thử lại."
       },
       "result": {
-        "ticket": "Mã phiếu",
-        "customer": "Khách hàng",
-        "carPlate": "Biển số xe",
-        "technician": "Kỹ thuật phụ trách"
+        "claimCode": "Mã yêu cầu",
+        "warrantyCode": "Mã E-Warranty",
+        "issue": "Vấn đề cần hỗ trợ",
+        "priority": "Mức ưu tiên",
+        "submittedAt": "Ngày gửi",
+        "dueAt": "Hạn xử lý dự kiến",
+        "resolvedAt": "Ngày hoàn tất",
+        "product": "Sản phẩm",
+        "serviceCenter": "Trung tâm bảo hành"
+      },
+      "statuses": {
+        "SUBMITTED": "Đã gửi",
+        "REVIEWING": "Đang xem xét",
+        "APPROVED": "Đã duyệt",
+        "REJECTED": "Đã từ chối",
+        "IN_REPAIR": "Đang sửa chữa",
+        "COMPLETED": "Đã hoàn tất",
+        "CANCELLED": "Đã hủy"
+      },
+      "priorities": {
+        "LOW": "Thấp",
+        "NORMAL": "Bình thường",
+        "HIGH": "Cao",
+        "URGENT": "Khẩn cấp"
+      },
+      "timeline": {
+        "title": "Lịch sử xử lý",
+        "statusChanged": "Trạng thái: {status}",
+        "serviceCenterAssigned": "Đã phân công: {name}",
+        "serviceCenterChanged": "Đã chuyển đến: {name}"
       }
     }
   },

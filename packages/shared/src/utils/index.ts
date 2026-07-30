@@ -1,5 +1,6 @@
 export * from "./date.ts";
 export * from "./website-config.ts";
+export * from "./warranty-claim-code.ts";
 export * from "./error.ts";
 export * from "./geo.ts";
 export * from "./invariant.ts";

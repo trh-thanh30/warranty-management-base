@@ -66,11 +66,13 @@ export class PublicController {
     return this.createPublicWarrantyClaimUseCase.execute(dto);
   }
 
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Get('warranty-claims/by-code/:claimCode')
   lookupWarrantyClaimByCode(@Param('claimCode') claimCode: string) {
     return this.publicLookupWarrantyClaimByCodeUseCase.execute(claimCode);
   }
 
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Get('warranty-claims/by-warranty-code/:warrantyCode')
   lookupWarrantyClaimsByWarrantyCode(
     @Param('warrantyCode') warrantyCode: string,
