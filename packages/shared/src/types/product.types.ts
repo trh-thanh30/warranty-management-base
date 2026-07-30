@@ -190,6 +190,7 @@ export type ListProductsQuery = PaginationQuery & {
 export type CreateProductBody = {
   templateId: string;
   productCode?: string;
+  warrantyCode?: string;
   categoryId?: string;
   displayName?: string;
   status?: ProductStatus;

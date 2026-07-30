@@ -1,7 +1,6 @@
 "use client";
 
-import { Eye } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { Link } from "@/src/i18n/navigation";
 import type { ProductResponse } from "@repo/shared";
 import {
   Button,
@@ -12,7 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui";
-import { Link } from "@/src/i18n/navigation";
+import { Eye } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { ProductStatusBadge } from "../../products/components/product-status-badge";
 import { WarrantyStatusBadge } from "../../products/components/warranty-status-badge";
 import {
@@ -28,9 +28,9 @@ export function LinkedProductsTable({
   const t = useTranslations("ProductTemplates");
 
   return (
-    <div className="overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800">
-      <Table className="min-w-[68rem]">
-        <TableHeader>
+    <div className="max-h-144 overflow-auto rounded-md border border-slate-200 dark:border-slate-800">
+      <Table className="min-w-272">
+        <TableHeader className="sticky top-0 z-10 bg-white dark:bg-slate-950 [&_th]:h-auto [&_th]:whitespace-normal [&_th]:text-wrap [&_th]:py-2 [&_th]:leading-4">
           <TableRow>
             <TableHead>{t("linkedProduct")}</TableHead>
             <TableHead>{t("productCode")}</TableHead>

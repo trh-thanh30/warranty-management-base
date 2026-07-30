@@ -77,6 +77,22 @@ test("sends an explicitly entered product code", () => {
   );
 });
 
+test("sends an explicitly entered warranty code when creating a product", () => {
+  assert.equal(
+    toCreateProductBody({
+      categoryId: "category-id",
+      displayName: "",
+      installationPosition: "",
+      productCode: "",
+      serialNumber: "",
+      status: "ACTIVE",
+      templateId: "template-id",
+      warrantyCode: " wm-2026-manual1 ",
+    }).warrantyCode,
+    "WM-2026-MANUAL1",
+  );
+});
+
 test("updates only physical product fields and preserves unrelated metadata", () => {
   assert.deepEqual(
     toUpdateProductBody(

@@ -1,8 +1,7 @@
 "use client";
 
-import { Ban, Eye, MoreHorizontal, Pencil, PlusCircle } from "lucide-react";
-import { useTranslations } from "next-intl";
-import type { ReactNode } from "react";
+import { usePermissions } from "@/src/hooks/use-permissions";
+import { Link } from "@/src/i18n/navigation";
 import type { ProductTemplateSummary } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
@@ -20,8 +19,9 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui";
-import { usePermissions } from "@/src/hooks/use-permissions";
-import { Link } from "@/src/i18n/navigation";
+import { Ban, Eye, MoreHorizontal, Pencil, PlusCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import { ProductTemplatePublicationBadge } from "./product-template-publication-badge";
 
 export function ProductTemplatesTable({
@@ -65,9 +65,9 @@ export function ProductTemplatesTable({
           </article>
         ))}
       </div>
-      <div className="hidden overflow-x-auto rounded-md border border-slate-200 lg:block dark:border-slate-800">
-        <Table>
-          <TableHeader>
+      <div className="hidden max-h-144 overflow-auto rounded-md border border-slate-200 lg:block dark:border-slate-800">
+        <Table className="min-w-5xl">
+          <TableHeader className="sticky top-0 z-10 bg-white dark:bg-slate-950 [&_th]:h-auto [&_th]:whitespace-normal [&_th]:text-wrap [&_th]:py-2 [&_th]:leading-4">
             <TableRow>
               <TableHead>{t("name")}</TableHead>
               <TableHead>{t("sku")}</TableHead>

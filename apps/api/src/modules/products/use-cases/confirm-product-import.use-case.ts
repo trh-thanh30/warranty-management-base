@@ -59,9 +59,10 @@ export class ConfirmProductImportUseCase {
         const productCode =
           row.productCode?.trim() ||
           (await this.generateProductCodeUseCase.execute(importDate, tx));
-        const warrantyCode = await this.generateWarrantyCodeUseCase.execute(
-          importDate,
+        const warrantyCode = await this.resolveWarrantyCode(
           tx,
+          row,
+          importDate,
         );
         const product = await tx.product.create({
           data: {
@@ -138,10 +139,7 @@ export class ConfirmProductImportUseCase {
 
     if (warranty?.warranty_code) return;
 
-    const warrantyCode = await this.generateWarrantyCodeUseCase.execute(
-      importDate,
-      tx,
-    );
+    const warrantyCode = await this.resolveWarrantyCode(tx, row, importDate);
 
     if (warranty) {
       await tx.warranty.update({
@@ -177,5 +175,17 @@ export class ConfirmProductImportUseCase {
 
   private blankToNull(value: string | null | undefined) {
     return value?.trim() || null;
+  }
+
+  private async resolveWarrantyCode(
+    tx: Prisma.TransactionClient,
+    row: PreparedProductImportRow,
+    importDate: Date,
+  ) {
+    const requestedCode = this.blankToNull(row.warrantyCode)?.toUpperCase();
+    return (
+      requestedCode ??
+      (await this.generateWarrantyCodeUseCase.execute(importDate, tx))
+    );
   }
 }

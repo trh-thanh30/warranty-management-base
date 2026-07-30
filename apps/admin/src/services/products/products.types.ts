@@ -12,6 +12,7 @@ export type ProductImportRowData = {
   templateSku: string;
   displayName: string | null;
   installationPosition: string | null;
+  warrantyCode: string | null;
   serialNumber: string | null;
   status: "ACTIVE" | "INACTIVE";
 };

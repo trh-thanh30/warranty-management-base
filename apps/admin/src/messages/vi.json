@@ -943,6 +943,7 @@
     "duplicateProductCode": "Mã sản phẩm này đã tồn tại.",
     "warrantyCode": "Mã bảo hành",
     "warrantyCodePlaceholder": "Ví dụ: WAR-CAR-2026-01",
+    "warrantyCodeCreateDescription": "Không bắt buộc. Để trống để hệ thống tự sinh mã bảo hành duy nhất.",
     "warrantyCodeEditableDescription": "Có thể đổi mã trước khi kích hoạt. Nếu xóa trắng, hệ thống vẫn giữ mã hiện tại.",
     "warrantyCodeNotDraftDescription": "Mã đã bị khóa vì bảo hành không còn ở trạng thái nháp.",
     "warrantyCodeOpenRequestDescription": "Mã đã bị khóa khi có yêu cầu kích hoạt đang chờ hoặc đã duyệt.",

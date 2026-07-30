@@ -51,11 +51,16 @@ export class CreateProductUseCase {
       }
     }
 
+    const requestedWarrantyCode =
+      dto.warrantyCode?.trim().toUpperCase() || null;
+    const resolvedWarrantyCode = requestedWarrantyCode
+      ? await this.resolveRequestedWarrantyCode(requestedWarrantyCode)
+      : null;
+
     const product = await this.prismaService.$transaction(async (tx) => {
-      const warrantyCode = await this.generateWarrantyCodeUseCase.execute(
-        new Date(),
-        tx,
-      );
+      const warrantyCode =
+        resolvedWarrantyCode ??
+        (await this.generateWarrantyCodeUseCase.execute(new Date(), tx));
 
       return tx.product.create({
         data: {
@@ -116,6 +121,15 @@ export class CreateProductUseCase {
       throw new ConflictError('Product code already exists');
     }
     return productCode;
+  }
+
+  private async resolveRequestedWarrantyCode(warrantyCode: string) {
+    const existing =
+      await this.productsRepository.findByWarrantyCode(warrantyCode);
+    if (existing) {
+      throw new ConflictError('Warranty code already exists');
+    }
+    return warrantyCode;
   }
 }
 

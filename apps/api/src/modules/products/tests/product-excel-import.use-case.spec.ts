@@ -11,12 +11,13 @@ import { product_status } from '@prisma/client';
 import { Readable } from 'stream';
 
 describe('PreviewProductImportUseCase', () => {
-  it('defines Vietnamese product Excel headers with an image URL column', () => {
+  it('defines Vietnamese product Excel headers with an optional warranty code column', () => {
     expect(productExcelColumns.map((column) => column.header)).toEqual([
       'Mã sản phẩm',
       'SKU product template',
       'Tên hiển thị thiết bị',
       'Vị trí gắn',
+      'Mã bảo hành',
       'Số serial',
       'Trạng thái sản phẩm',
     ]);
@@ -29,6 +30,7 @@ describe('PreviewProductImportUseCase', () => {
         templateSku: 'BATTERY-PLUS',
         displayName: 'Genuine Battery Pack',
         installationPosition: 'Engine bay',
+        warrantyCode: 'WM-2026-EXCEL01',
         serialNumber: 'SN-001',
         status: product_status.ACTIVE,
       },
@@ -54,6 +56,7 @@ describe('PreviewProductImportUseCase', () => {
         displayName: 'Genuine Battery Pack',
         installationPosition: 'Engine bay',
         productCode: 'PRD-2026-ABCDEF',
+        warrantyCode: 'WM-2026-EXCEL01',
         status: product_status.ACTIVE,
       }),
     );
@@ -80,6 +83,7 @@ describe('PreviewProductImportUseCase', () => {
         templateSku: 'UNKNOWN',
         displayName: 'Battery Pack',
         installationPosition: null,
+        warrantyCode: null,
         serialNumber: 'SN-UNKNOWN-CATEGORY',
         status: product_status.ACTIVE,
       },
@@ -106,6 +110,7 @@ describe('PreviewProductImportUseCase', () => {
         templateSku: '',
         displayName: 'Battery Pack',
         installationPosition: null,
+        warrantyCode: null,
         serialNumber: 'SN-MISSING-CATEGORY',
         status: product_status.ACTIVE,
       },
@@ -123,6 +128,47 @@ describe('PreviewProductImportUseCase', () => {
       rowNumber: 2,
     });
   });
+
+  it('reports duplicate warranty codes in the same workbook', async () => {
+    const file = await createFileFromRows([
+      {
+        productCode: null,
+        templateSku: 'BATTERY-PLUS',
+        displayName: 'Battery A',
+        installationPosition: null,
+        warrantyCode: 'WM-2026-DUPLICATE',
+        serialNumber: 'SN-A',
+        status: product_status.ACTIVE,
+      },
+      {
+        productCode: null,
+        templateSku: 'BATTERY-PLUS',
+        displayName: 'Battery B',
+        installationPosition: null,
+        warrantyCode: 'WM-2026-DUPLICATE',
+        serialNumber: 'SN-B',
+        status: product_status.ACTIVE,
+      },
+    ]);
+    const prismaService = createPrismaMock();
+    prismaService.productTemplate.findUnique.mockResolvedValue({
+      category_id: 'category-id',
+      id: 'template-id',
+      is_active: true,
+      default_warranty_duration_months: 36,
+      default_warranty_terms: null,
+    });
+    const useCase = new PreviewProductImportUseCase(prismaService as never);
+
+    const result = await useCase.execute(file);
+
+    expect(result.invalidRows).toBe(1);
+    expect(result.rows[1]?.errors).toContainEqual({
+      field: 'warrantyCode',
+      message: 'Mã bảo hành bị trùng trong file import',
+      rowNumber: 3,
+    });
+  });
 });
 
 function createPrismaMock() {
@@ -131,6 +177,9 @@ function createPrismaMock() {
       findUnique: jest.fn().mockResolvedValue(null),
     },
     product: {
+      findUnique: jest.fn().mockResolvedValue(null),
+    },
+    warranty: {
       findUnique: jest.fn().mockResolvedValue(null),
     },
   };

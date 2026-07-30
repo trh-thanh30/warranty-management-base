@@ -61,12 +61,14 @@ export function toCreateProductBody(
     values.installationPosition,
   );
   const productCode = toOptionalValue(values.productCode);
+  const warrantyCode = toOptionalValue(values.warrantyCode)?.toUpperCase();
 
   return {
     categoryId: values.categoryId,
     displayName: toOptionalValue(values.displayName),
     metadata: metadata ?? undefined,
     ...(productCode ? { productCode } : {}),
+    ...(warrantyCode ? { warrantyCode } : {}),
     serialNumber: toOptionalValue(values.serialNumber),
     status: values.status,
     templateId: values.templateId,

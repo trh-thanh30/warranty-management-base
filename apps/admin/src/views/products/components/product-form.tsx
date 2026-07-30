@@ -244,31 +244,35 @@ export function ProductForm({
         </Field>
       </div>
 
-      <Field
-        error={formatFieldError(
-          form.formState.errors.installationPosition?.message,
-          t,
-        )}
-        id="product-installation-position"
-        label={t("installationPosition")}
-      >
-        <Input
-          id="product-installation-position"
-          placeholder={t("installationPositionPlaceholder")}
-          {...form.register("installationPosition")}
-        />
-      </Field>
-
-      {product ? (
-        <div className="grid gap-5 sm:grid-cols-2">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+        <div className="w-full min-w-0">
+          <Field
+            error={formatFieldError(
+              form.formState.errors.installationPosition?.message,
+              t,
+            )}
+            id="product-installation-position"
+            label={t("installationPosition")}
+          >
+            <Input
+              className="w-full"
+              id="product-installation-position"
+              placeholder={t("installationPositionPlaceholder")}
+              {...form.register("installationPosition")}
+            />
+          </Field>
+        </div>
+        <div className="w-full min-w-0">
           <Field
             description={
-              product.warrantyCodeEditLockedReason === "WARRANTY_NOT_DRAFT"
-                ? t("warrantyCodeNotDraftDescription")
-                : product.warrantyCodeEditLockedReason ===
-                    "OPEN_ACTIVATION_REQUEST"
-                  ? t("warrantyCodeOpenRequestDescription")
-                  : t("warrantyCodeEditableDescription")
+              !product
+                ? t("warrantyCodeCreateDescription")
+                : product.warrantyCodeEditLockedReason === "WARRANTY_NOT_DRAFT"
+                  ? t("warrantyCodeNotDraftDescription")
+                  : product.warrantyCodeEditLockedReason ===
+                      "OPEN_ACTIVATION_REQUEST"
+                    ? t("warrantyCodeOpenRequestDescription")
+                    : t("warrantyCodeEditableDescription")
             }
             error={formatFieldError(
               form.formState.errors.warrantyCode?.message,
@@ -278,14 +282,17 @@ export function ProductForm({
             label={t("warrantyCode")}
           >
             <Input
-              disabled={!product.canEditWarrantyCode || isSubmitting}
+              className="w-full"
+              disabled={
+                isSubmitting || Boolean(product && !product.canEditWarrantyCode)
+              }
               id="product-warranty-code"
               placeholder={t("warrantyCodePlaceholder")}
               {...form.register("warrantyCode")}
             />
           </Field>
         </div>
-      ) : null}
+      </div>
 
       <Controller
         control={form.control}
@@ -433,6 +440,7 @@ const formatFieldError = createFieldErrorFormatter(
     "displayNameLength",
     "duplicateProductCode",
     "duplicateSerialNumber",
+    "duplicateWarrantyCode",
     "installationPositionLength",
     "productCodeLength",
     "serialNumberLength",

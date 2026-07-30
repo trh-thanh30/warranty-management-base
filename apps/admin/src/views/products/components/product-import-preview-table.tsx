@@ -52,6 +52,7 @@ type ProductImportPreviewTableProps = {
     editTitle: string;
     importStatus: string;
     installationPosition: string;
+    warrantyCode: string;
     invalidRows: string;
     next: string;
     noRows: string;
@@ -141,7 +142,7 @@ export function ProductImportPreviewTable({
 
       <div className="overflow-hidden rounded-md border border-slate-200">
         <div className="max-h-[27rem] overflow-auto">
-          <Table className="min-w-[70rem] whitespace-nowrap">
+          <Table className="min-w-[82rem] whitespace-nowrap">
             <TableHeader className="sticky top-0 z-10 bg-slate-50">
               <TableRow>
                 <TableHead className="w-20 whitespace-nowrap">
@@ -158,6 +159,9 @@ export function ProductImportPreviewTable({
                 </TableHead>
                 <TableHead className="w-44 whitespace-nowrap">
                   {labels.installationPosition}
+                </TableHead>
+                <TableHead className="w-48 whitespace-nowrap">
+                  {labels.warrantyCode}
                 </TableHead>
                 <TableHead className="w-44 whitespace-nowrap">
                   {labels.serialNumber}
@@ -186,6 +190,7 @@ export function ProductImportPreviewTable({
                     <PreviewCell value={row.data.templateSku} />
                     <PreviewCell value={row.data.displayName} />
                     <PreviewCell value={row.data.installationPosition} />
+                    <PreviewCell value={row.data.warrantyCode} />
                     <PreviewCell value={row.data.serialNumber} />
                     <PreviewCell value={row.data.status} />
                     <TableCell className="w-[32rem] max-w-[32rem] whitespace-normal">
@@ -223,7 +228,7 @@ export function ProductImportPreviewTable({
                 <TableRow>
                   <TableCell
                     className="h-24 text-center text-sm text-slate-500"
-                    colSpan={9}
+                    colSpan={10}
                   >
                     {labels.noRows}
                   </TableCell>
@@ -348,6 +353,7 @@ function ProductImportEditForm({
         onSave({
           ...values,
           templateSku: values.templateSku.trim(),
+          warrantyCode: values.warrantyCode?.trim().toUpperCase() || null,
         });
       }}
     >
@@ -383,6 +389,12 @@ function ProductImportEditForm({
               setText("installationPosition", event.target.value)
             }
             value={values.installationPosition ?? ""}
+          />
+        </ImportField>
+        <ImportField label={labels.warrantyCode}>
+          <Input
+            onChange={(event) => setText("warrantyCode", event.target.value)}
+            value={values.warrantyCode ?? ""}
           />
         </ImportField>
         <ImportField label={labels.status}>

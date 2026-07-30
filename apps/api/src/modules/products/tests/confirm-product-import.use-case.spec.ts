@@ -27,6 +27,9 @@ describe('ConfirmProductImportUseCase', () => {
       product: {
         findUnique: jest.fn().mockResolvedValue(null),
       },
+      warranty: {
+        findUnique: jest.fn().mockResolvedValue(null),
+      },
       $transaction: jest.fn((callback) => callback(tx)),
     };
     const generateProductCodeUseCase = {
@@ -93,6 +96,67 @@ describe('ConfirmProductImportUseCase', () => {
       errors: [],
       updated: 0,
     });
+  });
+
+  it('uses a manual warranty code from Excel instead of generating one', async () => {
+    const tx = {
+      product: {
+        create: jest.fn().mockResolvedValue({ id: 'product-id' }),
+        updateMany: jest.fn(),
+      },
+    };
+    const prismaService = {
+      productTemplate: {
+        findUnique: jest.fn().mockResolvedValue({
+          category_id: 'category-id',
+          id: 'template-id',
+          is_active: true,
+          default_warranty_duration_months: 36,
+          default_warranty_terms: null,
+        }),
+      },
+      product: {
+        findUnique: jest.fn().mockResolvedValue(null),
+      },
+      warranty: {
+        findUnique: jest.fn().mockResolvedValue(null),
+      },
+      $transaction: jest.fn((callback) => callback(tx)),
+    };
+    const generateWarrantyCodeUseCase = { execute: jest.fn() };
+    const useCase = new ConfirmProductImportUseCase(
+      prismaService as never,
+      { execute: jest.fn().mockResolvedValue('PRD-2026-ABCDEF') } as never,
+      generateWarrantyCodeUseCase as never,
+    );
+
+    await useCase.execute({
+      mode: 'upsert',
+      rows: [
+        {
+          templateSku: 'BATTERY-PLUS',
+          displayName: 'SUV Battery',
+          installationPosition: 'Engine bay',
+          productCode: null,
+          serialNumber: 'SN-001',
+          status: product_status.ACTIVE,
+          warrantyCode: ' wm-2026-excel01 ',
+        },
+      ],
+    });
+
+    expect(generateWarrantyCodeUseCase.execute).not.toHaveBeenCalled();
+    expect(tx.product.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          warranty: {
+            create: expect.objectContaining({
+              warranty_code: 'WM-2026-EXCEL01',
+            }),
+          },
+        }),
+      }),
+    );
   });
 
   it('fills a missing warranty code when an existing product is imported', async () => {

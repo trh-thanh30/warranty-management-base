@@ -19,6 +19,7 @@ export async function createProductImportTemplateWorkbook() {
         templateSku: 'BATTERY-PLUS',
         displayName: 'Pin xe khách Nguyễn Văn A',
         installationPosition: 'Khoang động cơ',
+        warrantyCode: null,
         serialNumber: 'SN-001',
         status: product_status.ACTIVE,
       },

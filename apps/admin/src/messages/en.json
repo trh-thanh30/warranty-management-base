@@ -943,6 +943,7 @@
     "duplicateProductCode": "This product code already exists.",
     "warrantyCode": "Warranty code",
     "warrantyCodePlaceholder": "e.g. WAR-CAR-2026-01",
+    "warrantyCodeCreateDescription": "Optional. Leave blank to generate a unique warranty code automatically.",
     "warrantyCodeEditableDescription": "You can replace this code before activation. Clearing the input keeps the current code.",
     "warrantyCodeNotDraftDescription": "The code is locked because this warranty is no longer in draft.",
     "warrantyCodeOpenRequestDescription": "The code is locked while an activation request is pending or approved.",

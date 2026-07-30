@@ -187,6 +187,7 @@ export function ProductsView() {
                   editTitle: t("excel.editRowTitle"),
                   importStatus: t("excel.importStatus"),
                   installationPosition: t("installationPosition"),
+                  warrantyCode: t("warrantyCode"),
                   invalidRows: t("excel.invalidRows", {
                     count: importSummary.invalidRows,
                   }),

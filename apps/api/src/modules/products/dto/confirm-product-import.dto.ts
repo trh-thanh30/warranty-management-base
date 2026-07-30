@@ -1,4 +1,5 @@
 import { product_status } from '@prisma/client';
+import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
   IsEnum,
@@ -6,9 +7,9 @@ import {
   IsOptional,
   IsString,
   Length,
+  Matches,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 
 export class ConfirmProductImportRowDto {
   @IsOptional()
@@ -28,6 +29,15 @@ export class ConfirmProductImportRowDto {
   @IsString()
   @Length(0, 160)
   installationPosition?: string | null;
+
+  @IsOptional()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toUpperCase() || null : value,
+  )
+  @IsString()
+  @Length(6, 64)
+  @Matches(/^[A-Z0-9-]+$/i)
+  warrantyCode?: string | null;
 
   @IsOptional()
   @IsString()

@@ -1,8 +1,9 @@
 import { ProductExcelRow } from '@/modules/products/excel/product-excel.types';
-import { Product, ProductTemplate } from '@prisma/client';
+import { Product, ProductTemplate, Warranty } from '@prisma/client';
 
 type ProductWithExportRelations = Product & {
   template?: ProductTemplate;
+  warranty?: Warranty | null;
 };
 
 export function toProductExcelRow(
@@ -19,6 +20,7 @@ export function toProductExcelRow(
     templateSku: product.template?.sku ?? '',
     displayName: product.display_name,
     installationPosition,
+    warrantyCode: product.warranty?.warranty_code ?? null,
     serialNumber: product.serial_number,
     status: product.status,
   };
