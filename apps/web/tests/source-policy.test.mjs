@@ -644,7 +644,18 @@ test("database migrations use a dedicated disposable image", async () => {
     /actions\/checkout@v4[\s\S]*appleboy\/scp-action@v1[\s\S]*source: docker-compose\.prod\.yml[\s\S]*target: \$\{\{ secrets\.DEPLOY_PATH \}\}[\s\S]*Deploy over SSH/,
     "deployment must synchronize the production Compose file before SSH commands run",
   );
-  assert.match(deployWorkflow, /docker compose .* run --rm migrate/);
+  assert.match(
+    deployWorkflow,
+    /docker compose .* --profile tools config --services \| grep -qx migrate/,
+  );
+  assert.match(
+    deployWorkflow,
+    /docker compose .* --profile tools pull migrate api worker-email web admin/,
+  );
+  assert.match(
+    deployWorkflow,
+    /docker compose .* --profile tools run --rm migrate/,
+  );
   assert.doesNotMatch(deployWorkflow, /run --rm api npx prisma migrate deploy/);
   assert.match(
     publishWorkflow,

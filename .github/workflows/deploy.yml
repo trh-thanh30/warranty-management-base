@@ -147,13 +147,13 @@ jobs:
               printf 'IMAGE_TAG=%s\n' "$IMAGE_TAG" >> .env.production
             fi
 
-            if ! docker compose -f docker-compose.prod.yml --env-file .env.production config --services | grep -qx migrate; then
+            if ! docker compose -f docker-compose.prod.yml --env-file .env.production --profile tools config --services | grep -qx migrate; then
               echo "The synchronized production Compose file does not define the migrate service."
               exit 1
             fi
 
-            docker compose -f docker-compose.prod.yml --env-file .env.production pull migrate api worker-email web admin
-            docker compose -f docker-compose.prod.yml --env-file .env.production run --rm migrate
+            docker compose -f docker-compose.prod.yml --env-file .env.production --profile tools pull migrate api worker-email web admin
+            docker compose -f docker-compose.prod.yml --env-file .env.production --profile tools run --rm migrate
             docker compose -f docker-compose.prod.yml --env-file .env.production up -d
             docker compose -f docker-compose.prod.yml --env-file .env.production ps
 
