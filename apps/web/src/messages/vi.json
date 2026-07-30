@@ -1311,6 +1311,7 @@
     }
   },
   "Warranty": {
+    "backToWarranty": "Quay lại bảo hành",
     "hub": {
       "title": "Trung tâm dịch vụ bảo hành điện tử",
       "description": "Hệ thống bảo hành điện tử chính hãng FUJITEK giúp tra cứu, kích hoạt và gửi yêu cầu hỗ trợ trên toàn quốc."

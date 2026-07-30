@@ -11,6 +11,7 @@ import { Container } from "@/src/components/common/container";
 import { WarrantyLookupForm } from "@/src/components/common/warranty-lookup-form";
 import { WarrantyLookupResultDetails } from "@/src/components/warranty-lookup-result";
 import { useWarrantyLookup } from "@/src/hooks/use-warranty-lookup";
+import { WarrantyBackLink } from "./components/warranty-back-link";
 
 export function WarrantyLookupView() {
   const t = useTranslations("Warranty.lookup");
@@ -37,6 +38,7 @@ export function WarrantyLookupView() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-deep-black via-deep-black/80 to-transparent z-10" />
         <Container className="relative z-20 max-w-[1400px] space-y-3">
+          <WarrantyBackLink className="mb-5" inverse />
           <span className="inline-block bg-premium-red text-white px-4 py-1 rounded-md text-xs font-semibold uppercase tracking-[0.25em]">
             {t("eyebrow")}
           </span>

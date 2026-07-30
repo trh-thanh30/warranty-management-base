@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
+import { WarrantyBackLink } from "./components/warranty-back-link";
 import { WarrantyClaimRequestForm } from "./components/warranty-claim-request-form";
 
 export function WarrantyClaimRequestView() {
@@ -52,16 +53,20 @@ export function WarrantyClaimRequestView() {
   return (
     <main className="min-h-screen bg-white py-12 text-deep-black sm:py-20">
       <Container className="max-w-[1000px] space-y-10">
-        <div className="space-y-4 text-center">
-          <span className="text-sm font-semibold uppercase text-premium-red">
-            {t("eyebrow")}
-          </span>
-          <h1 className="font-condensed text-3xl font-semibold uppercase sm:text-4xl">
-            {t("title")}
-          </h1>
-          <p className="mx-auto max-w-2xl text-base font-normal text-stone-gray sm:text-lg">
-            {t("description")}
-          </p>
+        <div className="space-y-8">
+          <WarrantyBackLink />
+
+          <div className="space-y-4 text-center">
+            <span className="text-sm font-semibold uppercase text-premium-red">
+              {t("eyebrow")}
+            </span>
+            <h1 className="font-condensed text-3xl font-semibold uppercase sm:text-4xl">
+              {t("title")}
+            </h1>
+            <p className="mx-auto max-w-2xl text-base font-normal text-stone-gray sm:text-lg">
+              {t("description")}
+            </p>
+          </div>
         </div>
 
         {claim ? (
@@ -89,7 +94,7 @@ export function WarrantyClaimRequestView() {
                 label={t("success.claimCodeLabel")}
                 value={
                   <div className="flex items-center justify-start gap-2 sm:justify-end">
-                    <p className="min-w-0 break-all font-mono text-base font-semibold text-deep-black">
+                    <p className="min-w-0 break-all text-sm font-semibold text-premium-red">
                       {claim.claimCode}
                     </p>
                     <Button

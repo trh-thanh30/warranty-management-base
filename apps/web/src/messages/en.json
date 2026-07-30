@@ -1311,6 +1311,7 @@
     }
   },
   "Warranty": {
+    "backToWarranty": "Back to warranty",
     "hub": {
       "title": "Electronic warranty service center",
       "description": "FUJITEK's official electronic warranty system supports nationwide lookup, activation, and service requests."

@@ -52,3 +52,49 @@ test("warranty policy card links to the dedicated warranty-return policy", async
 
   assert.equal(policyAction?.[1], "policyWarrantyReturn");
 });
+
+test("every warranty subpage shares the locale-aware warranty back link", async () => {
+  const componentSource = await readFile(
+    path.join(
+      webRoot,
+      "src",
+      "views",
+      "warranty",
+      "components",
+      "warranty-back-link.tsx",
+    ),
+    "utf8",
+  );
+  const subpageFiles = [
+    "activate.view.tsx",
+    "lookup.view.tsx",
+    "request.view.tsx",
+    "track.view.tsx",
+  ];
+
+  assert.match(componentSource, /href=\{APP_ROUTES\.warranty\}/);
+  assert.match(componentSource, /useTranslations\("Warranty"\)/);
+
+  for (const filename of subpageFiles) {
+    const source = await readFile(
+      path.join(webRoot, "src", "views", "warranty", filename),
+      "utf8",
+    );
+
+    assert.match(source, /<WarrantyBackLink(?:\s|\/|>)/, filename);
+  }
+
+  for (const [locale, expectedLabel] of [
+    ["vi", "Quay lại bảo hành"],
+    ["en", "Back to warranty"],
+  ]) {
+    const messages = JSON.parse(
+      await readFile(
+        path.join(webRoot, "src", "messages", `${locale}.json`),
+        "utf8",
+      ),
+    );
+
+    assert.equal(messages.Warranty.backToWarranty, expectedLabel);
+  }
+});
