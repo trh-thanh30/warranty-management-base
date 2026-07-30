@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Search, ShieldCheck, FileText, X, Sparkles } from "lucide-react";
 import { Link } from "@/src/i18n/navigation";
+import { PUBLIC_FEATURES } from "@/src/config/public-features.config";
 
 export function FloatingQuickAction() {
   const t = useTranslations("FloatingQuickAction");
@@ -21,13 +22,15 @@ export function FloatingQuickAction() {
           <Search className="size-5 text-premium-red" />
           <span>{t("mobile.lookup")}</span>
         </Link>
-        <Link
-          href="/warranty/activate"
-          className="flex flex-col items-center gap-1 text-light-gray hover:text-premium-red text-xs font-semibold uppercase tracking-wider"
-        >
-          <ShieldCheck className="size-5 text-premium-red" />
-          <span>{t("mobile.activate")}</span>
-        </Link>
+        {PUBLIC_FEATURES.warrantyActivation ? (
+          <Link
+            href="/warranty/activate"
+            className="flex flex-col items-center gap-1 text-light-gray hover:text-premium-red text-xs font-semibold uppercase tracking-wider"
+          >
+            <ShieldCheck className="size-5 text-premium-red" />
+            <span>{t("mobile.activate")}</span>
+          </Link>
+        ) : null}
         <Link
           href="/warranty/request"
           className="flex flex-col items-center gap-1 text-light-gray hover:text-premium-red text-xs font-semibold uppercase tracking-wider"
@@ -66,14 +69,16 @@ export function FloatingQuickAction() {
                 <span>{t("lookup")}</span>
               </Link>
 
-              <Link
-                href="/warranty/activate"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/10 text-xs font-medium uppercase transition-colors"
-              >
-                <ShieldCheck className="size-4 text-premium-red" />
-                <span>{t("activate")}</span>
-              </Link>
+              {PUBLIC_FEATURES.warrantyActivation ? (
+                <Link
+                  href="/warranty/activate"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/10 text-xs font-medium uppercase transition-colors"
+                >
+                  <ShieldCheck className="size-4 text-premium-red" />
+                  <span>{t("activate")}</span>
+                </Link>
+              ) : null}
 
               <Link
                 href="/warranty/request"
