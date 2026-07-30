@@ -22,7 +22,8 @@ test("product cards use a prominent contact action and supported name sorting", 
 
   assert.match(source, /catalog\.contactForPrice/);
   assert.match(source, /PhoneCall/);
-  assert.equal(source.match(/href=\{APP_ROUTES\.contact\}/g)?.length, 2);
+  assert.equal(source.match(/onClick=\{openPublicQuickChat\}/g)?.length, 2);
+  assert.doesNotMatch(source, /APP_ROUTES\.contact/);
   assert.equal(source.match(/border-premium-red bg-white/g)?.length, 2);
   assert.doesNotMatch(source, /bg-premium-red\/5/);
   assert.equal(
