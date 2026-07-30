@@ -512,6 +512,14 @@ test("database migrations use a dedicated disposable image", async () => {
     migratorDockerfile,
     /CMD \[[^\n]*prisma[^\n]*"migrate"[^\n]*"deploy"/,
   );
+  assert.match(
+    migratorDockerfile,
+    /pnpm install --frozen-lockfile --prod --filter @repo\/api-migrator --ignore-scripts/,
+  );
+  assert.match(
+    migratorDockerfile,
+    /pnpm --filter @repo\/api-migrator rebuild @prisma\/engines prisma/,
+  );
   assert.match(compose, /^\s{2}migrate:\s*$/m);
   assert.match(compose, /image: \$\{MIGRATOR_IMAGE[^}]*\}:\$\{IMAGE_TAG/);
   assert.match(deployWorkflow, /docker compose .* run --rm migrate/);

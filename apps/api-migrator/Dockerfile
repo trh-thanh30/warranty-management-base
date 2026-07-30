@@ -13,7 +13,8 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api-migrator/package.json ./apps/api-migrator/package.json
 
-RUN pnpm install --frozen-lockfile --prod --filter @repo/api-migrator
+RUN pnpm install --frozen-lockfile --prod --filter @repo/api-migrator --ignore-scripts \
+  && pnpm --filter @repo/api-migrator rebuild @prisma/engines prisma
 
 COPY apps/api/prisma ./apps/api/prisma
 COPY apps/api/prisma.config.ts ./apps/api/prisma.config.ts
