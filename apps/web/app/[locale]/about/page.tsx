@@ -1,7 +1,7 @@
-import { AboutView } from "@/src/views/about/about.view";
+import { AboutRedirectView } from "@/src/views/about/about-redirect.view";
 
-export { generateAboutMetadata as generateMetadata } from "@/src/views/about/about.metadata";
-
-export default function AboutPage() {
-  return <AboutView />;
+export default function AboutPage(
+  props: Parameters<typeof AboutRedirectView>[0],
+) {
+  return <AboutRedirectView {...props} />;
 }

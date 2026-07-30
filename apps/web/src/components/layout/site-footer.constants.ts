@@ -1,13 +1,23 @@
+import {
+  PUBLIC_FEATURES,
+  PUBLIC_PRODUCT_CATALOG_URL,
+} from "@/src/config/public-features.config";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { FaFacebookF, FaTiktok, FaYoutube } from "react-icons/fa6";
 import { SiZalo } from "react-icons/si";
 
 export const footerNavigationItems = [
-  { id: "about", href: APP_ROUTES.about },
-  { id: "products", href: APP_ROUTES.products },
-  { id: "warranty", href: APP_ROUTES.warranty },
-  { id: "dealers", href: APP_ROUTES.dealers },
-  { id: "contact", href: APP_ROUTES.contact },
+  { id: "about", href: APP_ROUTES.home, external: false },
+  {
+    id: "products",
+    href: PUBLIC_PRODUCT_CATALOG_URL,
+    external: true,
+  },
+  { id: "warranty", href: APP_ROUTES.warranty, external: false },
+  { id: "dealers", href: APP_ROUTES.dealers, external: false },
+  ...(PUBLIC_FEATURES.contactNavigation
+    ? [{ id: "contact" as const, href: APP_ROUTES.contact, external: false }]
+    : []),
 ] as const;
 
 export const footerPolicyItems = [

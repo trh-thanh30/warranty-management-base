@@ -32,6 +32,7 @@ import {
 } from "@repo/ui/select";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { Container } from "@/src/components/common/container";
+import { openPublicQuickChat } from "@/src/components/common/public-quick-chat.events";
 import { useLenis } from "@/src/components/providers/lenis-provider";
 import { Link } from "@/src/i18n/navigation";
 import { FadeIn } from "@/src/components/animation/fade-in";
@@ -615,13 +616,19 @@ export function ProductsView() {
                             >
                               {t("viewDetails")}
                             </Link>
-                            <Link
+                            <Button
                               className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-md border border-premium-red bg-white px-3 py-2 text-xs font-semibold uppercase text-premium-red transition-colors hover:bg-premium-red hover:text-white"
-                              href={APP_ROUTES.contact}
+                              onClick={openPublicQuickChat}
+                              size="sm"
+                              type="button"
+                              variant="outline"
                             >
-                              <PhoneCall className="size-3.5" />
+                              <PhoneCall
+                                aria-hidden="true"
+                                className="size-3.5"
+                              />
                               {t("catalog.contactForPrice")}
-                            </Link>
+                            </Button>
                           </div>
                         </StaggerItem>
                       );
@@ -685,13 +692,19 @@ export function ProductsView() {
                           >
                             {t("viewDetails")}
                           </Link>
-                          <Link
+                          <Button
                             className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-md border border-premium-red bg-white px-3 py-2 text-xs font-semibold uppercase text-premium-red transition-colors hover:bg-premium-red hover:text-white"
-                            href={APP_ROUTES.contact}
+                            onClick={openPublicQuickChat}
+                            size="sm"
+                            type="button"
+                            variant="outline"
                           >
-                            <PhoneCall className="size-3.5" />
+                            <PhoneCall
+                              aria-hidden="true"
+                              className="size-3.5"
+                            />
                             {t("catalog.contactForPrice")}
-                          </Link>
+                          </Button>
                         </div>
                       </StaggerItem>
                     );
