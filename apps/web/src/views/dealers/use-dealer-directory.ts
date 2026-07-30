@@ -7,6 +7,10 @@ import type {
   PaginationMeta,
 } from "@repo/shared";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useVietnamProvinces,
+  useVietnamWards,
+} from "@/src/hooks/use-vietnam-provinces";
 import { publicNetworkDirectoryService } from "@/src/services/network-directory/public-network-directory.service";
 import type {
   NearbyDealerStatus,
@@ -24,8 +28,6 @@ export function useDealerDirectory() {
     useState<string>(dealerFilterAll);
   const [selectedDistrict, setSelectedDistrict] =
     useState<string>(dealerFilterAll);
-  const [provinces, setProvinces] = useState<string[]>([]);
-  const [districts, setDistricts] = useState<string[]>([]);
   const [selectedLocationKey, setSelectedLocationKey] = useState<string | null>(
     null,
   );
@@ -41,6 +43,20 @@ export function useDealerDirectory() {
   const queryVersion = useRef(0);
   const loadingMoreRef = useRef(false);
   const debouncedSearch = useDebounce(searchQuery.trim(), 300);
+  const provincesQuery = useVietnamProvinces();
+  const selectedProvinceItem =
+    provincesQuery.data.find(
+      (province) => province.name === selectedProvince,
+    ) ?? null;
+  const wardsQuery = useVietnamWards(selectedProvinceItem?.code ?? null);
+  const provinces = useMemo(
+    () => provincesQuery.data.map((province) => province.name),
+    [provincesQuery.data],
+  );
+  const districts = useMemo(
+    () => wardsQuery.data.map((ward) => ward.name),
+    [wardsQuery.data],
+  );
 
   const baseQuery = useMemo<ListPublicNetworkDirectoryQuery>(
     () => ({
@@ -98,27 +114,6 @@ export function useDealerDirectory() {
 
     return () => controller.abort();
   }, [baseQuery, nearbyStatus, requestVersion]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const province =
-      selectedProvince === dealerFilterAll ? undefined : selectedProvince;
-
-    void publicNetworkDirectoryService
-      .listFilterOptions(province, controller.signal)
-      .then((options) => {
-        if (controller.signal.aborted) return;
-        setProvinces(options.provinces);
-        setDistricts(options.districts);
-      })
-      .catch(() => {
-        if (controller.signal.aborted) return;
-        setProvinces([]);
-        setDistricts([]);
-      });
-
-    return () => controller.abort();
-  }, [selectedProvince]);
 
   const loadMore = useCallback(async () => {
     if (
@@ -237,6 +232,7 @@ export function useDealerDirectory() {
     nearMeOnly,
     nearbyStatus,
     provinces,
+    provincesLoading: provincesQuery.isLoading,
     resultCount: meta?.total ?? 0,
     retry,
     searchQuery,
@@ -248,5 +244,6 @@ export function useDealerDirectory() {
     setSelectedLocation: (location: NetworkDirectoryLocation) =>
       setSelectedLocationKey(getNetworkLocationKey(location)),
     setSelectedDistrict,
+    wardsLoading: wardsQuery.isLoading,
   };
 }

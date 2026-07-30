@@ -19,9 +19,7 @@ export class LocationsService {
   async listVietnamWards(provinceCode: number): Promise<VietnamWard[]> {
     const response = await this.http.get<ApiResponse<VietnamWard[]>>(
       "/locations/vietnam/wards",
-      {
-        params: { province: provinceCode },
-      },
+      { params: { province: provinceCode } },
     );
     return response.data;
   }

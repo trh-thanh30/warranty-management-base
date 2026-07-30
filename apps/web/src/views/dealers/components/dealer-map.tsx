@@ -11,8 +11,10 @@ import {
 } from "@repo/ui/map";
 import { Button } from "@repo/ui/button";
 import { divIcon } from "leaflet";
+import type { DivIcon, Marker as LeafletMarker } from "leaflet";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo } from "react";
+import type { ReactNode } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Marker, Tooltip, useMap } from "react-leaflet";
 import { NetworkLocationPopup } from "@/src/components/common/network-location-popup";
 import { useNetworkLocations } from "@/src/hooks/use-network-locations";
@@ -20,6 +22,15 @@ import type { NetworkDirectoryLocation } from "../dealers.types";
 
 interface DealerMapProps {
   activeLocation: NetworkDirectoryLocation | null;
+  selectionRequestId: number;
+}
+
+interface AutoOpeningLocationMarkerProps {
+  children: ReactNode;
+  icon: DivIcon;
+  isSelected: boolean;
+  location: NetworkDirectoryLocation;
+  selectionRequestId: number;
 }
 
 const markerColorByKind: Record<PublicNetworkLocationKind, string> = {
@@ -36,6 +47,7 @@ function createLocationIcon(kind: PublicNetworkLocationKind, selected = false) {
     className: "fujitek-network-marker",
     html: `
       <div style="width:${size}px;height:${size}px;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer">
+        <span class="fujitek-network-marker-pulse" style="--marker-color:${color}"></span>
         <span style="position:absolute;inset:0;border-radius:9999px;background:${color};opacity:${selected ? 0.25 : 0.18}"></span>
         <span style="position:relative;width:${coreSize}px;height:${coreSize}px;border-radius:9999px;border:3px solid white;background:${color};box-shadow:0 2px 8px rgba(0,0,0,.28);display:flex;align-items:center;justify-content:center">
           <span style="width:5px;height:5px;border-radius:9999px;background:white"></span>
@@ -48,7 +60,7 @@ function createLocationIcon(kind: PublicNetworkLocationKind, selected = false) {
   });
 }
 
-function MapCamera({ activeLocation }: DealerMapProps) {
+function MapCamera({ activeLocation, selectionRequestId }: DealerMapProps) {
   const map = useMap();
 
   useEffect(() => {
@@ -60,12 +72,46 @@ function MapCamera({ activeLocation }: DealerMapProps) {
     }
 
     map.setView(VIETNAM_CENTER, VIETNAM_INITIAL_ZOOM, { animate: true });
-  }, [activeLocation, map]);
+  }, [activeLocation, map, selectionRequestId]);
 
   return null;
 }
 
-export function DealerMap({ activeLocation }: DealerMapProps) {
+function AutoOpeningLocationMarker({
+  children,
+  icon,
+  isSelected,
+  location,
+  selectionRequestId,
+}: AutoOpeningLocationMarkerProps) {
+  const markerRef = useRef<LeafletMarker | null>(null);
+
+  useEffect(() => {
+    if (!isSelected) return;
+
+    const animationFrame = window.requestAnimationFrame(() => {
+      markerRef.current?.openPopup();
+    });
+
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [isSelected, selectionRequestId]);
+
+  return (
+    <Marker
+      ref={markerRef}
+      position={[location.latitude, location.longitude]}
+      icon={icon}
+      title={location.name}
+    >
+      {children}
+    </Marker>
+  );
+}
+
+export function DealerMap({
+  activeLocation,
+  selectionRequestId,
+}: DealerMapProps) {
   const t = useTranslations("DealersPage.map");
   const { boundary, status } = useVietnamBoundary();
   const {
@@ -112,7 +158,10 @@ export function DealerMap({ activeLocation }: DealerMapProps) {
           />
         ) : null}
 
-        <MapCamera activeLocation={activeLocation} />
+        <MapCamera
+          activeLocation={activeLocation}
+          selectionRequestId={selectionRequestId}
+        />
 
         {locations.map((location) => {
           const isSelectedLocation =
@@ -121,9 +170,11 @@ export function DealerMap({ activeLocation }: DealerMapProps) {
             location.id === activeLocation.id;
 
           return (
-            <Marker
+            <AutoOpeningLocationMarker
               key={`${location.kind}-${location.id}`}
-              position={[location.latitude, location.longitude]}
+              location={location}
+              isSelected={isSelectedLocation}
+              selectionRequestId={selectionRequestId}
               icon={
                 isSelectedLocation
                   ? location.kind === "DEALER"
@@ -131,7 +182,6 @@ export function DealerMap({ activeLocation }: DealerMapProps) {
                     : markerIcons.selectedServiceCenter
                   : markerIcons[location.kind]
               }
-              title={location.name}
             >
               <Tooltip direction="top" offset={[0, -10]} opacity={0.95}>
                 {location.name}
@@ -145,7 +195,7 @@ export function DealerMap({ activeLocation }: DealerMapProps) {
                   directions: t("openGoogleMaps"),
                 }}
               />
-            </Marker>
+            </AutoOpeningLocationMarker>
           );
         })}
       </SharedMap>

@@ -6,6 +6,7 @@ import { Menu, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Container } from "@/src/components/common/container";
 import { HeaderNavLink } from "@/src/components/layout/components/header-nav-link";
+import { LanguageSwitcher } from "@/src/components/layout/components/language-switcher";
 import { SiteLogo } from "@/src/components/layout/components/site-logo";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { Link, usePathname } from "@/src/i18n/navigation";
@@ -99,6 +100,7 @@ export function SiteHeader({ logoUrl }: { logoUrl?: string | null }) {
           >
             {t("dealerCta")}
           </Link>
+          <LanguageSwitcher />
         </div>
 
         <button
@@ -159,6 +161,12 @@ export function SiteHeader({ logoUrl }: { logoUrl?: string | null }) {
                 >
                   {t("dealerCta")}
                 </Link>
+              </li>
+              <li>
+                <LanguageSwitcher
+                  className="w-full"
+                  onNavigate={closeMobileMenu}
+                />
               </li>
             </ul>
           </motion.nav>

@@ -403,6 +403,306 @@ test("frontend Docker builds retain root build helpers after Turbo prune", async
   }
 });
 
+test("frontend runtimes retain patched framework and image-processing dependencies", async () => {
+  const rootPackage = JSON.parse(
+    await readFile(path.join(repoRoot, "package.json"), "utf8"),
+  );
+  const minimumNextVersion = [16, 2, 11];
+
+  for (const app of ["web", "admin"]) {
+    const [appPackage, dockerfile] = await Promise.all([
+      readFile(path.join(repoRoot, "apps", app, "package.json"), "utf8").then(
+        JSON.parse,
+      ),
+      readFile(path.join(repoRoot, "apps", app, "Dockerfile"), "utf8"),
+    ]);
+    const nextVersion = appPackage.dependencies.next
+      .replace(/^[^\d]*/, "")
+      .split(".")
+      .map(Number);
+
+    assert.ok(
+      nextVersion.some(
+        (part, index) =>
+          part > minimumNextVersion[index] &&
+          nextVersion
+            .slice(0, index)
+            .every(
+              (value, prefixIndex) => value === minimumNextVersion[prefixIndex],
+            ),
+      ) ||
+        nextVersion.every((part, index) => part === minimumNextVersion[index]),
+      `${app} must use Next.js 16.2.11 or newer`,
+    );
+    assert.match(
+      dockerfile,
+      /rm -rf \/usr\/local\/lib\/node_modules\/npm \/usr\/local\/lib\/node_modules\/corepack/,
+      `${app} runtime must not retain npm or Corepack`,
+    );
+  }
+
+  assert.equal(rootPackage.pnpm?.overrides?.["next@16.2.11>sharp"], "0.35.0");
+});
+
+test("frontend images bake the public API URL into browser bundles", async () => {
+  for (const app of ["web", "admin"]) {
+    const dockerfile = await readFile(
+      path.join(repoRoot, "apps", app, "Dockerfile"),
+      "utf8",
+    );
+
+    assert.match(
+      dockerfile,
+      /ARG NEXT_PUBLIC_API_URL[\s\S]*ENV NEXT_PUBLIC_API_URL=\$NEXT_PUBLIC_API_URL[\s\S]*RUN pnpm --filter @repo\/(?:web|admin)\.\.\. build/,
+      `${app} Dockerfile must expose NEXT_PUBLIC_API_URL before the Next.js build`,
+    );
+  }
+
+  const publishWorkflow = await readFile(
+    path.join(repoRoot, ".github", "workflows", "publish-images.yml"),
+    "utf8",
+  );
+  const buildArgMatches =
+    publishWorkflow.match(
+      /NEXT_PUBLIC_API_URL=\$\{\{\s*vars\.NEXT_PUBLIC_API_URL\s*\}\}/g,
+    ) ?? [];
+
+  assert.equal(
+    buildArgMatches.length,
+    2,
+    "Web and Admin image builds must both receive the public API URL",
+  );
+});
+
+test("published images pass Trivy vulnerability gates before deployment", async () => {
+  const [publishWorkflow, trivyIgnore] = await Promise.all([
+    readFile(
+      path.join(repoRoot, ".github", "workflows", "publish-images.yml"),
+      "utf8",
+    ),
+    readFile(path.join(repoRoot, ".trivyignore.yaml"), "utf8"),
+  ]);
+
+  assert.equal(
+    (publishWorkflow.match(/uses: aquasecurity\/trivy-action@v0\.36\.0/g) ?? [])
+      .length,
+    4,
+    "API, Migrator, Web, and Admin images must each be scanned",
+  );
+  assert.equal(
+    (publishWorkflow.match(/severity: CRITICAL,HIGH/g) ?? []).length,
+    4,
+  );
+  assert.equal((publishWorkflow.match(/exit-code: "1"/g) ?? []).length, 4);
+  assert.equal(
+    (publishWorkflow.match(/trivyignores: \.trivyignore\.yaml/g) ?? []).length,
+    1,
+    "only the API scan should use the documented runtime exception",
+  );
+  assert.match(trivyIgnore, /id: CVE-2026-14257/);
+  assert.match(trivyIgnore, /pkg:npm\/brace-expansion@1\.1\.16/);
+  assert.match(trivyIgnore, /pkg:npm\/brace-expansion@2\.1\.2/);
+  assert.match(trivyIgnore, /expired_at: 2026-10-30/);
+
+  const finalScanIndex = publishWorkflow.indexOf("- name: Scan Admin image");
+  const deploymentIndex = publishWorkflow.indexOf(
+    "- name: Trigger production deployment",
+  );
+
+  assert.ok(finalScanIndex >= 0);
+  assert.ok(
+    deploymentIndex > finalScanIndex,
+    "deployment must only be triggered after every image scan passes",
+  );
+});
+
+test("API runtime excludes migration and unused build tooling", async () => {
+  const rootPackage = JSON.parse(
+    await readFile(path.join(repoRoot, "package.json"), "utf8"),
+  );
+  const apiPackage = JSON.parse(
+    await readFile(path.join(repoRoot, "apps", "api", "package.json"), "utf8"),
+  );
+  const apiDockerfile = await readFile(
+    path.join(repoRoot, "apps", "api", "Dockerfile"),
+    "utf8",
+  );
+
+  for (const dependency of [
+    "prisma",
+    "@prisma/config",
+    "puppeteer-core",
+    "@tailwindcss/cli",
+    "tailwindcss",
+  ]) {
+    assert.equal(
+      apiPackage.dependencies?.[dependency],
+      undefined,
+      `${dependency} must not ship as an API runtime dependency`,
+    );
+  }
+
+  for (const buildDependency of ["prisma", "@tailwindcss/cli", "tailwindcss"]) {
+    assert.ok(
+      apiPackage.devDependencies?.[buildDependency],
+      `${buildDependency} must remain available to API builds`,
+    );
+  }
+
+  assert.match(
+    apiDockerfile,
+    /--config\.auto-install-peers=false --filter @repo\/api deploy --prod --no-optional --ignore-scripts \/prod\/api/,
+  );
+  assert.match(
+    apiDockerfile,
+    /cd \/prod\/api && \/app\/apps\/api\/node_modules\/\.bin\/prisma generate/,
+  );
+  assert.match(
+    apiDockerfile,
+    /rm -rf \/usr\/local\/lib\/node_modules\/npm \/usr\/local\/lib\/node_modules\/corepack/,
+  );
+
+  assert.match(apiPackage.dependencies.axios, /^\^1\.(?:1[89]|[2-9]\d)\./);
+  assert.match(apiPackage.dependencies.multer, /^\^2\.[2-9]\./);
+  assert.match(apiPackage.dependencies.nodemailer, /^\^9\./);
+
+  for (const [dependency, safeVersion] of Object.entries({
+    "brace-expansion@1": "1.1.16",
+    "brace-expansion@2": "2.1.2",
+    "brace-expansion@5": "5.0.8",
+    "cross-spawn@7": "7.0.6",
+    "fast-uri@3": "3.1.4",
+    "form-data": "4.0.6",
+    "glob@10": "10.5.0",
+    hono: "4.12.25",
+    "js-yaml": "4.3.0",
+    "minimatch@3": "3.1.4",
+    "minimatch@9": "9.0.7",
+    multer: "2.2.0",
+    picomatch: "4.0.4",
+    postcss: "8.5.18",
+    svgo: "4.0.2",
+    "undici@6": "6.27.0",
+  })) {
+    assert.equal(rootPackage.pnpm?.overrides?.[dependency], safeVersion);
+  }
+});
+
+test("API lint scripts avoid brace globs that are unstable across minimatch versions", async () => {
+  const apiPackage = JSON.parse(
+    await readFile(path.join(repoRoot, "apps", "api", "package.json"), "utf8"),
+  );
+
+  for (const scriptName of ["lint", "lint:fix", "lint:strict"]) {
+    const lintScript = apiPackage.scripts[scriptName];
+
+    assert.doesNotMatch(
+      lintScript,
+      /\{src,apps,libs,test\}/,
+      `${scriptName} must use explicit source globs`,
+    );
+    assert.match(lintScript, /src\/\*\*\/\*\.ts/);
+    assert.match(lintScript, /test\/\*\*\/\*\.ts/);
+  }
+});
+
+test("database migrations use a dedicated disposable image", async () => {
+  const [
+    migratorDockerfile,
+    migratorPackage,
+    compose,
+    deployWorkflow,
+    publishWorkflow,
+  ] = await Promise.all([
+    readFile(path.join(repoRoot, "apps", "api-migrator", "Dockerfile"), "utf8"),
+    readFile(
+      path.join(repoRoot, "apps", "api-migrator", "package.json"),
+      "utf8",
+    ),
+    readFile(path.join(repoRoot, "docker-compose.prod.yml"), "utf8"),
+    readFile(path.join(repoRoot, ".github", "workflows", "deploy.yml"), "utf8"),
+    readFile(
+      path.join(repoRoot, ".github", "workflows", "publish-images.yml"),
+      "utf8",
+    ),
+  ]);
+
+  assert.match(
+    migratorDockerfile,
+    /CMD \[[^\n]*prisma[^\n]*"migrate"[^\n]*"deploy"/,
+  );
+  assert.match(
+    migratorDockerfile,
+    /pnpm install --frozen-lockfile --prod --filter @repo\/api-migrator --ignore-scripts/,
+  );
+  assert.match(
+    migratorDockerfile,
+    /pnpm --filter @repo\/api-migrator rebuild @prisma\/engines prisma/,
+  );
+  assert.match(migratorDockerfile, /FROM node:22-alpine AS builder/);
+  assert.match(migratorDockerfile, /FROM node:22-alpine AS runner/);
+  assert.match(
+    migratorDockerfile,
+    /COPY --from=builder .*\/app\/node_modules .*\/node_modules/,
+  );
+  assert.match(
+    migratorDockerfile,
+    /rm -rf \/usr\/local\/lib\/node_modules\/npm \/usr\/local\/lib\/node_modules\/corepack/,
+  );
+  assert.match(JSON.parse(migratorPackage).dependencies.prisma, /^\^7\.9\./);
+  assert.match(compose, /^\s{2}migrate:\s*$/m);
+  assert.match(compose, /image: \$\{MIGRATOR_IMAGE[^}]*\}:\$\{IMAGE_TAG/);
+  assert.match(
+    deployWorkflow,
+    /actions\/checkout@v4[\s\S]*appleboy\/scp-action@v1[\s\S]*source: docker-compose\.prod\.yml[\s\S]*target: \$\{\{ secrets\.DEPLOY_PATH \}\}[\s\S]*Deploy over SSH/,
+    "deployment must synchronize the production Compose file before SSH commands run",
+  );
+  assert.match(deployWorkflow, /docker compose .* run --rm migrate/);
+  assert.doesNotMatch(deployWorkflow, /run --rm api npx prisma migrate deploy/);
+  assert.match(
+    publishWorkflow,
+    /file: apps\/api-migrator\/Dockerfile[\s\S]*migrator_image/,
+  );
+});
+
+test("production deployment safely cleans only stale project images", async () => {
+  const deployWorkflow = await readFile(
+    path.join(repoRoot, ".github", "workflows", "deploy.yml"),
+    "utf8",
+  );
+
+  assert.match(
+    deployWorkflow,
+    /cleanup-images:[\s\S]*needs:\s*\n\s*- deploy\s*\n\s*- health-check/,
+    "image cleanup must wait for deployment health checks",
+  );
+  assert.match(
+    deployWorkflow,
+    /previous_tag=.*\.deploy\/previous-image-tag/,
+    "cleanup must preserve the previously deployed image tag for rollback",
+  );
+  assert.match(
+    deployWorkflow,
+    /for repository in "\$API_IMAGE" "\$WEB_IMAGE" "\$ADMIN_IMAGE"/,
+    "cleanup must be scoped to this project's application repositories",
+  );
+  assert.match(
+    deployWorkflow,
+    /\[ "\$image" = "\$repository:\$IMAGE_TAG" \] && continue/,
+    "cleanup must preserve the currently deployed image tag",
+  );
+  assert.match(
+    deployWorkflow,
+    /\[ "\$image" = "\$repository:\$previous_tag" \] && continue/,
+    "cleanup must preserve the previous image tag",
+  );
+  assert.doesNotMatch(
+    deployWorkflow,
+    /docker (?:system|volume) prune|docker image prune\s+-a/,
+    "deployment must not run host-wide or volume cleanup on a shared VPS",
+  );
+});
+
 test("container ports match the production ports documented for deployment", async () => {
   const ports = { api: 4100, web: 4101, admin: 4102 };
 

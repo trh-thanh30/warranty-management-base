@@ -1093,9 +1093,9 @@
       "searchPlaceholder": "Search by name or address...",
       "searchAriaLabel": "Search dealers by name, address, or phone number",
       "cityAriaLabel": "Select a province or city",
-      "districtAriaLabel": "Select a district",
+      "districtAriaLabel": "Select a ward",
       "allCities": "Nationwide",
-      "allDistricts": "All districts",
+      "allDistricts": "All wards",
       "nearMe": "Find dealers and warranty centers near you (≤ 20 km)",
       "nearMeLoading": "Finding your location...",
       "nearMeError": "Unable to access your location. Please check location permissions.",
@@ -1636,6 +1636,11 @@
     "closeMenuAriaLabel": "Close menu",
     "warrantyLookupAriaLabel": "Look up warranty",
     "dealerCta": "Become a dealer",
+    "languageMenuAriaLabel": "Choose language",
+    "languages": {
+      "vietnamese": "Vietnamese",
+      "english": "English"
+    },
     "nav": {
       "home": "Home",
       "about": "About",

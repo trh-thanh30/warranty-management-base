@@ -29,7 +29,8 @@ export function AboutNetworkMap() {
     divIcon({
       className: "fujitek-network-marker",
       html: `
-        <div class="relative cursor-pointer flex items-center justify-center">
+        <div class="relative size-7 cursor-pointer flex items-center justify-center">
+          <span class="fujitek-network-marker-pulse" style="--marker-color: ${markerColorByKind[kind]}"></span>
           <span class="absolute size-7 rounded-full opacity-20 pointer-events-none" style="background-color: ${markerColorByKind[kind]}"></span>
           <div class="relative size-4 rounded-full border-2 border-white shadow-md flex items-center justify-center" style="background-color: ${markerColorByKind[kind]}">
             <div class="size-1.5 rounded-full bg-white"></div>
