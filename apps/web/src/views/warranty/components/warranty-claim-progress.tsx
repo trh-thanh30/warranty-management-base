@@ -1,14 +1,27 @@
+import { WarrantyResultRow } from "@/src/components/common/warranty-result-row";
 import type {
   PublicWarrantyClaimSummary,
   WarrantyClaimPriority,
   WarrantyClaimStatus,
 } from "@repo/shared";
 import { formatDate } from "@repo/shared";
-import { Check, Clock3, MapPin, Package, Wrench } from "lucide-react";
+import {
+  Calendar,
+  Check,
+  CircleAlert,
+  Clock3,
+  Flag,
+  Hash,
+  MapPin,
+  Package,
+  Wrench,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { cn } from "@repo/ui/lib/utils";
 
 type WarrantyClaimProgressProps = {
   claim: PublicWarrantyClaimSummary;
+  embedded?: boolean;
 };
 
 const STATUS_CLASS_NAMES: Record<WarrantyClaimStatus, string> = {
@@ -21,13 +34,21 @@ const STATUS_CLASS_NAMES: Record<WarrantyClaimStatus, string> = {
   CANCELLED: "bg-border-gray text-stone-gray",
 };
 
-export function WarrantyClaimProgress({ claim }: WarrantyClaimProgressProps) {
+export function WarrantyClaimProgress({
+  claim,
+  embedded = false,
+}: WarrantyClaimProgressProps) {
   const locale = useLocale();
   const t = useTranslations("Warranty.track");
   const dateLocale = locale === "vi" ? "vi-VN" : "en-US";
 
   return (
-    <section className="overflow-hidden rounded-md border border-border-gray bg-white shadow-sm">
+    <section
+      className={cn(
+        "overflow-hidden bg-white",
+        !embedded && "rounded-md border border-border-gray shadow-sm",
+      )}
+    >
       <header className="flex flex-col gap-4 border-b border-border-gray p-5 sm:flex-row sm:items-center sm:justify-between sm:p-8">
         <div>
           <p className="text-sm text-stone-gray">{t("result.claimCode")}</p>
@@ -41,87 +62,88 @@ export function WarrantyClaimProgress({ claim }: WarrantyClaimProgressProps) {
       </header>
 
       <div className="grid gap-8 p-5 sm:p-8 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.7fr)]">
-        <div className="space-y-7">
-          <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
-            <Detail
-              label={t("result.warrantyCode")}
-              value={claim.warrantyCode}
+        <div className="divide-y divide-border-gray">
+          <WarrantyResultRow
+            icon={<Hash className="size-4" />}
+            label={t("result.warrantyCode")}
+            value={claim.warrantyCode}
+          />
+          <WarrantyResultRow
+            icon={<Flag className="size-4" />}
+            label={t("result.priority")}
+            value={t(`priorities.${claim.priority as WarrantyClaimPriority}`)}
+          />
+          <WarrantyResultRow
+            icon={<CircleAlert className="size-4" />}
+            label={t("result.issue")}
+            value={claim.issueTitle}
+          />
+          <WarrantyResultRow
+            icon={<Calendar className="size-4" />}
+            label={t("result.submittedAt")}
+            value={formatDate(claim.submittedAt, {
+              locale: dateLocale,
+              showTime: true,
+            })}
+          />
+          {claim.dueAt ? (
+            <WarrantyResultRow
+              icon={<Clock3 className="size-4" />}
+              label={t("result.dueAt")}
+              value={formatDate(claim.dueAt, { locale: dateLocale })}
             />
-            <Detail
-              label={t("result.priority")}
-              value={t(`priorities.${claim.priority as WarrantyClaimPriority}`)}
-            />
-            <Detail label={t("result.issue")} value={claim.issueTitle} />
-            <Detail
-              label={t("result.submittedAt")}
-              value={formatDate(claim.submittedAt, {
+          ) : null}
+          {claim.resolvedAt ? (
+            <WarrantyResultRow
+              icon={<Check className="size-4" />}
+              label={t("result.resolvedAt")}
+              value={formatDate(claim.resolvedAt, {
                 locale: dateLocale,
                 showTime: true,
               })}
             />
-            {claim.dueAt ? (
-              <Detail
-                label={t("result.dueAt")}
-                value={formatDate(claim.dueAt, { locale: dateLocale })}
-              />
-            ) : null}
-            {claim.resolvedAt ? (
-              <Detail
-                label={t("result.resolvedAt")}
-                value={formatDate(claim.resolvedAt, {
-                  locale: dateLocale,
-                  showTime: true,
-                })}
-              />
-            ) : null}
-          </dl>
+          ) : null}
 
           {claim.product ? (
-            <div className="flex gap-3 border-t border-border-gray pt-6">
-              <Package className="mt-0.5 size-5 shrink-0 text-premium-red" />
-              <div>
-                <h3 className="text-sm font-semibold uppercase">
-                  {t("result.product")}
-                </h3>
-                <p className="mt-1 text-sm text-stone-gray">
-                  {[
-                    claim.product.name,
-                    claim.product.brand,
-                    claim.product.model,
-                  ]
-                    .filter(Boolean)
-                    .join(" - ")}
-                </p>
-              </div>
-            </div>
+            <WarrantyResultRow
+              icon={<Package className="size-4" />}
+              label={t("result.product")}
+              value={[
+                claim.product.name,
+                claim.product.brand,
+                claim.product.model,
+              ]
+                .filter(Boolean)
+                .join(" - ")}
+            />
           ) : null}
 
           {claim.serviceCenter ? (
-            <div className="flex gap-3 border-t border-border-gray pt-6">
-              <MapPin className="mt-0.5 size-5 shrink-0 text-premium-red" />
-              <div className="space-y-1">
-                <h3 className="text-sm font-semibold uppercase">
-                  {t("result.serviceCenter")}
-                </h3>
-                <p className="text-sm font-medium">
-                  {claim.serviceCenter.name}
-                </p>
-                <p className="text-sm text-stone-gray">
-                  {[
-                    claim.serviceCenter.address,
-                    claim.serviceCenter.district,
-                    claim.serviceCenter.province,
-                  ]
-                    .filter(Boolean)
-                    .join(", ")}
-                </p>
-                <p className="text-sm text-stone-gray">
-                  {[claim.serviceCenter.phone, claim.serviceCenter.email]
-                    .filter(Boolean)
-                    .join(" - ")}
-                </p>
-              </div>
-            </div>
+            <WarrantyResultRow
+              icon={<MapPin className="size-4" />}
+              label={t("result.serviceCenter")}
+              value={
+                <span className="space-y-1">
+                  <span className="block font-semibold text-deep-black">
+                    {claim.serviceCenter.name}
+                  </span>
+                  <span className="block">
+                    {[
+                      claim.serviceCenter.address,
+                      claim.serviceCenter.district,
+                      claim.serviceCenter.province,
+                    ]
+                      .filter(Boolean)
+                      .join(", ")}
+                  </span>
+                  <span className="block">
+                    {[claim.serviceCenter.phone, claim.serviceCenter.email]
+                      .filter(Boolean)
+                      .join(" - ")}
+                  </span>
+                </span>
+              }
+            />
           ) : null}
         </div>
 
@@ -176,16 +198,5 @@ export function WarrantyClaimProgress({ claim }: WarrantyClaimProgressProps) {
         </div>
       </div>
     </section>
-  );
-}
-
-function Detail({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <dt className="text-xs font-semibold uppercase text-stone-gray">
-        {label}
-      </dt>
-      <dd className="mt-1 text-sm font-medium">{value}</dd>
-    </div>
   );
 }

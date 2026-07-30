@@ -2,6 +2,7 @@
 
 import { Container } from "@/src/components/common/container";
 import { useWarrantyClaimTracking } from "@/src/hooks/use-warranty-claim-tracking";
+import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { WarrantyClaimProgress } from "./components/warranty-claim-progress";
@@ -10,7 +11,7 @@ import { WarrantyTrackForm } from "./components/warranty-track-form";
 export function WarrantyTrackView() {
   const t = useTranslations("Warranty.track");
   const searchParams = useSearchParams();
-  const { data, isPending, track } = useWarrantyClaimTracking();
+  const { data, isPending, reset, track } = useWarrantyClaimTracking();
   const initialClaimCode = searchParams.get("claimCode") ?? "";
 
   return (
@@ -28,15 +29,34 @@ export function WarrantyTrackView() {
           </p>
         </header>
 
-        <section className="mx-auto max-w-2xl rounded-md border border-border-gray bg-white p-5 shadow-sm sm:p-8">
-          <WarrantyTrackForm
-            initialValue={initialClaimCode}
-            isPending={isPending}
-            onSubmit={track}
-          />
-        </section>
+        <motion.section
+          className="mx-auto max-w-5xl overflow-hidden rounded-md border border-border-gray bg-white shadow-sm"
+          layout
+        >
+          <div className="p-5 sm:p-8">
+            <WarrantyTrackForm
+              initialValue={initialClaimCode}
+              isPending={isPending}
+              onSubmit={track}
+              onValueChange={reset}
+            />
+          </div>
 
-        {data ? <WarrantyClaimProgress claim={data} /> : null}
+          <AnimatePresence mode="wait">
+            {data ? (
+              <motion.div
+                animate={{ opacity: 1, height: "auto" }}
+                className="overflow-hidden border-t border-border-gray"
+                exit={{ opacity: 0, height: 0 }}
+                initial={{ opacity: 0, height: 0 }}
+                key={data.claimCode}
+                transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+              >
+                <WarrantyClaimProgress claim={data} embedded />
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+        </motion.section>
       </Container>
     </main>
   );

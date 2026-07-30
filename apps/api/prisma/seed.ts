@@ -17,6 +17,7 @@ import {
 } from '@prisma/client';
 import { Pool } from 'pg';
 import { NOTIFICATION_TYPES } from '@repo/shared/constants';
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { seedAdminUsers } from './seed-admin';
@@ -47,6 +48,21 @@ const parsedDashboardActivationRequestChartSeed: unknown = JSON.parse(
     'utf8',
   ),
 );
+
+const DEMO_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const DEMO_CODE_SUFFIX_LENGTH = 6;
+
+function createStableDemoCode(prefix: 'PRD' | 'WM', key: string) {
+  const digest = createHash('sha256')
+    .update(`warranty-management-demo:${prefix}:${key}`)
+    .digest();
+  const suffix = Array.from(
+    digest.subarray(0, DEMO_CODE_SUFFIX_LENGTH),
+    (byte) => DEMO_CODE_ALPHABET.charAt(byte % DEMO_CODE_ALPHABET.length),
+  ).join('');
+
+  return `${prefix}-2026-${suffix}`;
+}
 
 function isDashboardWarrantyChartSeed(
   value: unknown,
@@ -786,8 +802,8 @@ async function main() {
   const seedNow = new Date();
 
   const camryDemo = await upsertDemoProduct({
-    productCode: 'PRD-2026-CAMRY',
-    warrantyCode: 'WM-2026-CAMRYA',
+    productCode: createStableDemoCode('PRD', 'camry'),
+    warrantyCode: createStableDemoCode('WM', 'camry'),
     serialNumber: 'VIN-CAMRY-A-2026',
     name: 'Toyota Camry 2.5Q',
     category: product_category.CAR,
@@ -802,8 +818,8 @@ async function main() {
   });
 
   await upsertDemoProduct({
-    productCode: 'PRD-2026-DASHCAM',
-    warrantyCode: 'WM-2026-DASHAA',
+    productCode: createStableDemoCode('PRD', 'dashcam'),
+    warrantyCode: createStableDemoCode('WM', 'dashcam'),
     serialNumber: 'SN-DASHCAM-A-001',
     name: 'Toyota Genuine Dash Camera',
     category: product_category.ACCESSORY,
@@ -818,8 +834,8 @@ async function main() {
   });
 
   const civicDemo = await upsertDemoProduct({
-    productCode: 'PRD-2026-CIVIC',
-    warrantyCode: 'WM-2026-CIVICB',
+    productCode: createStableDemoCode('PRD', 'civic'),
+    warrantyCode: createStableDemoCode('WM', 'civic'),
     serialNumber: 'VIN-CIVIC-B-2026',
     name: 'Honda Civic RS',
     category: product_category.CAR,
@@ -834,8 +850,8 @@ async function main() {
   });
 
   const walkInBatteryDemo = await upsertDemoProduct({
-    productCode: 'PRD-2026-WALKIN-BATTERY',
-    warrantyCode: 'WM-2026-WALKIN1',
+    productCode: createStableDemoCode('PRD', 'walk-in-battery'),
+    warrantyCode: createStableDemoCode('WM', 'walk-in-battery'),
     serialNumber: 'SN-WALKIN-BATTERY-001',
     name: 'Genuine Battery Pack',
     category: product_category.SPARE_PART,
@@ -850,8 +866,8 @@ async function main() {
   });
 
   const expiringSoonDemo = await upsertDemoProduct({
-    productCode: 'PRD-2026-EXPIRING-7D',
-    warrantyCode: 'WM-2026-EXP7D',
+    productCode: createStableDemoCode('PRD', 'expiring-7d'),
+    warrantyCode: createStableDemoCode('WM', 'expiring-7d'),
     serialNumber: 'SN-EXPIRING-7D-001',
     name: 'Lexzenz Parking Sensor Kit',
     category: product_category.ACCESSORY,
@@ -866,8 +882,8 @@ async function main() {
   });
 
   const expiringMonthDemo = await upsertDemoProduct({
-    productCode: 'PRD-2026-EXPIRING-30D',
-    warrantyCode: 'WM-2026-EXP30D',
+    productCode: createStableDemoCode('PRD', 'expiring-30d'),
+    warrantyCode: createStableDemoCode('WM', 'expiring-30d'),
     serialNumber: 'SN-EXPIRING-30D-001',
     name: 'Lexzenz Tire Pressure Monitor',
     category: product_category.ACCESSORY,
@@ -882,8 +898,8 @@ async function main() {
   });
 
   await upsertDemoProduct({
-    productCode: 'PRD-2026-DRAFT-CAMERA',
-    warrantyCode: 'WM-2026-DRAFT1',
+    productCode: createStableDemoCode('PRD', 'draft-camera'),
+    warrantyCode: createStableDemoCode('WM', 'draft-camera'),
     serialNumber: 'SN-DRAFT-CAMERA-001',
     name: 'Lexzenz Rear Camera Draft',
     category: product_category.ACCESSORY,
@@ -898,8 +914,8 @@ async function main() {
   });
 
   await upsertDemoProduct({
-    productCode: 'PRD-2026-VOIDED-GPS',
-    warrantyCode: 'WM-2026-VOID1',
+    productCode: createStableDemoCode('PRD', 'voided-gps'),
+    warrantyCode: createStableDemoCode('WM', 'voided-gps'),
     serialNumber: 'SN-VOIDED-GPS-001',
     name: 'Lexzenz GPS Tracker Voided',
     category: product_category.ACCESSORY,
@@ -918,8 +934,8 @@ async function main() {
   const chartDemoDate = addDays(seedNow, -10);
 
   await upsertDemoProduct({
-    productCode: 'PRD-2026-CHART-DRAFT',
-    warrantyCode: 'WM-2026-CHART-DRAFT',
+    productCode: createStableDemoCode('PRD', 'chart-draft'),
+    warrantyCode: createStableDemoCode('WM', 'chart-draft'),
     serialNumber: 'SN-CHART-DRAFT-001',
     name: 'Lexzenz Chart Demo Draft',
     category: product_category.ACCESSORY,
@@ -934,8 +950,8 @@ async function main() {
   });
 
   await upsertDemoProduct({
-    productCode: 'PRD-2026-CHART-ACTIVE',
-    warrantyCode: 'WM-2026-CHART-ACTIVE',
+    productCode: createStableDemoCode('PRD', 'chart-active'),
+    warrantyCode: createStableDemoCode('WM', 'chart-active'),
     serialNumber: 'SN-CHART-ACTIVE-001',
     name: 'Lexzenz Chart Demo Active',
     category: product_category.ACCESSORY,
@@ -950,8 +966,8 @@ async function main() {
   });
 
   await upsertDemoProduct({
-    productCode: 'PRD-2026-CHART-EXPIRED',
-    warrantyCode: 'WM-2026-CHART-EXPIRED',
+    productCode: createStableDemoCode('PRD', 'chart-expired'),
+    warrantyCode: createStableDemoCode('WM', 'chart-expired'),
     serialNumber: 'SN-CHART-EXPIRED-001',
     name: 'Lexzenz Chart Demo Expired',
     category: product_category.ACCESSORY,
@@ -966,8 +982,8 @@ async function main() {
   });
 
   await upsertDemoProduct({
-    productCode: 'PRD-2026-CHART-VOIDED',
-    warrantyCode: 'WM-2026-CHART-VOIDED',
+    productCode: createStableDemoCode('PRD', 'chart-voided'),
+    warrantyCode: createStableDemoCode('WM', 'chart-voided'),
     serialNumber: 'SN-CHART-VOIDED-001',
     name: 'Lexzenz Chart Demo Voided',
     category: product_category.ACCESSORY,
@@ -991,8 +1007,8 @@ async function main() {
         const suffix = `${statusKey}-${offset}d-${statusIndex + 1}-${copy}`;
 
         await upsertDemoProduct({
-          productCode: `PRD-2026-CHART-${suffix}`,
-          warrantyCode: `WM-2026-CHART-${suffix}`,
+          productCode: createStableDemoCode('PRD', `chart-${suffix}`),
+          warrantyCode: createStableDemoCode('WM', `chart-${suffix}`),
           serialNumber: `SN-CHART-${suffix}`,
           name: `Lexzenz Chart ${statusKey} ${offset}d #${copy}`,
           category: product_category.ACCESSORY,
@@ -1505,9 +1521,13 @@ async function main() {
   console.log(
     `Walk-in customer: ${walkInCustomer.customer_code} (no login account)`,
   );
-  console.log('Customer A codes: WM-2026-CAMRYA, WM-2026-DASHAA');
-  console.log('Customer B code: WM-2026-CIVICB');
-  console.log('Walk-in customer code: WM-2026-WALKIN1');
+  console.log(
+    `Customer A codes: ${camryDemo.warranty.warranty_code}, ${createStableDemoCode('WM', 'dashcam')}`,
+  );
+  console.log(`Customer B code: ${civicDemo.warranty.warranty_code}`);
+  console.log(
+    `Walk-in customer code: ${walkInBatteryDemo.warranty.warranty_code}`,
+  );
   console.log(
     `Service centers: ${hanoiServiceCenter.name}, ${hcmServiceCenter.name}, ${danangServiceCenter.name}`,
   );

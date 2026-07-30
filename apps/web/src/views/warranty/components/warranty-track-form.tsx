@@ -27,12 +27,14 @@ import {
 type WarrantyTrackFormProps = {
   initialValue?: string;
   isPending: boolean;
+  onValueChange: () => void;
   onSubmit: (claimCode: string) => Promise<PublicWarrantyClaimSummary>;
 };
 
 export function WarrantyTrackForm({
   initialValue = "",
   isPending,
+  onValueChange,
   onSubmit,
 }: WarrantyTrackFormProps) {
   const t = useTranslations("Warranty.track");
@@ -85,6 +87,10 @@ export function WarrantyTrackForm({
                     )}
                     disabled={isPending}
                     maxLength={32}
+                    onChange={(event) => {
+                      field.onChange(event);
+                      onValueChange();
+                    }}
                     placeholder={t("form.placeholder")}
                   />
                 </FormControl>

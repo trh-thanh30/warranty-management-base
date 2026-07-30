@@ -1,5 +1,6 @@
 "use client";
 
+import { WarrantyResultRow } from "@/src/components/common/warranty-result-row";
 import { warrantyLookupEmptyValue } from "@/src/constants/warranty.constants";
 import { getPopulatedWarrantyFilmItems } from "@/src/utils/warranty-lookup.utils";
 import type { WarrantyLookupResult } from "@repo/shared";
@@ -20,26 +21,6 @@ import { useLocale, useTranslations } from "next-intl";
 type WarrantyLookupResultProps = {
   result: WarrantyLookupResult;
 };
-
-type ResultRowProps = {
-  icon: React.ReactNode;
-  label: string;
-  value: string | null | undefined;
-};
-
-function ResultRow({ icon, label, value }: ResultRowProps) {
-  return (
-    <div className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-      <span className="flex shrink-0 items-center gap-2 text-xs font-semibold uppercase text-stone-gray sm:min-w-40">
-        {icon}
-        {label}
-      </span>
-      <span className="break-words text-sm font-semibold text-deep-black sm:text-right">
-        {value || warrantyLookupEmptyValue}
-      </span>
-    </div>
-  );
-}
 
 function formatWarrantyDate(
   value: string | null,
@@ -105,52 +86,52 @@ export function WarrantyLookupResultDetails({
       </div>
 
       <div className="divide-y divide-border-gray">
-        <ResultRow
+        <WarrantyResultRow
           icon={<Package className="size-4" />}
           label={t("product")}
           value={product.name}
         />
-        <ResultRow
+        <WarrantyResultRow
           icon={<Hash className="size-4" />}
           label={t("productCode")}
           value={product.productCode}
         />
-        <ResultRow
+        <WarrantyResultRow
           icon={<Tag className="size-4" />}
           label={t("category")}
           value={product.category?.name}
         />
-        <ResultRow
+        <WarrantyResultRow
           icon={<Tag className="size-4" />}
           label={t("brandModel")}
           value={productIdentity}
         />
-        <ResultRow
+        <WarrantyResultRow
           icon={<Hash className="size-4" />}
           label={t("serial")}
           value={product.serialNumber}
         />
-        <ResultRow
+        <WarrantyResultRow
           icon={<ShieldCheck className="size-4" />}
           label={t("warrantyCode")}
           value={warrantyCode}
         />
-        <ResultRow
+        <WarrantyResultRow
           icon={<Calendar className="size-4" />}
           label={t("startDate")}
           value={formatWarrantyDate(warranty.startDate, locale)}
         />
-        <ResultRow
+        <WarrantyResultRow
           icon={<Calendar className="size-4" />}
           label={t("endDate")}
           value={formatWarrantyDate(warranty.endDate, locale)}
         />
-        <ResultRow
+        <WarrantyResultRow
           icon={<Clock3 className="size-4" />}
           label={t("duration")}
           value={t("durationValue", { count: warranty.durationMonths })}
         />
-        <ResultRow
+        <WarrantyResultRow
           icon={<ShieldCheck className="size-4" />}
           label={t("terms")}
           value={warranty.terms}
@@ -164,35 +145,35 @@ export function WarrantyLookupResultDetails({
           </h4>
           <div className="mt-2 divide-y divide-border-gray">
             {installation?.installedAt && (
-              <ResultRow
+              <WarrantyResultRow
                 icon={<Calendar className="size-4" />}
                 label={t("installedAt")}
                 value={formatWarrantyDate(installation.installedAt, locale)}
               />
             )}
             {installation?.vehicleModel && (
-              <ResultRow
+              <WarrantyResultRow
                 icon={<Car className="size-4" />}
                 label={t("vehicleModel")}
                 value={installation.vehicleModel}
               />
             )}
             {installation?.dealer?.name && (
-              <ResultRow
+              <WarrantyResultRow
                 icon={<Building2 className="size-4" />}
                 label={t("dealer")}
                 value={installation.dealer.name}
               />
             )}
             {installation?.dealer?.phone && (
-              <ResultRow
+              <WarrantyResultRow
                 icon={<Building2 className="size-4" />}
                 label={t("dealerPhone")}
                 value={installation.dealer.phone}
               />
             )}
             {dealerAddress && (
-              <ResultRow
+              <WarrantyResultRow
                 icon={<MapPin className="size-4" />}
                 label={t("dealerAddress")}
                 value={dealerAddress}
@@ -209,7 +190,7 @@ export function WarrantyLookupResultDetails({
           </h4>
           <div className="mt-2 divide-y divide-border-gray">
             {filmItems.map(({ key, value }) => (
-              <ResultRow
+              <WarrantyResultRow
                 key={key}
                 icon={<Tag className="size-4" />}
                 label={t(`positions.${key}`)}

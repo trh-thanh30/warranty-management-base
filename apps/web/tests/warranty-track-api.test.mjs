@@ -131,6 +131,10 @@ test("warranty tracking view composes the real public claim workflow", async () 
   assert.match(source, /useWarrantyClaimTracking/);
   assert.match(source, /WarrantyTrackForm/);
   assert.match(source, /WarrantyClaimProgress/);
+  assert.match(source, /AnimatePresence/);
+  assert.match(source, /<motion\.section[\s\S]*layout/);
+  assert.match(source, /initial=\{\{\s*opacity:\s*0,\s*height:\s*0/);
+  assert.match(source, /embedded/);
   assert.doesNotMatch(source, /demoWarrantyTicket/);
   assert.doesNotMatch(source, /setTicketData/);
 });
