@@ -1,6 +1,11 @@
-import { NotFoundError } from '@/common/response';
+import { BadRequestError, NotFoundError } from '@/common/response';
+import { toPublicWarrantyClaimResponse } from '@/modules/public/mappers/public-warranty-claim.mapper';
 import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/warranty-claims.repository';
 import { Injectable } from '@nestjs/common';
+import {
+  isWarrantyClaimCode,
+  normalizeWarrantyClaimCode,
+} from '@repo/shared/utils';
 
 @Injectable()
 export class PublicLookupWarrantyClaimByCodeUseCase {
@@ -9,8 +14,15 @@ export class PublicLookupWarrantyClaimByCodeUseCase {
   ) {}
 
   async execute(claimCode: string) {
+    if (!isWarrantyClaimCode(claimCode)) {
+      throw new BadRequestError(
+        'Warranty claim code is invalid',
+        'WARRANTY_CLAIM_CODE_INVALID',
+      );
+    }
+
     const claim = await this.warrantyClaimsRepository.findByClaimCode(
-      claimCode.trim().toUpperCase(),
+      normalizeWarrantyClaimCode(claimCode),
     );
 
     if (!claim) {
@@ -19,59 +31,4 @@ export class PublicLookupWarrantyClaimByCodeUseCase {
 
     return toPublicWarrantyClaimResponse(claim);
   }
-}
-
-export function toPublicWarrantyClaimResponse(claim: {
-  claim_code: string;
-  warranty_code: string;
-  issue_title: string;
-  status: string;
-  priority?: string | null;
-  due_at?: Date | null;
-  submitted_at: Date;
-  resolved_at?: Date | null;
-  product?: {
-    display_name?: string | null;
-    template: {
-      name: string;
-      brand: string | null;
-      model: string | null;
-    };
-  } | null;
-  service_center?: {
-    name: string;
-    phone: string | null;
-    email: string | null;
-    province: string;
-    district: string | null;
-    address: string;
-  } | null;
-}) {
-  return {
-    claimCode: claim.claim_code,
-    warrantyCode: claim.warranty_code,
-    issueTitle: claim.issue_title,
-    status: claim.status,
-    priority: claim.priority,
-    dueAt: claim.due_at,
-    submittedAt: claim.submitted_at,
-    resolvedAt: claim.resolved_at,
-    product: claim.product
-      ? {
-          name: claim.product.display_name ?? claim.product.template.name,
-          brand: claim.product.template.brand,
-          model: claim.product.template.model,
-        }
-      : null,
-    serviceCenter: claim.service_center
-      ? {
-          name: claim.service_center.name,
-          phone: claim.service_center.phone,
-          email: claim.service_center.email,
-          province: claim.service_center.province,
-          district: claim.service_center.district,
-          address: claim.service_center.address,
-        }
-      : null,
-  };
 }

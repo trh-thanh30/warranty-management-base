@@ -1,651 +1,345 @@
 "use client";
 
 import { Container } from "@/src/components/common/container";
-import { findProductBySlug } from "@/src/constants/product-catalog.constants";
+import { openPublicQuickChat } from "@/src/components/common/public-quick-chat.events";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { Link } from "@/src/i18n/navigation";
-import type { ProductCatalogItem } from "@/src/types/product-catalog.types";
-import useEmblaCarousel from "embla-carousel-react";
+import { productsService } from "@/src/services/products/products.service";
+import { Button } from "@repo/ui/button";
+import { Skeleton } from "@repo/ui/skeleton";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
-  ChevronLeft,
+  Check,
   ChevronRight,
+  ImageOff,
+  MapPin,
   PhoneCall,
-  ShieldAlert,
-  Sun,
+  RefreshCw,
+  ShieldCheck,
 } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
-import type { ReactNode } from "react";
-import { useCallback, useEffect, useState } from "react";
-import {
-  defaultFilmProductId,
-  filmCatalogMap,
-  spectrumImages,
-} from "./product-detail.constants";
+import { useState } from "react";
 
 interface ProductDetailViewProps {
   slug: string;
 }
 
-interface ReasonItem {
-  title: string;
-  description: string;
-}
-
 export function ProductDetailView({ slug }: ProductDetailViewProps) {
-  const product = findProductBySlug(slug);
+  const t = useTranslations("ProductDetailPage");
+  const productQuery = useQuery({
+    queryKey: ["public-product-detail", slug],
+    queryFn: ({ signal }) => productsService.getProductDetail(slug, signal),
+  });
 
-  if (product && !product.film) {
-    return <AccessoryProductDetail product={product} />;
+  if (productQuery.isPending) {
+    return <ProductDetailSkeleton />;
   }
 
-  return <FilmProductDetail slug={slug} />;
-}
-
-function AccessoryProductDetail({ product }: { product: ProductCatalogItem }) {
-  const t = useTranslations("ProductDetailPage");
-  const productsT = useTranslations("ProductsPage");
-  const introduction = t.raw(
-    `products.${product.detailKey}.introduction`,
-  ) as string[];
-  const features = t.raw(`products.${product.detailKey}.features`) as string[];
-  const applications = t.raw(
-    `products.${product.detailKey}.applications`,
-  ) as string[];
-
-  return (
-    <main className="min-h-screen bg-surface-muted text-deep-black">
-      <section className="border-b border-border-gray bg-white py-10 sm:py-16">
-        <Container className="grid max-w-[1200px] gap-8 lg:grid-cols-2 lg:items-center">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-border-gray bg-surface-muted">
-            <Image
-              src={product.image}
-              alt={productsT("productImageAlt", { code: product.code })}
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-contain p-4"
-            />
-          </div>
-
-          <div className="space-y-5">
-            <nav className="flex items-center gap-2 text-sm text-stone-gray">
-              <Link href={APP_ROUTES.home}>{t("breadcrumbs.home")}</Link>
-              <span>/</span>
+  if (productQuery.isError) {
+    return (
+      <main className="min-h-screen bg-white py-16 text-deep-black">
+        <Container className="flex max-w-3xl flex-col items-center text-center">
+          <ImageOff className="size-10 text-premium-red" />
+          <h1 className="mt-4 text-xl font-semibold uppercase">
+            {t("loadErrorTitle")}
+          </h1>
+          <p className="mt-2 text-base text-stone-gray">
+            {t("loadErrorDescription")}
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Button
+              className="bg-premium-red text-white hover:bg-warm-red"
+              type="button"
+              onClick={() => void productQuery.refetch()}
+            >
+              <RefreshCw className="size-4" />
+              {t("retry")}
+            </Button>
+            <Button asChild variant="outline">
               <Link href={APP_ROUTES.products}>
-                {t("breadcrumbs.products")}
+                <ArrowLeft className="size-4" />
+                {t("backToCatalog")}
               </Link>
-            </nav>
-            <span className="text-sm font-medium uppercase tracking-wider text-premium-red">
-              {t(`products.${product.detailKey}.eyebrow`)}
-            </span>
-            <h1 className="font-condensed text-3xl font-semibold uppercase tracking-wide sm:text-5xl">
-              {productsT(`catalog.items.${product.detailKey}.name`)}
-            </h1>
-            <p className="text-base leading-relaxed text-stone-gray sm:text-lg">
-              {t(`products.${product.detailKey}.description`)}
-            </p>
-            <div className="grid grid-cols-2 gap-3 border-y border-border-gray py-5">
-              {product.highlightSpecs.map((spec) => (
-                <div key={spec.id}>
-                  <span className="block text-xs font-medium uppercase text-stone-gray">
-                    {productsT(`catalog.specs.${spec.id}`)}
-                  </span>
-                  <span className="text-base font-semibold">
-                    {spec.translateValue
-                      ? productsT(`catalog.values.${spec.value}`)
-                      : spec.value}
-                  </span>
-                </div>
-              ))}
-            </div>
-            <Link
-              href={APP_ROUTES.contact}
-              className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-premium-red px-6 text-sm font-semibold uppercase tracking-wide text-white transition-colors hover:bg-warm-red"
-            >
-              {t("bookInstallationCta")}
-            </Link>
+            </Button>
           </div>
         </Container>
-      </section>
+      </main>
+    );
+  }
 
-      <section className="py-12 sm:py-16">
-        <Container className="grid max-w-300 gap-8 lg:grid-cols-3">
-          {[
-            { title: t("introductionTitle"), items: introduction },
-            { title: t("technologyTitle"), items: features },
-            { title: t("applicationsTitle"), items: applications },
-          ].map((section) => (
-            <article
-              key={section.title}
-              className="rounded-3xl border border-border-gray bg-white p-6"
-            >
-              <h2 className="font-condensed text-xl font-semibold uppercase tracking-wide">
-                {section.title}
-              </h2>
-              <ul className="mt-4 space-y-3 text-sm leading-relaxed text-stone-gray">
-                {section.items.map((item) => (
-                  <li key={item} className="flex gap-2">
-                    <span className="mt-2 size-1.5 shrink-0 rounded-full bg-premium-red" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </article>
-          ))}
-        </Container>
-      </section>
-    </main>
-  );
-}
-
-function FilmProductDetail({ slug }: ProductDetailViewProps) {
-  const t = useTranslations("ProductDetailPage");
-  const productsT = useTranslations("ProductsPage");
-  const locale = useLocale();
-  const catalogProduct = findProductBySlug(slug);
-  const productId = catalogProduct?.film
-    ? catalogProduct.id
-    : defaultFilmProductId;
-  const filmData =
-    filmCatalogMap[productId as keyof typeof filmCatalogMap] ??
-    filmCatalogMap[defaultFilmProductId];
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    align: "start",
-    loop: true,
-  });
-  const [selectedIndex, setSelectedIndex] = useState(0);
-
-  const onSelect = useCallback(() => {
-    setSelectedIndex(emblaApi?.selectedScrollSnap() ?? 0);
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    onSelect();
-    emblaApi.on("select", onSelect);
-    emblaApi.on("reInit", onSelect);
-
-    return () => {
-      emblaApi.off("select", onSelect);
-      emblaApi.off("reInit", onSelect);
-    };
-  }, [emblaApi, onSelect]);
-
-  const activeName = productsT(`catalog.items.${filmData.detailKey}.name`);
-  const activePrice = filmData.priceRange
-    .map((price) =>
-      new Intl.NumberFormat(locale, {
-        style: "currency",
-        currency: "VND",
-        maximumFractionDigits: 0,
-      }).format(price),
-    )
-    .join(" – ");
-  const reasons = t.raw("film.reasons") as ReasonItem[];
-  const metrics = [
-    ["vlt", filmData.film.vlt, filmData.vltNum],
-    [
-      "internalReflection",
-      filmData.film.internalReflection,
-      filmData.internalReflectionNum,
-    ],
-    [
-      "externalReflection",
-      filmData.film.externalReflection,
-      filmData.externalReflectionNum,
-    ],
-    [
-      "energyTransmission",
-      filmData.film.energyTransmission,
-      filmData.energyTransmissionNum,
-    ],
-    [
-      "energyReflection",
-      filmData.film.energyReflection,
-      filmData.energyReflectionNum,
-    ],
-    [
-      "energyAbsorption",
-      filmData.film.energyAbsorption,
-      filmData.energyAbsorptionNum,
-    ],
-    ["uvBlock", filmData.film.uvBlock, filmData.uvBlockNum],
-    ["irBlock", filmData.film.irBlock, filmData.irBlockNum],
-    [
-      "heatTransferCoeff",
-      filmData.film.heatTransferCoeff,
-      filmData.heatTransferCoeffNum,
-    ],
-  ] as const;
+  const product = productQuery.data;
+  const primaryImage = product.coverImage ?? product.galleryImages[0] ?? null;
 
   return (
     <main className="min-h-screen bg-white text-deep-black">
-      <div className="border-b border-border-gray bg-white py-3">
-        <Container className="max-w-[1400px]">
-          <nav className="flex items-center gap-2 text-xs font-medium text-stone-gray">
+      <div className="border-b border-border-gray py-3">
+        <Container className="max-w-350">
+          <nav className="flex min-w-0 items-center gap-2 text-sm font-medium text-stone-gray">
             <Link
+              className="shrink-0 transition-colors hover:text-premium-red"
               href={APP_ROUTES.home}
-              className="transition-colors hover:text-premium-red"
             >
               {t("breadcrumbs.home")}
             </Link>
-            <ChevronRight className="size-3.5 text-stone-gray/50" />
+            <ChevronRight className="size-3.5 shrink-0 text-stone-gray/50" />
             <Link
+              className="shrink-0 transition-colors hover:text-premium-red"
               href={APP_ROUTES.products}
-              className="transition-colors hover:text-premium-red"
             >
               {t("breadcrumbs.products")}
             </Link>
-            <ChevronRight className="size-3.5 text-stone-gray/50" />
+            <ChevronRight className="size-3.5 shrink-0 text-stone-gray/50" />
             <span className="truncate font-semibold text-deep-black">
-              <span className="sm:hidden">{filmData.code}</span>
-              <span className="hidden sm:inline">{activeName}</span>
+              {product.name}
             </span>
           </nav>
         </Container>
       </div>
 
       <section className="py-10 sm:py-16">
-        <Container className="max-w-[1400px]">
-          <SectionHeading
-            number="01"
-            eyebrow={t("film.overviewEyebrow")}
-            title={activeName}
+        <Container className="grid max-w-350 gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-stretch">
+          <ProductDetailImage
+            key={primaryImage?.url ?? product.id}
+            alt={primaryImage?.altText ?? product.name}
+            src={primaryImage?.url ?? null}
           />
-          <div className="mt-8 grid gap-8 rounded-3xl border border-border-gray bg-surface-muted p-5 sm:p-8 lg:grid-cols-2 lg:p-10">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-border-gray bg-white">
-              <Image
-                src={filmData.image}
-                alt={activeName}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover"
-              />
-              <div className="absolute left-4 top-4 flex flex-wrap gap-2">
-                <span className="rounded-lg bg-premium-red px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-                  VLT | {filmData.code}
-                </span>
-                <span className="rounded-lg bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-deep-black">
-                  {t("film.noTint")}
-                </span>
-              </div>
-            </div>
 
-            <div className="flex flex-col justify-center">
-              <h1 className="font-condensed text-3xl font-semibold uppercase tracking-wide sm:text-5xl">
-                {activeName}
-              </h1>
-              <p className="mt-2 text-xl font-semibold text-premium-red">
-                {activePrice}
-              </p>
-              <ul className="my-6 space-y-3 border-y border-border-gray py-5 text-base">
-                <li>
-                  {t("summary.color", {
-                    value: t(`colors.${filmData.film.colorId}`),
-                  })}
-                </li>
-                <li>{t("summary.vlt", { value: filmData.film.vlt })}</li>
-                <li>{t("summary.ir", { value: filmData.film.irBlock })}</li>
-                <li>{t("summary.uv", { value: filmData.film.uvBlock })}</li>
-                <li>
-                  {t("summary.heatTransfer", {
-                    value: filmData.film.heatTransferCoeff,
-                  })}
-                </li>
-              </ul>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <a
-                  href="tel:0886337733"
-                  className="flex items-center gap-3 rounded-2xl bg-premium-red p-4 text-white transition-colors hover:bg-warm-red"
-                >
-                  <PhoneCall className="size-5" />
-                  <span>
-                    <span className="block text-xs uppercase tracking-wide">
-                      {t("film.hotlineLabel")}
-                    </span>
-                    <span className="font-semibold">0886 33 77 33</span>
-                  </span>
-                </a>
-                <a
-                  href="https://zalo.me"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 rounded-2xl bg-zalo-blue p-4 text-white transition-opacity hover:opacity-90"
-                >
-                  <span className="flex size-9 items-center justify-center rounded-xl bg-white text-xs font-semibold text-zalo-blue">
-                    Zalo
-                  </span>
-                  <span>
-                    <span className="block text-xs uppercase tracking-wide text-white/80">
-                      {t("film.onlineLabel")}
-                    </span>
-                    <span className="font-semibold">{t("film.zaloCta")}</span>
-                  </span>
-                </a>
-              </div>
-            </div>
-          </div>
-        </Container>
-      </section>
+          <div className="min-w-0 lg:flex lg:h-full lg:flex-col">
+            <p className="text-sm font-semibold uppercase text-premium-red">
+              {product.category.name}
+            </p>
+            <h1 className="mt-2 text-3xl font-semibold uppercase sm:text-5xl">
+              {product.name}
+            </h1>
+            <p className="mt-3 text-sm font-medium uppercase text-stone-gray">
+              {[product.brand, product.model].filter(Boolean).join(" / ")}
+            </p>
+            <p className="mt-5 text-base leading-7 text-stone-gray">
+              {product.shortDescription ??
+                product.description ??
+                t("noDescription")}
+            </p>
 
-      <section className="border-y border-border-gray bg-surface-muted py-12 sm:py-16">
-        <Container className="max-w-[1200px]">
-          <SectionHeading
-            number="02"
-            eyebrow={t("film.technologyEyebrow")}
-            title={t("film.technologyTitle", {
-              technology: filmData.film.structure,
-              code: filmData.code,
-            })}
-          />
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              [t("film.facts.originLabel"), t("film.facts.originValue")],
-              [t("film.facts.technologyLabel"), filmData.film.structure],
-              [t("film.facts.mechanismLabel"), t("film.facts.mechanismValue")],
-              [t("film.facts.materialLabel"), t("film.facts.materialValue")],
-            ].map(([label, value]) => (
-              <div
-                key={label}
-                className="rounded-2xl border border-border-gray bg-white p-5"
-              >
-                <span className="text-xs font-medium uppercase tracking-widest text-stone-gray">
-                  {label}
-                </span>
-                <span className="mt-2 block text-base font-semibold uppercase">
-                  {value}
-                </span>
-              </div>
-            ))}
-          </div>
-          <p className="mx-auto mt-8 max-w-4xl text-base leading-relaxed text-stone-gray sm:text-lg">
-            {t("film.technologyDescription")}
-          </p>
-        </Container>
-      </section>
-
-      <section className="py-12 sm:py-16">
-        <Container className="max-w-[1200px]">
-          <SectionHeading
-            number="03"
-            eyebrow={t("film.specsEyebrow")}
-            title={t("film.specsTitle")}
-          />
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {metrics.map(([id, displayValue, numericValue]) => (
-              <article
-                key={id}
-                className="rounded-2xl border border-border-gray bg-white p-5"
-              >
-                <div className="flex items-center justify-between gap-4 text-sm">
-                  <span className="font-medium uppercase tracking-wide">
-                    {t(`film.metrics.${id}`)}
-                  </span>
-                  <span className="font-semibold text-premium-red">
-                    {displayValue}
-                  </span>
+            <div className="mt-6 lg:mt-auto">
+              <dl className="grid grid-cols-2 gap-x-6 gap-y-4 border-y border-border-gray py-5 text-sm">
+                <div>
+                  <dt className="font-medium uppercase text-stone-gray">
+                    {t("skuLabel")}
+                  </dt>
+                  <dd className="mt-1 font-semibold">{product.sku}</dd>
                 </div>
-                <div className="mt-4 h-2 overflow-hidden rounded-full bg-surface-muted">
-                  <div
-                    className="h-full rounded-full bg-premium-red"
-                    style={{ width: `${Math.min(numericValue, 100)}%` }}
+                <div>
+                  <dt className="font-medium uppercase text-stone-gray">
+                    {t("warrantyLabel")}
+                  </dt>
+                  <dd className="mt-1 font-semibold">
+                    {t("warrantyMonths", {
+                      months: product.warranty.durationMonths,
+                    })}
+                  </dd>
+                </div>
+              </dl>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <button
+                  className="inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-premium-red px-3 text-xs font-semibold uppercase text-white transition-colors hover:bg-warm-red sm:px-5 sm:text-sm"
+                  onClick={openPublicQuickChat}
+                  type="button"
+                >
+                  <PhoneCall className="size-4 shrink-0" />
+                  {t("bookInstallationCta")}
+                </button>
+                <Link
+                  className="inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-border-gray px-3 text-xs font-semibold uppercase transition-colors hover:border-premium-red hover:text-premium-red sm:px-5 sm:text-sm"
+                  href={APP_ROUTES.dealers}
+                >
+                  <MapPin className="size-4 shrink-0" />
+                  {t("dealerNetworkCta")}
+                </Link>
+              </div>
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      {product.description && (
+        <section className="bg-surface-muted py-10 sm:py-14">
+          <Container className="max-w-350">
+            <SectionTitle>{t("introductionTitle")}</SectionTitle>
+            <p className="mt-5 text-base leading-8 text-stone-gray">
+              {product.description}
+            </p>
+          </Container>
+        </section>
+      )}
+
+      {product.specifications.length > 0 && (
+        <section className="py-10 sm:py-14">
+          <Container className="max-w-350">
+            <SectionTitle>{t("specsTitle")}</SectionTitle>
+            <div className="mt-6 overflow-hidden rounded-md border border-border-gray">
+              <table className="w-full border-collapse text-left text-sm">
+                <tbody>
+                  {product.specifications.map((specification, index) => (
+                    <tr
+                      className={
+                        index > 0 ? "border-t border-border-gray" : undefined
+                      }
+                      key={`${specification.key}-${specification.value}`}
+                    >
+                      <th className="w-2/5 bg-surface-muted px-4 py-3 font-semibold sm:px-6">
+                        {specification.key}
+                      </th>
+                      <td className="px-4 py-3 text-stone-gray sm:px-6">
+                        {specification.value}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Container>
+        </section>
+      )}
+
+      {(product.features.length > 0 || product.applications.length > 0) && (
+        <section className="bg-surface-muted py-10 sm:py-14">
+          <Container className="grid max-w-350 gap-10 md:grid-cols-2">
+            {product.features.length > 0 && (
+              <DetailList items={product.features} title={t("featuresTitle")} />
+            )}
+            {product.applications.length > 0 && (
+              <DetailList
+                items={product.applications}
+                title={t("applicationsTitle")}
+              />
+            )}
+          </Container>
+        </section>
+      )}
+
+      {(product.galleryImages.length > 0 || product.coverImage) && (
+        <section className="py-10 sm:py-14">
+          <Container className="max-w-350">
+            <SectionTitle>{t("galleryTitle")}</SectionTitle>
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {[
+                ...(product.coverImage ? [product.coverImage] : []),
+                ...product.galleryImages,
+              ].map((image) => (
+                <div
+                  className="relative aspect-[4/3] overflow-hidden rounded-md border border-border-gray bg-surface-muted"
+                  key={image.id}
+                >
+                  <Image
+                    alt={image.altText ?? product.name}
+                    className="object-contain"
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    src={image.url}
                   />
                 </div>
-              </article>
-            ))}
-          </div>
-          <div className="mt-6 rounded-2xl bg-deep-black px-5 py-4 text-center text-sm font-semibold uppercase tracking-wider text-white">
-            {t("warrantyYears", { years: filmData.warrantyYears })}
-          </div>
-        </Container>
-      </section>
-
-      <section className="border-y border-border-gray bg-surface-muted py-12 sm:py-16">
-        <Container className="max-w-[1200px]">
-          <SectionHeading
-            number="04"
-            eyebrow={t("film.spectrumEyebrow")}
-            title={t("film.spectrumTitle", { code: filmData.code })}
-          />
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {spectrumImages.map((src, index) => (
-              <div
-                key={src}
-                className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-border-gray bg-white"
-              >
-                <Image
-                  src={src}
-                  alt={t("film.spectrumImageAlt", {
-                    code: filmData.code,
-                    index: index + 1,
-                  })}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  className="object-cover"
-                />
-              </div>
-            ))}
-          </div>
-          <p className="mt-6 text-base leading-relaxed text-stone-gray">
-            {t("film.spectrumDescription")}
-          </p>
-        </Container>
-      </section>
-
-      <section className="py-12 sm:py-16">
-        <Container className="max-w-[1200px]">
-          <SectionHeading
-            number="05"
-            eyebrow={t("film.mechanismEyebrow")}
-            title={t("film.mechanismTitle", { code: filmData.code })}
-          />
-          <div className="mt-8 grid gap-5 md:grid-cols-2">
-            {[
-              {
-                Icon: Sun,
-                title: t("film.visibleLightTitle"),
-                description: t("film.visibleLightDescription"),
-              },
-              {
-                Icon: ShieldAlert,
-                title: t("film.infraredTitle"),
-                description: t("film.infraredDescription"),
-              },
-            ].map(({ Icon, title, description }) => (
-              <article
-                key={title}
-                className="rounded-3xl border border-border-gray bg-surface-muted p-6 sm:p-8"
-              >
-                <div className="flex size-12 items-center justify-center rounded-2xl bg-premium-red/10 text-premium-red">
-                  <Icon className="size-6" />
-                </div>
-                <h3 className="mt-5 font-condensed text-xl font-semibold uppercase">
-                  {title}
-                </h3>
-                <p className="mt-3 text-base leading-relaxed text-stone-gray">
-                  {description}
-                </p>
-              </article>
-            ))}
-          </div>
-        </Container>
-      </section>
-
-      <section className="border-y border-border-gray bg-surface-muted py-12 sm:py-16">
-        <Container className="max-w-[1200px]">
-          <SectionHeading
-            number="06"
-            eyebrow={t("film.reasonsEyebrow")}
-            title={t("film.reasonsTitle")}
-          />
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            {reasons.map((reason, index) => (
-              <article
-                key={reason.title}
-                className="rounded-2xl border border-border-gray bg-white p-5"
-              >
-                <span className="flex size-8 items-center justify-center rounded-full bg-premium-red text-sm font-semibold text-white">
-                  {index + 1}
-                </span>
-                <h3 className="mt-4 text-base font-semibold">{reason.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-stone-gray">
-                  {reason.description}
-                </p>
-              </article>
-            ))}
-          </div>
-        </Container>
-      </section>
-
-      <section className="py-12 sm:py-16">
-        <Container className="max-w-[1200px]">
-          <SectionHeading
-            number="07"
-            eyebrow={t("film.climateEyebrow")}
-            title={t("film.climateTitle")}
-          />
-          <p className="mt-8 rounded-3xl border border-border-gray bg-surface-muted p-6 text-base leading-relaxed text-stone-gray sm:p-10 sm:text-lg">
-            {t("film.climateDescription")}
-          </p>
-        </Container>
-      </section>
-
-      <section className="border-y border-border-gray bg-surface-muted py-12 sm:py-16">
-        <Container className="max-w-[1400px]">
-          <SectionHeading
-            number="08"
-            eyebrow={t("film.galleryEyebrow")}
-            title={t("film.galleryTitle")}
-          />
-
-          <div className="mt-8 space-y-4 sm:hidden">
-            <div ref={emblaRef} className="overflow-hidden rounded-3xl">
-              <div className="flex">
-                {filmData.galleryImages.map((src, index) => (
-                  <div key={src} className="min-w-0 flex-[0_0_100%]">
-                    <div className="relative aspect-[4/3] overflow-hidden">
-                      <Image
-                        src={src}
-                        alt={t("film.galleryImageAlt", {
-                          code: filmData.code,
-                          index: index + 1,
-                        })}
-                        fill
-                        sizes="100vw"
-                        className="object-cover"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              ))}
             </div>
-            <div className="flex items-center justify-center gap-5">
-              <CarouselButton
-                label={t("film.previousImage")}
-                onClick={() => emblaApi?.scrollPrev()}
-              >
-                <ChevronLeft className="size-5" />
-              </CarouselButton>
-              <span className="text-sm font-medium text-stone-gray">
-                {selectedIndex + 1} / {filmData.galleryImages.length}
-              </span>
-              <CarouselButton
-                label={t("film.nextImage")}
-                onClick={() => emblaApi?.scrollNext()}
-              >
-                <ChevronRight className="size-5" />
-              </CarouselButton>
+          </Container>
+        </section>
+      )}
+
+      <section className="py-10 sm:py-14">
+        <Container className="flex max-w-350 flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <ShieldCheck className="mt-0.5 size-6 shrink-0 text-premium-red" />
+            <div>
+              <h2 className="text-base font-semibold uppercase text-premium-red">
+                {t("warrantyLabel")}
+              </h2>
+              <p className="mt-1 text-base text-stone-gray">
+                {product.warranty.terms ??
+                  t("warrantyMonths", {
+                    months: product.warranty.durationMonths,
+                  })}
+              </p>
             </div>
           </div>
-
-          <div className="mt-8 hidden gap-5 sm:grid sm:grid-cols-2 lg:grid-cols-3">
-            {filmData.galleryImages.slice(0, 6).map((src, index) => (
-              <div
-                key={src}
-                className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-border-gray bg-white"
-              >
-                <Image
-                  src={src}
-                  alt={t("film.galleryImageAlt", {
-                    code: filmData.code,
-                    index: index + 1,
-                  })}
-                  fill
-                  sizes="(max-width: 1024px) 50vw, 33vw"
-                  className="object-cover transition-transform duration-500 hover:scale-105"
-                />
-              </div>
-            ))}
-          </div>
+          <button
+            className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-md bg-premium-red px-6 text-sm font-semibold uppercase text-white transition-colors hover:bg-warm-red sm:bg-deep-black sm:hover:bg-premium-red"
+            onClick={openPublicQuickChat}
+            type="button"
+          >
+            <PhoneCall className="size-4" />
+            {t("consultCta")}
+          </button>
         </Container>
-      </section>
-
-      <section className="py-12 text-center sm:py-16">
-        <h2 className="font-condensed text-2xl font-semibold uppercase tracking-wide sm:text-4xl">
-          {t("relatedTitle")}
-        </h2>
-        <Link
-          href={APP_ROUTES.products}
-          className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-premium-red px-6 py-4 text-sm font-semibold uppercase tracking-wide text-white transition-colors hover:bg-warm-red"
-        >
-          <ArrowLeft className="size-4" />
-          {t("backToCatalog")}
-        </Link>
       </section>
     </main>
   );
 }
 
-function SectionHeading({
-  number,
-  eyebrow,
-  title,
-}: {
-  number: string;
-  eyebrow: string;
-  title: string;
-}) {
+function ProductDetailImage({ alt, src }: { alt: string; src: string | null }) {
+  const t = useTranslations("ProductDetailPage");
+  const [hasError, setHasError] = useState(false);
+
   return (
-    <div className="flex items-center gap-4 sm:gap-6">
-      <span
-        aria-hidden="true"
-        className="font-condensed text-5xl font-semibold leading-none tracking-tighter text-transparent sm:text-7xl"
-        style={{ WebkitTextStroke: "2px var(--color-stone-gray)" }}
-      >
-        {number}
-      </span>
-      <div>
-        <span className="inline-flex rounded-full bg-premium-red px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white">
-          {eyebrow}
-        </span>
-        <h2 className="mt-2 font-condensed text-2xl font-semibold uppercase tracking-wide sm:text-4xl">
-          {title}
-        </h2>
-      </div>
+    <div className="relative aspect-[4/3] overflow-hidden rounded-md border border-border-gray bg-surface-muted">
+      {src && !hasError ? (
+        <Image
+          alt={alt}
+          className="object-contain p-4"
+          fill
+          onError={() => setHasError(true)}
+          priority
+          sizes="(max-width: 1024px) 100vw, 55vw"
+          src={src}
+        />
+      ) : (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-stone-gray">
+          <ImageOff className="size-10" />
+          <span className="text-sm font-medium">{t("noImage")}</span>
+        </div>
+      )}
     </div>
   );
 }
 
-function CarouselButton({
-  label,
-  onClick,
-  children,
-}: {
-  label: string;
-  onClick: () => void;
-  children: ReactNode;
-}) {
+function DetailList({ items, title }: { items: string[]; title: string }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      className="flex size-11 items-center justify-center rounded-full border border-border-gray bg-white transition-colors hover:border-premium-red hover:text-premium-red"
-    >
+    <div>
+      <SectionTitle>{title}</SectionTitle>
+      <ul className="mt-5 space-y-3">
+        {items.map((item) => (
+          <li className="flex gap-3 text-base text-stone-gray" key={item}>
+            <Check className="mt-1 size-4 shrink-0 text-premium-red" />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function SectionTitle({ children }: { children: string }) {
+  return (
+    <h2 className="text-xl font-semibold uppercase text-premium-red sm:text-2xl">
       {children}
-    </button>
+    </h2>
+  );
+}
+
+function ProductDetailSkeleton() {
+  return (
+    <main className="min-h-screen bg-white py-12">
+      <Container className="grid max-w-350 gap-8 lg:grid-cols-2 lg:items-center">
+        <Skeleton className="aspect-[4/3] w-full rounded-md" />
+        <div className="space-y-4">
+          <Skeleton className="h-4 w-1/3" />
+          <Skeleton className="h-12 w-4/5" />
+          <Skeleton className="h-5 w-1/2" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-11 w-full" />
+        </div>
+      </Container>
+    </main>
   );
 }

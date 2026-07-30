@@ -9,7 +9,6 @@ import { WarrantyActivationRequestNotificationService } from '@/modules/warranty
 import { GenerateWarrantyActivationRequestCodeUseCase } from '@/modules/warranty-activation-requests/use-cases/generate-warranty-activation-request-code.use-case';
 import {
   buildWarrantyActivationRequestFullAddress,
-  normalizePhone,
   normalizeText,
   optionalTrim,
 } from '@/modules/warranty-activation-requests/utils/warranty-activation-request-normalization.utils';
@@ -24,6 +23,7 @@ import {
   warranty_activation_request_status,
   warranty_status,
 } from '@prisma/client';
+import { normalizePhoneNumber } from '@repo/shared/utils';
 
 const REQUEST_CODE_GENERATION_ATTEMPTS = 3;
 const ACTIVATABLE_WARRANTY_STATUSES = new Set<warranty_status>([
@@ -423,11 +423,12 @@ export class CreateWarrantyActivationRequestUseCase {
     customerName: string;
     customerPhone: string;
   }) {
-    const expectedPhone = normalizePhone(input.currentOwner.phone);
+    const expectedPhone = normalizePhoneNumber(input.currentOwner.phone);
     const expectedEmail = normalizeText(input.currentOwner.email);
     const expectedName = normalizeText(input.currentOwner.full_name);
     const phoneMatches =
-      !expectedPhone || expectedPhone === normalizePhone(input.customerPhone);
+      !expectedPhone ||
+      expectedPhone === normalizePhoneNumber(input.customerPhone);
     const emailMatches =
       !expectedEmail ||
       !input.customerEmail ||

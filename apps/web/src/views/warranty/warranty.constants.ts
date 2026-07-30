@@ -39,13 +39,6 @@ export const warrantyActions = [
   },
 ] as const;
 
-export const warrantyIssueOptions = [
-  "bubble",
-  "fade",
-  "scratch",
-  "other",
-] as const;
-
 export const demoWarrantyRecord = {
   serial: "BL/BHDT/000199",
   code: "FJ-8899-2026",
@@ -64,10 +57,4 @@ export const demoWarrantyRecord = {
   sunroof: "",
   rearGlass: "SP30",
   notes: "",
-} as const;
-
-export const demoWarrantyTicket = {
-  carPlate: "30H-888.88",
-  createdDate: "21/07/2026",
-  step: 2,
 } as const;

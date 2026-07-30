@@ -15,6 +15,9 @@ const formValues = {
   defaultWarrantyDurationMonths: 36,
   defaultWarrantyTerms: " Standard warranty ",
   description: " Template description ",
+  shortDescription: " Short public summary ",
+  features: [{ value: " Blocks infrared " }],
+  applications: [{ value: " Windshield " }],
   galleryImages: [],
   isActive: true,
   isPublished: true,
@@ -37,6 +40,9 @@ test("leaves blank SKU and slug out so the API can generate them", () => {
     galleryAssetIds: [],
     isPublished: true,
     metadata: {
+      applications: ["Windshield"],
+      features: ["Blocks infrared"],
+      shortDescription: "Short public summary",
       specifications: [{ key: "UV", value: "99%" }],
     },
     model: "CR70",
@@ -65,6 +71,9 @@ test("maps editable catalog identifiers and publication on update", () => {
       isActive: true,
       isPublished: true,
       metadata: {
+        applications: ["Windshield"],
+        features: ["Blocks infrared"],
+        shortDescription: "Short public summary",
         specifications: [{ key: "UV", value: "99%" }],
       },
       model: "CR70",
@@ -89,7 +98,12 @@ test("uses API-generated SKU, slug and model year as edit defaults", () => {
     id: "template-id",
     isActive: true,
     isPublished: false,
-    metadata: null,
+    metadata: {
+      applications: ["Side windows"],
+      features: ["Heat rejection"],
+      shortDescription: "Public summary",
+      specifications: [{ key: "UV", value: "99%" }],
+    },
     model: null,
     modelYear: 2025,
     name: "Template",
@@ -104,6 +118,10 @@ test("uses API-generated SKU, slug and model year as edit defaults", () => {
   assert.equal(defaults.slug, "template");
   assert.equal(defaults.modelYear, 2025);
   assert.equal(defaults.isPublished, false);
+  assert.equal(defaults.shortDescription, "Public summary");
+  assert.deepEqual(defaults.features, [{ value: "Heat rejection" }]);
+  assert.deepEqual(defaults.applications, [{ value: "Side windows" }]);
+  assert.deepEqual(defaults.specifications, [{ key: "UV", value: "99%" }]);
 });
 
 test("groups product template summary details for quick scanning", () => {

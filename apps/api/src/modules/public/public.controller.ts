@@ -2,10 +2,10 @@ import { Public } from '@/common/decorators/public.decorator';
 import { ListServiceCentersDto } from '@/modules/service-centers/dto/list-service-centers.dto';
 import { LookupWarrantyDto } from '@/modules/warranties/dto/lookup-warranty.dto';
 import { LookupWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/lookup-warranty-by-code.use-case';
-import { CreateWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-warranty-activation-request.dto';
+import { CreatePublicWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-public-warranty-activation-request.dto';
 import { CreateWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-warranty-activation-request.use-case';
 import { CreateWarrantyClaimDto } from '@/modules/warranty-claims/dto/create-warranty-claim.dto';
-import { CreateWarrantyClaimUseCase } from '@/modules/warranty-claims/use-cases/create-warranty-claim.use-case';
+import { CreatePublicWarrantyClaimUseCase } from '@/modules/public/use-cases/create-public-warranty-claim.use-case';
 import { PublicListServiceCentersUseCase } from '@/modules/public/use-cases/public-list-service-centers.use-case';
 import { PublicListNetworkLocationsUseCase } from '@/modules/public/use-cases/public-list-network-locations.use-case';
 import { PublicListDealersUseCase } from '@/modules/public/use-cases/public-list-dealers.use-case';
@@ -18,11 +18,13 @@ import { PublicListNetworkDirectoryUseCase } from '@/modules/public/use-cases/pu
 import { PublicListNetworkDirectoryFilterOptionsUseCase } from '@/modules/public/use-cases/public-list-network-directory-filter-options.use-case';
 import { ListPublicProductsDto } from '@/modules/products/dto/list-public-products.dto';
 import { ListPublicProductsUseCase } from '@/modules/products/use-cases/list-public-products.use-case';
+import { GetPublicProductDetailUseCase } from '@/modules/products/use-cases/get-public-product-detail.use-case';
 import { ListPublicProductCategoriesUseCase } from '@/modules/categories/use-cases/list-public-product-categories.use-case';
 import { ListPublicProductCategoriesDto } from '@/modules/categories/dto/list-public-product-categories.dto';
 import { PublicLookupWarrantyClaimByCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claim-by-code.use-case';
 import { PublicLookupWarrantyClaimsByWarrantyCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claims-by-warranty-code.use-case';
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 
 @Public()
 @Controller('public')
@@ -30,7 +32,7 @@ export class PublicController {
   constructor(
     private readonly lookupWarrantyByCodeUseCase: LookupWarrantyByCodeUseCase,
     private readonly createWarrantyActivationRequestUseCase: CreateWarrantyActivationRequestUseCase,
-    private readonly createWarrantyClaimUseCase: CreateWarrantyClaimUseCase,
+    private readonly createPublicWarrantyClaimUseCase: CreatePublicWarrantyClaimUseCase,
     private readonly publicLookupWarrantyClaimByCodeUseCase: PublicLookupWarrantyClaimByCodeUseCase,
     private readonly publicLookupWarrantyClaimsByWarrantyCodeUseCase: PublicLookupWarrantyClaimsByWarrantyCodeUseCase,
     private readonly publicListServiceCentersUseCase: PublicListServiceCentersUseCase,
@@ -40,31 +42,37 @@ export class PublicController {
     private readonly publicListNetworkDirectoryUseCase: PublicListNetworkDirectoryUseCase,
     private readonly publicListNetworkDirectoryFilterOptionsUseCase: PublicListNetworkDirectoryFilterOptionsUseCase,
     private readonly listPublicProductsUseCase: ListPublicProductsUseCase,
+    private readonly getPublicProductDetailUseCase: GetPublicProductDetailUseCase,
     private readonly listPublicProductCategoriesUseCase: ListPublicProductCategoriesUseCase,
   ) {}
 
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Get('warranties/lookup')
   lookupWarranty(@Query() query: LookupWarrantyDto) {
     return this.lookupWarrantyByCodeUseCase.execute(query);
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('warranty-activation-requests')
   createWarrantyActivationRequest(
-    @Body() dto: CreateWarrantyActivationRequestDto,
+    @Body() dto: CreatePublicWarrantyActivationRequestDto,
   ) {
     return this.createWarrantyActivationRequestUseCase.execute(dto);
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('warranty-claims')
   createWarrantyClaim(@Body() dto: CreateWarrantyClaimDto) {
-    return this.createWarrantyClaimUseCase.execute(dto);
+    return this.createPublicWarrantyClaimUseCase.execute(dto);
   }
 
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Get('warranty-claims/by-code/:claimCode')
   lookupWarrantyClaimByCode(@Param('claimCode') claimCode: string) {
     return this.publicLookupWarrantyClaimByCodeUseCase.execute(claimCode);
   }
 
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Get('warranty-claims/by-warranty-code/:warrantyCode')
   lookupWarrantyClaimsByWarrantyCode(
     @Param('warrantyCode') warrantyCode: string,
@@ -111,6 +119,11 @@ export class PublicController {
   @Get('products')
   listProducts(@Query() query: ListPublicProductsDto) {
     return this.listPublicProductsUseCase.execute(query);
+  }
+
+  @Get('products/:slug')
+  getProductDetail(@Param('slug') slug: string) {
+    return this.getPublicProductDetailUseCase.execute(slug);
   }
 
   @Get('product-categories')

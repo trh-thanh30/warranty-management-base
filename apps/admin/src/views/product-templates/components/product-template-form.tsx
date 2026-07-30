@@ -36,7 +36,7 @@ export function ProductTemplateForm({
   const isSubmitting = form.formState.isSubmitting;
 
   return (
-    <form className="space-y-6" noValidate onSubmit={form.onSubmit}>
+    <form className="min-w-0 space-y-6" noValidate onSubmit={form.onSubmit}>
       {form.formState.errors.root?.message ? (
         <div
           className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300"
@@ -202,7 +202,7 @@ export function ProductTemplateForm({
         />
       </Field>
 
-      <section className="space-y-4 rounded-md border border-slate-200 p-4 dark:border-slate-800">
+      <section className="min-w-0 space-y-4 overflow-hidden rounded-md border border-slate-200 p-4 dark:border-slate-800">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="font-medium">{t("galleryTitle")}</h2>
@@ -211,6 +211,7 @@ export function ProductTemplateForm({
             </p>
           </div>
           <Button
+            className="w-full sm:w-auto"
             onClick={() => form.gallery.append({ assetId: "", url: "" })}
             type="button"
             variant="secondary"
@@ -224,9 +225,9 @@ export function ProductTemplateForm({
             {t("noGalleryImages")}
           </p>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid min-w-0 gap-4 sm:grid-cols-2">
             {form.gallery.fields.map((galleryField, index) => (
-              <div className="space-y-2" key={galleryField.id}>
+              <div className="min-w-0 space-y-2" key={galleryField.id}>
                 <Controller
                   control={form.control}
                   name={`galleryImages.${index}.url`}
@@ -280,6 +281,24 @@ export function ProductTemplateForm({
         />
       </Field>
 
+      <Field
+        description={t("shortDescriptionDescription")}
+        error={translateError(
+          form.formState.errors.shortDescription?.message,
+          t,
+        )}
+        id="template-short-description"
+        label={t("shortDescription")}
+      >
+        <Textarea
+          id="template-short-description"
+          maxLength={500}
+          placeholder={t("shortDescriptionPlaceholder")}
+          rows={3}
+          {...form.register("shortDescription")}
+        />
+      </Field>
+
       <Field id="template-warranty-terms" label={t("defaultWarrantyTerms")}>
         <Textarea
           id="template-warranty-terms"
@@ -288,6 +307,86 @@ export function ProductTemplateForm({
           {...form.register("defaultWarrantyTerms")}
         />
       </Field>
+
+      <div className="grid gap-5 lg:grid-cols-2">
+        <section className="space-y-4 rounded-md border border-slate-200 p-4 dark:border-slate-800">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="font-medium">{t("featuresTitle")}</h2>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                {t("featuresDescription")}
+              </p>
+            </div>
+            <Button
+              className="w-full sm:w-auto"
+              onClick={() => form.features.append({ value: "" })}
+              type="button"
+              variant="secondary"
+            >
+              <Plus className="size-4" />
+              {t("addFeature")}
+            </Button>
+          </div>
+          {form.features.fields.map((field, index) => (
+            <div className="flex items-center gap-2" key={field.id}>
+              <Input
+                aria-label={t("feature")}
+                maxLength={300}
+                placeholder={t("featurePlaceholder")}
+                {...form.register(`features.${index}.value`)}
+              />
+              <Button
+                aria-label={t("removeFeature")}
+                onClick={() => form.features.remove(index)}
+                size="icon"
+                type="button"
+                variant="ghost"
+              >
+                <Trash2 className="size-4" />
+              </Button>
+            </div>
+          ))}
+        </section>
+
+        <section className="space-y-4 rounded-md border border-slate-200 p-4 dark:border-slate-800">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="font-medium">{t("applicationsTitle")}</h2>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                {t("applicationsDescription")}
+              </p>
+            </div>
+            <Button
+              className="w-full sm:w-auto"
+              onClick={() => form.applications.append({ value: "" })}
+              type="button"
+              variant="secondary"
+            >
+              <Plus className="size-4" />
+              {t("addApplication")}
+            </Button>
+          </div>
+          {form.applications.fields.map((field, index) => (
+            <div className="flex items-center gap-2" key={field.id}>
+              <Input
+                aria-label={t("application")}
+                maxLength={300}
+                placeholder={t("applicationPlaceholder")}
+                {...form.register(`applications.${index}.value`)}
+              />
+              <Button
+                aria-label={t("removeApplication")}
+                onClick={() => form.applications.remove(index)}
+                size="icon"
+                type="button"
+                variant="ghost"
+              >
+                <Trash2 className="size-4" />
+              </Button>
+            </div>
+          ))}
+        </section>
+      </div>
 
       <section className="space-y-4 rounded-md border border-slate-200 p-4 dark:border-slate-800">
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -298,6 +397,7 @@ export function ProductTemplateForm({
             </p>
           </div>
           <Button
+            className="w-full sm:w-auto"
             onClick={() => form.specifications.append({ key: "", value: "" })}
             type="button"
             variant="secondary"
@@ -311,18 +411,41 @@ export function ProductTemplateForm({
             className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]"
             key={field.id}
           >
-            <Input
-              aria-label={t("specificationKey")}
-              placeholder={t("specificationKeyPlaceholder")}
-              {...form.register(`specifications.${index}.key`)}
-            />
-            <Input
-              aria-label={t("specificationValue")}
-              placeholder={t("specificationValuePlaceholder")}
-              {...form.register(`specifications.${index}.value`)}
-            />
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <Label htmlFor={`specification-${index}-key`}>
+                  {t("specificationKey")}
+                </Label>
+                <Button
+                  aria-label={t("removeSpecification")}
+                  className="sm:hidden"
+                  onClick={() => form.specifications.remove(index)}
+                  size="icon"
+                  type="button"
+                  variant="ghost"
+                >
+                  <Trash2 className="size-4" />
+                </Button>
+              </div>
+              <Input
+                id={`specification-${index}-key`}
+                placeholder={t("specificationKeyPlaceholder")}
+                {...form.register(`specifications.${index}.key`)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`specification-${index}-value`}>
+                {t("specificationValue")}
+              </Label>
+              <Input
+                id={`specification-${index}-value`}
+                placeholder={t("specificationValuePlaceholder")}
+                {...form.register(`specifications.${index}.value`)}
+              />
+            </div>
             <Button
               aria-label={t("removeSpecification")}
+              className="hidden sm:mt-6 sm:inline-flex"
               onClick={() => form.specifications.remove(index)}
               size="icon"
               type="button"

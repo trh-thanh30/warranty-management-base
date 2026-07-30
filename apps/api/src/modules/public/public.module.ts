@@ -11,6 +11,7 @@ import { PublicListNetworkDirectoryUseCase } from '@/modules/public/use-cases/pu
 import { PublicListNetworkDirectoryFilterOptionsUseCase } from '@/modules/public/use-cases/public-list-network-directory-filter-options.use-case';
 import { PublicLookupWarrantyClaimByCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claim-by-code.use-case';
 import { PublicLookupWarrantyClaimsByWarrantyCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claims-by-warranty-code.use-case';
+import { CreatePublicWarrantyClaimUseCase } from '@/modules/public/use-cases/create-public-warranty-claim.use-case';
 import { WarrantyClaimsModule } from '@/modules/warranty-claims/warranty-claims.module';
 import { WarrantyActivationRequestsModule } from '@/modules/warranty-activation-requests/warranty-activation-requests.module';
 import { WarrantiesModule } from '@/modules/warranties/warranties.module';
@@ -36,6 +37,7 @@ import { Module } from '@nestjs/common';
     PublicListNetworkDirectoryFilterOptionsUseCase,
     PublicLookupWarrantyClaimByCodeUseCase,
     PublicLookupWarrantyClaimsByWarrantyCodeUseCase,
+    CreatePublicWarrantyClaimUseCase,
   ],
 })
 export class PublicModule {}

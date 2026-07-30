@@ -55,3 +55,29 @@ export const WARRANTY_CLAIM_TERMINAL_STATUSES: WarrantyClaimStatus[] = [
   "COMPLETED",
   "CANCELLED",
 ];
+
+export const WARRANTY_CLAIM_OPEN_STATUSES = [
+  "SUBMITTED",
+  "REVIEWING",
+  "APPROVED",
+  "IN_REPAIR",
+] as const satisfies readonly WarrantyClaimStatus[];
+
+export const WARRANTY_CLAIM_ISSUE_OPTIONS = [
+  "bubble",
+  "fade",
+  "scratch",
+  "other",
+] as const;
+
+export type WarrantyClaimIssueOption =
+  (typeof WARRANTY_CLAIM_ISSUE_OPTIONS)[number];
+
+export function isWarrantyClaimIssueOption(
+  value: unknown,
+): value is WarrantyClaimIssueOption {
+  return (
+    typeof value === "string" &&
+    (WARRANTY_CLAIM_ISSUE_OPTIONS as readonly string[]).includes(value)
+  );
+}

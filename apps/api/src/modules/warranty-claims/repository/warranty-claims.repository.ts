@@ -16,6 +16,7 @@ import {
   warranty_claim_priority,
   warranty_claim_status,
 } from '@prisma/client';
+import { WARRANTY_CLAIM_OPEN_STATUSES } from '@repo/shared/constants';
 
 @Injectable()
 export class WarrantyClaimsRepository {
@@ -54,23 +55,25 @@ export class WarrantyClaimsRepository {
     });
   }
 
-  findLastClaimCode(prefix: string) {
-    return this.prismaService.warrantyClaim.findFirst({
-      where: {
-        claim_code: {
-          startsWith: prefix,
-        },
-      },
-      orderBy: { claim_code: 'desc' },
-      select: { claim_code: true },
-    });
-  }
-
   findByWarrantyCode(warrantyCode: string) {
     return this.prismaService.warrantyClaim.findMany({
       where: { warranty_code: warrantyCode },
       include: warrantyClaimInclude,
       orderBy: { created_at: 'desc' },
+    });
+  }
+
+  findOpenByWarrantyId(warrantyId: string) {
+    return this.prismaService.warrantyClaim.findFirst({
+      where: {
+        warranty_id: warrantyId,
+        status: { in: [...WARRANTY_CLAIM_OPEN_STATUSES] },
+      },
+      orderBy: { submitted_at: 'desc' },
+      select: {
+        claim_code: true,
+        status: true,
+      },
     });
   }
 

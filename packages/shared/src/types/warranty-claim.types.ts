@@ -44,6 +44,22 @@ export type WarrantyClaimStatus =
 
 export type WarrantyClaimPriority = "LOW" | "NORMAL" | "HIGH" | "URGENT";
 
+export type PublicWarrantyClaimStatusTimelineItem = {
+  type: "STATUS_CHANGED";
+  status: WarrantyClaimStatus;
+  createdAt: string;
+};
+
+export type PublicWarrantyClaimServiceCenterTimelineItem = {
+  type: "SERVICE_CENTER_ASSIGNED" | "SERVICE_CENTER_CHANGED";
+  serviceCenterName: string;
+  createdAt: string;
+};
+
+export type PublicWarrantyClaimTimelineItem =
+  | PublicWarrantyClaimStatusTimelineItem
+  | PublicWarrantyClaimServiceCenterTimelineItem;
+
 export const WARRANTY_CLAIM_ASSIGNMENT_STATUSES = [
   "ASSIGNED",
   "UNASSIGNED",
@@ -150,6 +166,7 @@ export type PublicWarrantyClaimSummary = Pick<
   | "submittedAt"
   | "resolvedAt"
 > & {
+  timeline: PublicWarrantyClaimTimelineItem[];
   product: Pick<ProductSummary, "name" | "brand" | "model"> | null;
   serviceCenter: Pick<
     ServiceCenterSummary,

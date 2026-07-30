@@ -9,7 +9,7 @@ import type {
   ComponentProps,
   HTMLAttributes,
 } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "./lib/utils";
 
 export function Pagination({ className, ...props }: ComponentProps<"nav">) {
   return (

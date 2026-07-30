@@ -7,7 +7,6 @@ export * from "./image-upload";
 export * from "./import-export-menu";
 export * from "./location-picker-field";
 export * from "./page-header";
-export * from "./pagination-controls";
 export * from "./search-dropdown";
 export * from "./state-panel";
 export * from "./stats-card";

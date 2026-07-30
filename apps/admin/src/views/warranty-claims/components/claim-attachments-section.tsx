@@ -24,7 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@repo/ui";
-import { PaginationControls } from "@/src/components/common/pagination-controls";
+import { PaginationControls } from "@repo/ui/pagination-controls";
 import { formatAttachmentSize } from "../warranty-claims.utils";
 
 const ATTACHMENTS_PAGE_SIZE = 6;

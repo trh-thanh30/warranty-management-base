@@ -91,7 +91,7 @@ export function SiteHeader({ logoUrl }: { logoUrl?: string | null }) {
           </ul>
         </nav>
 
-        <div className="hidden shrink-0 items-center gap-4 lg:flex">
+        <div className="hidden shrink-0 items-center gap-4 xl:flex">
           <Link
             href={APP_ROUTES.dealers}
             aria-current={isDealerRouteActive ? "page" : undefined}

@@ -19,7 +19,7 @@ import {
   Skeleton,
 } from "@repo/ui";
 import { PageHeader } from "@/src/components/common/page-header";
-import { PaginationControls } from "@/src/components/common/pagination-controls";
+import { PaginationControls } from "@repo/ui/pagination-controls";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";

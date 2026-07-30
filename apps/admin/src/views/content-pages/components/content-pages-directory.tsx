@@ -38,7 +38,7 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui";
-import { PaginationControls } from "@/src/components/common/pagination-controls";
+import { PaginationControls } from "@repo/ui/pagination-controls";
 import { SelectControl } from "@/src/components/common/select-control";
 import { SortableTableHead } from "@/src/components/common/sortable-table-head";
 import { StatePanel } from "@/src/components/common/state-panel";

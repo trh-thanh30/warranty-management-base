@@ -41,8 +41,24 @@ export async function validateProductTemplateAssets(
 }
 
 export function toTemplateJson(
-  value: Record<string, unknown> | null | undefined,
+  value: object | null | undefined,
 ): Prisma.InputJsonValue | typeof Prisma.JsonNull | undefined {
   if (value === undefined) return undefined;
-  return value === null ? Prisma.JsonNull : (value as Prisma.InputJsonObject);
+  return value === null ? Prisma.JsonNull : value;
+}
+
+export function mergeProductTemplateMetadata(
+  existing: unknown,
+  update: object | null | undefined,
+) {
+  if (update === undefined) return undefined;
+  if (update === null) return null;
+  return {
+    ...(isRecord(existing) ? existing : {}),
+    ...update,
+  };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }

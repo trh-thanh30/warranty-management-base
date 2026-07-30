@@ -14,7 +14,7 @@ import {
   Skeleton,
 } from "@repo/ui";
 import { FormPageShell } from "@/src/components/common/form-page-shell";
-import { PaginationControls } from "@/src/components/common/pagination-controls";
+import { PaginationControls } from "@repo/ui/pagination-controls";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { useProductTemplate } from "@/src/hooks/use-product-templates";

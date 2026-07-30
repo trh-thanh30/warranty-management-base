@@ -26,6 +26,10 @@ const result = spawnSync(
   ["--import", tsxLoader, "--test", ...testFiles],
   {
     cwd: workspaceRoot,
+    env: {
+      ...process.env,
+      TSX_TSCONFIG_PATH: path.join(webRoot, "tsconfig.json"),
+    },
     stdio: "inherit",
   },
 );

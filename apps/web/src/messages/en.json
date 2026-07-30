@@ -28,47 +28,65 @@
   },
   "WarrantyLookupModal": {
     "title": "E-Warranty lookup",
-    "subtitle": "Verify an official FUJITEK warranty label",
+    "subtitle": "Verify official FUJITEK coverage using an E-Warranty code",
     "closeAriaLabel": "Close warranty lookup dialog",
-    "placeholder": "Enter phone / license plate (e.g. 30H-888.88) / label code...",
-    "search": "Search",
-    "tryPrefix": "Try entering",
-    "or": "or",
-    "mock": {
-      "customerName": "Nguyen Van An",
-      "address": "Ho Chi Minh City",
-      "warrantyYears": "15 years",
-      "dealer": "Panda Auto Showroom & Hanoi Warranty Center",
-      "status": "Active (Official FUJITEK warranty)"
-    },
     "supportMessage": "For further support, contact the installation center or FUJITEK hotline.",
     "supportHotlineLabel": "Hotline",
     "supportClosing": "Thank you for using the FUJITEK E-Warranty system.",
-    "result": {
-      "serial": "Serial number",
-      "code": "E-Warranty code",
-      "warranty": "Warranty",
-      "owner": "Owner",
-      "phone": "Phone number",
-      "address": "Address",
-      "carPlate": "License plate",
-      "carModel": "Vehicle model",
-      "vehicle": "License plate & Vehicle",
-      "film": "Window-film package",
-      "warrantyYears": "Warranty period (years)",
-      "installedDate": "Completion date",
-      "expiryDate": "Warranty expiry",
-      "dates": "Activation & Expiry",
-      "dealer": "Installation center",
-      "glassSection": "Filmed glass positions",
+    "errors": {
+      "invalid": "The E-Warranty code is invalid. Check it and try again.",
+      "notFound": "No warranty information was found for this E-Warranty code.",
+      "rateLimit": "You have made too many lookup attempts. Try again in one minute.",
+      "request": "Warranty lookup is unavailable right now. Please try again later."
+    }
+  },
+  "WarrantyLookupForm": {
+    "ariaLabel": "E-Warranty code",
+    "placeholder": "Enter an E-Warranty code...",
+    "submit": "Search",
+    "submitting": "Searching...",
+    "tryPrefix": "For example, enter",
+    "or": "or",
+    "validation": {
+      "required": "Enter an E-Warranty code.",
+      "minLength": "The E-Warranty code must contain at least 6 characters.",
+      "maxLength": "The E-Warranty code must not exceed 64 characters.",
+      "format": "The E-Warranty code may contain only letters, numbers, and hyphens."
+    }
+  },
+  "WarrantyLookupResult": {
+    "product": "Product",
+    "productCode": "Product code",
+    "category": "Category",
+    "brandModel": "Brand / Model",
+    "serial": "Serial number",
+    "warrantyCode": "E-Warranty code",
+    "startDate": "Start date",
+    "endDate": "Expiry date",
+    "duration": "Coverage period",
+    "durationValue": "{count, plural, one {# month} other {# months}}",
+    "terms": "Terms",
+    "installation": "Installation information",
+    "installedAt": "Installation date",
+    "vehicleModel": "Vehicle model",
+    "dealer": "Installation dealer",
+    "dealerPhone": "Dealer phone",
+    "dealerAddress": "Dealer address",
+    "filmPositions": "Filmed glass positions",
+    "positions": {
       "windshield": "Windshield",
-      "frontLeftGlass": "Front left window",
-      "frontRightGlass": "Front right window",
-      "rearLeftGlass": "Rear left window",
-      "rearRightGlass": "Rear right window",
+      "frontLeftSide": "Front left window",
+      "frontRightSide": "Front right window",
+      "rearLeftSide": "Rear left window",
+      "rearRightSide": "Rear right window",
       "sunroof": "Sunroof",
-      "rearGlass": "Rear window",
-      "notes": "Notes"
+      "rearGlass": "Rear window"
+    },
+    "statuses": {
+      "DRAFT": "Not activated",
+      "ACTIVE": "Active",
+      "EXPIRED": "Expired",
+      "VOIDED": "Voided"
     }
   },
   "HomePage": {
@@ -624,12 +642,38 @@
           "name": "Bluetooth External-Valve TPMS"
         }
       },
-      "itemCount": "{count} items",
+      "itemCount": "<highlight>{count}</highlight> items",
+      "filterTitle": "Filters",
+      "closeFilter": "Close filters",
+      "searchLabel": "Search products",
       "searchPlaceholder": "Search products, model code...",
+      "categoriesTitle": "Categories",
+      "mobileFilterTrigger": "Filters",
+      "sortLabel": "Sort:",
+      "sortOptions": {
+        "newest": "Newest",
+        "nameAsc": "Name: A - Z",
+        "nameDesc": "Name: Z - A"
+      },
+      "viewGrid": "Grid view",
+      "viewList": "List view",
+      "contactForPrice": "Contact",
+      "imageUnavailable": "Image unavailable",
+      "loadingProducts": "Loading products...",
+      "loadErrorTitle": "Unable to load products",
+      "loadErrorDesc": "Product data is currently unavailable. Please try again.",
+      "retry": "Try again",
+      "noProductsTitle": "No products yet",
+      "noProductsDesc": "There are currently no published products.",
+      "categoryLoadError": "Unable to load categories.",
+      "uncategorized": "Uncategorized",
       "noResultsTitle": "No products found",
       "noResultsDesc": "Try searching with different keywords or clear your search filter.",
       "clearSearch": "Clear search",
+      "clearFilters": "Clear filters",
       "pageInfo": "Page {current} of {total}",
+      "paginationLabel": "Product pagination",
+      "goToPage": "Go to page {page}",
       "prev": "Previous",
       "next": "Next",
       "itemsPerPageLabel": "Show",
@@ -641,6 +685,15 @@
       "home": "Home",
       "products": "Products"
     },
+    "loadErrorTitle": "Unable to load product",
+    "loadErrorDescription": "This product is unavailable, unpublished, or temporarily cannot be loaded.",
+    "retry": "Try again",
+    "skuLabel": "Product code",
+    "warrantyMonths": "{months}-month warranty",
+    "noDescription": "Product details are being updated.",
+    "noImage": "No image available",
+    "galleryTitle": "Product images",
+    "consultCta": "Contact for consultation",
     "specsTitle": "DETAILED TECHNICAL SPECIFICATIONS",
     "featuresTitle": "KEY FEATURES & CORE TECHNOLOGY",
     "warrantyLabel": "OFFICIAL WARRANTY",
@@ -649,6 +702,7 @@
     "consultHotline": "HOTLINE CONSULTATION: 0886.33.77.33",
     "notFound": "Requested product could not be found.",
     "backToCatalog": "Back to product catalog",
+    "dealerNetworkCta": "Dealer network",
     "relatedTitle": "RELATED PRODUCTS",
     "introductionTitle": "Product introduction",
     "technologyTitle": "Technology & highlights",
@@ -1257,6 +1311,7 @@
     }
   },
   "Warranty": {
+    "backToWarranty": "Back to warranty",
     "hub": {
       "title": "Electronic warranty service center",
       "description": "FUJITEK's official electronic warranty system supports nationwide lookup, activation, and service requests."
@@ -1304,14 +1359,27 @@
       }
     },
     "activate": {
-      "eyebrow": "E-Warranty activation",
-      "title": "Activate electronic warranty",
-      "description": "For customers and dealers activating E-Warranty after FUJITEK window-film installation.",
-      "submit": "Confirm E-Warranty activation",
+      "eyebrow": "E-Warranty activation request",
+      "title": "Request electronic warranty activation",
+      "description": "Submit your E-Warranty information for FUJITEK to verify and approve before activation.",
+      "submit": "Submit activation request",
+      "submitting": "Submitting request...",
       "success": {
-        "title": "Warranty activated!",
-        "description": "The 15-year electronic warranty for vehicle <plate></plate> has been saved in the FUJITEK system.",
-        "reset": "Activate another label"
+        "title": "Request received",
+        "description": "Your request is awaiting FUJITEK verification and approval. Keep the request code for future support.",
+        "requestCodeLabel": "Request code",
+        "statusLabel": "Status",
+        "pendingStatus": "Pending review",
+        "copyCode": "Copy request code",
+        "copied": "Request code copied",
+        "copyFailed": "The request code could not be copied. Try again.",
+        "timelineTitle": "Processing timeline",
+        "submittedStep": "Request submitted",
+        "reviewStep": "FUJITEK reviews the request",
+        "reviewDescription": "Waiting for the FUJITEK team to receive and review the request.",
+        "activationStep": "Warranty activation",
+        "activationDescription": "Completed after the request has been approved.",
+        "reset": "Submit another request"
       },
       "fields": {
         "customerName": {
@@ -1322,6 +1390,10 @@
           "label": "Phone number *",
           "placeholder": "E.g. 0988 123 456"
         },
+        "customerEmail": {
+          "label": "Email *",
+          "placeholder": "E.g. alex@example.com"
+        },
         "carPlate": {
           "label": "License plate *",
           "placeholder": "E.g. 30H-888.88"
@@ -1329,56 +1401,81 @@
         "stampCode": {
           "label": "E-Warranty label code *",
           "placeholder": "E.g. FJ-8899-2026"
-        }
+        },
+        "province": {
+          "label": "Province / City *",
+          "placeholder": "Select a province or city",
+          "loading": "Loading provinces...",
+          "loadError": "Could not load provinces."
+        },
+        "ward": {
+          "label": "Ward *",
+          "placeholder": "Select a ward",
+          "loading": "Loading wards...",
+          "loadError": "Could not load wards."
+        },
+        "addressDetail": {
+          "label": "Address details *",
+          "placeholder": "Street number and street name..."
+        },
+        "retry": "Retry"
+      },
+      "validation": {
+        "addressRequired": "Enter the address details.",
+        "customerEmailInvalid": "Enter a valid email address.",
+        "customerEmailRequired": "Enter an email address to receive the warranty certificate.",
+        "customerNameInvalid": "The owner name must contain 2 to 120 characters.",
+        "customerPhoneInvalid": "Enter a valid phone number.",
+        "provinceRequired": "Select a province or city.",
+        "vehiclePlateInvalid": "Enter a valid license plate.",
+        "wardRequired": "Select a ward.",
+        "warrantyCodeInvalid": "Enter a valid E-Warranty code."
+      },
+      "errors": {
+        "alreadyOpen": "This product already has an activation request awaiting review.",
+        "invalid": "Some submitted information is invalid. Check the form and try again.",
+        "notEligible": "This E-Warranty code is not eligible for a new activation request.",
+        "notFound": "The E-Warranty code was not found.",
+        "rateLimit": "Too many requests were submitted. Try again later.",
+        "request": "The activation request could not be submitted. Try again."
       }
     },
     "lookup": {
       "eyebrow": "E-Warranty system",
       "title": "Check electronic warranty coverage",
-      "description": "Enter a phone number, license plate, or E-Warranty label code to verify official coverage.",
+      "description": "Enter an E-Warranty code to verify official product and coverage information.",
       "heroImageAlt": "FUJITEK electronic warranty lookup",
-      "placeholder": "Enter phone / License plate / Label code...",
-      "search": "Search",
-      "tryPrefix": "For example, enter",
-      "or": "or",
-      "mock": {
-        "customerName": "Nguyen Van An",
-        "address": "Ho Chi Minh City",
-        "warrantyYears": "15 years",
-        "dealer": "Panda Auto Hanoi Showroom",
-        "status": "Active (Official)"
-      },
       "registration": {
-        "title": "Your electronic warranty code can be registered through one of these identifiers",
-        "description": "Use one of the 3 methods below to look up E-Warranty label information",
+        "title": "Find your E-Warranty code",
+        "description": "Your lookup code may be provided through one of these channels",
         "methods": {
           "phone": {
-            "label": "Method 01",
-            "title": "Phone number",
-            "description": "The owner phone number registered during installation"
+            "label": "Source 01",
+            "title": "Warranty document",
+            "description": "The E-Warranty code printed on the product warranty document"
           },
           "qr": {
-            "label": "Method 02",
-            "title": "QR code / Email",
-            "description": "The warranty label code received by message or email"
+            "label": "Source 02",
+            "title": "Message / Email",
+            "description": "The warranty code sent after product activation"
           },
           "serial": {
-            "label": "Method 03",
-            "description": "Code format: BL/BHDT/000199"
+            "label": "Code format",
+            "description": "Examples: WM-2026-ABCDEF or FJ-8899-2026"
           }
         }
       },
       "searchSection": {
         "title": "Lookup",
-        "description": "Enter the code or phone number provided on the warranty document."
+        "description": "Enter the complete E-Warranty code shown on the warranty document."
       },
       "guide": {
         "title": "How to check E-Warranty in 3 steps",
         "steps": {
           "one": {
             "badge": "Step 01",
-            "title": "Enter information",
-            "description": "Enter a phone number, license plate, or E-Warranty label code."
+            "title": "Enter the code",
+            "description": "Enter the exact E-Warranty code from the warranty document."
           },
           "two": {
             "badge": "Step 02",
@@ -1388,7 +1485,7 @@
           "three": {
             "badge": "Step 03",
             "title": "View details",
-            "description": "Review owner, film package, glass positions, and 15-year coverage."
+            "description": "Review product, serial number, status, and coverage dates."
           }
         }
       },
@@ -1409,42 +1506,47 @@
         "description": "View warranty duration rules (10 - 15 years), eligible cases, and post-installation notes.",
         "action": "View warranty policy"
       },
-      "result": {
-        "code": "E-Warranty code",
-        "serial": "Serial number",
-        "duration": "Coverage",
-        "owner": "Owner",
-        "phone": "Phone number",
-        "address": "Address",
-        "carPlate": "License plate",
-        "carModel": "Vehicle model",
-        "vehicle": "License plate & Vehicle",
-        "film": "Window-film range",
-        "warrantyYears": "Warranty period (years)",
-        "installedDate": "Installation date",
-        "expiryDate": "Expiry date",
-        "dealer": "Installation center",
-        "glassSection": "Filmed glass positions",
-        "windshield": "Windshield",
-        "frontLeftGlass": "Front left window",
-        "frontRightGlass": "Front right window",
-        "rearLeftGlass": "Rear left window",
-        "rearRightGlass": "Rear right window",
-        "sunroof": "Sunroof",
-        "rearGlass": "Rear window",
-        "notes": "Notes"
-      },
-      "noResult": "No warranty record was found. Check the phone number or license plate and try again."
+      "errors": {
+        "invalid": "The E-Warranty code is invalid. Check it and try again.",
+        "notFound": "No warranty information was found for this E-Warranty code.",
+        "rateLimit": "You have made too many lookup attempts. Try again in one minute.",
+        "request": "Warranty lookup is unavailable right now. Please try again later."
+      }
     },
     "request": {
       "eyebrow": "Warranty service request",
       "title": "Submit a warranty & Support request",
       "description": "Get help with peeling, bubbles, discoloration, or installation-related issues.",
       "submit": "Submit support request",
+      "submitting": "Submitting request...",
       "success": {
-        "title": "Request submitted!",
-        "description": "Your support ticket is <ticket></ticket>. A FUJITEK technician will contact you within 24 hours.",
+        "title": "Request received",
+        "description": "Your request is awaiting FUJITEK review and processing. Keep the request code for tracking or future support.",
+        "claimCodeLabel": "Request code",
+        "issueLabel": "Support issue",
+        "submittedAtLabel": "Submitted at",
+        "statusLabel": "Status",
+        "submittedStatus": "Submitted",
+        "copyCode": "Copy request code",
+        "copied": "Request code copied",
+        "track": "Track progress",
         "reset": "Submit another request"
+      },
+      "errors": {
+        "alreadyOpen": "This E-Warranty code already has a warranty request being processed.",
+        "invalid": "The request information is invalid. Check it and try again.",
+        "notEligible": "This warranty is inactive, expired, or no longer eligible.",
+        "notFound": "This E-Warranty code was not found.",
+        "ownerMismatch": "The phone number does not match the current warranty owner.",
+        "rateLimit": "You have submitted too many requests. Try again in one minute.",
+        "request": "The warranty request could not be submitted. Please try again later."
+      },
+      "validation": {
+        "detailsInvalid": "Issue details must not exceed 4000 characters.",
+        "issueRequired": "Select the issue you are experiencing.",
+        "nameInvalid": "Enter a valid full name.",
+        "phoneInvalid": "Enter a valid phone number.",
+        "warrantyCodeInvalid": "Enter a valid E-Warranty code."
       },
       "fields": {
         "customerName": {
@@ -1456,8 +1558,8 @@
           "placeholder": "E.g. 0988 123 456"
         },
         "reference": {
-          "label": "License plate / E-Warranty code *",
-          "placeholder": "E.g. 30H-888.88"
+          "label": "E-Warranty code *",
+          "placeholder": "E.g. WM-2026-ABCDEF"
         },
         "issue": {
           "label": "Issue *",
@@ -1478,20 +1580,53 @@
     "track": {
       "eyebrow": "Track service progress",
       "title": "Track warranty processing",
-      "description": "Enter a request ID or phone number to view appointments and processing progress.",
-      "placeholder": "Enter REQ-... ticket or phone number...",
-      "search": "Check",
-      "mock": {
-        "customerName": "Nguyen Van An",
-        "issue": "Bubbles on the left side window",
-        "status": "Received & Scheduling a technician",
-        "technician": "Tran Van Binh - Panda Auto Hanoi"
+      "description": "Enter your CLM request code to view its current status and actual processing history.",
+      "form": {
+        "claimCodeLabel": "Warranty claim code",
+        "placeholder": "For example: CLM-0123456789ABCDEFABCD",
+        "submit": "Check",
+        "submitting": "Checking...",
+        "help": "The CLM code is issued after you submit a warranty support request."
+      },
+      "validation": {
+        "claimCodeInvalid": "Enter a valid CLM request code."
+      },
+      "errors": {
+        "notFound": "No warranty request was found for this code.",
+        "rateLimit": "You have made too many lookups. Please try again later.",
+        "request": "Unable to track this warranty request. Please try again."
       },
       "result": {
-        "ticket": "Ticket ID",
-        "customer": "Customer",
-        "carPlate": "License plate",
-        "technician": "Assigned technician"
+        "claimCode": "Request code",
+        "warrantyCode": "E-Warranty code",
+        "issue": "Reported issue",
+        "priority": "Priority",
+        "submittedAt": "Submitted",
+        "dueAt": "Expected due date",
+        "resolvedAt": "Completed",
+        "product": "Product",
+        "serviceCenter": "Warranty service center"
+      },
+      "statuses": {
+        "SUBMITTED": "Submitted",
+        "REVIEWING": "Under review",
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected",
+        "IN_REPAIR": "In repair",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled"
+      },
+      "priorities": {
+        "LOW": "Low",
+        "NORMAL": "Normal",
+        "HIGH": "High",
+        "URGENT": "Urgent"
+      },
+      "timeline": {
+        "title": "Processing history",
+        "statusChanged": "Status: {status}",
+        "serviceCenterAssigned": "Assigned to {name}",
+        "serviceCenterChanged": "Transferred to {name}"
       }
     }
   },

@@ -1,4 +1,8 @@
-import { BadRequestError, NotFoundError } from '@/common/response';
+import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+} from '@/common/response';
 import { CreateWarrantyClaimDto } from '@/modules/warranty-claims/dto/create-warranty-claim.dto';
 import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/warranty-claims.repository';
 import { WarrantyClaimNotificationService } from '@/modules/warranty-claims/service/warranty-claim-notification.service';
@@ -9,8 +13,10 @@ import { Injectable } from '@nestjs/common';
 import {
   Prisma,
   warranty_claim_priority,
+  warranty_claim_status,
   warranty_status,
 } from '@prisma/client';
+import { normalizePhoneNumber } from '@repo/shared/utils';
 
 const CLAIM_CODE_GENERATION_ATTEMPTS = 3;
 
@@ -19,11 +25,14 @@ export class CreateWarrantyClaimUseCase {
   constructor(
     private readonly warrantyClaimsRepository: WarrantyClaimsRepository,
     private readonly generateWarrantyClaimCodeUseCase: GenerateWarrantyClaimCodeUseCase,
-    private readonly warrantyClaimSlaService?: WarrantyClaimSlaService,
+    private readonly warrantyClaimSlaService: WarrantyClaimSlaService,
     private readonly warrantyClaimNotificationService?: WarrantyClaimNotificationService,
   ) {}
 
-  async execute(dto: CreateWarrantyClaimDto) {
+  async execute(
+    dto: CreateWarrantyClaimDto,
+    context: { requireOwnerMatch?: boolean } = {},
+  ) {
     const warrantyCode = dto.warrantyCode.trim().toUpperCase();
     const requesterName = dto.requesterName.trim();
     const requesterPhone = dto.requesterPhone.trim();
@@ -73,7 +82,25 @@ export class CreateWarrantyClaimUseCase {
       );
     }
 
+    const openClaim = await this.warrantyClaimsRepository.findOpenByWarrantyId(
+      product.warranty.id,
+    );
+    if (openClaim) {
+      this.throwOpenClaimError(warrantyCode, openClaim);
+    }
+
     const currentOwnership = product.ownerships[0];
+    if (
+      context.requireOwnerMatch &&
+      (!currentOwnership?.customer?.phone ||
+        normalizePhoneNumber(currentOwnership.customer.phone) !==
+          normalizePhoneNumber(requesterPhone))
+    ) {
+      throw new BadRequestError(
+        'Requester phone does not match the current warranty owner',
+        'WARRANTY_CLAIM_OWNER_MISMATCH',
+      );
+    }
 
     for (
       let attempt = 0;
@@ -81,10 +108,9 @@ export class CreateWarrantyClaimUseCase {
       attempt += 1
     ) {
       const claimCode = await this.generateWarrantyClaimCodeUseCase.execute();
-      const dueAt =
-        this.warrantyClaimSlaService?.calculateDueAt(
-          warranty_claim_priority.NORMAL,
-        ) ?? this.defaultDueAt();
+      const dueAt = this.warrantyClaimSlaService.calculateDueAt(
+        warranty_claim_priority.NORMAL,
+      );
 
       try {
         const claim = await this.warrantyClaimsRepository.create({
@@ -113,6 +139,16 @@ export class CreateWarrantyClaimUseCase {
           continue;
         }
 
+        if (this.isUniqueConstraintConflict(error)) {
+          const concurrentOpenClaim =
+            await this.warrantyClaimsRepository.findOpenByWarrantyId(
+              product.warranty.id,
+            );
+          if (concurrentOpenClaim) {
+            this.throwOpenClaimError(warrantyCode, concurrentOpenClaim);
+          }
+        }
+
         throw error;
       }
     }
@@ -129,9 +165,28 @@ export class CreateWarrantyClaimUseCase {
     );
   }
 
-  private defaultDueAt() {
-    const dueAt = new Date();
-    dueAt.setDate(dueAt.getDate() + 3);
-    return dueAt;
+  private isUniqueConstraintConflict(error: unknown) {
+    return (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    );
+  }
+
+  private throwOpenClaimError(
+    warrantyCode: string,
+    claim: {
+      claim_code: string;
+      status: warranty_claim_status;
+    },
+  ): never {
+    throw new ConflictError(
+      'Warranty already has an open claim',
+      'WARRANTY_CLAIM_ALREADY_OPEN',
+      {
+        claimCode: claim.claim_code,
+        currentStatus: claim.status,
+        warrantyCode,
+      },
+    );
   }
 }

@@ -4,7 +4,7 @@ import { Bell, Check, Inbox } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import type { PaginatedResponse, UserNotificationSummary } from "@repo/shared";
 import { Badge, Button, Skeleton } from "@repo/ui";
-import { PaginationControls } from "@/src/components/common/pagination-controls";
+import { PaginationControls } from "@repo/ui/pagination-controls";
 import { StatePanel } from "@/src/components/common/state-panel";
 import {
   formatNotificationDate,

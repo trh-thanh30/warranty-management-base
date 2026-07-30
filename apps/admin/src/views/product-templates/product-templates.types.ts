@@ -31,6 +31,7 @@ export const productTemplateFormSchema = z.object({
   model: optionalText.max(80, "modelLength"),
   modelYear: optionalInteger(1900, 2100, "modelYearRange"),
   description: optionalText.max(5000, "descriptionLength"),
+  shortDescription: optionalText.max(500, "shortDescriptionLength"),
   defaultWarrantyDurationMonths: z.coerce
     .number()
     .int("durationMonthsRange")
@@ -49,6 +50,16 @@ export const productTemplateFormSchema = z.object({
     z.object({
       key: optionalText.max(160, "specificationLength"),
       value: optionalText.max(160, "specificationLength"),
+    }),
+  ),
+  features: z.array(
+    z.object({
+      value: optionalText.max(300, "detailItemLength"),
+    }),
+  ),
+  applications: z.array(
+    z.object({
+      value: optionalText.max(300, "detailItemLength"),
     }),
   ),
   isActive: z.boolean(),

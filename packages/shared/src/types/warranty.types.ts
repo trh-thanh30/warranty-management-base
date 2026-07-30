@@ -1,4 +1,5 @@
 import type { ProductSummary } from "./product.types.ts";
+import type { CategorySummary } from "./category.types.ts";
 
 export type WarrantyStatus = "DRAFT" | "ACTIVE" | "EXPIRED" | "VOIDED";
 
@@ -34,13 +35,53 @@ export type WarrantyUserSummary = {
 export type WarrantyLookupResult = {
   product: Pick<
     ProductSummary,
-    "id" | "name" | "brand" | "model" | "serialNumber" | "warrantyCode"
-  >;
+    | "id"
+    | "productCode"
+    | "displayName"
+    | "name"
+    | "brand"
+    | "model"
+    | "serialNumber"
+    | "warrantyCode"
+  > & {
+    category: Pick<CategorySummary, "id" | "slug" | "name"> | null;
+  };
   warranty: Pick<
     WarrantySummary,
-    "warrantyCode" | "startDate" | "endDate" | "status"
+    | "warrantyCode"
+    | "startDate"
+    | "endDate"
+    | "durationMonths"
+    | "terms"
+    | "status"
   >;
+  installation: {
+    installedAt: string | null;
+    vehicleModel: string | null;
+    dealer: {
+      id: string | null;
+      name: string | null;
+      phone: string | null;
+      address: string | null;
+      province: string | null;
+      district: string | null;
+    } | null;
+    filmItems: WarrantyLookupFilmItems | null;
+  } | null;
 };
+
+export type WarrantyLookupFilmItems = Partial<
+  Record<
+    | "windshield"
+    | "frontLeftSide"
+    | "frontRightSide"
+    | "rearLeftSide"
+    | "rearRightSide"
+    | "sunroof"
+    | "rearGlass",
+    string
+  >
+>;
 
 export type WarrantyProductSummary = Pick<
   ProductSummary,

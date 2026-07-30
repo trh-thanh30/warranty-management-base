@@ -1,18 +1,22 @@
 import { BadRequestError, NotFoundError } from '@/common/response';
+import { WarrantyClaimSlaService } from '@/modules/warranty-claims/service/warranty-claim-sla.service';
 import { CreateWarrantyClaimUseCase } from '@/modules/warranty-claims/use-cases/create-warranty-claim.use-case';
 import { Prisma } from '@prisma/client';
 
 describe('CreateWarrantyClaimUseCase', () => {
   const warrantyClaimsRepository = {
     findWarrantyProductByCode: jest.fn(),
+    findOpenByWarrantyId: jest.fn(),
     create: jest.fn(),
   };
   const generateWarrantyClaimCodeUseCase = {
     execute: jest.fn(),
   };
+  const warrantyClaimSlaService = new WarrantyClaimSlaService();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    warrantyClaimsRepository.findOpenByWarrantyId.mockResolvedValue(null);
   });
 
   it('creates a claim from a valid warranty code and current owner', async () => {
@@ -57,6 +61,7 @@ describe('CreateWarrantyClaimUseCase', () => {
     const useCase = new CreateWarrantyClaimUseCase(
       warrantyClaimsRepository as never,
       generateWarrantyClaimCodeUseCase as never,
+      warrantyClaimSlaService,
     );
 
     const result = await useCase.execute({
@@ -128,6 +133,7 @@ describe('CreateWarrantyClaimUseCase', () => {
     const useCase = new CreateWarrantyClaimUseCase(
       warrantyClaimsRepository as never,
       generateWarrantyClaimCodeUseCase as never,
+      warrantyClaimSlaService,
     );
 
     const result = await useCase.execute({
@@ -147,6 +153,7 @@ describe('CreateWarrantyClaimUseCase', () => {
     const useCase = new CreateWarrantyClaimUseCase(
       warrantyClaimsRepository as never,
       generateWarrantyClaimCodeUseCase as never,
+      warrantyClaimSlaService,
     );
 
     await expect(
@@ -157,6 +164,140 @@ describe('CreateWarrantyClaimUseCase', () => {
         issueTitle: 'May khong hoat dong',
       }),
     ).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  it('rejects a second claim while the warranty already has an open claim', async () => {
+    warrantyClaimsRepository.findWarrantyProductByCode.mockResolvedValue({
+      id: 'product-id',
+      warranty: {
+        id: 'warranty-id',
+        status: 'ACTIVE',
+      },
+      ownerships: [],
+    });
+    warrantyClaimsRepository.findOpenByWarrantyId.mockResolvedValue({
+      claim_code: 'CLM-2026-OPEN01',
+      status: 'REVIEWING',
+    });
+    const useCase = new CreateWarrantyClaimUseCase(
+      warrantyClaimsRepository as never,
+      generateWarrantyClaimCodeUseCase as never,
+      warrantyClaimSlaService,
+    );
+
+    await expect(
+      useCase.execute({
+        warrantyCode: 'WM-2026-ABCDEF',
+        requesterName: 'Nguyen Van A',
+        requesterPhone: '0901234567',
+        issueTitle: 'Bubble',
+      }),
+    ).rejects.toMatchObject({
+      code: 'WARRANTY_CLAIM_ALREADY_OPEN',
+      details: expect.objectContaining({
+        claimCode: 'CLM-2026-OPEN01',
+        currentStatus: 'REVIEWING',
+      }),
+    });
+    expect(warrantyClaimsRepository.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects a public claim when requester phone does not match the current owner', async () => {
+    warrantyClaimsRepository.findWarrantyProductByCode.mockResolvedValue({
+      id: 'product-id',
+      warranty: {
+        id: 'warranty-id',
+        status: 'ACTIVE',
+      },
+      ownerships: [
+        {
+          customer: {
+            id: 'customer-id',
+            phone: '0886 33 77 33',
+          },
+        },
+      ],
+    });
+    const useCase = new CreateWarrantyClaimUseCase(
+      warrantyClaimsRepository as never,
+      generateWarrantyClaimCodeUseCase as never,
+      warrantyClaimSlaService,
+    );
+
+    await expect(
+      useCase.execute(
+        {
+          warrantyCode: 'WM-2026-ABCDEF',
+          requesterName: 'Nguyen Van A',
+          requesterPhone: '0901234567',
+          issueTitle: 'Bubble',
+        },
+        { requireOwnerMatch: true },
+      ),
+    ).rejects.toMatchObject({
+      code: 'WARRANTY_CLAIM_OWNER_MISMATCH',
+    });
+    expect(warrantyClaimsRepository.create).not.toHaveBeenCalled();
+  });
+
+  it('accepts a formatted public phone matching the normalized owner phone', async () => {
+    warrantyClaimsRepository.findWarrantyProductByCode.mockResolvedValue({
+      id: 'product-id',
+      warranty: {
+        id: 'warranty-id',
+        status: 'ACTIVE',
+      },
+      ownerships: [
+        {
+          customer: {
+            id: 'customer-id',
+            phone: '0886337733',
+          },
+        },
+      ],
+    });
+    generateWarrantyClaimCodeUseCase.execute.mockResolvedValue(
+      'CLM-2026-ABC123',
+    );
+    warrantyClaimsRepository.create.mockResolvedValue({
+      id: 'claim-id',
+      claim_code: 'CLM-2026-ABC123',
+      warranty_id: 'warranty-id',
+      product_id: 'product-id',
+      customer_id: 'customer-id',
+      warranty_code: 'WM-2026-ABCDEF',
+      requester_name: 'Nguyen Van A',
+      requester_phone: '0886 33 77 33',
+      issue_title: 'Bubble',
+      issue_detail: null,
+      status: 'SUBMITTED',
+      submitted_at: new Date('2026-07-30T00:00:00.000Z'),
+      resolved_at: null,
+      created_at: new Date('2026-07-30T00:00:00.000Z'),
+      updated_at: new Date('2026-07-30T00:00:00.000Z'),
+      product: undefined,
+      warranty: undefined,
+      customer: undefined,
+    });
+    const useCase = new CreateWarrantyClaimUseCase(
+      warrantyClaimsRepository as never,
+      generateWarrantyClaimCodeUseCase as never,
+      warrantyClaimSlaService,
+    );
+
+    await expect(
+      useCase.execute(
+        {
+          warrantyCode: 'WM-2026-ABCDEF',
+          requesterName: 'Nguyen Van A',
+          requesterPhone: '0886 33 77 33',
+          issueTitle: 'Bubble',
+        },
+        { requireOwnerMatch: true },
+      ),
+    ).resolves.toMatchObject({
+      claimCode: 'CLM-2026-ABC123',
+    });
   });
 
   it('rejects voided warranties', async () => {
@@ -172,6 +313,7 @@ describe('CreateWarrantyClaimUseCase', () => {
     const useCase = new CreateWarrantyClaimUseCase(
       warrantyClaimsRepository as never,
       generateWarrantyClaimCodeUseCase as never,
+      warrantyClaimSlaService,
     );
 
     await expect(
@@ -204,6 +346,7 @@ describe('CreateWarrantyClaimUseCase', () => {
       const useCase = new CreateWarrantyClaimUseCase(
         warrantyClaimsRepository as never,
         generateWarrantyClaimCodeUseCase as never,
+        warrantyClaimSlaService,
       );
 
       await expect(
@@ -232,6 +375,7 @@ describe('CreateWarrantyClaimUseCase', () => {
     const useCase = new CreateWarrantyClaimUseCase(
       warrantyClaimsRepository as never,
       generateWarrantyClaimCodeUseCase as never,
+      warrantyClaimSlaService,
     );
 
     await expect(

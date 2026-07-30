@@ -53,26 +53,46 @@ const productListInclude = {
   },
 };
 
-const publicProductListInclude = {
+const publicProductTemplateListInclude = {
   category_ref: true,
-  template: {
-    include: {
-      category_ref: true,
-      assets: {
-        where: {
-          role: 'COVER' as const,
-          asset: {
-            access_type: asset_access_type.PUBLIC,
-            is_deleted: false,
-          },
-        },
-        include: { asset: true },
-        orderBy: { sort_order: 'asc' as const },
+  assets: {
+    where: {
+      role: 'COVER' as const,
+      asset: {
+        access_type: asset_access_type.PUBLIC,
+        is_deleted: false,
       },
     },
+    include: { asset: true },
+    orderBy: { sort_order: 'asc' as const },
   },
-  warranty: true,
 };
+
+function buildPublicProductTemplateWhere(filters: {
+  categoryId?: string;
+  search?: string;
+  slug?: string;
+}): Prisma.ProductTemplateWhereInput {
+  const search = filters.search?.trim();
+
+  return {
+    ...(filters.categoryId ? { category_id: filters.categoryId } : {}),
+    category_ref: { is_active: true },
+    is_active: true,
+    is_published: true,
+    ...(filters.slug ? { slug: filters.slug } : {}),
+    ...(search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { sku: { contains: search, mode: 'insensitive' } },
+            { brand: { contains: search, mode: 'insensitive' } },
+            { model: { contains: search, mode: 'insensitive' } },
+          ],
+        }
+      : {}),
+  };
+}
 
 @Injectable()
 export class ProductsRepository {
@@ -99,6 +119,25 @@ export class ProductsRepository {
     return this.prismaService.product.findUnique({
       where: { id },
       include: productInclude,
+    });
+  }
+
+  findPublicTemplateBySlug(slug: string) {
+    return this.prismaService.productTemplate.findFirst({
+      where: buildPublicProductTemplateWhere({ slug }),
+      include: {
+        category_ref: true,
+        assets: {
+          where: {
+            asset: {
+              access_type: asset_access_type.PUBLIC,
+              is_deleted: false,
+            },
+          },
+          include: { asset: true },
+          orderBy: [{ role: 'asc' }, { sort_order: 'asc' }],
+        },
+      },
     });
   }
 
@@ -280,55 +319,30 @@ export class ProductsRepository {
     sortBy?: 'name' | 'publishedAt';
     sortOrder?: 'asc' | 'desc';
   }) {
-    const search = filters.search?.trim();
     const { page, limit, skip, take } = normalizePagination(filters);
     const sortMap = {
       name: 'name',
       publishedAt: 'published_at',
-    };
+    } satisfies Record<
+      'name' | 'publishedAt',
+      keyof Prisma.ProductTemplateOrderByWithRelationInput
+    >;
     const sortBy = filters.sortBy ? sortMap[filters.sortBy] : 'published_at';
-    const where: Prisma.ProductWhereInput = {
-      category_id: filters.categoryId,
-      category_ref: { is_active: true },
-      deleted_at: null,
-      status: product_status.ACTIVE,
-      template: {
-        is: {
-          is_published: true,
-        },
-      },
-      OR: search
-        ? [
-            { product_code: { contains: search, mode: 'insensitive' } },
-            {
-              template: {
-                is: {
-                  OR: [
-                    { name: { contains: search, mode: 'insensitive' } },
-                    { sku: { contains: search, mode: 'insensitive' } },
-                    { brand: { contains: search, mode: 'insensitive' } },
-                    { model: { contains: search, mode: 'insensitive' } },
-                  ],
-                },
-              },
-            },
-          ]
-        : undefined,
-    };
-    const orderBy: Prisma.ProductOrderByWithRelationInput[] = [
-      { template: { [sortBy]: filters.sortOrder ?? 'desc' } },
+    const where = buildPublicProductTemplateWhere(filters);
+    const orderBy: Prisma.ProductTemplateOrderByWithRelationInput[] = [
+      { [sortBy]: filters.sortOrder ?? 'desc' },
     ];
 
     return this.prismaService.$transaction(async (tx) => {
       const [items, total] = await Promise.all([
-        tx.product.findMany({
+        tx.productTemplate.findMany({
           where,
-          include: publicProductListInclude,
+          include: publicProductTemplateListInclude,
           orderBy,
           skip,
           take,
         }),
-        tx.product.count({ where }),
+        tx.productTemplate.count({ where }),
       ]);
 
       return paginate(items, { page, limit, total });

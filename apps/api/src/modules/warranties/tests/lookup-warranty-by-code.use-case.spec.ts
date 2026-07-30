@@ -11,10 +11,20 @@ describe('LookupWarrantyByCodeUseCase', () => {
   });
 
   it('returns warranty details for an active product matching the code', async () => {
+    const startDate = new Date('2026-06-14T00:00:00.000Z');
+    const endDate = new Date('2029-06-14T00:00:00.000Z');
+    const installedAt = new Date('2026-06-10T00:00:00.000Z');
+
     warrantiesRepository.findActiveProductByWarrantyCode.mockResolvedValue({
       id: 'product-id',
-      display_name: null,
+      product_code: 'LEX-SP50-001',
+      display_name: 'Lexzenz SP50',
       template: {
+        category_ref: {
+          id: 'category-id',
+          name: 'Phim cách nhiệt',
+          slug: 'phim-cach-nhiet',
+        },
         name: 'Toyota Camry',
         brand: 'Toyota',
         model: 'Camry',
@@ -22,9 +32,35 @@ describe('LookupWarrantyByCodeUseCase', () => {
       serial_number: 'VIN123',
       warranty: {
         warranty_code: 'WM-2026-ABCDEF',
-        start_date: new Date('2026-06-14T00:00:00.000Z'),
-        end_date: new Date('2029-06-14T00:00:00.000Z'),
+        start_date: startDate,
+        end_date: endDate,
+        duration_months: 36,
+        terms: 'Bảo hành chính hãng theo điều kiện công bố.',
         status: 'ACTIVE',
+        activation_request: {
+          installed_at: installedAt,
+          vehicle_model: 'Toyota Camry',
+          vehicle_plate: '30H-888.88',
+          customer_name: 'Nguyễn Văn An',
+          customer_phone: '0988123456',
+          full_address: 'Địa chỉ khách hàng',
+          metadata: {
+            dealer: {
+              id: 'dealer-id',
+              name: 'FUJITEK Hà Nội',
+              phone: '19009169',
+              address: '62 Nghĩa Đô',
+              province: 'Hà Nội',
+              district: 'Cầu Giấy',
+            },
+            filmItems: {
+              windshield: 'SP50',
+              frontLeftSide: 'SP30',
+              ignoredValue: 123,
+            },
+            internalNote: 'Không được public',
+          },
+        },
       },
     });
     const useCase = new LookupWarrantyByCodeUseCase(
@@ -36,8 +72,50 @@ describe('LookupWarrantyByCodeUseCase', () => {
     expect(
       warrantiesRepository.findActiveProductByWarrantyCode,
     ).toHaveBeenCalledWith('WM-2026-ABCDEF');
-    expect(result.product.id).toBe('product-id');
-    expect(result.warranty.warrantyCode).toBe('WM-2026-ABCDEF');
+    expect(result).toEqual({
+      product: {
+        id: 'product-id',
+        productCode: 'LEX-SP50-001',
+        name: 'Toyota Camry',
+        displayName: 'Lexzenz SP50',
+        brand: 'Toyota',
+        model: 'Camry',
+        serialNumber: 'VIN123',
+        warrantyCode: 'WM-2026-ABCDEF',
+        category: {
+          id: 'category-id',
+          name: 'Phim cách nhiệt',
+          slug: 'phim-cach-nhiet',
+        },
+      },
+      warranty: {
+        warrantyCode: 'WM-2026-ABCDEF',
+        startDate,
+        endDate,
+        durationMonths: 36,
+        terms: 'Bảo hành chính hãng theo điều kiện công bố.',
+        status: 'ACTIVE',
+      },
+      installation: {
+        installedAt,
+        vehicleModel: 'Toyota Camry',
+        dealer: {
+          id: 'dealer-id',
+          name: 'FUJITEK Hà Nội',
+          phone: '19009169',
+          address: '62 Nghĩa Đô',
+          province: 'Hà Nội',
+          district: 'Cầu Giấy',
+        },
+        filmItems: {
+          windshield: 'SP50',
+          frontLeftSide: 'SP30',
+        },
+      },
+    });
+    expect(JSON.stringify(result)).not.toMatch(
+      /Nguyễn Văn An|0988123456|30H-888\.88|Địa chỉ khách hàng|internalNote/,
+    );
   });
 
   it('throws not found when no non-deleted product warranty matches', async () => {

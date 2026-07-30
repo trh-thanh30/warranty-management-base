@@ -162,6 +162,13 @@ export type CreateWarrantyActivationRequestBody = {
   note?: string;
 };
 
+export type CreatePublicWarrantyActivationRequestBody = Omit<
+  CreateWarrantyActivationRequestBody,
+  "customerEmail"
+> & {
+  customerEmail: string;
+};
+
 export type CreateAdminWarrantyActivationRequestBody = Omit<
   CreateWarrantyActivationRequestBody,
   "warrantyCode"

@@ -13,6 +13,7 @@ import { ExportProductsUseCase } from '@/modules/products/use-cases/export-produ
 import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generate-product-code.use-case';
 import { GetProductDetailUseCase } from '@/modules/products/use-cases/get-product-detail.use-case';
+import { GetPublicProductDetailUseCase } from '@/modules/products/use-cases/get-public-product-detail.use-case';
 import { ListProductsUseCase } from '@/modules/products/use-cases/list-products.use-case';
 import { ListPublicProductsUseCase } from '@/modules/products/use-cases/list-public-products.use-case';
 import { PreviewProductImportUseCase } from '@/modules/products/use-cases/preview-product-import.use-case';
@@ -44,6 +45,7 @@ import { memoryStorage } from 'multer';
     SoftDeleteProductUseCase,
     ListProductsUseCase,
     ListPublicProductsUseCase,
+    GetPublicProductDetailUseCase,
     GetProductDetailUseCase,
     AssignProductOwnerUseCase,
     AttachProductAssetUseCase,
@@ -59,6 +61,7 @@ import { memoryStorage } from 'multer';
     GenerateWarrantyCodeUseCase,
     ProductsRepository,
     ListPublicProductsUseCase,
+    GetPublicProductDetailUseCase,
   ],
 })
 export class ProductsModule {}

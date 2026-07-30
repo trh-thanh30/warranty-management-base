@@ -73,20 +73,56 @@ type WarrantyResponse = {
 type WarrantyLookupResult = {
   product: {
     id: string;
+    productCode: string;
+    displayName: string | null;
     name: string;
     brand: string | null;
     model: string | null;
     serialNumber: string | null;
-    warrantyCode: string;
+    warrantyCode: string | null;
+    category: {
+      id: string;
+      slug: string;
+      name: string;
+    } | null;
   };
   warranty: {
-    warrantyCode: string;
+    warrantyCode: string | null;
     startDate: string | null;
     endDate: string | null;
+    durationMonths: number;
+    terms: string | null;
     status: "DRAFT" | "ACTIVE" | "EXPIRED" | "VOIDED";
   };
+  installation: {
+    installedAt: string | null;
+    vehicleModel: string | null;
+    dealer: {
+      id: string | null;
+      name: string | null;
+      phone: string | null;
+      address: string | null;
+      province: string | null;
+      district: string | null;
+    } | null;
+    filmItems: Partial<
+      Record<
+        | "windshield"
+        | "frontLeftSide"
+        | "frontRightSide"
+        | "rearLeftSide"
+        | "rearRightSide"
+        | "sunroof"
+        | "rearGlass",
+        string
+      >
+    > | null;
+  } | null;
 };
 ```
+
+Public lookup không trả tên, số điện thoại, email, địa chỉ khách hàng, biển
+số xe hoặc ghi chú nội bộ. `filmItems` chỉ chứa các vị trí có giá trị.
 
 ## GET /api/v1/warranties/lookup
 

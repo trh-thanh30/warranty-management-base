@@ -276,39 +276,52 @@ test("Vietnamese and English message files keep matching key paths", async () =>
   assert.deepEqual(keys(vi).sort(), keys(en).sort());
 });
 
-test("product views consume one shared catalog source", async () => {
+test("product listing and detail use the public products API", async () => {
   const sharedCatalogPath = path.join(
     webRoot,
     "src",
     "constants",
     "product-catalog.constants.ts",
   );
-  const consumers = [
-    path.join(webRoot, "src", "views", "home", "home.constants.ts"),
-    path.join(webRoot, "src", "views", "products", "products.constants.ts"),
-    path.join(
-      webRoot,
-      "src",
-      "views",
-      "product-detail",
-      "product-detail.view.tsx",
-    ),
-  ];
+  const productsViewPath = path.join(
+    webRoot,
+    "src",
+    "views",
+    "products",
+    "products.view.tsx",
+  );
+  const productsServicePath = path.join(
+    webRoot,
+    "src",
+    "services",
+    "products",
+    "products.service.ts",
+  );
+  const productDetailPath = path.join(
+    webRoot,
+    "src",
+    "views",
+    "product-detail",
+    "product-detail.view.tsx",
+  );
 
   const catalog = await readFile(sharedCatalogPath, "utf8").catch(() => "");
-  const contents = await Promise.all(
-    consumers.map((file) => readFile(file, "utf8")),
-  );
+  const [productsView, productsService, productDetail] = await Promise.all([
+    readFile(productsViewPath, "utf8"),
+    readFile(productsServicePath, "utf8"),
+    readFile(productDetailPath, "utf8"),
+  ]);
 
   assert.match(catalog, /export const productCatalog/);
-  assert.deepEqual(
-    consumers
-      .filter(
-        (_, index) => !contents[index].includes("product-catalog.constants"),
-      )
-      .map(relative),
-    [],
+  assert.match(productsView, /useProductsCatalog/);
+  assert.doesNotMatch(productsView, /product-catalog\.constants/);
+  assert.match(productsService, /"\/public\/products"/);
+  assert.match(
+    productsService,
+    /`\/public\/products\/\$\{encodeURIComponent\(slug\)\}`/,
   );
+  assert.match(productDetail, /productsService\.getProductDetail/);
+  assert.doesNotMatch(productDetail, /product-catalog\.constants/);
 });
 
 test("locale layout owns a shared site footer outside Home", async () => {

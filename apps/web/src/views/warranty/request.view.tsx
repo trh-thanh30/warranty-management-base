@@ -1,134 +1,189 @@
 "use client";
 
 import { Container } from "@/src/components/common/container";
-import { formControlFocusClassName } from "@/src/components/common/form-control.constants";
-import { Input } from "@repo/ui/input";
-import { CheckCircle2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { WarrantyResultRow } from "@/src/components/common/warranty-result-row";
+import { useWarrantyClaimRequest } from "@/src/hooks/use-warranty-claim-request";
+import { Link } from "@/src/i18n/navigation";
+import { formatDate } from "@repo/shared";
+import { Badge } from "@repo/ui/badge";
+import { Button } from "@repo/ui/button";
+import {
+  Calendar,
+  Check,
+  CheckCircle2,
+  CircleAlert,
+  Clock3,
+  Copy,
+  Hash,
+} from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
-import { warrantyIssueOptions } from "./warranty.constants";
+import { WarrantyBackLink } from "./components/warranty-back-link";
+import { WarrantyClaimRequestForm } from "./components/warranty-claim-request-form";
 
 export function WarrantyClaimRequestView() {
   const t = useTranslations("Warranty.request");
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [ticketId, setTicketId] = useState("");
+  const locale = useLocale();
+  const [isCodeCopied, setIsCodeCopied] = useState(false);
+  const {
+    data: claim,
+    errorKind,
+    isPending,
+    reset,
+    submit,
+  } = useWarrantyClaimRequest();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setTicketId(`REQ-${Math.floor(100000 + Math.random() * 900000)}`);
-    setIsSubmitted(true);
+  const copyClaimCode = async () => {
+    if (!claim) return;
+
+    try {
+      await navigator.clipboard.writeText(claim.claimCode);
+      setIsCodeCopied(true);
+      window.setTimeout(() => setIsCodeCopied(false), 2000);
+    } catch {
+      setIsCodeCopied(false);
+    }
+  };
+
+  const resetForm = () => {
+    setIsCodeCopied(false);
+    reset();
   };
 
   return (
-    <main className="min-h-screen bg-surface-muted py-12 sm:py-20 text-deep-black">
-      <Container className="max-w-250 space-y-12">
-        <div className="text-center space-y-4">
-          <span className="inline-block bg-premium-red/10 text-premium-red border border-premium-red/30 px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-[0.25em]">
-            {t("eyebrow")}
-          </span>
-          <h1 className="text-3xl sm:text-5xl font-condensed font-semibold uppercase tracking-wider">
-            {t("title")}
-          </h1>
-          <p className="text-base sm:text-lg text-stone-gray font-normal max-w-2xl mx-auto">
-            {t("description")}
-          </p>
+    <main className="min-h-screen bg-white py-12 text-deep-black sm:py-20">
+      <Container className="max-w-[1000px] space-y-10">
+        <div className="space-y-8">
+          <WarrantyBackLink />
+
+          <div className="space-y-4 text-center">
+            <span className="text-sm font-semibold uppercase text-premium-red">
+              {t("eyebrow")}
+            </span>
+            <h1 className="font-condensed text-3xl font-semibold uppercase sm:text-4xl">
+              {t("title")}
+            </h1>
+            <p className="mx-auto max-w-2xl text-base font-normal text-stone-gray sm:text-lg">
+              {t("description")}
+            </p>
+          </div>
         </div>
 
-        {isSubmitted ? (
-          <div className="bg-white rounded-[28px] p-8 sm:p-12 border-2 border-premium-red text-center space-y-6 shadow-2xl animate-in zoom-in-95 duration-300">
-            <div className="size-20 bg-premium-red/10 text-premium-red rounded-full flex items-center justify-center mx-auto">
-              <CheckCircle2 className="size-10" />
+        {claim ? (
+          <section
+            aria-live="polite"
+            className="animate-in mx-auto max-w-3xl zoom-in-95"
+          >
+            <div className="border-b border-border-gray pb-6 text-center">
+              <span className="mx-auto flex size-11 items-center justify-center rounded-full bg-premium-red/10 text-premium-red">
+                <CheckCircle2 className="size-6" aria-hidden="true" />
+              </span>
+              <div className="mt-4 min-w-0">
+                <h2 className="text-xl font-semibold uppercase text-deep-black sm:text-2xl">
+                  {t("success.title")}
+                </h2>
+                <p className="mt-2 max-w-2xl text-base leading-7 text-stone-gray">
+                  {t("success.description")}
+                </p>
+              </div>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-semibold uppercase text-deep-black">
-              {t("success.title")}
-            </h2>
-            <p className="text-base text-stone-gray font-normal max-w-lg mx-auto">
-              {t.rich("success.description", {
-                ticket: () => (
-                  <strong className="text-premium-red font-mono text-xl">
-                    {ticketId}
-                  </strong>
-                ),
-              })}
-            </p>
-            <button
-              type="button"
-              onClick={() => setIsSubmitted(false)}
-              className="bg-deep-black hover:bg-premium-red text-white px-8 py-3.5 rounded-[14px] text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer"
-            >
-              {t("success.reset")}
-            </button>
-          </div>
-        ) : (
-          <div className="bg-white rounded-[28px] p-6 sm:p-10 border border-border-gray shadow-xl">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid gap-6 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase text-deep-black">
-                    {t("fields.customerName.label")}
-                  </label>
-                  <Input
-                    required
-                    placeholder={t("fields.customerName.placeholder")}
-                    className={`h-12 rounded-[12px] border-border-gray ${formControlFocusClassName}`}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase text-deep-black">
-                    {t("fields.phone.label")}
-                  </label>
-                  <Input
-                    required
-                    placeholder={t("fields.phone.placeholder")}
-                    className={`h-12 rounded-[12px] border-border-gray ${formControlFocusClassName}`}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase text-deep-black">
-                    {t("fields.reference.label")}
-                  </label>
-                  <Input
-                    required
-                    placeholder={t("fields.reference.placeholder")}
-                    className={`h-12 rounded-[12px] border-border-gray ${formControlFocusClassName}`}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase text-deep-black">
-                    {t("fields.issue.label")}
-                  </label>
-                  <select
-                    required
-                    className={`w-full h-12 rounded-[12px] border border-border-gray px-3 text-sm font-medium outline-none ${formControlFocusClassName}`}
+
+            <div className="divide-y divide-border-gray">
+              <WarrantyResultRow
+                icon={<Hash className="size-4" aria-hidden="true" />}
+                label={t("success.claimCodeLabel")}
+                value={
+                  <div className="flex items-center justify-start gap-2 sm:justify-end">
+                    <p className="min-w-0 break-all text-sm font-semibold text-premium-red">
+                      {claim.claimCode}
+                    </p>
+                    <Button
+                      aria-label={
+                        isCodeCopied
+                          ? t("success.copied")
+                          : t("success.copyCode")
+                      }
+                      className="size-9 shrink-0 rounded-md border-border-gray p-0 text-stone-gray hover:border-premium-red hover:bg-premium-red/5 hover:text-premium-red"
+                      onClick={() => void copyClaimCode()}
+                      title={
+                        isCodeCopied
+                          ? t("success.copied")
+                          : t("success.copyCode")
+                      }
+                      type="button"
+                      variant="outline"
+                    >
+                      {isCodeCopied ? (
+                        <Check className="size-4" aria-hidden="true" />
+                      ) : (
+                        <Copy className="size-4" aria-hidden="true" />
+                      )}
+                    </Button>
+                  </div>
+                }
+              />
+              <WarrantyResultRow
+                icon={<CircleAlert className="size-4" aria-hidden="true" />}
+                label={t("success.issueLabel")}
+                value={claim.issueTitle}
+              />
+              <WarrantyResultRow
+                icon={<Calendar className="size-4" aria-hidden="true" />}
+                label={t("success.submittedAtLabel")}
+                value={formatDate(claim.submittedAt, {
+                  locale,
+                  showTime: true,
+                })}
+              />
+              <WarrantyResultRow
+                icon={<Clock3 className="size-4" aria-hidden="true" />}
+                label={t("success.statusLabel")}
+                value={
+                  <Badge
+                    className="gap-2 bg-premium-red/10 px-3 py-1.5 text-premium-red"
+                    variant="destructive"
                   >
-                    <option value="">{t("fields.issue.placeholder")}</option>
-                    {warrantyIssueOptions.map((issue) => (
-                      <option key={issue} value={issue}>
-                        {t(`fields.issue.options.${issue}`)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+                    <Clock3 className="size-4" aria-hidden="true" />
+                    {claim.status === "SUBMITTED"
+                      ? t("success.submittedStatus")
+                      : claim.status}
+                  </Badge>
+                }
+              />
+            </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase text-deep-black">
-                  {t("fields.details.label")}
-                </label>
-                <textarea
-                  rows={4}
-                  placeholder={t("fields.details.placeholder")}
-                  className={`w-full p-4 rounded-[14px] border border-border-gray text-sm outline-none ${formControlFocusClassName}`}
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-premium-red hover:bg-warm-red text-white py-4 rounded-[16px] text-sm font-semibold uppercase tracking-wider transition-colors shadow-lg cursor-pointer"
+            <div className="mt-7 grid gap-3 sm:grid-cols-2">
+              <Button
+                asChild
+                className="h-12 w-full rounded-md bg-premium-red px-8 text-xs font-semibold uppercase text-white hover:bg-warm-red"
               >
-                {t("submit")}
-              </button>
-            </form>
+                <Link
+                  href={{
+                    pathname: "/warranty/track",
+                    query: { claimCode: claim.claimCode },
+                  }}
+                >
+                  {t("success.track")}
+                </Link>
+              </Button>
+              <Button
+                className="h-12 w-full rounded-md border-premium-red px-8 text-xs font-semibold uppercase text-premium-red transition-colors hover:bg-premium-red hover:text-white"
+                onClick={resetForm}
+                type="button"
+                variant="outline"
+              >
+                {t("success.reset")}
+              </Button>
+            </div>
+          </section>
+        ) : (
+          <div className="rounded-md border border-border-gray bg-white p-6 shadow-xl sm:p-10">
+            <WarrantyClaimRequestForm
+              errorKind={errorKind}
+              isPending={isPending}
+              onResetError={reset}
+              onSubmit={submit}
+            />
           </div>
         )}
       </Container>

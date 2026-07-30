@@ -174,13 +174,13 @@ describe('ProductsRepository.list', () => {
     });
   });
 
-  it('always limits the public list to visible active products', async () => {
+  it('paginates visible product templates instead of physical products', async () => {
     const findMany = jest.fn().mockResolvedValue([]);
     const count = jest.fn().mockResolvedValue(0);
     const prismaService = {
       $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
         callback({
-          product: {
+          productTemplate: {
             count,
             findMany,
           },
@@ -189,18 +189,17 @@ describe('ProductsRepository.list', () => {
     };
     const repository = new ProductsRepository(prismaService as never);
 
-    await repository.listPublic({ limit: 12, page: 1 });
+    await repository.listPublic({
+      categoryId: 'category-id',
+      limit: 12,
+      page: 1,
+    });
 
     const visibilityFilter = {
-      category_id: undefined,
+      category_id: 'category-id',
       category_ref: { is_active: true },
-      deleted_at: null,
-      status: 'ACTIVE',
-      template: {
-        is: {
-          is_published: true,
-        },
-      },
+      is_active: true,
+      is_published: true,
     };
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({

@@ -1,4 +1,5 @@
 import { SiteSettingsProvider } from "@/src/app/providers/site-settings-provider";
+import { ToastProvider } from "@/src/app/providers/toast-provider";
 import { PublicQuickChat } from "@/src/components/common/public-quick-chat";
 import { SiteFooter } from "@/src/components/layout/site-footer";
 import { SiteHeader } from "@/src/components/layout/site-header";
@@ -85,6 +86,7 @@ export default async function LocaleLayout({
                 <div className="pt-[84px]">{children}</div>
                 <SiteFooter siteSettings={siteSettings} />
                 <PublicQuickChat siteSettings={siteSettings} />
+                <ToastProvider />
               </LenisProvider>
             </SiteSettingsProvider>
           </QueryProvider>

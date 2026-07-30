@@ -17,7 +17,3 @@ export function optionalTrim(value?: string) {
 export function normalizeText(value?: string | null) {
   return value?.trim().toLowerCase() ?? '';
 }
-
-export function normalizePhone(value?: string | null) {
-  return normalizeText(value).replace(/\D/g, '');
-}

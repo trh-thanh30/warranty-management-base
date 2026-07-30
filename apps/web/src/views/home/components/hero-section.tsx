@@ -1,16 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
+import { useCallback, useEffect, useState } from "react";
+import Autoplay from "embla-carousel-autoplay";
+import useEmblaCarousel from "embla-carousel-react";
+import { motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { motionDuration } from "@/src/constants/motion.constants";
 import {
   desktopHeroImages,
   type HeroImageItem,
   mobileHeroImages,
 } from "../home.constants";
-import { motionDuration } from "@/src/constants/motion.constants";
 
 export function HeroSection({
   desktopImages = desktopHeroImages,
@@ -51,55 +53,68 @@ function HeroCarousel({
   const shouldReduce = useReducedMotion();
   const availableImages = images.length > 0 ? images : fallbackImages;
   const [currentIndex, setCurrentIndex] = useState(0);
-  const activeImage = availableImages[currentIndex] ?? availableImages[0];
-
-  useEffect(() => {
-    setCurrentIndex((index) => index % availableImages.length);
-  }, [availableImages.length]);
-
-  useEffect(() => {
-    if (availableImages.length < 2) return;
-
-    const timer = window.setInterval(() => {
-      setCurrentIndex((index) => (index + 1) % availableImages.length);
-    }, 6000);
-    return () => window.clearInterval(timer);
-  }, [availableImages.length]);
-
-  if (!activeImage) return null;
-
-  const previous = () =>
-    setCurrentIndex(
-      (index) => (index - 1 + availableImages.length) % availableImages.length,
-    );
-  const next = () =>
-    setCurrentIndex((index) => (index + 1) % availableImages.length);
-  const knownSlide = ["primary", "technology", "protection"].includes(
-    activeImage.id,
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    {
+      align: "start",
+      loop: availableImages.length > 1,
+    },
+    [Autoplay({ delay: 6000, stopOnInteraction: false })],
   );
-  const alt = knownSlide ? t(`slides.${activeImage.id}.alt`) : t("slideAlt");
+
+  const syncSelectedIndex = useCallback(() => {
+    if (!emblaApi) return;
+    setCurrentIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+
+    syncSelectedIndex();
+    emblaApi.on("select", syncSelectedIndex);
+    emblaApi.on("reInit", syncSelectedIndex);
+
+    return () => {
+      emblaApi.off("select", syncSelectedIndex);
+      emblaApi.off("reInit", syncSelectedIndex);
+    };
+  }, [emblaApi, syncSelectedIndex]);
+
+  if (availableImages.length === 0) return null;
 
   return (
     <div className={`absolute inset-0 ${className}`}>
-      <AnimatePresence initial={false} mode="popLayout">
-        <motion.div
-          animate={{ opacity: 1 }}
-          className="absolute inset-0"
-          exit={{ opacity: 0 }}
-          initial={{ opacity: 0 }}
-          key={`${activeImage.id}-${currentIndex}`}
-          transition={{ duration: 0.8, ease: "easeInOut" }}
-        >
-          <Image
-            alt={alt}
-            className="object-cover object-center"
-            fill
-            priority
-            sizes="100vw"
-            src={activeImage.src}
-          />
-        </motion.div>
-      </AnimatePresence>
+      <div
+        className="absolute inset-0 cursor-grab touch-pan-y overflow-hidden active:cursor-grabbing"
+        ref={emblaRef}
+      >
+        <div className="flex h-full">
+          {availableImages.map((image, index) => {
+            const knownSlide = ["primary", "technology", "protection"].includes(
+              image.id,
+            );
+            const alt = knownSlide
+              ? t(`slides.${image.id}.alt`)
+              : t("slideAlt");
+
+            return (
+              <div
+                className="relative h-full min-w-0 flex-[0_0_100%]"
+                key={`${image.id}-${index}`}
+              >
+                <Image
+                  alt={alt}
+                  className="select-none object-cover object-center"
+                  draggable={false}
+                  fill
+                  priority={index === 0}
+                  sizes="100vw"
+                  src={image.src}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       <motion.div
         animate={{ opacity: 1, y: 0 }}
@@ -133,7 +148,7 @@ function HeroCarousel({
               <button
                 aria-label={t("previousSlideAriaLabel")}
                 className="flex size-10 items-center justify-center text-white/70 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                onClick={previous}
+                onClick={() => emblaApi?.scrollPrev()}
                 type="button"
               >
                 <ChevronLeft aria-hidden="true" className="size-7" />
@@ -151,7 +166,7 @@ function HeroCarousel({
               <button
                 aria-label={t("nextSlideAriaLabel")}
                 className="flex size-10 items-center justify-center text-white/70 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                onClick={next}
+                onClick={() => emblaApi?.scrollNext()}
                 type="button"
               >
                 <ChevronRight aria-hidden="true" className="size-7" />

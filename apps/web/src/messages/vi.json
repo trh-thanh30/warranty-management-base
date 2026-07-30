@@ -28,47 +28,65 @@
   },
   "WarrantyLookupModal": {
     "title": "Tra cứu bảo hành điện tử E-Warranty",
-    "subtitle": "Kiểm tra thông tin tem bảo hành chính hãng FUJITEK",
+    "subtitle": "Kiểm tra thông tin bảo hành chính hãng FUJITEK bằng mã E-Warranty",
     "closeAriaLabel": "Đóng cửa sổ tra cứu bảo hành",
-    "placeholder": "Nhập SĐT / Biển số xe (VD: 30H-888.88) / Mã tem...",
-    "search": "Tra cứu",
-    "tryPrefix": "Thử tra cứu: nhập",
-    "or": "hoặc",
-    "mock": {
-      "customerName": "Nguyễn Văn An",
-      "address": "TP. Hồ Chí Minh",
-      "warrantyYears": "15 năm",
-      "dealer": "Panda Auto Showroom & Trạm Bảo Hành Hà Nội",
-      "status": "Đang hiệu lực (Chính hãng FUJITEK)"
-    },
     "supportMessage": "Nếu cần hỗ trợ thêm, vui lòng liên hệ đại lý thi công hoặc hotline FUJITEK.",
     "supportHotlineLabel": "Hotline",
     "supportClosing": "Cảm ơn bạn đã sử dụng hệ thống E-Warranty FUJITEK.",
-    "result": {
-      "serial": "Số Serial",
-      "code": "Mã E-Warranty",
-      "warranty": "Bảo hành",
-      "owner": "Khách hàng",
-      "phone": "Số điện thoại",
-      "address": "Địa chỉ",
-      "carPlate": "Biển số xe",
-      "carModel": "Loại xe",
-      "vehicle": "Biển số & Dòng xe",
-      "film": "Tên gói dán",
-      "warrantyYears": "Thời gian bảo hành (năm)",
-      "installedDate": "Ngày hoàn thành",
-      "expiryDate": "Hạn bảo hành",
-      "dates": "Ngày kích hoạt & Hết hạn",
-      "dealer": "Đơn vị thi công",
-      "glassSection": "Vị trí kính dán phim",
+    "errors": {
+      "invalid": "Mã E-Warranty không hợp lệ. Vui lòng kiểm tra và nhập lại.",
+      "notFound": "Không tìm thấy thông tin bảo hành cho mã E-Warranty này.",
+      "rateLimit": "Bạn đã tra cứu quá nhiều lần. Vui lòng thử lại sau một phút.",
+      "request": "Không thể tra cứu bảo hành lúc này. Vui lòng thử lại sau."
+    }
+  },
+  "WarrantyLookupForm": {
+    "ariaLabel": "Mã E-Warranty",
+    "placeholder": "Nhập mã E-Warranty...",
+    "submit": "Tra cứu",
+    "submitting": "Đang tra cứu...",
+    "tryPrefix": "Ví dụ: nhập",
+    "or": "hoặc",
+    "validation": {
+      "required": "Vui lòng nhập mã E-Warranty.",
+      "minLength": "Mã E-Warranty phải có ít nhất 6 ký tự.",
+      "maxLength": "Mã E-Warranty không được vượt quá 64 ký tự.",
+      "format": "Mã E-Warranty chỉ được chứa chữ cái, số và dấu gạch ngang."
+    }
+  },
+  "WarrantyLookupResult": {
+    "product": "Sản phẩm",
+    "productCode": "Mã sản phẩm",
+    "category": "Danh mục",
+    "brandModel": "Thương hiệu / Model",
+    "serial": "Số Serial",
+    "warrantyCode": "Mã E-Warranty",
+    "startDate": "Ngày bắt đầu",
+    "endDate": "Ngày hết hạn",
+    "duration": "Thời hạn",
+    "durationValue": "{count} tháng",
+    "terms": "Điều khoản",
+    "installation": "Thông tin lắp đặt",
+    "installedAt": "Ngày lắp đặt",
+    "vehicleModel": "Model xe",
+    "dealer": "Đại lý thi công",
+    "dealerPhone": "Điện thoại đại lý",
+    "dealerAddress": "Địa chỉ đại lý",
+    "filmPositions": "Vị trí kính dán phim",
+    "positions": {
       "windshield": "Kính lái",
-      "frontLeftGlass": "Kính sườn trước – trái",
-      "frontRightGlass": "Kính sườn trước – phải",
-      "rearLeftGlass": "Kính sườn sau – trái",
-      "rearRightGlass": "Kính sườn sau – phải",
+      "frontLeftSide": "Kính sườn trước - trái",
+      "frontRightSide": "Kính sườn trước - phải",
+      "rearLeftSide": "Kính sườn sau - trái",
+      "rearRightSide": "Kính sườn sau - phải",
       "sunroof": "Cửa sổ trời",
-      "rearGlass": "Kính lưng",
-      "notes": "Ghi chú"
+      "rearGlass": "Kính lưng"
+    },
+    "statuses": {
+      "DRAFT": "Chưa kích hoạt",
+      "ACTIVE": "Đang hiệu lực",
+      "EXPIRED": "Đã hết hạn",
+      "VOIDED": "Đã hủy"
     }
   },
   "HomePage": {
@@ -624,12 +642,38 @@
           "name": "Cảm biến áp suất lốp van ngoài Bluetooth"
         }
       },
-      "itemCount": "Có {count} sản phẩm",
+      "itemCount": "Có <highlight>{count}</highlight> sản phẩm",
+      "filterTitle": "Bộ lọc",
+      "closeFilter": "Đóng bộ lọc",
+      "searchLabel": "Tìm sản phẩm",
       "searchPlaceholder": "Tìm kiếm sản phẩm, mã sản phẩm...",
+      "categoriesTitle": "Danh mục",
+      "mobileFilterTrigger": "Bộ lọc",
+      "sortLabel": "Sắp xếp:",
+      "sortOptions": {
+        "newest": "Mới nhất",
+        "nameAsc": "Tên: A - Z",
+        "nameDesc": "Tên: Z - A"
+      },
+      "viewGrid": "Chế độ xem dạng lưới",
+      "viewList": "Chế độ xem dạng danh sách",
+      "contactForPrice": "Liên hệ",
+      "imageUnavailable": "Chưa có hình ảnh",
+      "loadingProducts": "Đang tải sản phẩm...",
+      "loadErrorTitle": "Không thể tải sản phẩm",
+      "loadErrorDesc": "Dữ liệu sản phẩm hiện không thể tải. Vui lòng thử lại.",
+      "retry": "Thử lại",
+      "noProductsTitle": "Chưa có sản phẩm",
+      "noProductsDesc": "Hiện chưa có sản phẩm nào được công khai.",
+      "categoryLoadError": "Không thể tải danh mục.",
+      "uncategorized": "Chưa phân loại",
       "noResultsTitle": "Không tìm thấy sản phẩm nào",
       "noResultsDesc": "Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc tìm kiếm.",
       "clearSearch": "Xóa tìm kiếm",
+      "clearFilters": "Xóa bộ lọc",
       "pageInfo": "Trang {current} / {total}",
+      "paginationLabel": "Phân trang sản phẩm",
+      "goToPage": "Đến trang {page}",
       "prev": "Trang trước",
       "next": "Trang sau",
       "itemsPerPageLabel": "Hiển thị",
@@ -641,6 +685,15 @@
       "home": "Trang chủ",
       "products": "Sản phẩm"
     },
+    "loadErrorTitle": "Không thể tải sản phẩm",
+    "loadErrorDescription": "Sản phẩm không tồn tại, chưa được công khai hoặc dữ liệu đang tạm thời gián đoạn.",
+    "retry": "Thử lại",
+    "skuLabel": "Mã sản phẩm",
+    "warrantyMonths": "Bảo hành {months} tháng",
+    "noDescription": "Thông tin chi tiết đang được cập nhật.",
+    "noImage": "Chưa có hình ảnh",
+    "galleryTitle": "Hình ảnh sản phẩm",
+    "consultCta": "Liên hệ tư vấn",
     "specsTitle": "THÔNG SỐ KỸ THUẬT CHI TIẾT",
     "featuresTitle": "ĐẶC ĐIỂM NỔI BẬT & CÔNG NGHỆ LÕI",
     "warrantyLabel": "BẢO HÀNH CHÍNH HÃNG",
@@ -649,6 +702,7 @@
     "consultHotline": "TƯ VẤN HOTLINE: 0886.33.77.33",
     "notFound": "Không tìm thấy sản phẩm yêu cầu.",
     "backToCatalog": "Quay lại danh mục sản phẩm",
+    "dealerNetworkCta": "Hệ thống đại lý",
     "relatedTitle": "SẢN PHẨM LIÊN QUAN",
     "introductionTitle": "Giới thiệu sản phẩm",
     "technologyTitle": "Công nghệ & điểm nổi bật",
@@ -1257,6 +1311,7 @@
     }
   },
   "Warranty": {
+    "backToWarranty": "Quay lại bảo hành",
     "hub": {
       "title": "Trung tâm dịch vụ bảo hành điện tử",
       "description": "Hệ thống bảo hành điện tử chính hãng FUJITEK giúp tra cứu, kích hoạt và gửi yêu cầu hỗ trợ trên toàn quốc."
@@ -1304,14 +1359,27 @@
       }
     },
     "activate": {
-      "eyebrow": "Kích hoạt E-Warranty",
-      "title": "Kích hoạt bảo hành điện tử",
-      "description": "Dành cho khách hàng và đại lý kích hoạt E-Warranty sau khi thi công phim cách nhiệt FUJITEK.",
-      "submit": "Xác nhận kích hoạt E-Warranty",
+      "eyebrow": "Yêu cầu kích hoạt E-Warranty",
+      "title": "Đăng ký kích hoạt bảo hành điện tử",
+      "description": "Gửi thông tin E-Warranty để FUJITEK kiểm tra và xác nhận trước khi kích hoạt bảo hành.",
+      "submit": "Gửi yêu cầu kích hoạt",
+      "submitting": "Đang gửi yêu cầu...",
       "success": {
-        "title": "Kích hoạt bảo hành thành công!",
-        "description": "Thông tin bảo hành điện tử 15 năm cho xe <plate></plate> đã được lưu trên hệ thống FUJITEK.",
-        "reset": "Kích hoạt tem khác"
+        "title": "Đã tiếp nhận yêu cầu",
+        "description": "Yêu cầu đang chờ FUJITEK kiểm tra và phê duyệt. Vui lòng lưu mã yêu cầu để đối chiếu khi cần hỗ trợ.",
+        "requestCodeLabel": "Mã yêu cầu",
+        "statusLabel": "Trạng thái",
+        "pendingStatus": "Chờ xử lý",
+        "copyCode": "Sao chép mã yêu cầu",
+        "copied": "Đã sao chép mã yêu cầu",
+        "copyFailed": "Không thể sao chép mã yêu cầu. Vui lòng thử lại.",
+        "timelineTitle": "Tiến trình xử lý",
+        "submittedStep": "Yêu cầu đã được gửi",
+        "reviewStep": "FUJITEK kiểm tra yêu cầu",
+        "reviewDescription": "Đang chờ bộ phận FUJITEK tiếp nhận và kiểm tra.",
+        "activationStep": "Kích hoạt bảo hành",
+        "activationDescription": "Được thực hiện sau khi yêu cầu được phê duyệt.",
+        "reset": "Gửi yêu cầu khác"
       },
       "fields": {
         "customerName": {
@@ -1322,6 +1390,10 @@
           "label": "Số điện thoại *",
           "placeholder": "VD: 0988 123 456"
         },
+        "customerEmail": {
+          "label": "Email *",
+          "placeholder": "VD: nguyenvanan@email.com"
+        },
         "carPlate": {
           "label": "Biển số xe *",
           "placeholder": "VD: 30H-888.88"
@@ -1329,56 +1401,81 @@
         "stampCode": {
           "label": "Mã tem E-Warranty *",
           "placeholder": "VD: FJ-8899-2026"
-        }
+        },
+        "province": {
+          "label": "Tỉnh / Thành phố *",
+          "placeholder": "Chọn tỉnh hoặc thành phố",
+          "loading": "Đang tải tỉnh thành...",
+          "loadError": "Không thể tải danh sách tỉnh thành."
+        },
+        "ward": {
+          "label": "Phường / Xã *",
+          "placeholder": "Chọn phường hoặc xã",
+          "loading": "Đang tải phường xã...",
+          "loadError": "Không thể tải danh sách phường xã."
+        },
+        "addressDetail": {
+          "label": "Địa chỉ chi tiết *",
+          "placeholder": "Số nhà, tên đường..."
+        },
+        "retry": "Thử lại"
+      },
+      "validation": {
+        "addressRequired": "Vui lòng nhập địa chỉ chi tiết.",
+        "customerEmailInvalid": "Email không hợp lệ.",
+        "customerEmailRequired": "Vui lòng nhập email để nhận giấy bảo hành.",
+        "customerNameInvalid": "Họ và tên phải có từ 2 đến 120 ký tự.",
+        "customerPhoneInvalid": "Số điện thoại không hợp lệ.",
+        "provinceRequired": "Vui lòng chọn tỉnh hoặc thành phố.",
+        "vehiclePlateInvalid": "Biển số xe không hợp lệ.",
+        "wardRequired": "Vui lòng chọn phường hoặc xã.",
+        "warrantyCodeInvalid": "Mã E-Warranty không hợp lệ."
+      },
+      "errors": {
+        "alreadyOpen": "Sản phẩm này đã có yêu cầu kích hoạt đang chờ xử lý.",
+        "invalid": "Thông tin gửi lên chưa hợp lệ. Vui lòng kiểm tra lại.",
+        "notEligible": "Mã E-Warranty này không còn đủ điều kiện tạo yêu cầu kích hoạt.",
+        "notFound": "Không tìm thấy mã E-Warranty trên hệ thống.",
+        "rateLimit": "Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau.",
+        "request": "Không thể gửi yêu cầu kích hoạt. Vui lòng thử lại."
       }
     },
     "lookup": {
       "eyebrow": "Hệ thống E-Warranty",
       "title": "Tra cứu hạn bảo hành điện tử",
-      "description": "Nhập số điện thoại, biển số xe hoặc mã tem E-Warranty để kiểm tra thông tin chính hãng.",
+      "description": "Nhập mã E-Warranty để kiểm tra thông tin sản phẩm và thời hạn bảo hành chính hãng.",
       "heroImageAlt": "Tra cứu bảo hành điện tử FUJITEK",
-      "placeholder": "Nhập SĐT / Biển số xe / Mã tem...",
-      "search": "Tra cứu",
-      "tryPrefix": "Ví dụ: nhập",
-      "or": "hoặc",
-      "mock": {
-        "customerName": "Nguyễn Văn An",
-        "address": "TP. Hồ Chí Minh",
-        "warrantyYears": "15 năm",
-        "dealer": "Panda Auto Showroom Hà Nội",
-        "status": "Đang hiệu lực (Chính hãng)"
-      },
       "registration": {
-        "title": "Mã bảo hành điện tử của Quý khách có thể được đăng ký bằng một trong các dãy số",
-        "description": "Sử dụng một trong 3 phương thức dưới đây để tra cứu thông tin tem E-Warranty",
+        "title": "Tìm mã E-Warranty của Quý khách",
+        "description": "Mã tra cứu có thể được cung cấp qua một trong các kênh dưới đây",
         "methods": {
           "phone": {
-            "label": "Phương thức 01",
-            "title": "Số điện thoại",
-            "description": "SĐT chính chủ đã đăng ký khi dán phim"
+            "label": "Nguồn 01",
+            "title": "Phiếu bảo hành",
+            "description": "Mã E-Warranty được in trên phiếu bảo hành của sản phẩm"
           },
           "qr": {
-            "label": "Phương thức 02",
-            "title": "Mã QR / Email",
-            "description": "Mã tem bảo hành nhận qua tin nhắn hoặc email"
+            "label": "Nguồn 02",
+            "title": "Tin nhắn / Email",
+            "description": "Mã bảo hành được gửi sau khi sản phẩm được kích hoạt"
           },
           "serial": {
-            "label": "Phương thức 03",
-            "description": "Mã dạng: BL/BHDT/000199"
+            "label": "Định dạng mã",
+            "description": "Ví dụ: WM-2026-ABCDEF hoặc FJ-8899-2026"
           }
         }
       },
       "searchSection": {
         "title": "Tra cứu",
-        "description": "Vui lòng nhập đầy đủ thông tin mã hoặc Số Điện Thoại cung cấp trên phiếu bảo hành."
+        "description": "Vui lòng nhập đầy đủ mã E-Warranty được cung cấp trên phiếu bảo hành."
       },
       "guide": {
         "title": "Hướng dẫn tra cứu E-Warranty trong 3 bước",
         "steps": {
           "one": {
             "badge": "Bước 01",
-            "title": "Nhập thông tin",
-            "description": "Nhập Số điện thoại, Biển số xe hoặc Mã tem E-Warranty."
+            "title": "Nhập mã",
+            "description": "Nhập chính xác mã E-Warranty trên phiếu bảo hành."
           },
           "two": {
             "badge": "Bước 02",
@@ -1388,7 +1485,7 @@
           "three": {
             "badge": "Bước 03",
             "title": "Xem chi tiết",
-            "description": "Xem thông tin chủ xe, gói dán, các vị trí kính & thời hạn 15 năm."
+            "description": "Xem sản phẩm, số serial, trạng thái và thời hạn bảo hành."
           }
         }
       },
@@ -1409,42 +1506,47 @@
         "description": "Xem quy định thời gian bảo hành (10 - 15 năm), trường hợp được bảo hành & lưu ý sau khi dán phim.",
         "action": "Xem chính sách bảo hành"
       },
-      "result": {
-        "code": "Mã E-Warranty",
-        "serial": "Số Serial",
-        "duration": "Thời hạn",
-        "owner": "Khách hàng",
-        "phone": "Số điện thoại",
-        "address": "Địa chỉ",
-        "carPlate": "Biển số xe",
-        "carModel": "Loại xe",
-        "vehicle": "Biển số & Dòng xe",
-        "film": "Tên gói dán",
-        "warrantyYears": "Thời gian bảo hành (năm)",
-        "installedDate": "Ngày hoàn thành",
-        "expiryDate": "Hạn bảo hành",
-        "dealer": "Đơn vị thi công",
-        "glassSection": "Vị trí kính dán phim",
-        "windshield": "Kính lái",
-        "frontLeftGlass": "Kính sườn trước – trái",
-        "frontRightGlass": "Kính sườn trước – phải",
-        "rearLeftGlass": "Kính sườn sau – trái",
-        "rearRightGlass": "Kính sườn sau – phải",
-        "sunroof": "Cửa sổ trời",
-        "rearGlass": "Kính lưng",
-        "notes": "Ghi chú"
-      },
-      "noResult": "Không tìm thấy thông tin bảo hành. Vui lòng kiểm tra lại số điện thoại hoặc biển số xe."
+      "errors": {
+        "invalid": "Mã E-Warranty không hợp lệ. Vui lòng kiểm tra và nhập lại.",
+        "notFound": "Không tìm thấy thông tin bảo hành cho mã E-Warranty này.",
+        "rateLimit": "Bạn đã tra cứu quá nhiều lần. Vui lòng thử lại sau một phút.",
+        "request": "Không thể tra cứu bảo hành lúc này. Vui lòng thử lại sau."
+      }
     },
     "request": {
       "eyebrow": "Yêu cầu dịch vụ bảo hành",
       "title": "Gửi yêu cầu bảo hành & Hỗ trợ",
       "description": "Nhận hỗ trợ cho các vấn đề bong tróc, bọt khí, bay màu hoặc lỗi kỹ thuật thi công.",
       "submit": "Gửi phiếu yêu cầu hỗ trợ",
+      "submitting": "Đang gửi yêu cầu...",
       "success": {
-        "title": "Gửi yêu cầu thành công!",
-        "description": "Mã phiếu hỗ trợ của bạn là <ticket></ticket>. Kỹ thuật viên FUJITEK sẽ liên hệ trong vòng 24 giờ.",
+        "title": "Đã tiếp nhận yêu cầu",
+        "description": "Yêu cầu đang chờ FUJITEK kiểm tra và xử lý. Vui lòng lưu mã yêu cầu để tra cứu hoặc đối chiếu khi cần hỗ trợ.",
+        "claimCodeLabel": "Mã yêu cầu",
+        "issueLabel": "Vấn đề cần hỗ trợ",
+        "submittedAtLabel": "Ngày gửi",
+        "statusLabel": "Trạng thái",
+        "submittedStatus": "Đã gửi",
+        "copyCode": "Sao chép mã yêu cầu",
+        "copied": "Đã sao chép mã yêu cầu",
+        "track": "Theo dõi tiến độ",
         "reset": "Gửi yêu cầu khác"
+      },
+      "errors": {
+        "alreadyOpen": "Mã E-Warranty này đã có một yêu cầu bảo hành đang được xử lý.",
+        "invalid": "Thông tin yêu cầu chưa hợp lệ. Vui lòng kiểm tra và thử lại.",
+        "notEligible": "Bảo hành này chưa kích hoạt, đã hết hạn hoặc không còn hiệu lực.",
+        "notFound": "Không tìm thấy mã E-Warranty trong hệ thống.",
+        "ownerMismatch": "Số điện thoại không khớp với chủ sở hữu hiện tại của bảo hành.",
+        "rateLimit": "Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau một phút.",
+        "request": "Không thể gửi yêu cầu bảo hành lúc này. Vui lòng thử lại sau."
+      },
+      "validation": {
+        "detailsInvalid": "Mô tả sự cố không được vượt quá 4000 ký tự.",
+        "issueRequired": "Vui lòng chọn vấn đề gặp phải.",
+        "nameInvalid": "Vui lòng nhập họ tên hợp lệ.",
+        "phoneInvalid": "Vui lòng nhập số điện thoại hợp lệ.",
+        "warrantyCodeInvalid": "Vui lòng nhập mã E-Warranty hợp lệ."
       },
       "fields": {
         "customerName": {
@@ -1456,8 +1558,8 @@
           "placeholder": "VD: 0988 123 456"
         },
         "reference": {
-          "label": "Biển số xe / Mã E-Warranty *",
-          "placeholder": "VD: 30H-888.88"
+          "label": "Mã E-Warranty *",
+          "placeholder": "VD: WM-2026-ABCDEF"
         },
         "issue": {
           "label": "Vấn đề gặp phải *",
@@ -1478,20 +1580,53 @@
     "track": {
       "eyebrow": "Theo dõi tiến độ dịch vụ",
       "title": "Theo dõi xử lý bảo hành",
-      "description": "Nhập mã phiếu yêu cầu hoặc số điện thoại để xem lịch hẹn và tiến độ xử lý.",
-      "placeholder": "Nhập mã phiếu REQ-... hoặc SĐT...",
-      "search": "Kiểm tra",
-      "mock": {
-        "customerName": "Nguyễn Văn An",
-        "issue": "Bong tróc bọt khí kính sườn trái",
-        "status": "Đang tiếp nhận & Lên lịch kỹ thuật",
-        "technician": "Trần Văn Bình - Panda Auto Hà Nội"
+      "description": "Nhập mã yêu cầu CLM để xem trạng thái hiện tại và lịch sử xử lý thực tế.",
+      "form": {
+        "claimCodeLabel": "Mã yêu cầu bảo hành",
+        "placeholder": "Ví dụ: CLM-0123456789ABCDEFABCD",
+        "submit": "Kiểm tra",
+        "submitting": "Đang kiểm tra...",
+        "help": "Mã CLM được cấp sau khi bạn gửi yêu cầu bảo hành."
+      },
+      "validation": {
+        "claimCodeInvalid": "Vui lòng nhập đúng mã yêu cầu CLM."
+      },
+      "errors": {
+        "notFound": "Không tìm thấy yêu cầu bảo hành với mã này.",
+        "rateLimit": "Bạn đã tra cứu quá nhiều lần. Vui lòng thử lại sau.",
+        "request": "Không thể tra cứu tiến độ bảo hành. Vui lòng thử lại."
       },
       "result": {
-        "ticket": "Mã phiếu",
-        "customer": "Khách hàng",
-        "carPlate": "Biển số xe",
-        "technician": "Kỹ thuật phụ trách"
+        "claimCode": "Mã yêu cầu",
+        "warrantyCode": "Mã E-Warranty",
+        "issue": "Vấn đề cần hỗ trợ",
+        "priority": "Mức ưu tiên",
+        "submittedAt": "Ngày gửi",
+        "dueAt": "Hạn xử lý dự kiến",
+        "resolvedAt": "Ngày hoàn tất",
+        "product": "Sản phẩm",
+        "serviceCenter": "Trung tâm bảo hành"
+      },
+      "statuses": {
+        "SUBMITTED": "Đã gửi",
+        "REVIEWING": "Đang xem xét",
+        "APPROVED": "Đã duyệt",
+        "REJECTED": "Đã từ chối",
+        "IN_REPAIR": "Đang sửa chữa",
+        "COMPLETED": "Đã hoàn tất",
+        "CANCELLED": "Đã hủy"
+      },
+      "priorities": {
+        "LOW": "Thấp",
+        "NORMAL": "Bình thường",
+        "HIGH": "Cao",
+        "URGENT": "Khẩn cấp"
+      },
+      "timeline": {
+        "title": "Lịch sử xử lý",
+        "statusChanged": "Trạng thái: {status}",
+        "serviceCenterAssigned": "Đã phân công: {name}",
+        "serviceCenterChanged": "Đã chuyển đến: {name}"
       }
     }
   },
