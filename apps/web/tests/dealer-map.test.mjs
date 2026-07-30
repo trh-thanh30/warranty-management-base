@@ -43,6 +43,22 @@ const dealerFiltersPath = path.join(
   "components",
   "dealer-filters.tsx",
 );
+const dealerListPath = path.join(
+  webRoot,
+  "src",
+  "views",
+  "dealers",
+  "components",
+  "dealer-list.tsx",
+);
+const aboutNetworkMapPath = path.join(
+  webRoot,
+  "src",
+  "views",
+  "about",
+  "components",
+  "about-network-map.tsx",
+);
 const publicNetworkDirectoryServicePath = path.join(
   webRoot,
   "src",
@@ -131,6 +147,28 @@ test("dealer map uses the shared Vietnam overlay without locking horizontal pann
   assert.doesNotMatch(source, /setIsMounted|isMounted/);
   assert.doesNotMatch(source, /<TileLayer|<iframe/);
   assert.doesNotMatch(source, /🇻🇳|📍/u);
+});
+
+test("network locations have list separators and accessible pulsing map markers", async () => {
+  const [listSource, dealerMapSource, aboutMapSource, globalsSource] =
+    await Promise.all([
+      readFile(dealerListPath, "utf8"),
+      readFile(dealerMapPath, "utf8"),
+      readFile(aboutNetworkMapPath, "utf8"),
+      readFile(globalsPath, "utf8"),
+    ]);
+
+  assert.match(
+    listSource,
+    /border-b border-border-gray\/60[\s\S]*last:border-b-0/,
+  );
+  assert.match(dealerMapSource, /fujitek-network-marker-pulse/);
+  assert.match(aboutMapSource, /fujitek-network-marker-pulse/);
+  assert.match(globalsSource, /@keyframes network-marker-pulse/);
+  assert.match(
+    globalsSource,
+    /prefers-reduced-motion:\s*reduce[\s\S]*\.fujitek-network-marker-pulse[\s\S]*animation:\s*none/,
+  );
 });
 
 test("dealer page loads the combined public network directory and dynamically renders the Leaflet map", async () => {

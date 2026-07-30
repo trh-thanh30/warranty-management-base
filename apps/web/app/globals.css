@@ -133,6 +133,29 @@ body {
   font-synthesis-weight: none;
 }
 
+.fujitek-network-marker-pulse {
+  position: absolute;
+  inset: 1px;
+  pointer-events: none;
+  border: 2px solid var(--marker-color);
+  border-radius: 9999px;
+  animation: network-marker-pulse 1.8s ease-out infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes network-marker-pulse {
+  0% {
+    opacity: 0.85;
+    transform: scale(0.55);
+  }
+
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+
 /* ── Scroll & Touch Utilities ── */
 @utility snap-x {
   scroll-snap-type: x mandatory;
@@ -161,7 +184,8 @@ body {
   .animate-marquee-left,
   .animate-marquee-right,
   .animate-pulse,
-  .animate-ping {
+  .animate-ping,
+  .fujitek-network-marker-pulse {
     animation: none !important;
   }
 }

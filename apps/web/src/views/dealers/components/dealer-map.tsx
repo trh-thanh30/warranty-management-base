@@ -36,6 +36,7 @@ function createLocationIcon(kind: PublicNetworkLocationKind, selected = false) {
     className: "fujitek-network-marker",
     html: `
       <div style="width:${size}px;height:${size}px;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer">
+        <span class="fujitek-network-marker-pulse" style="--marker-color:${color}"></span>
         <span style="position:absolute;inset:0;border-radius:9999px;background:${color};opacity:${selected ? 0.25 : 0.18}"></span>
         <span style="position:relative;width:${coreSize}px;height:${coreSize}px;border-radius:9999px;border:3px solid white;background:${color};box-shadow:0 2px 8px rgba(0,0,0,.28);display:flex;align-items:center;justify-content:center">
           <span style="width:5px;height:5px;border-radius:9999px;background:white"></span>
