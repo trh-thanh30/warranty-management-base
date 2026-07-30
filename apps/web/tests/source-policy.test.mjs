@@ -486,7 +486,7 @@ test("API runtime excludes migration and unused build tooling", async () => {
   );
   assert.match(
     apiDockerfile,
-    /cd \/prod\/api && \/app\/node_modules\/\.bin\/prisma generate/,
+    /cd \/prod\/api && \/app\/apps\/api\/node_modules\/\.bin\/prisma generate/,
   );
 });
 

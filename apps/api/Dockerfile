@@ -26,7 +26,7 @@ COPY --from=pruner /app/out/full/ .
 RUN pnpm --filter @repo/api... build
 RUN pnpm --filter @repo/api deploy --prod --no-optional --ignore-scripts /prod/api
 
-RUN cd /prod/api && /app/node_modules/.bin/prisma generate
+RUN cd /prod/api && /app/apps/api/node_modules/.bin/prisma generate
 
 FROM base AS runner
 WORKDIR /app
