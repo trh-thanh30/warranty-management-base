@@ -22,6 +22,7 @@ import {
 } from "@repo/ui";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
+import { ProductTemplatePublicationBadge } from "./product-template-publication-badge";
 
 export function ProductTemplatesTable({
   items,
@@ -51,7 +52,9 @@ export function ProductTemplatesTable({
                 <TemplateStatus template={template} />
               </TemplateMobileField>
               <TemplateMobileField label={t("visibility")}>
-                <TemplatePublication template={template} />
+                <ProductTemplatePublicationBadge
+                  isPublished={template.isPublished}
+                />
               </TemplateMobileField>
               <TemplateMobileField label={t("linkedProduct")}>
                 <Badge className="whitespace-nowrap" variant="secondary">
@@ -94,7 +97,9 @@ export function ProductTemplatesTable({
                 <TableCell>
                   <div className="flex flex-wrap gap-2">
                     <TemplateStatus template={template} />
-                    <TemplatePublication template={template} />
+                    <ProductTemplatePublicationBadge
+                      isPublished={template.isPublished}
+                    />
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
@@ -150,22 +155,6 @@ function TemplateStatus({ template }: { template: ProductTemplateSummary }) {
       variant={template.isActive ? "success" : "secondary"}
     >
       {template.isActive ? t("active") : t("inactive")}
-    </Badge>
-  );
-}
-
-function TemplatePublication({
-  template,
-}: {
-  template: ProductTemplateSummary;
-}) {
-  const t = useTranslations("ProductTemplates");
-  return (
-    <Badge
-      className="whitespace-nowrap"
-      variant={template.isPublished ? "default" : "secondary"}
-    >
-      {template.isPublished ? t("published") : t("hidden")}
     </Badge>
   );
 }

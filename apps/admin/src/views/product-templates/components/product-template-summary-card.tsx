@@ -9,6 +9,7 @@ import {
   getProductTemplateDetailSections,
   type ProductTemplateDetailSection,
 } from "../product-templates.utils";
+import { ProductTemplatePublicationBadge } from "./product-template-publication-badge";
 
 type ProductTemplateSummaryCardProps = {
   template: ProductTemplateSummary;
@@ -49,9 +50,7 @@ export function ProductTemplateSummaryCard({
           <Badge variant={template.isActive ? "success" : "secondary"}>
             {template.isActive ? t("active") : t("inactive")}
           </Badge>
-          <Badge variant={template.isPublished ? "default" : "secondary"}>
-            {template.isPublished ? t("published") : t("hidden")}
-          </Badge>
+          <ProductTemplatePublicationBadge isPublished={template.isPublished} />
         </div>
       </CardHeader>
 
