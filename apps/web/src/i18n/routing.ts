@@ -1,10 +1,12 @@
 import { defineRouting } from "next-intl/routing";
 
+export const LOCALE_COOKIE_NAME = "NEXT_LOCALE";
+
 export const routing = defineRouting({
   locales: ["vi", "en"],
   defaultLocale: "vi",
   localeCookie: {
-    name: "NEXT_LOCALE",
+    name: LOCALE_COOKIE_NAME,
     maxAge: 60 * 60 * 24 * 365,
     sameSite: "lax",
   },
