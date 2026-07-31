@@ -11,7 +11,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-warranty_management_base_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-warranty_management_base_password}
     ports:
-      - "${PROD_DB_PORT:-25432}:5432"
+      - "127.0.0.1:${PROD_DB_PORT:-25432}:5432"
     volumes:
       - warranty_management_base_postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -31,7 +31,7 @@ services:
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD:-warranty_management_base_redis_password}
     ports:
-      - "${REDIS_DB_PORT:-16379}:6379"
+      - "127.0.0.1:${REDIS_DB_PORT:-16379}:6379"
     volumes:
       - warranty_management_base_redis_data:/data
     healthcheck:
@@ -56,8 +56,8 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
     ports:
-      - "${MINIO_PORT:-19000}:9000"
-      - "${MINIO_CONSOLE_PORT:-19001}:9001"
+      - "127.0.0.1:${MINIO_PORT:-19000}:9000"
+      - "127.0.0.1:${MINIO_CONSOLE_PORT:-19001}:9001"
     volumes:
       - warranty_management_base_minio_data:/data
 
@@ -76,7 +76,8 @@ services:
         mc mb --ignore-existing "minio/$${MINIO_BUCKET_TEMP}" &&
         (mc ilm rule rm --all --force "minio/$${MINIO_BUCKET_TEMP}" || true) &&
         mc ilm rule add "minio/$${MINIO_BUCKET_TEMP}" --expire-days "$${MINIO_TEMP_RETENTION_DAYS:-7}" &&
-        mc anonymous set download "minio/$${MINIO_BUCKET_PUBLIC}"
+        mc anonymous set download "minio/$${MINIO_BUCKET_PUBLIC}" &&
+        mc anonymous get "minio/$${MINIO_BUCKET_PUBLIC}"
     depends_on:
       minio:
         condition: service_started
@@ -119,7 +120,7 @@ services:
       DATABASE_URL: ${DOCKER_DATABASE_URL:-postgresql://${DB_USER:-warranty_management_base_user}:${DB_PASSWORD:-warranty_management_base_password}@db:5432/${DB_NAME:-warranty_management_base}?schema=${DB_SCHEMA:-public}}
       REDIS_URL: redis://:${REDIS_PASSWORD:-warranty_management_base_redis_password}@redis:6379
     ports:
-      - "${API_PORT:-4100}:4100"
+      - "127.0.0.1:${API_PORT:-4100}:4100"
     volumes:
       - warranty_management_base_storage:/app/storage
       - warranty_management_base_logs:/app/logs
@@ -189,7 +190,7 @@ services:
       PUBLIC_API_URL: ${PUBLIC_API_URL:-http://api:4100/api/v1}
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4100/api/v1}
     ports:
-      - "${WEB_PORT:-4101}:4101"
+      - "127.0.0.1:${WEB_PORT:-4101}:4101"
     depends_on:
       api:
         condition: service_healthy
@@ -209,7 +210,7 @@ services:
       PORT: 4102
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4100/api/v1}
     ports:
-      - "${ADMIN_PORT:-4102}:4102"
+      - "127.0.0.1:${ADMIN_PORT:-4102}:4102"
     depends_on:
       api:
         condition: service_healthy

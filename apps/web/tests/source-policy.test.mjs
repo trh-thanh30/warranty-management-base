@@ -742,3 +742,52 @@ test("container ports match the production ports documented for deployment", asy
     assert.match(dockerfile, new RegExp(`EXPOSE ${port}`));
   }
 });
+
+test("production infrastructure ports are only published on localhost", async () => {
+  const compose = await readFile(
+    path.join(repoRoot, "docker-compose.prod.yml"),
+    "utf8",
+  );
+
+  const publishedPorts = [
+    ["PROD_DB_PORT", 25432, 5432],
+    ["REDIS_DB_PORT", 16379, 6379],
+    ["MINIO_PORT", 19000, 9000],
+    ["MINIO_CONSOLE_PORT", 19001, 9001],
+    ["API_PORT", 4100, 4100],
+    ["WEB_PORT", 4101, 4101],
+    ["ADMIN_PORT", 4102, 4102],
+  ];
+
+  for (const [variable, fallback, containerPort] of publishedPorts) {
+    assert.match(
+      compose,
+      new RegExp(
+        `127\\.0\\.0\\.1:\\$\\{${variable}:-${fallback}\\}:${containerPort}`,
+      ),
+      `${variable} must not be exposed on every VPS network interface`,
+    );
+  }
+});
+
+test("production MinIO initialization verifies public bucket downloads", async () => {
+  const [compose, deployWorkflow] = await Promise.all([
+    readFile(path.join(repoRoot, "docker-compose.prod.yml"), "utf8"),
+    readFile(path.join(repoRoot, ".github", "workflows", "deploy.yml"), "utf8"),
+  ]);
+
+  assert.match(
+    compose,
+    /mc anonymous set download "minio\/\$\$\{MINIO_BUCKET_PUBLIC\}"/,
+  );
+  assert.match(
+    compose,
+    /mc anonymous get "minio\/\$\$\{MINIO_BUCKET_PUBLIC\}"/,
+    "MinIO initialization must fail when the public download policy was not applied",
+  );
+  assert.match(
+    deployWorkflow,
+    /docker compose .* run --rm minio-init/,
+    "deployment must reapply the idempotent MinIO bucket policies",
+  );
+});
