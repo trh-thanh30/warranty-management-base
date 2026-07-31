@@ -1,8 +1,7 @@
 "use client";
 
 import { Container } from "@/src/components/common/container";
-import { APP_ROUTES } from "@/src/constants/routes.constants";
-import { Link } from "@/src/i18n/navigation";
+import { openPublicQuickChat } from "@/src/components/common/public-quick-chat.events";
 import { Button } from "@repo/ui/button";
 import { Card } from "@repo/ui/card";
 import { ArrowUpRight, Handshake } from "lucide-react";
@@ -48,14 +47,13 @@ export function DealerRecruitmentCta() {
             </div>
 
             <Button
-              asChild
               size="md"
+              type="button"
+              onClick={openPublicQuickChat}
               className="min-h-12 w-full rounded-sm bg-premium-red px-6 text-xs font-semibold uppercase tracking-wider text-white shadow-md transition-colors hover:bg-warm-red focus-visible:ring-premium-red focus-visible:ring-offset-white sm:w-fit"
             >
-              <Link href={APP_ROUTES.contact}>
-                <span>{t("cta")}</span>
-                <ArrowUpRight aria-hidden="true" className="size-4" />
-              </Link>
+              <span>{t("cta")}</span>
+              <ArrowUpRight aria-hidden="true" className="size-4" />
             </Button>
           </div>
         </Card>

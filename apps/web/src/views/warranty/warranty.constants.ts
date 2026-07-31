@@ -1,3 +1,4 @@
+import { PUBLIC_FEATURES } from "@/src/config/public-features.config";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 
 export const warrantyActions = [
@@ -7,12 +8,16 @@ export const warrantyActions = [
     icon: "search",
     href: APP_ROUTES.warrantyLookup,
   },
-  {
-    id: "activate",
-    kind: "link",
-    icon: "shield",
-    href: APP_ROUTES.warrantyActivate,
-  },
+  ...(PUBLIC_FEATURES.warrantyActivation
+    ? [
+        {
+          id: "activate" as const,
+          kind: "link" as const,
+          icon: "shield" as const,
+          href: APP_ROUTES.warrantyActivate,
+        },
+      ]
+    : []),
   {
     id: "request",
     kind: "link",

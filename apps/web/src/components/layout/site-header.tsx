@@ -8,20 +8,36 @@ import { Container } from "@/src/components/common/container";
 import { HeaderNavLink } from "@/src/components/layout/components/header-nav-link";
 import { LanguageSwitcher } from "@/src/components/layout/components/language-switcher";
 import { SiteLogo } from "@/src/components/layout/components/site-logo";
+import {
+  PUBLIC_FEATURES,
+  PUBLIC_PRODUCT_CATALOG_URL,
+} from "@/src/config/public-features.config";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { Link, usePathname } from "@/src/i18n/navigation";
 import { isNavigationItemActive } from "@/src/utils/pathname.utils";
 
 const navigationItems = [
-  { labelKey: "home", href: APP_ROUTES.home },
-  { labelKey: "about", href: APP_ROUTES.about },
-  { labelKey: "products", href: APP_ROUTES.products },
-  { labelKey: "warranty", href: APP_ROUTES.warranty },
+  { labelKey: "about", href: APP_ROUTES.home, external: false },
+  {
+    labelKey: "products",
+    href: PUBLIC_PRODUCT_CATALOG_URL,
+    external: true,
+  },
+  { labelKey: "warranty", href: APP_ROUTES.warranty, external: false },
   {
     labelKey: "dealers",
     href: APP_ROUTES.dealers,
+    external: false,
   },
-  { labelKey: "contact", href: APP_ROUTES.contact },
+  ...(PUBLIC_FEATURES.contactNavigation
+    ? [
+        {
+          labelKey: "contact" as const,
+          href: APP_ROUTES.contact,
+          external: false,
+        },
+      ]
+    : []),
 ] as const;
 
 export function SiteHeader({ logoUrl }: { logoUrl?: string | null }) {
@@ -83,7 +99,7 @@ export function SiteHeader({ logoUrl }: { logoUrl?: string | null }) {
           <ul className="flex list-none items-center gap-7 lg:gap-9">
             {navigationItems.map((item) => (
               <li key={item.labelKey}>
-                <HeaderNavLink href={item.href}>
+                <HeaderNavLink external={item.external} href={item.href}>
                   {t(`nav.${item.labelKey}`)}
                 </HeaderNavLink>
               </li>
@@ -143,6 +159,7 @@ export function SiteHeader({ logoUrl }: { logoUrl?: string | null }) {
               {navigationItems.map((item) => (
                 <li key={item.labelKey}>
                   <HeaderNavLink
+                    external={item.external}
                     href={item.href}
                     isMobile
                     onClick={closeMobileMenu}

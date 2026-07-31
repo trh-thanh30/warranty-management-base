@@ -4,9 +4,12 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { Award, ArrowRight } from "lucide-react";
+import { Button } from "@repo/ui/button";
+import { openPublicQuickChat } from "@/src/components/common/public-quick-chat.events";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { Link } from "@/src/i18n/navigation";
 import { Counter } from "@/src/components/animation/counter";
+import { PUBLIC_FEATURES } from "@/src/config/public-features.config";
 
 export function AboutHeroCorporate() {
   const t = useTranslations("AboutPage");
@@ -70,20 +73,36 @@ export function AboutHeroCorporate() {
 
           {/* CTA Buttons */}
           <div className="flex flex-wrap gap-4 pt-2">
-            <Link
-              href={APP_ROUTES.products}
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-premium-red hover:bg-warm-red px-7 py-3.5 text-xs sm:text-sm font-semibold uppercase tracking-wider text-white shadow-md transition-all cursor-pointer"
-            >
-              <span>{t("hero.exploreProductsCta")}</span>
-              <ArrowRight className="size-4" />
-            </Link>
+            {PUBLIC_FEATURES.products ? (
+              <Button
+                asChild
+                className="h-auto rounded-md bg-premium-red px-7 py-3.5 text-xs font-semibold uppercase tracking-wider text-white shadow-md transition-all hover:bg-warm-red sm:text-sm"
+              >
+                <Link href={APP_ROUTES.products}>
+                  <span>{t("hero.exploreProductsCta")}</span>
+                  <ArrowRight aria-hidden="true" className="size-4" />
+                </Link>
+              </Button>
+            ) : (
+              <Button
+                className="h-auto rounded-md bg-premium-red px-7 py-3.5 text-xs font-semibold uppercase tracking-wider text-white shadow-md transition-all hover:bg-warm-red sm:text-sm"
+                onClick={openPublicQuickChat}
+                type="button"
+              >
+                <span>{t("hero.contactCta")}</span>
+                <ArrowRight aria-hidden="true" className="size-4" />
+              </Button>
+            )}
 
-            <Link
-              href={APP_ROUTES.dealers}
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-white hover:bg-light-gray border border-border-gray px-7 py-3.5 text-xs sm:text-sm font-semibold uppercase tracking-wider text-deep-black shadow-sm transition-all cursor-pointer"
+            <Button
+              asChild
+              variant="secondary"
+              className="h-auto rounded-md border-border-gray bg-white px-7 py-3.5 text-xs font-semibold uppercase tracking-wider text-deep-black shadow-sm transition-all hover:bg-light-gray sm:text-sm"
             >
-              <span>{t("hero.dealerNetworkCta")}</span>
-            </Link>
+              <Link href={APP_ROUTES.dealers}>
+                <span>{t("hero.dealerNetworkCta")}</span>
+              </Link>
+            </Button>
           </div>
         </motion.div>
 

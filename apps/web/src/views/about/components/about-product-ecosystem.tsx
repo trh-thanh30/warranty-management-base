@@ -4,7 +4,10 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { Shield, Zap, Camera, Gauge, ArrowRight } from "lucide-react";
+import { Button } from "@repo/ui/button";
 import { Container } from "@/src/components/common/container";
+import { openPublicQuickChat } from "@/src/components/common/public-quick-chat.events";
+import { PUBLIC_FEATURES } from "@/src/config/public-features.config";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { Link } from "@/src/i18n/navigation";
 import { aboutEcosystemProducts } from "../about.constants";
@@ -18,6 +21,12 @@ const productIcons = {
 
 export function AboutProductEcosystem() {
   const t = useTranslations("AboutPage");
+  const viewAllCtaLabel = PUBLIC_FEATURES.products
+    ? "ecosystem.viewAllCta"
+    : "hero.contactCta";
+  const productDetailCtaLabel = PUBLIC_FEATURES.products
+    ? "ecosystem.productDetailCta"
+    : "hero.contactCta";
 
   return (
     <section className="w-full bg-surface-muted py-16 lg:py-24">
@@ -35,13 +44,28 @@ export function AboutProductEcosystem() {
             </p>
           </div>
 
-          <Link
-            href={APP_ROUTES.products}
-            className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-wider text-premium-red hover:text-warm-red transition-colors shrink-0 font-sans"
-          >
-            <span>{t("ecosystem.viewAllCta")}</span>
-            <ArrowRight className="size-4" />
-          </Link>
+          {PUBLIC_FEATURES.products ? (
+            <Button
+              asChild
+              className="h-auto shrink-0 p-0 font-sans text-xs font-semibold uppercase tracking-wider text-premium-red hover:bg-transparent hover:text-warm-red sm:text-sm"
+              variant="ghost"
+            >
+              <Link href={APP_ROUTES.products}>
+                <span>{t(viewAllCtaLabel)}</span>
+                <ArrowRight aria-hidden="true" className="size-4" />
+              </Link>
+            </Button>
+          ) : (
+            <Button
+              className="h-auto shrink-0 p-0 font-sans text-xs font-semibold uppercase tracking-wider text-premium-red hover:bg-transparent hover:text-warm-red sm:text-sm"
+              onClick={openPublicQuickChat}
+              type="button"
+              variant="ghost"
+            >
+              <span>{t(viewAllCtaLabel)}</span>
+              <ArrowRight aria-hidden="true" className="size-4" />
+            </Button>
+          )}
         </div>
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
@@ -85,13 +109,28 @@ export function AboutProductEcosystem() {
                 </div>
 
                 <div className="px-6 pb-6 pt-2">
-                  <Link
-                    href={APP_ROUTES.products}
-                    className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-deep-black group-hover:text-premium-red transition-colors font-sans"
-                  >
-                    <span>{t("ecosystem.productDetailCta")}</span>
-                    <ArrowRight className="size-3.5" />
-                  </Link>
+                  {PUBLIC_FEATURES.products ? (
+                    <Button
+                      asChild
+                      className="h-auto p-0 font-sans text-xs font-semibold uppercase tracking-wider text-deep-black group-hover:text-premium-red hover:bg-transparent hover:text-premium-red"
+                      variant="ghost"
+                    >
+                      <Link href={APP_ROUTES.products}>
+                        <span>{t(productDetailCtaLabel)}</span>
+                        <ArrowRight aria-hidden="true" className="size-3.5" />
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button
+                      className="h-auto p-0 font-sans text-xs font-semibold uppercase tracking-wider text-deep-black group-hover:text-premium-red hover:bg-transparent hover:text-premium-red"
+                      onClick={openPublicQuickChat}
+                      type="button"
+                      variant="ghost"
+                    >
+                      <span>{t(productDetailCtaLabel)}</span>
+                      <ArrowRight aria-hidden="true" className="size-3.5" />
+                    </Button>
+                  )}
                 </div>
               </motion.div>
             );

@@ -135,7 +135,7 @@ test("dealer map uses the shared Vietnam overlay without locking horizontal pann
   assert.match(source, /initialCenter=\{VIETNAM_CENTER\}/);
   assert.match(source, /initialZoom=\{VIETNAM_INITIAL_ZOOM\}/);
   assert.match(source, /resetLabel=\{t\("resetMap"\)\}/);
-  assert.match(source, /fullscreenControlPosition="right"/);
+  assert.doesNotMatch(source, /fullscreenControlPosition="right"/);
   assert.match(source, /fullscreenLabel=\{t\("fullscreenMap"\)\}/);
   assert.match(source, /exitFullscreenLabel=\{t\("exitFullscreenMap"\)\}/);
   assert.match(overlaySource, /fillRule:\s*"evenodd"/);
@@ -254,7 +254,7 @@ test("dealer location filters use scrollable province and ward selects", async (
   assert.match(filtersSource, /wardsLoading/);
 });
 
-test("dealer page presents a localized recruitment CTA linked to Contact", async () => {
+test("dealer page presents a localized recruitment CTA that opens quick chat", async () => {
   const [viewSource, ctaSource] = await Promise.all([
     readFile(dealersViewPath, "utf8"),
     readFile(dealerRecruitmentCtaPath, "utf8"),
@@ -263,7 +263,9 @@ test("dealer page presents a localized recruitment CTA linked to Contact", async
   assert.match(viewSource, /<DealerRecruitmentCta/);
   assert.match(ctaSource, /from "@repo\/ui\/button"/);
   assert.match(ctaSource, /from "@\/src\/components\/common\/container"/);
-  assert.match(ctaSource, /href=\{APP_ROUTES\.contact\}/);
+  assert.match(ctaSource, /openPublicQuickChat/);
+  assert.match(ctaSource, /onClick=\{openPublicQuickChat\}/);
+  assert.doesNotMatch(ctaSource, /APP_ROUTES\.contact/);
   assert.match(ctaSource, /useTranslations\("DealersPage\.recruitment"\)/);
   assert.match(
     ctaSource,

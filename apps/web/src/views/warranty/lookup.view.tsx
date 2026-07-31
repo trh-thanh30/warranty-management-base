@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Phone, Building2, Hash, ShieldCheck, FileText } from "lucide-react";
 import { usePrimaryWebsiteHotline } from "@/src/app/providers/site-settings-provider";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
+import { PUBLIC_FEATURES } from "@/src/config/public-features.config";
 import { Link } from "@/src/i18n/navigation";
 import { Container } from "@/src/components/common/container";
 import { WarrantyLookupForm } from "@/src/components/common/warranty-lookup-form";
@@ -201,14 +202,22 @@ export function WarrantyLookupView() {
                 <p className="text-center text-sm font-semibold uppercase tracking-wider text-stone-gray mb-4">
                   {t("otherActions.title")}
                 </p>
-                <div className="grid gap-3 sm:grid-cols-3 text-xs font-semibold uppercase tracking-wide text-center">
-                  <Link
-                    href={APP_ROUTES.warrantyActivate}
-                    className="p-3.5 rounded-md bg-surface-muted hover:bg-premium-red hover:text-white border border-border-gray transition-colors text-deep-black flex items-center justify-center gap-2"
-                  >
-                    <ShieldCheck className="size-4 shrink-0" />
-                    <span>{t("otherActions.activate")}</span>
-                  </Link>
+                <div
+                  className={`grid gap-3 text-center text-xs font-semibold uppercase tracking-wide ${
+                    PUBLIC_FEATURES.warrantyActivation
+                      ? "sm:grid-cols-3"
+                      : "sm:grid-cols-2"
+                  }`}
+                >
+                  {PUBLIC_FEATURES.warrantyActivation ? (
+                    <Link
+                      href={APP_ROUTES.warrantyActivate}
+                      className="flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:bg-premium-red hover:text-white"
+                    >
+                      <ShieldCheck className="size-4 shrink-0" />
+                      <span>{t("otherActions.activate")}</span>
+                    </Link>
+                  ) : null}
                   <Link
                     href={APP_ROUTES.warrantyRequest}
                     className="p-3.5 rounded-md bg-surface-muted hover:bg-premium-red hover:text-white border border-border-gray transition-colors text-deep-black flex items-center justify-center gap-2"

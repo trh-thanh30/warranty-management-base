@@ -96,18 +96,31 @@ export function SiteFooter({
               </h4>
               <ul className="space-y-2.5 text-sm sm:text-base font-medium text-medium-gray">
                 {footerNavigationItems.map((item) => {
-                  const isActive = isNavigationItemActive(pathname, item.href);
+                  const isActive =
+                    !item.external &&
+                    isNavigationItemActive(pathname, item.href);
 
                   return (
                     <li key={item.id}>
-                      <Link
-                        aria-current={isActive ? "page" : undefined}
-                        data-active={isActive ? "true" : undefined}
-                        href={item.href}
-                        className={footerLinkClassName(isActive)}
-                      >
-                        {t(`navigation.${item.id}`)}
-                      </Link>
+                      {item.external ? (
+                        <a
+                          className={footerLinkClassName(false)}
+                          href={item.href}
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          {t(`navigation.${item.id}`)}
+                        </a>
+                      ) : (
+                        <Link
+                          aria-current={isActive ? "page" : undefined}
+                          data-active={isActive ? "true" : undefined}
+                          href={item.href}
+                          className={footerLinkClassName(isActive)}
+                        >
+                          {t(`navigation.${item.id}`)}
+                        </Link>
+                      )}
                     </li>
                   );
                 })}
