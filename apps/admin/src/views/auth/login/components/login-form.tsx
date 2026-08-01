@@ -14,6 +14,9 @@ import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import {
   adminLoginSchema,
+  ADMIN_LOGIN_CHALLENGE_METHOD,
+  ADMIN_TWO_FACTOR_METHOD,
+  type AdminTwoFactorMethod,
   HttpClientError,
   type AdminLoginChallengeResponse,
   type AdminLoginInput,
@@ -24,17 +27,22 @@ import { consumeAuthRedirectReason } from "@/src/app/stores/auth-session.store";
 import { useRouter } from "@/src/i18n/navigation";
 import { useToast } from "@/src/hooks/use-toast";
 import { TwoFactorForm } from "./two-factor-form";
+import { PinTwoFactorForm } from "./pin-two-factor-form";
 
 type LoginFormProps = {
-  onTwoFactorChange?: (active: boolean, email?: string) => void;
+  onTwoFactorChange?: (challenge: AdminLoginChallengeResponse | null) => void;
 };
 
 export function LoginForm({ onTwoFactorChange }: LoginFormProps) {
   const t = useTranslations("Login");
   const [showPassword, setShowPassword] = useState(false);
+  const [method, setMethod] = useState<AdminTwoFactorMethod>(
+    ADMIN_TWO_FACTOR_METHOD.EMAIL_OTP,
+  );
   const [challenge, setChallenge] =
     useState<AdminLoginChallengeResponse | null>(null);
-  const { login, resendTwoFactor, verifyTwoFactor } = useAuth();
+  const { login, resendTwoFactor, setupPin, verifyPin, verifyTwoFactor } =
+    useAuth();
   const router = useRouter();
   const toast = useToast();
   const {
@@ -57,10 +65,12 @@ export function LoginForm({ onTwoFactorChange }: LoginFormProps) {
 
   async function submit(values: AdminLoginInput) {
     try {
-      const nextChallenge = await login(values);
+      const nextChallenge = await login({ ...values, method });
       setChallenge(nextChallenge);
-      onTwoFactorChange?.(true, nextChallenge.masked_destination);
-      toast.success(t("twoFactorSent"));
+      onTwoFactorChange?.(nextChallenge);
+      if (nextChallenge.method === ADMIN_LOGIN_CHALLENGE_METHOD.EMAIL_OTP) {
+        toast.success(t("twoFactorSent"));
+      }
     } catch (error) {
       toast.error(
         error instanceof HttpClientError ? error.message : t("genericError"),
@@ -69,12 +79,32 @@ export function LoginForm({ onTwoFactorChange }: LoginFormProps) {
   }
 
   if (challenge) {
+    if (challenge.method !== ADMIN_LOGIN_CHALLENGE_METHOD.EMAIL_OTP) {
+      return (
+        <PinTwoFactorForm
+          mode={challenge.method}
+          onBack={() => {
+            setChallenge(null);
+            onTwoFactorChange?.(null);
+          }}
+          onSubmit={async (pin, confirmPin) => {
+            if (challenge.method === ADMIN_LOGIN_CHALLENGE_METHOD.PIN_SETUP) {
+              await setupPin(challenge.challenge_id, pin, confirmPin ?? "");
+            } else {
+              await verifyPin(challenge.challenge_id, pin);
+            }
+            toast.success(t("loginSuccess"));
+            router.replace("/dashboard");
+          }}
+        />
+      );
+    }
     return (
       <TwoFactorForm
         challenge={challenge}
         onBack={() => {
           setChallenge(null);
-          onTwoFactorChange?.(false);
+          onTwoFactorChange?.(null);
         }}
         onResend={resendTwoFactor}
         onVerify={async (code) => {
@@ -109,6 +139,31 @@ export function LoginForm({ onTwoFactorChange }: LoginFormProps) {
             {t("usernameRequired")}
           </p>
         ) : null}
+      </div>
+
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+          {t("verificationMethod")}
+        </p>
+        <div className="grid grid-cols-2 rounded-lg bg-slate-100 p-1 dark:bg-slate-900">
+          {Object.values(ADMIN_TWO_FACTOR_METHOD).map((option) => (
+            <button
+              aria-pressed={method === option}
+              className={`h-10 rounded-md text-sm font-medium transition-colors ${
+                method === option
+                  ? "bg-white text-blue-700 shadow-sm dark:bg-slate-800 dark:text-blue-300"
+                  : "text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white"
+              }`}
+              key={option}
+              onClick={() => setMethod(option)}
+              type="button"
+            >
+              {option === ADMIN_TWO_FACTOR_METHOD.EMAIL_OTP
+                ? t("methodEmail")
+                : t("methodPin")}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-2">

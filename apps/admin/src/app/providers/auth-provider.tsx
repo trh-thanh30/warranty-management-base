@@ -36,6 +36,12 @@ type AuthContextValue = {
   resendTwoFactor: (
     challengeId: string,
   ) => Promise<AdminResendTwoFactorResponse>;
+  setupPin: (
+    challengeId: string,
+    pin: string,
+    confirmPin: string,
+  ) => Promise<void>;
+  verifyPin: (challengeId: string, pin: string) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -100,6 +106,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return authService.resendTwoFactor({ challengeId });
   }, []);
 
+  const setupPin = useCallback(
+    async (challengeId: string, pin: string, confirmPin: string) => {
+      const result = await authService.setupPin({
+        challengeId,
+        pin,
+        confirmPin,
+      });
+      setAuthSession({ accessToken: result.access_token, user: result.user });
+      setBootstrapping(false);
+    },
+    [],
+  );
+
+  const verifyPin = useCallback(async (challengeId: string, pin: string) => {
+    const result = await authService.verifyPin({ challengeId, pin });
+    setAuthSession({ accessToken: result.access_token, user: result.user });
+    setBootstrapping(false);
+  }, []);
+
   const logout = useCallback(async () => {
     setIsLoggingOut(true);
     try {
@@ -118,6 +143,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login,
       verifyTwoFactor,
       resendTwoFactor,
+      setupPin,
+      verifyPin,
       logout,
     }),
     [
@@ -125,9 +152,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login,
       logout,
       resendTwoFactor,
+      setupPin,
       session.user,
       status,
       verifyTwoFactor,
+      verifyPin,
     ],
   );
 

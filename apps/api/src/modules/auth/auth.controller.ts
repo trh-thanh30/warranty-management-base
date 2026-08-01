@@ -14,6 +14,8 @@ import { AssetAccessTypeDto } from '@/modules/assets/dto/upload-asset.dto';
 import { ChangePasswordDto } from '@/modules/auth/dto/change-password.dto';
 import {
   ResendAdminLoginTwoFactorDto,
+  SetupAdminLoginPinDto,
+  VerifyAdminLoginPinDto,
   VerifyAdminLoginTwoFactorDto,
 } from '@/modules/auth/dto/admin-login-two-factor.dto';
 import { ForgotPasswordDto } from '@/modules/auth/dto/forgot-password.dto';
@@ -28,6 +30,8 @@ import { ForgotPasswordUseCase } from '@/modules/auth/use-cases/forgot-password.
 import { LoginUserUseCase } from '@/modules/auth/use-cases/login-user.usecase';
 import { ResendAdminLoginTwoFactorUseCase } from '@/modules/auth/use-cases/resend-admin-login-two-factor.usecase';
 import { StartAdminLoginUseCase } from '@/modules/auth/use-cases/start-admin-login.usecase';
+import { SetupAdminLoginPinUseCase } from '@/modules/auth/use-cases/setup-admin-login-pin.usecase';
+import { VerifyAdminLoginPinUseCase } from '@/modules/auth/use-cases/verify-admin-login-pin.usecase';
 import { VerifyAdminLoginTwoFactorUseCase } from '@/modules/auth/use-cases/verify-admin-login-two-factor.usecase';
 import { RefreshTokenUseCase } from '@/modules/auth/use-cases/refresh-token.usecase';
 import { RegisterUserUseCase } from '@/modules/auth/use-cases/register-user.usecase';
@@ -70,6 +74,8 @@ export class AuthController {
     private readonly startAdminLoginUseCase: StartAdminLoginUseCase,
     private readonly verifyAdminLoginTwoFactorUseCase: VerifyAdminLoginTwoFactorUseCase,
     private readonly resendAdminLoginTwoFactorUseCase: ResendAdminLoginTwoFactorUseCase,
+    private readonly setupAdminLoginPinUseCase: SetupAdminLoginPinUseCase,
+    private readonly verifyAdminLoginPinUseCase: VerifyAdminLoginPinUseCase,
     private readonly verifyAccountUseCase: VerifyAccountUseCase,
     private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
     private readonly resetPasswordUseCase: ResetPasswordUseCase,
@@ -124,6 +130,38 @@ export class AuthController {
   @ApiSuccess('Verification code resent')
   async resendAdminLoginTwoFactor(@Body() dto: ResendAdminLoginTwoFactorDto) {
     return this.resendAdminLoginTwoFactorUseCase.execute(dto);
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Post('login-admin/setup-pin')
+  @ApiSuccess('PIN created and login successful')
+  async setupAdminLoginPin(
+    @Body() dto: SetupAdminLoginPinDto,
+    @Res({ passthrough: true }) res: express.Response,
+  ) {
+    const result = await this.setupAdminLoginPinUseCase.execute(dto);
+    this.setRefreshCookies(res, 'admin', result.refresh_token);
+    return {
+      access_token: result.access_token,
+      user: await this.toAuthUser(result.user.id),
+    };
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Post('login-admin/verify-pin')
+  @ApiSuccess('PIN verified and login successful')
+  async verifyAdminLoginPin(
+    @Body() dto: VerifyAdminLoginPinDto,
+    @Res({ passthrough: true }) res: express.Response,
+  ) {
+    const result = await this.verifyAdminLoginPinUseCase.execute(dto);
+    this.setRefreshCookies(res, 'admin', result.refresh_token);
+    return {
+      access_token: result.access_token,
+      user: await this.toAuthUser(result.user.id),
+    };
   }
 
   @Public()

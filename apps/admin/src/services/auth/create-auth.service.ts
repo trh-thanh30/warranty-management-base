@@ -4,6 +4,8 @@ import type {
   AdminResendTwoFactorBody,
   AdminResendTwoFactorResponse,
   AdminVerifyTwoFactorBody,
+  AdminSetupPinBody,
+  AdminVerifyPinBody,
   AuthUser,
   LoginResponse,
   RefreshResponse,
@@ -37,6 +39,18 @@ export function createAuthService(http: AuthHttpClient) {
           "/auth/login-admin/resend-2fa",
           body,
         ),
+      );
+    },
+
+    async setupPin(body: AdminSetupPinBody): Promise<LoginResponse> {
+      return unwrap(
+        await http.post<LoginResponse>("/auth/login-admin/setup-pin", body),
+      );
+    },
+
+    async verifyPin(body: AdminVerifyPinBody): Promise<LoginResponse> {
+      return unwrap(
+        await http.post<LoginResponse>("/auth/login-admin/verify-pin", body),
       );
     },
 

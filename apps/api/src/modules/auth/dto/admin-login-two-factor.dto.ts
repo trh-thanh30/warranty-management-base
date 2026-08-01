@@ -16,3 +16,30 @@ export class ResendAdminLoginTwoFactorDto {
   @IsString()
   challengeId: string;
 }
+
+export class SetupAdminLoginPinDto {
+  @IsNotEmpty()
+  @IsString()
+  challengeId: string;
+
+  @IsString()
+  @Length(6, 6)
+  @Matches(/^\d{6}$/)
+  pin: string;
+
+  @IsString()
+  @Length(6, 6)
+  @Matches(/^\d{6}$/)
+  confirmPin: string;
+}
+
+export class VerifyAdminLoginPinDto {
+  @IsNotEmpty()
+  @IsString()
+  challengeId: string;
+
+  @IsString()
+  @Length(6, 6)
+  @Matches(/^\d{6}$/)
+  pin: string;
+}

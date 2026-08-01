@@ -6,12 +6,18 @@ import { VerificationService } from '@/modules/verification/verification.service
 import { BaseUseCase } from '@/shared/interfaces/base-usecase.interface';
 import { Injectable } from '@nestjs/common';
 import { user_role } from '@prisma/client';
+import {
+  ADMIN_LOGIN_CHALLENGE_METHOD,
+  ADMIN_TWO_FACTOR_METHOD,
+  type AdminLoginChallengeMethod,
+} from '@repo/shared';
 
 export type StartAdminLoginResponse = {
   requires_two_factor: true;
   challenge_id: string;
   expires_at: string;
-  masked_destination: string;
+  method: AdminLoginChallengeMethod;
+  masked_destination?: string;
 };
 
 @Injectable()
@@ -31,10 +37,28 @@ export class StartAdminLoginUseCase implements BaseUseCase<
       user_role.ADMIN,
       user_role.MODERATOR,
     ]);
+    if (dto.method === ADMIN_TWO_FACTOR_METHOD.PIN) {
+      const method = user.pin_hash
+        ? ADMIN_LOGIN_CHALLENGE_METHOD.PIN_VERIFY
+        : ADMIN_LOGIN_CHALLENGE_METHOD.PIN_SETUP;
+      const challenge = await this.challengeService.create({
+        userId: user.id,
+        email: user.email,
+        method,
+      });
+      return {
+        requires_two_factor: true,
+        challenge_id: challenge.challengeId,
+        expires_at: challenge.expiresAt.toISOString(),
+        method,
+      };
+    }
+
     await this.challengeService.acquireSendSlot(user.id);
     const challenge = await this.challengeService.create({
       userId: user.id,
       email: user.email,
+      method: ADMIN_LOGIN_CHALLENGE_METHOD.EMAIL_OTP,
     });
     let codeExpiresAt = challenge.expiresAt;
 
@@ -70,6 +94,7 @@ export class StartAdminLoginUseCase implements BaseUseCase<
       challenge_id: challenge.challengeId,
       expires_at: codeExpiresAt.toISOString(),
       masked_destination: this.maskEmail(user.email),
+      method: ADMIN_LOGIN_CHALLENGE_METHOD.EMAIL_OTP,
     };
   }
 

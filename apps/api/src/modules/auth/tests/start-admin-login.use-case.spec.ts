@@ -9,6 +9,7 @@ describe('StartAdminLoginUseCase', () => {
     role: user_role.ADMIN,
     status: user_status.ACTIVE,
     is_verified: true,
+    pin_hash: null,
   };
 
   it('creates an email challenge without issuing authentication tokens', async () => {
@@ -47,6 +48,7 @@ describe('StartAdminLoginUseCase', () => {
       challenge_id: 'challenge-1',
       expires_at: '2026-08-01T10:05:00.000Z',
       masked_destination: 'ad***@example.com',
+      method: 'EMAIL_OTP',
     });
     expect(result).not.toHaveProperty('access_token');
     expect(email.execute).toHaveBeenCalledWith({
@@ -54,6 +56,34 @@ describe('StartAdminLoginUseCase', () => {
       code: '123456',
       ttl: expect.any(Number),
     });
+  });
+
+  it('starts PIN setup without sending email when no PIN exists', async () => {
+    const challengeService = {
+      create: jest.fn().mockResolvedValue({
+        challengeId: 'challenge-pin',
+        expiresAt: new Date('2026-08-01T10:10:00.000Z'),
+      }),
+    };
+    const email = { execute: jest.fn() };
+    const result = await new StartAdminLoginUseCase(
+      { execute: jest.fn().mockResolvedValue(admin) } as any,
+      challengeService as any,
+      {} as any,
+      email as any,
+    ).execute({
+      usernameOrEmail: 'admin',
+      password: 'password',
+      method: 'PIN',
+    });
+
+    expect(result.method).toBe('PIN_SETUP');
+    expect(challengeService.create).toHaveBeenCalledWith({
+      userId: admin.id,
+      email: admin.email,
+      method: 'PIN_SETUP',
+    });
+    expect(email.execute).not.toHaveBeenCalled();
   });
 
   it('cleans up the challenge when the email cannot be queued', async () => {

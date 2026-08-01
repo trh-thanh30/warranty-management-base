@@ -1,10 +1,11 @@
-import { RateLimitError } from '@/common/response';
+import { BadRequestError, RateLimitError } from '@/common/response';
 import { ResendAdminLoginTwoFactorDto } from '@/modules/auth/dto/admin-login-two-factor.dto';
 import { AdminLoginChallengeService } from '@/modules/auth/service/admin-login-challenge.service';
 import { SendAdminLoginCodeEmailUseCase } from '@/modules/email/use-cases/send-admin-login-code-email.usecase';
 import { VerificationService } from '@/modules/verification/verification.service';
 import { BaseUseCase } from '@/shared/interfaces/base-usecase.interface';
 import { Injectable } from '@nestjs/common';
+import { ADMIN_LOGIN_CHALLENGE_METHOD } from '@repo/shared';
 
 @Injectable()
 export class ResendAdminLoginTwoFactorUseCase implements BaseUseCase<
@@ -21,6 +22,9 @@ export class ResendAdminLoginTwoFactorUseCase implements BaseUseCase<
     dto: ResendAdminLoginTwoFactorDto,
   ): Promise<{ expires_at: string }> {
     const challenge = await this.challengeService.get(dto.challengeId);
+    if (challenge.method !== ADMIN_LOGIN_CHALLENGE_METHOD.EMAIL_OTP) {
+      throw new BadRequestError('Email verification is not available');
+    }
     await this.challengeService.acquireSendSlot(challenge.userId);
 
     try {

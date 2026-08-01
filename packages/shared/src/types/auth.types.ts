@@ -1,3 +1,8 @@
+import type {
+  AdminLoginChallengeMethod,
+  AdminTwoFactorMethod,
+} from "../constants/auth.ts";
+
 export type AuthUserRole = "admin" | "moderator" | "customer" | null;
 
 export type AuthUser = {
@@ -18,6 +23,7 @@ export type AuthUser = {
 export type AdminLoginBody = {
   usernameOrEmail: string;
   password: string;
+  method?: AdminTwoFactorMethod;
 };
 
 export type LoginResponse = {
@@ -29,7 +35,8 @@ export type AdminLoginChallengeResponse = {
   requires_two_factor: true;
   challenge_id: string;
   expires_at: string;
-  masked_destination: string;
+  method: AdminLoginChallengeMethod;
+  masked_destination?: string;
 };
 
 export type AdminVerifyTwoFactorBody = {
@@ -43,6 +50,17 @@ export type AdminResendTwoFactorBody = {
 
 export type AdminResendTwoFactorResponse = {
   expires_at: string;
+};
+
+export type AdminSetupPinBody = {
+  challengeId: string;
+  pin: string;
+  confirmPin: string;
+};
+
+export type AdminVerifyPinBody = {
+  challengeId: string;
+  pin: string;
 };
 
 export type RefreshResponse = {

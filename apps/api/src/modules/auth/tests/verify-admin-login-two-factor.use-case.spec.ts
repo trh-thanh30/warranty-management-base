@@ -13,9 +13,11 @@ describe('VerifyAdminLoginTwoFactorUseCase', () => {
 
   it('issues tokens only after consuming a valid one-time code', async () => {
     const challengeService = {
-      get: jest
-        .fn()
-        .mockResolvedValue({ userId: admin.id, email: admin.email }),
+      get: jest.fn().mockResolvedValue({
+        userId: admin.id,
+        email: admin.email,
+        method: 'EMAIL_OTP',
+      }),
       withLock: jest.fn(async (_id, callback) => callback()),
       delete: jest.fn().mockResolvedValue(undefined),
     };
@@ -61,6 +63,7 @@ describe('VerifyAdminLoginTwoFactorUseCase', () => {
         get: jest.fn().mockResolvedValue({
           userId: admin.id,
           email: admin.email,
+          method: 'EMAIL_OTP',
         }),
         withLock: jest.fn(async (_id, callback) => callback()),
         delete: jest.fn(),

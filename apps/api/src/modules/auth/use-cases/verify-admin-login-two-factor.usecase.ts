@@ -7,6 +7,7 @@ import { VerificationService } from '@/modules/verification/verification.service
 import { BaseUseCase } from '@/shared/interfaces/base-usecase.interface';
 import { Injectable } from '@nestjs/common';
 import { User, user_role, user_status } from '@prisma/client';
+import { ADMIN_LOGIN_CHALLENGE_METHOD } from '@repo/shared';
 
 export type VerifiedAdminLogin = {
   access_token: string;
@@ -36,6 +37,7 @@ export class VerifyAdminLoginTwoFactorUseCase implements BaseUseCase<
       });
 
       if (
+        challenge.method !== ADMIN_LOGIN_CHALLENGE_METHOD.EMAIL_OTP ||
         !user ||
         user.email !== challenge.email ||
         user.status !== user_status.ACTIVE ||

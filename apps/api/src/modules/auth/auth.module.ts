@@ -16,6 +16,8 @@ import { AuthenticateLoginCredentialsUseCase } from '@/modules/auth/use-cases/au
 import { ResendAdminLoginTwoFactorUseCase } from '@/modules/auth/use-cases/resend-admin-login-two-factor.usecase';
 import { StartAdminLoginUseCase } from '@/modules/auth/use-cases/start-admin-login.usecase';
 import { VerifyAdminLoginTwoFactorUseCase } from '@/modules/auth/use-cases/verify-admin-login-two-factor.usecase';
+import { SetupAdminLoginPinUseCase } from '@/modules/auth/use-cases/setup-admin-login-pin.usecase';
+import { VerifyAdminLoginPinUseCase } from '@/modules/auth/use-cases/verify-admin-login-pin.usecase';
 import { RefreshTokenUseCase } from '@/modules/auth/use-cases/refresh-token.usecase';
 import { RegisterUserUseCase } from '@/modules/auth/use-cases/register-user.usecase';
 import { RequestVerificationUseCase } from '@/modules/auth/use-cases/request-verification.usecase';
@@ -37,6 +39,8 @@ import { ConfigModule } from '@nestjs/config';
     StartAdminLoginUseCase,
     VerifyAdminLoginTwoFactorUseCase,
     ResendAdminLoginTwoFactorUseCase,
+    SetupAdminLoginPinUseCase,
+    VerifyAdminLoginPinUseCase,
     VerifyAccountUseCase,
     ResendVerificationUseCase,
     ForgotPasswordUseCase,

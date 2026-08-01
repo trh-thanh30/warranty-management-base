@@ -1,6 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
+import {
+  ADMIN_LOGIN_CHALLENGE_METHOD,
+  type AdminLoginChallengeResponse,
+} from "@repo/shared";
 import { LoginForm } from "./components/login-form";
 
 type LoginContentProps = {
@@ -18,13 +23,25 @@ export function LoginContent({
   twoFactorTitle,
   twoFactorDescription,
 }: LoginContentProps) {
-  const [isTwoFactor, setIsTwoFactor] = useState(false);
-  const [maskedEmail, setMaskedEmail] = useState("");
+  const t = useTranslations("Login");
+  const [challenge, setChallenge] =
+    useState<AdminLoginChallengeResponse | null>(null);
 
-  function handleTwoFactorChange(active: boolean, email?: string) {
-    setIsTwoFactor(active);
-    setMaskedEmail(email ?? "");
-  }
+  const titleText =
+    challenge?.method === ADMIN_LOGIN_CHALLENGE_METHOD.PIN_SETUP
+      ? t("pinSetupTitle")
+      : twoFactorTitle;
+  const descriptionText =
+    challenge?.method === ADMIN_LOGIN_CHALLENGE_METHOD.PIN_SETUP
+      ? t("pinSetupDescription")
+      : challenge?.method === ADMIN_LOGIN_CHALLENGE_METHOD.PIN_VERIFY
+        ? t("pinVerifyDescription")
+        : challenge
+          ? twoFactorDescription.replace(
+              "{email}",
+              challenge.masked_destination ?? "",
+            )
+          : description;
 
   return (
     <>
@@ -33,16 +50,14 @@ export function LoginContent({
           {welcome}
         </p>
         <h2 className="mt-2 text-3xl font-semibold tracking-[-0.025em]">
-          {isTwoFactor ? twoFactorTitle : title}
+          {challenge ? titleText : title}
         </h2>
         <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-400">
-          {isTwoFactor
-            ? twoFactorDescription.replace("{email}", maskedEmail)
-            : description}
+          {descriptionText}
         </p>
       </div>
 
-      <LoginForm onTwoFactorChange={handleTwoFactorChange} />
+      <LoginForm onTwoFactorChange={setChallenge} />
     </>
   );
 }

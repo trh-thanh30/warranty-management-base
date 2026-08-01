@@ -17,6 +17,8 @@ model User {
   role          user_role   @default(CUSTOMER)
   status        user_status @default(ACTIVE)
   is_verified   Boolean     @default(false)
+  two_factor_method admin_two_factor_method @default(EMAIL_OTP)
+  pin_hash      String?
   refresh_token String?
   created_at    DateTime    @default(now())
   updated_at    DateTime    @updatedAt
@@ -770,6 +772,11 @@ enum user_role {
   ADMIN
   MODERATOR
   CUSTOMER
+}
+
+enum admin_two_factor_method {
+  EMAIL_OTP
+  PIN
 }
 
 enum user_status {

@@ -72,6 +72,12 @@ test("two-factor verification and resend use their dedicated endpoints", async (
     loginPayload,
   );
   await service.resendTwoFactor({ challengeId: "challenge-1" });
+  await service.setupPin({
+    challengeId: "challenge-1",
+    pin: "123456",
+    confirmPin: "123456",
+  });
+  await service.verifyPin({ challengeId: "challenge-1", pin: "123456" });
 
   assert.deepEqual(calls, [
     {
@@ -81,6 +87,18 @@ test("two-factor verification and resend use their dedicated endpoints", async (
     {
       url: "/auth/login-admin/resend-2fa",
       body: { challengeId: "challenge-1" },
+    },
+    {
+      url: "/auth/login-admin/setup-pin",
+      body: {
+        challengeId: "challenge-1",
+        pin: "123456",
+        confirmPin: "123456",
+      },
+    },
+    {
+      url: "/auth/login-admin/verify-pin",
+      body: { challengeId: "challenge-1", pin: "123456" },
     },
   ]);
 });
