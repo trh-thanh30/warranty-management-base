@@ -1,5 +1,9 @@
 import type {
   AdminLoginBody,
+  AdminLoginChallengeResponse,
+  AdminResendTwoFactorBody,
+  AdminResendTwoFactorResponse,
+  AdminVerifyTwoFactorBody,
   AuthUser,
   LoginResponse,
   RefreshResponse,
@@ -11,8 +15,29 @@ import type { AuthHttpClient } from "./auth.types";
 
 export function createAuthService(http: AuthHttpClient) {
   return {
-    async login(body: AdminLoginBody): Promise<LoginResponse> {
-      return unwrap(await http.post<LoginResponse>("/auth/login-admin", body));
+    async login(body: AdminLoginBody): Promise<AdminLoginChallengeResponse> {
+      return unwrap(
+        await http.post<AdminLoginChallengeResponse>("/auth/login-admin", body),
+      );
+    },
+
+    async verifyTwoFactor(
+      body: AdminVerifyTwoFactorBody,
+    ): Promise<LoginResponse> {
+      return unwrap(
+        await http.post<LoginResponse>("/auth/login-admin/verify-2fa", body),
+      );
+    },
+
+    async resendTwoFactor(
+      body: AdminResendTwoFactorBody,
+    ): Promise<AdminResendTwoFactorResponse> {
+      return unwrap(
+        await http.post<AdminResendTwoFactorResponse>(
+          "/auth/login-admin/resend-2fa",
+          body,
+        ),
+      );
     },
 
     async refresh(): Promise<RefreshResponse> {

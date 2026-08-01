@@ -12,6 +12,10 @@ import { cookieConfig } from '@/config';
 import { AssetsService } from '@/modules/assets/assets.service';
 import { AssetAccessTypeDto } from '@/modules/assets/dto/upload-asset.dto';
 import { ChangePasswordDto } from '@/modules/auth/dto/change-password.dto';
+import {
+  ResendAdminLoginTwoFactorDto,
+  VerifyAdminLoginTwoFactorDto,
+} from '@/modules/auth/dto/admin-login-two-factor.dto';
 import { ForgotPasswordDto } from '@/modules/auth/dto/forgot-password.dto';
 import { LoginDto } from '@/modules/auth/dto/login.dto';
 import { RegisterDto } from '@/modules/auth/dto/register.dto';
@@ -22,6 +26,9 @@ import { VerifyEmailDto } from '@/modules/auth/dto/verify-email.dto';
 import { ChangePasswordUseCase } from '@/modules/auth/use-cases/change-password.usecase';
 import { ForgotPasswordUseCase } from '@/modules/auth/use-cases/forgot-password.usecase';
 import { LoginUserUseCase } from '@/modules/auth/use-cases/login-user.usecase';
+import { ResendAdminLoginTwoFactorUseCase } from '@/modules/auth/use-cases/resend-admin-login-two-factor.usecase';
+import { StartAdminLoginUseCase } from '@/modules/auth/use-cases/start-admin-login.usecase';
+import { VerifyAdminLoginTwoFactorUseCase } from '@/modules/auth/use-cases/verify-admin-login-two-factor.usecase';
 import { RefreshTokenUseCase } from '@/modules/auth/use-cases/refresh-token.usecase';
 import { RegisterUserUseCase } from '@/modules/auth/use-cases/register-user.usecase';
 import { RequestVerificationUseCase } from '@/modules/auth/use-cases/request-verification.usecase';
@@ -43,6 +50,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { type ConfigType } from '@nestjs/config';
+import { Throttle } from '@nestjs/throttler';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { normalizeUserRole } from '@repo/shared/constants';
 import {
@@ -59,6 +67,9 @@ export class AuthController {
   constructor(
     private readonly registerUserUseCase: RegisterUserUseCase,
     private readonly loginUserUseCase: LoginUserUseCase,
+    private readonly startAdminLoginUseCase: StartAdminLoginUseCase,
+    private readonly verifyAdminLoginTwoFactorUseCase: VerifyAdminLoginTwoFactorUseCase,
+    private readonly resendAdminLoginTwoFactorUseCase: ResendAdminLoginTwoFactorUseCase,
     private readonly verifyAccountUseCase: VerifyAccountUseCase,
     private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
     private readonly resetPasswordUseCase: ResetPasswordUseCase,
@@ -84,22 +95,35 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('login-admin')
+  @ApiSuccess('Verification code sent')
+  async loginAdmin(@Body() dto: LoginDto) {
+    return this.startAdminLoginUseCase.execute(dto);
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Post('login-admin/verify-2fa')
   @ApiSuccess('Login successful')
-  async loginAdmin(
-    @Body() dto: LoginDto,
+  async verifyAdminLoginTwoFactor(
+    @Body() dto: VerifyAdminLoginTwoFactorDto,
     @Res({ passthrough: true }) res: express.Response,
   ) {
-    const result = await this.loginUserUseCase.execute(dto, [
-      user_role.ADMIN,
-      user_role.MODERATOR,
-    ]);
+    const result = await this.verifyAdminLoginTwoFactorUseCase.execute(dto);
     this.setRefreshCookies(res, 'admin', result.refresh_token);
-
     return {
       access_token: result.access_token,
       user: await this.toAuthUser(result.user.id),
     };
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
+  @Post('login-admin/resend-2fa')
+  @ApiSuccess('Verification code resent')
+  async resendAdminLoginTwoFactor(@Body() dto: ResendAdminLoginTwoFactorDto) {
+    return this.resendAdminLoginTwoFactorUseCase.execute(dto);
   }
 
   @Public()

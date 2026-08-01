@@ -25,6 +25,26 @@ export type LoginResponse = {
   user: AuthUser;
 };
 
+export type AdminLoginChallengeResponse = {
+  requires_two_factor: true;
+  challenge_id: string;
+  expires_at: string;
+  masked_destination: string;
+};
+
+export type AdminVerifyTwoFactorBody = {
+  challengeId: string;
+  code: string;
+};
+
+export type AdminResendTwoFactorBody = {
+  challengeId: string;
+};
+
+export type AdminResendTwoFactorResponse = {
+  expires_at: string;
+};
+
 export type RefreshResponse = {
   access_token: string;
 };

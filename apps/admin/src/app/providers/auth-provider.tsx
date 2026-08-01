@@ -10,7 +10,12 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import type { AdminLoginBody, AuthUser } from "@repo/shared";
+import type {
+  AdminLoginBody,
+  AdminLoginChallengeResponse,
+  AdminResendTwoFactorResponse,
+  AuthUser,
+} from "@repo/shared";
 import {
   clearAuthSession,
   getAuthSession,
@@ -26,7 +31,11 @@ type AuthContextValue = {
   user: AuthUser | null;
   status: AuthStatus;
   isLoggingOut: boolean;
-  login: (body: AdminLoginBody) => Promise<void>;
+  login: (body: AdminLoginBody) => Promise<AdminLoginChallengeResponse>;
+  verifyTwoFactor: (challengeId: string, code: string) => Promise<void>;
+  resendTwoFactor: (
+    challengeId: string,
+  ) => Promise<AdminResendTwoFactorResponse>;
   logout: () => Promise<void>;
 };
 
@@ -72,12 +81,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (body: AdminLoginBody) => {
-    const result = await authService.login(body);
-    setAuthSession({
-      accessToken: result.access_token,
-      user: result.user,
-    });
-    setBootstrapping(false);
+    return authService.login(body);
+  }, []);
+
+  const verifyTwoFactor = useCallback(
+    async (challengeId: string, code: string) => {
+      const result = await authService.verifyTwoFactor({ challengeId, code });
+      setAuthSession({
+        accessToken: result.access_token,
+        user: result.user,
+      });
+      setBootstrapping(false);
+    },
+    [],
+  );
+
+  const resendTwoFactor = useCallback(async (challengeId: string) => {
+    return authService.resendTwoFactor({ challengeId });
   }, []);
 
   const logout = useCallback(async () => {
@@ -91,8 +111,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user: session.user, status, isLoggingOut, login, logout }),
-    [isLoggingOut, login, logout, session.user, status],
+    () => ({
+      user: session.user,
+      status,
+      isLoggingOut,
+      login,
+      verifyTwoFactor,
+      resendTwoFactor,
+      logout,
+    }),
+    [
+      isLoggingOut,
+      login,
+      logout,
+      resendTwoFactor,
+      session.user,
+      status,
+      verifyTwoFactor,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

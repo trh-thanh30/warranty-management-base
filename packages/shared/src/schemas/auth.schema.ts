@@ -13,3 +13,9 @@ export const adminLoginSchema = z.object({
 });
 
 export type AdminLoginInput = z.infer<typeof adminLoginSchema>;
+
+export const adminTwoFactorSchema = z.object({
+  code: z.string().regex(/^\d{6}$/),
+});
+
+export type AdminTwoFactorInput = z.infer<typeof adminTwoFactorSchema>;

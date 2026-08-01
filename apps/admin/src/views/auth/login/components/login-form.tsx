@@ -15,6 +15,7 @@ import { useForm } from "react-hook-form";
 import {
   adminLoginSchema,
   HttpClientError,
+  type AdminLoginChallengeResponse,
   type AdminLoginInput,
 } from "@repo/shared";
 import { Button, Input, Label } from "@repo/ui";
@@ -22,11 +23,18 @@ import { useAuth } from "@/src/app/providers/auth-provider";
 import { consumeAuthRedirectReason } from "@/src/app/stores/auth-session.store";
 import { useRouter } from "@/src/i18n/navigation";
 import { useToast } from "@/src/hooks/use-toast";
+import { TwoFactorForm } from "./two-factor-form";
 
-export function LoginForm() {
+type LoginFormProps = {
+  onTwoFactorChange?: (active: boolean, email?: string) => void;
+};
+
+export function LoginForm({ onTwoFactorChange }: LoginFormProps) {
   const t = useTranslations("Login");
   const [showPassword, setShowPassword] = useState(false);
-  const { login } = useAuth();
+  const [challenge, setChallenge] =
+    useState<AdminLoginChallengeResponse | null>(null);
+  const { login, resendTwoFactor, verifyTwoFactor } = useAuth();
   const router = useRouter();
   const toast = useToast();
   const {
@@ -49,14 +57,33 @@ export function LoginForm() {
 
   async function submit(values: AdminLoginInput) {
     try {
-      await login(values);
-      toast.success(t("loginSuccess"));
-      router.replace("/dashboard");
+      const nextChallenge = await login(values);
+      setChallenge(nextChallenge);
+      onTwoFactorChange?.(true, nextChallenge.masked_destination);
+      toast.success(t("twoFactorSent"));
     } catch (error) {
       toast.error(
         error instanceof HttpClientError ? error.message : t("genericError"),
       );
     }
+  }
+
+  if (challenge) {
+    return (
+      <TwoFactorForm
+        challenge={challenge}
+        onBack={() => {
+          setChallenge(null);
+          onTwoFactorChange?.(false);
+        }}
+        onResend={resendTwoFactor}
+        onVerify={async (code) => {
+          await verifyTwoFactor(challenge.challenge_id, code);
+          toast.success(t("loginSuccess"));
+          router.replace("/dashboard");
+        }}
+      />
+    );
   }
 
   return (

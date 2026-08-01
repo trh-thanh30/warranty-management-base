@@ -1,0 +1,75 @@
+<mjml>
+  <mj-head>
+    <mj-title>{{subject}}</mj-title>
+    <mj-preview>Use this one-time code to finish signing in.</mj-preview>
+    <mj-attributes>
+      <mj-all font-family='Arial, Helvetica, sans-serif' />
+      <mj-text color='#334155' font-size='15px' line-height='1.6' />
+      <mj-section padding='0' />
+    </mj-attributes>
+  </mj-head>
+  <mj-body background-color='#f8fafc' width='600px'>
+    <mj-section background-color='#ffffff' padding='28px 28px 12px'>
+      <mj-column>
+        <mj-text
+          align='center'
+          color='#2563eb'
+          font-size='22px'
+          font-weight='700'
+          padding='0'
+        >Lexzenz Warranty Admin</mj-text>
+        <mj-text
+          align='center'
+          color='#64748b'
+          font-size='13px'
+          padding='8px 0 0'
+        >Secure administrator access</mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color='#2563eb' padding='6px 0'><mj-column><mj-spacer
+          height='1px'
+        /></mj-column></mj-section>
+    <mj-section background-color='#eff6ff' padding='32px 28px 22px'>
+      <mj-column>
+        <mj-text
+          align='center'
+          color='#0f172a'
+          font-size='25px'
+          font-weight='700'
+          padding='0 0 12px'
+        >Verify your sign-in</mj-text>
+        <mj-text align='center' padding='0'>Enter this one-time code on the
+          admin sign-in screen.</mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color='#ffffff' padding='30px 28px'>
+      <mj-column>
+        <mj-table align='center' padding='0'>
+          <tr>
+            <td
+              align='center'
+              style='background:#eff6ff;border:1px solid #bfdbfe;padding:20px 24px;'
+            >
+              <span
+                style='font-family:Courier, monospace;font-size:38px;font-weight:700;letter-spacing:10px;color:#1d4ed8;'
+              >{{code}}</span>
+            </td>
+          </tr>
+        </mj-table>
+        <mj-text
+          align='center'
+          color='#dc2626'
+          font-size='14px'
+          font-weight='700'
+          padding='22px 0 0'
+        >This code expires in {{ttl}} minutes and can be used once.</mj-text>
+        <mj-text
+          align='center'
+          color='#64748b'
+          font-size='13px'
+          padding='24px 0 0'
+        >If you did not attempt to sign in, contact your system administrator.</mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
