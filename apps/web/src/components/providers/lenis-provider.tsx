@@ -34,6 +34,7 @@ const LenisContext = createContext<{ scrollTo: LenisScrollTo }>({
 function LenisInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const hasHandledInitialRouteRef = useRef(false);
   const lenisRef = useRef<Lenis | null>(null);
   const scrollTo = useCallback<LenisScrollTo>((target, options) => {
     lenisRef.current?.scrollTo(target, options);
@@ -41,6 +42,7 @@ function LenisInner({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const lenis = new Lenis({
+      autoRaf: true,
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
@@ -49,15 +51,7 @@ function LenisInner({ children }: { children: React.ReactNode }) {
 
     lenisRef.current = lenis;
 
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    const rafId = requestAnimationFrame(raf);
-
     return () => {
-      cancelAnimationFrame(rafId);
       lenis.destroy();
       lenisRef.current = null;
     };
@@ -65,6 +59,11 @@ function LenisInner({ children }: { children: React.ReactNode }) {
 
   // Smoothly scroll to top on route change OR searchParams change (category/filter/pagination)
   useEffect(() => {
+    if (!hasHandledInitialRouteRef.current) {
+      hasHandledInitialRouteRef.current = true;
+      return;
+    }
+
     if (lenisRef.current) {
       lenisRef.current.scrollTo(0, { duration: 1.2 });
     }

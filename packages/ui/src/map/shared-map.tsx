@@ -7,8 +7,13 @@ import {
   Minimize2,
   MousePointerClick,
   RotateCcw,
+  X,
 } from "lucide-react";
-import type { LatLngBoundsExpression, LatLngExpression } from "leaflet";
+import type {
+  LatLngBoundsExpression,
+  LatLngExpression,
+  Map as LeafletMap,
+} from "leaflet";
 import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import { OPEN_STREET_MAP_TILE_PROVIDER } from "./map.constants";
 import type {
@@ -17,6 +22,22 @@ import type {
   SharedMapInitialView,
 } from "./map.types";
 import { cn } from "../lib/utils";
+
+function setMapInteractionEnabled(map: LeafletMap, enabled: boolean) {
+  const handlers = [
+    map.boxZoom,
+    map.doubleClickZoom,
+    map.dragging,
+    map.keyboard,
+    map.scrollWheelZoom,
+    map.touchZoom,
+  ];
+
+  for (const handler of handlers) {
+    if (enabled) handler.enable();
+    else handler.disable();
+  }
+}
 
 interface MapInteractionControllerProps {
   onInteractionChange: (enabled: boolean) => void;
@@ -29,27 +50,27 @@ function MapInteractionController({
 
   useMapEvents({
     click: () => {
-      map.scrollWheelZoom.enable();
+      setMapInteractionEnabled(map, true);
       onInteractionChange(true);
     },
   });
 
   useEffect(() => {
     const container = map.getContainer();
-    const disableWheelZoom = () => {
-      map.scrollWheelZoom.disable();
+    const disableInteraction = () => {
+      setMapInteractionEnabled(map, false);
       onInteractionChange(false);
     };
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
-      disableWheelZoom();
+      disableInteraction();
     };
 
-    container.addEventListener("mouseleave", disableWheelZoom);
+    container.addEventListener("mouseleave", disableInteraction);
     document.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      container.removeEventListener("mouseleave", disableWheelZoom);
+      container.removeEventListener("mouseleave", disableInteraction);
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [map, onInteractionChange]);
@@ -59,31 +80,31 @@ function MapInteractionController({
 
 interface MapActivationControlProps {
   activateLabel: string;
-  isWheelZoomEnabled: boolean;
+  isInteractionEnabled: boolean;
   onInteractionChange: (enabled: boolean) => void;
 }
 
 function MapActivationControl({
   activateLabel,
-  isWheelZoomEnabled,
+  isInteractionEnabled,
   onInteractionChange,
 }: MapActivationControlProps) {
   const map = useMap();
 
   const handleActivate = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
-    map.scrollWheelZoom.enable();
+    setMapInteractionEnabled(map, true);
     onInteractionChange(true);
   };
 
   return (
     <button
       type="button"
-      aria-hidden={isWheelZoomEnabled}
+      aria-hidden={isInteractionEnabled}
       aria-label={activateLabel}
-      tabIndex={isWheelZoomEnabled ? -1 : 0}
+      tabIndex={isInteractionEnabled ? -1 : 0}
       className={`group absolute inset-0 z-[900] grid items-start justify-end p-3 transition-[background-color,opacity] duration-200 focus-visible:outline-none motion-reduce:transition-none sm:p-4 ${
-        isWheelZoomEnabled
+        isInteractionEnabled
           ? "pointer-events-none bg-transparent opacity-0"
           : "pointer-events-auto bg-transparent opacity-100"
       }`}
@@ -97,8 +118,40 @@ function MapActivationControl({
   );
 }
 
+interface MapDeactivateControlProps {
+  deactivateLabel: string;
+  onInteractionChange: (enabled: boolean) => void;
+}
+
+function MapDeactivateControl({
+  deactivateLabel,
+  onInteractionChange,
+}: MapDeactivateControlProps) {
+  const map = useMap();
+
+  const handleDeactivate = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    setMapInteractionEnabled(map, false);
+    onInteractionChange(false);
+  };
+
+  return (
+    <button
+      type="button"
+      aria-label={deactivateLabel}
+      title={deactivateLabel}
+      className="absolute right-3 top-3 z-[1000] inline-flex min-h-11 items-center gap-2 rounded-md border border-border-gray bg-white/95 px-3 text-xs font-semibold text-deep-black shadow-md transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2"
+      onClick={handleDeactivate}
+    >
+      <X aria-hidden="true" className="size-4 shrink-0" />
+      <span>{deactivateLabel}</span>
+    </button>
+  );
+}
+
 interface MapResetControlProps {
   attachFullscreen?: boolean;
+  disableInteractionOnReset: boolean;
   initialBounds?: LatLngBoundsExpression;
   initialCenter?: LatLngExpression;
   initialZoom?: number;
@@ -108,6 +161,7 @@ interface MapResetControlProps {
 
 function MapResetControl({
   attachFullscreen = false,
+  disableInteractionOnReset,
   initialBounds,
   initialCenter,
   initialZoom,
@@ -124,8 +178,10 @@ function MapResetControl({
     } else if (initialCenter && initialZoom !== undefined) {
       map.setView(initialCenter, initialZoom);
     }
-    map.scrollWheelZoom.disable();
-    onInteractionChange(false);
+    if (disableInteractionOnReset) {
+      setMapInteractionEnabled(map, false);
+      onInteractionChange(false);
+    }
   };
 
   return (
@@ -223,6 +279,7 @@ type SharedMapBaseProps = {
   activationMode?: MapActivationMode;
   children?: ReactNode;
   className?: string;
+  deactivateLabel?: string;
   exitFullscreenLabel?: string;
   fullscreenControlPosition?: "left" | "right";
   fullscreenLabel?: string;
@@ -244,6 +301,7 @@ export function SharedMap({
   activationMode = "overlay",
   children,
   className = "size-full",
+  deactivateLabel,
   exitFullscreenLabel,
   fullscreenControlPosition = "left",
   fullscreenLabel,
@@ -261,7 +319,9 @@ export function SharedMap({
   zoomSnap,
 }: SharedMapProps) {
   const [isMounted, setIsMounted] = useState(false);
-  const [isWheelZoomEnabled, setIsWheelZoomEnabled] = useState(false);
+  const [isInteractionEnabled, setIsInteractionEnabled] = useState(
+    activationMode === "direct",
+  );
 
   useEffect(() => {
     setIsMounted(true);
@@ -281,17 +341,38 @@ export function SharedMap({
       maxZoom={maxZoom}
       maxBounds={maxBounds}
       maxBoundsViscosity={maxBoundsViscosity}
+      boxZoom={activationMode === "direct"}
+      doubleClickZoom={activationMode === "direct"}
+      dragging={activationMode === "direct"}
+      keyboard={activationMode === "direct"}
       scrollWheelZoom={activationMode === "direct"}
+      touchZoom={activationMode === "direct"}
+      style={{
+        touchAction:
+          activationMode === "direct" || isInteractionEnabled
+            ? "none"
+            : "pan-y",
+      }}
       className={cn("isolate z-0", className)}
     >
       {activationMode === "overlay" ? (
-        <MapInteractionController onInteractionChange={setIsWheelZoomEnabled} />
+        <MapInteractionController
+          onInteractionChange={setIsInteractionEnabled}
+        />
       ) : null}
       {activationMode === "overlay" && activateLabel ? (
         <MapActivationControl
           activateLabel={activateLabel}
-          isWheelZoomEnabled={isWheelZoomEnabled}
-          onInteractionChange={setIsWheelZoomEnabled}
+          isInteractionEnabled={isInteractionEnabled}
+          onInteractionChange={setIsInteractionEnabled}
+        />
+      ) : null}
+      {activationMode === "overlay" &&
+      isInteractionEnabled &&
+      deactivateLabel ? (
+        <MapDeactivateControl
+          deactivateLabel={deactivateLabel}
+          onInteractionChange={setIsInteractionEnabled}
         />
       ) : null}
       {showResetControl && resetLabel ? (
@@ -301,11 +382,12 @@ export function SharedMap({
             exitFullscreenLabel &&
             fullscreenControlPosition === "left",
           )}
+          disableInteractionOnReset={activationMode === "overlay"}
           initialBounds={initialBounds}
           initialCenter={initialCenter}
           initialZoom={initialZoom}
           resetLabel={resetLabel}
-          onInteractionChange={setIsWheelZoomEnabled}
+          onInteractionChange={setIsInteractionEnabled}
         />
       ) : null}
       {fullscreenLabel && exitFullscreenLabel ? (

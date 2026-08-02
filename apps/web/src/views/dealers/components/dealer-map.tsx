@@ -137,6 +137,7 @@ export function DealerMap({
     >
       <SharedMap
         activateLabel={t("activateMap")}
+        deactivateLabel={t("deactivateMap")}
         exitFullscreenLabel={t("exitFullscreenMap")}
         fullscreenLabel={t("fullscreenMap")}
         initialCenter={VIETNAM_CENTER}
