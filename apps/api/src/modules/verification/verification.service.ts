@@ -13,6 +13,7 @@ export type VerificationOptions = {
   length?: number; // code length, default 6
   rateLimitWindowSec?: number; // time to block resending
   rateLimitMax?: number; // maximum number of codes in the window
+  rateLimitSubject?: string; // optional stable subject for resend limits
 };
 
 export type GenerateResult = {
@@ -56,10 +57,11 @@ export class VerificationService {
       length = 6,
       rateLimitWindowSec = 60,
       rateLimitMax = 3,
+      rateLimitSubject = subject,
     } = opts;
 
     // rate-limit: increment counter in the window
-    const rateKey = this.keyRate(namespace, subject);
+    const rateKey = this.keyRate(namespace, rateLimitSubject);
     const current = await this.redis.incr(rateKey);
     if (current === 1) {
       await this.redis.expire(rateKey, rateLimitWindowSec);

@@ -14,6 +14,7 @@ export * from "./label";
 export * from "./lib/utils";
 export * from "./pagination";
 export * from "./pagination-controls";
+export * from "./pin-input";
 export * from "./policy-document";
 export * from "./popover";
 export * from "./radio-group";

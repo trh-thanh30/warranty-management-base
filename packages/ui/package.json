@@ -23,6 +23,7 @@
     "./map": "./src/map/index.ts",
     "./pagination": "./src/pagination.tsx",
     "./pagination-controls": "./src/pagination-controls.tsx",
+    "./pin-input": "./src/pin-input.tsx",
     "./policy-document": "./src/policy-document.tsx",
     "./popover": "./src/popover.tsx",
     "./radio-group": "./src/radio-group.tsx",

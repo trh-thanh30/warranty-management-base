@@ -1,5 +1,7 @@
 const AUTH_ENTRY_PATHS = [
   "/auth/login-admin",
+  "/auth/login-admin/verify-2fa",
+  "/auth/login-admin/resend-2fa",
   "/auth/refresh",
   "/auth/logout",
   "/auth/change-password",
@@ -7,6 +9,8 @@ const AUTH_ENTRY_PATHS = [
 
 const BUSINESS_UNAUTHORIZED_PATHS = [
   "/auth/login-admin",
+  "/auth/login-admin/verify-2fa",
+  "/auth/login-admin/resend-2fa",
   "/auth/change-password",
 ] as const;
 

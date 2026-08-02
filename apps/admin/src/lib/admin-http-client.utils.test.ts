@@ -13,7 +13,13 @@ test("protected API requests refresh once after an unauthorized response", () =>
 });
 
 test("authentication entry points do not enter the protected request refresh flow", () => {
-  for (const url of ["/auth/login-admin", "/auth/refresh", "/auth/logout"]) {
+  for (const url of [
+    "/auth/login-admin",
+    "/auth/login-admin/verify-2fa",
+    "/auth/login-admin/resend-2fa",
+    "/auth/refresh",
+    "/auth/logout",
+  ]) {
     assert.equal(isAuthEntryPoint(url), true);
     assert.equal(shouldAttemptTokenRefresh(401, url, false), false);
   }

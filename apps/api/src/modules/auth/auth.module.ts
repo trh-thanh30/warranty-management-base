@@ -7,10 +7,18 @@ import { RedisModule } from '@/database/redis/redis.module';
 import { AssetsModule } from '@/modules/assets/assets.module';
 import { AuthController } from '@/modules/auth/auth.controller';
 import { AuthTokenService } from '@/modules/auth/service/auth-token.service';
+import { AdminLoginChallengeService } from '@/modules/auth/service/admin-login-challenge.service';
 import { VerificationSessionService } from '@/modules/auth/service/verification-session.service';
 import { ChangePasswordUseCase } from '@/modules/auth/use-cases/change-password.usecase';
 import { ForgotPasswordUseCase } from '@/modules/auth/use-cases/forgot-password.usecase';
 import { LoginUserUseCase } from '@/modules/auth/use-cases/login-user.usecase';
+import { AuthenticateLoginCredentialsUseCase } from '@/modules/auth/use-cases/authenticate-login-credentials.usecase';
+import { ResendAdminLoginTwoFactorUseCase } from '@/modules/auth/use-cases/resend-admin-login-two-factor.usecase';
+import { StartAdminLoginUseCase } from '@/modules/auth/use-cases/start-admin-login.usecase';
+import { SelectAdminLoginMethodUseCase } from '@/modules/auth/use-cases/select-admin-login-method.usecase';
+import { VerifyAdminLoginTwoFactorUseCase } from '@/modules/auth/use-cases/verify-admin-login-two-factor.usecase';
+import { SetupAdminLoginPinUseCase } from '@/modules/auth/use-cases/setup-admin-login-pin.usecase';
+import { VerifyAdminLoginPinUseCase } from '@/modules/auth/use-cases/verify-admin-login-pin.usecase';
 import { RefreshTokenUseCase } from '@/modules/auth/use-cases/refresh-token.usecase';
 import { RegisterUserUseCase } from '@/modules/auth/use-cases/register-user.usecase';
 import { RequestVerificationUseCase } from '@/modules/auth/use-cases/request-verification.usecase';
@@ -28,6 +36,13 @@ import { ConfigModule } from '@nestjs/config';
   providers: [
     RegisterUserUseCase,
     LoginUserUseCase,
+    AuthenticateLoginCredentialsUseCase,
+    StartAdminLoginUseCase,
+    SelectAdminLoginMethodUseCase,
+    VerifyAdminLoginTwoFactorUseCase,
+    ResendAdminLoginTwoFactorUseCase,
+    SetupAdminLoginPinUseCase,
+    VerifyAdminLoginPinUseCase,
     VerifyAccountUseCase,
     ResendVerificationUseCase,
     ForgotPasswordUseCase,
@@ -37,6 +52,7 @@ import { ConfigModule } from '@nestjs/config';
     PrismaService,
     CodeService,
     AuthTokenService,
+    AdminLoginChallengeService,
     VerificationSessionService,
     BcryptService,
     ChangePasswordUseCase,

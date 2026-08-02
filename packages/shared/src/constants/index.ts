@@ -2,6 +2,7 @@ export * from "./pagination.ts";
 export * from "./contact.ts";
 export * from "./contact-submissions.ts";
 export * from "./catalog.ts";
+export * from "./auth.ts";
 export * from "./roles.ts";
 export * from "./permissions.ts";
 export * from "./warranty-domain.ts";

@@ -1,15 +1,15 @@
-import { CheckCircle2 } from "lucide-react";
-import Image from "next/image";
-import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/src/components/language-switcher";
 import { ThemeToggle } from "@/src/components/theme-toggle";
-import { LoginForm } from "./components/login-form";
+import { CheckCircle2 } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import Image from "next/image";
+import { LoginContent } from "./login-content";
 
 export async function LoginView() {
   const t = await getTranslations("Login");
 
   return (
-    <main className="grid min-h-[100dvh] bg-white text-slate-950 dark:bg-slate-950 dark:text-white lg:grid-cols-[minmax(0,1.08fr)_minmax(480px,0.92fr)]">
+    <main className="grid min-h-dvh bg-white text-slate-950 dark:bg-slate-950 dark:text-white lg:grid-cols-[minmax(0,1.08fr)_minmax(480px,0.92fr)]">
       <section className="relative hidden min-h-[100dvh] overflow-hidden border-r border-blue-400/30 bg-blue-600 p-12 text-white lg:flex lg:flex-col lg:justify-between xl:p-16 dark:bg-blue-900">
         <div
           aria-hidden="true"
@@ -67,28 +67,23 @@ export async function LoginView() {
 
         <div className="flex flex-1 items-center justify-center px-5 pb-20 pt-8 sm:px-8 lg:px-12">
           <div className="w-full max-w-[420px]">
-            <div className="mb-8">
-              <Image
-                alt={t("brand")}
-                className="mx-auto mb-8 hidden h-14 w-auto max-w-[260px] object-contain lg:block"
-                height={56}
-                priority
-                src="/logo.png"
-                width={260}
-              />
-              <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                {t("welcome")}
-              </p>
-              <h2 className="mt-2 text-3xl font-semibold tracking-[-0.025em]">
-                {t("title")}
-              </h2>
-              <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-400">
-                {t("description")}
-              </p>
-            </div>
-
-            <LoginForm />
-
+            <Image
+              alt={t("brand")}
+              className="mx-auto mb-8 hidden h-14 w-auto max-w-[260px] object-contain lg:block"
+              height={56}
+              priority
+              src="/logo.png"
+              width={260}
+            />
+            <LoginContent
+              description={t("description")}
+              title={t("title")}
+              twoFactorDescription={t("twoFactorDescription", {
+                email: "{email}",
+              })}
+              twoFactorTitle={t("twoFactorTitle")}
+              welcome={t("welcome")}
+            />
             <p className="mt-8 text-center text-xs leading-5 text-slate-500 dark:text-slate-500">
               {t("support")}
             </p>

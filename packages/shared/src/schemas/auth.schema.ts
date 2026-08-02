@@ -13,3 +13,20 @@ export const adminLoginSchema = z.object({
 });
 
 export type AdminLoginInput = z.infer<typeof adminLoginSchema>;
+
+export const adminTwoFactorSchema = z.object({
+  code: z.string().regex(/^\d{6}$/),
+});
+
+export type AdminTwoFactorInput = z.infer<typeof adminTwoFactorSchema>;
+
+export const adminPinSchema = z.object({
+  pin: z.string().regex(/^\d{6}$/),
+});
+
+export const adminPinSetupSchema = adminPinSchema
+  .extend({ confirmPin: z.string().regex(/^\d{6}$/) })
+  .refine((value) => value.pin === value.confirmPin, {
+    path: ["confirmPin"],
+    message: "PIN confirmation does not match",
+  });

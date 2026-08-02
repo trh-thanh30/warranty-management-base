@@ -1,15 +1,10 @@
-import { BcryptService } from '@/common/helpers/bcrypt.util';
-import {
-  UnauthorizedError,
-  ValidationError,
-} from '@/common/response/client-errors';
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { LoginDto } from '@/modules/auth/dto/login.dto';
 import { AuthTokenService } from '@/modules/auth/service/auth-token.service';
-import { VerificationSessionService } from '@/modules/auth/service/verification-session.service';
+import { AuthenticateLoginCredentialsUseCase } from '@/modules/auth/use-cases/authenticate-login-credentials.usecase';
 import { BaseUseCase } from '@/shared/interfaces/base-usecase.interface';
 import { Injectable } from '@nestjs/common';
-import { User, user_role, user_status } from '@prisma/client';
+import { User, user_role } from '@prisma/client';
 
 export interface AuthResponse {
   access_token: string;
@@ -20,72 +15,17 @@ export interface AuthResponse {
 
 @Injectable()
 export class LoginUserUseCase implements BaseUseCase<LoginDto, AuthResponse> {
-  private readonly errorMessages = {
-    INVALID_CREDENTIALS: 'Invalid email/username or password',
-    EMAIL_NOT_VERIFIED: 'Please verify your email before logging in',
-    ACCOUNT_INACTIVE: 'Account is inactive. Please contact support',
-  } as const;
-
   constructor(
+    private readonly authenticateCredentials: AuthenticateLoginCredentialsUseCase,
     private readonly prismaService: PrismaService,
-    private readonly bcryptService: BcryptService,
     private readonly tokenService: AuthTokenService,
-    private readonly verificationSessionService: VerificationSessionService,
   ) {}
 
   async execute(
     dto: LoginDto,
     requiredRole?: user_role | user_role[],
   ): Promise<AuthResponse> {
-    // Find user by email or username
-    const user = await this.prismaService.user.findFirst({
-      where: {
-        OR: [{ email: dto.usernameOrEmail }, { username: dto.usernameOrEmail }],
-      },
-    });
-    if (!user) {
-      throw new UnauthorizedError(this.errorMessages.INVALID_CREDENTIALS);
-    }
-
-    // Check role if required
-    if (requiredRole) {
-      const allowedRoles = Array.isArray(requiredRole)
-        ? requiredRole
-        : [requiredRole];
-      if (!allowedRoles.includes(user.role)) {
-        throw new UnauthorizedError(this.errorMessages.INVALID_CREDENTIALS);
-      }
-    }
-
-    // Validate password
-    const isPasswordValid = await this.bcryptService.comparePassword(
-      dto.password,
-      user.password,
-    );
-
-    if (!isPasswordValid) {
-      throw new ValidationError(this.errorMessages.INVALID_CREDENTIALS);
-    }
-    if (user.status !== user_status.ACTIVE) {
-      throw new ValidationError(this.errorMessages.ACCOUNT_INACTIVE);
-    }
-    // Check if user requires verification
-    if (!user.is_verified) {
-      const sessionId = await this.verificationSessionService.createSession(
-        user.email,
-      );
-      throw new ValidationError(
-        this.errorMessages.EMAIL_NOT_VERIFIED,
-        'EMAIL_NOT_VERIFIED',
-        {
-          requiresVerification: true,
-          sessionId,
-        },
-      );
-    }
-
-    // Validate user can login
-    this.validateUserCanLogin(user);
+    const user = await this.authenticateCredentials.execute(dto, requiredRole);
 
     // Generate tokens
     const tokens = this.tokenService.generateTokenPair({
@@ -103,12 +43,6 @@ export class LoginUserUseCase implements BaseUseCase<LoginDto, AuthResponse> {
       ...tokens,
       user,
     };
-  }
-
-  private validateUserCanLogin(user: User): void {
-    if (user.status !== user_status.ACTIVE) {
-      throw new ValidationError(this.errorMessages.ACCOUNT_INACTIVE);
-    }
   }
 
   private async updateUserRefreshToken(

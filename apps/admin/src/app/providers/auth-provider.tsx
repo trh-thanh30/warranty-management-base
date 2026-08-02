@@ -10,7 +10,14 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import type { AdminLoginBody, AuthUser } from "@repo/shared";
+import type {
+  AdminLoginBody,
+  AdminLoginChallengeResponse,
+  AdminLoginStartResponse,
+  AdminTwoFactorMethod,
+  AdminResendTwoFactorResponse,
+  AuthUser,
+} from "@repo/shared";
 import {
   clearAuthSession,
   getAuthSession,
@@ -26,7 +33,21 @@ type AuthContextValue = {
   user: AuthUser | null;
   status: AuthStatus;
   isLoggingOut: boolean;
-  login: (body: AdminLoginBody) => Promise<void>;
+  login: (body: AdminLoginBody) => Promise<AdminLoginStartResponse>;
+  selectTwoFactorMethod: (
+    challengeId: string,
+    method: AdminTwoFactorMethod,
+  ) => Promise<AdminLoginChallengeResponse>;
+  verifyTwoFactor: (challengeId: string, code: string) => Promise<void>;
+  resendTwoFactor: (
+    challengeId: string,
+  ) => Promise<AdminResendTwoFactorResponse>;
+  setupPin: (
+    challengeId: string,
+    pin: string,
+    confirmPin: string,
+  ) => Promise<void>;
+  verifyPin: (challengeId: string, pin: string) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -72,11 +93,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (body: AdminLoginBody) => {
-    const result = await authService.login(body);
-    setAuthSession({
-      accessToken: result.access_token,
-      user: result.user,
-    });
+    return authService.login(body);
+  }, []);
+
+  const selectTwoFactorMethod = useCallback(
+    async (challengeId: string, method: AdminTwoFactorMethod) => {
+      return authService.selectTwoFactorMethod({ challengeId, method });
+    },
+    [],
+  );
+
+  const verifyTwoFactor = useCallback(
+    async (challengeId: string, code: string) => {
+      const result = await authService.verifyTwoFactor({ challengeId, code });
+      setAuthSession({
+        accessToken: result.access_token,
+        user: result.user,
+      });
+      setBootstrapping(false);
+    },
+    [],
+  );
+
+  const resendTwoFactor = useCallback(async (challengeId: string) => {
+    return authService.resendTwoFactor({ challengeId });
+  }, []);
+
+  const setupPin = useCallback(
+    async (challengeId: string, pin: string, confirmPin: string) => {
+      const result = await authService.setupPin({
+        challengeId,
+        pin,
+        confirmPin,
+      });
+      setAuthSession({ accessToken: result.access_token, user: result.user });
+      setBootstrapping(false);
+    },
+    [],
+  );
+
+  const verifyPin = useCallback(async (challengeId: string, pin: string) => {
+    const result = await authService.verifyPin({ challengeId, pin });
+    setAuthSession({ accessToken: result.access_token, user: result.user });
     setBootstrapping(false);
   }, []);
 
@@ -91,8 +149,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user: session.user, status, isLoggingOut, login, logout }),
-    [isLoggingOut, login, logout, session.user, status],
+    () => ({
+      user: session.user,
+      status,
+      isLoggingOut,
+      login,
+      selectTwoFactorMethod,
+      verifyTwoFactor,
+      resendTwoFactor,
+      setupPin,
+      verifyPin,
+      logout,
+    }),
+    [
+      isLoggingOut,
+      login,
+      logout,
+      resendTwoFactor,
+      selectTwoFactorMethod,
+      setupPin,
+      session.user,
+      status,
+      verifyTwoFactor,
+      verifyPin,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

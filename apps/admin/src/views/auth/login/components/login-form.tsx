@@ -14,19 +14,44 @@ import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import {
   adminLoginSchema,
+  ADMIN_LOGIN_CHALLENGE_METHOD,
+  ADMIN_TWO_FACTOR_METHOD,
   HttpClientError,
+  type AdminLoginChallengeResponse,
   type AdminLoginInput,
+  type AdminLoginStartResponse,
 } from "@repo/shared";
 import { Button, Input, Label } from "@repo/ui";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { consumeAuthRedirectReason } from "@/src/app/stores/auth-session.store";
 import { useRouter } from "@/src/i18n/navigation";
 import { useToast } from "@/src/hooks/use-toast";
+import { TwoFactorForm } from "./two-factor-form";
+import { PinTwoFactorForm } from "./pin-two-factor-form";
+import { MethodSelectionForm } from "./method-selection-form";
+import type { LoginFlowState } from "../login.types";
 
-export function LoginForm() {
+type LoginFormProps = {
+  onFlowChange?: (state: LoginFlowState) => void;
+};
+
+export function LoginForm({ onFlowChange }: LoginFormProps) {
   const t = useTranslations("Login");
   const [showPassword, setShowPassword] = useState(false);
-  const { login } = useAuth();
+  const [loginChallenge, setLoginChallenge] =
+    useState<AdminLoginStartResponse | null>(null);
+  const [verificationChallenge, setVerificationChallenge] =
+    useState<AdminLoginChallengeResponse | null>(null);
+  const [lastVerificationChallenge, setLastVerificationChallenge] =
+    useState<AdminLoginChallengeResponse | null>(null);
+  const {
+    login,
+    resendTwoFactor,
+    selectTwoFactorMethod,
+    setupPin,
+    verifyPin,
+    verifyTwoFactor,
+  } = useAuth();
   const router = useRouter();
   const toast = useToast();
   const {
@@ -49,14 +74,113 @@ export function LoginForm() {
 
   async function submit(values: AdminLoginInput) {
     try {
-      await login(values);
-      toast.success(t("loginSuccess"));
-      router.replace("/dashboard");
+      const nextChallenge = await login(values);
+      setLoginChallenge(nextChallenge);
+      onFlowChange?.({ step: "METHOD_SELECTION", challenge: nextChallenge });
     } catch (error) {
       toast.error(
         error instanceof HttpClientError ? error.message : t("genericError"),
       );
     }
+  }
+
+  if (verificationChallenge) {
+    if (
+      verificationChallenge.method !== ADMIN_LOGIN_CHALLENGE_METHOD.EMAIL_OTP
+    ) {
+      return (
+        <PinTwoFactorForm
+          mode={verificationChallenge.method}
+          onBack={() => {
+            setVerificationChallenge(null);
+            if (loginChallenge) {
+              onFlowChange?.({
+                step: "METHOD_SELECTION",
+                challenge: loginChallenge,
+              });
+            }
+          }}
+          onSubmit={async (pin, confirmPin) => {
+            if (
+              verificationChallenge.method ===
+              ADMIN_LOGIN_CHALLENGE_METHOD.PIN_SETUP
+            ) {
+              await setupPin(
+                verificationChallenge.challenge_id,
+                pin,
+                confirmPin ?? "",
+              );
+            } else {
+              await verifyPin(verificationChallenge.challenge_id, pin);
+            }
+            toast.success(t("loginSuccess"));
+            router.replace("/dashboard");
+          }}
+        />
+      );
+    }
+    return (
+      <TwoFactorForm
+        challenge={verificationChallenge}
+        onBack={() => {
+          setVerificationChallenge(null);
+          if (loginChallenge) {
+            onFlowChange?.({
+              step: "METHOD_SELECTION",
+              challenge: loginChallenge,
+            });
+          }
+        }}
+        onResend={resendTwoFactor}
+        onVerify={async (code) => {
+          await verifyTwoFactor(verificationChallenge.challenge_id, code);
+          toast.success(t("loginSuccess"));
+          router.replace("/dashboard");
+        }}
+      />
+    );
+  }
+
+  if (loginChallenge) {
+    return (
+      <MethodSelectionForm
+        challenge={loginChallenge}
+        onBack={() => {
+          setLoginChallenge(null);
+          setLastVerificationChallenge(null);
+          onFlowChange?.(null);
+        }}
+        onSelect={async (method) => {
+          const reusesCurrentMethod =
+            lastVerificationChallenge &&
+            ((method === ADMIN_TWO_FACTOR_METHOD.EMAIL_OTP &&
+              lastVerificationChallenge.method ===
+                ADMIN_LOGIN_CHALLENGE_METHOD.EMAIL_OTP) ||
+              (method === ADMIN_TWO_FACTOR_METHOD.PIN &&
+                lastVerificationChallenge.method !==
+                  ADMIN_LOGIN_CHALLENGE_METHOD.EMAIL_OTP));
+          if (reusesCurrentMethod) {
+            setVerificationChallenge(lastVerificationChallenge);
+            onFlowChange?.({
+              step: "VERIFICATION",
+              challenge: lastVerificationChallenge,
+            });
+            return;
+          }
+
+          const selected = await selectTwoFactorMethod(
+            loginChallenge.challenge_id,
+            method,
+          );
+          setVerificationChallenge(selected);
+          setLastVerificationChallenge(selected);
+          onFlowChange?.({ step: "VERIFICATION", challenge: selected });
+          if (selected.method === ADMIN_LOGIN_CHALLENGE_METHOD.EMAIL_OTP) {
+            toast.success(t("twoFactorSent"));
+          }
+        }}
+      />
+    );
   }
 
   return (
