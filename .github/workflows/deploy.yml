@@ -164,34 +164,13 @@ jobs:
     needs: deploy
     environment: ${{ needs.deploy.outputs.deployment-environment }}
     steps:
+      - uses: actions/checkout@v4
       - name: Check deployment endpoints
         env:
           DEPLOY_API_HEALTH_URL: ${{ secrets.DEPLOY_API_HEALTH_URL }}
           DEPLOY_WEB_URL: ${{ secrets.DEPLOY_WEB_URL }}
           DEPLOY_ADMIN_URL: ${{ secrets.DEPLOY_ADMIN_URL }}
-        run: |
-          set -eu
-
-          checked=0
-
-          if [ -n "$DEPLOY_API_HEALTH_URL" ]; then
-            curl --fail --show-error --silent --location "$DEPLOY_API_HEALTH_URL" > /dev/null
-            checked=$((checked + 1))
-          fi
-
-          if [ -n "$DEPLOY_WEB_URL" ]; then
-            curl --fail --show-error --silent --location "$DEPLOY_WEB_URL" > /dev/null
-            checked=$((checked + 1))
-          fi
-
-          if [ -n "$DEPLOY_ADMIN_URL" ]; then
-            curl --fail --show-error --silent --location "$DEPLOY_ADMIN_URL" > /dev/null
-            checked=$((checked + 1))
-          fi
-
-          if [ "$checked" -eq 0 ]; then
-            echo "No deployment endpoint secrets configured. Skipping health check."
-          fi
+        run: bash scripts/check-deployment-endpoints.sh
 
   cleanup-images:
     name: Clean Up Previous Application Images
