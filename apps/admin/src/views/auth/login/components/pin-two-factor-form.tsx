@@ -8,6 +8,7 @@ import {
   ADMIN_LOGIN_CHALLENGE_METHOD,
   type AdminLoginPinChallengeMethod,
 } from "@repo/shared";
+import { resolvePinErrorMessage } from "../pin-two-factor.utils";
 
 type PinTwoFactorFormProps = {
   mode: AdminLoginPinChallengeMethod;
@@ -51,11 +52,7 @@ export function PinTwoFactorForm({
     try {
       await onSubmit(pin, isSetup ? confirmPin : undefined);
     } catch (submitError) {
-      setError(
-        submitError instanceof Error
-          ? submitError.message
-          : t("pinGenericError"),
-      );
+      setError(resolvePinErrorMessage(submitError, t));
     } finally {
       setIsSubmitting(false);
     }

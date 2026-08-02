@@ -145,6 +145,8 @@
     "pinVerifyLabel": "Security PIN",
     "pinRequired": "Enter the complete 6-digit PIN.",
     "pinMismatch": "The PIN confirmation does not match.",
+    "pinInvalid": "Invalid PIN. {remainingAttempts, plural, one {# attempt remaining.} other {# attempts remaining.}}",
+    "pinLocked": "Too many invalid PIN attempts. Please try again later.",
     "pinGenericError": "Unable to verify the PIN. Please try again.",
     "pinSetupSubmit": "Create PIN and sign in",
     "pinVerifySubmit": "Verify and sign in",
@@ -2456,6 +2458,8 @@
         "serviceCenters": "Service Center Management",
         "dealers": "Dealer Management",
         "contentPages": "Policy & FAQ Management",
+        "websiteConfig": "Website Configuration Management",
+        "contactSubmissions": "Contact Message Management",
         "categories": "Category Management",
         "system": "System Administration",
         "other": "Other Permissions"

@@ -73,6 +73,42 @@ describe('VerifyAdminLoginPinUseCase', () => {
 
     await expect(
       useCase.execute({ challengeId: 'challenge-1', pin: '000000' }),
-    ).rejects.toThrow('locked for 15 minutes');
+    ).rejects.toMatchObject({
+      code: 'PIN_VERIFICATION_LOCKED',
+      details: { retryAfterSeconds: 15 * 60 },
+    });
+  });
+
+  it('returns a stable code and remaining attempts for an invalid PIN', async () => {
+    const user = {
+      id: 'admin-1',
+      email: 'admin@example.com',
+      username: 'admin',
+      role: user_role.ADMIN,
+      status: user_status.ACTIVE,
+      pin_hash: await argon2.hash('123456'),
+    };
+    const challenge = {
+      get: jest.fn().mockResolvedValue({
+        userId: user.id,
+        email: user.email,
+        method: 'PIN_VERIFY',
+      }),
+      withLock: jest.fn((_id, callback) => callback()),
+      getPinLockSeconds: jest.fn().mockResolvedValue(0),
+      recordPinFailure: jest.fn().mockResolvedValue(4),
+    };
+    const useCase = new VerifyAdminLoginPinUseCase(
+      challenge as any,
+      { user: { findUnique: jest.fn().mockResolvedValue(user) } } as any,
+      {} as any,
+    );
+
+    await expect(
+      useCase.execute({ challengeId: 'challenge-1', pin: '000000' }),
+    ).rejects.toMatchObject({
+      code: 'INVALID_PIN',
+      details: { remainingAttempts: 4 },
+    });
   });
 });

@@ -43,6 +43,8 @@ export class VerifyAdminLoginPinUseCase {
       if (lockSeconds > 0) {
         throw new RateLimitError(
           `PIN verification is locked. Try again in ${lockSeconds} seconds.`,
+          'PIN_VERIFICATION_LOCKED',
+          { retryAfterSeconds: lockSeconds },
         );
       }
 
@@ -51,10 +53,16 @@ export class VerifyAdminLoginPinUseCase {
         if (remaining === 0) {
           throw new RateLimitError(
             'PIN verification is locked for 15 minutes.',
+            'PIN_VERIFICATION_LOCKED',
+            {
+              retryAfterSeconds: AdminLoginChallengeService.PIN_LOCK_SECONDS,
+            },
           );
         }
         throw new BadRequestError(
           `Invalid PIN. ${remaining} attempts remaining.`,
+          'INVALID_PIN',
+          { remainingAttempts: remaining },
         );
       }
 

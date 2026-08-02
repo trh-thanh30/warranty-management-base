@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import type { AuthUser } from "@repo/shared";
+import { PERMISSION_GROUPS } from "@repo/shared/constants";
 import {
   MAX_AVATAR_SIZE_BYTES,
   getProfileFormValues,
@@ -69,4 +71,26 @@ test("permission grouping retains permissions outside known groups", () => {
     { key: "dashboard", permissions: ["DASHBOARD_VIEW"] },
     { key: "other", permissions: ["CUSTOM_PERMISSION"] },
   ]);
+});
+
+test("every permission group has a category label in each admin locale", () => {
+  for (const locale of ["vi", "en"]) {
+    const messages = JSON.parse(
+      readFileSync(
+        new URL(`../../messages/${locale}.json`, import.meta.url),
+        "utf8",
+      ),
+    ) as {
+      Settings?: { permissions?: { categories?: Record<string, string> } };
+    };
+    const categories = messages.Settings?.permissions?.categories ?? {};
+
+    for (const group of PERMISSION_GROUPS) {
+      assert.equal(
+        typeof categories[group.key],
+        "string",
+        `${locale} is missing Settings.permissions.categories.${group.key}`,
+      );
+    }
+  }
 });

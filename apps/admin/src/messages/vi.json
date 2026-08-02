@@ -145,6 +145,8 @@
     "pinVerifyLabel": "Mã PIN bảo mật",
     "pinRequired": "Nhập đầy đủ mã PIN gồm 6 số.",
     "pinMismatch": "Hai mã PIN không trùng khớp.",
+    "pinInvalid": "Mã PIN không đúng. Bạn còn {remainingAttempts} lần thử.",
+    "pinLocked": "Bạn đã nhập sai mã PIN quá nhiều lần. Vui lòng thử lại sau.",
     "pinGenericError": "Không thể xác minh mã PIN. Vui lòng thử lại.",
     "pinSetupSubmit": "Tạo mã và đăng nhập",
     "pinVerifySubmit": "Xác minh và đăng nhập",
@@ -2456,6 +2458,8 @@
         "serviceCenters": "Quản lý trạm bảo hành",
         "dealers": "Quản lý đại lý",
         "contentPages": "Quản lý chính sách & hỏi đáp",
+        "websiteConfig": "Quản lý cấu hình website",
+        "contactSubmissions": "Quản lý lời nhắn liên hệ",
         "categories": "Quản lý danh mục",
         "system": "Quản trị hệ thống",
         "other": "Quyền hạn khác"
