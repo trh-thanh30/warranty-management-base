@@ -483,7 +483,7 @@ Các nhóm biến quan trọng:
 - **Database**: `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DATABASE_URL`
 - **Redis**: `REDIS_HOST`, `REDIS_DEV_PORT`, `REDIS_PASSWORD`, `REDIS_URL`
 - **Storage**: `STORAGE_DRIVER`, `STORAGE_ROOT_DIR`, `ASSET_CDN_URL`
-- **Web/Admin/Docs**: `WEB_PORT`, `ADMIN_PORT`, `DOCS_PORT`, `NEXT_PUBLIC_API_URL`
+- **Web/Admin/Docs**: `WEB_PORT`, `ADMIN_PORT`, `DOCS_PORT`, `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_WEB_URL`
 - **Telegram CI/CD**: `CI_TELEGRAM_BOT_TOKEN`, `CI_TELEGRAM_CHAT_ID`
 
 ## CI/CD Và Telegram

@@ -131,6 +131,7 @@ jobs:
           file: apps/web/Dockerfile
           build-args: |
             NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_WEB_URL=${{ vars.NEXT_PUBLIC_WEB_URL }}
           push: true
           tags: |
             ${{ steps.metadata.outputs.web_image }}:${{ steps.metadata.outputs.image_tag }}

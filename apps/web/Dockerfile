@@ -24,7 +24,9 @@ COPY --from=pruner /app/out/full/ .
 COPY --from=pruner /app/scripts ./scripts
 
 ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_WEB_URL=https://baohanh.lexzenz.com
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_WEB_URL=$NEXT_PUBLIC_WEB_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm --filter @repo/web... build
 
