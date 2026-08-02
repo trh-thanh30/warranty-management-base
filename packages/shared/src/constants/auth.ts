@@ -7,6 +7,7 @@ export type AdminTwoFactorMethod =
   (typeof ADMIN_TWO_FACTOR_METHOD)[keyof typeof ADMIN_TWO_FACTOR_METHOD];
 
 export const ADMIN_LOGIN_CHALLENGE_METHOD = {
+  METHOD_SELECTION: "METHOD_SELECTION",
   EMAIL_OTP: "EMAIL_OTP",
   PIN_SETUP: "PIN_SETUP",
   PIN_VERIFY: "PIN_VERIFY",
@@ -15,7 +16,11 @@ export const ADMIN_LOGIN_CHALLENGE_METHOD = {
 export type AdminLoginChallengeMethod =
   (typeof ADMIN_LOGIN_CHALLENGE_METHOD)[keyof typeof ADMIN_LOGIN_CHALLENGE_METHOD];
 
-export type AdminLoginPinChallengeMethod = Exclude<
+export type AdminLoginPinChallengeMethod =
+  | typeof ADMIN_LOGIN_CHALLENGE_METHOD.PIN_SETUP
+  | typeof ADMIN_LOGIN_CHALLENGE_METHOD.PIN_VERIFY;
+
+export type AdminVerificationChallengeMethod = Exclude<
   AdminLoginChallengeMethod,
-  typeof ADMIN_LOGIN_CHALLENGE_METHOD.EMAIL_OTP
+  typeof ADMIN_LOGIN_CHALLENGE_METHOD.METHOD_SELECTION
 >;

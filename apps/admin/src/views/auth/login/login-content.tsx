@@ -1,12 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { ADMIN_LOGIN_CHALLENGE_METHOD } from "@repo/shared";
 import { useTranslations } from "next-intl";
-import {
-  ADMIN_LOGIN_CHALLENGE_METHOD,
-  type AdminLoginChallengeResponse,
-} from "@repo/shared";
+import { useState } from "react";
 import { LoginForm } from "./components/login-form";
+import type { LoginFlowState } from "./login.types";
 
 type LoginContentProps = {
   welcome: string;
@@ -24,24 +22,28 @@ export function LoginContent({
   twoFactorDescription,
 }: LoginContentProps) {
   const t = useTranslations("Login");
-  const [challenge, setChallenge] =
-    useState<AdminLoginChallengeResponse | null>(null);
+  const [flow, setFlow] = useState<LoginFlowState>(null);
+  const challenge = flow?.step === "VERIFICATION" ? flow.challenge : null;
 
   const titleText =
-    challenge?.method === ADMIN_LOGIN_CHALLENGE_METHOD.PIN_SETUP
-      ? t("pinSetupTitle")
-      : twoFactorTitle;
+    flow?.step === "METHOD_SELECTION"
+      ? t("methodSelectionTitle")
+      : challenge?.method === ADMIN_LOGIN_CHALLENGE_METHOD.PIN_SETUP
+        ? t("pinSetupTitle")
+        : twoFactorTitle;
   const descriptionText =
-    challenge?.method === ADMIN_LOGIN_CHALLENGE_METHOD.PIN_SETUP
-      ? t("pinSetupDescription")
-      : challenge?.method === ADMIN_LOGIN_CHALLENGE_METHOD.PIN_VERIFY
-        ? t("pinVerifyDescription")
-        : challenge
-          ? twoFactorDescription.replace(
-              "{email}",
-              challenge.masked_destination ?? "",
-            )
-          : description;
+    flow?.step === "METHOD_SELECTION"
+      ? t("methodSelectionDescription")
+      : challenge?.method === ADMIN_LOGIN_CHALLENGE_METHOD.PIN_SETUP
+        ? t("pinSetupDescription")
+        : challenge?.method === ADMIN_LOGIN_CHALLENGE_METHOD.PIN_VERIFY
+          ? t("pinVerifyDescription")
+          : challenge
+            ? twoFactorDescription.replace(
+                "{email}",
+                challenge.masked_destination ?? "",
+              )
+            : description;
 
   return (
     <>
@@ -49,15 +51,15 @@ export function LoginContent({
         <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
           {welcome}
         </p>
-        <h2 className="mt-2 text-3xl font-semibold tracking-[-0.025em]">
-          {challenge ? titleText : title}
+        <h2 className="mt-2 text-3xl font-semibold tracking-tight">
+          {flow ? titleText : title}
         </h2>
         <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-400">
           {descriptionText}
         </p>
       </div>
 
-      <LoginForm onTwoFactorChange={setChallenge} />
+      <LoginForm onFlowChange={setFlow} />
     </>
   );
 }

@@ -172,7 +172,7 @@ export function TwoFactorForm({
           type="button"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
-          {t("twoFactorUseDifferentAccount")}
+          {t("methodChooseAnother")}
         </button>
       </div>
     </form>

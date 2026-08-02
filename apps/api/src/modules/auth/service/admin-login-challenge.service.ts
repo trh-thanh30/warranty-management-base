@@ -130,6 +130,26 @@ export class AdminLoginChallengeService {
     }
   }
 
+  async setMethod(
+    challengeId: string,
+    method: AdminLoginChallengeMethod,
+  ): Promise<{ expiresAt: Date }> {
+    const challenge = await this.get(challengeId);
+    await this.redisService
+      .getClient()
+      .set(
+        this.challengeKey(challengeId),
+        JSON.stringify({ ...challenge, method }),
+        'EX',
+        AdminLoginChallengeService.TTL_SECONDS,
+      );
+    return {
+      expiresAt: new Date(
+        Date.now() + AdminLoginChallengeService.TTL_SECONDS * 1000,
+      ),
+    };
+  }
+
   async delete(challengeId: string): Promise<void> {
     const challenge = await this.getOptional(challengeId);
     const redis = this.redisService.getClient();

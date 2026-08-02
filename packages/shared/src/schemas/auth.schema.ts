@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { ADMIN_TWO_FACTOR_METHOD } from "../constants/auth.ts";
 
 export const loginSchema = z.object({
   email: z.string().email(),
@@ -11,9 +10,6 @@ export type LoginInput = z.infer<typeof loginSchema>;
 export const adminLoginSchema = z.object({
   usernameOrEmail: z.string().trim().min(1),
   password: z.string().min(1),
-  method: z
-    .enum([ADMIN_TWO_FACTOR_METHOD.EMAIL_OTP, ADMIN_TWO_FACTOR_METHOD.PIN])
-    .optional(),
 });
 
 export type AdminLoginInput = z.infer<typeof adminLoginSchema>;

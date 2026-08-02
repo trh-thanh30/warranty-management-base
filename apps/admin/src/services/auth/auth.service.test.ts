@@ -9,6 +9,9 @@ test("login starts the admin two-factor challenge", async () => {
     requires_two_factor: true,
     challenge_id: "challenge-1",
     expires_at: "2026-08-01T10:10:00.000Z",
+    available_methods: ["EMAIL_OTP", "PIN"],
+    recommended_method: "EMAIL_OTP",
+    pin_configured: false,
     masked_destination: "ad***@example.com",
   };
   const http = {
@@ -64,6 +67,11 @@ test("two-factor verification and resend use their dedicated endpoints", async (
   };
   const service = createAuthService(http as unknown as AuthHttpClient);
 
+  await service.selectTwoFactorMethod({
+    challengeId: "challenge-1",
+    method: "PIN",
+  });
+
   assert.deepEqual(
     await service.verifyTwoFactor({
       challengeId: "challenge-1",
@@ -80,6 +88,10 @@ test("two-factor verification and resend use their dedicated endpoints", async (
   await service.verifyPin({ challengeId: "challenge-1", pin: "123456" });
 
   assert.deepEqual(calls, [
+    {
+      url: "/auth/login-admin/select-method",
+      body: { challengeId: "challenge-1", method: "PIN" },
+    },
     {
       url: "/auth/login-admin/verify-2fa",
       body: { challengeId: "challenge-1", code: "123456" },

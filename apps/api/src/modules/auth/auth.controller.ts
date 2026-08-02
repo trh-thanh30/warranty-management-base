@@ -14,6 +14,7 @@ import { AssetAccessTypeDto } from '@/modules/assets/dto/upload-asset.dto';
 import { ChangePasswordDto } from '@/modules/auth/dto/change-password.dto';
 import {
   ResendAdminLoginTwoFactorDto,
+  SelectAdminLoginMethodDto,
   SetupAdminLoginPinDto,
   VerifyAdminLoginPinDto,
   VerifyAdminLoginTwoFactorDto,
@@ -29,6 +30,7 @@ import { ChangePasswordUseCase } from '@/modules/auth/use-cases/change-password.
 import { ForgotPasswordUseCase } from '@/modules/auth/use-cases/forgot-password.usecase';
 import { LoginUserUseCase } from '@/modules/auth/use-cases/login-user.usecase';
 import { ResendAdminLoginTwoFactorUseCase } from '@/modules/auth/use-cases/resend-admin-login-two-factor.usecase';
+import { SelectAdminLoginMethodUseCase } from '@/modules/auth/use-cases/select-admin-login-method.usecase';
 import { StartAdminLoginUseCase } from '@/modules/auth/use-cases/start-admin-login.usecase';
 import { SetupAdminLoginPinUseCase } from '@/modules/auth/use-cases/setup-admin-login-pin.usecase';
 import { VerifyAdminLoginPinUseCase } from '@/modules/auth/use-cases/verify-admin-login-pin.usecase';
@@ -72,6 +74,7 @@ export class AuthController {
     private readonly registerUserUseCase: RegisterUserUseCase,
     private readonly loginUserUseCase: LoginUserUseCase,
     private readonly startAdminLoginUseCase: StartAdminLoginUseCase,
+    private readonly selectAdminLoginMethodUseCase: SelectAdminLoginMethodUseCase,
     private readonly verifyAdminLoginTwoFactorUseCase: VerifyAdminLoginTwoFactorUseCase,
     private readonly resendAdminLoginTwoFactorUseCase: ResendAdminLoginTwoFactorUseCase,
     private readonly setupAdminLoginPinUseCase: SetupAdminLoginPinUseCase,
@@ -103,9 +106,17 @@ export class AuthController {
   @Public()
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('login-admin')
-  @ApiSuccess('Verification code sent')
+  @ApiSuccess('Login credentials accepted')
   async loginAdmin(@Body() dto: LoginDto) {
     return this.startAdminLoginUseCase.execute(dto);
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Post('login-admin/select-method')
+  @ApiSuccess('Verification method selected')
+  async selectAdminLoginMethod(@Body() dto: SelectAdminLoginMethodDto) {
+    return this.selectAdminLoginMethodUseCase.execute(dto);
   }
 
   @Public()

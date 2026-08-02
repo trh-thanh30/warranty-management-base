@@ -10,7 +10,7 @@ import { AuthTokenService } from '@/modules/auth/service/auth-token.service';
 import { Injectable } from '@nestjs/common';
 import { user_role, user_status } from '@prisma/client';
 import * as argon2 from 'argon2';
-import { ADMIN_LOGIN_CHALLENGE_METHOD } from '@repo/shared';
+import { ADMIN_LOGIN_CHALLENGE_METHOD } from '@repo/shared/constants';
 
 @Injectable()
 export class VerifyAdminLoginPinUseCase {

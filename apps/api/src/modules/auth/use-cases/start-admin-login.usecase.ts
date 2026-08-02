@@ -1,100 +1,50 @@
 import { LoginDto } from '@/modules/auth/dto/login.dto';
 import { AdminLoginChallengeService } from '@/modules/auth/service/admin-login-challenge.service';
 import { AuthenticateLoginCredentialsUseCase } from '@/modules/auth/use-cases/authenticate-login-credentials.usecase';
-import { SendAdminLoginCodeEmailUseCase } from '@/modules/email/use-cases/send-admin-login-code-email.usecase';
-import { VerificationService } from '@/modules/verification/verification.service';
 import { BaseUseCase } from '@/shared/interfaces/base-usecase.interface';
 import { Injectable } from '@nestjs/common';
-import { user_role } from '@prisma/client';
+import { admin_two_factor_method, user_role } from '@prisma/client';
+import type { AdminLoginStartResponse } from '@repo/shared';
 import {
   ADMIN_LOGIN_CHALLENGE_METHOD,
   ADMIN_TWO_FACTOR_METHOD,
-  type AdminLoginChallengeMethod,
-} from '@repo/shared';
-
-export type StartAdminLoginResponse = {
-  requires_two_factor: true;
-  challenge_id: string;
-  expires_at: string;
-  method: AdminLoginChallengeMethod;
-  masked_destination?: string;
-};
+} from '@repo/shared/constants';
 
 @Injectable()
 export class StartAdminLoginUseCase implements BaseUseCase<
   LoginDto,
-  StartAdminLoginResponse
+  AdminLoginStartResponse
 > {
   constructor(
     private readonly authenticateCredentials: AuthenticateLoginCredentialsUseCase,
     private readonly challengeService: AdminLoginChallengeService,
-    private readonly verificationService: VerificationService,
-    private readonly sendLoginCodeEmail: SendAdminLoginCodeEmailUseCase,
   ) {}
 
-  async execute(dto: LoginDto): Promise<StartAdminLoginResponse> {
+  async execute(dto: LoginDto): Promise<AdminLoginStartResponse> {
     const user = await this.authenticateCredentials.execute(dto, [
       user_role.ADMIN,
       user_role.MODERATOR,
     ]);
-    if (dto.method === ADMIN_TWO_FACTOR_METHOD.PIN) {
-      const method = user.pin_hash
-        ? ADMIN_LOGIN_CHALLENGE_METHOD.PIN_VERIFY
-        : ADMIN_LOGIN_CHALLENGE_METHOD.PIN_SETUP;
-      const challenge = await this.challengeService.create({
-        userId: user.id,
-        email: user.email,
-        method,
-      });
-      return {
-        requires_two_factor: true,
-        challenge_id: challenge.challengeId,
-        expires_at: challenge.expiresAt.toISOString(),
-        method,
-      };
-    }
-
-    await this.challengeService.acquireSendSlot(user.id);
     const challenge = await this.challengeService.create({
       userId: user.id,
       email: user.email,
-      method: ADMIN_LOGIN_CHALLENGE_METHOD.EMAIL_OTP,
+      method: ADMIN_LOGIN_CHALLENGE_METHOD.METHOD_SELECTION,
     });
-    let codeExpiresAt = challenge.expiresAt;
-
-    try {
-      const generated = await this.verificationService.generate({
-        namespace: 'admin_login_2fa',
-        subject: challenge.challengeId,
-        rateLimitSubject: user.id,
-        ttlSec: 5 * 60,
-        length: 6,
-        maxAttempts: 5,
-        rateLimitWindowSec: 24 * 60 * 60,
-        rateLimitMax: 10,
-      });
-      codeExpiresAt = new Date(generated.expiresAt);
-      await this.sendLoginCodeEmail.execute({
-        to: user.email,
-        code: generated.code,
-        ttl: generated.expiresAt - Date.now(),
-      });
-    } catch (error) {
-      await this.challengeService.releaseSendSlot(user.id);
-      await this.verificationService.consume({
-        namespace: 'admin_login_2fa',
-        subject: challenge.challengeId,
-      });
-      await this.challengeService.delete(challenge.challengeId);
-      throw error;
-    }
 
     return {
       requires_two_factor: true,
       challenge_id: challenge.challengeId,
-      expires_at: codeExpiresAt.toISOString(),
+      expires_at: challenge.expiresAt.toISOString(),
+      available_methods: [
+        ADMIN_TWO_FACTOR_METHOD.EMAIL_OTP,
+        ADMIN_TWO_FACTOR_METHOD.PIN,
+      ],
+      recommended_method:
+        user.two_factor_method === admin_two_factor_method.PIN
+          ? ADMIN_TWO_FACTOR_METHOD.PIN
+          : ADMIN_TWO_FACTOR_METHOD.EMAIL_OTP,
+      pin_configured: Boolean(user.pin_hash),
       masked_destination: this.maskEmail(user.email),
-      method: ADMIN_LOGIN_CHALLENGE_METHOD.EMAIL_OTP,
     };
   }
 

@@ -1,6 +1,8 @@
 import type {
   AdminLoginBody,
   AdminLoginChallengeResponse,
+  AdminLoginStartResponse,
+  AdminSelectTwoFactorMethodBody,
   AdminResendTwoFactorBody,
   AdminResendTwoFactorResponse,
   AdminVerifyTwoFactorBody,
@@ -17,9 +19,20 @@ import type { AuthHttpClient } from "./auth.types";
 
 export function createAuthService(http: AuthHttpClient) {
   return {
-    async login(body: AdminLoginBody): Promise<AdminLoginChallengeResponse> {
+    async login(body: AdminLoginBody): Promise<AdminLoginStartResponse> {
       return unwrap(
-        await http.post<AdminLoginChallengeResponse>("/auth/login-admin", body),
+        await http.post<AdminLoginStartResponse>("/auth/login-admin", body),
+      );
+    },
+
+    async selectTwoFactorMethod(
+      body: AdminSelectTwoFactorMethodBody,
+    ): Promise<AdminLoginChallengeResponse> {
+      return unwrap(
+        await http.post<AdminLoginChallengeResponse>(
+          "/auth/login-admin/select-method",
+          body,
+        ),
       );
     },
 

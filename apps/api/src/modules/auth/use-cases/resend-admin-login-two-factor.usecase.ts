@@ -5,7 +5,7 @@ import { SendAdminLoginCodeEmailUseCase } from '@/modules/email/use-cases/send-a
 import { VerificationService } from '@/modules/verification/verification.service';
 import { BaseUseCase } from '@/shared/interfaces/base-usecase.interface';
 import { Injectable } from '@nestjs/common';
-import { ADMIN_LOGIN_CHALLENGE_METHOD } from '@repo/shared';
+import { ADMIN_LOGIN_CHALLENGE_METHOD } from '@repo/shared/constants';
 
 @Injectable()
 export class ResendAdminLoginTwoFactorUseCase implements BaseUseCase<

@@ -1,4 +1,15 @@
-import { IsNotEmpty, IsString, Length, Matches } from 'class-validator';
+import { IsIn, IsNotEmpty, IsString, Length, Matches } from 'class-validator';
+import type { AdminTwoFactorMethod } from '@repo/shared';
+import { ADMIN_TWO_FACTOR_METHOD } from '@repo/shared/constants';
+
+export class SelectAdminLoginMethodDto {
+  @IsNotEmpty()
+  @IsString()
+  challengeId: string;
+
+  @IsIn(Object.values(ADMIN_TWO_FACTOR_METHOD))
+  method: AdminTwoFactorMethod;
+}
 
 export class VerifyAdminLoginTwoFactorDto {
   @IsNotEmpty()

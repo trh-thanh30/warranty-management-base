@@ -13,6 +13,8 @@ import {
 import type {
   AdminLoginBody,
   AdminLoginChallengeResponse,
+  AdminLoginStartResponse,
+  AdminTwoFactorMethod,
   AdminResendTwoFactorResponse,
   AuthUser,
 } from "@repo/shared";
@@ -31,7 +33,11 @@ type AuthContextValue = {
   user: AuthUser | null;
   status: AuthStatus;
   isLoggingOut: boolean;
-  login: (body: AdminLoginBody) => Promise<AdminLoginChallengeResponse>;
+  login: (body: AdminLoginBody) => Promise<AdminLoginStartResponse>;
+  selectTwoFactorMethod: (
+    challengeId: string,
+    method: AdminTwoFactorMethod,
+  ) => Promise<AdminLoginChallengeResponse>;
   verifyTwoFactor: (challengeId: string, code: string) => Promise<void>;
   resendTwoFactor: (
     challengeId: string,
@@ -90,6 +96,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return authService.login(body);
   }, []);
 
+  const selectTwoFactorMethod = useCallback(
+    async (challengeId: string, method: AdminTwoFactorMethod) => {
+      return authService.selectTwoFactorMethod({ challengeId, method });
+    },
+    [],
+  );
+
   const verifyTwoFactor = useCallback(
     async (challengeId: string, code: string) => {
       const result = await authService.verifyTwoFactor({ challengeId, code });
@@ -141,6 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       status,
       isLoggingOut,
       login,
+      selectTwoFactorMethod,
       verifyTwoFactor,
       resendTwoFactor,
       setupPin,
@@ -152,6 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login,
       logout,
       resendTwoFactor,
+      selectTwoFactorMethod,
       setupPin,
       session.user,
       status,
