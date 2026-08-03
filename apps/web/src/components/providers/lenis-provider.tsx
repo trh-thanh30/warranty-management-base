@@ -15,20 +15,22 @@ import "lenis/dist/lenis.css";
 
 type LenisScrollTo = Lenis["scrollTo"];
 
+const nativeScrollTo: LenisScrollTo = (target, options) => {
+  if (typeof window === "undefined") return;
+
+  const behavior = options?.immediate ? "auto" : "smooth";
+  if (typeof target === "number") {
+    window.scrollTo({ behavior, top: target });
+    return;
+  }
+
+  const element =
+    typeof target === "string" ? document.querySelector(target) : target;
+  element?.scrollIntoView({ behavior, block: "start" });
+};
+
 const LenisContext = createContext<{ scrollTo: LenisScrollTo }>({
-  scrollTo(target, options) {
-    if (typeof window === "undefined") return;
-
-    const behavior = options?.immediate ? "auto" : "smooth";
-    if (typeof target === "number") {
-      window.scrollTo({ behavior, top: target });
-      return;
-    }
-
-    const element =
-      typeof target === "string" ? document.querySelector(target) : target;
-    element?.scrollIntoView({ behavior, block: "start" });
-  },
+  scrollTo: nativeScrollTo,
 });
 
 function LenisInner({ children }: { children: React.ReactNode }) {
@@ -37,10 +39,23 @@ function LenisInner({ children }: { children: React.ReactNode }) {
   const hasHandledInitialRouteRef = useRef(false);
   const lenisRef = useRef<Lenis | null>(null);
   const scrollTo = useCallback<LenisScrollTo>((target, options) => {
-    lenisRef.current?.scrollTo(target, options);
+    if (lenisRef.current) {
+      lenisRef.current.scrollTo(target, options);
+      return;
+    }
+
+    nativeScrollTo(target, options);
   }, []);
 
   useEffect(() => {
+    // Lenis only enhances wheel scrolling. Mounting its non-passive touch
+    // listeners on iOS can fight Safari's native momentum scroll and snap the
+    // page back while the address bar is resizing the visual viewport.
+    const prefersNativeTouchScroll = window.matchMedia(
+      "(hover: none), (pointer: coarse)",
+    ).matches;
+    if (prefersNativeTouchScroll) return;
+
     const lenis = new Lenis({
       autoRaf: true,
       duration: 1.2,

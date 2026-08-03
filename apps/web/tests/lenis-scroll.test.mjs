@@ -26,3 +26,13 @@ test("Lenis owns its RAF lifecycle and does not override the first touch scroll"
   );
   assert.match(source, /lenisRef\.current\.scrollTo\(0,/);
 });
+
+test("touch-only devices keep native scrolling instead of mounting Lenis", async () => {
+  const source = await readFile(lenisProviderPath, "utf8");
+
+  assert.match(
+    source,
+    /matchMedia\([\s\S]*?hover:\s*none[\s\S]*?pointer:\s*coarse[\s\S]*?\)\.matches/,
+  );
+  assert.match(source, /if \(prefersNativeTouchScroll\) return;/);
+});
