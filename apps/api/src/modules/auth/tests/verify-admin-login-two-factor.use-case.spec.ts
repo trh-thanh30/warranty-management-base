@@ -18,7 +18,7 @@ describe('VerifyAdminLoginTwoFactorUseCase', () => {
         email: admin.email,
         method: 'EMAIL_OTP',
       }),
-      withLock: jest.fn(async (_id, callback) => callback()),
+      withLock: jest.fn((_id, callback) => callback()),
       delete: jest.fn().mockResolvedValue(undefined),
     };
     const verificationService = {
@@ -65,7 +65,7 @@ describe('VerifyAdminLoginTwoFactorUseCase', () => {
           email: admin.email,
           method: 'EMAIL_OTP',
         }),
-        withLock: jest.fn(async (_id, callback) => callback()),
+        withLock: jest.fn((_id, callback) => callback()),
         delete: jest.fn(),
       } as any,
       { verifyAndConsume: jest.fn().mockResolvedValue(false) } as any,

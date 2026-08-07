@@ -64,7 +64,7 @@ export class SelectAdminLoginMethodUseCase implements BaseUseCase<
     }
 
     await this.challengeService.acquireSendSlot(user.id);
-    const challenge = await this.challengeService.setMethod(
+    await this.challengeService.setMethod(
       dto.challengeId,
       ADMIN_LOGIN_CHALLENGE_METHOD.EMAIL_OTP,
     );

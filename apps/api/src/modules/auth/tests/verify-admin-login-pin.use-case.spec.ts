@@ -18,7 +18,7 @@ describe('VerifyAdminLoginPinUseCase', () => {
         email: user.email,
         method: 'PIN_VERIFY',
       }),
-      withLock: jest.fn(async (_id, callback) => callback()),
+      withLock: jest.fn((_id, callback) => callback()),
       delete: jest.fn(),
       getPinLockSeconds: jest.fn().mockResolvedValue(0),
       resetPinFailures: jest.fn(),
@@ -61,7 +61,7 @@ describe('VerifyAdminLoginPinUseCase', () => {
         email: user.email,
         method: 'PIN_VERIFY',
       }),
-      withLock: jest.fn(async (_id, callback) => callback()),
+      withLock: jest.fn((_id, callback) => callback()),
       getPinLockSeconds: jest.fn().mockResolvedValue(0),
       recordPinFailure: jest.fn().mockResolvedValue(0),
     };
