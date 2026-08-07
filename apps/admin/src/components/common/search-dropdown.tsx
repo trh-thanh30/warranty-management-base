@@ -50,7 +50,9 @@ export function SearchDropdown<TItem>({
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const hasSearch = searchValue.trim().length > 0;
-  const displayValue = open ? searchValue : (selectedLabel ?? searchValue);
+  const displayValue = open
+    ? searchValue || selectedLabel || ""
+    : (selectedLabel ?? searchValue);
   const showError = Boolean(isError) && !isLoading && items.length === 0;
   const showEmpty = !showError && !isLoading && items.length === 0;
 
@@ -86,7 +88,12 @@ export function SearchDropdown<TItem>({
           onSearchChange(event.target.value);
           setOpen(true);
         }}
-        onFocus={() => setOpen(true)}
+        onFocus={(event) => {
+          setOpen(true);
+          if (selectedLabel && !searchValue) {
+            event.currentTarget.select();
+          }
+        }}
         onKeyDown={(event) => {
           if (event.key === "Escape") setOpen(false);
         }}
