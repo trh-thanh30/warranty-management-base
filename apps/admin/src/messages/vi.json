@@ -401,6 +401,8 @@
       "serviceCenters": "Trung tâm bảo hành",
       "dealers": "Đại lý",
       "contentPages": "Chính sách & Hỏi đáp",
+      "websiteConfig": "Cấu hình website",
+      "contactSubmissions": "Lời nhắn liên hệ",
       "categories": "Danh mục",
       "users": "Nhân viên",
       "system": "Hệ thống và nhật ký"
@@ -454,7 +456,9 @@
       "AUDIT_LOG_VIEW": "Xem nhật ký kiểm toán",
       "WEBSITE_CONFIG_VIEW": "Xem cấu hình website",
       "WEBSITE_CONFIG_UPDATE": "Chỉnh sửa cấu hình website",
-      "WEBSITE_CONFIG_PUBLISH": "Xuất bản cấu hình website"
+      "WEBSITE_CONFIG_PUBLISH": "Xuất bản cấu hình website",
+      "CONTACT_SUBMISSION_VIEW": "Xem lời nhắn liên hệ",
+      "CONTACT_SUBMISSION_UPDATE": "Cập nhật lời nhắn liên hệ"
     }
   },
   "Customers": {
@@ -982,7 +986,10 @@
     "slugPlaceholder": "Ví dụ: phim-cach-nhiet-sp50; để trống để hệ thống tự tạo",
     "productCode": "Mã sản phẩm",
     "productCodePlaceholder": "Để trống để hệ thống tự sinh",
+    "productCodeEditPlaceholder": "Nhập mã sản phẩm",
     "productCodeDescription": "Không bắt buộc. Nếu để trống, hệ thống sẽ tự sinh mã duy nhất.",
+    "productCodeEditDescription": "Mã định danh duy nhất của sản phẩm. Không được để trống hoặc trùng với sản phẩm khác.",
+    "productCodeRequired": "Nhập mã sản phẩm.",
     "productCodeLength": "Mã sản phẩm không được quá 64 ký tự.",
     "duplicateProductCode": "Mã sản phẩm này đã tồn tại.",
     "warrantyCode": "Mã bảo hành",
@@ -1084,7 +1091,7 @@
     "duplicateSlug": "Đường dẫn sản phẩm này đã được sử dụng.",
     "duplicateWarrantyCode": "Mã bảo hành này đã tồn tại.",
     "durationMonthsInteger": "Thời hạn bảo hành phải là số nguyên.",
-    "durationMonthsRange": "Thời hạn bảo hành phải từ 1 đến 120 tháng.",
+    "durationMonthsRange": "Thời hạn bảo hành phải là số nguyên từ 1 tháng trở lên.",
     "installationPositionLength": "Vị trí gắn không được quá 160 ký tự.",
     "manufactureYearInteger": "Năm sản xuất phải là số nguyên.",
     "manufactureYearRange": "Năm sản xuất phải từ 1900 đến 2100.",
@@ -1391,7 +1398,7 @@
     "duplicateSku": "SKU này đã được sử dụng.",
     "duplicateSlug": "Đường dẫn này đã được sử dụng.",
     "descriptionLength": "Mô tả không được vượt quá 5.000 ký tự.",
-    "durationMonthsRange": "Thời hạn bảo hành phải từ 1 đến 120 tháng.",
+    "durationMonthsRange": "Thời hạn bảo hành phải là số nguyên từ 1 tháng trở lên.",
     "warrantyTermsLength": "Điều khoản không được vượt quá 2.000 ký tự.",
     "specificationLength": "Thông số không được vượt quá 160 ký tự.",
     "categories": {
@@ -1489,7 +1496,7 @@
     "adjustmentReason": "Lý do điều chỉnh",
     "adjustmentReasonPlaceholder": "Nhập lý do thay đổi chính sách bảo hành",
     "adjustmentReasonRequired": "Lý do điều chỉnh phải có ít nhất 3 ký tự.",
-    "durationInvalid": "Thời hạn phải là số nguyên từ 1 đến 120 tháng.",
+    "durationInvalid": "Thời hạn phải là số nguyên từ 1 tháng trở lên.",
     "maxClaimCountInvalid": "Số claim tối đa phải là số nguyên từ 1 đến 1000.",
     "amountInvalid": "Hạn mức phải là số không âm và có tối đa 2 chữ số thập phân.",
     "perClaimExceedsCoverage": "Hạn mức mỗi claim không được lớn hơn tổng hạn mức bảo hành.",
@@ -1630,6 +1637,7 @@
     "customerSearchPlaceholder": "Tìm theo tên, số điện thoại, email hoặc mã khách hàng",
     "search": "Search",
     "noProduct": "Không tìm thấy sản phẩm.",
+    "productLoadError": "Không tải được danh sách sản phẩm. Vui lòng thử lại.",
     "loadingProducts": "Đang tải sản phẩm...",
     "loadingMoreProducts": "Đang tải thêm sản phẩm...",
     "productUnavailableNoWarranty": "Sản phẩm này chưa có hồ sơ bảo hành nên không thể chọn.",

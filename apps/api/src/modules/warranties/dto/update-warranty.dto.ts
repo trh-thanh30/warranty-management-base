@@ -16,7 +16,6 @@ export class UpdateWarrantyDto {
   @IsOptional()
   @IsInt()
   @Min(1)
-  @Max(120)
   durationMonths?: number;
 
   @IsOptional()

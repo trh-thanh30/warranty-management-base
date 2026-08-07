@@ -86,8 +86,10 @@ export function toUpdateProductBody(
       existingMetadata,
       values.installationPosition,
     ),
+    productCode: values.productCode.trim(),
     serialNumber: toNullableValue(values.serialNumber),
     status: values.status,
+    templateId: values.templateId,
     warrantyCode: values.warrantyCode?.trim() ?? "",
   };
 }

@@ -14,12 +14,25 @@ const BUSINESS_UNAUTHORIZED_PATHS = [
   "/auth/change-password",
 ] as const;
 
+const AUTH_COOKIE_PATHS = [
+  "/auth/login-admin/verify-2fa",
+  "/auth/login-admin/setup-pin",
+  "/auth/login-admin/verify-pin",
+  "/auth/refresh",
+  "/auth/logout",
+  "/auth/change-password",
+] as const;
+
 function includesPath(url: string, paths: readonly string[]) {
   return paths.some((path) => url.includes(path));
 }
 
 export function isAuthEntryPoint(url: string) {
   return includesPath(url, AUTH_ENTRY_PATHS);
+}
+
+export function shouldSendAuthCookies(url: string) {
+  return includesPath(url, AUTH_COOKIE_PATHS);
 }
 
 export function shouldAttemptTokenRefresh(

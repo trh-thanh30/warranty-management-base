@@ -35,8 +35,7 @@ export const productTemplateFormSchema = z.object({
   defaultWarrantyDurationMonths: z.coerce
     .number()
     .int("durationMonthsRange")
-    .min(1, "durationMonthsRange")
-    .max(120, "durationMonthsRange"),
+    .min(1, "durationMonthsRange"),
   defaultWarrantyTerms: optionalText.max(2000, "warrantyTermsLength"),
   coverAssetId: z.string(),
   coverImageUrl: z.string(),

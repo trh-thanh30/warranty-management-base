@@ -106,7 +106,6 @@ export class CreateProductTemplateDto {
   @IsOptional()
   @IsInt()
   @Min(1)
-  @Max(120)
   defaultWarrantyDurationMonths?: number;
 
   @IsOptional()

@@ -2,9 +2,39 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   isAuthEntryPoint,
+  shouldSendAuthCookies,
   shouldAttemptTokenRefresh,
   shouldClearSessionAfterUnauthorized,
 } from "./admin-http-client.utils.ts";
+
+test("only requests that create, refresh, or clear the session send cookies", () => {
+  const cookieEndpoints = [
+    "/auth/login-admin/verify-2fa",
+    "/auth/login-admin/setup-pin",
+    "/auth/login-admin/verify-pin",
+    "/auth/refresh",
+    "/auth/logout",
+    "/auth/change-password",
+  ];
+
+  for (const url of cookieEndpoints) {
+    assert.equal(shouldSendAuthCookies(url), true, url);
+  }
+
+  const bearerOnlyEndpoints = [
+    "/analytics/dashboard/trends",
+    "/notifications",
+    "/customers",
+    "/auth/me",
+    "/auth/login-admin",
+    "/auth/login-admin/select-method",
+    "/auth/login-admin/resend-2fa",
+  ];
+
+  for (const url of bearerOnlyEndpoints) {
+    assert.equal(shouldSendAuthCookies(url), false, url);
+  }
+});
 
 test("protected API requests refresh once after an unauthorized response", () => {
   assert.equal(shouldAttemptTokenRefresh(401, "/products", false), true);

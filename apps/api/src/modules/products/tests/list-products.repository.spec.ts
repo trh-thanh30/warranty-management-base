@@ -1,7 +1,8 @@
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
+import { product_status } from '@prisma/client';
 
 describe('ProductsRepository.list', () => {
-  it('includes soft-deleted products in the admin product list by default', async () => {
+  it('excludes soft-deleted products from the admin product list by default', async () => {
     const findMany = jest.fn().mockResolvedValue([]);
     const count = jest.fn().mockResolvedValue(0);
     const prismaService = {
@@ -20,15 +21,41 @@ describe('ProductsRepository.list', () => {
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: expect.not.objectContaining({
-          deleted_at: null,
-        }),
+        where: expect.objectContaining({ deleted_at: null }),
       }),
     );
     expect(count).toHaveBeenCalledWith({
-      where: expect.not.objectContaining({
-        deleted_at: null,
+      where: expect.objectContaining({ deleted_at: null }),
+    });
+  });
+
+  it('only includes soft-deleted products when filtering by deleted status', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const count = jest.fn().mockResolvedValue(0);
+    const prismaService = {
+      $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
+        callback({ product: { count, findMany } }),
+      ),
+    };
+    const repository = new ProductsRepository(prismaService as never);
+
+    await repository.list({
+      limit: 10,
+      page: 1,
+      status: product_status.DELETED,
+    });
+
+    const deletedFilter = {
+      deleted_at: { not: null },
+      status: product_status.DELETED,
+    };
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining(deletedFilter),
       }),
+    );
+    expect(count).toHaveBeenCalledWith({
+      where: expect.objectContaining(deletedFilter),
     });
   });
 
@@ -172,6 +199,30 @@ describe('ProductsRepository.list', () => {
         template: { is: { is_published: true } },
       }),
     });
+  });
+
+  it('applies the same soft-delete visibility rule to product exports', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const repository = new ProductsRepository({
+      product: { findMany },
+    } as never);
+
+    await repository.listForExport({});
+    expect(findMany).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ deleted_at: null }),
+      }),
+    );
+
+    await repository.listForExport({ status: product_status.DELETED });
+    expect(findMany).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          deleted_at: { not: null },
+          status: product_status.DELETED,
+        }),
+      }),
+    );
   });
 
   it('paginates visible product templates instead of physical products', async () => {

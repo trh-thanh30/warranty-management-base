@@ -1,12 +1,11 @@
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient, user_role, user_status } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
+import { PrismaClient } from '@prisma/client';
 import { Pool } from 'pg';
 import { seedLexzenzProductCategories } from './seed-categories';
 import { seedContentPages } from './seed-content-pages';
 import { seedLexzenzDealers } from './seed-dealers';
 import { seedLexzenzProducts } from './seed-products';
-import { requireSeedPassword } from './seed-env';
+import { seedProductionUsers } from './seed-production-users';
 import { seedWebsiteSiteSettings } from './seed-website-config';
 
 let prisma: PrismaClient | undefined;
@@ -23,7 +22,9 @@ async function main() {
   const adapter = new PrismaPg(pool);
   prisma = new PrismaClient({ adapter });
 
-  await seedProductionAdmin(prisma);
+  const { admin, moderator } = await seedProductionUsers(prisma);
+  console.log(`Seeded production admin: ${admin.email}`);
+  console.log(`Seeded production moderator: ${moderator.email}`);
   await seedLexzenzProductCategories(prisma);
   await seedLexzenzProducts(prisma);
   await seedLexzenzDealers(prisma);
@@ -31,47 +32,6 @@ async function main() {
   await seedWebsiteSiteSettings(prisma);
 
   console.log('Production database seed completed successfully.');
-}
-
-async function seedProductionAdmin(client: PrismaClient) {
-  const email = process.env.SEED_ADMIN_EMAIL ?? 'admin@example.com';
-  const username = process.env.SEED_ADMIN_USERNAME ?? 'admin';
-  const password = requireSeedPassword('SEED_ADMIN_PASSWORD');
-  const hashedPassword = await bcrypt.hash(password, 12);
-
-  const [userByEmail, userByUsername] = await Promise.all([
-    client.user.findUnique({ where: { email } }),
-    client.user.findUnique({ where: { username } }),
-  ]);
-
-  if (userByEmail && userByUsername && userByEmail.id !== userByUsername.id) {
-    throw new Error(
-      `Cannot seed production admin ${email}/${username}: email and username belong to different users.`,
-    );
-  }
-
-  const existingUser = userByEmail ?? userByUsername;
-  const accountData = {
-    email,
-    is_verified: true,
-    role: user_role.ADMIN,
-    status: user_status.ACTIVE,
-    username,
-  };
-
-  const admin = existingUser
-    ? await client.user.update({
-        where: { id: existingUser.id },
-        data: accountData,
-      })
-    : await client.user.create({
-        data: {
-          ...accountData,
-          password: hashedPassword,
-        },
-      });
-
-  console.log(`Seeded production admin: ${admin.email}`);
 }
 
 main()

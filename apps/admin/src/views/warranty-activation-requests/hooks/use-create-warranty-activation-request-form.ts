@@ -28,6 +28,7 @@ import {
 } from "../warranty-activation-requests.types";
 import {
   resolveActivationRequestCreateError,
+  resolveScopedProductSearch,
   toAdminActivationRequestBody,
 } from "../warranty-activation-requests.utils";
 
@@ -72,7 +73,10 @@ export function useCreateWarrantyActivationRequestForm({
   const toast = useToast();
   const createMutation = useCreateAdminWarrantyActivationRequest();
   const [customerSearch, setCustomerSearch] = useState("");
-  const [productSearch, setProductSearch] = useState("");
+  const [productSearchState, setProductSearchState] = useState({
+    categoryId: "",
+    value: "",
+  });
   const [dealerSearch, setDealerSearch] = useState("");
   const [pendingWardName, setPendingWardName] = useState<string | null>(null);
   const [selectedCustomer, setSelectedCustomer] =
@@ -98,7 +102,11 @@ export function useCreateWarrantyActivationRequestForm({
   );
   const wards = useMemo(() => wardsQuery.data ?? [], [wardsQuery.data]);
   const debouncedCustomerSearch = useDebounce(customerSearch.trim(), 300);
-  const debouncedProductSearch = useDebounce(productSearch.trim(), 300);
+  const debouncedProductSearch = useDebounce(productSearchState, 300);
+  const productSearchQuery = resolveScopedProductSearch(
+    categoryId,
+    debouncedProductSearch,
+  );
   const debouncedDealerSearch = useDebounce(dealerSearch.trim(), 300);
   const categoriesQuery = useCategories({
     isActive: "true",
@@ -115,7 +123,7 @@ export function useCreateWarrantyActivationRequestForm({
     {
       categoryId: categoryId || undefined,
       limit: 20,
-      search: debouncedProductSearch || undefined,
+      search: productSearchQuery,
       sortBy: "createdAt",
       sortOrder: "desc",
       status: "ACTIVE",
@@ -208,7 +216,7 @@ export function useCreateWarrantyActivationRequestForm({
 
   function selectProduct(product: ProductResponse) {
     setSelectedProduct(product);
-    setProductSearch("");
+    setProductSearchState({ categoryId, value: "" });
     setFormValues(form.setValue, {
       productId: product.id,
       productName: product.name,
@@ -217,6 +225,7 @@ export function useCreateWarrantyActivationRequestForm({
   }
 
   function selectCategory(value: string) {
+    setProductSearchState({ categoryId: value, value: "" });
     setFormValues(form.setValue, {
       categoryId: value,
       categoryInputValues: {},
@@ -231,6 +240,10 @@ export function useCreateWarrantyActivationRequestForm({
       productName: "",
       warrantyCode: "",
     });
+  }
+
+  function setProductSearch(value: string) {
+    setProductSearchState({ categoryId, value });
   }
 
   function selectDealer(dealer: DealerResponse) {
@@ -329,7 +342,7 @@ export function useCreateWarrantyActivationRequestForm({
     provincesQuery,
     mutationIsPending: createMutation.isPending,
     onSubmit: form.handleSubmit(submit),
-    productSearch,
+    productSearch: productSearchState.value,
     products,
     productsQuery,
     provinceCode,

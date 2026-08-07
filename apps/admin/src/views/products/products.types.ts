@@ -23,6 +23,12 @@ export const productFormSchema = z.object({
     .optional(),
 });
 
+export const productEditFormSchema = productFormSchema.extend({
+  productCode: optionalText
+    .min(1, "productCodeRequired")
+    .max(64, "productCodeLength"),
+});
+
 export const assignProductOwnerSchema = z
   .object({
     autoGenerateWarrantyCode: z.boolean(),

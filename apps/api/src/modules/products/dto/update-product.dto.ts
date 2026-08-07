@@ -10,6 +10,15 @@ import { product_status } from '@prisma/client';
 
 export class UpdateProductDto {
   @IsOptional()
+  @IsString()
+  @Length(1, 64)
+  productCode?: string;
+
+  @IsOptional()
+  @IsUUID()
+  templateId?: string;
+
+  @IsOptional()
   @IsUUID()
   categoryId?: string;
 

@@ -201,8 +201,10 @@ export type CreateProductBody = {
 export type UpdateProductBody = {
   categoryId?: string;
   displayName?: string | null;
+  productCode?: string;
   status?: ProductStatus;
   serialNumber?: string | null;
+  templateId?: string;
   metadata?: Record<string, unknown> | null;
   warrantyCode?: string;
 };

@@ -186,11 +186,16 @@ export function CreateWarrantyActivationRequestFormCard({
               label={t("productSearch")}
             >
               <SearchDropdown
-                emptyLabel={t("noProduct")}
+                emptyLabel={
+                  categoryId ? t("noProduct") : t("selectCategoryFirst")
+                }
+                errorLabel={t("productLoadError")}
                 getItemDisabledReason={(product) =>
                   getProductSelectDisabledReason(product, t)
                 }
                 getItemKey={(product) => product.id}
+                id="create-activation-request-product"
+                isError={productsQuery.isError}
                 isLoading={productsQuery.isFetching}
                 items={products}
                 loadingLabel={
@@ -202,6 +207,7 @@ export function CreateWarrantyActivationRequestFormCard({
                 }
                 onItemSelect={selectProduct}
                 onReachEnd={loadMoreProducts}
+                onRetry={() => void productsQuery.refetch()}
                 onSearchChange={(value) => {
                   if (selectedProduct) clearProduct();
                   setProductSearch(value);
@@ -222,6 +228,7 @@ export function CreateWarrantyActivationRequestFormCard({
                     warrantyCode={product.warrantyCode}
                   />
                 )}
+                retryLabel={t("tryAgain")}
                 searchValue={productSearch}
                 selectedLabel={
                   selectedProduct

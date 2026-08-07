@@ -106,7 +106,6 @@ export class CreateWarrantyActivationRequestDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(120)
   warrantyDurationMonths?: number;
 
   @IsOptional()

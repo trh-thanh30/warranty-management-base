@@ -115,6 +115,19 @@ export class ProductsRepository {
     });
   }
 
+  findActiveProductTemplateById(id: string) {
+    return this.prismaService.productTemplate.findFirst({
+      where: { id, is_active: true },
+      include: {
+        assets: {
+          include: { asset: true },
+          orderBy: [{ role: 'asc' }, { sort_order: 'asc' }],
+        },
+        category_ref: true,
+      },
+    });
+  }
+
   findById(id: string) {
     return this.prismaService.product.findUnique({
       where: { id },
@@ -236,6 +249,7 @@ export class ProductsRepository {
     const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
     const where: Prisma.ProductWhereInput = {
       AND: buildEffectiveCatalogueFilters(filters),
+      deleted_at: buildProductDeletionFilter(filters.status),
       template_id: filters.templateId,
       ownerships: filters.ownerCustomerId
         ? {
@@ -372,6 +386,7 @@ export class ProductsRepository {
     const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
     const where: Prisma.ProductWhereInput = {
       AND: buildEffectiveCatalogueFilters(filters),
+      deleted_at: buildProductDeletionFilter(filters.status),
       template_id: filters.templateId,
       ownerships: filters.ownerCustomerId
         ? {
@@ -446,6 +461,10 @@ export class ProductsRepository {
       include: productInclude,
     });
   }
+}
+
+function buildProductDeletionFilter(status?: product_status) {
+  return status === product_status.DELETED ? { not: null } : null;
 }
 
 function buildEffectiveCatalogueFilters(filters: {

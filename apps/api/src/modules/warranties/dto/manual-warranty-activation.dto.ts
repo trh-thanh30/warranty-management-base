@@ -8,7 +8,6 @@ import {
   IsUUID,
   Length,
   Matches,
-  Max,
   Min,
   ValidateIf,
   ValidateNested,
@@ -61,7 +60,6 @@ export class ManualWarrantyActivationWarrantyDto {
 
   @IsInt()
   @Min(1)
-  @Max(120)
   durationMonths: number;
 
   @IsOptional()
