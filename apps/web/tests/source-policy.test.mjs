@@ -497,12 +497,14 @@ test("published images pass Trivy vulnerability gates before deployment", async 
   assert.equal(
     (publishWorkflow.match(/trivyignores: \.trivyignore\.yaml/g) ?? []).length,
     1,
-    "only the API scan should use the documented runtime exception",
+    "only the API scan should load the shared Trivy ignore file",
   );
-  assert.match(trivyIgnore, /id: CVE-2026-14257/);
-  assert.match(trivyIgnore, /pkg:npm\/brace-expansion@1\.1\.16/);
-  assert.match(trivyIgnore, /pkg:npm\/brace-expansion@2\.1\.2/);
-  assert.match(trivyIgnore, /expired_at: 2026-10-30/);
+  assert.match(trivyIgnore, /^vulnerabilities:\s*\[\]\s*$/);
+  assert.doesNotMatch(
+    trivyIgnore,
+    /CVE-2026-14257/,
+    "patched brace-expansion versions must not be suppressed",
+  );
 
   const finalScanIndex = publishWorkflow.indexOf("- name: Scan Admin image");
   const deploymentIndex = publishWorkflow.indexOf(
@@ -567,15 +569,15 @@ test("API runtime excludes migration and unused build tooling", async () => {
   assert.match(apiPackage.dependencies.nodemailer, /^\^9\./);
 
   for (const [dependency, safeVersion] of Object.entries({
-    "brace-expansion@1": "1.1.16",
-    "brace-expansion@2": "2.1.2",
-    "brace-expansion@5": "5.0.8",
+    "brace-expansion@1": "1.1.18",
+    "brace-expansion@2": "2.1.4",
+    "brace-expansion@5": "5.0.9",
     "cross-spawn@7": "7.0.6",
-    "fast-uri@3": "3.1.4",
+    "fast-uri@3": "3.1.5",
     "form-data": "4.0.6",
     "glob@10": "10.5.0",
     hono: "4.12.25",
-    "js-yaml": "4.3.0",
+    "js-yaml": "5.2.2",
     "minimatch@3": "3.1.4",
     "minimatch@9": "9.0.7",
     multer: "2.2.0",
