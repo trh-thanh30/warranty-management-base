@@ -1,41 +1,49 @@
 "use client";
 
 import { Button, cn, Input } from "@repo/ui";
-import { Loader2, Search, X } from "lucide-react";
+import { Loader2, RefreshCw, Search, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 type SearchDropdownProps<TItem> = {
   emptyLabel: string;
+  errorLabel?: string;
   getItemKey: (item: TItem) => string;
   getItemDisabledReason?: (item: TItem) => string | null | undefined;
   id?: string;
   inputClassName?: string;
   isLoading?: boolean;
+  isError?: boolean;
   items: TItem[];
   loadingLabel: string;
   onItemSelect: (item: TItem) => void;
   onReachEnd?: () => void;
+  onRetry?: () => void;
   onSearchChange: (value: string) => void;
   placeholder: string;
   renderItem: (item: TItem) => ReactNode;
+  retryLabel?: string;
   searchValue: string;
   selectedLabel?: string;
 };
 
 export function SearchDropdown<TItem>({
   emptyLabel,
+  errorLabel,
   getItemKey,
   getItemDisabledReason,
   id,
   inputClassName,
   isLoading,
+  isError,
   items,
   loadingLabel,
   onItemSelect,
   onReachEnd,
+  onRetry,
   onSearchChange,
   placeholder,
   renderItem,
+  retryLabel,
   searchValue,
   selectedLabel,
 }: SearchDropdownProps<TItem>) {
@@ -43,7 +51,8 @@ export function SearchDropdown<TItem>({
   const rootRef = useRef<HTMLDivElement>(null);
   const hasSearch = searchValue.trim().length > 0;
   const displayValue = open ? searchValue : (selectedLabel ?? searchValue);
-  const showEmpty = !isLoading && items.length === 0;
+  const showError = Boolean(isError) && !isLoading && items.length === 0;
+  const showEmpty = !showError && !isLoading && items.length === 0;
 
   const itemKeys = useMemo(
     () => new Set(items.map((item) => getItemKey(item))),
@@ -145,6 +154,25 @@ export function SearchDropdown<TItem>({
               <div className="flex items-center justify-center gap-2 px-3 py-4 text-sm text-slate-500 dark:text-slate-400">
                 <Loader2 aria-hidden="true" className="size-4 animate-spin" />
                 {loadingLabel}
+              </div>
+            ) : null}
+            {showError ? (
+              <div
+                className="flex flex-col items-center gap-3 px-3 py-5 text-center text-sm text-red-700 dark:text-red-400"
+                role="alert"
+              >
+                <span>{errorLabel}</span>
+                {onRetry && retryLabel ? (
+                  <Button
+                    className="h-11 gap-2 sm:h-9"
+                    onClick={onRetry}
+                    type="button"
+                    variant="outline"
+                  >
+                    <RefreshCw aria-hidden="true" className="size-4" />
+                    {retryLabel}
+                  </Button>
+                ) : null}
               </div>
             ) : null}
             {showEmpty ? (

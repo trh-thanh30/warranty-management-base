@@ -401,6 +401,8 @@
       "serviceCenters": "Trung tâm bảo hành",
       "dealers": "Đại lý",
       "contentPages": "Chính sách & Hỏi đáp",
+      "websiteConfig": "Cấu hình website",
+      "contactSubmissions": "Lời nhắn liên hệ",
       "categories": "Danh mục",
       "users": "Nhân viên",
       "system": "Hệ thống và nhật ký"
@@ -454,7 +456,9 @@
       "AUDIT_LOG_VIEW": "Xem nhật ký kiểm toán",
       "WEBSITE_CONFIG_VIEW": "Xem cấu hình website",
       "WEBSITE_CONFIG_UPDATE": "Chỉnh sửa cấu hình website",
-      "WEBSITE_CONFIG_PUBLISH": "Xuất bản cấu hình website"
+      "WEBSITE_CONFIG_PUBLISH": "Xuất bản cấu hình website",
+      "CONTACT_SUBMISSION_VIEW": "Xem lời nhắn liên hệ",
+      "CONTACT_SUBMISSION_UPDATE": "Cập nhật lời nhắn liên hệ"
     }
   },
   "Customers": {
@@ -1630,6 +1634,7 @@
     "customerSearchPlaceholder": "Tìm theo tên, số điện thoại, email hoặc mã khách hàng",
     "search": "Search",
     "noProduct": "Không tìm thấy sản phẩm.",
+    "productLoadError": "Không tải được danh sách sản phẩm. Vui lòng thử lại.",
     "loadingProducts": "Đang tải sản phẩm...",
     "loadingMoreProducts": "Đang tải thêm sản phẩm...",
     "productUnavailableNoWarranty": "Sản phẩm này chưa có hồ sơ bảo hành nên không thể chọn.",

@@ -14,6 +14,7 @@ import {
   formatActivationRequestCreateFieldError,
   formatDealerSearchOption,
   resolveActivationRequestCreateError,
+  resolveScopedProductSearch,
   toAdminActivationRequestBody,
 } from "./warranty-activation-requests.utils.ts";
 import type { WarrantyActivationRequestCreateFormValues } from "./warranty-activation-requests.types.ts";
@@ -179,6 +180,29 @@ test("activation request category filter matches name, code, and slug without ac
       (category) => category.code,
     ),
     ["DASHCAM"],
+  );
+});
+
+test("product search never leaks a debounced keyword into another category", () => {
+  const staleSearch = {
+    categoryId: "film-category",
+    value: "ceramic",
+  };
+
+  assert.equal(
+    resolveScopedProductSearch("dashcam-category", staleSearch),
+    undefined,
+  );
+  assert.equal(
+    resolveScopedProductSearch("film-category", staleSearch),
+    "ceramic",
+  );
+  assert.equal(
+    resolveScopedProductSearch("film-category", {
+      categoryId: "film-category",
+      value: "   ",
+    }),
+    undefined,
   );
 });
 

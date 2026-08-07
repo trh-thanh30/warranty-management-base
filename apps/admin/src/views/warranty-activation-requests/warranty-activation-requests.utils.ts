@@ -103,6 +103,15 @@ export function filterActivationRequestCategories(
   );
 }
 
+export function resolveScopedProductSearch(
+  categoryId: string,
+  search: { categoryId: string; value: string },
+) {
+  if (!categoryId || search.categoryId !== categoryId) return undefined;
+
+  return search.value.trim() || undefined;
+}
+
 export function formatActivationRequestCreateFieldError(
   message: string | undefined,
   translate: (key: string) => string,

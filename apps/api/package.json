@@ -67,6 +67,7 @@
     "db:seed-admin:dev": "dotenv -e ../../.env.development -- ts-node prisma/seed-admin.ts",
     "db:seed-admin:test": "dotenv -e ../../.env.test -- ts-node prisma/seed-admin.ts",
     "db:seed-admin:prod": "dotenv -e ../../.env.production -- ts-node prisma/seed-admin.ts",
+    "db:seed-moderator:prod": "dotenv -e ../../.env.production -- ts-node prisma/seed-moderator.production.ts",
     "test:users:dev": "cross-env NODE_ENV=development ts-node scripts/test_base_users_module.ts",
     "test:users:test": "cross-env NODE_ENV=test ts-node scripts/test_base_users_module.ts",
     "test:users:prod": "cross-env NODE_ENV=production ts-node scripts/test_base_users_module.ts",
