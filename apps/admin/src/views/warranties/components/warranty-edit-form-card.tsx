@@ -27,7 +27,10 @@ import {
   stripHtml,
   toNullableRichText,
 } from "@/src/utils/rich-text";
-import { isValidWarrantyAmount } from "../warranties.utils";
+import {
+  isValidWarrantyAmount,
+  isValidWarrantyDuration,
+} from "../warranties.utils";
 
 type WarrantyEditFormCardProps = {
   warranty: WarrantyListItem;
@@ -87,7 +90,7 @@ export function WarrantyEditFormCard({ warranty }: WarrantyEditFormCardProps) {
       setFormError(t("adjustmentReasonRequired"));
       return null;
     }
-    if (!Number.isInteger(duration) || duration < 1 || duration > 120) {
+    if (!isValidWarrantyDuration(duration)) {
       setFormError(t("durationInvalid"));
       return null;
     }
@@ -136,7 +139,6 @@ export function WarrantyEditFormCard({ warranty }: WarrantyEditFormCardProps) {
             <FormField id="edit-warranty-duration" label={t("durationMonths")}>
               <Input
                 id="edit-warranty-duration"
-                max={120}
                 min={1}
                 onChange={(event) => setDurationMonths(event.target.value)}
                 required

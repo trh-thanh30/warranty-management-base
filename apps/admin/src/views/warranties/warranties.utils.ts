@@ -61,3 +61,7 @@ export function formatWarrantyMoneyLimit(
 export function isValidWarrantyAmount(value: string | null) {
   return value === null || /^\d+(\.\d{1,2})?$/.test(value);
 }
+
+export function isValidWarrantyDuration(value: number) {
+  return Number.isInteger(value) && value >= 1;
+}

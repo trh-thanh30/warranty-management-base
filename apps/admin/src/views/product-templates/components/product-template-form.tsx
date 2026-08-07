@@ -162,7 +162,6 @@ export function ProductTemplateForm({
             id="template-warranty-duration"
             inputMode="numeric"
             min={1}
-            max={120}
             placeholder={t("defaultWarrantyDurationPlaceholder")}
             type="number"
             {...form.register("defaultWarrantyDurationMonths")}

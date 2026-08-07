@@ -8,6 +8,7 @@ import {
 } from "./products.utils.ts";
 import {
   assignProductOwnerSchema,
+  productEditFormSchema,
   productFormSchema,
 } from "./products.types.ts";
 
@@ -100,7 +101,7 @@ test("updates only physical product fields and preserves unrelated metadata", ()
         categoryId: "overridden-category-id",
         displayName: " ",
         installationPosition: " Cửa trước ",
-        productCode: "",
+        productCode: " PRD-EDIT-001 ",
         serialNumber: "",
         status: "INACTIVE",
         templateId: "template-id",
@@ -115,11 +116,28 @@ test("updates only physical product fields and preserves unrelated metadata", ()
         source: "import",
         installationPosition: "Cửa trước",
       },
+      productCode: "PRD-EDIT-001",
       serialNumber: null,
       status: "INACTIVE",
+      templateId: "template-id",
       warrantyCode: "wm-2026-new001",
     },
   );
+});
+
+test("requires a product code only when editing", () => {
+  const values = {
+    categoryId: "category-id",
+    displayName: "",
+    installationPosition: "",
+    productCode: "",
+    serialNumber: "",
+    status: "ACTIVE" as const,
+    templateId: "template-id",
+  };
+
+  assert.equal(productFormSchema.safeParse(values).success, true);
+  assert.equal(productEditFormSchema.safeParse(values).success, false);
 });
 
 test("allows a blank warranty code but rejects an invalid non-empty code", () => {

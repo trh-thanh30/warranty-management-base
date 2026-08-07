@@ -25,6 +25,33 @@ export class UpdateProductUseCase {
       throw new NotFoundError('Product not found');
     }
 
+    const requestedProductCode =
+      dto.productCode === undefined ? undefined : dto.productCode.trim();
+    if (dto.productCode !== undefined && !requestedProductCode) {
+      throw new BadRequestError('Product code is required');
+    }
+    if (
+      requestedProductCode &&
+      requestedProductCode !== existingProduct.product_code
+    ) {
+      const productWithCode =
+        await this.productsRepository.findByProductCode(requestedProductCode);
+      if (productWithCode && productWithCode.id !== id) {
+        throw new ConflictError('Product code already exists');
+      }
+    }
+
+    const isTemplateReplacement =
+      Boolean(dto.templateId) && dto.templateId !== existingProduct.template_id;
+    const replacementTemplate = isTemplateReplacement
+      ? await this.productsRepository.findActiveProductTemplateById(
+          dto.templateId!,
+        )
+      : null;
+    if (isTemplateReplacement && !replacementTemplate) {
+      throw new NotFoundError('Product template not found');
+    }
+
     if (
       dto.serialNumber &&
       dto.serialNumber !== existingProduct.serial_number
@@ -36,10 +63,15 @@ export class UpdateProductUseCase {
       }
     }
 
-    if (dto.categoryId && dto.categoryId !== existingProduct.category_id) {
+    const requestedCategoryId =
+      dto.categoryId ?? replacementTemplate?.category_id;
+    if (
+      requestedCategoryId &&
+      requestedCategoryId !== existingProduct.category_id
+    ) {
       const category =
         await this.productsRepository.findActiveProductCategoryById(
-          dto.categoryId,
+          requestedCategoryId,
         );
       if (!category) {
         throw new NotFoundError('Product category not found');
@@ -91,8 +123,11 @@ export class UpdateProductUseCase {
             create: {
               warranty_code: nextWarrantyCode,
               duration_months:
+                replacementTemplate?.default_warranty_duration_months ??
                 existingProduct.template.default_warranty_duration_months,
-              terms: existingProduct.template.default_warranty_terms,
+              terms: replacementTemplate
+                ? replacementTemplate.default_warranty_terms
+                : existingProduct.template.default_warranty_terms,
               start_date: null,
               end_date: null,
               status: warranty_status.DRAFT,
@@ -101,8 +136,15 @@ export class UpdateProductUseCase {
     }
 
     const product = await this.productsRepository.update(id, {
-      category_ref: dto.categoryId
-        ? { connect: { id: dto.categoryId } }
+      product_code:
+        requestedProductCode === existingProduct.product_code
+          ? undefined
+          : requestedProductCode,
+      template: replacementTemplate
+        ? { connect: { id: replacementTemplate.id } }
+        : undefined,
+      category_ref: requestedCategoryId
+        ? { connect: { id: requestedCategoryId } }
         : undefined,
       display_name:
         dto.displayName === undefined

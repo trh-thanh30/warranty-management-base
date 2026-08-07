@@ -147,6 +147,126 @@ describe('UpdateProductUseCase', () => {
     );
   });
 
+  it('normalizes and updates a unique product code', async () => {
+    const existing = createExistingProduct({
+      id: 'warranty-id',
+      warranty_code: 'WM-2026-EXISTING',
+    });
+    const repository = createRepository(existing);
+    const useCase = new UpdateProductUseCase(
+      repository as never,
+      { execute: jest.fn() } as never,
+    );
+
+    await useCase.execute('product-id', {
+      productCode: ' PRD-UPDATED-001 ',
+    });
+
+    expect(repository.findByProductCode).toHaveBeenCalledWith(
+      'PRD-UPDATED-001',
+    );
+    expect(repository.update).toHaveBeenCalledWith(
+      'product-id',
+      expect.objectContaining({ product_code: 'PRD-UPDATED-001' }),
+    );
+  });
+
+  it('rejects a product code already assigned to another product', async () => {
+    const existing = createExistingProduct({
+      id: 'warranty-id',
+      warranty_code: 'WM-2026-EXISTING',
+    });
+    const repository = createRepository(existing);
+    repository.findByProductCode.mockResolvedValue({ id: 'other-product-id' });
+    const useCase = new UpdateProductUseCase(
+      repository as never,
+      { execute: jest.fn() } as never,
+    );
+
+    await expect(
+      useCase.execute('product-id', { productCode: 'PRD-DUPLICATE' }),
+    ).rejects.toThrow('Product code already exists');
+
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('changes to an active template and defaults to its category', async () => {
+    const existing = createExistingProduct({
+      id: 'warranty-id',
+      warranty_code: 'WM-2026-EXISTING',
+    });
+    const repository = createRepository(existing);
+    repository.findActiveProductTemplateById.mockResolvedValue({
+      id: 'new-template-id',
+      category_id: 'new-category-id',
+      default_warranty_duration_months: 180,
+      default_warranty_terms: 'New template terms',
+    });
+    const useCase = new UpdateProductUseCase(
+      repository as never,
+      { execute: jest.fn() } as never,
+    );
+
+    await useCase.execute('product-id', { templateId: 'new-template-id' });
+
+    expect(repository.update).toHaveBeenCalledWith(
+      'product-id',
+      expect.objectContaining({
+        category_ref: { connect: { id: 'new-category-id' } },
+        template: { connect: { id: 'new-template-id' } },
+        warranty: undefined,
+      }),
+    );
+  });
+
+  it('uses the replacement template policy only when creating a missing warranty', async () => {
+    const existing = createExistingProduct(null);
+    const repository = createRepository(existing);
+    repository.findActiveProductTemplateById.mockResolvedValue({
+      id: 'new-template-id',
+      category_id: 'new-category-id',
+      default_warranty_duration_months: 180,
+      default_warranty_terms: null,
+    });
+    const useCase = new UpdateProductUseCase(
+      repository as never,
+      { execute: jest.fn().mockResolvedValue('WM-2026-NEW') } as never,
+    );
+
+    await useCase.execute('product-id', { templateId: 'new-template-id' });
+
+    expect(repository.update).toHaveBeenCalledWith(
+      'product-id',
+      expect.objectContaining({
+        warranty: {
+          create: expect.objectContaining({
+            duration_months: 180,
+            terms: null,
+          }),
+        },
+      }),
+    );
+  });
+
+  it('rejects an inactive or missing replacement template', async () => {
+    const existing = createExistingProduct({
+      id: 'warranty-id',
+      warranty_code: 'WM-2026-EXISTING',
+    });
+    const repository = createRepository(existing);
+    repository.findActiveProductTemplateById.mockResolvedValue(null);
+    const useCase = new UpdateProductUseCase(
+      repository as never,
+      { execute: jest.fn() } as never,
+    );
+
+    await expect(
+      useCase.execute('product-id', { templateId: 'inactive-template-id' }),
+    ).rejects.toThrow('Product template not found');
+
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
   it('generates a code when the existing warranty code is missing', async () => {
     const existing = createExistingProduct({
       id: 'warranty-id',
@@ -435,6 +555,7 @@ function createExistingProduct(
     id: 'product-id',
     template_id: 'template-id',
     category_id: 'category-id',
+    product_code: 'PRD-001',
     serial_number: 'SN-001',
     display_name: null,
     metadata: null,
@@ -453,7 +574,12 @@ function createExistingProduct(
 
 function createRepository(existing: ReturnType<typeof createExistingProduct>) {
   return {
+    findActiveProductTemplateById: jest.fn(),
+    findActiveProductCategoryById: jest
+      .fn()
+      .mockResolvedValue({ id: 'new-category-id' }),
     findById: jest.fn().mockResolvedValue(existing),
+    findByProductCode: jest.fn().mockResolvedValue(null),
     findByWarrantyCode: jest.fn().mockResolvedValue(null),
     update: jest
       .fn()

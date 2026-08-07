@@ -14,6 +14,7 @@ import { useToast } from "@/src/hooks/use-toast";
 import { useCategories } from "../../categories/hooks/use-categories";
 import {
   type ProductFormInput,
+  productEditFormSchema,
   productFormSchema,
   type ProductFormValues,
 } from "../products.types";
@@ -40,7 +41,7 @@ export function useProductForm({
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct(product?.id ?? null);
   const form = useForm<ProductFormInput, unknown, ProductFormValues>({
-    resolver: zodResolver(productFormSchema),
+    resolver: zodResolver(creating ? productFormSchema : productEditFormSchema),
     defaultValues: getDefaultValues(product, initialTemplate),
   });
   const { control, reset, setError, setValue } = form;
@@ -49,7 +50,7 @@ export function useProductForm({
   const previousTemplateId = useRef(selectedTemplateId);
   const templatesQuery = useProductTemplates(
     { isActive: true, limit: 100, page: 1 },
-    { enabled: creating },
+    { enabled: true },
   );
   const categoriesQuery = useCategories(
     {
@@ -63,17 +64,18 @@ export function useProductForm({
   );
   const templates = useMemo(() => {
     const items = templatesQuery.data?.items ?? [];
+    const currentTemplate = product?.template ?? initialTemplate;
     if (
-      !initialTemplate ||
-      items.some((item) => item.id === initialTemplate.id)
+      !currentTemplate ||
+      items.some((item) => item.id === currentTemplate.id)
     ) {
       return items;
     }
-    return [initialTemplate, ...items];
-  }, [initialTemplate, templatesQuery.data?.items]);
+    return [currentTemplate, ...items];
+  }, [initialTemplate, product?.template, templatesQuery.data?.items]);
   const selectedTemplate =
-    product?.template ??
     templates.find((template) => template.id === selectedTemplateId) ??
+    (product?.templateId === selectedTemplateId ? product.template : null) ??
     (initialTemplate?.id === selectedTemplateId ? initialTemplate : null);
 
   useEffect(() => {
@@ -83,7 +85,7 @@ export function useProductForm({
   }, [initialTemplate, product, reset]);
 
   useEffect(() => {
-    if (!creating || !selectedTemplate) return;
+    if (!selectedTemplate) return;
     if (previousTemplateId.current === selectedTemplate.id) return;
 
     previousTemplateId.current = selectedTemplate.id;
@@ -99,7 +101,7 @@ export function useProductForm({
         shouldValidate: true,
       },
     );
-  }, [creating, selectedCategoryId, selectedTemplate, setValue]);
+  }, [selectedCategoryId, selectedTemplate, setValue]);
 
   async function submit(values: ProductFormValues) {
     try {
@@ -174,6 +176,7 @@ function handleProductSaveError(
 
   const messages = {
     "Product code already exists": ["productCode", "duplicateProductCode"],
+    "Product code is required": ["productCode", "productCodeRequired"],
     "Product category not found": ["categoryId", "categoryNotFound"],
     "Product template not found": ["templateId", "templateNotFound"],
     "Serial number already exists": ["serialNumber", "duplicateSerialNumber"],

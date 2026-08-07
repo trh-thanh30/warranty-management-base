@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   formatWarrantyMoneyLimit,
   isValidWarrantyAmount,
+  isValidWarrantyDuration,
 } from "./warranties.utils";
 
 test("formatWarrantyMoneyLimit returns fallback for an unlimited amount", () => {
@@ -34,4 +35,11 @@ test("isValidWarrantyAmount rejects malformed or negative amounts", () => {
   assert.equal(isValidWarrantyAmount("-1"), false);
   assert.equal(isValidWarrantyAmount("1.234"), false);
   assert.equal(isValidWarrantyAmount("1,000"), false);
+});
+
+test("warranty duration has no upper month limit", () => {
+  assert.equal(isValidWarrantyDuration(180), true);
+  assert.equal(isValidWarrantyDuration(240), true);
+  assert.equal(isValidWarrantyDuration(0), false);
+  assert.equal(isValidWarrantyDuration(1.5), false);
 });

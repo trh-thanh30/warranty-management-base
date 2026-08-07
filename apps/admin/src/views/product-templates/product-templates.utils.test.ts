@@ -6,6 +6,7 @@ import {
   toCreateTemplateBody,
   toUpdateTemplateBody,
 } from "./product-templates.utils.ts";
+import { productTemplateFormSchema } from "./product-templates.types.ts";
 
 const formValues = {
   brand: " 3M ",
@@ -154,5 +155,22 @@ test("groups product template summary details for quick scanning", () => {
         ],
       },
     ],
+  );
+});
+
+test("accepts warranty durations above 120 months", () => {
+  assert.equal(
+    productTemplateFormSchema.safeParse({
+      ...formValues,
+      defaultWarrantyDurationMonths: 180,
+    }).success,
+    true,
+  );
+  assert.equal(
+    productTemplateFormSchema.safeParse({
+      ...formValues,
+      defaultWarrantyDurationMonths: 0,
+    }).success,
+    false,
   );
 });

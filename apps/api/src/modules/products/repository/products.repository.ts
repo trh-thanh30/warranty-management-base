@@ -115,6 +115,19 @@ export class ProductsRepository {
     });
   }
 
+  findActiveProductTemplateById(id: string) {
+    return this.prismaService.productTemplate.findFirst({
+      where: { id, is_active: true },
+      include: {
+        assets: {
+          include: { asset: true },
+          orderBy: [{ role: 'asc' }, { sort_order: 'asc' }],
+        },
+        category_ref: true,
+      },
+    });
+  }
+
   findById(id: string) {
     return this.prismaService.product.findUnique({
       where: { id },

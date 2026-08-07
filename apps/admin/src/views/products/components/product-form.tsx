@@ -75,45 +75,33 @@ export function ProductForm({
           id="product-template"
           label={t("productTemplate")}
         >
-          {form.creating ? (
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-              <div className="min-w-0 flex-1">
-                <Controller
-                  control={form.control}
-                  name="templateId"
-                  render={({ field }) => (
-                    <ProductTemplateCombobox
-                      disabled={form.templatesQuery.isLoading || isSubmitting}
-                      id="product-template"
-                      onValueChange={field.onChange}
-                      options={form.templates}
-                      placeholder={t("selectTemplate")}
-                      searchPlaceholder={t("searchTemplate")}
-                      value={field.value}
-                    />
-                  )}
-                />
-              </div>
-              {hasPermission(PERMISSIONS.PRODUCT_TEMPLATE_CREATE) ? (
-                <Button asChild className="shrink-0" variant="secondary">
-                  <Link href="/product-templates/create">
-                    <Plus aria-hidden="true" className="size-4" />
-                    {t("createProductTemplate")}
-                  </Link>
-                </Button>
-              ) : null}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+            <div className="min-w-0 flex-1">
+              <Controller
+                control={form.control}
+                name="templateId"
+                render={({ field }) => (
+                  <ProductTemplateCombobox
+                    disabled={form.templatesQuery.isLoading || isSubmitting}
+                    id="product-template"
+                    onValueChange={field.onChange}
+                    options={form.templates}
+                    placeholder={t("selectTemplate")}
+                    searchPlaceholder={t("searchTemplate")}
+                    value={field.value}
+                  />
+                )}
+              />
             </div>
-          ) : (
-            <Input
-              id="product-template"
-              readOnly
-              value={
-                form.selectedTemplate
-                  ? `${form.selectedTemplate.name} · ${form.selectedTemplate.sku}`
-                  : "-"
-              }
-            />
-          )}
+            {hasPermission(PERMISSIONS.PRODUCT_TEMPLATE_CREATE) ? (
+              <Button asChild className="shrink-0" variant="secondary">
+                <Link href="/product-templates/create">
+                  <Plus aria-hidden="true" className="size-4" />
+                  {t("createProductTemplate")}
+                </Link>
+              </Button>
+            ) : null}
+          </div>
         </Field>
 
         {form.selectedTemplate ? (
@@ -227,7 +215,11 @@ export function ProductForm({
           </div>
         </Field>
         <Field
-          description={form.creating ? t("productCodeDescription") : undefined}
+          description={
+            form.creating
+              ? t("productCodeDescription")
+              : t("productCodeEditDescription")
+          }
           error={formatFieldError(
             form.formState.errors.productCode?.message,
             t,
@@ -237,8 +229,11 @@ export function ProductForm({
         >
           <Input
             id="product-code"
-            placeholder={t("productCodePlaceholder")}
-            readOnly={!form.creating}
+            placeholder={
+              form.creating
+                ? t("productCodePlaceholder")
+                : t("productCodeEditPlaceholder")
+            }
             {...form.register("productCode")}
           />
         </Field>
@@ -443,6 +438,7 @@ const formatFieldError = createFieldErrorFormatter(
     "duplicateWarrantyCode",
     "installationPositionLength",
     "productCodeLength",
+    "productCodeRequired",
     "serialNumberLength",
     "templateNotFound",
     "templateRequired",
