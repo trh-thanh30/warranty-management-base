@@ -249,6 +249,7 @@ export class ProductsRepository {
     const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
     const where: Prisma.ProductWhereInput = {
       AND: buildEffectiveCatalogueFilters(filters),
+      deleted_at: buildProductDeletionFilter(filters.status),
       template_id: filters.templateId,
       ownerships: filters.ownerCustomerId
         ? {
@@ -385,6 +386,7 @@ export class ProductsRepository {
     const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
     const where: Prisma.ProductWhereInput = {
       AND: buildEffectiveCatalogueFilters(filters),
+      deleted_at: buildProductDeletionFilter(filters.status),
       template_id: filters.templateId,
       ownerships: filters.ownerCustomerId
         ? {
@@ -459,6 +461,10 @@ export class ProductsRepository {
       include: productInclude,
     });
   }
+}
+
+function buildProductDeletionFilter(status?: product_status) {
+  return status === product_status.DELETED ? { not: null } : null;
 }
 
 function buildEffectiveCatalogueFilters(filters: {
