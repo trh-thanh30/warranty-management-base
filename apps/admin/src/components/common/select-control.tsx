@@ -49,7 +49,6 @@ export function SelectControl({
   value,
 }: SelectControlProps) {
   const normalizedValue = value === "" ? EMPTY_SELECT_VALUE : value;
-  const selectedLabel = resolveSelectControlLabel(options, value);
 
   return (
     <Select
@@ -64,7 +63,7 @@ export function SelectControl({
         className={triggerClassName ?? className}
         id={id}
       >
-        <SelectValue placeholder={placeholder}>{selectedLabel}</SelectValue>
+        <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent className={contentClassName}>
         {options.map((option) => (
