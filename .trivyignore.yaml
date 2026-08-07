@@ -1,11 +1,1 @@
-vulnerabilities:
-  - id: CVE-2026-14257
-    purls:
-      - pkg:npm/brace-expansion@1.1.16
-      - pkg:npm/brace-expansion@2.1.2
-    statement: >-
-      These legacy versions are transitive dependencies of ExcelJS and MJML.
-      The API does not pass user-controlled glob patterns to them, and forcing
-      brace-expansion 5.x breaks the CommonJS contract required by minimatch
-      3.x. Reassess when the upstream dependency chains support 5.x.
-    expired_at: 2026-10-30
+vulnerabilities: []
