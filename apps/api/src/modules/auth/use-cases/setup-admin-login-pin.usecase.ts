@@ -43,7 +43,13 @@ export class SetupAdminLoginPinUseCase {
       }
 
       const pinHash = await argon2.hash(dto.pin);
-      const tokens = this.tokenService.generateTokenPair(user);
+      const tokens = this.tokenService.generateTokenPair({
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        status: user.status,
+      });
       const updatedUser = await this.prisma.user.update({
         where: { id: user.id },
         data: {

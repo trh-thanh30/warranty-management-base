@@ -67,7 +67,13 @@ export class VerifyAdminLoginPinUseCase {
       }
 
       await this.challengeService.resetPinFailures(user.id);
-      const tokens = this.tokenService.generateTokenPair(user);
+      const tokens = this.tokenService.generateTokenPair({
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        status: user.status,
+      });
       await this.prisma.user.update({
         where: { id: user.id },
         data: { refresh_token: tokens.refresh_token },

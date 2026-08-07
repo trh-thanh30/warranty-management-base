@@ -59,10 +59,19 @@ export class AuthTokenService {
     access_token: string;
     refresh_token: string;
   } {
+    // Prisma model objects may contain password hashes and a previous refresh
+    // token. Build an explicit allowlist so those fields can never enter a JWT.
+    const tokenPayload: IUserTokenPayload = {
+      id: userPayload.id,
+      email: userPayload.email,
+      username: userPayload.username,
+      role: userPayload.role,
+      status: userPayload.status,
+    };
     const fullPayload: JWTTokenPayload<IUserTokenPayload> = {
-      payload: userPayload,
+      payload: tokenPayload,
       iss: this.issuer,
-      sub: userPayload.id,
+      sub: tokenPayload.id,
       aud: this.audience,
       jti: randomUUID(),
       // exp, iat, nbf will be set by jwt.sign

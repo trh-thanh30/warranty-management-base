@@ -13,6 +13,7 @@ import {
 } from "@/src/app/stores/auth-session.store";
 import {
   isAuthEntryPoint,
+  shouldSendAuthCookies,
   shouldAttemptTokenRefresh,
   shouldClearSessionAfterUnauthorized,
 } from "@/src/lib/admin-http-client.utils";
@@ -30,7 +31,7 @@ export const adminHttpClient = axios.create({
     "x-auth-context": "admin",
   },
   timeout: 15_000,
-  withCredentials: true,
+  withCredentials: false,
 });
 
 let refreshRequest: Promise<string> | null = null;
@@ -54,6 +55,8 @@ async function refreshAccessToken(): Promise<string> {
 
 adminHttpClient.interceptors.request.use((config) => {
   const accessToken = getAuthSession().accessToken;
+
+  config.withCredentials = shouldSendAuthCookies(config.url ?? "");
 
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
