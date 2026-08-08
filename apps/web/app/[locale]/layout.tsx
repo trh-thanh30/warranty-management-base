@@ -1,5 +1,6 @@
 import { SiteSettingsProvider } from "@/src/app/providers/site-settings-provider";
 import { ToastProvider } from "@/src/app/providers/toast-provider";
+import { GoogleAnalytics } from "@/src/components/common/google-analytics";
 import { PublicQuickChat } from "@/src/components/common/public-quick-chat";
 import { SiteFooter } from "@/src/components/layout/site-footer";
 import { SiteHeader } from "@/src/components/layout/site-header";
@@ -93,6 +94,7 @@ export default async function LocaleLayout({
             </SiteSettingsProvider>
           </QueryProvider>
         </NextIntlClientProvider>
+        <GoogleAnalytics />
       </body>
     </html>
   );
