@@ -51,11 +51,35 @@ export function buildCustomerAddress({
   provinceName,
   wardName,
 }: Pick<CustomerFormValues, "addressDetail" | "provinceName" | "wardName">) {
-  const detail = addressDetail.trim();
+  const detail = deduplicateAddressSuffix(addressDetail);
   const selection = getCustomerAddressSelection({ provinceName, wardName });
   if (!selection || detail.endsWith(selection)) return detail;
 
-  return [detail, selection].filter(Boolean).join(", ");
+  return deduplicateAddressSuffix(
+    [detail, selection].filter(Boolean).join(", "),
+  );
+}
+
+export function deduplicateAddressSuffix(address: string) {
+  const parts = address
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  for (
+    let chunkLength = Math.floor(parts.length / 2);
+    chunkLength >= 1;
+    chunkLength -= 1
+  ) {
+    if (parts.length % chunkLength !== 0) continue;
+    const chunk = parts.slice(0, chunkLength);
+    const isRepeated = parts.every(
+      (part, index) => part === chunk[index % chunkLength],
+    );
+    if (isRepeated) return chunk.join(", ");
+  }
+
+  return parts.join(", ");
 }
 
 export function getCustomerDisplayName(customer: CustomerSummary) {

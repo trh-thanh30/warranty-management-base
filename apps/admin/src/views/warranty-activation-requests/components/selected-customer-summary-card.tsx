@@ -4,6 +4,7 @@ import {
   SummaryGrid,
   SummaryItem,
 } from "./activation-request-summary-card";
+import { deduplicateAddressSuffix } from "../../customers/customers.utils";
 
 type SelectedCustomerSummaryCardProps = {
   address: string | null;
@@ -54,7 +55,7 @@ export function SelectedCustomerSummaryCard({
         <SummaryItem
           icon={<MapPin aria-hidden="true" className="size-3.5" />}
           label={labels.address}
-          value={address ?? "-"}
+          value={address ? deduplicateAddressSuffix(address) : "-"}
         />
         <SummaryItem label={labels.customerCode} value={customerCode} />
       </SummaryGrid>
