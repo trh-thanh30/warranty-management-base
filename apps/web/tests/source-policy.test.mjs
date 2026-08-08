@@ -499,7 +499,9 @@ test("published images pass Trivy vulnerability gates before deployment", async 
     1,
     "only the API scan should load the shared Trivy ignore file",
   );
-  assert.match(trivyIgnore, /^vulnerabilities:\s*\[\]\s*$/);
+  assert.match(trivyIgnore, /id:\s*CVE-2026-67213/);
+  assert.match(trivyIgnore, /pkg:npm\/nanoid@3\.3\.16/);
+  assert.match(trivyIgnore, /vulnerable customAlphabet API is not used/);
   assert.doesNotMatch(
     trivyIgnore,
     /CVE-2026-14257/,
