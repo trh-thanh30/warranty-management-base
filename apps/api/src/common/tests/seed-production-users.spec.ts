@@ -28,7 +28,7 @@ describe('Production login user seed', () => {
         SEED_MODERATOR_PASSWORD: 'moderator-password',
         SEED_MODERATOR_USERNAME: 'moderator',
       },
-      (password) => `hashed:${password}`,
+      (password) => Promise.resolve(`hashed:${password}`),
     );
 
     expect(create).toHaveBeenCalledTimes(1);
@@ -69,7 +69,7 @@ describe('Production login user seed', () => {
         SEED_MODERATOR_PASSWORD: 'moderator-password',
         SEED_MODERATOR_USERNAME: 'moderator',
       },
-      (password) => `hashed:${password}`,
+      (password) => Promise.resolve(`hashed:${password}`),
     );
 
     expect(create).toHaveBeenCalledTimes(2);
@@ -117,7 +117,7 @@ describe('Production login user seed', () => {
           SEED_MODERATOR_PASSWORD: 'moderator-password',
           SEED_MODERATOR_USERNAME: 'moderator',
         },
-        (password) => `hashed:${password}`,
+        (password) => Promise.resolve(`hashed:${password}`),
       ),
     ).rejects.toThrow('must use different email addresses and usernames');
   });
