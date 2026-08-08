@@ -20,6 +20,7 @@ import {
   useWarrantyActivationRequest,
 } from "@/src/hooks/use-warranty-activation-requests";
 import { useToast } from "@/src/hooks/use-toast";
+import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import { ReviewWarrantyActivationRequestDialog } from "./components/review-warranty-activation-request-dialog";
 import {
   WarrantyActivationRequestDetailCard,
@@ -35,6 +36,7 @@ export function WarrantyActivationRequestDetailView({
   requestId,
 }: WarrantyActivationRequestDetailViewProps) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
+  const tApiErrors = useTranslations("ApiErrors");
   const { hasPermission } = usePermissions();
   const toast = useToast();
   const requestQuery = useWarrantyActivationRequest(requestId);
@@ -61,9 +63,10 @@ export function WarrantyActivationRequestDetailView({
       toast.success(t("resentCertificateEmail"));
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : t("resendCertificateEmailError"),
+        getLocalizedApiError(error, t, {
+          apiErrors: tApiErrors,
+          fallbackKey: "resendCertificateEmailError",
+        }),
       );
     }
   }

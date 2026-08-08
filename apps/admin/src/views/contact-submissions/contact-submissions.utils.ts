@@ -7,13 +7,3 @@ export function toContactSubmissionStatusQuery(
 ): ContactSubmissionStatus | undefined {
   return status === "ALL" ? undefined : status;
 }
-
-export function formatContactSubmissionCreatedAt(
-  createdAt: string,
-  locale: string,
-) {
-  return new Intl.DateTimeFormat(locale, {
-    dateStyle: "short",
-    timeStyle: "short",
-  }).format(new Date(createdAt));
-}

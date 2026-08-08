@@ -1,6 +1,7 @@
 export type DateInput = Date | number | string;
 
 export type FormatDateOptions = {
+  dateStyle?: Intl.DateTimeFormatOptions["dateStyle"];
   fallback?: string;
   locale?: Intl.LocalesArgument;
   showTime?: boolean;
@@ -13,13 +14,19 @@ export function formatDate(
   value: DateInput | null | undefined,
   options: FormatDateOptions = {},
 ) {
-  const { fallback = "-", locale, showTime = false, timeZone } = options;
+  const {
+    dateStyle = "medium",
+    fallback = "-",
+    locale,
+    showTime = false,
+    timeZone,
+  } = options;
   const date = toDate(value);
 
   if (!date) return fallback;
 
   return new Intl.DateTimeFormat(locale, {
-    dateStyle: "medium",
+    dateStyle,
     ...(showTime ? { timeStyle: "short" as const } : {}),
     ...(timeZone ? { timeZone } : {}),
   }).format(date);

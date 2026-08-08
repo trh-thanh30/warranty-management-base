@@ -1,8 +1,8 @@
 "use client";
 
 import { Ban, Eye, MoreHorizontal, Pencil, ShieldCheck } from "lucide-react";
-import { useTranslations } from "next-intl";
-import type { WarrantyListItem } from "@repo/shared";
+import { useLocale, useTranslations } from "next-intl";
+import { formatDate, type WarrantyListItem } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
   Button,
@@ -23,7 +23,6 @@ import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
 import type { WarrantySortBy } from "../warranties.types";
 import {
-  formatWarrantyDate,
   formatWarrantyOwner,
   getWarrantyProductDisplayName,
 } from "../warranties.utils";
@@ -46,6 +45,7 @@ export function WarrantiesTable({
   sortBy,
   sortOrder,
 }: WarrantiesTableProps) {
+  const locale = useLocale();
   const t = useTranslations("Warranties");
 
   return (
@@ -103,6 +103,7 @@ export function WarrantiesTable({
                 key={warranty.id}
                 onActivate={onActivate}
                 onVoid={onVoid}
+                locale={locale}
                 warranty={warranty}
               />
             ))}
@@ -116,10 +117,12 @@ export function WarrantiesTable({
 function WarrantyTableRow({
   onActivate,
   onVoid,
+  locale,
   warranty,
 }: {
   onActivate: WarrantiesTableProps["onActivate"];
   onVoid: WarrantiesTableProps["onVoid"];
+  locale: string;
   warranty: WarrantyListItem;
 }) {
   const t = useTranslations("Warranties");
@@ -136,12 +139,12 @@ function WarrantyTableRow({
       <TableCell>
         <WarrantyStatusBadge status={warranty.status} />
       </TableCell>
-      <TableCell>{formatWarrantyDate(warranty.startDate)}</TableCell>
-      <TableCell>{formatWarrantyDate(warranty.endDate)}</TableCell>
+      <TableCell>{formatDate(warranty.startDate, { locale })}</TableCell>
+      <TableCell>{formatDate(warranty.endDate, { locale })}</TableCell>
       <TableCell>
         {t("durationValue", { count: warranty.durationMonths })}
       </TableCell>
-      <TableCell>{formatWarrantyDate(warranty.createdAt)}</TableCell>
+      <TableCell>{formatDate(warranty.createdAt, { locale })}</TableCell>
       <TableCell className="text-right">
         <WarrantyActions
           onActivate={onActivate}
@@ -162,6 +165,7 @@ function WarrantyMobileCard({
   onVoid: WarrantiesTableProps["onVoid"];
   warranty: WarrantyListItem;
 }) {
+  const locale = useLocale();
   const t = useTranslations("Warranties");
 
   return (
@@ -184,11 +188,11 @@ function WarrantyMobileCard({
         />
         <WarrantyMobileField
           label={t("startDate")}
-          value={formatWarrantyDate(warranty.startDate)}
+          value={formatDate(warranty.startDate, { locale })}
         />
         <WarrantyMobileField
           label={t("endDate")}
-          value={formatWarrantyDate(warranty.endDate)}
+          value={formatDate(warranty.endDate, { locale })}
         />
       </dl>
       <div className="mt-4 flex justify-end">

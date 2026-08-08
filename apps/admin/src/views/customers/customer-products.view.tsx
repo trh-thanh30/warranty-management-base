@@ -6,7 +6,11 @@ import { SortableTableHead } from "@/src/components/common/sortable-table-head";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
-import type { ProductResponse, ProductSortBy } from "@repo/shared";
+import {
+  formatDate,
+  type ProductResponse,
+  type ProductSortBy,
+} from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
   Badge,
@@ -20,10 +24,9 @@ import {
   TableRow,
 } from "@repo/ui";
 import { ExternalLink, PackageSearch, Search } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { useProducts } from "../products/hooks/use-products";
-import { formatProductCreatedAt } from "../products/products.utils";
 import { useCustomer } from "./hooks/use-customers";
 
 type CustomerProductsViewProps = {
@@ -224,6 +227,7 @@ export function CustomerProductsView({
 }
 
 function CustomerProductRow({ product }: { product: ProductResponse }) {
+  const locale = useLocale();
   const t = useTranslations("Customers");
   const tProducts = useTranslations("Products");
 
@@ -278,7 +282,7 @@ function CustomerProductRow({ product }: { product: ProductResponse }) {
         </Badge>
       </TableCell>
       <TableCell className="whitespace-nowrap">
-        {formatProductCreatedAt(product.createdAt)}
+        {formatDate(product.createdAt, { locale })}
       </TableCell>
       <TableCell className="whitespace-nowrap text-right">
         <Button asChild size="sm" variant="ghost">

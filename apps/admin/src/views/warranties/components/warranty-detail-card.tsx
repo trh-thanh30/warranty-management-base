@@ -4,11 +4,10 @@ import { CalendarDays, Package, ShieldCheck, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import type { WarrantyListItem } from "@repo/shared";
+import { formatDate, type WarrantyListItem } from "@repo/shared";
 import { Card, CardContent, CardHeader, CardTitle, Skeleton } from "@repo/ui";
 import {
   formatWarrantyMoneyLimit,
-  formatWarrantyDate,
   formatWarrantyOwner,
   formatWarrantyUser,
   getWarrantyProductDisplayName,
@@ -35,11 +34,11 @@ export function WarrantyDetailCard({ warranty }: WarrantyDetailCardProps) {
       },
       {
         label: t("startDate"),
-        value: formatWarrantyDate(warranty.startDate, locale),
+        value: formatDate(warranty.startDate, { locale }),
       },
       {
         label: t("endDate"),
-        value: formatWarrantyDate(warranty.endDate, locale),
+        value: formatDate(warranty.endDate, { locale }),
       },
       {
         label: t("duration"),
@@ -70,7 +69,7 @@ export function WarrantyDetailCard({ warranty }: WarrantyDetailCardProps) {
       },
       {
         label: t("createdAt"),
-        value: formatWarrantyDate(warranty.createdAt, locale),
+        value: formatDate(warranty.createdAt, { locale }),
       },
       {
         label: t("activatedBy"),
@@ -81,7 +80,7 @@ export function WarrantyDetailCard({ warranty }: WarrantyDetailCardProps) {
       },
       {
         label: t("voidedAt"),
-        value: formatWarrantyDate(warranty.voidedAt, locale),
+        value: formatDate(warranty.voidedAt, { locale }),
       },
       {
         label: t("voidedBy"),

@@ -1,12 +1,4 @@
-import {
-  formatDate,
-  type CategoryResponse,
-  type CategoryTreeNode,
-} from "@repo/shared";
-
-export function formatCategoryCreatedAt(createdAt: string) {
-  return formatDate(createdAt);
-}
+import type { CategoryResponse, CategoryTreeNode } from "@repo/shared";
 
 export function getCategoryParentLabel(
   category: CategoryResponse,

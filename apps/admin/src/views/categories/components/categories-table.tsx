@@ -9,8 +9,12 @@ import {
   Pencil,
   SlidersHorizontal,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
-import type { CategorySortBy, CategoryTreeNode } from "@repo/shared";
+import { useLocale, useTranslations } from "next-intl";
+import {
+  formatDate,
+  type CategorySortBy,
+  type CategoryTreeNode,
+} from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
   Button,
@@ -32,7 +36,6 @@ import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
 import { stripHtml } from "@/src/utils/rich-text";
 import {
-  formatCategoryCreatedAt,
   getCategoryDisplayCode,
   groupVisibleCategoryBranches,
 } from "../categories.utils";
@@ -176,6 +179,8 @@ function CategoryTableRow({
   onToggle: (categoryId: string) => void;
   parentName: string | null;
 }) {
+  const locale = useLocale();
+
   return (
     <TableRow className={cn(category.isContextOnly && "bg-slate-50/70")}>
       <TableCell>
@@ -197,7 +202,7 @@ function CategoryTableRow({
       <TableCell>
         <CategoryStatusBadge isActive={category.isActive} />
       </TableCell>
-      <TableCell>{formatCategoryCreatedAt(category.createdAt)}</TableCell>
+      <TableCell>{formatDate(category.createdAt, { locale })}</TableCell>
       <TableCell className="text-right">
         <CategoryActionsMenu category={category} onDeactivate={onDeactivate} />
       </TableCell>
@@ -294,6 +299,7 @@ function CategoryMobileCard({
   onToggle: (categoryId: string) => void;
   parentName: string | null;
 }) {
+  const locale = useLocale();
   const t = useTranslations("Categories");
   const hasChildren = category.children.length > 0;
 
@@ -357,7 +363,7 @@ function CategoryMobileCard({
         />
         <CategoryMobileField
           label={t("createdAt")}
-          value={formatCategoryCreatedAt(category.createdAt)}
+          value={formatDate(category.createdAt, { locale })}
         />
       </dl>
     </article>

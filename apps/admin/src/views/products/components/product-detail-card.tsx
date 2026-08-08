@@ -2,7 +2,7 @@
 
 import { useMemo, useState, type ReactNode } from "react";
 import Lightbox from "yet-another-react-lightbox";
-import type { ProductResponse } from "@repo/shared";
+import { formatDate, type ProductResponse } from "@repo/shared";
 import {
   Card,
   CardContent,
@@ -11,9 +11,8 @@ import {
   CardTitle,
   Skeleton,
 } from "@repo/ui";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
-  formatProductCreatedAt,
   formatProductOwner,
   getProductInstallationPosition,
 } from "../products.utils";
@@ -31,6 +30,7 @@ export function ProductDetailCard({
   product,
   title,
 }: ProductDetailCardProps) {
+  const locale = useLocale();
   const t = useTranslations("Products");
   const [previewIndex, setPreviewIndex] = useState(-1);
   const installationPosition = getProductInstallationPosition(product.metadata);
@@ -130,7 +130,7 @@ export function ProductDetailCard({
           </div>
           <DetailItem
             label={t("createdAt")}
-            value={formatProductCreatedAt(product.createdAt)}
+            value={formatDate(product.createdAt, { locale })}
           />
         </DetailSection>
 

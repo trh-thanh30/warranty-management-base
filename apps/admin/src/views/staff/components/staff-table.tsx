@@ -1,7 +1,7 @@
 "use client";
 
 import { MoreHorizontal, Pencil, ShieldCheck, UserRoundX } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   formatDate,
   type ListUsersQuery,
@@ -54,6 +54,7 @@ export function StaffTable({
   sortBy,
   sortOrder,
 }: StaffTableProps) {
+  const locale = useLocale();
   const t = useTranslations("Staff");
 
   return (
@@ -115,6 +116,7 @@ export function StaffTable({
                 key={user.id}
                 onPermissions={onPermissions}
                 onToggleStatus={onToggleStatus}
+                locale={locale}
                 user={user}
               />
             ))}
@@ -128,8 +130,9 @@ export function StaffTable({
 function StaffTableRow({
   onPermissions,
   onToggleStatus,
+  locale,
   user,
-}: StaffTableActionProps & { user: UserAccountSummary }) {
+}: StaffTableActionProps & { locale: string; user: UserAccountSummary }) {
   const t = useTranslations("Staff");
 
   return (
@@ -142,7 +145,7 @@ function StaffTableRow({
         <StaffStatusBadge status={user.status} />
       </TableCell>
       <TableCell>{user.isVerified ? t("yes") : t("no")}</TableCell>
-      <TableCell>{formatStaffCreatedAt(user.createdAt)}</TableCell>
+      <TableCell>{formatDate(user.createdAt, { locale })}</TableCell>
       <TableCell className="text-right">
         <StaffActionsMenu
           onPermissions={onPermissions}
@@ -180,6 +183,7 @@ function StaffMobileCard({
   onToggleStatus,
   user,
 }: StaffTableActionProps & { user: UserAccountSummary }) {
+  const locale = useLocale();
   const t = useTranslations("Staff");
 
   return (
@@ -223,7 +227,7 @@ function StaffMobileCard({
             {t("createdAt")}
           </dt>
           <dd className="mt-1 text-slate-950 dark:text-slate-50">
-            {formatStaffCreatedAt(user.createdAt)}
+            {formatDate(user.createdAt, { locale })}
           </dd>
         </div>
       </dl>
@@ -304,8 +308,4 @@ function StaffActionsMenu({
 
 function getStaffDisplayName(user: UserAccountSummary) {
   return user.fullName || user.username;
-}
-
-function formatStaffCreatedAt(createdAt: string) {
-  return formatDate(createdAt);
 }

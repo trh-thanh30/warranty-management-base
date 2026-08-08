@@ -11,6 +11,7 @@ import {
   type UpdateCustomerBody,
 } from "@repo/shared";
 import { useToast } from "@/src/hooks/use-toast";
+import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import {
   customerFormSchema,
   type CustomerFormValues,
@@ -27,6 +28,7 @@ export function useCustomerForm({
   onSaved: (customer?: CustomerSummary) => void;
 }) {
   const t = useTranslations("Customers");
+  const tApiErrors = useTranslations("ApiErrors");
   const toast = useToast();
   const creating = !customer;
   const createCustomer = useCreateCustomer();
@@ -72,8 +74,7 @@ export function useCustomerForm({
         return;
       }
 
-      const message =
-        error instanceof HttpClientError ? error.message : t("saveError");
+      const message = getLocalizedApiError(error, t, { apiErrors: tApiErrors });
       setError("root", { message });
       toast.error(message);
     }

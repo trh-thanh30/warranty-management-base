@@ -8,7 +8,7 @@ import {
   MoreHorizontal,
   XCircle,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import type {
   WarrantyActivationRequestSortBy,
@@ -62,6 +62,7 @@ export function WarrantyActivationRequestsTable({
   sortBy,
   sortOrder,
 }: WarrantyActivationRequestsTableProps) {
+  const locale = useLocale();
   const t = useTranslations("WarrantyActivationRequestsAdmin");
 
   return (
@@ -74,6 +75,7 @@ export function WarrantyActivationRequestsTable({
             onDownloadCertificate={onDownloadCertificate}
             onViewCertificate={onViewCertificate}
             request={request}
+            locale={locale}
           />
         ))}
       </div>
@@ -127,6 +129,7 @@ export function WarrantyActivationRequestsTable({
                 onDownloadCertificate={onDownloadCertificate}
                 onViewCertificate={onViewCertificate}
                 request={request}
+                locale={locale}
               />
             ))}
           </TableBody>
@@ -140,11 +143,13 @@ function WarrantyActivationRequestTableRow({
   onAction,
   onDownloadCertificate,
   onViewCertificate,
+  locale,
   request,
 }: {
   onAction: WarrantyActivationRequestsTableProps["onAction"];
   onDownloadCertificate: WarrantyActivationRequestsTableProps["onDownloadCertificate"];
   onViewCertificate: WarrantyActivationRequestsTableProps["onViewCertificate"];
+  locale: string;
   request: WarrantyActivationRequestSummary;
 }) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
@@ -185,7 +190,7 @@ function WarrantyActivationRequestTableRow({
         />
       </TableCell>
       <TableCell className="whitespace-nowrap">
-        {formatActivationRequestDate(request.createdAt)}
+        {formatActivationRequestDate(request.createdAt, locale)}
       </TableCell>
       <TableCell className="text-right">
         <WarrantyActivationRequestActions
@@ -203,11 +208,13 @@ function WarrantyActivationRequestMobileCard({
   onAction,
   onDownloadCertificate,
   onViewCertificate,
+  locale,
   request,
 }: {
   onAction: WarrantyActivationRequestsTableProps["onAction"];
   onDownloadCertificate: WarrantyActivationRequestsTableProps["onDownloadCertificate"];
   onViewCertificate: WarrantyActivationRequestsTableProps["onViewCertificate"];
+  locale: string;
   request: WarrantyActivationRequestSummary;
 }) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
@@ -247,7 +254,7 @@ function WarrantyActivationRequestMobileCard({
         <MobileField label={t("warrantyCode")} value={request.warrantyCode} />
         <MobileField
           label={t("createdAt")}
-          value={formatActivationRequestDate(request.createdAt)}
+          value={formatActivationRequestDate(request.createdAt, locale)}
         />
         <MobileField label={t("phone")} value={request.customerPhone} />
         <MobileField label={t("product")} value={request.productName ?? "-"} />

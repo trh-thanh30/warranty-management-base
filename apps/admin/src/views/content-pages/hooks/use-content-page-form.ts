@@ -4,12 +4,9 @@ import { useEffect, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import {
-  getRemovedMediaUrls,
-  HttpClientError,
-  type ContentPageSummary,
-} from "@repo/shared";
+import { getRemovedMediaUrls, type ContentPageSummary } from "@repo/shared";
 import { useToast } from "@/src/hooks/use-toast";
+import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import {
   contentPageFormSchema,
   type ContentPageFormValues,
@@ -32,6 +29,7 @@ export function useContentPageForm({
   onSaved: () => void;
 }) {
   const t = useTranslations("ContentPages");
+  const tApiErrors = useTranslations("ApiErrors");
   const toast = useToast();
   const createPage = useCreateContentPage();
   const updatePage = useUpdateContentPage(page?.id ?? null);
@@ -89,8 +87,7 @@ export function useContentPageForm({
         toast.error(message);
         return;
       }
-      const message =
-        error instanceof HttpClientError ? error.message : t("saveError");
+      const message = getLocalizedApiError(error, t, { apiErrors: tApiErrors });
       form.setError("root", { message });
       toast.error(message);
     }

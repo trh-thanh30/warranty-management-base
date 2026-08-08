@@ -1,15 +1,4 @@
-import {
-  formatDate,
-  type WarrantyListItem,
-  type WarrantyUserSummary,
-} from "@repo/shared";
-
-export function formatWarrantyDate(
-  value: string | null | undefined,
-  locale?: string,
-) {
-  return formatDate(value, { locale });
-}
+import { type WarrantyListItem, type WarrantyUserSummary } from "@repo/shared";
 
 export function formatWarrantyUser(
   user: WarrantyUserSummary | null | undefined,

@@ -16,7 +16,6 @@ import {
   adminLoginSchema,
   ADMIN_LOGIN_CHALLENGE_METHOD,
   ADMIN_TWO_FACTOR_METHOD,
-  HttpClientError,
   type AdminLoginChallengeResponse,
   type AdminLoginInput,
   type AdminLoginStartResponse,
@@ -26,6 +25,7 @@ import { useAuth } from "@/src/app/providers/auth-provider";
 import { consumeAuthRedirectReason } from "@/src/app/stores/auth-session.store";
 import { useRouter } from "@/src/i18n/navigation";
 import { useToast } from "@/src/hooks/use-toast";
+import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import { TwoFactorForm } from "./two-factor-form";
 import { PinTwoFactorForm } from "./pin-two-factor-form";
 import { MethodSelectionForm } from "./method-selection-form";
@@ -37,6 +37,7 @@ type LoginFormProps = {
 
 export function LoginForm({ onFlowChange }: LoginFormProps) {
   const t = useTranslations("Login");
+  const tApiErrors = useTranslations("ApiErrors");
   const [showPassword, setShowPassword] = useState(false);
   const [loginChallenge, setLoginChallenge] =
     useState<AdminLoginStartResponse | null>(null);
@@ -79,7 +80,10 @@ export function LoginForm({ onFlowChange }: LoginFormProps) {
       onFlowChange?.({ step: "METHOD_SELECTION", challenge: nextChallenge });
     } catch (error) {
       toast.error(
-        error instanceof HttpClientError ? error.message : t("genericError"),
+        getLocalizedApiError(error, t, {
+          apiErrors: tApiErrors,
+          fallbackKey: "genericError",
+        }),
       );
     }
   }

@@ -11,6 +11,7 @@ import {
 } from "@repo/shared";
 import { useProductTemplates } from "@/src/hooks/use-product-templates";
 import { useToast } from "@/src/hooks/use-toast";
+import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import { useCategories } from "../../categories/hooks/use-categories";
 import {
   type ProductFormInput,
@@ -36,6 +37,7 @@ export function useProductForm({
   product: ProductResponse | null;
 }) {
   const t = useTranslations("Products");
+  const tApiErrors = useTranslations("ApiErrors");
   const toast = useToast();
   const creating = !product;
   const createProduct = useCreateProduct();
@@ -119,8 +121,7 @@ export function useProductForm({
         return;
       }
 
-      const message =
-        error instanceof HttpClientError ? error.message : t("saveError");
+      const message = getLocalizedApiError(error, t, { apiErrors: tApiErrors });
       setError("root", { message });
       toast.error(message);
     }

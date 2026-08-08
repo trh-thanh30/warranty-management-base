@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import type { WarrantyClaimSummary } from "@repo/shared";
 import { formatClaimDate } from "../warranty-claims.utils";
@@ -36,6 +36,7 @@ function StateItem({
 export function WarrantyClaimStateSummary({
   claim,
 }: WarrantyClaimStateSummaryProps) {
+  const locale = useLocale();
   const t = useTranslations("WarrantyClaims");
 
   return (
@@ -50,7 +51,7 @@ export function WarrantyClaimStateSummary({
         <WarrantyClaimOverdueBadge claim={claim} />
         {claim.dueAt ? (
           <span className="text-xs text-slate-500 dark:text-slate-400">
-            {t("slaDueDate", { date: formatClaimDate(claim.dueAt) })}
+            {t("slaDueDate", { date: formatClaimDate(claim.dueAt, locale) })}
           </span>
         ) : null}
       </StateItem>

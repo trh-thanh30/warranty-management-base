@@ -1,5 +1,6 @@
 import {
   HttpClientError,
+  formatDate,
   type CategoryResponse,
   type CreateAdminWarrantyActivationRequestBody,
   type DealerResponse,
@@ -12,12 +13,11 @@ import type {
 } from "@/src/services/locations/locations.types";
 import { translateFieldError } from "@/src/utils";
 import { compactActivationInputValues } from "@/src/utils/category-activation-fields";
+import {
+  getLocalizedApiError,
+  type ApiErrorTranslator,
+} from "@/src/lib/localized-api-error.utils";
 import type { WarrantyActivationRequestCreateFormValues } from "./warranty-activation-requests.types";
-
-const DATE_TIME_FORMATTER = new Intl.DateTimeFormat("vi-VN", {
-  dateStyle: "medium",
-  timeStyle: "short",
-});
 
 const CREATE_FIELD_ERROR_KEYS = new Set([
   "addressRequired",
@@ -45,10 +45,11 @@ const CREATE_API_ERROR_CODES = new Set([
   "WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION",
 ]);
 
-export function formatActivationRequestDate(value: string | null) {
-  if (!value) return "-";
-
-  return DATE_TIME_FORMATTER.format(new Date(value));
+export function formatActivationRequestDate(
+  value: string | null,
+  locale: string,
+) {
+  return formatDate(value, { locale, showTime: true });
 }
 
 export function formatActivationRequestCustomer(
@@ -122,6 +123,7 @@ export function formatActivationRequestCreateFieldError(
 export function resolveActivationRequestCreateError(
   error: unknown,
   translate: (key: string) => string,
+  apiErrors?: ApiErrorTranslator,
 ) {
   if (!(error instanceof HttpClientError)) return translate("saveError");
 
@@ -132,10 +134,12 @@ export function resolveActivationRequestCreateError(
       : undefined;
 
   if (detailCode && CREATE_API_ERROR_CODES.has(detailCode)) {
+    if (apiErrors?.has?.(detailCode)) return apiErrors(detailCode);
+
     return translate(`apiErrors.${detailCode}`);
   }
 
-  return error.message || translate("saveError");
+  return getLocalizedApiError(error, translate, { apiErrors });
 }
 
 export function toAdminActivationRequestBody({

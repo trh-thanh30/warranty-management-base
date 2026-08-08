@@ -11,11 +11,12 @@ import {
   Trash2,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import type {
-  ContentPageSortBy,
-  ContentPageStatus,
-  ContentPageSummary,
-  PaginatedResponse,
+import {
+  formatDate,
+  type ContentPageSortBy,
+  type ContentPageStatus,
+  type ContentPageSummary,
+  type PaginatedResponse,
 } from "@repo/shared";
 import {
   Button,
@@ -51,7 +52,6 @@ import type {
   ContentPageKindFilter,
   ContentPageStatusFilter,
 } from "../content-pages.types";
-import { formatContentPageDate } from "../content-pages.utils";
 import { ContentPageStatusBadge } from "./content-page-status-badge";
 
 type Props = {
@@ -214,7 +214,8 @@ function DirectoryResults(
               </span>
             </div>
             <p className="mt-3 text-xs text-slate-500">
-              {t("updatedAt")}: {formatContentPageDate(page.updatedAt, locale)}
+              {t("updatedAt")}:{" "}
+              {formatDate(page.updatedAt, { locale, showTime: true })}
             </p>
           </article>
         ))}
@@ -258,7 +259,7 @@ function DirectoryResults(
                   <ContentPageStatusBadge status={page.status} />
                 </TableCell>
                 <TableCell>
-                  {formatContentPageDate(page.updatedAt, locale)}
+                  {formatDate(page.updatedAt, { locale, showTime: true })}
                 </TableCell>
                 <TableCell className="text-right">
                   <Actions {...props} page={page} />

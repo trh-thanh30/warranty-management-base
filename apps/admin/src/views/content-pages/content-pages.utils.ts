@@ -45,11 +45,3 @@ export function getContentPageSaveError(error: unknown) {
 
   return null;
 }
-
-export function formatContentPageDate(value: string | null, locale: string) {
-  if (!value) return "-";
-  return new Intl.DateTimeFormat(locale, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
-}

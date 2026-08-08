@@ -2,7 +2,11 @@
 
 import { Bell, Inbox } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import type { AdminNotificationSummary, PaginatedResponse } from "@repo/shared";
+import {
+  formatDate,
+  type AdminNotificationSummary,
+  type PaginatedResponse,
+} from "@repo/shared";
 import {
   Badge,
   Button,
@@ -16,10 +20,7 @@ import {
 } from "@repo/ui";
 import { PaginationControls } from "@repo/ui/pagination-controls";
 import { StatePanel } from "@/src/components/common/state-panel";
-import {
-  formatNotificationDate,
-  formatNotificationType,
-} from "../notifications.utils";
+import { formatNotificationType } from "../notifications.utils";
 
 type AdminNotificationListProps = {
   data?: PaginatedResponse<AdminNotificationSummary>;
@@ -113,7 +114,7 @@ export function AdminNotificationList({
               />
               <AdminField
                 label={t("createdAt")}
-                value={formatNotificationDate(item.createdAt, locale)}
+                value={formatDate(item.createdAt, { locale, showTime: true })}
               />
             </dl>
           </article>
@@ -156,7 +157,7 @@ export function AdminNotificationList({
                 </TableCell>
                 <TableCell>{item.recipientCount}</TableCell>
                 <TableCell className="whitespace-nowrap">
-                  {formatNotificationDate(item.createdAt, locale)}
+                  {formatDate(item.createdAt, { locale, showTime: true })}
                 </TableCell>
               </TableRow>
             ))}

@@ -14,10 +14,11 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import type {
-  ContactSubmissionResponse,
-  ContactSubmissionStatus,
-  ListContactSubmissionsResponse,
+import {
+  formatDate,
+  type ContactSubmissionResponse,
+  type ContactSubmissionStatus,
+  type ListContactSubmissionsResponse,
 } from "@repo/shared";
 import { getAllowedContactSubmissionTransitions } from "@repo/shared/constants";
 import {
@@ -50,7 +51,6 @@ import {
   CONTACT_SUBMISSION_STATUS_FILTERS,
   type ContactSubmissionStatusFilter,
 } from "../contact-submissions.constants";
-import { formatContactSubmissionCreatedAt } from "../contact-submissions.utils";
 import { Link } from "@/src/i18n/navigation";
 import { ContactSubmissionStatusBadge } from "./contact-submission-status-badge";
 
@@ -336,7 +336,11 @@ function ContactSubmissionTableRow({
         <ContactSubmissionStatusBadge status={submission.status} />
       </TableCell>
       <TableCell>
-        {formatContactSubmissionCreatedAt(submission.createdAt, locale)}
+        {formatDate(submission.createdAt, {
+          dateStyle: "short",
+          locale,
+          showTime: true,
+        })}
       </TableCell>
       <TableCell className="text-right">
         <RowActions
@@ -398,7 +402,11 @@ function ContactSubmissionMobileCard({
         {submission.content}
       </p>
       <p className="mt-4 text-xs text-slate-500">
-        {formatContactSubmissionCreatedAt(submission.createdAt, locale)}
+        {formatDate(submission.createdAt, {
+          dateStyle: "short",
+          locale,
+          showTime: true,
+        })}
       </p>
     </article>
   );

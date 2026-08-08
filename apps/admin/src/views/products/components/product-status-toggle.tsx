@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { HttpClientError, type ProductResponse } from "@repo/shared";
+import { type ProductResponse } from "@repo/shared";
 import { useToast } from "@/src/hooks/use-toast";
+import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import { productsService } from "@/src/services/products/products.service";
 import { productKeys } from "../hooks/use-products";
 import {
@@ -14,6 +15,7 @@ import {
 
 export function ProductStatusToggle({ product }: { product: ProductResponse }) {
   const t = useTranslations("Products");
+  const tApiErrors = useTranslations("ApiErrors");
   const toast = useToast();
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<ProductEditableStatus>(
@@ -24,10 +26,10 @@ export function ProductStatusToggle({ product }: { product: ProductResponse }) {
       productsService.updateProduct(product.id, { status: nextStatus }),
     onError: (error) => {
       setStatus(toEditableStatus(product.status));
-      const message =
-        error instanceof HttpClientError
-          ? error.message
-          : t("statusUpdateError");
+      const message = getLocalizedApiError(error, t, {
+        apiErrors: tApiErrors,
+        fallbackKey: "statusUpdateError",
+      });
       toast.error(message);
     },
     onSuccess: () => {

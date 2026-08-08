@@ -12,6 +12,10 @@ import {
   WARRANTY_CLAIM_ATTACHMENT_MIME_TYPES,
   WARRANTY_CLAIM_TERMINAL_STATUSES,
 } from "./warranty-claims.constants.ts";
+import {
+  getLocalizedApiError,
+  type ApiErrorTranslator,
+} from "@/src/lib/localized-api-error.utils";
 import type {
   WarrantyClaimCreateFormValues,
   WarrantyClaimRequesterSource,
@@ -75,12 +79,18 @@ export function formatAttachmentSize(size: number) {
   return `${Math.round((size / (1024 * 1024)) * 10) / 10} MB`;
 }
 
-export function formatClaimDate(value: string | null | undefined) {
-  return formatDate(value, { locale: "vi-VN" });
+export function formatClaimDate(
+  value: string | null | undefined,
+  locale: string,
+) {
+  return formatDate(value, { locale });
 }
 
-export function formatClaimDateTime(value: string | null | undefined) {
-  return formatDate(value, { locale: "vi-VN", showTime: true });
+export function formatClaimDateTime(
+  value: string | null | undefined,
+  locale: string,
+) {
+  return formatDate(value, { locale, showTime: true });
 }
 
 export function formatResolutionHours(value: number | null | undefined) {
@@ -144,12 +154,17 @@ export function translateWarrantyClaimCreateFieldError(
 export function resolveWarrantyClaimCreateError(
   error: unknown,
   translate: TranslateWarrantyClaim,
+  apiErrors?: ApiErrorTranslator,
 ) {
   if (!(error instanceof HttpClientError)) return translate("saveError");
 
   const key = CREATE_ERROR_MESSAGE_KEYS[error.message.trim().toLowerCase()];
 
-  return key ? translate(key) : error.message || translate("saveError");
+  return key
+    ? apiErrors?.has?.(key.replace("apiErrors.", ""))
+      ? apiErrors(key.replace("apiErrors.", ""))
+      : translate(key)
+    : getLocalizedApiError(error, translate, { apiErrors });
 }
 
 export function isClaimOverdue(claim: WarrantyClaimSummary) {

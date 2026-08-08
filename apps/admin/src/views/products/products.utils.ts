@@ -1,15 +1,10 @@
 import {
-  formatDate,
   type CreateProductBody,
   type ProductResponse,
   type UpdateProductBody,
 } from "@repo/shared";
 import { toNullableValue, toOptionalValue } from "../../utils/form.ts";
 import type { ProductFormValues } from "./products.types";
-
-export function formatProductCreatedAt(createdAt: string) {
-  return formatDate(createdAt);
-}
 
 export function formatProductOwner(product: ProductResponse) {
   if (!product.owner) return "-";

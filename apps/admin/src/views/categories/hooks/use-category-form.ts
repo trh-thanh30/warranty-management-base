@@ -16,6 +16,7 @@ import {
   type UpdateCategoryBody,
 } from "@repo/shared";
 import { useToast } from "@/src/hooks/use-toast";
+import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import {
   categoryFormSchema,
   type CategoryFormValues,
@@ -36,6 +37,7 @@ export function useCategoryForm({
   onSaved: () => void;
 }) {
   const t = useTranslations("Categories");
+  const tApiErrors = useTranslations("ApiErrors");
   const toast = useToast();
   const creating = !category;
   const createCategory = useCreateCategory();
@@ -88,8 +90,7 @@ export function useCategoryForm({
         return;
       }
 
-      const message =
-        error instanceof HttpClientError ? error.message : t("saveError");
+      const message = getLocalizedApiError(error, t, { apiErrors: tApiErrors });
       setError("root", { message });
       toast.error(message);
     }
