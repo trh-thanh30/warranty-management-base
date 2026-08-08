@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@repo/ui";
 import { useTranslations } from "next-intl";
+import { Link } from "@/src/i18n/navigation";
 
 type Props = { items: DealerActivatedCustomerSummary[] };
 
@@ -42,7 +43,18 @@ export function DealerActivatedCustomersTable({ items }: Props) {
                 </div>
               </TableCell>
               <TableCell>
-                <div className="font-medium">{item.product.name ?? "-"}</div>
+                <div className="font-medium">
+                  {item.product.id ? (
+                    <Link
+                      className="transition-colors hover:text-blue-600 hover:underline"
+                      href={`/products/${item.product.id}`}
+                    >
+                      {item.product.name ?? "-"}
+                    </Link>
+                  ) : (
+                    (item.product.name ?? "-")
+                  )}
+                </div>
                 <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                   {[item.product.productCode, item.product.serialNumber]
                     .filter(Boolean)
