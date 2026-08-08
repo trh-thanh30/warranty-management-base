@@ -200,18 +200,22 @@ export function useCreateWarrantyActivationRequestForm({
     }
   }
 
-  function clearCustomer() {
+  function clearCustomer(shouldValidate = true) {
     setSelectedCustomer(null);
     setPendingWardName(null);
-    setFormValues(form.setValue, {
-      addressDetail: "",
-      customerBirthdate: "",
-      customerEmail: "",
-      customerName: "",
-      customerPhone: "",
-      provinceCode: "",
-      wardCode: "",
-    });
+    setFormValues(
+      form.setValue,
+      {
+        addressDetail: "",
+        customerBirthdate: "",
+        customerEmail: "",
+        customerName: "",
+        customerPhone: "",
+        provinceCode: "",
+        wardCode: "",
+      },
+      shouldValidate,
+    );
   }
 
   function selectProduct(product: ProductResponse) {
@@ -370,11 +374,12 @@ export function useCreateWarrantyActivationRequestForm({
 function setFormValues(
   setValue: UseFormSetValue<WarrantyActivationRequestCreateFormValues>,
   values: Partial<WarrantyActivationRequestCreateFormValues>,
+  shouldValidate = true,
 ) {
   for (const [field, value] of Object.entries(values)) {
     setValue(field as keyof WarrantyActivationRequestCreateFormValues, value, {
       shouldDirty: true,
-      shouldValidate: true,
+      shouldValidate,
     });
   }
 }

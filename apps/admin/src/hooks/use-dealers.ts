@@ -10,6 +10,8 @@ import {
 import type {
   CreateDealerBody,
   DealerResponse,
+  DealerActivatedCustomerSummary,
+  ListDealerActivatedCustomersQuery,
   ListDealersQuery,
   PaginatedResponse,
   UpdateDealerBody,
@@ -24,7 +26,27 @@ export const dealerKeys = {
   list: (query: ListDealersQuery) => [...dealerKeys.lists(), query] as const,
   lists: () => [...dealerKeys.all, "list"] as const,
   provinces: () => [...dealerKeys.all, "provinces"] as const,
+  activatedCustomers: (
+    dealerId: string,
+    query: ListDealerActivatedCustomersQuery,
+  ) => [...dealerKeys.all, "activated-customers", dealerId, query] as const,
 };
+
+export function useDealerActivatedCustomers(
+  dealerId: string,
+  query: ListDealerActivatedCustomersQuery,
+  options?: Pick<
+    UseQueryOptions<PaginatedResponse<DealerActivatedCustomerSummary>>,
+    "enabled"
+  >,
+) {
+  return useQuery({
+    ...options,
+    queryKey: dealerKeys.activatedCustomers(dealerId, query),
+    queryFn: () => dealersService.listActivatedCustomers(dealerId, query),
+    placeholderData: keepPreviousData,
+  });
+}
 
 export function useDealers(
   query: ListDealersQuery,

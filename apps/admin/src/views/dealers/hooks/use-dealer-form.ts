@@ -20,7 +20,7 @@ export function useDealerForm({
   onSaved,
 }: {
   dealer: DealerResponse | null;
-  onSaved: () => void;
+  onSaved: (dealer?: DealerResponse) => void;
 }) {
   const t = useTranslations("Dealers");
   const toast = useToast();
@@ -48,9 +48,11 @@ export function useDealerForm({
   async function submit(values: DealerFormValues) {
     try {
       if (creating) {
-        await createDealer.mutateAsync(toCreateBody(values));
+        const createdDealer = await createDealer.mutateAsync(
+          toCreateBody(values),
+        );
         toast.success(t("created"));
-        onSaved();
+        onSaved(createdDealer);
         return;
       }
 

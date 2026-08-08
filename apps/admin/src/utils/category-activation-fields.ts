@@ -65,6 +65,7 @@ export function getCategoryActivationFields(
   category: CategoryResponse | null,
   fallback: CategoryActivationFieldConfig[] = DEFAULT_CATEGORY_ACTIVATION_FIELDS,
 ): CategoryActivationFieldConfig[] {
+  if (!category) return [];
   if (!isCategoryActivationFormEnabled(category?.metadata)) return [];
 
   const fields = parseActivationFields(category?.metadata);

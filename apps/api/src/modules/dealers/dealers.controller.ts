@@ -3,6 +3,7 @@ import { Permissions } from '@/common/decorators/permissions.decorator';
 import { createDatedExcelFilename, sendExcelFile } from '@/common/excel';
 import { CreateDealerDto } from '@/modules/dealers/dto/create-dealer.dto';
 import { ListDealersDto } from '@/modules/dealers/dto/list-dealers.dto';
+import { ListDealerActivatedCustomersDto } from '@/modules/dealers/dto/list-dealer-activated-customers.dto';
 import { UpdateDealerDto } from '@/modules/dealers/dto/update-dealer.dto';
 import { CreateDealerUseCase } from '@/modules/dealers/use-cases/create-dealer.use-case';
 import { DownloadDealerImportTemplateUseCase } from '@/modules/dealers/use-cases/download-dealer-import-template.use-case';
@@ -11,6 +12,7 @@ import { GetDealerDetailUseCase } from '@/modules/dealers/use-cases/get-dealer-d
 import { ImportDealersUseCase } from '@/modules/dealers/use-cases/import-dealers.use-case';
 import { ListDealerProvincesUseCase } from '@/modules/dealers/use-cases/list-dealer-provinces.use-case';
 import { ListDealersUseCase } from '@/modules/dealers/use-cases/list-dealers.use-case';
+import { ListDealerActivatedCustomersUseCase } from '@/modules/dealers/use-cases/list-dealer-activated-customers.use-case';
 import { UpdateDealerUseCase } from '@/modules/dealers/use-cases/update-dealer.use-case';
 import {
   Body,
@@ -33,6 +35,7 @@ export class DealersController {
   constructor(
     private readonly createDealerUseCase: CreateDealerUseCase,
     private readonly listDealersUseCase: ListDealersUseCase,
+    private readonly listDealerActivatedCustomersUseCase: ListDealerActivatedCustomersUseCase,
     private readonly getDealerDetailUseCase: GetDealerDetailUseCase,
     private readonly updateDealerUseCase: UpdateDealerUseCase,
     private readonly listDealerProvincesUseCase: ListDealerProvincesUseCase,
@@ -61,6 +64,15 @@ export class DealersController {
   ) {
     const buffer = await this.exportDealersUseCase.execute(query);
     sendExcelFile(res, buffer, createDatedExcelFilename('dealers'));
+  }
+
+  @Get(':id/activated-customers')
+  @Permissions([permission_key.DEALER_VIEW])
+  listActivatedCustomers(
+    @Param('id') id: string,
+    @Query() query: ListDealerActivatedCustomersDto,
+  ) {
+    return this.listDealerActivatedCustomersUseCase.execute(id, query);
   }
 
   @Get('import-template')

@@ -29,7 +29,7 @@ import { useDealerForm } from "../hooks/use-dealer-form";
 type DealerFormProps = {
   dealer: DealerResponse | null;
   onCancel: () => void;
-  onSaved: () => void;
+  onSaved: (dealer?: DealerResponse) => void;
 };
 
 export function DealerForm({ dealer, onCancel, onSaved }: DealerFormProps) {

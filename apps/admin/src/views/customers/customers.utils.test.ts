@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   buildCustomerAddress,
+  deduplicateAddressSuffix,
   fillCustomerAddressSelection,
   getCustomerAddressSelection,
 } from "./customers.utils.ts";
@@ -48,5 +49,14 @@ test("does not append the selected location twice when saving", () => {
       wardName: "Phường Sài Gòn",
     }),
     "12 Nguyễn Huệ, Phường Sài Gòn, Thành phố Hồ Chí Minh",
+  );
+});
+
+test("removes a repeated address suffix", () => {
+  assert.equal(
+    deduplicateAddressSuffix(
+      "Phường Ba Đình, Thành phố Hà Nội, Phường Ba Đình, Thành phố Hà Nội",
+    ),
+    "Phường Ba Đình, Thành phố Hà Nội",
   );
 });

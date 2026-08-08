@@ -2,6 +2,7 @@ import { ConflictError, NotFoundError } from '@/common/response';
 import { CreateDealerUseCase } from '@/modules/dealers/use-cases/create-dealer.use-case';
 import { GetDealerDetailUseCase } from '@/modules/dealers/use-cases/get-dealer-detail.use-case';
 import { ListDealersUseCase } from '@/modules/dealers/use-cases/list-dealers.use-case';
+import { ListDealerActivatedCustomersUseCase } from '@/modules/dealers/use-cases/list-dealer-activated-customers.use-case';
 import { UpdateDealerUseCase } from '@/modules/dealers/use-cases/update-dealer.use-case';
 
 const baseDealer = {
@@ -26,6 +27,7 @@ describe('Dealers use cases', () => {
     findById: jest.fn(),
     findByPhone: jest.fn(),
     list: jest.fn(),
+    listActivatedCustomers: jest.fn(),
     update: jest.fn(),
   };
 
@@ -110,6 +112,77 @@ describe('Dealers use cases', () => {
     await expect(useCase.execute('missing-id')).rejects.toBeInstanceOf(
       NotFoundError,
     );
+  });
+
+  it('lists activated customers for an existing dealer', async () => {
+    repository.findById.mockResolvedValue(baseDealer);
+    repository.listActivatedCustomers.mockResolvedValue({
+      items: [
+        {
+          id: 'activation-id',
+          reviewed_at: new Date('2026-07-30T00:00:00.000Z'),
+          customer: {
+            id: 'customer-id',
+            full_name: 'Nguyen Van A',
+            phone: '0901234567',
+            email: 'a@example.com',
+          },
+          product: {
+            id: 'product-id',
+            display_name: 'Film Premium',
+            product_code: 'PRD-001',
+            serial_number: 'SN-001',
+          },
+          activated_warranty: {
+            id: 'warranty-id',
+            warranty_code: 'WM-001',
+            status: 'ACTIVE',
+            start_date: new Date('2026-07-30T00:00:00.000Z'),
+            end_date: new Date('2028-07-30T00:00:00.000Z'),
+            duration_months: 24,
+          },
+        },
+      ],
+      meta: {
+        hasNextPage: false,
+        hasPreviousPage: false,
+        limit: 10,
+        page: 1,
+        total: 1,
+        totalPages: 1,
+      },
+    });
+
+    const useCase = new ListDealerActivatedCustomersUseCase(
+      repository as never,
+    );
+    const result = await useCase.execute('dealer-id', { limit: 10, page: 1 });
+
+    expect(repository.listActivatedCustomers).toHaveBeenCalledWith(
+      'dealer-id',
+      { limit: 10, page: 1 },
+    );
+    expect(result.items[0]).toEqual(
+      expect.objectContaining({
+        customer: expect.objectContaining({ fullName: 'Nguyen Van A' }),
+        warranty: expect.objectContaining({
+          status: 'ACTIVE',
+          warrantyCode: 'WM-001',
+        }),
+      }),
+    );
+  });
+
+  it('throws not found when listing customers for a missing dealer', async () => {
+    repository.findById.mockResolvedValue(null);
+    const useCase = new ListDealerActivatedCustomersUseCase(
+      repository as never,
+    );
+
+    await expect(
+      useCase.execute('missing-id', { limit: 10, page: 1 }),
+    ).rejects.toBeInstanceOf(NotFoundError);
+    expect(repository.listActivatedCustomers).not.toHaveBeenCalled();
   });
 
   it('updates a dealer and can deactivate it', async () => {

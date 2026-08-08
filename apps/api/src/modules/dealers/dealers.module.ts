@@ -8,6 +8,7 @@ import { GetDealerDetailUseCase } from '@/modules/dealers/use-cases/get-dealer-d
 import { ImportDealersUseCase } from '@/modules/dealers/use-cases/import-dealers.use-case';
 import { ListDealerProvincesUseCase } from '@/modules/dealers/use-cases/list-dealer-provinces.use-case';
 import { ListDealersUseCase } from '@/modules/dealers/use-cases/list-dealers.use-case';
+import { ListDealerActivatedCustomersUseCase } from '@/modules/dealers/use-cases/list-dealer-activated-customers.use-case';
 import { UpdateDealerUseCase } from '@/modules/dealers/use-cases/update-dealer.use-case';
 import { Module } from '@nestjs/common';
 
@@ -18,6 +19,7 @@ import { Module } from '@nestjs/common';
     DealersRepository,
     CreateDealerUseCase,
     ListDealersUseCase,
+    ListDealerActivatedCustomersUseCase,
     GetDealerDetailUseCase,
     UpdateDealerUseCase,
     ListDealerProvincesUseCase,

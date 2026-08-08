@@ -7,6 +7,7 @@ import {
   Pencil,
   Phone,
   Power,
+  Users,
   UserRound,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -216,6 +217,12 @@ function DealerActions({
             </Link>
           </DropdownMenuItem>
         ) : null}
+        <DropdownMenuItem asChild>
+          <Link href={`/dealers/${dealer.id}/activated-customers`}>
+            <Users className="mr-2 size-4" />
+            {t("viewActivatedCustomers")}
+          </Link>
+        </DropdownMenuItem>
         {canDeactivate ? (
           <DropdownMenuItem
             className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
