@@ -1,1 +1,8 @@
-vulnerabilities: []
+vulnerabilities:
+  - id: CVE-2026-67213
+    purls:
+      - pkg:npm/nanoid@3.3.16
+    statement: >-
+      Not affected in the API production path: nanoid@3.3.16 is an indirect
+      PostCSS dependency and PostCSS only uses nanoid/non-secure to generate
+      input IDs; the vulnerable customAlphabet API is not used.
