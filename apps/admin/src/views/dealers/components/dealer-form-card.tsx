@@ -16,7 +16,7 @@ type DealerFormCardProps = {
   description: string;
   isLoading?: boolean;
   onCancel: () => void;
-  onSaved: () => void;
+  onSaved: (dealer?: DealerResponse) => void;
   title: string;
 };
 

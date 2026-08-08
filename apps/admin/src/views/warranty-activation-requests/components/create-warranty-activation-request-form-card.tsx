@@ -28,12 +28,14 @@ import {
   Input,
   Textarea,
 } from "@repo/ui";
-import { Loader2, UserPlus } from "lucide-react";
+import { Building2, Loader2, UserPlus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { Controller } from "react-hook-form";
 import { CategoryActivationInputFields } from "./category-activation-input-fields";
 import { CustomerSearchResult } from "./customer-search-result";
+import { CreateCustomerDialog } from "../../customers/components/create-customer-dialog";
+import { CreateDealerDialog } from "../../dealers/components/create-dealer-dialog";
 import { ProductSearchResult } from "./product-search-result";
 import { SelectedCustomerSummaryCard } from "./selected-customer-summary-card";
 import { SelectedProductSummaryCard } from "./selected-product-summary-card";
@@ -59,13 +61,15 @@ export function CreateWarrantyActivationRequestFormCard({
 }: CreateWarrantyActivationRequestFormCardProps) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const [categorySearch, setCategorySearch] = useState("");
+  const [isCreateCustomerDialogOpen, setCreateCustomerDialogOpen] =
+    useState(false);
+  const [isCreateDealerDialogOpen, setCreateDealerDialogOpen] = useState(false);
   const {
     control,
     categories,
     categoriesQuery,
     categoryId,
     clearCustomer,
-    customerMode,
     clearDealer,
     customers,
     customersQuery,
@@ -96,8 +100,6 @@ export function CreateWarrantyActivationRequestFormCard({
     selectProduct,
     selectProvince,
     selectWard,
-    startNewCustomer,
-    switchToExistingCustomer,
     setCustomerSearch,
     setDealerSearch,
     setProductSearch,
@@ -324,123 +326,52 @@ export function CreateWarrantyActivationRequestFormCard({
               id="create-activation-request-customer"
               label={t("customerSearch")}
             >
-              {customerMode === "existing" ? (
-                <div className="flex w-full items-center gap-2">
-                  <div className="min-w-0 flex-1">
-                    <SearchDropdown
-                      emptyLabel={t("noCustomer")}
-                      getItemKey={(customer) => customer.id}
-                      isLoading={customersQuery.isFetching}
-                      items={customers}
-                      loadingLabel={t("loadingCustomers")}
-                      onItemSelect={selectCustomer}
-                      onSearchChange={(value) => {
-                        if (selectedCustomer) clearCustomer();
-                        setCustomerSearch(value);
-                      }}
-                      placeholder={t("customerSearchPlaceholder")}
-                      renderItem={(customer) => (
-                        <CustomerSearchResult
-                          customerCode={customer.customerCode}
-                          email={customer.email}
-                          fullName={customer.fullName}
-                          phone={customer.phone}
-                        />
-                      )}
-                      searchValue={customerSearch}
-                      selectedLabel={
-                        selectedCustomer
-                          ? formatCustomerSearchOption(selectedCustomer)
-                          : undefined
-                      }
-                    />
-                  </div>
-                  <Button
-                    aria-label={t("createNewCustomer")}
-                    className="shrink-0"
-                    onClick={startNewCustomer}
-                    size="icon"
-                    type="button"
-                    variant="outline"
-                  >
-                    <UserPlus aria-hidden="true" className="size-4" />
-                  </Button>
+              <div className="flex w-full items-center gap-2">
+                <div className="min-w-0 flex-1">
+                  <SearchDropdown
+                    emptyLabel={t("noCustomer")}
+                    getItemKey={(customer) => customer.id}
+                    isLoading={customersQuery.isFetching}
+                    items={customers}
+                    loadingLabel={t("loadingCustomers")}
+                    onItemSelect={selectCustomer}
+                    onSearchChange={(value) => {
+                      if (selectedCustomer) clearCustomer();
+                      setCustomerSearch(value);
+                    }}
+                    placeholder={t("customerSearchPlaceholder")}
+                    renderItem={(customer) => (
+                      <CustomerSearchResult
+                        customerCode={customer.customerCode}
+                        email={customer.email}
+                        fullName={customer.fullName}
+                        phone={customer.phone}
+                      />
+                    )}
+                    searchValue={customerSearch}
+                    selectedLabel={
+                      selectedCustomer
+                        ? formatCustomerSearchOption(selectedCustomer)
+                        : undefined
+                    }
+                  />
                 </div>
-              ) : (
-                <div className="rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-200">
-                  {t("newCustomerDescription")}
-                </div>
-              )}
-            </FormField>
-
-            {customerMode === "existing" ? (
-              <input type="hidden" {...register("customerName")} />
-            ) : null}
-            {customerMode === "existing" ? (
-              <input type="hidden" {...register("customerPhone")} />
-            ) : null}
-            {customerMode === "existing" ? (
-              <input type="hidden" {...register("customerEmail")} />
-            ) : null}
-
-            <div className="flex flex-wrap gap-2">
-              {customerMode === "new" ? (
                 <Button
-                  onClick={switchToExistingCustomer}
+                  aria-label={t("createNewCustomer")}
+                  className="shrink-0"
+                  onClick={() => setCreateCustomerDialogOpen(true)}
+                  size="icon"
                   type="button"
                   variant="outline"
                 >
-                  {t("selectExistingCustomer")}
+                  <UserPlus aria-hidden="true" className="size-4" />
                 </Button>
-              ) : null}
-            </div>
-
-            {customerMode === "new" ? (
-              <div className="grid gap-5 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-2 dark:border-slate-800 dark:bg-slate-950">
-                <FormField
-                  error={formatActivationRequestCreateFieldError(
-                    errors.customerName?.message,
-                    t,
-                  )}
-                  id="create-activation-request-customer-name"
-                  label={t("customerName")}
-                >
-                  <Input
-                    id="create-activation-request-customer-name"
-                    placeholder={t("customerNamePlaceholder")}
-                    {...register("customerName")}
-                  />
-                </FormField>
-                <FormField
-                  error={formatActivationRequestCreateFieldError(
-                    errors.customerPhone?.message,
-                    t,
-                  )}
-                  id="create-activation-request-customer-phone"
-                  label={t("customerPhone")}
-                >
-                  <Input
-                    id="create-activation-request-customer-phone"
-                    placeholder={t("customerPhonePlaceholder")}
-                    {...register("customerPhone")}
-                  />
-                </FormField>
-                <FormField
-                  error={formatActivationRequestCreateFieldError(
-                    errors.customerEmail?.message,
-                    t,
-                  )}
-                  id="create-activation-request-customer-email"
-                  label={t("email")}
-                >
-                  <Input
-                    id="create-activation-request-customer-email"
-                    placeholder={t("customerEmailPlaceholder")}
-                    {...register("customerEmail")}
-                  />
-                </FormField>
               </div>
-            ) : null}
+            </FormField>
+
+            <input type="hidden" {...register("customerName")} />
+            <input type="hidden" {...register("customerPhone")} />
+            <input type="hidden" {...register("customerEmail")} />
 
             {selectedCustomer ? (
               <SelectedCustomerSummaryCard
@@ -459,134 +390,136 @@ export function CreateWarrantyActivationRequestFormCard({
               />
             ) : null}
 
-            <div className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
-              <div className="grid gap-5 sm:grid-cols-2">
-                <FormField
-                  id="create-activation-request-customer-birthdate"
-                  label={t("birthdate")}
-                >
-                  <Controller
-                    control={control}
-                    name="customerBirthdate"
-                    render={({ field }) => (
-                      <DatePicker
-                        ariaLabel={t("birthdate")}
-                        id="create-activation-request-customer-birthdate"
-                        onValueChange={field.onChange}
-                        placeholder={t("selectBirthdate")}
-                        value={field.value}
-                      />
+            {selectedCustomer ? (
+              <div className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <FormField
+                    id="create-activation-request-customer-birthdate"
+                    label={t("birthdate")}
+                  >
+                    <Controller
+                      control={control}
+                      name="customerBirthdate"
+                      render={({ field }) => (
+                        <DatePicker
+                          ariaLabel={t("birthdate")}
+                          id="create-activation-request-customer-birthdate"
+                          onValueChange={field.onChange}
+                          placeholder={t("selectBirthdate")}
+                          value={field.value}
+                        />
+                      )}
+                    />
+                  </FormField>
+                  <FormField
+                    error={formatActivationRequestCreateFieldError(
+                      errors.addressDetail?.message,
+                      t,
                     )}
-                  />
-                </FormField>
-                <FormField
-                  error={formatActivationRequestCreateFieldError(
-                    errors.addressDetail?.message,
-                    t,
-                  )}
-                  id="create-activation-request-address"
-                  label={t("addressDetail")}
-                >
-                  <Input
                     id="create-activation-request-address"
-                    placeholder={t("addressDetailPlaceholder")}
-                    {...register("addressDetail")}
-                  />
-                </FormField>
-              </div>
+                    label={t("addressDetail")}
+                  >
+                    <Input
+                      id="create-activation-request-address"
+                      placeholder={t("addressDetailPlaceholder")}
+                      {...register("addressDetail")}
+                    />
+                  </FormField>
+                </div>
 
-              <div className="mt-5 grid gap-5 sm:grid-cols-2">
-                <FormField
-                  error={formatActivationRequestCreateFieldError(
-                    errors.provinceCode?.message,
-                    t,
-                  )}
-                  id="create-activation-request-province"
-                  label={t("province")}
-                >
-                  <Controller
-                    control={control}
-                    name="provinceCode"
-                    render={({ field }) => (
-                      <Combobox
-                        disabled={provincesQuery.isLoading}
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          selectProvince(value);
-                        }}
-                        value={field.value}
-                      >
-                        <ComboboxTrigger
-                          id="create-activation-request-province"
-                          placeholder={t("provincePlaceholder")}
-                          selectedLabel={selectedProvince?.name}
-                        />
-                        <ComboboxContent>
-                          <ComboboxInput
-                            placeholder={t("search")}
-                            showTrigger={false}
-                          />
-                          <ComboboxList>
-                            <ComboboxEmpty>{t("noProvince")}</ComboboxEmpty>
-                            {provinces.map((province) => (
-                              <ComboboxItem
-                                key={province.code}
-                                value={String(province.code)}
-                              >
-                                {province.name}
-                              </ComboboxItem>
-                            ))}
-                          </ComboboxList>
-                        </ComboboxContent>
-                      </Combobox>
+                <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                  <FormField
+                    error={formatActivationRequestCreateFieldError(
+                      errors.provinceCode?.message,
+                      t,
                     )}
-                  />
-                </FormField>
-                <FormField
-                  error={formatActivationRequestCreateFieldError(
-                    errors.wardCode?.message,
-                    t,
-                  )}
-                  id="create-activation-request-ward"
-                  label={t("ward")}
-                >
-                  <Controller
-                    control={control}
-                    name="wardCode"
-                    render={({ field }) => (
-                      <Combobox
-                        disabled={!provinceCode || wardsQuery.isLoading}
-                        onValueChange={selectWard}
-                        value={field.value}
-                      >
-                        <ComboboxTrigger
-                          id="create-activation-request-ward"
-                          placeholder={t("wardPlaceholder")}
-                          selectedLabel={selectedWard?.name}
-                        />
-                        <ComboboxContent>
-                          <ComboboxInput
-                            placeholder={t("search")}
-                            showTrigger={false}
+                    id="create-activation-request-province"
+                    label={t("province")}
+                  >
+                    <Controller
+                      control={control}
+                      name="provinceCode"
+                      render={({ field }) => (
+                        <Combobox
+                          disabled={provincesQuery.isLoading}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            selectProvince(value);
+                          }}
+                          value={field.value}
+                        >
+                          <ComboboxTrigger
+                            id="create-activation-request-province"
+                            placeholder={t("provincePlaceholder")}
+                            selectedLabel={selectedProvince?.name}
                           />
-                          <ComboboxList>
-                            <ComboboxEmpty>{t("noWard")}</ComboboxEmpty>
-                            {wards.map((ward) => (
-                              <ComboboxItem
-                                key={ward.code}
-                                value={String(ward.code)}
-                              >
-                                {ward.name}
-                              </ComboboxItem>
-                            ))}
-                          </ComboboxList>
-                        </ComboboxContent>
-                      </Combobox>
+                          <ComboboxContent>
+                            <ComboboxInput
+                              placeholder={t("search")}
+                              showTrigger={false}
+                            />
+                            <ComboboxList>
+                              <ComboboxEmpty>{t("noProvince")}</ComboboxEmpty>
+                              {provinces.map((province) => (
+                                <ComboboxItem
+                                  key={province.code}
+                                  value={String(province.code)}
+                                >
+                                  {province.name}
+                                </ComboboxItem>
+                              ))}
+                            </ComboboxList>
+                          </ComboboxContent>
+                        </Combobox>
+                      )}
+                    />
+                  </FormField>
+                  <FormField
+                    error={formatActivationRequestCreateFieldError(
+                      errors.wardCode?.message,
+                      t,
                     )}
-                  />
-                </FormField>
+                    id="create-activation-request-ward"
+                    label={t("ward")}
+                  >
+                    <Controller
+                      control={control}
+                      name="wardCode"
+                      render={({ field }) => (
+                        <Combobox
+                          disabled={!provinceCode || wardsQuery.isLoading}
+                          onValueChange={selectWard}
+                          value={field.value}
+                        >
+                          <ComboboxTrigger
+                            id="create-activation-request-ward"
+                            placeholder={t("wardPlaceholder")}
+                            selectedLabel={selectedWard?.name}
+                          />
+                          <ComboboxContent>
+                            <ComboboxInput
+                              placeholder={t("search")}
+                              showTrigger={false}
+                            />
+                            <ComboboxList>
+                              <ComboboxEmpty>{t("noWard")}</ComboboxEmpty>
+                              {wards.map((ward) => (
+                                <ComboboxItem
+                                  key={ward.code}
+                                  value={String(ward.code)}
+                                >
+                                  {ward.name}
+                                </ComboboxItem>
+                              ))}
+                            </ComboboxList>
+                          </ComboboxContent>
+                        </Combobox>
+                      )}
+                    />
+                  </FormField>
+                </div>
               </div>
-            </div>
+            ) : null}
           </FormSection>
 
           <FormSection
@@ -597,110 +530,126 @@ export function CreateWarrantyActivationRequestFormCard({
               id="create-activation-request-dealer"
               label={t("dealerSearch")}
             >
-              <SearchDropdown
-                emptyLabel={t("noDealer")}
-                getItemKey={(dealer) => dealer.id}
-                isLoading={dealersQuery.isFetching}
-                items={dealers}
-                loadingLabel={t("loadingDealers")}
-                onItemSelect={selectDealer}
-                onSearchChange={(value) => {
-                  if (selectedDealer) clearDealer();
-                  setDealerSearch(value);
-                }}
-                placeholder={t("dealerSearchPlaceholder")}
-                renderItem={(dealer) => (
-                  <div className="min-w-0">
-                    <p className="truncate font-medium">{dealer.name}</p>
-                    <p className="mt-1 truncate text-xs text-slate-500">
-                      {[dealer.province, dealer.district, dealer.phone]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </p>
-                  </div>
-                )}
-                searchValue={dealerSearch}
-                selectedLabel={
-                  selectedDealer
-                    ? formatDealerSearchOption(selectedDealer)
-                    : undefined
-                }
-              />
+              <div className="flex w-full items-center gap-2">
+                <div className="min-w-0 flex-1">
+                  <SearchDropdown
+                    emptyLabel={t("noDealer")}
+                    getItemKey={(dealer) => dealer.id}
+                    isLoading={dealersQuery.isFetching}
+                    items={dealers}
+                    loadingLabel={t("loadingDealers")}
+                    onItemSelect={selectDealer}
+                    onSearchChange={(value) => {
+                      if (selectedDealer) clearDealer();
+                      setDealerSearch(value);
+                    }}
+                    placeholder={t("dealerSearchPlaceholder")}
+                    renderItem={(dealer) => (
+                      <div className="min-w-0">
+                        <p className="truncate font-medium">{dealer.name}</p>
+                        <p className="mt-1 truncate text-xs text-slate-500">
+                          {[dealer.province, dealer.district, dealer.phone]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </p>
+                      </div>
+                    )}
+                    searchValue={dealerSearch}
+                    selectedLabel={
+                      selectedDealer
+                        ? formatDealerSearchOption(selectedDealer)
+                        : undefined
+                    }
+                  />
+                </div>
+                <Button
+                  aria-label={t("createNewDealer")}
+                  className="shrink-0"
+                  onClick={() => setCreateDealerDialogOpen(true)}
+                  size="icon"
+                  type="button"
+                  variant="outline"
+                >
+                  <Building2 aria-hidden="true" className="size-4" />
+                </Button>
+              </div>
             </FormField>
             <input type="hidden" {...register("dealerId")} />
 
-            <div className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
-              <div className="grid gap-5 sm:grid-cols-2">
-                <FormField
-                  id="create-activation-request-dealer-name"
-                  label={t("dealerName")}
-                >
-                  <Input
-                    disabled={Boolean(selectedDealer)}
+            {selectedDealer ? (
+              <div className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <FormField
                     id="create-activation-request-dealer-name"
-                    placeholder={t("dealerNamePlaceholder")}
-                    {...register("dealerName")}
-                  />
-                </FormField>
-                <FormField
-                  id="create-activation-request-dealer-phone"
-                  label={t("dealerPhone")}
-                >
-                  <Input
-                    disabled={Boolean(selectedDealer)}
+                    label={t("dealerName")}
+                  >
+                    <Input
+                      disabled={Boolean(selectedDealer)}
+                      id="create-activation-request-dealer-name"
+                      placeholder={t("dealerNamePlaceholder")}
+                      {...register("dealerName")}
+                    />
+                  </FormField>
+                  <FormField
                     id="create-activation-request-dealer-phone"
-                    placeholder={t("dealerPhonePlaceholder")}
-                    {...register("dealerPhone")}
-                  />
-                </FormField>
-                <FormField
-                  id="create-activation-request-dealer-province"
-                  label={t("dealerProvince")}
-                >
-                  <Input
-                    disabled={Boolean(selectedDealer)}
+                    label={t("dealerPhone")}
+                  >
+                    <Input
+                      disabled={Boolean(selectedDealer)}
+                      id="create-activation-request-dealer-phone"
+                      placeholder={t("dealerPhonePlaceholder")}
+                      {...register("dealerPhone")}
+                    />
+                  </FormField>
+                  <FormField
                     id="create-activation-request-dealer-province"
-                    placeholder={t("dealerProvincePlaceholder")}
-                    {...register("dealerProvince")}
-                  />
-                </FormField>
-                <FormField
-                  id="create-activation-request-dealer-district"
-                  label={t("dealerDistrict")}
-                >
-                  <Input
-                    disabled={Boolean(selectedDealer)}
+                    label={t("dealerProvince")}
+                  >
+                    <Input
+                      disabled={Boolean(selectedDealer)}
+                      id="create-activation-request-dealer-province"
+                      placeholder={t("dealerProvincePlaceholder")}
+                      {...register("dealerProvince")}
+                    />
+                  </FormField>
+                  <FormField
                     id="create-activation-request-dealer-district"
-                    placeholder={t("dealerDistrictPlaceholder")}
-                    {...register("dealerDistrict")}
-                  />
-                </FormField>
-              </div>
-              <div className="mt-5 grid gap-5 sm:grid-cols-2">
-                <FormField
-                  id="create-activation-request-dealer-address"
-                  label={t("dealerAddress")}
-                >
-                  <Input
-                    disabled={Boolean(selectedDealer)}
+                    label={t("dealerDistrict")}
+                  >
+                    <Input
+                      disabled={Boolean(selectedDealer)}
+                      id="create-activation-request-dealer-district"
+                      placeholder={t("dealerDistrictPlaceholder")}
+                      {...register("dealerDistrict")}
+                    />
+                  </FormField>
+                </div>
+                <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                  <FormField
                     id="create-activation-request-dealer-address"
-                    placeholder={t("dealerAddressPlaceholder")}
-                    {...register("dealerAddress")}
-                  />
-                </FormField>
-                <FormField
-                  id="create-activation-request-sales-name"
-                  label={t("salesName")}
-                >
-                  <Input
-                    disabled={Boolean(selectedDealer)}
+                    label={t("dealerAddress")}
+                  >
+                    <Input
+                      disabled={Boolean(selectedDealer)}
+                      id="create-activation-request-dealer-address"
+                      placeholder={t("dealerAddressPlaceholder")}
+                      {...register("dealerAddress")}
+                    />
+                  </FormField>
+                  <FormField
                     id="create-activation-request-sales-name"
-                    placeholder={t("salesNamePlaceholder")}
-                    {...register("salesName")}
-                  />
-                </FormField>
+                    label={t("salesName")}
+                  >
+                    <Input
+                      disabled={Boolean(selectedDealer)}
+                      id="create-activation-request-sales-name"
+                      placeholder={t("salesNamePlaceholder")}
+                      {...register("salesName")}
+                    />
+                  </FormField>
+                </div>
               </div>
-            </div>
+            ) : null}
           </FormSection>
 
           <FormSection
@@ -746,6 +695,22 @@ export function CreateWarrantyActivationRequestFormCard({
             </Button>
           </div>
         </form>
+        <CreateCustomerDialog
+          onOpenChange={setCreateCustomerDialogOpen}
+          onSaved={(customer) => {
+            selectCustomer(customer);
+            setCreateCustomerDialogOpen(false);
+          }}
+          open={isCreateCustomerDialogOpen}
+        />
+        <CreateDealerDialog
+          onOpenChange={setCreateDealerDialogOpen}
+          onSaved={(dealer) => {
+            selectDealer(dealer);
+            setCreateDealerDialogOpen(false);
+          }}
+          open={isCreateDealerDialogOpen}
+        />
       </CardContent>
     </Card>
   );

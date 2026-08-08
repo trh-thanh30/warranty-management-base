@@ -29,12 +29,14 @@ import {
 
 type CustomerFormProps = {
   customer: CustomerSummary | null;
+  embedded?: boolean;
   onCancel: () => void;
   onSaved: (customer?: CustomerSummary) => void;
 };
 
 export function CustomerForm({
   customer,
+  embedded = false,
   onCancel,
   onSaved,
 }: CustomerFormProps) {
@@ -146,8 +148,11 @@ export function CustomerForm({
     });
   }, [addressDetail, creating, provinceName, setValue, wardName]);
 
+  const Wrapper = embedded ? "div" : "form";
+  const wrapperProps = embedded ? {} : { noValidate: true, onSubmit };
+
   return (
-    <form className="space-y-6" noValidate onSubmit={onSubmit}>
+    <Wrapper className="space-y-6" {...wrapperProps}>
       {errors.root?.message ? (
         <div
           className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300"
@@ -351,19 +356,22 @@ export function CustomerForm({
       </FormField>
 
       <div className="grid grid-cols-2 gap-2 border-t border-slate-200 pt-5 dark:border-slate-800 sm:flex sm:justify-end">
+        {!embedded ? (
+          <Button
+            className="w-full sm:w-auto"
+            disabled={isSubmitting}
+            onClick={onCancel}
+            type="button"
+            variant="secondary"
+          >
+            {t("cancel")}
+          </Button>
+        ) : null}
         <Button
           className="w-full sm:w-auto"
           disabled={isSubmitting}
-          onClick={onCancel}
-          type="button"
-          variant="secondary"
-        >
-          {t("cancel")}
-        </Button>
-        <Button
-          className="w-full sm:w-auto"
-          disabled={isSubmitting}
-          type="submit"
+          onClick={embedded ? () => void onSubmit() : undefined}
+          type={embedded ? "button" : "submit"}
         >
           {isSubmitting ? (
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -371,7 +379,7 @@ export function CustomerForm({
           {creating ? t("create") : t("save")}
         </Button>
       </div>
-    </form>
+    </Wrapper>
   );
 }
 

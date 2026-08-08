@@ -81,9 +81,6 @@ export function useCreateWarrantyActivationRequestForm({
   const [pendingWardName, setPendingWardName] = useState<string | null>(null);
   const [selectedCustomer, setSelectedCustomer] =
     useState<CustomerSummary | null>(null);
-  const [customerMode, setCustomerMode] = useState<"existing" | "new">(
-    "existing",
-  );
   const [selectedProduct, setSelectedProduct] =
     useState<ProductResponse | null>(null);
   const [selectedDealer, setSelectedDealer] = useState<DealerResponse | null>(
@@ -185,7 +182,6 @@ export function useCreateWarrantyActivationRequestForm({
 
   function selectCustomer(customer: CustomerSummary) {
     const address = parseVietnamAddress(customer.address ?? "", provinces);
-    setCustomerMode("existing");
     setSelectedCustomer(customer);
     setCustomerSearch("");
     setFormValues(form.setValue, {
@@ -220,18 +216,6 @@ export function useCreateWarrantyActivationRequestForm({
       },
       shouldValidate,
     );
-  }
-
-  function startNewCustomer() {
-    clearCustomer(false);
-    setCustomerMode("new");
-    setCustomerSearch("");
-  }
-
-  function switchToExistingCustomer() {
-    clearCustomer();
-    setCustomerMode("existing");
-    setCustomerSearch("");
   }
 
   function selectProduct(product: ProductResponse) {
@@ -344,7 +328,6 @@ export function useCreateWarrantyActivationRequestForm({
 
   return {
     clearCustomer,
-    customerMode,
     clearDealer,
     control: form.control,
     categories,
@@ -374,8 +357,6 @@ export function useCreateWarrantyActivationRequestForm({
     selectedProduct,
     selectCategory,
     selectCustomer,
-    startNewCustomer,
-    switchToExistingCustomer,
     selectDealer,
     selectProduct,
     selectProvince,
