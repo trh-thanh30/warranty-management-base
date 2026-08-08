@@ -38,6 +38,7 @@ import { CreateCustomerDialog } from "../../customers/components/create-customer
 import { CreateDealerDialog } from "../../dealers/components/create-dealer-dialog";
 import { ProductSearchResult } from "./product-search-result";
 import { SelectedCustomerSummaryCard } from "./selected-customer-summary-card";
+import { SelectedDealerSummaryCard } from "./selected-dealer-summary-card";
 import { SelectedProductSummaryCard } from "./selected-product-summary-card";
 import { useCreateWarrantyActivationRequestForm } from "../hooks/use-create-warranty-activation-request-form";
 import {
@@ -577,78 +578,16 @@ export function CreateWarrantyActivationRequestFormCard({
             <input type="hidden" {...register("dealerId")} />
 
             {selectedDealer ? (
-              <div className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <FormField
-                    id="create-activation-request-dealer-name"
-                    label={t("dealerName")}
-                  >
-                    <Input
-                      disabled={Boolean(selectedDealer)}
-                      id="create-activation-request-dealer-name"
-                      placeholder={t("dealerNamePlaceholder")}
-                      {...register("dealerName")}
-                    />
-                  </FormField>
-                  <FormField
-                    id="create-activation-request-dealer-phone"
-                    label={t("dealerPhone")}
-                  >
-                    <Input
-                      disabled={Boolean(selectedDealer)}
-                      id="create-activation-request-dealer-phone"
-                      placeholder={t("dealerPhonePlaceholder")}
-                      {...register("dealerPhone")}
-                    />
-                  </FormField>
-                  <FormField
-                    id="create-activation-request-dealer-province"
-                    label={t("dealerProvince")}
-                  >
-                    <Input
-                      disabled={Boolean(selectedDealer)}
-                      id="create-activation-request-dealer-province"
-                      placeholder={t("dealerProvincePlaceholder")}
-                      {...register("dealerProvince")}
-                    />
-                  </FormField>
-                  <FormField
-                    id="create-activation-request-dealer-district"
-                    label={t("dealerDistrict")}
-                  >
-                    <Input
-                      disabled={Boolean(selectedDealer)}
-                      id="create-activation-request-dealer-district"
-                      placeholder={t("dealerDistrictPlaceholder")}
-                      {...register("dealerDistrict")}
-                    />
-                  </FormField>
-                </div>
-                <div className="mt-5 grid gap-5 sm:grid-cols-2">
-                  <FormField
-                    id="create-activation-request-dealer-address"
-                    label={t("dealerAddress")}
-                  >
-                    <Input
-                      disabled={Boolean(selectedDealer)}
-                      id="create-activation-request-dealer-address"
-                      placeholder={t("dealerAddressPlaceholder")}
-                      {...register("dealerAddress")}
-                    />
-                  </FormField>
-                  <FormField
-                    id="create-activation-request-sales-name"
-                    label={t("salesName")}
-                  >
-                    <Input
-                      disabled={Boolean(selectedDealer)}
-                      id="create-activation-request-sales-name"
-                      placeholder={t("salesNamePlaceholder")}
-                      {...register("salesName")}
-                    />
-                  </FormField>
-                </div>
-              </div>
+              <SelectedDealerSummaryCard
+                dealer={selectedDealer}
+                labels={{
+                  address: t("dealerAddress"),
+                  district: t("dealerDistrict"),
+                  phone: t("dealerPhone"),
+                  province: t("dealerProvince"),
+                  selected: t("dealerSelected"),
+                }}
+              />
             ) : null}
           </FormSection>
 
