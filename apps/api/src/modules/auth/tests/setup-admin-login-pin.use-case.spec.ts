@@ -17,7 +17,7 @@ describe('SetupAdminLoginPinUseCase', () => {
         email: user.email,
         method: 'PIN_SETUP',
       }),
-      withLock: jest.fn(async (_id, callback) => callback()),
+      withLock: jest.fn((_id, callback) => callback()),
       delete: jest.fn(),
     };
     const prisma = {

@@ -12,6 +12,7 @@ import {
 import { useTranslations } from "next-intl";
 import type {
   CategoryActivationFieldConfig,
+  CategoryActivationFieldOption,
   CategoryActivationFieldType,
 } from "@repo/shared";
 import { CATEGORY_ACTIVATION_FIELD_TYPES } from "@repo/shared";
@@ -26,7 +27,6 @@ import {
   Input,
   Label,
   Switch,
-  Textarea,
 } from "@repo/ui";
 import { FormPageShell } from "@/src/components/common/form-page-shell";
 import { SelectControl } from "@/src/components/common/select-control";
@@ -36,7 +36,6 @@ import { useToast } from "@/src/hooks/use-toast";
 import { useRouter } from "@/src/i18n/navigation";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { moveItem } from "@/src/utils/array";
-import { parseActivationFieldOptionsText } from "@/src/utils/category-activation-field-options";
 import {
   DEFAULT_CATEGORY_ACTIVATION_FIELDS,
   buildCategoryMetadataWithActivationFields,
@@ -51,8 +50,13 @@ type CategoryActivationFieldsViewProps = {
   categoryId: string;
 };
 
-type DraftActivationField = CategoryActivationFieldConfig & {
-  optionsText: string;
+type DraftActivationField = Omit<CategoryActivationFieldConfig, "options"> & {
+  options: CategoryActivationFieldOption[];
+};
+
+type ActivationFieldOptionErrors = {
+  label?: string;
+  value?: string;
 };
 
 export function CategoryActivationFieldsView({
@@ -227,7 +231,7 @@ export function CategoryActivationFieldsView({
                     {
                       key: "",
                       label: "",
-                      optionsText: "",
+                      options: [],
                       placeholder: "",
                       required: false,
                       type: "TEXT",
@@ -291,6 +295,11 @@ function ActivationFieldEditor({
   onRemove: () => void;
 }) {
   const t = useTranslations("Categories");
+  const [optionsTouched, setOptionsTouched] = useState(false);
+  const optionErrors =
+    field.type === "SELECT" && optionsTouched
+      ? getActivationFieldOptionErrors(field.options, t)
+      : [];
 
   return (
     <section className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
@@ -392,16 +401,89 @@ function ActivationFieldEditor({
       </div>
 
       {field.type === "SELECT" ? (
-        <div className="mt-5 space-y-2">
+        <div className="mt-5 space-y-3">
           <Label>{t("activationFieldOptions")}</Label>
-          <Textarea
-            onChange={(event) =>
-              onChange({ ...field, optionsText: event.target.value })
-            }
-            placeholder={t("activationFieldOptionsPlaceholder")}
-            rows={3}
-            value={field.optionsText}
-          />
+          <div className="space-y-3">
+            {field.options.map((option, optionIndex) => (
+              <div
+                className="grid gap-3 rounded-md border border-slate-200 p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-start dark:border-slate-800"
+                key={optionIndex}
+              >
+                <div className="space-y-2">
+                  <Label>{t("activationFieldOptionLabel")}</Label>
+                  <Input
+                    aria-invalid={Boolean(optionErrors[optionIndex]?.label)}
+                    onChange={(event) => {
+                      setOptionsTouched(true);
+                      const options = field.options.map((item, index) =>
+                        index === optionIndex
+                          ? { ...item, label: event.target.value }
+                          : item,
+                      );
+                      onChange({ ...field, options });
+                    }}
+                    placeholder={t("activationFieldOptionLabelPlaceholder")}
+                    value={option.label}
+                  />
+                  <p className="min-h-4 text-xs text-red-600 dark:text-red-400">
+                    {optionErrors[optionIndex]?.label ?? "\u00a0"}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("activationFieldOptionValue")}</Label>
+                  <Input
+                    aria-invalid={Boolean(optionErrors[optionIndex]?.value)}
+                    onChange={(event) => {
+                      setOptionsTouched(true);
+                      const options = field.options.map((item, index) =>
+                        index === optionIndex
+                          ? { ...item, value: event.target.value }
+                          : item,
+                      );
+                      onChange({ ...field, options });
+                    }}
+                    placeholder={t("activationFieldOptionValuePlaceholder")}
+                    value={option.value}
+                  />
+                  <p className="min-h-4 text-xs text-red-600 dark:text-red-400">
+                    {optionErrors[optionIndex]?.value ?? "\u00a0"}
+                  </p>
+                </div>
+                <Button
+                  aria-label={t("removeActivationFieldOption")}
+                  onClick={() => {
+                    setOptionsTouched(true);
+                    onChange({
+                      ...field,
+                      options: field.options.filter(
+                        (_, index) => index !== optionIndex,
+                      ),
+                    });
+                  }}
+                  className="text-red-600 hover:text-red-700 sm:mt-7 dark:text-red-400"
+                  size="icon"
+                  type="button"
+                  variant="ghost"
+                >
+                  <Trash2 className="size-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+          <Button
+            onClick={() => {
+              setOptionsTouched(true);
+              onChange({
+                ...field,
+                options: [...field.options, { label: "", value: "" }],
+              });
+            }}
+            type="button"
+            variant="secondary"
+          >
+            <Plus className="size-4" />
+            {t("addActivationFieldOption")}
+          </Button>
         </div>
       ) : null}
 
@@ -429,17 +511,54 @@ function validateFields(
     if (!key || !field.label.trim()) return t("activationFieldRequiredError");
     if (keys.has(key)) return t("activationFieldDuplicateKeyError");
     keys.add(key);
+
+    if (field.type === "SELECT") {
+      if (field.options.length === 0) {
+        return t("activationFieldOptionsRequired");
+      }
+
+      const optionErrors = getActivationFieldOptionErrors(field.options, t);
+      const firstOptionError = optionErrors.find(
+        (optionError) => optionError.label || optionError.value,
+      );
+      if (firstOptionError?.label) return firstOptionError.label;
+      if (firstOptionError?.value) return firstOptionError.value;
+    }
   }
 
   return null;
 }
 
+function getActivationFieldOptionErrors(
+  options: CategoryActivationFieldOption[],
+  t: (key: string) => string,
+): ActivationFieldOptionErrors[] {
+  const valueCounts = new Map<string, number>();
+
+  for (const option of options) {
+    const value = option.value.trim().toLowerCase();
+    if (value) valueCounts.set(value, (valueCounts.get(value) ?? 0) + 1);
+  }
+
+  return options.map((option) => {
+    const normalizedValue = option.value.trim().toLowerCase();
+    return {
+      label: option.label.trim()
+        ? undefined
+        : t("activationFieldOptionLabelRequired"),
+      value: !normalizedValue
+        ? t("activationFieldOptionValueRequired")
+        : valueCounts.get(normalizedValue) !== 1
+          ? t("activationFieldOptionDuplicateValue")
+          : undefined,
+    };
+  });
+}
+
 function toDraftFields(fields: CategoryActivationFieldConfig[]) {
   return fields.map((field) => ({
     ...field,
-    optionsText: (field.options ?? [])
-      .map((option) => `${option.label}|${option.value}`)
-      .join("\n"),
+    options: (field.options ?? []).map((option) => ({ ...option })),
   }));
 }
 
@@ -449,7 +568,7 @@ function fromDraftFields(
   return fields.map((field, index) => ({
     key: field.key,
     label: field.label,
-    options: parseActivationFieldOptionsText(field.optionsText),
+    options: field.options,
     order: index + 1,
     placeholder: field.placeholder,
     required: field.required,
