@@ -1,7 +1,9 @@
 import type {
   CreateDealerBody,
+  DealerActivatedCustomerSummary,
   DealerImportResult,
   DealerResponse,
+  ListDealerActivatedCustomersQuery,
   ListDealersQuery,
   PaginatedResponse,
   UpdateDealerBody,
@@ -27,6 +29,18 @@ export function createDealersService(http: DealersHttpClient) {
 
     async getDealer(dealerId: string): Promise<DealerResponse> {
       return unwrap(await http.get<DealerResponse>(`/dealers/${dealerId}`));
+    },
+
+    async listActivatedCustomers(
+      dealerId: string,
+      query: ListDealerActivatedCustomersQuery,
+    ): Promise<PaginatedResponse<DealerActivatedCustomerSummary>> {
+      return unwrap(
+        await http.get<PaginatedResponse<DealerActivatedCustomerSummary>>(
+          `/dealers/${dealerId}/activated-customers`,
+          { params: query },
+        ),
+      );
     },
 
     async createDealer(body: CreateDealerBody): Promise<DealerResponse> {

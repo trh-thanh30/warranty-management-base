@@ -1,6 +1,7 @@
 import { normalizePagination, paginate } from '@/common/pagination/pagination';
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { ListDealersDto } from '@/modules/dealers/dto/list-dealers.dto';
+import { ListDealerActivatedCustomersDto } from '@/modules/dealers/dto/list-dealer-activated-customers.dto';
 import { PreparedDealerImportRow } from '@/modules/dealers/excel/dealer-excel.types';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
@@ -78,6 +79,77 @@ export class DealersRepository {
           take,
         }),
         tx.dealer.count({ where }),
+      ]);
+
+      return paginate(items, { page, limit, total });
+    });
+  }
+
+  listActivatedCustomers(
+    dealerId: string,
+    filters: ListDealerActivatedCustomersDto,
+  ) {
+    const search = filters.search?.trim();
+    const { page, limit, skip, take } = normalizePagination(filters);
+    const where: Prisma.WarrantyActivationRequestWhereInput = {
+      dealer_id: dealerId,
+      status: 'ACTIVATED',
+      customer_id: { not: null },
+      activated_warranty_id: { not: null },
+      activated_warranty: filters.warrantyStatus
+        ? { is: { status: filters.warrantyStatus } }
+        : undefined,
+      OR: search
+        ? [
+            { customer_name: { contains: search, mode: 'insensitive' } },
+            { customer_phone: { contains: search, mode: 'insensitive' } },
+            { customer_email: { contains: search, mode: 'insensitive' } },
+            { warranty_code: { contains: search, mode: 'insensitive' } },
+            { product_name: { contains: search, mode: 'insensitive' } },
+            { serial_number: { contains: search, mode: 'insensitive' } },
+          ]
+        : undefined,
+    };
+
+    return this.prismaService.$transaction(async (tx) => {
+      const [items, total] = await Promise.all([
+        tx.warrantyActivationRequest.findMany({
+          where,
+          orderBy: { reviewed_at: 'desc' },
+          skip,
+          take,
+          select: {
+            id: true,
+            reviewed_at: true,
+            customer: {
+              select: {
+                id: true,
+                full_name: true,
+                phone: true,
+                email: true,
+              },
+            },
+            product: {
+              select: {
+                id: true,
+                display_name: true,
+                product_code: true,
+                serial_number: true,
+              },
+            },
+            activated_warranty: {
+              select: {
+                id: true,
+                warranty_code: true,
+                status: true,
+                start_date: true,
+                end_date: true,
+                duration_months: true,
+              },
+            },
+          },
+        }),
+        tx.warrantyActivationRequest.count({ where }),
       ]);
 
       return paginate(items, { page, limit, total });

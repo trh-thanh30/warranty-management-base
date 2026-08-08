@@ -28,7 +28,7 @@ import {
   Input,
   Textarea,
 } from "@repo/ui";
-import { Loader2 } from "lucide-react";
+import { Loader2, UserPlus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { Controller } from "react-hook-form";
@@ -65,6 +65,7 @@ export function CreateWarrantyActivationRequestFormCard({
     categoriesQuery,
     categoryId,
     clearCustomer,
+    customerMode,
     clearDealer,
     customers,
     customersQuery,
@@ -95,6 +96,8 @@ export function CreateWarrantyActivationRequestFormCard({
     selectProduct,
     selectProvince,
     selectWard,
+    startNewCustomer,
+    switchToExistingCustomer,
     setCustomerSearch,
     setDealerSearch,
     setProductSearch,
@@ -321,38 +324,123 @@ export function CreateWarrantyActivationRequestFormCard({
               id="create-activation-request-customer"
               label={t("customerSearch")}
             >
-              <SearchDropdown
-                emptyLabel={t("noCustomer")}
-                getItemKey={(customer) => customer.id}
-                isLoading={customersQuery.isFetching}
-                items={customers}
-                loadingLabel={t("loadingCustomers")}
-                onItemSelect={selectCustomer}
-                onSearchChange={(value) => {
-                  if (selectedCustomer) clearCustomer();
-                  setCustomerSearch(value);
-                }}
-                placeholder={t("customerSearchPlaceholder")}
-                renderItem={(customer) => (
-                  <CustomerSearchResult
-                    customerCode={customer.customerCode}
-                    email={customer.email}
-                    fullName={customer.fullName}
-                    phone={customer.phone}
-                  />
-                )}
-                searchValue={customerSearch}
-                selectedLabel={
-                  selectedCustomer
-                    ? formatCustomerSearchOption(selectedCustomer)
-                    : undefined
-                }
-              />
+              {customerMode === "existing" ? (
+                <div className="flex w-full items-center gap-2">
+                  <div className="min-w-0 flex-1">
+                    <SearchDropdown
+                      emptyLabel={t("noCustomer")}
+                      getItemKey={(customer) => customer.id}
+                      isLoading={customersQuery.isFetching}
+                      items={customers}
+                      loadingLabel={t("loadingCustomers")}
+                      onItemSelect={selectCustomer}
+                      onSearchChange={(value) => {
+                        if (selectedCustomer) clearCustomer();
+                        setCustomerSearch(value);
+                      }}
+                      placeholder={t("customerSearchPlaceholder")}
+                      renderItem={(customer) => (
+                        <CustomerSearchResult
+                          customerCode={customer.customerCode}
+                          email={customer.email}
+                          fullName={customer.fullName}
+                          phone={customer.phone}
+                        />
+                      )}
+                      searchValue={customerSearch}
+                      selectedLabel={
+                        selectedCustomer
+                          ? formatCustomerSearchOption(selectedCustomer)
+                          : undefined
+                      }
+                    />
+                  </div>
+                  <Button
+                    aria-label={t("createNewCustomer")}
+                    className="shrink-0"
+                    onClick={startNewCustomer}
+                    size="icon"
+                    type="button"
+                    variant="outline"
+                  >
+                    <UserPlus aria-hidden="true" className="size-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-200">
+                  {t("newCustomerDescription")}
+                </div>
+              )}
             </FormField>
 
-            <input type="hidden" {...register("customerName")} />
-            <input type="hidden" {...register("customerPhone")} />
-            <input type="hidden" {...register("customerEmail")} />
+            {customerMode === "existing" ? (
+              <input type="hidden" {...register("customerName")} />
+            ) : null}
+            {customerMode === "existing" ? (
+              <input type="hidden" {...register("customerPhone")} />
+            ) : null}
+            {customerMode === "existing" ? (
+              <input type="hidden" {...register("customerEmail")} />
+            ) : null}
+
+            <div className="flex flex-wrap gap-2">
+              {customerMode === "new" ? (
+                <Button
+                  onClick={switchToExistingCustomer}
+                  type="button"
+                  variant="outline"
+                >
+                  {t("selectExistingCustomer")}
+                </Button>
+              ) : null}
+            </div>
+
+            {customerMode === "new" ? (
+              <div className="grid gap-5 rounded-md border border-slate-200 bg-white p-4 sm:grid-cols-2 dark:border-slate-800 dark:bg-slate-950">
+                <FormField
+                  error={formatActivationRequestCreateFieldError(
+                    errors.customerName?.message,
+                    t,
+                  )}
+                  id="create-activation-request-customer-name"
+                  label={t("customerName")}
+                >
+                  <Input
+                    id="create-activation-request-customer-name"
+                    placeholder={t("customerNamePlaceholder")}
+                    {...register("customerName")}
+                  />
+                </FormField>
+                <FormField
+                  error={formatActivationRequestCreateFieldError(
+                    errors.customerPhone?.message,
+                    t,
+                  )}
+                  id="create-activation-request-customer-phone"
+                  label={t("customerPhone")}
+                >
+                  <Input
+                    id="create-activation-request-customer-phone"
+                    placeholder={t("customerPhonePlaceholder")}
+                    {...register("customerPhone")}
+                  />
+                </FormField>
+                <FormField
+                  error={formatActivationRequestCreateFieldError(
+                    errors.customerEmail?.message,
+                    t,
+                  )}
+                  id="create-activation-request-customer-email"
+                  label={t("email")}
+                >
+                  <Input
+                    id="create-activation-request-customer-email"
+                    placeholder={t("customerEmailPlaceholder")}
+                    {...register("customerEmail")}
+                  />
+                </FormField>
+              </div>
+            ) : null}
 
             {selectedCustomer ? (
               <SelectedCustomerSummaryCard

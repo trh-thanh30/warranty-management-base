@@ -26,6 +26,10 @@ const category = {
   updatedAt: "2026-07-24T00:00:00.000Z",
 } satisfies CategoryResponse;
 
+test("category activation fields stay hidden until a category is selected", () => {
+  assert.deepEqual(getCategoryActivationFields(null), []);
+});
+
 test("category activation fields fall back only when category has no config", () => {
   assert.equal(
     getCategoryActivationFields(category)[0]?.key,
