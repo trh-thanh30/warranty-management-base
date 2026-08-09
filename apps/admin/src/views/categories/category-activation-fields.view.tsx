@@ -71,7 +71,7 @@ export function CategoryActivationFieldsView({
   const updateCategory = useUpdateCategory(categoryId);
   const category = categoryQuery.data ?? null;
   const [fields, setFields] = useState<DraftActivationField[]>([]);
-  const [activationFieldsEnabled, setActivationFieldsEnabled] = useState(true);
+  const [activationFieldsEnabled, setActivationFieldsEnabled] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

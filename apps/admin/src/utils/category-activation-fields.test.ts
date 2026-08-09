@@ -30,10 +30,14 @@ test("category activation fields stay hidden until a category is selected", () =
   assert.deepEqual(getCategoryActivationFields(null), []);
 });
 
-test("category activation fields fall back only when category has no config", () => {
-  assert.equal(
-    getCategoryActivationFields(category)[0]?.key,
-    DEFAULT_CATEGORY_ACTIVATION_FIELDS[0]?.key,
+test("category activation fields stay disabled until explicitly enabled", () => {
+  assert.deepEqual(getCategoryActivationFields(category), []);
+  assert.deepEqual(
+    getCategoryActivationFields({
+      ...category,
+      metadata: { activationFieldsEnabled: true },
+    }),
+    DEFAULT_CATEGORY_ACTIVATION_FIELDS,
   );
   assert.deepEqual(
     getCategoryActivationFields({
@@ -41,6 +45,15 @@ test("category activation fields fall back only when category has no config", ()
       metadata: { activationFields: [] },
     }),
     [],
+  );
+});
+
+test("category activation form defaults to disabled", () => {
+  assert.equal(isCategoryActivationFormEnabled(null), false);
+  assert.equal(isCategoryActivationFormEnabled({}), false);
+  assert.equal(
+    buildCategoryMetadataWithActivationFields(null, []).activationFieldsEnabled,
+    false,
   );
 });
 

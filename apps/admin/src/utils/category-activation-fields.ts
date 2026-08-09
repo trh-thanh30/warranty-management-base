@@ -75,7 +75,7 @@ export function getCategoryActivationFields(
 }
 
 export function isCategoryActivationFormEnabled(metadata: unknown) {
-  return !isRecord(metadata) || metadata.activationFieldsEnabled !== false;
+  return isRecord(metadata) && metadata.activationFieldsEnabled === true;
 }
 
 export function hasCategoryActivationFieldsConfig(metadata: unknown) {
@@ -98,7 +98,7 @@ export function parseActivationFields(
 export function buildCategoryMetadataWithActivationFields(
   metadata: Record<string, unknown> | null,
   fields: CategoryActivationFieldConfig[],
-  enabled = true,
+  enabled = false,
 ) {
   return {
     ...(metadata ?? {}),
