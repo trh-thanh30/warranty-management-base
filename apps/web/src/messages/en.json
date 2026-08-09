@@ -1518,6 +1518,37 @@
       "eyebrow": "Warranty service request",
       "title": "Submit a warranty & Support request",
       "description": "Get help with peeling, bubbles, discoloration, or installation-related issues.",
+      "form": {
+        "title": "Submit a warranty request",
+        "description": "Enter your details so FUJITEK can receive and process your request."
+      },
+      "guide": {
+        "title": "Warranty request process",
+        "description": "Complete these 3 steps to submit a request and receive a CLM tracking code.",
+        "steps": {
+          "one": {
+            "badge": "Step 01",
+            "title": "Enter details",
+            "description": "Provide your contact details, E-Warranty code, and the issue that needs support."
+          },
+          "two": {
+            "badge": "Step 02",
+            "title": "Submit request",
+            "description": "Review your information and send the request to FUJITEK."
+          },
+          "three": {
+            "badge": "Step 03",
+            "title": "Receive CLM code",
+            "description": "Keep the CLM code to track your warranty request progress."
+          }
+        }
+      },
+      "otherActions": {
+        "title": "Other warranty services",
+        "activate": "Activate new label",
+        "request": "Submit an issue",
+        "dealers": "Find an installer"
+      },
       "submit": "Submit support request",
       "submitting": "Submitting request...",
       "success": {
@@ -1579,10 +1610,39 @@
       }
     },
     "track": {
+      "guide": {
+        "title": "Request processing flow",
+        "description": "Use your CLM code to follow the request through each stage.",
+        "steps": {
+          "one": {
+            "badge": "Step 01",
+            "title": "Received",
+            "description": "FUJITEK has recorded your warranty request."
+          },
+          "two": {
+            "badge": "Step 02",
+            "title": "Review & service",
+            "description": "Our technical team is reviewing and handling the request."
+          },
+          "three": {
+            "badge": "Step 03",
+            "title": "Completed",
+            "description": "The request is completed and the result is available."
+          }
+        }
+      },
+      "otherActions": {
+        "title": "Other warranty services",
+        "activate": "Activate new label",
+        "request": "Submit an issue",
+        "dealers": "Find an installer"
+      },
       "eyebrow": "Track service progress",
       "title": "Track warranty processing",
       "description": "Enter your CLM request code to view its current status and actual processing history.",
       "form": {
+        "title": "Check request progress",
+        "description": "Enter your CLM code to view the status and processing history of your warranty request.",
         "claimCodeLabel": "Warranty claim code",
         "placeholder": "For example: CLM-0123456789ABCDEFABCD",
         "submit": "Check",

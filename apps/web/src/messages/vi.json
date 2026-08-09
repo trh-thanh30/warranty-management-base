@@ -1518,6 +1518,37 @@
       "eyebrow": "Yêu cầu dịch vụ bảo hành",
       "title": "Gửi yêu cầu bảo hành & Hỗ trợ",
       "description": "Nhận hỗ trợ cho các vấn đề bong tróc, bọt khí, bay màu hoặc lỗi kỹ thuật thi công.",
+      "form": {
+        "title": "Gửi yêu cầu bảo hành",
+        "description": "Điền thông tin để FUJITEK tiếp nhận và xử lý yêu cầu của bạn."
+      },
+      "guide": {
+        "title": "Quy trình gửi yêu cầu bảo hành",
+        "description": "Thực hiện 3 bước để gửi yêu cầu và nhận mã CLM theo dõi.",
+        "steps": {
+          "one": {
+            "badge": "Bước 01",
+            "title": "Điền thông tin",
+            "description": "Cung cấp thông tin liên hệ, mã E-Warranty và vấn đề cần hỗ trợ."
+          },
+          "two": {
+            "badge": "Bước 02",
+            "title": "Gửi yêu cầu",
+            "description": "Kiểm tra thông tin và gửi phiếu yêu cầu đến FUJITEK."
+          },
+          "three": {
+            "badge": "Bước 03",
+            "title": "Nhận mã CLM",
+            "description": "Lưu mã CLM để theo dõi tiến độ xử lý yêu cầu bảo hành."
+          }
+        }
+      },
+      "otherActions": {
+        "title": "Dịch vụ bảo hành khác",
+        "activate": "Kích hoạt tem mới",
+        "request": "Gửi yêu cầu sự cố",
+        "dealers": "Tìm trạm thi công"
+      },
       "submit": "Gửi phiếu yêu cầu hỗ trợ",
       "submitting": "Đang gửi yêu cầu...",
       "success": {
@@ -1579,10 +1610,39 @@
       }
     },
     "track": {
+      "guide": {
+        "title": "Quy trình xử lý yêu cầu",
+        "description": "Mã CLM giúp bạn theo dõi yêu cầu qua từng giai đoạn.",
+        "steps": {
+          "one": {
+            "badge": "Bước 01",
+            "title": "Tiếp nhận",
+            "description": "FUJITEK đã ghi nhận yêu cầu của bạn."
+          },
+          "two": {
+            "badge": "Bước 02",
+            "title": "Kiểm tra & xử lý",
+            "description": "Đội ngũ kỹ thuật đang xem xét và xử lý."
+          },
+          "three": {
+            "badge": "Bước 03",
+            "title": "Hoàn tất",
+            "description": "Yêu cầu được hoàn tất và bạn nhận được kết quả."
+          }
+        }
+      },
+      "otherActions": {
+        "title": "Dịch vụ bảo hành khác",
+        "activate": "Kích hoạt tem mới",
+        "request": "Gửi yêu cầu sự cố",
+        "dealers": "Tìm trạm thi công"
+      },
       "eyebrow": "Theo dõi tiến độ dịch vụ",
       "title": "Theo dõi xử lý bảo hành",
       "description": "Nhập mã yêu cầu CLM để xem trạng thái hiện tại và lịch sử xử lý thực tế.",
       "form": {
+        "title": "Tra cứu tiến độ yêu cầu",
+        "description": "Nhập mã CLM để xem trạng thái và lịch sử xử lý yêu cầu bảo hành.",
         "claimCodeLabel": "Mã yêu cầu bảo hành",
         "placeholder": "Ví dụ: CLM-0123456789ABCDEFABCD",
         "submit": "Kiểm tra",

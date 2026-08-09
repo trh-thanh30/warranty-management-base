@@ -11,6 +11,7 @@ import { Link } from "@/src/i18n/navigation";
 import { Container } from "@/src/components/common/container";
 import { WarrantyLookupForm } from "@/src/components/common/warranty-lookup-form";
 import { WarrantyLookupResultDetails } from "@/src/components/warranty-lookup-result";
+import { WarrantyPolicyShortcut } from "@/src/components/common/warranty-policy-shortcut";
 import { useWarrantyLookup } from "@/src/hooks/use-warranty-lookup";
 import { WarrantyBackLink } from "./components/warranty-back-link";
 
@@ -39,7 +40,6 @@ export function WarrantyLookupView() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-deep-black via-deep-black/80 to-transparent z-10" />
         <Container className="relative z-20 max-w-[1400px] space-y-3">
-          <WarrantyBackLink className="mb-5" inverse />
           <span className="inline-block bg-premium-red text-white px-4 py-1 rounded-md text-xs font-semibold uppercase tracking-[0.25em]">
             {t("eyebrow")}
           </span>
@@ -53,6 +53,10 @@ export function WarrantyLookupView() {
       </section>
 
       <Container className="mt-12 max-w-[1400px] space-y-16 sm:mt-16">
+        <div className="border-b border-border-gray pb-6">
+          <WarrantyBackLink />
+        </div>
+
         {/* 2. Registration Methods Section */}
         <section className="space-y-8 text-center max-w-4xl lg:max-w-5xl mx-auto">
           <div className="space-y-3">
@@ -294,30 +298,7 @@ export function WarrantyLookupView() {
           </motion.div>
         </section>
 
-        <section className="max-w-3xl sm:max-w-4xl lg:max-w-5xl mx-auto">
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-border-gray">
-            <div className="space-y-2 text-center sm:text-left">
-              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-premium-red">
-                <ShieldCheck className="size-4" />
-                <span>{t("policyShortcut.eyebrow")}</span>
-              </div>
-              <h3 className="text-lg sm:text-xl font-semibold uppercase text-deep-black">
-                {t("policyShortcut.title")}
-              </h3>
-              <p className="text-sm text-stone-gray font-medium">
-                {t("policyShortcut.description")}
-              </p>
-            </div>
-
-            <Link
-              href={APP_ROUTES.policyWarrantyReturn}
-              className="inline-flex items-center gap-2.5 bg-premium-red hover:bg-warm-red text-white px-6 py-3.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors shrink-0 shadow-md"
-            >
-              <span>{t("policyShortcut.action")}</span>
-              <FileText className="size-4" />
-            </Link>
-          </div>
-        </section>
+        <WarrantyPolicyShortcut />
       </Container>
     </main>
   );
