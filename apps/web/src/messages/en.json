@@ -1360,6 +1360,33 @@
       }
     },
     "activate": {
+      "form": {
+        "title": "Submit a warranty activation request",
+        "description": "Enter your details so FUJITEK can receive, verify, and activate the product warranty.",
+        "sectionTitle": "Warranty activation information",
+        "sectionDescription": "Complete all required information so verification and activation can be processed accurately."
+      },
+      "guide": {
+        "title": "Warranty activation process",
+        "description": "Complete these 3 simple steps to submit an activation request.",
+        "steps": {
+          "one": {
+            "badge": "Step 01",
+            "title": "Enter details",
+            "description": "Provide the owner, product, and activation address information."
+          },
+          "two": {
+            "badge": "Step 02",
+            "title": "Submit request",
+            "description": "Review the information and send the request to FUJITEK."
+          },
+          "three": {
+            "badge": "Step 03",
+            "title": "Wait for verification",
+            "description": "FUJITEK verifies, approves, and activates your warranty."
+          }
+        }
+      },
       "eyebrow": "E-Warranty activation request",
       "title": "Request electronic warranty activation",
       "description": "Submit your E-Warranty information for FUJITEK to verify and approve before activation.",
@@ -1439,6 +1466,12 @@
         "notFound": "The E-Warranty code was not found.",
         "rateLimit": "Too many requests were submitted. Try again later.",
         "request": "The activation request could not be submitted. Try again."
+      },
+      "otherActions": {
+        "title": "Other warranty services",
+        "request": "Submit an issue",
+        "track": "Track progress",
+        "dealers": "Find an installer"
       }
     },
     "lookup": {

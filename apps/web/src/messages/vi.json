@@ -1360,6 +1360,33 @@
       }
     },
     "activate": {
+      "form": {
+        "title": "Gửi yêu cầu kích hoạt bảo hành",
+        "description": "Điền thông tin để FUJITEK tiếp nhận, kiểm tra và kích hoạt bảo hành cho sản phẩm.",
+        "sectionTitle": "Thông tin kích hoạt bảo hành",
+        "sectionDescription": "Vui lòng điền đầy đủ thông tin để quá trình xác minh và kích hoạt được thực hiện chính xác."
+      },
+      "guide": {
+        "title": "Quy trình kích hoạt bảo hành",
+        "description": "Thực hiện 3 bước đơn giản để gửi yêu cầu kích hoạt.",
+        "steps": {
+          "one": {
+            "badge": "Bước 01",
+            "title": "Điền thông tin",
+            "description": "Cung cấp thông tin chủ xe, sản phẩm và địa chỉ kích hoạt."
+          },
+          "two": {
+            "badge": "Bước 02",
+            "title": "Gửi yêu cầu",
+            "description": "Kiểm tra lại thông tin và gửi yêu cầu đến FUJITEK."
+          },
+          "three": {
+            "badge": "Bước 03",
+            "title": "Chờ xác minh",
+            "description": "FUJITEK kiểm tra, phê duyệt và kích hoạt bảo hành cho bạn."
+          }
+        }
+      },
       "eyebrow": "Yêu cầu kích hoạt E-Warranty",
       "title": "Đăng ký kích hoạt bảo hành điện tử",
       "description": "Gửi thông tin E-Warranty để FUJITEK kiểm tra và xác nhận trước khi kích hoạt bảo hành.",
@@ -1439,6 +1466,12 @@
         "notFound": "Không tìm thấy mã E-Warranty trên hệ thống.",
         "rateLimit": "Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau.",
         "request": "Không thể gửi yêu cầu kích hoạt. Vui lòng thử lại."
+      },
+      "otherActions": {
+        "title": "Dịch vụ bảo hành khác",
+        "request": "Gửi yêu cầu sự cố",
+        "track": "Theo dõi tiến độ",
+        "dealers": "Tìm trạm thi công"
       }
     },
     "lookup": {
