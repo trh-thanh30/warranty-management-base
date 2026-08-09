@@ -17,6 +17,7 @@ import {
   Button,
   Input,
   Table,
+  TableScroll,
   TableBody,
   TableCell,
   TableHead,
@@ -109,7 +110,7 @@ export function CustomerProductsView({
             </div>
           </div>
 
-          <div className="mt-5 max-h-[60vh] overflow-x-auto overflow-y-scroll rounded-md border border-slate-200 dark:border-slate-800">
+          <TableScroll className="mt-5 max-h-[60vh] overflow-y-scroll rounded-md border border-slate-200 dark:border-slate-800">
             <Table className="min-w-max whitespace-nowrap">
               <TableHeader className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900">
                 <TableRow>
@@ -202,7 +203,7 @@ export function CustomerProductsView({
                 }
               />
             ) : null}
-          </div>
+          </TableScroll>
 
           {meta ? (
             <PaginationControls

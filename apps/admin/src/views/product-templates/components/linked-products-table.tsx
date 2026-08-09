@@ -5,6 +5,7 @@ import { formatDate, type ProductResponse } from "@repo/shared";
 import {
   Button,
   Table,
+  TableScroll,
   TableBody,
   TableCell,
   TableHead,
@@ -26,7 +27,7 @@ export function LinkedProductsTable({
   const locale = useLocale();
 
   return (
-    <div className="max-h-144 overflow-auto rounded-md border border-slate-200 dark:border-slate-800">
+    <TableScroll className="max-h-144 overflow-y-auto rounded-md border border-slate-200 dark:border-slate-800">
       <Table className="min-w-272">
         <TableHeader className="sticky top-0 z-10 bg-white dark:bg-slate-950 [&_th]:h-auto [&_th]:whitespace-normal [&_th]:text-wrap [&_th]:py-2 [&_th]:leading-4">
           <TableRow>
@@ -87,6 +88,6 @@ export function LinkedProductsTable({
           ))}
         </TableBody>
       </Table>
-    </div>
+    </TableScroll>
   );
 }

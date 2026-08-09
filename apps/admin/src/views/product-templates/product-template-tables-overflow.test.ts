@@ -19,11 +19,21 @@ test("product template tables wrap headers and scroll long table content", async
   );
 
   for (const source of sources) {
-    assert.match(source, /max-h-144 overflow-auto/);
+    assert.match(source, /TableScroll/);
+    assert.match(source, /max-h-144 overflow-y-auto/);
     assert.match(
       source,
       /sticky top-0 z-10 bg-white.*\[&_th\]:whitespace-normal/,
     );
     assert.match(source, /\[&_th\]:text-wrap/);
   }
+
+  assert.match(
+    sources[0],
+    /TableCell className="whitespace-nowrap">\s*\{template\.categoryRef\?\.name \?\? "-"\}/,
+  );
+  assert.match(
+    sources[0],
+    /TableCell className="font-mono text-xs whitespace-nowrap">\s*\{template\.sku\}/,
+  );
 });
