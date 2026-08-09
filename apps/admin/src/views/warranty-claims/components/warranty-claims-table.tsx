@@ -7,7 +7,7 @@ import {
   MoreHorizontal,
   SlidersHorizontal,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import type { WarrantyClaimSortBy, WarrantyClaimSummary } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
@@ -61,6 +61,7 @@ export function WarrantyClaimsTable({
   sortBy,
   sortOrder,
 }: WarrantyClaimsTableProps) {
+  const locale = useLocale();
   const t = useTranslations("WarrantyClaims");
 
   return (
@@ -71,6 +72,7 @@ export function WarrantyClaimsTable({
             claim={claim}
             key={claim.id}
             onAction={onAction}
+            locale={locale}
           />
         ))}
       </div>
@@ -117,6 +119,7 @@ export function WarrantyClaimsTable({
                 claim={claim}
                 key={claim.id}
                 onAction={onAction}
+                locale={locale}
               />
             ))}
           </TableBody>
@@ -128,9 +131,11 @@ export function WarrantyClaimsTable({
 
 function WarrantyClaimTableRow({
   claim,
+  locale,
   onAction,
 }: {
   claim: WarrantyClaimSummary;
+  locale: string;
   onAction: WarrantyClaimsTableProps["onAction"];
 }) {
   const t = useTranslations("WarrantyClaims");
@@ -147,7 +152,7 @@ function WarrantyClaimTableRow({
         <div className="max-w-[18rem]">
           <p className="truncate font-medium">{claim.issueTitle}</p>
           <p className="mt-1 text-xs text-slate-500">
-            {t("submittedAt")}: {formatClaimDate(claim.submittedAt)}
+            {t("submittedAt")}: {formatClaimDate(claim.submittedAt, locale)}
           </p>
         </div>
       </TableCell>
@@ -170,7 +175,7 @@ function WarrantyClaimTableRow({
         <div className="space-y-1">
           <WarrantyClaimOverdueBadge claim={claim} />
           <p className="text-xs text-slate-500">
-            {formatClaimDate(claim.dueAt)}
+            {formatClaimDate(claim.dueAt, locale)}
           </p>
         </div>
       </TableCell>
@@ -183,9 +188,11 @@ function WarrantyClaimTableRow({
 
 function WarrantyClaimMobileCard({
   claim,
+  locale,
   onAction,
 }: {
   claim: WarrantyClaimSummary;
+  locale: string;
   onAction: WarrantyClaimsTableProps["onAction"];
 }) {
   const t = useTranslations("WarrantyClaims");
@@ -224,10 +231,13 @@ function WarrantyClaimMobileCard({
           label={t("serviceCenter")}
           value={formatClaimServiceCenter(claim)}
         />
-        <MobileField label={t("dueAt")} value={formatClaimDate(claim.dueAt)} />
+        <MobileField
+          label={t("dueAt")}
+          value={formatClaimDate(claim.dueAt, locale)}
+        />
         <MobileField
           label={t("submittedAt")}
-          value={formatClaimDate(claim.submittedAt)}
+          value={formatClaimDate(claim.submittedAt, locale)}
         />
       </dl>
     </article>

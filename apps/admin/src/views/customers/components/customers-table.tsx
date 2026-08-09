@@ -1,8 +1,12 @@
 "use client";
 
 import { MoreHorizontal, PackageSearch, Pencil } from "lucide-react";
-import { useTranslations } from "next-intl";
-import type { CustomerSummary, ListCustomersQuery } from "@repo/shared";
+import { useLocale, useTranslations } from "next-intl";
+import {
+  formatDate,
+  type CustomerSummary,
+  type ListCustomersQuery,
+} from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
   Avatar,
@@ -24,11 +28,7 @@ import { SortableTableHead } from "@/src/components/common/sortable-table-head";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
 import { getInitials } from "@/src/utils/get-initials";
-import {
-  formatCustomerCreatedAt,
-  getCustomerContact,
-  getCustomerDisplayName,
-} from "../customers.utils";
+import { getCustomerContact, getCustomerDisplayName } from "../customers.utils";
 
 type CustomersTableProps = {
   items: CustomerSummary[];
@@ -107,6 +107,8 @@ export function CustomersTable({
 }
 
 function CustomerTableRow({ customer }: { customer: CustomerSummary }) {
+  const locale = useLocale();
+
   return (
     <TableRow>
       <TableCell>
@@ -117,7 +119,7 @@ function CustomerTableRow({ customer }: { customer: CustomerSummary }) {
       <TableCell>
         <CustomerAccountBadge customer={customer} />
       </TableCell>
-      <TableCell>{formatCustomerCreatedAt(customer.createdAt)}</TableCell>
+      <TableCell>{formatDate(customer.createdAt, { locale })}</TableCell>
       <TableCell className="text-right">
         <CustomerActionsMenu customer={customer} />
       </TableCell>
@@ -146,6 +148,7 @@ function CustomerIdentityCell({ customer }: { customer: CustomerSummary }) {
 }
 
 function CustomerMobileCard({ customer }: { customer: CustomerSummary }) {
+  const locale = useLocale();
   const t = useTranslations("Customers");
 
   return (
@@ -168,7 +171,7 @@ function CustomerMobileCard({ customer }: { customer: CustomerSummary }) {
         </div>
         <CustomerMobileField
           label={t("createdAt")}
-          value={formatCustomerCreatedAt(customer.createdAt)}
+          value={formatDate(customer.createdAt, { locale })}
         />
       </dl>
       {customer.address ? (

@@ -11,6 +11,7 @@ import type {
 } from "@repo/shared";
 import { HttpClientError } from "@repo/shared";
 import { useToast } from "@/src/hooks/use-toast";
+import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import {
   useCreateServiceCenter,
   useUpdateServiceCenter,
@@ -29,6 +30,7 @@ export function useServiceCenterForm({
   serviceCenter: ServiceCenterSummary | null;
 }) {
   const t = useTranslations("ServiceCenters");
+  const tApiErrors = useTranslations("ApiErrors");
   const toast = useToast();
   const creating = !serviceCenter;
   const createServiceCenter = useCreateServiceCenter();
@@ -82,8 +84,7 @@ export function useServiceCenterForm({
         return;
       }
 
-      const message =
-        error instanceof HttpClientError ? error.message : t("saveError");
+      const message = getLocalizedApiError(error, t, { apiErrors: tApiErrors });
       setError("root", { message });
       toast.error(message);
     }

@@ -54,8 +54,8 @@ export function SelectedWarrantyClaimProductDetails({
               t("warrantyStatus"),
               warranty?.status ? t(`warrantyStatuses.${warranty.status}`) : "-",
             ],
-            [t("startDate"), formatClaimDate(warranty?.startDate)],
-            [t("endDate"), formatClaimDate(warranty?.endDate)],
+            [t("startDate"), formatClaimDate(warranty?.startDate, locale)],
+            [t("endDate"), formatClaimDate(warranty?.endDate, locale)],
             [
               t("durationMonths"),
               warranty
@@ -109,8 +109,14 @@ export function SelectedWarrantyClaimProductDetails({
             [t("phone"), customer.phone ?? "-"],
             [t("email"), customer.email ?? "-"],
             [t("address"), customer.address ?? "-"],
-            [t("purchaseDate"), formatClaimDate(product.owner?.purchaseDate)],
-            [t("activatedAt"), formatClaimDate(product.owner?.activatedAt)],
+            [
+              t("purchaseDate"),
+              formatClaimDate(product.owner?.purchaseDate, locale),
+            ],
+            [
+              t("activatedAt"),
+              formatClaimDate(product.owner?.activatedAt, locale),
+            ],
           ]}
           title={t("customerInfo")}
         />

@@ -1,4 +1,5 @@
 import { CheckCircle2, Package, ShieldCheck } from "lucide-react";
+import { useLocale } from "next-intl";
 import {
   ActivationRequestSummaryCard,
   SummaryGrid,
@@ -47,9 +48,10 @@ export function SelectedProductSummaryCard({
   warrantyCode,
   warrantyCodeLabel,
 }: SelectedProductSummaryCardProps) {
+  const locale = useLocale();
   const period =
     startDate || endDate
-      ? `${formatActivationRequestDate(startDate)} - ${formatActivationRequestDate(endDate)}`
+      ? `${formatActivationRequestDate(startDate, locale)} - ${formatActivationRequestDate(endDate, locale)}`
       : "-";
 
   return (

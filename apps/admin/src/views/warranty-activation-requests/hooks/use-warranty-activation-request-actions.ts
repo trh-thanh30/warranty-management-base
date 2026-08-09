@@ -8,6 +8,7 @@ import type {
 } from "@repo/shared";
 import { useExcel } from "@/src/hooks/use-excel";
 import { useToast } from "@/src/hooks/use-toast";
+import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import { useReviewWarrantyActivationRequest } from "@/src/hooks/use-warranty-activation-requests";
 import { warrantyActivationRequestsService } from "@/src/services/warranty-activation-requests/warranty-activation-requests.service";
 import type {
@@ -17,6 +18,7 @@ import type {
 
 export function useWarrantyActivationRequestActions() {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
+  const tApiErrors = useTranslations("ApiErrors");
   const toast = useToast();
   const { downloadBlob } = useExcel();
   const [activeAction, setActiveAction] =
@@ -59,7 +61,12 @@ export function useWarrantyActivationRequestActions() {
       }
       closeAction();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t("reviewError"));
+      toast.error(
+        getLocalizedApiError(error, t, {
+          apiErrors: tApiErrors,
+          fallbackKey: "reviewError",
+        }),
+      );
     }
   }
 
@@ -77,7 +84,10 @@ export function useWarrantyActivationRequestActions() {
       window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : t("viewCertificateError"),
+        getLocalizedApiError(error, t, {
+          apiErrors: tApiErrors,
+          fallbackKey: "viewCertificateError",
+        }),
       );
     } finally {
       setCertificateActionRequestId(null);
@@ -99,7 +109,10 @@ export function useWarrantyActivationRequestActions() {
       toast.success(t("downloadedCertificate"));
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : t("downloadCertificateError"),
+        getLocalizedApiError(error, t, {
+          apiErrors: tApiErrors,
+          fallbackKey: "downloadCertificateError",
+        }),
       );
     } finally {
       setCertificateActionRequestId(null);

@@ -20,7 +20,7 @@ import {
   Wrench,
   XCircle,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useId, useState } from "react";
 import { formatClaimDateTime } from "../warranty-claims.utils";
 import { WarrantyClaimStatusBadge } from "./warranty-claim-badges";
@@ -161,6 +161,7 @@ function TimelineDetailsDisclosure({
   note: string | null;
   noteLabel: string;
 }) {
+  const locale = useLocale();
   const t = useTranslations("WarrantyClaims");
   const [isOpen, setIsOpen] = useState(false);
   const contentId = useId();
@@ -201,7 +202,7 @@ function TimelineDetailsDisclosure({
             <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-500 dark:text-slate-400">
               <span className="inline-flex items-center gap-1.5">
                 <Clock3 aria-hidden="true" className="size-3.5" />
-                {formatClaimDateTime(createdAt)}
+                {formatClaimDateTime(createdAt, locale)}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <UserRound aria-hidden="true" className="size-3.5" />

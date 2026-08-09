@@ -10,8 +10,12 @@ import {
   Phone,
   Power,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
-import type { ServiceCenterSortBy, ServiceCenterSummary } from "@repo/shared";
+import { useLocale, useTranslations } from "next-intl";
+import {
+  formatDate,
+  type ServiceCenterSortBy,
+  type ServiceCenterSummary,
+} from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
   Button,
@@ -29,7 +33,6 @@ import {
 import { SortableTableHead } from "@/src/components/common/sortable-table-head";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
-import { formatServiceCenterCreatedAt } from "../service-centers.utils";
 import { ServiceCenterStatusBadge } from "./service-center-status-badge";
 
 type ServiceCentersTableProps = {
@@ -123,6 +126,8 @@ function ServiceCenterTableRow({
   onDeactivate: ServiceCentersTableProps["onDeactivate"];
   serviceCenter: ServiceCenterSummary;
 }) {
+  const locale = useLocale();
+
   return (
     <TableRow>
       <TableCell>
@@ -137,9 +142,7 @@ function ServiceCenterTableRow({
       <TableCell>
         <ServiceCenterStatusBadge isActive={serviceCenter.isActive} />
       </TableCell>
-      <TableCell>
-        {formatServiceCenterCreatedAt(serviceCenter.createdAt)}
-      </TableCell>
+      <TableCell>{formatDate(serviceCenter.createdAt, { locale })}</TableCell>
       <TableCell className="text-right">
         <ServiceCenterActions
           onDeactivate={onDeactivate}

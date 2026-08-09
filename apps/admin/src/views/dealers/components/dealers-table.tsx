@@ -10,8 +10,12 @@ import {
   Users,
   UserRound,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
-import type { DealerResponse, DealerSortBy } from "@repo/shared";
+import { useLocale, useTranslations } from "next-intl";
+import {
+  formatDate,
+  type DealerResponse,
+  type DealerSortBy,
+} from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
   Button,
@@ -29,7 +33,6 @@ import {
 import { SortableTableHead } from "@/src/components/common/sortable-table-head";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
-import { formatDealerCreatedAt } from "../dealers.utils";
 import { DealerStatusBadge } from "./dealer-status-badge";
 
 type DealersTableProps = {
@@ -117,6 +120,8 @@ function DealerTableRow({
   dealer: DealerResponse;
   onDeactivate: DealersTableProps["onDeactivate"];
 }) {
+  const locale = useLocale();
+
   return (
     <TableRow>
       <TableCell>
@@ -132,7 +137,7 @@ function DealerTableRow({
       <TableCell>
         <DealerStatusBadge isActive={dealer.isActive} />
       </TableCell>
-      <TableCell>{formatDealerCreatedAt(dealer.createdAt)}</TableCell>
+      <TableCell>{formatDate(dealer.createdAt, { locale })}</TableCell>
       <TableCell className="text-right">
         <DealerActions dealer={dealer} onDeactivate={onDeactivate} />
       </TableCell>

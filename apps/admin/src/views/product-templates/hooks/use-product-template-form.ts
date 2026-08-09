@@ -9,6 +9,7 @@ import {
   useUpdateProductTemplate,
 } from "@/src/hooks/use-product-templates";
 import { useToast } from "@/src/hooks/use-toast";
+import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import { useTranslations } from "next-intl";
 import { useCategories } from "../../categories/hooks/use-categories";
 import {
@@ -30,6 +31,7 @@ export function useProductTemplateForm({
   template: ProductTemplateSummary | null;
 }) {
   const t = useTranslations("ProductTemplates");
+  const tApiErrors = useTranslations("ApiErrors");
   const toast = useToast();
   const createTemplate = useCreateProductTemplate();
   const updateTemplate = useUpdateProductTemplate(template?.id ?? null);
@@ -93,7 +95,7 @@ export function useProductTemplateForm({
           return;
         }
       }
-      const message = error instanceof Error ? error.message : t("saveError");
+      const message = getLocalizedApiError(error, t, { apiErrors: tApiErrors });
       form.setError("root", { message });
       toast.error(message);
     }

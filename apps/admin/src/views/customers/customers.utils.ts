@@ -1,4 +1,4 @@
-import { formatDate, type CustomerSummary } from "@repo/shared";
+import type { CustomerSummary } from "@repo/shared";
 import type { CustomerFormValues } from "./customers.types";
 
 type CustomerAddressSelectionInput = Pick<
@@ -84,10 +84,6 @@ export function deduplicateAddressSuffix(address: string) {
 
 export function getCustomerDisplayName(customer: CustomerSummary) {
   return customer.fullName || customer.customerCode;
-}
-
-export function formatCustomerCreatedAt(createdAt: string) {
-  return formatDate(createdAt);
 }
 
 export function getCustomerContact(customer: CustomerSummary) {

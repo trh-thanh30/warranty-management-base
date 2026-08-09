@@ -3,7 +3,11 @@
 import { SortableTableHead } from "@/src/components/common/sortable-table-head";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
-import type { ProductResponse, ProductSortBy } from "@repo/shared";
+import {
+  formatDate,
+  type ProductResponse,
+  type ProductSortBy,
+} from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
   Button,
@@ -27,9 +31,8 @@ import {
   Trash2,
   UserPlus,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
-  formatProductCreatedAt,
   formatProductOwner,
   getProductCategoryLabel,
   getProductDisplayName,
@@ -140,6 +143,8 @@ function ProductTableRow({
   onDelete: ProductsTableProps["onDelete"];
   product: ProductResponse;
 }) {
+  const locale = useLocale();
+
   return (
     <TableRow>
       <TableCell>
@@ -156,7 +161,7 @@ function ProductTableRow({
       <TableCell>
         <ProductStatusBadge status={product.status} />
       </TableCell>
-      <TableCell>{formatProductCreatedAt(product.createdAt)}</TableCell>
+      <TableCell>{formatDate(product.createdAt, { locale })}</TableCell>
       <TableCell className="text-right">
         <ProductActionsMenu
           onAssignOwner={onAssignOwner}

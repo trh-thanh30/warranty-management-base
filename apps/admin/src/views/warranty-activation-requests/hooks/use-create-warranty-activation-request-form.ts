@@ -70,6 +70,7 @@ export function useCreateWarrantyActivationRequestForm({
   onCreated: () => void;
 }) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
+  const tApiErrors = useTranslations("ApiErrors");
   const toast = useToast();
   const createMutation = useCreateAdminWarrantyActivationRequest();
   const [customerSearch, setCustomerSearch] = useState("");
@@ -320,7 +321,7 @@ export function useCreateWarrantyActivationRequestForm({
       toast.success(t("created"));
       onCreated();
     } catch (error) {
-      const message = resolveActivationRequestCreateError(error, t);
+      const message = resolveActivationRequestCreateError(error, t, tApiErrors);
       form.setError("root", { message });
       toast.error(message);
     }

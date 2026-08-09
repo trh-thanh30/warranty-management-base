@@ -7,7 +7,7 @@ import {
   ListTodo,
   SlidersHorizontal,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { WarrantyClaimSummary } from "@repo/shared";
 import { Button } from "@repo/ui";
 import { Link } from "@/src/i18n/navigation";
@@ -35,6 +35,7 @@ export function WarrantyClaimDetailHeader({
   onUpdatePriority,
   onUpdateStatus,
 }: WarrantyClaimDetailHeaderProps) {
+  const locale = useLocale();
   const t = useTranslations("WarrantyClaims");
 
   return (
@@ -56,7 +57,7 @@ export function WarrantyClaimDetailHeader({
           </h1>
           <p className="mt-2 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
             <CalendarClock className="size-4 shrink-0" />
-            {t("submittedAt")}: {formatClaimDateTime(claim.submittedAt)}
+            {t("submittedAt")}: {formatClaimDateTime(claim.submittedAt, locale)}
           </p>
           <WarrantyClaimStateSummary claim={claim} />
         </div>

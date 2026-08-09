@@ -3,6 +3,7 @@
 import { Bell, CheckCheck, Inbox, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { formatDate } from "@repo/shared";
 import {
   Badge,
   Button,
@@ -20,10 +21,7 @@ import {
 } from "@/src/hooks/use-notifications";
 import { useToast } from "@/src/hooks/use-toast";
 import { Link } from "@/src/i18n/navigation";
-import {
-  formatNotificationDate,
-  formatNotificationType,
-} from "@/src/views/notifications/notifications.utils";
+import { formatNotificationType } from "@/src/views/notifications/notifications.utils";
 
 export function NotificationBell() {
   const t = useTranslations("Notifications");
@@ -183,7 +181,7 @@ export function NotificationBell() {
                     {item.notification.content}
                   </span>
                   <span className="mt-1 block text-xs text-slate-400">
-                    {formatNotificationDate(item.deliveredAt, locale)}
+                    {formatDate(item.deliveredAt, { locale, showTime: true })}
                   </span>
                 </span>
               </button>

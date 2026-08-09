@@ -14,6 +14,7 @@ import {
 } from "@repo/shared";
 import { usersService } from "@/src/services/users/users.service";
 import { useToast } from "@/src/hooks/use-toast";
+import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 
 export function useStaffAccountForm({
   onSaved,
@@ -27,6 +28,7 @@ export function useStaffAccountForm({
   user: UserAccountSummary | null;
 }) {
   const t = useTranslations("Staff");
+  const tApiErrors = useTranslations("ApiErrors");
   const toast = useToast();
   const creating = !user;
   const {
@@ -83,8 +85,7 @@ export function useStaffAccountForm({
         return;
       }
 
-      const message =
-        error instanceof HttpClientError ? error.message : t("saveError");
+      const message = getLocalizedApiError(error, t, { apiErrors: tApiErrors });
       setError("root", { message });
       toast.error(message);
     }

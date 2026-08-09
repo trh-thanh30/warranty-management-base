@@ -99,8 +99,8 @@ export function WarrantyClaimDetailContent({
                     status={warranty?.status}
                   />,
                 ],
-                [t("startDate"), formatClaimDate(warranty?.startDate)],
-                [t("endDate"), formatClaimDate(warranty?.endDate)],
+                [t("startDate"), formatClaimDate(warranty?.startDate, locale)],
+                [t("endDate"), formatClaimDate(warranty?.endDate, locale)],
                 [
                   t("durationMonths"),
                   warranty
@@ -147,9 +147,12 @@ export function WarrantyClaimDetailContent({
             className="mt-4"
             items={[
               [t("claimCode"), claim.claimCode],
-              [t("submittedAt"), formatClaimDateTime(claim.submittedAt)],
-              [t("dueAt"), formatClaimDate(claim.dueAt)],
-              [t("resolvedAt"), formatClaimDateTime(claim.resolvedAt)],
+              [
+                t("submittedAt"),
+                formatClaimDateTime(claim.submittedAt, locale),
+              ],
+              [t("dueAt"), formatClaimDate(claim.dueAt, locale)],
+              [t("resolvedAt"), formatClaimDateTime(claim.resolvedAt, locale)],
             ]}
           />
         </section>

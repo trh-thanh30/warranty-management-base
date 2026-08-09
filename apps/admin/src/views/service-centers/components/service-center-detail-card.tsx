@@ -1,6 +1,6 @@
 "use client";
 
-import type { ServiceCenterSummary } from "@repo/shared";
+import { formatDate, type ServiceCenterSummary } from "@repo/shared";
 import {
   Card,
   CardContent,
@@ -10,9 +10,8 @@ import {
   Skeleton,
 } from "@repo/ui";
 import { ExternalLink } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
-import { formatServiceCenterCreatedAt } from "../service-centers.utils";
 import { ServiceCenterStatusBadge } from "./service-center-status-badge";
 
 export function ServiceCenterDetailCard({
@@ -20,6 +19,7 @@ export function ServiceCenterDetailCard({
 }: {
   serviceCenter: ServiceCenterSummary;
 }) {
+  const locale = useLocale();
   const t = useTranslations("ServiceCenters");
 
   return (
@@ -68,7 +68,7 @@ export function ServiceCenterDetailCard({
           </div>
           <DetailItem
             label={t("createdAt")}
-            value={formatServiceCenterCreatedAt(serviceCenter.createdAt)}
+            value={formatDate(serviceCenter.createdAt, { locale })}
           />
         </DetailSection>
       </CardContent>

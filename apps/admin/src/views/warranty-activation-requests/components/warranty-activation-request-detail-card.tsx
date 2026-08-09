@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { WarrantyActivationRequestSummary } from "@repo/shared";
 import { Badge, Card, CardContent, Skeleton } from "@repo/ui";
 import {
@@ -17,6 +17,7 @@ type WarrantyActivationRequestDetailCardProps = {
 export function WarrantyActivationRequestDetailCard({
   request,
 }: WarrantyActivationRequestDetailCardProps) {
+  const locale = useLocale();
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const tWarranties = useTranslations("Warranties");
   const activatedWarranty = request.activatedWarranty;
@@ -47,7 +48,7 @@ export function WarrantyActivationRequestDetailCard({
           </div>
           <DetailItem
             label={t("createdAt")}
-            value={formatActivationRequestDate(request.createdAt)}
+            value={formatActivationRequestDate(request.createdAt, locale)}
           />
         </DetailSection>
 
@@ -96,7 +97,7 @@ export function WarrantyActivationRequestDetailCard({
         <DetailSection title={t("reviewInfo")}>
           <DetailItem
             label={t("reviewedAt")}
-            value={formatActivationRequestDate(request.reviewedAt)}
+            value={formatActivationRequestDate(request.reviewedAt, locale)}
           />
           <DetailItem
             label={t("reviewedBy")}
@@ -137,9 +138,11 @@ export function WarrantyActivationRequestDetailCard({
                     duration: activatedWarranty.durationMonths,
                     endDate: formatActivationRequestDate(
                       activatedWarranty.endDate,
+                      locale,
                     ),
                     startDate: formatActivationRequestDate(
                       activatedWarranty.startDate,
+                      locale,
                     ),
                   })
                 : "-"
@@ -200,11 +203,15 @@ export function WarrantyActivationRequestDetailCard({
             label={t("certificateGeneratedAt")}
             value={formatActivationRequestDate(
               certificate?.generatedAt ?? null,
+              locale,
             )}
           />
           <DetailItem
             label={t("certificateEmailedAt")}
-            value={formatActivationRequestDate(certificate?.emailedAt ?? null)}
+            value={formatActivationRequestDate(
+              certificate?.emailedAt ?? null,
+              locale,
+            )}
           />
           <DetailItem
             className="sm:col-span-2"

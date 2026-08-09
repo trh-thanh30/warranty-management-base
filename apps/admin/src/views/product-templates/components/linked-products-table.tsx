@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@/src/i18n/navigation";
-import type { ProductResponse } from "@repo/shared";
+import { formatDate, type ProductResponse } from "@repo/shared";
 import {
   Button,
   Table,
@@ -12,13 +12,10 @@ import {
   TableRow,
 } from "@repo/ui";
 import { Eye } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ProductStatusBadge } from "../../products/components/product-status-badge";
 import { WarrantyStatusBadge } from "../../products/components/warranty-status-badge";
-import {
-  formatProductCreatedAt,
-  formatProductOwner,
-} from "../../products/products.utils";
+import { formatProductOwner } from "../../products/products.utils";
 
 export function LinkedProductsTable({
   products,
@@ -26,6 +23,7 @@ export function LinkedProductsTable({
   products: ProductResponse[];
 }) {
   const t = useTranslations("ProductTemplates");
+  const locale = useLocale();
 
   return (
     <div className="max-h-144 overflow-auto rounded-md border border-slate-200 dark:border-slate-800">
@@ -70,7 +68,7 @@ export function LinkedProductsTable({
               <TableCell>
                 <ProductStatusBadge status={product.status} />
               </TableCell>
-              <TableCell>{formatProductCreatedAt(product.createdAt)}</TableCell>
+              <TableCell>{formatDate(product.createdAt, { locale })}</TableCell>
               <TableCell className="text-right">
                 <Button
                   aria-label={t("viewLinkedProduct", {

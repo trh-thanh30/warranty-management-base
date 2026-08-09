@@ -2,14 +2,15 @@
 
 import { Bell, Check, Inbox } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import type { PaginatedResponse, UserNotificationSummary } from "@repo/shared";
+import {
+  formatDate,
+  type PaginatedResponse,
+  type UserNotificationSummary,
+} from "@repo/shared";
 import { Badge, Button, Skeleton } from "@repo/ui";
 import { PaginationControls } from "@repo/ui/pagination-controls";
 import { StatePanel } from "@/src/components/common/state-panel";
-import {
-  formatNotificationDate,
-  formatNotificationType,
-} from "../notifications.utils";
+import { formatNotificationType } from "../notifications.utils";
 
 type UserNotificationListProps = {
   data?: PaginatedResponse<UserNotificationSummary>;
@@ -120,7 +121,7 @@ export function UserNotificationList({
                 </div>
                 <div className="mt-3 flex flex-col items-start gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3">
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {formatNotificationDate(item.deliveredAt, locale)}
+                    {formatDate(item.deliveredAt, { locale, showTime: true })}
                   </p>
                   {item.status === "UNREAD" ? (
                     <Button

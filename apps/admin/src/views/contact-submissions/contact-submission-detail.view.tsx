@@ -9,9 +9,10 @@ import {
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
-import type {
-  ContactSubmissionResponse,
-  ContactSubmissionStatus,
+import {
+  formatDate,
+  type ContactSubmissionResponse,
+  type ContactSubmissionStatus,
 } from "@repo/shared";
 import {
   getAllowedContactSubmissionTransitions,
@@ -43,7 +44,6 @@ import {
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { useToast } from "@/src/hooks/use-toast";
 import { Link } from "@/src/i18n/navigation";
-import { formatContactSubmissionCreatedAt } from "./contact-submissions.utils";
 import { ContactSubmissionStatusBadge } from "./components/contact-submission-status-badge";
 
 type ContactSubmissionDetailViewProps = {
@@ -235,17 +235,19 @@ function ContactSubmissionDetailContent({
               />
               <ContactSubmissionDetailRow
                 label={t("detail.createdAt")}
-                value={formatContactSubmissionCreatedAt(
-                  submission.createdAt,
+                value={formatDate(submission.createdAt, {
+                  dateStyle: "short",
                   locale,
-                )}
+                  showTime: true,
+                })}
               />
               <ContactSubmissionDetailRow
                 label={t("detail.updatedAt")}
-                value={formatContactSubmissionCreatedAt(
-                  submission.updatedAt,
+                value={formatDate(submission.updatedAt, {
+                  dateStyle: "short",
                   locale,
-                )}
+                  showTime: true,
+                })}
               />
               <ContactSubmissionDetailRow label={t("detail.message")}>
                 <div className="whitespace-pre-wrap leading-7 text-slate-800 dark:text-slate-100">

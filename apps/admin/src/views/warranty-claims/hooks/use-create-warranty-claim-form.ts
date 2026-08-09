@@ -36,6 +36,7 @@ export function useCreateWarrantyClaimForm({
   onCreated: (claimId: string) => void;
 }) {
   const t = useTranslations("WarrantyClaims");
+  const tApiErrors = useTranslations("ApiErrors");
   const toast = useToast();
   const createMutation = useCreateWarrantyClaim();
   const [productSearch, setProductSearch] = useState("");
@@ -145,7 +146,7 @@ export function useCreateWarrantyClaimForm({
       toast.success(t("created"));
       onCreated(claim.id);
     } catch (error) {
-      const message = resolveWarrantyClaimCreateError(error, t);
+      const message = resolveWarrantyClaimCreateError(error, t, tApiErrors);
       setError("root", { message });
       toast.error(message);
     }

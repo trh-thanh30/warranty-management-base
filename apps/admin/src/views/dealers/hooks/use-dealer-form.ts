@@ -12,6 +12,7 @@ import type {
 import { HttpClientError } from "@repo/shared";
 import { useCreateDealer, useUpdateDealer } from "@/src/hooks/use-dealers";
 import { useToast } from "@/src/hooks/use-toast";
+import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import { toOptionalValue } from "@/src/utils";
 import { dealerFormSchema, type DealerFormValues } from "../dealers.types";
 
@@ -23,6 +24,7 @@ export function useDealerForm({
   onSaved: (dealer?: DealerResponse) => void;
 }) {
   const t = useTranslations("Dealers");
+  const tApiErrors = useTranslations("ApiErrors");
   const toast = useToast();
   const creating = !dealer;
   const createDealer = useCreateDealer();
@@ -69,8 +71,7 @@ export function useDealerForm({
         return;
       }
 
-      const message =
-        error instanceof HttpClientError ? error.message : t("saveError");
+      const message = getLocalizedApiError(error, t, { apiErrors: tApiErrors });
       setError("root", { message });
       toast.error(message);
     }
