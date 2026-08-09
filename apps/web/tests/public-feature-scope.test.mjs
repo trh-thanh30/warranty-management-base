@@ -83,7 +83,7 @@ test("disabled contact navigation stays hidden without disabling contact flows",
   assert.doesNotMatch(contactPage, /notFound\(\)/);
 });
 
-test("public warranty activation stays hidden while its implementation remains available", async () => {
+test("public warranty activation is enabled while its feature guards remain available", async () => {
   const [featureConfig, activationPage, actions, lookup, floatingAction] =
     await Promise.all([
       readWebFile("src/config/public-features.config.ts"),
@@ -93,9 +93,9 @@ test("public warranty activation stays hidden while its implementation remains a
       readWebFile("src/components/floating-quick-action.tsx"),
     ]);
 
-  assert.match(featureConfig, /warrantyActivation:\s*false/);
+  assert.match(featureConfig, /warrantyActivation:\s*true/);
   assert.match(activationPage, /if \(!PUBLIC_FEATURES\.warrantyActivation\)/);
-  assert.match(activationPage, /notFound\(\)/);
+  assert.match(activationPage, /WarrantyActivateView/);
 
   for (const source of [actions, lookup, floatingAction]) {
     assert.match(source, /PUBLIC_FEATURES\.warrantyActivation/);

@@ -17,6 +17,8 @@ test("product template tables wrap headers and scroll long table content", async
       readFile(url, "utf8"),
     ),
   );
+  const directorySource = sources[0];
+  assert.ok(directorySource);
 
   for (const source of sources) {
     assert.match(source, /TableScroll/);
@@ -29,11 +31,11 @@ test("product template tables wrap headers and scroll long table content", async
   }
 
   assert.match(
-    sources[0],
+    directorySource,
     /TableCell className="whitespace-nowrap">\s*\{template\.categoryRef\?\.name \?\? "-"\}/,
   );
   assert.match(
-    sources[0],
+    directorySource,
     /TableCell className="font-mono text-xs whitespace-nowrap">\s*\{template\.sku\}/,
   );
 });
