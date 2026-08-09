@@ -3,7 +3,15 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
-import { Phone, Building2, Hash, ShieldCheck, FileText } from "lucide-react";
+import {
+  Building2,
+  CheckCircle2,
+  FileText,
+  Hash,
+  Phone,
+  Search,
+  ShieldCheck,
+} from "lucide-react";
 import { usePrimaryWebsiteHotline } from "@/src/app/providers/site-settings-provider";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { PUBLIC_FEATURES } from "@/src/config/public-features.config";
@@ -14,6 +22,12 @@ import { WarrantyLookupResultDetails } from "@/src/components/warranty-lookup-re
 import { WarrantyPolicyShortcut } from "@/src/components/common/warranty-policy-shortcut";
 import { useWarrantyLookup } from "@/src/hooks/use-warranty-lookup";
 import { WarrantyBackLink } from "./components/warranty-back-link";
+
+const lookupGuideSteps = [
+  { id: "one", number: "01", Icon: FileText },
+  { id: "two", number: "02", Icon: Search },
+  { id: "three", number: "03", Icon: CheckCircle2 },
+] as const;
 
 export function WarrantyLookupView() {
   const t = useTranslations("Warranty.lookup");
@@ -149,97 +163,46 @@ export function WarrantyLookupView() {
             <h2 className="text-xl sm:text-3xl font-semibold uppercase text-deep-black">
               {t("searchSection.title")}
             </h2>
-            <p className="text-base text-stone-gray font-medium max-w-xl mx-auto">
+            <p className="mx-auto max-w-none text-base font-medium text-stone-gray sm:whitespace-nowrap">
               {t("searchSection.description")}
             </p>
           </div>
+
+          <section className="space-y-6">
+            <ol className="grid gap-6 sm:grid-cols-3">
+              {lookupGuideSteps.map(({ id, number, Icon }) => (
+                <li
+                  className="group flex h-[230px] flex-col justify-between rounded-md border border-border-gray bg-white p-6 text-left shadow-md transition-all hover:border-premium-red hover:shadow-xl"
+                  key={id}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex size-12 items-center justify-center rounded-md border border-border-gray bg-surface-muted text-stone-gray transition-colors group-hover:border-premium-red/30 group-hover:text-premium-red">
+                      <Icon className="size-6" strokeWidth={1.8} />
+                    </div>
+                    <span className="font-condensed text-4xl font-semibold text-stone-gray/20 transition-colors group-hover:text-premium-red/30">
+                      {number}
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-stone-gray">
+                      {t(`guide.steps.${id}.badge`)}
+                    </span>
+                    <h4 className="text-lg font-semibold uppercase text-deep-black transition-colors group-hover:text-premium-red sm:text-xl">
+                      {t(`guide.steps.${id}.title`)}
+                    </h4>
+                    <p className="text-sm font-medium text-stone-gray">
+                      {t(`guide.steps.${id}.description`)}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
 
           <motion.div
             layout
             className="bg-white rounded-md p-6 sm:p-10 border border-border-gray shadow-xl max-w-3xl sm:max-w-4xl lg:max-w-5xl mx-auto overflow-hidden"
           >
-            <div className="mb-8 pb-8 border-b border-border-gray space-y-8">
-              <div>
-                <p className="text-center text-base font-semibold uppercase tracking-wider text-stone-gray mb-6">
-                  {t("guide.title")}
-                </p>
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <div className="bg-surface-muted/70 p-4 rounded-md border border-border-gray space-y-1 text-center">
-                    <span className="inline-block text-xs font-condensed font-semibold text-premium-red uppercase tracking-widest bg-premium-red/10 px-2.5 py-0.5 rounded-md">
-                      {t("guide.steps.one.badge")}
-                    </span>
-                    <h4 className="text-sm font-semibold uppercase text-deep-black pt-1">
-                      {t("guide.steps.one.title")}
-                    </h4>
-                    <p className="text-sm text-stone-gray font-medium">
-                      {t("guide.steps.one.description")}
-                    </p>
-                  </div>
-
-                  <div className="bg-surface-muted/70 p-4 rounded-md border border-border-gray space-y-1 text-center">
-                    <span className="inline-block text-xs font-condensed font-semibold text-premium-red uppercase tracking-widest bg-premium-red/10 px-2.5 py-0.5 rounded-md">
-                      {t("guide.steps.two.badge")}
-                    </span>
-                    <h4 className="text-sm font-semibold uppercase text-deep-black pt-1">
-                      {t("guide.steps.two.title")}
-                    </h4>
-                    <p className="text-sm text-stone-gray font-medium">
-                      {t("guide.steps.two.description")}
-                    </p>
-                  </div>
-
-                  <div className="bg-surface-muted/70 p-4 rounded-md border border-border-gray space-y-1 text-center">
-                    <span className="inline-block text-xs font-condensed font-semibold text-premium-red uppercase tracking-widest bg-premium-red/10 px-2.5 py-0.5 rounded-md">
-                      {t("guide.steps.three.badge")}
-                    </span>
-                    <h4 className="text-sm font-semibold uppercase text-deep-black pt-1">
-                      {t("guide.steps.three.title")}
-                    </h4>
-                    <p className="text-sm text-stone-gray font-medium">
-                      {t("guide.steps.three.description")}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t border-border-gray pt-6">
-                <p className="text-center text-sm font-semibold uppercase tracking-wider text-stone-gray mb-4">
-                  {t("otherActions.title")}
-                </p>
-                <div
-                  className={`grid gap-3 text-center text-xs font-semibold uppercase tracking-wide ${
-                    PUBLIC_FEATURES.warrantyActivation
-                      ? "sm:grid-cols-3"
-                      : "sm:grid-cols-2"
-                  }`}
-                >
-                  {PUBLIC_FEATURES.warrantyActivation ? (
-                    <Link
-                      href={APP_ROUTES.warrantyActivate}
-                      className="flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:bg-premium-red hover:text-white"
-                    >
-                      <ShieldCheck className="size-4 shrink-0" />
-                      <span>{t("otherActions.activate")}</span>
-                    </Link>
-                  ) : null}
-                  <Link
-                    href={APP_ROUTES.warrantyRequest}
-                    className="p-3.5 rounded-md bg-surface-muted hover:bg-premium-red hover:text-white border border-border-gray transition-colors text-deep-black flex items-center justify-center gap-2"
-                  >
-                    <FileText className="size-4 shrink-0" />
-                    <span>{t("otherActions.request")}</span>
-                  </Link>
-                  <Link
-                    href={APP_ROUTES.dealers}
-                    className="p-3.5 rounded-md bg-surface-muted hover:bg-premium-red hover:text-white border border-border-gray transition-colors text-deep-black flex items-center justify-center gap-2"
-                  >
-                    <Building2 className="size-4 shrink-0" />
-                    <span>{t("otherActions.dealers")}</span>
-                  </Link>
-                </div>
-              </div>
-            </div>
-
             <WarrantyLookupForm
               isPending={isPending}
               onSubmit={lookup}
@@ -296,6 +259,43 @@ export function WarrantyLookupView() {
               )}
             </AnimatePresence>
           </motion.div>
+        </section>
+
+        <section className="mx-auto w-full max-w-5xl border-t border-border-gray pt-6">
+          <p className="text-center text-sm font-semibold uppercase tracking-wider text-stone-gray">
+            {t("otherActions.title")}
+          </p>
+          <div
+            className={`mt-4 grid gap-3 text-center text-xs font-semibold uppercase tracking-wide ${
+              PUBLIC_FEATURES.warrantyActivation
+                ? "sm:grid-cols-3"
+                : "sm:grid-cols-2"
+            }`}
+          >
+            {PUBLIC_FEATURES.warrantyActivation ? (
+              <Link
+                href={APP_ROUTES.warrantyActivate}
+                className="flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:bg-premium-red hover:text-white"
+              >
+                <ShieldCheck className="size-4 shrink-0" />
+                <span>{t("otherActions.activate")}</span>
+              </Link>
+            ) : null}
+            <Link
+              href={APP_ROUTES.warrantyRequest}
+              className="flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:bg-premium-red hover:text-white"
+            >
+              <FileText className="size-4 shrink-0" />
+              <span>{t("otherActions.request")}</span>
+            </Link>
+            <Link
+              href={APP_ROUTES.dealers}
+              className="flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:bg-premium-red hover:text-white"
+            >
+              <Building2 className="size-4 shrink-0" />
+              <span>{t("otherActions.dealers")}</span>
+            </Link>
+          </div>
         </section>
 
         <WarrantyPolicyShortcut />
