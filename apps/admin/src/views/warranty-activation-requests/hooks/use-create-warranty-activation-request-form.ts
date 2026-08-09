@@ -243,6 +243,8 @@ export function useCreateWarrantyActivationRequestForm({
     setFormValues(form.setValue, {
       productId: "",
       productName: "",
+      vehicleModel: "",
+      vehiclePlate: "",
       warrantyCode: "",
     });
   }

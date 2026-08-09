@@ -274,36 +274,38 @@ export function CreateWarrantyActivationRequestFormCard({
               />
             ) : null}
 
-            <div className="grid gap-5 sm:grid-cols-2">
-              <FormField
-                error={formatActivationRequestCreateFieldError(
-                  errors.vehiclePlate?.message,
-                  t,
-                )}
-                id="create-activation-request-vehicle-plate"
-                label={t("vehiclePlate")}
-              >
-                <Input
+            {selectedProduct ? (
+              <div className="grid gap-5 sm:grid-cols-2">
+                <FormField
+                  error={formatActivationRequestCreateFieldError(
+                    errors.vehiclePlate?.message,
+                    t,
+                  )}
                   id="create-activation-request-vehicle-plate"
-                  placeholder={t("vehiclePlatePlaceholder")}
-                  {...register("vehiclePlate")}
-                />
-              </FormField>
-              <FormField
-                error={formatActivationRequestCreateFieldError(
-                  errors.vehicleModel?.message,
-                  t,
-                )}
-                id="create-activation-request-vehicle-model"
-                label={t("vehicleModel")}
-              >
-                <Input
+                  label={t("vehiclePlate")}
+                >
+                  <Input
+                    id="create-activation-request-vehicle-plate"
+                    placeholder={t("vehiclePlatePlaceholder")}
+                    {...register("vehiclePlate")}
+                  />
+                </FormField>
+                <FormField
+                  error={formatActivationRequestCreateFieldError(
+                    errors.vehicleModel?.message,
+                    t,
+                  )}
                   id="create-activation-request-vehicle-model"
-                  placeholder={t("vehicleModelPlaceholder")}
-                  {...register("vehicleModel")}
-                />
-              </FormField>
-            </div>
+                  label={t("vehicleModel")}
+                >
+                  <Input
+                    id="create-activation-request-vehicle-model"
+                    placeholder={t("vehicleModelPlaceholder")}
+                    {...register("vehicleModel")}
+                  />
+                </FormField>
+              </div>
+            ) : null}
 
             <CategoryActivationInputFields
               control={control}
