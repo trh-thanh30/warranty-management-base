@@ -1553,7 +1553,9 @@
       "description": "Nhận hỗ trợ cho các vấn đề bong tróc, bọt khí, bay màu hoặc lỗi kỹ thuật thi công.",
       "form": {
         "title": "Gửi yêu cầu bảo hành",
-        "description": "Điền thông tin để FUJITEK tiếp nhận và xử lý yêu cầu của bạn."
+        "description": "Điền thông tin để FUJITEK tiếp nhận và xử lý yêu cầu của bạn.",
+        "sectionTitle": "Thông tin yêu cầu bảo hành",
+        "sectionDescription": "Vui lòng điền đầy đủ thông tin để FUJITEK có thể tiếp nhận và hỗ trợ bạn chính xác."
       },
       "guide": {
         "title": "Quy trình gửi yêu cầu bảo hành",
@@ -1579,7 +1581,7 @@
       "otherActions": {
         "title": "Dịch vụ bảo hành khác",
         "activate": "Kích hoạt tem mới",
-        "request": "Gửi yêu cầu sự cố",
+        "track": "Theo dõi tiến độ",
         "dealers": "Tìm trạm thi công"
       },
       "submit": "Gửi phiếu yêu cầu hỗ trợ",

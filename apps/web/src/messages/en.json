@@ -1553,7 +1553,9 @@
       "description": "Get help with peeling, bubbles, discoloration, or installation-related issues.",
       "form": {
         "title": "Submit a warranty request",
-        "description": "Enter your details so FUJITEK can receive and process your request."
+        "description": "Enter your details so FUJITEK can receive and process your request.",
+        "sectionTitle": "Warranty request information",
+        "sectionDescription": "Complete all required information so FUJITEK can review and support your case accurately."
       },
       "guide": {
         "title": "Warranty request process",
@@ -1579,7 +1581,7 @@
       "otherActions": {
         "title": "Other warranty services",
         "activate": "Activate new label",
-        "request": "Submit an issue",
+        "track": "Track progress",
         "dealers": "Find an installer"
       },
       "submit": "Submit support request",

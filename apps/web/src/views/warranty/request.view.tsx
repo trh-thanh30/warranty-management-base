@@ -20,6 +20,7 @@ import {
   Copy,
   FileText,
   Hash,
+  Send,
   ShieldCheck,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -28,9 +29,9 @@ import { WarrantyBackLink } from "./components/warranty-back-link";
 import { WarrantyClaimRequestForm } from "./components/warranty-claim-request-form";
 
 const requestGuideSteps = [
-  { id: "one" },
-  { id: "two" },
-  { id: "three" },
+  { id: "one", number: "01", Icon: FileText },
+  { id: "two", number: "02", Icon: Send },
+  { id: "three", number: "03", Icon: Clock3 },
 ] as const;
 
 export function WarrantyClaimRequestView() {
@@ -101,185 +102,194 @@ export function WarrantyClaimRequestView() {
           </p>
         </header>
 
-        <div className="mx-auto flex w-full max-w-5xl flex-col overflow-hidden rounded-md border border-border-gray bg-white shadow-sm">
-          <section className="p-6 sm:p-10">
-            <div className="space-y-8">
-              <div>
-                <p className="text-center text-base font-semibold uppercase tracking-wider text-stone-gray">
-                  {t("guide.title")}
-                </p>
-                <p className="mx-auto mt-2 max-w-xl text-center text-sm text-stone-gray">
-                  {t("guide.description")}
-                </p>
-                <ol className="mt-5 grid gap-4 sm:grid-cols-3">
-                  {requestGuideSteps.map((step) => (
-                    <li
-                      className="space-y-1 rounded-md border border-border-gray bg-surface-muted/70 p-4 text-center"
-                      key={step.id}
-                    >
-                      <span className="inline-block rounded-md bg-premium-red/10 px-2.5 py-0.5 text-xs font-condensed font-semibold uppercase tracking-widest text-premium-red">
-                        {t(`guide.steps.${step.id}.badge`)}
-                      </span>
-                      <h3 className="pt-1 text-sm font-semibold uppercase text-deep-black">
-                        {t(`guide.steps.${step.id}.title`)}
-                      </h3>
-                      <p className="text-sm text-stone-gray">
-                        {t(`guide.steps.${step.id}.description`)}
-                      </p>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-
-              <div className="border-t border-border-gray pt-6">
-                <p className="text-center text-sm font-semibold uppercase tracking-wider text-stone-gray">
-                  {t("otherActions.title")}
-                </p>
-                <div className="mt-4 grid gap-3 text-center text-xs font-semibold uppercase tracking-wide sm:grid-cols-3">
-                  <Link
-                    className="group flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:border-premium-red hover:bg-premium-red hover:text-white"
-                    href={APP_ROUTES.warrantyActivate}
-                  >
-                    <ShieldCheck className="size-4 shrink-0" />
-                    <span>{t("otherActions.activate")}</span>
-                  </Link>
-                  <Link
-                    className="group flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:border-premium-red hover:bg-premium-red hover:text-white"
-                    href={APP_ROUTES.warrantyRequest}
-                  >
-                    <FileText className="size-4 shrink-0" />
-                    <span>{t("otherActions.request")}</span>
-                  </Link>
-                  <Link
-                    className="group flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:border-premium-red hover:bg-premium-red hover:text-white"
-                    href={APP_ROUTES.dealers}
-                  >
-                    <Building2 className="size-4 shrink-0" />
-                    <span>{t("otherActions.dealers")}</span>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section className="border-t border-border-gray p-6 sm:p-10">
-            {claim ? (
-              <section
-                aria-live="polite"
-                className="animate-in mx-auto max-w-3xl zoom-in-95"
+        <section className="mx-auto w-full max-w-5xl px-0 py-2 sm:px-2 sm:py-4">
+          <ol className="grid gap-6 sm:grid-cols-3">
+            {requestGuideSteps.map(({ id, number, Icon }) => (
+              <li
+                className="group flex h-[230px] flex-col justify-between rounded-md border border-border-gray bg-white p-6 text-left shadow-md transition-all hover:border-premium-red hover:shadow-xl"
+                key={id}
               >
-                <div className="border-b border-border-gray pb-6 text-center">
-                  <span className="mx-auto flex size-11 items-center justify-center rounded-full bg-premium-red/10 text-premium-red">
-                    <CheckCircle2 className="size-6" aria-hidden="true" />
-                  </span>
-                  <div className="mt-4 min-w-0">
-                    <h2 className="text-xl font-semibold uppercase text-deep-black sm:text-2xl">
-                      {t("success.title")}
-                    </h2>
-                    <p className="mt-2 max-w-2xl text-base leading-7 text-stone-gray">
-                      {t("success.description")}
-                    </p>
+                <div className="flex items-center justify-between">
+                  <div className="flex size-12 items-center justify-center rounded-md border border-border-gray bg-surface-muted text-stone-gray transition-colors group-hover:border-premium-red/30 group-hover:text-premium-red">
+                    <Icon className="size-6" strokeWidth={1.8} />
                   </div>
+                  <span className="font-condensed text-4xl font-semibold text-stone-gray/20 transition-colors group-hover:text-premium-red/30">
+                    {number}
+                  </span>
                 </div>
+                <div className="space-y-1.5">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-stone-gray">
+                    {t(`guide.steps.${id}.badge`)}
+                  </span>
+                  <h3 className="text-lg font-semibold uppercase text-deep-black transition-colors group-hover:text-premium-red sm:text-xl">
+                    {t(`guide.steps.${id}.title`)}
+                  </h3>
+                  <p className="text-sm font-medium text-stone-gray">
+                    {t(`guide.steps.${id}.description`)}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
 
-                <div className="divide-y divide-border-gray">
-                  <WarrantyResultRow
-                    icon={<Hash className="size-4" aria-hidden="true" />}
-                    label={t("success.claimCodeLabel")}
-                    value={
-                      <div className="flex items-center justify-start gap-2 sm:justify-end">
-                        <p className="min-w-0 break-all text-sm font-semibold text-premium-red">
-                          {claim.claimCode}
-                        </p>
-                        <Button
-                          aria-label={
-                            isCodeCopied
-                              ? t("success.copied")
-                              : t("success.copyCode")
-                          }
-                          className="size-9 shrink-0 rounded-md border-border-gray p-0 text-stone-gray hover:border-premium-red hover:bg-premium-red/5 hover:text-premium-red"
-                          onClick={() => void copyClaimCode()}
-                          title={
-                            isCodeCopied
-                              ? t("success.copied")
-                              : t("success.copyCode")
-                          }
-                          type="button"
-                          variant="outline"
-                        >
-                          {isCodeCopied ? (
-                            <Check className="size-4" aria-hidden="true" />
-                          ) : (
-                            <Copy className="size-4" aria-hidden="true" />
-                          )}
-                        </Button>
-                      </div>
-                    }
-                  />
-                  <WarrantyResultRow
-                    icon={<CircleAlert className="size-4" aria-hidden="true" />}
-                    label={t("success.issueLabel")}
-                    value={claim.issueTitle}
-                  />
-                  <WarrantyResultRow
-                    icon={<Calendar className="size-4" aria-hidden="true" />}
-                    label={t("success.submittedAtLabel")}
-                    value={formatDate(claim.submittedAt, {
-                      locale,
-                      showTime: true,
-                    })}
-                  />
-                  <WarrantyResultRow
-                    icon={<Clock3 className="size-4" aria-hidden="true" />}
-                    label={t("success.statusLabel")}
-                    value={
-                      <Badge
-                        className="gap-2 bg-premium-red/10 px-3 py-1.5 text-premium-red"
-                        variant="destructive"
+        {!claim ? (
+          <header className="mx-auto max-w-2xl space-y-2 text-center">
+            <h3 className="text-xl font-semibold uppercase tracking-wider text-deep-black sm:text-2xl">
+              {t("form.sectionTitle")}
+            </h3>
+            <p className="text-sm text-stone-gray sm:text-base">
+              {t("form.sectionDescription")}
+            </p>
+          </header>
+        ) : null}
+
+        <section className="mx-auto w-full max-w-5xl rounded-md border border-border-gray bg-white p-6 shadow-xl sm:p-10">
+          {claim ? (
+            <section
+              aria-live="polite"
+              className="animate-in mx-auto max-w-3xl zoom-in-95"
+            >
+              <div className="border-b border-border-gray pb-6 text-center">
+                <span className="mx-auto flex size-11 items-center justify-center rounded-full bg-premium-red/10 text-premium-red">
+                  <CheckCircle2 className="size-6" aria-hidden="true" />
+                </span>
+                <div className="mt-4 min-w-0">
+                  <h2 className="text-xl font-semibold uppercase text-deep-black sm:text-2xl">
+                    {t("success.title")}
+                  </h2>
+                  <p className="mt-2 max-w-2xl text-base leading-7 text-stone-gray">
+                    {t("success.description")}
+                  </p>
+                </div>
+              </div>
+
+              <div className="divide-y divide-border-gray">
+                <WarrantyResultRow
+                  icon={<Hash className="size-4" aria-hidden="true" />}
+                  label={t("success.claimCodeLabel")}
+                  value={
+                    <div className="flex items-center justify-start gap-2 sm:justify-end">
+                      <p className="min-w-0 break-all text-sm font-semibold text-premium-red">
+                        {claim.claimCode}
+                      </p>
+                      <Button
+                        aria-label={
+                          isCodeCopied
+                            ? t("success.copied")
+                            : t("success.copyCode")
+                        }
+                        className="size-9 shrink-0 rounded-md border-border-gray p-0 text-stone-gray hover:border-premium-red hover:bg-premium-red/5 hover:text-premium-red"
+                        onClick={() => void copyClaimCode()}
+                        title={
+                          isCodeCopied
+                            ? t("success.copied")
+                            : t("success.copyCode")
+                        }
+                        type="button"
+                        variant="outline"
                       >
-                        <Clock3 className="size-4" aria-hidden="true" />
-                        {claim.status === "SUBMITTED"
-                          ? t("success.submittedStatus")
-                          : claim.status}
-                      </Badge>
-                    }
-                  />
-                </div>
-
-                <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                  <Button
-                    asChild
-                    className="h-12 w-full rounded-md bg-premium-red px-8 text-xs font-semibold uppercase text-white hover:bg-warm-red"
-                  >
-                    <Link
-                      href={{
-                        pathname: "/warranty/track",
-                        query: { claimCode: claim.claimCode },
-                      }}
+                        {isCodeCopied ? (
+                          <Check className="size-4" aria-hidden="true" />
+                        ) : (
+                          <Copy className="size-4" aria-hidden="true" />
+                        )}
+                      </Button>
+                    </div>
+                  }
+                />
+                <WarrantyResultRow
+                  icon={<CircleAlert className="size-4" aria-hidden="true" />}
+                  label={t("success.issueLabel")}
+                  value={claim.issueTitle}
+                />
+                <WarrantyResultRow
+                  icon={<Calendar className="size-4" aria-hidden="true" />}
+                  label={t("success.submittedAtLabel")}
+                  value={formatDate(claim.submittedAt, {
+                    locale,
+                    showTime: true,
+                  })}
+                />
+                <WarrantyResultRow
+                  icon={<Clock3 className="size-4" aria-hidden="true" />}
+                  label={t("success.statusLabel")}
+                  value={
+                    <Badge
+                      className="gap-2 bg-premium-red/10 px-3 py-1.5 text-premium-red"
+                      variant="destructive"
                     >
-                      {t("success.track")}
-                    </Link>
-                  </Button>
-                  <Button
-                    className="h-12 w-full rounded-md border-premium-red px-8 text-xs font-semibold uppercase text-premium-red transition-colors hover:bg-premium-red hover:text-white"
-                    onClick={resetForm}
-                    type="button"
-                    variant="outline"
+                      <Clock3 className="size-4" aria-hidden="true" />
+                      {claim.status === "SUBMITTED"
+                        ? t("success.submittedStatus")
+                        : claim.status}
+                    </Badge>
+                  }
+                />
+              </div>
+
+              <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                <Button
+                  asChild
+                  className="h-12 w-full rounded-md bg-premium-red px-8 text-xs font-semibold uppercase text-white hover:bg-warm-red"
+                >
+                  <Link
+                    href={{
+                      pathname: "/warranty/track",
+                      query: { claimCode: claim.claimCode },
+                    }}
                   >
-                    {t("success.reset")}
-                  </Button>
-                </div>
-              </section>
-            ) : (
-              <WarrantyClaimRequestForm
-                errorKind={errorKind}
-                isPending={isPending}
-                onResetError={reset}
-                onSubmit={submit}
-              />
-            )}
-          </section>
-        </div>
+                    {t("success.track")}
+                  </Link>
+                </Button>
+                <Button
+                  className="h-12 w-full rounded-md border-premium-red px-8 text-xs font-semibold uppercase text-premium-red transition-colors hover:bg-premium-red hover:text-white"
+                  onClick={resetForm}
+                  type="button"
+                  variant="outline"
+                >
+                  {t("success.reset")}
+                </Button>
+              </div>
+            </section>
+          ) : (
+            <WarrantyClaimRequestForm
+              errorKind={errorKind}
+              isPending={isPending}
+              onResetError={reset}
+              onSubmit={submit}
+            />
+          )}
+        </section>
+
+        <section className="mx-auto w-full max-w-5xl border-t border-border-gray pt-6">
+          <p className="text-center text-sm font-semibold uppercase tracking-wider text-stone-gray">
+            {t("otherActions.title")}
+          </p>
+          <div className="mt-4 grid gap-3 text-center text-xs font-semibold uppercase tracking-wide sm:grid-cols-3">
+            <Link
+              className="group flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:border-premium-red hover:bg-premium-red hover:text-white"
+              href={APP_ROUTES.warrantyActivate}
+            >
+              <ShieldCheck className="size-4 shrink-0" />
+              <span>{t("otherActions.activate")}</span>
+            </Link>
+            <Link
+              className="group flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:border-premium-red hover:bg-premium-red hover:text-white"
+              href={APP_ROUTES.warrantyTrack}
+            >
+              <Clock3 className="size-4 shrink-0" />
+              <span>{t("otherActions.track")}</span>
+            </Link>
+            <Link
+              className="group flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:border-premium-red hover:bg-premium-red hover:text-white"
+              href={APP_ROUTES.dealers}
+            >
+              <Building2 className="size-4 shrink-0" />
+              <span>{t("otherActions.dealers")}</span>
+            </Link>
+          </div>
+        </section>
 
         <WarrantyPolicyShortcut />
       </Container>
