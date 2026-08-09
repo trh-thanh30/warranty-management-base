@@ -20,6 +20,7 @@ import { Container } from "@/src/components/common/container";
 import { WarrantyLookupForm } from "@/src/components/common/warranty-lookup-form";
 import { WarrantyLookupResultDetails } from "@/src/components/warranty-lookup-result";
 import { WarrantyPolicyShortcut } from "@/src/components/common/warranty-policy-shortcut";
+import { WarrantyProcessSteps } from "@/src/components/common/warranty-process-steps";
 import { useWarrantyLookup } from "@/src/hooks/use-warranty-lookup";
 import { WarrantyBackLink } from "./components/warranty-back-link";
 
@@ -168,36 +169,15 @@ export function WarrantyLookupView() {
             </p>
           </div>
 
-          <section className="space-y-6">
-            <ol className="grid gap-6 sm:grid-cols-3">
-              {lookupGuideSteps.map(({ id, number, Icon }) => (
-                <li
-                  className="group flex h-[230px] flex-col justify-between rounded-md border border-border-gray bg-white p-6 text-left shadow-md transition-all hover:border-premium-red hover:shadow-xl"
-                  key={id}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex size-12 items-center justify-center rounded-md border border-border-gray bg-surface-muted text-stone-gray transition-colors group-hover:border-premium-red/30 group-hover:text-premium-red">
-                      <Icon className="size-6" strokeWidth={1.8} />
-                    </div>
-                    <span className="font-condensed text-4xl font-semibold text-stone-gray/20 transition-colors group-hover:text-premium-red/30">
-                      {number}
-                    </span>
-                  </div>
-                  <div className="space-y-1.5">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-stone-gray">
-                      {t(`guide.steps.${id}.badge`)}
-                    </span>
-                    <h4 className="text-lg font-semibold uppercase text-deep-black transition-colors group-hover:text-premium-red sm:text-xl">
-                      {t(`guide.steps.${id}.title`)}
-                    </h4>
-                    <p className="text-sm font-medium text-stone-gray">
-                      {t(`guide.steps.${id}.description`)}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </section>
+          <WarrantyProcessSteps
+            steps={lookupGuideSteps.map(({ id, number, Icon }) => ({
+              number,
+              Icon,
+              badge: t(`guide.steps.${id}.badge`),
+              title: t(`guide.steps.${id}.title`),
+              description: t(`guide.steps.${id}.description`),
+            }))}
+          />
 
           <motion.div
             layout
