@@ -74,7 +74,7 @@ export function WarrantyLookupView() {
         {/* 2. Registration Methods Section */}
         <section className="space-y-8 text-center max-w-4xl lg:max-w-5xl mx-auto">
           <div className="space-y-3">
-            <h2 className="text-xl sm:text-3xl font-semibold uppercase text-deep-black">
+            <h2 className="text-2xl sm:text-3xl font-semibold uppercase text-deep-black">
               {t("registration.title")}
             </h2>
             <p className="text-base text-stone-gray font-medium max-w-xl mx-auto">
@@ -160,7 +160,7 @@ export function WarrantyLookupView() {
         {/* 3. Search Section */}
         <section className="space-y-6 max-w-3xl sm:max-w-4xl lg:max-w-5xl mx-auto">
           <div className="text-center space-y-2">
-            <h2 className="text-xl sm:text-3xl font-semibold uppercase text-deep-black">
+            <h2 className="text-2xl sm:text-3xl font-semibold uppercase text-deep-black">
               {t("searchSection.title")}
             </h2>
             <p className="mx-auto max-w-none text-base font-medium text-stone-gray sm:whitespace-nowrap">

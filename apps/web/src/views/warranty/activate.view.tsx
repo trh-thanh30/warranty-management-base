@@ -100,7 +100,7 @@ export function WarrantyActivateView() {
 
         {!request ? (
           <header className="mx-auto max-w-2xl space-y-2 text-center">
-            <h3 className="text-xl font-semibold uppercase tracking-wider text-deep-black sm:text-2xl">
+            <h3 className="text-2xl font-semibold uppercase tracking-wider text-deep-black sm:text-3xl">
               {t("form.sectionTitle")}
             </h3>
             <p className="text-sm text-stone-gray sm:text-base">
