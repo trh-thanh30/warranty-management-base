@@ -1678,6 +1678,8 @@
       "form": {
         "title": "Tra cứu tiến độ yêu cầu",
         "description": "Nhập mã CLM để xem trạng thái và lịch sử xử lý yêu cầu bảo hành.",
+        "sectionTitle": "Thông tin theo dõi yêu cầu",
+        "sectionDescription": "Nhập mã CLM được cấp sau khi gửi yêu cầu để kiểm tra tiến độ xử lý.",
         "claimCodeLabel": "Mã yêu cầu bảo hành",
         "placeholder": "Ví dụ: CLM-0123456789ABCDEFABCD",
         "submit": "Kiểm tra",

@@ -1678,6 +1678,8 @@
       "form": {
         "title": "Check request progress",
         "description": "Enter your CLM code to view the status and processing history of your warranty request.",
+        "sectionTitle": "Request tracking information",
+        "sectionDescription": "Enter the CLM code issued after submission to check the processing progress.",
         "claimCodeLabel": "Warranty claim code",
         "placeholder": "For example: CLM-0123456789ABCDEFABCD",
         "submit": "Check",

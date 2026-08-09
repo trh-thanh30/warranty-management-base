@@ -6,7 +6,7 @@ import { WarrantyPolicyShortcut } from "@/src/components/common/warranty-policy-
 import { Link } from "@/src/i18n/navigation";
 import { useWarrantyClaimTracking } from "@/src/hooks/use-warranty-claim-tracking";
 import { AnimatePresence, motion } from "framer-motion";
-import { Building2, FileText, ShieldCheck } from "lucide-react";
+import { Building2, Clock3, FileText, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
@@ -14,7 +14,11 @@ import { WarrantyBackLink } from "./components/warranty-back-link";
 import { WarrantyClaimProgress } from "./components/warranty-claim-progress";
 import { WarrantyTrackForm } from "./components/warranty-track-form";
 
-const guideSteps = [{ id: "one" }, { id: "two" }, { id: "three" }] as const;
+const guideSteps = [
+  { id: "one", number: "01", Icon: FileText },
+  { id: "two", number: "02", Icon: Clock3 },
+  { id: "three", number: "03", Icon: ShieldCheck },
+] as const;
 
 export function WarrantyTrackView() {
   const t = useTranslations("Warranty.track");
@@ -61,93 +65,103 @@ export function WarrantyTrackView() {
           </p>
         </header>
 
-        <div className="mx-auto flex w-full max-w-5xl flex-col overflow-hidden rounded-md border border-border-gray bg-white shadow-sm">
-          <motion.section className="order-2" layout>
-            <div className="mx-6 border-t border-border-gray py-6 sm:mx-10 sm:py-8">
-              <WarrantyTrackForm
-                initialValue={initialClaimCode}
-                isPending={isPending}
-                onSubmit={track}
-                onValueChange={reset}
-              />
-            </div>
-
-            <AnimatePresence mode="wait">
-              {data ? (
-                <motion.div
-                  animate={{ opacity: 1, height: "auto" }}
-                  className="mx-6 overflow-hidden border-t border-border-gray sm:mx-10"
-                  exit={{ opacity: 0, height: 0 }}
-                  initial={{ opacity: 0, height: 0 }}
-                  key={data.claimCode}
-                  transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-                >
-                  <WarrantyClaimProgress claim={data} embedded />
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
-          </motion.section>
-
-          <section className="order-1 p-6 sm:p-10">
-            <div className="space-y-8">
-              <div>
-                <p className="text-center text-base font-semibold uppercase tracking-wider text-stone-gray">
-                  {t("guide.title")}
-                </p>
-                <p className="mx-auto mt-2 max-w-xl text-center text-sm text-stone-gray">
-                  {t("guide.description")}
-                </p>
-                <ol className="mt-5 grid gap-4 sm:grid-cols-3">
-                  {guideSteps.map((step) => (
-                    <li
-                      className="space-y-1 rounded-md border border-border-gray bg-surface-muted/70 p-4 text-center"
-                      key={step.id}
-                    >
-                      <span className="inline-block rounded-md bg-premium-red/10 px-2.5 py-0.5 text-xs font-condensed font-semibold uppercase tracking-widest text-premium-red">
-                        {t(`guide.steps.${step.id}.badge`)}
-                      </span>
-                      <h3 className="pt-1 text-sm font-semibold uppercase text-deep-black">
-                        {t(`guide.steps.${step.id}.title`)}
-                      </h3>
-                      <p className="text-sm text-stone-gray">
-                        {t(`guide.steps.${step.id}.description`)}
-                      </p>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-
-              <div className="border-t border-border-gray pt-6">
-                <p className="text-center text-sm font-semibold uppercase tracking-wider text-stone-gray">
-                  {t("otherActions.title")}
-                </p>
-                <div className="mt-4 grid gap-3 text-center text-xs font-semibold uppercase tracking-wide sm:grid-cols-3">
-                  <Link
-                    className="group flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:border-premium-red hover:bg-premium-red hover:text-white"
-                    href={APP_ROUTES.warrantyActivate}
-                  >
-                    <ShieldCheck className="size-4 shrink-0" />
-                    <span>{t("otherActions.activate")}</span>
-                  </Link>
-                  <Link
-                    className="group flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:border-premium-red hover:bg-premium-red hover:text-white"
-                    href={APP_ROUTES.warrantyRequest}
-                  >
-                    <FileText className="size-4 shrink-0" />
-                    <span>{t("otherActions.request")}</span>
-                  </Link>
-                  <Link
-                    className="group flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:border-premium-red hover:bg-premium-red hover:text-white"
-                    href={APP_ROUTES.dealers}
-                  >
-                    <Building2 className="size-4 shrink-0" />
-                    <span>{t("otherActions.dealers")}</span>
-                  </Link>
+        <section className="mx-auto w-full max-w-5xl px-0 py-2 sm:px-2 sm:py-4">
+          <ol className="grid gap-6 sm:grid-cols-3">
+            {guideSteps.map(({ id, number, Icon }) => (
+              <li
+                className="group flex h-[230px] flex-col justify-between rounded-md border border-border-gray bg-white p-6 text-left shadow-md transition-all hover:border-premium-red hover:shadow-xl"
+                key={id}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex size-12 items-center justify-center rounded-md border border-border-gray bg-surface-muted text-stone-gray transition-colors group-hover:border-premium-red/30 group-hover:text-premium-red">
+                    <Icon className="size-6" strokeWidth={1.8} />
+                  </div>
+                  <span className="font-condensed text-4xl font-semibold text-stone-gray/20 transition-colors group-hover:text-premium-red/30">
+                    {number}
+                  </span>
                 </div>
-              </div>
-            </div>
-          </section>
-        </div>
+                <div className="space-y-1.5">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-stone-gray">
+                    {t(`guide.steps.${id}.badge`)}
+                  </span>
+                  <h3 className="text-lg font-semibold uppercase text-deep-black transition-colors group-hover:text-premium-red sm:text-xl">
+                    {t(`guide.steps.${id}.title`)}
+                  </h3>
+                  <p className="text-sm font-medium text-stone-gray">
+                    {t(`guide.steps.${id}.description`)}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {!data ? (
+          <header className="mx-auto max-w-2xl space-y-2 text-center">
+            <h3 className="text-xl font-semibold uppercase tracking-wider text-deep-black sm:text-2xl">
+              {t("form.sectionTitle")}
+            </h3>
+            <p className="text-sm text-stone-gray sm:text-base">
+              {t("form.sectionDescription")}
+            </p>
+          </header>
+        ) : null}
+
+        <motion.section
+          className="mx-auto w-full max-w-5xl rounded-md border border-border-gray bg-white p-6 shadow-xl sm:p-10"
+          layout
+        >
+          <WarrantyTrackForm
+            initialValue={initialClaimCode}
+            isPending={isPending}
+            onSubmit={track}
+            onValueChange={reset}
+          />
+
+          <AnimatePresence mode="wait">
+            {data ? (
+              <motion.div
+                animate={{ opacity: 1, height: "auto" }}
+                className="mt-8 overflow-hidden border-t border-border-gray pt-8"
+                exit={{ opacity: 0, height: 0 }}
+                initial={{ opacity: 0, height: 0 }}
+                key={data.claimCode}
+                transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+              >
+                <WarrantyClaimProgress claim={data} embedded />
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+        </motion.section>
+
+        <section className="mx-auto w-full max-w-5xl border-t border-border-gray pt-6">
+          <p className="text-center text-sm font-semibold uppercase tracking-wider text-stone-gray">
+            {t("otherActions.title")}
+          </p>
+          <div className="mt-4 grid gap-3 text-center text-xs font-semibold uppercase tracking-wide sm:grid-cols-3">
+            <Link
+              className="group flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:border-premium-red hover:bg-premium-red hover:text-white"
+              href={APP_ROUTES.warrantyActivate}
+            >
+              <ShieldCheck className="size-4 shrink-0" />
+              <span>{t("otherActions.activate")}</span>
+            </Link>
+            <Link
+              className="group flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:border-premium-red hover:bg-premium-red hover:text-white"
+              href={APP_ROUTES.warrantyRequest}
+            >
+              <FileText className="size-4 shrink-0" />
+              <span>{t("otherActions.request")}</span>
+            </Link>
+            <Link
+              className="group flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:border-premium-red hover:bg-premium-red hover:text-white"
+              href={APP_ROUTES.dealers}
+            >
+              <Building2 className="size-4 shrink-0" />
+              <span>{t("otherActions.dealers")}</span>
+            </Link>
+          </div>
+        </section>
 
         <WarrantyPolicyShortcut />
       </Container>
