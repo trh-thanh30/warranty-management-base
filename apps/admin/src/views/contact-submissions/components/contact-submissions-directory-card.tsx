@@ -38,6 +38,7 @@ import {
   Input,
   Skeleton,
   Table,
+  TableScroll,
   TableBody,
   TableCell,
   TableHead,
@@ -269,7 +270,7 @@ function DesktopContactSubmissionsTable({
   const t = useTranslations("ContactSubmissions");
 
   return (
-    <div className="hidden overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800 md:block">
+    <TableScroll className="hidden rounded-md border border-slate-200 dark:border-slate-800 md:block">
       <Table className="min-w-[72rem]">
         <TableHeader>
           <TableRow>
@@ -294,7 +295,7 @@ function DesktopContactSubmissionsTable({
           ))}
         </TableBody>
       </Table>
-    </div>
+    </TableScroll>
   );
 }
 

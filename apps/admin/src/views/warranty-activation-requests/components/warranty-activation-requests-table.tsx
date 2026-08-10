@@ -23,6 +23,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   Table,
+  TableScroll,
   TableBody,
   TableCell,
   TableHead,
@@ -80,7 +81,7 @@ export function WarrantyActivationRequestsTable({
         ))}
       </div>
 
-      <div className="hidden overflow-x-auto overscroll-x-contain rounded-md border border-slate-200 dark:border-slate-800 md:block">
+      <TableScroll className="hidden overscroll-x-contain rounded-md border border-slate-200 dark:border-slate-800 md:block">
         <Table className="min-w-[1180px]">
           <TableHeader>
             <TableRow>
@@ -134,7 +135,7 @@ export function WarrantyActivationRequestsTable({
             ))}
           </TableBody>
         </Table>
-      </div>
+      </TableScroll>
     </>
   );
 }

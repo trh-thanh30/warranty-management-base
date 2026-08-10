@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   Table,
+  TableScroll,
   TableBody,
   TableCell,
   TableHead,
@@ -61,7 +62,7 @@ export function WarrantiesTable({
         ))}
       </div>
 
-      <div className="hidden overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800 lg:block">
+      <TableScroll className="hidden rounded-md border border-slate-200 dark:border-slate-800 lg:block">
         <Table>
           <TableHeader>
             <TableRow>
@@ -109,7 +110,7 @@ export function WarrantiesTable({
             ))}
           </TableBody>
         </Table>
-      </div>
+      </TableScroll>
     </>
   );
 }

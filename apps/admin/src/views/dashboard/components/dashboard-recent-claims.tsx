@@ -17,6 +17,7 @@ import {
   CardTitle,
   Skeleton,
   Table,
+  TableScroll,
   TableBody,
   TableCell,
   TableHead,
@@ -128,7 +129,7 @@ export function DashboardRecentClaims({
               ))}
             </div>
 
-            <div className="hidden overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800 md:block">
+            <TableScroll className="hidden rounded-md border border-slate-200 dark:border-slate-800 md:block">
               <Table className="min-w-[760px]">
                 <TableHeader>
                   <TableRow>
@@ -184,7 +185,7 @@ export function DashboardRecentClaims({
                   ))}
                 </TableBody>
               </Table>
-            </div>
+            </TableScroll>
           </>
         )}
       </CardContent>

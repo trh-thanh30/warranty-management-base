@@ -17,6 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   Table,
+  TableScroll,
   TableBody,
   TableCell,
   TableHead,
@@ -72,7 +73,7 @@ export function ProductsTable({
         ))}
       </div>
 
-      <div className="hidden max-h-144 overflow-x-auto overflow-y-scroll rounded-md border border-slate-200 dark:border-slate-800 lg:block">
+      <TableScroll className="hidden max-h-144 overflow-y-scroll rounded-md border border-slate-200 dark:border-slate-800 lg:block">
         <Table className="min-w-6xl [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
           <TableHeader className="sticky top-0 z-10 bg-white dark:bg-slate-950">
             <TableRow>
@@ -129,7 +130,7 @@ export function ProductsTable({
             ))}
           </TableBody>
         </Table>
-      </div>
+      </TableScroll>
     </>
   );
 }
@@ -153,7 +154,9 @@ function ProductTableRow({
       <TableCell className="font-mono text-xs">
         {product.warrantyCode ?? "-"}
       </TableCell>
-      <TableCell>{getProductCategoryLabel(product)}</TableCell>
+      <TableCell className="whitespace-nowrap">
+        {getProductCategoryLabel(product)}
+      </TableCell>
       <TableCell>{formatProductOwner(product)}</TableCell>
       <TableCell>
         <WarrantyStatusBadge status={product.warranty?.status} />

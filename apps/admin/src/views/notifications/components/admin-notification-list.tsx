@@ -12,6 +12,7 @@ import {
   Button,
   Skeleton,
   Table,
+  TableScroll,
   TableBody,
   TableCell,
   TableHead,
@@ -121,7 +122,7 @@ export function AdminNotificationList({
         ))}
       </div>
 
-      <div className="hidden overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800 lg:block">
+      <TableScroll className="hidden rounded-md border border-slate-200 dark:border-slate-800 lg:block">
         <Table className="min-w-[980px]">
           <TableHeader>
             <TableRow>
@@ -163,7 +164,7 @@ export function AdminNotificationList({
             ))}
           </TableBody>
         </Table>
-      </div>
+      </TableScroll>
 
       <div className="sm:hidden">
         <PaginationControls

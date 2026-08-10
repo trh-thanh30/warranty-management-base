@@ -33,6 +33,7 @@ import {
   Input,
   Skeleton,
   Table,
+  TableScroll,
   TableBody,
   TableCell,
   TableHead,
@@ -220,7 +221,7 @@ function DirectoryResults(
           </article>
         ))}
       </div>
-      <div className="hidden overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800 lg:block">
+      <TableScroll className="hidden rounded-md border border-slate-200 dark:border-slate-800 lg:block">
         <Table>
           <TableHeader>
             <TableRow>
@@ -268,7 +269,7 @@ function DirectoryResults(
             ))}
           </TableBody>
         </Table>
-      </div>
+      </TableScroll>
       <PaginationControls
         nextLabel={t("next")}
         onPageChange={props.onPageChange}

@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   Table,
+  TableScroll,
   TableBody,
   TableCell,
   TableHead,
@@ -65,7 +66,7 @@ export function ProductTemplatesTable({
           </article>
         ))}
       </div>
-      <div className="hidden max-h-144 overflow-auto rounded-md border border-slate-200 lg:block dark:border-slate-800">
+      <TableScroll className="hidden max-h-144 overflow-y-auto rounded-md border border-slate-200 lg:block dark:border-slate-800">
         <Table className="min-w-5xl">
           <TableHeader className="sticky top-0 z-10 bg-white dark:bg-slate-950 [&_th]:h-auto [&_th]:whitespace-normal [&_th]:text-wrap [&_th]:py-2 [&_th]:leading-4">
             <TableRow>
@@ -84,10 +85,12 @@ export function ProductTemplatesTable({
                 <TableCell>
                   <TemplateIdentity template={template} />
                 </TableCell>
-                <TableCell className="font-mono text-xs">
+                <TableCell className="font-mono text-xs whitespace-nowrap">
                   {template.sku}
                 </TableCell>
-                <TableCell>{template.categoryRef?.name ?? "-"}</TableCell>
+                <TableCell className="whitespace-nowrap">
+                  {template.categoryRef?.name ?? "-"}
+                </TableCell>
                 <TableCell>
                   {t("durationValue", {
                     count: template.defaultWarrantyDurationMonths,
@@ -112,7 +115,7 @@ export function ProductTemplatesTable({
             ))}
           </TableBody>
         </Table>
-      </div>
+      </TableScroll>
     </>
   );
 }

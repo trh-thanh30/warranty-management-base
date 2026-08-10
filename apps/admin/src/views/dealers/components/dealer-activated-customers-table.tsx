@@ -4,6 +4,7 @@ import { formatDate, type DealerActivatedCustomerSummary } from "@repo/shared";
 import {
   Badge,
   Table,
+  TableScroll,
   TableBody,
   TableCell,
   TableHead,
@@ -19,7 +20,7 @@ export function DealerActivatedCustomersTable({ items }: Props) {
   const t = useTranslations("Dealers");
 
   return (
-    <div className="overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800">
+    <TableScroll className="rounded-md border border-slate-200 dark:border-slate-800">
       <Table className="min-w-[820px]">
         <TableHeader>
           <TableRow>
@@ -87,6 +88,6 @@ export function DealerActivatedCustomersTable({ items }: Props) {
           ))}
         </TableBody>
       </Table>
-    </div>
+    </TableScroll>
   );
 }

@@ -1360,6 +1360,33 @@
       }
     },
     "activate": {
+      "form": {
+        "title": "Gửi yêu cầu kích hoạt bảo hành",
+        "description": "Điền thông tin để FUJITEK tiếp nhận, kiểm tra và kích hoạt bảo hành cho sản phẩm.",
+        "sectionTitle": "Thông tin kích hoạt bảo hành",
+        "sectionDescription": "Vui lòng điền đầy đủ thông tin để quá trình xác minh và kích hoạt được thực hiện chính xác."
+      },
+      "guide": {
+        "title": "Quy trình kích hoạt bảo hành",
+        "description": "Thực hiện 3 bước đơn giản để gửi yêu cầu kích hoạt.",
+        "steps": {
+          "one": {
+            "badge": "Bước 01",
+            "title": "Điền thông tin",
+            "description": "Cung cấp thông tin chủ xe, sản phẩm và địa chỉ kích hoạt."
+          },
+          "two": {
+            "badge": "Bước 02",
+            "title": "Gửi yêu cầu",
+            "description": "Kiểm tra lại thông tin và gửi yêu cầu đến FUJITEK."
+          },
+          "three": {
+            "badge": "Bước 03",
+            "title": "Chờ xác minh",
+            "description": "FUJITEK kiểm tra, phê duyệt và kích hoạt bảo hành cho bạn."
+          }
+        }
+      },
       "eyebrow": "Yêu cầu kích hoạt E-Warranty",
       "title": "Đăng ký kích hoạt bảo hành điện tử",
       "description": "Gửi thông tin E-Warranty để FUJITEK kiểm tra và xác nhận trước khi kích hoạt bảo hành.",
@@ -1439,6 +1466,12 @@
         "notFound": "Không tìm thấy mã E-Warranty trên hệ thống.",
         "rateLimit": "Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau.",
         "request": "Không thể gửi yêu cầu kích hoạt. Vui lòng thử lại."
+      },
+      "otherActions": {
+        "title": "Dịch vụ bảo hành khác",
+        "request": "Gửi yêu cầu sự cố",
+        "track": "Theo dõi tiến độ",
+        "dealers": "Tìm trạm thi công"
       }
     },
     "lookup": {
@@ -1468,7 +1501,7 @@
       },
       "searchSection": {
         "title": "Tra cứu",
-        "description": "Vui lòng nhập đầy đủ mã E-Warranty được cung cấp trên phiếu bảo hành."
+        "description": "Vui lòng nhập đầy đủ mã E-Warranty được cung cấp trên phiếu bảo hành và thực hiện theo 3 bước dưới đây."
       },
       "guide": {
         "title": "Hướng dẫn tra cứu E-Warranty trong 3 bước",
@@ -1518,6 +1551,39 @@
       "eyebrow": "Yêu cầu dịch vụ bảo hành",
       "title": "Gửi yêu cầu bảo hành & Hỗ trợ",
       "description": "Nhận hỗ trợ cho các vấn đề bong tróc, bọt khí, bay màu hoặc lỗi kỹ thuật thi công.",
+      "form": {
+        "title": "Gửi yêu cầu bảo hành",
+        "description": "Điền thông tin để FUJITEK tiếp nhận và xử lý yêu cầu của bạn.",
+        "sectionTitle": "Thông tin yêu cầu bảo hành",
+        "sectionDescription": "Vui lòng điền đầy đủ thông tin để FUJITEK có thể tiếp nhận và hỗ trợ bạn chính xác."
+      },
+      "guide": {
+        "title": "Quy trình gửi yêu cầu bảo hành",
+        "description": "Thực hiện 3 bước để gửi yêu cầu và nhận mã CLM theo dõi.",
+        "steps": {
+          "one": {
+            "badge": "Bước 01",
+            "title": "Điền thông tin",
+            "description": "Cung cấp thông tin liên hệ, mã E-Warranty và vấn đề cần hỗ trợ."
+          },
+          "two": {
+            "badge": "Bước 02",
+            "title": "Gửi yêu cầu",
+            "description": "Kiểm tra thông tin và gửi phiếu yêu cầu đến FUJITEK."
+          },
+          "three": {
+            "badge": "Bước 03",
+            "title": "Nhận mã CLM",
+            "description": "Lưu mã CLM để theo dõi tiến độ xử lý yêu cầu bảo hành."
+          }
+        }
+      },
+      "otherActions": {
+        "title": "Dịch vụ bảo hành khác",
+        "activate": "Kích hoạt tem mới",
+        "track": "Theo dõi tiến độ",
+        "dealers": "Tìm trạm thi công"
+      },
       "submit": "Gửi phiếu yêu cầu hỗ trợ",
       "submitting": "Đang gửi yêu cầu...",
       "success": {
@@ -1579,10 +1645,41 @@
       }
     },
     "track": {
+      "guide": {
+        "title": "Quy trình xử lý yêu cầu",
+        "description": "Mã CLM giúp bạn theo dõi yêu cầu qua từng giai đoạn.",
+        "steps": {
+          "one": {
+            "badge": "Bước 01",
+            "title": "Tiếp nhận",
+            "description": "FUJITEK đã ghi nhận yêu cầu của bạn."
+          },
+          "two": {
+            "badge": "Bước 02",
+            "title": "Kiểm tra & xử lý",
+            "description": "Đội ngũ kỹ thuật đang xem xét và xử lý."
+          },
+          "three": {
+            "badge": "Bước 03",
+            "title": "Hoàn tất",
+            "description": "Yêu cầu được hoàn tất và bạn nhận được kết quả."
+          }
+        }
+      },
+      "otherActions": {
+        "title": "Dịch vụ bảo hành khác",
+        "activate": "Kích hoạt tem mới",
+        "request": "Gửi yêu cầu sự cố",
+        "dealers": "Tìm trạm thi công"
+      },
       "eyebrow": "Theo dõi tiến độ dịch vụ",
       "title": "Theo dõi xử lý bảo hành",
       "description": "Nhập mã yêu cầu CLM để xem trạng thái hiện tại và lịch sử xử lý thực tế.",
       "form": {
+        "title": "Tra cứu tiến độ yêu cầu",
+        "description": "Nhập mã CLM để xem trạng thái và lịch sử xử lý yêu cầu bảo hành.",
+        "sectionTitle": "Thông tin theo dõi yêu cầu",
+        "sectionDescription": "Nhập mã CLM được cấp sau khi gửi yêu cầu để kiểm tra tiến độ xử lý.",
         "claimCodeLabel": "Mã yêu cầu bảo hành",
         "placeholder": "Ví dụ: CLM-0123456789ABCDEFABCD",
         "submit": "Kiểm tra",

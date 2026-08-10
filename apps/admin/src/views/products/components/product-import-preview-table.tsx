@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
   Table,
+  TableScroll,
   TableBody,
   TableCell,
   TableHead,
@@ -141,7 +142,7 @@ export function ProductImportPreviewTable({
       </div>
 
       <div className="overflow-hidden rounded-md border border-slate-200">
-        <div className="max-h-[27rem] overflow-auto">
+        <TableScroll className="max-h-[27rem] overflow-y-auto">
           <Table className="min-w-[82rem] whitespace-nowrap">
             <TableHeader className="sticky top-0 z-10 bg-slate-50">
               <TableRow>
@@ -236,7 +237,7 @@ export function ProductImportPreviewTable({
               )}
             </TableBody>
           </Table>
-        </div>
+        </TableScroll>
       </div>
 
       <PaginationControls

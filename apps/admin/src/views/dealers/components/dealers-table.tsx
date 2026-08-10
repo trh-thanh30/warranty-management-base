@@ -24,6 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   Table,
+  TableScroll,
   TableBody,
   TableCell,
   TableHead,
@@ -64,7 +65,7 @@ export function DealersTable({
         ))}
       </div>
 
-      <div className="hidden overflow-hidden rounded-md border border-slate-200 dark:border-slate-800 md:block">
+      <TableScroll className="hidden rounded-md border border-slate-200 dark:border-slate-800 md:block">
         <Table>
           <TableHeader>
             <TableRow>
@@ -108,7 +109,7 @@ export function DealersTable({
             ))}
           </TableBody>
         </Table>
-      </div>
+      </TableScroll>
     </>
   );
 }
