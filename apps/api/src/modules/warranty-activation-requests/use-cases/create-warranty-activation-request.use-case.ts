@@ -110,14 +110,15 @@ export class CreateWarrantyActivationRequestUseCase {
       this.throwAlreadyOpenRequest(product.id, openRequest);
     }
 
-    const currentOwner = product.ownerships[0]?.customer;
-    if (currentOwner) {
-      this.assertCustomerMatchesCurrentOwner({
-        customerEmail,
-        customerName,
-        customerPhone,
-        currentOwner,
-      });
+    for (const item of requestItems) {
+      if (item.currentOwner) {
+        this.assertCustomerMatchesCurrentOwner({
+          customerEmail,
+          customerName,
+          customerPhone,
+          currentOwner: item.currentOwner,
+        });
+      }
     }
 
     const dealer = await this.resolveDealer(dto);
@@ -363,6 +364,7 @@ export class CreateWarrantyActivationRequestUseCase {
       brand: product.template.brand,
       model: product.template.model,
       manufactureYear: product.template.model_year,
+      currentOwner: product.ownerships[0]?.customer ?? null,
     };
   }
 

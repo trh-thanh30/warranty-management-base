@@ -3,7 +3,7 @@ import { CategoriesRepository } from '@/modules/categories/repository/categories
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
 import { Injectable } from '@nestjs/common';
-import { product_status, warranty_status } from '@prisma/client';
+import { product_status, type Customer, warranty_status } from '@prisma/client';
 import type { CreateWarrantyActivationRequestItemBody } from '@repo/shared';
 
 export type ValidatedActivationRequestItem = {
@@ -20,6 +20,7 @@ export type ValidatedActivationRequestItem = {
   brand: string | null;
   model: string | null;
   manufactureYear: number | null;
+  currentOwner: Pick<Customer, 'email' | 'full_name' | 'phone'> | null;
 };
 
 @Injectable()
@@ -149,6 +150,7 @@ export class ActivationRequestItemsValidatorService {
         brand: product.template.brand,
         model: product.template.model,
         manufactureYear: product.template.model_year,
+        currentOwner: product.ownerships?.[0]?.customer ?? null,
       };
     });
   }

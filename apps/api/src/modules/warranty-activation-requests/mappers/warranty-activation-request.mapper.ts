@@ -209,7 +209,7 @@ export function toWarrantyActivationRequestResponse(
         item.id,
       ),
     })),
-    itemCount: request.items?.length,
+    itemCount: request.items?.length ? request.items.length : undefined,
     metadata: toMetadata(request.metadata),
     createdAt: request.created_at.toISOString(),
     updatedAt: request.updated_at.toISOString(),

@@ -1,10 +1,12 @@
 import { BadRequestError, NotFoundError } from '@/common/response';
+import { toWarrantyActivationRequestResponse } from '@/modules/warranty-activation-requests/mappers/warranty-activation-request.mapper';
 import { CreateWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-warranty-activation-request.use-case';
 import { GenerateWarrantyActivationRequestCodeUseCase } from '@/modules/warranty-activation-requests/use-cases/generate-warranty-activation-request-code.use-case';
 import { ReviewWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/review-warranty-activation-request.use-case';
 import { ResendWarrantyActivationRequestCertificateEmailUseCase } from '@/modules/warranty-activation-requests/use-cases/resend-warranty-activation-request-certificate-email.use-case';
 import {
   Prisma,
+  warranty_activation_request_source,
   warranty_activation_request_status,
   warranty_status,
 } from '@prisma/client';
@@ -220,6 +222,77 @@ describe('WarrantyActivationRequestsUseCases', () => {
         productId: 'product-b',
       }),
     ]);
+  });
+
+  it('rejects a multi-product request when any current owner differs from the customer', async () => {
+    repository.findOpenByProductId.mockResolvedValue(null);
+    productsRepository.findActivationRequestTargetById.mockResolvedValue({
+      ...baseDraftProduct,
+      id: 'product-a',
+    });
+    const itemValidator = {
+      validate: jest.fn().mockResolvedValue([
+        createValidatedItem('windshield', 'product-a'),
+        {
+          ...createValidatedItem('rearGlass', 'product-b'),
+          currentOwner: {
+            email: 'another@example.com',
+            full_name: 'Another Customer',
+            phone: '0987654321',
+          },
+        },
+      ]),
+    };
+    const useCase = new CreateWarrantyActivationRequestUseCase(
+      repository as never,
+      new GenerateWarrantyActivationRequestCodeUseCase(repository as never),
+      productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
+      itemValidator as never,
+    );
+
+    await expect(
+      useCase.execute({
+        addressDetail: '1 Nguyen Trai',
+        categoryId: 'category-id',
+        customerEmail: 'customer@example.com',
+        customerName: 'Nguyen Van A',
+        customerPhone: '0901234567',
+        items: [
+          { positionKey: 'windshield', productId: 'product-a' },
+          { positionKey: 'rearGlass', productId: 'product-b' },
+        ],
+        provinceCode: '79',
+        provinceName: 'TP Ho Chi Minh',
+        wardCode: '26734',
+        wardName: 'Phuong Ben Thanh',
+      }),
+    ).rejects.toMatchObject({
+      details: { code: 'CUSTOMER_OWNER_MISMATCH' },
+    });
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it('preserves singular fallback for a legacy request without items', () => {
+    const result = toWarrantyActivationRequestResponse({
+      ...baseRequest,
+      category_id: null,
+      dealer_id: null,
+      installed_at: null,
+      items: [],
+      product_id: 'legacy-product-id',
+      product_name: 'Legacy product',
+      source: warranty_activation_request_source.PUBLIC_WEB,
+      vehicle_model: null,
+      vehicle_plate: null,
+      warranty_duration_months: null,
+    });
+
+    expect(result.itemCount).toBeUndefined();
+    expect(result.productId).toBe('legacy-product-id');
+    expect(result.productName).toBe('Legacy product');
   });
 
   it('publishes an admin notification when a public activation request is created', async () => {
@@ -976,6 +1049,7 @@ function createValidatedItem(positionKey: string, productId: string) {
     brand: 'Lexzenz',
     model: 'SP50',
     manufactureYear: 2026,
+    currentOwner: null,
   };
 }
 

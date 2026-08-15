@@ -215,11 +215,13 @@ test("activation request list summarizes one or many physical products", () => {
     items: [{ productName: "Film SP50" }, { productName: "Film B55" }],
   } as unknown as import("@repo/shared").WarrantyActivationRequestSummary;
   const legacyRequest = {
+    itemCount: 0,
     productId: "product-1",
     productName: "Camera hành trình",
   } as import("@repo/shared").WarrantyActivationRequestSummary;
 
   assert.equal(getActivationRequestProductCount(multiRequest), 2);
+  assert.equal(getActivationRequestProductCount(legacyRequest), 1);
   assert.equal(
     getActivationRequestProductTitle(
       multiRequest,

@@ -233,6 +233,34 @@ WHERE
   ) IS NOT NULL
 ON CONFLICT ("field_id", "value") DO NOTHING;
 
+-- Cut the known Film installation positions over to physical Product selectors.
+-- Resolve the category by its stable business code instead of an environment UUID.
+UPDATE "category_activation_field" AS "field"
+SET "type" = 'PRODUCT_SELECT'
+FROM "category"
+WHERE
+  "field"."category_id" = "category"."id"
+  AND "category"."type" = 'PRODUCT'
+  AND "category"."code" = 'LEXZENZ_REFLEX_KOREA_FILM'
+  AND "field"."key" IN (
+    'windshield',
+    'frontLeftSide',
+    'frontRightSide',
+    'rearLeftSide',
+    'rearRightSide',
+    'rearGlass',
+    'sunroof'
+  );
+
+DELETE FROM "category_activation_field_option" AS "option"
+USING "category_activation_field" AS "field", "category"
+WHERE
+  "option"."field_id" = "field"."id"
+  AND "field"."category_id" = "category"."id"
+  AND "category"."type" = 'PRODUCT'
+  AND "category"."code" = 'LEXZENZ_REFLEX_KOREA_FILM'
+  AND "field"."type" = 'PRODUCT_SELECT';
+
 -- Backfill one primaryProduct item for each legacy request that still resolves
 -- to a physical Product and Warranty. Singular request columns remain intact.
 INSERT INTO "warranty_activation_request_item" (

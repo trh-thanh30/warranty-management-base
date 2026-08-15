@@ -47,6 +47,13 @@ describe('Multi-product warranty activation contracts', () => {
 
     expect(migration).toMatch(/activationFields/);
     expect(migration).toMatch(/primaryProduct/);
+    expect(migration).toMatch(/LEXZENZ_REFLEX_KOREA_FILM/);
+    expect(migration).toMatch(
+      /UPDATE\s+"category_activation_field"[\s\S]+SET\s+"type"\s*=\s*'PRODUCT_SELECT'/,
+    );
+    expect(migration).toMatch(
+      /DELETE FROM\s+"category_activation_field_option"/,
+    );
     expect(migration).toMatch(/duplicate open/i);
     expect(migration).toMatch(
       /warranty_activation_request_item_one_open_per_product/,
