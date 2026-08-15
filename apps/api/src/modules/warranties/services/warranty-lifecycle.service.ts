@@ -166,23 +166,38 @@ export class WarrantyLifecycleService {
     }
 
     if (warranty.warranty_code) {
-      await tx.warrantyActivationRequest.updateMany({
+      const openRequests = await tx.warrantyActivationRequest.findMany({
         where: {
-          warranty_code: warranty.warranty_code,
           status: {
             in: [
               warranty_activation_request_status.PENDING,
               warranty_activation_request_status.APPROVED,
             ],
           },
+          OR: [
+            { warranty_code: warranty.warranty_code },
+            { items: { some: { warranty_id: warranty.id } } },
+          ],
         },
-        data: {
-          admin_note: `Tự động hủy do bảo hành bị vô hiệu: ${reason}`,
-          reviewed_at: voidedAt,
-          reviewed_by_id: input.voidedByUserId,
-          status: warranty_activation_request_status.CANCELLED,
-        },
+        select: { id: true },
       });
+      const requestIds = openRequests.map((request) => request.id);
+
+      if (requestIds.length > 0) {
+        await tx.warrantyActivationRequestItem.updateMany({
+          where: { request_id: { in: requestIds } },
+          data: { status: warranty_activation_request_status.CANCELLED },
+        });
+        await tx.warrantyActivationRequest.updateMany({
+          where: { id: { in: requestIds } },
+          data: {
+            admin_note: `Tự động hủy do bảo hành bị vô hiệu: ${reason}`,
+            reviewed_at: voidedAt,
+            reviewed_by_id: input.voidedByUserId,
+            status: warranty_activation_request_status.CANCELLED,
+          },
+        });
+      }
     }
 
     return tx.warranty.findUniqueOrThrow({ where: { id: warranty.id } });

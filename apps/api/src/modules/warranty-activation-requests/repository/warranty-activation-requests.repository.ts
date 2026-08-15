@@ -8,6 +8,7 @@ import { WarrantyLifecycleService } from '@/modules/warranties/services/warranty
 import { Injectable } from '@nestjs/common';
 import {
   Prisma,
+  product_status,
   warranty_activation_request_status,
   warranty_status,
 } from '@prisma/client';
@@ -263,18 +264,25 @@ export class WarrantyActivationRequestsRepository {
     rejectionReason?: string;
     reviewedById?: string;
   }) {
-    return this.prismaService.warrantyActivationRequest.update({
-      where: { id: input.id },
-      data: {
-        admin_note: input.adminNote,
-        rejection_reason: input.rejectionReason,
-        reviewed_at: new Date(),
-        reviewed_by: input.reviewedById
-          ? { connect: { id: input.reviewedById } }
-          : undefined,
-        status: input.status,
-      },
-      include: activationRequestInclude,
+    return this.prismaService.$transaction(async (tx) => {
+      await tx.warrantyActivationRequestItem.updateMany({
+        where: { request_id: input.id },
+        data: { status: input.status },
+      });
+
+      return tx.warrantyActivationRequest.update({
+        where: { id: input.id },
+        data: {
+          admin_note: input.adminNote,
+          rejection_reason: input.rejectionReason,
+          reviewed_at: new Date(),
+          reviewed_by: input.reviewedById
+            ? { connect: { id: input.reviewedById } }
+            : undefined,
+          status: input.status,
+        },
+        include: activationRequestInclude,
+      });
     });
   }
 
@@ -288,7 +296,13 @@ export class WarrantyActivationRequestsRepository {
     return this.prismaService.$transaction(async (tx) => {
       const request = await tx.warrantyActivationRequest.findUnique({
         where: { id: input.id },
-        include: { activated_warranty: true },
+        include: {
+          activated_warranty: true,
+          items: {
+            include: { product: { include: { warranty: true } } },
+            orderBy: [{ created_at: 'asc' }, { id: 'asc' }],
+          },
+        },
       });
 
       if (!request) {
@@ -303,28 +317,33 @@ export class WarrantyActivationRequestsRepository {
         );
       }
 
-      const product = await tx.product.findFirst({
-        where: {
-          warranty: { warranty_code: request.warranty_code },
-        },
-        include: { warranty: true },
-      });
+      const targets = request.items.length
+        ? request.items.map((item) => ({
+            product: item.product,
+            warrantyId: item.warranty_id,
+            warrantyCode: item.warranty_code,
+          }))
+        : await this.resolveLegacyActivationTargets(tx, request.warranty_code);
+      if (!targets.length) return null;
 
-      if (!product?.warranty) {
-        return null;
-      }
-
-      if (product.warranty.status !== warranty_status.DRAFT) {
-        throw new BadRequestError(
-          'Warranty code is not eligible for activation',
-          'BAD_REQUEST',
-          {
-            code: 'WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION',
-            currentStatus: product.warranty.status,
-            expectedStatuses: [warranty_status.DRAFT],
-            warrantyCode: request.warranty_code,
-          },
-        );
+      for (const target of targets) {
+        if (
+          target.product.status !== product_status.ACTIVE ||
+          target.product.deleted_at !== null ||
+          !target.product.warranty ||
+          target.product.warranty.id !== target.warrantyId ||
+          target.product.warranty.status !== warranty_status.DRAFT
+        ) {
+          throw new BadRequestError(
+            'Warranty code is not eligible for activation',
+            'BAD_REQUEST',
+            {
+              code: 'WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION',
+              productId: target.product.id,
+              warrantyCode: target.warrantyCode,
+            },
+          );
+        }
       }
 
       const customer = await this.resolveActivationCustomer(tx, {
@@ -333,41 +352,51 @@ export class WarrantyActivationRequestsRepository {
         fullName: request.customer_name,
         phone: request.customer_phone,
       });
-      await tx.productOwnership.updateMany({
-        where: {
-          product_id: product.id,
-          is_current_owner: true,
-        },
-        data: {
-          ended_at: reviewedAt,
-          is_current_owner: false,
-        },
-      });
-
-      await tx.productOwnership.create({
-        data: {
-          activated_at: null,
-          customer: { connect: { id: customer.id } },
-          is_current_owner: true,
-          owner_user: customer.user_id
-            ? { connect: { id: customer.user_id } }
-            : undefined,
-          product: { connect: { id: product.id } },
-          purchase_date: reviewedAt,
-        },
-      });
-
-      const updatedWarranty =
-        await this.warrantyLifecycleService.activateDraftWarranty(tx, {
-          activatedByUserId: input.reviewedById,
-          startDate: reviewedAt,
-          warrantyId: product.warranty.id,
+      const activatedWarrantyIds: string[] = [];
+      for (const target of targets) {
+        await tx.productOwnership.updateMany({
+          where: {
+            product_id: target.product.id,
+            is_current_owner: true,
+          },
+          data: {
+            ended_at: reviewedAt,
+            is_current_owner: false,
+          },
         });
+        await tx.productOwnership.create({
+          data: {
+            activated_at: null,
+            customer: { connect: { id: customer.id } },
+            is_current_owner: true,
+            owner_user: customer.user_id
+              ? { connect: { id: customer.user_id } }
+              : undefined,
+            product: { connect: { id: target.product.id } },
+            purchase_date: reviewedAt,
+          },
+        });
+        const updatedWarranty =
+          await this.warrantyLifecycleService.activateDraftWarranty(tx, {
+            activatedByUserId: input.reviewedById,
+            startDate: reviewedAt,
+            warrantyId: target.warrantyId,
+          });
+        activatedWarrantyIds.push(updatedWarranty.id);
+      }
+
+      await tx.warrantyActivationRequestItem.updateMany({
+        where: { request_id: input.id },
+        data: {
+          activated_at: reviewedAt,
+          status: warranty_activation_request_status.ACTIVATED,
+        },
+      });
 
       return tx.warrantyActivationRequest.update({
         where: { id: input.id },
         data: {
-          activated_warranty: { connect: { id: updatedWarranty.id } },
+          activated_warranty: { connect: { id: activatedWarrantyIds[0] } },
           admin_note: input.adminNote,
           customer: { connect: { id: customer.id } },
           reviewed_at: reviewedAt,
@@ -379,6 +408,25 @@ export class WarrantyActivationRequestsRepository {
         include: activationRequestInclude,
       });
     });
+  }
+
+  private async resolveLegacyActivationTargets(
+    tx: Prisma.TransactionClient,
+    warrantyCode: string,
+  ) {
+    const product = await tx.product.findFirst({
+      where: { warranty: { warranty_code: warrantyCode } },
+      include: { warranty: true },
+    });
+    if (!product?.warranty) return [];
+
+    return [
+      {
+        product,
+        warrantyId: product.warranty.id,
+        warrantyCode,
+      },
+    ];
   }
 
   private async resolveActivationCustomer(
