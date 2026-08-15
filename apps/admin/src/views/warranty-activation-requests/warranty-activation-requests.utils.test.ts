@@ -10,11 +10,13 @@ import type {
   VietnamWard,
 } from "@/src/services/locations/locations.types";
 import {
+  buildActivationRequestItems,
   filterActivationRequestCategories,
   formatActivationRequestCreateFieldError,
   formatDealerSearchOption,
   resolveActivationRequestCreateError,
   resolveScopedProductSearch,
+  getUnavailableActivationProductIds,
   toAdminActivationRequestBody,
 } from "./warranty-activation-requests.utils.ts";
 import type { WarrantyActivationRequestCreateFormValues } from "./warranty-activation-requests.types.ts";
@@ -23,6 +25,7 @@ const provinces = [{ code: 79, name: "TP HCM" }] as VietnamProvince[];
 const wards = [{ code: 1, name: "Phuong Sai Gon" }] as VietnamWard[];
 const baseValues: WarrantyActivationRequestCreateFormValues = {
   addressDetail: "",
+  activationProductIds: {},
   categoryId: "",
   categoryInputValues: {},
   customerBirthdate: "",
@@ -118,6 +121,87 @@ test("admin activation request body combines form and selected product data", ()
       wardCode: "1",
       wardName: "Phuong Sai Gon",
     },
+  );
+});
+
+test("admin activation request body maps physical products to configured positions", () => {
+  const products = {
+    rearGlass: { id: "product-2" } as ProductResponse,
+    windshield: { id: "product-1" } as ProductResponse,
+  };
+  const activationFields = [
+    {
+      id: "field-1",
+      key: "windshield",
+      label: "Kinh lai",
+      type: "PRODUCT_SELECT" as const,
+    },
+    {
+      id: "field-2",
+      key: "rearGlass",
+      label: "Kinh lung",
+      type: "PRODUCT_SELECT" as const,
+    },
+  ];
+
+  assert.deepEqual(buildActivationRequestItems(activationFields, products), [
+    {
+      activationFieldId: "field-1",
+      positionKey: "windshield",
+      productId: "product-1",
+    },
+    {
+      activationFieldId: "field-2",
+      positionKey: "rearGlass",
+      productId: "product-2",
+    },
+  ]);
+  assert.deepEqual(
+    toAdminActivationRequestBody({
+      activationFields,
+      activationProducts: products,
+      product: null,
+      provinces,
+      values: {
+        ...baseValues,
+        addressDetail: "12 Nguyen Hue",
+        activationProductIds: {
+          rearGlass: "product-2",
+          windshield: "product-1",
+        },
+        categoryId: "category-1",
+        customerName: "Nguyen Van An",
+        customerPhone: "0901234567",
+        provinceCode: "79",
+        wardCode: "1",
+      },
+      wards,
+    }).items,
+    [
+      {
+        activationFieldId: "field-1",
+        positionKey: "windshield",
+        productId: "product-1",
+      },
+      {
+        activationFieldId: "field-2",
+        positionKey: "rearGlass",
+        productId: "product-2",
+      },
+    ],
+  );
+});
+
+test("product selectors exclude products selected in other positions", () => {
+  assert.deepEqual(
+    getUnavailableActivationProductIds(
+      {
+        rearGlass: { id: "product-2" } as ProductResponse,
+        windshield: { id: "product-1" } as ProductResponse,
+      },
+      "rearGlass",
+    ),
+    new Set(["product-1"]),
   );
 });
 

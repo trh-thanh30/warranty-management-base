@@ -16,7 +16,6 @@ import {
   formatCustomerSearchOption,
   formatProductSearchOption,
 } from "@/src/utils";
-import { getCategoryActivationFields } from "@/src/utils/category-activation-fields";
 import {
   Button,
   Card,
@@ -66,12 +65,15 @@ export function CreateWarrantyActivationRequestFormCard({
     useState(false);
   const [isCreateDealerDialogOpen, setCreateDealerDialogOpen] = useState(false);
   const {
+    activationFields,
+    activationFieldsQuery,
     control,
     categories,
     categoriesQuery,
     categoryId,
     clearCustomer,
     clearDealer,
+    clearActivationProduct,
     customers,
     customersQuery,
     customerSearch,
@@ -95,10 +97,12 @@ export function CreateWarrantyActivationRequestFormCard({
     selectedCategory,
     selectedDealer,
     selectedProduct,
+    selectedActivationProducts,
     selectCategory,
     selectCustomer,
     selectDealer,
     selectProduct,
+    selectActivationProduct,
     selectProvince,
     selectWard,
     setCustomerSearch,
@@ -107,12 +111,15 @@ export function CreateWarrantyActivationRequestFormCard({
     wardCode,
     wards,
     wardsQuery,
+    usesProductSelectors,
   } = useCreateWarrantyActivationRequestForm({ onCreated });
   const selectedProvince = provinces.find(
     (province) => String(province.code) === provinceCode,
   );
   const selectedWard = wards.find((ward) => String(ward.code) === wardCode);
-  const activationFields = getCategoryActivationFields(selectedCategory);
+  const hasSelectedProduct =
+    Boolean(selectedProduct) ||
+    Object.keys(selectedActivationProducts).length > 0;
   const filteredCategories = useMemo(
     () => filterActivationRequestCategories(categories, categorySearch),
     [categories, categorySearch],
@@ -157,11 +164,10 @@ export function CreateWarrantyActivationRequestFormCard({
                 items={filteredCategories}
                 loadingLabel={t("loadingCategories")}
                 onItemSelect={(category) => {
-                  selectCategory(category.id);
-                  setCategorySearch("");
+                  if (selectCategory(category.id)) setCategorySearch("");
                 }}
                 onSearchChange={(value) => {
-                  if (selectedCategory) selectCategory("");
+                  if (selectedCategory && !selectCategory("")) return;
                   setCategorySearch(value);
                 }}
                 placeholder={t("categoryPlaceholder")}
@@ -183,72 +189,77 @@ export function CreateWarrantyActivationRequestFormCard({
             </FormField>
             <input type="hidden" {...register("categoryId")} />
 
-            <FormField
-              error={formatActivationRequestCreateFieldError(
-                errors.productId?.message,
-                t,
-              )}
-              id="create-activation-request-product"
-              label={t("productSearch")}
-            >
-              <SearchDropdown
-                emptyLabel={
-                  categoryId ? t("noProduct") : t("selectCategoryFirst")
-                }
-                errorLabel={t("productLoadError")}
-                getItemDisabledReason={(product) =>
-                  getProductSelectDisabledReason(product, t)
-                }
-                getItemKey={(product) => product.id}
-                id="create-activation-request-product"
-                isError={productsQuery.isError}
-                isLoading={productsQuery.isFetching}
-                items={products}
-                loadingLabel={
-                  !categoryId
-                    ? t("selectCategoryFirst")
-                    : productsQuery.isFetchingNextPage
-                      ? t("loadingMoreProducts")
-                      : t("loadingProducts")
-                }
-                onItemSelect={selectProduct}
-                onReachEnd={loadMoreProducts}
-                onRetry={() => void productsQuery.refetch()}
-                onSearchChange={(value) => {
-                  if (selectedProduct) clearProduct();
-                  setProductSearch(value);
-                }}
-                placeholder={
-                  categoryId
-                    ? t("productSearchPlaceholder")
-                    : t("selectCategoryFirst")
-                }
-                renderItem={(product) => (
-                  <ProductSearchResult
-                    disabledReason={getProductSelectDisabledReason(product, t)}
-                    ownerName={product.owner?.fullName}
-                    productCode={product.productCode}
-                    productName={product.name}
-                    serialNumber={product.serialNumber}
-                    statusLabel={getProductWarrantyStatusLabel(product, t)}
-                    warrantyCode={product.warrantyCode}
-                  />
+            {!usesProductSelectors && activationFieldsQuery.isSuccess ? (
+              <FormField
+                error={formatActivationRequestCreateFieldError(
+                  errors.productId?.message,
+                  t,
                 )}
-                retryLabel={t("tryAgain")}
-                searchValue={productSearch}
-                selectedLabel={
-                  selectedProduct
-                    ? formatProductSearchOption(selectedProduct)
-                    : undefined
-                }
-              />
-            </FormField>
+                id="create-activation-request-product"
+                label={t("productSearch")}
+              >
+                <SearchDropdown
+                  emptyLabel={
+                    categoryId ? t("noProduct") : t("selectCategoryFirst")
+                  }
+                  errorLabel={t("productLoadError")}
+                  getItemDisabledReason={(product) =>
+                    getProductSelectDisabledReason(product, t)
+                  }
+                  getItemKey={(product) => product.id}
+                  id="create-activation-request-product"
+                  isError={productsQuery.isError}
+                  isLoading={productsQuery.isFetching}
+                  items={products}
+                  loadingLabel={
+                    !categoryId
+                      ? t("selectCategoryFirst")
+                      : productsQuery.isFetchingNextPage
+                        ? t("loadingMoreProducts")
+                        : t("loadingProducts")
+                  }
+                  onItemSelect={selectProduct}
+                  onReachEnd={loadMoreProducts}
+                  onRetry={() => void productsQuery.refetch()}
+                  onSearchChange={(value) => {
+                    if (selectedProduct) clearProduct();
+                    setProductSearch(value);
+                  }}
+                  placeholder={
+                    categoryId
+                      ? t("productSearchPlaceholder")
+                      : t("selectCategoryFirst")
+                  }
+                  renderItem={(product) => (
+                    <ProductSearchResult
+                      disabledReason={getProductSelectDisabledReason(
+                        product,
+                        t,
+                      )}
+                      ownerName={product.owner?.fullName}
+                      productCode={product.productCode}
+                      productName={product.name}
+                      serialNumber={product.serialNumber}
+                      statusLabel={getProductWarrantyStatusLabel(product, t)}
+                      warrantyCode={product.warrantyCode}
+                    />
+                  )}
+                  retryLabel={t("tryAgain")}
+                  searchValue={productSearch}
+                  selectedLabel={
+                    selectedProduct
+                      ? formatProductSearchOption(selectedProduct)
+                      : undefined
+                  }
+                />
+              </FormField>
+            ) : null}
 
             <input type="hidden" {...register("productId")} />
             <input type="hidden" {...register("productName")} />
             <input type="hidden" {...register("warrantyCode")} />
 
-            {selectedProduct ? (
+            {!usesProductSelectors && selectedProduct ? (
               <SelectedProductSummaryCard
                 brand={selectedProduct.brand}
                 durationMonths={selectedProduct.warranty?.durationMonths}
@@ -274,7 +285,7 @@ export function CreateWarrantyActivationRequestFormCard({
               />
             ) : null}
 
-            {selectedProduct ? (
+            {hasSelectedProduct ? (
               <div className="grid gap-5 sm:grid-cols-2">
                 <FormField
                   error={formatActivationRequestCreateFieldError(
@@ -307,12 +318,36 @@ export function CreateWarrantyActivationRequestFormCard({
               </div>
             ) : null}
 
-            <CategoryActivationInputFields
-              control={control}
-              errors={errors}
-              fields={activationFields}
-              register={register}
-            />
+            {categoryId && activationFieldsQuery.isLoading ? (
+              <p className="text-sm text-slate-500">
+                {t("loadingActivationFields")}
+              </p>
+            ) : null}
+            {categoryId && activationFieldsQuery.isError ? (
+              <div className="flex items-center justify-between gap-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                <span>{t("activationFieldsLoadError")}</span>
+                <Button
+                  onClick={() => void activationFieldsQuery.refetch()}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                >
+                  {t("tryAgain")}
+                </Button>
+              </div>
+            ) : null}
+            {activationFieldsQuery.isSuccess ? (
+              <CategoryActivationInputFields
+                categoryId={categoryId}
+                control={control}
+                errors={errors}
+                fields={activationFields}
+                onProductClear={clearActivationProduct}
+                onProductSelect={selectActivationProduct}
+                register={register}
+                selectedProducts={selectedActivationProducts}
+              />
+            ) : null}
           </FormSection>
 
           <FormSection

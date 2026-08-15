@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDebounce } from "@repo/hooks";
 import type {
+  CategoryActivationFieldConfig,
   CustomerSummary,
   DealerResponse,
   ProductResponse,
@@ -17,9 +18,11 @@ import {
 import { useToast } from "@/src/hooks/use-toast";
 import { useCreateAdminWarrantyActivationRequest } from "@/src/hooks/use-warranty-activation-requests";
 import { parseVietnamAddress } from "@/src/utils";
-import { getCategoryActivationFields } from "@/src/utils/category-activation-fields";
 import { useDealers } from "@/src/hooks/use-dealers";
-import { useCategories } from "../../categories/hooks/use-categories";
+import {
+  useCategories,
+  useCategoryActivationFields,
+} from "../../categories/hooks/use-categories";
 import { useCustomers } from "../../customers/hooks/use-customers";
 import { useInfiniteProducts } from "../../products/hooks/use-products";
 import {
@@ -34,6 +37,7 @@ import {
 
 const DEFAULT_VALUES: WarrantyActivationRequestCreateFormValues = {
   addressDetail: "",
+  activationProductIds: {},
   categoryId: "",
   categoryInputValues: {},
   customerBirthdate: "",
@@ -84,6 +88,9 @@ export function useCreateWarrantyActivationRequestForm({
     useState<CustomerSummary | null>(null);
   const [selectedProduct, setSelectedProduct] =
     useState<ProductResponse | null>(null);
+  const [selectedActivationProducts, setSelectedActivationProducts] = useState<
+    Record<string, ProductResponse>
+  >({});
   const [selectedDealer, setSelectedDealer] = useState<DealerResponse | null>(
     null,
   );
@@ -114,6 +121,18 @@ export function useCreateWarrantyActivationRequestForm({
     limit: 100,
     type: "PRODUCT",
   });
+  const activationFieldsQuery = useCategoryActivationFields(categoryId, {
+    enabled: Boolean(categoryId),
+  });
+  const activationFields = useMemo<CategoryActivationFieldConfig[]>(() => {
+    if (!activationFieldsQuery.data?.activationFormEnabled) return [];
+    return [...activationFieldsQuery.data.activationFields].sort(
+      (left, right) => (left.order ?? 0) - (right.order ?? 0),
+    );
+  }, [activationFieldsQuery.data]);
+  const usesProductSelectors = activationFields.some(
+    (field) => field.type === "PRODUCT_SELECT",
+  );
   const customersQuery = useCustomers({
     limit: 20,
     search: debouncedCustomerSearch || undefined,
@@ -122,6 +141,7 @@ export function useCreateWarrantyActivationRequestForm({
   });
   const productsQuery = useInfiniteProducts(
     {
+      activationEligible: "true",
       categoryId: categoryId || undefined,
       limit: 20,
       search: productSearchQuery,
@@ -129,7 +149,12 @@ export function useCreateWarrantyActivationRequestForm({
       sortOrder: "desc",
       status: "ACTIVE",
     },
-    { enabled: Boolean(categoryId) },
+    {
+      enabled:
+        Boolean(categoryId) &&
+        activationFieldsQuery.isSuccess &&
+        !usesProductSelectors,
+    },
   );
   const dealersQuery = useDealers({
     isActive: "true",
@@ -230,12 +255,26 @@ export function useCreateWarrantyActivationRequestForm({
   }
 
   function selectCategory(value: string) {
+    if (
+      value !== categoryId &&
+      categoryId &&
+      (selectedProduct ||
+        Object.keys(selectedActivationProducts).length > 0 ||
+        Object.values(form.getValues("categoryInputValues")).some(Boolean)) &&
+      !window.confirm(t("categoryChangeConfirm"))
+    ) {
+      return false;
+    }
+
     setProductSearchState({ categoryId: value, value: "" });
     setFormValues(form.setValue, {
+      activationProductIds: {},
       categoryId: value,
       categoryInputValues: {},
     });
+    setSelectedActivationProducts({});
     clearProduct();
+    return true;
   }
 
   function clearProduct() {
@@ -251,6 +290,37 @@ export function useCreateWarrantyActivationRequestForm({
 
   function setProductSearch(value: string) {
     setProductSearchState({ categoryId, value });
+  }
+
+  function selectActivationProduct(
+    positionKey: string,
+    product: ProductResponse,
+  ) {
+    const isSelectedElsewhere = Object.entries(selectedActivationProducts).some(
+      ([key, selected]) => key !== positionKey && selected.id === product.id,
+    );
+    if (isSelectedElsewhere) return;
+
+    setSelectedActivationProducts((current) => ({
+      ...current,
+      [positionKey]: product,
+    }));
+    form.setValue(`activationProductIds.${positionKey}`, product.id, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  }
+
+  function clearActivationProduct(positionKey: string) {
+    setSelectedActivationProducts((current) => {
+      const next = { ...current };
+      delete next[positionKey];
+      return next;
+    });
+    form.setValue(`activationProductIds.${positionKey}`, "", {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
   }
 
   function selectDealer(dealer: DealerResponse) {
@@ -295,18 +365,48 @@ export function useCreateWarrantyActivationRequestForm({
   }
 
   async function submit(values: WarrantyActivationRequestCreateFormValues) {
-    const missingRequiredField = getCategoryActivationFields(
-      selectedCategory,
-    ).find((field) => {
+    if (!usesProductSelectors && !selectedProduct) {
+      const message = t("productRequired");
+      form.setError("productId", { message });
+      toast.error(message);
+      return;
+    }
+
+    if (
+      usesProductSelectors &&
+      Object.keys(selectedActivationProducts).length === 0
+    ) {
+      const firstProductField = activationFields.find(
+        (field) => field.type === "PRODUCT_SELECT",
+      );
+      const message = t("activationProductRequired");
+      if (firstProductField) {
+        form.setError(`activationProductIds.${firstProductField.key}`, {
+          message,
+        });
+      }
+      toast.error(message);
+      return;
+    }
+
+    const missingRequiredField = activationFields.find((field) => {
       if (!field.required) return false;
-      return !values.categoryInputValues[field.key]?.trim();
+      return field.type === "PRODUCT_SELECT"
+        ? !selectedActivationProducts[field.key]
+        : !values.categoryInputValues[field.key]?.trim();
     });
 
     if (missingRequiredField) {
       const message = t("activationFieldValueRequired");
-      form.setError(`categoryInputValues.${missingRequiredField.key}`, {
-        message,
-      });
+      if (missingRequiredField.type === "PRODUCT_SELECT") {
+        form.setError(`activationProductIds.${missingRequiredField.key}`, {
+          message: t("activationProductRequired"),
+        });
+      } else {
+        form.setError(`categoryInputValues.${missingRequiredField.key}`, {
+          message,
+        });
+      }
       toast.error(message);
       return;
     }
@@ -314,6 +414,8 @@ export function useCreateWarrantyActivationRequestForm({
     try {
       await createMutation.mutateAsync(
         toAdminActivationRequestBody({
+          activationFields,
+          activationProducts: selectedActivationProducts,
           product: selectedProduct,
           provinces,
           values,
@@ -330,6 +432,8 @@ export function useCreateWarrantyActivationRequestForm({
   }
 
   return {
+    activationFields,
+    activationFieldsQuery,
     clearCustomer,
     clearDealer,
     control: form.control,
@@ -358,19 +462,23 @@ export function useCreateWarrantyActivationRequestForm({
     selectedCategory,
     selectedDealer,
     selectedProduct,
+    selectedActivationProducts,
     selectCategory,
     selectCustomer,
     selectDealer,
     selectProduct,
+    selectActivationProduct,
     selectProvince,
     selectWard,
     clearProduct,
+    clearActivationProduct,
     setCustomerSearch,
     setDealerSearch,
     setProductSearch,
     wardCode,
     wards,
     wardsQuery,
+    usesProductSelectors,
   };
 }
 

@@ -2,25 +2,38 @@
 
 import { FormField } from "@/src/components/common";
 import { SelectControl } from "@/src/components/common/select-control";
-import type { CategoryActivationFieldConfig } from "@repo/shared";
+import type {
+  CategoryActivationFieldConfig,
+  ProductResponse,
+} from "@repo/shared";
 import { Input, Textarea } from "@repo/ui";
 import { useTranslations } from "next-intl";
 import { Controller } from "react-hook-form";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import type { WarrantyActivationRequestCreateFormValues } from "../warranty-activation-requests.types";
+import { getUnavailableActivationProductIds } from "../warranty-activation-requests.utils";
+import { ActivationProductSelectField } from "./activation-product-select-field";
 
 type CategoryActivationInputFieldsProps = {
   control: Control<WarrantyActivationRequestCreateFormValues>;
+  categoryId: string;
   errors: FieldErrors<WarrantyActivationRequestCreateFormValues>;
   fields: CategoryActivationFieldConfig[];
+  onProductClear: (positionKey: string) => void;
+  onProductSelect: (positionKey: string, product: ProductResponse) => void;
   register: UseFormRegister<WarrantyActivationRequestCreateFormValues>;
+  selectedProducts: Record<string, ProductResponse>;
 };
 
 export function CategoryActivationInputFields({
   control,
+  categoryId,
   errors,
   fields,
+  onProductClear,
+  onProductSelect,
   register,
+  selectedProducts,
 }: CategoryActivationInputFieldsProps) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   if (fields.length === 0) return null;
@@ -34,10 +47,14 @@ export function CategoryActivationInputFields({
         {fields.map((field) => (
           <DynamicActivationField
             control={control}
-            error={getCategoryInputError(errors, field.key)}
+            categoryId={categoryId}
+            error={getActivationFieldError(errors, field)}
             field={field}
             key={field.key}
+            onProductClear={onProductClear}
+            onProductSelect={onProductSelect}
             register={register}
+            selectedProducts={selectedProducts}
           />
         ))}
       </div>
@@ -47,14 +64,22 @@ export function CategoryActivationInputFields({
 
 function DynamicActivationField({
   control,
+  categoryId,
   error,
   field,
+  onProductClear,
+  onProductSelect,
   register,
+  selectedProducts,
 }: {
   control: Control<WarrantyActivationRequestCreateFormValues>;
+  categoryId: string;
   error?: string;
   field: CategoryActivationFieldConfig;
+  onProductClear: (positionKey: string) => void;
+  onProductSelect: (positionKey: string, product: ProductResponse) => void;
   register: UseFormRegister<WarrantyActivationRequestCreateFormValues>;
+  selectedProducts: Record<string, ProductResponse>;
 }) {
   const id = `create-activation-request-category-input-${field.key}`;
   const name = `categoryInputValues.${field.key}` as const;
@@ -62,7 +87,25 @@ function DynamicActivationField({
 
   return (
     <FormField error={error} id={id} label={label}>
-      {field.type === "TEXTAREA" ? (
+      {field.type === "PRODUCT_SELECT" ? (
+        <>
+          <ActivationProductSelectField
+            categoryId={categoryId}
+            id={id}
+            onClear={() => onProductClear(field.key)}
+            onSelect={(product) => onProductSelect(field.key, product)}
+            selectedProduct={selectedProducts[field.key]}
+            unavailableProductIds={getUnavailableActivationProductIds(
+              selectedProducts,
+              field.key,
+            )}
+          />
+          <input
+            type="hidden"
+            {...register(`activationProductIds.${field.key}` as const)}
+          />
+        </>
+      ) : field.type === "TEXTAREA" ? (
         <Textarea
           id={id}
           placeholder={field.placeholder}
@@ -105,13 +148,16 @@ function resolveDynamicInputType(type: CategoryActivationFieldConfig["type"]) {
   return "text";
 }
 
-function getCategoryInputError(
+function getActivationFieldError(
   errors: FieldErrors<WarrantyActivationRequestCreateFormValues>,
-  key: string,
+  field: CategoryActivationFieldConfig,
 ) {
-  const fieldErrors = errors.categoryInputValues;
+  const fieldErrors =
+    field.type === "PRODUCT_SELECT"
+      ? errors.activationProductIds
+      : errors.categoryInputValues;
   if (!fieldErrors || typeof fieldErrors !== "object") return undefined;
-  const fieldError = fieldErrors[key];
+  const fieldError = fieldErrors[field.key];
   return typeof fieldError?.message === "string"
     ? fieldError.message
     : undefined;

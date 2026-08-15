@@ -1,6 +1,7 @@
 import {
   HttpClientError,
   formatDate,
+  type CategoryActivationFieldConfig,
   type CategoryResponse,
   type CreateAdminWarrantyActivationRequestBody,
   type DealerResponse,
@@ -143,11 +144,15 @@ export function resolveActivationRequestCreateError(
 }
 
 export function toAdminActivationRequestBody({
+  activationFields = [],
+  activationProducts = {},
   product,
   provinces,
   values,
   wards,
 }: {
+  activationFields?: CategoryActivationFieldConfig[];
+  activationProducts?: Record<string, ProductResponse>;
   product: ProductResponse | null;
   provinces: VietnamProvince[];
   values: WarrantyActivationRequestCreateFormValues;
@@ -164,10 +169,16 @@ export function toAdminActivationRequestBody({
     Object.keys(activationInputValues).length > 0
       ? { activationInputValues }
       : undefined;
+  const items = buildActivationRequestItems(
+    activationFields,
+    activationProducts,
+  );
+  const primaryProduct =
+    product ?? Object.values(activationProducts)[0] ?? null;
 
   return omitUndefined({
     addressDetail: values.addressDetail.trim(),
-    brand: product?.brand ?? undefined,
+    brand: primaryProduct?.brand ?? undefined,
     categoryId: values.categoryId,
     customerBirthdate: values.customerBirthdate || undefined,
     customerEmail: values.customerEmail.trim() || undefined,
@@ -180,21 +191,53 @@ export function toAdminActivationRequestBody({
     dealerPhone: values.dealerPhone.trim() || undefined,
     dealerProvince: values.dealerProvince.trim() || undefined,
     filmItems: buildFilmItems(values, activationInputValues),
-    manufactureYear: product?.modelYear ?? undefined,
-    model: product?.model ?? undefined,
+    items: items.length > 0 ? items : undefined,
+    manufactureYear: primaryProduct?.modelYear ?? undefined,
+    model: primaryProduct?.model ?? undefined,
     metadata: activationMetadata,
     note: values.note.trim() || undefined,
-    productId: values.productId,
-    productName: product?.name ?? values.productName.trim(),
+    productId: items.length > 0 ? undefined : values.productId,
+    productName:
+      primaryProduct?.name ?? (values.productName.trim() || undefined),
     provinceCode: values.provinceCode,
     provinceName: province?.name ?? "",
     salesName: values.salesName.trim() || undefined,
-    serialNumber: product?.serialNumber ?? undefined,
+    serialNumber: primaryProduct?.serialNumber ?? undefined,
     vehicleModel: values.vehicleModel.trim() || undefined,
     vehiclePlate: values.vehiclePlate.trim() || undefined,
     wardCode: values.wardCode,
     wardName: ward?.name ?? "",
   });
+}
+
+export function buildActivationRequestItems(
+  fields: CategoryActivationFieldConfig[],
+  productsByPosition: Record<string, ProductResponse>,
+) {
+  return fields.flatMap((field) => {
+    if (field.type !== "PRODUCT_SELECT") return [];
+    const selectedProduct = productsByPosition[field.key];
+    if (!selectedProduct) return [];
+
+    return [
+      omitUndefined({
+        activationFieldId: field.id,
+        positionKey: field.key,
+        productId: selectedProduct.id,
+      }),
+    ];
+  });
+}
+
+export function getUnavailableActivationProductIds(
+  productsByPosition: Record<string, ProductResponse>,
+  currentPositionKey: string,
+) {
+  return new Set(
+    Object.entries(productsByPosition)
+      .filter(([positionKey]) => positionKey !== currentPositionKey)
+      .map(([, product]) => product.id),
+  );
 }
 
 function buildFilmItems(
