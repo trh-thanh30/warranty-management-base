@@ -1,5 +1,9 @@
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
-import { product_status } from '@prisma/client';
+import {
+  product_status,
+  warranty_activation_request_status,
+  warranty_status,
+} from '@prisma/client';
 
 describe('ProductsRepository.list', () => {
   it('excludes soft-deleted products from the admin product list by default', async () => {
@@ -164,6 +168,70 @@ describe('ProductsRepository.list', () => {
         }),
       }),
     );
+  });
+
+  it('filters activation selectors to eligible physical products', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const count = jest.fn().mockResolvedValue(0);
+    const prismaService = {
+      $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
+        callback({ product: { count, findMany } }),
+      ),
+    };
+    const repository = new ProductsRepository(prismaService as never);
+
+    await repository.list({
+      activationEligible: 'true',
+      categoryId: 'film-category-id',
+      limit: 10,
+      page: 2,
+      search: 'SP50',
+    });
+
+    const expectedEligibility = {
+      deleted_at: null,
+      status: product_status.ACTIVE,
+      warranty: {
+        is: {
+          status: warranty_status.DRAFT,
+          warranty_code: { not: '' },
+        },
+      },
+      warranty_activation_request_items: {
+        none: {
+          status: {
+            in: [
+              warranty_activation_request_status.PENDING,
+              warranty_activation_request_status.APPROVED,
+            ],
+          },
+        },
+      },
+      warranty_activation_requests: {
+        none: {
+          status: {
+            in: [
+              warranty_activation_request_status.PENDING,
+              warranty_activation_request_status.APPROVED,
+            ],
+          },
+        },
+      },
+    };
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          ...expectedEligibility,
+          AND: [{ category_id: 'film-category-id' }],
+          OR: expect.any(Array),
+        }),
+        skip: 10,
+        take: 10,
+      }),
+    );
+    expect(count).toHaveBeenCalledWith({
+      where: expect.objectContaining(expectedEligibility),
+    });
   });
 
   it('filters the admin product list by publication state', async () => {
