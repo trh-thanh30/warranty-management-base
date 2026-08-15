@@ -70,4 +70,94 @@ describe('WarrantyActivationRequestsRepository', () => {
       }),
     );
   });
+
+  it('searches request and related item product identifiers', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const count = jest.fn().mockResolvedValue(0);
+    const repository = new WarrantyActivationRequestsRepository(
+      {
+        $transaction: (callback: (tx: unknown) => unknown) =>
+          callback({ warrantyActivationRequest: { count, findMany } }),
+      } as never,
+      {} as never,
+      {} as never,
+    );
+
+    await repository.list({ search: 'SP50' });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          AND: expect.arrayContaining([
+            expect.objectContaining({
+              OR: expect.arrayContaining([
+                expect.objectContaining({
+                  items: {
+                    some: {
+                      OR: expect.arrayContaining([
+                        {
+                          product_name: {
+                            contains: 'SP50',
+                            mode: 'insensitive',
+                          },
+                        },
+                        {
+                          product_code: {
+                            contains: 'SP50',
+                            mode: 'insensitive',
+                          },
+                        },
+                        {
+                          serial_number: {
+                            contains: 'SP50',
+                            mode: 'insensitive',
+                          },
+                        },
+                        {
+                          warranty_code: {
+                            contains: 'SP50',
+                            mode: 'insensitive',
+                          },
+                        },
+                      ]),
+                    },
+                  },
+                }),
+              ]),
+            }),
+          ]),
+        }),
+      }),
+    );
+  });
+
+  it('filters warranty codes across legacy requests and related items', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const count = jest.fn().mockResolvedValue(0);
+    const repository = new WarrantyActivationRequestsRepository(
+      {
+        $transaction: (callback: (tx: unknown) => unknown) =>
+          callback({ warrantyActivationRequest: { count, findMany } }),
+      } as never,
+      {} as never,
+      {} as never,
+    );
+
+    await repository.list({ warrantyCode: 'wm-sp50' });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          AND: expect.arrayContaining([
+            {
+              OR: [
+                { warranty_code: 'WM-SP50' },
+                { items: { some: { warranty_code: 'WM-SP50' } } },
+              ],
+            },
+          ]),
+        }),
+      }),
+    );
+  });
 });

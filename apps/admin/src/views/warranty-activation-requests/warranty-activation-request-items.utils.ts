@@ -1,0 +1,18 @@
+import type { WarrantyActivationRequestSummary } from "@repo/shared";
+
+export function getActivationRequestProductCount(
+  request: WarrantyActivationRequestSummary,
+) {
+  if (typeof request.itemCount === "number") return request.itemCount;
+  if (request.items?.length) return request.items.length;
+  return request.productId || request.productName ? 1 : 0;
+}
+
+export function getActivationRequestProductTitle(
+  request: WarrantyActivationRequestSummary,
+  formatCount: (count: number) => string,
+) {
+  const count = getActivationRequestProductCount(request);
+  if (count > 1) return formatCount(count);
+  return request.items?.[0]?.productName ?? request.productName ?? "-";
+}

@@ -9,6 +9,8 @@ import {
   XCircle,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
+import type { WarrantyActivationRequestItemSummary } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { Button } from "@repo/ui";
 import { FormPageShell } from "@/src/components/common/form-page-shell";
@@ -20,6 +22,7 @@ import {
   useWarrantyActivationRequest,
 } from "@/src/hooks/use-warranty-activation-requests";
 import { useToast } from "@/src/hooks/use-toast";
+import { useExcel } from "@/src/hooks/use-excel";
 import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import { ReviewWarrantyActivationRequestDialog } from "./components/review-warranty-activation-request-dialog";
 import {
@@ -27,6 +30,7 @@ import {
   WarrantyActivationRequestDetailSkeleton,
 } from "./components/warranty-activation-request-detail-card";
 import { useWarrantyActivationRequestActions } from "./hooks/use-warranty-activation-request-actions";
+import { warrantyActivationRequestsService } from "@/src/services/warranty-activation-requests/warranty-activation-requests.service";
 
 type WarrantyActivationRequestDetailViewProps = {
   requestId: string;
@@ -39,6 +43,8 @@ export function WarrantyActivationRequestDetailView({
   const tApiErrors = useTranslations("ApiErrors");
   const { hasPermission } = usePermissions();
   const toast = useToast();
+  const { downloadBlob } = useExcel();
+  const [busyItemId, setBusyItemId] = useState<string | null>(null);
   const requestQuery = useWarrantyActivationRequest(requestId);
   const resendCertificateEmailMutation =
     useResendWarrantyActivationRequestCertificateEmail(requestId);
@@ -51,11 +57,14 @@ export function WarrantyActivationRequestDetailView({
   const approveLabel =
     request?.status === "APPROVED" ? t("activate") : t("approve");
   const canResendCertificateEmail =
+    !request?.items?.length &&
     Boolean(request?.certificate) &&
     Boolean(request?.certificate?.recipientEmail) &&
     request?.certificate?.emailStatus !== "SENT" &&
     hasPermission(PERMISSIONS.WARRANTY_UPDATE);
-  const canUseCertificate = Boolean(request?.certificate);
+  const canUseCertificate =
+    !request?.items?.length && Boolean(request?.certificate);
+  const canManageItemCertificates = hasPermission(PERMISSIONS.WARRANTY_UPDATE);
 
   async function resendCertificateEmail() {
     try {
@@ -68,6 +77,81 @@ export function WarrantyActivationRequestDetailView({
           fallbackKey: "resendCertificateEmailError",
         }),
       );
+    }
+  }
+
+  async function viewItemCertificate(
+    item: WarrantyActivationRequestItemSummary,
+  ) {
+    if (!item.certificate) return;
+    try {
+      setBusyItemId(item.id);
+      const blob =
+        await warrantyActivationRequestsService.viewWarrantyActivationRequestItemCertificate(
+          requestId,
+          item.id,
+        );
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank", "noopener,noreferrer");
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (error) {
+      toast.error(
+        getLocalizedApiError(error, t, {
+          apiErrors: tApiErrors,
+          fallbackKey: "viewCertificateError",
+        }),
+      );
+    } finally {
+      setBusyItemId(null);
+    }
+  }
+
+  async function downloadItemCertificate(
+    item: WarrantyActivationRequestItemSummary,
+  ) {
+    if (!item.certificate) return;
+    try {
+      setBusyItemId(item.id);
+      const blob =
+        await warrantyActivationRequestsService.downloadWarrantyActivationRequestItemCertificate(
+          requestId,
+          item.id,
+        );
+      downloadBlob(blob, `${item.certificate.certificateNumber}.pdf`);
+      toast.success(t("downloadedCertificate"));
+    } catch (error) {
+      toast.error(
+        getLocalizedApiError(error, t, {
+          apiErrors: tApiErrors,
+          fallbackKey: "downloadCertificateError",
+        }),
+      );
+    } finally {
+      setBusyItemId(null);
+    }
+  }
+
+  async function resendItemCertificate(
+    item: WarrantyActivationRequestItemSummary,
+  ) {
+    if (!item.certificate) return;
+    try {
+      setBusyItemId(item.id);
+      await warrantyActivationRequestsService.resendWarrantyActivationRequestItemCertificateEmail(
+        requestId,
+        item.id,
+      );
+      await requestQuery.refetch();
+      toast.success(t("resentCertificateEmail"));
+    } catch (error) {
+      toast.error(
+        getLocalizedApiError(error, t, {
+          apiErrors: tApiErrors,
+          fallbackKey: "resendCertificateEmailError",
+        }),
+      );
+    } finally {
+      setBusyItemId(null);
     }
   }
 
@@ -162,7 +246,15 @@ export function WarrantyActivationRequestDetailView({
             title={t("loadErrorTitle")}
           />
         ) : (
-          <WarrantyActivationRequestDetailCard request={request} />
+          <WarrantyActivationRequestDetailCard
+            busyItemId={busyItemId}
+            onDownloadItemCertificate={downloadItemCertificate}
+            onResendItemCertificate={
+              canManageItemCertificates ? resendItemCertificate : undefined
+            }
+            onViewItemCertificate={viewItemCertificate}
+            request={request}
+          />
         )}
 
         <ReviewWarrantyActivationRequestDialog

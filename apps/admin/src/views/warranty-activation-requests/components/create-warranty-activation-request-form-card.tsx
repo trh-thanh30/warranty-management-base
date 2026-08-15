@@ -649,6 +649,19 @@ export function CreateWarrantyActivationRequestFormCard({
             </FormField>
           </FormSection>
 
+          {usesProductSelectors ? (
+            <div className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-800 dark:bg-slate-900/50">
+              <span className="text-slate-600 dark:text-slate-300">
+                {t("selectedActivationProducts")}
+              </span>
+              <span className="font-semibold text-slate-950 dark:text-slate-50">
+                {t("productCount", {
+                  count: Object.keys(selectedActivationProducts).length,
+                })}
+              </span>
+            </div>
+          ) : null}
+
           <div className="flex flex-col-reverse gap-2 border-t border-slate-200 pt-5 dark:border-slate-800 sm:flex-row sm:justify-end">
             <Button
               className="w-full sm:w-auto"

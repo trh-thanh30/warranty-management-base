@@ -20,6 +20,10 @@ import {
   toAdminActivationRequestBody,
 } from "./warranty-activation-requests.utils.ts";
 import type { WarrantyActivationRequestCreateFormValues } from "./warranty-activation-requests.types.ts";
+import {
+  getActivationRequestProductCount,
+  getActivationRequestProductTitle,
+} from "./warranty-activation-request-items.utils.ts";
 
 const provinces = [{ code: 79, name: "TP HCM" }] as VietnamProvince[];
 const wards = [{ code: 1, name: "Phuong Sai Gon" }] as VietnamWard[];
@@ -202,6 +206,33 @@ test("product selectors exclude products selected in other positions", () => {
       "rearGlass",
     ),
     new Set(["product-1"]),
+  );
+});
+
+test("activation request list summarizes one or many physical products", () => {
+  const multiRequest = {
+    itemCount: 2,
+    items: [{ productName: "Film SP50" }, { productName: "Film B55" }],
+  } as unknown as import("@repo/shared").WarrantyActivationRequestSummary;
+  const legacyRequest = {
+    productId: "product-1",
+    productName: "Camera hành trình",
+  } as import("@repo/shared").WarrantyActivationRequestSummary;
+
+  assert.equal(getActivationRequestProductCount(multiRequest), 2);
+  assert.equal(
+    getActivationRequestProductTitle(
+      multiRequest,
+      (count) => `${count} products`,
+    ),
+    "2 products",
+  );
+  assert.equal(
+    getActivationRequestProductTitle(
+      legacyRequest,
+      (count) => `${count} products`,
+    ),
+    "Camera hành trình",
   );
 });
 

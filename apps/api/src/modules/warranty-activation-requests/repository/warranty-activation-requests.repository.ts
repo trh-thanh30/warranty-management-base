@@ -86,21 +86,53 @@ function buildWarrantyActivationRequestListQuery(
     createdAtFilter.gte || createdAtFilter.lte,
   );
   const sortBy = getWarrantyActivationRequestSortColumn(filters.sortBy);
+  const searchFilter: Prisma.WarrantyActivationRequestWhereInput | undefined =
+    search
+      ? {
+          OR: [
+            { request_code: { contains: search, mode: 'insensitive' } },
+            { warranty_code: { contains: search, mode: 'insensitive' } },
+            { customer_name: { contains: search, mode: 'insensitive' } },
+            { customer_phone: { contains: search, mode: 'insensitive' } },
+            { customer_email: { contains: search, mode: 'insensitive' } },
+            { product_name: { contains: search, mode: 'insensitive' } },
+            { serial_number: { contains: search, mode: 'insensitive' } },
+            {
+              items: {
+                some: {
+                  OR: [
+                    { product_name: { contains: search, mode: 'insensitive' } },
+                    { product_code: { contains: search, mode: 'insensitive' } },
+                    {
+                      serial_number: { contains: search, mode: 'insensitive' },
+                    },
+                    {
+                      warranty_code: { contains: search, mode: 'insensitive' },
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        }
+      : undefined;
+  const warrantyCodeFilter:
+    | Prisma.WarrantyActivationRequestWhereInput
+    | undefined = warrantyCode
+    ? {
+        OR: [
+          { warranty_code: warrantyCode },
+          { items: { some: { warranty_code: warrantyCode } } },
+        ],
+      }
+    : undefined;
   const where: Prisma.WarrantyActivationRequestWhereInput = {
     status: filters.status,
-    warranty_code: warrantyCode,
     created_at: hasCreatedAtFilter ? createdAtFilter : undefined,
-    OR: search
-      ? [
-          { request_code: { contains: search, mode: 'insensitive' } },
-          { warranty_code: { contains: search, mode: 'insensitive' } },
-          { customer_name: { contains: search, mode: 'insensitive' } },
-          { customer_phone: { contains: search, mode: 'insensitive' } },
-          { customer_email: { contains: search, mode: 'insensitive' } },
-          { product_name: { contains: search, mode: 'insensitive' } },
-          { serial_number: { contains: search, mode: 'insensitive' } },
-        ]
-      : undefined,
+    AND: [searchFilter, warrantyCodeFilter].filter(
+      (filter): filter is Prisma.WarrantyActivationRequestWhereInput =>
+        Boolean(filter),
+    ),
   };
   const orderBy: Prisma.WarrantyActivationRequestOrderByWithRelationInput[] =
     sortBy

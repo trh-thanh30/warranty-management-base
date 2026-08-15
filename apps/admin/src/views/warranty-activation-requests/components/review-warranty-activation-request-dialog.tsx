@@ -16,6 +16,7 @@ import {
   Label,
   Textarea,
 } from "@repo/ui";
+import { ActivationRequestItemsTable } from "./activation-request-items-table";
 
 type ReviewWarrantyActivationRequestDialogProps = {
   action: "approve" | "reject";
@@ -66,7 +67,7 @@ export function ReviewWarrantyActivationRequestDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-4xl">
         <DialogTitle className="text-lg font-semibold">
           {isReject ? t("rejectTitle") : t("approveTitle")}
         </DialogTitle>
@@ -75,6 +76,19 @@ export function ReviewWarrantyActivationRequestDialog({
             ? t("rejectDescription", { code: request?.requestCode ?? "" })
             : t("approveDescription", { code: request?.requestCode ?? "" })}
         </DialogDescription>
+
+        {request?.items?.length ? (
+          <div className="mt-5 space-y-3">
+            <p className="text-sm font-medium text-slate-950 dark:text-slate-50">
+              {isReject
+                ? t("reviewProductCount", { count: request.items.length })
+                : t("approveAllProductsWarning", {
+                    count: request.items.length,
+                  })}
+            </p>
+            <ActivationRequestItemsTable items={request.items} />
+          </div>
+        ) : null}
 
         <div className="mt-5 space-y-4">
           {isReject ? (

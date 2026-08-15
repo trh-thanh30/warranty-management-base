@@ -40,6 +40,7 @@ import {
   formatActivationRequestProduct,
 } from "../warranty-activation-requests.utils";
 import { WarrantyActivationRequestStatusBadge } from "./warranty-activation-request-status-badge";
+import { getActivationRequestProductTitle } from "../warranty-activation-request-items.utils";
 
 type WarrantyActivationRequestsTableProps = {
   items: WarrantyActivationRequestSummary[];
@@ -178,9 +179,15 @@ function WarrantyActivationRequestTableRow({
       </TableCell>
       <TableCell>
         <div className="max-w-[18rem]">
-          <p className="truncate font-medium">{request.productName ?? "-"}</p>
+          <p className="truncate font-medium">
+            {getActivationRequestProductTitle(request, (count) =>
+              t("productCount", { count }),
+            )}
+          </p>
           <p className="mt-1 truncate text-xs text-slate-500">
-            {formatActivationRequestProduct(request) || "-"}
+            {request.items?.length
+              ? request.items.map((item) => item.productName).join(" · ")
+              : formatActivationRequestProduct(request) || "-"}
           </p>
         </div>
       </TableCell>
@@ -258,7 +265,12 @@ function WarrantyActivationRequestMobileCard({
           value={formatActivationRequestDate(request.createdAt, locale)}
         />
         <MobileField label={t("phone")} value={request.customerPhone} />
-        <MobileField label={t("product")} value={request.productName ?? "-"} />
+        <MobileField
+          label={t("product")}
+          value={getActivationRequestProductTitle(request, (count) =>
+            t("productCount", { count }),
+          )}
+        />
       </dl>
     </article>
   );
@@ -310,6 +322,8 @@ function WarrantyActivationRequestActions({
   const canReview =
     (request.status === "PENDING" || request.status === "APPROVED") &&
     hasPermission(PERMISSIONS.WARRANTY_UPDATE);
+  const canUseParentCertificate =
+    Boolean(request.certificate) && !request.items?.length;
   const approveLabel =
     request.status === "APPROVED" ? t("activate") : t("approve");
 
@@ -332,7 +346,7 @@ function WarrantyActivationRequestActions({
             {t("viewDetail")}
           </Link>
         </DropdownMenuItem>
-        {request.certificate ? (
+        {canUseParentCertificate ? (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={() => onViewCertificate(request)}>

@@ -28,6 +28,22 @@ const request = {
     username: 'admin',
     email: 'admin@example.com',
   },
+  items: [
+    {
+      position_label: 'Kính lái',
+      product_name: 'Film SP50',
+      product_code: 'SP50-001',
+      serial_number: 'SN-SP50',
+      warranty_code: 'WM-SP50',
+    },
+    {
+      position_label: 'Kính lưng',
+      product_name: 'Film B55',
+      product_code: 'B55-001',
+      serial_number: null,
+      warranty_code: 'WM-B55',
+    },
+  ],
 };
 
 describe('ExportWarrantyActivationRequestsUseCase', () => {
@@ -40,6 +56,8 @@ describe('ExportWarrantyActivationRequestsUseCase', () => {
         status: 'Đã từ chối',
         reviewedBy: 'Admin vận hành',
         rejectionReason: 'Thông tin không khớp',
+        itemCount: 2,
+        productsByPosition: 'Kính lái: WM-SP50; Kính lưng: WM-B55',
       }),
     );
   });
