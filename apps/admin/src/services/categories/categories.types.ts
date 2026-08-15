@@ -5,4 +5,5 @@ export type CategoriesHttpClient = {
   get: HttpGet;
   patch: HttpWrite;
   post: HttpWrite;
+  put: HttpWrite;
 };

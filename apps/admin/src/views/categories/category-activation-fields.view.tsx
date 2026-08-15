@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type {
-  CategoryActivationFieldConfig,
   CategoryActivationFieldOption,
   CategoryActivationFieldType,
 } from "@repo/shared";
@@ -36,27 +35,23 @@ import { useToast } from "@/src/hooks/use-toast";
 import { useRouter } from "@/src/i18n/navigation";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { moveItem } from "@/src/utils/array";
+import { normalizeActivationFieldKey } from "@/src/utils/category-activation-fields";
 import {
-  DEFAULT_CATEGORY_ACTIVATION_FIELDS,
-  buildCategoryMetadataWithActivationFields,
-  hasCategoryActivationFieldsConfig,
-  isCategoryActivationFormEnabled,
-  normalizeActivationFieldKey,
-  parseActivationFields,
-} from "@/src/utils/category-activation-fields";
-import { useCategory, useUpdateCategory } from "./hooks/use-categories";
+  useCategory,
+  useCategoryActivationFields,
+  useUpdateCategoryActivationFields,
+} from "./hooks/use-categories";
+import type {
+  ActivationFieldOptionErrors,
+  DraftActivationField,
+} from "./category-activation-fields.types";
+import {
+  fromDraftActivationFields,
+  toDraftActivationFields,
+} from "./category-activation-fields.utils";
 
 type CategoryActivationFieldsViewProps = {
   categoryId: string;
-};
-
-type DraftActivationField = Omit<CategoryActivationFieldConfig, "options"> & {
-  options: CategoryActivationFieldOption[];
-};
-
-type ActivationFieldOptionErrors = {
-  label?: string;
-  value?: string;
 };
 
 export function CategoryActivationFieldsView({
@@ -68,26 +63,24 @@ export function CategoryActivationFieldsView({
   const categoryQuery = useCategory(categoryId, {
     enabled: Boolean(categoryId),
   });
-  const updateCategory = useUpdateCategory(categoryId);
+  const activationFieldsQuery = useCategoryActivationFields(categoryId, {
+    enabled: Boolean(categoryId),
+  });
+  const updateActivationFields = useUpdateCategoryActivationFields(categoryId);
   const category = categoryQuery.data ?? null;
   const [fields, setFields] = useState<DraftActivationField[]>([]);
   const [activationFieldsEnabled, setActivationFieldsEnabled] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!category) return;
-    const configuredFields = parseActivationFields(category.metadata);
+    if (!activationFieldsQuery.data) return;
     setActivationFieldsEnabled(
-      isCategoryActivationFormEnabled(category.metadata),
+      activationFieldsQuery.data.activationFormEnabled,
     );
     setFields(
-      toDraftFields(
-        hasCategoryActivationFieldsConfig(category.metadata)
-          ? configuredFields
-          : DEFAULT_CATEGORY_ACTIVATION_FIELDS,
-      ),
+      toDraftActivationFields(activationFieldsQuery.data.activationFields),
     );
-  }, [category]);
+  }, [activationFieldsQuery.data]);
 
   const canSave = useMemo(
     () => fields.every((field) => field.key.trim() && field.label.trim()),
@@ -105,12 +98,9 @@ export function CategoryActivationFieldsView({
     }
 
     setError(null);
-    await updateCategory.mutateAsync({
-      metadata: buildCategoryMetadataWithActivationFields(
-        category.metadata,
-        fromDraftFields(fields),
-        activationFieldsEnabled,
-      ),
+    await updateActivationFields.mutateAsync({
+      activationFields: fromDraftActivationFields(fields),
+      activationFormEnabled: activationFieldsEnabled,
     });
     toast.success(t("activationFieldsSaved"));
     router.push("/categories");
@@ -126,7 +116,7 @@ export function CategoryActivationFieldsView({
         maxWidthClassName="max-w-5xl"
         title={t("activationFieldsTitle")}
       >
-        {categoryQuery.isLoading ? (
+        {categoryQuery.isLoading || activationFieldsQuery.isLoading ? (
           <Card>
             <CardHeader>
               <CardTitle>{t("activationFieldsTitle")}</CardTitle>
@@ -139,12 +129,15 @@ export function CategoryActivationFieldsView({
               <div className="h-24 rounded-md bg-slate-100 dark:bg-slate-900" />
             </CardContent>
           </Card>
-        ) : categoryQuery.isError || !category ? (
+        ) : categoryQuery.isError ||
+          activationFieldsQuery.isError ||
+          !category ? (
           <StatePanel
             action={
               <Button
                 onClick={() => {
                   void categoryQuery.refetch();
+                  void activationFieldsQuery.refetch();
                 }}
                 variant="secondary"
               >
@@ -247,7 +240,7 @@ export function CategoryActivationFieldsView({
 
               <div className="flex flex-col-reverse gap-2 border-t border-slate-200 pt-5 dark:border-slate-800 sm:flex-row sm:justify-end">
                 <Button
-                  disabled={updateCategory.isPending}
+                  disabled={updateActivationFields.isPending}
                   onClick={() => router.push("/categories")}
                   type="button"
                   variant="secondary"
@@ -255,13 +248,13 @@ export function CategoryActivationFieldsView({
                   {t("cancel")}
                 </Button>
                 <Button
-                  disabled={!canSave || updateCategory.isPending}
+                  disabled={!canSave || updateActivationFields.isPending}
                   onClick={() => {
                     void submit();
                   }}
                   type="button"
                 >
-                  {updateCategory.isPending ? (
+                  {updateActivationFields.isPending ? (
                     <Loader2 className="size-4 animate-spin" />
                   ) : null}
                   {t("save")}
@@ -487,6 +480,12 @@ function ActivationFieldEditor({
         </div>
       ) : null}
 
+      {field.type === "PRODUCT_SELECT" ? (
+        <p className="mt-5 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300">
+          {t("activationFieldProductSelectDescription")}
+        </p>
+      ) : null}
+
       <label className="mt-5 flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
         <Checkbox
           checked={Boolean(field.required)}
@@ -553,25 +552,4 @@ function getActivationFieldOptionErrors(
           : undefined,
     };
   });
-}
-
-function toDraftFields(fields: CategoryActivationFieldConfig[]) {
-  return fields.map((field) => ({
-    ...field,
-    options: (field.options ?? []).map((option) => ({ ...option })),
-  }));
-}
-
-function fromDraftFields(
-  fields: DraftActivationField[],
-): CategoryActivationFieldConfig[] {
-  return fields.map((field, index) => ({
-    key: field.key,
-    label: field.label,
-    options: field.options,
-    order: index + 1,
-    placeholder: field.placeholder,
-    required: field.required,
-    type: field.type,
-  }));
 }

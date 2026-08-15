@@ -202,6 +202,65 @@ test("updating a category can clear the parent", async () => {
   assert.deepEqual(result, category);
 });
 
+test("activation field configuration uses its dedicated read endpoint", async () => {
+  const calls: unknown[] = [];
+  const response = {
+    activationFields: [],
+    activationFormEnabled: false,
+    categoryId: "category-id",
+  };
+  const http = {
+    async get(url: string) {
+      calls.push({ url });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  const result = await createCategoriesService(
+    http as unknown as CategoriesHttpClient,
+  ).getCategoryActivationFields("category-id");
+
+  assert.deepEqual(calls, [
+    { url: "/categories/category-id/activation-fields" },
+  ]);
+  assert.deepEqual(result, response);
+});
+
+test("activation field configuration replaces all fields through its dedicated endpoint", async () => {
+  const calls: unknown[] = [];
+  const body = {
+    activationFormEnabled: true,
+    activationFields: [
+      {
+        key: "windshield",
+        label: "Kinh lai",
+        order: 1,
+        required: true,
+        type: "PRODUCT_SELECT" as const,
+      },
+    ],
+  };
+  const response = { categoryId: "category-id", ...body };
+  const http = {
+    async put(url: string, requestBody?: unknown) {
+      calls.push({ url, body: requestBody });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  const result = await createCategoriesService(
+    http as unknown as CategoriesHttpClient,
+  ).updateCategoryActivationFields("category-id", body);
+
+  assert.deepEqual(calls, [
+    {
+      url: "/categories/category-id/activation-fields",
+      body,
+    },
+  ]);
+  assert.deepEqual(result, response);
+});
+
 test("deactivating a category uses the delete endpoint", async () => {
   const calls: unknown[] = [];
   const http = {

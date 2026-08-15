@@ -702,6 +702,7 @@
     "activationFieldPlaceholder": "Placeholder",
     "activationFieldPlaceholderExample": "Example: Select or enter film code",
     "activationFieldOptions": "Options",
+    "activationFieldProductSelectDescription": "Options are loaded from eligible physical products in this category.",
     "activationFieldOptionLabel": "Display label",
     "activationFieldOptionLabelPlaceholder": "Example: Film SP50",
     "activationFieldOptionValue": "Value",
@@ -783,7 +784,8 @@
       "TEXTAREA": "Long text",
       "NUMBER": "Number",
       "DATE": "Date",
-      "SELECT": "Select"
+      "SELECT": "Select",
+      "PRODUCT_SELECT": "Physical product selector"
     },
     "statuses": {
       "ALL": "All statuses",

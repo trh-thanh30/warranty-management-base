@@ -702,6 +702,7 @@
     "activationFieldPlaceholder": "Placeholder",
     "activationFieldPlaceholderExample": "Ví dụ: Chọn hoặc nhập mã phim",
     "activationFieldOptions": "Danh sách lựa chọn",
+    "activationFieldProductSelectDescription": "Danh sách được lấy từ các sản phẩm đủ điều kiện thuộc danh mục này.",
     "activationFieldOptionLabel": "Nhãn hiển thị",
     "activationFieldOptionLabelPlaceholder": "Ví dụ: Phim SP50",
     "activationFieldOptionValue": "Giá trị",
@@ -783,7 +784,8 @@
       "TEXTAREA": "Văn bản dài",
       "NUMBER": "Số",
       "DATE": "Ngày",
-      "SELECT": "Danh sách chọn"
+      "SELECT": "Danh sách chọn",
+      "PRODUCT_SELECT": "Chọn sản phẩm thực tế"
     },
     "statuses": {
       "ALL": "Tất cả trạng thái",
