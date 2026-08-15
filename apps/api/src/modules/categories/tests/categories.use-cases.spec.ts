@@ -44,6 +44,7 @@ describe('Category use cases', () => {
     findById: jest.fn(),
     findByIds: jest.fn(),
     findByTypeAndSlug: jest.fn(),
+    getActivationFields: jest.fn(),
     list: jest.fn(),
     listByType: jest.fn(),
     listPublicProductCategories: jest.fn(),
@@ -395,11 +396,30 @@ describe('Category use cases', () => {
 
   it('returns category detail', async () => {
     categoriesRepository.findById.mockResolvedValue(category);
+    categoriesRepository.getActivationFields.mockResolvedValue({
+      categoryId: 'category-id',
+      activationFormEnabled: true,
+      activationFields: [
+        {
+          id: 'field-id',
+          key: 'windshield',
+          label: 'Kính lái',
+          type: 'PRODUCT_SELECT',
+          required: true,
+          order: 0,
+          options: [],
+        },
+      ],
+    });
     const useCase = new GetCategoryDetailUseCase(categoriesRepository as never);
 
     await expect(useCase.execute('category-id')).resolves.toMatchObject({
       id: 'category-id',
       metadata: { color: 'blue' },
+      activationFormEnabled: true,
+      activationFields: [
+        expect.objectContaining({ key: 'windshield', type: 'PRODUCT_SELECT' }),
+      ],
     });
   });
 

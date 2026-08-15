@@ -1,21 +1,16 @@
-export const CATEGORY_ACTIVATION_FIELD_TYPES = [
-  "TEXT",
-  "TEXTAREA",
-  "NUMBER",
-  "DATE",
-  "SELECT",
-  "PRODUCT_SELECT",
-] as const;
+import type { CATEGORY_ACTIVATION_FIELD_TYPES } from "../constants/category-activation-fields.ts";
 
 export type CategoryActivationFieldType =
   (typeof CATEGORY_ACTIVATION_FIELD_TYPES)[number];
 
 export type CategoryActivationFieldOption = {
+  id?: string;
   label: string;
   value: string;
 };
 
 export type CategoryActivationFieldConfig = {
+  id?: string;
   key: string;
   label: string;
   type: CategoryActivationFieldType;
@@ -24,3 +19,14 @@ export type CategoryActivationFieldConfig = {
   order?: number;
   options?: CategoryActivationFieldOption[];
 };
+
+export type CategoryActivationFieldsResponse = {
+  categoryId: string;
+  activationFormEnabled: boolean;
+  activationFields: CategoryActivationFieldConfig[];
+};
+
+export type UpdateCategoryActivationFieldsBody = Omit<
+  CategoryActivationFieldsResponse,
+  "categoryId"
+>;

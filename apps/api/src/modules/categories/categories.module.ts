@@ -8,6 +8,7 @@ import { DeactivateCategoryUseCase } from '@/modules/categories/use-cases/deacti
 import { DownloadCategoryImportTemplateUseCase } from '@/modules/categories/use-cases/download-category-import-template.use-case';
 import { ExportCategoriesUseCase } from '@/modules/categories/use-cases/export-categories.use-case';
 import { GetCategoryDetailUseCase } from '@/modules/categories/use-cases/get-category-detail.use-case';
+import { GetCategoryActivationFieldsUseCase } from '@/modules/categories/use-cases/get-category-activation-fields.use-case';
 import { ImportCategoriesUseCase } from '@/modules/categories/use-cases/import-categories.use-case';
 import { ListCategoriesUseCase } from '@/modules/categories/use-cases/list-categories.use-case';
 import { ListCategoryTreeUseCase } from '@/modules/categories/use-cases/list-category-tree.use-case';
@@ -15,6 +16,7 @@ import { ListCategoryParentOptionsUseCase } from '@/modules/categories/use-cases
 import { ListPublicProductCategoriesUseCase } from '@/modules/categories/use-cases/list-public-product-categories.use-case';
 import { ReorderCategoriesUseCase } from '@/modules/categories/use-cases/reorder-categories.use-case';
 import { UpdateCategoryUseCase } from '@/modules/categories/use-cases/update-category.use-case';
+import { UpdateCategoryActivationFieldsUseCase } from '@/modules/categories/use-cases/update-category-activation-fields.use-case';
 import { Module } from '@nestjs/common';
 
 @Module({
@@ -29,8 +31,10 @@ import { Module } from '@nestjs/common';
     ListCategoryParentOptionsUseCase,
     ListPublicProductCategoriesUseCase,
     GetCategoryDetailUseCase,
+    GetCategoryActivationFieldsUseCase,
     ReorderCategoriesUseCase,
     UpdateCategoryUseCase,
+    UpdateCategoryActivationFieldsUseCase,
     DeactivateCategoryUseCase,
     DownloadCategoryImportTemplateUseCase,
     ExportCategoriesUseCase,

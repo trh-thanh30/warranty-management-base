@@ -4,7 +4,7 @@ import { join } from 'node:path';
 describe('Multi-product warranty activation contracts', () => {
   const sharedFieldTypesPath = join(
     __dirname,
-    '../../../../../../packages/shared/src/types/category-activation-field.types.ts',
+    '../../../../../../packages/shared/src/constants/category-activation-fields.ts',
   );
   const prismaSchemaPath = join(__dirname, '../../../../prisma/schema.prisma');
   const migrationPath = join(

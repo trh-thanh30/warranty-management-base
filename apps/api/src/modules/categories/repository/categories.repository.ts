@@ -4,6 +4,10 @@ import { ListCategoriesDto } from '@/modules/categories/dto/list-categories.dto'
 import { PreparedCategoryImportRow } from '@/modules/categories/excel/category-excel.types';
 import { Injectable } from '@nestjs/common';
 import { category_type, Prisma } from '@prisma/client';
+import type {
+  CategoryActivationFieldsResponse,
+  UpdateCategoryActivationFieldsBody,
+} from '@repo/shared';
 
 @Injectable()
 export class CategoriesRepository {
@@ -26,6 +30,60 @@ export class CategoriesRepository {
   findByTypeAndSlug(type: category_type, slug: string) {
     return this.prismaService.category.findUnique({
       where: { type_slug: { type, slug } },
+    });
+  }
+
+  async getActivationFields(
+    categoryId: string,
+  ): Promise<CategoryActivationFieldsResponse | null> {
+    const category = await this.prismaService.category.findUnique({
+      where: { id: categoryId },
+      select: categoryActivationFieldsSelect,
+    });
+
+    return category ? toActivationFieldsResponse(category) : null;
+  }
+
+  replaceActivationFields(
+    categoryId: string,
+    input: UpdateCategoryActivationFieldsBody,
+  ): Promise<CategoryActivationFieldsResponse> {
+    return this.prismaService.$transaction(async (tx) => {
+      await tx.category.update({
+        where: { id: categoryId },
+        data: { activation_form_enabled: input.activationFormEnabled },
+      });
+      await tx.categoryActivationField.deleteMany({
+        where: { category_id: categoryId },
+      });
+
+      for (const [index, field] of input.activationFields.entries()) {
+        await tx.categoryActivationField.create({
+          data: {
+            category_id: categoryId,
+            key: field.key,
+            label: field.label,
+            type: field.type,
+            placeholder: field.placeholder,
+            required: field.required ?? false,
+            sort_order: field.order ?? index,
+            options: {
+              create: (field.options ?? []).map((option, optionIndex) => ({
+                label: option.label,
+                value: option.value,
+                sort_order: optionIndex,
+              })),
+            },
+          },
+        });
+      }
+
+      const category = await tx.category.findUniqueOrThrow({
+        where: { id: categoryId },
+        select: categoryActivationFieldsSelect,
+      });
+
+      return toActivationFieldsResponse(category);
     });
   }
 
@@ -260,4 +318,45 @@ function toCategoryKey(type: category_type, slug: string) {
 
 function toJsonValue(value: Record<string, unknown> | null) {
   return value === null ? Prisma.JsonNull : (value as Prisma.InputJsonObject);
+}
+
+const categoryActivationFieldsSelect = {
+  id: true,
+  activation_form_enabled: true,
+  activation_fields: {
+    where: { is_active: true },
+    orderBy: [{ sort_order: 'asc' }, { created_at: 'asc' }],
+    include: {
+      options: {
+        orderBy: [{ sort_order: 'asc' }, { created_at: 'asc' }],
+      },
+    },
+  },
+} satisfies Prisma.CategorySelect;
+
+type CategoryWithActivationFields = Prisma.CategoryGetPayload<{
+  select: typeof categoryActivationFieldsSelect;
+}>;
+
+function toActivationFieldsResponse(
+  category: CategoryWithActivationFields,
+): CategoryActivationFieldsResponse {
+  return {
+    categoryId: category.id,
+    activationFormEnabled: category.activation_form_enabled,
+    activationFields: category.activation_fields.map((field) => ({
+      id: field.id,
+      key: field.key,
+      label: field.label,
+      type: field.type,
+      placeholder: field.placeholder ?? undefined,
+      required: field.required,
+      order: field.sort_order,
+      options: field.options.map((option) => ({
+        id: option.id,
+        label: option.label,
+        value: option.value,
+      })),
+    })),
+  };
 }
