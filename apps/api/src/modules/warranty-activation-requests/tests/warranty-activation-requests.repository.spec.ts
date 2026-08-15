@@ -17,13 +17,28 @@ describe('WarrantyActivationRequestsRepository', () => {
 
     expect(findFirst).toHaveBeenCalledWith({
       where: {
-        product_id: 'product-id',
         status: {
           in: [
             warranty_activation_request_status.PENDING,
             warranty_activation_request_status.APPROVED,
           ],
         },
+        OR: [
+          { product_id: 'product-id' },
+          {
+            items: {
+              some: {
+                product_id: 'product-id',
+                status: {
+                  in: [
+                    warranty_activation_request_status.PENDING,
+                    warranty_activation_request_status.APPROVED,
+                  ],
+                },
+              },
+            },
+          },
+        ],
       },
       orderBy: { created_at: 'desc' },
       select: {
@@ -32,5 +47,27 @@ describe('WarrantyActivationRequestsRepository', () => {
         status: true,
       },
     });
+  });
+
+  it('finds open reservations for multiple legacy or item products', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const repository = new WarrantyActivationRequestsRepository(
+      { warrantyActivationRequest: { findMany } } as never,
+      {} as never,
+      {} as never,
+    );
+
+    await repository.findOpenByProductIds(['product-a', 'product-b']);
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          OR: [
+            { product_id: { in: ['product-a', 'product-b'] } },
+            expect.objectContaining({ items: expect.any(Object) }),
+          ],
+        }),
+      }),
+    );
   });
 });

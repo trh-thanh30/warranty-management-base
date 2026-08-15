@@ -56,6 +56,34 @@ export type WarrantyActivationRequestWithRelations =
         last_error: string | null;
       }[];
     } | null;
+    items?: Array<{
+      id: string;
+      activation_field_id: string | null;
+      position_key: string;
+      position_label: string;
+      product_id: string;
+      product_name: string;
+      product_code: string;
+      serial_number: string | null;
+      warranty_id: string;
+      warranty_code: string;
+      status: WarrantyActivationRequest['status'];
+      activated_at: Date | null;
+      warranty: {
+        status: warranty_status;
+        certificates?: Array<{
+          id: string;
+          certificate_number: string;
+          status: warranty_certificate_status;
+          storage_key: string | null;
+          recipient_email: string | null;
+          generated_at: Date | null;
+          emailed_at: Date | null;
+          email_status: warranty_certificate_email_status;
+          last_error: string | null;
+        }>;
+      };
+    }>;
   };
 
 function toMetadata(
@@ -161,6 +189,26 @@ export function toWarrantyActivationRequestResponse(
       request.id,
       request.activated_warranty?.certificates?.[0] ?? null,
     ),
+    items: request.items?.map((item) => ({
+      id: item.id,
+      activationFieldId: item.activation_field_id,
+      positionKey: item.position_key,
+      positionLabel: item.position_label,
+      productId: item.product_id,
+      productName: item.product_name,
+      productCode: item.product_code,
+      serialNumber: item.serial_number,
+      warrantyId: item.warranty_id,
+      warrantyCode: item.warranty_code,
+      warrantyStatus: item.warranty.status,
+      status: item.status,
+      activatedAt: item.activated_at?.toISOString() ?? null,
+      certificate: toCertificateSummary(
+        request.id,
+        item.warranty.certificates?.[0] ?? null,
+      ),
+    })),
+    itemCount: request.items?.length,
     metadata: toMetadata(request.metadata),
     createdAt: request.created_at.toISOString(),
     updatedAt: request.updated_at.toISOString(),

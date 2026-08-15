@@ -204,6 +204,24 @@ export class ProductsRepository {
     });
   }
 
+  findActivationRequestTargetsByIds(productIds: string[]) {
+    return this.prismaService.product.findMany({
+      where: {
+        deleted_at: null,
+        id: { in: productIds },
+      },
+      include: {
+        warranty: true,
+        template: true,
+        ownerships: {
+          where: { is_current_owner: true },
+          include: { customer: true },
+          orderBy: { created_at: 'desc' },
+        },
+      },
+    });
+  }
+
   synchronizeWarrantyCode(input: { warrantyCode: string; warrantyId: string }) {
     return this.prismaService.$transaction(async (tx) => {
       await tx.warranty.update({

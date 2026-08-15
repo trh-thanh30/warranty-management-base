@@ -57,6 +57,19 @@ const activationRequestInclude = {
       },
     },
   },
+  items: {
+    orderBy: [{ created_at: 'asc' as const }, { id: 'asc' as const }],
+    include: {
+      warranty: {
+        include: {
+          certificates: {
+            orderBy: { created_at: 'desc' as const },
+            take: 1,
+          },
+        },
+      },
+    },
+  },
 } satisfies Prisma.WarrantyActivationRequestInclude;
 
 function buildWarrantyActivationRequestListQuery(
@@ -146,16 +159,54 @@ export class WarrantyActivationRequestsRepository {
   findOpenByProductId(productId: string) {
     return this.prismaService.warrantyActivationRequest.findFirst({
       where: {
-        product_id: productId,
         status: {
           in: OPEN_WARRANTY_ACTIVATION_REQUEST_STATUSES,
         },
+        OR: [
+          { product_id: productId },
+          {
+            items: {
+              some: {
+                product_id: productId,
+                status: { in: OPEN_WARRANTY_ACTIVATION_REQUEST_STATUSES },
+              },
+            },
+          },
+        ],
       },
       orderBy: { created_at: 'desc' },
       select: {
         id: true,
         request_code: true,
         status: true,
+      },
+    });
+  }
+
+  findOpenByProductIds(productIds: string[]) {
+    return this.prismaService.warrantyActivationRequest.findMany({
+      where: {
+        status: { in: OPEN_WARRANTY_ACTIVATION_REQUEST_STATUSES },
+        OR: [
+          { product_id: { in: productIds } },
+          {
+            items: {
+              some: {
+                product_id: { in: productIds },
+                status: { in: OPEN_WARRANTY_ACTIVATION_REQUEST_STATUSES },
+              },
+            },
+          },
+        ],
+      },
+      select: {
+        request_code: true,
+        status: true,
+        product_id: true,
+        items: {
+          where: { product_id: { in: productIds } },
+          select: { product_id: true },
+        },
       },
     });
   }

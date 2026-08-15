@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  ArrayMinSize,
   IsDateString,
   IsEmail,
   IsInt,
@@ -14,6 +15,20 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
+
+export class CreateWarrantyActivationRequestItemDto {
+  @IsOptional()
+  @IsUUID()
+  activationFieldId?: string;
+
+  @IsString()
+  @Length(1, 64)
+  @Matches(/^[a-z][a-zA-Z0-9_]*$/)
+  positionKey: string;
+
+  @IsUUID()
+  productId: string;
+}
 
 export class ActivationFilmItemsDto {
   @IsOptional()
@@ -66,6 +81,12 @@ export class CreateWarrantyActivationRequestDto {
   @IsOptional()
   @IsUUID()
   productId?: string;
+
+  @IsOptional()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => CreateWarrantyActivationRequestItemDto)
+  items?: CreateWarrantyActivationRequestItemDto[];
 
   @IsOptional()
   @IsUUID()

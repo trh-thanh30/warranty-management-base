@@ -109,9 +109,116 @@ describe('WarrantyActivationRequestsUseCases', () => {
         full_address: '1 Nguyen Trai, Phuong Ben Thanh, TP Ho Chi Minh',
         request_code: 'WAR-20260719-0001',
         warranty_code: 'WM-2026-ABC123',
+        items: {
+          create: [
+            expect.objectContaining({
+              position_key: 'primaryProduct',
+              product_id: 'product-id',
+              warranty_id: 'warranty-id',
+            }),
+          ],
+        },
       }),
     );
     expect(result.requestCode).toBe('WAR-20260719-0001');
+  });
+
+  it('creates one parent with multiple validated activation items', async () => {
+    repository.findLastRequestCode.mockResolvedValue(null);
+    repository.findOpenByProductId.mockResolvedValue(null);
+    productsRepository.findActivationRequestTargetById.mockResolvedValue({
+      ...baseDraftProduct,
+      id: 'product-a',
+      product_code: 'CODE-product-a',
+      warranty: {
+        ...baseDraftProduct.warranty,
+        id: 'warranty-product-a',
+        warranty_code: 'WM-product-a',
+      },
+    });
+    const itemValidator = {
+      validate: jest
+        .fn()
+        .mockResolvedValue([
+          createValidatedItem('windshield', 'product-a'),
+          createValidatedItem('rearGlass', 'product-b'),
+        ]),
+    };
+    repository.create.mockImplementation((data) =>
+      Promise.resolve({
+        ...baseRequest,
+        request_code: data.request_code,
+        warranty_code: 'WM-product-a',
+        product_id: 'product-a',
+        category_id: 'category-id',
+        product_name: 'Product product-a',
+        serial_number: 'SERIAL-product-a',
+        items: [
+          createPersistedItem('windshield', 'product-a'),
+          createPersistedItem('rearGlass', 'product-b'),
+        ],
+      }),
+    );
+    const generateCodeUseCase =
+      new GenerateWarrantyActivationRequestCodeUseCase(repository as never);
+    const useCase = new CreateWarrantyActivationRequestUseCase(
+      repository as never,
+      generateCodeUseCase,
+      productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
+      itemValidator as never,
+    );
+    const items = [
+      { positionKey: 'windshield', productId: 'product-a' },
+      { positionKey: 'rearGlass', productId: 'product-b' },
+    ];
+
+    const result = await useCase.execute({
+      addressDetail: '1 Nguyen Trai',
+      categoryId: 'category-id',
+      customerName: 'Nguyen Van A',
+      customerPhone: '0901234567',
+      items,
+      provinceCode: '79',
+      provinceName: 'TP Ho Chi Minh',
+      productName: 'Client supplied name',
+      wardCode: '26734',
+      wardName: 'Phuong Ben Thanh',
+    });
+
+    expect(itemValidator.validate).toHaveBeenCalledWith('category-id', items);
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        product: { connect: { id: 'product-a' } },
+        product_name: 'Product product-a',
+        warranty_code: 'WM-product-a',
+        items: {
+          create: [
+            expect.objectContaining({
+              position_key: 'windshield',
+              product_id: 'product-a',
+            }),
+            expect.objectContaining({
+              position_key: 'rearGlass',
+              product_id: 'product-b',
+            }),
+          ],
+        },
+      }),
+    );
+    expect(result.itemCount).toBe(2);
+    expect(result.items).toEqual([
+      expect.objectContaining({
+        positionKey: 'windshield',
+        productId: 'product-a',
+      }),
+      expect.objectContaining({
+        positionKey: 'rearGlass',
+        productId: 'product-b',
+      }),
+    ]);
   });
 
   it('publishes an admin notification when a public activation request is created', async () => {
@@ -744,6 +851,7 @@ const baseDraftProduct = {
   category_id: 'category-id',
   id: 'product-id',
   display_name: null,
+  product_code: 'CODE-product-id',
   template: {
     brand: 'Black Label',
     category_id: 'category-id',
@@ -762,8 +870,48 @@ const baseDraftProduct = {
   ],
   serial_number: 'SN-BLF-001',
   warranty: {
+    duration_months: 24,
     id: 'warranty-id',
     status: warranty_status.DRAFT,
     warranty_code: 'WM-2026-ABC123',
   },
 };
+
+function createValidatedItem(positionKey: string, productId: string) {
+  return {
+    activationFieldId: `${positionKey}-field-id`,
+    positionKey,
+    positionLabel: positionKey,
+    productId,
+    productName: `Product ${productId}`,
+    productCode: `CODE-${productId}`,
+    serialNumber: `SERIAL-${productId}`,
+    warrantyId: `warranty-${productId}`,
+    warrantyCode: `WM-${productId}`,
+    warrantyDurationMonths: 24,
+    brand: 'Lexzenz',
+    model: 'SP50',
+    manufactureYear: 2026,
+  };
+}
+
+function createPersistedItem(positionKey: string, productId: string) {
+  return {
+    id: `${positionKey}-item-id`,
+    activation_field_id: `${positionKey}-field-id`,
+    position_key: positionKey,
+    position_label: positionKey,
+    product_id: productId,
+    product_name: `Product ${productId}`,
+    product_code: `CODE-${productId}`,
+    serial_number: `SERIAL-${productId}`,
+    warranty_id: `warranty-${productId}`,
+    warranty_code: `WM-${productId}`,
+    status: warranty_activation_request_status.PENDING,
+    activated_at: null,
+    warranty: {
+      status: warranty_status.DRAFT,
+      certificates: [],
+    },
+  };
+}

@@ -135,4 +135,40 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
       createWarrantyActivationRequestUseCase.execute,
     ).not.toHaveBeenCalled();
   });
+
+  it('delegates a multi-product payload without collapsing it to one product', async () => {
+    createWarrantyActivationRequestUseCase.execute.mockResolvedValue({
+      id: 'request-id',
+      itemCount: 2,
+    });
+    const useCase = new CreateAdminWarrantyActivationRequestUseCase(
+      productsRepository as never,
+      generateWarrantyCodeUseCase as never,
+      createWarrantyActivationRequestUseCase as never,
+    );
+    const multiProductDto = {
+      ...dto,
+      categoryId: 'fd47a803-b240-4935-aab4-554d44fce684',
+      items: [
+        {
+          positionKey: 'windshield',
+          productId: '23684bbd-b6e0-401a-9ba4-97e1b98176fd',
+        },
+        {
+          positionKey: 'rearGlass',
+          productId: '8d51964e-a369-4815-a844-cfe03981732d',
+        },
+      ],
+    };
+
+    await useCase.execute(multiProductDto);
+
+    expect(
+      productsRepository.findActivationRequestTargetById,
+    ).not.toHaveBeenCalled();
+    expect(createWarrantyActivationRequestUseCase.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ items: multiProductDto.items }),
+      expect.objectContaining({ source: 'ADMIN_PORTAL' }),
+    );
+  });
 });

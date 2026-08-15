@@ -22,6 +22,20 @@ export class CreateAdminWarrantyActivationRequestUseCase {
     dto: CreateAdminWarrantyActivationRequestDto,
     context: { createdByUserId?: string } = {},
   ) {
+    if (dto.items?.length) {
+      return this.createWarrantyActivationRequestUseCase.execute(dto, {
+        createdByUserId: context.createdByUserId,
+        source: warranty_activation_request_source.ADMIN_PORTAL,
+      });
+    }
+
+    if (!dto.productId) {
+      throw new BadRequestError(
+        'Either items or productId is required',
+        'ACTIVATION_TARGET_REQUIRED',
+      );
+    }
+
     const product =
       await this.productsRepository.findActivationRequestTargetById(
         dto.productId,

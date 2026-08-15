@@ -202,9 +202,9 @@ export type CreateAdminWarrantyActivationRequestBody = Omit<
   CreateWarrantyActivationRequestBody,
   "warrantyCode"
 > & {
-  /** Optional during the dual-write migration; Task 4 makes items authoritative. */
+  /** Multi-product requests use items; productId remains for legacy clients. */
   items?: CreateWarrantyActivationRequestItemBody[];
-  productId: string;
+  productId?: string;
 };
 
 export type ListWarrantyActivationRequestsQuery = PaginationQuery & {

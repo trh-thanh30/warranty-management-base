@@ -6,13 +6,17 @@ import { CreateWarrantyActivationRequestDto } from '@/modules/warranty-activatio
 import { toWarrantyActivationRequestResponse } from '@/modules/warranty-activation-requests/mappers/warranty-activation-request.mapper';
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
 import { WarrantyActivationRequestNotificationService } from '@/modules/warranty-activation-requests/service/warranty-activation-request-notification.service';
+import {
+  ActivationRequestItemsValidatorService,
+  ValidatedActivationRequestItem,
+} from '@/modules/warranty-activation-requests/service/activation-request-items-validator.service';
 import { GenerateWarrantyActivationRequestCodeUseCase } from '@/modules/warranty-activation-requests/use-cases/generate-warranty-activation-request-code.use-case';
 import {
   buildWarrantyActivationRequestFullAddress,
   normalizeText,
   optionalTrim,
 } from '@/modules/warranty-activation-requests/utils/warranty-activation-request-normalization.utils';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import {
   Prisma,
   Product,
@@ -39,6 +43,8 @@ export class CreateWarrantyActivationRequestUseCase {
     private readonly dealersRepository: DealersRepository,
     private readonly generateWarrantyCodeUseCase: GenerateWarrantyCodeUseCase,
     private readonly warrantyActivationRequestNotificationService: WarrantyActivationRequestNotificationService,
+    @Optional()
+    private readonly activationRequestItemsValidatorService?: ActivationRequestItemsValidatorService,
   ) {}
 
   async execute(
@@ -52,7 +58,12 @@ export class CreateWarrantyActivationRequestUseCase {
     const customerPhone = dto.customerPhone.trim();
     const customerEmail = dto.customerEmail?.trim().toLowerCase() || null;
     const customerName = dto.customerName.trim();
-    const product = await this.resolveActivationProduct(dto, dtoWarrantyCode);
+    const validatedItems = await this.resolveValidatedItems(dto);
+    const product = validatedItems
+      ? await this.productsRepository.findActivationRequestTargetById(
+          validatedItems[0].productId,
+        )
+      : await this.resolveActivationProduct(dto, dtoWarrantyCode);
 
     if (!product?.warranty) {
       throw new NotFoundError('Warranty code not found', 'NOT_FOUND', {
@@ -64,6 +75,9 @@ export class CreateWarrantyActivationRequestUseCase {
     const warrantyCode =
       product.warranty.warranty_code ??
       (await this.generateWarrantyCodeUseCase.execute());
+    const requestItems = validatedItems ?? [
+      this.toPrimaryRequestItem(product, warrantyCode),
+    ];
 
     if (product.warranty.warranty_code !== warrantyCode) {
       await this.productsRepository.synchronizeWarrantyCode({
@@ -138,7 +152,9 @@ export class CreateWarrantyActivationRequestUseCase {
           vehicle_model: optionalTrim(dto.vehicleModel),
           installed_at: dto.installedAt ? new Date(dto.installedAt) : undefined,
           warranty_duration_months:
-            dto.warrantyDurationMonths ?? product.warranty.duration_months,
+            validatedItems?.[0].warrantyDurationMonths ??
+            dto.warrantyDurationMonths ??
+            product.warranty.duration_months,
           province_code: dto.provinceCode.trim(),
           province_name: dto.provinceName.trim(),
           ward_code: dto.wardCode.trim(),
@@ -146,14 +162,26 @@ export class CreateWarrantyActivationRequestUseCase {
           address_detail: dto.addressDetail.trim(),
           full_address: buildWarrantyActivationRequestFullAddress(dto),
           product_name:
+            validatedItems?.[0].productName ??
             optionalTrim(dto.productName) ??
             product.display_name ??
             product.template.name,
           serial_number:
-            optionalTrim(dto.serialNumber) ?? product.serial_number,
-          brand: optionalTrim(dto.brand) ?? product.template.brand,
-          model: optionalTrim(dto.model) ?? product.template.model,
-          manufacture_year: dto.manufactureYear ?? product.template.model_year,
+            validatedItems !== null
+              ? validatedItems[0].serialNumber
+              : (optionalTrim(dto.serialNumber) ?? product.serial_number),
+          brand:
+            validatedItems !== null
+              ? validatedItems[0].brand
+              : (optionalTrim(dto.brand) ?? product.template.brand),
+          model:
+            validatedItems !== null
+              ? validatedItems[0].model
+              : (optionalTrim(dto.model) ?? product.template.model),
+          manufacture_year:
+            validatedItems !== null
+              ? validatedItems[0].manufactureYear
+              : (dto.manufactureYear ?? product.template.model_year),
           note: optionalTrim(dto.note),
           metadata: this.buildActivationMetadata({
             dealer,
@@ -163,6 +191,19 @@ export class CreateWarrantyActivationRequestUseCase {
               context.source ?? warranty_activation_request_source.PUBLIC_WEB,
             warrantyId: product.warranty.id,
           }),
+          items: {
+            create: requestItems.map((item) => ({
+              activation_field_id: item.activationFieldId,
+              position_key: item.positionKey,
+              position_label: item.positionLabel,
+              product_id: item.productId,
+              warranty_id: item.warrantyId,
+              warranty_code: item.warrantyCode,
+              product_name: item.productName,
+              product_code: item.productCode,
+              serial_number: item.serialNumber,
+            })),
+          },
         });
 
         await this.warrantyActivationRequestNotificationService.requestCreated(
@@ -179,6 +220,24 @@ export class CreateWarrantyActivationRequestUseCase {
         }
 
         if (this.isUniqueConstraintConflict(error)) {
+          if (validatedItems) {
+            const concurrentOpenRequests =
+              await this.warrantyActivationRequestsRepository.findOpenByProductIds(
+                validatedItems.map((item) => item.productId),
+              );
+            const conflictingRequest = concurrentOpenRequests[0];
+            if (conflictingRequest) {
+              const conflictingProductId =
+                conflictingRequest.items[0]?.product_id ??
+                conflictingRequest.product_id ??
+                product.id;
+              this.throwAlreadyOpenRequest(
+                conflictingProductId,
+                conflictingRequest,
+              );
+            }
+          }
+
           const concurrentOpenRequest =
             await this.warrantyActivationRequestsRepository.findOpenByProductId(
               product.id,
@@ -256,6 +315,55 @@ export class CreateWarrantyActivationRequestUseCase {
       'BAD_REQUEST',
       { code: 'ACTIVATION_TARGET_REQUIRED' },
     );
+  }
+
+  private async resolveValidatedItems(dto: CreateWarrantyActivationRequestDto) {
+    if (!dto.items?.length) return null;
+    if (!dto.categoryId) {
+      throw new BadRequestError(
+        'Category is required for multi-product activation requests',
+        'ACTIVATION_CATEGORY_REQUIRED',
+      );
+    }
+    if (!this.activationRequestItemsValidatorService) {
+      throw new BadRequestError(
+        'Activation request item validation is unavailable',
+        'ACTIVATION_ITEM_VALIDATOR_UNAVAILABLE',
+      );
+    }
+
+    return this.activationRequestItemsValidatorService.validate(
+      dto.categoryId,
+      dto.items,
+    );
+  }
+
+  private toPrimaryRequestItem(
+    product: NonNullable<
+      Awaited<ReturnType<ProductsRepository['findActivationRequestTargetById']>>
+    >,
+    warrantyCode: string,
+  ): ValidatedActivationRequestItem {
+    if (!product.warranty) {
+      throw new NotFoundError('Product warranty not found');
+    }
+
+    return {
+      activationFieldId: null,
+      positionKey: 'primaryProduct',
+      positionLabel: 'Sản phẩm chính',
+      productId: product.id,
+      productName:
+        product.display_name ?? product.template.name ?? product.product_code,
+      productCode: product.product_code,
+      serialNumber: product.serial_number,
+      warrantyId: product.warranty.id,
+      warrantyCode,
+      warrantyDurationMonths: product.warranty.duration_months,
+      brand: product.template.brand,
+      model: product.template.model,
+      manufactureYear: product.template.model_year,
+    };
   }
 
   private async resolveDealer(dto: CreateWarrantyActivationRequestDto) {
