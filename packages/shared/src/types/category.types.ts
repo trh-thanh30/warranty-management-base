@@ -1,5 +1,6 @@
 import type { PaginationQuery } from "./pagination.types.ts";
 import type { CategoryType } from "../constants/catalog.ts";
+import type { CategoryActivationFieldConfig } from "./category-activation-field.types.ts";
 
 export type CategorySortBy =
   | "name"
@@ -27,6 +28,10 @@ export type CategorySummary = {
 };
 
 export type CategoryResponse = CategorySummary & {
+  /** Optional during the activation-field storage migration. */
+  activationFormEnabled?: boolean;
+  /** Optional during the activation-field storage migration. */
+  activationFields?: CategoryActivationFieldConfig[];
   children?: CategorySummary[];
 };
 

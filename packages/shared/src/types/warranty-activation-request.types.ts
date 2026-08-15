@@ -18,6 +18,37 @@ export type WarrantyCertificateEmailStatus =
   | "SENT"
   | "FAILED";
 
+export type WarrantyCertificateSummary = {
+  id: string;
+  certificateNumber: string;
+  downloadUrl: string;
+  status: WarrantyCertificateStatus;
+  storageKey: string | null;
+  viewUrl: string;
+  recipientEmail: string | null;
+  generatedAt: string | null;
+  emailedAt: string | null;
+  emailStatus: WarrantyCertificateEmailStatus;
+  lastError: string | null;
+};
+
+export type WarrantyActivationRequestItemSummary = {
+  id: string;
+  activationFieldId: string | null;
+  positionKey: string;
+  positionLabel: string;
+  productId: string;
+  productName: string;
+  productCode: string;
+  serialNumber: string | null;
+  warrantyId: string;
+  warrantyCode: string;
+  warrantyStatus: WarrantyStatus;
+  status: WarrantyActivationRequestStatus;
+  activatedAt: string | null;
+  certificate: WarrantyCertificateSummary | null;
+};
+
 export type WarrantyActivationRequestSortBy =
   | "requestCode"
   | "warrantyCode"
@@ -100,22 +131,20 @@ export type WarrantyActivationRequestSummary = {
     endDate: string | null;
     durationMonths: number;
   } | null;
-  certificate: {
-    id: string;
-    certificateNumber: string;
-    downloadUrl: string;
-    status: WarrantyCertificateStatus;
-    storageKey: string | null;
-    viewUrl: string;
-    recipientEmail: string | null;
-    generatedAt: string | null;
-    emailedAt: string | null;
-    emailStatus: WarrantyCertificateEmailStatus;
-    lastError: string | null;
-  } | null;
+  certificate: WarrantyCertificateSummary | null;
+  /** Optional while API consumers migrate from singular product fields. */
+  items?: WarrantyActivationRequestItemSummary[];
+  /** Optional while API consumers migrate from singular product fields. */
+  itemCount?: number;
   metadata: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
+};
+
+export type CreateWarrantyActivationRequestItemBody = {
+  activationFieldId?: string;
+  positionKey: string;
+  productId: string;
 };
 
 export type CreateWarrantyActivationRequestBody = {
@@ -173,6 +202,8 @@ export type CreateAdminWarrantyActivationRequestBody = Omit<
   CreateWarrantyActivationRequestBody,
   "warrantyCode"
 > & {
+  /** Optional during the dual-write migration; Task 4 makes items authoritative. */
+  items?: CreateWarrantyActivationRequestItemBody[];
   productId: string;
 };
 
