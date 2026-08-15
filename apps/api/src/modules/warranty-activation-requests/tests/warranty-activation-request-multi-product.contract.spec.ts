@@ -11,6 +11,10 @@ describe('Multi-product warranty activation contracts', () => {
     __dirname,
     '../../../../prisma/migrations/20260815090000_add_category_activation_fields_and_request_items/migration.sql',
   );
+  const rolloutAuditPath = join(
+    __dirname,
+    '../../../../prisma/audits/20260815_multi_product_warranty_activation.sql',
+  );
 
   it('exposes a product-backed category activation field type', () => {
     const sharedFieldTypes = readFileSync(sharedFieldTypesPath, 'utf8');
@@ -48,5 +52,17 @@ describe('Multi-product warranty activation contracts', () => {
       /warranty_activation_request_item_one_open_per_product/,
     );
     expect(migration).toMatch(/WHERE\s+"status" IN \('PENDING', 'APPROVED'\)/);
+  });
+
+  it('ships a rollout audit for backfill coverage and open-product conflicts', () => {
+    expect(existsSync(rolloutAuditPath)).toBe(true);
+
+    const audit = readFileSync(rolloutAuditPath, 'utf8');
+
+    expect(audit).toMatch(/legacy_request_count/);
+    expect(audit).toMatch(/backfilled_request_count/);
+    expect(audit).toMatch(/request_without_item_count/);
+    expect(audit).toMatch(/duplicate_open_product_count/);
+    expect(audit).toMatch(/RAISE EXCEPTION/);
   });
 });
