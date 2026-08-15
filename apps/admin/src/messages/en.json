@@ -1666,6 +1666,8 @@
     "requestInfo": "Request information",
     "reviewInfo": "Review information",
     "createProductDescription": "Select a category, then assign each eligible physical product to its configured activation position.",
+    "selectedActivationProducts": "Selected activation products",
+    "productCount": "{count} products",
     "createCustomerDescription": "Select an existing customer to pull contact information, then complete address details if needed.",
     "createDealerDescription": "Select an existing dealer or enter quick dealer details for this request.",
     "createNoteDescription": "Add an optional note for this activation request.",
