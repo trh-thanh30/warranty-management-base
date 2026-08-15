@@ -206,6 +206,7 @@ export function toWarrantyActivationRequestResponse(
       certificate: toCertificateSummary(
         request.id,
         item.warranty.certificates?.[0] ?? null,
+        item.id,
       ),
     })),
     itemCount: request.items?.length,
@@ -228,16 +229,21 @@ function toCertificateSummary(
     email_status: warranty_certificate_email_status;
     last_error: string | null;
   } | null,
+  itemId?: string,
 ) {
   if (!certificate) return null;
 
   return {
     id: certificate.id,
     certificateNumber: certificate.certificate_number,
-    downloadUrl: `/warranty-activation-requests/${requestId}/certificate/download`,
+    downloadUrl: itemId
+      ? `/warranty-activation-requests/${requestId}/items/${itemId}/certificate/download`
+      : `/warranty-activation-requests/${requestId}/certificate/download`,
     status: certificate.status,
     storageKey: certificate.storage_key,
-    viewUrl: `/warranty-activation-requests/${requestId}/certificate/view`,
+    viewUrl: itemId
+      ? `/warranty-activation-requests/${requestId}/items/${itemId}/certificate/view`
+      : `/warranty-activation-requests/${requestId}/certificate/view`,
     recipientEmail: certificate.recipient_email,
     generatedAt: certificate.generated_at?.toISOString() ?? null,
     emailedAt: certificate.emailed_at?.toISOString() ?? null,

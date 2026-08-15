@@ -2,6 +2,7 @@ import { BadRequestError, NotFoundError } from '@/common/response';
 import { CreateWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-warranty-activation-request.use-case';
 import { GenerateWarrantyActivationRequestCodeUseCase } from '@/modules/warranty-activation-requests/use-cases/generate-warranty-activation-request-code.use-case';
 import { ReviewWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/review-warranty-activation-request.use-case';
+import { ResendWarrantyActivationRequestCertificateEmailUseCase } from '@/modules/warranty-activation-requests/use-cases/resend-warranty-activation-request-certificate-email.use-case';
 import {
   Prisma,
   warranty_activation_request_status,
@@ -33,7 +34,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
   const warrantyActivationRequestNotificationService = {
     requestCreated: jest.fn(),
   };
-  const issueWarrantyCertificateUseCase = {
+  const issueWarrantyCertificatesForRequestUseCase = {
     execute: jest.fn(),
   };
 
@@ -723,6 +724,38 @@ describe('WarrantyActivationRequestsUseCases', () => {
         warranty_code: 'WM-2026-ABC123',
       },
       activated_warranty_id: 'warranty-id',
+      items: [
+        {
+          ...createPersistedItem('windshield', 'product-1'),
+          activated_at: new Date('2026-07-19T04:00:00.000Z'),
+          status: warranty_activation_request_status.ACTIVATED,
+          warranty: {
+            certificates: [
+              {
+                certificate_number: 'CERT-PRODUCT-1',
+                email_status: 'QUEUED',
+                emailed_at: new Date('2026-07-19T04:05:00.000Z'),
+                generated_at: new Date('2026-07-19T04:04:00.000Z'),
+                id: 'certificate-product-1',
+                last_error: null,
+                recipient_email: 'customer@example.com',
+                status: 'GENERATED',
+                storage_key: 'private/product-1.pdf',
+              },
+            ],
+            status: warranty_status.ACTIVE,
+          },
+        },
+        {
+          ...createPersistedItem('rearGlass', 'product-2'),
+          activated_at: new Date('2026-07-19T04:00:00.000Z'),
+          status: warranty_activation_request_status.ACTIVATED,
+          warranty: {
+            certificates: [],
+            status: warranty_status.ACTIVE,
+          },
+        },
+      ],
       reviewed_at: new Date('2026-07-19T04:00:00.000Z'),
       reviewed_by: {
         email: 'admin@example.com',
@@ -737,13 +770,13 @@ describe('WarrantyActivationRequestsUseCases', () => {
       .mockResolvedValueOnce(baseRequest)
       .mockResolvedValueOnce(activatedRequest);
     repository.activateApprovedRequest.mockResolvedValue(activatedRequest);
-    issueWarrantyCertificateUseCase.execute.mockResolvedValue({
-      certificate_number: 'CERT-2026-ABC123',
-      id: 'certificate-id',
+    issueWarrantyCertificatesForRequestUseCase.execute.mockResolvedValue({
+      certificateIds: ['certificate-id'],
+      failures: [],
     });
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
-      issueWarrantyCertificateUseCase as never,
+      issueWarrantyCertificatesForRequestUseCase as never,
     );
 
     const result = await useCase.execute(
@@ -761,10 +794,12 @@ describe('WarrantyActivationRequestsUseCases', () => {
       reviewedById: 'admin-id',
     });
     expect(repository.review).not.toHaveBeenCalled();
-    expect(issueWarrantyCertificateUseCase.execute).toHaveBeenCalledWith({
+    expect(
+      issueWarrantyCertificatesForRequestUseCase.execute,
+    ).toHaveBeenCalledWith({
       recipientEmail: 'customer@example.com',
       requestId: 'request-id',
-      warrantyId: 'warranty-id',
+      warrantyIds: ['warranty-product-1', 'warranty-product-2'],
     });
     expect(result.activatedWarrantyId).toBe('warranty-id');
     expect(result.activatedWarranty).toEqual({
@@ -782,13 +817,21 @@ describe('WarrantyActivationRequestsUseCases', () => {
       username: 'warranty.admin',
     });
     expect(result.status).toBe('ACTIVATED');
+    expect(result.items?.[0]?.certificate).toEqual(
+      expect.objectContaining({
+        downloadUrl:
+          '/warranty-activation-requests/request-id/items/windshield-item-id/certificate/download',
+        viewUrl:
+          '/warranty-activation-requests/request-id/items/windshield-item-id/certificate/view',
+      }),
+    );
   });
 
   it('requires a rejection reason when rejecting a pending request', async () => {
     repository.findById.mockResolvedValue(baseRequest);
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
-      issueWarrantyCertificateUseCase as never,
+      issueWarrantyCertificatesForRequestUseCase as never,
     );
 
     await expect(
@@ -802,7 +845,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     repository.findById.mockResolvedValue(null);
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
-      issueWarrantyCertificateUseCase as never,
+      issueWarrantyCertificatesForRequestUseCase as never,
     );
 
     await expect(
@@ -810,6 +853,47 @@ describe('WarrantyActivationRequestsUseCases', () => {
         status: warranty_activation_request_status.APPROVED,
       }),
     ).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  it('resends the certificate belonging to a specific request item', async () => {
+    const certificate = {
+      certificate_number: 'CERT-ITEM-2',
+      email_status: 'FAILED',
+      emailed_at: null,
+      generated_at: new Date('2026-07-19T04:00:00.000Z'),
+      id: 'certificate-item-2',
+      last_error: 'Email failed',
+      recipient_email: 'customer@example.com',
+      status: 'GENERATED',
+      storage_key: 'private/item-2.pdf',
+    };
+    const request = {
+      ...baseRequest,
+      items: [
+        createPersistedItem('windshield', 'product-1'),
+        {
+          ...createPersistedItem('rearGlass', 'product-2'),
+          warranty: {
+            certificates: [certificate],
+            status: warranty_status.ACTIVE,
+          },
+        },
+      ],
+    };
+    repository.findById.mockResolvedValue(request);
+    const resendWarrantyCertificateEmailUseCase = {
+      execute: jest.fn().mockResolvedValue(undefined),
+    };
+    const useCase = new ResendWarrantyActivationRequestCertificateEmailUseCase(
+      repository as never,
+      resendWarrantyCertificateEmailUseCase as never,
+    );
+
+    await useCase.execute('request-id', 'rearGlass-item-id');
+
+    expect(resendWarrantyCertificateEmailUseCase.execute).toHaveBeenCalledWith(
+      'certificate-item-2',
+    );
   });
 });
 

@@ -18,6 +18,7 @@ export interface EmailJobData {
   template?: string;
   context?: Record<string, unknown>;
   warrantyCertificateId?: string;
+  warrantyCertificateIds?: string[];
   // Idempotency key for deduplication
   idempotencyKey?: string;
 }
@@ -46,6 +47,7 @@ export class EmailProcessor extends WorkerHost {
       context,
       idempotencyKey,
       warrantyCertificateId,
+      warrantyCertificateIds,
     } = job.data;
 
     // Idempotency check - skip if already processed
@@ -94,12 +96,16 @@ export class EmailProcessor extends WorkerHost {
 
       // mark job as completed
       job.updateProgress(100);
-      await this.markWarrantyCertificateEmailSent(warrantyCertificateId);
+      await this.markWarrantyCertificateEmailSent(
+        warrantyCertificateIds ??
+          (warrantyCertificateId ? [warrantyCertificateId] : []),
+      );
 
       this.logger.log(`Email job ${job.id} completed successfully`);
     } catch (error) {
       await this.markWarrantyCertificateEmailFailed(
-        warrantyCertificateId,
+        warrantyCertificateIds ??
+          (warrantyCertificateId ? [warrantyCertificateId] : []),
         error instanceof Error ? error.message : 'Unknown email sending error',
       );
       this.logger.error(`Email job ${job.id} failed: ${error.message}`);
@@ -107,11 +113,11 @@ export class EmailProcessor extends WorkerHost {
     }
   }
 
-  private async markWarrantyCertificateEmailSent(certificateId?: string) {
-    if (!certificateId) return;
+  private async markWarrantyCertificateEmailSent(certificateIds: string[]) {
+    if (certificateIds.length === 0) return;
 
-    await this.prismaService.warrantyCertificate.update({
-      where: { id: certificateId },
+    await this.prismaService.warrantyCertificate.updateMany({
+      where: { id: { in: certificateIds } },
       data: {
         email_status: warranty_certificate_email_status.SENT,
         emailed_at: new Date(),
@@ -121,13 +127,13 @@ export class EmailProcessor extends WorkerHost {
   }
 
   private async markWarrantyCertificateEmailFailed(
-    certificateId: string | undefined,
+    certificateIds: string[],
     message: string,
   ) {
-    if (!certificateId) return;
+    if (certificateIds.length === 0) return;
 
-    await this.prismaService.warrantyCertificate.update({
-      where: { id: certificateId },
+    await this.prismaService.warrantyCertificate.updateMany({
+      where: { id: { in: certificateIds } },
       data: {
         email_status: warranty_certificate_email_status.FAILED,
         last_error: message,

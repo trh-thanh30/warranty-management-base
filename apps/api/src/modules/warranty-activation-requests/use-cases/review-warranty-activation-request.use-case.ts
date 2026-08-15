@@ -3,7 +3,7 @@ import { ReviewWarrantyActivationRequestDto } from '@/modules/warranty-activatio
 import { toWarrantyActivationRequestResponse } from '@/modules/warranty-activation-requests/mappers/warranty-activation-request.mapper';
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
 import { optionalTrim } from '@/modules/warranty-activation-requests/utils/warranty-activation-request-normalization.utils';
-import { IssueWarrantyCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-certificate.use-case';
+import { IssueWarrantyCertificatesForRequestUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-certificates-for-request.use-case';
 import { Injectable } from '@nestjs/common';
 import { warranty_activation_request_status } from '@prisma/client';
 
@@ -11,7 +11,7 @@ import { warranty_activation_request_status } from '@prisma/client';
 export class ReviewWarrantyActivationRequestUseCase {
   constructor(
     private readonly warrantyActivationRequestsRepository: WarrantyActivationRequestsRepository,
-    private readonly issueWarrantyCertificateUseCase: IssueWarrantyCertificateUseCase,
+    private readonly issueWarrantyCertificatesForRequestUseCase: IssueWarrantyCertificatesForRequestUseCase,
   ) {}
 
   async execute(
@@ -58,11 +58,17 @@ export class ReviewWarrantyActivationRequestUseCase {
         throw new NotFoundError('Warranty activation request target not found');
       }
 
-      if (activatedRequest.activated_warranty_id) {
-        await this.issueWarrantyCertificateUseCase.execute({
+      const warrantyIds =
+        activatedRequest.items?.map((item) => item.warranty_id) ?? [];
+      if (warrantyIds.length === 0 && activatedRequest.activated_warranty_id) {
+        warrantyIds.push(activatedRequest.activated_warranty_id);
+      }
+
+      if (warrantyIds.length > 0) {
+        await this.issueWarrantyCertificatesForRequestUseCase.execute({
           recipientEmail: activatedRequest.customer_email ?? undefined,
           requestId: activatedRequest.id,
-          warrantyId: activatedRequest.activated_warranty_id,
+          warrantyIds,
         });
       }
 
