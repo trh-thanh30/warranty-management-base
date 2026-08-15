@@ -10,6 +10,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { filterComboboxItem } from "./combobox.utils";
 
 type ComboboxContextValue = {
   disabled?: boolean;
@@ -49,7 +50,10 @@ export function Combobox({
   return (
     <ComboboxContext.Provider value={contextValue}>
       <Popover open={open} onOpenChange={setOpen}>
-        <CommandPrimitive shouldFilter={shouldFilter}>
+        <CommandPrimitive
+          filter={filterComboboxItem}
+          shouldFilter={shouldFilter}
+        >
           {children}
         </CommandPrimitive>
       </Popover>
@@ -179,17 +183,22 @@ export function ComboboxLoading({ label }: { label: string }) {
 
 export function ComboboxItem({
   children,
+  keywords,
   value,
 }: {
   children: ReactNode;
+  keywords?: string[];
   value: string;
 }) {
   const combobox = useComboboxContext();
   const selected = combobox.value === value;
+  const searchKeywords =
+    typeof children === "string" ? [children, ...(keywords ?? [])] : keywords;
 
   return (
     <CommandPrimitive.Item
       className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm outline-none aria-selected:bg-slate-100 aria-selected:text-slate-950 data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 dark:aria-selected:bg-slate-900 dark:aria-selected:text-slate-50"
+      keywords={searchKeywords}
       onSelect={() => {
         combobox.onValueChange(value);
         combobox.onOpenChange(false);
