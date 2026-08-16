@@ -61,6 +61,7 @@ describe('ProductTemplate write use cases', () => {
     expect(slugGenerator.execute).toHaveBeenCalledWith('PPF X10');
     expect(repository.create).toHaveBeenCalledWith(
       expect.objectContaining({
+        default_warranty_duration_months: null,
         sku: 'PPF-X10',
         slug: 'ppf-x10',
       }),

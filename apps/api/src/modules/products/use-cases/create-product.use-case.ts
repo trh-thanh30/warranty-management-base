@@ -75,7 +75,7 @@ export class CreateProductUseCase {
             create: {
               warranty_code: warrantyCode,
               duration_months:
-                selectedTemplate.default_warranty_duration_months,
+                selectedTemplate.default_warranty_duration_months ?? 36,
               terms: selectedTemplate.default_warranty_terms,
               start_date: null,
               end_date: null,

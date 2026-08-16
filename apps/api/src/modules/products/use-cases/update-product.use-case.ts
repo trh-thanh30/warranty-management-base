@@ -124,7 +124,8 @@ export class UpdateProductUseCase {
               warranty_code: nextWarrantyCode,
               duration_months:
                 replacementTemplate?.default_warranty_duration_months ??
-                existingProduct.template.default_warranty_duration_months,
+                existingProduct.template.default_warranty_duration_months ??
+                36,
               terms: replacementTemplate
                 ? replacementTemplate.default_warranty_terms
                 : existingProduct.template.default_warranty_terms,

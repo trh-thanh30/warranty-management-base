@@ -471,7 +471,7 @@ model ProductTemplate {
   model                            String?
   model_year                       Int?
   description                      String?
-  default_warranty_duration_months Int       @default(36)
+  default_warranty_duration_months Int?
   default_warranty_terms           String?
   metadata                         Json?
   is_active                        Boolean   @default(true)

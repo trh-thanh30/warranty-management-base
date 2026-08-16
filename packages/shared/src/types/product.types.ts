@@ -53,7 +53,7 @@ export type ProductTemplateSummary = {
   model: string | null;
   modelYear: number | null;
   description: string | null;
-  defaultWarrantyDurationMonths: number;
+  defaultWarrantyDurationMonths: number | null;
   defaultWarrantyTerms: string | null;
   metadata: ProductTemplateMetadata | null;
   isActive: boolean;
@@ -80,7 +80,7 @@ export type CreateProductTemplateBody = {
   model?: string;
   modelYear?: number;
   description?: string;
-  defaultWarrantyDurationMonths?: number;
+  defaultWarrantyDurationMonths?: number | null;
   defaultWarrantyTerms?: string;
   metadata?: ProductTemplateMetadataInput;
   isPublished?: boolean;
@@ -97,7 +97,7 @@ export type UpdateProductTemplateBody = {
   model?: string | null;
   modelYear?: number | null;
   description?: string | null;
-  defaultWarrantyDurationMonths?: number;
+  defaultWarrantyDurationMonths?: number | null;
   defaultWarrantyTerms?: string | null;
   metadata?: ProductTemplateMetadataInput | null;
   isActive?: boolean;
