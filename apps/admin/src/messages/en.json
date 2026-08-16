@@ -1357,6 +1357,7 @@
     "shortDescriptionDescription": "The summary displayed beside the cover image on the public product detail page.",
     "shortDescriptionPlaceholder": "Enter a concise product summary...",
     "defaultWarrantyDuration": "Default warranty duration",
+    "defaultWarrantyDurationDescription": "Optional. This value only pre-fills new products and can be overridden for each product.",
     "defaultWarrantyDurationPlaceholder": "Example: 36",
     "defaultWarrantyTerms": "Default warranty terms",
     "defaultWarrantyTermsPlaceholder": "Enter coverage, conditions, and exclusions...",

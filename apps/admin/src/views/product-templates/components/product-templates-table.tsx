@@ -92,9 +92,11 @@ export function ProductTemplatesTable({
                   {template.categoryRef?.name ?? "-"}
                 </TableCell>
                 <TableCell>
-                  {t("durationValue", {
-                    count: template.defaultWarrantyDurationMonths,
-                  })}
+                  {template.defaultWarrantyDurationMonths === null
+                    ? "-"
+                    : t("durationValue", {
+                        count: template.defaultWarrantyDurationMonths,
+                      })}
                 </TableCell>
                 <TableCell>{template.productCount}</TableCell>
                 <TableCell>

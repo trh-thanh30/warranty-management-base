@@ -1357,6 +1357,7 @@
     "shortDescriptionDescription": "Nội dung tóm tắt hiển thị cạnh ảnh đại diện trên trang chi tiết sản phẩm.",
     "shortDescriptionPlaceholder": "Nhập mô tả ngắn giúp khách hàng nhận biết nhanh sản phẩm...",
     "defaultWarrantyDuration": "Thời hạn bảo hành mặc định",
+    "defaultWarrantyDurationDescription": "Không bắt buộc. Giá trị này chỉ dùng để điền sẵn khi tạo sản phẩm mới và có thể chỉnh riêng trên từng sản phẩm.",
     "defaultWarrantyDurationPlaceholder": "Ví dụ: 36",
     "defaultWarrantyTerms": "Điều khoản bảo hành mặc định",
     "defaultWarrantyTermsPlaceholder": "Nhập điều kiện, phạm vi và các trường hợp không được bảo hành...",
