@@ -67,6 +67,7 @@ export function toCreateProductBody(
     serialNumber: toOptionalValue(values.serialNumber),
     status: values.status,
     templateId: values.templateId,
+    warrantyDurationMonths: values.warrantyDurationMonths,
   };
 }
 
@@ -86,6 +87,7 @@ export function toUpdateProductBody(
     status: values.status,
     templateId: values.templateId,
     warrantyCode: values.warrantyCode?.trim() ?? "",
+    warrantyDurationMonths: values.warrantyDurationMonths,
   };
 }
 

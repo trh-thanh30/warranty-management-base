@@ -1097,6 +1097,10 @@
     "selectPurchaseDate": "Select purchase date",
     "selectActivatedAt": "Select activation date",
     "durationMonths": "Warranty duration",
+    "warrantyDurationPlaceholder": "Example: 36",
+    "warrantyDurationCreateDescription": "Pre-filled from the template when available and independently editable for this product.",
+    "warrantyDurationDraftDescription": "Editable while the warranty remains in draft status.",
+    "warrantyDurationLockedDescription": "The warranty is no longer a draft. Adjust it from the Warranty screen and provide a reason.",
     "warrantyTerms": "Warranty terms",
     "metadata": "Metadata",
     "metadataPlaceholder": "{\n  \"source\": \"admin\"\n}",
@@ -1167,6 +1171,7 @@
     "warrantyCodeInvalid": "Warranty code must be 6 to 64 letters, numbers, or dashes.",
     "warrantyCodeNotDraft": "The warranty code cannot be changed after activation.",
     "warrantyCodeOpenRequest": "The warranty code cannot be changed while an activation request is open.",
+    "warrantyDurationNotDraft": "Warranty duration can only be changed while the warranty is in draft status.",
     "warrantyCodeRequired": "Enter the warranty code or enable auto-generation.",
     "warrantyTermsLength": "Warranty terms must be 2000 characters or fewer.",
     "categories": {

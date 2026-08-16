@@ -103,7 +103,17 @@ export function useProductForm({
         shouldValidate: true,
       },
     );
-  }, [selectedCategoryId, selectedTemplate, setValue]);
+    if (creating) {
+      setValue(
+        "warrantyDurationMonths",
+        selectedTemplate.defaultWarrantyDurationMonths ?? "",
+        {
+          shouldDirty: true,
+          shouldValidate: true,
+        },
+      );
+    }
+  }, [creating, selectedCategoryId, selectedTemplate, setValue]);
 
   async function submit(values: ProductFormValues) {
     try {
@@ -165,6 +175,10 @@ function getDefaultValues(
     status: product?.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
     templateId: product?.templateId ?? template?.id ?? "",
     warrantyCode: product?.warrantyCode ?? "",
+    warrantyDurationMonths:
+      product?.warranty?.durationMonths ??
+      template?.defaultWarrantyDurationMonths ??
+      "",
   };
 }
 
@@ -190,6 +204,14 @@ function handleProductSaveError(
     "Warranty code cannot be changed while an activation request is open": [
       "warrantyCode",
       "warrantyCodeOpenRequest",
+    ],
+    "Warranty duration is required": [
+      "warrantyDurationMonths",
+      "durationMonthsRange",
+    ],
+    "Warranty duration can only be changed while warranty is draft": [
+      "warrantyDurationMonths",
+      "warrantyDurationNotDraft",
     ],
   } as const;
   const match = messages[error.message as keyof typeof messages];

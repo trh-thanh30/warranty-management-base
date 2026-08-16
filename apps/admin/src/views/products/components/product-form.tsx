@@ -42,6 +42,8 @@ export function ProductForm({
   });
   const categories = form.categoriesQuery.data?.items ?? [];
   const isSubmitting = form.formState.isSubmitting;
+  const canEditWarrantyDuration =
+    !product?.warranty || product.warranty.status === "DRAFT";
 
   return (
     <form className="space-y-6" noValidate onSubmit={form.onSubmit}>
@@ -242,6 +244,35 @@ export function ProductForm({
       <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
         <div className="w-full min-w-0">
           <Field
+            description={
+              !product
+                ? t("warrantyDurationCreateDescription")
+                : canEditWarrantyDuration
+                  ? t("warrantyDurationDraftDescription")
+                  : t("warrantyDurationLockedDescription")
+            }
+            error={formatFieldError(
+              form.formState.errors.warrantyDurationMonths?.message,
+              t,
+            )}
+            id="product-warranty-duration"
+            label={t("durationMonths")}
+          >
+            <Input
+              className="w-full"
+              disabled={isSubmitting || !canEditWarrantyDuration}
+              id="product-warranty-duration"
+              inputMode="numeric"
+              min={1}
+              placeholder={t("warrantyDurationPlaceholder")}
+              step={1}
+              type="number"
+              {...form.register("warrantyDurationMonths")}
+            />
+          </Field>
+        </div>
+        <div className="w-full min-w-0">
+          <Field
             error={formatFieldError(
               form.formState.errors.installationPosition?.message,
               t,
@@ -436,6 +467,7 @@ const formatFieldError = createFieldErrorFormatter(
     "duplicateProductCode",
     "duplicateSerialNumber",
     "duplicateWarrantyCode",
+    "durationMonthsRange",
     "installationPositionLength",
     "productCodeLength",
     "productCodeRequired",
@@ -445,5 +477,6 @@ const formatFieldError = createFieldErrorFormatter(
     "warrantyCodeInvalid",
     "warrantyCodeNotDraft",
     "warrantyCodeOpenRequest",
+    "warrantyDurationNotDraft",
   ]),
 );

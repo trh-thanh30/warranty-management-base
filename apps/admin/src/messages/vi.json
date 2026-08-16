@@ -1097,6 +1097,10 @@
     "selectPurchaseDate": "Chọn ngày mua",
     "selectActivatedAt": "Chọn ngày kích hoạt",
     "durationMonths": "Thời hạn bảo hành",
+    "warrantyDurationPlaceholder": "Ví dụ: 36",
+    "warrantyDurationCreateDescription": "Được điền sẵn từ mẫu nếu có và có thể chỉnh riêng cho sản phẩm này.",
+    "warrantyDurationDraftDescription": "Có thể chỉnh khi bảo hành còn ở trạng thái nháp.",
+    "warrantyDurationLockedDescription": "Bảo hành đã rời trạng thái nháp. Hãy điều chỉnh tại màn hình Bảo hành và nhập lý do.",
     "warrantyTerms": "Điều khoản bảo hành",
     "metadata": "Metadata",
     "metadataPlaceholder": "{\n  \"source\": \"admin\"\n}",
@@ -1167,6 +1171,7 @@
     "warrantyCodeInvalid": "Mã bảo hành phải từ 6 đến 64 ký tự chữ, số hoặc dấu gạch ngang.",
     "warrantyCodeNotDraft": "Không thể đổi mã bảo hành sau khi đã kích hoạt.",
     "warrantyCodeOpenRequest": "Không thể đổi mã bảo hành khi đang có yêu cầu kích hoạt.",
+    "warrantyDurationNotDraft": "Chỉ có thể đổi thời hạn khi bảo hành còn ở trạng thái nháp.",
     "warrantyCodeRequired": "Nhập mã bảo hành hoặc bật tự sinh mã.",
     "warrantyTermsLength": "Điều khoản bảo hành không được quá 2000 ký tự.",
     "categories": {

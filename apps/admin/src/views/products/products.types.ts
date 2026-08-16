@@ -6,6 +6,12 @@ export type ProductStatusFilter = (typeof PRODUCT_STATUS_FILTERS)[number];
 export type ProductDirectorySortBy = ProductSortBy;
 
 const optionalText = z.string().trim();
+const requiredWarrantyDuration = z.preprocess(
+  (value) =>
+    value === "" || value === null || value === undefined ? undefined : value,
+  z.coerce.number().int("durationMonthsRange").min(1, "durationMonthsRange"),
+);
+
 export const productFormSchema = z.object({
   categoryId: optionalText.min(1, "categoryRequired"),
   displayName: optionalText.max(160, "displayNameLength"),
@@ -14,6 +20,7 @@ export const productFormSchema = z.object({
   serialNumber: optionalText.max(64, "serialNumberLength"),
   status: z.enum(["ACTIVE", "INACTIVE"]),
   templateId: optionalText.min(1, "templateRequired"),
+  warrantyDurationMonths: requiredWarrantyDuration,
   warrantyCode: optionalText
     .max(64, "warrantyCodeInvalid")
     .refine(

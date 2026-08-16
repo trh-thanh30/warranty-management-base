@@ -49,6 +49,7 @@ test("creates an inventory-only product payload", () => {
       serialNumber: " VIN-001 ",
       status: "ACTIVE",
       templateId: "template-id",
+      warrantyDurationMonths: 180,
     }),
     {
       categoryId: "category-id",
@@ -59,6 +60,7 @@ test("creates an inventory-only product payload", () => {
       serialNumber: "VIN-001",
       status: "ACTIVE",
       templateId: "template-id",
+      warrantyDurationMonths: 180,
     },
   );
 });
@@ -73,6 +75,7 @@ test("sends an explicitly entered product code", () => {
       serialNumber: "",
       status: "ACTIVE",
       templateId: "template-id",
+      warrantyDurationMonths: 24,
     }).productCode,
     "CUSTOM-001",
   );
@@ -88,6 +91,7 @@ test("sends an explicitly entered warranty code when creating a product", () => 
       serialNumber: "",
       status: "ACTIVE",
       templateId: "template-id",
+      warrantyDurationMonths: 24,
       warrantyCode: " wm-2026-manual1 ",
     }).warrantyCode,
     "WM-2026-MANUAL1",
@@ -106,6 +110,7 @@ test("updates only physical product fields and preserves unrelated metadata", ()
         status: "INACTIVE",
         templateId: "template-id",
         warrantyCode: " wm-2026-new001 ",
+        warrantyDurationMonths: 60,
       },
       { source: "import", installationPosition: "Old" },
     ),
@@ -121,6 +126,7 @@ test("updates only physical product fields and preserves unrelated metadata", ()
       status: "INACTIVE",
       templateId: "template-id",
       warrantyCode: "wm-2026-new001",
+      warrantyDurationMonths: 60,
     },
   );
 });
@@ -134,6 +140,7 @@ test("requires a product code only when editing", () => {
     serialNumber: "",
     status: "ACTIVE" as const,
     templateId: "template-id",
+    warrantyDurationMonths: 24,
   };
 
   assert.equal(productFormSchema.safeParse(values).success, true);
@@ -149,6 +156,7 @@ test("allows a blank warranty code but rejects an invalid non-empty code", () =>
     serialNumber: "",
     status: "ACTIVE" as const,
     templateId: "template-id",
+    warrantyDurationMonths: 24,
   };
 
   assert.equal(
@@ -169,6 +177,33 @@ test("allows a blank warranty code but rejects an invalid non-empty code", () =>
     productFormSchema.safeParse({
       ...baseValues,
       warrantyCode: "wm-2026-new001",
+    }).success,
+    true,
+  );
+});
+
+test("requires an individual warranty duration of at least one month", () => {
+  const values = {
+    categoryId: "category-id",
+    displayName: "",
+    installationPosition: "",
+    productCode: "",
+    serialNumber: "",
+    status: "ACTIVE" as const,
+    templateId: "template-id",
+  };
+
+  assert.equal(
+    productFormSchema.safeParse({
+      ...values,
+      warrantyDurationMonths: "",
+    }).success,
+    false,
+  );
+  assert.equal(
+    productFormSchema.safeParse({
+      ...values,
+      warrantyDurationMonths: 180,
     }).success,
     true,
   );
