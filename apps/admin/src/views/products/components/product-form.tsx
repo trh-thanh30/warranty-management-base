@@ -46,7 +46,7 @@ export function ProductForm({
     !product?.warranty || product.warranty.status === "DRAFT";
 
   return (
-    <form className="space-y-6" noValidate onSubmit={form.onSubmit}>
+    <form className="min-w-0 space-y-6" noValidate onSubmit={form.onSubmit}>
       {form.formState.errors.root?.message ? (
         <div
           className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300"
@@ -241,7 +241,7 @@ export function ProductForm({
         </Field>
       </div>
 
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+      <div className="grid min-w-0 gap-5 md:grid-cols-2 xl:grid-cols-3">
         <div className="w-full min-w-0">
           <Field
             description={
