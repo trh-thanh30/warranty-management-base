@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { useForm, useWatch, type UseFormSetError } from "react-hook-form";
 import {
-  HttpClientError,
   type ProductResponse,
   type ProductTemplateSummary,
 } from "@repo/shared";
@@ -22,6 +21,7 @@ import {
 import { useCreateProduct, useUpdateProduct } from "./use-products";
 import {
   getProductInstallationPosition,
+  getProductSaveErrorMatch,
   resolveProductCategoryId,
   toCreateProductBody,
   toUpdateProductBody,
@@ -187,34 +187,7 @@ function handleProductSaveError(
   setError: UseFormSetError<ProductFormValues>,
   t: (key: string) => string,
 ) {
-  if (!(error instanceof HttpClientError)) return null;
-
-  const messages = {
-    "Product code already exists": ["productCode", "duplicateProductCode"],
-    "Product code is required": ["productCode", "productCodeRequired"],
-    "Product category not found": ["categoryId", "categoryNotFound"],
-    "Product template not found": ["templateId", "templateNotFound"],
-    "Serial number already exists": ["serialNumber", "duplicateSerialNumber"],
-    "Warranty code already exists": ["warrantyCode", "duplicateWarrantyCode"],
-    "Warranty code is invalid": ["warrantyCode", "warrantyCodeInvalid"],
-    "Warranty code can only be changed while warranty is draft": [
-      "warrantyCode",
-      "warrantyCodeNotDraft",
-    ],
-    "Warranty code cannot be changed while an activation request is open": [
-      "warrantyCode",
-      "warrantyCodeOpenRequest",
-    ],
-    "Warranty duration is required": [
-      "warrantyDurationMonths",
-      "durationMonthsRange",
-    ],
-    "Warranty duration can only be changed while warranty is draft": [
-      "warrantyDurationMonths",
-      "warrantyDurationNotDraft",
-    ],
-  } as const;
-  const match = messages[error.message as keyof typeof messages];
+  const match = getProductSaveErrorMatch(error);
   if (!match) return null;
 
   const [field, translationKey] = match;

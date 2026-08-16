@@ -38,6 +38,8 @@
     "WARRANTY_CODE_NOT_DRAFT": "Chỉ được đổi mã bảo hành khi bảo hành đang ở trạng thái nháp.",
     "WARRANTY_CODE_NOT_FOUND": "Không tìm thấy mã bảo hành này trong hệ thống.",
     "WARRANTY_CODE_OPEN_REQUEST": "Không thể đổi mã bảo hành khi đang có yêu cầu kích hoạt mở.",
+    "WARRANTY_DURATION_NOT_DRAFT": "Chỉ có thể đổi thời hạn khi bảo hành đang ở trạng thái nháp.",
+    "WARRANTY_DURATION_REQUIRED": "Thời hạn bảo hành của sản phẩm là bắt buộc.",
     "WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION": "Mã bảo hành này không đủ điều kiện tạo yêu cầu kích hoạt.",
     "WARRANTY_NOT_ACTIVE": "Bảo hành này chưa hoạt động.",
     "WARRANTY_NOT_STARTED": "Bảo hành này chưa bắt đầu.",

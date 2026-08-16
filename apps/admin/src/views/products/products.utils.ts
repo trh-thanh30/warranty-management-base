@@ -1,4 +1,5 @@
 import {
+  HttpClientError,
   type CreateProductBody,
   type ProductResponse,
   type UpdateProductBody,
@@ -93,6 +94,60 @@ export function toUpdateProductBody(
 
 export function toProductActiveStatus(checked: boolean) {
   return checked ? ("ACTIVE" as const) : ("INACTIVE" as const);
+}
+
+export function getProductSaveErrorMatch(error: unknown) {
+  if (!(error instanceof HttpClientError)) return null;
+
+  const detailCode = getApiErrorDetailCode(error);
+  const detailMessages = {
+    WARRANTY_DURATION_NOT_DRAFT: [
+      "warrantyDurationMonths",
+      "warrantyDurationNotDraft",
+    ],
+    WARRANTY_DURATION_REQUIRED: [
+      "warrantyDurationMonths",
+      "durationMonthsRange",
+    ],
+  } as const;
+  const messages = {
+    "Product code already exists": ["productCode", "duplicateProductCode"],
+    "Product code is required": ["productCode", "productCodeRequired"],
+    "Product category not found": ["categoryId", "categoryNotFound"],
+    "Product template not found": ["templateId", "templateNotFound"],
+    "Serial number already exists": ["serialNumber", "duplicateSerialNumber"],
+    "Warranty code already exists": ["warrantyCode", "duplicateWarrantyCode"],
+    "Warranty code is invalid": ["warrantyCode", "warrantyCodeInvalid"],
+    "Warranty code can only be changed while warranty is draft": [
+      "warrantyCode",
+      "warrantyCodeNotDraft",
+    ],
+    "Warranty code cannot be changed while an activation request is open": [
+      "warrantyCode",
+      "warrantyCodeOpenRequest",
+    ],
+    "Warranty duration is required": [
+      "warrantyDurationMonths",
+      "durationMonthsRange",
+    ],
+    "Warranty duration can only be changed while warranty is draft": [
+      "warrantyDurationMonths",
+      "warrantyDurationNotDraft",
+    ],
+  } as const;
+
+  return (
+    (detailCode
+      ? detailMessages[detailCode as keyof typeof detailMessages]
+      : undefined) ?? messages[error.message as keyof typeof messages]
+  );
+}
+
+function getApiErrorDetailCode(error: HttpClientError) {
+  if (!error.details || typeof error.details !== "object") return undefined;
+
+  const code = (error.details as { code?: unknown }).code;
+  return typeof code === "string" ? code : undefined;
 }
 
 export function resolveProductCategoryId({

@@ -38,6 +38,8 @@
     "WARRANTY_CODE_NOT_DRAFT": "The warranty code can only be changed while the warranty is in draft status.",
     "WARRANTY_CODE_NOT_FOUND": "This warranty code was not found in the system.",
     "WARRANTY_CODE_OPEN_REQUEST": "The warranty code cannot be changed while an activation request is open.",
+    "WARRANTY_DURATION_NOT_DRAFT": "Warranty duration can only be changed while the warranty is in draft status.",
+    "WARRANTY_DURATION_REQUIRED": "A product warranty duration is required.",
     "WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION": "This warranty code is not eligible for an activation request.",
     "WARRANTY_NOT_ACTIVE": "This warranty is not active.",
     "WARRANTY_NOT_STARTED": "This warranty has not started yet.",

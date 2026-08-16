@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { HttpClientError } from "@repo/shared";
 import {
+  getProductSaveErrorMatch,
   resolveProductCategoryId,
   toCreateProductBody,
   toProductActiveStatus,
@@ -207,6 +209,21 @@ test("requires an individual warranty duration of at least one month", () => {
     }).success,
     true,
   );
+});
+
+test("maps stable warranty duration detail codes to the duration field", () => {
+  const error = new HttpClientError({
+    code: "BAD_REQUEST",
+    details: { code: "WARRANTY_DURATION_NOT_DRAFT" },
+    isNetworkError: false,
+    message: "Backend wording may change",
+    status: 400,
+  });
+
+  assert.deepEqual(getProductSaveErrorMatch(error), [
+    "warrantyDurationMonths",
+    "warrantyDurationNotDraft",
+  ]);
 });
 
 test("requires a valid manual warranty code when auto generation is disabled", () => {
