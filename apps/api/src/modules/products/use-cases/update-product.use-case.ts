@@ -79,6 +79,18 @@ export class UpdateProductUseCase {
     }
 
     const currentWarrantyCode = existingProduct.warranty?.warranty_code ?? null;
+    if (
+      dto.warrantyDurationMonths !== undefined &&
+      existingProduct.warranty &&
+      existingProduct.warranty.status !== warranty_status.DRAFT
+    ) {
+      throw new BadRequestError(
+        'Warranty duration can only be changed while warranty is draft',
+        'BAD_REQUEST',
+        { code: 'WARRANTY_DURATION_NOT_DRAFT' },
+      );
+    }
+
     const requestedWarrantyCode =
       dto.warrantyCode?.trim().toUpperCase() || null;
     const isWarrantyCodeReplacement =
@@ -116,24 +128,44 @@ export class UpdateProductUseCase {
     }
 
     let warranty: Prisma.ProductUpdateInput['warranty'];
-    if (nextWarrantyCode) {
-      warranty = existingProduct.warranty
-        ? { update: { warranty_code: nextWarrantyCode } }
-        : {
-            create: {
-              warranty_code: nextWarrantyCode,
-              duration_months:
-                replacementTemplate?.default_warranty_duration_months ??
-                existingProduct.template.default_warranty_duration_months ??
-                36,
-              terms: replacementTemplate
-                ? replacementTemplate.default_warranty_terms
-                : existingProduct.template.default_warranty_terms,
-              start_date: null,
-              end_date: null,
-              status: warranty_status.DRAFT,
-            },
-          };
+    if (existingProduct.warranty) {
+      const warrantyUpdate: {
+        warranty_code?: string;
+        duration_months?: number;
+      } = {};
+      if (nextWarrantyCode) {
+        warrantyUpdate.warranty_code = nextWarrantyCode;
+      }
+      if (dto.warrantyDurationMonths !== undefined) {
+        warrantyUpdate.duration_months = dto.warrantyDurationMonths;
+      }
+      if (Object.keys(warrantyUpdate).length > 0) {
+        warranty = { update: warrantyUpdate };
+      }
+    } else if (nextWarrantyCode) {
+      const durationMonths =
+        dto.warrantyDurationMonths ??
+        replacementTemplate?.default_warranty_duration_months ??
+        existingProduct.template.default_warranty_duration_months;
+      if (durationMonths === null || durationMonths === undefined) {
+        throw new BadRequestError(
+          'Warranty duration is required',
+          'BAD_REQUEST',
+          { code: 'WARRANTY_DURATION_REQUIRED' },
+        );
+      }
+      warranty = {
+        create: {
+          warranty_code: nextWarrantyCode,
+          duration_months: durationMonths,
+          terms: replacementTemplate
+            ? replacementTemplate.default_warranty_terms
+            : existingProduct.template.default_warranty_terms,
+          start_date: null,
+          end_date: null,
+          status: warranty_status.DRAFT,
+        },
+      };
     }
 
     const product = await this.productsRepository.update(id, {

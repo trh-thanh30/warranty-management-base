@@ -190,6 +190,7 @@ export type ListProductsQuery = PaginationQuery & {
 
 export type CreateProductBody = {
   templateId: string;
+  warrantyDurationMonths: number;
   productCode?: string;
   warrantyCode?: string;
   categoryId?: string;
@@ -208,6 +209,7 @@ export type UpdateProductBody = {
   templateId?: string;
   metadata?: Record<string, unknown> | null;
   warrantyCode?: string;
+  warrantyDurationMonths?: number;
 };
 
 export type PublicProductSummary = {

@@ -1,4 +1,8 @@
-import { ConflictError, NotFoundError } from '@/common/response';
+import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+} from '@/common/response';
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { AssetsService } from '@/modules/assets/assets.service';
 import { ProductTemplatesRepository } from '@/modules/product-templates/repository/product-templates.repository';
@@ -22,6 +26,17 @@ export class CreateProductUseCase {
   ) {}
 
   async execute(dto: CreateProductDto) {
+    if (
+      !Number.isInteger(dto.warrantyDurationMonths) ||
+      dto.warrantyDurationMonths < 1
+    ) {
+      throw new BadRequestError(
+        'Warranty duration is required',
+        'BAD_REQUEST',
+        { code: 'WARRANTY_DURATION_REQUIRED' },
+      );
+    }
+
     const selectedTemplate =
       await this.productTemplatesRepository.findActiveById(dto.templateId);
     if (!selectedTemplate) {
@@ -74,8 +89,7 @@ export class CreateProductUseCase {
           warranty: {
             create: {
               warranty_code: warrantyCode,
-              duration_months:
-                selectedTemplate.default_warranty_duration_months ?? 36,
+              duration_months: dto.warrantyDurationMonths,
               terms: selectedTemplate.default_warranty_terms,
               start_date: null,
               end_date: null,
