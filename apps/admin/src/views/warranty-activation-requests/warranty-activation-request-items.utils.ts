@@ -18,3 +18,12 @@ export function getActivationRequestProductTitle(
   if (count > 1) return formatCount(count);
   return request.items?.[0]?.productName ?? request.productName ?? "-";
 }
+
+export function getActivationRequestWarrantyCodeLabel(
+  request: WarrantyActivationRequestSummary,
+  formatCount: (count: number) => string,
+) {
+  const items = request.items ?? [];
+  if (items.length > 1) return formatCount(items.length);
+  return items[0]?.warrantyCode ?? request.warrantyCode ?? "-";
+}

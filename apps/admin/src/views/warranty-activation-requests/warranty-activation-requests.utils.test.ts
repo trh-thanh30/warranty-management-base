@@ -280,6 +280,29 @@ test("activation request list summarizes one or many physical products", () => {
   );
 });
 
+test("activation request list shows a code count instead of the first shared code", () => {
+  const multiRequest = {
+    warrantyCode: "WM-FIRST",
+    items: [{ warrantyCode: "WM-FIRST" }, { warrantyCode: "WM-SECOND" }],
+  } as import("@repo/shared").WarrantyActivationRequestSummary;
+  const singleRequest = {
+    warrantyCode: "WM-ONE",
+    items: [{ warrantyCode: "WM-ONE" }],
+  } as import("@repo/shared").WarrantyActivationRequestSummary;
+
+  assert.equal(
+    getActivationRequestWarrantyCodeLabel(
+      multiRequest,
+      (count) => `${count} warranty codes`,
+    ),
+    "2 warranty codes",
+  );
+  assert.equal(
+    getActivationRequestWarrantyCodeLabel(singleRequest, () => "unused"),
+    "WM-ONE",
+  );
+});
+
 test("activation request helpers translate known validation and API codes", () => {
   const translate = (key: string) => `translated:${key}`;
   const error = new HttpClientError({

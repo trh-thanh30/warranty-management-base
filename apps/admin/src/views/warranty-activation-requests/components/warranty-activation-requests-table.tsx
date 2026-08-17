@@ -40,7 +40,10 @@ import {
   formatActivationRequestProduct,
 } from "../warranty-activation-requests.utils";
 import { WarrantyActivationRequestStatusBadge } from "./warranty-activation-request-status-badge";
-import { getActivationRequestProductTitle } from "../warranty-activation-request-items.utils";
+import {
+  getActivationRequestProductTitle,
+  getActivationRequestWarrantyCodeLabel,
+} from "../warranty-activation-request-items.utils";
 
 type WarrantyActivationRequestsTableProps = {
   items: WarrantyActivationRequestSummary[];
@@ -167,7 +170,11 @@ function WarrantyActivationRequestTableRow({
         </Link>
       </TableCell>
       <TableCell>
-        <div className="font-mono text-xs">{request.warrantyCode}</div>
+        <div className="font-mono text-xs">
+          {getActivationRequestWarrantyCodeLabel(request, (count) =>
+            t("warrantyCodeCount", { count }),
+          )}
+        </div>
       </TableCell>
       <TableCell>
         <div className="max-w-[18rem]">
@@ -259,7 +266,12 @@ function WarrantyActivationRequestMobileCard({
       </dl>
 
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-        <MobileField label={t("warrantyCode")} value={request.warrantyCode} />
+        <MobileField
+          label={t("warrantyCode")}
+          value={getActivationRequestWarrantyCodeLabel(request, (count) =>
+            t("warrantyCodeCount", { count }),
+          )}
+        />
         <MobileField
           label={t("createdAt")}
           value={formatActivationRequestDate(request.createdAt, locale)}

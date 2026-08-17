@@ -1669,6 +1669,7 @@
     "selectedActivationProducts": "Selected activation products",
     "productCount": "{count} products",
     "activationProducts": "Activation products by position",
+    "warrantyCodeCount": "{count, plural, one {# warranty code} other {# warranty codes}}",
     "position": "Position",
     "productCodeSerial": "Product code / Serial",
     "reviewProductCount": "This request contains {count} products.",

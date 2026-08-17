@@ -13,6 +13,7 @@ import {
 } from "../warranty-activation-requests.utils";
 import { WarrantyActivationRequestStatusBadge } from "./warranty-activation-request-status-badge";
 import { ActivationRequestItemsTable } from "./activation-request-items-table";
+import { getActivationRequestWarrantyCodeLabel } from "../warranty-activation-request-items.utils";
 
 type WarrantyActivationRequestDetailCardProps = {
   busyItemId?: string | null;
@@ -46,7 +47,12 @@ export function WarrantyActivationRequestDetailCard({
       <CardContent className="space-y-7 px-4 py-6 sm:px-6">
         <DetailSection title={t("requestInfo")}>
           <DetailItem label={t("requestCode")} value={request.requestCode} />
-          <DetailItem label={t("warrantyCode")} value={request.warrantyCode} />
+          <DetailItem
+            label={t("warrantyCode")}
+            value={getActivationRequestWarrantyCodeLabel(request, (count) =>
+              t("warrantyCodeCount", { count }),
+            )}
+          />
           <DetailItem
             label={t("source")}
             value={t(`sources.${request.source}`)}

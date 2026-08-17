@@ -217,13 +217,15 @@ export function WarrantyActivationRequestDetailView({
                 {t("reject")}
               </Button>
             ) : null}
-            <Button
-              onClick={() => actions.openAction(request, "approve")}
-              type="button"
-            >
-              <CheckCircle2 className="size-4" />
-              {approveLabel}
-            </Button>
+            {canReview ? (
+              <Button
+                onClick={() => actions.openAction(request, "approve")}
+                type="button"
+              >
+                <CheckCircle2 className="size-4" />
+                {approveLabel}
+              </Button>
+            ) : null}
           </div>
         ) : null}
 

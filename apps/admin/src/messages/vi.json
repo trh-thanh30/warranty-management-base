@@ -1669,6 +1669,7 @@
     "selectedActivationProducts": "Sản phẩm kích hoạt đã chọn",
     "productCount": "{count} sản phẩm",
     "activationProducts": "Sản phẩm kích hoạt theo vị trí",
+    "warrantyCodeCount": "{count} mã bảo hành",
     "position": "Vị trí",
     "productCodeSerial": "Mã sản phẩm / Serial",
     "reviewProductCount": "Yêu cầu này có {count} sản phẩm.",
