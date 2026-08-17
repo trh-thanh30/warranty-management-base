@@ -2,10 +2,39 @@ import {
   HttpClientError,
   type CreateProductBody,
   type ProductResponse,
+  type ProductTemplateSummary,
   type UpdateProductBody,
 } from "@repo/shared";
 import { toNullableValue, toOptionalValue } from "../../utils/form.ts";
 import type { ProductFormValues } from "./products.types";
+
+export function getProductTemplateSearchKeywords(
+  template: ProductTemplateSummary,
+) {
+  return [
+    template.name,
+    template.sku,
+    template.brand,
+    template.model,
+    template.categoryRef?.name,
+    template.categoryRef?.code,
+    template.categoryRef?.slug,
+  ].filter((keyword): keyword is string => Boolean(keyword?.trim()));
+}
+
+export function mergeProductTemplateOptions(
+  items: ProductTemplateSummary[],
+  currentTemplate?: ProductTemplateSummary | null,
+) {
+  if (
+    !currentTemplate ||
+    items.some((template) => template.id === currentTemplate.id)
+  ) {
+    return items;
+  }
+
+  return [currentTemplate, ...items];
+}
 
 export function formatProductOwner(product: ProductResponse) {
   if (!product.owner) return "-";

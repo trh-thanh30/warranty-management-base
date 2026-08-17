@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useDebounce } from "@repo/hooks";
 import { useTranslations } from "next-intl";
 import { useForm, useWatch, type UseFormSetError } from "react-hook-form";
 import {
@@ -22,6 +23,7 @@ import { useCreateProduct, useUpdateProduct } from "./use-products";
 import {
   getProductInstallationPosition,
   getProductSaveErrorMatch,
+  mergeProductTemplateOptions,
   resolveProductCategoryId,
   toCreateProductBody,
   toUpdateProductBody,
@@ -46,12 +48,23 @@ export function useProductForm({
     resolver: zodResolver(creating ? productFormSchema : productEditFormSchema),
     defaultValues: getDefaultValues(product, initialTemplate),
   });
-  const { control, reset, setError, setValue } = form;
+  const { clearErrors, control, reset, setError, setValue } = form;
   const selectedTemplateId = useWatch({ control, name: "templateId" });
   const selectedCategoryId = useWatch({ control, name: "categoryId" });
   const previousTemplateId = useRef(selectedTemplateId);
+  const [templateSearch, setTemplateSearch] = useState("");
+  const [pinnedTemplate, setPinnedTemplate] =
+    useState<ProductTemplateSummary | null>(
+      product?.template ?? initialTemplate ?? null,
+    );
+  const debouncedTemplateSearch = useDebounce(templateSearch.trim(), 300);
   const templatesQuery = useProductTemplates(
-    { isActive: true, limit: 100, page: 1 },
+    {
+      isActive: true,
+      limit: 100,
+      page: 1,
+      search: debouncedTemplateSearch || undefined,
+    },
     { enabled: true },
   );
   const categoriesQuery = useCategories(
@@ -66,15 +79,8 @@ export function useProductForm({
   );
   const templates = useMemo(() => {
     const items = templatesQuery.data?.items ?? [];
-    const currentTemplate = product?.template ?? initialTemplate;
-    if (
-      !currentTemplate ||
-      items.some((item) => item.id === currentTemplate.id)
-    ) {
-      return items;
-    }
-    return [currentTemplate, ...items];
-  }, [initialTemplate, product?.template, templatesQuery.data?.items]);
+    return mergeProductTemplateOptions(items, pinnedTemplate);
+  }, [pinnedTemplate, templatesQuery.data?.items]);
   const selectedTemplate =
     templates.find((template) => template.id === selectedTemplateId) ??
     (product?.templateId === selectedTemplateId ? product.template : null) ??
@@ -82,9 +88,15 @@ export function useProductForm({
 
   useEffect(() => {
     reset(getDefaultValues(product, initialTemplate));
+    setPinnedTemplate(product?.template ?? initialTemplate ?? null);
     previousTemplateId.current =
       product?.templateId ?? initialTemplate?.id ?? "";
   }, [initialTemplate, product, reset]);
+
+  function pinTemplateSelection(templateId: string) {
+    const template = templates.find((item) => item.id === templateId);
+    if (template) setPinnedTemplate(template);
+  }
 
   useEffect(() => {
     if (!selectedTemplate) return;
@@ -104,16 +116,17 @@ export function useProductForm({
       },
     );
     if (creating) {
+      clearErrors("warrantyDurationMonths");
       setValue(
         "warrantyDurationMonths",
         selectedTemplate.defaultWarrantyDurationMonths ?? "",
         {
           shouldDirty: true,
-          shouldValidate: true,
+          shouldValidate: false,
         },
       );
     }
-  }, [creating, selectedCategoryId, selectedTemplate, setValue]);
+  }, [clearErrors, creating, selectedCategoryId, selectedTemplate, setValue]);
 
   async function submit(values: ProductFormValues) {
     try {
@@ -153,9 +166,12 @@ export function useProductForm({
       selectedTemplate && selectedCategoryId !== selectedTemplate.categoryId,
     ),
     onSubmit: form.handleSubmit(submit),
+    pinTemplateSelection,
     restoreTemplateCategory,
     selectedTemplate,
     selectedTemplateId,
+    setTemplateSearch,
+    templateSearch,
     templates,
     templatesQuery,
   };

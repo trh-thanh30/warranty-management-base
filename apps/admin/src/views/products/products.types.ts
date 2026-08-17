@@ -6,11 +6,15 @@ export type ProductStatusFilter = (typeof PRODUCT_STATUS_FILTERS)[number];
 export type ProductDirectorySortBy = ProductSortBy;
 
 const optionalText = z.string().trim();
-const requiredWarrantyDuration = z.preprocess(
-  (value) =>
-    value === "" || value === null || value === undefined ? undefined : value,
-  z.coerce.number().int("durationMonthsRange").min(1, "durationMonthsRange"),
-);
+const requiredWarrantyDuration = z
+  .union([z.number(), z.string()])
+  .transform((value) => (typeof value === "number" ? value : Number(value)))
+  .pipe(
+    z
+      .number({ invalid_type_error: "durationMonthsRange" })
+      .int("durationMonthsRange")
+      .min(1, "durationMonthsRange"),
+  );
 
 export const productFormSchema = z.object({
   categoryId: optionalText.min(1, "categoryRequired"),

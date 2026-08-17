@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { HttpClientError } from "@repo/shared";
+import { HttpClientError, type ProductTemplateSummary } from "@repo/shared";
 import {
+  getProductTemplateSearchKeywords,
   getProductSaveErrorMatch,
+  mergeProductTemplateOptions,
   resolveProductCategoryId,
   toCreateProductBody,
   toProductActiveStatus,
@@ -13,6 +15,53 @@ import {
   productEditFormSchema,
   productFormSchema,
 } from "./products.types.ts";
+
+const currentTemplate = {
+  id: "template-current",
+  name: "Phim cách nhiệt ô tô",
+  sku: "PHIM-CACH-NHIET-O-TO",
+  brand: "Lexzenz",
+  model: "Reflex",
+  categoryRef: {
+    name: "Film cách nhiệt ô tô Lexzenz Reflex Korea Film",
+    code: "LEXZENZ_REFLEX_KOREA_FILM",
+    slug: "film-cach-nhiet-o-to-lexzenz-reflex-korea-film",
+  },
+} as ProductTemplateSummary;
+
+test("builds product template search keywords from template and category data", () => {
+  assert.deepEqual(getProductTemplateSearchKeywords(currentTemplate), [
+    "Phim cách nhiệt ô tô",
+    "PHIM-CACH-NHIET-O-TO",
+    "Lexzenz",
+    "Reflex",
+    "Film cách nhiệt ô tô Lexzenz Reflex Korea Film",
+    "LEXZENZ_REFLEX_KOREA_FILM",
+    "film-cach-nhiet-o-to-lexzenz-reflex-korea-film",
+  ]);
+});
+
+test("keeps a selected template outside the current search result exactly once", () => {
+  const resultTemplate = {
+    ...currentTemplate,
+    id: "template-result",
+    name: "Film SP50",
+  };
+
+  assert.deepEqual(
+    mergeProductTemplateOptions([resultTemplate], currentTemplate).map(
+      (template) => template.id,
+    ),
+    ["template-current", "template-result"],
+  );
+  assert.deepEqual(
+    mergeProductTemplateOptions(
+      [currentTemplate, resultTemplate],
+      currentTemplate,
+    ).map((template) => template.id),
+    ["template-current", "template-result"],
+  );
+});
 
 test("maps the edit status toggle to an active product status", () => {
   assert.equal(toProductActiveStatus(true), "ACTIVE");
@@ -194,14 +243,20 @@ test("requires an individual warranty duration of at least one month", () => {
     status: "ACTIVE" as const,
     templateId: "template-id",
   };
+  const blankDuration = productFormSchema.safeParse({
+    ...values,
+    warrantyDurationMonths: "",
+  });
 
-  assert.equal(
-    productFormSchema.safeParse({
-      ...values,
-      warrantyDurationMonths: "",
-    }).success,
-    false,
-  );
+  assert.equal(blankDuration.success, false);
+  if (!blankDuration.success) {
+    assert.equal(
+      blankDuration.error.issues.find(
+        (issue) => issue.path[0] === "warrantyDurationMonths",
+      )?.message,
+      "durationMonthsRange",
+    );
+  }
   assert.equal(
     productFormSchema.safeParse({
       ...values,
