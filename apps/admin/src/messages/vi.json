@@ -1631,8 +1631,8 @@
     "birthdate": "Ngày sinh",
     "selectBirthdate": "Chọn ngày sinh",
     "address": "Địa chỉ",
-    "addressDetail": "Địa chỉ chi tiết",
-    "addressDetailPlaceholder": "Số nhà, tên đường",
+    "addressDetail": "Số nhà, đường hoặc khu phố",
+    "addressDetailPlaceholder": "Nhập số nhà, đường hoặc khu phố",
     "serialNumber": "Số serial",
     "brand": "Thương hiệu",
     "model": "Dòng sản phẩm",
@@ -1814,6 +1814,7 @@
       "exportError": "Không thể xuất danh sách yêu cầu kích hoạt."
     },
     "addressRequired": "Nhập địa chỉ chi tiết.",
+    "addressAdministrativeUnitNotAllowed": "Chỉ nhập số nhà, đường, khu phố, quận, huyện hoặc thị xã. Chọn phường/xã và tỉnh/thành phố ở các trường bên dưới.",
     "categoryRequired": "Chọn danh mục sản phẩm.",
     "customerNameRequired": "Chọn khách hàng hợp lệ.",
     "emailInvalid": "Email không hợp lệ.",

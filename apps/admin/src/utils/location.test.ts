@@ -36,6 +36,27 @@ test("parseVietnamAddress preserves an unstructured address", () => {
   assert.equal(result.wardName, null);
 });
 
+test("parseVietnamAddress leaves detail empty for a ward and province only", () => {
+  const province = provinces[0]!;
+  const result = parseVietnamAddress(`Ward One, ${province.name}`, provinces);
+
+  assert.equal(result.detail, "");
+  assert.equal(result.wardName, "Ward One");
+  assert.equal(result.province?.code, province.code);
+});
+
+test("parseVietnamAddress removes repeated ward and province components", () => {
+  const province = provinces[0]!;
+  const result = parseVietnamAddress(
+    `Ward One, ${province.name}, Ward One, ${province.name}`,
+    provinces,
+  );
+
+  assert.equal(result.detail, "");
+  assert.equal(result.wardName, "Ward One");
+  assert.equal(result.province?.code, province.code);
+});
+
 test("fills a selected province into an empty address", () => {
   assert.equal(
     fillVietnamAddressSelection({

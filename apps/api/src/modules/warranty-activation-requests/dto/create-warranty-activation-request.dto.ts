@@ -15,6 +15,7 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
+import { IsLocalAddressDetail } from './is-local-address-detail.decorator';
 
 export class CreateWarrantyActivationRequestItemDto {
   @IsOptional()
@@ -198,6 +199,7 @@ export class CreateWarrantyActivationRequestDto {
 
   @IsString()
   @Length(1, 255)
+  @IsLocalAddressDetail()
   addressDetail: string;
 
   @IsOptional()

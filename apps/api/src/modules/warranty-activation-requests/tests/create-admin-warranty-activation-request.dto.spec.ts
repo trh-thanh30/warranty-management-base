@@ -44,4 +44,37 @@ describe('CreateAdminWarrantyActivationRequestDto', () => {
 
     await expect(validate(dto)).resolves.not.toHaveLength(0);
   });
+
+  it.each([
+    'Khu phố Hoàng Xá, Phường A',
+    'Khu phố Hoàng Xá, Xã A',
+    'Khu phố Hoàng Xá, Tỉnh B',
+    'Khu phố Hoàng Xá, Thành phố B',
+  ])(
+    'rejects structured location text in address detail: %s',
+    async (addressDetail) => {
+      const dto = plainToInstance(CreateAdminWarrantyActivationRequestDto, {
+        ...base,
+        addressDetail,
+      });
+
+      const errors = await validate(dto);
+
+      expect(errors.some((error) => error.property === 'addressDetail')).toBe(
+        true,
+      );
+    },
+  );
+
+  it.each(['Khu phố Hoàng Xá, Thị xã Thuận Thành', 'Số 10 Tỉnh lộ 282'])(
+    'accepts local address detail: %s',
+    async (addressDetail) => {
+      const dto = plainToInstance(CreateAdminWarrantyActivationRequestDto, {
+        ...base,
+        addressDetail,
+      });
+
+      await expect(validate(dto)).resolves.toHaveLength(0);
+    },
+  );
 });

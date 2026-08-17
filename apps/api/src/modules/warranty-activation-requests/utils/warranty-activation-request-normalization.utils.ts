@@ -3,10 +3,31 @@ import { CreateWarrantyActivationRequestDto } from '@/modules/warranty-activatio
 export function buildWarrantyActivationRequestFullAddress(
   dto: CreateWarrantyActivationRequestDto,
 ) {
-  return [dto.addressDetail, dto.wardName, dto.provinceName]
+  const detailParts = splitAddressParts(dto.addressDetail);
+  const locationParts = [dto.wardName, dto.provinceName]
     .map((part) => part.trim())
-    .filter(Boolean)
-    .join(', ');
+    .filter(Boolean);
+
+  while (endsWithAddressParts(detailParts, locationParts)) {
+    detailParts.splice(-locationParts.length, locationParts.length);
+  }
+
+  return [...detailParts, ...locationParts].join(', ');
+}
+
+function splitAddressParts(address: string) {
+  return address
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function endsWithAddressParts(address: string[], suffix: string[]) {
+  if (suffix.length === 0 || address.length < suffix.length) return false;
+
+  return suffix.every(
+    (part, index) => address[address.length - suffix.length + index] === part,
+  );
 }
 
 export function optionalTrim(value?: string) {

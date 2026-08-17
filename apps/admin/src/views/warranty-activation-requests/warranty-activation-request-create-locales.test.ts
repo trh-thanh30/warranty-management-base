@@ -39,3 +39,43 @@ for (const locale of ["vi", "en"]) {
     }
   });
 }
+
+test("activation address copy asks only for the required local detail", () => {
+  const viMessages = JSON.parse(
+    readFileSync(new URL("../../messages/vi.json", import.meta.url), "utf8"),
+  ) as {
+    WarrantyActivationRequestsAdmin: Record<string, unknown>;
+  };
+  const enMessages = JSON.parse(
+    readFileSync(new URL("../../messages/en.json", import.meta.url), "utf8"),
+  ) as {
+    WarrantyActivationRequestsAdmin: Record<string, unknown>;
+  };
+
+  assert.equal(
+    viMessages.WarrantyActivationRequestsAdmin.addressDetail,
+    "Số nhà, đường hoặc khu phố",
+  );
+  assert.equal(
+    viMessages.WarrantyActivationRequestsAdmin.addressDetailPlaceholder,
+    "Nhập số nhà, đường hoặc khu phố",
+  );
+  assert.equal(
+    enMessages.WarrantyActivationRequestsAdmin.addressDetail,
+    "House number, street or neighborhood",
+  );
+  assert.equal(
+    enMessages.WarrantyActivationRequestsAdmin.addressDetailPlaceholder,
+    "Enter a house number, street or neighborhood",
+  );
+  assert.equal(
+    typeof viMessages.WarrantyActivationRequestsAdmin
+      .addressAdministrativeUnitNotAllowed,
+    "string",
+  );
+  assert.equal(
+    typeof enMessages.WarrantyActivationRequestsAdmin
+      .addressAdministrativeUnitNotAllowed,
+    "string",
+  );
+});

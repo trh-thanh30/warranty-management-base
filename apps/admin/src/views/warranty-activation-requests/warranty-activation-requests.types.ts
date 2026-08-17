@@ -3,6 +3,7 @@ import type {
   WarrantyActivationRequestStatus,
   WarrantyActivationRequestSummary,
 } from "@repo/shared";
+import { containsDisallowedVietnamAddressDetailUnit } from "@repo/shared/utils";
 import { z } from "zod";
 
 export type WarrantyActivationRequestStatusFilter =
@@ -54,7 +55,14 @@ export type WarrantyActivationRequestCreateFormValues = {
 };
 
 export const warrantyActivationRequestCreateFormSchema = z.object({
-  addressDetail: z.string().trim().min(1, "addressRequired").max(255),
+  addressDetail: z
+    .string()
+    .trim()
+    .min(1, "addressRequired")
+    .max(255)
+    .refine((value) => !containsDisallowedVietnamAddressDetailUnit(value), {
+      message: "addressAdministrativeUnitNotAllowed",
+    }),
   activationProductIds: z.record(z.string(), z.string().trim()),
   categoryId: z.string().trim().min(1, "categoryRequired"),
   categoryInputValues: z.record(z.string(), z.string().trim().max(500)),

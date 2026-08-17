@@ -1443,13 +1443,14 @@
           "loadError": "Không thể tải danh sách phường xã."
         },
         "addressDetail": {
-          "label": "Địa chỉ chi tiết *",
-          "placeholder": "Số nhà, tên đường..."
+          "label": "Số nhà, đường hoặc khu phố *",
+          "placeholder": "Nhập số nhà, đường hoặc khu phố..."
         },
         "retry": "Thử lại"
       },
       "validation": {
         "addressRequired": "Vui lòng nhập địa chỉ chi tiết.",
+        "addressAdministrativeUnitNotAllowed": "Chỉ nhập số nhà, đường, khu phố, quận, huyện hoặc thị xã. Chọn phường/xã và tỉnh/thành phố ở các trường bên dưới.",
         "customerEmailInvalid": "Email không hợp lệ.",
         "customerEmailRequired": "Vui lòng nhập email để nhận giấy bảo hành.",
         "customerNameInvalid": "Họ và tên phải có từ 2 đến 120 ký tự.",

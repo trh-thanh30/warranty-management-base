@@ -21,6 +21,7 @@ import {
 import type { WarrantyActivationRequestCreateFormValues } from "./warranty-activation-requests.types";
 
 const CREATE_FIELD_ERROR_KEYS = new Set([
+  "addressAdministrativeUnitNotAllowed",
   "addressRequired",
   "categoryRequired",
   "customerNameRequired",

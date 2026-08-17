@@ -1,7 +1,9 @@
 import { PHONE_NUMBER_PATTERN } from "@repo/shared/constants";
+import { containsDisallowedVietnamAddressDetailUnit } from "@repo/shared/utils";
 import { z } from "zod";
 
 export type WarrantyActivationFormValidationMessages = {
+  addressAdministrativeUnitNotAllowed: string;
   addressRequired: string;
   customerEmailInvalid: string;
   customerEmailRequired: string;
@@ -32,7 +34,11 @@ export function createWarrantyActivationFormSchema(
       .string()
       .trim()
       .min(1, messages.addressRequired)
-      .max(255, messages.addressRequired),
+      .max(255, messages.addressRequired)
+      .refine(
+        (value) => !containsDisallowedVietnamAddressDetailUnit(value),
+        messages.addressAdministrativeUnitNotAllowed,
+      ),
     customerEmail: z
       .string()
       .trim()

@@ -1631,8 +1631,8 @@
     "birthdate": "Birthdate",
     "selectBirthdate": "Select birthdate",
     "address": "Address",
-    "addressDetail": "Address detail",
-    "addressDetailPlaceholder": "House number, street name",
+    "addressDetail": "House number, street or neighborhood",
+    "addressDetailPlaceholder": "Enter a house number, street or neighborhood",
     "serialNumber": "Serial number",
     "brand": "Brand",
     "model": "Model",
@@ -1814,6 +1814,7 @@
       "exportError": "Unable to export activation requests."
     },
     "addressRequired": "Enter address detail.",
+    "addressAdministrativeUnitNotAllowed": "Only enter the house number, street, neighborhood, district, or town. Select the ward/commune and province/city in the fields below.",
     "categoryRequired": "Select a product category.",
     "customerNameRequired": "Select a valid customer.",
     "emailInvalid": "Enter a valid email.",

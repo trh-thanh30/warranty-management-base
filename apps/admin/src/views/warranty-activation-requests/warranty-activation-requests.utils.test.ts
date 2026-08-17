@@ -19,10 +19,14 @@ import {
   getUnavailableActivationProductIds,
   toAdminActivationRequestBody,
 } from "./warranty-activation-requests.utils.ts";
-import type { WarrantyActivationRequestCreateFormValues } from "./warranty-activation-requests.types.ts";
+import {
+  warrantyActivationRequestCreateFormSchema,
+  type WarrantyActivationRequestCreateFormValues,
+} from "./warranty-activation-requests.types.ts";
 import {
   getActivationRequestProductCount,
   getActivationRequestProductTitle,
+  getActivationRequestWarrantyCodeLabel,
 } from "./warranty-activation-request-items.utils.ts";
 
 const provinces = [{ code: 79, name: "TP HCM" }] as VietnamProvince[];
@@ -59,6 +63,44 @@ const baseValues: WarrantyActivationRequestCreateFormValues = {
   wardCode: "",
   warrantyCode: "",
 };
+
+const validFormValues: WarrantyActivationRequestCreateFormValues = {
+  ...baseValues,
+  addressDetail: "Khu phố Hoàng Xá, Thị xã Thuận Thành",
+  categoryId: "category-id",
+  customerName: "Nguyễn Văn A",
+  customerPhone: "0901234567",
+  provinceCode: "27",
+  wardCode: "09442",
+};
+
+test("activation request address detail rejects structured location units", () => {
+  const result = warrantyActivationRequestCreateFormSchema.safeParse({
+    ...validFormValues,
+    addressDetail: "Khu phố Hoàng Xá, Phường A, Tỉnh B",
+  });
+
+  assert.equal(result.success, false);
+  if (result.success) return;
+  assert.equal(
+    result.error.issues[0]?.message,
+    "addressAdministrativeUnitNotAllowed",
+  );
+});
+
+test("activation request address detail allows district and provincial roads", () => {
+  for (const addressDetail of [
+    "Khu phố Hoàng Xá, Thị xã Thuận Thành",
+    "Số 10 Tỉnh lộ 282",
+  ]) {
+    const result = warrantyActivationRequestCreateFormSchema.safeParse({
+      ...validFormValues,
+      addressDetail,
+    });
+
+    assert.equal(result.success, true);
+  }
+});
 
 test("admin activation request body combines form and selected product data", () => {
   const product = {
