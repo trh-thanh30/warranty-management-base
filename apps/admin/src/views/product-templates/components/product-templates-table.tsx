@@ -67,7 +67,7 @@ export function ProductTemplatesTable({
         ))}
       </div>
       <TableScroll className="hidden max-h-144 overflow-y-auto rounded-md border border-slate-200 lg:block dark:border-slate-800">
-        <Table className="min-w-5xl">
+        <Table className="min-w-5xl whitespace-nowrap">
           <TableHeader className="sticky top-0 z-10 bg-white dark:bg-slate-950 [&_th]:h-auto [&_th]:whitespace-normal [&_th]:text-wrap [&_th]:py-2 [&_th]:leading-4">
             <TableRow>
               <TableHead>{t("name")}</TableHead>
@@ -89,7 +89,9 @@ export function ProductTemplatesTable({
                   {template.sku}
                 </TableCell>
                 <TableCell className="whitespace-nowrap">
-                  {template.categoryRef?.name ?? "-"}
+                  <span className="block max-w-64 truncate">
+                    {template.categoryRef?.name ?? "-"}
+                  </span>
                 </TableCell>
                 <TableCell>
                   {template.defaultWarrantyDurationMonths === null
@@ -100,7 +102,7 @@ export function ProductTemplatesTable({
                 </TableCell>
                 <TableCell>{template.productCount}</TableCell>
                 <TableCell>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-nowrap gap-2">
                     <TemplateStatus template={template} />
                     <ProductTemplatePublicationBadge
                       isPublished={template.isPublished}
@@ -141,7 +143,7 @@ function TemplateMobileField({
 
 function TemplateIdentity({ template }: { template: ProductTemplateSummary }) {
   return (
-    <div className="min-w-0">
+    <div className="min-w-0 lg:max-w-72">
       <p className="truncate font-medium text-slate-950 dark:text-slate-50">
         {template.name}
       </p>

@@ -254,7 +254,9 @@ function CustomerProductRow({ product }: { product: ProductResponse }) {
         {product.serialNumber ?? "-"}
       </TableCell>
       <TableCell className="whitespace-nowrap">
-        {product.categoryRef.name}
+        <span className="block max-w-64 truncate">
+          {product.categoryRef.name}
+        </span>
       </TableCell>
       <TableCell className="whitespace-nowrap">
         {product.warranty?.status ? (

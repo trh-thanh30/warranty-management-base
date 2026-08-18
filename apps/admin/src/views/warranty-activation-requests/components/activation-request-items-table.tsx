@@ -61,11 +61,13 @@ export function ActivationRequestItemsTable({
           {items.map((item) => (
             <TableRow key={item.id}>
               <TableCell className="font-medium">
-                {item.positionLabel}
+                <span className="block max-w-52 truncate">
+                  {item.positionLabel}
+                </span>
               </TableCell>
               <TableCell>
                 <Link
-                  className="font-medium text-blue-700 hover:underline dark:text-blue-400"
+                  className="block max-w-64 truncate font-medium text-blue-700 hover:underline dark:text-blue-400"
                   href={`/products/${item.productId}`}
                 >
                   {item.productName}

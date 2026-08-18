@@ -149,7 +149,9 @@ export function DashboardRecentClaims({
                   {items.map((claim) => (
                     <TableRow key={claim.id}>
                       <TableCell className="font-mono text-xs">
-                        {claim.claimCode}
+                        <span className="block max-w-44 truncate">
+                          {claim.claimCode}
+                        </span>
                       </TableCell>
                       <TableCell>
                         <p className="max-w-52 truncate font-medium">

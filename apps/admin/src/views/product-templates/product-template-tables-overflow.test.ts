@@ -32,7 +32,7 @@ test("product template tables wrap headers and scroll long table content", async
 
   assert.match(
     directorySource,
-    /TableCell className="whitespace-nowrap">\s*\{template\.categoryRef\?\.name \?\? "-"\}/,
+    /TableCell className="whitespace-nowrap">\s*<span className="block max-w-64 truncate">\s*\{template\.categoryRef\?\.name \?\? "-"\}/,
   );
   assert.match(
     directorySource,

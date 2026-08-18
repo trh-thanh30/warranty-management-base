@@ -86,7 +86,7 @@ export function WarrantyActivationRequestsTable({
       </div>
 
       <TableScroll className="hidden overscroll-x-contain rounded-md border border-slate-200 dark:border-slate-800 md:block">
-        <Table className="min-w-[1180px]">
+        <Table className="min-w-[1180px] whitespace-nowrap">
           <TableHeader>
             <TableRow>
               <SortableTableHead
@@ -165,14 +165,14 @@ function WarrantyActivationRequestTableRow({
     <TableRow>
       <TableCell>
         <Link
-          className="font-mono text-xs font-medium text-slate-950 hover:underline dark:text-slate-50"
+          className="block max-w-52 truncate font-mono text-xs font-medium text-slate-950 hover:underline dark:text-slate-50"
           href={`/warranty-activation-requests/${request.id}`}
         >
           {request.requestCode}
         </Link>
       </TableCell>
       <TableCell>
-        <div className="font-mono text-xs">
+        <div className="max-w-52 truncate font-mono text-xs">
           {getActivationRequestWarrantyCodeLabel(request, (count) =>
             t("warrantyCodeCount", { count }),
           )}

@@ -66,7 +66,7 @@ export function ServiceCentersTable({
       </div>
 
       <TableScroll className="hidden rounded-md border border-slate-200 dark:border-slate-800 md:block">
-        <Table>
+        <Table className="min-w-[980px] whitespace-nowrap">
           <TableHeader>
             <TableRow>
               <SortableTableHead
@@ -262,7 +262,7 @@ function ServiceCenterIdentity({
   serviceCenter: ServiceCenterSummary;
 }) {
   return (
-    <div className="flex min-w-0 items-center gap-3">
+    <div className="flex min-w-0 items-center gap-3 md:max-w-72">
       <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-600 dark:bg-slate-900 dark:text-slate-300">
         <Building2 className="size-4" />
       </div>
@@ -282,9 +282,9 @@ function LocationSummary({
   serviceCenter: ServiceCenterSummary;
 }) {
   return (
-    <div className="flex min-w-0 items-start gap-2">
+    <div className="flex min-w-0 items-start gap-2 md:max-w-56">
       <MapPin className="mt-0.5 size-4 shrink-0 text-slate-400" />
-      <span className="line-clamp-2">
+      <span className="line-clamp-2 md:line-clamp-none md:block md:truncate">
         {[serviceCenter.district, serviceCenter.province]
           .filter(Boolean)
           .join(", ")}
@@ -299,7 +299,7 @@ function ContactSummary({
   serviceCenter: ServiceCenterSummary;
 }) {
   return (
-    <div className="space-y-1 text-sm">
+    <div className="space-y-1 text-sm md:max-w-56">
       <p className="flex min-w-0 items-center gap-2">
         <Phone className="size-4 shrink-0 text-slate-400" />
         <span className="truncate">{serviceCenter.phone || "-"}</span>

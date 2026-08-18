@@ -66,7 +66,7 @@ export function DealersTable({
       </div>
 
       <TableScroll className="hidden rounded-md border border-slate-200 dark:border-slate-800 md:block">
-        <Table>
+        <Table className="min-w-[1080px] whitespace-nowrap">
           <TableHeader>
             <TableRow>
               <SortableTableHead
@@ -134,7 +134,11 @@ function DealerTableRow({
       <TableCell>
         <ContactSummary dealer={dealer} />
       </TableCell>
-      <TableCell>{dealer.salesName ?? "-"}</TableCell>
+      <TableCell>
+        <span className="block max-w-40 truncate">
+          {dealer.salesName ?? "-"}
+        </span>
+      </TableCell>
       <TableCell>
         <DealerStatusBadge isActive={dealer.isActive} />
       </TableCell>
@@ -247,7 +251,7 @@ function DealerActions({
 
 function DealerIdentity({ dealer }: { dealer: DealerResponse }) {
   return (
-    <div className="min-w-0">
+    <div className="min-w-0 md:max-w-72">
       <div className="flex items-center gap-2">
         <Building2 className="size-4 shrink-0 text-slate-400" />
         <p className="truncate font-medium text-slate-950 dark:text-slate-50">
@@ -267,7 +271,7 @@ function LocationSummary({ dealer }: { dealer: DealerResponse }) {
     .join(" · ");
 
   return (
-    <div className="flex min-w-0 items-center gap-2 text-sm">
+    <div className="flex min-w-0 items-center gap-2 text-sm md:max-w-64">
       <MapPin className="size-4 shrink-0 text-slate-400" />
       <span className="truncate">{location}</span>
     </div>
@@ -276,7 +280,7 @@ function LocationSummary({ dealer }: { dealer: DealerResponse }) {
 
 function ContactSummary({ dealer }: { dealer: DealerResponse }) {
   return (
-    <div className="space-y-1 text-sm">
+    <div className="space-y-1 text-sm md:max-w-56">
       <div className="flex items-center gap-2">
         <Phone className="size-4 shrink-0 text-slate-400" />
         <span>{dealer.phone ?? "-"}</span>

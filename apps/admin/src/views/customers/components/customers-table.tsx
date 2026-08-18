@@ -57,7 +57,7 @@ export function CustomersTable({
       </div>
 
       <TableScroll className="hidden rounded-md border border-slate-200 dark:border-slate-800 md:block">
-        <Table>
+        <Table className="min-w-[960px] whitespace-nowrap">
           <TableHeader>
             <TableRow>
               <SortableTableHead
@@ -116,7 +116,9 @@ function CustomerTableRow({ customer }: { customer: CustomerSummary }) {
         <CustomerIdentityCell customer={customer} />
       </TableCell>
       <TableCell>{customer.phone || "-"}</TableCell>
-      <TableCell>{customer.email || "-"}</TableCell>
+      <TableCell>
+        <span className="block max-w-64 truncate">{customer.email || "-"}</span>
+      </TableCell>
       <TableCell>
         <CustomerAccountBadge customer={customer} />
       </TableCell>
@@ -133,7 +135,7 @@ function CustomerIdentityCell({ customer }: { customer: CustomerSummary }) {
   const contact = getCustomerContact(customer);
 
   return (
-    <div className="flex min-w-0 items-center gap-3">
+    <div className="flex min-w-0 items-center gap-3 md:max-w-72">
       <Avatar className="size-9">
         <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
       </Avatar>
