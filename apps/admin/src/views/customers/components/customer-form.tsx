@@ -152,7 +152,10 @@ export function CustomerForm({
   const wrapperProps = embedded ? {} : { noValidate: true, onSubmit };
 
   return (
-    <Wrapper className="space-y-6" {...wrapperProps}>
+    <Wrapper
+      className={embedded ? "space-y-6 pb-24 sm:pb-0" : "space-y-6"}
+      {...wrapperProps}
+    >
       {errors.root?.message ? (
         <div
           className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300"
@@ -355,7 +358,13 @@ export function CustomerForm({
         />
       </FormField>
 
-      <div className="grid grid-cols-2 gap-2 border-t border-slate-200 pt-5 dark:border-slate-800 sm:flex sm:justify-end">
+      <div
+        className={
+          embedded
+            ? "fixed inset-x-0 bottom-0 z-[60] border-t border-slate-200 bg-white px-6 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] dark:border-slate-800 dark:bg-slate-950 sm:static sm:z-auto sm:flex sm:justify-end sm:bg-transparent sm:px-0 sm:pb-0 sm:pt-5"
+            : "grid grid-cols-2 gap-2 border-t border-slate-200 pt-5 dark:border-slate-800 sm:flex sm:justify-end"
+        }
+      >
         {!embedded ? (
           <Button
             className="w-full sm:w-auto"
@@ -368,7 +377,9 @@ export function CustomerForm({
           </Button>
         ) : null}
         <Button
-          className="w-full sm:w-auto"
+          className={
+            embedded ? "col-span-2 w-full sm:w-auto" : "w-full sm:w-auto"
+          }
           disabled={isSubmitting}
           onClick={embedded ? () => void onSubmit() : undefined}
           type={embedded ? "button" : "submit"}
