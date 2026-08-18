@@ -661,7 +661,7 @@ export function CreateWarrantyActivationRequestFormCard({
           </FormSection>
 
           {usesProductSelectors ? (
-            <div className="flex items-center justify-between gap-2 overflow-hidden rounded-md border border-slate-200 bg-slate-50 px-3 py-3 text-xs dark:border-slate-800 dark:bg-slate-900/50 sm:px-4 sm:text-sm">
+            <div className="flex items-center justify-between gap-2 overflow-hidden whitespace-nowrap rounded-md border border-slate-200 bg-slate-50 px-3 py-3 text-xs dark:border-slate-800 dark:bg-slate-900/50 sm:px-4 sm:text-sm sm:whitespace-normal">
               <span className="min-w-0 truncate text-slate-600 dark:text-slate-300">
                 {t("selectedActivationProducts")}
               </span>

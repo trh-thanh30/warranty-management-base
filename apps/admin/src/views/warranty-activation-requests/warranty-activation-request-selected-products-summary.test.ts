@@ -13,6 +13,10 @@ const source = readFileSync(
 test("selected product summary stays on one line on narrow screens", () => {
   assert.match(
     source,
+    /className="flex items-center justify-between gap-2 overflow-hidden whitespace-nowrap rounded-md[^"]*sm:whitespace-normal/,
+  );
+  assert.match(
+    source,
     /className="min-w-0 truncate text-slate-600 dark:text-slate-300"/,
   );
   assert.match(
