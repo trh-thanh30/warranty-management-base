@@ -123,7 +123,9 @@ export function WarrantyActivationRequestsTable({
               >
                 {t("createdAt")}
               </SortableTableHead>
-              <TableHead className="text-right">{t("actions")}</TableHead>
+              <TableHead className="whitespace-nowrap text-right">
+                {t("actions")}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -207,7 +209,7 @@ function WarrantyActivationRequestTableRow({
       <TableCell className="whitespace-nowrap">
         {formatActivationRequestDate(request.createdAt, locale)}
       </TableCell>
-      <TableCell className="text-right">
+      <TableCell className="whitespace-nowrap text-right">
         <WarrantyActivationRequestActions
           onAction={onAction}
           onDownloadCertificate={onDownloadCertificate}
