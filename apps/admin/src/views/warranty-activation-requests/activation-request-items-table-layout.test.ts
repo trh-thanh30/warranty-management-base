@@ -14,3 +14,11 @@ test("activation request item columns stay readable and scroll horizontally", ()
   );
   assert.match(source, /Table className="min-w-\[1120px\] whitespace-nowrap"/);
 });
+
+test("certificate icon actions expose visible hover and focus tooltips", () => {
+  assert.match(source, /<TooltipProvider delayDuration=\{250\}>/);
+  assert.equal(source.match(/<Tooltip>/g)?.length, 3);
+  assert.match(source, /<TooltipContent>\s*\{t\("viewItemCertificate"/);
+  assert.match(source, /<TooltipContent>\s*\{t\("downloadItemCertificate"/);
+  assert.match(source, /<TooltipContent>\s*\{t\("resendItemCertificate"/);
+});

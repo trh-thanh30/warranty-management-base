@@ -11,6 +11,10 @@ import {
   TableHeader,
   TableRow,
   TableScroll,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from "@repo/ui";
 import { Download, Eye, Send } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -110,52 +114,81 @@ export function ActivationRequestItemsTable({
               onDownloadCertificate ||
               onResendCertificate ? (
                 <TableCell>
-                  <div className="flex justify-end gap-1">
-                    {item.certificate && onViewCertificate ? (
-                      <Button
-                        aria-label={t("viewItemCertificate", {
-                          position: item.positionLabel,
-                        })}
-                        disabled={busyItemId === item.id}
-                        onClick={() => onViewCertificate(item)}
-                        size="icon"
-                        type="button"
-                        variant="ghost"
-                      >
-                        <Eye className="size-4" />
-                      </Button>
-                    ) : null}
-                    {item.certificate && onDownloadCertificate ? (
-                      <Button
-                        aria-label={t("downloadItemCertificate", {
-                          position: item.positionLabel,
-                        })}
-                        disabled={busyItemId === item.id}
-                        onClick={() => onDownloadCertificate(item)}
-                        size="icon"
-                        type="button"
-                        variant="ghost"
-                      >
-                        <Download className="size-4" />
-                      </Button>
-                    ) : null}
-                    {item.certificate?.recipientEmail &&
-                    item.certificate.emailStatus !== "SENT" &&
-                    onResendCertificate ? (
-                      <Button
-                        aria-label={t("resendItemCertificate", {
-                          position: item.positionLabel,
-                        })}
-                        disabled={busyItemId === item.id}
-                        onClick={() => onResendCertificate(item)}
-                        size="icon"
-                        type="button"
-                        variant="ghost"
-                      >
-                        <Send className="size-4" />
-                      </Button>
-                    ) : null}
-                  </div>
+                  <TooltipProvider delayDuration={250}>
+                    <div className="flex justify-end gap-1">
+                      {item.certificate && onViewCertificate ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              aria-label={t("viewItemCertificate", {
+                                position: item.positionLabel,
+                              })}
+                              disabled={busyItemId === item.id}
+                              onClick={() => onViewCertificate(item)}
+                              size="icon"
+                              type="button"
+                              variant="ghost"
+                            >
+                              <Eye aria-hidden="true" className="size-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {t("viewItemCertificate", {
+                              position: item.positionLabel,
+                            })}
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : null}
+                      {item.certificate && onDownloadCertificate ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              aria-label={t("downloadItemCertificate", {
+                                position: item.positionLabel,
+                              })}
+                              disabled={busyItemId === item.id}
+                              onClick={() => onDownloadCertificate(item)}
+                              size="icon"
+                              type="button"
+                              variant="ghost"
+                            >
+                              <Download aria-hidden="true" className="size-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {t("downloadItemCertificate", {
+                              position: item.positionLabel,
+                            })}
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : null}
+                      {item.certificate?.recipientEmail &&
+                      item.certificate.emailStatus !== "SENT" &&
+                      onResendCertificate ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              aria-label={t("resendItemCertificate", {
+                                position: item.positionLabel,
+                              })}
+                              disabled={busyItemId === item.id}
+                              onClick={() => onResendCertificate(item)}
+                              size="icon"
+                              type="button"
+                              variant="ghost"
+                            >
+                              <Send aria-hidden="true" className="size-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {t("resendItemCertificate", {
+                              position: item.positionLabel,
+                            })}
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : null}
+                    </div>
+                  </TooltipProvider>
                 </TableCell>
               ) : null}
             </TableRow>
