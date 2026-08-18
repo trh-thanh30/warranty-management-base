@@ -5,6 +5,28 @@ type ActivationRequestTranslations = ReturnType<
   typeof useTranslations<"WarrantyActivationRequestsAdmin">
 >;
 
+export function getActivationProductDisplayName(
+  product: Pick<ProductResponse, "displayName" | "name" | "productCode">,
+) {
+  return (
+    product.displayName?.trim() ||
+    product.name?.trim() ||
+    product.productCode?.trim() ||
+    ""
+  );
+}
+
+export function formatActivationProductSearchOption(product: ProductResponse) {
+  return [
+    getActivationProductDisplayName(product),
+    product.warrantyCode,
+    product.serialNumber,
+    product.owner?.fullName,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
 export function getProductSelectDisabledReason(
   product: Pick<ProductResponse, "warranty">,
   t: ActivationRequestTranslations,

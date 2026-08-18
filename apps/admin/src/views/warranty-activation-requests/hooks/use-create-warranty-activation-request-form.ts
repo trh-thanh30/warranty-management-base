@@ -34,6 +34,7 @@ import {
   resolveScopedProductSearch,
   toAdminActivationRequestBody,
 } from "../warranty-activation-requests.utils";
+import { getActivationProductDisplayName } from "../warranty-activation-request-product.utils";
 
 const DEFAULT_VALUES: WarrantyActivationRequestCreateFormValues = {
   addressDetail: "",
@@ -249,7 +250,7 @@ export function useCreateWarrantyActivationRequestForm({
     setProductSearchState({ categoryId, value: "" });
     setFormValues(form.setValue, {
       productId: product.id,
-      productName: product.name,
+      productName: getActivationProductDisplayName(product),
       warrantyCode: product.warrantyCode ?? "",
     });
   }

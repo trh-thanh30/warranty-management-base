@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { useInfiniteProducts } from "../../products/hooks/use-products";
 import {
+  getActivationProductDisplayName,
   getProductSelectDisabledReason,
   getProductWarrantyStatusLabel,
 } from "../warranty-activation-request-product.utils";
@@ -99,7 +100,7 @@ export function ActivationProductSelectField({
             disabledReason={getDisabledReason(product)}
             ownerName={product.owner?.fullName}
             productCode={product.productCode}
-            productName={product.name}
+            productName={getActivationProductDisplayName(product)}
             serialNumber={product.serialNumber}
             statusLabel={getProductWarrantyStatusLabel(product, t)}
             warrantyCode={product.warrantyCode}
@@ -110,7 +111,7 @@ export function ActivationProductSelectField({
         selectedLabel={
           selectedProduct
             ? [
-                selectedProduct.name,
+                getActivationProductDisplayName(selectedProduct),
                 selectedProduct.productCode,
                 selectedProduct.warrantyCode,
               ]
@@ -122,7 +123,7 @@ export function ActivationProductSelectField({
       {selectedProduct ? (
         <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-900/50">
           <p className="truncate text-sm font-medium text-slate-950 dark:text-slate-50">
-            {selectedProduct.name}
+            {getActivationProductDisplayName(selectedProduct)}
           </p>
           <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
             {[

@@ -105,6 +105,7 @@ test("activation request address detail allows district and provincial roads", (
 test("admin activation request body combines form and selected product data", () => {
   const product = {
     brand: "Black Label",
+    displayName: "Film cach nhiet B C",
     id: "product-1",
     modelYear: 2026,
     model: "Premium",
@@ -158,7 +159,7 @@ test("admin activation request body combines form and selected product data", ()
       },
       model: "Premium",
       productId: "product-1",
-      productName: "Film cach nhiet",
+      productName: "Film cach nhiet B C",
       provinceCode: "79",
       provinceName: "TP HCM",
       serialNumber: "SN-001",

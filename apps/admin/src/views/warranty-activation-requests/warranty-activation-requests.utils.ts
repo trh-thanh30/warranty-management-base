@@ -19,6 +19,7 @@ import {
   type ApiErrorTranslator,
 } from "@/src/lib/localized-api-error.utils";
 import type { WarrantyActivationRequestCreateFormValues } from "./warranty-activation-requests.types";
+import { getActivationProductDisplayName } from "./warranty-activation-request-product.utils";
 
 const CREATE_FIELD_ERROR_KEYS = new Set([
   "addressAdministrativeUnitNotAllowed",
@@ -199,7 +200,9 @@ export function toAdminActivationRequestBody({
     note: values.note.trim() || undefined,
     productId: items.length > 0 ? undefined : values.productId,
     productName:
-      primaryProduct?.name ?? (values.productName.trim() || undefined),
+      (primaryProduct ? getActivationProductDisplayName(primaryProduct) : "") ||
+      values.productName.trim() ||
+      undefined,
     provinceCode: values.provinceCode,
     provinceName: province?.name ?? "",
     salesName: values.salesName.trim() || undefined,

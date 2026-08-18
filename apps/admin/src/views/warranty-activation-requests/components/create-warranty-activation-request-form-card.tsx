@@ -12,10 +12,7 @@ import {
   FormSection,
   SearchDropdown,
 } from "@/src/components/common";
-import {
-  formatCustomerSearchOption,
-  formatProductSearchOption,
-} from "@/src/utils";
+import { formatCustomerSearchOption } from "@/src/utils";
 import {
   Button,
   Card,
@@ -41,6 +38,8 @@ import { SelectedDealerSummaryCard } from "./selected-dealer-summary-card";
 import { SelectedProductSummaryCard } from "./selected-product-summary-card";
 import { useCreateWarrantyActivationRequestForm } from "../hooks/use-create-warranty-activation-request-form";
 import {
+  formatActivationProductSearchOption,
+  getActivationProductDisplayName,
   getProductSelectDisabledReason,
   getProductWarrantyStatusLabel,
 } from "../warranty-activation-request-product.utils";
@@ -238,7 +237,7 @@ export function CreateWarrantyActivationRequestFormCard({
                       )}
                       ownerName={product.owner?.fullName}
                       productCode={product.productCode}
-                      productName={product.name}
+                      productName={getActivationProductDisplayName(product)}
                       serialNumber={product.serialNumber}
                       statusLabel={getProductWarrantyStatusLabel(product, t)}
                       warrantyCode={product.warrantyCode}
@@ -248,7 +247,7 @@ export function CreateWarrantyActivationRequestFormCard({
                   searchValue={productSearch}
                   selectedLabel={
                     selectedProduct
-                      ? formatProductSearchOption(selectedProduct)
+                      ? formatActivationProductSearchOption(selectedProduct)
                       : undefined
                   }
                 />
@@ -268,7 +267,7 @@ export function CreateWarrantyActivationRequestFormCard({
                 ownerName={selectedProduct.owner?.fullName}
                 productCodeLabel={t("productCode")}
                 productCode={selectedProduct.productCode}
-                productName={selectedProduct.name}
+                productName={getActivationProductDisplayName(selectedProduct)}
                 serialNumber={selectedProduct.serialNumber}
                 serialNumberLabel={t("serialNumber")}
                 startDate={selectedProduct.warranty?.startDate ?? null}
