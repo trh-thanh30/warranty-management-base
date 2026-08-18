@@ -138,7 +138,9 @@ function DealerTableRow({
       <TableCell>
         <DealerStatusBadge isActive={dealer.isActive} />
       </TableCell>
-      <TableCell>{formatDate(dealer.createdAt, { locale })}</TableCell>
+      <TableCell className="whitespace-nowrap">
+        {formatDate(dealer.createdAt, { locale })}
+      </TableCell>
       <TableCell className="text-right">
         <DealerActions dealer={dealer} onDeactivate={onDeactivate} />
       </TableCell>

@@ -130,7 +130,7 @@ export function DashboardRecentClaims({
             </div>
 
             <TableScroll className="hidden rounded-md border border-slate-200 dark:border-slate-800 md:block">
-              <Table className="min-w-[760px]">
+              <Table className="min-w-[760px] whitespace-nowrap">
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("recentClaims.claim")}</TableHead>
