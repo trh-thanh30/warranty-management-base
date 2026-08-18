@@ -5,10 +5,18 @@ import {
   DayPicker,
   getDefaultClassNames,
   type DayButton,
+  type DropdownProps,
 } from "react-day-picker";
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { buttonVariants } from "./button";
 import { cn } from "./lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./select";
 
 export function Calendar({
   captionLayout = "label",
@@ -46,8 +54,12 @@ export function Calendar({
           "flex h-9 w-full items-center justify-center px-9",
           defaults.month_caption,
         ),
+        dropdowns: cn(
+          "flex items-center justify-center gap-1.5",
+          defaults.dropdowns,
+        ),
         caption_label: cn(
-          "select-none text-sm font-semibold",
+          "flex select-none items-center gap-1 text-sm font-semibold",
           defaults.caption_label,
         ),
         month_grid: cn("w-full border-collapse", defaults.month_grid),
@@ -96,11 +108,56 @@ export function Calendar({
           );
         },
         DayButton: CalendarDayButton,
+        Dropdown: CalendarDropdown,
         ...components,
       }}
       showOutsideDays={showOutsideDays}
       {...props}
     />
+  );
+}
+
+function CalendarDropdown({
+  "aria-label": ariaLabel,
+  disabled,
+  onChange,
+  options,
+  value,
+}: DropdownProps) {
+  const selectedValue = value === undefined ? undefined : String(value);
+
+  return (
+    <Select
+      disabled={disabled}
+      onValueChange={(nextValue) =>
+        onChange?.({
+          target: { value: nextValue },
+        } as unknown as React.ChangeEvent<HTMLSelectElement>)
+      }
+      value={selectedValue}
+    >
+      <SelectTrigger
+        aria-label={ariaLabel}
+        className="h-8 min-w-20 gap-1 px-2 py-1 shadow-none"
+      >
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent
+        className="max-h-none min-w-20"
+        position="item-aligned"
+        viewportClassName="max-h-80"
+      >
+        {options?.map((option) => (
+          <SelectItem
+            disabled={option.disabled}
+            key={option.value}
+            value={String(option.value)}
+          >
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
 

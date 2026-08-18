@@ -123,6 +123,8 @@ export function CreateWarrantyActivationRequestFormCard({
     () => filterActivationRequestCategories(categories, categorySearch),
     [categories, categorySearch],
   );
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   return (
     <Card className="min-w-0 w-full max-w-full">
@@ -439,10 +441,20 @@ export function CreateWarrantyActivationRequestFormCard({
                       name="customerBirthdate"
                       render={({ field }) => (
                         <DatePicker
+                          allowManualInput
                           ariaLabel={t("birthdate")}
+                          calendarAriaLabel={t("openBirthdateCalendar")}
+                          captionLayout="dropdown"
+                          disabledDates={{ after: today }}
+                          endMonth={today}
                           id="create-activation-request-customer-birthdate"
+                          inputPlaceholder={t("birthdateInputPlaceholder")}
+                          invalidInputMessage={t("birthdateInvalid")}
+                          maxDate={today}
+                          minDate={new Date(1900, 0, 1)}
                           onValueChange={field.onChange}
                           placeholder={t("selectBirthdate")}
+                          startMonth={new Date(1900, 0, 1)}
                           value={field.value}
                         />
                       )}
@@ -649,11 +661,11 @@ export function CreateWarrantyActivationRequestFormCard({
           </FormSection>
 
           {usesProductSelectors ? (
-            <div className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-800 dark:bg-slate-900/50">
-              <span className="text-slate-600 dark:text-slate-300">
+            <div className="flex items-center justify-between gap-2 overflow-hidden rounded-md border border-slate-200 bg-slate-50 px-3 py-3 text-xs dark:border-slate-800 dark:bg-slate-900/50 sm:px-4 sm:text-sm">
+              <span className="min-w-0 truncate text-slate-600 dark:text-slate-300">
                 {t("selectedActivationProducts")}
               </span>
-              <span className="font-semibold text-slate-950 dark:text-slate-50">
+              <span className="shrink-0 whitespace-nowrap font-semibold text-slate-950 dark:text-slate-50">
                 {t("productCount", {
                   count: Object.keys(selectedActivationProducts).length,
                 })}
