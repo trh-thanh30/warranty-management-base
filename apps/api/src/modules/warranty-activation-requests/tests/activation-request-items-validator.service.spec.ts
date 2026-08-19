@@ -1,4 +1,3 @@
-import { BadRequestError } from '@/common/response';
 import { ActivationRequestItemsValidatorService } from '@/modules/warranty-activation-requests/service/activation-request-items-validator.service';
 import { product_status, warranty_status } from '@prisma/client';
 
@@ -83,7 +82,7 @@ describe('ActivationRequestItemsValidatorService', () => {
         { positionKey: 'windshield', productId: 'product-a' },
         { positionKey: 'rearGlass', productId: 'product-a' },
       ]),
-    ).rejects.toBeInstanceOf(BadRequestError);
+    ).rejects.toMatchObject({ code: 'ACTIVATION_PRODUCT_DUPLICATE' });
   });
 
   it('rejects products from another category', async () => {
@@ -96,6 +95,24 @@ describe('ActivationRequestItemsValidatorService', () => {
         { positionKey: 'windshield', productId: 'product-a' },
       ]),
     ).rejects.toMatchObject({ code: 'PRODUCT_CATEGORY_MISMATCH' });
+  });
+
+  it('rejects a product reserved by another open request', async () => {
+    requestsRepository.findOpenByProductIds.mockResolvedValue([
+      {
+        product_id: null,
+        items: [{ product_id: 'product-a' }],
+      },
+    ]);
+
+    await expect(
+      service.validate('category-id', [
+        { positionKey: 'windshield', productId: 'product-a' },
+      ]),
+    ).rejects.toMatchObject({
+      code: 'ACTIVATION_REQUEST_ALREADY_OPEN',
+      details: { productId: 'product-a' },
+    });
   });
 });
 
