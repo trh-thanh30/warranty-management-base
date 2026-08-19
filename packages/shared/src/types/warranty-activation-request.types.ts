@@ -202,6 +202,7 @@ export type CreateAdminWarrantyActivationRequestBody = Omit<
   CreateWarrantyActivationRequestBody,
   "warrantyCode"
 > & {
+  customerId: string;
   /** Multi-product requests use items; productId remains for legacy clients. */
   items?: CreateWarrantyActivationRequestItemBody[];
   productId?: string;

@@ -1,4 +1,6 @@
+import { IsNotFutureDate } from '@/common/decorators/is-not-future-date.decorator';
 import {
+  IsDateString,
   IsEmail,
   IsOptional,
   IsString,
@@ -25,4 +27,9 @@ export class UpdateCustomerDto {
   @IsString()
   @Length(1, 255)
   address?: string;
+
+  @ValidateIf((_, value) => value !== undefined && value !== null)
+  @IsDateString()
+  @IsNotFutureDate()
+  birthdate?: string | null;
 }

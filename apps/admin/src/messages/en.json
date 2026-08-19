@@ -596,6 +596,11 @@
     "wardRequired": "Select a ward or commune.",
     "emailRequired": "Enter the customer's email address.",
     "emailInvalid": "Enter a valid email address.",
+    "birthdate": "Birthdate",
+    "selectBirthdate": "Select birthdate",
+    "birthdateInputPlaceholder": "dd/mm/yyyy",
+    "birthdateInvalid": "Enter a valid date in dd/mm/yyyy format that is not in the future.",
+    "openBirthdateCalendar": "Open birthdate calendar",
     "excel": {
       "title": "Import/Export Excel",
       "upload": "Upload file",

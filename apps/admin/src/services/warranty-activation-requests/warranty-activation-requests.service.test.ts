@@ -123,6 +123,7 @@ test("creates an admin activation request from a selected product", async () => 
     productId: "23684bbd-b6e0-401a-9ba4-97e1b98176fd",
     addressDetail: "1 Nguyen Trai",
     customerEmail: "customer@example.com",
+    customerId: "68a1578a-b13e-45de-b008-e357392be715",
     customerName: "Nguyen Van A",
     customerPhone: "0901234567",
     provinceCode: "79",

@@ -43,6 +43,7 @@ const DEFAULT_VALUES: WarrantyActivationRequestCreateFormValues = {
   categoryInputValues: {},
   customerBirthdate: "",
   customerEmail: "",
+  customerId: "",
   customerName: "",
   customerPhone: "",
   dealerAddress: "",
@@ -213,7 +214,9 @@ export function useCreateWarrantyActivationRequestForm({
     setCustomerSearch("");
     setFormValues(form.setValue, {
       addressDetail: address.detail,
+      customerBirthdate: customer.birthdate?.slice(0, 10) ?? "",
       customerEmail: customer.email ?? "",
+      customerId: customer.id,
       customerName: customer.fullName ?? "",
       customerPhone: customer.phone ?? "",
     });
@@ -236,6 +239,7 @@ export function useCreateWarrantyActivationRequestForm({
         addressDetail: "",
         customerBirthdate: "",
         customerEmail: "",
+        customerId: "",
         customerName: "",
         customerPhone: "",
         provinceCode: "",

@@ -596,6 +596,11 @@
     "wardRequired": "Chọn phường hoặc xã.",
     "emailRequired": "Nhập email khách hàng.",
     "emailInvalid": "Nhập email hợp lệ.",
+    "birthdate": "Ngày sinh",
+    "selectBirthdate": "Chọn ngày sinh",
+    "birthdateInputPlaceholder": "dd/mm/yyyy",
+    "birthdateInvalid": "Nhập ngày hợp lệ theo định dạng dd/mm/yyyy và không lớn hơn ngày hiện tại.",
+    "openBirthdateCalendar": "Mở lịch chọn ngày sinh",
     "excel": {
       "title": "Nhập/Xuất Excel",
       "upload": "Tải lên file (Upload)",

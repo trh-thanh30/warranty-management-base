@@ -359,7 +359,8 @@ export function CreateWarrantyActivationRequestFormCard({
               error={formatActivationRequestCreateFieldError(
                 errors.customerName?.message ??
                   errors.customerPhone?.message ??
-                  errors.customerEmail?.message,
+                  errors.customerEmail?.message ??
+                  errors.customerId?.message,
                 t,
               )}
               id="create-activation-request-customer"
@@ -411,6 +412,7 @@ export function CreateWarrantyActivationRequestFormCard({
             <input type="hidden" {...register("customerName")} />
             <input type="hidden" {...register("customerPhone")} />
             <input type="hidden" {...register("customerEmail")} />
+            <input type="hidden" {...register("customerId")} />
 
             {selectedCustomer ? (
               <SelectedCustomerSummaryCard

@@ -8,6 +8,7 @@ describe('CreateAdminWarrantyActivationRequestDto', () => {
   const base = {
     addressDetail: '1 Nguyen Trai',
     categoryId: 'fd47a803-b240-4935-aab4-554d44fce684',
+    customerId: '68a1578a-b13e-45de-b008-e357392be715',
     customerName: 'Nguyen Van A',
     customerPhone: '0901234567',
     provinceCode: '79',
@@ -15,6 +16,17 @@ describe('CreateAdminWarrantyActivationRequestDto', () => {
     wardCode: '26734',
     wardName: 'Phuong Ben Thanh',
   };
+
+  it('requires a selected Customer id', async () => {
+    const input = Object.fromEntries(
+      Object.entries(base).filter(([key]) => key !== 'customerId'),
+    );
+    const dto = plainToInstance(CreateAdminWarrantyActivationRequestDto, input);
+
+    const errors = await validate(dto);
+
+    expect(errors.some((error) => error.property === 'customerId')).toBe(true);
+  });
 
   it('accepts nested physical Product items', async () => {
     const dto = plainToInstance(CreateAdminWarrantyActivationRequestDto, {

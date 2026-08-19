@@ -167,6 +167,13 @@ function getWarrantyActivationRequestSortColumn(
   }
 }
 
+type CreateWarrantyActivationRequestOptions = {
+  customerProfile?: {
+    id: string;
+    birthdate?: Date;
+  };
+};
+
 @Injectable()
 export class WarrantyActivationRequestsRepository {
   constructor(
@@ -175,7 +182,30 @@ export class WarrantyActivationRequestsRepository {
     private readonly generateCustomerCodeUseCase: GenerateCustomerCodeUseCase,
   ) {}
 
-  create(data: Prisma.WarrantyActivationRequestCreateInput) {
+  create(
+    data: Prisma.WarrantyActivationRequestCreateInput,
+    options: CreateWarrantyActivationRequestOptions = {},
+  ) {
+    const customerProfile = options.customerProfile;
+    if (customerProfile) {
+      return this.prismaService.$transaction(async (tx) => {
+        if (customerProfile.birthdate !== undefined) {
+          await tx.customer.update({
+            where: { id: customerProfile.id },
+            data: { birthdate: customerProfile.birthdate },
+          });
+        }
+
+        return tx.warrantyActivationRequest.create({
+          data: {
+            ...data,
+            customer: { connect: { id: customerProfile.id } },
+          },
+          include: activationRequestInclude,
+        });
+      });
+    }
+
     return this.prismaService.warrantyActivationRequest.create({
       data,
       include: activationRequestInclude,

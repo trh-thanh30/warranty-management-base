@@ -28,6 +28,7 @@ export type WarrantyActivationRequestCreateFormValues = {
   categoryInputValues: Record<string, string>;
   customerBirthdate: string;
   customerEmail: string;
+  customerId: string;
   customerName: string;
   customerPhone: string;
   dealerAddress: string;
@@ -67,6 +68,7 @@ export const warrantyActivationRequestCreateFormSchema = z.object({
   categoryId: z.string().trim().min(1, "categoryRequired"),
   categoryInputValues: z.record(z.string(), z.string().trim().max(500)),
   customerBirthdate: z.string().trim(),
+  customerId: z.string().trim().min(1, "customerRequired"),
   customerEmail: z
     .string()
     .trim()

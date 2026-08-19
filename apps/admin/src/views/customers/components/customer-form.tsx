@@ -5,7 +5,7 @@ import { Controller } from "react-hook-form";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { CustomerSummary } from "@repo/shared";
-import { Button, Input, Textarea } from "@repo/ui";
+import { Button, DatePicker, Input, Textarea } from "@repo/ui";
 import {
   Combobox,
   ComboboxContent,
@@ -61,6 +61,8 @@ export function CustomerForm({
   const provinceName = watch("provinceName");
   const wardName = watch("wardName");
   const addressDetail = watch("addressDetail");
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   const provinceCodeNumber = provinceCode ? Number(provinceCode) : null;
   const provincesQuery = useVietnamProvinces();
   const wardsQuery = useVietnamWards(provinceCodeNumber);
@@ -165,37 +167,69 @@ export function CustomerForm({
         </div>
       ) : null}
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <FormField
-          error={formatFieldError(errors.fullName?.message, t)}
-          id="customer-full-name"
-          label={t("fullName")}
-        >
-          <Input
-            autoComplete="name"
+      <div className="grid gap-5 sm:grid-cols-12">
+        <div className="sm:col-span-5">
+          <FormField
+            error={formatFieldError(errors.fullName?.message, t)}
             id="customer-full-name"
-            placeholder={t("fullNamePlaceholder")}
-            {...register("fullName")}
-          />
-        </FormField>
+            label={t("fullName")}
+          >
+            <Input
+              autoComplete="name"
+              id="customer-full-name"
+              placeholder={t("fullNamePlaceholder")}
+              {...register("fullName")}
+            />
+          </FormField>
+        </div>
 
-        <FormField
-          error={formatFieldError(errors.customerCode?.message, t)}
-          id="customer-code"
-          label={t("customerCode")}
-        >
-          <Input
-            autoComplete="off"
-            disabled={!creating}
+        <div className="sm:col-span-4">
+          <FormField id="customer-birthdate" label={t("birthdate")}>
+            <Controller
+              control={control}
+              name="birthdate"
+              render={({ field }) => (
+                <DatePicker
+                  allowManualInput
+                  ariaLabel={t("birthdate")}
+                  calendarAriaLabel={t("openBirthdateCalendar")}
+                  captionLayout="dropdown"
+                  disabledDates={{ after: today }}
+                  endMonth={today}
+                  id="customer-birthdate"
+                  inputPlaceholder={t("birthdateInputPlaceholder")}
+                  invalidInputMessage={t("birthdateInvalid")}
+                  maxDate={today}
+                  minDate={new Date(1900, 0, 1)}
+                  onValueChange={field.onChange}
+                  placeholder={t("selectBirthdate")}
+                  startMonth={new Date(1900, 0, 1)}
+                  value={field.value}
+                />
+              )}
+            />
+          </FormField>
+        </div>
+
+        <div className="sm:col-span-3">
+          <FormField
+            error={formatFieldError(errors.customerCode?.message, t)}
             id="customer-code"
-            placeholder={
-              creating
-                ? t("customerCodeAutoPlaceholder")
-                : t("customerCodePlaceholder")
-            }
-            {...register("customerCode")}
-          />
-        </FormField>
+            label={t("customerCode")}
+          >
+            <Input
+              autoComplete="off"
+              disabled={!creating}
+              id="customer-code"
+              placeholder={
+                creating
+                  ? t("customerCodeAutoPlaceholder")
+                  : t("customerCodePlaceholder")
+              }
+              {...register("customerCode")}
+            />
+          </FormField>
+        </div>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">

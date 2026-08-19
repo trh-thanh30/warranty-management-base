@@ -2,6 +2,71 @@ import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activat
 import { warranty_activation_request_status } from '@prisma/client';
 
 describe('WarrantyActivationRequestsRepository', () => {
+  it('updates Customer birthdate and creates the request in one transaction', async () => {
+    const updateCustomer = jest.fn().mockResolvedValue({ id: 'customer-id' });
+    const createRequest = jest.fn().mockResolvedValue({ id: 'request-id' });
+    const transaction = jest.fn((callback: (tx: unknown) => unknown) =>
+      callback({
+        customer: { update: updateCustomer },
+        warrantyActivationRequest: { create: createRequest },
+      }),
+    );
+    const repository = new WarrantyActivationRequestsRepository(
+      { $transaction: transaction } as never,
+      {} as never,
+      {} as never,
+    );
+    const birthdate = new Date('2005-12-11T00:00:00.000Z');
+
+    await repository.create({ request_code: 'WAR-20260820-0001' } as never, {
+      customerProfile: { id: 'customer-id', birthdate },
+    });
+
+    expect(updateCustomer).toHaveBeenCalledWith({
+      where: { id: 'customer-id' },
+      data: { birthdate },
+    });
+    expect(createRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          customer: { connect: { id: 'customer-id' } },
+        }),
+      }),
+    );
+  });
+
+  it('connects the Customer without overwriting birthdate when it is omitted', async () => {
+    const updateCustomer = jest.fn();
+    const createRequest = jest.fn().mockResolvedValue({ id: 'request-id' });
+    const transaction = jest.fn((callback: (tx: unknown) => unknown) =>
+      callback({
+        customer: { update: updateCustomer },
+        warrantyActivationRequest: { create: createRequest },
+      }),
+    );
+    const repository = new WarrantyActivationRequestsRepository(
+      { $transaction: transaction } as never,
+      {} as never,
+      {} as never,
+    );
+
+    await repository.create({ request_code: 'WAR-20260820-0002' } as never, {
+      customerProfile: {
+        id: 'customer-id',
+        birthdate: undefined,
+      },
+    });
+
+    expect(updateCustomer).not.toHaveBeenCalled();
+    expect(createRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          customer: { connect: { id: 'customer-id' } },
+        }),
+      }),
+    );
+  });
+
   it('finds the newest pending or approved request for a product', async () => {
     const findFirst = jest.fn().mockResolvedValue(null);
     const prismaService = {

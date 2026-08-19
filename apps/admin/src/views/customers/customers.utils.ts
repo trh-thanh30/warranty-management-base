@@ -1,4 +1,9 @@
-import type { CustomerSummary } from "@repo/shared";
+import type {
+  CreateCustomerBody,
+  CustomerSummary,
+  UpdateCustomerBody,
+} from "@repo/shared";
+import { toOptionalValue, toRequiredValue } from "@/src/utils";
 import type { CustomerFormValues } from "./customers.types";
 
 type CustomerAddressSelectionInput = Pick<
@@ -88,4 +93,29 @@ export function getCustomerDisplayName(customer: CustomerSummary) {
 
 export function getCustomerContact(customer: CustomerSummary) {
   return customer.phone || customer.email || null;
+}
+
+export function toCreateCustomerBody(
+  values: CustomerFormValues,
+): CreateCustomerBody {
+  return {
+    address: buildCustomerAddress(values),
+    birthdate: toOptionalValue(values.birthdate),
+    customerCode: toOptionalValue(values.customerCode)?.toUpperCase(),
+    email: toRequiredValue(values.email),
+    fullName: values.fullName.trim(),
+    phone: toRequiredValue(values.phone),
+  };
+}
+
+export function toUpdateCustomerBody(
+  values: CustomerFormValues,
+): UpdateCustomerBody {
+  return {
+    address: buildCustomerAddress(values),
+    birthdate: toOptionalValue(values.birthdate) ?? null,
+    email: toRequiredValue(values.email),
+    fullName: values.fullName.trim(),
+    phone: toRequiredValue(values.phone),
+  };
 }

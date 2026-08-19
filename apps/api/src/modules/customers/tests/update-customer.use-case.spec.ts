@@ -46,6 +46,33 @@ describe('UpdateCustomerUseCase', () => {
     expect(result.email).toBe('user1@example.com');
   });
 
+  it('clears a customer birthdate explicitly', async () => {
+    const customersRepository = createCustomersRepository();
+    customersRepository.findById.mockResolvedValue({ id: 'customer-id' });
+    customersRepository.update.mockResolvedValue({
+      id: 'customer-id',
+      user_id: null,
+      customer_code: 'CUS-2026-0001',
+      full_name: 'Nguyen Van Hung',
+      phone: '0987654311',
+      email: 'user1@example.com',
+      address: 'Ho Chi Minh City',
+      birthdate: null,
+      metadata: null,
+      created_at: new Date('2026-07-09T00:00:00.000Z'),
+      updated_at: new Date('2026-07-09T00:00:00.000Z'),
+    });
+    const useCase = new UpdateCustomerUseCase(customersRepository as never);
+
+    const result = await useCase.execute('customer-id', { birthdate: null });
+
+    expect(customersRepository.update).toHaveBeenCalledWith(
+      'customer-id',
+      expect.objectContaining({ birthdate: null }),
+    );
+    expect(result.birthdate).toBeNull();
+  });
+
   it('throws when customer does not exist', async () => {
     const customersRepository = createCustomersRepository();
     customersRepository.findById.mockResolvedValue(null);
