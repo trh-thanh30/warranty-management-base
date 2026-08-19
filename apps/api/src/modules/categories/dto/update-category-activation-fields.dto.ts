@@ -29,7 +29,7 @@ export class CategoryActivationFieldOptionDto {
 export class CategoryActivationFieldDto {
   @IsString()
   @Length(1, 64)
-  @Matches(/^[a-z][a-z0-9_]*$/)
+  @Matches(/^[a-z][A-Za-z0-9_]*$/)
   key!: string;
 
   @IsString()

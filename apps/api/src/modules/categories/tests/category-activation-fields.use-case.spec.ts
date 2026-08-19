@@ -165,6 +165,26 @@ describe('Category activation field use cases', () => {
 });
 
 describe('UpdateCategoryActivationFieldsDto', () => {
+  it('accepts existing camelCase activation field keys', async () => {
+    const dto = plainToInstance(UpdateCategoryActivationFieldsDto, {
+      activationFormEnabled: false,
+      activationFields: [
+        {
+          key: 'frontLeftSide',
+          label: 'Kính sườn trước - trái',
+          type: 'PRODUCT_SELECT',
+          required: false,
+          order: 1,
+          options: [],
+        },
+      ],
+    });
+
+    const errors = await validate(dto);
+
+    expect(errors).toHaveLength(0);
+  });
+
   it('validates field keys and supported types', async () => {
     const dto = plainToInstance(UpdateCategoryActivationFieldsDto, {
       activationFormEnabled: true,
