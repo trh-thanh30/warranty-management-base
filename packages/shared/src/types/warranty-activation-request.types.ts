@@ -20,6 +20,7 @@ export type WarrantyCertificateEmailStatus =
 
 export type WarrantyCertificateSummary = {
   id: string;
+  scope: "ACTIVATION_REQUEST";
   certificateNumber: string;
   downloadUrl: string;
   status: WarrantyCertificateStatus;
@@ -46,7 +47,6 @@ export type WarrantyActivationRequestItemSummary = {
   warrantyStatus: WarrantyStatus;
   status: WarrantyActivationRequestStatus;
   activatedAt: string | null;
-  certificate: WarrantyCertificateSummary | null;
 };
 
 export type WarrantyActivationRequestSortBy =

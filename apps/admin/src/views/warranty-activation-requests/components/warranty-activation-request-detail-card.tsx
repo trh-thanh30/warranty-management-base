@@ -2,10 +2,7 @@
 
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import type {
-  WarrantyActivationRequestItemSummary,
-  WarrantyActivationRequestSummary,
-} from "@repo/shared";
+import type { WarrantyActivationRequestSummary } from "@repo/shared";
 import { Badge, Card, CardContent, Skeleton } from "@repo/ui";
 import {
   formatActivationRequestAddress,
@@ -16,22 +13,10 @@ import { ActivationRequestItemsTable } from "./activation-request-items-table";
 import { getActivationRequestWarrantyCodeLabel } from "../warranty-activation-request-items.utils";
 
 type WarrantyActivationRequestDetailCardProps = {
-  busyItemId?: string | null;
-  onDownloadItemCertificate?: (
-    item: WarrantyActivationRequestItemSummary,
-  ) => void;
-  onResendItemCertificate?: (
-    item: WarrantyActivationRequestItemSummary,
-  ) => void;
-  onViewItemCertificate?: (item: WarrantyActivationRequestItemSummary) => void;
   request: WarrantyActivationRequestSummary;
 };
 
 export function WarrantyActivationRequestDetailCard({
-  busyItemId,
-  onDownloadItemCertificate,
-  onResendItemCertificate,
-  onViewItemCertificate,
   request,
 }: WarrantyActivationRequestDetailCardProps) {
   const locale = useLocale();
@@ -114,13 +99,7 @@ export function WarrantyActivationRequestDetailCard({
                 {t("productCount", { count: items.length })}
               </span>
             </div>
-            <ActivationRequestItemsTable
-              busyItemId={busyItemId}
-              items={items}
-              onDownloadCertificate={onDownloadItemCertificate}
-              onResendCertificate={onResendItemCertificate}
-              onViewCertificate={onViewItemCertificate}
-            />
+            <ActivationRequestItemsTable items={items} />
           </section>
         ) : (
           <DetailSection title={t("productInfo")}>
@@ -213,67 +192,65 @@ export function WarrantyActivationRequestDetailCard({
           />
         </DetailSection>
 
-        {!hasItems ? (
-          <DetailSection title={t("certificateInfo")}>
-            <DetailItem
-              label={t("certificateNumber")}
-              value={certificate?.certificateNumber ?? "-"}
-            />
-            <DetailItem
-              label={t("certificateEmail")}
-              value={
-                certificate
-                  ? (certificate.recipientEmail ?? t("certificateNoEmail"))
-                  : "-"
-              }
-            />
-            <DetailItem
-              label={t("certificateStatus")}
-              value={
-                certificate ? (
-                  <Badge variant="secondary">
-                    {t(`certificateStatuses.${certificate.status}`)}
-                  </Badge>
-                ) : (
-                  "-"
-                )
-              }
-            />
-            <DetailItem
-              label={t("certificateEmailStatus")}
-              value={
-                certificate ? (
-                  <Badge variant="secondary">
-                    {certificate.recipientEmail
-                      ? t(`certificateEmailStatuses.${certificate.emailStatus}`)
-                      : t("certificateNoEmail")}
-                  </Badge>
-                ) : (
-                  "-"
-                )
-              }
-            />
-            <DetailItem
-              label={t("certificateGeneratedAt")}
-              value={formatActivationRequestDate(
-                certificate?.generatedAt ?? null,
-                locale,
-              )}
-            />
-            <DetailItem
-              label={t("certificateEmailedAt")}
-              value={formatActivationRequestDate(
-                certificate?.emailedAt ?? null,
-                locale,
-              )}
-            />
-            <DetailItem
-              className="sm:col-span-2"
-              label={t("certificateLastError")}
-              value={certificate?.lastError ?? "-"}
-            />
-          </DetailSection>
-        ) : null}
+        <DetailSection title={t("certificateInfo")}>
+          <DetailItem
+            label={t("certificateNumber")}
+            value={certificate?.certificateNumber ?? "-"}
+          />
+          <DetailItem
+            label={t("certificateEmail")}
+            value={
+              certificate
+                ? (certificate.recipientEmail ?? t("certificateNoEmail"))
+                : "-"
+            }
+          />
+          <DetailItem
+            label={t("certificateStatus")}
+            value={
+              certificate ? (
+                <Badge variant="secondary">
+                  {t(`certificateStatuses.${certificate.status}`)}
+                </Badge>
+              ) : (
+                "-"
+              )
+            }
+          />
+          <DetailItem
+            label={t("certificateEmailStatus")}
+            value={
+              certificate ? (
+                <Badge variant="secondary">
+                  {certificate.recipientEmail
+                    ? t(`certificateEmailStatuses.${certificate.emailStatus}`)
+                    : t("certificateNoEmail")}
+                </Badge>
+              ) : (
+                "-"
+              )
+            }
+          />
+          <DetailItem
+            label={t("certificateGeneratedAt")}
+            value={formatActivationRequestDate(
+              certificate?.generatedAt ?? null,
+              locale,
+            )}
+          />
+          <DetailItem
+            label={t("certificateEmailedAt")}
+            value={formatActivationRequestDate(
+              certificate?.emailedAt ?? null,
+              locale,
+            )}
+          />
+          <DetailItem
+            className="sm:col-span-2"
+            label={t("certificateLastError")}
+            value={certificate?.lastError ?? "-"}
+          />
+        </DetailSection>
       </CardContent>
     </Card>
   );

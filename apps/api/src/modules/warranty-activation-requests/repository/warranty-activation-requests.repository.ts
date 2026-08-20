@@ -42,6 +42,7 @@ const activationRequestInclude = {
       sales_name: true,
     },
   },
+  certificate: true,
   reviewed_by: {
     select: {
       id: true,
@@ -50,26 +51,10 @@ const activationRequestInclude = {
       username: true,
     },
   },
-  activated_warranty: {
-    include: {
-      certificates: {
-        orderBy: { created_at: 'desc' as const },
-        take: 1,
-      },
-    },
-  },
+  activated_warranty: true,
   items: {
     orderBy: [{ created_at: 'asc' as const }, { id: 'asc' as const }],
-    include: {
-      warranty: {
-        include: {
-          certificates: {
-            orderBy: { created_at: 'desc' as const },
-            take: 1,
-          },
-        },
-      },
-    },
+    include: { warranty: true },
   },
 } satisfies Prisma.WarrantyActivationRequestInclude;
 

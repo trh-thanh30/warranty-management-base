@@ -53,6 +53,54 @@ describe('WarrantyCertificatePdfService', () => {
     );
     expect(result.toString()).toBe('%PDF-test');
   });
+
+  it('renders an already normalized request certificate view model', async () => {
+    const htmlTemplate = {
+      render: jest.fn().mockReturnValue('<html>request certificate</html>'),
+    } as unknown as WarrantyCertificateHtmlTemplateService;
+    const htmlPdfRenderer = {
+      createPdf: jest.fn().mockResolvedValue(Buffer.from('%PDF-request')),
+    } as unknown as HtmlPdfRendererService;
+    const service = new WarrantyCertificatePdfService(
+      htmlTemplate,
+      htmlPdfRenderer,
+    );
+    const viewModel: WarrantyCertificateViewModel = {
+      activationFields: [],
+      certificate: {
+        installedAt: '16/8/2026',
+        issuedAt: '20/8/2026',
+        number: 'CERT-REQUEST-001',
+      },
+      customer: {
+        address: 'Hà Nội',
+        email: 'customer@example.com',
+        fullName: 'Nguyễn Văn A',
+        phone: '0901234567',
+      },
+      dealer: { name: 'Đại lý Lexzenz' },
+      products: [
+        {
+          durationLabel: '12 tháng',
+          expiryDate: '16/8/2027',
+          positionLabel: 'Kính lái',
+          productCode: 'PRD-A',
+          productName: 'Phim cách nhiệt A',
+          serialNumber: 'SERIAL-A',
+          warrantyCode: 'WM-A',
+        },
+      ],
+      vehicle: { model: 'Toyota Camry', plate: '30A-12345' },
+    };
+
+    const result = await service.createPdfFromViewModel(viewModel);
+
+    expect(htmlTemplate.render).toHaveBeenCalledWith(viewModel);
+    expect(htmlPdfRenderer.createPdf).toHaveBeenCalledWith(
+      '<html>request certificate</html>',
+    );
+    expect(result.toString()).toBe('%PDF-request');
+  });
 });
 
 const describeIntegration =

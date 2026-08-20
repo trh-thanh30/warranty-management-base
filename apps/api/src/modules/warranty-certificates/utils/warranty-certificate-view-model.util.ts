@@ -1,4 +1,5 @@
 import type {
+  RequestWarrantyCertificatePdfInput,
   WarrantyCertificatePdfInput,
   WarrantyCertificateViewModel,
 } from '@/modules/warranty-certificates/warranty-certificate.types';
@@ -56,6 +57,44 @@ export function buildWarrantyCertificateViewModel(
       },
     ],
     activationFields: toActivationFields(input.filmItems),
+  };
+}
+
+export function buildRequestWarrantyCertificateViewModel(
+  input: RequestWarrantyCertificatePdfInput,
+  issuedAt = new Date(),
+): WarrantyCertificateViewModel {
+  return {
+    certificate: {
+      installedAt: formatValue(
+        formatWarrantyCertificateDate(input.installedAt ?? null),
+      ),
+      issuedAt: formatValue(formatWarrantyCertificateDate(issuedAt)),
+      number: formatValue(input.certificateNumber),
+    },
+    customer: {
+      address: formatValue(input.customerAddress),
+      email: formatValue(input.customerEmail),
+      fullName: formatValue(input.customerName),
+      phone: formatValue(input.customerPhone),
+    },
+    dealer: {
+      name: formatValue(input.dealerName),
+    },
+    vehicle: {
+      model: formatValue(input.vehicleModel),
+      plate: formatValue(input.vehiclePlate),
+    },
+    products: input.items.map((item) => ({
+      durationLabel: formatWarrantyDuration(item.durationMonths),
+      expiryDate: formatValue(formatWarrantyCertificateDate(item.endDate)),
+      positionLabel: formatValue(item.positionLabel),
+      productCode: formatValue(item.productCode),
+      productName: formatValue(item.productName),
+      serialNumber: formatValue(item.serialNumber),
+      warrantyCode: formatValue(item.warrantyCode),
+    })),
+    activationFields: [],
   };
 }
 

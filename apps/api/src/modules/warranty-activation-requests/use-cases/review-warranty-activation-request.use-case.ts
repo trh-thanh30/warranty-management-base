@@ -3,15 +3,19 @@ import { ReviewWarrantyActivationRequestDto } from '@/modules/warranty-activatio
 import { toWarrantyActivationRequestResponse } from '@/modules/warranty-activation-requests/mappers/warranty-activation-request.mapper';
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
 import { optionalTrim } from '@/modules/warranty-activation-requests/utils/warranty-activation-request-normalization.utils';
-import { IssueWarrantyCertificatesForRequestUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-certificates-for-request.use-case';
-import { Injectable } from '@nestjs/common';
+import { IssueWarrantyActivationRequestCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-activation-request-certificate.use-case';
+import { Injectable, Logger } from '@nestjs/common';
 import { warranty_activation_request_status } from '@prisma/client';
 
 @Injectable()
 export class ReviewWarrantyActivationRequestUseCase {
+  private readonly logger = new Logger(
+    ReviewWarrantyActivationRequestUseCase.name,
+  );
+
   constructor(
     private readonly warrantyActivationRequestsRepository: WarrantyActivationRequestsRepository,
-    private readonly issueWarrantyCertificatesForRequestUseCase: IssueWarrantyCertificatesForRequestUseCase,
+    private readonly issueRequestCertificate: IssueWarrantyActivationRequestCertificateUseCase,
   ) {}
 
   async execute(
@@ -58,18 +62,15 @@ export class ReviewWarrantyActivationRequestUseCase {
         throw new NotFoundError('Warranty activation request target not found');
       }
 
-      const warrantyIds =
-        activatedRequest.items?.map((item) => item.warranty_id) ?? [];
-      if (warrantyIds.length === 0 && activatedRequest.activated_warranty_id) {
-        warrantyIds.push(activatedRequest.activated_warranty_id);
-      }
-
-      if (warrantyIds.length > 0) {
-        await this.issueWarrantyCertificatesForRequestUseCase.execute({
+      try {
+        await this.issueRequestCertificate.execute({
           recipientEmail: activatedRequest.customer_email ?? undefined,
           requestId: activatedRequest.id,
-          warrantyIds,
         });
+      } catch (error) {
+        this.logger.error(
+          `Activation request ${activatedRequest.id} was activated but certificate issuance failed: ${String(error)}`,
+        );
       }
 
       const refreshedRequest =

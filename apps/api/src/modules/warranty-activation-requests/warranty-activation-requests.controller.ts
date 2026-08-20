@@ -105,26 +105,6 @@ export class WarrantyActivationRequestsController {
     await this.sendCertificateFile(id, response, 'attachment');
   }
 
-  @Get(':id/items/:itemId/certificate/view')
-  @Permissions([permission_key.WARRANTY_VIEW])
-  async viewItemCertificate(
-    @Param('id') id: string,
-    @Param('itemId') itemId: string,
-    @Res() response: Response,
-  ) {
-    await this.sendCertificateFile(id, response, 'inline', itemId);
-  }
-
-  @Get(':id/items/:itemId/certificate/download')
-  @Permissions([permission_key.WARRANTY_VIEW])
-  async downloadItemCertificate(
-    @Param('id') id: string,
-    @Param('itemId') itemId: string,
-    @Res() response: Response,
-  ) {
-    await this.sendCertificateFile(id, response, 'attachment', itemId);
-  }
-
   @Get(':id')
   @Permissions([permission_key.WARRANTY_VIEW])
   detail(@Param('id') id: string) {
@@ -151,28 +131,14 @@ export class WarrantyActivationRequestsController {
     );
   }
 
-  @Post(':id/items/:itemId/certificate/resend-email')
-  @Permissions([permission_key.WARRANTY_UPDATE])
-  resendItemCertificateEmail(
-    @Param('id') id: string,
-    @Param('itemId') itemId: string,
-  ) {
-    return this.resendWarrantyActivationRequestCertificateEmailUseCase.execute(
-      id,
-      itemId,
-    );
-  }
-
   private async sendCertificateFile(
     id: string,
     response: Response,
     disposition: 'attachment' | 'inline',
-    itemId?: string,
   ) {
     const { filename, stream } =
       await this.downloadWarrantyActivationRequestCertificateUseCase.execute(
         id,
-        itemId,
       );
 
     response.setHeader('Content-Type', 'application/pdf');

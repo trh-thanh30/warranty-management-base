@@ -17,6 +17,29 @@ export type WarrantyCertificatePdfInput = {
   warrantyCode: string | null;
 };
 
+export type RequestWarrantyCertificatePdfItem = {
+  durationMonths: number;
+  endDate: Date | null;
+  positionLabel: string;
+  productCode: string;
+  productName: string;
+  serialNumber: string | null;
+  warrantyCode: string;
+};
+
+export type RequestWarrantyCertificatePdfInput = {
+  certificateNumber: string;
+  customerAddress?: string | null;
+  customerEmail?: string | null;
+  customerName: string;
+  customerPhone?: string | null;
+  dealerName?: string | null;
+  installedAt?: Date | null;
+  items: RequestWarrantyCertificatePdfItem[];
+  vehicleModel?: string | null;
+  vehiclePlate?: string | null;
+};
+
 export type WarrantyCertificateFieldRow = {
   label: string;
   value: string;

@@ -18,7 +18,7 @@ export interface EmailJobData {
   template?: string;
   context?: Record<string, unknown>;
   warrantyCertificateId?: string;
-  warrantyCertificateIds?: string[];
+  warrantyActivationRequestCertificateId?: string;
   // Idempotency key for deduplication
   idempotencyKey?: string;
 }
@@ -47,7 +47,7 @@ export class EmailProcessor extends WorkerHost {
       context,
       idempotencyKey,
       warrantyCertificateId,
-      warrantyCertificateIds,
+      warrantyActivationRequestCertificateId,
     } = job.data;
 
     // Idempotency check - skip if already processed
@@ -96,16 +96,19 @@ export class EmailProcessor extends WorkerHost {
 
       // mark job as completed
       job.updateProgress(100);
-      await this.markWarrantyCertificateEmailSent(
-        warrantyCertificateIds ??
-          (warrantyCertificateId ? [warrantyCertificateId] : []),
+      await this.markWarrantyCertificateEmailSent(warrantyCertificateId);
+      await this.markRequestCertificateEmailSent(
+        warrantyActivationRequestCertificateId,
       );
 
       this.logger.log(`Email job ${job.id} completed successfully`);
     } catch (error) {
       await this.markWarrantyCertificateEmailFailed(
-        warrantyCertificateIds ??
-          (warrantyCertificateId ? [warrantyCertificateId] : []),
+        warrantyCertificateId,
+        error instanceof Error ? error.message : 'Unknown email sending error',
+      );
+      await this.markRequestCertificateEmailFailed(
+        warrantyActivationRequestCertificateId,
         error instanceof Error ? error.message : 'Unknown email sending error',
       );
       this.logger.error(`Email job ${job.id} failed: ${error.message}`);
@@ -113,11 +116,11 @@ export class EmailProcessor extends WorkerHost {
     }
   }
 
-  private async markWarrantyCertificateEmailSent(certificateIds: string[]) {
-    if (certificateIds.length === 0) return;
+  private async markWarrantyCertificateEmailSent(certificateId?: string) {
+    if (!certificateId) return;
 
-    await this.prismaService.warrantyCertificate.updateMany({
-      where: { id: { in: certificateIds } },
+    await this.prismaService.warrantyCertificate.update({
+      where: { id: certificateId },
       data: {
         email_status: warranty_certificate_email_status.SENT,
         emailed_at: new Date(),
@@ -127,13 +130,41 @@ export class EmailProcessor extends WorkerHost {
   }
 
   private async markWarrantyCertificateEmailFailed(
-    certificateIds: string[],
+    certificateId: string | undefined,
     message: string,
   ) {
-    if (certificateIds.length === 0) return;
+    if (!certificateId) return;
 
-    await this.prismaService.warrantyCertificate.updateMany({
-      where: { id: { in: certificateIds } },
+    await this.prismaService.warrantyCertificate.update({
+      where: { id: certificateId },
+      data: {
+        email_status: warranty_certificate_email_status.FAILED,
+        last_error: message,
+      },
+    });
+  }
+
+  private async markRequestCertificateEmailSent(certificateId?: string) {
+    if (!certificateId) return;
+
+    await this.prismaService.warrantyActivationRequestCertificate.update({
+      where: { id: certificateId },
+      data: {
+        email_status: warranty_certificate_email_status.SENT,
+        emailed_at: new Date(),
+        last_error: null,
+      },
+    });
+  }
+
+  private async markRequestCertificateEmailFailed(
+    certificateId: string | undefined,
+    message: string,
+  ) {
+    if (!certificateId) return;
+
+    await this.prismaService.warrantyActivationRequestCertificate.update({
+      where: { id: certificateId },
       data: {
         email_status: warranty_certificate_email_status.FAILED,
         last_error: message,

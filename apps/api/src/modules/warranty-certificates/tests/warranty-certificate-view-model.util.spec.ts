@@ -1,4 +1,7 @@
-import { buildWarrantyCertificateViewModel } from '@/modules/warranty-certificates/utils/warranty-certificate-view-model.util';
+import {
+  buildRequestWarrantyCertificateViewModel,
+  buildWarrantyCertificateViewModel,
+} from '@/modules/warranty-certificates/utils/warranty-certificate-view-model.util';
 
 describe('buildWarrantyCertificateViewModel', () => {
   const input = {
@@ -81,5 +84,60 @@ describe('buildWarrantyCertificateViewModel', () => {
       { label: 'Kính lái', value: 'SP50' },
       { label: 'sunroof', value: 'SR15' },
     ]);
+  });
+
+  it('normalizes every product in an activation request', () => {
+    const result = buildRequestWarrantyCertificateViewModel(
+      {
+        certificateNumber: 'CERT-REQUEST-001',
+        customerAddress: 'Hà Nội',
+        customerEmail: 'customer@example.com',
+        customerName: 'Nguyễn Văn A',
+        customerPhone: '0901234567',
+        dealerName: 'Đại lý Lexzenz',
+        installedAt: new Date('2026-08-16T00:00:00.000Z'),
+        items: [
+          {
+            durationMonths: 12,
+            endDate: new Date('2027-08-16T00:00:00.000Z'),
+            positionLabel: 'Kính lái',
+            productCode: 'PRD-A',
+            productName: 'Phim cách nhiệt A',
+            serialNumber: 'SERIAL-A',
+            warrantyCode: 'WM-A',
+          },
+          {
+            durationMonths: 24,
+            endDate: new Date('2028-08-16T00:00:00.000Z'),
+            positionLabel: 'Kính lưng',
+            productCode: 'PRD-B',
+            productName: 'Phim cách nhiệt B',
+            serialNumber: null,
+            warrantyCode: 'WM-B',
+          },
+        ],
+        vehicleModel: 'Toyota Camry',
+        vehiclePlate: '30A-12345',
+      },
+      new Date('2026-08-20T00:00:00.000Z'),
+    );
+
+    expect(result.certificate.number).toBe('CERT-REQUEST-001');
+    expect(result.products).toEqual([
+      expect.objectContaining({
+        durationLabel: '12 tháng',
+        positionLabel: 'Kính lái',
+        productName: 'Phim cách nhiệt A',
+        warrantyCode: 'WM-A',
+      }),
+      expect.objectContaining({
+        durationLabel: '24 tháng',
+        positionLabel: 'Kính lưng',
+        productName: 'Phim cách nhiệt B',
+        serialNumber: 'Không',
+        warrantyCode: 'WM-B',
+      }),
+    ]);
+    expect(result.activationFields).toEqual([]);
   });
 });

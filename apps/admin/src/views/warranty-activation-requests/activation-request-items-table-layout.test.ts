@@ -12,13 +12,11 @@ test("activation request item columns stay readable and scroll horizontally", ()
     source,
     /TableScroll className="max-w-full overscroll-x-contain rounded-md/,
   );
-  assert.match(source, /Table className="min-w-\[1120px\] whitespace-nowrap"/);
+  assert.match(source, /Table className="min-w-\[920px\] whitespace-nowrap"/);
 });
 
-test("certificate icon actions expose visible hover and focus tooltips", () => {
-  assert.match(source, /<TooltipProvider delayDuration=\{250\}>/);
-  assert.equal(source.match(/<Tooltip>/g)?.length, 3);
-  assert.match(source, /<TooltipContent>\s*\{t\("viewItemCertificate"/);
-  assert.match(source, /<TooltipContent>\s*\{t\("downloadItemCertificate"/);
-  assert.match(source, /<TooltipContent>\s*\{t\("resendItemCertificate"/);
+test("activation request items do not expose certificate actions", () => {
+  assert.doesNotMatch(source, /viewItemCertificate/);
+  assert.doesNotMatch(source, /downloadItemCertificate/);
+  assert.doesNotMatch(source, /resendItemCertificate/);
 });

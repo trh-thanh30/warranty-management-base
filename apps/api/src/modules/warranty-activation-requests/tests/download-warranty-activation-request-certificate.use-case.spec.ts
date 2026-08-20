@@ -1,102 +1,43 @@
-import { DownloadWarrantyActivationRequestCertificateUseCase } from '@/modules/warranty-activation-requests/use-cases/download-warranty-activation-request-certificate.use-case';
 import { NotFoundError } from '@/common/response';
-import { Readable } from 'stream';
+import { DownloadWarrantyActivationRequestCertificateUseCase } from '@/modules/warranty-activation-requests/use-cases/download-warranty-activation-request-certificate.use-case';
+import { Readable } from 'node:stream';
 
 describe('DownloadWarrantyActivationRequestCertificateUseCase', () => {
-  it('returns the latest certificate PDF stream for an activation request', async () => {
+  it('returns the request-owned certificate PDF stream', async () => {
     const stream = Readable.from(['pdf']);
-    const prismaService = {
-      warrantyActivationRequest: {
-        findUnique: jest.fn().mockResolvedValue({
-          activated_warranty: {
-            certificates: [
-              {
-                certificate_number: 'CERT-2026-ABC123',
-                storage_key: 'private/2026/07/warranty-certificates/file.pdf',
-              },
-            ],
-          },
-        }),
-      },
+    const repository = {
+      findByRequestId: jest.fn().mockResolvedValue({
+        certificate_number: 'CERT-2026-ABC123',
+        storage_key: 'private/request-certificate.pdf',
+      }),
     };
     const uploadAssetService = {
       getStream: jest.fn().mockResolvedValue(stream),
     };
     const useCase = new DownloadWarrantyActivationRequestCertificateUseCase(
-      prismaService as never,
+      repository as never,
       uploadAssetService as never,
     );
 
-    const result = await useCase.execute('request-id');
-
-    expect(
-      prismaService.warrantyActivationRequest.findUnique,
-    ).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { id: 'request-id' },
-      }),
-    );
-    expect(uploadAssetService.getStream).toHaveBeenCalledWith(
-      'private/2026/07/warranty-certificates/file.pdf',
-    );
-    expect(result).toEqual({
+    await expect(useCase.execute('request-id')).resolves.toEqual({
       filename: 'CERT-2026-ABC123.pdf',
       stream,
     });
+    expect(repository.findByRequestId).toHaveBeenCalledWith('request-id');
+    expect(uploadAssetService.getStream).toHaveBeenCalledWith(
+      'private/request-certificate.pdf',
+    );
   });
 
-  it('rejects when the request has no generated certificate file', async () => {
-    const prismaService = {
-      warrantyActivationRequest: {
-        findUnique: jest.fn().mockResolvedValue({
-          activated_warranty: { certificates: [] },
-        }),
-      },
-    };
+  it('does not fall back when the request has no request-owned certificate', async () => {
+    const repository = { findByRequestId: jest.fn().mockResolvedValue(null) };
     const useCase = new DownloadWarrantyActivationRequestCertificateUseCase(
-      prismaService as never,
+      repository as never,
       { getStream: jest.fn() } as never,
     );
 
     await expect(useCase.execute('request-id')).rejects.toBeInstanceOf(
       NotFoundError,
-    );
-  });
-
-  it('returns the certificate belonging to the requested item', async () => {
-    const stream = Readable.from(['item-pdf']);
-    const prismaService = {
-      warrantyActivationRequestItem: {
-        findFirst: jest.fn().mockResolvedValue({
-          warranty: {
-            certificates: [
-              {
-                certificate_number: 'CERT-ITEM-002',
-                storage_key: 'private/item-2.pdf',
-              },
-            ],
-          },
-        }),
-      },
-    };
-    const uploadAssetService = {
-      getStream: jest.fn().mockResolvedValue(stream),
-    };
-    const useCase = new DownloadWarrantyActivationRequestCertificateUseCase(
-      prismaService as never,
-      uploadAssetService as never,
-    );
-
-    await expect(useCase.execute('request-id', 'item-2')).resolves.toEqual({
-      filename: 'CERT-ITEM-002.pdf',
-      stream,
-    });
-    expect(
-      prismaService.warrantyActivationRequestItem.findFirst,
-    ).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { id: 'item-2', request_id: 'request-id' },
-      }),
     );
   });
 });
