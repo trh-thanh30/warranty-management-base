@@ -46,6 +46,15 @@ Repo dùng nhiều file env theo môi trường. File mẫu là `.env.example`.
 - `STORAGE_USAGE_MONITOR_ENABLED`, `STORAGE_USAGE_MONITOR_CRON`: bật và đặt lịch job thống kê dung lượng.
 - `WARRANTY_CERTIFICATE_CLEANUP_ENABLED`, `WARRANTY_CERTIFICATE_CLEANUP_DRY_RUN`, `WARRANTY_CERTIFICATE_CLEANUP_CRON`, `WARRANTY_CERTIFICATE_ORPHAN_RETENTION_DAYS`: cấu hình job dọn PDF chứng nhận mồ côi.
 
+### Warranty Certificate PDF Renderer
+
+- `PDF_RENDERER_URL`: URL nội bộ của Chromium renderer. Docker Compose tự đặt thành `http://pdf-renderer:3001`; không public cổng này ra ngoài.
+- `PDF_RENDER_TIMEOUT_MS`: thời gian tối đa để render một PDF, mặc định `45000` ms.
+- `PDF_MAX_BODY_BYTES`: giới hạn request HTML gửi tới renderer, mặc định `10485760` byte.
+- `PUPPETEER_EXECUTABLE_PATH`: đường dẫn Chrome/Edge/Chromium dùng khi chạy API trực tiếp trên máy và không cấu hình `PDF_RENDERER_URL`.
+
+Khi phát triển không qua Docker, API có thể tự tìm Chrome/Edge đã cài hoặc dùng đường dẫn được cấu hình. Khi chạy qua Compose, API luôn gọi renderer nội bộ để dev và production sử dụng cùng engine in PDF.
+
 ### Telegram CI
 
 Chỉ cần cấu hình trên GitHub Actions Secrets:
@@ -60,6 +69,7 @@ Không cần đưa token thật vào file env local.
 Workflow `Publish Images` build và push Docker image lên GitHub Container Registry:
 
 - `API_IMAGE`
+- `PDF_RENDERER_IMAGE`
 - `WEB_IMAGE`
 - `ADMIN_IMAGE`
 - `IMAGE_TAG`

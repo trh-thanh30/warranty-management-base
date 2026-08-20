@@ -23,6 +23,7 @@ jobs:
     outputs:
       image-tag: ${{ steps.metadata.outputs.image_tag }}
       api-image: ${{ steps.metadata.outputs.api_image }}
+      pdf-renderer-image: ${{ steps.metadata.outputs.pdf_renderer_image }}
       migrator-image: ${{ steps.metadata.outputs.migrator_image }}
       web-image: ${{ steps.metadata.outputs.web_image }}
       admin-image: ${{ steps.metadata.outputs.admin_image }}
@@ -52,6 +53,7 @@ jobs:
           echo "deployment_environment=$deployment_environment" >> "$GITHUB_OUTPUT"
           echo "source_branch=$source_branch" >> "$GITHUB_OUTPUT"
           echo "api_image=$image_prefix-api" >> "$GITHUB_OUTPUT"
+          echo "pdf_renderer_image=$image_prefix-api-pdf-renderer" >> "$GITHUB_OUTPUT"
           echo "migrator_image=$image_prefix-api-migrator" >> "$GITHUB_OUTPUT"
           echo "web_image=$image_prefix-web" >> "$GITHUB_OUTPUT"
           echo "admin_image=$image_prefix-admin" >> "$GITHUB_OUTPUT"
@@ -95,6 +97,7 @@ jobs:
         uses: appleboy/ssh-action@v1.2.0
         env:
           API_IMAGE: ${{ steps.metadata.outputs.api_image }}
+          PDF_RENDERER_IMAGE: ${{ steps.metadata.outputs.pdf_renderer_image }}
           MIGRATOR_IMAGE: ${{ steps.metadata.outputs.migrator_image }}
           WEB_IMAGE: ${{ steps.metadata.outputs.web_image }}
           ADMIN_IMAGE: ${{ steps.metadata.outputs.admin_image }}
@@ -104,7 +107,7 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: ${{ secrets.DEPLOY_PORT || 22 }}
-          envs: API_IMAGE,MIGRATOR_IMAGE,WEB_IMAGE,ADMIN_IMAGE,IMAGE_TAG
+          envs: API_IMAGE,PDF_RENDERER_IMAGE,MIGRATOR_IMAGE,WEB_IMAGE,ADMIN_IMAGE,IMAGE_TAG
           script: |
             set -eu
             cd "${{ secrets.DEPLOY_PATH }}"
@@ -127,6 +130,12 @@ jobs:
               sed -i "s#^MIGRATOR_IMAGE=.*#MIGRATOR_IMAGE=$MIGRATOR_IMAGE#" .env.production
             else
               printf 'MIGRATOR_IMAGE=%s\n' "$MIGRATOR_IMAGE" >> .env.production
+            fi
+
+            if grep -qE '^PDF_RENDERER_IMAGE=' .env.production; then
+              sed -i "s#^PDF_RENDERER_IMAGE=.*#PDF_RENDERER_IMAGE=$PDF_RENDERER_IMAGE#" .env.production
+            else
+              printf 'PDF_RENDERER_IMAGE=%s\n' "$PDF_RENDERER_IMAGE" >> .env.production
             fi
 
             if grep -qE '^WEB_IMAGE=' .env.production; then
@@ -152,7 +161,7 @@ jobs:
               exit 1
             fi
 
-            docker compose -f docker-compose.prod.yml --env-file .env.production --profile tools pull migrate api worker-email web admin
+            docker compose -f docker-compose.prod.yml --env-file .env.production --profile tools pull migrate pdf-renderer api worker-email web admin
             docker compose -f docker-compose.prod.yml --env-file .env.production --profile tools run --rm migrate
             docker compose -f docker-compose.prod.yml --env-file .env.production run --rm minio-init
             docker compose -f docker-compose.prod.yml --env-file .env.production up -d
@@ -184,6 +193,7 @@ jobs:
         uses: appleboy/ssh-action@v1.2.0
         env:
           API_IMAGE: ${{ needs.deploy.outputs.api-image }}
+          PDF_RENDERER_IMAGE: ${{ needs.deploy.outputs.pdf-renderer-image }}
           MIGRATOR_IMAGE: ${{ needs.deploy.outputs.migrator-image }}
           WEB_IMAGE: ${{ needs.deploy.outputs.web-image }}
           ADMIN_IMAGE: ${{ needs.deploy.outputs.admin-image }}
@@ -193,12 +203,12 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: ${{ secrets.DEPLOY_PORT || 22 }}
-          envs: API_IMAGE,MIGRATOR_IMAGE,WEB_IMAGE,ADMIN_IMAGE,IMAGE_TAG
+          envs: API_IMAGE,PDF_RENDERER_IMAGE,MIGRATOR_IMAGE,WEB_IMAGE,ADMIN_IMAGE,IMAGE_TAG
           script: |
             set -eu
             cd "${{ secrets.DEPLOY_PATH }}"
 
-            for value in "$API_IMAGE" "$MIGRATOR_IMAGE" "$WEB_IMAGE" "$ADMIN_IMAGE" "$IMAGE_TAG"; do
+            for value in "$API_IMAGE" "$PDF_RENDERER_IMAGE" "$MIGRATOR_IMAGE" "$WEB_IMAGE" "$ADMIN_IMAGE" "$IMAGE_TAG"; do
               if [ -z "$value" ]; then
                 echo "Required image cleanup metadata is missing."
                 exit 1
@@ -215,7 +225,7 @@ jobs:
               echo "Keeping rollback image tag: $previous_tag"
             fi
 
-            for repository in "$API_IMAGE" "$WEB_IMAGE" "$ADMIN_IMAGE"; do
+            for repository in "$API_IMAGE" "$PDF_RENDERER_IMAGE" "$WEB_IMAGE" "$ADMIN_IMAGE"; do
               docker image ls "$repository" --format '{{.Repository}}:{{.Tag}}' |
               while IFS= read -r image; do
                 [ -z "$image" ] && continue
@@ -246,7 +256,7 @@ jobs:
               fi
             done
 
-            for repository in "$API_IMAGE" "$WEB_IMAGE" "$ADMIN_IMAGE"; do
+            for repository in "$API_IMAGE" "$PDF_RENDERER_IMAGE" "$WEB_IMAGE" "$ADMIN_IMAGE"; do
               docker image ls "$repository" \
                 --format 'table {{.Repository}}\t{{.Tag}}\t{{.Size}}'
             done

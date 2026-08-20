@@ -12,7 +12,10 @@ export const envSchema = z
     APP_NAME: z.string().default('nest-basic-prisma'),
     PORT: z.coerce.number().int().min(1).max(65535).default(3000),
     PUBLIC_API_URL: z.string().url().optional(),
+    PDF_RENDERER_URL: z.string().url().optional(),
     PUPPETEER_EXECUTABLE_PATH: z.string().optional(),
+    PDF_RENDER_TIMEOUT_MS: z.coerce.number().int().positive().default(45000),
+    PDF_MAX_BODY_BYTES: z.coerce.number().int().positive().default(10485760),
     SENTRY_DSN: z.string().optional(),
 
     // Database

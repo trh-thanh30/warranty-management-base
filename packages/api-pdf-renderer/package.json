@@ -1,0 +1,15 @@
+{
+  "name": "@repo/api-pdf-renderer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "server.mjs"
+  ],
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "puppeteer-core": "^24.42.0"
+  }
+}

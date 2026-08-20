@@ -4,7 +4,16 @@
   "sourceRoot": "src",
   "compilerOptions": {
     "deleteOutDir": true,
-    "assets": ["**/*.hbs", "**/*.mjml.hbs", "**/*.pdf", "**/*.ttf"]
+    "assets": [
+      "**/*.hbs",
+      "**/*.mjml.hbs",
+      "**/*.html",
+      "**/*.css",
+      "**/*.png",
+      "**/*.jpg",
+      "**/*.pdf",
+      "**/*.ttf"
+    ]
   },
   "projects": {
     "api": {

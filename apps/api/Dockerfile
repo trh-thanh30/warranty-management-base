@@ -10,7 +10,7 @@ FROM base AS pruner
 WORKDIR /app
 RUN npm install -g turbo@^2
 COPY . .
-RUN turbo prune @repo/api --docker
+RUN turbo prune @repo/api @repo/api-pdf-renderer --docker
 
 FROM base AS builder
 WORKDIR /app
@@ -25,6 +25,7 @@ COPY --from=pruner /app/out/full/ .
 
 RUN pnpm --filter @repo/api... build
 RUN pnpm --config.auto-install-peers=false --filter @repo/api deploy --prod --no-optional --ignore-scripts /prod/api
+RUN pnpm --config.auto-install-peers=false --filter @repo/api-pdf-renderer deploy --prod --no-optional --ignore-scripts /prod/pdf-renderer
 
 RUN cd /prod/api && /app/apps/api/node_modules/.bin/prisma generate
 
@@ -49,6 +50,27 @@ USER nestjs
 EXPOSE 4100
 
 CMD ["node", "dist/main.js"]
+
+FROM base AS pdf-runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV PORT=3001
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+
+RUN apk add --no-cache chromium freetype harfbuzz nss ttf-freefont \
+  && addgroup --system --gid 1001 nodejs \
+  && adduser --system --uid 1001 pdf \
+  && rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+  && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /usr/local/bin/pnpm /usr/local/bin/pnpx
+
+COPY --from=builder --chown=pdf:nodejs /prod/pdf-renderer ./
+
+USER pdf
+
+EXPOSE 3001
+
+CMD ["node", "server.mjs"]
 
 FROM base AS development
 WORKDIR /app

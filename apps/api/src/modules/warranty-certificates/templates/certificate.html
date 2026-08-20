@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chứng nhận bảo hành điện tử {{certificate.number}}</title>
+    <style>
+      {{{styles}}}
+    </style>
+  </head>
+  <body>
+    <main class="certificate">
+      <header class="hero">
+        <div class="hero__brand">
+          <img
+            class="hero__logo"
+            src="{{{brandLogoDataUrl}}}"
+            alt="FUJITEK và LEXZENZ"
+          />
+          <div class="hero__number">
+            <span class="hero__number-label">Warranty number</span>
+            <strong>{{certificate.number}}</strong>
+          </div>
+        </div>
+        <div class="hero__content">
+          <p class="eyebrow">Chứng nhận</p>
+          <h1>Bảo hành điện tử</h1>
+          <p class="hero__subtitle">Thông tin bảo hành sản phẩm chính hãng</p>
+        </div>
+      </header>
+
+      <section class="summary">
+        <div class="summary__block">
+          <h2>Thông tin khách hàng</h2>
+          <dl class="details">
+            <div>
+              <dt>Tên khách hàng</dt>
+              <dd>{{customer.fullName}}</dd>
+            </div>
+            <div>
+              <dt>Số điện thoại</dt>
+              <dd>{{customer.phone}}</dd>
+            </div>
+            <div>
+              <dt>Email</dt>
+              <dd>{{customer.email}}</dd>
+            </div>
+            <div>
+              <dt>Địa chỉ</dt>
+              <dd>{{customer.address}}</dd>
+            </div>
+          </dl>
+        </div>
+        <div class="summary__block">
+          <h2>Thông tin lắp đặt</h2>
+          <dl class="details">
+            <div>
+              <dt>Đại lý</dt>
+              <dd>{{dealer.name}}</dd>
+            </div>
+            <div>
+              <dt>Ngày lắp đặt</dt>
+              <dd>{{certificate.installedAt}}</dd>
+            </div>
+            <div>
+              <dt>Biển số xe</dt>
+              <dd>{{vehicle.plate}}</dd>
+            </div>
+            <div>
+              <dt>Loại xe</dt>
+              <dd>{{vehicle.model}}</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="section section--products">
+        <div class="section__heading">
+          <div>
+            <p class="eyebrow">Chi tiết bảo hành</p>
+            <h2>Sản phẩm được bảo hành</h2>
+          </div>
+          <p class="section__meta">Ngày cấp: {{certificate.issuedAt}}</p>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Vị trí</th>
+              <th>Sản phẩm</th>
+              <th>Mã sản phẩm</th>
+              <th>Serial</th>
+              <th>Mã bảo hành</th>
+              <th>Thời hạn</th>
+              <th>Ngày hết hạn</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each products}}
+            <tr>
+              <td>{{positionLabel}}</td>
+              <td>{{productName}}</td>
+              <td>{{productCode}}</td>
+              <td>{{serialNumber}}</td>
+              <td class="code">{{warrantyCode}}</td>
+              <td>{{durationLabel}}</td>
+              <td>{{expiryDate}}</td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </section>
+
+      {{#if activationFields.length}}
+      <section class="section section--fields">
+        <div class="section__heading">
+          <div>
+            <p class="eyebrow">Thông tin bổ sung</p>
+            <h2>Thông tin kích hoạt theo danh mục</h2>
+          </div>
+        </div>
+        <dl class="field-grid">
+          {{#each activationFields}}
+          <div>
+            <dt>{{label}}</dt>
+            <dd>{{value}}</dd>
+          </div>
+          {{/each}}
+        </dl>
+      </section>
+      {{/if}}
+
+      <footer>
+        <p>Chứng nhận được phát hành tự động bởi hệ thống E-Warranty.</p>
+        <strong>{{certificate.number}}</strong>
+      </footer>
+    </main>
+  </body>
+</html>
