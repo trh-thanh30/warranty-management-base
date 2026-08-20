@@ -38,6 +38,7 @@ import { Module } from '@nestjs/common';
   exports: [
     IssueWarrantyCertificateUseCase,
     IssueWarrantyActivationRequestCertificateUseCase,
+    WarrantyActivationRequestCertificatesRepository,
     ResendWarrantyActivationRequestCertificateEmailUseCase,
     DeleteWarrantyCertificateUseCase,
     ResendWarrantyCertificateEmailUseCase,
