@@ -87,6 +87,7 @@ export function WarrantyActivationRequestDetailView({
             {canUseCertificate ? (
               <>
                 <Button
+                  className="w-full sm:w-auto"
                   onClick={() => {
                     void actions.viewCertificate(request);
                   }}
@@ -97,6 +98,7 @@ export function WarrantyActivationRequestDetailView({
                   {t("viewCertificate")}
                 </Button>
                 <Button
+                  className="w-full sm:w-auto"
                   onClick={() => {
                     void actions.downloadCertificate(request);
                   }}

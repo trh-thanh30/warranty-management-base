@@ -91,11 +91,11 @@ export function WarrantyActivationRequestDetailCard({
 
         {hasItems ? (
           <section className="space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="text-sm font-semibold text-slate-950 dark:text-slate-50">
+            <div className="flex items-center justify-between gap-2 overflow-hidden whitespace-nowrap sm:gap-3 sm:whitespace-normal">
+              <h2 className="min-w-0 truncate text-sm font-semibold text-slate-950 dark:text-slate-50 sm:whitespace-normal">
                 {t("activationProducts")}
               </h2>
-              <span className="text-sm text-slate-500">
+              <span className="shrink-0 whitespace-nowrap text-sm text-slate-500">
                 {t("productCount", { count: items.length })}
               </span>
             </div>

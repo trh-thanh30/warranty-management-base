@@ -25,6 +25,17 @@ test("request certificate actions remain available when request items exist", ()
   assert.match(detailCard, /<DetailSection title=\{t\("certificateInfo"\)\}>/);
 });
 
+test("view and download certificate actions use full width only on mobile", () => {
+  assert.match(
+    detailView,
+    /<Button\s+className="w-full sm:w-auto"\s+onClick=\{\(\) => \{\s+void actions\.viewCertificate\(request\);/,
+  );
+  assert.match(
+    detailView,
+    /<Button\s+className="w-full sm:w-auto"\s+onClick=\{\(\) => \{\s+void actions\.downloadCertificate\(request\);/,
+  );
+});
+
 test("request items do not expose certificate actions", () => {
   assert.doesNotMatch(detailView, /viewItemCertificate/);
   assert.doesNotMatch(detailView, /downloadItemCertificate/);
