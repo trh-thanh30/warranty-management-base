@@ -155,9 +155,15 @@ function ProductTableRow({
         {product.warrantyCode ?? "-"}
       </TableCell>
       <TableCell className="whitespace-nowrap">
-        {getProductCategoryLabel(product)}
+        <span className="block max-w-64 truncate">
+          {getProductCategoryLabel(product)}
+        </span>
       </TableCell>
-      <TableCell>{formatProductOwner(product)}</TableCell>
+      <TableCell>
+        <span className="block max-w-52 truncate">
+          {formatProductOwner(product)}
+        </span>
+      </TableCell>
       <TableCell>
         <WarrantyStatusBadge status={product.warranty?.status} />
       </TableCell>
@@ -225,8 +231,8 @@ function ProductMobileCard({
 
 function ProductName({ product }: { product: ProductResponse }) {
   return (
-    <div className="min-w-0">
-      <span className="truncate font-medium text-slate-950 dark:text-slate-50">
+    <div className="min-w-0 lg:max-w-64">
+      <span className="block truncate font-medium text-slate-950 dark:text-slate-50">
         {getProductDisplayName(product)}
       </span>
       <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">

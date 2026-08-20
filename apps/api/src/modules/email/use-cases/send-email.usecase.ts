@@ -10,6 +10,7 @@ export interface SendEmailParams {
   template?: string;
   context?: Record<string, unknown>;
   warrantyCertificateId?: string;
+  warrantyCertificateIds?: string[];
   attachments?: Array<{
     contentBase64: string;
     contentType: string;
@@ -31,10 +32,15 @@ export class SendEmailUseCase implements BaseUseCase<SendEmailParams, void> {
       context,
       template,
       warrantyCertificateId,
+      warrantyCertificateIds,
     } = params;
-    const idempotencyKey = warrantyCertificateId
-      ? `email:warranty-certificate:${warrantyCertificateId}:${Date.now()}`
-      : `email:${to}:${subject}`;
+    const certificateIds =
+      warrantyCertificateIds ??
+      (warrantyCertificateId ? [warrantyCertificateId] : []);
+    const idempotencyKey =
+      certificateIds.length > 0
+        ? `email:warranty-certificate:${certificateIds.join(',')}:${Date.now()}`
+        : `email:${to}:${subject}`;
     await this.emailService.sendJob({
       to,
       subject,
@@ -43,6 +49,7 @@ export class SendEmailUseCase implements BaseUseCase<SendEmailParams, void> {
       template,
       context,
       warrantyCertificateId,
+      warrantyCertificateIds,
       attachments,
       idempotencyKey,
     });

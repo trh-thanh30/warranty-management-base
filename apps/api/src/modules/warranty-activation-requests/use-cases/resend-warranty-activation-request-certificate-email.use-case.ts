@@ -11,9 +11,12 @@ export class ResendWarrantyActivationRequestCertificateEmailUseCase {
     private readonly resendWarrantyCertificateEmailUseCase: ResendWarrantyCertificateEmailUseCase,
   ) {}
 
-  async execute(requestId: string) {
+  async execute(requestId: string, itemId?: string) {
     const request = await this.repository.findById(requestId);
-    const certificate = request?.activated_warranty?.certificates?.[0];
+    const certificate = itemId
+      ? request?.items?.find((item) => item.id === itemId)?.warranty
+          .certificates?.[0]
+      : request?.activated_warranty?.certificates?.[0];
 
     if (!request || !certificate) {
       throw new BadRequestError(

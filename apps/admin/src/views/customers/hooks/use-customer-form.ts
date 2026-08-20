@@ -4,21 +4,15 @@ import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { useForm, type UseFormSetError } from "react-hook-form";
-import {
-  HttpClientError,
-  type CreateCustomerBody,
-  type CustomerSummary,
-  type UpdateCustomerBody,
-} from "@repo/shared";
+import { HttpClientError, type CustomerSummary } from "@repo/shared";
 import { useToast } from "@/src/hooks/use-toast";
 import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import {
   customerFormSchema,
   type CustomerFormValues,
 } from "../customers.types";
-import { buildCustomerAddress } from "../customers.utils";
+import { toCreateCustomerBody, toUpdateCustomerBody } from "../customers.utils";
 import { useCreateCustomer, useUpdateCustomer } from "./use-customers";
-import { toOptionalValue, toRequiredValue } from "@/src/utils";
 
 export function useCustomerForm({
   customer,
@@ -98,6 +92,7 @@ function getDefaultValues(
   return {
     address: customer?.address ?? "",
     addressDetail: customer?.address ?? "",
+    birthdate: customer?.birthdate?.slice(0, 10) ?? "",
     customerCode: customer?.customerCode ?? "",
     email: customer?.email ?? "",
     fullName: customer?.fullName ?? "",
@@ -106,25 +101,6 @@ function getDefaultValues(
     provinceName: "",
     wardCode: "",
     wardName: "",
-  };
-}
-
-function toCreateCustomerBody(values: CustomerFormValues): CreateCustomerBody {
-  return {
-    address: buildCustomerAddress(values),
-    customerCode: toOptionalValue(values.customerCode)?.toUpperCase(),
-    email: toRequiredValue(values.email),
-    fullName: values.fullName.trim(),
-    phone: toRequiredValue(values.phone),
-  };
-}
-
-function toUpdateCustomerBody(values: CustomerFormValues): UpdateCustomerBody {
-  return {
-    address: buildCustomerAddress(values),
-    email: toRequiredValue(values.email),
-    fullName: values.fullName.trim(),
-    phone: toRequiredValue(values.phone),
   };
 }
 

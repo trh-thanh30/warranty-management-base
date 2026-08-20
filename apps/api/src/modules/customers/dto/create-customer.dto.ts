@@ -1,4 +1,12 @@
-import { IsEmail, IsOptional, IsString, IsUUID, Length } from 'class-validator';
+import { IsNotFutureDate } from '@/common/decorators/is-not-future-date.decorator';
+import {
+  IsDateString,
+  IsEmail,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Length,
+} from 'class-validator';
 
 export class CreateCustomerDto {
   @IsOptional()
@@ -24,4 +32,9 @@ export class CreateCustomerDto {
   @IsString()
   @Length(1, 255)
   address: string;
+
+  @IsOptional()
+  @IsDateString()
+  @IsNotFutureDate()
+  birthdate?: string;
 }

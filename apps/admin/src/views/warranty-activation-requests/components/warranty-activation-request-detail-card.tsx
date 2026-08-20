@@ -2,19 +2,36 @@
 
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import type { WarrantyActivationRequestSummary } from "@repo/shared";
+import type {
+  WarrantyActivationRequestItemSummary,
+  WarrantyActivationRequestSummary,
+} from "@repo/shared";
 import { Badge, Card, CardContent, Skeleton } from "@repo/ui";
 import {
   formatActivationRequestAddress,
   formatActivationRequestDate,
 } from "../warranty-activation-requests.utils";
 import { WarrantyActivationRequestStatusBadge } from "./warranty-activation-request-status-badge";
+import { ActivationRequestItemsTable } from "./activation-request-items-table";
+import { getActivationRequestWarrantyCodeLabel } from "../warranty-activation-request-items.utils";
 
 type WarrantyActivationRequestDetailCardProps = {
+  busyItemId?: string | null;
+  onDownloadItemCertificate?: (
+    item: WarrantyActivationRequestItemSummary,
+  ) => void;
+  onResendItemCertificate?: (
+    item: WarrantyActivationRequestItemSummary,
+  ) => void;
+  onViewItemCertificate?: (item: WarrantyActivationRequestItemSummary) => void;
   request: WarrantyActivationRequestSummary;
 };
 
 export function WarrantyActivationRequestDetailCard({
+  busyItemId,
+  onDownloadItemCertificate,
+  onResendItemCertificate,
+  onViewItemCertificate,
   request,
 }: WarrantyActivationRequestDetailCardProps) {
   const locale = useLocale();
@@ -22,13 +39,20 @@ export function WarrantyActivationRequestDetailCard({
   const tWarranties = useTranslations("Warranties");
   const activatedWarranty = request.activatedWarranty;
   const certificate = request.certificate;
+  const items = request.items ?? [];
+  const hasItems = items.length > 0;
 
   return (
     <Card className="min-w-0">
       <CardContent className="space-y-7 px-4 py-6 sm:px-6">
         <DetailSection title={t("requestInfo")}>
           <DetailItem label={t("requestCode")} value={request.requestCode} />
-          <DetailItem label={t("warrantyCode")} value={request.warrantyCode} />
+          <DetailItem
+            label={t("warrantyCode")}
+            value={getActivationRequestWarrantyCodeLabel(request, (count) =>
+              t("warrantyCodeCount", { count }),
+            )}
+          />
           <DetailItem
             label={t("source")}
             value={t(`sources.${request.source}`)}
@@ -49,6 +73,11 @@ export function WarrantyActivationRequestDetailCard({
           <DetailItem
             label={t("createdAt")}
             value={formatActivationRequestDate(request.createdAt, locale)}
+          />
+          <DetailItem
+            className="sm:col-span-2"
+            label={t("note")}
+            value={request.note ?? "-"}
           />
         </DetailSection>
 
@@ -75,24 +104,42 @@ export function WarrantyActivationRequestDetailCard({
           />
         </DetailSection>
 
-        <DetailSection title={t("productInfo")}>
-          <DetailItem label={t("product")} value={request.productName ?? "-"} />
-          <DetailItem
-            label={t("serialNumber")}
-            value={request.serialNumber ?? "-"}
-          />
-          <DetailItem label={t("brand")} value={request.brand ?? "-"} />
-          <DetailItem label={t("model")} value={request.model ?? "-"} />
-          <DetailItem
-            label={t("manufactureYear")}
-            value={request.manufactureYear?.toString() ?? "-"}
-          />
-          <DetailItem
-            className="sm:col-span-2"
-            label={t("note")}
-            value={request.note ?? "-"}
-          />
-        </DetailSection>
+        {hasItems ? (
+          <section className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-sm font-semibold text-slate-950 dark:text-slate-50">
+                {t("activationProducts")}
+              </h2>
+              <span className="text-sm text-slate-500">
+                {t("productCount", { count: items.length })}
+              </span>
+            </div>
+            <ActivationRequestItemsTable
+              busyItemId={busyItemId}
+              items={items}
+              onDownloadCertificate={onDownloadItemCertificate}
+              onResendCertificate={onResendItemCertificate}
+              onViewCertificate={onViewItemCertificate}
+            />
+          </section>
+        ) : (
+          <DetailSection title={t("productInfo")}>
+            <DetailItem
+              label={t("product")}
+              value={request.productName ?? "-"}
+            />
+            <DetailItem
+              label={t("serialNumber")}
+              value={request.serialNumber ?? "-"}
+            />
+            <DetailItem label={t("brand")} value={request.brand ?? "-"} />
+            <DetailItem label={t("model")} value={request.model ?? "-"} />
+            <DetailItem
+              label={t("manufactureYear")}
+              value={request.manufactureYear?.toString() ?? "-"}
+            />
+          </DetailSection>
+        )}
 
         <DetailSection title={t("reviewInfo")}>
           <DetailItem
@@ -103,51 +150,57 @@ export function WarrantyActivationRequestDetailCard({
             label={t("reviewedBy")}
             value={formatUserSummary(request.reviewedBy)}
           />
-          <DetailItem
-            label={t("activatedWarranty")}
-            value={
-              activatedWarranty ? (
-                <Link
-                  className="font-medium text-blue-700 underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 dark:text-blue-400"
-                  href={`/warranties/${activatedWarranty.id}`}
-                >
-                  {activatedWarranty.warrantyCode}
-                </Link>
-              ) : (
-                "-"
-              )
-            }
-          />
-          <DetailItem
-            label={t("activatedWarrantyStatus")}
-            value={
-              activatedWarranty ? (
-                <Badge variant="secondary">
-                  {tWarranties(`statuses.${activatedWarranty.status}`)}
-                </Badge>
-              ) : (
-                "-"
-              )
-            }
-          />
-          <DetailItem
-            label={t("activatedWarrantyPeriod")}
-            value={
-              activatedWarranty
-                ? t("activatedWarrantyPeriodValue", {
-                    duration: activatedWarranty.durationMonths,
-                    endDate: formatActivationRequestDate(
-                      activatedWarranty.endDate,
-                      locale,
-                    ),
-                    startDate: formatActivationRequestDate(
-                      activatedWarranty.startDate,
-                      locale,
-                    ),
-                  })
-                : "-"
-            }
-          />
+          {!hasItems ? (
+            <DetailItem
+              label={t("activatedWarranty")}
+              value={
+                activatedWarranty ? (
+                  <Link
+                    className="font-medium text-blue-700 underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 dark:text-blue-400"
+                    href={`/warranties/${activatedWarranty.id}`}
+                  >
+                    {activatedWarranty.warrantyCode}
+                  </Link>
+                ) : (
+                  "-"
+                )
+              }
+            />
+          ) : null}
+          {!hasItems ? (
+            <DetailItem
+              label={t("activatedWarrantyStatus")}
+              value={
+                activatedWarranty ? (
+                  <Badge variant="secondary">
+                    {tWarranties(`statuses.${activatedWarranty.status}`)}
+                  </Badge>
+                ) : (
+                  "-"
+                )
+              }
+            />
+          ) : null}
+          {!hasItems ? (
+            <DetailItem
+              label={t("activatedWarrantyPeriod")}
+              value={
+                activatedWarranty
+                  ? t("activatedWarrantyPeriodValue", {
+                      duration: activatedWarranty.durationMonths,
+                      endDate: formatActivationRequestDate(
+                        activatedWarranty.endDate,
+                        locale,
+                      ),
+                      startDate: formatActivationRequestDate(
+                        activatedWarranty.startDate,
+                        locale,
+                      ),
+                    })
+                  : "-"
+              }
+            />
+          ) : null}
           <DetailItem
             className="sm:col-span-2"
             label={t("adminNote")}
@@ -160,65 +213,67 @@ export function WarrantyActivationRequestDetailCard({
           />
         </DetailSection>
 
-        <DetailSection title={t("certificateInfo")}>
-          <DetailItem
-            label={t("certificateNumber")}
-            value={certificate?.certificateNumber ?? "-"}
-          />
-          <DetailItem
-            label={t("certificateEmail")}
-            value={
-              certificate
-                ? (certificate.recipientEmail ?? t("certificateNoEmail"))
-                : "-"
-            }
-          />
-          <DetailItem
-            label={t("certificateStatus")}
-            value={
-              certificate ? (
-                <Badge variant="secondary">
-                  {t(`certificateStatuses.${certificate.status}`)}
-                </Badge>
-              ) : (
-                "-"
-              )
-            }
-          />
-          <DetailItem
-            label={t("certificateEmailStatus")}
-            value={
-              certificate ? (
-                <Badge variant="secondary">
-                  {certificate.recipientEmail
-                    ? t(`certificateEmailStatuses.${certificate.emailStatus}`)
-                    : t("certificateNoEmail")}
-                </Badge>
-              ) : (
-                "-"
-              )
-            }
-          />
-          <DetailItem
-            label={t("certificateGeneratedAt")}
-            value={formatActivationRequestDate(
-              certificate?.generatedAt ?? null,
-              locale,
-            )}
-          />
-          <DetailItem
-            label={t("certificateEmailedAt")}
-            value={formatActivationRequestDate(
-              certificate?.emailedAt ?? null,
-              locale,
-            )}
-          />
-          <DetailItem
-            className="sm:col-span-2"
-            label={t("certificateLastError")}
-            value={certificate?.lastError ?? "-"}
-          />
-        </DetailSection>
+        {!hasItems ? (
+          <DetailSection title={t("certificateInfo")}>
+            <DetailItem
+              label={t("certificateNumber")}
+              value={certificate?.certificateNumber ?? "-"}
+            />
+            <DetailItem
+              label={t("certificateEmail")}
+              value={
+                certificate
+                  ? (certificate.recipientEmail ?? t("certificateNoEmail"))
+                  : "-"
+              }
+            />
+            <DetailItem
+              label={t("certificateStatus")}
+              value={
+                certificate ? (
+                  <Badge variant="secondary">
+                    {t(`certificateStatuses.${certificate.status}`)}
+                  </Badge>
+                ) : (
+                  "-"
+                )
+              }
+            />
+            <DetailItem
+              label={t("certificateEmailStatus")}
+              value={
+                certificate ? (
+                  <Badge variant="secondary">
+                    {certificate.recipientEmail
+                      ? t(`certificateEmailStatuses.${certificate.emailStatus}`)
+                      : t("certificateNoEmail")}
+                  </Badge>
+                ) : (
+                  "-"
+                )
+              }
+            />
+            <DetailItem
+              label={t("certificateGeneratedAt")}
+              value={formatActivationRequestDate(
+                certificate?.generatedAt ?? null,
+                locale,
+              )}
+            />
+            <DetailItem
+              label={t("certificateEmailedAt")}
+              value={formatActivationRequestDate(
+                certificate?.emailedAt ?? null,
+                locale,
+              )}
+            />
+            <DetailItem
+              className="sm:col-span-2"
+              label={t("certificateLastError")}
+              value={certificate?.lastError ?? "-"}
+            />
+          </DetailSection>
+        ) : null}
       </CardContent>
     </Card>
   );

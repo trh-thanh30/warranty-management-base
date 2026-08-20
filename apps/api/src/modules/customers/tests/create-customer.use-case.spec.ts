@@ -66,6 +66,47 @@ describe('CreateCustomerUseCase', () => {
     expect(result.userId).toBeNull();
   });
 
+  it('stores an optional customer birthdate', async () => {
+    const customersRepository = createCustomersRepository();
+    customersRepository.findByCustomerCode.mockResolvedValue(null);
+    customersRepository.findByPhone.mockResolvedValue(null);
+    customersRepository.findByEmail.mockResolvedValue(null);
+    customersRepository.create.mockResolvedValue({
+      id: 'customer-id',
+      user_id: null,
+      customer_code: 'CUS-2026-0001',
+      full_name: 'Nguyen Van Hung',
+      phone: '0987654311',
+      email: 'user1@example.com',
+      address: 'Ho Chi Minh City',
+      birthdate: new Date('2005-12-11T00:00:00.000Z'),
+      metadata: null,
+      created_at: new Date('2026-07-09T00:00:00.000Z'),
+      updated_at: new Date('2026-07-09T00:00:00.000Z'),
+    });
+    const useCase = new CreateCustomerUseCase(
+      customersRepository as never,
+      createPrismaService() as never,
+      createGenerateCustomerCodeUseCase() as never,
+    );
+
+    const result = await useCase.execute({
+      address: 'Ho Chi Minh City',
+      birthdate: '2005-12-11',
+      customerCode: 'CUS-2026-0001',
+      email: 'user1@example.com',
+      fullName: 'Nguyen Van Hung',
+      phone: '0987654311',
+    });
+
+    expect(customersRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        birthdate: new Date('2005-12-11T00:00:00.000Z'),
+      }),
+    );
+    expect(result.birthdate).toEqual(new Date('2005-12-11T00:00:00.000Z'));
+  });
+
   it('validates userId when linking to an existing account', async () => {
     const customersRepository = createCustomersRepository();
     const prismaService = createPrismaService();

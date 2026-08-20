@@ -12,6 +12,15 @@ const optionalInteger = (min: number, max: number, message: string) =>
       .optional(),
   );
 
+const optionalWarrantyDuration = z.preprocess(
+  (value) =>
+    value === "" || value === null || value === undefined ? null : value,
+  z.union([
+    z.null(),
+    z.coerce.number().int("durationMonthsRange").min(1, "durationMonthsRange"),
+  ]),
+);
+
 export const productTemplateFormSchema = z.object({
   sku: optionalText
     .max(64, "skuLength")
@@ -32,10 +41,7 @@ export const productTemplateFormSchema = z.object({
   modelYear: optionalInteger(1900, 2100, "modelYearRange"),
   description: optionalText.max(5000, "descriptionLength"),
   shortDescription: optionalText.max(500, "shortDescriptionLength"),
-  defaultWarrantyDurationMonths: z.coerce
-    .number()
-    .int("durationMonthsRange")
-    .min(1, "durationMonthsRange"),
+  defaultWarrantyDurationMonths: optionalWarrantyDuration,
   defaultWarrantyTerms: optionalText.max(2000, "warrantyTermsLength"),
   coverAssetId: z.string(),
   coverImageUrl: z.string(),

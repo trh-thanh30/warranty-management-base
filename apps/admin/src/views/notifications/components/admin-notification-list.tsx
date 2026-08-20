@@ -123,7 +123,7 @@ export function AdminNotificationList({
       </div>
 
       <TableScroll className="hidden rounded-md border border-slate-200 dark:border-slate-800 lg:block">
-        <Table className="min-w-[980px]">
+        <Table className="min-w-[980px] whitespace-nowrap">
           <TableHeader>
             <TableRow>
               <TableHead>{t("notification")}</TableHead>

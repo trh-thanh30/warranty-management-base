@@ -1,15 +1,21 @@
 import { product_status } from '@prisma/client';
 import {
   IsEnum,
+  IsInt,
   IsObject,
   IsOptional,
   IsString,
   Length,
   IsUUID,
   Matches,
+  Min,
 } from 'class-validator';
 
 export class CreateProductDto {
+  @IsInt()
+  @Min(1)
+  warrantyDurationMonths: number;
+
   @IsOptional()
   @IsString()
   @Length(1, 64)

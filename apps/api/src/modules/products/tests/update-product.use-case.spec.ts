@@ -219,6 +219,51 @@ describe('UpdateProductUseCase', () => {
     );
   });
 
+  it('updates the individual warranty duration while the warranty is draft', async () => {
+    const existing = createExistingProduct({
+      id: 'warranty-id',
+      warranty_code: 'WM-2026-EXISTING',
+    });
+    const repository = createRepository(existing);
+    const useCase = new UpdateProductUseCase(
+      repository as never,
+      { execute: jest.fn() } as never,
+    );
+
+    await useCase.execute('product-id', { warrantyDurationMonths: 60 });
+
+    expect(repository.update).toHaveBeenCalledWith(
+      'product-id',
+      expect.objectContaining({
+        warranty: { update: { duration_months: 60 } },
+      }),
+    );
+  });
+
+  it.each([
+    warranty_status.ACTIVE,
+    warranty_status.EXPIRED,
+    warranty_status.VOIDED,
+  ])('rejects a duration change for a %s warranty', async (status) => {
+    const existing = createExistingProduct({
+      id: 'warranty-id',
+      status,
+      warranty_code: 'WM-2026-EXISTING',
+    });
+    const repository = createRepository(existing);
+    const useCase = new UpdateProductUseCase(
+      repository as never,
+      { execute: jest.fn() } as never,
+    );
+
+    await expect(
+      useCase.execute('product-id', { warrantyDurationMonths: 60 }),
+    ).rejects.toMatchObject({
+      details: { code: 'WARRANTY_DURATION_NOT_DRAFT' },
+    });
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
   it('uses the replacement template policy only when creating a missing warranty', async () => {
     const existing = createExistingProduct(null);
     const repository = createRepository(existing);
@@ -246,6 +291,23 @@ describe('UpdateProductUseCase', () => {
         },
       }),
     );
+  });
+
+  it('requires a duration when a legacy product and its template have none', async () => {
+    const existing = createExistingProduct(null);
+    existing.template.default_warranty_duration_months = null;
+    const repository = createRepository(existing);
+    const useCase = new UpdateProductUseCase(
+      repository as never,
+      { execute: jest.fn().mockResolvedValue('WM-2026-NEW') } as never,
+    );
+
+    await expect(
+      useCase.execute('product-id', { displayName: 'Legacy product' }),
+    ).rejects.toMatchObject({
+      details: { code: 'WARRANTY_DURATION_REQUIRED' },
+    });
+    expect(repository.update).not.toHaveBeenCalled();
   });
 
   it('rejects an inactive or missing replacement template', async () => {
@@ -566,7 +628,7 @@ function createExistingProduct(
     warranty_activation_requests: openRequests,
     template: {
       id: 'template-id',
-      default_warranty_duration_months: 24,
+      default_warranty_duration_months: 24 as number | null,
       default_warranty_terms: 'Template terms',
     },
   };

@@ -6,6 +6,7 @@ export type CustomerSummary = {
   phone: string | null;
   email: string | null;
   address: string | null;
+  birthdate: string | null;
   metadata: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
@@ -32,6 +33,7 @@ export type CreateCustomerBody = {
   phone: string;
   email: string;
   address: string;
+  birthdate?: string;
 };
 
 export type UpdateCustomerBody = {
@@ -39,4 +41,5 @@ export type UpdateCustomerBody = {
   phone?: string;
   email?: string;
   address?: string;
+  birthdate?: string | null;
 };

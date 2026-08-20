@@ -28,7 +28,7 @@ export function LinkedProductsTable({
 
   return (
     <TableScroll className="max-h-144 overflow-y-auto rounded-md border border-slate-200 dark:border-slate-800">
-      <Table className="min-w-272">
+      <Table className="min-w-272 whitespace-nowrap">
         <TableHeader className="sticky top-0 z-10 bg-white dark:bg-slate-950 [&_th]:h-auto [&_th]:whitespace-normal [&_th]:text-wrap [&_th]:py-2 [&_th]:leading-4">
           <TableRow>
             <TableHead>{t("linkedProduct")}</TableHead>
@@ -62,7 +62,11 @@ export function LinkedProductsTable({
               <TableCell className="font-mono text-xs">
                 {product.serialNumber ?? "-"}
               </TableCell>
-              <TableCell>{formatProductOwner(product)}</TableCell>
+              <TableCell>
+                <span className="block max-w-52 truncate">
+                  {formatProductOwner(product)}
+                </span>
+              </TableCell>
               <TableCell>
                 <WarrantyStatusBadge status={product.warranty?.status} />
               </TableCell>

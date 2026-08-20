@@ -151,6 +151,7 @@ export function ProductTemplateForm({
           />
         </Field>
         <Field
+          description={t("defaultWarrantyDurationDescription")}
           error={translateError(
             form.formState.errors.defaultWarrantyDurationMonths?.message,
             t,

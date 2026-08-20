@@ -5,6 +5,7 @@ const optionalText = z.string().trim();
 export const customerFormSchema = z.object({
   address: optionalText.max(255),
   addressDetail: optionalText.min(1, "addressRequired").max(255),
+  birthdate: optionalText,
   customerCode: optionalText.refine(
     (value) => value.length === 0 || (value.length >= 4 && value.length <= 32),
     {

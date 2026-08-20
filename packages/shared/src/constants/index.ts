@@ -8,3 +8,4 @@ export * from "./permissions.ts";
 export * from "./warranty-domain.ts";
 export * from "./notification.ts";
 export * from "./website-defaults.ts";
+export * from "./category-activation-fields.ts";

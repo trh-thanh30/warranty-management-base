@@ -1,6 +1,9 @@
 import { BadRequestError } from '@/common/response';
 import { WarrantyLifecycleService } from '@/modules/warranties/services/warranty-lifecycle.service';
-import { warranty_status } from '@prisma/client';
+import {
+  warranty_activation_request_status,
+  warranty_status,
+} from '@prisma/client';
 
 describe('WarrantyLifecycleService', () => {
   const service = new WarrantyLifecycleService();
@@ -16,6 +19,10 @@ describe('WarrantyLifecycleService', () => {
         updateMany: jest.fn(),
       },
       warrantyActivationRequest: {
+        findMany: jest.fn(),
+        updateMany: jest.fn(),
+      },
+      warrantyActivationRequestItem: {
         updateMany: jest.fn(),
       },
       warrantyClaim: {
@@ -131,6 +138,9 @@ describe('WarrantyLifecycleService', () => {
     tx.warrantyClaim.count.mockResolvedValue(0);
     tx.warranty.updateMany.mockResolvedValue({ count: 1 });
     tx.warranty.findUniqueOrThrow.mockResolvedValue(voidedWarranty);
+    tx.warrantyActivationRequest.findMany.mockResolvedValue([
+      { id: 'request-id' },
+    ]);
 
     const result = await service.voidWarranty(tx as never, {
       reason: '  Duplicate warranty  ',
@@ -149,9 +159,13 @@ describe('WarrantyLifecycleService', () => {
     );
     expect(tx.warrantyActivationRequest.updateMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: expect.objectContaining({ warranty_code: 'WM-001' }),
+        where: { id: { in: ['request-id'] } },
       }),
     );
+    expect(tx.warrantyActivationRequestItem.updateMany).toHaveBeenCalledWith({
+      where: { request_id: { in: ['request-id'] } },
+      data: { status: warranty_activation_request_status.CANCELLED },
+    });
     expect(result).toBe(voidedWarranty);
   });
 

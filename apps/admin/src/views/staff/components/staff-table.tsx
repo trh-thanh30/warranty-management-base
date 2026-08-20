@@ -72,7 +72,7 @@ export function StaffTable({
       </div>
 
       <TableScroll className="hidden rounded-md border border-slate-200 dark:border-slate-800 md:block">
-        <Table>
+        <Table className="min-w-[900px] whitespace-nowrap">
           <TableHeader>
             <TableRow>
               <SortableTableHead
@@ -162,16 +162,16 @@ function StaffMemberCell({ user }: { user: UserAccountSummary }) {
   const displayName = getStaffDisplayName(user);
 
   return (
-    <div className="flex items-center gap-3">
-      <Avatar className="size-9">
+    <div className="flex min-w-0 items-center gap-3 md:max-w-72">
+      <Avatar className="size-9 shrink-0">
         {user.avatarUrl ? (
           <AvatarImage alt={displayName} src={user.avatarUrl} />
         ) : null}
         <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
       </Avatar>
-      <div>
-        <p className="font-medium">{displayName}</p>
-        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+      <div className="min-w-0">
+        <p className="truncate font-medium">{displayName}</p>
+        <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
           {user.email}
         </p>
       </div>

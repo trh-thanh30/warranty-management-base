@@ -12,7 +12,7 @@ import type {
 
 type ProductTemplateDetailSource = {
   categoryRef: { name: string } | null;
-  defaultWarrantyDurationMonths: number;
+  defaultWarrantyDurationMonths: number | null;
   modelYear: number | null;
   productCount: number;
   sku: string;
@@ -51,7 +51,10 @@ export function getProductTemplateDetailSections(
       items: [
         {
           key: "defaultWarrantyDuration",
-          value: String(template.defaultWarrantyDurationMonths),
+          value:
+            template.defaultWarrantyDurationMonths === null
+              ? "-"
+              : String(template.defaultWarrantyDurationMonths),
         },
         { key: "products", value: String(template.productCount) },
       ],
@@ -174,7 +177,7 @@ export function getProductTemplateDefaults(
     description: template?.description ?? "",
     shortDescription,
     defaultWarrantyDurationMonths:
-      template?.defaultWarrantyDurationMonths ?? 36,
+      template?.defaultWarrantyDurationMonths ?? "",
     defaultWarrantyTerms: template?.defaultWarrantyTerms ?? "",
     coverAssetId: cover?.assetId ?? "",
     coverImageUrl: cover?.url ?? "",

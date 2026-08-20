@@ -333,17 +333,17 @@ function ContactSubmissionTableRow({
           {submission.content}
         </p>
       </TableCell>
-      <TableCell>
+      <TableCell className="whitespace-nowrap">
         <ContactSubmissionStatusBadge status={submission.status} />
       </TableCell>
-      <TableCell>
+      <TableCell className="whitespace-nowrap">
         {formatDate(submission.createdAt, {
           dateStyle: "short",
           locale,
           showTime: true,
         })}
       </TableCell>
-      <TableCell className="text-right">
+      <TableCell className="whitespace-nowrap text-right">
         <RowActions
           canUpdate={canUpdate}
           isUpdating={isUpdating}
@@ -419,7 +419,7 @@ function ContactIdentity({
   submission: ContactSubmissionResponse;
 }) {
   return (
-    <div className="min-w-0">
+    <div className="min-w-0 md:max-w-64">
       <p className="truncate font-medium text-slate-950 dark:text-slate-50">
         {submission.fullName}
       </p>

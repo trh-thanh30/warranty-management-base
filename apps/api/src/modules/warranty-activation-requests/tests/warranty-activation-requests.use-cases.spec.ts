@@ -1,9 +1,12 @@
 import { BadRequestError, NotFoundError } from '@/common/response';
+import { toWarrantyActivationRequestResponse } from '@/modules/warranty-activation-requests/mappers/warranty-activation-request.mapper';
 import { CreateWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-warranty-activation-request.use-case';
 import { GenerateWarrantyActivationRequestCodeUseCase } from '@/modules/warranty-activation-requests/use-cases/generate-warranty-activation-request-code.use-case';
 import { ReviewWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/review-warranty-activation-request.use-case';
+import { ResendWarrantyActivationRequestCertificateEmailUseCase } from '@/modules/warranty-activation-requests/use-cases/resend-warranty-activation-request-certificate-email.use-case';
 import {
   Prisma,
+  warranty_activation_request_source,
   warranty_activation_request_status,
   warranty_status,
 } from '@prisma/client';
@@ -33,7 +36,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
   const warrantyActivationRequestNotificationService = {
     requestCreated: jest.fn(),
   };
-  const issueWarrantyCertificateUseCase = {
+  const issueWarrantyCertificatesForRequestUseCase = {
     execute: jest.fn(),
   };
 
@@ -109,9 +112,187 @@ describe('WarrantyActivationRequestsUseCases', () => {
         full_address: '1 Nguyen Trai, Phuong Ben Thanh, TP Ho Chi Minh',
         request_code: 'WAR-20260719-0001',
         warranty_code: 'WM-2026-ABC123',
+        items: {
+          create: [
+            expect.objectContaining({
+              position_key: 'primaryProduct',
+              product_id: 'product-id',
+              warranty_id: 'warranty-id',
+            }),
+          ],
+        },
       }),
     );
     expect(result.requestCode).toBe('WAR-20260719-0001');
+  });
+
+  it('creates one parent with multiple validated activation items', async () => {
+    repository.findLastRequestCode.mockResolvedValue(null);
+    repository.findOpenByProductId.mockResolvedValue(null);
+    productsRepository.findActivationRequestTargetById.mockResolvedValue({
+      ...baseDraftProduct,
+      id: 'product-a',
+      product_code: 'CODE-product-a',
+      warranty: {
+        ...baseDraftProduct.warranty,
+        id: 'warranty-product-a',
+        warranty_code: 'WM-product-a',
+      },
+    });
+    const itemValidator = {
+      validate: jest
+        .fn()
+        .mockResolvedValue([
+          createValidatedItem('windshield', 'product-a'),
+          createValidatedItem('rearGlass', 'product-b'),
+        ]),
+    };
+    repository.create.mockImplementation((data) =>
+      Promise.resolve({
+        ...baseRequest,
+        request_code: data.request_code,
+        warranty_code: 'WM-product-a',
+        product_id: 'product-a',
+        category_id: 'category-id',
+        product_name: 'Product product-a',
+        serial_number: 'SERIAL-product-a',
+        items: [
+          createPersistedItem('windshield', 'product-a'),
+          createPersistedItem('rearGlass', 'product-b'),
+        ],
+      }),
+    );
+    const generateCodeUseCase =
+      new GenerateWarrantyActivationRequestCodeUseCase(repository as never);
+    const useCase = new CreateWarrantyActivationRequestUseCase(
+      repository as never,
+      generateCodeUseCase,
+      productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
+      itemValidator as never,
+    );
+    const items = [
+      { positionKey: 'windshield', productId: 'product-a' },
+      { positionKey: 'rearGlass', productId: 'product-b' },
+    ];
+
+    const result = await useCase.execute({
+      addressDetail: '1 Nguyen Trai',
+      categoryId: 'category-id',
+      customerName: 'Nguyen Van A',
+      customerPhone: '0901234567',
+      items,
+      provinceCode: '79',
+      provinceName: 'TP Ho Chi Minh',
+      productName: 'Client supplied name',
+      wardCode: '26734',
+      wardName: 'Phuong Ben Thanh',
+    });
+
+    expect(itemValidator.validate).toHaveBeenCalledWith('category-id', items);
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        product: { connect: { id: 'product-a' } },
+        product_name: 'Product product-a',
+        warranty_code: 'WM-product-a',
+        items: {
+          create: [
+            expect.objectContaining({
+              position_key: 'windshield',
+              product_id: 'product-a',
+            }),
+            expect.objectContaining({
+              position_key: 'rearGlass',
+              product_id: 'product-b',
+            }),
+          ],
+        },
+      }),
+    );
+    expect(result.itemCount).toBe(2);
+    expect(result.items).toEqual([
+      expect.objectContaining({
+        positionKey: 'windshield',
+        productId: 'product-a',
+      }),
+      expect.objectContaining({
+        positionKey: 'rearGlass',
+        productId: 'product-b',
+      }),
+    ]);
+  });
+
+  it('rejects a multi-product request when any current owner differs from the customer', async () => {
+    repository.findOpenByProductId.mockResolvedValue(null);
+    productsRepository.findActivationRequestTargetById.mockResolvedValue({
+      ...baseDraftProduct,
+      id: 'product-a',
+    });
+    const itemValidator = {
+      validate: jest.fn().mockResolvedValue([
+        createValidatedItem('windshield', 'product-a'),
+        {
+          ...createValidatedItem('rearGlass', 'product-b'),
+          currentOwner: {
+            email: 'another@example.com',
+            full_name: 'Another Customer',
+            phone: '0987654321',
+          },
+        },
+      ]),
+    };
+    const useCase = new CreateWarrantyActivationRequestUseCase(
+      repository as never,
+      new GenerateWarrantyActivationRequestCodeUseCase(repository as never),
+      productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
+      itemValidator as never,
+    );
+
+    await expect(
+      useCase.execute({
+        addressDetail: '1 Nguyen Trai',
+        categoryId: 'category-id',
+        customerEmail: 'customer@example.com',
+        customerName: 'Nguyen Van A',
+        customerPhone: '0901234567',
+        items: [
+          { positionKey: 'windshield', productId: 'product-a' },
+          { positionKey: 'rearGlass', productId: 'product-b' },
+        ],
+        provinceCode: '79',
+        provinceName: 'TP Ho Chi Minh',
+        wardCode: '26734',
+        wardName: 'Phuong Ben Thanh',
+      }),
+    ).rejects.toMatchObject({
+      details: { code: 'CUSTOMER_OWNER_MISMATCH' },
+    });
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it('preserves singular fallback for a legacy request without items', () => {
+    const result = toWarrantyActivationRequestResponse({
+      ...baseRequest,
+      category_id: null,
+      dealer_id: null,
+      installed_at: null,
+      items: [],
+      product_id: 'legacy-product-id',
+      product_name: 'Legacy product',
+      source: warranty_activation_request_source.PUBLIC_WEB,
+      vehicle_model: null,
+      vehicle_plate: null,
+      warranty_duration_months: null,
+    });
+
+    expect(result.itemCount).toBeUndefined();
+    expect(result.productId).toBe('legacy-product-id');
+    expect(result.productName).toBe('Legacy product');
   });
 
   it('publishes an admin notification when a public activation request is created', async () => {
@@ -616,6 +797,38 @@ describe('WarrantyActivationRequestsUseCases', () => {
         warranty_code: 'WM-2026-ABC123',
       },
       activated_warranty_id: 'warranty-id',
+      items: [
+        {
+          ...createPersistedItem('windshield', 'product-1'),
+          activated_at: new Date('2026-07-19T04:00:00.000Z'),
+          status: warranty_activation_request_status.ACTIVATED,
+          warranty: {
+            certificates: [
+              {
+                certificate_number: 'CERT-PRODUCT-1',
+                email_status: 'QUEUED',
+                emailed_at: new Date('2026-07-19T04:05:00.000Z'),
+                generated_at: new Date('2026-07-19T04:04:00.000Z'),
+                id: 'certificate-product-1',
+                last_error: null,
+                recipient_email: 'customer@example.com',
+                status: 'GENERATED',
+                storage_key: 'private/product-1.pdf',
+              },
+            ],
+            status: warranty_status.ACTIVE,
+          },
+        },
+        {
+          ...createPersistedItem('rearGlass', 'product-2'),
+          activated_at: new Date('2026-07-19T04:00:00.000Z'),
+          status: warranty_activation_request_status.ACTIVATED,
+          warranty: {
+            certificates: [],
+            status: warranty_status.ACTIVE,
+          },
+        },
+      ],
       reviewed_at: new Date('2026-07-19T04:00:00.000Z'),
       reviewed_by: {
         email: 'admin@example.com',
@@ -630,13 +843,13 @@ describe('WarrantyActivationRequestsUseCases', () => {
       .mockResolvedValueOnce(baseRequest)
       .mockResolvedValueOnce(activatedRequest);
     repository.activateApprovedRequest.mockResolvedValue(activatedRequest);
-    issueWarrantyCertificateUseCase.execute.mockResolvedValue({
-      certificate_number: 'CERT-2026-ABC123',
-      id: 'certificate-id',
+    issueWarrantyCertificatesForRequestUseCase.execute.mockResolvedValue({
+      certificateIds: ['certificate-id'],
+      failures: [],
     });
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
-      issueWarrantyCertificateUseCase as never,
+      issueWarrantyCertificatesForRequestUseCase as never,
     );
 
     const result = await useCase.execute(
@@ -654,10 +867,12 @@ describe('WarrantyActivationRequestsUseCases', () => {
       reviewedById: 'admin-id',
     });
     expect(repository.review).not.toHaveBeenCalled();
-    expect(issueWarrantyCertificateUseCase.execute).toHaveBeenCalledWith({
+    expect(
+      issueWarrantyCertificatesForRequestUseCase.execute,
+    ).toHaveBeenCalledWith({
       recipientEmail: 'customer@example.com',
       requestId: 'request-id',
-      warrantyId: 'warranty-id',
+      warrantyIds: ['warranty-product-1', 'warranty-product-2'],
     });
     expect(result.activatedWarrantyId).toBe('warranty-id');
     expect(result.activatedWarranty).toEqual({
@@ -675,13 +890,21 @@ describe('WarrantyActivationRequestsUseCases', () => {
       username: 'warranty.admin',
     });
     expect(result.status).toBe('ACTIVATED');
+    expect(result.items?.[0]?.certificate).toEqual(
+      expect.objectContaining({
+        downloadUrl:
+          '/warranty-activation-requests/request-id/items/windshield-item-id/certificate/download',
+        viewUrl:
+          '/warranty-activation-requests/request-id/items/windshield-item-id/certificate/view',
+      }),
+    );
   });
 
   it('requires a rejection reason when rejecting a pending request', async () => {
     repository.findById.mockResolvedValue(baseRequest);
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
-      issueWarrantyCertificateUseCase as never,
+      issueWarrantyCertificatesForRequestUseCase as never,
     );
 
     await expect(
@@ -695,7 +918,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     repository.findById.mockResolvedValue(null);
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
-      issueWarrantyCertificateUseCase as never,
+      issueWarrantyCertificatesForRequestUseCase as never,
     );
 
     await expect(
@@ -703,6 +926,47 @@ describe('WarrantyActivationRequestsUseCases', () => {
         status: warranty_activation_request_status.APPROVED,
       }),
     ).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  it('resends the certificate belonging to a specific request item', async () => {
+    const certificate = {
+      certificate_number: 'CERT-ITEM-2',
+      email_status: 'FAILED',
+      emailed_at: null,
+      generated_at: new Date('2026-07-19T04:00:00.000Z'),
+      id: 'certificate-item-2',
+      last_error: 'Email failed',
+      recipient_email: 'customer@example.com',
+      status: 'GENERATED',
+      storage_key: 'private/item-2.pdf',
+    };
+    const request = {
+      ...baseRequest,
+      items: [
+        createPersistedItem('windshield', 'product-1'),
+        {
+          ...createPersistedItem('rearGlass', 'product-2'),
+          warranty: {
+            certificates: [certificate],
+            status: warranty_status.ACTIVE,
+          },
+        },
+      ],
+    };
+    repository.findById.mockResolvedValue(request);
+    const resendWarrantyCertificateEmailUseCase = {
+      execute: jest.fn().mockResolvedValue(undefined),
+    };
+    const useCase = new ResendWarrantyActivationRequestCertificateEmailUseCase(
+      repository as never,
+      resendWarrantyCertificateEmailUseCase as never,
+    );
+
+    await useCase.execute('request-id', 'rearGlass-item-id');
+
+    expect(resendWarrantyCertificateEmailUseCase.execute).toHaveBeenCalledWith(
+      'certificate-item-2',
+    );
   });
 });
 
@@ -744,6 +1008,7 @@ const baseDraftProduct = {
   category_id: 'category-id',
   id: 'product-id',
   display_name: null,
+  product_code: 'CODE-product-id',
   template: {
     brand: 'Black Label',
     category_id: 'category-id',
@@ -762,8 +1027,49 @@ const baseDraftProduct = {
   ],
   serial_number: 'SN-BLF-001',
   warranty: {
+    duration_months: 24,
     id: 'warranty-id',
     status: warranty_status.DRAFT,
     warranty_code: 'WM-2026-ABC123',
   },
 };
+
+function createValidatedItem(positionKey: string, productId: string) {
+  return {
+    activationFieldId: `${positionKey}-field-id`,
+    positionKey,
+    positionLabel: positionKey,
+    productId,
+    productName: `Product ${productId}`,
+    productCode: `CODE-${productId}`,
+    serialNumber: `SERIAL-${productId}`,
+    warrantyId: `warranty-${productId}`,
+    warrantyCode: `WM-${productId}`,
+    warrantyDurationMonths: 24,
+    brand: 'Lexzenz',
+    model: 'SP50',
+    manufactureYear: 2026,
+    currentOwner: null,
+  };
+}
+
+function createPersistedItem(positionKey: string, productId: string) {
+  return {
+    id: `${positionKey}-item-id`,
+    activation_field_id: `${positionKey}-field-id`,
+    position_key: positionKey,
+    position_label: positionKey,
+    product_id: productId,
+    product_name: `Product ${productId}`,
+    product_code: `CODE-${productId}`,
+    serial_number: `SERIAL-${productId}`,
+    warranty_id: `warranty-${productId}`,
+    warranty_code: `WM-${productId}`,
+    status: warranty_activation_request_status.PENDING,
+    activated_at: null,
+    warranty: {
+      status: warranty_status.DRAFT,
+      certificates: [],
+    },
+  };
+}

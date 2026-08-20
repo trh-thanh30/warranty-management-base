@@ -101,7 +101,7 @@ export function CategoriesTable({
       </div>
 
       <TableScroll className="hidden rounded-md border border-slate-200 dark:border-slate-800 lg:block">
-        <Table>
+        <Table className="min-w-[920px] whitespace-nowrap">
           <TableHeader>
             <TableRow>
               <SortableTableHead

@@ -130,6 +130,7 @@ function createPublishedTemplateFixture() {
     image_url: null,
     order: 10,
     is_active: true,
+    activation_form_enabled: false,
     metadata: null,
     created_at: createdAt,
     updated_at: createdAt,

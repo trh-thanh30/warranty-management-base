@@ -62,4 +62,41 @@ describe('DownloadWarrantyActivationRequestCertificateUseCase', () => {
       NotFoundError,
     );
   });
+
+  it('returns the certificate belonging to the requested item', async () => {
+    const stream = Readable.from(['item-pdf']);
+    const prismaService = {
+      warrantyActivationRequestItem: {
+        findFirst: jest.fn().mockResolvedValue({
+          warranty: {
+            certificates: [
+              {
+                certificate_number: 'CERT-ITEM-002',
+                storage_key: 'private/item-2.pdf',
+              },
+            ],
+          },
+        }),
+      },
+    };
+    const uploadAssetService = {
+      getStream: jest.fn().mockResolvedValue(stream),
+    };
+    const useCase = new DownloadWarrantyActivationRequestCertificateUseCase(
+      prismaService as never,
+      uploadAssetService as never,
+    );
+
+    await expect(useCase.execute('request-id', 'item-2')).resolves.toEqual({
+      filename: 'CERT-ITEM-002.pdf',
+      stream,
+    });
+    expect(
+      prismaService.warrantyActivationRequestItem.findFirst,
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'item-2', request_id: 'request-id' },
+      }),
+    );
+  });
 });

@@ -130,7 +130,7 @@ export function DashboardRecentClaims({
             </div>
 
             <TableScroll className="hidden rounded-md border border-slate-200 dark:border-slate-800 md:block">
-              <Table className="min-w-[760px]">
+              <Table className="min-w-[760px] whitespace-nowrap">
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("recentClaims.claim")}</TableHead>
@@ -149,7 +149,9 @@ export function DashboardRecentClaims({
                   {items.map((claim) => (
                     <TableRow key={claim.id}>
                       <TableCell className="font-mono text-xs">
-                        {claim.claimCode}
+                        <span className="block max-w-44 truncate">
+                          {claim.claimCode}
+                        </span>
                       </TableCell>
                       <TableCell>
                         <p className="max-w-52 truncate font-medium">

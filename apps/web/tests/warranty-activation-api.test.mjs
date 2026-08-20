@@ -106,6 +106,7 @@ test("warranty activation schema validates the required public fields", async ()
     "../src/views/warranty/warranty-activation-form.schema.ts",
   );
   const schema = createWarrantyActivationFormSchema({
+    addressAdministrativeUnitNotAllowed: "addressAdministrativeUnitNotAllowed",
     addressRequired: "addressRequired",
     customerEmailInvalid: "customerEmailInvalid",
     customerEmailRequired: "customerEmailRequired",

@@ -66,6 +66,7 @@ describe('CreateProductUseCase', () => {
       templateId: template.id,
       displayName: ' Camera cổng chính ',
       serialNumber: 'SN-001',
+      warrantyDurationMonths: 180,
     });
 
     expect(productCreate).toHaveBeenCalledWith(
@@ -76,6 +77,7 @@ describe('CreateProductUseCase', () => {
           template: { connect: { id: template.id } },
           warranty: {
             create: expect.objectContaining({
+              duration_months: 180,
               warranty_code: 'WM-2026-CREATE',
               status: warranty_status.DRAFT,
             }),
@@ -140,6 +142,7 @@ describe('CreateProductUseCase', () => {
     await useCase.execute({
       templateId: template.id,
       categoryId: 'override-category-id',
+      warrantyDurationMonths: 24,
     });
 
     expect(
@@ -198,6 +201,7 @@ describe('CreateProductUseCase', () => {
     await useCase.execute({
       productCode: ' CUSTOM-001 ',
       templateId: template.id,
+      warrantyDurationMonths: 24,
     });
 
     expect(productsRepository.findByProductCode).toHaveBeenCalledWith(
@@ -259,6 +263,7 @@ describe('CreateProductUseCase', () => {
     await useCase.execute({
       templateId: template.id,
       warrantyCode: ' wm-2026-manual1 ',
+      warrantyDurationMonths: 24,
     });
 
     expect(productsRepository.findByWarrantyCode).toHaveBeenCalledWith(

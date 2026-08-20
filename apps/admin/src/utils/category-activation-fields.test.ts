@@ -1,13 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { CategoryResponse } from "@repo/shared";
-import {
-  DEFAULT_CATEGORY_ACTIVATION_FIELDS,
-  buildCategoryMetadataWithActivationFields,
-  getCategoryActivationFields,
-  isCategoryActivationFormEnabled,
-  parseActivationFields,
-} from "./category-activation-fields.ts";
+import { getCategoryActivationFields } from "./category-activation-fields.ts";
 
 const category = {
   id: "category-id",
@@ -30,100 +24,23 @@ test("category activation fields stay hidden until a category is selected", () =
   assert.deepEqual(getCategoryActivationFields(null), []);
 });
 
-test("category activation fields stay disabled until explicitly enabled", () => {
-  assert.deepEqual(getCategoryActivationFields(category), []);
+test("category activation fields use first-class API configuration", () => {
   assert.deepEqual(
     getCategoryActivationFields({
       ...category,
-      metadata: { activationFieldsEnabled: true },
-    }),
-    DEFAULT_CATEGORY_ACTIVATION_FIELDS,
-  );
-  assert.deepEqual(
-    getCategoryActivationFields({
-      ...category,
-      metadata: { activationFields: [] },
-    }),
-    [],
-  );
-});
-
-test("category activation form defaults to disabled", () => {
-  assert.equal(isCategoryActivationFormEnabled(null), false);
-  assert.equal(isCategoryActivationFormEnabled({}), false);
-  assert.equal(
-    buildCategoryMetadataWithActivationFields(null, []).activationFieldsEnabled,
-    false,
-  );
-});
-
-test("category activation fields are hidden when form is disabled", () => {
-  const metadata = {
-    activationFieldsEnabled: false,
-    activationFields: [
-      {
-        key: "windshield",
-        label: "Kinh lai",
-        type: "TEXT",
-      },
-    ],
-  };
-
-  assert.equal(isCategoryActivationFormEnabled(metadata), false);
-  assert.deepEqual(
-    getCategoryActivationFields({
-      ...category,
-      metadata,
-    }),
-    [],
-  );
-});
-
-test("category activation fields metadata keeps enabled flag", () => {
-  assert.deepEqual(
-    buildCategoryMetadataWithActivationFields(
-      { existing: true },
-      [
-        {
-          key: "windshield",
-          label: "Kinh lai",
-          type: "TEXT",
-        },
-      ],
-      false,
-    ),
-    {
-      existing: true,
-      activationFieldsEnabled: false,
+      activationFormEnabled: true,
       activationFields: [
+        {
+          key: "rearGlass",
+          label: "Kinh lung",
+          order: 2,
+          type: "PRODUCT_SELECT",
+        },
         {
           key: "windshield",
           label: "Kinh lai",
           order: 1,
-          placeholder: undefined,
-          required: false,
-          type: "TEXT",
-          options: undefined,
-        },
-      ],
-    },
-  );
-});
-
-test("category activation fields ignore invalid metadata rows", () => {
-  assert.deepEqual(
-    parseActivationFields({
-      activationFields: [
-        {
-          key: "windshield",
-          label: "Kinh lai",
-          type: "TEXT",
-          order: 2,
-        },
-        {
-          key: "",
-          label: "",
-          type: "TEXT",
+          type: "PRODUCT_SELECT",
         },
       ],
     }),
@@ -131,10 +48,42 @@ test("category activation fields ignore invalid metadata rows", () => {
       {
         key: "windshield",
         label: "Kinh lai",
+        order: 1,
+        type: "PRODUCT_SELECT",
+      },
+      {
+        key: "rearGlass",
+        label: "Kinh lung",
         order: 2,
-        required: false,
-        type: "TEXT",
+        type: "PRODUCT_SELECT",
       },
     ],
+  );
+});
+
+test("category activation fields do not fall back to hardcoded Film fields", () => {
+  assert.deepEqual(
+    getCategoryActivationFields({
+      ...category,
+      activationFormEnabled: true,
+      activationFields: [],
+      metadata: {
+        activationFields: [{ key: "legacy", label: "Legacy", type: "TEXT" }],
+      },
+    }),
+    [],
+  );
+});
+
+test("disabled first-class configuration hides all activation fields", () => {
+  assert.deepEqual(
+    getCategoryActivationFields({
+      ...category,
+      activationFormEnabled: false,
+      activationFields: [
+        { key: "windshield", label: "Kinh lai", type: "PRODUCT_SELECT" },
+      ],
+    }),
+    [],
   );
 });

@@ -68,6 +68,11 @@ const publicProductTemplateListInclude = {
   },
 };
 
+const openActivationRequestStatuses = [
+  warranty_activation_request_status.PENDING,
+  warranty_activation_request_status.APPROVED,
+];
+
 function buildPublicProductTemplateWhere(filters: {
   categoryId?: string;
   search?: string;
@@ -199,6 +204,24 @@ export class ProductsRepository {
     });
   }
 
+  findActivationRequestTargetsByIds(productIds: string[]) {
+    return this.prismaService.product.findMany({
+      where: {
+        deleted_at: null,
+        id: { in: productIds },
+      },
+      include: {
+        warranty: true,
+        template: true,
+        ownerships: {
+          where: { is_current_owner: true },
+          include: { customer: true },
+          orderBy: { created_at: 'desc' },
+        },
+      },
+    });
+  }
+
   synchronizeWarrantyCode(input: { warrantyCode: string; warrantyId: string }) {
     return this.prismaService.$transaction(async (tx) => {
       await tx.warranty.update({
@@ -231,6 +254,7 @@ export class ProductsRepository {
     ownerCustomerId?: string;
     status?: product_status;
     isPublished?: string;
+    activationEligible?: string;
     warrantyStatus?: warranty_status;
     page?: number;
     limit?: number;
@@ -238,6 +262,7 @@ export class ProductsRepository {
     sortOrder?: 'asc' | 'desc';
   }) {
     const search = filters.search?.trim();
+    const activationEligible = filters.activationEligible === 'true';
     const { page, limit, skip, take } = normalizePagination(filters);
     const sortMap = {
       productCode: 'product_code',
@@ -249,7 +274,9 @@ export class ProductsRepository {
     const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
     const where: Prisma.ProductWhereInput = {
       AND: buildEffectiveCatalogueFilters(filters),
-      deleted_at: buildProductDeletionFilter(filters.status),
+      deleted_at: activationEligible
+        ? null
+        : buildProductDeletionFilter(filters.status),
       template_id: filters.templateId,
       ownerships: filters.ownerCustomerId
         ? {
@@ -259,7 +286,7 @@ export class ProductsRepository {
             },
           }
         : undefined,
-      status: filters.status,
+      status: activationEligible ? product_status.ACTIVE : filters.status,
       template: {
         is: {
           ...(filters.isPublished === undefined
@@ -267,8 +294,25 @@ export class ProductsRepository {
             : { is_published: filters.isPublished === 'true' }),
         },
       },
-      warranty: filters.warrantyStatus
-        ? { status: filters.warrantyStatus }
+      warranty: activationEligible
+        ? {
+            is: {
+              status: warranty_status.DRAFT,
+              warranty_code: { not: '' },
+            },
+          }
+        : filters.warrantyStatus
+          ? { status: filters.warrantyStatus }
+          : undefined,
+      warranty_activation_request_items: activationEligible
+        ? {
+            none: { status: { in: openActivationRequestStatuses } },
+          }
+        : undefined,
+      warranty_activation_requests: activationEligible
+        ? {
+            none: { status: { in: openActivationRequestStatuses } },
+          }
         : undefined,
       OR: search
         ? [
@@ -371,11 +415,13 @@ export class ProductsRepository {
     ownerCustomerId?: string;
     status?: product_status;
     isPublished?: string;
+    activationEligible?: string;
     warrantyStatus?: warranty_status;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
   }) {
     const search = filters.search?.trim();
+    const activationEligible = filters.activationEligible === 'true';
     const sortMap = {
       productCode: 'product_code',
       serialNumber: 'serial_number',
@@ -386,7 +432,9 @@ export class ProductsRepository {
     const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
     const where: Prisma.ProductWhereInput = {
       AND: buildEffectiveCatalogueFilters(filters),
-      deleted_at: buildProductDeletionFilter(filters.status),
+      deleted_at: activationEligible
+        ? null
+        : buildProductDeletionFilter(filters.status),
       template_id: filters.templateId,
       ownerships: filters.ownerCustomerId
         ? {
@@ -396,7 +444,7 @@ export class ProductsRepository {
             },
           }
         : undefined,
-      status: filters.status,
+      status: activationEligible ? product_status.ACTIVE : filters.status,
       template: {
         is: {
           ...(filters.isPublished === undefined
@@ -404,8 +452,25 @@ export class ProductsRepository {
             : { is_published: filters.isPublished === 'true' }),
         },
       },
-      warranty: filters.warrantyStatus
-        ? { status: filters.warrantyStatus }
+      warranty: activationEligible
+        ? {
+            is: {
+              status: warranty_status.DRAFT,
+              warranty_code: { not: '' },
+            },
+          }
+        : filters.warrantyStatus
+          ? { status: filters.warrantyStatus }
+          : undefined,
+      warranty_activation_request_items: activationEligible
+        ? {
+            none: { status: { in: openActivationRequestStatuses } },
+          }
+        : undefined,
+      warranty_activation_requests: activationEligible
+        ? {
+            none: { status: { in: openActivationRequestStatuses } },
+          }
         : undefined,
       OR: search
         ? [

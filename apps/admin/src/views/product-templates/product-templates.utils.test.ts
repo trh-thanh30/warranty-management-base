@@ -93,7 +93,7 @@ test("uses API-generated SKU, slug and model year as edit defaults", () => {
     categoryId: "category-id",
     categoryRef: null,
     createdAt: "2026-07-26T00:00:00.000Z",
-    defaultWarrantyDurationMonths: 24,
+    defaultWarrantyDurationMonths: null,
     defaultWarrantyTerms: null,
     description: null,
     id: "template-id",
@@ -118,6 +118,7 @@ test("uses API-generated SKU, slug and model year as edit defaults", () => {
   assert.equal(defaults.sku, "template");
   assert.equal(defaults.slug, "template");
   assert.equal(defaults.modelYear, 2025);
+  assert.equal(defaults.defaultWarrantyDurationMonths, "");
   assert.equal(defaults.isPublished, false);
   assert.equal(defaults.shortDescription, "Public summary");
   assert.deepEqual(defaults.features, [{ value: "Heat rejection" }]);
@@ -172,5 +173,20 @@ test("accepts warranty durations above 120 months", () => {
       defaultWarrantyDurationMonths: 0,
     }).success,
     false,
+  );
+});
+
+test("allows a blank template warranty duration", () => {
+  const parsed = productTemplateFormSchema.safeParse({
+    ...formValues,
+    defaultWarrantyDurationMonths: "",
+  });
+
+  assert.equal(parsed.success, true);
+  if (!parsed.success) return;
+  assert.equal(parsed.data.defaultWarrantyDurationMonths, null);
+  assert.equal(
+    toCreateTemplateBody(parsed.data).defaultWarrantyDurationMonths,
+    null,
   );
 });
