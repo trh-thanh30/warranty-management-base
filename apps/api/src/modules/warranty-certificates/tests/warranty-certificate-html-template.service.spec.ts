@@ -45,6 +45,9 @@ describe('WarrantyCertificateHtmlTemplateService', () => {
     expect(html).not.toContain('<script>');
     expect(html).toContain('<style>');
     expect(html).toContain('@page');
+    expect(html).toContain("font-family: 'Be Vietnam Pro'");
+    expect(html.match(/data:font\/woff2;base64,/g)).toHaveLength(4);
+    expect(html).toContain('font-weight: 800');
     expect(html).toContain('data:image/png;base64,');
     expect(html).not.toMatch(/https?:\/\//);
   });
