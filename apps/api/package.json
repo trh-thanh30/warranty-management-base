@@ -79,6 +79,7 @@
     "dev:full": "concurrently \"npm run start:dev\" \"npm run tw:dev\"",
     "build:full": "npm run tw:build && npm run build",
     "build:full:dev": "npm run tw:build:dev && npm run build",
+    "certificate:preview": "ts-node -r tsconfig-paths/register scripts/preview-warranty-certificate.ts",
     "postinstall": "prisma generate",
     "prepare": "husky"
   },

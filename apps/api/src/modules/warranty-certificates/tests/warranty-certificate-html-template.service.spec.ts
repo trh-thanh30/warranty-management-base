@@ -49,6 +49,39 @@ describe('WarrantyCertificateHtmlTemplateService', () => {
     expect(html.match(/data:font\/woff2;base64,/g)).toHaveLength(4);
     expect(html).toContain('font-weight: 800');
     expect(html).toContain('data:image/png;base64,');
+    expect(html).toContain('class="hero__vehicle"');
+    expect(html.match(/data:image\/png;base64,/g)).toHaveLength(3);
+    expect(html).toContain('class="certificate certificate--compact"');
+    expect(html).toContain('class="certificate-footer"');
+    expect(html).toContain('class="certificate-footer__watermark"');
+    expect(html).toContain('CHỨNG NHẬN BẢO HÀNH ĐIỆN TỬ');
+    expect(html).toContain(
+      'Chứng nhận được phát hành tự động bởi hệ thống E-Warranty.',
+    );
+    expect(html).not.toContain('class="continuation-header"');
     expect(html).not.toMatch(/https?:\/\//);
+  });
+
+  it('starts activation fields on a branded continuation page for six products', () => {
+    const product = model.products[0];
+    const html = new WarrantyCertificateHtmlTemplateService().render({
+      ...model,
+      activationFields: Array.from({ length: 6 }, (_, index) => ({
+        label: `Vị trí ${index + 1}`,
+        value: `Sản phẩm ${index + 1}`,
+      })),
+      products: Array.from({ length: 6 }, (_, index) => ({
+        ...product,
+        positionLabel: `Vị trí ${index + 1}`,
+        productCode: `PRD-${index + 1}`,
+        warrantyCode: `WM-${index + 1}`,
+      })),
+    });
+
+    expect(html).toContain('class="continuation-header"');
+    expect(html).toContain('<main class="certificate">');
+    expect(html).toContain('section--continuation');
+    expect(html).toContain('Chi tiết chứng nhận — tiếp theo');
+    expect(html.match(/data:image\/png;base64,/g)).toHaveLength(4);
   });
 });

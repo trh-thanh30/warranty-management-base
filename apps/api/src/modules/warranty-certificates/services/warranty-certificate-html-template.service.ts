@@ -7,12 +7,16 @@ import path from 'node:path';
 const TEMPLATE_FILE_NAME = 'certificate.html';
 const STYLES_FILE_NAME = 'certificate.css';
 const LOGO_FILE_NAME = path.join('assets', 'brand-logo.png');
+const HERO_VEHICLE_FILE_NAME = path.join('assets', 'red-sedan-hero.png');
 const FONT_FAMILY = 'Be Vietnam Pro';
 const FONT_WEIGHTS = [400, 600, 700, 800] as const;
 
 type WarrantyCertificateTemplateContext = WarrantyCertificateViewModel & {
+  activationFieldsContinuation: boolean;
   brandLogoDataUrl: string;
+  compactFooter: boolean;
   fontFaceStyles: string;
+  vehicleHeroDataUrl: string;
   styles: string;
 };
 
@@ -22,6 +26,7 @@ export class WarrantyCertificateHtmlTemplateService {
   private readonly styles: string;
   private readonly brandLogoDataUrl: string;
   private readonly fontFaceStyles: string;
+  private readonly vehicleHeroDataUrl: string;
 
   constructor() {
     this.renderTemplate = Handlebars.compile(
@@ -34,14 +39,24 @@ export class WarrantyCertificateHtmlTemplateService {
     this.brandLogoDataUrl = `data:image/png;base64,${fs
       .readFileSync(resolveTemplateAssetPath(LOGO_FILE_NAME))
       .toString('base64')}`;
+    this.vehicleHeroDataUrl = `data:image/png;base64,${fs
+      .readFileSync(resolveTemplateAssetPath(HERO_VEHICLE_FILE_NAME))
+      .toString('base64')}`;
     this.fontFaceStyles = buildEmbeddedFontFaceStyles();
   }
 
   render(viewModel: WarrantyCertificateViewModel) {
     return this.renderTemplate({
       ...viewModel,
+      activationFieldsContinuation:
+        viewModel.products.length >= 6 &&
+        viewModel.activationFields.length >= 6,
       brandLogoDataUrl: this.brandLogoDataUrl,
+      compactFooter:
+        viewModel.products.length === 1 &&
+        viewModel.activationFields.length <= 2,
       fontFaceStyles: this.fontFaceStyles,
+      vehicleHeroDataUrl: this.vehicleHeroDataUrl,
       styles: this.styles,
     });
   }

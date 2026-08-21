@@ -10,23 +10,31 @@
     </style>
   </head>
   <body>
-    <main class="certificate">
+    <main class="certificate{{#if compactFooter}} certificate--compact{{/if}}">
       <header class="hero">
+        <div class="hero__decor" aria-hidden="true"></div>
         <div class="hero__brand">
-          <img
-            class="hero__logo"
-            src="{{{brandLogoDataUrl}}}"
-            alt="FUJITEK và LEXZENZ"
-          />
+          <div class="hero__logo-frame">
+            <img
+              class="hero__logo"
+              src="{{{brandLogoDataUrl}}}"
+              alt="FUJITEK và LEXZENZ"
+            />
+          </div>
           <div class="hero__number">
             <span class="hero__number-label">Warranty number</span>
             <strong>{{certificate.number}}</strong>
           </div>
         </div>
+        <img
+          class="hero__vehicle"
+          src="{{{vehicleHeroDataUrl}}}"
+          alt=""
+        />
         <div class="hero__content">
           <p class="eyebrow">Chứng nhận</p>
           <h1>Bảo hành điện tử</h1>
-          <p class="hero__subtitle">Thông tin bảo hành sản phẩm chính hãng</p>
+          <p class="hero__subtitle">Xác thực bảo hành chính hãng</p>
         </div>
       </header>
 
@@ -112,7 +120,20 @@
       </section>
 
       {{#if activationFields.length}}
-      <section class="section section--fields">
+      <section class="section section--fields{{#if activationFieldsContinuation}} section--continuation{{/if}}">
+        {{#if activationFieldsContinuation}}
+        <div class="continuation-header">
+          <img
+            class="continuation-header__logo"
+            src="{{{brandLogoDataUrl}}}"
+            alt=""
+          />
+          <div class="continuation-header__title">
+            <span>Chi tiết chứng nhận — tiếp theo</span>
+            <strong>{{certificate.number}}</strong>
+          </div>
+        </div>
+        {{/if}}
         <div class="section__heading">
           <div>
             <p class="eyebrow">Thông tin bổ sung</p>
@@ -130,9 +151,26 @@
       </section>
       {{/if}}
 
-      <footer>
-        <p>Chứng nhận được phát hành tự động bởi hệ thống E-Warranty.</p>
-        <strong>{{certificate.number}}</strong>
+      <footer class="certificate-footer">
+        <div class="certificate-footer__watermark" aria-hidden="true">
+          E-WARRANTY
+        </div>
+        <div class="certificate-footer__content">
+          <img
+            class="certificate-footer__logo"
+            src="{{{brandLogoDataUrl}}}"
+            alt="FUJITEK và LEXZENZ"
+          />
+          <div class="certificate-footer__copy">
+            <strong>CHỨNG NHẬN BẢO HÀNH ĐIỆN TỬ</strong>
+            <p>Chứng nhận được phát hành tự động bởi hệ thống E-Warranty.</p>
+          </div>
+          <div class="certificate-footer__meta">
+            <span>Ngày cấp: {{certificate.issuedAt}}</span>
+            <strong>{{certificate.number}}</strong>
+          </div>
+        </div>
+        <div class="certificate-footer__band" aria-hidden="true"></div>
       </footer>
     </main>
   </body>
