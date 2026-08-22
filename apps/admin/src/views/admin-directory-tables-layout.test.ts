@@ -33,7 +33,8 @@ const tablePolicies = [
   },
   {
     file: "./warranties/components/warranties-table.tsx",
-    tableClass: "min-w-[1280px] whitespace-nowrap",
+    tableClass:
+      "min-w-[1280px] whitespace-nowrap [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap",
   },
 ] as const;
 

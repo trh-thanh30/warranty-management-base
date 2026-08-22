@@ -63,7 +63,7 @@ export function WarrantiesTable({
       </div>
 
       <TableScroll className="hidden rounded-md border border-slate-200 dark:border-slate-800 lg:block">
-        <Table className="min-w-[1280px] whitespace-nowrap">
+        <Table className="min-w-[1280px] whitespace-nowrap [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
           <TableHeader>
             <TableRow>
               <TableHead>{t("product")}</TableHead>
