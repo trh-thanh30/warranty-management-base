@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
 import fs from 'node:fs';
 import path from 'node:path';
-import puppeteer, { type Page } from 'puppeteer-core';
+import type { Page } from 'puppeteer-core';
 
 const PDF_SIGNATURE = '%PDF-';
 const MAX_DIAGNOSTIC_LENGTH = 500;
@@ -76,6 +76,7 @@ export class HtmlPdfRendererService {
 
   private async createLocalPdf(html: string) {
     const executablePath = resolveBrowserExecutable(this.config.executablePath);
+    const puppeteer = await import('puppeteer-core');
     const browser = await puppeteer.launch({
       args: ['--disable-dev-shm-usage', '--no-sandbox'],
       executablePath,
