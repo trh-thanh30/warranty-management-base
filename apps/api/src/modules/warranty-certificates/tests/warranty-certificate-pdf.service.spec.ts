@@ -147,6 +147,42 @@ describeIntegration(
       expect((await PDFDocument.load(pdf)).getPageCount()).toBe(1);
     });
 
+    it('keeps a two-product certificate on one A4 page', async () => {
+      const service = new WarrantyCertificatePdfService(
+        htmlTemplate,
+        htmlPdfRenderer,
+      );
+      const viewModel: WarrantyCertificateViewModel = {
+        activationFields: [],
+        certificate: {
+          installedAt: '24/07/2026',
+          issuedAt: '22/08/2026',
+          number: 'CERT-TWO-PRODUCTS',
+        },
+        customer: {
+          address: 'Hà Nội',
+          email: 'khach@example.com',
+          fullName: 'Nguyễn Văn A',
+          phone: '0901234567',
+        },
+        dealer: { name: 'Đại lý Lexzenz Hà Nội' },
+        products: Array.from({ length: 2 }, (_, index) => ({
+          durationLabel: '36 tháng',
+          expiryDate: '24/07/2029',
+          positionLabel: `Vị trí ${index + 1}`,
+          productCode: `PRD-${index + 1}`,
+          productName: `Sản phẩm bảo hành ${index + 1}`,
+          serialNumber: `SERIAL-${index + 1}`,
+          warrantyCode: `WM-2026-${index + 1}`,
+        })),
+        vehicle: { model: 'Toyota Camry', plate: '30A-12345' },
+      };
+
+      const pdf = await service.createPdfFromViewModel(viewModel);
+
+      expect((await PDFDocument.load(pdf)).getPageCount()).toBe(1);
+    });
+
     it('keeps all long content and automatically creates multiple A4 pages', async () => {
       const products = Array.from({ length: 45 }, (_, index) => ({
         durationLabel: '36 tháng',

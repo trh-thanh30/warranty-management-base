@@ -51,18 +51,51 @@ describe('WarrantyCertificateHtmlTemplateService', () => {
     expect(html).toContain('data:image/png;base64,');
     expect(html).toContain('class="hero__vehicle"');
     expect(html.match(/data:image\/png;base64,/g)).toHaveLength(3);
-    expect(html).toContain('class="certificate certificate--compact"');
-    expect(html).toContain('class="certificate-footer"');
+    expect(html).toContain('class="certificate-document"');
+    expect(html).toContain('class="certificate-page-header"');
+    expect(html).toContain('class="certificate-page-body"');
+    expect(html).toContain('class="product-table"');
+    expect(html).toContain('class="certificate-page-footer"');
     expect(html).toContain('class="certificate-footer__watermark"');
-    expect(html).toContain('CHỨNG NHẬN BẢO HÀNH ĐIỆN TỬ');
-    expect(html).toContain(
+    expect(html).toContain('TRA CỨU BẢO HÀNH ĐIỆN TỬ');
+    expect(html).toContain('Kiểm tra hiệu lực và thời hạn bảo hành tại');
+    expect(html).toContain('baohanh.lexzenz.com/tra-cuu');
+    expect(html).toMatch(/Ngày cấp:\s*<strong>20\/8\/2026<\/strong>/);
+    expect(html).toContain('Mã chứng nhận:');
+    expect(html).toContain('CERT-2026-001');
+    expect(html).toContain('Chứng nhận bảo hành điện tử');
+    expect(html).not.toContain(
       'Chứng nhận được phát hành tự động bởi hệ thống E-Warranty.',
     );
-    expect(html).not.toContain('class="continuation-header"');
+    expect(html).not.toContain('certificate--compact');
+    expect(html).not.toContain('continuation-header');
+    expect(html).not.toContain('section--continuation');
     expect(html).not.toMatch(/https?:\/\//);
   });
 
-  it('starts activation fields on a branded continuation page for six products', () => {
+  it('uses the same natural A4 layout for two products', () => {
+    const product = model.products[0];
+    const html = new WarrantyCertificateHtmlTemplateService().render({
+      ...model,
+      products: [
+        product,
+        {
+          ...product,
+          positionLabel: 'Kính sườn trước - trái',
+          productCode: 'PRD-002',
+          warrantyCode: 'WM-2026-002',
+        },
+      ],
+    });
+
+    expect(html).toContain('class="certificate-document"');
+    expect(html).toContain('class="certificate-page-header"');
+    expect(html).toContain('class="certificate-page-footer"');
+    expect(html).not.toContain('certificate--compact');
+    expect(html).not.toContain('section--continuation');
+  });
+
+  it('keeps long dynamic content in the natural document flow', () => {
     const product = model.products[0];
     const html = new WarrantyCertificateHtmlTemplateService().render({
       ...model,
@@ -78,10 +111,12 @@ describe('WarrantyCertificateHtmlTemplateService', () => {
       })),
     });
 
-    expect(html).toContain('class="continuation-header"');
-    expect(html).toContain('<main class="certificate">');
-    expect(html).toContain('section--continuation');
-    expect(html).toContain('Chi tiết chứng nhận — tiếp theo');
-    expect(html.match(/data:image\/png;base64,/g)).toHaveLength(4);
+    expect(html).toContain('PRD-1');
+    expect(html).toContain('PRD-6');
+    expect(html).toContain('WM-1');
+    expect(html).toContain('WM-6');
+    expect(html).not.toContain('continuation-header');
+    expect(html).not.toContain('section--continuation');
+    expect(html.match(/data:image\/png;base64,/g)).toHaveLength(3);
   });
 });

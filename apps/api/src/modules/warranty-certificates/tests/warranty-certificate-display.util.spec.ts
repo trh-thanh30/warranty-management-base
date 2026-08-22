@@ -13,7 +13,7 @@ describe('warranty certificate display formatting', () => {
 
   it('renders the warranty duration and end date on one line', () => {
     expect(formatWarrantyPeriod(36, new Date('2029-07-24T00:00:00.000Z'))).toBe(
-      '36 tháng - 24/7/2029',
+      '36 tháng - 24/07/2029',
     );
   });
 });

@@ -1,7 +1,8 @@
+import { HtmlPdfRendererService } from '../src/modules/warranty-certificates/services/html-pdf-renderer.service';
 import { WarrantyCertificateHtmlTemplateService } from '../src/modules/warranty-certificates/services/warranty-certificate-html-template.service';
 import type { WarrantyCertificateViewModel } from '../src/modules/warranty-certificates/warranty-certificate.types';
 import fs from 'node:fs';
-import http, { type ServerResponse } from 'node:http';
+import http, { type IncomingMessage, type ServerResponse } from 'node:http';
 import path from 'node:path';
 
 const HOST = '127.0.0.1';
@@ -55,7 +56,56 @@ const previewViewModel: WarrantyCertificateViewModel = {
   vehicle: { model: 'Sedan', plate: '30A-123.45' },
 };
 
+function createPreviewViewModel(
+  previewCase: string | null,
+): WarrantyCertificateViewModel {
+  if (previewCase === 'single') {
+    return {
+      ...previewViewModel,
+      activationFields: previewViewModel.activationFields.slice(0, 1),
+      products: previewViewModel.products.slice(0, 1),
+    };
+  }
+
+  if (previewCase === 'double') {
+    return {
+      ...previewViewModel,
+      activationFields: previewViewModel.activationFields.slice(0, 2),
+      products: previewViewModel.products.slice(0, 2),
+    };
+  }
+
+  if (previewCase === 'long') {
+    return {
+      ...previewViewModel,
+      activationFields: Array.from({ length: 20 }, (_, index) => ({
+        label: `Thông tin bổ sung ${index + 1}`,
+        value: `Giá trị kiểm tra phân trang ${index + 1}`,
+      })),
+      products: Array.from({ length: 45 }, (_, index) => {
+        const source =
+          previewViewModel.products[index % previewViewModel.products.length];
+
+        return {
+          ...source,
+          productCode: `PRD-2026-PREVIEW-${String(index + 1).padStart(2, '0')}`,
+          warrantyCode: `WM-2026-PREVIEW-${String(index + 1).padStart(2, '0')}`,
+        };
+      }),
+    };
+  }
+
+  return previewViewModel;
+}
+
 const server = http.createServer((request, response) => {
+  void handleRequest(request, response);
+});
+
+async function handleRequest(
+  request: IncomingMessage,
+  response: ServerResponse,
+) {
   const requestUrl = new URL(request.url ?? '/', `http://${HOST}:${PORT}`);
 
   if (requestUrl.pathname === '/events') {
@@ -76,33 +126,45 @@ const server = http.createServer((request, response) => {
   }
 
   try {
-    const viewModel =
-      requestUrl.searchParams.get('case') === 'single'
-        ? {
-            ...previewViewModel,
-            activationFields: previewViewModel.activationFields.slice(0, 1),
-            products: previewViewModel.products.slice(0, 1),
-          }
-        : previewViewModel;
-    const html = new WarrantyCertificateHtmlTemplateService()
-      .render(viewModel)
-      .replace(
-        '</body>',
-        `<script>
+    const viewModel = createPreviewViewModel(
+      requestUrl.searchParams.get('case'),
+    );
+    const html = new WarrantyCertificateHtmlTemplateService().render(viewModel);
+
+    if (requestUrl.searchParams.get('format') === 'pdf') {
+      const renderer = new HtmlPdfRendererService({
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+        maxBodyBytes: 10_485_760,
+        timeoutMs: 45_000,
+        url: process.env.PDF_RENDERER_URL,
+      });
+      const pdf = await renderer.createPdf(html);
+      response.writeHead(200, {
+        'Cache-Control': 'no-store',
+        'Content-Disposition': `inline; filename="certificate-${requestUrl.searchParams.get('case') ?? 'default'}.pdf"`,
+        'Content-Type': 'application/pdf',
+      });
+      response.end(pdf);
+      return;
+    }
+
+    const liveHtml = html.replace(
+      '</body>',
+      `<script>
           const events = new EventSource('/events');
           events.onmessage = () => window.location.reload();
         </script></body>`,
-      );
+    );
     response.writeHead(200, {
       'Cache-Control': 'no-store',
       'Content-Type': 'text/html; charset=utf-8',
     });
-    response.end(html);
+    response.end(liveHtml);
   } catch (error) {
     response.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
     response.end(error instanceof Error ? error.stack : String(error));
   }
-});
+}
 
 let reloadTimer: NodeJS.Timeout | undefined;
 const watcher = fs.watch(TEMPLATE_DIRECTORY, { recursive: true }, () => {
@@ -114,6 +176,10 @@ const watcher = fs.watch(TEMPLATE_DIRECTORY, { recursive: true }, () => {
 
 server.listen(PORT, HOST, () => {
   console.log(`Certificate preview: http://${HOST}:${PORT}`);
+  console.log(`Single product: http://${HOST}:${PORT}/?case=single`);
+  console.log(`Two products: http://${HOST}:${PORT}/?case=double`);
+  console.log(`Long document: http://${HOST}:${PORT}/?case=long`);
+  console.log(`PDF: add &format=pdf to any preview URL`);
   console.log('Edit certificate.html, certificate.css or assets to reload.');
 });
 

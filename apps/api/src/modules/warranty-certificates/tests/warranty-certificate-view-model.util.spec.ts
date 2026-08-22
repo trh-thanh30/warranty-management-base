@@ -34,8 +34,8 @@ describe('buildWarrantyCertificateViewModel', () => {
 
     expect(result).toMatchObject({
       certificate: {
-        installedAt: '16/8/2026',
-        issuedAt: '20/8/2026',
+        installedAt: '16/08/2026',
+        issuedAt: '20/08/2026',
         number: 'CERT-2026-001',
       },
       customer: {
@@ -48,7 +48,7 @@ describe('buildWarrantyCertificateViewModel', () => {
       products: [
         {
           durationLabel: '36 tháng',
-          expiryDate: '16/8/2029',
+          expiryDate: '16/08/2029',
           positionLabel: 'Sản phẩm',
           productCode: 'Không',
           productName: 'Phim cách nhiệt ô tô B',
@@ -122,16 +122,22 @@ describe('buildWarrantyCertificateViewModel', () => {
       new Date('2026-08-20T00:00:00.000Z'),
     );
 
-    expect(result.certificate.number).toBe('CERT-REQUEST-001');
+    expect(result.certificate).toEqual({
+      installedAt: '16/08/2026',
+      issuedAt: '20/08/2026',
+      number: 'CERT-REQUEST-001',
+    });
     expect(result.products).toEqual([
       expect.objectContaining({
         durationLabel: '12 tháng',
+        expiryDate: '16/08/2027',
         positionLabel: 'Kính lái',
         productName: 'Phim cách nhiệt A',
         warrantyCode: 'WM-A',
       }),
       expect.objectContaining({
         durationLabel: '24 tháng',
+        expiryDate: '16/08/2028',
         positionLabel: 'Kính lưng',
         productName: 'Phim cách nhiệt B',
         serialNumber: 'Không',

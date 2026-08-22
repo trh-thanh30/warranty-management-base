@@ -12,9 +12,7 @@ const FONT_FAMILY = 'Be Vietnam Pro';
 const FONT_WEIGHTS = [400, 600, 700, 800] as const;
 
 type WarrantyCertificateTemplateContext = WarrantyCertificateViewModel & {
-  activationFieldsContinuation: boolean;
   brandLogoDataUrl: string;
-  compactFooter: boolean;
   fontFaceStyles: string;
   vehicleHeroDataUrl: string;
   styles: string;
@@ -48,13 +46,7 @@ export class WarrantyCertificateHtmlTemplateService {
   render(viewModel: WarrantyCertificateViewModel) {
     return this.renderTemplate({
       ...viewModel,
-      activationFieldsContinuation:
-        viewModel.products.length >= 6 &&
-        viewModel.activationFields.length >= 6,
       brandLogoDataUrl: this.brandLogoDataUrl,
-      compactFooter:
-        viewModel.products.length === 1 &&
-        viewModel.activationFields.length <= 2,
       fontFaceStyles: this.fontFaceStyles,
       vehicleHeroDataUrl: this.vehicleHeroDataUrl,
       styles: this.styles,
