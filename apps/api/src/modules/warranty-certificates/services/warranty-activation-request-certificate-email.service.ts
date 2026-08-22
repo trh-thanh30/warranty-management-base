@@ -1,7 +1,9 @@
 import { UploadAssetService } from '@/modules/assets/services/upload-asset.service';
+import EmailConfig from '@/config/email.config';
 import { SendEmailUseCase } from '@/modules/email/use-cases/send-email.usecase';
 import { WarrantyActivationRequestCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-activation-request-certificates.repository';
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import type { ConfigType } from '@nestjs/config';
 import { warranty_certificate_email_status } from '@prisma/client';
 
 @Injectable()
@@ -14,6 +16,8 @@ export class WarrantyActivationRequestCertificateEmailService {
     private readonly repository: WarrantyActivationRequestCertificatesRepository,
     private readonly sendEmailUseCase: SendEmailUseCase,
     private readonly uploadAssetService: UploadAssetService,
+    @Inject(EmailConfig.KEY)
+    private readonly emailConfig: ConfigType<typeof EmailConfig>,
   ) {}
 
   async queueEmail(certificateId: string) {
@@ -54,10 +58,12 @@ export class WarrantyActivationRequestCertificateEmailService {
           },
         ],
         context: {
+          brandLogoUrl: this.emailConfig.brandLogoUrl,
           certificateCount: items.length,
+          certificateNumber: certificate.certificate_number,
           certificates: items.map((item) => ({
-            certificateNumber: certificate.certificate_number,
-            productName: `${item.position_label}: ${item.product_name}`,
+            positionLabel: item.position_label,
+            productName: item.product_name,
             warrantyCode: item.warranty_code,
           })),
           customerName: certificate.activation_request.customer_name,

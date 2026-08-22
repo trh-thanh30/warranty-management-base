@@ -1,4 +1,12 @@
+import EmailConfig from '@/config/email.config';
+import { UploadAssetService } from '@/modules/assets/services/upload-asset.service';
+import {
+  SendEmailParams,
+  SendEmailUseCase,
+} from '@/modules/email/use-cases/send-email.usecase';
+import { WarrantyActivationRequestCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-activation-request-certificates.repository';
 import { WarrantyActivationRequestCertificateEmailService } from '@/modules/warranty-certificates/services/warranty-activation-request-certificate-email.service';
+import { Test } from '@nestjs/testing';
 import { Readable } from 'node:stream';
 
 describe('WarrantyActivationRequestCertificateEmailService', () => {
@@ -26,7 +34,12 @@ describe('WarrantyActivationRequestCertificateEmailService', () => {
         ],
       },
     };
-    const repository = {
+    const repository: jest.Mocked<
+      Pick<
+        WarrantyActivationRequestCertificatesRepository,
+        'findEmailDataById' | 'update'
+      >
+    > = {
       findEmailDataById: jest.fn().mockResolvedValue(certificate),
       update: jest
         .fn()
@@ -34,44 +47,64 @@ describe('WarrantyActivationRequestCertificateEmailService', () => {
           Promise.resolve({ ...certificate, ...data }),
         ),
     };
-    const sendEmail = { execute: jest.fn().mockResolvedValue(undefined) };
-    const upload = {
+    const sendEmail: jest.Mocked<Pick<SendEmailUseCase, 'execute'>> = {
+      execute: jest.fn<Promise<void>, [SendEmailParams]>(),
+    };
+    const upload: jest.Mocked<Pick<UploadAssetService, 'getStream'>> = {
       getStream: jest.fn().mockResolvedValue(Readable.from(Buffer.from('pdf'))),
     };
-    const service = new WarrantyActivationRequestCertificateEmailService(
-      repository as never,
-      sendEmail as never,
-      upload as never,
+    const module = await Test.createTestingModule({
+      providers: [
+        WarrantyActivationRequestCertificateEmailService,
+        {
+          provide: WarrantyActivationRequestCertificatesRepository,
+          useValue: repository,
+        },
+        { provide: SendEmailUseCase, useValue: sendEmail },
+        { provide: UploadAssetService, useValue: upload },
+        {
+          provide: EmailConfig.KEY,
+          useValue: {
+            brandLogoUrl: 'https://cdn.example.com/brand-logo.png',
+          },
+        },
+      ],
+    }).compile();
+    const service = module.get(
+      WarrantyActivationRequestCertificateEmailService,
     );
 
     await service.queueEmail('request-certificate-1');
 
-    expect(sendEmail.execute).toHaveBeenCalledWith(
-      expect.objectContaining({
-        attachments: [
-          expect.objectContaining({ filename: 'CERT-2026-ABC.pdf' }),
-        ],
-        context: expect.objectContaining({
-          certificateCount: 2,
-          certificates: [
-            {
-              certificateNumber: 'CERT-2026-ABC',
-              productName: 'Kính lái: SP50',
-              warrantyCode: 'WM-SP50',
-            },
-            {
-              certificateNumber: 'CERT-2026-ABC',
-              productName: 'Cửa sổ trời: B55',
-              warrantyCode: 'WM-B55',
-            },
-          ],
-        }),
-        text: expect.stringMatching(/WM-SP50[\s\S]*WM-B55/),
-        warrantyActivationRequestCertificateId: 'request-certificate-1',
-      }),
-    );
-    expect(repository.update).toHaveBeenCalledWith(
+    const email = sendEmail.execute.mock.calls[0]?.[0];
+    expect(email?.attachments?.[0]?.filename).toBe('CERT-2026-ABC.pdf');
+    expect(email?.context).toEqual({
+      brandLogoUrl: 'https://cdn.example.com/brand-logo.png',
+      certificateCount: 2,
+      certificateNumber: 'CERT-2026-ABC',
+      certificates: [
+        {
+          positionLabel: 'Kính lái',
+          productName: 'SP50',
+          warrantyCode: 'WM-SP50',
+        },
+        {
+          positionLabel: 'Cửa sổ trời',
+          productName: 'B55',
+          warrantyCode: 'WM-B55',
+        },
+      ],
+      customerName: 'Nguyễn Văn A',
+      subject: 'Chứng nhận bảo hành điện tử CERT-2026-ABC',
+    });
+    expect(email?.text).toMatch(/WM-SP50[\s\S]*WM-B55/);
+    expect(email?.warrantyActivationRequestCertificateId).toBe(
       'request-certificate-1',
+    );
+
+    const update = repository.update.mock.calls[0];
+    expect(update?.[0]).toBe('request-certificate-1');
+    expect(update?.[1]).toEqual(
       expect.objectContaining({ email_status: 'QUEUED', last_error: null }),
     );
   });
