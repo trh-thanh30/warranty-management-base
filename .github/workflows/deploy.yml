@@ -99,15 +99,24 @@ jobs:
           WEB_IMAGE: ${{ steps.metadata.outputs.web_image }}
           ADMIN_IMAGE: ${{ steps.metadata.outputs.admin_image }}
           IMAGE_TAG: ${{ steps.metadata.outputs.image_tag }}
+          RUN_MULTI_PRODUCT_ACTIVATION_AUDIT: ${{ vars.RUN_MULTI_PRODUCT_ACTIVATION_AUDIT || 'false' }}
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: ${{ secrets.DEPLOY_PORT || 22 }}
-          envs: API_IMAGE,MIGRATOR_IMAGE,WEB_IMAGE,ADMIN_IMAGE,IMAGE_TAG
+          envs: API_IMAGE,MIGRATOR_IMAGE,WEB_IMAGE,ADMIN_IMAGE,IMAGE_TAG,RUN_MULTI_PRODUCT_ACTIVATION_AUDIT
           script: |
             set -eu
             cd "${{ secrets.DEPLOY_PATH }}"
+
+            case "$RUN_MULTI_PRODUCT_ACTIVATION_AUDIT" in
+              true|false) ;;
+              *)
+                echo "RUN_MULTI_PRODUCT_ACTIVATION_AUDIT must be either true or false."
+                exit 1
+                ;;
+            esac
 
             mkdir -p .deploy
             if [ -f .env.production ]; then
@@ -154,6 +163,18 @@ jobs:
 
             docker compose -f docker-compose.prod.yml --env-file .env.production --profile tools pull migrate api worker-email web admin
             docker compose -f docker-compose.prod.yml --env-file .env.production --profile tools run --rm migrate
+
+            if [ "$RUN_MULTI_PRODUCT_ACTIVATION_AUDIT" = "true" ]; then
+              echo "Running multi-product warranty activation audit."
+              docker compose -f docker-compose.prod.yml --env-file .env.production --profile tools run --rm \
+                --entrypoint /app/apps/api-migrator/run-sql-audit.sh \
+                -e AUDIT_SQL_FILE=/app/apps/api/prisma/audits/20260815_multi_product_warranty_activation.sql \
+                migrate
+              echo "Multi-product warranty activation audit passed."
+            else
+              echo "Multi-product warranty activation audit is disabled."
+            fi
+
             docker compose -f docker-compose.prod.yml --env-file .env.production run --rm minio-init
             docker compose -f docker-compose.prod.yml --env-file .env.production up -d
             docker compose -f docker-compose.prod.yml --env-file .env.production ps

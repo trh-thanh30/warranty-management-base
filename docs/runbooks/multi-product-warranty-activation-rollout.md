@@ -33,6 +33,18 @@ The audit reports:
 
 Both `request_without_item_count` and `duplicate_open_product_count` must be zero. The SQL exits with an error otherwise.
 
+## Automated production gate
+
+Set the GitHub Actions variable `RUN_MULTI_PRODUCT_ACTIVATION_AUDIT=true` for the
+`production` environment before deploying this rollout. The deployment runs the
+same audit immediately after `prisma migrate deploy` and before starting the new
+API, Worker, Admin, and Web containers. Any audit error stops the deployment.
+
+The variable accepts only `true` or `false`. Keep it set to `true` until the
+multi-product rollout and production smoke tests are complete. This automated
+gate does not replace the isolated restore and pre-deployment audit required
+above.
+
 Before any live production migration, create and verify the VPS database backup from the deployment directory:
 
 ```bash
