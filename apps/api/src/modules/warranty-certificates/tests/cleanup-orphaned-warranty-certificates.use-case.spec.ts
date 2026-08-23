@@ -51,6 +51,7 @@ describe('CleanupOrphanedWarrantyCertificatesUseCase', () => {
     const useCase = new CleanupOrphanedWarrantyCertificatesUseCase(
       new WarrantyCertificatesRepository(prismaService as never),
       uploadAssetService as never,
+      { millisecondsPerDay: 24 * 60 * 60 * 1000 },
     );
 
     const result = await useCase.execute({
@@ -75,6 +76,7 @@ describe('CleanupOrphanedWarrantyCertificatesUseCase', () => {
     const useCase = new CleanupOrphanedWarrantyCertificatesUseCase(
       new WarrantyCertificatesRepository(prismaService as never),
       uploadAssetService as never,
+      { millisecondsPerDay: 24 * 60 * 60 * 1000 },
     );
 
     const result = await useCase.execute({

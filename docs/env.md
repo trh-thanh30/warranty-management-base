@@ -18,6 +18,7 @@ Repo dùng nhiều file env theo môi trường. File mẫu là `.env.example`.
 - `API_PORT`
 - `WEB_PORT`
 - `ADMIN_PORT`
+- `MILLISECONDS_PER_DAY`: số mili giây trong một ngày, mặc định `86400000`.
 
 ### Database
 

@@ -1,3 +1,4 @@
+import { timeConfig } from '@/config';
 import { PrismaModule } from '@/database/prisma/prisma.module';
 import { AssetsModule } from '@/modules/assets/assets.module';
 import { EmailModule } from '@/modules/email/email.module';
@@ -13,9 +14,15 @@ import { IssueWarrantyCertificateUseCase } from '@/modules/warranty-certificates
 import { IssueWarrantyCertificatesForRequestUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-certificates-for-request.use-case';
 import { ResendWarrantyCertificateEmailUseCase } from '@/modules/warranty-certificates/use-cases/resend-warranty-certificate-email.use-case';
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [AssetsModule, EmailModule, PrismaModule],
+  imports: [
+    AssetsModule,
+    ConfigModule.forFeature(timeConfig),
+    EmailModule,
+    PrismaModule,
+  ],
   providers: [
     WarrantyCertificatesRepository,
     IssueWarrantyCertificateUseCase,
