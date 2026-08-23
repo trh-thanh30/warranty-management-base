@@ -1,3 +1,4 @@
+import { isValidOptionalBirthdate } from "@/src/utils/birthdate";
 import { z } from "zod";
 
 const optionalText = z.string().trim();
@@ -5,7 +6,9 @@ const optionalText = z.string().trim();
 export const customerFormSchema = z.object({
   address: optionalText.max(255),
   addressDetail: optionalText.min(1, "addressRequired").max(255),
-  birthdate: optionalText,
+  birthdate: optionalText.refine(isValidOptionalBirthdate, {
+    message: "birthdateInvalid",
+  }),
   customerCode: optionalText.refine(
     (value) => value.length === 0 || (value.length >= 4 && value.length <= 32),
     {

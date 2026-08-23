@@ -14,6 +14,24 @@ const translationKeys = [...formSource.matchAll(/\bt\("([^"]+)"/g)]
   .map((match) => match[1])
   .filter((key): key is string => Boolean(key));
 
+const activationApiErrorCodes = [
+  "ACTIVATION_CATEGORY_REQUIRED",
+  "ACTIVATION_FORM_DISABLED",
+  "ACTIVATION_ITEM_VALIDATOR_UNAVAILABLE",
+  "ACTIVATION_POSITION_DUPLICATE",
+  "ACTIVATION_POSITION_INVALID",
+  "ACTIVATION_PRODUCT_DUPLICATE",
+  "ACTIVATION_REQUIRED_POSITION_MISSING",
+  "ACTIVATION_REQUEST_ALREADY_ACTIVATED",
+  "ACTIVATION_TARGET_REQUIRED",
+  "CATEGORY_NOT_FOUND",
+  "CUSTOMER_IDENTITY_CONFLICT",
+  "CUSTOMER_NOT_FOUND",
+  "DEALER_NOT_FOUND",
+  "WARRANTY_OWNER_REQUIRED",
+  "WARRANTY_START_DATE_IN_FUTURE",
+] as const;
+
 for (const locale of ["vi", "en"]) {
   test(`create activation request form copy exists in the ${locale} locale`, () => {
     const messages = JSON.parse(
@@ -35,6 +53,26 @@ for (const locale of ["vi", "en"]) {
       assert.ok(
         namespace[key],
         `${locale} is missing WarrantyActivationRequestsAdmin.${key}`,
+      );
+    }
+  });
+}
+
+for (const locale of ["vi", "en"]) {
+  test(`activation API errors are localized in the ${locale} locale`, () => {
+    const messages = JSON.parse(
+      readFileSync(
+        new URL(`../../messages/${locale}.json`, import.meta.url),
+        "utf8",
+      ),
+    ) as { ApiErrors?: Record<string, unknown> };
+
+    assert.ok(messages.ApiErrors, `${locale} is missing ApiErrors`);
+    for (const code of activationApiErrorCodes) {
+      assert.equal(
+        typeof messages.ApiErrors[code],
+        "string",
+        `${locale} is missing ApiErrors.${code}`,
       );
     }
   });

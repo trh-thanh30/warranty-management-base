@@ -1,3 +1,4 @@
+import { IsNotFutureDate } from '@/common/decorators/is-not-future-date.decorator';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
@@ -108,6 +109,7 @@ export class CreateWarrantyActivationRequestDto {
 
   @IsOptional()
   @IsDateString()
+  @IsNotFutureDate()
   customerBirthdate?: string;
 
   @IsOptional()

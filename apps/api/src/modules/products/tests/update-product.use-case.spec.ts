@@ -264,6 +264,33 @@ describe('UpdateProductUseCase', () => {
     expect(repository.update).not.toHaveBeenCalled();
   });
 
+  it('allows other product edits when a non-draft duration is submitted unchanged', async () => {
+    const existing = createExistingProduct({
+      duration_months: 24,
+      id: 'warranty-id',
+      status: warranty_status.ACTIVE,
+      warranty_code: 'WM-2026-EXISTING',
+    });
+    const repository = createRepository(existing);
+    const useCase = new UpdateProductUseCase(
+      repository as never,
+      { execute: jest.fn() } as never,
+    );
+
+    await useCase.execute('product-id', {
+      displayName: 'Updated display name',
+      warrantyDurationMonths: 24,
+    });
+
+    expect(repository.update).toHaveBeenCalledWith(
+      'product-id',
+      expect.objectContaining({
+        display_name: 'Updated display name',
+        warranty: undefined,
+      }),
+    );
+  });
+
   it('uses the replacement template policy only when creating a missing warranty', async () => {
     const existing = createExistingProduct(null);
     const repository = createRepository(existing);
@@ -607,6 +634,7 @@ describe('UpdateProductUseCase', () => {
 
 function createExistingProduct(
   warranty: {
+    duration_months?: number;
     id: string;
     status?: warranty_status;
     warranty_code: string | null;
@@ -623,7 +651,11 @@ function createExistingProduct(
     metadata: null,
     deleted_at: null,
     warranty: warranty
-      ? { ...warranty, status: warranty.status ?? warranty_status.DRAFT }
+      ? {
+          ...warranty,
+          duration_months: warranty.duration_months ?? 24,
+          status: warranty.status ?? warranty_status.DRAFT,
+        }
       : null,
     warranty_activation_requests: openRequests,
     template: {
@@ -652,6 +684,7 @@ function createRepository(existing: ReturnType<typeof createExistingProduct>) {
 function createUpdatedProduct(
   existing: ReturnType<typeof createExistingProduct>,
   warranty: {
+    duration_months?: number;
     id: string;
     warranty_code: string | null;
     status?: warranty_status;

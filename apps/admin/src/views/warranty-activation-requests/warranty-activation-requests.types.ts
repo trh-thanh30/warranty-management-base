@@ -3,6 +3,7 @@ import type {
   WarrantyActivationRequestStatus,
   WarrantyActivationRequestSummary,
 } from "@repo/shared";
+import { isValidOptionalBirthdate } from "@/src/utils/birthdate";
 import { containsDisallowedVietnamAddressDetailUnit } from "@repo/shared/utils";
 import { z } from "zod";
 
@@ -67,7 +68,9 @@ export const warrantyActivationRequestCreateFormSchema = z.object({
   activationProductIds: z.record(z.string(), z.string().trim()),
   categoryId: z.string().trim().min(1, "categoryRequired"),
   categoryInputValues: z.record(z.string(), z.string().trim().max(500)),
-  customerBirthdate: z.string().trim(),
+  customerBirthdate: z.string().trim().refine(isValidOptionalBirthdate, {
+    message: "birthdateInvalid",
+  }),
   customerId: z.string().trim().min(1, "customerRequired"),
   customerEmail: z
     .string()
