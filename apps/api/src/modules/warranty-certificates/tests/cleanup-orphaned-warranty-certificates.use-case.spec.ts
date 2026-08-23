@@ -1,4 +1,5 @@
 import { CleanupOrphanedWarrantyCertificatesUseCase } from '@/modules/warranty-certificates/use-cases/cleanup-orphaned-warranty-certificates.use-case';
+import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
 
 describe('CleanupOrphanedWarrantyCertificatesUseCase', () => {
   const now = new Date('2026-07-24T00:00:00.000Z');
@@ -48,7 +49,7 @@ describe('CleanupOrphanedWarrantyCertificatesUseCase', () => {
   it('reports old unreferenced certificate PDFs without deleting in dry-run mode', async () => {
     const { prismaService, uploadAssetService } = createDependencies();
     const useCase = new CleanupOrphanedWarrantyCertificatesUseCase(
-      prismaService as never,
+      new WarrantyCertificatesRepository(prismaService as never),
       uploadAssetService as never,
     );
 
@@ -72,7 +73,7 @@ describe('CleanupOrphanedWarrantyCertificatesUseCase', () => {
   it('deletes only old unreferenced certificate PDFs', async () => {
     const { prismaService, uploadAssetService } = createDependencies();
     const useCase = new CleanupOrphanedWarrantyCertificatesUseCase(
-      prismaService as never,
+      new WarrantyCertificatesRepository(prismaService as never),
       uploadAssetService as never,
     );
 

@@ -1,4 +1,5 @@
 import { IssueWarrantyCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-certificate.use-case';
+import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
 import {
   warranty_certificate_email_status,
   warranty_certificate_status,
@@ -68,7 +69,7 @@ describe('IssueWarrantyCertificateUseCase', () => {
       createPdfBuffer: jest.fn().mockResolvedValue(Buffer.from('%PDF-')),
     };
     const useCase = new IssueWarrantyCertificateUseCase(
-      prismaService as never,
+      new WarrantyCertificatesRepository(prismaService as never),
       uploadAssetService as never,
       certificateEmailQueueService as never,
       pdfService,
@@ -129,7 +130,7 @@ describe('IssueWarrantyCertificateUseCase', () => {
       upload: jest.fn().mockResolvedValue({ path: uploadedPath }),
     };
     const useCase = new IssueWarrantyCertificateUseCase(
-      prismaService as never,
+      new WarrantyCertificatesRepository(prismaService as never),
       uploadAssetService as never,
       { queueEmail: jest.fn() } as never,
       {
@@ -159,7 +160,7 @@ describe('IssueWarrantyCertificateUseCase', () => {
       },
     };
     const useCase = new IssueWarrantyCertificateUseCase(
-      prismaService as never,
+      new WarrantyCertificatesRepository(prismaService as never),
       { upload: jest.fn() } as never,
       { queueEmail: jest.fn() } as never,
       {
@@ -203,7 +204,7 @@ describe('IssueWarrantyCertificateUseCase', () => {
       },
     };
     const useCase = new IssueWarrantyCertificateUseCase(
-      prismaService as never,
+      new WarrantyCertificatesRepository(prismaService as never),
       {
         upload: jest.fn().mockResolvedValue({ path: 'private/retried.pdf' }),
       } as never,

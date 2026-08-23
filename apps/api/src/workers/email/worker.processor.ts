@@ -1,6 +1,6 @@
 import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '@/database/prisma/prisma.service';
+import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
 import { warranty_certificate_email_status } from '@prisma/client';
 import { Job } from 'bullmq';
 import { WorkerEmailService } from '@/workers/email/worker.service';
@@ -31,7 +31,7 @@ export class EmailProcessor extends WorkerHost {
 
   constructor(
     private readonly emailService: WorkerEmailService,
-    private readonly prismaService: PrismaService,
+    private readonly warrantyCertificatesRepository: WarrantyCertificatesRepository,
   ) {
     super();
   }
@@ -116,13 +116,10 @@ export class EmailProcessor extends WorkerHost {
   private async markWarrantyCertificateEmailSent(certificateIds: string[]) {
     if (certificateIds.length === 0) return;
 
-    await this.prismaService.warrantyCertificate.updateMany({
-      where: { id: { in: certificateIds } },
-      data: {
-        email_status: warranty_certificate_email_status.SENT,
-        emailed_at: new Date(),
-        last_error: null,
-      },
+    await this.warrantyCertificatesRepository.updateMany(certificateIds, {
+      email_status: warranty_certificate_email_status.SENT,
+      emailed_at: new Date(),
+      last_error: null,
     });
   }
 
@@ -132,12 +129,9 @@ export class EmailProcessor extends WorkerHost {
   ) {
     if (certificateIds.length === 0) return;
 
-    await this.prismaService.warrantyCertificate.updateMany({
-      where: { id: { in: certificateIds } },
-      data: {
-        email_status: warranty_certificate_email_status.FAILED,
-        last_error: message,
-      },
+    await this.warrantyCertificatesRepository.updateMany(certificateIds, {
+      email_status: warranty_certificate_email_status.FAILED,
+      last_error: message,
     });
   }
 

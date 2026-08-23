@@ -1,4 +1,5 @@
 import { WarrantyCertificateBatchEmailService } from '@/modules/warranty-certificates/services/warranty-certificate-batch-email.service';
+import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
 import { warranty_certificate_email_status } from '@prisma/client';
 import { Readable } from 'node:stream';
 
@@ -27,7 +28,7 @@ describe('WarrantyCertificateBatchEmailService', () => {
         .mockResolvedValueOnce(Readable.from(Buffer.from('pdf-two'))),
     };
     const service = new WarrantyCertificateBatchEmailService(
-      prismaService as never,
+      new WarrantyCertificatesRepository(prismaService as never),
       sendEmailUseCase as never,
       uploadAssetService as never,
     );

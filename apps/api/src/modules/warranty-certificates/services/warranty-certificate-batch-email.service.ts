@@ -1,6 +1,6 @@
-import { PrismaService } from '@/database/prisma/prisma.service';
 import { UploadAssetService } from '@/modules/assets/services/upload-asset.service';
 import { SendEmailUseCase } from '@/modules/email/use-cases/send-email.usecase';
+import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
 import { Injectable, Logger } from '@nestjs/common';
 import { warranty_certificate_email_status } from '@prisma/client';
 
@@ -11,7 +11,7 @@ export class WarrantyCertificateBatchEmailService {
   );
 
   constructor(
-    private readonly prismaService: PrismaService,
+    private readonly warrantyCertificatesRepository: WarrantyCertificatesRepository,
     private readonly sendEmailUseCase: SendEmailUseCase,
     private readonly uploadAssetService: UploadAssetService,
   ) {}
@@ -25,18 +25,12 @@ export class WarrantyCertificateBatchEmailService {
     if (certificateIds.length === 0) return;
 
     const [request, unorderedCertificates] = await Promise.all([
-      this.prismaService.warrantyActivationRequest.findUnique({
-        where: { id: input.requestId },
-        select: { customer_name: true },
-      }),
-      this.prismaService.warrantyCertificate.findMany({
-        where: { id: { in: certificateIds } },
-        include: {
-          warranty: {
-            include: { product: { include: { template: true } } },
-          },
-        },
-      }),
+      this.warrantyCertificatesRepository.findBatchEmailRequest(
+        input.requestId,
+      ),
+      this.warrantyCertificatesRepository.findBatchEmailCertificates(
+        certificateIds,
+      ),
     ]);
     const byId = new Map(
       unorderedCertificates.map((certificate) => [certificate.id, certificate]),
@@ -112,13 +106,10 @@ export class WarrantyCertificateBatchEmailService {
         warrantyCertificateIds: certificateIds,
       });
 
-      await this.prismaService.warrantyCertificate.updateMany({
-        where: { id: { in: certificateIds } },
-        data: {
-          email_status: warranty_certificate_email_status.QUEUED,
-          emailed_at: new Date(),
-          last_error: null,
-        },
+      await this.warrantyCertificatesRepository.updateMany(certificateIds, {
+        email_status: warranty_certificate_email_status.QUEUED,
+        emailed_at: new Date(),
+        last_error: null,
       });
     } catch (error) {
       const message =
@@ -126,12 +117,9 @@ export class WarrantyCertificateBatchEmailService {
       this.logger.error(
         `Failed to queue certificate batch email for request ${input.requestId}: ${message}`,
       );
-      await this.prismaService.warrantyCertificate.updateMany({
-        where: { id: { in: certificateIds } },
-        data: {
-          email_status: warranty_certificate_email_status.FAILED,
-          last_error: message,
-        },
+      await this.warrantyCertificatesRepository.updateMany(certificateIds, {
+        email_status: warranty_certificate_email_status.FAILED,
+        last_error: message,
       });
     }
   }
