@@ -9,5 +9,6 @@ coverage
 !.env.example
 *.log
 storage
+backups
 prisma-data
 telegram-notification.preview.*

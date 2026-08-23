@@ -33,6 +33,17 @@ The audit reports:
 
 Both `request_without_item_count` and `duplicate_open_product_count` must be zero. The SQL exits with an error otherwise.
 
+Before any live production migration, create and verify the VPS database backup from the deployment directory:
+
+```bash
+ENV_FILE=.env.production \
+  COMPOSE_FILE=docker-compose.prod.yml \
+  BACKUP_LABEL=manual \
+  bash ./scripts/backup-production.sh
+```
+
+The deployment workflow synchronizes this script to the VPS but does not execute it. Run it manually for this rollout and schedule it independently from deployments for routine backups. Local VPS backups are only the first recovery layer; copy them to off-server storage before treating the backup process as disaster-recovery ready.
+
 ## Smoke tests
 
 - Public: submit one valid E-Warranty code and verify one request with one `primaryProduct` item.
