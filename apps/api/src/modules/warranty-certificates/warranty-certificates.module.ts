@@ -1,6 +1,7 @@
 import { PrismaModule } from '@/database/prisma/prisma.module';
 import { AssetsModule } from '@/modules/assets/assets.module';
 import { EmailModule } from '@/modules/email/email.module';
+import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
 import { WarrantyCertificateEmailQueueService } from '@/modules/warranty-certificates/services/warranty-certificate-email-queue.service';
 import { WarrantyCertificateBatchEmailService } from '@/modules/warranty-certificates/services/warranty-certificate-batch-email.service';
 import { WarrantyCertificateEmailContentService } from '@/modules/warranty-certificates/services/warranty-certificate-email-content.service';
@@ -16,6 +17,7 @@ import { Module } from '@nestjs/common';
 @Module({
   imports: [AssetsModule, EmailModule, PrismaModule],
   providers: [
+    WarrantyCertificatesRepository,
     IssueWarrantyCertificateUseCase,
     IssueWarrantyCertificatesForRequestUseCase,
     CleanupOrphanedWarrantyCertificatesUseCase,
@@ -28,6 +30,7 @@ import { Module } from '@nestjs/common';
     WarrantyCertificatePdfService,
   ],
   exports: [
+    WarrantyCertificatesRepository,
     IssueWarrantyCertificateUseCase,
     IssueWarrantyCertificatesForRequestUseCase,
     DeleteWarrantyCertificateUseCase,

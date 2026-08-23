@@ -1,4 +1,5 @@
 import { DownloadWarrantyActivationRequestCertificateUseCase } from '@/modules/warranty-activation-requests/use-cases/download-warranty-activation-request-certificate.use-case';
+import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
 import { NotFoundError } from '@/common/response';
 import { Readable } from 'stream';
 
@@ -23,7 +24,7 @@ describe('DownloadWarrantyActivationRequestCertificateUseCase', () => {
       getStream: jest.fn().mockResolvedValue(stream),
     };
     const useCase = new DownloadWarrantyActivationRequestCertificateUseCase(
-      prismaService as never,
+      new WarrantyCertificatesRepository(prismaService as never),
       uploadAssetService as never,
     );
 
@@ -54,7 +55,7 @@ describe('DownloadWarrantyActivationRequestCertificateUseCase', () => {
       },
     };
     const useCase = new DownloadWarrantyActivationRequestCertificateUseCase(
-      prismaService as never,
+      new WarrantyCertificatesRepository(prismaService as never),
       { getStream: jest.fn() } as never,
     );
 
@@ -83,7 +84,7 @@ describe('DownloadWarrantyActivationRequestCertificateUseCase', () => {
       getStream: jest.fn().mockResolvedValue(stream),
     };
     const useCase = new DownloadWarrantyActivationRequestCertificateUseCase(
-      prismaService as never,
+      new WarrantyCertificatesRepository(prismaService as never),
       uploadAssetService as never,
     );
 

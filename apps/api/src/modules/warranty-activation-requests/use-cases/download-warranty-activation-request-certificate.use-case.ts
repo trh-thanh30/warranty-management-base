@@ -1,59 +1,23 @@
 import { NotFoundError } from '@/common/response';
-import { PrismaService } from '@/database/prisma/prisma.service';
 import { UploadAssetService } from '@/modules/assets/services/upload-asset.service';
+import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class DownloadWarrantyActivationRequestCertificateUseCase {
   constructor(
-    private readonly prismaService: PrismaService,
+    private readonly warrantyCertificatesRepository: WarrantyCertificatesRepository,
     private readonly uploadAssetService: UploadAssetService,
   ) {}
 
   async execute(requestId: string, itemId?: string) {
-    if (itemId) {
-      const item =
-        await this.prismaService.warrantyActivationRequestItem.findFirst({
-          where: { id: itemId, request_id: requestId },
-          select: {
-            warranty: {
-              select: {
-                certificates: {
-                  orderBy: { created_at: 'desc' },
-                  select: {
-                    certificate_number: true,
-                    storage_key: true,
-                  },
-                  take: 1,
-                },
-              },
-            },
-          },
-        });
+    const certificate =
+      await this.warrantyCertificatesRepository.findLatestFileForActivationRequest(
+        requestId,
+        itemId,
+      );
 
-      return this.toCertificateFile(item?.warranty.certificates[0]);
-    }
-
-    const request =
-      await this.prismaService.warrantyActivationRequest.findUnique({
-        where: { id: requestId },
-        select: {
-          activated_warranty: {
-            select: {
-              certificates: {
-                orderBy: { created_at: 'desc' },
-                select: {
-                  certificate_number: true,
-                  storage_key: true,
-                },
-                take: 1,
-              },
-            },
-          },
-        },
-      });
-
-    return this.toCertificateFile(request?.activated_warranty?.certificates[0]);
+    return this.toCertificateFile(certificate ?? undefined);
   }
 
   private async toCertificateFile(

@@ -13,12 +13,12 @@ import {
 
 describe('WarrantyActivationRequestsUseCases', () => {
   const repository = {
-    activateApprovedRequest: jest.fn(),
     create: jest.fn(),
     findById: jest.fn(),
     findLastRequestCode: jest.fn(),
     findOpenByProductId: jest.fn(),
     review: jest.fn(),
+    withReviewTransaction: jest.fn(),
   };
   const productsRepository = {
     findActivationRequestTargetById: jest.fn(),
@@ -842,7 +842,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     repository.findById
       .mockResolvedValueOnce(baseRequest)
       .mockResolvedValueOnce(activatedRequest);
-    repository.activateApprovedRequest.mockResolvedValue(activatedRequest);
+    repository.withReviewTransaction.mockResolvedValue(activatedRequest);
     issueWarrantyCertificatesForRequestUseCase.execute.mockResolvedValue({
       certificateIds: ['certificate-id'],
       failures: [],
@@ -861,11 +861,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
       { reviewedByUserId: 'admin-id' },
     );
 
-    expect(repository.activateApprovedRequest).toHaveBeenCalledWith({
-      adminNote: 'Thong tin hop le',
-      id: 'request-id',
-      reviewedById: 'admin-id',
-    });
+    expect(repository.withReviewTransaction).toHaveBeenCalledTimes(1);
     expect(repository.review).not.toHaveBeenCalled();
     expect(
       issueWarrantyCertificatesForRequestUseCase.execute,

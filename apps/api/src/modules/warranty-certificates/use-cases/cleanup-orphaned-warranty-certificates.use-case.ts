@@ -1,5 +1,5 @@
-import { PrismaService } from '@/database/prisma/prisma.service';
 import { UploadAssetService } from '@/modules/assets/services/upload-asset.service';
+import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
 import { WARRANTY_CERTIFICATE_FOLDER_SEGMENT } from '@/modules/warranty-certificates/warranty-certificate.constants';
 import { Injectable, Logger } from '@nestjs/common';
 
@@ -18,7 +18,7 @@ export class CleanupOrphanedWarrantyCertificatesUseCase {
   );
 
   constructor(
-    private readonly prismaService: PrismaService,
+    private readonly warrantyCertificatesRepository: WarrantyCertificatesRepository,
     private readonly uploadAssetService: UploadAssetService,
   ) {}
 
@@ -29,10 +29,7 @@ export class CleanupOrphanedWarrantyCertificatesUseCase {
     );
     const [storedObjects, certificateRecords] = await Promise.all([
       this.uploadAssetService.list('private'),
-      this.prismaService.warrantyCertificate.findMany({
-        where: { storage_key: { not: null } },
-        select: { storage_key: true },
-      }),
+      this.warrantyCertificatesRepository.findStoredPaths(),
     ]);
     const referencedPaths = new Set(
       certificateRecords
