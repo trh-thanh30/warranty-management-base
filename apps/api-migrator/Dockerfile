@@ -17,7 +17,7 @@ RUN pnpm install --frozen-lockfile --prod --filter @repo/api-migrator --ignore-s
 
 FROM node:22-alpine AS runner
 
-RUN apk add --no-cache ca-certificates libc6-compat openssl \
+RUN apk add --no-cache ca-certificates libc6-compat openssl postgresql-client \
   && addgroup --system --gid 1001 nodejs \
   && adduser --system --uid 1001 migrator \
   && rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
@@ -29,6 +29,9 @@ COPY --from=builder --chown=migrator:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=migrator:nodejs /app/apps/api-migrator/node_modules ./apps/api-migrator/node_modules
 COPY apps/api/prisma ./apps/api/prisma
 COPY apps/api/prisma.config.ts ./apps/api/prisma.config.ts
+COPY --chown=migrator:nodejs apps/api-migrator/run-sql-audit.sh /app/apps/api-migrator/run-sql-audit.sh
+
+RUN chmod 0555 /app/apps/api-migrator/run-sql-audit.sh
 
 WORKDIR /app/apps/api
 
