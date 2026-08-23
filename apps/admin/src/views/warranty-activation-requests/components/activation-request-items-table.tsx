@@ -25,9 +25,9 @@ export function ActivationRequestItemsTable({
   const tWarranties = useTranslations("Warranties");
 
   return (
-    <TableScroll className="max-w-full overscroll-x-contain rounded-md border border-slate-200 dark:border-slate-800">
+    <TableScroll className="max-w-full overscroll-x-contain rounded-md max-h-[30rem] overflow-y-auto border border-slate-200 dark:border-slate-800">
       <Table className="min-w-[920px] whitespace-nowrap">
-        <TableHeader>
+        <TableHeader className="sticky top-0 z-10 bg-white dark:bg-slate-950">
           <TableRow>
             <TableHead>{t("position")}</TableHead>
             <TableHead>{t("product")}</TableHead>

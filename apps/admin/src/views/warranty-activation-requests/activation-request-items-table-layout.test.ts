@@ -15,6 +15,17 @@ test("activation request item columns stay readable and scroll horizontally", ()
   assert.match(source, /Table className="min-w-\[920px\] whitespace-nowrap"/);
 });
 
+test("activation request items scroll vertically with a sticky header", () => {
+  assert.match(
+    source,
+    /TableScroll className="[^"]*max-h-\[30rem\][^"]*overflow-y-auto/,
+  );
+  assert.match(
+    source,
+    /TableHeader className="sticky top-0 z-10 bg-white dark:bg-slate-950"/,
+  );
+});
+
 test("activation request items do not expose certificate actions", () => {
   assert.doesNotMatch(source, /viewItemCertificate/);
   assert.doesNotMatch(source, /downloadItemCertificate/);
