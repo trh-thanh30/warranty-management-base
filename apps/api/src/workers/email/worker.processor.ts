@@ -1,6 +1,6 @@
 import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '@/database/prisma/prisma.service';
+import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
 import { warranty_certificate_email_status } from '@prisma/client';
 import { Job } from 'bullmq';
 import { WorkerEmailService } from '@/workers/email/worker.service';
@@ -18,6 +18,7 @@ export interface EmailJobData {
   template?: string;
   context?: Record<string, unknown>;
   warrantyCertificateId?: string;
+  warrantyCertificateIds?: string[];
   // Idempotency key for deduplication
   idempotencyKey?: string;
 }
@@ -30,7 +31,7 @@ export class EmailProcessor extends WorkerHost {
 
   constructor(
     private readonly emailService: WorkerEmailService,
-    private readonly prismaService: PrismaService,
+    private readonly warrantyCertificatesRepository: WarrantyCertificatesRepository,
   ) {
     super();
   }
@@ -46,6 +47,7 @@ export class EmailProcessor extends WorkerHost {
       context,
       idempotencyKey,
       warrantyCertificateId,
+      warrantyCertificateIds,
     } = job.data;
 
     // Idempotency check - skip if already processed
@@ -94,12 +96,16 @@ export class EmailProcessor extends WorkerHost {
 
       // mark job as completed
       job.updateProgress(100);
-      await this.markWarrantyCertificateEmailSent(warrantyCertificateId);
+      await this.markWarrantyCertificateEmailSent(
+        warrantyCertificateIds ??
+          (warrantyCertificateId ? [warrantyCertificateId] : []),
+      );
 
       this.logger.log(`Email job ${job.id} completed successfully`);
     } catch (error) {
       await this.markWarrantyCertificateEmailFailed(
-        warrantyCertificateId,
+        warrantyCertificateIds ??
+          (warrantyCertificateId ? [warrantyCertificateId] : []),
         error instanceof Error ? error.message : 'Unknown email sending error',
       );
       this.logger.error(`Email job ${job.id} failed: ${error.message}`);
@@ -107,31 +113,25 @@ export class EmailProcessor extends WorkerHost {
     }
   }
 
-  private async markWarrantyCertificateEmailSent(certificateId?: string) {
-    if (!certificateId) return;
+  private async markWarrantyCertificateEmailSent(certificateIds: string[]) {
+    if (certificateIds.length === 0) return;
 
-    await this.prismaService.warrantyCertificate.update({
-      where: { id: certificateId },
-      data: {
-        email_status: warranty_certificate_email_status.SENT,
-        emailed_at: new Date(),
-        last_error: null,
-      },
+    await this.warrantyCertificatesRepository.updateMany(certificateIds, {
+      email_status: warranty_certificate_email_status.SENT,
+      emailed_at: new Date(),
+      last_error: null,
     });
   }
 
   private async markWarrantyCertificateEmailFailed(
-    certificateId: string | undefined,
+    certificateIds: string[],
     message: string,
   ) {
-    if (!certificateId) return;
+    if (certificateIds.length === 0) return;
 
-    await this.prismaService.warrantyCertificate.update({
-      where: { id: certificateId },
-      data: {
-        email_status: warranty_certificate_email_status.FAILED,
-        last_error: message,
-      },
+    await this.warrantyCertificatesRepository.updateMany(certificateIds, {
+      email_status: warranty_certificate_email_status.FAILED,
+      last_error: message,
     });
   }
 

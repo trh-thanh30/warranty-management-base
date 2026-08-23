@@ -9,10 +9,12 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
   };
   const generateWarrantyCodeUseCase = { execute: jest.fn() };
   const createWarrantyActivationRequestUseCase = { execute: jest.fn() };
+  const customersRepository = { findById: jest.fn() };
   const dto = {
     productId: '23684bbd-b6e0-401a-9ba4-97e1b98176fd',
     addressDetail: '1 Nguyen Trai',
     customerEmail: 'customer@example.com',
+    customerId: '68a1578a-b13e-45de-b008-e357392be715',
     customerName: 'Nguyen Van A',
     customerPhone: '0901234567',
     provinceCode: '79',
@@ -23,6 +25,103 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    customersRepository.findById.mockResolvedValue({
+      id: dto.customerId,
+      birthdate: new Date('2005-12-11T00:00:00.000Z'),
+      email: dto.customerEmail,
+      full_name: dto.customerName,
+      phone: dto.customerPhone,
+    });
+  });
+
+  it('rejects an unknown selected Customer', async () => {
+    customersRepository.findById.mockResolvedValue(null);
+    const useCase = new CreateAdminWarrantyActivationRequestUseCase(
+      productsRepository as never,
+      generateWarrantyCodeUseCase as never,
+      createWarrantyActivationRequestUseCase as never,
+      customersRepository as never,
+    );
+
+    await expect(useCase.execute(dto)).rejects.toMatchObject({
+      code: 'NOT_FOUND',
+      details: { code: 'CUSTOMER_NOT_FOUND' },
+    });
+    expect(
+      createWarrantyActivationRequestUseCase.execute,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('uses the selected Customer birthdate when the form omits it', async () => {
+    createWarrantyActivationRequestUseCase.execute.mockResolvedValue({
+      id: 'request-id',
+    });
+    const useCase = new CreateAdminWarrantyActivationRequestUseCase(
+      productsRepository as never,
+      generateWarrantyCodeUseCase as never,
+      createWarrantyActivationRequestUseCase as never,
+      customersRepository as never,
+    );
+
+    await useCase.execute({
+      ...dto,
+      categoryId: 'fd47a803-b240-4935-aab4-554d44fce684',
+      items: [
+        {
+          positionKey: 'windshield',
+          productId: '23684bbd-b6e0-401a-9ba4-97e1b98176fd',
+        },
+      ],
+    });
+
+    expect(createWarrantyActivationRequestUseCase.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        customerBirthdate: '2005-12-11',
+        customerEmail: dto.customerEmail,
+        customerName: dto.customerName,
+        customerPhone: dto.customerPhone,
+      }),
+      expect.objectContaining({
+        customerProfile: {
+          id: dto.customerId,
+          birthdate: undefined,
+        },
+      }),
+    );
+  });
+
+  it('passes a submitted birthdate to the atomic Customer update context', async () => {
+    createWarrantyActivationRequestUseCase.execute.mockResolvedValue({
+      id: 'request-id',
+    });
+    const useCase = new CreateAdminWarrantyActivationRequestUseCase(
+      productsRepository as never,
+      generateWarrantyCodeUseCase as never,
+      createWarrantyActivationRequestUseCase as never,
+      customersRepository as never,
+    );
+
+    await useCase.execute({
+      ...dto,
+      categoryId: 'fd47a803-b240-4935-aab4-554d44fce684',
+      customerBirthdate: '2001-01-02',
+      items: [
+        {
+          positionKey: 'windshield',
+          productId: '23684bbd-b6e0-401a-9ba4-97e1b98176fd',
+        },
+      ],
+    });
+
+    expect(createWarrantyActivationRequestUseCase.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ customerBirthdate: '2001-01-02' }),
+      expect.objectContaining({
+        customerProfile: {
+          id: dto.customerId,
+          birthdate: new Date('2001-01-02T00:00:00.000Z'),
+        },
+      }),
+    );
   });
 
   it('generates and synchronizes a missing warranty code before creating the request', async () => {
@@ -51,6 +150,7 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
       productsRepository as never,
       generateWarrantyCodeUseCase as never,
       createWarrantyActivationRequestUseCase as never,
+      customersRepository as never,
     );
 
     const result = await useCase.execute(dto);
@@ -95,6 +195,7 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
       productsRepository as never,
       generateWarrantyCodeUseCase as never,
       createWarrantyActivationRequestUseCase as never,
+      customersRepository as never,
     );
 
     await useCase.execute(dto);
@@ -128,11 +229,49 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
       productsRepository as never,
       generateWarrantyCodeUseCase as never,
       createWarrantyActivationRequestUseCase as never,
+      customersRepository as never,
     );
 
     await expect(useCase.execute(dto)).rejects.toBeInstanceOf(BadRequestError);
     expect(
       createWarrantyActivationRequestUseCase.execute,
     ).not.toHaveBeenCalled();
+  });
+
+  it('delegates a multi-product payload without collapsing it to one product', async () => {
+    createWarrantyActivationRequestUseCase.execute.mockResolvedValue({
+      id: 'request-id',
+      itemCount: 2,
+    });
+    const useCase = new CreateAdminWarrantyActivationRequestUseCase(
+      productsRepository as never,
+      generateWarrantyCodeUseCase as never,
+      createWarrantyActivationRequestUseCase as never,
+      customersRepository as never,
+    );
+    const multiProductDto = {
+      ...dto,
+      categoryId: 'fd47a803-b240-4935-aab4-554d44fce684',
+      items: [
+        {
+          positionKey: 'windshield',
+          productId: '23684bbd-b6e0-401a-9ba4-97e1b98176fd',
+        },
+        {
+          positionKey: 'rearGlass',
+          productId: '8d51964e-a369-4815-a844-cfe03981732d',
+        },
+      ],
+    };
+
+    await useCase.execute(multiProductDto);
+
+    expect(
+      productsRepository.findActivationRequestTargetById,
+    ).not.toHaveBeenCalled();
+    expect(createWarrantyActivationRequestUseCase.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ items: multiProductDto.items }),
+      expect.objectContaining({ source: 'ADMIN_PORTAL' }),
+    );
   });
 });

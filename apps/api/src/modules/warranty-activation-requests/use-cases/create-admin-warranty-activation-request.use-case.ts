@@ -1,4 +1,5 @@
 import { BadRequestError, NotFoundError } from '@/common/response';
+import { CustomersRepository } from '@/modules/customers/repository/customers.repository';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
 import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { CreateAdminWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-admin-warranty-activation-request.dto';
@@ -16,15 +17,60 @@ export class CreateAdminWarrantyActivationRequestUseCase {
     private readonly productsRepository: ProductsRepository,
     private readonly generateWarrantyCodeUseCase: GenerateWarrantyCodeUseCase,
     private readonly createWarrantyActivationRequestUseCase: CreateWarrantyActivationRequestUseCase,
+    private readonly customersRepository: CustomersRepository,
   ) {}
 
   async execute(
     dto: CreateAdminWarrantyActivationRequestDto,
     context: { createdByUserId?: string } = {},
   ) {
+    const customer = await this.customersRepository.findById(dto.customerId);
+    if (!customer) {
+      throw new NotFoundError('Customer not found', 'NOT_FOUND', {
+        code: 'CUSTOMER_NOT_FOUND',
+        customerId: dto.customerId,
+      });
+    }
+
+    const submittedBirthdate = dto.customerBirthdate
+      ? new Date(dto.customerBirthdate)
+      : undefined;
+    const effectiveBirthdate = submittedBirthdate ?? customer.birthdate;
+    const customerDto = {
+      ...dto,
+      customerBirthdate: effectiveBirthdate
+        ? effectiveBirthdate.toISOString().slice(0, 10)
+        : undefined,
+      customerEmail: customer.email ?? undefined,
+      customerName: customer.full_name,
+      customerPhone: customer.phone ?? dto.customerPhone,
+    };
+    const createContext = {
+      createdByUserId: context.createdByUserId,
+      source: warranty_activation_request_source.ADMIN_PORTAL,
+      customerProfile: {
+        id: customer.id,
+        birthdate: submittedBirthdate,
+      },
+    };
+
+    if (customerDto.items?.length) {
+      return this.createWarrantyActivationRequestUseCase.execute(
+        customerDto,
+        createContext,
+      );
+    }
+
+    if (!customerDto.productId) {
+      throw new BadRequestError(
+        'Either items or productId is required',
+        'ACTIVATION_TARGET_REQUIRED',
+      );
+    }
+
     const product =
       await this.productsRepository.findActivationRequestTargetById(
-        dto.productId,
+        customerDto.productId,
       );
 
     if (!product?.warranty) {
@@ -56,20 +102,22 @@ export class CreateAdminWarrantyActivationRequestUseCase {
 
     return this.createWarrantyActivationRequestUseCase.execute(
       {
-        ...dto,
-        brand: dto.brand ?? product.template.brand ?? undefined,
+        ...customerDto,
+        brand: customerDto.brand ?? product.template.brand ?? undefined,
         manufactureYear:
-          dto.manufactureYear ?? product.template.model_year ?? undefined,
-        model: dto.model ?? product.template.model ?? undefined,
+          customerDto.manufactureYear ??
+          product.template.model_year ??
+          undefined,
+        model: customerDto.model ?? product.template.model ?? undefined,
         productName:
-          dto.productName ?? product.display_name ?? product.template.name,
-        serialNumber: dto.serialNumber ?? product.serial_number ?? undefined,
+          customerDto.productName ??
+          product.display_name ??
+          product.template.name,
+        serialNumber:
+          customerDto.serialNumber ?? product.serial_number ?? undefined,
         warrantyCode,
       },
-      {
-        createdByUserId: context.createdByUserId,
-        source: warranty_activation_request_source.ADMIN_PORTAL,
-      },
+      createContext,
     );
   }
 }

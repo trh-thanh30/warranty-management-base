@@ -40,6 +40,10 @@ import {
   formatActivationRequestProduct,
 } from "../warranty-activation-requests.utils";
 import { WarrantyActivationRequestStatusBadge } from "./warranty-activation-request-status-badge";
+import {
+  getActivationRequestProductTitle,
+  getActivationRequestWarrantyCodeLabel,
+} from "../warranty-activation-request-items.utils";
 
 type WarrantyActivationRequestsTableProps = {
   items: WarrantyActivationRequestSummary[];
@@ -82,7 +86,7 @@ export function WarrantyActivationRequestsTable({
       </div>
 
       <TableScroll className="hidden overscroll-x-contain rounded-md border border-slate-200 dark:border-slate-800 md:block">
-        <Table className="min-w-[1180px]">
+        <Table className="min-w-[1180px] whitespace-nowrap">
           <TableHeader>
             <TableRow>
               <SortableTableHead
@@ -119,7 +123,9 @@ export function WarrantyActivationRequestsTable({
               >
                 {t("createdAt")}
               </SortableTableHead>
-              <TableHead className="text-right">{t("actions")}</TableHead>
+              <TableHead className="whitespace-nowrap text-right">
+                {t("actions")}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -159,14 +165,18 @@ function WarrantyActivationRequestTableRow({
     <TableRow>
       <TableCell>
         <Link
-          className="font-mono text-xs font-medium text-slate-950 hover:underline dark:text-slate-50"
+          className="block max-w-52 truncate font-mono text-xs font-medium text-slate-950 hover:underline dark:text-slate-50"
           href={`/warranty-activation-requests/${request.id}`}
         >
           {request.requestCode}
         </Link>
       </TableCell>
       <TableCell>
-        <div className="font-mono text-xs">{request.warrantyCode}</div>
+        <div className="max-w-52 truncate font-mono text-xs">
+          {getActivationRequestWarrantyCodeLabel(request, (count) =>
+            t("warrantyCodeCount", { count }),
+          )}
+        </div>
       </TableCell>
       <TableCell>
         <div className="max-w-[18rem]">
@@ -178,9 +188,15 @@ function WarrantyActivationRequestTableRow({
       </TableCell>
       <TableCell>
         <div className="max-w-[18rem]">
-          <p className="truncate font-medium">{request.productName ?? "-"}</p>
+          <p className="truncate font-medium">
+            {getActivationRequestProductTitle(request, (count) =>
+              t("productCount", { count }),
+            )}
+          </p>
           <p className="mt-1 truncate text-xs text-slate-500">
-            {formatActivationRequestProduct(request) || "-"}
+            {request.items?.length
+              ? request.items.map((item) => item.productName).join(" · ")
+              : formatActivationRequestProduct(request) || "-"}
           </p>
         </div>
       </TableCell>
@@ -193,7 +209,7 @@ function WarrantyActivationRequestTableRow({
       <TableCell className="whitespace-nowrap">
         {formatActivationRequestDate(request.createdAt, locale)}
       </TableCell>
-      <TableCell className="text-right">
+      <TableCell className="whitespace-nowrap text-right">
         <WarrantyActivationRequestActions
           onAction={onAction}
           onDownloadCertificate={onDownloadCertificate}
@@ -252,13 +268,23 @@ function WarrantyActivationRequestMobileCard({
       </dl>
 
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-        <MobileField label={t("warrantyCode")} value={request.warrantyCode} />
+        <MobileField
+          label={t("warrantyCode")}
+          value={getActivationRequestWarrantyCodeLabel(request, (count) =>
+            t("warrantyCodeCount", { count }),
+          )}
+        />
         <MobileField
           label={t("createdAt")}
           value={formatActivationRequestDate(request.createdAt, locale)}
         />
         <MobileField label={t("phone")} value={request.customerPhone} />
-        <MobileField label={t("product")} value={request.productName ?? "-"} />
+        <MobileField
+          label={t("product")}
+          value={getActivationRequestProductTitle(request, (count) =>
+            t("productCount", { count }),
+          )}
+        />
       </dl>
     </article>
   );
@@ -310,6 +336,8 @@ function WarrantyActivationRequestActions({
   const canReview =
     (request.status === "PENDING" || request.status === "APPROVED") &&
     hasPermission(PERMISSIONS.WARRANTY_UPDATE);
+  const canUseParentCertificate =
+    Boolean(request.certificate) && !request.items?.length;
   const approveLabel =
     request.status === "APPROVED" ? t("activate") : t("approve");
 
@@ -332,7 +360,7 @@ function WarrantyActivationRequestActions({
             {t("viewDetail")}
           </Link>
         </DropdownMenuItem>
-        {request.certificate ? (
+        {canUseParentCertificate ? (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={() => onViewCertificate(request)}>

@@ -1,11 +1,28 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { customerFormSchema } from "./customers.types.ts";
 import {
   buildCustomerAddress,
   deduplicateAddressSuffix,
   fillCustomerAddressSelection,
   getCustomerAddressSelection,
+  toCreateCustomerBody,
+  toUpdateCustomerBody,
 } from "./customers.utils.ts";
+
+const customerFormValues = {
+  address: "",
+  addressDetail: "12 Nguyen Trai",
+  birthdate: "2005-12-11",
+  customerCode: "",
+  email: "customer@example.com",
+  fullName: "Nguyen Van A",
+  phone: "0901234567",
+  provinceCode: "79",
+  provinceName: "Thanh pho Ho Chi Minh",
+  wardCode: "26734",
+  wardName: "Phuong Ben Thanh",
+};
 
 test("waits for a ward before filling the address detail", () => {
   assert.equal(
@@ -59,4 +76,37 @@ test("removes a repeated address suffix", () => {
     ),
     "Phường Ba Đình, Thành phố Hà Nội",
   );
+});
+
+test("includes birthdate when creating a customer", () => {
+  assert.equal(
+    toCreateCustomerBody(customerFormValues).birthdate,
+    "2005-12-11",
+  );
+});
+
+test("clears birthdate explicitly when updating a customer", () => {
+  assert.equal(
+    toUpdateCustomerBody({ ...customerFormValues, birthdate: "" }).birthdate,
+    null,
+  );
+});
+
+test("customer form rejects invalid, unsupported, and future birthdates", () => {
+  for (const birthdate of ["not-a-date", "1899-12-31", "2999-01-01"]) {
+    const result = customerFormSchema.safeParse({
+      ...customerFormValues,
+      birthdate,
+    });
+
+    assert.equal(result.success, false);
+    if (result.success) continue;
+    assert.equal(
+      result.error.issues.some(
+        (issue) =>
+          issue.path[0] === "birthdate" && issue.message === "birthdateInvalid",
+      ),
+      true,
+    );
+  }
 });

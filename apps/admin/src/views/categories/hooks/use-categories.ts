@@ -9,6 +9,7 @@ import {
   type UseQueryOptions,
 } from "@tanstack/react-query";
 import type {
+  CategoryActivationFieldsResponse,
   CategoryResponse,
   CategoryParentOption,
   CategoryTreeResponse,
@@ -19,10 +20,13 @@ import type {
   PaginatedResponse,
   ReorderCategoriesBody,
   UpdateCategoryBody,
+  UpdateCategoryActivationFieldsBody,
 } from "@repo/shared";
 import { categoriesService } from "@/src/services/categories/categories.service";
 
 export const categoryKeys = {
+  activationFields: (categoryId: string) =>
+    [...categoryKeys.all, "activation-fields", categoryId] as const,
   all: ["categories"] as const,
   detail: (categoryId: string | null) =>
     [...categoryKeys.details(), categoryId] as const,
@@ -37,6 +41,44 @@ export const categoryKeys = {
     [...categoryKeys.all, "tree", query] as const,
   trees: () => [...categoryKeys.all, "tree"] as const,
 };
+
+export function useCategoryActivationFields(
+  categoryId: string,
+  options?: Pick<UseQueryOptions<CategoryActivationFieldsResponse>, "enabled">,
+) {
+  return useQuery({
+    ...options,
+    queryKey: categoryKeys.activationFields(categoryId),
+    queryFn: () => categoriesService.getCategoryActivationFields(categoryId),
+  });
+}
+
+export function useUpdateCategoryActivationFields(categoryId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: UpdateCategoryActivationFieldsBody) =>
+      categoriesService.updateCategoryActivationFields(categoryId, body),
+    onSuccess: (configuration) => {
+      queryClient.setQueryData(
+        categoryKeys.activationFields(categoryId),
+        configuration,
+      );
+      queryClient.setQueryData<CategoryResponse | undefined>(
+        categoryKeys.detail(categoryId),
+        (category) =>
+          category
+            ? {
+                ...category,
+                activationFields: configuration.activationFields,
+                activationFormEnabled: configuration.activationFormEnabled,
+              }
+            : category,
+      );
+      invalidateCategoryCollections(queryClient);
+    },
+  });
+}
 
 export function useCategories(
   query: ListCategoriesQuery,

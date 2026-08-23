@@ -1,5 +1,5 @@
-import { PrismaService } from '@/database/prisma/prisma.service';
 import { UploadAssetService } from '@/modules/assets/services/upload-asset.service';
+import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
 import { WarrantyCertificateEmailQueueService } from '@/modules/warranty-certificates/services/warranty-certificate-email-queue.service';
 import { WarrantyCertificatePdfService } from '@/modules/warranty-certificates/services/warranty-certificate-pdf.service';
 import {
@@ -12,6 +12,7 @@ import {
   warranty_certificate_email_status,
   warranty_certificate_status,
   WarrantyActivationRequest,
+  WarrantyCertificate,
 } from '@prisma/client';
 import { Readable } from 'stream';
 
@@ -22,41 +23,30 @@ export class IssueWarrantyCertificateUseCase {
   private readonly logger = new Logger(IssueWarrantyCertificateUseCase.name);
 
   constructor(
-    private readonly prismaService: PrismaService,
+    private readonly warrantyCertificatesRepository: WarrantyCertificatesRepository,
     private readonly uploadAssetService: UploadAssetService,
     private readonly certificateEmailQueueService: WarrantyCertificateEmailQueueService,
     private readonly pdfService: WarrantyCertificatePdfService,
   ) {}
 
   async execute(input: {
+    queueEmail?: boolean;
     recipientEmail?: string;
     warrantyId: string;
     requestId?: string;
   }) {
-    const warranty = await this.prismaService.warranty.findUnique({
-      where: { id: input.warrantyId },
-      include: {
-        product: {
-          include: {
-            template: true,
-            ownerships: {
-              where: { is_current_owner: true },
-              include: { customer: true },
-              take: 1,
-            },
-          },
-        },
-      },
-    });
+    const warranty =
+      await this.warrantyCertificatesRepository.findWarrantyForCertificate(
+        input.warrantyId,
+      );
 
     if (!warranty) {
       throw new Error('Warranty not found while issuing certificate');
     }
     const request = input.requestId
-      ? await this.prismaService.warrantyActivationRequest.findUnique({
-          where: { id: input.requestId },
-          include: { dealer: true },
-        })
+      ? await this.warrantyCertificatesRepository.findActivationRequestForCertificate(
+          input.requestId,
+        )
       : null;
     const currentCustomer = warranty.product.ownerships[0]?.customer;
     const recipientEmail = (
@@ -69,21 +59,34 @@ export class IssueWarrantyCertificateUseCase {
       .toLowerCase();
 
     const existingCertificate =
-      await this.prismaService.warrantyCertificate.findFirst({
-        where: { warranty_id: warranty.id },
-        orderBy: { created_at: 'desc' },
-      });
+      await this.warrantyCertificatesRepository.findLatestByWarrantyId(
+        warranty.id,
+      );
 
-    if (existingCertificate) {
+    if (existingCertificate?.status === warranty_certificate_status.GENERATED) {
       return existingCertificate;
     }
 
-    const certificate = await this.createGeneratedCertificate({
-      recipientEmail,
-      requestId: input.requestId,
-      warrantyCode: warranty.warranty_code,
-      warrantyId: warranty.id,
-    });
+    let certificate: WarrantyCertificate;
+    try {
+      certificate = await this.createGeneratedCertificate({
+        existingCertificate,
+        recipientEmail,
+        requestId: input.requestId,
+        warrantyCode: warranty.warranty_code,
+        warrantyId: warranty.id,
+      });
+    } catch (error) {
+      await this.recordGenerationFailure({
+        error,
+        existingCertificate,
+        recipientEmail,
+        requestId: input.requestId,
+        warrantyCode: warranty.warranty_code,
+        warrantyId: warranty.id,
+      });
+      throw error;
+    }
 
     if (!recipientEmail) {
       this.logger.log(
@@ -92,36 +95,26 @@ export class IssueWarrantyCertificateUseCase {
       return certificate;
     }
 
+    if (input.queueEmail === false) return certificate;
+
     return this.certificateEmailQueueService.queueEmail(certificate.id);
   }
 
   private async createGeneratedCertificate(input: {
+    existingCertificate: WarrantyCertificate | null;
     recipientEmail: string;
     requestId?: string;
     warrantyCode: string | null;
     warrantyId: string;
   }) {
     const [warranty, request] = await Promise.all([
-      this.prismaService.warranty.findUnique({
-        where: { id: input.warrantyId },
-        include: {
-          product: {
-            include: {
-              template: true,
-              ownerships: {
-                where: { is_current_owner: true },
-                include: { customer: true },
-                take: 1,
-              },
-            },
-          },
-        },
-      }),
+      this.warrantyCertificatesRepository.findWarrantyForCertificate(
+        input.warrantyId,
+      ),
       input.requestId
-        ? this.prismaService.warrantyActivationRequest.findUnique({
-            where: { id: input.requestId },
-            include: { dealer: true },
-          })
+        ? this.warrantyCertificatesRepository.findActivationRequestForCertificate(
+            input.requestId,
+          )
         : Promise.resolve(null),
     ]);
 
@@ -136,7 +129,9 @@ export class IssueWarrantyCertificateUseCase {
     ) {
       let uploadedPdfPath: string | null = null;
       try {
-        const certificateNumber = generateCertificateNumber();
+        const certificateNumber =
+          input.existingCertificate?.certificate_number ??
+          generateCertificateNumber();
         const pdfBuffer = await this.pdfService.createPdfBuffer({
           certificateNumber,
           customerName:
@@ -183,21 +178,36 @@ export class IssueWarrantyCertificateUseCase {
         );
         uploadedPdfPath = uploadedPdf.path;
 
-        return await this.prismaService.warrantyCertificate.create({
-          data: {
-            certificate_number: certificateNumber,
-            email_status: warranty_certificate_email_status.PENDING,
-            generated_at: new Date(),
-            metadata: {
-              requestId: input.requestId,
-              warrantyCode: input.warrantyCode,
-            },
-            recipient_email: input.recipientEmail || null,
-            status: warranty_certificate_status.GENERATED,
-            storage_key: uploadedPdf.path,
-            warranty: { connect: { id: input.warrantyId } },
+        const data = {
+          certificate_number: certificateNumber,
+          email_status: warranty_certificate_email_status.PENDING,
+          generated_at: new Date(),
+          metadata: {
+            requestId: input.requestId,
+            warrantyCode: input.warrantyCode,
           },
-        });
+          recipient_email: input.recipientEmail || null,
+          status: warranty_certificate_status.GENERATED,
+          storage_key: uploadedPdf.path,
+          warranty: { connect: { id: input.warrantyId } },
+        };
+
+        if (input.existingCertificate) {
+          return await this.warrantyCertificatesRepository.update(
+            input.existingCertificate.id,
+            {
+              email_status: data.email_status,
+              generated_at: data.generated_at,
+              last_error: null,
+              metadata: data.metadata,
+              recipient_email: data.recipient_email,
+              status: data.status,
+              storage_key: data.storage_key,
+            },
+          );
+        }
+
+        return await this.warrantyCertificatesRepository.create(data);
       } catch (error) {
         if (uploadedPdfPath) {
           try {
@@ -225,6 +235,55 @@ export class IssueWarrantyCertificateUseCase {
     }
 
     throw new Error('Could not generate a unique warranty certificate number');
+  }
+
+  private async recordGenerationFailure(input: {
+    error: unknown;
+    existingCertificate: WarrantyCertificate | null;
+    recipientEmail: string;
+    requestId?: string;
+    warrantyCode: string | null;
+    warrantyId: string;
+  }) {
+    const message =
+      input.error instanceof Error
+        ? input.error.message
+        : 'Unknown certificate generation error';
+    const data = {
+      email_status: warranty_certificate_email_status.PENDING,
+      last_error: message,
+      metadata: {
+        requestId: input.requestId,
+        warrantyCode: input.warrantyCode,
+      },
+      recipient_email: input.recipientEmail || null,
+      status: warranty_certificate_status.FAILED,
+      storage_key: null,
+    };
+
+    try {
+      if (input.existingCertificate) {
+        await this.warrantyCertificatesRepository.update(
+          input.existingCertificate.id,
+          data,
+        );
+        return;
+      }
+
+      await this.warrantyCertificatesRepository.create({
+        ...data,
+        certificate_number: generateCertificateNumber(),
+        warranty: { connect: { id: input.warrantyId } },
+      });
+    } catch (persistenceError) {
+      this.logger.error(
+        `Failed to persist certificate generation error for warranty ${input.warrantyId}: ${
+          persistenceError instanceof Error
+            ? persistenceError.message
+            : String(persistenceError)
+        }`,
+      );
+    }
   }
 
   private resolveDealerName(

@@ -87,6 +87,7 @@ test("creating a product sends inventory fields", async () => {
     categoryId: "category-id",
     displayName: "SUV Battery",
     templateId: "template-id",
+    warrantyDurationMonths: 36,
   });
 
   assert.deepEqual(calls, [
@@ -96,6 +97,7 @@ test("creating a product sends inventory fields", async () => {
         categoryId: "category-id",
         displayName: "SUV Battery",
         templateId: "template-id",
+        warrantyDurationMonths: 36,
       },
     },
   ]);

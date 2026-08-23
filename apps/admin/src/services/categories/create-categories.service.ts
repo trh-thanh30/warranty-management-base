@@ -1,4 +1,5 @@
 import type {
+  CategoryActivationFieldsResponse,
   CategoryResponse,
   CategoryParentOption,
   CategoryTreeResponse,
@@ -10,6 +11,7 @@ import type {
   PaginatedResponse,
   ReorderCategoriesBody,
   UpdateCategoryBody,
+  UpdateCategoryActivationFieldsBody,
 } from "@repo/shared";
 import { unwrap, unwrapBlob } from "../service.utils.ts";
 import type { CategoriesHttpClient } from "./categories.types";
@@ -49,6 +51,28 @@ export function createCategoriesService(http: CategoriesHttpClient) {
     async getCategory(categoryId: string): Promise<CategoryResponse> {
       return unwrap(
         await http.get<CategoryResponse>(`/categories/${categoryId}`),
+      );
+    },
+
+    async getCategoryActivationFields(
+      categoryId: string,
+    ): Promise<CategoryActivationFieldsResponse> {
+      return unwrap(
+        await http.get<CategoryActivationFieldsResponse>(
+          `/categories/${categoryId}/activation-fields`,
+        ),
+      );
+    },
+
+    async updateCategoryActivationFields(
+      categoryId: string,
+      body: UpdateCategoryActivationFieldsBody,
+    ): Promise<CategoryActivationFieldsResponse> {
+      return unwrap(
+        await http.put<CategoryActivationFieldsResponse>(
+          `/categories/${categoryId}/activation-fields`,
+          body,
+        ),
       );
     },
 

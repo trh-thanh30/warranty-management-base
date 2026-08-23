@@ -63,7 +63,7 @@ export function WarrantiesTable({
       </div>
 
       <TableScroll className="hidden rounded-md border border-slate-200 dark:border-slate-800 lg:block">
-        <Table>
+        <Table className="min-w-[1280px] whitespace-nowrap">
           <TableHeader>
             <TableRow>
               <TableHead>{t("product")}</TableHead>
@@ -133,7 +133,11 @@ function WarrantyTableRow({
       <TableCell>
         <WarrantyProductName warranty={warranty} />
       </TableCell>
-      <TableCell>{formatWarrantyOwner(warranty)}</TableCell>
+      <TableCell>
+        <span className="block max-w-52 truncate">
+          {formatWarrantyOwner(warranty)}
+        </span>
+      </TableCell>
       <TableCell className="font-mono text-xs">
         {warranty.warrantyCode ?? "-"}
       </TableCell>
@@ -209,7 +213,7 @@ function WarrantyMobileCard({
 
 function WarrantyProductName({ warranty }: { warranty: WarrantyListItem }) {
   return (
-    <div className="min-w-0">
+    <div className="min-w-0 lg:max-w-64">
       <Link
         className="block truncate font-medium text-slate-950 hover:underline dark:text-slate-50"
         href={`/warranties/${warranty.id}`}

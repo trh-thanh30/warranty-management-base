@@ -84,7 +84,8 @@ export class CreateProductTemplateUseCase {
       model: dto.model,
       model_year: dto.modelYear,
       description: dto.description,
-      default_warranty_duration_months: dto.defaultWarrantyDurationMonths ?? 36,
+      default_warranty_duration_months:
+        dto.defaultWarrantyDurationMonths ?? null,
       default_warranty_terms: dto.defaultWarrantyTerms,
       metadata: toTemplateJson(dto.metadata),
       is_published: dto.isPublished ?? false,

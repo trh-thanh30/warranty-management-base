@@ -7,6 +7,12 @@ export const warrantyActivationRequestExcelColumns: Array<
   { key: 'requestCode', header: 'Mã yêu cầu', width: 22 },
   { key: 'status', header: 'Trạng thái', width: 20 },
   { key: 'warrantyCode', header: 'Mã bảo hành', width: 22 },
+  { key: 'itemCount', header: 'Số sản phẩm', width: 16 },
+  {
+    key: 'productsByPosition',
+    header: 'Sản phẩm theo vị trí',
+    width: 56,
+  },
   { key: 'customerName', header: 'Tên khách hàng', width: 28 },
   { key: 'customerPhone', header: 'Số điện thoại', width: 20 },
   { key: 'customerEmail', header: 'Email', width: 32 },

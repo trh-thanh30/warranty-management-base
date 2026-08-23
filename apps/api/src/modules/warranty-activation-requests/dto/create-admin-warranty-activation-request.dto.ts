@@ -7,5 +7,5 @@ export class CreateAdminWarrantyActivationRequestDto extends OmitType(
   ['warrantyCode'] as const,
 ) {
   @IsUUID()
-  productId: string;
+  customerId: string;
 }

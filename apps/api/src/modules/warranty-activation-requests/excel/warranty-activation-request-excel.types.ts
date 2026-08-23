@@ -7,12 +7,21 @@ export type WarrantyActivationRequestExportRecord =
       full_name: string | null;
       username: string;
     } | null;
+    items?: Array<{
+      position_label: string;
+      product_name: string;
+      product_code: string;
+      serial_number: string | null;
+      warranty_code: string;
+    }>;
   };
 
 export type WarrantyActivationRequestExcelRow = {
   requestCode: string;
   status: string;
   warrantyCode: string;
+  itemCount: number;
+  productsByPosition: string;
   customerName: string;
   customerPhone: string;
   customerEmail: string | null;

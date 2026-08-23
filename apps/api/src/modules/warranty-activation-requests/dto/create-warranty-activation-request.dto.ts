@@ -1,5 +1,7 @@
+import { IsNotFutureDate } from '@/common/decorators/is-not-future-date.decorator';
 import { Type } from 'class-transformer';
 import {
+  ArrayMinSize,
   IsDateString,
   IsEmail,
   IsInt,
@@ -14,6 +16,21 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
+import { IsLocalAddressDetail } from './is-local-address-detail.decorator';
+
+export class CreateWarrantyActivationRequestItemDto {
+  @IsOptional()
+  @IsUUID()
+  activationFieldId?: string;
+
+  @IsString()
+  @Length(1, 64)
+  @Matches(/^[a-z][a-zA-Z0-9_]*$/)
+  positionKey: string;
+
+  @IsUUID()
+  productId: string;
+}
 
 export class ActivationFilmItemsDto {
   @IsOptional()
@@ -68,6 +85,12 @@ export class CreateWarrantyActivationRequestDto {
   productId?: string;
 
   @IsOptional()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => CreateWarrantyActivationRequestItemDto)
+  items?: CreateWarrantyActivationRequestItemDto[];
+
+  @IsOptional()
   @IsUUID()
   dealerId?: string;
 
@@ -86,6 +109,7 @@ export class CreateWarrantyActivationRequestDto {
 
   @IsOptional()
   @IsDateString()
+  @IsNotFutureDate()
   customerBirthdate?: string;
 
   @IsOptional()
@@ -177,6 +201,7 @@ export class CreateWarrantyActivationRequestDto {
 
   @IsString()
   @Length(1, 255)
+  @IsLocalAddressDetail()
   addressDetail: string;
 
   @IsOptional()

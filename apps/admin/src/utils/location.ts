@@ -53,18 +53,13 @@ export function parseVietnamAddress(
     .filter(Boolean);
   const provinceName = province?.name;
   const provinceIndex = provinceName ? parts.indexOf(provinceName) : -1;
-  const wardName =
-    provinceIndex > 0
-      ? parts[provinceIndex - 1]
-      : parts.length >= 2
-        ? parts.at(-2)
-        : null;
+  const wardName = provinceIndex > 0 ? parts[provinceIndex - 1] : null;
   const detail = parts
     .filter((part) => part !== provinceName && part !== wardName)
     .join(", ");
 
   return {
-    detail: detail || address,
+    detail: province ? detail : address,
     province,
     wardName,
   };

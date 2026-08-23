@@ -53,7 +53,7 @@ export type ProductTemplateSummary = {
   model: string | null;
   modelYear: number | null;
   description: string | null;
-  defaultWarrantyDurationMonths: number;
+  defaultWarrantyDurationMonths: number | null;
   defaultWarrantyTerms: string | null;
   metadata: ProductTemplateMetadata | null;
   isActive: boolean;
@@ -80,7 +80,7 @@ export type CreateProductTemplateBody = {
   model?: string;
   modelYear?: number;
   description?: string;
-  defaultWarrantyDurationMonths?: number;
+  defaultWarrantyDurationMonths?: number | null;
   defaultWarrantyTerms?: string;
   metadata?: ProductTemplateMetadataInput;
   isPublished?: boolean;
@@ -97,7 +97,7 @@ export type UpdateProductTemplateBody = {
   model?: string | null;
   modelYear?: number | null;
   description?: string | null;
-  defaultWarrantyDurationMonths?: number;
+  defaultWarrantyDurationMonths?: number | null;
   defaultWarrantyTerms?: string | null;
   metadata?: ProductTemplateMetadataInput | null;
   isActive?: boolean;
@@ -182,6 +182,7 @@ export type ListProductsQuery = PaginationQuery & {
   ownerCustomerId?: string;
   status?: ProductStatus;
   isPublished?: "true" | "false";
+  activationEligible?: "true" | "false";
   warrantyStatus?: WarrantyStatus;
   sortBy?: ProductSortBy;
   sortOrder?: "asc" | "desc";
@@ -189,6 +190,7 @@ export type ListProductsQuery = PaginationQuery & {
 
 export type CreateProductBody = {
   templateId: string;
+  warrantyDurationMonths: number;
   productCode?: string;
   warrantyCode?: string;
   categoryId?: string;
@@ -207,6 +209,7 @@ export type UpdateProductBody = {
   templateId?: string;
   metadata?: Record<string, unknown> | null;
   warrantyCode?: string;
+  warrantyDurationMonths?: number;
 };
 
 export type PublicProductSummary = {

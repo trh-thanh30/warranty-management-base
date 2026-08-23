@@ -11,6 +11,7 @@ export const envSchema = z
     // Application
     APP_NAME: z.string().default('nest-basic-prisma'),
     PORT: z.coerce.number().int().min(1).max(65535).default(3000),
+    MILLISECONDS_PER_DAY: z.coerce.number().int().positive().default(86400000),
     PUBLIC_API_URL: z.string().url().optional(),
     PUPPETEER_EXECUTABLE_PATH: z.string().optional(),
     SENTRY_DSN: z.string().optional(),

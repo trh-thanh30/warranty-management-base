@@ -222,7 +222,7 @@ function DirectoryResults(
         ))}
       </div>
       <TableScroll className="hidden rounded-md border border-slate-200 dark:border-slate-800 lg:block">
-        <Table>
+        <Table className="min-w-[900px] whitespace-nowrap">
           <TableHeader>
             <TableRow>
               <SortableTableHead
@@ -251,7 +251,7 @@ function DirectoryResults(
               <TableRow key={page.id}>
                 <TableCell>
                   <p className="max-w-sm truncate font-medium">{page.title}</p>
-                  <p className="mt-1 font-mono text-xs text-slate-500">
+                  <p className="mt-1 max-w-sm truncate font-mono text-xs text-slate-500">
                     /{page.slug}
                   </p>
                 </TableCell>

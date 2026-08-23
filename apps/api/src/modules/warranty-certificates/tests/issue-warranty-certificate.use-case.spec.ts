@@ -1,4 +1,5 @@
 import { IssueWarrantyCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-certificate.use-case';
+import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
 import {
   warranty_certificate_email_status,
   warranty_certificate_status,
@@ -68,7 +69,7 @@ describe('IssueWarrantyCertificateUseCase', () => {
       createPdfBuffer: jest.fn().mockResolvedValue(Buffer.from('%PDF-')),
     };
     const useCase = new IssueWarrantyCertificateUseCase(
-      prismaService as never,
+      new WarrantyCertificatesRepository(prismaService as never),
       uploadAssetService as never,
       certificateEmailQueueService as never,
       pdfService,
@@ -129,7 +130,7 @@ describe('IssueWarrantyCertificateUseCase', () => {
       upload: jest.fn().mockResolvedValue({ path: uploadedPath }),
     };
     const useCase = new IssueWarrantyCertificateUseCase(
-      prismaService as never,
+      new WarrantyCertificatesRepository(prismaService as never),
       uploadAssetService as never,
       { queueEmail: jest.fn() } as never,
       {
@@ -142,4 +143,105 @@ describe('IssueWarrantyCertificateUseCase', () => {
     );
     expect(uploadAssetService.delete).toHaveBeenCalledWith(uploadedPath);
   });
+
+  it('records a failed certificate without reverting the activated warranty', async () => {
+    const warranty = buildWarranty();
+    const prismaService = {
+      warranty: { findUnique: jest.fn().mockResolvedValue(warranty) },
+      warrantyActivationRequest: {
+        findUnique: jest.fn().mockResolvedValue(null),
+      },
+      warrantyCertificate: {
+        create: jest.fn().mockResolvedValue({
+          id: 'failed-certificate-id',
+          status: warranty_certificate_status.FAILED,
+        }),
+        findFirst: jest.fn().mockResolvedValue(null),
+      },
+    };
+    const useCase = new IssueWarrantyCertificateUseCase(
+      new WarrantyCertificatesRepository(prismaService as never),
+      { upload: jest.fn() } as never,
+      { queueEmail: jest.fn() } as never,
+      {
+        createPdfBuffer: jest
+          .fn()
+          .mockRejectedValue(new Error('PDF generation failed')),
+      },
+    );
+
+    await expect(
+      useCase.execute({ queueEmail: false, warrantyId: warranty.id }),
+    ).rejects.toThrow('PDF generation failed');
+    expect(prismaService.warrantyCertificate.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        last_error: 'PDF generation failed',
+        status: warranty_certificate_status.FAILED,
+        warranty: { connect: { id: warranty.id } },
+      }),
+    });
+  });
+
+  it('retries and replaces a previously failed certificate', async () => {
+    const warranty = buildWarranty();
+    const failedCertificate = {
+      certificate_number: 'CERT-FAILED-001',
+      id: 'failed-certificate-id',
+      status: warranty_certificate_status.FAILED,
+    };
+    const prismaService = {
+      warranty: { findUnique: jest.fn().mockResolvedValue(warranty) },
+      warrantyActivationRequest: {
+        findUnique: jest.fn().mockResolvedValue(null),
+      },
+      warrantyCertificate: {
+        findFirst: jest.fn().mockResolvedValue(failedCertificate),
+        update: jest.fn().mockResolvedValue({
+          ...failedCertificate,
+          status: warranty_certificate_status.GENERATED,
+          storage_key: 'private/retried.pdf',
+        }),
+      },
+    };
+    const useCase = new IssueWarrantyCertificateUseCase(
+      new WarrantyCertificatesRepository(prismaService as never),
+      {
+        upload: jest.fn().mockResolvedValue({ path: 'private/retried.pdf' }),
+      } as never,
+      { queueEmail: jest.fn() } as never,
+      { createPdfBuffer: jest.fn().mockResolvedValue(Buffer.from('%PDF-')) },
+    );
+
+    await expect(
+      useCase.execute({ queueEmail: false, warrantyId: warranty.id }),
+    ).resolves.toEqual(
+      expect.objectContaining({
+        status: warranty_certificate_status.GENERATED,
+      }),
+    );
+    expect(prismaService.warrantyCertificate.update).toHaveBeenCalledWith({
+      where: { id: failedCertificate.id },
+      data: expect.objectContaining({
+        last_error: null,
+        status: warranty_certificate_status.GENERATED,
+        storage_key: 'private/retried.pdf',
+      }),
+    });
+  });
 });
+
+function buildWarranty() {
+  return {
+    duration_months: 36,
+    end_date: new Date('2029-07-24T00:00:00.000Z'),
+    id: 'warranty-id',
+    product: {
+      display_name: null,
+      ownerships: [],
+      serial_number: 'SN-001',
+      template: { name: 'Lexzenz Film' },
+    },
+    start_date: new Date('2026-07-24T00:00:00.000Z'),
+    warranty_code: 'WM-2026-ABC123',
+  };
+}

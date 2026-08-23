@@ -7,21 +7,21 @@ datasource db {
 }
 
 model User {
-  id            String      @id @default(uuid()) @db.Uuid
-  email         String      @unique
-  password      String
-  username      String      @unique
-  full_name     String?
-  phone         String?     @unique
-  avatar_url    String?
-  role          user_role   @default(CUSTOMER)
-  status        user_status @default(ACTIVE)
-  is_verified   Boolean     @default(false)
+  id                String                  @id @default(uuid()) @db.Uuid
+  email             String                  @unique
+  password          String
+  username          String                  @unique
+  full_name         String?
+  phone             String?                 @unique
+  avatar_url        String?
+  role              user_role               @default(CUSTOMER)
+  status            user_status             @default(ACTIVE)
+  is_verified       Boolean                 @default(false)
   two_factor_method admin_two_factor_method @default(EMAIL_OTP)
-  pin_hash      String?
-  refresh_token String?
-  created_at    DateTime    @default(now())
-  updated_at    DateTime    @updatedAt
+  pin_hash          String?
+  refresh_token     String?
+  created_at        DateTime                @default(now())
+  updated_at        DateTime                @updatedAt
 
   assets                                Asset[]
   created_notifications                 Notification[]                      @relation("NotificationCreatedBy")
@@ -346,6 +346,7 @@ model Customer {
   phone         String?  @unique
   email         String?  @unique
   address       String?
+  birthdate     DateTime?
   metadata      Json?
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
@@ -363,20 +364,21 @@ model Customer {
 }
 
 model Category {
-  id          String        @id @default(uuid()) @db.Uuid
-  type        category_type
-  code        String?
-  slug        String
-  name        String
-  description String?
-  parent_id   String?       @db.Uuid
-  icon        String?
-  image_url   String?
-  order       Int           @default(0)
-  is_active   Boolean       @default(true)
-  metadata    Json?
-  created_at  DateTime      @default(now())
-  updated_at  DateTime      @updatedAt
+  id                      String        @id @default(uuid()) @db.Uuid
+  type                    category_type
+  code                    String?
+  slug                    String
+  name                    String
+  description             String?
+  parent_id               String?       @db.Uuid
+  icon                    String?
+  image_url               String?
+  order                   Int           @default(0)
+  is_active               Boolean       @default(true)
+  activation_form_enabled Boolean       @default(false)
+  metadata                Json?
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
 
   parent                       Category?                   @relation("CategoryHierarchy", fields: [parent_id], references: [id], onDelete: SetNull)
   children                     Category[]                  @relation("CategoryHierarchy")
@@ -384,11 +386,50 @@ model Category {
   products                     Product[]
   content_pages                ContentPage[]
   warranty_activation_requests WarrantyActivationRequest[]
+  activation_fields            CategoryActivationField[]
 
   @@unique([type, slug])
   @@index([type, is_active, order])
   @@index([parent_id])
   @@map("category")
+}
+
+model CategoryActivationField {
+  id          String                         @id @default(uuid()) @db.Uuid
+  category_id String                         @db.Uuid
+  key         String
+  label       String
+  type        category_activation_field_type
+  placeholder String?
+  required    Boolean                        @default(false)
+  sort_order  Int                            @default(0)
+  is_active   Boolean                        @default(true)
+  created_at  DateTime                       @default(now())
+  updated_at  DateTime                       @updatedAt
+
+  category      Category                        @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  options       CategoryActivationFieldOption[]
+  request_items WarrantyActivationRequestItem[]
+
+  @@unique([category_id, key])
+  @@index([category_id, is_active, sort_order])
+  @@map("category_activation_field")
+}
+
+model CategoryActivationFieldOption {
+  id         String   @id @default(uuid()) @db.Uuid
+  field_id   String   @db.Uuid
+  label      String
+  value      String
+  sort_order Int      @default(0)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  field CategoryActivationField @relation(fields: [field_id], references: [id], onDelete: Cascade)
+
+  @@unique([field_id, value])
+  @@index([field_id, sort_order])
+  @@map("category_activation_field_option")
 }
 
 model Product {
@@ -404,13 +445,14 @@ model Product {
   updated_at    DateTime       @updatedAt
   deleted_at    DateTime?
 
-  template                     ProductTemplate             @relation(fields: [template_id], references: [id], onDelete: Restrict)
-  category_ref                 Category                    @relation(fields: [category_id], references: [id], onDelete: Restrict)
-  ownerships                   ProductOwnership[]
-  warranty                     Warranty?
-  claims                       WarrantyClaim[]
-  assets                       ProductAsset[]
-  warranty_activation_requests WarrantyActivationRequest[]
+  template                          ProductTemplate                 @relation(fields: [template_id], references: [id], onDelete: Restrict)
+  category_ref                      Category                        @relation(fields: [category_id], references: [id], onDelete: Restrict)
+  ownerships                        ProductOwnership[]
+  warranty                          Warranty?
+  claims                            WarrantyClaim[]
+  assets                            ProductAsset[]
+  warranty_activation_requests      WarrantyActivationRequest[]
+  warranty_activation_request_items WarrantyActivationRequestItem[]
 
   @@index([template_id])
   @@index([category_id])
@@ -430,7 +472,7 @@ model ProductTemplate {
   model                            String?
   model_year                       Int?
   description                      String?
-  default_warranty_duration_months Int       @default(36)
+  default_warranty_duration_months Int?
   default_warranty_terms           String?
   metadata                         Json?
   is_active                        Boolean   @default(true)
@@ -530,12 +572,13 @@ model Warranty {
   created_at            DateTime        @default(now())
   updated_at            DateTime        @updatedAt
 
-  product            Product                    @relation(fields: [product_id], references: [id], onDelete: Cascade)
-  claims             WarrantyClaim[]
-  activation_request WarrantyActivationRequest?
-  certificates       WarrantyCertificate[]
-  activated_by       User?                      @relation("WarrantyActivatedBy", fields: [activated_by_id], references: [id], onDelete: SetNull)
-  voided_by          User?                      @relation("WarrantyVoidedBy", fields: [voided_by_id], references: [id], onDelete: SetNull)
+  product                  Product                         @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  claims                   WarrantyClaim[]
+  activation_request       WarrantyActivationRequest?
+  activation_request_items WarrantyActivationRequestItem[]
+  certificates             WarrantyCertificate[]
+  activated_by             User?                           @relation("WarrantyActivatedBy", fields: [activated_by_id], references: [id], onDelete: SetNull)
+  voided_by                User?                           @relation("WarrantyVoidedBy", fields: [voided_by_id], references: [id], onDelete: SetNull)
 
   @@index([warranty_code])
   @@index([status])
@@ -586,13 +629,14 @@ model WarrantyActivationRequest {
   created_at               DateTime                           @default(now())
   updated_at               DateTime                           @updatedAt
 
-  created_by         User?     @relation("WarrantyActivationRequestCreatedBy", fields: [created_by_id], references: [id], onDelete: SetNull)
-  customer           Customer? @relation(fields: [customer_id], references: [id], onDelete: SetNull)
-  category           Category? @relation(fields: [category_id], references: [id], onDelete: SetNull)
-  product            Product?  @relation(fields: [product_id], references: [id], onDelete: SetNull)
-  dealer             Dealer?   @relation(fields: [dealer_id], references: [id], onDelete: SetNull)
-  reviewed_by        User?     @relation("WarrantyActivationRequestReviewedBy", fields: [reviewed_by_id], references: [id], onDelete: SetNull)
-  activated_warranty Warranty? @relation(fields: [activated_warranty_id], references: [id], onDelete: SetNull)
+  created_by         User?                           @relation("WarrantyActivationRequestCreatedBy", fields: [created_by_id], references: [id], onDelete: SetNull)
+  customer           Customer?                       @relation(fields: [customer_id], references: [id], onDelete: SetNull)
+  category           Category?                       @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  product            Product?                        @relation(fields: [product_id], references: [id], onDelete: SetNull)
+  dealer             Dealer?                         @relation(fields: [dealer_id], references: [id], onDelete: SetNull)
+  reviewed_by        User?                           @relation("WarrantyActivationRequestReviewedBy", fields: [reviewed_by_id], references: [id], onDelete: SetNull)
+  activated_warranty Warranty?                       @relation(fields: [activated_warranty_id], references: [id], onDelete: SetNull)
+  items              WarrantyActivationRequestItem[]
 
   @@index([request_code])
   @@index([status])
@@ -609,6 +653,36 @@ model WarrantyActivationRequest {
   @@index([created_at])
   @@index([warranty_code, customer_phone, status], map: "warranty_activation_request_lookup_pending")
   @@map("warranty_activation_request")
+}
+
+model WarrantyActivationRequestItem {
+  id                  String                             @id @default(uuid()) @db.Uuid
+  request_id          String                             @db.Uuid
+  activation_field_id String?                            @db.Uuid
+  position_key        String
+  position_label      String
+  product_id          String                             @db.Uuid
+  warranty_id         String                             @db.Uuid
+  warranty_code       String
+  product_name        String
+  product_code        String
+  serial_number       String?
+  status              warranty_activation_request_status @default(PENDING)
+  activated_at        DateTime?
+  created_at          DateTime                           @default(now())
+  updated_at          DateTime                           @updatedAt
+
+  request          WarrantyActivationRequest @relation(fields: [request_id], references: [id], onDelete: Cascade)
+  activation_field CategoryActivationField?  @relation(fields: [activation_field_id], references: [id], onDelete: SetNull)
+  product          Product                   @relation(fields: [product_id], references: [id], onDelete: Restrict)
+  warranty         Warranty                  @relation(fields: [warranty_id], references: [id], onDelete: Restrict)
+
+  @@unique([request_id, position_key])
+  @@unique([request_id, product_id])
+  @@index([request_id, status])
+  @@index([product_id, status])
+  @@index([warranty_id])
+  @@map("warranty_activation_request_item")
 }
 
 model WarrantyCertificate {
@@ -935,6 +1009,15 @@ enum category_type {
   CONTENT_PAGE
   ASSET
   WARRANTY_CLAIM_ISSUE
+}
+
+enum category_activation_field_type {
+  TEXT
+  TEXTAREA
+  NUMBER
+  DATE
+  SELECT
+  PRODUCT_SELECT
 }
 
 enum product_status {

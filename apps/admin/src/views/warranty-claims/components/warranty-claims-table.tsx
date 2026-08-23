@@ -79,7 +79,7 @@ export function WarrantyClaimsTable({
       </div>
 
       <TableScroll className="hidden overscroll-x-contain rounded-md border border-slate-200 dark:border-slate-800 md:block">
-        <Table className="min-w-[1360px]">
+        <Table className="min-w-[1360px] whitespace-nowrap">
           <TableHeader>
             <TableRow>
               <SortableTableHead
@@ -144,8 +144,10 @@ function WarrantyClaimTableRow({
   return (
     <TableRow>
       <TableCell>
-        <div className="font-mono text-xs">{claim.claimCode}</div>
-        <div className="mt-1 font-mono text-xs text-slate-500">
+        <div className="max-w-52 truncate font-mono text-xs">
+          {claim.claimCode}
+        </div>
+        <div className="mt-1 max-w-52 truncate font-mono text-xs text-slate-500">
           {claim.warrantyCode}
         </div>
       </TableCell>
@@ -165,7 +167,11 @@ function WarrantyClaimTableRow({
           </p>
         </div>
       </TableCell>
-      <TableCell>{formatClaimServiceCenter(claim)}</TableCell>
+      <TableCell>
+        <span className="block max-w-52 truncate">
+          {formatClaimServiceCenter(claim)}
+        </span>
+      </TableCell>
       <TableCell className="min-w-[160px] whitespace-nowrap">
         <div className="flex flex-nowrap items-center gap-1.5">
           <WarrantyClaimStatusBadge status={claim.status} />

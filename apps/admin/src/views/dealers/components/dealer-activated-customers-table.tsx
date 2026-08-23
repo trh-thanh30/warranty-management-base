@@ -21,7 +21,7 @@ export function DealerActivatedCustomersTable({ items }: Props) {
 
   return (
     <TableScroll className="rounded-md border border-slate-200 dark:border-slate-800">
-      <Table className="min-w-[820px]">
+      <Table className="min-w-[960px] whitespace-nowrap">
         <TableHeader>
           <TableRow>
             <TableHead>{t("activatedCustomer")}</TableHead>
@@ -36,15 +36,15 @@ export function DealerActivatedCustomersTable({ items }: Props) {
           {items.map((item) => (
             <TableRow key={item.id}>
               <TableCell>
-                <div className="font-medium text-slate-950 dark:text-slate-50">
+                <div className="max-w-64 truncate font-medium text-slate-950 dark:text-slate-50">
                   {item.customer.fullName}
                 </div>
-                <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                <div className="mt-1 max-w-64 truncate text-xs text-slate-500 dark:text-slate-400">
                   {item.customer.phone ?? item.customer.email ?? "-"}
                 </div>
               </TableCell>
               <TableCell>
-                <div className="font-medium">
+                <div className="max-w-64 truncate font-medium">
                   {item.product.id ? (
                     <Link
                       className="transition-colors hover:text-blue-600 hover:underline"
@@ -56,7 +56,7 @@ export function DealerActivatedCustomersTable({ items }: Props) {
                     (item.product.name ?? "-")
                   )}
                 </div>
-                <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                <div className="mt-1 max-w-64 truncate text-xs text-slate-500 dark:text-slate-400">
                   {[item.product.productCode, item.product.serialNumber]
                     .filter(Boolean)
                     .join(" · ") || "-"}

@@ -39,6 +39,12 @@ export class UpdateCustomerUseCase {
       phone: dto.phone,
       email: dto.email,
       address: dto.address,
+      birthdate:
+        dto.birthdate === null
+          ? null
+          : dto.birthdate
+            ? new Date(dto.birthdate)
+            : undefined,
     });
 
     return toCustomerResponse(customer);

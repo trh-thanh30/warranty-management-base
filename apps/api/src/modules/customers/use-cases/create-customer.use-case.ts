@@ -66,6 +66,7 @@ export class CreateCustomerUseCase {
       phone,
       email,
       address: dto.address,
+      birthdate: dto.birthdate ? new Date(dto.birthdate) : undefined,
     });
 
     return toCustomerResponse(customer);

@@ -1,8 +1,82 @@
 import { PrismaPg } from '@prisma/adapter-pg';
-import { category_type, Prisma, PrismaClient } from '@prisma/client';
+import {
+  category_activation_field_type,
+  category_type,
+  Prisma,
+  PrismaClient,
+} from '@prisma/client';
 import { Pool } from 'pg';
 
 let prisma: PrismaClient | undefined;
+
+const FILM_CATEGORY_CODE = 'LEXZENZ_REFLEX_KOREA_FILM';
+const FILM_FIELD_PLACEHOLDER = 'Chọn hoặc nhập mã phim';
+
+export const filmActivationFieldSeeds = [
+  {
+    key: 'windshield',
+    label: 'Kính lái',
+    placeholder: FILM_FIELD_PLACEHOLDER,
+    required: false,
+  },
+  {
+    key: 'frontLeftSide',
+    label: 'Kính sườn trước - trái',
+    placeholder: FILM_FIELD_PLACEHOLDER,
+    required: false,
+  },
+  {
+    key: 'frontRightSide',
+    label: 'Kính sườn trước - phải',
+    placeholder: FILM_FIELD_PLACEHOLDER,
+    required: false,
+  },
+  {
+    key: 'rearLeftSide',
+    label: 'Kính sườn sau - trái',
+    placeholder: FILM_FIELD_PLACEHOLDER,
+    required: false,
+  },
+  {
+    key: 'rearRightSide',
+    label: 'Kính sườn sau - phải',
+    placeholder: FILM_FIELD_PLACEHOLDER,
+    required: false,
+  },
+  {
+    key: 'rearGlass',
+    label: 'Kính lưng',
+    placeholder: FILM_FIELD_PLACEHOLDER,
+    required: false,
+  },
+  {
+    key: 'sunroof',
+    label: 'Cửa sổ trời',
+    placeholder: FILM_FIELD_PLACEHOLDER,
+    required: false,
+  },
+] as const;
+
+type CategorySeedTransaction = {
+  category: {
+    update(args: Prisma.CategoryUpdateArgs): PromiseLike<unknown>;
+  };
+  categoryActivationField: {
+    count(args: Prisma.CategoryActivationFieldCountArgs): PromiseLike<number>;
+    createMany(
+      args: Prisma.CategoryActivationFieldCreateManyArgs,
+    ): PromiseLike<unknown>;
+  };
+};
+
+export type LexzenzCategorySeedClient = {
+  category: {
+    upsert(args: Prisma.CategoryUpsertArgs): PromiseLike<{ id: string }>;
+  };
+  $transaction<T>(
+    operation: (tx: CategorySeedTransaction) => Promise<T>,
+  ): Promise<T>;
+};
 
 export const lexzenzProductCategories = [
   {
@@ -67,9 +141,11 @@ export const lexzenzProductCategories = [
   slug: string;
 }>;
 
-export async function seedLexzenzProductCategories(client: PrismaClient) {
+export async function seedLexzenzProductCategories(
+  client: LexzenzCategorySeedClient,
+) {
   for (const category of lexzenzProductCategories) {
-    await client.category.upsert({
+    const savedCategory = await client.category.upsert({
       where: {
         type_slug: {
           slug: category.slug,
@@ -97,11 +173,43 @@ export async function seedLexzenzProductCategories(client: PrismaClient) {
         type: category_type.PRODUCT,
       },
     });
+
+    if (category.code === FILM_CATEGORY_CODE) {
+      await initializeFilmActivationFields(client, savedCategory.id);
+    }
   }
 
   console.log(
     `Seeded ${lexzenzProductCategories.length} Lexzenz product categories.`,
   );
+}
+
+async function initializeFilmActivationFields(
+  client: LexzenzCategorySeedClient,
+  categoryId: string,
+) {
+  await client.$transaction(async (tx) => {
+    const existingFieldCount = await tx.categoryActivationField.count({
+      where: { category_id: categoryId },
+    });
+    if (existingFieldCount > 0) return;
+
+    await tx.category.update({
+      where: { id: categoryId },
+      data: { activation_form_enabled: true },
+    });
+    await tx.categoryActivationField.createMany({
+      data: filmActivationFieldSeeds.map((field, index) => ({
+        category_id: categoryId,
+        key: field.key,
+        label: field.label,
+        type: category_activation_field_type.PRODUCT_SELECT,
+        placeholder: field.placeholder,
+        required: field.required,
+        sort_order: index + 1,
+      })),
+    });
+  });
 }
 
 async function main() {

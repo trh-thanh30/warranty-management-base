@@ -13,6 +13,7 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
+  ComboboxLoading,
   ComboboxTrigger,
 } from "@/src/components/common";
 import { FormField as Field } from "@/src/components/common/form-field";
@@ -20,6 +21,7 @@ import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
 import { createFieldErrorFormatter } from "@/src/utils";
 import { useProductForm } from "../hooks/use-product-form";
+import { getProductTemplateSearchKeywords } from "../products.utils";
 import { ProductStatusControl } from "./product-status-control";
 
 export function ProductForm({
@@ -42,9 +44,11 @@ export function ProductForm({
   });
   const categories = form.categoriesQuery.data?.items ?? [];
   const isSubmitting = form.formState.isSubmitting;
+  const canEditWarrantyDuration =
+    !product?.warranty || product.warranty.status === "DRAFT";
 
   return (
-    <form className="space-y-6" noValidate onSubmit={form.onSubmit}>
+    <form className="min-w-0 space-y-6" noValidate onSubmit={form.onSubmit}>
       {form.formState.errors.root?.message ? (
         <div
           className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300"
@@ -84,9 +88,16 @@ export function ProductForm({
                   <ProductTemplateCombobox
                     disabled={form.templatesQuery.isLoading || isSubmitting}
                     id="product-template"
-                    onValueChange={field.onChange}
+                    isLoading={form.templatesQuery.isFetching}
+                    loadingLabel={t("loadingTemplates")}
+                    onSearchChange={form.setTemplateSearch}
+                    onValueChange={(nextValue) => {
+                      form.pinTemplateSelection(nextValue);
+                      field.onChange(nextValue);
+                    }}
                     options={form.templates}
                     placeholder={t("selectTemplate")}
+                    search={form.templateSearch}
                     searchPlaceholder={t("searchTemplate")}
                     value={field.value}
                   />
@@ -239,7 +250,36 @@ export function ProductForm({
         </Field>
       </div>
 
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+      <div className="grid min-w-0 gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="w-full min-w-0">
+          <Field
+            description={
+              !product
+                ? t("warrantyDurationCreateDescription")
+                : canEditWarrantyDuration
+                  ? t("warrantyDurationDraftDescription")
+                  : t("warrantyDurationLockedDescription")
+            }
+            error={formatFieldError(
+              form.formState.errors.warrantyDurationMonths?.message,
+              t,
+            )}
+            id="product-warranty-duration"
+            label={t("durationMonths")}
+          >
+            <Input
+              className="w-full"
+              disabled={isSubmitting || !canEditWarrantyDuration}
+              id="product-warranty-duration"
+              inputMode="numeric"
+              min={1}
+              placeholder={t("warrantyDurationPlaceholder")}
+              step={1}
+              type="number"
+              {...form.register("warrantyDurationMonths")}
+            />
+          </Field>
+        </div>
         <div className="w-full min-w-0">
           <Field
             error={formatFieldError(
@@ -341,17 +381,25 @@ function TemplateDetail({ label, value }: { label: string; value: string }) {
 function ProductTemplateCombobox({
   disabled,
   id,
+  isLoading,
+  loadingLabel,
+  onSearchChange,
   onValueChange,
   options,
   placeholder,
+  search,
   searchPlaceholder,
   value,
 }: {
   disabled?: boolean;
   id: string;
+  isLoading: boolean;
+  loadingLabel: string;
+  onSearchChange: (value: string) => void;
   onValueChange: (value: string) => void;
   options: ProductTemplateSummary[];
   placeholder: string;
+  search: string;
   searchPlaceholder: string;
   value?: string;
 }) {
@@ -359,7 +407,11 @@ function ProductTemplateCombobox({
   return (
     <Combobox
       disabled={disabled}
-      onValueChange={onValueChange}
+      onValueChange={(nextValue) => {
+        onValueChange(nextValue);
+        onSearchChange("");
+      }}
+      shouldFilter={false}
       value={value ?? ""}
     >
       <ComboboxTrigger
@@ -370,11 +422,21 @@ function ProductTemplateCombobox({
         }
       />
       <ComboboxContent>
-        <ComboboxInput placeholder={searchPlaceholder} showTrigger={false} />
+        <ComboboxInput
+          onValueChange={onSearchChange}
+          placeholder={searchPlaceholder}
+          showTrigger={false}
+          value={search}
+        />
         <ComboboxList>
           <ComboboxEmpty>{placeholder}</ComboboxEmpty>
+          {isLoading ? <ComboboxLoading label={loadingLabel} /> : null}
           {options.map((option) => (
-            <ComboboxItem key={option.id} value={option.id}>
+            <ComboboxItem
+              key={option.id}
+              keywords={getProductTemplateSearchKeywords(option)}
+              value={option.id}
+            >
               {option.name} · {option.sku}
             </ComboboxItem>
           ))}
@@ -436,6 +498,7 @@ const formatFieldError = createFieldErrorFormatter(
     "duplicateProductCode",
     "duplicateSerialNumber",
     "duplicateWarrantyCode",
+    "durationMonthsRange",
     "installationPositionLength",
     "productCodeLength",
     "productCodeRequired",
@@ -445,5 +508,6 @@ const formatFieldError = createFieldErrorFormatter(
     "warrantyCodeInvalid",
     "warrantyCodeNotDraft",
     "warrantyCodeOpenRequest",
+    "warrantyDurationNotDraft",
   ]),
 );

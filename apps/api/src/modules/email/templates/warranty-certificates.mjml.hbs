@@ -1,0 +1,45 @@
+<mjml>
+  <mj-head>
+    <mj-title>{{subject}}</mj-title>
+    <mj-preview>{{certificateCount}} chứng nhận bảo hành điện tử đã được tạo.</mj-preview>
+    <mj-attributes>
+      <mj-all font-family="Arial, Helvetica, sans-serif" />
+      <mj-text color="#334155" font-size="15px" line-height="1.6" />
+      <mj-section padding="0" />
+    </mj-attributes>
+  </mj-head>
+  <mj-body background-color="#f8fafc" width="640px">
+    <mj-section background-color="#ffffff" padding="28px 28px 12px">
+      <mj-column>
+        <mj-text color="#0f172a" font-size="22px" font-weight="800" padding="0">Chứng nhận bảo hành điện tử</mj-text>
+        <mj-text color="#64748b" font-size="13px" padding="8px 0 0">{{certificateCount}} sản phẩm đã được kích hoạt bảo hành.</mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#2563eb" padding="4px 0">
+      <mj-column><mj-spacer height="1px" /></mj-column>
+    </mj-section>
+    <mj-section background-color="#ffffff" padding="28px">
+      <mj-column>
+        <mj-text padding="0 0 14px">Xin chào {{customerName}},</mj-text>
+        <mj-text padding="0 0 18px">Các sản phẩm dưới đây đã được kích hoạt bảo hành thành công. Toàn bộ file PDF chứng nhận được đính kèm trong email này.</mj-text>
+        {{#each certificates}}
+        <mj-table padding="0 0 14px">
+          <tr>
+            <td style="padding:8px 10px;border:1px solid #e2e8f0;background:#f8fafc;color:#64748b;width:34%;">Sản phẩm</td>
+            <td style="padding:8px 10px;border:1px solid #e2e8f0;color:#0f172a;font-weight:700;">{{productName}}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 10px;border:1px solid #e2e8f0;background:#f8fafc;color:#64748b;">Mã bảo hành</td>
+            <td style="padding:8px 10px;border:1px solid #e2e8f0;color:#0f172a;">{{warrantyCode}}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 10px;border:1px solid #e2e8f0;background:#f8fafc;color:#64748b;">Mã chứng nhận</td>
+            <td style="padding:8px 10px;border:1px solid #e2e8f0;color:#0f172a;">{{certificateNumber}}</td>
+          </tr>
+        </mj-table>
+        {{/each}}
+        <mj-text color="#64748b" font-size="13px" padding="10px 0 0">Vui lòng lưu email này để đối chiếu khi cần hỗ trợ bảo hành.</mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

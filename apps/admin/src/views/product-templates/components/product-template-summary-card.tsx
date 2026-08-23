@@ -79,7 +79,8 @@ export function ProductTemplateSummaryCard({
                       key={item.key}
                       label={t(item.key)}
                       value={
-                        item.key === "defaultWarrantyDuration"
+                        item.key === "defaultWarrantyDuration" &&
+                        item.value !== "-"
                           ? t("durationValue", {
                               count: Number(item.value),
                             })

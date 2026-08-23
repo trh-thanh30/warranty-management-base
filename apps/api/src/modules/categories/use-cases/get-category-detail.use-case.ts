@@ -14,6 +14,15 @@ export class GetCategoryDetailUseCase {
       throw new NotFoundError('Category not found');
     }
 
-    return toCategoryResponse(category);
+    const activationConfig =
+      await this.categoriesRepository.getActivationFields(id);
+
+    return {
+      ...toCategoryResponse(category),
+      activationFormEnabled:
+        activationConfig?.activationFormEnabled ??
+        category.activation_form_enabled,
+      activationFields: activationConfig?.activationFields ?? [],
+    };
   }
 }

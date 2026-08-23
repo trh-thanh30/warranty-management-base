@@ -1,5 +1,6 @@
 import { PrismaModule } from '@/database/prisma/prisma.module';
 import { CustomersModule } from '@/modules/customers/customers.module';
+import { CategoriesModule } from '@/modules/categories/categories.module';
 import { DealersModule } from '@/modules/dealers/dealers.module';
 import { NotificationModule } from '@/modules/notification/notification.module';
 import { ProductsModule } from '@/modules/products/products.module';
@@ -8,6 +9,7 @@ import { WarrantyCertificatesModule } from '@/modules/warranty-certificates/warr
 import { WarrantiesModule } from '@/modules/warranties/warranties.module';
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
 import { WarrantyActivationRequestNotificationService } from '@/modules/warranty-activation-requests/service/warranty-activation-request-notification.service';
+import { ActivationRequestItemsValidatorService } from '@/modules/warranty-activation-requests/service/activation-request-items-validator.service';
 import { CreateWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-warranty-activation-request.use-case';
 import { CreateAdminWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-admin-warranty-activation-request.use-case';
 import { DownloadWarrantyActivationRequestCertificateUseCase } from '@/modules/warranty-activation-requests/use-cases/download-warranty-activation-request-certificate.use-case';
@@ -23,6 +25,7 @@ import { Module } from '@nestjs/common';
 @Module({
   imports: [
     AssetsModule,
+    CategoriesModule,
     CustomersModule,
     DealersModule,
     NotificationModule,
@@ -35,6 +38,7 @@ import { Module } from '@nestjs/common';
   providers: [
     WarrantyActivationRequestsRepository,
     WarrantyActivationRequestNotificationService,
+    ActivationRequestItemsValidatorService,
     CreateAdminWarrantyActivationRequestUseCase,
     GenerateWarrantyActivationRequestCodeUseCase,
     CreateWarrantyActivationRequestUseCase,

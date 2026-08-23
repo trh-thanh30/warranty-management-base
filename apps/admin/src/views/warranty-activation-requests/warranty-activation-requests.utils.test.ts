@@ -10,23 +10,35 @@ import type {
   VietnamWard,
 } from "@/src/services/locations/locations.types";
 import {
+  buildActivationRequestItems,
   filterActivationRequestCategories,
   formatActivationRequestCreateFieldError,
   formatDealerSearchOption,
   resolveActivationRequestCreateError,
   resolveScopedProductSearch,
+  getUnavailableActivationProductIds,
   toAdminActivationRequestBody,
 } from "./warranty-activation-requests.utils.ts";
-import type { WarrantyActivationRequestCreateFormValues } from "./warranty-activation-requests.types.ts";
+import {
+  warrantyActivationRequestCreateFormSchema,
+  type WarrantyActivationRequestCreateFormValues,
+} from "./warranty-activation-requests.types.ts";
+import {
+  getActivationRequestProductCount,
+  getActivationRequestProductTitle,
+  getActivationRequestWarrantyCodeLabel,
+} from "./warranty-activation-request-items.utils.ts";
 
 const provinces = [{ code: 79, name: "TP HCM" }] as VietnamProvince[];
 const wards = [{ code: 1, name: "Phuong Sai Gon" }] as VietnamWard[];
 const baseValues: WarrantyActivationRequestCreateFormValues = {
   addressDetail: "",
+  activationProductIds: {},
   categoryId: "",
   categoryInputValues: {},
   customerBirthdate: "",
   customerEmail: "",
+  customerId: "",
   customerName: "",
   customerPhone: "",
   dealerAddress: "",
@@ -53,9 +65,69 @@ const baseValues: WarrantyActivationRequestCreateFormValues = {
   warrantyCode: "",
 };
 
+const validFormValues: WarrantyActivationRequestCreateFormValues = {
+  ...baseValues,
+  addressDetail: "Khu phố Hoàng Xá, Thị xã Thuận Thành",
+  categoryId: "category-id",
+  customerId: "68a1578a-b13e-45de-b008-e357392be715",
+  customerName: "Nguyễn Văn A",
+  customerPhone: "0901234567",
+  provinceCode: "27",
+  wardCode: "09442",
+};
+
+test("activation request address detail rejects structured location units", () => {
+  const result = warrantyActivationRequestCreateFormSchema.safeParse({
+    ...validFormValues,
+    addressDetail: "Khu phố Hoàng Xá, Phường A, Tỉnh B",
+  });
+
+  assert.equal(result.success, false);
+  if (result.success) return;
+  assert.equal(
+    result.error.issues[0]?.message,
+    "addressAdministrativeUnitNotAllowed",
+  );
+});
+
+test("activation request address detail allows district and provincial roads", () => {
+  for (const addressDetail of [
+    "Khu phố Hoàng Xá, Thị xã Thuận Thành",
+    "Số 10 Tỉnh lộ 282",
+  ]) {
+    const result = warrantyActivationRequestCreateFormSchema.safeParse({
+      ...validFormValues,
+      addressDetail,
+    });
+
+    assert.equal(result.success, true);
+  }
+});
+
+test("admin activation request rejects invalid, unsupported, and future customer birthdates", () => {
+  for (const customerBirthdate of ["not-a-date", "1899-12-31", "2999-01-01"]) {
+    const result = warrantyActivationRequestCreateFormSchema.safeParse({
+      ...validFormValues,
+      customerBirthdate,
+    });
+
+    assert.equal(result.success, false);
+    if (result.success) continue;
+    assert.equal(
+      result.error.issues.some(
+        (issue) =>
+          issue.path[0] === "customerBirthdate" &&
+          issue.message === "birthdateInvalid",
+      ),
+      true,
+    );
+  }
+});
+
 test("admin activation request body combines form and selected product data", () => {
   const product = {
     brand: "Black Label",
+    displayName: "Film cach nhiet B C",
     id: "product-1",
     modelYear: 2026,
     model: "Premium",
@@ -77,6 +149,7 @@ test("admin activation request body combines form and selected product data", ()
         },
         customerBirthdate: "",
         customerEmail: " an@example.com ",
+        customerId: "68a1578a-b13e-45de-b008-e357392be715",
         customerName: " Nguyen Van An ",
         customerPhone: " 0901234567 ",
         note: " ",
@@ -95,6 +168,7 @@ test("admin activation request body combines form and selected product data", ()
       brand: "Black Label",
       categoryId: "category-1",
       customerEmail: "an@example.com",
+      customerId: "68a1578a-b13e-45de-b008-e357392be715",
       customerName: "Nguyen Van An",
       customerPhone: "0901234567",
       filmItems: {
@@ -109,7 +183,7 @@ test("admin activation request body combines form and selected product data", ()
       },
       model: "Premium",
       productId: "product-1",
-      productName: "Film cach nhiet",
+      productName: "Film cach nhiet B C",
       provinceCode: "79",
       provinceName: "TP HCM",
       serialNumber: "SN-001",
@@ -118,6 +192,139 @@ test("admin activation request body combines form and selected product data", ()
       wardCode: "1",
       wardName: "Phuong Sai Gon",
     },
+  );
+});
+
+test("admin activation request body maps physical products to configured positions", () => {
+  const products = {
+    rearGlass: { id: "product-2" } as ProductResponse,
+    windshield: { id: "product-1" } as ProductResponse,
+  };
+  const activationFields = [
+    {
+      id: "field-1",
+      key: "windshield",
+      label: "Kinh lai",
+      type: "PRODUCT_SELECT" as const,
+    },
+    {
+      id: "field-2",
+      key: "rearGlass",
+      label: "Kinh lung",
+      type: "PRODUCT_SELECT" as const,
+    },
+  ];
+
+  assert.deepEqual(buildActivationRequestItems(activationFields, products), [
+    {
+      activationFieldId: "field-1",
+      positionKey: "windshield",
+      productId: "product-1",
+    },
+    {
+      activationFieldId: "field-2",
+      positionKey: "rearGlass",
+      productId: "product-2",
+    },
+  ]);
+  assert.deepEqual(
+    toAdminActivationRequestBody({
+      activationFields,
+      activationProducts: products,
+      product: null,
+      provinces,
+      values: {
+        ...baseValues,
+        addressDetail: "12 Nguyen Hue",
+        activationProductIds: {
+          rearGlass: "product-2",
+          windshield: "product-1",
+        },
+        categoryId: "category-1",
+        customerName: "Nguyen Van An",
+        customerPhone: "0901234567",
+        provinceCode: "79",
+        wardCode: "1",
+      },
+      wards,
+    }).items,
+    [
+      {
+        activationFieldId: "field-1",
+        positionKey: "windshield",
+        productId: "product-1",
+      },
+      {
+        activationFieldId: "field-2",
+        positionKey: "rearGlass",
+        productId: "product-2",
+      },
+    ],
+  );
+});
+
+test("product selectors exclude products selected in other positions", () => {
+  assert.deepEqual(
+    getUnavailableActivationProductIds(
+      {
+        rearGlass: { id: "product-2" } as ProductResponse,
+        windshield: { id: "product-1" } as ProductResponse,
+      },
+      "rearGlass",
+    ),
+    new Set(["product-1"]),
+  );
+});
+
+test("activation request list summarizes one or many physical products", () => {
+  const multiRequest = {
+    itemCount: 2,
+    items: [{ productName: "Film SP50" }, { productName: "Film B55" }],
+  } as unknown as import("@repo/shared").WarrantyActivationRequestSummary;
+  const legacyRequest = {
+    itemCount: 0,
+    productId: "product-1",
+    productName: "Camera hành trình",
+  } as import("@repo/shared").WarrantyActivationRequestSummary;
+
+  assert.equal(getActivationRequestProductCount(multiRequest), 2);
+  assert.equal(getActivationRequestProductCount(legacyRequest), 1);
+  assert.equal(
+    getActivationRequestProductTitle(
+      multiRequest,
+      (count) => `${count} products`,
+    ),
+    "2 products",
+  );
+  assert.equal(
+    getActivationRequestProductTitle(
+      legacyRequest,
+      (count) => `${count} products`,
+    ),
+    "Camera hành trình",
+  );
+});
+
+test("activation request list shows a code count instead of the first shared code", () => {
+  const multiRequest = {
+    warrantyCode: "WM-FIRST",
+    items: [{ warrantyCode: "WM-FIRST" }, { warrantyCode: "WM-SECOND" }],
+  } as import("@repo/shared").WarrantyActivationRequestSummary;
+  const singleRequest = {
+    warrantyCode: "WM-ONE",
+    items: [{ warrantyCode: "WM-ONE" }],
+  } as import("@repo/shared").WarrantyActivationRequestSummary;
+
+  assert.equal(
+    getActivationRequestWarrantyCodeLabel(
+      multiRequest,
+      (count) => `${count} warranty codes`,
+    ),
+    "2 warranty codes",
+  );
+  assert.equal(
+    getActivationRequestWarrantyCodeLabel(singleRequest, () => "unused"),
+    "WM-ONE",
   );
 });
 

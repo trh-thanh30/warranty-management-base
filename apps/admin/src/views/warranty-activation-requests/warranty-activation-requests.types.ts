@@ -3,6 +3,8 @@ import type {
   WarrantyActivationRequestStatus,
   WarrantyActivationRequestSummary,
 } from "@repo/shared";
+import { isValidOptionalBirthdate } from "@/src/utils/birthdate";
+import { containsDisallowedVietnamAddressDetailUnit } from "@repo/shared/utils";
 import { z } from "zod";
 
 export type WarrantyActivationRequestStatusFilter =
@@ -22,10 +24,12 @@ export type WarrantyActivationRequestAction = "approve" | "reject";
 
 export type WarrantyActivationRequestCreateFormValues = {
   addressDetail: string;
+  activationProductIds: Record<string, string>;
   categoryId: string;
   categoryInputValues: Record<string, string>;
   customerBirthdate: string;
   customerEmail: string;
+  customerId: string;
   customerName: string;
   customerPhone: string;
   dealerAddress: string;
@@ -53,10 +57,21 @@ export type WarrantyActivationRequestCreateFormValues = {
 };
 
 export const warrantyActivationRequestCreateFormSchema = z.object({
-  addressDetail: z.string().trim().min(1, "addressRequired").max(255),
+  addressDetail: z
+    .string()
+    .trim()
+    .min(1, "addressRequired")
+    .max(255)
+    .refine((value) => !containsDisallowedVietnamAddressDetailUnit(value), {
+      message: "addressAdministrativeUnitNotAllowed",
+    }),
+  activationProductIds: z.record(z.string(), z.string().trim()),
   categoryId: z.string().trim().min(1, "categoryRequired"),
   categoryInputValues: z.record(z.string(), z.string().trim().max(500)),
-  customerBirthdate: z.string().trim(),
+  customerBirthdate: z.string().trim().refine(isValidOptionalBirthdate, {
+    message: "birthdateInvalid",
+  }),
+  customerId: z.string().trim().min(1, "customerRequired"),
   customerEmail: z
     .string()
     .trim()
@@ -80,8 +95,8 @@ export const warrantyActivationRequestCreateFormSchema = z.object({
   filmSunroof: z.string().trim().max(120),
   filmWindshield: z.string().trim().max(120),
   note: z.string().trim().max(1000, "noteLength"),
-  productId: z.string().trim().min(1, "productRequired"),
-  productName: z.string().trim().min(1, "productRequired"),
+  productId: z.string().trim(),
+  productName: z.string().trim(),
   provinceCode: z.string().trim().min(1, "provinceRequired"),
   salesName: z.string().trim().max(120),
   vehicleModel: z.string().trim().max(160),
