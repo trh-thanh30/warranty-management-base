@@ -1450,7 +1450,6 @@
       },
       "validation": {
         "addressRequired": "Enter the address details.",
-        "addressAdministrativeUnitNotAllowed": "Only enter the house number, street, neighborhood, district, or town. Select the ward/commune and province/city in the fields below.",
         "customerEmailInvalid": "Enter a valid email address.",
         "customerEmailRequired": "Enter an email address to receive the warranty certificate.",
         "customerNameInvalid": "The owner name must contain 2 to 120 characters.",
