@@ -5,10 +5,8 @@ import {
 } from '@/common/response';
 import { ReviewWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/review-warranty-activation-request.dto';
 import { toWarrantyActivationRequestResponse } from '@/modules/warranty-activation-requests/mappers/warranty-activation-request.mapper';
-import {
-  WarrantyActivationRequestsRepository,
-  WarrantyActivationReviewTransactionRepository,
-} from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
+import { WarrantyActivationReviewTransactionRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-review-transaction.repository';
+import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
 import { optionalTrim } from '@/modules/warranty-activation-requests/utils/warranty-activation-request-normalization.utils';
 import { IssueWarrantyCertificatesForRequestUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-certificates-for-request.use-case';
 import { Injectable } from '@nestjs/common';
@@ -155,6 +153,7 @@ export class ReviewWarrantyActivationRequestUseCase {
         const reviewedAt = new Date();
         const customer = await this.resolveActivationCustomer(repository, {
           address: request.full_address,
+          customerId: request.customer_id,
           email: request.customer_email,
           fullName: request.customer_name,
           phone: request.customer_phone,
@@ -214,11 +213,24 @@ export class ReviewWarrantyActivationRequestUseCase {
     repository: WarrantyActivationReviewTransactionRepository,
     input: {
       address: string;
+      customerId: string | null;
       email: string | null;
       fullName: string;
       phone: string;
     },
   ) {
+    if (input.customerId) {
+      const customer = await repository.findCustomerById(input.customerId);
+      if (!customer) {
+        throw new NotFoundError('Customer not found', 'NOT_FOUND', {
+          code: 'CUSTOMER_NOT_FOUND',
+          customerId: input.customerId,
+        });
+      }
+
+      return customer;
+    }
+
     const [phoneCustomer, emailCustomer] = await Promise.all([
       repository.findCustomerByPhone(input.phone),
       input.email

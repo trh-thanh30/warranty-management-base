@@ -8,6 +8,7 @@ import { AssetsModule } from '@/modules/assets/assets.module';
 import { WarrantyCertificatesModule } from '@/modules/warranty-certificates/warranty-certificates.module';
 import { WarrantiesModule } from '@/modules/warranties/warranties.module';
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
+import { WarrantyActivationRequestQueries } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository.queries';
 import { WarrantyActivationRequestNotificationService } from '@/modules/warranty-activation-requests/service/warranty-activation-request-notification.service';
 import { ActivationRequestItemsValidatorService } from '@/modules/warranty-activation-requests/service/activation-request-items-validator.service';
 import { CreateWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-warranty-activation-request.use-case';
@@ -36,6 +37,7 @@ import { Module } from '@nestjs/common';
   ],
   controllers: [WarrantyActivationRequestsController],
   providers: [
+    WarrantyActivationRequestQueries,
     WarrantyActivationRequestsRepository,
     WarrantyActivationRequestNotificationService,
     ActivationRequestItemsValidatorService,

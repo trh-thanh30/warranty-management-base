@@ -1,7 +1,10 @@
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
+import { WarrantyActivationRequestQueries } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository.queries';
 import { warranty_activation_request_status } from '@prisma/client';
 
 describe('WarrantyActivationRequestsRepository', () => {
+  const queries = new WarrantyActivationRequestQueries();
+
   it('updates Customer birthdate and creates the request in one transaction', async () => {
     const updateCustomer = jest.fn().mockResolvedValue({ id: 'customer-id' });
     const createRequest = jest.fn().mockResolvedValue({ id: 'request-id' });
@@ -11,9 +14,10 @@ describe('WarrantyActivationRequestsRepository', () => {
         warrantyActivationRequest: { create: createRequest },
       }),
     );
-    const repository = new WarrantyActivationRequestsRepository({
-      $transaction: transaction,
-    } as never);
+    const repository = new WarrantyActivationRequestsRepository(
+      { $transaction: transaction } as never,
+      queries,
+    );
     const birthdate = new Date('2005-12-11T00:00:00.000Z');
 
     await repository.create({ request_code: 'WAR-20260820-0001' } as never, {
@@ -42,9 +46,10 @@ describe('WarrantyActivationRequestsRepository', () => {
         warrantyActivationRequest: { create: createRequest },
       }),
     );
-    const repository = new WarrantyActivationRequestsRepository({
-      $transaction: transaction,
-    } as never);
+    const repository = new WarrantyActivationRequestsRepository(
+      { $transaction: transaction } as never,
+      queries,
+    );
 
     await repository.create({ request_code: 'WAR-20260820-0002' } as never, {
       customerProfile: {
@@ -70,6 +75,7 @@ describe('WarrantyActivationRequestsRepository', () => {
     };
     const repository = new WarrantyActivationRequestsRepository(
       prismaService as never,
+      queries,
     );
 
     await repository.findOpenByProductId('product-id');
@@ -110,9 +116,10 @@ describe('WarrantyActivationRequestsRepository', () => {
 
   it('finds open reservations for multiple legacy or item products', async () => {
     const findMany = jest.fn().mockResolvedValue([]);
-    const repository = new WarrantyActivationRequestsRepository({
-      warrantyActivationRequest: { findMany },
-    } as never);
+    const repository = new WarrantyActivationRequestsRepository(
+      { warrantyActivationRequest: { findMany } } as never,
+      queries,
+    );
 
     await repository.findOpenByProductIds(['product-a', 'product-b']);
 
@@ -131,10 +138,13 @@ describe('WarrantyActivationRequestsRepository', () => {
   it('searches request and related item product identifiers', async () => {
     const findMany = jest.fn().mockResolvedValue([]);
     const count = jest.fn().mockResolvedValue(0);
-    const repository = new WarrantyActivationRequestsRepository({
-      $transaction: (callback: (tx: unknown) => unknown) =>
-        callback({ warrantyActivationRequest: { count, findMany } }),
-    } as never);
+    const repository = new WarrantyActivationRequestsRepository(
+      {
+        $transaction: (callback: (tx: unknown) => unknown) =>
+          callback({ warrantyActivationRequest: { count, findMany } }),
+      } as never,
+      queries,
+    );
 
     await repository.list({ search: 'SP50' });
 
@@ -187,10 +197,13 @@ describe('WarrantyActivationRequestsRepository', () => {
   it('filters warranty codes across legacy requests and related items', async () => {
     const findMany = jest.fn().mockResolvedValue([]);
     const count = jest.fn().mockResolvedValue(0);
-    const repository = new WarrantyActivationRequestsRepository({
-      $transaction: (callback: (tx: unknown) => unknown) =>
-        callback({ warrantyActivationRequest: { count, findMany } }),
-    } as never);
+    const repository = new WarrantyActivationRequestsRepository(
+      {
+        $transaction: (callback: (tx: unknown) => unknown) =>
+          callback({ warrantyActivationRequest: { count, findMany } }),
+      } as never,
+      queries,
+    );
 
     await repository.list({ warrantyCode: 'wm-sp50' });
 
