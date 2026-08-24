@@ -8,6 +8,52 @@ import {
 import { toNullableValue, toOptionalValue } from "../../utils/form.ts";
 import type { ProductFormValues } from "./products.types";
 
+type ProductWarrantyPeriod = {
+  endDate: string;
+  startDate: string;
+};
+
+export type ProductWarrantyProgress = {
+  percentage: number;
+  remainingMonths: number;
+  state: "active" | "expired" | "upcoming";
+};
+
+export function getProductWarrantyProgress(
+  warranty: ProductWarrantyPeriod,
+  now = new Date(),
+): ProductWarrantyProgress {
+  const start = new Date(warranty.startDate);
+  const end = new Date(warranty.endDate);
+  const totalDuration = end.getTime() - start.getTime();
+  const elapsedDuration = now.getTime() - start.getTime();
+  const percentage =
+    totalDuration > 0
+      ? Math.round(
+          Math.min(1, Math.max(0, elapsedDuration / totalDuration)) * 100,
+        )
+      : 0;
+
+  return {
+    percentage,
+    remainingMonths: getRemainingCalendarMonths(now, end),
+    state: now < start ? "upcoming" : now >= end ? "expired" : "active",
+  };
+}
+
+function getRemainingCalendarMonths(from: Date, to: Date) {
+  if (from >= to) return 0;
+
+  const wholeMonths =
+    (to.getUTCFullYear() - from.getUTCFullYear()) * 12 +
+    to.getUTCMonth() -
+    from.getUTCMonth();
+  const anchor = new Date(from);
+  anchor.setUTCMonth(anchor.getUTCMonth() + wholeMonths);
+
+  return wholeMonths + (anchor < to ? 1 : 0);
+}
+
 export function getProductTemplateSearchKeywords(
   template: ProductTemplateSummary,
 ) {

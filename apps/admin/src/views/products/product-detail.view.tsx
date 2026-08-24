@@ -38,37 +38,41 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
         backHref="/products"
         backLabel={t("backToDirectory")}
         description={t("detailDescription")}
+        descriptionAccessory={
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+            {canAssignOwner ? (
+              <Button
+                className="w-full sm:w-auto"
+                disabled={!product}
+                onClick={() => setAssignOpen(true)}
+                type="button"
+                variant="secondary"
+              >
+                <UserPlus className="size-4" />
+                {t("assignOwner")}
+              </Button>
+            ) : null}
+            {canEdit ? (
+              <Button
+                asChild
+                className="w-full sm:w-auto"
+                disabled={!product}
+                variant="secondary"
+              >
+                <Link href={`/products/${productId}/edit`}>
+                  <Pencil className="size-4" />
+                  {t("edit")}
+                </Link>
+              </Button>
+            ) : null}
+          </div>
+        }
         eyebrow={t("eyebrow")}
         maxWidthClassName="max-w-5xl"
         title={t("detailTitle")}
       >
-        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-          {canAssignOwner ? (
-            <Button
-              disabled={!product}
-              onClick={() => setAssignOpen(true)}
-              type="button"
-              variant="secondary"
-            >
-              <UserPlus className="size-4" />
-              {t("assignOwner")}
-            </Button>
-          ) : null}
-          {canEdit ? (
-            <Button asChild disabled={!product} variant="secondary">
-              <Link href={`/products/${productId}/edit`}>
-                <Pencil className="size-4" />
-                {t("edit")}
-              </Link>
-            </Button>
-          ) : null}
-        </div>
-
         {productQuery.isLoading ? (
-          <ProductDetailSkeleton
-            description={t("detailDescription")}
-            title={t("detailTitle")}
-          />
+          <ProductDetailSkeleton />
         ) : productQuery.isError || !product ? (
           <StatePanel
             action={
@@ -86,11 +90,7 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
             title={t("loadErrorTitle")}
           />
         ) : (
-          <ProductDetailCard
-            description={t("detailDescription")}
-            product={product}
-            title={t("detailTitle")}
-          />
+          <ProductDetailCard product={product} />
         )}
 
         <AssignOwnerDialog
