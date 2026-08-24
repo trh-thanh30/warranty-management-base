@@ -1,9 +1,9 @@
-import { PrismaService } from '@/database/prisma/prisma.service';
+import { timeConfig } from '@/config';
 import { UploadAssetService } from '@/modules/assets/services/upload-asset.service';
+import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
 import { WARRANTY_CERTIFICATE_FOLDER_SEGMENT } from '@/modules/warranty-certificates/warranty-certificate.constants';
-import { Injectable, Logger } from '@nestjs/common';
-
-const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import type { ConfigType } from '@nestjs/config';
 
 export interface CleanupOrphanedWarrantyCertificatesInput {
   dryRun: boolean;
@@ -18,21 +18,20 @@ export class CleanupOrphanedWarrantyCertificatesUseCase {
   );
 
   constructor(
-    private readonly prismaService: PrismaService,
+    private readonly warrantyCertificatesRepository: WarrantyCertificatesRepository,
     private readonly uploadAssetService: UploadAssetService,
+    @Inject(timeConfig.KEY)
+    private readonly config: ConfigType<typeof timeConfig>,
   ) {}
 
   async execute(input: CleanupOrphanedWarrantyCertificatesInput) {
     const now = input.now ?? new Date();
     const cutoff = new Date(
-      now.getTime() - input.retentionDays * MILLISECONDS_PER_DAY,
+      now.getTime() - input.retentionDays * this.config.millisecondsPerDay,
     );
     const [storedObjects, certificateRecords] = await Promise.all([
       this.uploadAssetService.list('private'),
-      this.prismaService.warrantyCertificate.findMany({
-        where: { storage_key: { not: null } },
-        select: { storage_key: true },
-      }),
+      this.warrantyCertificatesRepository.findStoredPaths(),
     ]);
     const referencedPaths = new Set(
       certificateRecords

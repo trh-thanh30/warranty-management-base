@@ -50,8 +50,8 @@ test("product template detail actions fill mobile width only", async () => {
     /className="flex w-full flex-col gap-2 sm:flex-row sm:justify-end"/,
   );
   assert.equal(
-    detailView.match(/<Button asChild className="w-full sm:w-auto"/g)?.length ??
-      0,
+    detailView.match(/<Button\s+asChild\s+className="w-full sm:w-auto"/g)
+      ?.length ?? 0,
     2,
   );
 });

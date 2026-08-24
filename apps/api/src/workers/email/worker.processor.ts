@@ -1,6 +1,7 @@
 import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '@/database/prisma/prisma.service';
+import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
+import { WarrantyActivationRequestCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-activation-request-certificates.repository';
 import { warranty_certificate_email_status } from '@prisma/client';
 import { Job } from 'bullmq';
 import { WorkerEmailService } from '@/workers/email/worker.service';
@@ -31,7 +32,8 @@ export class EmailProcessor extends WorkerHost {
 
   constructor(
     private readonly emailService: WorkerEmailService,
-    private readonly prismaService: PrismaService,
+    private readonly warrantyCertificatesRepository: WarrantyCertificatesRepository,
+    private readonly requestCertificatesRepository: WarrantyActivationRequestCertificatesRepository,
   ) {
     super();
   }
@@ -119,13 +121,10 @@ export class EmailProcessor extends WorkerHost {
   private async markWarrantyCertificateEmailSent(certificateId?: string) {
     if (!certificateId) return;
 
-    await this.prismaService.warrantyCertificate.update({
-      where: { id: certificateId },
-      data: {
-        email_status: warranty_certificate_email_status.SENT,
-        emailed_at: new Date(),
-        last_error: null,
-      },
+    await this.warrantyCertificatesRepository.update(certificateId, {
+      email_status: warranty_certificate_email_status.SENT,
+      emailed_at: new Date(),
+      last_error: null,
     });
   }
 
@@ -135,25 +134,19 @@ export class EmailProcessor extends WorkerHost {
   ) {
     if (!certificateId) return;
 
-    await this.prismaService.warrantyCertificate.update({
-      where: { id: certificateId },
-      data: {
-        email_status: warranty_certificate_email_status.FAILED,
-        last_error: message,
-      },
+    await this.warrantyCertificatesRepository.update(certificateId, {
+      email_status: warranty_certificate_email_status.FAILED,
+      last_error: message,
     });
   }
 
   private async markRequestCertificateEmailSent(certificateId?: string) {
     if (!certificateId) return;
 
-    await this.prismaService.warrantyActivationRequestCertificate.update({
-      where: { id: certificateId },
-      data: {
-        email_status: warranty_certificate_email_status.SENT,
-        emailed_at: new Date(),
-        last_error: null,
-      },
+    await this.requestCertificatesRepository.update(certificateId, {
+      email_status: warranty_certificate_email_status.SENT,
+      emailed_at: new Date(),
+      last_error: null,
     });
   }
 
@@ -163,12 +156,9 @@ export class EmailProcessor extends WorkerHost {
   ) {
     if (!certificateId) return;
 
-    await this.prismaService.warrantyActivationRequestCertificate.update({
-      where: { id: certificateId },
-      data: {
-        email_status: warranty_certificate_email_status.FAILED,
-        last_error: message,
-      },
+    await this.requestCertificatesRepository.update(certificateId, {
+      email_status: warranty_certificate_email_status.FAILED,
+      last_error: message,
     });
   }
 

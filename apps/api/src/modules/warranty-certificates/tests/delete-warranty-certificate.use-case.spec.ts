@@ -1,4 +1,5 @@
 import { DeleteWarrantyCertificateUseCase } from '@/modules/warranty-certificates/use-cases/delete-warranty-certificate.use-case';
+import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
 import { NotFoundException } from '@nestjs/common';
 
 describe('DeleteWarrantyCertificateUseCase', () => {
@@ -24,7 +25,7 @@ describe('DeleteWarrantyCertificateUseCase', () => {
   it('deletes the storage object before deleting the certificate record', async () => {
     const { prismaService, uploadAssetService } = createDependencies();
     const useCase = new DeleteWarrantyCertificateUseCase(
-      prismaService as never,
+      new WarrantyCertificatesRepository(prismaService as never),
       uploadAssetService as never,
     );
 
@@ -45,7 +46,7 @@ describe('DeleteWarrantyCertificateUseCase', () => {
     const { prismaService, uploadAssetService } = createDependencies();
     uploadAssetService.delete.mockRejectedValue(new Error('MinIO unavailable'));
     const useCase = new DeleteWarrantyCertificateUseCase(
-      prismaService as never,
+      new WarrantyCertificatesRepository(prismaService as never),
       uploadAssetService as never,
     );
 
@@ -59,7 +60,7 @@ describe('DeleteWarrantyCertificateUseCase', () => {
     const { prismaService, uploadAssetService } = createDependencies();
     prismaService.warrantyCertificate.findUnique.mockResolvedValue(null);
     const useCase = new DeleteWarrantyCertificateUseCase(
-      prismaService as never,
+      new WarrantyCertificatesRepository(prismaService as never),
       uploadAssetService as never,
     );
 

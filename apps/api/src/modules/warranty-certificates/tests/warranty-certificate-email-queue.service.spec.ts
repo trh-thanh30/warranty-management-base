@@ -1,4 +1,5 @@
 import { WarrantyCertificateEmailQueueService } from '@/modules/warranty-certificates/services/warranty-certificate-email-queue.service';
+import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
 import { Readable } from 'node:stream';
 
 describe('WarrantyCertificateEmailQueueService', () => {
@@ -48,7 +49,7 @@ describe('WarrantyCertificateEmailQueueService', () => {
       getStream: jest.fn().mockResolvedValue(Readable.from(storedPdf)),
     };
     const service = new WarrantyCertificateEmailQueueService(
-      prismaService as never,
+      new WarrantyCertificatesRepository(prismaService as never),
       sendEmailUseCase as never,
       emailContentService,
       uploadAssetService as never,

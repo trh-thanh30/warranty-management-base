@@ -1,6 +1,6 @@
-import { PrismaService } from '@/database/prisma/prisma.service';
 import { UploadAssetService } from '@/modules/assets/services/upload-asset.service';
 import { SendEmailUseCase } from '@/modules/email/use-cases/send-email.usecase';
+import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
 import { WarrantyCertificateEmailContentService } from '@/modules/warranty-certificates/services/warranty-certificate-email-content.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { warranty_certificate_email_status } from '@prisma/client';
@@ -12,34 +12,15 @@ export class WarrantyCertificateEmailQueueService {
   );
 
   constructor(
-    private readonly prismaService: PrismaService,
+    private readonly warrantyCertificatesRepository: WarrantyCertificatesRepository,
     private readonly sendEmailUseCase: SendEmailUseCase,
     private readonly emailContentService: WarrantyCertificateEmailContentService,
     private readonly uploadAssetService: UploadAssetService,
   ) {}
 
   async queueEmail(certificateId: string) {
-    const certificate = await this.prismaService.warrantyCertificate.findUnique(
-      {
-        where: { id: certificateId },
-        include: {
-          warranty: {
-            include: {
-              product: {
-                include: {
-                  template: true,
-                  ownerships: {
-                    where: { is_current_owner: true },
-                    include: { customer: true },
-                    take: 1,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    );
+    const certificate =
+      await this.warrantyCertificatesRepository.findForEmail(certificateId);
 
     if (!certificate) {
       throw new Error('Warranty certificate not found while queueing email');
@@ -56,10 +37,9 @@ export class WarrantyCertificateEmailQueueService {
 
     const requestId = this.getRequestId(certificate.metadata);
     const request = requestId
-      ? await this.prismaService.warrantyActivationRequest.findUnique({
-          where: { id: requestId },
-          include: { dealer: true },
-        })
+      ? await this.warrantyCertificatesRepository.findActivationRequestForCertificate(
+          requestId,
+        )
       : null;
     const emailInput = {
       certificateNumber: certificate.certificate_number,
@@ -108,13 +88,10 @@ export class WarrantyCertificateEmailQueueService {
         warrantyCertificateId: certificate.id,
       });
 
-      return this.prismaService.warrantyCertificate.update({
-        where: { id: certificate.id },
-        data: {
-          email_status: warranty_certificate_email_status.QUEUED,
-          emailed_at: new Date(),
-          last_error: null,
-        },
+      return this.warrantyCertificatesRepository.update(certificate.id, {
+        email_status: warranty_certificate_email_status.QUEUED,
+        emailed_at: new Date(),
+        last_error: null,
       });
     } catch (error) {
       const message =
@@ -123,12 +100,9 @@ export class WarrantyCertificateEmailQueueService {
         `Failed to queue warranty certificate email ${certificate.id}: ${message}`,
       );
 
-      return this.prismaService.warrantyCertificate.update({
-        where: { id: certificate.id },
-        data: {
-          email_status: warranty_certificate_email_status.FAILED,
-          last_error: message,
-        },
+      return this.warrantyCertificatesRepository.update(certificate.id, {
+        email_status: warranty_certificate_email_status.FAILED,
+        last_error: message,
       });
     }
   }

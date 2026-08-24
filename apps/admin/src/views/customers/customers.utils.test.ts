@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { customerFormSchema } from "./customers.types.ts";
 import {
   buildCustomerAddress,
   deduplicateAddressSuffix,
@@ -89,4 +90,23 @@ test("clears birthdate explicitly when updating a customer", () => {
     toUpdateCustomerBody({ ...customerFormValues, birthdate: "" }).birthdate,
     null,
   );
+});
+
+test("customer form rejects invalid, unsupported, and future birthdates", () => {
+  for (const birthdate of ["not-a-date", "1899-12-31", "2999-01-01"]) {
+    const result = customerFormSchema.safeParse({
+      ...customerFormValues,
+      birthdate,
+    });
+
+    assert.equal(result.success, false);
+    if (result.success) continue;
+    assert.equal(
+      result.error.issues.some(
+        (issue) =>
+          issue.path[0] === "birthdate" && issue.message === "birthdateInvalid",
+      ),
+      true,
+    );
+  }
 });

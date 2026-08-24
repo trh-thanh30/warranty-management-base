@@ -13,12 +13,12 @@ import {
 
 describe('WarrantyActivationRequestsUseCases', () => {
   const repository = {
-    activateApprovedRequest: jest.fn(),
     create: jest.fn(),
     findById: jest.fn(),
     findLastRequestCode: jest.fn(),
     findOpenByProductId: jest.fn(),
     review: jest.fn(),
+    withReviewTransaction: jest.fn(),
   };
   const productsRepository = {
     findActivationRequestTargetById: jest.fn(),
@@ -842,7 +842,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     repository.findById
       .mockResolvedValueOnce(baseRequest)
       .mockResolvedValueOnce(activatedRequest);
-    repository.activateApprovedRequest.mockResolvedValue(activatedRequest);
+    repository.withReviewTransaction.mockResolvedValue(activatedRequest);
     issueWarrantyActivationRequestCertificateUseCase.execute.mockResolvedValue({
       id: 'request-certificate-id',
     });
@@ -860,11 +860,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
       { reviewedByUserId: 'admin-id' },
     );
 
-    expect(repository.activateApprovedRequest).toHaveBeenCalledWith({
-      adminNote: 'Thong tin hop le',
-      id: 'request-id',
-      reviewedById: 'admin-id',
-    });
+    expect(repository.withReviewTransaction).toHaveBeenCalledTimes(1);
     expect(repository.review).not.toHaveBeenCalled();
     expect(
       issueWarrantyActivationRequestCertificateUseCase.execute,
@@ -899,7 +895,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     repository.findById
       .mockResolvedValueOnce(baseRequest)
       .mockResolvedValueOnce(activatedRequest);
-    repository.activateApprovedRequest.mockResolvedValue(activatedRequest);
+    repository.withReviewTransaction.mockResolvedValue(activatedRequest);
     issueWarrantyActivationRequestCertificateUseCase.execute.mockRejectedValue(
       new Error('PDF generation failed'),
     );
@@ -915,7 +911,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     ).resolves.toMatchObject({
       status: warranty_activation_request_status.ACTIVATED,
     });
-    expect(repository.activateApprovedRequest).toHaveBeenCalledTimes(1);
+    expect(repository.withReviewTransaction).toHaveBeenCalledTimes(1);
   });
 
   it('requires a rejection reason when rejecting a pending request', async () => {

@@ -104,6 +104,26 @@ test("activation request address detail allows district and provincial roads", (
   }
 });
 
+test("admin activation request rejects invalid, unsupported, and future customer birthdates", () => {
+  for (const customerBirthdate of ["not-a-date", "1899-12-31", "2999-01-01"]) {
+    const result = warrantyActivationRequestCreateFormSchema.safeParse({
+      ...validFormValues,
+      customerBirthdate,
+    });
+
+    assert.equal(result.success, false);
+    if (result.success) continue;
+    assert.equal(
+      result.error.issues.some(
+        (issue) =>
+          issue.path[0] === "customerBirthdate" &&
+          issue.message === "birthdateInvalid",
+      ),
+      true,
+    );
+  }
+});
+
 test("admin activation request body combines form and selected product data", () => {
   const product = {
     brand: "Black Label",

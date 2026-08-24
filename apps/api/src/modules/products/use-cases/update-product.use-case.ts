@@ -79,8 +79,11 @@ export class UpdateProductUseCase {
     }
 
     const currentWarrantyCode = existingProduct.warranty?.warranty_code ?? null;
-    if (
+    const isWarrantyDurationChange =
       dto.warrantyDurationMonths !== undefined &&
+      dto.warrantyDurationMonths !== existingProduct.warranty?.duration_months;
+    if (
+      isWarrantyDurationChange &&
       existingProduct.warranty &&
       existingProduct.warranty.status !== warranty_status.DRAFT
     ) {
@@ -136,7 +139,7 @@ export class UpdateProductUseCase {
       if (nextWarrantyCode) {
         warrantyUpdate.warranty_code = nextWarrantyCode;
       }
-      if (dto.warrantyDurationMonths !== undefined) {
+      if (isWarrantyDurationChange) {
         warrantyUpdate.duration_months = dto.warrantyDurationMonths;
       }
       if (Object.keys(warrantyUpdate).length > 0) {

@@ -1,5 +1,5 @@
-import { PrismaService } from '@/database/prisma/prisma.service';
 import { UploadAssetService } from '@/modules/assets/services/upload-asset.service';
+import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
 import { WarrantyCertificateEmailQueueService } from '@/modules/warranty-certificates/services/warranty-certificate-email-queue.service';
 import { WarrantyCertificatePdfService } from '@/modules/warranty-certificates/services/warranty-certificate-pdf.service';
 import {
@@ -23,7 +23,7 @@ export class IssueWarrantyCertificateUseCase {
   private readonly logger = new Logger(IssueWarrantyCertificateUseCase.name);
 
   constructor(
-    private readonly prismaService: PrismaService,
+    private readonly warrantyCertificatesRepository: WarrantyCertificatesRepository,
     private readonly uploadAssetService: UploadAssetService,
     private readonly certificateEmailQueueService: WarrantyCertificateEmailQueueService,
     private readonly pdfService: WarrantyCertificatePdfService,
@@ -35,30 +35,18 @@ export class IssueWarrantyCertificateUseCase {
     warrantyId: string;
     requestId?: string;
   }) {
-    const warranty = await this.prismaService.warranty.findUnique({
-      where: { id: input.warrantyId },
-      include: {
-        product: {
-          include: {
-            template: true,
-            ownerships: {
-              where: { is_current_owner: true },
-              include: { customer: true },
-              take: 1,
-            },
-          },
-        },
-      },
-    });
+    const warranty =
+      await this.warrantyCertificatesRepository.findWarrantyForCertificate(
+        input.warrantyId,
+      );
 
     if (!warranty) {
       throw new Error('Warranty not found while issuing certificate');
     }
     const request = input.requestId
-      ? await this.prismaService.warrantyActivationRequest.findUnique({
-          where: { id: input.requestId },
-          include: { dealer: true },
-        })
+      ? await this.warrantyCertificatesRepository.findActivationRequestForCertificate(
+          input.requestId,
+        )
       : null;
     const currentCustomer = warranty.product.ownerships[0]?.customer;
     const recipientEmail = (
@@ -71,10 +59,9 @@ export class IssueWarrantyCertificateUseCase {
       .toLowerCase();
 
     const existingCertificate =
-      await this.prismaService.warrantyCertificate.findFirst({
-        where: { warranty_id: warranty.id },
-        orderBy: { created_at: 'desc' },
-      });
+      await this.warrantyCertificatesRepository.findLatestByWarrantyId(
+        warranty.id,
+      );
 
     if (existingCertificate?.status === warranty_certificate_status.GENERATED) {
       return existingCertificate;
@@ -121,26 +108,13 @@ export class IssueWarrantyCertificateUseCase {
     warrantyId: string;
   }) {
     const [warranty, request] = await Promise.all([
-      this.prismaService.warranty.findUnique({
-        where: { id: input.warrantyId },
-        include: {
-          product: {
-            include: {
-              template: true,
-              ownerships: {
-                where: { is_current_owner: true },
-                include: { customer: true },
-                take: 1,
-              },
-            },
-          },
-        },
-      }),
+      this.warrantyCertificatesRepository.findWarrantyForCertificate(
+        input.warrantyId,
+      ),
       input.requestId
-        ? this.prismaService.warrantyActivationRequest.findUnique({
-            where: { id: input.requestId },
-            include: { dealer: true },
-          })
+        ? this.warrantyCertificatesRepository.findActivationRequestForCertificate(
+            input.requestId,
+          )
         : Promise.resolve(null),
     ]);
 
@@ -219,9 +193,9 @@ export class IssueWarrantyCertificateUseCase {
         };
 
         if (input.existingCertificate) {
-          return await this.prismaService.warrantyCertificate.update({
-            where: { id: input.existingCertificate.id },
-            data: {
+          return await this.warrantyCertificatesRepository.update(
+            input.existingCertificate.id,
+            {
               email_status: data.email_status,
               generated_at: data.generated_at,
               last_error: null,
@@ -230,10 +204,10 @@ export class IssueWarrantyCertificateUseCase {
               status: data.status,
               storage_key: data.storage_key,
             },
-          });
+          );
         }
 
-        return await this.prismaService.warrantyCertificate.create({ data });
+        return await this.warrantyCertificatesRepository.create(data);
       } catch (error) {
         if (uploadedPdfPath) {
           try {
@@ -289,19 +263,17 @@ export class IssueWarrantyCertificateUseCase {
 
     try {
       if (input.existingCertificate) {
-        await this.prismaService.warrantyCertificate.update({
-          where: { id: input.existingCertificate.id },
+        await this.warrantyCertificatesRepository.update(
+          input.existingCertificate.id,
           data,
-        });
+        );
         return;
       }
 
-      await this.prismaService.warrantyCertificate.create({
-        data: {
-          ...data,
-          certificate_number: generateCertificateNumber(),
-          warranty: { connect: { id: input.warrantyId } },
-        },
+      await this.warrantyCertificatesRepository.create({
+        ...data,
+        certificate_number: generateCertificateNumber(),
+        warranty: { connect: { id: input.warrantyId } },
       });
     } catch (persistenceError) {
       this.logger.error(

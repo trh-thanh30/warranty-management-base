@@ -16,6 +16,8 @@ import {
 } from '@/config';
 import { EmailProcessor } from '@/workers/email/worker.processor';
 import { WorkerEmailService } from '@/workers/email/worker.service';
+import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
+import { WarrantyActivationRequestCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-activation-request-certificates.repository';
 
 @Module({
   imports: [
@@ -45,6 +47,11 @@ import { WorkerEmailService } from '@/workers/email/worker.service';
     }),
     BullModule.registerQueue({ name: 'email' }),
   ],
-  providers: [EmailProcessor, WorkerEmailService],
+  providers: [
+    EmailProcessor,
+    WorkerEmailService,
+    WarrantyCertificatesRepository,
+    WarrantyActivationRequestCertificatesRepository,
+  ],
 })
 export class WorkerModule {}

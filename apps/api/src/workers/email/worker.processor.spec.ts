@@ -1,4 +1,6 @@
 import { EmailProcessor } from '@/workers/email/worker.processor';
+import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
+import { WarrantyActivationRequestCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-activation-request-certificates.repository';
 import { warranty_certificate_email_status } from '@prisma/client';
 
 describe('EmailProcessor', () => {
@@ -13,7 +15,10 @@ describe('EmailProcessor', () => {
     };
     const processor = new EmailProcessor(
       emailService as never,
-      prismaService as never,
+      new WarrantyCertificatesRepository(prismaService as never),
+      new WarrantyActivationRequestCertificatesRepository(
+        prismaService as never,
+      ),
     );
     const job = {
       data: {
@@ -51,7 +56,10 @@ describe('EmailProcessor', () => {
     };
     const processor = new EmailProcessor(
       emailService as never,
-      prismaService as never,
+      new WarrantyCertificatesRepository(prismaService as never),
+      new WarrantyActivationRequestCertificatesRepository(
+        prismaService as never,
+      ),
     );
     const job = {
       data: {

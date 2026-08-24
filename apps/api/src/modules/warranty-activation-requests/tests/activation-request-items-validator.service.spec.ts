@@ -3,7 +3,10 @@ import { product_status, warranty_status } from '@prisma/client';
 
 describe('ActivationRequestItemsValidatorService', () => {
   const categoriesRepository = { getActivationFields: jest.fn() };
-  const productsRepository = { findActivationRequestTargetsByIds: jest.fn() };
+  const productsRepository = {
+    findActivationRequestTargetsByIds: jest.fn(),
+    findActiveProductCategoryById: jest.fn(),
+  };
   const requestsRepository = { findOpenByProductIds: jest.fn() };
   const service = new ActivationRequestItemsValidatorService(
     categoriesRepository as never,
@@ -34,6 +37,9 @@ describe('ActivationRequestItemsValidatorService', () => {
           order: 1,
         },
       ],
+    });
+    productsRepository.findActiveProductCategoryById.mockResolvedValue({
+      id: 'category-id',
     });
     productsRepository.findActivationRequestTargetsByIds.mockResolvedValue([
       createProduct('product-a'),
@@ -95,6 +101,23 @@ describe('ActivationRequestItemsValidatorService', () => {
         { positionKey: 'windshield', productId: 'product-a' },
       ]),
     ).rejects.toMatchObject({ code: 'PRODUCT_CATEGORY_MISMATCH' });
+  });
+
+  it('rejects activation requests for an inactive category', async () => {
+    productsRepository.findActiveProductCategoryById.mockResolvedValue(null);
+
+    await expect(
+      service.validate('category-id', [
+        { positionKey: 'windshield', productId: 'product-a' },
+      ]),
+    ).rejects.toMatchObject({
+      code: 'NOT_FOUND',
+      details: { code: 'PRODUCT_CATEGORY_NOT_FOUND' },
+    });
+
+    expect(
+      productsRepository.findActivationRequestTargetsByIds,
+    ).not.toHaveBeenCalled();
   });
 
   it('rejects a product reserved by another open request', async () => {

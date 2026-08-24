@@ -35,6 +35,15 @@ export class ActivationRequestItemsValidatorService {
     categoryId: string,
     items: CreateWarrantyActivationRequestItemBody[],
   ): Promise<ValidatedActivationRequestItem[]> {
+    const category =
+      await this.productsRepository.findActiveProductCategoryById(categoryId);
+    if (!category) {
+      throw new NotFoundError('Product category not found', 'NOT_FOUND', {
+        code: 'PRODUCT_CATEGORY_NOT_FOUND',
+        categoryId,
+      });
+    }
+
     const config =
       await this.categoriesRepository.getActivationFields(categoryId);
     if (!config) {

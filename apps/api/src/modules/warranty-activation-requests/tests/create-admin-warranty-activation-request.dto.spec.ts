@@ -28,6 +28,25 @@ describe('CreateAdminWarrantyActivationRequestDto', () => {
     expect(errors.some((error) => error.property === 'customerId')).toBe(true);
   });
 
+  it('rejects a future customer birthdate', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-20T12:00:00.000Z'));
+
+    try {
+      const dto = plainToInstance(CreateAdminWarrantyActivationRequestDto, {
+        ...base,
+        customerBirthdate: '2026-08-21',
+      });
+
+      const errors = await validate(dto);
+
+      expect(
+        errors.some((error) => error.property === 'customerBirthdate'),
+      ).toBe(true);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('accepts nested physical Product items', async () => {
     const dto = plainToInstance(CreateAdminWarrantyActivationRequestDto, {
       ...base,
