@@ -5,17 +5,21 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 
 describe('CreatePublicWarrantyActivationRequestDto', () => {
+  const base = {
+    customerEmail: 'customer@example.com',
+    customerName: 'Nguyen Van A',
+    customerPhone: '0901234567',
+    provinceCode: '79',
+    provinceName: 'TP Ho Chi Minh',
+    wardCode: '26734',
+    wardName: 'Phuong Ben Thanh',
+  };
+
   it('does not accept the Admin-only customer birthdate field', async () => {
     const dto = plainToInstance(CreatePublicWarrantyActivationRequestDto, {
       addressDetail: '1 Nguyen Trai',
       customerBirthdate: '2005-12-11',
-      customerEmail: 'customer@example.com',
-      customerName: 'Nguyen Van A',
-      customerPhone: '0901234567',
-      provinceCode: '79',
-      provinceName: 'TP Ho Chi Minh',
-      wardCode: '26734',
-      wardName: 'Phuong Ben Thanh',
+      ...base,
     });
 
     const errors = await validate(dto, {
@@ -27,4 +31,21 @@ describe('CreatePublicWarrantyActivationRequestDto', () => {
       true,
     );
   });
+
+  it.each([
+    '123 Nguyễn Trãi, Phường 1',
+    'Khu phố Hoàng Xá, Xã A, Tỉnh B',
+    'Số 10, Thành phố Tây Hồ',
+    '123 Nguyen Trai, Phuong 1',
+  ])(
+    'accepts a previously valid public address detail: %s',
+    async (addressDetail) => {
+      const dto = plainToInstance(CreatePublicWarrantyActivationRequestDto, {
+        addressDetail,
+        ...base,
+      });
+
+      await expect(validate(dto)).resolves.toHaveLength(0);
+    },
+  );
 });

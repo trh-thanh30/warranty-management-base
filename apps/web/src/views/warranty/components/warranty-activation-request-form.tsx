@@ -70,9 +70,6 @@ export function WarrantyActivationRequestForm({
   const schema = useMemo(
     () =>
       createWarrantyActivationFormSchema({
-        addressAdministrativeUnitNotAllowed: t(
-          "validation.addressAdministrativeUnitNotAllowed",
-        ),
         addressRequired: t("validation.addressRequired"),
         customerEmailInvalid: t("validation.customerEmailInvalid"),
         customerEmailRequired: t("validation.customerEmailRequired"),
