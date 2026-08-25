@@ -1,14 +1,14 @@
 "use client";
 
-import { ChevronDown, Clock3, History, UserRound } from "lucide-react";
-import { useMemo, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
 import type {
   WarrantyAdjustmentHistoryEntry,
   WarrantyAdjustmentValue,
 } from "@repo/shared";
 import { formatDate } from "@repo/shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
+import { ChevronDown, Clock3, History, UserRound } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
 import { formatWarrantyMoneyLimit } from "../warranties.utils";
 import { getWarrantyAdjustmentHistory } from "../warranty-adjustment-history.utils";
 
@@ -81,7 +81,7 @@ function AdjustmentHistoryEntryCard({
   );
 
   return (
-    <article className="rounded-lg border border-slate-200 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-900/40">
+    <article className="rounded-lg border border-slate-200  dark:border-slate-800 dark:bg-slate-900/40">
       <button
         type="button"
         aria-expanded={isOpen}
