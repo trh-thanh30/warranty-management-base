@@ -563,6 +563,7 @@
     "search": "Search",
     "noProvince": "Không tìm thấy tỉnh/thành phố.",
     "noWard": "Không tìm thấy phường/xã.",
+    "loadingWards": "Đang tải phường/xã...",
     "account": "Tài khoản",
     "linkedAccount": "Đã liên kết",
     "profileOnly": "Chỉ có hồ sơ",

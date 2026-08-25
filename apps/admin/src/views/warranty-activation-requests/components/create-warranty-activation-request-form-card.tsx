@@ -28,14 +28,8 @@ import { Building2, Loader2, UserPlus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { Controller } from "react-hook-form";
-import { CategoryActivationInputFields } from "./category-activation-input-fields";
-import { CustomerSearchResult } from "./customer-search-result";
 import { CreateCustomerDialog } from "../../customers/components/create-customer-dialog";
 import { CreateDealerDialog } from "../../dealers/components/create-dealer-dialog";
-import { ProductSearchResult } from "./product-search-result";
-import { SelectedCustomerSummaryCard } from "./selected-customer-summary-card";
-import { SelectedDealerSummaryCard } from "./selected-dealer-summary-card";
-import { SelectedProductSummaryCard } from "./selected-product-summary-card";
 import { useCreateWarrantyActivationRequestForm } from "../hooks/use-create-warranty-activation-request-form";
 import {
   formatActivationProductSearchOption,
@@ -48,6 +42,12 @@ import {
   formatActivationRequestCreateFieldError,
   formatDealerSearchOption,
 } from "../warranty-activation-requests.utils";
+import { CategoryActivationInputFields } from "./category-activation-input-fields";
+import { CustomerSearchResult } from "./customer-search-result";
+import { ProductSearchResult } from "./product-search-result";
+import { SelectedCustomerSummaryCard } from "./selected-customer-summary-card";
+import { SelectedDealerSummaryCard } from "./selected-dealer-summary-card";
+import { SelectedProductSummaryCard } from "./selected-product-summary-card";
 
 type CreateWarrantyActivationRequestFormCardProps = {
   onCancel: () => void;

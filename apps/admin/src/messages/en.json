@@ -563,6 +563,7 @@
     "search": "Search",
     "noProvince": "No province found.",
     "noWard": "No ward found.",
+    "loadingWards": "Loading wards...",
     "account": "Account",
     "linkedAccount": "Linked account",
     "profileOnly": "Profile only",

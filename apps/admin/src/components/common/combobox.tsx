@@ -63,10 +63,14 @@ export function Combobox({
 
 export function ComboboxTrigger({
   id,
+  loading = false,
+  loadingLabel,
   placeholder,
   selectedLabel,
 }: {
   id: string;
+  loading?: boolean;
+  loadingLabel?: string;
   placeholder: string;
   selectedLabel?: string;
 }) {
@@ -75,6 +79,7 @@ export function ComboboxTrigger({
   return (
     <PopoverTrigger asChild>
       <Button
+        aria-busy={loading || undefined}
         aria-expanded={combobox.open}
         className="h-10 w-full justify-between border-slate-300 px-3 font-normal shadow-sm dark:border-slate-700"
         disabled={combobox.disabled}
@@ -91,12 +96,21 @@ export function ComboboxTrigger({
               : "text-slate-400",
           )}
         >
-          {selectedLabel || placeholder}
+          {loading
+            ? (loadingLabel ?? placeholder)
+            : selectedLabel || placeholder}
         </span>
-        <ChevronsUpDown
-          aria-hidden="true"
-          className="ml-2 size-4 shrink-0 text-slate-500"
-        />
+        {loading ? (
+          <Loader2
+            aria-hidden="true"
+            className="ml-2 size-4 shrink-0 animate-spin text-slate-500"
+          />
+        ) : (
+          <ChevronsUpDown
+            aria-hidden="true"
+            className="ml-2 size-4 shrink-0 text-slate-500"
+          />
+        )}
       </Button>
     </PopoverTrigger>
   );

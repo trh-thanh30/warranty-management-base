@@ -1,11 +1,5 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Controller } from "react-hook-form";
-import { Loader2 } from "lucide-react";
-import { useTranslations } from "next-intl";
-import type { CustomerSummary } from "@repo/shared";
-import { Button, DatePicker, Input, Textarea } from "@repo/ui";
 import {
   Combobox,
   ComboboxContent,
@@ -21,11 +15,17 @@ import {
   useVietnamWards,
 } from "@/src/hooks/use-locations";
 import { createFieldErrorFormatter, parseVietnamAddress } from "@/src/utils";
-import { useCustomerForm } from "../hooks/use-customer-form";
+import type { CustomerSummary } from "@repo/shared";
+import { Button, DatePicker, Input, Textarea } from "@repo/ui";
+import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Controller } from "react-hook-form";
 import {
   fillCustomerAddressSelection,
   getCustomerAddressSelection,
 } from "../customers.utils";
+import { useCustomerForm } from "../hooks/use-customer-form";
 
 type CustomerFormProps = {
   customer: CustomerSummary | null;
@@ -166,70 +166,65 @@ export function CustomerForm({
           {errors.root.message}
         </div>
       ) : null}
-
-      <div className="grid gap-5 sm:grid-cols-12">
-        <div className="sm:col-span-5">
-          <FormField
-            error={formatFieldError(errors.fullName?.message, t)}
-            id="customer-full-name"
-            label={t("fullName")}
-          >
-            <Input
-              autoComplete="name"
-              id="customer-full-name"
-              placeholder={t("fullNamePlaceholder")}
-              {...register("fullName")}
-            />
-          </FormField>
-        </div>
-
-        <div className="sm:col-span-4">
-          <FormField id="customer-birthdate" label={t("birthdate")}>
-            <Controller
-              control={control}
-              name="birthdate"
-              render={({ field }) => (
-                <DatePicker
-                  allowManualInput
-                  ariaLabel={t("birthdate")}
-                  calendarAriaLabel={t("openBirthdateCalendar")}
-                  captionLayout="dropdown"
-                  disabledDates={{ after: today }}
-                  endMonth={today}
-                  id="customer-birthdate"
-                  inputPlaceholder={t("birthdateInputPlaceholder")}
-                  invalidInputMessage={t("birthdateInvalid")}
-                  maxDate={today}
-                  minDate={new Date(1900, 0, 1)}
-                  onValueChange={field.onChange}
-                  placeholder={t("selectBirthdate")}
-                  startMonth={new Date(1900, 0, 1)}
-                  value={field.value}
-                />
-              )}
-            />
-          </FormField>
-        </div>
-
-        <div className="sm:col-span-3">
-          <FormField
-            error={formatFieldError(errors.customerCode?.message, t)}
+      <div className="sm:col-span-3">
+        <FormField
+          error={formatFieldError(errors.customerCode?.message, t)}
+          id="customer-code"
+          label={t("customerCode")}
+        >
+          <Input
+            autoComplete="off"
+            disabled={!creating}
             id="customer-code"
-            label={t("customerCode")}
-          >
-            <Input
-              autoComplete="off"
-              disabled={!creating}
-              id="customer-code"
-              placeholder={
-                creating
-                  ? t("customerCodeAutoPlaceholder")
-                  : t("customerCodePlaceholder")
-              }
-              {...register("customerCode")}
-            />
-          </FormField>
-        </div>
+            placeholder={
+              creating
+                ? t("customerCodeAutoPlaceholder")
+                : t("customerCodePlaceholder")
+            }
+            {...register("customerCode")}
+          />
+        </FormField>
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <FormField
+          error={formatFieldError(errors.fullName?.message, t)}
+          id="customer-full-name"
+          label={t("fullName")}
+        >
+          <Input
+            autoComplete="name"
+            id="customer-full-name"
+            placeholder={t("fullNamePlaceholder")}
+            {...register("fullName")}
+          />
+        </FormField>
+
+        <FormField id="customer-birthdate" label={t("birthdate")}>
+          <Controller
+            control={control}
+            name="birthdate"
+            render={({ field }) => (
+              <DatePicker
+                allowManualInput
+                ariaLabel={t("birthdate")}
+                calendarAriaLabel={t("openBirthdateCalendar")}
+                captionLayout="dropdown"
+                disabledDates={{ after: today }}
+                endMonth={today}
+                id="customer-birthdate"
+                inputPlaceholder={t("birthdateInputPlaceholder")}
+                invalidInputMessage={t("birthdateInvalid")}
+                maxDate={today}
+                minDate={new Date(1900, 0, 1)}
+                onValueChange={field.onChange}
+                placeholder={t("selectBirthdate")}
+                startMonth={new Date(1900, 0, 1)}
+                value={field.value}
+              />
+            )}
+          />
+        </FormField>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
@@ -325,7 +320,11 @@ export function CustomerForm({
         </FormField>
 
         <FormField
-          error={formatFieldError(errors.wardCode?.message, t)}
+          error={
+            wardsQuery.isLoading
+              ? undefined
+              : formatFieldError(errors.wardCode?.message, t)
+          }
           id="customer-ward"
           label={t("ward")}
         >
@@ -352,6 +351,8 @@ export function CustomerForm({
               >
                 <ComboboxTrigger
                   id="customer-ward"
+                  loading={wardsQuery.isLoading}
+                  loadingLabel={t("loadingWards")}
                   placeholder={
                     provinceCode
                       ? t("wardPlaceholder")
