@@ -164,7 +164,11 @@ export function ServiceCenterForm({
         </Field>
 
         <Field
-          error={formatFieldError(errors.district?.message, t)}
+          error={
+            wardsQuery.isLoading
+              ? undefined
+              : formatFieldError(errors.district?.message, t)
+          }
           id="service-center-district"
           label={t("ward")}
         >
@@ -200,12 +204,12 @@ export function ServiceCenterForm({
               >
                 <ComboboxTrigger
                   id="service-center-district"
+                  loading={wardsQuery.isLoading}
+                  loadingLabel={t("loadingWards")}
                   placeholder={
                     !selectedProvinceItem
                       ? t("selectProvinceFirst")
-                      : wardsQuery.isLoading
-                        ? t("loadingWards")
-                        : t("wardPlaceholder")
+                      : t("wardPlaceholder")
                   }
                   selectedLabel={field.value}
                 />

@@ -32,6 +32,19 @@ describe('CreatePublicWarrantyActivationRequestDto', () => {
     );
   });
 
+  it('continues to require address detail from public customers', async () => {
+    const dto = plainToInstance(CreatePublicWarrantyActivationRequestDto, {
+      ...base,
+      addressDetail: '',
+    });
+
+    const errors = await validate(dto);
+
+    expect(errors.some((error) => error.property === 'addressDetail')).toBe(
+      true,
+    );
+  });
+
   it.each([
     '123 Nguyễn Trãi, Phường 1',
     'Khu phố Hoàng Xá, Xã A, Tỉnh B',

@@ -163,7 +163,11 @@ export function DealerForm({
         </Field>
 
         <Field
-          error={formatFieldError(errors.district?.message, t)}
+          error={
+            wardsQuery.isLoading
+              ? undefined
+              : formatFieldError(errors.district?.message, t)
+          }
           id="dealer-district"
           label={t("ward")}
         >
@@ -199,12 +203,12 @@ export function DealerForm({
               >
                 <ComboboxTrigger
                   id="dealer-district"
+                  loading={wardsQuery.isLoading}
+                  loadingLabel={t("loadingWards")}
                   placeholder={
                     !selectedProvinceItem
                       ? t("selectProvinceFirst")
-                      : wardsQuery.isLoading
-                        ? t("loadingWards")
-                        : t("wardPlaceholder")
+                      : t("wardPlaceholder")
                   }
                   selectedLabel={field.value}
                 />

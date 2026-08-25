@@ -155,6 +155,7 @@ send_telegram() {
   local detail="$2"
 
   if [ "$BACKUP_TELEGRAM_ENABLED" != "true" ]; then
+    log "Telegram notification disabled: $status"
     return 0
   fi
 
@@ -176,13 +177,18 @@ send_telegram() {
 $(html_escape "$detail")"
 
   if command -v curl >/dev/null 2>&1; then
-    curl -fsS -X POST \
+    if curl -fsS -X POST \
       "https://api.telegram.org/bot${OPS_TELEGRAM_BOT_TOKEN}/sendMessage" \
+      --connect-timeout 10 \
+      --max-time 30 \
       -d "chat_id=${OPS_TELEGRAM_CHAT_ID}" \
       -d "parse_mode=HTML" \
       -d "disable_web_page_preview=true" \
-      --data-urlencode "text=${text}" >/dev/null \
-      || log "WARNING: Telegram notification failed"
+      --data-urlencode "text=${text}" >/dev/null; then
+      log "Telegram notification sent: $status"
+    else
+      log "WARNING: Telegram notification failed: $status"
+    fi
     return 0
   fi
 

@@ -97,6 +97,10 @@ test("uses item-specific certificate endpoints", async () => {
     "request-id",
     "item-id",
   );
+  await service.retryWarrantyActivationRequestItemCertificate(
+    "request-id",
+    "item-id",
+  );
 
   assert.deepEqual(calls, [
     {
@@ -112,6 +116,11 @@ test("uses item-specific certificate endpoints", async () => {
     {
       method: "POST",
       url: "/warranty-activation-requests/request-id/items/item-id/certificate/resend-email",
+      body: {},
+    },
+    {
+      method: "POST",
+      url: "/warranty-activation-requests/request-id/items/item-id/certificate/retry",
       body: {},
     },
   ]);

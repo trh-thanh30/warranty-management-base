@@ -76,6 +76,15 @@ const validFormValues: WarrantyActivationRequestCreateFormValues = {
   wardCode: "09442",
 };
 
+test("admin activation accepts an address made only from ward and province", () => {
+  const result = warrantyActivationRequestCreateFormSchema.safeParse({
+    ...validFormValues,
+    addressDetail: "",
+  });
+
+  assert.equal(result.success, true);
+});
+
 test("activation request address detail rejects structured location units", () => {
   const result = warrantyActivationRequestCreateFormSchema.safeParse({
     ...validFormValues,

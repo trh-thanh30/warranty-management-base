@@ -14,18 +14,15 @@ test("customer form uses the shared birthdate picker", () => {
   assert.match(formSource, /minDate=\{new Date\(1900, 0, 1\)\}/);
 });
 
-test("customer identity fields share one responsive desktop row", () => {
-  assert.match(formSource, /grid gap-5 sm:grid-cols-12/);
-  assert.match(formSource, /sm:col-span-5/);
-  assert.match(formSource, /sm:col-span-3/);
-  assert.match(formSource, /sm:col-span-4/);
+test("customer code stays separate from the responsive identity row", () => {
+  assert.match(formSource, /grid gap-5 sm:grid-cols-2/);
 
+  const customerCodeIndex = formSource.indexOf('id="customer-code"');
   const fullNameIndex = formSource.indexOf('id="customer-full-name"');
   const birthdateIndex = formSource.indexOf('id="customer-birthdate"');
-  const customerCodeIndex = formSource.indexOf('id="customer-code"');
 
+  assert.ok(customerCodeIndex < fullNameIndex);
   assert.ok(fullNameIndex < birthdateIndex);
-  assert.ok(birthdateIndex < customerCodeIndex);
 });
 
 for (const locale of ["vi", "en"] as const) {

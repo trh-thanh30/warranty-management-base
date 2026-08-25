@@ -20,6 +20,7 @@ import { GetWarrantyActivationRequestDetailUseCase } from '@/modules/warranty-ac
 import { ListWarrantyActivationRequestsUseCase } from '@/modules/warranty-activation-requests/use-cases/list-warranty-activation-requests.use-case';
 import { ReviewWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/review-warranty-activation-request.use-case';
 import { ResendWarrantyActivationRequestCertificateEmailUseCase } from '@/modules/warranty-activation-requests/use-cases/resend-warranty-activation-request-certificate-email.use-case';
+import { RetryWarrantyActivationRequestCertificateUseCase } from '@/modules/warranty-activation-requests/use-cases/retry-warranty-activation-request-certificate.use-case';
 import { WarrantyActivationRequestsController } from '@/modules/warranty-activation-requests/warranty-activation-requests.controller';
 import { Module } from '@nestjs/common';
 
@@ -50,6 +51,7 @@ import { Module } from '@nestjs/common';
     GetWarrantyActivationRequestDetailUseCase,
     ReviewWarrantyActivationRequestUseCase,
     ResendWarrantyActivationRequestCertificateEmailUseCase,
+    RetryWarrantyActivationRequestCertificateUseCase,
   ],
   exports: [
     CreateWarrantyActivationRequestUseCase,
