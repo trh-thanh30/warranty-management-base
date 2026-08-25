@@ -1710,6 +1710,7 @@
     "reviewProductCount": "Yêu cầu này có {count} sản phẩm.",
     "approveAllProductsWarning": "Toàn bộ {count} sản phẩm sẽ được kích hoạt cùng lúc. Nếu một sản phẩm không còn đủ điều kiện, toàn bộ thao tác sẽ được hoàn tác.",
     "viewItemCertificate": "Xem chứng nhận của {position}",
+    "openItemActions": "Mở thao tác cho {position}",
     "downloadItemCertificate": "Tải chứng nhận của {position}",
     "resendItemCertificate": "Gửi lại chứng nhận của {position}",
     "createCustomerDescription": "Chọn khách hàng có sẵn để lấy thông tin liên hệ, sau đó bổ sung địa chỉ nếu cần.",
