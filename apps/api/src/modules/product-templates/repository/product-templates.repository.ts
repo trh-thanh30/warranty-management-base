@@ -162,7 +162,7 @@ export class ProductTemplatesRepository {
         tx.productTemplate.findMany({
           where,
           include: productTemplateInclude,
-          orderBy: [{ name: 'asc' }, { created_at: 'desc' }],
+          orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
           skip,
           take,
         }),
