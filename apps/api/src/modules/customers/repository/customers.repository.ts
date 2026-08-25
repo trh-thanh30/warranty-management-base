@@ -8,6 +8,10 @@ import { Prisma } from '@prisma/client';
 export class CustomersRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
+  findUserById(id: string) {
+    return this.prismaService.user.findUnique({ where: { id } });
+  }
+
   create(data: Prisma.CustomerCreateInput) {
     return this.prismaService.customer.create({ data });
   }

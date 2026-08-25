@@ -32,20 +32,16 @@ const templateRecord = {
 describe('ProductTemplate write use cases', () => {
   it('auto-generates SKU and slug when both fields are blank', async () => {
     const repository = {
+      findProductCategoryById: jest.fn().mockResolvedValue({
+        id: 'category-id',
+        type: category_type.PRODUCT,
+      }),
       findImageAssets: jest.fn().mockResolvedValue([]),
       create: jest.fn().mockResolvedValue(templateRecord),
     };
     const skuGenerator = { execute: jest.fn().mockResolvedValue('PPF-X10') };
     const slugGenerator = { execute: jest.fn().mockResolvedValue('ppf-x10') };
     const useCase = new CreateProductTemplateUseCase(
-      {
-        category: {
-          findUnique: jest.fn().mockResolvedValue({
-            id: 'category-id',
-            type: category_type.PRODUCT,
-          }),
-        },
-      } as never,
       repository as never,
       { enrichAssetUrl: jest.fn() } as never,
       skuGenerator as never,
@@ -70,6 +66,10 @@ describe('ProductTemplate write use cases', () => {
 
   it('creates a reusable template with validated image assets', async () => {
     const repository = {
+      findProductCategoryById: jest.fn().mockResolvedValue({
+        id: 'category-id',
+        type: category_type.PRODUCT,
+      }),
       findBySku: jest.fn().mockResolvedValue(null),
       findBySlug: jest.fn().mockResolvedValue(null),
       findImageAssets: jest
@@ -78,14 +78,6 @@ describe('ProductTemplate write use cases', () => {
       create: jest.fn().mockResolvedValue(templateRecord),
     };
     const useCase = new CreateProductTemplateUseCase(
-      {
-        category: {
-          findUnique: jest.fn().mockResolvedValue({
-            id: 'category-id',
-            type: category_type.PRODUCT,
-          }),
-        },
-      } as never,
       repository as never,
       { enrichAssetUrl: jest.fn() } as never,
       { execute: jest.fn() } as never,
@@ -134,9 +126,6 @@ describe('ProductTemplate write use cases', () => {
       enrichAssetUrl: jest.fn(),
     };
     const useCase = new UpdateProductTemplateUseCase(
-      {
-        category: { findUnique: jest.fn() },
-      } as never,
       repository as never,
       assetsService as never,
     );
@@ -167,9 +156,6 @@ describe('ProductTemplate write use cases', () => {
       update: jest.fn().mockResolvedValue(templateRecord),
     };
     const useCase = new UpdateProductTemplateUseCase(
-      {
-        category: { findUnique: jest.fn() },
-      } as never,
       repository as never,
       {
         deleteAssetIfUnreferenced: jest.fn(),

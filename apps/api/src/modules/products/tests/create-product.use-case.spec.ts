@@ -48,15 +48,15 @@ describe('CreateProductUseCase', () => {
         status: warranty_status.DRAFT,
       },
     });
-    const tx = { product: { create: productCreate } };
     const generateWarrantyCodeUseCase = {
       execute: jest.fn().mockResolvedValue('WM-2026-CREATE'),
     };
+    const productsRepository = {
+      create: productCreate,
+      findBySerialNumber: jest.fn().mockResolvedValue(null),
+    };
     const useCase = new CreateProductUseCase(
-      {
-        $transaction: jest.fn((callback) => callback(tx)),
-      } as never,
-      { findBySerialNumber: jest.fn().mockResolvedValue(null) } as never,
+      productsRepository as never,
       { execute: jest.fn().mockResolvedValue('PRD-2026-ABCDEF') } as never,
       { findActiveById: jest.fn().mockResolvedValue(template) } as never,
       generateWarrantyCodeUseCase as never,
@@ -71,23 +71,20 @@ describe('CreateProductUseCase', () => {
 
     expect(productCreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({
-          category_ref: { connect: { id: template.category_id } },
-          display_name: 'Camera cổng chính',
-          template: { connect: { id: template.id } },
-          warranty: {
-            create: expect.objectContaining({
-              duration_months: 180,
-              warranty_code: 'WM-2026-CREATE',
-              status: warranty_status.DRAFT,
-            }),
-          },
-        }),
+        category_ref: { connect: { id: template.category_id } },
+        display_name: 'Camera cổng chính',
+        template: { connect: { id: template.id } },
+        warranty: {
+          create: expect.objectContaining({
+            duration_months: 180,
+            warranty_code: 'WM-2026-CREATE',
+            status: warranty_status.DRAFT,
+          }),
+        },
       }),
     );
     expect(generateWarrantyCodeUseCase.execute).toHaveBeenCalledWith(
       expect.any(Date),
-      tx,
     );
     expect(result.displayName).toBe('Camera cổng chính');
     expect(result.name).toBe(template.name);
@@ -122,17 +119,13 @@ describe('CreateProductUseCase', () => {
       },
     });
     const productsRepository = {
+      create: productCreate,
       findBySerialNumber: jest.fn(),
       findActiveProductCategoryById: jest.fn().mockResolvedValue({
         id: 'override-category-id',
       }),
     };
     const useCase = new CreateProductUseCase(
-      {
-        $transaction: jest.fn((callback) =>
-          callback({ product: { create: productCreate } }),
-        ),
-      } as never,
       productsRepository as never,
       { execute: jest.fn().mockResolvedValue('PRD-2026-ABCDEF') } as never,
       { findActiveById: jest.fn().mockResolvedValue(template) } as never,
@@ -150,9 +143,7 @@ describe('CreateProductUseCase', () => {
     ).toHaveBeenCalledWith('override-category-id');
     expect(productCreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({
-          category_ref: { connect: { id: 'override-category-id' } },
-        }),
+        category_ref: { connect: { id: 'override-category-id' } },
       }),
     );
   });
@@ -184,14 +175,10 @@ describe('CreateProductUseCase', () => {
     });
     const generateProductCodeUseCase = { execute: jest.fn() };
     const productsRepository = {
+      create: productCreate,
       findByProductCode: jest.fn().mockResolvedValue(null),
     };
     const useCase = new CreateProductUseCase(
-      {
-        $transaction: jest.fn((callback) =>
-          callback({ product: { create: productCreate } }),
-        ),
-      } as never,
       productsRepository as never,
       generateProductCodeUseCase as never,
       { findActiveById: jest.fn().mockResolvedValue(template) } as never,
@@ -210,7 +197,7 @@ describe('CreateProductUseCase', () => {
     expect(generateProductCodeUseCase.execute).not.toHaveBeenCalled();
     expect(productCreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ product_code: 'CUSTOM-001' }),
+        product_code: 'CUSTOM-001',
       }),
     );
   });
@@ -245,15 +232,11 @@ describe('CreateProductUseCase', () => {
       category_ref: { id: 'category-id', name: 'Camera' },
     });
     const productsRepository = {
+      create: productCreate,
       findByWarrantyCode: jest.fn().mockResolvedValue(null),
     };
     const generateWarrantyCodeUseCase = { execute: jest.fn() };
     const useCase = new CreateProductUseCase(
-      {
-        $transaction: jest.fn((callback) =>
-          callback({ product: { create: productCreate } }),
-        ),
-      } as never,
       productsRepository as never,
       { execute: jest.fn().mockResolvedValue('PRD-2026-ABCDEF') } as never,
       { findActiveById: jest.fn().mockResolvedValue(template) } as never,
@@ -272,13 +255,11 @@ describe('CreateProductUseCase', () => {
     expect(generateWarrantyCodeUseCase.execute).not.toHaveBeenCalled();
     expect(productCreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({
-          warranty: {
-            create: expect.objectContaining({
-              warranty_code: 'WM-2026-MANUAL1',
-            }),
-          },
-        }),
+        warranty: {
+          create: expect.objectContaining({
+            warranty_code: 'WM-2026-MANUAL1',
+          }),
+        },
       }),
     );
   });
