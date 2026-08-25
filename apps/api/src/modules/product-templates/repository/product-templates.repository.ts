@@ -2,7 +2,7 @@ import { normalizePagination, paginate } from '@/common/pagination/pagination';
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { ListProductTemplatesDto } from '@/modules/product-templates/dto/list-product-templates.dto';
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { category_type, Prisma } from '@prisma/client';
 
 export const productTemplateInclude = {
   assets: {
@@ -16,6 +16,12 @@ export const productTemplateInclude = {
 @Injectable()
 export class ProductTemplatesRepository {
   constructor(private readonly prismaService: PrismaService) {}
+
+  findProductCategoryById(id: string) {
+    return this.prismaService.category.findFirst({
+      where: { id, type: category_type.PRODUCT },
+    });
+  }
 
   findActiveById(id: string, tx?: Prisma.TransactionClient) {
     const client = tx ?? this.prismaService;
