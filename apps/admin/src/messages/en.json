@@ -1710,6 +1710,7 @@
     "reviewProductCount": "This request contains {count} products.",
     "approveAllProductsWarning": "All {count} products will be activated together. If any product is no longer eligible, the entire operation will be rolled back.",
     "viewItemCertificate": "View certificate for {position}",
+    "openItemActions": "Open actions for {position}",
     "downloadItemCertificate": "Download certificate for {position}",
     "resendItemCertificate": "Resend certificate for {position}",
     "createCustomerDescription": "Select an existing customer to pull contact information, then complete address details if needed.",

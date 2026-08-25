@@ -4,6 +4,10 @@ import type { WarrantyActivationRequestItemSummary } from "@repo/shared";
 import {
   Badge,
   Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   Table,
   TableBody,
   TableCell,
@@ -11,12 +15,8 @@ import {
   TableHeader,
   TableRow,
   TableScroll,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
 } from "@repo/ui";
-import { Download, Eye, RotateCcw, Send } from "lucide-react";
+import { Download, Eye, MoreHorizontal, RotateCcw, Send } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/src/i18n/navigation";
 import { WarrantyActivationRequestStatusBadge } from "./warranty-activation-request-status-badge";
@@ -119,117 +119,15 @@ export function ActivationRequestItemsTable({
               onDownloadCertificate ||
               onResendCertificate ||
               onRetryCertificate ? (
-                <TableCell>
-                  <TooltipProvider delayDuration={250}>
-                    <div className="flex justify-end gap-1">
-                      {item.certificate?.status === "GENERATED" &&
-                      item.certificate.storageKey &&
-                      onViewCertificate ? (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              aria-label={t("viewItemCertificate", {
-                                position: item.positionLabel,
-                              })}
-                              disabled={busyItemId === item.id}
-                              onClick={() => onViewCertificate(item)}
-                              size="icon"
-                              type="button"
-                              variant="ghost"
-                            >
-                              <Eye aria-hidden="true" className="size-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {t("viewItemCertificate", {
-                              position: item.positionLabel,
-                            })}
-                          </TooltipContent>
-                        </Tooltip>
-                      ) : null}
-                      {item.certificate?.status === "GENERATED" &&
-                      item.certificate.storageKey &&
-                      onDownloadCertificate ? (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              aria-label={t("downloadItemCertificate", {
-                                position: item.positionLabel,
-                              })}
-                              disabled={busyItemId === item.id}
-                              onClick={() => onDownloadCertificate(item)}
-                              size="icon"
-                              type="button"
-                              variant="ghost"
-                            >
-                              <Download aria-hidden="true" className="size-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {t("downloadItemCertificate", {
-                              position: item.positionLabel,
-                            })}
-                          </TooltipContent>
-                        </Tooltip>
-                      ) : null}
-                      {item.certificate?.status === "GENERATED" &&
-                      item.certificate.recipientEmail &&
-                      item.certificate.emailStatus !== "SENT" &&
-                      onResendCertificate ? (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              aria-label={t("resendItemCertificate", {
-                                position: item.positionLabel,
-                              })}
-                              disabled={busyItemId === item.id}
-                              onClick={() => onResendCertificate(item)}
-                              size="icon"
-                              type="button"
-                              variant="ghost"
-                            >
-                              <Send aria-hidden="true" className="size-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {t("resendItemCertificate", {
-                              position: item.positionLabel,
-                            })}
-                          </TooltipContent>
-                        </Tooltip>
-                      ) : null}
-                      {item.status === "ACTIVATED" &&
-                      (!item.certificate ||
-                        item.certificate.status !== "GENERATED" ||
-                        !item.certificate.storageKey) &&
-                      onRetryCertificate ? (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              aria-label={t("retryItemCertificate", {
-                                position: item.positionLabel,
-                              })}
-                              disabled={busyItemId === item.id}
-                              onClick={() => onRetryCertificate(item)}
-                              size="icon"
-                              type="button"
-                              variant="ghost"
-                            >
-                              <RotateCcw
-                                aria-hidden="true"
-                                className="size-4"
-                              />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {t("retryItemCertificate", {
-                              position: item.positionLabel,
-                            })}
-                          </TooltipContent>
-                        </Tooltip>
-                      ) : null}
-                    </div>
-                  </TooltipProvider>
+                <TableCell className="text-right">
+                  <ActivationRequestItemActions
+                    busy={busyItemId === item.id}
+                    item={item}
+                    onDownloadCertificate={onDownloadCertificate}
+                    onResendCertificate={onResendCertificate}
+                    onRetryCertificate={onRetryCertificate}
+                    onViewCertificate={onViewCertificate}
+                  />
                 </TableCell>
               ) : null}
             </TableRow>
@@ -237,5 +135,85 @@ export function ActivationRequestItemsTable({
         </TableBody>
       </Table>
     </TableScroll>
+  );
+}
+
+function ActivationRequestItemActions({
+  busy,
+  item,
+  onDownloadCertificate,
+  onResendCertificate,
+  onRetryCertificate,
+  onViewCertificate,
+}: {
+  busy: boolean;
+  item: WarrantyActivationRequestItemSummary;
+  onDownloadCertificate?: (item: WarrantyActivationRequestItemSummary) => void;
+  onResendCertificate?: (item: WarrantyActivationRequestItemSummary) => void;
+  onRetryCertificate?: (item: WarrantyActivationRequestItemSummary) => void;
+  onViewCertificate?: (item: WarrantyActivationRequestItemSummary) => void;
+}) {
+  const t = useTranslations("WarrantyActivationRequestsAdmin");
+  const hasGeneratedCertificate =
+    item.certificate?.status === "GENERATED" &&
+    Boolean(item.certificate.storageKey);
+  const canView = hasGeneratedCertificate && Boolean(onViewCertificate);
+  const canDownload = hasGeneratedCertificate && Boolean(onDownloadCertificate);
+  const canResend = Boolean(
+    item.certificate?.status === "GENERATED" &&
+    item.certificate.recipientEmail &&
+    item.certificate.emailStatus !== "SENT" &&
+    onResendCertificate,
+  );
+  const canRetry = Boolean(
+    item.status === "ACTIVATED" &&
+    (!item.certificate ||
+      item.certificate.status !== "GENERATED" ||
+      !item.certificate.storageKey) &&
+    onRetryCertificate,
+  );
+
+  if (!canView && !canDownload && !canResend && !canRetry) return null;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          aria-label={t("openItemActions", { position: item.positionLabel })}
+          disabled={busy}
+          size="icon"
+          type="button"
+          variant="ghost"
+        >
+          <MoreHorizontal aria-hidden="true" className="size-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-56">
+        {canView ? (
+          <DropdownMenuItem onSelect={() => onViewCertificate?.(item)}>
+            <Eye aria-hidden="true" className="mr-2 size-4" />
+            {t("viewCertificate")}
+          </DropdownMenuItem>
+        ) : null}
+        {canDownload ? (
+          <DropdownMenuItem onSelect={() => onDownloadCertificate?.(item)}>
+            <Download aria-hidden="true" className="mr-2 size-4" />
+            {t("downloadCertificate")}
+          </DropdownMenuItem>
+        ) : null}
+        {canResend ? (
+          <DropdownMenuItem onSelect={() => onResendCertificate?.(item)}>
+            <Send aria-hidden="true" className="mr-2 size-4" />
+            {t("resendCertificateEmail")}
+          </DropdownMenuItem>
+        ) : null}
+        {canRetry ? (
+          <DropdownMenuItem onSelect={() => onRetryCertificate?.(item)}>
+            <RotateCcw aria-hidden="true" className="mr-2 size-4" />
+            {t("retryCertificate")}
+          </DropdownMenuItem>
+        ) : null}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
