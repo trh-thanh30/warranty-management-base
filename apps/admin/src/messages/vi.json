@@ -1591,6 +1591,20 @@
     "adjustmentReason": "Lý do điều chỉnh",
     "adjustmentReasonPlaceholder": "Nhập lý do thay đổi chính sách bảo hành",
     "adjustmentReasonRequired": "Lý do điều chỉnh phải có ít nhất 3 ký tự.",
+    "adjustmentHistory": {
+      "title": "Lịch sử điều chỉnh",
+      "description": "Theo dõi các lần thay đổi thời hạn và chính sách bảo hành.",
+      "changedFields": "{count} trường thay đổi",
+      "systemActor": "Hệ thống",
+      "valueUnavailable": "Không có dữ liệu trước đây"
+    },
+    "adjustmentFields": {
+      "durationMonths": "Thời hạn bảo hành",
+      "coverageLimitAmount": "Tổng hạn mức bảo hành",
+      "maxClaimCount": "Số claim tối đa",
+      "maxAmountPerClaim": "Hạn mức mỗi claim",
+      "terms": "Điều khoản"
+    },
     "durationInvalid": "Thời hạn phải là số nguyên từ 1 tháng trở lên.",
     "maxClaimCountInvalid": "Số claim tối đa phải là số nguyên từ 1 đến 1000.",
     "amountInvalid": "Hạn mức phải là số không âm và có tối đa 2 chữ số thập phân.",

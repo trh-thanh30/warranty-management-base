@@ -3,6 +3,39 @@ import type { CategorySummary } from "./category.types.ts";
 
 export type WarrantyStatus = "DRAFT" | "ACTIVE" | "EXPIRED" | "VOIDED";
 
+export type WarrantyAdjustmentValue = string | number | null;
+
+export type WarrantyAdjustmentChange = {
+  before: WarrantyAdjustmentValue;
+  after: WarrantyAdjustmentValue;
+};
+
+export type WarrantyAdjustmentHistoryEntry = {
+  reason: string;
+  changedFields: string[];
+  changes: Record<string, WarrantyAdjustmentChange>;
+  adjustedAt: string;
+  adjustedByUserId: string | null;
+  adjustedByUser: WarrantyAdjustmentActor | null;
+};
+
+export type WarrantyAdjustmentActor = {
+  id: string;
+  email: string;
+  name: string | null;
+};
+
+export type WarrantyAdjustmentMetadata = {
+  adjustmentHistory?: WarrantyAdjustmentHistoryEntry[];
+  lastAdjustment?: Omit<
+    WarrantyAdjustmentHistoryEntry,
+    "changes" | "adjustedByUser"
+  > & {
+    changes?: Record<string, WarrantyAdjustmentChange>;
+    adjustedByUser?: WarrantyAdjustmentActor | null;
+  };
+};
+
 export type WarrantySummary = {
   id: string;
   productId: string;
