@@ -7,9 +7,18 @@ describe('UpdateWarrantyUseCase', () => {
     findById: jest.fn(),
     update: jest.fn(),
   };
+  const usersService = {
+    findAccountById: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    usersService.findAccountById.mockResolvedValue({
+      id: 'admin-id',
+      email: 'admin@example.com',
+      username: 'admin',
+      fullName: 'Admin User',
+    });
   });
 
   it('updates coverage limits and recalculates an active warranty end date', async () => {
@@ -27,7 +36,10 @@ describe('UpdateWarrantyUseCase', () => {
         terms: data.terms,
       }),
     );
-    const useCase = new UpdateWarrantyUseCase(repository as never);
+    const useCase = new UpdateWarrantyUseCase(
+      repository as never,
+      usersService as never,
+    );
 
     const result = await useCase.execute(
       warranty.id,
@@ -61,13 +73,101 @@ describe('UpdateWarrantyUseCase', () => {
         maxClaimCount: 3,
       }),
     );
+
+    const updatePayload = repository.update.mock.calls[0][1] as Record<
+      string,
+      unknown
+    >;
+    expect(updatePayload.metadata).toEqual(
+      expect.objectContaining({
+        adjustmentHistory: [
+          expect.objectContaining({
+            reason: 'Gia han theo chinh sach moi',
+            changedFields: expect.arrayContaining([
+              'coverageLimitAmount',
+              'durationMonths',
+              'maxAmountPerClaim',
+              'maxClaimCount',
+              'terms',
+            ]),
+            changes: expect.objectContaining({
+              durationMonths: { before: 12, after: 24 },
+              terms: { before: null, after: 'Dieu khoan cap nhat' },
+            }),
+            adjustedByUser: {
+              id: 'admin-id',
+              email: 'admin@example.com',
+              name: 'Admin User',
+            },
+          }),
+        ],
+      }),
+    );
+  });
+
+  it('appends a new history entry without removing previous adjustments', async () => {
+    const warranty = createWarranty({
+      metadata: {
+        adjustmentHistory: [
+          {
+            adjustedAt: '2026-01-02T00:00:00.000Z',
+            adjustedByUserId: 'previous-admin',
+            changedFields: ['durationMonths'],
+            changes: {
+              durationMonths: { before: 12, after: 18 },
+            },
+            reason: 'Lan dieu chinh truoc',
+          },
+        ],
+      },
+    });
+    repository.findById.mockResolvedValue(warranty);
+    repository.update.mockImplementation(
+      (_id: string, data: Record<string, unknown>) => ({
+        ...warranty,
+        metadata: data.metadata,
+      }),
+    );
+    const useCase = new UpdateWarrantyUseCase(
+      repository as never,
+      usersService as never,
+    );
+
+    await useCase.execute(
+      warranty.id,
+      {
+        adjustmentReason: 'Lan dieu chinh moi',
+        durationMonths: 24,
+      },
+      { adjustedByUserId: 'current-admin' },
+    );
+
+    const updatePayload = repository.update.mock.calls[0][1] as Record<
+      string,
+      unknown
+    >;
+    expect(updatePayload.metadata).toEqual(
+      expect.objectContaining({
+        adjustmentHistory: [
+          expect.objectContaining({ reason: 'Lan dieu chinh truoc' }),
+          expect.objectContaining({ reason: 'Lan dieu chinh moi' }),
+        ],
+        lastAdjustment: expect.objectContaining({
+          adjustedByUserId: 'current-admin',
+          reason: 'Lan dieu chinh moi',
+        }),
+      }),
+    );
   });
 
   it.each([warranty_status.EXPIRED, warranty_status.VOIDED])(
     'rejects adjustments for a %s warranty',
     async (status) => {
       repository.findById.mockResolvedValue(createWarranty({ status }));
-      const useCase = new UpdateWarrantyUseCase(repository as never);
+      const useCase = new UpdateWarrantyUseCase(
+        repository as never,
+        usersService as never,
+      );
 
       await expect(
         useCase.execute('warranty-id', {
@@ -81,7 +181,10 @@ describe('UpdateWarrantyUseCase', () => {
 
   it('rejects a per-claim amount above the total coverage limit', async () => {
     repository.findById.mockResolvedValue(createWarranty());
-    const useCase = new UpdateWarrantyUseCase(repository as never);
+    const useCase = new UpdateWarrantyUseCase(
+      repository as never,
+      usersService as never,
+    );
 
     await expect(
       useCase.execute('warranty-id', {
@@ -95,7 +198,10 @@ describe('UpdateWarrantyUseCase', () => {
 
   it('rejects an adjustment without mutable fields', async () => {
     repository.findById.mockResolvedValue(createWarranty());
-    const useCase = new UpdateWarrantyUseCase(repository as never);
+    const useCase = new UpdateWarrantyUseCase(
+      repository as never,
+      usersService as never,
+    );
 
     await expect(
       useCase.execute('warranty-id', {
@@ -104,9 +210,29 @@ describe('UpdateWarrantyUseCase', () => {
     ).rejects.toBeInstanceOf(BadRequestError);
   });
 
+  it('rejects an adjustment when provided values are unchanged', async () => {
+    repository.findById.mockResolvedValue(createWarranty());
+    const useCase = new UpdateWarrantyUseCase(
+      repository as never,
+      usersService as never,
+    );
+
+    await expect(
+      useCase.execute('warranty-id', {
+        adjustmentReason: 'Gui lai gia tri hien tai',
+        durationMonths: 12,
+        terms: null,
+      }),
+    ).rejects.toMatchObject({ code: 'WARRANTY_ADJUSTMENT_NO_CHANGES' });
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
   it('throws not found for an absent warranty', async () => {
     repository.findById.mockResolvedValue(null);
-    const useCase = new UpdateWarrantyUseCase(repository as never);
+    const useCase = new UpdateWarrantyUseCase(
+      repository as never,
+      usersService as never,
+    );
 
     await expect(
       useCase.execute('missing-id', {
@@ -136,7 +262,7 @@ function createWarrantyBase() {
     max_amount_per_claim: null,
     status: warranty_status.ACTIVE as warranty_status,
     terms: null,
-    metadata: null,
+    metadata: null as Record<string, unknown> | null,
     created_at: new Date('2026-01-01T00:00:00.000Z'),
     updated_at: new Date('2026-01-01T00:00:00.000Z'),
     product: {

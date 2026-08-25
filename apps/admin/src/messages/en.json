@@ -1591,6 +1591,20 @@
     "adjustmentReason": "Adjustment reason",
     "adjustmentReasonPlaceholder": "Explain why this warranty policy is changing",
     "adjustmentReasonRequired": "The adjustment reason must contain at least 3 characters.",
+    "adjustmentHistory": {
+      "title": "Adjustment history",
+      "description": "Review changes made to the warranty duration and coverage policy.",
+      "changedFields": "{count} changed fields",
+      "systemActor": "System",
+      "valueUnavailable": "Previous value unavailable"
+    },
+    "adjustmentFields": {
+      "durationMonths": "Warranty duration",
+      "coverageLimitAmount": "Total coverage limit",
+      "maxClaimCount": "Maximum claims",
+      "maxAmountPerClaim": "Per-claim limit",
+      "terms": "Terms"
+    },
     "durationInvalid": "Duration must be an integer of at least 1 month.",
     "maxClaimCountInvalid": "Maximum claims must be an integer between 1 and 1000.",
     "amountInvalid": "Limits must be non-negative numbers with at most 2 decimal places.",

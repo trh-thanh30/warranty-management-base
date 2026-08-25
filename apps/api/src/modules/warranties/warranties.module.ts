@@ -1,5 +1,6 @@
 import { PrismaModule } from '@/database/prisma/prisma.module';
 import { CustomersModule } from '@/modules/customers/customers.module';
+import { UsersModule } from '@/modules/user/user.module';
 import { ProductsModule } from '@/modules/products/products.module';
 import { WarrantyCertificatesModule } from '@/modules/warranty-certificates/warranty-certificates.module';
 import { WarrantiesRepository } from '@/modules/warranties/repository/warranties.repository';
@@ -28,6 +29,7 @@ import { memoryStorage } from 'multer';
   imports: [
     PrismaModule,
     CustomersModule,
+    UsersModule,
     ProductsModule,
     WarrantyCertificatesModule,
     MulterModule.register({
