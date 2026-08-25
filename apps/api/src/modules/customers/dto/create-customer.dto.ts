@@ -1,11 +1,11 @@
-import { IsNotFutureDate } from '@/common/decorators/is-not-future-date.decorator';
+import { IsBirthdate } from '@/common/decorators/is-birthdate.decorator';
 import {
-  IsDateString,
   IsEmail,
   IsOptional,
   IsString,
   IsUUID,
   Length,
+  ValidateIf,
 } from 'class-validator';
 
 export class CreateCustomerDto {
@@ -33,8 +33,7 @@ export class CreateCustomerDto {
   @Length(1, 255)
   address: string;
 
-  @IsOptional()
-  @IsDateString()
-  @IsNotFutureDate()
+  @ValidateIf((_, value) => value !== undefined)
+  @IsBirthdate()
   birthdate?: string;
 }

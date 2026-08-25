@@ -155,6 +155,7 @@ export type CreateWarrantyActivationRequestBody = {
   customerName: string;
   customerPhone: string;
   customerEmail?: string;
+  /** Admin-only date value in YYYY-MM-DD format when supplied. */
   customerBirthdate?: string;
   vehiclePlate?: string;
   vehicleModel?: string;

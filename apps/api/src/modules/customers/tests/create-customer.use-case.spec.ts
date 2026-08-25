@@ -104,7 +104,7 @@ describe('CreateCustomerUseCase', () => {
         birthdate: new Date('2005-12-11T00:00:00.000Z'),
       }),
     );
-    expect(result.birthdate).toEqual(new Date('2005-12-11T00:00:00.000Z'));
+    expect(result.birthdate).toBe('2005-12-11T00:00:00.000Z');
   });
 
   it('validates userId when linking to an existing account', async () => {
