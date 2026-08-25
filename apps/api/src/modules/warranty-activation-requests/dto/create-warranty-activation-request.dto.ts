@@ -200,7 +200,7 @@ export class CreateWarrantyActivationRequestDto {
   wardName: string;
 
   @IsString()
-  @Length(1, 255)
+  @Length(0, 255)
   @IsLocalAddressDetail()
   addressDetail: string;
 

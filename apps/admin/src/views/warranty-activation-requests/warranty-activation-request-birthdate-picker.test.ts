@@ -10,12 +10,13 @@ const formSource = readFileSync(
   "utf8",
 );
 
-test("birthdate supports manual input and month-year navigation", () => {
-  assert.match(formSource, /allowManualInput/);
-  assert.match(formSource, /captionLayout="dropdown"/);
-  assert.match(formSource, /startMonth=\{new Date\(1900, 0, 1\)\}/);
-  assert.match(formSource, /maxDate=\{today\}/);
-  assert.match(formSource, /disabledDates=\{\{ after: today \}\}/);
+test("activation form does not duplicate the customer birthdate editor", () => {
+  assert.doesNotMatch(formSource, /name="customerBirthdate"/);
+  assert.doesNotMatch(
+    formSource,
+    /id="create-activation-request-customer-birthdate"/,
+  );
+  assert.doesNotMatch(formSource, /<DatePicker/);
 });
 
 for (const locale of ["vi", "en"]) {

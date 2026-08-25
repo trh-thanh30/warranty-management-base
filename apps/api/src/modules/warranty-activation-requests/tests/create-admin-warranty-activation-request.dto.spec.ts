@@ -28,6 +28,15 @@ describe('CreateAdminWarrantyActivationRequestDto', () => {
     expect(errors.some((error) => error.property === 'customerId')).toBe(true);
   });
 
+  it('accepts an address made only from the selected ward and province', async () => {
+    const dto = plainToInstance(CreateAdminWarrantyActivationRequestDto, {
+      ...base,
+      addressDetail: '',
+    });
+
+    await expect(validate(dto)).resolves.toHaveLength(0);
+  });
+
   it('rejects a future customer birthdate', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-08-20T12:00:00.000Z'));
 

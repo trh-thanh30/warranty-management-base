@@ -1,13 +1,6 @@
 "use client";
 
 import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-  ComboboxTrigger,
   FormField,
   FormSection,
   SearchDropdown,
@@ -20,15 +13,14 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  DatePicker,
   Input,
   Textarea,
 } from "@repo/ui";
 import { Building2, Loader2, UserPlus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { Controller } from "react-hook-form";
 import { CreateCustomerDialog } from "../../customers/components/create-customer-dialog";
+import { EditCustomerAddressDialog } from "../../customers/components/edit-customer-address-dialog";
 import { CreateDealerDialog } from "../../dealers/components/create-dealer-dialog";
 import { useCreateWarrantyActivationRequestForm } from "../hooks/use-create-warranty-activation-request-form";
 import {
@@ -62,6 +54,8 @@ export function CreateWarrantyActivationRequestFormCard({
   const [categorySearch, setCategorySearch] = useState("");
   const [isCreateCustomerDialogOpen, setCreateCustomerDialogOpen] =
     useState(false);
+  const [isEditCustomerAddressDialogOpen, setEditCustomerAddressDialogOpen] =
+    useState(false);
   const [isCreateDealerDialogOpen, setCreateDealerDialogOpen] = useState(false);
   const {
     activationFields,
@@ -88,9 +82,6 @@ export function CreateWarrantyActivationRequestFormCard({
     productSearch,
     products,
     productsQuery,
-    provinceCode,
-    provinces,
-    provincesQuery,
     register,
     selectedCustomer,
     selectedCategory,
@@ -102,20 +93,11 @@ export function CreateWarrantyActivationRequestFormCard({
     selectDealer,
     selectProduct,
     selectActivationProduct,
-    selectProvince,
-    selectWard,
     setCustomerSearch,
     setDealerSearch,
     setProductSearch,
-    wardCode,
-    wards,
-    wardsQuery,
     usesProductSelectors,
   } = useCreateWarrantyActivationRequestForm({ onCreated });
-  const selectedProvince = provinces.find(
-    (province) => String(province.code) === provinceCode,
-  );
-  const selectedWard = wards.find((ward) => String(ward.code) === wardCode);
   const hasSelectedProduct =
     Boolean(selectedProduct) ||
     Object.keys(selectedActivationProducts).length > 0;
@@ -123,9 +105,6 @@ export function CreateWarrantyActivationRequestFormCard({
     () => filterActivationRequestCategories(categories, categorySearch),
     [categories, categorySearch],
   );
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
   return (
     <Card className="min-w-0 w-full max-w-full">
       <CardHeader className="px-4 sm:px-6">
@@ -417,159 +396,26 @@ export function CreateWarrantyActivationRequestFormCard({
             {selectedCustomer ? (
               <SelectedCustomerSummaryCard
                 address={selectedCustomer.address}
+                addressError={formatActivationRequestCreateFieldError(
+                  errors.addressDetail?.message ??
+                    errors.provinceCode?.message ??
+                    errors.wardCode?.message,
+                  t,
+                )}
                 customerCode={selectedCustomer.customerCode}
                 email={selectedCustomer.email}
                 fullName={selectedCustomer.fullName}
                 labels={{
                   address: t("address"),
                   customerCode: t("customerCode"),
+                  editAddress: t("editCustomerAddress"),
                   email: t("email"),
                   phone: t("phone"),
                   selected: t("customerSelected"),
                 }}
+                onEditAddress={() => setEditCustomerAddressDialogOpen(true)}
                 phone={selectedCustomer.phone}
               />
-            ) : null}
-
-            {selectedCustomer ? (
-              <div className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <FormField
-                    id="create-activation-request-customer-birthdate"
-                    label={t("birthdate")}
-                  >
-                    <Controller
-                      control={control}
-                      name="customerBirthdate"
-                      render={({ field }) => (
-                        <DatePicker
-                          allowManualInput
-                          ariaLabel={t("birthdate")}
-                          calendarAriaLabel={t("openBirthdateCalendar")}
-                          captionLayout="dropdown"
-                          disabledDates={{ after: today }}
-                          endMonth={today}
-                          id="create-activation-request-customer-birthdate"
-                          inputPlaceholder={t("birthdateInputPlaceholder")}
-                          invalidInputMessage={t("birthdateInvalid")}
-                          maxDate={today}
-                          minDate={new Date(1900, 0, 1)}
-                          onValueChange={field.onChange}
-                          placeholder={t("selectBirthdate")}
-                          startMonth={new Date(1900, 0, 1)}
-                          value={field.value}
-                        />
-                      )}
-                    />
-                  </FormField>
-                  <FormField
-                    error={formatActivationRequestCreateFieldError(
-                      errors.addressDetail?.message,
-                      t,
-                    )}
-                    id="create-activation-request-address"
-                    label={t("addressDetail")}
-                  >
-                    <Input
-                      id="create-activation-request-address"
-                      placeholder={t("addressDetailPlaceholder")}
-                      {...register("addressDetail")}
-                    />
-                  </FormField>
-                </div>
-
-                <div className="mt-5 grid gap-5 sm:grid-cols-2">
-                  <FormField
-                    error={formatActivationRequestCreateFieldError(
-                      errors.provinceCode?.message,
-                      t,
-                    )}
-                    id="create-activation-request-province"
-                    label={t("province")}
-                  >
-                    <Controller
-                      control={control}
-                      name="provinceCode"
-                      render={({ field }) => (
-                        <Combobox
-                          disabled={provincesQuery.isLoading}
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            selectProvince(value);
-                          }}
-                          value={field.value}
-                        >
-                          <ComboboxTrigger
-                            id="create-activation-request-province"
-                            placeholder={t("provincePlaceholder")}
-                            selectedLabel={selectedProvince?.name}
-                          />
-                          <ComboboxContent>
-                            <ComboboxInput
-                              placeholder={t("search")}
-                              showTrigger={false}
-                            />
-                            <ComboboxList>
-                              <ComboboxEmpty>{t("noProvince")}</ComboboxEmpty>
-                              {provinces.map((province) => (
-                                <ComboboxItem
-                                  key={province.code}
-                                  value={String(province.code)}
-                                >
-                                  {province.name}
-                                </ComboboxItem>
-                              ))}
-                            </ComboboxList>
-                          </ComboboxContent>
-                        </Combobox>
-                      )}
-                    />
-                  </FormField>
-                  <FormField
-                    error={formatActivationRequestCreateFieldError(
-                      errors.wardCode?.message,
-                      t,
-                    )}
-                    id="create-activation-request-ward"
-                    label={t("ward")}
-                  >
-                    <Controller
-                      control={control}
-                      name="wardCode"
-                      render={({ field }) => (
-                        <Combobox
-                          disabled={!provinceCode || wardsQuery.isLoading}
-                          onValueChange={selectWard}
-                          value={field.value}
-                        >
-                          <ComboboxTrigger
-                            id="create-activation-request-ward"
-                            placeholder={t("wardPlaceholder")}
-                            selectedLabel={selectedWard?.name}
-                          />
-                          <ComboboxContent>
-                            <ComboboxInput
-                              placeholder={t("search")}
-                              showTrigger={false}
-                            />
-                            <ComboboxList>
-                              <ComboboxEmpty>{t("noWard")}</ComboboxEmpty>
-                              {wards.map((ward) => (
-                                <ComboboxItem
-                                  key={ward.code}
-                                  value={String(ward.code)}
-                                >
-                                  {ward.name}
-                                </ComboboxItem>
-                              ))}
-                            </ComboboxList>
-                          </ComboboxContent>
-                        </Combobox>
-                      )}
-                    />
-                  </FormField>
-                </div>
-              </div>
             ) : null}
           </FormSection>
 
@@ -712,6 +558,12 @@ export function CreateWarrantyActivationRequestFormCard({
             setCreateDealerDialogOpen(false);
           }}
           open={isCreateDealerDialogOpen}
+        />
+        <EditCustomerAddressDialog
+          customer={selectedCustomer}
+          onOpenChange={setEditCustomerAddressDialogOpen}
+          onSaved={selectCustomer}
+          open={isEditCustomerAddressDialogOpen}
         />
       </CardContent>
     </Card>

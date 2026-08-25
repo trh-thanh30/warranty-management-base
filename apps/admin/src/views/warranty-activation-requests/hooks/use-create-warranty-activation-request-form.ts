@@ -101,7 +101,6 @@ export function useCreateWarrantyActivationRequestForm({
     defaultValues: DEFAULT_VALUES,
   });
   const provinceCode = form.watch("provinceCode");
-  const wardCode = form.watch("wardCode");
   const categoryId = form.watch("categoryId");
   const provinceCodeNumber = provinceCode ? Number(provinceCode) : null;
   const provincesQuery = useVietnamProvinces();
@@ -203,7 +202,7 @@ export function useCreateWarrantyActivationRequestForm({
 
     form.setValue("wardCode", String(ward.code), {
       shouldDirty: true,
-      shouldValidate: true,
+      shouldValidate: false,
     });
     setPendingWardName(null);
   }, [form, pendingWardName, wards]);
@@ -212,20 +211,29 @@ export function useCreateWarrantyActivationRequestForm({
     const address = parseVietnamAddress(customer.address ?? "", provinces);
     setSelectedCustomer(customer);
     setCustomerSearch("");
-    setFormValues(form.setValue, {
-      addressDetail: address.detail,
-      customerBirthdate: customer.birthdate?.slice(0, 10) ?? "",
-      customerEmail: customer.email ?? "",
-      customerId: customer.id,
-      customerName: customer.fullName ?? "",
-      customerPhone: customer.phone ?? "",
-    });
+    form.clearErrors(["addressDetail", "provinceCode", "wardCode"]);
+    setFormValues(
+      form.setValue,
+      {
+        addressDetail: address.detail,
+        customerBirthdate: customer.birthdate?.slice(0, 10) ?? "",
+        customerEmail: customer.email ?? "",
+        customerId: customer.id,
+        customerName: customer.fullName ?? "",
+        customerPhone: customer.phone ?? "",
+      },
+      false,
+    );
 
     if (address.province) {
-      setFormValues(form.setValue, {
-        provinceCode: String(address.province.code),
-        wardCode: "",
-      });
+      setFormValues(
+        form.setValue,
+        {
+          provinceCode: String(address.province.code),
+          wardCode: "",
+        },
+        false,
+      );
       setPendingWardName(address.wardName ?? null);
     }
   }
@@ -355,14 +363,6 @@ export function useCreateWarrantyActivationRequestForm({
     });
   }
 
-  function selectProvince(value: string) {
-    setFormValues(form.setValue, { provinceCode: value, wardCode: "" });
-  }
-
-  function selectWard(value: string) {
-    setFormValues(form.setValue, { wardCode: value });
-  }
-
   function loadMoreProducts() {
     if (productsQuery.hasNextPage && !productsQuery.isFetchingNextPage) {
       void productsQuery.fetchNextPage();
@@ -454,14 +454,11 @@ export function useCreateWarrantyActivationRequestForm({
     errors: form.formState.errors,
     isSaving: form.formState.isSubmitting || createMutation.isPending,
     loadMoreProducts,
-    provinces,
-    provincesQuery,
     mutationIsPending: createMutation.isPending,
     onSubmit: form.handleSubmit(submit),
     productSearch: productSearchState.value,
     products,
     productsQuery,
-    provinceCode,
     register: form.register,
     selectedCustomer,
     selectedCategory,
@@ -473,16 +470,11 @@ export function useCreateWarrantyActivationRequestForm({
     selectDealer,
     selectProduct,
     selectActivationProduct,
-    selectProvince,
-    selectWard,
     clearProduct,
     clearActivationProduct,
     setCustomerSearch,
     setDealerSearch,
     setProductSearch,
-    wardCode,
-    wards,
-    wardsQuery,
     usesProductSelectors,
   };
 }
