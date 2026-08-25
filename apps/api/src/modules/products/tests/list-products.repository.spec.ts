@@ -33,6 +33,49 @@ describe('ProductsRepository.list', () => {
     });
   });
 
+  it('sorts the admin product list by newest creation date and id by default', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const count = jest.fn().mockResolvedValue(0);
+    const prismaService = {
+      $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
+        callback({ product: { count, findMany } }),
+      ),
+    };
+    const repository = new ProductsRepository(prismaService as never);
+
+    await repository.list({ limit: 10, page: 1 });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
+      }),
+    );
+  });
+
+  it('keeps a selected product sort before creation date and id tie-breakers', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const count = jest.fn().mockResolvedValue(0);
+    const prismaService = {
+      $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
+        callback({ product: { count, findMany } }),
+      ),
+    };
+    const repository = new ProductsRepository(prismaService as never);
+
+    await repository.list({
+      limit: 10,
+      page: 1,
+      sortBy: 'status',
+      sortOrder: 'asc',
+    });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderBy: [{ status: 'asc' }, { created_at: 'desc' }, { id: 'desc' }],
+      }),
+    );
+  });
+
   it('only includes soft-deleted products when filtering by deleted status', async () => {
     const findMany = jest.fn().mockResolvedValue([]);
     const count = jest.fn().mockResolvedValue(0);

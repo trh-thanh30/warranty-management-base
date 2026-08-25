@@ -73,6 +73,22 @@ const openActivationRequestStatuses = [
   warranty_activation_request_status.APPROVED,
 ];
 
+function buildProductOrderBy(
+  sortBy?: keyof Prisma.ProductOrderByWithRelationInput,
+  sortOrder: 'asc' | 'desc' = 'desc',
+): Prisma.ProductOrderByWithRelationInput[] {
+  if (!sortBy) return [{ created_at: 'desc' }, { id: 'desc' }];
+
+  const orderBy = [
+    { [sortBy]: sortOrder },
+  ] as Prisma.ProductOrderByWithRelationInput[];
+
+  if (sortBy !== 'created_at') orderBy.push({ created_at: 'desc' });
+
+  orderBy.push({ id: 'desc' });
+  return orderBy;
+}
+
 function buildPublicProductTemplateWhere(filters: {
   categoryId?: string;
   search?: string;
@@ -349,9 +365,7 @@ export class ProductsRepository {
           ]
         : undefined,
     };
-    const orderBy: Prisma.ProductOrderByWithRelationInput[] = sortBy
-      ? [{ [sortBy]: filters.sortOrder ?? 'desc' }]
-      : [{ created_at: 'desc' }];
+    const orderBy = buildProductOrderBy(sortBy, filters.sortOrder);
 
     return this.prismaService.$transaction(async (tx) => {
       const [items, total] = await Promise.all([
@@ -507,9 +521,7 @@ export class ProductsRepository {
           ]
         : undefined,
     };
-    const orderBy: Prisma.ProductOrderByWithRelationInput[] = sortBy
-      ? [{ [sortBy]: filters.sortOrder ?? 'desc' }]
-      : [{ created_at: 'desc' }];
+    const orderBy = buildProductOrderBy(sortBy, filters.sortOrder);
 
     return this.prismaService.product.findMany({
       where,
