@@ -17,8 +17,9 @@ test("activation request item columns stay readable and scroll horizontally", ()
 
 test("certificate icon actions expose visible hover and focus tooltips", () => {
   assert.match(source, /<TooltipProvider delayDuration=\{250\}>/);
-  assert.equal(source.match(/<Tooltip>/g)?.length, 3);
+  assert.equal(source.match(/<Tooltip>/g)?.length, 4);
   assert.match(source, /<TooltipContent>\s*\{t\("viewItemCertificate"/);
   assert.match(source, /<TooltipContent>\s*\{t\("downloadItemCertificate"/);
   assert.match(source, /<TooltipContent>\s*\{t\("resendItemCertificate"/);
+  assert.match(source, /<TooltipContent>\s*\{t\("retryItemCertificate"/);
 });

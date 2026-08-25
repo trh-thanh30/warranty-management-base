@@ -77,6 +77,11 @@ main() {
     exit 1
   fi
 
+  if [ ! -f "$DEPLOY_DIR/scripts/run-production-backup-cron.sh" ]; then
+    log "ERROR: backup cron runner not found in $DEPLOY_DIR/scripts"
+    exit 1
+  fi
+
   local timezone
   timezone="$(read_env_value TZ)"
   case "$timezone" in
@@ -110,19 +115,18 @@ main() {
 
   {
     printf '\n%s\n' "$MARKER_START"
-    printf 'CRON_TZ=%s\n' "$timezone"
-    printf '%s %s * * * cd %q && ENV_FILE=%q COMPOSE_FILE=%q BACKUP_LABEL=daily %q ./scripts/backup-production.sh >> ./backups/cron.log 2>&1\n' \
-      "$CRON_MINUTE" \
-      "$CRON_HOUR" \
+    printf '* * * * * cd %q && ENV_FILE=%q COMPOSE_FILE=%q BACKUP_LABEL=daily BACKUP_CRON_HOUR=%q BACKUP_CRON_MINUTE=%q %q ./scripts/run-production-backup-cron.sh >> ./backups/cron.log 2>&1\n' \
       "$DEPLOY_DIR" \
       "$ENV_FILE" \
       "$COMPOSE_FILE" \
+      "$CRON_HOUR" \
+      "$CRON_MINUTE" \
       "$bash_bin"
     printf '%s\n' "$MARKER_END"
   } >>"$next_crontab"
 
   crontab "$next_crontab"
-  log "Installed daily production backup at $(printf '%02d:%02d' "$CRON_HOUR" "$CRON_MINUTE") in $timezone"
+  log "Installed timezone-aware daily production backup at $(printf '%02d:%02d' "$CRON_HOUR" "$CRON_MINUTE") in $timezone"
   crontab -l | awk -v start="$MARKER_START" -v end="$MARKER_END" '
     $0 == start { printing = 1 }
     printing { print }

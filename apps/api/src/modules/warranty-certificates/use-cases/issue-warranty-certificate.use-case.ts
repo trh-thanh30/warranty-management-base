@@ -63,7 +63,10 @@ export class IssueWarrantyCertificateUseCase {
         warranty.id,
       );
 
-    if (existingCertificate?.status === warranty_certificate_status.GENERATED) {
+    if (
+      existingCertificate?.status === warranty_certificate_status.GENERATED &&
+      existingCertificate.storage_key
+    ) {
       return existingCertificate;
     }
 

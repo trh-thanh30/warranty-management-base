@@ -10,10 +10,21 @@ const source = readFileSync(
   "utf8",
 );
 
-test("activation request review dialog fills mobile screens only", () => {
+test("activation request review dialog fills mobile screens and adapts its desktop width", () => {
   assert.match(
     source,
-    /DialogContent className="[^"]*h-dvh[^"]*w-screen[^"]*max-w-none[^"]*rounded-none[^"]*sm:block[^"]*sm:h-fit[^"]*sm:w-\[min\(calc\(100vw-2rem\),36rem\)\][^"]*sm:rounded-lg[^"]*sm:p-4[^"]*"/,
+    /DialogContent\s+className=\{`[^`]*h-dvh[^`]*w-screen[^`]*max-w-none[^`]*rounded-none[^`]*sm:block[^`]*sm:h-fit[^`]*sm:rounded-lg[^`]*sm:p-4[^`]*\$\{/,
+  );
+  assert.match(
+    source,
+    /isReject\s*\? "sm:w-\[min\(calc\(100vw-2rem\),36rem\)\] sm:max-w-xl"\s*: "sm:w-\[min\(calc\(100vw-2rem\),72rem\)\] sm:max-w-6xl"/,
+  );
+});
+
+test("reject dialog summarizes products instead of rendering the wide table", () => {
+  assert.match(
+    source,
+    /\{visibleRequest\?\.items\?\.length \? \([\s\S]*\{!isReject \? \([\s\S]*<ActivationRequestItemsTable[\s\S]*\) : null\}/,
   );
 });
 
@@ -43,4 +54,17 @@ test("activation request review dialog provides a mobile header close action", (
     source,
     /DialogTitle className="pr-12 text-lg font-semibold sm:pr-0"/,
   );
+});
+
+test("activation request review dialog retains its presentation during exit animation", () => {
+  assert.match(
+    source,
+    /if \(open && request\) \{\s*setDisplayedAction\(action\);\s*setDisplayedRequest\(request\);\s*\}/,
+  );
+  assert.match(
+    source,
+    /const visibleAction = open \? action : displayedAction;/,
+  );
+  assert.match(source, /const visibleRequest = request \?\? displayedRequest;/);
+  assert.match(source, /visibleRequest\?\.items\?\.length/);
 });

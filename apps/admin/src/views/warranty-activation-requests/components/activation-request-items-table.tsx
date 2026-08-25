@@ -16,7 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@repo/ui";
-import { Download, Eye, Send } from "lucide-react";
+import { Download, Eye, RotateCcw, Send } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/src/i18n/navigation";
 import { WarrantyActivationRequestStatusBadge } from "./warranty-activation-request-status-badge";
@@ -26,6 +26,7 @@ type ActivationRequestItemsTableProps = {
   items: WarrantyActivationRequestItemSummary[];
   onDownloadCertificate?: (item: WarrantyActivationRequestItemSummary) => void;
   onResendCertificate?: (item: WarrantyActivationRequestItemSummary) => void;
+  onRetryCertificate?: (item: WarrantyActivationRequestItemSummary) => void;
   onViewCertificate?: (item: WarrantyActivationRequestItemSummary) => void;
 };
 
@@ -34,6 +35,7 @@ export function ActivationRequestItemsTable({
   items,
   onDownloadCertificate,
   onResendCertificate,
+  onRetryCertificate,
   onViewCertificate,
 }: ActivationRequestItemsTableProps) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
@@ -52,7 +54,8 @@ export function ActivationRequestItemsTable({
             <TableHead>{t("certificateInfo")}</TableHead>
             {onViewCertificate ||
             onDownloadCertificate ||
-            onResendCertificate ? (
+            onResendCertificate ||
+            onRetryCertificate ? (
               <TableHead className="text-right">{t("actions")}</TableHead>
             ) : null}
           </TableRow>
@@ -114,11 +117,14 @@ export function ActivationRequestItemsTable({
               </TableCell>
               {onViewCertificate ||
               onDownloadCertificate ||
-              onResendCertificate ? (
+              onResendCertificate ||
+              onRetryCertificate ? (
                 <TableCell>
                   <TooltipProvider delayDuration={250}>
                     <div className="flex justify-end gap-1">
-                      {item.certificate && onViewCertificate ? (
+                      {item.certificate?.status === "GENERATED" &&
+                      item.certificate.storageKey &&
+                      onViewCertificate ? (
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
@@ -141,7 +147,9 @@ export function ActivationRequestItemsTable({
                           </TooltipContent>
                         </Tooltip>
                       ) : null}
-                      {item.certificate && onDownloadCertificate ? (
+                      {item.certificate?.status === "GENERATED" &&
+                      item.certificate.storageKey &&
+                      onDownloadCertificate ? (
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
@@ -164,7 +172,8 @@ export function ActivationRequestItemsTable({
                           </TooltipContent>
                         </Tooltip>
                       ) : null}
-                      {item.certificate?.recipientEmail &&
+                      {item.certificate?.status === "GENERATED" &&
+                      item.certificate.recipientEmail &&
                       item.certificate.emailStatus !== "SENT" &&
                       onResendCertificate ? (
                         <Tooltip>
@@ -184,6 +193,36 @@ export function ActivationRequestItemsTable({
                           </TooltipTrigger>
                           <TooltipContent>
                             {t("resendItemCertificate", {
+                              position: item.positionLabel,
+                            })}
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : null}
+                      {item.status === "ACTIVATED" &&
+                      (!item.certificate ||
+                        item.certificate.status !== "GENERATED" ||
+                        !item.certificate.storageKey) &&
+                      onRetryCertificate ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              aria-label={t("retryItemCertificate", {
+                                position: item.positionLabel,
+                              })}
+                              disabled={busyItemId === item.id}
+                              onClick={() => onRetryCertificate(item)}
+                              size="icon"
+                              type="button"
+                              variant="ghost"
+                            >
+                              <RotateCcw
+                                aria-hidden="true"
+                                className="size-4"
+                              />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {t("retryItemCertificate", {
                               position: item.positionLabel,
                             })}
                           </TooltipContent>

@@ -142,5 +142,28 @@ export function createWarrantyActivationRequestsService(
         ),
       );
     },
+
+    async retryWarrantyActivationRequestCertificate(
+      requestId: string,
+    ): Promise<WarrantyActivationRequestSummary> {
+      return unwrap(
+        await http.post<WarrantyActivationRequestSummary>(
+          `/warranty-activation-requests/${requestId}/certificate/retry`,
+          {},
+        ),
+      );
+    },
+
+    async retryWarrantyActivationRequestItemCertificate(
+      requestId: string,
+      itemId: string,
+    ): Promise<WarrantyActivationRequestSummary> {
+      return unwrap(
+        await http.post<WarrantyActivationRequestSummary>(
+          `/warranty-activation-requests/${requestId}/items/${itemId}/certificate/retry`,
+          {},
+        ),
+      );
+    },
   };
 }
