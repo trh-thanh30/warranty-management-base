@@ -6,6 +6,7 @@ export type CustomerSummary = {
   phone: string | null;
   email: string | null;
   address: string | null;
+  /** ISO-8601 string serialized by the Customer API, or null when unknown. */
   birthdate: string | null;
   metadata: Record<string, unknown> | null;
   createdAt: string;
@@ -33,6 +34,7 @@ export type CreateCustomerBody = {
   phone: string;
   email: string;
   address: string;
+  /** Date-only value in YYYY-MM-DD format. */
   birthdate?: string;
 };
 
@@ -41,5 +43,6 @@ export type UpdateCustomerBody = {
   phone?: string;
   email?: string;
   address?: string;
+  /** Date-only YYYY-MM-DD value; null explicitly clears the birthdate. */
   birthdate?: string | null;
 };

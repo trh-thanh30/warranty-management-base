@@ -1,18 +1,7 @@
-import { Customer } from '@prisma/client';
+import type { CustomerSummary } from '@repo/shared';
+import type { Customer } from '@prisma/client';
 
-export type CustomerResponse = {
-  id: string;
-  userId: string | null;
-  customerCode: string;
-  fullName: string;
-  phone: string | null;
-  email: string | null;
-  address: string | null;
-  birthdate: Date | null;
-  metadata: Record<string, unknown> | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
+export type CustomerResponse = CustomerSummary;
 
 export function toCustomerResponse(customer: Customer): CustomerResponse {
   return {
@@ -23,9 +12,9 @@ export function toCustomerResponse(customer: Customer): CustomerResponse {
     phone: customer.phone,
     email: customer.email,
     address: customer.address,
-    birthdate: customer.birthdate,
+    birthdate: customer.birthdate?.toISOString() ?? null,
     metadata: customer.metadata as Record<string, unknown> | null,
-    createdAt: customer.created_at,
-    updatedAt: customer.updated_at,
+    createdAt: customer.created_at.toISOString(),
+    updatedAt: customer.updated_at.toISOString(),
   };
 }

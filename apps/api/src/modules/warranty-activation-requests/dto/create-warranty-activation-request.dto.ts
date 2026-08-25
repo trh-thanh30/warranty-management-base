@@ -1,4 +1,4 @@
-import { IsNotFutureDate } from '@/common/decorators/is-not-future-date.decorator';
+import { IsBirthdate } from '@/common/decorators/is-birthdate.decorator';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
@@ -14,6 +14,7 @@ import {
   Matches,
   Max,
   Min,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 import { IsLocalAddressDetail } from './is-local-address-detail.decorator';
@@ -107,9 +108,8 @@ export class CreateWarrantyActivationRequestDto {
   @Length(3, 160)
   customerEmail?: string;
 
-  @IsOptional()
-  @IsDateString()
-  @IsNotFutureDate()
+  @ValidateIf((_, value) => value !== undefined)
+  @IsBirthdate()
   customerBirthdate?: string;
 
   @IsOptional()
