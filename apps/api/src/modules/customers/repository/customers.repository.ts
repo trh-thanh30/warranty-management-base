@@ -4,6 +4,22 @@ import { ListCustomersDto } from '@/modules/customers/dto/list-customers.dto';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
+function buildCustomerOrderBy(
+  sortBy?: keyof Prisma.CustomerOrderByWithRelationInput,
+  sortOrder: 'asc' | 'desc' = 'desc',
+): Prisma.CustomerOrderByWithRelationInput[] {
+  if (!sortBy) return [{ created_at: 'desc' }, { id: 'desc' }];
+
+  const orderBy = [
+    { [sortBy]: sortOrder },
+  ] as Prisma.CustomerOrderByWithRelationInput[];
+
+  if (sortBy !== 'created_at') orderBy.push({ created_at: 'desc' });
+
+  orderBy.push({ id: 'desc' });
+  return orderBy;
+}
+
 @Injectable()
 export class CustomersRepository {
   constructor(private readonly prismaService: PrismaService) {}
@@ -84,9 +100,7 @@ export class CustomersRepository {
           ],
         }
       : {};
-    const orderBy: Prisma.CustomerOrderByWithRelationInput[] = sortBy
-      ? [{ [sortBy]: filters.sortOrder ?? 'desc' }]
-      : [{ created_at: 'desc' }];
+    const orderBy = buildCustomerOrderBy(sortBy, filters.sortOrder);
 
     return this.prismaService.$transaction(async (tx) => {
       const [items, total] = await Promise.all([
@@ -120,7 +134,7 @@ export class CustomersRepository {
 
     return this.prismaService.customer.findMany({
       where,
-      orderBy: { created_at: 'desc' },
+      orderBy: buildCustomerOrderBy(),
       take: 5000,
     });
   }
