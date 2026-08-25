@@ -1703,6 +1703,8 @@
     "productCount": "{count} sản phẩm",
     "activationProducts": "Sản phẩm kích hoạt theo vị trí",
     "warrantyCodeCount": "{count} mã bảo hành",
+    "showMoreWarrantyCodes": "Hiển thị {count} mã bảo hành còn lại",
+    "showMoreProducts": "Hiển thị {count} sản phẩm còn lại",
     "position": "Vị trí",
     "productCodeSerial": "Mã sản phẩm / Serial",
     "reviewProductCount": "Yêu cầu này có {count} sản phẩm.",

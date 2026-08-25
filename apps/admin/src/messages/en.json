@@ -1703,6 +1703,8 @@
     "productCount": "{count} products",
     "activationProducts": "Activation products by position",
     "warrantyCodeCount": "{count, plural, one {# warranty code} other {# warranty codes}}",
+    "showMoreWarrantyCodes": "Show {count, plural, one {# remaining warranty code} other {# remaining warranty codes}}",
+    "showMoreProducts": "Show {count, plural, one {# remaining product} other {# remaining products}}",
     "position": "Position",
     "productCodeSerial": "Product code / Serial",
     "reviewProductCount": "This request contains {count} products.",

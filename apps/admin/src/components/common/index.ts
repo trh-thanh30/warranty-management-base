@@ -1,4 +1,5 @@
 export * from "./combobox";
+export * from "./compact-badge-list";
 export * from "./excel-import-dialog";
 export * from "./form-field";
 export * from "./form-section";
