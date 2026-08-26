@@ -1,6 +1,11 @@
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
 import { WarrantyActivationRequestQueries } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository.queries';
-import { warranty_activation_request_status } from '@prisma/client';
+import { CreateWarrantyActivationRequestCommand } from '@/modules/warranty-activation-requests/warranty-activation-requests.types';
+import { Prisma, warranty_activation_request_status } from '@prisma/client';
+import {
+  WarrantyActivationRequestCodeConflictError,
+  WarrantyActivationRequestUniqueConflictError,
+} from '@/modules/warranty-activation-requests/repository/warranty-activation-request-errors';
 
 describe('WarrantyActivationRequestsRepository', () => {
   const queries = new WarrantyActivationRequestQueries();
@@ -20,7 +25,7 @@ describe('WarrantyActivationRequestsRepository', () => {
     );
     const birthdate = new Date('2005-12-11T00:00:00.000Z');
 
-    await repository.create({ request_code: 'WAR-20260820-0001' } as never, {
+    await repository.create(createCommand('WAR-20260820-0001'), {
       customerProfile: { id: 'customer-id', birthdate },
     });
 
@@ -51,7 +56,7 @@ describe('WarrantyActivationRequestsRepository', () => {
       queries,
     );
 
-    await repository.create({ request_code: 'WAR-20260820-0002' } as never, {
+    await repository.create(createCommand('WAR-20260820-0002'), {
       customerProfile: {
         id: 'customer-id',
         birthdate: undefined,
@@ -66,6 +71,50 @@ describe('WarrantyActivationRequestsRepository', () => {
         }),
       }),
     );
+  });
+
+  it('translates Prisma unique violations into application conflict errors', async () => {
+    const conflict = new Prisma.PrismaClientKnownRequestError(
+      'Unique constraint failed',
+      {
+        clientVersion: 'test',
+        code: 'P2002',
+        meta: { target: ['request_code'] },
+      },
+    );
+    const repository = new WarrantyActivationRequestsRepository(
+      {
+        warrantyActivationRequest: {
+          create: jest.fn().mockRejectedValue(conflict),
+        },
+      } as never,
+      queries,
+    );
+
+    await expect(
+      repository.create(createCommand('WAR-duplicate')),
+    ).rejects.toBeInstanceOf(WarrantyActivationRequestCodeConflictError);
+
+    const otherConflict = new Prisma.PrismaClientKnownRequestError(
+      'Unique constraint failed',
+      {
+        clientVersion: 'test',
+        code: 'P2002',
+        meta: { target: ['another_index'] },
+      },
+    );
+    const otherRepository = new WarrantyActivationRequestsRepository(
+      {
+        warrantyActivationRequest: {
+          create: jest.fn().mockRejectedValue(otherConflict),
+        },
+      } as never,
+      queries,
+    );
+
+    await expect(
+      otherRepository.create(createCommand('WAR-other')),
+    ).rejects.toBeInstanceOf(WarrantyActivationRequestUniqueConflictError);
   });
 
   it('finds the newest pending or approved request for a product', async () => {
@@ -223,3 +272,31 @@ describe('WarrantyActivationRequestsRepository', () => {
     );
   });
 });
+
+function createCommand(
+  requestCode: string,
+): CreateWarrantyActivationRequestCommand {
+  return {
+    addressDetail: '',
+    brand: null,
+    customerEmail: null,
+    customerName: 'Customer',
+    customerPhone: '0900000000',
+    fullAddress: 'Ward, Province',
+    items: [],
+    manufactureYear: null,
+    metadata: {},
+    model: null,
+    productId: 'product-id',
+    productName: 'Product',
+    provinceCode: '01',
+    provinceName: 'Province',
+    requestCode,
+    serialNumber: null,
+    source: 'PUBLIC_WEB',
+    wardCode: '001',
+    wardName: 'Ward',
+    warrantyCode: 'WM-001',
+    warrantyDurationMonths: 12,
+  };
+}

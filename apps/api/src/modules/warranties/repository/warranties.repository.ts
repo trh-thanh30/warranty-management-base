@@ -1,5 +1,7 @@
 import { normalizePagination, paginate } from '@/common/pagination/pagination';
 import { PrismaService } from '@/database/prisma/prisma.service';
+import { WarrantyTransactionRepository } from '@/modules/warranties/repository/warranty-transaction.repository';
+import { toWarrantyRecord } from '@/modules/warranties/warranties.types';
 import { Injectable } from '@nestjs/common';
 import { Prisma, warranty_status } from '@prisma/client';
 
@@ -33,6 +35,14 @@ const warrantyLookupInclude = {
 @Injectable()
 export class WarrantiesRepository {
   constructor(private readonly prismaService: PrismaService) {}
+
+  withTransaction<T>(
+    operation: (repository: WarrantyTransactionRepository) => Promise<T>,
+  ) {
+    return this.prismaService.$transaction((tx) =>
+      operation(new WarrantyTransactionRepository(tx)),
+    );
+  }
 
   list(filters: {
     search?: string;
@@ -207,6 +217,14 @@ export class WarrantiesRepository {
     return this.prismaService.warranty.findUnique({
       where: { product_id: productId },
     });
+  }
+
+  async findRecordByProductId(productId: string) {
+    const warranty = await this.prismaService.warranty.findUnique({
+      where: { product_id: productId },
+    });
+
+    return warranty ? toWarrantyRecord(warranty) : null;
   }
 
   findById(id: string) {

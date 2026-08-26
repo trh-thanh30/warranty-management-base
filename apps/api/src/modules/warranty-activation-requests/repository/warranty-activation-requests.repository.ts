@@ -4,15 +4,16 @@ import { ListWarrantyActivationRequestsDto } from '@/modules/warranty-activation
 import { WarrantyActivationReviewTransactionRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-review-transaction.repository';
 import { WarrantyActivationRequestQueries } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository.queries';
 import { OPEN_WARRANTY_ACTIVATION_REQUEST_STATUSES } from '@/modules/warranty-activation-requests/warranty-activation-requests.constants';
+import {
+  CreateWarrantyActivationRequestCommand,
+  CreateWarrantyActivationRequestOptions,
+} from '@/modules/warranty-activation-requests/warranty-activation-requests.types';
+import {
+  WarrantyActivationRequestCodeConflictError,
+  WarrantyActivationRequestUniqueConflictError,
+} from '@/modules/warranty-activation-requests/repository/warranty-activation-request-errors';
 import { Injectable } from '@nestjs/common';
 import { Prisma, warranty_activation_request_status } from '@prisma/client';
-
-type CreateWarrantyActivationRequestOptions = {
-  customerProfile?: {
-    id: string;
-    birthdate?: Date;
-  };
-};
 
 @Injectable()
 export class WarrantyActivationRequestsRepository {
@@ -22,32 +23,35 @@ export class WarrantyActivationRequestsRepository {
   ) {}
 
   create(
-    data: Prisma.WarrantyActivationRequestCreateInput,
+    command: CreateWarrantyActivationRequestCommand,
     options: CreateWarrantyActivationRequestOptions = {},
   ) {
+    const data = this.toCreateInput(command);
     const customerProfile = options.customerProfile;
-    if (customerProfile) {
-      return this.prismaService.$transaction(async (tx) => {
-        if (customerProfile.birthdate !== undefined) {
-          await tx.customer.update({
-            where: { id: customerProfile.id },
-            data: { birthdate: customerProfile.birthdate },
-          });
-        }
+    const operation = customerProfile
+      ? this.prismaService.$transaction(async (tx) => {
+          if (customerProfile.birthdate !== undefined) {
+            await tx.customer.update({
+              where: { id: customerProfile.id },
+              data: { birthdate: customerProfile.birthdate },
+            });
+          }
 
-        return tx.warrantyActivationRequest.create({
-          data: {
-            ...data,
-            customer: { connect: { id: customerProfile.id } },
-          },
+          return tx.warrantyActivationRequest.create({
+            data: {
+              ...data,
+              customer: { connect: { id: customerProfile.id } },
+            },
+            include: this.queries.include,
+          });
+        })
+      : this.prismaService.warrantyActivationRequest.create({
+          data,
           include: this.queries.include,
         });
-      });
-    }
 
-    return this.prismaService.warrantyActivationRequest.create({
-      data,
-      include: this.queries.include,
+    return operation.catch((error: unknown) => {
+      throw toApplicationConflictError(error);
     });
   }
 
@@ -196,4 +200,76 @@ export class WarrantyActivationRequestsRepository {
       work(new WarrantyActivationReviewTransactionRepository(tx, this.queries)),
     );
   }
+
+  private toCreateInput(
+    command: CreateWarrantyActivationRequestCommand,
+  ): Prisma.WarrantyActivationRequestCreateInput {
+    return {
+      request_code: command.requestCode,
+      source: command.source,
+      warranty_code: command.warrantyCode,
+      created_by: command.createdByUserId
+        ? { connect: { id: command.createdByUserId } }
+        : undefined,
+      customer_name: command.customerName,
+      customer_phone: command.customerPhone,
+      customer_email: command.customerEmail,
+      customer_birthdate: command.customerBirthdate,
+      category: command.categoryId
+        ? { connect: { id: command.categoryId } }
+        : undefined,
+      product: { connect: { id: command.productId } },
+      dealer: command.dealerId
+        ? { connect: { id: command.dealerId } }
+        : undefined,
+      vehicle_plate: command.vehiclePlate,
+      vehicle_model: command.vehicleModel,
+      installed_at: command.installedAt,
+      warranty_duration_months: command.warrantyDurationMonths,
+      province_code: command.provinceCode,
+      province_name: command.provinceName,
+      ward_code: command.wardCode,
+      ward_name: command.wardName,
+      address_detail: command.addressDetail,
+      full_address: command.fullAddress,
+      product_name: command.productName,
+      serial_number: command.serialNumber,
+      brand: command.brand,
+      model: command.model,
+      manufacture_year: command.manufactureYear,
+      note: command.note,
+      metadata: command.metadata as Prisma.InputJsonObject,
+      items: {
+        create: command.items.map((item) => ({
+          activation_field_id: item.activationFieldId,
+          position_key: item.positionKey,
+          position_label: item.positionLabel,
+          product_id: item.productId,
+          warranty_id: item.warrantyId,
+          warranty_code: item.warrantyCode,
+          product_name: item.productName,
+          product_code: item.productCode,
+          serial_number: item.serialNumber,
+        })),
+      },
+    };
+  }
+}
+
+function toApplicationConflictError(error: unknown) {
+  if (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === 'P2002'
+  ) {
+    const target = Array.isArray(error.meta?.target)
+      ? error.meta.target.filter(
+          (value): value is string => typeof value === 'string',
+        )
+      : undefined;
+    return target?.includes('request_code')
+      ? new WarrantyActivationRequestCodeConflictError()
+      : new WarrantyActivationRequestUniqueConflictError(target);
+  }
+
+  return error;
 }
