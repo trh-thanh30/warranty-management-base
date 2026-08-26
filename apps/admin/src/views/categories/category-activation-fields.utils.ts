@@ -1,4 +1,7 @@
-import type { CategoryActivationFieldConfig } from "@repo/shared";
+import type {
+  CategoryActivationFieldConfig,
+  UpdateCategoryActivationField,
+} from "@repo/shared";
 import type { DraftActivationField } from "./category-activation-fields.types";
 
 export function toDraftActivationFields(
@@ -12,9 +15,10 @@ export function toDraftActivationFields(
 
 export function fromDraftActivationFields(
   fields: DraftActivationField[],
-): CategoryActivationFieldConfig[] {
+): UpdateCategoryActivationField[] {
   return fields.map((field, index) => ({
-    key: field.key.trim(),
+    ...(field.id ? { id: field.id } : {}),
+    ...(field.key.trim() ? { key: field.key.trim() } : {}),
     label: field.label.trim(),
     ...(field.type === "SELECT" ? { options: field.options } : {}),
     order: index + 1,

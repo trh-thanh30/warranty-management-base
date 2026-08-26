@@ -26,7 +26,18 @@ export type CategoryActivationFieldsResponse = {
   activationFields: CategoryActivationFieldConfig[];
 };
 
-export type UpdateCategoryActivationFieldsBody = Omit<
-  CategoryActivationFieldsResponse,
-  "categoryId"
->;
+export type UpdateCategoryActivationField = Omit<
+  CategoryActivationFieldConfig,
+  "key"
+> & { key?: string };
+
+export type UpdateCategoryActivationFieldsBody = {
+  activationFormEnabled: boolean;
+  activationFields: UpdateCategoryActivationField[];
+};
+
+/** Fully resolved configuration used after application validation/generation. */
+export type ReplaceCategoryActivationFieldsInput = {
+  activationFormEnabled: boolean;
+  activationFields: CategoryActivationFieldConfig[];
+};

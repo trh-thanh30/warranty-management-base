@@ -6,8 +6,13 @@ import { Injectable } from '@nestjs/common';
 import { category_type, Prisma } from '@prisma/client';
 import type {
   CategoryActivationFieldsResponse,
-  UpdateCategoryActivationFieldsBody,
+  ReplaceCategoryActivationFieldsInput,
 } from '@repo/shared';
+import {
+  categoryActivationFieldsSelect,
+  toActivationFieldsResponse,
+} from './category-activation-fields.mapper';
+import { toCategoryKey, toJsonValue } from './categories.repository.utils';
 
 @Injectable()
 export class CategoriesRepository {
@@ -46,7 +51,7 @@ export class CategoriesRepository {
 
   replaceActivationFields(
     categoryId: string,
-    input: UpdateCategoryActivationFieldsBody,
+    input: ReplaceCategoryActivationFieldsInput,
   ): Promise<CategoryActivationFieldsResponse> {
     return this.prismaService.$transaction(async (tx) => {
       await tx.category.update({
@@ -310,53 +315,4 @@ export class CategoriesRepository {
       ),
     );
   }
-}
-
-function toCategoryKey(type: category_type, slug: string) {
-  return `${type}:${slug}`;
-}
-
-function toJsonValue(value: Record<string, unknown> | null) {
-  return value === null ? Prisma.JsonNull : (value as Prisma.InputJsonObject);
-}
-
-const categoryActivationFieldsSelect = {
-  id: true,
-  activation_form_enabled: true,
-  activation_fields: {
-    where: { is_active: true },
-    orderBy: [{ sort_order: 'asc' }, { created_at: 'asc' }],
-    include: {
-      options: {
-        orderBy: [{ sort_order: 'asc' }, { created_at: 'asc' }],
-      },
-    },
-  },
-} satisfies Prisma.CategorySelect;
-
-type CategoryWithActivationFields = Prisma.CategoryGetPayload<{
-  select: typeof categoryActivationFieldsSelect;
-}>;
-
-function toActivationFieldsResponse(
-  category: CategoryWithActivationFields,
-): CategoryActivationFieldsResponse {
-  return {
-    categoryId: category.id,
-    activationFormEnabled: category.activation_form_enabled,
-    activationFields: category.activation_fields.map((field) => ({
-      id: field.id,
-      key: field.key,
-      label: field.label,
-      type: field.type,
-      placeholder: field.placeholder ?? undefined,
-      required: field.required,
-      order: field.sort_order,
-      options: field.options.map((option) => ({
-        id: option.id,
-        label: option.label,
-        value: option.value,
-      })),
-    })),
-  };
 }

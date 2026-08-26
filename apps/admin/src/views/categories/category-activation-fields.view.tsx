@@ -35,7 +35,6 @@ import { useToast } from "@/src/hooks/use-toast";
 import { useRouter } from "@/src/i18n/navigation";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { moveItem } from "@/src/utils/array";
-import { normalizeActivationFieldKey } from "@/src/utils/category-activation-fields";
 import {
   useCategory,
   useCategoryActivationFields,
@@ -83,7 +82,7 @@ export function CategoryActivationFieldsView({
   }, [activationFieldsQuery.data]);
 
   const canSave = useMemo(
-    () => fields.every((field) => field.key.trim() && field.label.trim()),
+    () => fields.every((field) => field.label.trim()),
     [fields],
   );
 
@@ -338,31 +337,11 @@ function ActivationFieldEditor({
         <div className="space-y-2">
           <Label>{t("activationFieldLabel")}</Label>
           <Input
-            onBlur={() => {
-              if (field.key.trim() || !field.label.trim()) return;
-              onChange({
-                ...field,
-                key: normalizeActivationFieldKey(field.label),
-              });
-            }}
             onChange={(event) =>
               onChange({ ...field, label: event.target.value })
             }
             placeholder={t("activationFieldLabelPlaceholder")}
             value={field.label}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>{t("activationFieldKey")}</Label>
-          <Input
-            onChange={(event) =>
-              onChange({
-                ...field,
-                key: normalizeActivationFieldKey(event.target.value),
-              })
-            }
-            placeholder={t("activationFieldKeyPlaceholder")}
-            value={field.key}
           />
         </div>
         <div className="space-y-2">
@@ -503,13 +482,14 @@ function validateFields(
   fields: DraftActivationField[],
   t: (key: string) => string,
 ) {
-  const keys = new Set<string>();
+  const labels = new Set<string>();
 
   for (const field of fields) {
-    const key = field.key.trim();
-    if (!key || !field.label.trim()) return t("activationFieldRequiredError");
-    if (keys.has(key)) return t("activationFieldDuplicateKeyError");
-    keys.add(key);
+    const label = field.label.trim().replace(/\s+/g, " ");
+    if (!label) return t("activationFieldRequiredError");
+    const identity = label.toLocaleLowerCase();
+    if (labels.has(identity)) return t("activationFieldDuplicateLabelError");
+    labels.add(identity);
 
     if (field.type === "SELECT") {
       if (field.options.length === 0) {

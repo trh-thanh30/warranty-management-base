@@ -9,6 +9,7 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  IsUUID,
   Length,
   Matches,
   Max,
@@ -27,10 +28,15 @@ export class CategoryActivationFieldOptionDto {
 }
 
 export class CategoryActivationFieldDto {
+  @IsOptional()
+  @IsUUID()
+  id?: string;
+
   @IsString()
+  @IsOptional()
   @Length(1, 64)
   @Matches(/^[a-z][A-Za-z0-9_]*$/)
-  key!: string;
+  key?: string;
 
   @IsString()
   @Length(1, 160)
@@ -69,7 +75,6 @@ export class UpdateCategoryActivationFieldsDto {
 
   @IsArray()
   @ArrayMaxSize(50)
-  @ArrayUnique((field: CategoryActivationFieldDto) => field.key)
   @ValidateNested({ each: true })
   @Type(() => CategoryActivationFieldDto)
   activationFields!: CategoryActivationFieldDto[];
