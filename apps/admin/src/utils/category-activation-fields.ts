@@ -23,6 +23,10 @@ export function normalizeActivationFieldKey(value: string) {
     .replace(/^_+|_+$/g, "");
 }
 
+export function isValidActivationFieldKey(value: string) {
+  return /^[a-z][A-Za-z0-9_]*$/.test(value.trim());
+}
+
 export function compactActivationInputValues(values: Record<string, string>) {
   return Object.fromEntries(
     Object.entries(values)

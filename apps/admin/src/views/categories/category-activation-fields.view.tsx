@@ -1,23 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import {
-  ArrowDown,
-  ArrowUp,
-  ChevronDown,
-  ChevronUp,
-  Eye,
-  FolderTree,
-  Loader2,
-  Plus,
-  Trash2,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
+import { FormPageShell } from "@/src/components/common/form-page-shell";
+import { SelectControl } from "@/src/components/common/select-control";
+import { StatePanel } from "@/src/components/common/state-panel";
+import { PermissionGuard } from "@/src/components/permission-guard";
+import { useToast } from "@/src/hooks/use-toast";
+import { useRouter } from "@/src/i18n/navigation";
+import { moveItem } from "@/src/utils/array";
+import { normalizeActivationFieldKey } from "@/src/utils/category-activation-fields";
 import type {
   CategoryActivationFieldOption,
   CategoryActivationFieldType,
 } from "@repo/shared";
 import { CATEGORY_ACTIVATION_FIELD_TYPES } from "@repo/shared";
+import { PERMISSIONS } from "@repo/shared/constants";
 import {
   Button,
   Card,
@@ -30,20 +26,19 @@ import {
   Label,
   Switch,
 } from "@repo/ui";
-import { FormPageShell } from "@/src/components/common/form-page-shell";
-import { SelectControl } from "@/src/components/common/select-control";
-import { StatePanel } from "@/src/components/common/state-panel";
-import { PermissionGuard } from "@/src/components/permission-guard";
-import { useToast } from "@/src/hooks/use-toast";
-import { useRouter } from "@/src/i18n/navigation";
-import { PERMISSIONS } from "@repo/shared/constants";
-import { moveItem } from "@/src/utils/array";
-import { normalizeActivationFieldKey } from "@/src/utils/category-activation-fields";
 import {
-  useCategory,
-  useCategoryActivationFields,
-  useUpdateCategoryActivationFields,
-} from "./hooks/use-categories";
+  ArrowDown,
+  ArrowUp,
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  FolderTree,
+  Loader2,
+  Plus,
+  Trash2,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
 import type {
   ActivationFieldOptionErrors,
   DraftActivationField,
@@ -54,6 +49,11 @@ import {
 } from "./category-activation-fields.utils";
 import { CategoryActivationFieldsPreviewDialog } from "./components/category-activation-fields-preview-dialog";
 import { FloatingPreviewButton } from "./components/floating-preview-button";
+import {
+  useCategory,
+  useCategoryActivationFields,
+  useUpdateCategoryActivationFields,
+} from "./hooks/use-categories";
 
 type CategoryActivationFieldsViewProps = {
   categoryId: string;
@@ -89,7 +89,7 @@ export function CategoryActivationFieldsView({
   }, [activationFieldsQuery.data]);
 
   const canSave = useMemo(
-    () => fields.every((field) => field.key.trim() && field.label.trim()),
+    () => fields.every((field) => field.label.trim()),
     [fields],
   );
 
@@ -560,13 +560,14 @@ function validateFields(
   fields: DraftActivationField[],
   t: (key: string) => string,
 ) {
-  const keys = new Set<string>();
+  const labels = new Set<string>();
 
   for (const field of fields) {
-    const key = field.key.trim();
-    if (!key || !field.label.trim()) return t("activationFieldRequiredError");
-    if (keys.has(key)) return t("activationFieldDuplicateKeyError");
-    keys.add(key);
+    const label = field.label.trim().replace(/\s+/g, " ");
+    if (!label) return t("activationFieldRequiredError");
+    const identity = label.toLocaleLowerCase();
+    if (labels.has(identity)) return t("activationFieldDuplicateLabelError");
+    labels.add(identity);
 
     if (field.type === "SELECT") {
       if (field.options.length === 0) {
