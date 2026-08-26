@@ -42,6 +42,12 @@ export function createCustomersService(http: CustomersHttpClient) {
       );
     },
 
+    async deleteCustomer(customerId: string): Promise<CustomerSummary> {
+      return unwrap(
+        await http.delete<CustomerSummary>(`/customers/${customerId}`),
+      );
+    },
+
     async downloadImportTemplate(): Promise<Blob> {
       const response = await http.get<Blob>("/customers/import-template", {
         responseType: "blob",

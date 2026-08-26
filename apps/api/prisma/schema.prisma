@@ -348,6 +348,7 @@ model Customer {
   address       String?
   birthdate     DateTime?
   metadata      Json?
+  deleted_at    DateTime?
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 
@@ -360,6 +361,7 @@ model Customer {
   @@index([full_name])
   @@index([phone])
   @@index([email])
+  @@index([deleted_at])
   @@map("customer")
 }
 

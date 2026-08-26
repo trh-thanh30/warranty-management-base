@@ -9,6 +9,7 @@ import { GetCustomerDetailUseCase } from '@/modules/customers/use-cases/get-cust
 import { ImportCustomersUseCase } from '@/modules/customers/use-cases/import-customers.use-case';
 import { ListCustomersUseCase } from '@/modules/customers/use-cases/list-customers.use-case';
 import { UpdateCustomerUseCase } from '@/modules/customers/use-cases/update-customer.use-case';
+import { SoftDeleteCustomerUseCase } from '@/modules/customers/use-cases/soft-delete-customer.use-case';
 import { Module } from '@nestjs/common';
 
 @Module({
@@ -24,6 +25,7 @@ import { Module } from '@nestjs/common';
     ListCustomersUseCase,
     GetCustomerDetailUseCase,
     ImportCustomersUseCase,
+    SoftDeleteCustomerUseCase,
   ],
   exports: [CustomersRepository, GenerateCustomerCodeUseCase],
 })

@@ -524,6 +524,15 @@
     }
   },
   "Customers": {
+    "statusActive": "Đang hoạt động",
+    "statusDeleted": "Đã xóa",
+    "statusAll": "Tất cả",
+    "statusFilter": "Lọc trạng thái khách hàng",
+    "delete": "Xóa khách hàng",
+    "deleted": "Đã xóa mềm khách hàng.",
+    "deleteConfirm": "Khách hàng sẽ được ẩn khỏi danh sách đang hoạt động, nhưng dữ liệu và lịch sử bảo hành vẫn được giữ lại.",
+    "deleteTitle": "Xóa mềm khách hàng",
+    "deleteError": "Không thể xóa khách hàng.",
     "title": "Quản lý khách hàng",
     "eyebrow": "Hồ sơ khách hàng",
     "description": "Quản lý hồ sơ khách hàng dùng để gán sản phẩm và xử lý bảo hành.",
@@ -573,6 +582,7 @@
     "saving": "Đang lưu...",
     "addressUpdated": "Đã cập nhật địa chỉ khách hàng.",
     "account": "Tài khoản",
+    "status": "Trạng thái",
     "linkedAccount": "Đã liên kết",
     "profileOnly": "Chỉ có hồ sơ",
     "createdAt": "Ngày tạo",

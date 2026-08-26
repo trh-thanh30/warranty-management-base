@@ -1,9 +1,10 @@
-import type { HttpGet, HttpWrite } from "../service.types";
+import type { HttpDelete, HttpGet, HttpWrite } from "../service.types";
 
 export type CustomersHttpClient = {
   get: HttpGet;
   patch: HttpWrite;
   post: HttpWrite;
+  delete: HttpDelete;
 };
 
 export type CustomerImportResult = {

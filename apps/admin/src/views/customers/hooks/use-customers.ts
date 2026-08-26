@@ -89,3 +89,14 @@ export function useImportCustomers() {
     },
   });
 }
+
+export function useDeleteCustomer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (customerId: string) =>
+      customersService.deleteCustomer(customerId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
+    },
+  });
+}
