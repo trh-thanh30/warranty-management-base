@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ArrowDown,
   ArrowUp,
+  ChevronDown,
+  ChevronUp,
   Eye,
   FolderTree,
   Loader2,
@@ -309,6 +311,7 @@ function ActivationFieldEditor({
 }) {
   const t = useTranslations("Categories");
   const [optionsTouched, setOptionsTouched] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const optionErrors =
     field.type === "SELECT" && optionsTouched
       ? getActivationFieldOptionErrors(field.options, t)
@@ -318,9 +321,33 @@ function ActivationFieldEditor({
     <section className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h3 className="text-sm font-semibold text-slate-950 dark:text-slate-50">
-          {t("activationFieldNumber", { number: index + 1 })}
+          {collapsed && field.label.trim()
+            ? `${t("activationFieldNumber", { number: index + 1 })} - ${field.label}`
+            : t("activationFieldNumber", { number: index + 1 })}
         </h3>
         <div className="flex items-center gap-1">
+          <Button
+            aria-label={
+              collapsed
+                ? t("expandActivationField")
+                : t("collapseActivationField")
+            }
+            onClick={() => setCollapsed((current) => !current)}
+            size="icon"
+            title={
+              collapsed
+                ? t("expandActivationField")
+                : t("collapseActivationField")
+            }
+            type="button"
+            variant="ghost"
+          >
+            {collapsed ? (
+              <ChevronDown aria-hidden="true" className="size-4" />
+            ) : (
+              <ChevronUp aria-hidden="true" className="size-4" />
+            )}
+          </Button>
           <Button
             aria-label={t("moveActivationFieldUp")}
             disabled={isFirst}
@@ -354,167 +381,175 @@ function ActivationFieldEditor({
         </div>
       </div>
 
-      <div className="mt-4 grid gap-5 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label>{t("activationFieldLabel")}</Label>
-          <Input
-            onBlur={() => {
-              if (field.key.trim() || !field.label.trim()) return;
-              onChange({
-                ...field,
-                key: normalizeActivationFieldKey(field.label),
-              });
-            }}
-            onChange={(event) =>
-              onChange({ ...field, label: event.target.value })
-            }
-            placeholder={t("activationFieldLabelPlaceholder")}
-            value={field.label}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>{t("activationFieldKey")}</Label>
-          <Input
-            onChange={(event) =>
-              onChange({
-                ...field,
-                key: normalizeActivationFieldKey(event.target.value),
-              })
-            }
-            placeholder={t("activationFieldKeyPlaceholder")}
-            value={field.key}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>{t("activationFieldType")}</Label>
-          <SelectControl
-            onValueChange={(value) =>
-              onChange({
-                ...field,
-                type: value as CategoryActivationFieldType,
-              })
-            }
-            options={CATEGORY_ACTIVATION_FIELD_TYPES.map((type) => ({
-              label: t(`activationFieldTypes.${type}`),
-              value: type,
-            }))}
-            value={field.type}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>{t("activationFieldPlaceholder")}</Label>
-          <Input
-            onChange={(event) =>
-              onChange({ ...field, placeholder: event.target.value })
-            }
-            placeholder={t("activationFieldPlaceholderExample")}
-            value={field.placeholder ?? ""}
-          />
+      <div
+        className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
+          collapsed ? "grid-rows-[0fr]" : "grid-rows-[1fr]"
+        }`}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div className="mt-4 grid gap-5 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>{t("activationFieldLabel")}</Label>
+              <Input
+                onBlur={() => {
+                  if (field.key.trim() || !field.label.trim()) return;
+                  onChange({
+                    ...field,
+                    key: normalizeActivationFieldKey(field.label),
+                  });
+                }}
+                onChange={(event) =>
+                  onChange({ ...field, label: event.target.value })
+                }
+                placeholder={t("activationFieldLabelPlaceholder")}
+                value={field.label}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{t("activationFieldKey")}</Label>
+              <Input
+                onChange={(event) =>
+                  onChange({
+                    ...field,
+                    key: normalizeActivationFieldKey(event.target.value),
+                  })
+                }
+                placeholder={t("activationFieldKeyPlaceholder")}
+                value={field.key}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{t("activationFieldType")}</Label>
+              <SelectControl
+                onValueChange={(value) =>
+                  onChange({
+                    ...field,
+                    type: value as CategoryActivationFieldType,
+                  })
+                }
+                options={CATEGORY_ACTIVATION_FIELD_TYPES.map((type) => ({
+                  label: t(`activationFieldTypes.${type}`),
+                  value: type,
+                }))}
+                value={field.type}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{t("activationFieldPlaceholder")}</Label>
+              <Input
+                onChange={(event) =>
+                  onChange({ ...field, placeholder: event.target.value })
+                }
+                placeholder={t("activationFieldPlaceholderExample")}
+                value={field.placeholder ?? ""}
+              />
+            </div>
+          </div>
+
+          {field.type === "SELECT" ? (
+            <div className="mt-5 space-y-3">
+              <Label>{t("activationFieldOptions")}</Label>
+              <div className="space-y-3">
+                {field.options.map((option, optionIndex) => (
+                  <div
+                    className="grid gap-3 rounded-md border border-slate-200 p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-start dark:border-slate-800"
+                    key={optionIndex}
+                  >
+                    <div className="space-y-2">
+                      <Label>{t("activationFieldOptionLabel")}</Label>
+                      <Input
+                        aria-invalid={Boolean(optionErrors[optionIndex]?.label)}
+                        onChange={(event) => {
+                          setOptionsTouched(true);
+                          const options = field.options.map((item, index) =>
+                            index === optionIndex
+                              ? { ...item, label: event.target.value }
+                              : item,
+                          );
+                          onChange({ ...field, options });
+                        }}
+                        placeholder={t("activationFieldOptionLabelPlaceholder")}
+                        value={option.label}
+                      />
+                      <p className="min-h-4 text-xs text-red-600 dark:text-red-400">
+                        {optionErrors[optionIndex]?.label ?? "\u00a0"}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("activationFieldOptionValue")}</Label>
+                      <Input
+                        aria-invalid={Boolean(optionErrors[optionIndex]?.value)}
+                        onChange={(event) => {
+                          setOptionsTouched(true);
+                          const options = field.options.map((item, index) =>
+                            index === optionIndex
+                              ? { ...item, value: event.target.value }
+                              : item,
+                          );
+                          onChange({ ...field, options });
+                        }}
+                        placeholder={t("activationFieldOptionValuePlaceholder")}
+                        value={option.value}
+                      />
+                      <p className="min-h-4 text-xs text-red-600 dark:text-red-400">
+                        {optionErrors[optionIndex]?.value ?? "\u00a0"}
+                      </p>
+                    </div>
+                    <Button
+                      aria-label={t("removeActivationFieldOption")}
+                      onClick={() => {
+                        setOptionsTouched(true);
+                        onChange({
+                          ...field,
+                          options: field.options.filter(
+                            (_, index) => index !== optionIndex,
+                          ),
+                        });
+                      }}
+                      className="text-red-600 hover:text-red-700 sm:mt-7 dark:text-red-400"
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <Button
+                onClick={() => {
+                  setOptionsTouched(true);
+                  onChange({
+                    ...field,
+                    options: [...field.options, { label: "", value: "" }],
+                  });
+                }}
+                type="button"
+                variant="secondary"
+              >
+                <Plus className="size-4" />
+                {t("addActivationFieldOption")}
+              </Button>
+            </div>
+          ) : null}
+
+          {field.type === "PRODUCT_SELECT" ? (
+            <p className="mt-5 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300">
+              {t("activationFieldProductSelectDescription")}
+            </p>
+          ) : null}
+
+          <label className="mt-5 flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+            <Checkbox
+              checked={Boolean(field.required)}
+              onCheckedChange={(checked) =>
+                onChange({ ...field, required: checked === true })
+              }
+            />
+            {t("activationFieldRequired")}
+          </label>
         </div>
       </div>
-
-      {field.type === "SELECT" ? (
-        <div className="mt-5 space-y-3">
-          <Label>{t("activationFieldOptions")}</Label>
-          <div className="space-y-3">
-            {field.options.map((option, optionIndex) => (
-              <div
-                className="grid gap-3 rounded-md border border-slate-200 p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-start dark:border-slate-800"
-                key={optionIndex}
-              >
-                <div className="space-y-2">
-                  <Label>{t("activationFieldOptionLabel")}</Label>
-                  <Input
-                    aria-invalid={Boolean(optionErrors[optionIndex]?.label)}
-                    onChange={(event) => {
-                      setOptionsTouched(true);
-                      const options = field.options.map((item, index) =>
-                        index === optionIndex
-                          ? { ...item, label: event.target.value }
-                          : item,
-                      );
-                      onChange({ ...field, options });
-                    }}
-                    placeholder={t("activationFieldOptionLabelPlaceholder")}
-                    value={option.label}
-                  />
-                  <p className="min-h-4 text-xs text-red-600 dark:text-red-400">
-                    {optionErrors[optionIndex]?.label ?? "\u00a0"}
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <Label>{t("activationFieldOptionValue")}</Label>
-                  <Input
-                    aria-invalid={Boolean(optionErrors[optionIndex]?.value)}
-                    onChange={(event) => {
-                      setOptionsTouched(true);
-                      const options = field.options.map((item, index) =>
-                        index === optionIndex
-                          ? { ...item, value: event.target.value }
-                          : item,
-                      );
-                      onChange({ ...field, options });
-                    }}
-                    placeholder={t("activationFieldOptionValuePlaceholder")}
-                    value={option.value}
-                  />
-                  <p className="min-h-4 text-xs text-red-600 dark:text-red-400">
-                    {optionErrors[optionIndex]?.value ?? "\u00a0"}
-                  </p>
-                </div>
-                <Button
-                  aria-label={t("removeActivationFieldOption")}
-                  onClick={() => {
-                    setOptionsTouched(true);
-                    onChange({
-                      ...field,
-                      options: field.options.filter(
-                        (_, index) => index !== optionIndex,
-                      ),
-                    });
-                  }}
-                  className="text-red-600 hover:text-red-700 sm:mt-7 dark:text-red-400"
-                  size="icon"
-                  type="button"
-                  variant="ghost"
-                >
-                  <Trash2 className="size-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-          <Button
-            onClick={() => {
-              setOptionsTouched(true);
-              onChange({
-                ...field,
-                options: [...field.options, { label: "", value: "" }],
-              });
-            }}
-            type="button"
-            variant="secondary"
-          >
-            <Plus className="size-4" />
-            {t("addActivationFieldOption")}
-          </Button>
-        </div>
-      ) : null}
-
-      {field.type === "PRODUCT_SELECT" ? (
-        <p className="mt-5 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300">
-          {t("activationFieldProductSelectDescription")}
-        </p>
-      ) : null}
-
-      <label className="mt-5 flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
-        <Checkbox
-          checked={Boolean(field.required)}
-          onCheckedChange={(checked) =>
-            onChange({ ...field, required: checked === true })
-          }
-        />
-        {t("activationFieldRequired")}
-      </label>
     </section>
   );
 }

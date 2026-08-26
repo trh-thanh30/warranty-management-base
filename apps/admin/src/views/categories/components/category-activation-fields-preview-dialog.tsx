@@ -35,6 +35,7 @@ export function CategoryActivationFieldsPreviewDialog({
               aria-label={t("closePreview")}
               className="absolute right-4 top-4 z-10"
               size="icon"
+              title={t("closePreview")}
               type="button"
               variant="ghost"
             >
