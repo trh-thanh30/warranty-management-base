@@ -82,7 +82,7 @@ export function ReviewWarrantyActivationRequestDialog({
       <DialogContent
         className={`flex h-dvh max-h-dvh w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none p-0 sm:flex sm:h-[min(90vh,52rem)] sm:max-h-[90vh] sm:rounded-lg sm:p-4 ${
           isReject
-            ? "sm:w-[min(calc(100vw-2rem),36rem)] sm:max-w-xl"
+            ? "sm:h-auto sm:w-[min(calc(100vw-2rem),36rem)] sm:max-w-xl"
             : "sm:w-[min(calc(100vw-2rem),72rem)] sm:max-w-6xl"
         }`}
       >
