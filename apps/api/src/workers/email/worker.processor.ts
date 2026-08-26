@@ -1,27 +1,9 @@
+import { WarrantyCertificateEmailStatusService } from '@/modules/warranty-certificates/services/warranty-certificate-email-status.service';
+import { EmailJobData } from '@/workers/email/types/email-worker.type';
+import { WorkerEmailService } from '@/workers/email/worker.service';
 import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
-import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
-import { warranty_certificate_email_status } from '@prisma/client';
 import { Job } from 'bullmq';
-import { WorkerEmailService } from '@/workers/email/worker.service';
-
-export interface EmailJobData {
-  to: string;
-  subject?: string;
-  text?: string;
-  html?: string;
-  attachments?: Array<{
-    contentBase64: string;
-    contentType: string;
-    filename: string;
-  }>;
-  template?: string;
-  context?: Record<string, unknown>;
-  warrantyCertificateId?: string;
-  warrantyCertificateIds?: string[];
-  // Idempotency key for deduplication
-  idempotencyKey?: string;
-}
 
 @Injectable()
 @Processor('email', { concurrency: 5 })
@@ -31,7 +13,7 @@ export class EmailProcessor extends WorkerHost {
 
   constructor(
     private readonly emailService: WorkerEmailService,
-    private readonly warrantyCertificatesRepository: WarrantyCertificatesRepository,
+    private readonly warrantyCertificateEmailStatusService: WarrantyCertificateEmailStatusService,
   ) {
     super();
   }
@@ -103,12 +85,14 @@ export class EmailProcessor extends WorkerHost {
 
       this.logger.log(`Email job ${job.id} completed successfully`);
     } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Unknown email sending error';
       await this.markWarrantyCertificateEmailFailed(
         warrantyCertificateIds ??
           (warrantyCertificateId ? [warrantyCertificateId] : []),
-        error instanceof Error ? error.message : 'Unknown email sending error',
+        message,
       );
-      this.logger.error(`Email job ${job.id} failed: ${error.message}`);
+      this.logger.error(`Email job ${job.id} failed: ${message}`);
       throw error; // Re-throw to mark job as failed
     }
   }
@@ -116,11 +100,7 @@ export class EmailProcessor extends WorkerHost {
   private async markWarrantyCertificateEmailSent(certificateIds: string[]) {
     if (certificateIds.length === 0) return;
 
-    await this.warrantyCertificatesRepository.updateMany(certificateIds, {
-      email_status: warranty_certificate_email_status.SENT,
-      emailed_at: new Date(),
-      last_error: null,
-    });
+    await this.warrantyCertificateEmailStatusService.markSent(certificateIds);
   }
 
   private async markWarrantyCertificateEmailFailed(
@@ -129,10 +109,10 @@ export class EmailProcessor extends WorkerHost {
   ) {
     if (certificateIds.length === 0) return;
 
-    await this.warrantyCertificatesRepository.updateMany(certificateIds, {
-      email_status: warranty_certificate_email_status.FAILED,
-      last_error: message,
-    });
+    await this.warrantyCertificateEmailStatusService.markFailed(
+      certificateIds,
+      message,
+    );
   }
 
   @OnWorkerEvent('completed')

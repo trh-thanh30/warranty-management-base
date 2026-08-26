@@ -91,10 +91,12 @@ describe('IssueWarrantyCertificateUseCase', () => {
         }),
       }),
     );
-    expect(result).toEqual({
-      id: 'certificate-id',
-      recipient_email: null,
-    });
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: 'certificate-id',
+        recipientEmail: null,
+      }),
+    );
   });
 
   it('deletes the uploaded PDF when the certificate record cannot be created', async () => {

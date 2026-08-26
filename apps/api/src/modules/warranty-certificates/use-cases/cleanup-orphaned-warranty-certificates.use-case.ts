@@ -35,7 +35,7 @@ export class CleanupOrphanedWarrantyCertificatesUseCase {
     ]);
     const referencedPaths = new Set(
       certificateRecords
-        .map(({ storage_key }) => storage_key)
+        .map(({ storageKey }) => storageKey)
         .filter((path): path is string => Boolean(path)),
     );
     const certificateObjects = storedObjects.filter(({ path }) =>

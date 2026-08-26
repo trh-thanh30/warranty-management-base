@@ -2,7 +2,6 @@ import { UploadAssetService } from '@/modules/assets/services/upload-asset.servi
 import { SendEmailUseCase } from '@/modules/email/use-cases/send-email.usecase';
 import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
 import { Injectable, Logger } from '@nestjs/common';
-import { warranty_certificate_email_status } from '@prisma/client';
 
 @Injectable()
 export class WarrantyCertificateBatchEmailService {
@@ -36,18 +35,18 @@ export class WarrantyCertificateBatchEmailService {
       unorderedCertificates.map((certificate) => [certificate.id, certificate]),
     );
     const certificates: Array<
-      (typeof unorderedCertificates)[number] & { storage_key: string }
+      (typeof unorderedCertificates)[number] & { storageKey: string }
     > = [];
     for (const id of certificateIds) {
       const certificate = byId.get(id);
-      if (!certificate?.storage_key) {
+      if (!certificate?.storageKey) {
         throw new Error(
           'One or more warranty certificate PDFs are unavailable',
         );
       }
       certificates.push(
         certificate as (typeof unorderedCertificates)[number] & {
-          storage_key: string;
+          storageKey: string;
         },
       );
     }
@@ -60,23 +59,23 @@ export class WarrantyCertificateBatchEmailService {
       }> = [];
       for (const certificate of certificates) {
         const stream = await this.uploadAssetService.getStream(
-          certificate.storage_key,
+          certificate.storageKey,
         );
         attachments.push({
           contentBase64: (await this.streamToBuffer(stream)).toString('base64'),
           contentType: 'application/pdf',
-          filename: `${certificate.certificate_number}.pdf`,
+          filename: `${certificate.certificateNumber}.pdf`,
         });
       }
 
-      const customerName = request?.customer_name ?? 'Quý khách';
+      const customerName = request?.customerName ?? 'Quý khách';
       const certificateContext = certificates.map((certificate) => ({
-        certificateNumber: certificate.certificate_number,
+        certificateNumber: certificate.certificateNumber,
         productName:
-          certificate.warranty.product.display_name ??
+          certificate.warranty.product.displayName ??
           certificate.warranty.product.template.name,
-        serialNumber: certificate.warranty.product.serial_number ?? '-',
-        warrantyCode: certificate.warranty.warranty_code ?? '-',
+        serialNumber: certificate.warranty.product.serialNumber ?? '-',
+        warrantyCode: certificate.warranty.warrantyCode ?? '-',
       }));
       const subject = `Chứng nhận bảo hành điện tử (${certificates.length} sản phẩm)`;
       const text = [
@@ -106,21 +105,20 @@ export class WarrantyCertificateBatchEmailService {
         warrantyCertificateIds: certificateIds,
       });
 
-      await this.warrantyCertificatesRepository.updateMany(certificateIds, {
-        email_status: warranty_certificate_email_status.QUEUED,
-        emailed_at: new Date(),
-        last_error: null,
-      });
+      await this.warrantyCertificatesRepository.markEmailQueued(
+        certificateIds,
+        new Date(),
+      );
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Unknown email queue error';
       this.logger.error(
         `Failed to queue certificate batch email for request ${input.requestId}: ${message}`,
       );
-      await this.warrantyCertificatesRepository.updateMany(certificateIds, {
-        email_status: warranty_certificate_email_status.FAILED,
-        last_error: message,
-      });
+      await this.warrantyCertificatesRepository.markEmailQueueFailed(
+        certificateIds,
+        message,
+      );
     }
   }
 
