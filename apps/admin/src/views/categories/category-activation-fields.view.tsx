@@ -223,26 +223,28 @@ export function CategoryActivationFieldsView({
                 ))}
               </div>
 
-              <Button
-                onClick={() => {
-                  setFields((current) => [
-                    ...current,
-                    {
-                      key: "",
-                      label: "",
-                      options: [],
-                      placeholder: "",
-                      required: false,
-                      type: "TEXT",
-                    },
-                  ]);
-                }}
-                type="button"
-                variant="secondary"
-              >
-                <Plus className="size-4" />
-                {t("addActivationField")}
-              </Button>
+              <div className="flex justify-end">
+                <Button
+                  onClick={() => {
+                    setFields((current) => [
+                      ...current,
+                      {
+                        key: "",
+                        label: "",
+                        options: [],
+                        placeholder: "",
+                        required: false,
+                        type: "TEXT",
+                      },
+                    ]);
+                  }}
+                  type="button"
+                  variant="secondary"
+                >
+                  <Plus className="size-4" />
+                  {t("addActivationField")}
+                </Button>
+              </div>
 
               <div className="flex flex-col-reverse gap-2 border-t border-slate-200 pt-5 dark:border-slate-800 sm:flex-row sm:justify-end">
                 <Button
