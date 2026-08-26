@@ -17,7 +17,7 @@ test("activation request review dialog fills mobile screens and adapts its deskt
   );
   assert.match(
     source,
-    /isReject\s*\? "sm:w-\[min\(calc\(100vw-2rem\),36rem\)\] sm:max-w-xl"\s*: "sm:w-\[min\(calc\(100vw-2rem\),72rem\)\] sm:max-w-6xl"/,
+    /isReject\s*\? "sm:h-auto sm:w-\[min\(calc\(100vw-2rem\),36rem\)\] sm:max-w-xl"\s*: "sm:w-\[min\(calc\(100vw-2rem\),72rem\)\] sm:max-w-6xl"/,
   );
 });
 
