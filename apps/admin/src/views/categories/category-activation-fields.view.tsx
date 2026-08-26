@@ -1,20 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import {
-  ArrowDown,
-  ArrowUp,
-  FolderTree,
-  Loader2,
-  Plus,
-  Trash2,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
+import { FormPageShell } from "@/src/components/common/form-page-shell";
+import { SelectControl } from "@/src/components/common/select-control";
+import { StatePanel } from "@/src/components/common/state-panel";
+import { PermissionGuard } from "@/src/components/permission-guard";
+import { useToast } from "@/src/hooks/use-toast";
+import { useRouter } from "@/src/i18n/navigation";
+import { moveItem } from "@/src/utils/array";
 import type {
   CategoryActivationFieldOption,
   CategoryActivationFieldType,
 } from "@repo/shared";
 import { CATEGORY_ACTIVATION_FIELD_TYPES } from "@repo/shared";
+import { PERMISSIONS } from "@repo/shared/constants";
 import {
   Button,
   Card,
@@ -27,19 +25,16 @@ import {
   Label,
   Switch,
 } from "@repo/ui";
-import { FormPageShell } from "@/src/components/common/form-page-shell";
-import { SelectControl } from "@/src/components/common/select-control";
-import { StatePanel } from "@/src/components/common/state-panel";
-import { PermissionGuard } from "@/src/components/permission-guard";
-import { useToast } from "@/src/hooks/use-toast";
-import { useRouter } from "@/src/i18n/navigation";
-import { PERMISSIONS } from "@repo/shared/constants";
-import { moveItem } from "@/src/utils/array";
 import {
-  useCategory,
-  useCategoryActivationFields,
-  useUpdateCategoryActivationFields,
-} from "./hooks/use-categories";
+  ArrowDown,
+  ArrowUp,
+  FolderTree,
+  Loader2,
+  Plus,
+  Trash2,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
 import type {
   ActivationFieldOptionErrors,
   DraftActivationField,
@@ -48,6 +43,11 @@ import {
   fromDraftActivationFields,
   toDraftActivationFields,
 } from "./category-activation-fields.utils";
+import {
+  useCategory,
+  useCategoryActivationFields,
+  useUpdateCategoryActivationFields,
+} from "./hooks/use-categories";
 
 type CategoryActivationFieldsViewProps = {
   categoryId: string;
@@ -333,7 +333,7 @@ function ActivationFieldEditor({
         </div>
       </div>
 
-      <div className="mt-4 grid gap-5 sm:grid-cols-2">
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
         <div className="space-y-2">
           <Label>{t("activationFieldLabel")}</Label>
           <Input
