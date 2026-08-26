@@ -13,7 +13,7 @@ const source = readFileSync(
 test("activation request review dialog fills mobile screens and adapts its desktop width", () => {
   assert.match(
     source,
-    /DialogContent\s+className=\{`[^`]*h-dvh[^`]*w-screen[^`]*max-w-none[^`]*rounded-none[^`]*sm:block[^`]*sm:h-fit[^`]*sm:rounded-lg[^`]*sm:p-4[^`]*\$\{/,
+    /DialogContent\s+className=\{`[^`]*flex[^`]*h-dvh[^`]*max-h-dvh[^`]*w-screen[^`]*max-w-none[^`]*overflow-hidden[^`]*rounded-none[^`]*sm:h-auto[^`]*sm:max-h-\[calc\(100dvh-2rem\)\][^`]*sm:rounded-lg[^`]*\$\{/,
   );
   assert.match(
     source,
@@ -35,11 +35,11 @@ test("activation request review dialog keeps actions visible while content scrol
   assert.match(source, /<header className="[^"]*sm:border-0[^"]*sm:p-0[^"]*"/);
   assert.match(
     source,
-    /<div className="min-h-0 flex-1 overflow-y-auto[^"]*sm:overflow-visible sm:p-0[^"]*"/,
+    /<div className="min-h-0 flex-1 overflow-y-auto[^"]*sm:px-0[^"]*"/,
   );
   assert.match(
     source,
-    /<footer className="[^"]*sm:mt-6[^"]*sm:border-0[^"]*sm:p-0[^"]*"/,
+    /<footer className="[^"]*shrink-0[^"]*sm:flex-row[^"]*sm:justify-end[^"]*"/,
   );
 });
 

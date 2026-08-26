@@ -80,7 +80,7 @@ export function ReviewWarrantyActivationRequestDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className={`flex h-dvh max-h-dvh w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none p-0 sm:block sm:h-fit sm:max-h-none sm:overflow-visible sm:rounded-lg sm:p-4 ${
+        className={`flex h-dvh max-h-dvh w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none p-0 sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:rounded-lg sm:p-4 ${
           isReject
             ? "sm:w-[min(calc(100vw-2rem),36rem)] sm:max-w-xl"
             : "sm:w-[min(calc(100vw-2rem),72rem)] sm:max-w-6xl"
@@ -112,7 +112,7 @@ export function ReviewWarrantyActivationRequestDialog({
           </DialogDescription>
         </header>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:overflow-visible sm:p-0">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-0 sm:py-0">
           {visibleRequest?.items?.length ? (
             <div className="space-y-3 sm:mt-5">
               <p className="text-sm font-medium text-slate-950 dark:text-slate-50">
