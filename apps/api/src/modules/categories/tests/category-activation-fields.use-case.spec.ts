@@ -135,6 +135,59 @@ describe('Category activation field use cases', () => {
     expect(categoriesRepository.replaceActivationFields).not.toHaveBeenCalled();
   });
 
+  it('generates a stable slug key for new fields', async () => {
+    categoriesRepository.getActivationFields.mockResolvedValue({
+      categoryId: 'category-id',
+      activationFormEnabled: false,
+      activationFields: [],
+    });
+    categoriesRepository.replaceActivationFields.mockResolvedValue({});
+    const useCase = new UpdateCategoryActivationFieldsUseCase(
+      categoriesRepository as never,
+    );
+
+    await useCase.execute('category-id', {
+      activationFormEnabled: true,
+      activationFields: [
+        { label: 'Kính trước trái', type: 'TEXT' },
+        { label: 'Kính trước phải', type: 'TEXT' },
+      ],
+    });
+
+    expect(categoriesRepository.replaceActivationFields).toHaveBeenCalledWith(
+      'category-id',
+      expect.objectContaining({
+        activationFields: expect.arrayContaining([
+          expect.objectContaining({ key: 'kinh_truoc_trai' }),
+          expect.objectContaining({ key: 'kinh_truoc_phai' }),
+        ]),
+      }),
+    );
+  });
+
+  it('rejects duplicate display labels in a category', async () => {
+    categoriesRepository.getActivationFields.mockResolvedValue({
+      categoryId: 'category-id',
+      activationFormEnabled: false,
+      activationFields: [],
+    });
+    const useCase = new UpdateCategoryActivationFieldsUseCase(
+      categoriesRepository as never,
+    );
+
+    await expect(
+      useCase.execute('category-id', {
+        activationFormEnabled: true,
+        activationFields: [
+          { label: 'Kính lái', type: 'TEXT' },
+          { label: '  kính   lái ', type: 'TEXT' },
+        ],
+      }),
+    ).rejects.toMatchObject({
+      code: 'CATEGORY_ACTIVATION_FIELD_LABEL_DUPLICATE',
+    });
+  });
+
   it('rejects static options on PRODUCT_SELECT fields', async () => {
     categoriesRepository.getActivationFields.mockResolvedValue({
       categoryId: 'category-id',
