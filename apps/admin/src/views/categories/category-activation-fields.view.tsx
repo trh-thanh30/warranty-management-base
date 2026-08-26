@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ArrowDown,
   ArrowUp,
+  Eye,
   FolderTree,
   Loader2,
   Plus,
@@ -49,6 +50,8 @@ import {
   fromDraftActivationFields,
   toDraftActivationFields,
 } from "./category-activation-fields.utils";
+import { CategoryActivationFieldsPreviewDialog } from "./components/category-activation-fields-preview-dialog";
+import { FloatingPreviewButton } from "./components/floating-preview-button";
 
 type CategoryActivationFieldsViewProps = {
   categoryId: string;
@@ -70,6 +73,7 @@ export function CategoryActivationFieldsView({
   const category = categoryQuery.data ?? null;
   const [fields, setFields] = useState<DraftActivationField[]>([]);
   const [activationFieldsEnabled, setActivationFieldsEnabled] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -264,6 +268,22 @@ export function CategoryActivationFieldsView({
           </Card>
         )}
       </FormPageShell>
+      {!categoryQuery.isLoading &&
+      !activationFieldsQuery.isLoading &&
+      category ? (
+        <FloatingPreviewButton
+          aria-label={t("previewActivationFields")}
+          onClick={() => setPreviewOpen(true)}
+          title={t("previewActivationFields")}
+        >
+          <Eye aria-hidden="true" className="size-5" />
+        </FloatingPreviewButton>
+      ) : null}
+      <CategoryActivationFieldsPreviewDialog
+        fields={fields}
+        onOpenChange={setPreviewOpen}
+        open={previewOpen}
+      />
     </PermissionGuard>
   );
 }
