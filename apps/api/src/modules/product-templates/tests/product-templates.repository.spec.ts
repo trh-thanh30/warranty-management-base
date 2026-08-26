@@ -37,6 +37,7 @@ describe('ProductTemplatesRepository.list', () => {
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
+        orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
         where: expect.objectContaining({
           is_active: true,
           OR: expect.arrayContaining([categorySearch]),

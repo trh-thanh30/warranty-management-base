@@ -55,7 +55,7 @@ export class ContactSubmissionsRepository {
       const [items, total] = await Promise.all([
         tx.contactSubmission.findMany({
           where,
-          orderBy: [{ created_at: 'desc' }],
+          orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
           skip,
           take,
         }),

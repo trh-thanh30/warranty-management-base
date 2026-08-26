@@ -6,7 +6,7 @@ import {
 import { warranty_claim_status } from '@prisma/client';
 
 describe('warranty claim repository queries', () => {
-  it('normalizes codes and builds search, date, service center and sort filters', () => {
+  it('normalizes codes and builds search, date, service center and stable sort filters', () => {
     const { orderBy, where } = buildWarrantyClaimListQuery({
       search: '  lỗi màn hình  ',
       warrantyCode: ' wm-2026-001 ',
@@ -35,7 +35,17 @@ describe('warranty claim repository queries', () => {
         mode: 'insensitive',
       },
     });
-    expect(orderBy).toEqual([{ due_at: 'asc' }]);
+    expect(orderBy).toEqual([
+      { due_at: 'asc' },
+      { created_at: 'desc' },
+      { id: 'desc' },
+    ]);
+  });
+
+  it('lists newest claims first with an id tie-breaker by default', () => {
+    const { orderBy } = buildWarrantyClaimListQuery({});
+
+    expect(orderBy).toEqual([{ created_at: 'desc' }, { id: 'desc' }]);
   });
 
   it('uses the current time and excludes terminal statuses for overdue claims', () => {

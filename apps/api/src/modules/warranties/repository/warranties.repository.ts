@@ -30,6 +30,37 @@ const warrantyLookupInclude = {
   },
 } satisfies Prisma.ProductInclude;
 
+const warrantySortMap: Readonly<
+  Record<string, keyof Prisma.WarrantyOrderByWithRelationInput>
+> = {
+  createdAt: 'created_at',
+  endDate: 'end_date',
+  startDate: 'start_date',
+  updatedAt: 'updated_at',
+};
+
+function buildWarrantyOrderBy(
+  sortBy?: string,
+  sortOrder: 'asc' | 'desc' = 'desc',
+): Prisma.WarrantyOrderByWithRelationInput[] {
+  const mappedSortBy = sortBy ? warrantySortMap[sortBy] : undefined;
+
+  if (!mappedSortBy) {
+    return [{ created_at: 'desc' }, { id: 'desc' }];
+  }
+
+  const orderBy = [
+    { [mappedSortBy]: sortOrder },
+  ] as Prisma.WarrantyOrderByWithRelationInput[];
+
+  if (mappedSortBy !== 'created_at') {
+    orderBy.push({ created_at: 'desc' });
+  }
+
+  orderBy.push({ id: 'desc' });
+  return orderBy;
+}
+
 @Injectable()
 export class WarrantiesRepository {
   constructor(private readonly prismaService: PrismaService) {}
@@ -44,13 +75,6 @@ export class WarrantiesRepository {
   }) {
     const search = filters.search?.trim();
     const { page, limit, skip, take } = normalizePagination(filters);
-    const sortMap = {
-      createdAt: 'created_at',
-      endDate: 'end_date',
-      startDate: 'start_date',
-      updatedAt: 'updated_at',
-    } satisfies Record<string, keyof Prisma.WarrantyOrderByWithRelationInput>;
-    const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
     const where: Prisma.WarrantyWhereInput = {
       status: filters.status,
       product: {
@@ -104,9 +128,7 @@ export class WarrantiesRepository {
           ]
         : undefined,
     };
-    const orderBy: Prisma.WarrantyOrderByWithRelationInput[] = sortBy
-      ? [{ [sortBy]: filters.sortOrder ?? 'desc' }]
-      : [{ created_at: 'desc' }];
+    const orderBy = buildWarrantyOrderBy(filters.sortBy, filters.sortOrder);
 
     return this.prismaService.$transaction(async (tx) => {
       const [items, total] = await Promise.all([
@@ -131,13 +153,6 @@ export class WarrantiesRepository {
     sortOrder?: 'asc' | 'desc';
   }) {
     const search = filters.search?.trim();
-    const sortMap = {
-      createdAt: 'created_at',
-      endDate: 'end_date',
-      startDate: 'start_date',
-      updatedAt: 'updated_at',
-    } satisfies Record<string, keyof Prisma.WarrantyOrderByWithRelationInput>;
-    const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
     const where: Prisma.WarrantyWhereInput = {
       status: filters.status,
       product: {
@@ -191,9 +206,7 @@ export class WarrantiesRepository {
           ]
         : undefined,
     };
-    const orderBy: Prisma.WarrantyOrderByWithRelationInput[] = sortBy
-      ? [{ [sortBy]: filters.sortOrder ?? 'desc' }]
-      : [{ created_at: 'desc' }];
+    const orderBy = buildWarrantyOrderBy(filters.sortBy, filters.sortOrder);
 
     return this.prismaService.warranty.findMany({
       where,

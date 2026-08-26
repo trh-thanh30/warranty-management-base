@@ -2,6 +2,22 @@ import { ListWarrantyActivationRequestsDto } from '@/modules/warranty-activation
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
+function buildWarrantyActivationRequestOrderBy(
+  sortBy?: keyof Prisma.WarrantyActivationRequestOrderByWithRelationInput,
+  sortOrder: 'asc' | 'desc' = 'desc',
+): Prisma.WarrantyActivationRequestOrderByWithRelationInput[] {
+  if (!sortBy) return [{ created_at: 'desc' }, { id: 'desc' }];
+
+  const orderBy = [
+    { [sortBy]: sortOrder },
+  ] as Prisma.WarrantyActivationRequestOrderByWithRelationInput[];
+
+  if (sortBy !== 'created_at') orderBy.push({ created_at: 'desc' });
+
+  orderBy.push({ id: 'desc' });
+  return orderBy;
+}
+
 @Injectable()
 export class WarrantyActivationRequestQueries {
   readonly include = {
@@ -139,10 +155,10 @@ export class WarrantyActivationRequestQueries {
           Boolean(filter),
       ),
     };
-    const orderBy: Prisma.WarrantyActivationRequestOrderByWithRelationInput[] =
-      sortBy
-        ? [{ [sortBy]: filters.sortOrder ?? 'desc' }]
-        : [{ created_at: 'desc' }];
+    const orderBy = buildWarrantyActivationRequestOrderBy(
+      sortBy,
+      filters.sortOrder,
+    );
 
     return { orderBy, where };
   }

@@ -222,4 +222,44 @@ describe('WarrantyActivationRequestsRepository', () => {
       }),
     );
   });
+
+  it('sorts activation requests by newest creation date and id by default', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const count = jest.fn().mockResolvedValue(0);
+    const repository = new WarrantyActivationRequestsRepository(
+      {
+        $transaction: (callback: (tx: unknown) => unknown) =>
+          callback({ warrantyActivationRequest: { count, findMany } }),
+      } as never,
+      queries,
+    );
+
+    await repository.list({});
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
+      }),
+    );
+  });
+
+  it('keeps a selected sort before creation date and id tie-breakers', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const count = jest.fn().mockResolvedValue(0);
+    const repository = new WarrantyActivationRequestsRepository(
+      {
+        $transaction: (callback: (tx: unknown) => unknown) =>
+          callback({ warrantyActivationRequest: { count, findMany } }),
+      } as never,
+      queries,
+    );
+
+    await repository.list({ sortBy: 'status', sortOrder: 'asc' });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderBy: [{ status: 'asc' }, { created_at: 'desc' }, { id: 'desc' }],
+      }),
+    );
+  });
 });
