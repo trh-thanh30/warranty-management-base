@@ -1,5 +1,6 @@
 import { WarrantyCertificateBatchEmailService } from '@/modules/warranty-certificates/services/warranty-certificate-batch-email.service';
 import { IssueWarrantyCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-certificate.use-case';
+import { WarrantyCertificateEmailLocale } from '@/modules/warranty-certificates/warranty-certificates.types';
 import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
@@ -14,6 +15,7 @@ export class IssueWarrantyCertificatesForRequestUseCase {
   ) {}
 
   async execute(input: {
+    locale?: WarrantyCertificateEmailLocale;
     recipientEmail?: string;
     requestId: string;
     warrantyIds: string[];
@@ -24,6 +26,7 @@ export class IssueWarrantyCertificatesForRequestUseCase {
     for (const warrantyId of [...new Set(input.warrantyIds)]) {
       try {
         const certificate = await this.issueWarrantyCertificateUseCase.execute({
+          ...(input.locale ? { locale: input.locale } : {}),
           queueEmail: false,
           recipientEmail: input.recipientEmail,
           requestId: input.requestId,
@@ -46,6 +49,7 @@ export class IssueWarrantyCertificatesForRequestUseCase {
           certificateIds,
           recipientEmail: input.recipientEmail,
           requestId: input.requestId,
+          ...(input.locale ? { locale: input.locale } : {}),
         });
       } catch (error) {
         const message =

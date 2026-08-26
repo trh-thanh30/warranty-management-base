@@ -5,6 +5,7 @@ import {
   IsDateString,
   IsEmail,
   IsInt,
+  IsIn,
   IsNumber,
   IsObject,
   IsOptional,
@@ -71,6 +72,10 @@ export class ActivationFilmItemsDto {
 }
 
 export class CreateWarrantyActivationRequestDto {
+  @IsOptional()
+  @IsIn(['vi', 'en'])
+  locale?: 'vi' | 'en';
+
   @IsOptional()
   @IsString()
   @Length(6, 64)

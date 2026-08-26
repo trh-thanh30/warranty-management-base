@@ -46,4 +46,23 @@ describe('WarrantyCertificatesRepository application contracts', () => {
       warrantyId: 'warranty-1',
     });
   });
+
+  it('loads the request locale and preserves the Vietnamese fallback', async () => {
+    const findUnique = jest.fn().mockResolvedValue({
+      customer_name: 'Thanh',
+      metadata: { locale: 'en' },
+    });
+    const repository = new WarrantyCertificatesRepository({
+      warrantyActivationRequest: { findUnique },
+    } as never);
+
+    await expect(
+      repository.findBatchEmailRequest('request-id'),
+    ).resolves.toEqual({ customerName: 'Thanh', locale: 'en' });
+
+    expect(findUnique).toHaveBeenCalledWith({
+      where: { id: 'request-id' },
+      select: { customer_name: true, metadata: true },
+    });
+  });
 });

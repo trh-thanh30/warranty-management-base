@@ -478,6 +478,7 @@ export class CreateWarrantyActivationRequestUseCase {
     metadata.productId = input.product.id;
     metadata.source = input.source;
     metadata.warrantyId = input.warrantyId;
+    metadata.locale = input.dto.locale ?? 'vi';
 
     const dealerSnapshot = this.buildDealerSnapshot(input.dto, input.dealer);
     if (dealerSnapshot) {

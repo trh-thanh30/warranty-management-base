@@ -17,6 +17,22 @@ export type WarrantyCertificateStatus =
 export type WarrantyCertificateEmailStatus =
   (typeof WARRANTY_CERTIFICATE_EMAIL_STATUS)[keyof typeof WARRANTY_CERTIFICATE_EMAIL_STATUS];
 
+export const WARRANTY_CERTIFICATE_EMAIL_LOCALE = {
+  EN: 'en',
+  VI: 'vi',
+} as const;
+
+export type WarrantyCertificateEmailLocale =
+  (typeof WARRANTY_CERTIFICATE_EMAIL_LOCALE)[keyof typeof WARRANTY_CERTIFICATE_EMAIL_LOCALE];
+
+export function normalizeWarrantyCertificateEmailLocale(
+  locale: unknown,
+): WarrantyCertificateEmailLocale {
+  return locale === WARRANTY_CERTIFICATE_EMAIL_LOCALE.EN
+    ? WARRANTY_CERTIFICATE_EMAIL_LOCALE.EN
+    : WARRANTY_CERTIFICATE_EMAIL_LOCALE.VI;
+}
+
 export type WarrantyCertificateRecord = {
   certificateNumber: string;
   createdAt: Date;
@@ -100,6 +116,7 @@ export type WarrantyCertificateForBatchEmail = WarrantyCertificateRecord & {
 
 export type WarrantyCertificateBatchEmailRequest = {
   customerName: string;
+  locale: WarrantyCertificateEmailLocale;
 };
 
 export type WarrantyCertificateStorageReference = {

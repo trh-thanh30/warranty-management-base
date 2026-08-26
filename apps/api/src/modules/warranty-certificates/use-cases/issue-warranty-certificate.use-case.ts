@@ -6,6 +6,7 @@ import { WarrantyCertificatePdfService } from '@/modules/warranty-certificates/s
 import {
   WarrantyCertificateActivationRequest,
   WarrantyCertificateRecord,
+  WarrantyCertificateEmailLocale,
   WARRANTY_CERTIFICATE_EMAIL_STATUS,
   WARRANTY_CERTIFICATE_STATUS,
 } from '@/modules/warranty-certificates/warranty-certificates.types';
@@ -30,6 +31,7 @@ export class IssueWarrantyCertificateUseCase {
   ) {}
 
   async execute(input: {
+    locale?: WarrantyCertificateEmailLocale;
     queueEmail?: boolean;
     recipientEmail?: string;
     warrantyId: string;

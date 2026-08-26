@@ -11,6 +11,7 @@ import {
   WarrantyCertificateStorageReference,
   WarrantyCertificateWriteInput,
   WarrantyForCertificate,
+  normalizeWarrantyCertificateEmailLocale,
 } from '@/modules/warranty-certificates/warranty-certificates.types';
 import { Injectable } from '@nestjs/common';
 import {
@@ -150,10 +151,17 @@ export class WarrantyCertificatesRepository {
     const request =
       await this.prismaService.warrantyActivationRequest.findUnique({
         where: { id: requestId },
-        select: { customer_name: true },
+        select: { customer_name: true, metadata: true },
       });
 
-    return request ? { customerName: request.customer_name } : null;
+    return request
+      ? {
+          customerName: request.customer_name,
+          locale: normalizeWarrantyCertificateEmailLocale(
+            isRecord(request.metadata) ? request.metadata.locale : undefined,
+          ),
+        }
+      : null;
   }
 
   async findBatchEmailCertificates(
@@ -454,4 +462,8 @@ function toWarrantyCertificateForBatchEmail(
       warrantyCode: certificate.warranty.warranty_code,
     },
   };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 }

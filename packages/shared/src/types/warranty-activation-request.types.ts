@@ -148,6 +148,7 @@ export type CreateWarrantyActivationRequestItemBody = {
 };
 
 export type CreateWarrantyActivationRequestBody = {
+  locale?: "vi" | "en";
   warrantyCode?: string;
   categoryId?: string;
   productId?: string;

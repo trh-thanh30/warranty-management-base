@@ -2,6 +2,7 @@ import { BadRequestError, NotFoundError } from '@/common/response';
 import { toWarrantyActivationRequestResponse } from '@/modules/warranty-activation-requests/mappers/warranty-activation-request.mapper';
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
 import { IssueWarrantyCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-certificate.use-case';
+import { normalizeWarrantyCertificateEmailLocale } from '@/modules/warranty-certificates/warranty-certificates.types';
 import { Injectable } from '@nestjs/common';
 import { warranty_activation_request_status } from '@prisma/client';
 
@@ -36,7 +37,11 @@ export class RetryWarrantyActivationRequestCertificateUseCase {
       );
     }
 
+    const requestedLocale = this.readLocale(request.metadata);
     await this.issueWarrantyCertificateUseCase.execute({
+      ...(requestedLocale
+        ? { locale: normalizeWarrantyCertificateEmailLocale(requestedLocale) }
+        : {}),
       recipientEmail: request.customer_email ?? undefined,
       requestId,
       warrantyId,
@@ -48,5 +53,11 @@ export class RetryWarrantyActivationRequestCertificateUseCase {
     }
 
     return toWarrantyActivationRequestResponse(updatedRequest);
+  }
+
+  private readLocale(metadata: unknown) {
+    return metadata && typeof metadata === 'object' && !Array.isArray(metadata)
+      ? (metadata as Record<string, unknown>).locale
+      : undefined;
   }
 }
