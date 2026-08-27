@@ -43,7 +43,10 @@ export function NotificationBell() {
 
     setIsRefreshing(true);
     try {
-      await Promise.all([unreadQuery.refetch(), recentQuery.refetch()]);
+      const refreshes: Promise<unknown>[] = [];
+      if (unreadQuery.isStale) refreshes.push(unreadQuery.refetch());
+      if (recentQuery.isStale) refreshes.push(recentQuery.refetch());
+      await Promise.all(refreshes);
     } catch {
       toast.error(t("loadError"));
     } finally {
