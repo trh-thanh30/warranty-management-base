@@ -1,7 +1,9 @@
 import type {
+  ActivationProductOption,
   AssignProductOwnerBody,
   AttachProductAssetBody,
   CreateProductBody,
+  ListActivationProductOptionsQuery,
   ListProductsQuery,
   PaginatedResponse,
   ProductResponse,
@@ -19,6 +21,17 @@ import type {
 
 export function createProductsService(http: ProductsHttpClient) {
   return {
+    async listActivationProductOptions(
+      query: ListActivationProductOptionsQuery,
+    ): Promise<PaginatedResponse<ActivationProductOption>> {
+      return unwrap(
+        await http.get<PaginatedResponse<ActivationProductOption>>(
+          "/products/activation-options",
+          { params: query },
+        ),
+      );
+    },
+
     async listProducts(
       query: ListProductsQuery,
     ): Promise<PaginatedResponse<ProductResponse>> {

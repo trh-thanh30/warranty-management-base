@@ -25,8 +25,8 @@ import { CreateDealerDialog } from "../../dealers/components/create-dealer-dialo
 import { useCreateWarrantyActivationRequestForm } from "../hooks/use-create-warranty-activation-request-form";
 import {
   formatActivationProductSearchOption,
+  getActivationProductOptionDisabledReason,
   getActivationProductDisplayName,
-  getProductSelectDisabledReason,
   getProductWarrantyStatusLabel,
 } from "../warranty-activation-request-product.utils";
 import {
@@ -184,7 +184,7 @@ export function CreateWarrantyActivationRequestFormCard({
                   }
                   errorLabel={t("productLoadError")}
                   getItemDisabledReason={(product) =>
-                    getProductSelectDisabledReason(product, t)
+                    getActivationProductOptionDisabledReason(product, t)
                   }
                   getItemKey={(product) => product.id}
                   id="create-activation-request-product"
@@ -212,7 +212,7 @@ export function CreateWarrantyActivationRequestFormCard({
                   }
                   renderItem={(product) => (
                     <ProductSearchResult
-                      disabledReason={getProductSelectDisabledReason(
+                      disabledReason={getActivationProductOptionDisabledReason(
                         product,
                         t,
                       )}

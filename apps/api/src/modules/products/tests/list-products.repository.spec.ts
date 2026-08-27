@@ -463,4 +463,56 @@ describe('ProductsRepository.list', () => {
       where: expect.objectContaining(visibilityFilter),
     });
   });
+
+  it('paginates eligible activation options before disabled products', async () => {
+    const eligibleProduct = { id: 'eligible-product' };
+    const ineligibleProduct = { id: 'ineligible-product' };
+    const findMany = jest
+      .fn()
+      .mockResolvedValueOnce([eligibleProduct])
+      .mockResolvedValueOnce([ineligibleProduct]);
+    const count = jest.fn().mockResolvedValueOnce(2).mockResolvedValueOnce(4);
+    const prismaService = {
+      $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
+        callback({ product: { count, findMany } }),
+      ),
+    };
+    const repository = new ProductsRepository(prismaService as never);
+
+    const result = await repository.listActivationOptions({
+      categoryId: 'category-id',
+      limit: 3,
+      page: 1,
+      search: 'film',
+    });
+
+    expect(result.items).toEqual([eligibleProduct, ineligibleProduct]);
+    expect(result.meta).toEqual(
+      expect.objectContaining({ limit: 3, page: 1, total: 4 }),
+    );
+    expect(findMany).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        skip: 0,
+        take: 2,
+        where: expect.objectContaining({
+          AND: expect.arrayContaining([
+            expect.objectContaining({ category_id: 'category-id' }),
+          ]),
+        }),
+      }),
+    );
+    expect(findMany).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        skip: 0,
+        take: 1,
+        where: expect.objectContaining({
+          AND: expect.arrayContaining([
+            expect.objectContaining({ NOT: expect.any(Object) }),
+          ]),
+        }),
+      }),
+    );
+  });
 });
