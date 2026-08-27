@@ -123,7 +123,7 @@ function StaffDirectoryFilters({
   const t = useTranslations("Staff");
 
   return (
-    <div className="grid gap-3 sm:grid-cols-[minmax(16rem,1fr)_10rem]">
+    <div className="grid gap-3 sm:grid-cols-[minmax(22rem,1fr)_10rem]">
       <div className="relative">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
         <Input
