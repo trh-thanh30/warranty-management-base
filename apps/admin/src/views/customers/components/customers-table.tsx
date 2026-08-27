@@ -27,7 +27,13 @@ import {
   TableRow,
   TableScroll,
 } from "@repo/ui";
-import { MoreHorizontal, PackageSearch, Pencil, Trash2 } from "lucide-react";
+import {
+  MoreHorizontal,
+  PackageSearch,
+  Pencil,
+  RotateCcw,
+  Trash2,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { getCustomerContact, getCustomerDisplayName } from "../customers.utils";
 
@@ -37,6 +43,7 @@ type CustomersTableProps = {
   sortBy?: CustomerSortBy;
   sortOrder: "asc" | "desc";
   onDelete?: (customer: CustomerSummary) => void;
+  onRestore?: (customer: CustomerSummary) => void;
 };
 
 type CustomerSortBy = NonNullable<ListCustomersQuery["sortBy"]>;
@@ -47,6 +54,7 @@ export function CustomersTable({
   sortBy,
   sortOrder,
   onDelete,
+  onRestore,
 }: CustomersTableProps) {
   const t = useTranslations("Customers");
 
@@ -58,6 +66,7 @@ export function CustomersTable({
             customer={customer}
             key={customer.id}
             onDelete={onDelete}
+            onRestore={onRestore}
           />
         ))}
       </div>
@@ -108,6 +117,7 @@ export function CustomersTable({
                 customer={customer}
                 key={customer.id}
                 onDelete={onDelete}
+                onRestore={onRestore}
               />
             ))}
           </TableBody>
@@ -120,9 +130,11 @@ export function CustomersTable({
 function CustomerTableRow({
   customer,
   onDelete,
+  onRestore,
 }: {
   customer: CustomerSummary;
   onDelete?: (customer: CustomerSummary) => void;
+  onRestore?: (customer: CustomerSummary) => void;
 }) {
   const locale = useLocale();
 
@@ -140,7 +152,11 @@ function CustomerTableRow({
       </TableCell>
       <TableCell>{formatDate(customer.createdAt, { locale })}</TableCell>
       <TableCell className="text-right">
-        <CustomerActionsMenu customer={customer} onDelete={onDelete} />
+        <CustomerActionsMenu
+          customer={customer}
+          onDelete={onDelete}
+          onRestore={onRestore}
+        />
       </TableCell>
     </TableRow>
   );
@@ -169,9 +185,11 @@ function CustomerIdentityCell({ customer }: { customer: CustomerSummary }) {
 function CustomerMobileCard({
   customer,
   onDelete,
+  onRestore,
 }: {
   customer: CustomerSummary;
   onDelete?: (customer: CustomerSummary) => void;
+  onRestore?: (customer: CustomerSummary) => void;
 }) {
   const locale = useLocale();
   const t = useTranslations("Customers");
@@ -180,7 +198,11 @@ function CustomerMobileCard({
     <article className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
       <div className="flex items-start justify-between gap-3">
         <CustomerIdentityCell customer={customer} />
-        <CustomerActionsMenu customer={customer} onDelete={onDelete} />
+        <CustomerActionsMenu
+          customer={customer}
+          onDelete={onDelete}
+          onRestore={onRestore}
+        />
       </div>
 
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
@@ -240,9 +262,11 @@ function CustomerStatusBadge({ customer }: { customer: CustomerSummary }) {
 function CustomerActionsMenu({
   customer,
   onDelete,
+  onRestore,
 }: {
   customer: CustomerSummary;
   onDelete?: (customer: CustomerSummary) => void;
+  onRestore?: (customer: CustomerSummary) => void;
 }) {
   const t = useTranslations("Customers");
   const { hasPermission } = usePermissions();
@@ -282,13 +306,19 @@ function CustomerActionsMenu({
             </Link>
           </DropdownMenuItem>
         ) : null}
-        {onDelete ? (
+        {customer.status === "ACTIVE" && onDelete ? (
           <DropdownMenuItem
             className="text-red-600"
             onSelect={() => onDelete(customer)}
           >
             <Trash2 className="mr-2 size-4" />
             {t("delete")}
+          </DropdownMenuItem>
+        ) : null}
+        {customer.status === "DELETED" && onRestore ? (
+          <DropdownMenuItem onSelect={() => onRestore(customer)}>
+            <RotateCcw className="mr-2 size-4" />
+            {t("restore")}
           </DropdownMenuItem>
         ) : null}
       </DropdownMenuContent>

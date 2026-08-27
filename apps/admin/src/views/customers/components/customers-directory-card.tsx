@@ -37,6 +37,7 @@ type CustomersDirectoryCardProps = {
   onSortChange: (sortBy: CustomerSortBy) => void;
   onStatusChange: (status: "ACTIVE" | "DELETED" | "ALL") => void;
   onDelete?: (customer: CustomerSummary) => void;
+  onRestore?: (customer: CustomerSummary) => void;
   pageSize: number;
   search: string;
   sortBy?: CustomerSortBy;
@@ -61,6 +62,7 @@ export function CustomersDirectoryCard({
   sortBy,
   sortOrder,
   onDelete,
+  onRestore,
 }: CustomersDirectoryCardProps) {
   const t = useTranslations("Customers");
   const hasSearch = Boolean(search.trim());
@@ -97,6 +99,7 @@ export function CustomersDirectoryCard({
           sortBy={sortBy}
           sortOrder={sortOrder}
           onDelete={onDelete}
+          onRestore={onRestore}
         />
       </CardContent>
     </Card>
@@ -157,6 +160,7 @@ function CustomersDirectoryContent({
   onSearchChange,
   onSortChange,
   onDelete,
+  onRestore,
   pageSize,
   sortBy,
   sortOrder,
@@ -172,6 +176,7 @@ function CustomersDirectoryContent({
   | "onSearchChange"
   | "onSortChange"
   | "onDelete"
+  | "onRestore"
   | "pageSize"
   | "sortBy"
   | "sortOrder"
@@ -205,6 +210,7 @@ function CustomersDirectoryContent({
         <CustomersTable
           items={data.items}
           onDelete={onDelete}
+          onRestore={onRestore}
           onSortChange={onSortChange}
           sortBy={sortBy}
           sortOrder={sortOrder}

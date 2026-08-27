@@ -18,11 +18,15 @@ export function CustomersView() {
   const t = useTranslations("Customers");
   const [customerToDelete, setCustomerToDelete] =
     useState<CustomerSummary | null>(null);
+  const [customerToRestore, setCustomerToRestore] =
+    useState<CustomerSummary | null>(null);
   const {
     canCreateCustomers,
     canDeleteCustomers,
     deleteCustomer,
     isDeleting,
+    isRestoring,
+    restoreCustomer,
     closeImportDialog,
     customersQuery,
     downloadImportTemplate,
@@ -94,6 +98,13 @@ export function CustomersView() {
                 }
               : undefined
           }
+          onRestore={
+            canDeleteCustomers
+              ? (customer) => {
+                  setCustomerToRestore(customer);
+                }
+              : undefined
+          }
           data={customersQuery.data}
           isError={customersQuery.isError}
           isLoading={customersQuery.isLoading}
@@ -130,6 +141,25 @@ export function CustomersView() {
           open={Boolean(customerToDelete)}
           title={t("deleteTitle")}
           variant="destructive"
+        />
+
+        <ConfirmActionDialog
+          cancelLabel={t("cancel")}
+          confirmDisabled={!customerToRestore}
+          confirmLabel={t("restore")}
+          description={t("restoreConfirm")}
+          isLoading={isRestoring}
+          onConfirm={() => {
+            if (!customerToRestore) return;
+            void restoreCustomer(customerToRestore.id)
+              .then(() => setCustomerToRestore(null))
+              .catch(() => undefined);
+          }}
+          onOpenChange={(open) => {
+            if (!open) setCustomerToRestore(null);
+          }}
+          open={Boolean(customerToRestore)}
+          title={t("restoreTitle")}
         />
 
         <ExcelImportDialog

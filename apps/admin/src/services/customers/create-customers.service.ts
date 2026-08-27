@@ -48,6 +48,12 @@ export function createCustomersService(http: CustomersHttpClient) {
       );
     },
 
+    async restoreCustomer(customerId: string): Promise<CustomerSummary> {
+      return unwrap(
+        await http.patch<CustomerSummary>(`/customers/${customerId}/restore`),
+      );
+    },
+
     async downloadImportTemplate(): Promise<Blob> {
       const response = await http.get<Blob>("/customers/import-template", {
         responseType: "blob",

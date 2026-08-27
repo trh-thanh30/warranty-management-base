@@ -15,6 +15,7 @@ import {
   useCustomers,
   useDeleteCustomer,
   useImportCustomers,
+  useRestoreCustomer,
 } from "./use-customers";
 
 const CUSTOMERS_PAGE_SIZE = 10;
@@ -49,6 +50,7 @@ export function useCustomersDirectory() {
   const canDeleteCustomers = hasPermission(PERMISSIONS.CUSTOMER_DELETE);
   const importCustomers = useImportCustomers();
   const deleteCustomer = useDeleteCustomer();
+  const restoreCustomer = useRestoreCustomer();
   const customersQuery = useCustomers(
     {
       limit: pageSize,
@@ -138,6 +140,16 @@ export function useCustomersDirectory() {
       }
     },
     isDeleting: deleteCustomer.isPending,
+    restoreCustomer: async (id: string) => {
+      try {
+        await restoreCustomer.mutateAsync(id);
+        toast.success(t("restored"));
+      } catch {
+        toast.error(t("restoreError"));
+        throw new Error("Customer restoration failed");
+      }
+    },
+    isRestoring: restoreCustomer.isPending,
     isImportDialogOpen,
     isImporting: importCustomers.isPending,
     openImportDialog: () => setImportDialogOpen(true),

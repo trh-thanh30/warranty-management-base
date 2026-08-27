@@ -100,3 +100,14 @@ export function useDeleteCustomer() {
     },
   });
 }
+
+export function useRestoreCustomer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (customerId: string) =>
+      customersService.restoreCustomer(customerId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
+    },
+  });
+}

@@ -11,6 +11,7 @@ import { ImportCustomersUseCase } from '@/modules/customers/use-cases/import-cus
 import { ListCustomersUseCase } from '@/modules/customers/use-cases/list-customers.use-case';
 import { UpdateCustomerUseCase } from '@/modules/customers/use-cases/update-customer.use-case';
 import { SoftDeleteCustomerUseCase } from '@/modules/customers/use-cases/soft-delete-customer.use-case';
+import { RestoreCustomerUseCase } from '@/modules/customers/use-cases/restore-customer.use-case';
 import {
   Body,
   Controller,
@@ -39,6 +40,7 @@ export class CustomersController {
     private readonly exportCustomersUseCase: ExportCustomersUseCase,
     private readonly importCustomersUseCase: ImportCustomersUseCase,
     private readonly softDeleteCustomerUseCase: SoftDeleteCustomerUseCase,
+    private readonly restoreCustomerUseCase: RestoreCustomerUseCase,
   ) {}
 
   @Get()
@@ -87,6 +89,12 @@ export class CustomersController {
   @Permissions([permission_key.CUSTOMER_UPDATE])
   update(@Param('id') id: string, @Body() dto: UpdateCustomerDto) {
     return this.updateCustomerUseCase.execute(id, dto);
+  }
+
+  @Patch(':id/restore')
+  @Permissions([permission_key.CUSTOMER_DELETE])
+  restore(@Param('id') id: string) {
+    return this.restoreCustomerUseCase.execute(id);
   }
 
   @Delete(':id')
