@@ -26,6 +26,9 @@ export const notificationKeys = {
     [...notificationKeys.all, "user", query] as const,
 };
 
+const UNREAD_NOTIFICATION_POLL_INTERVAL_MS = 30_000;
+const UNREAD_NOTIFICATION_ERROR_INTERVAL_MS = 120_000;
+
 export function useUnreadNotificationCount(
   options?: Pick<UseQueryOptions<UnreadNotificationCount>, "enabled">,
 ) {
@@ -33,7 +36,16 @@ export function useUnreadNotificationCount(
     ...options,
     queryKey: notificationKeys.unread(),
     queryFn: () => notificationsService.countUnread(),
-    refetchInterval: 30_000,
+    // Keep the badge fresh for active tabs without generating background traffic.
+    refetchInterval: (query) =>
+      query.state.status === "error" || query.state.fetchFailureCount > 0
+        ? UNREAD_NOTIFICATION_ERROR_INTERVAL_MS
+        : UNREAD_NOTIFICATION_POLL_INTERVAL_MS,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1_000 * 2 ** attemptIndex, 10_000),
+    staleTime: 15_000,
   });
 }
 

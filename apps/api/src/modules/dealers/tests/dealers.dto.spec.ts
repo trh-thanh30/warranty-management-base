@@ -1,5 +1,8 @@
+import 'reflect-metadata';
+
 import { CreateDealerDto } from '@/modules/dealers/dto/create-dealer.dto';
 import { UpdateDealerDto } from '@/modules/dealers/dto/update-dealer.dto';
+import { ListDealersDto } from '@/modules/dealers/dto/list-dealers.dto';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 
@@ -12,6 +15,12 @@ const validDealer = {
 };
 
 describe('Dealer DTO validation', () => {
+  it('accepts all as the active list filter', async () => {
+    const dto = plainToInstance(ListDealersDto, { isActive: 'all' });
+
+    await expect(validate(dto)).resolves.toHaveLength(0);
+  });
+
   it('requires coordinates when creating a dealer', async () => {
     const dto = plainToInstance(CreateDealerDto, {
       name: validDealer.name,

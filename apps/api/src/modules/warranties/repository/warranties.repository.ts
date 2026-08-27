@@ -77,7 +77,7 @@ export class WarrantiesRepository {
 
   list(filters: {
     search?: string;
-    status?: warranty_status;
+    status?: warranty_status | 'ALL';
     page?: number;
     limit?: number;
     sortBy?: string;
@@ -86,7 +86,12 @@ export class WarrantiesRepository {
     const search = filters.search?.trim();
     const { page, limit, skip, take } = normalizePagination(filters);
     const where: Prisma.WarrantyWhereInput = {
-      status: filters.status,
+      status:
+        filters.status === undefined
+          ? warranty_status.ACTIVE
+          : filters.status === 'ALL'
+            ? undefined
+            : filters.status,
       product: {
         deleted_at: null,
       },
@@ -158,13 +163,18 @@ export class WarrantiesRepository {
 
   listForExport(filters: {
     search?: string;
-    status?: warranty_status;
+    status?: warranty_status | 'ALL';
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
   }) {
     const search = filters.search?.trim();
     const where: Prisma.WarrantyWhereInput = {
-      status: filters.status,
+      status:
+        filters.status === undefined
+          ? warranty_status.ACTIVE
+          : filters.status === 'ALL'
+            ? undefined
+            : filters.status,
       product: {
         deleted_at: null,
       },

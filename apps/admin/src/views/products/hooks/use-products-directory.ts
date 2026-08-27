@@ -41,7 +41,7 @@ type ProductDirectoryFilters = {
 
 const INITIAL_PRODUCT_DIRECTORY_FILTERS = {
   categoryId: "ALL",
-  status: "ALL",
+  status: "ACTIVE",
 } satisfies ProductDirectoryFilters;
 
 export function useProductsDirectory() {
@@ -87,7 +87,7 @@ export function useProductsDirectory() {
       search: debouncedSearch || undefined,
       sortBy,
       sortOrder,
-      status: filters.status === "ALL" ? undefined : filters.status,
+      status: filters.status === "ALL" ? "ALL" : filters.status,
     },
     {
       enabled: Boolean(currentUser) && canViewProducts,
@@ -291,7 +291,7 @@ export function useProductsDirectory() {
       search: debouncedSearch || undefined,
       sortBy,
       sortOrder,
-      status: filters.status === "ALL" ? undefined : filters.status,
+      status: filters.status === "ALL" ? "ALL" : filters.status,
     };
   }
 

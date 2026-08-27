@@ -1,4 +1,5 @@
 import { WarrantiesRepository } from '@/modules/warranties/repository/warranties.repository';
+import { warranty_status } from '@prisma/client';
 
 describe('WarrantiesRepository sorting', () => {
   const findMany = jest.fn().mockResolvedValue([]);
@@ -28,6 +29,17 @@ describe('WarrantiesRepository sorting', () => {
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
+        where: expect.objectContaining({ status: warranty_status.ACTIVE }),
+      }),
+    );
+  });
+
+  it('does not filter warranty status when status is all', async () => {
+    await repository.list({ limit: 10, page: 1, status: 'ALL' });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ status: undefined }),
       }),
     );
   });
@@ -60,6 +72,22 @@ describe('WarrantiesRepository sorting', () => {
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         orderBy: [{ end_date: 'desc' }, { created_at: 'desc' }, { id: 'desc' }],
+      }),
+    );
+  });
+
+  it('uses the same default and all status semantics for exports', async () => {
+    await repository.listForExport({});
+    expect(findMany).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ status: warranty_status.ACTIVE }),
+      }),
+    );
+
+    await repository.listForExport({ status: 'ALL' });
+    expect(findMany).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ status: undefined }),
       }),
     );
   });

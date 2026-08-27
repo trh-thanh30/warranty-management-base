@@ -28,7 +28,7 @@ type ServiceCenterDirectoryFilters = {
 
 const INITIAL_SERVICE_CENTER_FILTERS = {
   province: "",
-  status: "ALL",
+  status: "ACTIVE",
 } satisfies ServiceCenterDirectoryFilters;
 
 export function useServiceCentersDirectory() {

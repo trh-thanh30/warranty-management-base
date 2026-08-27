@@ -1,10 +1,16 @@
 import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
-import { IsBooleanString, IsOptional, IsString, Length } from 'class-validator';
+import {
+  IsBooleanString,
+  IsIn,
+  IsOptional,
+  IsString,
+  Length,
+} from 'class-validator';
 
 export class ListProductTemplatesDto extends PaginationQueryDto {
   @IsOptional()
-  @IsBooleanString()
-  isActive?: string;
+  @IsIn(['true', 'false', 'all'])
+  isActive?: 'true' | 'false' | 'all';
 
   @IsOptional()
   @IsBooleanString()

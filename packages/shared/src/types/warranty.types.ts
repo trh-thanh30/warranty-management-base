@@ -139,7 +139,7 @@ export type ListWarrantiesQuery = {
   search?: string;
   sortBy?: "createdAt" | "endDate" | "startDate" | "updatedAt";
   sortOrder?: "asc" | "desc";
-  status?: WarrantyStatus;
+  status?: WarrantyStatus | "ALL";
 };
 
 export type LookupWarrantyQuery = {

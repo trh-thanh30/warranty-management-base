@@ -4,6 +4,7 @@ import { ListDealersDto } from '@/modules/dealers/dto/list-dealers.dto';
 import { ListDealerActivatedCustomersDto } from '@/modules/dealers/dto/list-dealer-activated-customers.dto';
 import { PreparedDealerImportRow } from '@/modules/dealers/excel/dealer-excel.types';
 import { Injectable } from '@nestjs/common';
+import { resolveActiveFilter } from '@/common/helpers/active-filter.helper';
 import { Prisma } from '@prisma/client';
 import type { ListPublicDealersQuery } from '@repo/shared';
 
@@ -41,8 +42,7 @@ export class DealersRepository {
   list(filters: ListDealersDto) {
     const search = filters.search?.trim();
     const province = filters.province?.trim();
-    const isActive =
-      filters.isActive === undefined ? undefined : filters.isActive === 'true';
+    const isActive = resolveActiveFilter(filters.isActive);
     const { page, limit, skip, take } = normalizePagination(filters);
     const sortMap = {
       createdAt: 'created_at',
@@ -260,8 +260,7 @@ export class DealersRepository {
   listForExport(filters: ListDealersDto) {
     const search = filters.search?.trim();
     const province = filters.province?.trim();
-    const isActive =
-      filters.isActive === undefined ? undefined : filters.isActive === 'true';
+    const isActive = resolveActiveFilter(filters.isActive);
     const sortMap = {
       createdAt: 'created_at',
       name: 'name',
