@@ -15,7 +15,6 @@ export type WarrantyActivationRequestDirectoryFilters = {
   dateFrom: string;
   dateTo: string;
   status: WarrantyActivationRequestStatusFilter;
-  warrantyCode: string;
 };
 
 export type WarrantyActivationRequestSort = WarrantyActivationRequestSortBy;
