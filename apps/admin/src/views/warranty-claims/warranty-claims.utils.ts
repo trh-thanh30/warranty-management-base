@@ -3,6 +3,7 @@ import {
   HttpClientError,
   type CreateWarrantyClaimBody,
   type ListProductsQuery,
+  type ListWarrantyClaimsQuery,
   type ServiceCenterSummary,
   type WarrantyClaimPriority,
   type WarrantyClaimStatus,
@@ -18,8 +19,10 @@ import {
   type ApiErrorTranslator,
 } from "@/src/lib/localized-api-error.utils";
 import type {
+  WarrantyClaimDirectoryFilters,
   WarrantyClaimCreateFormValues,
   WarrantyClaimRequesterSource,
+  WarrantyClaimSort,
 } from "./warranty-claims.types.ts";
 
 type TranslateWarrantyClaim = (key: string) => string;
@@ -44,6 +47,39 @@ const CREATE_ERROR_MESSAGE_KEYS: Record<string, string> = {
 export type WarrantyClaimAttachmentValidationError =
   | "attachmentTooLarge"
   | "attachmentTypeInvalid";
+
+export function buildWarrantyClaimListQuery(
+  filters: WarrantyClaimDirectoryFilters,
+  search: string,
+  page: number,
+  pageSize: number,
+  sortBy: WarrantyClaimSort,
+  sortOrder: "asc" | "desc",
+): ListWarrantyClaimsQuery {
+  return {
+    assignmentStatus:
+      filters.serviceCenter === "UNASSIGNED" ? "UNASSIGNED" : undefined,
+    dateFrom: filters.dateFrom || undefined,
+    dateTo: filters.dateTo || undefined,
+    isOverdue:
+      filters.isOverdue === "ALL"
+        ? undefined
+        : filters.isOverdue === "OVERDUE"
+          ? "true"
+          : "false",
+    limit: pageSize,
+    page,
+    priority: filters.priority === "ALL" ? undefined : filters.priority,
+    search: search.trim() || undefined,
+    serviceCenterId:
+      filters.serviceCenter === "ALL" || filters.serviceCenter === "UNASSIGNED"
+        ? undefined
+        : filters.serviceCenter,
+    sortBy,
+    sortOrder,
+    status: filters.status === "ALL" ? undefined : filters.status,
+  };
+}
 
 export function buildWarrantyClaimProductQuery(
   search: string,

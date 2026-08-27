@@ -2014,7 +2014,7 @@
     "assignServiceCenter": "Gán trạm bảo hành",
     "updatePriority": "Cập nhật ưu tiên",
     "searchLabel": "Tìm claim",
-    "searchPlaceholder": "Tìm theo sự cố, người gửi, sản phẩm hoặc mã",
+    "searchPlaceholder": "Tìm theo mã claim, mã bảo hành, người gửi, số điện thoại, sự cố hoặc sản phẩm",
     "statusFilter": "Lọc theo trạng thái",
     "priorityFilter": "Lọc theo ưu tiên",
     "serviceCenterFilter": "Lọc theo trạm",

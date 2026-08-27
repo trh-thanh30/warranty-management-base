@@ -2014,7 +2014,7 @@
     "assignServiceCenter": "Assign service center",
     "updatePriority": "Update priority",
     "searchLabel": "Search claims",
-    "searchPlaceholder": "Search issue, requester, product, or code",
+    "searchPlaceholder": "Search by claim code, warranty code, requester, phone, issue, or product",
     "statusFilter": "Filter by status",
     "priorityFilter": "Filter by priority",
     "serviceCenterFilter": "Filter by service center",

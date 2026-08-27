@@ -63,7 +63,6 @@ export function WarrantyClaimsView() {
           filters={directory.filters}
           isError={directory.claimsQuery.isError}
           isLoading={directory.claimsQuery.isLoading}
-          onClaimCodeChange={directory.updateClaimCode}
           onClaimAction={directory.actions.openAction}
           onClearFilters={directory.clearFilters}
           onDateFromChange={directory.updateDateFrom}
@@ -76,13 +75,10 @@ export function WarrantyClaimsView() {
             void directory.claimsQuery.refetch();
           }}
           onSearchChange={directory.updateSearch}
-          onServiceCenterChange={directory.updateServiceCenter}
           onSortChange={directory.toggleSort}
           onStatusChange={directory.updateStatusFilter}
-          onWarrantyCodeChange={directory.updateWarrantyCode}
           pageSize={directory.pageSize}
           search={directory.search}
-          serviceCenters={directory.serviceCenters}
           sortBy={directory.sortBy}
           sortOrder={directory.sortOrder}
         />
