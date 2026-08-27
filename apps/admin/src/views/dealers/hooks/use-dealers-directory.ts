@@ -28,7 +28,7 @@ type DealerDirectoryFilters = {
 
 const INITIAL_DEALER_FILTERS = {
   province: "",
-  status: "ALL",
+  status: "ACTIVE",
 } satisfies DealerDirectoryFilters;
 
 export function useDealersDirectory() {

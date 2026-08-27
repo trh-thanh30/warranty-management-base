@@ -1,6 +1,6 @@
 import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
 import { warranty_status } from '@prisma/client';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsOptional, IsString } from 'class-validator';
 
 export class ListWarrantiesDto extends PaginationQueryDto {
   @IsOptional()
@@ -8,6 +8,6 @@ export class ListWarrantiesDto extends PaginationQueryDto {
   search?: string;
 
   @IsOptional()
-  @IsEnum(warranty_status)
-  status?: warranty_status;
+  @IsIn([...Object.values(warranty_status), 'ALL'])
+  status?: warranty_status | 'ALL';
 }

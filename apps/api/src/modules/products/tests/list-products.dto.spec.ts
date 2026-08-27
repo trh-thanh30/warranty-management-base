@@ -5,6 +5,12 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 
 describe('ListProductsDto', () => {
+  it('accepts status=ALL', async () => {
+    const dto = plainToInstance(ListProductsDto, { status: 'ALL' });
+
+    await expect(validate(dto)).resolves.toHaveLength(0);
+  });
+
   it.each(['true', 'false'])('accepts activationEligible=%s', async (value) => {
     const dto = plainToInstance(ListProductsDto, {
       activationEligible: value,

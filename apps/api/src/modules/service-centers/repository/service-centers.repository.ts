@@ -3,6 +3,7 @@ import { normalizePagination, paginate } from '@/common/pagination/pagination';
 import { ListServiceCentersDto } from '@/modules/service-centers/dto/list-service-centers.dto';
 import { PreparedServiceCenterImportRow } from '@/modules/service-centers/excel/service-center-excel.types';
 import { Injectable } from '@nestjs/common';
+import { resolveActiveFilter } from '@/common/helpers/active-filter.helper';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
@@ -44,8 +45,7 @@ export class ServiceCentersRepository {
   list(filters: ListServiceCentersDto) {
     const search = filters.search?.trim();
     const province = filters.province?.trim();
-    const isActive =
-      filters.isActive === undefined ? undefined : filters.isActive === 'true';
+    const isActive = resolveActiveFilter(filters.isActive);
     const { page, limit, skip, take } = normalizePagination(filters);
     const sortMap = {
       name: 'name',
@@ -117,8 +117,7 @@ export class ServiceCentersRepository {
   listForExport(filters: ListServiceCentersDto) {
     const search = filters.search?.trim();
     const province = filters.province?.trim();
-    const isActive =
-      filters.isActive === undefined ? undefined : filters.isActive === 'true';
+    const isActive = resolveActiveFilter(filters.isActive);
     const sortMap = {
       name: 'name',
       province: 'province',

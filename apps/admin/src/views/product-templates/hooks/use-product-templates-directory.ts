@@ -32,7 +32,7 @@ export function useProductTemplatesDirectory() {
     page,
     limit: pageSize,
     search: debouncedSearch || undefined,
-    isActive: status === "ALL" ? undefined : status === "ACTIVE",
+    isActive: status === "ALL" ? "all" : status === "ACTIVE",
     isPublished:
       publication === "ALL" ? undefined : publication === "PUBLISHED",
     sortBy: "name",

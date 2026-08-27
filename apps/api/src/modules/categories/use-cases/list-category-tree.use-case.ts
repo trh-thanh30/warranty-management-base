@@ -6,6 +6,7 @@ import { ListCategoryTreeDto } from '@/modules/categories/dto/list-category-tree
 import { CategoriesRepository } from '@/modules/categories/repository/categories.repository';
 import { Injectable } from '@nestjs/common';
 import type { CategoryTreeResponse } from '@repo/shared';
+import { resolveActiveFilter } from '@/common/helpers/active-filter.helper';
 
 @Injectable()
 export class ListCategoryTreeUseCase {
@@ -15,8 +16,7 @@ export class ListCategoryTreeUseCase {
     const categories = await this.categoriesRepository.listByType(dto.type);
     const items = buildCategoryTree(categories, {
       filter: {
-        isActive:
-          dto.isActive === undefined ? undefined : dto.isActive === 'true',
+        isActive: resolveActiveFilter(dto.isActive),
         search: dto.search,
       },
       sortBy: dto.sortBy,
