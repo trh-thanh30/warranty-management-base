@@ -4,6 +4,7 @@ export * from "./excel-import-dialog";
 export * from "./form-field";
 export * from "./form-section";
 export * from "./form-page-shell";
+export * from "./floating-action-button";
 export * from "./image-upload";
 export * from "./import-export-menu";
 export * from "./location-picker-field";

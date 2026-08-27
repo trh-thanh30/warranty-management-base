@@ -2,6 +2,8 @@ import {
   formatDate,
   HttpClientError,
   type CreateWarrantyClaimBody,
+  type ListProductsQuery,
+  type ListWarrantyClaimsQuery,
   type ServiceCenterSummary,
   type WarrantyClaimPriority,
   type WarrantyClaimStatus,
@@ -17,8 +19,10 @@ import {
   type ApiErrorTranslator,
 } from "@/src/lib/localized-api-error.utils";
 import type {
+  WarrantyClaimDirectoryFilters,
   WarrantyClaimCreateFormValues,
   WarrantyClaimRequesterSource,
+  WarrantyClaimSort,
 } from "./warranty-claims.types.ts";
 
 type TranslateWarrantyClaim = (key: string) => string;
@@ -44,6 +48,53 @@ export type WarrantyClaimAttachmentValidationError =
   | "attachmentTooLarge"
   | "attachmentTypeInvalid";
 
+export function buildWarrantyClaimListQuery(
+  filters: WarrantyClaimDirectoryFilters,
+  search: string,
+  page: number,
+  pageSize: number,
+  sortBy: WarrantyClaimSort,
+  sortOrder: "asc" | "desc",
+): ListWarrantyClaimsQuery {
+  return {
+    assignmentStatus:
+      filters.serviceCenter === "UNASSIGNED" ? "UNASSIGNED" : undefined,
+    dateFrom: filters.dateFrom || undefined,
+    dateTo: filters.dateTo || undefined,
+    isOverdue:
+      filters.isOverdue === "ALL"
+        ? undefined
+        : filters.isOverdue === "OVERDUE"
+          ? "true"
+          : "false",
+    limit: pageSize,
+    page,
+    priority: filters.priority === "ALL" ? undefined : filters.priority,
+    search: search.trim() || undefined,
+    serviceCenterId:
+      filters.serviceCenter === "ALL" || filters.serviceCenter === "UNASSIGNED"
+        ? undefined
+        : filters.serviceCenter,
+    sortBy,
+    sortOrder,
+    status: filters.status === "ALL" ? undefined : filters.status,
+  };
+}
+
+export function buildWarrantyClaimProductQuery(
+  search: string,
+): ListProductsQuery {
+  const normalizedSearch = search.trim();
+
+  return {
+    claimEligible: "true",
+    limit: 20,
+    search: normalizedSearch || undefined,
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  };
+}
+
 export function getWarrantyClaimRequesterValues(
   source: WarrantyClaimRequesterSource | null | undefined,
 ): Pick<WarrantyClaimCreateFormValues, "requesterName" | "requesterPhone"> {
@@ -51,6 +102,19 @@ export function getWarrantyClaimRequesterValues(
     requesterName: source?.fullName ?? "",
     requesterPhone: source?.phone ?? "",
   };
+}
+
+export function getWarrantyClaimRequesterPrefill(
+  owner:
+    | (WarrantyClaimRequesterSource & { customerId?: string })
+    | null
+    | undefined,
+  customer: (WarrantyClaimRequesterSource & { id: string }) | null | undefined,
+): Pick<WarrantyClaimCreateFormValues, "requesterName" | "requesterPhone"> {
+  const source =
+    customer && customer.id === owner?.customerId ? customer : owner;
+
+  return getWarrantyClaimRequesterValues(source);
 }
 
 export function validateWarrantyClaimAttachment(file: {

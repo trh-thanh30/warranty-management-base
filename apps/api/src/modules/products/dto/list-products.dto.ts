@@ -39,6 +39,10 @@ export class ListProductsDto extends PaginationQueryDto {
   activationEligible?: string;
 
   @IsOptional()
+  @IsBooleanString()
+  claimEligible?: string;
+
+  @IsOptional()
   @IsEnum(warranty_status)
   warrantyStatus?: warranty_status;
 }

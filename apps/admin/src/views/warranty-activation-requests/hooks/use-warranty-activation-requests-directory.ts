@@ -12,6 +12,7 @@ import { useWarrantyActivationRequests } from "@/src/hooks/use-warranty-activati
 import { useToast } from "@/src/hooks/use-toast";
 import { warrantyActivationRequestsService } from "@/src/services/warranty-activation-requests/warranty-activation-requests.service";
 import { WARRANTY_ACTIVATION_REQUESTS_PAGE_SIZE } from "../warranty-activation-requests.constants";
+import { buildWarrantyActivationRequestListQuery } from "../warranty-activation-requests.utils";
 import type {
   WarrantyActivationRequestDirectoryFilters,
   WarrantyActivationRequestSort,
@@ -22,7 +23,6 @@ const INITIAL_FILTERS = {
   dateFrom: "",
   dateTo: "",
   status: "ALL",
-  warrantyCode: "",
 } satisfies WarrantyActivationRequestDirectoryFilters;
 
 export function useWarrantyActivationRequestsDirectory() {
@@ -57,17 +57,16 @@ export function useWarrantyActivationRequestsDirectory() {
   const debouncedSearch = useDebounce(search.trim(), 300);
   const enabled =
     Boolean(currentUser) && hasPermission(PERMISSIONS.WARRANTY_VIEW);
-  const listQuery = {
-    dateFrom: filters.dateFrom || undefined,
-    dateTo: filters.dateTo || undefined,
+  const listQuery = buildWarrantyActivationRequestListQuery({
+    dateFrom: filters.dateFrom,
+    dateTo: filters.dateTo,
     limit: pageSize,
     page,
-    search: debouncedSearch || undefined,
+    search: debouncedSearch,
     sortBy,
     sortOrder,
-    status: filters.status === "ALL" ? undefined : filters.status,
-    warrantyCode: filters.warrantyCode.trim().toUpperCase() || undefined,
-  } satisfies ListWarrantyActivationRequestsQuery;
+    status: filters.status,
+  }) satisfies ListWarrantyActivationRequestsQuery;
   const requestsQuery = useWarrantyActivationRequests(listQuery, { enabled });
 
   function clearFilters() {
@@ -106,6 +105,5 @@ export function useWarrantyActivationRequestsDirectory() {
     updateDateTo: filterHandlers.dateTo,
     updateSearch: setSearch,
     updateStatusFilter: filterHandlers.status,
-    updateWarrantyCode: filterHandlers.warrantyCode,
   };
 }

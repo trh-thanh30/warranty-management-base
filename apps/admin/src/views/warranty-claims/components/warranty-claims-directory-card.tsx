@@ -4,7 +4,6 @@ import { FileSearch, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type {
   PaginatedResponse,
-  ServiceCenterSummary,
   WarrantyClaimSortBy,
   WarrantyClaimSummary,
 } from "@repo/shared";
@@ -34,7 +33,6 @@ import type {
   WarrantyClaimPriorityFilter,
   WarrantyClaimStatusFilter,
 } from "../warranty-claims.types";
-import { formatServiceCenterOption } from "../warranty-claims.utils";
 import { WarrantyClaimsTable } from "./warranty-claims-table";
 
 type WarrantyClaimsDirectoryCardProps = {
@@ -42,7 +40,6 @@ type WarrantyClaimsDirectoryCardProps = {
   filters: WarrantyClaimDirectoryFilters;
   isError: boolean;
   isLoading: boolean;
-  onClaimCodeChange: (value: string) => void;
   onClaimAction: (
     claim: WarrantyClaimSummary,
     action: WarrantyClaimAction,
@@ -56,13 +53,10 @@ type WarrantyClaimsDirectoryCardProps = {
   onPriorityChange: (value: WarrantyClaimPriorityFilter) => void;
   onRetry: () => void;
   onSearchChange: (value: string) => void;
-  onServiceCenterChange: (value: string) => void;
   onSortChange: (sortBy: WarrantyClaimSortBy) => void;
   onStatusChange: (value: WarrantyClaimStatusFilter) => void;
-  onWarrantyCodeChange: (value: string) => void;
   pageSize: number;
   search: string;
-  serviceCenters: ServiceCenterSummary[];
   sortBy?: WarrantyClaimSortBy;
   sortOrder: "asc" | "desc";
 };
@@ -72,7 +66,6 @@ export function WarrantyClaimsDirectoryCard({
   filters,
   isError,
   isLoading,
-  onClaimCodeChange,
   onClaimAction,
   onClearFilters,
   onDateFromChange,
@@ -83,21 +76,16 @@ export function WarrantyClaimsDirectoryCard({
   onPriorityChange,
   onRetry,
   onSearchChange,
-  onServiceCenterChange,
   onSortChange,
   onStatusChange,
-  onWarrantyCodeChange,
   pageSize,
   search,
-  serviceCenters,
   sortBy,
   sortOrder,
 }: WarrantyClaimsDirectoryCardProps) {
   const t = useTranslations("WarrantyClaims");
   const hasFilters =
     Boolean(search.trim()) ||
-    Boolean(filters.claimCode.trim()) ||
-    Boolean(filters.warrantyCode.trim()) ||
     Boolean(filters.dateFrom) ||
     Boolean(filters.dateTo) ||
     filters.status !== "ALL" ||
@@ -117,17 +105,13 @@ export function WarrantyClaimsDirectoryCard({
 
         <WarrantyClaimsFilters
           filters={filters}
-          onClaimCodeChange={onClaimCodeChange}
           onDateFromChange={onDateFromChange}
           onDateToChange={onDateToChange}
           onOverdueChange={onOverdueChange}
           onPriorityChange={onPriorityChange}
           onSearchChange={onSearchChange}
-          onServiceCenterChange={onServiceCenterChange}
           onStatusChange={onStatusChange}
-          onWarrantyCodeChange={onWarrantyCodeChange}
           search={search}
-          serviceCenters={serviceCenters}
         />
       </CardHeader>
       <CardContent className="min-w-0 px-4 sm:px-6">
@@ -153,36 +137,28 @@ export function WarrantyClaimsDirectoryCard({
 
 function WarrantyClaimsFilters({
   filters,
-  onClaimCodeChange,
   onDateFromChange,
   onDateToChange,
   onOverdueChange,
   onPriorityChange,
   onSearchChange,
-  onServiceCenterChange,
   onStatusChange,
-  onWarrantyCodeChange,
   search,
-  serviceCenters,
 }: Pick<
   WarrantyClaimsDirectoryCardProps,
   | "filters"
-  | "onClaimCodeChange"
   | "onDateFromChange"
   | "onDateToChange"
   | "onOverdueChange"
   | "onPriorityChange"
   | "onSearchChange"
-  | "onServiceCenterChange"
   | "onStatusChange"
-  | "onWarrantyCodeChange"
   | "search"
-  | "serviceCenters"
 >) {
   const t = useTranslations("WarrantyClaims");
 
   return (
-    <div className="grid min-w-0 w-full grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid min-w-0 w-full grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))]">
       <div className="relative min-w-0 md:col-span-2 xl:col-span-1">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
         <Input
@@ -193,20 +169,6 @@ function WarrantyClaimsFilters({
           value={search}
         />
       </div>
-      <Input
-        aria-label={t("claimCode")}
-        className="min-w-0"
-        onChange={(event) => onClaimCodeChange(event.target.value)}
-        placeholder={t("claimCodePlaceholder")}
-        value={filters.claimCode}
-      />
-      <Input
-        aria-label={t("warrantyCode")}
-        className="min-w-0"
-        onChange={(event) => onWarrantyCodeChange(event.target.value)}
-        placeholder={t("warrantyCodePlaceholder")}
-        value={filters.warrantyCode}
-      />
       <SelectControl
         ariaLabel={t("statusFilter")}
         onValueChange={(value) =>
@@ -230,20 +192,6 @@ function WarrantyClaimsFilters({
         }))}
         triggerClassName="min-w-0 w-full max-w-full"
         value={filters.priority}
-      />
-      <SelectControl
-        ariaLabel={t("serviceCenterFilter")}
-        onValueChange={onServiceCenterChange}
-        options={[
-          { label: t("allServiceCenters"), value: "ALL" },
-          { label: t("unassignedServiceCenter"), value: "UNASSIGNED" },
-          ...serviceCenters.map((serviceCenter) => ({
-            label: formatServiceCenterOption(serviceCenter),
-            value: serviceCenter.id,
-          })),
-        ]}
-        triggerClassName="min-w-0 w-full max-w-full"
-        value={filters.serviceCenter}
       />
       <SelectControl
         ariaLabel={t("overdueFilter")}

@@ -354,6 +354,14 @@ export function CreateWarrantyActivationRequestFormCard({
                     items={customers}
                     loadingLabel={t("loadingCustomers")}
                     onItemSelect={selectCustomer}
+                    onReachEnd={() => {
+                      if (
+                        customersQuery.hasNextPage &&
+                        !customersQuery.isFetchingNextPage
+                      ) {
+                        void customersQuery.fetchNextPage();
+                      }
+                    }}
                     onSearchChange={(value) => {
                       if (selectedCustomer) clearCustomer();
                       setCustomerSearch(value);
@@ -436,6 +444,14 @@ export function CreateWarrantyActivationRequestFormCard({
                     items={dealers}
                     loadingLabel={t("loadingDealers")}
                     onItemSelect={selectDealer}
+                    onReachEnd={() => {
+                      if (
+                        dealersQuery.hasNextPage &&
+                        !dealersQuery.isFetchingNextPage
+                      ) {
+                        void dealersQuery.fetchNextPage();
+                      }
+                    }}
                     onSearchChange={(value) => {
                       if (selectedDealer) clearDealer();
                       setDealerSearch(value);

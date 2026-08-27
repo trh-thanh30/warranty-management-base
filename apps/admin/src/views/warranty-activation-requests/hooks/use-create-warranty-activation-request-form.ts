@@ -18,12 +18,12 @@ import {
 import { useToast } from "@/src/hooks/use-toast";
 import { useCreateAdminWarrantyActivationRequest } from "@/src/hooks/use-warranty-activation-requests";
 import { parseVietnamAddress } from "@/src/utils";
-import { useDealers } from "@/src/hooks/use-dealers";
+import { useInfiniteDealers } from "@/src/hooks/use-dealers";
 import {
   useCategories,
   useCategoryActivationFields,
 } from "../../categories/hooks/use-categories";
-import { useCustomers } from "../../customers/hooks/use-customers";
+import { useInfiniteCustomers } from "../../customers/hooks/use-customers";
 import { useInfiniteProducts } from "../../products/hooks/use-products";
 import {
   type WarrantyActivationRequestCreateFormValues,
@@ -134,7 +134,7 @@ export function useCreateWarrantyActivationRequestForm({
   const usesProductSelectors = activationFields.some(
     (field) => field.type === "PRODUCT_SELECT",
   );
-  const customersQuery = useCustomers({
+  const customersQuery = useInfiniteCustomers({
     limit: 20,
     search: debouncedCustomerSearch || undefined,
     sortBy: "createdAt",
@@ -157,7 +157,7 @@ export function useCreateWarrantyActivationRequestForm({
         !usesProductSelectors,
     },
   );
-  const dealersQuery = useDealers({
+  const dealersQuery = useInfiniteDealers({
     isActive: "true",
     limit: 20,
     search: debouncedDealerSearch || undefined,
@@ -165,8 +165,15 @@ export function useCreateWarrantyActivationRequestForm({
     sortOrder: "asc",
   });
   const customers = useMemo(
-    () => customersQuery.data?.items ?? [],
-    [customersQuery.data?.items],
+    () =>
+      Array.from(
+        new Map(
+          (customersQuery.data?.pages ?? [])
+            .flatMap((page) => page.items)
+            .map((customer) => [customer.id, customer]),
+        ),
+      ).map(([, customer]) => customer),
+    [customersQuery.data?.pages],
   );
   const products = useMemo(
     () =>
@@ -186,8 +193,15 @@ export function useCreateWarrantyActivationRequestForm({
     [categoriesQuery.data?.items],
   );
   const dealers = useMemo(
-    () => dealersQuery.data?.items ?? [],
-    [dealersQuery.data?.items],
+    () =>
+      Array.from(
+        new Map(
+          (dealersQuery.data?.pages ?? [])
+            .flatMap((page) => page.items)
+            .map((dealer) => [dealer.id, dealer]),
+        ),
+      ).map(([, dealer]) => dealer),
+    [dealersQuery.data?.pages],
   );
   const selectedCategory = useMemo(
     () => categories.find((category) => category.id === categoryId) ?? null,

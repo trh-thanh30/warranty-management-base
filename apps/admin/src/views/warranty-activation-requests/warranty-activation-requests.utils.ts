@@ -5,6 +5,7 @@ import {
   type CategoryResponse,
   type CreateAdminWarrantyActivationRequestBody,
   type DealerResponse,
+  type ListWarrantyActivationRequestsQuery,
   type ProductResponse,
   type WarrantyActivationRequestSummary,
 } from "@repo/shared";
@@ -18,7 +19,10 @@ import {
   getLocalizedApiError,
   type ApiErrorTranslator,
 } from "@/src/lib/localized-api-error.utils";
-import type { WarrantyActivationRequestCreateFormValues } from "./warranty-activation-requests.types";
+import type {
+  WarrantyActivationRequestCreateFormValues,
+  WarrantyActivationRequestDirectoryFilters,
+} from "./warranty-activation-requests.types";
 import { getActivationProductDisplayName } from "./warranty-activation-request-product.utils";
 
 const CREATE_FIELD_ERROR_KEYS = new Set([
@@ -54,6 +58,37 @@ export function formatActivationRequestDate(
   locale: string,
 ) {
   return formatDate(value, { locale, showTime: true });
+}
+
+export function buildWarrantyActivationRequestListQuery({
+  dateFrom,
+  dateTo,
+  limit,
+  page,
+  search,
+  sortBy,
+  sortOrder,
+  status,
+}: {
+  dateFrom: string;
+  dateTo: string;
+  limit: number;
+  page: number;
+  search: string;
+  sortBy?: ListWarrantyActivationRequestsQuery["sortBy"];
+  sortOrder: "asc" | "desc";
+  status: WarrantyActivationRequestDirectoryFilters["status"];
+}): ListWarrantyActivationRequestsQuery {
+  return omitUndefined({
+    dateFrom: dateFrom || undefined,
+    dateTo: dateTo || undefined,
+    limit,
+    page,
+    search: search.trim() || undefined,
+    sortBy,
+    sortOrder,
+    status: status === "ALL" ? undefined : status,
+  });
 }
 
 export function formatActivationRequestCustomer(

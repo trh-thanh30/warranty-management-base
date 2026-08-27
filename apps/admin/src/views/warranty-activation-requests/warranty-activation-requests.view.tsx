@@ -68,7 +68,6 @@ export function WarrantyActivationRequestsView() {
           onSortChange={directory.toggleSort}
           onStatusChange={directory.updateStatusFilter}
           onViewCertificate={directory.actions.viewCertificate}
-          onWarrantyCodeChange={directory.updateWarrantyCode}
           pageSize={directory.pageSize}
           search={directory.search}
           sortBy={directory.sortBy}

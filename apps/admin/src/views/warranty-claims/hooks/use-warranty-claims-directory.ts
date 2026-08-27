@@ -1,7 +1,6 @@
 "use client";
 
 import { useDebounce } from "@repo/hooks";
-import type { ListWarrantyClaimsQuery } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/src/app/providers/auth-provider";
@@ -20,17 +19,16 @@ import type {
   WarrantyClaimDirectoryFilters,
   WarrantyClaimSort,
 } from "../warranty-claims.types";
+import { buildWarrantyClaimListQuery } from "../warranty-claims.utils";
 import { useWarrantyClaimDirectoryActions } from "./use-warranty-claim-directory-actions";
 
 const INITIAL_FILTERS = {
-  claimCode: "",
   dateFrom: "",
   dateTo: "",
   isOverdue: "ALL",
   priority: "ALL",
   serviceCenter: "ALL",
   status: "ALL",
-  warrantyCode: "",
 } satisfies WarrantyClaimDirectoryFilters;
 
 export function useWarrantyClaimsDirectory() {
@@ -62,31 +60,14 @@ export function useWarrantyClaimsDirectory() {
   const debouncedSearch = useDebounce(search.trim(), 300);
   const canViewClaims = hasPermission(PERMISSIONS.WARRANTY_CLAIM_VIEW);
   const enabled = Boolean(currentUser) && canViewClaims;
-  const listQuery = {
-    assignmentStatus:
-      filters.serviceCenter === "UNASSIGNED" ? "UNASSIGNED" : undefined,
-    claimCode: filters.claimCode.trim().toUpperCase() || undefined,
-    dateFrom: filters.dateFrom || undefined,
-    dateTo: filters.dateTo || undefined,
-    isOverdue:
-      filters.isOverdue === "ALL"
-        ? undefined
-        : filters.isOverdue === "OVERDUE"
-          ? ("true" as const)
-          : ("false" as const),
-    limit: pageSize,
+  const listQuery = buildWarrantyClaimListQuery(
+    filters,
+    debouncedSearch,
     page,
-    priority: filters.priority === "ALL" ? undefined : filters.priority,
-    search: debouncedSearch || undefined,
-    serviceCenterId:
-      filters.serviceCenter === "ALL" || filters.serviceCenter === "UNASSIGNED"
-        ? undefined
-        : filters.serviceCenter,
-    sortBy,
+    pageSize,
+    sortBy ?? "createdAt",
     sortOrder,
-    status: filters.status === "ALL" ? undefined : filters.status,
-    warrantyCode: filters.warrantyCode.trim().toUpperCase() || undefined,
-  } satisfies ListWarrantyClaimsQuery;
+  );
   const claimsQuery = useWarrantyClaims(listQuery, { enabled });
   const metricsQuery = useWarrantyClaimMetrics(
     {
@@ -136,7 +117,6 @@ export function useWarrantyClaimsDirectory() {
     sortBy,
     sortOrder,
     toggleSort,
-    updateClaimCode: filterHandlers.claimCode,
     updateDateFrom: filterHandlers.dateFrom,
     updateDateTo: filterHandlers.dateTo,
     updateOverdue: filterHandlers.isOverdue,
@@ -144,6 +124,5 @@ export function useWarrantyClaimsDirectory() {
     updateSearch: setSearch,
     updateServiceCenter: filterHandlers.serviceCenter,
     updateStatusFilter: filterHandlers.status,
-    updateWarrantyCode: filterHandlers.warrantyCode,
   };
 }

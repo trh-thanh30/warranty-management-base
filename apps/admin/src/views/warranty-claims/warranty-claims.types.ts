@@ -20,14 +20,12 @@ export type WarrantyClaimOverdueFilter =
   (typeof WARRANTY_CLAIM_OVERDUE_FILTERS)[number];
 
 export type WarrantyClaimDirectoryFilters = {
-  claimCode: string;
   dateFrom: string;
   dateTo: string;
   isOverdue: WarrantyClaimOverdueFilter;
   priority: WarrantyClaimPriorityFilter;
   serviceCenter: string;
   status: WarrantyClaimStatusFilter;
-  warrantyCode: string;
 };
 
 export type WarrantyClaimAction =

@@ -49,7 +49,6 @@ type WarrantyActivationRequestsDirectoryCardProps = {
   onSortChange: (sortBy: WarrantyActivationRequestSortBy) => void;
   onViewCertificate: (request: WarrantyActivationRequestSummary) => void;
   onStatusChange: (value: WarrantyActivationRequestStatusFilter) => void;
-  onWarrantyCodeChange: (value: string) => void;
   pageSize: number;
   search: string;
   sortBy?: WarrantyActivationRequestSortBy;
@@ -73,7 +72,6 @@ export function WarrantyActivationRequestsDirectoryCard({
   onSortChange,
   onViewCertificate,
   onStatusChange,
-  onWarrantyCodeChange,
   pageSize,
   search,
   sortBy,
@@ -82,7 +80,6 @@ export function WarrantyActivationRequestsDirectoryCard({
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const hasFilters =
     Boolean(search.trim()) ||
-    Boolean(filters.warrantyCode.trim()) ||
     Boolean(filters.dateFrom) ||
     Boolean(filters.dateTo) ||
     filters.status !== "ALL";
@@ -103,7 +100,6 @@ export function WarrantyActivationRequestsDirectoryCard({
           onDateToChange={onDateToChange}
           onSearchChange={onSearchChange}
           onStatusChange={onStatusChange}
-          onWarrantyCodeChange={onWarrantyCodeChange}
           search={search}
         />
       </CardHeader>
@@ -136,7 +132,6 @@ function WarrantyActivationRequestsFilters({
   onDateToChange,
   onSearchChange,
   onStatusChange,
-  onWarrantyCodeChange,
   search,
 }: Pick<
   WarrantyActivationRequestsDirectoryCardProps,
@@ -145,13 +140,12 @@ function WarrantyActivationRequestsFilters({
   | "onDateToChange"
   | "onSearchChange"
   | "onStatusChange"
-  | "onWarrantyCodeChange"
   | "search"
 >) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
 
   return (
-    <div className="grid min-w-0 w-full grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid min-w-0 w-full grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
       <div className="relative min-w-0">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
         <Input
@@ -162,13 +156,6 @@ function WarrantyActivationRequestsFilters({
           value={search}
         />
       </div>
-      <Input
-        aria-label={t("warrantyCode")}
-        className="min-w-0"
-        onChange={(event) => onWarrantyCodeChange(event.target.value)}
-        placeholder={t("warrantyCodePlaceholder")}
-        value={filters.warrantyCode}
-      />
       <SelectControl
         ariaLabel={t("statusFilter")}
         onValueChange={(value) =>
