@@ -111,6 +111,19 @@ export function useDeleteProduct() {
   });
 }
 
+export function useRestoreProduct() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (productId: string) =>
+      productsService.restoreProduct(productId),
+    onSuccess: (product) => {
+      void queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.setQueryData(productKeys.detail(product.id), product);
+    },
+  });
+}
+
 export function usePreviewProductImport() {
   return useMutation<ProductImportPreview, Error, File>({
     mutationFn: (file) => productsService.previewImport(file),
