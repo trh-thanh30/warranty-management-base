@@ -165,7 +165,7 @@ describe('Multi-item activation lifecycle', () => {
     expect(transactionRepository.completeActivation).not.toHaveBeenCalled();
   });
 
-  it('rejects an ineligible product before changing ownership', async () => {
+  it('returns a clear API message when an inactive product blocks approval', async () => {
     const transactionRepository = createTransactionRepository();
     const request = createActivationRequest();
     request.items[0].product.status = product_status.INACTIVE;
@@ -178,9 +178,45 @@ describe('Multi-item activation lifecycle', () => {
     await expect(
       useCase.execute('request-id', {
         status: warranty_activation_request_status.APPROVED,
+        locale: 'vi',
       }),
     ).rejects.toMatchObject({
-      details: { code: 'WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION' },
+      message:
+        'Không thể duyệt yêu cầu vì sản phẩm "Product product-a" tại vị trí "Position product-a" đang ngừng hoạt động. Hãy chuyển sản phẩm về trạng thái hoạt động rồi thử lại hoặc từ chối yêu cầu này.',
+      details: {
+        code: 'WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION',
+        productId: 'product-a',
+        reason: 'PRODUCT_INACTIVE',
+        warrantyCode: 'WM-product-a',
+      },
+    });
+    expect(transactionRepository.createOwnership).not.toHaveBeenCalled();
+  });
+
+  it('returns a clear English API message when a deleted product blocks approval', async () => {
+    const transactionRepository = createTransactionRepository();
+    const request = createActivationRequest();
+    request.items[0].product.deleted_at = new Date();
+    transactionRepository.findRequest.mockResolvedValue(request);
+    const useCase = new ReviewWarrantyActivationRequestUseCase(
+      createRepository(transactionRepository) as never,
+      { execute: jest.fn() } as never,
+    );
+
+    await expect(
+      useCase.execute('request-id', {
+        status: warranty_activation_request_status.APPROVED,
+        locale: 'en',
+      }),
+    ).rejects.toMatchObject({
+      message:
+        'The request cannot be approved because product "Product product-a" at position "Position product-a" has been soft-deleted. Restore the product and try again, or reject this request.',
+      details: {
+        code: 'WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION',
+        productId: 'product-a',
+        reason: 'PRODUCT_DELETED',
+        warrantyCode: 'WM-product-a',
+      },
     });
     expect(transactionRepository.createOwnership).not.toHaveBeenCalled();
   });
@@ -314,15 +350,22 @@ function createActivationRequest() {
   };
 }
 
-function createItem(productId: string, warrantyId: string) {
+function createItem(
+  productId: string,
+  warrantyId: string,
+  deletedAt: Date | null = null,
+) {
   return {
+    id: `item-${productId}`,
+    position_label: `Position ${productId}`,
     product_id: productId,
+    product_name: `Product ${productId}`,
     warranty_id: warrantyId,
     warranty_code: `WM-${productId}`,
     product: {
       id: productId,
       status: product_status.ACTIVE as product_status,
-      deleted_at: null,
+      deleted_at: deletedAt,
       warranty: {
         id: warrantyId,
         status: warranty_status.DRAFT,

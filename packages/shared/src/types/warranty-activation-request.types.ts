@@ -222,4 +222,5 @@ export type ReviewWarrantyActivationRequestBody = {
   status: Extract<WarrantyActivationRequestStatus, "APPROVED" | "REJECTED">;
   adminNote?: string;
   rejectionReason?: string;
+  locale?: "vi" | "en";
 };
