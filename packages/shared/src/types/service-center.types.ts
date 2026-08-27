@@ -28,7 +28,7 @@ export type ServiceCenterSortBy =
 export type ListServiceCentersQuery = Omit<PaginationQuery, "sortBy"> & {
   search?: string;
   province?: string;
-  isActive?: "true" | "false";
+  isActive?: "true" | "false" | "all";
   sortBy?: ServiceCenterSortBy;
 };
 

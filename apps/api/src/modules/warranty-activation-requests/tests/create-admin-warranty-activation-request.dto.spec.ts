@@ -28,6 +28,15 @@ describe('CreateAdminWarrantyActivationRequestDto', () => {
     expect(errors.some((error) => error.property === 'customerId')).toBe(true);
   });
 
+  it('accepts an address made only from the selected ward and province', async () => {
+    const dto = plainToInstance(CreateAdminWarrantyActivationRequestDto, {
+      ...base,
+      addressDetail: '',
+    });
+
+    await expect(validate(dto)).resolves.toHaveLength(0);
+  });
+
   it('rejects a future customer birthdate', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-08-20T12:00:00.000Z'));
 
@@ -46,6 +55,35 @@ describe('CreateAdminWarrantyActivationRequestDto', () => {
       jest.useRealTimers();
     }
   });
+
+  it('rejects null because Admin activation can omit but cannot clear birthdate', async () => {
+    const dto = plainToInstance(CreateAdminWarrantyActivationRequestDto, {
+      ...base,
+      customerBirthdate: null,
+    });
+
+    const errors = await validate(dto);
+
+    expect(errors.some((error) => error.property === 'customerBirthdate')).toBe(
+      true,
+    );
+  });
+
+  it.each(['1899-12-31', '2005-02-29', '2005-12-11T00:00:00.000Z'])(
+    'rejects an unsupported customer birthdate: %s',
+    async (birthdate) => {
+      const dto = plainToInstance(CreateAdminWarrantyActivationRequestDto, {
+        ...base,
+        customerBirthdate: birthdate,
+      });
+
+      const errors = await validate(dto);
+
+      expect(
+        errors.some((error) => error.property === 'customerBirthdate'),
+      ).toBe(true);
+    },
+  );
 
   it('accepts nested physical Product items', async () => {
     const dto = plainToInstance(CreateAdminWarrantyActivationRequestDto, {

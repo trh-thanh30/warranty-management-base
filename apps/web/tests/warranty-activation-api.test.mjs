@@ -106,7 +106,6 @@ test("warranty activation schema validates the required public fields", async ()
     "../src/views/warranty/warranty-activation-form.schema.ts",
   );
   const schema = createWarrantyActivationFormSchema({
-    addressAdministrativeUnitNotAllowed: "addressAdministrativeUnitNotAllowed",
     addressRequired: "addressRequired",
     customerEmailInvalid: "customerEmailInvalid",
     customerEmailRequired: "customerEmailRequired",
@@ -148,6 +147,19 @@ test("warranty activation schema validates the required public fields", async ()
     }).success,
     false,
   );
+
+  for (const addressDetail of [
+    "123 Nguyễn Trãi, Phường 1",
+    "Khu phố Hoàng Xá, Xã A, Tỉnh B",
+    "Số 10, Thành phố Tây Hồ",
+    "123 Nguyen Trai, Phuong 1",
+  ]) {
+    assert.equal(
+      schema.safeParse({ ...validFormValues, addressDetail }).success,
+      true,
+      `expected public address detail to remain valid: ${addressDetail}`,
+    );
+  }
 });
 
 test("warranty activation errors distinguish business and transport failures", async () => {

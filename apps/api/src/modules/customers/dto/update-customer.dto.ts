@@ -1,6 +1,5 @@
-import { IsNotFutureDate } from '@/common/decorators/is-not-future-date.decorator';
+import { IsBirthdate } from '@/common/decorators/is-birthdate.decorator';
 import {
-  IsDateString,
   IsEmail,
   IsOptional,
   IsString,
@@ -29,7 +28,6 @@ export class UpdateCustomerDto {
   address?: string;
 
   @ValidateIf((_, value) => value !== undefined && value !== null)
-  @IsDateString()
-  @IsNotFutureDate()
+  @IsBirthdate()
   birthdate?: string | null;
 }

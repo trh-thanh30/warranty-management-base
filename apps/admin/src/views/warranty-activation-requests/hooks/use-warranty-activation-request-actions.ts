@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type {
   ReviewWarrantyActivationRequestBody,
   WarrantyActivationRequestSummary,
@@ -19,6 +19,7 @@ import type {
 export function useWarrantyActivationRequestActions() {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const tApiErrors = useTranslations("ApiErrors");
+  const locale = useLocale();
   const toast = useToast();
   const { downloadBlob } = useExcel();
   const [activeAction, setActiveAction] =
@@ -49,7 +50,10 @@ export function useWarrantyActivationRequestActions() {
     if (!selectedRequest) return;
 
     try {
-      const request = await reviewMutation.mutateAsync(body);
+      const request = await reviewMutation.mutateAsync({
+        ...body,
+        locale: locale === "en" ? "en" : "vi",
+      });
       if (body.status === "APPROVED") {
         toast.success(
           request.certificate?.recipientEmail
@@ -65,6 +69,7 @@ export function useWarrantyActivationRequestActions() {
         getLocalizedApiError(error, t, {
           apiErrors: tApiErrors,
           fallbackKey: "reviewError",
+          preferApiMessage: true,
         }),
       );
     }

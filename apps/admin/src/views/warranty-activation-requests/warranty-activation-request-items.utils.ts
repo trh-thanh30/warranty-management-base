@@ -27,3 +27,21 @@ export function getActivationRequestWarrantyCodeLabel(
   if (items.length > 1) return formatCount(items.length);
   return items[0]?.warrantyCode ?? request.warrantyCode ?? "-";
 }
+
+export function getActivationRequestProductNames(
+  request: WarrantyActivationRequestSummary,
+) {
+  if (request.items?.length) {
+    return request.items.map((item) => item.productName);
+  }
+  return request.productName ? [request.productName] : [];
+}
+
+export function getActivationRequestWarrantyCodes(
+  request: WarrantyActivationRequestSummary,
+) {
+  if (request.items?.length) {
+    return request.items.map((item) => item.warrantyCode);
+  }
+  return request.warrantyCode ? [request.warrantyCode] : [];
+}

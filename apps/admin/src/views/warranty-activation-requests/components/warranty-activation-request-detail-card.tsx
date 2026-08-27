@@ -1,12 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import type {
   WarrantyActivationRequestItemSummary,
   WarrantyActivationRequestSummary,
 } from "@repo/shared";
 import { Badge, Card, CardContent, Skeleton } from "@repo/ui";
+import { Link } from "@/src/i18n/navigation";
 import {
   formatActivationRequestAddress,
   formatActivationRequestDate,
@@ -23,6 +23,7 @@ type WarrantyActivationRequestDetailCardProps = {
   onResendItemCertificate?: (
     item: WarrantyActivationRequestItemSummary,
   ) => void;
+  onRetryItemCertificate?: (item: WarrantyActivationRequestItemSummary) => void;
   onViewItemCertificate?: (item: WarrantyActivationRequestItemSummary) => void;
   request: WarrantyActivationRequestSummary;
 };
@@ -31,6 +32,7 @@ export function WarrantyActivationRequestDetailCard({
   busyItemId,
   onDownloadItemCertificate,
   onResendItemCertificate,
+  onRetryItemCertificate,
   onViewItemCertificate,
   request,
 }: WarrantyActivationRequestDetailCardProps) {
@@ -119,6 +121,7 @@ export function WarrantyActivationRequestDetailCard({
               items={items}
               onDownloadCertificate={onDownloadItemCertificate}
               onResendCertificate={onResendItemCertificate}
+              onRetryCertificate={onRetryItemCertificate}
               onViewCertificate={onViewItemCertificate}
             />
           </section>

@@ -2,6 +2,7 @@ import { ProductsRepository } from '@/modules/products/repository/products.repos
 import {
   product_status,
   warranty_activation_request_status,
+  warranty_claim_status,
   warranty_status,
 } from '@prisma/client';
 
@@ -25,12 +26,78 @@ describe('ProductsRepository.list', () => {
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: expect.objectContaining({ deleted_at: null }),
+        where: expect.objectContaining({
+          deleted_at: null,
+          status: product_status.ACTIVE,
+        }),
       }),
     );
     expect(count).toHaveBeenCalledWith({
-      where: expect.objectContaining({ deleted_at: null }),
+      where: expect.objectContaining({
+        deleted_at: null,
+        status: product_status.ACTIVE,
+      }),
     });
+  });
+
+  it('does not filter product status or deletion state when status is all', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const count = jest.fn().mockResolvedValue(0);
+    const repository = new ProductsRepository({
+      $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
+        callback({ product: { count, findMany } }),
+      ),
+    } as never);
+
+    await repository.list({ limit: 10, page: 1, status: 'ALL' });
+
+    const where = findMany.mock.calls[0]?.[0].where;
+    expect(where.status).toBeUndefined();
+    expect(where.deleted_at).toBeUndefined();
+    expect(count).toHaveBeenCalledWith({ where });
+  });
+
+  it('sorts the admin product list by newest creation date and id by default', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const count = jest.fn().mockResolvedValue(0);
+    const prismaService = {
+      $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
+        callback({ product: { count, findMany } }),
+      ),
+    };
+    const repository = new ProductsRepository(prismaService as never);
+
+    await repository.list({ limit: 10, page: 1 });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
+      }),
+    );
+  });
+
+  it('keeps a selected product sort before creation date and id tie-breakers', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const count = jest.fn().mockResolvedValue(0);
+    const prismaService = {
+      $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
+        callback({ product: { count, findMany } }),
+      ),
+    };
+    const repository = new ProductsRepository(prismaService as never);
+
+    await repository.list({
+      limit: 10,
+      page: 1,
+      sortBy: 'status',
+      sortOrder: 'asc',
+    });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderBy: [{ status: 'asc' }, { created_at: 'desc' }, { id: 'desc' }],
+      }),
+    );
   });
 
   it('only includes soft-deleted products when filtering by deleted status', async () => {
@@ -234,6 +301,73 @@ describe('ProductsRepository.list', () => {
     });
   });
 
+  it('filters claim selectors to products with currently active warranties and no open claims', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-27T08:00:00.000Z'));
+
+    try {
+      const findMany = jest.fn().mockResolvedValue([]);
+      const count = jest.fn().mockResolvedValue(0);
+      const prismaService = {
+        $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
+          callback({ product: { count, findMany } }),
+        ),
+      };
+      const repository = new ProductsRepository(prismaService as never);
+      const filters = {
+        claimEligible: 'true',
+        limit: 20,
+        page: 1,
+        search: 'WM-2026',
+      };
+
+      await repository.list(filters);
+
+      const now = new Date('2026-08-27T08:00:00.000Z');
+      const expectedEligibility = {
+        deleted_at: null,
+        status: product_status.ACTIVE,
+        warranty: {
+          is: {
+            status: warranty_status.ACTIVE,
+            warranty_code: { not: '' },
+            AND: [
+              { OR: [{ start_date: null }, { start_date: { lte: now } }] },
+              { OR: [{ end_date: null }, { end_date: { gte: now } }] },
+            ],
+            claims: {
+              none: {
+                status: {
+                  in: [
+                    warranty_claim_status.SUBMITTED,
+                    warranty_claim_status.REVIEWING,
+                    warranty_claim_status.APPROVED,
+                    warranty_claim_status.IN_REPAIR,
+                  ],
+                },
+              },
+            },
+          },
+        },
+      };
+
+      expect(findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            ...expectedEligibility,
+            OR: expect.any(Array),
+          }),
+          skip: 0,
+          take: 20,
+        }),
+      );
+      expect(count).toHaveBeenCalledWith({
+        where: expect.objectContaining(expectedEligibility),
+      });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('filters the admin product list by publication state', async () => {
     const findMany = jest.fn().mockResolvedValue([]);
     const count = jest.fn().mockResolvedValue(0);
@@ -328,5 +462,57 @@ describe('ProductsRepository.list', () => {
     expect(count).toHaveBeenCalledWith({
       where: expect.objectContaining(visibilityFilter),
     });
+  });
+
+  it('paginates eligible activation options before disabled products', async () => {
+    const eligibleProduct = { id: 'eligible-product' };
+    const ineligibleProduct = { id: 'ineligible-product' };
+    const findMany = jest
+      .fn()
+      .mockResolvedValueOnce([eligibleProduct])
+      .mockResolvedValueOnce([ineligibleProduct]);
+    const count = jest.fn().mockResolvedValueOnce(2).mockResolvedValueOnce(4);
+    const prismaService = {
+      $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
+        callback({ product: { count, findMany } }),
+      ),
+    };
+    const repository = new ProductsRepository(prismaService as never);
+
+    const result = await repository.listActivationOptions({
+      categoryId: 'category-id',
+      limit: 3,
+      page: 1,
+      search: 'film',
+    });
+
+    expect(result.items).toEqual([eligibleProduct, ineligibleProduct]);
+    expect(result.meta).toEqual(
+      expect.objectContaining({ limit: 3, page: 1, total: 4 }),
+    );
+    expect(findMany).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        skip: 0,
+        take: 2,
+        where: expect.objectContaining({
+          AND: expect.arrayContaining([
+            expect.objectContaining({ category_id: 'category-id' }),
+          ]),
+        }),
+      }),
+    );
+    expect(findMany).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        skip: 0,
+        take: 1,
+        where: expect.objectContaining({
+          AND: expect.arrayContaining([
+            expect.objectContaining({ NOT: expect.any(Object) }),
+          ]),
+        }),
+      }),
+    );
   });
 });

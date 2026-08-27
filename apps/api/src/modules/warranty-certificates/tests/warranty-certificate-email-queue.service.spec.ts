@@ -31,6 +31,7 @@ describe('WarrantyCertificateEmailQueueService', () => {
       },
       warrantyCertificate: {
         findUnique: jest.fn().mockResolvedValue(certificate),
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
         update: jest.fn().mockImplementation(({ data }) => ({
           ...certificate,
           ...data,
@@ -71,5 +72,17 @@ describe('WarrantyCertificateEmailQueueService', () => {
         ],
       }),
     );
+    expect(prismaService.warrantyCertificate.updateMany).toHaveBeenCalledWith({
+      where: {
+        id: { in: [certificate.id] },
+        email_status: { not: 'SENT' },
+      },
+      data: {
+        email_status: 'QUEUED',
+        emailed_at: expect.any(Date),
+        last_error: null,
+      },
+    });
+    expect(prismaService.warrantyCertificate.update).not.toHaveBeenCalled();
   });
 });

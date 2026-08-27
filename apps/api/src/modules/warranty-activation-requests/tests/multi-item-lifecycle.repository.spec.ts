@@ -1,4 +1,5 @@
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
+import { WarrantyActivationRequestQueries } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository.queries';
 import { ReviewWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/review-warranty-activation-request.use-case';
 import {
   product_status,
@@ -59,6 +60,91 @@ describe('Multi-item activation lifecycle', () => {
     });
   });
 
+  it('uses the linked Customer even when snapshot contact matches another profile', async () => {
+    const transactionRepository = createTransactionRepository();
+    const request = createActivationRequest();
+    request.customer_id = 'selected-customer-id';
+    transactionRepository.findRequest.mockResolvedValue(request);
+    transactionRepository.findCustomerById.mockResolvedValue({
+      id: 'selected-customer-id',
+      user_id: 'selected-user-id',
+    });
+    transactionRepository.findCustomerByPhone.mockResolvedValue({
+      id: 'contact-match-customer-id',
+      user_id: null,
+    });
+    const useCase = new ReviewWarrantyActivationRequestUseCase(
+      createRepository(transactionRepository) as never,
+      { execute: jest.fn() } as never,
+    );
+
+    await useCase.execute('request-id', {
+      status: warranty_activation_request_status.APPROVED,
+    });
+
+    expect(transactionRepository.findCustomerById).toHaveBeenCalledWith(
+      'selected-customer-id',
+    );
+    expect(transactionRepository.findCustomerByPhone).not.toHaveBeenCalled();
+    expect(transactionRepository.findCustomerByEmail).not.toHaveBeenCalled();
+    expect(transactionRepository.updateCustomer).not.toHaveBeenCalled();
+    expect(transactionRepository.createOwnership).toHaveBeenCalledTimes(2);
+    expect(transactionRepository.createOwnership).toHaveBeenCalledWith(
+      expect.objectContaining({
+        customerId: 'selected-customer-id',
+        ownerUserId: 'selected-user-id',
+      }),
+    );
+    expect(transactionRepository.completeActivation).toHaveBeenCalledWith(
+      expect.objectContaining({ customerId: 'selected-customer-id' }),
+    );
+  });
+
+  it('keeps contact-based Customer resolution for a public request', async () => {
+    const transactionRepository = createTransactionRepository();
+    const useCase = new ReviewWarrantyActivationRequestUseCase(
+      createRepository(transactionRepository) as never,
+      { execute: jest.fn() } as never,
+    );
+
+    await useCase.execute('request-id', {
+      status: warranty_activation_request_status.APPROVED,
+    });
+
+    expect(transactionRepository.findCustomerById).not.toHaveBeenCalled();
+    expect(transactionRepository.findCustomerByPhone).toHaveBeenCalledWith(
+      '0901234567',
+    );
+    expect(transactionRepository.updateCustomer).toHaveBeenCalledWith(
+      'customer-id',
+      expect.objectContaining({ phone: '0901234567' }),
+    );
+  });
+
+  it('rejects approval when the linked Customer no longer exists', async () => {
+    const transactionRepository = createTransactionRepository();
+    const request = createActivationRequest();
+    request.customer_id = 'missing-customer-id';
+    transactionRepository.findRequest.mockResolvedValue(request);
+    transactionRepository.findCustomerById.mockResolvedValue(null);
+    const useCase = new ReviewWarrantyActivationRequestUseCase(
+      createRepository(transactionRepository) as never,
+      { execute: jest.fn() } as never,
+    );
+
+    await expect(
+      useCase.execute('request-id', {
+        status: warranty_activation_request_status.APPROVED,
+      }),
+    ).rejects.toMatchObject({
+      details: {
+        code: 'CUSTOMER_NOT_FOUND',
+        customerId: 'missing-customer-id',
+      },
+    });
+    expect(transactionRepository.createOwnership).not.toHaveBeenCalled();
+  });
+
   it('does not complete the request when any warranty transition fails', async () => {
     const transactionRepository = createTransactionRepository();
     transactionRepository.transitionWarranty
@@ -79,7 +165,7 @@ describe('Multi-item activation lifecycle', () => {
     expect(transactionRepository.completeActivation).not.toHaveBeenCalled();
   });
 
-  it('rejects an ineligible product before changing ownership', async () => {
+  it('returns a clear API message when an inactive product blocks approval', async () => {
     const transactionRepository = createTransactionRepository();
     const request = createActivationRequest();
     request.items[0].product.status = product_status.INACTIVE;
@@ -92,9 +178,45 @@ describe('Multi-item activation lifecycle', () => {
     await expect(
       useCase.execute('request-id', {
         status: warranty_activation_request_status.APPROVED,
+        locale: 'vi',
       }),
     ).rejects.toMatchObject({
-      details: { code: 'WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION' },
+      message:
+        'Không thể duyệt yêu cầu vì sản phẩm "Product product-a" tại vị trí "Position product-a" đang ngừng hoạt động. Hãy chuyển sản phẩm về trạng thái hoạt động rồi thử lại hoặc từ chối yêu cầu này.',
+      details: {
+        code: 'WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION',
+        productId: 'product-a',
+        reason: 'PRODUCT_INACTIVE',
+        warrantyCode: 'WM-product-a',
+      },
+    });
+    expect(transactionRepository.createOwnership).not.toHaveBeenCalled();
+  });
+
+  it('returns a clear English API message when a deleted product blocks approval', async () => {
+    const transactionRepository = createTransactionRepository();
+    const request = createActivationRequest();
+    request.items[0].product.deleted_at = new Date();
+    transactionRepository.findRequest.mockResolvedValue(request);
+    const useCase = new ReviewWarrantyActivationRequestUseCase(
+      createRepository(transactionRepository) as never,
+      { execute: jest.fn() } as never,
+    );
+
+    await expect(
+      useCase.execute('request-id', {
+        status: warranty_activation_request_status.APPROVED,
+        locale: 'en',
+      }),
+    ).rejects.toMatchObject({
+      message:
+        'The request cannot be approved because product "Product product-a" at position "Position product-a" has been soft-deleted. Restore the product and try again, or reject this request.',
+      details: {
+        code: 'WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION',
+        productId: 'product-a',
+        reason: 'PRODUCT_DELETED',
+        warrantyCode: 'WM-product-a',
+      },
     });
     expect(transactionRepository.createOwnership).not.toHaveBeenCalled();
   });
@@ -129,11 +251,14 @@ describe('Multi-item activation lifecycle', () => {
         updateMany: jest.fn().mockResolvedValue({ count: 2 }),
       },
     };
-    const repository = new WarrantyActivationRequestsRepository({
-      $transaction: jest.fn((callback: (client: typeof tx) => unknown) =>
-        callback(tx),
-      ),
-    } as never);
+    const repository = new WarrantyActivationRequestsRepository(
+      {
+        $transaction: jest.fn((callback: (client: typeof tx) => unknown) =>
+          callback(tx),
+        ),
+      } as never,
+      new WarrantyActivationRequestQueries(),
+    );
 
     await repository.review({
       id: 'request-id',
@@ -177,6 +302,7 @@ function createTransactionRepository() {
     completeActivation: jest.fn().mockResolvedValue(request),
     createCustomer: jest.fn(),
     createOwnership: jest.fn(),
+    findCustomerById: jest.fn(),
     findCustomerByEmail: jest.fn().mockResolvedValue(null),
     findCustomerByPhone: jest.fn().mockResolvedValue({
       id: 'customer-id',
@@ -210,6 +336,7 @@ function createTransactionRepository() {
 function createActivationRequest() {
   return {
     activated_warranty_id: null,
+    customer_id: null as string | null,
     customer_email: 'customer@example.com',
     customer_name: 'Nguyen Van A',
     customer_phone: '0901234567',
@@ -223,15 +350,22 @@ function createActivationRequest() {
   };
 }
 
-function createItem(productId: string, warrantyId: string) {
+function createItem(
+  productId: string,
+  warrantyId: string,
+  deletedAt: Date | null = null,
+) {
   return {
+    id: `item-${productId}`,
+    position_label: `Position ${productId}`,
     product_id: productId,
+    product_name: `Product ${productId}`,
     warranty_id: warrantyId,
     warranty_code: `WM-${productId}`,
     product: {
       id: productId,
       status: product_status.ACTIVE as product_status,
-      deleted_at: null,
+      deleted_at: deletedAt,
       warranty: {
         id: warrantyId,
         status: warranty_status.DRAFT,

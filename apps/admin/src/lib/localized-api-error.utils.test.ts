@@ -56,6 +56,30 @@ test("uses the centralized API error translator", () => {
   );
 });
 
+test("can prefer a message returned by the API and use client copy only as fallback", () => {
+  const translate = createTranslator({
+    reviewError: "Không thể duyệt yêu cầu.",
+  });
+  const apiErrors = createTranslator({
+    WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION: "Bản dịch chung phía client.",
+  });
+  const error = new HttpClientError({
+    message:
+      "Không thể duyệt vì sản phẩm đã bị xóa mềm. Hãy khôi phục sản phẩm rồi thử lại.",
+    details: { code: "WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION" },
+    isNetworkError: false,
+  });
+
+  assert.equal(
+    getLocalizedApiError(error, translate, {
+      apiErrors,
+      fallbackKey: "reviewError",
+      preferApiMessage: true,
+    }),
+    "Không thể duyệt vì sản phẩm đã bị xóa mềm. Hãy khôi phục sản phẩm rồi thử lại.",
+  );
+});
+
 test("keeps the backend message when an API error code is not translated", () => {
   const translate = createTranslator({ saveError: "Không thể lưu dữ liệu." });
   const error = new HttpClientError({

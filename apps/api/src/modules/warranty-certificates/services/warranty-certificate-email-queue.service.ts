@@ -3,7 +3,6 @@ import { SendEmailUseCase } from '@/modules/email/use-cases/send-email.usecase';
 import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
 import { WarrantyCertificateEmailContentService } from '@/modules/warranty-certificates/services/warranty-certificate-email-content.service';
 import { Injectable, Logger } from '@nestjs/common';
-import { warranty_certificate_email_status } from '@prisma/client';
 
 @Injectable()
 export class WarrantyCertificateEmailQueueService {
@@ -28,10 +27,10 @@ export class WarrantyCertificateEmailQueueService {
 
     const currentCustomer =
       certificate.warranty.product.ownerships[0]?.customer;
-    if (!certificate.recipient_email) {
+    if (!certificate.recipientEmail) {
       throw new Error('Warranty certificate recipient email is required');
     }
-    if (!certificate.storage_key) {
+    if (!certificate.storageKey) {
       throw new Error('Warranty certificate PDF is not available in storage');
     }
 
@@ -42,33 +41,32 @@ export class WarrantyCertificateEmailQueueService {
         )
       : null;
     const emailInput = {
-      certificateNumber: certificate.certificate_number,
-      customerAddress: request?.full_address ?? null,
-      customerEmail: request?.customer_email ?? currentCustomer?.email ?? null,
+      certificateNumber: certificate.certificateNumber,
+      customerAddress: request?.fullAddress ?? null,
+      customerEmail: request?.customerEmail ?? currentCustomer?.email ?? null,
       customerName:
-        request?.customer_name ?? currentCustomer?.full_name ?? 'Quý khách',
-      customerPhone: request?.customer_phone ?? currentCustomer?.phone ?? null,
+        request?.customerName ?? currentCustomer?.fullName ?? 'Quý khách',
+      customerPhone: request?.customerPhone ?? currentCustomer?.phone ?? null,
       dealerName:
         request?.dealer?.name ?? this.getDealerName(request?.metadata),
-      endDate: certificate.warranty.end_date,
+      endDate: certificate.warranty.endDate,
       filmItems: this.getFilmItems(request?.metadata),
-      installedAt: request?.installed_at ?? certificate.warranty.start_date,
+      installedAt: request?.installedAt ?? certificate.warranty.startDate,
       productName:
-        certificate.warranty.product.display_name ??
+        certificate.warranty.product.displayName ??
         certificate.warranty.product.template.name,
-      serialNumber: certificate.warranty.product.serial_number,
-      startDate: certificate.warranty.start_date,
-      vehicleModel: request?.vehicle_model ?? null,
-      vehiclePlate: request?.vehicle_plate ?? null,
+      serialNumber: certificate.warranty.product.serialNumber,
+      startDate: certificate.warranty.startDate,
+      vehicleModel: request?.vehicleModel ?? null,
+      vehiclePlate: request?.vehiclePlate ?? null,
       warrantyDurationMonths:
-        request?.warranty_duration_months ??
-        certificate.warranty.duration_months,
-      warrantyCode: certificate.warranty.warranty_code,
+        request?.warrantyDurationMonths ?? certificate.warranty.durationMonths,
+      warrantyCode: certificate.warranty.warrantyCode,
     };
 
     try {
       const pdfStream = await this.uploadAssetService.getStream(
-        certificate.storage_key,
+        certificate.storageKey,
       );
       const pdfBuffer = await this.streamToBuffer(pdfStream);
 
@@ -77,22 +75,26 @@ export class WarrantyCertificateEmailQueueService {
           {
             contentBase64: pdfBuffer.toString('base64'),
             contentType: 'application/pdf',
-            filename: `${certificate.certificate_number}.pdf`,
+            filename: `${certificate.certificateNumber}.pdf`,
           },
         ],
         context: this.emailContentService.buildTemplateContext(emailInput),
         template: 'warranty-certificate',
-        to: certificate.recipient_email,
+        to: certificate.recipientEmail,
         subject: this.emailContentService.buildSubject(emailInput),
         text: this.emailContentService.buildText(emailInput),
         warrantyCertificateId: certificate.id,
       });
 
-      return this.warrantyCertificatesRepository.update(certificate.id, {
-        email_status: warranty_certificate_email_status.QUEUED,
-        emailed_at: new Date(),
-        last_error: null,
-      });
+      await this.warrantyCertificatesRepository.markEmailQueued(
+        [certificate.id],
+        new Date(),
+      );
+
+      return (
+        (await this.warrantyCertificatesRepository.findById(certificate.id)) ??
+        certificate
+      );
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Unknown email queue error';
@@ -100,10 +102,15 @@ export class WarrantyCertificateEmailQueueService {
         `Failed to queue warranty certificate email ${certificate.id}: ${message}`,
       );
 
-      return this.warrantyCertificatesRepository.update(certificate.id, {
-        email_status: warranty_certificate_email_status.FAILED,
-        last_error: message,
-      });
+      await this.warrantyCertificatesRepository.markEmailQueueFailed(
+        [certificate.id],
+        message,
+      );
+
+      return (
+        (await this.warrantyCertificatesRepository.findById(certificate.id)) ??
+        certificate
+      );
     }
   }
 

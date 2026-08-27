@@ -51,7 +51,7 @@ test("places contact submissions after dealers in the general sidebar section", 
   assert.equal(contactSubmissions?.notificationBadgeKey, "contactSubmissions");
 });
 
-test("orders product templates before physical products", () => {
+test("orders physical products before product templates", () => {
   const config = getDashboardConfig((key) => key);
   const products = config.sidebarSections
     .flatMap((section) => section.items)
@@ -61,8 +61,8 @@ test("orders product templates before physical products", () => {
   assert.deepEqual(
     products?.children?.map((item) => [item.title, item.href]),
     [
-      ["items.productTemplates", "/product-templates"],
       ["items.products", "/products"],
+      ["items.productTemplates", "/product-templates"],
     ],
   );
 });
@@ -75,7 +75,7 @@ test("groups warranties while keeping claims independent", () => {
   assert.deepEqual(
     warranties?.children?.map((item) => [item.title, item.href]),
     [
-      ["items.warranties", "/warranties"],
+      ["items.warrantyList", "/warranties"],
       ["items.warrantyActivationRequests", "/warranty-activation-requests"],
     ],
   );

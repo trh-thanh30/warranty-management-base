@@ -12,6 +12,7 @@ import type {
   AssignProductOwnerBody,
   AttachProductAssetBody,
   CreateProductBody,
+  ListActivationProductOptionsQuery,
   ListProductsQuery,
   PaginatedResponse,
   ProductResponse,
@@ -31,7 +32,27 @@ export const productKeys = {
   details: () => [...productKeys.all, "detail"] as const,
   list: (query: ListProductsQuery) => [...productKeys.lists(), query] as const,
   lists: () => [...productKeys.all, "list"] as const,
+  activationOptions: (query: ListActivationProductOptionsQuery) =>
+    [...productKeys.all, "activation-options", query] as const,
 };
+
+export function useInfiniteActivationProductOptions(
+  query: Omit<ListActivationProductOptionsQuery, "page">,
+  options?: { enabled?: boolean },
+) {
+  return useInfiniteQuery({
+    ...options,
+    queryKey: productKeys.activationOptions(query),
+    queryFn: ({ pageParam }) =>
+      productsService.listActivationProductOptions({
+        ...query,
+        page: pageParam,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.meta.hasNextPage ? lastPage.meta.page + 1 : undefined,
+  });
+}
 
 export function useProducts(
   query: ListProductsQuery,
@@ -104,6 +125,19 @@ export function useDeleteProduct() {
 
   return useMutation({
     mutationFn: (productId: string) => productsService.deleteProduct(productId),
+    onSuccess: (product) => {
+      void queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.setQueryData(productKeys.detail(product.id), product);
+    },
+  });
+}
+
+export function useRestoreProduct() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (productId: string) =>
+      productsService.restoreProduct(productId),
     onSuccess: (product) => {
       void queryClient.invalidateQueries({ queryKey: productKeys.lists() });
       queryClient.setQueryData(productKeys.detail(product.id), product);

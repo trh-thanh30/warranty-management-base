@@ -1,5 +1,5 @@
-import { WarrantyCertificateBatchEmailService } from '@/modules/warranty-certificates/services/warranty-certificate-batch-email.service';
 import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
+import { WarrantyCertificateBatchEmailService } from '@/modules/warranty-certificates/services/warranty-certificate-batch-email.service';
 import { warranty_certificate_email_status } from '@prisma/client';
 import { Readable } from 'node:stream';
 
@@ -52,7 +52,10 @@ describe('WarrantyCertificateBatchEmailService', () => {
       }),
     );
     expect(prismaService.warrantyCertificate.updateMany).toHaveBeenCalledWith({
-      where: { id: { in: ['certificate-1', 'certificate-2'] } },
+      where: {
+        id: { in: ['certificate-1', 'certificate-2'] },
+        email_status: { not: warranty_certificate_email_status.SENT },
+      },
       data: expect.objectContaining({
         email_status: warranty_certificate_email_status.QUEUED,
         last_error: null,

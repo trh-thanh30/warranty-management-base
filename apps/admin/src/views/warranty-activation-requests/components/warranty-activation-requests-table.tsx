@@ -31,18 +31,18 @@ import {
   TableRow,
 } from "@repo/ui";
 import { SortableTableHead } from "@/src/components/common/sortable-table-head";
+import { CompactBadgeList } from "@/src/components/common";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
 import type { WarrantyActivationRequestAction } from "../warranty-activation-requests.types";
 import {
   formatActivationRequestCustomer,
   formatActivationRequestDate,
-  formatActivationRequestProduct,
 } from "../warranty-activation-requests.utils";
 import { WarrantyActivationRequestStatusBadge } from "./warranty-activation-request-status-badge";
 import {
-  getActivationRequestProductTitle,
-  getActivationRequestWarrantyCodeLabel,
+  getActivationRequestProductNames,
+  getActivationRequestWarrantyCodes,
 } from "../warranty-activation-request-items.utils";
 
 type WarrantyActivationRequestsTableProps = {
@@ -172,11 +172,11 @@ function WarrantyActivationRequestTableRow({
         </Link>
       </TableCell>
       <TableCell>
-        <div className="max-w-52 truncate font-mono text-xs">
-          {getActivationRequestWarrantyCodeLabel(request, (count) =>
-            t("warrantyCodeCount", { count }),
-          )}
-        </div>
+        <CompactBadgeList
+          items={getActivationRequestWarrantyCodes(request)}
+          monospace
+          overflowAriaLabel={(count) => t("showMoreWarrantyCodes", { count })}
+        />
       </TableCell>
       <TableCell>
         <div className="max-w-[18rem]">
@@ -187,18 +187,11 @@ function WarrantyActivationRequestTableRow({
         </div>
       </TableCell>
       <TableCell>
-        <div className="max-w-[18rem]">
-          <p className="truncate font-medium">
-            {getActivationRequestProductTitle(request, (count) =>
-              t("productCount", { count }),
-            )}
-          </p>
-          <p className="mt-1 truncate text-xs text-slate-500">
-            {request.items?.length
-              ? request.items.map((item) => item.productName).join(" · ")
-              : formatActivationRequestProduct(request) || "-"}
-          </p>
-        </div>
+        <CompactBadgeList
+          items={getActivationRequestProductNames(request)}
+          overflowAriaLabel={(count) => t("showMoreProducts", { count })}
+          showItemTooltip
+        />
       </TableCell>
       <TableCell>
         <WarrantyActivationRequestStatusBadge
@@ -268,23 +261,25 @@ function WarrantyActivationRequestMobileCard({
       </dl>
 
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-        <MobileField
-          label={t("warrantyCode")}
-          value={getActivationRequestWarrantyCodeLabel(request, (count) =>
-            t("warrantyCodeCount", { count }),
-          )}
-        />
+        <MobileField label={t("warrantyCode")}>
+          <CompactBadgeList
+            items={getActivationRequestWarrantyCodes(request)}
+            monospace
+            overflowAriaLabel={(count) => t("showMoreWarrantyCodes", { count })}
+          />
+        </MobileField>
         <MobileField
           label={t("createdAt")}
           value={formatActivationRequestDate(request.createdAt, locale)}
         />
         <MobileField label={t("phone")} value={request.customerPhone} />
-        <MobileField
-          label={t("product")}
-          value={getActivationRequestProductTitle(request, (count) =>
-            t("productCount", { count }),
-          )}
-        />
+        <MobileField label={t("product")}>
+          <CompactBadgeList
+            items={getActivationRequestProductNames(request)}
+            overflowAriaLabel={(count) => t("showMoreProducts", { count })}
+            showItemTooltip
+          />
+        </MobileField>
       </dl>
     </article>
   );
@@ -307,14 +302,22 @@ function MobileStatusRow({
   );
 }
 
-function MobileField({ label, value }: { label: string; value: string }) {
+function MobileField({
+  children,
+  label,
+  value,
+}: {
+  children?: ReactNode;
+  label: string;
+  value?: string;
+}) {
   return (
     <div className="min-w-0">
       <dt className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
         {label}
       </dt>
-      <dd className="mt-1 truncate text-slate-950 dark:text-slate-50">
-        {value}
+      <dd className="mt-1 min-w-0 text-slate-950 dark:text-slate-50">
+        {children ?? <span className="block truncate">{value}</span>}
       </dd>
     </div>
   );

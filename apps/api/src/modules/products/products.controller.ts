@@ -4,6 +4,7 @@ import { AttachProductAssetDto } from '@/modules/products/dto/attach-product-ass
 import { AssignProductOwnerDto } from '@/modules/products/dto/assign-product-owner.dto';
 import { ConfirmProductImportDto } from '@/modules/products/dto/confirm-product-import.dto';
 import { CreateProductDto } from '@/modules/products/dto/create-product.dto';
+import { ListActivationProductOptionsDto } from '@/modules/products/dto/list-activation-product-options.dto';
 import { ListProductsDto } from '@/modules/products/dto/list-products.dto';
 import { UpdateProductDto } from '@/modules/products/dto/update-product.dto';
 import { UpdateProductAssetDto } from '@/modules/products/dto/update-product-asset.dto';
@@ -15,8 +16,10 @@ import { DownloadProductImportTemplateUseCase } from '@/modules/products/use-cas
 import { ExportProductsUseCase } from '@/modules/products/use-cases/export-products.use-case';
 import { GetProductDetailUseCase } from '@/modules/products/use-cases/get-product-detail.use-case';
 import { ListProductsUseCase } from '@/modules/products/use-cases/list-products.use-case';
+import { ListActivationProductOptionsUseCase } from '@/modules/products/use-cases/list-activation-product-options.use-case';
 import { PreviewProductImportUseCase } from '@/modules/products/use-cases/preview-product-import.use-case';
 import { SoftDeleteProductUseCase } from '@/modules/products/use-cases/soft-delete-product.use-case';
+import { RestoreProductUseCase } from '@/modules/products/use-cases/restore-product.use-case';
 import { RemoveProductAssetUseCase } from '@/modules/products/use-cases/remove-product-asset.use-case';
 import { UpdateProductAssetUseCase } from '@/modules/products/use-cases/update-product-asset.use-case';
 import { UpdateProductUseCase } from '@/modules/products/use-cases/update-product.use-case';
@@ -43,7 +46,9 @@ export class ProductsController {
     private readonly createProductUseCase: CreateProductUseCase,
     private readonly updateProductUseCase: UpdateProductUseCase,
     private readonly softDeleteProductUseCase: SoftDeleteProductUseCase,
+    private readonly restoreProductUseCase: RestoreProductUseCase,
     private readonly listProductsUseCase: ListProductsUseCase,
+    private readonly listActivationProductOptionsUseCase: ListActivationProductOptionsUseCase,
     private readonly getProductDetailUseCase: GetProductDetailUseCase,
     private readonly assignProductOwnerUseCase: AssignProductOwnerUseCase,
     private readonly attachProductAssetUseCase: AttachProductAssetUseCase,
@@ -59,6 +64,12 @@ export class ProductsController {
   @Permissions([permission_key.PRODUCT_VIEW])
   list(@Query() query: ListProductsDto) {
     return this.listProductsUseCase.execute(query);
+  }
+
+  @Get('activation-options')
+  @Permissions([permission_key.PRODUCT_VIEW])
+  listActivationOptions(@Query() query: ListActivationProductOptionsDto) {
+    return this.listActivationProductOptionsUseCase.execute(query);
   }
 
   @Get('export')
@@ -113,6 +124,12 @@ export class ProductsController {
   @Permissions([permission_key.PRODUCT_DELETE])
   remove(@Param('id') id: string) {
     return this.softDeleteProductUseCase.execute(id);
+  }
+
+  @Patch(':id/restore')
+  @Permissions([permission_key.PRODUCT_DELETE])
+  restore(@Param('id') id: string) {
+    return this.restoreProductUseCase.execute(id);
   }
 
   @Post(':id/assign-owner')

@@ -8,7 +8,8 @@ export class GetWarrantyByProductUseCase {
   constructor(private readonly warrantiesRepository: WarrantiesRepository) {}
 
   async execute(productId: string) {
-    const warranty = await this.warrantiesRepository.findByProductId(productId);
+    const warranty =
+      await this.warrantiesRepository.findRecordByProductId(productId);
     if (!warranty) {
       throw new NotFoundError('Warranty not found');
     }

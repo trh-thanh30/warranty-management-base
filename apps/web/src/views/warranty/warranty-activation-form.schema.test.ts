@@ -3,7 +3,6 @@ import test from "node:test";
 import { createWarrantyActivationFormSchema } from "./warranty-activation-form.schema.ts";
 
 const schema = createWarrantyActivationFormSchema({
-  addressAdministrativeUnitNotAllowed: "address location error",
   addressRequired: "address required",
   customerEmailInvalid: "email invalid",
   customerEmailRequired: "email required",
@@ -26,19 +25,12 @@ const validValues = {
   warrantyCode: "WM-2026-ABCDE",
 };
 
-test("public activation address detail rejects structured location units", () => {
-  const result = schema.safeParse({
-    ...validValues,
-    addressDetail: "Khu phố Hoàng Xá, Xã A, Tỉnh B",
-  });
-
-  assert.equal(result.success, false);
-  if (result.success) return;
-  assert.equal(result.error.issues[0]?.message, "address location error");
-});
-
-test("public activation address detail allows district and provincial roads", () => {
+test("public activation accepts previously valid Vietnamese address details", () => {
   for (const addressDetail of [
+    "123 Nguyễn Trãi, Phường 1",
+    "Khu phố Hoàng Xá, Xã A, Tỉnh B",
+    "Số 10, Thành phố Tây Hồ",
+    "123 Nguyen Trai, Phuong 1",
     "Khu phố Hoàng Xá, Thị xã Thuận Thành",
     "Số 10 Tỉnh lộ 282",
   ]) {

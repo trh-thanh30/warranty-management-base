@@ -2,13 +2,13 @@
 
 import { SearchDropdown } from "@/src/components/common";
 import { useDebounce } from "@repo/hooks";
-import type { ProductResponse } from "@repo/shared";
+import type { ActivationProductOption, ProductResponse } from "@repo/shared";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { useInfiniteProducts } from "../../products/hooks/use-products";
+import { useInfiniteActivationProductOptions } from "../../products/hooks/use-products";
 import {
+  getActivationProductOptionDisabledReason,
   getActivationProductDisplayName,
-  getProductSelectDisabledReason,
   getProductWarrantyStatusLabel,
 } from "../warranty-activation-request-product.utils";
 import { ProductSearchResult } from "./product-search-result";
@@ -33,15 +33,11 @@ export function ActivationProductSelectField({
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search.trim(), 300);
-  const productsQuery = useInfiniteProducts(
+  const productsQuery = useInfiniteActivationProductOptions(
     {
-      activationEligible: "true",
       categoryId,
       limit: 20,
       search: debouncedSearch || undefined,
-      sortBy: "createdAt",
-      sortOrder: "desc",
-      status: "ACTIVE",
     },
     { enabled: Boolean(categoryId) },
   );
@@ -57,11 +53,11 @@ export function ActivationProductSelectField({
     [productsQuery.data?.pages],
   );
 
-  function getDisabledReason(product: ProductResponse) {
+  function getDisabledReason(product: ActivationProductOption) {
     if (unavailableProductIds.has(product.id)) {
       return t("activationProductAlreadySelected");
     }
-    return getProductSelectDisabledReason(product, t);
+    return getActivationProductOptionDisabledReason(product, t);
   }
 
   return (

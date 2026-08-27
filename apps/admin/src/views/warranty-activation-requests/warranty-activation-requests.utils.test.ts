@@ -11,6 +11,7 @@ import type {
 } from "@/src/services/locations/locations.types";
 import {
   buildActivationRequestItems,
+  buildWarrantyActivationRequestListQuery,
   filterActivationRequestCategories,
   formatActivationRequestCreateFieldError,
   formatDealerSearchOption,
@@ -75,6 +76,39 @@ const validFormValues: WarrantyActivationRequestCreateFormValues = {
   provinceCode: "27",
   wardCode: "09442",
 };
+
+test("activation request directory uses one search query for request and warranty identifiers", () => {
+  assert.deepEqual(
+    buildWarrantyActivationRequestListQuery({
+      dateFrom: "2026-08-01",
+      dateTo: "2026-08-27",
+      limit: 20,
+      page: 1,
+      search: "  WM-2026-ABC123  ",
+      sortBy: "createdAt",
+      sortOrder: "desc",
+      status: "ALL",
+    }),
+    {
+      dateFrom: "2026-08-01",
+      dateTo: "2026-08-27",
+      limit: 20,
+      page: 1,
+      search: "WM-2026-ABC123",
+      sortBy: "createdAt",
+      sortOrder: "desc",
+    },
+  );
+});
+
+test("admin activation accepts an address made only from ward and province", () => {
+  const result = warrantyActivationRequestCreateFormSchema.safeParse({
+    ...validFormValues,
+    addressDetail: "",
+  });
+
+  assert.equal(result.success, true);
+});
 
 test("activation request address detail rejects structured location units", () => {
   const result = warrantyActivationRequestCreateFormSchema.safeParse({

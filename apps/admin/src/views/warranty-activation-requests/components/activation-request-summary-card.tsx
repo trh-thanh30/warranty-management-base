@@ -56,21 +56,41 @@ export function SummaryGrid({
 }
 
 export function SummaryItem({
+  action,
+  error,
   icon,
   label,
   value,
 }: {
+  action?: ReactNode;
+  error?: string;
   icon?: ReactNode;
   label: string;
   value: string;
 }) {
   return (
     <div className="min-w-0 bg-white px-4 py-3 dark:bg-slate-950">
-      <p className="flex items-center gap-1.5 text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-        {icon}
-        {label}
+      <div className="flex items-center justify-between gap-2">
+        <p className="flex min-w-0 items-center gap-1.5 text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+          {icon}
+          <span className="truncate">{label}</span>
+        </p>
+        {action}
+      </div>
+      <p
+        className={`mt-1 truncate ${
+          error
+            ? "text-red-700 dark:text-red-300"
+            : "text-slate-950 dark:text-slate-50"
+        }`}
+      >
+        {value}
       </p>
-      <p className="mt-1 truncate text-slate-950 dark:text-slate-50">{value}</p>
+      {error ? (
+        <p className="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

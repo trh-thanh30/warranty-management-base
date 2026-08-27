@@ -206,6 +206,30 @@ describe('Category use cases', () => {
     });
   });
 
+  it('does not filter category tree status when isActive is all', async () => {
+    categoriesRepository.listByType.mockResolvedValue([
+      category,
+      {
+        ...category,
+        id: 'inactive-category-id',
+        is_active: false,
+        name: 'Inactive category',
+        slug: 'inactive-category',
+      },
+    ]);
+    const useCase = new ListCategoryTreeUseCase(categoriesRepository as never);
+
+    const result = await useCase.execute({
+      isActive: 'all',
+      type: category_type.PRODUCT,
+    });
+
+    expect(result.items.map((item) => item.id)).toEqual([
+      category.id,
+      'inactive-category-id',
+    ]);
+  });
+
   it('paginates complete category branches instead of individual rows', async () => {
     const secondRoot = {
       ...category,

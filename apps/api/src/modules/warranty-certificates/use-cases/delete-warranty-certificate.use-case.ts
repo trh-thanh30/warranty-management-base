@@ -17,8 +17,8 @@ export class DeleteWarrantyCertificateUseCase {
       throw new NotFoundException('Warranty certificate not found');
     }
 
-    if (certificate.storage_key) {
-      await this.uploadAssetService.delete(certificate.storage_key);
+    if (certificate.storageKey) {
+      await this.uploadAssetService.delete(certificate.storageKey);
     }
 
     return this.warrantyCertificatesRepository.delete(certificate.id);

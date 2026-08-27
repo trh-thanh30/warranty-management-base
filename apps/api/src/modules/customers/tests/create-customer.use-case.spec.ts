@@ -8,12 +8,7 @@ describe('CreateCustomerUseCase', () => {
     findByCustomerCode: jest.fn(),
     findByEmail: jest.fn(),
     findByPhone: jest.fn(),
-  });
-
-  const createPrismaService = () => ({
-    user: {
-      findUnique: jest.fn(),
-    },
+    findUserById: jest.fn(),
   });
 
   const createGenerateCustomerCodeUseCase = () => ({
@@ -37,11 +32,9 @@ describe('CreateCustomerUseCase', () => {
       created_at: new Date('2026-07-09T00:00:00.000Z'),
       updated_at: new Date('2026-07-09T00:00:00.000Z'),
     });
-    const prismaService = createPrismaService();
     const generateCustomerCodeUseCase = createGenerateCustomerCodeUseCase();
     const useCase = new CreateCustomerUseCase(
       customersRepository as never,
-      prismaService as never,
       generateCustomerCodeUseCase as never,
     );
 
@@ -53,7 +46,7 @@ describe('CreateCustomerUseCase', () => {
       address: 'Ho Chi Minh City',
     });
 
-    expect(prismaService.user.findUnique).not.toHaveBeenCalled();
+    expect(customersRepository.findUserById).not.toHaveBeenCalled();
     expect(generateCustomerCodeUseCase.execute).not.toHaveBeenCalled();
     expect(customersRepository.findByUserId).not.toHaveBeenCalled();
     expect(customersRepository.create).toHaveBeenCalledWith(
@@ -86,7 +79,6 @@ describe('CreateCustomerUseCase', () => {
     });
     const useCase = new CreateCustomerUseCase(
       customersRepository as never,
-      createPrismaService() as never,
       createGenerateCustomerCodeUseCase() as never,
     );
 
@@ -104,17 +96,15 @@ describe('CreateCustomerUseCase', () => {
         birthdate: new Date('2005-12-11T00:00:00.000Z'),
       }),
     );
-    expect(result.birthdate).toEqual(new Date('2005-12-11T00:00:00.000Z'));
+    expect(result.birthdate).toBe('2005-12-11T00:00:00.000Z');
   });
 
   it('validates userId when linking to an existing account', async () => {
     const customersRepository = createCustomersRepository();
-    const prismaService = createPrismaService();
-    prismaService.user.findUnique.mockResolvedValue(null);
+    customersRepository.findUserById.mockResolvedValue(null);
     const generateCustomerCodeUseCase = createGenerateCustomerCodeUseCase();
     const useCase = new CreateCustomerUseCase(
       customersRepository as never,
-      prismaService as never,
       generateCustomerCodeUseCase as never,
     );
 
@@ -135,6 +125,11 @@ describe('CreateCustomerUseCase', () => {
     customersRepository.findByCustomerCode.mockResolvedValue(null);
     customersRepository.findByPhone.mockResolvedValue(null);
     customersRepository.findByEmail.mockResolvedValue(null);
+    customersRepository.findUserById.mockResolvedValue({
+      id: '00000000-0000-4000-8000-000000000001',
+      phone: '0987654311',
+      email: 'user1@example.com',
+    });
     customersRepository.create.mockResolvedValue({
       id: 'customer-id',
       user_id: '00000000-0000-4000-8000-000000000001',
@@ -147,16 +142,9 @@ describe('CreateCustomerUseCase', () => {
       created_at: new Date('2026-07-09T00:00:00.000Z'),
       updated_at: new Date('2026-07-09T00:00:00.000Z'),
     });
-    const prismaService = createPrismaService();
-    prismaService.user.findUnique.mockResolvedValue({
-      id: '00000000-0000-4000-8000-000000000001',
-      phone: '0987654311',
-      email: 'user1@example.com',
-    });
     const generateCustomerCodeUseCase = createGenerateCustomerCodeUseCase();
     const useCase = new CreateCustomerUseCase(
       customersRepository as never,
-      prismaService as never,
       generateCustomerCodeUseCase as never,
     );
 
@@ -183,8 +171,7 @@ describe('CreateCustomerUseCase', () => {
   it('prevents creating another customer profile for the same account', async () => {
     const customersRepository = createCustomersRepository();
     customersRepository.findByUserId.mockResolvedValue({ id: 'customer-id' });
-    const prismaService = createPrismaService();
-    prismaService.user.findUnique.mockResolvedValue({
+    customersRepository.findUserById.mockResolvedValue({
       id: '00000000-0000-4000-8000-000000000001',
       phone: null,
       email: null,
@@ -192,7 +179,6 @@ describe('CreateCustomerUseCase', () => {
     const generateCustomerCodeUseCase = createGenerateCustomerCodeUseCase();
     const useCase = new CreateCustomerUseCase(
       customersRepository as never,
-      prismaService as never,
       generateCustomerCodeUseCase as never,
     );
 
@@ -224,12 +210,10 @@ describe('CreateCustomerUseCase', () => {
       created_at: new Date('2026-07-09T00:00:00.000Z'),
       updated_at: new Date('2026-07-09T00:00:00.000Z'),
     });
-    const prismaService = createPrismaService();
     const generateCustomerCodeUseCase = createGenerateCustomerCodeUseCase();
     generateCustomerCodeUseCase.execute.mockResolvedValue('CUS-2026-ABCD');
     const useCase = new CreateCustomerUseCase(
       customersRepository as never,
-      prismaService as never,
       generateCustomerCodeUseCase as never,
     );
 
@@ -253,11 +237,9 @@ describe('CreateCustomerUseCase', () => {
     const customersRepository = createCustomersRepository();
     customersRepository.findByCustomerCode.mockResolvedValue(null);
     customersRepository.findByPhone.mockResolvedValue({ id: 'existing-id' });
-    const prismaService = createPrismaService();
     const generateCustomerCodeUseCase = createGenerateCustomerCodeUseCase();
     const useCase = new CreateCustomerUseCase(
       customersRepository as never,
-      prismaService as never,
       generateCustomerCodeUseCase as never,
     );
 
@@ -278,11 +260,9 @@ describe('CreateCustomerUseCase', () => {
     customersRepository.findByCustomerCode.mockResolvedValue(null);
     customersRepository.findByPhone.mockResolvedValue(null);
     customersRepository.findByEmail.mockResolvedValue({ id: 'existing-id' });
-    const prismaService = createPrismaService();
     const generateCustomerCodeUseCase = createGenerateCustomerCodeUseCase();
     const useCase = new CreateCustomerUseCase(
       customersRepository as never,
-      prismaService as never,
       generateCustomerCodeUseCase as never,
     );
 

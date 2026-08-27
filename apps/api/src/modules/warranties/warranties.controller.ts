@@ -9,6 +9,7 @@ import { ManualWarrantyActivationDto } from '@/modules/warranties/dto/manual-war
 import { UpdateWarrantyDto } from '@/modules/warranties/dto/update-warranty.dto';
 import { VoidWarrantyDto } from '@/modules/warranties/dto/void-warranty.dto';
 import { ActivateWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/activate-warranty-by-code.use-case';
+import { ActivateProductWarrantyUseCase } from '@/modules/warranties/use-cases/activate-product-warranty.use-case';
 import { ActivateWarrantyUseCase } from '@/modules/warranties/use-cases/activate-warranty.use-case';
 import { GetMyProductWarrantyUseCase } from '@/modules/warranties/use-cases/get-my-product-warranty.use-case';
 import { GetWarrantyDetailUseCase } from '@/modules/warranties/use-cases/get-warranty-detail.use-case';
@@ -48,6 +49,7 @@ export class WarrantiesController {
   constructor(
     private readonly activateWarrantyUseCase: ActivateWarrantyUseCase,
     private readonly activateWarrantyByCodeUseCase: ActivateWarrantyByCodeUseCase,
+    private readonly activateProductWarrantyUseCase: ActivateProductWarrantyUseCase,
     private readonly getWarrantyDetailUseCase: GetWarrantyDetailUseCase,
     private readonly getWarrantyByProductUseCase: GetWarrantyByProductUseCase,
     private readonly listWarrantiesUseCase: ListWarrantiesUseCase,
@@ -170,13 +172,9 @@ export class WarrantiesController {
     @Body() dto: ActivateWarrantyDto,
     @User() user: RequestUser,
   ) {
-    return this.getWarrantyByProductUseCase
-      .execute(productId)
-      .then((warranty) =>
-        this.activateWarrantyUseCase.execute(warranty.id, dto, {
-          activatedByUserId: user.id,
-        }),
-      );
+    return this.activateProductWarrantyUseCase.execute(productId, dto, {
+      activatedByUserId: user.id,
+    });
   }
 
   @Get('products/:id/warranty')

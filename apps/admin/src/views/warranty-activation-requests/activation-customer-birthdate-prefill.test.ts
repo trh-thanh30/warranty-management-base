@@ -22,3 +22,10 @@ test("clearing a customer clears its id and birthdate", () => {
   assert.match(hookSource, /customerId:\s*""/);
   assert.match(hookSource, /customerBirthdate:\s*""/);
 });
+
+test("selecting a customer clears stale customer validation errors", () => {
+  assert.match(
+    hookSource,
+    /form\.clearErrors\(\[[\s\S]*"customerEmail"[\s\S]*"customerId"[\s\S]*"customerName"[\s\S]*"customerPhone"/,
+  );
+});

@@ -1,5 +1,4 @@
 import { ConflictError, NotFoundError } from '@/common/response';
-import { PrismaService } from '@/database/prisma/prisma.service';
 import { toCustomerResponse } from '@/modules/customers/customers.types';
 import { CreateCustomerDto } from '@/modules/customers/dto/create-customer.dto';
 import { CustomersRepository } from '@/modules/customers/repository/customers.repository';
@@ -10,15 +9,12 @@ import { Injectable } from '@nestjs/common';
 export class CreateCustomerUseCase {
   constructor(
     private readonly customersRepository: CustomersRepository,
-    private readonly prismaService: PrismaService,
     private readonly generateCustomerCodeUseCase: GenerateCustomerCodeUseCase,
   ) {}
 
   async execute(dto: CreateCustomerDto) {
     const user = dto.userId
-      ? await this.prismaService.user.findUnique({
-          where: { id: dto.userId },
-        })
+      ? await this.customersRepository.findUserById(dto.userId)
       : null;
 
     if (dto.userId && !user) {

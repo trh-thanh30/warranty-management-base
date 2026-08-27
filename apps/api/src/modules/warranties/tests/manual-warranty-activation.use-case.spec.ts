@@ -24,141 +24,110 @@ describe('ManualWarrantyActivationUseCase', () => {
     },
   };
 
-  function createPrismaService(overrides?: {
+  function createDependencies(overrides?: {
     customerByEmail?: unknown;
     customerByPhone?: unknown;
+    existingProduct?: unknown;
     existingSerial?: unknown;
     existingWarranty?: unknown;
   }) {
-    const createdCustomer = {
+    const customer = {
       id: 'customer-id',
-      user_id: null,
-      customer_code: 'CUS000001',
-      full_name: dto.customer.fullName,
+      userId: null,
+      customerCode: 'CUS000001',
+      fullName: dto.customer.fullName,
       phone: dto.customer.phone,
       email: dto.customer.email,
       address: dto.customer.address,
-      metadata: null,
-      created_at: new Date('2026-07-19T00:00:00.000Z'),
-      updated_at: new Date('2026-07-19T00:00:00.000Z'),
     };
-    const createdProduct = {
+    const warranty = {
+      id: 'warranty-id',
+      productId: 'product-id',
+      warrantyCode: dto.warranty.warrantyCode,
+      startDate: new Date(dto.warranty.activatedAt),
+      endDate: new Date('2029-07-19T00:00:00.000Z'),
+      durationMonths: dto.warranty.durationMonths,
+      status: warranty_status.ACTIVE,
+      terms: dto.warranty.terms,
+      metadata: {
+        source: 'manual_warranty_activation',
+        certificateEmailStatus: 'PENDING_TEMPLATE',
+      },
+      activatedById: null,
+      coverageLimitAmount: null,
+      maxAmountPerClaim: null,
+      maxClaimCount: null,
+      voidedAt: null,
+      voidedById: null,
+      voidReason: null,
+      createdAt: new Date('2026-07-19T00:00:00.000Z'),
+      updatedAt: new Date('2026-07-19T00:00:00.000Z'),
+    };
+    const product = {
       id: 'product-id',
-      template_id: 'template-id',
-      product_code: 'PRD-2026-ABCDEF',
-      serial_number: dto.product.serialNumber,
-      display_name: dto.product.displayName,
+      productCode: 'PRD-2026-ABCDEF',
+      serialNumber: dto.product.serialNumber,
+      displayName: dto.product.displayName,
       status: 'ACTIVE',
       metadata: { source: 'manual_warranty_activation' },
-      created_at: new Date('2026-07-19T00:00:00.000Z'),
-      updated_at: new Date('2026-07-19T00:00:00.000Z'),
-      deleted_at: null,
+      deletedAt: null,
       template: {
-        id: 'template-id',
-        category_id: 'category-id',
         name: 'Black Label Ceramic Film',
         brand: 'Black Label',
         model: 'Premium',
       },
       ownerships: [
         {
-          id: 'ownership-id',
-          product_id: 'product-id',
-          customer_id: 'customer-id',
-          owner_user_id: null,
-          purchase_date: new Date(dto.warranty.purchaseDate),
-          activated_at: new Date(dto.warranty.activatedAt),
-          ended_at: null,
-          is_current_owner: true,
-          created_at: new Date('2026-07-19T00:00:00.000Z'),
-          updated_at: new Date('2026-07-19T00:00:00.000Z'),
-          customer: createdCustomer,
+          isCurrentOwner: true,
+          customer,
         },
       ],
-      warranty: {
-        id: 'warranty-id',
-        product_id: 'product-id',
-        warranty_code: dto.warranty.warrantyCode,
-        start_date: new Date(dto.warranty.activatedAt),
-        end_date: new Date('2029-07-19T00:00:00.000Z'),
-        duration_months: dto.warranty.durationMonths,
-        status: warranty_status.ACTIVE,
-        terms: dto.warranty.terms,
-        metadata: {
-          source: 'manual_warranty_activation',
-          certificateEmailStatus: 'PENDING_TEMPLATE',
-        },
-        created_at: new Date('2026-07-19T00:00:00.000Z'),
-        updated_at: new Date('2026-07-19T00:00:00.000Z'),
-      },
+      warranty,
     };
-    const tx = {
-      customer: {
-        create: jest.fn().mockResolvedValue(createdCustomer),
-        findFirst: jest.fn().mockResolvedValue(null),
-        findUnique: jest
-          .fn()
-          .mockResolvedValueOnce(overrides?.customerByEmail ?? null)
-          .mockResolvedValueOnce(overrides?.customerByPhone ?? null),
-        update: jest.fn().mockResolvedValue(createdCustomer),
-      },
-      product: {
-        create: jest.fn().mockResolvedValue(createdProduct),
-        findUnique: jest
-          .fn()
-          .mockResolvedValueOnce(overrides?.existingWarranty ?? null)
-          .mockResolvedValueOnce(overrides?.existingSerial ?? null)
-          .mockResolvedValue(null),
-      },
-      productTemplate: {
-        findFirst: jest.fn().mockResolvedValue({
-          category_id: 'category-id',
-          id: 'template-id',
-          is_active: true,
-        }),
-      },
-      warranty: {
-        findUnique: jest.fn().mockResolvedValue(null),
-      },
+    const transactionRepository = {
+      closeCurrentOwnerships: jest.fn(),
+      createCustomer: jest.fn().mockResolvedValue(customer),
+      createManualActivationProduct: jest.fn().mockResolvedValue(product),
+      findActiveProductTemplate: jest.fn().mockResolvedValue({
+        categoryId: 'category-id',
+        id: 'template-id',
+      }),
+      findCustomerByEmail: jest
+        .fn()
+        .mockResolvedValue(overrides?.customerByEmail ?? null),
+      findCustomerByPhone: jest
+        .fn()
+        .mockResolvedValue(overrides?.customerByPhone ?? null),
+      findManualActivationProduct: jest
+        .fn()
+        .mockResolvedValue(overrides?.existingProduct ?? null),
+      findProductBySerialNumber: jest
+        .fn()
+        .mockResolvedValue(overrides?.existingSerial ?? null),
+      findWarrantyByCode: jest
+        .fn()
+        .mockResolvedValue(overrides?.existingWarranty ?? null),
+      updateCustomer: jest.fn().mockResolvedValue(customer),
+      updateManualActivationProduct: jest.fn().mockResolvedValue(product),
     };
-
-    return {
-      codeGenerators: {
-        customer: { execute: jest.fn().mockResolvedValue('CUS000001') },
-        product: { execute: jest.fn().mockResolvedValue('PRD-2026-ABCDEF') },
-        warranty: { execute: jest.fn().mockResolvedValue('WM-2026-ABCDEF') },
-      },
-      lifecycleService: {
-        activateDraftWarranty: jest
-          .fn()
-          .mockResolvedValue(createdProduct.warranty),
-      },
-      certificateUseCase: {
-        execute: jest.fn().mockResolvedValue({
-          certificate_number: 'CERT-2026-ABC123',
-          id: 'certificate-id',
-        }),
-      },
-      tx,
-      service: {
-        product: {
-          findUnique: jest.fn(),
-        },
-        $transaction: jest.fn((callback) => callback(tx)),
-      },
+    const warrantiesRepository = {
+      withTransaction: jest.fn(async (operation) =>
+        operation(transactionRepository),
+      ),
     };
-  }
-
-  it('creates customer, product ownership, and active warranty manually', async () => {
-    const {
-      certificateUseCase,
-      codeGenerators,
-      lifecycleService,
-      service,
-      tx,
-    } = createPrismaService();
+    const codeGenerators = {
+      customer: { execute: jest.fn().mockResolvedValue('CUS000001') },
+      product: { execute: jest.fn().mockResolvedValue('PRD-2026-ABCDEF') },
+      warranty: { execute: jest.fn().mockResolvedValue('WM-2026-ABCDEF') },
+    };
+    const lifecycleService = {
+      activateDraftWarranty: jest.fn().mockResolvedValue(warranty),
+    };
+    const certificateUseCase = {
+      execute: jest.fn().mockResolvedValue({ id: 'certificate-id' }),
+    };
     const useCase = new ManualWarrantyActivationUseCase(
-      service as never,
+      warrantiesRepository as never,
       lifecycleService as never,
       codeGenerators.customer as never,
       codeGenerators.product as never,
@@ -166,108 +135,145 @@ describe('ManualWarrantyActivationUseCase', () => {
       certificateUseCase as never,
     );
 
-    const result = await useCase.execute(dto);
+    return {
+      certificateUseCase,
+      codeGenerators,
+      lifecycleService,
+      product,
+      transactionRepository,
+      useCase,
+      warrantiesRepository,
+    };
+  }
 
-    expect(tx.customer.create).toHaveBeenCalledWith({
-      data: expect.objectContaining({
-        customer_code: 'CUS000001',
-        full_name: dto.customer.fullName,
-        phone: dto.customer.phone,
-        email: dto.customer.email,
-      }),
-    });
-    expect(tx.product.create).toHaveBeenCalledWith(
+  it('creates customer, product ownership, and active warranty manually', async () => {
+    const dependencies = createDependencies();
+
+    const result = await dependencies.useCase.execute(dto);
+
+    expect(
+      dependencies.transactionRepository.createCustomer,
+    ).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({
-          category_ref: { connect: { id: 'category-id' } },
-          template: { connect: { id: 'template-id' } },
-          display_name: dto.product.displayName,
-          ownerships: {
-            create: expect.objectContaining({
-              customer: { connect: { id: 'customer-id' } },
-              activated_at: null,
-            }),
-          },
-          warranty: {
-            create: expect.objectContaining({
-              status: warranty_status.DRAFT,
-              duration_months: 36,
-            }),
-          },
-        }),
+        customerCode: 'CUS000001',
+        email: dto.customer.email,
+        fullName: dto.customer.fullName,
       }),
     );
-    expect(lifecycleService.activateDraftWarranty).toHaveBeenCalledWith(tx, {
+    expect(
+      dependencies.transactionRepository.createManualActivationProduct,
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({
+        categoryId: 'category-id',
+        customerId: 'customer-id',
+        productCode: 'PRD-2026-ABCDEF',
+        templateId: 'template-id',
+        warrantyCode: dto.warranty.warrantyCode,
+      }),
+    );
+    expect(
+      dependencies.lifecycleService.activateDraftWarranty,
+    ).toHaveBeenCalledWith(dependencies.transactionRepository, {
       activatedByUserId: undefined,
       startDate: new Date(dto.warranty.activatedAt),
       warrantyId: 'warranty-id',
     });
-    expect(codeGenerators.customer.execute).toHaveBeenCalledWith(tx);
-    expect(codeGenerators.product.execute).toHaveBeenCalledWith(
+    expect(dependencies.codeGenerators.customer.execute).toHaveBeenCalledWith();
+    expect(dependencies.codeGenerators.product.execute).toHaveBeenCalledWith(
       expect.any(Date),
-      tx,
     );
-    expect(codeGenerators.warranty.execute).not.toHaveBeenCalled();
-    expect(certificateUseCase.execute).toHaveBeenCalledWith({
+    expect(dependencies.codeGenerators.warranty.execute).not.toHaveBeenCalled();
+    expect(dependencies.certificateUseCase.execute).toHaveBeenCalledWith({
       recipientEmail: dto.customer.email,
       warrantyId: 'warranty-id',
     });
+    expect(
+      dependencies.warrantiesRepository.withTransaction.mock
+        .invocationCallOrder[0],
+    ).toBeLessThan(
+      dependencies.certificateUseCase.execute.mock.invocationCallOrder[0],
+    );
     expect(result.warranty.status).toBe(warranty_status.ACTIVE);
     expect(result.customer.customerCode).toBe('CUS000001');
   });
 
   it('updates and reuses an existing customer matched by email', async () => {
-    const existingCustomer = {
-      id: 'customer-id',
-      user_id: null,
-      customer_code: 'CUS000010',
-    };
-    const {
-      certificateUseCase,
-      codeGenerators,
-      lifecycleService,
-      service,
-      tx,
-    } = createPrismaService({
-      customerByEmail: existingCustomer,
+    const dependencies = createDependencies({
+      customerByEmail: {
+        id: 'customer-id',
+        userId: null,
+        customerCode: 'CUS000010',
+      },
     });
-    const useCase = new ManualWarrantyActivationUseCase(
-      service as never,
-      lifecycleService as never,
-      codeGenerators.customer as never,
-      codeGenerators.product as never,
-      codeGenerators.warranty as never,
-      certificateUseCase as never,
-    );
 
-    await useCase.execute(dto);
+    await dependencies.useCase.execute(dto);
 
-    expect(tx.customer.create).not.toHaveBeenCalled();
-    expect(tx.customer.update).toHaveBeenCalledWith({
-      where: { id: 'customer-id' },
-      data: expect.objectContaining({
-        full_name: dto.customer.fullName,
-        phone: dto.customer.phone,
+    expect(
+      dependencies.transactionRepository.createCustomer,
+    ).not.toHaveBeenCalled();
+    expect(
+      dependencies.transactionRepository.updateCustomer,
+    ).toHaveBeenCalledWith(
+      'customer-id',
+      expect.objectContaining({
         email: dto.customer.email,
+        fullName: dto.customer.fullName,
       }),
-    });
+    );
   });
 
   it('rejects when email and phone belong to different customers', async () => {
-    const { certificateUseCase, codeGenerators, lifecycleService, service } =
-      createPrismaService({
-        customerByEmail: { id: 'customer-a' },
-        customerByPhone: { id: 'customer-b' },
-      });
-    const useCase = new ManualWarrantyActivationUseCase(
-      service as never,
-      lifecycleService as never,
-      codeGenerators.customer as never,
-      codeGenerators.product as never,
-      codeGenerators.warranty as never,
-      certificateUseCase as never,
-    );
+    const dependencies = createDependencies({
+      customerByEmail: { id: 'customer-a' },
+      customerByPhone: { id: 'customer-b' },
+    });
 
-    await expect(useCase.execute(dto)).rejects.toBeInstanceOf(ConflictError);
+    await expect(dependencies.useCase.execute(dto)).rejects.toBeInstanceOf(
+      ConflictError,
+    );
+    expect(dependencies.certificateUseCase.execute).not.toHaveBeenCalled();
+  });
+
+  it('rejects a warranty code owned by another product', async () => {
+    const dependencies = createDependencies({
+      existingWarranty: { productId: 'another-product' },
+    });
+
+    await expect(dependencies.useCase.execute(dto)).rejects.toBeInstanceOf(
+      ConflictError,
+    );
+    expect(
+      dependencies.transactionRepository.createManualActivationProduct,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('updates an eligible existing product inside the same transaction', async () => {
+    const existingProduct = {
+      ...createDependencies().product,
+      warranty: {
+        ...createDependencies().product.warranty,
+        status: warranty_status.DRAFT,
+      },
+    };
+    const dependencies = createDependencies({ existingProduct });
+    const existingProductDto = {
+      ...dto,
+      product: { ...dto.product, id: 'product-id' },
+    };
+
+    await dependencies.useCase.execute(existingProductDto);
+
+    expect(
+      dependencies.transactionRepository.closeCurrentOwnerships,
+    ).toHaveBeenCalledWith('product-id', new Date(dto.warranty.activatedAt));
+    expect(
+      dependencies.transactionRepository.updateManualActivationProduct,
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({
+        productId: 'product-id',
+        warrantyCode: dto.warranty.warrantyCode,
+      }),
+    );
+    expect(dependencies.codeGenerators.product.execute).not.toHaveBeenCalled();
   });
 });

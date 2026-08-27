@@ -3,7 +3,6 @@ import {
   ConflictError,
   NotFoundError,
 } from '@/common/response';
-import { PrismaService } from '@/database/prisma/prisma.service';
 import { AssetsService } from '@/modules/assets/assets.service';
 import { ProductTemplatesRepository } from '@/modules/product-templates/repository/product-templates.repository';
 import { CreateProductDto } from '@/modules/products/dto/create-product.dto';
@@ -17,7 +16,6 @@ import { Prisma, product_status, warranty_status } from '@prisma/client';
 @Injectable()
 export class CreateProductUseCase {
   constructor(
-    private readonly prismaService: PrismaService,
     private readonly productsRepository: ProductsRepository,
     private readonly generateProductCodeUseCase: GenerateProductCodeUseCase,
     private readonly productTemplatesRepository: ProductTemplatesRepository,
@@ -72,54 +70,28 @@ export class CreateProductUseCase {
       ? await this.resolveRequestedWarrantyCode(requestedWarrantyCode)
       : null;
 
-    const product = await this.prismaService.$transaction(async (tx) => {
-      const warrantyCode =
-        resolvedWarrantyCode ??
-        (await this.generateWarrantyCodeUseCase.execute(new Date(), tx));
-
-      return tx.product.create({
-        data: {
-          product_code: productCode,
-          serial_number: dto.serialNumber,
-          display_name: dto.displayName?.trim() || null,
-          status: dto.status ?? product_status.ACTIVE,
-          template: { connect: { id: selectedTemplate.id } },
-          category_ref: { connect: { id: categoryId } },
-          metadata: toPhysicalProductMetadata(dto.metadata),
-          warranty: {
-            create: {
-              warranty_code: warrantyCode,
-              duration_months: dto.warrantyDurationMonths,
-              terms: selectedTemplate.default_warranty_terms,
-              start_date: null,
-              end_date: null,
-              status: warranty_status.DRAFT,
-            },
-          },
-          ownerships: undefined,
+    const warrantyCode =
+      resolvedWarrantyCode ??
+      (await this.generateWarrantyCodeUseCase.execute(new Date()));
+    const product = await this.productsRepository.create({
+      product_code: productCode,
+      serial_number: dto.serialNumber,
+      display_name: dto.displayName?.trim() || null,
+      status: dto.status ?? product_status.ACTIVE,
+      template: { connect: { id: selectedTemplate.id } },
+      category_ref: { connect: { id: categoryId } },
+      metadata: toPhysicalProductMetadata(dto.metadata),
+      warranty: {
+        create: {
+          warranty_code: warrantyCode,
+          duration_months: dto.warrantyDurationMonths,
+          terms: selectedTemplate.default_warranty_terms,
+          start_date: null,
+          end_date: null,
+          status: warranty_status.DRAFT,
         },
-        include: {
-          assets: {
-            include: { asset: true },
-            orderBy: [{ role: 'asc' }, { sort_order: 'asc' }],
-          },
-          template: {
-            include: {
-              assets: {
-                include: { asset: true },
-                orderBy: [{ role: 'asc' }, { sort_order: 'asc' }],
-              },
-              category_ref: true,
-            },
-          },
-          category_ref: true,
-          ownerships: {
-            include: { customer: true },
-            orderBy: { created_at: 'desc' },
-          },
-          warranty: true,
-        },
-      });
+      },
+      ownerships: undefined,
     });
 
     return toProductResponse(

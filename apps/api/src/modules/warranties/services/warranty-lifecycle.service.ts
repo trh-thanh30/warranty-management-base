@@ -3,63 +3,52 @@ import {
   ConflictError,
   NotFoundError,
 } from '@/common/response';
-import { Injectable } from '@nestjs/common';
+import { WarrantyTransactionRepository } from '@/modules/warranties/repository/warranty-transaction.repository';
 import {
-  Prisma,
-  warranty_activation_request_status,
-  warranty_claim_status,
-  warranty_status,
-} from '@prisma/client';
+  WARRANTY_ACTIVATION_REQUEST_STATUS,
+  WARRANTY_CLAIM_STATUS,
+  WARRANTY_STATUS,
+} from '@/modules/warranties/warranties.types';
+import { Injectable } from '@nestjs/common';
 
 const OPEN_CLAIM_STATUSES = [
-  warranty_claim_status.SUBMITTED,
-  warranty_claim_status.REVIEWING,
-  warranty_claim_status.APPROVED,
-  warranty_claim_status.IN_REPAIR,
+  WARRANTY_CLAIM_STATUS.SUBMITTED,
+  WARRANTY_CLAIM_STATUS.REVIEWING,
+  WARRANTY_CLAIM_STATUS.APPROVED,
+  WARRANTY_CLAIM_STATUS.IN_REPAIR,
 ] as const;
 
 @Injectable()
 export class WarrantyLifecycleService {
   async activateDraftWarranty(
-    tx: Prisma.TransactionClient,
+    repository: WarrantyTransactionRepository,
     input: {
       activatedByUserId?: string;
       startDate?: Date;
       warrantyId: string;
     },
   ) {
-    const warranty = await tx.warranty.findUnique({
-      where: { id: input.warrantyId },
-      include: {
-        product: {
-          include: {
-            ownerships: {
-              where: { is_current_owner: true },
-              take: 1,
-            },
-          },
-        },
-      },
-    });
+    const warranty = await repository.findWarrantyForActivation(
+      input.warrantyId,
+    );
 
     if (!warranty) throw new NotFoundError('Warranty not found');
-    if (warranty.status !== warranty_status.DRAFT) {
+    if (warranty.status !== WARRANTY_STATUS.DRAFT) {
       throw new BadRequestError(
         'Warranty is not eligible for activation',
         'BAD_REQUEST',
         {
           code: 'WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION',
           currentStatus: warranty.status,
-          expectedStatuses: [warranty_status.DRAFT],
+          expectedStatuses: [WARRANTY_STATUS.DRAFT],
         },
       );
     }
-    if (!warranty.warranty_code) {
+    if (!warranty.warrantyCode) {
       throw new BadRequestError('Warranty code is required for activation');
     }
 
-    const currentOwnership = warranty.product.ownerships[0];
-    if (!currentOwnership) {
+    if (!warranty.currentOwnershipId) {
       throw new BadRequestError(
         'Warranty requires a current owner before activation',
         'BAD_REQUEST',
@@ -75,30 +64,27 @@ export class WarrantyLifecycleService {
         { code: 'WARRANTY_START_DATE_IN_FUTURE' },
       );
     }
-    const transition = await tx.warranty.updateMany({
-      where: { id: warranty.id, status: warranty_status.DRAFT },
-      data: {
-        activated_by_id: input.activatedByUserId,
-        end_date: addMonths(startDate, warranty.duration_months),
-        start_date: startDate,
-        status: warranty_status.ACTIVE,
-      },
+    const transition = await repository.activateDraftWarranty({
+      activatedByUserId: input.activatedByUserId,
+      endDate: this.addMonths(startDate, warranty.durationMonths),
+      startDate,
+      warrantyId: warranty.id,
     });
 
     if (transition.count !== 1) {
       throw new ConflictError('Warranty status changed during activation');
     }
 
-    await tx.productOwnership.update({
-      where: { id: currentOwnership.id },
-      data: { activated_at: startDate },
-    });
+    await repository.markOwnershipActivated(
+      warranty.currentOwnershipId,
+      startDate,
+    );
 
-    return tx.warranty.findUniqueOrThrow({ where: { id: warranty.id } });
+    return repository.findWarrantyByIdOrThrow(warranty.id);
   }
 
   async voidWarranty(
-    tx: Prisma.TransactionClient,
+    repository: WarrantyTransactionRepository,
     input: {
       reason: string;
       voidedByUserId: string;
@@ -114,14 +100,12 @@ export class WarrantyLifecycleService {
       );
     }
 
-    const warranty = await tx.warranty.findUnique({
-      where: { id: input.warrantyId },
-    });
+    const warranty = await repository.findWarrantyForVoid(input.warrantyId);
 
     if (!warranty) throw new NotFoundError('Warranty not found');
     if (
-      warranty.status !== warranty_status.DRAFT &&
-      warranty.status !== warranty_status.ACTIVE
+      warranty.status !== WARRANTY_STATUS.DRAFT &&
+      warranty.status !== WARRANTY_STATUS.ACTIVE
     ) {
       throw new BadRequestError(
         'Warranty is not eligible for voiding',
@@ -129,17 +113,14 @@ export class WarrantyLifecycleService {
         {
           code: 'WARRANTY_NOT_ELIGIBLE_FOR_VOIDING',
           currentStatus: warranty.status,
-          expectedStatuses: [warranty_status.DRAFT, warranty_status.ACTIVE],
+          expectedStatuses: [WARRANTY_STATUS.DRAFT, WARRANTY_STATUS.ACTIVE],
         },
       );
     }
 
-    const openClaimCount = await tx.warrantyClaim.count({
-      where: {
-        warranty_id: warranty.id,
-        status: { in: [...OPEN_CLAIM_STATUSES] },
-      },
-    });
+    const openClaimCount = await repository.countOpenClaims(warranty.id, [
+      ...OPEN_CLAIM_STATUSES,
+    ]);
     if (openClaimCount > 0) {
       throw new BadRequestError('Warranty has open claims', 'BAD_REQUEST', {
         code: 'WARRANTY_HAS_OPEN_CLAIMS',
@@ -148,64 +129,49 @@ export class WarrantyLifecycleService {
     }
 
     const voidedAt = new Date();
-    const transition = await tx.warranty.updateMany({
-      where: {
-        id: warranty.id,
-        status: { in: [warranty_status.DRAFT, warranty_status.ACTIVE] },
-      },
-      data: {
-        status: warranty_status.VOIDED,
-        void_reason: reason,
-        voided_at: voidedAt,
-        voided_by_id: input.voidedByUserId,
-      },
+    const transition = await repository.voidEligibleWarranty({
+      reason,
+      voidedAt,
+      voidedByUserId: input.voidedByUserId,
+      warrantyId: warranty.id,
     });
 
     if (transition.count !== 1) {
       throw new ConflictError('Warranty status changed during voiding');
     }
 
-    if (warranty.warranty_code) {
-      const openRequests = await tx.warrantyActivationRequest.findMany({
-        where: {
-          status: {
-            in: [
-              warranty_activation_request_status.PENDING,
-              warranty_activation_request_status.APPROVED,
-            ],
-          },
-          OR: [
-            { warranty_code: warranty.warranty_code },
-            { items: { some: { warranty_id: warranty.id } } },
-          ],
-        },
-        select: { id: true },
-      });
+    if (warranty.warrantyCode) {
+      const openRequests = await repository.findOpenActivationRequestIds(
+        warranty.id,
+        warranty.warrantyCode,
+        [
+          WARRANTY_ACTIVATION_REQUEST_STATUS.PENDING,
+          WARRANTY_ACTIVATION_REQUEST_STATUS.APPROVED,
+        ],
+      );
       const requestIds = openRequests.map((request) => request.id);
 
       if (requestIds.length > 0) {
-        await tx.warrantyActivationRequestItem.updateMany({
-          where: { request_id: { in: requestIds } },
-          data: { status: warranty_activation_request_status.CANCELLED },
-        });
-        await tx.warrantyActivationRequest.updateMany({
-          where: { id: { in: requestIds } },
-          data: {
-            admin_note: `Tự động hủy do bảo hành bị vô hiệu: ${reason}`,
-            reviewed_at: voidedAt,
-            reviewed_by_id: input.voidedByUserId,
-            status: warranty_activation_request_status.CANCELLED,
-          },
+        await repository.cancelActivationRequestItems(
+          requestIds,
+          WARRANTY_ACTIVATION_REQUEST_STATUS.CANCELLED,
+        );
+        await repository.cancelActivationRequests({
+          adminNote: `Tự động hủy do bảo hành bị vô hiệu: ${reason}`,
+          requestIds,
+          reviewedAt: voidedAt,
+          reviewedById: input.voidedByUserId,
+          status: WARRANTY_ACTIVATION_REQUEST_STATUS.CANCELLED,
         });
       }
     }
 
-    return tx.warranty.findUniqueOrThrow({ where: { id: warranty.id } });
+    return repository.findWarrantyByIdOrThrow(warranty.id);
   }
-}
 
-function addMonths(date: Date, months: number) {
-  const nextDate = new Date(date);
-  nextDate.setMonth(nextDate.getMonth() + months);
-  return nextDate;
+  private addMonths(date: Date, months: number) {
+    const nextDate = new Date(date);
+    nextDate.setMonth(nextDate.getMonth() + months);
+    return nextDate;
+  }
 }

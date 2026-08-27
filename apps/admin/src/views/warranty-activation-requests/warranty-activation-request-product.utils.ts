@@ -1,4 +1,4 @@
-import type { ProductResponse } from "@repo/shared";
+import type { ActivationProductOption, ProductResponse } from "@repo/shared";
 import type { useTranslations } from "next-intl";
 
 type ActivationRequestTranslations = ReturnType<
@@ -27,18 +27,35 @@ export function formatActivationProductSearchOption(product: ProductResponse) {
     .join(" · ");
 }
 
-export function getProductSelectDisabledReason(
-  product: Pick<ProductResponse, "warranty">,
+export function getActivationProductOptionDisabledReason(
+  product: Pick<ActivationProductOption, "activationEligibility">,
   t: ActivationRequestTranslations,
 ) {
-  if (!product.warranty) return t("productUnavailableNoWarranty");
-  if (product.warranty.status !== "DRAFT") {
-    return t("productUnavailableWarrantyStatus", {
-      status: getProductWarrantyStatusLabel(product, t),
-    });
-  }
+  const eligibility = product.activationEligibility;
+  if (eligibility.eligible) return null;
 
-  return null;
+  switch (eligibility.reason) {
+    case "PRODUCT_DELETED":
+      return t("activationProductUnavailableDeleted");
+    case "PRODUCT_INACTIVE":
+      return t("activationProductUnavailableInactive");
+    case "ACTIVATION_REQUEST_PENDING":
+      return t("activationProductUnavailablePendingRequest", {
+        requestCode: eligibility.requestCode ?? "-",
+      });
+    case "ACTIVATION_REQUEST_APPROVED":
+      return t("activationProductUnavailableApprovedRequest", {
+        requestCode: eligibility.requestCode ?? "-",
+      });
+    case "WARRANTY_MISSING":
+      return t("productUnavailableNoWarranty");
+    case "WARRANTY_CODE_MISSING":
+      return t("activationProductUnavailableNoWarrantyCode");
+    case "WARRANTY_ALREADY_ACTIVATED":
+      return t("activationProductUnavailableAlreadyActivated");
+    case "WARRANTY_NOT_DRAFT":
+      return t("activationProductUnavailableWarrantyNotDraft");
+  }
 }
 
 export function getProductWarrantyStatusLabel(

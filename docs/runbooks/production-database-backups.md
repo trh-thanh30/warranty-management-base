@@ -72,10 +72,10 @@ The Drive UI shows filenames such as `daily_20260824_030001.dump`; file contents
 
 ## Schedule the daily backup
 
-The installer reads `TZ` from `.env.production` and installs an idempotent crontab block for 03:00 in that timezone:
+The installer reads `TZ` from `.env.production` and installs an idempotent cron runner for 03:00 in that timezone:
 
 ```bash
-chmod 700 scripts/backup-production.sh scripts/install-production-backup-cron.sh
+chmod 700 scripts/backup-production.sh scripts/run-production-backup-cron.sh scripts/install-production-backup-cron.sh
 ENV_FILE=.env.production \
   COMPOSE_FILE=docker-compose.prod.yml \
   bash ./scripts/install-production-backup-cron.sh
@@ -88,6 +88,14 @@ crontab -l
 ```
 
 Cron output is appended to `./backups/cron.log`. Successful and failed runs notify the Telegram chat configured with `OPS_TELEGRAM_BOT_TOKEN` and `OPS_TELEGRAM_CHAT_ID`.
+
+The crontab invokes `run-production-backup-cron.sh` every minute, and the runner starts the backup only when the local time in `TZ` matches the configured hour and minute. This intentionally does not rely on `CRON_TZ`, which is ignored by some cron implementations. Scheduled runs clear inherited backup and Telegram variables before loading `.env.production`, so interactive shell state cannot differ from cron behavior.
+
+A completed run records one of these notification results in `./backups/cron.log`:
+
+- `Telegram notification sent: SUCCESS`;
+- `Telegram notification disabled: SUCCESS`;
+- a warning explaining that credentials are missing or delivery failed.
 
 ## Recovery check
 

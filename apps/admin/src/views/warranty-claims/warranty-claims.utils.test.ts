@@ -2,6 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { HttpClientError } from "@repo/shared";
 import {
+  buildWarrantyClaimListQuery,
+  buildWarrantyClaimProductQuery,
+  getWarrantyClaimRequesterPrefill,
   getWarrantyClaimRequesterValues,
   getStatusBadgeVariant,
   resolveWarrantyClaimCreateError,
@@ -85,6 +88,46 @@ test("maps the selected product owner or customer to requester fields", () => {
   });
 });
 
+test("requester prefill reuses the hydrated customer for another product with the same owner", () => {
+  assert.deepEqual(
+    getWarrantyClaimRequesterPrefill(
+      {
+        customerId: "customer-1",
+        fullName: "Nguyen Van Hung",
+      },
+      {
+        fullName: "Nguyen Van Hung",
+        id: "customer-1",
+        phone: "0985844298",
+      },
+    ),
+    {
+      requesterName: "Nguyen Van Hung",
+      requesterPhone: "0985844298",
+    },
+  );
+});
+
+test("requester prefill does not reuse a cached customer from another owner", () => {
+  assert.deepEqual(
+    getWarrantyClaimRequesterPrefill(
+      {
+        customerId: "customer-2",
+        fullName: "Nguyen Van Hung",
+      },
+      {
+        fullName: "Nguyen Van Hung",
+        id: "customer-1",
+        phone: "0985844298",
+      },
+    ),
+    {
+      requesterName: "Nguyen Van Hung",
+      requesterPhone: "",
+    },
+  );
+});
+
 test("create claim schema requires requester name and phone", () => {
   const result = warrantyClaimCreateFormSchema.safeParse({
     issueDetail: "",
@@ -141,4 +184,75 @@ test("claim statuses use distinct semantic badge colors", () => {
   assert.equal(getStatusBadgeVariant("COMPLETED"), "success");
   assert.equal(getStatusBadgeVariant("REJECTED"), "destructive");
   assert.equal(getStatusBadgeVariant("CANCELLED"), "destructive");
+});
+
+test("claim product selector requests only claim-eligible products", () => {
+  assert.deepEqual(buildWarrantyClaimProductQuery("  WM-2026-ABC  "), {
+    claimEligible: "true",
+    limit: 20,
+    search: "WM-2026-ABC",
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  });
+
+  assert.deepEqual(buildWarrantyClaimProductQuery("   "), {
+    claimEligible: "true",
+    limit: 20,
+    search: undefined,
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  });
+});
+
+test("claim directory uses one search term for claim and warranty codes", () => {
+  assert.deepEqual(
+    buildWarrantyClaimListQuery(
+      {
+        dateFrom: "",
+        dateTo: "",
+        isOverdue: "ALL",
+        priority: "ALL",
+        serviceCenter: "ALL",
+        status: "ALL",
+      },
+      "  WM-2026-ABC  ",
+      1,
+      10,
+      "createdAt",
+      "desc",
+    ),
+    {
+      assignmentStatus: undefined,
+      dateFrom: undefined,
+      dateTo: undefined,
+      isOverdue: undefined,
+      limit: 10,
+      page: 1,
+      priority: undefined,
+      search: "WM-2026-ABC",
+      serviceCenterId: undefined,
+      sortBy: "createdAt",
+      sortOrder: "desc",
+      status: undefined,
+    },
+  );
+
+  assert.equal(
+    buildWarrantyClaimListQuery(
+      {
+        dateFrom: "",
+        dateTo: "",
+        isOverdue: "ALL",
+        priority: "ALL",
+        serviceCenter: "UNASSIGNED",
+        status: "ALL",
+      },
+      "",
+      1,
+      10,
+      "createdAt",
+      "desc",
+    ).assignmentStatus,
+    "UNASSIGNED",
+  );
 });

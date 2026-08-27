@@ -8,8 +8,8 @@ import type {
 } from "@repo/shared";
 import { Input, Textarea } from "@repo/ui";
 import { useTranslations } from "next-intl";
-import { Controller } from "react-hook-form";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import type { WarrantyActivationRequestCreateFormValues } from "../warranty-activation-requests.types";
 import { getUnavailableActivationProductIds } from "../warranty-activation-requests.utils";
 import { ActivationProductSelectField } from "./activation-product-select-field";
@@ -43,7 +43,7 @@ export function CategoryActivationInputFields({
       <h3 className="text-sm font-semibold text-slate-950 dark:text-slate-50">
         {t("categoryActivationInfo")}
       </h3>
-      <div className="mt-4 grid gap-5 sm:grid-cols-2">
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
         {fields.map((field) => (
           <DynamicActivationField
             control={control}

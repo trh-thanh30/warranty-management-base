@@ -6,7 +6,7 @@ import type { ProductResponse } from "@repo/shared";
 import { HttpClientError } from "@repo/shared";
 import { useToast } from "@/src/hooks/use-toast";
 import { toOptionalValue } from "@/src/utils";
-import { useCustomers } from "../../customers/hooks/use-customers";
+import { useInfiniteCustomers } from "../../customers/hooks/use-customers";
 import { assignProductOwnerSchema } from "../products.types";
 import { useAssignProductOwner } from "./use-products";
 
@@ -26,7 +26,7 @@ export function useAssignProductOwnerWorkflow({
   const [autoGenerateWarrantyCode, setAutoGenerateWarrantyCode] =
     useState(true);
   const [warrantyCode, setWarrantyCode] = useState("");
-  const customersQuery = useCustomers(
+  const customersQuery = useInfiniteCustomers(
     {
       limit: 50,
       sortBy: "createdAt",

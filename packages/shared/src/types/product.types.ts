@@ -67,7 +67,7 @@ export type ProductTemplateSummary = {
 
 export type ListProductTemplatesQuery = PaginationQuery & {
   search?: string;
-  isActive?: boolean;
+  isActive?: boolean | "all";
   isPublished?: boolean;
 };
 
@@ -175,14 +175,49 @@ export type ProductSummary = {
 
 export type ProductResponse = ProductSummary;
 
+export type ActivationProductIneligibilityReason =
+  | "PRODUCT_DELETED"
+  | "PRODUCT_INACTIVE"
+  | "ACTIVATION_REQUEST_PENDING"
+  | "ACTIVATION_REQUEST_APPROVED"
+  | "WARRANTY_MISSING"
+  | "WARRANTY_CODE_MISSING"
+  | "WARRANTY_ALREADY_ACTIVATED"
+  | "WARRANTY_NOT_DRAFT";
+
+export type ActivationProductEligibility =
+  | {
+      eligible: true;
+      reason: null;
+      requestCode: null;
+    }
+  | {
+      eligible: false;
+      reason: ActivationProductIneligibilityReason;
+      requestCode: string | null;
+    };
+
+export type ActivationProductOption = ProductResponse & {
+  activationEligibility: ActivationProductEligibility;
+};
+
+export type ListActivationProductOptionsQuery = Pick<
+  PaginationQuery,
+  "page" | "limit"
+> & {
+  categoryId: string;
+  search?: string;
+};
+
 export type ListProductsQuery = PaginationQuery & {
   search?: string;
   categoryId?: string;
   templateId?: string;
   ownerCustomerId?: string;
-  status?: ProductStatus;
+  status?: ProductStatus | "ALL";
   isPublished?: "true" | "false";
   activationEligible?: "true" | "false";
+  claimEligible?: "true" | "false";
   warrantyStatus?: WarrantyStatus;
   sortBy?: ProductSortBy;
   sortOrder?: "asc" | "desc";

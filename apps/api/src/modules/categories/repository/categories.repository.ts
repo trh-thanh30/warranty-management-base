@@ -3,11 +3,17 @@ import { PrismaService } from '@/database/prisma/prisma.service';
 import { ListCategoriesDto } from '@/modules/categories/dto/list-categories.dto';
 import { PreparedCategoryImportRow } from '@/modules/categories/excel/category-excel.types';
 import { Injectable } from '@nestjs/common';
+import { resolveActiveFilter } from '@/common/helpers/active-filter.helper';
 import { category_type, Prisma } from '@prisma/client';
 import type {
   CategoryActivationFieldsResponse,
-  UpdateCategoryActivationFieldsBody,
+  ReplaceCategoryActivationFieldsInput,
 } from '@repo/shared';
+import {
+  categoryActivationFieldsSelect,
+  toActivationFieldsResponse,
+} from './category-activation-fields.mapper';
+import { toCategoryKey, toJsonValue } from './categories.repository.utils';
 
 @Injectable()
 export class CategoriesRepository {
@@ -46,7 +52,7 @@ export class CategoriesRepository {
 
   replaceActivationFields(
     categoryId: string,
-    input: UpdateCategoryActivationFieldsBody,
+    input: ReplaceCategoryActivationFieldsInput,
   ): Promise<CategoryActivationFieldsResponse> {
     return this.prismaService.$transaction(async (tx) => {
       await tx.category.update({
@@ -89,8 +95,7 @@ export class CategoriesRepository {
 
   list(filters: ListCategoriesDto) {
     const search = filters.search?.trim();
-    const isActive =
-      filters.isActive === undefined ? undefined : filters.isActive === 'true';
+    const isActive = resolveActiveFilter(filters.isActive);
     const { page, limit, skip, take } = normalizePagination(filters);
     const sortMap = {
       name: 'name',
@@ -183,8 +188,7 @@ export class CategoriesRepository {
 
   listForExport(filters: ListCategoriesDto) {
     const search = filters.search?.trim();
-    const isActive =
-      filters.isActive === undefined ? undefined : filters.isActive === 'true';
+    const isActive = resolveActiveFilter(filters.isActive);
     const sortMap = {
       name: 'name',
       slug: 'slug',
@@ -310,53 +314,4 @@ export class CategoriesRepository {
       ),
     );
   }
-}
-
-function toCategoryKey(type: category_type, slug: string) {
-  return `${type}:${slug}`;
-}
-
-function toJsonValue(value: Record<string, unknown> | null) {
-  return value === null ? Prisma.JsonNull : (value as Prisma.InputJsonObject);
-}
-
-const categoryActivationFieldsSelect = {
-  id: true,
-  activation_form_enabled: true,
-  activation_fields: {
-    where: { is_active: true },
-    orderBy: [{ sort_order: 'asc' }, { created_at: 'asc' }],
-    include: {
-      options: {
-        orderBy: [{ sort_order: 'asc' }, { created_at: 'asc' }],
-      },
-    },
-  },
-} satisfies Prisma.CategorySelect;
-
-type CategoryWithActivationFields = Prisma.CategoryGetPayload<{
-  select: typeof categoryActivationFieldsSelect;
-}>;
-
-function toActivationFieldsResponse(
-  category: CategoryWithActivationFields,
-): CategoryActivationFieldsResponse {
-  return {
-    categoryId: category.id,
-    activationFormEnabled: category.activation_form_enabled,
-    activationFields: category.activation_fields.map((field) => ({
-      id: field.id,
-      key: field.key,
-      label: field.label,
-      type: field.type,
-      placeholder: field.placeholder ?? undefined,
-      required: field.required,
-      order: field.sort_order,
-      options: field.options.map((option) => ({
-        id: option.id,
-        label: option.label,
-        value: option.value,
-      })),
-    })),
-  };
 }

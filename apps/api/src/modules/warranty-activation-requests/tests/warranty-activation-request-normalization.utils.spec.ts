@@ -3,6 +3,12 @@ import { CreateWarrantyActivationRequestDto } from '@/modules/warranty-activatio
 import { buildWarrantyActivationRequestFullAddress } from '@/modules/warranty-activation-requests/utils/warranty-activation-request-normalization.utils';
 
 describe('warranty activation request address normalization', () => {
+  it('uses the ward and province when local address detail is empty', () => {
+    expect(buildWarrantyActivationRequestFullAddress(createDto(''))).toBe(
+      'Ward One, Province One',
+    );
+  });
+
   it('appends the selected ward and province to a street detail', () => {
     expect(
       buildWarrantyActivationRequestFullAddress(createDto('12 Nguyen Trai')),

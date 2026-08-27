@@ -1,10 +1,14 @@
 import { storageConfig } from '@/config';
 import { FileValidatorService } from '@/modules/assets/services/file-validator.service';
 import type { IStorageService } from '@/modules/assets/services/storage.interface';
+import {
+  ASSET_ACCESS_TYPE,
+  AssetAccessType,
+} from '@/modules/assets/types/assets.types';
 import { normalizeUploadFileName } from '@/modules/assets/utils/file-name.utils';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
-import { asset_access_type, asset_type } from '@prisma/client';
+import { asset_type } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import * as path from 'path';
 
@@ -38,13 +42,13 @@ export class UploadAssetService {
     file: Express.Multer.File,
     options: {
       folder?: string;
-      accessType?: asset_access_type;
+      accessType?: AssetAccessType;
     } = {},
   ): Promise<UploadResult> {
     // 1. Validate File
     this.fileValidator.validateFile(file);
 
-    const { folder, accessType = asset_access_type.PUBLIC } = options;
+    const { folder, accessType = ASSET_ACCESS_TYPE.PUBLIC } = options;
     const originalName = normalizeUploadFileName(file.originalname);
 
     const now = new Date();
@@ -105,10 +109,10 @@ export class UploadAssetService {
    */
   public getFullUrl(
     filePath: string,
-    accessType: asset_access_type = asset_access_type.PUBLIC,
+    accessType: AssetAccessType = ASSET_ACCESS_TYPE.PUBLIC,
     id?: string,
   ): string {
-    if (accessType === asset_access_type.PUBLIC) {
+    if (accessType === ASSET_ACCESS_TYPE.PUBLIC) {
       const normalizedPath = filePath.trim().replace(/\\/g, '/');
       const cleanPath = normalizedPath.startsWith('public/')
         ? normalizedPath.replace(/^public\//, '')

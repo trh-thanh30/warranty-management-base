@@ -4,8 +4,12 @@ import { IsEmail, IsString, Length } from 'class-validator';
 
 export class CreatePublicWarrantyActivationRequestDto extends OmitType(
   CreateWarrantyActivationRequestDto,
-  ['customerBirthdate', 'customerEmail', 'items'] as const,
+  ['addressDetail', 'customerBirthdate', 'customerEmail', 'items'] as const,
 ) {
+  @IsString()
+  @Length(1, 255)
+  addressDetail: string;
+
   @IsString()
   @IsEmail()
   @Length(3, 160)

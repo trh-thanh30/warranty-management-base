@@ -13,6 +13,7 @@ import {
   getWarrantyProductDisplayName,
 } from "../warranties.utils";
 import { WarrantyStatusBadge } from "./warranty-status-badge";
+import { WarrantyAdjustmentHistory } from "./warranty-adjustment-history";
 
 type WarrantyDetailCardProps = {
   warranty: WarrantyListItem;
@@ -98,79 +99,87 @@ export function WarrantyDetailCard({ warranty }: WarrantyDetailCardProps) {
   );
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.8fr)]">
-      <Card>
-        <CardHeader className="border-b border-slate-200 dark:border-slate-800">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="size-4 text-slate-500 dark:text-slate-400" />
-            <CardTitle>{t("sections.coverage")}</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="divide-y divide-slate-200 p-0 dark:divide-slate-800">
-          {coverageItems.map((item) => (
-            <DetailRow key={item.label} label={item.label} value={item.value} />
-          ))}
-        </CardContent>
-      </Card>
-
-      <div className="space-y-4">
+    <div className="space-y-4">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.8fr)]">
         <Card>
           <CardHeader className="border-b border-slate-200 dark:border-slate-800">
             <div className="flex items-center gap-2">
-              <Package className="size-4 text-slate-500 dark:text-slate-400" />
-              <CardTitle>{t("sections.product")}</CardTitle>
+              <ShieldCheck className="size-4 text-slate-500 dark:text-slate-400" />
+              <CardTitle>{t("sections.coverage")}</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="divide-y divide-slate-200 p-0 dark:divide-slate-800">
-            <DetailRow label={t("product")} value={warranty.product.name} />
-            <DetailRow
-              label={t("productCode")}
-              value={warranty.product.productCode}
-            />
-            <DetailRow
-              label={t("serialNumber")}
-              value={warranty.product.serialNumber ?? "-"}
-            />
-            <DetailRow label={t("model")} value={productDisplayName} />
+            {coverageItems.map((item) => (
+              <DetailRow
+                key={item.label}
+                label={item.label}
+                value={item.value}
+              />
+            ))}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="border-b border-slate-200 dark:border-slate-800">
-            <div className="flex items-center gap-2">
-              <UserRound className="size-4 text-slate-500 dark:text-slate-400" />
-              <CardTitle>{t("sections.owner")}</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="divide-y divide-slate-200 p-0 dark:divide-slate-800">
-            <DetailRow
-              label={t("owner")}
-              value={formatWarrantyOwner(warranty)}
-            />
-            <DetailRow
-              label={t("customerCode")}
-              value={warranty.owner?.customerCode ?? "-"}
-            />
-          </CardContent>
-        </Card>
-
-        {warranty.terms ? (
+        <div className="space-y-4">
           <Card>
             <CardHeader className="border-b border-slate-200 dark:border-slate-800">
               <div className="flex items-center gap-2">
-                <CalendarDays className="size-4 text-slate-500 dark:text-slate-400" />
-                <CardTitle>{t("warrantyTerms")}</CardTitle>
+                <Package className="size-4 text-slate-500 dark:text-slate-400" />
+                <CardTitle>{t("sections.product")}</CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="p-4">
-              <div
-                className="prose prose-slate dark:prose-invert max-w-none text-sm text-slate-700 dark:text-slate-300"
-                dangerouslySetInnerHTML={{ __html: warranty.terms }}
+            <CardContent className="divide-y divide-slate-200 p-0 dark:divide-slate-800">
+              <DetailRow label={t("product")} value={warranty.product.name} />
+              <DetailRow
+                label={t("productCode")}
+                value={warranty.product.productCode}
+              />
+              <DetailRow
+                label={t("serialNumber")}
+                value={warranty.product.serialNumber ?? "-"}
+              />
+              <DetailRow label={t("model")} value={productDisplayName} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <UserRound className="size-4 text-slate-500 dark:text-slate-400" />
+                <CardTitle>{t("sections.owner")}</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="divide-y divide-slate-200 p-0 dark:divide-slate-800">
+              <DetailRow
+                label={t("owner")}
+                value={formatWarrantyOwner(warranty)}
+              />
+              <DetailRow
+                label={t("customerCode")}
+                value={warranty.owner?.customerCode ?? "-"}
               />
             </CardContent>
           </Card>
-        ) : null}
+
+          {warranty.terms ? (
+            <Card>
+              <CardHeader className="border-b border-slate-200 dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <CalendarDays className="size-4 text-slate-500 dark:text-slate-400" />
+                  <CardTitle>{t("warrantyTerms")}</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div
+                  className="prose prose-slate dark:prose-invert max-w-none text-sm text-slate-700 dark:text-slate-300"
+                  dangerouslySetInnerHTML={{ __html: warranty.terms }}
+                />
+              </CardContent>
+            </Card>
+          ) : null}
+        </div>
       </div>
+
+      <WarrantyAdjustmentHistory metadata={warranty.metadata} />
     </div>
   );
 }

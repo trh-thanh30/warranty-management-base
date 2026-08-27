@@ -5,15 +5,19 @@ import {
 } from '@/common/response';
 import { ReviewWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/review-warranty-activation-request.dto';
 import { toWarrantyActivationRequestResponse } from '@/modules/warranty-activation-requests/mappers/warranty-activation-request.mapper';
-import {
-  WarrantyActivationRequestsRepository,
-  WarrantyActivationReviewTransactionRepository,
-} from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
+import { WarrantyActivationReviewTransactionRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-review-transaction.repository';
+import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
 import { optionalTrim } from '@/modules/warranty-activation-requests/utils/warranty-activation-request-normalization.utils';
+import {
+  buildActivationEligibilityError,
+  getActivationEligibilityFailure,
+  getWarrantyActivationReviewErrorMessage,
+  WarrantyActivationReviewLocale,
+  WarrantyActivationReviewTarget,
+} from '@/modules/warranty-activation-requests/utils/warranty-activation-review-error.utils';
 import { IssueWarrantyCertificatesForRequestUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-certificates-for-request.use-case';
 import { Injectable } from '@nestjs/common';
 import {
-  product_status,
   warranty_activation_request_status,
   warranty_status,
 } from '@prisma/client';
@@ -30,11 +34,20 @@ export class ReviewWarrantyActivationRequestUseCase {
     dto: ReviewWarrantyActivationRequestDto,
     context: { reviewedByUserId?: string } = {},
   ) {
+    const locale = dto.locale ?? 'vi';
     const existingRequest =
       await this.warrantyActivationRequestsRepository.findById(id);
 
     if (!existingRequest) {
-      throw new NotFoundError('Warranty activation request not found');
+      throw new NotFoundError(
+        getWarrantyActivationReviewErrorMessage(
+          'REQUEST_NOT_FOUND',
+          locale,
+          id,
+        ),
+        'NOT_FOUND',
+        { code: 'WARRANTY_ACTIVATION_REQUEST_NOT_FOUND', requestId: id },
+      );
     }
 
     const canActivateApprovedRequest =
@@ -45,25 +58,51 @@ export class ReviewWarrantyActivationRequestUseCase {
       existingRequest.status !== warranty_activation_request_status.PENDING &&
       !canActivateApprovedRequest
     ) {
-      throw new BadRequestError('Warranty activation request is not pending');
+      throw new BadRequestError(
+        getWarrantyActivationReviewErrorMessage(
+          'REQUEST_NOT_PENDING',
+          locale,
+          existingRequest.status,
+        ),
+        'BAD_REQUEST',
+        {
+          code: 'WARRANTY_ACTIVATION_REQUEST_NOT_PENDING',
+          currentStatus: existingRequest.status,
+        },
+      );
     }
 
     if (
       dto.status === warranty_activation_request_status.REJECTED &&
       !dto.rejectionReason?.trim()
     ) {
-      throw new BadRequestError('Rejection reason is required');
+      throw new BadRequestError(
+        getWarrantyActivationReviewErrorMessage(
+          'REJECTION_REASON_REQUIRED',
+          locale,
+        ),
+        'BAD_REQUEST',
+        { code: 'REJECTION_REASON_REQUIRED' },
+      );
     }
 
     if (dto.status === warranty_activation_request_status.APPROVED) {
       const activatedRequest = await this.activateApprovedRequest({
         adminNote: optionalTrim(dto.adminNote),
         id,
+        locale,
         reviewedById: context.reviewedByUserId,
       });
 
       if (!activatedRequest) {
-        throw new NotFoundError('Warranty activation request target not found');
+        throw new NotFoundError(
+          getWarrantyActivationReviewErrorMessage(
+            'REQUEST_TARGET_NOT_FOUND',
+            locale,
+          ),
+          'NOT_FOUND',
+          { code: 'WARRANTY_ACTIVATION_REQUEST_TARGET_NOT_FOUND' },
+        );
       }
 
       const warrantyIds =
@@ -105,6 +144,7 @@ export class ReviewWarrantyActivationRequestUseCase {
   private activateApprovedRequest(input: {
     adminNote?: string;
     id: string;
+    locale: WarrantyActivationReviewLocale;
     reviewedById?: string;
   }) {
     return this.warrantyActivationRequestsRepository.withReviewTransaction(
@@ -114,40 +154,43 @@ export class ReviewWarrantyActivationRequestUseCase {
 
         if (request.activated_warranty_id) {
           throw new BadRequestError(
-            'Warranty activation request already activated',
+            getWarrantyActivationReviewErrorMessage(
+              'REQUEST_ALREADY_ACTIVATED',
+              input.locale,
+            ),
             'BAD_REQUEST',
             { code: 'ACTIVATION_REQUEST_ALREADY_ACTIVATED' },
           );
         }
 
-        const targets = request.items.length
+        const targets: WarrantyActivationReviewTarget[] = request.items.length
           ? request.items.map((item) => ({
+              itemId: item.id,
+              positionLabel: item.position_label,
               product: item.product,
+              productName: item.product_name,
               warrantyId: item.warranty_id,
               warrantyCode: item.warranty_code,
             }))
           : await this.resolveLegacyActivationTargets(
               repository,
               request.warranty_code,
+              request.product_name,
             );
         if (targets.length === 0) return null;
 
         for (const target of targets) {
-          if (
-            target.product.status !== product_status.ACTIVE ||
-            target.product.deleted_at !== null ||
-            !target.product.warranty ||
-            target.product.warranty.id !== target.warrantyId ||
-            target.product.warranty.status !== warranty_status.DRAFT
-          ) {
+          const reason = getActivationEligibilityFailure(target);
+          if (reason) {
+            const error = buildActivationEligibilityError(
+              target,
+              reason,
+              input.locale,
+            );
             throw new BadRequestError(
-              'Warranty code is not eligible for activation',
+              error.message,
               'BAD_REQUEST',
-              {
-                code: 'WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION',
-                productId: target.product.id,
-                warrantyCode: target.warrantyCode,
-              },
+              error.details,
             );
           }
         }
@@ -155,8 +198,10 @@ export class ReviewWarrantyActivationRequestUseCase {
         const reviewedAt = new Date();
         const customer = await this.resolveActivationCustomer(repository, {
           address: request.full_address,
+          customerId: request.customer_id,
           email: request.customer_email,
           fullName: request.customer_name,
+          locale: input.locale,
           phone: request.customer_phone,
         });
         const activatedWarrantyIds: string[] = [];
@@ -174,7 +219,12 @@ export class ReviewWarrantyActivationRequestUseCase {
           });
           const updatedWarranty = await this.activateDraftWarranty(repository, {
             activatedByUserId: input.reviewedById,
+            locale: input.locale,
+            positionLabel: target.positionLabel,
+            productId: target.product.id,
+            productName: target.productName,
             startDate: reviewedAt,
+            warrantyCode: target.warrantyCode,
             warrantyId: target.warrantyId,
           });
           activatedWarrantyIds.push(updatedWarranty.id);
@@ -197,6 +247,7 @@ export class ReviewWarrantyActivationRequestUseCase {
   private async resolveLegacyActivationTargets(
     repository: WarrantyActivationReviewTransactionRepository,
     warrantyCode: string,
+    productName?: string | null,
   ) {
     const product = await repository.findLegacyProduct(warrantyCode);
     if (!product?.warranty) return [];
@@ -204,6 +255,7 @@ export class ReviewWarrantyActivationRequestUseCase {
     return [
       {
         product,
+        productName,
         warrantyId: product.warranty.id,
         warrantyCode,
       },
@@ -214,11 +266,33 @@ export class ReviewWarrantyActivationRequestUseCase {
     repository: WarrantyActivationReviewTransactionRepository,
     input: {
       address: string;
+      customerId: string | null;
       email: string | null;
       fullName: string;
+      locale: WarrantyActivationReviewLocale;
       phone: string;
     },
   ) {
+    if (input.customerId) {
+      const customer = await repository.findCustomerById(input.customerId);
+      if (!customer) {
+        throw new NotFoundError(
+          getWarrantyActivationReviewErrorMessage(
+            'CUSTOMER_NOT_FOUND',
+            input.locale,
+            input.customerId,
+          ),
+          'NOT_FOUND',
+          {
+            code: 'CUSTOMER_NOT_FOUND',
+            customerId: input.customerId,
+          },
+        );
+      }
+
+      return customer;
+    }
+
     const [phoneCustomer, emailCustomer] = await Promise.all([
       repository.findCustomerByPhone(input.phone),
       input.email
@@ -233,7 +307,10 @@ export class ReviewWarrantyActivationRequestUseCase {
       phoneCustomer.id !== emailCustomer.id
     ) {
       throw new BadRequestError(
-        'Customer email and phone belong to different customer profiles',
+        getWarrantyActivationReviewErrorMessage(
+          'CUSTOMER_IDENTITY_CONFLICT',
+          input.locale,
+        ),
         'BAD_REQUEST',
         { code: 'CUSTOMER_IDENTITY_CONFLICT' },
       );
@@ -273,40 +350,82 @@ export class ReviewWarrantyActivationRequestUseCase {
     repository: WarrantyActivationReviewTransactionRepository,
     input: {
       activatedByUserId?: string;
+      locale: WarrantyActivationReviewLocale;
+      positionLabel?: string;
+      productId: string;
+      productName?: string | null;
       startDate: Date;
+      warrantyCode: string;
       warrantyId: string;
     },
   ) {
     const warranty = await repository.findWarrantyForActivation(
       input.warrantyId,
     );
-    if (!warranty) throw new NotFoundError('Warranty not found');
-    if (warranty.status !== warranty_status.DRAFT) {
-      throw new BadRequestError(
-        'Warranty is not eligible for activation',
-        'BAD_REQUEST',
+    if (!warranty) {
+      throw new NotFoundError(
+        getWarrantyActivationReviewErrorMessage(
+          'WARRANTY_NOT_FOUND',
+          input.locale,
+          input.warrantyCode,
+        ),
+        'NOT_FOUND',
         {
-          code: 'WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION',
-          currentStatus: warranty.status,
-          expectedStatuses: [warranty_status.DRAFT],
+          code: 'WARRANTY_NOT_FOUND',
+          warrantyCode: input.warrantyCode,
+          warrantyId: input.warrantyId,
         },
       );
     }
+    if (warranty.status !== warranty_status.DRAFT) {
+      const error = buildActivationEligibilityError(
+        {
+          positionLabel: input.positionLabel,
+          product: {
+            deleted_at: warranty.product.deleted_at,
+            id: input.productId,
+            status: warranty.product.status,
+            warranty: { id: warranty.id, status: warranty.status },
+          },
+          productName: input.productName,
+          warrantyCode: input.warrantyCode,
+          warrantyId: input.warrantyId,
+        },
+        'WARRANTY_STATUS_NOT_DRAFT',
+        input.locale,
+      );
+      throw new BadRequestError(error.message, 'BAD_REQUEST', error.details);
+    }
     if (!warranty.warranty_code) {
-      throw new BadRequestError('Warranty code is required for activation');
+      throw new BadRequestError(
+        getWarrantyActivationReviewErrorMessage(
+          'WARRANTY_CODE_REQUIRED',
+          input.locale,
+          input.warrantyId,
+        ),
+        'BAD_REQUEST',
+        { code: 'WARRANTY_CODE_REQUIRED', warrantyId: input.warrantyId },
+      );
     }
 
     const currentOwnership = warranty.product.ownerships[0];
     if (!currentOwnership) {
       throw new BadRequestError(
-        'Warranty requires a current owner before activation',
+        getWarrantyActivationReviewErrorMessage(
+          'WARRANTY_OWNER_REQUIRED',
+          input.locale,
+          input.warrantyCode,
+        ),
         'BAD_REQUEST',
         { code: 'WARRANTY_OWNER_REQUIRED' },
       );
     }
     if (input.startDate.getTime() > Date.now()) {
       throw new BadRequestError(
-        'Warranty start date cannot be in the future',
+        getWarrantyActivationReviewErrorMessage(
+          'WARRANTY_START_DATE_IN_FUTURE',
+          input.locale,
+        ),
         'BAD_REQUEST',
         { code: 'WARRANTY_START_DATE_IN_FUTURE' },
       );
@@ -322,7 +441,19 @@ export class ReviewWarrantyActivationRequestUseCase {
       },
     );
     if (transition.count !== 1) {
-      throw new ConflictError('Warranty status changed during activation');
+      throw new ConflictError(
+        getWarrantyActivationReviewErrorMessage(
+          'WARRANTY_STATUS_CHANGED',
+          input.locale,
+          input.warrantyCode,
+        ),
+        'CONFLICT',
+        {
+          code: 'WARRANTY_STATUS_CHANGED_DURING_ACTIVATION',
+          warrantyCode: input.warrantyCode,
+          warrantyId: input.warrantyId,
+        },
+      );
     }
 
     await repository.markOwnershipActivated(

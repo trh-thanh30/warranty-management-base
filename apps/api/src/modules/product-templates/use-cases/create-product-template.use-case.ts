@@ -1,4 +1,3 @@
-import { PrismaService } from '@/database/prisma/prisma.service';
 import { AssetsService } from '@/modules/assets/assets.service';
 import { CreateProductTemplateDto } from '@/modules/product-templates/dto/create-product-template.dto';
 import {
@@ -17,7 +16,6 @@ import { ConflictError } from '@/common/response';
 @Injectable()
 export class CreateProductTemplateUseCase {
   constructor(
-    private readonly prismaService: PrismaService,
     private readonly productTemplatesRepository: ProductTemplatesRepository,
     private readonly assetsService: AssetsService,
     private readonly generateProductTemplateSkuUseCase: GenerateProductTemplateSkuUseCase,
@@ -46,7 +44,7 @@ export class CreateProductTemplateUseCase {
       throw new ConflictError('Product template slug already exists');
     }
     const category = await resolveProductTemplateCategory(
-      this.prismaService,
+      this.productTemplatesRepository,
       dto.categoryId,
     );
     await validateProductTemplateAssets(
