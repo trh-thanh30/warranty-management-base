@@ -3,6 +3,7 @@ import test from "node:test";
 import { HttpClientError } from "@repo/shared";
 import {
   buildWarrantyClaimProductQuery,
+  getWarrantyClaimRequesterPrefill,
   getWarrantyClaimRequesterValues,
   getStatusBadgeVariant,
   resolveWarrantyClaimCreateError,
@@ -84,6 +85,46 @@ test("maps the selected product owner or customer to requester fields", () => {
     requesterName: "",
     requesterPhone: "",
   });
+});
+
+test("requester prefill reuses the hydrated customer for another product with the same owner", () => {
+  assert.deepEqual(
+    getWarrantyClaimRequesterPrefill(
+      {
+        customerId: "customer-1",
+        fullName: "Nguyen Van Hung",
+      },
+      {
+        fullName: "Nguyen Van Hung",
+        id: "customer-1",
+        phone: "0985844298",
+      },
+    ),
+    {
+      requesterName: "Nguyen Van Hung",
+      requesterPhone: "0985844298",
+    },
+  );
+});
+
+test("requester prefill does not reuse a cached customer from another owner", () => {
+  assert.deepEqual(
+    getWarrantyClaimRequesterPrefill(
+      {
+        customerId: "customer-2",
+        fullName: "Nguyen Van Hung",
+      },
+      {
+        fullName: "Nguyen Van Hung",
+        id: "customer-1",
+        phone: "0985844298",
+      },
+    ),
+    {
+      requesterName: "Nguyen Van Hung",
+      requesterPhone: "",
+    },
+  );
 });
 
 test("create claim schema requires requester name and phone", () => {

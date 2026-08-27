@@ -12,11 +12,11 @@ import { useCustomer } from "../../customers/hooks/use-customers";
 import { useProducts } from "../../products/hooks/use-products";
 import {
   type WarrantyClaimCreateFormValues,
-  type WarrantyClaimRequesterSource,
   warrantyClaimCreateFormSchema,
 } from "../warranty-claims.types";
 import {
   buildWarrantyClaimProductQuery,
+  getWarrantyClaimRequesterPrefill,
   getWarrantyClaimRequesterValues,
   resolveWarrantyClaimCreateError,
   toCreateWarrantyClaimBody,
@@ -46,6 +46,7 @@ export function useCreateWarrantyClaimForm({
   const requesterPrefillCustomerIdRef = useRef<string | null>(null);
   const debouncedProductSearch = useDebounce(productSearch.trim(), 300);
   const {
+    clearErrors,
     formState: { errors, isSubmitting },
     handleSubmit,
     register,
@@ -64,18 +65,21 @@ export function useCreateWarrantyClaimForm({
     { enabled: Boolean(selectedProduct?.owner?.customerId) },
   );
   const setRequesterValues = useCallback(
-    (source: WarrantyClaimRequesterSource | null | undefined) => {
-      const values = getWarrantyClaimRequesterValues(source);
+    (
+      values: Pick<
+        WarrantyClaimCreateFormValues,
+        "requesterName" | "requesterPhone"
+      >,
+    ) => {
       setValue("requesterName", values.requesterName, {
         shouldDirty: true,
-        shouldValidate: true,
       });
       setValue("requesterPhone", values.requesterPhone, {
         shouldDirty: true,
-        shouldValidate: true,
       });
+      clearErrors(["requesterName", "requesterPhone"]);
     },
-    [setValue],
+    [clearErrors, setValue],
   );
 
   useEffect(() => {
@@ -89,7 +93,7 @@ export function useCreateWarrantyClaimForm({
       return;
     }
 
-    setRequesterValues(customer);
+    setRequesterValues(getWarrantyClaimRequesterValues(customer));
     requesterPrefillCustomerIdRef.current = customer.id;
   }, [
     customerQuery.data,
@@ -112,7 +116,14 @@ export function useCreateWarrantyClaimForm({
       shouldValidate: true,
     });
 
-    setRequesterValues(product.owner);
+    const hydratedCustomer =
+      customerQuery.data?.id === product.owner?.customerId
+        ? customerQuery.data
+        : null;
+    setRequesterValues(
+      getWarrantyClaimRequesterPrefill(product.owner, hydratedCustomer),
+    );
+    requesterPrefillCustomerIdRef.current = hydratedCustomer?.id ?? null;
   }
 
   function clearProduct() {
@@ -126,7 +137,7 @@ export function useCreateWarrantyClaimForm({
       shouldDirty: true,
       shouldValidate: true,
     });
-    setRequesterValues(null);
+    setRequesterValues(getWarrantyClaimRequesterValues(null));
   }
 
   async function submit(values: WarrantyClaimCreateFormValues) {

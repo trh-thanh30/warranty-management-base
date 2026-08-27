@@ -68,6 +68,19 @@ export function getWarrantyClaimRequesterValues(
   };
 }
 
+export function getWarrantyClaimRequesterPrefill(
+  owner:
+    | (WarrantyClaimRequesterSource & { customerId?: string })
+    | null
+    | undefined,
+  customer: (WarrantyClaimRequesterSource & { id: string }) | null | undefined,
+): Pick<WarrantyClaimCreateFormValues, "requesterName" | "requesterPhone"> {
+  const source =
+    customer && customer.id === owner?.customerId ? customer : owner;
+
+  return getWarrantyClaimRequesterValues(source);
+}
+
 export function validateWarrantyClaimAttachment(file: {
   size: number;
   type: string;
