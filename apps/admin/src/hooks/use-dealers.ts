@@ -2,6 +2,7 @@
 
 import {
   keepPreviousData,
+  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
@@ -57,6 +58,21 @@ export function useDealers(
     queryKey: dealerKeys.list(query),
     queryFn: () => dealersService.listDealers(query),
     placeholderData: keepPreviousData,
+  });
+}
+
+export function useInfiniteDealers(
+  query: Omit<ListDealersQuery, "page">,
+  options?: { enabled?: boolean },
+) {
+  return useInfiniteQuery({
+    ...options,
+    queryKey: [...dealerKeys.lists(), "infinite", query] as const,
+    queryFn: ({ pageParam }) =>
+      dealersService.listDealers({ ...query, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.meta.hasNextPage ? lastPage.meta.page + 1 : undefined,
   });
 }
 

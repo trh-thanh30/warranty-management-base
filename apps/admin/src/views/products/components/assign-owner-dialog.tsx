@@ -22,6 +22,7 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
+  ComboboxLoading,
   ComboboxTrigger,
 } from "@/src/components/common/combobox";
 import { formatCustomerSearchOption } from "@/src/utils";
@@ -45,7 +46,13 @@ export function AssignOwnerDialog({
     product,
     onAssigned: () => onOpenChange(false),
   });
-  const customers = workflow.customersQuery.data?.items ?? [];
+  const customers = Array.from(
+    new Map(
+      (workflow.customersQuery.data?.pages ?? [])
+        .flatMap((page) => page.items)
+        .map((customer) => [customer.id, customer]),
+    ),
+  ).map(([, customer]) => customer);
   const selectedCustomer = customers.find(
     (customer) => customer.id === workflow.customerId,
   );
@@ -109,13 +116,25 @@ export function AssignOwnerDialog({
                     placeholder={t("customerSearchPlaceholder")}
                     showTrigger={false}
                   />
-                  <ComboboxList>
+                  <ComboboxList
+                    onReachEnd={() => {
+                      if (
+                        workflow.customersQuery.hasNextPage &&
+                        !workflow.customersQuery.isFetchingNextPage
+                      ) {
+                        void workflow.customersQuery.fetchNextPage();
+                      }
+                    }}
+                  >
                     <ComboboxEmpty>{t("noCustomerFound")}</ComboboxEmpty>
                     {customers.map((customer) => (
                       <ComboboxItem key={customer.id} value={customer.id}>
                         {formatCustomerSearchOption(customer)}
                       </ComboboxItem>
                     ))}
+                    {workflow.customersQuery.isFetchingNextPage ? (
+                      <ComboboxLoading label={t("loadingCustomers")} />
+                    ) : null}
                   </ComboboxList>
                 </ComboboxContent>
               </Combobox>

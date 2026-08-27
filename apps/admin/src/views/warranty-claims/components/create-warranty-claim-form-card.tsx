@@ -88,6 +88,14 @@ export function CreateWarrantyClaimFormCard({
                 items={products}
                 loadingLabel={t("loadingProducts")}
                 onItemSelect={selectProduct}
+                onReachEnd={() => {
+                  if (
+                    productsQuery.hasNextPage &&
+                    !productsQuery.isFetchingNextPage
+                  ) {
+                    void productsQuery.fetchNextPage();
+                  }
+                }}
                 onSearchChange={(value) => {
                   if (selectedProduct) clearProduct();
                   setProductSearch(value);

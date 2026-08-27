@@ -9,7 +9,7 @@ import type { ProductResponse } from "@repo/shared";
 import { useToast } from "@/src/hooks/use-toast";
 import { useCreateWarrantyClaim } from "@/src/hooks/use-warranty-claims";
 import { useCustomer } from "../../customers/hooks/use-customers";
-import { useProducts } from "../../products/hooks/use-products";
+import { useInfiniteProducts } from "../../products/hooks/use-products";
 import {
   type WarrantyClaimCreateFormValues,
   warrantyClaimCreateFormSchema,
@@ -56,10 +56,16 @@ export function useCreateWarrantyClaimForm({
     resolver: zodResolver(warrantyClaimCreateFormSchema),
     defaultValues: DEFAULT_VALUES,
   });
-  const productsQuery = useProducts(
+  const productsQuery = useInfiniteProducts(
     buildWarrantyClaimProductQuery(debouncedProductSearch),
   );
-  const products = productsQuery.data?.items ?? [];
+  const products = Array.from(
+    new Map(
+      (productsQuery.data?.pages ?? [])
+        .flatMap((page) => page.items)
+        .map((product) => [product.id, product]),
+    ),
+  ).map(([, product]) => product);
   const customerQuery = useCustomer(
     selectedProduct?.owner?.customerId ?? null,
     { enabled: Boolean(selectedProduct?.owner?.customerId) },
