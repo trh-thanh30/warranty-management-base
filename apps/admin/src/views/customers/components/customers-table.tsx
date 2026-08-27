@@ -1,7 +1,9 @@
 "use client";
 
-import { MoreHorizontal, PackageSearch, Pencil } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { SortableTableHead } from "@/src/components/common/sortable-table-head";
+import { usePermissions } from "@/src/hooks/use-permissions";
+import { Link } from "@/src/i18n/navigation";
+import { getInitials } from "@/src/utils/get-initials";
 import {
   formatDate,
   type CustomerSummary,
@@ -18,17 +20,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   Table,
-  TableScroll,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
+  TableScroll,
 } from "@repo/ui";
-import { SortableTableHead } from "@/src/components/common/sortable-table-head";
-import { usePermissions } from "@/src/hooks/use-permissions";
-import { Link } from "@/src/i18n/navigation";
-import { getInitials } from "@/src/utils/get-initials";
+import {
+  MoreHorizontal,
+  PackageSearch,
+  Pencil,
+  RotateCcw,
+  Trash2,
+} from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { getCustomerContact, getCustomerDisplayName } from "../customers.utils";
 
 type CustomersTableProps = {
@@ -36,6 +42,8 @@ type CustomersTableProps = {
   onSortChange: (sortBy: CustomerSortBy) => void;
   sortBy?: CustomerSortBy;
   sortOrder: "asc" | "desc";
+  onDelete?: (customer: CustomerSummary) => void;
+  onRestore?: (customer: CustomerSummary) => void;
 };
 
 type CustomerSortBy = NonNullable<ListCustomersQuery["sortBy"]>;
@@ -45,6 +53,8 @@ export function CustomersTable({
   onSortChange,
   sortBy,
   sortOrder,
+  onDelete,
+  onRestore,
 }: CustomersTableProps) {
   const t = useTranslations("Customers");
 
@@ -52,7 +62,12 @@ export function CustomersTable({
     <>
       <div className="space-y-3 md:hidden">
         {items.map((customer) => (
-          <CustomerMobileCard customer={customer} key={customer.id} />
+          <CustomerMobileCard
+            customer={customer}
+            key={customer.id}
+            onDelete={onDelete}
+            onRestore={onRestore}
+          />
         ))}
       </div>
 
@@ -84,7 +99,7 @@ export function CustomersTable({
               >
                 {t("email")}
               </SortableTableHead>
-              <TableHead>{t("account")}</TableHead>
+              <TableHead>{t("status")}</TableHead>
               <SortableTableHead
                 activeSortBy={sortBy}
                 onSortChange={onSortChange}
@@ -98,7 +113,12 @@ export function CustomersTable({
           </TableHeader>
           <TableBody>
             {items.map((customer) => (
-              <CustomerTableRow customer={customer} key={customer.id} />
+              <CustomerTableRow
+                customer={customer}
+                key={customer.id}
+                onDelete={onDelete}
+                onRestore={onRestore}
+              />
             ))}
           </TableBody>
         </Table>
@@ -107,7 +127,15 @@ export function CustomersTable({
   );
 }
 
-function CustomerTableRow({ customer }: { customer: CustomerSummary }) {
+function CustomerTableRow({
+  customer,
+  onDelete,
+  onRestore,
+}: {
+  customer: CustomerSummary;
+  onDelete?: (customer: CustomerSummary) => void;
+  onRestore?: (customer: CustomerSummary) => void;
+}) {
   const locale = useLocale();
 
   return (
@@ -120,11 +148,15 @@ function CustomerTableRow({ customer }: { customer: CustomerSummary }) {
         <span className="block max-w-64 truncate">{customer.email || "-"}</span>
       </TableCell>
       <TableCell>
-        <CustomerAccountBadge customer={customer} />
+        <CustomerStatusBadge customer={customer} />
       </TableCell>
       <TableCell>{formatDate(customer.createdAt, { locale })}</TableCell>
       <TableCell className="text-right">
-        <CustomerActionsMenu customer={customer} />
+        <CustomerActionsMenu
+          customer={customer}
+          onDelete={onDelete}
+          onRestore={onRestore}
+        />
       </TableCell>
     </TableRow>
   );
@@ -150,7 +182,15 @@ function CustomerIdentityCell({ customer }: { customer: CustomerSummary }) {
   );
 }
 
-function CustomerMobileCard({ customer }: { customer: CustomerSummary }) {
+function CustomerMobileCard({
+  customer,
+  onDelete,
+  onRestore,
+}: {
+  customer: CustomerSummary;
+  onDelete?: (customer: CustomerSummary) => void;
+  onRestore?: (customer: CustomerSummary) => void;
+}) {
   const locale = useLocale();
   const t = useTranslations("Customers");
 
@@ -158,7 +198,11 @@ function CustomerMobileCard({ customer }: { customer: CustomerSummary }) {
     <article className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
       <div className="flex items-start justify-between gap-3">
         <CustomerIdentityCell customer={customer} />
-        <CustomerActionsMenu customer={customer} />
+        <CustomerActionsMenu
+          customer={customer}
+          onDelete={onDelete}
+          onRestore={onRestore}
+        />
       </div>
 
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
@@ -166,10 +210,10 @@ function CustomerMobileCard({ customer }: { customer: CustomerSummary }) {
         <CustomerMobileField label={t("email")} value={customer.email || "-"} />
         <div>
           <dt className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-            {t("account")}
+            {t("status")}
           </dt>
           <dd className="mt-1">
-            <CustomerAccountBadge customer={customer} />
+            <CustomerStatusBadge customer={customer} />
           </dd>
         </div>
         <CustomerMobileField
@@ -205,23 +249,32 @@ function CustomerMobileField({
   );
 }
 
-function CustomerAccountBadge({ customer }: { customer: CustomerSummary }) {
+function CustomerStatusBadge({ customer }: { customer: CustomerSummary }) {
   const t = useTranslations("Customers");
 
   return (
-    <Badge variant={customer.userId ? "success" : "secondary"}>
-      {customer.userId ? t("linkedAccount") : t("profileOnly")}
+    <Badge variant={customer.status === "ACTIVE" ? "success" : "secondary"}>
+      {customer.status === "ACTIVE" ? t("statusActive") : t("statusDeleted")}
     </Badge>
   );
 }
 
-function CustomerActionsMenu({ customer }: { customer: CustomerSummary }) {
+function CustomerActionsMenu({
+  customer,
+  onDelete,
+  onRestore,
+}: {
+  customer: CustomerSummary;
+  onDelete?: (customer: CustomerSummary) => void;
+  onRestore?: (customer: CustomerSummary) => void;
+}) {
   const t = useTranslations("Customers");
   const { hasPermission } = usePermissions();
   const canEdit = hasPermission(PERMISSIONS.CUSTOMER_UPDATE);
+  const canDelete = hasPermission(PERMISSIONS.CUSTOMER_DELETE);
   const displayName = getCustomerDisplayName(customer);
 
-  if (!canEdit) {
+  if (!canEdit && !canDelete) {
     return null;
   }
 
@@ -244,12 +297,30 @@ function CustomerActionsMenu({ customer }: { customer: CustomerSummary }) {
             {t("viewProducts")}
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href={`/customers/${customer.id}/edit`}>
-            <Pencil className="mr-2 size-4" />
-            {t("edit")}
-          </Link>
-        </DropdownMenuItem>
+
+        {canEdit ? (
+          <DropdownMenuItem asChild>
+            <Link href={`/customers/${customer.id}/edit`}>
+              <Pencil className="mr-2 size-4" />
+              {t("edit")}
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
+        {customer.status === "ACTIVE" && onDelete ? (
+          <DropdownMenuItem
+            className="text-red-600"
+            onSelect={() => onDelete(customer)}
+          >
+            <Trash2 className="mr-2 size-4" />
+            {t("delete")}
+          </DropdownMenuItem>
+        ) : null}
+        {customer.status === "DELETED" && onRestore ? (
+          <DropdownMenuItem onSelect={() => onRestore(customer)}>
+            <RotateCcw className="mr-2 size-4" />
+            {t("restore")}
+          </DropdownMenuItem>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );

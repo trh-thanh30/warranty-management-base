@@ -11,12 +11,16 @@ export type CustomerSummary = {
   metadata: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
+  status: CustomerStatus;
 };
+
+export type CustomerStatus = "ACTIVE" | "DELETED";
 
 export type ListCustomersQuery = {
   page?: number;
   limit?: number;
   search?: string;
+  status?: CustomerStatus | "ALL";
   sortBy?:
     | "customerCode"
     | "fullName"

@@ -10,12 +10,15 @@ import { GetCustomerDetailUseCase } from '@/modules/customers/use-cases/get-cust
 import { ImportCustomersUseCase } from '@/modules/customers/use-cases/import-customers.use-case';
 import { ListCustomersUseCase } from '@/modules/customers/use-cases/list-customers.use-case';
 import { UpdateCustomerUseCase } from '@/modules/customers/use-cases/update-customer.use-case';
+import { SoftDeleteCustomerUseCase } from '@/modules/customers/use-cases/soft-delete-customer.use-case';
+import { RestoreCustomerUseCase } from '@/modules/customers/use-cases/restore-customer.use-case';
 import {
   Body,
   Controller,
   Get,
   Param,
   Patch,
+  Delete,
   Post,
   Query,
   Res,
@@ -36,6 +39,8 @@ export class CustomersController {
     private readonly downloadCustomerImportTemplateUseCase: DownloadCustomerImportTemplateUseCase,
     private readonly exportCustomersUseCase: ExportCustomersUseCase,
     private readonly importCustomersUseCase: ImportCustomersUseCase,
+    private readonly softDeleteCustomerUseCase: SoftDeleteCustomerUseCase,
+    private readonly restoreCustomerUseCase: RestoreCustomerUseCase,
   ) {}
 
   @Get()
@@ -84,5 +89,17 @@ export class CustomersController {
   @Permissions([permission_key.CUSTOMER_UPDATE])
   update(@Param('id') id: string, @Body() dto: UpdateCustomerDto) {
     return this.updateCustomerUseCase.execute(id, dto);
+  }
+
+  @Patch(':id/restore')
+  @Permissions([permission_key.CUSTOMER_DELETE])
+  restore(@Param('id') id: string) {
+    return this.restoreCustomerUseCase.execute(id);
+  }
+
+  @Delete(':id')
+  @Permissions([permission_key.CUSTOMER_DELETE])
+  softDelete(@Param('id') id: string) {
+    return this.softDeleteCustomerUseCase.execute(id);
   }
 }

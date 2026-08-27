@@ -19,6 +19,7 @@ import {
 } from "@repo/ui";
 import { PaginationControls } from "@repo/ui/pagination-controls";
 import { StatePanel } from "@/src/components/common/state-panel";
+import { SelectControl } from "@/src/components/common/select-control";
 import { Link } from "@/src/i18n/navigation";
 import { CustomersTable } from "./customers-table";
 
@@ -34,10 +35,14 @@ type CustomersDirectoryCardProps = {
   onRetry: () => void;
   onSearchChange: (search: string) => void;
   onSortChange: (sortBy: CustomerSortBy) => void;
+  onStatusChange: (status: "ACTIVE" | "DELETED" | "ALL") => void;
+  onDelete?: (customer: CustomerSummary) => void;
+  onRestore?: (customer: CustomerSummary) => void;
   pageSize: number;
   search: string;
   sortBy?: CustomerSortBy;
   sortOrder: "asc" | "desc";
+  status: "ACTIVE" | "DELETED" | "ALL";
 };
 
 export function CustomersDirectoryCard({
@@ -49,11 +54,15 @@ export function CustomersDirectoryCard({
   onPageSizeChange,
   onRetry,
   onSearchChange,
+  onStatusChange,
   onSortChange,
   pageSize,
   search,
+  status,
   sortBy,
   sortOrder,
+  onDelete,
+  onRestore,
 }: CustomersDirectoryCardProps) {
   const t = useTranslations("Customers");
   const hasSearch = Boolean(search.trim());
@@ -70,6 +79,8 @@ export function CustomersDirectoryCard({
         <CustomersDirectoryFilters
           onSearchChange={onSearchChange}
           search={search}
+          status={status}
+          onStatusChange={onStatusChange}
         />
       </CardHeader>
       <CardContent className="px-3 sm:px-6">
@@ -87,6 +98,8 @@ export function CustomersDirectoryCard({
           pageSize={pageSize}
           sortBy={sortBy}
           sortOrder={sortOrder}
+          onDelete={onDelete}
+          onRestore={onRestore}
         />
       </CardContent>
     </Card>
@@ -94,17 +107,34 @@ export function CustomersDirectoryCard({
 }
 
 function CustomersDirectoryFilters({
+  onStatusChange,
   onSearchChange,
   search,
+  status,
 }: {
+  onStatusChange: (status: "ACTIVE" | "DELETED" | "ALL") => void;
   onSearchChange: (search: string) => void;
   search: string;
+  status: "ACTIVE" | "DELETED" | "ALL";
 }) {
   const t = useTranslations("Customers");
 
   return (
-    <div className="w-full lg:w-[24rem]">
-      <div className="relative">
+    <div className="flex w-full gap-2 lg:w-[32rem]">
+      <SelectControl
+        ariaLabel={t("statusFilter")}
+        className="w-40"
+        onValueChange={(value) =>
+          onStatusChange(value as "ACTIVE" | "DELETED" | "ALL")
+        }
+        options={[
+          { label: t("statusActive"), value: "ACTIVE" },
+          { label: t("statusDeleted"), value: "DELETED" },
+          { label: t("statusAll"), value: "ALL" },
+        ]}
+        value={status}
+      />
+      <div className="relative min-w-0 flex-1">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
         <Input
           aria-label={t("searchLabel")}
@@ -129,6 +159,8 @@ function CustomersDirectoryContent({
   onRetry,
   onSearchChange,
   onSortChange,
+  onDelete,
+  onRestore,
   pageSize,
   sortBy,
   sortOrder,
@@ -143,6 +175,8 @@ function CustomersDirectoryContent({
   | "onRetry"
   | "onSearchChange"
   | "onSortChange"
+  | "onDelete"
+  | "onRestore"
   | "pageSize"
   | "sortBy"
   | "sortOrder"
@@ -175,6 +209,8 @@ function CustomersDirectoryContent({
       <>
         <CustomersTable
           items={data.items}
+          onDelete={onDelete}
+          onRestore={onRestore}
           onSortChange={onSortChange}
           sortBy={sortBy}
           sortOrder={sortOrder}

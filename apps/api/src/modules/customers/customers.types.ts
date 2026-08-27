@@ -16,5 +16,6 @@ export function toCustomerResponse(customer: Customer): CustomerResponse {
     metadata: customer.metadata as Record<string, unknown> | null,
     createdAt: customer.created_at.toISOString(),
     updatedAt: customer.updated_at.toISOString(),
+    status: customer.deleted_at ? 'DELETED' : 'ACTIVE',
   };
 }
