@@ -7,6 +7,7 @@ export type ApiErrorTranslator = ((key: string) => string) & {
 type LocalizedApiErrorOptions = {
   apiErrors?: ApiErrorTranslator;
   fallbackKey?: string;
+  preferApiMessage?: boolean;
 };
 
 export function getLocalizedApiError(
@@ -20,6 +21,13 @@ export function getLocalizedApiError(
       : (fallbackKeyOrOptions.fallbackKey ?? "saveError");
 
   if (!(error instanceof HttpClientError)) return translate(fallbackKey);
+
+  const preferApiMessage =
+    typeof fallbackKeyOrOptions === "object" &&
+    fallbackKeyOrOptions.preferApiMessage;
+  if (preferApiMessage && !error.isNetworkError && error.message.trim()) {
+    return error.message;
+  }
 
   const code = getApiErrorCode(error);
   const apiErrorTranslator =

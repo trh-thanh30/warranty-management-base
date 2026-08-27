@@ -18,6 +18,7 @@ import { ListProductsUseCase } from '@/modules/products/use-cases/list-products.
 import { ListPublicProductsUseCase } from '@/modules/products/use-cases/list-public-products.use-case';
 import { PreviewProductImportUseCase } from '@/modules/products/use-cases/preview-product-import.use-case';
 import { SoftDeleteProductUseCase } from '@/modules/products/use-cases/soft-delete-product.use-case';
+import { RestoreProductUseCase } from '@/modules/products/use-cases/restore-product.use-case';
 import { RemoveProductAssetUseCase } from '@/modules/products/use-cases/remove-product-asset.use-case';
 import { UpdateProductAssetUseCase } from '@/modules/products/use-cases/update-product-asset.use-case';
 import { UpdateProductUseCase } from '@/modules/products/use-cases/update-product.use-case';
@@ -43,6 +44,7 @@ import { memoryStorage } from 'multer';
     CreateProductUseCase,
     UpdateProductUseCase,
     SoftDeleteProductUseCase,
+    RestoreProductUseCase,
     ListProductsUseCase,
     ListPublicProductsUseCase,
     GetPublicProductDetailUseCase,

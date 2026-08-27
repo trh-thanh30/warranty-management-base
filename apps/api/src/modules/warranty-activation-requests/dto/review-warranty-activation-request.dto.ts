@@ -28,4 +28,8 @@ export class ReviewWarrantyActivationRequestDto {
   @IsString()
   @Length(1, 2000)
   rejectionReason?: string;
+
+  @IsOptional()
+  @IsIn(['vi', 'en'])
+  locale?: 'vi' | 'en';
 }
