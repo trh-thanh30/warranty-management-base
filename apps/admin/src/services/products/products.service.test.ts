@@ -25,6 +25,60 @@ const product = {
   warranty: null,
 };
 
+test("activation product options use the dedicated paginated endpoint", async () => {
+  const calls: unknown[] = [];
+  const response = {
+    items: [
+      {
+        ...product,
+        activationEligibility: {
+          eligible: false,
+          reason: "ACTIVATION_REQUEST_PENDING",
+          requestCode: "WAR-20260827-0001",
+        },
+      },
+    ],
+    meta: {
+      page: 1,
+      limit: 20,
+      total: 1,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    },
+  };
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  const result = await createProductsService(
+    http as unknown as ProductsHttpClient,
+  ).listActivationProductOptions({
+    categoryId: "category-id",
+    limit: 20,
+    page: 1,
+    search: "film",
+  });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/products/activation-options",
+      config: {
+        params: {
+          categoryId: "category-id",
+          limit: 20,
+          page: 1,
+          search: "film",
+        },
+      },
+    },
+  ]);
+  assert.deepEqual(result, response);
+});
+
 test("product directory requests paginated products with filters", async () => {
   const calls: unknown[] = [];
   const response = {

@@ -11,6 +11,11 @@ import {
   warranty_status,
 } from '@prisma/client';
 
+const openActivationRequestStatuses = [
+  warranty_activation_request_status.PENDING,
+  warranty_activation_request_status.APPROVED,
+];
+
 const productInclude = {
   assets: {
     include: { asset: true },
@@ -54,6 +59,25 @@ const productListInclude = {
   },
 };
 
+const activationProductOptionInclude = {
+  ...productListInclude,
+  warranty_activation_requests: {
+    where: { status: { in: openActivationRequestStatuses } },
+    select: { id: true, request_code: true, status: true },
+    orderBy: { created_at: 'desc' as const },
+  },
+  warranty_activation_request_items: {
+    where: { status: { in: openActivationRequestStatuses } },
+    select: {
+      status: true,
+      request: {
+        select: { request_code: true, status: true },
+      },
+    },
+    orderBy: { created_at: 'desc' as const },
+  },
+};
+
 const publicProductTemplateListInclude = {
   category_ref: true,
   assets: {
@@ -68,11 +92,6 @@ const publicProductTemplateListInclude = {
     orderBy: { sort_order: 'asc' as const },
   },
 };
-
-const openActivationRequestStatuses = [
-  warranty_activation_request_status.PENDING,
-  warranty_activation_request_status.APPROVED,
-];
 
 function buildProductOrderBy(
   sortBy?: keyof Prisma.ProductOrderByWithRelationInput,
@@ -417,6 +436,67 @@ export class ProductsRepository {
     });
   }
 
+  listActivationOptions(filters: {
+    categoryId: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const { page, limit, skip, take } = normalizePagination(filters);
+    const baseWhere: Prisma.ProductWhereInput = {
+      category_id: filters.categoryId,
+      ...buildProductSearchWhere(filters.search),
+    };
+    const eligibilityWhere = buildActivationEligibleProductWhere();
+    const eligibleWhere: Prisma.ProductWhereInput = {
+      AND: [baseWhere, eligibilityWhere],
+    };
+    const ineligibleWhere: Prisma.ProductWhereInput = {
+      AND: [baseWhere, { NOT: eligibilityWhere }],
+    };
+    const orderBy = buildProductOrderBy('created_at', 'desc');
+
+    return this.prismaService.$transaction(async (tx) => {
+      const [eligibleTotal, total] = await Promise.all([
+        tx.product.count({ where: eligibleWhere }),
+        tx.product.count({ where: baseWhere }),
+      ]);
+      const eligibleSkip = Math.min(skip, eligibleTotal);
+      const eligibleTake = Math.min(
+        take,
+        Math.max(eligibleTotal - eligibleSkip, 0),
+      );
+      const ineligibleSkip = Math.max(skip - eligibleTotal, 0);
+      const ineligibleTake = take - eligibleTake;
+      const [eligibleItems, ineligibleItems] = await Promise.all([
+        eligibleTake > 0
+          ? tx.product.findMany({
+              where: eligibleWhere,
+              include: activationProductOptionInclude,
+              orderBy,
+              skip: eligibleSkip,
+              take: eligibleTake,
+            })
+          : Promise.resolve([]),
+        ineligibleTake > 0
+          ? tx.product.findMany({
+              where: ineligibleWhere,
+              include: activationProductOptionInclude,
+              orderBy,
+              skip: ineligibleSkip,
+              take: ineligibleTake,
+            })
+          : Promise.resolve([]),
+      ]);
+
+      return paginate([...eligibleItems, ...ineligibleItems], {
+        page,
+        limit,
+        total,
+      });
+    });
+  }
+
   listPublic(filters: {
     search?: string;
     categoryId?: string;
@@ -593,4 +673,63 @@ function buildEffectiveCatalogueFilters(filters: {
     clauses.push({ category_id: filters.categoryId });
   }
   return clauses.length > 0 ? clauses : undefined;
+}
+
+function buildActivationEligibleProductWhere(): Prisma.ProductWhereInput {
+  return {
+    deleted_at: null,
+    status: product_status.ACTIVE,
+    warranty: {
+      is: {
+        status: warranty_status.DRAFT,
+        warranty_code: { not: '' },
+      },
+    },
+    warranty_activation_request_items: {
+      none: { status: { in: openActivationRequestStatuses } },
+    },
+    warranty_activation_requests: {
+      none: { status: { in: openActivationRequestStatuses } },
+    },
+  };
+}
+
+function buildProductSearchWhere(search?: string): Prisma.ProductWhereInput {
+  const value = search?.trim();
+  if (!value) return {};
+
+  return {
+    OR: [
+      { product_code: { contains: value, mode: 'insensitive' } },
+      {
+        warranty: {
+          warranty_code: { contains: value, mode: 'insensitive' },
+        },
+      },
+      { serial_number: { contains: value, mode: 'insensitive' } },
+      { display_name: { contains: value, mode: 'insensitive' } },
+      {
+        template: {
+          is: {
+            OR: [
+              { name: { contains: value, mode: 'insensitive' } },
+              { sku: { contains: value, mode: 'insensitive' } },
+              { brand: { contains: value, mode: 'insensitive' } },
+              { model: { contains: value, mode: 'insensitive' } },
+            ],
+          },
+        },
+      },
+      {
+        ownerships: {
+          some: {
+            is_current_owner: true,
+            customer: {
+              full_name: { contains: value, mode: 'insensitive' },
+            },
+          },
+        },
+      },
+    ],
+  };
 }

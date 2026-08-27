@@ -24,7 +24,7 @@ import {
   useCategoryActivationFields,
 } from "../../categories/hooks/use-categories";
 import { useInfiniteCustomers } from "../../customers/hooks/use-customers";
-import { useInfiniteProducts } from "../../products/hooks/use-products";
+import { useInfiniteActivationProductOptions } from "../../products/hooks/use-products";
 import {
   type WarrantyActivationRequestCreateFormValues,
   warrantyActivationRequestCreateFormSchema,
@@ -140,15 +140,11 @@ export function useCreateWarrantyActivationRequestForm({
     sortBy: "createdAt",
     sortOrder: "desc",
   });
-  const productsQuery = useInfiniteProducts(
+  const productsQuery = useInfiniteActivationProductOptions(
     {
-      activationEligible: "true",
-      categoryId: categoryId || undefined,
+      categoryId,
       limit: 20,
       search: productSearchQuery,
-      sortBy: "createdAt",
-      sortOrder: "desc",
-      status: "ACTIVE",
     },
     {
       enabled:
@@ -225,7 +221,15 @@ export function useCreateWarrantyActivationRequestForm({
     const address = parseVietnamAddress(customer.address ?? "", provinces);
     setSelectedCustomer(customer);
     setCustomerSearch("");
-    form.clearErrors(["addressDetail", "provinceCode", "wardCode"]);
+    form.clearErrors([
+      "addressDetail",
+      "customerEmail",
+      "customerId",
+      "customerName",
+      "customerPhone",
+      "provinceCode",
+      "wardCode",
+    ]);
     setFormValues(
       form.setValue,
       {
