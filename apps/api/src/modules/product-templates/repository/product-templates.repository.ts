@@ -2,6 +2,7 @@ import { normalizePagination, paginate } from '@/common/pagination/pagination';
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { ListProductTemplatesDto } from '@/modules/product-templates/dto/list-product-templates.dto';
 import { Injectable } from '@nestjs/common';
+import { resolveActiveFilter } from '@/common/helpers/active-filter.helper';
 import { category_type, Prisma } from '@prisma/client';
 
 export const productTemplateInclude = {
@@ -132,8 +133,7 @@ export class ProductTemplatesRepository {
 
   list(filters: ListProductTemplatesDto) {
     const search = filters.search?.trim();
-    const isActive =
-      filters.isActive === undefined ? undefined : filters.isActive === 'true';
+    const isActive = resolveActiveFilter(filters.isActive);
     const isPublished =
       filters.isPublished === undefined
         ? undefined

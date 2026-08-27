@@ -1,12 +1,5 @@
 import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
-import {
-  IsBooleanString,
-  IsEnum,
-  IsIn,
-  IsOptional,
-  IsString,
-  Length,
-} from 'class-validator';
+import { IsEnum, IsIn, IsOptional, IsString, Length } from 'class-validator';
 import { category_type } from '@prisma/client';
 
 const CATEGORY_TREE_SORT_FIELDS = [
@@ -23,8 +16,8 @@ export class ListCategoryTreeDto extends PaginationQueryDto {
   type: category_type;
 
   @IsOptional()
-  @IsBooleanString()
-  isActive?: string;
+  @IsIn(['true', 'false', 'all'])
+  isActive?: 'true' | 'false' | 'all';
 
   @IsOptional()
   @IsString()

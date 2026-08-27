@@ -67,7 +67,7 @@ export type ProductTemplateSummary = {
 
 export type ListProductTemplatesQuery = PaginationQuery & {
   search?: string;
-  isActive?: boolean;
+  isActive?: boolean | "all";
   isPublished?: boolean;
 };
 
@@ -180,7 +180,7 @@ export type ListProductsQuery = PaginationQuery & {
   categoryId?: string;
   templateId?: string;
   ownerCustomerId?: string;
-  status?: ProductStatus;
+  status?: ProductStatus | "ALL";
   isPublished?: "true" | "false";
   activationEligible?: "true" | "false";
   claimEligible?: "true" | "false";

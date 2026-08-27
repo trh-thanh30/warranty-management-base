@@ -31,11 +31,19 @@ describe('Warranty activation review architecture', () => {
       ),
       'utf8',
     );
+    const reviewErrorUtilitySource = readFileSync(
+      join(__dirname, '../utils/warranty-activation-review-error.utils.ts'),
+      'utf8',
+    );
 
     expect(repositorySource).not.toContain('BadRequestError');
     expect(repositorySource).not.toContain('product_status');
     expect(repositorySource).not.toContain('warranty_status');
-    expect(useCaseSource).toContain('WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION');
+    expect(useCaseSource).toContain('getActivationEligibilityFailure');
+    expect(useCaseSource).toContain('buildActivationEligibilityError');
+    expect(reviewErrorUtilitySource).toContain(
+      'WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION',
+    );
     expect(useCaseSource).toContain('CUSTOMER_IDENTITY_CONFLICT');
   });
 });

@@ -44,6 +44,7 @@ type ProductsDirectoryCardProps = {
   onClearFilters: () => void;
   onAssignOwner: (product: ProductResponse) => void;
   onDelete: (product: ProductResponse) => void;
+  onRestore: (product: ProductResponse) => void;
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
   onRetry: () => void;
@@ -67,6 +68,7 @@ export function ProductsDirectoryCard({
   onClearFilters,
   onAssignOwner,
   onDelete,
+  onRestore,
   onPageChange,
   onPageSizeChange,
   onRetry,
@@ -112,6 +114,7 @@ export function ProductsDirectoryCard({
           onClearFilters={onClearFilters}
           onAssignOwner={onAssignOwner}
           onDelete={onDelete}
+          onRestore={onRestore}
           onPageChange={onPageChange}
           onPageSizeChange={onPageSizeChange}
           onRetry={onRetry}
@@ -196,6 +199,7 @@ function ProductsDirectoryContent({
   onClearFilters,
   onAssignOwner,
   onDelete,
+  onRestore,
   onPageChange,
   onPageSizeChange,
   onRetry,
@@ -212,6 +216,7 @@ function ProductsDirectoryContent({
   | "onClearFilters"
   | "onAssignOwner"
   | "onDelete"
+  | "onRestore"
   | "onPageChange"
   | "onPageSizeChange"
   | "onRetry"
@@ -248,6 +253,7 @@ function ProductsDirectoryContent({
           items={data.items}
           onAssignOwner={onAssignOwner}
           onDelete={onDelete}
+          onRestore={onRestore}
           onSortChange={onSortChange}
           sortBy={sortBy}
           sortOrder={sortOrder}

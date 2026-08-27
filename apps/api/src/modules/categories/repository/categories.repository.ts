@@ -3,6 +3,7 @@ import { PrismaService } from '@/database/prisma/prisma.service';
 import { ListCategoriesDto } from '@/modules/categories/dto/list-categories.dto';
 import { PreparedCategoryImportRow } from '@/modules/categories/excel/category-excel.types';
 import { Injectable } from '@nestjs/common';
+import { resolveActiveFilter } from '@/common/helpers/active-filter.helper';
 import { category_type, Prisma } from '@prisma/client';
 import type {
   CategoryActivationFieldsResponse,
@@ -94,8 +95,7 @@ export class CategoriesRepository {
 
   list(filters: ListCategoriesDto) {
     const search = filters.search?.trim();
-    const isActive =
-      filters.isActive === undefined ? undefined : filters.isActive === 'true';
+    const isActive = resolveActiveFilter(filters.isActive);
     const { page, limit, skip, take } = normalizePagination(filters);
     const sortMap = {
       name: 'name',
@@ -188,8 +188,7 @@ export class CategoriesRepository {
 
   listForExport(filters: ListCategoriesDto) {
     const search = filters.search?.trim();
-    const isActive =
-      filters.isActive === undefined ? undefined : filters.isActive === 'true';
+    const isActive = resolveActiveFilter(filters.isActive);
     const sortMap = {
       name: 'name',
       slug: 'slug',

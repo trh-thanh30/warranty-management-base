@@ -56,7 +56,7 @@ export type ListDealerActivatedCustomersQuery = PaginationQuery & {
 export type ListDealersQuery = PaginationQuery & {
   search?: string;
   province?: string;
-  isActive?: string;
+  isActive?: "true" | "false" | "all";
   sortBy?: DealerSortBy;
   sortOrder?: "asc" | "desc";
 };

@@ -26,12 +26,35 @@ describe('ProductsRepository.list', () => {
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: expect.objectContaining({ deleted_at: null }),
+        where: expect.objectContaining({
+          deleted_at: null,
+          status: product_status.ACTIVE,
+        }),
       }),
     );
     expect(count).toHaveBeenCalledWith({
-      where: expect.objectContaining({ deleted_at: null }),
+      where: expect.objectContaining({
+        deleted_at: null,
+        status: product_status.ACTIVE,
+      }),
     });
+  });
+
+  it('does not filter product status or deletion state when status is all', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const count = jest.fn().mockResolvedValue(0);
+    const repository = new ProductsRepository({
+      $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
+        callback({ product: { count, findMany } }),
+      ),
+    } as never);
+
+    await repository.list({ limit: 10, page: 1, status: 'ALL' });
+
+    const where = findMany.mock.calls[0]?.[0].where;
+    expect(where.status).toBeUndefined();
+    expect(where.deleted_at).toBeUndefined();
+    expect(count).toHaveBeenCalledWith({ where });
   });
 
   it('sorts the admin product list by newest creation date and id by default', async () => {

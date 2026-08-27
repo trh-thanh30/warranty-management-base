@@ -1,6 +1,6 @@
 import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
 import {
-  IsBooleanString,
+  IsIn,
   IsEnum,
   IsOptional,
   IsString,
@@ -19,8 +19,8 @@ export class ListCategoriesDto extends PaginationQueryDto {
   parentId?: string;
 
   @IsOptional()
-  @IsBooleanString()
-  isActive?: string;
+  @IsIn(['true', 'false', 'all'])
+  isActive?: 'true' | 'false' | 'all';
 
   @IsOptional()
   @IsString()

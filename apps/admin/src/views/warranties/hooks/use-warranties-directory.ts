@@ -21,7 +21,7 @@ type WarrantyDirectoryFilters = {
 };
 
 const INITIAL_WARRANTY_DIRECTORY_FILTERS = {
-  status: "ALL",
+  status: "ACTIVE",
 } satisfies WarrantyDirectoryFilters;
 
 export function useWarrantiesDirectory() {
@@ -62,7 +62,7 @@ export function useWarrantiesDirectory() {
     search: debouncedSearch || undefined,
     sortBy,
     sortOrder,
-    status: filters.status === "ALL" ? undefined : filters.status,
+    status: filters.status === "ALL" ? "ALL" : filters.status,
   } satisfies ListWarrantiesQuery;
   const warrantiesQuery = useWarranties(listQuery, {
     enabled: Boolean(currentUser) && canViewWarranties,

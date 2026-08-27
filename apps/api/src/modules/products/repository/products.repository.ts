@@ -269,7 +269,7 @@ export class ProductsRepository {
     categoryId?: string;
     templateId?: string;
     ownerCustomerId?: string;
-    status?: product_status;
+    status?: product_status | 'ALL';
     isPublished?: string;
     activationEligible?: string;
     claimEligible?: string;
@@ -308,10 +308,15 @@ export class ProductsRepository {
             },
           }
         : undefined,
-      status:
-        activationEligible || claimEligible
+      status: activationEligible
+        ? product_status.ACTIVE
+        : claimEligible
           ? product_status.ACTIVE
-          : filters.status,
+          : filters.status === undefined
+            ? product_status.ACTIVE
+            : filters.status === 'ALL'
+              ? undefined
+              : filters.status,
       template: {
         is: {
           ...(filters.isPublished === undefined
@@ -456,7 +461,7 @@ export class ProductsRepository {
     categoryId?: string;
     templateId?: string;
     ownerCustomerId?: string;
-    status?: product_status;
+    status?: product_status | 'ALL';
     isPublished?: string;
     activationEligible?: string;
     warrantyStatus?: warranty_status;
@@ -487,7 +492,13 @@ export class ProductsRepository {
             },
           }
         : undefined,
-      status: activationEligible ? product_status.ACTIVE : filters.status,
+      status: activationEligible
+        ? product_status.ACTIVE
+        : filters.status === undefined
+          ? product_status.ACTIVE
+          : filters.status === 'ALL'
+            ? undefined
+            : filters.status,
       template: {
         is: {
           ...(filters.isPublished === undefined
@@ -569,7 +580,8 @@ export class ProductsRepository {
   }
 }
 
-function buildProductDeletionFilter(status?: product_status) {
+function buildProductDeletionFilter(status?: product_status | 'ALL') {
+  if (status === 'ALL') return undefined;
   return status === product_status.DELETED ? { not: null } : null;
 }
 

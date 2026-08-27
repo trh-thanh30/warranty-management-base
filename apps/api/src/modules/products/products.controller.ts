@@ -17,6 +17,7 @@ import { GetProductDetailUseCase } from '@/modules/products/use-cases/get-produc
 import { ListProductsUseCase } from '@/modules/products/use-cases/list-products.use-case';
 import { PreviewProductImportUseCase } from '@/modules/products/use-cases/preview-product-import.use-case';
 import { SoftDeleteProductUseCase } from '@/modules/products/use-cases/soft-delete-product.use-case';
+import { RestoreProductUseCase } from '@/modules/products/use-cases/restore-product.use-case';
 import { RemoveProductAssetUseCase } from '@/modules/products/use-cases/remove-product-asset.use-case';
 import { UpdateProductAssetUseCase } from '@/modules/products/use-cases/update-product-asset.use-case';
 import { UpdateProductUseCase } from '@/modules/products/use-cases/update-product.use-case';
@@ -43,6 +44,7 @@ export class ProductsController {
     private readonly createProductUseCase: CreateProductUseCase,
     private readonly updateProductUseCase: UpdateProductUseCase,
     private readonly softDeleteProductUseCase: SoftDeleteProductUseCase,
+    private readonly restoreProductUseCase: RestoreProductUseCase,
     private readonly listProductsUseCase: ListProductsUseCase,
     private readonly getProductDetailUseCase: GetProductDetailUseCase,
     private readonly assignProductOwnerUseCase: AssignProductOwnerUseCase,
@@ -113,6 +115,12 @@ export class ProductsController {
   @Permissions([permission_key.PRODUCT_DELETE])
   remove(@Param('id') id: string) {
     return this.softDeleteProductUseCase.execute(id);
+  }
+
+  @Patch(':id/restore')
+  @Permissions([permission_key.PRODUCT_DELETE])
+  restore(@Param('id') id: string) {
+    return this.restoreProductUseCase.execute(id);
   }
 
   @Post(':id/assign-owner')

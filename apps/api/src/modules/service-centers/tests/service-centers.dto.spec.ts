@@ -1,8 +1,17 @@
+import 'reflect-metadata';
+
 import { CreateServiceCenterDto } from '@/modules/service-centers/dto/create-service-center.dto';
+import { ListServiceCentersDto } from '@/modules/service-centers/dto/list-service-centers.dto';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 
 describe('Service center DTO validation', () => {
+  it('accepts all as the active list filter', async () => {
+    const dto = plainToInstance(ListServiceCentersDto, { isActive: 'all' });
+
+    await expect(validate(dto)).resolves.toHaveLength(0);
+  });
+
   it('rejects non-phone text in the phone field', async () => {
     const dto = plainToInstance(CreateServiceCenterDto, {
       name: 'Da Nang Warranty Center',
