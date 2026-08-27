@@ -1,16 +1,9 @@
 "use client";
 
-import {
-  AlertTriangle,
-  CalendarClock,
-  Clock3,
-  Inbox,
-  Timer,
-} from "lucide-react";
+import { AlertTriangle, CalendarClock, Inbox, Timer } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { WarrantyClaimMetrics } from "@repo/shared";
 import { Card, CardContent, Skeleton } from "@repo/ui";
-import { formatResolutionHours } from "../warranty-claims.utils";
 
 type WarrantyClaimsMetricsProps = {
   data?: WarrantyClaimMetrics;
@@ -43,15 +36,10 @@ export function WarrantyClaimsMetrics({
       label: t("metrics.overdue"),
       value: data?.overdue ?? 0,
     },
-    {
-      icon: Clock3,
-      label: t("metrics.averageResolutionHours"),
-      value: formatResolutionHours(data?.averageResolutionHours),
-    },
   ];
 
   return (
-    <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+    <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       {items.map((item) => (
         <Card className="min-w-0" key={item.label}>
           <CardContent className="flex items-center gap-3 p-4">
