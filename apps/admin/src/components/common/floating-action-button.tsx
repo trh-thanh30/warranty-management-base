@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@repo/ui";
 
-type FloatingPreviewButtonProps = {
+type FloatingActionButtonProps = {
   "aria-label": string;
   children: ReactNode;
   onClick: () => void;
@@ -13,7 +13,6 @@ type FloatingPreviewButtonProps = {
 };
 
 type Position = { left: number; top: number };
-
 type DragState = {
   pointerId: number;
   startX: number;
@@ -45,12 +44,12 @@ function getSnappedPosition(left: number, top: number) {
   };
 }
 
-export function FloatingPreviewButton({
+export function FloatingActionButton({
   "aria-label": ariaLabel,
   children,
   onClick,
   title,
-}: FloatingPreviewButtonProps) {
+}: FloatingActionButtonProps) {
   const [mounted, setMounted] = useState(false);
   const [position, setPosition] = useState<Position | null>(null);
   const [isDragging, setIsDragging] = useState(false);

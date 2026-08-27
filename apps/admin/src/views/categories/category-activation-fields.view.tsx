@@ -1,6 +1,7 @@
 "use client";
 
 import { FormPageShell } from "@/src/components/common/form-page-shell";
+import { FloatingActionButton } from "@/src/components/common/floating-action-button";
 import { SelectControl } from "@/src/components/common/select-control";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
@@ -48,7 +49,6 @@ import {
   toDraftActivationFields,
 } from "./category-activation-fields.utils";
 import { CategoryActivationFieldsPreviewDialog } from "./components/category-activation-fields-preview-dialog";
-import { FloatingPreviewButton } from "./components/floating-preview-button";
 import {
   useCategory,
   useCategoryActivationFields,
@@ -275,13 +275,13 @@ export function CategoryActivationFieldsView({
       {!categoryQuery.isLoading &&
       !activationFieldsQuery.isLoading &&
       category ? (
-        <FloatingPreviewButton
+        <FloatingActionButton
           aria-label={t("previewActivationFields")}
           onClick={() => setPreviewOpen(true)}
           title={t("previewActivationFields")}
         >
           <Eye aria-hidden="true" className="size-5" />
-        </FloatingPreviewButton>
+        </FloatingActionButton>
       ) : null}
       <CategoryActivationFieldsPreviewDialog
         fields={fields}
