@@ -1,7 +1,7 @@
 "use client";
 
-import { FormPageShell } from "@/src/components/common/form-page-shell";
 import { FloatingActionButton } from "@/src/components/common/floating-action-button";
+import { FormPageShell } from "@/src/components/common/form-page-shell";
 import { SelectControl } from "@/src/components/common/select-control";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
@@ -390,7 +390,7 @@ function ActivationFieldEditor({
       >
         <div className="min-h-0 overflow-hidden">
           <div className="mt-4 grid gap-5 sm:grid-cols-2">
-            <div className="space-y-2">
+            <div className="space-y-2 sm:col-span-2">
               <Label>{t("activationFieldLabel")}</Label>
               <Input
                 onBlur={() => {
@@ -405,19 +405,6 @@ function ActivationFieldEditor({
                 }
                 placeholder={t("activationFieldLabelPlaceholder")}
                 value={field.label}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>{t("activationFieldKey")}</Label>
-              <Input
-                onChange={(event) =>
-                  onChange({
-                    ...field,
-                    key: normalizeActivationFieldKey(event.target.value),
-                  })
-                }
-                placeholder={t("activationFieldKeyPlaceholder")}
-                value={field.key}
               />
             </div>
             <div className="space-y-2">

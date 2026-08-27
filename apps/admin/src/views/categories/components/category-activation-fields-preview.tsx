@@ -1,6 +1,6 @@
+import { Input, Label, Textarea } from "@repo/ui";
 import { CalendarDays, ChevronDown, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Input, Label, Textarea } from "@repo/ui";
 import type { DraftActivationField } from "../category-activation-fields.types";
 
 type CategoryActivationFieldsPreviewProps = {
@@ -25,7 +25,7 @@ export function CategoryActivationFieldsPreview({
       <h3 className="text-sm font-semibold text-slate-950 dark:text-slate-50">
         {t("categoryActivationInfo")}
       </h3>
-      <div className="mt-4 grid gap-5 sm:grid-cols-2">
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
         {fields.map((field) => (
           <PreviewField field={field} key={field.key || field.label} />
         ))}
