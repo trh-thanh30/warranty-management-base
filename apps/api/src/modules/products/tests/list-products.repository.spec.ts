@@ -2,6 +2,7 @@ import { ProductsRepository } from '@/modules/products/repository/products.repos
 import {
   product_status,
   warranty_activation_request_status,
+  warranty_claim_status,
   warranty_status,
 } from '@prisma/client';
 
@@ -275,6 +276,73 @@ describe('ProductsRepository.list', () => {
     expect(count).toHaveBeenCalledWith({
       where: expect.objectContaining(expectedEligibility),
     });
+  });
+
+  it('filters claim selectors to products with currently active warranties and no open claims', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-27T08:00:00.000Z'));
+
+    try {
+      const findMany = jest.fn().mockResolvedValue([]);
+      const count = jest.fn().mockResolvedValue(0);
+      const prismaService = {
+        $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
+          callback({ product: { count, findMany } }),
+        ),
+      };
+      const repository = new ProductsRepository(prismaService as never);
+      const filters = {
+        claimEligible: 'true',
+        limit: 20,
+        page: 1,
+        search: 'WM-2026',
+      };
+
+      await repository.list(filters);
+
+      const now = new Date('2026-08-27T08:00:00.000Z');
+      const expectedEligibility = {
+        deleted_at: null,
+        status: product_status.ACTIVE,
+        warranty: {
+          is: {
+            status: warranty_status.ACTIVE,
+            warranty_code: { not: '' },
+            AND: [
+              { OR: [{ start_date: null }, { start_date: { lte: now } }] },
+              { OR: [{ end_date: null }, { end_date: { gte: now } }] },
+            ],
+            claims: {
+              none: {
+                status: {
+                  in: [
+                    warranty_claim_status.SUBMITTED,
+                    warranty_claim_status.REVIEWING,
+                    warranty_claim_status.APPROVED,
+                    warranty_claim_status.IN_REPAIR,
+                  ],
+                },
+              },
+            },
+          },
+        },
+      };
+
+      expect(findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            ...expectedEligibility,
+            OR: expect.any(Array),
+          }),
+          skip: 0,
+          take: 20,
+        }),
+      );
+      expect(count).toHaveBeenCalledWith({
+        where: expect.objectContaining(expectedEligibility),
+      });
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('filters the admin product list by publication state', async () => {

@@ -1,6 +1,7 @@
 import { normalizePagination, paginate } from '@/common/pagination/pagination';
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
+import { WARRANTY_CLAIM_OPEN_STATUSES } from '@repo/shared/constants';
 import {
   asset_access_type,
   category_type,
@@ -271,6 +272,7 @@ export class ProductsRepository {
     status?: product_status;
     isPublished?: string;
     activationEligible?: string;
+    claimEligible?: string;
     warrantyStatus?: warranty_status;
     page?: number;
     limit?: number;
@@ -278,7 +280,10 @@ export class ProductsRepository {
     sortOrder?: 'asc' | 'desc';
   }) {
     const search = filters.search?.trim();
-    const activationEligible = filters.activationEligible === 'true';
+    const claimEligible = filters.claimEligible === 'true';
+    const activationEligible =
+      filters.activationEligible === 'true' && !claimEligible;
+    const now = new Date();
     const { page, limit, skip, take } = normalizePagination(filters);
     const sortMap = {
       productCode: 'product_code',
@@ -290,9 +295,10 @@ export class ProductsRepository {
     const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
     const where: Prisma.ProductWhereInput = {
       AND: buildEffectiveCatalogueFilters(filters),
-      deleted_at: activationEligible
-        ? null
-        : buildProductDeletionFilter(filters.status),
+      deleted_at:
+        activationEligible || claimEligible
+          ? null
+          : buildProductDeletionFilter(filters.status),
       template_id: filters.templateId,
       ownerships: filters.ownerCustomerId
         ? {
@@ -302,7 +308,10 @@ export class ProductsRepository {
             },
           }
         : undefined,
-      status: activationEligible ? product_status.ACTIVE : filters.status,
+      status:
+        activationEligible || claimEligible
+          ? product_status.ACTIVE
+          : filters.status,
       template: {
         is: {
           ...(filters.isPublished === undefined
@@ -310,16 +319,36 @@ export class ProductsRepository {
             : { is_published: filters.isPublished === 'true' }),
         },
       },
-      warranty: activationEligible
+      warranty: claimEligible
         ? {
             is: {
-              status: warranty_status.DRAFT,
+              status: warranty_status.ACTIVE,
               warranty_code: { not: '' },
+              AND: [
+                {
+                  OR: [{ start_date: null }, { start_date: { lte: now } }],
+                },
+                {
+                  OR: [{ end_date: null }, { end_date: { gte: now } }],
+                },
+              ],
+              claims: {
+                none: {
+                  status: { in: [...WARRANTY_CLAIM_OPEN_STATUSES] },
+                },
+              },
             },
           }
-        : filters.warrantyStatus
-          ? { status: filters.warrantyStatus }
-          : undefined,
+        : activationEligible
+          ? {
+              is: {
+                status: warranty_status.DRAFT,
+                warranty_code: { not: '' },
+              },
+            }
+          : filters.warrantyStatus
+            ? { status: filters.warrantyStatus }
+            : undefined,
       warranty_activation_request_items: activationEligible
         ? {
             none: { status: { in: openActivationRequestStatuses } },

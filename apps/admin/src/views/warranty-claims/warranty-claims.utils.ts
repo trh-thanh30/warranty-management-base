@@ -2,6 +2,7 @@ import {
   formatDate,
   HttpClientError,
   type CreateWarrantyClaimBody,
+  type ListProductsQuery,
   type ServiceCenterSummary,
   type WarrantyClaimPriority,
   type WarrantyClaimStatus,
@@ -43,6 +44,20 @@ const CREATE_ERROR_MESSAGE_KEYS: Record<string, string> = {
 export type WarrantyClaimAttachmentValidationError =
   | "attachmentTooLarge"
   | "attachmentTypeInvalid";
+
+export function buildWarrantyClaimProductQuery(
+  search: string,
+): ListProductsQuery {
+  const normalizedSearch = search.trim();
+
+  return {
+    claimEligible: "true",
+    limit: 20,
+    search: normalizedSearch || undefined,
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  };
+}
 
 export function getWarrantyClaimRequesterValues(
   source: WarrantyClaimRequesterSource | null | undefined,

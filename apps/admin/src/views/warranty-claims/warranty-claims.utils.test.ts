@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { HttpClientError } from "@repo/shared";
 import {
+  buildWarrantyClaimProductQuery,
   getWarrantyClaimRequesterValues,
   getStatusBadgeVariant,
   resolveWarrantyClaimCreateError,
@@ -141,4 +142,22 @@ test("claim statuses use distinct semantic badge colors", () => {
   assert.equal(getStatusBadgeVariant("COMPLETED"), "success");
   assert.equal(getStatusBadgeVariant("REJECTED"), "destructive");
   assert.equal(getStatusBadgeVariant("CANCELLED"), "destructive");
+});
+
+test("claim product selector requests only claim-eligible products", () => {
+  assert.deepEqual(buildWarrantyClaimProductQuery("  WM-2026-ABC  "), {
+    claimEligible: "true",
+    limit: 20,
+    search: "WM-2026-ABC",
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  });
+
+  assert.deepEqual(buildWarrantyClaimProductQuery("   "), {
+    claimEligible: "true",
+    limit: 20,
+    search: undefined,
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  });
 });

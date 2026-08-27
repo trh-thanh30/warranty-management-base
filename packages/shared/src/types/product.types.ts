@@ -183,6 +183,7 @@ export type ListProductsQuery = PaginationQuery & {
   status?: ProductStatus;
   isPublished?: "true" | "false";
   activationEligible?: "true" | "false";
+  claimEligible?: "true" | "false";
   warrantyStatus?: WarrantyStatus;
   sortBy?: ProductSortBy;
   sortOrder?: "asc" | "desc";

@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDebounce } from "@repo/hooks";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { ProductResponse } from "@repo/shared";
 import { useToast } from "@/src/hooks/use-toast";
@@ -16,6 +16,7 @@ import {
   warrantyClaimCreateFormSchema,
 } from "../warranty-claims.types";
 import {
+  buildWarrantyClaimProductQuery,
   getWarrantyClaimRequesterValues,
   resolveWarrantyClaimCreateError,
   toCreateWarrantyClaimBody,
@@ -54,20 +55,10 @@ export function useCreateWarrantyClaimForm({
     resolver: zodResolver(warrantyClaimCreateFormSchema),
     defaultValues: DEFAULT_VALUES,
   });
-  const productsQuery = useProducts({
-    limit: 20,
-    search: debouncedProductSearch || undefined,
-    sortBy: "createdAt",
-    sortOrder: "desc",
-    status: "ACTIVE",
-  });
-  const products = useMemo(
-    () =>
-      (productsQuery.data?.items ?? []).filter(
-        (product) => product.warrantyCode !== null,
-      ),
-    [productsQuery.data?.items],
+  const productsQuery = useProducts(
+    buildWarrantyClaimProductQuery(debouncedProductSearch),
   );
+  const products = productsQuery.data?.items ?? [];
   const customerQuery = useCustomer(
     selectedProduct?.owner?.customerId ?? null,
     { enabled: Boolean(selectedProduct?.owner?.customerId) },
