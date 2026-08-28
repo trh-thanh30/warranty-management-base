@@ -441,6 +441,17 @@ model Product {
   product_code  String         @unique
   serial_number String?        @unique
   display_name  String?
+  // Snapshot of catalogue fields formerly inherited from ProductTemplate.
+  // Nullable during the expand/backfill phase; these become authoritative in
+  // the application cut-over migration.
+  catalogue_name        String?
+  catalogue_sku         String?
+  catalogue_slug        String?
+  catalogue_brand       String?
+  catalogue_model       String?
+  catalogue_model_year  Int?
+  catalogue_description String?
+  catalogue_metadata    Json?
   status        product_status @default(ACTIVE)
   metadata      Json?
   created_at    DateTime       @default(now())

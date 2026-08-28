@@ -16,14 +16,30 @@ import {
   toProductTemplateResponse,
 } from '@/modules/product-templates/product-templates.types';
 
-type ProductWithRelations = Product & {
-  assets?: Array<ProductAsset & { asset: Asset }>;
-  ownerships?: Array<ProductOwnership & { customer?: Customer }>;
-  warranty?: Warranty | null;
-  warranty_activation_requests?: Array<{ id: string }>;
-  template?: ProductTemplateWithRelations | null;
-  category_ref?: Category;
-};
+type ProductCatalogueSnapshot = Pick<
+  Product,
+  | 'catalogue_name'
+  | 'catalogue_sku'
+  | 'catalogue_slug'
+  | 'catalogue_brand'
+  | 'catalogue_model'
+  | 'catalogue_model_year'
+  | 'catalogue_description'
+  | 'catalogue_metadata'
+>;
+
+// Snapshot columns are nullable during the expand/backfill release. Keeping
+// them optional here lets existing repository fixtures and the legacy
+// template-backed read path continue to work until the cut-over release.
+type ProductWithRelations = Omit<Product, keyof ProductCatalogueSnapshot> &
+  Partial<ProductCatalogueSnapshot> & {
+    assets?: Array<ProductAsset & { asset: Asset }>;
+    ownerships?: Array<ProductOwnership & { customer?: Customer }>;
+    warranty?: Warranty | null;
+    warranty_activation_requests?: Array<{ id: string }>;
+    template?: ProductTemplateWithRelations | null;
+    category_ref?: Category;
+  };
 
 export function toProductResponse(
   product: ProductWithRelations,
