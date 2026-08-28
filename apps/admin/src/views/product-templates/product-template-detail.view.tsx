@@ -73,10 +73,14 @@ export function ProductTemplateDetailView({
           />
         ) : (
           <div className="space-y-4">
-            <div className="flex flex-wrap justify-end gap-2">
+            <div className="flex w-full flex-col gap-2 sm:flex-row sm:justify-end">
               {hasPermission(PERMISSIONS.PRODUCT_CREATE) &&
               template.isActive ? (
-                <Button asChild variant="secondary">
+                <Button
+                  asChild
+                  className="w-full sm:w-auto"
+                  variant="secondary"
+                >
                   <Link href={`/products/create?templateId=${template.id}`}>
                     <PlusCircle className="size-4" />
                     {t("createProductFromTemplate")}
@@ -84,7 +88,7 @@ export function ProductTemplateDetailView({
                 </Button>
               ) : null}
               {hasPermission(PERMISSIONS.PRODUCT_TEMPLATE_UPDATE) ? (
-                <Button asChild>
+                <Button asChild className="w-full sm:w-auto">
                   <Link href={`/product-templates/${template.id}/edit`}>
                     <Pencil className="size-4" />
                     {t("edit")}

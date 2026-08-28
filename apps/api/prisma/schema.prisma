@@ -639,6 +639,7 @@ model WarrantyActivationRequest {
   reviewed_by        User?                           @relation("WarrantyActivationRequestReviewedBy", fields: [reviewed_by_id], references: [id], onDelete: SetNull)
   activated_warranty Warranty?                       @relation(fields: [activated_warranty_id], references: [id], onDelete: SetNull)
   items              WarrantyActivationRequestItem[]
+  certificate        WarrantyActivationRequestCertificate?
 
   @@index([request_code])
   @@index([status])
@@ -711,6 +712,31 @@ model WarrantyCertificate {
   @@index([email_status])
   @@index([recipient_email])
   @@map("warranty_certificate")
+}
+
+model WarrantyActivationRequestCertificate {
+  id                    String                            @id @default(uuid()) @db.Uuid
+  activation_request_id String                            @unique(map: "warranty_activation_request_certificate_activation_request_id_k") @db.Uuid
+  certificate_number    String                            @unique
+  version               Int                               @default(1)
+  status                warranty_certificate_status       @default(PENDING)
+  storage_key           String?
+  recipient_email       String?
+  generated_at          DateTime?
+  emailed_at            DateTime?
+  email_status          warranty_certificate_email_status @default(PENDING)
+  last_error            String?
+  metadata              Json?
+  created_at            DateTime                          @default(now())
+  updated_at            DateTime                          @updatedAt
+
+  activation_request WarrantyActivationRequest @relation(fields: [activation_request_id], references: [id], onDelete: Cascade, map: "warranty_activation_request_certificate_activation_request_id_f")
+
+  @@index([certificate_number])
+  @@index([status])
+  @@index([email_status])
+  @@index([recipient_email])
+  @@map("warranty_activation_request_certificate")
 }
 
 model Dealer {

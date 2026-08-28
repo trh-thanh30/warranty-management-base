@@ -72,7 +72,7 @@ describe('IssueWarrantyCertificateUseCase', () => {
       new WarrantyCertificatesRepository(prismaService as never),
       uploadAssetService as never,
       certificateEmailQueueService as never,
-      pdfService,
+      pdfService as never,
     );
 
     const result = await useCase.execute({
@@ -137,7 +137,7 @@ describe('IssueWarrantyCertificateUseCase', () => {
       { queueEmail: jest.fn() } as never,
       {
         createPdfBuffer: jest.fn().mockResolvedValue(Buffer.from('%PDF-')),
-      },
+      } as never,
     );
 
     await expect(useCase.execute({ warrantyId: warranty.id })).rejects.toThrow(
@@ -169,7 +169,7 @@ describe('IssueWarrantyCertificateUseCase', () => {
         createPdfBuffer: jest
           .fn()
           .mockRejectedValue(new Error('PDF generation failed')),
-      },
+      } as never,
     );
 
     await expect(
@@ -211,7 +211,9 @@ describe('IssueWarrantyCertificateUseCase', () => {
         upload: jest.fn().mockResolvedValue({ path: 'private/retried.pdf' }),
       } as never,
       { queueEmail: jest.fn() } as never,
-      { createPdfBuffer: jest.fn().mockResolvedValue(Buffer.from('%PDF-')) },
+      {
+        createPdfBuffer: jest.fn().mockResolvedValue(Buffer.from('%PDF-')),
+      } as never,
     );
 
     await expect(
@@ -258,7 +260,9 @@ describe('IssueWarrantyCertificateUseCase', () => {
         upload: jest.fn().mockResolvedValue({ path: 'private/recovered.pdf' }),
       } as never,
       { queueEmail: jest.fn() } as never,
-      { createPdfBuffer: jest.fn().mockResolvedValue(Buffer.from('%PDF-')) },
+      {
+        createPdfBuffer: jest.fn().mockResolvedValue(Buffer.from('%PDF-')),
+      } as never,
     );
 
     await useCase.execute({ queueEmail: false, warrantyId: warranty.id });

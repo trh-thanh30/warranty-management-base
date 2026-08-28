@@ -10,6 +10,10 @@ const imageUploadUrl = new URL(
   "../../components/common/image-upload.tsx",
   import.meta.url,
 );
+const detailViewUrl = new URL(
+  "./product-template-detail.view.tsx",
+  import.meta.url,
+);
 
 test("product template dynamic media cannot widen the mobile form", async () => {
   const [form, imageUpload] = await Promise.all([
@@ -36,4 +40,18 @@ test("product template add actions fill mobile width only", async () => {
     form.match(/className="w-full sm:w-auto"/g)?.length ?? 0;
 
   assert.equal(responsiveActions, 4);
+});
+
+test("product template detail actions fill mobile width only", async () => {
+  const detailView = await readFile(detailViewUrl, "utf8");
+
+  assert.match(
+    detailView,
+    /className="flex w-full flex-col gap-2 sm:flex-row sm:justify-end"/,
+  );
+  assert.equal(
+    detailView.match(/<Button\s+asChild\s+className="w-full sm:w-auto"/g)
+      ?.length ?? 0,
+    2,
+  );
 });

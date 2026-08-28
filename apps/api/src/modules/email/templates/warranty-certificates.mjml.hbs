@@ -1,44 +1,185 @@
 <mjml>
   <mj-head>
     <mj-title>{{subject}}</mj-title>
-    <mj-preview>{{certificateCount}} chứng nhận bảo hành điện tử đã được tạo.</mj-preview>
+    <mj-preview>Chứng nhận bảo hành điện tử {{certificateNumber}} đã được kích hoạt thành công.</mj-preview>
+    <mj-font name="Inter" href="https://fonts.googleapis.com/css?family=Inter:400,500,600,700" />
     <mj-attributes>
-      <mj-all font-family="Arial, Helvetica, sans-serif" />
-      <mj-text color="#334155" font-size="15px" line-height="1.6" />
+      <mj-all font-family="'Inter', Arial, Helvetica, sans-serif" />
+      <mj-text color="#374151" font-size="15px" line-height="1.7" />
       <mj-section padding="0" />
     </mj-attributes>
+    <mj-style>
+      a[x-apple-data-detectors],
+      #MessageViewBody a,
+      u + #body a {
+        color: inherit !important;
+        font: inherit !important;
+        text-decoration: none !important;
+      }
+
+      @media only screen and (max-width: 600px) {
+        .mobile-padding > table > tbody > tr > td { padding-left: 20px !important; padding-right: 20px !important; }
+        .mobile-center div, .mobile-center td { text-align: center !important; }
+        .mobile-logo { text-align: center !important; }
+        .mobile-logo table { margin: 0 auto !important; }
+        .mobile-logo img { margin: 0 auto !important; }
+        .hero-title div { font-size: 24px !important; line-height: 1.25 !important; }
+        .certificate-meta div { text-align: center !important; }
+        .branch-content-left { border-right: 0 !important; border-bottom: 1px solid #e2e8f0 !important; padding-bottom: 18px !important; }
+        .branch-content-right { padding-top: 18px !important; }
+      }
+    </mj-style>
   </mj-head>
-  <mj-body background-color="#f8fafc" width="640px">
-    <mj-section background-color="#ffffff" padding="28px 28px 12px">
-      <mj-column>
-        <mj-text color="#0f172a" font-size="22px" font-weight="800" padding="0">Chứng nhận bảo hành điện tử</mj-text>
-        <mj-text color="#64748b" font-size="13px" padding="8px 0 0">{{certificateCount}} sản phẩm đã được kích hoạt bảo hành.</mj-text>
-      </mj-column>
-    </mj-section>
-    <mj-section background-color="#2563eb" padding="4px 0">
+
+  <mj-body background-color="#f3f4f6" width="600px">
+    <!-- Brand accent -->
+    <mj-section background-color="#dc2626" padding="4px 0 0">
       <mj-column><mj-spacer height="1px" /></mj-column>
     </mj-section>
-    <mj-section background-color="#ffffff" padding="28px">
-      <mj-column>
-        <mj-text padding="0 0 14px">Xin chào {{customerName}},</mj-text>
-        <mj-text padding="0 0 18px">Các sản phẩm dưới đây đã được kích hoạt bảo hành thành công. Toàn bộ file PDF chứng nhận được đính kèm trong email này.</mj-text>
-        {{#each certificates}}
-        <mj-table padding="0 0 14px">
+
+    <!-- Header -->
+    <mj-section css-class="mobile-padding" background-color="#ffffff" padding="24px 32px 20px">
+      <mj-column width="56%" vertical-align="middle">
+        {{#if brandLogoUrl}}
+        <mj-image css-class="mobile-logo" align="left" alt="FUJITEK và LEXZENZ" href="https://baohanh.lexzenz.com" target="_blank" padding="0" src="{{brandLogoUrl}}" width="180px" />
+        {{else}}
+        <mj-text css-class="mobile-center" color="#111827" font-size="22px" font-weight="800" letter-spacing=".2px" padding="0">
+          FUJITEK <span style="color:#9ca3af;font-weight:400;padding:0 7px;">|</span> <span style="color:#dc2626;">LEXZENZ</span>
+        </mj-text>
+        {{/if}}
+      </mj-column>
+      <mj-column width="44%" vertical-align="middle">
+        <mj-text css-class="certificate-meta" align="right" color="#64748b" font-size="10px" font-weight="700" letter-spacing="1px" padding="0" text-transform="uppercase">
+          HỆ THỐNG E-WARRANTY
+        </mj-text>
+        <mj-text css-class="certificate-meta" align="right" color="#111827" font-size="12px" font-weight="700" padding="4px 0 0" line-height="1.4">
+          <span style="white-space:nowrap;">MÃ CHỨNG NHẬN: <span style="color:#dc2626;font-family:'Inter',Arial,Helvetica,sans-serif;">{{certificateNumber}}</span></span>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Certificate title -->
+    <mj-section css-class="mobile-padding" background-color="#ffffff" padding="10px 32px 8px" border-top="1px solid #e5e7eb">
+      <mj-column width="100%">
+        <mj-text css-class="hero-title" font-family="'Inter', Arial, Helvetica, sans-serif" color="#dc2626" font-size="26px" font-weight="700" line-height="1.3" letter-spacing=".2px" text-transform="uppercase" padding="24px 0 0" align="center">
+          Chứng nhận bảo hành điện tử
+        </mj-text>
+        <mj-divider border-color="#e5e7eb" border-width="1px" padding="24px 0 0" />
+      </mj-column>
+    </mj-section>
+
+    <!-- Greeting and introduction -->
+    <mj-section css-class="mobile-padding" background-color="#ffffff" padding="22px 32px 18px">
+      <mj-column width="100%">
+        <mj-text color="#111827" font-size="15px" padding="0 0 10px">
+          Xin chào <strong>{{customerName}}</strong>,
+        </mj-text>
+        <mj-text color="#6b7280" font-size="15px" line-height="1.7" padding="0">
+          FUJITEK đã xác nhận và kích hoạt bảo hành điện tử cho các sản phẩm dưới đây. File chứng nhận PDF chính thức được đính kèm trong email này.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Warranty products -->
+    <mj-section css-class="mobile-padding" background-color="#ffffff" padding="0 32px 28px">
+      <mj-column width="100%">
+        <mj-table padding="0" table-layout="fixed" width="100%">
           <tr>
-            <td style="padding:8px 10px;border:1px solid #e2e8f0;background:#f8fafc;color:#64748b;width:34%;">Sản phẩm</td>
-            <td style="padding:8px 10px;border:1px solid #e2e8f0;color:#0f172a;font-weight:700;">{{productName}}</td>
+            <td width="58%" style="padding:14px 20px;border:1px solid #e5e7eb;border-right:0;border-bottom:1px dashed #dbe4ef;font-family:'Inter',Arial,Helvetica,sans-serif;color:#64748b;font-size:13px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;">CHI TIẾT BẢO HÀNH</td>
+            <td width="42%" align="right" style="padding:14px 20px;border:1px solid #e5e7eb;border-left:0;border-bottom:1px dashed #dbe4ef;font-family:'Inter',Arial,Helvetica,sans-serif;color:#64748b;font-size:13px;white-space:nowrap;">{{certificateCount}} sản phẩm</td>
           </tr>
+          {{#each certificates}}
           <tr>
-            <td style="padding:8px 10px;border:1px solid #e2e8f0;background:#f8fafc;color:#64748b;">Mã bảo hành</td>
-            <td style="padding:8px 10px;border:1px solid #e2e8f0;color:#0f172a;">{{warrantyCode}}</td>
+            <td class="receipt-product-main" width="58%" style="padding:15px 16px 15px 20px;border-left:4px solid #dc2626;border-bottom:1px solid #e5e7eb;background:#f8fafc;vertical-align:top;font-family:'Inter',Arial,Helvetica,sans-serif;">
+              <div style="color:#dc2626;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;">{{positionLabel}}</div>
+              <div style="margin-top:8px;color:#1f2937;font-size:15px;font-weight:700;line-height:1.35;word-break:break-word;">{{productName}}</div>
+            </td>
+            <td class="receipt-product-code" width="42%" align="right" style="padding:15px 20px 15px 12px;border-right:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;background:#f8fafc;vertical-align:top;font-family:'Inter',Arial,Helvetica,sans-serif;">
+              <div style="color:#94a3b8;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap;">MÃ BẢO HÀNH</div>
+              <div style="margin-top:8px;color:#dc2626;font-family:'Inter',Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;line-height:1.35;overflow-wrap:anywhere;word-break:break-word;">{{warrantyCode}}</div>
+            </td>
           </tr>
+          {{/each}}
+        </mj-table>
+      </mj-column>
+    </mj-section>
+
+    <!-- Warranty lookup CTA -->
+    <mj-section css-class="mobile-padding" background-color="#ffffff" padding="4px 32px 28px">
+      <mj-column width="100%">
+        <mj-button align="center" background-color="#dc2626" color="#ffffff" font-size="14px" font-weight="700" letter-spacing=".4px" border-radius="6px" padding="0 0 12px" href="{{#if lookupUrl}}{{lookupUrl}}{{else}}https://baohanh.lexzenz.com/warranty/lookup{{/if}}">
+          Tra cứu thời hạn bảo hành &rarr;
+        </mj-button>
+        <mj-text align="center" color="#64748b" font-size="13px" line-height="1.5" padding="0">
+          Quý khách có thể kiểm tra tình trạng hiệu lực, lịch sử và thời hạn bảo hành bất kỳ lúc nào tại <a href="{{#if lookupUrl}}{{lookupUrl}}{{else}}https://baohanh.lexzenz.com/warranty/lookup{{/if}}" style="color:#dc2626;font-weight:700;text-decoration:none;">baohanh.lexzenz.com/tra-cuu</a>.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- PDF notice -->
+    <mj-section css-class="mobile-padding" background-color="#ffffff" padding="0 32px 32px">
+      <mj-column width="100%">
+        <mj-table padding="0">
           <tr>
-            <td style="padding:8px 10px;border:1px solid #e2e8f0;background:#f8fafc;color:#64748b;">Mã chứng nhận</td>
-            <td style="padding:8px 10px;border:1px solid #e2e8f0;color:#0f172a;">{{certificateNumber}}</td>
+            <td style="padding:16px 18px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-family:'Inter',Arial,Helvetica,sans-serif;">
+              <div style="color:#111827;font-family:'Inter',Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;letter-spacing:0;">
+                <span style="display:inline-block;vertical-align:middle;margin-right:6px;line-height:0;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M14 2v6h6" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M4 4a2 2 0 0 1 2-2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4Z" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+                Chứng nhận PDF đã được đính kèm
+              </div>
+              <div style="margin-top:6px;color:#64748b;font-family:'Inter',Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;">
+                Vui lòng lưu email và file PDF đính kèm để đối chiếu khi cần hỗ trợ bảo hành chính hãng.
+              </div>
+            </td>
           </tr>
         </mj-table>
-        {{/each}}
-        <mj-text color="#64748b" font-size="13px" padding="10px 0 0">Vui lòng lưu email này để đối chiếu khi cần hỗ trợ bảo hành.</mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Footer -->
+    <mj-section css-class="mobile-padding" background-color="#f8fafc" padding="26px 32px 6px" border-top="1px solid #e2e8f0">
+      <mj-column width="100%">
+        <mj-text align="center" color="#4b5563" font-size="12px" line-height="1.6" padding="0">
+          Email được gửi tự động. Vui lòng không trả lời trực tiếp email này.
+        </mj-text>
+        <mj-text align="center" color="#4b5563" font-size="12px" line-height="1.7" padding="4px 0 0">
+          Nếu có thắc mắc, vui lòng liên hệ chi nhánh gần bạn nhất bên dưới.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-wrapper css-class="mobile-padding" background-color="#f8fafc" padding="8px 32px 10px">
+      <mj-section css-class="footer-contact-card" background-color="#ffffff" border="1px solid #e2e8f0" border-radius="8px" padding="18px 0">
+        <mj-column width="50%">
+          <mj-text css-class="branch-column-left" align="center" color="#4b5563" font-size="12px" line-height="1.7" padding="0">
+            <div class="branch-content-left" style="border-right:1px solid #e2e8f0;padding:0 18px;">
+              <strong style="color:#dc2626;font-size:11px;letter-spacing:.6px;text-transform:uppercase;">CHI NHÁNH HÀ NỘI</strong><br />
+              <a href="https://maps.google.com/?q=S%E1%BB%91%2062%2C%20Ng%C3%B5%2020%20Ngh%C4%A9a%20%C4%90%C3%B4%2C%20Ph%C6%B0%E1%BB%9Dng%20Ngh%C4%A9a%20%C4%90%C3%B4%2C%20TP.%20H%C3%A0%20N%E1%BB%99i" target="_blank" style="color:#4b5563 !important;text-decoration:none !important;"><span class="branch-address-text" style="color:#4b5563 !important;-webkit-text-fill-color:#4b5563 !important;text-decoration:none !important;"><font color="#4b5563">Số 62, Ngõ 20 Nghĩa Đô, Phường Nghĩa Đô, TP. Hà Nội</font></span></a><br />
+              <strong style="color:#111827;white-space:nowrap;">0989 017 999</strong>
+            </div>
+          </mj-text>
+        </mj-column>
+        <mj-column width="50%">
+          <mj-text css-class="branch-column-right" align="center" color="#4b5563" font-size="12px" line-height="1.7" padding="0">
+            <div class="branch-content-right" style="padding:0 18px;">
+              <strong style="color:#dc2626;font-size:11px;letter-spacing:.6px;text-transform:uppercase;">CHI NHÁNH TP. HỒ CHÍ MINH</strong><br />
+              <a href="https://maps.google.com/?q=7C%20Nguy%E1%BB%85n%20Ng%E1%BB%8Dc%20Ph%C6%B0%C6%A1ng%2C%20Ph%C6%B0%E1%BB%9Dng%20Th%E1%BA%A1nh%20M%E1%BB%B9%20T%C3%A2y%2C%20TP.%20H%E1%BB%93%20Ch%C3%AD%20Minh" target="_blank" style="color:#4b5563 !important;text-decoration:none !important;"><span class="branch-address-text" style="color:#4b5563 !important;-webkit-text-fill-color:#4b5563 !important;text-decoration:none !important;"><font color="#4b5563">7C Nguyễn Ngọc Phương, Phường Thạnh Mỹ Tây, TP. Hồ Chí Minh</font></span></a><br />
+              <strong style="color:#111827;white-space:nowrap;">0886 33 77 33</strong>
+            </div>
+          </mj-text>
+        </mj-column>
+      </mj-section>
+    </mj-wrapper>
+
+    <mj-section css-class="mobile-padding" background-color="#f8fafc" padding="6px 32px 28px">
+      <mj-column width="100%">
+        <mj-text align="center" color="#9ca3af" font-size="11px" padding="0">
+          &copy; {{year}} FUJITEK - LEXZENZ. Bảo hành chính hãng.
+        </mj-text>
       </mj-column>
     </mj-section>
   </mj-body>

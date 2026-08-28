@@ -7,16 +7,13 @@ describe('GetWarrantyCertificateFileForActivationRequestUseCase', () => {
       storageKey: 'private/certificate.pdf',
     };
     const repository = {
-      findLatestFileForActivationRequest: jest.fn().mockResolvedValue(file),
+      findFileByRequestId: jest.fn().mockResolvedValue(file),
     };
     const useCase = new GetWarrantyCertificateFileForActivationRequestUseCase(
       repository as never,
     );
 
-    await expect(useCase.execute('request-1', 'item-1')).resolves.toBe(file);
-    expect(repository.findLatestFileForActivationRequest).toHaveBeenCalledWith(
-      'request-1',
-      'item-1',
-    );
+    await expect(useCase.execute('request-1')).resolves.toBe(file);
+    expect(repository.findFileByRequestId).toHaveBeenCalledWith('request-1');
   });
 });

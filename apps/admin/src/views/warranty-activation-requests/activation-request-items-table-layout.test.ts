@@ -12,22 +12,22 @@ test("activation request item columns stay readable and scroll horizontally", ()
     source,
     /TableScroll className="max-w-full overscroll-x-contain rounded-md/,
   );
-  assert.match(source, /Table className="min-w-\[1120px\] whitespace-nowrap"/);
+  assert.match(source, /Table className="min-w-\[920px\] whitespace-nowrap"/);
 });
 
-test("certificate actions use the standard accessible overflow menu", () => {
-  assert.match(source, /function ActivationRequestItemActions/);
-  assert.match(source, /<DropdownMenuTrigger asChild>/);
-  assert.match(source, /aria-label=\{t\("openItemActions"/);
-  assert.match(source, /<MoreHorizontal aria-hidden="true"/);
-  assert.equal(source.match(/<DropdownMenuItem /g)?.length, 4);
-  assert.doesNotMatch(source, /<TooltipProvider/);
-});
-
-test("certificate overflow menu is omitted when an item has no actions", () => {
+test("activation request items scroll vertically with a sticky header", () => {
   assert.match(
     source,
-    /if \(!canView && !canDownload && !canResend && !canRetry\) return null/,
+    /TableScroll className="[^"]*max-h-\[30rem\][^"]*overflow-y-auto/,
   );
-  assert.match(source, /disabled=\{busy\}/);
+  assert.match(
+    source,
+    /TableHeader className="sticky top-0 z-10 bg-white dark:bg-slate-950"/,
+  );
+});
+
+test("activation request items do not expose certificate actions", () => {
+  assert.doesNotMatch(source, /viewItemCertificate/);
+  assert.doesNotMatch(source, /downloadItemCertificate/);
+  assert.doesNotMatch(source, /resendItemCertificate/);
 });

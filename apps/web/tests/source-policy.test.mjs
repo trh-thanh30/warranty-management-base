@@ -486,14 +486,14 @@ test("published images pass Trivy vulnerability gates before deployment", async 
   assert.equal(
     (publishWorkflow.match(/uses: aquasecurity\/trivy-action@v0\.36\.0/g) ?? [])
       .length,
-    4,
-    "API, Migrator, Web, and Admin images must each be scanned",
+    5,
+    "API, PDF renderer, Migrator, Web, and Admin images must each be scanned",
   );
   assert.equal(
     (publishWorkflow.match(/severity: CRITICAL,HIGH/g) ?? []).length,
-    4,
+    5,
   );
-  assert.equal((publishWorkflow.match(/exit-code: "1"/g) ?? []).length, 4);
+  assert.equal((publishWorkflow.match(/exit-code: "1"/g) ?? []).length, 5);
   assert.equal(
     (publishWorkflow.match(/trivyignores: \.trivyignore\.yaml/g) ?? []).length,
     1,
@@ -531,11 +531,23 @@ test("API runtime excludes migration and unused build tooling", async () => {
     path.join(repoRoot, "apps", "api", "Dockerfile"),
     "utf8",
   );
+  const htmlPdfRendererService = await readFile(
+    path.join(
+      repoRoot,
+      "apps",
+      "api",
+      "src",
+      "modules",
+      "warranty-certificates",
+      "services",
+      "html-pdf-renderer.service.ts",
+    ),
+    "utf8",
+  );
 
   for (const dependency of [
     "prisma",
     "@prisma/config",
-    "puppeteer-core",
     "@tailwindcss/cli",
     "tailwindcss",
   ]) {
@@ -545,6 +557,21 @@ test("API runtime excludes migration and unused build tooling", async () => {
       `${dependency} must not ship as an API runtime dependency`,
     );
   }
+
+  assert.ok(
+    apiPackage.dependencies?.["puppeteer-core"],
+    "the local PDF fallback must declare puppeteer-core explicitly",
+  );
+  assert.match(
+    htmlPdfRendererService,
+    /await import\(['"]puppeteer-core['"]\)/,
+    "the API must load puppeteer-core only when the local PDF fallback runs",
+  );
+  assert.doesNotMatch(
+    htmlPdfRendererService,
+    /^import (?!type\b).* from ['"]puppeteer-core['"];?$/m,
+    "puppeteer-core must not be loaded eagerly by the API",
+  );
 
   for (const buildDependency of ["prisma", "@tailwindcss/cli", "tailwindcss"]) {
     assert.ok(
@@ -593,7 +620,7 @@ test("API runtime excludes migration and unused build tooling", async () => {
 });
 
 test("production runners refresh Alpine security packages before image scans", async () => {
-  const apps = ["api", "api-migrator", "web", "admin"];
+  const apps = ["api", "api-migrator", "api-pdf-renderer", "web", "admin"];
   const publishWorkflow = await readFile(
     path.join(repoRoot, ".github", "workflows", "publish-images.yml"),
     "utf8",
@@ -604,10 +631,11 @@ test("production runners refresh Alpine security packages before image scans", a
       path.join(repoRoot, "apps", app, "Dockerfile"),
       "utf8",
     );
-    const runnerStage = dockerfile.slice(
-      dockerfile.indexOf("FROM node:22-alpine AS runner"),
-    );
+    const runnerStage = dockerfile.match(
+      /FROM [^\n]+ AS runner[\s\S]*?(?=\nFROM |$)/,
+    )?.[0];
 
+    assert.ok(runnerStage, `${app} production runner stage must exist`);
     assert.match(
       runnerStage,
       /RUN apk upgrade --no-cache/,
@@ -618,6 +646,7 @@ test("production runners refresh Alpine security packages before image scans", a
   const imageBuildSteps = [
     "Build and push API image",
     "Build and push API migrator image",
+    "Build and push PDF renderer image",
     "Build and push Web image",
     "Build and push Admin image",
   ];
@@ -728,7 +757,7 @@ test("database migrations use a dedicated disposable image", async () => {
   );
   assert.match(
     deployWorkflow,
-    /docker compose .* --profile tools pull migrate api worker-email web admin/,
+    /docker compose .* --profile tools pull migrate pdf-renderer api worker-email web admin/,
   );
   assert.match(
     deployWorkflow,
@@ -759,7 +788,7 @@ test("production deployment safely cleans only stale project images", async () =
   );
   assert.match(
     deployWorkflow,
-    /for repository in "\$API_IMAGE" "\$WEB_IMAGE" "\$ADMIN_IMAGE"/,
+    /for repository in "\$API_IMAGE" "\$PDF_RENDERER_IMAGE" "\$WEB_IMAGE" "\$ADMIN_IMAGE"/,
     "cleanup must be scoped to this project's application repositories",
   );
   assert.match(
@@ -779,7 +808,7 @@ test("production deployment safely cleans only stale project images", async () =
   );
 });
 
-test("container ports match the production ports documented for deployment", async () => {
+test("container runtime stages match the production ports documented for deployment", async () => {
   const ports = { api: 4100, web: 4101, admin: 4102 };
 
   for (const [app, port] of Object.entries(ports)) {
@@ -787,11 +816,91 @@ test("container ports match the production ports documented for deployment", asy
       path.join(repoRoot, "apps", app, "Dockerfile"),
       "utf8",
     );
+    const runtimeStage =
+      app === "api"
+        ? dockerfile.match(
+            /FROM (?:base|node:22-alpine) AS runner[\s\S]*?(?=\nFROM |$)/,
+          )?.[0]
+        : dockerfile;
 
-    assert.match(dockerfile, new RegExp(`ENV PORT=${port}`));
-    assert.doesNotMatch(dockerfile, /EXPOSE 300[012]/);
-    assert.match(dockerfile, new RegExp(`EXPOSE ${port}`));
+    assert.ok(runtimeStage, `${app} production runtime stage must exist`);
+    assert.match(runtimeStage, new RegExp(`ENV PORT=${port}`));
+    assert.doesNotMatch(runtimeStage, /EXPOSE 300[012]/);
+    assert.match(runtimeStage, new RegExp(`EXPOSE ${port}`));
   }
+
+  const pdfRendererDockerfile = await readFile(
+    path.join(repoRoot, "apps", "api-pdf-renderer", "Dockerfile"),
+    "utf8",
+  );
+  const pdfRendererStage = pdfRendererDockerfile.match(
+    /FROM [^\n]+ AS runner[\s\S]*?(?=\nFROM |$)/,
+  )?.[0];
+
+  assert.ok(pdfRendererStage, "PDF renderer production stage must exist");
+  assert.match(pdfRendererStage, /ENV PORT=3001/);
+  assert.match(pdfRendererStage, /EXPOSE 3001/);
+
+  const apiDockerfile = await readFile(
+    path.join(repoRoot, "apps", "api", "Dockerfile"),
+    "utf8",
+  );
+  assert.doesNotMatch(apiDockerfile, /@repo\/api-pdf-renderer|pdf-runner/);
+});
+
+test("PDF renderer remains independently buildable and quality-gated", async () => {
+  const [
+    packageJson,
+    dockerfile,
+    developmentCompose,
+    ciWorkflow,
+    publishWorkflow,
+  ] = await Promise.all([
+    readFile(
+      path.join(repoRoot, "apps", "api-pdf-renderer", "package.json"),
+      "utf8",
+    ),
+    readFile(
+      path.join(repoRoot, "apps", "api-pdf-renderer", "Dockerfile"),
+      "utf8",
+    ),
+    readFile(path.join(repoRoot, "docker-compose.dev.yml"), "utf8"),
+    readFile(path.join(repoRoot, ".github", "workflows", "ci.yml"), "utf8"),
+    readFile(
+      path.join(repoRoot, ".github", "workflows", "publish-images.yml"),
+      "utf8",
+    ),
+  ]);
+  const scripts = JSON.parse(packageJson).scripts;
+
+  for (const script of ["build", "check-types", "lint", "test"]) {
+    assert.equal(typeof scripts[script], "string", `${script} gate must exist`);
+  }
+
+  assert.match(
+    developmentCompose,
+    /dockerfile: apps\/api-pdf-renderer\/Dockerfile[\s\S]*127\.0\.0\.1:\$\{PDF_RENDERER_PORT:-3001\}:3001/,
+  );
+  assert.match(
+    ciWorkflow,
+    /pdf-renderer:[\s\S]*pnpm lint:pdf-renderer[\s\S]*pnpm typecheck:pdf-renderer[\s\S]*pnpm test:pdf-renderer[\s\S]*pnpm build:pdf-renderer/,
+  );
+  assert.match(
+    publishWorkflow,
+    /Build and push PDF renderer image[\s\S]*file: apps\/api-pdf-renderer\/Dockerfile/,
+  );
+  assert.match(dockerfile, /FROM node:\d+\.\d+\.\d+-alpine\d+\.\d+ AS runner/);
+  assert.match(dockerfile, /ENV HOME=\/tmp/);
+  assert.match(dockerfile, /USER pdf/);
+  assert.match(dockerfile, /HEALTHCHECK[\s\S]*127\.0\.0\.1:3001\/health/);
+  assert.match(
+    ciWorkflow,
+    /pdf-renderer-chromium:[\s\S]*timeout-minutes: 15[\s\S]*--cpus 2[\s\S]*--memory 2g[\s\S]*--pids-limit 256/,
+  );
+  assert.match(
+    ciWorkflow,
+    /RUN_PDF_RENDERER_INTEGRATION: "true"[\s\S]*actions\/upload-artifact@v4/,
+  );
 });
 
 test("production infrastructure ports are only published on localhost", async () => {

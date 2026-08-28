@@ -8,6 +8,7 @@ describe('WarrantyCertificateEmailStatusService', () => {
     };
     const service = new WarrantyCertificateEmailStatusService(
       repository as never,
+      {} as never,
     );
 
     await service.markSent([]);
@@ -24,6 +25,7 @@ describe('WarrantyCertificateEmailStatusService', () => {
     };
     const service = new WarrantyCertificateEmailStatusService(
       repository as never,
+      {} as never,
     );
 
     await service.markSent(['certificate-1', 'certificate-1', 'certificate-2']);
@@ -38,6 +40,32 @@ describe('WarrantyCertificateEmailStatusService', () => {
     );
     expect(repository.markEmailFailed).toHaveBeenCalledWith(
       ['certificate-1', 'certificate-2'],
+      'SMTP unavailable',
+    );
+  });
+
+  it('transitions a request-owned certificate through its repository', async () => {
+    const requestRepository = {
+      markEmailFailed: jest.fn().mockResolvedValue({ count: 1 }),
+      markEmailSent: jest.fn().mockResolvedValue({ count: 1 }),
+    };
+    const service = new WarrantyCertificateEmailStatusService(
+      {} as never,
+      requestRepository as never,
+    );
+
+    await service.markRequestSent('request-certificate-1');
+    await service.markRequestFailed(
+      'request-certificate-1',
+      'SMTP unavailable',
+    );
+
+    expect(requestRepository.markEmailSent).toHaveBeenCalledWith(
+      'request-certificate-1',
+      expect.any(Date),
+    );
+    expect(requestRepository.markEmailFailed).toHaveBeenCalledWith(
+      'request-certificate-1',
       'SMTP unavailable',
     );
   });

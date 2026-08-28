@@ -34,6 +34,7 @@ jobs:
       image_channel: ${{ steps.metadata.outputs.image_channel }}
       source_branch: ${{ steps.metadata.outputs.source_branch }}
       api-image: ${{ steps.metadata.outputs.api_image }}
+      pdf-renderer-image: ${{ steps.metadata.outputs.pdf_renderer_image }}
       migrator-image: ${{ steps.metadata.outputs.migrator_image }}
       web-image: ${{ steps.metadata.outputs.web_image }}
       admin-image: ${{ steps.metadata.outputs.admin_image }}
@@ -77,6 +78,7 @@ jobs:
           echo "image_channel=$image_channel" >> "$GITHUB_OUTPUT"
           echo "source_branch=$source_branch" >> "$GITHUB_OUTPUT"
           echo "api_image=$image_prefix-api" >> "$GITHUB_OUTPUT"
+          echo "pdf_renderer_image=$image_prefix-api-pdf-renderer" >> "$GITHUB_OUTPUT"
           echo "migrator_image=$image_prefix-api-migrator" >> "$GITHUB_OUTPUT"
           echo "web_image=$image_prefix-web" >> "$GITHUB_OUTPUT"
           echo "admin_image=$image_prefix-admin" >> "$GITHUB_OUTPUT"
@@ -113,6 +115,21 @@ jobs:
             ${{ steps.metadata.outputs.api_image }}:${{ steps.metadata.outputs.image_channel }}
           cache-from: type=gha,scope=api
           cache-to: type=gha,mode=max,scope=api
+
+      - name: Build and push PDF renderer image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/api-pdf-renderer/Dockerfile
+          target: runner
+          push: true
+          pull: true
+          no-cache-filters: runner
+          tags: |
+            ${{ steps.metadata.outputs.pdf_renderer_image }}:${{ steps.metadata.outputs.image_tag }}
+            ${{ steps.metadata.outputs.pdf_renderer_image }}:${{ steps.metadata.outputs.image_channel }}
+          cache-from: type=gha,scope=api-pdf-renderer
+          cache-to: type=gha,mode=max,scope=api-pdf-renderer
 
       - name: Build and push API migrator image
         uses: docker/build-push-action@v6
@@ -184,6 +201,21 @@ jobs:
           TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         with:
           image-ref: ${{ steps.metadata.outputs.migrator_image }}:${{ steps.metadata.outputs.image_tag }}
+          format: table
+          scanners: vuln
+          vuln-type: os,library
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
+          skip-setup-trivy: true
+
+      - name: Scan PDF renderer image
+        uses: aquasecurity/trivy-action@v0.36.0
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          image-ref: ${{ steps.metadata.outputs.pdf_renderer_image }}:${{ steps.metadata.outputs.image_tag }}
           format: table
           scanners: vuln
           vuln-type: os,library
@@ -294,7 +326,7 @@ jobs:
             --branch "${{ needs.publish.outputs.source_branch }}" \
             --repository "${{ github.repository }}" \
             --commit "${{ needs.publish.outputs.image-tag }}" \
-            --message "api, api-migrator, web, admin" \
+            --message "api, pdf-renderer, api-migrator, web, admin" \
             --author "${{ github.actor }}" \
             --workflow "${{ github.workflow }}" \
             --job "Build and Push Images" \

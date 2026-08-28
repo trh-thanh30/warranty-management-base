@@ -8,76 +8,43 @@ import {
 
 describe('RetryWarrantyActivationRequestCertificateUseCase', () => {
   const repository = { findById: jest.fn() };
-  const issueWarrantyCertificateUseCase = { execute: jest.fn() };
+  const issueRequestCertificateUseCase = { execute: jest.fn() };
 
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
-  it('reissues the certificate for the selected activated request item', async () => {
+  it('reissues one aggregate certificate for the activated request', async () => {
     const request = buildRequest();
     repository.findById.mockResolvedValueOnce(request).mockResolvedValueOnce({
       ...request,
-      items: [
-        {
-          ...request.items[0],
-          warranty: {
-            ...request.items[0].warranty,
-            certificates: [
-              {
-                certificate_number: 'CERT-RETRIED',
-                email_status: 'QUEUED',
-                emailed_at: null,
-                generated_at: new Date('2026-08-24T01:05:00.000Z'),
-                id: 'certificate-id',
-                last_error: null,
-                recipient_email: 'customer@example.com',
-                status: 'GENERATED',
-                storage_key: 'private/certificate.pdf',
-              },
-            ],
-          },
-        },
-      ],
+      certificate: {
+        certificate_number: 'CERT-RETRIED',
+        email_status: 'QUEUED',
+        emailed_at: null,
+        generated_at: new Date('2026-08-24T01:05:00.000Z'),
+        id: 'certificate-id',
+        last_error: null,
+        recipient_email: 'customer@example.com',
+        status: 'GENERATED',
+        storage_key: 'private/certificate.pdf',
+      },
     });
-    issueWarrantyCertificateUseCase.execute.mockResolvedValue({
+    issueRequestCertificateUseCase.execute.mockResolvedValue({
       id: 'certificate-id',
     });
     const useCase = new RetryWarrantyActivationRequestCertificateUseCase(
       repository as never,
-      issueWarrantyCertificateUseCase as never,
+      issueRequestCertificateUseCase as never,
     );
 
-    const result = await useCase.execute('request-id', 'item-id');
+    const result = await useCase.execute('request-id');
 
-    expect(issueWarrantyCertificateUseCase.execute).toHaveBeenCalledWith({
+    expect(issueRequestCertificateUseCase.execute).toHaveBeenCalledWith({
       recipientEmail: 'customer@example.com',
       requestId: 'request-id',
-      warrantyId: 'warranty-id',
     });
-    expect(result.items?.[0]?.certificate?.status).toBe('GENERATED');
-  });
-
-  it('reissues a legacy request certificate from activated_warranty_id', async () => {
-    const request = { ...buildRequest(), items: [] };
-    repository.findById
-      .mockResolvedValueOnce(request)
-      .mockResolvedValueOnce(request);
-    issueWarrantyCertificateUseCase.execute.mockResolvedValue({
-      id: 'certificate-id',
-    });
-    const useCase = new RetryWarrantyActivationRequestCertificateUseCase(
-      repository as never,
-      issueWarrantyCertificateUseCase as never,
-    );
-
-    await useCase.execute('request-id');
-
-    expect(issueWarrantyCertificateUseCase.execute).toHaveBeenCalledWith({
-      recipientEmail: 'customer@example.com',
-      requestId: 'request-id',
-      warrantyId: 'warranty-id',
-    });
+    expect(result.certificate?.status).toBe('GENERATED');
   });
 
   it('rejects certificate issuance before the activation transaction completes', async () => {
@@ -87,26 +54,26 @@ describe('RetryWarrantyActivationRequestCertificateUseCase', () => {
     });
     const useCase = new RetryWarrantyActivationRequestCertificateUseCase(
       repository as never,
-      issueWarrantyCertificateUseCase as never,
+      issueRequestCertificateUseCase as never,
     );
 
-    await expect(
-      useCase.execute('request-id', 'item-id'),
-    ).rejects.toBeInstanceOf(BadRequestError);
-    expect(issueWarrantyCertificateUseCase.execute).not.toHaveBeenCalled();
+    await expect(useCase.execute('request-id')).rejects.toBeInstanceOf(
+      BadRequestError,
+    );
+    expect(issueRequestCertificateUseCase.execute).not.toHaveBeenCalled();
   });
 
-  it('rejects an item that does not belong to the activation request', async () => {
-    repository.findById.mockResolvedValue(buildRequest());
+  it('rejects a missing activation request', async () => {
+    repository.findById.mockResolvedValue(null);
     const useCase = new RetryWarrantyActivationRequestCertificateUseCase(
       repository as never,
-      issueWarrantyCertificateUseCase as never,
+      issueRequestCertificateUseCase as never,
     );
 
-    await expect(
-      useCase.execute('request-id', 'different-item-id'),
-    ).rejects.toBeInstanceOf(NotFoundError);
-    expect(issueWarrantyCertificateUseCase.execute).not.toHaveBeenCalled();
+    await expect(useCase.execute('request-id')).rejects.toBeInstanceOf(
+      NotFoundError,
+    );
+    expect(issueRequestCertificateUseCase.execute).not.toHaveBeenCalled();
   });
 });
 

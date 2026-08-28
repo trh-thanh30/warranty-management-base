@@ -44,17 +44,17 @@ export type WarrantyActivationRequestWithRelations =
       start_date: Date | null;
       end_date: Date | null;
       duration_months: number;
-      certificates?: {
-        id: string;
-        certificate_number: string;
-        status: warranty_certificate_status;
-        storage_key: string | null;
-        recipient_email: string | null;
-        generated_at: Date | null;
-        emailed_at: Date | null;
-        email_status: warranty_certificate_email_status;
-        last_error: string | null;
-      }[];
+    } | null;
+    certificate?: {
+      id: string;
+      certificate_number: string;
+      status: warranty_certificate_status;
+      storage_key: string | null;
+      recipient_email: string | null;
+      generated_at: Date | null;
+      emailed_at: Date | null;
+      email_status: warranty_certificate_email_status;
+      last_error: string | null;
     } | null;
     items?: Array<{
       id: string;
@@ -71,17 +71,6 @@ export type WarrantyActivationRequestWithRelations =
       activated_at: Date | null;
       warranty: {
         status: warranty_status;
-        certificates?: Array<{
-          id: string;
-          certificate_number: string;
-          status: warranty_certificate_status;
-          storage_key: string | null;
-          recipient_email: string | null;
-          generated_at: Date | null;
-          emailed_at: Date | null;
-          email_status: warranty_certificate_email_status;
-          last_error: string | null;
-        }>;
       };
     }>;
   };
@@ -185,10 +174,7 @@ export function toWarrantyActivationRequestResponse(
           durationMonths: request.activated_warranty.duration_months,
         }
       : null,
-    certificate: toCertificateSummary(
-      request.id,
-      request.activated_warranty?.certificates?.[0] ?? null,
-    ),
+    certificate: toCertificateSummary(request.id, request.certificate ?? null),
     items: request.items?.map((item) => ({
       id: item.id,
       activationFieldId: item.activation_field_id,
@@ -203,11 +189,6 @@ export function toWarrantyActivationRequestResponse(
       warrantyStatus: item.warranty.status,
       status: item.status,
       activatedAt: item.activated_at?.toISOString() ?? null,
-      certificate: toCertificateSummary(
-        request.id,
-        item.warranty.certificates?.[0] ?? null,
-        item.id,
-      ),
     })),
     itemCount: request.items?.length ? request.items.length : undefined,
     metadata: toMetadata(request.metadata),
@@ -229,21 +210,17 @@ function toCertificateSummary(
     email_status: warranty_certificate_email_status;
     last_error: string | null;
   } | null,
-  itemId?: string,
 ) {
   if (!certificate) return null;
 
   return {
     id: certificate.id,
+    scope: 'ACTIVATION_REQUEST' as const,
     certificateNumber: certificate.certificate_number,
-    downloadUrl: itemId
-      ? `/warranty-activation-requests/${requestId}/items/${itemId}/certificate/download`
-      : `/warranty-activation-requests/${requestId}/certificate/download`,
+    downloadUrl: `/warranty-activation-requests/${requestId}/certificate/download`,
     status: certificate.status,
     storageKey: certificate.storage_key,
-    viewUrl: itemId
-      ? `/warranty-activation-requests/${requestId}/items/${itemId}/certificate/view`
-      : `/warranty-activation-requests/${requestId}/certificate/view`,
+    viewUrl: `/warranty-activation-requests/${requestId}/certificate/view`,
     recipientEmail: certificate.recipient_email,
     generatedAt: certificate.generated_at?.toISOString() ?? null,
     emailedAt: certificate.emailed_at?.toISOString() ?? null,

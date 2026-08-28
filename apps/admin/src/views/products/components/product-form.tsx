@@ -250,7 +250,7 @@ export function ProductForm({
         </Field>
       </div>
 
-      <div className="grid min-w-0 gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid min-w-0 gap-5 md:grid-cols-2">
         <div className="w-full min-w-0">
           <Field
             description={
@@ -277,23 +277,6 @@ export function ProductForm({
               step={1}
               type="number"
               {...form.register("warrantyDurationMonths")}
-            />
-          </Field>
-        </div>
-        <div className="w-full min-w-0">
-          <Field
-            error={formatFieldError(
-              form.formState.errors.installationPosition?.message,
-              t,
-            )}
-            id="product-installation-position"
-            label={t("installationPosition")}
-          >
-            <Input
-              className="w-full"
-              id="product-installation-position"
-              placeholder={t("installationPositionPlaceholder")}
-              {...form.register("installationPosition")}
             />
           </Field>
         </div>

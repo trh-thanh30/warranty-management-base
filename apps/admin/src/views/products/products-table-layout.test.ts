@@ -20,3 +20,16 @@ test("desktop product table keeps content on one line and scrolls long results",
   );
   assert.match(source, /sticky top-0 z-10 bg-white dark:bg-slate-950/);
 });
+
+test("product actions expose the existing product detail route", async () => {
+  const source = await readFile(productsTableUrl, "utf8");
+
+  assert.match(
+    source,
+    /const canView = hasPermission\(PERMISSIONS\.PRODUCT_VIEW\)/,
+  );
+  assert.match(
+    source,
+    /<Link href=\{`\/products\/\$\{product\.id\}`\}>[\s\S]*?<Eye[\s\S]*?\{t\("viewDetail"\)\}/,
+  );
+});

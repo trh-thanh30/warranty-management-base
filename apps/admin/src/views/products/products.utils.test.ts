@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { HttpClientError, type ProductTemplateSummary } from "@repo/shared";
 import {
+  getProductWarrantyProgress,
   getProductTemplateSearchKeywords,
   getProductSaveErrorMatch,
   mergeProductTemplateOptions,
@@ -28,6 +29,47 @@ const currentTemplate = {
     slug: "film-cach-nhiet-o-to-lexzenz-reflex-korea-film",
   },
 } as ProductTemplateSummary;
+
+test("calculates active warranty progress and remaining months", () => {
+  assert.deepEqual(
+    getProductWarrantyProgress(
+      {
+        endDate: "2028-01-01T00:00:00.000Z",
+        startDate: "2026-01-01T00:00:00.000Z",
+      },
+      new Date("2026-03-01T00:00:00.000Z"),
+    ),
+    {
+      percentage: 8,
+      remainingMonths: 22,
+      state: "active",
+    },
+  );
+});
+
+test("clamps warranty progress before activation and after expiry", () => {
+  const warranty = {
+    endDate: "2027-01-01T00:00:00.000Z",
+    startDate: "2026-01-01T00:00:00.000Z",
+  };
+
+  assert.deepEqual(
+    getProductWarrantyProgress(warranty, new Date("2025-12-01T00:00:00.000Z")),
+    {
+      percentage: 0,
+      remainingMonths: 13,
+      state: "upcoming",
+    },
+  );
+  assert.deepEqual(
+    getProductWarrantyProgress(warranty, new Date("2027-02-01T00:00:00.000Z")),
+    {
+      percentage: 100,
+      remainingMonths: 0,
+      state: "expired",
+    },
+  );
+});
 
 test("builds product template search keywords from template and category data", () => {
   assert.deepEqual(getProductTemplateSearchKeywords(currentTemplate), [

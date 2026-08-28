@@ -25,6 +25,7 @@ import {
   TableRow,
 } from "@repo/ui";
 import {
+  Eye,
   Layers3,
   MoreHorizontal,
   Pencil,
@@ -285,6 +286,7 @@ function ProductActionsMenu({
 }) {
   const t = useTranslations("Products");
   const { hasPermission } = usePermissions();
+  const canView = hasPermission(PERMISSIONS.PRODUCT_VIEW);
   const canEdit = hasPermission(PERMISSIONS.PRODUCT_UPDATE);
   const canDelete = hasPermission(PERMISSIONS.PRODUCT_DELETE);
   const canAssignOwner = hasPermission(PERMISSIONS.PRODUCT_ASSIGN_OWNER);
@@ -298,6 +300,7 @@ function ProductActionsMenu({
   if (
     (isDeleted && !canDelete) ||
     (!isDeleted &&
+      !canView &&
       !canEdit &&
       !canDelete &&
       !canAssignOwner &&
@@ -327,6 +330,14 @@ function ProductActionsMenu({
         ) : null}
         {!isDeleted ? (
           <>
+            {canView ? (
+              <DropdownMenuItem asChild>
+                <Link href={`/products/${product.id}`}>
+                  <Eye className="mr-2 size-4" />
+                  {t("viewDetail")}
+                </Link>
+              </DropdownMenuItem>
+            ) : null}
             {canEdit ? (
               <DropdownMenuItem asChild>
                 <Link href={`/products/${product.id}/edit`}>

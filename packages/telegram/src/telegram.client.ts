@@ -1,4 +1,12 @@
-import type { TelegramConfig, TelegramSendMessageInput, TelegramSendPhotoInput } from "@/telegram.types.js";
+import type {
+  TelegramConfig,
+  TelegramSendMessageInput,
+  TelegramSendPhotoInput,
+} from "@/telegram.types.js";
+import { truncateTelegramHtml } from "@/utils/truncate-html.js";
+
+const TELEGRAM_MESSAGE_MAX_CHARACTERS = 4096;
+const TELEGRAM_CAPTION_MAX_CHARACTERS = 1024;
 
 export class TelegramClient {
   private readonly apiBaseUrl: string;
@@ -10,7 +18,7 @@ export class TelegramClient {
   async sendMessage(input: TelegramSendMessageInput): Promise<void> {
     const body: Record<string, unknown> = {
       chat_id: this.config.chatId,
-      text: input.text,
+      text: truncateTelegramHtml(input.text, TELEGRAM_MESSAGE_MAX_CHARACTERS),
       parse_mode: "HTML",
       disable_web_page_preview: input.disableWebPagePreview ?? false,
       disable_notification: this.config.disableNotification ?? false,
@@ -31,11 +39,21 @@ export class TelegramClient {
     ) as ArrayBuffer;
 
     form.append("chat_id", this.config.chatId);
-    form.append("photo", new Blob([photo], { type: "image/png" }), input.filename ?? "notification.png");
-    form.append("disable_notification", String(this.config.disableNotification ?? false));
+    form.append(
+      "photo",
+      new Blob([photo], { type: "image/png" }),
+      input.filename ?? "notification.png",
+    );
+    form.append(
+      "disable_notification",
+      String(this.config.disableNotification ?? false),
+    );
 
     if (input.caption) {
-      form.append("caption", input.caption);
+      form.append(
+        "caption",
+        truncateTelegramHtml(input.caption, TELEGRAM_CAPTION_MAX_CHARACTERS),
+      );
       form.append("parse_mode", "HTML");
     }
 
@@ -46,7 +64,10 @@ export class TelegramClient {
     await this.requestForm("sendPhoto", form);
   }
 
-  private async request(method: string, body: Record<string, unknown>): Promise<void> {
+  private async request(
+    method: string,
+    body: Record<string, unknown>,
+  ): Promise<void> {
     const response = await fetch(`${this.apiBaseUrl}/${method}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -71,6 +92,8 @@ export class TelegramClient {
     }
 
     const error = await response.text();
-    throw new Error(`Telegram API request failed with ${response.status}: ${error}`);
+    throw new Error(
+      `Telegram API request failed with ${response.status}: ${error}`,
+    );
   }
 }

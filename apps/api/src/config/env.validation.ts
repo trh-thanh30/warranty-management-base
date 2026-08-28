@@ -13,7 +13,10 @@ export const envSchema = z
     PORT: z.coerce.number().int().min(1).max(65535).default(3000),
     MILLISECONDS_PER_DAY: z.coerce.number().int().positive().default(86400000),
     PUBLIC_API_URL: z.string().url().optional(),
+    PDF_RENDERER_URL: z.string().url().optional(),
     PUPPETEER_EXECUTABLE_PATH: z.string().optional(),
+    PDF_RENDER_TIMEOUT_MS: z.coerce.number().int().positive().default(45000),
+    PDF_MAX_BODY_BYTES: z.coerce.number().int().positive().default(10485760),
     SENTRY_DSN: z.string().optional(),
 
     // Database
@@ -70,6 +73,7 @@ export const envSchema = z
     SMTP_USER: z.string(),
     SMTP_PASS: z.string(),
     EMAIL_FROM: z.string(),
+    EMAIL_BRAND_LOGO_URL: z.string().url().optional(),
     EMAIL_TEMPLATES_PATH: z.string().default('src/modules/email/templates'),
 
     // Redis Configuration

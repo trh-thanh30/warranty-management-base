@@ -56,7 +56,6 @@ describe('Multi-item activation lifecycle', () => {
     expect(issueCertificates.execute).toHaveBeenCalledWith({
       recipientEmail: 'customer@example.com',
       requestId: 'request-id',
-      warrantyIds: ['warranty-a', 'warranty-b'],
     });
   });
 

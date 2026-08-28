@@ -10,11 +10,9 @@ export class DownloadWarrantyActivationRequestCertificateUseCase {
     private readonly uploadAssetService: UploadAssetService,
   ) {}
 
-  async execute(requestId: string, itemId?: string) {
-    const certificate = await this.getWarrantyCertificateFileUseCase.execute(
-      requestId,
-      itemId,
-    );
+  async execute(requestId: string) {
+    const certificate =
+      await this.getWarrantyCertificateFileUseCase.execute(requestId);
 
     return this.toCertificateFile(certificate ?? undefined);
   }
