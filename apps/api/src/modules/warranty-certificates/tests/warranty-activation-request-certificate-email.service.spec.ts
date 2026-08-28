@@ -13,23 +13,23 @@ describe('WarrantyActivationRequestCertificateEmailService', () => {
   it('queues one PDF attachment containing every request item', async () => {
     const certificate = {
       id: 'request-certificate-1',
-      certificate_number: 'CERT-2026-ABC',
-      recipient_email: 'customer@example.com',
-      storage_key: 'private/certificate.pdf',
-      activation_request: {
-        customer_name: 'Nguyễn Văn A',
+      certificateNumber: 'CERT-2026-ABC',
+      recipientEmail: 'customer@example.com',
+      storageKey: 'private/certificate.pdf',
+      request: {
+        customerName: 'Nguyễn Văn A',
         items: [
           {
-            position_label: 'Kính lái',
-            product_name: 'SP50',
-            serial_number: 'SERIAL-1',
-            warranty_code: 'WM-SP50',
+            positionLabel: 'Kính lái',
+            productName: 'SP50',
+            serialNumber: 'SERIAL-1',
+            warrantyCode: 'WM-SP50',
           },
           {
-            position_label: 'Cửa sổ trời',
-            product_name: 'B55',
-            serial_number: null,
-            warranty_code: 'WM-B55',
+            positionLabel: 'Cửa sổ trời',
+            productName: 'B55',
+            serialNumber: null,
+            warrantyCode: 'WM-B55',
           },
         ],
       },
@@ -105,7 +105,7 @@ describe('WarrantyActivationRequestCertificateEmailService', () => {
     const update = repository.update.mock.calls[0];
     expect(update?.[0]).toBe('request-certificate-1');
     expect(update?.[1]).toEqual(
-      expect.objectContaining({ email_status: 'QUEUED', last_error: null }),
+      expect.objectContaining({ emailStatus: 'QUEUED', lastError: null }),
     );
   });
 });

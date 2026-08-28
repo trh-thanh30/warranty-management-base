@@ -1,8 +1,5 @@
 import { IssueWarrantyActivationRequestCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-activation-request-certificate.use-case';
-import {
-  warranty_activation_request_status,
-  warranty_certificate_status,
-} from '@prisma/client';
+import type { WarrantyActivationRequestStatus } from '@repo/shared';
 
 describe('IssueWarrantyActivationRequestCertificateUseCase', () => {
   const repository = {
@@ -20,7 +17,7 @@ describe('IssueWarrantyActivationRequestCertificateUseCase', () => {
   it('returns an existing generated request certificate without rendering again', async () => {
     const generated = {
       id: 'request-certificate-1',
-      status: warranty_certificate_status.GENERATED,
+      status: 'GENERATED',
     };
     repository.findByRequestId.mockResolvedValue(generated);
     const useCase = createUseCase();
@@ -48,7 +45,7 @@ describe('IssueWarrantyActivationRequestCertificateUseCase', () => {
     );
     emailService.queueEmail.mockResolvedValue({
       id: 'request-certificate-1',
-      status: warranty_certificate_status.GENERATED,
+      status: 'GENERATED',
     });
     const useCase = createUseCase();
 
@@ -60,21 +57,21 @@ describe('IssueWarrantyActivationRequestCertificateUseCase', () => {
     expect(pdfService.createPdfFromViewModel).toHaveBeenCalledWith(
       expect.objectContaining({
         products: items.map((item) =>
-          expect.objectContaining({ warrantyCode: item.warranty_code }),
+          expect.objectContaining({ warrantyCode: item.warrantyCode }),
         ),
       }),
     );
     expect(repository.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        activation_request_id: 'request-1',
+        activationRequestId: 'request-1',
         metadata: {
           itemCount: items.length,
           requestId: 'request-1',
-          warrantyCodes: items.map((item) => item.warranty_code),
+          warrantyCodes: items.map((item) => item.warrantyCode),
         },
-        recipient_email: 'customer@example.com',
-        status: warranty_certificate_status.GENERATED,
-        storage_key: 'private/cert.pdf',
+        recipientEmail: 'customer@example.com',
+        status: 'GENERATED',
+        storageKey: 'private/cert.pdf',
       }),
     );
     expect(emailService.queueEmail).toHaveBeenCalledWith(
@@ -86,7 +83,7 @@ describe('IssueWarrantyActivationRequestCertificateUseCase', () => {
     [
       'pending request',
       buildRequest([buildItem('windshield', 'WM-A')], {
-        requestStatus: warranty_activation_request_status.PENDING,
+        requestStatus: 'PENDING',
       }),
     ],
     [
@@ -128,19 +125,19 @@ describe('IssueWarrantyActivationRequestCertificateUseCase', () => {
     );
     expect(repository.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        activation_request_id: 'request-1',
-        last_error: 'PDF generation failed',
-        status: warranty_certificate_status.FAILED,
-        storage_key: null,
+        activationRequestId: 'request-1',
+        lastError: 'PDF generation failed',
+        status: 'FAILED',
+        storageKey: null,
       }),
     );
   });
 
   it('reuses a failed certificate record when generation is retried', async () => {
     repository.findByRequestId.mockResolvedValue({
-      certificate_number: 'CERT-FAILED-1',
+      certificateNumber: 'CERT-FAILED-1',
       id: 'failed-certificate',
-      status: warranty_certificate_status.FAILED,
+      status: 'FAILED',
     });
     repository.findRequestForIssuance.mockResolvedValue(
       buildRequest([buildItem('windshield', 'WM-A')]),
@@ -149,7 +146,7 @@ describe('IssueWarrantyActivationRequestCertificateUseCase', () => {
     uploadAssetService.upload.mockResolvedValue({ path: 'private/cert.pdf' });
     repository.update.mockResolvedValue({
       id: 'failed-certificate',
-      status: warranty_certificate_status.GENERATED,
+      status: 'GENERATED',
     });
     const useCase = createUseCase();
 
@@ -158,9 +155,9 @@ describe('IssueWarrantyActivationRequestCertificateUseCase', () => {
     expect(repository.update).toHaveBeenCalledWith(
       'failed-certificate',
       expect.objectContaining({
-        certificate_number: 'CERT-FAILED-1',
-        status: warranty_certificate_status.GENERATED,
-        storage_key: 'private/cert.pdf',
+        certificateNumber: 'CERT-FAILED-1',
+        status: 'GENERATED',
+        storageKey: 'private/cert.pdf',
       }),
     );
     expect(repository.create).not.toHaveBeenCalled();
@@ -178,21 +175,20 @@ describe('IssueWarrantyActivationRequestCertificateUseCase', () => {
 
 function buildRequest(
   items: ReturnType<typeof buildItem>[],
-  options: { requestStatus?: warranty_activation_request_status } = {},
+  options: { requestStatus?: WarrantyActivationRequestStatus } = {},
 ) {
   return {
     id: 'request-1',
-    status:
-      options.requestStatus ?? warranty_activation_request_status.ACTIVATED,
-    customer_email: 'customer@example.com',
-    customer_name: 'Nguyễn Văn A',
-    customer_phone: '0900000000',
-    dealer: { name: 'Đại lý A' },
-    full_address: 'Hà Nội',
-    installed_at: new Date('2026-08-17T00:00:00.000Z'),
+    status: options.requestStatus ?? 'ACTIVATED',
+    customerEmail: 'customer@example.com',
+    customerName: 'Nguyễn Văn A',
+    customerPhone: '0900000000',
+    dealerName: 'Đại lý A',
+    fullAddress: 'Hà Nội',
+    installedAt: new Date('2026-08-17T00:00:00.000Z'),
     items,
-    vehicle_model: 'Sedan',
-    vehicle_plate: '30A-12345',
+    vehicleModel: 'Sedan',
+    vehiclePlate: '30A-12345',
   };
 }
 
@@ -202,21 +198,16 @@ function buildItem(
   options: { activated?: boolean } = {},
 ) {
   return {
-    position_key: positionKey,
-    position_label: positionKey === 'windshield' ? 'Kính lái' : 'Kính lưng',
-    product_code: `PRD-${warrantyCode}`,
-    product_name: `Product ${warrantyCode}`,
-    serial_number: null,
-    status:
-      options.activated === false
-        ? warranty_activation_request_status.PENDING
-        : warranty_activation_request_status.ACTIVATED,
-    activated_at:
+    positionKey,
+    positionLabel: positionKey === 'windshield' ? 'Kính lái' : 'Kính lưng',
+    productCode: `PRD-${warrantyCode}`,
+    productName: `Product ${warrantyCode}`,
+    serialNumber: null,
+    status: options.activated === false ? 'PENDING' : 'ACTIVATED',
+    activatedAt:
       options.activated === false ? null : new Date('2026-08-17T00:00:00.000Z'),
-    warranty_code: warrantyCode,
-    warranty: {
-      duration_months: 12,
-      end_date: new Date('2027-08-17T00:00:00.000Z'),
-    },
+    warrantyCode,
+    durationMonths: 12,
+    endDate: new Date('2027-08-17T00:00:00.000Z'),
   };
 }
