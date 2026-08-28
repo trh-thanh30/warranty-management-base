@@ -189,7 +189,7 @@ services:
       PORT: 4101
       PUBLIC_API_URL: ${PUBLIC_API_URL:-http://api:4100/api/v1}
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4100/api/v1}
-      NEXT_PUBLIC_WEB_URL: ${NEXT_PUBLIC_WEB_URL:-https://baohanh.lexzenz.com}
+      NEXT_PUBLIC_WEB_URL: ${NEXT_PUBLIC_WEB_URL:?NEXT_PUBLIC_WEB_URL is required}
     ports:
       - "127.0.0.1:${WEB_PORT:-4101}:4101"
     depends_on:

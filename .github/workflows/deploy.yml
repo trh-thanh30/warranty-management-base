@@ -99,16 +99,22 @@ jobs:
           WEB_IMAGE: ${{ steps.metadata.outputs.web_image }}
           ADMIN_IMAGE: ${{ steps.metadata.outputs.admin_image }}
           IMAGE_TAG: ${{ steps.metadata.outputs.image_tag }}
+          NEXT_PUBLIC_WEB_URL: ${{ vars.NEXT_PUBLIC_WEB_URL }}
           RUN_MULTI_PRODUCT_ACTIVATION_AUDIT: ${{ vars.RUN_MULTI_PRODUCT_ACTIVATION_AUDIT || 'false' }}
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: ${{ secrets.DEPLOY_PORT || 22 }}
-          envs: API_IMAGE,MIGRATOR_IMAGE,WEB_IMAGE,ADMIN_IMAGE,IMAGE_TAG,RUN_MULTI_PRODUCT_ACTIVATION_AUDIT
+          envs: API_IMAGE,MIGRATOR_IMAGE,WEB_IMAGE,ADMIN_IMAGE,IMAGE_TAG,NEXT_PUBLIC_WEB_URL,RUN_MULTI_PRODUCT_ACTIVATION_AUDIT
           script: |
             set -eu
             cd "${{ secrets.DEPLOY_PATH }}"
+
+            if [ -z "$NEXT_PUBLIC_WEB_URL" ]; then
+              echo "NEXT_PUBLIC_WEB_URL GitHub Actions variable is required."
+              exit 1
+            fi
 
             case "$RUN_MULTI_PRODUCT_ACTIVATION_AUDIT" in
               true|false) ;;
@@ -154,6 +160,12 @@ jobs:
               sed -i "s#^IMAGE_TAG=.*#IMAGE_TAG=$IMAGE_TAG#" .env.production
             else
               printf 'IMAGE_TAG=%s\n' "$IMAGE_TAG" >> .env.production
+            fi
+
+            if grep -qE '^NEXT_PUBLIC_WEB_URL=' .env.production; then
+              sed -i "s#^NEXT_PUBLIC_WEB_URL=.*#NEXT_PUBLIC_WEB_URL=$NEXT_PUBLIC_WEB_URL#" .env.production
+            else
+              printf 'NEXT_PUBLIC_WEB_URL=%s\n' "$NEXT_PUBLIC_WEB_URL" >> .env.production
             fi
 
             if ! docker compose -f docker-compose.prod.yml --env-file .env.production --profile tools config --services | grep -qx migrate; then
