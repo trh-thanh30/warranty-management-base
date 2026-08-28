@@ -17,7 +17,8 @@ RUN pnpm install --frozen-lockfile --prod --filter @repo/api-migrator --ignore-s
 
 FROM node:22-alpine AS runner
 
-RUN apk add --no-cache ca-certificates libc6-compat openssl postgresql-client \
+RUN apk upgrade --no-cache \
+  && apk add --no-cache ca-certificates libc6-compat openssl postgresql-client \
   && addgroup --system --gid 1001 nodejs \
   && adduser --system --uid 1001 migrator \
   && rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \

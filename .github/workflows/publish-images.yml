@@ -108,6 +108,8 @@ jobs:
           file: apps/api/Dockerfile
           target: runner
           push: true
+          pull: true
+          no-cache-filters: runner
           tags: |
             ${{ steps.metadata.outputs.api_image }}:${{ steps.metadata.outputs.image_tag }}
             ${{ steps.metadata.outputs.api_image }}:${{ steps.metadata.outputs.image_channel }}
@@ -133,6 +135,8 @@ jobs:
           context: .
           file: apps/api-migrator/Dockerfile
           push: true
+          pull: true
+          no-cache-filters: runner
           tags: |
             ${{ steps.metadata.outputs.migrator_image }}:${{ steps.metadata.outputs.image_tag }}
             ${{ steps.metadata.outputs.migrator_image }}:${{ steps.metadata.outputs.image_channel }}
@@ -144,6 +148,8 @@ jobs:
         with:
           context: .
           file: apps/web/Dockerfile
+          pull: true
+          no-cache-filters: runner
           build-args: |
             NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
             NEXT_PUBLIC_WEB_URL=${{ vars.NEXT_PUBLIC_WEB_URL }}
@@ -160,6 +166,8 @@ jobs:
         with:
           context: .
           file: apps/admin/Dockerfile
+          pull: true
+          no-cache-filters: runner
           build-args: |
             NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
           push: true

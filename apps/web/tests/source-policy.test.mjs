@@ -619,6 +619,53 @@ test("API runtime excludes migration and unused build tooling", async () => {
   }
 });
 
+test("production runners refresh Alpine security packages before image scans", async () => {
+  const apps = ["api", "api-migrator", "web", "admin"];
+  const publishWorkflow = await readFile(
+    path.join(repoRoot, ".github", "workflows", "publish-images.yml"),
+    "utf8",
+  );
+
+  for (const app of apps) {
+    const dockerfile = await readFile(
+      path.join(repoRoot, "apps", app, "Dockerfile"),
+      "utf8",
+    );
+    const runnerStage = dockerfile.slice(
+      dockerfile.indexOf("FROM node:22-alpine AS runner"),
+    );
+
+    assert.match(
+      runnerStage,
+      /RUN apk upgrade --no-cache/,
+      `${app} runner must install Alpine security updates in the final image`,
+    );
+  }
+
+  const imageBuildSteps = [
+    "Build and push API image",
+    "Build and push API migrator image",
+    "Build and push Web image",
+    "Build and push Admin image",
+  ];
+
+  for (const stepName of imageBuildSteps) {
+    const stepStart = publishWorkflow.indexOf(`- name: ${stepName}`);
+    const nextStepStart = publishWorkflow.indexOf(
+      "\n      - name:",
+      stepStart + 1,
+    );
+    const step = publishWorkflow.slice(
+      stepStart,
+      nextStepStart >= 0 ? nextStepStart : undefined,
+    );
+
+    assert.ok(stepStart >= 0, `${stepName} must exist`);
+    assert.match(step, /\n\s+pull: true\s*$/m);
+    assert.match(step, /\n\s+no-cache-filters: runner\s*$/m);
+  }
+});
+
 test("API lint scripts avoid brace globs that are unstable across minimatch versions", async () => {
   const apiPackage = JSON.parse(
     await readFile(path.join(repoRoot, "apps", "api", "package.json"), "utf8"),
@@ -769,7 +816,9 @@ test("container runtime stages match the production ports documented for deploym
     );
     const runtimeStage =
       app === "api"
-        ? dockerfile.match(/FROM base AS runner[\s\S]*?(?=\nFROM |$)/)?.[0]
+        ? dockerfile.match(
+            /FROM (?:base|node:22-alpine) AS runner[\s\S]*?(?=\nFROM |$)/,
+          )?.[0]
         : dockerfile;
 
     assert.ok(runtimeStage, `${app} production runtime stage must exist`);
