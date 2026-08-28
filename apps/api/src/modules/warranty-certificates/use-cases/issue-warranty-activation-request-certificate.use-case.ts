@@ -1,15 +1,17 @@
+import { BadRequestError, NotFoundError } from '@/common/response';
 import { UploadAssetService } from '@/modules/assets/services/upload-asset.service';
 import { WarrantyActivationRequestCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-activation-request-certificates.repository';
 import { WarrantyActivationRequestCertificateEmailService } from '@/modules/warranty-certificates/services/warranty-activation-request-certificate-email.service';
 import { WarrantyCertificatePdfService } from '@/modules/warranty-certificates/services/warranty-certificate-pdf.service';
-import { buildRequestWarrantyCertificateViewModel } from '@/modules/warranty-certificates/utils/warranty-certificate-view-model.util';
 import {
   generateCertificateNumber,
   isCertificateNumberConflict,
 } from '@/modules/warranty-certificates/utils/warranty-certificate-number.util';
+import { buildRequestWarrantyCertificateViewModel } from '@/modules/warranty-certificates/utils/warranty-certificate-view-model.util';
 import { Injectable, Logger } from '@nestjs/common';
 import {
   asset_access_type,
+  warranty_activation_request_status,
   warranty_certificate_email_status,
   warranty_certificate_status,
   type WarrantyActivationRequestCertificate,
@@ -40,9 +42,33 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
     const request = await this.repository.findRequestForIssuance(
       input.requestId,
     );
-    if (!request) throw new Error('Warranty activation request not found');
-    if (request.items.length === 0) {
-      throw new Error('Warranty activation request has no items');
+    if (!request) {
+      throw new NotFoundError(
+        'Warranty activation request',
+        'WARRANTY_ACTIVATION_REQUEST_NOT_FOUND',
+        { requestId: input.requestId },
+      );
+    }
+
+    const activatedItemCount = request.items.filter(
+      (item) =>
+        item.status === warranty_activation_request_status.ACTIVATED &&
+        item.activated_at !== null,
+    ).length;
+    if (
+      request.status !== warranty_activation_request_status.ACTIVATED ||
+      activatedItemCount === 0
+    ) {
+      throw new BadRequestError(
+        'Chỉ có thể phát hành chứng nhận cho yêu cầu đã kích hoạt bảo hành.',
+        'WARRANTY_ACTIVATION_REQUEST_NOT_ELIGIBLE_FOR_CERTIFICATE',
+        {
+          activatedItemCount,
+          itemCount: request.items.length,
+          requestId: input.requestId,
+          requestStatus: request.status,
+        },
+      );
     }
 
     let certificate: WarrantyActivationRequestCertificate;

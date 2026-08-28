@@ -1,4 +1,4 @@
-import { BadRequestError } from '@/common/response';
+import { NotFoundError } from '@/common/response';
 import { toWarrantyActivationRequestResponse } from '@/modules/warranty-activation-requests/mappers/warranty-activation-request.mapper';
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
 import { IssueWarrantyActivationRequestCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-activation-request-certificate.use-case';
@@ -18,10 +18,18 @@ export class ResendWarrantyActivationRequestCertificateEmailUseCase {
     const request = await this.repository.findById(requestId);
     const certificate = request?.certificate;
 
-    if (!request || !certificate) {
-      throw new BadRequestError(
-        'WARRANTY_ACTIVATION_CERTIFICATE_NOT_FOUND',
+    if (!request) {
+      throw new NotFoundError(
+        'Warranty activation request not found',
+        'WARRANTY_ACTIVATION_REQUEST_NOT_FOUND',
+        { requestId },
+      );
+    }
+    if (!certificate) {
+      throw new NotFoundError(
         'Warranty activation certificate not found',
+        'WARRANTY_ACTIVATION_CERTIFICATE_NOT_FOUND',
+        { requestId },
       );
     }
 
@@ -36,9 +44,10 @@ export class ResendWarrantyActivationRequestCertificateEmailUseCase {
 
     const updatedRequest = await this.repository.findById(requestId);
     if (!updatedRequest) {
-      throw new BadRequestError(
-        'WARRANTY_ACTIVATION_REQUEST_NOT_FOUND',
+      throw new NotFoundError(
         'Warranty activation request not found',
+        'WARRANTY_ACTIVATION_REQUEST_NOT_FOUND',
+        { requestId },
       );
     }
 
