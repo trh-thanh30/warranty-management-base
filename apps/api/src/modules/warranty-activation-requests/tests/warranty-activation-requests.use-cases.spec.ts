@@ -927,35 +927,19 @@ describe('WarrantyActivationRequestsUseCases', () => {
   });
 
   it('resends the request-owned certificate', async () => {
-    const certificate = {
-      certificate_number: 'CERT-REQUEST-1',
-      email_status: 'FAILED',
-      emailed_at: null,
-      generated_at: new Date('2026-07-19T04:00:00.000Z'),
-      id: 'request-certificate-1',
-      last_error: 'Email failed',
-      recipient_email: 'customer@example.com',
-      status: 'GENERATED',
-      storage_key: 'private/request.pdf',
-    };
-    const request = {
-      ...baseRequest,
-      certificate,
-    };
-    repository.findById.mockResolvedValue(request);
+    repository.findById.mockResolvedValue(baseRequest);
     const resendWarrantyCertificateEmailUseCase = {
       execute: jest.fn().mockResolvedValue(undefined),
     };
     const useCase = new ResendWarrantyActivationRequestCertificateEmailUseCase(
       repository as never,
       resendWarrantyCertificateEmailUseCase as never,
-      issueWarrantyActivationRequestCertificateUseCase as never,
     );
 
     await useCase.execute('request-id');
 
     expect(resendWarrantyCertificateEmailUseCase.execute).toHaveBeenCalledWith(
-      'request-certificate-1',
+      'request-id',
     );
   });
 
@@ -963,7 +947,6 @@ describe('WarrantyActivationRequestsUseCases', () => {
     repository.findById.mockResolvedValue(null);
     const useCase = new ResendWarrantyActivationRequestCertificateEmailUseCase(
       repository as never,
-      { execute: jest.fn() } as never,
       { execute: jest.fn() } as never,
     );
 
@@ -975,14 +958,21 @@ describe('WarrantyActivationRequestsUseCases', () => {
   });
 
   it('returns a structured not-found error when the request certificate is absent', async () => {
-    repository.findById.mockResolvedValue({
-      ...baseRequest,
-      certificate: null,
-    });
+    repository.findById.mockResolvedValue(baseRequest);
+    const resendCertificate = {
+      execute: jest
+        .fn()
+        .mockRejectedValue(
+          new NotFoundError(
+            'Warranty activation certificate not found',
+            'WARRANTY_ACTIVATION_CERTIFICATE_NOT_FOUND',
+            { requestId: 'request-id' },
+          ),
+        ),
+    };
     const useCase = new ResendWarrantyActivationRequestCertificateEmailUseCase(
       repository as never,
-      { execute: jest.fn() } as never,
-      { execute: jest.fn() } as never,
+      resendCertificate as never,
     );
 
     await expect(useCase.execute('request-id')).rejects.toMatchObject({
@@ -990,38 +980,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
       details: { requestId: 'request-id' },
       statusCode: 404,
     });
-  });
-
-  it('regenerates a failed request certificate before resending', async () => {
-    repository.findById.mockResolvedValue({
-      ...baseRequest,
-      certificate: {
-        certificate_number: 'CERT-REQUEST-1',
-        email_status: 'PENDING',
-        emailed_at: null,
-        generated_at: null,
-        id: 'request-certificate-1',
-        last_error: 'PDF generation failed',
-        recipient_email: 'customer@example.com',
-        status: 'FAILED',
-        storage_key: null,
-      },
-    });
-    const resendEmail = { execute: jest.fn() };
-    const issueCertificate = { execute: jest.fn().mockResolvedValue({}) };
-    const useCase = new ResendWarrantyActivationRequestCertificateEmailUseCase(
-      repository as never,
-      resendEmail as never,
-      issueCertificate as never,
-    );
-
-    await useCase.execute('request-id');
-
-    expect(issueCertificate.execute).toHaveBeenCalledWith({
-      recipientEmail: 'customer@example.com',
-      requestId: 'request-id',
-    });
-    expect(resendEmail.execute).not.toHaveBeenCalled();
+    expect(resendCertificate.execute).toHaveBeenCalledWith('request-id');
   });
 });
 

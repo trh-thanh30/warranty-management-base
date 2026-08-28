@@ -2,9 +2,9 @@ import { UploadAssetService } from '@/modules/assets/services/upload-asset.servi
 import EmailConfig from '@/config/email.config';
 import { SendEmailUseCase } from '@/modules/email/use-cases/send-email.usecase';
 import { WarrantyActivationRequestCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-activation-request-certificates.repository';
+import { WARRANTY_CERTIFICATE_EMAIL_STATUS } from '@/modules/warranty-certificates/warranty-certificates.types';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
-import { warranty_certificate_email_status } from '@prisma/client';
 
 @Injectable()
 export class WarrantyActivationRequestCertificateEmailService {
@@ -23,27 +23,27 @@ export class WarrantyActivationRequestCertificateEmailService {
   async queueEmail(certificateId: string) {
     const certificate = await this.repository.findEmailDataById(certificateId);
     if (!certificate) throw new Error('Request certificate not found');
-    if (!certificate.recipient_email) {
+    if (!certificate.recipientEmail) {
       throw new Error('Request certificate recipient email is required');
     }
-    if (!certificate.storage_key) {
+    if (!certificate.storageKey) {
       throw new Error('Request certificate PDF is unavailable');
     }
 
     try {
       const stream = await this.uploadAssetService.getStream(
-        certificate.storage_key,
+        certificate.storageKey,
       );
       const pdf = await streamToBuffer(stream);
-      const items = certificate.activation_request.items;
-      const subject = `Chứng nhận bảo hành điện tử ${certificate.certificate_number}`;
+      const items = certificate.request.items;
+      const subject = `Chứng nhận bảo hành điện tử ${certificate.certificateNumber}`;
       const text = [
-        `Xin chào ${certificate.activation_request.customer_name},`,
+        `Xin chào ${certificate.request.customerName},`,
         '',
         'Các sản phẩm trong yêu cầu đã được kích hoạt bảo hành:',
         ...items.map(
           (item) =>
-            `- ${item.position_label}: ${item.product_name} | ${item.serial_number ?? '-'} | ${item.warranty_code}`,
+            `- ${item.positionLabel}: ${item.productName} | ${item.serialNumber ?? '-'} | ${item.warrantyCode}`,
         ),
         '',
         'Chứng nhận bảo hành được đính kèm trong email này.',
@@ -54,32 +54,32 @@ export class WarrantyActivationRequestCertificateEmailService {
           {
             contentBase64: pdf.toString('base64'),
             contentType: 'application/pdf',
-            filename: `${certificate.certificate_number}.pdf`,
+            filename: `${certificate.certificateNumber}.pdf`,
           },
         ],
         context: {
           brandLogoUrl: this.emailConfig.brandLogoUrl,
           certificateCount: items.length,
-          certificateNumber: certificate.certificate_number,
+          certificateNumber: certificate.certificateNumber,
           certificates: items.map((item) => ({
-            positionLabel: item.position_label,
-            productName: item.product_name,
-            warrantyCode: item.warranty_code,
+            positionLabel: item.positionLabel,
+            productName: item.productName,
+            warrantyCode: item.warrantyCode,
           })),
-          customerName: certificate.activation_request.customer_name,
+          customerName: certificate.request.customerName,
           subject,
         },
         subject,
         template: 'warranty-certificates',
         text,
-        to: certificate.recipient_email,
+        to: certificate.recipientEmail,
         warrantyActivationRequestCertificateId: certificate.id,
       });
 
       return this.repository.update(certificate.id, {
-        email_status: warranty_certificate_email_status.QUEUED,
-        emailed_at: new Date(),
-        last_error: null,
+        emailStatus: WARRANTY_CERTIFICATE_EMAIL_STATUS.QUEUED,
+        emailedAt: new Date(),
+        lastError: null,
       });
     } catch (error) {
       const message =
@@ -88,8 +88,8 @@ export class WarrantyActivationRequestCertificateEmailService {
         `Failed to queue request certificate email ${certificate.id}: ${message}`,
       );
       await this.repository.update(certificate.id, {
-        email_status: warranty_certificate_email_status.FAILED,
-        last_error: message,
+        emailStatus: WARRANTY_CERTIFICATE_EMAIL_STATUS.FAILED,
+        lastError: message,
       });
       throw error;
     }

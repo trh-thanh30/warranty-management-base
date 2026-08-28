@@ -1,5 +1,6 @@
 import { BadRequestError, NotFoundError } from '@/common/response';
 import { UploadAssetService } from '@/modules/assets/services/upload-asset.service';
+import { ASSET_ACCESS_TYPE } from '@/modules/assets/types/assets.types';
 import { WarrantyActivationRequestCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-activation-request-certificates.repository';
 import { WarrantyActivationRequestCertificateEmailService } from '@/modules/warranty-certificates/services/warranty-activation-request-certificate-email.service';
 import { WarrantyCertificatePdfService } from '@/modules/warranty-certificates/services/warranty-certificate-pdf.service';
@@ -8,17 +9,19 @@ import {
   isCertificateNumberConflict,
 } from '@/modules/warranty-certificates/utils/warranty-certificate-number.util';
 import { buildRequestWarrantyCertificateViewModel } from '@/modules/warranty-certificates/utils/warranty-certificate-view-model.util';
-import { Injectable, Logger } from '@nestjs/common';
+import type {
+  WarrantyActivationRequestCertificateRecord,
+  WarrantyActivationRequestForCertificateIssuance,
+} from '@/modules/warranty-certificates/warranty-activation-request-certificate.types';
 import {
-  asset_access_type,
-  warranty_activation_request_status,
-  warranty_certificate_email_status,
-  warranty_certificate_status,
-  type WarrantyActivationRequestCertificate,
-} from '@prisma/client';
+  WARRANTY_CERTIFICATE_EMAIL_STATUS,
+  WARRANTY_CERTIFICATE_STATUS,
+} from '@/modules/warranty-certificates/warranty-certificates.types';
+import { Injectable, Logger } from '@nestjs/common';
 import { Readable } from 'node:stream';
 
 const CERTIFICATE_NUMBER_GENERATION_ATTEMPTS = 3;
+const ACTIVATED_REQUEST_STATUS = 'ACTIVATED';
 
 @Injectable()
 export class IssueWarrantyActivationRequestCertificateUseCase {
@@ -35,7 +38,7 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
 
   async execute(input: { recipientEmail?: string; requestId: string }) {
     const existing = await this.repository.findByRequestId(input.requestId);
-    if (existing?.status === warranty_certificate_status.GENERATED) {
+    if (existing?.status === WARRANTY_CERTIFICATE_STATUS.GENERATED) {
       return existing;
     }
 
@@ -52,11 +55,10 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
 
     const activatedItemCount = request.items.filter(
       (item) =>
-        item.status === warranty_activation_request_status.ACTIVATED &&
-        item.activated_at !== null,
+        item.status === ACTIVATED_REQUEST_STATUS && item.activatedAt !== null,
     ).length;
     if (
-      request.status !== warranty_activation_request_status.ACTIVATED ||
+      request.status !== ACTIVATED_REQUEST_STATUS ||
       activatedItemCount === 0
     ) {
       throw new BadRequestError(
@@ -71,7 +73,7 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
       );
     }
 
-    let certificate: WarrantyActivationRequestCertificate;
+    let certificate: WarrantyActivationRequestCertificateRecord;
     try {
       certificate = await this.generateCertificate({
         existing,
@@ -88,15 +90,9 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
   }
 
   private async generateCertificate(input: {
-    existing: WarrantyActivationRequestCertificate | null;
+    existing: WarrantyActivationRequestCertificateRecord | null;
     input: { recipientEmail?: string; requestId: string };
-    request: NonNullable<
-      Awaited<
-        ReturnType<
-          WarrantyActivationRequestCertificatesRepository['findRequestForIssuance']
-        >
-      >
-    >;
+    request: WarrantyActivationRequestForCertificateIssuance;
   }) {
     for (
       let attempt = 0;
@@ -106,26 +102,26 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
       let uploadedPath: string | null = null;
       try {
         const certificateNumber =
-          input.existing?.certificate_number ?? generateCertificateNumber();
+          input.existing?.certificateNumber ?? generateCertificateNumber();
         const viewModel = buildRequestWarrantyCertificateViewModel({
           certificateNumber,
-          customerAddress: input.request.full_address,
-          customerEmail: input.request.customer_email,
-          customerName: input.request.customer_name,
-          customerPhone: input.request.customer_phone,
-          dealerName: input.request.dealer?.name,
-          installedAt: input.request.installed_at,
+          customerAddress: input.request.fullAddress,
+          customerEmail: input.request.customerEmail,
+          customerName: input.request.customerName,
+          customerPhone: input.request.customerPhone,
+          dealerName: input.request.dealerName,
+          installedAt: input.request.installedAt,
           items: input.request.items.map((item) => ({
-            durationMonths: item.warranty.duration_months,
-            endDate: item.warranty.end_date,
-            positionLabel: item.position_label,
-            productCode: item.product_code,
-            productName: item.product_name,
-            serialNumber: item.serial_number,
-            warrantyCode: item.warranty_code,
+            durationMonths: item.durationMonths,
+            endDate: item.endDate,
+            positionLabel: item.positionLabel,
+            productCode: item.productCode,
+            productName: item.productName,
+            serialNumber: item.serialNumber,
+            warrantyCode: item.warrantyCode,
           })),
-          vehicleModel: input.request.vehicle_model,
-          vehiclePlate: input.request.vehicle_plate,
+          vehicleModel: input.request.vehicleModel,
+          vehiclePlate: input.request.vehiclePlate,
         });
         const pdfBuffer =
           await this.pdfService.createPdfFromViewModel(viewModel);
@@ -143,33 +139,31 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
             stream: Readable.from(pdfBuffer),
           },
           {
-            accessType: asset_access_type.PRIVATE,
+            accessType: ASSET_ACCESS_TYPE.PRIVATE,
             folder: 'warranty-activation-request-certificates',
           },
         );
         uploadedPath = uploaded.path;
         const data = {
-          certificate_number: certificateNumber,
-          email_status: warranty_certificate_email_status.PENDING,
-          generated_at: new Date(),
-          last_error: null,
+          certificateNumber,
+          emailStatus: WARRANTY_CERTIFICATE_EMAIL_STATUS.PENDING,
+          generatedAt: new Date(),
+          lastError: null,
           metadata: {
             itemCount: input.request.items.length,
             requestId: input.input.requestId,
-            warrantyCodes: input.request.items.map(
-              (item) => item.warranty_code,
-            ),
+            warrantyCodes: input.request.items.map((item) => item.warrantyCode),
           },
-          recipient_email: normalizeEmail(input.input.recipientEmail),
-          status: warranty_certificate_status.GENERATED,
-          storage_key: uploaded.path,
+          recipientEmail: normalizeEmail(input.input.recipientEmail),
+          status: WARRANTY_CERTIFICATE_STATUS.GENERATED,
+          storageKey: uploaded.path,
         };
 
         return input.existing
           ? this.repository.update(input.existing.id, data)
           : this.repository.create({
               ...data,
-              activation_request_id: input.input.requestId,
+              activationRequestId: input.input.requestId,
             });
       } catch (error) {
         if (uploadedPath) {
@@ -194,16 +188,16 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
   }
 
   private async recordFailure(
-    existing: WarrantyActivationRequestCertificate | null,
+    existing: WarrantyActivationRequestCertificateRecord | null,
     input: { recipientEmail?: string; requestId: string },
     error: unknown,
   ) {
     const data = {
-      email_status: warranty_certificate_email_status.PENDING,
-      last_error: error instanceof Error ? error.message : String(error),
-      recipient_email: normalizeEmail(input.recipientEmail),
-      status: warranty_certificate_status.FAILED,
-      storage_key: null,
+      emailStatus: WARRANTY_CERTIFICATE_EMAIL_STATUS.PENDING,
+      lastError: error instanceof Error ? error.message : String(error),
+      recipientEmail: normalizeEmail(input.recipientEmail),
+      status: WARRANTY_CERTIFICATE_STATUS.FAILED,
+      storageKey: null,
     };
     try {
       if (existing) {
@@ -211,8 +205,8 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
       } else {
         await this.repository.create({
           ...data,
-          activation_request_id: input.requestId,
-          certificate_number: generateCertificateNumber(),
+          activationRequestId: input.requestId,
+          certificateNumber: generateCertificateNumber(),
         });
       }
     } catch (persistenceError) {
