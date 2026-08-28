@@ -93,6 +93,39 @@ describe('EmailProcessor', () => {
     );
     expect(emailStatusService.markRequestSent).not.toHaveBeenCalled();
   });
+
+  it('does not suppress a retry when sent persistence fails', async () => {
+    const emailService = {
+      sendEmail: jest.fn().mockResolvedValue(undefined),
+    };
+    const emailStatusService = createEmailStatusService();
+    emailStatusService.markSent.mockRejectedValueOnce(
+      new Error('Database unavailable'),
+    );
+    const processor = new EmailProcessor(
+      emailService as never,
+      emailStatusService as never,
+    );
+    const job = {
+      data: {
+        idempotencyKey: 'certificate-email:certificate-1',
+        subject: 'Warranty certificate',
+        text: 'Certificate attached',
+        to: 'customer@example.com',
+        warrantyCertificateIds: ['certificate-1'],
+      },
+      id: 'job-id',
+      updateProgress: jest.fn(),
+    };
+
+    await expect(processor.process(job as never)).rejects.toThrow(
+      'Database unavailable',
+    );
+    await processor.process(job as never);
+
+    expect(emailService.sendEmail).toHaveBeenCalledTimes(2);
+    expect(emailStatusService.markSent).toHaveBeenCalledTimes(2);
+  });
 });
 
 function createEmailStatusService() {

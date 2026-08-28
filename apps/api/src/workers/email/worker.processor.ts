@@ -63,6 +63,14 @@ export class EmailProcessor extends WorkerHost {
         );
       }
 
+      job.updateProgress(100);
+      await Promise.all([
+        this.warrantyCertificateEmailStatusService.markSent(certificateIds),
+        this.warrantyCertificateEmailStatusService.markRequestSent(
+          warrantyActivationRequestCertificateId,
+        ),
+      ]);
+
       if (idempotencyKey) {
         this.processedJobs.add(idempotencyKey);
         if (this.processedJobs.size > 10000) {
@@ -71,14 +79,6 @@ export class EmailProcessor extends WorkerHost {
           recentJobs.forEach((key) => this.processedJobs.add(key));
         }
       }
-
-      job.updateProgress(100);
-      await Promise.all([
-        this.warrantyCertificateEmailStatusService.markSent(certificateIds),
-        this.warrantyCertificateEmailStatusService.markRequestSent(
-          warrantyActivationRequestCertificateId,
-        ),
-      ]);
 
       this.logger.log(`Email job ${job.id} completed successfully`);
     } catch (error) {
