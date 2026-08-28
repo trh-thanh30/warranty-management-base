@@ -1,5 +1,5 @@
+import type { WarrantyCertificateViewModel } from '@/modules/warranty-certificates/types/warranty-certificate.types';
 import { Injectable } from '@nestjs/common';
-import type { WarrantyCertificateViewModel } from '@/modules/warranty-certificates/warranty-certificate.types';
 import Handlebars from 'handlebars';
 import fs from 'node:fs';
 import path from 'node:path';

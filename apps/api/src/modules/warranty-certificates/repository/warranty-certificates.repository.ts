@@ -11,7 +11,7 @@ import {
   WarrantyCertificateStorageReference,
   WarrantyCertificateWriteInput,
   WarrantyForCertificate,
-} from '@/modules/warranty-certificates/warranty-certificates.types';
+} from '@/modules/warranty-certificates/types/warranty-certificates.types';
 import { Injectable } from '@nestjs/common';
 import {
   Prisma,

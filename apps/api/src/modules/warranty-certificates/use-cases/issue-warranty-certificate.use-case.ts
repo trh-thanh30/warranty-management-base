@@ -4,11 +4,11 @@ import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/
 import { WarrantyCertificateEmailQueueService } from '@/modules/warranty-certificates/services/warranty-certificate-email-queue.service';
 import { WarrantyCertificatePdfService } from '@/modules/warranty-certificates/services/warranty-certificate-pdf.service';
 import {
-  WarrantyCertificateActivationRequest,
-  WarrantyCertificateRecord,
   WARRANTY_CERTIFICATE_EMAIL_STATUS,
   WARRANTY_CERTIFICATE_STATUS,
-} from '@/modules/warranty-certificates/warranty-certificates.types';
+  WarrantyCertificateActivationRequest,
+  WarrantyCertificateRecord,
+} from '@/modules/warranty-certificates/types/warranty-certificates.types';
 import {
   generateCertificateNumber,
   isCertificateNumberConflict,

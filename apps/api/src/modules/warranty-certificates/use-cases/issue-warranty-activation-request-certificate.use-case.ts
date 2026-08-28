@@ -4,19 +4,19 @@ import { ASSET_ACCESS_TYPE } from '@/modules/assets/types/assets.types';
 import { WarrantyActivationRequestCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-activation-request-certificates.repository';
 import { WarrantyActivationRequestCertificateEmailService } from '@/modules/warranty-certificates/services/warranty-activation-request-certificate-email.service';
 import { WarrantyCertificatePdfService } from '@/modules/warranty-certificates/services/warranty-certificate-pdf.service';
+import type {
+  WarrantyActivationRequestCertificateRecord,
+  WarrantyActivationRequestForCertificateIssuance,
+} from '@/modules/warranty-certificates/types/warranty-activation-request-certificate.types';
+import {
+  WARRANTY_CERTIFICATE_EMAIL_STATUS,
+  WARRANTY_CERTIFICATE_STATUS,
+} from '@/modules/warranty-certificates/types/warranty-certificates.types';
 import {
   generateCertificateNumber,
   isCertificateNumberConflict,
 } from '@/modules/warranty-certificates/utils/warranty-certificate-number.util';
 import { buildRequestWarrantyCertificateViewModel } from '@/modules/warranty-certificates/utils/warranty-certificate-view-model.util';
-import type {
-  WarrantyActivationRequestCertificateRecord,
-  WarrantyActivationRequestForCertificateIssuance,
-} from '@/modules/warranty-certificates/warranty-activation-request-certificate.types';
-import {
-  WARRANTY_CERTIFICATE_EMAIL_STATUS,
-  WARRANTY_CERTIFICATE_STATUS,
-} from '@/modules/warranty-certificates/warranty-certificates.types';
 import { Injectable, Logger } from '@nestjs/common';
 import { Readable } from 'node:stream';
 

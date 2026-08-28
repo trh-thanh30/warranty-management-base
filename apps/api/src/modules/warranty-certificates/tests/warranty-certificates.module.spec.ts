@@ -1,6 +1,6 @@
+import { WarrantyCertificatesModule } from '@/modules/warranty-certificates/modules/warranty-certificates.module';
 import { GetWarrantyCertificateFileForActivationRequestUseCase } from '@/modules/warranty-certificates/use-cases/get-warranty-certificate-file-for-activation-request.use-case';
 import { IssueWarrantyActivationRequestCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-activation-request-certificate.use-case';
-import { WarrantyCertificatesModule } from '@/modules/warranty-certificates/warranty-certificates.module';
 import { MODULE_METADATA } from '@nestjs/common/constants';
 
 describe('WarrantyCertificatesModule', () => {

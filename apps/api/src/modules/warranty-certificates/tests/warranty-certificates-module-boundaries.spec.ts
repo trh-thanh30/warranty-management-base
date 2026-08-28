@@ -1,8 +1,8 @@
+import { WarrantyCertificateEmailStatusModule } from '@/modules/warranty-certificates/modules/warranty-certificate-email-status.module';
+import { WarrantyCertificatesModule } from '@/modules/warranty-certificates/modules/warranty-certificates.module';
 import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
 import { WarrantyCertificateEmailStatusService } from '@/modules/warranty-certificates/services/warranty-certificate-email-status.service';
 import { GetWarrantyCertificateFileForActivationRequestUseCase } from '@/modules/warranty-certificates/use-cases/get-warranty-certificate-file-for-activation-request.use-case';
-import { WarrantyCertificateEmailStatusModule } from '@/modules/warranty-certificates/warranty-certificate-email-status.module';
-import { WarrantyCertificatesModule } from '@/modules/warranty-certificates/warranty-certificates.module';
 import { EmailProcessor } from '@/workers/email/worker.processor';
 import { MODULE_METADATA } from '@nestjs/common/constants';
 import { readFileSync } from 'node:fs';

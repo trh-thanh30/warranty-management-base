@@ -3,11 +3,11 @@ import { WarrantyCertificateHtmlTemplateService } from '@/modules/warranty-certi
 import type {
   WarrantyCertificatePdfInput,
   WarrantyCertificateViewModel,
-} from '@/modules/warranty-certificates/warranty-certificate.types';
+} from '@/modules/warranty-certificates/types/warranty-certificate.types';
 import { buildWarrantyCertificateViewModel } from '@/modules/warranty-certificates/utils/warranty-certificate-view-model.util';
 import { Injectable } from '@nestjs/common';
 
-export type { WarrantyCertificatePdfInput } from '@/modules/warranty-certificates/warranty-certificate.types';
+export type { WarrantyCertificatePdfInput } from '@/modules/warranty-certificates/types/warranty-certificate.types';
 
 @Injectable()
 export class WarrantyCertificatePdfService {

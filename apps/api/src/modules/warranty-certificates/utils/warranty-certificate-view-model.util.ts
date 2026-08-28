@@ -2,7 +2,7 @@ import type {
   RequestWarrantyCertificatePdfInput,
   WarrantyCertificatePdfInput,
   WarrantyCertificateViewModel,
-} from '@/modules/warranty-certificates/warranty-certificate.types';
+} from '@/modules/warranty-certificates/types/warranty-certificate.types';
 import { formatWarrantyCertificateDate } from '@/modules/warranty-certificates/utils/warranty-certificate-date.util';
 import {
   formatWarrantyCertificateValue,

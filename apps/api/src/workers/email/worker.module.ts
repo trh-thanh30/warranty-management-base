@@ -1,21 +1,21 @@
-import { Module } from '@nestjs/common';
-import { BullModule } from '@nestjs/bullmq';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { validateEnv } from '@/config/env.validation';
 import {
   appConfig,
+  bullConfig,
+  bullConfigFactory,
   databaseConfig,
   emailConfig,
   jobsConfig,
   jwtConfig,
   rateLimitConfig,
-  bullConfig,
-  bullConfigFactory,
   redisConfig,
 } from '@/config';
+import { validateEnv } from '@/config/env.validation';
+import { WarrantyCertificateEmailStatusModule } from '@/modules/warranty-certificates/modules/warranty-certificate-email-status.module';
 import { EmailProcessor } from '@/workers/email/worker.processor';
 import { WorkerEmailService } from '@/workers/email/worker.service';
-import { WarrantyCertificateEmailStatusModule } from '@/modules/warranty-certificates/warranty-certificate-email-status.module';
+import { BullModule } from '@nestjs/bullmq';
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [

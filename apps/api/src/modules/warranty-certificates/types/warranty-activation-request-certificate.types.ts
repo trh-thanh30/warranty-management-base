@@ -3,7 +3,7 @@ import type { WarrantyActivationRequestStatus } from '@repo/shared';
 import type {
   WarrantyCertificateEmailStatus,
   WarrantyCertificateStatus,
-} from '@/modules/warranty-certificates/warranty-certificates.types';
+} from '@/modules/warranty-certificates/types/warranty-certificates.types';
 
 export type WarrantyActivationRequestCertificateRecord = {
   activationRequestId: string;
