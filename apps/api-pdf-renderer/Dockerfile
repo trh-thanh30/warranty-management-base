@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:22-alpine AS builder
+FROM node:22.23.2-alpine3.24 AS builder
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -14,7 +14,7 @@ COPY apps/api-pdf-renderer/package.json ./apps/api-pdf-renderer/package.json
 
 RUN pnpm install --frozen-lockfile --prod --filter @repo/api-pdf-renderer --ignore-scripts
 
-FROM node:22-alpine AS runner
+FROM node:22.23.2-alpine3.24 AS runner
 
 ENV NODE_ENV=production
 ENV PORT=3001
@@ -38,5 +38,8 @@ WORKDIR /app/apps/api-pdf-renderer
 USER pdf
 
 EXPOSE 3001
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD node -e "require('http').get('http://127.0.0.1:3001/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
 
 CMD ["node", "server.mjs"]

@@ -620,7 +620,7 @@ test("API runtime excludes migration and unused build tooling", async () => {
 });
 
 test("production runners refresh Alpine security packages before image scans", async () => {
-  const apps = ["api", "api-migrator", "web", "admin"];
+  const apps = ["api", "api-migrator", "api-pdf-renderer", "web", "admin"];
   const publishWorkflow = await readFile(
     path.join(repoRoot, ".github", "workflows", "publish-images.yml"),
     "utf8",
@@ -631,10 +631,11 @@ test("production runners refresh Alpine security packages before image scans", a
       path.join(repoRoot, "apps", app, "Dockerfile"),
       "utf8",
     );
-    const runnerStage = dockerfile.slice(
-      dockerfile.indexOf("FROM node:22-alpine AS runner"),
-    );
+    const runnerStage = dockerfile.match(
+      /FROM [^\n]+ AS runner[\s\S]*?(?=\nFROM |$)/,
+    )?.[0];
 
+    assert.ok(runnerStage, `${app} production runner stage must exist`);
     assert.match(
       runnerStage,
       /RUN apk upgrade --no-cache/,
@@ -645,6 +646,7 @@ test("production runners refresh Alpine security packages before image scans", a
   const imageBuildSteps = [
     "Build and push API image",
     "Build and push API migrator image",
+    "Build and push PDF renderer image",
     "Build and push Web image",
     "Build and push Admin image",
   ];
@@ -832,7 +834,7 @@ test("container runtime stages match the production ports documented for deploym
     "utf8",
   );
   const pdfRendererStage = pdfRendererDockerfile.match(
-    /FROM node:22-alpine AS runner[\s\S]*?(?=\nFROM |$)/,
+    /FROM [^\n]+ AS runner[\s\S]*?(?=\nFROM |$)/,
   )?.[0];
 
   assert.ok(pdfRendererStage, "PDF renderer production stage must exist");
@@ -847,19 +849,28 @@ test("container runtime stages match the production ports documented for deploym
 });
 
 test("PDF renderer remains independently buildable and quality-gated", async () => {
-  const [packageJson, developmentCompose, ciWorkflow, publishWorkflow] =
-    await Promise.all([
-      readFile(
-        path.join(repoRoot, "apps", "api-pdf-renderer", "package.json"),
-        "utf8",
-      ),
-      readFile(path.join(repoRoot, "docker-compose.dev.yml"), "utf8"),
-      readFile(path.join(repoRoot, ".github", "workflows", "ci.yml"), "utf8"),
-      readFile(
-        path.join(repoRoot, ".github", "workflows", "publish-images.yml"),
-        "utf8",
-      ),
-    ]);
+  const [
+    packageJson,
+    dockerfile,
+    developmentCompose,
+    ciWorkflow,
+    publishWorkflow,
+  ] = await Promise.all([
+    readFile(
+      path.join(repoRoot, "apps", "api-pdf-renderer", "package.json"),
+      "utf8",
+    ),
+    readFile(
+      path.join(repoRoot, "apps", "api-pdf-renderer", "Dockerfile"),
+      "utf8",
+    ),
+    readFile(path.join(repoRoot, "docker-compose.dev.yml"), "utf8"),
+    readFile(path.join(repoRoot, ".github", "workflows", "ci.yml"), "utf8"),
+    readFile(
+      path.join(repoRoot, ".github", "workflows", "publish-images.yml"),
+      "utf8",
+    ),
+  ]);
   const scripts = JSON.parse(packageJson).scripts;
 
   for (const script of ["build", "check-types", "lint", "test"]) {
@@ -877,6 +888,17 @@ test("PDF renderer remains independently buildable and quality-gated", async () 
   assert.match(
     publishWorkflow,
     /Build and push PDF renderer image[\s\S]*file: apps\/api-pdf-renderer\/Dockerfile/,
+  );
+  assert.match(dockerfile, /FROM node:\d+\.\d+\.\d+-alpine\d+\.\d+ AS runner/);
+  assert.match(dockerfile, /USER pdf/);
+  assert.match(dockerfile, /HEALTHCHECK[\s\S]*127\.0\.0\.1:3001\/health/);
+  assert.match(
+    ciWorkflow,
+    /pdf-renderer-chromium:[\s\S]*timeout-minutes: 15[\s\S]*--cpus 2[\s\S]*--memory 2g[\s\S]*--pids-limit 256/,
+  );
+  assert.match(
+    ciWorkflow,
+    /RUN_PDF_RENDERER_INTEGRATION: "true"[\s\S]*actions\/upload-artifact@v4/,
   );
 });
 

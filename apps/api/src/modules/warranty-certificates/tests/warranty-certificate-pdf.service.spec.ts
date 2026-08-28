@@ -3,6 +3,8 @@ import { WarrantyCertificateHtmlTemplateService } from '@/modules/warranty-certi
 import { WarrantyCertificatePdfService } from '@/modules/warranty-certificates/services/warranty-certificate-pdf.service';
 import type { WarrantyCertificateViewModel } from '@/modules/warranty-certificates/warranty-certificate.types';
 import { PDFDocument } from 'pdf-lib';
+import fs from 'node:fs';
+import path from 'node:path';
 
 describe('WarrantyCertificatePdfService', () => {
   it('normalizes legacy input, renders HTML and delegates PDF creation', async () => {
@@ -143,6 +145,7 @@ describeIntegration(
         warrantyDurationMonths: 36,
       });
 
+      savePdfArtifact('single-product-certificate.pdf', pdf);
       expect(pdf.subarray(0, 5).toString()).toBe('%PDF-');
       expect((await PDFDocument.load(pdf)).getPageCount()).toBe(1);
     });
@@ -180,6 +183,7 @@ describeIntegration(
 
       const pdf = await service.createPdfFromViewModel(viewModel);
 
+      savePdfArtifact('two-product-certificate.pdf', pdf);
       expect((await PDFDocument.load(pdf)).getPageCount()).toBe(1);
     });
 
@@ -219,7 +223,16 @@ describeIntegration(
       expect(html).toContain('Sản phẩm bảo hành 45');
 
       const pdf = await htmlPdfRenderer.createPdf(html);
+      savePdfArtifact('aggregate-multi-page-certificate.pdf', pdf);
       expect((await PDFDocument.load(pdf)).getPageCount()).toBeGreaterThan(1);
     });
   },
 );
+
+function savePdfArtifact(fileName: string, pdf: Buffer) {
+  const artifactDirectory = process.env.PDF_TEST_ARTIFACT_DIR;
+  if (!artifactDirectory) return;
+
+  fs.mkdirSync(artifactDirectory, { recursive: true });
+  fs.writeFileSync(path.join(artifactDirectory, fileName), pdf);
+}

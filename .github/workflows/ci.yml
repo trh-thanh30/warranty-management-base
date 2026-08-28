@@ -65,6 +65,86 @@ jobs:
       - run: pnpm test:pdf-renderer
       - run: pnpm build:pdf-renderer
 
+  pdf-renderer-chromium:
+    name: PDF Renderer Chromium acceptance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: pdf-renderer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.0.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build production PDF renderer image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/api-pdf-renderer/Dockerfile
+          target: runner
+          load: true
+          pull: true
+          no-cache-filters: runner
+          tags: warranty-management-base-api-pdf-renderer:ci
+          cache-from: type=gha,scope=api-pdf-renderer-ci
+          cache-to: type=gha,mode=max,scope=api-pdf-renderer-ci
+      - name: Verify non-root runtime user
+        run: |
+          test "$(docker image inspect warranty-management-base-api-pdf-renderer:ci --format '{{.Config.User}}')" = "pdf"
+      - name: Start bounded PDF renderer container
+        run: |
+          docker run --detach \
+            --name pdf-renderer-acceptance \
+            --cpus 2 \
+            --memory 2g \
+            --pids-limit 256 \
+            --read-only \
+            --tmpfs /tmp:rw,noexec,nosuid,size=512m \
+            --publish 127.0.0.1:3001:3001 \
+            warranty-management-base-api-pdf-renderer:ci
+      - name: Wait for renderer health check
+        run: |
+          for attempt in $(seq 1 30); do
+            status="$(docker inspect pdf-renderer-acceptance --format '{{.State.Health.Status}}')"
+            if [ "$status" = "healthy" ]; then
+              exit 0
+            fi
+            if [ "$status" = "unhealthy" ]; then
+              docker logs pdf-renderer-acceptance
+              exit 1
+            fi
+            sleep 2
+          done
+          docker logs pdf-renderer-acceptance
+          exit 1
+      - name: Render real aggregate warranty certificates
+        run: pnpm --filter @repo/api test -- warranty-certificate-pdf.service.spec.ts --runInBand
+        env:
+          PDF_RENDERER_URL: http://127.0.0.1:3001
+          PDF_TEST_ARTIFACT_DIR: ${{ github.workspace }}/artifacts/pdf-renderer
+          RUN_PDF_RENDERER_INTEGRATION: "true"
+      - name: Collect renderer diagnostics
+        if: failure()
+        run: |
+          mkdir -p artifacts/pdf-renderer
+          docker logs pdf-renderer-acceptance > artifacts/pdf-renderer/container.log 2>&1 || true
+          docker inspect pdf-renderer-acceptance > artifacts/pdf-renderer/container.json 2>&1 || true
+      - name: Upload renderer diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-renderer-acceptance-diagnostics
+          path: artifacts/pdf-renderer
+          if-no-files-found: warn
+      - name: Stop renderer container
+        if: always()
+        run: docker rm --force pdf-renderer-acceptance || true
+
   web:
     name: Web
     runs-on: ubuntu-latest
@@ -108,6 +188,7 @@ jobs:
       - packages
       - api
       - pdf-renderer
+      - pdf-renderer-chromium
       - web
       - admin
     if: ${{ always() }}

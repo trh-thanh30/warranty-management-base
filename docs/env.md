@@ -52,6 +52,8 @@ Repo dùng nhiều file env theo môi trường. File mẫu là `.env.example`.
 - `PDF_RENDERER_URL`: URL của Chromium renderer. Docker Compose đặt API container dùng `http://pdf-renderer:3001`; khi API chạy trên host có thể dùng `http://localhost:3001`.
 - `PDF_RENDER_TIMEOUT_MS`: thời gian tối đa để render một PDF, mặc định `45000` ms.
 - `PDF_MAX_BODY_BYTES`: giới hạn request HTML gửi tới renderer, mặc định `10485760` byte.
+- `PDF_RENDER_CONCURRENCY`: số lượt render Chromium đồng thời, mặc định `2`.
+- `PDF_RENDER_QUEUE_SIZE`: số request chờ tối đa khi renderer bận, mặc định `8`.
 - `PUPPETEER_EXECUTABLE_PATH`: đường dẫn Chrome/Edge/Chromium dùng khi chạy API trực tiếp trên máy và không cấu hình `PDF_RENDERER_URL`.
 
 Compose dev chỉ publish renderer trên `127.0.0.1` để API chạy trên host truy cập được mà không mở dịch vụ ra mạng LAN. Khi phát triển hoàn toàn không qua Docker, API có thể tự tìm Chrome/Edge đã cài hoặc dùng đường dẫn được cấu hình. Khi chạy qua Compose, API container luôn gọi renderer nội bộ để dev và production sử dụng cùng engine in PDF.
