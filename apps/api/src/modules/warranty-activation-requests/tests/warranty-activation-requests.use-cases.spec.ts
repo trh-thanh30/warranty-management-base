@@ -959,6 +959,39 @@ describe('WarrantyActivationRequestsUseCases', () => {
     );
   });
 
+  it('returns a structured not-found error when the request is absent', async () => {
+    repository.findById.mockResolvedValue(null);
+    const useCase = new ResendWarrantyActivationRequestCertificateEmailUseCase(
+      repository as never,
+      { execute: jest.fn() } as never,
+      { execute: jest.fn() } as never,
+    );
+
+    await expect(useCase.execute('missing-request')).rejects.toMatchObject({
+      code: 'WARRANTY_ACTIVATION_REQUEST_NOT_FOUND',
+      details: { requestId: 'missing-request' },
+      statusCode: 404,
+    });
+  });
+
+  it('returns a structured not-found error when the request certificate is absent', async () => {
+    repository.findById.mockResolvedValue({
+      ...baseRequest,
+      certificate: null,
+    });
+    const useCase = new ResendWarrantyActivationRequestCertificateEmailUseCase(
+      repository as never,
+      { execute: jest.fn() } as never,
+      { execute: jest.fn() } as never,
+    );
+
+    await expect(useCase.execute('request-id')).rejects.toMatchObject({
+      code: 'WARRANTY_ACTIVATION_CERTIFICATE_NOT_FOUND',
+      details: { requestId: 'request-id' },
+      statusCode: 404,
+    });
+  });
+
   it('regenerates a failed request certificate before resending', async () => {
     repository.findById.mockResolvedValue({
       ...baseRequest,
