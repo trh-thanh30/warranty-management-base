@@ -1,20 +1,17 @@
 import { NotFoundError } from '@/common/response';
-import { PrismaService } from '@/database/prisma/prisma.service';
 import { ProductTemplatesRepository } from '@/modules/product-templates/repository/product-templates.repository';
-import { category_type, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 export function normalizeSku(value: string) {
   return value.trim().toUpperCase();
 }
 
 export async function resolveProductTemplateCategory(
-  prismaService: PrismaService,
+  repository: ProductTemplatesRepository,
   categoryId: string,
 ) {
-  const category = await prismaService.category.findUnique({
-    where: { id: categoryId },
-  });
-  if (!category || category.type !== category_type.PRODUCT) {
+  const category = await repository.findProductCategoryById(categoryId);
+  if (!category) {
     throw new NotFoundError('Product category not found');
   }
   return category;

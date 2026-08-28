@@ -27,6 +27,7 @@ import { type ProductStatusFilter } from "../products.types";
 import {
   useConfirmProductImport,
   useDeleteProduct,
+  useRestoreProduct,
   usePreviewProductImport,
   useProducts,
 } from "./use-products";
@@ -40,7 +41,7 @@ type ProductDirectoryFilters = {
 
 const INITIAL_PRODUCT_DIRECTORY_FILTERS = {
   categoryId: "ALL",
-  status: "ALL",
+  status: "ACTIVE",
 } satisfies ProductDirectoryFilters;
 
 export function useProductsDirectory() {
@@ -70,6 +71,8 @@ export function useProductsDirectory() {
   });
   const [productToDelete, setProductToDelete] =
     useState<ProductResponse | null>(null);
+  const [productToRestore, setProductToRestore] =
+    useState<ProductResponse | null>(null);
   const [isImportDialogOpen, setImportDialogOpen] = useState(false);
   const [importMode, setImportMode] = useState<ExcelImportMode>("upsert");
   const [importRows, setImportRows] = useState<EditableProductImportRow[]>([]);
@@ -84,7 +87,7 @@ export function useProductsDirectory() {
       search: debouncedSearch || undefined,
       sortBy,
       sortOrder,
-      status: filters.status === "ALL" ? undefined : filters.status,
+      status: filters.status === "ALL" ? "ALL" : filters.status,
     },
     {
       enabled: Boolean(currentUser) && canViewProducts,
@@ -101,6 +104,7 @@ export function useProductsDirectory() {
     { enabled: Boolean(currentUser) && canViewProducts },
   );
   const deleteProduct = useDeleteProduct();
+  const restoreProduct = useRestoreProduct();
   const previewProductImport = usePreviewProductImport();
   const confirmProductImport = useConfirmProductImport();
 
@@ -118,6 +122,14 @@ export function useProductsDirectory() {
     setProductToDelete(null);
   }
 
+  function openRestore(product: ProductResponse) {
+    setProductToRestore(product);
+  }
+
+  function closeRestore() {
+    setProductToRestore(null);
+  }
+
   async function confirmDelete() {
     if (!productToDelete) return;
 
@@ -127,6 +139,18 @@ export function useProductsDirectory() {
       closeDelete();
     } catch {
       toast.error(t("deleteError"));
+    }
+  }
+
+  async function confirmRestore() {
+    if (!productToRestore) return;
+
+    try {
+      await restoreProduct.mutateAsync(productToRestore.id);
+      toast.success(t("restored"));
+      closeRestore();
+    } catch {
+      toast.error(t("restoreError"));
     }
   }
 
@@ -267,7 +291,7 @@ export function useProductsDirectory() {
       search: debouncedSearch || undefined,
       sortBy,
       sortOrder,
-      status: filters.status === "ALL" ? undefined : filters.status,
+      status: filters.status === "ALL" ? "ALL" : filters.status,
     };
   }
 
@@ -280,6 +304,7 @@ export function useProductsDirectory() {
     confirmDelete,
     filters,
     isDeleting: deleteProduct.isPending,
+    isRestoring: restoreProduct.isPending,
     isImportDialogOpen,
     importMode,
     importRows,
@@ -287,11 +312,15 @@ export function useProductsDirectory() {
     isImportConfirming: confirmProductImport.isPending,
     isImportPreviewing: previewProductImport.isPending,
     openDelete,
+    openRestore,
     openImportDialog: () => setImportDialogOpen(true),
     pageSize,
     productToDelete,
+    productToRestore,
     productsQuery,
     search,
+    closeRestore,
+    confirmRestore,
     setPage,
     setPageSize,
     sortBy,

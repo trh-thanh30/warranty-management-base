@@ -12,6 +12,7 @@ import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
 import { AssignOwnerDialog } from "./components/assign-owner-dialog";
 import { DeleteProductDialog } from "./components/delete-product-dialog";
+import { RestoreProductDialog } from "./components/restore-product-dialog";
 import { ProductImportPreviewTable } from "./components/product-import-preview-table";
 import { ProductManagementTabs } from "../product-management/components/product-management-tabs";
 import { ProductsDirectoryCard } from "./components/products-directory-card";
@@ -38,12 +39,17 @@ export function ProductsView() {
     importRows,
     importSummary,
     openDelete,
+    openRestore,
     openImportDialog,
     pageSize,
     confirmImport,
     previewImport,
     productToDelete,
+    productToRestore,
     productsQuery,
+    closeRestore,
+    confirmRestore,
+    isRestoring,
     search,
     setPage,
     setPageSize,
@@ -111,6 +117,7 @@ export function ProductsView() {
           onAssignOwner={setProductToAssignOwner}
           onClearFilters={clearFilters}
           onDelete={openDelete}
+          onRestore={openRestore}
           onPageChange={setPage}
           onPageSizeChange={setPageSize}
           onRetry={() => {
@@ -135,6 +142,18 @@ export function ProductsView() {
           }}
           open={Boolean(productToDelete)}
           product={productToDelete}
+        />
+
+        <RestoreProductDialog
+          isRestoring={isRestoring}
+          onConfirm={() => {
+            void confirmRestore();
+          }}
+          onOpenChange={(open) => {
+            if (!open) closeRestore();
+          }}
+          open={Boolean(productToRestore)}
+          product={productToRestore}
         />
 
         <AssignOwnerDialog

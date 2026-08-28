@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { CategoryResponse } from "@repo/shared";
-import { getCategoryActivationFields } from "./category-activation-fields.ts";
+import {
+  getCategoryActivationFields,
+  isValidActivationFieldKey,
+} from "./category-activation-fields.ts";
 
 const category = {
   id: "category-id",
@@ -22,6 +25,13 @@ const category = {
 
 test("category activation fields stay hidden until a category is selected", () => {
   assert.deepEqual(getCategoryActivationFields(null), []);
+});
+
+test("category activation field keys match the API contract", () => {
+  assert.equal(isValidActivationFieldKey("windshield"), true);
+  assert.equal(isValidActivationFieldKey("lamp_position2"), true);
+  assert.equal(isValidActivationFieldKey("123"), false);
+  assert.equal(isValidActivationFieldKey("_position"), false);
 });
 
 test("category activation fields use first-class API configuration", () => {

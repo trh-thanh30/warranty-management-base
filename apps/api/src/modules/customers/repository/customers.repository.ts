@@ -4,9 +4,54 @@ import { ListCustomersDto } from '@/modules/customers/dto/list-customers.dto';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
+function buildCustomerOrderBy(
+  sortBy?: keyof Prisma.CustomerOrderByWithRelationInput,
+  sortOrder: 'asc' | 'desc' = 'desc',
+): Prisma.CustomerOrderByWithRelationInput[] {
+  if (!sortBy) return [{ created_at: 'desc' }, { id: 'desc' }];
+
+  const orderBy = [
+    { [sortBy]: sortOrder },
+  ] as Prisma.CustomerOrderByWithRelationInput[];
+
+  if (sortBy !== 'created_at') orderBy.push({ created_at: 'desc' });
+
+  orderBy.push({ id: 'desc' });
+  return orderBy;
+}
+
+function buildCustomerWhere(
+  filters: ListCustomersDto,
+): Prisma.CustomerWhereInput {
+  const trimmedSearch = filters.search?.trim();
+  const status = filters.status ?? 'ACTIVE';
+  const statusFilter: Prisma.CustomerWhereInput =
+    status === 'ALL'
+      ? {}
+      : { deleted_at: status === 'DELETED' ? { not: null } : null };
+
+  return {
+    ...statusFilter,
+    ...(trimmedSearch
+      ? {
+          OR: [
+            { customer_code: { contains: trimmedSearch, mode: 'insensitive' } },
+            { full_name: { contains: trimmedSearch, mode: 'insensitive' } },
+            { phone: { contains: trimmedSearch, mode: 'insensitive' } },
+            { email: { contains: trimmedSearch, mode: 'insensitive' } },
+          ],
+        }
+      : {}),
+  };
+}
+
 @Injectable()
 export class CustomersRepository {
   constructor(private readonly prismaService: PrismaService) {}
+
+  findUserById(id: string) {
+    return this.prismaService.user.findUnique({ where: { id } });
+  }
 
   create(data: Prisma.CustomerCreateInput) {
     return this.prismaService.customer.create({ data });
@@ -61,7 +106,6 @@ export class CustomersRepository {
   }
 
   list(filters: ListCustomersDto) {
-    const trimmedSearch = filters.search?.trim();
     const { page, limit, skip, take } = normalizePagination(filters);
     const sortMap = {
       customerCode: 'customer_code',
@@ -72,21 +116,8 @@ export class CustomersRepository {
       updatedAt: 'updated_at',
     } satisfies Record<string, keyof Prisma.CustomerOrderByWithRelationInput>;
     const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
-    const where: Prisma.CustomerWhereInput = trimmedSearch
-      ? {
-          OR: [
-            {
-              customer_code: { contains: trimmedSearch, mode: 'insensitive' },
-            },
-            { full_name: { contains: trimmedSearch, mode: 'insensitive' } },
-            { phone: { contains: trimmedSearch, mode: 'insensitive' } },
-            { email: { contains: trimmedSearch, mode: 'insensitive' } },
-          ],
-        }
-      : {};
-    const orderBy: Prisma.CustomerOrderByWithRelationInput[] = sortBy
-      ? [{ [sortBy]: filters.sortOrder ?? 'desc' }]
-      : [{ created_at: 'desc' }];
+    const where = buildCustomerWhere(filters);
+    const orderBy = buildCustomerOrderBy(sortBy, filters.sortOrder);
 
     return this.prismaService.$transaction(async (tx) => {
       const [items, total] = await Promise.all([
@@ -104,23 +135,11 @@ export class CustomersRepository {
   }
 
   listForExport(filters: ListCustomersDto) {
-    const trimmedSearch = filters.search?.trim();
-    const where: Prisma.CustomerWhereInput = trimmedSearch
-      ? {
-          OR: [
-            {
-              customer_code: { contains: trimmedSearch, mode: 'insensitive' },
-            },
-            { full_name: { contains: trimmedSearch, mode: 'insensitive' } },
-            { phone: { contains: trimmedSearch, mode: 'insensitive' } },
-            { email: { contains: trimmedSearch, mode: 'insensitive' } },
-          ],
-        }
-      : {};
+    const where = buildCustomerWhere(filters);
 
     return this.prismaService.customer.findMany({
       where,
-      orderBy: { created_at: 'desc' },
+      orderBy: buildCustomerOrderBy(),
       take: 5000,
     });
   }

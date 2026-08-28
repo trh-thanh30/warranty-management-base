@@ -13,10 +13,12 @@ import { WarrantyActivationRequestCertificatesRepository } from '@/modules/warra
 import { WarrantyActivationRequestCertificateEmailService } from '@/modules/warranty-certificates/services/warranty-activation-request-certificate-email.service';
 import { CleanupOrphanedWarrantyCertificatesUseCase } from '@/modules/warranty-certificates/use-cases/cleanup-orphaned-warranty-certificates.use-case';
 import { DeleteWarrantyCertificateUseCase } from '@/modules/warranty-certificates/use-cases/delete-warranty-certificate.use-case';
+import { GetWarrantyCertificateFileForActivationRequestUseCase } from '@/modules/warranty-certificates/use-cases/get-warranty-certificate-file-for-activation-request.use-case';
 import { IssueWarrantyCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-certificate.use-case';
 import { IssueWarrantyActivationRequestCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-activation-request-certificate.use-case';
 import { ResendWarrantyActivationRequestCertificateEmailUseCase } from '@/modules/warranty-certificates/use-cases/resend-warranty-activation-request-certificate-email.use-case';
 import { ResendWarrantyCertificateEmailUseCase } from '@/modules/warranty-certificates/use-cases/resend-warranty-certificate-email.use-case';
+import { WarrantyCertificateEmailStatusModule } from '@/modules/warranty-certificates/warranty-certificate-email-status.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
@@ -26,6 +28,7 @@ import { ConfigModule } from '@nestjs/config';
     ConfigModule.forFeature(timeConfig),
     EmailModule,
     PrismaModule,
+    WarrantyCertificateEmailStatusModule,
   ],
   providers: [
     WarrantyCertificatesRepository,
@@ -33,6 +36,7 @@ import { ConfigModule } from '@nestjs/config';
     IssueWarrantyActivationRequestCertificateUseCase,
     CleanupOrphanedWarrantyCertificatesUseCase,
     DeleteWarrantyCertificateUseCase,
+    GetWarrantyCertificateFileForActivationRequestUseCase,
     ResendWarrantyCertificateEmailUseCase,
     WarrantyCertificateCleanupSchedulerService,
     WarrantyCertificateEmailQueueService,
@@ -45,13 +49,13 @@ import { ConfigModule } from '@nestjs/config';
     ResendWarrantyActivationRequestCertificateEmailUseCase,
   ],
   exports: [
-    WarrantyCertificatesRepository,
     IssueWarrantyCertificateUseCase,
     IssueWarrantyActivationRequestCertificateUseCase,
-    WarrantyActivationRequestCertificatesRepository,
     ResendWarrantyActivationRequestCertificateEmailUseCase,
     DeleteWarrantyCertificateUseCase,
+    GetWarrantyCertificateFileForActivationRequestUseCase,
     ResendWarrantyCertificateEmailUseCase,
+    WarrantyCertificateEmailStatusModule,
   ],
 })
 export class WarrantyCertificatesModule {}

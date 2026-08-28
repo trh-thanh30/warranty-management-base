@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import type { WarrantyActivationRequestSummary } from "@repo/shared";
 import { Badge, Card, CardContent, Skeleton } from "@repo/ui";
+import { Link } from "@/src/i18n/navigation";
 import {
   formatActivationRequestAddress,
   formatActivationRequestDate,

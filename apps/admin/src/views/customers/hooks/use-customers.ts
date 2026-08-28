@@ -3,6 +3,7 @@
 import {
   keepPreviousData,
   useMutation,
+  useInfiniteQuery,
   useQuery,
   useQueryClient,
   type UseQueryOptions,
@@ -38,6 +39,21 @@ export function useCustomers(
     queryFn: () => customersService.listCustomers(query),
     placeholderData: keepPreviousData,
     ...options,
+  });
+}
+
+export function useInfiniteCustomers(
+  query: Omit<ListCustomersQuery, "page">,
+  options?: { enabled?: boolean },
+) {
+  return useInfiniteQuery({
+    ...options,
+    queryKey: [...customerKeys.lists(), "infinite", query] as const,
+    queryFn: ({ pageParam }) =>
+      customersService.listCustomers({ ...query, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.meta.hasNextPage ? lastPage.meta.page + 1 : undefined,
   });
 }
 
@@ -86,6 +102,28 @@ export function useImportCustomers() {
       if (result.errors.length === 0) {
         void queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
       }
+    },
+  });
+}
+
+export function useDeleteCustomer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (customerId: string) =>
+      customersService.deleteCustomer(customerId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
+    },
+  });
+}
+
+export function useRestoreCustomer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (customerId: string) =>
+      customersService.restoreCustomer(customerId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
     },
   });
 }

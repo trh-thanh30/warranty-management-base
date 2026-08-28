@@ -3,19 +3,19 @@ import { DownloadWarrantyActivationRequestCertificateUseCase } from '@/modules/w
 import { Readable } from 'node:stream';
 
 describe('DownloadWarrantyActivationRequestCertificateUseCase', () => {
-  it('returns the request-owned certificate PDF stream', async () => {
+  it('returns the aggregate request-owned certificate PDF stream', async () => {
     const stream = Readable.from(['pdf']);
-    const repository = {
-      findByRequestId: jest.fn().mockResolvedValue({
-        certificate_number: 'CERT-2026-ABC123',
-        storage_key: 'private/request-certificate.pdf',
+    const getCertificateFileUseCase = {
+      execute: jest.fn().mockResolvedValue({
+        certificateNumber: 'CERT-2026-ABC123',
+        storageKey: 'private/request-certificate.pdf',
       }),
     };
     const uploadAssetService = {
       getStream: jest.fn().mockResolvedValue(stream),
     };
     const useCase = new DownloadWarrantyActivationRequestCertificateUseCase(
-      repository as never,
+      getCertificateFileUseCase as never,
       uploadAssetService as never,
     );
 
@@ -23,16 +23,20 @@ describe('DownloadWarrantyActivationRequestCertificateUseCase', () => {
       filename: 'CERT-2026-ABC123.pdf',
       stream,
     });
-    expect(repository.findByRequestId).toHaveBeenCalledWith('request-id');
+    expect(getCertificateFileUseCase.execute).toHaveBeenCalledWith(
+      'request-id',
+    );
     expect(uploadAssetService.getStream).toHaveBeenCalledWith(
       'private/request-certificate.pdf',
     );
   });
 
-  it('does not fall back when the request has no request-owned certificate', async () => {
-    const repository = { findByRequestId: jest.fn().mockResolvedValue(null) };
+  it('does not fall back when the request has no aggregate certificate', async () => {
+    const getCertificateFileUseCase = {
+      execute: jest.fn().mockResolvedValue(null),
+    };
     const useCase = new DownloadWarrantyActivationRequestCertificateUseCase(
-      repository as never,
+      getCertificateFileUseCase as never,
       { getStream: jest.fn() } as never,
     );
 

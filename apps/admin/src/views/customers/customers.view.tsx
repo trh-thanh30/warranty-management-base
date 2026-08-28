@@ -2,6 +2,8 @@
 
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
+import type { CustomerSummary } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { Button } from "@repo/ui";
 import { ExcelImportDialog, ImportExportMenu } from "@/src/components/common";
@@ -9,12 +11,22 @@ import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
 import { CustomersDirectoryCard } from "./components/customers-directory-card";
+import { ConfirmActionDialog } from "@/src/components/common/confirm-action-dialog";
 import { useCustomersDirectory } from "./hooks/use-customers-directory";
 
 export function CustomersView() {
   const t = useTranslations("Customers");
+  const [customerToDelete, setCustomerToDelete] =
+    useState<CustomerSummary | null>(null);
+  const [customerToRestore, setCustomerToRestore] =
+    useState<CustomerSummary | null>(null);
   const {
     canCreateCustomers,
+    canDeleteCustomers,
+    deleteCustomer,
+    isDeleting,
+    isRestoring,
+    restoreCustomer,
     closeImportDialog,
     customersQuery,
     downloadImportTemplate,
@@ -29,6 +41,8 @@ export function CustomersView() {
     setPageSize,
     sortBy,
     sortOrder,
+    status,
+    setStatus,
     toggleSort,
     updateSearch,
   } = useCustomersDirectory();
@@ -77,6 +91,20 @@ export function CustomersView() {
 
         <CustomersDirectoryCard
           canCreate={canCreateCustomers}
+          onDelete={
+            canDeleteCustomers
+              ? (customer) => {
+                  setCustomerToDelete(customer);
+                }
+              : undefined
+          }
+          onRestore={
+            canDeleteCustomers
+              ? (customer) => {
+                  setCustomerToRestore(customer);
+                }
+              : undefined
+          }
           data={customersQuery.data}
           isError={customersQuery.isError}
           isLoading={customersQuery.isLoading}
@@ -89,8 +117,49 @@ export function CustomersView() {
           onSortChange={toggleSort}
           pageSize={pageSize}
           search={search}
+          status={status}
+          onStatusChange={setStatus}
           sortBy={sortBy}
           sortOrder={sortOrder}
+        />
+
+        <ConfirmActionDialog
+          cancelLabel={t("cancel")}
+          confirmDisabled={!customerToDelete}
+          confirmLabel={t("delete")}
+          description={t("deleteConfirm")}
+          isLoading={isDeleting}
+          onConfirm={() => {
+            if (!customerToDelete) return;
+            void deleteCustomer(customerToDelete.id)
+              .then(() => setCustomerToDelete(null))
+              .catch(() => undefined);
+          }}
+          onOpenChange={(open) => {
+            if (!open) setCustomerToDelete(null);
+          }}
+          open={Boolean(customerToDelete)}
+          title={t("deleteTitle")}
+          variant="destructive"
+        />
+
+        <ConfirmActionDialog
+          cancelLabel={t("cancel")}
+          confirmDisabled={!customerToRestore}
+          confirmLabel={t("restore")}
+          description={t("restoreConfirm")}
+          isLoading={isRestoring}
+          onConfirm={() => {
+            if (!customerToRestore) return;
+            void restoreCustomer(customerToRestore.id)
+              .then(() => setCustomerToRestore(null))
+              .catch(() => undefined);
+          }}
+          onOpenChange={(open) => {
+            if (!open) setCustomerToRestore(null);
+          }}
+          open={Boolean(customerToRestore)}
+          title={t("restoreTitle")}
         />
 
         <ExcelImportDialog

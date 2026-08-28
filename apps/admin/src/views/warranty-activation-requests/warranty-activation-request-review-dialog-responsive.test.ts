@@ -10,21 +10,35 @@ const source = readFileSync(
   "utf8",
 );
 
-test("activation request review dialog fills mobile screens only", () => {
+test("activation request review dialog fills mobile screens and adapts its desktop width", () => {
   assert.match(
     source,
-    /DialogContent className="[^"]*h-dvh[^"]*w-screen[^"]*max-w-none[^"]*rounded-none[^"]*sm:block[^"]*sm:h-fit[^"]*sm:w-\[min\(calc\(100vw-2rem\),36rem\)\][^"]*sm:rounded-lg[^"]*sm:p-4[^"]*"/,
+    /DialogContent\s+className=\{`[^`]*w-screen[^`]*max-w-none[^`]*rounded-none[^`]*max-sm:h-dvh[^`]*max-sm:max-h-dvh[^`]*sm:flex[^`]*sm:h-fit[^`]*sm:rounded-lg[^`]*sm:p-4[^`]*\$\{/,
+  );
+  assert.match(
+    source,
+    /isReject\s*\? "sm:w-\[min\(calc\(100vw-2rem\),36rem\)\] sm:max-w-xl"\s*: "sm:w-\[min\(calc\(100vw-2rem\),72rem\)\] sm:max-w-6xl"/,
+  );
+});
+
+test("reject dialog summarizes products instead of rendering the wide table", () => {
+  assert.match(
+    source,
+    /\{visibleRequest\?\.items\?\.length \? \([\s\S]*\{!isReject \? \([\s\S]*<ActivationRequestItemsTable[\s\S]*\) : null\}/,
   );
 });
 
 test("activation request review dialog keeps actions visible while content scrolls", () => {
   assert.match(source, /<header className="[^"]*shrink-0[^"]*"/);
-  assert.match(source, /<div className="min-h-0 flex-1 overflow-y-auto[^"]*"/);
+  assert.match(
+    source,
+    /<div className="min-h-0 overflow-y-auto[^"]*max-sm:flex-1[^"]*"/,
+  );
   assert.match(source, /<footer className="[^"]*shrink-0[^"]*"/);
   assert.match(source, /<header className="[^"]*sm:border-0[^"]*sm:p-0[^"]*"/);
   assert.match(
     source,
-    /<div className="min-h-0 flex-1 overflow-y-auto[^"]*sm:overflow-visible sm:p-0[^"]*"/,
+    /<div className="min-h-0 overflow-y-auto[^"]*max-sm:flex-1[^"]*sm:p-0[^"]*"/,
   );
   assert.match(
     source,
@@ -43,4 +57,24 @@ test("activation request review dialog provides a mobile header close action", (
     source,
     /DialogTitle className="pr-12 text-lg font-semibold sm:pr-0"/,
   );
+});
+
+test("approval product table scrolls independently on narrow dialogs", () => {
+  assert.match(
+    source,
+    /className="min-w-0 max-h-\[min\(45vh,30rem\)\] overflow-x-auto overflow-y-auto"/,
+  );
+});
+
+test("activation request review dialog retains its presentation during exit animation", () => {
+  assert.match(
+    source,
+    /if \(open && request\) \{\s*setDisplayedAction\(action\);\s*setDisplayedRequest\(request\);\s*\}/,
+  );
+  assert.match(
+    source,
+    /const visibleAction = open \? action : displayedAction;/,
+  );
+  assert.match(source, /const visibleRequest = request \?\? displayedRequest;/);
+  assert.match(source, /visibleRequest\?\.items\?\.length/);
 });

@@ -9,6 +9,113 @@ import {
   WarrantyActivationRequest,
 } from '@prisma/client';
 
+export const WARRANTY_STATUS = {
+  ACTIVE: 'ACTIVE',
+  DRAFT: 'DRAFT',
+  EXPIRED: 'EXPIRED',
+  VOIDED: 'VOIDED',
+} as const;
+
+export type WarrantyStatus =
+  (typeof WARRANTY_STATUS)[keyof typeof WARRANTY_STATUS];
+
+export const WARRANTY_CLAIM_STATUS = {
+  APPROVED: 'APPROVED',
+  IN_REPAIR: 'IN_REPAIR',
+  REVIEWING: 'REVIEWING',
+  SUBMITTED: 'SUBMITTED',
+} as const;
+
+export type WarrantyClaimStatus =
+  (typeof WARRANTY_CLAIM_STATUS)[keyof typeof WARRANTY_CLAIM_STATUS];
+
+export const WARRANTY_ACTIVATION_REQUEST_STATUS = {
+  APPROVED: 'APPROVED',
+  CANCELLED: 'CANCELLED',
+  PENDING: 'PENDING',
+} as const;
+
+export type WarrantyActivationRequestStatus =
+  (typeof WARRANTY_ACTIVATION_REQUEST_STATUS)[keyof typeof WARRANTY_ACTIVATION_REQUEST_STATUS];
+
+type WarrantyUserSummary = {
+  email: string;
+  fullName: string | null;
+  id: string;
+};
+
+export type WarrantyRecord = {
+  activatedBy?: WarrantyUserSummary | null;
+  activatedById: string | null;
+  coverageLimitAmount: { toString(): string } | null;
+  createdAt: Date;
+  durationMonths: number;
+  endDate: Date | null;
+  id: string;
+  maxAmountPerClaim: { toString(): string } | null;
+  maxClaimCount: number | null;
+  metadata: unknown;
+  productId: string;
+  startDate: Date | null;
+  status: WarrantyStatus;
+  terms: string | null;
+  updatedAt: Date;
+  voidReason: string | null;
+  voidedAt: Date | null;
+  voidedBy?: WarrantyUserSummary | null;
+  voidedById: string | null;
+  warrantyCode: string | null;
+};
+
+export type ManualActivationProduct = {
+  deletedAt: Date | null;
+  displayName: string | null;
+  id: string;
+  ownerships: Array<{
+    customer: {
+      address: string | null;
+      customerCode: string;
+      email: string | null;
+      fullName: string;
+      id: string;
+      phone: string | null;
+    };
+    isCurrentOwner: boolean;
+  }>;
+  productCode: string;
+  serialNumber: string | null;
+  template: {
+    brand: string | null;
+    model: string | null;
+    name: string;
+  };
+  warranty: WarrantyRecord | null;
+};
+
+export type WarrantyCustomer = {
+  address: string | null;
+  customerCode: string;
+  email: string | null;
+  fullName: string;
+  id: string;
+  phone: string | null;
+  userId: string | null;
+};
+
+export type WarrantyActivationCandidate = {
+  currentOwnershipId: string | null;
+  durationMonths: number;
+  id: string;
+  status: WarrantyStatus;
+  warrantyCode: string | null;
+};
+
+export type WarrantyVoidCandidate = {
+  id: string;
+  status: WarrantyStatus;
+  warrantyCode: string | null;
+};
+
 type WarrantyWithProduct = Warranty & {
   activated_by?: User | null;
   voided_by?: User | null;
@@ -18,48 +125,46 @@ type WarrantyWithProduct = Warranty & {
   };
 };
 
-type WarrantyWithAuditUsers = Warranty & {
-  activated_by?: User | null;
-  voided_by?: User | null;
+type WarrantyWithAuditUsers = WarrantyRecord & {
+  activatedBy?: WarrantyUserSummary | null;
+  voidedBy?: WarrantyUserSummary | null;
 };
 
 export function toWarrantyResponse(warranty: WarrantyWithAuditUsers) {
   return {
     id: warranty.id,
-    productId: warranty.product_id,
-    warrantyCode: warranty.warranty_code,
-    startDate: warranty.start_date,
-    endDate: warranty.end_date,
-    durationMonths: warranty.duration_months,
-    coverageLimitAmount: warranty.coverage_limit_amount?.toString() ?? null,
-    maxClaimCount: warranty.max_claim_count,
-    maxAmountPerClaim: warranty.max_amount_per_claim?.toString() ?? null,
+    productId: warranty.productId,
+    warrantyCode: warranty.warrantyCode,
+    startDate: warranty.startDate,
+    endDate: warranty.endDate,
+    durationMonths: warranty.durationMonths,
+    coverageLimitAmount: warranty.coverageLimitAmount?.toString() ?? null,
+    maxClaimCount: warranty.maxClaimCount,
+    maxAmountPerClaim: warranty.maxAmountPerClaim?.toString() ?? null,
     status: warranty.status,
     terms: warranty.terms,
     metadata: warranty.metadata as Record<string, unknown> | null,
-    activatedByUserId: warranty.activated_by_id,
-    activatedByUser: getWarrantyUserSummary(
-      'activated_by' in warranty ? warranty.activated_by : null,
-    ),
-    voidedAt: warranty.voided_at,
-    voidedByUserId: warranty.voided_by_id,
-    voidedByUser: getWarrantyUserSummary(
-      'voided_by' in warranty ? warranty.voided_by : null,
-    ),
-    voidReason: warranty.void_reason,
-    createdAt: warranty.created_at,
-    updatedAt: warranty.updated_at,
+    activatedByUserId: warranty.activatedById,
+    activatedByUser: warranty.activatedBy
+      ? {
+          id: warranty.activatedBy.id,
+          email: warranty.activatedBy.email,
+          name: warranty.activatedBy.fullName,
+        }
+      : null,
+    voidedAt: warranty.voidedAt,
+    voidedByUserId: warranty.voidedById,
+    voidedByUser: warranty.voidedBy
+      ? {
+          id: warranty.voidedBy.id,
+          email: warranty.voidedBy.email,
+          name: warranty.voidedBy.fullName,
+        }
+      : null,
+    voidReason: warranty.voidReason,
+    createdAt: warranty.createdAt,
+    updatedAt: warranty.updatedAt,
   };
-}
-
-function getWarrantyUserSummary(user: User | null | undefined) {
-  return user
-    ? {
-        id: user.id,
-        email: user.email,
-        name: user.full_name,
-      }
-    : null;
 }
 
 export function toWarrantyLookupResponse(input: {
@@ -167,7 +272,7 @@ export function toWarrantyListItemResponse(warranty: WarrantyWithProduct) {
   );
 
   return {
-    ...toWarrantyResponse(warranty),
+    ...toWarrantyResponse(toWarrantyRecord(warranty)),
     product: {
       id: warranty.product.id,
       name: warranty.product.template.name,
@@ -185,5 +290,47 @@ export function toWarrantyListItemResponse(warranty: WarrantyWithProduct) {
           fullName: currentOwnership.customer?.full_name,
         }
       : null,
+  };
+}
+
+export function toWarrantyRecord(
+  warranty: Warranty & {
+    activated_by?: User | null;
+    voided_by?: User | null;
+  },
+): WarrantyRecord {
+  return {
+    activatedBy: warranty.activated_by
+      ? {
+          email: warranty.activated_by.email,
+          fullName: warranty.activated_by.full_name,
+          id: warranty.activated_by.id,
+        }
+      : null,
+    activatedById: warranty.activated_by_id,
+    coverageLimitAmount: warranty.coverage_limit_amount,
+    createdAt: warranty.created_at,
+    durationMonths: warranty.duration_months,
+    endDate: warranty.end_date,
+    id: warranty.id,
+    maxAmountPerClaim: warranty.max_amount_per_claim,
+    maxClaimCount: warranty.max_claim_count,
+    metadata: warranty.metadata,
+    productId: warranty.product_id,
+    startDate: warranty.start_date,
+    status: warranty.status,
+    terms: warranty.terms,
+    updatedAt: warranty.updated_at,
+    voidReason: warranty.void_reason,
+    voidedAt: warranty.voided_at,
+    voidedBy: warranty.voided_by
+      ? {
+          email: warranty.voided_by.email,
+          fullName: warranty.voided_by.full_name,
+          id: warranty.voided_by.id,
+        }
+      : null,
+    voidedById: warranty.voided_by_id,
+    warrantyCode: warranty.warranty_code,
   };
 }

@@ -1,5 +1,5 @@
-import { PrismaService } from '@/database/prisma/prisma.service';
 import { VoidWarrantyDto } from '@/modules/warranties/dto/void-warranty.dto';
+import { WarrantiesRepository } from '@/modules/warranties/repository/warranties.repository';
 import { WarrantyLifecycleService } from '@/modules/warranties/services/warranty-lifecycle.service';
 import { toWarrantyResponse } from '@/modules/warranties/warranties.types';
 import { Injectable } from '@nestjs/common';
@@ -7,7 +7,7 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class VoidWarrantyUseCase {
   constructor(
-    private readonly prismaService: PrismaService,
+    private readonly warrantiesRepository: WarrantiesRepository,
     private readonly warrantyLifecycleService: WarrantyLifecycleService,
   ) {}
 
@@ -16,12 +16,13 @@ export class VoidWarrantyUseCase {
     dto: VoidWarrantyDto,
     context: { voidedByUserId: string },
   ) {
-    const warranty = await this.prismaService.$transaction((tx) =>
-      this.warrantyLifecycleService.voidWarranty(tx, {
-        reason: dto.reason,
-        voidedByUserId: context.voidedByUserId,
-        warrantyId,
-      }),
+    const warranty = await this.warrantiesRepository.withTransaction(
+      (repository) =>
+        this.warrantyLifecycleService.voidWarranty(repository, {
+          reason: dto.reason,
+          voidedByUserId: context.voidedByUserId,
+          warrantyId,
+        }),
     );
 
     return toWarrantyResponse(warranty);

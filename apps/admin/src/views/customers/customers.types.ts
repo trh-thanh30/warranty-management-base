@@ -25,3 +25,18 @@ export const customerFormSchema = z.object({
 });
 
 export type CustomerFormValues = z.infer<typeof customerFormSchema>;
+
+export const customerAddressFormSchema = customerFormSchema
+  .pick({
+    provinceCode: true,
+    provinceName: true,
+    wardCode: true,
+    wardName: true,
+  })
+  .extend({
+    addressDetail: optionalText.max(255),
+  });
+
+export type CustomerAddressFormValues = z.infer<
+  typeof customerAddressFormSchema
+>;

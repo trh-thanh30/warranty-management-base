@@ -91,10 +91,12 @@ describe('IssueWarrantyCertificateUseCase', () => {
         }),
       }),
     );
-    expect(result).toEqual({
-      id: 'certificate-id',
-      recipient_email: null,
-    });
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: 'certificate-id',
+        recipientEmail: null,
+      }),
+    );
   });
 
   it('deletes the uploaded PDF when the certificate record cannot be created', async () => {
@@ -227,6 +229,49 @@ describe('IssueWarrantyCertificateUseCase', () => {
         last_error: null,
         status: warranty_certificate_status.GENERATED,
         storage_key: 'private/retried.pdf',
+      }),
+    });
+  });
+
+  it('regenerates a generated certificate whose PDF is missing', async () => {
+    const warranty = buildWarranty();
+    const incompleteCertificate = {
+      certificate_number: 'CERT-INCOMPLETE-001',
+      id: 'incomplete-certificate-id',
+      status: warranty_certificate_status.GENERATED,
+      storage_key: null,
+    };
+    const prismaService = {
+      warranty: { findUnique: jest.fn().mockResolvedValue(warranty) },
+      warrantyActivationRequest: {
+        findUnique: jest.fn().mockResolvedValue(null),
+      },
+      warrantyCertificate: {
+        findFirst: jest.fn().mockResolvedValue(incompleteCertificate),
+        update: jest.fn().mockResolvedValue({
+          ...incompleteCertificate,
+          storage_key: 'private/recovered.pdf',
+        }),
+      },
+    };
+    const useCase = new IssueWarrantyCertificateUseCase(
+      new WarrantyCertificatesRepository(prismaService as never),
+      {
+        upload: jest.fn().mockResolvedValue({ path: 'private/recovered.pdf' }),
+      } as never,
+      { queueEmail: jest.fn() } as never,
+      {
+        createPdfBuffer: jest.fn().mockResolvedValue(Buffer.from('%PDF-')),
+      } as never,
+    );
+
+    await useCase.execute({ queueEmail: false, warrantyId: warranty.id });
+
+    expect(prismaService.warrantyCertificate.update).toHaveBeenCalledWith({
+      where: { id: incompleteCertificate.id },
+      data: expect.objectContaining({
+        status: warranty_certificate_status.GENERATED,
+        storage_key: 'private/recovered.pdf',
       }),
     });
   });

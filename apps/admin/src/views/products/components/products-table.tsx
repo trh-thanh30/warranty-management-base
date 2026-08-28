@@ -30,6 +30,7 @@ import {
   MoreHorizontal,
   Pencil,
   PlusCircle,
+  RotateCcw,
   Trash2,
   UserPlus,
 } from "lucide-react";
@@ -45,6 +46,7 @@ import { WarrantyStatusBadge } from "./warranty-status-badge";
 type ProductsTableProps = {
   items: ProductResponse[];
   onDelete: (product: ProductResponse) => void;
+  onRestore: (product: ProductResponse) => void;
   onAssignOwner: (product: ProductResponse) => void;
   onSortChange: (sortBy: ProductSortBy) => void;
   sortBy?: ProductSortBy;
@@ -55,6 +57,7 @@ export function ProductsTable({
   items,
   onAssignOwner,
   onDelete,
+  onRestore,
   onSortChange,
   sortBy,
   sortOrder,
@@ -69,6 +72,7 @@ export function ProductsTable({
             key={product.id}
             onAssignOwner={onAssignOwner}
             onDelete={onDelete}
+            onRestore={onRestore}
             product={product}
           />
         ))}
@@ -126,6 +130,7 @@ export function ProductsTable({
                 key={product.id}
                 onAssignOwner={onAssignOwner}
                 onDelete={onDelete}
+                onRestore={onRestore}
                 product={product}
               />
             ))}
@@ -139,10 +144,12 @@ export function ProductsTable({
 function ProductTableRow({
   onAssignOwner,
   onDelete,
+  onRestore,
   product,
 }: {
   onAssignOwner: ProductsTableProps["onAssignOwner"];
   onDelete: ProductsTableProps["onDelete"];
+  onRestore: ProductsTableProps["onRestore"];
   product: ProductResponse;
 }) {
   const locale = useLocale();
@@ -176,6 +183,7 @@ function ProductTableRow({
         <ProductActionsMenu
           onAssignOwner={onAssignOwner}
           onDelete={onDelete}
+          onRestore={onRestore}
           product={product}
         />
       </TableCell>
@@ -186,10 +194,12 @@ function ProductTableRow({
 function ProductMobileCard({
   onAssignOwner,
   onDelete,
+  onRestore,
   product,
 }: {
   onAssignOwner: ProductsTableProps["onAssignOwner"];
   onDelete: ProductsTableProps["onDelete"];
+  onRestore: ProductsTableProps["onRestore"];
   product: ProductResponse;
 }) {
   const t = useTranslations("Products");
@@ -201,6 +211,7 @@ function ProductMobileCard({
         <ProductActionsMenu
           onAssignOwner={onAssignOwner}
           onDelete={onDelete}
+          onRestore={onRestore}
           product={product}
         />
       </div>
@@ -265,10 +276,12 @@ function ProductMobileField({
 function ProductActionsMenu({
   onAssignOwner,
   onDelete,
+  onRestore,
   product,
 }: {
   onAssignOwner: ProductsTableProps["onAssignOwner"];
   onDelete: ProductsTableProps["onDelete"];
+  onRestore: ProductsTableProps["onRestore"];
   product: ProductResponse;
 }) {
   const t = useTranslations("Products");
@@ -282,10 +295,12 @@ function ProductActionsMenu({
   const isDeleted = product.status === "DELETED";
 
   const hasTemplateAction =
-    canViewTemplate || (canCreateProduct && product.template.isActive);
+    !isDeleted &&
+    (canViewTemplate || (canCreateProduct && product.template.isActive));
   if (
-    isDeleted ||
-    (!canView &&
+    (isDeleted && !canDelete) ||
+    (!isDeleted &&
+      !canView &&
       !canEdit &&
       !canDelete &&
       !canAssignOwner &&
@@ -307,54 +322,66 @@ function ProductActionsMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {canView ? (
-          <DropdownMenuItem asChild>
-            <Link href={`/products/${product.id}`}>
-              <Eye className="mr-2 size-4" />
-              {t("viewDetail")}
-            </Link>
+        {isDeleted ? (
+          <DropdownMenuItem onSelect={() => onRestore(product)}>
+            <RotateCcw className="mr-2 size-4" />
+            {t("restore")}
           </DropdownMenuItem>
         ) : null}
-        {canEdit ? (
-          <DropdownMenuItem asChild>
-            <Link href={`/products/${product.id}/edit`}>
-              <Pencil className="mr-2 size-4" />
-              {t("edit")}
-            </Link>
-          </DropdownMenuItem>
-        ) : null}
-        {canCreateProduct && product.template.isActive ? (
-          <DropdownMenuItem asChild>
-            <Link href={`/products/create?templateId=${product.template.id}`}>
-              <PlusCircle className="mr-2 size-4" />
-              {t("createAnotherFromTemplate")}
-            </Link>
-          </DropdownMenuItem>
-        ) : null}
-        {canViewTemplate ? (
-          <DropdownMenuItem asChild>
-            <Link href={`/product-templates/${product.template.id}`}>
-              <Layers3 className="mr-2 size-4" />
-              {t("viewProductTemplate")}
-            </Link>
-          </DropdownMenuItem>
-        ) : null}
-        {canAssignOwner ? (
-          <DropdownMenuItem onSelect={() => onAssignOwner(product)}>
-            <UserPlus className="mr-2 size-4" />
-            {t("assignOwner")}
-          </DropdownMenuItem>
-        ) : null}
-        {canDelete ? (
+        {!isDeleted ? (
           <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="text-red-600 focus:text-red-700 dark:text-red-400"
-              onSelect={() => onDelete(product)}
-            >
-              <Trash2 className="mr-2 size-4" />
-              {t("delete")}
-            </DropdownMenuItem>
+            {canView ? (
+              <DropdownMenuItem asChild>
+                <Link href={`/products/${product.id}`}>
+                  <Eye className="mr-2 size-4" />
+                  {t("viewDetail")}
+                </Link>
+              </DropdownMenuItem>
+            ) : null}
+            {canEdit ? (
+              <DropdownMenuItem asChild>
+                <Link href={`/products/${product.id}/edit`}>
+                  <Pencil className="mr-2 size-4" />
+                  {t("edit")}
+                </Link>
+              </DropdownMenuItem>
+            ) : null}
+            {canCreateProduct && product.template.isActive ? (
+              <DropdownMenuItem asChild>
+                <Link
+                  href={`/products/create?templateId=${product.template.id}`}
+                >
+                  <PlusCircle className="mr-2 size-4" />
+                  {t("createAnotherFromTemplate")}
+                </Link>
+              </DropdownMenuItem>
+            ) : null}
+            {canViewTemplate ? (
+              <DropdownMenuItem asChild>
+                <Link href={`/product-templates/${product.template.id}`}>
+                  <Layers3 className="mr-2 size-4" />
+                  {t("viewProductTemplate")}
+                </Link>
+              </DropdownMenuItem>
+            ) : null}
+            {canAssignOwner ? (
+              <DropdownMenuItem onSelect={() => onAssignOwner(product)}>
+                <UserPlus className="mr-2 size-4" />
+                {t("assignOwner")}
+              </DropdownMenuItem>
+            ) : null}
+            {canDelete ? (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-red-600 focus:text-red-700 dark:text-red-400"
+                  onSelect={() => onDelete(product)}
+                >
+                  <Trash2 className="mr-2 size-4" />
+                  {t("delete")}
+                </DropdownMenuItem>
+              </>
+            ) : null}
           </>
         ) : null}
       </DropdownMenuContent>

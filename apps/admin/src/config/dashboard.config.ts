@@ -67,16 +67,16 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             icon: Package,
             children: [
               {
-                title: t("items.productTemplates"),
-                href: "/product-templates",
-                icon: Layers3,
-                requiredPermission: PERMISSIONS.PRODUCT_TEMPLATE_VIEW,
-              },
-              {
                 title: t("items.products"),
                 href: "/products",
                 icon: Boxes,
                 requiredPermission: PERMISSIONS.PRODUCT_VIEW,
+              },
+              {
+                title: t("items.productTemplates"),
+                href: "/product-templates",
+                icon: Layers3,
+                requiredPermission: PERMISSIONS.PRODUCT_TEMPLATE_VIEW,
               },
             ],
           },
@@ -85,7 +85,7 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             icon: ShieldCheck,
             children: [
               {
-                title: t("items.warranties"),
+                title: t("items.warrantyList"),
                 href: "/warranties",
                 icon: ShieldCheck,
                 requiredPermission: PERMISSIONS.WARRANTY_VIEW,

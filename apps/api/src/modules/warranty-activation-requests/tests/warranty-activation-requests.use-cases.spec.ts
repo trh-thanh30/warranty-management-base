@@ -5,7 +5,10 @@ import { GenerateWarrantyActivationRequestCodeUseCase } from '@/modules/warranty
 import { ReviewWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/review-warranty-activation-request.use-case';
 import { ResendWarrantyActivationRequestCertificateEmailUseCase } from '@/modules/warranty-activation-requests/use-cases/resend-warranty-activation-request-certificate-email.use-case';
 import {
-  Prisma,
+  WarrantyActivationRequestCodeConflictError,
+  WarrantyActivationRequestUniqueConflictError,
+} from '@/modules/warranty-activation-requests/repository/warranty-activation-request-errors';
+import {
   warranty_activation_request_source,
   warranty_activation_request_status,
   warranty_status,
@@ -108,19 +111,17 @@ describe('WarrantyActivationRequestsUseCases', () => {
     expect(repository.findOpenByProductId).toHaveBeenCalledWith('product-id');
     expect(repository.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        customer_email: 'customer@example.com',
-        full_address: '1 Nguyen Trai, Phuong Ben Thanh, TP Ho Chi Minh',
-        request_code: 'WAR-20260719-0001',
-        warranty_code: 'WM-2026-ABC123',
-        items: {
-          create: [
-            expect.objectContaining({
-              position_key: 'primaryProduct',
-              product_id: 'product-id',
-              warranty_id: 'warranty-id',
-            }),
-          ],
-        },
+        customerEmail: 'customer@example.com',
+        fullAddress: '1 Nguyen Trai, Phuong Ben Thanh, TP Ho Chi Minh',
+        requestCode: 'WAR-20260719-0001',
+        warrantyCode: 'WM-2026-ABC123',
+        items: [
+          expect.objectContaining({
+            positionKey: 'primaryProduct',
+            productId: 'product-id',
+            warrantyId: 'warranty-id',
+          }),
+        ],
       }),
     );
     expect(result.requestCode).toBe('WAR-20260719-0001');
@@ -150,7 +151,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     repository.create.mockImplementation((data) =>
       Promise.resolve({
         ...baseRequest,
-        request_code: data.request_code,
+        request_code: data.requestCode,
         warranty_code: 'WM-product-a',
         product_id: 'product-a',
         category_id: 'category-id',
@@ -194,21 +195,19 @@ describe('WarrantyActivationRequestsUseCases', () => {
     expect(itemValidator.validate).toHaveBeenCalledWith('category-id', items);
     expect(repository.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        product: { connect: { id: 'product-a' } },
-        product_name: 'Product product-a',
-        warranty_code: 'WM-product-a',
-        items: {
-          create: [
-            expect.objectContaining({
-              position_key: 'windshield',
-              product_id: 'product-a',
-            }),
-            expect.objectContaining({
-              position_key: 'rearGlass',
-              product_id: 'product-b',
-            }),
-          ],
-        },
+        productId: 'product-a',
+        productName: 'Product product-a',
+        warrantyCode: 'WM-product-a',
+        items: [
+          expect.objectContaining({
+            positionKey: 'windshield',
+            productId: 'product-a',
+          }),
+          expect.objectContaining({
+            positionKey: 'rearGlass',
+            productId: 'product-b',
+          }),
+        ],
       }),
     );
     expect(result.itemCount).toBe(2);
@@ -411,7 +410,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     );
     expect(repository.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        dealer: { connect: { id: 'dealer-id' } },
+        dealerId: 'dealer-id',
       }),
     );
   });
@@ -548,13 +547,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
       baseDraftProduct,
     );
     repository.create
-      .mockRejectedValueOnce(
-        new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
-          clientVersion: 'test',
-          code: 'P2002',
-          meta: { target: ['request_code'] },
-        }),
-      )
+      .mockRejectedValueOnce(new WarrantyActivationRequestCodeConflictError())
       .mockResolvedValueOnce({
         ...baseRequest,
         request_code: 'WAR-20260719-0001',
@@ -599,13 +592,9 @@ describe('WarrantyActivationRequestsUseCases', () => {
       baseDraftProduct,
     );
     repository.create.mockRejectedValueOnce(
-      new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
-        clientVersion: 'test',
-        code: 'P2002',
-        meta: {
-          target: ['warranty_activation_request_one_open_per_product'],
-        },
-      }),
+      new WarrantyActivationRequestUniqueConflictError([
+        'warranty_activation_request_one_open_per_product',
+      ]),
     );
     const generateCodeUseCase =
       new GenerateWarrantyActivationRequestCodeUseCase(repository as never);
@@ -646,14 +635,9 @@ describe('WarrantyActivationRequestsUseCases', () => {
   });
 
   it('rethrows a unique conflict when no open request exists for the product', async () => {
-    const uniqueConflict = new Prisma.PrismaClientKnownRequestError(
-      'Unique constraint failed',
-      {
-        clientVersion: 'test',
-        code: 'P2002',
-        meta: { target: ['another_unique_index'] },
-      },
-    );
+    const uniqueConflict = new WarrantyActivationRequestUniqueConflictError([
+      'another_unique_index',
+    ]);
     repository.findOpenByProductId.mockResolvedValue(null);
     repository.findLastRequestCode.mockResolvedValue(null);
     productsRepository.findActivationRequestTargetByWarrantyCode.mockResolvedValue(

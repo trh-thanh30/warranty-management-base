@@ -15,7 +15,6 @@ export type WarrantyActivationRequestDirectoryFilters = {
   dateFrom: string;
   dateTo: string;
   status: WarrantyActivationRequestStatusFilter;
-  warrantyCode: string;
 };
 
 export type WarrantyActivationRequestSort = WarrantyActivationRequestSortBy;
@@ -60,7 +59,6 @@ export const warrantyActivationRequestCreateFormSchema = z.object({
   addressDetail: z
     .string()
     .trim()
-    .min(1, "addressRequired")
     .max(255)
     .refine((value) => !containsDisallowedVietnamAddressDetailUnit(value), {
       message: "addressAdministrativeUnitNotAllowed",

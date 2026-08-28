@@ -2,6 +2,7 @@ import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
 import { product_status, warranty_status } from '@prisma/client';
 import {
   IsBooleanString,
+  IsIn,
   IsEnum,
   IsOptional,
   IsString,
@@ -26,8 +27,8 @@ export class ListProductsDto extends PaginationQueryDto {
   ownerCustomerId?: string;
 
   @IsOptional()
-  @IsEnum(product_status)
-  status?: product_status;
+  @IsIn([...Object.values(product_status), 'ALL'])
+  status?: product_status | 'ALL';
 
   @IsOptional()
   @IsBooleanString()
@@ -36,6 +37,10 @@ export class ListProductsDto extends PaginationQueryDto {
   @IsOptional()
   @IsBooleanString()
   activationEligible?: string;
+
+  @IsOptional()
+  @IsBooleanString()
+  claimEligible?: string;
 
   @IsOptional()
   @IsEnum(warranty_status)

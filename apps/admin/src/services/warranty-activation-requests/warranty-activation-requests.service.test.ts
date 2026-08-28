@@ -62,6 +62,28 @@ test("downloads an activation request certificate as a blob", async () => {
   ]);
 });
 
+test("retries an aggregate activation request certificate", async () => {
+  const calls: unknown[] = [];
+  const http = {
+    async post(url: string, body?: unknown) {
+      calls.push({ method: "POST", url, body });
+      return { data: { success: true, data: { id: "request-id" } } };
+    },
+  };
+  const service = createWarrantyActivationRequestsService(
+    http as unknown as WarrantyActivationRequestsHttpClient,
+  );
+
+  await service.retryWarrantyActivationRequestCertificate("request-id");
+
+  assert.deepEqual(calls, [
+    {
+      method: "POST",
+      url: "/warranty-activation-requests/request-id/certificate/retry",
+      body: {},
+    },
+  ]);
+});
 test("creates an admin activation request from a selected product", async () => {
   const calls: unknown[] = [];
   const body = {

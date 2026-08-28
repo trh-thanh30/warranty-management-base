@@ -83,7 +83,7 @@ export type ListPublicProductCategoriesQuery = Pick<
 export type ListCategoriesQuery = PaginationQuery & {
   type?: CategoryType;
   parentId?: string;
-  isActive?: "true" | "false";
+  isActive?: "true" | "false" | "all";
   search?: string;
   sortBy?: CategorySortBy;
   sortOrder?: "asc" | "desc";
@@ -91,7 +91,7 @@ export type ListCategoriesQuery = PaginationQuery & {
 
 export type ListCategoryTreeQuery = PaginationQuery & {
   type: CategoryType;
-  isActive?: "true" | "false";
+  isActive?: "true" | "false" | "all";
   search?: string;
   sortBy?: CategorySortBy;
   sortOrder?: "asc" | "desc";

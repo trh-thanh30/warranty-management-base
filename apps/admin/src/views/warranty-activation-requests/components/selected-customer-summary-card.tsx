@@ -1,4 +1,12 @@
-import { CheckCircle2, Mail, MapPin, Phone, UserRound } from "lucide-react";
+import { Button } from "@repo/ui";
+import {
+  CheckCircle2,
+  Mail,
+  MapPin,
+  Pencil,
+  Phone,
+  UserRound,
+} from "lucide-react";
 import {
   ActivationRequestSummaryCard,
   SummaryGrid,
@@ -8,25 +16,30 @@ import { deduplicateAddressSuffix } from "../../customers/customers.utils";
 
 type SelectedCustomerSummaryCardProps = {
   address: string | null;
+  addressError?: string;
   customerCode: string;
   email: string | null;
   fullName: string;
   labels: {
     address: string;
     customerCode: string;
+    editAddress: string;
     email: string;
     phone: string;
     selected: string;
   };
+  onEditAddress: () => void;
   phone: string | null;
 };
 
 export function SelectedCustomerSummaryCard({
   address,
+  addressError,
   customerCode,
   email,
   fullName,
   labels,
+  onEditAddress,
   phone,
 }: SelectedCustomerSummaryCardProps) {
   return (
@@ -53,6 +66,20 @@ export function SelectedCustomerSummaryCard({
           value={email ?? "-"}
         />
         <SummaryItem
+          action={
+            <Button
+              aria-label={labels.editAddress}
+              className="-mr-1 size-8 shrink-0 text-slate-500 hover:text-slate-950 dark:text-slate-400 dark:hover:text-slate-50"
+              onClick={onEditAddress}
+              size="icon"
+              title={labels.editAddress}
+              type="button"
+              variant="ghost"
+            >
+              <Pencil aria-hidden="true" className="size-3.5" />
+            </Button>
+          }
+          error={addressError}
           icon={<MapPin aria-hidden="true" className="size-3.5" />}
           label={labels.address}
           value={address ? deduplicateAddressSuffix(address) : "-"}

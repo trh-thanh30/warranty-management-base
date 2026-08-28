@@ -28,7 +28,7 @@ type CategoryDirectoryFilters = {
 };
 
 const INITIAL_CATEGORY_DIRECTORY_FILTERS = {
-  status: "ALL",
+  status: "ACTIVE",
   type: "PRODUCT",
 } satisfies CategoryDirectoryFilters;
 
@@ -188,5 +188,5 @@ function toIsActiveQuery(status: CategoryStatusFilter) {
   if (status === "ACTIVE") return "true";
   if (status === "INACTIVE") return "false";
 
-  return undefined;
+  return "all";
 }

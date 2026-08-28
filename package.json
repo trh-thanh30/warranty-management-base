@@ -61,6 +61,7 @@
     "test:api:debug": "pnpm --filter @repo/api test:debug",
     "test:admin": "pnpm --filter @repo/admin test",
     "test:web": "pnpm --filter @repo/web test",
+    "test:ops-scripts": "node --test scripts/tests/*.test.mjs",
     "seed:categories:dev": "pnpm --filter @repo/api db:seed-categories:dev",
     "seed:categories:test": "pnpm --filter @repo/api db:seed-categories:test",
     "seed:categories:prod": "pnpm --filter @repo/api db:seed-categories:prod",

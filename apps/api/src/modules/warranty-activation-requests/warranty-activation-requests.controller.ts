@@ -13,6 +13,7 @@ import { GetWarrantyActivationRequestDetailUseCase } from '@/modules/warranty-ac
 import { ListWarrantyActivationRequestsUseCase } from '@/modules/warranty-activation-requests/use-cases/list-warranty-activation-requests.use-case';
 import { ReviewWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/review-warranty-activation-request.use-case';
 import { ResendWarrantyActivationRequestCertificateEmailUseCase } from '@/modules/warranty-activation-requests/use-cases/resend-warranty-activation-request-certificate-email.use-case';
+import { RetryWarrantyActivationRequestCertificateUseCase } from '@/modules/warranty-activation-requests/use-cases/retry-warranty-activation-request-certificate.use-case';
 import {
   Body,
   Controller,
@@ -44,6 +45,7 @@ export class WarrantyActivationRequestsController {
     private readonly getWarrantyActivationRequestDetailUseCase: GetWarrantyActivationRequestDetailUseCase,
     private readonly reviewWarrantyActivationRequestUseCase: ReviewWarrantyActivationRequestUseCase,
     private readonly resendWarrantyActivationRequestCertificateEmailUseCase: ResendWarrantyActivationRequestCertificateEmailUseCase,
+    private readonly retryWarrantyActivationRequestCertificateUseCase: RetryWarrantyActivationRequestCertificateUseCase,
   ) {}
 
   @Post('admin')
@@ -131,6 +133,11 @@ export class WarrantyActivationRequestsController {
     );
   }
 
+  @Post(':id/certificate/retry')
+  @Permissions([permission_key.WARRANTY_UPDATE])
+  retryCertificate(@Param('id') id: string) {
+    return this.retryWarrantyActivationRequestCertificateUseCase.execute(id);
+  }
   private async sendCertificateFile(
     id: string,
     response: Response,

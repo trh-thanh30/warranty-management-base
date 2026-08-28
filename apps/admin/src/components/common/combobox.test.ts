@@ -12,3 +12,17 @@ test("ComboboxItem sends visible string labels to cmdk as keywords", () => {
   assert.match(source, /keywords=\{searchKeywords\}/);
   assert.match(source, /typeof children === "string"/);
 });
+
+test("ComboboxTrigger exposes an accessible loading state", () => {
+  assert.match(source, /loading\?: boolean/);
+  assert.match(source, /loadingLabel\?: string/);
+  assert.match(source, /aria-busy=\{loading \|\| undefined\}/);
+  assert.match(
+    source,
+    /loading\s*\? \(loadingLabel \?\? placeholder\)\s*:\s*selectedLabel \|\| placeholder/,
+  );
+  assert.match(
+    source,
+    /loading \? \([\s\S]*<Loader2[\s\S]*animate-spin[\s\S]*\) : \([\s\S]*<ChevronsUpDown/,
+  );
+});

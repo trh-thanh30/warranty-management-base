@@ -1,31 +1,21 @@
 import { EmailProcessor } from '@/workers/email/worker.processor';
-import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
-import { WarrantyActivationRequestCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-activation-request-certificates.repository';
-import { warranty_certificate_email_status } from '@prisma/client';
 
 describe('EmailProcessor', () => {
-  it('marks a product certificate as sent', async () => {
+  it('marks every legacy certificate in an aggregate email as sent', async () => {
     const emailService = {
       sendTemplatedEmail: jest.fn().mockResolvedValue(undefined),
     };
-    const prismaService = {
-      warrantyCertificate: {
-        update: jest.fn().mockResolvedValue({}),
-      },
-    };
+    const emailStatusService = createEmailStatusService();
     const processor = new EmailProcessor(
       emailService as never,
-      new WarrantyCertificatesRepository(prismaService as never),
-      new WarrantyActivationRequestCertificatesRepository(
-        prismaService as never,
-      ),
+      emailStatusService as never,
     );
     const job = {
       data: {
         context: {},
         template: 'warranty-certificates',
         to: 'customer@example.com',
-        warrantyCertificateId: 'certificate-1',
+        warrantyCertificateIds: ['certificate-1', 'certificate-2'],
       },
       id: 'job-id',
       updateProgress: jest.fn(),
@@ -33,33 +23,22 @@ describe('EmailProcessor', () => {
 
     await processor.process(job as never);
 
-    expect(prismaService.warrantyCertificate.update).toHaveBeenCalledWith({
-      where: { id: 'certificate-1' },
-      data: expect.objectContaining({
-        email_status: warranty_certificate_email_status.SENT,
-        last_error: null,
-      }),
-    });
+    expect(emailStatusService.markSent).toHaveBeenCalledWith([
+      'certificate-1',
+      'certificate-2',
+    ]);
+    expect(emailStatusService.markRequestSent).toHaveBeenCalledWith(undefined);
+    expect(emailStatusService.markFailed).not.toHaveBeenCalled();
   });
 
-  it('marks a request-owned certificate as sent', async () => {
+  it('marks a request-owned aggregate certificate as sent', async () => {
     const emailService = {
       sendTemplatedEmail: jest.fn().mockResolvedValue(undefined),
     };
-    const prismaService = {
-      warrantyActivationRequestCertificate: {
-        update: jest.fn().mockResolvedValue({}),
-      },
-      warrantyCertificate: {
-        update: jest.fn().mockResolvedValue({}),
-      },
-    };
+    const emailStatusService = createEmailStatusService();
     const processor = new EmailProcessor(
       emailService as never,
-      new WarrantyCertificatesRepository(prismaService as never),
-      new WarrantyActivationRequestCertificatesRepository(
-        prismaService as never,
-      ),
+      emailStatusService as never,
     );
     const job = {
       data: {
@@ -74,15 +53,53 @@ describe('EmailProcessor', () => {
 
     await processor.process(job as never);
 
-    expect(
-      prismaService.warrantyActivationRequestCertificate.update,
-    ).toHaveBeenCalledWith({
-      where: { id: 'request-certificate-1' },
-      data: expect.objectContaining({
-        email_status: warranty_certificate_email_status.SENT,
-        last_error: null,
-      }),
-    });
-    expect(prismaService.warrantyCertificate.update).not.toHaveBeenCalled();
+    expect(emailStatusService.markSent).toHaveBeenCalledWith([]);
+    expect(emailStatusService.markRequestSent).toHaveBeenCalledWith(
+      'request-certificate-1',
+    );
+    expect(emailStatusService.markRequestFailed).not.toHaveBeenCalled();
+  });
+
+  it('marks request certificate email as failed and rethrows for BullMQ retry', async () => {
+    const sendError = new Error('SMTP unavailable');
+    const emailService = {
+      sendEmail: jest.fn().mockRejectedValue(sendError),
+    };
+    const emailStatusService = createEmailStatusService();
+    const processor = new EmailProcessor(
+      emailService as never,
+      emailStatusService as never,
+    );
+    const job = {
+      data: {
+        subject: 'Warranty certificate',
+        text: 'Certificate attached',
+        to: 'customer@example.com',
+        warrantyActivationRequestCertificateId: 'request-certificate-1',
+      },
+      id: 'job-id',
+      updateProgress: jest.fn(),
+    };
+
+    await expect(processor.process(job as never)).rejects.toBe(sendError);
+
+    expect(emailStatusService.markFailed).toHaveBeenCalledWith(
+      [],
+      'SMTP unavailable',
+    );
+    expect(emailStatusService.markRequestFailed).toHaveBeenCalledWith(
+      'request-certificate-1',
+      'SMTP unavailable',
+    );
+    expect(emailStatusService.markRequestSent).not.toHaveBeenCalled();
   });
 });
+
+function createEmailStatusService() {
+  return {
+    markFailed: jest.fn().mockResolvedValue(undefined),
+    markRequestFailed: jest.fn().mockResolvedValue(undefined),
+    markRequestSent: jest.fn().mockResolvedValue(undefined),
+    markSent: jest.fn().mockResolvedValue(undefined),
+  };
+}

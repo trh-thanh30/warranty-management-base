@@ -1,7 +1,9 @@
 import type {
+  ActivationProductOption,
   AssignProductOwnerBody,
   AttachProductAssetBody,
   CreateProductBody,
+  ListActivationProductOptionsQuery,
   ListProductsQuery,
   PaginatedResponse,
   ProductResponse,
@@ -19,6 +21,17 @@ import type {
 
 export function createProductsService(http: ProductsHttpClient) {
   return {
+    async listActivationProductOptions(
+      query: ListActivationProductOptionsQuery,
+    ): Promise<PaginatedResponse<ActivationProductOption>> {
+      return unwrap(
+        await http.get<PaginatedResponse<ActivationProductOption>>(
+          "/products/activation-options",
+          { params: query },
+        ),
+      );
+    },
+
     async listProducts(
       query: ListProductsQuery,
     ): Promise<PaginatedResponse<ProductResponse>> {
@@ -49,6 +62,12 @@ export function createProductsService(http: ProductsHttpClient) {
     async deleteProduct(productId: string): Promise<ProductResponse> {
       return unwrap(
         await http.delete<ProductResponse>(`/products/${productId}`),
+      );
+    },
+
+    async restoreProduct(productId: string): Promise<ProductResponse> {
+      return unwrap(
+        await http.patch<ProductResponse>(`/products/${productId}/restore`),
       );
     },
 

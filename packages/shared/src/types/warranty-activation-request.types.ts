@@ -155,6 +155,7 @@ export type CreateWarrantyActivationRequestBody = {
   customerName: string;
   customerPhone: string;
   customerEmail?: string;
+  /** Admin-only date value in YYYY-MM-DD format when supplied. */
   customerBirthdate?: string;
   vehiclePlate?: string;
   vehicleModel?: string;
@@ -221,4 +222,5 @@ export type ReviewWarrantyActivationRequestBody = {
   status: Extract<WarrantyActivationRequestStatus, "APPROVED" | "REJECTED">;
   adminNote?: string;
   rejectionReason?: string;
+  locale?: "vi" | "en";
 };

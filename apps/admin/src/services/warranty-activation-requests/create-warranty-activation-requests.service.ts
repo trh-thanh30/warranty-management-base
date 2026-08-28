@@ -108,5 +108,15 @@ export function createWarrantyActivationRequestsService(
       );
       return unwrapBlob(response);
     },
+    async retryWarrantyActivationRequestCertificate(
+      requestId: string,
+    ): Promise<WarrantyActivationRequestSummary> {
+      return unwrap(
+        await http.post<WarrantyActivationRequestSummary>(
+          `/warranty-activation-requests/${requestId}/certificate/retry`,
+          {},
+        ),
+      );
+    },
   };
 }

@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
 import type {
   ReviewWarrantyActivationRequestBody,
   WarrantyActivationRequestSummary,
@@ -17,6 +15,8 @@ import {
   Textarea,
 } from "@repo/ui";
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { ActivationRequestItemsTable } from "./activation-request-items-table";
 
 type ReviewWarrantyActivationRequestDialogProps = {
@@ -39,8 +39,19 @@ export function ReviewWarrantyActivationRequestDialog({
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const [adminNote, setAdminNote] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
-  const isReject = action === "reject";
+  const [displayedAction, setDisplayedAction] = useState(action);
+  const [displayedRequest, setDisplayedRequest] = useState(request);
+  const visibleAction = open ? action : displayedAction;
+  const visibleRequest = request ?? displayedRequest;
+  const isReject = visibleAction === "reject";
   const canSubmit = !isReviewing && (!isReject || rejectionReason.trim());
+
+  useEffect(() => {
+    if (open && request) {
+      setDisplayedAction(action);
+      setDisplayedRequest(request);
+    }
+  }, [action, open, request]);
 
   useEffect(() => {
     if (!open) {
@@ -50,7 +61,7 @@ export function ReviewWarrantyActivationRequestDialog({
   }, [open]);
 
   function handleConfirm() {
-    if (!request) return;
+    if (!visibleRequest) return;
 
     onConfirm(
       isReject
@@ -68,7 +79,13 @@ export function ReviewWarrantyActivationRequestDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex h-dvh max-h-dvh w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none p-0 sm:block sm:h-fit sm:max-h-none sm:w-[min(calc(100vw-2rem),36rem)] sm:max-w-4xl sm:overflow-visible sm:rounded-lg sm:p-4">
+      <DialogContent
+        className={`flex w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none p-0 max-sm:h-dvh max-sm:max-h-dvh sm:flex sm:h-fit sm:rounded-lg sm:p-4 ${
+          isReject
+            ? "sm:w-[min(calc(100vw-2rem),36rem)] sm:max-w-xl"
+            : "sm:w-[min(calc(100vw-2rem),72rem)] sm:max-w-6xl"
+        }`}
+      >
         <header className="shrink-0 border-b border-slate-200 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-950 sm:border-0 sm:bg-transparent sm:p-0 sm:dark:border-0 sm:dark:bg-transparent">
           <DialogClose asChild>
             <Button
@@ -86,22 +103,32 @@ export function ReviewWarrantyActivationRequestDialog({
           </DialogTitle>
           <DialogDescription className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
             {isReject
-              ? t("rejectDescription", { code: request?.requestCode ?? "" })
-              : t("approveDescription", { code: request?.requestCode ?? "" })}
+              ? t("rejectDescription", {
+                  code: visibleRequest?.requestCode ?? "",
+                })
+              : t("approveDescription", {
+                  code: visibleRequest?.requestCode ?? "",
+                })}
           </DialogDescription>
         </header>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:overflow-visible sm:p-0">
-          {request?.items?.length ? (
+        <div className="min-h-0 overflow-y-auto px-5 py-5 max-sm:flex-1 sm:p-0">
+          {visibleRequest?.items?.length ? (
             <div className="space-y-3 sm:mt-5">
               <p className="text-sm font-medium text-slate-950 dark:text-slate-50">
                 {isReject
-                  ? t("reviewProductCount", { count: request.items.length })
+                  ? t("reviewProductCount", {
+                      count: visibleRequest.items.length,
+                    })
                   : t("approveAllProductsWarning", {
-                      count: request.items.length,
+                      count: visibleRequest.items.length,
                     })}
               </p>
-              <ActivationRequestItemsTable items={request.items} />
+              {!isReject ? (
+                <div className="min-w-0 max-h-[min(45vh,30rem)] overflow-x-auto overflow-y-auto">
+                  <ActivationRequestItemsTable items={visibleRequest.items} />
+                </div>
+              ) : null}
             </div>
           ) : null}
 

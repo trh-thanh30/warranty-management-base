@@ -1,5 +1,4 @@
 import { ConflictError, NotFoundError } from '@/common/response';
-import { PrismaService } from '@/database/prisma/prisma.service';
 import { AssetsService } from '@/modules/assets/assets.service';
 import { UpdateProductTemplateDto } from '@/modules/product-templates/dto/update-product-template.dto';
 import {
@@ -16,7 +15,6 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class UpdateProductTemplateUseCase {
   constructor(
-    private readonly prismaService: PrismaService,
     private readonly productTemplatesRepository: ProductTemplatesRepository,
     private readonly assetsService: AssetsService,
   ) {}
@@ -39,7 +37,10 @@ export class UpdateProductTemplateUseCase {
     }
 
     const category = dto.categoryId
-      ? await resolveProductTemplateCategory(this.prismaService, dto.categoryId)
+      ? await resolveProductTemplateCategory(
+          this.productTemplatesRepository,
+          dto.categoryId,
+        )
       : null;
     await validateProductTemplateAssets(
       this.productTemplatesRepository,

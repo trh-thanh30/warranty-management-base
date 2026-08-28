@@ -16,23 +16,34 @@ import {
   normalizeText,
   optionalTrim,
 } from '@/modules/warranty-activation-requests/utils/warranty-activation-request-normalization.utils';
-import { Injectable, Optional } from '@nestjs/common';
 import {
-  Prisma,
-  Product,
-  ProductTemplate,
-  Customer,
-  Dealer,
-  warranty_activation_request_source,
-  warranty_activation_request_status,
-  warranty_status,
-} from '@prisma/client';
+  CreateWarrantyActivationRequestCommand,
+  WARRANTY_ACTIVATION_REQUEST_SOURCE,
+  WarrantyActivationRequestSource,
+} from '@/modules/warranty-activation-requests/warranty-activation-requests.types';
+import {
+  WarrantyActivationRequestCodeConflictError,
+  WarrantyActivationRequestUniqueConflictError,
+} from '@/modules/warranty-activation-requests/repository/warranty-activation-request-errors';
+import { Injectable, Optional } from '@nestjs/common';
 import { normalizePhoneNumber } from '@repo/shared/utils';
 
 const REQUEST_CODE_GENERATION_ATTEMPTS = 3;
-const ACTIVATABLE_WARRANTY_STATUSES = new Set<warranty_status>([
-  warranty_status.DRAFT,
-]);
+const ACTIVATABLE_WARRANTY_STATUSES = new Set(['DRAFT']);
+
+type ActivationRequestProduct = NonNullable<
+  Awaited<ReturnType<ProductsRepository['findActivationRequestTargetById']>>
+>;
+
+type ActivationRequestDealer = {
+  address: string;
+  district: string | null;
+  id: string;
+  name: string;
+  phone: string | null;
+  province: string;
+  sales_name: string | null;
+};
 
 @Injectable()
 export class CreateWarrantyActivationRequestUseCase {
@@ -55,7 +66,7 @@ export class CreateWarrantyActivationRequestUseCase {
         id: string;
         birthdate?: Date;
       };
-      source?: warranty_activation_request_source;
+      source?: WarrantyActivationRequestSource;
     } = {},
   ) {
     const dtoWarrantyCode = dto.warrantyCode?.trim().toUpperCase();
@@ -138,43 +149,41 @@ export class CreateWarrantyActivationRequestUseCase {
       try {
         const request = await this.createRequest(
           {
-            request_code: requestCode,
+            requestCode,
             source:
-              context.source ?? warranty_activation_request_source.PUBLIC_WEB,
-            warranty_code: warrantyCode,
-            created_by: context.createdByUserId
-              ? { connect: { id: context.createdByUserId } }
-              : undefined,
-            customer_name: customerName,
-            customer_phone: customerPhone,
-            customer_email: customerEmail,
-            customer_birthdate: dto.customerBirthdate
+              context.source ?? WARRANTY_ACTIVATION_REQUEST_SOURCE.PUBLIC_WEB,
+            warrantyCode,
+            createdByUserId: context.createdByUserId,
+            customerName,
+            customerPhone,
+            customerEmail,
+            customerBirthdate: dto.customerBirthdate
               ? new Date(dto.customerBirthdate)
               : undefined,
-            category: this.resolveCategoryConnect(dto.categoryId, product),
-            product: { connect: { id: product.id } },
-            dealer: dealer ? { connect: { id: dealer.id } } : undefined,
-            vehicle_plate: optionalTrim(dto.vehiclePlate),
-            vehicle_model: optionalTrim(dto.vehicleModel),
-            installed_at: dto.installedAt
+            categoryId: this.resolveCategoryId(dto.categoryId, product),
+            productId: product.id,
+            dealerId: dealer?.id,
+            vehiclePlate: optionalTrim(dto.vehiclePlate),
+            vehicleModel: optionalTrim(dto.vehicleModel),
+            installedAt: dto.installedAt
               ? new Date(dto.installedAt)
               : undefined,
-            warranty_duration_months:
+            warrantyDurationMonths:
               validatedItems?.[0].warrantyDurationMonths ??
               dto.warrantyDurationMonths ??
               product.warranty.duration_months,
-            province_code: dto.provinceCode.trim(),
-            province_name: dto.provinceName.trim(),
-            ward_code: dto.wardCode.trim(),
-            ward_name: dto.wardName.trim(),
-            address_detail: dto.addressDetail.trim(),
-            full_address: buildWarrantyActivationRequestFullAddress(dto),
-            product_name:
+            provinceCode: dto.provinceCode.trim(),
+            provinceName: dto.provinceName.trim(),
+            wardCode: dto.wardCode.trim(),
+            wardName: dto.wardName.trim(),
+            addressDetail: dto.addressDetail.trim(),
+            fullAddress: buildWarrantyActivationRequestFullAddress(dto),
+            productName:
               validatedItems?.[0].productName ??
               optionalTrim(dto.productName) ??
               product.display_name ??
               product.template.name,
-            serial_number:
+            serialNumber:
               validatedItems !== null
                 ? validatedItems[0].serialNumber
                 : (optionalTrim(dto.serialNumber) ?? product.serial_number),
@@ -186,7 +195,7 @@ export class CreateWarrantyActivationRequestUseCase {
               validatedItems !== null
                 ? validatedItems[0].model
                 : (optionalTrim(dto.model) ?? product.template.model),
-            manufacture_year:
+            manufactureYear:
               validatedItems !== null
                 ? validatedItems[0].manufactureYear
                 : (dto.manufactureYear ?? product.template.model_year),
@@ -196,22 +205,10 @@ export class CreateWarrantyActivationRequestUseCase {
               dto,
               product,
               source:
-                context.source ?? warranty_activation_request_source.PUBLIC_WEB,
+                context.source ?? WARRANTY_ACTIVATION_REQUEST_SOURCE.PUBLIC_WEB,
               warrantyId: product.warranty.id,
             }),
-            items: {
-              create: requestItems.map((item) => ({
-                activation_field_id: item.activationFieldId,
-                position_key: item.positionKey,
-                position_label: item.positionLabel,
-                product_id: item.productId,
-                warranty_id: item.warrantyId,
-                warranty_code: item.warrantyCode,
-                product_name: item.productName,
-                product_code: item.productCode,
-                serial_number: item.serialNumber,
-              })),
-            },
+            items: requestItems,
           },
           context.customerProfile,
         );
@@ -224,12 +221,12 @@ export class CreateWarrantyActivationRequestUseCase {
       } catch (error) {
         if (
           attempt < REQUEST_CODE_GENERATION_ATTEMPTS - 1 &&
-          this.isRequestCodeConflict(error)
+          error instanceof WarrantyActivationRequestCodeConflictError
         ) {
           continue;
         }
 
-        if (this.isUniqueConstraintConflict(error)) {
+        if (error instanceof WarrantyActivationRequestUniqueConflictError) {
           if (validatedItems) {
             const concurrentOpenRequests =
               await this.warrantyActivationRequestsRepository.findOpenByProductIds(
@@ -270,7 +267,7 @@ export class CreateWarrantyActivationRequestUseCase {
   }
 
   private createRequest(
-    data: Prisma.WarrantyActivationRequestCreateInput,
+    data: CreateWarrantyActivationRequestCommand,
     customerProfile?: {
       id: string;
       birthdate?: Date;
@@ -285,27 +282,11 @@ export class CreateWarrantyActivationRequestUseCase {
     });
   }
 
-  private isRequestCodeConflict(error: unknown) {
-    return (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === 'P2002' &&
-      Array.isArray(error.meta?.target) &&
-      error.meta.target.includes('request_code')
-    );
-  }
-
-  private isUniqueConstraintConflict(error: unknown) {
-    return (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === 'P2002'
-    );
-  }
-
   private throwAlreadyOpenRequest(
     productId: string,
     openRequest: {
       request_code: string;
-      status: warranty_activation_request_status;
+      status: string;
     },
   ): never {
     throw new BadRequestError(
@@ -365,9 +346,7 @@ export class CreateWarrantyActivationRequestUseCase {
   }
 
   private toPrimaryRequestItem(
-    product: NonNullable<
-      Awaited<ReturnType<ProductsRepository['findActivationRequestTargetById']>>
-    >,
+    product: ActivationRequestProduct,
     warrantyCode: string,
   ): ValidatedActivationRequestItem {
     if (!product.warranty) {
@@ -459,19 +438,16 @@ export class CreateWarrantyActivationRequestUseCase {
     });
   }
 
-  private resolveCategoryConnect(
+  private resolveCategoryId(
     categoryId: string | undefined,
-    product: Product & { template: ProductTemplate },
+    product: ActivationRequestProduct,
   ) {
-    const resolvedCategoryId = categoryId ?? product.category_id;
-    return resolvedCategoryId
-      ? { connect: { id: resolvedCategoryId } }
-      : undefined;
+    return categoryId ?? product.category_id ?? undefined;
   }
 
   private assertProductMatchesCategory(
     categoryId: string | undefined,
-    product: Product & { template: ProductTemplate },
+    product: ActivationRequestProduct,
   ) {
     if (!categoryId) return;
 
@@ -489,15 +465,15 @@ export class CreateWarrantyActivationRequestUseCase {
   }
 
   private buildActivationMetadata(input: {
-    dealer: Dealer | null;
+    dealer: ActivationRequestDealer | null;
     dto: CreateWarrantyActivationRequestDto;
-    product: Product;
-    source: warranty_activation_request_source;
+    product: ActivationRequestProduct;
+    source: WarrantyActivationRequestSource;
     warrantyId: string;
-  }): Prisma.InputJsonObject {
+  }): Record<string, unknown> {
     const metadata = {
       ...(input.dto.metadata ?? {}),
-    } as Record<string, Prisma.InputJsonValue>;
+    };
 
     metadata.productId = input.product.id;
     metadata.source = input.source;
@@ -518,7 +494,7 @@ export class CreateWarrantyActivationRequestUseCase {
 
   private buildDealerSnapshot(
     dto: CreateWarrantyActivationRequestDto,
-    dealer: Dealer | null,
+    dealer: ActivationRequestDealer | null,
   ) {
     const snapshot = {
       address: dealer?.address ?? optionalTrim(dto.dealerAddress),
@@ -533,9 +509,7 @@ export class CreateWarrantyActivationRequestUseCase {
       Object.entries(snapshot).filter(([, value]) => Boolean(value)),
     );
 
-    return Object.keys(compact).length > 0
-      ? (compact as Prisma.InputJsonObject)
-      : null;
+    return Object.keys(compact).length > 0 ? compact : null;
   }
 
   private buildFilmItems(dto: CreateWarrantyActivationRequestDto) {
@@ -547,13 +521,15 @@ export class CreateWarrantyActivationRequestUseCase {
         .filter(([, value]) => Boolean(value)),
     );
 
-    return Object.keys(compact).length > 0
-      ? (compact as Prisma.InputJsonObject)
-      : null;
+    return Object.keys(compact).length > 0 ? compact : null;
   }
 
   private assertCustomerMatchesCurrentOwner(input: {
-    currentOwner: Pick<Customer, 'email' | 'full_name' | 'phone'>;
+    currentOwner: {
+      email: string | null;
+      full_name: string;
+      phone: string | null;
+    };
     customerEmail: string | null;
     customerName: string;
     customerPhone: string;

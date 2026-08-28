@@ -1,28 +1,9 @@
+import { WarrantyCertificateEmailStatusService } from '@/modules/warranty-certificates/services/warranty-certificate-email-status.service';
+import { EmailJobData } from '@/workers/email/types/email-worker.type';
+import { WorkerEmailService } from '@/workers/email/worker.service';
 import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
-import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
-import { WarrantyActivationRequestCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-activation-request-certificates.repository';
-import { warranty_certificate_email_status } from '@prisma/client';
 import { Job } from 'bullmq';
-import { WorkerEmailService } from '@/workers/email/worker.service';
-
-export interface EmailJobData {
-  to: string;
-  subject?: string;
-  text?: string;
-  html?: string;
-  attachments?: Array<{
-    contentBase64: string;
-    contentType: string;
-    filename: string;
-  }>;
-  template?: string;
-  context?: Record<string, unknown>;
-  warrantyCertificateId?: string;
-  warrantyActivationRequestCertificateId?: string;
-  // Idempotency key for deduplication
-  idempotencyKey?: string;
-}
 
 @Injectable()
 @Processor('email', { concurrency: 5 })
@@ -32,27 +13,29 @@ export class EmailProcessor extends WorkerHost {
 
   constructor(
     private readonly emailService: WorkerEmailService,
-    private readonly warrantyCertificatesRepository: WarrantyCertificatesRepository,
-    private readonly requestCertificatesRepository: WarrantyActivationRequestCertificatesRepository,
+    private readonly warrantyCertificateEmailStatusService: WarrantyCertificateEmailStatusService,
   ) {
     super();
   }
 
   async process(job: Job<EmailJobData>): Promise<void> {
     const {
-      to,
-      subject,
-      text,
-      html,
       attachments,
-      template,
       context,
+      html,
       idempotencyKey,
-      warrantyCertificateId,
+      subject,
+      template,
+      text,
+      to,
       warrantyActivationRequestCertificateId,
+      warrantyCertificateId,
+      warrantyCertificateIds,
     } = job.data;
+    const certificateIds =
+      warrantyCertificateIds ??
+      (warrantyCertificateId ? [warrantyCertificateId] : []);
 
-    // Idempotency check - skip if already processed
     if (idempotencyKey && this.processedJobs.has(idempotencyKey)) {
       this.logger.log(
         `Skipping duplicate job ${job.id} with idempotency key: ${idempotencyKey}`,
@@ -62,19 +45,15 @@ export class EmailProcessor extends WorkerHost {
 
     try {
       this.logger.log(`Processing email job ${job.id} to ${to}`);
-
-      // send progress
       job.updateProgress(50);
 
       if (template && context) {
-        // Send templated email
         await this.emailService.sendTemplatedEmail(to, template, context, {
           attachments,
           subject,
           text,
         });
       } else {
-        // Send regular email
         await this.emailService.sendEmail(
           to,
           subject || 'No Subject',
@@ -84,82 +63,40 @@ export class EmailProcessor extends WorkerHost {
         );
       }
 
-      // Mark as processed for idempotency
       if (idempotencyKey) {
         this.processedJobs.add(idempotencyKey);
-        // Clean up old processed jobs to prevent memory leak
         if (this.processedJobs.size > 10000) {
-          // Keep only recent 5000 jobs
           const recentJobs = Array.from(this.processedJobs).slice(-5000);
           this.processedJobs.clear();
           recentJobs.forEach((key) => this.processedJobs.add(key));
         }
       }
 
-      // mark job as completed
       job.updateProgress(100);
-      await this.markWarrantyCertificateEmailSent(warrantyCertificateId);
-      await this.markRequestCertificateEmailSent(
-        warrantyActivationRequestCertificateId,
-      );
+      await Promise.all([
+        this.warrantyCertificateEmailStatusService.markSent(certificateIds),
+        this.warrantyCertificateEmailStatusService.markRequestSent(
+          warrantyActivationRequestCertificateId,
+        ),
+      ]);
 
       this.logger.log(`Email job ${job.id} completed successfully`);
     } catch (error) {
-      await this.markWarrantyCertificateEmailFailed(
-        warrantyCertificateId,
-        error instanceof Error ? error.message : 'Unknown email sending error',
-      );
-      await this.markRequestCertificateEmailFailed(
-        warrantyActivationRequestCertificateId,
-        error instanceof Error ? error.message : 'Unknown email sending error',
-      );
-      this.logger.error(`Email job ${job.id} failed: ${error.message}`);
-      throw error; // Re-throw to mark job as failed
+      const message =
+        error instanceof Error ? error.message : 'Unknown email sending error';
+      await Promise.all([
+        this.warrantyCertificateEmailStatusService.markFailed(
+          certificateIds,
+          message,
+        ),
+        this.warrantyCertificateEmailStatusService.markRequestFailed(
+          warrantyActivationRequestCertificateId,
+          message,
+        ),
+      ]);
+      this.logger.error(`Email job ${job.id} failed: ${message}`);
+      throw error;
     }
-  }
-
-  private async markWarrantyCertificateEmailSent(certificateId?: string) {
-    if (!certificateId) return;
-
-    await this.warrantyCertificatesRepository.update(certificateId, {
-      email_status: warranty_certificate_email_status.SENT,
-      emailed_at: new Date(),
-      last_error: null,
-    });
-  }
-
-  private async markWarrantyCertificateEmailFailed(
-    certificateId: string | undefined,
-    message: string,
-  ) {
-    if (!certificateId) return;
-
-    await this.warrantyCertificatesRepository.update(certificateId, {
-      email_status: warranty_certificate_email_status.FAILED,
-      last_error: message,
-    });
-  }
-
-  private async markRequestCertificateEmailSent(certificateId?: string) {
-    if (!certificateId) return;
-
-    await this.requestCertificatesRepository.update(certificateId, {
-      email_status: warranty_certificate_email_status.SENT,
-      emailed_at: new Date(),
-      last_error: null,
-    });
-  }
-
-  private async markRequestCertificateEmailFailed(
-    certificateId: string | undefined,
-    message: string,
-  ) {
-    if (!certificateId) return;
-
-    await this.requestCertificatesRepository.update(certificateId, {
-      email_status: warranty_certificate_email_status.FAILED,
-      last_error: message,
-    });
   }
 
   @OnWorkerEvent('completed')

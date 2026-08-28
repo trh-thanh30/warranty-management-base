@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { PrismaModule } from '@/database/prisma/prisma.module';
 import { validateEnv } from '@/config/env.validation';
 import {
   appConfig,
@@ -16,8 +15,7 @@ import {
 } from '@/config';
 import { EmailProcessor } from '@/workers/email/worker.processor';
 import { WorkerEmailService } from '@/workers/email/worker.service';
-import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
-import { WarrantyActivationRequestCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-activation-request-certificates.repository';
+import { WarrantyCertificateEmailStatusModule } from '@/modules/warranty-certificates/warranty-certificate-email-status.module';
 
 @Module({
   imports: [
@@ -39,7 +37,7 @@ import { WarrantyActivationRequestCertificatesRepository } from '@/modules/warra
         redisConfig,
       ],
     }),
-    PrismaModule,
+    WarrantyCertificateEmailStatusModule,
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -47,11 +45,6 @@ import { WarrantyActivationRequestCertificatesRepository } from '@/modules/warra
     }),
     BullModule.registerQueue({ name: 'email' }),
   ],
-  providers: [
-    EmailProcessor,
-    WorkerEmailService,
-    WarrantyCertificatesRepository,
-    WarrantyActivationRequestCertificatesRepository,
-  ],
+  providers: [EmailProcessor, WorkerEmailService],
 })
 export class WorkerModule {}

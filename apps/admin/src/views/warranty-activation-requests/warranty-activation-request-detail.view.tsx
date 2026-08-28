@@ -5,10 +5,12 @@ import {
   Download,
   FileSearch,
   FileText,
+  RotateCcw,
   Send,
   XCircle,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { Button } from "@repo/ui";
 import { FormPageShell } from "@/src/components/common/form-page-shell";
@@ -21,6 +23,7 @@ import {
 } from "@/src/hooks/use-warranty-activation-requests";
 import { useToast } from "@/src/hooks/use-toast";
 import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
+import { warrantyActivationRequestsService } from "@/src/services/warranty-activation-requests/warranty-activation-requests.service";
 import { ReviewWarrantyActivationRequestDialog } from "./components/review-warranty-activation-request-dialog";
 import {
   WarrantyActivationRequestDetailCard,
@@ -39,6 +42,7 @@ export function WarrantyActivationRequestDetailView({
   const tApiErrors = useTranslations("ApiErrors");
   const { hasPermission } = usePermissions();
   const toast = useToast();
+  const [isRetryingCertificate, setIsRetryingCertificate] = useState(false);
   const requestQuery = useWarrantyActivationRequest(requestId);
   const resendCertificateEmailMutation =
     useResendWarrantyActivationRequestCertificateEmail(requestId);
@@ -51,11 +55,20 @@ export function WarrantyActivationRequestDetailView({
   const approveLabel =
     request?.status === "APPROVED" ? t("activate") : t("approve");
   const canResendCertificateEmail =
-    Boolean(request?.certificate) &&
+    request?.certificate?.status === "GENERATED" &&
+    Boolean(request.certificate.storageKey) &&
     Boolean(request?.certificate?.recipientEmail) &&
     request?.certificate?.emailStatus !== "SENT" &&
     hasPermission(PERMISSIONS.WARRANTY_UPDATE);
-  const canUseCertificate = Boolean(request?.certificate);
+  const canUseCertificate =
+    request?.certificate?.status === "GENERATED" &&
+    Boolean(request.certificate.storageKey);
+  const canRetryCertificate =
+    request?.status === "ACTIVATED" &&
+    (!request.certificate ||
+      request.certificate.status !== "GENERATED" ||
+      !request.certificate.storageKey) &&
+    hasPermission(PERMISSIONS.WARRANTY_UPDATE);
 
   async function resendCertificateEmail() {
     try {
@@ -71,6 +84,25 @@ export function WarrantyActivationRequestDetailView({
     }
   }
 
+  async function retryCertificate() {
+    try {
+      setIsRetryingCertificate(true);
+      await warrantyActivationRequestsService.retryWarrantyActivationRequestCertificate(
+        requestId,
+      );
+      await requestQuery.refetch();
+      toast.success(t("retriedCertificate"));
+    } catch (error) {
+      toast.error(
+        getLocalizedApiError(error, t, {
+          apiErrors: tApiErrors,
+          fallbackKey: "retryCertificateError",
+        }),
+      );
+    } finally {
+      setIsRetryingCertificate(false);
+    }
+  }
   return (
     <PermissionGuard permissions={[PERMISSIONS.WARRANTY_VIEW]}>
       <FormPageShell
@@ -81,7 +113,10 @@ export function WarrantyActivationRequestDetailView({
         maxWidthClassName="max-w-5xl"
         title={request?.requestCode ?? t("detailTitle")}
       >
-        {(canReview || canResendCertificateEmail || canUseCertificate) &&
+        {(canReview ||
+          canResendCertificateEmail ||
+          canUseCertificate ||
+          canRetryCertificate) &&
         request ? (
           <div className="flex flex-wrap justify-end gap-2">
             {canUseCertificate ? (
@@ -123,6 +158,21 @@ export function WarrantyActivationRequestDetailView({
                 {resendCertificateEmailMutation.isPending
                   ? t("resendingCertificateEmail")
                   : t("resendCertificateEmail")}
+              </Button>
+            ) : null}
+            {canRetryCertificate ? (
+              <Button
+                disabled={isRetryingCertificate}
+                onClick={() => {
+                  void retryCertificate();
+                }}
+                type="button"
+                variant="secondary"
+              >
+                <RotateCcw className="size-4" />
+                {isRetryingCertificate
+                  ? t("retryingCertificate")
+                  : t("retryCertificate")}
               </Button>
             ) : null}
             {request.status === "PENDING" ? (

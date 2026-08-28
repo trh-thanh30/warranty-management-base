@@ -78,6 +78,22 @@ function getDateFilter(
   };
 }
 
+function buildWarrantyClaimOrderBy(
+  sortBy?: keyof Prisma.WarrantyClaimOrderByWithRelationInput,
+  sortOrder: 'asc' | 'desc' = 'desc',
+): Prisma.WarrantyClaimOrderByWithRelationInput[] {
+  if (!sortBy) return [{ created_at: 'desc' }, { id: 'desc' }];
+
+  const orderBy = [
+    { [sortBy]: sortOrder },
+  ] as Prisma.WarrantyClaimOrderByWithRelationInput[];
+
+  if (sortBy !== 'created_at') orderBy.push({ created_at: 'desc' });
+
+  orderBy.push({ id: 'desc' });
+  return orderBy;
+}
+
 export function buildWarrantyClaimListQuery(
   filters: ListWarrantyClaimsDto,
   now = new Date(),
@@ -117,9 +133,7 @@ export function buildWarrantyClaimListQuery(
         ]
       : undefined,
   };
-  const orderBy: Prisma.WarrantyClaimOrderByWithRelationInput[] = sortBy
-    ? [{ [sortBy]: filters.sortOrder ?? 'desc' }]
-    : [{ created_at: 'desc' }];
+  const orderBy = buildWarrantyClaimOrderBy(sortBy, filters.sortOrder);
 
   return { orderBy, where };
 }

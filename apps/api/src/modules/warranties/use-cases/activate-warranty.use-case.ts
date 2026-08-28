@@ -1,6 +1,6 @@
-import { PrismaService } from '@/database/prisma/prisma.service';
 import { IssueWarrantyCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-certificate.use-case';
 import { ActivateWarrantyDto } from '@/modules/warranties/dto/activate-warranty.dto';
+import { WarrantiesRepository } from '@/modules/warranties/repository/warranties.repository';
 import { WarrantyLifecycleService } from '@/modules/warranties/services/warranty-lifecycle.service';
 import { toWarrantyResponse } from '@/modules/warranties/warranties.types';
 import { Injectable } from '@nestjs/common';
@@ -8,7 +8,7 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class ActivateWarrantyUseCase {
   constructor(
-    private readonly prismaService: PrismaService,
+    private readonly warrantiesRepository: WarrantiesRepository,
     private readonly warrantyLifecycleService: WarrantyLifecycleService,
     private readonly issueWarrantyCertificateUseCase: IssueWarrantyCertificateUseCase,
   ) {}
@@ -18,12 +18,13 @@ export class ActivateWarrantyUseCase {
     dto: ActivateWarrantyDto,
     context: { activatedByUserId?: string } = {},
   ) {
-    const warranty = await this.prismaService.$transaction((tx) =>
-      this.warrantyLifecycleService.activateDraftWarranty(tx, {
-        activatedByUserId: context.activatedByUserId,
-        startDate: dto.startDate ? new Date(dto.startDate) : undefined,
-        warrantyId,
-      }),
+    const warranty = await this.warrantiesRepository.withTransaction(
+      (repository) =>
+        this.warrantyLifecycleService.activateDraftWarranty(repository, {
+          activatedByUserId: context.activatedByUserId,
+          startDate: dto.startDate ? new Date(dto.startDate) : undefined,
+          warrantyId,
+        }),
     );
 
     await this.issueWarrantyCertificateUseCase.execute({
