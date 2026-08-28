@@ -47,6 +47,24 @@ jobs:
       - run: pnpm test:api
       - run: pnpm build:api
 
+  pdf-renderer:
+    name: PDF Renderer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.0.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint:pdf-renderer
+      - run: pnpm typecheck:pdf-renderer
+      - run: pnpm test:pdf-renderer
+      - run: pnpm build:pdf-renderer
+
   web:
     name: Web
     runs-on: ubuntu-latest
@@ -89,6 +107,7 @@ jobs:
     needs:
       - packages
       - api
+      - pdf-renderer
       - web
       - admin
     if: ${{ always() }}
@@ -141,7 +160,7 @@ jobs:
             --message "$CI_COMMIT_MESSAGE" \
             --author "${{ github.actor }}" \
             --workflow "${{ github.workflow }}" \
-            --job "Packages, API, Web, Admin" \
+            --job "Packages, API, PDF Renderer, Web, Admin" \
             --jobs-json "$JOBS_JSON" \
             --passed "$PASSED" \
             --failed "$FAILED" \

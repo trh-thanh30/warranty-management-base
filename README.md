@@ -396,16 +396,18 @@ Thêm docs module mới:
 
 ### Lệnh Docker
 
-| Lệnh                      | Mô tả                         |
-| :------------------------ | :---------------------------- |
-| `pnpm docker:build:api`   | Tạo Docker image cho API      |
-| `pnpm docker:build:web`   | Tạo Docker image cho Web      |
-| `pnpm docker:build:admin` | Tạo Docker image cho Admin    |
-| `pnpm docker:build:all`   | Tạo toàn bộ image app         |
-| `pnpm docker:check:api`   | Kiểm tra Dockerfile của API   |
-| `pnpm docker:check:web`   | Kiểm tra Dockerfile của Web   |
-| `pnpm docker:check:admin` | Kiểm tra Dockerfile của Admin |
-| `pnpm docker:check:all`   | Kiểm tra toàn bộ Dockerfile   |
+| Lệnh                             | Mô tả                             |
+| :------------------------------- | :-------------------------------- |
+| `pnpm docker:build:api`          | Tạo Docker image cho API          |
+| `pnpm docker:build:pdf-renderer` | Tạo Docker image cho PDF renderer |
+| `pnpm docker:build:web`          | Tạo Docker image cho Web          |
+| `pnpm docker:build:admin`        | Tạo Docker image cho Admin        |
+| `pnpm docker:build:all`          | Tạo toàn bộ image app             |
+| `pnpm docker:check:api`          | Kiểm tra Dockerfile của API       |
+| `pnpm docker:check:pdf-renderer` | Kiểm tra Dockerfile PDF renderer  |
+| `pnpm docker:check:web`          | Kiểm tra Dockerfile của Web       |
+| `pnpm docker:check:admin`        | Kiểm tra Dockerfile của Admin     |
+| `pnpm docker:check:all`          | Kiểm tra toàn bộ Dockerfile       |
 
 ### Shortcut Makefile
 
