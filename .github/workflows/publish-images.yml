@@ -120,9 +120,11 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: apps/api/Dockerfile
-          target: pdf-runner
+          file: apps/api-pdf-renderer/Dockerfile
+          target: runner
           push: true
+          pull: true
+          no-cache-filters: runner
           tags: |
             ${{ steps.metadata.outputs.pdf_renderer_image }}:${{ steps.metadata.outputs.image_tag }}
             ${{ steps.metadata.outputs.pdf_renderer_image }}:${{ steps.metadata.outputs.image_channel }}

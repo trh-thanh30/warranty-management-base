@@ -1,0 +1,26 @@
+{
+  "name": "@repo/api-pdf-renderer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "server.mjs"
+  ],
+  "scripts": {
+    "build": "node --check server.mjs",
+    "check-types": "tsc --project jsconfig.json",
+    "lint": "eslint . --max-warnings 0",
+    "start": "node server.mjs",
+    "test": "node --test tests"
+  },
+  "dependencies": {
+    "puppeteer-core": "^24.42.0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@types/node": "^22.10.7",
+    "eslint": "^9.39.1",
+    "globals": "^16.5.0",
+    "typescript": "5.9.2"
+  }
+}

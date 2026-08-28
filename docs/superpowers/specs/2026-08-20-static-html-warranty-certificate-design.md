@@ -204,12 +204,11 @@ mapping.
 
 ## 8. Deployment
 
-Create workspace package `@repo/api-pdf-renderer` containing the small internal
-HTTP server and `puppeteer-core` dependency.
-
-Add Docker target `pdf-runner` with Alpine Chromium and fonts. Add a
-`pdf-renderer` service to development and production compose files. The API
-receives:
+Create the deployable workspace app `@repo/api-pdf-renderer` under
+`apps/api-pdf-renderer`, containing the small internal HTTP server,
+`puppeteer-core` dependency, and a dedicated Dockerfile with Alpine Chromium
+and fonts. Add a `pdf-renderer` service to development and production compose
+files. The API receives:
 
 ```text
 PDF_RENDERER_URL=http://pdf-renderer:3001

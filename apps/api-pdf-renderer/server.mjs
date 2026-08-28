@@ -1,5 +1,7 @@
 import { createServer } from "node:http";
 import process from "node:process";
+import { pathToFileURL } from "node:url";
+
 import puppeteer from "puppeteer-core";
 
 const port = readPositiveNumber("PORT", 3001);
@@ -99,40 +101,49 @@ async function renderPdf(html) {
   }
 }
 
-const server = createServer(async (request, response) => {
-  if (request.method === "GET" && request.url === "/health") {
-    sendJson(response, 200, { status: "ok" });
-    return;
-  }
-
-  if (request.method !== "POST" || request.url !== "/render") {
-    sendJson(response, 404, { message: "Not found" });
-    return;
-  }
-
-  try {
-    const body = await readJsonBody(request);
-    if (!body || typeof body.html !== "string" || body.html.length === 0) {
-      sendJson(response, 400, { message: "html is required" });
+export function createRequestHandler({ render = renderPdf } = {}) {
+  return async (request, response) => {
+    if (request.method === "GET" && request.url === "/health") {
+      sendJson(response, 200, { status: "ok" });
       return;
     }
 
-    const pdf = await renderPdf(body.html);
-    response.writeHead(200, {
-      "cache-control": "no-store",
-      "content-length": String(pdf.length),
-      "content-type": "application/pdf",
-    });
-    response.end(pdf);
-  } catch (error) {
-    const statusCode =
-      typeof error?.statusCode === "number" ? error.statusCode : 500;
-    console.error("PDF render failed:", error);
-    sendJson(response, statusCode, {
-      message: statusCode === 500 ? "PDF render failed" : error.message,
-    });
-  }
-});
+    if (request.method !== "POST" || request.url !== "/render") {
+      sendJson(response, 404, { message: "Not found" });
+      return;
+    }
+
+    try {
+      const body = await readJsonBody(request);
+      if (!body || typeof body.html !== "string" || body.html.length === 0) {
+        sendJson(response, 400, { message: "html is required" });
+        return;
+      }
+
+      const pdf = await render(body.html);
+      response.writeHead(200, {
+        "cache-control": "no-store",
+        "content-length": String(pdf.length),
+        "content-type": "application/pdf",
+      });
+      response.end(pdf);
+    } catch (error) {
+      const statusCode =
+        error && typeof error.statusCode === "number" ? error.statusCode : 500;
+      console.error("PDF render failed:", error);
+      sendJson(response, statusCode, {
+        message:
+          statusCode === 500
+            ? "PDF render failed"
+            : getErrorMessage(error, "PDF render failed"),
+      });
+    }
+  };
+}
+
+export function createPdfRendererServer(options) {
+  return createServer(createRequestHandler(options));
+}
 
 function sendJson(response, statusCode, body) {
   response.writeHead(statusCode, {
@@ -146,27 +157,40 @@ function createHttpError(statusCode, message) {
   return Object.assign(new Error(message), { statusCode });
 }
 
-function readPositiveNumber(name, fallback) {
-  const value = Number(process.env[name] ?? fallback);
+export function readPositiveNumber(name, fallback, environment = process.env) {
+  const value = Number(environment[name] ?? fallback);
   if (!Number.isFinite(value) || value <= 0) {
     throw new Error(`${name} must be a positive number`);
   }
   return value;
 }
 
-async function shutdown(signal) {
+function getErrorMessage(error, fallback) {
+  return error instanceof Error ? error.message : fallback;
+}
+
+async function shutdown(server, signal) {
   console.log(`Received ${signal}; stopping PDF renderer`);
   await new Promise((resolve) => server.close(resolve));
   const browser = await browserPromise?.catch(() => undefined);
   await browser?.close();
 }
 
-for (const signal of ["SIGTERM", "SIGINT"]) {
-  process.once(signal, () => {
-    void shutdown(signal).finally(() => process.exit(0));
+function startServer() {
+  const server = createPdfRendererServer();
+
+  for (const signal of ["SIGTERM", "SIGINT"]) {
+    process.once(signal, () => {
+      void shutdown(server, signal).finally(() => process.exit(0));
+    });
+  }
+
+  server.listen(port, host, () => {
+    console.log(`PDF renderer listening on http://${host}:${port}`);
   });
 }
 
-server.listen(port, host, () => {
-  console.log(`PDF renderer listening on http://${host}:${port}`);
-});
+const entrypoint = process.argv[1];
+if (entrypoint && pathToFileURL(entrypoint).href === import.meta.url) {
+  startServer();
+}

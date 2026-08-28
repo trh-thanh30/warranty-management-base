@@ -827,17 +827,57 @@ test("container runtime stages match the production ports documented for deploym
     assert.match(runtimeStage, new RegExp(`EXPOSE ${port}`));
   }
 
-  const apiDockerfile = await readFile(
-    path.join(repoRoot, "apps", "api", "Dockerfile"),
+  const pdfRendererDockerfile = await readFile(
+    path.join(repoRoot, "apps", "api-pdf-renderer", "Dockerfile"),
     "utf8",
   );
-  const pdfRendererStage = apiDockerfile.match(
-    /FROM base AS pdf-runner[\s\S]*?(?=\nFROM |$)/,
+  const pdfRendererStage = pdfRendererDockerfile.match(
+    /FROM node:22-alpine AS runner[\s\S]*?(?=\nFROM |$)/,
   )?.[0];
 
   assert.ok(pdfRendererStage, "PDF renderer production stage must exist");
   assert.match(pdfRendererStage, /ENV PORT=3001/);
   assert.match(pdfRendererStage, /EXPOSE 3001/);
+
+  const apiDockerfile = await readFile(
+    path.join(repoRoot, "apps", "api", "Dockerfile"),
+    "utf8",
+  );
+  assert.doesNotMatch(apiDockerfile, /@repo\/api-pdf-renderer|pdf-runner/);
+});
+
+test("PDF renderer remains independently buildable and quality-gated", async () => {
+  const [packageJson, developmentCompose, ciWorkflow, publishWorkflow] =
+    await Promise.all([
+      readFile(
+        path.join(repoRoot, "apps", "api-pdf-renderer", "package.json"),
+        "utf8",
+      ),
+      readFile(path.join(repoRoot, "docker-compose.dev.yml"), "utf8"),
+      readFile(path.join(repoRoot, ".github", "workflows", "ci.yml"), "utf8"),
+      readFile(
+        path.join(repoRoot, ".github", "workflows", "publish-images.yml"),
+        "utf8",
+      ),
+    ]);
+  const scripts = JSON.parse(packageJson).scripts;
+
+  for (const script of ["build", "check-types", "lint", "test"]) {
+    assert.equal(typeof scripts[script], "string", `${script} gate must exist`);
+  }
+
+  assert.match(
+    developmentCompose,
+    /dockerfile: apps\/api-pdf-renderer\/Dockerfile[\s\S]*127\.0\.0\.1:\$\{PDF_RENDERER_PORT:-3001\}:3001/,
+  );
+  assert.match(
+    ciWorkflow,
+    /pdf-renderer:[\s\S]*pnpm lint:pdf-renderer[\s\S]*pnpm typecheck:pdf-renderer[\s\S]*pnpm test:pdf-renderer[\s\S]*pnpm build:pdf-renderer/,
+  );
+  assert.match(
+    publishWorkflow,
+    /Build and push PDF renderer image[\s\S]*file: apps\/api-pdf-renderer\/Dockerfile/,
+  );
 });
 
 test("production infrastructure ports are only published on localhost", async () => {

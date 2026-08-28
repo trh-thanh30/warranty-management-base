@@ -81,8 +81,8 @@ services:
   pdf-renderer:
     build:
       context: .
-      dockerfile: apps/api/Dockerfile
-      target: pdf-runner
+      dockerfile: apps/api-pdf-renderer/Dockerfile
+      target: runner
     container_name: warranty-management-base-pdf-renderer
     environment:
       PORT: 3001
@@ -91,6 +91,8 @@ services:
       PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium
     expose:
       - "3001"
+    ports:
+      - "127.0.0.1:${PDF_RENDERER_PORT:-3001}:3001"
     healthcheck:
       test:
         [
