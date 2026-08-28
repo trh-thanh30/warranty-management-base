@@ -1,5 +1,8 @@
 import { IssueWarrantyActivationRequestCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-activation-request-certificate.use-case';
-import { warranty_certificate_status } from '@prisma/client';
+import {
+  warranty_activation_request_status,
+  warranty_certificate_status,
+} from '@prisma/client';
 
 describe('IssueWarrantyActivationRequestCertificateUseCase', () => {
   const repository = {
@@ -79,6 +82,36 @@ describe('IssueWarrantyActivationRequestCertificateUseCase', () => {
     );
   });
 
+  it.each([
+    [
+      'pending request',
+      buildRequest([buildItem('windshield', 'WM-A')], {
+        requestStatus: warranty_activation_request_status.PENDING,
+      }),
+    ],
+    [
+      'request without activated items',
+      buildRequest([buildItem('windshield', 'WM-A', { activated: false })]),
+    ],
+    ['request with no items', buildRequest([])],
+  ])(
+    'rejects certificate issuance for an ineligible %s',
+    async (_label, request) => {
+      repository.findByRequestId.mockResolvedValue(null);
+      repository.findRequestForIssuance.mockResolvedValue(request);
+      const useCase = createUseCase();
+
+      await expect(
+        useCase.execute({ requestId: 'request-1' }),
+      ).rejects.toMatchObject({
+        code: 'WARRANTY_ACTIVATION_REQUEST_NOT_ELIGIBLE_FOR_CERTIFICATE',
+        details: expect.objectContaining({ requestId: 'request-1' }),
+      });
+      expect(pdfService.createPdfFromViewModel).not.toHaveBeenCalled();
+      expect(uploadAssetService.upload).not.toHaveBeenCalled();
+    },
+  );
+
   it('persists generation failure without hiding the original error', async () => {
     repository.findByRequestId.mockResolvedValue(null);
     repository.findRequestForIssuance.mockResolvedValue(
@@ -143,9 +176,14 @@ describe('IssueWarrantyActivationRequestCertificateUseCase', () => {
   }
 });
 
-function buildRequest(items: ReturnType<typeof buildItem>[]) {
+function buildRequest(
+  items: ReturnType<typeof buildItem>[],
+  options: { requestStatus?: warranty_activation_request_status } = {},
+) {
   return {
     id: 'request-1',
+    status:
+      options.requestStatus ?? warranty_activation_request_status.ACTIVATED,
     customer_email: 'customer@example.com',
     customer_name: 'Nguyễn Văn A',
     customer_phone: '0900000000',
@@ -158,13 +196,23 @@ function buildRequest(items: ReturnType<typeof buildItem>[]) {
   };
 }
 
-function buildItem(positionKey: string, warrantyCode: string) {
+function buildItem(
+  positionKey: string,
+  warrantyCode: string,
+  options: { activated?: boolean } = {},
+) {
   return {
     position_key: positionKey,
     position_label: positionKey === 'windshield' ? 'Kính lái' : 'Kính lưng',
     product_code: `PRD-${warrantyCode}`,
     product_name: `Product ${warrantyCode}`,
     serial_number: null,
+    status:
+      options.activated === false
+        ? warranty_activation_request_status.PENDING
+        : warranty_activation_request_status.ACTIVATED,
+    activated_at:
+      options.activated === false ? null : new Date('2026-08-17T00:00:00.000Z'),
     warranty_code: warrantyCode,
     warranty: {
       duration_months: 12,

@@ -65,6 +65,7 @@ export class WarrantyActivationRequestCertificatesRepository {
       where: { id: requestId },
       select: {
         id: true,
+        status: true,
         customer_email: true,
         customer_name: true,
         customer_phone: true,
@@ -74,6 +75,8 @@ export class WarrantyActivationRequestCertificatesRepository {
         items: {
           orderBy: [{ created_at: 'asc' }, { id: 'asc' }],
           select: {
+            status: true,
+            activated_at: true,
             position_key: true,
             position_label: true,
             product_code: true,
