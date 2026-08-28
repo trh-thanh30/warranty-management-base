@@ -1,10 +1,10 @@
 import { HtmlPdfRendererService } from '@/modules/warranty-certificates/services/html-pdf-renderer.service';
 import { WarrantyCertificateHtmlTemplateService } from '@/modules/warranty-certificates/services/warranty-certificate-html-template.service';
 import { WarrantyCertificatePdfService } from '@/modules/warranty-certificates/services/warranty-certificate-pdf.service';
-import type { WarrantyCertificateViewModel } from '@/modules/warranty-certificates/warranty-certificate.types';
-import { PDFDocument } from 'pdf-lib';
+import type { WarrantyCertificateViewModel } from '@/modules/warranty-certificates/types/warranty-certificate.types';
 import fs from 'node:fs';
 import path from 'node:path';
+import { PDFDocument } from 'pdf-lib';
 
 describe('WarrantyCertificatePdfService', () => {
   it('normalizes legacy input, renders HTML and delegates PDF creation', async () => {

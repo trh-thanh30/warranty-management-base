@@ -1,8 +1,8 @@
 import { NotFoundError } from '@/common/response';
 import { WarrantyActivationRequestCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-activation-request-certificates.repository';
 import { WarrantyActivationRequestCertificateEmailService } from '@/modules/warranty-certificates/services/warranty-activation-request-certificate-email.service';
+import { WARRANTY_CERTIFICATE_STATUS } from '@/modules/warranty-certificates/types/warranty-certificates.types';
 import { IssueWarrantyActivationRequestCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-activation-request-certificate.use-case';
-import { WARRANTY_CERTIFICATE_STATUS } from '@/modules/warranty-certificates/warranty-certificates.types';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

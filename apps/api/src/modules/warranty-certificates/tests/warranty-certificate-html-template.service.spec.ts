@@ -1,5 +1,5 @@
 import { WarrantyCertificateHtmlTemplateService } from '@/modules/warranty-certificates/services/warranty-certificate-html-template.service';
-import type { WarrantyCertificateViewModel } from '@/modules/warranty-certificates/warranty-certificate.types';
+import type { WarrantyCertificateViewModel } from '@/modules/warranty-certificates/types/warranty-certificate.types';
 
 describe('WarrantyCertificateHtmlTemplateService', () => {
   const model: WarrantyCertificateViewModel = {

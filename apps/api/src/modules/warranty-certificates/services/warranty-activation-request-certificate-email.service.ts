@@ -1,8 +1,8 @@
-import { UploadAssetService } from '@/modules/assets/services/upload-asset.service';
 import EmailConfig from '@/config/email.config';
+import { UploadAssetService } from '@/modules/assets/services/upload-asset.service';
 import { SendEmailUseCase } from '@/modules/email/use-cases/send-email.usecase';
 import { WarrantyActivationRequestCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-activation-request-certificates.repository';
-import { WARRANTY_CERTIFICATE_EMAIL_STATUS } from '@/modules/warranty-certificates/warranty-certificates.types';
+import { WARRANTY_CERTIFICATE_EMAIL_STATUS } from '@/modules/warranty-certificates/types/warranty-certificates.types';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
 

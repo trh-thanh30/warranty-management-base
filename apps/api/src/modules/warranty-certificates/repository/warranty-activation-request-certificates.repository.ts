@@ -5,8 +5,8 @@ import type {
   WarrantyActivationRequestCertificateRecord,
   WarrantyActivationRequestCertificateWriteInput,
   WarrantyActivationRequestForCertificateIssuance,
-} from '@/modules/warranty-certificates/warranty-activation-request-certificate.types';
-import type { WarrantyCertificateFile } from '@/modules/warranty-certificates/warranty-certificates.types';
+} from '@/modules/warranty-certificates/types/warranty-activation-request-certificate.types';
+import type { WarrantyCertificateFile } from '@/modules/warranty-certificates/types/warranty-certificates.types';
 import { Injectable } from '@nestjs/common';
 import {
   Prisma,
