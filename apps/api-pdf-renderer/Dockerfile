@@ -18,6 +18,7 @@ FROM node:22.23.2-alpine3.24 AS runner
 
 ENV NODE_ENV=production
 ENV PORT=3001
+ENV HOME=/tmp
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 RUN apk upgrade --no-cache \

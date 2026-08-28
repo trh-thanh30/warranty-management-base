@@ -402,3 +402,15 @@ test("graceful shutdown stops the HTTP server and closes Chromium", async () => 
   assert.equal(serverCloseCalls, 1);
   assert.equal(browserCloseCalls, 1);
 });
+
+test("renderer keeps Chromium profile data in the writable temporary directory", async () => {
+  // This contract is intentionally asserted against the runtime source so the
+  // production read-only container remains compatible with Chromium startup.
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(
+    new URL("../server.mjs", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(source, /--user-data-dir=\/tmp\/pdf-renderer-chromium/);
+});

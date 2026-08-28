@@ -22,6 +22,7 @@ function getBrowser() {
         args: [
           "--disable-dev-shm-usage",
           "--disable-setuid-sandbox",
+          "--user-data-dir=/tmp/pdf-renderer-chromium",
           "--no-sandbox",
         ],
         executablePath,

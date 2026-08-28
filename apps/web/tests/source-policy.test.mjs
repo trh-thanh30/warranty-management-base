@@ -890,6 +890,7 @@ test("PDF renderer remains independently buildable and quality-gated", async () 
     /Build and push PDF renderer image[\s\S]*file: apps\/api-pdf-renderer\/Dockerfile/,
   );
   assert.match(dockerfile, /FROM node:\d+\.\d+\.\d+-alpine\d+\.\d+ AS runner/);
+  assert.match(dockerfile, /ENV HOME=\/tmp/);
   assert.match(dockerfile, /USER pdf/);
   assert.match(dockerfile, /HEALTHCHECK[\s\S]*127\.0\.0\.1:3001\/health/);
   assert.match(
