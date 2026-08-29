@@ -10,11 +10,11 @@ import { LanguageSwitcher } from "@/src/components/layout/components/language-sw
 import { SiteLogo } from "@/src/components/layout/components/site-logo";
 import {
   PUBLIC_FEATURES,
+  PUBLIC_DEALER_NETWORK_URL,
   PUBLIC_PRODUCT_CATALOG_URL,
 } from "@/src/config/public-features.config";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
-import { Link, usePathname } from "@/src/i18n/navigation";
-import { isNavigationItemActive } from "@/src/utils/pathname.utils";
+import { Link } from "@/src/i18n/navigation";
 
 const navigationItems = [
   { labelKey: "about", href: APP_ROUTES.home, external: false },
@@ -26,8 +26,8 @@ const navigationItems = [
   { labelKey: "warranty", href: APP_ROUTES.warranty, external: false },
   {
     labelKey: "dealers",
-    href: APP_ROUTES.dealers,
-    external: false,
+    href: PUBLIC_DEALER_NETWORK_URL,
+    external: true,
   },
   ...(PUBLIC_FEATURES.contactNavigation
     ? [
@@ -42,7 +42,6 @@ const navigationItems = [
 
 export function SiteHeader({ logoUrl }: { logoUrl?: string | null }) {
   const t = useTranslations("SiteHeader");
-  const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
@@ -69,10 +68,6 @@ export function SiteHeader({ logoUrl }: { logoUrl?: string | null }) {
   }, [isMobileMenuOpen]);
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
-  const isDealerRouteActive =
-    isNavigationItemActive(pathname, APP_ROUTES.dealers) ||
-    isNavigationItemActive(pathname, APP_ROUTES.supportCenters);
-
   return (
     <header
       data-site-header
@@ -108,14 +103,13 @@ export function SiteHeader({ logoUrl }: { logoUrl?: string | null }) {
         </nav>
 
         <div className="hidden shrink-0 items-center gap-4 xl:flex">
-          <Link
-            href={APP_ROUTES.dealers}
-            aria-current={isDealerRouteActive ? "page" : undefined}
-            data-active={isDealerRouteActive ? "true" : undefined}
+          <a
+            href={PUBLIC_DEALER_NETWORK_URL}
+            rel="noopener noreferrer"
             className="rounded-md bg-premium-red px-7 py-3 text-xs font-medium uppercase tracking-wide text-off-white shadow-md shadow-premium-red/20 transition-colors duration-200 hover:bg-warm-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2 sm:text-sm"
           >
             {t("dealerCta")}
-          </Link>
+          </a>
           <LanguageSwitcher />
         </div>
 
@@ -169,15 +163,14 @@ export function SiteHeader({ logoUrl }: { logoUrl?: string | null }) {
                 </li>
               ))}
               <li className="pt-3">
-                <Link
-                  href={APP_ROUTES.dealers}
-                  aria-current={isDealerRouteActive ? "page" : undefined}
-                  data-active={isDealerRouteActive ? "true" : undefined}
+                <a
+                  href={PUBLIC_DEALER_NETWORK_URL}
+                  rel="noopener noreferrer"
                   onClick={closeMobileMenu}
                   className="block rounded-md bg-premium-red py-3.5 text-center text-sm font-medium uppercase tracking-wide text-off-white shadow-md shadow-premium-red/20 transition-colors duration-200 hover:bg-warm-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2"
                 >
                   {t("dealerCta")}
-                </Link>
+                </a>
               </li>
               <li>
                 <LanguageSwitcher

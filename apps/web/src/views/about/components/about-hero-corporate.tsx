@@ -9,7 +9,10 @@ import { openPublicQuickChat } from "@/src/components/common/public-quick-chat.e
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { Link } from "@/src/i18n/navigation";
 import { Counter } from "@/src/components/animation/counter";
-import { PUBLIC_FEATURES } from "@/src/config/public-features.config";
+import {
+  PUBLIC_DEALER_NETWORK_URL,
+  PUBLIC_FEATURES,
+} from "@/src/config/public-features.config";
 
 export function AboutHeroCorporate() {
   const t = useTranslations("AboutPage");
@@ -99,9 +102,9 @@ export function AboutHeroCorporate() {
               variant="secondary"
               className="h-auto rounded-md border-border-gray bg-white px-7 py-3.5 text-xs font-semibold uppercase tracking-wider text-deep-black shadow-sm transition-all hover:bg-light-gray sm:text-sm"
             >
-              <Link href={APP_ROUTES.dealers}>
+              <a href={PUBLIC_DEALER_NETWORK_URL}>
                 <span>{t("hero.dealerNetworkCta")}</span>
-              </Link>
+              </a>
             </Button>
           </div>
         </motion.div>

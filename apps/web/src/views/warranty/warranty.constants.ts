@@ -1,4 +1,7 @@
-import { PUBLIC_FEATURES } from "@/src/config/public-features.config";
+import {
+  PUBLIC_DEALER_NETWORK_URL,
+  PUBLIC_FEATURES,
+} from "@/src/config/public-features.config";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 
 export const warrantyActions = [
@@ -34,7 +37,7 @@ export const warrantyActions = [
     id: "dealers",
     kind: "link",
     icon: "map",
-    href: APP_ROUTES.dealers,
+    href: PUBLIC_DEALER_NETWORK_URL,
   },
   {
     id: "policy",

@@ -1,5 +1,6 @@
 "use client";
 
+import type { ComponentProps } from "react";
 import { Container } from "@/src/components/common/container";
 import { revealViewportOnce } from "@/src/constants/motion.constants";
 import { useScrollReveal } from "@/src/hooks/use-scroll-reveal";
@@ -52,6 +53,7 @@ export function WarrantyActionCards() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {warrantyActions.map((action) => {
             const Icon = actionIcons[action.icon];
+            const isExternal = action.href.startsWith("http");
             return (
               <motion.div
                 key={action.id}
@@ -61,31 +63,70 @@ export function WarrantyActionCards() {
                 viewport={revealViewportOnce}
                 className="group rounded-md border border-border-gray bg-white shadow-md transition-all hover:border-premium-red hover:shadow-xl"
               >
-                <Link
-                  href={action.href}
-                  className="p-6 sm:p-7 space-y-5 flex h-full flex-col justify-between"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex size-12 items-center justify-center text-stone-gray transition-colors group-hover:text-deep-black">
-                      <Icon className="size-7" strokeWidth={1.6} />
+                {isExternal ? (
+                  <a
+                    href={
+                      action.href as Extract<
+                        ComponentProps<typeof Link>["href"],
+                        string
+                      >
+                    }
+                    rel="noopener noreferrer"
+                    className="p-6 sm:p-7 space-y-5 flex h-full flex-col justify-between"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex size-12 items-center justify-center text-stone-gray transition-colors group-hover:text-deep-black">
+                        <Icon className="size-7" strokeWidth={1.6} />
+                      </div>
+                      <span className="rounded-md bg-light-gray px-3 py-1 text-xs font-medium uppercase text-stone-gray">
+                        {t(`items.${action.id}.badge`)}
+                      </span>
                     </div>
-                    <span className="rounded-md bg-light-gray px-3 py-1 text-xs font-medium uppercase text-stone-gray">
-                      {t(`items.${action.id}.badge`)}
-                    </span>
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-lg sm:text-xl font-semibold uppercase text-deep-black group-hover:text-premium-red transition-colors">
-                      {t(`items.${action.id}.title`)}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-stone-gray font-medium leading-relaxed">
-                      {t(`items.${action.id}.description`)}
-                    </p>
-                  </div>
-                  <div className="pt-2 border-t border-border-gray flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-deep-black group-hover:text-premium-red">
-                    <span>{t(`items.${action.id}.action`)}</span>
-                    <ChevronRight className="size-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </Link>
+                    <div className="space-y-2">
+                      <h3 className="text-lg sm:text-xl font-semibold uppercase text-deep-black group-hover:text-premium-red transition-colors">
+                        {t(`items.${action.id}.title`)}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-stone-gray font-medium leading-relaxed">
+                        {t(`items.${action.id}.description`)}
+                      </p>
+                    </div>
+                    <div className="pt-2 border-t border-border-gray flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-deep-black group-hover:text-premium-red">
+                      <span>{t(`items.${action.id}.action`)}</span>
+                      <ChevronRight className="size-4 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </a>
+                ) : (
+                  <Link
+                    href={
+                      action.href as Extract<
+                        ComponentProps<typeof Link>["href"],
+                        string
+                      >
+                    }
+                    className="p-6 sm:p-7 space-y-5 flex h-full flex-col justify-between"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex size-12 items-center justify-center text-stone-gray transition-colors group-hover:text-deep-black">
+                        <Icon className="size-7" strokeWidth={1.6} />
+                      </div>
+                      <span className="rounded-md bg-light-gray px-3 py-1 text-xs font-medium uppercase text-stone-gray">
+                        {t(`items.${action.id}.badge`)}
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-lg sm:text-xl font-semibold uppercase text-deep-black group-hover:text-premium-red transition-colors">
+                        {t(`items.${action.id}.title`)}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-stone-gray font-medium leading-relaxed">
+                        {t(`items.${action.id}.description`)}
+                      </p>
+                    </div>
+                    <div className="pt-2 border-t border-border-gray flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-deep-black group-hover:text-premium-red">
+                      <span>{t(`items.${action.id}.action`)}</span>
+                      <ChevronRight className="size-4 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </Link>
+                )}
               </motion.div>
             );
           })}

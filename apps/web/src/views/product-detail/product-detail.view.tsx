@@ -2,6 +2,7 @@
 
 import { Container } from "@/src/components/common/container";
 import { openPublicQuickChat } from "@/src/components/common/public-quick-chat.events";
+import { PUBLIC_DEALER_NETWORK_URL } from "@/src/config/public-features.config";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { Link } from "@/src/i18n/navigation";
 import { productsService } from "@/src/services/products/products.service";
@@ -151,13 +152,14 @@ export function ProductDetailView({ slug }: ProductDetailViewProps) {
                   <PhoneCall className="size-4 shrink-0" />
                   {t("bookInstallationCta")}
                 </button>
-                <Link
+                <a
                   className="inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-border-gray px-3 text-xs font-semibold uppercase transition-colors hover:border-premium-red hover:text-premium-red sm:px-5 sm:text-sm"
-                  href={APP_ROUTES.dealers}
+                  href={PUBLIC_DEALER_NETWORK_URL}
+                  rel="noopener noreferrer"
                 >
                   <MapPin className="size-4 shrink-0" />
                   {t("dealerNetworkCta")}
-                </Link>
+                </a>
               </div>
             </div>
           </div>

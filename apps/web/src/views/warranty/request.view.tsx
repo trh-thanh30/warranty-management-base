@@ -5,6 +5,7 @@ import { Container } from "@/src/components/common/container";
 import { WarrantyPolicyShortcut } from "@/src/components/common/warranty-policy-shortcut";
 import { WarrantyProcessSteps } from "@/src/components/common/warranty-process-steps";
 import { WarrantyResultRow } from "@/src/components/common/warranty-result-row";
+import { PUBLIC_DEALER_NETWORK_URL } from "@/src/config/public-features.config";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { useWarrantyClaimRequest } from "@/src/hooks/use-warranty-claim-request";
 import { Link } from "@/src/i18n/navigation";
@@ -261,13 +262,14 @@ export function WarrantyClaimRequestView() {
               <Clock3 className="size-4 shrink-0" />
               <span>{t("otherActions.track")}</span>
             </Link>
-            <Link
+            <a
               className="group flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:border-premium-red hover:bg-premium-red hover:text-white"
-              href={APP_ROUTES.dealers}
+              href={PUBLIC_DEALER_NETWORK_URL}
+              rel="noopener noreferrer"
             >
               <Building2 className="size-4 shrink-0" />
               <span>{t("otherActions.dealers")}</span>
-            </Link>
+            </a>
           </div>
         </section>
 
