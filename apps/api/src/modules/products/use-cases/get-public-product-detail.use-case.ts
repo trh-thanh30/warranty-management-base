@@ -12,7 +12,7 @@ export class GetPublicProductDetailUseCase {
 
   async execute(slug: string) {
     const template =
-      await this.productsRepository.findPublicTemplateBySlug(slug);
+      await this.productsRepository.findPublicProductBySlug(slug);
 
     if (!template) {
       throw new NotFoundException('Published product not found');

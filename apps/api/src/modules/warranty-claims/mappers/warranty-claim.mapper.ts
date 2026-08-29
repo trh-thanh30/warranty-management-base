@@ -2,6 +2,7 @@ import type {
   WarrantyClaimAttachmentResponse,
   WarrantyClaimWithRelations,
 } from '@/modules/warranty-claims/types/warranty-claim.types';
+import { getProductCatalogue } from '@/modules/products/product-catalogue';
 import type {
   Asset,
   Category,
@@ -134,6 +135,7 @@ export function toWarrantyClaimResponse(
   claim: WarrantyClaimWithRelations,
   attachments: WarrantyClaimAttachmentResponse[] = [],
 ) {
+  const catalogue = claim.product ? getProductCatalogue(claim.product) : null;
   return {
     id: claim.id,
     claimCode: claim.claim_code,
@@ -161,12 +163,12 @@ export function toWarrantyClaimResponse(
           warrantyCode: claim.warranty?.warranty_code ?? null,
           serialNumber: claim.product.serial_number,
           displayName: claim.product.display_name,
-          name: claim.product.template?.name ?? claim.product.product_code,
+          name: catalogue?.name ?? claim.product.product_code,
           categoryId: claim.product.category_id,
           categoryRef: toCategoryResponse(claim.product.category_ref),
-          brand: claim.product.template?.brand ?? null,
-          model: claim.product.template?.model ?? null,
-          modelYear: claim.product.template?.model_year ?? null,
+          brand: catalogue?.brand ?? null,
+          model: catalogue?.model ?? null,
+          modelYear: catalogue?.modelYear ?? null,
           status: claim.product.status,
         }
       : null,

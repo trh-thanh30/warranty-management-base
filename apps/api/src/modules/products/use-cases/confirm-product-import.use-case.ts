@@ -9,6 +9,7 @@ import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generat
 import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { Injectable } from '@nestjs/common';
 import { Prisma, product_status, warranty_status } from '@prisma/client';
+import { toSlug } from '@/common/helpers/string.util';
 
 @Injectable()
 export class ConfirmProductImportUseCase {
@@ -67,8 +68,13 @@ export class ConfirmProductImportUseCase {
         const product = await tx.product.create({
           data: {
             product_code: productCode,
-            template: { connect: { id: row.templateId } },
-            category_ref: { connect: { id: row.templateCategoryId } },
+            category_ref: { connect: { id: row.categoryId } },
+            catalogue_name: row.productName.trim(),
+            catalogue_sku: productCode,
+            catalogue_slug: this.toCatalogueSlug(row.productName, productCode),
+            catalogue_brand: this.blankToNull(row.brand),
+            catalogue_model: this.blankToNull(row.model),
+            catalogue_model_year: row.modelYear,
             serial_number: this.blankToNull(row.serialNumber),
             display_name: this.blankToNull(row.displayName),
             status: row.status ?? product_status.ACTIVE,
@@ -76,11 +82,11 @@ export class ConfirmProductImportUseCase {
             warranty: {
               create: {
                 warranty_code: warrantyCode,
-                duration_months: row.templateWarrantyDurationMonths,
+                duration_months: row.warrantyDurationMonths,
                 start_date: null,
                 end_date: null,
                 status: warranty_status.DRAFT,
-                terms: row.templateWarrantyTerms,
+                terms: this.blankToNull(row.warrantyTerms),
               },
             },
           },
@@ -117,8 +123,16 @@ export class ConfirmProductImportUseCase {
     row: PreparedProductImportRow,
   ): Prisma.ProductUpdateInput {
     return {
-      template: { connect: { id: row.templateId } },
-      category_ref: { connect: { id: row.templateCategoryId } },
+      category_ref: { connect: { id: row.categoryId } },
+      catalogue_name: row.productName.trim(),
+      catalogue_sku: row.productCode ?? row.existingProductCode ?? undefined,
+      catalogue_slug: this.toCatalogueSlug(
+        row.productName,
+        row.productCode ?? row.existingProductCode ?? '',
+      ),
+      catalogue_brand: this.blankToNull(row.brand),
+      catalogue_model: this.blankToNull(row.model),
+      catalogue_model_year: row.modelYear,
       display_name: this.blankToNull(row.displayName),
       status: row.status,
       serial_number: this.blankToNull(row.serialNumber),
@@ -134,30 +148,42 @@ export class ConfirmProductImportUseCase {
   ) {
     const warranty = await tx.warranty.findUnique({
       where: { product_id: productId },
-      select: { id: true, warranty_code: true },
+      select: { id: true, warranty_code: true, status: true },
     });
 
-    if (warranty?.warranty_code) return;
-
-    const warrantyCode = await this.resolveWarrantyCode(tx, row, importDate);
-
-    if (warranty) {
+    if (warranty?.status === warranty_status.DRAFT) {
       await tx.warranty.update({
         where: { id: warranty.id },
-        data: { warranty_code: warrantyCode },
+        data: {
+          duration_months: row.warrantyDurationMonths,
+          terms: this.blankToNull(row.warrantyTerms),
+          ...(warranty.warranty_code
+            ? {}
+            : {
+                warranty_code: await this.resolveWarrantyCode(
+                  tx,
+                  row,
+                  importDate,
+                ),
+              }),
+        },
       });
       return;
     }
+
+    if (warranty) return;
+
+    const warrantyCode = await this.resolveWarrantyCode(tx, row, importDate);
 
     await tx.warranty.create({
       data: {
         product_id: productId,
         warranty_code: warrantyCode,
-        duration_months: row.templateWarrantyDurationMonths,
+        duration_months: row.warrantyDurationMonths,
         start_date: null,
         end_date: null,
         status: warranty_status.DRAFT,
-        terms: row.templateWarrantyTerms,
+        terms: this.blankToNull(row.warrantyTerms),
       },
     });
   }
@@ -187,5 +213,9 @@ export class ConfirmProductImportUseCase {
       requestedCode ??
       (await this.generateWarrantyCodeUseCase.execute(importDate, tx))
     );
+  }
+
+  private toCatalogueSlug(name: string, productCode: string) {
+    return `${toSlug(name)}-${productCode.trim().toLowerCase()}`;
   }
 }

@@ -2,7 +2,6 @@ import {
   HttpClientError,
   type CreateProductBody,
   type ProductResponse,
-  type ProductTemplateSummary,
   type UpdateProductBody,
 } from "@repo/shared";
 import { toNullableValue, toOptionalValue } from "../../utils/form.ts";
@@ -52,34 +51,6 @@ function getRemainingCalendarMonths(from: Date, to: Date) {
   anchor.setUTCMonth(anchor.getUTCMonth() + wholeMonths);
 
   return wholeMonths + (anchor < to ? 1 : 0);
-}
-
-export function getProductTemplateSearchKeywords(
-  template: ProductTemplateSummary,
-) {
-  return [
-    template.name,
-    template.sku,
-    template.brand,
-    template.model,
-    template.categoryRef?.name,
-    template.categoryRef?.code,
-    template.categoryRef?.slug,
-  ].filter((keyword): keyword is string => Boolean(keyword?.trim()));
-}
-
-export function mergeProductTemplateOptions(
-  items: ProductTemplateSummary[],
-  currentTemplate?: ProductTemplateSummary | null,
-) {
-  if (
-    !currentTemplate ||
-    items.some((template) => template.id === currentTemplate.id)
-  ) {
-    return items;
-  }
-
-  return [currentTemplate, ...items];
 }
 
 export function formatProductOwner(product: ProductResponse) {
@@ -135,15 +106,38 @@ export function toCreateProductBody(
   const warrantyCode = toOptionalValue(values.warrantyCode)?.toUpperCase();
 
   return {
+    name: values.name,
     categoryId: values.categoryId,
+    ...(toOptionalValue(values.brand)
+      ? { brand: toOptionalValue(values.brand) }
+      : {}),
+    ...(toOptionalValue(values.model)
+      ? { model: toOptionalValue(values.model) }
+      : {}),
+    ...(values.modelYear ? { modelYear: values.modelYear } : {}),
+    ...(toOptionalValue(values.description)
+      ? { description: toOptionalValue(values.description) }
+      : {}),
+    ...(toOptionalValue(values.coverAssetId)
+      ? { coverAssetId: toOptionalValue(values.coverAssetId) }
+      : {}),
+    ...(values.galleryImages.some((image) => image.assetId)
+      ? {
+          galleryAssetIds: values.galleryImages
+            .map((image) => image.assetId)
+            .filter(Boolean),
+        }
+      : {}),
     displayName: toOptionalValue(values.displayName),
     metadata: metadata ?? undefined,
     ...(productCode ? { productCode } : {}),
     ...(warrantyCode ? { warrantyCode } : {}),
     serialNumber: toOptionalValue(values.serialNumber),
     status: values.status,
-    templateId: values.templateId,
     warrantyDurationMonths: values.warrantyDurationMonths,
+    ...(toOptionalValue(values.warrantyTerms)
+      ? { warrantyTerms: toOptionalValue(values.warrantyTerms) }
+      : {}),
   };
 }
 
@@ -152,7 +146,16 @@ export function toUpdateProductBody(
   existingMetadata: Record<string, unknown> | null,
 ): UpdateProductBody {
   return {
+    name: values.name,
     categoryId: values.categoryId,
+    brand: toNullableValue(values.brand),
+    model: toNullableValue(values.model),
+    modelYear: values.modelYear ?? null,
+    description: toNullableValue(values.description),
+    coverAssetId: toNullableValue(values.coverAssetId),
+    galleryAssetIds: values.galleryImages
+      .map((image) => image.assetId)
+      .filter(Boolean),
     displayName: toNullableValue(values.displayName),
     metadata: mergeProductInstallationPosition(
       existingMetadata,
@@ -161,9 +164,9 @@ export function toUpdateProductBody(
     productCode: values.productCode.trim(),
     serialNumber: toNullableValue(values.serialNumber),
     status: values.status,
-    templateId: values.templateId,
     warrantyCode: values.warrantyCode?.trim() ?? "",
     warrantyDurationMonths: values.warrantyDurationMonths,
+    warrantyTerms: toNullableValue(values.warrantyTerms),
   };
 }
 
@@ -189,7 +192,6 @@ export function getProductSaveErrorMatch(error: unknown) {
     "Product code already exists": ["productCode", "duplicateProductCode"],
     "Product code is required": ["productCode", "productCodeRequired"],
     "Product category not found": ["categoryId", "categoryNotFound"],
-    "Product template not found": ["templateId", "templateNotFound"],
     "Serial number already exists": ["serialNumber", "duplicateSerialNumber"],
     "Warranty code already exists": ["warrantyCode", "duplicateWarrantyCode"],
     "Warranty code is invalid": ["warrantyCode", "warrantyCodeInvalid"],

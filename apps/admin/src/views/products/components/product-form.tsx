@@ -1,11 +1,10 @@
 "use client";
 
 import { Controller } from "react-hook-form";
-import { Layers3, Loader2, Plus, RotateCcw } from "lucide-react";
+import { ImagePlus, Loader2, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import type { ProductResponse, ProductTemplateSummary } from "@repo/shared";
-import { PERMISSIONS } from "@repo/shared/constants";
-import { Badge, Button, Input } from "@repo/ui";
+import type { ProductResponse } from "@repo/shared";
+import { Button, Input, Textarea } from "@repo/ui";
 import {
   Combobox,
   ComboboxContent,
@@ -13,35 +12,25 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
-  ComboboxLoading,
   ComboboxTrigger,
 } from "@/src/components/common";
 import { FormField as Field } from "@/src/components/common/form-field";
-import { usePermissions } from "@/src/hooks/use-permissions";
-import { Link } from "@/src/i18n/navigation";
+import { ImageUpload } from "@/src/components/common/image-upload";
 import { createFieldErrorFormatter } from "@/src/utils";
 import { useProductForm } from "../hooks/use-product-form";
-import { getProductTemplateSearchKeywords } from "../products.utils";
 import { ProductStatusControl } from "./product-status-control";
 
 export function ProductForm({
-  initialTemplate,
   onCancel,
   onSaved,
   product,
 }: {
-  initialTemplate?: ProductTemplateSummary | null;
   onCancel: () => void;
   onSaved: (product?: ProductResponse) => void;
   product: ProductResponse | null;
 }) {
   const t = useTranslations("Products");
-  const { hasPermission } = usePermissions();
-  const form = useProductForm({
-    initialTemplate,
-    onSaved,
-    product,
-  });
+  const form = useProductForm({ onSaved, product });
   const categories = form.categoriesQuery.data?.items ?? [];
   const isSubmitting = form.formState.isSubmitting;
   const canEditWarrantyDuration =
@@ -58,83 +47,187 @@ export function ProductForm({
         </div>
       ) : null}
 
-      <section className="space-y-4 rounded-lg border border-blue-200 bg-blue-50/70 p-4 dark:border-blue-900 dark:bg-blue-950/30">
-        <div className="flex gap-3">
-          <Layers3
-            aria-hidden="true"
-            className="mt-0.5 size-5 shrink-0 text-blue-600 dark:text-blue-400"
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field
+          error={formatFieldError(form.formState.errors.name?.message, t)}
+          id="product-name"
+          label={t("name")}
+        >
+          <Input
+            id="product-name"
+            placeholder={t("namePlaceholder")}
+            {...form.register("name")}
           />
+        </Field>
+        <Field
+          error={formatFieldError(form.formState.errors.categoryId?.message, t)}
+          id="product-category-id"
+          label={t("dynamicCategory")}
+        >
+          <Controller
+            control={form.control}
+            name="categoryId"
+            render={({ field }) => (
+              <ProductCategoryCombobox
+                disabled={form.categoriesQuery.isLoading || isSubmitting}
+                id="product-category-id"
+                onValueChange={field.onChange}
+                options={categories.map((category) => ({
+                  label: category.name,
+                  value: category.id,
+                }))}
+                placeholder={t("dynamicCategory")}
+                searchPlaceholder={t("search")}
+                value={field.value}
+              />
+            )}
+          />
+        </Field>
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-3">
+        <Field
+          error={formatFieldError(form.formState.errors.brand?.message, t)}
+          id="product-brand"
+          label={t("brand")}
+        >
+          <Input
+            id="product-brand"
+            placeholder={t("brandPlaceholder")}
+            {...form.register("brand")}
+          />
+        </Field>
+        <Field
+          error={formatFieldError(form.formState.errors.model?.message, t)}
+          id="product-model"
+          label={t("model")}
+        >
+          <Input
+            id="product-model"
+            placeholder={t("modelPlaceholder")}
+            {...form.register("model")}
+          />
+        </Field>
+        <Field
+          error={formatFieldError(form.formState.errors.modelYear?.message, t)}
+          id="product-model-year"
+          label={t("modelYear")}
+        >
+          <Input
+            id="product-model-year"
+            inputMode="numeric"
+            min={1900}
+            max={2200}
+            type="number"
+            {...form.register("modelYear")}
+          />
+        </Field>
+      </div>
+
+      <Field
+        error={formatFieldError(form.formState.errors.description?.message, t)}
+        id="product-description"
+        label={t("descriptionLabel")}
+      >
+        <Textarea
+          id="product-description"
+          rows={3}
+          {...form.register("description")}
+        />
+      </Field>
+
+      <Field id="product-cover" label={t("coverImage")}>
+        <Controller
+          control={form.control}
+          name="coverImageUrl"
+          render={({ field }) => (
+            <ImageUpload
+              disabled={isSubmitting}
+              id="product-cover"
+              labels={{
+                hint: t("coverImageHint"),
+                previewAlt: t("coverImageAlt"),
+              }}
+              onAssetChange={(asset) =>
+                form.setValue("coverAssetId", asset?.id ?? "", {
+                  shouldDirty: true,
+                })
+              }
+              onChange={field.onChange}
+              persistedValue={
+                product?.assets.find((asset) => asset.role === "COVER")?.url ??
+                ""
+              }
+              uploadOptions={{ accessType: "PUBLIC", folder: "products" }}
+              value={field.value}
+            />
+          )}
+        />
+      </Field>
+
+      <section className="min-w-0 space-y-4 overflow-hidden rounded-md border border-slate-200 p-4 dark:border-slate-800">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold text-slate-950 dark:text-slate-50">
-              {t("templateSectionTitle")}
-            </h2>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-              {t("templateRequiredDescription")}
+            <h2 className="font-medium">{t("galleryTitle")}</h2>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              {t("galleryDescription")}
             </p>
           </div>
+          <Button
+            className="w-full sm:w-auto"
+            onClick={() => form.gallery.append({ assetId: "", url: "" })}
+            type="button"
+            variant="secondary"
+          >
+            <ImagePlus className="size-4" />
+            {t("addGalleryImage")}
+          </Button>
         </div>
-
-        <Field
-          error={formatFieldError(form.formState.errors.templateId?.message, t)}
-          id="product-template"
-          label={t("productTemplate")}
-        >
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-            <div className="min-w-0 flex-1">
-              <Controller
-                control={form.control}
-                name="templateId"
-                render={({ field }) => (
-                  <ProductTemplateCombobox
-                    disabled={form.templatesQuery.isLoading || isSubmitting}
-                    id="product-template"
-                    isLoading={form.templatesQuery.isFetching}
-                    loadingLabel={t("loadingTemplates")}
-                    onSearchChange={form.setTemplateSearch}
-                    onValueChange={(nextValue) => {
-                      form.pinTemplateSelection(nextValue);
-                      field.onChange(nextValue);
-                    }}
-                    options={form.templates}
-                    placeholder={t("selectTemplate")}
-                    search={form.templateSearch}
-                    searchPlaceholder={t("searchTemplate")}
-                    value={field.value}
-                  />
-                )}
-              />
-            </div>
-            {hasPermission(PERMISSIONS.PRODUCT_TEMPLATE_CREATE) ? (
-              <Button asChild className="shrink-0" variant="secondary">
-                <Link href="/product-templates/create">
-                  <Plus aria-hidden="true" className="size-4" />
-                  {t("createProductTemplate")}
-                </Link>
-              </Button>
-            ) : null}
+        {form.gallery.fields.length === 0 ? (
+          <p className="rounded-md border border-dashed p-5 text-center text-sm text-slate-500">
+            {t("noGalleryImages")}
+          </p>
+        ) : (
+          <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+            {form.gallery.fields.map((galleryField, index) => (
+              <div className="min-w-0 space-y-2" key={galleryField.id}>
+                <Controller
+                  control={form.control}
+                  name={`galleryImages.${index}.url`}
+                  render={({ field }) => (
+                    <ImageUpload
+                      disabled={isSubmitting}
+                      id={`product-gallery-${galleryField.id}`}
+                      onAssetChange={(asset) =>
+                        form.setValue(
+                          `galleryImages.${index}.assetId`,
+                          asset?.id ?? "",
+                          { shouldDirty: true },
+                        )
+                      }
+                      onChange={field.onChange}
+                      persistedValue={galleryField.url}
+                      uploadOptions={{
+                        accessType: "PUBLIC",
+                        folder: "products",
+                      }}
+                      value={field.value}
+                    />
+                  )}
+                />
+                <Button
+                  className="w-full"
+                  onClick={() => form.gallery.remove(index)}
+                  type="button"
+                  variant="secondary"
+                >
+                  <Trash2 className="size-4" />
+                  {t("removeGalleryImage")}
+                </Button>
+              </div>
+            ))}
           </div>
-        </Field>
-
-        {form.selectedTemplate ? (
-          <dl className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
-            <TemplateDetail
-              label={t("templateSku")}
-              value={form.selectedTemplate.sku}
-            />
-            <TemplateDetail
-              label={t("brand")}
-              value={form.selectedTemplate.brand ?? "-"}
-            />
-            <TemplateDetail
-              label={t("model")}
-              value={form.selectedTemplate.model ?? "-"}
-            />
-            <TemplateDetail
-              label={t("modelYear")}
-              value={String(form.selectedTemplate.modelYear ?? "-")}
-            />
-          </dl>
-        ) : null}
+        )}
       </section>
 
       <div className="grid gap-5 sm:grid-cols-2">
@@ -149,9 +242,7 @@ export function ProductForm({
         >
           <Input
             id="product-display-name"
-            placeholder={
-              form.selectedTemplate?.name ?? t("displayNamePlaceholder")
-            }
+            placeholder={t("displayNamePlaceholder")}
             {...form.register("displayName")}
           />
         </Field>
@@ -172,59 +263,6 @@ export function ProductForm({
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field
-          description={t("categoryOverrideDescription")}
-          error={formatFieldError(form.formState.errors.categoryId?.message, t)}
-          id="product-category-id"
-          label={t("dynamicCategory")}
-        >
-          <div className="space-y-2">
-            <Controller
-              control={form.control}
-              name="categoryId"
-              render={({ field }) => (
-                <ProductCategoryCombobox
-                  disabled={
-                    !form.selectedTemplate ||
-                    form.categoriesQuery.isLoading ||
-                    isSubmitting
-                  }
-                  id="product-category-id"
-                  onValueChange={field.onChange}
-                  options={categories.map((category) => ({
-                    label: category.name,
-                    value: category.id,
-                  }))}
-                  placeholder={t("dynamicCategory")}
-                  searchPlaceholder={t("search")}
-                  value={field.value}
-                />
-              )}
-            />
-            {form.selectedTemplate ? (
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <Badge
-                  variant={form.isCategoryOverridden ? "warning" : "secondary"}
-                >
-                  {form.isCategoryOverridden
-                    ? t("categoryOverridden")
-                    : t("categoryFromTemplate")}
-                </Badge>
-                {form.isCategoryOverridden ? (
-                  <Button
-                    onClick={form.restoreTemplateCategory}
-                    size="sm"
-                    type="button"
-                    variant="ghost"
-                  >
-                    <RotateCcw aria-hidden="true" className="size-4" />
-                    {t("restoreTemplateCategory")}
-                  </Button>
-                ) : null}
-              </div>
-            ) : null}
-          </div>
-        </Field>
         <Field
           description={
             form.creating
@@ -248,69 +286,93 @@ export function ProductForm({
             {...form.register("productCode")}
           />
         </Field>
+        <Field
+          error={formatFieldError(
+            form.formState.errors.installationPosition?.message,
+            t,
+          )}
+          id="product-installation-position"
+          label={t("installationPosition")}
+        >
+          <Input
+            id="product-installation-position"
+            placeholder={t("installationPositionPlaceholder")}
+            {...form.register("installationPosition")}
+          />
+        </Field>
       </div>
 
       <div className="grid min-w-0 gap-5 md:grid-cols-2">
-        <div className="w-full min-w-0">
-          <Field
-            description={
-              !product
-                ? t("warrantyDurationCreateDescription")
-                : canEditWarrantyDuration
-                  ? t("warrantyDurationDraftDescription")
-                  : t("warrantyDurationLockedDescription")
-            }
-            error={formatFieldError(
-              form.formState.errors.warrantyDurationMonths?.message,
-              t,
-            )}
+        <Field
+          description={
+            !product
+              ? t("warrantyDurationCreateDescription")
+              : canEditWarrantyDuration
+                ? t("warrantyDurationDraftDescription")
+                : t("warrantyDurationLockedDescription")
+          }
+          error={formatFieldError(
+            form.formState.errors.warrantyDurationMonths?.message,
+            t,
+          )}
+          id="product-warranty-duration"
+          label={t("durationMonths")}
+        >
+          <Input
+            disabled={isSubmitting || !canEditWarrantyDuration}
             id="product-warranty-duration"
-            label={t("durationMonths")}
-          >
-            <Input
-              className="w-full"
-              disabled={isSubmitting || !canEditWarrantyDuration}
-              id="product-warranty-duration"
-              inputMode="numeric"
-              min={1}
-              placeholder={t("warrantyDurationPlaceholder")}
-              step={1}
-              type="number"
-              {...form.register("warrantyDurationMonths")}
-            />
-          </Field>
-        </div>
-        <div className="w-full min-w-0">
-          <Field
-            description={
-              !product
-                ? t("warrantyCodeCreateDescription")
-                : product.warrantyCodeEditLockedReason === "WARRANTY_NOT_DRAFT"
-                  ? t("warrantyCodeNotDraftDescription")
-                  : product.warrantyCodeEditLockedReason ===
-                      "OPEN_ACTIVATION_REQUEST"
-                    ? t("warrantyCodeOpenRequestDescription")
-                    : t("warrantyCodeEditableDescription")
+            inputMode="numeric"
+            min={1}
+            placeholder={t("warrantyDurationPlaceholder")}
+            step={1}
+            type="number"
+            {...form.register("warrantyDurationMonths")}
+          />
+        </Field>
+        <Field
+          description={
+            !product
+              ? t("warrantyCodeCreateDescription")
+              : product.warrantyCodeEditLockedReason === "WARRANTY_NOT_DRAFT"
+                ? t("warrantyCodeNotDraftDescription")
+                : product.warrantyCodeEditLockedReason ===
+                    "OPEN_ACTIVATION_REQUEST"
+                  ? t("warrantyCodeOpenRequestDescription")
+                  : t("warrantyCodeEditableDescription")
+          }
+          error={formatFieldError(
+            form.formState.errors.warrantyCode?.message,
+            t,
+          )}
+          id="product-warranty-code"
+          label={t("warrantyCode")}
+        >
+          <Input
+            disabled={
+              isSubmitting || Boolean(product && !product.canEditWarrantyCode)
             }
-            error={formatFieldError(
-              form.formState.errors.warrantyCode?.message,
-              t,
-            )}
             id="product-warranty-code"
-            label={t("warrantyCode")}
-          >
-            <Input
-              className="w-full"
-              disabled={
-                isSubmitting || Boolean(product && !product.canEditWarrantyCode)
-              }
-              id="product-warranty-code"
-              placeholder={t("warrantyCodePlaceholder")}
-              {...form.register("warrantyCode")}
-            />
-          </Field>
-        </div>
+            placeholder={t("warrantyCodePlaceholder")}
+            {...form.register("warrantyCode")}
+          />
+        </Field>
       </div>
+
+      <Field
+        error={formatFieldError(
+          form.formState.errors.warrantyTerms?.message,
+          t,
+        )}
+        id="product-warranty-terms"
+        label={t("warrantyTerms")}
+      >
+        <Textarea
+          disabled={isSubmitting || !canEditWarrantyDuration}
+          id="product-warranty-terms"
+          rows={3}
+          {...form.register("warrantyTerms")}
+        />
+      </Field>
 
       <Controller
         control={form.control}
@@ -350,85 +412,6 @@ export function ProductForm({
   );
 }
 
-function TemplateDetail({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <dt className="text-slate-500 dark:text-slate-400">{label}</dt>
-      <dd className="mt-1 font-medium text-slate-950 dark:text-slate-50">
-        {value}
-      </dd>
-    </div>
-  );
-}
-
-function ProductTemplateCombobox({
-  disabled,
-  id,
-  isLoading,
-  loadingLabel,
-  onSearchChange,
-  onValueChange,
-  options,
-  placeholder,
-  search,
-  searchPlaceholder,
-  value,
-}: {
-  disabled?: boolean;
-  id: string;
-  isLoading: boolean;
-  loadingLabel: string;
-  onSearchChange: (value: string) => void;
-  onValueChange: (value: string) => void;
-  options: ProductTemplateSummary[];
-  placeholder: string;
-  search: string;
-  searchPlaceholder: string;
-  value?: string;
-}) {
-  const selected = options.find((option) => option.id === value);
-  return (
-    <Combobox
-      disabled={disabled}
-      onValueChange={(nextValue) => {
-        onValueChange(nextValue);
-        onSearchChange("");
-      }}
-      shouldFilter={false}
-      value={value ?? ""}
-    >
-      <ComboboxTrigger
-        id={id}
-        placeholder={placeholder}
-        selectedLabel={
-          selected ? `${selected.name} · ${selected.sku}` : undefined
-        }
-      />
-      <ComboboxContent>
-        <ComboboxInput
-          onValueChange={onSearchChange}
-          placeholder={searchPlaceholder}
-          showTrigger={false}
-          value={search}
-        />
-        <ComboboxList>
-          <ComboboxEmpty>{placeholder}</ComboboxEmpty>
-          {isLoading ? <ComboboxLoading label={loadingLabel} /> : null}
-          {options.map((option) => (
-            <ComboboxItem
-              key={option.id}
-              keywords={getProductTemplateSearchKeywords(option)}
-              value={option.id}
-            >
-              {option.name} · {option.sku}
-            </ComboboxItem>
-          ))}
-        </ComboboxList>
-      </ComboboxContent>
-    </Combobox>
-  );
-}
-
 function ProductCategoryCombobox({
   disabled,
   id,
@@ -459,11 +442,15 @@ function ProductCategoryCombobox({
         selectedLabel={selectedOption?.label ?? value}
       />
       <ComboboxContent>
-        <ComboboxInput placeholder={searchPlaceholder} showTrigger={false} />
+        <ComboboxInput placeholder={searchPlaceholder} />
         <ComboboxList>
           <ComboboxEmpty>{placeholder}</ComboboxEmpty>
           {options.map((option) => (
-            <ComboboxItem key={option.value} value={option.value}>
+            <ComboboxItem
+              key={option.value}
+              keywords={[option.label]}
+              value={option.value}
+            >
               {option.label}
             </ComboboxItem>
           ))}
@@ -475,22 +462,19 @@ function ProductCategoryCombobox({
 
 const formatFieldError = createFieldErrorFormatter(
   new Set([
-    "categoryNotFound",
+    "brandLength",
     "categoryRequired",
+    "descriptionLength",
     "displayNameLength",
-    "duplicateProductCode",
-    "duplicateSerialNumber",
-    "duplicateWarrantyCode",
     "durationMonthsRange",
     "installationPositionLength",
+    "modelLength",
+    "nameLength",
+    "nameRequired",
     "productCodeLength",
     "productCodeRequired",
     "serialNumberLength",
-    "templateNotFound",
-    "templateRequired",
     "warrantyCodeInvalid",
-    "warrantyCodeNotDraft",
-    "warrantyCodeOpenRequest",
-    "warrantyDurationNotDraft",
+    "warrantyTermsLength",
   ]),
 );

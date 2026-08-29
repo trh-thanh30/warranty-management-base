@@ -138,9 +138,9 @@ test("creating a product sends inventory fields", async () => {
   const result = await createProductsService(
     http as unknown as ProductsHttpClient,
   ).createProduct({
+    name: "SUV Battery",
     categoryId: "category-id",
     displayName: "SUV Battery",
-    templateId: "template-id",
     warrantyDurationMonths: 36,
   });
 
@@ -148,9 +148,9 @@ test("creating a product sends inventory fields", async () => {
     {
       url: "/products",
       body: {
+        name: "SUV Battery",
         categoryId: "category-id",
         displayName: "SUV Battery",
-        templateId: "template-id",
         warrantyDurationMonths: 36,
       },
     },
@@ -337,12 +337,18 @@ test("confirming product import posts edited preview rows", async () => {
     rows: [
       {
         displayName: "SUV Battery",
+        productName: "Battery Plus",
+        categoryCode: "ACCESSORY",
+        brand: "Lexzenz",
+        model: "Battery Plus",
+        modelYear: 2026,
+        warrantyDurationMonths: 36,
+        warrantyTerms: null,
         installationPosition: "Khoang động cơ",
         productCode: null,
         warrantyCode: null,
         serialNumber: "SN-001",
         status: "ACTIVE",
-        templateSku: "BATTERY-PLUS",
       },
     ],
   });
@@ -355,12 +361,18 @@ test("confirming product import posts edited preview rows", async () => {
         rows: [
           {
             displayName: "SUV Battery",
+            productName: "Battery Plus",
+            categoryCode: "ACCESSORY",
+            brand: "Lexzenz",
+            model: "Battery Plus",
+            modelYear: 2026,
+            warrantyDurationMonths: 36,
+            warrantyTerms: null,
             installationPosition: "Khoang động cơ",
             productCode: null,
             warrantyCode: null,
             serialNumber: "SN-001",
             status: "ACTIVE",
-            templateSku: "BATTERY-PLUS",
           },
         ],
       },

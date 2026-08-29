@@ -5,7 +5,6 @@ import Lightbox from "yet-another-react-lightbox";
 import { formatDate, type ProductResponse } from "@repo/shared";
 import { Badge, Button, Skeleton } from "@repo/ui";
 import {
-  BookOpen,
   CalendarDays,
   CalendarRange,
   Check,
@@ -100,11 +99,6 @@ export function ProductDetailCard({ product }: ProductDetailCardProps) {
             value={product.displayName || emptyValue}
           />
           <CopyableDetailItem
-            icon={<BookOpen className="size-4" />}
-            label={t("templateSku")}
-            value={product.template.sku}
-          />
-          <CopyableDetailItem
             icon={<Hash className="size-4" />}
             label={t("productCode")}
             value={product.productCode}
@@ -119,12 +113,6 @@ export function ProductDetailCard({ product }: ProductDetailCardProps) {
             label={t("serialNumber")}
             value={product.serialNumber}
           />
-          {product.categoryId !== product.template.categoryId ? (
-            <DetailItem
-              label={t("templateCategory")}
-              value={product.template.categoryRef?.name || emptyValue}
-            />
-          ) : null}
           <DetailItem
             icon={<CalendarRange className="size-4" />}
             label={t("modelYear")}

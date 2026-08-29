@@ -15,15 +15,35 @@ const requiredWarrantyDuration = z
       .int("durationMonthsRange")
       .min(1, "durationMonthsRange"),
   );
+const optionalModelYear = z.preprocess(
+  (value) =>
+    value === "" || value === null || value === undefined
+      ? undefined
+      : Number(value),
+  z.number().int().min(1900).max(2200).optional(),
+);
 
 export const productFormSchema = z.object({
   categoryId: optionalText.min(1, "categoryRequired"),
+  name: optionalText.min(1, "nameRequired").max(160, "nameLength"),
+  brand: optionalText.max(80, "brandLength"),
+  model: optionalText.max(80, "modelLength"),
+  modelYear: optionalModelYear,
+  description: optionalText.max(1000, "descriptionLength"),
+  coverAssetId: z.string(),
+  coverImageUrl: z.string(),
+  galleryImages: z.array(
+    z.object({
+      assetId: z.string(),
+      url: z.string(),
+    }),
+  ),
   displayName: optionalText.max(160, "displayNameLength"),
   installationPosition: optionalText.max(160, "installationPositionLength"),
   productCode: optionalText.max(64, "productCodeLength"),
   serialNumber: optionalText.max(64, "serialNumberLength"),
   status: z.enum(["ACTIVE", "INACTIVE"]),
-  templateId: optionalText.min(1, "templateRequired"),
+  warrantyTerms: optionalText.max(2000, "warrantyTermsLength"),
   warrantyDurationMonths: requiredWarrantyDuration,
   warrantyCode: optionalText
     .max(64, "warrantyCodeInvalid")

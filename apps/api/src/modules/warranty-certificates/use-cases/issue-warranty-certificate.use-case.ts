@@ -151,8 +151,7 @@ export class IssueWarrantyCertificateUseCase {
           endDate: warranty.endDate,
           filmItems: this.resolveFilmItems(request),
           installedAt: request?.installedAt ?? warranty.startDate,
-          productName:
-            warranty.product.displayName ?? warranty.product.template.name,
+          productName: warranty.product.displayName ?? warranty.product.name,
           serialNumber: warranty.product.serialNumber,
           startDate: warranty.startDate,
           vehicleModel: request?.vehicleModel ?? null,

@@ -54,7 +54,7 @@ export class WarrantyCertificateEmailQueueService {
       installedAt: request?.installedAt ?? certificate.warranty.startDate,
       productName:
         certificate.warranty.product.displayName ??
-        certificate.warranty.product.template.name,
+        certificate.warranty.product.name,
       serialNumber: certificate.warranty.product.serialNumber,
       startDate: certificate.warranty.startDate,
       vehicleModel: request?.vehicleModel ?? null,

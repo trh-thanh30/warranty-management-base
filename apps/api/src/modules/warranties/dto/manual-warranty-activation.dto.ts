@@ -37,7 +37,22 @@ export class ManualWarrantyActivationProductDto {
 
   @ValidateIf((dto: ManualWarrantyActivationProductDto) => !dto.id)
   @IsUUID()
-  templateId?: string;
+  categoryId?: string;
+
+  @ValidateIf((dto: ManualWarrantyActivationProductDto) => !dto.id)
+  @IsString()
+  @Length(2, 160)
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 120)
+  brand?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 120)
+  model?: string;
 
   @IsOptional()
   @IsString()

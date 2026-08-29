@@ -59,7 +59,7 @@ describe('AttachProductAssetUseCase', () => {
     );
   });
 
-  it('rejects shared media on a product linked to a template', async () => {
+  it('attaches product-owned media during the template transition', async () => {
     const repository = {
       findProduct: jest.fn().mockResolvedValue({
         id: 'product-id',
@@ -70,22 +70,42 @@ describe('AttachProductAssetUseCase', () => {
         id: 'asset-id',
         type: asset_type.IMAGE,
         is_deleted: false,
+        mime_type: 'image/jpeg',
+        original_name: 'cover.jpg',
       }),
-      attach: jest.fn(),
+      attach: jest.fn().mockResolvedValue({
+        productAsset: {
+          id: 'product-asset-id',
+          asset_id: 'asset-id',
+          role: product_asset_role.COVER,
+          sort_order: 0,
+          alt_text: null,
+        },
+        replacedCoverAssetIds: [],
+      }),
+    };
+    const assetsService = {
+      deleteAssetIfUnreferenced: jest.fn(),
+      enrichAssetUrl: jest.fn().mockReturnValue({
+        url: 'https://cdn.example.com/products/cover.jpg',
+      }),
     };
     const useCase = new AttachProductAssetUseCase(
       repository as never,
-      {} as never,
+      assetsService as never,
     );
 
-    await expect(
-      useCase.execute('product-id', {
-        assetId: 'asset-id',
-        role: product_asset_role.COVER,
-      }),
-    ).rejects.toThrow(
-      'Template-owned product media must be updated on the product template',
-    );
-    expect(repository.attach).not.toHaveBeenCalled();
+    const result = await useCase.execute('product-id', {
+      assetId: 'asset-id',
+      role: product_asset_role.COVER,
+    });
+
+    expect(repository.attach).toHaveBeenCalledWith('product-id', {
+      assetId: 'asset-id',
+      role: product_asset_role.COVER,
+      sortOrder: 0,
+      altText: undefined,
+    });
+    expect(result.assetId).toBe('asset-id');
   });
 });

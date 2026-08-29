@@ -353,11 +353,17 @@ function normalizePreviewRow(row: {
     ...row,
     data: {
       displayName: row.data.displayName ?? null,
+      productName: row.data.productName ?? "",
+      categoryCode: row.data.categoryCode ?? "",
+      brand: row.data.brand ?? null,
+      model: row.data.model ?? null,
+      modelYear: row.data.modelYear ?? null,
+      warrantyDurationMonths: row.data.warrantyDurationMonths ?? 0,
+      warrantyTerms: row.data.warrantyTerms ?? null,
       installationPosition: row.data.installationPosition ?? null,
       productCode: row.data.productCode ?? null,
       serialNumber: row.data.serialNumber ?? null,
       status: row.data.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
-      templateSku: row.data.templateSku ?? "",
       warrantyCode: row.data.warrantyCode ?? null,
     },
   };
@@ -404,10 +410,24 @@ function validateImportRows(rows: EditableProductImportRow[]) {
     const productCode = row.data.productCode?.trim();
     const serialNumber = row.data.serialNumber?.trim();
     const warrantyCode = row.data.warrantyCode?.trim().toUpperCase();
-    if (!row.data.templateSku.trim()) {
+    if (!row.data.productName.trim()) {
       errors.push({
-        field: "templateSku",
-        message: "SKU của product template là bắt buộc.",
+        field: "productName",
+        message: "Tên sản phẩm là bắt buộc.",
+        rowNumber: row.rowNumber,
+      });
+    }
+    if (!row.data.categoryCode.trim()) {
+      errors.push({
+        field: "categoryCode",
+        message: "Mã danh mục là bắt buộc.",
+        rowNumber: row.rowNumber,
+      });
+    }
+    if (row.data.warrantyDurationMonths < 1) {
+      errors.push({
+        field: "warrantyDurationMonths",
+        message: "Thời hạn bảo hành phải từ 1 tháng.",
         rowNumber: row.rowNumber,
       });
     }
@@ -461,6 +481,11 @@ function validateImportRows(rows: EditableProductImportRow[]) {
 }
 
 const RECOMPUTED_IMPORT_ERROR_MESSAGES = new Set([
+  "Tên sản phẩm là bắt buộc",
+  "Tên sản phẩm là bắt buộc.",
+  "Mã danh mục là bắt buộc",
+  "Mã danh mục là bắt buộc.",
+  "Thời hạn bảo hành phải từ 1 tháng.",
   "Mã sản phẩm bị trùng trong file import",
   "Mã sản phẩm bị trùng trong bảng preview.",
   "Số serial bị trùng trong file import",

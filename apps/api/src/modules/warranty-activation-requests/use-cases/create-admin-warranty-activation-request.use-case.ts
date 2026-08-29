@@ -1,5 +1,9 @@
 import { BadRequestError, NotFoundError } from '@/common/response';
 import { CustomersRepository } from '@/modules/customers/repository/customers.repository';
+import {
+  getProductCatalogue,
+  getProductDisplayName,
+} from '@/modules/products/product-catalogue';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
 import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { CreateAdminWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-admin-warranty-activation-request.dto';
@@ -100,19 +104,15 @@ export class CreateAdminWarrantyActivationRequestUseCase {
       });
     }
 
+    const catalogue = getProductCatalogue(product);
     return this.createWarrantyActivationRequestUseCase.execute(
       {
         ...customerDto,
-        brand: customerDto.brand ?? product.template.brand ?? undefined,
+        brand: customerDto.brand ?? catalogue.brand ?? undefined,
         manufactureYear:
-          customerDto.manufactureYear ??
-          product.template.model_year ??
-          undefined,
-        model: customerDto.model ?? product.template.model ?? undefined,
-        productName:
-          customerDto.productName ??
-          product.display_name ??
-          product.template.name,
+          customerDto.manufactureYear ?? catalogue.modelYear ?? undefined,
+        model: customerDto.model ?? catalogue.model ?? undefined,
+        productName: customerDto.productName ?? getProductDisplayName(product),
         serialNumber:
           customerDto.serialNumber ?? product.serial_number ?? undefined,
         warrantyCode,

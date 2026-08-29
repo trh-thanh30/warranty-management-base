@@ -6,10 +6,11 @@ import {
   ProductTemplate,
   Warranty,
 } from '@prisma/client';
+import { getProductCatalogue } from '@/modules/products/product-catalogue';
 
 type WarrantyWithProduct = Warranty & {
   product: Product & {
-    template?: ProductTemplate;
+    template?: ProductTemplate | null;
     ownerships?: Array<ProductOwnership & { customer?: Customer }>;
   };
 };
@@ -24,8 +25,7 @@ export function toWarrantyExcelRow(
   return {
     warrantyCode: warranty.warranty_code,
     productCode: warranty.product.product_code,
-    productName:
-      warranty.product.template?.name ?? warranty.product.product_code,
+    productName: getProductCatalogue(warranty.product).name,
     serialNumber: warranty.product.serial_number,
     ownerCustomerCode: currentOwnership?.customer?.customer_code ?? null,
     ownerFullName: currentOwnership?.customer?.full_name ?? null,

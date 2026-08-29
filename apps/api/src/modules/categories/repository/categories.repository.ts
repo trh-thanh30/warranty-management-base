@@ -169,10 +169,11 @@ export class CategoriesRepository {
           include: {
             _count: {
               select: {
-                product_templates: {
+                products: {
                   where: {
-                    is_active: true,
-                    is_published: true,
+                    deleted_at: null,
+                    status: 'ACTIVE',
+                    catalogue_is_published: true,
                   },
                 },
               },

@@ -26,10 +26,8 @@ import {
 } from "@repo/ui";
 import {
   Eye,
-  Layers3,
   MoreHorizontal,
   Pencil,
-  PlusCircle,
   RotateCcw,
   Trash2,
   UserPlus,
@@ -248,7 +246,7 @@ function ProductName({ product }: { product: ProductResponse }) {
         {getProductDisplayName(product)}
       </span>
       <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
-        {product.name} · {product.template.sku}
+        {product.name} · {product.productCode}
       </p>
     </div>
   );
@@ -290,21 +288,11 @@ function ProductActionsMenu({
   const canEdit = hasPermission(PERMISSIONS.PRODUCT_UPDATE);
   const canDelete = hasPermission(PERMISSIONS.PRODUCT_DELETE);
   const canAssignOwner = hasPermission(PERMISSIONS.PRODUCT_ASSIGN_OWNER);
-  const canCreateProduct = hasPermission(PERMISSIONS.PRODUCT_CREATE);
-  const canViewTemplate = hasPermission(PERMISSIONS.PRODUCT_TEMPLATE_VIEW);
   const isDeleted = product.status === "DELETED";
 
-  const hasTemplateAction =
-    !isDeleted &&
-    (canViewTemplate || (canCreateProduct && product.template.isActive));
   if (
     (isDeleted && !canDelete) ||
-    (!isDeleted &&
-      !canView &&
-      !canEdit &&
-      !canDelete &&
-      !canAssignOwner &&
-      !hasTemplateAction)
+    (!isDeleted && !canView && !canEdit && !canDelete && !canAssignOwner)
   ) {
     return null;
   }
@@ -343,24 +331,6 @@ function ProductActionsMenu({
                 <Link href={`/products/${product.id}/edit`}>
                   <Pencil className="mr-2 size-4" />
                   {t("edit")}
-                </Link>
-              </DropdownMenuItem>
-            ) : null}
-            {canCreateProduct && product.template.isActive ? (
-              <DropdownMenuItem asChild>
-                <Link
-                  href={`/products/create?templateId=${product.template.id}`}
-                >
-                  <PlusCircle className="mr-2 size-4" />
-                  {t("createAnotherFromTemplate")}
-                </Link>
-              </DropdownMenuItem>
-            ) : null}
-            {canViewTemplate ? (
-              <DropdownMenuItem asChild>
-                <Link href={`/product-templates/${product.template.id}`}>
-                  <Layers3 className="mr-2 size-4" />
-                  {t("viewProductTemplate")}
                 </Link>
               </DropdownMenuItem>
             ) : null}

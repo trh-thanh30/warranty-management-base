@@ -2,6 +2,35 @@ import { toProductResponse } from '@/modules/products/products.types';
 import { category_type, product_status, warranty_status } from '@prisma/client';
 
 describe('toProductResponse', () => {
+  it('uses the product catalogue snapshot and hides template persistence details', () => {
+    const response = toProductResponse({
+      ...createProductFixture(),
+      catalogue_name: 'Product-owned name',
+      catalogue_sku: 'PRODUCT-SKU',
+      catalogue_slug: 'product-owned-name',
+      catalogue_brand: 'Product brand',
+      catalogue_model: 'Product model',
+      catalogue_model_year: 2027,
+      catalogue_description: 'Product description',
+      catalogue_metadata: { specifications: [{ key: 'Power', value: '12W' }] },
+    });
+
+    expect(response).toEqual(
+      expect.objectContaining({
+        name: 'Product-owned name',
+        sku: 'PRODUCT-SKU',
+        slug: 'product-owned-name',
+        brand: 'Product brand',
+        model: 'Product model',
+        modelYear: 2027,
+        description: 'Product description',
+        metadata: { specifications: [{ key: 'Power', value: '12W' }] },
+      }),
+    );
+    expect(response).not.toHaveProperty('templateId');
+    expect(response).not.toHaveProperty('template');
+  });
+
   it('projects template-owned catalogue fields while preserving physical metadata', () => {
     const response = toProductResponse({
       id: 'product-id',

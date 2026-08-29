@@ -23,13 +23,26 @@ test("product form fields cannot widen the mobile layout", async () => {
   assert.doesNotMatch(productForm, /xl:grid-cols-3/);
 });
 
-test("product form temporarily hides the free-text installation position", async () => {
+test("product form persists its direct installation position metadata", async () => {
   const [productForm, productUtils] = await Promise.all([
     readFile(productFormUrl, "utf8"),
     readFile(new URL("./products.utils.ts", import.meta.url), "utf8"),
   ]);
 
-  assert.doesNotMatch(productForm, /product-installation-position/);
-  assert.doesNotMatch(productForm, /register\("installationPosition"\)/);
+  assert.match(productForm, /product-installation-position/);
+  assert.match(productForm, /register\("installationPosition"\)/);
   assert.match(productUtils, /metadata\.installationPosition/);
+});
+
+test("product form manages cover and gallery images on the product", async () => {
+  const [productForm, productUtils] = await Promise.all([
+    readFile(productFormUrl, "utf8"),
+    readFile(new URL("./products.utils.ts", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(productForm, /name="coverImageUrl"/);
+  assert.ok(productForm.includes("name={`galleryImages.${index}.url`}"));
+  assert.match(productForm, /folder: "products"/);
+  assert.match(productUtils, /coverAssetId/);
+  assert.match(productUtils, /galleryAssetIds/);
 });

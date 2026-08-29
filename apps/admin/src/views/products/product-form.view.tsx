@@ -13,33 +13,23 @@ import {
 } from "./components/product-form-card";
 import { useProductDetail } from "./hooks/use-product-detail";
 import { useProductFormWorkflow } from "./hooks/use-product-form-workflow";
-import { useProductTemplate } from "@/src/hooks/use-product-templates";
 type ProductFormViewProps =
   | {
       mode: "create";
       productId?: never;
-      templateId?: string;
     }
   | {
       mode: "edit";
       productId: string;
-      templateId?: never;
     };
 
-export function ProductFormView({
-  mode,
-  productId,
-  templateId,
-}: ProductFormViewProps) {
+export function ProductFormView({ mode, productId }: ProductFormViewProps) {
   const t = useTranslations("Products");
   const workflow = useProductFormWorkflow();
   const isEditing = mode === "edit";
   const { product, productQuery } = useProductDetail(
     isEditing ? { mode: "edit", productId } : { mode: "create" },
   );
-  const templateQuery = useProductTemplate(templateId ?? null, {
-    enabled: mode === "create" && !!templateId,
-  });
   const requiredPermission: PermissionKey = isEditing
     ? PERMISSIONS.PRODUCT_UPDATE
     : PERMISSIONS.PRODUCT_CREATE;
@@ -56,8 +46,7 @@ export function ProductFormView({
         maxWidthClassName="max-w-5xl"
         title={title}
       >
-        {(isEditing && productQuery.isLoading) ||
-        (mode === "create" && !!templateId && templateQuery.isLoading) ? (
+        {isEditing && productQuery.isLoading ? (
           <ProductFormSkeleton description={description} title={title} />
         ) : isEditing && (productQuery.isError || !product) ? (
           <StatePanel
@@ -81,7 +70,6 @@ export function ProductFormView({
             onCancel={workflow.goBackToDirectory}
             onSaved={workflow.handleSaved}
             product={product}
-            initialTemplate={templateQuery.data ?? null}
             title={title}
           />
         )}

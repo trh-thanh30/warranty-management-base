@@ -14,7 +14,13 @@ describe('PreviewProductImportUseCase', () => {
   it('defines Vietnamese product Excel headers with an optional warranty code column', () => {
     expect(productExcelColumns.map((column) => column.header)).toEqual([
       'Mã sản phẩm',
-      'SKU product template',
+      'Tên sản phẩm',
+      'Mã danh mục',
+      'Thương hiệu',
+      'Model',
+      'Năm model',
+      'Thời hạn bảo hành (tháng)',
+      'Điều khoản bảo hành',
       'Tên hiển thị thiết bị',
       'Vị trí gắn',
       'Mã bảo hành',
@@ -27,7 +33,13 @@ describe('PreviewProductImportUseCase', () => {
     const file = await createFileFromRows([
       {
         productCode: 'PRD-2026-ABCDEF',
-        templateSku: 'BATTERY-PLUS',
+        productName: 'Battery Plus',
+        categoryCode: 'ACCESSORY',
+        brand: 'Lexzenz',
+        model: 'Battery Plus',
+        modelYear: 2026,
+        warrantyDurationMonths: 36,
+        warrantyTerms: null,
         displayName: 'Genuine Battery Pack',
         installationPosition: 'Engine bay',
         warrantyCode: 'WM-2026-EXCEL01',
@@ -36,13 +48,7 @@ describe('PreviewProductImportUseCase', () => {
       },
     ]);
     const prismaService = createPrismaMock();
-    prismaService.productTemplate.findUnique.mockResolvedValue({
-      category_id: 'category-id',
-      id: 'template-id',
-      is_active: true,
-      default_warranty_duration_months: 36,
-      default_warranty_terms: null,
-    });
+    prismaService.category.findFirst.mockResolvedValue({ id: 'category-id' });
     const useCase = new PreviewProductImportUseCase(prismaService as never);
 
     const result = await useCase.execute(file);
@@ -52,7 +58,8 @@ describe('PreviewProductImportUseCase', () => {
     expect(result.invalidRows).toBe(0);
     expect(result.rows[0].data).toEqual(
       expect.objectContaining({
-        templateSku: 'BATTERY-PLUS',
+        productName: 'Battery Plus',
+        categoryCode: 'ACCESSORY',
         displayName: 'Genuine Battery Pack',
         installationPosition: 'Engine bay',
         productCode: 'PRD-2026-ABCDEF',
@@ -76,11 +83,17 @@ describe('PreviewProductImportUseCase', () => {
     ).rejects.toBeInstanceOf(ValidationError);
   });
 
-  it('reports an unknown product template SKU during preview', async () => {
+  it('reports an unknown product category during preview', async () => {
     const file = await createFileFromRows([
       {
         productCode: null,
-        templateSku: 'UNKNOWN',
+        productName: 'Battery Pack',
+        categoryCode: 'UNKNOWN',
+        brand: null,
+        model: null,
+        modelYear: null,
+        warrantyDurationMonths: 36,
+        warrantyTerms: null,
         displayName: 'Battery Pack',
         installationPosition: null,
         warrantyCode: null,
@@ -89,7 +102,7 @@ describe('PreviewProductImportUseCase', () => {
       },
     ]);
     const prismaService = createPrismaMock();
-    prismaService.productTemplate.findUnique.mockResolvedValue(null);
+    prismaService.category.findFirst.mockResolvedValue(null);
     const useCase = new PreviewProductImportUseCase(prismaService as never);
 
     const result = await useCase.execute(file);
@@ -97,17 +110,23 @@ describe('PreviewProductImportUseCase', () => {
     expect(result.invalidRows).toBe(1);
     expect(result.validRows).toBe(0);
     expect(result.rows[0]?.errors).toContainEqual({
-      field: 'templateSku',
-      message: 'Không tìm thấy product template đang hoạt động',
+      field: 'categoryCode',
+      message: 'Không tìm thấy danh mục sản phẩm đang hoạt động',
       rowNumber: 2,
     });
   });
 
-  it('requires a product template SKU during preview', async () => {
+  it('requires a product category code during preview', async () => {
     const file = await createFileFromRows([
       {
         productCode: null,
-        templateSku: '',
+        productName: 'Battery Pack',
+        categoryCode: '',
+        brand: null,
+        model: null,
+        modelYear: null,
+        warrantyDurationMonths: 36,
+        warrantyTerms: null,
         displayName: 'Battery Pack',
         installationPosition: null,
         warrantyCode: null,
@@ -123,8 +142,8 @@ describe('PreviewProductImportUseCase', () => {
     expect(result.invalidRows).toBe(1);
     expect(result.validRows).toBe(0);
     expect(result.rows[0]?.errors).toContainEqual({
-      field: 'templateSku',
-      message: 'SKU product template is required',
+      field: 'categoryCode',
+      message: 'Mã danh mục is required',
       rowNumber: 2,
     });
   });
@@ -133,7 +152,13 @@ describe('PreviewProductImportUseCase', () => {
     const file = await createFileFromRows([
       {
         productCode: null,
-        templateSku: 'BATTERY-PLUS',
+        productName: 'Battery A',
+        categoryCode: 'ACCESSORY',
+        brand: null,
+        model: null,
+        modelYear: null,
+        warrantyDurationMonths: 36,
+        warrantyTerms: null,
         displayName: 'Battery A',
         installationPosition: null,
         warrantyCode: 'WM-2026-DUPLICATE',
@@ -142,7 +167,13 @@ describe('PreviewProductImportUseCase', () => {
       },
       {
         productCode: null,
-        templateSku: 'BATTERY-PLUS',
+        productName: 'Battery B',
+        categoryCode: 'ACCESSORY',
+        brand: null,
+        model: null,
+        modelYear: null,
+        warrantyDurationMonths: 36,
+        warrantyTerms: null,
         displayName: 'Battery B',
         installationPosition: null,
         warrantyCode: 'WM-2026-DUPLICATE',
@@ -151,13 +182,7 @@ describe('PreviewProductImportUseCase', () => {
       },
     ]);
     const prismaService = createPrismaMock();
-    prismaService.productTemplate.findUnique.mockResolvedValue({
-      category_id: 'category-id',
-      id: 'template-id',
-      is_active: true,
-      default_warranty_duration_months: 36,
-      default_warranty_terms: null,
-    });
+    prismaService.category.findFirst.mockResolvedValue({ id: 'category-id' });
     const useCase = new PreviewProductImportUseCase(prismaService as never);
 
     const result = await useCase.execute(file);
@@ -173,8 +198,8 @@ describe('PreviewProductImportUseCase', () => {
 
 function createPrismaMock() {
   return {
-    productTemplate: {
-      findUnique: jest.fn().mockResolvedValue(null),
+    category: {
+      findFirst: jest.fn().mockResolvedValue(null),
     },
     product: {
       findUnique: jest.fn().mockResolvedValue(null),

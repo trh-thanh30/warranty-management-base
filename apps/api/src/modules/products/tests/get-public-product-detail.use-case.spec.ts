@@ -9,7 +9,7 @@ import {
 } from '@prisma/client';
 
 describe('GetPublicProductDetailUseCase', () => {
-  it('maps one public card from the template without a physical product', () => {
+  it('maps one public card from the authoritative product', () => {
     const template = createPublishedTemplateFixture();
 
     expect(
@@ -41,9 +41,9 @@ describe('GetPublicProductDetailUseCase', () => {
     });
   });
 
-  it('maps one published template into the public detail contract', async () => {
+  it('maps one published product into the public detail contract', async () => {
     const repository = {
-      findPublicTemplateBySlug: jest
+      findPublicProductBySlug: jest
         .fn()
         .mockResolvedValue(createPublishedTemplateFixture()),
     };
@@ -103,7 +103,7 @@ describe('GetPublicProductDetailUseCase', () => {
 
   it('throws not found when the slug is not publicly available', async () => {
     const repository = {
-      findPublicTemplateBySlug: jest.fn().mockResolvedValue(null),
+      findPublicProductBySlug: jest.fn().mockResolvedValue(null),
     };
     const useCase = new GetPublicProductDetailUseCase(
       repository as never,
@@ -158,18 +158,20 @@ function createPublishedTemplateFixture() {
 
   return {
     id: 'template-id',
-    sku: 'LEX-SP50',
-    slug: 'lex-sp50',
-    name: 'SP50',
+    template_id: null,
+    product_code: 'LEX-SP50',
+    serial_number: null,
+    display_name: null,
     category_id: category.id,
     category_ref: category,
-    brand: 'Lexzenz',
-    model: 'SP50',
-    model_year: 2026,
-    description: 'Mô tả đầy đủ.',
-    default_warranty_duration_months: 180,
-    default_warranty_terms: 'Bảo hành điện tử chính hãng.',
-    metadata: {
+    catalogue_name: 'SP50',
+    catalogue_sku: 'LEX-SP50',
+    catalogue_slug: 'lex-sp50',
+    catalogue_brand: 'Lexzenz',
+    catalogue_model: 'SP50',
+    catalogue_model_year: 2026,
+    catalogue_description: 'Mô tả đầy đủ.',
+    catalogue_metadata: {
       shortDescription: 'Phim dành cho kính lái.',
       specifications: [
         { key: 'IR Block', value: '97%', group: 'Hiệu suất' },
@@ -179,15 +181,21 @@ function createPublishedTemplateFixture() {
       features: ['Cản tia hồng ngoại', 'Giữ tầm nhìn rõ', 42],
       applications: ['Kính lái ô tô'],
     },
-    is_active: true,
-    is_published: true,
-    published_at: new Date('2026-01-24T00:00:00.000Z'),
+    catalogue_is_published: true,
+    catalogue_published_at: new Date('2026-01-24T00:00:00.000Z'),
+    status: 'ACTIVE' as const,
+    metadata: null,
+    deleted_at: null,
+    warranty: {
+      duration_months: 180,
+      terms: 'Bảo hành điện tử chính hãng.',
+    },
     created_at: createdAt,
     updated_at: createdAt,
     assets: [
       {
         id: 'cover-link-id',
-        product_template_id: 'template-id',
+        product_id: 'template-id',
         asset_id: 'cover-asset-id',
         role: product_asset_role.COVER,
         sort_order: 0,
@@ -202,7 +210,7 @@ function createPublishedTemplateFixture() {
       },
       {
         id: 'gallery-link-id',
-        product_template_id: 'template-id',
+        product_id: 'template-id',
         asset_id: 'gallery-asset-id',
         role: product_asset_role.GALLERY,
         sort_order: 1,
