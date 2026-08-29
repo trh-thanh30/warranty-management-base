@@ -38,6 +38,7 @@ export const productFormSchema = z.object({
   brand: optionalText.max(80, "brandLength"),
   model: optionalText.max(80, "modelLength"),
   modelYear: optionalModelYear,
+  shortDescription: optionalText.max(500, "shortDescriptionLength").optional(),
   description: optionalText.max(1000, "descriptionLength"),
   coverAssetId: z.string(),
   coverImageUrl: z.string(),

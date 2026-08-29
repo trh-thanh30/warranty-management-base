@@ -124,6 +124,10 @@ function getDefaultValues(product: ProductResponse | null): ProductFormInput {
     brand: product?.brand ?? "",
     model: product?.model ?? "",
     modelYear: product?.modelYear ?? "",
+    shortDescription:
+      typeof product?.catalogueMetadata?.shortDescription === "string"
+        ? product.catalogueMetadata.shortDescription
+        : "",
     description: product?.description ?? "",
     coverAssetId: cover?.assetId ?? "",
     coverImageUrl: cover?.url ?? "",

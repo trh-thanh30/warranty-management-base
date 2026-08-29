@@ -140,7 +140,7 @@ export function mergeProductCatalogueMetadata(
   metadata: Record<string, unknown> | null | undefined,
   values: Pick<
     ProductFormValues,
-    "applications" | "features" | "specifications"
+    "applications" | "features" | "specifications" | "shortDescription"
   >,
 ): Record<string, unknown> | null {
   const nextMetadata = { ...(metadata ?? {}) };
@@ -157,6 +157,9 @@ export function mergeProductCatalogueMetadata(
   setOrDeleteMetadataValue(nextMetadata, "specifications", specifications);
   setOrDeleteMetadataValue(nextMetadata, "features", features);
   setOrDeleteMetadataValue(nextMetadata, "applications", applications);
+  const shortDescription = toOptionalValue(values.shortDescription);
+  if (shortDescription) nextMetadata.shortDescription = shortDescription;
+  else delete nextMetadata.shortDescription;
 
   return Object.keys(nextMetadata).length > 0 ? nextMetadata : null;
 }

@@ -9,6 +9,7 @@ import {
   ComboboxList,
   ComboboxTrigger,
 } from "@/src/components/common";
+import { RichTextEditor } from "@/src/components/common/rich-text-editor";
 import { FormField as Field } from "@/src/components/common/form-field";
 import { createFieldErrorFormatter } from "@/src/utils";
 import type { ProductResponse } from "@repo/shared";
@@ -48,7 +49,7 @@ export function ProductForm({
         </div>
       ) : null}
 
-      <div className="grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.42fr)]">
+      <div className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.42fr)]">
         <div className="min-w-0 space-y-6">
           <div className="grid gap-5 sm:grid-cols-2">
             <Field
@@ -254,16 +255,38 @@ export function ProductForm({
 
           <Field
             error={formatFieldError(
+              form.formState.errors.shortDescription?.message,
+              t,
+            )}
+            id="product-short-description"
+            label={t("shortDescriptionLabel")}
+          >
+            <Textarea
+              id="product-short-description"
+              placeholder={t("shortDescriptionPlaceholder")}
+              rows={2}
+              {...form.register("shortDescription")}
+            />
+          </Field>
+
+          <Field
+            error={formatFieldError(
               form.formState.errors.description?.message,
               t,
             )}
             id="product-description"
             label={t("descriptionLabel")}
           >
-            <Textarea
-              id="product-description"
-              rows={3}
-              {...form.register("description")}
+            <Controller
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <RichTextEditor
+                  disabled={isSubmitting}
+                  onChange={field.onChange}
+                  value={field.value}
+                />
+              )}
             />
           </Field>
 
@@ -279,6 +302,7 @@ export function ProductForm({
             <Textarea
               disabled={isSubmitting || !canEditWarrantyDuration}
               id="product-warranty-terms"
+              placeholder={t("warrantyTermsPlaceholder")}
               rows={3}
               {...form.register("warrantyTerms")}
             />
