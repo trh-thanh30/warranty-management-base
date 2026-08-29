@@ -1,4 +1,4 @@
-import type { ProductStatus } from "@repo/shared";
+import type { ProductStatus, WarrantyStatus } from "@repo/shared";
 export { PRODUCT_CATEGORIES } from "@repo/shared/constants";
 
 export const PRODUCT_STATUS_FILTERS = [
@@ -7,3 +7,11 @@ export const PRODUCT_STATUS_FILTERS = [
   "INACTIVE",
   "DELETED",
 ] as const satisfies Array<"ALL" | ProductStatus>;
+
+export const PRODUCT_WARRANTY_STATUS_FILTERS = [
+  "ALL",
+  "DRAFT",
+  "ACTIVE",
+  "EXPIRED",
+  "VOIDED",
+] as const satisfies Array<"ALL" | WarrantyStatus>;
