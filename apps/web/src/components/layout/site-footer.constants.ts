@@ -1,5 +1,6 @@
 import {
   PUBLIC_FEATURES,
+  PUBLIC_DEALER_NETWORK_URL,
   PUBLIC_PRODUCT_CATALOG_URL,
 } from "@/src/config/public-features.config";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
@@ -14,7 +15,7 @@ export const footerNavigationItems = [
     external: true,
   },
   { id: "warranty", href: APP_ROUTES.warranty, external: false },
-  { id: "dealers", href: APP_ROUTES.dealers, external: false },
+  { id: "dealers", href: PUBLIC_DEALER_NETWORK_URL, external: true },
   ...(PUBLIC_FEATURES.contactNavigation
     ? [{ id: "contact" as const, href: APP_ROUTES.contact, external: false }]
     : []),

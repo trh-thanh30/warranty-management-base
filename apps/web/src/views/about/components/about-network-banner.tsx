@@ -5,8 +5,7 @@ import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Container } from "@/src/components/common/container";
-import { APP_ROUTES } from "@/src/constants/routes.constants";
-import { Link } from "@/src/i18n/navigation";
+import { PUBLIC_DEALER_NETWORK_URL } from "@/src/config/public-features.config";
 import { Counter } from "@/src/components/animation/counter";
 
 const AboutNetworkMap = dynamic(
@@ -92,13 +91,14 @@ export function AboutNetworkBanner() {
             </div>
 
             <div className="pt-2">
-              <Link
-                href={APP_ROUTES.dealers}
+              <a
+                href={PUBLIC_DEALER_NETWORK_URL}
+                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2.5 rounded-md bg-premium-red hover:bg-warm-red px-8 py-4 text-xs sm:text-sm font-semibold uppercase tracking-wider text-white shadow-md transition-all cursor-pointer"
               >
                 <span>{t("network.viewDealersCta")}</span>
                 <ArrowRight className="size-4" />
-              </Link>
+              </a>
             </div>
           </div>
         </div>

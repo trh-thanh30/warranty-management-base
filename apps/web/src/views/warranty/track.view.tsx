@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Container } from "@/src/components/common/container";
 import { WarrantyPolicyShortcut } from "@/src/components/common/warranty-policy-shortcut";
 import { WarrantyProcessSteps } from "@/src/components/common/warranty-process-steps";
+import { PUBLIC_DEALER_NETWORK_URL } from "@/src/config/public-features.config";
 import { Link } from "@/src/i18n/navigation";
 import { useWarrantyClaimTracking } from "@/src/hooks/use-warranty-claim-tracking";
 import { AnimatePresence, motion } from "framer-motion";
@@ -133,13 +134,14 @@ export function WarrantyTrackView() {
               <FileText className="size-4 shrink-0" />
               <span>{t("otherActions.request")}</span>
             </Link>
-            <Link
+            <a
               className="group flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:border-premium-red hover:bg-premium-red hover:text-white"
-              href={APP_ROUTES.dealers}
+              href={PUBLIC_DEALER_NETWORK_URL}
+              rel="noopener noreferrer"
             >
               <Building2 className="size-4 shrink-0" />
               <span>{t("otherActions.dealers")}</span>
-            </Link>
+            </a>
           </div>
         </section>
 
