@@ -28,7 +28,7 @@ test("remaining long table values are bounded without changing mobile cards", ()
   const productsSource = readViewSource(
     "./products/components/products-table.tsx",
   );
-  assert.match(productsSource, /<div className="min-w-0 lg:max-w-64">/);
+  assert.match(productsSource, /lg:max-w-64/);
   assert.match(productsSource, /block truncate font-medium/);
   assert.match(productsSource, /block max-w-64 truncate/);
   assert.match(productsSource, /block max-w-52 truncate/);

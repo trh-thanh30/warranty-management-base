@@ -29,7 +29,7 @@ test("product form fields cannot widen the mobile layout", async () => {
       readFile(productFormViewUrl, "utf8"),
     ]);
 
-  assert.match(productForm, /<form className="min-w-0 space-y-6"/);
+  assert.match(productForm, /<form className="min-w-0 space-y-4"/);
   assert.match(formField, /className="min-w-0 space-y-2"/);
   assert.match(productForm, /className="grid min-w-0 gap-5 md:grid-cols-2"/);
   assert.match(
