@@ -8,6 +8,7 @@ import {
   Warranty,
   WarrantyActivationRequest,
 } from '@prisma/client';
+import { getProductCatalogue } from '@/modules/products/product-catalogue';
 
 export const WARRANTY_STATUS = {
   ACTIVE: 'ACTIVE',
@@ -84,7 +85,7 @@ export type ManualActivationProduct = {
   }>;
   productCode: string;
   serialNumber: string | null;
-  template: {
+  catalogue: {
     brand: string | null;
     model: string | null;
     name: string;
@@ -120,7 +121,7 @@ type WarrantyWithProduct = Warranty & {
   activated_by?: User | null;
   voided_by?: User | null;
   product: Product & {
-    template: ProductTemplate;
+    template?: ProductTemplate | null;
     ownerships?: Array<ProductOwnership & { customer?: Customer }>;
   };
 };
@@ -169,29 +170,33 @@ export function toWarrantyResponse(warranty: WarrantyWithAuditUsers) {
 
 export function toWarrantyLookupResponse(input: {
   product: Product & {
-    template: ProductTemplate & { category_ref?: Category | null };
+    template?: (ProductTemplate & { category_ref?: Category | null }) | null;
+    category_ref?: Category | null;
   };
   warranty: Warranty & {
     activation_request?: WarrantyActivationRequest | null;
   };
 }) {
   const activationRequest = input.warranty.activation_request;
+  const catalogue = getProductCatalogue(input.product);
+  const category =
+    input.product.category_ref ?? input.product.template?.category_ref;
 
   return {
     product: {
       id: input.product.id,
       productCode: input.product.product_code,
-      name: input.product.template.name,
+      name: catalogue.name,
       displayName: input.product.display_name,
-      brand: input.product.template.brand,
-      model: input.product.template.model,
+      brand: catalogue.brand,
+      model: catalogue.model,
       serialNumber: input.product.serial_number,
       warrantyCode: input.warranty.warranty_code,
-      category: input.product.template.category_ref
+      category: category
         ? {
-            id: input.product.template.category_ref.id,
-            name: input.product.template.category_ref.name,
-            slug: input.product.template.category_ref.slug,
+            id: category.id,
+            name: category.name,
+            slug: category.slug,
           }
         : null,
     },
@@ -275,10 +280,10 @@ export function toWarrantyListItemResponse(warranty: WarrantyWithProduct) {
     ...toWarrantyResponse(toWarrantyRecord(warranty)),
     product: {
       id: warranty.product.id,
-      name: warranty.product.template.name,
+      name: getProductCatalogue(warranty.product).name,
       displayName: warranty.product.display_name,
-      brand: warranty.product.template.brand,
-      model: warranty.product.template.model,
+      brand: getProductCatalogue(warranty.product).brand,
+      model: getProductCatalogue(warranty.product).model,
       productCode: warranty.product.product_code,
       serialNumber: warranty.product.serial_number,
     },

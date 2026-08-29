@@ -76,8 +76,8 @@ export type WarrantyForCertificate = {
         phone: string | null;
       };
     }>;
+    name: string;
     serialNumber: string | null;
-    template: { name: string };
   };
   startDate: Date | null;
   warrantyCode: string | null;
@@ -91,8 +91,8 @@ export type WarrantyCertificateForBatchEmail = WarrantyCertificateRecord & {
   warranty: {
     product: {
       displayName: string | null;
+      name: string;
       serialNumber: string | null;
-      template: { name: string };
     };
     warrantyCode: string | null;
   };

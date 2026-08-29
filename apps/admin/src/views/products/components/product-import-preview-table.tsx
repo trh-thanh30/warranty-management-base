@@ -47,12 +47,16 @@ type ProductImportPreviewTableProps = {
     actions: string;
     allRows: string;
     cancel: string;
+    brand: string;
+    categoryCode: string;
     displayName: string;
     edit: string;
     editDescription: string;
     editTitle: string;
     importStatus: string;
     installationPosition: string;
+    model: string;
+    modelYear: string;
     warrantyCode: string;
     invalidRows: string;
     next: string;
@@ -65,13 +69,15 @@ type ProductImportPreviewTableProps = {
     }) => string;
     previous: string;
     productCode: string;
+    productName: string;
     ready: string;
     remove: string;
     row: string;
     saveChanges: string;
     serialNumber: string;
     status: string;
-    templateSku: string;
+    warrantyDurationMonths: string;
+    warrantyTerms: string;
     validRows: string;
     withErrors: string;
   };
@@ -143,7 +149,7 @@ export function ProductImportPreviewTable({
 
       <div className="overflow-hidden rounded-md border border-slate-200">
         <TableScroll className="max-h-[27rem] overflow-y-auto">
-          <Table className="min-w-[82rem] whitespace-nowrap">
+          <Table className="min-w-[126rem] whitespace-nowrap">
             <TableHeader className="sticky top-0 z-10 bg-slate-50">
               <TableRow>
                 <TableHead className="w-20 whitespace-nowrap">
@@ -153,7 +159,25 @@ export function ProductImportPreviewTable({
                   {labels.productCode}
                 </TableHead>
                 <TableHead className="w-56 whitespace-nowrap">
-                  {labels.templateSku}
+                  {labels.productName}
+                </TableHead>
+                <TableHead className="w-44 whitespace-nowrap">
+                  {labels.categoryCode}
+                </TableHead>
+                <TableHead className="w-40 whitespace-nowrap">
+                  {labels.brand}
+                </TableHead>
+                <TableHead className="w-40 whitespace-nowrap">
+                  {labels.model}
+                </TableHead>
+                <TableHead className="w-32 whitespace-nowrap">
+                  {labels.modelYear}
+                </TableHead>
+                <TableHead className="w-44 whitespace-nowrap">
+                  {labels.warrantyDurationMonths}
+                </TableHead>
+                <TableHead className="w-64 whitespace-nowrap">
+                  {labels.warrantyTerms}
                 </TableHead>
                 <TableHead className="w-56 whitespace-nowrap">
                   {labels.displayName}
@@ -188,7 +212,13 @@ export function ProductImportPreviewTable({
                       </span>
                     </TableCell>
                     <PreviewCell value={row.data.productCode} />
-                    <PreviewCell value={row.data.templateSku} />
+                    <PreviewCell value={row.data.productName} />
+                    <PreviewCell value={row.data.categoryCode} />
+                    <PreviewCell value={row.data.brand} />
+                    <PreviewCell value={row.data.model} />
+                    <PreviewCell value={row.data.modelYear} />
+                    <PreviewCell value={row.data.warrantyDurationMonths} />
+                    <PreviewCell value={row.data.warrantyTerms} />
                     <PreviewCell value={row.data.displayName} />
                     <PreviewCell value={row.data.installationPosition} />
                     <PreviewCell value={row.data.warrantyCode} />
@@ -229,7 +259,7 @@ export function ProductImportPreviewTable({
                 <TableRow>
                   <TableCell
                     className="h-24 text-center text-sm text-slate-500"
-                    colSpan={10}
+                    colSpan={16}
                   >
                     {labels.noRows}
                   </TableCell>
@@ -337,12 +367,16 @@ function ProductImportEditForm({
 }) {
   const [values, setValues] = useState(data);
   const setText = (
-    key: Exclude<keyof ProductImportRowData, "status">,
+    key: Exclude<
+      keyof ProductImportRowData,
+      "modelYear" | "status" | "warrantyDurationMonths"
+    >,
     value: string,
   ) => {
     setValues((current) => ({
       ...current,
-      [key]: key === "templateSku" ? value : value || null,
+      [key]:
+        key === "productName" || key === "categoryCode" ? value : value || null,
     }));
   };
 
@@ -353,7 +387,8 @@ function ProductImportEditForm({
         event.preventDefault();
         onSave({
           ...values,
-          templateSku: values.templateSku.trim(),
+          productName: values.productName.trim(),
+          categoryCode: values.categoryCode.trim().toUpperCase(),
           warrantyCode: values.warrantyCode?.trim().toUpperCase() || null,
         });
       }}
@@ -365,11 +400,58 @@ function ProductImportEditForm({
             value={values.productCode ?? ""}
           />
         </ImportField>
-        <ImportField label={labels.templateSku}>
+        <ImportField label={labels.productName}>
           <Input
-            onChange={(event) => setText("templateSku", event.target.value)}
+            onChange={(event) => setText("productName", event.target.value)}
             required
-            value={values.templateSku}
+            value={values.productName}
+          />
+        </ImportField>
+        <ImportField label={labels.categoryCode}>
+          <Input
+            onChange={(event) => setText("categoryCode", event.target.value)}
+            required
+            value={values.categoryCode}
+          />
+        </ImportField>
+        <ImportField label={labels.brand}>
+          <Input
+            onChange={(event) => setText("brand", event.target.value)}
+            value={values.brand ?? ""}
+          />
+        </ImportField>
+        <ImportField label={labels.model}>
+          <Input
+            onChange={(event) => setText("model", event.target.value)}
+            value={values.model ?? ""}
+          />
+        </ImportField>
+        <ImportField label={labels.modelYear}>
+          <Input
+            onChange={(event) =>
+              setValues((current) => ({
+                ...current,
+                modelYear: event.target.value
+                  ? Number(event.target.value)
+                  : null,
+              }))
+            }
+            type="number"
+            value={values.modelYear ?? ""}
+          />
+        </ImportField>
+        <ImportField label={labels.warrantyDurationMonths}>
+          <Input
+            min={1}
+            onChange={(event) =>
+              setValues((current) => ({
+                ...current,
+                warrantyDurationMonths: Number(event.target.value),
+              }))
+            }
+            required
+            type="number"
+            value={values.warrantyDurationMonths}
           />
         </ImportField>
         <ImportField label={labels.displayName}>
@@ -396,6 +478,12 @@ function ProductImportEditForm({
           <Input
             onChange={(event) => setText("warrantyCode", event.target.value)}
             value={values.warrantyCode ?? ""}
+          />
+        </ImportField>
+        <ImportField label={labels.warrantyTerms}>
+          <Input
+            onChange={(event) => setText("warrantyTerms", event.target.value)}
+            value={values.warrantyTerms ?? ""}
           />
         </ImportField>
         <ImportField label={labels.status}>

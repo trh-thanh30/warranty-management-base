@@ -14,13 +14,58 @@ export const productExcelColumns: Array<
     parse: parseOptionalString,
   },
   {
-    key: 'templateSku',
-    header: 'SKU product template',
+    key: 'productName',
+    header: 'Tên sản phẩm',
+    required: true,
+    width: 34,
+    example: 'Pin Battery Plus',
+    note: 'Tên catalogue được lưu trực tiếp trên sản phẩm.',
+    parse: parseRequiredString,
+  },
+  {
+    key: 'categoryCode',
+    header: 'Mã danh mục',
+    required: true,
+    width: 22,
+    example: 'ACCESSORY',
+    note: 'Mã danh mục sản phẩm đang hoạt động.',
+    parse: parseRequiredString,
+  },
+  {
+    key: 'brand',
+    header: 'Thương hiệu',
+    width: 20,
+    example: 'Lexzenz',
+    parse: parseOptionalString,
+  },
+  {
+    key: 'model',
+    header: 'Model',
+    width: 20,
+    example: 'Battery Plus',
+    parse: parseOptionalString,
+  },
+  {
+    key: 'modelYear',
+    header: 'Năm model',
+    width: 14,
+    example: 2026,
+    parse: parseOptionalNumber,
+  },
+  {
+    key: 'warrantyDurationMonths',
+    header: 'Thời hạn bảo hành (tháng)',
     required: true,
     width: 26,
-    example: 'BATTERY-PLUS',
-    note: 'SKU của product template đã tồn tại và đang hoạt động.',
-    parse: parseRequiredString,
+    example: 24,
+    parse: parseRequiredNumber,
+  },
+  {
+    key: 'warrantyTerms',
+    header: 'Điều khoản bảo hành',
+    width: 36,
+    example: 'Áp dụng theo điều kiện bảo hành của hãng.',
+    parse: parseOptionalString,
   },
   {
     key: 'displayName',
@@ -79,6 +124,19 @@ function parseOptionalString(value: ExcelCellValue) {
   }
 
   return String(value).trim() || null;
+}
+
+function parseOptionalNumber(value: ExcelCellValue) {
+  if (value === null || String(value).trim() === '') return null;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed)) throw new Error('Value must be an integer');
+  return parsed;
+}
+
+function parseRequiredNumber(value: ExcelCellValue) {
+  const parsed = parseOptionalNumber(value);
+  if (parsed === null) throw new Error('Value is required');
+  return parsed;
 }
 
 function parseOptionalWarrantyCode(value: ExcelCellValue) {

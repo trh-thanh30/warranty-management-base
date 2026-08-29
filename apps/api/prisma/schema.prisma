@@ -436,7 +436,7 @@ model CategoryActivationFieldOption {
 
 model Product {
   id            String         @id @default(uuid()) @db.Uuid
-  template_id   String         @db.Uuid
+  template_id   String?        @db.Uuid
   category_id   String         @db.Uuid
   product_code  String         @unique
   serial_number String?        @unique
@@ -444,21 +444,23 @@ model Product {
   // Snapshot of catalogue fields formerly inherited from ProductTemplate.
   // Nullable during the expand/backfill phase; these become authoritative in
   // the application cut-over migration.
-  catalogue_name        String?
-  catalogue_sku         String?
-  catalogue_slug        String?
+  catalogue_name        String
+  catalogue_sku         String         @unique
+  catalogue_slug        String         @unique
   catalogue_brand       String?
   catalogue_model       String?
   catalogue_model_year  Int?
   catalogue_description String?
   catalogue_metadata    Json?
+  catalogue_is_published Boolean   @default(false)
+  catalogue_published_at DateTime?
   status        product_status @default(ACTIVE)
   metadata      Json?
   created_at    DateTime       @default(now())
   updated_at    DateTime       @updatedAt
   deleted_at    DateTime?
 
-  template                          ProductTemplate                 @relation(fields: [template_id], references: [id], onDelete: Restrict)
+  template                          ProductTemplate?                @relation(fields: [template_id], references: [id], onDelete: Restrict)
   category_ref                      Category                        @relation(fields: [category_id], references: [id], onDelete: Restrict)
   ownerships                        ProductOwnership[]
   warranty                          Warranty?

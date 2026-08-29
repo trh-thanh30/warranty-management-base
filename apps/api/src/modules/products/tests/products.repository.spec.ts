@@ -34,23 +34,25 @@ describe('ProductsRepository', () => {
     );
   });
 
-  it('finds public detail by published template slug', async () => {
+  it('finds public detail by published product slug', async () => {
     const findFirst = jest.fn().mockResolvedValue(null);
     const repository = new ProductsRepository({
-      productTemplate: { findFirst },
+      product: { findFirst },
     } as never);
 
-    await repository.findPublicTemplateBySlug('lex-sp50');
+    await repository.findPublicProductBySlug('lex-sp50');
 
     expect(findFirst).toHaveBeenCalledWith({
       where: {
-        slug: 'lex-sp50',
-        is_active: true,
-        is_published: true,
+        catalogue_slug: 'lex-sp50',
+        catalogue_is_published: true,
+        deleted_at: null,
+        status: 'ACTIVE',
         category_ref: { is_active: true },
       },
       include: {
         category_ref: true,
+        warranty: true,
         assets: {
           where: {
             asset: {

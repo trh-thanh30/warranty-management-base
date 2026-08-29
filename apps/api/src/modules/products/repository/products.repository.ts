@@ -21,15 +21,7 @@ const productInclude = {
     include: { asset: true },
     orderBy: [{ role: 'asc' as const }, { sort_order: 'asc' as const }],
   },
-  template: {
-    include: {
-      assets: {
-        include: { asset: true },
-        orderBy: [{ role: 'asc' as const }, { sort_order: 'asc' as const }],
-      },
-      category_ref: true,
-    },
-  },
+  template: true,
   ownerships: {
     include: { customer: true },
     orderBy: { created_at: 'desc' as const },
@@ -78,8 +70,9 @@ const activationProductOptionInclude = {
   },
 };
 
-const publicProductTemplateListInclude = {
+const publicProductListInclude = {
   category_ref: true,
+  warranty: true,
   assets: {
     where: {
       role: 'COVER' as const,
@@ -109,26 +102,27 @@ function buildProductOrderBy(
   return orderBy;
 }
 
-function buildPublicProductTemplateWhere(filters: {
+function buildPublicProductWhere(filters: {
   categoryId?: string;
   search?: string;
   slug?: string;
-}): Prisma.ProductTemplateWhereInput {
+}): Prisma.ProductWhereInput {
   const search = filters.search?.trim();
 
   return {
     ...(filters.categoryId ? { category_id: filters.categoryId } : {}),
     category_ref: { is_active: true },
-    is_active: true,
-    is_published: true,
-    ...(filters.slug ? { slug: filters.slug } : {}),
+    deleted_at: null,
+    status: product_status.ACTIVE,
+    catalogue_is_published: true,
+    ...(filters.slug ? { catalogue_slug: filters.slug } : {}),
     ...(search
       ? {
           OR: [
-            { name: { contains: search, mode: 'insensitive' } },
-            { sku: { contains: search, mode: 'insensitive' } },
-            { brand: { contains: search, mode: 'insensitive' } },
-            { model: { contains: search, mode: 'insensitive' } },
+            { catalogue_name: { contains: search, mode: 'insensitive' } },
+            { catalogue_sku: { contains: search, mode: 'insensitive' } },
+            { catalogue_brand: { contains: search, mode: 'insensitive' } },
+            { catalogue_model: { contains: search, mode: 'insensitive' } },
           ],
         }
       : {}),
@@ -156,19 +150,6 @@ export class ProductsRepository {
     });
   }
 
-  findActiveProductTemplateById(id: string) {
-    return this.prismaService.productTemplate.findFirst({
-      where: { id, is_active: true },
-      include: {
-        assets: {
-          include: { asset: true },
-          orderBy: [{ role: 'asc' }, { sort_order: 'asc' }],
-        },
-        category_ref: true,
-      },
-    });
-  }
-
   findById(id: string) {
     return this.prismaService.product.findUnique({
       where: { id },
@@ -176,11 +157,12 @@ export class ProductsRepository {
     });
   }
 
-  findPublicTemplateBySlug(slug: string) {
-    return this.prismaService.productTemplate.findFirst({
-      where: buildPublicProductTemplateWhere({ slug }),
+  findPublicProductBySlug(slug: string) {
+    return this.prismaService.product.findFirst({
+      where: buildPublicProductWhere({ slug }),
       include: {
         category_ref: true,
+        warranty: true,
         assets: {
           where: {
             asset: {
@@ -286,7 +268,6 @@ export class ProductsRepository {
     search?: string;
     category?: string;
     categoryId?: string;
-    templateId?: string;
     ownerCustomerId?: string;
     status?: product_status | 'ALL';
     isPublished?: string;
@@ -307,6 +288,8 @@ export class ProductsRepository {
     const sortMap = {
       productCode: 'product_code',
       serialNumber: 'serial_number',
+      name: 'catalogue_name',
+      publishedAt: 'catalogue_published_at',
       status: 'status',
       createdAt: 'created_at',
       updatedAt: 'updated_at',
@@ -318,7 +301,6 @@ export class ProductsRepository {
         activationEligible || claimEligible
           ? null
           : buildProductDeletionFilter(filters.status),
-      template_id: filters.templateId,
       ownerships: filters.ownerCustomerId
         ? {
             some: {
@@ -336,13 +318,10 @@ export class ProductsRepository {
             : filters.status === 'ALL'
               ? undefined
               : filters.status,
-      template: {
-        is: {
-          ...(filters.isPublished === undefined
-            ? {}
-            : { is_published: filters.isPublished === 'true' }),
-        },
-      },
+      catalogue_is_published:
+        filters.isPublished === undefined
+          ? undefined
+          : filters.isPublished === 'true',
       warranty: claimEligible
         ? {
             is: {
@@ -393,18 +372,10 @@ export class ProductsRepository {
             },
             { serial_number: { contains: search, mode: 'insensitive' } },
             { display_name: { contains: search, mode: 'insensitive' } },
-            {
-              template: {
-                is: {
-                  OR: [
-                    { name: { contains: search, mode: 'insensitive' } },
-                    { sku: { contains: search, mode: 'insensitive' } },
-                    { brand: { contains: search, mode: 'insensitive' } },
-                    { model: { contains: search, mode: 'insensitive' } },
-                  ],
-                },
-              },
-            },
+            { catalogue_name: { contains: search, mode: 'insensitive' } },
+            { catalogue_sku: { contains: search, mode: 'insensitive' } },
+            { catalogue_brand: { contains: search, mode: 'insensitive' } },
+            { catalogue_model: { contains: search, mode: 'insensitive' } },
             {
               ownerships: {
                 some: {
@@ -507,28 +478,30 @@ export class ProductsRepository {
   }) {
     const { page, limit, skip, take } = normalizePagination(filters);
     const sortMap = {
-      name: 'name',
-      publishedAt: 'published_at',
+      name: 'catalogue_name',
+      publishedAt: 'catalogue_published_at',
     } satisfies Record<
       'name' | 'publishedAt',
-      keyof Prisma.ProductTemplateOrderByWithRelationInput
+      keyof Prisma.ProductOrderByWithRelationInput
     >;
-    const sortBy = filters.sortBy ? sortMap[filters.sortBy] : 'published_at';
-    const where = buildPublicProductTemplateWhere(filters);
-    const orderBy: Prisma.ProductTemplateOrderByWithRelationInput[] = [
+    const sortBy = filters.sortBy
+      ? sortMap[filters.sortBy]
+      : 'catalogue_published_at';
+    const where = buildPublicProductWhere(filters);
+    const orderBy: Prisma.ProductOrderByWithRelationInput[] = [
       { [sortBy]: filters.sortOrder ?? 'desc' },
     ];
 
     return this.prismaService.$transaction(async (tx) => {
       const [items, total] = await Promise.all([
-        tx.productTemplate.findMany({
+        tx.product.findMany({
           where,
-          include: publicProductTemplateListInclude,
+          include: publicProductListInclude,
           orderBy,
           skip,
           take,
         }),
-        tx.productTemplate.count({ where }),
+        tx.product.count({ where }),
       ]);
 
       return paginate(items, { page, limit, total });
@@ -539,7 +512,6 @@ export class ProductsRepository {
     search?: string;
     category?: string;
     categoryId?: string;
-    templateId?: string;
     ownerCustomerId?: string;
     status?: product_status | 'ALL';
     isPublished?: string;
@@ -553,6 +525,8 @@ export class ProductsRepository {
     const sortMap = {
       productCode: 'product_code',
       serialNumber: 'serial_number',
+      name: 'catalogue_name',
+      publishedAt: 'catalogue_published_at',
       status: 'status',
       createdAt: 'created_at',
       updatedAt: 'updated_at',
@@ -563,7 +537,6 @@ export class ProductsRepository {
       deleted_at: activationEligible
         ? null
         : buildProductDeletionFilter(filters.status),
-      template_id: filters.templateId,
       ownerships: filters.ownerCustomerId
         ? {
             some: {
@@ -579,13 +552,10 @@ export class ProductsRepository {
           : filters.status === 'ALL'
             ? undefined
             : filters.status,
-      template: {
-        is: {
-          ...(filters.isPublished === undefined
-            ? {}
-            : { is_published: filters.isPublished === 'true' }),
-        },
-      },
+      catalogue_is_published:
+        filters.isPublished === undefined
+          ? undefined
+          : filters.isPublished === 'true',
       warranty: activationEligible
         ? {
             is: {
@@ -616,18 +586,10 @@ export class ProductsRepository {
             },
             { serial_number: { contains: search, mode: 'insensitive' } },
             { display_name: { contains: search, mode: 'insensitive' } },
-            {
-              template: {
-                is: {
-                  OR: [
-                    { name: { contains: search, mode: 'insensitive' } },
-                    { sku: { contains: search, mode: 'insensitive' } },
-                    { brand: { contains: search, mode: 'insensitive' } },
-                    { model: { contains: search, mode: 'insensitive' } },
-                  ],
-                },
-              },
-            },
+            { catalogue_name: { contains: search, mode: 'insensitive' } },
+            { catalogue_sku: { contains: search, mode: 'insensitive' } },
+            { catalogue_brand: { contains: search, mode: 'insensitive' } },
+            { catalogue_model: { contains: search, mode: 'insensitive' } },
             {
               ownerships: {
                 some: {
@@ -708,18 +670,10 @@ function buildProductSearchWhere(search?: string): Prisma.ProductWhereInput {
       },
       { serial_number: { contains: value, mode: 'insensitive' } },
       { display_name: { contains: value, mode: 'insensitive' } },
-      {
-        template: {
-          is: {
-            OR: [
-              { name: { contains: value, mode: 'insensitive' } },
-              { sku: { contains: value, mode: 'insensitive' } },
-              { brand: { contains: value, mode: 'insensitive' } },
-              { model: { contains: value, mode: 'insensitive' } },
-            ],
-          },
-        },
-      },
+      { catalogue_name: { contains: value, mode: 'insensitive' } },
+      { catalogue_sku: { contains: value, mode: 'insensitive' } },
+      { catalogue_brand: { contains: value, mode: 'insensitive' } },
+      { catalogue_model: { contains: value, mode: 'insensitive' } },
       {
         ownerships: {
           some: {

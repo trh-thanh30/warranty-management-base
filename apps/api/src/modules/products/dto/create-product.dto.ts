@@ -1,5 +1,7 @@
 import { product_status } from '@prisma/client';
 import {
+  ArrayMaxSize,
+  IsArray,
   IsEnum,
   IsInt,
   IsObject,
@@ -12,6 +14,10 @@ import {
 } from 'class-validator';
 
 export class CreateProductDto {
+  @IsString()
+  @Length(2, 160)
+  name: string;
+
   @IsInt()
   @Min(1)
   warrantyDurationMonths: number;
@@ -22,11 +28,46 @@ export class CreateProductDto {
   productCode?: string;
 
   @IsUUID()
-  templateId: string;
+  categoryId: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 120)
+  brand?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 120)
+  model?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1900)
+  modelYear?: number;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 5000)
+  description?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 10000)
+  warrantyTerms?: string;
+
+  @IsOptional()
+  @IsObject()
+  catalogueMetadata?: Record<string, unknown>;
 
   @IsOptional()
   @IsUUID()
-  categoryId?: string;
+  coverAssetId?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(20)
+  @IsUUID('4', { each: true })
+  galleryAssetIds?: string[];
 
   @IsOptional()
   @IsString()

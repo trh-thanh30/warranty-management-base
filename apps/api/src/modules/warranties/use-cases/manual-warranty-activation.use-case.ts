@@ -104,16 +104,20 @@ export class ManualWarrantyActivationUseCase {
             },
           );
         } else {
-          if (!dto.product.templateId) {
+          if (!dto.product.categoryId || !dto.product.name) {
             throw new BadRequestError(
-              'Product template is required for a new product',
+              'Product category and name are required for a new product',
             );
           }
-          const template = await repository.findActiveProductTemplate(
-            dto.product.templateId,
+          const categoryIsEligible = await repository.isActiveProductCategory(
+            dto.product.categoryId,
           );
-          if (!template) {
-            throw new NotFoundError('Product template not found');
+          if (!categoryIsEligible) {
+            throw new BadRequestError(
+              'Product category must be an active product category',
+              'BAD_REQUEST',
+              { code: 'PRODUCT_CATEGORY_NOT_ELIGIBLE' },
+            );
           }
           const productCode = await this.generateProductCodeUseCase.execute(
             new Date(),
@@ -121,14 +125,16 @@ export class ManualWarrantyActivationUseCase {
 
           productWithRelations = await repository.createManualActivationProduct(
             {
-              categoryId: template.categoryId,
+              brand: optionalText(dto.product.brand),
+              categoryId: dto.product.categoryId,
               customerId: customer.id,
               displayName: optionalText(dto.product.displayName),
+              model: optionalText(dto.product.model),
+              name: dto.product.name,
               ownerUserId: customer.userId,
               productCode,
               purchaseDate,
               serialNumber: optionalText(dto.product.serialNumber),
-              templateId: template.id,
               warrantyCode,
               warrantyDurationMonths: dto.warranty.durationMonths,
               warrantyTerms: optionalText(dto.warranty.terms),
@@ -183,9 +189,9 @@ export class ManualWarrantyActivationUseCase {
         warrantyCode: warranty.warrantyCode,
         displayName: productWithRelations.displayName,
         serialNumber: productWithRelations.serialNumber,
-        name: productWithRelations.template.name,
-        brand: productWithRelations.template.brand,
-        model: productWithRelations.template.model,
+        name: productWithRelations.catalogue.name,
+        brand: productWithRelations.catalogue.brand,
+        model: productWithRelations.catalogue.model,
       },
       warranty: toWarrantyResponse(warranty),
     };

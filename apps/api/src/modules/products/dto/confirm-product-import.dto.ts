@@ -3,10 +3,13 @@ import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
   IsEnum,
+  IsInt,
   IsIn,
   IsOptional,
   IsString,
   Length,
+  Max,
+  Min,
   Matches,
   ValidateNested,
 } from 'class-validator';
@@ -18,7 +21,37 @@ export class ConfirmProductImportRowDto {
 
   @IsString()
   @Length(1, 64)
-  templateSku: string;
+  productName: string;
+
+  @IsString()
+  @Length(1, 64)
+  categoryCode: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 120)
+  brand?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 120)
+  model?: string | null;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1900)
+  @Max(2200)
+  modelYear?: number | null;
+
+  @IsInt()
+  @Min(1)
+  @Max(600)
+  warrantyDurationMonths: number;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 4000)
+  warrantyTerms?: string | null;
 
   @IsOptional()
   @IsString()

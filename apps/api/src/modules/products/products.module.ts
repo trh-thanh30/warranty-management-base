@@ -1,6 +1,5 @@
 import { PrismaModule } from '@/database/prisma/prisma.module';
 import { AssetsModule } from '@/modules/assets/assets.module';
-import { ProductTemplatesModule } from '@/modules/product-templates/product-templates.module';
 import { ProductsController } from '@/modules/products/products.controller';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
 import { ProductAssetsRepository } from '@/modules/products/repository/product-assets.repository';
@@ -31,7 +30,6 @@ import { memoryStorage } from 'multer';
   imports: [
     PrismaModule,
     AssetsModule,
-    ProductTemplatesModule,
     MulterModule.register({
       storage: memoryStorage(),
     }),

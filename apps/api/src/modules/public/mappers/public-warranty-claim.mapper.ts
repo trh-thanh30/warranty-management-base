@@ -4,11 +4,12 @@ import type {
   PublicWarrantyClaimTimelineItem,
 } from '@repo/shared';
 import { warranty_claim_status } from '@prisma/client';
+import { getProductCatalogue } from '@/modules/products/product-catalogue';
 
 export function toPublicWarrantyClaimResponse(
   claim: WarrantyClaimWithRelations,
 ): PublicWarrantyClaimSummary {
-  const template = claim.product?.template;
+  const catalogue = claim.product ? getProductCatalogue(claim.product) : null;
 
   return {
     claimCode: claim.claim_code,
@@ -20,11 +21,11 @@ export function toPublicWarrantyClaimResponse(
     submittedAt: claim.submitted_at.toISOString(),
     resolvedAt: claim.resolved_at?.toISOString() ?? null,
     product:
-      claim.product && template
+      claim.product && catalogue
         ? {
-            name: claim.product.display_name ?? template.name,
-            brand: template.brand,
-            model: template.model,
+            name: claim.product.display_name ?? catalogue.name,
+            brand: catalogue.brand,
+            model: catalogue.model,
           }
         : null,
     serviceCenter: claim.service_center

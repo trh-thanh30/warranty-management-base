@@ -1,12 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { HttpClientError, type ProductTemplateSummary } from "@repo/shared";
+import { HttpClientError } from "@repo/shared";
 import {
   getProductWarrantyProgress,
-  getProductTemplateSearchKeywords,
   getProductSaveErrorMatch,
-  mergeProductTemplateOptions,
-  resolveProductCategoryId,
   toCreateProductBody,
   toProductActiveStatus,
   toUpdateProductBody,
@@ -16,19 +13,6 @@ import {
   productEditFormSchema,
   productFormSchema,
 } from "./products.types.ts";
-
-const currentTemplate = {
-  id: "template-current",
-  name: "Phim cách nhiệt ô tô",
-  sku: "PHIM-CACH-NHIET-O-TO",
-  brand: "Lexzenz",
-  model: "Reflex",
-  categoryRef: {
-    name: "Film cách nhiệt ô tô Lexzenz Reflex Korea Film",
-    code: "LEXZENZ_REFLEX_KOREA_FILM",
-    slug: "film-cach-nhiet-o-to-lexzenz-reflex-korea-film",
-  },
-} as ProductTemplateSummary;
 
 test("calculates active warranty progress and remaining months", () => {
   assert.deepEqual(
@@ -71,88 +55,43 @@ test("clamps warranty progress before activation and after expiry", () => {
   );
 });
 
-test("builds product template search keywords from template and category data", () => {
-  assert.deepEqual(getProductTemplateSearchKeywords(currentTemplate), [
-    "Phim cách nhiệt ô tô",
-    "PHIM-CACH-NHIET-O-TO",
-    "Lexzenz",
-    "Reflex",
-    "Film cách nhiệt ô tô Lexzenz Reflex Korea Film",
-    "LEXZENZ_REFLEX_KOREA_FILM",
-    "film-cach-nhiet-o-to-lexzenz-reflex-korea-film",
-  ]);
-});
-
-test("keeps a selected template outside the current search result exactly once", () => {
-  const resultTemplate = {
-    ...currentTemplate,
-    id: "template-result",
-    name: "Film SP50",
-  };
-
-  assert.deepEqual(
-    mergeProductTemplateOptions([resultTemplate], currentTemplate).map(
-      (template) => template.id,
-    ),
-    ["template-current", "template-result"],
-  );
-  assert.deepEqual(
-    mergeProductTemplateOptions(
-      [currentTemplate, resultTemplate],
-      currentTemplate,
-    ).map((template) => template.id),
-    ["template-current", "template-result"],
-  );
-});
-
 test("maps the edit status toggle to an active product status", () => {
   assert.equal(toProductActiveStatus(true), "ACTIVE");
   assert.equal(toProductActiveStatus(false), "INACTIVE");
-});
-
-test("resets category to the new template default after a template change", () => {
-  assert.equal(
-    resolveProductCategoryId({
-      currentCategoryId: "overridden-category",
-      templateCategoryId: "new-template-category",
-      templateChanged: true,
-    }),
-    "new-template-category",
-  );
-});
-
-test("preserves an existing category when the template did not change", () => {
-  assert.equal(
-    resolveProductCategoryId({
-      currentCategoryId: "overridden-category",
-      templateCategoryId: "template-category",
-      templateChanged: false,
-    }),
-    "overridden-category",
-  );
 });
 
 test("creates an inventory-only product payload", () => {
   assert.deepEqual(
     toCreateProductBody({
       categoryId: "category-id",
+      name: "Toyota Camry",
+      brand: "Toyota",
+      model: "Camry",
+      modelYear: 2026,
+      description: "",
+      coverAssetId: "",
+      coverImageUrl: "",
+      galleryImages: [],
       displayName: " Toyota Camry - showroom ",
       installationPosition: " Kính lái ",
       productCode: "",
       serialNumber: " VIN-001 ",
       status: "ACTIVE",
-      templateId: "template-id",
       warrantyDurationMonths: 180,
+      warrantyTerms: "",
     }),
     {
       categoryId: "category-id",
+      name: "Toyota Camry",
+      brand: "Toyota",
+      model: "Camry",
+      modelYear: 2026,
       displayName: "Toyota Camry - showroom",
       metadata: {
         installationPosition: "Kính lái",
       },
       serialNumber: "VIN-001",
       status: "ACTIVE",
-      templateId: "template-id",
       warrantyDurationMonths: 180,
     },
   );
@@ -162,13 +101,20 @@ test("sends an explicitly entered product code", () => {
   assert.equal(
     toCreateProductBody({
       categoryId: "category-id",
+      name: "Camera",
+      brand: "",
+      model: "",
+      description: "",
+      coverAssetId: "",
+      coverImageUrl: "",
+      galleryImages: [],
       displayName: "",
       installationPosition: "",
       productCode: " CUSTOM-001 ",
       serialNumber: "",
       status: "ACTIVE",
-      templateId: "template-id",
       warrantyDurationMonths: 24,
+      warrantyTerms: "",
     }).productCode,
     "CUSTOM-001",
   );
@@ -178,13 +124,20 @@ test("sends an explicitly entered warranty code when creating a product", () => 
   assert.equal(
     toCreateProductBody({
       categoryId: "category-id",
+      name: "Camera",
+      brand: "",
+      model: "",
+      description: "",
+      coverAssetId: "",
+      coverImageUrl: "",
+      galleryImages: [],
       displayName: "",
       installationPosition: "",
       productCode: "",
       serialNumber: "",
       status: "ACTIVE",
-      templateId: "template-id",
       warrantyDurationMonths: 24,
+      warrantyTerms: "",
       warrantyCode: " wm-2026-manual1 ",
     }).warrantyCode,
     "WM-2026-MANUAL1",
@@ -196,19 +149,39 @@ test("updates only physical product fields and preserves unrelated metadata", ()
     toUpdateProductBody(
       {
         categoryId: "overridden-category-id",
+        name: "Camera updated",
+        brand: "Acme",
+        model: "C4K",
+        modelYear: 2026,
+        description: "Updated",
+        coverAssetId: "cover-asset-id",
+        coverImageUrl: "https://example.com/cover.jpg",
+        galleryImages: [
+          {
+            assetId: "gallery-asset-id",
+            url: "https://example.com/gallery.jpg",
+          },
+        ],
         displayName: " ",
         installationPosition: " Cửa trước ",
         productCode: " PRD-EDIT-001 ",
         serialNumber: "",
         status: "INACTIVE",
-        templateId: "template-id",
         warrantyCode: " wm-2026-new001 ",
         warrantyDurationMonths: 60,
+        warrantyTerms: "Product terms",
       },
       { source: "import", installationPosition: "Old" },
     ),
     {
       categoryId: "overridden-category-id",
+      name: "Camera updated",
+      brand: "Acme",
+      model: "C4K",
+      modelYear: 2026,
+      description: "Updated",
+      coverAssetId: "cover-asset-id",
+      galleryAssetIds: ["gallery-asset-id"],
       displayName: null,
       metadata: {
         source: "import",
@@ -217,9 +190,9 @@ test("updates only physical product fields and preserves unrelated metadata", ()
       productCode: "PRD-EDIT-001",
       serialNumber: null,
       status: "INACTIVE",
-      templateId: "template-id",
       warrantyCode: "wm-2026-new001",
       warrantyDurationMonths: 60,
+      warrantyTerms: "Product terms",
     },
   );
 });
@@ -227,12 +200,19 @@ test("updates only physical product fields and preserves unrelated metadata", ()
 test("requires a product code only when editing", () => {
   const values = {
     categoryId: "category-id",
+    name: "Camera",
+    brand: "",
+    model: "",
+    description: "",
+    coverAssetId: "",
+    coverImageUrl: "",
+    galleryImages: [],
     displayName: "",
     installationPosition: "",
     productCode: "",
     serialNumber: "",
     status: "ACTIVE" as const,
-    templateId: "template-id",
+    warrantyTerms: "",
     warrantyDurationMonths: 24,
   };
 
@@ -243,13 +223,20 @@ test("requires a product code only when editing", () => {
 test("allows a blank warranty code but rejects an invalid non-empty code", () => {
   const baseValues = {
     categoryId: "category-id",
+    name: "Camera",
+    brand: "",
+    model: "",
+    description: "",
+    coverAssetId: "",
+    coverImageUrl: "",
+    galleryImages: [],
     displayName: "",
     installationPosition: "",
     productCode: "",
     serialNumber: "",
     status: "ACTIVE" as const,
-    templateId: "template-id",
     warrantyDurationMonths: 24,
+    warrantyTerms: "",
   };
 
   assert.equal(
@@ -278,12 +265,19 @@ test("allows a blank warranty code but rejects an invalid non-empty code", () =>
 test("requires an individual warranty duration of at least one month", () => {
   const values = {
     categoryId: "category-id",
+    name: "Camera",
+    brand: "",
+    model: "",
+    description: "",
+    coverAssetId: "",
+    coverImageUrl: "",
+    galleryImages: [],
     displayName: "",
     installationPosition: "",
     productCode: "",
     serialNumber: "",
     status: "ACTIVE" as const,
-    templateId: "template-id",
+    warrantyTerms: "",
   };
   const blankDuration = productFormSchema.safeParse({
     ...values,

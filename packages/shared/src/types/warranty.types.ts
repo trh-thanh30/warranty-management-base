@@ -176,7 +176,10 @@ export type ManualWarrantyActivationCustomerInput = {
 
 export type ManualWarrantyActivationProductInput = {
   id?: string;
-  templateId?: string;
+  categoryId?: string;
+  name?: string;
+  brand?: string;
+  model?: string;
   displayName?: string;
   serialNumber?: string;
 };

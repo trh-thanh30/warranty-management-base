@@ -10,6 +10,7 @@ const warrantyInclude = {
   voided_by: true,
   product: {
     include: {
+      category_ref: true,
       template: { include: { category_ref: true } },
       ownerships: {
         include: { customer: true },
@@ -25,6 +26,7 @@ const warrantyLookupInclude = {
       activation_request: true,
     },
   },
+  category_ref: true,
   template: {
     include: {
       category_ref: true,
@@ -100,9 +102,7 @@ export class WarrantiesRepository {
             { warranty_code: { contains: search, mode: 'insensitive' } },
             {
               product: {
-                template: {
-                  name: { contains: search, mode: 'insensitive' },
-                },
+                catalogue_name: { contains: search, mode: 'insensitive' },
               },
             },
             {
@@ -183,9 +183,7 @@ export class WarrantiesRepository {
             { warranty_code: { contains: search, mode: 'insensitive' } },
             {
               product: {
-                template: {
-                  name: { contains: search, mode: 'insensitive' },
-                },
+                catalogue_name: { contains: search, mode: 'insensitive' },
               },
             },
             {

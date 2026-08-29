@@ -1,15 +1,14 @@
 import { ExcelRowError } from '@/common/excel';
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { ConfirmProductImportRowDto } from '@/modules/products/dto/confirm-product-import.dto';
+import { category_type } from '@prisma/client';
 
 export type PreparedProductImportRow = ConfirmProductImportRowDto & {
   action: 'create' | 'update';
   existingProductId: string | null;
+  existingProductCode: string | null;
   rowNumber: number;
-  templateCategoryId: string;
-  templateId: string;
-  templateWarrantyDurationMonths: number;
-  templateWarrantyTerms: string | null;
+  categoryId: string;
 };
 
 type ProductImportValidationRow = ConfirmProductImportRowDto;
@@ -30,7 +29,8 @@ export async function prepareProductImportRows(
   for (const row of rows) {
     const productCode = row.data.productCode?.trim() || null;
     const serialNumber = row.data.serialNumber?.trim() || null;
-    const templateSku = row.data.templateSku?.trim().toUpperCase() || null;
+    const productName = row.data.productName?.trim() || null;
+    const categoryCode = row.data.categoryCode?.trim().toUpperCase() || null;
     const warrantyCode = row.data.warrantyCode?.trim().toUpperCase() || null;
 
     if (productCode) {
@@ -66,12 +66,12 @@ export async function prepareProductImportRows(
       seenWarrantyCodes.add(warrantyCode);
     }
 
-    const [existingProduct, productWithSerial, productWithWarranty, template] =
+    const [existingProduct, productWithSerial, productWithWarranty, category] =
       await Promise.all([
         productCode
           ? prismaService.product.findUnique({
               where: { product_code: productCode },
-              select: { id: true },
+              select: { id: true, product_code: true },
             })
           : null,
         serialNumber
@@ -86,18 +86,14 @@ export async function prepareProductImportRows(
               select: { product_id: true },
             })
           : null,
-        templateSku
-          ? prismaService.productTemplate.findUnique({
+        categoryCode
+          ? prismaService.category.findFirst({
               where: {
-                sku: templateSku,
-              },
-              select: {
-                category_id: true,
-                id: true,
+                code: categoryCode,
+                type: category_type.PRODUCT,
                 is_active: true,
-                default_warranty_duration_months: true,
-                default_warranty_terms: true,
               },
+              select: { id: true },
             })
           : null,
       ]);
@@ -125,17 +121,25 @@ export async function prepareProductImportRows(
       });
     }
 
-    if (!templateSku) {
+    if (!productName) {
       errors.push({
         rowNumber: row.rowNumber,
-        field: 'templateSku',
-        message: 'SKU của product template là bắt buộc',
+        field: 'productName',
+        message: 'Tên sản phẩm là bắt buộc',
       });
-    } else if (!template || !template.is_active) {
+    }
+
+    if (!categoryCode) {
       errors.push({
         rowNumber: row.rowNumber,
-        field: 'templateSku',
-        message: 'Không tìm thấy product template đang hoạt động',
+        field: 'categoryCode',
+        message: 'Mã danh mục là bắt buộc',
+      });
+    } else if (!category) {
+      errors.push({
+        rowNumber: row.rowNumber,
+        field: 'categoryCode',
+        message: 'Không tìm thấy danh mục sản phẩm đang hoạt động',
       });
     }
 
@@ -143,14 +147,12 @@ export async function prepareProductImportRows(
       ...row.data,
       action: existingProduct ? 'update' : 'create',
       existingProductId: existingProduct?.id ?? null,
+      existingProductCode: existingProduct?.product_code ?? null,
       rowNumber: row.rowNumber,
-      templateSku: templateSku ?? '',
+      productName: productName ?? '',
+      categoryCode: categoryCode ?? '',
       warrantyCode,
-      templateCategoryId: template?.category_id ?? '',
-      templateId: template?.id ?? '',
-      templateWarrantyDurationMonths:
-        template?.default_warranty_duration_months ?? 36,
-      templateWarrantyTerms: template?.default_warranty_terms ?? null,
+      categoryId: category?.id ?? '',
     });
   }
 

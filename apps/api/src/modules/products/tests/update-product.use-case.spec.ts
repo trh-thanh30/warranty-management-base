@@ -190,31 +190,63 @@ describe('UpdateProductUseCase', () => {
     expect(repository.update).not.toHaveBeenCalled();
   });
 
-  it('changes to an active template and defaults to its category', async () => {
+  it('updates authoritative catalogue fields and category', async () => {
     const existing = createExistingProduct({
       id: 'warranty-id',
       warranty_code: 'WM-2026-EXISTING',
     });
     const repository = createRepository(existing);
-    repository.findActiveProductTemplateById.mockResolvedValue({
-      id: 'new-template-id',
-      category_id: 'new-category-id',
-      default_warranty_duration_months: 180,
-      default_warranty_terms: 'New template terms',
-    });
     const useCase = new UpdateProductUseCase(
       repository as never,
       { execute: jest.fn() } as never,
     );
 
-    await useCase.execute('product-id', { templateId: 'new-template-id' });
+    await useCase.execute('product-id', {
+      name: 'New product name',
+      categoryId: 'new-category-id',
+    });
 
     expect(repository.update).toHaveBeenCalledWith(
       'product-id',
       expect.objectContaining({
         category_ref: { connect: { id: 'new-category-id' } },
-        template: { connect: { id: 'new-template-id' } },
+        catalogue_name: 'New product name',
         warranty: undefined,
+      }),
+    );
+  });
+
+  it('replaces product-owned cover and gallery assets', async () => {
+    const existing = createExistingProduct({
+      id: 'warranty-id',
+      warranty_code: 'WM-2026-EXISTING',
+    });
+    const repository = createRepository(existing);
+    const useCase = new UpdateProductUseCase(
+      repository as never,
+      { execute: jest.fn() } as never,
+    );
+
+    await useCase.execute('product-id', {
+      coverAssetId: '1f218ef4-6878-4c1d-a6e6-11d31ed85aa1',
+      galleryAssetIds: [
+        'b7de03bf-d9bb-4018-aab5-98e108ce66c3',
+        'b7de03bf-d9bb-4018-aab5-98e108ce66c3',
+      ],
+    });
+
+    expect(repository.update).toHaveBeenCalledWith(
+      'product-id',
+      expect.objectContaining({
+        assets: {
+          deleteMany: {
+            role: { in: ['COVER', 'GALLERY'] },
+          },
+          create: [
+            expect.objectContaining({ role: 'COVER' }),
+            expect.objectContaining({ role: 'GALLERY', sort_order: 0 }),
+          ],
+        },
       }),
     );
   });
@@ -291,21 +323,18 @@ describe('UpdateProductUseCase', () => {
     );
   });
 
-  it('uses the replacement template policy only when creating a missing warranty', async () => {
+  it('uses submitted product warranty policy when creating a missing warranty', async () => {
     const existing = createExistingProduct(null);
     const repository = createRepository(existing);
-    repository.findActiveProductTemplateById.mockResolvedValue({
-      id: 'new-template-id',
-      category_id: 'new-category-id',
-      default_warranty_duration_months: 180,
-      default_warranty_terms: null,
-    });
     const useCase = new UpdateProductUseCase(
       repository as never,
       { execute: jest.fn().mockResolvedValue('WM-2026-NEW') } as never,
     );
 
-    await useCase.execute('product-id', { templateId: 'new-template-id' });
+    await useCase.execute('product-id', {
+      warrantyDurationMonths: 180,
+      warrantyTerms: 'New product terms',
+    });
 
     expect(repository.update).toHaveBeenCalledWith(
       'product-id',
@@ -313,7 +342,7 @@ describe('UpdateProductUseCase', () => {
         warranty: {
           create: expect.objectContaining({
             duration_months: 180,
-            terms: null,
+            terms: 'New product terms',
           }),
         },
       }),
@@ -337,21 +366,21 @@ describe('UpdateProductUseCase', () => {
     expect(repository.update).not.toHaveBeenCalled();
   });
 
-  it('rejects an inactive or missing replacement template', async () => {
+  it('rejects an inactive or missing replacement category', async () => {
     const existing = createExistingProduct({
       id: 'warranty-id',
       warranty_code: 'WM-2026-EXISTING',
     });
     const repository = createRepository(existing);
-    repository.findActiveProductTemplateById.mockResolvedValue(null);
+    repository.findActiveProductCategoryById.mockResolvedValue(null);
     const useCase = new UpdateProductUseCase(
       repository as never,
       { execute: jest.fn() } as never,
     );
 
     await expect(
-      useCase.execute('product-id', { templateId: 'inactive-template-id' }),
-    ).rejects.toThrow('Product template not found');
+      useCase.execute('product-id', { categoryId: 'inactive-category-id' }),
+    ).rejects.toThrow('Product category not found');
 
     expect(repository.update).not.toHaveBeenCalled();
   });
@@ -439,7 +468,11 @@ describe('UpdateProductUseCase', () => {
       generateWarrantyCodeUseCase as never,
     );
 
-    await useCase.execute('product-id', { displayName: 'Camera updated' });
+    await useCase.execute('product-id', {
+      displayName: 'Camera updated',
+      warrantyDurationMonths: 24,
+      warrantyTerms: 'Product terms',
+    });
 
     expect(generateWarrantyCodeUseCase.execute).toHaveBeenCalledTimes(1);
     expect(repository.update).toHaveBeenCalledWith(
@@ -449,7 +482,7 @@ describe('UpdateProductUseCase', () => {
           create: {
             warranty_code: 'WM-2026-UPDATE',
             duration_months: 24,
-            terms: 'Template terms',
+            terms: 'Product terms',
             start_date: null,
             end_date: null,
             status: warranty_status.DRAFT,
@@ -616,6 +649,7 @@ describe('UpdateProductUseCase', () => {
 
     await useCase.execute('product-id', {
       warrantyCode: ' wm-2026-manual1 ',
+      warrantyDurationMonths: 24,
     });
 
     expect(repository.update).toHaveBeenCalledWith(

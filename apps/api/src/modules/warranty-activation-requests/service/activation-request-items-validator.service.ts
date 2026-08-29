@@ -1,5 +1,9 @@
 import { BadRequestError, NotFoundError } from '@/common/response';
 import { CategoriesRepository } from '@/modules/categories/repository/categories.repository';
+import {
+  getProductCatalogue,
+  getProductDisplayName,
+} from '@/modules/products/product-catalogue';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
 import { Injectable } from '@nestjs/common';
@@ -144,21 +148,21 @@ export class ActivationRequestItemsValidatorService {
         });
       }
 
+      const catalogue = getProductCatalogue(product);
       return {
         activationFieldId: field.id ?? null,
         positionKey: field.key,
         positionLabel: field.label,
         productId: product.id,
-        productName:
-          product.display_name ?? product.template.name ?? product.product_code,
+        productName: getProductDisplayName(product),
         productCode: product.product_code,
         serialNumber: product.serial_number,
         warrantyId: product.warranty.id,
         warrantyCode: product.warranty.warranty_code,
         warrantyDurationMonths: product.warranty.duration_months,
-        brand: product.template.brand,
-        model: product.template.model,
-        manufactureYear: product.template.model_year,
+        brand: catalogue.brand,
+        model: catalogue.model,
+        manufactureYear: catalogue.modelYear,
         currentOwner: product.ownerships?.[0]?.customer ?? null,
       };
     });

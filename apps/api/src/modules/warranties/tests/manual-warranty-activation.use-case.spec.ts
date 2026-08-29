@@ -11,7 +11,10 @@ describe('ManualWarrantyActivationUseCase', () => {
       address: '1 Nguyen Van Linh, Da Nang',
     },
     product: {
-      templateId: 'template-id',
+      categoryId: 'category-id',
+      name: 'Black Label Ceramic Film',
+      brand: 'Black Label',
+      model: 'Premium',
       displayName: 'Film xe Nguyen Van A',
       serialNumber: 'SN-BLF-001',
     },
@@ -71,7 +74,7 @@ describe('ManualWarrantyActivationUseCase', () => {
       status: 'ACTIVE',
       metadata: { source: 'manual_warranty_activation' },
       deletedAt: null,
-      template: {
+      catalogue: {
         name: 'Black Label Ceramic Film',
         brand: 'Black Label',
         model: 'Premium',
@@ -88,10 +91,6 @@ describe('ManualWarrantyActivationUseCase', () => {
       closeCurrentOwnerships: jest.fn(),
       createCustomer: jest.fn().mockResolvedValue(customer),
       createManualActivationProduct: jest.fn().mockResolvedValue(product),
-      findActiveProductTemplate: jest.fn().mockResolvedValue({
-        categoryId: 'category-id',
-        id: 'template-id',
-      }),
       findCustomerByEmail: jest
         .fn()
         .mockResolvedValue(overrides?.customerByEmail ?? null),
@@ -101,6 +100,7 @@ describe('ManualWarrantyActivationUseCase', () => {
       findManualActivationProduct: jest
         .fn()
         .mockResolvedValue(overrides?.existingProduct ?? null),
+      isActiveProductCategory: jest.fn().mockResolvedValue(true),
       findProductBySerialNumber: jest
         .fn()
         .mockResolvedValue(overrides?.existingSerial ?? null),
@@ -167,7 +167,7 @@ describe('ManualWarrantyActivationUseCase', () => {
         categoryId: 'category-id',
         customerId: 'customer-id',
         productCode: 'PRD-2026-ABCDEF',
-        templateId: 'template-id',
+        name: 'Black Label Ceramic Film',
         warrantyCode: dto.warranty.warrantyCode,
       }),
     );
@@ -242,6 +242,20 @@ describe('ManualWarrantyActivationUseCase', () => {
     await expect(dependencies.useCase.execute(dto)).rejects.toBeInstanceOf(
       ConflictError,
     );
+    expect(
+      dependencies.transactionRepository.createManualActivationProduct,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('rejects an inactive or non-product category for a new product', async () => {
+    const dependencies = createDependencies();
+    dependencies.transactionRepository.isActiveProductCategory.mockResolvedValue(
+      false,
+    );
+
+    await expect(dependencies.useCase.execute(dto)).rejects.toMatchObject({
+      details: { code: 'PRODUCT_CATEGORY_NOT_ELIGIBLE' },
+    });
     expect(
       dependencies.transactionRepository.createManualActivationProduct,
     ).not.toHaveBeenCalled();

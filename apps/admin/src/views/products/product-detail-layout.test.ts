@@ -41,7 +41,6 @@ test("product detail actions remain full width only on mobile", async () => {
 test("product identifiers use distinct semantic icons", async () => {
   const source = await readFile(detailCardUrl, "utf8");
 
-  assert.match(source, /icon=\{<BookOpen className="size-4" \/>\}/);
   assert.match(source, /icon=\{<Hash className="size-4" \/>\}/);
   assert.match(source, /icon=\{<KeyRound className="size-4" \/>\}/);
   assert.match(source, /icon=\{<Fingerprint className="size-4" \/>\}/);

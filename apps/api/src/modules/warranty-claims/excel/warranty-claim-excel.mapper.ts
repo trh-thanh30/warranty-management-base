@@ -3,6 +3,7 @@ import type {
   WarrantyClaimExportRecord,
 } from '@/modules/warranty-claims/excel/warranty-claim-excel.types';
 import { warranty_claim_priority, warranty_claim_status } from '@prisma/client';
+import { getProductCatalogue } from '@/modules/products/product-catalogue';
 
 const statusLabels: Record<warranty_claim_status, string> = {
   SUBMITTED: 'Đã gửi',
@@ -31,11 +32,14 @@ export function toWarrantyClaimExcelRow(
   claim: WarrantyClaimExportRecord,
   now = new Date(),
 ): WarrantyClaimExcelRow {
+  const productName = claim.product
+    ? getProductCatalogue(claim.product).name
+    : null;
   return {
     claimCode: claim.claim_code,
     warrantyCode: claim.warranty_code,
     productCode: claim.product?.product_code ?? null,
-    productName: claim.product?.template?.name ?? null,
+    productName,
     serialNumber: claim.product?.serial_number ?? null,
     requesterName: claim.requester_name,
     requesterPhone: claim.requester_phone,

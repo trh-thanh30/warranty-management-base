@@ -145,8 +145,7 @@ export type WarrantyCodeEditLockedReason =
 
 export type ProductSummary = {
   id: string;
-  templateId: string;
-  template: ProductTemplateSummary;
+  sku: string;
   productCode: string;
   slug: string;
   warrantyCode: string | null;
@@ -212,7 +211,6 @@ export type ListActivationProductOptionsQuery = Pick<
 export type ListProductsQuery = PaginationQuery & {
   search?: string;
   categoryId?: string;
-  templateId?: string;
   ownerCustomerId?: string;
   status?: ProductStatus | "ALL";
   isPublished?: "true" | "false";
@@ -224,11 +222,18 @@ export type ListProductsQuery = PaginationQuery & {
 };
 
 export type CreateProductBody = {
-  templateId: string;
+  name: string;
+  categoryId: string;
   warrantyDurationMonths: number;
+  warrantyTerms?: string;
+  brand?: string;
+  model?: string;
+  modelYear?: number;
+  description?: string;
+  coverAssetId?: string;
+  galleryAssetIds?: string[];
   productCode?: string;
   warrantyCode?: string;
-  categoryId?: string;
   displayName?: string;
   status?: ProductStatus;
   serialNumber?: string;
@@ -236,15 +241,22 @@ export type CreateProductBody = {
 };
 
 export type UpdateProductBody = {
+  name?: string;
   categoryId?: string;
+  brand?: string | null;
+  model?: string | null;
+  modelYear?: number | null;
+  description?: string | null;
+  coverAssetId?: string | null;
+  galleryAssetIds?: string[];
   displayName?: string | null;
   productCode?: string;
   status?: ProductStatus;
   serialNumber?: string | null;
-  templateId?: string;
   metadata?: Record<string, unknown> | null;
   warrantyCode?: string;
   warrantyDurationMonths?: number;
+  warrantyTerms?: string | null;
 };
 
 export type PublicProductSummary = {

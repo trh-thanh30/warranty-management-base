@@ -52,6 +52,6 @@ test("product template detail actions fill mobile width only", async () => {
   assert.equal(
     detailView.match(/<Button\s+asChild\s+className="w-full sm:w-auto"/g)
       ?.length ?? 0,
-    2,
+    1,
   );
 });

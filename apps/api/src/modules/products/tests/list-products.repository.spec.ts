@@ -172,7 +172,7 @@ describe('ProductsRepository.list', () => {
     });
   });
 
-  it('filters physical products by product template id', async () => {
+  it('does not expose a product-template filter', async () => {
     const findMany = jest.fn().mockResolvedValue([]);
     const count = jest.fn().mockResolvedValue(0);
     const prismaService = {
@@ -190,20 +190,15 @@ describe('ProductsRepository.list', () => {
     await repository.list({
       limit: 10,
       page: 1,
-      templateId: 'template-1',
     });
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: expect.objectContaining({
-          template_id: 'template-1',
-        }),
+        where: expect.not.objectContaining({ template_id: expect.anything() }),
       }),
     );
     expect(count).toHaveBeenCalledWith({
-      where: expect.objectContaining({
-        template_id: 'template-1',
-      }),
+      where: expect.not.objectContaining({ template_id: expect.anything() }),
     });
   });
 
@@ -392,13 +387,13 @@ describe('ProductsRepository.list', () => {
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          template: { is: { is_published: true } },
+          catalogue_is_published: true,
         }),
       }),
     );
     expect(count).toHaveBeenCalledWith({
       where: expect.objectContaining({
-        template: { is: { is_published: true } },
+        catalogue_is_published: true,
       }),
     });
   });
@@ -427,13 +422,13 @@ describe('ProductsRepository.list', () => {
     );
   });
 
-  it('paginates visible product templates instead of physical products', async () => {
+  it('paginates visible authoritative products', async () => {
     const findMany = jest.fn().mockResolvedValue([]);
     const count = jest.fn().mockResolvedValue(0);
     const prismaService = {
       $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
         callback({
-          productTemplate: {
+          product: {
             count,
             findMany,
           },
@@ -451,8 +446,9 @@ describe('ProductsRepository.list', () => {
     const visibilityFilter = {
       category_id: 'category-id',
       category_ref: { is_active: true },
-      is_active: true,
-      is_published: true,
+      deleted_at: null,
+      status: product_status.ACTIVE,
+      catalogue_is_published: true,
     };
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({

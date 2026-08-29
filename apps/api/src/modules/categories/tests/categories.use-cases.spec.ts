@@ -361,7 +361,7 @@ describe('Category use cases', () => {
         {
           ...category,
           image_url: 'https://cdn.example.com/categories/car.jpg',
-          _count: { product_templates: 3 },
+          _count: { products: 3 },
         },
       ],
       meta: {
