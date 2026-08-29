@@ -17,12 +17,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   Table,
-  TableScroll,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
+  TableScroll,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from "@repo/ui";
 import {
   Eye,
@@ -63,7 +67,7 @@ export function ProductsTable({
   const t = useTranslations("Products");
 
   return (
-    <>
+    <TooltipProvider delayDuration={250}>
       <div className="space-y-3 lg:hidden">
         {items.map((product) => (
           <ProductMobileCard
@@ -111,6 +115,9 @@ export function ProductsTable({
               >
                 {t("productStatus")}
               </SortableTableHead>
+              <TableHead className="whitespace-nowrap">
+                {t("warrantyDuration")}
+              </TableHead>
               <SortableTableHead
                 activeSortBy={sortBy}
                 onSortChange={onSortChange}
@@ -119,6 +126,7 @@ export function ProductsTable({
               >
                 {t("createdAt")}
               </SortableTableHead>
+
               <TableHead aria-label={t("actions")} className="w-12" />
             </TableRow>
           </TableHeader>
@@ -135,7 +143,7 @@ export function ProductsTable({
           </TableBody>
         </Table>
       </TableScroll>
-    </>
+    </TooltipProvider>
   );
 }
 
@@ -151,6 +159,7 @@ function ProductTableRow({
   product: ProductResponse;
 }) {
   const locale = useLocale();
+  const t = useTranslations("Products");
 
   return (
     <TableRow>
@@ -161,9 +170,19 @@ function ProductTableRow({
         {product.warrantyCode ?? "-"}
       </TableCell>
       <TableCell className="whitespace-nowrap">
-        <span className="block max-w-64 truncate">
-          {getProductCategoryLabel(product)}
-        </span>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span
+              className="block max-w-64 truncate outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+              tabIndex={0}
+            >
+              {getProductCategoryLabel(product)}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent className="max-w-80 wrap-break-word" side="top">
+            {getProductCategoryLabel(product)}
+          </TooltipContent>
+        </Tooltip>
       </TableCell>
       <TableCell>
         <span className="block max-w-52 truncate">
@@ -176,7 +195,15 @@ function ProductTableRow({
       <TableCell>
         <ProductStatusBadge status={product.status} />
       </TableCell>
+      <TableCell>
+        {product.warranty?.durationMonths
+          ? t("durationValue", {
+              count: product.warranty.durationMonths,
+            })
+          : "-"}
+      </TableCell>
       <TableCell>{formatDate(product.createdAt, { locale })}</TableCell>
+
       <TableCell className="text-right">
         <ProductActionsMenu
           onAssignOwner={onAssignOwner}
@@ -240,15 +267,28 @@ function ProductMobileCard({
 }
 
 function ProductName({ product }: { product: ProductResponse }) {
+  const displayName = getProductDisplayName(product);
+
   return (
-    <div className="min-w-0 lg:max-w-64">
-      <span className="block truncate font-medium text-slate-950 dark:text-slate-50">
-        {getProductDisplayName(product)}
-      </span>
-      <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
-        {product.name} · {product.productCode}
-      </p>
-    </div>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div
+          aria-label={displayName}
+          className="min-w-0 cursor-default outline-none focus-visible:ring-2 focus-visible:ring-slate-400 lg:max-w-64"
+          tabIndex={0}
+        >
+          <span className="block truncate font-medium text-slate-950 dark:text-slate-50">
+            {displayName}
+          </span>
+          <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
+            {product.name} · {product.productCode}
+          </p>
+        </div>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-80 wrap-break-word" side="top">
+        {displayName}
+      </TooltipContent>
+    </Tooltip>
   );
 }
 

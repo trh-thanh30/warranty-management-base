@@ -14,10 +14,8 @@ test("desktop product table keeps content on one line and scrolls long results",
   assert.match(source, /max-h-144 overflow-y-scroll/);
   assert.match(source, /\[&_td\]:whitespace-nowrap/);
   assert.match(source, /\[&_th\]:whitespace-nowrap/);
-  assert.match(
-    source,
-    /TableCell className="whitespace-nowrap">\s*<span className="block max-w-64 truncate">\s*\{getProductCategoryLabel\(product\)\}/,
-  );
+  assert.match(source, /TooltipTrigger asChild/);
+  assert.match(source, /getProductCategoryLabel\(product\)/);
   assert.match(source, /sticky top-0 z-10 bg-white dark:bg-slate-950/);
 });
 

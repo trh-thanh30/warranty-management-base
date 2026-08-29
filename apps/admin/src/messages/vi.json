@@ -1184,6 +1184,7 @@
     "startDate": "Ngày bắt đầu",
     "endDate": "Ngày kết thúc",
     "duration": "Thời hạn",
+    "warrantyDuration": "Thời gian bảo hành",
     "durationValue": "{count} tháng",
     "notUpdated": "Chưa cập nhật",
     "noOwner": "Chưa gán chủ sở hữu",
