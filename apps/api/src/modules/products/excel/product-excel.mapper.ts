@@ -14,6 +14,10 @@ export function toProductExcelRow(
     typeof metadata?.installationPosition === 'string'
       ? metadata.installationPosition
       : null;
+  const shortDescription =
+    typeof metadata?.shortDescription === 'string'
+      ? metadata.shortDescription
+      : null;
 
   return {
     productCode: product.product_code,
@@ -22,6 +26,8 @@ export function toProductExcelRow(
     brand: product.catalogue_brand,
     model: product.catalogue_model,
     modelYear: product.catalogue_model_year,
+    shortDescription,
+    description: product.catalogue_description,
     warrantyDurationMonths: product.warranty?.duration_months ?? 0,
     warrantyTerms: product.warranty?.terms ?? null,
     installationPosition,

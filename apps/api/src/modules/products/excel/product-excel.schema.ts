@@ -53,6 +53,20 @@ export const productExcelColumns: Array<
     parse: parseOptionalNumber,
   },
   {
+    key: 'shortDescription',
+    header: 'Mô tả ngắn',
+    width: 40,
+    example: 'Sản phẩm chất lượng cao cho xe của bạn.',
+    parse: parseOptionalString,
+  },
+  {
+    key: 'description',
+    header: 'Mô tả',
+    width: 50,
+    example: 'Thông tin chi tiết về sản phẩm và phạm vi sử dụng.',
+    parse: parseOptionalString,
+  },
+  {
     key: 'warrantyDurationMonths',
     header: 'Thời hạn bảo hành (tháng)',
     required: true,

@@ -20,6 +20,8 @@ describe('PreviewProductImportUseCase', () => {
       'Thương hiệu',
       'Model',
       'Năm model',
+      'Mô tả ngắn',
+      'Mô tả',
       'Thời hạn bảo hành (tháng)',
       'Điều khoản bảo hành',
       'Vị trí gắn',

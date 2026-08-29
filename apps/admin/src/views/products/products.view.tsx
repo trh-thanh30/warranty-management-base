@@ -198,6 +198,8 @@ export function ProductsView() {
                   allRows: t("excel.allRows"),
                   cancel: t("cancel"),
                   displayName: t("excel.productName"),
+                  shortDescription: t("shortDescriptionLabel"),
+                  description: t("descriptionLabel"),
                   edit: t("excel.editRow"),
                   editDescription: t("excel.editRowDescription"),
                   editTitle: t("excel.editRowTitle"),

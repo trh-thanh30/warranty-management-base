@@ -21,6 +21,8 @@ export async function createProductImportTemplateWorkbook() {
         brand: 'Lexzenz',
         model: 'Battery Plus',
         modelYear: 2026,
+        shortDescription: 'Sản phẩm chất lượng cao cho xe của bạn.',
+        description: 'Thông tin chi tiết về sản phẩm và phạm vi sử dụng.',
         warrantyDurationMonths: 24,
         warrantyTerms: null,
         installationPosition: 'Khoang động cơ',
