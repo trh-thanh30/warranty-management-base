@@ -9,8 +9,8 @@ import {
   ComboboxList,
   ComboboxTrigger,
 } from "@/src/components/common";
-import { RichTextEditor } from "@/src/components/common/rich-text-editor";
 import { FormField as Field } from "@/src/components/common/form-field";
+import { RichTextEditor } from "@/src/components/common/rich-text-editor";
 import { createFieldErrorFormatter } from "@/src/utils";
 import type { ProductResponse } from "@repo/shared";
 import { Button, Input, Textarea } from "@repo/ui";
@@ -39,7 +39,7 @@ export function ProductForm({
     !product?.warranty || product.warranty.status === "DRAFT";
 
   return (
-    <form className="min-w-0 space-y-6" noValidate onSubmit={form.onSubmit}>
+    <form className="min-w-0 space-y-4" noValidate onSubmit={form.onSubmit}>
       {form.formState.errors.root?.message ? (
         <div
           className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300"
@@ -50,7 +50,7 @@ export function ProductForm({
       ) : null}
 
       <div className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.42fr)]">
-        <div className="min-w-0 space-y-6">
+        <div className="min-w-0 space-y-4">
           <div className="grid gap-5 sm:grid-cols-2">
             <Field
               error={formatFieldError(
@@ -108,55 +108,6 @@ export function ProductForm({
               />
             </Field>
             <Field
-              error={formatFieldError(form.formState.errors.model?.message, t)}
-              id="product-model"
-              label={t("model")}
-            >
-              <Input
-                id="product-model"
-                placeholder={t("modelPlaceholder")}
-                {...form.register("model")}
-              />
-            </Field>
-          </div>
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field
-              error={formatFieldError(
-                form.formState.errors.serialNumber?.message,
-                t,
-              )}
-              id="product-serial-number"
-              label={t("serialNumber")}
-            >
-              <Input
-                id="product-serial-number"
-                placeholder={t("serialNumberPlaceholder")}
-                {...form.register("serialNumber")}
-              />
-            </Field>
-            <Field
-              error={formatFieldError(
-                form.formState.errors.modelYear?.message,
-                t,
-              )}
-              id="product-model-year"
-              label={t("modelYear")}
-            >
-              <Input
-                placeholder={t("modelYearPlaceholder")}
-                id="product-model-year"
-                inputMode="numeric"
-                min={1900}
-                max={2200}
-                type="number"
-                {...form.register("modelYear")}
-              />
-            </Field>
-          </div>
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field
               description={
                 form.creating
                   ? t("productCodeDescription")
@@ -177,20 +128,6 @@ export function ProductForm({
                     : t("productCodeEditPlaceholder")
                 }
                 {...form.register("productCode")}
-              />
-            </Field>
-            <Field
-              error={formatFieldError(
-                form.formState.errors.installationPosition?.message,
-                t,
-              )}
-              id="product-installation-position"
-              label={t("installationPosition")}
-            >
-              <Input
-                id="product-installation-position"
-                placeholder={t("installationPositionPlaceholder")}
-                {...form.register("installationPosition")}
               />
             </Field>
           </div>
@@ -249,6 +186,69 @@ export function ProductForm({
                 id="product-warranty-code"
                 placeholder={t("warrantyCodePlaceholder")}
                 {...form.register("warrantyCode")}
+              />
+            </Field>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field
+              error={formatFieldError(
+                form.formState.errors.serialNumber?.message,
+                t,
+              )}
+              id="product-serial-number"
+              label={t("serialNumber")}
+            >
+              <Input
+                id="product-serial-number"
+                placeholder={t("serialNumberPlaceholder")}
+                {...form.register("serialNumber")}
+              />
+            </Field>
+            <Field
+              error={formatFieldError(
+                form.formState.errors.installationPosition?.message,
+                t,
+              )}
+              id="product-installation-position"
+              label={t("installationPosition")}
+            >
+              <Input
+                id="product-installation-position"
+                placeholder={t("installationPositionPlaceholder")}
+                {...form.register("installationPosition")}
+              />
+            </Field>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field
+              error={formatFieldError(form.formState.errors.model?.message, t)}
+              id="product-model"
+              label={t("model")}
+            >
+              <Input
+                id="product-model"
+                placeholder={t("modelPlaceholder")}
+                {...form.register("model")}
+              />
+            </Field>
+            <Field
+              error={formatFieldError(
+                form.formState.errors.modelYear?.message,
+                t,
+              )}
+              id="product-model-year"
+              label={t("modelYear")}
+            >
+              <Input
+                placeholder={t("modelYearPlaceholder")}
+                id="product-model-year"
+                inputMode="numeric"
+                min={1900}
+                max={2200}
+                type="number"
+                {...form.register("modelYear")}
               />
             </Field>
           </div>

@@ -1184,6 +1184,7 @@
     "startDate": "Start date",
     "endDate": "End date",
     "duration": "Duration",
+    "warrantyDuration": "Warranty duration",
     "durationValue": "{count} months",
     "notUpdated": "Not updated",
     "noOwner": "No owner assigned",
