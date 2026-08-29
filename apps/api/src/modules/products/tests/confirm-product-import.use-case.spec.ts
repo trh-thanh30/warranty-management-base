@@ -42,7 +42,6 @@ describe('ConfirmProductImportUseCase', () => {
       mode: 'upsert',
       rows: [
         {
-          productName: 'Battery Plus',
           categoryCode: 'ACCESSORY',
           brand: 'Lexzenz',
           model: 'Battery Plus',
@@ -62,7 +61,7 @@ describe('ConfirmProductImportUseCase', () => {
       expect.objectContaining({
         data: expect.objectContaining({
           category_ref: { connect: { id: 'category-id' } },
-          catalogue_name: 'Battery Plus',
+          catalogue_name: 'SUV Battery',
           catalogue_brand: 'Lexzenz',
           display_name: 'SUV Battery',
           metadata: {
@@ -129,7 +128,6 @@ describe('ConfirmProductImportUseCase', () => {
       mode: 'upsert',
       rows: [
         {
-          productName: 'Battery Plus',
           categoryCode: 'ACCESSORY',
           brand: null,
           model: null,
@@ -317,7 +315,6 @@ describe('ConfirmProductImportUseCase', () => {
 });
 
 const existingProductImportRow = {
-  productName: 'Battery Plus',
   categoryCode: 'ACCESSORY',
   brand: 'Lexzenz',
   model: 'Battery Plus',

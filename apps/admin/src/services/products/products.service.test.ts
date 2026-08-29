@@ -337,7 +337,6 @@ test("confirming product import posts edited preview rows", async () => {
     rows: [
       {
         displayName: "SUV Battery",
-        productName: "Battery Plus",
         categoryCode: "ACCESSORY",
         brand: "Lexzenz",
         model: "Battery Plus",
@@ -361,7 +360,6 @@ test("confirming product import posts edited preview rows", async () => {
         rows: [
           {
             displayName: "SUV Battery",
-            productName: "Battery Plus",
             categoryCode: "ACCESSORY",
             brand: "Lexzenz",
             model: "Battery Plus",

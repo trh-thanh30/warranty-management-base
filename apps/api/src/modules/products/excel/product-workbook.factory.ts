@@ -16,14 +16,13 @@ export async function createProductImportTemplateWorkbook() {
     rows: [
       {
         productCode: null,
-        productName: 'Pin Battery Plus',
+        displayName: 'Pin Battery Plus',
         categoryCode: 'ACCESSORY',
         brand: 'Lexzenz',
         model: 'Battery Plus',
         modelYear: 2026,
         warrantyDurationMonths: 24,
         warrantyTerms: null,
-        displayName: 'Pin xe khách Nguyễn Văn A',
         installationPosition: 'Khoang động cơ',
         warrantyCode: null,
         serialNumber: 'SN-001',

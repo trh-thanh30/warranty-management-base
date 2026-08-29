@@ -29,7 +29,7 @@ export async function prepareProductImportRows(
   for (const row of rows) {
     const productCode = row.data.productCode?.trim() || null;
     const serialNumber = row.data.serialNumber?.trim() || null;
-    const productName = row.data.productName?.trim() || null;
+    const displayName = row.data.displayName?.trim() || null;
     const categoryCode = row.data.categoryCode?.trim().toUpperCase() || null;
     const warrantyCode = row.data.warrantyCode?.trim().toUpperCase() || null;
 
@@ -121,10 +121,10 @@ export async function prepareProductImportRows(
       });
     }
 
-    if (!productName) {
+    if (!displayName) {
       errors.push({
         rowNumber: row.rowNumber,
-        field: 'productName',
+        field: 'displayName',
         message: 'Tên sản phẩm là bắt buộc',
       });
     }
@@ -149,7 +149,7 @@ export async function prepareProductImportRows(
       existingProductId: existingProduct?.id ?? null,
       existingProductCode: existingProduct?.product_code ?? null,
       rowNumber: row.rowNumber,
-      productName: productName ?? '',
+      displayName: displayName ?? '',
       categoryCode: categoryCode ?? '',
       warrantyCode,
       categoryId: category?.id ?? '',

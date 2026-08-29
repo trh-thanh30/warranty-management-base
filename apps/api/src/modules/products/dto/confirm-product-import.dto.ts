@@ -20,8 +20,8 @@ export class ConfirmProductImportRowDto {
   productCode?: string | null;
 
   @IsString()
-  @Length(1, 64)
-  productName: string;
+  @Length(1, 160)
+  displayName: string;
 
   @IsString()
   @Length(1, 64)
@@ -52,11 +52,6 @@ export class ConfirmProductImportRowDto {
   @IsString()
   @Length(0, 4000)
   warrantyTerms?: string | null;
-
-  @IsOptional()
-  @IsString()
-  @Length(0, 160)
-  displayName?: string | null;
 
   @IsOptional()
   @IsString()

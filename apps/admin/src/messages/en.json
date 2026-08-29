@@ -1318,6 +1318,7 @@
       "backToUpload": "Choose another file",
       "confirmImport": "Confirm import",
       "row": "Row",
+      "productName": "Product name",
       "categoryCode": "Category code",
       "imageUrl": "Image URL",
       "ready": "Ready",
