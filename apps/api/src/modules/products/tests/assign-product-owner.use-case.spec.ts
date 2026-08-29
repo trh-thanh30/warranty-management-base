@@ -111,7 +111,6 @@ function createContext({
   const resolvedWarrantyCode = warrantyCode ?? 'WM-2026-GENERATED';
   const productResponse = {
     id: 'product-id',
-    template_id: 'template-id',
     product_code: 'PRD-2026-ABC',
     display_name: null,
     serial_number: null,

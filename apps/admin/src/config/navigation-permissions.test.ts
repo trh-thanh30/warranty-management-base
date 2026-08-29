@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Boxes, Package } from "lucide-react";
-import { PERMISSIONS, type PermissionKey } from "@repo/shared/constants";
+import { PERMISSIONS } from "@repo/shared/constants";
 import {
   canAccessNavigationItem,
   getAccessibleNavigationItems,
@@ -14,11 +14,10 @@ const item = {
 };
 
 test("resolves product navigation only for product viewers", () => {
-  const templateOnly = (permission: PermissionKey) =>
-    permission === PERMISSIONS.PRODUCT_TEMPLATE_VIEW;
+  const noPermissions = () => false;
 
-  assert.equal(canAccessNavigationItem(item, templateOnly), false);
-  assert.equal(resolveNavigationHref(item, templateOnly), "/products");
+  assert.equal(canAccessNavigationItem(item, noPermissions), false);
+  assert.equal(resolveNavigationHref(item, noPermissions), "/products");
   assert.equal(
     canAccessNavigationItem(
       item,

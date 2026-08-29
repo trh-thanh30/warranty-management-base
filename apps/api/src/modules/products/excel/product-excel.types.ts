@@ -7,6 +7,8 @@ export type ProductExcelRow = {
   brand: string | null;
   model: string | null;
   modelYear: number | null;
+  shortDescription?: string | null;
+  description?: string | null;
   warrantyDurationMonths: number;
   warrantyTerms: string | null;
   installationPosition: string | null;

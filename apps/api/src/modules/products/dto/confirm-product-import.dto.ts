@@ -43,6 +43,16 @@ export class ConfirmProductImportRowDto {
   @Max(2200)
   modelYear?: number | null;
 
+  @IsOptional()
+  @IsString()
+  @Length(0, 500)
+  shortDescription?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 5000)
+  description?: string | null;
+
   @IsInt()
   @Min(1)
   @Max(600)

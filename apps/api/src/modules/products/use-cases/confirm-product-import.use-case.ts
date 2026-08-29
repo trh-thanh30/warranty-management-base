@@ -75,9 +75,11 @@ export class ConfirmProductImportUseCase {
             catalogue_brand: this.blankToNull(row.brand),
             catalogue_model: this.blankToNull(row.model),
             catalogue_model_year: row.modelYear,
+            catalogue_description: this.blankToNull(row.description),
             serial_number: this.blankToNull(row.serialNumber),
             display_name: row.displayName.trim(),
             status: row.status ?? product_status.ACTIVE,
+            catalogue_metadata: this.toCatalogueMetadata(row),
             metadata: this.toMetadata(row),
             warranty: {
               create: {
@@ -133,8 +135,10 @@ export class ConfirmProductImportUseCase {
       catalogue_brand: this.blankToNull(row.brand),
       catalogue_model: this.blankToNull(row.model),
       catalogue_model_year: row.modelYear,
+      catalogue_description: this.blankToNull(row.description),
       display_name: row.displayName.trim(),
       status: row.status,
+      catalogue_metadata: this.toCatalogueMetadata(row),
       serial_number: this.blankToNull(row.serialNumber),
       metadata: this.toMetadata(row),
     };
@@ -195,8 +199,12 @@ export class ConfirmProductImportUseCase {
     if (installationPosition) {
       metadata.installationPosition = installationPosition;
     }
-
     return Object.keys(metadata).length > 0 ? metadata : undefined;
+  }
+
+  private toCatalogueMetadata(row: PreparedProductImportRow) {
+    const shortDescription = this.blankToNull(row.shortDescription);
+    return shortDescription ? { shortDescription } : undefined;
   }
 
   private blankToNull(value: string | null | undefined) {

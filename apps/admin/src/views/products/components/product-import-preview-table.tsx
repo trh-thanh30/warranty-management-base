@@ -50,6 +50,8 @@ type ProductImportPreviewTableProps = {
     brand: string;
     categoryCode: string;
     displayName: string;
+    shortDescription: string;
+    description: string;
     edit: string;
     editDescription: string;
     editTitle: string;
@@ -172,6 +174,12 @@ export function ProductImportPreviewTable({
                 <TableHead className="w-32 whitespace-nowrap">
                   {labels.modelYear}
                 </TableHead>
+                <TableHead className="w-64 whitespace-nowrap">
+                  {labels.shortDescription}
+                </TableHead>
+                <TableHead className="w-72 whitespace-nowrap">
+                  {labels.description}
+                </TableHead>
                 <TableHead className="w-44 whitespace-nowrap">
                   {labels.warrantyDurationMonths}
                 </TableHead>
@@ -213,6 +221,8 @@ export function ProductImportPreviewTable({
                     <PreviewCell value={row.data.brand} />
                     <PreviewCell value={row.data.model} />
                     <PreviewCell value={row.data.modelYear} />
+                    <PreviewCell value={row.data.shortDescription ?? null} />
+                    <PreviewCell value={row.data.description ?? null} />
                     <PreviewCell value={row.data.warrantyDurationMonths} />
                     <PreviewCell value={row.data.warrantyTerms} />
                     <PreviewCell value={row.data.installationPosition} />
@@ -433,6 +443,20 @@ function ProductImportEditForm({
             }
             type="number"
             value={values.modelYear ?? ""}
+          />
+        </ImportField>
+        <ImportField label={labels.shortDescription}>
+          <Input
+            onChange={(event) =>
+              setText("shortDescription", event.target.value)
+            }
+            value={values.shortDescription ?? ""}
+          />
+        </ImportField>
+        <ImportField label={labels.description}>
+          <Input
+            onChange={(event) => setText("description", event.target.value)}
+            value={values.description ?? ""}
           />
         </ImportField>
         <ImportField label={labels.warrantyDurationMonths}>

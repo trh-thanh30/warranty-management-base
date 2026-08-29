@@ -357,6 +357,8 @@ function normalizePreviewRow(row: {
       brand: row.data.brand ?? null,
       model: row.data.model ?? null,
       modelYear: row.data.modelYear ?? null,
+      shortDescription: row.data.shortDescription ?? null,
+      description: row.data.description ?? null,
       warrantyDurationMonths: row.data.warrantyDurationMonths ?? 0,
       warrantyTerms: row.data.warrantyTerms ?? null,
       installationPosition: row.data.installationPosition ?? null,

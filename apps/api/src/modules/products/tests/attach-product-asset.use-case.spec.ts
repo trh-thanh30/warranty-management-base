@@ -11,7 +11,6 @@ describe('AttachProductAssetUseCase', () => {
       findProduct: jest.fn().mockResolvedValue({
         id: 'product-id',
         deleted_at: null,
-        template_id: null,
       }),
       findAsset: jest.fn().mockResolvedValue({
         id: 'new-asset-id',
@@ -64,7 +63,6 @@ describe('AttachProductAssetUseCase', () => {
       findProduct: jest.fn().mockResolvedValue({
         id: 'product-id',
         deleted_at: null,
-        template_id: 'template-id',
       }),
       findAsset: jest.fn().mockResolvedValue({
         id: 'asset-id',

@@ -10,7 +10,7 @@
 - **Permission override**: an Admin-controlled grant or revocation applied to one Staff account relative to the Moderator role defaults. Only differences from the role defaults are persisted.
 - **Category taxonomy**: shared, admin-managed classification records for domain data. Product categories now use dynamic `Category` records while the legacy product category enum remains for backward compatibility.
 - **Metadata field**: nullable JSON extension data for low-query-frequency integration or display attributes. Business-critical fields that drive filtering, sorting, permissions, status transitions, or reports must remain first-class columns.
-- **Legacy Product Template**: retained rollback data from the former reusable catalogue model. It is not part of active application reads, writes, navigation, or API composition and will be removed after production verification.
+- **Retired Product Template**: the former reusable catalogue model. Its runtime module, contracts, permissions, relations, and persistence have been removed; historical migrations remain immutable.
 - **Product**: the authoritative product aggregate. It owns catalogue identity and content, media, physical-unit identity, ownership, warranty, claim history, and installation context.
 - **Network location**: an active Dealer or Service Center with first-class latitude and longitude, suitable for public map display. Coordinates are authoritative; Google Maps URLs are derived values.
 

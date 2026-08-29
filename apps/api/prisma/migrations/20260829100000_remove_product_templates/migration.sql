@@ -1,0 +1,74 @@
+-- Product is authoritative. Remove the retired Product Template persistence.
+ALTER TABLE "product"
+  DROP CONSTRAINT IF EXISTS "product_template_id_fkey",
+  DROP COLUMN IF EXISTS "template_id";
+
+DROP TABLE IF EXISTS "product_template_asset";
+DROP TABLE IF EXISTS "product_template";
+
+-- Remove retired permission overrides before narrowing the PostgreSQL enum.
+DELETE FROM "user_permission"
+WHERE "permission_key"::text IN (
+  'PRODUCT_TEMPLATE_VIEW',
+  'PRODUCT_TEMPLATE_CREATE',
+  'PRODUCT_TEMPLATE_UPDATE'
+);
+
+ALTER TYPE "permission_key" RENAME TO "permission_key_legacy";
+
+CREATE TYPE "permission_key" AS ENUM (
+  'DASHBOARD_VIEW',
+  'CUSTOMER_VIEW',
+  'CUSTOMER_CREATE',
+  'CUSTOMER_UPDATE',
+  'CUSTOMER_DELETE',
+  'PRODUCT_VIEW',
+  'PRODUCT_CREATE',
+  'PRODUCT_UPDATE',
+  'PRODUCT_DELETE',
+  'PRODUCT_ASSIGN_OWNER',
+  'WARRANTY_VIEW',
+  'WARRANTY_CREATE',
+  'WARRANTY_UPDATE',
+  'WARRANTY_ACTIVATE',
+  'WARRANTY_VOID',
+  'WARRANTY_LOOKUP_OWN',
+  'WARRANTY_CLAIM_VIEW',
+  'WARRANTY_CLAIM_CREATE',
+  'WARRANTY_CLAIM_UPDATE',
+  'WARRANTY_CLAIM_STATUS_UPDATE',
+  'SERVICE_CENTER_VIEW',
+  'SERVICE_CENTER_CREATE',
+  'SERVICE_CENTER_UPDATE',
+  'SERVICE_CENTER_DELETE',
+  'DEALER_VIEW',
+  'DEALER_CREATE',
+  'DEALER_UPDATE',
+  'DEALER_DELETE',
+  'CONTENT_PAGE_VIEW',
+  'CONTENT_PAGE_CREATE',
+  'CONTENT_PAGE_UPDATE',
+  'CONTENT_PAGE_DELETE',
+  'WEBSITE_CONFIG_VIEW',
+  'WEBSITE_CONFIG_UPDATE',
+  'WEBSITE_CONFIG_PUBLISH',
+  'CONTACT_SUBMISSION_VIEW',
+  'CONTACT_SUBMISSION_UPDATE',
+  'CATEGORY_VIEW',
+  'CATEGORY_CREATE',
+  'CATEGORY_UPDATE',
+  'CATEGORY_DELETE',
+  'USER_VIEW',
+  'USER_CREATE',
+  'USER_UPDATE',
+  'USER_DELETE',
+  'USER_PERMISSION_MANAGE',
+  'SYSTEM_VIEW',
+  'AUDIT_LOG_VIEW'
+);
+
+ALTER TABLE "user_permission"
+  ALTER COLUMN "permission_key" TYPE "permission_key"
+  USING "permission_key"::text::"permission_key";
+
+DROP TYPE "permission_key_legacy";

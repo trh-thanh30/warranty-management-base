@@ -172,36 +172,6 @@ describe('ProductsRepository.list', () => {
     });
   });
 
-  it('does not expose a product-template filter', async () => {
-    const findMany = jest.fn().mockResolvedValue([]);
-    const count = jest.fn().mockResolvedValue(0);
-    const prismaService = {
-      $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
-        callback({
-          product: {
-            count,
-            findMany,
-          },
-        }),
-      ),
-    };
-    const repository = new ProductsRepository(prismaService as never);
-
-    await repository.list({
-      limit: 10,
-      page: 1,
-    });
-
-    expect(findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.not.objectContaining({ template_id: expect.anything() }),
-      }),
-    );
-    expect(count).toHaveBeenCalledWith({
-      where: expect.not.objectContaining({ template_id: expect.anything() }),
-    });
-  });
-
   it('filters products by the editable product category', async () => {
     const findMany = jest.fn().mockResolvedValue([]);
     const count = jest.fn().mockResolvedValue(0);

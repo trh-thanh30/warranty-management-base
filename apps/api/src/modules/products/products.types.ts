@@ -46,7 +46,6 @@ export function toProductResponse(
       url: resolveAssetUrl(productAsset.asset),
       mimeType: productAsset.asset.mime_type,
       originalName: productAsset.asset.original_name,
-      source: 'PRODUCT' as const,
     })) ?? [];
   const warrantyCodeEditLockedReason =
     product.warranty && product.warranty.status !== warranty_status.DRAFT

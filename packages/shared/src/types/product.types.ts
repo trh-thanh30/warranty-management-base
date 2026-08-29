@@ -15,95 +15,15 @@ export type ProductAssetSummary = {
   url: string;
   mimeType: string;
   originalName: string;
-  source?: "PRODUCT" | "TEMPLATE";
 };
 
-export type ProductTemplateSpecificationInput = {
+export type ProductSpecificationInput = {
   key: string;
   value: string;
 };
 
-export type ProductTemplateSpecification = ProductTemplateSpecificationInput & {
+export type ProductSpecification = ProductSpecificationInput & {
   group?: string;
-};
-
-export type ProductTemplateMetadataInput = {
-  applications?: string[];
-  features?: string[];
-  shortDescription?: string | null;
-  specifications?: ProductTemplateSpecificationInput[];
-};
-
-export type ProductTemplateMetadata = {
-  applications?: string[];
-  features?: string[];
-  shortDescription?: string | null;
-  specifications?: ProductTemplateSpecification[];
-  [key: string]: unknown;
-};
-
-export type ProductTemplateSummary = {
-  id: string;
-  sku: string;
-  slug: string;
-  name: string;
-  categoryId: string;
-  categoryRef: CategorySummary | null;
-  brand: string | null;
-  model: string | null;
-  modelYear: number | null;
-  description: string | null;
-  defaultWarrantyDurationMonths: number | null;
-  defaultWarrantyTerms: string | null;
-  metadata: ProductTemplateMetadata | null;
-  isActive: boolean;
-  isPublished: boolean;
-  publishedAt: string | null;
-  productCount: number;
-  assets: ProductAssetSummary[];
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type ListProductTemplatesQuery = PaginationQuery & {
-  search?: string;
-  isActive?: boolean | "all";
-  isPublished?: boolean;
-};
-
-export type CreateProductTemplateBody = {
-  sku?: string;
-  slug?: string;
-  name: string;
-  categoryId: string;
-  brand?: string;
-  model?: string;
-  modelYear?: number;
-  description?: string;
-  defaultWarrantyDurationMonths?: number | null;
-  defaultWarrantyTerms?: string;
-  metadata?: ProductTemplateMetadataInput;
-  isPublished?: boolean;
-  coverAssetId?: string;
-  galleryAssetIds?: string[];
-};
-
-export type UpdateProductTemplateBody = {
-  sku?: string;
-  slug?: string;
-  name?: string;
-  categoryId?: string;
-  brand?: string | null;
-  model?: string | null;
-  modelYear?: number | null;
-  description?: string | null;
-  defaultWarrantyDurationMonths?: number | null;
-  defaultWarrantyTerms?: string | null;
-  metadata?: ProductTemplateMetadataInput | null;
-  isActive?: boolean;
-  isPublished?: boolean;
-  coverAssetId?: string | null;
-  galleryAssetIds?: string[];
 };
 
 export type ProductSortBy =
@@ -273,7 +193,7 @@ export type PublicProductSummary = {
   model: string | null;
   description: string | null;
   coverImageUrl: string | null;
-  specifications: ProductTemplateSpecification[];
+  specifications: ProductSpecification[];
   warrantyDurationMonths: number;
   publishedAt: string;
 };
@@ -298,7 +218,7 @@ export type PublicProductDetail = {
   description: string | null;
   coverImage: PublicProductImage | null;
   galleryImages: PublicProductImage[];
-  specifications: ProductTemplateSpecification[];
+  specifications: ProductSpecification[];
   features: string[];
   applications: string[];
   warranty: {
