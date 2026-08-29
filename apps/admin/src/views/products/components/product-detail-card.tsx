@@ -10,12 +10,14 @@ import {
   Check,
   Clock3,
   Copy,
+  Factory,
   Fingerprint,
   Hash,
   KeyRound,
   MapPin,
   Package,
   ShieldCheck,
+  Tag,
   UserRound,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -114,6 +116,16 @@ export function ProductDetailCard({ product }: ProductDetailCardProps) {
             value={product.serialNumber}
           />
           <DetailItem
+            icon={<Factory className="size-4" />}
+            label={t("brand")}
+            value={product.brand || emptyValue}
+          />
+          <DetailItem
+            icon={<Tag className="size-4" />}
+            label={t("model")}
+            value={product.model || emptyValue}
+          />
+          <DetailItem
             icon={<CalendarRange className="size-4" />}
             label={t("modelYear")}
             value={product.modelYear ? String(product.modelYear) : emptyValue}
@@ -144,6 +156,24 @@ export function ProductDetailCard({ product }: ProductDetailCardProps) {
                 value={t("durationValue", {
                   count: product.warranty.durationMonths,
                 })}
+              />
+              <DetailItem
+                icon={<CalendarDays className="size-4" />}
+                label={t("startDate")}
+                value={
+                  product.warranty.startDate
+                    ? formatDate(product.warranty.startDate, { locale })
+                    : emptyValue
+                }
+              />
+              <DetailItem
+                icon={<CalendarDays className="size-4" />}
+                label={t("endDate")}
+                value={
+                  product.warranty.endDate
+                    ? formatDate(product.warranty.endDate, { locale })
+                    : emptyValue
+                }
               />
             </>
           ) : (
