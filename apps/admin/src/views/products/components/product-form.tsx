@@ -290,7 +290,6 @@ export function ProductForm({
             />
           </Field>
 
-          <ProductCatalogueMetadataFields disabled={isSubmitting} form={form} />
           <Field
             error={formatFieldError(
               form.formState.errors.warrantyTerms?.message,
@@ -307,6 +306,8 @@ export function ProductForm({
               {...form.register("warrantyTerms")}
             />
           </Field>
+
+          <ProductCatalogueMetadataFields disabled={isSubmitting} form={form} />
 
           <Controller
             control={form.control}

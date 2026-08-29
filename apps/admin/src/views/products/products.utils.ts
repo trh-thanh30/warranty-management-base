@@ -157,9 +157,11 @@ export function mergeProductCatalogueMetadata(
   setOrDeleteMetadataValue(nextMetadata, "specifications", specifications);
   setOrDeleteMetadataValue(nextMetadata, "features", features);
   setOrDeleteMetadataValue(nextMetadata, "applications", applications);
-  const shortDescription = toOptionalValue(values.shortDescription);
-  if (shortDescription) nextMetadata.shortDescription = shortDescription;
-  else delete nextMetadata.shortDescription;
+  if (values.shortDescription !== undefined) {
+    const shortDescription = toOptionalValue(values.shortDescription);
+    if (shortDescription) nextMetadata.shortDescription = shortDescription;
+    else delete nextMetadata.shortDescription;
+  }
 
   return Object.keys(nextMetadata).length > 0 ? nextMetadata : null;
 }
