@@ -1110,6 +1110,7 @@
     "displayNamePlaceholder": "Để trống để dùng tên sản phẩm",
     "displayNameDescription": "Tên riêng cho sản phẩm vật lý này; để trống sẽ hiển thị tên chuẩn của mẫu.",
     "displayNameLength": "Tên hiển thị không được quá 160 ký tự.",
+    "modelYearPlaceholder": "Ví dụ: 2026",
     "namePlaceholder": "Ví dụ: VinFast VF 8 Plus, Toyota Camry 2.5Q...",
     "slug": "Đường dẫn sản phẩm",
     "slugPlaceholder": "Ví dụ: phim-cach-nhiet-sp50; để trống để hệ thống tự tạo",

@@ -96,4 +96,10 @@ test("product form edits catalogue metadata directly on the product", async () =
   assert.match(metadataFields, /minmax\(0,1fr\)/);
   assert.match(productUtils, /catalogueMetadata/);
   assert.match(productUtils, /mergeProductCatalogueMetadata/);
+
+  const warrantyTermsIndex = productForm.indexOf("product-warranty-terms");
+  const catalogueMetadataIndex = productForm.indexOf(
+    "<ProductCatalogueMetadataFields",
+  );
+  assert.ok(catalogueMetadataIndex > warrantyTermsIndex);
 });

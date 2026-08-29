@@ -1110,6 +1110,7 @@
     "displayNamePlaceholder": "Leave blank to use the product name",
     "displayNameDescription": "A unit-specific name; leave blank to display the canonical template name.",
     "displayNameLength": "Display name cannot exceed 160 characters.",
+    "modelYearPlaceholder": "Example: 2026",
     "namePlaceholder": "e.g. VinFast VF 8 Plus, Toyota Camry 2.5Q...",
     "slug": "Product URL slug",
     "slugPlaceholder": "e.g. heat-rejection-film-sp50; leave blank to generate automatically",

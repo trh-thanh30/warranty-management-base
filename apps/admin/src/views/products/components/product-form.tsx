@@ -1,10 +1,5 @@
 "use client";
 
-import { Controller } from "react-hook-form";
-import { Loader2 } from "lucide-react";
-import { useTranslations } from "next-intl";
-import type { ProductResponse } from "@repo/shared";
-import { Button, Input, Textarea } from "@repo/ui";
 import {
   Combobox,
   ComboboxContent,
@@ -16,6 +11,11 @@ import {
 } from "@/src/components/common";
 import { FormField as Field } from "@/src/components/common/form-field";
 import { createFieldErrorFormatter } from "@/src/utils";
+import type { ProductResponse } from "@repo/shared";
+import { Button, Input, Textarea } from "@repo/ui";
+import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Controller } from "react-hook-form";
 import { useProductForm } from "../hooks/use-product-form";
 import { ProductCatalogueMetadataFields } from "./product-catalogue-metadata-fields";
 import { ProductMediaFields } from "./product-media-fields";
@@ -94,7 +94,7 @@ export function ProductForm({
             </Field>
           </div>
 
-          <div className="grid gap-5 sm:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2">
             <Field
               error={formatFieldError(form.formState.errors.brand?.message, t)}
               id="product-brand"
@@ -117,41 +117,7 @@ export function ProductForm({
                 {...form.register("model")}
               />
             </Field>
-            <Field
-              error={formatFieldError(
-                form.formState.errors.modelYear?.message,
-                t,
-              )}
-              id="product-model-year"
-              label={t("modelYear")}
-            >
-              <Input
-                id="product-model-year"
-                inputMode="numeric"
-                min={1900}
-                max={2200}
-                type="number"
-                {...form.register("modelYear")}
-              />
-            </Field>
           </div>
-
-          <Field
-            error={formatFieldError(
-              form.formState.errors.description?.message,
-              t,
-            )}
-            id="product-description"
-            label={t("descriptionLabel")}
-          >
-            <Textarea
-              id="product-description"
-              rows={3}
-              {...form.register("description")}
-            />
-          </Field>
-
-          <ProductCatalogueMetadataFields disabled={isSubmitting} form={form} />
 
           <div className="grid gap-5 sm:grid-cols-2">
             <Field
@@ -166,6 +132,24 @@ export function ProductForm({
                 id="product-serial-number"
                 placeholder={t("serialNumberPlaceholder")}
                 {...form.register("serialNumber")}
+              />
+            </Field>
+            <Field
+              error={formatFieldError(
+                form.formState.errors.modelYear?.message,
+                t,
+              )}
+              id="product-model-year"
+              label={t("modelYear")}
+            >
+              <Input
+                placeholder={t("modelYearPlaceholder")}
+                id="product-model-year"
+                inputMode="numeric"
+                min={1900}
+                max={2200}
+                type="number"
+                {...form.register("modelYear")}
               />
             </Field>
           </div>
@@ -268,6 +252,22 @@ export function ProductForm({
             </Field>
           </div>
 
+          <Field
+            error={formatFieldError(
+              form.formState.errors.description?.message,
+              t,
+            )}
+            id="product-description"
+            label={t("descriptionLabel")}
+          >
+            <Textarea
+              id="product-description"
+              rows={3}
+              {...form.register("description")}
+            />
+          </Field>
+
+          <ProductCatalogueMetadataFields disabled={isSubmitting} form={form} />
           <Field
             error={formatFieldError(
               form.formState.errors.warrantyTerms?.message,
