@@ -11,15 +11,14 @@ export class GetPublicProductDetailUseCase {
   ) {}
 
   async execute(slug: string) {
-    const template =
-      await this.productsRepository.findPublicProductBySlug(slug);
+    const product = await this.productsRepository.findPublicProductBySlug(slug);
 
-    if (!template) {
+    if (!product) {
       throw new NotFoundException('Published product not found');
     }
 
     return toPublicProductDetail(
-      template,
+      product,
       (asset) => this.assetsService.enrichAssetUrl(asset).url,
     );
   }

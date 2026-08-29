@@ -96,7 +96,6 @@ export class AssignProductOwnerUseCase {
             },
             warranty: true,
             category_ref: true,
-            template: true,
           },
         });
       },

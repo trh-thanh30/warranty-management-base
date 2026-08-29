@@ -8,12 +8,10 @@ import {
   FileText,
   Globe2,
   LayoutDashboard,
-  Layers3,
   LogOut,
   HardDrive,
   MessageSquareText,
   Navigation,
-  Package,
   PanelsTopLeft,
   Settings,
   ShieldCheck,
@@ -64,21 +62,9 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
           },
           {
             title: t("items.products"),
-            icon: Package,
-            children: [
-              {
-                title: t("items.products"),
-                href: "/products",
-                icon: Boxes,
-                requiredPermission: PERMISSIONS.PRODUCT_VIEW,
-              },
-              {
-                title: t("items.productTemplates"),
-                href: "/product-templates",
-                icon: Layers3,
-                requiredPermission: PERMISSIONS.PRODUCT_TEMPLATE_VIEW,
-              },
-            ],
+            href: "/products",
+            icon: Boxes,
+            requiredPermission: PERMISSIONS.PRODUCT_VIEW,
           },
           {
             title: t("items.warranties"),
@@ -211,20 +197,7 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
       {
         title: t("items.products"),
         href: "/products",
-        permissionHrefs: [
-          {
-            permission: PERMISSIONS.PRODUCT_VIEW,
-            href: "/products",
-          },
-          {
-            permission: PERMISSIONS.PRODUCT_TEMPLATE_VIEW,
-            href: "/product-templates",
-          },
-        ],
-        requiredAnyPermissions: [
-          PERMISSIONS.PRODUCT_VIEW,
-          PERMISSIONS.PRODUCT_TEMPLATE_VIEW,
-        ],
+        requiredPermission: PERMISSIONS.PRODUCT_VIEW,
       },
       {
         title: t("items.warranties"),

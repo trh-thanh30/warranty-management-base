@@ -19,15 +19,15 @@ describe('LookupWarrantyByCodeUseCase', () => {
       id: 'product-id',
       product_code: 'LEX-SP50-001',
       display_name: 'Lexzenz SP50',
-      template: {
-        category_ref: {
-          id: 'category-id',
-          name: 'Phim cách nhiệt',
-          slug: 'phim-cach-nhiet',
-        },
-        name: 'Toyota Camry',
-        brand: 'Toyota',
-        model: 'Camry',
+      catalogue_name: 'Toyota Camry',
+      catalogue_sku: 'LEX-SP50-001',
+      catalogue_slug: 'toyota-camry',
+      catalogue_brand: 'Toyota',
+      catalogue_model: 'Camry',
+      category_ref: {
+        id: 'category-id',
+        name: 'Phim cách nhiệt',
+        slug: 'phim-cach-nhiet',
       },
       serial_number: 'VIN123',
       warranty: {

@@ -2,7 +2,6 @@ import type {
   Category,
   Customer,
   Product,
-  ProductTemplate,
   ServiceCenter,
   User,
   Warranty,
@@ -28,9 +27,6 @@ export type WarrantyClaimWithRelations = WarrantyClaim & {
   product?:
     | (Product & {
         category_ref?: Category | null;
-        template?:
-          | (ProductTemplate & { category_ref?: Category | null })
-          | null;
       })
     | null;
   warranty?: Warranty;

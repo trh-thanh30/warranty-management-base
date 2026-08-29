@@ -36,7 +36,6 @@ export const warrantyClaimInclude = {
   product: {
     include: {
       category_ref: true,
-      template: { include: { category_ref: true } },
     },
   },
   warranty: true,

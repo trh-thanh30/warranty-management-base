@@ -27,6 +27,16 @@ describe('UpdateProductUseCase', () => {
       template_id: 'template-id',
       serial_number: 'SN-001',
       display_name: null,
+      catalogue_name: 'Camera AI 4K',
+      catalogue_sku: 'CAM-4K',
+      catalogue_slug: 'camera-ai-4k',
+      catalogue_brand: null,
+      catalogue_model: null,
+      catalogue_model_year: null,
+      catalogue_description: null,
+      catalogue_metadata: null,
+      catalogue_is_published: false,
+      catalogue_published_at: null,
       metadata: null,
       deleted_at: null,
       warranty: {
@@ -49,27 +59,6 @@ describe('UpdateProductUseCase', () => {
         assets: [],
         ownerships: [],
         warranty: null,
-        template: {
-          id: 'template-id',
-          sku: 'CAM-4K',
-          slug: 'camera-ai-4k',
-          name: 'Camera AI 4K',
-          category_id: 'category-id',
-          category_ref: null,
-          brand: null,
-          model: null,
-          model_year: null,
-          description: null,
-          default_warranty_duration_months: 24,
-          default_warranty_terms: null,
-          metadata: null,
-          is_active: true,
-          is_published: false,
-          published_at: null,
-          created_at: new Date(),
-          updated_at: new Date(),
-          assets: [],
-        },
       }),
     };
     const useCase = new UpdateProductUseCase(
@@ -93,6 +82,16 @@ describe('UpdateProductUseCase', () => {
       id: 'product-id',
       category_id: 'template-category-id',
       serial_number: null,
+      catalogue_name: 'Camera AI 4K',
+      catalogue_sku: 'CAM-4K',
+      catalogue_slug: 'camera-ai-4k',
+      catalogue_brand: null,
+      catalogue_model: null,
+      catalogue_model_year: null,
+      catalogue_description: null,
+      catalogue_metadata: null,
+      catalogue_is_published: false,
+      catalogue_published_at: null,
       metadata: null,
       deleted_at: null,
       warranty: {
@@ -119,12 +118,6 @@ describe('UpdateProductUseCase', () => {
         assets: [],
         ownerships: [],
         warranty: null,
-        template: {
-          id: 'template-id',
-          name: 'Camera AI 4K',
-          assets: [],
-          category_ref: null,
-        },
       }),
     };
     const useCase = new UpdateProductUseCase(
@@ -349,9 +342,8 @@ describe('UpdateProductUseCase', () => {
     );
   });
 
-  it('requires a duration when a legacy product and its template have none', async () => {
+  it('requires a submitted duration when a product has no warranty', async () => {
     const existing = createExistingProduct(null);
-    existing.template.default_warranty_duration_months = null;
     const repository = createRepository(existing);
     const useCase = new UpdateProductUseCase(
       repository as never,
@@ -682,6 +674,16 @@ function createExistingProduct(
     product_code: 'PRD-001',
     serial_number: 'SN-001',
     display_name: null,
+    catalogue_name: 'Camera AI 4K',
+    catalogue_sku: 'CAM-4K',
+    catalogue_slug: 'camera-ai-4k',
+    catalogue_brand: null,
+    catalogue_model: null,
+    catalogue_model_year: null,
+    catalogue_description: null,
+    catalogue_metadata: null,
+    catalogue_is_published: false,
+    catalogue_published_at: null,
     metadata: null,
     deleted_at: null,
     warranty: warranty
@@ -692,11 +694,6 @@ function createExistingProduct(
         }
       : null,
     warranty_activation_requests: openRequests,
-    template: {
-      id: 'template-id',
-      default_warranty_duration_months: 24 as number | null,
-      default_warranty_terms: 'Template terms',
-    },
   };
 }
 
@@ -734,11 +731,5 @@ function createUpdatedProduct(
     ownerships: [],
     category_ref: null,
     warranty,
-    template: {
-      ...existing.template,
-      name: 'Camera AI 4K',
-      assets: [],
-      category_ref: null,
-    },
   };
 }

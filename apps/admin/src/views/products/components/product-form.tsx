@@ -1,10 +1,5 @@
 "use client";
 
-import { Controller } from "react-hook-form";
-import { ImagePlus, Loader2, Trash2 } from "lucide-react";
-import { useTranslations } from "next-intl";
-import type { ProductResponse } from "@repo/shared";
-import { Button, Input, Textarea } from "@repo/ui";
 import {
   Combobox,
   ComboboxContent,
@@ -14,10 +9,17 @@ import {
   ComboboxList,
   ComboboxTrigger,
 } from "@/src/components/common";
+import { RichTextEditor } from "@/src/components/common/rich-text-editor";
 import { FormField as Field } from "@/src/components/common/form-field";
-import { ImageUpload } from "@/src/components/common/image-upload";
 import { createFieldErrorFormatter } from "@/src/utils";
+import type { ProductResponse } from "@repo/shared";
+import { Button, Input, Textarea } from "@repo/ui";
+import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Controller } from "react-hook-form";
 import { useProductForm } from "../hooks/use-product-form";
+import { ProductCatalogueMetadataFields } from "./product-catalogue-metadata-fields";
+import { ProductMediaFields } from "./product-media-fields";
 import { ProductStatusControl } from "./product-status-control";
 
 export function ProductForm({
@@ -47,345 +49,286 @@ export function ProductForm({
         </div>
       ) : null}
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field
-          error={formatFieldError(form.formState.errors.name?.message, t)}
-          id="product-name"
-          label={t("name")}
-        >
-          <Input
-            id="product-name"
-            placeholder={t("namePlaceholder")}
-            {...form.register("name")}
-          />
-        </Field>
-        <Field
-          error={formatFieldError(form.formState.errors.categoryId?.message, t)}
-          id="product-category-id"
-          label={t("dynamicCategory")}
-        >
+      <div className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.42fr)]">
+        <div className="min-w-0 space-y-6">
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field
+              error={formatFieldError(
+                form.formState.errors.displayName?.message,
+                t,
+              )}
+              id="product-display-name"
+              label={t("displayName")}
+            >
+              <Input
+                id="product-display-name"
+                placeholder={t("displayNamePlaceholder")}
+                {...form.register("displayName")}
+              />
+            </Field>
+            <Field
+              error={formatFieldError(
+                form.formState.errors.categoryId?.message,
+                t,
+              )}
+              id="product-category-id"
+              label={t("dynamicCategory")}
+            >
+              <Controller
+                control={form.control}
+                name="categoryId"
+                render={({ field }) => (
+                  <ProductCategoryCombobox
+                    disabled={form.categoriesQuery.isLoading || isSubmitting}
+                    id="product-category-id"
+                    onValueChange={field.onChange}
+                    options={categories.map((category) => ({
+                      label: category.name,
+                      value: category.id,
+                    }))}
+                    placeholder={t("dynamicCategory")}
+                    searchPlaceholder={t("search")}
+                    value={field.value}
+                  />
+                )}
+              />
+            </Field>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field
+              error={formatFieldError(form.formState.errors.brand?.message, t)}
+              id="product-brand"
+              label={t("brand")}
+            >
+              <Input
+                id="product-brand"
+                placeholder={t("brandPlaceholder")}
+                {...form.register("brand")}
+              />
+            </Field>
+            <Field
+              error={formatFieldError(form.formState.errors.model?.message, t)}
+              id="product-model"
+              label={t("model")}
+            >
+              <Input
+                id="product-model"
+                placeholder={t("modelPlaceholder")}
+                {...form.register("model")}
+              />
+            </Field>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field
+              error={formatFieldError(
+                form.formState.errors.serialNumber?.message,
+                t,
+              )}
+              id="product-serial-number"
+              label={t("serialNumber")}
+            >
+              <Input
+                id="product-serial-number"
+                placeholder={t("serialNumberPlaceholder")}
+                {...form.register("serialNumber")}
+              />
+            </Field>
+            <Field
+              error={formatFieldError(
+                form.formState.errors.modelYear?.message,
+                t,
+              )}
+              id="product-model-year"
+              label={t("modelYear")}
+            >
+              <Input
+                placeholder={t("modelYearPlaceholder")}
+                id="product-model-year"
+                inputMode="numeric"
+                min={1900}
+                max={2200}
+                type="number"
+                {...form.register("modelYear")}
+              />
+            </Field>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field
+              description={
+                form.creating
+                  ? t("productCodeDescription")
+                  : t("productCodeEditDescription")
+              }
+              error={formatFieldError(
+                form.formState.errors.productCode?.message,
+                t,
+              )}
+              id="product-code"
+              label={t("productCode")}
+            >
+              <Input
+                id="product-code"
+                placeholder={
+                  form.creating
+                    ? t("productCodePlaceholder")
+                    : t("productCodeEditPlaceholder")
+                }
+                {...form.register("productCode")}
+              />
+            </Field>
+            <Field
+              error={formatFieldError(
+                form.formState.errors.installationPosition?.message,
+                t,
+              )}
+              id="product-installation-position"
+              label={t("installationPosition")}
+            >
+              <Input
+                id="product-installation-position"
+                placeholder={t("installationPositionPlaceholder")}
+                {...form.register("installationPosition")}
+              />
+            </Field>
+          </div>
+
+          <div className="grid min-w-0 gap-5 md:grid-cols-2">
+            <Field
+              description={
+                !product
+                  ? t("warrantyDurationCreateDescription")
+                  : canEditWarrantyDuration
+                    ? t("warrantyDurationDraftDescription")
+                    : t("warrantyDurationLockedDescription")
+              }
+              error={formatFieldError(
+                form.formState.errors.warrantyDurationMonths?.message,
+                t,
+              )}
+              id="product-warranty-duration"
+              label={t("durationMonths")}
+            >
+              <Input
+                disabled={isSubmitting || !canEditWarrantyDuration}
+                id="product-warranty-duration"
+                inputMode="numeric"
+                min={1}
+                placeholder={t("warrantyDurationPlaceholder")}
+                step={1}
+                type="number"
+                {...form.register("warrantyDurationMonths")}
+              />
+            </Field>
+            <Field
+              description={
+                !product
+                  ? t("warrantyCodeCreateDescription")
+                  : product.warrantyCodeEditLockedReason ===
+                      "WARRANTY_NOT_DRAFT"
+                    ? t("warrantyCodeNotDraftDescription")
+                    : product.warrantyCodeEditLockedReason ===
+                        "OPEN_ACTIVATION_REQUEST"
+                      ? t("warrantyCodeOpenRequestDescription")
+                      : t("warrantyCodeEditableDescription")
+              }
+              error={formatFieldError(
+                form.formState.errors.warrantyCode?.message,
+                t,
+              )}
+              id="product-warranty-code"
+              label={t("warrantyCode")}
+            >
+              <Input
+                disabled={
+                  isSubmitting ||
+                  Boolean(product && !product.canEditWarrantyCode)
+                }
+                id="product-warranty-code"
+                placeholder={t("warrantyCodePlaceholder")}
+                {...form.register("warrantyCode")}
+              />
+            </Field>
+          </div>
+
+          <Field
+            error={formatFieldError(
+              form.formState.errors.shortDescription?.message,
+              t,
+            )}
+            id="product-short-description"
+            label={t("shortDescriptionLabel")}
+          >
+            <Textarea
+              id="product-short-description"
+              placeholder={t("shortDescriptionPlaceholder")}
+              rows={2}
+              {...form.register("shortDescription")}
+            />
+          </Field>
+
+          <Field
+            error={formatFieldError(
+              form.formState.errors.description?.message,
+              t,
+            )}
+            id="product-description"
+            label={t("descriptionLabel")}
+          >
+            <Controller
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <RichTextEditor
+                  disabled={isSubmitting}
+                  onChange={field.onChange}
+                  value={field.value}
+                />
+              )}
+            />
+          </Field>
+
+          <Field
+            error={formatFieldError(
+              form.formState.errors.warrantyTerms?.message,
+              t,
+            )}
+            id="product-warranty-terms"
+            label={t("warrantyTerms")}
+          >
+            <Textarea
+              disabled={isSubmitting || !canEditWarrantyDuration}
+              id="product-warranty-terms"
+              placeholder={t("warrantyTermsPlaceholder")}
+              rows={3}
+              {...form.register("warrantyTerms")}
+            />
+          </Field>
+
+          <ProductCatalogueMetadataFields disabled={isSubmitting} form={form} />
+
           <Controller
             control={form.control}
-            name="categoryId"
+            name="status"
             render={({ field }) => (
-              <ProductCategoryCombobox
-                disabled={form.categoriesQuery.isLoading || isSubmitting}
-                id="product-category-id"
-                onValueChange={field.onChange}
-                options={categories.map((category) => ({
-                  label: category.name,
-                  value: category.id,
-                }))}
-                placeholder={t("dynamicCategory")}
-                searchPlaceholder={t("search")}
-                value={field.value}
+              <ProductStatusControl
+                disabled={isSubmitting}
+                id="product-status"
+                onStatusChange={field.onChange}
+                status={field.value}
               />
             )}
           />
-        </Field>
-      </div>
-
-      <div className="grid gap-5 sm:grid-cols-3">
-        <Field
-          error={formatFieldError(form.formState.errors.brand?.message, t)}
-          id="product-brand"
-          label={t("brand")}
-        >
-          <Input
-            id="product-brand"
-            placeholder={t("brandPlaceholder")}
-            {...form.register("brand")}
-          />
-        </Field>
-        <Field
-          error={formatFieldError(form.formState.errors.model?.message, t)}
-          id="product-model"
-          label={t("model")}
-        >
-          <Input
-            id="product-model"
-            placeholder={t("modelPlaceholder")}
-            {...form.register("model")}
-          />
-        </Field>
-        <Field
-          error={formatFieldError(form.formState.errors.modelYear?.message, t)}
-          id="product-model-year"
-          label={t("modelYear")}
-        >
-          <Input
-            id="product-model-year"
-            inputMode="numeric"
-            min={1900}
-            max={2200}
-            type="number"
-            {...form.register("modelYear")}
-          />
-        </Field>
-      </div>
-
-      <Field
-        error={formatFieldError(form.formState.errors.description?.message, t)}
-        id="product-description"
-        label={t("descriptionLabel")}
-      >
-        <Textarea
-          id="product-description"
-          rows={3}
-          {...form.register("description")}
-        />
-      </Field>
-
-      <Field id="product-cover" label={t("coverImage")}>
-        <Controller
-          control={form.control}
-          name="coverImageUrl"
-          render={({ field }) => (
-            <ImageUpload
-              disabled={isSubmitting}
-              id="product-cover"
-              labels={{
-                hint: t("coverImageHint"),
-                previewAlt: t("coverImageAlt"),
-              }}
-              onAssetChange={(asset) =>
-                form.setValue("coverAssetId", asset?.id ?? "", {
-                  shouldDirty: true,
-                })
-              }
-              onChange={field.onChange}
-              persistedValue={
-                product?.assets.find((asset) => asset.role === "COVER")?.url ??
-                ""
-              }
-              uploadOptions={{ accessType: "PUBLIC", folder: "products" }}
-              value={field.value}
-            />
-          )}
-        />
-      </Field>
-
-      <section className="min-w-0 space-y-4 overflow-hidden rounded-md border border-slate-200 p-4 dark:border-slate-800">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h2 className="font-medium">{t("galleryTitle")}</h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              {t("galleryDescription")}
-            </p>
-          </div>
-          <Button
-            className="w-full sm:w-auto"
-            onClick={() => form.gallery.append({ assetId: "", url: "" })}
-            type="button"
-            variant="secondary"
-          >
-            <ImagePlus className="size-4" />
-            {t("addGalleryImage")}
-          </Button>
         </div>
-        {form.gallery.fields.length === 0 ? (
-          <p className="rounded-md border border-dashed p-5 text-center text-sm text-slate-500">
-            {t("noGalleryImages")}
-          </p>
-        ) : (
-          <div className="grid min-w-0 gap-4 sm:grid-cols-2">
-            {form.gallery.fields.map((galleryField, index) => (
-              <div className="min-w-0 space-y-2" key={galleryField.id}>
-                <Controller
-                  control={form.control}
-                  name={`galleryImages.${index}.url`}
-                  render={({ field }) => (
-                    <ImageUpload
-                      disabled={isSubmitting}
-                      id={`product-gallery-${galleryField.id}`}
-                      onAssetChange={(asset) =>
-                        form.setValue(
-                          `galleryImages.${index}.assetId`,
-                          asset?.id ?? "",
-                          { shouldDirty: true },
-                        )
-                      }
-                      onChange={field.onChange}
-                      persistedValue={galleryField.url}
-                      uploadOptions={{
-                        accessType: "PUBLIC",
-                        folder: "products",
-                      }}
-                      value={field.value}
-                    />
-                  )}
-                />
-                <Button
-                  className="w-full"
-                  onClick={() => form.gallery.remove(index)}
-                  type="button"
-                  variant="secondary"
-                >
-                  <Trash2 className="size-4" />
-                  {t("removeGalleryImage")}
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field
-          description={t("displayNameDescription")}
-          error={formatFieldError(
-            form.formState.errors.displayName?.message,
-            t,
-          )}
-          id="product-display-name"
-          label={t("displayName")}
-        >
-          <Input
-            id="product-display-name"
-            placeholder={t("displayNamePlaceholder")}
-            {...form.register("displayName")}
-          />
-        </Field>
-        <Field
-          error={formatFieldError(
-            form.formState.errors.serialNumber?.message,
-            t,
-          )}
-          id="product-serial-number"
-          label={t("serialNumber")}
-        >
-          <Input
-            id="product-serial-number"
-            placeholder={t("serialNumberPlaceholder")}
-            {...form.register("serialNumber")}
-          />
-        </Field>
-      </div>
-
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field
-          description={
-            form.creating
-              ? t("productCodeDescription")
-              : t("productCodeEditDescription")
-          }
-          error={formatFieldError(
-            form.formState.errors.productCode?.message,
-            t,
-          )}
-          id="product-code"
-          label={t("productCode")}
-        >
-          <Input
-            id="product-code"
-            placeholder={
-              form.creating
-                ? t("productCodePlaceholder")
-                : t("productCodeEditPlaceholder")
-            }
-            {...form.register("productCode")}
-          />
-        </Field>
-        <Field
-          error={formatFieldError(
-            form.formState.errors.installationPosition?.message,
-            t,
-          )}
-          id="product-installation-position"
-          label={t("installationPosition")}
-        >
-          <Input
-            id="product-installation-position"
-            placeholder={t("installationPositionPlaceholder")}
-            {...form.register("installationPosition")}
-          />
-        </Field>
-      </div>
-
-      <div className="grid min-w-0 gap-5 md:grid-cols-2">
-        <Field
-          description={
-            !product
-              ? t("warrantyDurationCreateDescription")
-              : canEditWarrantyDuration
-                ? t("warrantyDurationDraftDescription")
-                : t("warrantyDurationLockedDescription")
-          }
-          error={formatFieldError(
-            form.formState.errors.warrantyDurationMonths?.message,
-            t,
-          )}
-          id="product-warranty-duration"
-          label={t("durationMonths")}
-        >
-          <Input
-            disabled={isSubmitting || !canEditWarrantyDuration}
-            id="product-warranty-duration"
-            inputMode="numeric"
-            min={1}
-            placeholder={t("warrantyDurationPlaceholder")}
-            step={1}
-            type="number"
-            {...form.register("warrantyDurationMonths")}
-          />
-        </Field>
-        <Field
-          description={
-            !product
-              ? t("warrantyCodeCreateDescription")
-              : product.warrantyCodeEditLockedReason === "WARRANTY_NOT_DRAFT"
-                ? t("warrantyCodeNotDraftDescription")
-                : product.warrantyCodeEditLockedReason ===
-                    "OPEN_ACTIVATION_REQUEST"
-                  ? t("warrantyCodeOpenRequestDescription")
-                  : t("warrantyCodeEditableDescription")
-          }
-          error={formatFieldError(
-            form.formState.errors.warrantyCode?.message,
-            t,
-          )}
-          id="product-warranty-code"
-          label={t("warrantyCode")}
-        >
-          <Input
-            disabled={
-              isSubmitting || Boolean(product && !product.canEditWarrantyCode)
-            }
-            id="product-warranty-code"
-            placeholder={t("warrantyCodePlaceholder")}
-            {...form.register("warrantyCode")}
-          />
-        </Field>
-      </div>
-
-      <Field
-        error={formatFieldError(
-          form.formState.errors.warrantyTerms?.message,
-          t,
-        )}
-        id="product-warranty-terms"
-        label={t("warrantyTerms")}
-      >
-        <Textarea
-          disabled={isSubmitting || !canEditWarrantyDuration}
-          id="product-warranty-terms"
-          rows={3}
-          {...form.register("warrantyTerms")}
+        <ProductMediaFields
+          disabled={isSubmitting}
+          form={form}
+          product={product}
         />
-      </Field>
-
-      <Controller
-        control={form.control}
-        name="status"
-        render={({ field }) => (
-          <ProductStatusControl
-            disabled={isSubmitting}
-            id="product-status"
-            onStatusChange={field.onChange}
-            status={field.value}
-          />
-        )}
-      />
+      </div>
 
       <div className="grid grid-cols-2 gap-2 border-t border-slate-200 pt-5 sm:flex sm:justify-end dark:border-slate-800">
         <Button
@@ -463,6 +406,7 @@ function ProductCategoryCombobox({
 const formatFieldError = createFieldErrorFormatter(
   new Set([
     "brandLength",
+    "catalogueMetadataItemLength",
     "categoryRequired",
     "descriptionLength",
     "displayNameLength",
@@ -474,6 +418,8 @@ const formatFieldError = createFieldErrorFormatter(
     "productCodeLength",
     "productCodeRequired",
     "serialNumberLength",
+    "specificationKeyLength",
+    "specificationValueLength",
     "warrantyCodeInvalid",
     "warrantyTermsLength",
   ]),

@@ -69,7 +69,6 @@ type ProductImportPreviewTableProps = {
     }) => string;
     previous: string;
     productCode: string;
-    productName: string;
     ready: string;
     remove: string;
     row: string;
@@ -149,7 +148,7 @@ export function ProductImportPreviewTable({
 
       <div className="overflow-hidden rounded-md border border-slate-200">
         <TableScroll className="max-h-[27rem] overflow-y-auto">
-          <Table className="min-w-[126rem] whitespace-nowrap">
+          <Table className="min-w-[112rem] whitespace-nowrap">
             <TableHeader className="sticky top-0 z-10 bg-slate-50">
               <TableRow>
                 <TableHead className="w-20 whitespace-nowrap">
@@ -159,7 +158,7 @@ export function ProductImportPreviewTable({
                   {labels.productCode}
                 </TableHead>
                 <TableHead className="w-56 whitespace-nowrap">
-                  {labels.productName}
+                  {labels.displayName}
                 </TableHead>
                 <TableHead className="w-44 whitespace-nowrap">
                   {labels.categoryCode}
@@ -178,9 +177,6 @@ export function ProductImportPreviewTable({
                 </TableHead>
                 <TableHead className="w-64 whitespace-nowrap">
                   {labels.warrantyTerms}
-                </TableHead>
-                <TableHead className="w-56 whitespace-nowrap">
-                  {labels.displayName}
                 </TableHead>
                 <TableHead className="w-44 whitespace-nowrap">
                   {labels.installationPosition}
@@ -212,14 +208,13 @@ export function ProductImportPreviewTable({
                       </span>
                     </TableCell>
                     <PreviewCell value={row.data.productCode} />
-                    <PreviewCell value={row.data.productName} />
+                    <PreviewCell value={row.data.displayName} />
                     <PreviewCell value={row.data.categoryCode} />
                     <PreviewCell value={row.data.brand} />
                     <PreviewCell value={row.data.model} />
                     <PreviewCell value={row.data.modelYear} />
                     <PreviewCell value={row.data.warrantyDurationMonths} />
                     <PreviewCell value={row.data.warrantyTerms} />
-                    <PreviewCell value={row.data.displayName} />
                     <PreviewCell value={row.data.installationPosition} />
                     <PreviewCell value={row.data.warrantyCode} />
                     <PreviewCell value={row.data.serialNumber} />
@@ -259,7 +254,7 @@ export function ProductImportPreviewTable({
                 <TableRow>
                   <TableCell
                     className="h-24 text-center text-sm text-slate-500"
-                    colSpan={16}
+                    colSpan={15}
                   >
                     {labels.noRows}
                   </TableCell>
@@ -376,7 +371,7 @@ function ProductImportEditForm({
     setValues((current) => ({
       ...current,
       [key]:
-        key === "productName" || key === "categoryCode" ? value : value || null,
+        key === "displayName" || key === "categoryCode" ? value : value || null,
     }));
   };
 
@@ -387,7 +382,7 @@ function ProductImportEditForm({
         event.preventDefault();
         onSave({
           ...values,
-          productName: values.productName.trim(),
+          displayName: values.displayName.trim(),
           categoryCode: values.categoryCode.trim().toUpperCase(),
           warrantyCode: values.warrantyCode?.trim().toUpperCase() || null,
         });
@@ -400,11 +395,11 @@ function ProductImportEditForm({
             value={values.productCode ?? ""}
           />
         </ImportField>
-        <ImportField label={labels.productName}>
+        <ImportField label={labels.displayName}>
           <Input
-            onChange={(event) => setText("productName", event.target.value)}
+            onChange={(event) => setText("displayName", event.target.value)}
             required
-            value={values.productName}
+            value={values.displayName}
           />
         </ImportField>
         <ImportField label={labels.categoryCode}>
@@ -452,12 +447,6 @@ function ProductImportEditForm({
             required
             type="number"
             value={values.warrantyDurationMonths}
-          />
-        </ImportField>
-        <ImportField label={labels.displayName}>
-          <Input
-            onChange={(event) => setText("displayName", event.target.value)}
-            value={values.displayName ?? ""}
           />
         </ImportField>
         <ImportField label={labels.serialNumber}>

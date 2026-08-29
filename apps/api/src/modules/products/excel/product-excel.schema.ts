@@ -14,12 +14,12 @@ export const productExcelColumns: Array<
     parse: parseOptionalString,
   },
   {
-    key: 'productName',
+    key: 'displayName',
     header: 'Tên sản phẩm',
     required: true,
     width: 34,
     example: 'Pin Battery Plus',
-    note: 'Tên catalogue được lưu trực tiếp trên sản phẩm.',
+    note: 'Tên hiển thị được lưu trực tiếp trên sản phẩm.',
     parse: parseRequiredString,
   },
   {
@@ -65,14 +65,6 @@ export const productExcelColumns: Array<
     header: 'Điều khoản bảo hành',
     width: 36,
     example: 'Áp dụng theo điều kiện bảo hành của hãng.',
-    parse: parseOptionalString,
-  },
-  {
-    key: 'displayName',
-    header: 'Tên hiển thị thiết bị',
-    width: 34,
-    example: 'Pin xe khách Nguyễn Văn A',
-    note: 'Không bắt buộc. Chỉ dùng khi thiết bị cụ thể cần tên hiển thị riêng.',
     parse: parseOptionalString,
   },
   {

@@ -15,9 +15,9 @@ export class ListPublicProductsUseCase {
     const result = await this.productsRepository.listPublic(dto);
 
     return {
-      items: result.items.map((template) =>
+      items: result.items.map((product) =>
         toPublicProductSummary(
-          template,
+          product,
           (asset) =>
             this.assetsService?.enrichAssetUrl(asset).url ?? asset.path,
         ),

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { Boxes, Layers3, Package } from "lucide-react";
+import { Boxes, Package } from "lucide-react";
 import { PERMISSIONS, type PermissionKey } from "@repo/shared/constants";
 import {
   canAccessNavigationItem,
@@ -10,28 +10,25 @@ import {
 
 const item = {
   href: "/products",
-  permissionHrefs: [
-    { permission: PERMISSIONS.PRODUCT_VIEW, href: "/products" },
-    {
-      permission: PERMISSIONS.PRODUCT_TEMPLATE_VIEW,
-      href: "/product-templates",
-    },
-  ],
-  requiredAnyPermissions: [
-    PERMISSIONS.PRODUCT_VIEW,
-    PERMISSIONS.PRODUCT_TEMPLATE_VIEW,
-  ],
+  requiredPermission: PERMISSIONS.PRODUCT_VIEW,
 };
 
-test("resolves product navigation to the first permitted page", () => {
+test("resolves product navigation only for product viewers", () => {
   const templateOnly = (permission: PermissionKey) =>
     permission === PERMISSIONS.PRODUCT_TEMPLATE_VIEW;
 
-  assert.equal(canAccessNavigationItem(item, templateOnly), true);
-  assert.equal(resolveNavigationHref(item, templateOnly), "/product-templates");
+  assert.equal(canAccessNavigationItem(item, templateOnly), false);
+  assert.equal(resolveNavigationHref(item, templateOnly), "/products");
+  assert.equal(
+    canAccessNavigationItem(
+      item,
+      (permission) => permission === PERMISSIONS.PRODUCT_VIEW,
+    ),
+    true,
+  );
 });
 
-test("hides grouped navigation without either product permission", () => {
+test("hides product navigation without product permission", () => {
   assert.equal(
     canAccessNavigationItem(item, () => false),
     false,
@@ -45,12 +42,6 @@ test("keeps only accessible children and hides an empty parent", () => {
       icon: Package,
       children: [
         {
-          title: "Templates",
-          href: "/product-templates",
-          icon: Layers3,
-          requiredPermission: PERMISSIONS.PRODUCT_TEMPLATE_VIEW,
-        },
-        {
           title: "Products",
           href: "/products",
           icon: Boxes,
@@ -59,15 +50,15 @@ test("keeps only accessible children and hides an empty parent", () => {
       ],
     },
   ];
-  const templateOnly = getAccessibleNavigationItems(
+  const productOnly = getAccessibleNavigationItems(
     items,
-    (permission) => permission === PERMISSIONS.PRODUCT_TEMPLATE_VIEW,
+    (permission) => permission === PERMISSIONS.PRODUCT_VIEW,
     () => true,
   );
 
   assert.deepEqual(
-    templateOnly[0]?.children?.map((child) => child.href),
-    ["/product-templates"],
+    productOnly[0]?.children?.map((child) => child.href),
+    ["/products"],
   );
   assert.deepEqual(
     getAccessibleNavigationItems(

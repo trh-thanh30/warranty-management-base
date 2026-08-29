@@ -14,7 +14,6 @@ import { AssignOwnerDialog } from "./components/assign-owner-dialog";
 import { DeleteProductDialog } from "./components/delete-product-dialog";
 import { RestoreProductDialog } from "./components/restore-product-dialog";
 import { ProductImportPreviewTable } from "./components/product-import-preview-table";
-import { ProductManagementTabs } from "../product-management/components/product-management-tabs";
 import { ProductsDirectoryCard } from "./components/products-directory-card";
 import { useProductsDirectory } from "./hooks/use-products-directory";
 
@@ -103,8 +102,6 @@ export function ProductsView() {
           eyebrow={t("eyebrow")}
           title={t("title")}
         />
-
-        <ProductManagementTabs activeTab="products" />
 
         <ProductsDirectoryCard
           canCreate={canCreateProducts}
@@ -200,7 +197,7 @@ export function ProductsView() {
                   actions: t("actions"),
                   allRows: t("excel.allRows"),
                   cancel: t("cancel"),
-                  displayName: t("displayName"),
+                  displayName: t("excel.productName"),
                   edit: t("excel.editRow"),
                   editDescription: t("excel.editRowDescription"),
                   editTitle: t("excel.editRowTitle"),
@@ -220,7 +217,6 @@ export function ProductsView() {
                   pagination: (values) => t("excel.previewPagination", values),
                   previous: t("previous"),
                   productCode: t("productCode"),
-                  productName: t("name"),
                   ready: t("excel.ready"),
                   remove: t("excel.removeRow"),
                   row: t("excel.row"),

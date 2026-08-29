@@ -5,6 +5,7 @@ import {
 } from '@/common/excel';
 import { ValidationError } from '@/common/response';
 import { productExcelColumns } from '@/modules/products/excel/product-excel.schema';
+import { toProductExcelRow } from '@/modules/products/excel/product-excel.mapper';
 import { ProductExcelRow } from '@/modules/products/excel/product-excel.types';
 import { PreviewProductImportUseCase } from '@/modules/products/use-cases/preview-product-import.use-case';
 import { product_status } from '@prisma/client';
@@ -21,7 +22,6 @@ describe('PreviewProductImportUseCase', () => {
       'Năm model',
       'Thời hạn bảo hành (tháng)',
       'Điều khoản bảo hành',
-      'Tên hiển thị thiết bị',
       'Vị trí gắn',
       'Mã bảo hành',
       'Số serial',
@@ -29,11 +29,42 @@ describe('PreviewProductImportUseCase', () => {
     ]);
   });
 
+  it('exports one product name from displayName with a catalogue fallback', () => {
+    const baseProduct = {
+      catalogue_brand: 'Lexzenz',
+      catalogue_model: 'Battery Plus',
+      catalogue_model_year: 2026,
+      catalogue_name: 'Catalogue Battery',
+      category_id: 'category-id',
+      category_ref: { code: 'ACCESSORY' },
+      display_name: 'Customer Battery',
+      metadata: null,
+      product_code: 'PRD-2026-ABCDEF',
+      serial_number: 'SN-001',
+      status: product_status.ACTIVE,
+      warranty: null,
+    };
+
+    expect(toProductExcelRow(baseProduct as never)).toEqual(
+      expect.objectContaining({
+        displayName: 'Customer Battery',
+      }),
+    );
+    expect(toProductExcelRow(baseProduct as never)).not.toHaveProperty(
+      'productName',
+    );
+    expect(
+      toProductExcelRow({
+        ...baseProduct,
+        display_name: null,
+      } as never).displayName,
+    ).toBe('Catalogue Battery');
+  });
+
   it('parses and validates product import rows', async () => {
     const file = await createFileFromRows([
       {
         productCode: 'PRD-2026-ABCDEF',
-        productName: 'Battery Plus',
         categoryCode: 'ACCESSORY',
         brand: 'Lexzenz',
         model: 'Battery Plus',
@@ -58,7 +89,6 @@ describe('PreviewProductImportUseCase', () => {
     expect(result.invalidRows).toBe(0);
     expect(result.rows[0].data).toEqual(
       expect.objectContaining({
-        productName: 'Battery Plus',
         categoryCode: 'ACCESSORY',
         displayName: 'Genuine Battery Pack',
         installationPosition: 'Engine bay',
@@ -67,6 +97,7 @@ describe('PreviewProductImportUseCase', () => {
         status: product_status.ACTIVE,
       }),
     );
+    expect(result.rows[0].data).not.toHaveProperty('productName');
   });
 
   it('rejects workbooks that do not match the product template headers', async () => {
@@ -87,7 +118,6 @@ describe('PreviewProductImportUseCase', () => {
     const file = await createFileFromRows([
       {
         productCode: null,
-        productName: 'Battery Pack',
         categoryCode: 'UNKNOWN',
         brand: null,
         model: null,
@@ -120,7 +150,6 @@ describe('PreviewProductImportUseCase', () => {
     const file = await createFileFromRows([
       {
         productCode: null,
-        productName: 'Battery Pack',
         categoryCode: '',
         brand: null,
         model: null,
@@ -152,7 +181,6 @@ describe('PreviewProductImportUseCase', () => {
     const file = await createFileFromRows([
       {
         productCode: null,
-        productName: 'Battery A',
         categoryCode: 'ACCESSORY',
         brand: null,
         model: null,
@@ -167,7 +195,6 @@ describe('PreviewProductImportUseCase', () => {
       },
       {
         productCode: null,
-        productName: 'Battery B',
         categoryCode: 'ACCESSORY',
         brand: null,
         model: null,

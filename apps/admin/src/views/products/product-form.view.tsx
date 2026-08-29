@@ -43,7 +43,7 @@ export function ProductFormView({ mode, productId }: ProductFormViewProps) {
         backLabel={t("backToDirectory")}
         description={description}
         eyebrow={t("eyebrow")}
-        maxWidthClassName="max-w-5xl"
+        maxWidthClassName="max-w-7xl"
         title={title}
       >
         {isEditing && productQuery.isLoading ? (

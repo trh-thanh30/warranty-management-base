@@ -352,8 +352,7 @@ function normalizePreviewRow(row: {
   const normalizedRow: EditableProductImportRow = {
     ...row,
     data: {
-      displayName: row.data.displayName ?? null,
-      productName: row.data.productName ?? "",
+      displayName: row.data.displayName ?? "",
       categoryCode: row.data.categoryCode ?? "",
       brand: row.data.brand ?? null,
       model: row.data.model ?? null,
@@ -410,9 +409,9 @@ function validateImportRows(rows: EditableProductImportRow[]) {
     const productCode = row.data.productCode?.trim();
     const serialNumber = row.data.serialNumber?.trim();
     const warrantyCode = row.data.warrantyCode?.trim().toUpperCase();
-    if (!row.data.productName.trim()) {
+    if (!row.data.displayName.trim()) {
       errors.push({
-        field: "productName",
+        field: "displayName",
         message: "Tên sản phẩm là bắt buộc.",
         rowNumber: row.rowNumber,
       });

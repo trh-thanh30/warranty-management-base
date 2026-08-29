@@ -9,14 +9,13 @@ export type ProductsHttpClient = {
 
 export type ProductImportRowData = {
   productCode: string | null;
-  productName: string;
+  displayName: string;
   categoryCode: string;
   brand: string | null;
   model: string | null;
   modelYear: number | null;
   warrantyDurationMonths: number;
   warrantyTerms: string | null;
-  displayName: string | null;
   installationPosition: string | null;
   warrantyCode: string | null;
   serialNumber: string | null;

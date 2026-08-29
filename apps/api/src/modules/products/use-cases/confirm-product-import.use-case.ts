@@ -69,14 +69,14 @@ export class ConfirmProductImportUseCase {
           data: {
             product_code: productCode,
             category_ref: { connect: { id: row.categoryId } },
-            catalogue_name: row.productName.trim(),
+            catalogue_name: row.displayName.trim(),
             catalogue_sku: productCode,
-            catalogue_slug: this.toCatalogueSlug(row.productName, productCode),
+            catalogue_slug: this.toCatalogueSlug(row.displayName, productCode),
             catalogue_brand: this.blankToNull(row.brand),
             catalogue_model: this.blankToNull(row.model),
             catalogue_model_year: row.modelYear,
             serial_number: this.blankToNull(row.serialNumber),
-            display_name: this.blankToNull(row.displayName),
+            display_name: row.displayName.trim(),
             status: row.status ?? product_status.ACTIVE,
             metadata: this.toMetadata(row),
             warranty: {
@@ -124,16 +124,16 @@ export class ConfirmProductImportUseCase {
   ): Prisma.ProductUpdateInput {
     return {
       category_ref: { connect: { id: row.categoryId } },
-      catalogue_name: row.productName.trim(),
+      catalogue_name: row.displayName.trim(),
       catalogue_sku: row.productCode ?? row.existingProductCode ?? undefined,
       catalogue_slug: this.toCatalogueSlug(
-        row.productName,
+        row.displayName,
         row.productCode ?? row.existingProductCode ?? '',
       ),
       catalogue_brand: this.blankToNull(row.brand),
       catalogue_model: this.blankToNull(row.model),
       catalogue_model_year: row.modelYear,
-      display_name: this.blankToNull(row.displayName),
+      display_name: row.displayName.trim(),
       status: row.status,
       serial_number: this.blankToNull(row.serialNumber),
       metadata: this.toMetadata(row),

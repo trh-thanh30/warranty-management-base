@@ -1,5 +1,10 @@
-import { ProductTemplatesView } from "@/src/views/product-templates/product-templates.view";
+import { redirect } from "next/navigation";
 
-export default function ProductTemplatesPage() {
-  return <ProductTemplatesView />;
+export default async function ProductTemplatesPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  redirect(`/${locale}/products`);
 }
