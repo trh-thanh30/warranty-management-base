@@ -37,7 +37,6 @@ describe('toProductResponse', () => {
   it('projects product-owned catalogue fields while preserving physical metadata', () => {
     const response = toProductResponse({
       id: 'product-id',
-      template_id: 'template-id',
       category_id: 'override-category-id',
       category_ref: {
         id: 'override-category-id',
@@ -165,7 +164,6 @@ describe('toProductResponse', () => {
 function createProductFixture() {
   return {
     id: 'product-id',
-    template_id: 'template-id',
     category_id: 'category-id',
     product_code: 'PRD-001',
     serial_number: 'SERIAL-001',

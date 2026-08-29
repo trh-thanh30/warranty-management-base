@@ -26,7 +26,6 @@ describe('toWarrantyClaimResponse', () => {
       updated_at: now,
       product: {
         id: 'product-id',
-        template_id: 'template-id',
         category_id: 'category-id',
         category_ref: {
           id: 'category-id',

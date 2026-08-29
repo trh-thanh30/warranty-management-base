@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { Boxes, Layers3, Package } from "lucide-react";
+import { Boxes, Package } from "lucide-react";
 import type { DashboardConfig } from "@/src/config/dashboard.types";
 import { flattenNavigationItems, getNavItems } from "./nav-items.ts";
 
@@ -47,9 +47,9 @@ test("flattens nested navigation into navigable leaf items", () => {
       icon: Package,
       children: [
         {
-          title: "Templates",
-          href: "/product-templates",
-          icon: Layers3,
+          title: "Archived products",
+          href: "/products/archive",
+          icon: Boxes,
         },
         {
           title: "Products",
@@ -62,6 +62,6 @@ test("flattens nested navigation into navigable leaf items", () => {
 
   assert.deepEqual(
     flattenNavigationItems(items).map((item) => item.href),
-    ["/product-templates", "/products"],
+    ["/products/archive", "/products"],
   );
 });

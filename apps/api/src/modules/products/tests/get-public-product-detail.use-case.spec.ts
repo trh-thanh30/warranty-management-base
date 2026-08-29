@@ -158,7 +158,6 @@ function createPublishedTemplateFixture() {
 
   return {
     id: 'template-id',
-    template_id: null,
     product_code: 'LEX-SP50',
     serial_number: null,
     display_name: null,

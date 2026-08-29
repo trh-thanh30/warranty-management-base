@@ -24,7 +24,6 @@ describe('UpdateProductUseCase', () => {
   it('updates only physical product fields including display name', async () => {
     const existing = {
       id: 'product-id',
-      template_id: 'template-id',
       serial_number: 'SN-001',
       display_name: null,
       catalogue_name: 'Camera AI 4K',
@@ -669,7 +668,6 @@ function createExistingProduct(
 ) {
   return {
     id: 'product-id',
-    template_id: 'template-id',
     category_id: 'category-id',
     product_code: 'PRD-001',
     serial_number: 'SN-001',
@@ -699,7 +697,6 @@ function createExistingProduct(
 
 function createRepository(existing: ReturnType<typeof createExistingProduct>) {
   return {
-    findActiveProductTemplateById: jest.fn(),
     findActiveProductCategoryById: jest
       .fn()
       .mockResolvedValue({ id: 'new-category-id' }),

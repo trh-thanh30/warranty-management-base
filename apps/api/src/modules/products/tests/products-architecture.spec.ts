@@ -15,7 +15,7 @@ describe('Products architecture', () => {
     expect(source).toContain('productsRepository.create');
   });
 
-  it('keeps Product Template outside active product and warranty runtime paths', () => {
+  it('keeps retired catalogue persistence outside active runtime paths', () => {
     const runtimeFiles = [
       '../product-catalogue.ts',
       '../products.types.ts',
@@ -41,5 +41,17 @@ describe('Products architecture', () => {
       expect(source).not.toMatch(/\btemplate:\s*(?:true|\{)/);
       expect(source).not.toContain('.template?.');
     }
+  });
+
+  it('removes retired Product Template persistence from the Prisma schema', () => {
+    const schema = readFileSync(
+      join(__dirname, '../../../../prisma/schema.prisma'),
+      'utf8',
+    );
+
+    expect(schema).not.toContain('model ProductTemplate');
+    expect(schema).not.toContain('ProductTemplateAsset');
+    expect(schema).not.toContain('template_id');
+    expect(schema).not.toContain('PRODUCT_TEMPLATE_');
   });
 });

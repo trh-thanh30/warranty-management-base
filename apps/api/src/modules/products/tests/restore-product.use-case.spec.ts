@@ -20,8 +20,6 @@ describe('RestoreProductUseCase', () => {
         product_code: 'PRD-1',
         serial_number: null,
         status: 'DELETED',
-        template: null,
-        template_id: 'template-1',
         updated_at: new Date(),
         warranty: null,
         warranty_activation_requests: [],

@@ -11,13 +11,6 @@ test("remaining directory tables keep compact columns on one line", () => {
     readViewSource("./notifications/components/admin-notification-list.tsx"),
     /<Table className="min-w-\[980px\] whitespace-nowrap">/,
   );
-  assert.match(
-    readViewSource(
-      "./product-templates/components/product-templates-table.tsx",
-    ),
-    /<Table className="min-w-5xl whitespace-nowrap">/,
-  );
-
   const contactSubmissionsSource = readViewSource(
     "./contact-submissions/components/contact-submissions-directory-card.tsx",
   );
@@ -44,13 +37,6 @@ test("remaining long table values are bounded without changing mobile cards", ()
     readViewSource("./customers/customer-products.view.tsx"),
     /block max-w-64 truncate/,
   );
-
-  const templatesSource = readViewSource(
-    "./product-templates/components/product-templates-table.tsx",
-  );
-  assert.match(templatesSource, /lg:max-w-72/);
-  assert.match(templatesSource, /block max-w-64 truncate/);
-  assert.match(templatesSource, /flex flex-nowrap gap-2/);
 
   const contactSubmissionsSource = readViewSource(
     "./contact-submissions/components/contact-submissions-directory-card.tsx",

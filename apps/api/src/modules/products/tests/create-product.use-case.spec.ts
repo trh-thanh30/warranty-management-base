@@ -10,7 +10,6 @@ const now = new Date('2026-08-29T00:00:00.000Z');
 function persistedProduct(overrides: Record<string, unknown> = {}) {
   return {
     id: 'product-id',
-    template_id: null,
     category_id: 'category-id',
     product_code: 'PRD-2026-ABCDEF',
     serial_number: 'SN-001',
