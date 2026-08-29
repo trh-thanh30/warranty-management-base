@@ -252,37 +252,11 @@ async function upsertDemoProduct(data: {
     throw new Error(`Product category ${data.category} must be seeded first`);
   }
 
-  const templateSku = `DEMO-${data.productCode}`;
-  const template = await prisma.productTemplate.upsert({
-    where: { sku: templateSku },
-    update: {
-      name: data.name,
-      brand: data.brand,
-      model: data.model,
-      model_year: data.manufactureYear,
-      category_id: category.id,
-      default_warranty_duration_months: data.durationMonths,
-      is_active: true,
-    },
-    create: {
-      sku: templateSku,
-      slug: data.productCode.toLowerCase(),
-      name: data.name,
-      brand: data.brand,
-      model: data.model,
-      model_year: data.manufactureYear,
-      category_id: category.id,
-      default_warranty_duration_months: data.durationMonths,
-      is_active: true,
-    },
-  });
-
   const product = await prisma.product.upsert({
     where: { product_code: data.productCode },
     update: {
       serial_number: data.serialNumber,
-      template_id: template.id,
-      category_id: template.category_id,
+      category_id: category.id,
       catalogue_name: data.name,
       catalogue_sku: data.productCode,
       catalogue_slug: data.productCode.toLowerCase(),
@@ -295,8 +269,7 @@ async function upsertDemoProduct(data: {
     create: {
       product_code: data.productCode,
       serial_number: data.serialNumber,
-      template_id: template.id,
-      category_id: template.category_id,
+      category_id: category.id,
       catalogue_name: data.name,
       catalogue_sku: data.productCode,
       catalogue_slug: data.productCode.toLowerCase(),
@@ -305,7 +278,6 @@ async function upsertDemoProduct(data: {
       catalogue_model_year: data.manufactureYear,
       status: product_status.ACTIVE,
     },
-    include: { template: true },
   });
 
   const endDate = new Date(data.purchaseDate);

@@ -1,10 +1,10 @@
-import { ProductTemplateDetailView } from "@/src/views/product-templates/product-template-detail.view";
+import { redirect } from "next/navigation";
 
 export default async function ProductTemplateDetailPage({
   params,
 }: {
-  params: Promise<{ templateId: string }>;
+  params: Promise<{ locale: string; templateId: string }>;
 }) {
-  const { templateId } = await params;
-  return <ProductTemplateDetailView templateId={templateId} />;
+  const { locale } = await params;
+  redirect(`/${locale}/products`);
 }

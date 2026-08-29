@@ -9,37 +9,15 @@ import {
   warranty_status,
 } from '@prisma/client';
 import { toCategoryResponse } from '@/modules/categories/categories.types';
-import {
-  getProductCatalogue,
-  type ProductCatalogueSource,
-} from '@/modules/products/product-catalogue';
+import { getProductCatalogue } from '@/modules/products/product-catalogue';
 
-type ProductCatalogueSnapshot = Pick<
-  Product,
-  | 'catalogue_name'
-  | 'catalogue_sku'
-  | 'catalogue_slug'
-  | 'catalogue_brand'
-  | 'catalogue_model'
-  | 'catalogue_model_year'
-  | 'catalogue_description'
-  | 'catalogue_metadata'
-  | 'catalogue_is_published'
-  | 'catalogue_published_at'
->;
-
-// Snapshot columns are nullable during the expand/backfill release. Keeping
-// them optional here lets existing repository fixtures and the legacy
-// template-backed read path continue to work until the cut-over release.
-type ProductWithRelations = Omit<Product, keyof ProductCatalogueSnapshot> &
-  Partial<ProductCatalogueSnapshot> & {
-    assets?: Array<ProductAsset & { asset: Asset }>;
-    ownerships?: Array<ProductOwnership & { customer?: Customer }>;
-    warranty?: Warranty | null;
-    warranty_activation_requests?: Array<{ id: string }>;
-    template?: ProductCatalogueSource['template'];
-    category_ref?: Category;
-  };
+type ProductWithRelations = Product & {
+  assets?: Array<ProductAsset & { asset: Asset }>;
+  ownerships?: Array<ProductOwnership & { customer?: Customer }>;
+  warranty?: Warranty | null;
+  warranty_activation_requests?: Array<{ id: string }>;
+  category_ref?: Category;
+};
 
 export function toProductResponse(
   product: ProductWithRelations,
@@ -96,12 +74,11 @@ export function toProductResponse(
     model: catalogue.model,
     modelYear: catalogue.modelYear,
     description: catalogue.description,
+    catalogueMetadata,
     status: product.status,
     metadata: effectiveMetadata,
-    isPublished:
-      product.catalogue_is_published ?? product.template?.is_published ?? false,
-    publishedAt:
-      product.catalogue_published_at ?? product.template?.published_at ?? null,
+    isPublished: product.catalogue_is_published,
+    publishedAt: product.catalogue_published_at,
     createdAt: product.created_at,
     updatedAt: product.updated_at,
     deletedAt: product.deleted_at,

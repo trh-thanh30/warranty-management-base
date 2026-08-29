@@ -160,6 +160,7 @@ export type ProductSummary = {
   model: string | null;
   modelYear: number | null;
   description: string | null;
+  catalogueMetadata: Record<string, unknown> | null;
   status: ProductStatus;
   isPublished: boolean;
   publishedAt: string | null;
@@ -230,6 +231,7 @@ export type CreateProductBody = {
   model?: string;
   modelYear?: number;
   description?: string;
+  catalogueMetadata?: Record<string, unknown>;
   coverAssetId?: string;
   galleryAssetIds?: string[];
   productCode?: string;
@@ -247,6 +249,7 @@ export type UpdateProductBody = {
   model?: string | null;
   modelYear?: number | null;
   description?: string | null;
+  catalogueMetadata?: Record<string, unknown> | null;
   coverAssetId?: string | null;
   galleryAssetIds?: string[];
   displayName?: string | null;

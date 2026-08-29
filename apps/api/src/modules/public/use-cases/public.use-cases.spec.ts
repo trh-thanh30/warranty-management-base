@@ -399,11 +399,11 @@ describe('Public use cases', () => {
       ],
       product: {
         display_name: null,
-        template: {
-          name: 'May bom',
-          brand: 'UKG',
-          model: 'A1',
-        },
+        catalogue_name: 'May bom',
+        catalogue_sku: 'MAY-BOM-A1',
+        catalogue_slug: 'may-bom-a1',
+        catalogue_brand: 'UKG',
+        catalogue_model: 'A1',
       },
       service_center: null,
     } as never);

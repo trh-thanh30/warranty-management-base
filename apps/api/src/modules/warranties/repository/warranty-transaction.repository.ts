@@ -23,7 +23,6 @@ const manualActivationProductInclude = {
     orderBy: { created_at: 'desc' as const },
   },
   warranty: true,
-  template: true,
 } satisfies Prisma.ProductInclude;
 
 type PersistedManualActivationProduct = Prisma.ProductGetPayload<{

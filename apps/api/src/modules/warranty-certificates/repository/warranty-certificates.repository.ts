@@ -23,7 +23,6 @@ import {
 const warrantyForCertificateInclude = {
   product: {
     include: {
-      template: true,
       ownerships: {
         where: { is_current_owner: true },
         include: { customer: true },
@@ -57,7 +56,7 @@ type PersistedWarrantyCertificateForBatchEmail =
   Prisma.WarrantyCertificateGetPayload<{
     include: {
       warranty: {
-        include: { product: { include: { template: true } } };
+        include: { product: true };
       };
     };
   }>;
@@ -164,7 +163,7 @@ export class WarrantyCertificatesRepository {
       where: { id: { in: certificateIds } },
       include: {
         warranty: {
-          include: { product: { include: { template: true } } },
+          include: { product: true },
         },
       },
     });

@@ -21,7 +21,6 @@ const productInclude = {
     include: { asset: true },
     orderBy: [{ role: 'asc' as const }, { sort_order: 'asc' as const }],
   },
-  template: true,
   ownerships: {
     include: { customer: true },
     orderBy: { created_at: 'desc' as const },
@@ -194,7 +193,6 @@ export class ProductsRepository {
       },
       include: {
         warranty: true,
-        template: true,
         ownerships: {
           where: { is_current_owner: true },
           include: { customer: true },
@@ -212,7 +210,6 @@ export class ProductsRepository {
       },
       include: {
         warranty: true,
-        template: true,
         ownerships: {
           where: { is_current_owner: true },
           include: { customer: true },
@@ -230,7 +227,6 @@ export class ProductsRepository {
       },
       include: {
         warranty: true,
-        template: true,
         ownerships: {
           where: { is_current_owner: true },
           include: { customer: true },

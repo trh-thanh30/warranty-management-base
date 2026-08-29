@@ -95,6 +95,92 @@ export function mergeProductInstallationPosition(
   return Object.keys(nextMetadata).length > 0 ? nextMetadata : null;
 }
 
+export function getProductSpecifications(
+  metadata: Record<string, unknown> | null | undefined,
+) {
+  const specifications = metadata?.specifications;
+  if (!Array.isArray(specifications)) return [{ key: "", value: "" }];
+
+  const values = specifications.flatMap((specification) => {
+    if (
+      !specification ||
+      typeof specification !== "object" ||
+      Array.isArray(specification)
+    ) {
+      return [];
+    }
+    const key =
+      "key" in specification && typeof specification.key === "string"
+        ? specification.key.trim()
+        : "";
+    const value =
+      "value" in specification && typeof specification.value === "string"
+        ? specification.value.trim()
+        : "";
+    return key || value ? [{ key, value }] : [];
+  });
+
+  return values.length ? values : [{ key: "", value: "" }];
+}
+
+export function getProductMetadataTextList(
+  metadata: Record<string, unknown> | null | undefined,
+  key: "applications" | "features",
+) {
+  const items = metadata?.[key];
+  if (!Array.isArray(items)) return [{ value: "" }];
+
+  const values = items.flatMap((item) =>
+    typeof item === "string" && item.trim() ? [{ value: item.trim() }] : [],
+  );
+  return values.length ? values : [{ value: "" }];
+}
+
+export function mergeProductCatalogueMetadata(
+  metadata: Record<string, unknown> | null | undefined,
+  values: Pick<
+    ProductFormValues,
+    "applications" | "features" | "specifications"
+  >,
+): Record<string, unknown> | null {
+  const nextMetadata = { ...(metadata ?? {}) };
+  const specifications = values.specifications
+    .map(({ key, value }) => ({ key: key.trim(), value: value.trim() }))
+    .filter(({ key, value }) => key && value);
+  const features = values.features
+    .map(({ value }) => value.trim())
+    .filter(Boolean);
+  const applications = values.applications
+    .map(({ value }) => value.trim())
+    .filter(Boolean);
+
+  setOrDeleteMetadataValue(nextMetadata, "specifications", specifications);
+  setOrDeleteMetadataValue(nextMetadata, "features", features);
+  setOrDeleteMetadataValue(nextMetadata, "applications", applications);
+
+  return Object.keys(nextMetadata).length > 0 ? nextMetadata : null;
+}
+
+export function getProductPhysicalMetadata(
+  metadata: Record<string, unknown> | null | undefined,
+) {
+  const nextMetadata = { ...(metadata ?? {}) };
+  delete nextMetadata.applications;
+  delete nextMetadata.features;
+  delete nextMetadata.shortDescription;
+  delete nextMetadata.specifications;
+  return Object.keys(nextMetadata).length > 0 ? nextMetadata : null;
+}
+
+function setOrDeleteMetadataValue(
+  metadata: Record<string, unknown>,
+  key: "applications" | "features" | "specifications",
+  value: unknown[],
+) {
+  if (value.length) metadata[key] = value;
+  else delete metadata[key];
+}
+
 export function toCreateProductBody(
   values: ProductFormValues,
 ): CreateProductBody {
@@ -104,9 +190,10 @@ export function toCreateProductBody(
   );
   const productCode = toOptionalValue(values.productCode);
   const warrantyCode = toOptionalValue(values.warrantyCode)?.toUpperCase();
+  const catalogueMetadata = mergeProductCatalogueMetadata(null, values);
 
   return {
-    name: values.name,
+    name: values.displayName,
     categoryId: values.categoryId,
     ...(toOptionalValue(values.brand)
       ? { brand: toOptionalValue(values.brand) }
@@ -118,6 +205,7 @@ export function toCreateProductBody(
     ...(toOptionalValue(values.description)
       ? { description: toOptionalValue(values.description) }
       : {}),
+    ...(catalogueMetadata ? { catalogueMetadata } : {}),
     ...(toOptionalValue(values.coverAssetId)
       ? { coverAssetId: toOptionalValue(values.coverAssetId) }
       : {}),
@@ -128,7 +216,7 @@ export function toCreateProductBody(
             .filter(Boolean),
         }
       : {}),
-    displayName: toOptionalValue(values.displayName),
+    displayName: values.displayName,
     metadata: metadata ?? undefined,
     ...(productCode ? { productCode } : {}),
     ...(warrantyCode ? { warrantyCode } : {}),
@@ -144,19 +232,24 @@ export function toCreateProductBody(
 export function toUpdateProductBody(
   values: ProductFormValues,
   existingMetadata: Record<string, unknown> | null,
+  existingCatalogueMetadata: Record<string, unknown> | null = null,
 ): UpdateProductBody {
   return {
-    name: values.name,
+    name: values.displayName,
     categoryId: values.categoryId,
     brand: toNullableValue(values.brand),
     model: toNullableValue(values.model),
     modelYear: values.modelYear ?? null,
     description: toNullableValue(values.description),
+    catalogueMetadata: mergeProductCatalogueMetadata(
+      existingCatalogueMetadata,
+      values,
+    ),
     coverAssetId: toNullableValue(values.coverAssetId),
     galleryAssetIds: values.galleryImages
       .map((image) => image.assetId)
       .filter(Boolean),
-    displayName: toNullableValue(values.displayName),
+    displayName: values.displayName,
     metadata: mergeProductInstallationPosition(
       existingMetadata,
       values.installationPosition,

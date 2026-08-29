@@ -3,6 +3,7 @@ import test from "node:test";
 import { HttpClientError } from "@repo/shared";
 import {
   getProductWarrantyProgress,
+  getProductPhysicalMetadata,
   getProductSaveErrorMatch,
   toCreateProductBody,
   toProductActiveStatus,
@@ -60,11 +61,25 @@ test("maps the edit status toggle to an active product status", () => {
   assert.equal(toProductActiveStatus(false), "INACTIVE");
 });
 
+test("separates physical metadata from catalogue metadata in a product response", () => {
+  assert.deepEqual(
+    getProductPhysicalMetadata({
+      applications: ["Windshield"],
+      features: ["Heat rejection"],
+      installationPosition: "Front-left",
+      shortDescription: "Catalogue copy",
+      source: "import",
+      specifications: [{ key: "UV", value: "99%" }],
+    }),
+    { installationPosition: "Front-left", source: "import" },
+  );
+});
+
 test("creates an inventory-only product payload", () => {
   assert.deepEqual(
     toCreateProductBody({
       categoryId: "category-id",
-      name: "Toyota Camry",
+      displayName: "Toyota Camry",
       brand: "Toyota",
       model: "Camry",
       modelYear: 2026,
@@ -72,7 +87,9 @@ test("creates an inventory-only product payload", () => {
       coverAssetId: "",
       coverImageUrl: "",
       galleryImages: [],
-      displayName: " Toyota Camry - showroom ",
+      features: [{ value: " Cản tia cực tím " }],
+      applications: [{ value: " Kính lái ô tô " }],
+      specifications: [{ key: " Công suất ", value: " 75W " }],
       installationPosition: " Kính lái ",
       productCode: "",
       serialNumber: " VIN-001 ",
@@ -83,10 +100,15 @@ test("creates an inventory-only product payload", () => {
     {
       categoryId: "category-id",
       name: "Toyota Camry",
+      displayName: "Toyota Camry",
       brand: "Toyota",
       model: "Camry",
       modelYear: 2026,
-      displayName: "Toyota Camry - showroom",
+      catalogueMetadata: {
+        applications: ["Kính lái ô tô"],
+        features: ["Cản tia cực tím"],
+        specifications: [{ key: "Công suất", value: "75W" }],
+      },
       metadata: {
         installationPosition: "Kính lái",
       },
@@ -101,14 +123,16 @@ test("sends an explicitly entered product code", () => {
   assert.equal(
     toCreateProductBody({
       categoryId: "category-id",
-      name: "Camera",
+      displayName: "Camera",
       brand: "",
       model: "",
       description: "",
       coverAssetId: "",
       coverImageUrl: "",
       galleryImages: [],
-      displayName: "",
+      features: [],
+      applications: [],
+      specifications: [],
       installationPosition: "",
       productCode: " CUSTOM-001 ",
       serialNumber: "",
@@ -124,14 +148,16 @@ test("sends an explicitly entered warranty code when creating a product", () => 
   assert.equal(
     toCreateProductBody({
       categoryId: "category-id",
-      name: "Camera",
+      displayName: "Camera",
       brand: "",
       model: "",
       description: "",
       coverAssetId: "",
       coverImageUrl: "",
       galleryImages: [],
-      displayName: "",
+      features: [],
+      applications: [],
+      specifications: [],
       installationPosition: "",
       productCode: "",
       serialNumber: "",
@@ -149,7 +175,7 @@ test("updates only physical product fields and preserves unrelated metadata", ()
     toUpdateProductBody(
       {
         categoryId: "overridden-category-id",
-        name: "Camera updated",
+        displayName: "Camera updated",
         brand: "Acme",
         model: "C4K",
         modelYear: 2026,
@@ -162,7 +188,9 @@ test("updates only physical product fields and preserves unrelated metadata", ()
             url: "https://example.com/gallery.jpg",
           },
         ],
-        displayName: " ",
+        features: [{ value: " Heat rejection " }],
+        applications: [{ value: " Windshield " }],
+        specifications: [{ key: " UV ", value: " 99% " }],
         installationPosition: " Cửa trước ",
         productCode: " PRD-EDIT-001 ",
         serialNumber: "",
@@ -172,17 +200,24 @@ test("updates only physical product fields and preserves unrelated metadata", ()
         warrantyTerms: "Product terms",
       },
       { source: "import", installationPosition: "Old" },
+      { shortDescription: "Preserved" },
     ),
     {
       categoryId: "overridden-category-id",
       name: "Camera updated",
+      displayName: "Camera updated",
       brand: "Acme",
       model: "C4K",
       modelYear: 2026,
       description: "Updated",
+      catalogueMetadata: {
+        applications: ["Windshield"],
+        features: ["Heat rejection"],
+        shortDescription: "Preserved",
+        specifications: [{ key: "UV", value: "99%" }],
+      },
       coverAssetId: "cover-asset-id",
       galleryAssetIds: ["gallery-asset-id"],
-      displayName: null,
       metadata: {
         source: "import",
         installationPosition: "Cửa trước",
@@ -200,14 +235,16 @@ test("updates only physical product fields and preserves unrelated metadata", ()
 test("requires a product code only when editing", () => {
   const values = {
     categoryId: "category-id",
-    name: "Camera",
     brand: "",
     model: "",
     description: "",
     coverAssetId: "",
     coverImageUrl: "",
     galleryImages: [],
-    displayName: "",
+    features: [],
+    applications: [],
+    specifications: [],
+    displayName: "Camera",
     installationPosition: "",
     productCode: "",
     serialNumber: "",
@@ -223,14 +260,16 @@ test("requires a product code only when editing", () => {
 test("allows a blank warranty code but rejects an invalid non-empty code", () => {
   const baseValues = {
     categoryId: "category-id",
-    name: "Camera",
     brand: "",
     model: "",
     description: "",
     coverAssetId: "",
     coverImageUrl: "",
     galleryImages: [],
-    displayName: "",
+    features: [],
+    applications: [],
+    specifications: [],
+    displayName: "Camera",
     installationPosition: "",
     productCode: "",
     serialNumber: "",
@@ -265,14 +304,16 @@ test("allows a blank warranty code but rejects an invalid non-empty code", () =>
 test("requires an individual warranty duration of at least one month", () => {
   const values = {
     categoryId: "category-id",
-    name: "Camera",
     brand: "",
     model: "",
     description: "",
     coverAssetId: "",
     coverImageUrl: "",
     galleryImages: [],
-    displayName: "",
+    features: [],
+    applications: [],
+    specifications: [],
+    displayName: "Camera",
     installationPosition: "",
     productCode: "",
     serialNumber: "",

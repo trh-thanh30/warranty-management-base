@@ -11,7 +11,6 @@ const warrantyInclude = {
   product: {
     include: {
       category_ref: true,
-      template: { include: { category_ref: true } },
       ownerships: {
         include: { customer: true },
         orderBy: { created_at: 'desc' as const },
@@ -27,11 +26,6 @@ const warrantyLookupInclude = {
     },
   },
   category_ref: true,
-  template: {
-    include: {
-      category_ref: true,
-    },
-  },
 } satisfies Prisma.ProductInclude;
 
 const warrantySortMap: Readonly<

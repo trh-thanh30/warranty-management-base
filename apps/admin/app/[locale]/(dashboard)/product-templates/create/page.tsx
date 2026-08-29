@@ -1,5 +1,10 @@
-import { ProductTemplateFormView } from "@/src/views/product-templates/product-template-form.view";
+import { redirect } from "next/navigation";
 
-export default function CreateProductTemplatePage() {
-  return <ProductTemplateFormView mode="create" />;
+export default async function CreateProductTemplatePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  redirect(`/${locale}/products`);
 }

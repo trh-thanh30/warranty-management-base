@@ -16,6 +16,9 @@ import {
 } from "../products.types";
 import { useCreateProduct, useUpdateProduct } from "./use-products";
 import {
+  getProductMetadataTextList,
+  getProductPhysicalMetadata,
+  getProductSpecifications,
   getProductInstallationPosition,
   getProductSaveErrorMatch,
   toCreateProductBody,
@@ -43,6 +46,18 @@ export function useProductForm({
     control: form.control,
     name: "galleryImages",
   });
+  const features = useFieldArray({
+    control: form.control,
+    name: "features",
+  });
+  const applications = useFieldArray({
+    control: form.control,
+    name: "applications",
+  });
+  const specifications = useFieldArray({
+    control: form.control,
+    name: "specifications",
+  });
   const categoriesQuery = useCategories(
     {
       isActive: "true",
@@ -63,7 +78,11 @@ export function useProductForm({
       const saved = creating
         ? await createProduct.mutateAsync(toCreateProductBody(values))
         : await updateProduct.mutateAsync(
-            toUpdateProductBody(values, product.metadata),
+            toUpdateProductBody(
+              values,
+              getProductPhysicalMetadata(product.metadata),
+              product.catalogueMetadata,
+            ),
           );
       toast.success(creating ? t("created") : t("updated"));
       onSaved(saved);
@@ -85,6 +104,9 @@ export function useProductForm({
     categoriesQuery,
     creating,
     gallery,
+    features,
+    applications,
+    specifications,
     onSubmit: form.handleSubmit(submit),
   };
 }
@@ -97,7 +119,7 @@ function getDefaultValues(product: ProductResponse | null): ProductFormInput {
       .map((asset) => ({ assetId: asset.assetId, url: asset.url })) ?? [];
 
   return {
-    name: product?.name ?? "",
+    displayName: product?.displayName ?? product?.name ?? "",
     categoryId: product?.categoryId ?? "",
     brand: product?.brand ?? "",
     model: product?.model ?? "",
@@ -106,7 +128,15 @@ function getDefaultValues(product: ProductResponse | null): ProductFormInput {
     coverAssetId: cover?.assetId ?? "",
     coverImageUrl: cover?.url ?? "",
     galleryImages: gallery,
-    displayName: product?.displayName ?? "",
+    features: getProductMetadataTextList(
+      product?.catalogueMetadata,
+      "features",
+    ),
+    applications: getProductMetadataTextList(
+      product?.catalogueMetadata,
+      "applications",
+    ),
+    specifications: getProductSpecifications(product?.catalogueMetadata),
     installationPosition: getProductInstallationPosition(product?.metadata),
     productCode: product?.productCode ?? "",
     serialNumber: product?.serialNumber ?? "",

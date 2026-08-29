@@ -22,10 +22,19 @@ const optionalModelYear = z.preprocess(
       : Number(value),
   z.number().int().min(1900).max(2200).optional(),
 );
+const catalogueTextItem = z.object({
+  value: optionalText.max(300, "catalogueMetadataItemLength"),
+});
+const catalogueSpecification = z.object({
+  key: optionalText.max(120, "specificationKeyLength"),
+  value: optionalText.max(300, "specificationValueLength"),
+});
 
 export const productFormSchema = z.object({
   categoryId: optionalText.min(1, "categoryRequired"),
-  name: optionalText.min(1, "nameRequired").max(160, "nameLength"),
+  displayName: optionalText
+    .min(1, "nameRequired")
+    .max(160, "displayNameLength"),
   brand: optionalText.max(80, "brandLength"),
   model: optionalText.max(80, "modelLength"),
   modelYear: optionalModelYear,
@@ -38,7 +47,9 @@ export const productFormSchema = z.object({
       url: z.string(),
     }),
   ),
-  displayName: optionalText.max(160, "displayNameLength"),
+  features: z.array(catalogueTextItem).max(50),
+  applications: z.array(catalogueTextItem).max(50),
+  specifications: z.array(catalogueSpecification).max(50),
   installationPosition: optionalText.max(160, "installationPositionLength"),
   productCode: optionalText.max(64, "productCodeLength"),
   serialNumber: optionalText.max(64, "serialNumberLength"),

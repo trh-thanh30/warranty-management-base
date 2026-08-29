@@ -3,7 +3,6 @@ import {
   Customer,
   Product,
   ProductOwnership,
-  ProductTemplate,
   User,
   Warranty,
   WarrantyActivationRequest,
@@ -121,7 +120,6 @@ type WarrantyWithProduct = Warranty & {
   activated_by?: User | null;
   voided_by?: User | null;
   product: Product & {
-    template?: ProductTemplate | null;
     ownerships?: Array<ProductOwnership & { customer?: Customer }>;
   };
 };
@@ -170,7 +168,6 @@ export function toWarrantyResponse(warranty: WarrantyWithAuditUsers) {
 
 export function toWarrantyLookupResponse(input: {
   product: Product & {
-    template?: (ProductTemplate & { category_ref?: Category | null }) | null;
     category_ref?: Category | null;
   };
   warranty: Warranty & {
@@ -179,8 +176,7 @@ export function toWarrantyLookupResponse(input: {
 }) {
   const activationRequest = input.warranty.activation_request;
   const catalogue = getProductCatalogue(input.product);
-  const category =
-    input.product.category_ref ?? input.product.template?.category_ref;
+  const category = input.product.category_ref;
 
   return {
     product: {

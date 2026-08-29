@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { PERMISSIONS } from "@repo/shared/constants";
 import { getDashboardConfig } from "./dashboard.config.ts";
 
 test("places content pages first in the other sidebar section", () => {
@@ -51,20 +52,16 @@ test("places contact submissions after dealers in the general sidebar section", 
   assert.equal(contactSubmissions?.notificationBadgeKey, "contactSubmissions");
 });
 
-test("orders physical products before product templates", () => {
+test("exposes physical products without the retired template destination", () => {
   const config = getDashboardConfig((key) => key);
   const products = config.sidebarSections
     .flatMap((section) => section.items)
     .find((item) => item.title === "items.products");
 
-  assert.equal(products?.href, undefined);
-  assert.deepEqual(
-    products?.children?.map((item) => [item.title, item.href]),
-    [
-      ["items.products", "/products"],
-      ["items.productTemplates", "/product-templates"],
-    ],
-  );
+  assert.equal(products?.href, "/products");
+  assert.equal(products?.requiredPermission, PERMISSIONS.PRODUCT_VIEW);
+  assert.equal(products?.children, undefined);
+  assert.equal(JSON.stringify(config).includes("/product-templates"), false);
 });
 
 test("groups warranties while keeping claims independent", () => {
