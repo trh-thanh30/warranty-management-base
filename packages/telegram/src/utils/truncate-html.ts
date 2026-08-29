@@ -12,7 +12,13 @@ export function truncateTelegramHtml(value: string, maxCharacters: number) {
   const tokens = value.match(/<[^>]+>|[^<]+/g) ?? [];
   const openTags: string[] = [];
   let output = "";
-  let truncated = false;
+
+  const closingTagsLength = () =>
+    openTags.reduce((total, tag) => total + tag.length + 3, 0);
+
+  const fitsWithClosures = (nextValue: string) =>
+    output.length + nextValue.length + closingTagsLength() + "…".length <=
+    maxCharacters;
 
   for (const token of tokens) {
     if (token.startsWith("<")) {
@@ -21,46 +27,51 @@ export function truncateTelegramHtml(value: string, maxCharacters: number) {
         const tagName = closing[1];
         if (!tagName) continue;
         const index = openTags.lastIndexOf(tagName.toLowerCase());
-        if (index >= 0) openTags.splice(index, 1);
-        if (output.length + token.length <= maxCharacters) output += token;
+
+        if (index < 0) {
+          if (!fitsWithClosures(token)) break;
+          output += token;
+          continue;
+        }
+
+        const [removedTag] = openTags.splice(index, 1);
+        if (!fitsWithClosures(token)) {
+          if (removedTag) openTags.splice(index, 0, removedTag);
+          break;
+        }
+        output += token;
         continue;
       }
 
       const opening = token.match(OPEN_TAG_PATTERN);
       if (opening && !VOID_TAG_PATTERN.test(token)) {
         const tagName = opening[1];
-        if (tagName) openTags.push(tagName.toLowerCase());
+        if (tagName) {
+          openTags.push(tagName.toLowerCase());
+          if (!fitsWithClosures(token)) {
+            openTags.pop();
+            break;
+          }
+          output += token;
+          continue;
+        }
       }
-      if (output.length + token.length <= maxCharacters) {
-        output += token;
-      } else {
-        truncated = true;
-        break;
-      }
+
+      if (!fitsWithClosures(token)) break;
+      output += token;
       continue;
     }
 
-    const textTokens = token.match(/&(?:amp|lt|gt|quot|#\d+);|./gu) ?? [];
-    const closingLength = openTags.reduce(
-      (total, tag) => total + tag.length + 3,
-      0,
-    );
-    const available = Math.max(
-      0,
-      maxCharacters - output.length - closingLength - 1,
-    );
-    const text = textTokens.slice(0, available).join("");
-    output += text;
-    if (text.length < token.length) {
-      output += "…";
-      truncated = true;
-      break;
+    const textTokens = token.match(/&(?:amp|lt|gt|quot|#\d+);|[\s\S]/gu) ?? [];
+    for (const textToken of textTokens) {
+      if (!fitsWithClosures(textToken)) break;
+      output += textToken;
     }
+
+    if (!output.endsWith(token)) break;
   }
 
-  if (!truncated) {
-    output = output.slice(0, Math.max(0, maxCharacters - 1)) + "…";
-  }
+  output += "…";
 
   for (let index = openTags.length - 1; index >= 0; index -= 1) {
     output += `</${openTags[index]}>`;
