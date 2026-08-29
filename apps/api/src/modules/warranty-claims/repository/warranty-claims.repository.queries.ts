@@ -124,7 +124,7 @@ export function buildWarrantyClaimListQuery(
           { issue_title: { contains: search, mode: 'insensitive' } },
           {
             product: {
-              catalogue_name: { contains: search, mode: 'insensitive' },
+              display_name: { contains: search, mode: 'insensitive' },
             },
           },
         ]

@@ -357,13 +357,13 @@ describe('ProductsRepository.list', () => {
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          catalogue_is_published: true,
+          is_published: true,
         }),
       }),
     );
     expect(count).toHaveBeenCalledWith({
       where: expect.objectContaining({
-        catalogue_is_published: true,
+        is_published: true,
       }),
     });
   });
@@ -418,7 +418,7 @@ describe('ProductsRepository.list', () => {
       category_ref: { is_active: true },
       deleted_at: null,
       status: product_status.ACTIVE,
-      catalogue_is_published: true,
+      is_published: true,
     };
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({

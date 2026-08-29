@@ -18,7 +18,7 @@ describe('toProductResponse', () => {
     expect(response).toEqual(
       expect.objectContaining({
         name: 'Product-owned name',
-        sku: 'PRODUCT-SKU',
+        sku: 'PRD-001',
         slug: 'product-owned-name',
         brand: 'Product brand',
         model: 'Product model',

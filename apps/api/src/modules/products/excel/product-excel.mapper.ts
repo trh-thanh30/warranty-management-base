@@ -9,7 +9,10 @@ type ProductWithExportRelations = Product & {
 export function toProductExcelRow(
   product: ProductWithExportRelations,
 ): ProductExcelRow {
-  const metadata = product.metadata as Record<string, unknown> | null;
+  const metadata = (product.catalogue_metadata ?? product.metadata) as Record<
+    string,
+    unknown
+  > | null;
   const installationPosition =
     typeof metadata?.installationPosition === 'string'
       ? metadata.installationPosition
@@ -23,11 +26,11 @@ export function toProductExcelRow(
     productCode: product.product_code,
     displayName: product.display_name?.trim() || product.catalogue_name,
     categoryCode: product.category_ref?.code ?? product.category_id,
-    brand: product.catalogue_brand,
-    model: product.catalogue_model,
-    modelYear: product.catalogue_model_year,
+    brand: product.brand ?? product.catalogue_brand,
+    model: product.model ?? product.catalogue_model,
+    modelYear: product.model_year ?? product.catalogue_model_year,
     shortDescription,
-    description: product.catalogue_description,
+    description: product.description ?? product.catalogue_description,
     warrantyDurationMonths: product.warranty?.duration_months ?? 0,
     warrantyTerms: product.warranty?.terms ?? null,
     installationPosition,

@@ -187,6 +187,17 @@ export class UpdateProductUseCase {
           : dto.catalogueMetadata === null
             ? Prisma.JsonNull
             : (dto.catalogueMetadata as Prisma.InputJsonObject),
+      brand: dto.brand === undefined ? undefined : dto.brand?.trim() || null,
+      model: dto.model === undefined ? undefined : dto.model?.trim() || null,
+      model_year: dto.modelYear,
+      description:
+        dto.description === undefined
+          ? undefined
+          : dto.description?.trim() || null,
+      slug:
+        dto.name || requestedProductCode
+          ? `${toSlug(dto.name?.trim() || getProductCatalogue(existingProduct).name)}-${(requestedProductCode ?? existingProduct.product_code).toLowerCase()}`
+          : undefined,
       assets:
         dto.coverAssetId !== undefined || dto.galleryAssetIds !== undefined
           ? {

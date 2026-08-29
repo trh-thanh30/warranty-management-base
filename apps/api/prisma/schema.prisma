@@ -438,7 +438,10 @@ model Product {
   product_code           String         @unique
   serial_number          String?        @unique
   display_name           String?
-  // Product-owned catalogue fields.
+  brand                  String?
+  model                  String?
+  model_year             Int?
+  description            String?
   catalogue_name         String
   catalogue_sku          String         @unique
   catalogue_slug         String         @unique
@@ -449,6 +452,9 @@ model Product {
   catalogue_metadata     Json?
   catalogue_is_published Boolean        @default(false)
   catalogue_published_at DateTime?
+  slug                   String?        @unique
+  is_published           Boolean        @default(false)
+  published_at           DateTime?
   status                 product_status @default(ACTIVE)
   metadata               Json?
   created_at             DateTime       @default(now())

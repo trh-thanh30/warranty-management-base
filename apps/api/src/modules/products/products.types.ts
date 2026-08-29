@@ -11,13 +11,25 @@ import {
 import { toCategoryResponse } from '@/modules/categories/categories.types';
 import { getProductCatalogue } from '@/modules/products/product-catalogue';
 
-type ProductWithRelations = Product & {
-  assets?: Array<ProductAsset & { asset: Asset }>;
-  ownerships?: Array<ProductOwnership & { customer?: Customer }>;
-  warranty?: Warranty | null;
-  warranty_activation_requests?: Array<{ id: string }>;
-  category_ref?: Category;
-};
+type ProductCanonicalFields = Pick<
+  Product,
+  | 'brand'
+  | 'model'
+  | 'model_year'
+  | 'description'
+  | 'slug'
+  | 'is_published'
+  | 'published_at'
+>;
+
+type ProductWithRelations = Omit<Product, keyof ProductCanonicalFields> &
+  Partial<ProductCanonicalFields> & {
+    assets?: Array<ProductAsset & { asset: Asset }>;
+    ownerships?: Array<ProductOwnership & { customer?: Customer }>;
+    warranty?: Warranty | null;
+    warranty_activation_requests?: Array<{ id: string }>;
+    category_ref?: Category;
+  };
 
 export function toProductResponse(
   product: ProductWithRelations,
@@ -76,8 +88,8 @@ export function toProductResponse(
     catalogueMetadata,
     status: product.status,
     metadata: effectiveMetadata,
-    isPublished: product.catalogue_is_published,
-    publishedAt: product.catalogue_published_at,
+    isPublished: product.is_published ?? product.catalogue_is_published,
+    publishedAt: product.published_at ?? product.catalogue_published_at,
     createdAt: product.created_at,
     updatedAt: product.updated_at,
     deletedAt: product.deleted_at,
@@ -136,31 +148,38 @@ export function toPublicProductSummary(
 
   return {
     id: product.id,
-    sku: product.catalogue_sku ?? product.product_code,
-    slug: product.catalogue_slug ?? product.product_code.toLowerCase(),
+    sku: product.product_code,
+    slug:
+      product.slug ??
+      product.catalogue_slug ??
+      product.product_code.toLowerCase(),
     name:
-      product.catalogue_name ?? product.display_name ?? product.product_code,
+      product.display_name ?? product.catalogue_name ?? product.product_code,
     categoryId: product.category_id,
     category: {
       id: product.category_ref.id,
       slug: product.category_ref.slug,
       name: product.category_ref.name,
     },
-    brand: product.catalogue_brand,
-    model: product.catalogue_model,
-    description: product.catalogue_description,
+    brand: product.brand ?? product.catalogue_brand,
+    model: product.model ?? product.catalogue_model,
+    description: product.description ?? product.catalogue_description,
     coverImageUrl: cover ? resolveAssetUrl(cover.asset) : null,
     specifications: toPublicSpecifications(metadata.specifications),
     warrantyDurationMonths: product.warranty?.duration_months ?? 0,
-    publishedAt: product.catalogue_published_at ?? product.created_at,
+    publishedAt:
+      product.published_at ??
+      product.catalogue_published_at ??
+      product.created_at,
   };
 }
 
-type PublicProductWithRelations = Product & {
-  assets: Array<ProductAsset & { asset: Asset }>;
-  category_ref: Category;
-  warranty: Pick<Warranty, 'duration_months' | 'terms'> | null;
-};
+type PublicProductWithRelations = Omit<Product, keyof ProductCanonicalFields> &
+  Partial<ProductCanonicalFields> & {
+    assets: Array<ProductAsset & { asset: Asset }>;
+    category_ref: Category;
+    warranty: Pick<Warranty, 'duration_months' | 'terms'> | null;
+  };
 
 export function toPublicProductDetail(
   product: PublicProductWithRelations,
@@ -181,23 +200,26 @@ export function toPublicProductDetail(
 
   return {
     id: product.id,
-    sku: product.catalogue_sku ?? product.product_code,
-    slug: product.catalogue_slug ?? product.product_code.toLowerCase(),
+    sku: product.product_code,
+    slug:
+      product.slug ??
+      product.catalogue_slug ??
+      product.product_code.toLowerCase(),
     name:
-      product.catalogue_name ?? product.display_name ?? product.product_code,
+      product.display_name ?? product.catalogue_name ?? product.product_code,
     category: {
       id: product.category_ref.id,
       slug: product.category_ref.slug,
       name: product.category_ref.name,
     },
-    brand: product.catalogue_brand,
-    model: product.catalogue_model,
+    brand: product.brand ?? product.catalogue_brand,
+    model: product.model ?? product.catalogue_model,
     modelYear: product.catalogue_model_year,
     shortDescription:
       typeof metadata.shortDescription === 'string'
         ? metadata.shortDescription
         : null,
-    description: product.catalogue_description,
+    description: product.description ?? product.catalogue_description,
     coverImage: coverIndex >= 0 ? images[coverIndex] : null,
     galleryImages: images.filter(
       (_, index) =>
@@ -210,7 +232,7 @@ export function toPublicProductDetail(
       durationMonths: product.warranty?.duration_months ?? 0,
       terms: product.warranty?.terms ?? null,
     },
-    publishedAt: product.catalogue_published_at,
+    publishedAt: product.published_at ?? product.catalogue_published_at,
   };
 }
 
