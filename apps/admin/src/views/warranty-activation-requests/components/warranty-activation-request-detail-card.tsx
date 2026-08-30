@@ -1,16 +1,17 @@
 "use client";
 
-import { useLocale, useTranslations } from "next-intl";
+import { DetailSection } from "@/src/components/common/detail-section";
+import { Link } from "@/src/i18n/navigation";
 import type { WarrantyActivationRequestSummary } from "@repo/shared";
 import { Badge, Card, CardContent, Skeleton } from "@repo/ui";
-import { Link } from "@/src/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { getActivationRequestWarrantyCodeLabel } from "../warranty-activation-request-items.utils";
 import {
   formatActivationRequestAddress,
   formatActivationRequestDate,
 } from "../warranty-activation-requests.utils";
-import { WarrantyActivationRequestStatusBadge } from "./warranty-activation-request-status-badge";
 import { ActivationRequestItemsTable } from "./activation-request-items-table";
-import { getActivationRequestWarrantyCodeLabel } from "../warranty-activation-request-items.utils";
+import { WarrantyActivationRequestStatusBadge } from "./warranty-activation-request-status-badge";
 
 type WarrantyActivationRequestDetailCardProps = {
   request: WarrantyActivationRequestSummary;
@@ -90,17 +91,17 @@ export function WarrantyActivationRequestDetailCard({
         </DetailSection>
 
         {hasItems ? (
-          <section className="space-y-3">
-            <div className="flex items-center justify-between gap-2 overflow-hidden whitespace-nowrap sm:gap-3 sm:whitespace-normal">
-              <h2 className="min-w-0 truncate text-sm font-semibold text-slate-950 dark:text-slate-50 sm:whitespace-normal">
-                {t("activationProducts")}
-              </h2>
+          <DetailSection
+            headerAside={
               <span className="shrink-0 whitespace-nowrap text-sm text-slate-500">
                 {t("productCount", { count: items.length })}
               </span>
-            </div>
+            }
+            title={t("activationProducts")}
+            useDefinitionList={false}
+          >
             <ActivationRequestItemsTable items={items} />
-          </section>
+          </DetailSection>
         ) : (
           <DetailSection title={t("productInfo")}>
             <DetailItem
@@ -263,25 +264,6 @@ function formatUserSummary(
   } | null,
 ) {
   return user ? `${user.displayName} (${user.email})` : "-";
-}
-
-function DetailSection({
-  children,
-  title,
-}: {
-  children: React.ReactNode;
-  title: string;
-}) {
-  return (
-    <section className="space-y-3">
-      <h2 className="text-sm font-semibold text-slate-950 dark:text-slate-50">
-        {title}
-      </h2>
-      <dl className="grid gap-x-8 gap-y-5 border-t border-slate-200 pt-4 sm:grid-cols-2 dark:border-slate-800">
-        {children}
-      </dl>
-    </section>
-  );
 }
 
 function DetailItem({

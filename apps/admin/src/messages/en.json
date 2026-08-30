@@ -1646,6 +1646,7 @@
     "confirmReject": "Reject request",
     "viewCertificate": "View certificate",
     "downloadCertificate": "Download certificate",
+    "loadingCertificate": "Loading certificate...",
     "downloadedCertificate": "Certificate downloaded.",
     "viewCertificateError": "Unable to open certificate.",
     "downloadCertificateError": "Unable to download certificate.",

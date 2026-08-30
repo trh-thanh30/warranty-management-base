@@ -16,6 +16,8 @@ import type {
   WarrantyActivationRequestAction,
 } from "../warranty-activation-requests.types";
 
+type CertificateAction = "view" | "download";
+
 export function useWarrantyActivationRequestActions() {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const tApiErrors = useTranslations("ApiErrors");
@@ -27,6 +29,8 @@ export function useWarrantyActivationRequestActions() {
   const [certificateActionRequestId, setCertificateActionRequestId] = useState<
     string | null
   >(null);
+  const [certificateAction, setCertificateAction] =
+    useState<CertificateAction | null>(null);
   const [selectedRequest, setSelectedRequest] =
     useState<SelectedWarrantyActivationRequest>(null);
   const reviewMutation = useReviewWarrantyActivationRequest(
@@ -80,6 +84,8 @@ export function useWarrantyActivationRequestActions() {
 
     try {
       setCertificateActionRequestId(request.id);
+      setCertificateAction("view");
+      toast.info(t("loadingCertificate"));
       const blob =
         await warrantyActivationRequestsService.viewWarrantyActivationRequestCertificate(
           request.id,
@@ -96,6 +102,7 @@ export function useWarrantyActivationRequestActions() {
       );
     } finally {
       setCertificateActionRequestId(null);
+      setCertificateAction(null);
     }
   }
 
@@ -106,6 +113,8 @@ export function useWarrantyActivationRequestActions() {
 
     try {
       setCertificateActionRequestId(request.id);
+      setCertificateAction("download");
+      toast.info(t("loadingCertificate"));
       const blob =
         await warrantyActivationRequestsService.downloadWarrantyActivationRequestCertificate(
           request.id,
@@ -121,12 +130,14 @@ export function useWarrantyActivationRequestActions() {
       );
     } finally {
       setCertificateActionRequestId(null);
+      setCertificateAction(null);
     }
   }
 
   return {
     activeAction,
     certificateActionRequestId,
+    certificateAction,
     closeAction,
     downloadCertificate,
     isReviewing: reviewMutation.isPending,
