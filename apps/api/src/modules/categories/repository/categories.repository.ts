@@ -173,7 +173,7 @@ export class CategoriesRepository {
                   where: {
                     deleted_at: null,
                     status: 'ACTIVE',
-                    catalogue_is_published: true,
+                    is_published: true,
                   },
                 },
               },

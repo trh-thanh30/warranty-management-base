@@ -257,12 +257,12 @@ async function upsertDemoProduct(data: {
     update: {
       serial_number: data.serialNumber,
       category_id: category.id,
-      catalogue_name: data.name,
-      catalogue_sku: data.productCode,
-      catalogue_slug: data.productCode.toLowerCase(),
-      catalogue_brand: data.brand,
-      catalogue_model: data.model,
-      catalogue_model_year: data.manufactureYear,
+      display_name: data.name,
+      product_code: data.productCode,
+      slug: data.productCode.toLowerCase(),
+      brand: data.brand,
+      model: data.model,
+      model_year: data.manufactureYear,
       status: product_status.ACTIVE,
       deleted_at: null,
     },
@@ -270,12 +270,11 @@ async function upsertDemoProduct(data: {
       product_code: data.productCode,
       serial_number: data.serialNumber,
       category_id: category.id,
-      catalogue_name: data.name,
-      catalogue_sku: data.productCode,
-      catalogue_slug: data.productCode.toLowerCase(),
-      catalogue_brand: data.brand,
-      catalogue_model: data.model,
-      catalogue_model_year: data.manufactureYear,
+      display_name: data.name,
+      slug: data.productCode.toLowerCase(),
+      brand: data.brand,
+      model: data.model,
+      model_year: data.manufactureYear,
       status: product_status.ACTIVE,
     },
   });
@@ -1053,12 +1052,12 @@ async function main() {
     installedAt: addDays(seedNow, -8),
     warrantyDurationMonths: 12,
     productName:
-      expiringMonthDemo.product.catalogue_name ??
+      expiringMonthDemo.product.display_name ??
       expiringMonthDemo.product.product_code,
     serialNumber: expiringMonthDemo.product.serial_number,
-    brand: expiringMonthDemo.product.catalogue_brand,
-    model: expiringMonthDemo.product.catalogue_model,
-    manufactureYear: expiringMonthDemo.product.catalogue_model_year,
+    brand: expiringMonthDemo.product.brand,
+    model: expiringMonthDemo.product.model,
+    manufactureYear: expiringMonthDemo.product.model_year,
     adminNote: 'Approved by demo admin, awaiting warranty activation.',
     createdById: adminUser.id,
     reviewedById: moderatorUser.id,
@@ -1101,15 +1100,15 @@ async function main() {
     dealerId: lexzenzHanoiDealer.id,
     vehiclePlate: '30G-24680',
     vehicleModel:
-      camryDemo.product.catalogue_name ?? camryDemo.product.product_code,
+      camryDemo.product.display_name ?? camryDemo.product.product_code,
     installedAt: camryDemo.warranty.start_date,
     warrantyDurationMonths: camryDemo.warranty.duration_months,
     productName:
-      camryDemo.product.catalogue_name ?? camryDemo.product.product_code,
+      camryDemo.product.display_name ?? camryDemo.product.product_code,
     serialNumber: camryDemo.product.serial_number,
-    brand: camryDemo.product.catalogue_brand,
-    model: camryDemo.product.catalogue_model,
-    manufactureYear: camryDemo.product.catalogue_model_year,
+    brand: camryDemo.product.brand,
+    model: camryDemo.product.model,
+    manufactureYear: camryDemo.product.model_year,
     reviewedById: adminUser.id,
     reviewedAt: addDays(seedNow, -2),
     activatedWarrantyId: camryDemo.warranty.id,
@@ -1129,12 +1128,12 @@ async function main() {
     productId: expiringSoonDemo.product.id,
     dealerId: lexzenzHanoiDealer.id,
     productName:
-      expiringSoonDemo.product.catalogue_name ??
+      expiringSoonDemo.product.display_name ??
       expiringSoonDemo.product.product_code,
     serialNumber: expiringSoonDemo.product.serial_number,
-    brand: expiringSoonDemo.product.catalogue_brand,
-    model: expiringSoonDemo.product.catalogue_model,
-    manufactureYear: expiringSoonDemo.product.catalogue_model_year,
+    brand: expiringSoonDemo.product.brand,
+    model: expiringSoonDemo.product.model,
+    manufactureYear: expiringSoonDemo.product.model_year,
     adminNote: 'Cancelled after customer created a replacement request.',
     createdById: adminUser.id,
     reviewedById: adminUser.id,
@@ -1152,11 +1151,11 @@ async function main() {
       dealerId: lexzenzHanoiDealer.id,
       productId: camryDemo.product.id,
       productName:
-        camryDemo.product.catalogue_name ?? camryDemo.product.product_code,
+        camryDemo.product.display_name ?? camryDemo.product.product_code,
       serialNumber: camryDemo.product.serial_number,
-      brand: camryDemo.product.catalogue_brand,
-      model: camryDemo.product.catalogue_model,
-      manufactureYear: camryDemo.product.catalogue_model_year,
+      brand: camryDemo.product.brand,
+      model: camryDemo.product.model,
+      manufactureYear: camryDemo.product.model_year,
     },
     {
       categoryId: accessoryCategory?.id,
@@ -1167,12 +1166,12 @@ async function main() {
       dealerId: lexzenzHcmDealer.id,
       productId: expiringMonthDemo.product.id,
       productName:
-        expiringMonthDemo.product.catalogue_name ??
+        expiringMonthDemo.product.display_name ??
         expiringMonthDemo.product.product_code,
       serialNumber: expiringMonthDemo.product.serial_number,
-      brand: expiringMonthDemo.product.catalogue_brand,
-      model: expiringMonthDemo.product.catalogue_model,
-      manufactureYear: expiringMonthDemo.product.catalogue_model_year,
+      brand: expiringMonthDemo.product.brand,
+      model: expiringMonthDemo.product.model,
+      manufactureYear: expiringMonthDemo.product.model_year,
     },
     {
       categoryId: accessoryCategory?.id,
@@ -1183,12 +1182,12 @@ async function main() {
       dealerId: lexzenzHanoiDealer.id,
       productId: expiringSoonDemo.product.id,
       productName:
-        expiringSoonDemo.product.catalogue_name ??
+        expiringSoonDemo.product.display_name ??
         expiringSoonDemo.product.product_code,
       serialNumber: expiringSoonDemo.product.serial_number,
-      brand: expiringSoonDemo.product.catalogue_brand,
-      model: expiringSoonDemo.product.catalogue_model,
-      manufactureYear: expiringSoonDemo.product.catalogue_model_year,
+      brand: expiringSoonDemo.product.brand,
+      model: expiringSoonDemo.product.model,
+      manufactureYear: expiringSoonDemo.product.model_year,
     },
   ];
   const activationRequestSources = [

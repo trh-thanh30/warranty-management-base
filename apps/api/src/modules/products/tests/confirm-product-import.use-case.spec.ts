@@ -61,9 +61,8 @@ describe('ConfirmProductImportUseCase', () => {
       expect.objectContaining({
         data: expect.objectContaining({
           category_ref: { connect: { id: 'category-id' } },
-          catalogue_name: 'SUV Battery',
-          catalogue_brand: 'Lexzenz',
           display_name: 'SUV Battery',
+          brand: 'Lexzenz',
           metadata: {
             installationPosition: 'Engine bay',
           },

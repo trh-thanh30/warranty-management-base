@@ -44,8 +44,8 @@ describe('ProductsRepository', () => {
 
     expect(findFirst).toHaveBeenCalledWith({
       where: {
-        catalogue_slug: 'lex-sp50',
-        catalogue_is_published: true,
+        slug: 'lex-sp50',
+        is_published: true,
         deleted_at: null,
         status: 'ACTIVE',
         category_ref: { is_active: true },

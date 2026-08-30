@@ -113,15 +113,15 @@ function buildPublicProductWhere(filters: {
     category_ref: { is_active: true },
     deleted_at: null,
     status: product_status.ACTIVE,
-    catalogue_is_published: true,
-    ...(filters.slug ? { catalogue_slug: filters.slug } : {}),
+    is_published: true,
+    ...(filters.slug ? { slug: filters.slug } : {}),
     ...(search
       ? {
           OR: [
-            { catalogue_name: { contains: search, mode: 'insensitive' } },
-            { catalogue_sku: { contains: search, mode: 'insensitive' } },
-            { catalogue_brand: { contains: search, mode: 'insensitive' } },
-            { catalogue_model: { contains: search, mode: 'insensitive' } },
+            { display_name: { contains: search, mode: 'insensitive' } },
+            { product_code: { contains: search, mode: 'insensitive' } },
+            { brand: { contains: search, mode: 'insensitive' } },
+            { model: { contains: search, mode: 'insensitive' } },
           ],
         }
       : {}),
@@ -284,8 +284,8 @@ export class ProductsRepository {
     const sortMap = {
       productCode: 'product_code',
       serialNumber: 'serial_number',
-      name: 'catalogue_name',
-      publishedAt: 'catalogue_published_at',
+      name: 'display_name',
+      publishedAt: 'published_at',
       status: 'status',
       createdAt: 'created_at',
       updatedAt: 'updated_at',
@@ -314,7 +314,7 @@ export class ProductsRepository {
             : filters.status === 'ALL'
               ? undefined
               : filters.status,
-      catalogue_is_published:
+      is_published:
         filters.isPublished === undefined
           ? undefined
           : filters.isPublished === 'true',
@@ -368,10 +368,10 @@ export class ProductsRepository {
             },
             { serial_number: { contains: search, mode: 'insensitive' } },
             { display_name: { contains: search, mode: 'insensitive' } },
-            { catalogue_name: { contains: search, mode: 'insensitive' } },
-            { catalogue_sku: { contains: search, mode: 'insensitive' } },
-            { catalogue_brand: { contains: search, mode: 'insensitive' } },
-            { catalogue_model: { contains: search, mode: 'insensitive' } },
+            { display_name: { contains: search, mode: 'insensitive' } },
+            { product_code: { contains: search, mode: 'insensitive' } },
+            { brand: { contains: search, mode: 'insensitive' } },
+            { model: { contains: search, mode: 'insensitive' } },
             {
               ownerships: {
                 some: {
@@ -474,15 +474,13 @@ export class ProductsRepository {
   }) {
     const { page, limit, skip, take } = normalizePagination(filters);
     const sortMap = {
-      name: 'catalogue_name',
-      publishedAt: 'catalogue_published_at',
+      name: 'display_name',
+      publishedAt: 'published_at',
     } satisfies Record<
       'name' | 'publishedAt',
       keyof Prisma.ProductOrderByWithRelationInput
     >;
-    const sortBy = filters.sortBy
-      ? sortMap[filters.sortBy]
-      : 'catalogue_published_at';
+    const sortBy = filters.sortBy ? sortMap[filters.sortBy] : 'published_at';
     const where = buildPublicProductWhere(filters);
     const orderBy: Prisma.ProductOrderByWithRelationInput[] = [
       { [sortBy]: filters.sortOrder ?? 'desc' },
@@ -521,8 +519,8 @@ export class ProductsRepository {
     const sortMap = {
       productCode: 'product_code',
       serialNumber: 'serial_number',
-      name: 'catalogue_name',
-      publishedAt: 'catalogue_published_at',
+      name: 'display_name',
+      publishedAt: 'published_at',
       status: 'status',
       createdAt: 'created_at',
       updatedAt: 'updated_at',
@@ -548,7 +546,7 @@ export class ProductsRepository {
           : filters.status === 'ALL'
             ? undefined
             : filters.status,
-      catalogue_is_published:
+      is_published:
         filters.isPublished === undefined
           ? undefined
           : filters.isPublished === 'true',
@@ -582,10 +580,10 @@ export class ProductsRepository {
             },
             { serial_number: { contains: search, mode: 'insensitive' } },
             { display_name: { contains: search, mode: 'insensitive' } },
-            { catalogue_name: { contains: search, mode: 'insensitive' } },
-            { catalogue_sku: { contains: search, mode: 'insensitive' } },
-            { catalogue_brand: { contains: search, mode: 'insensitive' } },
-            { catalogue_model: { contains: search, mode: 'insensitive' } },
+            { display_name: { contains: search, mode: 'insensitive' } },
+            { product_code: { contains: search, mode: 'insensitive' } },
+            { brand: { contains: search, mode: 'insensitive' } },
+            { model: { contains: search, mode: 'insensitive' } },
             {
               ownerships: {
                 some: {
@@ -666,10 +664,10 @@ function buildProductSearchWhere(search?: string): Prisma.ProductWhereInput {
       },
       { serial_number: { contains: value, mode: 'insensitive' } },
       { display_name: { contains: value, mode: 'insensitive' } },
-      { catalogue_name: { contains: value, mode: 'insensitive' } },
-      { catalogue_sku: { contains: value, mode: 'insensitive' } },
-      { catalogue_brand: { contains: value, mode: 'insensitive' } },
-      { catalogue_model: { contains: value, mode: 'insensitive' } },
+      { display_name: { contains: value, mode: 'insensitive' } },
+      { product_code: { contains: value, mode: 'insensitive' } },
+      { brand: { contains: value, mode: 'insensitive' } },
+      { model: { contains: value, mode: 'insensitive' } },
       {
         ownerships: {
           some: {

@@ -69,18 +69,18 @@ export class CreateProductUseCase {
     const product = await this.productsRepository.create({
       product_code: productCode,
       serial_number: dto.serialNumber,
-      display_name: dto.displayName?.trim() || null,
-      catalogue_name: dto.name.trim(),
-      catalogue_sku: productCode,
-      catalogue_slug: `${toSlug(dto.name)}-${productCode.toLowerCase()}`,
-      catalogue_brand: dto.brand?.trim() || null,
-      catalogue_model: dto.model?.trim() || null,
-      catalogue_model_year: dto.modelYear,
-      catalogue_description: dto.description?.trim() || null,
-      catalogue_metadata: toJsonObject(dto.catalogueMetadata),
+      display_name: dto.name.trim(),
+      slug: `${toSlug(dto.name)}-${productCode.toLowerCase()}`,
+      brand: dto.brand?.trim() || null,
+      model: dto.model?.trim() || null,
+      model_year: dto.modelYear,
+      description: dto.description?.trim() || null,
+      metadata: toJsonObject({
+        ...(dto.catalogueMetadata ?? {}),
+        ...(dto.metadata ?? {}),
+      }),
       status: dto.status ?? product_status.ACTIVE,
       category_ref: { connect: { id: dto.categoryId } },
-      metadata: toPhysicalProductMetadata(dto.metadata),
       assets: buildProductAssets(dto.coverAssetId, dto.galleryAssetIds),
       warranty: {
         create: {

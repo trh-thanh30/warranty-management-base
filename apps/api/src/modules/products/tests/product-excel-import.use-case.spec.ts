@@ -33,10 +33,9 @@ describe('PreviewProductImportUseCase', () => {
 
   it('exports one product name from displayName with a catalogue fallback', () => {
     const baseProduct = {
-      catalogue_brand: 'Lexzenz',
-      catalogue_model: 'Battery Plus',
-      catalogue_model_year: 2026,
-      catalogue_name: 'Catalogue Battery',
+      brand: 'Lexzenz',
+      model: 'Battery Plus',
+      model_year: 2026,
       category_id: 'category-id',
       category_ref: { code: 'ACCESSORY' },
       display_name: 'Customer Battery',
@@ -60,7 +59,7 @@ describe('PreviewProductImportUseCase', () => {
         ...baseProduct,
         display_name: null,
       } as never).displayName,
-    ).toBe('Catalogue Battery');
+    ).toBe('PRD-2026-ABCDEF');
   });
 
   it('parses and validates product import rows', async () => {

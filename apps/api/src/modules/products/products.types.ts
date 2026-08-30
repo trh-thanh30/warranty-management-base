@@ -27,15 +27,9 @@ export function toProductResponse(
     (ownership) => ownership.is_current_owner,
   );
   const catalogue = getProductCatalogue(product);
-  const catalogueMetadata = isRecord(product.catalogue_metadata)
-    ? product.catalogue_metadata
-    : isRecord(catalogue.metadata)
-      ? catalogue.metadata
-      : null;
-  const effectiveMetadata = mergeEffectiveMetadata(
-    catalogueMetadata ?? null,
-    product.metadata,
-  );
+  const effectiveMetadata = isRecord(product.metadata)
+    ? product.metadata
+    : null;
   const productAssets =
     product.assets?.map((productAsset) => ({
       id: productAsset.id,
@@ -56,7 +50,7 @@ export function toProductResponse(
 
   return {
     id: product.id,
-    sku: catalogue.sku,
+    sku: product.product_code,
     productCode: product.product_code,
     slug: catalogue.slug,
     warrantyCode: product.warranty?.warranty_code ?? null,
@@ -73,11 +67,11 @@ export function toProductResponse(
     model: catalogue.model,
     modelYear: catalogue.modelYear,
     description: catalogue.description,
-    catalogueMetadata,
+    catalogueMetadata: effectiveMetadata,
     status: product.status,
     metadata: effectiveMetadata,
-    isPublished: product.catalogue_is_published,
-    publishedAt: product.catalogue_published_at,
+    isPublished: product.is_published,
+    publishedAt: product.published_at,
     createdAt: product.created_at,
     updatedAt: product.updated_at,
     deletedAt: product.deleted_at,
@@ -111,16 +105,6 @@ export function toProductResponse(
   };
 }
 
-function mergeEffectiveMetadata(
-  catalogueMetadata: Record<string, unknown> | null,
-  productMetadata: unknown,
-) {
-  const physicalMetadata = isRecord(productMetadata) ? productMetadata : {};
-  const sharedMetadata = catalogueMetadata ?? {};
-  const merged = { ...sharedMetadata, ...physicalMetadata };
-  return Object.keys(merged).length > 0 ? merged : null;
-}
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
@@ -130,29 +114,26 @@ export function toPublicProductSummary(
   resolveAssetUrl: (asset: Asset) => string = (asset) => asset.path,
 ) {
   const cover = product.assets.find((asset) => asset.role === 'COVER');
-  const metadata = isRecord(product.catalogue_metadata)
-    ? product.catalogue_metadata
-    : {};
+  const metadata = isRecord(product.metadata) ? product.metadata : {};
 
   return {
     id: product.id,
-    sku: product.catalogue_sku ?? product.product_code,
-    slug: product.catalogue_slug ?? product.product_code.toLowerCase(),
-    name:
-      product.catalogue_name ?? product.display_name ?? product.product_code,
+    sku: product.product_code,
+    slug: product.slug ?? product.product_code.toLowerCase(),
+    name: product.display_name ?? product.product_code,
     categoryId: product.category_id,
     category: {
       id: product.category_ref.id,
       slug: product.category_ref.slug,
       name: product.category_ref.name,
     },
-    brand: product.catalogue_brand,
-    model: product.catalogue_model,
-    description: product.catalogue_description,
+    brand: product.brand,
+    model: product.model,
+    description: product.description,
     coverImageUrl: cover ? resolveAssetUrl(cover.asset) : null,
     specifications: toPublicSpecifications(metadata.specifications),
     warrantyDurationMonths: product.warranty?.duration_months ?? 0,
-    publishedAt: product.catalogue_published_at ?? product.created_at,
+    publishedAt: product.published_at ?? product.created_at,
   };
 }
 
@@ -166,9 +147,7 @@ export function toPublicProductDetail(
   product: PublicProductWithRelations,
   resolveAssetUrl: (asset: Asset) => string = (asset) => asset.path,
 ) {
-  const metadata = isRecord(product.catalogue_metadata)
-    ? product.catalogue_metadata
-    : {};
+  const metadata = isRecord(product.metadata) ? product.metadata : {};
   const images = product.assets.map((productAsset) => ({
     id: productAsset.id,
     url: resolveAssetUrl(productAsset.asset),
@@ -181,23 +160,22 @@ export function toPublicProductDetail(
 
   return {
     id: product.id,
-    sku: product.catalogue_sku ?? product.product_code,
-    slug: product.catalogue_slug ?? product.product_code.toLowerCase(),
-    name:
-      product.catalogue_name ?? product.display_name ?? product.product_code,
+    sku: product.product_code,
+    slug: product.slug ?? product.product_code.toLowerCase(),
+    name: product.display_name ?? product.product_code,
     category: {
       id: product.category_ref.id,
       slug: product.category_ref.slug,
       name: product.category_ref.name,
     },
-    brand: product.catalogue_brand,
-    model: product.catalogue_model,
-    modelYear: product.catalogue_model_year,
+    brand: product.brand,
+    model: product.model,
+    modelYear: product.model_year,
     shortDescription:
       typeof metadata.shortDescription === 'string'
         ? metadata.shortDescription
         : null,
-    description: product.catalogue_description,
+    description: product.description,
     coverImage: coverIndex >= 0 ? images[coverIndex] : null,
     galleryImages: images.filter(
       (_, index) =>
@@ -210,7 +188,7 @@ export function toPublicProductDetail(
       durationMonths: product.warranty?.duration_months ?? 0,
       terms: product.warranty?.terms ?? null,
     },
-    publishedAt: product.catalogue_published_at,
+    publishedAt: product.published_at,
   };
 }
 
