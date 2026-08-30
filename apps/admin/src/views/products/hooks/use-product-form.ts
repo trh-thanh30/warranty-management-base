@@ -26,21 +26,23 @@ import {
 } from "../products.utils";
 
 export function useProductForm({
+  isClone = false,
   onSaved,
   product,
 }: {
+  isClone?: boolean;
   onSaved: (product?: ProductResponse) => void;
   product: ProductResponse | null;
 }) {
   const t = useTranslations("Products");
   const tApiErrors = useTranslations("ApiErrors");
   const toast = useToast();
-  const creating = !product;
+  const creating = isClone || !product;
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct(product?.id ?? null);
   const form = useForm<ProductFormInput, unknown, ProductFormValues>({
     resolver: zodResolver(creating ? productFormSchema : productEditFormSchema),
-    defaultValues: getDefaultValues(product),
+    defaultValues: getDefaultValues(product, isClone),
   });
   const gallery = useFieldArray({
     control: form.control,
@@ -111,7 +113,10 @@ export function useProductForm({
   };
 }
 
-function getDefaultValues(product: ProductResponse | null): ProductFormInput {
+function getDefaultValues(
+  product: ProductResponse | null,
+  isClone = false,
+): ProductFormInput {
   const cover = product?.assets.find((asset) => asset.role === "COVER");
   const gallery =
     product?.assets
@@ -142,10 +147,10 @@ function getDefaultValues(product: ProductResponse | null): ProductFormInput {
     ),
     specifications: getProductSpecifications(product?.catalogueMetadata),
     installationPosition: getProductInstallationPosition(product?.metadata),
-    productCode: product?.productCode ?? "",
-    serialNumber: product?.serialNumber ?? "",
+    productCode: isClone ? "" : (product?.productCode ?? ""),
+    serialNumber: isClone ? "" : (product?.serialNumber ?? ""),
     status: product?.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
-    warrantyCode: product?.warrantyCode ?? "",
+    warrantyCode: isClone ? "" : (product?.warrantyCode ?? ""),
     warrantyDurationMonths: product?.warranty?.durationMonths ?? "",
     warrantyTerms: product?.warranty?.terms ?? "",
   };

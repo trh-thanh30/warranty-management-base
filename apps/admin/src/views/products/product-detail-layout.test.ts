@@ -34,7 +34,7 @@ test("product detail actions remain full width only on mobile", async () => {
     "utf8",
   );
 
-  assert.equal(source.match(/className="w-full sm:w-auto"/g)?.length ?? 0, 2);
+  assert.equal(source.match(/className="w-full sm:w-auto"/g)?.length ?? 0, 3);
   assert.match(source, /descriptionAccessory={/);
 });
 
