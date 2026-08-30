@@ -161,7 +161,7 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
     expect(createWarrantyActivationRequestUseCase.execute).toHaveBeenCalledWith(
       expect.objectContaining({
         brand: 'Toyota',
-        productName: 'Bo pin chinh hang',
+        productName: 'BO-PIN-001',
         serialNumber: 'SN-001',
         warrantyCode: 'WM-2026-ABC123',
       }),

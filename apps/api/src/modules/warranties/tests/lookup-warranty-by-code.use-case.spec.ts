@@ -75,7 +75,7 @@ describe('LookupWarrantyByCodeUseCase', () => {
         id: 'product-id',
         productCode: 'LEX-SP50-001',
         name: 'Toyota Camry',
-        displayName: 'Lexzenz SP50',
+        displayName: 'Toyota Camry',
         brand: 'Toyota',
         model: 'Camry',
         serialNumber: 'VIN123',
