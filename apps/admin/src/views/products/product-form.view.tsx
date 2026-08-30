@@ -36,7 +36,7 @@ export function ProductFormView({ mode, productId }: ProductFormViewProps) {
     isEditing
       ? { mode: "edit", productId }
       : isCloning
-        ? { mode: "detail", productId: cloneFrom! }
+        ? { mode: "clone", productId: cloneFrom! }
         : { mode: "create" },
   );
   const requiredPermission: PermissionKey = isEditing
