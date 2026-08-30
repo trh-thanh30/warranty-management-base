@@ -8,8 +8,7 @@ import {
   StaggerItem,
 } from "@/src/components/animation/stagger-group";
 import { FadeIn } from "@/src/components/animation/fade-in";
-import { APP_ROUTES } from "@/src/constants/routes.constants";
-import { Link } from "@/src/i18n/navigation";
+import { PUBLIC_DEALER_NETWORK_URL } from "@/src/config/public-features.config";
 import { aboutB2BBenefits } from "../about.constants";
 import { usePrimaryWebsiteHotline } from "@/src/app/providers/site-settings-provider";
 
@@ -42,13 +41,14 @@ export function AboutB2BCta() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2 pb-4">
-            <Link
-              href={APP_ROUTES.dealers}
+            <a
+              href={PUBLIC_DEALER_NETWORK_URL}
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2.5 rounded-md bg-premium-red hover:bg-warm-red px-8 py-4 text-xs sm:text-sm font-semibold uppercase tracking-wider text-white shadow-md transition-all cursor-pointer"
             >
               <span>{t("b2bCta.partnerBtn")}</span>
               <ArrowRight className="size-4 text-white" />
-            </Link>
+            </a>
 
             {hotline && (
               <a

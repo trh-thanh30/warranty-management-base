@@ -14,20 +14,71 @@ export const productExcelColumns: Array<
     parse: parseOptionalString,
   },
   {
-    key: 'templateSku',
-    header: 'SKU product template',
+    key: 'displayName',
+    header: 'Tên sản phẩm',
     required: true,
-    width: 26,
-    example: 'BATTERY-PLUS',
-    note: 'SKU của product template đã tồn tại và đang hoạt động.',
+    width: 34,
+    example: 'Pin Battery Plus',
+    note: 'Tên hiển thị được lưu trực tiếp trên sản phẩm.',
     parse: parseRequiredString,
   },
   {
-    key: 'displayName',
-    header: 'Tên hiển thị thiết bị',
-    width: 34,
-    example: 'Pin xe khách Nguyễn Văn A',
-    note: 'Không bắt buộc. Chỉ dùng khi thiết bị cụ thể cần tên hiển thị riêng.',
+    key: 'categoryCode',
+    header: 'Mã danh mục',
+    required: true,
+    width: 22,
+    example: 'ACCESSORY',
+    note: 'Mã danh mục sản phẩm đang hoạt động.',
+    parse: parseRequiredString,
+  },
+  {
+    key: 'brand',
+    header: 'Thương hiệu',
+    width: 20,
+    example: 'Lexzenz',
+    parse: parseOptionalString,
+  },
+  {
+    key: 'model',
+    header: 'Model',
+    width: 20,
+    example: 'Battery Plus',
+    parse: parseOptionalString,
+  },
+  {
+    key: 'modelYear',
+    header: 'Năm model',
+    width: 14,
+    example: 2026,
+    parse: parseOptionalNumber,
+  },
+  {
+    key: 'shortDescription',
+    header: 'Mô tả ngắn',
+    width: 40,
+    example: 'Sản phẩm chất lượng cao cho xe của bạn.',
+    parse: parseOptionalString,
+  },
+  {
+    key: 'description',
+    header: 'Mô tả',
+    width: 50,
+    example: 'Thông tin chi tiết về sản phẩm và phạm vi sử dụng.',
+    parse: parseOptionalString,
+  },
+  {
+    key: 'warrantyDurationMonths',
+    header: 'Thời hạn bảo hành (tháng)',
+    required: true,
+    width: 26,
+    example: 24,
+    parse: parseRequiredNumber,
+  },
+  {
+    key: 'warrantyTerms',
+    header: 'Điều khoản bảo hành',
+    width: 36,
+    example: 'Áp dụng theo điều kiện bảo hành của hãng.',
     parse: parseOptionalString,
   },
   {
@@ -79,6 +130,19 @@ function parseOptionalString(value: ExcelCellValue) {
   }
 
   return String(value).trim() || null;
+}
+
+function parseOptionalNumber(value: ExcelCellValue) {
+  if (value === null || String(value).trim() === '') return null;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed)) throw new Error('Value must be an integer');
+  return parsed;
+}
+
+function parseRequiredNumber(value: ExcelCellValue) {
+  const parsed = parseOptionalNumber(value);
+  if (parsed === null) throw new Error('Value is required');
+  return parsed;
 }
 
 function parseOptionalWarrantyCode(value: ExcelCellValue) {

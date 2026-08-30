@@ -108,59 +108,12 @@ export function createWarrantyActivationRequestsService(
       );
       return unwrapBlob(response);
     },
-
-    async viewWarrantyActivationRequestItemCertificate(
-      requestId: string,
-      itemId: string,
-    ): Promise<Blob> {
-      const response = await http.get<Blob>(
-        `/warranty-activation-requests/${requestId}/items/${itemId}/certificate/view`,
-        { responseType: "blob" },
-      );
-      return unwrapBlob(response);
-    },
-
-    async downloadWarrantyActivationRequestItemCertificate(
-      requestId: string,
-      itemId: string,
-    ): Promise<Blob> {
-      const response = await http.get<Blob>(
-        `/warranty-activation-requests/${requestId}/items/${itemId}/certificate/download`,
-        { responseType: "blob" },
-      );
-      return unwrapBlob(response);
-    },
-
-    async resendWarrantyActivationRequestItemCertificateEmail(
-      requestId: string,
-      itemId: string,
-    ): Promise<WarrantyActivationRequestSummary> {
-      return unwrap(
-        await http.post<WarrantyActivationRequestSummary>(
-          `/warranty-activation-requests/${requestId}/items/${itemId}/certificate/resend-email`,
-          {},
-        ),
-      );
-    },
-
     async retryWarrantyActivationRequestCertificate(
       requestId: string,
     ): Promise<WarrantyActivationRequestSummary> {
       return unwrap(
         await http.post<WarrantyActivationRequestSummary>(
           `/warranty-activation-requests/${requestId}/certificate/retry`,
-          {},
-        ),
-      );
-    },
-
-    async retryWarrantyActivationRequestItemCertificate(
-      requestId: string,
-      itemId: string,
-    ): Promise<WarrantyActivationRequestSummary> {
-      return unwrap(
-        await http.post<WarrantyActivationRequestSummary>(
-          `/warranty-activation-requests/${requestId}/items/${itemId}/certificate/retry`,
           {},
         ),
       );

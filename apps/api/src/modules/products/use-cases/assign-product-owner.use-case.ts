@@ -95,12 +95,7 @@ export class AssignProductOwnerUseCase {
               orderBy: { created_at: 'desc' },
             },
             warranty: true,
-            template: {
-              include: {
-                category_ref: true,
-                assets: { include: { asset: true } },
-              },
-            },
+            category_ref: true,
           },
         });
       },

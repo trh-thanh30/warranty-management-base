@@ -1,10 +1,10 @@
-import { ProductTemplateFormView } from "@/src/views/product-templates/product-template-form.view";
+import { redirect } from "next/navigation";
 
 export default async function EditProductTemplatePage({
   params,
 }: {
-  params: Promise<{ templateId: string }>;
+  params: Promise<{ locale: string; templateId: string }>;
 }) {
-  const { templateId } = await params;
-  return <ProductTemplateFormView mode="edit" templateId={templateId} />;
+  const { locale } = await params;
+  redirect(`/${locale}/products`);
 }

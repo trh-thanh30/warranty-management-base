@@ -515,12 +515,8 @@ export class AnalyticsRepository {
       select: {
         status: true,
         category_id: true,
+        brand: true,
         category_ref: { select: { name: true } },
-        template: {
-          select: {
-            brand: true,
-          },
-        },
       },
     });
     const statusCounts = new Map<string, number>();
@@ -539,7 +535,7 @@ export class AnalyticsRepository {
         categoryName: product.category_ref.name,
         count: (categoryCounts.get(categoryId)?.count ?? 0) + 1,
       });
-      const brand = product.template.brand ?? 'Unknown';
+      const brand = product.brand ?? 'Unknown';
       brandCounts.set(brand, (brandCounts.get(brand) ?? 0) + 1);
     }
 

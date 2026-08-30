@@ -2,7 +2,7 @@ import { CategoriesRepository } from '@/modules/categories/repository/categories
 import { category_type } from '@prisma/client';
 
 describe('CategoriesRepository.listPublicProductCategories', () => {
-  it('returns active product categories and counts only visible templates', async () => {
+  it('returns active product categories and counts only visible products', async () => {
     const findMany = jest.fn().mockResolvedValue([]);
     const count = jest.fn().mockResolvedValue(0);
     const repository = new CategoriesRepository({
@@ -31,9 +31,10 @@ describe('CategoriesRepository.listPublicProductCategories', () => {
       include: {
         _count: {
           select: {
-            product_templates: {
+            products: {
               where: {
-                is_active: true,
+                deleted_at: null,
+                status: 'ACTIVE',
                 is_published: true,
               },
             },

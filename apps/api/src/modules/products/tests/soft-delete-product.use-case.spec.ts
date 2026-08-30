@@ -18,8 +18,6 @@ describe('SoftDeleteProductUseCase', () => {
       ownerships: [],
       product_code: 'PRD-1',
       serial_number: null,
-      template: null,
-      template_id: 'template-1',
       updated_at: new Date('2026-08-01T00:00:00.000Z'),
       warranty: null,
       warranty_activation_requests: [],

@@ -1,7 +1,7 @@
 import { BadRequestError, NotFoundError } from '@/common/response';
 import { toWarrantyActivationRequestResponse } from '@/modules/warranty-activation-requests/mappers/warranty-activation-request.mapper';
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
-import { IssueWarrantyCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-certificate.use-case';
+import { IssueWarrantyActivationRequestCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-activation-request-certificate.use-case';
 import { Injectable } from '@nestjs/common';
 import { warranty_activation_request_status } from '@prisma/client';
 
@@ -9,10 +9,10 @@ import { warranty_activation_request_status } from '@prisma/client';
 export class RetryWarrantyActivationRequestCertificateUseCase {
   constructor(
     private readonly repository: WarrantyActivationRequestsRepository,
-    private readonly issueWarrantyCertificateUseCase: IssueWarrantyCertificateUseCase,
+    private readonly issueRequestCertificateUseCase: IssueWarrantyActivationRequestCertificateUseCase,
   ) {}
 
-  async execute(requestId: string, itemId?: string) {
+  async execute(requestId: string) {
     const request = await this.repository.findById(requestId);
     if (!request) {
       throw new NotFoundError('Warranty activation request not found');
@@ -25,21 +25,9 @@ export class RetryWarrantyActivationRequestCertificateUseCase {
       );
     }
 
-    const warrantyId = itemId
-      ? request.items?.find((item) => item.id === itemId)?.warranty_id
-      : request.activated_warranty_id;
-    if (!warrantyId) {
-      throw new NotFoundError(
-        itemId
-          ? 'Warranty activation request item not found'
-          : 'Activated warranty not found',
-      );
-    }
-
-    await this.issueWarrantyCertificateUseCase.execute({
+    await this.issueRequestCertificateUseCase.execute({
       recipientEmail: request.customer_email ?? undefined,
       requestId,
-      warrantyId,
     });
 
     const updatedRequest = await this.repository.findById(requestId);

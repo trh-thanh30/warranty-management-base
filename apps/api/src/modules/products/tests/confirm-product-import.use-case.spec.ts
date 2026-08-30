@@ -15,14 +15,8 @@ describe('ConfirmProductImportUseCase', () => {
       },
     };
     const prismaService = {
-      productTemplate: {
-        findUnique: jest.fn().mockResolvedValue({
-          category_id: 'category-id',
-          id: 'template-id',
-          is_active: true,
-          default_warranty_duration_months: 36,
-          default_warranty_terms: 'Template terms',
-        }),
+      category: {
+        findFirst: jest.fn().mockResolvedValue({ id: 'category-id' }),
       },
       product: {
         findUnique: jest.fn().mockResolvedValue(null),
@@ -48,7 +42,12 @@ describe('ConfirmProductImportUseCase', () => {
       mode: 'upsert',
       rows: [
         {
-          templateSku: 'BATTERY-PLUS',
+          categoryCode: 'ACCESSORY',
+          brand: 'Lexzenz',
+          model: 'Battery Plus',
+          modelYear: 2026,
+          warrantyDurationMonths: 36,
+          warrantyTerms: 'Product terms',
           displayName: 'SUV Battery',
           installationPosition: 'Engine bay',
           productCode: null,
@@ -62,8 +61,8 @@ describe('ConfirmProductImportUseCase', () => {
       expect.objectContaining({
         data: expect.objectContaining({
           category_ref: { connect: { id: 'category-id' } },
-          template: { connect: { id: 'template-id' } },
           display_name: 'SUV Battery',
+          brand: 'Lexzenz',
           metadata: {
             installationPosition: 'Engine bay',
           },
@@ -75,7 +74,7 @@ describe('ConfirmProductImportUseCase', () => {
               end_date: null,
               start_date: null,
               status: 'DRAFT',
-              terms: 'Template terms',
+              terms: 'Product terms',
               warranty_code: 'WM-2026-IMPORT01',
             }),
           },
@@ -106,14 +105,8 @@ describe('ConfirmProductImportUseCase', () => {
       },
     };
     const prismaService = {
-      productTemplate: {
-        findUnique: jest.fn().mockResolvedValue({
-          category_id: 'category-id',
-          id: 'template-id',
-          is_active: true,
-          default_warranty_duration_months: 36,
-          default_warranty_terms: null,
-        }),
+      category: {
+        findFirst: jest.fn().mockResolvedValue({ id: 'category-id' }),
       },
       product: {
         findUnique: jest.fn().mockResolvedValue(null),
@@ -134,7 +127,12 @@ describe('ConfirmProductImportUseCase', () => {
       mode: 'upsert',
       rows: [
         {
-          templateSku: 'BATTERY-PLUS',
+          categoryCode: 'ACCESSORY',
+          brand: null,
+          model: null,
+          modelYear: null,
+          warrantyDurationMonths: 36,
+          warrantyTerms: null,
           displayName: 'SUV Battery',
           installationPosition: 'Engine bay',
           productCode: null,
@@ -171,6 +169,7 @@ describe('ConfirmProductImportUseCase', () => {
         findUnique: jest.fn().mockResolvedValue({
           id: 'warranty-id',
           warranty_code: null,
+          status: 'DRAFT',
         }),
         update: jest.fn(),
         upsert: jest.fn(),
@@ -196,7 +195,7 @@ describe('ConfirmProductImportUseCase', () => {
 
     expect(tx.warranty.findUnique).toHaveBeenCalledWith({
       where: { product_id: 'product-id' },
-      select: { id: true, warranty_code: true },
+      select: { id: true, warranty_code: true, status: true },
     });
     expect(generateWarrantyCodeUseCase.execute).toHaveBeenCalledWith(
       expect.any(Date),
@@ -204,7 +203,11 @@ describe('ConfirmProductImportUseCase', () => {
     );
     expect(tx.warranty.update).toHaveBeenCalledWith({
       where: { id: 'warranty-id' },
-      data: { warranty_code: 'WM-2026-IMPORT01' },
+      data: {
+        duration_months: 36,
+        terms: 'Product terms',
+        warranty_code: 'WM-2026-IMPORT01',
+      },
     });
     expect(result).toEqual({
       created: 0,
@@ -226,6 +229,7 @@ describe('ConfirmProductImportUseCase', () => {
         findUnique: jest.fn().mockResolvedValue({
           id: 'warranty-id',
           warranty_code: 'WM-2026-EXISTING',
+          status: 'DRAFT',
         }),
         update: jest.fn(),
         upsert: jest.fn(),
@@ -251,11 +255,14 @@ describe('ConfirmProductImportUseCase', () => {
 
     expect(tx.warranty.findUnique).toHaveBeenCalledWith({
       where: { product_id: 'product-id' },
-      select: { id: true, warranty_code: true },
+      select: { id: true, warranty_code: true, status: true },
     });
     expect(generateWarrantyCodeUseCase.execute).not.toHaveBeenCalled();
     expect(tx.warranty.create).not.toHaveBeenCalled();
-    expect(tx.warranty.update).not.toHaveBeenCalled();
+    expect(tx.warranty.update).toHaveBeenCalledWith({
+      where: { id: 'warranty-id' },
+      data: { duration_months: 36, terms: 'Product terms' },
+    });
     expect(tx.warranty.upsert).not.toHaveBeenCalled();
   });
 
@@ -299,7 +306,7 @@ describe('ConfirmProductImportUseCase', () => {
         start_date: null,
         end_date: null,
         status: 'DRAFT',
-        terms: 'Template terms',
+        terms: 'Product terms',
       },
     });
     expect(tx.warranty.update).not.toHaveBeenCalled();
@@ -307,7 +314,12 @@ describe('ConfirmProductImportUseCase', () => {
 });
 
 const existingProductImportRow = {
-  templateSku: 'BATTERY-PLUS',
+  categoryCode: 'ACCESSORY',
+  brand: 'Lexzenz',
+  model: 'Battery Plus',
+  modelYear: 2026,
+  warrantyDurationMonths: 36,
+  warrantyTerms: 'Product terms',
   displayName: 'SUV Battery',
   installationPosition: 'Engine bay',
   productCode: 'PRD-2026-EXISTING',
@@ -317,14 +329,8 @@ const existingProductImportRow = {
 
 function createPrismaServiceMockForExistingProduct(tx: object) {
   return {
-    productTemplate: {
-      findUnique: jest.fn().mockResolvedValue({
-        category_id: 'category-id',
-        id: 'template-id',
-        is_active: true,
-        default_warranty_duration_months: 36,
-        default_warranty_terms: 'Template terms',
-      }),
+    category: {
+      findFirst: jest.fn().mockResolvedValue({ id: 'category-id' }),
     },
     product: {
       findUnique: jest.fn().mockImplementation(({ where }) => {

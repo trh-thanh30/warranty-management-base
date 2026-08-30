@@ -1,5 +1,27 @@
 import { registerAs } from '@nestjs/config';
 
+export function resolveEmailBrandLogoUrl(
+  explicitUrl?: string,
+  assetCdnUrl?: string,
+) {
+  const configuredLogoUrl = explicitUrl?.trim();
+  if (configuredLogoUrl) return configuredLogoUrl;
+
+  const configuredAssetCdnUrl = assetCdnUrl?.trim();
+  if (!configuredAssetCdnUrl) return undefined;
+
+  try {
+    const hostname = new URL(configuredAssetCdnUrl).hostname.toLowerCase();
+    if (['localhost', '127.0.0.1', '0.0.0.0', '::1'].includes(hostname)) {
+      return undefined;
+    }
+  } catch {
+    return undefined;
+  }
+
+  return `${configuredAssetCdnUrl.replace(/\/$/, '')}/website-config/logo_2.png`;
+}
+
 export default registerAs('email', () => {
   const smtpUser = process.env.SMTP_USER || '';
   const appName = process.env.APP_NAME || 'Warranty Management API';
@@ -22,6 +44,10 @@ export default registerAs('email', () => {
     user: smtpUser,
     pass: process.env.SMTP_PASS || '',
     from,
+    brandLogoUrl: resolveEmailBrandLogoUrl(
+      process.env.EMAIL_BRAND_LOGO_URL,
+      process.env.ASSET_CDN_URL,
+    ),
     templatesPath:
       process.env.EMAIL_TEMPLATES_PATH || 'src/modules/email/templates',
   };

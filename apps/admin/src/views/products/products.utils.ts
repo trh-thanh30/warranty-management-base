@@ -2,38 +2,55 @@ import {
   HttpClientError,
   type CreateProductBody,
   type ProductResponse,
-  type ProductTemplateSummary,
   type UpdateProductBody,
 } from "@repo/shared";
 import { toNullableValue, toOptionalValue } from "../../utils/form.ts";
 import type { ProductFormValues } from "./products.types";
 
-export function getProductTemplateSearchKeywords(
-  template: ProductTemplateSummary,
-) {
-  return [
-    template.name,
-    template.sku,
-    template.brand,
-    template.model,
-    template.categoryRef?.name,
-    template.categoryRef?.code,
-    template.categoryRef?.slug,
-  ].filter((keyword): keyword is string => Boolean(keyword?.trim()));
+type ProductWarrantyPeriod = {
+  endDate: string;
+  startDate: string;
+};
+
+export type ProductWarrantyProgress = {
+  percentage: number;
+  remainingMonths: number;
+  state: "active" | "expired" | "upcoming";
+};
+
+export function getProductWarrantyProgress(
+  warranty: ProductWarrantyPeriod,
+  now = new Date(),
+): ProductWarrantyProgress {
+  const start = new Date(warranty.startDate);
+  const end = new Date(warranty.endDate);
+  const totalDuration = end.getTime() - start.getTime();
+  const elapsedDuration = now.getTime() - start.getTime();
+  const percentage =
+    totalDuration > 0
+      ? Math.round(
+          Math.min(1, Math.max(0, elapsedDuration / totalDuration)) * 100,
+        )
+      : 0;
+
+  return {
+    percentage,
+    remainingMonths: getRemainingCalendarMonths(now, end),
+    state: now < start ? "upcoming" : now >= end ? "expired" : "active",
+  };
 }
 
-export function mergeProductTemplateOptions(
-  items: ProductTemplateSummary[],
-  currentTemplate?: ProductTemplateSummary | null,
-) {
-  if (
-    !currentTemplate ||
-    items.some((template) => template.id === currentTemplate.id)
-  ) {
-    return items;
-  }
+function getRemainingCalendarMonths(from: Date, to: Date) {
+  if (from >= to) return 0;
 
-  return [currentTemplate, ...items];
+  const wholeMonths =
+    (to.getUTCFullYear() - from.getUTCFullYear()) * 12 +
+    to.getUTCMonth() -
+    from.getUTCMonth();
+  const anchor = new Date(from);
+  anchor.setUTCMonth(anchor.getUTCMonth() + wholeMonths);
+
+  return wholeMonths + (anchor < to ? 1 : 0);
 }
 
 export function formatProductOwner(product: ProductResponse) {
@@ -78,6 +95,97 @@ export function mergeProductInstallationPosition(
   return Object.keys(nextMetadata).length > 0 ? nextMetadata : null;
 }
 
+export function getProductSpecifications(
+  metadata: Record<string, unknown> | null | undefined,
+) {
+  const specifications = metadata?.specifications;
+  if (!Array.isArray(specifications)) return [{ key: "", value: "" }];
+
+  const values = specifications.flatMap((specification) => {
+    if (
+      !specification ||
+      typeof specification !== "object" ||
+      Array.isArray(specification)
+    ) {
+      return [];
+    }
+    const key =
+      "key" in specification && typeof specification.key === "string"
+        ? specification.key.trim()
+        : "";
+    const value =
+      "value" in specification && typeof specification.value === "string"
+        ? specification.value.trim()
+        : "";
+    return key || value ? [{ key, value }] : [];
+  });
+
+  return values.length ? values : [{ key: "", value: "" }];
+}
+
+export function getProductMetadataTextList(
+  metadata: Record<string, unknown> | null | undefined,
+  key: "applications" | "features",
+) {
+  const items = metadata?.[key];
+  if (!Array.isArray(items)) return [{ value: "" }];
+
+  const values = items.flatMap((item) =>
+    typeof item === "string" && item.trim() ? [{ value: item.trim() }] : [],
+  );
+  return values.length ? values : [{ value: "" }];
+}
+
+export function mergeProductCatalogueMetadata(
+  metadata: Record<string, unknown> | null | undefined,
+  values: Pick<
+    ProductFormValues,
+    "applications" | "features" | "specifications" | "shortDescription"
+  >,
+): Record<string, unknown> | null {
+  const nextMetadata = { ...(metadata ?? {}) };
+  const specifications = values.specifications
+    .map(({ key, value }) => ({ key: key.trim(), value: value.trim() }))
+    .filter(({ key, value }) => key && value);
+  const features = values.features
+    .map(({ value }) => value.trim())
+    .filter(Boolean);
+  const applications = values.applications
+    .map(({ value }) => value.trim())
+    .filter(Boolean);
+
+  setOrDeleteMetadataValue(nextMetadata, "specifications", specifications);
+  setOrDeleteMetadataValue(nextMetadata, "features", features);
+  setOrDeleteMetadataValue(nextMetadata, "applications", applications);
+  if (values.shortDescription !== undefined) {
+    const shortDescription = toOptionalValue(values.shortDescription);
+    if (shortDescription) nextMetadata.shortDescription = shortDescription;
+    else delete nextMetadata.shortDescription;
+  }
+
+  return Object.keys(nextMetadata).length > 0 ? nextMetadata : null;
+}
+
+export function getProductPhysicalMetadata(
+  metadata: Record<string, unknown> | null | undefined,
+) {
+  const nextMetadata = { ...(metadata ?? {}) };
+  delete nextMetadata.applications;
+  delete nextMetadata.features;
+  delete nextMetadata.shortDescription;
+  delete nextMetadata.specifications;
+  return Object.keys(nextMetadata).length > 0 ? nextMetadata : null;
+}
+
+function setOrDeleteMetadataValue(
+  metadata: Record<string, unknown>,
+  key: "applications" | "features" | "specifications",
+  value: unknown[],
+) {
+  if (value.length) metadata[key] = value;
+  else delete metadata[key];
+}
+
 export function toCreateProductBody(
   values: ProductFormValues,
 ): CreateProductBody {
@@ -87,27 +195,66 @@ export function toCreateProductBody(
   );
   const productCode = toOptionalValue(values.productCode);
   const warrantyCode = toOptionalValue(values.warrantyCode)?.toUpperCase();
+  const catalogueMetadata = mergeProductCatalogueMetadata(null, values);
 
   return {
+    name: values.displayName,
     categoryId: values.categoryId,
-    displayName: toOptionalValue(values.displayName),
+    ...(toOptionalValue(values.brand)
+      ? { brand: toOptionalValue(values.brand) }
+      : {}),
+    ...(toOptionalValue(values.model)
+      ? { model: toOptionalValue(values.model) }
+      : {}),
+    ...(values.modelYear ? { modelYear: values.modelYear } : {}),
+    ...(toOptionalValue(values.description)
+      ? { description: toOptionalValue(values.description) }
+      : {}),
+    ...(catalogueMetadata ? { catalogueMetadata } : {}),
+    ...(toOptionalValue(values.coverAssetId)
+      ? { coverAssetId: toOptionalValue(values.coverAssetId) }
+      : {}),
+    ...(values.galleryImages.some((image) => image.assetId)
+      ? {
+          galleryAssetIds: values.galleryImages
+            .map((image) => image.assetId)
+            .filter(Boolean),
+        }
+      : {}),
+    displayName: values.displayName,
     metadata: metadata ?? undefined,
     ...(productCode ? { productCode } : {}),
     ...(warrantyCode ? { warrantyCode } : {}),
     serialNumber: toOptionalValue(values.serialNumber),
     status: values.status,
-    templateId: values.templateId,
     warrantyDurationMonths: values.warrantyDurationMonths,
+    ...(toOptionalValue(values.warrantyTerms)
+      ? { warrantyTerms: toOptionalValue(values.warrantyTerms) }
+      : {}),
   };
 }
 
 export function toUpdateProductBody(
   values: ProductFormValues,
   existingMetadata: Record<string, unknown> | null,
+  existingCatalogueMetadata: Record<string, unknown> | null = null,
 ): UpdateProductBody {
   return {
+    name: values.displayName,
     categoryId: values.categoryId,
-    displayName: toNullableValue(values.displayName),
+    brand: toNullableValue(values.brand),
+    model: toNullableValue(values.model),
+    modelYear: values.modelYear ?? null,
+    description: toNullableValue(values.description),
+    catalogueMetadata: mergeProductCatalogueMetadata(
+      existingCatalogueMetadata,
+      values,
+    ),
+    coverAssetId: toNullableValue(values.coverAssetId),
+    galleryAssetIds: values.galleryImages
+      .map((image) => image.assetId)
+      .filter(Boolean),
+    displayName: values.displayName,
     metadata: mergeProductInstallationPosition(
       existingMetadata,
       values.installationPosition,
@@ -115,9 +262,9 @@ export function toUpdateProductBody(
     productCode: values.productCode.trim(),
     serialNumber: toNullableValue(values.serialNumber),
     status: values.status,
-    templateId: values.templateId,
     warrantyCode: values.warrantyCode?.trim() ?? "",
     warrantyDurationMonths: values.warrantyDurationMonths,
+    warrantyTerms: toNullableValue(values.warrantyTerms),
   };
 }
 
@@ -143,7 +290,6 @@ export function getProductSaveErrorMatch(error: unknown) {
     "Product code already exists": ["productCode", "duplicateProductCode"],
     "Product code is required": ["productCode", "productCodeRequired"],
     "Product category not found": ["categoryId", "categoryNotFound"],
-    "Product template not found": ["templateId", "templateNotFound"],
     "Serial number already exists": ["serialNumber", "duplicateSerialNumber"],
     "Warranty code already exists": ["warrantyCode", "duplicateWarrantyCode"],
     "Warranty code is invalid": ["warrantyCode", "warrantyCodeInvalid"],

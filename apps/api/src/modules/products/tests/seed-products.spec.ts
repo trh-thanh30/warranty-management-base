@@ -14,7 +14,7 @@ const categoryIds = new Map([
 ]);
 
 describe('Lexzenz product seed', () => {
-  it('defines 24 unique templates split evenly across the production categories', () => {
+  it('defines 24 unique catalogue products split evenly across the production categories', () => {
     expect(lexzenzProductSeeds).toHaveLength(24);
     expect(new Set(lexzenzProductSeeds.map((item) => item.sku)).size).toBe(24);
     expect(new Set(lexzenzProductSeeds.map((item) => item.slug)).size).toBe(24);
@@ -27,11 +27,7 @@ describe('Lexzenz product seed', () => {
     }
   });
 
-  it('upserts published catalog templates and two draft physical products for each template', async () => {
-    const productTemplateUpsert = jest.fn(
-      ({ where }: Prisma.ProductTemplateUpsertArgs) =>
-        Promise.resolve({ id: `template-${where.sku}` }),
-    );
+  it('upserts two published physical products for each catalogue definition', async () => {
     const productUpsert = jest.fn(({ where }: Prisma.ProductUpsertArgs) =>
       Promise.resolve({ id: `product-${where.product_code}` }),
     );
@@ -46,40 +42,14 @@ describe('Lexzenz product seed', () => {
           ),
         ),
       },
-      productTemplate: { upsert: productTemplateUpsert },
       product: { upsert: productUpsert },
       warranty: { upsert: warrantyUpsert },
     };
 
     await seedLexzenzProducts(client);
 
-    expect(productTemplateUpsert).toHaveBeenCalledTimes(24);
     expect(productUpsert).toHaveBeenCalledTimes(48);
     expect(warrantyUpsert).toHaveBeenCalledTimes(48);
-
-    for (const call of productTemplateUpsert.mock.calls) {
-      const input = call[0];
-      expect(input.create).toMatchObject({
-        is_active: true,
-        is_published: true,
-      });
-      expect(input.create.published_at).toBeInstanceOf(Date);
-      expect(input.update).toMatchObject({
-        is_active: true,
-        is_published: true,
-      });
-      expect(input.update.published_at).toBeInstanceOf(Date);
-      expect(input.create).not.toHaveProperty('assets');
-      expect(input.update).not.toHaveProperty('assets');
-      expect(input.create.metadata).toEqual(
-        expect.objectContaining({
-          shortDescription: expect.any(String),
-          specifications: expect.any(Array),
-          features: expect.arrayContaining([expect.any(String)]),
-          applications: expect.arrayContaining([expect.any(String)]),
-        }),
-      );
-    }
 
     const productCodes = productUpsert.mock.calls.map(
       ([input]) => input.create.product_code,
@@ -96,27 +66,35 @@ describe('Lexzenz product seed', () => {
     expect(new Set(warrantyCodes).size).toBe(48);
 
     for (const [input] of productUpsert.mock.calls) {
-      const templateSku = input.create.product_code
+      const catalogueSku = input.create.product_code
         .replace(/^PRD-/, '')
         .replace(/-\d{2}$/, '');
 
       expect(input.create).toMatchObject({
         category_id: categoryIds.get(
-          lexzenzProductSeeds.find((seed) => seed.sku === templateSku)!
+          lexzenzProductSeeds.find((seed) => seed.sku === catalogueSku)!
             .categoryCode,
         ),
+        is_published: true,
+        metadata: expect.objectContaining({
+          shortDescription: expect.any(String),
+          specifications: expect.any(Array),
+          features: expect.arrayContaining([expect.any(String)]),
+          applications: expect.arrayContaining([expect.any(String)]),
+        }),
+        published_at: expect.any(Date),
         display_name: expect.any(String),
         status: 'ACTIVE',
-        template_id: `template-${templateSku}`,
       });
+      expect(input.create).not.toHaveProperty('template_id');
       expect(input.update).toMatchObject({
         category_id: input.create.category_id,
         deleted_at: null,
         display_name: input.create.display_name,
         serial_number: input.create.serial_number,
         status: 'ACTIVE',
-        template_id: input.create.template_id,
       });
+      expect(input.update).not.toHaveProperty('template_id');
     }
 
     for (const [input] of warrantyUpsert.mock.calls) {
@@ -152,7 +130,6 @@ describe('Lexzenz product seed', () => {
           ]),
         ),
       },
-      productTemplate: { upsert: jest.fn() },
       product: { upsert: jest.fn() },
       warranty: { upsert: jest.fn() },
     };
@@ -160,7 +137,7 @@ describe('Lexzenz product seed', () => {
     await expect(seedLexzenzProducts(client)).rejects.toThrow(
       'Missing product categories',
     );
-    expect(client.productTemplate.upsert).not.toHaveBeenCalled();
+    expect(client.product.upsert).not.toHaveBeenCalled();
   });
 
   it('runs after category seed in production and exposes environment scripts', () => {

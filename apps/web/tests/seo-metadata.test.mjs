@@ -75,22 +75,44 @@ test("robots allows crawling and advertises the canonical sitemap", () => {
 });
 
 test("the production Web image receives the canonical public site URL", async () => {
-  const [dockerfile, workflow, compose, turbo] = await Promise.all([
-    readFile(path.join(process.cwd(), "apps/web/Dockerfile"), "utf8"),
-    readFile(
-      path.join(process.cwd(), ".github/workflows/publish-images.yml"),
-      "utf8",
-    ),
-    readFile(path.join(process.cwd(), "docker-compose.prod.yml"), "utf8"),
-    readFile(path.join(process.cwd(), "turbo.json"), "utf8"),
-  ]);
+  const [dockerfile, publishWorkflow, deployWorkflow, compose, turbo] =
+    await Promise.all([
+      readFile(path.join(process.cwd(), "apps/web/Dockerfile"), "utf8"),
+      readFile(
+        path.join(process.cwd(), ".github/workflows/publish-images.yml"),
+        "utf8",
+      ),
+      readFile(
+        path.join(process.cwd(), ".github/workflows/deploy.yml"),
+        "utf8",
+      ),
+      readFile(path.join(process.cwd(), "docker-compose.prod.yml"), "utf8"),
+      readFile(path.join(process.cwd(), "turbo.json"), "utf8"),
+    ]);
 
   assert.match(dockerfile, /ARG NEXT_PUBLIC_WEB_URL/);
+  assert.doesNotMatch(
+    dockerfile,
+    /ARG NEXT_PUBLIC_WEB_URL=/,
+    "the public URL must come from the build environment",
+  );
+  assert.match(dockerfile, /NEXT_PUBLIC_WEB_URL build argument is required/);
   assert.match(dockerfile, /ENV NEXT_PUBLIC_WEB_URL=\$NEXT_PUBLIC_WEB_URL/);
   assert.match(
-    workflow,
+    publishWorkflow,
     /NEXT_PUBLIC_WEB_URL=\$\{\{ vars\.NEXT_PUBLIC_WEB_URL \}\}/,
   );
-  assert.match(compose, /NEXT_PUBLIC_WEB_URL:/);
+  assert.match(
+    deployWorkflow,
+    /NEXT_PUBLIC_WEB_URL: \$\{\{ vars\.NEXT_PUBLIC_WEB_URL \}\}/,
+  );
+  assert.match(
+    deployWorkflow,
+    /NEXT_PUBLIC_WEB_URL GitHub Actions variable is required/,
+  );
+  assert.match(
+    compose,
+    /NEXT_PUBLIC_WEB_URL: \$\{NEXT_PUBLIC_WEB_URL:\?NEXT_PUBLIC_WEB_URL is required\}/,
+  );
   assert.ok(JSON.parse(turbo).globalEnv.includes("NEXT_PUBLIC_WEB_URL"));
 });

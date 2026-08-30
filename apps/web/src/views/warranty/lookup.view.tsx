@@ -14,7 +14,10 @@ import {
 } from "lucide-react";
 import { usePrimaryWebsiteHotline } from "@/src/app/providers/site-settings-provider";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
-import { PUBLIC_FEATURES } from "@/src/config/public-features.config";
+import {
+  PUBLIC_DEALER_NETWORK_URL,
+  PUBLIC_FEATURES,
+} from "@/src/config/public-features.config";
 import { Link } from "@/src/i18n/navigation";
 import { Container } from "@/src/components/common/container";
 import { WarrantyLookupForm } from "@/src/components/common/warranty-lookup-form";
@@ -268,13 +271,14 @@ export function WarrantyLookupView() {
               <FileText className="size-4 shrink-0" />
               <span>{t("otherActions.request")}</span>
             </Link>
-            <Link
-              href={APP_ROUTES.dealers}
+            <a
+              href={PUBLIC_DEALER_NETWORK_URL}
+              rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:bg-premium-red hover:text-white"
             >
               <Building2 className="size-4 shrink-0" />
               <span>{t("otherActions.dealers")}</span>
-            </Link>
+            </a>
           </div>
         </section>
 

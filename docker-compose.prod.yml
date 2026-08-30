@@ -98,6 +98,32 @@ services:
       db:
         condition: service_healthy
 
+  pdf-renderer:
+    image: ${PDF_RENDERER_IMAGE:-warranty-management-base-api-pdf-renderer}:${IMAGE_TAG:-latest}
+    container_name: warranty-management-base-pdf-renderer
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    environment:
+      PORT: 3001
+      PDF_MAX_BODY_BYTES: ${PDF_MAX_BODY_BYTES:-10485760}
+      PDF_RENDER_TIMEOUT_MS: ${PDF_RENDER_TIMEOUT_MS:-45000}
+      PDF_RENDER_CONCURRENCY: ${PDF_RENDER_CONCURRENCY:-2}
+      PDF_RENDER_QUEUE_SIZE: ${PDF_RENDER_QUEUE_SIZE:-8}
+      PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium
+    expose:
+      - "3001"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "require(''http'').get(''http://127.0.0.1:3001/health'', r => process.exit(r.statusCode === 200 ? 0 : 1)).on(''error'', () => process.exit(1))"',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+
   api:
     image: ${API_IMAGE:-warranty-management-base-api}:${IMAGE_TAG:-latest}
     container_name: warranty-management-base-api
@@ -117,6 +143,7 @@ services:
       REDIS_PORT: 6379
       MINIO_ENDPOINT: minio
       MINIO_PORT: 9000
+      PDF_RENDERER_URL: http://pdf-renderer:3001
       DATABASE_URL: ${DOCKER_DATABASE_URL:-postgresql://${DB_USER:-warranty_management_base_user}:${DB_PASSWORD:-warranty_management_base_password}@db:5432/${DB_NAME:-warranty_management_base}?schema=${DB_SCHEMA:-public}}
       REDIS_URL: redis://:${REDIS_PASSWORD:-warranty_management_base_redis_password}@redis:6379
     ports:
@@ -131,6 +158,8 @@ services:
         condition: service_healthy
       minio-init:
         condition: service_completed_successfully
+      pdf-renderer:
+        condition: service_healthy
     healthcheck:
       test:
         [
@@ -189,7 +218,7 @@ services:
       PORT: 4101
       PUBLIC_API_URL: ${PUBLIC_API_URL:-http://api:4100/api/v1}
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4100/api/v1}
-      NEXT_PUBLIC_WEB_URL: ${NEXT_PUBLIC_WEB_URL:-https://baohanh.lexzenz.com}
+      NEXT_PUBLIC_WEB_URL: ${NEXT_PUBLIC_WEB_URL:?NEXT_PUBLIC_WEB_URL is required}
     ports:
       - "127.0.0.1:${WEB_PORT:-4101}:4101"
     depends_on:

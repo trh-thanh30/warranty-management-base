@@ -1,10 +1,12 @@
+import { WarrantyCertificateEmailStatusModule } from '@/modules/warranty-certificates/modules/warranty-certificate-email-status.module';
+import { WarrantyCertificatesModule } from '@/modules/warranty-certificates/modules/warranty-certificates.module';
 import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
 import { WarrantyCertificateEmailStatusService } from '@/modules/warranty-certificates/services/warranty-certificate-email-status.service';
 import { GetWarrantyCertificateFileForActivationRequestUseCase } from '@/modules/warranty-certificates/use-cases/get-warranty-certificate-file-for-activation-request.use-case';
-import { WarrantyCertificateEmailStatusModule } from '@/modules/warranty-certificates/warranty-certificate-email-status.module';
-import { WarrantyCertificatesModule } from '@/modules/warranty-certificates/warranty-certificates.module';
 import { EmailProcessor } from '@/workers/email/worker.processor';
 import { MODULE_METADATA } from '@nestjs/common/constants';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 describe('Warranty certificate module boundaries', () => {
   it('exposes email status transitions without exporting the repository', () => {
@@ -56,6 +58,31 @@ describe('Warranty certificate module boundaries', () => {
       ]),
     );
     expect(exports).not.toContain(WarrantyCertificatesRepository);
+  });
+
+  it('keeps request certificate persistence details inside its repository', () => {
+    const applicationSource = [
+      '../use-cases/issue-warranty-activation-request-certificate.use-case.ts',
+      '../services/warranty-activation-request-certificate-email.service.ts',
+    ]
+      .map((relativePath) =>
+        readFileSync(join(__dirname, relativePath), 'utf8'),
+      )
+      .join('\n');
+    const repositorySource = readFileSync(
+      join(
+        __dirname,
+        '../repository/warranty-activation-request-certificates.repository.ts',
+      ),
+      'utf8',
+    );
+
+    expect(applicationSource).not.toContain('@prisma/client');
+    expect(applicationSource).not.toMatch(
+      /\b(?:activation_request_id|certificate_number|email_status|recipient_email|storage_key)\b/,
+    );
+    expect(repositorySource).toContain('@prisma/client');
+    expect(repositorySource).toContain('toRequestCertificateRecord');
   });
 });
 

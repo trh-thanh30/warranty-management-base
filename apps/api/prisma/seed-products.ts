@@ -26,9 +26,6 @@ export type LexzenzProductSeedClient = {
       args: Prisma.CategoryFindManyArgs,
     ): PromiseLike<Array<{ code: string | null; id: string }>>;
   };
-  productTemplate: {
-    upsert(args: Prisma.ProductTemplateUpsertArgs): PromiseLike<{ id: string }>;
-  };
   product: {
     upsert(args: Prisma.ProductUpsertArgs): PromiseLike<{ id: string }>;
   };
@@ -542,43 +539,12 @@ export async function seedLexzenzProducts(client: LexzenzProductSeedClient) {
       Date.UTC(2026, 0, lexzenzProductSeeds.length - index),
     );
     const detailMetadata = categoryDetailMetadata[productSeed.categoryCode];
-    const templateMetadata: Prisma.InputJsonObject = {
+    const productMetadata: Prisma.InputJsonObject = {
       applications: detailMetadata.applications,
       features: detailMetadata.features,
       shortDescription: productSeed.description,
       specifications: productSeed.specifications,
     };
-    const template = await client.productTemplate.upsert({
-      where: { sku: productSeed.sku },
-      update: {
-        brand: productSeed.brand,
-        category_id: categoryId,
-        default_warranty_duration_months: productSeed.warrantyDurationMonths,
-        description: productSeed.description,
-        is_active: true,
-        is_published: true,
-        metadata: templateMetadata,
-        model: productSeed.model,
-        name: productSeed.name,
-        published_at: publishedAt,
-        slug: productSeed.slug,
-      },
-      create: {
-        brand: productSeed.brand,
-        category_id: categoryId,
-        default_warranty_duration_months: productSeed.warrantyDurationMonths,
-        description: productSeed.description,
-        is_active: true,
-        is_published: true,
-        metadata: templateMetadata,
-        model: productSeed.model,
-        name: productSeed.name,
-        published_at: publishedAt,
-        sku: productSeed.sku,
-        slug: productSeed.slug,
-      },
-    });
-
     for (
       let productIndex = 0;
       productIndex < PHYSICAL_PRODUCTS_PER_TEMPLATE;
@@ -594,19 +560,32 @@ export async function seedLexzenzProducts(client: LexzenzProductSeedClient) {
         where: { product_code: productCode },
         update: {
           category_id: categoryId,
+          brand: productSeed.brand,
+          description: productSeed.description,
+          is_published: true,
+          metadata: productMetadata,
+          model: productSeed.model,
+          display_name: productSeed.name,
+          published_at: publishedAt,
+          product_code: productCode,
+          slug: `${productSeed.slug}-${productCode.toLowerCase()}`,
           deleted_at: null,
-          display_name: displayName,
           serial_number: serialNumber,
           status: product_status.ACTIVE,
-          template_id: template.id,
         },
         create: {
           category_id: categoryId,
-          display_name: displayName,
+          brand: productSeed.brand,
+          description: productSeed.description,
+          is_published: true,
+          metadata: productMetadata,
+          model: productSeed.model,
+          display_name: productSeed.name,
+          published_at: publishedAt,
           product_code: productCode,
+          slug: `${productSeed.slug}-${productCode.toLowerCase()}`,
           serial_number: serialNumber,
           status: product_status.ACTIVE,
-          template_id: template.id,
         },
       });
 
@@ -634,7 +613,7 @@ export async function seedLexzenzProducts(client: LexzenzProductSeedClient) {
   }
 
   console.log(
-    `Seeded ${lexzenzProductSeeds.length} Lexzenz product templates and ${lexzenzProductSeeds.length * PHYSICAL_PRODUCTS_PER_TEMPLATE} physical products.`,
+    `Seeded ${lexzenzProductSeeds.length * PHYSICAL_PRODUCTS_PER_TEMPLATE} physical Lexzenz products.`,
   );
 }
 

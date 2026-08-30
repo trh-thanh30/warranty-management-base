@@ -49,6 +49,7 @@ export class WarrantyActivationRequestQueries {
         sales_name: true,
       },
     },
+    certificate: true,
     reviewed_by: {
       select: {
         id: true,

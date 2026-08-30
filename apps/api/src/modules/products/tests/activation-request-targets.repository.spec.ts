@@ -19,7 +19,6 @@ describe('ProductsRepository.findActivationRequestTargetsByIds', () => {
       },
       include: expect.objectContaining({
         warranty: true,
-        template: true,
         ownerships: expect.objectContaining({
           where: { is_current_owner: true },
         }),

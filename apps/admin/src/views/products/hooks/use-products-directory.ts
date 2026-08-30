@@ -23,7 +23,10 @@ import type {
 import type { ExcelImportMode } from "@/src/components/common/excel-import-dialog";
 import { useCategories } from "../../categories/hooks/use-categories";
 import type { EditableProductImportRow } from "../components/product-import-preview-table";
-import { type ProductStatusFilter } from "../products.types";
+import {
+  type ProductStatusFilter,
+  type ProductWarrantyStatusFilter,
+} from "../products.types";
 import {
   useConfirmProductImport,
   useDeleteProduct,
@@ -37,11 +40,13 @@ const PRODUCTS_PAGE_SIZE = 10;
 type ProductDirectoryFilters = {
   categoryId: string;
   status: ProductStatusFilter;
+  warrantyStatus: ProductWarrantyStatusFilter;
 };
 
 const INITIAL_PRODUCT_DIRECTORY_FILTERS = {
   categoryId: "ALL",
   status: "ACTIVE",
+  warrantyStatus: "ALL",
 } satisfies ProductDirectoryFilters;
 
 export function useProductsDirectory() {
@@ -88,6 +93,8 @@ export function useProductsDirectory() {
       sortBy,
       sortOrder,
       status: filters.status === "ALL" ? "ALL" : filters.status,
+      warrantyStatus:
+        filters.warrantyStatus === "ALL" ? undefined : filters.warrantyStatus,
     },
     {
       enabled: Boolean(currentUser) && canViewProducts,
@@ -292,6 +299,8 @@ export function useProductsDirectory() {
       sortBy,
       sortOrder,
       status: filters.status === "ALL" ? "ALL" : filters.status,
+      warrantyStatus:
+        filters.warrantyStatus === "ALL" ? undefined : filters.warrantyStatus,
     };
   }
 
@@ -339,6 +348,7 @@ export function useProductsDirectory() {
     updateCategoryId: filterHandlers.categoryId,
     updateSearch: setSearch,
     updateStatus: filterHandlers.status,
+    updateWarrantyStatus: filterHandlers.warrantyStatus,
     updateImportRowData,
   };
 }
@@ -352,12 +362,19 @@ function normalizePreviewRow(row: {
   const normalizedRow: EditableProductImportRow = {
     ...row,
     data: {
-      displayName: row.data.displayName ?? null,
+      displayName: row.data.displayName ?? "",
+      categoryCode: row.data.categoryCode ?? "",
+      brand: row.data.brand ?? null,
+      model: row.data.model ?? null,
+      modelYear: row.data.modelYear ?? null,
+      shortDescription: row.data.shortDescription ?? null,
+      description: row.data.description ?? null,
+      warrantyDurationMonths: row.data.warrantyDurationMonths ?? 0,
+      warrantyTerms: row.data.warrantyTerms ?? null,
       installationPosition: row.data.installationPosition ?? null,
       productCode: row.data.productCode ?? null,
       serialNumber: row.data.serialNumber ?? null,
       status: row.data.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
-      templateSku: row.data.templateSku ?? "",
       warrantyCode: row.data.warrantyCode ?? null,
     },
   };
@@ -404,10 +421,24 @@ function validateImportRows(rows: EditableProductImportRow[]) {
     const productCode = row.data.productCode?.trim();
     const serialNumber = row.data.serialNumber?.trim();
     const warrantyCode = row.data.warrantyCode?.trim().toUpperCase();
-    if (!row.data.templateSku.trim()) {
+    if (!row.data.displayName.trim()) {
       errors.push({
-        field: "templateSku",
-        message: "SKU của product template là bắt buộc.",
+        field: "displayName",
+        message: "Tên sản phẩm là bắt buộc.",
+        rowNumber: row.rowNumber,
+      });
+    }
+    if (!row.data.categoryCode.trim()) {
+      errors.push({
+        field: "categoryCode",
+        message: "Mã danh mục là bắt buộc.",
+        rowNumber: row.rowNumber,
+      });
+    }
+    if (row.data.warrantyDurationMonths < 1) {
+      errors.push({
+        field: "warrantyDurationMonths",
+        message: "Thời hạn bảo hành phải từ 1 tháng.",
         rowNumber: row.rowNumber,
       });
     }
@@ -461,6 +492,11 @@ function validateImportRows(rows: EditableProductImportRow[]) {
 }
 
 const RECOMPUTED_IMPORT_ERROR_MESSAGES = new Set([
+  "Tên sản phẩm là bắt buộc",
+  "Tên sản phẩm là bắt buộc.",
+  "Mã danh mục là bắt buộc",
+  "Mã danh mục là bắt buộc.",
+  "Thời hạn bảo hành phải từ 1 tháng.",
   "Mã sản phẩm bị trùng trong file import",
   "Mã sản phẩm bị trùng trong bảng preview.",
   "Số serial bị trùng trong file import",

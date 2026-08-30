@@ -1,16 +1,13 @@
-import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
+import { WarrantyActivationRequestCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-activation-request-certificates.repository';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class GetWarrantyCertificateFileForActivationRequestUseCase {
   constructor(
-    private readonly warrantyCertificatesRepository: WarrantyCertificatesRepository,
+    private readonly requestCertificatesRepository: WarrantyActivationRequestCertificatesRepository,
   ) {}
 
-  execute(requestId: string, itemId?: string) {
-    return this.warrantyCertificatesRepository.findLatestFileForActivationRequest(
-      requestId,
-      itemId,
-    );
+  execute(requestId: string) {
+    return this.requestCertificatesRepository.findFileByRequestId(requestId);
   }
 }

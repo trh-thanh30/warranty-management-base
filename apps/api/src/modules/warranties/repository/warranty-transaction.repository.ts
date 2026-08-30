@@ -8,7 +8,9 @@ import {
   WarrantyVoidCandidate,
   toWarrantyRecord,
 } from '@/modules/warranties/warranties.types';
+import { getProductCatalogue } from '@/modules/products/product-catalogue';
 import {
+  category_type,
   Customer,
   Prisma,
   product_status,
@@ -21,7 +23,6 @@ const manualActivationProductInclude = {
     orderBy: { created_at: 'desc' as const },
   },
   warranty: true,
-  template: true,
 } satisfies Prisma.ProductInclude;
 
 type PersistedManualActivationProduct = Prisma.ProductGetPayload<{
@@ -93,6 +94,19 @@ export class WarrantyTransactionRepository {
     return product ? this.toManualActivationProduct(product) : null;
   }
 
+  async isActiveProductCategory(categoryId: string): Promise<boolean> {
+    const category = await this.tx.category.findFirst({
+      where: {
+        id: categoryId,
+        is_active: true,
+        type: category_type.PRODUCT,
+      },
+      select: { id: true },
+    });
+
+    return category !== null;
+  }
+
   closeCurrentOwnerships(productId: string, endedAt: Date) {
     return this.tx.productOwnership.updateMany({
       where: { product_id: productId, is_current_owner: true },
@@ -146,27 +160,17 @@ export class WarrantyTransactionRepository {
       .then((product) => this.toManualActivationProduct(product));
   }
 
-  async findActiveProductTemplate(
-    id: string,
-  ): Promise<{ categoryId: string; id: string } | null> {
-    const template = await this.tx.productTemplate.findFirst({
-      where: { id, is_active: true },
-      select: { category_id: true, id: true },
-    });
-    return template
-      ? { categoryId: template.category_id, id: template.id }
-      : null;
-  }
-
   createManualActivationProduct(input: {
+    brand?: string;
     categoryId: string;
     customerId: string;
     displayName?: string;
     ownerUserId?: string | null;
+    model?: string;
+    name: string;
     productCode: string;
     purchaseDate: Date;
     serialNumber?: string;
-    templateId: string;
     warrantyCode: string;
     warrantyDurationMonths: number;
     warrantyTerms?: string;
@@ -176,8 +180,10 @@ export class WarrantyTransactionRepository {
         data: {
           product_code: input.productCode,
           serial_number: input.serialNumber,
-          display_name: input.displayName,
-          template: { connect: { id: input.templateId } },
+          display_name: input.name,
+          slug: input.productCode.toLowerCase(),
+          brand: input.brand,
+          model: input.model,
           category_ref: { connect: { id: input.categoryId } },
           status: product_status.ACTIVE,
           metadata: { source: 'manual_warranty_activation' },
@@ -405,10 +411,10 @@ export class WarrantyTransactionRepository {
       })),
       productCode: product.product_code,
       serialNumber: product.serial_number,
-      template: {
-        brand: product.template.brand,
-        model: product.template.model,
-        name: product.template.name,
+      catalogue: {
+        brand: getProductCatalogue(product).brand,
+        model: getProductCatalogue(product).model,
+        name: getProductCatalogue(product).name,
       },
       warranty: product.warranty ? toWarrantyRecord(product.warranty) : null,
     };

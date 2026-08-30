@@ -20,19 +20,22 @@ export class EmailProcessor extends WorkerHost {
 
   async process(job: Job<EmailJobData>): Promise<void> {
     const {
-      to,
-      subject,
-      text,
-      html,
       attachments,
-      template,
       context,
+      html,
       idempotencyKey,
+      subject,
+      template,
+      text,
+      to,
+      warrantyActivationRequestCertificateId,
       warrantyCertificateId,
       warrantyCertificateIds,
     } = job.data;
+    const certificateIds =
+      warrantyCertificateIds ??
+      (warrantyCertificateId ? [warrantyCertificateId] : []);
 
-    // Idempotency check - skip if already processed
     if (idempotencyKey && this.processedJobs.has(idempotencyKey)) {
       this.logger.log(
         `Skipping duplicate job ${job.id} with idempotency key: ${idempotencyKey}`,
@@ -42,19 +45,15 @@ export class EmailProcessor extends WorkerHost {
 
     try {
       this.logger.log(`Processing email job ${job.id} to ${to}`);
-
-      // send progress
       job.updateProgress(50);
 
       if (template && context) {
-        // Send templated email
         await this.emailService.sendTemplatedEmail(to, template, context, {
           attachments,
           subject,
           text,
         });
       } else {
-        // Send regular email
         await this.emailService.sendEmail(
           to,
           subject || 'No Subject',
@@ -64,55 +63,40 @@ export class EmailProcessor extends WorkerHost {
         );
       }
 
-      // Mark as processed for idempotency
+      job.updateProgress(100);
+      await Promise.all([
+        this.warrantyCertificateEmailStatusService.markSent(certificateIds),
+        this.warrantyCertificateEmailStatusService.markRequestSent(
+          warrantyActivationRequestCertificateId,
+        ),
+      ]);
+
       if (idempotencyKey) {
         this.processedJobs.add(idempotencyKey);
-        // Clean up old processed jobs to prevent memory leak
         if (this.processedJobs.size > 10000) {
-          // Keep only recent 5000 jobs
           const recentJobs = Array.from(this.processedJobs).slice(-5000);
           this.processedJobs.clear();
           recentJobs.forEach((key) => this.processedJobs.add(key));
         }
       }
 
-      // mark job as completed
-      job.updateProgress(100);
-      await this.markWarrantyCertificateEmailSent(
-        warrantyCertificateIds ??
-          (warrantyCertificateId ? [warrantyCertificateId] : []),
-      );
-
       this.logger.log(`Email job ${job.id} completed successfully`);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Unknown email sending error';
-      await this.markWarrantyCertificateEmailFailed(
-        warrantyCertificateIds ??
-          (warrantyCertificateId ? [warrantyCertificateId] : []),
-        message,
-      );
+      await Promise.all([
+        this.warrantyCertificateEmailStatusService.markFailed(
+          certificateIds,
+          message,
+        ),
+        this.warrantyCertificateEmailStatusService.markRequestFailed(
+          warrantyActivationRequestCertificateId,
+          message,
+        ),
+      ]);
       this.logger.error(`Email job ${job.id} failed: ${message}`);
-      throw error; // Re-throw to mark job as failed
+      throw error;
     }
-  }
-
-  private async markWarrantyCertificateEmailSent(certificateIds: string[]) {
-    if (certificateIds.length === 0) return;
-
-    await this.warrantyCertificateEmailStatusService.markSent(certificateIds);
-  }
-
-  private async markWarrantyCertificateEmailFailed(
-    certificateIds: string[],
-    message: string,
-  ) {
-    if (certificateIds.length === 0) return;
-
-    await this.warrantyCertificateEmailStatusService.markFailed(
-      certificateIds,
-      message,
-    );
   }
 
   @OnWorkerEvent('completed')

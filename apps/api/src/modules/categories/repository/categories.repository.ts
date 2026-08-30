@@ -169,9 +169,10 @@ export class CategoriesRepository {
           include: {
             _count: {
               select: {
-                product_templates: {
+                products: {
                   where: {
-                    is_active: true,
+                    deleted_at: null,
+                    status: 'ACTIVE',
                     is_published: true,
                   },
                 },

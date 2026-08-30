@@ -1,10 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import type {
-  WarrantyActivationRequestItemSummary,
-  WarrantyActivationRequestSummary,
-} from "@repo/shared";
+import type { WarrantyActivationRequestSummary } from "@repo/shared";
 import { Badge, Card, CardContent, Skeleton } from "@repo/ui";
 import { Link } from "@/src/i18n/navigation";
 import {
@@ -16,24 +13,10 @@ import { ActivationRequestItemsTable } from "./activation-request-items-table";
 import { getActivationRequestWarrantyCodeLabel } from "../warranty-activation-request-items.utils";
 
 type WarrantyActivationRequestDetailCardProps = {
-  busyItemId?: string | null;
-  onDownloadItemCertificate?: (
-    item: WarrantyActivationRequestItemSummary,
-  ) => void;
-  onResendItemCertificate?: (
-    item: WarrantyActivationRequestItemSummary,
-  ) => void;
-  onRetryItemCertificate?: (item: WarrantyActivationRequestItemSummary) => void;
-  onViewItemCertificate?: (item: WarrantyActivationRequestItemSummary) => void;
   request: WarrantyActivationRequestSummary;
 };
 
 export function WarrantyActivationRequestDetailCard({
-  busyItemId,
-  onDownloadItemCertificate,
-  onResendItemCertificate,
-  onRetryItemCertificate,
-  onViewItemCertificate,
   request,
 }: WarrantyActivationRequestDetailCardProps) {
   const locale = useLocale();
@@ -108,22 +91,15 @@ export function WarrantyActivationRequestDetailCard({
 
         {hasItems ? (
           <section className="space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="text-sm font-semibold text-slate-950 dark:text-slate-50">
+            <div className="flex items-center justify-between gap-2 overflow-hidden whitespace-nowrap sm:gap-3 sm:whitespace-normal">
+              <h2 className="min-w-0 truncate text-sm font-semibold text-slate-950 dark:text-slate-50 sm:whitespace-normal">
                 {t("activationProducts")}
               </h2>
-              <span className="text-sm text-slate-500">
+              <span className="shrink-0 whitespace-nowrap text-sm text-slate-500">
                 {t("productCount", { count: items.length })}
               </span>
             </div>
-            <ActivationRequestItemsTable
-              busyItemId={busyItemId}
-              items={items}
-              onDownloadCertificate={onDownloadItemCertificate}
-              onResendCertificate={onResendItemCertificate}
-              onRetryCertificate={onRetryItemCertificate}
-              onViewCertificate={onViewItemCertificate}
-            />
+            <ActivationRequestItemsTable items={items} />
           </section>
         ) : (
           <DetailSection title={t("productInfo")}>
@@ -216,67 +192,65 @@ export function WarrantyActivationRequestDetailCard({
           />
         </DetailSection>
 
-        {!hasItems ? (
-          <DetailSection title={t("certificateInfo")}>
-            <DetailItem
-              label={t("certificateNumber")}
-              value={certificate?.certificateNumber ?? "-"}
-            />
-            <DetailItem
-              label={t("certificateEmail")}
-              value={
-                certificate
-                  ? (certificate.recipientEmail ?? t("certificateNoEmail"))
-                  : "-"
-              }
-            />
-            <DetailItem
-              label={t("certificateStatus")}
-              value={
-                certificate ? (
-                  <Badge variant="secondary">
-                    {t(`certificateStatuses.${certificate.status}`)}
-                  </Badge>
-                ) : (
-                  "-"
-                )
-              }
-            />
-            <DetailItem
-              label={t("certificateEmailStatus")}
-              value={
-                certificate ? (
-                  <Badge variant="secondary">
-                    {certificate.recipientEmail
-                      ? t(`certificateEmailStatuses.${certificate.emailStatus}`)
-                      : t("certificateNoEmail")}
-                  </Badge>
-                ) : (
-                  "-"
-                )
-              }
-            />
-            <DetailItem
-              label={t("certificateGeneratedAt")}
-              value={formatActivationRequestDate(
-                certificate?.generatedAt ?? null,
-                locale,
-              )}
-            />
-            <DetailItem
-              label={t("certificateEmailedAt")}
-              value={formatActivationRequestDate(
-                certificate?.emailedAt ?? null,
-                locale,
-              )}
-            />
-            <DetailItem
-              className="sm:col-span-2"
-              label={t("certificateLastError")}
-              value={certificate?.lastError ?? "-"}
-            />
-          </DetailSection>
-        ) : null}
+        <DetailSection title={t("certificateInfo")}>
+          <DetailItem
+            label={t("certificateNumber")}
+            value={certificate?.certificateNumber ?? "-"}
+          />
+          <DetailItem
+            label={t("certificateEmail")}
+            value={
+              certificate
+                ? (certificate.recipientEmail ?? t("certificateNoEmail"))
+                : "-"
+            }
+          />
+          <DetailItem
+            label={t("certificateStatus")}
+            value={
+              certificate ? (
+                <Badge variant="secondary">
+                  {t(`certificateStatuses.${certificate.status}`)}
+                </Badge>
+              ) : (
+                "-"
+              )
+            }
+          />
+          <DetailItem
+            label={t("certificateEmailStatus")}
+            value={
+              certificate ? (
+                <Badge variant="secondary">
+                  {certificate.recipientEmail
+                    ? t(`certificateEmailStatuses.${certificate.emailStatus}`)
+                    : t("certificateNoEmail")}
+                </Badge>
+              ) : (
+                "-"
+              )
+            }
+          />
+          <DetailItem
+            label={t("certificateGeneratedAt")}
+            value={formatActivationRequestDate(
+              certificate?.generatedAt ?? null,
+              locale,
+            )}
+          />
+          <DetailItem
+            label={t("certificateEmailedAt")}
+            value={formatActivationRequestDate(
+              certificate?.emailedAt ?? null,
+              locale,
+            )}
+          />
+          <DetailItem
+            className="sm:col-span-2"
+            label={t("certificateLastError")}
+            value={certificate?.lastError ?? "-"}
+          />
+        </DetailSection>
       </CardContent>
     </Card>
   );

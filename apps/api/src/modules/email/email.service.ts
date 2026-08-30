@@ -15,7 +15,7 @@ export interface EmailJobData {
   template?: string;
   context?: Record<string, unknown>;
   warrantyCertificateId?: string;
-  warrantyCertificateIds?: string[];
+  warrantyActivationRequestCertificateId?: string;
   // Idempotency key for deduplication
   idempotencyKey?: string;
 }

@@ -117,7 +117,6 @@ function createProduct(overrides: Record<string, unknown> = {}) {
   const now = new Date('2026-08-27T00:00:00.000Z');
   return {
     id: 'product-id',
-    template_id: 'template-id',
     category_id: 'category-id',
     product_code: 'PRD-001',
     serial_number: 'SN-001',

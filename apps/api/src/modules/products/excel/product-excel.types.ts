@@ -2,8 +2,15 @@ import { product_status } from '@prisma/client';
 
 export type ProductExcelRow = {
   productCode: string | null;
-  templateSku: string;
-  displayName: string | null;
+  displayName: string;
+  categoryCode: string;
+  brand: string | null;
+  model: string | null;
+  modelYear: number | null;
+  shortDescription?: string | null;
+  description?: string | null;
+  warrantyDurationMonths: number;
+  warrantyTerms: string | null;
   installationPosition: string | null;
   warrantyCode: string | null;
   serialNumber: string | null;

@@ -14,7 +14,6 @@ import { AssignOwnerDialog } from "./components/assign-owner-dialog";
 import { DeleteProductDialog } from "./components/delete-product-dialog";
 import { RestoreProductDialog } from "./components/restore-product-dialog";
 import { ProductImportPreviewTable } from "./components/product-import-preview-table";
-import { ProductManagementTabs } from "../product-management/components/product-management-tabs";
 import { ProductsDirectoryCard } from "./components/products-directory-card";
 import { useProductsDirectory } from "./hooks/use-products-directory";
 
@@ -61,6 +60,7 @@ export function ProductsView() {
     updateCategoryId,
     updateSearch,
     updateStatus,
+    updateWarrantyStatus,
     updateImportRowData,
   } = useProductsDirectory();
   const hasImportErrors = importSummary.invalidRows > 0;
@@ -104,8 +104,6 @@ export function ProductsView() {
           title={t("title")}
         />
 
-        <ProductManagementTabs activeTab="products" />
-
         <ProductsDirectoryCard
           canCreate={canCreateProducts}
           categories={categories}
@@ -126,6 +124,7 @@ export function ProductsView() {
           onSearchChange={updateSearch}
           onSortChange={toggleSort}
           onStatusChange={updateStatus}
+          onWarrantyStatusChange={updateWarrantyStatus}
           pageSize={pageSize}
           search={search}
           sortBy={sortBy}
@@ -200,12 +199,18 @@ export function ProductsView() {
                   actions: t("actions"),
                   allRows: t("excel.allRows"),
                   cancel: t("cancel"),
-                  displayName: t("displayName"),
+                  displayName: t("excel.productName"),
+                  shortDescription: t("shortDescriptionLabel"),
+                  description: t("descriptionLabel"),
                   edit: t("excel.editRow"),
                   editDescription: t("excel.editRowDescription"),
                   editTitle: t("excel.editRowTitle"),
+                  brand: t("brand"),
+                  categoryCode: t("excel.categoryCode"),
                   importStatus: t("excel.importStatus"),
                   installationPosition: t("installationPosition"),
+                  model: t("model"),
+                  modelYear: t("modelYear"),
                   warrantyCode: t("warrantyCode"),
                   invalidRows: t("excel.invalidRows", {
                     count: importSummary.invalidRows,
@@ -222,7 +227,8 @@ export function ProductsView() {
                   saveChanges: t("excel.saveRowChanges"),
                   serialNumber: t("serialNumber"),
                   status: t("productStatus"),
-                  templateSku: t("templateSku"),
+                  warrantyDurationMonths: t("durationMonths"),
+                  warrantyTerms: t("warrantyTerms"),
                   validRows: t("excel.validRows", {
                     count: importSummary.validRows,
                   }),

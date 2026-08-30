@@ -31,7 +31,6 @@ export class WarrantyClaimsRepository {
       include: {
         category_ref: true,
         warranty: true,
-        template: { include: { category_ref: true } },
         ownerships: {
           where: { is_current_owner: true },
           include: { customer: true },

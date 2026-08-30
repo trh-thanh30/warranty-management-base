@@ -39,7 +39,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
   const warrantyActivationRequestNotificationService = {
     requestCreated: jest.fn(),
   };
-  const issueWarrantyCertificatesForRequestUseCase = {
+  const issueWarrantyActivationRequestCertificateUseCase = {
     execute: jest.fn(),
   };
 
@@ -827,13 +827,12 @@ describe('WarrantyActivationRequestsUseCases', () => {
       .mockResolvedValueOnce(baseRequest)
       .mockResolvedValueOnce(activatedRequest);
     repository.withReviewTransaction.mockResolvedValue(activatedRequest);
-    issueWarrantyCertificatesForRequestUseCase.execute.mockResolvedValue({
-      certificateIds: ['certificate-id'],
-      failures: [],
+    issueWarrantyActivationRequestCertificateUseCase.execute.mockResolvedValue({
+      id: 'request-certificate-id',
     });
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
-      issueWarrantyCertificatesForRequestUseCase as never,
+      issueWarrantyActivationRequestCertificateUseCase as never,
     );
 
     const result = await useCase.execute(
@@ -848,11 +847,10 @@ describe('WarrantyActivationRequestsUseCases', () => {
     expect(repository.withReviewTransaction).toHaveBeenCalledTimes(1);
     expect(repository.review).not.toHaveBeenCalled();
     expect(
-      issueWarrantyCertificatesForRequestUseCase.execute,
+      issueWarrantyActivationRequestCertificateUseCase.execute,
     ).toHaveBeenCalledWith({
       recipientEmail: 'customer@example.com',
       requestId: 'request-id',
-      warrantyIds: ['warranty-product-1', 'warranty-product-2'],
     });
     expect(result.activatedWarrantyId).toBe('warranty-id');
     expect(result.activatedWarranty).toEqual({
@@ -870,21 +868,41 @@ describe('WarrantyActivationRequestsUseCases', () => {
       username: 'warranty.admin',
     });
     expect(result.status).toBe('ACTIVATED');
-    expect(result.items?.[0]?.certificate).toEqual(
-      expect.objectContaining({
-        downloadUrl:
-          '/warranty-activation-requests/request-id/items/windshield-item-id/certificate/download',
-        viewUrl:
-          '/warranty-activation-requests/request-id/items/windshield-item-id/certificate/view',
-      }),
+    expect(result.items?.[0]).not.toHaveProperty('certificate');
+  });
+
+  it('keeps the activated response when request certificate issuance fails', async () => {
+    const activatedRequest = {
+      ...baseRequest,
+      status: warranty_activation_request_status.ACTIVATED,
+    };
+    repository.findById
+      .mockResolvedValueOnce(baseRequest)
+      .mockResolvedValueOnce(activatedRequest);
+    repository.withReviewTransaction.mockResolvedValue(activatedRequest);
+    issueWarrantyActivationRequestCertificateUseCase.execute.mockRejectedValue(
+      new Error('PDF generation failed'),
     );
+    const useCase = new ReviewWarrantyActivationRequestUseCase(
+      repository as never,
+      issueWarrantyActivationRequestCertificateUseCase as never,
+    );
+
+    await expect(
+      useCase.execute('request-id', {
+        status: warranty_activation_request_status.APPROVED,
+      }),
+    ).resolves.toMatchObject({
+      status: warranty_activation_request_status.ACTIVATED,
+    });
+    expect(repository.withReviewTransaction).toHaveBeenCalledTimes(1);
   });
 
   it('requires a rejection reason when rejecting a pending request', async () => {
     repository.findById.mockResolvedValue(baseRequest);
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
-      issueWarrantyCertificatesForRequestUseCase as never,
+      issueWarrantyActivationRequestCertificateUseCase as never,
     );
 
     await expect(
@@ -898,7 +916,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     repository.findById.mockResolvedValue(null);
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
-      issueWarrantyCertificatesForRequestUseCase as never,
+      issueWarrantyActivationRequestCertificateUseCase as never,
     );
 
     await expect(
@@ -908,32 +926,8 @@ describe('WarrantyActivationRequestsUseCases', () => {
     ).rejects.toBeInstanceOf(NotFoundError);
   });
 
-  it('resends the certificate belonging to a specific request item', async () => {
-    const certificate = {
-      certificate_number: 'CERT-ITEM-2',
-      email_status: 'FAILED',
-      emailed_at: null,
-      generated_at: new Date('2026-07-19T04:00:00.000Z'),
-      id: 'certificate-item-2',
-      last_error: 'Email failed',
-      recipient_email: 'customer@example.com',
-      status: 'GENERATED',
-      storage_key: 'private/item-2.pdf',
-    };
-    const request = {
-      ...baseRequest,
-      items: [
-        createPersistedItem('windshield', 'product-1'),
-        {
-          ...createPersistedItem('rearGlass', 'product-2'),
-          warranty: {
-            certificates: [certificate],
-            status: warranty_status.ACTIVE,
-          },
-        },
-      ],
-    };
-    repository.findById.mockResolvedValue(request);
+  it('resends the request-owned certificate', async () => {
+    repository.findById.mockResolvedValue(baseRequest);
     const resendWarrantyCertificateEmailUseCase = {
       execute: jest.fn().mockResolvedValue(undefined),
     };
@@ -942,11 +936,51 @@ describe('WarrantyActivationRequestsUseCases', () => {
       resendWarrantyCertificateEmailUseCase as never,
     );
 
-    await useCase.execute('request-id', 'rearGlass-item-id');
+    await useCase.execute('request-id');
 
     expect(resendWarrantyCertificateEmailUseCase.execute).toHaveBeenCalledWith(
-      'certificate-item-2',
+      'request-id',
     );
+  });
+
+  it('returns a structured not-found error when the request is absent', async () => {
+    repository.findById.mockResolvedValue(null);
+    const useCase = new ResendWarrantyActivationRequestCertificateEmailUseCase(
+      repository as never,
+      { execute: jest.fn() } as never,
+    );
+
+    await expect(useCase.execute('missing-request')).rejects.toMatchObject({
+      code: 'WARRANTY_ACTIVATION_REQUEST_NOT_FOUND',
+      details: { requestId: 'missing-request' },
+      statusCode: 404,
+    });
+  });
+
+  it('returns a structured not-found error when the request certificate is absent', async () => {
+    repository.findById.mockResolvedValue(baseRequest);
+    const resendCertificate = {
+      execute: jest
+        .fn()
+        .mockRejectedValue(
+          new NotFoundError(
+            'Warranty activation certificate not found',
+            'WARRANTY_ACTIVATION_CERTIFICATE_NOT_FOUND',
+            { requestId: 'request-id' },
+          ),
+        ),
+    };
+    const useCase = new ResendWarrantyActivationRequestCertificateEmailUseCase(
+      repository as never,
+      resendCertificate as never,
+    );
+
+    await expect(useCase.execute('request-id')).rejects.toMatchObject({
+      code: 'WARRANTY_ACTIVATION_CERTIFICATE_NOT_FOUND',
+      details: { requestId: 'request-id' },
+      statusCode: 404,
+    });
+    expect(resendCertificate.execute).toHaveBeenCalledWith('request-id');
   });
 });
 

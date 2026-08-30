@@ -252,48 +252,31 @@ async function upsertDemoProduct(data: {
     throw new Error(`Product category ${data.category} must be seeded first`);
   }
 
-  const templateSku = `DEMO-${data.productCode}`;
-  const template = await prisma.productTemplate.upsert({
-    where: { sku: templateSku },
-    update: {
-      name: data.name,
-      brand: data.brand,
-      model: data.model,
-      model_year: data.manufactureYear,
-      category_id: category.id,
-      default_warranty_duration_months: data.durationMonths,
-      is_active: true,
-    },
-    create: {
-      sku: templateSku,
-      slug: data.productCode.toLowerCase(),
-      name: data.name,
-      brand: data.brand,
-      model: data.model,
-      model_year: data.manufactureYear,
-      category_id: category.id,
-      default_warranty_duration_months: data.durationMonths,
-      is_active: true,
-    },
-  });
-
   const product = await prisma.product.upsert({
     where: { product_code: data.productCode },
     update: {
       serial_number: data.serialNumber,
-      template_id: template.id,
-      category_id: template.category_id,
+      category_id: category.id,
+      display_name: data.name,
+      product_code: data.productCode,
+      slug: data.productCode.toLowerCase(),
+      brand: data.brand,
+      model: data.model,
+      model_year: data.manufactureYear,
       status: product_status.ACTIVE,
       deleted_at: null,
     },
     create: {
       product_code: data.productCode,
       serial_number: data.serialNumber,
-      template_id: template.id,
-      category_id: template.category_id,
+      category_id: category.id,
+      display_name: data.name,
+      slug: data.productCode.toLowerCase(),
+      brand: data.brand,
+      model: data.model,
+      model_year: data.manufactureYear,
       status: product_status.ACTIVE,
     },
-    include: { template: true },
   });
 
   const endDate = new Date(data.purchaseDate);
@@ -1068,11 +1051,13 @@ async function main() {
     vehicleModel: 'Honda Civic RS',
     installedAt: addDays(seedNow, -8),
     warrantyDurationMonths: 12,
-    productName: expiringMonthDemo.product.template.name,
+    productName:
+      expiringMonthDemo.product.display_name ??
+      expiringMonthDemo.product.product_code,
     serialNumber: expiringMonthDemo.product.serial_number,
-    brand: expiringMonthDemo.product.template.brand,
-    model: expiringMonthDemo.product.template.model,
-    manufactureYear: expiringMonthDemo.product.template.model_year,
+    brand: expiringMonthDemo.product.brand,
+    model: expiringMonthDemo.product.model,
+    manufactureYear: expiringMonthDemo.product.model_year,
     adminNote: 'Approved by demo admin, awaiting warranty activation.',
     createdById: adminUser.id,
     reviewedById: moderatorUser.id,
@@ -1114,14 +1099,16 @@ async function main() {
     productId: camryDemo.product.id,
     dealerId: lexzenzHanoiDealer.id,
     vehiclePlate: '30G-24680',
-    vehicleModel: camryDemo.product.template.name,
+    vehicleModel:
+      camryDemo.product.display_name ?? camryDemo.product.product_code,
     installedAt: camryDemo.warranty.start_date,
     warrantyDurationMonths: camryDemo.warranty.duration_months,
-    productName: camryDemo.product.template.name,
+    productName:
+      camryDemo.product.display_name ?? camryDemo.product.product_code,
     serialNumber: camryDemo.product.serial_number,
-    brand: camryDemo.product.template.brand,
-    model: camryDemo.product.template.model,
-    manufactureYear: camryDemo.product.template.model_year,
+    brand: camryDemo.product.brand,
+    model: camryDemo.product.model,
+    manufactureYear: camryDemo.product.model_year,
     reviewedById: adminUser.id,
     reviewedAt: addDays(seedNow, -2),
     activatedWarrantyId: camryDemo.warranty.id,
@@ -1140,11 +1127,13 @@ async function main() {
     categoryId: accessoryCategory?.id,
     productId: expiringSoonDemo.product.id,
     dealerId: lexzenzHanoiDealer.id,
-    productName: expiringSoonDemo.product.template.name,
+    productName:
+      expiringSoonDemo.product.display_name ??
+      expiringSoonDemo.product.product_code,
     serialNumber: expiringSoonDemo.product.serial_number,
-    brand: expiringSoonDemo.product.template.brand,
-    model: expiringSoonDemo.product.template.model,
-    manufactureYear: expiringSoonDemo.product.template.model_year,
+    brand: expiringSoonDemo.product.brand,
+    model: expiringSoonDemo.product.model,
+    manufactureYear: expiringSoonDemo.product.model_year,
     adminNote: 'Cancelled after customer created a replacement request.',
     createdById: adminUser.id,
     reviewedById: adminUser.id,
@@ -1161,11 +1150,12 @@ async function main() {
       customerEmail: customerA.email,
       dealerId: lexzenzHanoiDealer.id,
       productId: camryDemo.product.id,
-      productName: camryDemo.product.template.name,
+      productName:
+        camryDemo.product.display_name ?? camryDemo.product.product_code,
       serialNumber: camryDemo.product.serial_number,
-      brand: camryDemo.product.template.brand,
-      model: camryDemo.product.template.model,
-      manufactureYear: camryDemo.product.template.model_year,
+      brand: camryDemo.product.brand,
+      model: camryDemo.product.model,
+      manufactureYear: camryDemo.product.model_year,
     },
     {
       categoryId: accessoryCategory?.id,
@@ -1175,11 +1165,13 @@ async function main() {
       customerEmail: customerB.email,
       dealerId: lexzenzHcmDealer.id,
       productId: expiringMonthDemo.product.id,
-      productName: expiringMonthDemo.product.template.name,
+      productName:
+        expiringMonthDemo.product.display_name ??
+        expiringMonthDemo.product.product_code,
       serialNumber: expiringMonthDemo.product.serial_number,
-      brand: expiringMonthDemo.product.template.brand,
-      model: expiringMonthDemo.product.template.model,
-      manufactureYear: expiringMonthDemo.product.template.model_year,
+      brand: expiringMonthDemo.product.brand,
+      model: expiringMonthDemo.product.model,
+      manufactureYear: expiringMonthDemo.product.model_year,
     },
     {
       categoryId: accessoryCategory?.id,
@@ -1189,11 +1181,13 @@ async function main() {
       customerEmail: walkInCustomer.email,
       dealerId: lexzenzHanoiDealer.id,
       productId: expiringSoonDemo.product.id,
-      productName: expiringSoonDemo.product.template.name,
+      productName:
+        expiringSoonDemo.product.display_name ??
+        expiringSoonDemo.product.product_code,
       serialNumber: expiringSoonDemo.product.serial_number,
-      brand: expiringSoonDemo.product.template.brand,
-      model: expiringSoonDemo.product.template.model,
-      manufactureYear: expiringSoonDemo.product.template.model_year,
+      brand: expiringSoonDemo.product.brand,
+      model: expiringSoonDemo.product.model,
+      manufactureYear: expiringSoonDemo.product.model_year,
     },
   ];
   const activationRequestSources = [

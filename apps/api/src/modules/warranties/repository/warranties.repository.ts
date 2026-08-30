@@ -10,7 +10,7 @@ const warrantyInclude = {
   voided_by: true,
   product: {
     include: {
-      template: { include: { category_ref: true } },
+      category_ref: true,
       ownerships: {
         include: { customer: true },
         orderBy: { created_at: 'desc' as const },
@@ -25,11 +25,7 @@ const warrantyLookupInclude = {
       activation_request: true,
     },
   },
-  template: {
-    include: {
-      category_ref: true,
-    },
-  },
+  category_ref: true,
 } satisfies Prisma.ProductInclude;
 
 const warrantySortMap: Readonly<
@@ -100,9 +96,7 @@ export class WarrantiesRepository {
             { warranty_code: { contains: search, mode: 'insensitive' } },
             {
               product: {
-                template: {
-                  name: { contains: search, mode: 'insensitive' },
-                },
+                display_name: { contains: search, mode: 'insensitive' },
               },
             },
             {
@@ -183,9 +177,7 @@ export class WarrantiesRepository {
             { warranty_code: { contains: search, mode: 'insensitive' } },
             {
               product: {
-                template: {
-                  name: { contains: search, mode: 'insensitive' },
-                },
+                display_name: { contains: search, mode: 'insensitive' },
               },
             },
             {

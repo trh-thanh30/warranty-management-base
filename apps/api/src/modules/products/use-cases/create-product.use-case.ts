@@ -4,8 +4,9 @@ import {
   NotFoundError,
 } from '@/common/response';
 import { AssetsService } from '@/modules/assets/assets.service';
-import { ProductTemplatesRepository } from '@/modules/product-templates/repository/product-templates.repository';
+import { toSlug } from '@/common/helpers/string.util';
 import { CreateProductDto } from '@/modules/products/dto/create-product.dto';
+import { buildProductAssets } from '@/modules/products/product-assets';
 import { toProductResponse } from '@/modules/products/products.types';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
 import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generate-product-code.use-case';
@@ -18,7 +19,6 @@ export class CreateProductUseCase {
   constructor(
     private readonly productsRepository: ProductsRepository,
     private readonly generateProductCodeUseCase: GenerateProductCodeUseCase,
-    private readonly productTemplatesRepository: ProductTemplatesRepository,
     private readonly generateWarrantyCodeUseCase: GenerateWarrantyCodeUseCase,
     private readonly assetsService?: AssetsService,
   ) {}
@@ -35,12 +35,6 @@ export class CreateProductUseCase {
       );
     }
 
-    const selectedTemplate =
-      await this.productTemplatesRepository.findActiveById(dto.templateId);
-    if (!selectedTemplate) {
-      throw new NotFoundError('Product template not found');
-    }
-
     const requestedProductCode = dto.productCode?.trim() || null;
     const productCode = requestedProductCode
       ? await this.resolveRequestedProductCode(requestedProductCode)
@@ -55,13 +49,12 @@ export class CreateProductUseCase {
       }
     }
 
-    const categoryId = dto.categoryId ?? selectedTemplate.category_id;
-    if (dto.categoryId) {
-      const category =
-        await this.productsRepository.findActiveProductCategoryById(categoryId);
-      if (!category) {
-        throw new NotFoundError('Product category not found');
-      }
+    const category =
+      await this.productsRepository.findActiveProductCategoryById(
+        dto.categoryId,
+      );
+    if (!category) {
+      throw new NotFoundError('Product category not found');
     }
 
     const requestedWarrantyCode =
@@ -76,16 +69,24 @@ export class CreateProductUseCase {
     const product = await this.productsRepository.create({
       product_code: productCode,
       serial_number: dto.serialNumber,
-      display_name: dto.displayName?.trim() || null,
+      display_name: dto.name.trim(),
+      slug: `${toSlug(dto.name)}-${productCode.toLowerCase()}`,
+      brand: dto.brand?.trim() || null,
+      model: dto.model?.trim() || null,
+      model_year: dto.modelYear,
+      description: dto.description?.trim() || null,
+      metadata: toJsonObject({
+        ...(dto.catalogueMetadata ?? {}),
+        ...(dto.metadata ?? {}),
+      }),
       status: dto.status ?? product_status.ACTIVE,
-      template: { connect: { id: selectedTemplate.id } },
-      category_ref: { connect: { id: categoryId } },
-      metadata: toPhysicalProductMetadata(dto.metadata),
+      category_ref: { connect: { id: dto.categoryId } },
+      assets: buildProductAssets(dto.coverAssetId, dto.galleryAssetIds),
       warranty: {
         create: {
           warranty_code: warrantyCode,
           duration_months: dto.warrantyDurationMonths,
-          terms: selectedTemplate.default_warranty_terms,
+          terms: dto.warrantyTerms?.trim() || null,
           start_date: null,
           end_date: null,
           status: warranty_status.DRAFT,
@@ -117,6 +118,12 @@ export class CreateProductUseCase {
     }
     return warrantyCode;
   }
+}
+
+function toJsonObject(
+  value: Record<string, unknown> | undefined,
+): Prisma.InputJsonObject | undefined {
+  return value as Prisma.InputJsonObject | undefined;
 }
 
 function toPhysicalProductMetadata(

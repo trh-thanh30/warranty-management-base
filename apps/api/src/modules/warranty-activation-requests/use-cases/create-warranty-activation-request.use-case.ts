@@ -1,5 +1,9 @@
 import { BadRequestError, NotFoundError } from '@/common/response';
 import { DealersRepository } from '@/modules/dealers/repository/dealers.repository';
+import {
+  getProductCatalogue,
+  getProductDisplayName,
+} from '@/modules/products/product-catalogue';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
 import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { CreateWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-warranty-activation-request.dto';
@@ -147,6 +151,7 @@ export class CreateWarrantyActivationRequestUseCase {
         await this.generateWarrantyActivationRequestCodeUseCase.execute();
 
       try {
+        const catalogue = getProductCatalogue(product);
         const request = await this.createRequest(
           {
             requestCode,
@@ -181,8 +186,7 @@ export class CreateWarrantyActivationRequestUseCase {
             productName:
               validatedItems?.[0].productName ??
               optionalTrim(dto.productName) ??
-              product.display_name ??
-              product.template.name,
+              getProductDisplayName(product),
             serialNumber:
               validatedItems !== null
                 ? validatedItems[0].serialNumber
@@ -190,15 +194,15 @@ export class CreateWarrantyActivationRequestUseCase {
             brand:
               validatedItems !== null
                 ? validatedItems[0].brand
-                : (optionalTrim(dto.brand) ?? product.template.brand),
+                : (optionalTrim(dto.brand) ?? catalogue.brand),
             model:
               validatedItems !== null
                 ? validatedItems[0].model
-                : (optionalTrim(dto.model) ?? product.template.model),
+                : (optionalTrim(dto.model) ?? catalogue.model),
             manufactureYear:
               validatedItems !== null
                 ? validatedItems[0].manufactureYear
-                : (dto.manufactureYear ?? product.template.model_year),
+                : (dto.manufactureYear ?? catalogue.modelYear),
             note: optionalTrim(dto.note),
             metadata: this.buildActivationMetadata({
               dealer,
@@ -353,21 +357,21 @@ export class CreateWarrantyActivationRequestUseCase {
       throw new NotFoundError('Product warranty not found');
     }
 
+    const catalogue = getProductCatalogue(product);
     return {
       activationFieldId: null,
       positionKey: 'primaryProduct',
       positionLabel: 'Sản phẩm chính',
       productId: product.id,
-      productName:
-        product.display_name ?? product.template.name ?? product.product_code,
+      productName: getProductDisplayName(product),
       productCode: product.product_code,
       serialNumber: product.serial_number,
       warrantyId: product.warranty.id,
       warrantyCode,
       warrantyDurationMonths: product.warranty.duration_months,
-      brand: product.template.brand,
-      model: product.template.model,
-      manufactureYear: product.template.model_year,
+      brand: catalogue.brand,
+      model: catalogue.model,
+      manufactureYear: catalogue.modelYear,
       currentOwner: product.ownerships[0]?.customer ?? null,
     };
   }

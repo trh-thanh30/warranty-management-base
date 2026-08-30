@@ -1,7 +1,7 @@
 import { timeConfig } from '@/config';
 import { UploadAssetService } from '@/modules/assets/services/upload-asset.service';
+import { WARRANTY_CERTIFICATE_FOLDER_SEGMENT } from '@/modules/warranty-certificates/constants/warranty-certificate.constants';
 import { WarrantyCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-certificates.repository';
-import { WARRANTY_CERTIFICATE_FOLDER_SEGMENT } from '@/modules/warranty-certificates/warranty-certificate.constants';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
 

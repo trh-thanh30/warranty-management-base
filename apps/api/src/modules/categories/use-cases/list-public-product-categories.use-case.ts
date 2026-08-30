@@ -23,7 +23,7 @@ export class ListPublicProductCategoriesUseCase {
         icon: category.icon,
         imageUrl: category.image_url,
         order: category.order,
-        productCount: category._count.product_templates,
+        productCount: category._count.products,
       })),
       meta: result.meta,
     };

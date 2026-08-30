@@ -4,12 +4,15 @@ import {
   NotFoundError,
 } from '@/common/response';
 import { AssetsService } from '@/modules/assets/assets.service';
+import { toSlug } from '@/common/helpers/string.util';
 import { UpdateProductDto } from '@/modules/products/dto/update-product.dto';
+import { getProductCatalogue } from '@/modules/products/product-catalogue';
+import { buildProductAssets } from '@/modules/products/product-assets';
 import { toProductResponse } from '@/modules/products/products.types';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
 import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { Injectable } from '@nestjs/common';
-import { Prisma, warranty_status } from '@prisma/client';
+import { Prisma, product_asset_role, warranty_status } from '@prisma/client';
 
 @Injectable()
 export class UpdateProductUseCase {
@@ -41,17 +44,6 @@ export class UpdateProductUseCase {
       }
     }
 
-    const isTemplateReplacement =
-      Boolean(dto.templateId) && dto.templateId !== existingProduct.template_id;
-    const replacementTemplate = isTemplateReplacement
-      ? await this.productsRepository.findActiveProductTemplateById(
-          dto.templateId!,
-        )
-      : null;
-    if (isTemplateReplacement && !replacementTemplate) {
-      throw new NotFoundError('Product template not found');
-    }
-
     if (
       dto.serialNumber &&
       dto.serialNumber !== existingProduct.serial_number
@@ -63,8 +55,7 @@ export class UpdateProductUseCase {
       }
     }
 
-    const requestedCategoryId =
-      dto.categoryId ?? replacementTemplate?.category_id;
+    const requestedCategoryId = dto.categoryId;
     if (
       requestedCategoryId &&
       requestedCategoryId !== existingProduct.category_id
@@ -135,6 +126,7 @@ export class UpdateProductUseCase {
       const warrantyUpdate: {
         warranty_code?: string;
         duration_months?: number;
+        terms?: string | null;
       } = {};
       if (nextWarrantyCode) {
         warrantyUpdate.warranty_code = nextWarrantyCode;
@@ -142,14 +134,14 @@ export class UpdateProductUseCase {
       if (isWarrantyDurationChange) {
         warrantyUpdate.duration_months = dto.warrantyDurationMonths;
       }
+      if (dto.warrantyTerms !== undefined) {
+        warrantyUpdate.terms = dto.warrantyTerms?.trim() || null;
+      }
       if (Object.keys(warrantyUpdate).length > 0) {
         warranty = { update: warrantyUpdate };
       }
     } else if (nextWarrantyCode) {
-      const durationMonths =
-        dto.warrantyDurationMonths ??
-        replacementTemplate?.default_warranty_duration_months ??
-        existingProduct.template.default_warranty_duration_months;
+      const durationMonths = dto.warrantyDurationMonths;
       if (durationMonths === null || durationMonths === undefined) {
         throw new BadRequestError(
           'Warranty duration is required',
@@ -161,9 +153,7 @@ export class UpdateProductUseCase {
         create: {
           warranty_code: nextWarrantyCode,
           duration_months: durationMonths,
-          terms: replacementTemplate
-            ? replacementTemplate.default_warranty_terms
-            : existingProduct.template.default_warranty_terms,
+          terms: dto.warrantyTerms?.trim() || null,
           start_date: null,
           end_date: null,
           status: warranty_status.DRAFT,
@@ -176,22 +166,48 @@ export class UpdateProductUseCase {
         requestedProductCode === existingProduct.product_code
           ? undefined
           : requestedProductCode,
-      template: replacementTemplate
-        ? { connect: { id: replacementTemplate.id } }
-        : undefined,
+      display_name:
+        dto.name?.trim() ??
+        (dto.displayName === undefined
+          ? undefined
+          : dto.displayName?.trim() || null),
+      slug:
+        dto.name || requestedProductCode
+          ? `${toSlug(dto.name?.trim() || getProductCatalogue(existingProduct).name)}-${(requestedProductCode ?? existingProduct.product_code).toLowerCase()}`
+          : undefined,
+      brand: dto.brand === undefined ? undefined : dto.brand?.trim() || null,
+      model: dto.model === undefined ? undefined : dto.model?.trim() || null,
+      model_year: dto.modelYear,
+      description:
+        dto.description === undefined
+          ? undefined
+          : dto.description?.trim() || null,
+      assets:
+        dto.coverAssetId !== undefined || dto.galleryAssetIds !== undefined
+          ? {
+              deleteMany: {
+                role: {
+                  in: [product_asset_role.COVER, product_asset_role.GALLERY],
+                },
+              },
+              ...buildProductAssets(
+                dto.coverAssetId ?? undefined,
+                dto.galleryAssetIds,
+              ),
+            }
+          : undefined,
       category_ref: requestedCategoryId
         ? { connect: { id: requestedCategoryId } }
         : undefined,
-      display_name:
-        dto.displayName === undefined
-          ? undefined
-          : dto.displayName?.trim() || null,
       status: dto.status,
       serial_number: dto.serialNumber,
-      metadata: toPhysicalProductMetadata(
-        existingProduct.metadata,
-        dto.metadata,
-      ),
+      metadata:
+        dto.catalogueMetadata === undefined && dto.metadata === undefined
+          ? undefined
+          : toPhysicalProductMetadata(existingProduct.metadata, {
+              ...(dto.catalogueMetadata ?? {}),
+              ...(dto.metadata ?? {}),
+            }),
       warranty,
     });
 

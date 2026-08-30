@@ -62,14 +62,9 @@ test("downloads an activation request certificate as a blob", async () => {
   ]);
 });
 
-test("uses item-specific certificate endpoints", async () => {
+test("retries an aggregate activation request certificate", async () => {
   const calls: unknown[] = [];
-  const blob = new Blob(["pdf"]);
   const http = {
-    async get(url: string, config?: unknown) {
-      calls.push({ method: "GET", url, config });
-      return { data: blob };
-    },
     async post(url: string, body?: unknown) {
       calls.push({ method: "POST", url, body });
       return { data: { success: true, data: { id: "request-id" } } };
@@ -79,53 +74,16 @@ test("uses item-specific certificate endpoints", async () => {
     http as unknown as WarrantyActivationRequestsHttpClient,
   );
 
-  assert.equal(
-    await service.viewWarrantyActivationRequestItemCertificate(
-      "request-id",
-      "item-id",
-    ),
-    blob,
-  );
-  assert.equal(
-    await service.downloadWarrantyActivationRequestItemCertificate(
-      "request-id",
-      "item-id",
-    ),
-    blob,
-  );
-  await service.resendWarrantyActivationRequestItemCertificateEmail(
-    "request-id",
-    "item-id",
-  );
-  await service.retryWarrantyActivationRequestItemCertificate(
-    "request-id",
-    "item-id",
-  );
+  await service.retryWarrantyActivationRequestCertificate("request-id");
 
   assert.deepEqual(calls, [
     {
-      method: "GET",
-      url: "/warranty-activation-requests/request-id/items/item-id/certificate/view",
-      config: { responseType: "blob" },
-    },
-    {
-      method: "GET",
-      url: "/warranty-activation-requests/request-id/items/item-id/certificate/download",
-      config: { responseType: "blob" },
-    },
-    {
       method: "POST",
-      url: "/warranty-activation-requests/request-id/items/item-id/certificate/resend-email",
-      body: {},
-    },
-    {
-      method: "POST",
-      url: "/warranty-activation-requests/request-id/items/item-id/certificate/retry",
+      url: "/warranty-activation-requests/request-id/certificate/retry",
       body: {},
     },
   ]);
 });
-
 test("creates an admin activation request from a selected product", async () => {
   const calls: unknown[] = [];
   const body = {

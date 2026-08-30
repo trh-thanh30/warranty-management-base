@@ -12,10 +12,6 @@ const tablePolicies = [
     tableClass: "min-w-[900px] whitespace-nowrap",
   },
   {
-    file: "./product-templates/components/linked-products-table.tsx",
-    tableClass: "min-w-272 whitespace-nowrap",
-  },
-  {
     file: "./warranty-activation-requests/components/warranty-activation-requests-table.tsx",
     tableClass: "min-w-[1180px] whitespace-nowrap",
   },
@@ -40,11 +36,6 @@ test("secondary table long values use bounded truncation", () => {
     readViewSource("./content-pages/components/content-pages-directory.tsx"),
     /max-w-sm truncate font-mono/,
   );
-  assert.match(
-    readViewSource("./product-templates/components/linked-products-table.tsx"),
-    /block max-w-52 truncate/,
-  );
-
   const activationRequestsSource = readViewSource(
     "./warranty-activation-requests/components/warranty-activation-requests-table.tsx",
   );

@@ -5,246 +5,150 @@ jest.mock('@/modules/assets/assets.service', () => ({
   AssetsService: class AssetsService {},
 }));
 
+const now = new Date('2026-08-29T00:00:00.000Z');
+
+function persistedProduct(overrides: Record<string, unknown> = {}) {
+  return {
+    id: 'product-id',
+    category_id: 'category-id',
+    product_code: 'PRD-2026-ABCDEF',
+    serial_number: 'SN-001',
+    display_name: 'Camera AI 4K',
+    slug: 'camera-ai-4k-prd-2026-abcdef',
+    brand: 'Acme',
+    model: 'C4K',
+    model_year: 2026,
+    description: null,
+    metadata: null,
+    is_published: false,
+    published_at: null,
+    status: 'ACTIVE',
+    created_at: now,
+    updated_at: now,
+    deleted_at: null,
+    assets: [],
+    ownerships: [],
+    category_ref: null,
+    template: null,
+    warranty_activation_requests: [],
+    warranty: {
+      id: 'warranty-id',
+      warranty_code: 'WM-2026-CREATE',
+      status: warranty_status.DRAFT,
+      duration_months: 24,
+      start_date: null,
+      end_date: null,
+      coverage_limit_amount: null,
+      max_claim_count: null,
+      max_amount_per_claim: null,
+      terms: null,
+    },
+    ...overrides,
+  };
+}
+
+function setup() {
+  const productsRepository = {
+    create: jest.fn().mockResolvedValue(persistedProduct()),
+    findActiveProductCategoryById: jest
+      .fn()
+      .mockResolvedValue({ id: 'category-id' }),
+    findByProductCode: jest.fn().mockResolvedValue(null),
+    findBySerialNumber: jest.fn().mockResolvedValue(null),
+    findByWarrantyCode: jest.fn().mockResolvedValue(null),
+  };
+  const generateProductCode = {
+    execute: jest.fn().mockResolvedValue('PRD-2026-ABCDEF'),
+  };
+  const generateWarrantyCode = {
+    execute: jest.fn().mockResolvedValue('WM-2026-CREATE'),
+  };
+  const useCase = new CreateProductUseCase(
+    productsRepository as never,
+    generateProductCode as never,
+    generateWarrantyCode as never,
+  );
+  return {
+    generateProductCode,
+    generateWarrantyCode,
+    productsRepository,
+    useCase,
+  };
+}
+
 describe('CreateProductUseCase', () => {
-  it('creates a physical product from a required template with a display name', async () => {
-    const template = {
-      id: 'template-id',
-      sku: 'CAM-4K',
-      slug: 'camera-ai-4k',
-      name: 'Camera AI 4K',
-      category_id: 'category-id',
-      brand: 'Acme',
-      model: 'C4K',
-      model_year: 2026,
-      description: null,
-      default_warranty_duration_months: 24,
-      default_warranty_terms: null,
-      metadata: null,
-      is_active: true,
-      is_published: false,
-      published_at: null,
-      created_at: new Date(),
-      updated_at: new Date(),
-    };
-    const productCreate = jest.fn().mockResolvedValue({
-      id: 'product-id',
-      template_id: template.id,
-      template: { ...template, assets: [], category_ref: null },
-      category_id: template.category_id,
-      category_ref: null,
-      product_code: 'PRD-2026-ABCDEF',
-      serial_number: 'SN-001',
-      display_name: 'Camera cổng chính',
-      status: 'ACTIVE',
-      metadata: null,
-      created_at: new Date(),
-      updated_at: new Date(),
-      deleted_at: null,
-      assets: [],
-      ownerships: [],
-      warranty: {
-        id: 'warranty-id',
-        warranty_code: 'WM-2026-CREATE',
-        status: warranty_status.DRAFT,
-      },
-    });
-    const generateWarrantyCodeUseCase = {
-      execute: jest.fn().mockResolvedValue('WM-2026-CREATE'),
-    };
-    const productsRepository = {
-      create: productCreate,
-      findBySerialNumber: jest.fn().mockResolvedValue(null),
-    };
-    const useCase = new CreateProductUseCase(
-      productsRepository as never,
-      { execute: jest.fn().mockResolvedValue('PRD-2026-ABCDEF') } as never,
-      { findActiveById: jest.fn().mockResolvedValue(template) } as never,
-      generateWarrantyCodeUseCase as never,
-    );
+  it('creates an authoritative product without a product template', async () => {
+    const { productsRepository, useCase } = setup();
 
     const result = await useCase.execute({
-      templateId: template.id,
+      name: ' Camera AI 4K ',
+      categoryId: 'category-id',
+      brand: ' Acme ',
+      model: ' C4K ',
+      modelYear: 2026,
       displayName: ' Camera cổng chính ',
       serialNumber: 'SN-001',
-      warrantyDurationMonths: 180,
+      warrantyDurationMonths: 24,
     });
 
-    expect(productCreate).toHaveBeenCalledWith(
+    expect(productsRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        category_ref: { connect: { id: template.category_id } },
-        display_name: 'Camera cổng chính',
-        template: { connect: { id: template.id } },
+        display_name: 'Camera AI 4K',
+        brand: 'Acme',
+        model: 'C4K',
+        category_ref: { connect: { id: 'category-id' } },
         warranty: {
           create: expect.objectContaining({
-            duration_months: 180,
+            duration_months: 24,
             warranty_code: 'WM-2026-CREATE',
             status: warranty_status.DRAFT,
           }),
         },
       }),
     );
-    expect(generateWarrantyCodeUseCase.execute).toHaveBeenCalledWith(
-      expect.any(Date),
-    );
-    expect(result.displayName).toBe('Camera cổng chính');
-    expect(result.name).toBe(template.name);
+    expect(result.name).toBe('Camera AI 4K');
+    expect(result).not.toHaveProperty('templateId');
+    expect(result).not.toHaveProperty('template');
   });
 
-  it('allows an active product category to override the template category', async () => {
-    const template = {
-      id: 'template-id',
-      category_id: 'template-category-id',
-      default_warranty_duration_months: 24,
-      default_warranty_terms: null,
-    };
-    const productCreate = jest.fn().mockResolvedValue({
-      id: 'product-id',
-      template_id: template.id,
-      category_id: 'override-category-id',
-      product_code: 'PRD-2026-ABCDEF',
-      status: 'ACTIVE',
-      metadata: null,
-      assets: [],
-      ownerships: [],
-      warranty: null,
-      template: {
-        ...template,
+  it('requires an active product category', async () => {
+    const { productsRepository, useCase } = setup();
+    productsRepository.findActiveProductCategoryById.mockResolvedValue(null);
+
+    await expect(
+      useCase.execute({
         name: 'Camera AI 4K',
-        assets: [],
-        category_ref: null,
-      },
-      category_ref: {
-        id: 'override-category-id',
-        name: 'Camera chuyên dụng',
-      },
-    });
-    const productsRepository = {
-      create: productCreate,
-      findBySerialNumber: jest.fn(),
-      findActiveProductCategoryById: jest.fn().mockResolvedValue({
-        id: 'override-category-id',
+        categoryId: 'missing-category',
+        warrantyDurationMonths: 24,
       }),
-    };
-    const useCase = new CreateProductUseCase(
-      productsRepository as never,
-      { execute: jest.fn().mockResolvedValue('PRD-2026-ABCDEF') } as never,
-      { findActiveById: jest.fn().mockResolvedValue(template) } as never,
-      { execute: jest.fn().mockResolvedValue('WM-2026-CREATE') } as never,
-    );
-
-    await useCase.execute({
-      templateId: template.id,
-      categoryId: 'override-category-id',
-      warrantyDurationMonths: 24,
-    });
-
-    expect(
-      productsRepository.findActiveProductCategoryById,
-    ).toHaveBeenCalledWith('override-category-id');
-    expect(productCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        category_ref: { connect: { id: 'override-category-id' } },
-      }),
-    );
+    ).rejects.toThrow('Product category not found');
   });
 
   it('keeps an explicit unique product code instead of generating one', async () => {
-    const template = {
-      id: 'template-id',
-      category_id: 'category-id',
-      default_warranty_duration_months: 24,
-      default_warranty_terms: null,
-    };
-    const productCreate = jest.fn().mockResolvedValue({
-      id: 'product-id',
-      template_id: template.id,
-      category_id: template.category_id,
-      product_code: 'CUSTOM-001',
-      status: 'ACTIVE',
-      metadata: null,
-      assets: [],
-      ownerships: [],
-      warranty: null,
-      template: {
-        ...template,
-        name: 'Camera AI 4K',
-        assets: [],
-        category_ref: null,
-      },
-      category_ref: { id: 'category-id', name: 'Camera' },
-    });
-    const generateProductCodeUseCase = { execute: jest.fn() };
-    const productsRepository = {
-      create: productCreate,
-      findByProductCode: jest.fn().mockResolvedValue(null),
-    };
-    const useCase = new CreateProductUseCase(
-      productsRepository as never,
-      generateProductCodeUseCase as never,
-      { findActiveById: jest.fn().mockResolvedValue(template) } as never,
-      { execute: jest.fn().mockResolvedValue('WM-2026-CREATE') } as never,
-    );
+    const { generateProductCode, productsRepository, useCase } = setup();
 
     await useCase.execute({
+      name: 'Camera AI 4K',
+      categoryId: 'category-id',
       productCode: ' CUSTOM-001 ',
-      templateId: template.id,
       warrantyDurationMonths: 24,
     });
 
     expect(productsRepository.findByProductCode).toHaveBeenCalledWith(
       'CUSTOM-001',
     );
-    expect(generateProductCodeUseCase.execute).not.toHaveBeenCalled();
-    expect(productCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        product_code: 'CUSTOM-001',
-      }),
+    expect(generateProductCode.execute).not.toHaveBeenCalled();
+    expect(productsRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ product_code: 'CUSTOM-001' }),
     );
   });
 
   it('keeps an explicit unique warranty code instead of generating one', async () => {
-    const template = {
-      id: 'template-id',
-      category_id: 'category-id',
-      default_warranty_duration_months: 24,
-      default_warranty_terms: null,
-    };
-    const productCreate = jest.fn().mockResolvedValue({
-      id: 'product-id',
-      template_id: template.id,
-      category_id: template.category_id,
-      product_code: 'PRD-2026-ABCDEF',
-      status: 'ACTIVE',
-      metadata: null,
-      assets: [],
-      ownerships: [],
-      warranty: {
-        id: 'warranty-id',
-        warranty_code: 'WM-2026-MANUAL1',
-        status: warranty_status.DRAFT,
-      },
-      template: {
-        ...template,
-        name: 'Camera AI 4K',
-        assets: [],
-        category_ref: null,
-      },
-      category_ref: { id: 'category-id', name: 'Camera' },
-    });
-    const productsRepository = {
-      create: productCreate,
-      findByWarrantyCode: jest.fn().mockResolvedValue(null),
-    };
-    const generateWarrantyCodeUseCase = { execute: jest.fn() };
-    const useCase = new CreateProductUseCase(
-      productsRepository as never,
-      { execute: jest.fn().mockResolvedValue('PRD-2026-ABCDEF') } as never,
-      { findActiveById: jest.fn().mockResolvedValue(template) } as never,
-      generateWarrantyCodeUseCase as never,
-    );
+    const { generateWarrantyCode, productsRepository, useCase } = setup();
 
     await useCase.execute({
-      templateId: template.id,
+      name: 'Camera AI 4K',
+      categoryId: 'category-id',
       warrantyCode: ' wm-2026-manual1 ',
       warrantyDurationMonths: 24,
     });
@@ -252,8 +156,8 @@ describe('CreateProductUseCase', () => {
     expect(productsRepository.findByWarrantyCode).toHaveBeenCalledWith(
       'WM-2026-MANUAL1',
     );
-    expect(generateWarrantyCodeUseCase.execute).not.toHaveBeenCalled();
-    expect(productCreate).toHaveBeenCalledWith(
+    expect(generateWarrantyCode.execute).not.toHaveBeenCalled();
+    expect(productsRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         warranty: {
           create: expect.objectContaining({

@@ -172,41 +172,6 @@ describe('ProductsRepository.list', () => {
     });
   });
 
-  it('filters physical products by product template id', async () => {
-    const findMany = jest.fn().mockResolvedValue([]);
-    const count = jest.fn().mockResolvedValue(0);
-    const prismaService = {
-      $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
-        callback({
-          product: {
-            count,
-            findMany,
-          },
-        }),
-      ),
-    };
-    const repository = new ProductsRepository(prismaService as never);
-
-    await repository.list({
-      limit: 10,
-      page: 1,
-      templateId: 'template-1',
-    });
-
-    expect(findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({
-          template_id: 'template-1',
-        }),
-      }),
-    );
-    expect(count).toHaveBeenCalledWith({
-      where: expect.objectContaining({
-        template_id: 'template-1',
-      }),
-    });
-  });
-
   it('filters products by the editable product category', async () => {
     const findMany = jest.fn().mockResolvedValue([]);
     const count = jest.fn().mockResolvedValue(0);
@@ -392,13 +357,13 @@ describe('ProductsRepository.list', () => {
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          template: { is: { is_published: true } },
+          is_published: true,
         }),
       }),
     );
     expect(count).toHaveBeenCalledWith({
       where: expect.objectContaining({
-        template: { is: { is_published: true } },
+        is_published: true,
       }),
     });
   });
@@ -427,13 +392,13 @@ describe('ProductsRepository.list', () => {
     );
   });
 
-  it('paginates visible product templates instead of physical products', async () => {
+  it('paginates visible authoritative products', async () => {
     const findMany = jest.fn().mockResolvedValue([]);
     const count = jest.fn().mockResolvedValue(0);
     const prismaService = {
       $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
         callback({
-          productTemplate: {
+          product: {
             count,
             findMany,
           },
@@ -451,7 +416,8 @@ describe('ProductsRepository.list', () => {
     const visibilityFilter = {
       category_id: 'category-id',
       category_ref: { is_active: true },
-      is_active: true,
+      deleted_at: null,
+      status: product_status.ACTIVE,
       is_published: true,
     };
     expect(findMany).toHaveBeenCalledWith(

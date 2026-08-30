@@ -11,8 +11,9 @@ import {
   WarrantyCertificateStorageReference,
   WarrantyCertificateWriteInput,
   WarrantyForCertificate,
-} from '@/modules/warranty-certificates/warranty-certificates.types';
+} from '@/modules/warranty-certificates/types/warranty-certificates.types';
 import { Injectable } from '@nestjs/common';
+import { getProductCatalogue } from '@/modules/products/product-catalogue';
 import {
   Prisma,
   WarrantyCertificate,
@@ -22,7 +23,6 @@ import {
 const warrantyForCertificateInclude = {
   product: {
     include: {
-      template: true,
       ownerships: {
         where: { is_current_owner: true },
         include: { customer: true },
@@ -56,7 +56,7 @@ type PersistedWarrantyCertificateForBatchEmail =
   Prisma.WarrantyCertificateGetPayload<{
     include: {
       warranty: {
-        include: { product: { include: { template: true } } };
+        include: { product: true };
       };
     };
   }>;
@@ -163,7 +163,7 @@ export class WarrantyCertificatesRepository {
       where: { id: { in: certificateIds } },
       include: {
         warranty: {
-          include: { product: { include: { template: true } } },
+          include: { product: true },
         },
       },
     });
@@ -393,6 +393,7 @@ function toWarrantyCertificateRecord(
 function toWarrantyForCertificate(
   warranty: PersistedWarrantyForCertificate,
 ): WarrantyForCertificate {
+  const catalogue = getProductCatalogue(warranty.product);
   return {
     durationMonths: warranty.duration_months,
     endDate: warranty.end_date,
@@ -406,8 +407,8 @@ function toWarrantyForCertificate(
           phone: customer.phone,
         },
       })),
+      name: catalogue.name,
       serialNumber: warranty.product.serial_number,
-      template: { name: warranty.product.template.name },
     },
     startDate: warranty.start_date,
     warrantyCode: warranty.warranty_code,
@@ -443,13 +444,14 @@ function toWarrantyCertificateForEmail(
 function toWarrantyCertificateForBatchEmail(
   certificate: PersistedWarrantyCertificateForBatchEmail,
 ): WarrantyCertificateForBatchEmail {
+  const catalogue = getProductCatalogue(certificate.warranty.product);
   return {
     ...toWarrantyCertificateRecord(certificate),
     warranty: {
       product: {
         displayName: certificate.warranty.product.display_name,
+        name: catalogue.name,
         serialNumber: certificate.warranty.product.serial_number,
-        template: { name: certificate.warranty.product.template.name },
       },
       warrantyCode: certificate.warranty.warranty_code,
     },

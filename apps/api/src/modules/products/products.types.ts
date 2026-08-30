@@ -6,22 +6,16 @@ import {
   ProductAsset,
   ProductOwnership,
   Warranty,
-  ProductTemplate,
-  ProductTemplateAsset,
   warranty_status,
 } from '@prisma/client';
 import { toCategoryResponse } from '@/modules/categories/categories.types';
-import {
-  ProductTemplateWithRelations,
-  toProductTemplateResponse,
-} from '@/modules/product-templates/product-templates.types';
+import { getProductCatalogue } from '@/modules/products/product-catalogue';
 
 type ProductWithRelations = Product & {
   assets?: Array<ProductAsset & { asset: Asset }>;
   ownerships?: Array<ProductOwnership & { customer?: Customer }>;
   warranty?: Warranty | null;
   warranty_activation_requests?: Array<{ id: string }>;
-  template?: ProductTemplateWithRelations | null;
   category_ref?: Category;
 };
 
@@ -32,12 +26,10 @@ export function toProductResponse(
   const currentOwnership = product.ownerships?.find(
     (ownership) => ownership.is_current_owner,
   );
-  const templateResponse = product.template
-    ? toProductTemplateResponse(product.template, resolveAssetUrl)
+  const catalogue = getProductCatalogue(product);
+  const effectiveMetadata = isRecord(product.metadata)
+    ? product.metadata
     : null;
-  const effectiveMetadata = templateResponse
-    ? mergeEffectiveMetadata(templateResponse.metadata, product.metadata)
-    : (product.metadata as Record<string, unknown> | null);
   const productAssets =
     product.assets?.map((productAsset) => ({
       id: productAsset.id,
@@ -48,7 +40,6 @@ export function toProductResponse(
       url: resolveAssetUrl(productAsset.asset),
       mimeType: productAsset.asset.mime_type,
       originalName: productAsset.asset.original_name,
-      source: 'PRODUCT' as const,
     })) ?? [];
   const warrantyCodeEditLockedReason =
     product.warranty && product.warranty.status !== warranty_status.DRAFT
@@ -59,29 +50,28 @@ export function toProductResponse(
 
   return {
     id: product.id,
-    templateId: product.template_id,
-    template: templateResponse,
+    sku: product.product_code,
     productCode: product.product_code,
-    slug: templateResponse?.slug ?? '',
+    slug: catalogue.slug,
     warrantyCode: product.warranty?.warranty_code ?? null,
     canEditWarrantyCode: warrantyCodeEditLockedReason === null,
     warrantyCodeEditLockedReason,
     serialNumber: product.serial_number,
     displayName: product.display_name,
-    name:
-      templateResponse?.name ?? product.display_name ?? product.product_code,
+    name: catalogue.name,
     categoryId: product.category_id,
     categoryRef: product.category_ref
       ? toCategoryResponse(product.category_ref)
       : null,
-    brand: templateResponse?.brand ?? null,
-    model: templateResponse?.model ?? null,
-    modelYear: templateResponse?.modelYear ?? null,
-    description: templateResponse?.description ?? null,
+    brand: catalogue.brand,
+    model: catalogue.model,
+    modelYear: catalogue.modelYear,
+    description: catalogue.description,
+    catalogueMetadata: effectiveMetadata,
     status: product.status,
     metadata: effectiveMetadata,
-    isPublished: templateResponse?.isPublished ?? false,
-    publishedAt: templateResponse?.publishedAt ?? null,
+    isPublished: product.is_published,
+    publishedAt: product.published_at,
     createdAt: product.created_at,
     updatedAt: product.updated_at,
     deletedAt: product.deleted_at,
@@ -111,131 +101,94 @@ export function toProductResponse(
           terms: product.warranty.terms,
         }
       : null,
-    assets: mergeEffectiveProductAssets(
-      templateResponse?.assets ?? [],
-      productAssets,
-    ),
+    assets: productAssets,
   };
-}
-
-function mergeEffectiveMetadata(
-  templateMetadata: Record<string, unknown> | null,
-  productMetadata: unknown,
-) {
-  const physicalMetadata = isRecord(productMetadata) ? productMetadata : {};
-  const sharedMetadata = templateMetadata ?? {};
-  const merged = { ...sharedMetadata, ...physicalMetadata };
-  return Object.keys(merged).length > 0 ? merged : null;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function mergeEffectiveProductAssets<
-  TTemplate extends {
-    assetId: string;
-    role: string;
-    source?: 'PRODUCT' | 'TEMPLATE';
-  },
-  TProduct extends {
-    assetId: string;
-    role: string;
-    source?: 'PRODUCT' | 'TEMPLATE';
-  },
->(
-  templateAssets: TTemplate[],
-  productAssets: TProduct[],
-): Array<TTemplate | TProduct> {
-  const productHasCover = productAssets.some((asset) => asset.role === 'COVER');
-  const seenAssetIds = new Set(productAssets.map((asset) => asset.assetId));
-  const inheritedAssets = templateAssets.filter(
-    (asset) =>
-      !seenAssetIds.has(asset.assetId) &&
-      !(asset.role === 'COVER' && productHasCover),
-  );
-  return [...inheritedAssets, ...productAssets];
-}
-
 export function toPublicProductSummary(
-  template: PublicProductTemplateWithRelations,
+  product: PublicProductWithRelations,
   resolveAssetUrl: (asset: Asset) => string = (asset) => asset.path,
 ) {
-  const cover = template.assets.find((asset) => asset.role === 'COVER');
-  const metadata = isRecord(template.metadata) ? template.metadata : {};
+  const cover = product.assets.find((asset) => asset.role === 'COVER');
+  const metadata = isRecord(product.metadata) ? product.metadata : {};
 
   return {
-    id: template.id,
-    sku: template.sku,
-    slug: template.slug,
-    name: template.name,
-    categoryId: template.category_id,
+    id: product.id,
+    sku: product.product_code,
+    slug: product.slug ?? product.product_code.toLowerCase(),
+    name: product.display_name ?? product.product_code,
+    categoryId: product.category_id,
     category: {
-      id: template.category_ref.id,
-      slug: template.category_ref.slug,
-      name: template.category_ref.name,
+      id: product.category_ref.id,
+      slug: product.category_ref.slug,
+      name: product.category_ref.name,
     },
-    brand: template.brand,
-    model: template.model,
-    description: template.description,
+    brand: product.brand,
+    model: product.model,
+    description: product.description,
     coverImageUrl: cover ? resolveAssetUrl(cover.asset) : null,
     specifications: toPublicSpecifications(metadata.specifications),
-    warrantyDurationMonths: template.default_warranty_duration_months,
-    publishedAt: template.published_at ?? template.created_at,
+    warrantyDurationMonths: product.warranty?.duration_months ?? 0,
+    publishedAt: product.published_at ?? product.created_at,
   };
 }
 
-type PublicProductTemplateWithRelations = ProductTemplate & {
-  assets: Array<ProductTemplateAsset & { asset: Asset }>;
+type PublicProductWithRelations = Product & {
+  assets: Array<ProductAsset & { asset: Asset }>;
   category_ref: Category;
+  warranty: Pick<Warranty, 'duration_months' | 'terms'> | null;
 };
 
 export function toPublicProductDetail(
-  template: PublicProductTemplateWithRelations,
+  product: PublicProductWithRelations,
   resolveAssetUrl: (asset: Asset) => string = (asset) => asset.path,
 ) {
-  const metadata = isRecord(template.metadata) ? template.metadata : {};
-  const images = template.assets.map((templateAsset) => ({
-    id: templateAsset.id,
-    url: resolveAssetUrl(templateAsset.asset),
-    altText: templateAsset.alt_text,
-    sortOrder: templateAsset.sort_order,
+  const metadata = isRecord(product.metadata) ? product.metadata : {};
+  const images = product.assets.map((productAsset) => ({
+    id: productAsset.id,
+    url: resolveAssetUrl(productAsset.asset),
+    altText: productAsset.alt_text,
+    sortOrder: productAsset.sort_order,
   }));
-  const coverIndex = template.assets.findIndex(
-    (templateAsset) => templateAsset.role === 'COVER',
+  const coverIndex = product.assets.findIndex(
+    (productAsset) => productAsset.role === 'COVER',
   );
 
   return {
-    id: template.id,
-    sku: template.sku,
-    slug: template.slug,
-    name: template.name,
+    id: product.id,
+    sku: product.product_code,
+    slug: product.slug ?? product.product_code.toLowerCase(),
+    name: product.display_name ?? product.product_code,
     category: {
-      id: template.category_ref.id,
-      slug: template.category_ref.slug,
-      name: template.category_ref.name,
+      id: product.category_ref.id,
+      slug: product.category_ref.slug,
+      name: product.category_ref.name,
     },
-    brand: template.brand,
-    model: template.model,
-    modelYear: template.model_year,
+    brand: product.brand,
+    model: product.model,
+    modelYear: product.model_year,
     shortDescription:
       typeof metadata.shortDescription === 'string'
         ? metadata.shortDescription
         : null,
-    description: template.description,
+    description: product.description,
     coverImage: coverIndex >= 0 ? images[coverIndex] : null,
     galleryImages: images.filter(
       (_, index) =>
-        index !== coverIndex && template.assets[index]?.role === 'GALLERY',
+        index !== coverIndex && product.assets[index]?.role === 'GALLERY',
     ),
     specifications: toPublicSpecifications(metadata.specifications),
     features: toPublicStringList(metadata.features),
     applications: toPublicStringList(metadata.applications),
     warranty: {
-      durationMonths: template.default_warranty_duration_months,
-      terms: template.default_warranty_terms,
+      durationMonths: product.warranty?.duration_months ?? 0,
+      terms: product.warranty?.terms ?? null,
     },
-    publishedAt: template.published_at,
+    publishedAt: product.published_at,
   };
 }
 
