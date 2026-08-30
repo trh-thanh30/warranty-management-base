@@ -16,6 +16,10 @@ const detailSource = readFileSync(
   ),
   "utf8",
 );
+const detailSectionSource = readFileSync(
+  new URL("../../components/common/detail-section.tsx", import.meta.url),
+  "utf8",
+);
 
 test("selected product summary stays on one line on narrow screens", () => {
   assert.match(
@@ -34,12 +38,12 @@ test("selected product summary stays on one line on narrow screens", () => {
 
 test("activation product summary stays on one line on narrow screens", () => {
   assert.match(
-    detailSource,
+    detailSectionSource,
     /className="flex items-center justify-between gap-2 overflow-hidden whitespace-nowrap[^"\n]*sm:gap-3 sm:whitespace-normal"/,
   );
   assert.match(
-    detailSource,
-    /className="min-w-0 truncate text-sm font-semibold[^"\n]*sm:whitespace-normal"/,
+    detailSectionSource,
+    /className="min-w-0 truncate text-base font-semibold[^"\n]*sm:whitespace-normal"/,
   );
   assert.match(
     detailSource,
