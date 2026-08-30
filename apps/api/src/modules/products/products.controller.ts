@@ -15,6 +15,7 @@ import { CreateProductUseCase } from '@/modules/products/use-cases/create-produc
 import { DownloadProductImportTemplateUseCase } from '@/modules/products/use-cases/download-product-import-template.use-case';
 import { ExportProductsUseCase } from '@/modules/products/use-cases/export-products.use-case';
 import { GetProductDetailUseCase } from '@/modules/products/use-cases/get-product-detail.use-case';
+import { GetProductCloneDraftUseCase } from '@/modules/products/use-cases/get-product-clone-draft.use-case';
 import { ListProductsUseCase } from '@/modules/products/use-cases/list-products.use-case';
 import { ListActivationProductOptionsUseCase } from '@/modules/products/use-cases/list-activation-product-options.use-case';
 import { PreviewProductImportUseCase } from '@/modules/products/use-cases/preview-product-import.use-case';
@@ -50,6 +51,7 @@ export class ProductsController {
     private readonly listProductsUseCase: ListProductsUseCase,
     private readonly listActivationProductOptionsUseCase: ListActivationProductOptionsUseCase,
     private readonly getProductDetailUseCase: GetProductDetailUseCase,
+    private readonly getProductCloneDraftUseCase: GetProductCloneDraftUseCase,
     private readonly assignProductOwnerUseCase: AssignProductOwnerUseCase,
     private readonly attachProductAssetUseCase: AttachProductAssetUseCase,
     private readonly updateProductAssetUseCase: UpdateProductAssetUseCase,
@@ -106,6 +108,12 @@ export class ProductsController {
   @Permissions([permission_key.PRODUCT_CREATE])
   create(@Body() dto: CreateProductDto) {
     return this.createProductUseCase.execute(dto);
+  }
+
+  @Get(':id/clone-draft')
+  @Permissions([permission_key.PRODUCT_CREATE])
+  cloneDraft(@Param('id') id: string) {
+    return this.getProductCloneDraftUseCase.execute(id);
   }
 
   @Get(':id')

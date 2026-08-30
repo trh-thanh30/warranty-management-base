@@ -26,13 +26,15 @@ export function ProductForm({
   onCancel,
   onSaved,
   product,
+  isClone = false,
 }: {
   onCancel: () => void;
   onSaved: (product?: ProductResponse) => void;
   product: ProductResponse | null;
+  isClone?: boolean;
 }) {
   const t = useTranslations("Products");
-  const form = useProductForm({ onSaved, product });
+  const form = useProductForm({ isClone, onSaved, product });
   const categories = form.categoriesQuery.data?.items ?? [];
   const isSubmitting = form.formState.isSubmitting;
   const canEditWarrantyDuration =

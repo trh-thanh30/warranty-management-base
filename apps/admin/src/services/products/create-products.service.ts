@@ -46,6 +46,12 @@ export function createProductsService(http: ProductsHttpClient) {
       return unwrap(await http.get<ProductResponse>(`/products/${productId}`));
     },
 
+    async getProductCloneDraft(productId: string): Promise<ProductResponse> {
+      return unwrap(
+        await http.get<ProductResponse>(`/products/${productId}/clone-draft`),
+      );
+    },
+
     async createProduct(body: CreateProductBody): Promise<ProductResponse> {
       return unwrap(await http.post<ProductResponse>("/products", body));
     },
