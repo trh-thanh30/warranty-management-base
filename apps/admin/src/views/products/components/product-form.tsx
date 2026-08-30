@@ -192,37 +192,6 @@ export function ProductForm({
 
           <div className="grid gap-5 sm:grid-cols-2">
             <Field
-              error={formatFieldError(
-                form.formState.errors.serialNumber?.message,
-                t,
-              )}
-              id="product-serial-number"
-              label={t("serialNumber")}
-            >
-              <Input
-                id="product-serial-number"
-                placeholder={t("serialNumberPlaceholder")}
-                {...form.register("serialNumber")}
-              />
-            </Field>
-            <Field
-              error={formatFieldError(
-                form.formState.errors.installationPosition?.message,
-                t,
-              )}
-              id="product-installation-position"
-              label={t("installationPosition")}
-            >
-              <Input
-                id="product-installation-position"
-                placeholder={t("installationPositionPlaceholder")}
-                {...form.register("installationPosition")}
-              />
-            </Field>
-          </div>
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field
               error={formatFieldError(form.formState.errors.model?.message, t)}
               id="product-model"
               label={t("model")}
@@ -249,6 +218,37 @@ export function ProductForm({
                 max={2200}
                 type="number"
                 {...form.register("modelYear")}
+              />
+            </Field>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field
+              error={formatFieldError(
+                form.formState.errors.serialNumber?.message,
+                t,
+              )}
+              id="product-serial-number"
+              label={t("serialNumber")}
+            >
+              <Input
+                id="product-serial-number"
+                placeholder={t("serialNumberPlaceholder")}
+                {...form.register("serialNumber")}
+              />
+            </Field>
+            <Field
+              error={formatFieldError(
+                form.formState.errors.installationPosition?.message,
+                t,
+              )}
+              id="product-installation-position"
+              label={t("installationPosition")}
+            >
+              <Input
+                id="product-installation-position"
+                placeholder={t("installationPositionPlaceholder")}
+                {...form.register("installationPosition")}
               />
             </Field>
           </div>
