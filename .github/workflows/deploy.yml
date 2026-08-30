@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 env:
   REGISTRY: ghcr.io
@@ -104,12 +105,14 @@ jobs:
           IMAGE_TAG: ${{ steps.metadata.outputs.image_tag }}
           NEXT_PUBLIC_WEB_URL: ${{ vars.NEXT_PUBLIC_WEB_URL }}
           RUN_MULTI_PRODUCT_ACTIVATION_AUDIT: ${{ vars.RUN_MULTI_PRODUCT_ACTIVATION_AUDIT || 'false' }}
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME || github.repository_owner }}
+          GHCR_TOKEN: ${{ secrets.GHCR_READ_TOKEN || secrets.GITHUB_TOKEN }}
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: ${{ secrets.DEPLOY_PORT || 22 }}
-          envs: API_IMAGE,PDF_RENDERER_IMAGE,MIGRATOR_IMAGE,WEB_IMAGE,ADMIN_IMAGE,IMAGE_TAG,NEXT_PUBLIC_WEB_URL,RUN_MULTI_PRODUCT_ACTIVATION_AUDIT
+          envs: API_IMAGE,PDF_RENDERER_IMAGE,MIGRATOR_IMAGE,WEB_IMAGE,ADMIN_IMAGE,IMAGE_TAG,NEXT_PUBLIC_WEB_URL,RUN_MULTI_PRODUCT_ACTIVATION_AUDIT,GHCR_USERNAME,GHCR_TOKEN
           script: |
             set -eu
             cd "${{ secrets.DEPLOY_PATH }}"
@@ -181,6 +184,12 @@ jobs:
               echo "The synchronized production Compose file does not define the migrate service."
               exit 1
             fi
+
+            if [ -z "$GHCR_USERNAME" ] || [ -z "$GHCR_TOKEN" ]; then
+              echo "GHCR credentials are required to pull private application images."
+              exit 1
+            fi
+            printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GHCR_USERNAME" --password-stdin
 
             docker compose -f docker-compose.prod.yml --env-file .env.production --profile tools pull migrate pdf-renderer api worker-email web admin
             docker compose -f docker-compose.prod.yml --env-file .env.production --profile tools run --rm migrate
