@@ -21,6 +21,9 @@ export function mapDealerUniqueConflict(error: unknown) {
     if (target.includes('phone')) {
       return new ConflictError('Dealer phone already exists');
     }
+    if (target.includes('dealer_code')) {
+      return new ConflictError('Dealer code already exists');
+    }
   }
 
   return null;

@@ -11,10 +11,14 @@ import {
   optionalTrim,
 } from '@/modules/dealers/dealers.utils';
 import { Injectable } from '@nestjs/common';
+import { GenerateDealerCodeUseCase } from '@/modules/dealers/use-cases/generate-dealer-code.use-case';
 
 @Injectable()
 export class CreateDealerUseCase {
-  constructor(private readonly dealersRepository: DealersRepository) {}
+  constructor(
+    private readonly dealersRepository: DealersRepository,
+    private readonly generateDealerCodeUseCase: GenerateDealerCodeUseCase = new GenerateDealerCodeUseCase(),
+  ) {}
 
   async execute(dto: CreateDealerDto) {
     const phone = normalizeDealerPhone(dto.phone);
@@ -25,6 +29,7 @@ export class CreateDealerUseCase {
 
     try {
       const dealer = await this.dealersRepository.create({
+        dealer_code: this.generateDealerCodeUseCase.execute(),
         address: dto.address.trim(),
         metadata: normalizeDealerMetadata(dto.metadata),
         name: dto.name.trim(),
