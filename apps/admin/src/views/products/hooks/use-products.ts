@@ -95,6 +95,17 @@ export function useProduct(
   });
 }
 
+export function useProductCloneDraft(
+  productId: string | null,
+  options?: Pick<UseQueryOptions<ProductResponse>, "enabled">,
+) {
+  return useQuery({
+    ...options,
+    queryKey: [...productKeys.detail(productId), "clone"],
+    queryFn: () => productsService.getProductCloneDraft(productId ?? ""),
+  });
+}
+
 export function useCreateProduct() {
   const queryClient = useQueryClient();
 

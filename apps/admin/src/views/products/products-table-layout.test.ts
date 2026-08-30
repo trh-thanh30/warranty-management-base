@@ -31,3 +31,12 @@ test("product actions expose the existing product detail route", async () => {
     /<Link href=\{`\/products\/\$\{product\.id\}`\}>[\s\S]*?<Eye[\s\S]*?\{t\("viewDetail"\)\}/,
   );
 });
+
+test("product actions expose the clone route", async () => {
+  const source = await readFile(productsTableUrl, "utf8");
+
+  assert.match(
+    source,
+    /<Link href=\{`\/products\/create\?cloneFrom=\$\{product\.id\}`\}>[\s\S]*?<Copy[\s\S]*?\{t\("clone"\)\}/,
+  );
+});

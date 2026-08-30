@@ -29,6 +29,7 @@ import {
   TooltipTrigger,
 } from "@repo/ui";
 import {
+  Copy,
   Eye,
   MoreHorizontal,
   Pencil,
@@ -326,13 +327,19 @@ function ProductActionsMenu({
   const { hasPermission } = usePermissions();
   const canView = hasPermission(PERMISSIONS.PRODUCT_VIEW);
   const canEdit = hasPermission(PERMISSIONS.PRODUCT_UPDATE);
+  const canCreate = hasPermission(PERMISSIONS.PRODUCT_CREATE);
   const canDelete = hasPermission(PERMISSIONS.PRODUCT_DELETE);
   const canAssignOwner = hasPermission(PERMISSIONS.PRODUCT_ASSIGN_OWNER);
   const isDeleted = product.status === "DELETED";
 
   if (
     (isDeleted && !canDelete) ||
-    (!isDeleted && !canView && !canEdit && !canDelete && !canAssignOwner)
+    (!isDeleted &&
+      !canView &&
+      !canEdit &&
+      !canDelete &&
+      !canAssignOwner &&
+      !canCreate)
   ) {
     return null;
   }
@@ -371,6 +378,14 @@ function ProductActionsMenu({
                 <Link href={`/products/${product.id}/edit`}>
                   <Pencil className="mr-2 size-4" />
                   {t("edit")}
+                </Link>
+              </DropdownMenuItem>
+            ) : null}
+            {canCreate ? (
+              <DropdownMenuItem asChild>
+                <Link href={`/products/create?cloneFrom=${product.id}`}>
+                  <Copy className="mr-2 size-4" />
+                  {t("clone")}
                 </Link>
               </DropdownMenuItem>
             ) : null}

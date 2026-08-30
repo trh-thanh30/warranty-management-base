@@ -16,6 +16,7 @@ type ProductFormCardProps = {
   onCancel: () => void;
   onSaved: (product?: ProductResponse) => void;
   product: ProductResponse | null;
+  isClone?: boolean;
   title: string;
 };
 
@@ -24,6 +25,7 @@ export function ProductFormCard({
   onCancel,
   onSaved,
   product,
+  isClone = false,
   title,
 }: ProductFormCardProps) {
   return (
@@ -33,7 +35,12 @@ export function ProductFormCard({
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <ProductForm onCancel={onCancel} onSaved={onSaved} product={product} />
+        <ProductForm
+          isClone={isClone}
+          onCancel={onCancel}
+          onSaved={onSaved}
+          product={product}
+        />
       </CardContent>
     </Card>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { PackageSearch, Pencil, UserPlus } from "lucide-react";
+import { Copy, PackageSearch, Pencil, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
@@ -30,6 +30,7 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
   });
   const [assignOpen, setAssignOpen] = useState(false);
   const canEdit = hasPermission(PERMISSIONS.PRODUCT_UPDATE);
+  const canCreate = hasPermission(PERMISSIONS.PRODUCT_CREATE);
   const canAssignOwner = hasPermission(PERMISSIONS.PRODUCT_ASSIGN_OWNER);
 
   return (
@@ -62,6 +63,14 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
                 <Link href={`/products/${productId}/edit`}>
                   <Pencil className="size-4" />
                   {t("edit")}
+                </Link>
+              </Button>
+            ) : null}
+            {canCreate ? (
+              <Button asChild className="w-full sm:w-auto" variant="secondary">
+                <Link href={`/products/create?cloneFrom=${productId}`}>
+                  <Copy className="size-4" />
+                  {t("clone")}
                 </Link>
               </Button>
             ) : null}
