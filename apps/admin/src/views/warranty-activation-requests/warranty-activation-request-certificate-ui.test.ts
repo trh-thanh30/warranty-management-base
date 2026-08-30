@@ -28,11 +28,11 @@ test("request certificate actions remain available when request items exist", ()
 test("view and download certificate actions use full width only on mobile", () => {
   assert.match(
     detailView,
-    /<Button\s+className="w-full sm:w-auto"\s+onClick=\{\(\) => \{\s+void actions\.viewCertificate\(request\);/,
+    /<Button\b(?=[^>]*className="w-full sm:w-auto")(?=[^>]*onClick=\{\(\) => \{\s+void actions\.viewCertificate\(request\);)[^>]*>/,
   );
   assert.match(
     detailView,
-    /<Button\s+className="w-full sm:w-auto"\s+onClick=\{\(\) => \{\s+void actions\.downloadCertificate\(request\);/,
+    /<Button\b(?=[^>]*className="w-full sm:w-auto")(?=[^>]*onClick=\{\(\) => \{\s+void actions\.downloadCertificate\(request\);)[^>]*>/,
   );
 });
 

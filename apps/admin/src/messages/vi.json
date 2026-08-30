@@ -1646,6 +1646,7 @@
     "confirmReject": "Từ chối yêu cầu",
     "viewCertificate": "Xem chứng nhận",
     "downloadCertificate": "Tải chứng nhận",
+    "loadingCertificate": "Đang tải chứng nhận...",
     "downloadedCertificate": "Đã tải chứng nhận.",
     "viewCertificateError": "Không thể mở chứng nhận.",
     "downloadCertificateError": "Không thể tải chứng nhận.",

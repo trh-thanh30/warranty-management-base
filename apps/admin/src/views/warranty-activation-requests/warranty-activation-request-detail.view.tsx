@@ -5,6 +5,7 @@ import {
   Download,
   FileSearch,
   FileText,
+  Loader2,
   RotateCcw,
   Send,
   XCircle,
@@ -58,11 +59,16 @@ export function WarrantyActivationRequestDetailView({
     request?.certificate?.status === "GENERATED" &&
     Boolean(request.certificate.storageKey) &&
     Boolean(request?.certificate?.recipientEmail) &&
-    request?.certificate?.emailStatus !== "SENT" &&
     hasPermission(PERMISSIONS.WARRANTY_UPDATE);
   const canUseCertificate =
     request?.certificate?.status === "GENERATED" &&
     Boolean(request.certificate.storageKey);
+  const isCertificateActionPending =
+    actions.certificateActionRequestId === request?.id;
+  const isViewingCertificate =
+    isCertificateActionPending && actions.certificateAction === "view";
+  const isDownloadingCertificate =
+    isCertificateActionPending && actions.certificateAction === "download";
   const canRetryCertificate =
     request?.status === "ACTIVATED" &&
     (!request.certificate ||
@@ -123,30 +129,45 @@ export function WarrantyActivationRequestDetailView({
               <>
                 <Button
                   className="w-full sm:w-auto"
+                  disabled={isViewingCertificate}
                   onClick={() => {
                     void actions.viewCertificate(request);
                   }}
                   type="button"
                   variant="secondary"
                 >
-                  <FileText className="size-4" />
-                  {t("viewCertificate")}
+                  {isViewingCertificate ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <FileText className="size-4" />
+                  )}
+                  {isViewingCertificate
+                    ? t("loadingCertificate")
+                    : t("viewCertificate")}
                 </Button>
                 <Button
                   className="w-full sm:w-auto"
+                  disabled={isDownloadingCertificate}
                   onClick={() => {
                     void actions.downloadCertificate(request);
                   }}
                   type="button"
                   variant="secondary"
                 >
-                  <Download className="size-4" />
-                  {t("downloadCertificate")}
+                  {isDownloadingCertificate ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Download className="size-4" />
+                  )}
+                  {isDownloadingCertificate
+                    ? t("loadingCertificate")
+                    : t("downloadCertificate")}
                 </Button>
               </>
             ) : null}
             {canResendCertificateEmail ? (
               <Button
+                className="w-full sm:w-auto"
                 disabled={resendCertificateEmailMutation.isPending}
                 onClick={() => {
                   void resendCertificateEmail();
