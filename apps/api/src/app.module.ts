@@ -10,6 +10,7 @@ import { join } from 'node:path';
 
 // config
 import {
+  activationCodeConfig,
   appConfig,
   bullConfig,
   bullConfigFactory,
@@ -44,13 +45,15 @@ import { IdentityMiddleware } from '@/common/middleware/identity.middleware';
 import { PermissionsModule } from '@/common/permissions/permissions.module';
 import { PrismaModule } from '@/database/prisma/prisma.module';
 import { RedisModule } from '@/database/redis/redis.module';
+import { ActivationCodesModule } from '@/modules/activation-codes/activation-codes.module';
+import { SystemConfigModule } from '@/modules/system-config/system-config.module';
 import { AnalyticsModule } from '@/modules/analytics/analytics.module';
 import { AssetsModule } from '@/modules/assets/assets.module';
 import { AuthModule } from '@/modules/auth/auth.module';
-import { CommonModule } from '@/modules/common/common.module';
 import { CategoriesModule } from '@/modules/categories/categories.module';
-import { ContentPagesModule } from '@/modules/content-pages/content-pages.module';
+import { CommonModule } from '@/modules/common/common.module';
 import { ContactSubmissionsModule } from '@/modules/contact-submissions/contact-submissions.module';
+import { ContentPagesModule } from '@/modules/content-pages/content-pages.module';
 import { CustomersModule } from '@/modules/customers/customers.module';
 import { DealersModule } from '@/modules/dealers/dealers.module';
 import { EmailModule } from '@/modules/email/email.module';
@@ -63,9 +66,9 @@ import { PublicModule } from '@/modules/public/public.module';
 import { ServiceCentersModule } from '@/modules/service-centers/service-centers.module';
 import { UsersModule } from '@/modules/user/user.module';
 import { VerificationModule } from '@/modules/verification/verification.module';
+import { WarrantiesModule } from '@/modules/warranties/warranties.module';
 import { WarrantyActivationRequestsModule } from '@/modules/warranty-activation-requests/warranty-activation-requests.module';
 import { WarrantyClaimsModule } from '@/modules/warranty-claims/warranty-claims.module';
-import { WarrantiesModule } from '@/modules/warranties/warranties.module';
 import { WebsiteConfigModule } from '@/modules/website-config/website-config.module';
 import { MiddlewareConsumer, NestModule } from '@nestjs/common';
 
@@ -85,6 +88,7 @@ const envPath = join(rootDir, envFile);
       validate: validateEnv,
       load: [
         appConfig,
+        activationCodeConfig,
         databaseConfig,
         emailConfig,
         geoapifyConfig,
@@ -153,6 +157,8 @@ const envPath = join(rootDir, envFile);
     JobsModule,
     HealthModule,
     AnalyticsModule,
+    ActivationCodesModule,
+    SystemConfigModule,
     AssetsModule,
     CommonModule,
     CategoriesModule,
