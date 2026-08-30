@@ -166,27 +166,22 @@ export class UpdateProductUseCase {
         requestedProductCode === existingProduct.product_code
           ? undefined
           : requestedProductCode,
-      catalogue_name: dto.name?.trim(),
-      catalogue_sku: requestedProductCode ? requestedProductCode : undefined,
-      catalogue_slug:
+      display_name:
+        dto.name?.trim() ??
+        (dto.displayName === undefined
+          ? undefined
+          : dto.displayName?.trim() || null),
+      slug:
         dto.name || requestedProductCode
           ? `${toSlug(dto.name?.trim() || getProductCatalogue(existingProduct).name)}-${(requestedProductCode ?? existingProduct.product_code).toLowerCase()}`
           : undefined,
-      catalogue_brand:
-        dto.brand === undefined ? undefined : dto.brand?.trim() || null,
-      catalogue_model:
-        dto.model === undefined ? undefined : dto.model?.trim() || null,
-      catalogue_model_year: dto.modelYear,
-      catalogue_description:
+      brand: dto.brand === undefined ? undefined : dto.brand?.trim() || null,
+      model: dto.model === undefined ? undefined : dto.model?.trim() || null,
+      model_year: dto.modelYear,
+      description:
         dto.description === undefined
           ? undefined
           : dto.description?.trim() || null,
-      catalogue_metadata:
-        dto.catalogueMetadata === undefined
-          ? undefined
-          : dto.catalogueMetadata === null
-            ? Prisma.JsonNull
-            : (dto.catalogueMetadata as Prisma.InputJsonObject),
       assets:
         dto.coverAssetId !== undefined || dto.galleryAssetIds !== undefined
           ? {
@@ -204,16 +199,15 @@ export class UpdateProductUseCase {
       category_ref: requestedCategoryId
         ? { connect: { id: requestedCategoryId } }
         : undefined,
-      display_name:
-        dto.displayName === undefined
-          ? undefined
-          : dto.displayName?.trim() || null,
       status: dto.status,
       serial_number: dto.serialNumber,
-      metadata: toPhysicalProductMetadata(
-        existingProduct.metadata,
-        dto.metadata,
-      ),
+      metadata:
+        dto.catalogueMetadata === undefined && dto.metadata === undefined
+          ? undefined
+          : toPhysicalProductMetadata(existingProduct.metadata, {
+              ...(dto.catalogueMetadata ?? {}),
+              ...(dto.metadata ?? {}),
+            }),
       warranty,
     });
 

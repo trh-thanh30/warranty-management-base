@@ -439,16 +439,13 @@ model Product {
   serial_number          String?        @unique
   display_name           String?
   // Product-owned catalogue fields.
-  catalogue_name         String
-  catalogue_sku          String         @unique
-  catalogue_slug         String         @unique
-  catalogue_brand        String?
-  catalogue_model        String?
-  catalogue_model_year   Int?
-  catalogue_description  String?
-  catalogue_metadata     Json?
-  catalogue_is_published Boolean        @default(false)
-  catalogue_published_at DateTime?
+  slug                   String         @unique
+  brand                  String?
+  model                  String?
+  model_year             Int?
+  description            String?
+  is_published           Boolean        @default(false)
+  published_at           DateTime?
   status                 product_status @default(ACTIVE)
   metadata               Json?
   created_at             DateTime       @default(now())

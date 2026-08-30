@@ -22,11 +22,9 @@ describe('ListWarrantiesUseCase', () => {
               product_code: 'PRD-2026-ABCDEF',
               display_name: null,
               serial_number: 'SN-001',
-              catalogue_name: 'Genuine Battery Pack',
-              catalogue_sku: 'PRD-2026-ABCDEF',
-              catalogue_slug: 'genuine-battery-pack',
-              catalogue_brand: 'Toyota',
-              catalogue_model: 'Battery Plus',
+              slug: 'genuine-battery-pack',
+              brand: 'Toyota',
+              model: 'Battery Plus',
               ownerships: [
                 {
                   customer_id: 'customer-id',

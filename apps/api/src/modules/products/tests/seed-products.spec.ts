@@ -75,14 +75,14 @@ describe('Lexzenz product seed', () => {
           lexzenzProductSeeds.find((seed) => seed.sku === catalogueSku)!
             .categoryCode,
         ),
-        catalogue_is_published: true,
-        catalogue_metadata: expect.objectContaining({
+        is_published: true,
+        metadata: expect.objectContaining({
           shortDescription: expect.any(String),
           specifications: expect.any(Array),
           features: expect.arrayContaining([expect.any(String)]),
           applications: expect.arrayContaining([expect.any(String)]),
         }),
-        catalogue_published_at: expect.any(Date),
+        published_at: expect.any(Date),
         display_name: expect.any(String),
         status: 'ACTIVE',
       });

@@ -69,17 +69,14 @@ export class ConfirmProductImportUseCase {
           data: {
             product_code: productCode,
             category_ref: { connect: { id: row.categoryId } },
-            catalogue_name: row.displayName.trim(),
-            catalogue_sku: productCode,
-            catalogue_slug: this.toCatalogueSlug(row.displayName, productCode),
-            catalogue_brand: this.blankToNull(row.brand),
-            catalogue_model: this.blankToNull(row.model),
-            catalogue_model_year: row.modelYear,
-            catalogue_description: this.blankToNull(row.description),
-            serial_number: this.blankToNull(row.serialNumber),
             display_name: row.displayName.trim(),
+            slug: this.toCatalogueSlug(row.displayName, productCode),
+            brand: this.blankToNull(row.brand),
+            model: this.blankToNull(row.model),
+            model_year: row.modelYear,
+            description: this.blankToNull(row.description),
+            serial_number: this.blankToNull(row.serialNumber),
             status: row.status ?? product_status.ACTIVE,
-            catalogue_metadata: this.toCatalogueMetadata(row),
             metadata: this.toMetadata(row),
             warranty: {
               create: {
@@ -126,19 +123,17 @@ export class ConfirmProductImportUseCase {
   ): Prisma.ProductUpdateInput {
     return {
       category_ref: { connect: { id: row.categoryId } },
-      catalogue_name: row.displayName.trim(),
-      catalogue_sku: row.productCode ?? row.existingProductCode ?? undefined,
-      catalogue_slug: this.toCatalogueSlug(
+      display_name: row.displayName.trim(),
+      product_code: row.productCode ?? row.existingProductCode ?? undefined,
+      slug: this.toCatalogueSlug(
         row.displayName,
         row.productCode ?? row.existingProductCode ?? '',
       ),
-      catalogue_brand: this.blankToNull(row.brand),
-      catalogue_model: this.blankToNull(row.model),
-      catalogue_model_year: row.modelYear,
-      catalogue_description: this.blankToNull(row.description),
-      display_name: row.displayName.trim(),
+      brand: this.blankToNull(row.brand),
+      model: this.blankToNull(row.model),
+      model_year: row.modelYear,
+      description: this.blankToNull(row.description),
       status: row.status,
-      catalogue_metadata: this.toCatalogueMetadata(row),
       serial_number: this.blankToNull(row.serialNumber),
       metadata: this.toMetadata(row),
     };

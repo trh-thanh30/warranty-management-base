@@ -398,12 +398,11 @@ describe('Public use cases', () => {
         },
       ],
       product: {
-        display_name: null,
-        catalogue_name: 'May bom',
-        catalogue_sku: 'MAY-BOM-A1',
-        catalogue_slug: 'may-bom-a1',
-        catalogue_brand: 'UKG',
-        catalogue_model: 'A1',
+        display_name: 'May bom',
+        product_code: 'MAY-BOM-A1',
+        slug: 'may-bom-a1',
+        brand: 'UKG',
+        model: 'A1',
       },
       service_center: null,
     } as never);

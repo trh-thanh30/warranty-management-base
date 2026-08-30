@@ -21,13 +21,13 @@ export function toProductExcelRow(
 
   return {
     productCode: product.product_code,
-    displayName: product.display_name?.trim() || product.catalogue_name,
+    displayName: product.display_name?.trim() || product.product_code,
     categoryCode: product.category_ref?.code ?? product.category_id,
-    brand: product.catalogue_brand,
-    model: product.catalogue_model,
-    modelYear: product.catalogue_model_year,
+    brand: product.brand,
+    model: product.model,
+    modelYear: product.model_year,
     shortDescription,
-    description: product.catalogue_description,
+    description: product.description,
     warrantyDurationMonths: product.warranty?.duration_months ?? 0,
     warrantyTerms: product.warranty?.terms ?? null,
     installationPosition,
