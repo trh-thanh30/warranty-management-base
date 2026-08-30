@@ -319,7 +319,9 @@ export class DealersRepository {
           });
           updated += 1;
         } else {
-          await tx.dealer.create({ data });
+          await tx.dealer.create({
+            data: { ...data, dealer_code: row.dealerCode! },
+          });
           created += 1;
         }
       }

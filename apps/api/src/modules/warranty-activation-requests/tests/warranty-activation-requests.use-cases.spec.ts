@@ -278,6 +278,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     const result = toWarrantyActivationRequestResponse({
       ...baseRequest,
       category_id: null,
+      activation_code_id: null,
       dealer_id: null,
       installed_at: null,
       items: [],

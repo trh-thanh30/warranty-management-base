@@ -1,5 +1,10 @@
 import { toProductResponse } from '@/modules/products/products.types';
-import { category_type, product_status, warranty_status } from '@prisma/client';
+import {
+  category_type,
+  product_status,
+  warranty_method,
+  warranty_status,
+} from '@prisma/client';
 
 describe('toProductResponse', () => {
   it('uses the product catalogue snapshot and hides template persistence details', () => {
@@ -131,6 +136,7 @@ describe('toProductResponse', () => {
           id: 'warranty-id',
           product_id: 'product-id',
           warranty_code: 'WM-2026-ABCDEF',
+          method: warranty_method.REPAIR,
           start_date: null,
           end_date: null,
           duration_months: 24,

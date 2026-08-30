@@ -30,6 +30,7 @@ import {
   WarrantyActivationRequestUniqueConflictError,
 } from '@/modules/warranty-activation-requests/repository/warranty-activation-request-errors';
 import { Injectable, Optional } from '@nestjs/common';
+import { GenerateDealerCodeUseCase } from '@/modules/dealers/use-cases/generate-dealer-code.use-case';
 import { normalizePhoneNumber } from '@repo/shared/utils';
 
 const REQUEST_CODE_GENERATION_ATTEMPTS = 3;
@@ -60,6 +61,8 @@ export class CreateWarrantyActivationRequestUseCase {
     private readonly warrantyActivationRequestNotificationService: WarrantyActivationRequestNotificationService,
     @Optional()
     private readonly activationRequestItemsValidatorService?: ActivationRequestItemsValidatorService,
+    @Optional()
+    private readonly generateDealerCodeUseCase: GenerateDealerCodeUseCase = new GenerateDealerCodeUseCase(),
   ) {}
 
   async execute(
@@ -427,6 +430,7 @@ export class CreateWarrantyActivationRequestUseCase {
     }
 
     return this.dealersRepository.create({
+      dealer_code: this.generateDealerCodeUseCase.execute(),
       address,
       district: optionalTrim(dto.dealerDistrict),
       is_active: true,

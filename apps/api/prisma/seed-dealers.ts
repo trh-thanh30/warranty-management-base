@@ -1,6 +1,10 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { Pool } from 'pg';
+import { randomUUID } from 'node:crypto';
+
+const generateSeedDealerCode = () =>
+  `DLR-${randomUUID().slice(0, 8).toUpperCase()}`;
 
 export const lexzenzDealers = [
   {
@@ -110,6 +114,7 @@ export async function seedLexzenzDealers(client: PrismaClient) {
         province: dealer.province,
       },
       create: {
+        dealer_code: generateSeedDealerCode(),
         address: dealer.address,
         district: dealer.district,
         is_active: true,
