@@ -1,7 +1,5 @@
-import {
-  addCalendarMonthsUtc,
-  CreateActivationCodeBatchUseCase,
-} from '@/modules/activation-codes/use-cases/create-activation-code-batch.use-case';
+import { addCalendarMonthsUtc } from '@/modules/activation-codes/utils/date.utils';
+import { CreateActivationCodeBatchUseCase } from '@/modules/activation-codes/use-cases/create-activation-code-batch.use-case';
 import { product_status, warranty_method } from '@prisma/client';
 
 describe('CreateActivationCodeBatchUseCase', () => {

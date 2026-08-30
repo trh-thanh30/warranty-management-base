@@ -46,6 +46,7 @@ import { PermissionsModule } from '@/common/permissions/permissions.module';
 import { PrismaModule } from '@/database/prisma/prisma.module';
 import { RedisModule } from '@/database/redis/redis.module';
 import { ActivationCodesModule } from '@/modules/activation-codes/activation-codes.module';
+import { SystemConfigModule } from '@/modules/system-config/system-config.module';
 import { AnalyticsModule } from '@/modules/analytics/analytics.module';
 import { AssetsModule } from '@/modules/assets/assets.module';
 import { AuthModule } from '@/modules/auth/auth.module';
@@ -157,6 +158,7 @@ const envPath = join(rootDir, envFile);
     HealthModule,
     AnalyticsModule,
     ActivationCodesModule,
+    SystemConfigModule,
     AssetsModule,
     CommonModule,
     CategoriesModule,
