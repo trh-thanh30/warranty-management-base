@@ -65,6 +65,14 @@ export const envSchema = z
     JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
     JWT_SECRET: z.string(),
     JWT_EXPIRES_IN: z.string().default('24h'),
+    ACTIVATION_CODE_SECRET: z.string().min(32).optional(),
+    ACTIVATION_CODE_ALGORITHM: z.enum(['aes-256-gcm']).default('aes-256-gcm'),
+    ACTIVATION_CODE_IV_BYTES: z.coerce
+      .number()
+      .int()
+      .min(12)
+      .max(32)
+      .default(12),
 
     // Email Configuration
     SMTP_HOST: z.string().default('smtp.gmail.com'),
