@@ -31,6 +31,9 @@ export function toHttpClientError(error: unknown): HttpClientError {
           : undefined) ??
         axiosError.response?.data?.details ??
         axiosError.response?.data,
+      retryAfterSeconds: parseRetryAfterSeconds(
+        axiosError.response?.headers?.["retry-after"],
+      ),
       isNetworkError: !axiosError.response,
       cause: error,
     });
@@ -49,4 +52,10 @@ export function toHttpClientError(error: unknown): HttpClientError {
     isNetworkError: false,
     cause: error,
   });
+}
+
+function parseRetryAfterSeconds(value: unknown): number | undefined {
+  const seconds = Number(value);
+  if (!Number.isFinite(seconds) || seconds <= 0) return undefined;
+  return Math.ceil(seconds);
 }
