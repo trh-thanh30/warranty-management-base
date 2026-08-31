@@ -41,7 +41,7 @@ test("includes the server-provided retry delay for rate-limit errors", () => {
   const translate = createTranslator({
     "apiErrors.RATE_LIMIT": "Có quá nhiều yêu cầu.",
     "apiErrors.RATE_LIMIT_RETRY_AFTER":
-      "Có quá nhiều yêu cầu. Vui lòng thử lại sau {seconds} giây!",
+      "Có quá nhiều yêu cầu. Vui lòng thử lại sau {seconds} giây.",
   });
   const error = new HttpClientError({
     message: "Too many requests",

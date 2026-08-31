@@ -37,7 +37,7 @@
     "PRODUCT_WARRANTY_NOT_FOUND": "The warranty for the selected product was not found.",
     "QUICK_DEALER_REQUIRED_FIELDS": "Quick dealer creation requires a name, address, and province/city.",
     "RATE_LIMIT": "Too many requests. Please try again later.",
-    "RATE_LIMIT_RETRY_AFTER": "Too many requests. Please try again in {seconds} seconds !",
+    "RATE_LIMIT_RETRY_AFTER": "Too many requests. Please try again in {seconds} seconds.",
     "RECORD_NOT_FOUND": "The requested record was not found.",
     "SERIAL_NUMBER_ALREADY_EXISTS": "This serial number already exists.",
     "UNAUTHORIZED": "Your session is invalid or has expired.",
