@@ -17,13 +17,13 @@ export class SystemConfigController {
   ) {}
 
   @Get('activation-code-policy')
-  @Permissions([permission_key.SYSTEM_VIEW])
+  @Permissions([permission_key.SYSTEM_CONFIG_VIEW])
   getActivationCodePolicy() {
     return this.getPolicyUseCase.execute();
   }
 
   @Post('activation-code-policy')
-  @Permissions([permission_key.WARRANTY_UPDATE])
+  @Permissions([permission_key.SYSTEM_CONFIG_UPDATE])
   updateActivationCodePolicy(
     @Body() dto: UpdateActivationCodePolicyDto,
     @User() user: RequestUser,

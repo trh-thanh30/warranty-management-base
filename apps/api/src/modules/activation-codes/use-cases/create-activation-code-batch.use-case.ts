@@ -1,13 +1,13 @@
 import { BadRequestError, NotFoundError } from '@/common/response';
+import { activationCodeConfig } from '@/config';
 import { ActivationCodeBatchesRepository } from '@/modules/activation-codes/repository/activation-code-batches.repository';
 import { ActivationCodeCryptoService } from '@/modules/activation-codes/services/activation-code-crypto.service';
 import { GenerateActivationCodeUseCase } from '@/modules/activation-codes/use-cases/generate-activation-code.use-case';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Inject, Injectable } from '@nestjs/common';
+import type { ConfigType } from '@nestjs/config';
 import { ActivationCodePolicyService } from '@/modules/system-config/services/activation-code-policy.service';
 import { addCalendarMonthsUtc } from '@/modules/activation-codes/utils/date.utils';
-import { Optional } from '@nestjs/common';
 import { Prisma, product_status } from '@prisma/client';
 import { randomBytes } from 'node:crypto';
 
@@ -18,15 +18,9 @@ export class CreateActivationCodeBatchUseCase {
     private readonly productsRepository: ProductsRepository,
     private readonly generateActivationCodeUseCase: GenerateActivationCodeUseCase,
     private readonly cryptoService: ActivationCodeCryptoService,
-    private readonly configService: ConfigService = new ConfigService({
-      activationCode: {
-        expiryMonths: 6,
-        minBatchQuantity: 50,
-        maxBatchQuantity: 1000,
-        createAttempts: 3,
-      },
-    }),
-    @Optional() private readonly policyService?: ActivationCodePolicyService,
+    @Inject(activationCodeConfig.KEY)
+    private readonly config: ConfigType<typeof activationCodeConfig>,
+    private readonly policyService: ActivationCodePolicyService,
   ) {}
 
   async execute(input: {
@@ -34,17 +28,9 @@ export class CreateActivationCodeBatchUseCase {
     quantity?: number;
     createdById: string;
   }) {
-    const policy = this.policyService
-      ? await this.policyService.get()
-      : {
-          expiryMonths: this.getConfigNumber('expiryMonths', 6),
-          defaultBatchQuantity: this.getConfigNumber(
-            'defaultBatchQuantity',
-            50,
-          ),
-        };
-    const minBatchQuantity = this.getConfigNumber('minBatchQuantity', 50);
-    const maxBatchQuantity = this.getConfigNumber('maxBatchQuantity', 1000);
+    const policy = await this.policyService.get();
+    const minBatchQuantity = this.config.minBatchQuantity;
+    const maxBatchQuantity = this.config.maxBatchQuantity;
     const quantity = input.quantity ?? policy.defaultBatchQuantity;
     if (
       !Number.isInteger(quantity) ||
@@ -78,7 +64,7 @@ export class CreateActivationCodeBatchUseCase {
 
     const now = new Date();
     const expiresAt = addCalendarMonthsUtc(now, policy.expiryMonths);
-    const createAttempts = this.getConfigNumber('createAttempts', 3);
+    const createAttempts = this.config.createAttempts;
 
     for (let attempt = 1; attempt <= createAttempts; attempt += 1) {
       const plaintextCodes =
@@ -147,12 +133,5 @@ export class CreateActivationCodeBatchUseCase {
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === 'P2002'
     );
-  }
-
-  private getConfigNumber(key: string, fallback: number): number {
-    const value = this.configService.get<number>(`activationCode.${key}`);
-    return typeof value === 'number' && Number.isFinite(value)
-      ? value
-      : fallback;
   }
 }

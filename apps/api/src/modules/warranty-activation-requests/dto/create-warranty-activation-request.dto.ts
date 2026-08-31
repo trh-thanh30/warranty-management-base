@@ -73,6 +73,12 @@ export class ActivationFilmItemsDto {
 export class CreateWarrantyActivationRequestDto {
   @IsOptional()
   @IsString()
+  @Length(6, 120)
+  @Matches(/^[A-Z0-9-]+$/i)
+  activationCode?: string;
+
+  @IsOptional()
+  @IsString()
   @Length(6, 64)
   @Matches(/^[A-Z0-9-]+$/i)
   warrantyCode?: string;

@@ -966,6 +966,11 @@ enum permission_key {
   PRODUCT_DELETE // Xóa sản phẩm.
   PRODUCT_ASSIGN_OWNER // Gán chủ sở hữu sản phẩm.
 
+  ACTIVATION_CODE_BATCH_VIEW // Xem các batch mã kích hoạt.
+  ACTIVATION_CODE_BATCH_CREATE // Tạo batch mã kích hoạt.
+  ACTIVATION_CODE_BATCH_PRINT // In tem mã kích hoạt.
+  ACTIVATION_CODE_BATCH_REVOKE // Thu hồi batch hoặc mã kích hoạt.
+
   WARRANTY_VIEW // Xem hồ sơ bảo hành.
   WARRANTY_CREATE // Tạo hồ sơ bảo hành.
   WARRANTY_UPDATE // Cập nhật hồ sơ bảo hành.
@@ -1012,6 +1017,8 @@ enum permission_key {
   USER_PERMISSION_MANAGE // Quản lý quyền riêng của người dùng.
 
   SYSTEM_VIEW // Xem thông tin hệ thống.
+  SYSTEM_CONFIG_VIEW // Xem cấu hình hệ thống.
+  SYSTEM_CONFIG_UPDATE // Cập nhật cấu hình hệ thống.
   AUDIT_LOG_VIEW // Xem nhật ký kiểm toán.
 }
 

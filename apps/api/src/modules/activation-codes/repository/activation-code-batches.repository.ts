@@ -56,4 +56,47 @@ export class ActivationCodeBatchesRepository {
       } satisfies Prisma.ActivationCodeBatchCreateInput,
     });
   }
+
+  findWithCodes(id: string) {
+    return this.prismaService.activationCodeBatch.findUnique({
+      where: { id },
+      include: {
+        codes: {
+          where: {
+            status: activation_code_status.AVAILABLE,
+            expires_at: { gt: new Date() },
+          },
+          orderBy: { created_at: 'asc' },
+        },
+      },
+    });
+  }
+
+  findAvailableByHash(codeHash: string) {
+    return this.prismaService.activationCode.findFirst({
+      where: {
+        code_hash: codeHash,
+        status: activation_code_status.AVAILABLE,
+      },
+      include: { batch: true },
+    });
+  }
+
+  expireIfNeeded(id: string, now = new Date()) {
+    return this.prismaService.activationCode.updateMany({
+      where: {
+        id,
+        status: activation_code_status.AVAILABLE,
+        expires_at: { lte: now },
+      },
+      data: { status: activation_code_status.EXPIRED },
+    });
+  }
+
+  revoke(id: string) {
+    return this.prismaService.activationCode.updateMany({
+      where: { id, status: activation_code_status.AVAILABLE },
+      data: { status: activation_code_status.REVOKED, revoked_at: new Date() },
+    });
+  }
 }

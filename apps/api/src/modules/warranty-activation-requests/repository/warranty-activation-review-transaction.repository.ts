@@ -128,6 +128,13 @@ export class WarrantyActivationReviewTransactionRepository {
     });
   }
 
+  markActivationCodeActivated(codeId: string, activatedAt: Date) {
+    return this.tx.activationCode.updateMany({
+      where: { id: codeId, status: 'AVAILABLE' },
+      data: { status: 'ACTIVATED', activated_at: activatedAt },
+    });
+  }
+
   completeActivation(input: {
     activatedWarrantyId: string;
     adminNote?: string;
