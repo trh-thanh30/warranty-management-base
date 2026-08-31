@@ -1,6 +1,6 @@
+import { HttpClientError } from "@repo/shared";
 import assert from "node:assert/strict";
 import test from "node:test";
-import { HttpClientError } from "@repo/shared";
 import { getLocalizedApiError } from "./localized-api-error.utils.ts";
 
 function createTranslator(
@@ -34,6 +34,26 @@ test("uses a localized API error code when the translation exists", () => {
   assert.equal(
     getLocalizedApiError(error, translate),
     "Mã sản phẩm đã tồn tại.",
+  );
+});
+
+test("includes the server-provided retry delay for rate-limit errors", () => {
+  const translate = createTranslator({
+    "apiErrors.RATE_LIMIT": "Có quá nhiều yêu cầu.",
+    "apiErrors.RATE_LIMIT_RETRY_AFTER":
+      "Có quá nhiều yêu cầu. Vui lòng thử lại sau {seconds} giây!",
+  });
+  const error = new HttpClientError({
+    message: "Too many requests",
+    status: 429,
+    code: "RATE_LIMIT",
+    retryAfterSeconds: 17,
+    isNetworkError: false,
+  });
+
+  assert.equal(
+    getLocalizedApiError(error, translate),
+    "Có quá nhiều yêu cầu. Vui lòng thử lại sau 17 giây.",
   );
 });
 

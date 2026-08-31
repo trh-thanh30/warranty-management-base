@@ -11,7 +11,6 @@ import {
 import { cookieConfig } from '@/config';
 import { AssetsService } from '@/modules/assets/assets.service';
 import { AssetAccessTypeDto } from '@/modules/assets/dto/upload-asset.dto';
-import { ChangePasswordDto } from '@/modules/auth/dto/change-password.dto';
 import {
   ResendAdminLoginTwoFactorDto,
   SelectAdminLoginMethodDto,
@@ -19,6 +18,7 @@ import {
   VerifyAdminLoginPinDto,
   VerifyAdminLoginTwoFactorDto,
 } from '@/modules/auth/dto/admin-login-two-factor.dto';
+import { ChangePasswordDto } from '@/modules/auth/dto/change-password.dto';
 import { ForgotPasswordDto } from '@/modules/auth/dto/forgot-password.dto';
 import { LoginDto } from '@/modules/auth/dto/login.dto';
 import { RegisterDto } from '@/modules/auth/dto/register.dto';
@@ -29,18 +29,18 @@ import { VerifyEmailDto } from '@/modules/auth/dto/verify-email.dto';
 import { ChangePasswordUseCase } from '@/modules/auth/use-cases/change-password.usecase';
 import { ForgotPasswordUseCase } from '@/modules/auth/use-cases/forgot-password.usecase';
 import { LoginUserUseCase } from '@/modules/auth/use-cases/login-user.usecase';
-import { ResendAdminLoginTwoFactorUseCase } from '@/modules/auth/use-cases/resend-admin-login-two-factor.usecase';
-import { SelectAdminLoginMethodUseCase } from '@/modules/auth/use-cases/select-admin-login-method.usecase';
-import { StartAdminLoginUseCase } from '@/modules/auth/use-cases/start-admin-login.usecase';
-import { SetupAdminLoginPinUseCase } from '@/modules/auth/use-cases/setup-admin-login-pin.usecase';
-import { VerifyAdminLoginPinUseCase } from '@/modules/auth/use-cases/verify-admin-login-pin.usecase';
-import { VerifyAdminLoginTwoFactorUseCase } from '@/modules/auth/use-cases/verify-admin-login-two-factor.usecase';
 import { RefreshTokenUseCase } from '@/modules/auth/use-cases/refresh-token.usecase';
 import { RegisterUserUseCase } from '@/modules/auth/use-cases/register-user.usecase';
 import { RequestVerificationUseCase } from '@/modules/auth/use-cases/request-verification.usecase';
+import { ResendAdminLoginTwoFactorUseCase } from '@/modules/auth/use-cases/resend-admin-login-two-factor.usecase';
 import { ResendVerificationUseCase } from '@/modules/auth/use-cases/resend-verification.usecase';
 import { ResetPasswordUseCase } from '@/modules/auth/use-cases/reset-password.usecase';
+import { SelectAdminLoginMethodUseCase } from '@/modules/auth/use-cases/select-admin-login-method.usecase';
+import { SetupAdminLoginPinUseCase } from '@/modules/auth/use-cases/setup-admin-login-pin.usecase';
+import { StartAdminLoginUseCase } from '@/modules/auth/use-cases/start-admin-login.usecase';
 import { VerifyAccountUseCase } from '@/modules/auth/use-cases/verify-account.usecase';
+import { VerifyAdminLoginPinUseCase } from '@/modules/auth/use-cases/verify-admin-login-pin.usecase';
+import { VerifyAdminLoginTwoFactorUseCase } from '@/modules/auth/use-cases/verify-admin-login-two-factor.usecase';
 import { UsersService } from '@/modules/user/user.service';
 import {
   Body,
@@ -56,14 +56,14 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { type ConfigType } from '@nestjs/config';
-import { Throttle } from '@nestjs/throttler';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { normalizeUserRole } from '@repo/shared/constants';
+import { Throttle } from '@nestjs/throttler';
 import {
   asset_type,
   user_role,
   type User as CurrentUser,
 } from '@prisma/client';
+import { normalizeUserRole } from '@repo/shared/constants';
 import express from 'express';
 
 type AuthRequestUser = CurrentUser;
@@ -104,7 +104,7 @@ export class AuthController {
   }
 
   @Public()
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Throttle({ default: { limit: 5, ttl: 300_000 } })
   @Post('login-admin')
   @ApiSuccess('Login credentials accepted')
   async loginAdmin(@Body() dto: LoginDto) {
@@ -112,7 +112,7 @@ export class AuthController {
   }
 
   @Public()
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Throttle({ default: { limit: 5, ttl: 300_000 } })
   @Post('login-admin/select-method')
   @ApiSuccess('Verification method selected')
   async selectAdminLoginMethod(@Body() dto: SelectAdminLoginMethodDto) {
@@ -120,7 +120,7 @@ export class AuthController {
   }
 
   @Public()
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Throttle({ default: { limit: 10, ttl: 300_000 } })
   @Post('login-admin/verify-2fa')
   @ApiSuccess('Login successful')
   async verifyAdminLoginTwoFactor(
@@ -136,7 +136,7 @@ export class AuthController {
   }
 
   @Public()
-  @Throttle({ default: { limit: 3, ttl: 60_000 } })
+  @Throttle({ default: { limit: 3, ttl: 300_000 } })
   @Post('login-admin/resend-2fa')
   @ApiSuccess('Verification code resent')
   async resendAdminLoginTwoFactor(@Body() dto: ResendAdminLoginTwoFactorDto) {
@@ -144,7 +144,7 @@ export class AuthController {
   }
 
   @Public()
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Throttle({ default: { limit: 5, ttl: 300_000 } })
   @Post('login-admin/setup-pin')
   @ApiSuccess('PIN created and login successful')
   async setupAdminLoginPin(
@@ -160,7 +160,7 @@ export class AuthController {
   }
 
   @Public()
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Throttle({ default: { limit: 10, ttl: 300_000 } })
   @Post('login-admin/verify-pin')
   @ApiSuccess('PIN verified and login successful')
   async verifyAdminLoginPin(

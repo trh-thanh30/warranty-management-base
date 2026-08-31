@@ -73,6 +73,12 @@ async function bootstrap() {
         'X-Requested-With',
         'apollo-require-preflight',
       ],
+      exposedHeaders: [
+        'Retry-After',
+        'X-RateLimit-Limit',
+        'X-RateLimit-Remaining',
+        'X-RateLimit-Reset',
+      ],
     });
 
     // Apply global pipes, interceptors, and filters
