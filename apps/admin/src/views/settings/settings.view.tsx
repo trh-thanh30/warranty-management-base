@@ -24,18 +24,15 @@ import {
   CardHeader,
   CardTitle,
   Input,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
 } from "@repo/ui";
 import { FormField } from "@/src/components/common/form-field";
 import { PageHeader } from "@/src/components/common/page-header";
 import { getInitials } from "@/src/utils/get-initials";
 import { useSettingsForm } from "./hooks/use-settings-form";
 import { groupPermissions } from "./settings.utils";
+import type { SettingsSection } from "./settings.types";
 
-export function SettingsView() {
+export function SettingsView({ section }: { section: SettingsSection }) {
   const t = useTranslations("Settings");
   const {
     user,
@@ -86,20 +83,8 @@ export function SettingsView() {
         title={t("title")}
       />
 
-      <Tabs className="space-y-6" defaultValue="profile">
-        <TabsList className="h-12 w-full justify-start overflow-x-auto sm:h-10 sm:w-auto">
-          <TabsTrigger className="h-10 sm:h-8" value="profile">
-            {t("tabs.profile")}
-          </TabsTrigger>
-          <TabsTrigger className="h-10 sm:h-8" value="security">
-            {t("tabs.security")}
-          </TabsTrigger>
-          <TabsTrigger className="h-10 sm:h-8" value="permissions">
-            {t("tabs.permissions")}
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="profile">
+      <div className="space-y-6">
+        {section === "profile" ? (
           <form onSubmit={onProfileSubmit}>
             <Card>
               <CardHeader>
@@ -304,9 +289,9 @@ export function SettingsView() {
               </div>
             </Card>
           </form>
-        </TabsContent>
+        ) : null}
 
-        <TabsContent value="security">
+        {section === "security" ? (
           <form onSubmit={onPasswordSubmit}>
             <Card>
               <CardHeader>
@@ -483,9 +468,9 @@ export function SettingsView() {
               </div>
             </Card>
           </form>
-        </TabsContent>
+        ) : null}
 
-        <TabsContent value="permissions">
+        {section === "permissions" ? (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -548,8 +533,8 @@ export function SettingsView() {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+        ) : null}
+      </div>
     </div>
   );
 }
