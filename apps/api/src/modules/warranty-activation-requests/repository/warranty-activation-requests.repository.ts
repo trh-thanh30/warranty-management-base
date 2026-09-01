@@ -208,6 +208,9 @@ export class WarrantyActivationRequestsRepository {
       request_code: command.requestCode,
       source: command.source,
       warranty_code: command.warrantyCode,
+      activation_code: command.activationCodeId
+        ? { connect: { id: command.activationCodeId } }
+        : undefined,
       created_by: command.createdByUserId
         ? { connect: { id: command.createdByUserId } }
         : undefined,

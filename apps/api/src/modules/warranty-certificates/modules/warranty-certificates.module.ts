@@ -56,6 +56,7 @@ import { ConfigModule } from '@nestjs/config';
     GetWarrantyCertificateFileForActivationRequestUseCase,
     ResendWarrantyCertificateEmailUseCase,
     WarrantyCertificateEmailStatusModule,
+    HtmlPdfRendererService,
   ],
 })
 export class WarrantyCertificatesModule {}

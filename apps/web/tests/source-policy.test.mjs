@@ -743,8 +743,8 @@ test("database migrations use a dedicated disposable image", async () => {
         /DATABASE_URL:\s*\$\{DOCKER_DATABASE_URL:-postgresql:\/\/[^\n]*@db:5432\/[^\n]*\}/g,
       ) ?? []
     ).length,
-    3,
-    "migrate, API, and email worker must use the Docker-internal database address",
+    4,
+    "migrate, API, email worker, and activation-label worker must use the Docker-internal database address",
   );
   assert.match(
     deployWorkflow,

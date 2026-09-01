@@ -32,6 +32,8 @@ import {
 import { Injectable, Optional } from '@nestjs/common';
 import { GenerateDealerCodeUseCase } from '@/modules/dealers/use-cases/generate-dealer-code.use-case';
 import { normalizePhoneNumber } from '@repo/shared/utils';
+import { ActivationCodeBatchesRepository } from '@/modules/activation-codes/repository/activation-code-batches.repository';
+import { ActivationCodeCryptoService } from '@/modules/activation-codes/services/activation-code-crypto.service';
 
 const REQUEST_CODE_GENERATION_ATTEMPTS = 3;
 const ACTIVATABLE_WARRANTY_STATUSES = new Set(['DRAFT']);
@@ -63,6 +65,10 @@ export class CreateWarrantyActivationRequestUseCase {
     private readonly activationRequestItemsValidatorService?: ActivationRequestItemsValidatorService,
     @Optional()
     private readonly generateDealerCodeUseCase: GenerateDealerCodeUseCase = new GenerateDealerCodeUseCase(),
+    @Optional()
+    private readonly activationCodeRepository?: ActivationCodeBatchesRepository,
+    @Optional()
+    private readonly activationCodeCrypto?: ActivationCodeCryptoService,
   ) {}
 
   async execute(
@@ -76,6 +82,10 @@ export class CreateWarrantyActivationRequestUseCase {
       source?: WarrantyActivationRequestSource;
     } = {},
   ) {
+    const activationCode = dto.activationCode?.trim().toUpperCase();
+    const activationCodeRecord = activationCode
+      ? await this.resolveActivationCode(activationCode)
+      : null;
     const dtoWarrantyCode = dto.warrantyCode?.trim().toUpperCase();
     const customerPhone = dto.customerPhone.trim();
     const customerEmail = dto.customerEmail?.trim().toLowerCase() || null;
@@ -85,7 +95,11 @@ export class CreateWarrantyActivationRequestUseCase {
       ? await this.productsRepository.findActivationRequestTargetById(
           validatedItems[0].productId,
         )
-      : await this.resolveActivationProduct(dto, dtoWarrantyCode);
+      : activationCodeRecord
+        ? await this.productsRepository.findActivationRequestTargetById(
+            activationCodeRecord.batch.source_product_id ?? '',
+          )
+        : await this.resolveActivationProduct(dto, dtoWarrantyCode);
 
     if (!product?.warranty) {
       throw new NotFoundError('Warranty code not found', 'NOT_FOUND', {
@@ -161,6 +175,7 @@ export class CreateWarrantyActivationRequestUseCase {
             source:
               context.source ?? WARRANTY_ACTIVATION_REQUEST_SOURCE.PUBLIC_WEB,
             warrantyCode,
+            activationCodeId: activationCodeRecord?.id,
             createdByUserId: context.createdByUserId,
             customerName,
             customerPhone,
@@ -271,6 +286,42 @@ export class CreateWarrantyActivationRequestUseCase {
       'BAD_REQUEST',
       { code: 'ACTIVATION_REQUEST_CREATE_FAILED' },
     );
+  }
+
+  private async resolveActivationCode(code: string) {
+    if (!this.activationCodeRepository || !this.activationCodeCrypto) {
+      throw new BadRequestError(
+        'Activation code support is unavailable',
+        'BAD_REQUEST',
+        { code: 'ACTIVATION_CODE_UNAVAILABLE' },
+      );
+    }
+    const record = await this.activationCodeRepository.findAvailableByHash(
+      this.activationCodeCrypto.hash(code),
+    );
+    if (!record) {
+      throw new BadRequestError(
+        'Activation code is invalid or expired',
+        'BAD_REQUEST',
+        { code: 'ACTIVATION_CODE_INVALID_OR_EXPIRED' },
+      );
+    }
+    if (record.expires_at <= new Date()) {
+      await this.activationCodeRepository.expireIfNeeded(record.id);
+      throw new BadRequestError(
+        'Activation code is invalid or expired',
+        'BAD_REQUEST',
+        { code: 'ACTIVATION_CODE_INVALID_OR_EXPIRED' },
+      );
+    }
+    if (!record.batch.source_product_id) {
+      throw new BadRequestError(
+        'Activation code is not linked to a product',
+        'BAD_REQUEST',
+        { code: 'ACTIVATION_CODE_PRODUCT_NOT_FOUND' },
+      );
+    }
+    return record;
   }
 
   private createRequest(

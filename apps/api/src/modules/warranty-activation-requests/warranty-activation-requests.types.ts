@@ -10,6 +10,7 @@ export type CreateWarrantyActivationRequestCommand = {
   requestCode: string;
   source: WarrantyActivationRequestSource;
   warrantyCode: string;
+  activationCodeId?: string;
   createdByUserId?: string;
   customerName: string;
   customerPhone: string;

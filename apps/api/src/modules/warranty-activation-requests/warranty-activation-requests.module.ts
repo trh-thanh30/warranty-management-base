@@ -22,11 +22,13 @@ import { RetryWarrantyActivationRequestCertificateUseCase } from '@/modules/warr
 import { ReviewWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/review-warranty-activation-request.use-case';
 import { WarrantyActivationRequestsController } from '@/modules/warranty-activation-requests/warranty-activation-requests.controller';
 import { WarrantyCertificatesModule } from '@/modules/warranty-certificates/modules/warranty-certificates.module';
+import { ActivationCodesModule } from '@/modules/activation-codes/activation-codes.module';
 import { Module } from '@nestjs/common';
 
 @Module({
   imports: [
     AssetsModule,
+    ActivationCodesModule,
     CategoriesModule,
     CustomersModule,
     DealersModule,

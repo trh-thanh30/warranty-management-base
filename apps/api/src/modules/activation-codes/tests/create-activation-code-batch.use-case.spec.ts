@@ -7,11 +7,24 @@ describe('CreateActivationCodeBatchUseCase', () => {
   const productsRepository = { findById: jest.fn() };
   const generator = { executeBatch: jest.fn() };
   const cryptoService = { encrypt: jest.fn(), hash: jest.fn() };
+  const config = {
+    minBatchQuantity: 50,
+    maxBatchQuantity: 1000,
+    createAttempts: 3,
+  };
+  const policyService = {
+    get: jest.fn().mockResolvedValue({
+      expiryMonths: 6,
+      defaultBatchQuantity: 50,
+    }),
+  };
   const useCase = new CreateActivationCodeBatchUseCase(
     batchesRepository as never,
     productsRepository as never,
     generator as never,
     cryptoService as never,
+    config as never,
+    policyService as never,
   );
 
   beforeEach(() => {

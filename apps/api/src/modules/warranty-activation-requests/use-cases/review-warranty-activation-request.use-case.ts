@@ -233,6 +233,19 @@ export class ReviewWarrantyActivationRequestUseCase {
 
         await repository.markItemsActivated(input.id, reviewedAt);
 
+        if (request.activation_code_id) {
+          const updatedCode = await repository.markActivationCodeActivated(
+            request.activation_code_id,
+            reviewedAt,
+          );
+          if (updatedCode.count !== 1) {
+            throw new ConflictError(
+              'Activation code has already been activated or revoked',
+              'ACTIVATION_CODE_ALREADY_USED',
+            );
+          }
+        }
+
         return repository.completeActivation({
           activatedWarrantyId: activatedWarrantyIds[0],
           adminNote: input.adminNote,

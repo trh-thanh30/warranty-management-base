@@ -38,6 +38,7 @@ model User {
   published_website_site_revisions      WebsiteSiteRevision[]               @relation("WebsiteSitePublishedBy")
   website_config_audits                 WebsiteConfigAudit[]
   activation_code_batches               ActivationCodeBatch[]               @relation("ActivationCodeBatchCreatedBy")
+  activation_code_print_jobs            ActivationCodePrintJob[]            @relation("ActivationCodePrintJobRequestedBy")
   updated_system_configs                SystemConfig[]                      @relation("SystemConfigUpdatedBy")
 
   @@index([role, status])
@@ -571,11 +572,38 @@ model ActivationCodeBatch {
   source_product Product?         @relation("ActivationCodeBatchSourceProduct", fields: [source_product_id], references: [id], onDelete: SetNull)
   created_by     User             @relation("ActivationCodeBatchCreatedBy", fields: [created_by_id], references: [id], onDelete: Restrict)
   codes          ActivationCode[]
+  print_jobs     ActivationCodePrintJob[]
 
   @@index([source_product_id])
   @@index([expires_at])
   @@index([created_at])
   @@map("activation_code_batch")
+}
+
+model ActivationCodePrintJob {
+  id               String                           @id @default(uuid()) @db.Uuid
+  batch_id         String                           @db.Uuid
+  requested_by_id  String                           @db.Uuid
+  idempotency_key  String                           @unique
+  status           activation_code_print_job_status @default(QUEUED)
+  from_index       Int
+  to_index         Int
+  bull_job_id      String?                          @unique
+  storage_key      String?
+  filename         String?
+  error_message    String?
+  attempts         Int                              @default(0)
+  started_at       DateTime?
+  completed_at     DateTime?
+  created_at       DateTime                         @default(now())
+  updated_at       DateTime                         @updatedAt
+
+  batch        ActivationCodeBatch @relation(fields: [batch_id], references: [id], onDelete: Cascade)
+  requested_by User                @relation("ActivationCodePrintJobRequestedBy", fields: [requested_by_id], references: [id], onDelete: Restrict)
+
+  @@index([batch_id, created_at])
+  @@index([status, created_at])
+  @@map("activation_code_print_job")
 }
 
 model ActivationCode {
@@ -600,6 +628,8 @@ model ActivationCode {
 
   @@index([batch_id, status])
   @@index([status, expires_at])
+  @@index([status, created_at])
+  @@index([created_at])
   @@map("activation_code")
 }
 
@@ -667,6 +697,7 @@ model WarrantyActivationRequest {
   @@index([vehicle_plate])
   @@index([created_by_id])
   @@index([customer_id])
+  @@index([province_code])
   @@index([created_at])
   @@index([warranty_code, customer_phone, status], map: "warranty_activation_request_lookup_pending")
   @@map("warranty_activation_request")
@@ -966,6 +997,11 @@ enum permission_key {
   PRODUCT_DELETE // Xóa sản phẩm.
   PRODUCT_ASSIGN_OWNER // Gán chủ sở hữu sản phẩm.
 
+  ACTIVATION_CODE_BATCH_VIEW // Xem các batch mã kích hoạt.
+  ACTIVATION_CODE_BATCH_CREATE // Tạo batch mã kích hoạt.
+  ACTIVATION_CODE_BATCH_PRINT // In tem mã kích hoạt.
+  ACTIVATION_CODE_BATCH_REVOKE // Thu hồi batch hoặc mã kích hoạt.
+
   WARRANTY_VIEW // Xem hồ sơ bảo hành.
   WARRANTY_CREATE // Tạo hồ sơ bảo hành.
   WARRANTY_UPDATE // Cập nhật hồ sơ bảo hành.
@@ -1012,6 +1048,8 @@ enum permission_key {
   USER_PERMISSION_MANAGE // Quản lý quyền riêng của người dùng.
 
   SYSTEM_VIEW // Xem thông tin hệ thống.
+  SYSTEM_CONFIG_VIEW // Xem cấu hình hệ thống.
+  SYSTEM_CONFIG_UPDATE // Cập nhật cấu hình hệ thống.
   AUDIT_LOG_VIEW // Xem nhật ký kiểm toán.
 }
 
@@ -1106,6 +1144,13 @@ enum activation_code_status {
   EXPIRED // Mã quá thời hạn kích hoạt.
   REVOKED // Mã đã bị thu hồi.
   REPLACED // Mã đã được thay thế bởi mã khác.
+}
+
+enum activation_code_print_job_status {
+  QUEUED // Job đã được đưa vào hàng đợi.
+  PROCESSING // Worker đang tạo PDF.
+  COMPLETED // PDF đã tạo và lưu thành công.
+  FAILED // Tạo PDF thất bại sau lần xử lý gần nhất.
 }
 
 enum warranty_activation_request_status {
