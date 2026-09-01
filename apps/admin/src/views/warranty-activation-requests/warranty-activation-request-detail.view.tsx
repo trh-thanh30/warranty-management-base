@@ -115,109 +115,113 @@ export function WarrantyActivationRequestDetailView({
         backHref="/warranty-activation-requests"
         backLabel={t("backToDirectory")}
         description={t("detailDescription")}
+        descriptionAccessory={
+          (canReview ||
+            canResendCertificateEmail ||
+            canUseCertificate ||
+            canRetryCertificate) &&
+          request ? (
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
+              {canUseCertificate ? (
+                <>
+                  <Button
+                    className="w-full sm:w-auto"
+                    disabled={isViewingCertificate}
+                    onClick={() => {
+                      void actions.viewCertificate(request);
+                    }}
+                    type="button"
+                    variant="secondary"
+                  >
+                    {isViewingCertificate ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <FileText className="size-4" />
+                    )}
+                    {isViewingCertificate
+                      ? t("loadingCertificate")
+                      : t("viewCertificate")}
+                  </Button>
+                  <Button
+                    className="w-full sm:w-auto"
+                    disabled={isDownloadingCertificate}
+                    onClick={() => {
+                      void actions.downloadCertificate(request);
+                    }}
+                    type="button"
+                    variant="secondary"
+                  >
+                    {isDownloadingCertificate ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Download className="size-4" />
+                    )}
+                    {isDownloadingCertificate
+                      ? t("loadingCertificate")
+                      : t("downloadCertificate")}
+                  </Button>
+                </>
+              ) : null}
+              {canRetryCertificate ? (
+                <Button
+                  className="w-full sm:w-auto"
+                  disabled={isRetryingCertificate}
+                  onClick={() => {
+                    void retryCertificate();
+                  }}
+                  type="button"
+                  variant="secondary"
+                >
+                  <RotateCcw className="size-4" />
+                  {isRetryingCertificate
+                    ? t("retryingCertificate")
+                    : t("retryCertificate")}
+                </Button>
+              ) : null}
+              {canResendCertificateEmail ? (
+                <Button
+                  className="w-full sm:w-auto"
+                  disabled={resendCertificateEmailMutation.isPending}
+                  onClick={() => {
+                    void resendCertificateEmail();
+                  }}
+                  type="button"
+                  variant="secondary"
+                >
+                  <Send className="size-4" />
+                  {resendCertificateEmailMutation.isPending
+                    ? t("resendingCertificateEmail")
+                    : t("resendCertificateEmail")}
+                </Button>
+              ) : null}
+              {request.status === "PENDING" ? (
+                <Button
+                  className="w-full sm:w-auto"
+                  onClick={() => actions.openAction(request, "reject")}
+                  type="button"
+                  variant="destructive"
+                >
+                  <XCircle className="size-4" />
+                  {t("reject")}
+                </Button>
+              ) : null}
+              {canReview ? (
+                <Button
+                  className="w-full sm:w-auto"
+                  onClick={() => actions.openAction(request, "approve")}
+                  type="button"
+                >
+                  <CheckCircle2 className="size-4" />
+                  {approveLabel}
+                </Button>
+              ) : null}
+            </div>
+          ) : null
+        }
         eyebrow={t("eyebrow")}
         maxWidthClassName="max-w-5xl"
         title={request?.requestCode ?? t("detailTitle")}
       >
-        {(canReview ||
-          canResendCertificateEmail ||
-          canUseCertificate ||
-          canRetryCertificate) &&
-        request ? (
-          <div className="flex flex-wrap justify-end gap-2">
-            {canUseCertificate ? (
-              <>
-                <Button
-                  className="w-full sm:w-auto"
-                  disabled={isViewingCertificate}
-                  onClick={() => {
-                    void actions.viewCertificate(request);
-                  }}
-                  type="button"
-                  variant="secondary"
-                >
-                  {isViewingCertificate ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <FileText className="size-4" />
-                  )}
-                  {isViewingCertificate
-                    ? t("loadingCertificate")
-                    : t("viewCertificate")}
-                </Button>
-                <Button
-                  className="w-full sm:w-auto"
-                  disabled={isDownloadingCertificate}
-                  onClick={() => {
-                    void actions.downloadCertificate(request);
-                  }}
-                  type="button"
-                  variant="secondary"
-                >
-                  {isDownloadingCertificate ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <Download className="size-4" />
-                  )}
-                  {isDownloadingCertificate
-                    ? t("loadingCertificate")
-                    : t("downloadCertificate")}
-                </Button>
-              </>
-            ) : null}
-            {canResendCertificateEmail ? (
-              <Button
-                className="w-full sm:w-auto"
-                disabled={resendCertificateEmailMutation.isPending}
-                onClick={() => {
-                  void resendCertificateEmail();
-                }}
-                type="button"
-                variant="secondary"
-              >
-                <Send className="size-4" />
-                {resendCertificateEmailMutation.isPending
-                  ? t("resendingCertificateEmail")
-                  : t("resendCertificateEmail")}
-              </Button>
-            ) : null}
-            {canRetryCertificate ? (
-              <Button
-                disabled={isRetryingCertificate}
-                onClick={() => {
-                  void retryCertificate();
-                }}
-                type="button"
-                variant="secondary"
-              >
-                <RotateCcw className="size-4" />
-                {isRetryingCertificate
-                  ? t("retryingCertificate")
-                  : t("retryCertificate")}
-              </Button>
-            ) : null}
-            {request.status === "PENDING" ? (
-              <Button
-                onClick={() => actions.openAction(request, "reject")}
-                type="button"
-                variant="destructive"
-              >
-                <XCircle className="size-4" />
-                {t("reject")}
-              </Button>
-            ) : null}
-            {canReview ? (
-              <Button
-                onClick={() => actions.openAction(request, "approve")}
-                type="button"
-              >
-                <CheckCircle2 className="size-4" />
-                {approveLabel}
-              </Button>
-            ) : null}
-          </div>
-        ) : null}
-
         {requestQuery.isLoading ? (
           <WarrantyActivationRequestDetailSkeleton />
         ) : requestQuery.isError || !request ? (
