@@ -301,7 +301,7 @@ export function SettingsView({ section }: { section: SettingsSection }) {
                 </CardTitle>
                 <CardDescription>{t("security.description")}</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4 max-w-2xl">
+              <CardContent className="space-y-4">
                 <FormField
                   error={
                     passwordForm.formState.errors.currentPassword?.message
