@@ -96,7 +96,7 @@ export function SettingsView({ section }: { section: SettingsSection }) {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Avatar row block */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6 border-b border-slate-100 pb-6 dark:border-slate-800">
+                <div className="flex flex-col items-center gap-4 border-b border-slate-100 pb-6 dark:border-slate-800 sm:flex-row sm:gap-6">
                   <button
                     aria-label={t("profile.uploadAvatar")}
                     className="group relative size-20 shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 dark:focus-visible:ring-slate-300"
@@ -118,7 +118,7 @@ export function SettingsView({ section }: { section: SettingsSection }) {
                       />
                     </div>
                   </button>
-                  <div className="space-y-1">
+                  <div className="w-full space-y-1 text-center sm:w-auto sm:text-left">
                     <h4 className="text-sm font-medium text-slate-900 dark:text-slate-100">
                       {t("profile.avatar")}
                     </h4>
@@ -130,7 +130,7 @@ export function SettingsView({ section }: { section: SettingsSection }) {
                         type="button"
                         disabled={uploadingAvatar}
                         onClick={triggerFileInput}
-                        className="h-11 sm:h-9"
+                        className="h-11 w-full sm:h-9 sm:w-auto"
                         size="sm"
                         variant="outline"
                       >
