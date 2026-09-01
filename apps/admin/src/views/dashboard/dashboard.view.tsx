@@ -5,6 +5,7 @@ import { PERMISSIONS } from "@repo/shared/constants";
 import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { DashboardActivationRequestAnalytics } from "./components/dashboard-activation-request-analytics";
+import { DashboardActivationCodeOperations } from "./components/dashboard-activation-code-operations";
 import { DashboardBreakdownCharts } from "./components/dashboard-breakdown-charts";
 import { DashboardClaimsTrendChart } from "./components/dashboard-claims-trend-chart";
 import { DashboardDateRangeFilter } from "./components/dashboard-date-range-filter";
@@ -20,10 +21,12 @@ export function DashboardView() {
     activationRequestRange,
     activationRequestsQuery,
     activationRequestsTrendQuery,
+    activationCodeReportQuery,
     activeActivationRequestQuickRange,
     activeQuickRange,
     activeWarrantyQuickRange,
     canViewClaims,
+    canViewActivationCodes,
     claimsQuery,
     range,
     recentClaimsQuery,
@@ -138,6 +141,14 @@ export function DashboardView() {
             trendError={activationRequestsTrendQuery.isError}
             trendLoading={activationRequestsTrendQuery.isPending}
           />
+          {canViewActivationCodes ? (
+            <DashboardActivationCodeOperations
+              data={activationCodeReportQuery.data}
+              error={activationCodeReportQuery.isError}
+              loading={activationCodeReportQuery.isPending}
+              onRetry={() => void activationCodeReportQuery.refetch()}
+            />
+          ) : null}
         </div>
 
         <div className="grid min-w-0 gap-4 lg:grid-cols-3">

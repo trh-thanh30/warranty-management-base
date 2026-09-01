@@ -241,6 +241,20 @@
       "noResolvedClaims": "No resolved claims in this period",
       "hours": "{value}h"
     },
+    "activationCodes": {
+      "title": "Warranty activation codes",
+      "description": "Track created, available, activated, and expired codes.",
+      "metrics": {
+        "total": "Total codes",
+        "available": "Available",
+        "activated": "Activated",
+        "expired": "Expired"
+      },
+      "provinceTitle": "By province",
+      "emptyProvince": "No province breakdown is available.",
+      "retry": "Retry",
+      "errorDescription": "Activation code reporting could not be loaded."
+    },
     "charts": {
       "claims": "Claims",
       "claimCount": "Claim count",
