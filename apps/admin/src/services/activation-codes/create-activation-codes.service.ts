@@ -1,4 +1,5 @@
 import type {
+  ActivationCodeReport,
   ActivationCodePrintJob,
   RequestActivationCodePrintJobQuery,
 } from "@repo/shared";
@@ -33,6 +34,22 @@ export function createActivationCodesService(http: ActivationCodesHttpClient) {
         await http.get<Blob>(
           `/activation-code-batches/print-jobs/${jobId}/download`,
           { responseType: "blob" },
+        ),
+      );
+    },
+
+    async getReport(
+      filters: {
+        dateFrom?: string;
+        dateTo?: string;
+        batchId?: string;
+        provinceCode?: string;
+      } = {},
+    ): Promise<ActivationCodeReport> {
+      return unwrap(
+        await http.get<ActivationCodeReport>(
+          "/activation-code-batches/reports/summary",
+          { params: filters },
         ),
       );
     },

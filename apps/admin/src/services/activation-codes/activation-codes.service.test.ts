@@ -49,3 +49,28 @@ test("downloads a completed print job as a blob", async () => {
   ]);
   assert.equal(result, blob);
 });
+
+test("loads activation code report filters", async () => {
+  const calls: unknown[] = [];
+  const report = { total: 12, byStatus: {}, byProvince: [] };
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: { success: true, data: report } };
+    },
+  };
+
+  const result = await createActivationCodesService(
+    http as unknown as ActivationCodesHttpClient,
+  ).getReport({ dateFrom: "2026-09-01", dateTo: "2026-09-30" });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/activation-code-batches/reports/summary",
+      config: {
+        params: { dateFrom: "2026-09-01", dateTo: "2026-09-30" },
+      },
+    },
+  ]);
+  assert.equal(result, report);
+});

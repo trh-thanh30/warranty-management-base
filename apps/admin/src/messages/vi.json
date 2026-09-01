@@ -241,6 +241,20 @@
       "noResolvedClaims": "Chưa có yêu cầu hoàn tất trong khoảng này",
       "hours": "{value} giờ"
     },
+    "activationCodes": {
+      "title": "Mã kích hoạt bảo hành",
+      "description": "Theo dõi số lượng mã đã tạo, sẵn sàng, đã kích hoạt và hết hạn.",
+      "metrics": {
+        "total": "Tổng mã",
+        "available": "Có thể kích hoạt",
+        "activated": "Đã kích hoạt",
+        "expired": "Đã hết hạn"
+      },
+      "provinceTitle": "Phân bổ theo tỉnh/thành",
+      "emptyProvince": "Chưa có dữ liệu phân bổ theo tỉnh/thành.",
+      "retry": "Thử lại",
+      "errorDescription": "Không tải được báo cáo mã kích hoạt."
+    },
     "charts": {
       "claims": "Yêu cầu",
       "claimCount": "Số yêu cầu",
