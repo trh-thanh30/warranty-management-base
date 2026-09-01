@@ -42,6 +42,7 @@ import { ConfigModule } from '@nestjs/config';
     WarrantyCertificateEmailQueueService,
     WarrantyCertificateEmailContentService,
     WarrantyCertificateHtmlTemplateService,
+    HtmlPdfRendererService,
     WarrantyCertificatePdfService,
     WarrantyActivationRequestCertificatesRepository,
     WarrantyActivationRequestCertificateEmailService,

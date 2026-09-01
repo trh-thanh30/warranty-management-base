@@ -91,6 +91,40 @@ export const envSchema = z
       .min(1)
       .max(10)
       .default(3),
+    ACTIVATION_CODE_PRINT_CONCURRENCY: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(8)
+      .default(2),
+    ACTIVATION_CODE_PRINT_QUEUE_SIZE: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(1000)
+      .default(8),
+    ACTIVATION_CODE_PRINT_ATTEMPTS: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(10)
+      .default(3),
+    ACTIVATION_CODE_PRINT_BACKOFF_MS: z.coerce
+      .number()
+      .int()
+      .min(100)
+      .max(300000)
+      .default(5000),
+    ACTIVATION_CODE_PRINT_COMPLETED_RETENTION_SECONDS: z.coerce
+      .number()
+      .int()
+      .min(60)
+      .default(3600),
+    ACTIVATION_CODE_PRINT_FAILED_RETENTION_SECONDS: z.coerce
+      .number()
+      .int()
+      .min(60)
+      .default(86400),
 
     // Email Configuration
     SMTP_HOST: z.string().default('smtp.gmail.com'),
