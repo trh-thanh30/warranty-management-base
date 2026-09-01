@@ -1,5 +1,6 @@
 export * from "./admin-user.types.ts";
 export * from "./activation-code-print-job.types.ts";
+export * from "./activation-code-report.types.ts";
 export * from "./analytics.types.ts";
 export * from "./api-response.types.ts";
 export * from "./auth.types.ts";

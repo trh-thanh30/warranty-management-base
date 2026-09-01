@@ -54,6 +54,14 @@ export const envSchema = z
       .default(30),
     STORAGE_USAGE_MONITOR_CRON: z.string().default('0 4 * * *'),
     STORAGE_USAGE_MONITOR_ENABLED: z.coerce.boolean().default(false),
+    ACTIVATION_CODE_EXPIRY_CRON: z.string().default('0 * * * *'),
+    ACTIVATION_CODE_EXPIRY_ENABLED: z.coerce.boolean().default(true),
+    ACTIVATION_CODE_EXPIRY_BATCH_SIZE: z.coerce
+      .number()
+      .int()
+      .positive()
+      .max(10000)
+      .default(500),
 
     // Health Check Configuration
     HEALTH_ENDPOINTS_ENABLED: z.coerce.boolean().default(false),

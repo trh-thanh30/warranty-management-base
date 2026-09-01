@@ -628,6 +628,8 @@ model ActivationCode {
 
   @@index([batch_id, status])
   @@index([status, expires_at])
+  @@index([status, created_at])
+  @@index([created_at])
   @@map("activation_code")
 }
 
@@ -695,6 +697,7 @@ model WarrantyActivationRequest {
   @@index([vehicle_plate])
   @@index([created_by_id])
   @@index([customer_id])
+  @@index([province_code])
   @@index([created_at])
   @@index([warranty_code, customer_phone, status], map: "warranty_activation_request_lookup_pending")
   @@map("warranty_activation_request")
