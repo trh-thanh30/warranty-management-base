@@ -81,6 +81,7 @@
       "customers": "Khách hàng",
       "categories": "Danh mục",
       "products": "Sản phẩm",
+      "activationCodeBatches": "Lô mã kích hoạt",
       "dealers": "Đại lý",
       "warranties": "Bảo hành",
       "warrantyList": "Danh sách bảo hành",
@@ -353,6 +354,57 @@
       "noChartData": "Chưa có dữ liệu biểu đồ",
       "noChartDataDescription": "Không có dữ liệu trong khoảng thời gian đã chọn."
     }
+  },
+  "ActivationCodeBatches": {
+    "title": "Lô mã kích hoạt",
+    "eyebrow": "Vận hành bảo hành",
+    "description": "Theo dõi các lô mã kích hoạt được tạo và thời hạn sử dụng.",
+    "settings": "Cấu hình mã kích hoạt",
+    "directoryTitle": "Danh sách lô mã",
+    "directoryDescription": "Tìm kiếm và theo dõi các lô mã theo sản phẩm, số lượng, trạng thái và thời hạn.",
+    "create": "Tạo lô mã",
+    "createTitle": "Tạo lô mã kích hoạt",
+    "productLabel": "Sản phẩm",
+    "productPlaceholder": "Chọn sản phẩm",
+    "productEmpty": "Không tìm thấy sản phẩm phù hợp.",
+    "productError": "Không tải được danh sách sản phẩm.",
+    "productLoading": "Đang tìm sản phẩm...",
+    "productLoadingMore": "Đang tải thêm sản phẩm...",
+    "quantityLabel": "Số lượng mã",
+    "createSubmit": "Tạo mã",
+    "cancel": "Hủy",
+    "created": "Đã tạo lô mã kích hoạt.",
+    "createError": "Không thể tạo lô mã kích hoạt.",
+    "revokeAria": "Thu hồi lô {batch}",
+    "revokeConfirm": "Bạn có chắc muốn thu hồi các mã chưa kích hoạt trong lô {batch}?",
+    "revoked": "Đã thu hồi các mã chưa kích hoạt.",
+    "revokeError": "Không thể thu hồi lô mã.",
+    "searchLabel": "Tìm lô mã",
+    "searchPlaceholder": "Tìm theo mã lô, SKU hoặc tên sản phẩm",
+    "statusLabel": "Lọc theo trạng thái",
+    "allStatuses": "Tất cả trạng thái",
+    "statuses": {
+      "AVAILABLE": "Có thể kích hoạt",
+      "ACTIVATED": "Đã kích hoạt",
+      "EXPIRED": "Đã hết hạn",
+      "REVOKED": "Đã thu hồi"
+    },
+    "columns": {
+      "batch": "Mã lô",
+      "product": "Sản phẩm",
+      "quantity": "Số lượng",
+      "status": "Trạng thái mã",
+      "expiresAt": "Hết hạn",
+      "createdAt": "Ngày tạo",
+      "actions": "Thao tác"
+    },
+    "summary": "Tổng {total} lô mã",
+    "next": "Trang sau",
+    "previous": "Trang trước",
+    "retry": "Thử lại",
+    "errorDescription": "Không tải được danh sách lô mã.",
+    "emptyTitle": "Chưa có lô mã nào",
+    "emptyDescription": "Hãy tạo lô mã kích hoạt đầu tiên để bắt đầu vận hành."
   },
   "Staff": {
     "title": "Quản lý nhân viên",
@@ -2403,7 +2455,21 @@
     "tabs": {
       "profile": "Thông tin cá nhân",
       "security": "Bảo mật",
-      "permissions": "Quyền hạn & Vai trò"
+      "permissions": "Quyền hạn & Vai trò",
+      "activationCodePolicy": "Chính sách mã kích hoạt"
+    },
+    "activationCodePolicy": {
+      "title": "Chính sách mã kích hoạt",
+      "description": "Thiết lập thời hạn hiệu lực và số lượng mặc định khi tạo lô mã.",
+      "expiryMonths": "Thời hạn hiệu lực (tháng)",
+      "defaultBatchQuantity": "Số lượng mã mặc định",
+      "save": "Lưu chính sách",
+      "saving": "Đang lưu...",
+      "saveSuccess": "Đã cập nhật chính sách mã kích hoạt.",
+      "saveError": "Không thể cập nhật chính sách mã kích hoạt.",
+      "errorTitle": "Không thể tải chính sách",
+      "errorDescription": "Kiểm tra quyền và kết nối API rồi thử lại.",
+      "retry": "Thử lại"
     },
     "profile": {
       "title": "Chi tiết tài khoản",

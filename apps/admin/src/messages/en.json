@@ -81,6 +81,7 @@
       "customers": "Customers",
       "categories": "Categories",
       "products": "Products",
+      "activationCodeBatches": "Activation batches",
       "dealers": "Dealers",
       "warranties": "Warranties",
       "warrantyList": "Warranty list",
@@ -353,6 +354,57 @@
       "noChartData": "No chart data",
       "noChartDataDescription": "There is no data for the selected date range."
     }
+  },
+  "ActivationCodeBatches": {
+    "title": "Activation batches",
+    "eyebrow": "Warranty operations",
+    "description": "Track generated activation-code batches and their validity period.",
+    "settings": "Activation code settings",
+    "directoryTitle": "Batch directory",
+    "directoryDescription": "Search and track activation batches by product, quantity, status, and validity period.",
+    "create": "Create batch",
+    "createTitle": "Create activation batch",
+    "productLabel": "Product",
+    "productPlaceholder": "Select a product",
+    "productEmpty": "No matching products found.",
+    "productError": "Products could not be loaded.",
+    "productLoading": "Searching products...",
+    "productLoadingMore": "Loading more products...",
+    "quantityLabel": "Code quantity",
+    "createSubmit": "Create codes",
+    "cancel": "Cancel",
+    "created": "Activation batch created.",
+    "createError": "Activation batch could not be created.",
+    "revokeAria": "Revoke batch {batch}",
+    "revokeConfirm": "Revoke all unused codes in batch {batch}?",
+    "revoked": "Unused codes were revoked.",
+    "revokeError": "Batch could not be revoked.",
+    "searchLabel": "Search batches",
+    "searchPlaceholder": "Search by batch code, SKU, or product name",
+    "statusLabel": "Filter by status",
+    "allStatuses": "All statuses",
+    "statuses": {
+      "AVAILABLE": "Available",
+      "ACTIVATED": "Activated",
+      "EXPIRED": "Expired",
+      "REVOKED": "Revoked"
+    },
+    "columns": {
+      "batch": "Batch code",
+      "product": "Product",
+      "quantity": "Quantity",
+      "status": "Code status",
+      "expiresAt": "Expires",
+      "createdAt": "Created",
+      "actions": "Actions"
+    },
+    "summary": "{total} batches",
+    "next": "Next page",
+    "previous": "Previous page",
+    "retry": "Retry",
+    "errorDescription": "Activation batches could not be loaded.",
+    "emptyTitle": "No activation batches",
+    "emptyDescription": "Create an activation batch to start operations."
   },
   "Staff": {
     "title": "Staff management",
@@ -2403,7 +2455,21 @@
     "tabs": {
       "profile": "Profile details",
       "security": "Security & Password",
-      "permissions": "Roles & Permissions"
+      "permissions": "Roles & Permissions",
+      "activationCodePolicy": "Activation code policy"
+    },
+    "activationCodePolicy": {
+      "title": "Activation code policy",
+      "description": "Configure code validity and the default quantity for new batches.",
+      "expiryMonths": "Validity period (months)",
+      "defaultBatchQuantity": "Default batch quantity",
+      "save": "Save policy",
+      "saving": "Saving...",
+      "saveSuccess": "Activation code policy updated.",
+      "saveError": "Activation code policy could not be updated.",
+      "errorTitle": "Unable to load policy",
+      "errorDescription": "Check your permissions and API connection, then try again.",
+      "retry": "Retry"
     },
     "profile": {
       "title": "Account Details",

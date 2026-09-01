@@ -12,6 +12,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import {
   Avatar,
   AvatarFallback,
@@ -34,9 +35,15 @@ import { PageHeader } from "@/src/components/common/page-header";
 import { getInitials } from "@/src/utils/get-initials";
 import { useSettingsForm } from "./hooks/use-settings-form";
 import { groupPermissions } from "./settings.utils";
+import { ActivationCodePolicySettings } from "./components/activation-code-policy-settings";
+import { usePermissions } from "@/src/hooks/use-permissions";
+import { PERMISSIONS } from "@repo/shared/constants";
 
 export function SettingsView() {
   const t = useTranslations("Settings");
+  const searchParams = useSearchParams();
+  const { hasPermission } = usePermissions();
+  const canViewActivationPolicy = hasPermission(PERMISSIONS.SYSTEM_CONFIG_VIEW);
   const {
     user,
     uploadingAvatar,
@@ -78,6 +85,12 @@ export function SettingsView() {
     }));
   };
 
+  const requestedTab = searchParams.get("tab");
+  const defaultTab =
+    requestedTab === "activation-code-policy" && canViewActivationPolicy
+      ? requestedTab
+      : "profile";
+
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <PageHeader
@@ -86,7 +99,7 @@ export function SettingsView() {
         title={t("title")}
       />
 
-      <Tabs className="space-y-6" defaultValue="profile">
+      <Tabs className="space-y-6" defaultValue={defaultTab}>
         <TabsList className="h-12 w-full justify-start overflow-x-auto sm:h-10 sm:w-auto">
           <TabsTrigger className="h-10 sm:h-8" value="profile">
             {t("tabs.profile")}
@@ -97,6 +110,11 @@ export function SettingsView() {
           <TabsTrigger className="h-10 sm:h-8" value="permissions">
             {t("tabs.permissions")}
           </TabsTrigger>
+          {canViewActivationPolicy ? (
+            <TabsTrigger className="h-10 sm:h-8" value="activation-code-policy">
+              {t("tabs.activationCodePolicy")}
+            </TabsTrigger>
+          ) : null}
         </TabsList>
 
         <TabsContent value="profile">
@@ -549,6 +567,12 @@ export function SettingsView() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {canViewActivationPolicy ? (
+          <TabsContent value="activation-code-policy">
+            <ActivationCodePolicySettings />
+          </TabsContent>
+        ) : null}
       </Tabs>
     </div>
   );

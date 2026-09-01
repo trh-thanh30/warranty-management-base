@@ -8,6 +8,7 @@ import {
   FileText,
   Globe2,
   LayoutDashboard,
+  KeyRound,
   LogOut,
   HardDrive,
   MessageSquareText,
@@ -65,6 +66,12 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             href: "/products",
             icon: Boxes,
             requiredPermission: PERMISSIONS.PRODUCT_VIEW,
+          },
+          {
+            title: t("items.activationCodeBatches"),
+            href: "/activation-code-batches",
+            icon: KeyRound,
+            requiredPermission: PERMISSIONS.ACTIVATION_CODE_BATCH_VIEW,
           },
           {
             title: t("items.warranties"),

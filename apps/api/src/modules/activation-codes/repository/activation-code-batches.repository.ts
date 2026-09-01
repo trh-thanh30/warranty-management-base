@@ -1,3 +1,4 @@
+import { normalizePagination, paginate } from '@/common/pagination/pagination';
 import { PrismaService } from '@/database/prisma/prisma.service';
 import type {
   ActivationCodeReport,
@@ -32,6 +33,79 @@ export type CreateActivationCodeBatchRecord = {
 @Injectable()
 export class ActivationCodeBatchesRepository {
   constructor(private readonly prismaService: PrismaService) {}
+
+  list(filters: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    status?: activation_code_status;
+  }) {
+    const { page, limit, skip, take } = normalizePagination(filters);
+    const search = filters.search?.trim();
+    const where: Prisma.ActivationCodeBatchWhereInput = {
+      ...(search
+        ? {
+            OR: [
+              { batch_code: { contains: search, mode: 'insensitive' } },
+              { product_sku: { contains: search, mode: 'insensitive' } },
+              { product_name: { contains: search, mode: 'insensitive' } },
+            ],
+          }
+        : {}),
+      ...(filters.status
+        ? { codes: { some: { status: filters.status } } }
+        : {}),
+    };
+
+    return this.prismaService.$transaction(async (tx) => {
+      const [batches, total] = await Promise.all([
+        tx.activationCodeBatch.findMany({
+          where,
+          orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
+          skip,
+          take,
+          include: { codes: { select: { status: true } } },
+        }),
+        tx.activationCodeBatch.count({ where }),
+      ]);
+
+      return paginate(
+        batches.map((batch) => {
+          const statusCounts = batch.codes.reduce<
+            Partial<Record<activation_code_status, number>>
+          >((counts, code) => {
+            counts[code.status] = (counts[code.status] ?? 0) + 1;
+            return counts;
+          }, {});
+
+          return {
+            id: batch.id,
+            batchCode: batch.batch_code,
+            productSku: batch.product_sku,
+            productName: batch.product_name,
+            quantity: batch.quantity,
+            expiresAt: batch.expires_at,
+            createdAt: batch.created_at,
+            statusCounts,
+          };
+        }),
+        { page, limit, total },
+      );
+    });
+  }
+
+  async revokeBatch(id: string) {
+    const batch = await this.prismaService.activationCodeBatch.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+    if (!batch) return null;
+    const result = await this.prismaService.activationCode.updateMany({
+      where: { batch_id: id, status: activation_code_status.AVAILABLE },
+      data: { status: activation_code_status.REVOKED, revoked_at: new Date() },
+    });
+    return { batchId: id, revokedCount: result.count };
+  }
 
   create(input: CreateActivationCodeBatchRecord) {
     return this.prismaService.activationCodeBatch.create({
