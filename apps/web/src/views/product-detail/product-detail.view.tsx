@@ -155,6 +155,7 @@ export function ProductDetailView({ slug }: ProductDetailViewProps) {
                 <a
                   className="inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-border-gray px-3 text-xs font-semibold uppercase transition-colors hover:border-premium-red hover:text-premium-red sm:px-5 sm:text-sm"
                   href={PUBLIC_DEALER_NETWORK_URL}
+                  target="_blank"
                   rel="noopener noreferrer"
                 >
                   <MapPin className="size-4 shrink-0" />
