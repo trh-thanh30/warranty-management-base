@@ -71,6 +71,7 @@ export function WarrantyActionCards() {
                         string
                       >
                     }
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="p-6 sm:p-7 space-y-5 flex h-full flex-col justify-between"
                   >
