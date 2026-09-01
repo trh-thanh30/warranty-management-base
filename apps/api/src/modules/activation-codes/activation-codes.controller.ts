@@ -4,6 +4,7 @@ import { createDatedExcelFilename, sendExcelFile } from '@/common/excel';
 import { BadRequestError } from '@/common/response';
 import { ActivationCodeReportQueryDto } from '@/modules/activation-codes/dto/activation-code-report-query.dto';
 import { CreateActivationCodeBatchDto } from '@/modules/activation-codes/dto/create-activation-code-batch.dto';
+import { ListActivationCodeBatchesDto } from '@/modules/activation-codes/dto/list-activation-code-batches.dto';
 import { PrintableActivationLabelsQueryDto } from '@/modules/activation-codes/dto/printable-activation-labels-query.dto';
 import { CreateActivationCodeBatchUseCase } from '@/modules/activation-codes/use-cases/create-activation-code-batch.use-case';
 import { DownloadActivationLabelPrintJobUseCase } from '@/modules/activation-codes/use-cases/download-activation-label-print-job.use-case';
@@ -11,7 +12,9 @@ import { ExportActivationCodeReportUseCase } from '@/modules/activation-codes/us
 import { GetActivationCodeReportUseCase } from '@/modules/activation-codes/use-cases/get-activation-code-report.use-case';
 import { GetActivationLabelPrintJobUseCase } from '@/modules/activation-codes/use-cases/get-activation-label-print-job.use-case';
 import { RequestActivationLabelPrintJobUseCase } from '@/modules/activation-codes/use-cases/request-activation-label-print-job.use-case';
+import { ListActivationCodeBatchesUseCase } from '@/modules/activation-codes/use-cases/list-activation-code-batches.use-case';
 import { RevokeActivationCodeUseCase } from '@/modules/activation-codes/use-cases/revoke-activation-code.use-case';
+import { RevokeActivationCodeBatchUseCase } from '@/modules/activation-codes/use-cases/revoke-activation-code-batch.use-case';
 import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import { permission_key } from '@prisma/client';
 import type { Response } from 'express';
@@ -28,7 +31,15 @@ export class ActivationCodesController {
     private readonly downloadPrintJobUseCase: DownloadActivationLabelPrintJobUseCase,
     private readonly getReportUseCase: GetActivationCodeReportUseCase,
     private readonly exportReportUseCase: ExportActivationCodeReportUseCase,
+    private readonly listBatchesUseCase: ListActivationCodeBatchesUseCase,
+    private readonly revokeBatchUseCase: RevokeActivationCodeBatchUseCase,
   ) {}
+
+  @Get()
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_VIEW])
+  list(@Query() query: ListActivationCodeBatchesDto) {
+    return this.listBatchesUseCase.execute(query);
+  }
 
   @Get('reports/summary')
   @Permissions([permission_key.ACTIVATION_CODE_BATCH_VIEW])
@@ -77,6 +88,12 @@ export class ActivationCodesController {
   @Permissions([permission_key.ACTIVATION_CODE_BATCH_REVOKE])
   revoke(@Param('id') id: string) {
     return this.revokeActivationCodeUseCase.execute(id);
+  }
+
+  @Post(':id/revoke')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_REVOKE])
+  revokeBatch(@Param('id') id: string) {
+    return this.revokeBatchUseCase.execute(id);
   }
 
   @Post(':id/print-jobs')

@@ -8,12 +8,14 @@ import { GenerateActivationCodeUseCase } from '@/modules/activation-codes/use-ca
 import { SystemConfigModule } from '@/modules/system-config/system-config.module';
 import { ProductsModule } from '@/modules/products/products.module';
 import { RevokeActivationCodeUseCase } from '@/modules/activation-codes/use-cases/revoke-activation-code.use-case';
+import { RevokeActivationCodeBatchUseCase } from '@/modules/activation-codes/use-cases/revoke-activation-code-batch.use-case';
 import { RequestActivationLabelPrintJobUseCase } from '@/modules/activation-codes/use-cases/request-activation-label-print-job.use-case';
 import { GetActivationLabelPrintJobUseCase } from '@/modules/activation-codes/use-cases/get-activation-label-print-job.use-case';
 import { DownloadActivationLabelPrintJobUseCase } from '@/modules/activation-codes/use-cases/download-activation-label-print-job.use-case';
 import { ExpireActivationCodesUseCase } from '@/modules/activation-codes/use-cases/expire-activation-codes.use-case';
 import { GetActivationCodeReportUseCase } from '@/modules/activation-codes/use-cases/get-activation-code-report.use-case';
 import { ExportActivationCodeReportUseCase } from '@/modules/activation-codes/use-cases/export-activation-code-report.use-case';
+import { ListActivationCodeBatchesUseCase } from '@/modules/activation-codes/use-cases/list-activation-code-batches.use-case';
 import { ActivationCodePrintJobsRepository } from '@/modules/activation-codes/repository/activation-code-print-jobs.repository';
 import { ActivationLabelPrintQueueService } from '@/modules/activation-codes/services/activation-label-print-queue.service';
 import { ActivationCodeExpirySchedulerService } from '@/modules/activation-codes/services/activation-code-expiry-scheduler.service';
@@ -35,6 +37,7 @@ import { Module } from '@nestjs/common';
     GenerateActivationCodeUseCase,
     CreateActivationCodeBatchUseCase,
     RevokeActivationCodeUseCase,
+    RevokeActivationCodeBatchUseCase,
     ActivationCodePrintJobsRepository,
     ActivationLabelPrintQueueService,
     RequestActivationLabelPrintJobUseCase,
@@ -44,6 +47,7 @@ import { Module } from '@nestjs/common';
     ActivationCodeExpirySchedulerService,
     GetActivationCodeReportUseCase,
     ExportActivationCodeReportUseCase,
+    ListActivationCodeBatchesUseCase,
   ],
   exports: [ActivationCodeBatchesRepository, ActivationCodeCryptoService],
 })

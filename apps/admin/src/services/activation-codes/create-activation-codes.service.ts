@@ -4,6 +4,13 @@ import type {
   RequestActivationCodePrintJobQuery,
 } from "@repo/shared";
 import { unwrap, unwrapBlob } from "../service.utils";
+import type {
+  ActivationCodeBatchList,
+  ActivationCodeBatchListQuery,
+  CreateActivationCodeBatchBody,
+  CreateActivationCodeBatchResult,
+  RevokeActivationCodeBatchResult,
+} from "./activation-code-batches.types";
 import type { ActivationCodesHttpClient } from "./activation-codes.types";
 
 export function createActivationCodesService(http: ActivationCodesHttpClient) {
@@ -50,6 +57,39 @@ export function createActivationCodesService(http: ActivationCodesHttpClient) {
         await http.get<ActivationCodeReport>(
           "/activation-code-batches/reports/summary",
           { params: filters },
+        ),
+      );
+    },
+
+    async listBatches(
+      query: ActivationCodeBatchListQuery = {},
+    ): Promise<ActivationCodeBatchList> {
+      return unwrap(
+        await http.get<ActivationCodeBatchList>("/activation-code-batches", {
+          params: query,
+        }),
+      );
+    },
+
+    async createBatch(body: CreateActivationCodeBatchBody) {
+      return unwrap(
+        await http.post<CreateActivationCodeBatchResult>(
+          "/activation-code-batches",
+          body,
+        ),
+      );
+    },
+
+    async revokeCode(codeId: string): Promise<void> {
+      await http.post(`/activation-code-batches/codes/${codeId}/revoke`);
+    },
+
+    async revokeBatch(
+      batchId: string,
+    ): Promise<RevokeActivationCodeBatchResult> {
+      return unwrap(
+        await http.post<RevokeActivationCodeBatchResult>(
+          `/activation-code-batches/${batchId}/revoke`,
         ),
       );
     },
