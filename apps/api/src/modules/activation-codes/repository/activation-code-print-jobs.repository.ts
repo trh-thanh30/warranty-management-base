@@ -44,6 +44,7 @@ export class ActivationCodePrintJobsRepository {
       where: { id },
       data: {
         bull_job_id: bullJobId,
+        progress_percent: 0,
         status: activation_code_print_job_status.QUEUED,
         error_message: null,
       },
@@ -55,10 +56,18 @@ export class ActivationCodePrintJobsRepository {
       where: { id },
       data: {
         attempts,
+        progress_percent: 10,
         started_at: new Date(),
         status: activation_code_print_job_status.PROCESSING,
         error_message: null,
       },
+    });
+  }
+
+  markProgress(id: string, progressPercent: number) {
+    return this.prisma.activationCodePrintJob.update({
+      where: { id },
+      data: { progress_percent: Math.max(0, Math.min(100, progressPercent)) },
     });
   }
 
@@ -69,6 +78,7 @@ export class ActivationCodePrintJobsRepository {
         completed_at: new Date(),
         error_message: null,
         filename: input.filename,
+        progress_percent: 100,
         status: activation_code_print_job_status.COMPLETED,
         storage_key: input.storageKey,
       },

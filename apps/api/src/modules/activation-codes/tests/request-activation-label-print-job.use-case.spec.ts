@@ -50,7 +50,7 @@ describe('RequestActivationLabelPrintJobUseCase', () => {
     expect(jobs.create).not.toHaveBeenCalled();
   });
 
-  it('returns an existing queued or completed job without enqueuing again', async () => {
+  it('returns an existing completed job without enqueuing again', async () => {
     const existing = { id: 'print-job-id', status: 'COMPLETED' };
     jobs.findByIdempotencyKey.mockResolvedValue(existing);
 
@@ -62,5 +62,21 @@ describe('RequestActivationLabelPrintJobUseCase', () => {
     ).resolves.toBe(existing);
 
     expect(queue.enqueue).not.toHaveBeenCalled();
+  });
+
+  it('ensures an existing queued job is still present in BullMQ', async () => {
+    const existing = { id: 'print-job-id', status: 'QUEUED' };
+    jobs.findByIdempotencyKey.mockResolvedValue(existing);
+    queue.enqueue.mockResolvedValue({ id: 'print-job-id' });
+
+    await expect(
+      useCase.execute({
+        batchId: 'batch-id',
+        requestedById: 'admin-id',
+      }),
+    ).resolves.toBe(existing);
+
+    expect(queue.enqueue).toHaveBeenCalledWith('print-job-id');
+    expect(jobs.create).not.toHaveBeenCalled();
   });
 });

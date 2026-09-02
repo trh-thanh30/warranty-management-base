@@ -14,7 +14,14 @@ export class CreatePrintableActivationLabelsUseCase {
     private readonly template: ActivationLabelTemplateService = new ActivationLabelTemplateService(),
   ) {}
 
-  async execute(batchId: string, options?: { from?: number; to?: number }) {
+  async execute(
+    batchId: string,
+    options?: {
+      from?: number;
+      to?: number;
+      onProgress?: (progressPercent: number) => Promise<void> | void;
+    },
+  ) {
     const batch = await this.repository.findWithCodes(batchId);
     if (!batch) throw new NotFoundError('Activation code batch not found');
 
@@ -34,6 +41,7 @@ export class CreatePrintableActivationLabelsUseCase {
     const boundedTo = Math.min(batch.codes.length, to);
     const codes = batch.codes.slice(from - 1, boundedTo);
     if (!codes.length) throw new NotFoundError('No activation codes to print');
+    await options?.onProgress?.(25);
 
     const html = this.template.render(
       {
@@ -43,7 +51,9 @@ export class CreatePrintableActivationLabelsUseCase {
       },
       codes.map((code) => this.crypto.decrypt(code.code_ciphertext)),
     );
+    await options?.onProgress?.(40);
     const pdf = await this.pdfRenderer.createPdf(html);
+    await options?.onProgress?.(80);
     return { pdf, filename: `${batch.batch_code}-labels.pdf` };
   }
 }

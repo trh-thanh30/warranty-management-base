@@ -50,7 +50,8 @@ export function useActivationCodeBatches() {
     },
   });
   const revokeMutation = useMutation({
-    mutationFn: (codeId: string) => activationCodesService.revokeCode(codeId),
+    mutationFn: (batchId: string) =>
+      activationCodesService.revokeBatch(batchId),
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: ["activation-code-batches"],

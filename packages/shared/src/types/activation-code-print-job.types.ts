@@ -10,6 +10,7 @@ export type ActivationCodePrintJob = {
   requested_by_id: string;
   idempotency_key: string;
   status: ActivationCodePrintJobStatus;
+  progress_percent: number;
   from_index: number;
   to_index: number;
   bull_job_id: string | null;
