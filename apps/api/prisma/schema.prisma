@@ -586,6 +586,7 @@ model ActivationCodePrintJob {
   requested_by_id  String                           @db.Uuid
   idempotency_key  String                           @unique
   status           activation_code_print_job_status @default(QUEUED)
+  progress_percent Int                              @default(0)
   from_index       Int
   to_index         Int
   bull_job_id      String?                          @unique

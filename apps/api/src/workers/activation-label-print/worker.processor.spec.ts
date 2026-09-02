@@ -10,13 +10,24 @@ describe('ActivationLabelPrintProcessor', () => {
         to_index: 50,
       }),
       markCompleted: jest.fn().mockResolvedValue(undefined),
+      markProgress: jest.fn().mockResolvedValue(undefined),
       markProcessing: jest.fn().mockResolvedValue(undefined),
     };
     const renderer = {
-      execute: jest.fn().mockResolvedValue({
-        filename: 'labels.pdf',
-        pdf: Buffer.from('%PDF-test'),
-      }),
+      execute: jest
+        .fn()
+        .mockImplementation(
+          async (
+            _batchId: string,
+            options: { onProgress: (progress: number) => Promise<void> },
+          ) => {
+            await options.onProgress(40);
+            return {
+              filename: 'labels.pdf',
+              pdf: Buffer.from('%PDF-test'),
+            };
+          },
+        ),
     };
     const assets = {
       upload: jest.fn().mockResolvedValue({ path: 'private/labels.pdf' }),
@@ -31,12 +42,13 @@ describe('ActivationLabelPrintProcessor', () => {
       attemptsMade: 0,
       data: { printJobId: 'print-job-id' },
       opts: { attempts: 3 },
+      updateProgress: jest.fn().mockResolvedValue(undefined),
     } as never);
 
-    expect(renderer.execute).toHaveBeenCalledWith('batch-id', {
-      from: 1,
-      to: 50,
-    });
+    expect(renderer.execute).toHaveBeenCalledWith(
+      'batch-id',
+      expect.objectContaining({ from: 1, to: 50 }),
+    );
     expect(assets.upload).toHaveBeenCalledWith(
       expect.objectContaining({
         filename: 'labels.pdf',
@@ -48,6 +60,8 @@ describe('ActivationLabelPrintProcessor', () => {
       filename: 'labels.pdf',
       storageKey: 'private/labels.pdf',
     });
+    expect(jobs.markProgress).toHaveBeenNthCalledWith(1, 'print-job-id', 40);
+    expect(jobs.markProgress).toHaveBeenNthCalledWith(2, 'print-job-id', 95);
   });
 
   it('marks the job failed only after the final BullMQ attempt', async () => {
@@ -60,6 +74,7 @@ describe('ActivationLabelPrintProcessor', () => {
         to_index: 1,
       }),
       markFailed: jest.fn().mockResolvedValue(undefined),
+      markProgress: jest.fn().mockResolvedValue(undefined),
       markProcessing: jest.fn().mockResolvedValue(undefined),
     };
     const renderer = { execute: jest.fn().mockRejectedValue(error) };
@@ -74,6 +89,7 @@ describe('ActivationLabelPrintProcessor', () => {
         attemptsMade: 2,
         data: { printJobId: 'print-job-id' },
         opts: { attempts: 3 },
+        updateProgress: jest.fn().mockResolvedValue(undefined),
       } as never),
     ).rejects.toBe(error);
 

@@ -12,6 +12,7 @@ describe('ActivationLabelPrintQueueService', () => {
   it('enqueues an idempotent print job with retry policy', async () => {
     const queue = {
       add: jest.fn().mockResolvedValue({ id: 'bull-id' }),
+      getJob: jest.fn().mockResolvedValue(null),
       getWaitingCount: jest.fn().mockResolvedValue(1),
     };
     await new ActivationLabelPrintQueueService(
@@ -33,6 +34,7 @@ describe('ActivationLabelPrintQueueService', () => {
   it('rejects when the waiting queue is full', async () => {
     const queue = {
       add: jest.fn(),
+      getJob: jest.fn().mockResolvedValue(null),
       getWaitingCount: jest.fn().mockResolvedValue(8),
     };
     await expect(
@@ -42,6 +44,25 @@ describe('ActivationLabelPrintQueueService', () => {
       ).enqueue('print-job-id'),
     ).rejects.toMatchObject({ code: 'ACTIVATION_LABEL_QUEUE_FULL' });
     expect(queue.add).not.toHaveBeenCalled();
+  });
+
+  it('returns an existing BullMQ job without adding a duplicate', async () => {
+    const existing = { id: 'existing-job' };
+    const queue = {
+      add: jest.fn(),
+      getJob: jest.fn().mockResolvedValue(existing),
+      getWaitingCount: jest.fn(),
+    };
+
+    await expect(
+      new ActivationLabelPrintQueueService(
+        queue as never,
+        config as never,
+      ).enqueue('print-job-id'),
+    ).resolves.toBe(existing);
+
+    expect(queue.add).not.toHaveBeenCalled();
+    expect(queue.getWaitingCount).not.toHaveBeenCalled();
   });
 
   it('removes an exhausted BullMQ job before re-enqueueing a retry', async () => {

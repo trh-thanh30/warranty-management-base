@@ -35,6 +35,12 @@ export class ActivationLabelPrintProcessor extends WorkerHost {
     try {
       const result = await this.renderer.execute(printJob.batch_id, {
         from: printJob.from_index,
+        onProgress: async (progressPercent) => {
+          await Promise.all([
+            job.updateProgress(progressPercent),
+            this.jobs.markProgress(printJob.id, progressPercent),
+          ]);
+        },
         to: printJob.to_index,
       });
       const uploaded = await this.assets.upload(
@@ -55,6 +61,10 @@ export class ActivationLabelPrintProcessor extends WorkerHost {
           folder: 'activation-labels',
         },
       );
+      await Promise.all([
+        job.updateProgress(95),
+        this.jobs.markProgress(printJob.id, 95),
+      ]);
       await this.jobs.markCompleted(printJob.id, {
         filename: result.filename,
         storageKey: uploaded.path,

@@ -20,15 +20,17 @@ export class ActivationLabelPrintQueueService {
   ) {}
 
   async enqueue(printJobId: string, options: { replaceFailed?: boolean } = {}) {
-    if (options.replaceFailed) {
-      const existing = await this.queue.getJob(printJobId);
-      if (existing) {
+    const existing = await this.queue.getJob(printJobId);
+    if (existing) {
+      if (options.replaceFailed) {
         const state = await existing.getState();
         if (state === 'failed') {
           await existing.remove();
         } else {
           return existing;
         }
+      } else {
+        return existing;
       }
     }
 

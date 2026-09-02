@@ -1,10 +1,15 @@
 "use client";
 
-import { ShieldOff } from "lucide-react";
+import { useState } from "react";
+import { MoreHorizontal, Printer, ShieldOff } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { formatDate } from "@repo/shared";
+import { formatDate, type ActivationCodePrintJob } from "@repo/shared";
 import {
   Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   Table,
   TableBody,
   TableCell,
@@ -13,18 +18,27 @@ import {
   TableRow,
   TableScroll,
 } from "@repo/ui";
+import { ConfirmActionDialog } from "@/src/components/common/confirm-action-dialog";
 import type { ActivationCodeBatchListItem } from "@/src/services/activation-codes/activation-code-batches.types";
 import { ACTIVATION_CODE_BATCH_STATUSES } from "../activation-code-batches.constants";
+import { ActivationCodePrintDialog } from "./activation-code-print-dialog";
 
 type ActivationCodeBatchesTableProps = {
+  canPrint: boolean;
   canRevoke: boolean;
   items: ActivationCodeBatchListItem[];
+  onJobRequested: (
+    batch: ActivationCodeBatchListItem,
+    job: ActivationCodePrintJob,
+  ) => void;
   onRevoke: (batch: ActivationCodeBatchListItem) => void;
 };
 
 export function ActivationCodeBatchesTable({
+  canPrint,
   canRevoke,
   items,
+  onJobRequested,
   onRevoke,
 }: ActivationCodeBatchesTableProps) {
   return (
@@ -33,8 +47,10 @@ export function ActivationCodeBatchesTable({
         {items.map((batch) => (
           <ActivationCodeBatchMobileCard
             batch={batch}
+            canPrint={canPrint}
             canRevoke={canRevoke}
             key={batch.id}
+            onJobRequested={onJobRequested}
             onRevoke={onRevoke}
           />
         ))}
@@ -49,8 +65,10 @@ export function ActivationCodeBatchesTable({
             {items.map((batch) => (
               <ActivationCodeBatchTableRow
                 batch={batch}
+                canPrint={canPrint}
                 canRevoke={canRevoke}
                 key={batch.id}
+                onJobRequested={onJobRequested}
                 onRevoke={onRevoke}
               />
             ))}
@@ -79,11 +97,15 @@ function ActivationCodeBatchTableHeader() {
 
 function ActivationCodeBatchTableRow({
   batch,
+  canPrint,
   canRevoke,
+  onJobRequested,
   onRevoke,
 }: {
   batch: ActivationCodeBatchListItem;
+  canPrint: boolean;
   canRevoke: boolean;
+  onJobRequested: ActivationCodeBatchesTableProps["onJobRequested"];
   onRevoke: ActivationCodeBatchesTableProps["onRevoke"];
 }) {
   const locale = useLocale();
@@ -103,9 +125,11 @@ function ActivationCodeBatchTableRow({
       <TableCell>{formatDate(batch.expiresAt, { locale })}</TableCell>
       <TableCell>{formatDate(batch.createdAt, { locale })}</TableCell>
       <TableCell className="text-right">
-        <RevokeBatchButton
+        <ActivationCodeBatchActionsMenu
           batch={batch}
+          canPrint={canPrint}
           canRevoke={canRevoke}
+          onJobRequested={onJobRequested}
           onRevoke={onRevoke}
         />
       </TableCell>
@@ -115,11 +139,15 @@ function ActivationCodeBatchTableRow({
 
 function ActivationCodeBatchMobileCard({
   batch,
+  canPrint,
   canRevoke,
+  onJobRequested,
   onRevoke,
 }: {
   batch: ActivationCodeBatchListItem;
+  canPrint: boolean;
   canRevoke: boolean;
+  onJobRequested: ActivationCodeBatchesTableProps["onJobRequested"];
   onRevoke: ActivationCodeBatchesTableProps["onRevoke"];
 }) {
   const locale = useLocale();
@@ -134,9 +162,11 @@ function ActivationCodeBatchMobileCard({
           </p>
           <ProductSummary batch={batch} />
         </div>
-        <RevokeBatchButton
+        <ActivationCodeBatchActionsMenu
           batch={batch}
+          canPrint={canPrint}
           canRevoke={canRevoke}
+          onJobRequested={onJobRequested}
           onRevoke={onRevoke}
         />
       </div>
@@ -183,6 +213,19 @@ function ActivationCodeStatusCounts({
   batch: ActivationCodeBatchListItem;
 }) {
   const t = useTranslations("ActivationCodeBatches");
+  const statusClasses: Record<
+    (typeof ACTIVATION_CODE_BATCH_STATUSES)[number],
+    string
+  > = {
+    AVAILABLE:
+      "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300",
+    ACTIVATED:
+      "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300",
+    EXPIRED:
+      "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300",
+    REVOKED:
+      "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
+  };
 
   return (
     <div className="flex flex-wrap gap-1">
@@ -192,7 +235,7 @@ function ActivationCodeStatusCounts({
 
         return (
           <span
-            className="rounded-md bg-slate-100 px-2 py-1 text-xs text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+            className={`rounded-md px-2 py-1 text-xs ${statusClasses[status]}`}
             key={status}
           >
             {t(`statuses.${status}`)}: {count}
@@ -203,28 +246,79 @@ function ActivationCodeStatusCounts({
   );
 }
 
-function RevokeBatchButton({
+function ActivationCodeBatchActionsMenu({
   batch,
+  canPrint,
   canRevoke,
+  onJobRequested,
   onRevoke,
 }: {
   batch: ActivationCodeBatchListItem;
+  canPrint: boolean;
   canRevoke: boolean;
+  onJobRequested: ActivationCodeBatchesTableProps["onJobRequested"];
   onRevoke: ActivationCodeBatchesTableProps["onRevoke"];
 }) {
   const t = useTranslations("ActivationCodeBatches");
+  const [printOpen, setPrintOpen] = useState(false);
+  const [revokeOpen, setRevokeOpen] = useState(false);
+  const canRevokeAvailable =
+    canRevoke && (batch.statusCounts.AVAILABLE ?? 0) > 0;
 
-  if (!canRevoke || (batch.statusCounts.AVAILABLE ?? 0) === 0) return null;
+  if (!canPrint && !canRevokeAvailable) return null;
 
   return (
-    <Button
-      aria-label={t("revokeAria", { batch: batch.batchCode })}
-      className="size-10 md:size-9"
-      onClick={() => onRevoke(batch)}
-      size="icon"
-      variant="ghost"
-    >
-      <ShieldOff className="size-4" />
-    </Button>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            aria-label={t("openActions", { batch: batch.batchCode })}
+            className="size-10 md:size-9"
+            size="icon"
+            variant="ghost"
+          >
+            <MoreHorizontal className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {canPrint ? (
+            <DropdownMenuItem onSelect={() => setPrintOpen(true)}>
+              <Printer className="mr-2 size-4" />
+              {t("printAction")}
+            </DropdownMenuItem>
+          ) : null}
+          {canRevokeAvailable ? (
+            <DropdownMenuItem
+              className="text-red-600 focus:text-red-700 dark:text-red-400"
+              onSelect={() => setRevokeOpen(true)}
+            >
+              <ShieldOff className="mr-2 size-4" />
+              {t("revokeAction")}
+            </DropdownMenuItem>
+          ) : null}
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {canPrint ? (
+        <ActivationCodePrintDialog
+          batch={batch}
+          onJobRequested={onJobRequested}
+          onOpenChange={setPrintOpen}
+          open={printOpen}
+        />
+      ) : null}
+      <ConfirmActionDialog
+        cancelLabel={t("cancel")}
+        confirmLabel={t("revokeAction")}
+        description={t("revokeConfirm", { batch: batch.batchCode })}
+        onConfirm={() => {
+          setRevokeOpen(false);
+          onRevoke(batch);
+        }}
+        onOpenChange={setRevokeOpen}
+        open={revokeOpen}
+        title={t("revokeTitle")}
+        variant="destructive"
+      />
+    </>
   );
 }

@@ -23,12 +23,13 @@ describe('CreatePrintableActivationLabelsUseCase', () => {
     const pdfRenderer = {
       createPdf: jest.fn().mockResolvedValue(Buffer.from('%PDF-test')),
     } as unknown as HtmlPdfRendererService;
+    const onProgress = jest.fn().mockResolvedValue(undefined);
 
     const result = await new CreatePrintableActivationLabelsUseCase(
       repository,
       crypto,
       pdfRenderer,
-    ).execute('batch-id', { from: 1, to: 1 });
+    ).execute('batch-id', { from: 1, onProgress, to: 1 });
 
     expect(crypto.decrypt).toHaveBeenCalledWith('cipher-1');
     expect(crypto.decrypt).not.toHaveBeenCalledWith('cipher-2');
@@ -37,6 +38,9 @@ describe('CreatePrintableActivationLabelsUseCase', () => {
     );
     expect(result.filename).toBe('ACB-20260831-ABC-labels.pdf');
     expect(result.pdf.subarray(0, 5).toString()).toBe('%PDF-');
+    expect(onProgress.mock.calls.map(([progress]) => progress)).toEqual([
+      25, 40, 80,
+    ]);
   });
 
   it('rejects an invalid range', async () => {

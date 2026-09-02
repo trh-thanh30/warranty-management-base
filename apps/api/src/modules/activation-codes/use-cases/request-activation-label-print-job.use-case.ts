@@ -43,7 +43,12 @@ export class RequestActivationLabelPrintJobUseCase {
     const idempotencyKey = `activation-labels-${input.batchId}-${from}-${boundedTo}`;
     const existing = await this.jobs.findByIdempotencyKey(idempotencyKey);
     if (existing) {
-      if (existing.status !== 'FAILED') return existing;
+      if (existing.status === 'COMPLETED') return existing;
+
+      if (existing.status !== 'FAILED') {
+        await this.queue.enqueue(existing.id);
+        return existing;
+      }
 
       const bullJob = await this.queue.enqueue(existing.id, {
         replaceFailed: true,

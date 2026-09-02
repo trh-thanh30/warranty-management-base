@@ -7,6 +7,7 @@ import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { useToast } from "@/src/hooks/use-toast";
 import { usePermissions } from "@/src/hooks/use-permissions";
+import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import { useDebounce } from "@repo/hooks";
 import type { ProductResponse } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
@@ -21,21 +22,27 @@ import {
   Skeleton,
 } from "@repo/ui";
 import { PaginationControls } from "@repo/ui/pagination-controls";
-import { AlertCircle, KeyRound, Plus, Settings2 } from "lucide-react";
+import { AlertCircle, FileText, KeyRound, Plus, Settings2 } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { useInfiniteProducts } from "../products/hooks/use-products";
 import { ACTIVATION_CODE_BATCH_STATUSES } from "./activation-code-batches.constants";
 import { ActivationCodeBatchesTable } from "./components/activation-code-batches-table";
+import { ActivationCodePrintJobsDialog } from "./components/activation-code-print-jobs-panel";
 import { useActivationCodeBatches } from "./hooks/use-activation-code-batches";
+import { useActivationCodePrintJobs } from "./hooks/use-activation-code-print-jobs";
 
 export function ActivationCodeBatchesView() {
   const t = useTranslations("ActivationCodeBatches");
+  const tApiErrors = useTranslations("ApiErrors");
   const directory = useActivationCodeBatches();
+  const printJobs = useActivationCodePrintJobs();
   const toast = useToast();
   const { hasPermission } = usePermissions();
   const canConfigurePolicy = hasPermission(PERMISSIONS.SYSTEM_CONFIG_VIEW);
+  const canPrint = hasPermission(PERMISSIONS.ACTIVATION_CODE_BATCH_PRINT);
+  const [isPrintJobsOpen, setPrintJobsOpen] = useState(false);
   const [productSearch, setProductSearch] = useState("");
   const debouncedProductSearch = useDebounce(productSearch.trim(), 300);
   const productsQuery = useInfiniteProducts(
@@ -71,6 +78,16 @@ export function ActivationCodeBatchesView() {
                     <Settings2 className="size-4" />
                     {t("settings")}
                   </Link>
+                </Button>
+              ) : null}
+              {canPrint ? (
+                <Button
+                  onClick={() => setPrintJobsOpen(true)}
+                  size="md"
+                  variant="outline"
+                >
+                  <FileText className="size-4" />
+                  {t("openPrintJobs", { count: printJobs.jobs.length })}
                 </Button>
               ) : null}
               {directory.canCreate ? (
@@ -194,6 +211,12 @@ export function ActivationCodeBatchesView() {
             </CardContent>
           </Card>
         ) : null}
+        <ActivationCodePrintJobsDialog
+          jobs={printJobs.jobs}
+          onDismiss={printJobs.remove}
+          onOpenChange={setPrintJobsOpen}
+          open={isPrintJobsOpen}
+        />
         <Card>
           <CardHeader className="gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div>
@@ -249,20 +272,22 @@ export function ActivationCodeBatchesView() {
             ) : data?.items.length ? (
               <>
                 <ActivationCodeBatchesTable
+                  canPrint={canPrint}
                   canRevoke={directory.canRevoke}
                   items={data.items}
+                  onJobRequested={printJobs.add}
                   onRevoke={(batch) => {
-                    if (
-                      !window.confirm(
-                        t("revokeConfirm", { batch: batch.batchCode }),
-                      )
-                    ) {
-                      return;
-                    }
                     void directory.revokeMutation
                       .mutateAsync(batch.id)
                       .then(() => toast.success(t("revoked")))
-                      .catch(() => toast.error(t("revokeError")));
+                      .catch((error) =>
+                        toast.error(
+                          getLocalizedApiError(error, t, {
+                            apiErrors: tApiErrors,
+                            fallbackKey: "revokeError",
+                          }),
+                        ),
+                      );
                   }}
                 />
                 <PaginationControls
