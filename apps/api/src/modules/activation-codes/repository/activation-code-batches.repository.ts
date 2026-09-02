@@ -1,12 +1,12 @@
 import { normalizePagination, paginate } from '@/common/pagination/pagination';
 import { PrismaService } from '@/database/prisma/prisma.service';
-import { ActivationCodeCryptoService } from '@/modules/activation-codes/services/activation-code-crypto.service';
 import type {
   ActivationCodeReport,
   ActivationCodeReportFilters,
   ActivationCodeReportQueryResult,
   ActivationCodeReportRow,
 } from '@/modules/activation-codes/activation-code-reporting.types';
+import { ActivationCodeCryptoService } from '@/modules/activation-codes/services/activation-code-crypto.service';
 import { Injectable } from '@nestjs/common';
 import {
   activation_code_status,
@@ -191,6 +191,12 @@ export class ActivationCodeBatchesRepository {
           expires_at: true,
           activated_at: true,
           revoked_at: true,
+          replaced_by: {
+            select: { id: true, code_ciphertext: true, status: true },
+          },
+          replaces: {
+            select: { id: true, code_ciphertext: true, status: true },
+          },
         },
       }),
       this.prismaService.activationCode.count({ where }),
@@ -210,10 +216,64 @@ export class ActivationCodeBatchesRepository {
           expiresAt: row.expires_at,
           activatedAt: row.activated_at,
           revokedAt: row.revoked_at,
+          replacedBy: row.replaced_by
+            ? {
+                id: row.replaced_by.id,
+                maskedCode: this.mask(row.replaced_by.code_ciphertext),
+                status: row.replaced_by.status,
+              }
+            : null,
+          replaces: row.replaces
+            ? {
+                id: row.replaces.id,
+                maskedCode: this.mask(row.replaces.code_ciphertext),
+                status: row.replaces.status,
+              }
+            : null,
         };
       }),
       { page, limit, total },
     );
+  }
+
+  async replaceExpiredCode(expiredId: string, replacementCode: string) {
+    const replacementHash = this.crypto.hash(replacementCode);
+    return this.prismaService.$transaction(async (tx) => {
+      const expired = await tx.activationCode.findUnique({
+        where: { id: expiredId },
+        include: { batch: { select: { product_sku: true } } },
+      });
+      if (!expired) return { kind: 'NOT_FOUND' as const };
+      if (
+        expired.status !== activation_code_status.EXPIRED ||
+        expired.replaced_by_id
+      ) {
+        return { kind: 'NOT_REPLACEABLE' as const };
+      }
+      const replacement = await tx.activationCode.findUnique({
+        where: { code_hash: replacementHash },
+        include: { batch: { select: { product_sku: true } } },
+      });
+      if (
+        !replacement ||
+        replacement.status !== activation_code_status.AVAILABLE ||
+        replacement.batch.product_sku !== expired.batch.product_sku
+      ) {
+        return { kind: 'INVALID_REPLACEMENT' as const };
+      }
+      await tx.activationCode.update({
+        where: { id: expired.id },
+        data: {
+          status: activation_code_status.REPLACED,
+          replaced_by_id: replacement.id,
+        },
+      });
+      return { kind: 'REPLACED' as const, replacementId: replacement.id };
+    });
+  }
+
+  private mask(ciphertext: string) {
+    return `${this.crypto.decrypt(ciphertext).slice(0, 8)}••••`;
   }
 
   findAvailableByHash(codeHash: string) {

@@ -417,7 +417,8 @@
       "AVAILABLE": "Available",
       "ACTIVATED": "Activated",
       "EXPIRED": "Expired",
-      "REVOKED": "Revoked"
+      "REVOKED": "Revoked",
+      "REPLACED": "Replaced"
     },
     "columns": {
       "batch": "Batch code",
@@ -465,6 +466,15 @@
     "revokeTitle": "Revoke activation code",
     "revokeConfirm": "Are you sure you want to revoke {code}? It can no longer be used for activation.",
     "revokeError": "Could not revoke the activation code.",
+    "replace": "Replace code",
+    "replaceTitle": "Replace expired activation code",
+    "replaceDescription": "Enter an AVAILABLE code to replace {code}.",
+    "replacementCode": "Replacement code",
+    "replacementCodePlaceholder": "Enter the new activation code",
+    "replaceError": "Could not replace the activation code.",
+    "replaced": "Activation code replaced.",
+    "replacedBy": "Replaced by {code}",
+    "replaces": "Replaces {code}",
     "cancel": "Cancel",
     "next": "Next",
     "previous": "Previous",

@@ -98,6 +98,12 @@ export function createActivationCodesService(http: ActivationCodesHttpClient) {
       await http.post(`/activation-code-batches/codes/${codeId}/revoke`);
     },
 
+    async replaceCode(codeId: string, replacementCode: string): Promise<void> {
+      await http.post(`/activation-code-batches/codes/${codeId}/replace`, {
+        replacementCode,
+      });
+    },
+
     async revokeBatch(
       batchId: string,
     ): Promise<RevokeActivationCodeBatchResult> {

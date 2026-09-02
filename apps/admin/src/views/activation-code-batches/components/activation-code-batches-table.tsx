@@ -227,6 +227,8 @@ function ActivationCodeStatusCounts({
       "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300",
     REVOKED:
       "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
+    REPLACED:
+      "bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300",
   };
 
   return (

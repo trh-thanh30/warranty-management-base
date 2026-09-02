@@ -33,6 +33,14 @@ export type ActivationCodeDetail = {
   expiresAt: string;
   activatedAt: string | null;
   revokedAt: string | null;
+  replacedBy: ActivationCodeHistoryLink | null;
+  replaces: ActivationCodeHistoryLink | null;
+};
+
+export type ActivationCodeHistoryLink = {
+  id: string;
+  maskedCode: string;
+  status: ActivationCodeReportStatus;
 };
 
 export type ActivationCodeDetailList = {

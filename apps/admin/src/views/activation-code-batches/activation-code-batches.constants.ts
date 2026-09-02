@@ -5,4 +5,5 @@ export const ACTIVATION_CODE_BATCH_STATUSES = [
   "ACTIVATED",
   "EXPIRED",
   "REVOKED",
+  "REPLACED",
 ] as const satisfies readonly ActivationCodeReportStatus[];

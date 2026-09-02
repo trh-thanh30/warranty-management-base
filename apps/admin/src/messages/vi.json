@@ -417,7 +417,8 @@
       "AVAILABLE": "Có thể kích hoạt",
       "ACTIVATED": "Đã kích hoạt",
       "EXPIRED": "Đã hết hạn",
-      "REVOKED": "Đã thu hồi"
+      "REVOKED": "Đã thu hồi",
+      "REPLACED": "Đã thay thế"
     },
     "columns": {
       "batch": "Mã lô",
@@ -465,6 +466,15 @@
     "revokeTitle": "Thu hồi mã kích hoạt",
     "revokeConfirm": "Bạn có chắc muốn thu hồi mã {code}? Mã này sẽ không thể dùng để kích hoạt.",
     "revokeError": "Không thể thu hồi mã kích hoạt.",
+    "replace": "Thay thế mã",
+    "replaceTitle": "Thay thế mã kích hoạt hết hạn",
+    "replaceDescription": "Nhập mã AVAILABLE mới để thay thế {code}.",
+    "replacementCode": "Mã thay thế",
+    "replacementCodePlaceholder": "Nhập mã kích hoạt mới",
+    "replaceError": "Không thể thay thế mã kích hoạt.",
+    "replaced": "Đã thay thế mã kích hoạt.",
+    "replacedBy": "Được thay thế bởi {code}",
+    "replaces": "Thay thế cho {code}",
     "cancel": "Hủy",
     "next": "Sau",
     "previous": "Trước",

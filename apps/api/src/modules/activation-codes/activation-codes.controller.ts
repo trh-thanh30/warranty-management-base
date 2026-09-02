@@ -19,6 +19,8 @@ import { ListActivationCodeBatchesUseCase } from '@/modules/activation-codes/use
 import { RevokeActivationCodeUseCase } from '@/modules/activation-codes/use-cases/revoke-activation-code.use-case';
 import { RevokeActivationCodeBatchUseCase } from '@/modules/activation-codes/use-cases/revoke-activation-code-batch.use-case';
 import { ListActivationCodesUseCase } from '@/modules/activation-codes/use-cases/list-activation-codes.use-case';
+import { ReplaceActivationCodeDto } from '@/modules/activation-codes/dto/replace-activation-code.dto';
+import { ReplaceActivationCodeUseCase } from '@/modules/activation-codes/use-cases/replace-activation-code.use-case';
 import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import { permission_key } from '@prisma/client';
 import type { Response } from 'express';
@@ -38,6 +40,7 @@ export class ActivationCodesController {
     private readonly listBatchesUseCase: ListActivationCodeBatchesUseCase,
     private readonly revokeBatchUseCase: RevokeActivationCodeBatchUseCase,
     private readonly listCodesUseCase: ListActivationCodesUseCase,
+    private readonly replaceActivationCodeUseCase: ReplaceActivationCodeUseCase,
   ) {}
 
   @Get()
@@ -99,6 +102,12 @@ export class ActivationCodesController {
   @Permissions([permission_key.ACTIVATION_CODE_BATCH_REVOKE])
   revoke(@Param('id') id: string) {
     return this.revokeActivationCodeUseCase.execute(id);
+  }
+
+  @Post('codes/:id/replace')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_REVOKE])
+  replace(@Param('id') id: string, @Body() dto: ReplaceActivationCodeDto) {
+    return this.replaceActivationCodeUseCase.execute(id, dto.replacementCode);
   }
 
   @Post(':id/revoke')

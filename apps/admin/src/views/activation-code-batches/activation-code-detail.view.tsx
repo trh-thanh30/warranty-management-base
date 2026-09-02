@@ -65,6 +65,9 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
   const [revokeTarget, setRevokeTarget] = useState<ActivationCodeDetail | null>(
     null,
   );
+  const [replaceTarget, setReplaceTarget] =
+    useState<ActivationCodeDetail | null>(null);
+  const [replacementCode, setReplacementCode] = useState("");
   const debouncedSearch = useDebounce(search.trim(), 300);
   const query = useQuery({
     placeholderData: (previous) => previous,
@@ -90,6 +93,22 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
       });
       setRevokeTarget(null);
       toast.success(t("revoked"));
+    },
+  });
+  const replaceMutation = useMutation({
+    mutationFn: () =>
+      activationCodesService.replaceCode(
+        replaceTarget!.id,
+        replacementCode.trim(),
+      ),
+    onError: () => toast.error(t("replaceError")),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["activation-code-detail", batchId],
+      });
+      setReplaceTarget(null);
+      setReplacementCode("");
+      toast.success(t("replaced"));
     },
   });
   const statusOptions = useMemo(
@@ -167,6 +186,10 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
                       .catch(() => toast.error(t("copyError")));
                   }}
                   onRevoke={setRevokeTarget}
+                  onReplace={(code) => {
+                    setReplacementCode("");
+                    setReplaceTarget(code);
+                  }}
                   t={t}
                 />
                 <PaginationControls
@@ -210,6 +233,43 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
           title={t("revokeTitle")}
           variant="destructive"
         />
+        {replaceTarget ? (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-slate-900">
+              <h2 className="text-lg font-semibold">{t("replaceTitle")}</h2>
+              <p className="mt-2 text-sm text-slate-500">
+                {t("replaceDescription", { code: replaceTarget.maskedCode })}
+              </p>
+              <Input
+                className="mt-4"
+                value={replacementCode}
+                onChange={(e) => setReplacementCode(e.target.value)}
+                placeholder={t("replacementCodePlaceholder")}
+                aria-label={t("replacementCode")}
+              />
+              <div className="mt-5 flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setReplaceTarget(null)}
+                >
+                  {t("cancel")}
+                </Button>
+                <Button
+                  disabled={
+                    !replacementCode.trim() || replaceMutation.isPending
+                  }
+                  onClick={() => replaceMutation.mutate()}
+                >
+                  {t("replace")}
+                </Button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </FormPageShell>
     </PermissionGuard>
   );
@@ -221,6 +281,7 @@ function ActivationCodesTable({
   locale,
   onCopy,
   onRevoke,
+  onReplace,
   t,
 }: {
   canRevoke: boolean;
@@ -228,6 +289,7 @@ function ActivationCodesTable({
   locale: string;
   onCopy: (code: ActivationCodeDetail) => void;
   onRevoke: (code: ActivationCodeDetail) => void;
+  onReplace: (code: ActivationCodeDetail) => void;
   t: ReturnType<typeof useTranslations<"ActivationCodeDetail">>;
 }) {
   const [revealedCodeId, setRevealedCodeId] = useState<string | null>(null);
@@ -285,6 +347,16 @@ function ActivationCodesTable({
                 <span className="rounded bg-slate-100 px-2 py-1 text-xs dark:bg-slate-800">
                   {t(`statuses.${item.status}`)}
                 </span>
+                {item.replacedBy ? (
+                  <div className="mt-1 text-xs text-slate-500">
+                    {t("replacedBy", { code: item.replacedBy.maskedCode })}
+                  </div>
+                ) : null}
+                {item.replaces ? (
+                  <div className="mt-1 text-xs text-slate-500">
+                    {t("replaces", { code: item.replaces.maskedCode })}
+                  </div>
+                ) : null}
               </TableCell>
               <TableCell>{formatDate(item.createdAt, { locale })}</TableCell>
               <TableCell>{formatDate(item.expiresAt, { locale })}</TableCell>
@@ -294,7 +366,8 @@ function ActivationCodesTable({
                   : "—"}
               </TableCell>
               <TableCell className="text-right">
-                {item.copyCode ? (
+                {item.copyCode ||
+                (canRevoke && item.status === "EXPIRED" && !item.replacedBy) ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -331,6 +404,14 @@ function ActivationCodesTable({
                         </>
                       ) : null}
                       {canRevoke ? (
+                        item.status === "EXPIRED" && !item.replacedBy ? (
+                          <DropdownMenuItem onSelect={() => onReplace(item)}>
+                            <KeyRound className="mr-2 size-4" />
+                            {t("replace")}
+                          </DropdownMenuItem>
+                        ) : null
+                      ) : null}
+                      {canRevoke && item.status === "AVAILABLE" ? (
                         <DropdownMenuItem
                           className="text-red-600 focus:text-red-700 dark:text-red-400"
                           onSelect={() => onRevoke(item)}
