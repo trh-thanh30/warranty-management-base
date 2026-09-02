@@ -298,7 +298,6 @@ export function ActivationCodeBatchesView() {
                   previousLabel={t("previous")}
                   summary={t("summary", { total: data.meta.total })}
                   totalPages={data.meta.totalPages}
-                  variant="compact"
                 />
               </>
             ) : (
