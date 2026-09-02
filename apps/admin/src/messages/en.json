@@ -78,6 +78,9 @@
       "dashboard": "Dashboard",
       "users": "Staff",
       "settings": "Settings",
+      "settingsProfile": "Profile details",
+      "settingsSecurity": "Security",
+      "settingsPermissions": "Permissions & roles",
       "overview": "Overview",
       "customers": "Customers",
       "categories": "Categories",
@@ -2503,7 +2506,9 @@
         "AUDIT_LOG_VIEW": "View audit logs",
         "WEBSITE_CONFIG_VIEW": "View website configuration",
         "WEBSITE_CONFIG_UPDATE": "Update website configuration",
-        "WEBSITE_CONFIG_PUBLISH": "Publish website configuration"
+        "WEBSITE_CONFIG_PUBLISH": "Publish website configuration",
+        "CONTACT_SUBMISSION_VIEW": "View contact messages",
+        "CONTACT_SUBMISSION_UPDATE": "Update contact messages"
       }
     },
     "save": "Save changes",

@@ -7,6 +7,7 @@ import {
   FileCheck2,
   FileText,
   Globe2,
+  KeyRound,
   LayoutDashboard,
   LogOut,
   HardDrive,
@@ -166,8 +167,24 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
           },
           {
             title: t("items.settings"),
-            href: "/settings",
             icon: Settings,
+            children: [
+              {
+                title: t("items.settingsProfile"),
+                href: "/settings/profile",
+                icon: UserRound,
+              },
+              {
+                title: t("items.settingsSecurity"),
+                href: "/settings/security",
+                icon: KeyRound,
+              },
+              {
+                title: t("items.settingsPermissions"),
+                href: "/settings/permissions",
+                icon: ShieldCheck,
+              },
+            ],
           },
         ],
       },
@@ -242,14 +259,14 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
       },
       {
         title: t("items.settings"),
-        href: "/settings",
+        href: "/settings/profile",
       },
     ],
     userMenu: {
       menuItems: [
         {
           label: t("items.settings"),
-          href: "/settings",
+          href: "/settings/profile",
           icon: Settings,
         },
         {

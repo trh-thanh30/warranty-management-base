@@ -1,0 +1,51 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+const detailCardUrl = new URL(
+  "./components/warranty-detail-card.tsx",
+  import.meta.url,
+);
+
+test("warranty detail separates summary, coverage, and cancellation details", async () => {
+  const source = await readFile(detailCardUrl, "utf8");
+
+  assert.match(source, /WarrantySummaryHeader/);
+  assert.match(source, /warranty\.status === "VOIDED"/);
+  assert.match(source, /voidItems\.length/);
+  assert.match(source, /const voidItems/);
+  assert.match(source, /mt-3 grid gap-2 border-t.*sm:grid-cols-3/s);
+});
+
+test("warranty detail uses the product-style detail sections with lighter row dividers", async () => {
+  const source = await readFile(detailCardUrl, "utf8");
+
+  assert.match(source, /function DetailSection/);
+  assert.match(source, /divide-y divide-slate-100/);
+  assert.doesNotMatch(
+    source,
+    /CardHeader className="border-b border-slate-200/,
+  );
+});
+
+test("warranty coverage section hugs its content instead of stretching beside the right column", async () => {
+  const source = await readFile(detailCardUrl, "utf8");
+
+  assert.match(
+    source,
+    /<DetailSection\s+className="self-start"[\s\S]*title=\{t\("sections\.coverage"\)\}/,
+  );
+});
+
+test("warranty detail keeps its actions in the page header on desktop", async () => {
+  const source = await readFile(
+    new URL("./warranty-detail.view.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(source, /descriptionAccessory=\{/);
+  assert.doesNotMatch(
+    source,
+    /<div className="flex flex-wrap justify-end gap-2">/,
+  );
+});

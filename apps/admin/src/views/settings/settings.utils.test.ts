@@ -73,7 +73,7 @@ test("permission grouping retains permissions outside known groups", () => {
   ]);
 });
 
-test("every permission group has a category label in each admin locale", () => {
+test("every permission group and permission has a label in each admin locale", () => {
   for (const locale of ["vi", "en"]) {
     const messages = JSON.parse(
       readFileSync(
@@ -81,9 +81,15 @@ test("every permission group has a category label in each admin locale", () => {
         "utf8",
       ),
     ) as {
-      Settings?: { permissions?: { categories?: Record<string, string> } };
+      Settings?: {
+        permissions?: {
+          categories?: Record<string, string>;
+          labels?: Record<string, string>;
+        };
+      };
     };
     const categories = messages.Settings?.permissions?.categories ?? {};
+    const labels = messages.Settings?.permissions?.labels ?? {};
 
     for (const group of PERMISSION_GROUPS) {
       assert.equal(
@@ -91,6 +97,14 @@ test("every permission group has a category label in each admin locale", () => {
         "string",
         `${locale} is missing Settings.permissions.categories.${group.key}`,
       );
+
+      for (const permission of group.permissions) {
+        assert.equal(
+          typeof labels[permission],
+          "string",
+          `${locale} is missing Settings.permissions.labels.${permission}`,
+        );
+      }
     }
   }
 });

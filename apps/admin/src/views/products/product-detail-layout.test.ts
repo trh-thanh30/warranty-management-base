@@ -47,18 +47,54 @@ test("product identifiers use distinct semantic icons", async () => {
   assert.match(source, /icon=\{<CalendarRange className="size-4" \/>\}/);
 });
 
-test("product detail rows stay on one line on mobile", async () => {
+test("product detail rows keep labels above values on mobile", async () => {
   const source = await readFile(detailCardUrl, "utf8");
 
   assert.equal(
-    source.match(/grid-cols-\[minmax\(0,1fr\)_minmax\(0,1fr\)\][^"]*sm:flex/g)
+    source.match(/grid min-h-11 grid-cols-\[minmax\(0,1fr\)_minmax\(0,1fr\)\]/g)
       ?.length ?? 0,
     2,
   );
-  assert.match(source, /overflow-hidden whitespace-nowrap/);
+  assert.match(source, /flex min-w-0 items-center justify-end gap-1/);
   assert.match(source, /truncate text-right/);
-  assert.match(source, /title=\{value\}/);
-  assert.doesNotMatch(source, /className="break-all text-right/);
+  assert.match(source, /title=\{value \?\? undefined\}/);
+  assert.doesNotMatch(source, /grid-cols-\[96px_minmax\(0,1fr\)\]/);
+});
+
+test("product detail rows render localized placeholders for unavailable values", async () => {
+  const source = await readFile(detailCardUrl, "utf8");
+
+  assert.match(source, /const emptyValue = t\("notUpdated"\)/);
+  assert.match(source, /value=\{product\.displayName \|\| emptyValue\}/);
+  assert.match(
+    source,
+    /value=\{product\.modelYear \? String\(product\.modelYear\) : emptyValue\}/,
+  );
+  assert.match(source, /value=\{installationPosition \|\| emptyValue\}/);
+  assert.match(source, /\{value \|\| t\("notUpdated"\)\}/);
+  assert.doesNotMatch(source, /muted=/);
+});
+
+test("product summary and owner sections preserve mobile width", async () => {
+  const source = await readFile(detailCardUrl, "utf8");
+  const summarySource = source.slice(
+    source.indexOf("function ProductSummaryHeader"),
+    source.indexOf("function OwnerSummary"),
+  );
+
+  assert.match(source, /flex flex-col gap-4 rounded-lg border/);
+  assert.match(summarySource, /getProductDisplayName\(product\)/);
+  assert.match(summarySource, /product\.categoryRef\.name/);
+  assert.match(source, /<OwnerSummary product=\{product\} \/>/);
+  assert.match(
+    source,
+    /<CopyableDetailItem\s+icon=\{<Hash className="size-4" \/>\}\s+label=\{t\("productCode"\)\}/,
+  );
+  assert.match(source, /flex items-center justify-between gap-3 border-b/);
+  assert.match(
+    source,
+    /<WarrantyStatusBadge status=\{product\.warranty\?\.status\} \/>/,
+  );
 });
 
 test("product detail translations exist in every admin locale", async () => {
