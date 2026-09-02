@@ -12,3 +12,14 @@ export class ListActivationCodeBatchesDto extends PaginationQueryDto {
   @IsIn(Object.values(activation_code_status))
   status?: activation_code_status;
 }
+
+export class ListActivationCodesDto extends PaginationQueryDto {
+  @IsOptional()
+  @IsString()
+  @Length(1, 120)
+  search?: string;
+
+  @IsOptional()
+  @IsIn(Object.values(activation_code_status))
+  status?: activation_code_status;
+}

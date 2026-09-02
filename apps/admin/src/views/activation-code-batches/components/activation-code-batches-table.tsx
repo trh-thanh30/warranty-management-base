@@ -22,6 +22,8 @@ import { ConfirmActionDialog } from "@/src/components/common/confirm-action-dial
 import type { ActivationCodeBatchListItem } from "@/src/services/activation-codes/activation-code-batches.types";
 import { ACTIVATION_CODE_BATCH_STATUSES } from "../activation-code-batches.constants";
 import { ActivationCodePrintDialog } from "./activation-code-print-dialog";
+import Link from "next/link";
+import { Eye } from "lucide-react";
 
 type ActivationCodeBatchesTableProps = {
   canPrint: boolean;
@@ -225,6 +227,8 @@ function ActivationCodeStatusCounts({
       "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300",
     REVOKED:
       "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
+    REPLACED:
+      "bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300",
   };
 
   return (
@@ -265,8 +269,6 @@ function ActivationCodeBatchActionsMenu({
   const canRevokeAvailable =
     canRevoke && (batch.statusCounts.AVAILABLE ?? 0) > 0;
 
-  if (!canPrint && !canRevokeAvailable) return null;
-
   return (
     <>
       <DropdownMenu>
@@ -281,6 +283,12 @@ function ActivationCodeBatchActionsMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild>
+            <Link href={`/activation-code-batches/${batch.id}`}>
+              <Eye className="mr-2 size-4" />
+              Xem chi tiết mã
+            </Link>
+          </DropdownMenuItem>
           {canPrint ? (
             <DropdownMenuItem onSelect={() => setPrintOpen(true)}>
               <Printer className="mr-2 size-4" />

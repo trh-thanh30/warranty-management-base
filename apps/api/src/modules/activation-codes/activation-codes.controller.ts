@@ -4,7 +4,10 @@ import { createDatedExcelFilename, sendExcelFile } from '@/common/excel';
 import { BadRequestError } from '@/common/response';
 import { ActivationCodeReportQueryDto } from '@/modules/activation-codes/dto/activation-code-report-query.dto';
 import { CreateActivationCodeBatchDto } from '@/modules/activation-codes/dto/create-activation-code-batch.dto';
-import { ListActivationCodeBatchesDto } from '@/modules/activation-codes/dto/list-activation-code-batches.dto';
+import {
+  ListActivationCodeBatchesDto,
+  ListActivationCodesDto,
+} from '@/modules/activation-codes/dto/list-activation-code-batches.dto';
 import { PrintableActivationLabelsQueryDto } from '@/modules/activation-codes/dto/printable-activation-labels-query.dto';
 import { CreateActivationCodeBatchUseCase } from '@/modules/activation-codes/use-cases/create-activation-code-batch.use-case';
 import { DownloadActivationLabelPrintJobUseCase } from '@/modules/activation-codes/use-cases/download-activation-label-print-job.use-case';
@@ -15,6 +18,9 @@ import { RequestActivationLabelPrintJobUseCase } from '@/modules/activation-code
 import { ListActivationCodeBatchesUseCase } from '@/modules/activation-codes/use-cases/list-activation-code-batches.use-case';
 import { RevokeActivationCodeUseCase } from '@/modules/activation-codes/use-cases/revoke-activation-code.use-case';
 import { RevokeActivationCodeBatchUseCase } from '@/modules/activation-codes/use-cases/revoke-activation-code-batch.use-case';
+import { ListActivationCodesUseCase } from '@/modules/activation-codes/use-cases/list-activation-codes.use-case';
+import { ReplaceActivationCodeDto } from '@/modules/activation-codes/dto/replace-activation-code.dto';
+import { ReplaceActivationCodeUseCase } from '@/modules/activation-codes/use-cases/replace-activation-code.use-case';
 import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import { permission_key } from '@prisma/client';
 import type { Response } from 'express';
@@ -33,12 +39,20 @@ export class ActivationCodesController {
     private readonly exportReportUseCase: ExportActivationCodeReportUseCase,
     private readonly listBatchesUseCase: ListActivationCodeBatchesUseCase,
     private readonly revokeBatchUseCase: RevokeActivationCodeBatchUseCase,
+    private readonly listCodesUseCase: ListActivationCodesUseCase,
+    private readonly replaceActivationCodeUseCase: ReplaceActivationCodeUseCase,
   ) {}
 
   @Get()
   @Permissions([permission_key.ACTIVATION_CODE_BATCH_VIEW])
   list(@Query() query: ListActivationCodeBatchesDto) {
     return this.listBatchesUseCase.execute(query);
+  }
+
+  @Get(':id/codes')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_VIEW])
+  listCodes(@Param('id') id: string, @Query() query: ListActivationCodesDto) {
+    return this.listCodesUseCase.execute(id, query);
   }
 
   @Get('reports/summary')
@@ -88,6 +102,12 @@ export class ActivationCodesController {
   @Permissions([permission_key.ACTIVATION_CODE_BATCH_REVOKE])
   revoke(@Param('id') id: string) {
     return this.revokeActivationCodeUseCase.execute(id);
+  }
+
+  @Post('codes/:id/replace')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_REVOKE])
+  replace(@Param('id') id: string, @Body() dto: ReplaceActivationCodeDto) {
+    return this.replaceActivationCodeUseCase.execute(id, dto.replacementCode);
   }
 
   @Post(':id/revoke')

@@ -1,5 +1,6 @@
 import type {
   ActivationCodeReportStatus,
+  ActivationCodeDetailList,
   PaginatedResponse,
 } from "@repo/shared";
 
@@ -40,3 +41,12 @@ export type RevokeActivationCodeBatchResult = {
   batchId: string;
   revokedCount: number;
 };
+
+export type ActivationCodeDetailQuery = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: ActivationCodeReportStatus;
+};
+
+export type { ActivationCodeDetailList };

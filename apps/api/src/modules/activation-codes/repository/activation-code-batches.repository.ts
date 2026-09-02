@@ -6,6 +6,7 @@ import type {
   ActivationCodeReportQueryResult,
   ActivationCodeReportRow,
 } from '@/modules/activation-codes/activation-code-reporting.types';
+import { ActivationCodeCryptoService } from '@/modules/activation-codes/services/activation-code-crypto.service';
 import { Injectable } from '@nestjs/common';
 import {
   activation_code_status,
@@ -32,7 +33,10 @@ export type CreateActivationCodeBatchRecord = {
 
 @Injectable()
 export class ActivationCodeBatchesRepository {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly crypto: ActivationCodeCryptoService,
+  ) {}
 
   list(filters: {
     page?: number;
@@ -150,6 +154,126 @@ export class ActivationCodeBatchesRepository {
         },
       },
     });
+  }
+
+  async listCodes(
+    batchId: string,
+    filters: {
+      page?: number;
+      limit?: number;
+      search?: string;
+      status?: activation_code_status;
+    },
+  ) {
+    const { page, limit, skip, take } = normalizePagination(filters);
+    const batch = await this.prismaService.activationCodeBatch.findUnique({
+      where: { id: batchId },
+      select: { id: true },
+    });
+    if (!batch) return null;
+    const search = filters.search?.trim();
+    const where: Prisma.ActivationCodeWhereInput = {
+      batch_id: batchId,
+      ...(filters.status ? { status: filters.status } : {}),
+      ...(search ? { code_hash: this.crypto.hash(search) } : {}),
+    };
+    const [rows, total] = await this.prismaService.$transaction([
+      this.prismaService.activationCode.findMany({
+        where,
+        orderBy: [{ created_at: 'asc' }, { id: 'asc' }],
+        skip,
+        take,
+        select: {
+          id: true,
+          code_ciphertext: true,
+          status: true,
+          created_at: true,
+          expires_at: true,
+          activated_at: true,
+          revoked_at: true,
+          replaced_by: {
+            select: { id: true, code_ciphertext: true, status: true },
+          },
+          replaces: {
+            select: { id: true, code_ciphertext: true, status: true },
+          },
+        },
+      }),
+      this.prismaService.activationCode.count({ where }),
+    ]);
+
+    return paginate(
+      rows.map((row) => {
+        const plaintext = this.crypto.decrypt(row.code_ciphertext);
+        return {
+          id: row.id,
+          maskedCode: `${plaintext.slice(0, 8)}••••`,
+          ...(row.status === activation_code_status.AVAILABLE
+            ? { copyCode: plaintext }
+            : {}),
+          status: row.status,
+          createdAt: row.created_at,
+          expiresAt: row.expires_at,
+          activatedAt: row.activated_at,
+          revokedAt: row.revoked_at,
+          replacedBy: row.replaced_by
+            ? {
+                id: row.replaced_by.id,
+                maskedCode: this.mask(row.replaced_by.code_ciphertext),
+                status: row.replaced_by.status,
+              }
+            : null,
+          replaces: row.replaces
+            ? {
+                id: row.replaces.id,
+                maskedCode: this.mask(row.replaces.code_ciphertext),
+                status: row.replaces.status,
+              }
+            : null,
+        };
+      }),
+      { page, limit, total },
+    );
+  }
+
+  async replaceExpiredCode(expiredId: string, replacementCode: string) {
+    const replacementHash = this.crypto.hash(replacementCode);
+    return this.prismaService.$transaction(async (tx) => {
+      const expired = await tx.activationCode.findUnique({
+        where: { id: expiredId },
+        include: { batch: { select: { product_sku: true } } },
+      });
+      if (!expired) return { kind: 'NOT_FOUND' as const };
+      if (
+        expired.status !== activation_code_status.EXPIRED ||
+        expired.replaced_by_id
+      ) {
+        return { kind: 'NOT_REPLACEABLE' as const };
+      }
+      const replacement = await tx.activationCode.findUnique({
+        where: { code_hash: replacementHash },
+        include: { batch: { select: { product_sku: true } } },
+      });
+      if (
+        !replacement ||
+        replacement.status !== activation_code_status.AVAILABLE ||
+        replacement.batch.product_sku !== expired.batch.product_sku
+      ) {
+        return { kind: 'INVALID_REPLACEMENT' as const };
+      }
+      await tx.activationCode.update({
+        where: { id: expired.id },
+        data: {
+          status: activation_code_status.REPLACED,
+          replaced_by_id: replacement.id,
+        },
+      });
+      return { kind: 'REPLACED' as const, replacementId: replacement.id };
+    });
+  }
+
+  private mask(ciphertext: string) {
+    return `${this.crypto.decrypt(ciphertext).slice(0, 8)}••••`;
   }
 
   findAvailableByHash(codeHash: string) {

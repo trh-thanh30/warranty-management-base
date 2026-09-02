@@ -23,3 +23,34 @@ export type ActivationCodeReportFilters = {
   batchId?: string;
   provinceCode?: string;
 };
+
+export type ActivationCodeDetail = {
+  id: string;
+  maskedCode: string;
+  copyCode?: string;
+  status: ActivationCodeReportStatus;
+  createdAt: string;
+  expiresAt: string;
+  activatedAt: string | null;
+  revokedAt: string | null;
+  replacedBy: ActivationCodeHistoryLink | null;
+  replaces: ActivationCodeHistoryLink | null;
+};
+
+export type ActivationCodeHistoryLink = {
+  id: string;
+  maskedCode: string;
+  status: ActivationCodeReportStatus;
+};
+
+export type ActivationCodeDetailList = {
+  items: ActivationCodeDetail[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+};

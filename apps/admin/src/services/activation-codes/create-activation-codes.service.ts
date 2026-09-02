@@ -10,6 +10,8 @@ import type {
   CreateActivationCodeBatchBody,
   CreateActivationCodeBatchResult,
   RevokeActivationCodeBatchResult,
+  ActivationCodeDetailList,
+  ActivationCodeDetailQuery,
 } from "./activation-code-batches.types";
 import type { ActivationCodesHttpClient } from "./activation-codes.types";
 
@@ -71,6 +73,18 @@ export function createActivationCodesService(http: ActivationCodesHttpClient) {
       );
     },
 
+    async listCodes(
+      batchId: string,
+      query: ActivationCodeDetailQuery = {},
+    ): Promise<ActivationCodeDetailList> {
+      return unwrap(
+        await http.get<ActivationCodeDetailList>(
+          `/activation-code-batches/${batchId}/codes`,
+          { params: query },
+        ),
+      );
+    },
+
     async createBatch(body: CreateActivationCodeBatchBody) {
       return unwrap(
         await http.post<CreateActivationCodeBatchResult>(
@@ -82,6 +96,12 @@ export function createActivationCodesService(http: ActivationCodesHttpClient) {
 
     async revokeCode(codeId: string): Promise<void> {
       await http.post(`/activation-code-batches/codes/${codeId}/revoke`);
+    },
+
+    async replaceCode(codeId: string, replacementCode: string): Promise<void> {
+      await http.post(`/activation-code-batches/codes/${codeId}/replace`, {
+        replacementCode,
+      });
     },
 
     async revokeBatch(
