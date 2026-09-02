@@ -55,36 +55,39 @@ export function ServiceCenterDetailView({
         backHref="/service-centers"
         backLabel={t("backToDirectory")}
         description={t("detailDescription")}
+        descriptionAccessory={
+          canDeactivate || canEdit ? (
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+              {canDeactivate ? (
+                <Button
+                  className="w-full cursor-pointer bg-red-50 text-red-500 transition-colors duration-300 hover:bg-red-100 sm:w-auto"
+                  disabled={!serviceCenter}
+                  onClick={() => setDeactivateOpen(true)}
+                  type="button"
+                  variant="destructive"
+                >
+                  <Power className="size-4" />
+                  {t("deactivate")}
+                </Button>
+              ) : null}
+              {canEdit ? (
+                <Button
+                  className="w-full cursor-pointer bg-gray-100 text-gray-500 transition-colors duration-300 hover:bg-gray-200 sm:w-auto"
+                  asChild
+                >
+                  <Link href={`/service-centers/${serviceCenterId}/edit`}>
+                    <Pencil className="size-4" />
+                    {t("edit")}
+                  </Link>
+                </Button>
+              ) : null}
+            </div>
+          ) : null
+        }
         eyebrow={t("eyebrow")}
         maxWidthClassName="max-w-5xl"
         title={t("detailTitle")}
       >
-        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-          {canDeactivate ? (
-            <Button
-              className="text-red-500 bg-red-50 hover:bg-red-100 cursor-pointer transition-colors duration-300"
-              disabled={!serviceCenter}
-              onClick={() => setDeactivateOpen(true)}
-              type="button"
-              variant="destructive"
-            >
-              <Power className="size-4" />
-              {t("deactivate")}
-            </Button>
-          ) : null}
-          {canEdit ? (
-            <Button
-              className="text-gray-500 bg-gray-100 hover:bg-gray-200 cursor-pointer transition-colors duration-300"
-              asChild
-            >
-              <Link href={`/service-centers/${serviceCenterId}/edit`}>
-                <Pencil className="size-4" />
-                {t("edit")}
-              </Link>
-            </Button>
-          ) : null}
-        </div>
-
         {serviceCenterQuery.isLoading ? (
           <ServiceCenterDetailSkeleton />
         ) : serviceCenterQuery.isError || !serviceCenter ? (

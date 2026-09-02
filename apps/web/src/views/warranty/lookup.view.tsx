@@ -273,6 +273,7 @@ export function WarrantyLookupView() {
             </Link>
             <a
               href={PUBLIC_DEALER_NETWORK_URL}
+              target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:bg-premium-red hover:text-white"
             >

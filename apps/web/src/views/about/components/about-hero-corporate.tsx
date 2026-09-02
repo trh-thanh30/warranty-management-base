@@ -102,7 +102,11 @@ export function AboutHeroCorporate() {
               variant="secondary"
               className="h-auto rounded-md border-border-gray bg-white px-7 py-3.5 text-xs font-semibold uppercase tracking-wider text-deep-black shadow-sm transition-all hover:bg-light-gray sm:text-sm"
             >
-              <a href={PUBLIC_DEALER_NETWORK_URL}>
+              <a
+                href={PUBLIC_DEALER_NETWORK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <span>{t("hero.dealerNetworkCta")}</span>
               </a>
             </Button>

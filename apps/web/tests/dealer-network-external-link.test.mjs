@@ -47,4 +47,17 @@ test("dealer network navigation points to the external Lexzenz page", async () =
     "utf8",
   );
   assert.match(actionCardsSource, /isExternal/);
+  assert.match(actionCardsSource, /target="_blank"/);
+
+  const sharedLinkSources = await Promise.all(
+    [
+      "../src/components/layout/components/header-nav-link.tsx",
+      "../src/components/layout/site-footer.tsx",
+    ].map((relativePath) =>
+      readFile(new URL(relativePath, import.meta.url), "utf8"),
+    ),
+  );
+  for (const source of sharedLinkSources) {
+    assert.match(source, /target="_blank"/);
+  }
 });

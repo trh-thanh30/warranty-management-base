@@ -125,6 +125,7 @@ export function WarrantyActivateView() {
             <a
               className="group flex items-center justify-center gap-2 rounded-md border border-border-gray bg-surface-muted p-3.5 text-deep-black transition-colors hover:border-premium-red hover:bg-premium-red hover:text-white"
               href={PUBLIC_DEALER_NETWORK_URL}
+              target="_blank"
               rel="noopener noreferrer"
             >
               <Building2 className="size-4 shrink-0" />

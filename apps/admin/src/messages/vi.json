@@ -78,6 +78,9 @@
       "dashboard": "Bảng điều khiển",
       "users": "Nhân viên",
       "settings": "Cài đặt",
+      "settingsProfile": "Thông tin cá nhân",
+      "settingsSecurity": "Bảo mật",
+      "settingsPermissions": "Quyền hạn & Vai trò",
       "overview": "Tổng quan",
       "customers": "Khách hàng",
       "categories": "Danh mục",
@@ -2503,7 +2506,9 @@
         "AUDIT_LOG_VIEW": "Xem nhật ký kiểm toán",
         "WEBSITE_CONFIG_VIEW": "Xem cấu hình website",
         "WEBSITE_CONFIG_UPDATE": "Chỉnh sửa cấu hình website",
-        "WEBSITE_CONFIG_PUBLISH": "Xuất bản cấu hình website"
+        "WEBSITE_CONFIG_PUBLISH": "Xuất bản cấu hình website",
+        "CONTACT_SUBMISSION_VIEW": "Xem lời nhắn liên hệ",
+        "CONTACT_SUBMISSION_UPDATE": "Cập nhật lời nhắn liên hệ"
       }
     },
     "save": "Lưu thay đổi",

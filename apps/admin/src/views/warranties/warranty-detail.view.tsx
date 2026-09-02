@@ -46,41 +46,44 @@ export function WarrantyDetailView({ warrantyId }: WarrantyDetailViewProps) {
         backHref="/warranties"
         backLabel={t("backToDirectory")}
         description={t("detailDescription")}
+        descriptionAccessory={
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+            {canEdit ? (
+              <Button asChild className="w-full sm:w-auto" variant="secondary">
+                <Link href={`/warranties/${warranty.id}/edit`}>
+                  <Pencil className="size-4" />
+                  {t("edit")}
+                </Link>
+              </Button>
+            ) : null}
+            {canActivate ? (
+              <Button
+                className="w-full sm:w-auto"
+                onClick={() => setActivateOpen(true)}
+                type="button"
+                variant="secondary"
+              >
+                <ShieldCheck className="size-4" />
+                {t("activate")}
+              </Button>
+            ) : null}
+            {canVoid ? (
+              <Button
+                className="w-full sm:w-auto"
+                onClick={() => setVoidOpen(true)}
+                type="button"
+                variant="destructive"
+              >
+                <Ban className="size-4" />
+                {t("void")}
+              </Button>
+            ) : null}
+          </div>
+        }
         eyebrow={t("eyebrow")}
         maxWidthClassName="max-w-5xl"
         title={t("detailTitle")}
       >
-        <div className="flex flex-wrap justify-end gap-2">
-          {canEdit ? (
-            <Button asChild variant="secondary">
-              <Link href={`/warranties/${warranty.id}/edit`}>
-                <Pencil className="size-4" />
-                {t("edit")}
-              </Link>
-            </Button>
-          ) : null}
-          {canActivate ? (
-            <Button
-              onClick={() => setActivateOpen(true)}
-              type="button"
-              variant="secondary"
-            >
-              <ShieldCheck className="size-4" />
-              {t("activate")}
-            </Button>
-          ) : null}
-          {canVoid ? (
-            <Button
-              onClick={() => setVoidOpen(true)}
-              type="button"
-              variant="destructive"
-            >
-              <Ban className="size-4" />
-              {t("void")}
-            </Button>
-          ) : null}
-        </div>
-
         {warrantyQuery.isLoading ? (
           <WarrantyDetailSkeleton />
         ) : warrantyQuery.isError || !warranty ? (
