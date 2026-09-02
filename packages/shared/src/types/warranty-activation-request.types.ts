@@ -65,6 +65,16 @@ export type WarrantyActivationRequestSummary = {
   status: WarrantyActivationRequestStatus;
   source: WarrantyActivationRequestSource;
   warrantyCode: string;
+  activationCode: {
+    id: string;
+    status:
+      | "AVAILABLE"
+      | "ACTIVATED"
+      | "EXPIRED"
+      | "REVOKED"
+      | "REPLACED"
+      | "PENDING_APPROVAL";
+  } | null;
   categoryId: string | null;
   productId: string | null;
   dealerId: string | null;
@@ -204,6 +214,7 @@ export type CreateAdminWarrantyActivationRequestBody = Omit<
   "warrantyCode"
 > & {
   customerId: string;
+  activationCodeId?: string;
   /** Multi-product requests use items; productId remains for legacy clients. */
   items?: CreateWarrantyActivationRequestItemBody[];
   productId?: string;

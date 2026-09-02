@@ -23,6 +23,7 @@ export class ListActivationProductOptionsUseCase {
             this.assetsService?.enrichAssetUrl(asset).url ?? asset.path,
         ),
         activationEligibility: getActivationProductEligibility(product),
+        activationCodeCounts: product.activationCodeCounts,
       })),
       meta: result.meta,
     };

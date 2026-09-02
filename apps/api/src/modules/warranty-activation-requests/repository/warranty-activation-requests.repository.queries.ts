@@ -50,6 +50,7 @@ export class WarrantyActivationRequestQueries {
       },
     },
     certificate: true,
+    activation_code: { select: { id: true, status: true } },
     reviewed_by: {
       select: {
         id: true,

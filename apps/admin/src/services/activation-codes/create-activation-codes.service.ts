@@ -12,6 +12,7 @@ import type {
   RevokeActivationCodeBatchResult,
   ActivationCodeDetailList,
   ActivationCodeDetailQuery,
+  AvailableActivationCodeList,
 } from "./activation-code-batches.types";
 import type { ActivationCodesHttpClient } from "./activation-codes.types";
 
@@ -81,6 +82,20 @@ export function createActivationCodesService(http: ActivationCodesHttpClient) {
         await http.get<ActivationCodeDetailList>(
           `/activation-code-batches/${batchId}/codes`,
           { params: query },
+        ),
+      );
+    },
+
+    async listAvailableByProduct(
+      productId: string,
+      query: { page?: number; limit?: number; search?: string } = {},
+    ): Promise<AvailableActivationCodeList> {
+      return unwrap(
+        await http.get<AvailableActivationCodeList>(
+          "/activation-code-batches/available",
+          {
+            params: { ...query, productId },
+          },
         ),
       );
     },

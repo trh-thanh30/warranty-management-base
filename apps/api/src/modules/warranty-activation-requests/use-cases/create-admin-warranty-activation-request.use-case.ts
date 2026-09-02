@@ -58,6 +58,13 @@ export class CreateAdminWarrantyActivationRequestUseCase {
       },
     };
 
+    if (customerDto.activationCodeId) {
+      return this.createWarrantyActivationRequestUseCase.execute(
+        customerDto,
+        createContext,
+      );
+    }
+
     if (customerDto.items?.length) {
       return this.createWarrantyActivationRequestUseCase.execute(
         customerDto,

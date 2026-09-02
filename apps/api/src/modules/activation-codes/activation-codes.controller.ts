@@ -8,6 +8,7 @@ import {
   ListActivationCodeBatchesDto,
   ListActivationCodesDto,
 } from '@/modules/activation-codes/dto/list-activation-code-batches.dto';
+import { ListAvailableActivationCodesDto } from '@/modules/activation-codes/dto/list-available-activation-codes.dto';
 import { PrintableActivationLabelsQueryDto } from '@/modules/activation-codes/dto/printable-activation-labels-query.dto';
 import { CreateActivationCodeBatchUseCase } from '@/modules/activation-codes/use-cases/create-activation-code-batch.use-case';
 import { DownloadActivationLabelPrintJobUseCase } from '@/modules/activation-codes/use-cases/download-activation-label-print-job.use-case';
@@ -19,6 +20,7 @@ import { ListActivationCodeBatchesUseCase } from '@/modules/activation-codes/use
 import { RevokeActivationCodeUseCase } from '@/modules/activation-codes/use-cases/revoke-activation-code.use-case';
 import { RevokeActivationCodeBatchUseCase } from '@/modules/activation-codes/use-cases/revoke-activation-code-batch.use-case';
 import { ListActivationCodesUseCase } from '@/modules/activation-codes/use-cases/list-activation-codes.use-case';
+import { ListAvailableActivationCodesUseCase } from '@/modules/activation-codes/use-cases/list-available-activation-codes.use-case';
 import { ReplaceActivationCodeDto } from '@/modules/activation-codes/dto/replace-activation-code.dto';
 import { ReplaceActivationCodeUseCase } from '@/modules/activation-codes/use-cases/replace-activation-code.use-case';
 import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
@@ -40,6 +42,7 @@ export class ActivationCodesController {
     private readonly listBatchesUseCase: ListActivationCodeBatchesUseCase,
     private readonly revokeBatchUseCase: RevokeActivationCodeBatchUseCase,
     private readonly listCodesUseCase: ListActivationCodesUseCase,
+    private readonly listAvailableCodesUseCase: ListAvailableActivationCodesUseCase,
     private readonly replaceActivationCodeUseCase: ReplaceActivationCodeUseCase,
   ) {}
 
@@ -47,6 +50,12 @@ export class ActivationCodesController {
   @Permissions([permission_key.ACTIVATION_CODE_BATCH_VIEW])
   list(@Query() query: ListActivationCodeBatchesDto) {
     return this.listBatchesUseCase.execute(query);
+  }
+
+  @Get('available')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_VIEW])
+  listAvailable(@Query() query: ListAvailableActivationCodesDto) {
+    return this.listAvailableCodesUseCase.execute(query.productId, query);
   }
 
   @Get(':id/codes')

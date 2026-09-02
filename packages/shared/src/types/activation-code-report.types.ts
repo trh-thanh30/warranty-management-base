@@ -35,6 +35,8 @@ export type ActivationCodeDetail = {
   revokedAt: string | null;
   replacedBy: ActivationCodeHistoryLink | null;
   replaces: ActivationCodeHistoryLink | null;
+  productName?: string;
+  productSku?: string;
 };
 
 export type ActivationCodeHistoryLink = {

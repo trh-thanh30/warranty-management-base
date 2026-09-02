@@ -17,6 +17,7 @@ import { GetActivationCodeReportUseCase } from '@/modules/activation-codes/use-c
 import { ExportActivationCodeReportUseCase } from '@/modules/activation-codes/use-cases/export-activation-code-report.use-case';
 import { ListActivationCodeBatchesUseCase } from '@/modules/activation-codes/use-cases/list-activation-code-batches.use-case';
 import { ListActivationCodesUseCase } from '@/modules/activation-codes/use-cases/list-activation-codes.use-case';
+import { ListAvailableActivationCodesUseCase } from '@/modules/activation-codes/use-cases/list-available-activation-codes.use-case';
 import { ReplaceActivationCodeUseCase } from '@/modules/activation-codes/use-cases/replace-activation-code.use-case';
 import { ActivationCodePrintJobsRepository } from '@/modules/activation-codes/repository/activation-code-print-jobs.repository';
 import { ActivationLabelPrintQueueService } from '@/modules/activation-codes/services/activation-label-print-queue.service';
@@ -51,6 +52,7 @@ import { Module } from '@nestjs/common';
     ExportActivationCodeReportUseCase,
     ListActivationCodeBatchesUseCase,
     ListActivationCodesUseCase,
+    ListAvailableActivationCodesUseCase,
     ReplaceActivationCodeUseCase,
   ],
   exports: [ActivationCodeBatchesRepository, ActivationCodeCryptoService],

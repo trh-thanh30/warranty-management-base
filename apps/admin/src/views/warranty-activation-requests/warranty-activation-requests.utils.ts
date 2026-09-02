@@ -43,6 +43,7 @@ const CREATE_FIELD_ERROR_KEYS = new Set([
 const CREATE_API_ERROR_CODES = new Set([
   "ACTIVATION_REQUEST_ALREADY_PENDING",
   "ACTIVATION_REQUEST_CREATE_FAILED",
+  "ACTIVATION_CODE_PRODUCT_MISMATCH",
   "CUSTOMER_OWNER_MISMATCH",
   "PRODUCT_NOT_ELIGIBLE_FOR_ACTIVATION_REQUEST",
   "PRODUCT_CATEGORY_MISMATCH",
@@ -215,9 +216,10 @@ export function toAdminActivationRequestBody({
     product ?? Object.values(activationProducts)[0] ?? null;
 
   return omitUndefined({
+    activationCodeId: values.activationCodeId,
     addressDetail: values.addressDetail.trim(),
     brand: primaryProduct?.brand ?? undefined,
-    categoryId: values.categoryId,
+    categoryId: values.categoryId || undefined,
     customerBirthdate: values.customerBirthdate || undefined,
     customerEmail: values.customerEmail.trim() || undefined,
     customerId: values.customerId,
@@ -235,7 +237,7 @@ export function toAdminActivationRequestBody({
     model: primaryProduct?.model ?? undefined,
     metadata: activationMetadata,
     note: values.note.trim() || undefined,
-    productId: items.length > 0 ? undefined : values.productId,
+    productId: items.length > 0 ? undefined : values.productId || undefined,
     productName:
       (primaryProduct ? getActivationProductDisplayName(primaryProduct) : "") ||
       values.productName.trim() ||

@@ -40,6 +40,14 @@ export function WarrantyActivationRequestDetailCard({
             )}
           />
           <DetailItem
+            label={t("activationCodeStatus")}
+            value={
+              request.activationCode
+                ? t(`activationCodeStatuses.${request.activationCode.status}`)
+                : t("activationCodeUnavailable")
+            }
+          />
+          <DetailItem
             label={t("source")}
             value={t(`sources.${request.source}`)}
           />

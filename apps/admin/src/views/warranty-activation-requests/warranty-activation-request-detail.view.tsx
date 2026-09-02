@@ -52,6 +52,8 @@ export function WarrantyActivationRequestDetailView({
   const canReview =
     Boolean(request) &&
     (request?.status === "PENDING" || request?.status === "APPROVED") &&
+    (!request?.activationCode ||
+      request.activationCode.status === "AVAILABLE") &&
     hasPermission(PERMISSIONS.WARRANTY_UPDATE);
   const approveLabel =
     request?.status === "APPROVED" ? t("activate") : t("approve");
@@ -75,6 +77,9 @@ export function WarrantyActivationRequestDetailView({
       request.certificate.status !== "GENERATED" ||
       !request.certificate.storageKey) &&
     hasPermission(PERMISSIONS.WARRANTY_UPDATE);
+  const activationCodeBlocked = Boolean(
+    request?.activationCode && request.activationCode.status !== "AVAILABLE",
+  );
 
   async function resendCertificateEmail() {
     try {
@@ -215,6 +220,15 @@ export function WarrantyActivationRequestDetailView({
                 {approveLabel}
               </Button>
             ) : null}
+          </div>
+        ) : null}
+        {activationCodeBlocked ? (
+          <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+            {t("activationCodeBlocked", {
+              status: t(
+                `activationCodeStatuses.${request?.activationCode?.status}`,
+              ),
+            })}
           </div>
         ) : null}
 

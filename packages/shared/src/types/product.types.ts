@@ -1,4 +1,5 @@
 import type { CategorySummary } from "./category.types.ts";
+import type { ActivationCodeReportStatus } from "./activation-code-report.types.ts";
 import type { PaginationQuery } from "./pagination.types.ts";
 import type { WarrantyStatus } from "./warranty.types.ts";
 
@@ -119,6 +120,7 @@ export type ActivationProductEligibility =
 
 export type ActivationProductOption = ProductResponse & {
   activationEligibility: ActivationProductEligibility;
+  activationCodeCounts: Partial<Record<ActivationCodeReportStatus, number>>;
 };
 
 export type ListActivationProductOptionsQuery = Pick<

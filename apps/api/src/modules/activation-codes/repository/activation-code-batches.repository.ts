@@ -185,6 +185,7 @@ export class ActivationCodeBatchesRepository {
         take,
         select: {
           id: true,
+          batch: { select: { product_name: true, product_sku: true } },
           code_ciphertext: true,
           status: true,
           created_at: true,
@@ -207,6 +208,8 @@ export class ActivationCodeBatchesRepository {
         const plaintext = this.crypto.decrypt(row.code_ciphertext);
         return {
           id: row.id,
+          productName: row.batch.product_name,
+          productSku: row.batch.product_sku,
           maskedCode: `${plaintext.slice(0, 8)}••••`,
           ...(row.status === activation_code_status.AVAILABLE
             ? { copyCode: plaintext }
@@ -230,6 +233,109 @@ export class ActivationCodeBatchesRepository {
                 status: row.replaces.status,
               }
             : null,
+        };
+      }),
+      { page, limit, total },
+    );
+  }
+
+  async listAvailableByProduct(
+    productId: string,
+    filters: { page?: number; limit?: number; search?: string },
+  ) {
+    const { page, limit, skip, take } = normalizePagination(filters);
+    const search = filters.search?.trim();
+    const product = await this.prismaService.product.findUnique({
+      where: { id: productId },
+      select: { product_code: true },
+    });
+    if (!product) return paginate([], { page, limit, total: 0 });
+    const baseWhere: Prisma.ActivationCodeWhereInput = {
+      OR: [
+        { batch: { source_product_id: productId } },
+        { batch: { product_sku: product.product_code } },
+      ],
+      ...(search ? { code_hash: this.crypto.hash(search) } : {}),
+    };
+    const availableWhere: Prisma.ActivationCodeWhereInput = {
+      AND: [
+        baseWhere,
+        {
+          status: activation_code_status.AVAILABLE,
+          expires_at: { gt: new Date() },
+        },
+      ],
+    };
+    const unavailableWhere: Prisma.ActivationCodeWhereInput = {
+      AND: [
+        baseWhere,
+        {
+          NOT: {
+            status: activation_code_status.AVAILABLE,
+            expires_at: { gt: new Date() },
+          },
+        },
+      ],
+    };
+    const select = {
+      id: true,
+      code_ciphertext: true,
+      status: true,
+      batch: {
+        select: { batch_code: true, product_name: true, product_sku: true },
+      },
+      expires_at: true,
+    } satisfies Prisma.ActivationCodeSelect;
+    const [availableTotal, total] = await this.prismaService.$transaction([
+      this.prismaService.activationCode.count({ where: availableWhere }),
+      this.prismaService.activationCode.count({ where: baseWhere }),
+    ]);
+    const availableSkip = Math.min(skip, availableTotal);
+    const availableTake = Math.min(
+      take,
+      Math.max(availableTotal - availableSkip, 0),
+    );
+    const unavailableSkip = Math.max(skip - availableTotal, 0);
+    const unavailableTake = take - availableTake;
+    const [availableRows, unavailableRows] = await Promise.all([
+      availableTake > 0
+        ? this.prismaService.activationCode.findMany({
+            where: availableWhere,
+            orderBy: [{ created_at: 'asc' }, { id: 'asc' }],
+            skip: availableSkip,
+            take: availableTake,
+            select,
+          })
+        : Promise.resolve([]),
+      unavailableTake > 0
+        ? this.prismaService.activationCode.findMany({
+            where: unavailableWhere,
+            orderBy: [{ status: 'asc' }, { created_at: 'asc' }, { id: 'asc' }],
+            skip: unavailableSkip,
+            take: unavailableTake,
+            select,
+          })
+        : Promise.resolve([]),
+    ]);
+    const rows = [...availableRows, ...unavailableRows];
+    const now = Date.now();
+    return paginate(
+      rows.map((row) => {
+        const plaintext = this.crypto.decrypt(row.code_ciphertext);
+        const status =
+          row.status === activation_code_status.AVAILABLE &&
+          row.expires_at.getTime() <= now
+            ? activation_code_status.EXPIRED
+            : row.status;
+        return {
+          id: row.id,
+          maskedCode: `${plaintext.slice(0, 8)}••••`,
+          batchCode: row.batch.batch_code,
+          productName: row.batch.product_name,
+          productSku: row.batch.product_sku,
+          expiresAt: row.expires_at,
+          status,
+          selectable: status === activation_code_status.AVAILABLE,
         };
       }),
       { page, limit, total },
@@ -282,6 +388,13 @@ export class ActivationCodeBatchesRepository {
         code_hash: codeHash,
         status: activation_code_status.AVAILABLE,
       },
+      include: { batch: true },
+    });
+  }
+
+  findAvailableById(id: string) {
+    return this.prismaService.activationCode.findFirst({
+      where: { id, status: activation_code_status.AVAILABLE },
       include: { batch: true },
     });
   }

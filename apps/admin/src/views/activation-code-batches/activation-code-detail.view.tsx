@@ -47,6 +47,7 @@ import {
   ShieldOff,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "@/src/i18n/navigation";
 import { useMemo, useState } from "react";
 import { ACTIVATION_CODE_BATCH_STATUSES } from "./activation-code-batches.constants";
 
@@ -56,6 +57,7 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
   const t = useTranslations("ActivationCodeDetail");
   const locale = useLocale();
   const toast = useToast();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
   const canRevoke = hasPermission(PERMISSIONS.ACTIVATION_CODE_BATCH_REVOKE);
@@ -190,6 +192,11 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
                     setReplacementCode("");
                     setReplaceTarget(code);
                   }}
+                  onActivate={(code) =>
+                    router.push(
+                      `/warranty-activation-requests/create?activationCodeId=${encodeURIComponent(code.id)}&activationCode=${encodeURIComponent(code.copyCode ?? code.maskedCode)}&productName=${encodeURIComponent(code.productName ?? "")}&productSku=${encodeURIComponent(code.productSku ?? "")}`,
+                    )
+                  }
                   t={t}
                 />
                 <PaginationControls
@@ -282,6 +289,7 @@ function ActivationCodesTable({
   onCopy,
   onRevoke,
   onReplace,
+  onActivate,
   t,
 }: {
   canRevoke: boolean;
@@ -290,6 +298,7 @@ function ActivationCodesTable({
   onCopy: (code: ActivationCodeDetail) => void;
   onRevoke: (code: ActivationCodeDetail) => void;
   onReplace: (code: ActivationCodeDetail) => void;
+  onActivate: (code: ActivationCodeDetail) => void;
   t: ReturnType<typeof useTranslations<"ActivationCodeDetail">>;
 }) {
   const [revealedCodeId, setRevealedCodeId] = useState<string | null>(null);
@@ -410,6 +419,12 @@ function ActivationCodesTable({
                             {t("replace")}
                           </DropdownMenuItem>
                         ) : null
+                      ) : null}
+                      {canRevoke && item.status === "AVAILABLE" ? (
+                        <DropdownMenuItem onSelect={() => onActivate(item)}>
+                          <KeyRound className="mr-2 size-4" />
+                          {t("activate")}
+                        </DropdownMenuItem>
                       ) : null}
                       {canRevoke && item.status === "AVAILABLE" ? (
                         <DropdownMenuItem

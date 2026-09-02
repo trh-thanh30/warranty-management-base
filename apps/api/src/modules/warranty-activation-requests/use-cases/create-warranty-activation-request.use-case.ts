@@ -83,9 +83,20 @@ export class CreateWarrantyActivationRequestUseCase {
     } = {},
   ) {
     const activationCode = dto.activationCode?.trim().toUpperCase();
-    const activationCodeRecord = activationCode
-      ? await this.resolveActivationCode(activationCode)
-      : null;
+    if (
+      dto.activationCodeId &&
+      context.source !== WARRANTY_ACTIVATION_REQUEST_SOURCE.ADMIN_PORTAL
+    ) {
+      throw new BadRequestError(
+        'Activation code ID is only available for admin requests',
+        'ACTIVATION_CODE_ID_NOT_ALLOWED',
+      );
+    }
+    const activationCodeRecord = dto.activationCodeId
+      ? await this.resolveActivationCodeById(dto.activationCodeId)
+      : activationCode
+        ? await this.resolveActivationCode(activationCode)
+        : null;
     const dtoWarrantyCode = dto.warrantyCode?.trim().toUpperCase();
     const customerPhone = dto.customerPhone.trim();
     const customerEmail = dto.customerEmail?.trim().toLowerCase() || null;
@@ -106,6 +117,14 @@ export class CreateWarrantyActivationRequestUseCase {
         code: 'WARRANTY_CODE_NOT_FOUND',
         warrantyCode: dtoWarrantyCode,
       });
+    }
+
+    if (activationCodeRecord && dto.productId && dto.productId !== product.id) {
+      throw new BadRequestError(
+        'Activation code does not belong to the selected product',
+        'BAD_REQUEST',
+        { code: 'ACTIVATION_CODE_PRODUCT_MISMATCH' },
+      );
     }
 
     const warrantyCode =
@@ -321,6 +340,31 @@ export class CreateWarrantyActivationRequestUseCase {
         { code: 'ACTIVATION_CODE_PRODUCT_NOT_FOUND' },
       );
     }
+    return record;
+  }
+
+  private async resolveActivationCodeById(id: string) {
+    if (!this.activationCodeRepository) {
+      throw new BadRequestError(
+        'Activation code support is unavailable',
+        'BAD_REQUEST',
+      );
+    }
+    const record = await this.activationCodeRepository.findAvailableById(id);
+    if (!record || record.expires_at <= new Date()) {
+      if (record) await this.activationCodeRepository.expireIfNeeded(record.id);
+      throw new BadRequestError(
+        'Activation code is invalid or expired',
+        'BAD_REQUEST',
+        { code: 'ACTIVATION_CODE_INVALID_OR_EXPIRED' },
+      );
+    }
+    if (!record.batch.source_product_id)
+      throw new BadRequestError(
+        'Activation code is not linked to a product',
+        'BAD_REQUEST',
+        { code: 'ACTIVATION_CODE_UNAVAILABLE' },
+      );
     return record;
   }
 

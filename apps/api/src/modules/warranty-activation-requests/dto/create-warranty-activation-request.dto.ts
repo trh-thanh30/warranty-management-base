@@ -78,6 +78,10 @@ export class CreateWarrantyActivationRequestDto {
   activationCode?: string;
 
   @IsOptional()
+  @IsUUID()
+  activationCodeId?: string;
+
+  @IsOptional()
   @IsString()
   @Length(6, 64)
   @Matches(/^[A-Z0-9-]+$/i)

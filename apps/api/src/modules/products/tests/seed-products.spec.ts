@@ -60,10 +60,16 @@ describe('Lexzenz product seed', () => {
     const warrantyCodes = warrantyUpsert.mock.calls.map(
       ([input]) => input.create.warranty_code,
     );
+    const displayNames = productUpsert.mock.calls.map(
+      ([input]) => input.create.display_name,
+    );
 
     expect(new Set(productCodes).size).toBe(48);
     expect(new Set(serialNumbers).size).toBe(48);
     expect(new Set(warrantyCodes).size).toBe(48);
+    expect(new Set(displayNames).size).toBe(48);
+    expect(displayNames).toContain('Cảm biến áp suất lốp Pro 6 bánh #01');
+    expect(displayNames).toContain('Cảm biến áp suất lốp Pro 6 bánh #02');
 
     for (const [input] of productUpsert.mock.calls) {
       const catalogueSku = input.create.product_code

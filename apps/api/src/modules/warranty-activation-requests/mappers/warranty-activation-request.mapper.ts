@@ -4,6 +4,7 @@ import type {
   warranty_status,
   warranty_certificate_email_status,
   warranty_certificate_status,
+  activation_code_status,
 } from '@prisma/client';
 import type { WarrantyActivationRequestSummary } from '@repo/shared';
 
@@ -37,6 +38,7 @@ export type WarrantyActivationRequestWithRelations =
       full_name: string | null;
       username: string;
     } | null;
+    activation_code?: { id: string; status: activation_code_status } | null;
     activated_warranty?: {
       id: string;
       warranty_code: string | null;
@@ -94,6 +96,12 @@ export function toWarrantyActivationRequestResponse(
     status: request.status,
     source: request.source,
     warrantyCode: request.warranty_code,
+    activationCode: request.activation_code
+      ? {
+          id: request.activation_code.id,
+          status: request.activation_code.status,
+        }
+      : null,
     categoryId: request.category_id,
     productId: request.product_id,
     dealerId: request.dealer_id,

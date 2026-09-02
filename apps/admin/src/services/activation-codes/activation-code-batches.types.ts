@@ -49,4 +49,19 @@ export type ActivationCodeDetailQuery = {
   status?: ActivationCodeReportStatus;
 };
 
+export type AvailableActivationCode = {
+  id: string;
+  maskedCode: string;
+  copyCode?: string;
+  batchCode: string;
+  productName: string;
+  productSku: string;
+  expiresAt: string;
+  status: ActivationCodeReportStatus;
+  selectable: boolean;
+};
+
+export type AvailableActivationCodeList =
+  PaginatedResponse<AvailableActivationCode>;
+
 export type { ActivationCodeDetailList };
