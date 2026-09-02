@@ -2506,7 +2506,9 @@
         "AUDIT_LOG_VIEW": "Xem nhật ký kiểm toán",
         "WEBSITE_CONFIG_VIEW": "Xem cấu hình website",
         "WEBSITE_CONFIG_UPDATE": "Chỉnh sửa cấu hình website",
-        "WEBSITE_CONFIG_PUBLISH": "Xuất bản cấu hình website"
+        "WEBSITE_CONFIG_PUBLISH": "Xuất bản cấu hình website",
+        "CONTACT_SUBMISSION_VIEW": "Xem lời nhắn liên hệ",
+        "CONTACT_SUBMISSION_UPDATE": "Cập nhật lời nhắn liên hệ"
       }
     },
     "save": "Lưu thay đổi",
