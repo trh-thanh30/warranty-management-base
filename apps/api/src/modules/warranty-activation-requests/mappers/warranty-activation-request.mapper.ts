@@ -26,6 +26,7 @@ export type WarrantyActivationRequestWithRelations =
     dealer?: {
       id: string;
       name: string;
+      email: string | null;
       phone: string | null;
       address: string;
       province: string;
@@ -110,6 +111,7 @@ export function toWarrantyActivationRequestResponse(
       ? {
           id: request.dealer.id,
           name: request.dealer.name,
+          email: request.dealer.email,
           phone: request.dealer.phone,
           address: request.dealer.address,
           province: request.dealer.province,

@@ -6,7 +6,7 @@ export class ListAvailableActivationCodesUseCase {
   constructor(private readonly repository: ActivationCodeBatchesRepository) {}
 
   execute(
-    productId: string,
+    productId: string | undefined,
     filters: { page?: number; limit?: number; search?: string },
   ) {
     return this.repository.listAvailableByProduct(productId, filters);

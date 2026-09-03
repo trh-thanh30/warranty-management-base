@@ -213,6 +213,7 @@ export class ProductsRepository {
         warranty: { warranty_code: warrantyCode },
       },
       include: {
+        category_ref: true,
         warranty: true,
         ownerships: {
           where: { is_current_owner: true },
@@ -230,6 +231,7 @@ export class ProductsRepository {
         id: productId,
       },
       include: {
+        category_ref: true,
         warranty: true,
         ownerships: {
           where: { is_current_owner: true },
@@ -247,6 +249,7 @@ export class ProductsRepository {
         id: { in: productIds },
       },
       include: {
+        category_ref: true,
         warranty: true,
         ownerships: {
           where: { is_current_owner: true },

@@ -113,7 +113,10 @@ export class ReviewWarrantyActivationRequestUseCase {
 
       try {
         await this.issueRequestCertificate.execute({
-          recipientEmail: activatedRequest.customer_email ?? undefined,
+          recipientEmail:
+            activatedRequest.customer_email ??
+            activatedRequest.dealer?.email ??
+            undefined,
           requestId: activatedRequest.id,
         });
       } catch (error) {
@@ -169,6 +172,7 @@ export class ReviewWarrantyActivationRequestUseCase {
         const targets: WarrantyActivationReviewTarget[] = request.items.length
           ? request.items.map((item) => ({
               itemId: item.id,
+              activationCodeId: item.activation_code_id,
               positionLabel: item.position_label,
               product: item.product,
               productName: item.product_name,
@@ -229,18 +233,35 @@ export class ReviewWarrantyActivationRequestUseCase {
             startDate: reviewedAt,
             warrantyCode: target.warrantyCode,
             warrantyId: target.warrantyId,
+            activationCodeId: target.activationCodeId ?? null,
+            warrantyDurationMonths:
+              target.product.warranty_duration_months ??
+              target.product.warranty?.duration_months ??
+              0,
+            warrantyMethod:
+              target.product.warranty_method ?? target.product.warranty?.method,
+            warrantyTerms:
+              target.product.warranty_terms ?? target.product.warranty?.terms,
           });
           activatedWarrantyIds.push(updatedWarranty.id);
         }
 
         await repository.markItemsActivated(input.id, reviewedAt);
 
+        const activationCodeIds = new Set(
+          targets.flatMap((target) =>
+            target.activationCodeId ? [target.activationCodeId] : [],
+          ),
+        );
         if (request.activation_code_id) {
-          const updatedCode = await repository.markActivationCodeActivated(
-            request.activation_code_id,
+          activationCodeIds.add(request.activation_code_id);
+        }
+        if (activationCodeIds.size > 0) {
+          const updatedCode = await repository.markActivationCodesActivated(
+            [...activationCodeIds],
             reviewedAt,
           );
-          if (updatedCode.count !== 1) {
+          if (updatedCode.count !== activationCodeIds.size) {
             throw new ConflictError(
               'Activation code has already been activated or revoked',
               'ACTIVATION_CODE_ALREADY_USED',
@@ -272,6 +293,7 @@ export class ReviewWarrantyActivationRequestUseCase {
       {
         product,
         productName,
+        activationCodeId: null,
         warrantyId: product.warranty.id,
         warrantyCode,
       },
@@ -339,11 +361,24 @@ export class ReviewWarrantyActivationRequestUseCase {
       startDate: Date;
       warrantyCode: string;
       warrantyId: string;
+      activationCodeId: string | null;
+      warrantyDurationMonths: number;
+      warrantyMethod?: import('@prisma/client').warranty_method;
+      warrantyTerms?: string | null;
     },
   ) {
-    const warranty = await repository.findWarrantyForActivation(
-      input.warrantyId,
-    );
+    const warranty = input.warrantyId
+      ? await repository.findWarrantyForActivation(input.warrantyId)
+      : input.activationCodeId
+        ? await repository.createWarrantyForActivation({
+            activationCodeId: input.activationCodeId,
+            durationMonths: input.warrantyDurationMonths,
+            productId: input.productId,
+            warrantyCode: input.warrantyCode,
+            method: input.warrantyMethod,
+            terms: input.warrantyTerms,
+          })
+        : null;
     if (!warranty) {
       throw new NotFoundError(
         getWarrantyActivationReviewErrorMessage(

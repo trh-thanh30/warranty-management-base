@@ -22,6 +22,9 @@ import { IsLocalAddressDetail } from './is-local-address-detail.decorator';
 export class CreateWarrantyActivationRequestItemDto {
   @IsOptional()
   @IsUUID()
+  activationCodeId?: string;
+  @IsOptional()
+  @IsUUID()
   activationFieldId?: string;
 
   @IsString()

@@ -1,5 +1,9 @@
 import { WarrantyActivationRequestQueries } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository.queries';
-import { Prisma, warranty_activation_request_status } from '@prisma/client';
+import {
+  Prisma,
+  warranty_activation_request_status,
+  warranty_method,
+} from '@prisma/client';
 
 const activationReviewRequestInclude = {
   activated_warranty: true,
@@ -121,6 +125,37 @@ export class WarrantyActivationReviewTransactionRepository {
     return this.tx.warranty.findUniqueOrThrow({ where: { id: warrantyId } });
   }
 
+  createWarrantyForActivation(input: {
+    activationCodeId: string;
+    productId: string;
+    warrantyCode: string;
+    durationMonths: number;
+    method?: warranty_method;
+    terms?: string | null;
+  }) {
+    return this.tx.warranty.create({
+      data: {
+        activation_code: { connect: { id: input.activationCodeId } },
+        duration_months: input.durationMonths,
+        product: { connect: { id: input.productId } },
+        status: 'DRAFT',
+        warranty_code: input.warrantyCode,
+        method: input.method ?? warranty_method.REPAIR,
+        terms: input.terms ?? undefined,
+      },
+      include: {
+        product: {
+          include: {
+            ownerships: {
+              where: { is_current_owner: true },
+              take: 1,
+            },
+          },
+        },
+      },
+    });
+  }
+
   markItemsActivated(requestId: string, activatedAt: Date) {
     return this.tx.warrantyActivationRequestItem.updateMany({
       where: { request_id: requestId },
@@ -134,6 +169,18 @@ export class WarrantyActivationReviewTransactionRepository {
   markActivationCodeActivated(codeId: string, activatedAt: Date) {
     return this.tx.activationCode.updateMany({
       where: { id: codeId, status: 'AVAILABLE' },
+      data: { status: 'ACTIVATED', activated_at: activatedAt },
+    });
+  }
+
+  markActivationCodesActivated(codeIds: string[], activatedAt: Date) {
+    if (codeIds.length === 0) return Promise.resolve({ count: 0 });
+    return this.tx.activationCode.updateMany({
+      where: {
+        id: { in: codeIds },
+        status: 'AVAILABLE',
+        expires_at: { gt: activatedAt },
+      },
       data: { status: 'ACTIVATED', activated_at: activatedAt },
     });
   }

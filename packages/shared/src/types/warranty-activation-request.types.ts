@@ -82,6 +82,7 @@ export type WarrantyActivationRequestSummary = {
   dealer: {
     id: string;
     name: string;
+    email: string | null;
     phone: string | null;
     address: string;
     province: string;
@@ -153,12 +154,15 @@ export type WarrantyActivationRequestSummary = {
 };
 
 export type CreateWarrantyActivationRequestItemBody = {
+  activationCodeId?: string;
   activationFieldId?: string;
   positionKey: string;
   productId: string;
 };
 
 export type CreateWarrantyActivationRequestBody = {
+  activationCode?: string;
+  activationCodeId?: string;
   warrantyCode?: string;
   categoryId?: string;
   productId?: string;
@@ -205,7 +209,7 @@ export type CreateWarrantyActivationRequestBody = {
 
 export type CreatePublicWarrantyActivationRequestBody = Omit<
   CreateWarrantyActivationRequestBody,
-  "customerBirthdate" | "customerEmail"
+  "customerBirthdate" | "customerEmail" | "activationCodeId"
 > & {
   customerEmail: string;
 };

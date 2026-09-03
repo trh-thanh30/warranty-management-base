@@ -24,7 +24,7 @@ export class CreateActivationCodeBatchUseCase {
   ) {}
 
   async execute(input: {
-    sourceProductId: string;
+    sourceProductId?: string;
     quantity?: number;
     createdById: string;
   }) {
@@ -43,19 +43,19 @@ export class CreateActivationCodeBatchUseCase {
       );
     }
 
-    const product = await this.productsRepository.findById(
-      input.sourceProductId,
-    );
-    if (!product || product.deleted_at) {
+    const product = input.sourceProductId
+      ? await this.productsRepository.findById(input.sourceProductId)
+      : null;
+    if (input.sourceProductId && (!product || product.deleted_at)) {
       throw new NotFoundError('Product', 'PRODUCT_NOT_FOUND');
     }
-    if (product.status !== product_status.ACTIVE) {
+    if (product && product.status !== product_status.ACTIVE) {
       throw new BadRequestError(
         'Only active products can be used to generate activation codes',
         'ACTIVATION_CODE_PRODUCT_INACTIVE',
       );
     }
-    if (!product.warranty || product.warranty.duration_months <= 0) {
+    if (product && !product.warranty && !product.warranty_duration_months) {
       throw new BadRequestError(
         'Product must have a valid warranty configuration',
         'ACTIVATION_CODE_WARRANTY_REQUIRED',
@@ -74,15 +74,20 @@ export class CreateActivationCodeBatchUseCase {
       try {
         const batch = await this.batchesRepository.create({
           batchCode,
-          sourceProductId: product.id,
-          productSku: product.product_code,
-          productName: product.display_name?.trim() || product.product_code,
-          brand: product.brand,
-          model: product.model,
-          modelYear: product.model_year,
-          warrantyDurationMonths: product.warranty.duration_months,
-          warrantyMethod: product.warranty.method,
-          warrantyTerms: product.warranty.terms,
+          sourceProductId: product?.id,
+          productSku: product?.product_code,
+          productName: product?.display_name?.trim() || product?.product_code,
+          brand: product?.brand ?? null,
+          model: product?.model ?? null,
+          modelYear: product?.model_year ?? null,
+          warrantyDurationMonths:
+            product?.warranty?.duration_months ??
+            product?.warranty_duration_months ??
+            undefined,
+          warrantyMethod:
+            product?.warranty?.method ?? product?.warranty_method ?? undefined,
+          warrantyTerms:
+            product?.warranty?.terms ?? product?.warranty_terms ?? null,
           quantity,
           expiresAt,
           createdById: input.createdById,

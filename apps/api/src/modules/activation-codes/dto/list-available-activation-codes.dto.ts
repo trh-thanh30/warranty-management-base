@@ -2,8 +2,9 @@ import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
 import { IsOptional, IsString, IsUUID, Length } from 'class-validator';
 
 export class ListAvailableActivationCodesDto extends PaginationQueryDto {
+  @IsOptional()
   @IsUUID()
-  productId: string;
+  productId?: string;
 
   @IsOptional()
   @IsString()

@@ -245,11 +245,12 @@ export class WarrantyActivationRequestsRepository {
       items: {
         create: command.items.map((item) => ({
           activation_field_id: item.activationFieldId,
+          activation_code_id: item.activationCodeId ?? undefined,
           position_key: item.positionKey,
           position_label: item.positionLabel,
           product_id: item.productId,
-          warranty_id: item.warrantyId,
-          warranty_code: item.warrantyCode,
+          warranty_id: item.warrantyId ?? undefined,
+          warranty_code: item.warrantyCode ?? undefined,
           product_name: item.productName,
           product_code: item.productCode,
           serial_number: item.serialNumber,

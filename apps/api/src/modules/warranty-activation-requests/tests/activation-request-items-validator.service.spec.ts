@@ -8,10 +8,15 @@ describe('ActivationRequestItemsValidatorService', () => {
     findActiveProductCategoryById: jest.fn(),
   };
   const requestsRepository = { findOpenByProductIds: jest.fn() };
+  const activationCodesRepository = {
+    findAvailableById: jest.fn(),
+    expireIfNeeded: jest.fn(),
+  };
   const service = new ActivationRequestItemsValidatorService(
     categoriesRepository as never,
     productsRepository as never,
     requestsRepository as never,
+    activationCodesRepository as never,
   );
 
   beforeEach(() => {
@@ -71,6 +76,41 @@ describe('ActivationRequestItemsValidatorService', () => {
         warrantyCode: 'WM-product-a',
       }),
       expect.objectContaining({ productId: 'product-b' }),
+    ]);
+  });
+
+  it('allows the same product for different generic activation codes', async () => {
+    activationCodesRepository.findAvailableById.mockImplementation(
+      async (id: string) => ({
+        id,
+        expires_at: new Date('2027-01-01T00:00:00.000Z'),
+      }),
+    );
+
+    await expect(
+      service.validate('category-id', [
+        {
+          activationCodeId: 'code-a',
+          positionKey: 'windshield',
+          productId: 'product-a',
+        },
+        {
+          activationCodeId: 'code-b',
+          positionKey: 'rearGlass',
+          productId: 'product-a',
+        },
+      ]),
+    ).resolves.toEqual([
+      expect.objectContaining({
+        activationCodeId: 'code-a',
+        productId: 'product-a',
+        warrantyId: null,
+      }),
+      expect.objectContaining({
+        activationCodeId: 'code-b',
+        productId: 'product-a',
+        warrantyId: null,
+      }),
     ]);
   });
 
@@ -153,5 +193,6 @@ function createProduct(id: string) {
       status: warranty_status.DRAFT,
       warranty_code: `WM-${id}`,
     },
+    warranty_duration_months: 24,
   };
 }

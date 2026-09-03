@@ -101,6 +101,46 @@ describe('CreateActivationCodeBatchUseCase', () => {
     expect(result.codes).toEqual(plaintextCodes);
   });
 
+  it('creates a generic batch without selecting a product', async () => {
+    const plaintextCodes = Array.from(
+      { length: 50 },
+      (_, index) => `GENERIC-${index + 1}`,
+    );
+    generator.executeBatch.mockReturnValue(plaintextCodes);
+    cryptoService.hash.mockImplementation((code: string) => `hash:${code}`);
+    cryptoService.encrypt.mockImplementation(
+      (code: string) => `encrypted:${code}`,
+    );
+    batchesRepository.create.mockImplementation((input) =>
+      Promise.resolve({
+        id: 'generic-batch-id',
+        batch_code: input.batchCode,
+        source_product_id: null,
+        product_sku: null,
+        product_name: null,
+        quantity: input.quantity,
+        expires_at: input.expiresAt,
+        created_at: new Date(),
+      }),
+    );
+
+    const result = await useCase.execute({
+      quantity: 50,
+      createdById: 'admin-id',
+    });
+
+    expect(productsRepository.findById).not.toHaveBeenCalled();
+    expect(batchesRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sourceProductId: undefined,
+        productSku: undefined,
+        productName: undefined,
+        quantity: 50,
+      }),
+    );
+    expect(result.codes).toEqual(plaintextCodes);
+  });
+
   it('rejects an inactive product', async () => {
     productsRepository.findById.mockResolvedValue({
       id: 'product-id',

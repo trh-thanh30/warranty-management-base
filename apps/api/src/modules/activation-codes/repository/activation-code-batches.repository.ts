@@ -16,14 +16,14 @@ import {
 
 export type CreateActivationCodeBatchRecord = {
   batchCode: string;
-  sourceProductId: string;
-  productSku: string;
-  productName: string;
+  sourceProductId?: string;
+  productSku?: string;
+  productName?: string;
   brand: string | null;
   model: string | null;
   modelYear: number | null;
-  warrantyDurationMonths: number;
-  warrantyMethod: warranty_method;
+  warrantyDurationMonths?: number;
+  warrantyMethod?: warranty_method;
   warrantyTerms: string | null;
   quantity: number;
   expiresAt: Date;
@@ -115,7 +115,9 @@ export class ActivationCodeBatchesRepository {
     return this.prismaService.activationCodeBatch.create({
       data: {
         batch_code: input.batchCode,
-        source_product: { connect: { id: input.sourceProductId } },
+        source_product: input.sourceProductId
+          ? { connect: { id: input.sourceProductId } }
+          : undefined,
         product_sku: input.productSku,
         product_name: input.productName,
         brand: input.brand,
@@ -240,21 +242,27 @@ export class ActivationCodeBatchesRepository {
   }
 
   async listAvailableByProduct(
-    productId: string,
+    productId: string | undefined,
     filters: { page?: number; limit?: number; search?: string },
   ) {
     const { page, limit, skip, take } = normalizePagination(filters);
     const search = filters.search?.trim();
-    const product = await this.prismaService.product.findUnique({
-      where: { id: productId },
-      select: { product_code: true },
-    });
-    if (!product) return paginate([], { page, limit, total: 0 });
+    const product = productId
+      ? await this.prismaService.product.findUnique({
+          where: { id: productId },
+          select: { product_code: true },
+        })
+      : null;
+    if (productId && !product) return paginate([], { page, limit, total: 0 });
     const baseWhere: Prisma.ActivationCodeWhereInput = {
-      OR: [
-        { batch: { source_product_id: productId } },
-        { batch: { product_sku: product.product_code } },
-      ],
+      ...(product
+        ? {
+            OR: [
+              { batch: { source_product_id: productId } },
+              { batch: { product_sku: product.product_code } },
+            ],
+          }
+        : {}),
       ...(search ? { code_hash: this.crypto.hash(search) } : {}),
     };
     const availableWhere: Prisma.ActivationCodeWhereInput = {

@@ -107,16 +107,33 @@ export class CreateWarrantyActivationRequestUseCase {
           validatedItems[0].productId,
         )
       : activationCodeRecord
-        ? await this.productsRepository.findActivationRequestTargetById(
-            activationCodeRecord.batch.source_product_id ?? '',
-          )
+        ? dto.productId
+          ? await this.productsRepository.findActivationRequestTargetById(
+              dto.productId,
+            )
+          : await this.productsRepository.findActivationRequestTargetById(
+              activationCodeRecord.batch.source_product_id ?? '',
+            )
         : await this.resolveActivationProduct(dto, dtoWarrantyCode);
 
-    if (!product?.warranty) {
+    const hasGenericCode = Boolean(
+      validatedItems?.some((item) => item.activationCodeId) ||
+      (activationCodeRecord && dto.productId),
+    );
+    if (!product || (!product.warranty && !hasGenericCode)) {
       throw new NotFoundError('Warranty code not found', 'NOT_FOUND', {
         code: 'WARRANTY_CODE_NOT_FOUND',
         warrantyCode: dtoWarrantyCode,
       });
+    }
+    if (
+      hasGenericCode &&
+      product.category_ref?.activation_code_enabled === false
+    ) {
+      throw new BadRequestError(
+        'Activation codes are not applicable to this product category',
+        'ACTIVATION_CODE_NOT_APPLICABLE',
+      );
     }
 
     if (activationCodeRecord && dto.productId && dto.productId !== product.id) {
@@ -128,20 +145,34 @@ export class CreateWarrantyActivationRequestUseCase {
     }
 
     const warrantyCode =
-      product.warranty.warranty_code ??
-      (await this.generateWarrantyCodeUseCase.execute());
-    const requestItems = validatedItems ?? [
-      this.toPrimaryRequestItem(product, warrantyCode),
-    ];
+      product.warranty?.warranty_code ??
+      dtoWarrantyCode ??
+      (hasGenericCode
+        ? await this.generateWarrantyCodeUseCase.execute()
+        : `PENDING-${activationCodeRecord?.id ?? Date.now()}`);
+    const requestItems = validatedItems
+      ? validatedItems.map((item) => ({
+          ...item,
+          warrantyCode: item.warrantyCode ?? warrantyCode,
+        }))
+      : [
+          {
+            ...this.toPrimaryRequestItem(product, warrantyCode),
+            activationCodeId: activationCodeRecord?.id ?? null,
+          },
+        ];
 
-    if (product.warranty.warranty_code !== warrantyCode) {
+    if (product.warranty && product.warranty.warranty_code !== warrantyCode) {
       await this.productsRepository.synchronizeWarrantyCode({
         warrantyCode,
         warrantyId: product.warranty.id,
       });
     }
 
-    if (!ACTIVATABLE_WARRANTY_STATUSES.has(product.warranty.status)) {
+    if (
+      product.warranty &&
+      !ACTIVATABLE_WARRANTY_STATUSES.has(product.warranty.status)
+    ) {
       throw new BadRequestError(
         'Warranty code is not eligible for activation request',
         'BAD_REQUEST',
@@ -161,7 +192,7 @@ export class CreateWarrantyActivationRequestUseCase {
         product.id,
       );
 
-    if (openRequest) {
+    if (openRequest && !hasGenericCode) {
       this.throwAlreadyOpenRequest(product.id, openRequest);
     }
 
@@ -213,7 +244,9 @@ export class CreateWarrantyActivationRequestUseCase {
             warrantyDurationMonths:
               validatedItems?.[0].warrantyDurationMonths ??
               dto.warrantyDurationMonths ??
-              product.warranty.duration_months,
+              product.warranty?.duration_months ??
+              product.warranty_duration_months ??
+              0,
             provinceCode: dto.provinceCode.trim(),
             provinceName: dto.provinceName.trim(),
             wardCode: dto.wardCode.trim(),
@@ -247,7 +280,7 @@ export class CreateWarrantyActivationRequestUseCase {
               product,
               source:
                 context.source ?? WARRANTY_ACTIVATION_REQUEST_SOURCE.PUBLIC_WEB,
-              warrantyId: product.warranty.id,
+              warrantyId: product.warranty?.id ?? '',
             }),
             items: requestItems,
           },
@@ -333,13 +366,6 @@ export class CreateWarrantyActivationRequestUseCase {
         { code: 'ACTIVATION_CODE_INVALID_OR_EXPIRED' },
       );
     }
-    if (!record.batch.source_product_id) {
-      throw new BadRequestError(
-        'Activation code is not linked to a product',
-        'BAD_REQUEST',
-        { code: 'ACTIVATION_CODE_PRODUCT_NOT_FOUND' },
-      );
-    }
     return record;
   }
 
@@ -359,12 +385,6 @@ export class CreateWarrantyActivationRequestUseCase {
         { code: 'ACTIVATION_CODE_INVALID_OR_EXPIRED' },
       );
     }
-    if (!record.batch.source_product_id)
-      throw new BadRequestError(
-        'Activation code is not linked to a product',
-        'BAD_REQUEST',
-        { code: 'ACTIVATION_CODE_UNAVAILABLE' },
-      );
     return record;
   }
 
@@ -451,12 +471,9 @@ export class CreateWarrantyActivationRequestUseCase {
     product: ActivationRequestProduct,
     warrantyCode: string,
   ): ValidatedActivationRequestItem {
-    if (!product.warranty) {
-      throw new NotFoundError('Product warranty not found');
-    }
-
     const catalogue = getProductCatalogue(product);
     return {
+      activationCodeId: null,
       activationFieldId: null,
       positionKey: 'primaryProduct',
       positionLabel: 'Sản phẩm chính',
@@ -464,9 +481,12 @@ export class CreateWarrantyActivationRequestUseCase {
       productName: getProductDisplayName(product),
       productCode: product.product_code,
       serialNumber: product.serial_number,
-      warrantyId: product.warranty.id,
-      warrantyCode,
-      warrantyDurationMonths: product.warranty.duration_months,
+      warrantyId: product.warranty?.id ?? null,
+      warrantyCode: product.warranty?.warranty_code ?? warrantyCode,
+      warrantyDurationMonths:
+        product.warranty?.duration_months ??
+        product.warranty_duration_months ??
+        0,
       brand: catalogue.brand,
       model: catalogue.model,
       manufactureYear: catalogue.modelYear,
