@@ -35,6 +35,7 @@ export type WarrantyCertificateSummary = {
 
 export type WarrantyActivationRequestItemSummary = {
   id: string;
+  activationCodeId: string | null;
   activationFieldId: string | null;
   positionKey: string;
   positionLabel: string;
@@ -42,9 +43,9 @@ export type WarrantyActivationRequestItemSummary = {
   productName: string;
   productCode: string;
   serialNumber: string | null;
-  warrantyId: string;
-  warrantyCode: string;
-  warrantyStatus: WarrantyStatus;
+  warrantyId: string | null;
+  warrantyCode: string | null;
+  warrantyStatus: WarrantyStatus | null;
   status: WarrantyActivationRequestStatus;
   activatedAt: string | null;
 };

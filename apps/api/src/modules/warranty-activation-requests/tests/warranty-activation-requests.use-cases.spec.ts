@@ -42,6 +42,9 @@ describe('WarrantyActivationRequestsUseCases', () => {
   const issueWarrantyActivationRequestCertificateUseCase = {
     execute: jest.fn(),
   };
+  const generateCustomerCodeUseCase = {
+    generateCustomerCode: jest.fn().mockResolvedValue('CUS000001'),
+  };
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -834,6 +837,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
       issueWarrantyActivationRequestCertificateUseCase as never,
+      generateCustomerCodeUseCase as never,
     );
 
     const result = await useCase.execute(
@@ -887,6 +891,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
       issueWarrantyActivationRequestCertificateUseCase as never,
+      generateCustomerCodeUseCase as never,
     );
 
     await expect(
@@ -904,6 +909,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
       issueWarrantyActivationRequestCertificateUseCase as never,
+      generateCustomerCodeUseCase as never,
     );
 
     await expect(
@@ -918,6 +924,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
       issueWarrantyActivationRequestCertificateUseCase as never,
+      generateCustomerCodeUseCase as never,
     );
 
     await expect(

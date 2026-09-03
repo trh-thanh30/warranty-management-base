@@ -97,7 +97,9 @@ describe('CreateProductUseCase', () => {
         brand: 'Acme',
         model: 'C4K',
         category_ref: { connect: { id: 'category-id' } },
-        warranty: {
+        warranty_duration_months: 24,
+        warranty_method: 'REPAIR',
+        warranties: {
           create: expect.objectContaining({
             duration_months: 24,
             warranty_code: 'WM-2026-CREATE',
@@ -159,7 +161,7 @@ describe('CreateProductUseCase', () => {
     expect(generateWarrantyCode.execute).not.toHaveBeenCalled();
     expect(productsRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        warranty: {
+        warranties: {
           create: expect.objectContaining({
             warranty_code: 'WM-2026-MANUAL1',
           }),

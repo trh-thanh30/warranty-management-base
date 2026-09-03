@@ -133,9 +133,30 @@ export class ProductsRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
   create(data: Prisma.ProductCreateInput) {
-    return this.prismaService.product.create({
-      data,
-      include: productInclude,
+    return this.prismaService.$transaction(async (tx) => {
+      const product = await tx.product.create({
+        data,
+        include: {
+          warranties: {
+            orderBy: { created_at: 'desc' },
+            take: 1,
+          },
+        },
+      });
+      const currentWarranty = product.warranties[0];
+
+      if (!currentWarranty) {
+        return tx.product.findUniqueOrThrow({
+          where: { id: product.id },
+          include: productInclude,
+        });
+      }
+
+      return tx.product.update({
+        where: { id: product.id },
+        data: { current_warranty_id: currentWarranty.id },
+        include: productInclude,
+      });
     });
   }
 

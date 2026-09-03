@@ -197,7 +197,7 @@ describe('ManualWarrantyActivationUseCase', () => {
     expect(result.customer.customerCode).toBe('CUS000001');
   });
 
-  it('updates and reuses an existing customer matched by email', async () => {
+  it('does not use a shared email as customer identity', async () => {
     const dependencies = createDependencies({
       customerByEmail: {
         id: 'customer-id',
@@ -209,29 +209,27 @@ describe('ManualWarrantyActivationUseCase', () => {
     await dependencies.useCase.execute(dto);
 
     expect(
-      dependencies.transactionRepository.createCustomer,
+      dependencies.transactionRepository.findCustomerByEmail,
     ).not.toHaveBeenCalled();
     expect(
-      dependencies.transactionRepository.updateCustomer,
-    ).toHaveBeenCalledWith(
-      'customer-id',
-      expect.objectContaining({
-        email: dto.customer.email,
-        fullName: dto.customer.fullName,
-      }),
-    );
+      dependencies.transactionRepository.createCustomer,
+    ).toHaveBeenCalled();
   });
 
-  it('rejects when email and phone belong to different customers', async () => {
+  it('uses phone identity even when the email is shared by another customer', async () => {
     const dependencies = createDependencies({
       customerByEmail: { id: 'customer-a' },
       customerByPhone: { id: 'customer-b' },
     });
 
-    await expect(dependencies.useCase.execute(dto)).rejects.toBeInstanceOf(
-      ConflictError,
-    );
-    expect(dependencies.certificateUseCase.execute).not.toHaveBeenCalled();
+    await dependencies.useCase.execute(dto);
+
+    expect(
+      dependencies.transactionRepository.updateCustomer,
+    ).toHaveBeenCalledWith('customer-b', expect.any(Object));
+    expect(
+      dependencies.transactionRepository.findCustomerByEmail,
+    ).not.toHaveBeenCalled();
   });
 
   it('rejects a warranty code owned by another product', async () => {

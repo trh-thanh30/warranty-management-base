@@ -81,6 +81,7 @@ export type LexzenzCategorySeedClient = {
 export const lexzenzProductCategories = [
   {
     code: 'LEXZENZ_REFLEX_KOREA_FILM',
+    activationCodeEnabled: false,
     slug: 'lexzenz-reflex-korea-film',
     name: 'Film cách nhiệt ô tô Lexzenz Reflex Korea Film',
     description:
@@ -94,6 +95,7 @@ export const lexzenzProductCategories = [
   },
   {
     code: 'LEXZENZ_LED_FUJITEK',
+    activationCodeEnabled: true,
     slug: 'lexzenz-led-fujitek',
     name: 'Đèn tăng sáng ô tô, xe máy Lexzenz Led Fujitek',
     description:
@@ -107,6 +109,7 @@ export const lexzenzProductCategories = [
   },
   {
     code: 'LEXZENZ_DASHCAM',
+    activationCodeEnabled: true,
     slug: 'lexzenz-dashcam',
     name: 'Camera hành trình Lexzenz Dashcam',
     description:
@@ -120,6 +123,7 @@ export const lexzenzProductCategories = [
   },
   {
     code: 'LEXZENZ_TPMS',
+    activationCodeEnabled: true,
     slug: 'lexzenz-tpms',
     name: 'Cảm biến Áp suất lốp TPMS Lexzenz',
     description:
@@ -133,6 +137,7 @@ export const lexzenzProductCategories = [
   },
 ] satisfies Array<{
   code: string;
+  activationCodeEnabled: boolean;
   description: string;
   imageUrl: string;
   metadata: Prisma.InputJsonObject;
@@ -153,6 +158,7 @@ export async function seedLexzenzProductCategories(
         },
       },
       update: {
+        activation_code_enabled: category.activationCodeEnabled,
         code: category.code,
         description: category.description,
         image_url: category.imageUrl,
@@ -162,6 +168,7 @@ export async function seedLexzenzProductCategories(
         order: category.order,
       },
       create: {
+        activation_code_enabled: category.activationCodeEnabled,
         code: category.code,
         description: category.description,
         image_url: category.imageUrl,

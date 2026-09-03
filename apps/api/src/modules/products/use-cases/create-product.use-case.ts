@@ -1,10 +1,10 @@
+import { toSlug } from '@/common/helpers/string.util';
 import {
   BadRequestError,
   ConflictError,
   NotFoundError,
 } from '@/common/response';
 import { AssetsService } from '@/modules/assets/assets.service';
-import { toSlug } from '@/common/helpers/string.util';
 import { CreateProductDto } from '@/modules/products/dto/create-product.dto';
 import { buildProductAssets } from '@/modules/products/product-assets';
 import { toProductResponse } from '@/modules/products/products.types';
@@ -12,7 +12,12 @@ import { ProductsRepository } from '@/modules/products/repository/products.repos
 import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generate-product-code.use-case';
 import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { Injectable } from '@nestjs/common';
-import { Prisma, product_status, warranty_status } from '@prisma/client';
+import {
+  Prisma,
+  product_status,
+  warranty_method,
+  warranty_status,
+} from '@prisma/client';
 
 @Injectable()
 export class CreateProductUseCase {
@@ -75,14 +80,17 @@ export class CreateProductUseCase {
       model: dto.model?.trim() || null,
       model_year: dto.modelYear,
       description: dto.description?.trim() || null,
-      metadata: toJsonObject({
+      metadata: this.toJsonObject({
         ...(dto.catalogueMetadata ?? {}),
         ...(dto.metadata ?? {}),
       }),
       status: dto.status ?? product_status.ACTIVE,
+      warranty_duration_months: dto.warrantyDurationMonths,
+      warranty_method: warranty_method.REPAIR,
+      warranty_terms: dto.warrantyTerms?.trim() || null,
       category_ref: { connect: { id: dto.categoryId } },
       assets: buildProductAssets(dto.coverAssetId, dto.galleryAssetIds),
-      warranty: {
+      warranties: {
         create: {
           warranty_code: warrantyCode,
           duration_months: dto.warrantyDurationMonths,
@@ -118,23 +126,23 @@ export class CreateProductUseCase {
     }
     return warrantyCode;
   }
-}
 
-function toJsonObject(
-  value: Record<string, unknown> | undefined,
-): Prisma.InputJsonObject | undefined {
-  return value as Prisma.InputJsonObject | undefined;
-}
-
-function toPhysicalProductMetadata(
-  metadata: Record<string, unknown> | undefined,
-): Prisma.InputJsonObject | undefined {
-  const installationPosition = metadata?.installationPosition;
-  if (
-    typeof installationPosition !== 'string' ||
-    installationPosition.trim().length === 0
-  ) {
-    return undefined;
+  private toJsonObject(
+    value: Record<string, unknown> | undefined,
+  ): Prisma.InputJsonObject | undefined {
+    return value as Prisma.InputJsonObject | undefined;
   }
-  return { installationPosition: installationPosition.trim() };
+
+  // private toPhysicalProductMetadata(
+  //   metadata: Record<string, unknown> | undefined,
+  // ): Prisma.InputJsonObject | undefined {
+  //   const installationPosition = metadata?.installationPosition;
+  //   if (
+  //     typeof installationPosition !== 'string' ||
+  //     installationPosition.trim().length === 0
+  //   ) {
+  //     return undefined;
+  //   }
+  //   return { installationPosition: installationPosition.trim() };
+  // }
 }

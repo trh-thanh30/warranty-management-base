@@ -120,7 +120,6 @@ export class ImportCustomersUseCase {
     const preparedRows: PreparedCustomerImportRow[] = [];
     const seenCustomerCodes = new Set<string>();
     const seenPhones = new Set<string>();
-    const seenEmails = new Set<string>();
     const rowsNeedingGeneratedCode: Array<
       CustomerExcelRow & {
         rowNumber: number;
@@ -150,37 +149,21 @@ export class ImportCustomersUseCase {
         seen: seenPhones,
         value: phone,
       });
-      this.validateDuplicate({
-        errors,
-        field: 'email',
-        message: 'Email bị trùng trong file import',
-        rowNumber: row.rowNumber,
-        seen: seenEmails,
-        value: email,
-      });
-
-      const [customerByCode, customerByPhone, customerByEmail] =
-        await Promise.all([
-          customerCode
-            ? this.prismaService.customer.findUnique({
-                where: { customer_code: customerCode },
-                select: { id: true },
-              })
-            : null,
-          this.prismaService.customer.findUnique({
-            where: { phone },
-            select: { id: true, customer_code: true },
-          }),
-          this.prismaService.customer.findUnique({
-            where: { email },
-            select: { id: true, customer_code: true },
-          }),
-        ]);
+      const [customerByCode, customerByPhone] = await Promise.all([
+        customerCode
+          ? this.prismaService.customer.findUnique({
+              where: { customer_code: customerCode },
+              select: { id: true },
+            })
+          : null,
+        this.prismaService.customer.findUnique({
+          where: { phone },
+          select: { id: true, customer_code: true },
+        }),
+      ]);
 
       const matchedIds = new Set(
-        [customerByCode?.id, customerByPhone?.id, customerByEmail?.id].filter(
-          Boolean,
-        ),
+        [customerByCode?.id, customerByPhone?.id].filter(Boolean),
       );
 
       if (matchedIds.size > 1) {
@@ -188,15 +171,12 @@ export class ImportCustomersUseCase {
           rowNumber: row.rowNumber,
           field: 'customer',
           message:
-            'Mã khách hàng, số điện thoại hoặc email đang thuộc nhiều hồ sơ khác nhau',
+            'Mã khách hàng hoặc số điện thoại đang thuộc nhiều hồ sơ khác nhau',
         });
       }
 
       const existingCustomerId =
-        customerByCode?.id ??
-        customerByPhone?.id ??
-        customerByEmail?.id ??
-        null;
+        customerByCode?.id ?? customerByPhone?.id ?? null;
 
       if (!customerCode && !existingCustomerId) {
         rowsNeedingGeneratedCode.push(row);

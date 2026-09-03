@@ -440,7 +440,11 @@ describe('ProductsRepository.list', () => {
     const count = jest.fn().mockResolvedValueOnce(2).mockResolvedValueOnce(4);
     const prismaService = {
       $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
-        callback({ product: { count, findMany } }),
+        callback({
+          activationCode: { groupBy: jest.fn().mockResolvedValue([]) },
+          activationCodeBatch: { findMany: jest.fn().mockResolvedValue([]) },
+          product: { count, findMany },
+        }),
       ),
     };
     const repository = new ProductsRepository(prismaService as never);
@@ -452,7 +456,10 @@ describe('ProductsRepository.list', () => {
       search: 'film',
     });
 
-    expect(result.items).toEqual([eligibleProduct, ineligibleProduct]);
+    expect(result.items).toEqual([
+      { ...eligibleProduct, activationCodeCounts: {} },
+      { ...ineligibleProduct, activationCodeCounts: {} },
+    ]);
     expect(result.meta).toEqual(
       expect.objectContaining({ limit: 3, page: 1, total: 4 }),
     );

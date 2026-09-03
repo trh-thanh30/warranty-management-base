@@ -8,7 +8,12 @@ import {
 import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generate-product-code.use-case';
 import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { Injectable } from '@nestjs/common';
-import { Prisma, product_status, warranty_status } from '@prisma/client';
+import {
+  Prisma,
+  product_status,
+  warranty_method,
+  warranty_status,
+} from '@prisma/client';
 import { toSlug } from '@/common/helpers/string.util';
 
 @Injectable()
@@ -77,8 +82,11 @@ export class ConfirmProductImportUseCase {
             description: this.blankToNull(row.description),
             serial_number: this.blankToNull(row.serialNumber),
             status: row.status ?? product_status.ACTIVE,
+            warranty_duration_months: row.warrantyDurationMonths,
+            warranty_method: warranty_method.REPAIR,
+            warranty_terms: this.blankToNull(row.warrantyTerms),
             metadata: this.toMetadata(row),
-            warranty: {
+            warranties: {
               create: {
                 warranty_code: warrantyCode,
                 duration_months: row.warrantyDurationMonths,
@@ -89,8 +97,22 @@ export class ConfirmProductImportUseCase {
               },
             },
           },
-          select: { id: true },
+          select: {
+            id: true,
+            warranties: {
+              orderBy: { created_at: 'desc' },
+              select: { id: true },
+              take: 1,
+            },
+          },
         });
+        const currentWarranty = product.warranties[0];
+        if (currentWarranty) {
+          await tx.product.update({
+            where: { id: product.id },
+            data: { current_warranty_id: currentWarranty.id },
+          });
+        }
         importedProductIds.push(product.id);
         created += 1;
       }
@@ -135,6 +157,9 @@ export class ConfirmProductImportUseCase {
       description: this.blankToNull(row.description),
       status: row.status,
       serial_number: this.blankToNull(row.serialNumber),
+      warranty_duration_months: row.warrantyDurationMonths,
+      warranty_method: warranty_method.REPAIR,
+      warranty_terms: this.blankToNull(row.warrantyTerms),
       metadata: this.toMetadata(row),
     };
   }
@@ -145,8 +170,9 @@ export class ConfirmProductImportUseCase {
     row: PreparedProductImportRow,
     importDate: Date,
   ) {
-    const warranty = await tx.warranty.findUnique({
+    const warranty = await tx.warranty.findFirst({
       where: { product_id: productId },
+      orderBy: { created_at: 'desc' },
       select: { id: true, warranty_code: true, status: true },
     });
 

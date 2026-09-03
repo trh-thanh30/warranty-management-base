@@ -15,6 +15,14 @@ jest.mock(
 );
 
 describe('Multi-item activation lifecycle', () => {
+  const generateCustomerCode = {
+    generateCustomerCode: jest.fn().mockResolvedValue('CUS000001'),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('orchestrates every item for one customer inside the review transaction', async () => {
     const transactionRepository = createTransactionRepository();
     const activatedRequest = {
@@ -34,6 +42,7 @@ describe('Multi-item activation lifecycle', () => {
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
       issueCertificates as never,
+      generateCustomerCode as never,
     );
 
     await useCase.execute('request-id', {
@@ -75,6 +84,7 @@ describe('Multi-item activation lifecycle', () => {
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       createRepository(transactionRepository) as never,
       { execute: jest.fn() } as never,
+      generateCustomerCode as never,
     );
 
     await useCase.execute('request-id', {
@@ -104,6 +114,7 @@ describe('Multi-item activation lifecycle', () => {
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       createRepository(transactionRepository) as never,
       { execute: jest.fn() } as never,
+      generateCustomerCode as never,
     );
 
     await useCase.execute('request-id', {
@@ -120,6 +131,31 @@ describe('Multi-item activation lifecycle', () => {
     );
   });
 
+  it('delegates transaction-bound customer code generation to the shared use case', async () => {
+    const transactionRepository = createTransactionRepository();
+    transactionRepository.findCustomerByPhone.mockResolvedValue(null);
+    transactionRepository.createCustomer.mockResolvedValue({
+      id: 'new-customer-id',
+      user_id: null,
+    });
+    const useCase = new ReviewWarrantyActivationRequestUseCase(
+      createRepository(transactionRepository) as never,
+      { execute: jest.fn() } as never,
+      generateCustomerCode as never,
+    );
+
+    await useCase.execute('request-id', {
+      status: warranty_activation_request_status.APPROVED,
+    });
+
+    expect(generateCustomerCode.generateCustomerCode).toHaveBeenCalledWith(
+      transactionRepository,
+    );
+    expect(transactionRepository.createCustomer).toHaveBeenCalledWith(
+      expect.objectContaining({ customer_code: 'CUS000001' }),
+    );
+  });
+
   it('rejects approval when the linked Customer no longer exists', async () => {
     const transactionRepository = createTransactionRepository();
     const request = createActivationRequest();
@@ -129,6 +165,7 @@ describe('Multi-item activation lifecycle', () => {
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       createRepository(transactionRepository) as never,
       { execute: jest.fn() } as never,
+      generateCustomerCode as never,
     );
 
     await expect(
@@ -153,6 +190,7 @@ describe('Multi-item activation lifecycle', () => {
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
       { execute: jest.fn() } as never,
+      generateCustomerCode as never,
     );
 
     await expect(
@@ -172,6 +210,7 @@ describe('Multi-item activation lifecycle', () => {
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       createRepository(transactionRepository) as never,
       { execute: jest.fn() } as never,
+      generateCustomerCode as never,
     );
 
     await expect(
@@ -200,6 +239,7 @@ describe('Multi-item activation lifecycle', () => {
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       createRepository(transactionRepository) as never,
       { execute: jest.fn() } as never,
+      generateCustomerCode as never,
     );
 
     await expect(
@@ -220,7 +260,7 @@ describe('Multi-item activation lifecycle', () => {
     expect(transactionRepository.createOwnership).not.toHaveBeenCalled();
   });
 
-  it('rejects customer identity conflicts before changing ownership', async () => {
+  it('ignores a shared email when resolving customer identity', async () => {
     const transactionRepository = createTransactionRepository();
     transactionRepository.findCustomerByEmail.mockResolvedValue({
       id: 'different-customer-id',
@@ -229,16 +269,19 @@ describe('Multi-item activation lifecycle', () => {
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       createRepository(transactionRepository) as never,
       { execute: jest.fn() } as never,
+      generateCustomerCode as never,
     );
 
-    await expect(
-      useCase.execute('request-id', {
-        status: warranty_activation_request_status.APPROVED,
-      }),
-    ).rejects.toMatchObject({
-      details: { code: 'CUSTOMER_IDENTITY_CONFLICT' },
+    await useCase.execute('request-id', {
+      status: warranty_activation_request_status.APPROVED,
     });
-    expect(transactionRepository.createOwnership).not.toHaveBeenCalled();
+
+    expect(transactionRepository.findCustomerByEmail).not.toHaveBeenCalled();
+    expect(transactionRepository.updateCustomer).toHaveBeenCalledWith(
+      'customer-id',
+      expect.any(Object),
+    );
+    expect(transactionRepository.createOwnership).toHaveBeenCalled();
   });
 
   it('rejects the parent and all items together', async () => {

@@ -5,7 +5,10 @@ describe('ConfirmProductImportUseCase', () => {
   it('creates products from validated import rows', async () => {
     const tx = {
       product: {
-        create: jest.fn().mockResolvedValue({ id: 'product-id' }),
+        create: jest.fn().mockResolvedValue({
+          id: 'product-id',
+          warranties: [{ id: 'warranty-id' }],
+        }),
         findUnique: jest.fn().mockResolvedValue(null),
         update: jest.fn(),
         updateMany: jest.fn(),
@@ -68,7 +71,10 @@ describe('ConfirmProductImportUseCase', () => {
           },
           serial_number: 'SN-001',
           status: product_status.ACTIVE,
-          warranty: {
+          warranty_duration_months: 36,
+          warranty_method: 'REPAIR',
+          warranty_terms: 'Product terms',
+          warranties: {
             create: expect.objectContaining({
               duration_months: 36,
               end_date: null,
@@ -89,6 +95,10 @@ describe('ConfirmProductImportUseCase', () => {
       expect.any(Date),
       tx,
     );
+    expect(tx.product.update).toHaveBeenCalledWith({
+      where: { id: 'product-id' },
+      data: { current_warranty_id: 'warranty-id' },
+    });
     expect(result).toEqual({
       created: 1,
       deactivated: 0,
@@ -100,7 +110,11 @@ describe('ConfirmProductImportUseCase', () => {
   it('uses a manual warranty code from Excel instead of generating one', async () => {
     const tx = {
       product: {
-        create: jest.fn().mockResolvedValue({ id: 'product-id' }),
+        create: jest.fn().mockResolvedValue({
+          id: 'product-id',
+          warranties: [{ id: 'warranty-id' }],
+        }),
+        update: jest.fn(),
         updateMany: jest.fn(),
       },
     };
@@ -147,7 +161,7 @@ describe('ConfirmProductImportUseCase', () => {
     expect(tx.product.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          warranty: {
+          warranties: {
             create: expect.objectContaining({
               warranty_code: 'WM-2026-EXCEL01',
             }),
@@ -166,7 +180,7 @@ describe('ConfirmProductImportUseCase', () => {
       },
       warranty: {
         create: jest.fn(),
-        findUnique: jest.fn().mockResolvedValue({
+        findFirst: jest.fn().mockResolvedValue({
           id: 'warranty-id',
           warranty_code: null,
           status: 'DRAFT',
@@ -193,8 +207,9 @@ describe('ConfirmProductImportUseCase', () => {
       rows: [existingProductImportRow],
     });
 
-    expect(tx.warranty.findUnique).toHaveBeenCalledWith({
+    expect(tx.warranty.findFirst).toHaveBeenCalledWith({
       where: { product_id: 'product-id' },
+      orderBy: { created_at: 'desc' },
       select: { id: true, warranty_code: true, status: true },
     });
     expect(generateWarrantyCodeUseCase.execute).toHaveBeenCalledWith(
@@ -226,7 +241,7 @@ describe('ConfirmProductImportUseCase', () => {
       },
       warranty: {
         create: jest.fn(),
-        findUnique: jest.fn().mockResolvedValue({
+        findFirst: jest.fn().mockResolvedValue({
           id: 'warranty-id',
           warranty_code: 'WM-2026-EXISTING',
           status: 'DRAFT',
@@ -253,8 +268,9 @@ describe('ConfirmProductImportUseCase', () => {
       rows: [existingProductImportRow],
     });
 
-    expect(tx.warranty.findUnique).toHaveBeenCalledWith({
+    expect(tx.warranty.findFirst).toHaveBeenCalledWith({
       where: { product_id: 'product-id' },
+      orderBy: { created_at: 'desc' },
       select: { id: true, warranty_code: true, status: true },
     });
     expect(generateWarrantyCodeUseCase.execute).not.toHaveBeenCalled();
@@ -275,7 +291,7 @@ describe('ConfirmProductImportUseCase', () => {
       },
       warranty: {
         create: jest.fn(),
-        findUnique: jest.fn().mockResolvedValue(null),
+        findFirst: jest.fn().mockResolvedValue(null),
         update: jest.fn(),
         upsert: jest.fn(),
       },

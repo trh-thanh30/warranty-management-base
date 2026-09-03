@@ -60,6 +60,7 @@ export type WarrantyActivationRequestWithRelations =
     } | null;
     items?: Array<{
       id: string;
+      activation_code_id: string | null;
       activation_field_id: string | null;
       position_key: string;
       position_label: string;
@@ -67,13 +68,13 @@ export type WarrantyActivationRequestWithRelations =
       product_name: string;
       product_code: string;
       serial_number: string | null;
-      warranty_id: string;
-      warranty_code: string;
+      warranty_id: string | null;
+      warranty_code: string | null;
       status: WarrantyActivationRequest['status'];
       activated_at: Date | null;
       warranty: {
         status: warranty_status;
-      };
+      } | null;
     }>;
   };
 
@@ -185,6 +186,7 @@ export function toWarrantyActivationRequestResponse(
     certificate: toCertificateSummary(request.id, request.certificate ?? null),
     items: request.items?.map((item) => ({
       id: item.id,
+      activationCodeId: item.activation_code_id,
       activationFieldId: item.activation_field_id,
       positionKey: item.position_key,
       positionLabel: item.position_label,
@@ -194,7 +196,7 @@ export function toWarrantyActivationRequestResponse(
       serialNumber: item.serial_number,
       warrantyId: item.warranty_id,
       warrantyCode: item.warranty_code,
-      warrantyStatus: item.warranty.status,
+      warrantyStatus: item.warranty?.status ?? null,
       status: item.status,
       activatedAt: item.activated_at?.toISOString() ?? null,
     })),

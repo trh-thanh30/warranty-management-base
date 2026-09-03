@@ -43,6 +43,10 @@ describe('toProductResponse', () => {
     const response = toProductResponse({
       id: 'product-id',
       category_id: 'override-category-id',
+      current_warranty_id: null,
+      warranty_duration_months: null,
+      warranty_method: null,
+      warranty_terms: null,
       category_ref: {
         id: 'override-category-id',
         code: 'SPECIAL_CAMERA',
@@ -56,6 +60,7 @@ describe('toProductResponse', () => {
         order: 0,
         is_active: true,
         activation_form_enabled: false,
+        activation_code_enabled: true,
         metadata: null,
         created_at: new Date('2026-07-25T00:00:00.000Z'),
         updated_at: new Date('2026-07-25T00:00:00.000Z'),
@@ -135,6 +140,7 @@ describe('toProductResponse', () => {
         warranty: {
           id: 'warranty-id',
           product_id: 'product-id',
+          activation_code_id: null,
           warranty_code: 'WM-2026-ABCDEF',
           method: warranty_method.REPAIR,
           start_date: null,
@@ -170,6 +176,10 @@ function createProductFixture() {
   return {
     id: 'product-id',
     category_id: 'category-id',
+    current_warranty_id: null,
+    warranty_duration_months: null,
+    warranty_method: null,
+    warranty_terms: null,
     product_code: 'PRD-001',
     serial_number: 'SERIAL-001',
     display_name: 'PPF X10',
@@ -200,6 +210,7 @@ function createProductFixture() {
       order: 0,
       is_active: true,
       activation_form_enabled: false,
+      activation_code_enabled: true,
       metadata: null,
       created_at: new Date('2026-07-25T00:00:00.000Z'),
       updated_at: new Date('2026-07-25T00:00:00.000Z'),

@@ -11,7 +11,10 @@
 - **Category taxonomy**: shared, admin-managed classification records for domain data. Product categories now use dynamic `Category` records while the legacy product category enum remains for backward compatibility.
 - **Metadata field**: nullable JSON extension data for low-query-frequency integration or display attributes. Business-critical fields that drive filtering, sorting, permissions, status transitions, or reports must remain first-class columns.
 - **Retired Product Template**: the former reusable catalogue model. Its runtime module, contracts, permissions, relations, and persistence have been removed; historical migrations remain immutable.
-- **Product**: the authoritative product aggregate. It owns catalogue identity and content, media, physical-unit identity, ownership, warranty, claim history, and installation context.
+- **Product**: the authoritative selectable product/SKU aggregate. It owns catalogue identity, content, media, and the reusable warranty policy. One Product may appear in many activation request items and issued warranties.
+- **Generic activation code**: a one-time printed code created without a Product. A dealer proposes the Product when submitting an activation request; admin approval permanently binds the code through one issued Warranty.
+- **Warranty issuance**: one customer-facing warranty record created for one activation code after approval. Uniqueness belongs to the activation code, not the Product.
+- **Legacy current warranty**: the temporary `Product.current_warranty_id` compatibility pointer used while singular warranty consumers migrate to Product's warranty history.
 - **Network location**: an active Dealer or Service Center with first-class latitude and longitude, suitable for public map display. Coordinates are authoritative; Google Maps URLs are derived values.
 
 ## Architecture Principles

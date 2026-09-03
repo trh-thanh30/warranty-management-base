@@ -235,22 +235,7 @@ export class ManualWarrantyActivationUseCase {
       phone: string;
     },
   ) {
-    const [customerByEmail, customerByPhone] = await Promise.all([
-      repository.findCustomerByEmail(input.email),
-      repository.findCustomerByPhone(input.phone),
-    ]);
-
-    if (
-      customerByEmail &&
-      customerByPhone &&
-      customerByEmail.id !== customerByPhone.id
-    ) {
-      throw new ConflictError(
-        'Customer email and phone belong to different customers',
-      );
-    }
-
-    const existingCustomer = customerByEmail ?? customerByPhone;
+    const existingCustomer = await repository.findCustomerByPhone(input.phone);
     if (existingCustomer) {
       return repository.updateCustomer(existingCustomer.id, input);
     }

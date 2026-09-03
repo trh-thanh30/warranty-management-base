@@ -3,6 +3,7 @@ import {
   ConflictError,
   NotFoundError,
 } from '@/common/response';
+import { GenerateCustomerCodeUseCase } from '@/modules/customers/use-cases/generate-customer-code.use-case';
 import { ReviewWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/review-warranty-activation-request.dto';
 import { toWarrantyActivationRequestResponse } from '@/modules/warranty-activation-requests/mappers/warranty-activation-request.mapper';
 import { WarrantyActivationReviewTransactionRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-review-transaction.repository';
@@ -31,6 +32,7 @@ export class ReviewWarrantyActivationRequestUseCase {
   constructor(
     private readonly warrantyActivationRequestsRepository: WarrantyActivationRequestsRepository,
     private readonly issueRequestCertificate: IssueWarrantyActivationRequestCertificateUseCase,
+    private readonly generateCustomerCodeUseCase: GenerateCustomerCodeUseCase,
   ) {}
 
   async execute(
@@ -170,8 +172,8 @@ export class ReviewWarrantyActivationRequestUseCase {
               positionLabel: item.position_label,
               product: item.product,
               productName: item.product_name,
-              warrantyId: item.warranty_id,
-              warrantyCode: item.warranty_code,
+              warrantyId: item.warranty_id ?? '',
+              warrantyCode: item.warranty_code ?? request.warranty_code,
             }))
           : await this.resolveLegacyActivationTargets(
               repository,
@@ -307,28 +309,7 @@ export class ReviewWarrantyActivationRequestUseCase {
       return customer;
     }
 
-    const [phoneCustomer, emailCustomer] = await Promise.all([
-      repository.findCustomerByPhone(input.phone),
-      input.email
-        ? repository.findCustomerByEmail(input.email)
-        : Promise.resolve(null),
-    ]);
-    const existingCustomer = phoneCustomer ?? emailCustomer;
-
-    if (
-      phoneCustomer &&
-      emailCustomer &&
-      phoneCustomer.id !== emailCustomer.id
-    ) {
-      throw new BadRequestError(
-        getWarrantyActivationReviewErrorMessage(
-          'CUSTOMER_IDENTITY_CONFLICT',
-          input.locale,
-        ),
-        'BAD_REQUEST',
-        { code: 'CUSTOMER_IDENTITY_CONFLICT' },
-      );
-    }
+    const existingCustomer = await repository.findCustomerByPhone(input.phone);
 
     const data = {
       address: input.address,
@@ -342,22 +323,9 @@ export class ReviewWarrantyActivationRequestUseCase {
 
     return repository.createCustomer({
       ...data,
-      customer_code: await this.generateCustomerCode(repository),
+      customer_code:
+        await this.generateCustomerCodeUseCase.generateCustomerCode(repository),
     });
-  }
-
-  private async generateCustomerCode(
-    repository: WarrantyActivationReviewTransactionRepository,
-  ) {
-    const prefix = 'CUS';
-    const padLength = 6;
-    const lastCustomer = await repository.findLastCustomerCode(prefix);
-    const match = lastCustomer?.customer_code.match(
-      new RegExp(`^${prefix}(\\d{${padLength},})$`),
-    );
-    const nextNumber = match ? Number.parseInt(match[1], 10) + 1 : 1;
-
-    return `${prefix}${nextNumber.toString().padStart(padLength, '0')}`;
   }
 
   private async activateDraftWarranty(

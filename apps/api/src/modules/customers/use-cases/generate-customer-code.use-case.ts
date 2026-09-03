@@ -1,14 +1,21 @@
 import { CustomersRepository } from '@/modules/customers/repository/customers.repository';
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+
+export interface CustomerCodeSequenceReader {
+  findLastCustomerCode(
+    prefix: string,
+  ): PromiseLike<{ customer_code: string } | null>;
+}
 
 export interface IGenerateCustomerCodeUseCase {
   generateCustomerCodeBatch(
     count: number,
-    tx?: Prisma.TransactionClient,
+    sequenceReader?: CustomerCodeSequenceReader,
   ): Promise<string[]>;
-  generateCustomerCode(tx?: Prisma.TransactionClient): Promise<string>;
-  execute(tx?: Prisma.TransactionClient): Promise<string>;
+  generateCustomerCode(
+    sequenceReader?: CustomerCodeSequenceReader,
+  ): Promise<string>;
+  execute(sequenceReader?: CustomerCodeSequenceReader): Promise<string>;
 }
 
 @Injectable()
@@ -20,11 +27,11 @@ export class GenerateCustomerCodeUseCase implements IGenerateCustomerCodeUseCase
 
   async generateCustomerCodeBatch(
     count: number,
-    tx?: Prisma.TransactionClient,
+    sequenceReader: CustomerCodeSequenceReader = this.customersRepository,
   ): Promise<string[]> {
-    const lastCustomerCode = tx
-      ? await this.customersRepository.findLastCustomerCode(this.prefix, tx)
-      : await this.customersRepository.findLastCustomerCode(this.prefix);
+    const lastCustomerCode = await sequenceReader.findLastCustomerCode(
+      this.prefix,
+    );
     const startNumber = this.getNextNumber(lastCustomerCode?.customer_code);
 
     const codes: string[] = [];
@@ -39,13 +46,15 @@ export class GenerateCustomerCodeUseCase implements IGenerateCustomerCodeUseCase
     return codes;
   }
 
-  async generateCustomerCode(tx?: Prisma.TransactionClient): Promise<string> {
-    const codes = await this.generateCustomerCodeBatch(1, tx);
+  async generateCustomerCode(
+    sequenceReader?: CustomerCodeSequenceReader,
+  ): Promise<string> {
+    const codes = await this.generateCustomerCodeBatch(1, sequenceReader);
     return codes[0];
   }
 
-  async execute(tx?: Prisma.TransactionClient): Promise<string> {
-    return this.generateCustomerCode(tx);
+  async execute(sequenceReader?: CustomerCodeSequenceReader): Promise<string> {
+    return this.generateCustomerCode(sequenceReader);
   }
 
   private getNextNumber(lastCustomerCode?: string) {

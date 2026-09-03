@@ -307,6 +307,7 @@ describe('UpdateProductUseCase', () => {
       'product-id',
       expect.objectContaining({
         display_name: 'Updated display name',
+        warranty_duration_months: 24,
         warranty: undefined,
       }),
     );
@@ -328,6 +329,8 @@ describe('UpdateProductUseCase', () => {
     expect(repository.update).toHaveBeenCalledWith(
       'product-id',
       expect.objectContaining({
+        warranty_duration_months: 180,
+        warranty_terms: 'New product terms',
         warranty: {
           create: expect.objectContaining({
             duration_months: 180,
@@ -471,6 +474,7 @@ describe('UpdateProductUseCase', () => {
             warranty_code: 'WM-2026-UPDATE',
             duration_months: 24,
             terms: 'Product terms',
+            product: { connect: { id: 'product-id' } },
             start_date: null,
             end_date: null,
             status: warranty_status.DRAFT,

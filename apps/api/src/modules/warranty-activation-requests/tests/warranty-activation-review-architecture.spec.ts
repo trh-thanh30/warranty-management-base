@@ -44,6 +44,11 @@ describe('Warranty activation review architecture', () => {
     expect(reviewErrorUtilitySource).toContain(
       'WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION',
     );
-    expect(useCaseSource).toContain('CUSTOMER_IDENTITY_CONFLICT');
+    expect(useCaseSource).toContain('findCustomerByPhone');
+    expect(useCaseSource).not.toContain('findCustomerByEmail');
+    expect(useCaseSource).toContain(
+      'generateCustomerCodeUseCase.generateCustomerCode(repository)',
+    );
+    expect(useCaseSource).not.toContain('private async generateCustomerCode');
   });
 });

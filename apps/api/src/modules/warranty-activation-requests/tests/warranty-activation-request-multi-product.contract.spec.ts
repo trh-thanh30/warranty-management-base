@@ -32,7 +32,7 @@ describe('Multi-product warranty activation contracts', () => {
       /activation_form_enabled\s+Boolean\s+@default\(false\)/,
     );
     expect(schema).toMatch(/@@unique\(\[request_id, position_key\]\)/);
-    expect(schema).toMatch(/@@unique\(\[request_id, product_id\]\)/);
+    expect(schema).not.toMatch(/@@unique\(\[request_id, product_id\]\)/);
 
     expect(schema).toMatch(/product_id\s+String\?\s+@db\.Uuid/);
     expect(schema).toMatch(

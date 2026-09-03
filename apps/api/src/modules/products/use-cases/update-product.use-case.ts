@@ -1,13 +1,13 @@
+import { toSlug } from '@/common/helpers/string.util';
 import {
   BadRequestError,
   ConflictError,
   NotFoundError,
 } from '@/common/response';
 import { AssetsService } from '@/modules/assets/assets.service';
-import { toSlug } from '@/common/helpers/string.util';
 import { UpdateProductDto } from '@/modules/products/dto/update-product.dto';
-import { getProductCatalogue } from '@/modules/products/product-catalogue';
 import { buildProductAssets } from '@/modules/products/product-assets';
+import { getProductCatalogue } from '@/modules/products/product-catalogue';
 import { toProductResponse } from '@/modules/products/products.types';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
 import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
@@ -151,6 +151,7 @@ export class UpdateProductUseCase {
       }
       warranty = {
         create: {
+          product: { connect: { id } },
           warranty_code: nextWarrantyCode,
           duration_months: durationMonths,
           terms: dto.warrantyTerms?.trim() || null,
@@ -201,10 +202,15 @@ export class UpdateProductUseCase {
         : undefined,
       status: dto.status,
       serial_number: dto.serialNumber,
+      warranty_duration_months: dto.warrantyDurationMonths,
+      warranty_terms:
+        dto.warrantyTerms === undefined
+          ? undefined
+          : dto.warrantyTerms?.trim() || null,
       metadata:
         dto.catalogueMetadata === undefined && dto.metadata === undefined
           ? undefined
-          : toPhysicalProductMetadata(existingProduct.metadata, {
+          : this.toPhysicalProductMetadata(existingProduct.metadata, {
               ...(dto.catalogueMetadata ?? {}),
               ...(dto.metadata ?? {}),
             }),
@@ -216,27 +222,27 @@ export class UpdateProductUseCase {
       (asset) => this.assetsService?.enrichAssetUrl(asset).url ?? asset.path,
     );
   }
-}
 
-function toPhysicalProductMetadata(
-  existingMetadata: Prisma.JsonValue,
-  requestedMetadata: Record<string, unknown> | null | undefined,
-): Prisma.InputJsonValue | undefined {
-  if (requestedMetadata === undefined) return undefined;
+  private toPhysicalProductMetadata(
+    existingMetadata: Prisma.JsonValue,
+    requestedMetadata: Record<string, unknown> | null | undefined,
+  ): Prisma.InputJsonValue | undefined {
+    if (requestedMetadata === undefined) return undefined;
 
-  const next = isRecord(existingMetadata) ? { ...existingMetadata } : {};
-  const installationPosition = requestedMetadata?.installationPosition;
-  if (
-    typeof installationPosition === 'string' &&
-    installationPosition.trim().length > 0
-  ) {
-    next.installationPosition = installationPosition.trim();
-  } else {
-    delete next.installationPosition;
+    const next = this.isRecord(existingMetadata) ? { ...existingMetadata } : {};
+    const installationPosition = requestedMetadata?.installationPosition;
+    if (
+      typeof installationPosition === 'string' &&
+      installationPosition.trim().length > 0
+    ) {
+      next.installationPosition = installationPosition.trim();
+    } else {
+      delete next.installationPosition;
+    }
+    return next;
   }
-  return next;
-}
 
-function isRecord(value: unknown): value is Record<string, Prisma.JsonValue> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+  private isRecord(value: unknown): value is Record<string, Prisma.JsonValue> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+  }
 }

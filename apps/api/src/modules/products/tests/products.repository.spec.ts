@@ -5,6 +5,41 @@ import {
 } from '@prisma/client';
 
 describe('ProductsRepository', () => {
+  it('keeps the transitional current warranty pointer after product creation', async () => {
+    const create = jest.fn().mockResolvedValue({
+      id: 'product-id',
+      warranties: [{ id: 'warranty-id' }],
+    });
+    const update = jest.fn().mockResolvedValue({
+      id: 'product-id',
+      warranty: { id: 'warranty-id' },
+    });
+    const repository = new ProductsRepository({
+      $transaction: jest.fn((work: (tx: unknown) => unknown) =>
+        work({ product: { create, update } }),
+      ),
+    } as never);
+
+    await repository.create({
+      category_ref: { connect: { id: 'category-id' } },
+      product_code: 'PRD-001',
+      slug: 'prd-001',
+      warranties: {
+        create: {
+          duration_months: 24,
+          warranty_code: 'WM-001',
+        },
+      },
+    });
+
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: { current_warranty_id: 'warranty-id' },
+        where: { id: 'product-id' },
+      }),
+    );
+  });
+
   it('loads at most one open activation request with a product', async () => {
     const findUnique = jest.fn().mockResolvedValue(null);
     const repository = new ProductsRepository({
