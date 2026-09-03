@@ -47,7 +47,6 @@ type CreateWarrantyActivationRequestFormCardProps = {
   onCreated: () => void;
   activationCodeId?: string;
   activationCode?: string;
-  activationProductSnapshot?: { name: string; sku: string };
 };
 
 export function CreateWarrantyActivationRequestFormCard({
@@ -55,7 +54,6 @@ export function CreateWarrantyActivationRequestFormCard({
   onCreated,
   activationCodeId,
   activationCode,
-  activationProductSnapshot,
 }: CreateWarrantyActivationRequestFormCardProps) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const [categorySearch, setCategorySearch] = useState("");
@@ -157,35 +155,9 @@ export function CreateWarrantyActivationRequestFormCard({
                   {activationCode ?? activationCodeId}
                 </p>
               </div>
-              <SelectedProductSummaryCard
-                productName={
-                  activationProductSnapshot?.name ||
-                  t("activationCodeProductLoading")
-                }
-                productCode={activationProductSnapshot?.sku || "-"}
-                productCodeLabel={t("productCode")}
-                serialNumber={null}
-                serialNumberLabel={t("serialNumber")}
-                summaryLabels={{
-                  brandModel: `${t("brand")} / ${t("model")}`,
-                  currentOwner: t("currentOwner"),
-                  durationMonths: t("durationMonths"),
-                  monthUnit: t("monthUnit"),
-                  warrantyPeriod: t("warrantyPeriod"),
-                }}
-                brand={null}
-                model={null}
-                ownerName={null}
-                durationMonths={undefined}
-                startDate={null}
-                endDate={null}
-                warrantyCode={null}
-                warrantyCodeLabel={t("warrantyCode")}
-                statusLabel={t("activationCodeLocked")}
-              />
             </div>
           ) : null}
-          {!activationCodeId ? (
+          {
             <FormSection
               description={t("createProductDescription")}
               title={t("productInfo")}
@@ -199,7 +171,7 @@ export function CreateWarrantyActivationRequestFormCard({
                 label={t("category")}
               >
                 <SearchDropdown
-                  disabled={Boolean(selectedActivationCode)}
+                  disabled={false}
                   emptyLabel={t("noCategory")}
                   getItemKey={(category) => category.id}
                   inputClassName="h-11 text-base sm:h-10 sm:text-sm"
@@ -403,7 +375,7 @@ export function CreateWarrantyActivationRequestFormCard({
                 />
               ) : null}
             </FormSection>
-          ) : null}
+          }
 
           <FormSection
             description={t("createCustomerDescription")}
@@ -501,7 +473,7 @@ export function CreateWarrantyActivationRequestFormCard({
               />
             ) : null}
 
-            {!activationCodeId && !usesProductSelectors && selectedProduct ? (
+            {!activationCodeId ? (
               <FormField
                 id="create-activation-request-activation-code"
                 label={t("activationCodeOptional")}

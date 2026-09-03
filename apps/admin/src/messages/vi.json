@@ -394,6 +394,7 @@
       "FAILED": "Đã thất bại"
     },
     "createTitle": "Tạo lô mã kích hoạt",
+    "genericPoolDescription": "Mã được tạo từ kho dùng chung, chưa gắn với sản phẩm. Sản phẩm sẽ được chọn khi kích hoạt.",
     "productLabel": "Sản phẩm",
     "productPlaceholder": "Chọn sản phẩm",
     "productEmpty": "Không tìm thấy sản phẩm phù hợp.",
@@ -1635,7 +1636,7 @@
       "PENDING_APPROVAL": "Chờ duyệt"
     },
     "activationCodeBlocked": "Không thể duyệt vì mã kích hoạt đang ở trạng thái {status}.",
-    "activationCodeLockedProduct": "Sản phẩm sẽ được xác định tự động từ mã kích hoạt đã chọn. Không thể thay đổi sản phẩm trong yêu cầu này.",
+    "activationCodeLockedProduct": "Mã kích hoạt đã được chọn. Hãy chọn sản phẩm phù hợp để gắn với mã này.",
     "activationCodeLabel": "Mã kích hoạt",
     "activationCodeOptional": "Mã kích hoạt (không bắt buộc)",
     "activationCodeOptionalPlaceholder": "Chọn mã kích hoạt theo sản phẩm",

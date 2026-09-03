@@ -216,7 +216,7 @@ export function toAdminActivationRequestBody({
     product ?? Object.values(activationProducts)[0] ?? null;
 
   return omitUndefined({
-    activationCodeId: values.activationCodeId,
+    activationCodeId: values.activationCodeId || undefined,
     addressDetail: values.addressDetail.trim(),
     brand: primaryProduct?.brand ?? undefined,
     categoryId: values.categoryId || undefined,

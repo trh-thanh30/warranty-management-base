@@ -1,6 +1,5 @@
 "use client";
 
-import { SearchDropdown } from "@/src/components/common";
 import { PageHeader } from "@/src/components/common/page-header";
 import { SelectControl } from "@/src/components/common/select-control";
 import { StatePanel } from "@/src/components/common/state-panel";
@@ -8,8 +7,6 @@ import { PermissionGuard } from "@/src/components/permission-guard";
 import { useToast } from "@/src/hooks/use-toast";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
-import { useDebounce } from "@repo/hooks";
-import type { ProductResponse } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
   Button,
@@ -25,8 +22,7 @@ import { PaginationControls } from "@repo/ui/pagination-controls";
 import { AlertCircle, FileText, KeyRound, Plus, Settings2 } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
-import { useInfiniteProducts } from "../products/hooks/use-products";
+import { useState } from "react";
 import { ACTIVATION_CODE_BATCH_STATUSES } from "./activation-code-batches.constants";
 import { ActivationCodeBatchesTable } from "./components/activation-code-batches-table";
 import { ActivationCodePrintJobsDialog } from "./components/activation-code-print-jobs-panel";
@@ -43,27 +39,6 @@ export function ActivationCodeBatchesView() {
   const canConfigurePolicy = hasPermission(PERMISSIONS.SYSTEM_CONFIG_VIEW);
   const canPrint = hasPermission(PERMISSIONS.ACTIVATION_CODE_BATCH_PRINT);
   const [isPrintJobsOpen, setPrintJobsOpen] = useState(false);
-  const [productSearch, setProductSearch] = useState("");
-  const debouncedProductSearch = useDebounce(productSearch.trim(), 300);
-  const productsQuery = useInfiniteProducts(
-    {
-      limit: 20,
-      search: debouncedProductSearch || undefined,
-      status: "ACTIVE",
-    },
-    { enabled: directory.isCreateOpen },
-  );
-  const products = useMemo(
-    () =>
-      Array.from(
-        new Map(
-          (productsQuery.data?.pages ?? [])
-            .flatMap((page) => page.items)
-            .map((product) => [product.id, product]),
-        ).values(),
-      ),
-    [productsQuery.data?.pages],
-  );
   const data = directory.query.data;
 
   return (
@@ -109,71 +84,18 @@ export function ActivationCodeBatchesView() {
             </CardHeader>
             <CardContent>
               <form
-                className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_10rem_auto] sm:items-end"
+                className="flex flex-wrap items-end gap-4"
                 onSubmit={(event) => {
                   event.preventDefault();
-                  if (!directory.selectedProductId) return;
                   void directory.createMutation
                     .mutateAsync()
                     .then(() => toast.success(t("created")))
                     .catch(() => toast.error(t("createError")));
                 }}
               >
-                <div className="space-y-2 text-sm font-medium">
-                  {t("productLabel")}
-                  <SearchDropdown
-                    emptyLabel={t("productEmpty")}
-                    errorLabel={t("productError")}
-                    getItemKey={(product) => product.id}
-                    id="activation-batch-product"
-                    isError={productsQuery.isError}
-                    isLoading={productsQuery.isFetching}
-                    items={products}
-                    loadingLabel={
-                      productsQuery.isFetchingNextPage
-                        ? t("productLoadingMore")
-                        : t("productLoading")
-                    }
-                    onItemSelect={(product) => {
-                      directory.setSelectedProductId(product.id);
-                      setProductSearch("");
-                    }}
-                    onRetry={() => void productsQuery.refetch()}
-                    onReachEnd={() => {
-                      if (
-                        productsQuery.hasNextPage &&
-                        !productsQuery.isFetchingNextPage
-                      ) {
-                        void productsQuery.fetchNextPage();
-                      }
-                    }}
-                    onSearchChange={(value) => {
-                      if (directory.selectedProductId) {
-                        directory.setSelectedProductId("");
-                      }
-                      setProductSearch(value);
-                    }}
-                    placeholder={t("productPlaceholder")}
-                    renderItem={(product: ProductResponse) => (
-                      <div>
-                        <p className="font-medium">{product.name}</p>
-                        <p className="mt-0.5 text-xs text-slate-500">
-                          {product.productCode}
-                        </p>
-                      </div>
-                    )}
-                    retryLabel={t("retry")}
-                    searchValue={productSearch}
-                    selectedLabel={
-                      directory.selectedProductId
-                        ? products.find(
-                            (product) =>
-                              product.id === directory.selectedProductId,
-                          )?.name
-                        : undefined
-                    }
-                  />
-                </div>
+                <p className="flex-1 text-sm text-slate-600 dark:text-slate-300">
+                  {t("genericPoolDescription")}
+                </p>
                 <label className="space-y-2 text-sm font-medium">
                   {t("quantityLabel")}
                   <Input
@@ -190,10 +112,7 @@ export function ActivationCodeBatchesView() {
                 <div className="flex h-10 items-stretch gap-2">
                   <Button
                     className="h-10"
-                    disabled={
-                      !directory.selectedProductId ||
-                      directory.createMutation.isPending
-                    }
+                    disabled={directory.createMutation.isPending}
                     type="submit"
                   >
                     {t("createSubmit")}

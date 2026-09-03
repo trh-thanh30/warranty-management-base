@@ -87,14 +87,14 @@ export function createActivationCodesService(http: ActivationCodesHttpClient) {
     },
 
     async listAvailableByProduct(
-      productId: string,
+      productId?: string,
       query: { page?: number; limit?: number; search?: string } = {},
     ): Promise<AvailableActivationCodeList> {
       return unwrap(
         await http.get<AvailableActivationCodeList>(
           "/activation-code-batches/available",
           {
-            params: { ...query, productId },
+            params: { ...query, ...(productId ? { productId } : {}) },
           },
         ),
       );

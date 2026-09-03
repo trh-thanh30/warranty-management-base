@@ -143,14 +143,10 @@ export function useCreateWarrantyActivationRequestForm({
     300,
   );
   const activationCodesQuery = useInfiniteQuery({
-    enabled: Boolean(selectedProduct?.id) && !activationCodeId,
-    queryKey: [
-      "available-activation-codes",
-      selectedProduct?.id,
-      debouncedActivationCodeSearch,
-    ],
+    enabled: !activationCodeId,
+    queryKey: ["available-activation-codes", debouncedActivationCodeSearch],
     queryFn: ({ pageParam }) =>
-      activationCodesService.listAvailableByProduct(selectedProduct!.id, {
+      activationCodesService.listAvailableByProduct(undefined, {
         limit: 10,
         page: pageParam,
         search: debouncedActivationCodeSearch || undefined,

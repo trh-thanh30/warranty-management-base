@@ -16,12 +16,6 @@ export function WarrantyActivationRequestCreateView() {
   const activationCode = activationCodeId
     ? (searchParams.get("activationCode") ?? undefined)
     : undefined;
-  const activationProductSnapshot = activationCodeId
-    ? {
-        name: searchParams.get("productName") ?? "",
-        sku: searchParams.get("productSku") ?? "",
-      }
-    : undefined;
   const goBack = () => router.push("/warranty-activation-requests");
 
   return (
@@ -37,7 +31,6 @@ export function WarrantyActivationRequestCreateView() {
         <CreateWarrantyActivationRequestFormCard
           activationCodeId={activationCodeId}
           activationCode={activationCode}
-          activationProductSnapshot={activationProductSnapshot}
           onCancel={goBack}
           onCreated={goBack}
         />

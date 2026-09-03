@@ -5,7 +5,8 @@ ALTER TABLE "category"
   ADD COLUMN "activation_code_enabled" BOOLEAN NOT NULL DEFAULT true;
 
 DROP INDEX "customer_email_key";
-CREATE INDEX "customer_email_idx" ON "customer"("email");
+-- customer_email_idx is created by the original warranty-domain migration.
+-- Keep and reuse that non-unique lookup index after dropping the unique index.
 
 ALTER TABLE "dealer" ADD COLUMN "email" TEXT;
 CREATE INDEX "dealer_email_idx" ON "dealer"("email");

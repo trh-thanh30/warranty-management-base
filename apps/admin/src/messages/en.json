@@ -394,6 +394,7 @@
       "FAILED": "Failed"
     },
     "createTitle": "Create activation batch",
+    "genericPoolDescription": "Codes are created in a shared pool and linked to a product when activated.",
     "productLabel": "Product",
     "productPlaceholder": "Select a product",
     "productEmpty": "No matching products found.",
@@ -1635,7 +1636,7 @@
       "PENDING_APPROVAL": "Pending approval"
     },
     "activationCodeBlocked": "This request cannot be approved because the activation code is {status}.",
-    "activationCodeLockedProduct": "The product will be determined from the selected activation code. It cannot be changed for this request.",
+    "activationCodeLockedProduct": "The activation code is selected. Choose the product to link to this code.",
     "activationCodeLabel": "Activation code",
     "activationCodeOptional": "Activation code (optional)",
     "activationCodeOptionalPlaceholder": "Select an activation code for this product",

@@ -26,7 +26,7 @@ export type ActivationCodeBatchListQuery = {
 };
 
 export type CreateActivationCodeBatchBody = {
-  sourceProductId: string;
+  sourceProductId?: string;
   quantity?: number;
 };
 

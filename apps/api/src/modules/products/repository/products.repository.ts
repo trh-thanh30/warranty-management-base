@@ -705,12 +705,21 @@ function buildActivationEligibleProductWhere(): Prisma.ProductWhereInput {
   return {
     deleted_at: null,
     status: product_status.ACTIVE,
-    warranty: {
-      is: {
-        status: warranty_status.DRAFT,
-        warranty_code: { not: '' },
+    OR: [
+      {
+        warranty: {
+          is: {
+            status: warranty_status.DRAFT,
+            warranty_code: { not: '' },
+          },
+        },
       },
-    },
+      {
+        warranty: { is: null },
+        warranty_duration_months: { gt: 0 },
+        category_ref: { activation_code_enabled: true },
+      },
+    ],
     warranty_activation_request_items: {
       none: { status: { in: openActivationRequestStatuses } },
     },
