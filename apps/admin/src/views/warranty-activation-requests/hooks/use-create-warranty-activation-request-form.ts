@@ -147,7 +147,10 @@ export function useCreateWarrantyActivationRequestForm({
   );
   const debouncedDealerSearch = useDebounce(dealerSearch.trim(), 300);
   const activationCodesQuery = useInfiniteQuery({
-    enabled: !activationCodeId && Boolean(selectedProduct),
+    enabled:
+      !activationCodeId &&
+      Boolean(selectedProduct) &&
+      selectedProduct?.categoryRef?.activationCodeEnabled !== false,
     queryKey: ["available-activation-codes", selectedProduct?.id ?? "all"],
     queryFn: ({ pageParam }) =>
       activationCodesService.listAvailableByProduct(selectedProduct?.id, {

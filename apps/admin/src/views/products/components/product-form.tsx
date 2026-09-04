@@ -132,28 +132,26 @@ export function ProductForm({
             </Field>
           </div>
 
-          <div className="grid min-w-0 gap-5 ">
-            <Field
-              description={t("warrantyPolicyDescription")}
-              error={formatFieldError(
-                form.formState.errors.warrantyDurationMonths?.message,
-                t,
-              )}
+          <Field
+            description={t("warrantyPolicyDescription")}
+            error={formatFieldError(
+              form.formState.errors.warrantyDurationMonths?.message,
+              t,
+            )}
+            id="product-warranty-duration"
+            label={t("durationMonths")}
+          >
+            <Input
+              disabled={isSubmitting}
               id="product-warranty-duration"
-              label={t("durationMonths")}
-            >
-              <Input
-                disabled={isSubmitting}
-                id="product-warranty-duration"
-                inputMode="numeric"
-                min={1}
-                placeholder={t("warrantyDurationPlaceholder")}
-                step={1}
-                type="number"
-                {...form.register("warrantyDurationMonths")}
-              />
-            </Field>
-          </div>
+              inputMode="numeric"
+              min={1}
+              placeholder={t("warrantyDurationPlaceholder")}
+              step={1}
+              type="number"
+              {...form.register("warrantyDurationMonths")}
+            />
+          </Field>
 
           <div className="grid gap-5 sm:grid-cols-2">
             <Field

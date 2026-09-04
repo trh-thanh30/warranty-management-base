@@ -14,7 +14,7 @@ import { ListPublicProductCategoriesUseCase } from '@/modules/categories/use-cas
 import { ReorderCategoriesUseCase } from '@/modules/categories/use-cases/reorder-categories.use-case';
 import { UpdateCategoryUseCase } from '@/modules/categories/use-cases/update-category.use-case';
 import { CategoryHierarchyService } from '@/modules/categories/service/category-hierarchy.service';
-import { category_type } from '@prisma/client';
+import { category_type, user_role } from '@prisma/client';
 import { createCategoryExportWorkbook } from '@/modules/categories/excel/category-workbook.factory';
 
 jest.mock('@/modules/assets/assets.service', () => ({
@@ -33,6 +33,7 @@ const category = {
   image_url: null,
   order: 10,
   is_active: true,
+  activation_code_enabled: true,
   metadata: { color: 'blue' },
   created_at: new Date('2026-07-09T00:00:00.000Z'),
   updated_at: new Date('2026-07-09T00:00:00.000Z'),
@@ -41,6 +42,7 @@ const category = {
 describe('Category use cases', () => {
   const categoriesRepository = {
     create: jest.fn(),
+    countAssignedActivationCodes: jest.fn(),
     findById: jest.fn(),
     findByIds: jest.fn(),
     findByTypeAndSlug: jest.fn(),
@@ -62,6 +64,7 @@ describe('Category use cases', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    categoriesRepository.countAssignedActivationCodes.mockResolvedValue(0);
   });
 
   it('creates a category with generated slug', async () => {
@@ -105,6 +108,27 @@ describe('Category use cases', () => {
         name: 'Car',
       }),
     ).rejects.toBeInstanceOf(ConflictError);
+  });
+
+  it('rejects a moderator configuring activation codes while creating a category', async () => {
+    const useCase = new CreateCategoryUseCase(
+      categoriesRepository as never,
+      hierarchyService(),
+    );
+
+    await expect(
+      useCase.execute(
+        {
+          type: category_type.PRODUCT,
+          name: 'Restricted category',
+          activationCodeEnabled: false,
+        },
+        user_role.MODERATOR,
+      ),
+    ).rejects.toMatchObject({
+      code: 'CATEGORY_ACTIVATION_CODE_CONFIG_ADMIN_ONLY',
+    });
+    expect(categoriesRepository.create).not.toHaveBeenCalled();
   });
 
   it('rejects parent category from another type', async () => {
@@ -501,6 +525,44 @@ describe('Category use cases', () => {
       'category-id',
       expect.objectContaining({ parent: { disconnect: true } }),
     );
+  });
+
+  it('rejects disabling activation codes while the category still has assigned codes', async () => {
+    categoriesRepository.findById.mockResolvedValue(category);
+    categoriesRepository.countAssignedActivationCodes.mockResolvedValue(3);
+    const useCase = new UpdateCategoryUseCase(
+      categoriesRepository as never,
+      hierarchyService(),
+      assetsService as never,
+    );
+
+    await expect(
+      useCase.execute('category-id', { activationCodeEnabled: false }),
+    ).rejects.toMatchObject({
+      code: 'CATEGORY_ACTIVATION_CODES_STILL_ASSIGNED',
+      details: { assignedCount: 3, categoryId: 'category-id' },
+    });
+    expect(categoriesRepository.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects a moderator changing category activation-code configuration', async () => {
+    const useCase = new UpdateCategoryUseCase(
+      categoriesRepository as never,
+      hierarchyService(),
+      assetsService as never,
+    );
+
+    await expect(
+      useCase.execute(
+        'category-id',
+        { activationCodeEnabled: false },
+        user_role.MODERATOR,
+      ),
+    ).rejects.toMatchObject({
+      code: 'CATEGORY_ACTIVATION_CODE_CONFIG_ADMIN_ONLY',
+    });
+    expect(categoriesRepository.findById).not.toHaveBeenCalled();
+    expect(categoriesRepository.update).not.toHaveBeenCalled();
   });
 
   it('rejects selecting the edited category as its own parent', async () => {

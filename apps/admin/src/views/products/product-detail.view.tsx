@@ -72,7 +72,8 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                {canAssignCodes ? (
+                {canAssignCodes &&
+                product?.categoryRef?.activationCodeEnabled === true ? (
                   <DropdownMenuItem
                     disabled={
                       !product ||

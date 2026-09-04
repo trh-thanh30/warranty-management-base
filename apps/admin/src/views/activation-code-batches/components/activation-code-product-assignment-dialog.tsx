@@ -60,6 +60,7 @@ export function ActivationCodeProductAssignmentDialog({
   const debouncedSearch = useDebounce(search.trim(), 300);
   const productsQuery = useInfiniteProducts(
     {
+      activationCodeAssignable: "true",
       limit: 20,
       search: debouncedSearch || undefined,
       status: "ACTIVE",

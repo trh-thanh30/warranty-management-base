@@ -202,6 +202,37 @@ describe('ProductsRepository.list', () => {
     );
   });
 
+  it('filters activation-code assignment pickers to assignable products', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const count = jest.fn().mockResolvedValue(0);
+    const repository = new ProductsRepository({
+      $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
+        callback({ product: { count, findMany } }),
+      ),
+    } as never);
+
+    await repository.list({
+      activationCodeAssignable: 'true',
+      limit: 20,
+      page: 1,
+      status: product_status.ACTIVE,
+    });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          AND: expect.arrayContaining([
+            { category_ref: { activation_code_enabled: true } },
+            { warranty_duration_months: { gt: 0 } },
+            { activation_code: { is: null } },
+          ]),
+          deleted_at: null,
+          status: product_status.ACTIVE,
+        }),
+      }),
+    );
+  });
+
   it('filters activation selectors to eligible physical products', async () => {
     const findMany = jest.fn().mockResolvedValue([]);
     const count = jest.fn().mockResolvedValue(0);

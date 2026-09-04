@@ -36,6 +36,10 @@ export class ListProductsDto extends PaginationQueryDto {
 
   @IsOptional()
   @IsBooleanString()
+  activationCodeAssignable?: string;
+
+  @IsOptional()
+  @IsBooleanString()
   claimEligible?: string;
 
   @IsOptional()

@@ -304,6 +304,7 @@ export class ProductsRepository {
     status?: product_status | 'ALL';
     isPublished?: string;
     activationEligible?: string;
+    activationCodeAssignable?: string;
     claimEligible?: string;
     warrantyStatus?: warranty_status;
     page?: number;
@@ -315,6 +316,8 @@ export class ProductsRepository {
     const claimEligible = filters.claimEligible === 'true';
     const activationEligible =
       filters.activationEligible === 'true' && !claimEligible;
+    const activationCodeAssignable =
+      filters.activationCodeAssignable === 'true';
     const now = new Date();
     const { page, limit, skip, take } = normalizePagination(filters);
     const sortMap = {
@@ -328,9 +331,12 @@ export class ProductsRepository {
     } satisfies Record<string, keyof Prisma.ProductOrderByWithRelationInput>;
     const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
     const where: Prisma.ProductWhereInput = {
-      AND: buildEffectiveCatalogueFilters(filters),
+      AND: buildEffectiveCatalogueFilters({
+        ...filters,
+        activationCodeAssignable,
+      }),
       deleted_at:
-        activationEligible || claimEligible
+        activationEligible || claimEligible || activationCodeAssignable
           ? null
           : buildProductDeletionFilter(filters.status),
       ownerships: filters.ownerCustomerId
@@ -345,11 +351,13 @@ export class ProductsRepository {
         ? product_status.ACTIVE
         : claimEligible
           ? product_status.ACTIVE
-          : filters.status === undefined
+          : activationCodeAssignable
             ? product_status.ACTIVE
-            : filters.status === 'ALL'
-              ? undefined
-              : filters.status,
+            : filters.status === undefined
+              ? product_status.ACTIVE
+              : filters.status === 'ALL'
+                ? undefined
+                : filters.status,
       is_published:
         filters.isPublished === undefined
           ? undefined
@@ -683,10 +691,18 @@ function buildProductDeletionFilter(status?: product_status | 'ALL') {
 
 function buildEffectiveCatalogueFilters(filters: {
   categoryId?: string;
+  activationCodeAssignable?: boolean;
 }): Prisma.ProductWhereInput[] | undefined {
   const clauses: Prisma.ProductWhereInput[] = [];
   if (filters.categoryId) {
     clauses.push({ category_id: filters.categoryId });
+  }
+  if (filters.activationCodeAssignable) {
+    clauses.push(
+      { category_ref: { activation_code_enabled: true } },
+      { warranty_duration_months: { gt: 0 } },
+      { activation_code: { is: null } },
+    );
   }
   return clauses.length > 0 ? clauses : undefined;
 }

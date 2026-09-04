@@ -31,7 +31,7 @@ test("product form fields cannot widen the mobile layout", async () => {
 
   assert.match(productForm, /<form className="min-w-0 space-y-4"/);
   assert.match(formField, /className="min-w-0 space-y-2"/);
-  assert.match(productForm, /className="grid min-w-0 gap-5 md:grid-cols-2"/);
+  assert.match(productForm, /<div className="min-w-0 space-y-4">/);
   assert.match(
     productForm,
     /xl:grid-cols-\[minmax\(0,1fr\)_minmax\(320px,0\.42fr\)\]/,

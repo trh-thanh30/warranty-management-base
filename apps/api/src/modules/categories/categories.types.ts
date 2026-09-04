@@ -13,6 +13,7 @@ export function toCategoryResponse(category: Category) {
     imageUrl: category.image_url,
     order: category.order,
     isActive: category.is_active,
+    activationCodeEnabled: category.activation_code_enabled,
     metadata: category.metadata as Record<string, unknown> | null,
     createdAt: category.created_at,
     updatedAt: category.updated_at,

@@ -439,7 +439,8 @@ function ProductActionsMenu({
                 {t("assignOwner")}
               </DropdownMenuItem>
             ) : null}
-            {canAssignCodes ? (
+            {canAssignCodes &&
+            product.categoryRef?.activationCodeEnabled === true ? (
               <DropdownMenuItem
                 disabled={
                   product.status !== "ACTIVE" || !product.warrantyDurationMonths

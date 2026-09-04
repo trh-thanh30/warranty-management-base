@@ -18,6 +18,7 @@ import {
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
   Button,
+  Badge,
   cn,
   DropdownMenu,
   DropdownMenuContent,
@@ -114,6 +115,7 @@ export function CategoriesTable({
               </SortableTableHead>
               <TableHead>{t("code")}</TableHead>
               <TableHead>{t("type")}</TableHead>
+              <TableHead>{t("activationCodeStatus")}</TableHead>
               <SortableTableHead
                 activeSortBy={sortBy}
                 onSortChange={onSortChange}
@@ -181,6 +183,7 @@ function CategoryTableRow({
   parentName: string | null;
 }) {
   const locale = useLocale();
+  const t = useTranslations("Categories");
 
   return (
     <TableRow className={cn(category.isContextOnly && "bg-slate-50/70")}>
@@ -198,6 +201,17 @@ function CategoryTableRow({
       </TableCell>
       <TableCell>
         <CategoryTypeBadge type={category.type} />
+      </TableCell>
+      <TableCell>
+        <Badge
+          variant={
+            category.activationCodeEnabled !== false ? "success" : "secondary"
+          }
+        >
+          {category.activationCodeEnabled !== false
+            ? t("activationCodeEnabledShort")
+            : t("activationCodeDisabledShort")}
+        </Badge>
       </TableCell>
       <TableCell>{category.order}</TableCell>
       <TableCell>
@@ -351,6 +365,15 @@ function CategoryMobileCard({
       <div className="mt-3 flex flex-wrap gap-2">
         <CategoryTypeBadge type={category.type} />
         <CategoryStatusBadge isActive={category.isActive} />
+        <Badge
+          variant={
+            category.activationCodeEnabled !== false ? "success" : "secondary"
+          }
+        >
+          {category.activationCodeEnabled !== false
+            ? t("activationCodeEnabledShort")
+            : t("activationCodeDisabledShort")}
+        </Badge>
       </div>
 
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">

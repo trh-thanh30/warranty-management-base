@@ -151,6 +151,7 @@ export type ListProductsQuery = PaginationQuery & {
   status?: ProductStatus | "ALL";
   isPublished?: "true" | "false";
   activationEligible?: "true" | "false";
+  activationCodeAssignable?: "true" | "false";
   claimEligible?: "true" | "false";
   warrantyStatus?: WarrantyStatus;
   sortBy?: ProductSortBy;
