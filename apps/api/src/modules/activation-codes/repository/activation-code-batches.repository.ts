@@ -194,6 +194,14 @@ export class ActivationCodeBatchesRepository {
           expires_at: true,
           activated_at: true,
           revoked_at: true,
+          product: {
+            select: {
+              id: true,
+              product_code: true,
+              display_name: true,
+              serial_number: true,
+            },
+          },
           replaced_by: {
             select: { id: true, code_ciphertext: true, status: true },
           },
@@ -221,6 +229,15 @@ export class ActivationCodeBatchesRepository {
           expiresAt: row.expires_at,
           activatedAt: row.activated_at,
           revokedAt: row.revoked_at,
+          assignedProduct: row.product
+            ? {
+                id: row.product.id,
+                productCode: row.product.product_code,
+                displayName: row.product.display_name,
+                name: row.product.display_name ?? row.product.product_code,
+                serialNumber: row.product.serial_number,
+              }
+            : null,
           replacedBy: row.replaced_by
             ? {
                 id: row.replaced_by.id,
@@ -243,25 +260,29 @@ export class ActivationCodeBatchesRepository {
 
   async listAvailableByProduct(
     productId: string | undefined,
-    filters: { page?: number; limit?: number; search?: string },
+    filters: {
+      page?: number;
+      limit?: number;
+      search?: string;
+      assignment?: 'ALL' | 'ASSIGNED' | 'UNASSIGNED';
+    },
   ) {
     const { page, limit, skip, take } = normalizePagination(filters);
     const search = filters.search?.trim();
     const product = productId
       ? await this.prismaService.product.findUnique({
           where: { id: productId },
-          select: { product_code: true },
+          select: { id: true },
         })
       : null;
     if (productId && !product) return paginate([], { page, limit, total: 0 });
     const baseWhere: Prisma.ActivationCodeWhereInput = {
-      ...(product
-        ? {
-            OR: [
-              { batch: { source_product_id: productId } },
-              { batch: { product_sku: product.product_code } },
-            ],
-          }
+      ...(product ? { product_id: product.id } : {}),
+      ...(!product && filters.assignment === 'ASSIGNED'
+        ? { product_id: { not: null } }
+        : {}),
+      ...(!product && filters.assignment === 'UNASSIGNED'
+        ? { product_id: null }
         : {}),
       ...(search ? { code_hash: this.crypto.hash(search) } : {}),
     };
@@ -293,6 +314,14 @@ export class ActivationCodeBatchesRepository {
         select: { batch_code: true, product_name: true, product_sku: true },
       },
       expires_at: true,
+      product: {
+        select: {
+          id: true,
+          product_code: true,
+          display_name: true,
+          serial_number: true,
+        },
+      },
     } satisfies Prisma.ActivationCodeSelect;
     const [availableTotal, total] = await this.prismaService.$transaction([
       this.prismaService.activationCode.count({ where: availableWhere }),
@@ -344,6 +373,15 @@ export class ActivationCodeBatchesRepository {
           expiresAt: row.expires_at,
           status,
           selectable: status === activation_code_status.AVAILABLE,
+          assignedProduct: row.product
+            ? {
+                id: row.product.id,
+                productCode: row.product.product_code,
+                displayName: row.product.display_name,
+                name: row.product.display_name ?? row.product.product_code,
+                serialNumber: row.product.serial_number,
+              }
+            : null,
         };
       }),
       { page, limit, total },
@@ -355,7 +393,6 @@ export class ActivationCodeBatchesRepository {
     return this.prismaService.$transaction(async (tx) => {
       const expired = await tx.activationCode.findUnique({
         where: { id: expiredId },
-        include: { batch: { select: { product_sku: true } } },
       });
       if (!expired) return { kind: 'NOT_FOUND' as const };
       if (
@@ -366,12 +403,12 @@ export class ActivationCodeBatchesRepository {
       }
       const replacement = await tx.activationCode.findUnique({
         where: { code_hash: replacementHash },
-        include: { batch: { select: { product_sku: true } } },
       });
       if (
         !replacement ||
         replacement.status !== activation_code_status.AVAILABLE ||
-        replacement.batch.product_sku !== expired.batch.product_sku
+        replacement.expires_at <= new Date() ||
+        replacement.product_id
       ) {
         return { kind: 'INVALID_REPLACEMENT' as const };
       }
@@ -380,8 +417,15 @@ export class ActivationCodeBatchesRepository {
         data: {
           status: activation_code_status.REPLACED,
           replaced_by_id: replacement.id,
+          product_id: null,
         },
       });
+      if (expired.product_id) {
+        await tx.activationCode.update({
+          where: { id: replacement.id },
+          data: { product_id: expired.product_id },
+        });
+      }
       return { kind: 'REPLACED' as const, replacementId: replacement.id };
     });
   }
@@ -415,6 +459,75 @@ export class ActivationCodeBatchesRepository {
         expires_at: { lte: now },
       },
       data: { status: activation_code_status.EXPIRED },
+    });
+  }
+
+  findAssignmentProduct(id: string) {
+    return this.prismaService.product.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        product_code: true,
+        display_name: true,
+        serial_number: true,
+        status: true,
+        deleted_at: true,
+        warranty_duration_months: true,
+        category_ref: { select: { activation_code_enabled: true } },
+      },
+    });
+  }
+
+  findCodesForAssignment(ids: string[]) {
+    return this.prismaService.activationCode.findMany({
+      where: { id: { in: ids } },
+      select: {
+        id: true,
+        status: true,
+        expires_at: true,
+        product_id: true,
+        request: { select: { id: true } },
+        request_items: { select: { id: true }, take: 1 },
+        warranty: { select: { id: true } },
+      },
+    });
+  }
+
+  findCodeAssignedToProduct(productId: string, excludedCodeId: string) {
+    return this.prismaService.activationCode.findFirst({
+      where: {
+        id: { not: excludedCodeId },
+        product_id: productId,
+      },
+      select: { id: true },
+    });
+  }
+
+  assignProduct(ids: string[], productId: string, now: Date) {
+    return this.prismaService.activationCode.updateMany({
+      where: {
+        id: { in: ids },
+        status: activation_code_status.AVAILABLE,
+        expires_at: { gt: now },
+        request: { is: null },
+        request_items: { none: {} },
+        warranty: { is: null },
+      },
+      data: { product_id: productId },
+    });
+  }
+
+  unassignProduct(ids: string[], now: Date) {
+    return this.prismaService.activationCode.updateMany({
+      where: {
+        id: { in: ids },
+        status: activation_code_status.AVAILABLE,
+        expires_at: { gt: now },
+        request: { is: null },
+        request_items: { none: {} },
+        warranty: { is: null },
+      },
+      data: { product_id: null },
     });
   }
 

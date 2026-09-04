@@ -1,6 +1,9 @@
 import type {
   ActivationCodeReport,
   ActivationCodePrintJob,
+  AssignActivationCodesToProductBody,
+  AssignActivationCodesToProductResult,
+  UnassignActivationCodesFromProductBody,
   RequestActivationCodePrintJobQuery,
 } from "@repo/shared";
 import { unwrap, unwrapBlob } from "../service.utils";
@@ -88,7 +91,12 @@ export function createActivationCodesService(http: ActivationCodesHttpClient) {
 
     async listAvailableByProduct(
       productId?: string,
-      query: { page?: number; limit?: number; search?: string } = {},
+      query: {
+        page?: number;
+        limit?: number;
+        search?: string;
+        assignment?: "ALL" | "ASSIGNED" | "UNASSIGNED";
+      } = {},
     ): Promise<AvailableActivationCodeList> {
       return unwrap(
         await http.get<AvailableActivationCodeList>(
@@ -111,6 +119,28 @@ export function createActivationCodesService(http: ActivationCodesHttpClient) {
 
     async revokeCode(codeId: string): Promise<void> {
       await http.post(`/activation-code-batches/codes/${codeId}/revoke`);
+    },
+
+    async assignProduct(
+      body: AssignActivationCodesToProductBody,
+    ): Promise<AssignActivationCodesToProductResult> {
+      return unwrap(
+        await http.post<AssignActivationCodesToProductResult>(
+          "/activation-code-batches/codes/assign-product",
+          body,
+        ),
+      );
+    },
+
+    async unassignProduct(
+      body: UnassignActivationCodesFromProductBody,
+    ): Promise<{ activationCodeId: string }> {
+      return unwrap(
+        await http.post(
+          "/activation-code-batches/codes/unassign-product",
+          body,
+        ),
+      );
     },
 
     async replaceCode(codeId: string, replacementCode: string): Promise<void> {

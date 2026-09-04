@@ -11,3 +11,10 @@ export class WarrantyActivationRequestCodeConflictError extends WarrantyActivati
     this.name = 'WarrantyActivationRequestCodeConflictError';
   }
 }
+
+export class WarrantyActivationRequestWarrantyCodeConflictError extends WarrantyActivationRequestUniqueConflictError {
+  constructor() {
+    super(['warranty_code']);
+    this.name = 'WarrantyActivationRequestWarrantyCodeConflictError';
+  }
+}

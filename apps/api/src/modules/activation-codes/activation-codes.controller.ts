@@ -23,6 +23,12 @@ import { ListActivationCodesUseCase } from '@/modules/activation-codes/use-cases
 import { ListAvailableActivationCodesUseCase } from '@/modules/activation-codes/use-cases/list-available-activation-codes.use-case';
 import { ReplaceActivationCodeDto } from '@/modules/activation-codes/dto/replace-activation-code.dto';
 import { ReplaceActivationCodeUseCase } from '@/modules/activation-codes/use-cases/replace-activation-code.use-case';
+import {
+  AssignActivationCodesToProductDto,
+  UnassignActivationCodesFromProductDto,
+} from '@/modules/activation-codes/dto/assign-activation-codes-to-product.dto';
+import { AssignActivationCodesToProductUseCase } from '@/modules/activation-codes/use-cases/assign-activation-codes-to-product.use-case';
+import { UnassignActivationCodesFromProductUseCase } from '@/modules/activation-codes/use-cases/unassign-activation-codes-from-product.use-case';
 import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import { permission_key } from '@prisma/client';
 import type { Response } from 'express';
@@ -44,6 +50,8 @@ export class ActivationCodesController {
     private readonly listCodesUseCase: ListActivationCodesUseCase,
     private readonly listAvailableCodesUseCase: ListAvailableActivationCodesUseCase,
     private readonly replaceActivationCodeUseCase: ReplaceActivationCodeUseCase,
+    private readonly assignCodesToProductUseCase: AssignActivationCodesToProductUseCase,
+    private readonly unassignCodesFromProductUseCase: UnassignActivationCodesFromProductUseCase,
   ) {}
 
   @Get()
@@ -111,6 +119,18 @@ export class ActivationCodesController {
   @Permissions([permission_key.ACTIVATION_CODE_BATCH_REVOKE])
   revoke(@Param('id') id: string) {
     return this.revokeActivationCodeUseCase.execute(id);
+  }
+
+  @Post('codes/assign-product')
+  @Permissions([permission_key.ACTIVATION_CODE_ASSIGN_PRODUCT])
+  assignProduct(@Body() dto: AssignActivationCodesToProductDto) {
+    return this.assignCodesToProductUseCase.execute(dto);
+  }
+
+  @Post('codes/unassign-product')
+  @Permissions([permission_key.ACTIVATION_CODE_ASSIGN_PRODUCT])
+  unassignProduct(@Body() dto: UnassignActivationCodesFromProductDto) {
+    return this.unassignCodesFromProductUseCase.execute(dto);
   }
 
   @Post('codes/:id/replace')

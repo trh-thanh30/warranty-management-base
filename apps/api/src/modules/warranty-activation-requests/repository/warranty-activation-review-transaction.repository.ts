@@ -156,6 +156,20 @@ export class WarrantyActivationReviewTransactionRepository {
     });
   }
 
+  linkItemWarranty(input: {
+    itemId: string;
+    warrantyCode: string;
+    warrantyId: string;
+  }) {
+    return this.tx.warrantyActivationRequestItem.update({
+      where: { id: input.itemId },
+      data: {
+        warranty: { connect: { id: input.warrantyId } },
+        warranty_code: input.warrantyCode,
+      },
+    });
+  }
+
   markItemsActivated(requestId: string, activatedAt: Date) {
     return this.tx.warrantyActivationRequestItem.updateMany({
       where: { request_id: requestId },

@@ -26,6 +26,7 @@ import {
 } from "../../categories/hooks/use-categories";
 import { useInfiniteCustomers } from "../../customers/hooks/use-customers";
 import { useInfiniteActivationProductOptions } from "../../products/hooks/use-products";
+import { useProduct } from "../../products/hooks/use-products";
 import { activationCodesService } from "@/src/services/activation-codes/activation-codes.service";
 import type { AvailableActivationCode } from "@/src/services/activation-codes/activation-code-batches.types";
 import {
@@ -77,9 +78,11 @@ const DEFAULT_VALUES: WarrantyActivationRequestCreateFormValues = {
 export function useCreateWarrantyActivationRequestForm({
   onCreated,
   activationCodeId,
+  assignedProductId,
 }: {
   onCreated: () => void;
   activationCodeId?: string;
+  assignedProductId?: string;
 }) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const tApiErrors = useTranslations("ApiErrors");
@@ -102,6 +105,14 @@ export function useCreateWarrantyActivationRequestForm({
   const [activationCodeSearch, setActivationCodeSearch] = useState("");
   const [selectedActivationCode, setSelectedActivationCode] =
     useState<AvailableActivationCode | null>(null);
+  const assignedProductQuery = useProduct(
+    selectedActivationCode?.assignedProduct?.id ?? assignedProductId ?? null,
+    {
+      enabled: Boolean(
+        selectedActivationCode?.assignedProduct?.id ?? assignedProductId,
+      ),
+    },
+  );
   const [selectedActivationProducts, setSelectedActivationProducts] = useState<
     Record<string, ProductResponse>
   >({});
@@ -147,6 +158,7 @@ export function useCreateWarrantyActivationRequestForm({
     queryKey: ["available-activation-codes", debouncedActivationCodeSearch],
     queryFn: ({ pageParam }) =>
       activationCodesService.listAvailableByProduct(undefined, {
+        assignment: "ASSIGNED",
         limit: 10,
         page: pageParam,
         search: debouncedActivationCodeSearch || undefined,
@@ -252,6 +264,24 @@ export function useCreateWarrantyActivationRequestForm({
     () => categories.find((category) => category.id === categoryId) ?? null,
     [categories, categoryId],
   );
+
+  useEffect(() => {
+    const product = assignedProductQuery.data;
+    if (!product) return;
+
+    setSelectedProduct(product);
+    setProductSearchState({ categoryId: product.categoryId, value: "" });
+    setFormValues(
+      form.setValue,
+      {
+        categoryId: product.categoryId,
+        productId: product.id,
+        productName: getActivationProductDisplayName(product),
+        warrantyCode: product.warrantyCode ?? "",
+      },
+      false,
+    );
+  }, [assignedProductQuery.data, form.setValue]);
 
   useEffect(() => {
     if (!pendingWardName || wards.length === 0) return;

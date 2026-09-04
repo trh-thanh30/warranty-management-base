@@ -11,6 +11,7 @@ import {
 import {
   WarrantyActivationRequestCodeConflictError,
   WarrantyActivationRequestUniqueConflictError,
+  WarrantyActivationRequestWarrantyCodeConflictError,
 } from '@/modules/warranty-activation-requests/repository/warranty-activation-request-errors';
 import { Injectable } from '@nestjs/common';
 import { Prisma, warranty_activation_request_status } from '@prisma/client';
@@ -270,9 +271,13 @@ function toApplicationConflictError(error: unknown) {
           (value): value is string => typeof value === 'string',
         )
       : undefined;
-    return target?.includes('request_code')
-      ? new WarrantyActivationRequestCodeConflictError()
-      : new WarrantyActivationRequestUniqueConflictError(target);
+    if (target?.includes('request_code')) {
+      return new WarrantyActivationRequestCodeConflictError();
+    }
+    if (target?.includes('warranty_code')) {
+      return new WarrantyActivationRequestWarrantyCodeConflictError();
+    }
+    return new WarrantyActivationRequestUniqueConflictError(target);
   }
 
   return error;

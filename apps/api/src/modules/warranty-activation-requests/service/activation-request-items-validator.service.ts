@@ -164,6 +164,18 @@ export class ActivationRequestItemsValidatorService {
             activationCodeId: item.activationCodeId,
           });
         }
+        if (!code.product_id) {
+          this.throwValidation('ACTIVATION_CODE_PRODUCT_NOT_ASSIGNED', {
+            activationCodeId: item.activationCodeId,
+          });
+        }
+        if (code.product_id !== item.productId) {
+          this.throwValidation('ACTIVATION_CODE_PRODUCT_MISMATCH', {
+            activationCodeId: item.activationCodeId,
+            assignedProductId: code.product_id,
+            productId: item.productId,
+          });
+        }
       }
     }
 

@@ -482,38 +482,16 @@ export class ProductsRepository {
 
       const products = [...eligibleItems, ...ineligibleItems];
       const productIds = products.map((product) => product.id);
-      const productCodes = products.map((product) => product.product_code);
-      const batches = productIds.length
-        ? await tx.activationCodeBatch.findMany({
-            where: {
-              OR: [
-                { source_product_id: { in: productIds } },
-                { product_sku: { in: productCodes } },
-              ],
-            },
-            select: { id: true, source_product_id: true, product_sku: true },
-          })
-        : [];
-      const batchIds = batches.map((batch) => batch.id);
-      const groupedCodes = batchIds.length
+      const groupedCodes = productIds.length
         ? await tx.activationCode.groupBy({
-            by: ['batch_id', 'status'],
-            where: { batch_id: { in: batchIds } },
+            by: ['product_id', 'status'],
+            where: { product_id: { in: productIds } },
             _count: { _all: true },
           })
         : [];
-      const productIdByBatchId = new Map(
-        batches.map((batch) => [
-          batch.id,
-          batch.source_product_id ??
-            products.find(
-              (product) => product.product_code === batch.product_sku,
-            )?.id,
-        ]),
-      );
       const countsByProduct = new Map<string, Record<string, number>>();
       for (const row of groupedCodes) {
-        const productId = productIdByBatchId.get(row.batch_id);
+        const productId = row.product_id;
         if (!productId) continue;
         const counts = countsByProduct.get(productId) ?? {};
         counts[row.status] = (counts[row.status] ?? 0) + row._count._all;

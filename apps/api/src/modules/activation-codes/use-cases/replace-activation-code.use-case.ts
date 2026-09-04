@@ -20,7 +20,7 @@ export class ReplaceActivationCodeUseCase {
     }
     if (result.kind === 'INVALID_REPLACEMENT') {
       throw new BadRequestError(
-        'Replacement code must be available for the same product',
+        'Replacement code must be available, unexpired, and unassigned',
         'ACTIVATION_CODE_REPLACEMENT_INVALID',
       );
     }

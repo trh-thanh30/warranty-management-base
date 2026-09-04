@@ -34,8 +34,10 @@ test("product detail actions remain full width only on mobile", async () => {
     "utf8",
   );
 
-  assert.equal(source.match(/className="w-full sm:w-auto"/g)?.length ?? 0, 3);
+  assert.equal(source.match(/className="w-full sm:w-auto"/g)?.length ?? 0, 4);
   assert.match(source, /descriptionAccessory={/);
+  assert.match(source, /PERMISSIONS\.ACTIVATION_CODE_ASSIGN_PRODUCT/);
+  assert.match(source, /<AssignActivationCodesDialog/);
 });
 
 test("product identifiers use distinct semantic icons", async () => {

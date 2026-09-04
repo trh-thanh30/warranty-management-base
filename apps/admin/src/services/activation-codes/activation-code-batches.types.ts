@@ -1,5 +1,6 @@
 import type {
   ActivationCodeReportStatus,
+  ActivationCodeAssignedProduct,
   ActivationCodeDetailList,
   PaginatedResponse,
 } from "@repo/shared";
@@ -59,6 +60,7 @@ export type AvailableActivationCode = {
   expiresAt: string;
   status: ActivationCodeReportStatus;
   selectable: boolean;
+  assignedProduct: ActivationCodeAssignedProduct | null;
 };
 
 export type AvailableActivationCodeList =

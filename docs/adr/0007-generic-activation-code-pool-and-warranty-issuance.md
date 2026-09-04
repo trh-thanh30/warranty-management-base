@@ -37,7 +37,9 @@ activation flow and is not eligible for the generic code pool.
   invariant for one code issuing at most one warranty.
 - WarrantyActivationRequestItem carries the Product resolved from the assigned
   ActivationCode. Public and dealer request payloads cannot override that
-  Product. Its Warranty link and warranty code are nullable until issuance.
+  Product. A unique customer-facing warranty code is reserved on each request
+  item when the request is created; the Warranty link remains nullable until
+  approval issues the Warranty.
 - Multiple request items may select the same Product when their activation codes
   differ.
 - Category has a first-class `activation_code_enabled` flag. Eligibility is
@@ -74,6 +76,8 @@ mandatory before migration.
   items and issued warranties.
 - Approval must create warranties transactionally and idempotently by
   activation code.
+- Rejected requests retain their reserved warranty codes as immutable history;
+  those codes never identify an issued Warranty.
 - Certificate and email failures occur after warranty issuance and cannot roll
   the warranty back.
 - The compatibility pointer is transitional debt and must be removed after all

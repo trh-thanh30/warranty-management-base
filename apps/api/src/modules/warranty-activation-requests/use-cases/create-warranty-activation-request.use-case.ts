@@ -28,6 +28,7 @@ import {
 import {
   WarrantyActivationRequestCodeConflictError,
   WarrantyActivationRequestUniqueConflictError,
+  WarrantyActivationRequestWarrantyCodeConflictError,
 } from '@/modules/warranty-activation-requests/repository/warranty-activation-request-errors';
 import { Injectable, Optional } from '@nestjs/common';
 import { GenerateDealerCodeUseCase } from '@/modules/dealers/use-cases/generate-dealer-code.use-case';
@@ -97,6 +98,12 @@ export class CreateWarrantyActivationRequestUseCase {
       : activationCode
         ? await this.resolveActivationCode(activationCode)
         : null;
+    if (activationCodeRecord && !activationCodeRecord.product_id) {
+      throw new BadRequestError(
+        'Activation code has not been assigned to a product',
+        'ACTIVATION_CODE_PRODUCT_NOT_ASSIGNED',
+      );
+    }
     const dtoWarrantyCode = dto.warrantyCode?.trim().toUpperCase();
     const customerPhone = dto.customerPhone.trim();
     const customerEmail = dto.customerEmail?.trim().toLowerCase() || null;
@@ -107,18 +114,14 @@ export class CreateWarrantyActivationRequestUseCase {
           validatedItems[0].productId,
         )
       : activationCodeRecord
-        ? dto.productId
-          ? await this.productsRepository.findActivationRequestTargetById(
-              dto.productId,
-            )
-          : await this.productsRepository.findActivationRequestTargetById(
-              activationCodeRecord.batch.source_product_id ?? '',
-            )
+        ? await this.productsRepository.findActivationRequestTargetById(
+            activationCodeRecord.product_id ?? '',
+          )
         : await this.resolveActivationProduct(dto, dtoWarrantyCode);
 
     const hasGenericCode = Boolean(
       validatedItems?.some((item) => item.activationCodeId) ||
-      (activationCodeRecord && dto.productId),
+      activationCodeRecord,
     );
     if (!product || (!product.warranty && !hasGenericCode)) {
       throw new NotFoundError('Warranty code not found', 'NOT_FOUND', {
@@ -144,23 +147,34 @@ export class CreateWarrantyActivationRequestUseCase {
       );
     }
 
-    const warrantyCode =
-      product.warranty?.warranty_code ??
-      dtoWarrantyCode ??
+    const existingWarrantyCode =
+      product.warranty?.warranty_code ?? dtoWarrantyCode;
+    const reservedWarrantyCodes = new Set<string>();
+    let requestItems = validatedItems
+      ? await Promise.all(
+          validatedItems.map(async (item) => {
+            const itemWarrantyCode =
+              item.warrantyCode ??
+              (item.activationCodeId
+                ? await this.generateDistinctWarrantyCode(reservedWarrantyCodes)
+                : existingWarrantyCode);
+            if (itemWarrantyCode) reservedWarrantyCodes.add(itemWarrantyCode);
+            return { ...item, warrantyCode: itemWarrantyCode ?? null };
+          }),
+        )
+      : [];
+    let warrantyCode =
+      requestItems[0]?.warrantyCode ??
+      existingWarrantyCode ??
       (hasGenericCode
-        ? await this.generateWarrantyCodeUseCase.execute()
+        ? await this.generateDistinctWarrantyCode(reservedWarrantyCodes)
         : `PENDING-${activationCodeRecord?.id ?? Date.now()}`);
-    const requestItems = validatedItems
-      ? validatedItems.map((item) => ({
-          ...item,
-          warrantyCode: item.warrantyCode ?? warrantyCode,
-        }))
-      : [
-          {
-            ...this.toPrimaryRequestItem(product, warrantyCode),
-            activationCodeId: activationCodeRecord?.id ?? null,
-          },
-        ];
+    if (!validatedItems) {
+      requestItems.push({
+        ...this.toPrimaryRequestItem(product, warrantyCode),
+        activationCodeId: activationCodeRecord?.id ?? null,
+      });
+    }
 
     if (product.warranty && product.warranty.warranty_code !== warrantyCode) {
       await this.productsRepository.synchronizeWarrantyCode({
@@ -295,6 +309,24 @@ export class CreateWarrantyActivationRequestUseCase {
       } catch (error) {
         if (
           attempt < REQUEST_CODE_GENERATION_ATTEMPTS - 1 &&
+          error instanceof WarrantyActivationRequestWarrantyCodeConflictError
+        ) {
+          const retriedCodes = new Set<string>();
+          requestItems = await Promise.all(
+            requestItems.map(async (item) => ({
+              ...item,
+              warrantyCode:
+                item.activationCodeId && !item.warrantyId
+                  ? await this.generateDistinctWarrantyCode(retriedCodes)
+                  : item.warrantyCode,
+            })),
+          );
+          warrantyCode = requestItems[0]?.warrantyCode ?? warrantyCode;
+          continue;
+        }
+
+        if (
+          attempt < REQUEST_CODE_GENERATION_ATTEMPTS - 1 &&
           error instanceof WarrantyActivationRequestCodeConflictError
         ) {
           continue;
@@ -337,6 +369,21 @@ export class CreateWarrantyActivationRequestUseCase {
       'Could not create warranty activation request',
       'BAD_REQUEST',
       { code: 'ACTIVATION_REQUEST_CREATE_FAILED' },
+    );
+  }
+
+  private async generateDistinctWarrantyCode(reserved: Set<string>) {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const code = await this.generateWarrantyCodeUseCase.execute();
+      if (!reserved.has(code)) {
+        reserved.add(code);
+        return code;
+      }
+    }
+
+    throw new BadRequestError(
+      'Could not reserve a unique warranty code for every activation item',
+      'WARRANTY_CODE_GENERATION_FAILED',
     );
   }
 

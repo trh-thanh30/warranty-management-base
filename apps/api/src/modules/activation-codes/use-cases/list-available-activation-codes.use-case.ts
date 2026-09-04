@@ -7,7 +7,12 @@ export class ListAvailableActivationCodesUseCase {
 
   execute(
     productId: string | undefined,
-    filters: { page?: number; limit?: number; search?: string },
+    filters: {
+      page?: number;
+      limit?: number;
+      search?: string;
+      assignment?: 'ALL' | 'ASSIGNED' | 'UNASSIGNED';
+    },
   ) {
     return this.repository.listAvailableByProduct(productId, filters);
   }

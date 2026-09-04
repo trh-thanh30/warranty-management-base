@@ -31,6 +31,17 @@ test("activation code rows reveal available codes and group actions in a dropdow
   assert.match(source, /<DropdownMenuItem/);
 });
 
+test("activation code rows expose product assignment through permissioned actions", async () => {
+  const source = await readFile(viewUrl, "utf8");
+
+  assert.match(source, /PERMISSIONS\.ACTIVATION_CODE_ASSIGN_PRODUCT/);
+  assert.match(source, /columns\.product/);
+  assert.match(source, /<ActivationCodeProductAssignmentDialog/);
+  assert.match(source, /item\.assignedProduct/);
+  assert.match(source, /activationCodeId=\$\{encodeURIComponent\(code\.id\)\}/);
+  assert.match(source, /productId=\$\{encodeURIComponent/);
+});
+
 test("activation code detail uses the shared detail-page shell", async () => {
   const source = await readFile(viewUrl, "utf8");
 

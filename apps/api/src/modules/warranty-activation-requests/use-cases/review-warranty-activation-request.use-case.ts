@@ -244,6 +244,13 @@ export class ReviewWarrantyActivationRequestUseCase {
               target.product.warranty_terms ?? target.product.warranty?.terms,
           });
           activatedWarrantyIds.push(updatedWarranty.id);
+          if (target.itemId) {
+            await repository.linkItemWarranty({
+              itemId: target.itemId,
+              warrantyCode: target.warrantyCode,
+              warrantyId: updatedWarranty.id,
+            });
+          }
         }
 
         await repository.markItemsActivated(input.id, reviewedAt);

@@ -470,7 +470,7 @@ model Product {
   warranty_activation_requests      WarrantyActivationRequest[]
   warranty_activation_request_items WarrantyActivationRequestItem[]
   activation_code_batch_sources     ActivationCodeBatch[]           @relation("ActivationCodeBatchSourceProduct")
-  activation_codes                  ActivationCode[]                @relation("ActivationCodeProduct")
+  activation_code                   ActivationCode?                 @relation("ActivationCodeProduct")
 
   @@index([category_id])
   @@index([status])
@@ -625,7 +625,7 @@ model ActivationCode {
   code_ciphertext String
   status          activation_code_status @default(AVAILABLE)
   expires_at      DateTime
-  product_id      String?                @db.Uuid
+  product_id      String?                @unique @db.Uuid
   activated_at    DateTime?
   revoked_at      DateTime?
   replaced_by_id  String?                @unique @db.Uuid
@@ -641,7 +641,6 @@ model ActivationCode {
   replaces      ActivationCode?                 @relation("ActivationCodeReplacement")
 
   @@index([batch_id, status])
-  @@index([product_id])
   @@index([status, expires_at])
   @@index([status, created_at])
   @@index([created_at])
@@ -727,7 +726,7 @@ model WarrantyActivationRequestItem {
   product_id          String                             @db.Uuid
   activation_code_id  String?                            @db.Uuid
   warranty_id         String?                            @db.Uuid
-  warranty_code       String?
+  warranty_code       String?                            @unique
   product_name        String
   product_code        String
   serial_number       String?
@@ -1020,6 +1019,7 @@ enum permission_key {
   ACTIVATION_CODE_BATCH_CREATE // Tạo batch mã kích hoạt.
   ACTIVATION_CODE_BATCH_PRINT // In tem mã kích hoạt.
   ACTIVATION_CODE_BATCH_REVOKE // Thu hồi batch hoặc mã kích hoạt.
+  ACTIVATION_CODE_ASSIGN_PRODUCT // Gán mã kích hoạt vào sản phẩm trước khi kích hoạt.
 
   WARRANTY_VIEW // Xem hồ sơ bảo hành.
   WARRANTY_CREATE // Tạo hồ sơ bảo hành.

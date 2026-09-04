@@ -47,6 +47,7 @@ type CreateWarrantyActivationRequestFormCardProps = {
   onCreated: () => void;
   activationCodeId?: string;
   activationCode?: string;
+  assignedProductId?: string;
 };
 
 export function CreateWarrantyActivationRequestFormCard({
@@ -54,6 +55,7 @@ export function CreateWarrantyActivationRequestFormCard({
   onCreated,
   activationCodeId,
   activationCode,
+  assignedProductId,
 }: CreateWarrantyActivationRequestFormCardProps) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const [categorySearch, setCategorySearch] = useState("");
@@ -113,10 +115,17 @@ export function CreateWarrantyActivationRequestFormCard({
     setActivationCodeSearch,
     selectAvailableActivationCode,
     usesProductSelectors,
-  } = useCreateWarrantyActivationRequestForm({ onCreated, activationCodeId });
+  } = useCreateWarrantyActivationRequestForm({
+    onCreated,
+    activationCodeId,
+    assignedProductId,
+  });
   const hasSelectedProduct =
     Boolean(selectedProduct) ||
     Object.keys(selectedActivationProducts).length > 0;
+  const isProductLockedByActivationCode = Boolean(
+    activationCodeId || selectedActivationCode,
+  );
   const filteredCategories = useMemo(
     () => filterActivationRequestCategories(categories, categorySearch),
     [categories, categorySearch],
@@ -171,7 +180,7 @@ export function CreateWarrantyActivationRequestFormCard({
                 label={t("category")}
               >
                 <SearchDropdown
-                  disabled={false}
+                  disabled={isProductLockedByActivationCode}
                   emptyLabel={t("noCategory")}
                   getItemKey={(category) => category.id}
                   inputClassName="h-11 text-base sm:h-10 sm:text-sm"
@@ -214,6 +223,7 @@ export function CreateWarrantyActivationRequestFormCard({
                   label={t("productSearch")}
                 >
                   <SearchDropdown
+                    disabled={isProductLockedByActivationCode}
                     emptyLabel={
                       categoryId ? t("noProduct") : t("selectCategoryFirst")
                     }

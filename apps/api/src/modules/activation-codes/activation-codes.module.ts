@@ -22,6 +22,8 @@ import { ReplaceActivationCodeUseCase } from '@/modules/activation-codes/use-cas
 import { ActivationCodePrintJobsRepository } from '@/modules/activation-codes/repository/activation-code-print-jobs.repository';
 import { ActivationLabelPrintQueueService } from '@/modules/activation-codes/services/activation-label-print-queue.service';
 import { ActivationCodeExpirySchedulerService } from '@/modules/activation-codes/services/activation-code-expiry-scheduler.service';
+import { AssignActivationCodesToProductUseCase } from '@/modules/activation-codes/use-cases/assign-activation-codes-to-product.use-case';
+import { UnassignActivationCodesFromProductUseCase } from '@/modules/activation-codes/use-cases/unassign-activation-codes-from-product.use-case';
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 
@@ -54,6 +56,8 @@ import { Module } from '@nestjs/common';
     ListActivationCodesUseCase,
     ListAvailableActivationCodesUseCase,
     ReplaceActivationCodeUseCase,
+    AssignActivationCodesToProductUseCase,
+    UnassignActivationCodesFromProductUseCase,
   ],
   exports: [ActivationCodeBatchesRepository, ActivationCodeCryptoService],
 })

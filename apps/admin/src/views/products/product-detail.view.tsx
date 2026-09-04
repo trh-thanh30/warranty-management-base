@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, PackageSearch, Pencil, UserPlus } from "lucide-react";
+import { Copy, KeyRound, PackageSearch, Pencil, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
@@ -11,6 +11,7 @@ import { PermissionGuard } from "@/src/components/permission-guard";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
 import { AssignOwnerDialog } from "./components/assign-owner-dialog";
+import { AssignActivationCodesDialog } from "./components/assign-activation-codes-dialog";
 import {
   ProductDetailCard,
   ProductDetailSkeleton,
@@ -29,9 +30,13 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
     productId,
   });
   const [assignOpen, setAssignOpen] = useState(false);
+  const [assignCodesOpen, setAssignCodesOpen] = useState(false);
   const canEdit = hasPermission(PERMISSIONS.PRODUCT_UPDATE);
   const canCreate = hasPermission(PERMISSIONS.PRODUCT_CREATE);
   const canAssignOwner = hasPermission(PERMISSIONS.PRODUCT_ASSIGN_OWNER);
+  const canAssignCodes = hasPermission(
+    PERMISSIONS.ACTIVATION_CODE_ASSIGN_PRODUCT,
+  );
 
   return (
     <PermissionGuard permissions={[PERMISSIONS.PRODUCT_VIEW]}>
@@ -41,6 +46,22 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
         description={t("detailDescription")}
         descriptionAccessory={
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+            {canAssignCodes ? (
+              <Button
+                className="w-full sm:w-auto"
+                disabled={
+                  !product ||
+                  product.status !== "ACTIVE" ||
+                  !product.warrantyDurationMonths
+                }
+                onClick={() => setAssignCodesOpen(true)}
+                type="button"
+                variant="secondary"
+              >
+                <KeyRound className="size-4" />
+                {t("assignActivationCodes")}
+              </Button>
+            ) : null}
             {canAssignOwner ? (
               <Button
                 className="w-full sm:w-auto"
@@ -105,6 +126,11 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
         <AssignOwnerDialog
           onOpenChange={setAssignOpen}
           open={assignOpen}
+          product={product}
+        />
+        <AssignActivationCodesDialog
+          onOpenChange={setAssignCodesOpen}
+          open={assignCodesOpen}
           product={product}
         />
       </FormPageShell>

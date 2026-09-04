@@ -15,6 +15,7 @@
 - **Generic activation code**: a one-time printed code created without a Product. After a label is attached to a physical item, staff pre-assigns the code to the matching Product. Customer and dealer activation flows resolve that Product from the code and cannot substitute another Product.
 - **Activation-code assignment**: the staff-only step between printing and customer/dealer activation that binds an unused generic code to one Product. Assignment does not issue a Warranty or consume the code.
 - **Warranty issuance**: one customer-facing warranty record created for one activation code after approval. Uniqueness belongs to the activation code, not the Product.
+- **Reserved warranty code**: the unique customer-facing `WM-*` lookup code allocated to one activation request item when the request is submitted. It becomes the issued Warranty's code only after approval and remains historical if the request is rejected.
 - **Legacy current warranty**: the temporary `Product.current_warranty_id` compatibility pointer used while singular warranty consumers migrate to Product's warranty history.
 - **Network location**: an active Dealer or Service Center with first-class latitude and longitude, suitable for public map display. Coordinates are authoritative; Google Maps URLs are derived values.
 
