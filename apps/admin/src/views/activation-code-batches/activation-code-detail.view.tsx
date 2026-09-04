@@ -7,6 +7,8 @@ import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { useToast } from "@/src/hooks/use-toast";
+import { useRouter } from "@/src/i18n/navigation";
+import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import { activationCodesService } from "@/src/services/activation-codes/activation-codes.service";
 import { useDebounce } from "@repo/hooks";
 import {
@@ -47,7 +49,6 @@ import {
   Unlink,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/src/i18n/navigation";
 import { useMemo, useState } from "react";
 import { ACTIVATION_CODE_BATCH_STATUSES } from "./activation-code-batches.constants";
 import { ActivationCodeProductAssignmentDialog } from "./components/activation-code-product-assignment-dialog";
@@ -56,6 +57,7 @@ const PAGE_SIZE = 10;
 
 export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
   const t = useTranslations("ActivationCodeDetail");
+  const tApiErrors = useTranslations("ApiErrors");
   const locale = useLocale();
   const toast = useToast();
   const router = useRouter();
@@ -99,7 +101,13 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
   });
   const revokeMutation = useMutation({
     mutationFn: (codeId: string) => activationCodesService.revokeCode(codeId),
-    onError: () => toast.error(t("revokeError")),
+    onError: (error) =>
+      toast.error(
+        getLocalizedApiError(error, t, {
+          apiErrors: tApiErrors,
+          fallbackKey: "revokeError",
+        }),
+      ),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ["activation-code-detail", batchId],
@@ -114,7 +122,13 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
         replaceTarget!.id,
         replacementCode.trim(),
       ),
-    onError: () => toast.error(t("replaceError")),
+    onError: (error) =>
+      toast.error(
+        getLocalizedApiError(error, t, {
+          apiErrors: tApiErrors,
+          fallbackKey: "replaceError",
+        }),
+      ),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ["activation-code-detail", batchId],
@@ -129,7 +143,13 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
       activationCodesService.unassignProduct({
         activationCodeId,
       }),
-    onError: () => toast.error(t("unassignError")),
+    onError: (error) =>
+      toast.error(
+        getLocalizedApiError(error, t, {
+          apiErrors: tApiErrors,
+          fallbackKey: "unassignError",
+        }),
+      ),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ["activation-code-detail", batchId],

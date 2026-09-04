@@ -11,7 +11,7 @@ export class AssignActivationCodesToProductUseCase {
     const product = await this.repository.findAssignmentProduct(
       input.productId,
     );
-    if (!product) throw new NotFoundError('Product not found');
+    if (!product) throw new NotFoundError('Product', 'PRODUCT_NOT_FOUND');
     if (product.deleted_at || product.status !== product_status.ACTIVE) {
       throw this.invalid('ACTIVATION_CODE_ASSIGN_PRODUCT_INACTIVE');
     }
@@ -27,7 +27,7 @@ export class AssignActivationCodesToProductUseCase {
       input.activationCodeId,
     ]);
     if (codes.length !== 1) {
-      throw new NotFoundError('Activation code not found');
+      throw new NotFoundError('Activation code', 'ACTIVATION_CODE_NOT_FOUND');
     }
     for (const code of codes) {
       if (

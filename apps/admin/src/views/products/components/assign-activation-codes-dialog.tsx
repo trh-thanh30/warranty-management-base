@@ -11,6 +11,7 @@ import {
   ComboboxTrigger,
 } from "@/src/components/common/combobox";
 import { ConfirmActionDialog } from "@/src/components/common/confirm-action-dialog";
+import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import type { AvailableActivationCode } from "@/src/services/activation-codes/activation-code-batches.types";
 import { activationCodesService } from "@/src/services/activation-codes/activation-codes.service";
 import { useToast } from "@/src/hooks/use-toast";
@@ -44,6 +45,7 @@ export function AssignActivationCodesDialog({
   product: ProductResponse | null;
 }) {
   const t = useTranslations("ProductActivationCodeAssignment");
+  const tApiErrors = useTranslations("ApiErrors");
   const toast = useToast();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
@@ -51,6 +53,7 @@ export function AssignActivationCodesDialog({
     null,
   );
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const currentCode = product?.assignedActivationCode ?? null;
   const isReplacement = currentCode !== null;
   const canSubmit = !isReplacement || currentCode.canReplace;
@@ -87,6 +90,7 @@ export function AssignActivationCodesDialog({
         productId: product!.id,
       });
     },
+    onMutate: () => setErrorMessage(null),
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["activation-code-detail"] }),
@@ -99,8 +103,14 @@ export function AssignActivationCodesDialog({
       setConfirmOpen(false);
       onOpenChange(false);
     },
-    onError: () => {
-      toast.error(t("error"));
+    onError: (error) => {
+      const message = getLocalizedApiError(error, t, {
+        apiErrors: tApiErrors,
+        fallbackKey: "error",
+      });
+      setConfirmOpen(false);
+      setErrorMessage(message);
+      toast.error(message);
     },
   });
   const resetMutation = mutation.reset;
@@ -110,6 +120,7 @@ export function AssignActivationCodesDialog({
     setSearch("");
     setSelected(null);
     setConfirmOpen(false);
+    setErrorMessage(null);
     resetMutation();
   }, [open, resetMutation]);
 
@@ -169,7 +180,10 @@ export function AssignActivationCodesDialog({
                 disabled={mutation.isPending || !canSubmit}
                 onValueChange={(id) => {
                   const code = codes.find((item) => item.id === id);
-                  if (code) setSelected(code);
+                  if (code) {
+                    setSelected(code);
+                    setErrorMessage(null);
+                  }
                 }}
                 shouldFilter={false}
                 value=""
@@ -231,12 +245,12 @@ export function AssignActivationCodesDialog({
                   </div>
                 </div>
               ) : null}
-              {mutation.isError ? (
+              {errorMessage ? (
                 <p
                   className="text-sm text-red-600 dark:text-red-400"
                   role="alert"
                 >
-                  {t("error")}
+                  {errorMessage}
                 </p>
               ) : null}
             </div>

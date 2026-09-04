@@ -24,7 +24,7 @@ export class ReplaceProductActivationCodeAssignmentUseCase {
     const product = await this.repository.findAssignmentProduct(
       input.productId,
     );
-    if (!product) throw new NotFoundError('Product not found');
+    if (!product) throw new NotFoundError('Product', 'PRODUCT_NOT_FOUND');
     if (product.deleted_at || product.status !== product_status.ACTIVE) {
       throw this.invalid('ACTIVATION_CODE_ASSIGN_PRODUCT_INACTIVE');
     }
@@ -47,7 +47,7 @@ export class ReplaceProductActivationCodeAssignmentUseCase {
       (code) => code.id === input.replacementActivationCodeId,
     );
     if (!currentCode || !replacementCode) {
-      throw new NotFoundError('Activation code not found');
+      throw new NotFoundError('Activation code', 'ACTIVATION_CODE_NOT_FOUND');
     }
     if (currentCode.product_id !== product.id) {
       throw this.invalid('PRODUCT_ACTIVATION_CODE_MISMATCH');

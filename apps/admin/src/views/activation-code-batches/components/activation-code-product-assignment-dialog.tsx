@@ -11,6 +11,8 @@ import {
   ComboboxTrigger,
 } from "@/src/components/common/combobox";
 import { ConfirmActionDialog } from "@/src/components/common/confirm-action-dialog";
+import { useToast } from "@/src/hooks/use-toast";
+import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import { activationCodesService } from "@/src/services/activation-codes/activation-codes.service";
 import { useInfiniteProducts } from "@/src/views/products/hooks/use-products";
 import { useDebounce } from "@repo/hooks";
@@ -49,9 +51,12 @@ export function ActivationCodeProductAssignmentDialog({
   open,
 }: Props) {
   const t = useTranslations("ActivationCodeAssignment");
+  const tApiErrors = useTranslations("ApiErrors");
+  const toast = useToast();
   const [productId, setProductId] = useState("");
   const [search, setSearch] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const debouncedSearch = useDebounce(search.trim(), 300);
   const productsQuery = useInfiniteProducts(
     {
@@ -74,6 +79,16 @@ export function ActivationCodeProductAssignmentDialog({
   const mutation = useMutation({
     mutationFn: () =>
       activationCodesService.assignProduct({ activationCodeId, productId }),
+    onMutate: () => setErrorMessage(null),
+    onError: (error) => {
+      const message = getLocalizedApiError(error, t, {
+        apiErrors: tApiErrors,
+        fallbackKey: "error",
+      });
+      setConfirmOpen(false);
+      setErrorMessage(message);
+      toast.error(message);
+    },
     onSuccess: () => {
       onAssigned(currentProduct ? "changed" : "assigned");
       setConfirmOpen(false);
@@ -87,6 +102,7 @@ export function ActivationCodeProductAssignmentDialog({
     setProductId(currentProduct?.id ?? "");
     setSearch("");
     setConfirmOpen(false);
+    setErrorMessage(null);
     resetMutation();
   }, [currentProduct?.id, open, resetMutation]);
 
@@ -122,7 +138,10 @@ export function ActivationCodeProductAssignmentDialog({
             <Label htmlFor="activation-code-product">{t("product")}</Label>
             <Combobox
               disabled={mutation.isPending}
-              onValueChange={setProductId}
+              onValueChange={(value) => {
+                setProductId(value);
+                setErrorMessage(null);
+              }}
               shouldFilter={false}
               value={productId}
             >
@@ -172,12 +191,12 @@ export function ActivationCodeProductAssignmentDialog({
                 </ComboboxList>
               </ComboboxContent>
             </Combobox>
-            {mutation.isError ? (
+            {errorMessage ? (
               <p
                 className="text-sm text-red-600 dark:text-red-400"
                 role="alert"
               >
-                {t("error")}
+                {errorMessage}
               </p>
             ) : null}
           </div>

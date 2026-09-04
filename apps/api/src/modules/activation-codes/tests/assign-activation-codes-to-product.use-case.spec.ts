@@ -44,6 +44,27 @@ describe('AssignActivationCodesToProductUseCase', () => {
     );
   });
 
+  it('returns stable not-found codes for assignment feedback', async () => {
+    await expect(
+      new AssignActivationCodesToProductUseCase({
+        findAssignmentProduct: jest.fn().mockResolvedValue(null),
+      } as never).execute({
+        activationCodeId: 'code-id',
+        productId: 'missing-product-id',
+      }),
+    ).rejects.toMatchObject({ code: 'PRODUCT_NOT_FOUND' });
+
+    await expect(
+      new AssignActivationCodesToProductUseCase({
+        findAssignmentProduct: jest.fn().mockResolvedValue(product),
+        findCodesForAssignment: jest.fn().mockResolvedValue([]),
+      } as never).execute({
+        activationCodeId: 'missing-code-id',
+        productId: product.id,
+      }),
+    ).rejects.toMatchObject({ code: 'ACTIVATION_CODE_NOT_FOUND' });
+  });
+
   it('rejects a product category that does not use activation codes', async () => {
     const repository = {
       findAssignmentProduct: jest.fn().mockResolvedValue({

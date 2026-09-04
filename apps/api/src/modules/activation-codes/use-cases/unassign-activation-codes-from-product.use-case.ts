@@ -13,7 +13,7 @@ export class UnassignActivationCodesFromProductUseCase {
       input.activationCodeId,
     ]);
     if (codes.length !== 1) {
-      throw new NotFoundError('Activation code not found');
+      throw new NotFoundError('Activation code', 'ACTIVATION_CODE_NOT_FOUND');
     }
     for (const code of codes) {
       if (
