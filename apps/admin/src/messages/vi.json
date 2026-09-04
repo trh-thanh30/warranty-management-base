@@ -427,6 +427,7 @@
     "searchPlaceholder": "Tìm theo mã lô, SKU hoặc tên sản phẩm",
     "statusLabel": "Lọc theo trạng thái",
     "allStatuses": "Tất cả trạng thái",
+    "assignedProgress": "Đã gán: {assigned}/{total}",
     "statuses": {
       "AVAILABLE": "Có thể kích hoạt",
       "ACTIVATED": "Đã kích hoạt",
@@ -438,6 +439,7 @@
       "batch": "Mã lô",
       "product": "Sản phẩm",
       "quantity": "Số lượng",
+      "assignment": "Gán sản phẩm",
       "status": "Trạng thái mã",
       "expiresAt": "Hết hạn",
       "createdAt": "Ngày tạo",

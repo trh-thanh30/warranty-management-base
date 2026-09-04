@@ -427,6 +427,7 @@
     "searchPlaceholder": "Search by batch code, SKU, or product name",
     "statusLabel": "Filter by status",
     "allStatuses": "All statuses",
+    "assignedProgress": "Assigned: {assigned}/{total}",
     "statuses": {
       "AVAILABLE": "Available",
       "ACTIVATED": "Activated",
@@ -438,6 +439,7 @@
       "batch": "Batch code",
       "product": "Product",
       "quantity": "Quantity",
+      "assignment": "Product assignment",
       "status": "Code status",
       "expiresAt": "Expires",
       "createdAt": "Created",

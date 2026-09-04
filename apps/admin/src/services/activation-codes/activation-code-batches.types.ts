@@ -11,6 +11,7 @@ export type ActivationCodeBatchListItem = {
   productSku: string;
   productName: string;
   quantity: number;
+  assignedCount: number;
   expiresAt: string;
   createdAt: string;
   statusCounts: Partial<Record<ActivationCodeReportStatus, number>>;

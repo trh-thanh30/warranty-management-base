@@ -77,6 +77,12 @@ test("activation code repository paginates in the database", async () => {
   assert.doesNotMatch(source, /items\.slice\(skip, skip \+ take\)/);
 });
 
+test("activation code details prioritize codes already assigned to products", async () => {
+  const source = await readFile(repositoryUrl, "utf8");
+
+  assert.match(source, /orderBy: \[[\s\S]*\{ product_id: 'asc' \}/);
+});
+
 test("activation batch directory uses the shared default pagination", async () => {
   const source = await readFile(batchesViewUrl, "utf8");
 

@@ -4,6 +4,42 @@ import {
 } from '@/modules/activation-codes/repository/activation-code-batches.repository';
 
 describe('ActivationCodeBatchesRepository product assignment', () => {
+  it('reports how many codes in a batch are assigned to products', async () => {
+    const batch = {
+      id: 'batch-id',
+      batch_code: 'ACB-001',
+      product_sku: 'GENERIC',
+      product_name: 'Kho mã dùng chung',
+      quantity: 3,
+      expires_at: new Date('2027-03-01T00:00:00.000Z'),
+      created_at: new Date('2026-09-01T00:00:00.000Z'),
+      codes: [
+        { status: 'AVAILABLE', product_id: 'product-id' },
+        { status: 'AVAILABLE', product_id: null },
+        { status: 'ACTIVATED', product_id: 'activated-product-id' },
+      ],
+    };
+    const transaction = jest.fn(
+      (operation: (tx: unknown) => Promise<unknown>) =>
+        operation({
+          activationCodeBatch: {
+            findMany: jest.fn().mockResolvedValue([batch]),
+            count: jest.fn().mockResolvedValue(1),
+          },
+        }),
+    );
+    const repository = new ActivationCodeBatchesRepository(
+      { $transaction: transaction } as never,
+      {} as never,
+    );
+
+    const result = await repository.list({});
+
+    expect(result.items[0]).toEqual(
+      expect.objectContaining({ assignedCount: 2, quantity: 3 }),
+    );
+  });
+
   it('releases the current code and assigns its replacement in one transaction', async () => {
     const updateMany = jest
       .fn()

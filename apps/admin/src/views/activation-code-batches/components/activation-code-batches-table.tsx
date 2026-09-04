@@ -87,8 +87,8 @@ function ActivationCodeBatchTableHeader() {
   return (
     <TableRow>
       <TableHead>{t("columns.batch")}</TableHead>
-      <TableHead>{t("columns.product")}</TableHead>
       <TableHead>{t("columns.quantity")}</TableHead>
+      <TableHead>{t("columns.assignment")}</TableHead>
       <TableHead>{t("columns.status")}</TableHead>
       <TableHead>{t("columns.expiresAt")}</TableHead>
       <TableHead>{t("columns.createdAt")}</TableHead>
@@ -117,10 +117,10 @@ function ActivationCodeBatchTableRow({
       <TableCell className="font-medium text-slate-950 dark:text-slate-50">
         {batch.batchCode}
       </TableCell>
-      <TableCell>
-        <ProductSummary batch={batch} />
-      </TableCell>
       <TableCell className="tabular-nums">{batch.quantity}</TableCell>
+      <TableCell>
+        <ActivationCodeAssignmentProgress batch={batch} />
+      </TableCell>
       <TableCell>
         <ActivationCodeStatusCounts batch={batch} />
       </TableCell>
@@ -181,6 +181,14 @@ function ActivationCodeBatchMobileCard({
         </div>
         <div>
           <dt className="text-xs font-medium uppercase text-slate-500">
+            {t("columns.assignment")}
+          </dt>
+          <dd className="mt-2">
+            <ActivationCodeAssignmentProgress batch={batch} />
+          </dd>
+        </div>
+        <div>
+          <dt className="text-xs font-medium uppercase text-slate-500">
             {t("columns.expiresAt")}
           </dt>
           <dd className="mt-1">{formatDate(batch.expiresAt, { locale })}</dd>
@@ -195,6 +203,23 @@ function ActivationCodeBatchMobileCard({
         </div>
       </dl>
     </article>
+  );
+}
+
+function ActivationCodeAssignmentProgress({
+  batch,
+}: {
+  batch: ActivationCodeBatchListItem;
+}) {
+  const t = useTranslations("ActivationCodeBatches");
+
+  return (
+    <span className="inline-flex rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium tabular-nums text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300">
+      {t("assignedProgress", {
+        assigned: batch.assignedCount,
+        total: batch.quantity,
+      })}
+    </span>
   );
 }
 

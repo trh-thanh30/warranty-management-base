@@ -70,7 +70,7 @@ export class ActivationCodeBatchesRepository {
           orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
           skip,
           take,
-          include: { codes: { select: { status: true } } },
+          include: { codes: { select: { status: true, product_id: true } } },
         }),
         tx.activationCodeBatch.count({ where }),
       ]);
@@ -83,6 +83,10 @@ export class ActivationCodeBatchesRepository {
             counts[code.status] = (counts[code.status] ?? 0) + 1;
             return counts;
           }, {});
+          const assignedCount = batch.codes.reduce(
+            (count, code) => count + (code.product_id ? 1 : 0),
+            0,
+          );
 
           return {
             id: batch.id,
@@ -92,6 +96,7 @@ export class ActivationCodeBatchesRepository {
             quantity: batch.quantity,
             expiresAt: batch.expires_at,
             createdAt: batch.created_at,
+            assignedCount,
             statusCounts,
           };
         }),
@@ -184,7 +189,7 @@ export class ActivationCodeBatchesRepository {
     const [rows, total] = await this.prismaService.$transaction([
       this.prismaService.activationCode.findMany({
         where,
-        orderBy: [{ created_at: 'asc' }, { id: 'asc' }],
+        orderBy: [{ product_id: 'asc' }, { created_at: 'asc' }, { id: 'asc' }],
         skip,
         take,
         select: {
