@@ -17,6 +17,8 @@ test("desktop product table keeps content on one line and scrolls long results",
   assert.match(source, /TooltipTrigger asChild/);
   assert.match(source, /getProductCategoryLabel\(product\)/);
   assert.match(source, /sticky top-0 z-10 bg-white dark:bg-slate-950/);
+  assert.doesNotMatch(source, /t\("owner"\)/);
+  assert.doesNotMatch(source, /formatProductOwner/);
 });
 
 test("product actions expose the existing product detail route", async () => {

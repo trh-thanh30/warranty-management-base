@@ -106,11 +106,6 @@ export function ProductDetailCard({ product }: ProductDetailCardProps) {
             value={product.productCode}
           />
           <CopyableDetailItem
-            icon={<KeyRound className="size-4" />}
-            label={t("warrantyCode")}
-            value={product.warrantyCode}
-          />
-          <CopyableDetailItem
             icon={<Fingerprint className="size-4" />}
             label={t("serialNumber")}
             value={product.serialNumber}
@@ -149,6 +144,11 @@ export function ProductDetailCard({ product }: ProductDetailCardProps) {
           <OwnerSummary product={product} />
           {product.warranty ? (
             <>
+              <CopyableDetailItem
+                icon={<KeyRound className="size-4" />}
+                label={t("warrantyCode")}
+                value={product.warrantyCode}
+              />
               <WarrantyProgress product={product} />
               <DetailItem
                 icon={<Clock3 className="size-4" />}
@@ -177,8 +177,26 @@ export function ProductDetailCard({ product }: ProductDetailCardProps) {
               />
             </>
           ) : (
-            <DetailItem label={t("warrantyStatus")} value={emptyValue} />
+            <div className="rounded-md border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/50">
+              <p className="text-sm font-medium text-slate-950 dark:text-slate-50">
+                {t("warrantyNotIssued")}
+              </p>
+              <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
+                {t("warrantyNotIssuedDescription")}
+              </p>
+            </div>
           )}
+          <DetailItem
+            icon={<Clock3 className="size-4" />}
+            label={t("warrantyPolicyDuration")}
+            value={
+              product.warrantyDurationMonths
+                ? t("durationValue", {
+                    count: product.warrantyDurationMonths,
+                  })
+                : emptyValue
+            }
+          />
         </DetailSection>
       </div>
 

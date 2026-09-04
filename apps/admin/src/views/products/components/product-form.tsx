@@ -37,8 +37,6 @@ export function ProductForm({
   const form = useProductForm({ isClone, onSaved, product });
   const categories = form.categoriesQuery.data?.items ?? [];
   const isSubmitting = form.formState.isSubmitting;
-  const canEditWarrantyDuration =
-    !product?.warranty || product.warranty.status === "DRAFT";
 
   return (
     <form className="min-w-0 space-y-4" noValidate onSubmit={form.onSubmit}>
@@ -136,13 +134,7 @@ export function ProductForm({
 
           <div className="grid min-w-0 gap-5 md:grid-cols-2">
             <Field
-              description={
-                !product
-                  ? t("warrantyDurationCreateDescription")
-                  : canEditWarrantyDuration
-                    ? t("warrantyDurationDraftDescription")
-                    : t("warrantyDurationLockedDescription")
-              }
+              description={t("warrantyPolicyDescription")}
               error={formatFieldError(
                 form.formState.errors.warrantyDurationMonths?.message,
                 t,
@@ -151,7 +143,7 @@ export function ProductForm({
               label={t("durationMonths")}
             >
               <Input
-                disabled={isSubmitting || !canEditWarrantyDuration}
+                disabled={isSubmitting}
                 id="product-warranty-duration"
                 inputMode="numeric"
                 min={1}
@@ -159,35 +151,6 @@ export function ProductForm({
                 step={1}
                 type="number"
                 {...form.register("warrantyDurationMonths")}
-              />
-            </Field>
-            <Field
-              description={
-                !product
-                  ? t("warrantyCodeCreateDescription")
-                  : product.warrantyCodeEditLockedReason ===
-                      "WARRANTY_NOT_DRAFT"
-                    ? t("warrantyCodeNotDraftDescription")
-                    : product.warrantyCodeEditLockedReason ===
-                        "OPEN_ACTIVATION_REQUEST"
-                      ? t("warrantyCodeOpenRequestDescription")
-                      : t("warrantyCodeEditableDescription")
-              }
-              error={formatFieldError(
-                form.formState.errors.warrantyCode?.message,
-                t,
-              )}
-              id="product-warranty-code"
-              label={t("warrantyCode")}
-            >
-              <Input
-                disabled={
-                  isSubmitting ||
-                  Boolean(product && !product.canEditWarrantyCode)
-                }
-                id="product-warranty-code"
-                placeholder={t("warrantyCodePlaceholder")}
-                {...form.register("warrantyCode")}
               />
             </Field>
           </div>
@@ -301,7 +264,7 @@ export function ProductForm({
             label={t("warrantyTerms")}
           >
             <Textarea
-              disabled={isSubmitting || !canEditWarrantyDuration}
+              disabled={isSubmitting}
               id="product-warranty-terms"
               placeholder={t("warrantyTermsPlaceholder")}
               rows={3}
@@ -422,7 +385,6 @@ const formatFieldError = createFieldErrorFormatter(
     "serialNumberLength",
     "specificationKeyLength",
     "specificationValueLength",
-    "warrantyCodeInvalid",
     "warrantyTermsLength",
   ]),
 );

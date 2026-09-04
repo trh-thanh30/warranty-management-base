@@ -33,9 +33,7 @@ export class GetProductCloneDraftUseCase {
       serialNumber: null,
       warrantyCode: null,
       owner: null,
-      warranty: product.warranty
-        ? { ...product.warranty, warrantyCode: null, status: 'DRAFT' }
-        : null,
+      warranty: null,
     };
   }
 }

@@ -101,6 +101,8 @@ export function toProductResponse(
           terms: product.warranty.terms,
         }
       : null,
+    warrantyDurationMonths: product.warranty_duration_months,
+    warrantyTerms: product.warranty_terms,
     assets: productAssets,
   };
 }
@@ -132,7 +134,7 @@ export function toPublicProductSummary(
     description: product.description,
     coverImageUrl: cover ? resolveAssetUrl(cover.asset) : null,
     specifications: toPublicSpecifications(metadata.specifications),
-    warrantyDurationMonths: product.warranty?.duration_months ?? 0,
+    warrantyDurationMonths: product.warranty_duration_months ?? 0,
     publishedAt: product.published_at ?? product.created_at,
   };
 }
@@ -185,8 +187,8 @@ export function toPublicProductDetail(
     features: toPublicStringList(metadata.features),
     applications: toPublicStringList(metadata.applications),
     warranty: {
-      durationMonths: product.warranty?.duration_months ?? 0,
-      terms: product.warranty?.terms ?? null,
+      durationMonths: product.warranty_duration_months ?? 0,
+      terms: product.warranty_terms,
     },
     publishedAt: product.published_at,
   };

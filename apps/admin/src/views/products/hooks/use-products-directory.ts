@@ -375,7 +375,6 @@ function normalizePreviewRow(row: {
       productCode: row.data.productCode ?? null,
       serialNumber: row.data.serialNumber ?? null,
       status: row.data.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
-      warrantyCode: row.data.warrantyCode ?? null,
     },
   };
 
@@ -385,12 +384,10 @@ function normalizePreviewRow(row: {
 function validateImportRows(rows: EditableProductImportRow[]) {
   const productCodeCounts = new Map<string, number>();
   const serialNumberCounts = new Map<string, number>();
-  const warrantyCodeCounts = new Map<string, number>();
 
   rows.forEach((row) => {
     const productCode = row.data.productCode?.trim();
     const serialNumber = row.data.serialNumber?.trim();
-    const warrantyCode = row.data.warrantyCode?.trim().toUpperCase();
 
     if (productCode) {
       productCodeCounts.set(
@@ -405,13 +402,6 @@ function validateImportRows(rows: EditableProductImportRow[]) {
         (serialNumberCounts.get(serialNumber) ?? 0) + 1,
       );
     }
-
-    if (warrantyCode) {
-      warrantyCodeCounts.set(
-        warrantyCode,
-        (warrantyCodeCounts.get(warrantyCode) ?? 0) + 1,
-      );
-    }
   });
 
   return rows.map((row) => {
@@ -420,7 +410,6 @@ function validateImportRows(rows: EditableProductImportRow[]) {
     );
     const productCode = row.data.productCode?.trim();
     const serialNumber = row.data.serialNumber?.trim();
-    const warrantyCode = row.data.warrantyCode?.trim().toUpperCase();
     if (!row.data.displayName.trim()) {
       errors.push({
         field: "displayName",
@@ -467,23 +456,6 @@ function validateImportRows(rows: EditableProductImportRow[]) {
       });
     }
 
-    if (warrantyCode && !/^[A-Z0-9-]{6,64}$/.test(warrantyCode)) {
-      errors.push({
-        field: "warrantyCode",
-        message: "Mã bảo hành chỉ gồm 6-64 chữ cái, số hoặc dấu gạch ngang.",
-        rowNumber: row.rowNumber,
-      });
-    } else if (
-      warrantyCode &&
-      (warrantyCodeCounts.get(warrantyCode) ?? 0) > 1
-    ) {
-      errors.push({
-        field: "warrantyCode",
-        message: "Mã bảo hành bị trùng trong bảng preview.",
-        rowNumber: row.rowNumber,
-      });
-    }
-
     return {
       ...row,
       errors: dedupeImportErrors(errors),
@@ -501,9 +473,6 @@ const RECOMPUTED_IMPORT_ERROR_MESSAGES = new Set([
   "Mã sản phẩm bị trùng trong bảng preview.",
   "Số serial bị trùng trong file import",
   "Số serial bị trùng trong bảng preview.",
-  "Mã bảo hành bị trùng trong file import",
-  "Mã bảo hành bị trùng trong bảng preview.",
-  "Mã bảo hành chỉ gồm 6-64 chữ cái, số hoặc dấu gạch ngang.",
 ]);
 
 function isRecomputedImportError(error: ProductImportRowError) {

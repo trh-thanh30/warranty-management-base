@@ -211,7 +211,6 @@ export function ProductsView() {
                   installationPosition: t("installationPosition"),
                   model: t("model"),
                   modelYear: t("modelYear"),
-                  warrantyCode: t("warrantyCode"),
                   invalidRows: t("excel.invalidRows", {
                     count: importSummary.invalidRows,
                   }),

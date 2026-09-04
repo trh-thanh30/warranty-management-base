@@ -10,21 +10,14 @@ import { buildProductAssets } from '@/modules/products/product-assets';
 import { toProductResponse } from '@/modules/products/products.types';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
 import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generate-product-code.use-case';
-import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { Injectable } from '@nestjs/common';
-import {
-  Prisma,
-  product_status,
-  warranty_method,
-  warranty_status,
-} from '@prisma/client';
+import { Prisma, product_status, warranty_method } from '@prisma/client';
 
 @Injectable()
 export class CreateProductUseCase {
   constructor(
     private readonly productsRepository: ProductsRepository,
     private readonly generateProductCodeUseCase: GenerateProductCodeUseCase,
-    private readonly generateWarrantyCodeUseCase: GenerateWarrantyCodeUseCase,
     private readonly assetsService?: AssetsService,
   ) {}
 
@@ -62,15 +55,6 @@ export class CreateProductUseCase {
       throw new NotFoundError('Product category not found');
     }
 
-    const requestedWarrantyCode =
-      dto.warrantyCode?.trim().toUpperCase() || null;
-    const resolvedWarrantyCode = requestedWarrantyCode
-      ? await this.resolveRequestedWarrantyCode(requestedWarrantyCode)
-      : null;
-
-    const warrantyCode =
-      resolvedWarrantyCode ??
-      (await this.generateWarrantyCodeUseCase.execute(new Date()));
     const product = await this.productsRepository.create({
       product_code: productCode,
       serial_number: dto.serialNumber,
@@ -90,16 +74,6 @@ export class CreateProductUseCase {
       warranty_terms: dto.warrantyTerms?.trim() || null,
       category_ref: { connect: { id: dto.categoryId } },
       assets: buildProductAssets(dto.coverAssetId, dto.galleryAssetIds),
-      warranties: {
-        create: {
-          warranty_code: warrantyCode,
-          duration_months: dto.warrantyDurationMonths,
-          terms: dto.warrantyTerms?.trim() || null,
-          start_date: null,
-          end_date: null,
-          status: warranty_status.DRAFT,
-        },
-      },
       ownerships: undefined,
     });
 
@@ -116,15 +90,6 @@ export class CreateProductUseCase {
       throw new ConflictError('Product code already exists');
     }
     return productCode;
-  }
-
-  private async resolveRequestedWarrantyCode(warrantyCode: string) {
-    const existing =
-      await this.productsRepository.findByWarrantyCode(warrantyCode);
-    if (existing) {
-      throw new ConflictError('Warranty code already exists');
-    }
-    return warrantyCode;
   }
 
   private toJsonObject(

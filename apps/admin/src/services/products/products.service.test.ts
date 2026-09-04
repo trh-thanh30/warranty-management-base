@@ -196,20 +196,16 @@ test("assigning an owner posts to product assign-owner endpoint", async () => {
   await createProductsService(
     http as unknown as ProductsHttpClient,
   ).assignOwner("product-id", {
-    autoGenerateWarrantyCode: false,
     customerId: "customer-id",
     purchaseDate: "2026-07-12",
-    warrantyCode: "WM-2026-MANUAL1",
   });
 
   assert.deepEqual(calls, [
     {
       url: "/products/product-id/assign-owner",
       body: {
-        autoGenerateWarrantyCode: false,
         customerId: "customer-id",
         purchaseDate: "2026-07-12",
-        warrantyCode: "WM-2026-MANUAL1",
       },
     },
   ]);
@@ -345,7 +341,6 @@ test("confirming product import posts edited preview rows", async () => {
         warrantyTerms: null,
         installationPosition: "Khoang động cơ",
         productCode: null,
-        warrantyCode: null,
         serialNumber: "SN-001",
         status: "ACTIVE",
       },
@@ -368,7 +363,6 @@ test("confirming product import posts edited preview rows", async () => {
             warrantyTerms: null,
             installationPosition: "Khoang động cơ",
             productCode: null,
-            warrantyCode: null,
             serialNumber: "SN-001",
             status: "ACTIVE",
           },

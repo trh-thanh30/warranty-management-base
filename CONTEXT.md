@@ -12,7 +12,8 @@
 - **Metadata field**: nullable JSON extension data for low-query-frequency integration or display attributes. Business-critical fields that drive filtering, sorting, permissions, status transitions, or reports must remain first-class columns.
 - **Retired Product Template**: the former reusable catalogue model. Its runtime module, contracts, permissions, relations, and persistence have been removed; historical migrations remain immutable.
 - **Product**: the authoritative selectable product/SKU aggregate. It owns catalogue identity, content, media, and the reusable warranty policy. One Product may appear in many activation request items and issued warranties.
-- **Generic activation code**: a one-time printed code created without a Product. A dealer proposes the Product when submitting an activation request; admin approval permanently binds the code through one issued Warranty.
+- **Generic activation code**: a one-time printed code created without a Product. After a label is attached to a physical item, staff pre-assigns the code to the matching Product. Customer and dealer activation flows resolve that Product from the code and cannot substitute another Product.
+- **Activation-code assignment**: the staff-only step between printing and customer/dealer activation that binds an unused generic code to one Product. Assignment does not issue a Warranty or consume the code.
 - **Warranty issuance**: one customer-facing warranty record created for one activation code after approval. Uniqueness belongs to the activation code, not the Product.
 - **Legacy current warranty**: the temporary `Product.current_warranty_id` compatibility pointer used while singular warranty consumers migrate to Product's warranty history.
 - **Network location**: an active Dealer or Service Center with first-class latitude and longitude, suitable for public map display. Coordinates are authoritative; Google Maps URLs are derived values.

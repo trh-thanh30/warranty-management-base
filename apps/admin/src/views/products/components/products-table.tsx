@@ -39,7 +39,6 @@ import {
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import {
-  formatProductOwner,
   getProductCategoryLabel,
   getProductDisplayName,
 } from "../products.utils";
@@ -93,18 +92,9 @@ export function ProductsTable({
               >
                 {t("name")}
               </SortableTableHead>
-              <SortableTableHead
-                activeSortBy={sortBy}
-                onSortChange={onSortChange}
-                sortBy="warrantyCode"
-                sortOrder={sortOrder}
-              >
-                {t("warrantyCode")}
-              </SortableTableHead>
               <TableHead className="whitespace-nowrap">
                 {t("category")}
               </TableHead>
-              <TableHead className="whitespace-nowrap">{t("owner")}</TableHead>
               <TableHead className="whitespace-nowrap">
                 {t("warrantyStatus")}
               </TableHead>
@@ -167,9 +157,6 @@ function ProductTableRow({
       <TableCell>
         <ProductName product={product} />
       </TableCell>
-      <TableCell className="font-mono text-xs">
-        {product.warrantyCode ?? "-"}
-      </TableCell>
       <TableCell className="whitespace-nowrap">
         <Tooltip>
           <TooltipTrigger asChild>
@@ -186,20 +173,15 @@ function ProductTableRow({
         </Tooltip>
       </TableCell>
       <TableCell>
-        <span className="block max-w-52 truncate">
-          {formatProductOwner(product)}
-        </span>
-      </TableCell>
-      <TableCell>
         <WarrantyStatusBadge status={product.warranty?.status} />
       </TableCell>
       <TableCell>
         <ProductStatusBadge status={product.status} />
       </TableCell>
       <TableCell>
-        {product.warranty?.durationMonths
+        {product.warrantyDurationMonths
           ? t("durationValue", {
-              count: product.warranty.durationMonths,
+              count: product.warrantyDurationMonths,
             })
           : "-"}
       </TableCell>
@@ -242,17 +224,27 @@ function ProductMobileCard({
         />
       </div>
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-        <ProductMobileField
-          label={t("warrantyCode")}
-          value={product.warrantyCode ?? "-"}
-        />
+        <div>
+          <dt className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+            {t("warrantyStatus")}
+          </dt>
+          <dd className="mt-1">
+            <WarrantyStatusBadge status={product.warranty?.status} />
+          </dd>
+        </div>
         <ProductMobileField
           label={t("category")}
           value={getProductCategoryLabel(product)}
         />
         <ProductMobileField
-          label={t("owner")}
-          value={formatProductOwner(product)}
+          label={t("warrantyDuration")}
+          value={
+            product.warrantyDurationMonths
+              ? t("durationValue", {
+                  count: product.warrantyDurationMonths,
+                })
+              : "-"
+          }
         />
         <div>
           <dt className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
@@ -389,7 +381,7 @@ function ProductActionsMenu({
                 </Link>
               </DropdownMenuItem>
             ) : null}
-            {canAssignOwner ? (
+            {canAssignOwner && product.warranty ? (
               <DropdownMenuItem onSelect={() => onAssignOwner(product)}>
                 <UserPlus className="mr-2 size-4" />
                 {t("assignOwner")}

@@ -59,7 +59,6 @@ type ProductImportPreviewTableProps = {
     installationPosition: string;
     model: string;
     modelYear: string;
-    warrantyCode: string;
     invalidRows: string;
     next: string;
     noRows: string;
@@ -189,9 +188,6 @@ export function ProductImportPreviewTable({
                 <TableHead className="w-44 whitespace-nowrap">
                   {labels.installationPosition}
                 </TableHead>
-                <TableHead className="w-48 whitespace-nowrap">
-                  {labels.warrantyCode}
-                </TableHead>
                 <TableHead className="w-44 whitespace-nowrap">
                   {labels.serialNumber}
                 </TableHead>
@@ -226,7 +222,6 @@ export function ProductImportPreviewTable({
                     <PreviewCell value={row.data.warrantyDurationMonths} />
                     <PreviewCell value={row.data.warrantyTerms} />
                     <PreviewCell value={row.data.installationPosition} />
-                    <PreviewCell value={row.data.warrantyCode} />
                     <PreviewCell value={row.data.serialNumber} />
                     <PreviewCell value={row.data.status} />
                     <TableCell className="w-[32rem] max-w-[32rem] whitespace-normal">
@@ -264,7 +259,7 @@ export function ProductImportPreviewTable({
                 <TableRow>
                   <TableCell
                     className="h-24 text-center text-sm text-slate-500"
-                    colSpan={15}
+                    colSpan={14}
                   >
                     {labels.noRows}
                   </TableCell>
@@ -394,7 +389,6 @@ function ProductImportEditForm({
           ...values,
           displayName: values.displayName.trim(),
           categoryCode: values.categoryCode.trim().toUpperCase(),
-          warrantyCode: values.warrantyCode?.trim().toUpperCase() || null,
         });
       }}
     >
@@ -485,12 +479,6 @@ function ProductImportEditForm({
               setText("installationPosition", event.target.value)
             }
             value={values.installationPosition ?? ""}
-          />
-        </ImportField>
-        <ImportField label={labels.warrantyCode}>
-          <Input
-            onChange={(event) => setText("warrantyCode", event.target.value)}
-            value={values.warrantyCode ?? ""}
           />
         </ImportField>
         <ImportField label={labels.warrantyTerms}>

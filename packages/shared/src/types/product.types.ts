@@ -91,6 +91,8 @@ export type ProductSummary = {
   deletedAt: string | null;
   owner: ProductOwnerSummary | null;
   warranty: ProductWarrantySummary | null;
+  warrantyDurationMonths: number | null;
+  warrantyTerms: string | null;
   assets: ProductAssetSummary[];
 };
 
@@ -157,7 +159,6 @@ export type CreateProductBody = {
   coverAssetId?: string;
   galleryAssetIds?: string[];
   productCode?: string;
-  warrantyCode?: string;
   displayName?: string;
   status?: ProductStatus;
   serialNumber?: string;
@@ -179,7 +180,6 @@ export type UpdateProductBody = {
   status?: ProductStatus;
   serialNumber?: string | null;
   metadata?: Record<string, unknown> | null;
-  warrantyCode?: string;
   warrantyDurationMonths?: number;
   warrantyTerms?: string | null;
 };
@@ -239,8 +239,6 @@ export type ListPublicProductsQuery = PaginationQuery & {
 
 export type AssignProductOwnerBody = {
   customerId: string;
-  autoGenerateWarrantyCode?: boolean;
-  warrantyCode?: string;
   purchaseDate?: string;
 };
 

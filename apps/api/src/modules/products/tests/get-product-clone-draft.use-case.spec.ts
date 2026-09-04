@@ -26,7 +26,7 @@ describe('GetProductCloneDraftUseCase', () => {
       serialNumber: null,
       warrantyCode: null,
       owner: null,
-      warranty: { warrantyCode: null, status: 'DRAFT' },
+      warranty: null,
     });
   });
 

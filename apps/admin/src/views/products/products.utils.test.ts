@@ -1,10 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { HttpClientError } from "@repo/shared";
 import {
   getProductWarrantyProgress,
   getProductPhysicalMetadata,
-  getProductSaveErrorMatch,
   toCreateProductBody,
   toProductActiveStatus,
   toUpdateProductBody,
@@ -144,32 +142,6 @@ test("sends an explicitly entered product code", () => {
   );
 });
 
-test("sends an explicitly entered warranty code when creating a product", () => {
-  assert.equal(
-    toCreateProductBody({
-      categoryId: "category-id",
-      displayName: "Camera",
-      brand: "",
-      model: "",
-      description: "",
-      coverAssetId: "",
-      coverImageUrl: "",
-      galleryImages: [],
-      features: [],
-      applications: [],
-      specifications: [],
-      installationPosition: "",
-      productCode: "",
-      serialNumber: "",
-      status: "ACTIVE",
-      warrantyDurationMonths: 24,
-      warrantyTerms: "",
-      warrantyCode: " wm-2026-manual1 ",
-    }).warrantyCode,
-    "WM-2026-MANUAL1",
-  );
-});
-
 test("updates only physical product fields and preserves unrelated metadata", () => {
   assert.deepEqual(
     toUpdateProductBody(
@@ -195,7 +167,6 @@ test("updates only physical product fields and preserves unrelated metadata", ()
         productCode: " PRD-EDIT-001 ",
         serialNumber: "",
         status: "INACTIVE",
-        warrantyCode: " wm-2026-new001 ",
         warrantyDurationMonths: 60,
         warrantyTerms: "Product terms",
       },
@@ -225,7 +196,6 @@ test("updates only physical product fields and preserves unrelated metadata", ()
       productCode: "PRD-EDIT-001",
       serialNumber: null,
       status: "INACTIVE",
-      warrantyCode: "wm-2026-new001",
       warrantyDurationMonths: 60,
       warrantyTerms: "Product terms",
     },
@@ -255,50 +225,6 @@ test("requires a product code only when editing", () => {
 
   assert.equal(productFormSchema.safeParse(values).success, true);
   assert.equal(productEditFormSchema.safeParse(values).success, false);
-});
-
-test("allows a blank warranty code but rejects an invalid non-empty code", () => {
-  const baseValues = {
-    categoryId: "category-id",
-    brand: "",
-    model: "",
-    description: "",
-    coverAssetId: "",
-    coverImageUrl: "",
-    galleryImages: [],
-    features: [],
-    applications: [],
-    specifications: [],
-    displayName: "Camera",
-    installationPosition: "",
-    productCode: "",
-    serialNumber: "",
-    status: "ACTIVE" as const,
-    warrantyDurationMonths: 24,
-    warrantyTerms: "",
-  };
-
-  assert.equal(
-    productFormSchema.safeParse({
-      ...baseValues,
-      warrantyCode: "",
-    }).success,
-    true,
-  );
-  assert.equal(
-    productFormSchema.safeParse({
-      ...baseValues,
-      warrantyCode: "bad code!",
-    }).success,
-    false,
-  );
-  assert.equal(
-    productFormSchema.safeParse({
-      ...baseValues,
-      warrantyCode: "wm-2026-new001",
-    }).success,
-    true,
-  );
 });
 
 test("requires an individual warranty duration of at least one month", () => {
@@ -343,37 +269,18 @@ test("requires an individual warranty duration of at least one month", () => {
   );
 });
 
-test("maps stable warranty duration detail codes to the duration field", () => {
-  const error = new HttpClientError({
-    code: "BAD_REQUEST",
-    details: { code: "WARRANTY_DURATION_NOT_DRAFT" },
-    isNetworkError: false,
-    message: "Backend wording may change",
-    status: 400,
-  });
-
-  assert.deepEqual(getProductSaveErrorMatch(error), [
-    "warrantyDurationMonths",
-    "warrantyDurationNotDraft",
-  ]);
-});
-
-test("requires a valid manual warranty code when auto generation is disabled", () => {
+test("requires a customer when assigning an owner to a legacy warranty", () => {
   assert.equal(
     assignProductOwnerSchema.safeParse({
-      autoGenerateWarrantyCode: false,
-      customerId: "customer-id",
+      customerId: "",
       purchaseDate: "",
-      warrantyCode: "",
     }).success,
     false,
   );
   assert.equal(
     assignProductOwnerSchema.safeParse({
-      autoGenerateWarrantyCode: false,
       customerId: "customer-id",
       purchaseDate: "",
-      warrantyCode: "wm-2026-manual1",
     }).success,
     true,
   );

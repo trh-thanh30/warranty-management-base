@@ -10,9 +10,10 @@ Activation-code batches were initially tied to one Product and copied that
 product's warranty snapshot when generated. Warranty also enforced a unique
 `product_id`, so a Product could only have one issued warranty. The confirmed
 business flow instead prints generic labels that may be attached to any
-eligible product. A dealer selects the actual product only when submitting an
-activation request, and every one-time code issues its own warranty after admin
-approval.
+eligible product. After attaching a label, staff records which Product the code
+was attached to. Customer and dealer activation flows resolve that pre-assigned
+Product from the submitted code and cannot select a different Product. Every
+one-time code issues its own warranty after admin approval.
 
 Customer email is optional and may be shared. Delivery uses the customer's
 email first and falls back to the dealer's email. Window Film keeps its existing
@@ -27,11 +28,16 @@ activation flow and is not eligible for the generic code pool.
   ProductDefinition or ProductTemplate model is introduced.
 - Product owns reusable warranty-policy fields. Warranty represents issuance
   history, so Product has many warranties.
+- Product creation, update and import manage the reusable policy only. They do
+  not create a draft Warranty or a customer-facing warranty lookup code.
+- An available code is assigned to a Product by staff after the physical label
+  is attached. Assignment does not consume the code and does not issue a
+  Warranty.
 - Warranty has an optional, unique `activation_code_id`. This is the database
   invariant for one code issuing at most one warranty.
-- WarrantyActivationRequestItem carries the proposed Product and optional
-  ActivationCode before approval. Its Warranty link and warranty code are
-  nullable until issuance.
+- WarrantyActivationRequestItem carries the Product resolved from the assigned
+  ActivationCode. Public and dealer request payloads cannot override that
+  Product. Its Warranty link and warranty code are nullable until issuance.
 - Multiple request items may select the same Product when their activation codes
   differ.
 - Category has a first-class `activation_code_enabled` flag. Eligibility is
@@ -62,9 +68,10 @@ mandatory before migration.
 
 ## Consequences
 
-- Available generic codes cannot be reported by Product because no Product is
-  selected yet.
-- Product-level reports count pending request items or issued warranties only.
+- Unassigned generic codes are not reported by Product. Assigned available
+  codes may be counted for their Product before activation.
+- Product-level reports distinguish assigned available codes, pending request
+  items and issued warranties.
 - Approval must create warranties transactionally and idempotently by
   activation code.
 - Certificate and email failures occur after warranty issuance and cannot roll
