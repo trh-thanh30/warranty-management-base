@@ -75,6 +75,7 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
     useState<ActivationCodeDetail | null>(null);
   const [replacementCode, setReplacementCode] = useState("");
   const [assignmentTarget, setAssignmentTarget] = useState<{
+    code: string;
     id: string;
     currentProduct: ActivationCodeDetail["assignedProduct"];
   } | null>(null);
@@ -219,6 +220,7 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
                   }}
                   onAssign={(code) =>
                     setAssignmentTarget({
+                      code: code.copyCode ?? code.maskedCode,
                       id: code.id,
                       currentProduct: code.assignedProduct,
                     })
@@ -291,13 +293,19 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
           title={t("unassignTitle")}
         />
         <ActivationCodeProductAssignmentDialog
+          activationCode={assignmentTarget?.code ?? ""}
           activationCodeId={assignmentTarget?.id ?? ""}
           currentProduct={assignmentTarget?.currentProduct}
-          onAssigned={() => {
-            void queryClient.invalidateQueries({
-              queryKey: ["activation-code-detail", batchId],
-            });
-            toast.success(t("assigned"));
+          onAssigned={(mode) => {
+            void Promise.all([
+              queryClient.invalidateQueries({
+                queryKey: ["activation-code-detail", batchId],
+              }),
+              queryClient.invalidateQueries({ queryKey: ["products"] }),
+            ]);
+            toast.success(
+              t(mode === "changed" ? "productChanged" : "assigned"),
+            );
           }}
           onOpenChange={(open) => {
             if (!open) setAssignmentTarget(null);

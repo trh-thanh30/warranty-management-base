@@ -10,6 +10,7 @@ import {
 } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
+  Badge,
   Button,
   DropdownMenu,
   DropdownMenuContent,
@@ -43,6 +44,7 @@ import {
   getProductCategoryLabel,
   getProductDisplayName,
 } from "../products.utils";
+import { ProductActivationCodeStatusBadge } from "./product-activation-code-status-badge";
 import { ProductStatusBadge } from "./product-status-badge";
 import { WarrantyStatusBadge } from "./warranty-status-badge";
 
@@ -85,7 +87,7 @@ export function ProductsTable({
       </div>
 
       <TableScroll className="hidden max-h-144 overflow-y-scroll rounded-md border border-slate-200 dark:border-slate-800 lg:block">
-        <Table className="min-w-6xl [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
+        <Table className="min-w-[88rem] [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
           <TableHeader className="sticky top-0 z-10 bg-white dark:bg-slate-950">
             <TableRow>
               <SortableTableHead
@@ -101,6 +103,9 @@ export function ProductsTable({
               </TableHead>
               <TableHead className="whitespace-nowrap">
                 {t("warrantyStatus")}
+              </TableHead>
+              <TableHead className="whitespace-nowrap">
+                {t("activationCode")}
               </TableHead>
               <SortableTableHead
                 activeSortBy={sortBy}
@@ -183,6 +188,9 @@ function ProductTableRow({
         <WarrantyStatusBadge status={product.warranty?.status} />
       </TableCell>
       <TableCell>
+        <ProductActivationCodeCell product={product} />
+      </TableCell>
+      <TableCell>
         <ProductStatusBadge status={product.status} />
       </TableCell>
       <TableCell>
@@ -247,6 +255,14 @@ function ProductMobileCard({
           label={t("category")}
           value={getProductCategoryLabel(product)}
         />
+        <div className="col-span-2 min-w-0">
+          <dt className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+            {t("activationCode")}
+          </dt>
+          <dd className="mt-1">
+            <ProductActivationCodeCell product={product} />
+          </dd>
+        </div>
         <ProductMobileField
           label={t("warrantyDuration")}
           value={
@@ -267,6 +283,25 @@ function ProductMobileCard({
         </div>
       </dl>
     </article>
+  );
+}
+
+function ProductActivationCodeCell({ product }: { product: ProductResponse }) {
+  const t = useTranslations("Products");
+  const activationCode = product.assignedActivationCode;
+
+  if (!activationCode) {
+    return <Badge variant="secondary">{t("activationCodeUnassigned")}</Badge>;
+  }
+  return (
+    <div className="flex items-center gap-2">
+      <div className="space-y-1">
+        <p className="text-xs font-semibold text-slate-950 dark:text-slate-50">
+          {activationCode.code}
+        </p>
+        <ProductActivationCodeStatusBadge status={activationCode.status} />
+      </div>
+    </div>
   );
 }
 
@@ -412,7 +447,11 @@ function ProductActionsMenu({
                 onSelect={() => onAssignCodes(product)}
               >
                 <KeyRound className="mr-2 size-4" />
-                {t("assignActivationCodes")}
+                {t(
+                  product.assignedActivationCode
+                    ? "replaceActivationCode"
+                    : "assignActivationCodes",
+                )}
               </DropdownMenuItem>
             ) : null}
             {canDelete ? (

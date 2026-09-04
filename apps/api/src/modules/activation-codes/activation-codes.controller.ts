@@ -25,10 +25,12 @@ import { ReplaceActivationCodeDto } from '@/modules/activation-codes/dto/replace
 import { ReplaceActivationCodeUseCase } from '@/modules/activation-codes/use-cases/replace-activation-code.use-case';
 import {
   AssignActivationCodesToProductDto,
+  ReplaceProductActivationCodeAssignmentDto,
   UnassignActivationCodesFromProductDto,
 } from '@/modules/activation-codes/dto/assign-activation-codes-to-product.dto';
 import { AssignActivationCodesToProductUseCase } from '@/modules/activation-codes/use-cases/assign-activation-codes-to-product.use-case';
 import { UnassignActivationCodesFromProductUseCase } from '@/modules/activation-codes/use-cases/unassign-activation-codes-from-product.use-case';
+import { ReplaceProductActivationCodeAssignmentUseCase } from '@/modules/activation-codes/use-cases/replace-product-activation-code-assignment.use-case';
 import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import { permission_key } from '@prisma/client';
 import type { Response } from 'express';
@@ -52,6 +54,7 @@ export class ActivationCodesController {
     private readonly replaceActivationCodeUseCase: ReplaceActivationCodeUseCase,
     private readonly assignCodesToProductUseCase: AssignActivationCodesToProductUseCase,
     private readonly unassignCodesFromProductUseCase: UnassignActivationCodesFromProductUseCase,
+    private readonly replaceProductAssignmentUseCase: ReplaceProductActivationCodeAssignmentUseCase,
   ) {}
 
   @Get()
@@ -125,6 +128,14 @@ export class ActivationCodesController {
   @Permissions([permission_key.ACTIVATION_CODE_ASSIGN_PRODUCT])
   assignProduct(@Body() dto: AssignActivationCodesToProductDto) {
     return this.assignCodesToProductUseCase.execute(dto);
+  }
+
+  @Post('codes/replace-product-assignment')
+  @Permissions([permission_key.ACTIVATION_CODE_ASSIGN_PRODUCT])
+  replaceProductAssignment(
+    @Body() dto: ReplaceProductActivationCodeAssignmentDto,
+  ) {
+    return this.replaceProductAssignmentUseCase.execute(dto);
   }
 
   @Post('codes/unassign-product')

@@ -12,3 +12,14 @@ export class UnassignActivationCodesFromProductDto {
   @IsUUID()
   activationCodeId!: string;
 }
+
+export class ReplaceProductActivationCodeAssignmentDto {
+  @IsUUID()
+  currentActivationCodeId!: string;
+
+  @IsUUID()
+  replacementActivationCodeId!: string;
+
+  @IsUUID()
+  productId!: string;
+}

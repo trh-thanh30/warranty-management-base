@@ -474,6 +474,7 @@
     "assignSelected": "Assign product to selected codes",
     "selectedCodes": "{count} activation codes selected",
     "assigned": "Activation codes assigned to the product.",
+    "productChanged": "The activation code's assigned product was changed.",
     "unassign": "Remove product assignment",
     "unassigned": "Product assignment removed from the activation code.",
     "unassignTitle": "Remove product assignment",
@@ -516,7 +517,10 @@
   },
   "ActivationCodeAssignment": {
     "title": "Assign activation codes to a product",
+    "changeTitle": "Change assigned product",
     "description": "Choose the physical product carrying this activation code. Customers and dealers can only activate the assigned product.",
+    "changeDescription": "Choose the new physical product carrying this code. Its current product assignment will be replaced.",
+    "currentProduct": "Currently assigned product",
     "product": "Product",
     "productPlaceholder": "Select a product",
     "productSearchPlaceholder": "Search by name, product code, or serial",
@@ -526,11 +530,20 @@
     "error": "The codes could not be assigned. Check the code state and selected product.",
     "cancel": "Cancel",
     "confirm": "Confirm assignment",
-    "assigning": "Assigning..."
+    "assigning": "Assigning...",
+    "changing": "Changing product...",
+    "changeConfirm": "Confirm change",
+    "changeConfirmTitle": "Confirm assigned-product change?",
+    "changeConfirmDescription": "Activation code {activationCode} will move from {currentProduct} to {replacementProduct}. Make sure the code label is attached to the new product."
   },
   "ProductActivationCodeAssignment": {
     "title": "Assign activation codes to product",
+    "replaceTitle": "Change product activation code",
     "description": "Select the activation code physically attached to {product}. Each product can have only one code.",
+    "replaceDescription": "Select a new code to replace the code currently assigned to {product}.",
+    "currentCode": "Currently assigned code",
+    "replacementCode": "New activation code",
+    "replaceBlocked": "The current code is already involved in an activation request or warranty and cannot be changed.",
     "codes": "Activation codes",
     "placeholder": "Select an activation code",
     "searchPlaceholder": "Search by activation code or batch code",
@@ -541,9 +554,15 @@
     "remove": "Remove code {code} from the selection",
     "error": "The codes could not be assigned. Check their status and expiry date.",
     "success": "Activation code assigned to the product.",
+    "replaceSuccess": "The product activation code was changed.",
     "cancel": "Cancel",
     "confirm": "Confirm assignment",
-    "assigning": "Assigning..."
+    "assigning": "Assigning...",
+    "replace": "Continue to change code",
+    "replacing": "Changing code...",
+    "replaceConfirmTitle": "Confirm activation-code change?",
+    "replaceConfirmDescription": "Product {product} will release code {currentCode} and use {replacementCode}. This succeeds only while both codes remain unused.",
+    "replaceConfirm": "Confirm change"
   },
   "Staff": {
     "title": "Staff management",
@@ -1251,6 +1270,7 @@
     "customerRequired": "Choose a customer.",
     "assignOwner": "Assign owner",
     "assignActivationCodes": "Assign activation codes",
+    "replaceActivationCode": "Change activation code",
     "activateWarranty": "Activate warranty",
     "assignOwnerTitle": "Assign product owner",
     "assignOwnerDescription": "Choose the customer who owns {name}.",
@@ -1289,6 +1309,20 @@
     "productCodeLength": "Product code must be 64 characters or fewer.",
     "duplicateProductCode": "This product code already exists.",
     "warrantyCode": "Warranty code",
+    "activationCode": "Activation code",
+    "activationCodeStatus": "Code status",
+    "activationCodeUnassigned": "Not assigned",
+    "activationCodeUnassignedDescription": "This product is not linked to an activation code yet.",
+    "activationCodeBatch": "Activation code batch",
+    "activationCodeExpiresAt": "Activation deadline",
+    "activationCodeStatuses": {
+      "AVAILABLE": "Available",
+      "PENDING_APPROVAL": "Pending approval",
+      "ACTIVATED": "Activated",
+      "EXPIRED": "Expired",
+      "REVOKED": "Revoked",
+      "REPLACED": "Replaced"
+    },
     "warrantyCodePlaceholder": "e.g. WAR-CAR-2026-01",
     "warrantyCodeCreateDescription": "Optional. Leave blank to generate a unique warranty code automatically.",
     "warrantyCodeEditableDescription": "You can replace this code before activation. Clearing the input keeps the current code.",
@@ -1524,6 +1558,7 @@
     },
     "sections": {
       "product": "Product",
+      "activationCode": "Assigned activation code",
       "ownerWarranty": "Owner and warranty"
     }
   },

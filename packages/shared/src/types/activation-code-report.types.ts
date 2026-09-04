@@ -58,6 +58,17 @@ export type AssignActivationCodesToProductResult = {
   product: ActivationCodeAssignedProduct;
 };
 
+export type ReplaceProductActivationCodeAssignmentBody = {
+  currentActivationCodeId: string;
+  replacementActivationCodeId: string;
+  productId: string;
+};
+
+export type ReplaceProductActivationCodeAssignmentResult =
+  AssignActivationCodesToProductResult & {
+    previousActivationCodeId: string;
+  };
+
 export type UnassignActivationCodesFromProductBody = {
   activationCodeId: string;
 };

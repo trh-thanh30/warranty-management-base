@@ -82,7 +82,11 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
                     onSelect={() => setAssignCodesOpen(true)}
                   >
                     <KeyRound className="mr-2 size-4" />
-                    {t("assignActivationCodes")}
+                    {t(
+                      product?.assignedActivationCode
+                        ? "replaceActivationCode"
+                        : "assignActivationCodes",
+                    )}
                   </DropdownMenuItem>
                 ) : null}
                 {canAssignOwner ? (

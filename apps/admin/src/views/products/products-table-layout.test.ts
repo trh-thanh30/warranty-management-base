@@ -48,5 +48,31 @@ test("product actions expose permissioned activation-code assignment", async () 
 
   assert.match(source, /PERMISSIONS\.ACTIVATION_CODE_ASSIGN_PRODUCT/);
   assert.match(source, /onSelect=\{\(\) => onAssignCodes\(product\)\}/);
-  assert.match(source, /t\("assignActivationCodes"\)/);
+  assert.match(source, /product\.assignedActivationCode/);
+  assert.match(source, /"replaceActivationCode"/);
+  assert.match(source, /"assignActivationCodes"/);
+});
+
+test("activation-code dialog separates assignment from confirmed replacement", async () => {
+  const source = await readFile(
+    new URL("./components/assign-activation-codes-dialog.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(source, /const currentCode = product\?\.assignedActivationCode/);
+  assert.match(source, /replaceProductAssignment/);
+  assert.match(source, /currentActivationCodeId: currentCode\.id/);
+  assert.match(source, /replacementActivationCodeId: selected!\.id/);
+  assert.match(source, /<ProductActivationCodeStatusBadge/);
+  assert.match(source, /<ConfirmActionDialog/);
+  assert.match(source, /!currentCode\.canReplace/);
+});
+
+test("product table displays the assigned activation code on desktop and mobile", async () => {
+  const source = await readFile(productsTableUrl, "utf8");
+
+  assert.match(source, /t\("activationCode"\)/);
+  assert.match(source, /ProductActivationCodeCell/);
+  assert.match(source, /product\.assignedActivationCode/);
+  assert.match(source, /t\("activationCodeUnassigned"\)/);
 });

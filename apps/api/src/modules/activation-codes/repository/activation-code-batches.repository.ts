@@ -14,6 +14,8 @@ import {
   warranty_method,
 } from '@prisma/client';
 
+export class ProductActivationCodeReplacementConflictError extends Error {}
+
 export type CreateActivationCodeBatchRecord = {
   batchCode: string;
   sourceProductId?: string;
@@ -516,6 +518,47 @@ export class ActivationCodeBatchesRepository {
         warranty: { is: null },
       },
       data: { product_id: productId },
+    });
+  }
+
+  replaceProductAssignment(input: {
+    currentActivationCodeId: string;
+    replacementActivationCodeId: string;
+    productId: string;
+    now: Date;
+  }) {
+    return this.prismaService.$transaction(async (tx) => {
+      const released = await tx.activationCode.updateMany({
+        where: {
+          id: input.currentActivationCodeId,
+          product_id: input.productId,
+          status: activation_code_status.AVAILABLE,
+          expires_at: { gt: input.now },
+          request: { is: null },
+          request_items: { none: {} },
+          warranty: { is: null },
+        },
+        data: { product_id: null },
+      });
+      if (released.count !== 1) {
+        throw new ProductActivationCodeReplacementConflictError();
+      }
+
+      const assigned = await tx.activationCode.updateMany({
+        where: {
+          id: input.replacementActivationCodeId,
+          product_id: null,
+          status: activation_code_status.AVAILABLE,
+          expires_at: { gt: input.now },
+          request: { is: null },
+          request_items: { none: {} },
+          warranty: { is: null },
+        },
+        data: { product_id: input.productId },
+      });
+      if (assigned.count !== 1) {
+        throw new ProductActivationCodeReplacementConflictError();
+      }
     });
   }
 

@@ -3,6 +3,8 @@ import type {
   ActivationCodePrintJob,
   AssignActivationCodesToProductBody,
   AssignActivationCodesToProductResult,
+  ReplaceProductActivationCodeAssignmentBody,
+  ReplaceProductActivationCodeAssignmentResult,
   UnassignActivationCodesFromProductBody,
   RequestActivationCodePrintJobQuery,
 } from "@repo/shared";
@@ -138,6 +140,17 @@ export function createActivationCodesService(http: ActivationCodesHttpClient) {
       return unwrap(
         await http.post(
           "/activation-code-batches/codes/unassign-product",
+          body,
+        ),
+      );
+    },
+
+    async replaceProductAssignment(
+      body: ReplaceProductActivationCodeAssignmentBody,
+    ): Promise<ReplaceProductActivationCodeAssignmentResult> {
+      return unwrap(
+        await http.post<ReplaceProductActivationCodeAssignmentResult>(
+          "/activation-code-batches/codes/replace-product-assignment",
           body,
         ),
       );

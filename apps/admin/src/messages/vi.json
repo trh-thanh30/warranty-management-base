@@ -474,6 +474,7 @@
     "assignSelected": "Gán sản phẩm cho các mã đã chọn",
     "selectedCodes": "Đã chọn {count} mã kích hoạt",
     "assigned": "Đã gán mã kích hoạt vào sản phẩm.",
+    "productChanged": "Đã đổi sản phẩm được gán mã kích hoạt.",
     "unassign": "Gỡ gán sản phẩm",
     "unassigned": "Đã gỡ gán sản phẩm khỏi mã kích hoạt.",
     "unassignTitle": "Gỡ gán sản phẩm",
@@ -516,7 +517,10 @@
   },
   "ActivationCodeAssignment": {
     "title": "Gán mã kích hoạt vào sản phẩm",
+    "changeTitle": "Đổi sản phẩm được gán mã",
     "description": "Chọn sản phẩm vật lý đã được dán mã kích hoạt này. Khách hàng và đại lý chỉ có thể kích hoạt đúng sản phẩm đã gán.",
+    "changeDescription": "Chọn sản phẩm vật lý mới đã được dán mã này. Liên kết với sản phẩm hiện tại sẽ được thay thế.",
+    "currentProduct": "Sản phẩm đang gán",
     "product": "Sản phẩm",
     "productPlaceholder": "Chọn sản phẩm",
     "productSearchPlaceholder": "Tìm theo tên, mã sản phẩm hoặc serial",
@@ -526,11 +530,20 @@
     "error": "Không thể gán mã. Hãy kiểm tra trạng thái mã và sản phẩm được chọn.",
     "cancel": "Hủy",
     "confirm": "Xác nhận gán",
-    "assigning": "Đang gán..."
+    "assigning": "Đang gán...",
+    "changing": "Đang đổi sản phẩm...",
+    "changeConfirm": "Xác nhận đổi",
+    "changeConfirmTitle": "Xác nhận đổi sản phẩm được gán?",
+    "changeConfirmDescription": "Mã kích hoạt {activationCode} sẽ được chuyển từ {currentProduct} sang {replacementProduct}. Hãy bảo đảm tem mã đã được dán đúng lên sản phẩm mới."
   },
   "ProductActivationCodeAssignment": {
     "title": "Gán mã kích hoạt cho sản phẩm",
+    "replaceTitle": "Đổi mã kích hoạt của sản phẩm",
     "description": "Chọn mã kích hoạt đã được dán lên sản phẩm {product}. Mỗi sản phẩm chỉ được gán một mã.",
+    "replaceDescription": "Chọn mã mới để thay thế mã đang gán cho sản phẩm {product}.",
+    "currentCode": "Mã đang gán",
+    "replacementCode": "Mã kích hoạt mới",
+    "replaceBlocked": "Mã hiện tại đã tham gia yêu cầu kích hoạt hoặc hồ sơ bảo hành nên không thể đổi.",
     "codes": "Mã kích hoạt",
     "placeholder": "Chọn mã kích hoạt",
     "searchPlaceholder": "Tìm theo mã kích hoạt hoặc mã lô",
@@ -541,9 +554,15 @@
     "remove": "Bỏ mã {code} khỏi danh sách đã chọn",
     "error": "Không thể gán mã. Hãy kiểm tra trạng thái và hạn sử dụng của mã.",
     "success": "Đã gán mã kích hoạt cho sản phẩm.",
+    "replaceSuccess": "Đã đổi mã kích hoạt của sản phẩm.",
     "cancel": "Hủy",
     "confirm": "Xác nhận gán",
-    "assigning": "Đang gán..."
+    "assigning": "Đang gán...",
+    "replace": "Tiếp tục đổi mã",
+    "replacing": "Đang đổi mã...",
+    "replaceConfirmTitle": "Xác nhận đổi mã kích hoạt?",
+    "replaceConfirmDescription": "Sản phẩm {product} sẽ bỏ mã {currentCode} và chuyển sang mã {replacementCode}. Thao tác chỉ thành công nếu cả hai mã vẫn chưa được sử dụng.",
+    "replaceConfirm": "Xác nhận đổi"
   },
   "Staff": {
     "title": "Quản lý nhân viên",
@@ -1251,6 +1270,7 @@
     "customerRequired": "Chọn khách hàng.",
     "assignOwner": "Gán chủ sở hữu",
     "assignActivationCodes": "Gán mã kích hoạt",
+    "replaceActivationCode": "Đổi mã kích hoạt",
     "activateWarranty": "Kích hoạt bảo hành",
     "assignOwnerTitle": "Gán chủ sở hữu sản phẩm",
     "assignOwnerDescription": "Chọn khách hàng đang sở hữu {name}.",
@@ -1289,6 +1309,20 @@
     "productCodeLength": "Mã sản phẩm không được quá 64 ký tự.",
     "duplicateProductCode": "Mã sản phẩm này đã tồn tại.",
     "warrantyCode": "Mã bảo hành",
+    "activationCode": "Mã kích hoạt",
+    "activationCodeStatus": "Trạng thái mã",
+    "activationCodeUnassigned": "Chưa gán mã",
+    "activationCodeUnassignedDescription": "Sản phẩm này chưa được liên kết với mã kích hoạt nào.",
+    "activationCodeBatch": "Lô mã kích hoạt",
+    "activationCodeExpiresAt": "Hạn kích hoạt",
+    "activationCodeStatuses": {
+      "AVAILABLE": "Có thể kích hoạt",
+      "PENDING_APPROVAL": "Chờ duyệt",
+      "ACTIVATED": "Đã kích hoạt",
+      "EXPIRED": "Đã hết hạn",
+      "REVOKED": "Đã thu hồi",
+      "REPLACED": "Đã thay thế"
+    },
     "warrantyCodePlaceholder": "Ví dụ: WAR-CAR-2026-01",
     "warrantyCodeCreateDescription": "Không bắt buộc. Để trống để hệ thống tự sinh mã bảo hành duy nhất.",
     "warrantyCodeEditableDescription": "Có thể đổi mã trước khi kích hoạt. Nếu xóa trắng, hệ thống vẫn giữ mã hiện tại.",
@@ -1524,6 +1558,7 @@
     },
     "sections": {
       "product": "Sản phẩm",
+      "activationCode": "Mã kích hoạt đã gán",
       "ownerWarranty": "Chủ sở hữu và bảo hành"
     }
   },

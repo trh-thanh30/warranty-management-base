@@ -11,6 +11,10 @@ const repositoryUrl = new URL(
   "../../../../api/src/modules/activation-codes/repository/activation-code-batches.repository.ts",
   import.meta.url,
 );
+const assignmentDialogUrl = new URL(
+  "./components/activation-code-product-assignment-dialog.tsx",
+  import.meta.url,
+);
 
 test("activation code details request 10 items and render pagination controls", async () => {
   const source = await readFile(viewUrl, "utf8");
@@ -40,6 +44,17 @@ test("activation code rows expose product assignment through permissioned action
   assert.match(source, /item\.assignedProduct/);
   assert.match(source, /activationCodeId=\$\{encodeURIComponent\(code\.id\)\}/);
   assert.match(source, /productId=\$\{encodeURIComponent/);
+});
+
+test("changing an activation code's assigned product requires confirmation", async () => {
+  const source = await readFile(assignmentDialogUrl, "utf8");
+
+  assert.match(source, /currentProduct \? "changeTitle" : "title"/);
+  assert.match(source, /productId === currentProduct\?\.id/);
+  assert.match(source, /setConfirmOpen\(true\)/);
+  assert.match(source, /<ConfirmActionDialog/);
+  assert.match(source, /activationCode,/);
+  assert.match(source, /replacementProduct:/);
 });
 
 test("activation code detail uses the shared detail-page shell", async () => {
