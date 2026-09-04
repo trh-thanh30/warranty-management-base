@@ -5,7 +5,9 @@ import {
   getActivationProductOptionDisabledReason,
   formatActivationProductSearchOption,
   getActivationProductDisplayName,
+  resolveAssignedActivationCodeForProduct,
 } from "./warranty-activation-request-product.utils.ts";
+import type { AvailableActivationCode } from "@/src/services/activation-codes/activation-code-batches.types";
 
 const translate = ((key: string, values?: Record<string, string>): string =>
   values?.requestCode ? `${key}:${values.requestCode}` : key) as never;
@@ -74,6 +76,45 @@ test("eligible activation product option remains selectable", () => {
 
   assert.equal(
     getActivationProductOptionDisabledReason(product, translate),
+    null,
+  );
+});
+
+test("resolves the available activation code assigned to the selected product", () => {
+  const assignedCode = {
+    id: "code-a",
+    selectable: true,
+    assignedProduct: { id: "product-a" },
+  } as AvailableActivationCode;
+
+  assert.equal(
+    resolveAssignedActivationCodeForProduct("product-a", [assignedCode]),
+    assignedCode,
+  );
+});
+
+test("does not reuse a code from the previously selected product", () => {
+  const staleCode = {
+    id: "code-a",
+    selectable: true,
+    assignedProduct: { id: "product-a" },
+  } as AvailableActivationCode;
+
+  assert.equal(
+    resolveAssignedActivationCodeForProduct("product-b", [staleCode]),
+    null,
+  );
+});
+
+test("does not auto-fill an unavailable assigned activation code", () => {
+  const expiredCode = {
+    id: "code-a",
+    selectable: false,
+    assignedProduct: { id: "product-a" },
+  } as AvailableActivationCode;
+
+  assert.equal(
+    resolveAssignedActivationCodeForProduct("product-a", [expiredCode]),
     null,
   );
 });

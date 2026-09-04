@@ -132,7 +132,7 @@ export function ProductForm({
             </Field>
           </div>
 
-          <div className="grid min-w-0 gap-5 md:grid-cols-2">
+          <div className="grid min-w-0 gap-5 ">
             <Field
               description={t("warrantyPolicyDescription")}
               error={formatFieldError(

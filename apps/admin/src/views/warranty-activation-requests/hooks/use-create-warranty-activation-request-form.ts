@@ -38,7 +38,10 @@ import {
   resolveScopedProductSearch,
   toAdminActivationRequestBody,
 } from "../warranty-activation-requests.utils";
-import { getActivationProductDisplayName } from "../warranty-activation-request-product.utils";
+import {
+  getActivationProductDisplayName,
+  resolveAssignedActivationCodeForProduct,
+} from "../warranty-activation-request-product.utils";
 
 const DEFAULT_VALUES: WarrantyActivationRequestCreateFormValues = {
   activationCodeId: "",
@@ -102,17 +105,11 @@ export function useCreateWarrantyActivationRequestForm({
     useState<CustomerSummary | null>(null);
   const [selectedProduct, setSelectedProduct] =
     useState<ProductResponse | null>(null);
-  const [activationCodeSearch, setActivationCodeSearch] = useState("");
   const [selectedActivationCode, setSelectedActivationCode] =
     useState<AvailableActivationCode | null>(null);
-  const assignedProductQuery = useProduct(
-    selectedActivationCode?.assignedProduct?.id ?? assignedProductId ?? null,
-    {
-      enabled: Boolean(
-        selectedActivationCode?.assignedProduct?.id ?? assignedProductId,
-      ),
-    },
-  );
+  const assignedProductQuery = useProduct(assignedProductId ?? null, {
+    enabled: Boolean(assignedProductId),
+  });
   const [selectedActivationProducts, setSelectedActivationProducts] = useState<
     Record<string, ProductResponse>
   >({});
@@ -149,23 +146,14 @@ export function useCreateWarrantyActivationRequestForm({
     debouncedProductSearch,
   );
   const debouncedDealerSearch = useDebounce(dealerSearch.trim(), 300);
-  const debouncedActivationCodeSearch = useDebounce(
-    activationCodeSearch.trim(),
-    300,
-  );
   const activationCodesQuery = useInfiniteQuery({
-    enabled: !activationCodeId,
-    queryKey: [
-      "available-activation-codes",
-      selectedProduct?.id ?? "all",
-      debouncedActivationCodeSearch,
-    ],
+    enabled: !activationCodeId && Boolean(selectedProduct),
+    queryKey: ["available-activation-codes", selectedProduct?.id ?? "all"],
     queryFn: ({ pageParam }) =>
       activationCodesService.listAvailableByProduct(selectedProduct?.id, {
         assignment: "ASSIGNED",
         limit: 10,
         page: pageParam,
-        search: debouncedActivationCodeSearch || undefined,
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
@@ -181,6 +169,15 @@ export function useCreateWarrantyActivationRequestForm({
         ).values(),
       ),
     [activationCodesQuery.data?.pages],
+  );
+  const assignedActivationCodeForSelectedProduct = useMemo(
+    () =>
+      selectedProduct
+        ? (availableActivationCodes.find(
+            (code) => code.assignedProduct?.id === selectedProduct.id,
+          ) ?? null)
+        : null,
+    [availableActivationCodes, selectedProduct],
   );
   const categoriesQuery = useCategories({
     isActive: "true",
@@ -288,6 +285,39 @@ export function useCreateWarrantyActivationRequestForm({
   }, [assignedProductQuery.data, form.setValue]);
 
   useEffect(() => {
+    if (
+      activationCodeId ||
+      !selectedProduct ||
+      !activationCodesQuery.isSuccess
+    ) {
+      return;
+    }
+
+    const assignedCode = resolveAssignedActivationCodeForProduct(
+      selectedProduct.id,
+      availableActivationCodes,
+    );
+    if (!assignedCode) return;
+
+    setSelectedActivationCode((current) =>
+      current?.id === assignedCode.id ? current : assignedCode,
+    );
+    if (form.getValues("activationCodeId") !== assignedCode.id) {
+      form.setValue("activationCodeId", assignedCode.id, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      form.clearErrors("activationCodeId");
+    }
+  }, [
+    activationCodeId,
+    activationCodesQuery.isSuccess,
+    availableActivationCodes,
+    form,
+    selectedProduct,
+  ]);
+
+  useEffect(() => {
     if (!pendingWardName || wards.length === 0) return;
 
     const ward = wards.find((item) => pendingWardName.includes(item.name));
@@ -367,7 +397,6 @@ export function useCreateWarrantyActivationRequestForm({
       warrantyCode: product.warrantyCode ?? "",
     });
     setSelectedActivationCode(null);
-    setActivationCodeSearch("");
     form.setValue("activationCodeId", "", {
       shouldDirty: true,
       shouldValidate: false,
@@ -421,37 +450,10 @@ export function useCreateWarrantyActivationRequestForm({
       warrantyCode: "",
     });
     setSelectedActivationCode(null);
-    setActivationCodeSearch("");
     form.setValue("activationCodeId", "", {
       shouldDirty: true,
       shouldValidate: false,
     });
-  }
-
-  function selectAvailableActivationCode(code: AvailableActivationCode) {
-    setSelectedActivationCode(code);
-    setActivationCodeSearch("");
-    form.setValue("activationCodeId", code.id, {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-  }
-
-  function clearAvailableActivationCode() {
-    setSelectedActivationCode(null);
-    form.setValue("activationCodeId", "", {
-      shouldDirty: true,
-      shouldValidate: false,
-    });
-  }
-
-  function loadMoreActivationCodes() {
-    if (
-      activationCodesQuery.hasNextPage &&
-      !activationCodesQuery.isFetchingNextPage
-    ) {
-      void activationCodesQuery.fetchNextPage();
-    }
   }
 
   function setProductSearch(value: string) {
@@ -527,10 +529,16 @@ export function useCreateWarrantyActivationRequestForm({
       values.activationCodeId || activationCodeId,
     );
 
+    if (!hasActivationCode) {
+      const message = t("activationCodeRequired");
+      toast.error(message);
+      return;
+    }
+
     // When the request is created from an activation code, the backend resolves
     // and locks the product from that code. There is intentionally no product
     // selector in this mode, so do not require a locally selected product.
-    if (!hasActivationCode && !usesProductSelectors && !selectedProduct) {
+    if (!usesProductSelectors && !selectedProduct) {
       const message = t("productRequired");
       form.setError("productId", { message });
       toast.error(message);
@@ -626,14 +634,11 @@ export function useCreateWarrantyActivationRequestForm({
     selectedDealer,
     selectedProduct,
     selectedActivationProducts,
-    activationCodeSearch,
     activationCodesQuery,
-    availableActivationCodes,
     selectedActivationCode,
+    assignedActivationCodeForSelectedProduct,
     confirmCategoryChange,
     cancelCategoryChange,
-    clearAvailableActivationCode,
-    loadMoreActivationCodes,
     selectCategory,
     selectCustomer,
     selectDealer,
@@ -644,8 +649,6 @@ export function useCreateWarrantyActivationRequestForm({
     setCustomerSearch,
     setDealerSearch,
     setProductSearch,
-    setActivationCodeSearch,
-    selectAvailableActivationCode,
     usesProductSelectors,
   };
 }
