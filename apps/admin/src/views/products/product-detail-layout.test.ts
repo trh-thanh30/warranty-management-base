@@ -28,13 +28,15 @@ test("product detail formats warranty dates and exposes copy actions", async () 
   assert.match(source, /aria-label=\{t\("copyValue"/);
 });
 
-test("product detail actions remain full width only on mobile", async () => {
+test("product detail actions are grouped in an accessible dropdown", async () => {
   const source = await readFile(
     new URL("./product-detail.view.tsx", import.meta.url),
     "utf8",
   );
 
-  assert.equal(source.match(/className="w-full sm:w-auto"/g)?.length ?? 0, 4);
+  assert.equal(source.match(/<DropdownMenuItem/g)?.length ?? 0, 4);
+  assert.match(source, /<DropdownMenuTrigger asChild>/);
+  assert.match(source, /aria-label=\{t\("actions"\)\}/);
   assert.match(source, /descriptionAccessory={/);
   assert.match(source, /PERMISSIONS\.ACTIVATION_CODE_ASSIGN_PRODUCT/);
   assert.match(source, /<AssignActivationCodesDialog/);

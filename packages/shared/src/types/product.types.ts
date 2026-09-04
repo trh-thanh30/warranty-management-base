@@ -64,6 +64,16 @@ export type WarrantyCodeEditLockedReason =
   | "WARRANTY_NOT_DRAFT"
   | "OPEN_ACTIVATION_REQUEST";
 
+export type ProductAssignedActivationCodeSummary = {
+  id: string;
+  code: string;
+  status: ActivationCodeReportStatus;
+  expiresAt: string;
+  batchCode: string;
+  canReplace: boolean;
+  unavailableReason: Exclude<ActivationCodeReportStatus, "AVAILABLE"> | null;
+};
+
 export type ProductSummary = {
   id: string;
   sku: string;
@@ -93,6 +103,7 @@ export type ProductSummary = {
   warranty: ProductWarrantySummary | null;
   warrantyDurationMonths: number | null;
   warrantyTerms: string | null;
+  assignedActivationCode: ProductAssignedActivationCodeSummary | null;
   assets: ProductAssetSummary[];
 };
 

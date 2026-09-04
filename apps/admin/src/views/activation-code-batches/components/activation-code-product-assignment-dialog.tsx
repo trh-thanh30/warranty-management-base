@@ -10,8 +10,8 @@ import {
   ComboboxLoading,
   ComboboxTrigger,
 } from "@/src/components/common/combobox";
-import { useInfiniteProducts } from "@/src/views/products/hooks/use-products";
 import { activationCodesService } from "@/src/services/activation-codes/activation-codes.service";
+import { useInfiniteProducts } from "@/src/views/products/hooks/use-products";
 import { useDebounce } from "@repo/hooks";
 import type {
   ActivationCodeAssignedProduct,
@@ -27,8 +27,8 @@ import {
 } from "@repo/ui";
 import { useMutation } from "@tanstack/react-query";
 import { PackageCheck } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
 
 type Props = {
   activationCodeId: string;
@@ -89,8 +89,10 @@ export function ActivationCodeProductAssignmentDialog({
             <PackageCheck className="size-5" />
           </div>
           <div className="min-w-0">
-            <DialogTitle>{t("title")}</DialogTitle>
-            <DialogDescription className="mt-1 leading-6">
+            <DialogTitle className="text-base font-semibold">
+              {t("title")}
+            </DialogTitle>
+            <DialogDescription className="mt-1 leading-6 text-sm font-medium text-gray-500">
               {t("description")}
             </DialogDescription>
           </div>

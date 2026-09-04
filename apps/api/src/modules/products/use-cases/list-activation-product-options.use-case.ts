@@ -1,4 +1,5 @@
 import { AssetsService } from '@/modules/assets/assets.service';
+import { ActivationCodeCryptoService } from '@/modules/activation-codes/services/activation-code-crypto.service';
 import { ListActivationProductOptionsDto } from '@/modules/products/dto/list-activation-product-options.dto';
 import { getActivationProductEligibility } from '@/modules/products/product-activation-eligibility';
 import { toProductResponse } from '@/modules/products/products.types';
@@ -10,6 +11,7 @@ export class ListActivationProductOptionsUseCase {
   constructor(
     private readonly productsRepository: ProductsRepository,
     private readonly assetsService?: AssetsService,
+    private readonly activationCodeCryptoService?: ActivationCodeCryptoService,
   ) {}
 
   async execute(dto: ListActivationProductOptionsDto) {
@@ -21,6 +23,10 @@ export class ListActivationProductOptionsUseCase {
           product,
           (asset) =>
             this.assetsService?.enrichAssetUrl(asset).url ?? asset.path,
+          this.activationCodeCryptoService
+            ? (ciphertext) =>
+                this.activationCodeCryptoService!.decrypt(ciphertext)
+            : undefined,
         ),
         activationEligibility: getActivationProductEligibility(product),
         activationCodeCounts: product.activationCodeCounts,

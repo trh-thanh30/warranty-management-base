@@ -220,10 +220,11 @@ export class ActivationCodeBatchesRepository {
           id: row.id,
           productName: row.batch.product_name,
           productSku: row.batch.product_sku,
-          maskedCode: `${plaintext.slice(0, 8)}••••`,
-          ...(row.status === activation_code_status.AVAILABLE
-            ? { copyCode: plaintext }
-            : {}),
+          // The admin activation-code workspace is an operational screen;
+          // staff must be able to read and copy the complete code for every
+          // lifecycle state, including revoked/replaced history.
+          maskedCode: plaintext,
+          copyCode: plaintext,
           status: row.status,
           createdAt: row.created_at,
           expiresAt: row.expires_at,
@@ -366,7 +367,8 @@ export class ActivationCodeBatchesRepository {
             : row.status;
         return {
           id: row.id,
-          maskedCode: `${plaintext.slice(0, 8)}••••`,
+          maskedCode: plaintext,
+          copyCode: plaintext,
           batchCode: row.batch.batch_code,
           productName: row.batch.product_name,
           productSku: row.batch.product_sku,
@@ -431,7 +433,7 @@ export class ActivationCodeBatchesRepository {
   }
 
   private mask(ciphertext: string) {
-    return `${this.crypto.decrypt(ciphertext).slice(0, 8)}••••`;
+    return this.crypto.decrypt(ciphertext);
   }
 
   findAvailableByHash(codeHash: string) {

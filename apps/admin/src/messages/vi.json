@@ -540,6 +540,7 @@
     "currentlyAssigned": "Hiện đang gán cho {product}; xác nhận để chuyển sang sản phẩm này",
     "remove": "Bỏ mã {code} khỏi danh sách đã chọn",
     "error": "Không thể gán mã. Hãy kiểm tra trạng thái và hạn sử dụng của mã.",
+    "success": "Đã gán mã kích hoạt cho sản phẩm.",
     "cancel": "Hủy",
     "confirm": "Xác nhận gán",
     "assigning": "Đang gán..."

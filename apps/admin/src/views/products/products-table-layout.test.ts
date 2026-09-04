@@ -42,3 +42,11 @@ test("product actions expose the clone route", async () => {
     /<Link href=\{`\/products\/create\?cloneFrom=\$\{product\.id\}`\}>[\s\S]*?<Copy[\s\S]*?\{t\("clone"\)\}/,
   );
 });
+
+test("product actions expose permissioned activation-code assignment", async () => {
+  const source = await readFile(productsTableUrl, "utf8");
+
+  assert.match(source, /PERMISSIONS\.ACTIVATION_CODE_ASSIGN_PRODUCT/);
+  assert.match(source, /onSelect=\{\(\) => onAssignCodes\(product\)\}/);
+  assert.match(source, /t\("assignActivationCodes"\)/);
+});

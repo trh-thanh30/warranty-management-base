@@ -22,11 +22,11 @@ test("activation code details request 10 items and render pagination controls", 
   assert.doesNotMatch(source, /limit:\s*1000/);
 });
 
-test("activation code rows reveal available codes and group actions in a dropdown", async () => {
+test("activation code rows render complete codes and group actions in a dropdown", async () => {
   const source = await readFile(viewUrl, "utf8");
 
-  assert.match(source, /group-hover\/code:opacity-100/);
-  assert.match(source, /revealedCodeId === item\.id && item\.copyCode/);
+  assert.match(source, /item\.copyCode \?\? item\.maskedCode/);
+  assert.doesNotMatch(source, /revealedCodeId/);
   assert.match(source, /<DropdownMenu>/);
   assert.match(source, /<DropdownMenuItem/);
 });

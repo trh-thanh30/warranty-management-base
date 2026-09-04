@@ -1,5 +1,6 @@
 import { toProductResponse } from '@/modules/products/products.types';
 import {
+  activation_code_status,
   category_type,
   product_status,
   warranty_method,
@@ -7,6 +8,100 @@ import {
 } from '@prisma/client';
 
 describe('toProductResponse', () => {
+  it('exposes the activation code assigned to an admin product response', () => {
+    const expiresAt = new Date('2099-01-25T00:00:00.000Z');
+    const response = toProductResponse(
+      {
+        ...createProductFixture(),
+        activation_code: {
+          id: 'activation-code-id',
+          code_ciphertext: 'encrypted-code',
+          status: activation_code_status.AVAILABLE,
+          expires_at: expiresAt,
+          batch: { batch_code: 'ACB-20260725-001' },
+          request: null,
+          request_items: [],
+          warranty: null,
+        },
+      },
+      undefined,
+      (ciphertext) =>
+        ciphertext === 'encrypted-code' ? 'SP-ABC123' : 'unexpected',
+    );
+
+    expect(response.assignedActivationCode).toEqual({
+      id: 'activation-code-id',
+      code: 'SP-ABC123',
+      status: 'AVAILABLE',
+      expiresAt,
+      batchCode: 'ACB-20260725-001',
+      canReplace: true,
+      unavailableReason: null,
+    });
+  });
+
+  it('marks an assigned activation code with a request as unavailable', () => {
+    const response = toProductResponse(
+      {
+        ...createProductFixture(),
+        activation_code: {
+          id: 'activation-code-id',
+          code_ciphertext: 'encrypted-code',
+          status: activation_code_status.AVAILABLE,
+          expires_at: new Date('2099-01-25T00:00:00.000Z'),
+          batch: { batch_code: 'ACB-20260725-001' },
+          request: { id: 'request-id' },
+          request_items: [],
+          warranty: null,
+        },
+      },
+      undefined,
+      () => 'SP-ABC123',
+    );
+
+    expect(response.assignedActivationCode).toEqual(
+      expect.objectContaining({
+        status: 'PENDING_APPROVAL',
+        canReplace: false,
+        unavailableReason: 'PENDING_APPROVAL',
+      }),
+    );
+  });
+
+  it('normalizes an overdue available activation code as expired', () => {
+    const response = toProductResponse(
+      {
+        ...createProductFixture(),
+        activation_code: {
+          id: 'activation-code-id',
+          code_ciphertext: 'encrypted-code',
+          status: activation_code_status.AVAILABLE,
+          expires_at: new Date('2000-01-25T00:00:00.000Z'),
+          batch: { batch_code: 'ACB-20260725-001' },
+          request: null,
+          request_items: [],
+          warranty: null,
+        },
+      },
+      undefined,
+      () => 'SP-ABC123',
+    );
+
+    expect(response.assignedActivationCode).toEqual(
+      expect.objectContaining({
+        status: 'EXPIRED',
+        canReplace: false,
+        unavailableReason: 'EXPIRED',
+      }),
+    );
+  });
+
+  it('returns no assigned activation code when the product has none', () => {
+    const response = toProductResponse(createProductFixture());
+
+    expect(response.assignedActivationCode).toBeNull();
+  });
+
   it('uses the product catalogue snapshot and hides template persistence details', () => {
     const response = toProductResponse({
       ...createProductFixture(),

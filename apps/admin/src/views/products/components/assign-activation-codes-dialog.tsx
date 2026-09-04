@@ -10,8 +10,9 @@ import {
   ComboboxLoading,
   ComboboxTrigger,
 } from "@/src/components/common/combobox";
-import { activationCodesService } from "@/src/services/activation-codes/activation-codes.service";
 import type { AvailableActivationCode } from "@/src/services/activation-codes/activation-code-batches.types";
+import { activationCodesService } from "@/src/services/activation-codes/activation-codes.service";
+import { useToast } from "@/src/hooks/use-toast";
 import { useDebounce } from "@repo/hooks";
 import type { ProductResponse } from "@repo/shared";
 import {
@@ -28,8 +29,8 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { KeyRound } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
 
 export function AssignActivationCodesDialog({
   onOpenChange,
@@ -41,6 +42,7 @@ export function AssignActivationCodesDialog({
   product: ProductResponse | null;
 }) {
   const t = useTranslations("ProductActivationCodeAssignment");
+  const toast = useToast();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<AvailableActivationCode | null>(
@@ -76,7 +78,11 @@ export function AssignActivationCodesDialog({
         queryClient.invalidateQueries({ queryKey: ["activation-code-detail"] }),
         queryClient.invalidateQueries({ queryKey: ["products"] }),
       ]);
+      toast.success(t("success"));
       onOpenChange(false);
+    },
+    onError: () => {
+      toast.error(t("error"));
     },
   });
   const resetMutation = mutation.reset;
@@ -96,8 +102,10 @@ export function AssignActivationCodesDialog({
             <KeyRound className="size-5" />
           </div>
           <div className="min-w-0">
-            <DialogTitle>{t("title")}</DialogTitle>
-            <DialogDescription className="mt-1 leading-6">
+            <DialogTitle className="text-base font-semibold">
+              {t("title")}
+            </DialogTitle>
+            <DialogDescription className="mt-1 leading-6 text-sm font-medium text-gray-500">
               {t("description", {
                 product: product?.displayName || product?.name || "",
               })}
@@ -142,7 +150,7 @@ export function AssignActivationCodesDialog({
                   .filter((code) => code.selectable)
                   .map((code) => (
                     <ComboboxItem key={code.id} value={code.id}>
-                      {code.maskedCode} · {code.batchCode}
+                      {code.copyCode ?? code.maskedCode} · {code.batchCode}
                     </ComboboxItem>
                   ))}
                 {codesQuery.isFetchingNextPage ? (
@@ -159,7 +167,7 @@ export function AssignActivationCodesDialog({
             <div className="space-y-2 rounded-md border border-slate-200 p-3 dark:border-slate-800">
               <div className="text-sm">
                 <p className="truncate font-mono font-medium">
-                  {selected.maskedCode}
+                  {selected.copyCode ?? selected.maskedCode}
                 </p>
                 <p className="truncate text-xs text-slate-500">
                   {selected.assignedProduct

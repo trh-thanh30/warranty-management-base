@@ -51,6 +51,18 @@ describe('ProductsRepository', () => {
     expect(findUnique).toHaveBeenCalledWith(
       expect.objectContaining({
         include: expect.objectContaining({
+          activation_code: {
+            select: {
+              id: true,
+              code_ciphertext: true,
+              status: true,
+              expires_at: true,
+              batch: { select: { batch_code: true } },
+              request: { select: { id: true } },
+              request_items: { select: { id: true }, take: 1 },
+              warranty: { select: { id: true } },
+            },
+          },
           warranty_activation_requests: {
             select: { id: true },
             take: 1,

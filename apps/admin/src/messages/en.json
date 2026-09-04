@@ -540,6 +540,7 @@
     "currentlyAssigned": "Currently assigned to {product}; confirm to move it to this product",
     "remove": "Remove code {code} from the selection",
     "error": "The codes could not be assigned. Check their status and expiry date.",
+    "success": "Activation code assigned to the product.",
     "cancel": "Cancel",
     "confirm": "Confirm assignment",
     "assigning": "Assigning..."

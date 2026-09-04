@@ -31,6 +31,7 @@ import {
 import {
   Copy,
   Eye,
+  KeyRound,
   MoreHorizontal,
   Pencil,
   RotateCcw,
@@ -50,6 +51,7 @@ type ProductsTableProps = {
   onDelete: (product: ProductResponse) => void;
   onRestore: (product: ProductResponse) => void;
   onAssignOwner: (product: ProductResponse) => void;
+  onAssignCodes: (product: ProductResponse) => void;
   onSortChange: (sortBy: ProductSortBy) => void;
   sortBy?: ProductSortBy;
   sortOrder: "asc" | "desc";
@@ -57,6 +59,7 @@ type ProductsTableProps = {
 
 export function ProductsTable({
   items,
+  onAssignCodes,
   onAssignOwner,
   onDelete,
   onRestore,
@@ -73,6 +76,7 @@ export function ProductsTable({
           <ProductMobileCard
             key={product.id}
             onAssignOwner={onAssignOwner}
+            onAssignCodes={onAssignCodes}
             onDelete={onDelete}
             onRestore={onRestore}
             product={product}
@@ -126,6 +130,7 @@ export function ProductsTable({
               <ProductTableRow
                 key={product.id}
                 onAssignOwner={onAssignOwner}
+                onAssignCodes={onAssignCodes}
                 onDelete={onDelete}
                 onRestore={onRestore}
                 product={product}
@@ -139,11 +144,13 @@ export function ProductsTable({
 }
 
 function ProductTableRow({
+  onAssignCodes,
   onAssignOwner,
   onDelete,
   onRestore,
   product,
 }: {
+  onAssignCodes: ProductsTableProps["onAssignCodes"];
   onAssignOwner: ProductsTableProps["onAssignOwner"];
   onDelete: ProductsTableProps["onDelete"];
   onRestore: ProductsTableProps["onRestore"];
@@ -189,6 +196,7 @@ function ProductTableRow({
 
       <TableCell className="text-right">
         <ProductActionsMenu
+          onAssignCodes={onAssignCodes}
           onAssignOwner={onAssignOwner}
           onDelete={onDelete}
           onRestore={onRestore}
@@ -200,11 +208,13 @@ function ProductTableRow({
 }
 
 function ProductMobileCard({
+  onAssignCodes,
   onAssignOwner,
   onDelete,
   onRestore,
   product,
 }: {
+  onAssignCodes: ProductsTableProps["onAssignCodes"];
   onAssignOwner: ProductsTableProps["onAssignOwner"];
   onDelete: ProductsTableProps["onDelete"];
   onRestore: ProductsTableProps["onRestore"];
@@ -217,6 +227,7 @@ function ProductMobileCard({
       <div className="flex items-start justify-between gap-3">
         <ProductName product={product} />
         <ProductActionsMenu
+          onAssignCodes={onAssignCodes}
           onAssignOwner={onAssignOwner}
           onDelete={onDelete}
           onRestore={onRestore}
@@ -305,11 +316,13 @@ function ProductMobileField({
 }
 
 function ProductActionsMenu({
+  onAssignCodes,
   onAssignOwner,
   onDelete,
   onRestore,
   product,
 }: {
+  onAssignCodes: ProductsTableProps["onAssignCodes"];
   onAssignOwner: ProductsTableProps["onAssignOwner"];
   onDelete: ProductsTableProps["onDelete"];
   onRestore: ProductsTableProps["onRestore"];
@@ -322,6 +335,9 @@ function ProductActionsMenu({
   const canCreate = hasPermission(PERMISSIONS.PRODUCT_CREATE);
   const canDelete = hasPermission(PERMISSIONS.PRODUCT_DELETE);
   const canAssignOwner = hasPermission(PERMISSIONS.PRODUCT_ASSIGN_OWNER);
+  const canAssignCodes = hasPermission(
+    PERMISSIONS.ACTIVATION_CODE_ASSIGN_PRODUCT,
+  );
   const isDeleted = product.status === "DELETED";
 
   if (
@@ -331,6 +347,7 @@ function ProductActionsMenu({
       !canEdit &&
       !canDelete &&
       !canAssignOwner &&
+      !canAssignCodes &&
       !canCreate)
   ) {
     return null;
@@ -385,6 +402,17 @@ function ProductActionsMenu({
               <DropdownMenuItem onSelect={() => onAssignOwner(product)}>
                 <UserPlus className="mr-2 size-4" />
                 {t("assignOwner")}
+              </DropdownMenuItem>
+            ) : null}
+            {canAssignCodes ? (
+              <DropdownMenuItem
+                disabled={
+                  product.status !== "ACTIVE" || !product.warrantyDurationMonths
+                }
+                onSelect={() => onAssignCodes(product)}
+              >
+                <KeyRound className="mr-2 size-4" />
+                {t("assignActivationCodes")}
               </DropdownMenuItem>
             ) : null}
             {canDelete ? (

@@ -1,10 +1,23 @@
 "use client";
 
-import { Copy, KeyRound, PackageSearch, Pencil, UserPlus } from "lucide-react";
+import {
+  Copy,
+  KeyRound,
+  PackageSearch,
+  Pencil,
+  UserPlus,
+  MoreHorizontal,
+} from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
-import { Button } from "@repo/ui";
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@repo/ui";
 import { FormPageShell } from "@/src/components/common/form-page-shell";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
@@ -45,56 +58,60 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
         backLabel={t("backToDirectory")}
         description={t("detailDescription")}
         descriptionAccessory={
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-            {canAssignCodes ? (
-              <Button
-                className="w-full sm:w-auto"
-                disabled={
-                  !product ||
-                  product.status !== "ACTIVE" ||
-                  !product.warrantyDurationMonths
-                }
-                onClick={() => setAssignCodesOpen(true)}
-                type="button"
-                variant="secondary"
-              >
-                <KeyRound className="size-4" />
-                {t("assignActivationCodes")}
-              </Button>
-            ) : null}
-            {canAssignOwner ? (
-              <Button
-                className="w-full sm:w-auto"
-                disabled={!product}
-                onClick={() => setAssignOpen(true)}
-                type="button"
-                variant="secondary"
-              >
-                <UserPlus className="size-4" />
-                {t("assignOwner")}
-              </Button>
-            ) : null}
-            {canEdit ? (
-              <Button
-                asChild
-                className="w-full sm:w-auto"
-                disabled={!product}
-                variant="secondary"
-              >
-                <Link href={`/products/${productId}/edit`}>
-                  <Pencil className="size-4" />
-                  {t("edit")}
-                </Link>
-              </Button>
-            ) : null}
-            {canCreate ? (
-              <Button asChild className="w-full sm:w-auto" variant="secondary">
-                <Link href={`/products/create?cloneFrom=${productId}`}>
-                  <Copy className="size-4" />
-                  {t("clone")}
-                </Link>
-              </Button>
-            ) : null}
+          <div className="flex w-full justify-end sm:w-auto">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  aria-label={t("actions")}
+                  className="w-full sm:w-auto"
+                  type="button"
+                  variant="secondary"
+                >
+                  <MoreHorizontal className="size-4" />
+                  {t("actions")}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {canAssignCodes ? (
+                  <DropdownMenuItem
+                    disabled={
+                      !product ||
+                      product.status !== "ACTIVE" ||
+                      !product.warrantyDurationMonths
+                    }
+                    onSelect={() => setAssignCodesOpen(true)}
+                  >
+                    <KeyRound className="mr-2 size-4" />
+                    {t("assignActivationCodes")}
+                  </DropdownMenuItem>
+                ) : null}
+                {canAssignOwner ? (
+                  <DropdownMenuItem
+                    disabled={!product}
+                    onSelect={() => setAssignOpen(true)}
+                  >
+                    <UserPlus className="mr-2 size-4" />
+                    {t("assignOwner")}
+                  </DropdownMenuItem>
+                ) : null}
+                {canEdit ? (
+                  <DropdownMenuItem asChild disabled={!product}>
+                    <Link href={`/products/${productId}/edit`}>
+                      <Pencil className="mr-2 size-4" />
+                      {t("edit")}
+                    </Link>
+                  </DropdownMenuItem>
+                ) : null}
+                {canCreate ? (
+                  <DropdownMenuItem asChild>
+                    <Link href={`/products/create?cloneFrom=${productId}`}>
+                      <Copy className="mr-2 size-4" />
+                      {t("clone")}
+                    </Link>
+                  </DropdownMenuItem>
+                ) : null}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         }
         eyebrow={t("eyebrow")}

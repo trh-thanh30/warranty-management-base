@@ -40,8 +40,6 @@ import { PaginationControls } from "@repo/ui/pagination-controls";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Copy,
-  Eye,
-  EyeOff,
   KeyRound,
   MoreHorizontal,
   PackageCheck,
@@ -373,8 +371,6 @@ function ActivationCodesTable({
   onActivate: (code: ActivationCodeDetail) => void;
   t: ReturnType<typeof useTranslations<"ActivationCodeDetail">>;
 }) {
-  const [revealedCodeId, setRevealedCodeId] = useState<string | null>(null);
-
   return (
     <TableScroll className="rounded-md border border-slate-200 dark:border-slate-800">
       <Table className="min-w-[850px]">
@@ -395,34 +391,8 @@ function ActivationCodesTable({
               <TableCell className="font-medium">
                 <div className="group/code flex min-w-[12rem] items-center gap-1">
                   <span className="font-mono tabular-nums">
-                    {revealedCodeId === item.id && item.copyCode
-                      ? item.copyCode
-                      : item.maskedCode}
+                    {item.copyCode ?? item.maskedCode}
                   </span>
-                  {item.copyCode ? (
-                    <Button
-                      aria-label={
-                        revealedCodeId === item.id
-                          ? t("hideCodeAria", { code: item.maskedCode })
-                          : t("revealCodeAria", { code: item.maskedCode })
-                      }
-                      className="size-8 opacity-100 transition-opacity md:opacity-0 md:group-hover/code:opacity-100 md:focus-visible:opacity-100"
-                      onClick={() =>
-                        setRevealedCodeId((current) =>
-                          current === item.id ? null : item.id,
-                        )
-                      }
-                      size="icon"
-                      type="button"
-                      variant="ghost"
-                    >
-                      {revealedCodeId === item.id ? (
-                        <EyeOff className="size-4" />
-                      ) : (
-                        <Eye className="size-4" />
-                      )}
-                    </Button>
-                  ) : null}
                 </div>
               </TableCell>
               <TableCell>
@@ -481,22 +451,6 @@ function ActivationCodesTable({
                     <DropdownMenuContent align="end">
                       {item.copyCode ? (
                         <>
-                          <DropdownMenuItem
-                            onSelect={() =>
-                              setRevealedCodeId((current) =>
-                                current === item.id ? null : item.id,
-                              )
-                            }
-                          >
-                            {revealedCodeId === item.id ? (
-                              <EyeOff className="mr-2 size-4" />
-                            ) : (
-                              <Eye className="mr-2 size-4" />
-                            )}
-                            {revealedCodeId === item.id
-                              ? t("hideCode")
-                              : t("revealCode")}
-                          </DropdownMenuItem>
                           <DropdownMenuItem onSelect={() => onCopy(item)}>
                             <Copy className="mr-2 size-4" />
                             {t("copy")}

@@ -5,6 +5,7 @@ import {
   NotFoundError,
 } from '@/common/response';
 import { AssetsService } from '@/modules/assets/assets.service';
+import { ActivationCodeCryptoService } from '@/modules/activation-codes/services/activation-code-crypto.service';
 import { UpdateProductDto } from '@/modules/products/dto/update-product.dto';
 import { buildProductAssets } from '@/modules/products/product-assets';
 import { getProductCatalogue } from '@/modules/products/product-catalogue';
@@ -18,6 +19,7 @@ export class UpdateProductUseCase {
   constructor(
     private readonly productsRepository: ProductsRepository,
     private readonly assetsService?: AssetsService,
+    private readonly activationCodeCryptoService?: ActivationCodeCryptoService,
   ) {}
 
   async execute(id: string, dto: UpdateProductDto) {
@@ -124,6 +126,9 @@ export class UpdateProductUseCase {
     return toProductResponse(
       product,
       (asset) => this.assetsService?.enrichAssetUrl(asset).url ?? asset.path,
+      this.activationCodeCryptoService
+        ? (ciphertext) => this.activationCodeCryptoService!.decrypt(ciphertext)
+        : undefined,
     );
   }
 

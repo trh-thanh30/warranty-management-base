@@ -1,6 +1,7 @@
 import { NotFoundError } from '@/common/response';
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { AssetsService } from '@/modules/assets/assets.service';
+import { ActivationCodeCryptoService } from '@/modules/activation-codes/services/activation-code-crypto.service';
 import { AssignProductOwnerDto } from '@/modules/products/dto/assign-product-owner.dto';
 import { toProductResponse } from '@/modules/products/products.types';
 import { Injectable } from '@nestjs/common';
@@ -10,6 +11,7 @@ export class AssignProductOwnerUseCase {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly assetsService?: AssetsService,
+    private readonly activationCodeCryptoService?: ActivationCodeCryptoService,
   ) {}
 
   async execute(productId: string, dto: AssignProductOwnerDto) {
@@ -69,6 +71,18 @@ export class AssignProductOwnerUseCase {
               orderBy: { created_at: 'desc' },
             },
             warranty: true,
+            activation_code: {
+              select: {
+                id: true,
+                code_ciphertext: true,
+                status: true,
+                expires_at: true,
+                batch: { select: { batch_code: true } },
+                request: { select: { id: true } },
+                request_items: { select: { id: true }, take: 1 },
+                warranty: { select: { id: true } },
+              },
+            },
             category_ref: true,
           },
         });
@@ -78,6 +92,9 @@ export class AssignProductOwnerUseCase {
     return toProductResponse(
       productWithOwner,
       (asset) => this.assetsService?.enrichAssetUrl(asset).url ?? asset.path,
+      this.activationCodeCryptoService
+        ? (ciphertext) => this.activationCodeCryptoService!.decrypt(ciphertext)
+        : undefined,
     );
   }
 }
