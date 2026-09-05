@@ -45,8 +45,8 @@ export class CreatePrintableActivationLabelsUseCase {
 
     const html = this.template.render(
       {
-        productName: batch.product_name,
-        productSku: batch.product_sku,
+        productName: batch.product_name ?? 'Mã kích hoạt bảo hành',
+        productSku: batch.product_sku ?? 'Dùng chung',
         expiresAt: batch.expires_at,
       },
       codes.map((code) => this.crypto.decrypt(code.code_ciphertext)),

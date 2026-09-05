@@ -24,16 +24,6 @@ export class UpdateCustomerUseCase {
       }
     }
 
-    if (dto.email) {
-      const existingEmail = await this.customersRepository.findByEmail(
-        dto.email,
-        id,
-      );
-      if (existingEmail) {
-        throw new ConflictError('Customer email already exists');
-      }
-    }
-
     const customer = await this.customersRepository.update(id, {
       full_name: dto.fullName,
       phone: dto.phone,

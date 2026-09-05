@@ -28,14 +28,18 @@ test("product detail formats warranty dates and exposes copy actions", async () 
   assert.match(source, /aria-label=\{t\("copyValue"/);
 });
 
-test("product detail actions remain full width only on mobile", async () => {
+test("product detail actions are grouped in an accessible dropdown", async () => {
   const source = await readFile(
     new URL("./product-detail.view.tsx", import.meta.url),
     "utf8",
   );
 
-  assert.equal(source.match(/className="w-full sm:w-auto"/g)?.length ?? 0, 3);
+  assert.equal(source.match(/<DropdownMenuItem/g)?.length ?? 0, 4);
+  assert.match(source, /<DropdownMenuTrigger asChild>/);
+  assert.match(source, /aria-label=\{t\("actions"\)\}/);
   assert.match(source, /descriptionAccessory={/);
+  assert.match(source, /PERMISSIONS\.ACTIVATION_CODE_ASSIGN_PRODUCT/);
+  assert.match(source, /<AssignActivationCodesDialog/);
 });
 
 test("product identifiers use distinct semantic icons", async () => {
@@ -47,13 +51,22 @@ test("product identifiers use distinct semantic icons", async () => {
   assert.match(source, /icon=\{<CalendarRange className="size-4" \/>\}/);
 });
 
+test("product detail gives the assigned activation code its own section", async () => {
+  const source = await readFile(detailCardUrl, "utf8");
+
+  assert.match(source, /title=\{t\("sections\.activationCode"\)\}/);
+  assert.match(source, /AssignedActivationCodeDetails/);
+  assert.match(source, /product\.assignedActivationCode/);
+  assert.match(source, /t\("activationCodeUnassignedDescription"\)/);
+});
+
 test("product detail rows stay on one line on mobile", async () => {
   const source = await readFile(detailCardUrl, "utf8");
 
   assert.equal(
     source.match(/grid-cols-\[minmax\(0,1fr\)_minmax\(0,1fr\)\][^"]*sm:flex/g)
       ?.length ?? 0,
-    2,
+    3,
   );
   assert.match(source, /overflow-hidden whitespace-nowrap/);
   assert.match(source, /truncate text-right/);
@@ -72,6 +85,11 @@ test("product detail translations exist in every admin locale", async () => {
     "remainingMonths",
     "warrantyExpired",
     "warrantyUpcoming",
+    "activationCode",
+    "activationCodeUnassigned",
+    "activationCodeUnassignedDescription",
+    "activationCodeBatch",
+    "activationCodeExpiresAt",
   ];
 
   for (const locale of ["en", "vi"]) {

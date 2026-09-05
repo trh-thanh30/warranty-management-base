@@ -17,6 +17,7 @@ type ActivationProductEligibilitySource = {
     status: warranty_status;
     warranty_code: string | null;
   } | null;
+  warranty_duration_months?: number | null;
   warranty_activation_requests?: ActivationRequestReference[];
   warranty_activation_request_items?: Array<{
     status: warranty_activation_request_status;
@@ -42,7 +43,11 @@ export function getActivationProductEligibility(
     return ineligible('ACTIVATION_REQUEST_APPROVED', openRequest.request_code);
   }
 
-  if (!product.warranty) return ineligible('WARRANTY_MISSING');
+  if (!product.warranty) {
+    return (product.warranty_duration_months ?? 0) > 0
+      ? { eligible: true, reason: null, requestCode: null }
+      : ineligible('WARRANTY_MISSING');
+  }
   if (!product.warranty.warranty_code?.trim()) {
     return ineligible('WARRANTY_CODE_MISSING');
   }

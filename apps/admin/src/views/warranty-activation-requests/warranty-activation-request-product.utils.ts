@@ -1,5 +1,6 @@
 import type { ActivationProductOption, ProductResponse } from "@repo/shared";
 import type { useTranslations } from "next-intl";
+import type { AvailableActivationCode } from "@/src/services/activation-codes/activation-code-batches.types";
 
 type ActivationRequestTranslations = ReturnType<
   typeof useTranslations<"WarrantyActivationRequestsAdmin">
@@ -13,6 +14,17 @@ export function getActivationProductDisplayName(
     product.name?.trim() ||
     product.productCode?.trim() ||
     ""
+  );
+}
+
+export function resolveAssignedActivationCodeForProduct(
+  productId: string,
+  activationCodes: AvailableActivationCode[],
+) {
+  return (
+    activationCodes.find(
+      (code) => code.selectable && code.assignedProduct?.id === productId,
+    ) ?? null
   );
 }
 

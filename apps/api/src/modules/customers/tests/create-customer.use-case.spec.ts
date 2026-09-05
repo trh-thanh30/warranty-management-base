@@ -255,26 +255,41 @@ describe('CreateCustomerUseCase', () => {
     expect(customersRepository.create).not.toHaveBeenCalled();
   });
 
-  it('prevents creating a customer with duplicate email', async () => {
+  it('allows creating a customer with a shared delivery email', async () => {
     const customersRepository = createCustomersRepository();
     customersRepository.findByCustomerCode.mockResolvedValue(null);
     customersRepository.findByPhone.mockResolvedValue(null);
     customersRepository.findByEmail.mockResolvedValue({ id: 'existing-id' });
+    customersRepository.create.mockResolvedValue({
+      id: 'customer-id',
+      user_id: null,
+      customer_code: 'CUS-2026-0004',
+      full_name: 'Nguyen Van Hung',
+      phone: '0987654312',
+      email: 'shared-dealer@example.com',
+      address: 'Ho Chi Minh City',
+      birthdate: null,
+      metadata: null,
+      created_at: new Date('2026-07-09T00:00:00.000Z'),
+      updated_at: new Date('2026-07-09T00:00:00.000Z'),
+    });
     const generateCustomerCodeUseCase = createGenerateCustomerCodeUseCase();
     const useCase = new CreateCustomerUseCase(
       customersRepository as never,
       generateCustomerCodeUseCase as never,
     );
 
-    await expect(
-      useCase.execute({
-        customerCode: 'CUS-2026-0004',
-        address: 'Ho Chi Minh City',
-        email: 'user1@example.com',
-        fullName: 'Nguyen Van Hung',
-        phone: '0987654312',
-      }),
-    ).rejects.toBeInstanceOf(ConflictError);
-    expect(customersRepository.create).not.toHaveBeenCalled();
+    await useCase.execute({
+      customerCode: 'CUS-2026-0004',
+      address: 'Ho Chi Minh City',
+      email: 'shared-dealer@example.com',
+      fullName: 'Nguyen Van Hung',
+      phone: '0987654312',
+    });
+
+    expect(customersRepository.findByEmail).not.toHaveBeenCalled();
+    expect(customersRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ email: 'shared-dealer@example.com' }),
+    );
   });
 });

@@ -4,7 +4,7 @@ import {
   Prisma,
   PrismaClient,
   product_status,
-  warranty_status,
+  warranty_method,
 } from '@prisma/client';
 import { Pool } from 'pg';
 
@@ -28,9 +28,6 @@ export type LexzenzProductSeedClient = {
   };
   product: {
     upsert(args: Prisma.ProductUpsertArgs): PromiseLike<{ id: string }>;
-  };
-  warranty: {
-    upsert(args: Prisma.WarrantyUpsertArgs): PromiseLike<{ id: string }>;
   };
 };
 
@@ -488,24 +485,6 @@ const requiredCategoryCodes = [
   TPMS_CATEGORY,
 ] as const;
 
-const PHYSICAL_PRODUCTS_PER_TEMPLATE = 2;
-const SEEDED_WARRANTY_YEAR = 2026;
-const WARRANTY_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-
-function createSeedWarrantyCode(templateIndex: number, productIndex: number) {
-  let value = templateIndex * PHYSICAL_PRODUCTS_PER_TEMPLATE + productIndex;
-  let suffix = '';
-
-  for (let index = 0; index < 5; index += 1) {
-    suffix =
-      WARRANTY_CODE_ALPHABET.charAt(value % WARRANTY_CODE_ALPHABET.length) +
-      suffix;
-    value = Math.floor(value / WARRANTY_CODE_ALPHABET.length);
-  }
-
-  return `WM-${SEEDED_WARRANTY_YEAR}-S${suffix}`;
-}
-
 export async function seedLexzenzProducts(client: LexzenzProductSeedClient) {
   const categories = await client.category.findMany({
     where: {
@@ -545,76 +524,49 @@ export async function seedLexzenzProducts(client: LexzenzProductSeedClient) {
       shortDescription: productSeed.description,
       specifications: productSeed.specifications,
     };
-    for (
-      let productIndex = 0;
-      productIndex < PHYSICAL_PRODUCTS_PER_TEMPLATE;
-      productIndex += 1
-    ) {
-      const sequence = String(productIndex + 1).padStart(2, '0');
-      const productCode = `PRD-${productSeed.sku}-${sequence}`;
-      const serialNumber = `SN-${productSeed.sku}-${sequence}`;
-      const warrantyCode = createSeedWarrantyCode(index, productIndex);
-      const displayName = `${productSeed.name} #${sequence}`;
+    const productCode = `PRD-${productSeed.sku}`;
 
-      const product = await client.product.upsert({
-        where: { product_code: productCode },
-        update: {
-          category_id: categoryId,
-          brand: productSeed.brand,
-          description: productSeed.description,
-          is_published: true,
-          metadata: productMetadata,
-          model: productSeed.model,
-          display_name: productSeed.name,
-          published_at: publishedAt,
-          product_code: productCode,
-          slug: `${productSeed.slug}-${productCode.toLowerCase()}`,
-          deleted_at: null,
-          serial_number: serialNumber,
-          status: product_status.ACTIVE,
-        },
-        create: {
-          category_id: categoryId,
-          brand: productSeed.brand,
-          description: productSeed.description,
-          is_published: true,
-          metadata: productMetadata,
-          model: productSeed.model,
-          display_name: productSeed.name,
-          published_at: publishedAt,
-          product_code: productCode,
-          slug: `${productSeed.slug}-${productCode.toLowerCase()}`,
-          serial_number: serialNumber,
-          status: product_status.ACTIVE,
-        },
-      });
-
-      await client.warranty.upsert({
-        where: { product_id: product.id },
-        update: {
-          duration_months: productSeed.warrantyDurationMonths,
-          end_date: null,
-          start_date: null,
-          status: warranty_status.DRAFT,
-          terms: null,
-          warranty_code: warrantyCode,
-        },
-        create: {
-          duration_months: productSeed.warrantyDurationMonths,
-          end_date: null,
-          product_id: product.id,
-          start_date: null,
-          status: warranty_status.DRAFT,
-          terms: null,
-          warranty_code: warrantyCode,
-        },
-      });
-    }
+    await client.product.upsert({
+      where: { product_code: productCode },
+      update: {
+        category_id: categoryId,
+        brand: productSeed.brand,
+        description: productSeed.description,
+        is_published: true,
+        metadata: productMetadata,
+        model: productSeed.model,
+        display_name: productSeed.name,
+        published_at: publishedAt,
+        product_code: productCode,
+        slug: productSeed.slug,
+        deleted_at: null,
+        serial_number: null,
+        status: product_status.ACTIVE,
+        warranty_duration_months: productSeed.warrantyDurationMonths,
+        warranty_method: warranty_method.REPAIR,
+        warranty_terms: null,
+      },
+      create: {
+        category_id: categoryId,
+        brand: productSeed.brand,
+        description: productSeed.description,
+        is_published: true,
+        metadata: productMetadata,
+        model: productSeed.model,
+        display_name: productSeed.name,
+        published_at: publishedAt,
+        product_code: productCode,
+        slug: productSeed.slug,
+        serial_number: null,
+        status: product_status.ACTIVE,
+        warranty_duration_months: productSeed.warrantyDurationMonths,
+        warranty_method: warranty_method.REPAIR,
+        warranty_terms: null,
+      },
+    });
   }
 
-  console.log(
-    `Seeded ${lexzenzProductSeeds.length * PHYSICAL_PRODUCTS_PER_TEMPLATE} physical Lexzenz products.`,
-  );
+  console.log(`Seeded ${lexzenzProductSeeds.length} Lexzenz products.`);
 }
 
 let prisma: PrismaClient | undefined;

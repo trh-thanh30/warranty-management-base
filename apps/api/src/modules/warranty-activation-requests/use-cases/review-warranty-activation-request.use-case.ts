@@ -3,6 +3,7 @@ import {
   ConflictError,
   NotFoundError,
 } from '@/common/response';
+import { GenerateCustomerCodeUseCase } from '@/modules/customers/use-cases/generate-customer-code.use-case';
 import { ReviewWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/review-warranty-activation-request.dto';
 import { toWarrantyActivationRequestResponse } from '@/modules/warranty-activation-requests/mappers/warranty-activation-request.mapper';
 import { WarrantyActivationReviewTransactionRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-review-transaction.repository';
@@ -31,6 +32,7 @@ export class ReviewWarrantyActivationRequestUseCase {
   constructor(
     private readonly warrantyActivationRequestsRepository: WarrantyActivationRequestsRepository,
     private readonly issueRequestCertificate: IssueWarrantyActivationRequestCertificateUseCase,
+    private readonly generateCustomerCodeUseCase: GenerateCustomerCodeUseCase,
   ) {}
 
   async execute(
@@ -111,7 +113,10 @@ export class ReviewWarrantyActivationRequestUseCase {
 
       try {
         await this.issueRequestCertificate.execute({
-          recipientEmail: activatedRequest.customer_email ?? undefined,
+          recipientEmail:
+            activatedRequest.customer_email ??
+            activatedRequest.dealer?.email ??
+            undefined,
           requestId: activatedRequest.id,
         });
       } catch (error) {
@@ -167,11 +172,12 @@ export class ReviewWarrantyActivationRequestUseCase {
         const targets: WarrantyActivationReviewTarget[] = request.items.length
           ? request.items.map((item) => ({
               itemId: item.id,
+              activationCodeId: item.activation_code_id,
               positionLabel: item.position_label,
               product: item.product,
               productName: item.product_name,
-              warrantyId: item.warranty_id,
-              warrantyCode: item.warranty_code,
+              warrantyId: item.warranty_id ?? '',
+              warrantyCode: item.warranty_code ?? request.warranty_code,
             }))
           : await this.resolveLegacyActivationTargets(
               repository,
@@ -227,18 +233,42 @@ export class ReviewWarrantyActivationRequestUseCase {
             startDate: reviewedAt,
             warrantyCode: target.warrantyCode,
             warrantyId: target.warrantyId,
+            activationCodeId: target.activationCodeId ?? null,
+            warrantyDurationMonths:
+              target.product.warranty_duration_months ??
+              target.product.warranty?.duration_months ??
+              0,
+            warrantyMethod:
+              target.product.warranty_method ?? target.product.warranty?.method,
+            warrantyTerms:
+              target.product.warranty_terms ?? target.product.warranty?.terms,
           });
           activatedWarrantyIds.push(updatedWarranty.id);
+          if (target.itemId) {
+            await repository.linkItemWarranty({
+              itemId: target.itemId,
+              warrantyCode: target.warrantyCode,
+              warrantyId: updatedWarranty.id,
+            });
+          }
         }
 
         await repository.markItemsActivated(input.id, reviewedAt);
 
+        const activationCodeIds = new Set(
+          targets.flatMap((target) =>
+            target.activationCodeId ? [target.activationCodeId] : [],
+          ),
+        );
         if (request.activation_code_id) {
-          const updatedCode = await repository.markActivationCodeActivated(
-            request.activation_code_id,
+          activationCodeIds.add(request.activation_code_id);
+        }
+        if (activationCodeIds.size > 0) {
+          const updatedCode = await repository.markActivationCodesActivated(
+            [...activationCodeIds],
             reviewedAt,
           );
-          if (updatedCode.count !== 1) {
+          if (updatedCode.count !== activationCodeIds.size) {
             throw new ConflictError(
               'Activation code has already been activated or revoked',
               'ACTIVATION_CODE_ALREADY_USED',
@@ -270,6 +300,7 @@ export class ReviewWarrantyActivationRequestUseCase {
       {
         product,
         productName,
+        activationCodeId: null,
         warrantyId: product.warranty.id,
         warrantyCode,
       },
@@ -307,28 +338,7 @@ export class ReviewWarrantyActivationRequestUseCase {
       return customer;
     }
 
-    const [phoneCustomer, emailCustomer] = await Promise.all([
-      repository.findCustomerByPhone(input.phone),
-      input.email
-        ? repository.findCustomerByEmail(input.email)
-        : Promise.resolve(null),
-    ]);
-    const existingCustomer = phoneCustomer ?? emailCustomer;
-
-    if (
-      phoneCustomer &&
-      emailCustomer &&
-      phoneCustomer.id !== emailCustomer.id
-    ) {
-      throw new BadRequestError(
-        getWarrantyActivationReviewErrorMessage(
-          'CUSTOMER_IDENTITY_CONFLICT',
-          input.locale,
-        ),
-        'BAD_REQUEST',
-        { code: 'CUSTOMER_IDENTITY_CONFLICT' },
-      );
-    }
+    const existingCustomer = await repository.findCustomerByPhone(input.phone);
 
     const data = {
       address: input.address,
@@ -342,22 +352,9 @@ export class ReviewWarrantyActivationRequestUseCase {
 
     return repository.createCustomer({
       ...data,
-      customer_code: await this.generateCustomerCode(repository),
+      customer_code:
+        await this.generateCustomerCodeUseCase.generateCustomerCode(repository),
     });
-  }
-
-  private async generateCustomerCode(
-    repository: WarrantyActivationReviewTransactionRepository,
-  ) {
-    const prefix = 'CUS';
-    const padLength = 6;
-    const lastCustomer = await repository.findLastCustomerCode(prefix);
-    const match = lastCustomer?.customer_code.match(
-      new RegExp(`^${prefix}(\\d{${padLength},})$`),
-    );
-    const nextNumber = match ? Number.parseInt(match[1], 10) + 1 : 1;
-
-    return `${prefix}${nextNumber.toString().padStart(padLength, '0')}`;
   }
 
   private async activateDraftWarranty(
@@ -371,11 +368,24 @@ export class ReviewWarrantyActivationRequestUseCase {
       startDate: Date;
       warrantyCode: string;
       warrantyId: string;
+      activationCodeId: string | null;
+      warrantyDurationMonths: number;
+      warrantyMethod?: import('@prisma/client').warranty_method;
+      warrantyTerms?: string | null;
     },
   ) {
-    const warranty = await repository.findWarrantyForActivation(
-      input.warrantyId,
-    );
+    const warranty = input.warrantyId
+      ? await repository.findWarrantyForActivation(input.warrantyId)
+      : input.activationCodeId
+        ? await repository.createWarrantyForActivation({
+            activationCodeId: input.activationCodeId,
+            durationMonths: input.warrantyDurationMonths,
+            productId: input.productId,
+            warrantyCode: input.warrantyCode,
+            method: input.warrantyMethod,
+            terms: input.warrantyTerms,
+          })
+        : null;
     if (!warranty) {
       throw new NotFoundError(
         getWarrantyActivationReviewErrorMessage(

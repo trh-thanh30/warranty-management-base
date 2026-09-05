@@ -10,6 +10,7 @@ import { ImageUpload } from "@/src/components/common/image-upload";
 import { SelectControl } from "@/src/components/common/select-control";
 import { FormField as Field } from "@/src/components/common/form-field";
 import { createFieldErrorFormatter } from "@/src/utils";
+import { usePermissions } from "@/src/hooks/use-permissions";
 import { MANAGEABLE_CATEGORY_TYPES } from "../categories.constants";
 import {
   clearParentOnTypeChange,
@@ -29,6 +30,7 @@ export function CategoryForm({
   onSaved,
 }: CategoryFormProps) {
   const t = useTranslations("Categories");
+  const { hasRole } = usePermissions();
   const {
     control,
     creating,
@@ -222,6 +224,31 @@ export function CategoryForm({
           </div>
         )}
       />
+
+      {selectedType === "PRODUCT" && hasRole("admin") ? (
+        <Controller
+          control={control}
+          name="activationCodeEnabled"
+          render={({ field }) => (
+            <div className="flex items-center justify-between gap-4 rounded-md border border-slate-200 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-900/40">
+              <div>
+                <Label htmlFor="category-activation-code-enabled">
+                  {t("activationCodeEnabled")}
+                </Label>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  {t("activationCodeEnabledDescription")}
+                </p>
+              </div>
+              <Switch
+                checked={field.value}
+                disabled={isSubmitting}
+                id="category-activation-code-enabled"
+                onCheckedChange={field.onChange}
+              />
+            </div>
+          )}
+        />
+      ) : null}
 
       <div className="grid grid-cols-2 gap-2 border-t border-slate-200 pt-5 dark:border-slate-800 sm:flex sm:justify-end">
         <Button

@@ -90,14 +90,6 @@ export const productExcelColumns: Array<
     parse: parseOptionalString,
   },
   {
-    key: 'warrantyCode',
-    header: 'Mã bảo hành',
-    width: 26,
-    example: 'WM-2026-EXCEL01',
-    note: 'Không bắt buộc. Nhập mã có sẵn hoặc để trống để hệ thống tự sinh mã duy nhất.',
-    parse: parseOptionalWarrantyCode,
-  },
-  {
     key: 'serialNumber',
     header: 'Số serial',
     width: 24,
@@ -142,17 +134,6 @@ function parseOptionalNumber(value: ExcelCellValue) {
 function parseRequiredNumber(value: ExcelCellValue) {
   const parsed = parseOptionalNumber(value);
   if (parsed === null) throw new Error('Value is required');
-  return parsed;
-}
-
-function parseOptionalWarrantyCode(value: ExcelCellValue) {
-  const parsed = parseOptionalString(value)?.toUpperCase() ?? null;
-  if (parsed && !/^[A-Z0-9-]{6,64}$/.test(parsed)) {
-    throw new Error(
-      'Warranty code must contain 6-64 letters, numbers, or hyphens',
-    );
-  }
-
   return parsed;
 }
 

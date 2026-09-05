@@ -1,6 +1,11 @@
 import type {
   ActivationCodeReport,
   ActivationCodePrintJob,
+  AssignActivationCodesToProductBody,
+  AssignActivationCodesToProductResult,
+  ReplaceProductActivationCodeAssignmentBody,
+  ReplaceProductActivationCodeAssignmentResult,
+  UnassignActivationCodesFromProductBody,
   RequestActivationCodePrintJobQuery,
 } from "@repo/shared";
 import { unwrap, unwrapBlob } from "../service.utils";
@@ -12,6 +17,7 @@ import type {
   RevokeActivationCodeBatchResult,
   ActivationCodeDetailList,
   ActivationCodeDetailQuery,
+  AvailableActivationCodeList,
 } from "./activation-code-batches.types";
 import type { ActivationCodesHttpClient } from "./activation-codes.types";
 
@@ -85,6 +91,25 @@ export function createActivationCodesService(http: ActivationCodesHttpClient) {
       );
     },
 
+    async listAvailableByProduct(
+      productId?: string,
+      query: {
+        page?: number;
+        limit?: number;
+        search?: string;
+        assignment?: "ALL" | "ASSIGNED" | "UNASSIGNED";
+      } = {},
+    ): Promise<AvailableActivationCodeList> {
+      return unwrap(
+        await http.get<AvailableActivationCodeList>(
+          "/activation-code-batches/available",
+          {
+            params: { ...query, ...(productId ? { productId } : {}) },
+          },
+        ),
+      );
+    },
+
     async createBatch(body: CreateActivationCodeBatchBody) {
       return unwrap(
         await http.post<CreateActivationCodeBatchResult>(
@@ -96,6 +121,39 @@ export function createActivationCodesService(http: ActivationCodesHttpClient) {
 
     async revokeCode(codeId: string): Promise<void> {
       await http.post(`/activation-code-batches/codes/${codeId}/revoke`);
+    },
+
+    async assignProduct(
+      body: AssignActivationCodesToProductBody,
+    ): Promise<AssignActivationCodesToProductResult> {
+      return unwrap(
+        await http.post<AssignActivationCodesToProductResult>(
+          "/activation-code-batches/codes/assign-product",
+          body,
+        ),
+      );
+    },
+
+    async unassignProduct(
+      body: UnassignActivationCodesFromProductBody,
+    ): Promise<{ activationCodeId: string }> {
+      return unwrap(
+        await http.post(
+          "/activation-code-batches/codes/unassign-product",
+          body,
+        ),
+      );
+    },
+
+    async replaceProductAssignment(
+      body: ReplaceProductActivationCodeAssignmentBody,
+    ): Promise<ReplaceProductActivationCodeAssignmentResult> {
+      return unwrap(
+        await http.post<ReplaceProductActivationCodeAssignmentResult>(
+          "/activation-code-batches/codes/replace-product-assignment",
+          body,
+        ),
+      );
     },
 
     async replaceCode(codeId: string, replacementCode: string): Promise<void> {

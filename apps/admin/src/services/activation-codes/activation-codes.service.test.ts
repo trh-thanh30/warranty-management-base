@@ -74,3 +74,93 @@ test("loads activation code report filters", async () => {
   ]);
   assert.equal(result, report);
 });
+
+test("assigns one activation code to one physical product", async () => {
+  const calls: unknown[] = [];
+  const response = {
+    activationCodeId: "code-id",
+    product: {
+      id: "product-id",
+      productCode: "PRD-01",
+      displayName: "Camera",
+      name: "Camera",
+      serialNumber: "SN-01",
+    },
+  };
+  const http = {
+    async post(url: string, body?: unknown) {
+      calls.push({ url, body });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  const result = await createActivationCodesService(
+    http as unknown as ActivationCodesHttpClient,
+  ).assignProduct({ activationCodeId: "code-id", productId: "product-id" });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/activation-code-batches/codes/assign-product",
+      body: { activationCodeId: "code-id", productId: "product-id" },
+    },
+  ]);
+  assert.equal(result, response);
+});
+
+test("removes an unused activation-code assignment", async () => {
+  const calls: unknown[] = [];
+  const http = {
+    async post(url: string, body?: unknown) {
+      calls.push({ url, body });
+      return {
+        data: { success: true, data: { activationCodeId: "code-id" } },
+      };
+    },
+  };
+
+  await createActivationCodesService(
+    http as unknown as ActivationCodesHttpClient,
+  ).unassignProduct({ activationCodeId: "code-id" });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/activation-code-batches/codes/unassign-product",
+      body: { activationCodeId: "code-id" },
+    },
+  ]);
+});
+
+test("replaces a product activation-code assignment atomically", async () => {
+  const calls: unknown[] = [];
+  const response = {
+    previousActivationCodeId: "old-code-id",
+    activationCodeId: "new-code-id",
+    product: { id: "product-id" },
+  };
+  const http = {
+    async post(url: string, body?: unknown) {
+      calls.push({ url, body });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  const result = await createActivationCodesService(
+    http as unknown as ActivationCodesHttpClient,
+  ).replaceProductAssignment({
+    currentActivationCodeId: "old-code-id",
+    replacementActivationCodeId: "new-code-id",
+    productId: "product-id",
+  });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/activation-code-batches/codes/replace-product-assignment",
+      body: {
+        currentActivationCodeId: "old-code-id",
+        replacementActivationCodeId: "new-code-id",
+        productId: "product-id",
+      },
+    },
+  ]);
+  assert.equal(result, response);
+});

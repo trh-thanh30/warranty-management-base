@@ -1,5 +1,6 @@
 import type {
   ActivationCodeReportStatus,
+  ActivationCodeAssignedProduct,
   ActivationCodeDetailList,
   PaginatedResponse,
 } from "@repo/shared";
@@ -10,6 +11,7 @@ export type ActivationCodeBatchListItem = {
   productSku: string;
   productName: string;
   quantity: number;
+  assignedCount: number;
   expiresAt: string;
   createdAt: string;
   statusCounts: Partial<Record<ActivationCodeReportStatus, number>>;
@@ -26,7 +28,7 @@ export type ActivationCodeBatchListQuery = {
 };
 
 export type CreateActivationCodeBatchBody = {
-  sourceProductId: string;
+  sourceProductId?: string;
   quantity?: number;
 };
 
@@ -48,5 +50,21 @@ export type ActivationCodeDetailQuery = {
   search?: string;
   status?: ActivationCodeReportStatus;
 };
+
+export type AvailableActivationCode = {
+  id: string;
+  maskedCode: string;
+  copyCode?: string;
+  batchCode: string;
+  productName: string;
+  productSku: string;
+  expiresAt: string;
+  status: ActivationCodeReportStatus;
+  selectable: boolean;
+  assignedProduct: ActivationCodeAssignedProduct | null;
+};
+
+export type AvailableActivationCodeList =
+  PaginatedResponse<AvailableActivationCode>;
 
 export type { ActivationCodeDetailList };

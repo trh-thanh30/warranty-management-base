@@ -1,10 +1,10 @@
-import { ConflictError } from '@/common/response';
+import { ConflictError, ForbiddenError } from '@/common/response';
 import { CreateCategoryDto } from '@/modules/categories/dto/create-category.dto';
 import { CategoriesRepository } from '@/modules/categories/repository/categories.repository';
 import { CategoryHierarchyService } from '@/modules/categories/service/category-hierarchy.service';
 import { toCategoryResponse } from '@/modules/categories/categories.types';
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, user_role } from '@prisma/client';
 
 @Injectable()
 export class CreateCategoryUseCase {
@@ -13,7 +13,19 @@ export class CreateCategoryUseCase {
     private readonly categoryHierarchyService: CategoryHierarchyService,
   ) {}
 
-  async execute(dto: CreateCategoryDto) {
+  async execute(
+    dto: CreateCategoryDto,
+    actorRole: user_role = user_role.ADMIN,
+  ) {
+    if (
+      dto.activationCodeEnabled !== undefined &&
+      actorRole !== user_role.ADMIN
+    ) {
+      throw new ForbiddenError(
+        'Only administrators can configure category activation codes',
+        'CATEGORY_ACTIVATION_CODE_CONFIG_ADMIN_ONLY',
+      );
+    }
     const slug = dto.slug?.trim() ?? this.slugify(dto.name);
     const existingCategory = await this.categoriesRepository.findByTypeAndSlug(
       dto.type,
@@ -42,6 +54,7 @@ export class CreateCategoryUseCase {
       image_url: dto.imageUrl?.trim(),
       order: dto.order ?? 0,
       is_active: dto.isActive ?? true,
+      activation_code_enabled: dto.activationCodeEnabled ?? true,
       metadata,
     });
 

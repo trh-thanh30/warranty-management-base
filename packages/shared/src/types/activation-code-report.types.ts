@@ -35,6 +35,42 @@ export type ActivationCodeDetail = {
   revokedAt: string | null;
   replacedBy: ActivationCodeHistoryLink | null;
   replaces: ActivationCodeHistoryLink | null;
+  productName?: string;
+  productSku?: string;
+  assignedProduct: ActivationCodeAssignedProduct | null;
+};
+
+export type ActivationCodeAssignedProduct = {
+  id: string;
+  productCode: string;
+  displayName: string | null;
+  name: string;
+  serialNumber: string | null;
+};
+
+export type AssignActivationCodesToProductBody = {
+  activationCodeId: string;
+  productId: string;
+};
+
+export type AssignActivationCodesToProductResult = {
+  activationCodeId: string;
+  product: ActivationCodeAssignedProduct;
+};
+
+export type ReplaceProductActivationCodeAssignmentBody = {
+  currentActivationCodeId: string;
+  replacementActivationCodeId: string;
+  productId: string;
+};
+
+export type ReplaceProductActivationCodeAssignmentResult =
+  AssignActivationCodesToProductResult & {
+    previousActivationCodeId: string;
+  };
+
+export type UnassignActivationCodesFromProductBody = {
+  activationCodeId: string;
 };
 
 export type ActivationCodeHistoryLink = {

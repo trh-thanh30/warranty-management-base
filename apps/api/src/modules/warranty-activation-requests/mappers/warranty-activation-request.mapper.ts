@@ -4,6 +4,7 @@ import type {
   warranty_status,
   warranty_certificate_email_status,
   warranty_certificate_status,
+  activation_code_status,
 } from '@prisma/client';
 import type { WarrantyActivationRequestSummary } from '@repo/shared';
 
@@ -25,6 +26,7 @@ export type WarrantyActivationRequestWithRelations =
     dealer?: {
       id: string;
       name: string;
+      email: string | null;
       phone: string | null;
       address: string;
       province: string;
@@ -37,6 +39,7 @@ export type WarrantyActivationRequestWithRelations =
       full_name: string | null;
       username: string;
     } | null;
+    activation_code?: { id: string; status: activation_code_status } | null;
     activated_warranty?: {
       id: string;
       warranty_code: string | null;
@@ -58,6 +61,7 @@ export type WarrantyActivationRequestWithRelations =
     } | null;
     items?: Array<{
       id: string;
+      activation_code_id: string | null;
       activation_field_id: string | null;
       position_key: string;
       position_label: string;
@@ -65,13 +69,13 @@ export type WarrantyActivationRequestWithRelations =
       product_name: string;
       product_code: string;
       serial_number: string | null;
-      warranty_id: string;
-      warranty_code: string;
+      warranty_id: string | null;
+      warranty_code: string | null;
       status: WarrantyActivationRequest['status'];
       activated_at: Date | null;
       warranty: {
         status: warranty_status;
-      };
+      } | null;
     }>;
   };
 
@@ -94,6 +98,12 @@ export function toWarrantyActivationRequestResponse(
     status: request.status,
     source: request.source,
     warrantyCode: request.warranty_code,
+    activationCode: request.activation_code
+      ? {
+          id: request.activation_code.id,
+          status: request.activation_code.status,
+        }
+      : null,
     categoryId: request.category_id,
     productId: request.product_id,
     dealerId: request.dealer_id,
@@ -101,6 +111,7 @@ export function toWarrantyActivationRequestResponse(
       ? {
           id: request.dealer.id,
           name: request.dealer.name,
+          email: request.dealer.email,
           phone: request.dealer.phone,
           address: request.dealer.address,
           province: request.dealer.province,
@@ -177,6 +188,7 @@ export function toWarrantyActivationRequestResponse(
     certificate: toCertificateSummary(request.id, request.certificate ?? null),
     items: request.items?.map((item) => ({
       id: item.id,
+      activationCodeId: item.activation_code_id,
       activationFieldId: item.activation_field_id,
       positionKey: item.position_key,
       positionLabel: item.position_label,
@@ -186,7 +198,7 @@ export function toWarrantyActivationRequestResponse(
       serialNumber: item.serial_number,
       warrantyId: item.warranty_id,
       warrantyCode: item.warranty_code,
-      warrantyStatus: item.warranty.status,
+      warrantyStatus: item.warranty?.status ?? null,
       status: item.status,
       activatedAt: item.activated_at?.toISOString() ?? null,
     })),

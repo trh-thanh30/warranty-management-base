@@ -7,6 +7,8 @@ import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { useToast } from "@/src/hooks/use-toast";
+import { useRouter } from "@/src/i18n/navigation";
+import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import { activationCodesService } from "@/src/services/activation-codes/activation-codes.service";
 import { useDebounce } from "@repo/hooks";
 import {
@@ -40,25 +42,31 @@ import { PaginationControls } from "@repo/ui/pagination-controls";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Copy,
-  Eye,
-  EyeOff,
   KeyRound,
   MoreHorizontal,
+  PackageCheck,
   ShieldOff,
+  Unlink,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { ACTIVATION_CODE_BATCH_STATUSES } from "./activation-code-batches.constants";
+import { ActivationCodeProductAssignmentDialog } from "./components/activation-code-product-assignment-dialog";
 
 const PAGE_SIZE = 10;
 
 export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
   const t = useTranslations("ActivationCodeDetail");
+  const tApiErrors = useTranslations("ApiErrors");
   const locale = useLocale();
   const toast = useToast();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
   const canRevoke = hasPermission(PERMISSIONS.ACTIVATION_CODE_BATCH_REVOKE);
+  const canAssignProduct = hasPermission(
+    PERMISSIONS.ACTIVATION_CODE_ASSIGN_PRODUCT,
+  );
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<ActivationCodeReportStatus | "">("");
@@ -68,6 +76,13 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
   const [replaceTarget, setReplaceTarget] =
     useState<ActivationCodeDetail | null>(null);
   const [replacementCode, setReplacementCode] = useState("");
+  const [assignmentTarget, setAssignmentTarget] = useState<{
+    code: string;
+    id: string;
+    currentProduct: ActivationCodeDetail["assignedProduct"];
+  } | null>(null);
+  const [unassignTarget, setUnassignTarget] =
+    useState<ActivationCodeDetail | null>(null);
   const debouncedSearch = useDebounce(search.trim(), 300);
   const query = useQuery({
     placeholderData: (previous) => previous,
@@ -86,7 +101,13 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
   });
   const revokeMutation = useMutation({
     mutationFn: (codeId: string) => activationCodesService.revokeCode(codeId),
-    onError: () => toast.error(t("revokeError")),
+    onError: (error) =>
+      toast.error(
+        getLocalizedApiError(error, t, {
+          apiErrors: tApiErrors,
+          fallbackKey: "revokeError",
+        }),
+      ),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ["activation-code-detail", batchId],
@@ -101,7 +122,13 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
         replaceTarget!.id,
         replacementCode.trim(),
       ),
-    onError: () => toast.error(t("replaceError")),
+    onError: (error) =>
+      toast.error(
+        getLocalizedApiError(error, t, {
+          apiErrors: tApiErrors,
+          fallbackKey: "replaceError",
+        }),
+      ),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ["activation-code-detail", batchId],
@@ -109,6 +136,26 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
       setReplaceTarget(null);
       setReplacementCode("");
       toast.success(t("replaced"));
+    },
+  });
+  const unassignMutation = useMutation({
+    mutationFn: (activationCodeId: string) =>
+      activationCodesService.unassignProduct({
+        activationCodeId,
+      }),
+    onError: (error) =>
+      toast.error(
+        getLocalizedApiError(error, t, {
+          apiErrors: tApiErrors,
+          fallbackKey: "unassignError",
+        }),
+      ),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["activation-code-detail", batchId],
+      });
+      setUnassignTarget(null);
+      toast.success(t("unassigned"));
     },
   });
   const statusOptions = useMemo(
@@ -175,6 +222,7 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
             ) : data?.items.length ? (
               <>
                 <ActivationCodesTable
+                  canAssignProduct={canAssignProduct}
                   canRevoke={canRevoke}
                   items={data.items}
                   locale={locale}
@@ -190,11 +238,26 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
                     setReplacementCode("");
                     setReplaceTarget(code);
                   }}
+                  onAssign={(code) =>
+                    setAssignmentTarget({
+                      code: code.copyCode ?? code.maskedCode,
+                      id: code.id,
+                      currentProduct: code.assignedProduct,
+                    })
+                  }
+                  onUnassign={setUnassignTarget}
+                  onActivate={(code) =>
+                    router.push(
+                      `/warranty-activation-requests/create?activationCodeId=${encodeURIComponent(code.id)}&activationCode=${encodeURIComponent(code.copyCode ?? code.maskedCode)}&productId=${encodeURIComponent(code.assignedProduct!.id)}`,
+                    )
+                  }
                   t={t}
                 />
                 <PaginationControls
                   nextLabel={t("next")}
-                  onPageChange={setPage}
+                  onPageChange={(nextPage) => {
+                    setPage(nextPage);
+                  }}
                   page={data.meta.page}
                   pageSize={PAGE_SIZE}
                   previousLabel={t("previous")}
@@ -232,6 +295,42 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
           open={Boolean(revokeTarget)}
           title={t("revokeTitle")}
           variant="destructive"
+        />
+        <ConfirmActionDialog
+          cancelLabel={t("cancel")}
+          confirmLabel={t("unassign")}
+          description={t("unassignConfirm", {
+            code: unassignTarget?.maskedCode ?? "",
+          })}
+          isLoading={unassignMutation.isPending}
+          onConfirm={() => {
+            if (unassignTarget) unassignMutation.mutate(unassignTarget.id);
+          }}
+          onOpenChange={(open) => {
+            if (!open && !unassignMutation.isPending) setUnassignTarget(null);
+          }}
+          open={Boolean(unassignTarget)}
+          title={t("unassignTitle")}
+        />
+        <ActivationCodeProductAssignmentDialog
+          activationCode={assignmentTarget?.code ?? ""}
+          activationCodeId={assignmentTarget?.id ?? ""}
+          currentProduct={assignmentTarget?.currentProduct}
+          onAssigned={(mode) => {
+            void Promise.all([
+              queryClient.invalidateQueries({
+                queryKey: ["activation-code-detail", batchId],
+              }),
+              queryClient.invalidateQueries({ queryKey: ["products"] }),
+            ]);
+            toast.success(
+              t(mode === "changed" ? "productChanged" : "assigned"),
+            );
+          }}
+          onOpenChange={(open) => {
+            if (!open) setAssignmentTarget(null);
+          }}
+          open={Boolean(assignmentTarget)}
         />
         {replaceTarget ? (
           <div
@@ -276,30 +375,37 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
 }
 
 function ActivationCodesTable({
+  canAssignProduct,
   canRevoke,
   items,
   locale,
   onCopy,
+  onAssign,
   onRevoke,
   onReplace,
+  onUnassign,
+  onActivate,
   t,
 }: {
+  canAssignProduct: boolean;
   canRevoke: boolean;
   items: ActivationCodeDetail[];
   locale: string;
   onCopy: (code: ActivationCodeDetail) => void;
+  onAssign: (code: ActivationCodeDetail) => void;
   onRevoke: (code: ActivationCodeDetail) => void;
   onReplace: (code: ActivationCodeDetail) => void;
+  onUnassign: (code: ActivationCodeDetail) => void;
+  onActivate: (code: ActivationCodeDetail) => void;
   t: ReturnType<typeof useTranslations<"ActivationCodeDetail">>;
 }) {
-  const [revealedCodeId, setRevealedCodeId] = useState<string | null>(null);
-
   return (
     <TableScroll className="rounded-md border border-slate-200 dark:border-slate-800">
       <Table className="min-w-[850px]">
         <TableHeader>
           <TableRow>
             <TableHead>{t("columns.code")}</TableHead>
+            <TableHead>{t("columns.product")}</TableHead>
             <TableHead>{t("columns.status")}</TableHead>
             <TableHead>{t("columns.createdAt")}</TableHead>
             <TableHead>{t("columns.expiresAt")}</TableHead>
@@ -313,35 +419,26 @@ function ActivationCodesTable({
               <TableCell className="font-medium">
                 <div className="group/code flex min-w-[12rem] items-center gap-1">
                   <span className="font-mono tabular-nums">
-                    {revealedCodeId === item.id && item.copyCode
-                      ? item.copyCode
-                      : item.maskedCode}
+                    {item.copyCode ?? item.maskedCode}
                   </span>
-                  {item.copyCode ? (
-                    <Button
-                      aria-label={
-                        revealedCodeId === item.id
-                          ? t("hideCodeAria", { code: item.maskedCode })
-                          : t("revealCodeAria", { code: item.maskedCode })
-                      }
-                      className="size-8 opacity-100 transition-opacity md:opacity-0 md:group-hover/code:opacity-100 md:focus-visible:opacity-100"
-                      onClick={() =>
-                        setRevealedCodeId((current) =>
-                          current === item.id ? null : item.id,
-                        )
-                      }
-                      size="icon"
-                      type="button"
-                      variant="ghost"
-                    >
-                      {revealedCodeId === item.id ? (
-                        <EyeOff className="size-4" />
-                      ) : (
-                        <Eye className="size-4" />
-                      )}
-                    </Button>
-                  ) : null}
                 </div>
+              </TableCell>
+              <TableCell>
+                {item.assignedProduct ? (
+                  <div className="max-w-64">
+                    <p className="truncate text-sm font-medium">
+                      {item.assignedProduct.displayName ||
+                        item.assignedProduct.name}
+                    </p>
+                    <p className="truncate font-mono text-xs text-slate-500">
+                      {item.assignedProduct.productCode}
+                    </p>
+                  </div>
+                ) : (
+                  <span className="text-sm text-slate-500">
+                    {t("unassignedProduct")}
+                  </span>
+                )}
               </TableCell>
               <TableCell>
                 <span className="rounded bg-slate-100 px-2 py-1 text-xs dark:bg-slate-800">
@@ -367,6 +464,7 @@ function ActivationCodesTable({
               </TableCell>
               <TableCell className="text-right">
                 {item.copyCode ||
+                (canAssignProduct && item.status === "AVAILABLE") ||
                 (canRevoke && item.status === "EXPIRED" && !item.replacedBy) ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -381,27 +479,27 @@ function ActivationCodesTable({
                     <DropdownMenuContent align="end">
                       {item.copyCode ? (
                         <>
-                          <DropdownMenuItem
-                            onSelect={() =>
-                              setRevealedCodeId((current) =>
-                                current === item.id ? null : item.id,
-                              )
-                            }
-                          >
-                            {revealedCodeId === item.id ? (
-                              <EyeOff className="mr-2 size-4" />
-                            ) : (
-                              <Eye className="mr-2 size-4" />
-                            )}
-                            {revealedCodeId === item.id
-                              ? t("hideCode")
-                              : t("revealCode")}
-                          </DropdownMenuItem>
                           <DropdownMenuItem onSelect={() => onCopy(item)}>
                             <Copy className="mr-2 size-4" />
                             {t("copy")}
                           </DropdownMenuItem>
                         </>
+                      ) : null}
+                      {canAssignProduct && item.status === "AVAILABLE" ? (
+                        <DropdownMenuItem onSelect={() => onAssign(item)}>
+                          <PackageCheck className="mr-2 size-4" />
+                          {item.assignedProduct
+                            ? t("changeProduct")
+                            : t("assignProduct")}
+                        </DropdownMenuItem>
+                      ) : null}
+                      {canAssignProduct &&
+                      item.status === "AVAILABLE" &&
+                      item.assignedProduct ? (
+                        <DropdownMenuItem onSelect={() => onUnassign(item)}>
+                          <Unlink className="mr-2 size-4" />
+                          {t("unassign")}
+                        </DropdownMenuItem>
                       ) : null}
                       {canRevoke ? (
                         item.status === "EXPIRED" && !item.replacedBy ? (
@@ -410,6 +508,14 @@ function ActivationCodesTable({
                             {t("replace")}
                           </DropdownMenuItem>
                         ) : null
+                      ) : null}
+                      {canRevoke &&
+                      item.status === "AVAILABLE" &&
+                      item.assignedProduct ? (
+                        <DropdownMenuItem onSelect={() => onActivate(item)}>
+                          <KeyRound className="mr-2 size-4" />
+                          {t("activate")}
+                        </DropdownMenuItem>
                       ) : null}
                       {canRevoke && item.status === "AVAILABLE" ? (
                         <DropdownMenuItem

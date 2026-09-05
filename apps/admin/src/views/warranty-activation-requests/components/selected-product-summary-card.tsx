@@ -16,11 +16,12 @@ type SelectedProductSummaryCardProps = {
   productCode: string;
   productCodeLabel: string;
   productName: string;
-  serialNumber: string | null;
-  serialNumberLabel: string;
+  sku: string;
+  skuLabel: string;
   startDate: string | null;
   statusLabel: string;
   summaryLabels: {
+    activationStartPending: string;
     brandModel: string;
     currentOwner: string;
     durationMonths: string;
@@ -40,8 +41,8 @@ export function SelectedProductSummaryCard({
   productCode,
   productCodeLabel,
   productName,
-  serialNumber,
-  serialNumberLabel,
+  sku,
+  skuLabel,
   startDate,
   statusLabel,
   summaryLabels,
@@ -52,7 +53,9 @@ export function SelectedProductSummaryCard({
   const period =
     startDate || endDate
       ? `${formatActivationRequestDate(startDate, locale)} - ${formatActivationRequestDate(endDate, locale)}`
-      : "-";
+      : durationMonths
+        ? `${durationMonths} ${summaryLabels.monthUnit} · ${summaryLabels.activationStartPending}`
+        : "-";
 
   return (
     <ActivationRequestSummaryCard
@@ -69,7 +72,7 @@ export function SelectedProductSummaryCard({
       title={productName}
     >
       <SummaryGrid>
-        <SummaryItem label={serialNumberLabel} value={serialNumber ?? "-"} />
+        <SummaryItem label={skuLabel} value={sku || "-"} />
         <SummaryItem
           label={summaryLabels.brandModel}
           value={[brand, model].filter(Boolean).join(" / ") || "-"}

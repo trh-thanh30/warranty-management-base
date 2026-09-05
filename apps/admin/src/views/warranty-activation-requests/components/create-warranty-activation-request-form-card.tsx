@@ -5,6 +5,7 @@ import {
   FormSection,
   SearchDropdown,
 } from "@/src/components/common";
+import { ConfirmActionDialog } from "@/src/components/common/confirm-action-dialog";
 import { formatCustomerSearchOption } from "@/src/utils";
 import {
   Button,
@@ -25,8 +26,8 @@ import { CreateDealerDialog } from "../../dealers/components/create-dealer-dialo
 import { useCreateWarrantyActivationRequestForm } from "../hooks/use-create-warranty-activation-request-form";
 import {
   formatActivationProductSearchOption,
-  getActivationProductOptionDisabledReason,
   getActivationProductDisplayName,
+  getActivationProductOptionDisabledReason,
   getProductWarrantyStatusLabel,
 } from "../warranty-activation-request-product.utils";
 import {
@@ -44,11 +45,17 @@ import { SelectedProductSummaryCard } from "./selected-product-summary-card";
 type CreateWarrantyActivationRequestFormCardProps = {
   onCancel: () => void;
   onCreated: () => void;
+  activationCodeId?: string;
+  activationCode?: string;
+  assignedProductId?: string;
 };
 
 export function CreateWarrantyActivationRequestFormCard({
   onCancel,
   onCreated,
+  activationCodeId,
+  activationCode,
+  assignedProductId,
 }: CreateWarrantyActivationRequestFormCardProps) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const [categorySearch, setCategorySearch] = useState("");
@@ -60,9 +67,12 @@ export function CreateWarrantyActivationRequestFormCard({
   const {
     activationFields,
     activationFieldsQuery,
+    activationCodesQuery,
+    cancelCategoryChange,
     control,
     categories,
     categoriesQuery,
+    categoryChangePending,
     categoryId,
     clearCustomer,
     clearDealer,
@@ -88,6 +98,9 @@ export function CreateWarrantyActivationRequestFormCard({
     selectedDealer,
     selectedProduct,
     selectedActivationProducts,
+    selectedActivationCode,
+    assignedActivationCodeForSelectedProduct,
+    confirmCategoryChange,
     selectCategory,
     selectCustomer,
     selectDealer,
@@ -97,10 +110,15 @@ export function CreateWarrantyActivationRequestFormCard({
     setDealerSearch,
     setProductSearch,
     usesProductSelectors,
-  } = useCreateWarrantyActivationRequestForm({ onCreated });
+  } = useCreateWarrantyActivationRequestForm({
+    onCreated,
+    activationCodeId,
+    assignedProductId,
+  });
   const hasSelectedProduct =
     Boolean(selectedProduct) ||
     Object.keys(selectedActivationProducts).length > 0;
+  const isProductLockedByActivationCode = Boolean(activationCodeId);
   const filteredCategories = useMemo(
     () => filterActivationRequestCategories(categories, categorySearch),
     [categories, categorySearch],
@@ -124,211 +142,247 @@ export function CreateWarrantyActivationRequestFormCard({
             </div>
           ) : null}
 
-          <FormSection
-            description={t("createProductDescription")}
-            title={t("productInfo")}
-          >
-            <FormField
-              error={formatActivationRequestCreateFieldError(
-                errors.categoryId?.message,
-                t,
-              )}
-              id="create-activation-request-category"
-              label={t("category")}
-            >
-              <SearchDropdown
-                emptyLabel={t("noCategory")}
-                getItemKey={(category) => category.id}
-                inputClassName="h-11 text-base sm:h-10 sm:text-sm"
-                isLoading={categoriesQuery.isLoading}
-                items={filteredCategories}
-                loadingLabel={t("loadingCategories")}
-                onItemSelect={(category) => {
-                  if (selectCategory(category.id)) setCategorySearch("");
-                }}
-                onSearchChange={(value) => {
-                  if (selectedCategory && !selectCategory("")) return;
-                  setCategorySearch(value);
-                }}
-                placeholder={t("categoryPlaceholder")}
-                renderItem={(category) => (
-                  <div className="min-w-0 space-y-1">
-                    <p className="truncate font-medium text-slate-950 dark:text-slate-50">
-                      {category.name}
-                    </p>
-                    {category.code ? (
-                      <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-                        {category.code}
-                      </p>
-                    ) : null}
-                  </div>
-                )}
-                searchValue={categorySearch}
-                selectedLabel={selectedCategory?.name}
-              />
-            </FormField>
-            <input type="hidden" {...register("categoryId")} />
+          <input type="hidden" {...register("activationCodeId")} />
 
-            {!usesProductSelectors && activationFieldsQuery.isSuccess ? (
+          {activationCodeId ? (
+            <div className="space-y-3">
+              <div className="rounded-md border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-100">
+                {t("activationCodeLockedProduct")}
+              </div>
+              <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/50">
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  {t("activationCodeLabel")}
+                </p>
+                <p className="mt-1  text-sm font-semibold text-slate-950 dark:text-slate-50">
+                  {activationCode ?? activationCodeId}
+                </p>
+              </div>
+            </div>
+          ) : null}
+          {
+            <FormSection
+              description={t("createProductDescription")}
+              title={t("productInfo")}
+            >
               <FormField
                 error={formatActivationRequestCreateFieldError(
-                  errors.productId?.message,
+                  errors.categoryId?.message,
                   t,
                 )}
-                id="create-activation-request-product"
-                label={t("productSearch")}
+                id="create-activation-request-category"
+                label={t("category")}
               >
                 <SearchDropdown
-                  emptyLabel={
-                    categoryId ? t("noProduct") : t("selectCategoryFirst")
-                  }
-                  errorLabel={t("productLoadError")}
-                  getItemDisabledReason={(product) =>
-                    getActivationProductOptionDisabledReason(product, t)
-                  }
-                  getItemKey={(product) => product.id}
-                  id="create-activation-request-product"
-                  isError={productsQuery.isError}
-                  isLoading={productsQuery.isFetching}
-                  items={products}
-                  loadingLabel={
-                    !categoryId
-                      ? t("selectCategoryFirst")
-                      : productsQuery.isFetchingNextPage
-                        ? t("loadingMoreProducts")
-                        : t("loadingProducts")
-                  }
-                  onItemSelect={selectProduct}
-                  onReachEnd={loadMoreProducts}
-                  onRetry={() => void productsQuery.refetch()}
-                  onSearchChange={(value) => {
-                    if (selectedProduct) clearProduct();
-                    setProductSearch(value);
+                  disabled={isProductLockedByActivationCode}
+                  emptyLabel={t("noCategory")}
+                  getItemKey={(category) => category.id}
+                  inputClassName="h-11 text-base sm:h-10 sm:text-sm"
+                  isLoading={categoriesQuery.isLoading}
+                  items={filteredCategories}
+                  loadingLabel={t("loadingCategories")}
+                  onItemSelect={(category) => {
+                    if (selectCategory(category.id)) setCategorySearch("");
                   }}
-                  placeholder={
-                    categoryId
-                      ? t("productSearchPlaceholder")
-                      : t("selectCategoryFirst")
-                  }
-                  renderItem={(product) => (
-                    <ProductSearchResult
-                      disabledReason={getActivationProductOptionDisabledReason(
-                        product,
-                        t,
-                      )}
-                      ownerName={product.owner?.fullName}
-                      productCode={product.productCode}
-                      productName={getActivationProductDisplayName(product)}
-                      serialNumber={product.serialNumber}
-                      statusLabel={getProductWarrantyStatusLabel(product, t)}
-                      warrantyCode={product.warrantyCode}
-                    />
+                  onSearchChange={(value) => {
+                    if (selectedCategory && !selectCategory("")) return;
+                    setCategorySearch(value);
+                  }}
+                  placeholder={t("categoryPlaceholder")}
+                  renderItem={(category) => (
+                    <div className="min-w-0 space-y-1">
+                      <p className="truncate font-medium text-slate-950 dark:text-slate-50">
+                        {category.name}
+                      </p>
+                      {category.code ? (
+                        <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                          {category.code}
+                        </p>
+                      ) : null}
+                    </div>
                   )}
-                  retryLabel={t("tryAgain")}
-                  searchValue={productSearch}
-                  selectedLabel={
-                    selectedProduct
-                      ? formatActivationProductSearchOption(selectedProduct)
-                      : undefined
-                  }
+                  searchValue={categorySearch}
+                  selectedLabel={selectedCategory?.name}
                 />
               </FormField>
-            ) : null}
+              <input type="hidden" {...register("categoryId")} />
 
-            <input type="hidden" {...register("productId")} />
-            <input type="hidden" {...register("productName")} />
-            <input type="hidden" {...register("warrantyCode")} />
-
-            {!usesProductSelectors && selectedProduct ? (
-              <SelectedProductSummaryCard
-                brand={selectedProduct.brand}
-                durationMonths={selectedProduct.warranty?.durationMonths}
-                endDate={selectedProduct.warranty?.endDate ?? null}
-                model={selectedProduct.model}
-                ownerName={selectedProduct.owner?.fullName}
-                productCodeLabel={t("productCode")}
-                productCode={selectedProduct.productCode}
-                productName={getActivationProductDisplayName(selectedProduct)}
-                serialNumber={selectedProduct.serialNumber}
-                serialNumberLabel={t("serialNumber")}
-                startDate={selectedProduct.warranty?.startDate ?? null}
-                statusLabel={getProductWarrantyStatusLabel(selectedProduct, t)}
-                summaryLabels={{
-                  brandModel: `${t("brand")} / ${t("model")}`,
-                  currentOwner: t("currentOwner"),
-                  durationMonths: t("durationMonths"),
-                  monthUnit: t("monthUnit"),
-                  warrantyPeriod: t("warrantyPeriod"),
-                }}
-                warrantyCode={selectedProduct.warrantyCode}
-                warrantyCodeLabel={t("warrantyCode")}
-              />
-            ) : null}
-
-            {hasSelectedProduct ? (
-              <div className="grid gap-5 sm:grid-cols-2">
+              {!usesProductSelectors && activationFieldsQuery.isSuccess ? (
                 <FormField
                   error={formatActivationRequestCreateFieldError(
-                    errors.vehiclePlate?.message,
+                    errors.productId?.message,
                     t,
                   )}
-                  id="create-activation-request-vehicle-plate"
-                  label={t("vehiclePlate")}
+                  id="create-activation-request-product"
+                  label={t("productSearch")}
                 >
-                  <Input
+                  <SearchDropdown
+                    disabled={isProductLockedByActivationCode}
+                    emptyLabel={
+                      categoryId ? t("noProduct") : t("selectCategoryFirst")
+                    }
+                    errorLabel={t("productLoadError")}
+                    getItemDisabledReason={(product) =>
+                      getActivationProductOptionDisabledReason(product, t)
+                    }
+                    getItemKey={(product) => product.id}
+                    id="create-activation-request-product"
+                    isError={productsQuery.isError}
+                    isLoading={productsQuery.isFetching}
+                    items={products}
+                    loadingLabel={
+                      !categoryId
+                        ? t("selectCategoryFirst")
+                        : productsQuery.isFetchingNextPage
+                          ? t("loadingMoreProducts")
+                          : t("loadingProducts")
+                    }
+                    onItemSelect={selectProduct}
+                    onReachEnd={loadMoreProducts}
+                    onRetry={() => void productsQuery.refetch()}
+                    onSearchChange={(value) => {
+                      if (selectedProduct) clearProduct();
+                      setProductSearch(value);
+                    }}
+                    placeholder={
+                      categoryId
+                        ? t("productSearchPlaceholder")
+                        : t("selectCategoryFirst")
+                    }
+                    renderItem={(product) => (
+                      <ProductSearchResult
+                        disabledReason={getActivationProductOptionDisabledReason(
+                          product,
+                          t,
+                        )}
+                        activationCodeCounts={product.activationCodeCounts}
+                        activationCodeSummary={t("activationCodeCount", {
+                          available:
+                            product.activationCodeCounts?.AVAILABLE ?? 0,
+                          total: Object.values(
+                            product.activationCodeCounts ?? {},
+                          ).reduce((sum, count) => sum + (count ?? 0), 0),
+                        })}
+                        ownerName={product.owner?.fullName}
+                        productCode={product.productCode}
+                        productName={getActivationProductDisplayName(product)}
+                        serialNumber={product.serialNumber}
+                        statusLabel={getProductWarrantyStatusLabel(product, t)}
+                        warrantyCode={product.warrantyCode}
+                      />
+                    )}
+                    retryLabel={t("tryAgain")}
+                    searchValue={productSearch}
+                    selectedLabel={
+                      selectedProduct
+                        ? formatActivationProductSearchOption(selectedProduct)
+                        : undefined
+                    }
+                  />
+                </FormField>
+              ) : null}
+
+              <input type="hidden" {...register("productId")} />
+              <input type="hidden" {...register("productName")} />
+              <input type="hidden" {...register("warrantyCode")} />
+
+              {!usesProductSelectors && selectedProduct ? (
+                <SelectedProductSummaryCard
+                  brand={selectedProduct.brand}
+                  durationMonths={
+                    selectedProduct.warrantyDurationMonths ??
+                    selectedProduct.warranty?.durationMonths
+                  }
+                  endDate={selectedProduct.warranty?.endDate ?? null}
+                  model={selectedProduct.model}
+                  ownerName={selectedProduct.owner?.fullName}
+                  productCodeLabel={t("productCode")}
+                  productCode={selectedProduct.productCode}
+                  productName={getActivationProductDisplayName(selectedProduct)}
+                  sku={selectedProduct.sku}
+                  skuLabel={t("sku")}
+                  startDate={selectedProduct.warranty?.startDate ?? null}
+                  statusLabel={getProductWarrantyStatusLabel(
+                    selectedProduct,
+                    t,
+                  )}
+                  summaryLabels={{
+                    activationStartPending: t("activationStartPending"),
+                    brandModel: `${t("brand")} / ${t("model")}`,
+                    currentOwner: t("currentOwner"),
+                    durationMonths: t("durationMonths"),
+                    monthUnit: t("monthUnit"),
+                    warrantyPeriod: t("warrantyPeriod"),
+                  }}
+                  warrantyCode={selectedProduct.warrantyCode}
+                  warrantyCodeLabel={t("warrantyCode")}
+                />
+              ) : null}
+
+              {hasSelectedProduct ? (
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <FormField
+                    error={formatActivationRequestCreateFieldError(
+                      errors.vehiclePlate?.message,
+                      t,
+                    )}
                     id="create-activation-request-vehicle-plate"
-                    placeholder={t("vehiclePlatePlaceholder")}
-                    {...register("vehiclePlate")}
-                  />
-                </FormField>
-                <FormField
-                  error={formatActivationRequestCreateFieldError(
-                    errors.vehicleModel?.message,
-                    t,
-                  )}
-                  id="create-activation-request-vehicle-model"
-                  label={t("vehicleModel")}
-                >
-                  <Input
+                    label={t("vehiclePlate")}
+                  >
+                    <Input
+                      id="create-activation-request-vehicle-plate"
+                      placeholder={t("vehiclePlatePlaceholder")}
+                      {...register("vehiclePlate")}
+                    />
+                  </FormField>
+                  <FormField
+                    error={formatActivationRequestCreateFieldError(
+                      errors.vehicleModel?.message,
+                      t,
+                    )}
                     id="create-activation-request-vehicle-model"
-                    placeholder={t("vehicleModelPlaceholder")}
-                    {...register("vehicleModel")}
-                  />
-                </FormField>
-              </div>
-            ) : null}
+                    label={t("vehicleModel")}
+                  >
+                    <Input
+                      id="create-activation-request-vehicle-model"
+                      placeholder={t("vehicleModelPlaceholder")}
+                      {...register("vehicleModel")}
+                    />
+                  </FormField>
+                </div>
+              ) : null}
 
-            {categoryId && activationFieldsQuery.isLoading ? (
-              <p className="text-sm text-slate-500">
-                {t("loadingActivationFields")}
-              </p>
-            ) : null}
-            {categoryId && activationFieldsQuery.isError ? (
-              <div className="flex items-center justify-between gap-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-                <span>{t("activationFieldsLoadError")}</span>
-                <Button
-                  onClick={() => void activationFieldsQuery.refetch()}
-                  size="sm"
-                  type="button"
-                  variant="outline"
-                >
-                  {t("tryAgain")}
-                </Button>
-              </div>
-            ) : null}
-            {activationFieldsQuery.isSuccess ? (
-              <CategoryActivationInputFields
-                categoryId={categoryId}
-                control={control}
-                errors={errors}
-                fields={activationFields}
-                onProductClear={clearActivationProduct}
-                onProductSelect={selectActivationProduct}
-                register={register}
-                selectedProducts={selectedActivationProducts}
-              />
-            ) : null}
-          </FormSection>
+              {categoryId && activationFieldsQuery.isLoading ? (
+                <p className="text-sm text-slate-500">
+                  {t("loadingActivationFields")}
+                </p>
+              ) : null}
+              {categoryId && activationFieldsQuery.isError ? (
+                <div className="flex items-center justify-between gap-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                  <span>{t("activationFieldsLoadError")}</span>
+                  <Button
+                    onClick={() => void activationFieldsQuery.refetch()}
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                  >
+                    {t("tryAgain")}
+                  </Button>
+                </div>
+              ) : null}
+              {activationFieldsQuery.isSuccess ? (
+                <CategoryActivationInputFields
+                  categoryId={categoryId}
+                  control={control}
+                  errors={errors}
+                  fields={activationFields}
+                  onProductClear={clearActivationProduct}
+                  onProductSelect={selectActivationProduct}
+                  register={register}
+                  selectedProducts={selectedActivationProducts}
+                />
+              ) : null}
+            </FormSection>
+          }
 
           <FormSection
             description={t("createCustomerDescription")}
@@ -424,6 +478,62 @@ export function CreateWarrantyActivationRequestFormCard({
                 onEditAddress={() => setEditCustomerAddressDialogOpen(true)}
                 phone={selectedCustomer.phone}
               />
+            ) : null}
+
+            {!activationCodeId &&
+            selectedProduct?.categoryRef?.activationCodeEnabled !== false ? (
+              <FormField
+                id="create-activation-request-activation-code"
+                label={t("activationCodeLabel")}
+              >
+                <Input
+                  aria-busy={activationCodesQuery.isFetching}
+                  className="h-11 border-slate-200 bg-slate-50/70 font-medium text-base text-slate-500 shadow-none placeholder:text-slate-400 sm:h-10 sm:text-sm dark:border-slate-800 dark:bg-slate-900/30 dark:text-slate-400 dark:placeholder:text-slate-500"
+                  id="create-activation-request-activation-code"
+                  placeholder={
+                    !selectedProduct
+                      ? t("selectProductBeforeActivationCode")
+                      : activationCodesQuery.isFetching
+                        ? t("loadingAssignedActivationCode")
+                        : t("noAssignedActivationCode")
+                  }
+                  readOnly
+                  value={selectedActivationCode?.maskedCode ?? ""}
+                />
+                {selectedProduct && selectedActivationCode ? (
+                  <p
+                    className="mt-0.5 text-sm text-emerald-700 dark:text-emerald-300"
+                    role="status"
+                  >
+                    {t("activationCodeAutoFilled", {
+                      code: selectedActivationCode.maskedCode,
+                    })}
+                  </p>
+                ) : selectedProduct && activationCodesQuery.isError ? (
+                  <div className="mt-2 flex items-center justify-between gap-3 text-sm text-red-700 dark:text-red-300">
+                    <span role="alert">{t("activationCodesLoadError")}</span>
+                    <Button
+                      onClick={() => void activationCodesQuery.refetch()}
+                      size="sm"
+                      type="button"
+                      variant="outline"
+                    >
+                      {t("tryAgain")}
+                    </Button>
+                  </div>
+                ) : selectedProduct && activationCodesQuery.isSuccess ? (
+                  <p
+                    className="mt-0.5 text-sm text-red-500 dark:text-red-400"
+                    role="status"
+                  >
+                    {assignedActivationCodeForSelectedProduct
+                      ? t(
+                          `activationCodeUnavailableReasons.${assignedActivationCodeForSelectedProduct.status}`,
+                        )
+                      : t("activationCodeNotAssignedToProduct")}
+                  </p>
+                ) : null}
+              </FormField>
             ) : null}
           </FormSection>
 
@@ -559,6 +669,18 @@ export function CreateWarrantyActivationRequestFormCard({
             </Button>
           </div>
         </form>
+        <ConfirmActionDialog
+          cancelLabel={t("cancel")}
+          confirmLabel={t("confirmCategoryChange")}
+          description={t("categoryChangeConfirm")}
+          onConfirm={confirmCategoryChange}
+          onOpenChange={(open) => {
+            if (!open) cancelCategoryChange();
+          }}
+          open={categoryChangePending}
+          title={t("categoryChangeTitle")}
+          variant="destructive"
+        />
         <CreateCustomerDialog
           onOpenChange={setCreateCustomerDialogOpen}
           onSaved={(customer) => {

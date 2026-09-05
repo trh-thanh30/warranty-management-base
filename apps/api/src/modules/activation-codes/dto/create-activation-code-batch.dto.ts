@@ -1,8 +1,9 @@
 import { IsInt, IsOptional, IsUUID, Max, Min } from 'class-validator';
 
 export class CreateActivationCodeBatchDto {
+  @IsOptional()
   @IsUUID()
-  sourceProductId: string;
+  sourceProductId?: string;
 
   @IsOptional()
   @IsInt()

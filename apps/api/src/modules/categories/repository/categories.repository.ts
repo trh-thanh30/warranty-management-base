@@ -33,6 +33,12 @@ export class CategoriesRepository {
     });
   }
 
+  countAssignedActivationCodes(categoryId: string) {
+    return this.prismaService.activationCode.count({
+      where: { product: { is: { category_id: categoryId } } },
+    });
+  }
+
   findByTypeAndSlug(type: category_type, slug: string) {
     return this.prismaService.category.findUnique({
       where: { type_slug: { type, slug } },

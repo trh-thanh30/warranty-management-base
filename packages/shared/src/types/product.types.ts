@@ -1,4 +1,5 @@
 import type { CategorySummary } from "./category.types.ts";
+import type { ActivationCodeReportStatus } from "./activation-code-report.types.ts";
 import type { PaginationQuery } from "./pagination.types.ts";
 import type { WarrantyStatus } from "./warranty.types.ts";
 
@@ -63,6 +64,16 @@ export type WarrantyCodeEditLockedReason =
   | "WARRANTY_NOT_DRAFT"
   | "OPEN_ACTIVATION_REQUEST";
 
+export type ProductAssignedActivationCodeSummary = {
+  id: string;
+  code: string;
+  status: ActivationCodeReportStatus;
+  expiresAt: string;
+  batchCode: string;
+  canReplace: boolean;
+  unavailableReason: Exclude<ActivationCodeReportStatus, "AVAILABLE"> | null;
+};
+
 export type ProductSummary = {
   id: string;
   sku: string;
@@ -90,6 +101,9 @@ export type ProductSummary = {
   deletedAt: string | null;
   owner: ProductOwnerSummary | null;
   warranty: ProductWarrantySummary | null;
+  warrantyDurationMonths: number | null;
+  warrantyTerms: string | null;
+  assignedActivationCode: ProductAssignedActivationCodeSummary | null;
   assets: ProductAssetSummary[];
 };
 
@@ -119,6 +133,7 @@ export type ActivationProductEligibility =
 
 export type ActivationProductOption = ProductResponse & {
   activationEligibility: ActivationProductEligibility;
+  activationCodeCounts: Partial<Record<ActivationCodeReportStatus, number>>;
 };
 
 export type ListActivationProductOptionsQuery = Pick<
@@ -136,6 +151,7 @@ export type ListProductsQuery = PaginationQuery & {
   status?: ProductStatus | "ALL";
   isPublished?: "true" | "false";
   activationEligible?: "true" | "false";
+  activationCodeAssignable?: "true" | "false";
   claimEligible?: "true" | "false";
   warrantyStatus?: WarrantyStatus;
   sortBy?: ProductSortBy;
@@ -155,7 +171,6 @@ export type CreateProductBody = {
   coverAssetId?: string;
   galleryAssetIds?: string[];
   productCode?: string;
-  warrantyCode?: string;
   displayName?: string;
   status?: ProductStatus;
   serialNumber?: string;
@@ -177,7 +192,6 @@ export type UpdateProductBody = {
   status?: ProductStatus;
   serialNumber?: string | null;
   metadata?: Record<string, unknown> | null;
-  warrantyCode?: string;
   warrantyDurationMonths?: number;
   warrantyTerms?: string | null;
 };
@@ -237,8 +251,6 @@ export type ListPublicProductsQuery = PaginationQuery & {
 
 export type AssignProductOwnerBody = {
   customerId: string;
-  autoGenerateWarrantyCode?: boolean;
-  warrantyCode?: string;
   purchaseDate?: string;
 };
 

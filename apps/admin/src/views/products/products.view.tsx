@@ -11,6 +11,7 @@ import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
 import { AssignOwnerDialog } from "./components/assign-owner-dialog";
+import { AssignActivationCodesDialog } from "./components/assign-activation-codes-dialog";
 import { DeleteProductDialog } from "./components/delete-product-dialog";
 import { RestoreProductDialog } from "./components/restore-product-dialog";
 import { ProductImportPreviewTable } from "./components/product-import-preview-table";
@@ -20,6 +21,8 @@ import { useProductsDirectory } from "./hooks/use-products-directory";
 export function ProductsView() {
   const t = useTranslations("Products");
   const [productToAssignOwner, setProductToAssignOwner] =
+    useState<ProductResponse | null>(null);
+  const [productToAssignCodes, setProductToAssignCodes] =
     useState<ProductResponse | null>(null);
   const {
     canCreateProducts,
@@ -113,6 +116,7 @@ export function ProductsView() {
           isLoading={productsQuery.isLoading}
           onCategoryIdChange={updateCategoryId}
           onAssignOwner={setProductToAssignOwner}
+          onAssignCodes={setProductToAssignCodes}
           onClearFilters={clearFilters}
           onDelete={openDelete}
           onRestore={openRestore}
@@ -163,6 +167,14 @@ export function ProductsView() {
           product={productToAssignOwner}
         />
 
+        <AssignActivationCodesDialog
+          onOpenChange={(open) => {
+            if (!open) setProductToAssignCodes(null);
+          }}
+          open={Boolean(productToAssignCodes)}
+          product={productToAssignCodes}
+        />
+
         <ExcelImportDialog
           confirmDisabled={importRows.length === 0 || hasImportErrors}
           description={t("excel.importDescription")}
@@ -211,7 +223,6 @@ export function ProductsView() {
                   installationPosition: t("installationPosition"),
                   model: t("model"),
                   modelYear: t("modelYear"),
-                  warrantyCode: t("warrantyCode"),
                   invalidRows: t("excel.invalidRows", {
                     count: importSummary.invalidRows,
                   }),

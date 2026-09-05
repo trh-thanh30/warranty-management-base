@@ -1,4 +1,5 @@
 import { AssetsService } from '@/modules/assets/assets.service';
+import { ActivationCodeCryptoService } from '@/modules/activation-codes/services/activation-code-crypto.service';
 import { ListProductsDto } from '@/modules/products/dto/list-products.dto';
 import { toProductResponse } from '@/modules/products/products.types';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
@@ -9,6 +10,7 @@ export class ListProductsUseCase {
   constructor(
     private readonly productsRepository: ProductsRepository,
     private readonly assetsService?: AssetsService,
+    private readonly activationCodeCryptoService?: ActivationCodeCryptoService,
   ) {}
 
   async execute(dto: ListProductsDto) {
@@ -20,6 +22,10 @@ export class ListProductsUseCase {
           product,
           (asset) =>
             this.assetsService?.enrichAssetUrl(asset).url ?? asset.path,
+          this.activationCodeCryptoService
+            ? (ciphertext) =>
+                this.activationCodeCryptoService!.decrypt(ciphertext)
+            : undefined,
         ),
       ),
       meta: result.meta,

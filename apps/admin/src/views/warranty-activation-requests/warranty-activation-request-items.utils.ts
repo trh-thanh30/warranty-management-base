@@ -41,7 +41,9 @@ export function getActivationRequestWarrantyCodes(
   request: WarrantyActivationRequestSummary,
 ) {
   if (request.items?.length) {
-    return request.items.map((item) => item.warrantyCode);
+    return request.items
+      .map((item) => item.warrantyCode)
+      .filter((code): code is string => Boolean(code));
   }
   return request.warrantyCode ? [request.warrantyCode] : [];
 }

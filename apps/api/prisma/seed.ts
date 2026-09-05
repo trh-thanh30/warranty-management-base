@@ -287,7 +287,7 @@ async function upsertDemoProduct(data: {
   endDate.setMonth(endDate.getMonth() + data.durationMonths);
 
   const warranty = await prisma.warranty.upsert({
-    where: { product_id: product.id },
+    where: { warranty_code: data.warrantyCode },
     update: {
       warranty_code: data.warrantyCode,
       start_date: data.purchaseDate,
@@ -303,6 +303,11 @@ async function upsertDemoProduct(data: {
       duration_months: data.durationMonths,
       status: data.warrantyStatus,
     },
+  });
+
+  await prisma.product.update({
+    where: { id: product.id },
+    data: { current_warranty_id: warranty.id },
   });
 
   await prisma.productOwnership.updateMany({

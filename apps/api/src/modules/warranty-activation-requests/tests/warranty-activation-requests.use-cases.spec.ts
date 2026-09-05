@@ -7,6 +7,7 @@ import { ResendWarrantyActivationRequestCertificateEmailUseCase } from '@/module
 import {
   WarrantyActivationRequestCodeConflictError,
   WarrantyActivationRequestUniqueConflictError,
+  WarrantyActivationRequestWarrantyCodeConflictError,
 } from '@/modules/warranty-activation-requests/repository/warranty-activation-request-errors';
 import {
   warranty_activation_request_source,
@@ -41,6 +42,9 @@ describe('WarrantyActivationRequestsUseCases', () => {
   };
   const issueWarrantyActivationRequestCertificateUseCase = {
     execute: jest.fn(),
+  };
+  const generateCustomerCodeUseCase = {
+    generateCustomerCode: jest.fn().mockResolvedValue('CUS000001'),
   };
 
   beforeEach(() => {
@@ -221,6 +225,185 @@ describe('WarrantyActivationRequestsUseCases', () => {
         productId: 'product-b',
       }),
     ]);
+  });
+
+  it('reserves a different warranty code for every generic activation item', async () => {
+    repository.findLastRequestCode.mockResolvedValue(null);
+    repository.findOpenByProductId.mockResolvedValue(null);
+    productsRepository.findActivationRequestTargetById.mockResolvedValue({
+      ...baseDraftProduct,
+      id: 'product-a',
+      product_code: 'CODE-product-a',
+      warranty: null,
+      warranty_duration_months: 24,
+    });
+    const genericItems = [
+      {
+        ...createValidatedItem('item-a', 'product-a'),
+        activationCodeId: 'activation-code-a',
+        warrantyCode: null,
+        warrantyId: null,
+      },
+      {
+        ...createValidatedItem('item-b', 'product-b'),
+        activationCodeId: 'activation-code-b',
+        warrantyCode: null,
+        warrantyId: null,
+      },
+    ];
+    const itemValidator = {
+      validate: jest.fn().mockResolvedValue(genericItems),
+    };
+    generateWarrantyCodeUseCase.execute
+      .mockResolvedValueOnce('WM-2026-CODEA1')
+      .mockResolvedValueOnce('WM-2026-CODEB2');
+    repository.create.mockImplementation((data) =>
+      Promise.resolve({
+        ...baseRequest,
+        request_code: data.requestCode,
+        warranty_code: data.warrantyCode,
+        product_id: data.productId,
+        items: data.items.map((item, index) => ({
+          ...createPersistedItem(item.positionKey, item.productId),
+          id: `item-${index}`,
+          activation_code_id: item.activationCodeId,
+          warranty_code: item.warrantyCode,
+          warranty_id: null,
+          warranty: null,
+        })),
+      }),
+    );
+    const useCase = new CreateWarrantyActivationRequestUseCase(
+      repository as never,
+      new GenerateWarrantyActivationRequestCodeUseCase(repository as never),
+      productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
+      itemValidator as never,
+    );
+
+    await useCase.execute({
+      addressDetail: '1 Nguyen Trai',
+      categoryId: 'category-id',
+      customerName: 'Nguyen Van A',
+      customerPhone: '0901234567',
+      items: [
+        {
+          activationCodeId: 'activation-code-a',
+          positionKey: 'item-a',
+          productId: 'product-a',
+        },
+        {
+          activationCodeId: 'activation-code-b',
+          positionKey: 'item-b',
+          productId: 'product-b',
+        },
+      ],
+      provinceCode: '79',
+      provinceName: 'TP Ho Chi Minh',
+      wardCode: '26734',
+      wardName: 'Phuong Ben Thanh',
+    });
+
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        warrantyCode: 'WM-2026-CODEA1',
+        items: [
+          expect.objectContaining({ warrantyCode: 'WM-2026-CODEA1' }),
+          expect.objectContaining({ warrantyCode: 'WM-2026-CODEB2' }),
+        ],
+      }),
+    );
+  });
+
+  it('regenerates all reserved item codes when a concurrent reservation wins', async () => {
+    repository.findLastRequestCode.mockResolvedValue(null);
+    repository.findOpenByProductId.mockResolvedValue(null);
+    productsRepository.findActivationRequestTargetById.mockResolvedValue({
+      ...baseDraftProduct,
+      id: 'product-a',
+      product_code: 'CODE-product-a',
+      warranty: null,
+      warranty_duration_months: 24,
+    });
+    const itemValidator = {
+      validate: jest.fn().mockResolvedValue([
+        {
+          ...createValidatedItem('item-a', 'product-a'),
+          activationCodeId: 'activation-code-a',
+          warrantyCode: null,
+          warrantyId: null,
+        },
+        {
+          ...createValidatedItem('item-b', 'product-b'),
+          activationCodeId: 'activation-code-b',
+          warrantyCode: null,
+          warrantyId: null,
+        },
+      ]),
+    };
+    generateWarrantyCodeUseCase.execute
+      .mockResolvedValueOnce('WM-2026-INITIAL1')
+      .mockResolvedValueOnce('WM-2026-INITIAL2')
+      .mockResolvedValueOnce('WM-2026-RETRY01')
+      .mockResolvedValueOnce('WM-2026-RETRY02');
+    repository.create
+      .mockRejectedValueOnce(
+        new WarrantyActivationRequestWarrantyCodeConflictError(),
+      )
+      .mockImplementation((data) =>
+        Promise.resolve({
+          ...baseRequest,
+          request_code: data.requestCode,
+          warranty_code: data.warrantyCode,
+          product_id: data.productId,
+          items: data.items,
+        }),
+      );
+    const useCase = new CreateWarrantyActivationRequestUseCase(
+      repository as never,
+      new GenerateWarrantyActivationRequestCodeUseCase(repository as never),
+      productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
+      itemValidator as never,
+    );
+
+    await useCase.execute({
+      addressDetail: '1 Nguyen Trai',
+      categoryId: 'category-id',
+      customerName: 'Nguyen Van A',
+      customerPhone: '0901234567',
+      items: [
+        {
+          activationCodeId: 'activation-code-a',
+          positionKey: 'item-a',
+          productId: 'product-a',
+        },
+        {
+          activationCodeId: 'activation-code-b',
+          positionKey: 'item-b',
+          productId: 'product-b',
+        },
+      ],
+      provinceCode: '79',
+      provinceName: 'TP Ho Chi Minh',
+      wardCode: '26734',
+      wardName: 'Phuong Ben Thanh',
+    });
+
+    expect(repository.create).toHaveBeenCalledTimes(2);
+    expect(repository.create).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        warrantyCode: 'WM-2026-RETRY01',
+        items: [
+          expect.objectContaining({ warrantyCode: 'WM-2026-RETRY01' }),
+          expect.objectContaining({ warrantyCode: 'WM-2026-RETRY02' }),
+        ],
+      }),
+    );
   });
 
   it('rejects a multi-product request when any current owner differs from the customer', async () => {
@@ -834,6 +1017,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
       issueWarrantyActivationRequestCertificateUseCase as never,
+      generateCustomerCodeUseCase as never,
     );
 
     const result = await useCase.execute(
@@ -887,6 +1071,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
       issueWarrantyActivationRequestCertificateUseCase as never,
+      generateCustomerCodeUseCase as never,
     );
 
     await expect(
@@ -904,6 +1089,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
       issueWarrantyActivationRequestCertificateUseCase as never,
+      generateCustomerCodeUseCase as never,
     );
 
     await expect(
@@ -918,6 +1104,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     const useCase = new ReviewWarrantyActivationRequestUseCase(
       repository as never,
       issueWarrantyActivationRequestCertificateUseCase as never,
+      generateCustomerCodeUseCase as never,
     );
 
     await expect(

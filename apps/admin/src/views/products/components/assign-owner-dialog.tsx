@@ -13,7 +13,6 @@ import {
   DatePicker,
   Input,
   Label,
-  Switch,
 } from "@repo/ui";
 import {
   Combobox,
@@ -164,41 +163,7 @@ export function AssignOwnerDialog({
                   {t("existingWarrantyCodeDescription")}
                 </p>
               </div>
-            ) : (
-              <div className="space-y-4 rounded-md border border-slate-200 p-4 dark:border-slate-800">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="min-w-0">
-                    <Label htmlFor="assign-owner-auto-warranty-code">
-                      {t("autoGenerateWarrantyCode")}
-                    </Label>
-                    <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                      {t("autoGenerateWarrantyCodeOnAssignmentDescription")}
-                    </p>
-                  </div>
-                  <Switch
-                    checked={workflow.autoGenerateWarrantyCode}
-                    className="shrink-0"
-                    id="assign-owner-auto-warranty-code"
-                    onCheckedChange={workflow.setAutoGenerateWarrantyCode}
-                  />
-                </div>
-                {!workflow.autoGenerateWarrantyCode ? (
-                  <div className="space-y-2">
-                    <Label htmlFor="assign-owner-warranty-code">
-                      {t("warrantyCode")}
-                    </Label>
-                    <Input
-                      id="assign-owner-warranty-code"
-                      onChange={(event) =>
-                        workflow.setWarrantyCode(event.target.value)
-                      }
-                      placeholder={t("warrantyCodePlaceholder")}
-                      value={workflow.warrantyCode}
-                    />
-                  </div>
-                ) : null}
-              </div>
-            )}
+            ) : null}
 
             <div className="grid gap-4">
               <div className="space-y-2">

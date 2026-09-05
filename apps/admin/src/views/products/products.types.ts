@@ -62,13 +62,6 @@ export const productFormSchema = z.object({
   status: z.enum(["ACTIVE", "INACTIVE"]),
   warrantyTerms: optionalText.max(2000, "warrantyTermsLength"),
   warrantyDurationMonths: requiredWarrantyDuration,
-  warrantyCode: optionalText
-    .max(64, "warrantyCodeInvalid")
-    .refine(
-      (value) => !value || /^[A-Z0-9-]{6,64}$/i.test(value),
-      "warrantyCodeInvalid",
-    )
-    .optional(),
 });
 
 export const productEditFormSchema = productFormSchema.extend({
@@ -77,33 +70,10 @@ export const productEditFormSchema = productFormSchema.extend({
     .max(64, "productCodeLength"),
 });
 
-export const assignProductOwnerSchema = z
-  .object({
-    autoGenerateWarrantyCode: z.boolean(),
-    customerId: optionalText.min(1, "customerRequired"),
-    purchaseDate: optionalText,
-    warrantyCode: optionalText,
-  })
-  .superRefine((values, context) => {
-    if (values.autoGenerateWarrantyCode) return;
-
-    if (!values.warrantyCode) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "warrantyCodeRequired",
-        path: ["warrantyCode"],
-      });
-      return;
-    }
-
-    if (!/^[A-Z0-9-]{6,64}$/i.test(values.warrantyCode)) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "warrantyCodeInvalid",
-        path: ["warrantyCode"],
-      });
-    }
-  });
+export const assignProductOwnerSchema = z.object({
+  customerId: optionalText.min(1, "customerRequired"),
+  purchaseDate: optionalText,
+});
 
 export type ProductFormInput = z.input<typeof productFormSchema>;
 export type ProductFormValues = z.output<typeof productFormSchema>;

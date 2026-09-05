@@ -42,6 +42,7 @@ export class WarrantyActivationRequestQueries {
       select: {
         id: true,
         name: true,
+        email: true,
         phone: true,
         address: true,
         province: true,
@@ -50,6 +51,7 @@ export class WarrantyActivationRequestQueries {
       },
     },
     certificate: true,
+    activation_code: { select: { id: true, status: true } },
     reviewed_by: {
       select: {
         id: true,

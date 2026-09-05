@@ -59,6 +59,10 @@ export class CreateCategoryDto {
   isActive?: boolean;
 
   @IsOptional()
+  @IsBoolean()
+  activationCodeEnabled?: boolean;
+
+  @IsOptional()
   @IsObject()
   metadata?: Record<string, unknown>;
 }

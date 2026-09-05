@@ -1,5 +1,5 @@
 import { IsBirthdate } from '@/common/decorators/is-birthdate.decorator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsDateString,
@@ -21,6 +21,11 @@ import { IsLocalAddressDetail } from './is-local-address-detail.decorator';
 
 export class CreateWarrantyActivationRequestItemDto {
   @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  @IsUUID()
+  activationCodeId?: string;
+  @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
   @IsUUID()
   activationFieldId?: string;
 
@@ -76,6 +81,11 @@ export class CreateWarrantyActivationRequestDto {
   @Length(6, 120)
   @Matches(/^[A-Z0-9-]+$/i)
   activationCode?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  @IsUUID()
+  activationCodeId?: string;
 
   @IsOptional()
   @IsString()

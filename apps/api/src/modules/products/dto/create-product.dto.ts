@@ -9,7 +9,6 @@ import {
   IsString,
   Length,
   IsUUID,
-  Matches,
   Min,
 } from 'class-validator';
 
@@ -82,12 +81,6 @@ export class CreateProductDto {
   @IsString()
   @Length(1, 64)
   serialNumber?: string;
-
-  @IsOptional()
-  @IsString()
-  @Length(6, 64)
-  @Matches(/^[A-Z0-9-]+$/i)
-  warrantyCode?: string;
 
   @IsOptional()
   @IsObject()

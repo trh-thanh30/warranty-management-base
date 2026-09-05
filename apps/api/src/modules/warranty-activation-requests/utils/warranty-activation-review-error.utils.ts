@@ -1,4 +1,8 @@
-import { product_status, warranty_status } from '@prisma/client';
+import {
+  product_status,
+  warranty_method,
+  warranty_status,
+} from '@prisma/client';
 
 export type WarrantyActivationReviewLocale = 'en' | 'vi';
 
@@ -24,6 +28,7 @@ export type WarrantyActivationReviewErrorKey =
   | 'WARRANTY_STATUS_CHANGED';
 
 export type WarrantyActivationReviewTarget = {
+  activationCodeId?: string | null;
   itemId?: string;
   positionLabel?: string;
   product: {
@@ -33,7 +38,13 @@ export type WarrantyActivationReviewTarget = {
     warranty: {
       id: string;
       status: warranty_status;
+      duration_months?: number;
+      method?: warranty_method;
+      terms?: string | null;
     } | null;
+    warranty_duration_months?: number | null;
+    warranty_method?: warranty_method | null;
+    warranty_terms?: string | null;
   };
   productName?: string | null;
   warrantyCode: string;
@@ -47,11 +58,13 @@ export function getActivationEligibilityFailure(
   if (target.product.status !== product_status.ACTIVE) {
     return 'PRODUCT_INACTIVE';
   }
-  if (!target.product.warranty) return 'WARRANTY_MISSING';
-  if (target.product.warranty.id !== target.warrantyId) {
+  if (!target.product.warranty && !target.activationCodeId)
+    return 'WARRANTY_MISSING';
+  if (!target.product.warranty && target.activationCodeId) return null;
+  if (target.product.warranty!.id !== target.warrantyId) {
     return 'WARRANTY_PRODUCT_MISMATCH';
   }
-  if (target.product.warranty.status !== warranty_status.DRAFT) {
+  if (target.product.warranty!.status !== warranty_status.DRAFT) {
     return 'WARRANTY_STATUS_NOT_DRAFT';
   }
 

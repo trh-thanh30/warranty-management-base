@@ -23,9 +23,6 @@ export function useAssignProductOwnerWorkflow({
   const toast = useToast();
   const [customerId, setCustomerId] = useState("");
   const [purchaseDate, setPurchaseDate] = useState("");
-  const [autoGenerateWarrantyCode, setAutoGenerateWarrantyCode] =
-    useState(true);
-  const [warrantyCode, setWarrantyCode] = useState("");
   const customersQuery = useInfiniteCustomers(
     {
       limit: 50,
@@ -38,16 +35,12 @@ export function useAssignProductOwnerWorkflow({
   function reset() {
     setCustomerId("");
     setPurchaseDate("");
-    setAutoGenerateWarrantyCode(true);
-    setWarrantyCode("");
   }
 
   async function confirm() {
     const result = assignProductOwnerSchema.safeParse({
-      autoGenerateWarrantyCode,
       customerId,
       purchaseDate,
-      warrantyCode,
     });
     if (!result.success) {
       toast.error(t(result.error.issues[0]?.message ?? "assignOwnerError"));
@@ -56,15 +49,8 @@ export function useAssignProductOwnerWorkflow({
 
     try {
       await assignOwner.mutateAsync({
-        autoGenerateWarrantyCode: product?.warrantyCode
-          ? undefined
-          : result.data.autoGenerateWarrantyCode,
         customerId: result.data.customerId,
         purchaseDate: toOptionalValue(result.data.purchaseDate),
-        warrantyCode:
-          product?.warrantyCode || result.data.autoGenerateWarrantyCode
-            ? undefined
-            : result.data.warrantyCode.trim().toUpperCase(),
       });
       toast.success(t("ownerAssigned"));
       reset();
@@ -79,18 +65,14 @@ export function useAssignProductOwnerWorkflow({
   }
 
   return {
-    autoGenerateWarrantyCode,
     confirm,
     customerId,
     customersQuery,
     isAssigning: assignOwner.isPending,
     purchaseDate,
     reset,
-    setAutoGenerateWarrantyCode,
     setCustomerId,
     setPurchaseDate,
-    setWarrantyCode,
-    warrantyCode,
   };
 }
 
@@ -100,10 +82,6 @@ function getAssignOwnerErrorMessage(
 ) {
   const translationKeys: Record<string, string> = {
     "Customer not found": "customerNotFound",
-    "Warranty code already exists": "duplicateWarrantyCode",
-    "Warranty code is required": "warrantyCodeRequired",
-    "Warranty code must be 6-64 uppercase letters, numbers, or dashes":
-      "warrantyCodeInvalid",
     "Warranty not found": "warrantyNotFound",
   };
 
