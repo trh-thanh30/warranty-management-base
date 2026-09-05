@@ -87,7 +87,7 @@ export function ProductsTable({
       </div>
 
       <TableScroll className="hidden max-h-144 overflow-y-scroll rounded-md border border-slate-200 dark:border-slate-800 lg:block">
-        <Table className="min-w-[88rem] [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
+        <Table className="w-max min-w-full table-auto [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
           <TableHeader className="sticky top-0 z-10 bg-white dark:bg-slate-950">
             <TableRow>
               <SortableTableHead
@@ -98,9 +98,6 @@ export function ProductsTable({
               >
                 {t("name")}
               </SortableTableHead>
-              <TableHead className="whitespace-nowrap">
-                {t("category")}
-              </TableHead>
               <TableHead className="whitespace-nowrap">
                 {t("warrantyStatus")}
               </TableHead>
@@ -169,21 +166,6 @@ function ProductTableRow({
       <TableCell>
         <ProductName product={product} />
       </TableCell>
-      <TableCell className="whitespace-nowrap">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span
-              className="block max-w-64 truncate outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
-              tabIndex={0}
-            >
-              {getProductCategoryLabel(product)}
-            </span>
-          </TooltipTrigger>
-          <TooltipContent className="max-w-80 wrap-break-word" side="top">
-            {getProductCategoryLabel(product)}
-          </TooltipContent>
-        </Tooltip>
-      </TableCell>
       <TableCell>
         <WarrantyStatusBadge status={product.warranty?.status} />
       </TableCell>
@@ -251,10 +233,6 @@ function ProductMobileCard({
             <WarrantyStatusBadge status={product.warranty?.status} />
           </dd>
         </div>
-        <ProductMobileField
-          label={t("category")}
-          value={getProductCategoryLabel(product)}
-        />
         <div className="col-span-2 min-w-0">
           <dt className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
             {t("activationCode")}
@@ -320,7 +298,7 @@ function ProductName({ product }: { product: ProductResponse }) {
             {displayName}
           </span>
           <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
-            {product.name} · {product.productCode}
+            {getProductCategoryLabel(product)}
           </p>
         </div>
       </TooltipTrigger>

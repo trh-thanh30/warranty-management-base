@@ -16,6 +16,14 @@ test("desktop product table keeps content on one line and scrolls long results",
   assert.match(source, /\[&_th\]:whitespace-nowrap/);
   assert.match(source, /TooltipTrigger asChild/);
   assert.match(source, /getProductCategoryLabel\(product\)/);
+  assert.match(
+    source,
+    /className="w-max min-w-full table-auto \[&_td\]:whitespace-nowrap \[&_th\]:whitespace-nowrap"/,
+  );
+  assert.doesNotMatch(source, /min-w-352/);
+  assert.doesNotMatch(source, /\{t\("category"\)\}/);
+  assert.match(source, /\{getProductCategoryLabel\(product\)\}/);
+  assert.doesNotMatch(source, /\{product\.name\} · \{product\.productCode\}/);
   assert.match(source, /sticky top-0 z-10 bg-white dark:bg-slate-950/);
   assert.doesNotMatch(source, /t\("owner"\)/);
   assert.doesNotMatch(source, /formatProductOwner/);
