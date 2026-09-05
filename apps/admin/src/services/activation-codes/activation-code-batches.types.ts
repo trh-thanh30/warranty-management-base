@@ -65,6 +65,7 @@ export type AvailableActivationCode = {
   maskedCode: string;
   copyCode?: string;
   batchCode: string;
+  batchName: string;
   productName: string;
   productSku: string;
   expiresAt: string;

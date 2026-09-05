@@ -75,6 +75,34 @@ test("loads activation code report filters", async () => {
   assert.equal(result, report);
 });
 
+test("filters assignable activation codes by batch", async () => {
+  const calls: unknown[] = [];
+  const response = { items: [], meta: { page: 1, total: 0 } };
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  const result = await createActivationCodesService(
+    http as unknown as ActivationCodesHttpClient,
+  ).listAvailableByProduct(undefined, {
+    assignment: "UNASSIGNED",
+    batchId: "batch-id",
+  });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/activation-code-batches/available",
+      config: {
+        params: { assignment: "UNASSIGNED", batchId: "batch-id" },
+      },
+    },
+  ]);
+  assert.equal(result, response);
+});
+
 test("assigns one activation code to one physical product", async () => {
   const calls: unknown[] = [];
   const response = {

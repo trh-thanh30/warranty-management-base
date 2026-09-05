@@ -4,6 +4,7 @@ import { ConfirmActionDialog } from "@/src/components/common/confirm-action-dial
 import { FormPageShell } from "@/src/components/common/form-page-shell";
 import { SelectControl } from "@/src/components/common/select-control";
 import { StatePanel } from "@/src/components/common/state-panel";
+import { ActivationCodeStatusBadge } from "@/src/components/activation-code-status-badge";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { useToast } from "@/src/hooks/use-toast";
@@ -441,9 +442,7 @@ function ActivationCodesTable({
                 )}
               </TableCell>
               <TableCell>
-                <span className="rounded bg-slate-100 px-2 py-1 text-xs dark:bg-slate-800">
-                  {t(`statuses.${item.status}`)}
-                </span>
+                <ActivationCodeStatusBadge status={item.status} />
                 {item.replacedBy ? (
                   <div className="mt-1 text-xs text-slate-500">
                     {t("replacedBy", { code: item.replacedBy.maskedCode })}

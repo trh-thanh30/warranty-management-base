@@ -1,5 +1,6 @@
 "use client";
 
+import { ActivationCodeStatusBadge } from "@/src/components/activation-code-status-badge";
 import { SortableTableHead } from "@/src/components/common/sortable-table-head";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
@@ -44,7 +45,6 @@ import {
   getProductCategoryLabel,
   getProductDisplayName,
 } from "../products.utils";
-import { ProductActivationCodeStatusBadge } from "./product-activation-code-status-badge";
 import { ProductStatusBadge } from "./product-status-badge";
 import { WarrantyStatusBadge } from "./warranty-status-badge";
 
@@ -299,7 +299,7 @@ function ProductActivationCodeCell({ product }: { product: ProductResponse }) {
         <p className="text-xs font-semibold text-slate-950 dark:text-slate-50">
           {activationCode.code}
         </p>
-        <ProductActivationCodeStatusBadge status={activationCode.status} />
+        <ActivationCodeStatusBadge status={activationCode.status} />
       </div>
     </div>
   );
@@ -443,15 +443,23 @@ function ProductActionsMenu({
             product.categoryRef?.activationCodeEnabled === true ? (
               <DropdownMenuItem
                 disabled={
-                  product.status !== "ACTIVE" || !product.warrantyDurationMonths
+                  product.status !== "ACTIVE" ||
+                  !product.warrantyDurationMonths ||
+                  Boolean(
+                    product.assignedActivationCode &&
+                    !product.assignedActivationCode.canReplace,
+                  )
                 }
                 onSelect={() => onAssignCodes(product)}
               >
                 <KeyRound className="mr-2 size-4" />
                 {t(
-                  product.assignedActivationCode
-                    ? "replaceActivationCode"
-                    : "assignActivationCodes",
+                  product.assignedActivationCode &&
+                    !product.assignedActivationCode.canReplace
+                    ? "activationCodeChangeLocked"
+                    : product.assignedActivationCode
+                      ? "replaceActivationCode"
+                      : "assignActivationCodes",
                 )}
               </DropdownMenuItem>
             ) : null}

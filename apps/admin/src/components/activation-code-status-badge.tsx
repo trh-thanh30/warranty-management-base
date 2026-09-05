@@ -1,7 +1,7 @@
 "use client";
 
 import type { ActivationCodeReportStatus } from "@repo/shared";
-import { Badge } from "@repo/ui";
+import { Badge, type BadgeProps } from "@repo/ui";
 import { useTranslations } from "next-intl";
 
 const STATUS_VARIANTS = {
@@ -13,12 +13,18 @@ const STATUS_VARIANTS = {
   REVOKED: "secondary",
 } as const;
 
-export function ProductActivationCodeStatusBadge({
+export function ActivationCodeStatusBadge({
+  className,
   status,
 }: {
+  className?: BadgeProps["className"];
   status: ActivationCodeReportStatus;
 }) {
-  const t = useTranslations("Products.activationCodeStatuses");
+  const t = useTranslations("ActivationCodeStatuses");
 
-  return <Badge variant={STATUS_VARIANTS[status]}>{t(status)}</Badge>;
+  return (
+    <Badge className={className} variant={STATUS_VARIANTS[status]}>
+      {t(status)}
+    </Badge>
+  );
 }

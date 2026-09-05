@@ -51,6 +51,11 @@ test("product actions expose permissioned activation-code assignment", async () 
   assert.match(source, /product\.assignedActivationCode/);
   assert.match(source, /"replaceActivationCode"/);
   assert.match(source, /"assignActivationCodes"/);
+  assert.match(
+    source,
+    /product\.assignedActivationCode &&[\s\S]*?!product\.assignedActivationCode\.canReplace/,
+  );
+  assert.match(source, /"activationCodeChangeLocked"/);
 });
 
 test("activation-code dialog separates assignment from confirmed replacement", async () => {
@@ -63,9 +68,47 @@ test("activation-code dialog separates assignment from confirmed replacement", a
   assert.match(source, /replaceProductAssignment/);
   assert.match(source, /currentActivationCodeId: currentCode\.id/);
   assert.match(source, /replacementActivationCodeId: selected!\.id/);
-  assert.match(source, /<ProductActivationCodeStatusBadge/);
+  assert.match(source, /<ActivationCodeStatusBadge/);
   assert.match(source, /<ConfirmActionDialog/);
   assert.match(source, /!currentCode\.canReplace/);
+});
+
+test("activation-code dialog filters assignable codes by a searchable batch", async () => {
+  const source = await readFile(
+    new URL("./components/assign-activation-codes-dialog.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(source, /activationCodesService\.listBatches/);
+  assert.match(source, /const \[batchId, setBatchId\] = useState\("ALL"\)/);
+  assert.match(
+    source,
+    /className="w-\[min\(calc\(100vw-2rem\),42rem\)\] max-w-2xl"/,
+  );
+  assert.match(
+    source,
+    /selectedBatchLabel[\s\S]*?useState\(\(\) =>\s*t\("allBatches"\)/,
+  );
+  assert.match(source, /batchId: batchId === "ALL" \? undefined : batchId/);
+  assert.equal(source.match(/<SearchDropdown/g)?.length, 2);
+  assert.doesNotMatch(source, /<Combobox/);
+  assert.match(source, /id: "ALL"/);
+  assert.match(source, /setBatchId\("ALL"\)/);
+  assert.match(
+    source,
+    /onOpenAutoFocus=\{\(event\) => event\.preventDefault\(\)\}/,
+  );
+  assert.match(source, /t\("allBatchesDescription"\)/);
+  assert.match(source, /setSelected\(null\)/);
+  assert.match(source, /t\("allBatches"\)/);
+  assert.match(source, /code\.batchName \|\| code\.batchCode/);
+  assert.match(source, /selected\.batchName \|\| selected\.batchCode/);
+  assert.match(
+    source,
+    /<ActivationCodeStatusBadge[\s\S]*?status=\{code\.status\}/,
+  );
+  assert.match(source, /onRetry=\{\(\) => void batchesQuery\.refetch\(\)\}/);
+  assert.match(source, /onRetry=\{\(\) => void codesQuery\.refetch\(\)\}/);
 });
 
 test("product table displays the assigned activation code on desktop and mobile", async () => {

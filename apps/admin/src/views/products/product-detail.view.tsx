@@ -78,15 +78,22 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
                     disabled={
                       !product ||
                       product.status !== "ACTIVE" ||
-                      !product.warrantyDurationMonths
+                      !product.warrantyDurationMonths ||
+                      Boolean(
+                        product.assignedActivationCode &&
+                        !product.assignedActivationCode.canReplace,
+                      )
                     }
                     onSelect={() => setAssignCodesOpen(true)}
                   >
                     <KeyRound className="mr-2 size-4" />
                     {t(
-                      product?.assignedActivationCode
-                        ? "replaceActivationCode"
-                        : "assignActivationCodes",
+                      product?.assignedActivationCode &&
+                        !product.assignedActivationCode.canReplace
+                        ? "activationCodeChangeLocked"
+                        : product?.assignedActivationCode
+                          ? "replaceActivationCode"
+                          : "assignActivationCodes",
                     )}
                   </DropdownMenuItem>
                 ) : null}

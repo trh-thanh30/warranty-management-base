@@ -95,6 +95,7 @@ export function createActivationCodesService(http: ActivationCodesHttpClient) {
     async listAvailableByProduct(
       productId?: string,
       query: {
+        batchId?: string;
         page?: number;
         limit?: number;
         search?: string;

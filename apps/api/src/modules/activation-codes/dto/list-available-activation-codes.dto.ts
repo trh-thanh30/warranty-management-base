@@ -4,6 +4,10 @@ import { IsIn, IsOptional, IsString, IsUUID, Length } from 'class-validator';
 export class ListAvailableActivationCodesDto extends PaginationQueryDto {
   @IsOptional()
   @IsUUID()
+  batchId?: string;
+
+  @IsOptional()
+  @IsUUID()
   productId?: string;
 
   @IsOptional()
