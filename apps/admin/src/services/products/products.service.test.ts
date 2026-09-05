@@ -126,6 +126,48 @@ test("product directory requests paginated products with filters", async () => {
   assert.deepEqual(result, response);
 });
 
+test("activation-code assignment requests only assignable products", async () => {
+  const calls: unknown[] = [];
+  const response = {
+    items: [product],
+    meta: {
+      page: 1,
+      limit: 20,
+      total: 1,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    },
+  };
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  await createProductsService(
+    http as unknown as ProductsHttpClient,
+  ).listProducts({
+    activationCodeAssignable: "true",
+    page: 1,
+    status: "ACTIVE",
+  });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/products",
+      config: {
+        params: {
+          activationCodeAssignable: "true",
+          page: 1,
+          status: "ACTIVE",
+        },
+      },
+    },
+  ]);
+});
+
 test("creating a product sends inventory fields", async () => {
   const calls: unknown[] = [];
   const http = {

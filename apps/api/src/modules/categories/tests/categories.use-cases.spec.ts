@@ -545,6 +545,28 @@ describe('Category use cases', () => {
     expect(categoriesRepository.update).not.toHaveBeenCalled();
   });
 
+  it('disables activation codes when the category has no assigned codes', async () => {
+    categoriesRepository.findById.mockResolvedValue(category);
+    categoriesRepository.countAssignedActivationCodes.mockResolvedValue(0);
+    categoriesRepository.update.mockResolvedValue({
+      ...category,
+      activation_code_enabled: false,
+    });
+    const useCase = new UpdateCategoryUseCase(
+      categoriesRepository as never,
+      hierarchyService(),
+      assetsService as never,
+    );
+
+    await expect(
+      useCase.execute('category-id', { activationCodeEnabled: false }),
+    ).resolves.toMatchObject({ activationCodeEnabled: false });
+    expect(categoriesRepository.update).toHaveBeenCalledWith(
+      'category-id',
+      expect.objectContaining({ activation_code_enabled: false }),
+    );
+  });
+
   it('rejects a moderator changing category activation-code configuration', async () => {
     const useCase = new UpdateCategoryUseCase(
       categoriesRepository as never,

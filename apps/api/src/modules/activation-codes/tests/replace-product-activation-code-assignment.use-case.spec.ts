@@ -85,6 +85,29 @@ describe('ReplaceProductActivationCodeAssignmentUseCase', () => {
     ).rejects.toMatchObject({ code: 'PRODUCT_ACTIVATION_CODE_MISMATCH' });
   });
 
+  it('rejects replacement for a product category that does not use activation codes', async () => {
+    const repository = {
+      findAssignmentProduct: jest.fn().mockResolvedValue({
+        ...product,
+        category_ref: { activation_code_enabled: false },
+      }),
+      findCodesForAssignment: jest.fn(),
+      replaceProductAssignment: jest.fn(),
+    };
+
+    await expect(
+      new ReplaceProductActivationCodeAssignmentUseCase(
+        repository as never,
+      ).execute({
+        currentActivationCodeId: currentCode.id,
+        replacementActivationCodeId: replacementCode.id,
+        productId: product.id,
+      }),
+    ).rejects.toMatchObject({ code: 'ACTIVATION_CODE_NOT_APPLICABLE' });
+    expect(repository.findCodesForAssignment).not.toHaveBeenCalled();
+    expect(repository.replaceProductAssignment).not.toHaveBeenCalled();
+  });
+
   it('rejects replacement after the current code enters an activation request', async () => {
     const repository = {
       findAssignmentProduct: jest.fn().mockResolvedValue(product),

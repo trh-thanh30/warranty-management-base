@@ -135,6 +135,24 @@ describe('ActivationRequestItemsValidatorService', () => {
     });
   });
 
+  it('rejects activation codes for a category that does not use them', async () => {
+    productsRepository.findActiveProductCategoryById.mockResolvedValue({
+      id: 'category-id',
+      activation_code_enabled: false,
+    });
+
+    await expect(
+      service.validate('category-id', [
+        {
+          activationCodeId: 'code-a',
+          positionKey: 'windshield',
+          productId: 'product-a',
+        },
+      ]),
+    ).rejects.toMatchObject({ code: 'ACTIVATION_CODE_NOT_APPLICABLE' });
+    expect(activationCodesRepository.findAvailableById).not.toHaveBeenCalled();
+  });
+
   it('rejects a product different from the activation code assignment', async () => {
     activationCodesRepository.findAvailableById.mockResolvedValue({
       id: 'code-a',
