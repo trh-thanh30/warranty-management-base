@@ -65,4 +65,34 @@ describe('CreatePrintableActivationLabelsUseCase', () => {
       code: 'ACTIVATION_LABEL_RANGE_INVALID',
     });
   });
+
+  it('renders using the requested label dimensions', async () => {
+    const repository = {
+      findWithCodes: jest.fn().mockResolvedValue({
+        batch_code: 'ACB',
+        product_name: 'Product',
+        product_sku: 'SKU',
+        expires_at: new Date(),
+        codes: [{ code_ciphertext: 'cipher' }],
+      }),
+    } as unknown as ActivationCodeBatchesRepository;
+    const pdfRenderer = {
+      createPdf: jest.fn().mockResolvedValue(Buffer.from('%PDF-test')),
+    } as unknown as HtmlPdfRendererService;
+
+    await new CreatePrintableActivationLabelsUseCase(
+      repository,
+      { decrypt: jest.fn().mockReturnValue('SP-1') } as never,
+      pdfRenderer,
+    ).execute('batch-id', {
+      labelHeightMm: 20,
+      labelWidthMm: 40,
+    });
+
+    expect(pdfRenderer.createPdf).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'grid-template-columns:repeat(4,40mm);grid-template-rows:repeat(13,20mm)',
+      ),
+    );
+  });
 });

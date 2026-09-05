@@ -7,6 +7,8 @@ describe('ActivationLabelPrintProcessor', () => {
         id: 'print-job-id',
         batch_id: 'batch-id',
         from_index: 1,
+        label_height_mm: 20,
+        label_width_mm: 40,
         to_index: 50,
       }),
       markCompleted: jest.fn().mockResolvedValue(undefined),
@@ -47,7 +49,12 @@ describe('ActivationLabelPrintProcessor', () => {
 
     expect(renderer.execute).toHaveBeenCalledWith(
       'batch-id',
-      expect.objectContaining({ from: 1, to: 50 }),
+      expect.objectContaining({
+        from: 1,
+        labelHeightMm: 20,
+        labelWidthMm: 40,
+        to: 50,
+      }),
     );
     expect(assets.upload).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -71,6 +78,8 @@ describe('ActivationLabelPrintProcessor', () => {
         id: 'print-job-id',
         batch_id: 'batch-id',
         from_index: 1,
+        label_height_mm: 16.9,
+        label_width_mm: 45.7,
         to_index: 1,
       }),
       markFailed: jest.fn().mockResolvedValue(undefined),

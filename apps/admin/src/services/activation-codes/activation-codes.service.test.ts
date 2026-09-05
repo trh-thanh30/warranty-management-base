@@ -15,13 +15,25 @@ test("requesting a print job sends the selected label range", async () => {
 
   const result = await createActivationCodesService(
     http as unknown as ActivationCodesHttpClient,
-  ).requestPrintJob("batch-id", { from: 1, to: 50 });
+  ).requestPrintJob("batch-id", {
+    from: 1,
+    labelHeightMm: 20,
+    labelWidthMm: 40,
+    to: 50,
+  });
 
   assert.deepEqual(calls, [
     {
       url: "/activation-code-batches/batch-id/print-jobs",
       body: undefined,
-      config: { params: { from: 1, to: 50 } },
+      config: {
+        params: {
+          from: 1,
+          labelHeightMm: 20,
+          labelWidthMm: 40,
+          to: 50,
+        },
+      },
     },
   ]);
   assert.equal(result, job);

@@ -43,10 +43,10 @@ export function ActivationCodePrintJobsDialog({
             <X className="size-4" />
           </Button>
         </DialogClose>
-        <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
+        <DialogTitle className="flex items-center gap-2 text-base font-semibold">
           {t("printJobsTitle")}
         </DialogTitle>
-        <DialogDescription className="mt-1 text-base font-medium text-slate-500">
+        <DialogDescription className="mt-1 text-sm font-medium text-slate-500">
           {t("printJobsDescription")}
         </DialogDescription>
         <div className="mt-5 space-y-3">

@@ -79,4 +79,45 @@ describe('RequestActivationLabelPrintJobUseCase', () => {
     expect(queue.enqueue).toHaveBeenCalledWith('print-job-id');
     expect(jobs.create).not.toHaveBeenCalled();
   });
+
+  it('persists custom label dimensions and scopes idempotency to the layout', async () => {
+    jobs.findByIdempotencyKey.mockResolvedValue(null);
+    jobs.create.mockResolvedValue({ id: 'print-job-id' });
+    jobs.markQueued.mockResolvedValue({ id: 'print-job-id', status: 'QUEUED' });
+    queue.enqueue.mockResolvedValue({ id: 'bull-job-id' });
+
+    await useCase.execute({
+      batchId: 'batch-id',
+      labelHeightMm: 20,
+      labelWidthMm: 40,
+      requestedById: 'admin-id',
+    });
+
+    expect(jobs.findByIdempotencyKey).toHaveBeenCalledWith(
+      'activation-labels-batch-id-1-50-40x20',
+    );
+    expect(jobs.create).toHaveBeenCalledWith({
+      batchId: 'batch-id',
+      from: 1,
+      idempotencyKey: 'activation-labels-batch-id-1-50-40x20',
+      labelHeightMm: 20,
+      labelWidthMm: 40,
+      requestedById: 'admin-id',
+      to: 50,
+    });
+  });
+
+  it('rejects label dimensions that cannot render legibly in the A4 area', async () => {
+    await expect(
+      useCase.execute({
+        batchId: 'batch-id',
+        labelHeightMm: 10,
+        labelWidthMm: 20,
+        requestedById: 'admin-id',
+      }),
+    ).rejects.toMatchObject({ code: 'ACTIVATION_LABEL_SIZE_INVALID' });
+
+    expect(jobs.create).not.toHaveBeenCalled();
+    expect(queue.enqueue).not.toHaveBeenCalled();
+  });
 });

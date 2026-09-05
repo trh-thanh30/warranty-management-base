@@ -163,7 +163,7 @@ export function AssignActivationCodesDialog({
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent
-          className="w-[min(calc(100vw-2rem),42rem)] max-w-2xl"
+          className="w-[min(calc(100vw-2rem),42rem)] md:max-w-2xl"
           onOpenAutoFocus={(event) => event.preventDefault()}
         >
           <div className="flex items-start gap-3">

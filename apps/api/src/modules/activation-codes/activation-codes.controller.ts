@@ -177,6 +177,8 @@ export class ActivationCodesController {
     return this.requestPrintJobUseCase.execute({
       batchId: id,
       from: query.from,
+      labelHeightMm: query.labelHeightMm,
+      labelWidthMm: query.labelWidthMm,
       requestedById: user.id,
       to: query.to,
     });

@@ -4,6 +4,10 @@ import { ActivationCodeCryptoService } from '@/modules/activation-codes/services
 import { HtmlPdfRendererService } from '@/modules/warranty-certificates/services/html-pdf-renderer.service';
 import { ActivationLabelTemplateService } from '@/modules/activation-codes/services/activation-label-template.service';
 import { Injectable } from '@nestjs/common';
+import {
+  DEFAULT_ACTIVATION_LABEL_HEIGHT_MM,
+  DEFAULT_ACTIVATION_LABEL_WIDTH_MM,
+} from '@repo/shared/constants';
 
 @Injectable()
 export class CreatePrintableActivationLabelsUseCase {
@@ -18,6 +22,8 @@ export class CreatePrintableActivationLabelsUseCase {
     batchId: string,
     options?: {
       from?: number;
+      labelHeightMm?: number;
+      labelWidthMm?: number;
       to?: number;
       onProgress?: (progressPercent: number) => Promise<void> | void;
     },
@@ -46,10 +52,15 @@ export class CreatePrintableActivationLabelsUseCase {
     const html = this.template.render(
       {
         productName: batch.product_name ?? 'Mã kích hoạt bảo hành',
-        productSku: batch.product_sku ?? 'Dùng chung',
         expiresAt: batch.expires_at,
       },
       codes.map((code) => this.crypto.decrypt(code.code_ciphertext)),
+      {
+        labelHeightMm:
+          options?.labelHeightMm ?? DEFAULT_ACTIVATION_LABEL_HEIGHT_MM,
+        labelWidthMm:
+          options?.labelWidthMm ?? DEFAULT_ACTIVATION_LABEL_WIDTH_MM,
+      },
     );
     await options?.onProgress?.(40);
     const pdf = await this.pdfRenderer.createPdf(html);

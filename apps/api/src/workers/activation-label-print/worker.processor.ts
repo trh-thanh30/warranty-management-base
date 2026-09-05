@@ -35,6 +35,8 @@ export class ActivationLabelPrintProcessor extends WorkerHost {
     try {
       const result = await this.renderer.execute(printJob.batch_id, {
         from: printJob.from_index,
+        labelHeightMm: printJob.label_height_mm,
+        labelWidthMm: printJob.label_width_mm,
         onProgress: async (progressPercent) => {
           await Promise.all([
             job.updateProgress(progressPercent),

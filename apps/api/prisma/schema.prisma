@@ -601,6 +601,8 @@ model ActivationCodePrintJob {
   progress_percent Int                              @default(0)
   from_index       Int
   to_index         Int
+  label_width_mm   Float                            @default(45.7)
+  label_height_mm  Float                            @default(16.9)
   bull_job_id      String?                          @unique
   storage_key      String?
   filename         String?
