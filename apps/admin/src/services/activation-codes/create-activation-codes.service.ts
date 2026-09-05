@@ -15,6 +15,7 @@ import type {
   CreateActivationCodeBatchBody,
   CreateActivationCodeBatchResult,
   RevokeActivationCodeBatchResult,
+  UpdateActivationCodeBatchResult,
   ActivationCodeDetailList,
   ActivationCodeDetailQuery,
   AvailableActivationCodeList,
@@ -115,6 +116,15 @@ export function createActivationCodesService(http: ActivationCodesHttpClient) {
         await http.post<CreateActivationCodeBatchResult>(
           "/activation-code-batches",
           body,
+        ),
+      );
+    },
+
+    async updateBatchName(batchId: string, batchName: string) {
+      return unwrap(
+        await http.patch<UpdateActivationCodeBatchResult>(
+          `/activation-code-batches/${batchId}`,
+          { batchName },
         ),
       );
     },

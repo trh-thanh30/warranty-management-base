@@ -11,6 +11,7 @@ import type {
 export type ActivationCodesHttpClient = {
   get: HttpGet;
   post: HttpWrite;
+  patch: HttpWrite;
 };
 
 export type ActivationCodeReportService = {
@@ -29,6 +30,10 @@ export type ActivationCodeBatchService = {
   createBatch: (
     body: CreateActivationCodeBatchBody,
   ) => Promise<CreateActivationCodeBatchResult>;
+  updateBatchName: (
+    batchId: string,
+    batchName: string,
+  ) => Promise<{ id: string; batchCode: string; batchName: string }>;
   revokeCode: (codeId: string) => Promise<void>;
   revokeBatch: (batchId: string) => Promise<RevokeActivationCodeBatchResult>;
 };

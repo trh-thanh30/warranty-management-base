@@ -6,6 +6,7 @@ import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { useToast } from "@/src/hooks/use-toast";
 import { usePermissions } from "@/src/hooks/use-permissions";
+import { activationCodesService } from "@/src/services/activation-codes/activation-codes.service";
 import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
@@ -15,6 +16,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
   Input,
   Skeleton,
 } from "@repo/ui";
@@ -23,6 +28,7 @@ import { AlertCircle, FileText, KeyRound, Plus, Settings2 } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ACTIVATION_CODE_BATCH_STATUSES } from "./activation-code-batches.constants";
 import { ActivationCodeBatchesTable } from "./components/activation-code-batches-table";
 import { ActivationCodePrintJobsDialog } from "./components/activation-code-print-jobs-panel";
@@ -35,11 +41,28 @@ export function ActivationCodeBatchesView() {
   const directory = useActivationCodeBatches();
   const printJobs = useActivationCodePrintJobs();
   const toast = useToast();
+  const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
   const canConfigurePolicy = hasPermission(PERMISSIONS.SYSTEM_CONFIG_VIEW);
   const canPrint = hasPermission(PERMISSIONS.ACTIVATION_CODE_BATCH_PRINT);
   const [isPrintJobsOpen, setPrintJobsOpen] = useState(false);
   const data = directory.query.data;
+  const renameMutation = useMutation({
+    mutationFn: ({
+      batchId,
+      batchName,
+    }: {
+      batchId: string;
+      batchName: string;
+    }) => activationCodesService.updateBatchName(batchId, batchName),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ["activation-code-batches"],
+      });
+      toast.success(t("renamed"));
+    },
+    onError: () => toast.error(t("renameError")),
+  });
 
   return (
     <PermissionGuard permissions={[PERMISSIONS.ACTIVATION_CODE_BATCH_VIEW]}>
@@ -77,59 +100,77 @@ export function ActivationCodeBatchesView() {
           eyebrow={t("eyebrow")}
           title={t("title")}
         />
-        {directory.isCreateOpen ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("createTitle")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form
-                className="flex flex-wrap items-end gap-4"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  void directory.createMutation
-                    .mutateAsync()
-                    .then(() => toast.success(t("created")))
-                    .catch(() => toast.error(t("createError")));
-                }}
-              >
-                <p className="flex-1 text-sm text-slate-600 dark:text-slate-300">
-                  {t("genericPoolDescription")}
-                </p>
-                <label className="space-y-2 text-sm font-medium">
-                  {t("quantityLabel")}
-                  <Input
-                    inputMode="numeric"
-                    max={1000}
-                    min={50}
-                    onChange={(event) =>
-                      directory.setQuantity(event.target.value)
-                    }
-                    type="number"
-                    value={directory.quantity}
-                  />
-                </label>
-                <div className="flex h-10 items-stretch gap-2">
-                  <Button
-                    className="h-10"
-                    disabled={directory.createMutation.isPending}
-                    type="submit"
-                  >
-                    {t("createSubmit")}
-                  </Button>
-                  <Button
-                    className="h-10"
-                    onClick={() => directory.setCreateOpen(false)}
-                    type="button"
-                    variant="secondary"
-                  >
-                    {t("cancel")}
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        ) : null}
+        <Dialog
+          onOpenChange={(open) => {
+            if (!directory.createMutation.isPending) {
+              directory.setCreateOpen(open);
+            }
+          }}
+          open={directory.isCreateOpen}
+        >
+          <DialogContent className="space-y-5 sm:max-w-lg">
+            <div className="space-y-1.5">
+              <DialogTitle className="text-lg font-semibold text-slate-950 dark:text-slate-50">
+                {t("createTitle")}
+              </DialogTitle>
+              <DialogDescription className="text-sm leading-6 text-slate-500 dark:text-slate-400">
+                {t("genericPoolDescription")}
+              </DialogDescription>
+            </div>
+            <form
+              className="space-y-5"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void directory.createMutation
+                  .mutateAsync()
+                  .then(() => toast.success(t("created")))
+                  .catch(() => toast.error(t("createError")));
+              }}
+            >
+              <label className="block space-y-2 text-sm font-medium text-slate-900 dark:text-slate-100">
+                {t("batchNameLabel")}
+                <Input
+                  maxLength={120}
+                  onChange={(event) =>
+                    directory.setBatchName(event.target.value)
+                  }
+                  placeholder={t("batchNamePlaceholder")}
+                  value={directory.batchName}
+                />
+              </label>
+              <label className="block space-y-2 text-sm font-medium text-slate-900 dark:text-slate-100">
+                {t("quantityLabel")}
+                <Input
+                  autoFocus
+                  inputMode="numeric"
+                  max={1000}
+                  min={50}
+                  onChange={(event) =>
+                    directory.setQuantity(event.target.value)
+                  }
+                  type="number"
+                  value={directory.quantity}
+                />
+              </label>
+              <div className="flex justify-end gap-2">
+                <Button
+                  disabled={directory.createMutation.isPending}
+                  onClick={() => directory.setCreateOpen(false)}
+                  type="button"
+                  variant="secondary"
+                >
+                  {t("cancel")}
+                </Button>
+                <Button
+                  disabled={directory.createMutation.isPending}
+                  type="submit"
+                >
+                  {t("createSubmit")}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
         <ActivationCodePrintJobsDialog
           jobs={printJobs.jobs}
           onDismiss={printJobs.remove}
@@ -207,6 +248,12 @@ export function ActivationCodeBatchesView() {
                           }),
                         ),
                       );
+                  }}
+                  onRename={(batch, batchName) => {
+                    void renameMutation.mutateAsync({
+                      batchId: batch.id,
+                      batchName,
+                    });
                   }}
                 />
                 <PaginationControls

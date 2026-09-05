@@ -565,6 +565,7 @@ model Warranty {
 model ActivationCodeBatch {
   id                       String           @id @default(uuid()) @db.Uuid
   batch_code               String           @unique
+  batch_name               String
   source_product_id        String?          @db.Uuid
   product_sku              String?
   product_name             String?

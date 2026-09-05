@@ -1,15 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { MoreHorizontal, Printer, ShieldOff } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { ConfirmActionDialog } from "@/src/components/common/confirm-action-dialog";
+import type { ActivationCodeBatchListItem } from "@/src/services/activation-codes/activation-code-batches.types";
 import { formatDate, type ActivationCodePrintJob } from "@repo/shared";
 import {
   Button,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  Input,
   Table,
   TableBody,
   TableCell,
@@ -18,12 +23,12 @@ import {
   TableRow,
   TableScroll,
 } from "@repo/ui";
-import { ConfirmActionDialog } from "@/src/components/common/confirm-action-dialog";
-import type { ActivationCodeBatchListItem } from "@/src/services/activation-codes/activation-code-batches.types";
+import { Eye, MoreHorizontal, Pencil, Printer, ShieldOff } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
+import { useState } from "react";
 import { ACTIVATION_CODE_BATCH_STATUSES } from "../activation-code-batches.constants";
 import { ActivationCodePrintDialog } from "./activation-code-print-dialog";
-import Link from "next/link";
-import { Eye } from "lucide-react";
 
 type ActivationCodeBatchesTableProps = {
   canPrint: boolean;
@@ -34,6 +39,7 @@ type ActivationCodeBatchesTableProps = {
     job: ActivationCodePrintJob,
   ) => void;
   onRevoke: (batch: ActivationCodeBatchListItem) => void;
+  onRename: (batch: ActivationCodeBatchListItem, name: string) => void;
 };
 
 export function ActivationCodeBatchesTable({
@@ -42,6 +48,7 @@ export function ActivationCodeBatchesTable({
   items,
   onJobRequested,
   onRevoke,
+  onRename,
 }: ActivationCodeBatchesTableProps) {
   return (
     <>
@@ -54,12 +61,13 @@ export function ActivationCodeBatchesTable({
             key={batch.id}
             onJobRequested={onJobRequested}
             onRevoke={onRevoke}
+            onRename={onRename}
           />
         ))}
       </div>
 
       <TableScroll className="hidden rounded-md border border-slate-200 dark:border-slate-800 md:block">
-        <Table className="min-w-[920px] [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
+        <Table className="min-w-230 [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
           <TableHeader>
             <ActivationCodeBatchTableHeader />
           </TableHeader>
@@ -72,6 +80,7 @@ export function ActivationCodeBatchesTable({
                 key={batch.id}
                 onJobRequested={onJobRequested}
                 onRevoke={onRevoke}
+                onRename={onRename}
               />
             ))}
           </TableBody>
@@ -90,8 +99,8 @@ function ActivationCodeBatchTableHeader() {
       <TableHead>{t("columns.quantity")}</TableHead>
       <TableHead>{t("columns.assignment")}</TableHead>
       <TableHead>{t("columns.status")}</TableHead>
-      <TableHead>{t("columns.expiresAt")}</TableHead>
       <TableHead>{t("columns.createdAt")}</TableHead>
+      <TableHead>{t("columns.expiresAt")}</TableHead>
       <TableHead aria-label={t("columns.actions")} className="w-12" />
     </TableRow>
   );
@@ -103,19 +112,26 @@ function ActivationCodeBatchTableRow({
   canRevoke,
   onJobRequested,
   onRevoke,
+  onRename,
 }: {
   batch: ActivationCodeBatchListItem;
   canPrint: boolean;
   canRevoke: boolean;
   onJobRequested: ActivationCodeBatchesTableProps["onJobRequested"];
   onRevoke: ActivationCodeBatchesTableProps["onRevoke"];
+  onRename: ActivationCodeBatchesTableProps["onRename"];
 }) {
   const locale = useLocale();
 
   return (
     <TableRow>
       <TableCell className="font-medium text-slate-950 dark:text-slate-50">
-        {batch.batchCode}
+        <div>
+          <p>{batch.batchName}</p>
+          <p className="mt-0.5 text-xs font-normal text-slate-500 dark:text-slate-400">
+            {batch.batchCode}
+          </p>
+        </div>
       </TableCell>
       <TableCell className="tabular-nums">{batch.quantity}</TableCell>
       <TableCell>
@@ -124,8 +140,8 @@ function ActivationCodeBatchTableRow({
       <TableCell>
         <ActivationCodeStatusCounts batch={batch} />
       </TableCell>
-      <TableCell>{formatDate(batch.expiresAt, { locale })}</TableCell>
       <TableCell>{formatDate(batch.createdAt, { locale })}</TableCell>
+      <TableCell>{formatDate(batch.expiresAt, { locale })}</TableCell>
       <TableCell className="text-right">
         <ActivationCodeBatchActionsMenu
           batch={batch}
@@ -133,6 +149,7 @@ function ActivationCodeBatchTableRow({
           canRevoke={canRevoke}
           onJobRequested={onJobRequested}
           onRevoke={onRevoke}
+          onRename={onRename}
         />
       </TableCell>
     </TableRow>
@@ -145,12 +162,14 @@ function ActivationCodeBatchMobileCard({
   canRevoke,
   onJobRequested,
   onRevoke,
+  onRename,
 }: {
   batch: ActivationCodeBatchListItem;
   canPrint: boolean;
   canRevoke: boolean;
   onJobRequested: ActivationCodeBatchesTableProps["onJobRequested"];
   onRevoke: ActivationCodeBatchesTableProps["onRevoke"];
+  onRename: ActivationCodeBatchesTableProps["onRename"];
 }) {
   const locale = useLocale();
   const t = useTranslations("ActivationCodeBatches");
@@ -159,9 +178,12 @@ function ActivationCodeBatchMobileCard({
     <article className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate font-medium text-slate-950 dark:text-slate-50">
-            {batch.batchCode}
-          </p>
+          <div className="truncate font-medium text-slate-950 dark:text-slate-50">
+            <p className="truncate font-medium">{batch.batchName}</p>
+            <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+              {batch.batchCode}
+            </p>
+          </div>
           <ProductSummary batch={batch} />
         </div>
         <ActivationCodeBatchActionsMenu
@@ -170,6 +192,7 @@ function ActivationCodeBatchMobileCard({
           canRevoke={canRevoke}
           onJobRequested={onJobRequested}
           onRevoke={onRevoke}
+          onRename={onRename}
         />
       </div>
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
@@ -281,16 +304,20 @@ function ActivationCodeBatchActionsMenu({
   canRevoke,
   onJobRequested,
   onRevoke,
+  onRename,
 }: {
   batch: ActivationCodeBatchListItem;
   canPrint: boolean;
   canRevoke: boolean;
   onJobRequested: ActivationCodeBatchesTableProps["onJobRequested"];
   onRevoke: ActivationCodeBatchesTableProps["onRevoke"];
+  onRename: ActivationCodeBatchesTableProps["onRename"];
 }) {
   const t = useTranslations("ActivationCodeBatches");
   const [printOpen, setPrintOpen] = useState(false);
   const [revokeOpen, setRevokeOpen] = useState(false);
+  const [renameOpen, setRenameOpen] = useState(false);
+  const [renameValue, setRenameValue] = useState(batch.batchName);
   const canRevokeAvailable =
     canRevoke && (batch.statusCounts.AVAILABLE ?? 0) > 0;
 
@@ -308,10 +335,19 @@ function ActivationCodeBatchActionsMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onSelect={() => {
+              setRenameValue(batch.batchName);
+              setRenameOpen(true);
+            }}
+          >
+            <Pencil className="mr-2 size-4" />
+            {t("renameAction")}
+          </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href={`/activation-code-batches/${batch.id}`}>
               <Eye className="mr-2 size-4" />
-              Xem chi tiết mã
+              {t("viewDetails")}
             </Link>
           </DropdownMenuItem>
           {canPrint ? (
@@ -352,6 +388,48 @@ function ActivationCodeBatchActionsMenu({
         title={t("revokeTitle")}
         variant="destructive"
       />
+      <Dialog open={renameOpen} onOpenChange={setRenameOpen}>
+        <DialogContent className="space-y-5 sm:max-w-xl">
+          <div className="space-y-1.5">
+            <DialogTitle className="text-lg font-semibold text-slate-950 dark:text-slate-50">
+              {t("renameTitle")}
+            </DialogTitle>
+            <DialogDescription className="text-sm leading-6 text-slate-500 dark:text-slate-400">
+              {t("renameDescription")}
+            </DialogDescription>
+          </div>
+          <form
+            className="space-y-5"
+            onSubmit={(event) => {
+              event.preventDefault();
+              const nextName = renameValue.trim();
+              if (!nextName) return;
+              onRename(batch, nextName);
+              setRenameOpen(false);
+            }}
+          >
+            <label className="block space-y-2 text-sm font-medium text-slate-900 dark:text-slate-100">
+              {t("renameInputLabel")}
+              <Input
+                autoFocus
+                maxLength={120}
+                onChange={(event) => setRenameValue(event.target.value)}
+                value={renameValue}
+              />
+            </label>
+            <div className="flex justify-end gap-2">
+              <DialogClose asChild>
+                <Button type="button" variant="secondary">
+                  {t("cancel")}
+                </Button>
+              </DialogClose>
+              <Button disabled={!renameValue.trim()} type="submit">
+                {t("renameSubmit")}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -8,6 +8,7 @@ import type {
 export type ActivationCodeBatchListItem = {
   id: string;
   batchCode: string;
+  batchName: string;
   productSku: string;
   productName: string;
   quantity: number;
@@ -28,6 +29,7 @@ export type ActivationCodeBatchListQuery = {
 };
 
 export type CreateActivationCodeBatchBody = {
+  batchName?: string;
   sourceProductId?: string;
   quantity?: number;
 };
@@ -35,8 +37,15 @@ export type CreateActivationCodeBatchBody = {
 export type CreateActivationCodeBatchResult = {
   id: string;
   batchCode: string;
+  batchName: string;
   quantity: number;
   expiresAt: string;
+};
+
+export type UpdateActivationCodeBatchResult = {
+  id: string;
+  batchCode: string;
+  batchName: string;
 };
 
 export type RevokeActivationCodeBatchResult = {

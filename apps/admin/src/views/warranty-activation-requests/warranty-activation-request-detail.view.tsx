@@ -1,5 +1,18 @@
 "use client";
 
+import { FormPageShell } from "@/src/components/common/form-page-shell";
+import { StatePanel } from "@/src/components/common/state-panel";
+import { PermissionGuard } from "@/src/components/permission-guard";
+import { usePermissions } from "@/src/hooks/use-permissions";
+import { useToast } from "@/src/hooks/use-toast";
+import {
+  useResendWarrantyActivationRequestCertificateEmail,
+  useWarrantyActivationRequest,
+} from "@/src/hooks/use-warranty-activation-requests";
+import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
+import { warrantyActivationRequestsService } from "@/src/services/warranty-activation-requests/warranty-activation-requests.service";
+import { PERMISSIONS } from "@repo/shared/constants";
+import { Button } from "@repo/ui";
 import {
   CheckCircle2,
   Download,
@@ -12,19 +25,6 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { PERMISSIONS } from "@repo/shared/constants";
-import { Button } from "@repo/ui";
-import { FormPageShell } from "@/src/components/common/form-page-shell";
-import { StatePanel } from "@/src/components/common/state-panel";
-import { PermissionGuard } from "@/src/components/permission-guard";
-import { usePermissions } from "@/src/hooks/use-permissions";
-import {
-  useResendWarrantyActivationRequestCertificateEmail,
-  useWarrantyActivationRequest,
-} from "@/src/hooks/use-warranty-activation-requests";
-import { useToast } from "@/src/hooks/use-toast";
-import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
-import { warrantyActivationRequestsService } from "@/src/services/warranty-activation-requests/warranty-activation-requests.service";
 import { ReviewWarrantyActivationRequestDialog } from "./components/review-warranty-activation-request-dialog";
 import {
   WarrantyActivationRequestDetailCard,
@@ -223,7 +223,7 @@ export function WarrantyActivationRequestDetailView({
           </div>
         ) : null}
         {activationCodeBlocked ? (
-          <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+          <div className="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-600 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
             {t("activationCodeBlocked", {
               status: t(
                 `activationCodeStatuses.${request?.activationCode?.status}`,

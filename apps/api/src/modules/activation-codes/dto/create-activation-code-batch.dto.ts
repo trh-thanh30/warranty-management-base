@@ -1,6 +1,19 @@
-import { IsInt, IsOptional, IsUUID, Max, Min } from 'class-validator';
+import {
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  Min,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateActivationCodeBatchDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  batchName?: string;
+
   @IsOptional()
   @IsUUID()
   sourceProductId?: string;
