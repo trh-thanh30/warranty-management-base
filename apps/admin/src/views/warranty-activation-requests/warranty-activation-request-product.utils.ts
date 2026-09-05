@@ -28,6 +28,13 @@ export function resolveAssignedActivationCodeForProduct(
   );
 }
 
+export function isActivationCodeRequiredForRequest(
+  selectedCategoryRule: boolean | undefined,
+  selectedProductCategoryRule: boolean | undefined,
+) {
+  return (selectedCategoryRule ?? selectedProductCategoryRule) !== false;
+}
+
 export function formatActivationProductSearchOption(product: ProductResponse) {
   return [
     getActivationProductDisplayName(product),

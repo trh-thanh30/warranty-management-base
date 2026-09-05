@@ -51,6 +51,12 @@ describe('Multi-item activation lifecycle', () => {
 
     expect(transactionRepository.createOwnership).toHaveBeenCalledTimes(2);
     expect(transactionRepository.transitionWarranty).toHaveBeenCalledTimes(2);
+    expect(transactionRepository.setCurrentWarranty).toHaveBeenCalledTimes(2);
+    expect(transactionRepository.setCurrentWarranty).toHaveBeenNthCalledWith(
+      1,
+      'product-a',
+      'warranty-a',
+    );
     expect(transactionRepository.markItemsActivated).toHaveBeenCalledWith(
       'request-id',
       expect.any(Date),
@@ -124,6 +130,68 @@ describe('Multi-item activation lifecycle', () => {
       itemId: 'item-product-b',
       warrantyCode: 'WM-2026-RESERVED2',
       warrantyId: 'warranty-activation-code-2',
+    });
+  });
+
+  it('creates and links warranties for approved items that do not use activation codes', async () => {
+    const transactionRepository = createTransactionRepository();
+    const request = createActivationRequest();
+    request.items = request.items.map((item, index) => ({
+      ...item,
+      activation_code_id: null,
+      warranty_id: null,
+      warranty_code: `WM-2026-NOCODE${index + 1}`,
+      product: {
+        ...item.product,
+        warranty: null,
+        warranty_duration_months: 24,
+      },
+    }));
+    transactionRepository.findRequest.mockResolvedValue(request);
+    transactionRepository.createWarrantyForActivation.mockImplementation(
+      (input: { productId: string; warrantyCode: string }) =>
+        Promise.resolve({
+          duration_months: 24,
+          id: `warranty-${input.productId}`,
+          product: {
+            deleted_at: null,
+            ownerships: [{ id: `ownership-${input.productId}` }],
+            status: product_status.ACTIVE,
+          },
+          status: warranty_status.DRAFT,
+          warranty_code: input.warrantyCode,
+        }),
+    );
+    transactionRepository.findWarrantyByIdOrThrow.mockImplementation(
+      (id: string) => Promise.resolve({ id }),
+    );
+    const useCase = new ReviewWarrantyActivationRequestUseCase(
+      createRepository(transactionRepository) as never,
+      { execute: jest.fn() } as never,
+      generateCustomerCode as never,
+    );
+
+    await useCase.execute('request-id', {
+      status: warranty_activation_request_status.APPROVED,
+    });
+
+    expect(
+      transactionRepository.createWarrantyForActivation,
+    ).toHaveBeenCalledTimes(2);
+    expect(
+      transactionRepository.createWarrantyForActivation,
+    ).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        activationCodeId: null,
+        productId: 'product-a',
+        warrantyCode: 'WM-2026-NOCODE1',
+      }),
+    );
+    expect(transactionRepository.linkItemWarranty).toHaveBeenNthCalledWith(1, {
+      itemId: 'item-product-a',
+      warrantyCode: 'WM-2026-NOCODE1',
+      warrantyId: 'warranty-product-a',
     });
   });
 
@@ -433,6 +501,7 @@ function createTransactionRepository() {
       ),
     markItemsActivated: jest.fn(),
     markOwnershipActivated: jest.fn(),
+    setCurrentWarranty: jest.fn(),
     transitionWarranty: jest.fn().mockResolvedValue({ count: 1 }),
     updateCustomer: jest.fn().mockResolvedValue({
       id: 'customer-id',

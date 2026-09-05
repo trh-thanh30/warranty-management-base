@@ -8,6 +8,7 @@ export class ListAvailableActivationCodesUseCase {
   execute(
     productId: string | undefined,
     filters: {
+      batchId?: string;
       page?: number;
       limit?: number;
       search?: string;

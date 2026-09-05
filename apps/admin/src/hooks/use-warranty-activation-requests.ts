@@ -105,6 +105,8 @@ export function useReviewWarrantyActivationRequest(requestId: string | null) {
       void queryClient.invalidateQueries({
         queryKey: warrantyActivationRequestKeys.all,
       });
+      void queryClient.invalidateQueries({ queryKey: ["products"] });
+      void queryClient.invalidateQueries({ queryKey: ["warranties"] });
       queryClient.setQueryData(
         warrantyActivationRequestKeys.detail(request.id),
         request,

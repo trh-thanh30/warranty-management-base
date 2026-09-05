@@ -13,6 +13,8 @@ export type ActivationCodePrintJob = {
   progress_percent: number;
   from_index: number;
   to_index: number;
+  label_width_mm: number;
+  label_height_mm: number;
   bull_job_id: string | null;
   storage_key: string | null;
   filename: string | null;
@@ -26,5 +28,7 @@ export type ActivationCodePrintJob = {
 
 export type RequestActivationCodePrintJobQuery = {
   from?: number;
+  labelHeightMm?: number;
+  labelWidthMm?: number;
   to?: number;
 };

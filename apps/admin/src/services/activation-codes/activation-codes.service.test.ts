@@ -15,13 +15,25 @@ test("requesting a print job sends the selected label range", async () => {
 
   const result = await createActivationCodesService(
     http as unknown as ActivationCodesHttpClient,
-  ).requestPrintJob("batch-id", { from: 1, to: 50 });
+  ).requestPrintJob("batch-id", {
+    from: 1,
+    labelHeightMm: 20,
+    labelWidthMm: 40,
+    to: 50,
+  });
 
   assert.deepEqual(calls, [
     {
       url: "/activation-code-batches/batch-id/print-jobs",
       body: undefined,
-      config: { params: { from: 1, to: 50 } },
+      config: {
+        params: {
+          from: 1,
+          labelHeightMm: 20,
+          labelWidthMm: 40,
+          to: 50,
+        },
+      },
     },
   ]);
   assert.equal(result, job);
@@ -73,6 +85,34 @@ test("loads activation code report filters", async () => {
     },
   ]);
   assert.equal(result, report);
+});
+
+test("filters assignable activation codes by batch", async () => {
+  const calls: unknown[] = [];
+  const response = { items: [], meta: { page: 1, total: 0 } };
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  const result = await createActivationCodesService(
+    http as unknown as ActivationCodesHttpClient,
+  ).listAvailableByProduct(undefined, {
+    assignment: "UNASSIGNED",
+    batchId: "batch-id",
+  });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/activation-code-batches/available",
+      config: {
+        params: { assignment: "UNASSIGNED", batchId: "batch-id" },
+      },
+    },
+  ]);
+  assert.equal(result, response);
 });
 
 test("assigns one activation code to one physical product", async () => {

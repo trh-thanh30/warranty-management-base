@@ -227,6 +227,78 @@ describe('WarrantyActivationRequestsUseCases', () => {
     ]);
   });
 
+  it('reserves a warranty code for a validated item whose category does not use activation codes', async () => {
+    repository.findLastRequestCode.mockResolvedValue(null);
+    repository.findOpenByProductId.mockResolvedValue(null);
+    productsRepository.findActivationRequestTargetById.mockResolvedValue({
+      ...baseDraftProduct,
+      id: 'product-a',
+      product_code: 'CODE-product-a',
+      warranty: null,
+      warranty_duration_months: 24,
+    });
+    const itemValidator = {
+      validate: jest.fn().mockResolvedValue([
+        {
+          ...createValidatedItem('windshield', 'product-a'),
+          activationCodeId: null,
+          warrantyCode: null,
+          warrantyId: null,
+        },
+      ]),
+    };
+    repository.create.mockImplementation((data) =>
+      Promise.resolve({
+        ...baseRequest,
+        request_code: data.requestCode,
+        warranty_code: data.warrantyCode,
+        product_id: 'product-a',
+        category_id: 'category-id',
+        product_name: 'Product product-a',
+        serial_number: 'SERIAL-product-a',
+        items: data.items,
+      }),
+    );
+    const generateCodeUseCase =
+      new GenerateWarrantyActivationRequestCodeUseCase(repository as never);
+    const useCase = new CreateWarrantyActivationRequestUseCase(
+      repository as never,
+      generateCodeUseCase,
+      productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
+      itemValidator as never,
+    );
+
+    await useCase.execute({
+      addressDetail: '1 Nguyen Trai',
+      categoryId: 'category-id',
+      customerName: 'Nguyen Van A',
+      customerPhone: '0901234567',
+      items: [{ positionKey: 'windshield', productId: 'product-a' }],
+      provinceCode: '79',
+      provinceName: 'TP Ho Chi Minh',
+      wardCode: '26734',
+      wardName: 'Phuong Ben Thanh',
+    });
+
+    expect(generateWarrantyCodeUseCase.execute).toHaveBeenCalled();
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        warrantyCode: 'WM-2026-GENERATED',
+        items: [
+          expect.objectContaining({
+            activationCodeId: null,
+            productId: 'product-a',
+            warrantyCode: 'WM-2026-GENERATED',
+            warrantyId: null,
+          }),
+        ],
+      }),
+    );
+  });
+
   it('reserves a different warranty code for every generic activation item', async () => {
     repository.findLastRequestCode.mockResolvedValue(null);
     repository.findOpenByProductId.mockResolvedValue(null);

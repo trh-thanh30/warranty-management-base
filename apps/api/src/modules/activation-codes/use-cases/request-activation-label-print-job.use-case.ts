@@ -3,6 +3,11 @@ import { ActivationCodeBatchesRepository } from '@/modules/activation-codes/repo
 import { ActivationCodePrintJobsRepository } from '@/modules/activation-codes/repository/activation-code-print-jobs.repository';
 import { ActivationLabelPrintQueueService } from '@/modules/activation-codes/services/activation-label-print-queue.service';
 import { Injectable } from '@nestjs/common';
+import {
+  DEFAULT_ACTIVATION_LABEL_HEIGHT_MM,
+  DEFAULT_ACTIVATION_LABEL_WIDTH_MM,
+} from '@repo/shared/constants';
+import { isActivationLabelSizeValid } from '@repo/shared/utils';
 
 @Injectable()
 export class RequestActivationLabelPrintJobUseCase {
@@ -15,6 +20,8 @@ export class RequestActivationLabelPrintJobUseCase {
   async execute(input: {
     batchId: string;
     from?: number;
+    labelHeightMm?: number;
+    labelWidthMm?: number;
     requestedById: string;
     to?: number;
   }) {
@@ -23,6 +30,10 @@ export class RequestActivationLabelPrintJobUseCase {
 
     const from = input.from ?? 1;
     const to = input.to ?? batch.codes.length;
+    const labelHeightMm =
+      input.labelHeightMm ?? DEFAULT_ACTIVATION_LABEL_HEIGHT_MM;
+    const labelWidthMm =
+      input.labelWidthMm ?? DEFAULT_ACTIVATION_LABEL_WIDTH_MM;
     if (
       !Number.isInteger(from) ||
       !Number.isInteger(to) ||
@@ -38,9 +49,15 @@ export class RequestActivationLabelPrintJobUseCase {
     if (from > batch.codes.length) {
       throw new NotFoundError('No activation codes to print');
     }
+    if (isActivationLabelSizeValid({ labelHeightMm, labelWidthMm }) === false) {
+      throw new BadRequestError(
+        'Activation label size is invalid',
+        'ACTIVATION_LABEL_SIZE_INVALID',
+      );
+    }
 
     const boundedTo = Math.min(to, batch.codes.length);
-    const idempotencyKey = `activation-labels-${input.batchId}-${from}-${boundedTo}`;
+    const idempotencyKey = `activation-labels-${input.batchId}-${from}-${boundedTo}-${labelWidthMm}x${labelHeightMm}`;
     const existing = await this.jobs.findByIdempotencyKey(idempotencyKey);
     if (existing) {
       if (existing.status === 'COMPLETED') return existing;
@@ -62,6 +79,8 @@ export class RequestActivationLabelPrintJobUseCase {
         batchId: input.batchId,
         from,
         idempotencyKey,
+        labelHeightMm,
+        labelWidthMm,
         requestedById: input.requestedById,
         to: boundedTo,
       });

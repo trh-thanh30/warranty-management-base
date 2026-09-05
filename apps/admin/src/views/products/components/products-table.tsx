@@ -1,5 +1,6 @@
 "use client";
 
+import { ActivationCodeStatusBadge } from "@/src/components/activation-code-status-badge";
 import { SortableTableHead } from "@/src/components/common/sortable-table-head";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
@@ -44,7 +45,6 @@ import {
   getProductCategoryLabel,
   getProductDisplayName,
 } from "../products.utils";
-import { ProductActivationCodeStatusBadge } from "./product-activation-code-status-badge";
 import { ProductStatusBadge } from "./product-status-badge";
 import { WarrantyStatusBadge } from "./warranty-status-badge";
 
@@ -87,7 +87,7 @@ export function ProductsTable({
       </div>
 
       <TableScroll className="hidden max-h-144 overflow-y-scroll rounded-md border border-slate-200 dark:border-slate-800 lg:block">
-        <Table className="min-w-[88rem] [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
+        <Table className="w-max min-w-full table-auto [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
           <TableHeader className="sticky top-0 z-10 bg-white dark:bg-slate-950">
             <TableRow>
               <SortableTableHead
@@ -98,9 +98,6 @@ export function ProductsTable({
               >
                 {t("name")}
               </SortableTableHead>
-              <TableHead className="whitespace-nowrap">
-                {t("category")}
-              </TableHead>
               <TableHead className="whitespace-nowrap">
                 {t("warrantyStatus")}
               </TableHead>
@@ -169,21 +166,6 @@ function ProductTableRow({
       <TableCell>
         <ProductName product={product} />
       </TableCell>
-      <TableCell className="whitespace-nowrap">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span
-              className="block max-w-64 truncate outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
-              tabIndex={0}
-            >
-              {getProductCategoryLabel(product)}
-            </span>
-          </TooltipTrigger>
-          <TooltipContent className="max-w-80 wrap-break-word" side="top">
-            {getProductCategoryLabel(product)}
-          </TooltipContent>
-        </Tooltip>
-      </TableCell>
       <TableCell>
         <WarrantyStatusBadge status={product.warranty?.status} />
       </TableCell>
@@ -251,10 +233,6 @@ function ProductMobileCard({
             <WarrantyStatusBadge status={product.warranty?.status} />
           </dd>
         </div>
-        <ProductMobileField
-          label={t("category")}
-          value={getProductCategoryLabel(product)}
-        />
         <div className="col-span-2 min-w-0">
           <dt className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
             {t("activationCode")}
@@ -299,7 +277,7 @@ function ProductActivationCodeCell({ product }: { product: ProductResponse }) {
         <p className="text-xs font-semibold text-slate-950 dark:text-slate-50">
           {activationCode.code}
         </p>
-        <ProductActivationCodeStatusBadge status={activationCode.status} />
+        <ActivationCodeStatusBadge status={activationCode.status} />
       </div>
     </div>
   );
@@ -320,7 +298,7 @@ function ProductName({ product }: { product: ProductResponse }) {
             {displayName}
           </span>
           <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
-            {product.name} · {product.productCode}
+            {getProductCategoryLabel(product)}
           </p>
         </div>
       </TooltipTrigger>
@@ -443,15 +421,23 @@ function ProductActionsMenu({
             product.categoryRef?.activationCodeEnabled === true ? (
               <DropdownMenuItem
                 disabled={
-                  product.status !== "ACTIVE" || !product.warrantyDurationMonths
+                  product.status !== "ACTIVE" ||
+                  !product.warrantyDurationMonths ||
+                  Boolean(
+                    product.assignedActivationCode &&
+                    !product.assignedActivationCode.canReplace,
+                  )
                 }
                 onSelect={() => onAssignCodes(product)}
               >
                 <KeyRound className="mr-2 size-4" />
                 {t(
-                  product.assignedActivationCode
-                    ? "replaceActivationCode"
-                    : "assignActivationCodes",
+                  product.assignedActivationCode &&
+                    !product.assignedActivationCode.canReplace
+                    ? "activationCodeChangeLocked"
+                    : product.assignedActivationCode
+                      ? "replaceActivationCode"
+                      : "assignActivationCodes",
                 )}
               </DropdownMenuItem>
             ) : null}

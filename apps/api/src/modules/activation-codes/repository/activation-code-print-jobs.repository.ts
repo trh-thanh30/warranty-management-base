@@ -24,6 +24,8 @@ export class ActivationCodePrintJobsRepository {
     batchId: string;
     from: number;
     idempotencyKey: string;
+    labelHeightMm: number;
+    labelWidthMm: number;
     requestedById: string;
     to: number;
   }) {
@@ -33,6 +35,8 @@ export class ActivationCodePrintJobsRepository {
         requested_by: { connect: { id: input.requestedById } },
         idempotency_key: input.idempotencyKey,
         from_index: input.from,
+        label_height_mm: input.labelHeightMm,
+        label_width_mm: input.labelWidthMm,
         to_index: input.to,
       },
       include: { batch: true },

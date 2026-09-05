@@ -18,6 +18,7 @@ export class ProductActivationCodeReplacementConflictError extends Error {}
 
 export type CreateActivationCodeBatchRecord = {
   batchCode: string;
+  batchName: string;
   sourceProductId?: string;
   productSku?: string;
   productName?: string;
@@ -52,6 +53,7 @@ export class ActivationCodeBatchesRepository {
       ...(search
         ? {
             OR: [
+              { batch_name: { contains: search, mode: 'insensitive' } },
               { batch_code: { contains: search, mode: 'insensitive' } },
               { product_sku: { contains: search, mode: 'insensitive' } },
               { product_name: { contains: search, mode: 'insensitive' } },
@@ -91,6 +93,7 @@ export class ActivationCodeBatchesRepository {
           return {
             id: batch.id,
             batchCode: batch.batch_code,
+            batchName: batch.batch_name,
             productSku: batch.product_sku,
             productName: batch.product_name,
             quantity: batch.quantity,
@@ -118,10 +121,24 @@ export class ActivationCodeBatchesRepository {
     return { batchId: id, revokedCount: result.count };
   }
 
+  async updateBatchName(id: string, batchName: string) {
+    const existing = await this.prismaService.activationCodeBatch.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+    if (!existing) return null;
+    return this.prismaService.activationCodeBatch.update({
+      where: { id },
+      data: { batch_name: batchName },
+      select: { id: true, batch_code: true, batch_name: true },
+    });
+  }
+
   create(input: CreateActivationCodeBatchRecord) {
     return this.prismaService.activationCodeBatch.create({
       data: {
         batch_code: input.batchCode,
+        batch_name: input.batchName,
         source_product: input.sourceProductId
           ? { connect: { id: input.sourceProductId } }
           : undefined,
@@ -269,6 +286,7 @@ export class ActivationCodeBatchesRepository {
   async listAvailableByProduct(
     productId: string | undefined,
     filters: {
+      batchId?: string;
       page?: number;
       limit?: number;
       search?: string;
@@ -285,6 +303,7 @@ export class ActivationCodeBatchesRepository {
       : null;
     if (productId && !product) return paginate([], { page, limit, total: 0 });
     const baseWhere: Prisma.ActivationCodeWhereInput = {
+      ...(filters.batchId ? { batch_id: filters.batchId } : {}),
       ...(product ? { product_id: product.id } : {}),
       ...(!product && filters.assignment === 'ASSIGNED'
         ? { product_id: { not: null } }
@@ -319,7 +338,12 @@ export class ActivationCodeBatchesRepository {
       code_ciphertext: true,
       status: true,
       batch: {
-        select: { batch_code: true, product_name: true, product_sku: true },
+        select: {
+          batch_code: true,
+          batch_name: true,
+          product_name: true,
+          product_sku: true,
+        },
       },
       expires_at: true,
       product: {
@@ -377,6 +401,7 @@ export class ActivationCodeBatchesRepository {
           maskedCode: plaintext,
           copyCode: plaintext,
           batchCode: row.batch.batch_code,
+          batchName: row.batch.batch_name,
           productName: row.batch.product_name,
           productSku: row.batch.product_sku,
           expiresAt: row.expires_at,

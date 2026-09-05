@@ -24,6 +24,7 @@ export class CreateActivationCodeBatchUseCase {
   ) {}
 
   async execute(input: {
+    batchName?: string;
     sourceProductId?: string;
     quantity?: number;
     createdById: string;
@@ -64,6 +65,7 @@ export class CreateActivationCodeBatchUseCase {
 
     const now = new Date();
     const expiresAt = addCalendarMonthsUtc(now, policy.expiryMonths);
+    const batchName = input.batchName?.trim() || undefined;
     const createAttempts = this.config.createAttempts;
 
     for (let attempt = 1; attempt <= createAttempts; attempt += 1) {
@@ -74,6 +76,7 @@ export class CreateActivationCodeBatchUseCase {
       try {
         const batch = await this.batchesRepository.create({
           batchCode,
+          batchName: batchName ?? batchCode,
           sourceProductId: product?.id,
           productSku: product?.product_code,
           productName: product?.display_name?.trim() || product?.product_code,
@@ -100,6 +103,7 @@ export class CreateActivationCodeBatchUseCase {
         return {
           id: batch.id,
           batchCode: batch.batch_code,
+          batchName: batch.batch_name,
           sourceProductId: batch.source_product_id,
           product: {
             sku: batch.product_sku,

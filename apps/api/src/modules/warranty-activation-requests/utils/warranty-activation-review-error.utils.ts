@@ -58,9 +58,8 @@ export function getActivationEligibilityFailure(
   if (target.product.status !== product_status.ACTIVE) {
     return 'PRODUCT_INACTIVE';
   }
-  if (!target.product.warranty && !target.activationCodeId)
-    return 'WARRANTY_MISSING';
-  if (!target.product.warranty && target.activationCodeId) return null;
+  if (!target.product.warranty && !target.warrantyId) return null;
+  if (!target.product.warranty) return 'WARRANTY_MISSING';
   if (target.product.warranty!.id !== target.warrantyId) {
     return 'WARRANTY_PRODUCT_MISMATCH';
   }

@@ -131,4 +131,34 @@ describe('ReplaceProductActivationCodeAssignmentUseCase', () => {
       code: 'CURRENT_ACTIVATION_CODE_NOT_REPLACEABLE',
     });
   });
+
+  it('does not replace an activated code that issued a warranty', async () => {
+    const repository = {
+      findAssignmentProduct: jest.fn().mockResolvedValue(product),
+      findCodesForAssignment: jest.fn().mockResolvedValue([
+        {
+          ...currentCode,
+          status: activation_code_status.ACTIVATED,
+          request: { id: 'request-id' },
+          request_items: [{ id: 'request-item-id' }],
+          warranty: { id: 'warranty-id' },
+        },
+        replacementCode,
+      ]),
+      replaceProductAssignment: jest.fn(),
+    };
+
+    await expect(
+      new ReplaceProductActivationCodeAssignmentUseCase(
+        repository as never,
+      ).execute({
+        currentActivationCodeId: currentCode.id,
+        replacementActivationCodeId: replacementCode.id,
+        productId: product.id,
+      }),
+    ).rejects.toMatchObject({
+      code: 'CURRENT_ACTIVATION_CODE_NOT_REPLACEABLE',
+    });
+    expect(repository.replaceProductAssignment).not.toHaveBeenCalled();
+  });
 });

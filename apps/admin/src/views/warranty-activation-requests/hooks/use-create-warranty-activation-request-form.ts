@@ -40,6 +40,7 @@ import {
 } from "../warranty-activation-requests.utils";
 import {
   getActivationProductDisplayName,
+  isActivationCodeRequiredForRequest,
   resolveAssignedActivationCodeForProduct,
 } from "../warranty-activation-request-product.utils";
 
@@ -131,6 +132,23 @@ export function useCreateWarrantyActivationRequestForm({
   }, [activationCodeId, form]);
   const provinceCode = form.watch("provinceCode");
   const categoryId = form.watch("categoryId");
+  const categoriesQuery = useCategories({
+    isActive: "true",
+    limit: 100,
+    type: "PRODUCT",
+  });
+  const categories = useMemo(
+    () => categoriesQuery.data?.items ?? [],
+    [categoriesQuery.data?.items],
+  );
+  const selectedCategory = useMemo(
+    () => categories.find((category) => category.id === categoryId) ?? null,
+    [categories, categoryId],
+  );
+  const requiresActivationCode = isActivationCodeRequiredForRequest(
+    selectedCategory?.activationCodeEnabled,
+    selectedProduct?.categoryRef?.activationCodeEnabled,
+  );
   const provinceCodeNumber = provinceCode ? Number(provinceCode) : null;
   const provincesQuery = useVietnamProvinces();
   const wardsQuery = useVietnamWards(provinceCodeNumber);
@@ -148,9 +166,7 @@ export function useCreateWarrantyActivationRequestForm({
   const debouncedDealerSearch = useDebounce(dealerSearch.trim(), 300);
   const activationCodesQuery = useInfiniteQuery({
     enabled:
-      !activationCodeId &&
-      Boolean(selectedProduct) &&
-      selectedProduct?.categoryRef?.activationCodeEnabled !== false,
+      !activationCodeId && Boolean(selectedProduct) && requiresActivationCode,
     queryKey: ["available-activation-codes", selectedProduct?.id ?? "all"],
     queryFn: ({ pageParam }) =>
       activationCodesService.listAvailableByProduct(selectedProduct?.id, {
@@ -182,11 +198,6 @@ export function useCreateWarrantyActivationRequestForm({
         : null,
     [availableActivationCodes, selectedProduct],
   );
-  const categoriesQuery = useCategories({
-    isActive: "true",
-    limit: 100,
-    type: "PRODUCT",
-  });
   const activationFieldsQuery = useCategoryActivationFields(categoryId, {
     enabled: Boolean(categoryId),
   });
@@ -249,10 +260,6 @@ export function useCreateWarrantyActivationRequestForm({
           ),
     [categoryId, productsQuery.data?.pages],
   );
-  const categories = useMemo(
-    () => categoriesQuery.data?.items ?? [],
-    [categoriesQuery.data?.items],
-  );
   const dealers = useMemo(
     () =>
       Array.from(
@@ -264,11 +271,6 @@ export function useCreateWarrantyActivationRequestForm({
       ).map(([, dealer]) => dealer),
     [dealersQuery.data?.pages],
   );
-  const selectedCategory = useMemo(
-    () => categories.find((category) => category.id === categoryId) ?? null,
-    [categories, categoryId],
-  );
-
   useEffect(() => {
     const product = assignedProductQuery.data;
     if (!product) return;
@@ -532,7 +534,7 @@ export function useCreateWarrantyActivationRequestForm({
       values.activationCodeId || activationCodeId,
     );
 
-    if (!hasActivationCode) {
+    if (requiresActivationCode && !hasActivationCode) {
       const message = t("activationCodeRequired");
       toast.error(message);
       return;
@@ -632,6 +634,7 @@ export function useCreateWarrantyActivationRequestForm({
     products,
     productsQuery,
     register: form.register,
+    requiresActivationCode,
     selectedCustomer,
     selectedCategory,
     selectedDealer,

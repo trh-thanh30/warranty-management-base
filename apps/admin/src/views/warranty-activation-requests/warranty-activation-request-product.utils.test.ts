@@ -5,6 +5,7 @@ import {
   getActivationProductOptionDisabledReason,
   formatActivationProductSearchOption,
   getActivationProductDisplayName,
+  isActivationCodeRequiredForRequest,
   resolveAssignedActivationCodeForProduct,
 } from "./warranty-activation-request-product.utils.ts";
 import type { AvailableActivationCode } from "@/src/services/activation-codes/activation-code-batches.types";
@@ -117,4 +118,13 @@ test("does not auto-fill an unavailable assigned activation code", () => {
     resolveAssignedActivationCodeForProduct("product-a", [expiredCode]),
     null,
   );
+});
+
+test("does not require an activation code for a category with codes disabled", () => {
+  assert.equal(isActivationCodeRequiredForRequest(false, undefined), false);
+});
+
+test("falls back to the selected product category activation-code rule", () => {
+  assert.equal(isActivationCodeRequiredForRequest(undefined, false), false);
+  assert.equal(isActivationCodeRequiredForRequest(undefined, true), true);
 });

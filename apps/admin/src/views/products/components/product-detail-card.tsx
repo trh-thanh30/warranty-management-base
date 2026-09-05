@@ -1,5 +1,6 @@
 "use client";
 
+import { ActivationCodeStatusBadge } from "@/src/components/activation-code-status-badge";
 import { useMemo, useState, type ReactNode } from "react";
 import Lightbox from "yet-another-react-lightbox";
 import { formatDate, type ProductResponse } from "@repo/shared";
@@ -28,7 +29,6 @@ import {
   getProductInstallationPosition,
   getProductWarrantyProgress,
 } from "../products.utils";
-import { ProductActivationCodeStatusBadge } from "./product-activation-code-status-badge";
 import { ProductStatusBadge } from "./product-status-badge";
 import { WarrantyStatusBadge } from "./warranty-status-badge";
 
@@ -256,9 +256,7 @@ function AssignedActivationCodeDetails({
       />
       <DetailBadgeItem
         label={t("activationCodeStatus")}
-        value={
-          <ProductActivationCodeStatusBadge status={activationCode.status} />
-        }
+        value={<ActivationCodeStatusBadge status={activationCode.status} />}
       />
       <DetailItem
         icon={<Hash className="size-4" />}

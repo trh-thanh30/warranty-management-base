@@ -114,6 +114,13 @@ export class WarrantyActivationReviewTransactionRepository {
     return this.tx.warranty.updateMany({ where, data });
   }
 
+  setCurrentWarranty(productId: string, warrantyId: string) {
+    return this.tx.product.update({
+      where: { id: productId },
+      data: { current_warranty_id: warrantyId },
+    });
+  }
+
   markOwnershipActivated(ownershipId: string, activatedAt: Date) {
     return this.tx.productOwnership.update({
       where: { id: ownershipId },
@@ -126,7 +133,7 @@ export class WarrantyActivationReviewTransactionRepository {
   }
 
   createWarrantyForActivation(input: {
-    activationCodeId: string;
+    activationCodeId: string | null;
     productId: string;
     warrantyCode: string;
     durationMonths: number;
@@ -135,7 +142,9 @@ export class WarrantyActivationReviewTransactionRepository {
   }) {
     return this.tx.warranty.create({
       data: {
-        activation_code: { connect: { id: input.activationCodeId } },
+        activation_code: input.activationCodeId
+          ? { connect: { id: input.activationCodeId } }
+          : undefined,
         duration_months: input.durationMonths,
         product: { connect: { id: input.productId } },
         status: 'DRAFT',

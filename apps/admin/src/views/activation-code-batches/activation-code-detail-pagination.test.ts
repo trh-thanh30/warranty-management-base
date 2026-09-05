@@ -30,6 +30,7 @@ test("activation code rows render complete codes and group actions in a dropdown
   const source = await readFile(viewUrl, "utf8");
 
   assert.match(source, /item\.copyCode \?\? item\.maskedCode/);
+  assert.match(source, /<ActivationCodeStatusBadge status=\{item\.status\}/);
   assert.doesNotMatch(source, /revealedCodeId/);
   assert.match(source, /<DropdownMenu>/);
   assert.match(source, /<DropdownMenuItem/);

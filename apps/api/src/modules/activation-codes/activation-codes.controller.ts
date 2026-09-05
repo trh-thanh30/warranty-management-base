@@ -19,6 +19,7 @@ import { RequestActivationLabelPrintJobUseCase } from '@/modules/activation-code
 import { ListActivationCodeBatchesUseCase } from '@/modules/activation-codes/use-cases/list-activation-code-batches.use-case';
 import { RevokeActivationCodeUseCase } from '@/modules/activation-codes/use-cases/revoke-activation-code.use-case';
 import { RevokeActivationCodeBatchUseCase } from '@/modules/activation-codes/use-cases/revoke-activation-code-batch.use-case';
+import { UpdateActivationCodeBatchUseCase } from '@/modules/activation-codes/use-cases/update-activation-code-batch.use-case';
 import { ListActivationCodesUseCase } from '@/modules/activation-codes/use-cases/list-activation-codes.use-case';
 import { ListAvailableActivationCodesUseCase } from '@/modules/activation-codes/use-cases/list-available-activation-codes.use-case';
 import { ReplaceActivationCodeDto } from '@/modules/activation-codes/dto/replace-activation-code.dto';
@@ -32,6 +33,8 @@ import { AssignActivationCodesToProductUseCase } from '@/modules/activation-code
 import { UnassignActivationCodesFromProductUseCase } from '@/modules/activation-codes/use-cases/unassign-activation-codes-from-product.use-case';
 import { ReplaceProductActivationCodeAssignmentUseCase } from '@/modules/activation-codes/use-cases/replace-product-activation-code-assignment.use-case';
 import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
+import { Patch } from '@nestjs/common';
+import { UpdateActivationCodeBatchDto } from '@/modules/activation-codes/dto/update-activation-code-batch.dto';
 import { permission_key } from '@prisma/client';
 import type { Response } from 'express';
 
@@ -55,6 +58,7 @@ export class ActivationCodesController {
     private readonly assignCodesToProductUseCase: AssignActivationCodesToProductUseCase,
     private readonly unassignCodesFromProductUseCase: UnassignActivationCodesFromProductUseCase,
     private readonly replaceProductAssignmentUseCase: ReplaceProductActivationCodeAssignmentUseCase,
+    private readonly updateBatchNameUseCase: UpdateActivationCodeBatchUseCase,
   ) {}
 
   @Get()
@@ -118,6 +122,12 @@ export class ActivationCodesController {
     });
   }
 
+  @Patch(':id')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_CREATE])
+  update(@Param('id') id: string, @Body() dto: UpdateActivationCodeBatchDto) {
+    return this.updateBatchNameUseCase.execute(id, dto.batchName);
+  }
+
   @Post('codes/:id/revoke')
   @Permissions([permission_key.ACTIVATION_CODE_BATCH_REVOKE])
   revoke(@Param('id') id: string) {
@@ -167,6 +177,8 @@ export class ActivationCodesController {
     return this.requestPrintJobUseCase.execute({
       batchId: id,
       from: query.from,
+      labelHeightMm: query.labelHeightMm,
+      labelWidthMm: query.labelWidthMm,
       requestedById: user.id,
       to: query.to,
     });

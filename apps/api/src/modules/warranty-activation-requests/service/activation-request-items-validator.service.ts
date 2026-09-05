@@ -56,6 +56,7 @@ export class ActivationRequestItemsValidatorService {
     ) {
       this.throwValidation('ACTIVATION_CODE_NOT_APPLICABLE', { categoryId });
     }
+    const requiresActivationCode = category.activation_code_enabled !== false;
 
     const config =
       await this.categoriesRepository.getActivationFields(categoryId);
@@ -198,7 +199,11 @@ export class ActivationRequestItemsValidatorService {
           productId: item.productId,
         });
       }
-      if (!item.activationCodeId && !product.warranty) {
+      if (
+        requiresActivationCode &&
+        !item.activationCodeId &&
+        !product.warranty
+      ) {
         throw new NotFoundError('Product warranty not found', 'NOT_FOUND', {
           code: 'PRODUCT_WARRANTY_NOT_FOUND',
           productId: item.productId,
@@ -223,7 +228,8 @@ export class ActivationRequestItemsValidatorService {
       }
       if (
         product.status !== product_status.ACTIVE ||
-        (!item.activationCodeId &&
+        (requiresActivationCode &&
+          !item.activationCodeId &&
           (!product.warranty ||
             product.warranty.status !== warranty_status.DRAFT ||
             !product.warranty.warranty_code))
@@ -250,10 +256,12 @@ export class ActivationRequestItemsValidatorService {
         productName: getProductDisplayName(product),
         productCode: product.product_code,
         serialNumber: product.serial_number,
-        warrantyId: item.activationCodeId ? null : product.warranty!.id,
+        warrantyId: item.activationCodeId
+          ? null
+          : (product.warranty?.id ?? null),
         warrantyCode: item.activationCodeId
           ? null
-          : product.warranty!.warranty_code,
+          : (product.warranty?.warranty_code ?? null),
         warrantyDurationMonths:
           product.warranty?.duration_months ??
           product.warranty_duration_months ??

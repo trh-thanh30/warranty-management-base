@@ -376,16 +376,14 @@ export class ReviewWarrantyActivationRequestUseCase {
   ) {
     const warranty = input.warrantyId
       ? await repository.findWarrantyForActivation(input.warrantyId)
-      : input.activationCodeId
-        ? await repository.createWarrantyForActivation({
-            activationCodeId: input.activationCodeId,
-            durationMonths: input.warrantyDurationMonths,
-            productId: input.productId,
-            warrantyCode: input.warrantyCode,
-            method: input.warrantyMethod,
-            terms: input.warrantyTerms,
-          })
-        : null;
+      : await repository.createWarrantyForActivation({
+          activationCodeId: input.activationCodeId,
+          durationMonths: input.warrantyDurationMonths,
+          productId: input.productId,
+          warrantyCode: input.warrantyCode,
+          method: input.warrantyMethod,
+          terms: input.warrantyTerms,
+        });
     if (!warranty) {
       throw new NotFoundError(
         getWarrantyActivationReviewErrorMessage(
@@ -479,6 +477,8 @@ export class ReviewWarrantyActivationRequestUseCase {
         },
       );
     }
+
+    await repository.setCurrentWarranty(input.productId, warranty.id);
 
     await repository.markOwnershipActivated(
       currentOwnership.id,
