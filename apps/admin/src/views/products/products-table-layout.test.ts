@@ -91,7 +91,7 @@ test("activation-code dialog filters assignable codes by a searchable batch", as
   assert.match(source, /const \[batchId, setBatchId\] = useState\("ALL"\)/);
   assert.match(
     source,
-    /className="w-\[min\(calc\(100vw-2rem\),42rem\)\] max-w-2xl"/,
+    /className="w-\[min\(calc\(100vw-2rem\),42rem\)\] md:max-w-2xl"/,
   );
   assert.match(
     source,
