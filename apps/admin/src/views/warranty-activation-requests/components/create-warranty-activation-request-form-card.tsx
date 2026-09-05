@@ -93,6 +93,7 @@ export function CreateWarrantyActivationRequestFormCard({
     products,
     productsQuery,
     register,
+    requiresActivationCode,
     selectedCustomer,
     selectedCategory,
     selectedDealer,
@@ -480,8 +481,7 @@ export function CreateWarrantyActivationRequestFormCard({
               />
             ) : null}
 
-            {!activationCodeId &&
-            selectedProduct?.categoryRef?.activationCodeEnabled !== false ? (
+            {!activationCodeId && requiresActivationCode ? (
               <FormField
                 id="create-activation-request-activation-code"
                 label={t("activationCodeLabel")}

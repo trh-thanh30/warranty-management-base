@@ -123,7 +123,10 @@ export class CreateWarrantyActivationRequestUseCase {
       validatedItems?.some((item) => item.activationCodeId) ||
       activationCodeRecord,
     );
-    if (!product || (!product.warranty && !hasGenericCode)) {
+    if (
+      !product ||
+      (!product.warranty && !hasGenericCode && !validatedItems?.length)
+    ) {
       throw new NotFoundError('Warranty code not found', 'NOT_FOUND', {
         code: 'WARRANTY_CODE_NOT_FOUND',
         warrantyCode: dtoWarrantyCode,
@@ -155,7 +158,7 @@ export class CreateWarrantyActivationRequestUseCase {
           validatedItems.map(async (item) => {
             const itemWarrantyCode =
               item.warrantyCode ??
-              (item.activationCodeId
+              (!item.warrantyId
                 ? await this.generateDistinctWarrantyCode(reservedWarrantyCodes)
                 : existingWarrantyCode);
             if (itemWarrantyCode) reservedWarrantyCodes.add(itemWarrantyCode);

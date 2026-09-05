@@ -126,7 +126,7 @@ export class WarrantyActivationReviewTransactionRepository {
   }
 
   createWarrantyForActivation(input: {
-    activationCodeId: string;
+    activationCodeId: string | null;
     productId: string;
     warrantyCode: string;
     durationMonths: number;
@@ -135,7 +135,9 @@ export class WarrantyActivationReviewTransactionRepository {
   }) {
     return this.tx.warranty.create({
       data: {
-        activation_code: { connect: { id: input.activationCodeId } },
+        activation_code: input.activationCodeId
+          ? { connect: { id: input.activationCodeId } }
+          : undefined,
         duration_months: input.durationMonths,
         product: { connect: { id: input.productId } },
         status: 'DRAFT',

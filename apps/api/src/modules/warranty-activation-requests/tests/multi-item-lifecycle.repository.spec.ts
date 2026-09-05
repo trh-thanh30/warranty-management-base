@@ -127,6 +127,68 @@ describe('Multi-item activation lifecycle', () => {
     });
   });
 
+  it('creates and links warranties for approved items that do not use activation codes', async () => {
+    const transactionRepository = createTransactionRepository();
+    const request = createActivationRequest();
+    request.items = request.items.map((item, index) => ({
+      ...item,
+      activation_code_id: null,
+      warranty_id: null,
+      warranty_code: `WM-2026-NOCODE${index + 1}`,
+      product: {
+        ...item.product,
+        warranty: null,
+        warranty_duration_months: 24,
+      },
+    }));
+    transactionRepository.findRequest.mockResolvedValue(request);
+    transactionRepository.createWarrantyForActivation.mockImplementation(
+      (input: { productId: string; warrantyCode: string }) =>
+        Promise.resolve({
+          duration_months: 24,
+          id: `warranty-${input.productId}`,
+          product: {
+            deleted_at: null,
+            ownerships: [{ id: `ownership-${input.productId}` }],
+            status: product_status.ACTIVE,
+          },
+          status: warranty_status.DRAFT,
+          warranty_code: input.warrantyCode,
+        }),
+    );
+    transactionRepository.findWarrantyByIdOrThrow.mockImplementation(
+      (id: string) => Promise.resolve({ id }),
+    );
+    const useCase = new ReviewWarrantyActivationRequestUseCase(
+      createRepository(transactionRepository) as never,
+      { execute: jest.fn() } as never,
+      generateCustomerCode as never,
+    );
+
+    await useCase.execute('request-id', {
+      status: warranty_activation_request_status.APPROVED,
+    });
+
+    expect(
+      transactionRepository.createWarrantyForActivation,
+    ).toHaveBeenCalledTimes(2);
+    expect(
+      transactionRepository.createWarrantyForActivation,
+    ).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        activationCodeId: null,
+        productId: 'product-a',
+        warrantyCode: 'WM-2026-NOCODE1',
+      }),
+    );
+    expect(transactionRepository.linkItemWarranty).toHaveBeenNthCalledWith(1, {
+      itemId: 'item-product-a',
+      warrantyCode: 'WM-2026-NOCODE1',
+      warrantyId: 'warranty-product-a',
+    });
+  });
+
   it('uses the linked Customer even when snapshot contact matches another profile', async () => {
     const transactionRepository = createTransactionRepository();
     const request = createActivationRequest();

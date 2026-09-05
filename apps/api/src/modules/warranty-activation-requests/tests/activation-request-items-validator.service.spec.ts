@@ -153,6 +153,30 @@ describe('ActivationRequestItemsValidatorService', () => {
     expect(activationCodesRepository.findAvailableById).not.toHaveBeenCalled();
   });
 
+  it('allows a product without a pre-issued warranty when its category does not use activation codes', async () => {
+    productsRepository.findActiveProductCategoryById.mockResolvedValue({
+      id: 'category-id',
+      activation_code_enabled: false,
+    });
+    productsRepository.findActivationRequestTargetsByIds.mockResolvedValue([
+      { ...createProduct('product-a'), warranty: null },
+    ]);
+
+    await expect(
+      service.validate('category-id', [
+        { positionKey: 'windshield', productId: 'product-a' },
+      ]),
+    ).resolves.toEqual([
+      expect.objectContaining({
+        activationCodeId: null,
+        productId: 'product-a',
+        warrantyCode: null,
+        warrantyId: null,
+        warrantyDurationMonths: 24,
+      }),
+    ]);
+  });
+
   it('rejects a product different from the activation code assignment', async () => {
     activationCodesRepository.findAvailableById.mockResolvedValue({
       id: 'code-a',
