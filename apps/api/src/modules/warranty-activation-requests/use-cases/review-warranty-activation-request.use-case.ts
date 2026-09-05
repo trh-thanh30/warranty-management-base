@@ -478,6 +478,8 @@ export class ReviewWarrantyActivationRequestUseCase {
       );
     }
 
+    await repository.setCurrentWarranty(input.productId, warranty.id);
+
     await repository.markOwnershipActivated(
       currentOwnership.id,
       input.startDate,

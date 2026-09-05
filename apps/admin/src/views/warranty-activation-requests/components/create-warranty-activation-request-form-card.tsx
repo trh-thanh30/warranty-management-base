@@ -6,7 +6,9 @@ import {
   SearchDropdown,
 } from "@/src/components/common";
 import { ConfirmActionDialog } from "@/src/components/common/confirm-action-dialog";
+import { usePermissions } from "@/src/hooks/use-permissions";
 import { formatCustomerSearchOption } from "@/src/utils";
+import { PERMISSIONS } from "@repo/shared/constants";
 import {
   Button,
   Card,
@@ -17,12 +19,13 @@ import {
   Input,
   Textarea,
 } from "@repo/ui";
-import { Building2, Loader2, UserPlus } from "lucide-react";
+import { Building2, KeyRound, Loader2, UserPlus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { CreateCustomerDialog } from "../../customers/components/create-customer-dialog";
 import { EditCustomerAddressDialog } from "../../customers/components/edit-customer-address-dialog";
 import { CreateDealerDialog } from "../../dealers/components/create-dealer-dialog";
+import { AssignActivationCodesDialog } from "../../products/components/assign-activation-codes-dialog";
 import { useCreateWarrantyActivationRequestForm } from "../hooks/use-create-warranty-activation-request-form";
 import {
   formatActivationProductSearchOption,
@@ -58,12 +61,15 @@ export function CreateWarrantyActivationRequestFormCard({
   assignedProductId,
 }: CreateWarrantyActivationRequestFormCardProps) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
+  const { hasPermission } = usePermissions();
   const [categorySearch, setCategorySearch] = useState("");
   const [isCreateCustomerDialogOpen, setCreateCustomerDialogOpen] =
     useState(false);
   const [isEditCustomerAddressDialogOpen, setEditCustomerAddressDialogOpen] =
     useState(false);
   const [isCreateDealerDialogOpen, setCreateDealerDialogOpen] = useState(false);
+  const [isAssignActivationCodeDialogOpen, setAssignActivationCodeDialogOpen] =
+    useState(false);
   const {
     activationFields,
     activationFieldsQuery,
@@ -120,6 +126,9 @@ export function CreateWarrantyActivationRequestFormCard({
     Boolean(selectedProduct) ||
     Object.keys(selectedActivationProducts).length > 0;
   const isProductLockedByActivationCode = Boolean(activationCodeId);
+  const canAssignActivationCode = hasPermission(
+    PERMISSIONS.ACTIVATION_CODE_ASSIGN_PRODUCT,
+  );
   const filteredCategories = useMemo(
     () => filterActivationRequestCategories(categories, categorySearch),
     [categories, categorySearch],
@@ -522,16 +531,37 @@ export function CreateWarrantyActivationRequestFormCard({
                     </Button>
                   </div>
                 ) : selectedProduct && activationCodesQuery.isSuccess ? (
-                  <p
-                    className="mt-0.5 text-sm text-red-500 dark:text-red-400"
+                  <div
+                    className="mt-2 flex flex-col gap-2 rounded-md border border-amber-200 bg-amber-50/70 px-3 py-2.5 text-sm text-amber-800 dark:border-amber-900/70 dark:bg-amber-950/30 dark:text-amber-200 sm:flex-row sm:items-center sm:justify-between"
                     role="status"
                   >
-                    {assignedActivationCodeForSelectedProduct
-                      ? t(
-                          `activationCodeUnavailableReasons.${assignedActivationCodeForSelectedProduct.status}`,
-                        )
-                      : t("activationCodeNotAssignedToProduct")}
-                  </p>
+                    <span>
+                      {assignedActivationCodeForSelectedProduct
+                        ? t(
+                            `activationCodeUnavailableReasons.${assignedActivationCodeForSelectedProduct.status}`,
+                          )
+                        : t("activationCodeNotAssignedToProduct")}
+                    </span>
+                    {!assignedActivationCodeForSelectedProduct &&
+                    !selectedProduct.assignedActivationCode &&
+                    canAssignActivationCode ? (
+                      <Button
+                        className="shrink-0 self-start sm:self-auto hover:bg-amber-50 border border-amber-400 cursor-pointer"
+                        onClick={() => setAssignActivationCodeDialogOpen(true)}
+                        size="sm"
+                        type="button"
+                        variant="outline"
+                      >
+                        <KeyRound aria-hidden="true" className="size-4" />
+                        {t("assignActivationCode")}
+                      </Button>
+                    ) : !assignedActivationCodeForSelectedProduct &&
+                      !selectedProduct.assignedActivationCode ? (
+                      <span className="text-xs text-amber-700 dark:text-amber-300">
+                        {t("activationCodeAssignmentPermissionRequired")}
+                      </span>
+                    ) : null}
+                  </div>
                 ) : null}
               </FormField>
             ) : null}
@@ -702,6 +732,14 @@ export function CreateWarrantyActivationRequestFormCard({
           onOpenChange={setEditCustomerAddressDialogOpen}
           onSaved={selectCustomer}
           open={isEditCustomerAddressDialogOpen}
+        />
+        <AssignActivationCodesDialog
+          onAssigned={async () => {
+            await activationCodesQuery.refetch();
+          }}
+          onOpenChange={setAssignActivationCodeDialogOpen}
+          open={isAssignActivationCodeDialogOpen}
+          product={selectedProduct}
         />
       </CardContent>
     </Card>

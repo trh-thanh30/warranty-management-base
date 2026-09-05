@@ -114,6 +114,13 @@ export class WarrantyActivationReviewTransactionRepository {
     return this.tx.warranty.updateMany({ where, data });
   }
 
+  setCurrentWarranty(productId: string, warrantyId: string) {
+    return this.tx.product.update({
+      where: { id: productId },
+      data: { current_warranty_id: warrantyId },
+    });
+  }
+
   markOwnershipActivated(ownershipId: string, activatedAt: Date) {
     return this.tx.productOwnership.update({
       where: { id: ownershipId },

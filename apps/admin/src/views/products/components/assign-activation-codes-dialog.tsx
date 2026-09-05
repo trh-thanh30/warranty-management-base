@@ -27,10 +27,12 @@ import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 
 export function AssignActivationCodesDialog({
+  onAssigned,
   onOpenChange,
   open,
   product,
 }: {
+  onAssigned?: () => Promise<void> | void;
   onOpenChange: (open: boolean) => void;
   open: boolean;
   product: ProductResponse | null;
@@ -125,6 +127,7 @@ export function AssignActivationCodesDialog({
           queryKey: ["activation-code-assignment-options"],
         }),
       ]);
+      await onAssigned?.();
       toast.success(t(isReplacement ? "replaceSuccess" : "success"));
       setConfirmOpen(false);
       onOpenChange(false);

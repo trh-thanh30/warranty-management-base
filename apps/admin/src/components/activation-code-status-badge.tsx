@@ -5,8 +5,8 @@ import { Badge, type BadgeProps } from "@repo/ui";
 import { useTranslations } from "next-intl";
 
 const STATUS_VARIANTS = {
-  ACTIVATED: "info",
-  AVAILABLE: "success",
+  ACTIVATED: "success",
+  AVAILABLE: "info",
   EXPIRED: "destructive",
   PENDING_APPROVAL: "warning",
   REPLACED: "secondary",
@@ -15,9 +15,11 @@ const STATUS_VARIANTS = {
 
 export function ActivationCodeStatusBadge({
   className,
+  count,
   status,
 }: {
   className?: BadgeProps["className"];
+  count?: number;
   status: ActivationCodeReportStatus;
 }) {
   const t = useTranslations("ActivationCodeStatuses");
@@ -25,6 +27,7 @@ export function ActivationCodeStatusBadge({
   return (
     <Badge className={className} variant={STATUS_VARIANTS[status]}>
       {t(status)}
+      {count !== undefined ? `: ${count}` : null}
     </Badge>
   );
 }

@@ -14,6 +14,14 @@ test("batch rows show product assignment progress separately from code status", 
   assert.match(tableSource, /<ActivationCodeStatusCounts batch=\{batch\}/);
 });
 
+test("batch status counts reuse the shared activation code status badge", () => {
+  assert.match(
+    tableSource,
+    /<ActivationCodeStatusBadge[\s\S]*?count=\{count\}[\s\S]*?status=\{status\}/,
+  );
+  assert.doesNotMatch(tableSource, /const statusClasses/);
+});
+
 test("mobile batch summaries use valid paragraph structure and identify rename action", () => {
   assert.match(
     tableSource,

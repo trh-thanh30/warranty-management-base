@@ -37,3 +37,13 @@ test("categories with activation codes disabled skip code UI and validation", ()
   );
   assert.match(formSource, /!activationCodeId && requiresActivationCode \? \(/);
 });
+
+test("an eligible admin can assign a missing activation code without leaving the form", () => {
+  assert.match(formSource, /PERMISSIONS\.ACTIVATION_CODE_ASSIGN_PRODUCT/);
+  assert.match(formSource, /<AssignActivationCodesDialog/);
+  assert.match(formSource, /t\("assignActivationCode"\)/);
+  assert.match(
+    formSource,
+    /onAssigned=\{async \(\) => \{[\s\S]*?activationCodesQuery\.refetch\(\)/,
+  );
+});

@@ -51,6 +51,12 @@ describe('Multi-item activation lifecycle', () => {
 
     expect(transactionRepository.createOwnership).toHaveBeenCalledTimes(2);
     expect(transactionRepository.transitionWarranty).toHaveBeenCalledTimes(2);
+    expect(transactionRepository.setCurrentWarranty).toHaveBeenCalledTimes(2);
+    expect(transactionRepository.setCurrentWarranty).toHaveBeenNthCalledWith(
+      1,
+      'product-a',
+      'warranty-a',
+    );
     expect(transactionRepository.markItemsActivated).toHaveBeenCalledWith(
       'request-id',
       expect.any(Date),
@@ -495,6 +501,7 @@ function createTransactionRepository() {
       ),
     markItemsActivated: jest.fn(),
     markOwnershipActivated: jest.fn(),
+    setCurrentWarranty: jest.fn(),
     transitionWarranty: jest.fn().mockResolvedValue({ count: 1 }),
     updateCustomer: jest.fn().mockResolvedValue({
       id: 'customer-id',

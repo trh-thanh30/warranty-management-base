@@ -1780,6 +1780,8 @@
     "activationCodeOptionalPlaceholder": "Chọn mã kích hoạt đã gán sản phẩm",
     "activationCodeAutoFilled": "Đã tự động điền mã kích hoạt {code} được gán cho sản phẩm này.",
     "activationCodeNotAssignedToProduct": "Sản phẩm này chưa được gán mã kích hoạt khả dụng.",
+    "assignActivationCode": "Gán mã kích hoạt",
+    "activationCodeAssignmentPermissionRequired": "Liên hệ quản trị viên có quyền gán mã để tiếp tục.",
     "selectProductBeforeActivationCode": "Chọn sản phẩm để hệ thống tự điền mã kích hoạt",
     "loadingAssignedActivationCode": "Đang tải mã kích hoạt đã gán...",
     "noAssignedActivationCode": "Không có mã kích hoạt khả dụng",

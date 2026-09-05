@@ -11,9 +11,11 @@ test("activation code status badge centralizes labels and visual variants", asyn
   const source = await readFile(componentUrl, "utf8");
 
   assert.match(source, /useTranslations\("ActivationCodeStatuses"\)/);
-  assert.match(source, /AVAILABLE: "success"/);
+  assert.match(source, /AVAILABLE: "info"/);
   assert.match(source, /PENDING_APPROVAL: "warning"/);
-  assert.match(source, /ACTIVATED: "info"/);
+  assert.match(source, /ACTIVATED: "success"/);
   assert.match(source, /EXPIRED: "destructive"/);
   assert.match(source, /variant=\{STATUS_VARIANTS\[status\]\}/);
+  assert.match(source, /count\?: number/);
+  assert.match(source, /count !== undefined \? `: \$\{count\}` : null/);
 });
