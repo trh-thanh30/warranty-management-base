@@ -31,6 +31,7 @@ import {
 import { formControlFocusClassName } from "@/src/components/common/form-control.constants";
 import {
   getWarrantyActivationErrorKind,
+  isActivationCodeErrorKind,
   type WarrantyActivationErrorKind,
 } from "@/src/hooks/use-warranty-activation-request";
 import { useVietnamProvinces } from "@/src/hooks/use-vietnam-provinces";
@@ -93,12 +94,32 @@ export function WarrantyActivationRequestForm({
   const wardsQuery = useVietnamWards(provinceCodeNumber);
 
   useEffect(() => {
-    const subscription = form.watch(() => {
-      if (errorKind) onResetError();
+    const subscription = form.watch((_values, { name }) => {
+      if (!errorKind) return;
+
+      if (isActivationCodeErrorKind(errorKind)) {
+        if (name !== "activationCode") return;
+        form.clearErrors("activationCode");
+      }
+
+      onResetError();
     });
 
     return () => subscription.unsubscribe();
   }, [errorKind, form, onResetError]);
+
+  useEffect(() => {
+    if (!isActivationCodeErrorKind(errorKind)) return;
+
+    form.setError(
+      "activationCode",
+      {
+        message: t(`errors.${errorKind}`),
+        type: "server",
+      },
+      { shouldFocus: true },
+    );
+  }, [errorKind, form, t]);
 
   const handleSubmit = async (values: WarrantyActivationFormValues) => {
     const province = provincesQuery.data.find(
@@ -133,7 +154,18 @@ export function WarrantyActivationRequestForm({
       toast.success(t("success.title"));
       form.reset();
     } catch (error) {
-      toast.error(t(`errors.${getWarrantyActivationErrorKind(error)}`));
+      const submittedErrorKind = getWarrantyActivationErrorKind(error);
+
+      if (isActivationCodeErrorKind(submittedErrorKind)) {
+        form.setError(
+          "activationCode",
+          {
+            message: t(`errors.${submittedErrorKind}`),
+            type: "server",
+          },
+          { shouldFocus: true },
+        );
+      }
     }
   };
 
@@ -395,7 +427,7 @@ export function WarrantyActivationRequestForm({
           <Send className="size-4" />
         </Button>
 
-        {errorKind ? (
+        {errorKind && !isActivationCodeErrorKind(errorKind) ? (
           <p role="alert" className="text-sm font-medium text-premium-red">
             {t(`errors.${errorKind}`)}
           </p>

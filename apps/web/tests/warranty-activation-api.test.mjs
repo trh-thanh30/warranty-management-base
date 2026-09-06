@@ -191,9 +191,8 @@ test("warranty activation schema validates the required public fields", async ()
 });
 
 test("warranty activation errors distinguish business and transport failures", async () => {
-  const { getWarrantyActivationErrorKind } = await importRequired(
-    "../src/hooks/use-warranty-activation-request.ts",
-  );
+  const { getWarrantyActivationErrorKind, isActivationCodeErrorKind } =
+    await importRequired("../src/hooks/use-warranty-activation-request.ts");
   const businessError = (code) =>
     new HttpClientError({
       details: { code },
@@ -212,7 +211,13 @@ test("warranty activation errors distinguish business and transport failures", a
     getWarrantyActivationErrorKind(
       businessError("ACTIVATION_CODE_PRODUCT_NOT_ASSIGNED"),
     ),
-    "notEligible",
+    "activationCodeNotAssigned",
+  );
+  assert.equal(
+    getWarrantyActivationErrorKind(
+      businessError("ACTIVATION_CODE_NOT_APPLICABLE"),
+    ),
+    "activationCodeNotApplicable",
   );
   assert.equal(
     getWarrantyActivationErrorKind(
@@ -241,6 +246,92 @@ test("warranty activation errors distinguish business and transport failures", a
     ),
     "rateLimit",
   );
+  assert.equal(
+    getWarrantyActivationErrorKind(
+      new HttpClientError({
+        isNetworkError: true,
+        message: "Network Error",
+      }),
+    ),
+    "network",
+  );
+  assert.equal(
+    getWarrantyActivationErrorKind(
+      new HttpClientError({
+        isNetworkError: false,
+        message: "Service unavailable",
+        status: 503,
+      }),
+    ),
+    "serviceUnavailable",
+  );
+  assert.equal(
+    getWarrantyActivationErrorKind(
+      businessError("ACTIVATION_CODE_UNAVAILABLE"),
+    ),
+    "serviceUnavailable",
+  );
+  assert.equal(
+    getWarrantyActivationErrorKind(
+      new HttpClientError({
+        isNetworkError: false,
+        message: "Not found",
+        status: 404,
+      }),
+    ),
+    "notFound",
+  );
+
+  for (const kind of [
+    "activationCodeInvalid",
+    "activationCodeNotApplicable",
+    "activationCodeNotAssigned",
+    "alreadyOpen",
+    "notFound",
+  ]) {
+    assert.equal(isActivationCodeErrorKind(kind), true);
+  }
+  assert.equal(isActivationCodeErrorKind("network"), false);
+  assert.equal(isActivationCodeErrorKind(null), false);
+});
+
+test("warranty activation form renders code errors at the activation-code field", async () => {
+  const [source, viSource, enSource] = await Promise.all([
+    readFile(
+      new URL(
+        "../src/views/warranty/components/warranty-activation-request-form.tsx",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+    readFile(new URL("../src/messages/vi.json", import.meta.url), "utf8"),
+    readFile(new URL("../src/messages/en.json", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(source, /form\.setError\(\s*"activationCode"/);
+  assert.match(source, /isActivationCodeErrorKind\(errorKind\)/);
+  assert.doesNotMatch(source, /toast\.error/);
+
+  const errorKinds = [
+    "activationCodeInvalid",
+    "activationCodeNotApplicable",
+    "activationCodeNotAssigned",
+    "alreadyOpen",
+    "invalid",
+    "network",
+    "notFound",
+    "rateLimit",
+    "request",
+    "serviceUnavailable",
+  ];
+
+  for (const messagesSource of [viSource, enSource]) {
+    const errors = JSON.parse(messagesSource).Warranty.activate.errors;
+    for (const kind of errorKinds) {
+      assert.equal(typeof errors[kind], "string", `missing errors.${kind}`);
+      assert.notEqual(errors[kind].trim(), "", `empty errors.${kind}`);
+    }
+  }
 });
 
 test("web locations service loads wards for the selected province", async () => {
@@ -310,7 +401,7 @@ test("warranty activation success keeps a receipt and static process timeline in
   }
 });
 
-test("warranty activation reports submit and clipboard results through localized toasts", async () => {
+test("warranty activation reports success and clipboard results through localized toasts", async () => {
   const [formSource, successSource, vi, en] = await Promise.all([
     readFile(
       new URL(
@@ -331,10 +422,7 @@ test("warranty activation reports submit and clipboard results through localized
   ]);
 
   assert.match(formSource, /toast\.success\(t\("success\.title"\)\)/);
-  assert.match(
-    formSource,
-    /toast\.error\(t\(`errors\.\$\{getWarrantyActivationErrorKind\(error\)\}`\)\)/,
-  );
+  assert.doesNotMatch(formSource, /toast\.error/);
   assert.match(successSource, /toast\.success\(t\("copied"\)\)/);
   assert.match(successSource, /toast\.error\(t\("copyFailed"\)\)/);
 

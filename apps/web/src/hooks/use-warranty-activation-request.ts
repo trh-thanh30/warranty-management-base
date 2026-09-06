@@ -7,18 +7,52 @@ import { warrantyActivationRequestsService } from "@/src/services/warranty-activ
 
 export type WarrantyActivationErrorKind =
   | "activationCodeInvalid"
+  | "activationCodeNotApplicable"
+  | "activationCodeNotAssigned"
   | "alreadyOpen"
   | "invalid"
-  | "notEligible"
+  | "network"
   | "notFound"
   | "rateLimit"
-  | "request";
+  | "request"
+  | "serviceUnavailable";
+
+export type ActivationCodeErrorKind = Extract<
+  WarrantyActivationErrorKind,
+  | "activationCodeInvalid"
+  | "activationCodeNotApplicable"
+  | "activationCodeNotAssigned"
+  | "alreadyOpen"
+  | "notFound"
+>;
+
+const ACTIVATION_CODE_ERROR_KINDS: ReadonlySet<WarrantyActivationErrorKind> =
+  new Set([
+    "activationCodeInvalid",
+    "activationCodeNotApplicable",
+    "activationCodeNotAssigned",
+    "alreadyOpen",
+    "notFound",
+  ]);
+
+const SERVICE_UNAVAILABLE_CODES = new Set([
+  "ACTIVATION_CODE_UNAVAILABLE",
+  "ACTIVATION_REQUEST_CREATE_FAILED",
+  "WARRANTY_CODE_GENERATION_FAILED",
+]);
+
+export function isActivationCodeErrorKind(
+  kind: WarrantyActivationErrorKind | null,
+): kind is ActivationCodeErrorKind {
+  return kind !== null && ACTIVATION_CODE_ERROR_KINDS.has(kind);
+}
 
 export function getWarrantyActivationErrorKind(
   error: unknown,
 ): WarrantyActivationErrorKind {
   if (!(error instanceof HttpClientError)) return "request";
 
+  if (error.isNetworkError) return "network";
   if (error.status === 429) return "rateLimit";
 
   const detailCode =
@@ -32,9 +66,20 @@ export function getWarrantyActivationErrorKind(
     return "activationCodeInvalid";
   }
   if (detailCode === "ACTIVATION_CODE_PRODUCT_NOT_ASSIGNED") {
-    return "notEligible";
+    return "activationCodeNotAssigned";
+  }
+  if (detailCode === "ACTIVATION_CODE_NOT_APPLICABLE") {
+    return "activationCodeNotApplicable";
+  }
+  if (detailCode === "ACTIVATION_CODE_PRODUCT_MISMATCH") {
+    return "activationCodeInvalid";
   }
   if (detailCode === "ACTIVATION_REQUEST_ALREADY_OPEN") return "alreadyOpen";
+  if (detailCode && SERVICE_UNAVAILABLE_CODES.has(detailCode)) {
+    return "serviceUnavailable";
+  }
+  if (error.status === 404) return "notFound";
+  if (error.status && error.status >= 500) return "serviceUnavailable";
   if (error.status === 400 || error.status === 422) return "invalid";
 
   return "request";

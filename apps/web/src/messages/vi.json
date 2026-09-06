@@ -1462,12 +1462,15 @@
       },
       "errors": {
         "activationCodeInvalid": "Mã kích hoạt không hợp lệ hoặc đã hết hạn.",
-        "alreadyOpen": "Sản phẩm này đã có yêu cầu kích hoạt đang chờ xử lý.",
+        "activationCodeNotApplicable": "Danh mục của sản phẩm này không áp dụng mã kích hoạt. Vui lòng liên hệ đại lý để được hỗ trợ.",
+        "activationCodeNotAssigned": "Mã kích hoạt chưa được gán cho sản phẩm. Vui lòng liên hệ đại lý để kiểm tra.",
+        "alreadyOpen": "Mã kích hoạt này đã có yêu cầu đang chờ xử lý. Vui lòng không gửi lại.",
         "invalid": "Thông tin gửi lên chưa hợp lệ. Vui lòng kiểm tra lại.",
-        "notEligible": "Mã kích hoạt chưa được gán cho sản phẩm hợp lệ.",
-        "notFound": "Không tìm thấy thông tin kích hoạt trên hệ thống.",
+        "network": "Không thể kết nối đến hệ thống. Vui lòng kiểm tra mạng và thử lại.",
+        "notFound": "Không tìm thấy mã kích hoạt trên hệ thống.",
         "rateLimit": "Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau.",
-        "request": "Không thể gửi yêu cầu kích hoạt. Vui lòng thử lại."
+        "request": "Không thể gửi yêu cầu kích hoạt. Vui lòng thử lại.",
+        "serviceUnavailable": "Hệ thống kích hoạt đang tạm thời gián đoạn. Vui lòng thử lại sau."
       },
       "otherActions": {
         "title": "Dịch vụ bảo hành khác",

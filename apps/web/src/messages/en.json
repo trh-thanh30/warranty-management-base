@@ -1462,12 +1462,15 @@
       },
       "errors": {
         "activationCodeInvalid": "The activation code is invalid or expired.",
-        "alreadyOpen": "This product already has an activation request awaiting review.",
+        "activationCodeNotApplicable": "This product category does not use activation codes. Contact the dealer for assistance.",
+        "activationCodeNotAssigned": "This activation code has not been assigned to a product. Contact the dealer to verify it.",
+        "alreadyOpen": "This activation code already has a request awaiting review. Please do not submit it again.",
         "invalid": "Some submitted information is invalid. Check the form and try again.",
-        "notEligible": "The activation code is not assigned to an eligible product.",
-        "notFound": "No activation information was found.",
+        "network": "The system could not be reached. Check your connection and try again.",
+        "notFound": "This activation code was not found.",
         "rateLimit": "Too many requests were submitted. Try again later.",
-        "request": "The activation request could not be submitted. Try again."
+        "request": "The activation request could not be submitted. Try again.",
+        "serviceUnavailable": "The activation service is temporarily unavailable. Try again later."
       },
       "otherActions": {
         "title": "Other warranty services",
