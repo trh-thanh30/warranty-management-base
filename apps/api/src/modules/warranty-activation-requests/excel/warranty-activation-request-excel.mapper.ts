@@ -23,7 +23,10 @@ export function toWarrantyActivationRequestExcelRow(
     warrantyCode: request.warranty_code,
     itemCount: items.length || (request.product_id ? 1 : 0),
     productsByPosition: items
-      .map((item) => `${item.position_label}: ${item.warranty_code}`)
+      .map(
+        (item) =>
+          `${item.position_label}: ${item.warranty_code ?? 'Chờ phát hành'}`,
+      )
       .join('; '),
     customerName: request.customer_name,
     customerPhone: request.customer_phone,

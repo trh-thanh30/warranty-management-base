@@ -203,7 +203,6 @@ export function toCreateProductBody(
     values.installationPosition,
   );
   const productCode = toOptionalValue(values.productCode);
-  const warrantyCode = toOptionalValue(values.warrantyCode)?.toUpperCase();
   const catalogueMetadata = mergeProductCatalogueMetadata(null, values);
 
   return {
@@ -233,7 +232,6 @@ export function toCreateProductBody(
     displayName: values.displayName,
     metadata: metadata ?? undefined,
     ...(productCode ? { productCode } : {}),
-    ...(warrantyCode ? { warrantyCode } : {}),
     serialNumber: toOptionalValue(values.serialNumber),
     status: values.status,
     warrantyDurationMonths: values.warrantyDurationMonths,
@@ -271,7 +269,6 @@ export function toUpdateProductBody(
     productCode: values.productCode.trim(),
     serialNumber: toNullableValue(values.serialNumber),
     status: values.status,
-    warrantyCode: values.warrantyCode?.trim() ?? "",
     warrantyDurationMonths: values.warrantyDurationMonths,
     warrantyTerms: toNullableValue(values.warrantyTerms),
   };
@@ -300,16 +297,6 @@ export function getProductSaveErrorMatch(error: unknown) {
     "Product code is required": ["productCode", "productCodeRequired"],
     "Product category not found": ["categoryId", "categoryNotFound"],
     "Serial number already exists": ["serialNumber", "duplicateSerialNumber"],
-    "Warranty code already exists": ["warrantyCode", "duplicateWarrantyCode"],
-    "Warranty code is invalid": ["warrantyCode", "warrantyCodeInvalid"],
-    "Warranty code can only be changed while warranty is draft": [
-      "warrantyCode",
-      "warrantyCodeNotDraft",
-    ],
-    "Warranty code cannot be changed while an activation request is open": [
-      "warrantyCode",
-      "warrantyCodeOpenRequest",
-    ],
     "Warranty duration is required": [
       "warrantyDurationMonths",
       "durationMonthsRange",

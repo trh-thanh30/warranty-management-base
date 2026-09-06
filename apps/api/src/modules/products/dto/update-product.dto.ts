@@ -88,9 +88,4 @@ export class UpdateProductDto {
   @IsOptional()
   @IsObject()
   metadata?: Record<string, unknown> | null;
-
-  @IsOptional()
-  @IsString()
-  @Length(0, 64)
-  warrantyCode?: string;
 }

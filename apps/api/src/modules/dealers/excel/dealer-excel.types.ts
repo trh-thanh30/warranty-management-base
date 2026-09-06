@@ -11,6 +11,7 @@ export type DealerExcelRow = {
 };
 
 export type PreparedDealerImportRow = DealerExcelRow & {
+  dealerCode: string | null;
   existingDealerId: string | null;
   rowNumber: number;
 };

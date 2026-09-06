@@ -10,13 +10,17 @@ import {
   PreparedDealerImportRow,
 } from '@/modules/dealers/excel/dealer-excel.types';
 import { DealersRepository } from '@/modules/dealers/repository/dealers.repository';
+import { GenerateDealerCodeUseCase } from '@/modules/dealers/use-cases/generate-dealer-code.use-case';
 import { Injectable } from '@nestjs/common';
 import { Dealer } from '@prisma/client';
 import type { DealerImportResult } from '@repo/shared';
 
 @Injectable()
 export class ImportDealersUseCase {
-  constructor(private readonly dealersRepository: DealersRepository) {}
+  constructor(
+    private readonly dealersRepository: DealersRepository,
+    private readonly generateDealerCodeUseCase: GenerateDealerCodeUseCase = new GenerateDealerCodeUseCase(),
+  ) {}
 
   async execute(file: Express.Multer.File | undefined) {
     if (!file) throw new BadRequestError('Excel file is required');
@@ -96,6 +100,7 @@ export class ImportDealersUseCase {
 
       preparedRows.push({
         ...row,
+        dealerCode: existing ? null : this.generateDealerCodeUseCase.execute(),
         phone,
         existingDealerId: existing?.id ?? null,
       });

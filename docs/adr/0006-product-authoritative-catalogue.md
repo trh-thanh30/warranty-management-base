@@ -2,7 +2,11 @@
 
 ## Status
 
-Accepted
+Amended by [ADR 0007](./0007-generic-activation-code-pool-and-warranty-issuance.md).
+
+ADR 0006 remains authoritative for removing Product Template. ADR 0007 changes
+the warranty semantics: Product is the reusable SKU/catalogue record, while an
+issued Warranty plus its Activation Code identifies one sold unit.
 
 ## Context
 

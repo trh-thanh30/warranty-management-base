@@ -1,4 +1,5 @@
 export { default as appConfig } from '@/config/app.config';
+export { default as activationCodeConfig } from '@/config/activation-code.config';
 export {
   default as bullConfig,
   bullConfig as bullConfigFactory,

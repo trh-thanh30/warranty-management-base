@@ -30,8 +30,7 @@ test("remaining long table values are bounded without changing mobile cards", ()
   );
   assert.match(productsSource, /lg:max-w-64/);
   assert.match(productsSource, /block truncate font-medium/);
-  assert.match(productsSource, /block max-w-64 truncate/);
-  assert.match(productsSource, /block max-w-52 truncate/);
+  assert.match(productsSource, /mt-1 line-clamp-1 text-xs/);
 
   assert.match(
     readViewSource("./customers/customer-products.view.tsx"),

@@ -55,6 +55,10 @@ export class UpdateCategoryDto {
   isActive?: boolean;
 
   @IsOptional()
+  @IsBoolean()
+  activationCodeEnabled?: boolean;
+
+  @IsOptional()
   @IsObject()
   metadata?: Record<string, unknown> | null;
 }

@@ -1,5 +1,9 @@
 import { WarrantyActivationRequestQueries } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository.queries';
-import { Prisma, warranty_activation_request_status } from '@prisma/client';
+import {
+  Prisma,
+  warranty_activation_request_status,
+  warranty_method,
+} from '@prisma/client';
 
 const activationReviewRequestInclude = {
   activated_warranty: true,
@@ -38,7 +42,10 @@ export class WarrantyActivationReviewTransactionRepository {
   }
 
   findCustomerByEmail(email: string) {
-    return this.tx.customer.findUnique({ where: { email } });
+    return this.tx.customer.findFirst({
+      where: { email },
+      orderBy: { created_at: 'desc' },
+    });
   }
 
   findLastCustomerCode(prefix: string) {
@@ -107,6 +114,13 @@ export class WarrantyActivationReviewTransactionRepository {
     return this.tx.warranty.updateMany({ where, data });
   }
 
+  setCurrentWarranty(productId: string, warrantyId: string) {
+    return this.tx.product.update({
+      where: { id: productId },
+      data: { current_warranty_id: warrantyId },
+    });
+  }
+
   markOwnershipActivated(ownershipId: string, activatedAt: Date) {
     return this.tx.productOwnership.update({
       where: { id: ownershipId },
@@ -118,6 +132,53 @@ export class WarrantyActivationReviewTransactionRepository {
     return this.tx.warranty.findUniqueOrThrow({ where: { id: warrantyId } });
   }
 
+  createWarrantyForActivation(input: {
+    activationCodeId: string | null;
+    productId: string;
+    warrantyCode: string;
+    durationMonths: number;
+    method?: warranty_method;
+    terms?: string | null;
+  }) {
+    return this.tx.warranty.create({
+      data: {
+        activation_code: input.activationCodeId
+          ? { connect: { id: input.activationCodeId } }
+          : undefined,
+        duration_months: input.durationMonths,
+        product: { connect: { id: input.productId } },
+        status: 'DRAFT',
+        warranty_code: input.warrantyCode,
+        method: input.method ?? warranty_method.REPAIR,
+        terms: input.terms ?? undefined,
+      },
+      include: {
+        product: {
+          include: {
+            ownerships: {
+              where: { is_current_owner: true },
+              take: 1,
+            },
+          },
+        },
+      },
+    });
+  }
+
+  linkItemWarranty(input: {
+    itemId: string;
+    warrantyCode: string;
+    warrantyId: string;
+  }) {
+    return this.tx.warrantyActivationRequestItem.update({
+      where: { id: input.itemId },
+      data: {
+        warranty: { connect: { id: input.warrantyId } },
+        warranty_code: input.warrantyCode,
+      },
+    });
+  }
+
   markItemsActivated(requestId: string, activatedAt: Date) {
     return this.tx.warrantyActivationRequestItem.updateMany({
       where: { request_id: requestId },
@@ -125,6 +186,25 @@ export class WarrantyActivationReviewTransactionRepository {
         activated_at: activatedAt,
         status: warranty_activation_request_status.ACTIVATED,
       },
+    });
+  }
+
+  markActivationCodeActivated(codeId: string, activatedAt: Date) {
+    return this.tx.activationCode.updateMany({
+      where: { id: codeId, status: 'AVAILABLE' },
+      data: { status: 'ACTIVATED', activated_at: activatedAt },
+    });
+  }
+
+  markActivationCodesActivated(codeIds: string[], activatedAt: Date) {
+    if (codeIds.length === 0) return Promise.resolve({ count: 0 });
+    return this.tx.activationCode.updateMany({
+      where: {
+        id: { in: codeIds },
+        status: 'AVAILABLE',
+        expires_at: { gt: activatedAt },
+      },
+      data: { status: 'ACTIVATED', activated_at: activatedAt },
     });
   }
 

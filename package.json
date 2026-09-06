@@ -85,6 +85,8 @@
     "worker:prod": "pnpm worker:email:prod",
     "worker:email:dev": "pnpm --filter @repo/api start:worker:email",
     "worker:email:prod": "pnpm --filter @repo/api start:worker:email:prod",
+    "worker:activation-labels:dev": "pnpm --filter @repo/api start:worker:activation-labels",
+    "worker:activation-labels:prod": "pnpm --filter @repo/api start:worker:activation-labels:prod",
     "infra:dev:up": "docker compose -f docker-compose.dev.yml --env-file .env.development up -d db redis minio minio-init pdf-renderer",
     "infra:dev:up:deps": "docker compose -f docker-compose.dev.yml --env-file .env.development up -d db redis minio minio-init",
     "infra:dev:up:no-build": "docker compose -f docker-compose.dev.yml --env-file .env.development up -d --no-build db redis minio minio-init pdf-renderer",

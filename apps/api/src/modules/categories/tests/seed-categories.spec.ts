@@ -35,6 +35,29 @@ describe('Lexzenz category seed', () => {
 
     await seedLexzenzProductCategories(client);
 
+    const filmUpsert = categoryUpsert.mock.calls.find(
+      ([input]) =>
+        Reflect.get(input.create, 'code') === 'LEXZENZ_REFLEX_KOREA_FILM',
+    )?.[0];
+    const nonFilmUpserts = categoryUpsert.mock.calls.filter(
+      ([input]) =>
+        Reflect.get(input.create, 'code') !== 'LEXZENZ_REFLEX_KOREA_FILM',
+    );
+
+    expect(filmUpsert?.create).toMatchObject({
+      activation_code_enabled: false,
+    });
+    expect(filmUpsert?.update).toMatchObject({
+      activation_code_enabled: false,
+    });
+    expect(
+      nonFilmUpserts.every(
+        ([input]) =>
+          Reflect.get(input.create, 'activation_code_enabled') === true &&
+          Reflect.get(input.update, 'activation_code_enabled') === true,
+      ),
+    ).toBe(true);
+
     expect(filmActivationFieldSeeds.map((field) => field.key)).toEqual([
       'windshield',
       'frontLeftSide',

@@ -1,0 +1,216 @@
+import { Permissions } from '@/common/decorators/permissions.decorator';
+import { User } from '@/common/decorators/user.decorator';
+import { createDatedExcelFilename, sendExcelFile } from '@/common/excel';
+import { BadRequestError } from '@/common/response';
+import { ActivationCodeReportQueryDto } from '@/modules/activation-codes/dto/activation-code-report-query.dto';
+import { CreateActivationCodeBatchDto } from '@/modules/activation-codes/dto/create-activation-code-batch.dto';
+import {
+  ListActivationCodeBatchesDto,
+  ListActivationCodesDto,
+} from '@/modules/activation-codes/dto/list-activation-code-batches.dto';
+import { ListAvailableActivationCodesDto } from '@/modules/activation-codes/dto/list-available-activation-codes.dto';
+import { PrintableActivationLabelsQueryDto } from '@/modules/activation-codes/dto/printable-activation-labels-query.dto';
+import { CreateActivationCodeBatchUseCase } from '@/modules/activation-codes/use-cases/create-activation-code-batch.use-case';
+import { DownloadActivationLabelPrintJobUseCase } from '@/modules/activation-codes/use-cases/download-activation-label-print-job.use-case';
+import { ExportActivationCodeReportUseCase } from '@/modules/activation-codes/use-cases/export-activation-code-report.use-case';
+import { GetActivationCodeReportUseCase } from '@/modules/activation-codes/use-cases/get-activation-code-report.use-case';
+import { GetActivationLabelPrintJobUseCase } from '@/modules/activation-codes/use-cases/get-activation-label-print-job.use-case';
+import { RequestActivationLabelPrintJobUseCase } from '@/modules/activation-codes/use-cases/request-activation-label-print-job.use-case';
+import { ListActivationCodeBatchesUseCase } from '@/modules/activation-codes/use-cases/list-activation-code-batches.use-case';
+import { RevokeActivationCodeUseCase } from '@/modules/activation-codes/use-cases/revoke-activation-code.use-case';
+import { RevokeActivationCodeBatchUseCase } from '@/modules/activation-codes/use-cases/revoke-activation-code-batch.use-case';
+import { UpdateActivationCodeBatchUseCase } from '@/modules/activation-codes/use-cases/update-activation-code-batch.use-case';
+import { ListActivationCodesUseCase } from '@/modules/activation-codes/use-cases/list-activation-codes.use-case';
+import { ListAvailableActivationCodesUseCase } from '@/modules/activation-codes/use-cases/list-available-activation-codes.use-case';
+import { ReplaceActivationCodeDto } from '@/modules/activation-codes/dto/replace-activation-code.dto';
+import { RevokeActivationCodeBatchDto } from '@/modules/activation-codes/dto/revoke-activation-code-batch.dto';
+import { ReplaceActivationCodeUseCase } from '@/modules/activation-codes/use-cases/replace-activation-code.use-case';
+import {
+  AssignActivationCodesToProductDto,
+  ReplaceProductActivationCodeAssignmentDto,
+  UnassignActivationCodesFromProductDto,
+} from '@/modules/activation-codes/dto/assign-activation-codes-to-product.dto';
+import { AssignActivationCodesToProductUseCase } from '@/modules/activation-codes/use-cases/assign-activation-codes-to-product.use-case';
+import { UnassignActivationCodesFromProductUseCase } from '@/modules/activation-codes/use-cases/unassign-activation-codes-from-product.use-case';
+import { ReplaceProductActivationCodeAssignmentUseCase } from '@/modules/activation-codes/use-cases/replace-product-activation-code-assignment.use-case';
+import { GetActivationCodeBatchRevokePreviewUseCase } from '@/modules/activation-codes/use-cases/get-activation-code-batch-revoke-preview.use-case';
+import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
+import { Patch } from '@nestjs/common';
+import { UpdateActivationCodeBatchDto } from '@/modules/activation-codes/dto/update-activation-code-batch.dto';
+import { permission_key } from '@prisma/client';
+import type { Response } from 'express';
+
+type RequestUser = { id?: string };
+
+@Controller('activation-code-batches')
+export class ActivationCodesController {
+  constructor(
+    private readonly createActivationCodeBatchUseCase: CreateActivationCodeBatchUseCase,
+    private readonly revokeActivationCodeUseCase: RevokeActivationCodeUseCase,
+    private readonly requestPrintJobUseCase: RequestActivationLabelPrintJobUseCase,
+    private readonly getPrintJobUseCase: GetActivationLabelPrintJobUseCase,
+    private readonly downloadPrintJobUseCase: DownloadActivationLabelPrintJobUseCase,
+    private readonly getReportUseCase: GetActivationCodeReportUseCase,
+    private readonly exportReportUseCase: ExportActivationCodeReportUseCase,
+    private readonly listBatchesUseCase: ListActivationCodeBatchesUseCase,
+    private readonly revokeBatchUseCase: RevokeActivationCodeBatchUseCase,
+    private readonly getBatchRevokePreviewUseCase: GetActivationCodeBatchRevokePreviewUseCase,
+    private readonly listCodesUseCase: ListActivationCodesUseCase,
+    private readonly listAvailableCodesUseCase: ListAvailableActivationCodesUseCase,
+    private readonly replaceActivationCodeUseCase: ReplaceActivationCodeUseCase,
+    private readonly assignCodesToProductUseCase: AssignActivationCodesToProductUseCase,
+    private readonly unassignCodesFromProductUseCase: UnassignActivationCodesFromProductUseCase,
+    private readonly replaceProductAssignmentUseCase: ReplaceProductActivationCodeAssignmentUseCase,
+    private readonly updateBatchNameUseCase: UpdateActivationCodeBatchUseCase,
+  ) {}
+
+  @Get()
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_VIEW])
+  list(@Query() query: ListActivationCodeBatchesDto) {
+    return this.listBatchesUseCase.execute(query);
+  }
+
+  @Get('available')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_VIEW])
+  listAvailable(@Query() query: ListAvailableActivationCodesDto) {
+    return this.listAvailableCodesUseCase.execute(query.productId, query);
+  }
+
+  @Get(':id/codes')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_VIEW])
+  listCodes(@Param('id') id: string, @Query() query: ListActivationCodesDto) {
+    return this.listCodesUseCase.execute(id, query);
+  }
+
+  @Get(':id/revoke-preview')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_REVOKE])
+  getBatchRevokePreview(@Param('id') id: string) {
+    return this.getBatchRevokePreviewUseCase.execute(id);
+  }
+
+  @Get('reports/summary')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_VIEW])
+  report(@Query() query: ActivationCodeReportQueryDto) {
+    return this.getReportUseCase.execute(query);
+  }
+
+  @Get('reports/by-province')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_VIEW])
+  reportByProvince(@Query() query: ActivationCodeReportQueryDto) {
+    return this.getReportUseCase
+      .execute(query)
+      .then((result) => result.byProvince);
+  }
+
+  @Get('reports/export')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_VIEW])
+  async exportReport(
+    @Query() query: ActivationCodeReportQueryDto,
+    @Res() response: Response,
+  ) {
+    const buffer = await this.exportReportUseCase.execute(query);
+    sendExcelFile(
+      response,
+      buffer,
+      createDatedExcelFilename('activation-code-report'),
+    );
+  }
+
+  @Post()
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_CREATE])
+  create(@Body() dto: CreateActivationCodeBatchDto, @User() user: RequestUser) {
+    if (!user?.id) {
+      throw new BadRequestError(
+        'Authenticated user is required',
+        'ACTIVATION_CODE_CREATOR_REQUIRED',
+      );
+    }
+    return this.createActivationCodeBatchUseCase.execute({
+      ...dto,
+      createdById: user.id,
+    });
+  }
+
+  @Patch(':id')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_CREATE])
+  update(@Param('id') id: string, @Body() dto: UpdateActivationCodeBatchDto) {
+    return this.updateBatchNameUseCase.execute(id, dto.batchName);
+  }
+
+  @Post('codes/:id/revoke')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_REVOKE])
+  revoke(@Param('id') id: string) {
+    return this.revokeActivationCodeUseCase.execute(id);
+  }
+
+  @Post('codes/assign-product')
+  @Permissions([permission_key.ACTIVATION_CODE_ASSIGN_PRODUCT])
+  assignProduct(@Body() dto: AssignActivationCodesToProductDto) {
+    return this.assignCodesToProductUseCase.execute(dto);
+  }
+
+  @Post('codes/replace-product-assignment')
+  @Permissions([permission_key.ACTIVATION_CODE_ASSIGN_PRODUCT])
+  replaceProductAssignment(
+    @Body() dto: ReplaceProductActivationCodeAssignmentDto,
+  ) {
+    return this.replaceProductAssignmentUseCase.execute(dto);
+  }
+
+  @Post('codes/unassign-product')
+  @Permissions([permission_key.ACTIVATION_CODE_ASSIGN_PRODUCT])
+  unassignProduct(@Body() dto: UnassignActivationCodesFromProductDto) {
+    return this.unassignCodesFromProductUseCase.execute(dto);
+  }
+
+  @Post('codes/:id/replace')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_REVOKE])
+  replace(@Param('id') id: string, @Body() dto: ReplaceActivationCodeDto) {
+    return this.replaceActivationCodeUseCase.execute(id, dto.replacementCode);
+  }
+
+  @Post(':id/revoke')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_REVOKE])
+  revokeBatch(
+    @Param('id') id: string,
+    @Body() dto?: RevokeActivationCodeBatchDto,
+  ) {
+    return this.revokeBatchUseCase.execute(id, dto?.scope);
+  }
+
+  @Post(':id/print-jobs')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_PRINT])
+  requestPrintJob(
+    @Param('id') id: string,
+    @Query() query: PrintableActivationLabelsQueryDto,
+    @User() user: RequestUser,
+  ) {
+    if (!user?.id) throw new BadRequestError('Authenticated user is required');
+    return this.requestPrintJobUseCase.execute({
+      batchId: id,
+      from: query.from,
+      labelHeightMm: query.labelHeightMm,
+      labelWidthMm: query.labelWidthMm,
+      requestedById: user.id,
+      to: query.to,
+    });
+  }
+
+  @Get('print-jobs/:id')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_PRINT])
+  getPrintJob(@Param('id') id: string) {
+    return this.getPrintJobUseCase.execute(id);
+  }
+
+  @Get('print-jobs/:id/download')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_PRINT])
+  async downloadPrintJob(@Param('id') id: string, @Res() response: Response) {
+    const result = await this.downloadPrintJobUseCase.execute(id);
+    response.setHeader('Content-Type', 'application/pdf');
+    response.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${result.filename}"`,
+    );
+    result.stream.pipe(response);
+  }
+}

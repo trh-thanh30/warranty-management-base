@@ -27,6 +27,12 @@
       "root": ".",
       "entryFile": "workers/email/worker.main",
       "sourceRoot": "src"
+    },
+    "worker:activation-labels": {
+      "type": "application",
+      "root": ".",
+      "entryFile": "workers/activation-label-print/worker.main",
+      "sourceRoot": "src"
     }
   }
 }

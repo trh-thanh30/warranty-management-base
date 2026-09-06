@@ -54,6 +54,14 @@ export const envSchema = z
       .default(30),
     STORAGE_USAGE_MONITOR_CRON: z.string().default('0 4 * * *'),
     STORAGE_USAGE_MONITOR_ENABLED: z.coerce.boolean().default(false),
+    ACTIVATION_CODE_EXPIRY_CRON: z.string().default('0 * * * *'),
+    ACTIVATION_CODE_EXPIRY_ENABLED: z.coerce.boolean().default(true),
+    ACTIVATION_CODE_EXPIRY_BATCH_SIZE: z.coerce
+      .number()
+      .int()
+      .positive()
+      .max(10000)
+      .default(500),
 
     // Health Check Configuration
     HEALTH_ENDPOINTS_ENABLED: z.coerce.boolean().default(false),
@@ -65,6 +73,66 @@ export const envSchema = z
     JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
     JWT_SECRET: z.string(),
     JWT_EXPIRES_IN: z.string().default('24h'),
+    ACTIVATION_CODE_SECRET: z.string().min(32).optional(),
+    ACTIVATION_CODE_ALGORITHM: z.enum(['aes-256-gcm']).default('aes-256-gcm'),
+    ACTIVATION_CODE_IV_BYTES: z.coerce
+      .number()
+      .int()
+      .min(12)
+      .max(32)
+      .default(12),
+    ACTIVATION_CODE_MIN_BATCH_QUANTITY: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(1000)
+      .default(50),
+    ACTIVATION_CODE_MAX_BATCH_QUANTITY: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(1000)
+      .default(1000),
+    ACTIVATION_CODE_CREATE_ATTEMPTS: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(10)
+      .default(3),
+    ACTIVATION_CODE_PRINT_CONCURRENCY: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(8)
+      .default(2),
+    ACTIVATION_CODE_PRINT_QUEUE_SIZE: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(1000)
+      .default(8),
+    ACTIVATION_CODE_PRINT_ATTEMPTS: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(10)
+      .default(3),
+    ACTIVATION_CODE_PRINT_BACKOFF_MS: z.coerce
+      .number()
+      .int()
+      .min(100)
+      .max(300000)
+      .default(5000),
+    ACTIVATION_CODE_PRINT_COMPLETED_RETENTION_SECONDS: z.coerce
+      .number()
+      .int()
+      .min(60)
+      .default(3600),
+    ACTIVATION_CODE_PRINT_FAILED_RETENTION_SECONDS: z.coerce
+      .number()
+      .int()
+      .min(60)
+      .default(86400),
 
     // Email Configuration
     SMTP_HOST: z.string().default('smtp.gmail.com'),

@@ -25,6 +25,10 @@ import { seedContentPages } from './seed-content-pages';
 import { seedLexzenzDealers } from './seed-dealers';
 import { requireSeedPassword } from './seed-env';
 import { seedWebsiteSiteSettings } from './seed-website-config';
+import { randomUUID } from 'node:crypto';
+
+const generateSeedDealerCode = () =>
+  `DLR-${randomUUID().slice(0, 8).toUpperCase()}`;
 
 type DashboardWarrantyChartSeed = {
   offsetDays: number;
@@ -283,7 +287,7 @@ async function upsertDemoProduct(data: {
   endDate.setMonth(endDate.getMonth() + data.durationMonths);
 
   const warranty = await prisma.warranty.upsert({
-    where: { product_id: product.id },
+    where: { warranty_code: data.warrantyCode },
     update: {
       warranty_code: data.warrantyCode,
       start_date: data.purchaseDate,
@@ -299,6 +303,11 @@ async function upsertDemoProduct(data: {
       duration_months: data.durationMonths,
       status: data.warrantyStatus,
     },
+  });
+
+  await prisma.product.update({
+    where: { id: product.id },
+    data: { current_warranty_id: warranty.id },
   });
 
   await prisma.productOwnership.updateMany({
@@ -391,6 +400,7 @@ async function upsertDemoDealer(data: {
     },
     create: {
       id: data.id,
+      dealer_code: generateSeedDealerCode(),
       name: data.name,
       phone: data.phone,
       province: data.province,

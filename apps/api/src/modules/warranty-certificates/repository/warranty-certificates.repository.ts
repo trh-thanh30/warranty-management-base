@@ -312,7 +312,7 @@ export class WarrantyCertificatesRepository {
           },
         });
 
-      const certificate = item?.warranty.certificates[0];
+      const certificate = item?.warranty?.certificates[0];
       return certificate
         ? {
             certificateNumber: certificate.certificate_number,

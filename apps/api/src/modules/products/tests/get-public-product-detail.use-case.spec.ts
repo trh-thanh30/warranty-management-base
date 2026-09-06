@@ -132,6 +132,7 @@ function createPublishedTemplateFixture() {
     order: 10,
     is_active: true,
     activation_form_enabled: false,
+    activation_code_enabled: false,
     created_at: createdAt,
     updated_at: createdAt,
   };
@@ -162,6 +163,10 @@ function createPublishedTemplateFixture() {
     serial_number: null,
     display_name: 'SP50',
     category_id: category.id,
+    current_warranty_id: null,
+    warranty_duration_months: 180,
+    warranty_method: null,
+    warranty_terms: 'Bảo hành điện tử chính hãng.',
     category_ref: category,
     slug: 'lex-sp50',
     brand: 'Lexzenz',

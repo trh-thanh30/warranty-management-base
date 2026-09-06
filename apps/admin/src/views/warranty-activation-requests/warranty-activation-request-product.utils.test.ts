@@ -5,7 +5,10 @@ import {
   getActivationProductOptionDisabledReason,
   formatActivationProductSearchOption,
   getActivationProductDisplayName,
+  isActivationCodeRequiredForRequest,
+  resolveAssignedActivationCodeForProduct,
 } from "./warranty-activation-request-product.utils.ts";
+import type { AvailableActivationCode } from "@/src/services/activation-codes/activation-code-batches.types";
 
 const translate = ((key: string, values?: Record<string, string>): string =>
   values?.requestCode ? `${key}:${values.requestCode}` : key) as never;
@@ -76,4 +79,52 @@ test("eligible activation product option remains selectable", () => {
     getActivationProductOptionDisabledReason(product, translate),
     null,
   );
+});
+
+test("resolves the available activation code assigned to the selected product", () => {
+  const assignedCode = {
+    id: "code-a",
+    selectable: true,
+    assignedProduct: { id: "product-a" },
+  } as AvailableActivationCode;
+
+  assert.equal(
+    resolveAssignedActivationCodeForProduct("product-a", [assignedCode]),
+    assignedCode,
+  );
+});
+
+test("does not reuse a code from the previously selected product", () => {
+  const staleCode = {
+    id: "code-a",
+    selectable: true,
+    assignedProduct: { id: "product-a" },
+  } as AvailableActivationCode;
+
+  assert.equal(
+    resolveAssignedActivationCodeForProduct("product-b", [staleCode]),
+    null,
+  );
+});
+
+test("does not auto-fill an unavailable assigned activation code", () => {
+  const expiredCode = {
+    id: "code-a",
+    selectable: false,
+    assignedProduct: { id: "product-a" },
+  } as AvailableActivationCode;
+
+  assert.equal(
+    resolveAssignedActivationCodeForProduct("product-a", [expiredCode]),
+    null,
+  );
+});
+
+test("does not require an activation code for a category with codes disabled", () => {
+  assert.equal(isActivationCodeRequiredForRequest(false, undefined), false);
+});
+
+test("falls back to the selected product category activation-code rule", () => {
+  assert.equal(isActivationCodeRequiredForRequest(undefined, false), false);
+  assert.equal(isActivationCodeRequiredForRequest(undefined, true), true);
 });

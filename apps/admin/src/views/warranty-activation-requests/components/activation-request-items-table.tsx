@@ -59,12 +59,16 @@ export function ActivationRequestItemsTable({
                 </p>
               </TableCell>
               <TableCell>
-                <Link
-                  className="font-mono text-xs text-blue-700 hover:underline dark:text-blue-400"
-                  href={`/warranties/${item.warrantyId}`}
-                >
-                  {item.warrantyCode}
-                </Link>
+                {item.warrantyId ? (
+                  <Link
+                    className="font-mono text-xs text-blue-700 hover:underline dark:text-blue-400"
+                    href={`/warranties/${item.warrantyId}`}
+                  >
+                    {item.warrantyCode ?? "-"}
+                  </Link>
+                ) : (
+                  <span className="font-mono text-xs text-slate-500">-</span>
+                )}
               </TableCell>
               <TableCell>
                 <div className="space-y-1.5">
@@ -73,7 +77,9 @@ export function ActivationRequestItemsTable({
                     status={item.status}
                   />
                   <p className="text-xs text-slate-500">
-                    {tWarranties(`statuses.${item.warrantyStatus}`)}
+                    {item.warrantyStatus
+                      ? tWarranties(`statuses.${item.warrantyStatus}`)
+                      : t("warrantyStatusMissing")}
                   </p>
                 </div>
               </TableCell>

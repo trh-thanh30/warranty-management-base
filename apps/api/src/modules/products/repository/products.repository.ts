@@ -26,6 +26,18 @@ const productInclude = {
     orderBy: { created_at: 'desc' as const },
   },
   warranty: true,
+  activation_code: {
+    select: {
+      id: true,
+      code_ciphertext: true,
+      status: true,
+      expires_at: true,
+      batch: { select: { batch_code: true } },
+      request: { select: { id: true } },
+      request_items: { select: { id: true }, take: 1 },
+      warranty: { select: { id: true } },
+    },
+  },
   warranty_activation_requests: {
     where: {
       status: {
@@ -133,9 +145,30 @@ export class ProductsRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
   create(data: Prisma.ProductCreateInput) {
-    return this.prismaService.product.create({
-      data,
-      include: productInclude,
+    return this.prismaService.$transaction(async (tx) => {
+      const product = await tx.product.create({
+        data,
+        include: {
+          warranties: {
+            orderBy: { created_at: 'desc' },
+            take: 1,
+          },
+        },
+      });
+      const currentWarranty = product.warranties[0];
+
+      if (!currentWarranty) {
+        return tx.product.findUniqueOrThrow({
+          where: { id: product.id },
+          include: productInclude,
+        });
+      }
+
+      return tx.product.update({
+        where: { id: product.id },
+        data: { current_warranty_id: currentWarranty.id },
+        include: productInclude,
+      });
     });
   }
 
@@ -192,6 +225,7 @@ export class ProductsRepository {
         warranty: { warranty_code: warrantyCode },
       },
       include: {
+        category_ref: true,
         warranty: true,
         ownerships: {
           where: { is_current_owner: true },
@@ -209,6 +243,7 @@ export class ProductsRepository {
         id: productId,
       },
       include: {
+        category_ref: true,
         warranty: true,
         ownerships: {
           where: { is_current_owner: true },
@@ -226,6 +261,7 @@ export class ProductsRepository {
         id: { in: productIds },
       },
       include: {
+        category_ref: true,
         warranty: true,
         ownerships: {
           where: { is_current_owner: true },
@@ -268,6 +304,7 @@ export class ProductsRepository {
     status?: product_status | 'ALL';
     isPublished?: string;
     activationEligible?: string;
+    activationCodeAssignable?: string;
     claimEligible?: string;
     warrantyStatus?: warranty_status;
     page?: number;
@@ -279,6 +316,8 @@ export class ProductsRepository {
     const claimEligible = filters.claimEligible === 'true';
     const activationEligible =
       filters.activationEligible === 'true' && !claimEligible;
+    const activationCodeAssignable =
+      filters.activationCodeAssignable === 'true';
     const now = new Date();
     const { page, limit, skip, take } = normalizePagination(filters);
     const sortMap = {
@@ -292,9 +331,12 @@ export class ProductsRepository {
     } satisfies Record<string, keyof Prisma.ProductOrderByWithRelationInput>;
     const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
     const where: Prisma.ProductWhereInput = {
-      AND: buildEffectiveCatalogueFilters(filters),
+      AND: buildEffectiveCatalogueFilters({
+        ...filters,
+        activationCodeAssignable,
+      }),
       deleted_at:
-        activationEligible || claimEligible
+        activationEligible || claimEligible || activationCodeAssignable
           ? null
           : buildProductDeletionFilter(filters.status),
       ownerships: filters.ownerCustomerId
@@ -309,11 +351,13 @@ export class ProductsRepository {
         ? product_status.ACTIVE
         : claimEligible
           ? product_status.ACTIVE
-          : filters.status === undefined
+          : activationCodeAssignable
             ? product_status.ACTIVE
-            : filters.status === 'ALL'
-              ? undefined
-              : filters.status,
+            : filters.status === undefined
+              ? product_status.ACTIVE
+              : filters.status === 'ALL'
+                ? undefined
+                : filters.status,
       is_published:
         filters.isPublished === undefined
           ? undefined
@@ -456,11 +500,35 @@ export class ProductsRepository {
           : Promise.resolve([]),
       ]);
 
-      return paginate([...eligibleItems, ...ineligibleItems], {
-        page,
-        limit,
-        total,
-      });
+      const products = [...eligibleItems, ...ineligibleItems];
+      const productIds = products.map((product) => product.id);
+      const groupedCodes = productIds.length
+        ? await tx.activationCode.groupBy({
+            by: ['product_id', 'status'],
+            where: { product_id: { in: productIds } },
+            _count: { _all: true },
+          })
+        : [];
+      const countsByProduct = new Map<string, Record<string, number>>();
+      for (const row of groupedCodes) {
+        const productId = row.product_id;
+        if (!productId) continue;
+        const counts = countsByProduct.get(productId) ?? {};
+        counts[row.status] = (counts[row.status] ?? 0) + row._count._all;
+        countsByProduct.set(productId, counts);
+      }
+
+      return paginate(
+        products.map((product) => ({
+          ...product,
+          activationCodeCounts: countsByProduct.get(product.id) ?? {},
+        })),
+        {
+          page,
+          limit,
+          total,
+        },
+      );
     });
   }
 
@@ -623,10 +691,18 @@ function buildProductDeletionFilter(status?: product_status | 'ALL') {
 
 function buildEffectiveCatalogueFilters(filters: {
   categoryId?: string;
+  activationCodeAssignable?: boolean;
 }): Prisma.ProductWhereInput[] | undefined {
   const clauses: Prisma.ProductWhereInput[] = [];
   if (filters.categoryId) {
     clauses.push({ category_id: filters.categoryId });
+  }
+  if (filters.activationCodeAssignable) {
+    clauses.push(
+      { category_ref: { activation_code_enabled: true } },
+      { warranty_duration_months: { gt: 0 } },
+      { activation_code: { is: null } },
+    );
   }
   return clauses.length > 0 ? clauses : undefined;
 }
@@ -635,12 +711,21 @@ function buildActivationEligibleProductWhere(): Prisma.ProductWhereInput {
   return {
     deleted_at: null,
     status: product_status.ACTIVE,
-    warranty: {
-      is: {
-        status: warranty_status.DRAFT,
-        warranty_code: { not: '' },
+    OR: [
+      {
+        warranty: {
+          is: {
+            status: warranty_status.DRAFT,
+            warranty_code: { not: '' },
+          },
+        },
       },
-    },
+      {
+        warranty: { is: null },
+        warranty_duration_months: { gt: 0 },
+        category_ref: { activation_code_enabled: true },
+      },
+    ],
     warranty_activation_request_items: {
       none: { status: { in: openActivationRequestStatuses } },
     },

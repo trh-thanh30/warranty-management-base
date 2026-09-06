@@ -1,4 +1,4 @@
-import { CheckCircle2, Package, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Package } from "lucide-react";
 import { useLocale } from "next-intl";
 import {
   ActivationRequestSummaryCard,
@@ -9,50 +9,52 @@ import { formatActivationRequestDate } from "../warranty-activation-requests.uti
 
 type SelectedProductSummaryCardProps = {
   brand: string | null;
+  categoryName: string;
   durationMonths?: number | null;
   endDate: string | null;
   model: string | null;
-  ownerName?: string | null;
   productCode: string;
   productCodeLabel: string;
   productName: string;
-  serialNumber: string | null;
-  serialNumberLabel: string;
+  productStatusLabel: string;
+  sku: string;
+  skuLabel: string;
   startDate: string | null;
   statusLabel: string;
   summaryLabels: {
+    activationStartPending: string;
     brandModel: string;
-    currentOwner: string;
+    category: string;
     durationMonths: string;
     monthUnit: string;
+    productStatus: string;
     warrantyPeriod: string;
   };
-  warrantyCode: string | null;
-  warrantyCodeLabel: string;
 };
 
 export function SelectedProductSummaryCard({
   brand,
+  categoryName,
   durationMonths,
   endDate,
   model,
-  ownerName,
   productCode,
   productCodeLabel,
   productName,
-  serialNumber,
-  serialNumberLabel,
+  productStatusLabel,
+  sku,
+  skuLabel,
   startDate,
   statusLabel,
   summaryLabels,
-  warrantyCode,
-  warrantyCodeLabel,
 }: SelectedProductSummaryCardProps) {
   const locale = useLocale();
   const period =
     startDate || endDate
       ? `${formatActivationRequestDate(startDate, locale)} - ${formatActivationRequestDate(endDate, locale)}`
-      : "-";
+      : durationMonths
+        ? `${durationMonths} ${summaryLabels.monthUnit} · ${summaryLabels.activationStartPending}`
+        : "-";
 
   return (
     <ActivationRequestSummaryCard
@@ -63,21 +65,16 @@ export function SelectedProductSummaryCard({
         </span>
       }
       icon={<Package aria-hidden="true" className="size-4" />}
-      meta={`${productCodeLabel}: ${productCode} • ${warrantyCodeLabel}: ${
-        warrantyCode ?? "-"
-      }`}
+      meta={`${productCodeLabel}: ${productCode}`}
       title={productName}
     >
       <SummaryGrid>
-        <SummaryItem label={serialNumberLabel} value={serialNumber ?? "-"} />
+        <SummaryItem label={skuLabel} value={sku || "-"} />
         <SummaryItem
           label={summaryLabels.brandModel}
           value={[brand, model].filter(Boolean).join(" / ") || "-"}
         />
-        <SummaryItem
-          label={summaryLabels.currentOwner}
-          value={ownerName ?? "-"}
-        />
+        <SummaryItem label={summaryLabels.category} value={categoryName} />
         <SummaryItem label={summaryLabels.warrantyPeriod} value={period} />
         <SummaryItem
           label={summaryLabels.durationMonths}
@@ -88,9 +85,8 @@ export function SelectedProductSummaryCard({
           }
         />
         <SummaryItem
-          icon={<ShieldCheck aria-hidden="true" className="size-3.5" />}
-          label={warrantyCodeLabel}
-          value={warrantyCode ?? "-"}
+          label={summaryLabels.productStatus}
+          value={productStatusLabel}
         />
       </SummaryGrid>
     </ActivationRequestSummaryCard>

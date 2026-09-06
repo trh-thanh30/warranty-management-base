@@ -1,5 +1,6 @@
 "use client";
 
+import { ActivationCodeStatusBadge } from "@/src/components/activation-code-status-badge";
 import { SortableTableHead } from "@/src/components/common/sortable-table-head";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
@@ -10,6 +11,7 @@ import {
 } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
+  Badge,
   Button,
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +33,7 @@ import {
 import {
   Copy,
   Eye,
+  KeyRound,
   MoreHorizontal,
   Pencil,
   RotateCcw,
@@ -39,7 +42,6 @@ import {
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import {
-  formatProductOwner,
   getProductCategoryLabel,
   getProductDisplayName,
 } from "../products.utils";
@@ -51,6 +53,7 @@ type ProductsTableProps = {
   onDelete: (product: ProductResponse) => void;
   onRestore: (product: ProductResponse) => void;
   onAssignOwner: (product: ProductResponse) => void;
+  onAssignCodes: (product: ProductResponse) => void;
   onSortChange: (sortBy: ProductSortBy) => void;
   sortBy?: ProductSortBy;
   sortOrder: "asc" | "desc";
@@ -58,6 +61,7 @@ type ProductsTableProps = {
 
 export function ProductsTable({
   items,
+  onAssignCodes,
   onAssignOwner,
   onDelete,
   onRestore,
@@ -74,6 +78,7 @@ export function ProductsTable({
           <ProductMobileCard
             key={product.id}
             onAssignOwner={onAssignOwner}
+            onAssignCodes={onAssignCodes}
             onDelete={onDelete}
             onRestore={onRestore}
             product={product}
@@ -82,7 +87,7 @@ export function ProductsTable({
       </div>
 
       <TableScroll className="hidden max-h-144 overflow-y-scroll rounded-md border border-slate-200 dark:border-slate-800 lg:block">
-        <Table className="min-w-6xl [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
+        <Table className="w-max min-w-full table-auto [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
           <TableHeader className="sticky top-0 z-10 bg-white dark:bg-slate-950">
             <TableRow>
               <SortableTableHead
@@ -93,20 +98,11 @@ export function ProductsTable({
               >
                 {t("name")}
               </SortableTableHead>
-              <SortableTableHead
-                activeSortBy={sortBy}
-                onSortChange={onSortChange}
-                sortBy="warrantyCode"
-                sortOrder={sortOrder}
-              >
-                {t("warrantyCode")}
-              </SortableTableHead>
-              <TableHead className="whitespace-nowrap">
-                {t("category")}
-              </TableHead>
-              <TableHead className="whitespace-nowrap">{t("owner")}</TableHead>
               <TableHead className="whitespace-nowrap">
                 {t("warrantyStatus")}
+              </TableHead>
+              <TableHead className="whitespace-nowrap">
+                {t("activationCode")}
               </TableHead>
               <SortableTableHead
                 activeSortBy={sortBy}
@@ -136,6 +132,7 @@ export function ProductsTable({
               <ProductTableRow
                 key={product.id}
                 onAssignOwner={onAssignOwner}
+                onAssignCodes={onAssignCodes}
                 onDelete={onDelete}
                 onRestore={onRestore}
                 product={product}
@@ -149,11 +146,13 @@ export function ProductsTable({
 }
 
 function ProductTableRow({
+  onAssignCodes,
   onAssignOwner,
   onDelete,
   onRestore,
   product,
 }: {
+  onAssignCodes: ProductsTableProps["onAssignCodes"];
   onAssignOwner: ProductsTableProps["onAssignOwner"];
   onDelete: ProductsTableProps["onDelete"];
   onRestore: ProductsTableProps["onRestore"];
@@ -167,39 +166,19 @@ function ProductTableRow({
       <TableCell>
         <ProductName product={product} />
       </TableCell>
-      <TableCell className="font-mono text-xs">
-        {product.warrantyCode ?? "-"}
-      </TableCell>
-      <TableCell className="whitespace-nowrap">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span
-              className="block max-w-64 truncate outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
-              tabIndex={0}
-            >
-              {getProductCategoryLabel(product)}
-            </span>
-          </TooltipTrigger>
-          <TooltipContent className="max-w-80 wrap-break-word" side="top">
-            {getProductCategoryLabel(product)}
-          </TooltipContent>
-        </Tooltip>
-      </TableCell>
-      <TableCell>
-        <span className="block max-w-52 truncate">
-          {formatProductOwner(product)}
-        </span>
-      </TableCell>
       <TableCell>
         <WarrantyStatusBadge status={product.warranty?.status} />
+      </TableCell>
+      <TableCell>
+        <ProductActivationCodeCell product={product} />
       </TableCell>
       <TableCell>
         <ProductStatusBadge status={product.status} />
       </TableCell>
       <TableCell>
-        {product.warranty?.durationMonths
+        {product.warrantyDurationMonths
           ? t("durationValue", {
-              count: product.warranty.durationMonths,
+              count: product.warrantyDurationMonths,
             })
           : "-"}
       </TableCell>
@@ -207,6 +186,7 @@ function ProductTableRow({
 
       <TableCell className="text-right">
         <ProductActionsMenu
+          onAssignCodes={onAssignCodes}
           onAssignOwner={onAssignOwner}
           onDelete={onDelete}
           onRestore={onRestore}
@@ -218,11 +198,13 @@ function ProductTableRow({
 }
 
 function ProductMobileCard({
+  onAssignCodes,
   onAssignOwner,
   onDelete,
   onRestore,
   product,
 }: {
+  onAssignCodes: ProductsTableProps["onAssignCodes"];
   onAssignOwner: ProductsTableProps["onAssignOwner"];
   onDelete: ProductsTableProps["onDelete"];
   onRestore: ProductsTableProps["onRestore"];
@@ -235,6 +217,7 @@ function ProductMobileCard({
       <div className="flex items-start justify-between gap-3">
         <ProductName product={product} />
         <ProductActionsMenu
+          onAssignCodes={onAssignCodes}
           onAssignOwner={onAssignOwner}
           onDelete={onDelete}
           onRestore={onRestore}
@@ -242,17 +225,31 @@ function ProductMobileCard({
         />
       </div>
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+        <div>
+          <dt className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+            {t("warrantyStatus")}
+          </dt>
+          <dd className="mt-1">
+            <WarrantyStatusBadge status={product.warranty?.status} />
+          </dd>
+        </div>
+        <div className="col-span-2 min-w-0">
+          <dt className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+            {t("activationCode")}
+          </dt>
+          <dd className="mt-1">
+            <ProductActivationCodeCell product={product} />
+          </dd>
+        </div>
         <ProductMobileField
-          label={t("warrantyCode")}
-          value={product.warrantyCode ?? "-"}
-        />
-        <ProductMobileField
-          label={t("category")}
-          value={getProductCategoryLabel(product)}
-        />
-        <ProductMobileField
-          label={t("owner")}
-          value={formatProductOwner(product)}
+          label={t("warrantyDuration")}
+          value={
+            product.warrantyDurationMonths
+              ? t("durationValue", {
+                  count: product.warrantyDurationMonths,
+                })
+              : "-"
+          }
         />
         <div>
           <dt className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
@@ -264,6 +261,25 @@ function ProductMobileCard({
         </div>
       </dl>
     </article>
+  );
+}
+
+function ProductActivationCodeCell({ product }: { product: ProductResponse }) {
+  const t = useTranslations("Products");
+  const activationCode = product.assignedActivationCode;
+
+  if (!activationCode) {
+    return <Badge variant="secondary">{t("activationCodeUnassigned")}</Badge>;
+  }
+  return (
+    <div className="flex items-center gap-2">
+      <div className="space-y-1">
+        <p className="text-xs font-semibold text-slate-950 dark:text-slate-50">
+          {activationCode.code}
+        </p>
+        <ActivationCodeStatusBadge status={activationCode.status} />
+      </div>
+    </div>
   );
 }
 
@@ -282,7 +298,7 @@ function ProductName({ product }: { product: ProductResponse }) {
             {displayName}
           </span>
           <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
-            {product.name} · {product.productCode}
+            {getProductCategoryLabel(product)}
           </p>
         </div>
       </TooltipTrigger>
@@ -313,11 +329,13 @@ function ProductMobileField({
 }
 
 function ProductActionsMenu({
+  onAssignCodes,
   onAssignOwner,
   onDelete,
   onRestore,
   product,
 }: {
+  onAssignCodes: ProductsTableProps["onAssignCodes"];
   onAssignOwner: ProductsTableProps["onAssignOwner"];
   onDelete: ProductsTableProps["onDelete"];
   onRestore: ProductsTableProps["onRestore"];
@@ -330,6 +348,9 @@ function ProductActionsMenu({
   const canCreate = hasPermission(PERMISSIONS.PRODUCT_CREATE);
   const canDelete = hasPermission(PERMISSIONS.PRODUCT_DELETE);
   const canAssignOwner = hasPermission(PERMISSIONS.PRODUCT_ASSIGN_OWNER);
+  const canAssignCodes = hasPermission(
+    PERMISSIONS.ACTIVATION_CODE_ASSIGN_PRODUCT,
+  );
   const isDeleted = product.status === "DELETED";
 
   if (
@@ -339,6 +360,7 @@ function ProductActionsMenu({
       !canEdit &&
       !canDelete &&
       !canAssignOwner &&
+      !canAssignCodes &&
       !canCreate)
   ) {
     return null;
@@ -389,10 +411,34 @@ function ProductActionsMenu({
                 </Link>
               </DropdownMenuItem>
             ) : null}
-            {canAssignOwner ? (
+            {canAssignOwner && product.warranty ? (
               <DropdownMenuItem onSelect={() => onAssignOwner(product)}>
                 <UserPlus className="mr-2 size-4" />
                 {t("assignOwner")}
+              </DropdownMenuItem>
+            ) : null}
+            {canAssignCodes &&
+            product.categoryRef?.activationCodeEnabled === true ? (
+              <DropdownMenuItem
+                disabled={
+                  product.status !== "ACTIVE" ||
+                  !product.warrantyDurationMonths ||
+                  Boolean(
+                    product.assignedActivationCode &&
+                    !product.assignedActivationCode.canReplace,
+                  )
+                }
+                onSelect={() => onAssignCodes(product)}
+              >
+                <KeyRound className="mr-2 size-4" />
+                {t(
+                  product.assignedActivationCode &&
+                    !product.assignedActivationCode.canReplace
+                    ? "activationCodeChangeLocked"
+                    : product.assignedActivationCode
+                      ? "replaceActivationCode"
+                      : "assignActivationCodes",
+                )}
               </DropdownMenuItem>
             ) : null}
             {canDelete ? (

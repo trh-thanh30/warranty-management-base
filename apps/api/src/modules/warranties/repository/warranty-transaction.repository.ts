@@ -1,14 +1,14 @@
+import { getProductCatalogue } from '@/modules/products/product-catalogue';
 import {
   ManualActivationProduct,
+  toWarrantyRecord,
   WarrantyActivationCandidate,
   WarrantyActivationRequestStatus,
   WarrantyClaimStatus,
   WarrantyCustomer,
   WarrantyRecord,
   WarrantyVoidCandidate,
-  toWarrantyRecord,
 } from '@/modules/warranties/warranties.types';
-import { getProductCatalogue } from '@/modules/products/product-catalogue';
 import {
   category_type,
   Customer,
@@ -23,6 +23,7 @@ const manualActivationProductInclude = {
     orderBy: { created_at: 'desc' as const },
   },
   warranty: true,
+  warranties: { orderBy: { created_at: 'desc' as const }, take: 1 },
 } satisfies Prisma.ProductInclude;
 
 type PersistedManualActivationProduct = Prisma.ProductGetPayload<{
@@ -33,7 +34,10 @@ export class WarrantyTransactionRepository {
   constructor(private readonly tx: Prisma.TransactionClient) {}
 
   async findCustomerByEmail(email: string): Promise<WarrantyCustomer | null> {
-    const customer = await this.tx.customer.findUnique({ where: { email } });
+    const customer = await this.tx.customer.findFirst({
+      where: { email },
+      orderBy: { created_at: 'desc' },
+    });
     return customer ? this.toWarrantyCustomer(customer) : null;
   }
 
@@ -64,7 +68,7 @@ export class WarrantyTransactionRepository {
       .then((customer) => this.toWarrantyCustomer(customer));
   }
 
-  createCustomer(data: {
+  async createCustomer(data: {
     address: string;
     customerCode: string;
     email: string;
@@ -198,7 +202,7 @@ export class WarrantyTransactionRepository {
               is_current_owner: true,
             },
           },
-          warranty: {
+          warranties: {
             create: {
               warranty_code: input.warrantyCode,
               duration_months: input.warrantyDurationMonths,
@@ -416,7 +420,10 @@ export class WarrantyTransactionRepository {
         model: getProductCatalogue(product).model,
         name: getProductCatalogue(product).name,
       },
-      warranty: product.warranty ? toWarrantyRecord(product.warranty) : null,
+      warranty:
+        (product.warranty ?? product.warranties[0])
+          ? toWarrantyRecord(product.warranty ?? product.warranties[0]!)
+          : null,
     };
   }
 }

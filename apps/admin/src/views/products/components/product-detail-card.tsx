@@ -1,5 +1,6 @@
 "use client";
 
+import { ActivationCodeStatusBadge } from "@/src/components/activation-code-status-badge";
 import { useMemo, useState, type ReactNode } from "react";
 import Lightbox from "yet-another-react-lightbox";
 import { formatDate, type ProductResponse } from "@repo/shared";
@@ -54,6 +55,13 @@ export function ProductDetailCard({ product }: ProductDetailCardProps) {
     <div className="space-y-4">
       <ProductSummaryHeader product={product} />
 
+      <DetailSection
+        icon={<KeyRound className="size-4" />}
+        title={t("sections.activationCode")}
+      >
+        <AssignedActivationCodeDetails product={product} />
+      </DetailSection>
+
       {product.assets.length ? (
         <section className="space-y-3 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
           <h2 className="text-sm font-semibold text-slate-950 dark:text-slate-50">
@@ -106,11 +114,6 @@ export function ProductDetailCard({ product }: ProductDetailCardProps) {
             value={product.productCode}
           />
           <CopyableDetailItem
-            icon={<KeyRound className="size-4" />}
-            label={t("warrantyCode")}
-            value={product.warrantyCode}
-          />
-          <CopyableDetailItem
             icon={<Fingerprint className="size-4" />}
             label={t("serialNumber")}
             value={product.serialNumber}
@@ -149,6 +152,11 @@ export function ProductDetailCard({ product }: ProductDetailCardProps) {
           <OwnerSummary product={product} />
           {product.warranty ? (
             <>
+              <CopyableDetailItem
+                icon={<KeyRound className="size-4" />}
+                label={t("warrantyCode")}
+                value={product.warrantyCode}
+              />
               <WarrantyProgress product={product} />
               <DetailItem
                 icon={<Clock3 className="size-4" />}
@@ -177,8 +185,26 @@ export function ProductDetailCard({ product }: ProductDetailCardProps) {
               />
             </>
           ) : (
-            <DetailItem label={t("warrantyStatus")} value={emptyValue} />
+            <div className="rounded-md border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/50">
+              <p className="text-sm font-medium text-slate-950 dark:text-slate-50">
+                {t("warrantyNotIssued")}
+              </p>
+              <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
+                {t("warrantyNotIssuedDescription")}
+              </p>
+            </div>
           )}
+          <DetailItem
+            icon={<Clock3 className="size-4" />}
+            label={t("warrantyPolicyDuration")}
+            value={
+              product.warrantyDurationMonths
+                ? t("durationValue", {
+                    count: product.warrantyDurationMonths,
+                  })
+                : emptyValue
+            }
+          />
         </DetailSection>
       </div>
 
@@ -194,6 +220,55 @@ export function ProductDetailCard({ product }: ProductDetailCardProps) {
         </section>
       ) : null}
     </div>
+  );
+}
+
+function AssignedActivationCodeDetails({
+  product,
+}: {
+  product: ProductResponse;
+}) {
+  const locale = useLocale();
+  const t = useTranslations("Products");
+  const activationCode = product.assignedActivationCode;
+
+  if (!activationCode) {
+    return (
+      <div className="py-4">
+        <div className="rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-900/50">
+          <p className="text-sm font-medium text-slate-950 dark:text-slate-50">
+            {t("activationCodeUnassigned")}
+          </p>
+          <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
+            {t("activationCodeUnassignedDescription")}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <CopyableDetailItem
+        icon={<KeyRound className="size-4" />}
+        label={t("activationCode")}
+        value={activationCode.code}
+      />
+      <DetailBadgeItem
+        label={t("activationCodeStatus")}
+        value={<ActivationCodeStatusBadge status={activationCode.status} />}
+      />
+      <DetailItem
+        icon={<Hash className="size-4" />}
+        label={t("activationCodeBatch")}
+        value={activationCode.batchCode}
+      />
+      <DetailItem
+        icon={<CalendarDays className="size-4" />}
+        label={t("activationCodeExpiresAt")}
+        value={formatDate(activationCode.expiresAt, { locale })}
+      />
+    </>
   );
 }
 
@@ -365,6 +440,23 @@ function DetailItem({
       >
         {value}
       </dd>
+    </div>
+  );
+}
+
+function DetailBadgeItem({
+  label,
+  value,
+}: {
+  label: string;
+  value: ReactNode;
+}) {
+  return (
+    <div className="grid min-h-11 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-3 py-2.5 sm:flex sm:justify-between sm:gap-4">
+      <dt className="min-w-0 truncate text-sm text-slate-500 sm:shrink-0 dark:text-slate-400">
+        {label}
+      </dt>
+      <dd className="flex min-w-0 justify-end">{value}</dd>
     </div>
   );
 }

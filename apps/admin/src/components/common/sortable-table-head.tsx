@@ -2,12 +2,13 @@
 
 import type { ReactNode } from "react";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
-import { TableHead } from "@repo/ui";
+import { cn, TableHead } from "@repo/ui";
 
 type SortOrder = "asc" | "desc";
 
 type SortableTableHeadProps<TSortBy extends string> = {
   activeSortBy?: TSortBy;
+  className?: string;
   children: ReactNode;
   onSortChange: (sortBy: TSortBy) => void;
   sortBy: TSortBy;
@@ -16,6 +17,7 @@ type SortableTableHeadProps<TSortBy extends string> = {
 
 export function SortableTableHead<TSortBy extends string>({
   activeSortBy,
+  className,
   children,
   onSortChange,
   sortBy,
@@ -29,7 +31,7 @@ export function SortableTableHead<TSortBy extends string>({
     : ArrowUpDown;
 
   return (
-    <TableHead className="whitespace-nowrap">
+    <TableHead className={cn("whitespace-nowrap", className)}>
       <button
         className="inline-flex items-center gap-1.5 whitespace-nowrap text-left font-medium uppercase text-inherit transition-colors hover:text-slate-950 dark:hover:text-slate-50"
         onClick={() => onSortChange(sortBy)}

@@ -38,10 +38,7 @@ describe('UpdateCustomerUseCase', () => {
       '0987654311',
       'customer-id',
     );
-    expect(customersRepository.findByEmail).toHaveBeenCalledWith(
-      'user1@example.com',
-      'customer-id',
-    );
+    expect(customersRepository.findByEmail).not.toHaveBeenCalled();
     expect(result.phone).toBe('0987654311');
     expect(result.email).toBe('user1@example.com');
   });
@@ -95,15 +92,33 @@ describe('UpdateCustomerUseCase', () => {
     expect(customersRepository.update).not.toHaveBeenCalled();
   });
 
-  it('prevents updating to duplicate email', async () => {
+  it('allows updating to a shared delivery email', async () => {
     const customersRepository = createCustomersRepository();
     customersRepository.findById.mockResolvedValue({ id: 'customer-id' });
     customersRepository.findByEmail.mockResolvedValue({ id: 'existing-id' });
+    customersRepository.update.mockResolvedValue({
+      id: 'customer-id',
+      user_id: null,
+      customer_code: 'CUS-2026-0001',
+      full_name: 'Nguyen Van Hung',
+      phone: '0987654311',
+      email: 'shared-dealer@example.com',
+      address: 'Ho Chi Minh City',
+      birthdate: null,
+      metadata: null,
+      created_at: new Date('2026-07-09T00:00:00.000Z'),
+      updated_at: new Date('2026-07-09T00:00:00.000Z'),
+    });
     const useCase = new UpdateCustomerUseCase(customersRepository as never);
 
-    await expect(
-      useCase.execute('customer-id', { email: 'user1@example.com' }),
-    ).rejects.toBeInstanceOf(ConflictError);
-    expect(customersRepository.update).not.toHaveBeenCalled();
+    await useCase.execute('customer-id', {
+      email: 'shared-dealer@example.com',
+    });
+
+    expect(customersRepository.findByEmail).not.toHaveBeenCalled();
+    expect(customersRepository.update).toHaveBeenCalledWith(
+      'customer-id',
+      expect.objectContaining({ email: 'shared-dealer@example.com' }),
+    );
   });
 });

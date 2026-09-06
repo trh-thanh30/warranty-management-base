@@ -229,14 +229,16 @@ export class WarrantiesRepository {
   }
 
   findByProductId(productId: string) {
-    return this.prismaService.warranty.findUnique({
+    return this.prismaService.warranty.findFirst({
       where: { product_id: productId },
+      orderBy: { created_at: 'desc' },
     });
   }
 
   async findRecordByProductId(productId: string) {
-    const warranty = await this.prismaService.warranty.findUnique({
+    const warranty = await this.prismaService.warranty.findFirst({
       where: { product_id: productId },
+      orderBy: { created_at: 'desc' },
     });
 
     return warranty ? toWarrantyRecord(warranty) : null;

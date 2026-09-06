@@ -48,13 +48,6 @@ export class CreateCustomerUseCase {
       }
     }
 
-    if (email) {
-      const existingEmail = await this.customersRepository.findByEmail(email);
-      if (existingEmail) {
-        throw new ConflictError('Customer email already exists');
-      }
-    }
-
     const customer = await this.customersRepository.create({
       user: user ? { connect: { id: user.id } } : undefined,
       customer_code: customerCode,

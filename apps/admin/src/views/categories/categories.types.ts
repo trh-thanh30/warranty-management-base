@@ -21,6 +21,7 @@ export const categoryFormSchema = z.object({
   description: optionalText.max(500, "descriptionLength"),
   imageUrl: optionalText.max(500, "imageUrlLength"),
   isActive: z.boolean(),
+  activationCodeEnabled: z.boolean(),
   name: optionalText.min(2, "nameRequired").max(160, "nameLength"),
   order: z.coerce.number().int("orderInteger"),
   parentId: z.string(),

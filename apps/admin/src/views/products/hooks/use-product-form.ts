@@ -150,9 +150,8 @@ function getDefaultValues(
     productCode: isClone ? "" : (product?.productCode ?? ""),
     serialNumber: isClone ? "" : (product?.serialNumber ?? ""),
     status: product?.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
-    warrantyCode: isClone ? "" : (product?.warrantyCode ?? ""),
-    warrantyDurationMonths: product?.warranty?.durationMonths ?? "",
-    warrantyTerms: product?.warranty?.terms ?? "",
+    warrantyDurationMonths: product?.warrantyDurationMonths ?? "",
+    warrantyTerms: product?.warrantyTerms ?? "",
   };
 }
 

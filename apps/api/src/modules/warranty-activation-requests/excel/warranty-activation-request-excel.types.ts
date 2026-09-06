@@ -12,7 +12,7 @@ export type WarrantyActivationRequestExportRecord =
       product_name: string;
       product_code: string;
       serial_number: string | null;
-      warranty_code: string;
+      warranty_code: string | null;
     }>;
   };
 

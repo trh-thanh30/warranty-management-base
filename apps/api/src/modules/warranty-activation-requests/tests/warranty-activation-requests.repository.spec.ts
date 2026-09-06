@@ -5,6 +5,7 @@ import { Prisma, warranty_activation_request_status } from '@prisma/client';
 import {
   WarrantyActivationRequestCodeConflictError,
   WarrantyActivationRequestUniqueConflictError,
+  WarrantyActivationRequestWarrantyCodeConflictError,
 } from '@/modules/warranty-activation-requests/repository/warranty-activation-request-errors';
 
 describe('WarrantyActivationRequestsRepository', () => {
@@ -94,6 +95,29 @@ describe('WarrantyActivationRequestsRepository', () => {
     await expect(
       repository.create(createCommand('WAR-duplicate')),
     ).rejects.toBeInstanceOf(WarrantyActivationRequestCodeConflictError);
+
+    const warrantyCodeConflict = new Prisma.PrismaClientKnownRequestError(
+      'Unique constraint failed',
+      {
+        clientVersion: 'test',
+        code: 'P2002',
+        meta: { target: ['warranty_code'] },
+      },
+    );
+    const warrantyCodeRepository = new WarrantyActivationRequestsRepository(
+      {
+        warrantyActivationRequest: {
+          create: jest.fn().mockRejectedValue(warrantyCodeConflict),
+        },
+      } as never,
+      queries,
+    );
+
+    await expect(
+      warrantyCodeRepository.create(createCommand('WAR-warranty-code')),
+    ).rejects.toBeInstanceOf(
+      WarrantyActivationRequestWarrantyCodeConflictError,
+    );
 
     const otherConflict = new Prisma.PrismaClientKnownRequestError(
       'Unique constraint failed',

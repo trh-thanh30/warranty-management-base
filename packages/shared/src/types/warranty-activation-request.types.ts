@@ -35,6 +35,7 @@ export type WarrantyCertificateSummary = {
 
 export type WarrantyActivationRequestItemSummary = {
   id: string;
+  activationCodeId: string | null;
   activationFieldId: string | null;
   positionKey: string;
   positionLabel: string;
@@ -42,9 +43,9 @@ export type WarrantyActivationRequestItemSummary = {
   productName: string;
   productCode: string;
   serialNumber: string | null;
-  warrantyId: string;
-  warrantyCode: string;
-  warrantyStatus: WarrantyStatus;
+  warrantyId: string | null;
+  warrantyCode: string | null;
+  warrantyStatus: WarrantyStatus | null;
   status: WarrantyActivationRequestStatus;
   activatedAt: string | null;
 };
@@ -65,12 +66,23 @@ export type WarrantyActivationRequestSummary = {
   status: WarrantyActivationRequestStatus;
   source: WarrantyActivationRequestSource;
   warrantyCode: string;
+  activationCode: {
+    id: string;
+    status:
+      | "AVAILABLE"
+      | "ACTIVATED"
+      | "EXPIRED"
+      | "REVOKED"
+      | "REPLACED"
+      | "PENDING_APPROVAL";
+  } | null;
   categoryId: string | null;
   productId: string | null;
   dealerId: string | null;
   dealer: {
     id: string;
     name: string;
+    email: string | null;
     phone: string | null;
     address: string;
     province: string;
@@ -142,12 +154,15 @@ export type WarrantyActivationRequestSummary = {
 };
 
 export type CreateWarrantyActivationRequestItemBody = {
+  activationCodeId?: string;
   activationFieldId?: string;
   positionKey: string;
   productId: string;
 };
 
 export type CreateWarrantyActivationRequestBody = {
+  activationCode?: string;
+  activationCodeId?: string;
   warrantyCode?: string;
   categoryId?: string;
   productId?: string;
@@ -194,7 +209,7 @@ export type CreateWarrantyActivationRequestBody = {
 
 export type CreatePublicWarrantyActivationRequestBody = Omit<
   CreateWarrantyActivationRequestBody,
-  "customerBirthdate" | "customerEmail"
+  "customerBirthdate" | "customerEmail" | "activationCodeId"
 > & {
   customerEmail: string;
 };
@@ -204,6 +219,7 @@ export type CreateAdminWarrantyActivationRequestBody = Omit<
   "warrantyCode"
 > & {
   customerId: string;
+  activationCodeId?: string;
   /** Multi-product requests use items; productId remains for legacy clients. */
   items?: CreateWarrantyActivationRequestItemBody[];
   productId?: string;

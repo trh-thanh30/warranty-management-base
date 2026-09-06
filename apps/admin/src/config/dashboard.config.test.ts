@@ -94,6 +94,17 @@ test("groups settings sections under dedicated routes", () => {
       ["items.settingsProfile", "/settings/profile"],
       ["items.settingsSecurity", "/settings/security"],
       ["items.settingsPermissions", "/settings/permissions"],
+      [
+        "items.settingsActivationCodePolicy",
+        "/settings/activation-code-policy",
+      ],
     ],
+  );
+
+  assert.equal(
+    settings?.children?.find(
+      (item) => item.href === "/settings/activation-code-policy",
+    )?.requiredPermission,
+    PERMISSIONS.SYSTEM_CONFIG_VIEW,
   );
 });

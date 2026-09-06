@@ -10,6 +10,7 @@ export type CreateWarrantyActivationRequestCommand = {
   requestCode: string;
   source: WarrantyActivationRequestSource;
   warrantyCode: string;
+  activationCodeId?: string;
   createdByUserId?: string;
   customerName: string;
   customerPhone: string;
@@ -36,12 +37,13 @@ export type CreateWarrantyActivationRequestCommand = {
   note?: string;
   metadata: Record<string, unknown>;
   items: Array<{
+    activationCodeId?: string | null;
     activationFieldId: string | null;
     positionKey: string;
     positionLabel: string;
     productId: string;
-    warrantyId: string;
-    warrantyCode: string;
+    warrantyId: string | null;
+    warrantyCode: string | null;
     productName: string;
     productCode: string;
     serialNumber: string | null;
