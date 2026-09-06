@@ -13,6 +13,7 @@ import {
   Prisma,
   warranty_method,
 } from '@prisma/client';
+import type { ActivationCodeBatchRevokeScope } from '@repo/shared';
 
 export class ProductActivationCodeReplacementConflictError extends Error {}
 
@@ -108,17 +109,82 @@ export class ActivationCodeBatchesRepository {
     });
   }
 
-  async revokeBatch(id: string) {
-    const batch = await this.prismaService.activationCodeBatch.findUnique({
-      where: { id },
-      select: { id: true },
+  async revokeBatch(id: string, scope: ActivationCodeBatchRevokeScope) {
+    return this.prismaService.$transaction(async (tx) => {
+      const batch = await tx.activationCodeBatch.findUnique({
+        where: { id },
+        select: { id: true },
+      });
+      if (!batch) return null;
+
+      const result = await tx.activationCode.updateMany({
+        where: this.buildRevocableWhere({
+          batch_id: id,
+          ...(scope === 'UNASSIGNED_ONLY' ? { product_id: null } : {}),
+        }),
+        data: {
+          status: activation_code_status.REVOKED,
+          revoked_at: new Date(),
+          ...(scope === 'ALL_REVOCABLE' ? { product_id: null } : {}),
+        },
+      });
+      return { batchId: id, scope, revokedCount: result.count };
     });
-    if (!batch) return null;
-    const result = await this.prismaService.activationCode.updateMany({
-      where: { batch_id: id, status: activation_code_status.AVAILABLE },
-      data: { status: activation_code_status.REVOKED, revoked_at: new Date() },
+  }
+
+  async getRevokePreview(id: string) {
+    return this.prismaService.$transaction(async (tx) => {
+      const batch = await tx.activationCodeBatch.findUnique({
+        where: { id },
+        select: { id: true },
+      });
+      if (!batch) return null;
+
+      const revocableWhere = this.buildRevocableWhere({
+        batch_id: id,
+      });
+      const [
+        totalCount,
+        unassignedRevocableCount,
+        assignedRevocableCount,
+        requestProtectedCount,
+        activatedProtectedCount,
+      ] = await Promise.all([
+        tx.activationCode.count({ where: { batch_id: id } }),
+        tx.activationCode.count({
+          where: { ...revocableWhere, product_id: null },
+        }),
+        tx.activationCode.count({
+          where: { ...revocableWhere, product_id: { not: null } },
+        }),
+        tx.activationCode.count({
+          where: {
+            batch_id: id,
+            status: activation_code_status.AVAILABLE,
+            warranty: { is: null },
+            OR: [{ request: { isNot: null } }, { request_items: { some: {} } }],
+          },
+        }),
+        tx.activationCode.count({
+          where: {
+            batch_id: id,
+            OR: [
+              { status: activation_code_status.ACTIVATED },
+              { warranty: { isNot: null } },
+            ],
+          },
+        }),
+      ]);
+
+      return {
+        batchId: id,
+        totalCount,
+        unassignedRevocableCount,
+        assignedRevocableCount,
+        requestProtectedCount,
+        activatedProtectedCount,
+      };
     });
-    return { batchId: id, revokedCount: result.count };
   }
 
   async updateBatchName(id: string, batchName: string) {
@@ -730,9 +796,25 @@ export class ActivationCodeBatchesRepository {
 
   revoke(id: string) {
     return this.prismaService.activationCode.updateMany({
-      where: { id, status: activation_code_status.AVAILABLE },
-      data: { status: activation_code_status.REVOKED, revoked_at: new Date() },
+      where: this.buildRevocableWhere({ id }),
+      data: {
+        status: activation_code_status.REVOKED,
+        revoked_at: new Date(),
+        product_id: null,
+      },
     });
+  }
+
+  private buildRevocableWhere(
+    where: Prisma.ActivationCodeWhereInput,
+  ): Prisma.ActivationCodeWhereInput {
+    return {
+      ...where,
+      status: activation_code_status.AVAILABLE,
+      request: { is: null },
+      request_items: { none: {} },
+      warranty: { is: null },
+    };
   }
 
   private buildReportWhere(

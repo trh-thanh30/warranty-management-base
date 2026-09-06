@@ -1,5 +1,6 @@
 import type {
   ActivationCodeReport,
+  ActivationCodeBatchRevokePreview,
   ActivationCodePrintJob,
   AssignActivationCodesToProductBody,
   AssignActivationCodesToProductResult,
@@ -7,6 +8,7 @@ import type {
   ReplaceProductActivationCodeAssignmentResult,
   UnassignActivationCodesFromProductBody,
   RequestActivationCodePrintJobQuery,
+  RevokeActivationCodeBatchRequest,
 } from "@repo/shared";
 import { unwrap, unwrapBlob } from "../service.utils";
 import type {
@@ -130,6 +132,16 @@ export function createActivationCodesService(http: ActivationCodesHttpClient) {
       );
     },
 
+    async getBatchRevokePreview(
+      batchId: string,
+    ): Promise<ActivationCodeBatchRevokePreview> {
+      return unwrap(
+        await http.get<ActivationCodeBatchRevokePreview>(
+          `/activation-code-batches/${batchId}/revoke-preview`,
+        ),
+      );
+    },
+
     async revokeCode(codeId: string): Promise<void> {
       await http.post(`/activation-code-batches/codes/${codeId}/revoke`);
     },
@@ -175,10 +187,12 @@ export function createActivationCodesService(http: ActivationCodesHttpClient) {
 
     async revokeBatch(
       batchId: string,
+      body: RevokeActivationCodeBatchRequest = {},
     ): Promise<RevokeActivationCodeBatchResult> {
       return unwrap(
         await http.post<RevokeActivationCodeBatchResult>(
           `/activation-code-batches/${batchId}/revoke`,
+          body,
         ),
       );
     },

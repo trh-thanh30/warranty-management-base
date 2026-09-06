@@ -298,16 +298,19 @@ export function CreateWarrantyActivationRequestFormCard({
               {!usesProductSelectors && selectedProduct ? (
                 <SelectedProductSummaryCard
                   brand={selectedProduct.brand}
+                  categoryName={selectedProduct.categoryRef.name}
                   durationMonths={
                     selectedProduct.warrantyDurationMonths ??
                     selectedProduct.warranty?.durationMonths
                   }
                   endDate={selectedProduct.warranty?.endDate ?? null}
                   model={selectedProduct.model}
-                  ownerName={selectedProduct.owner?.fullName}
                   productCodeLabel={t("productCode")}
                   productCode={selectedProduct.productCode}
                   productName={getActivationProductDisplayName(selectedProduct)}
+                  productStatusLabel={t(
+                    `productStatuses.${selectedProduct.status}`,
+                  )}
                   sku={selectedProduct.sku}
                   skuLabel={t("sku")}
                   startDate={selectedProduct.warranty?.startDate ?? null}
@@ -318,13 +321,12 @@ export function CreateWarrantyActivationRequestFormCard({
                   summaryLabels={{
                     activationStartPending: t("activationStartPending"),
                     brandModel: `${t("brand")} / ${t("model")}`,
-                    currentOwner: t("currentOwner"),
+                    category: t("category"),
                     durationMonths: t("durationMonths"),
                     monthUnit: t("monthUnit"),
+                    productStatus: t("productStatus"),
                     warrantyPeriod: t("warrantyPeriod"),
                   }}
-                  warrantyCode={selectedProduct.warrantyCode}
-                  warrantyCodeLabel={t("warrantyCode")}
                 />
               ) : null}
 

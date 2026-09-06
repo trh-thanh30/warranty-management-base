@@ -204,3 +204,57 @@ test("replaces a product activation-code assignment atomically", async () => {
   ]);
   assert.equal(result, response);
 });
+
+test("loads the revoke impact for an activation-code batch", async () => {
+  const calls: unknown[] = [];
+  const preview = {
+    batchId: "batch-id",
+    totalCount: 50,
+    unassignedRevocableCount: 30,
+    assignedRevocableCount: 10,
+    requestProtectedCount: 5,
+    activatedProtectedCount: 5,
+  };
+  const http = {
+    async get(url: string) {
+      calls.push({ url });
+      return { data: { success: true, data: preview } };
+    },
+  };
+
+  const result = await createActivationCodesService(
+    http as unknown as ActivationCodesHttpClient,
+  ).getBatchRevokePreview("batch-id");
+
+  assert.deepEqual(calls, [
+    { url: "/activation-code-batches/batch-id/revoke-preview" },
+  ]);
+  assert.equal(result, preview);
+});
+
+test("sends the selected scope when revoking an activation-code batch", async () => {
+  const calls: unknown[] = [];
+  const response = {
+    batchId: "batch-id",
+    scope: "ALL_REVOCABLE",
+    revokedCount: 40,
+  };
+  const http = {
+    async post(url: string, body?: unknown) {
+      calls.push({ url, body });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  const result = await createActivationCodesService(
+    http as unknown as ActivationCodesHttpClient,
+  ).revokeBatch("batch-id", { scope: "ALL_REVOCABLE" });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/activation-code-batches/batch-id/revoke",
+      body: { scope: "ALL_REVOCABLE" },
+    },
+  ]);
+  assert.equal(result, response);
+});
