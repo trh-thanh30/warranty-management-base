@@ -71,7 +71,7 @@ export function SiteHeader({ logoUrl }: { logoUrl?: string | null }) {
   return (
     <header
       data-site-header
-      className="fixed inset-x-0 top-0 z-50 w-full border-b border-border-gray bg-off-white py-3 shadow-sm"
+      className="sticky top-0 z-50 w-full border-b border-border-gray bg-off-white py-3 shadow-sm"
     >
       <Container className="flex items-center justify-between gap-6">
         <Link
