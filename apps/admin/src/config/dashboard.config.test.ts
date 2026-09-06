@@ -81,3 +81,30 @@ test("groups warranties while keeping claims independent", () => {
     "/warranty-claims",
   );
 });
+
+test("groups settings sections under dedicated routes", () => {
+  const config = getDashboardConfig((key) => key);
+  const settings = config.sidebarSections
+    .flatMap((section) => section.items)
+    .find((item) => item.title === "items.settings");
+
+  assert.deepEqual(
+    settings?.children?.map((item) => [item.title, item.href]),
+    [
+      ["items.settingsProfile", "/settings/profile"],
+      ["items.settingsSecurity", "/settings/security"],
+      ["items.settingsPermissions", "/settings/permissions"],
+      [
+        "items.settingsActivationCodePolicy",
+        "/settings/activation-code-policy",
+      ],
+    ],
+  );
+
+  assert.equal(
+    settings?.children?.find(
+      (item) => item.href === "/settings/activation-code-policy",
+    )?.requiredPermission,
+    PERMISSIONS.SYSTEM_CONFIG_VIEW,
+  );
+});

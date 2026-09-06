@@ -7,14 +7,15 @@ import {
   FileCheck2,
   FileText,
   Globe2,
-  LayoutDashboard,
   KeyRound,
+  LayoutDashboard,
   LogOut,
   HardDrive,
   MessageSquareText,
   Navigation,
   PanelsTopLeft,
   Settings,
+  Settings2,
   ShieldCheck,
   Store,
   Tags,
@@ -173,8 +174,30 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
           },
           {
             title: t("items.settings"),
-            href: "/settings",
             icon: Settings,
+            children: [
+              {
+                title: t("items.settingsProfile"),
+                href: "/settings/profile",
+                icon: UserRound,
+              },
+              {
+                title: t("items.settingsSecurity"),
+                href: "/settings/security",
+                icon: KeyRound,
+              },
+              {
+                title: t("items.settingsPermissions"),
+                href: "/settings/permissions",
+                icon: ShieldCheck,
+              },
+              {
+                title: t("items.settingsActivationCodePolicy"),
+                href: "/settings/activation-code-policy",
+                icon: Settings2,
+                requiredPermission: PERMISSIONS.SYSTEM_CONFIG_VIEW,
+              },
+            ],
           },
         ],
       },
@@ -249,14 +272,14 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
       },
       {
         title: t("items.settings"),
-        href: "/settings",
+        href: "/settings/profile",
       },
     ],
     userMenu: {
       menuItems: [
         {
           label: t("items.settings"),
-          href: "/settings",
+          href: "/settings/profile",
           icon: Settings,
         },
         {

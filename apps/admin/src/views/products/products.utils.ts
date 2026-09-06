@@ -63,6 +63,15 @@ export function formatProductOwner(product: ProductResponse) {
   );
 }
 
+export function getInitials(name: string) {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(-2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("");
+}
+
 export function getProductCategoryLabel(product: ProductResponse) {
   return product.categoryRef.name;
 }

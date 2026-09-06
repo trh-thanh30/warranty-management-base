@@ -47,6 +47,7 @@ export type HttpClientErrorPayload = {
   status?: number;
   code?: string;
   details?: unknown;
+  retryAfterSeconds?: number;
   isNetworkError: boolean;
 };
 
@@ -56,6 +57,8 @@ export class HttpClientError extends Error {
   readonly code?: string;
 
   readonly details?: unknown;
+
+  readonly retryAfterSeconds?: number;
 
   readonly isNetworkError: boolean;
 
@@ -67,6 +70,7 @@ export class HttpClientError extends Error {
     this.status = payload.status;
     this.code = payload.code;
     this.details = payload.details;
+    this.retryAfterSeconds = payload.retryAfterSeconds;
     this.isNetworkError = payload.isNetworkError;
     this.cause = payload.cause;
   }

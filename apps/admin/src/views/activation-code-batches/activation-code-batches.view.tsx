@@ -72,7 +72,7 @@ export function ActivationCodeBatchesView() {
             <div className="flex flex-wrap items-center justify-end gap-2">
               {canConfigurePolicy ? (
                 <Button asChild size="md" variant="outline">
-                  <Link href="/settings?tab=activation-code-policy">
+                  <Link href="/settings/activation-code-policy">
                     <Settings2 className="size-4" />
                     {t("settings")}
                   </Link>

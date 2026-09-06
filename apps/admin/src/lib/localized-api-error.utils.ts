@@ -1,6 +1,9 @@
 import { HttpClientError } from "@repo/shared";
 
-export type ApiErrorTranslator = ((key: string) => string) & {
+export type ApiErrorTranslator = ((
+  key: string,
+  values?: Record<string, string | number | Date>,
+) => string) & {
   has?: (key: string) => boolean;
 };
 
@@ -36,15 +39,47 @@ export function getLocalizedApiError(
       : undefined;
 
   if (code && apiErrorTranslator?.has?.(code)) {
-    return apiErrorTranslator(code);
+    return appendRetryAfter(
+      apiErrorTranslator(code),
+      error,
+      apiErrorTranslator,
+    );
   }
 
   const scopedTranslationKey = code ? `apiErrors.${code}` : undefined;
   if (scopedTranslationKey && translate.has?.(scopedTranslationKey)) {
-    return translate(scopedTranslationKey);
+    return appendRetryAfter(translate(scopedTranslationKey), error, translate);
   }
 
-  return error.message || translate(fallbackKey);
+  return appendRetryAfter(
+    error.message || translate(fallbackKey),
+    error,
+    translate,
+  );
+}
+
+function appendRetryAfter(
+  message: string,
+  error: HttpClientError,
+  translate: ApiErrorTranslator,
+) {
+  const seconds = error.retryAfterSeconds;
+  if (!seconds || error.status !== 429) return message;
+
+  const key = "RATE_LIMIT_RETRY_AFTER";
+  if (translate.has?.(key)) {
+    return translate(key, { seconds }).replace("{seconds}", String(seconds));
+  }
+
+  const scopedKey = `apiErrors.${key}`;
+  if (translate.has?.(scopedKey)) {
+    return translate(scopedKey, { seconds }).replace(
+      "{seconds}",
+      String(seconds),
+    );
+  }
+
+  return `${message} (${seconds}s)`;
 }
 
 function getApiErrorCode(error: HttpClientError) {

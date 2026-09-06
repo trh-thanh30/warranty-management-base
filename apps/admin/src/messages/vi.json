@@ -61,6 +61,7 @@
     "PRODUCT_WARRANTY_NOT_FOUND": "Không tìm thấy bảo hành của sản phẩm đã chọn.",
     "QUICK_DEALER_REQUIRED_FIELDS": "Tạo nhanh đại lý cần có tên, địa chỉ và tỉnh/thành phố.",
     "RATE_LIMIT": "Có quá nhiều yêu cầu. Vui lòng thử lại sau.",
+    "RATE_LIMIT_RETRY_AFTER": "Có quá nhiều yêu cầu. Vui lòng thử lại sau {seconds} giây.",
     "RECORD_NOT_FOUND": "Không tìm thấy bản ghi yêu cầu.",
     "SERIAL_NUMBER_ALREADY_EXISTS": "Số serial này đã tồn tại.",
     "UNAUTHORIZED": "Phiên đăng nhập không hợp lệ hoặc đã hết hạn.",
@@ -101,6 +102,10 @@
       "dashboard": "Bảng điều khiển",
       "users": "Nhân viên",
       "settings": "Cài đặt",
+      "settingsProfile": "Thông tin cá nhân",
+      "settingsSecurity": "Bảo mật",
+      "settingsPermissions": "Quyền hạn & Vai trò",
+      "settingsActivationCodePolicy": "Chính sách mã kích hoạt",
       "overview": "Tổng quan",
       "customers": "Khách hàng",
       "categories": "Danh mục",
@@ -990,6 +995,7 @@
     "code": "Mã danh mục",
     "slug": "Slug",
     "name": "Tên danh mục",
+    "descriptionLabel": "Mô tả",
     "parent": "Danh mục cha",
     "imageUrl": "Hình ảnh danh mục",
     "order": "Thứ tự hiển thị",
@@ -2899,7 +2905,9 @@
         "AUDIT_LOG_VIEW": "Xem nhật ký kiểm toán",
         "WEBSITE_CONFIG_VIEW": "Xem cấu hình website",
         "WEBSITE_CONFIG_UPDATE": "Chỉnh sửa cấu hình website",
-        "WEBSITE_CONFIG_PUBLISH": "Xuất bản cấu hình website"
+        "WEBSITE_CONFIG_PUBLISH": "Xuất bản cấu hình website",
+        "CONTACT_SUBMISSION_VIEW": "Xem lời nhắn liên hệ",
+        "CONTACT_SUBMISSION_UPDATE": "Cập nhật lời nhắn liên hệ"
       }
     },
     "save": "Lưu thay đổi",

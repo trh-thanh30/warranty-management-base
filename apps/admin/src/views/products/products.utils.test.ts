@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  getInitials,
   getProductWarrantyProgress,
   getProductPhysicalMetadata,
   toCreateProductBody,
@@ -12,6 +13,11 @@ import {
   productEditFormSchema,
   productFormSchema,
 } from "./products.types.ts";
+
+test("gets initials from the last two parts of a product owner name", () => {
+  assert.equal(getInitials("Nguyễn Văn Hùng"), "VH");
+  assert.equal(getInitials("  Lê   Minh  "), "LM");
+});
 
 test("calculates active warranty progress and remaining months", () => {
   assert.deepEqual(

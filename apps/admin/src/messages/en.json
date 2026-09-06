@@ -61,6 +61,7 @@
     "PRODUCT_WARRANTY_NOT_FOUND": "The warranty for the selected product was not found.",
     "QUICK_DEALER_REQUIRED_FIELDS": "Quick dealer creation requires a name, address, and province/city.",
     "RATE_LIMIT": "Too many requests. Please try again later.",
+    "RATE_LIMIT_RETRY_AFTER": "Too many requests. Please try again in {seconds} seconds.",
     "RECORD_NOT_FOUND": "The requested record was not found.",
     "SERIAL_NUMBER_ALREADY_EXISTS": "This serial number already exists.",
     "UNAUTHORIZED": "Your session is invalid or has expired.",
@@ -101,6 +102,10 @@
       "dashboard": "Dashboard",
       "users": "Staff",
       "settings": "Settings",
+      "settingsProfile": "Profile details",
+      "settingsSecurity": "Security",
+      "settingsPermissions": "Permissions & roles",
+      "settingsActivationCodePolicy": "Activation code policy",
       "overview": "Overview",
       "customers": "Customers",
       "categories": "Categories",
@@ -990,6 +995,7 @@
     "code": "Category code",
     "slug": "Slug",
     "name": "Category name",
+    "descriptionLabel": "Description",
     "parent": "Parent",
     "imageUrl": "Category image",
     "order": "Display order",
@@ -2899,7 +2905,9 @@
         "AUDIT_LOG_VIEW": "View audit logs",
         "WEBSITE_CONFIG_VIEW": "View website configuration",
         "WEBSITE_CONFIG_UPDATE": "Update website configuration",
-        "WEBSITE_CONFIG_PUBLISH": "Publish website configuration"
+        "WEBSITE_CONFIG_PUBLISH": "Publish website configuration",
+        "CONTACT_SUBMISSION_VIEW": "View contact messages",
+        "CONTACT_SUBMISSION_UPDATE": "Update contact messages"
       }
     },
     "save": "Save changes",

@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+export type SettingsSection =
+  | "profile"
+  | "security"
+  | "permissions"
+  | "activation-code-policy";
+
 export const profileSchema = z.object({
   fullName: z.string().trim().max(120, "fullNameLength").nullable(),
   phone: z.string().trim().max(32, "phoneLength").nullable(),
