@@ -443,10 +443,11 @@ describe('WarrantyActivationRequestsUseCases', () => {
         wardName: 'Phuong Ben Thanh',
       }),
     ).rejects.toMatchObject({
+      code: 'ACTIVATION_REQUEST_ALREADY_OPEN',
       details: {
         activationCodeIds: ['activation-code-a'],
-        code: 'ACTIVATION_REQUEST_ALREADY_OPEN',
       },
+      statusCode: 409,
     });
   });
 
@@ -483,10 +484,11 @@ describe('WarrantyActivationRequestsUseCases', () => {
         wardName: 'Phuong Ben Thanh',
       }),
     ).rejects.toMatchObject({
+      code: 'ACTIVATION_REQUEST_ALREADY_OPEN',
       details: {
         activationCodeIds: ['activation-code-a'],
-        code: 'ACTIVATION_REQUEST_ALREADY_OPEN',
       },
+      statusCode: 409,
     });
     expect(
       productsRepository.findActivationRequestTargetById,

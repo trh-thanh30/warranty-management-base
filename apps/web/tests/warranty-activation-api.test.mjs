@@ -195,6 +195,17 @@ test("warranty activation errors distinguish business and transport failures", a
   assert.equal(
     getWarrantyActivationErrorKind(
       new HttpClientError({
+        code: "ACTIVATION_REQUEST_ALREADY_OPEN",
+        isNetworkError: false,
+        message: "Activation code already has an open request",
+        status: 409,
+      }),
+    ),
+    "alreadyOpen",
+  );
+  assert.equal(
+    getWarrantyActivationErrorKind(
+      new HttpClientError({
         isNetworkError: false,
         message: "Too many requests",
         status: 429,

@@ -82,6 +82,42 @@ describe('WarrantyActivationRequestsRepository', () => {
     expect(createRequest).not.toHaveBeenCalled();
   });
 
+  it('rejects the whole request when only part of a multi-code reservation succeeds', async () => {
+    const createRequest = jest.fn();
+    const reserveCodes = jest.fn().mockResolvedValue({ count: 1 });
+    const repository = new WarrantyActivationRequestsRepository(
+      {
+        $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
+          callback({
+            activationCode: { updateMany: reserveCodes },
+            warrantyActivationRequest: { create: createRequest },
+          }),
+        ),
+      } as never,
+      queries,
+    );
+    const command = createCommand('WAR-20260820-PARTIAL');
+    command.items = ['activation-code-a', 'activation-code-b'].map(
+      (activationCodeId, index) => ({
+        activationCodeId,
+        activationFieldId: null,
+        positionKey: `position${index}`,
+        positionLabel: `Position ${index}`,
+        productCode: `PRODUCT-${index}`,
+        productId: `product-${index}`,
+        productName: `Product ${index}`,
+        serialNumber: null,
+        warrantyCode: `WM-${index}`,
+        warrantyId: null,
+      }),
+    );
+
+    await expect(repository.create(command)).rejects.toMatchObject({
+      activationCodeIds: ['activation-code-a', 'activation-code-b'],
+    });
+    expect(createRequest).not.toHaveBeenCalled();
+  });
+
   it('updates Customer birthdate and creates the request in one transaction', async () => {
     const updateCustomer = jest.fn().mockResolvedValue({ id: 'customer-id' });
     const createRequest = jest.fn().mockResolvedValue({ id: 'request-id' });

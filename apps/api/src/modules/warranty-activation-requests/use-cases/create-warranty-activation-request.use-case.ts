@@ -1,4 +1,8 @@
-import { BadRequestError, NotFoundError } from '@/common/response';
+import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+} from '@/common/response';
 import { DealersRepository } from '@/modules/dealers/repository/dealers.repository';
 import {
   getProductCatalogue,
@@ -313,12 +317,11 @@ export class CreateWarrantyActivationRequestUseCase {
         return toWarrantyActivationRequestResponse(request);
       } catch (error) {
         if (error instanceof WarrantyActivationCodeReservationConflictError) {
-          throw new BadRequestError(
+          throw new ConflictError(
             'Activation code already has an open activation request',
-            'BAD_REQUEST',
+            'ACTIVATION_REQUEST_ALREADY_OPEN',
             {
               activationCodeIds: error.activationCodeIds,
-              code: 'ACTIVATION_REQUEST_ALREADY_OPEN',
             },
           );
         }
@@ -467,12 +470,11 @@ export class CreateWarrantyActivationRequestUseCase {
   }
 
   private throwActivationCodeAlreadyPending(activationCodeId: string): never {
-    throw new BadRequestError(
+    throw new ConflictError(
       'Activation code already has an open activation request',
-      'BAD_REQUEST',
+      'ACTIVATION_REQUEST_ALREADY_OPEN',
       {
         activationCodeIds: [activationCodeId],
-        code: 'ACTIVATION_REQUEST_ALREADY_OPEN',
       },
     );
   }
