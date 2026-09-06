@@ -1362,7 +1362,7 @@
     "activate": {
       "form": {
         "title": "Gửi yêu cầu kích hoạt bảo hành",
-        "description": "Điền thông tin để FUJITEK tiếp nhận, kiểm tra và kích hoạt bảo hành cho sản phẩm.",
+        "description": "Nhập mã kích hoạt trên tem và thông tin chủ xe để FUJITEK kiểm tra, phê duyệt trước khi cấp bảo hành.",
         "sectionTitle": "Thông tin kích hoạt bảo hành",
         "sectionDescription": "Vui lòng điền đầy đủ thông tin để quá trình xác minh và kích hoạt được thực hiện chính xác."
       },
@@ -1373,7 +1373,7 @@
           "one": {
             "badge": "Bước 01",
             "title": "Điền thông tin",
-            "description": "Cung cấp thông tin chủ xe, sản phẩm và địa chỉ kích hoạt."
+            "description": "Nhập mã kích hoạt trên tem, thông tin chủ xe và địa chỉ kích hoạt."
           },
           "two": {
             "badge": "Bước 02",
@@ -1389,7 +1389,7 @@
       },
       "eyebrow": "Yêu cầu kích hoạt E-Warranty",
       "title": "Đăng ký kích hoạt bảo hành điện tử",
-      "description": "Gửi thông tin E-Warranty để FUJITEK kiểm tra và xác nhận trước khi kích hoạt bảo hành.",
+      "description": "Nhập mã kích hoạt trên tem để FUJITEK xác định sản phẩm, kiểm tra và phê duyệt bảo hành.",
       "submit": "Gửi yêu cầu kích hoạt",
       "submitting": "Đang gửi yêu cầu...",
       "success": {
@@ -1426,9 +1426,10 @@
           "label": "Biển số xe *",
           "placeholder": "VD: 30H-888.88"
         },
-        "stampCode": {
+        "activationCode": {
           "label": "Mã kích hoạt *",
-          "placeholder": "VD: SP-ABCDEF123456"
+          "placeholder": "VD: SP-ABCDEF123456",
+          "description": "Nhập mã SP-* được in trên tem sản phẩm. Đây không phải mã bảo hành WM-* được cấp sau khi kích hoạt."
         },
         "province": {
           "label": "Tỉnh / Thành phố *",

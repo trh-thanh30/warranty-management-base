@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -235,17 +236,20 @@ export function WarrantyActivationRequestForm({
             render={({ field }) => (
               <FormItem className="sm:col-span-2">
                 <FormLabel className="text-sm font-semibold uppercase text-deep-black">
-                  {t("fields.stampCode.label")}
+                  {t("fields.activationCode.label")}
                 </FormLabel>
                 <FormControl>
                   <Input
                     autoComplete="off"
                     className={`h-12 rounded-md border-border-gray bg-white font-mono uppercase ${formControlFocusClassName}`}
                     maxLength={120}
-                    placeholder={t("fields.stampCode.placeholder")}
+                    placeholder={t("fields.activationCode.placeholder")}
                     {...field}
                   />
                 </FormControl>
+                <FormDescription className="text-xs leading-5">
+                  {t("fields.activationCode.description")}
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}

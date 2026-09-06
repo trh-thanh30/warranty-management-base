@@ -101,6 +101,34 @@ test("warranty activation form maps selected location names into the API body", 
   );
 });
 
+test("warranty activation form clearly distinguishes activation and warranty codes", async () => {
+  const [formSource, viSource, enSource] = await Promise.all([
+    readFile(
+      new URL(
+        "../src/views/warranty/components/warranty-activation-request-form.tsx",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+    readFile(new URL("../src/messages/vi.json", import.meta.url), "utf8"),
+    readFile(new URL("../src/messages/en.json", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(formSource, /name="activationCode"/);
+  assert.match(formSource, /fields\.activationCode\.description/);
+  assert.doesNotMatch(formSource, /fields\.stampCode/);
+
+  for (const source of [viSource, enSource]) {
+    const messages = JSON.parse(source);
+    const field = messages.Warranty.activate.fields.activationCode;
+
+    assert.equal(typeof field.label, "string");
+    assert.equal(typeof field.placeholder, "string");
+    assert.match(field.description, /SP-/);
+    assert.match(field.description, /WM-/);
+  }
+});
+
 test("warranty activation schema validates the required public fields", async () => {
   const { createWarrantyActivationFormSchema } = await importRequired(
     "../src/views/warranty/warranty-activation-form.schema.ts",

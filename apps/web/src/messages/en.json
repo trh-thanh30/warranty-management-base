@@ -1362,7 +1362,7 @@
     "activate": {
       "form": {
         "title": "Submit a warranty activation request",
-        "description": "Enter your details so FUJITEK can receive, verify, and activate the product warranty.",
+        "description": "Enter the activation code from the label and the vehicle owner's details for FUJITEK to review and approve before issuing the warranty.",
         "sectionTitle": "Warranty activation information",
         "sectionDescription": "Complete all required information so verification and activation can be processed accurately."
       },
@@ -1373,7 +1373,7 @@
           "one": {
             "badge": "Step 01",
             "title": "Enter details",
-            "description": "Provide the owner, product, and activation address information."
+            "description": "Enter the activation code from the label, vehicle owner details, and activation address."
           },
           "two": {
             "badge": "Step 02",
@@ -1389,7 +1389,7 @@
       },
       "eyebrow": "E-Warranty activation request",
       "title": "Request electronic warranty activation",
-      "description": "Submit your E-Warranty information for FUJITEK to verify and approve before activation.",
+      "description": "Enter the activation code from the label so FUJITEK can identify the product, review it, and approve the warranty.",
       "submit": "Submit activation request",
       "submitting": "Submitting request...",
       "success": {
@@ -1426,9 +1426,10 @@
           "label": "License plate *",
           "placeholder": "E.g. 30H-888.88"
         },
-        "stampCode": {
+        "activationCode": {
           "label": "Activation code *",
-          "placeholder": "E.g. SP-ABCDEF123456"
+          "placeholder": "E.g. SP-ABCDEF123456",
+          "description": "Enter the SP-* code printed on the product label. This is not the WM-* warranty code issued after activation."
         },
         "province": {
           "label": "Province / City *",
