@@ -1915,6 +1915,12 @@
     "productSearch": "Find product or warranty code",
     "productSearchPlaceholder": "Search by name, warranty code, serial number, or owner",
     "category": "Product category",
+    "productStatus": "Product status",
+    "productStatuses": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive",
+      "DELETED": "Deleted"
+    },
     "categoryPlaceholder": "Search or choose a product category",
     "selectCategoryFirst": "Select a category before searching products",
     "noCategory": "No categories found.",

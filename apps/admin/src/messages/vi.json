@@ -1915,6 +1915,12 @@
     "productSearch": "Tìm sản phẩm hoặc mã bảo hành",
     "productSearchPlaceholder": "Tìm theo tên, mã bảo hành, số serial hoặc chủ sở hữu",
     "category": "Danh mục sản phẩm",
+    "productStatus": "Trạng thái sản phẩm",
+    "productStatuses": {
+      "ACTIVE": "Đang hoạt động",
+      "INACTIVE": "Ngừng hoạt động",
+      "DELETED": "Đã xóa"
+    },
     "categoryPlaceholder": "Tìm hoặc chọn danh mục sản phẩm",
     "selectCategoryFirst": "Chọn danh mục trước khi tìm sản phẩm",
     "noCategory": "Không tìm thấy danh mục.",
