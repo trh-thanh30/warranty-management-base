@@ -389,15 +389,37 @@ test("warranty activation success keeps a receipt and static process timeline in
   assert.match(source, /formatDate\(request\.createdAt/);
   assert.match(source, /framer-motion/);
   assert.match(source, /timelineTitle/);
+  assert.match(source, /submittedAtLabel/);
+  assert.match(source, /reservationTitle/);
+  assert.match(source, /reservationDescription/);
+  assert.match(source, /aria-atomic="true"/);
+  assert.match(source, /bg-success-surface/);
+  assert.match(source, /bg-info-surface/);
   assert.doesNotMatch(source, /function formatRequestDateTime/);
   assert.doesNotMatch(source, /1-2/);
 
-  for (const messages of [vi.default, en.default]) {
+  for (const [locale, messages] of [
+    ["vi", vi.default],
+    ["en", en.default],
+  ]) {
     const success = messages.Warranty.activate.success;
     assert.equal(typeof success.timelineTitle, "string");
     assert.equal(typeof success.submittedStep, "string");
     assert.equal(typeof success.reviewStep, "string");
     assert.equal(typeof success.activationStep, "string");
+    assert.equal(typeof success.submittedAtLabel, "string");
+    assert.equal(typeof success.requestCodeHint, "string");
+    assert.equal(typeof success.reservationTitle, "string");
+    assert.equal(typeof success.reservationDescription, "string");
+    assert.equal(typeof success.emailDescription, "string");
+
+    if (locale === "vi") {
+      assert.match(success.description, /chưa được kích hoạt/i);
+      assert.match(success.reservationDescription, /mã kích hoạt/i);
+    } else {
+      assert.match(success.description, /not active yet/i);
+      assert.match(success.reservationDescription, /activation code/i);
+    }
   }
 });
 
