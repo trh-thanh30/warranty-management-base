@@ -534,19 +534,16 @@ export class ActivationCodeBatchesRepository {
     return this.crypto.decrypt(ciphertext);
   }
 
-  findAvailableByHash(codeHash: string) {
-    return this.prismaService.activationCode.findFirst({
-      where: {
-        code_hash: codeHash,
-        status: activation_code_status.AVAILABLE,
-      },
+  findByHash(codeHash: string) {
+    return this.prismaService.activationCode.findUnique({
+      where: { code_hash: codeHash },
       include: { batch: true },
     });
   }
 
-  findAvailableById(id: string) {
-    return this.prismaService.activationCode.findFirst({
-      where: { id, status: activation_code_status.AVAILABLE },
+  findById(id: string) {
+    return this.prismaService.activationCode.findUnique({
+      where: { id },
       include: { batch: true },
     });
   }

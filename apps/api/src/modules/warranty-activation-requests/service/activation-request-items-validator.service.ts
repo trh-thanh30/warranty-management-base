@@ -8,7 +8,12 @@ import { ProductsRepository } from '@/modules/products/repository/products.repos
 import { ActivationCodeBatchesRepository } from '@/modules/activation-codes/repository/activation-code-batches.repository';
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
 import { Injectable } from '@nestjs/common';
-import { product_status, type Customer, warranty_status } from '@prisma/client';
+import {
+  activation_code_status,
+  product_status,
+  type Customer,
+  warranty_status,
+} from '@prisma/client';
 import type { CreateWarrantyActivationRequestItemBody } from '@repo/shared';
 
 export type ValidatedActivationRequestItem = {
@@ -139,10 +144,9 @@ export class ActivationRequestItemsValidatorService {
           items
             .filter((item) => item.activationCodeId)
             .map(async (item) => {
-              const code =
-                await this.activationCodesRepository.findAvailableById(
-                  item.activationCodeId!,
-                );
+              const code = await this.activationCodesRepository.findById(
+                item.activationCodeId!,
+              );
               return [item.activationCodeId!, code] as const;
             }),
         )
@@ -155,6 +159,16 @@ export class ActivationRequestItemsValidatorService {
       if (item.activationCodeId) {
         const code = codeRecords.get(item.activationCodeId);
         if (!code) {
+          this.throwValidation('ACTIVATION_CODE_INVALID_OR_EXPIRED', {
+            activationCodeId: item.activationCodeId,
+          });
+        }
+        if (code.status === activation_code_status.PENDING_APPROVAL) {
+          this.throwValidation('ACTIVATION_REQUEST_ALREADY_OPEN', {
+            activationCodeId: item.activationCodeId,
+          });
+        }
+        if (code.status !== activation_code_status.AVAILABLE) {
           this.throwValidation('ACTIVATION_CODE_INVALID_OR_EXPIRED', {
             activationCodeId: item.activationCodeId,
           });

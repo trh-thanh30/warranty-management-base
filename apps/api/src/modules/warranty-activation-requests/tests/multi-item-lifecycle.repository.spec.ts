@@ -2,6 +2,7 @@ import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activat
 import { WarrantyActivationRequestQueries } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository.queries';
 import { ReviewWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/review-warranty-activation-request.use-case';
 import {
+  activation_code_status,
   product_status,
   warranty_activation_request_status,
   warranty_status,
@@ -413,7 +414,17 @@ describe('Multi-item activation lifecycle', () => {
 
   it('rejects the parent and all items together', async () => {
     const tx = {
+      activationCode: {
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+      },
       warrantyActivationRequest: {
+        findUnique: jest.fn().mockResolvedValue({
+          activation_code_id: null,
+          items: [
+            { activation_code_id: 'activation-code-id' },
+            { activation_code_id: 'activation-code-id' },
+          ],
+        }),
         update: jest.fn().mockResolvedValue({ id: 'request-id' }),
       },
       warrantyActivationRequestItem: {
@@ -440,6 +451,22 @@ describe('Multi-item activation lifecycle', () => {
       data: { status: warranty_activation_request_status.REJECTED },
     });
     expect(tx.warrantyActivationRequest.update).toHaveBeenCalled();
+    expect(tx.activationCode.updateMany).toHaveBeenNthCalledWith(1, {
+      where: {
+        expires_at: { lte: expect.any(Date) },
+        id: { in: ['activation-code-id'] },
+        status: activation_code_status.PENDING_APPROVAL,
+      },
+      data: { status: activation_code_status.EXPIRED },
+    });
+    expect(tx.activationCode.updateMany).toHaveBeenNthCalledWith(2, {
+      where: {
+        expires_at: { gt: expect.any(Date) },
+        id: { in: ['activation-code-id'] },
+        status: activation_code_status.PENDING_APPROVAL,
+      },
+      data: { status: activation_code_status.AVAILABLE },
+    });
   });
 });
 

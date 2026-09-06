@@ -18,3 +18,10 @@ export class WarrantyActivationRequestWarrantyCodeConflictError extends Warranty
     this.name = 'WarrantyActivationRequestWarrantyCodeConflictError';
   }
 }
+
+export class WarrantyActivationCodeReservationConflictError extends Error {
+  constructor(readonly activationCodeIds: string[]) {
+    super('One or more activation codes could not be reserved');
+    this.name = 'WarrantyActivationCodeReservationConflictError';
+  }
+}
