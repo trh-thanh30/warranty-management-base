@@ -13,6 +13,43 @@ const lenisProviderPath = path.join(
   "providers",
   "lenis-provider.tsx",
 );
+const localeLayoutPath = path.join(
+  process.cwd(),
+  "apps",
+  "web",
+  "app",
+  "[locale]",
+  "layout.tsx",
+);
+const globalStylesPath = path.join(
+  process.cwd(),
+  "apps",
+  "web",
+  "app",
+  "globals.css",
+);
+const aboutViewPath = path.join(
+  process.cwd(),
+  "apps",
+  "web",
+  "src",
+  "views",
+  "about",
+  "about.view.tsx",
+);
+
+test("public pages use one native root scroll container", async () => {
+  const [layoutSource, globalStyles, aboutViewSource] = await Promise.all([
+    readFile(localeLayoutPath, "utf8"),
+    readFile(globalStylesPath, "utf8"),
+    readFile(aboutViewPath, "utf8"),
+  ]);
+
+  assert.doesNotMatch(layoutSource, /LenisProvider/);
+  assert.doesNotMatch(globalStyles, /scrollbar-gutter:\s*stable/);
+  assert.match(aboutViewSource, /overflow-x-clip/);
+  assert.doesNotMatch(aboutViewSource, /overflow-x-hidden/);
+});
 
 test("Lenis owns its RAF lifecycle and does not override the first touch scroll", async () => {
   const source = await readFile(lenisProviderPath, "utf8");

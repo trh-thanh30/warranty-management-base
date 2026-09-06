@@ -6,8 +6,8 @@ import { SiteFooter } from "@/src/components/layout/site-footer";
 import { SiteHeader } from "@/src/components/layout/site-header";
 import { LenisProvider } from "@/src/components/providers/lenis-provider";
 import { QueryProvider } from "@/src/components/providers/query-provider";
-import { routing } from "@/src/i18n/routing";
 import { resolveSiteOrigin } from "@/src/config/seo.config";
+import { routing } from "@/src/i18n/routing";
 import { getCachedSiteSetting } from "@/src/services/website-config/website-config.service";
 import type { Metadata } from "next";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
@@ -86,7 +86,7 @@ export default async function LocaleLayout({
             <SiteSettingsProvider siteSettings={siteSettings}>
               <LenisProvider>
                 <SiteHeader logoUrl={siteSettings?.headerLogo?.url} />
-                <div className="pt-[84px]">{children}</div>
+                <div className="pt-21">{children}</div>
                 <SiteFooter siteSettings={siteSettings} />
                 <PublicQuickChat siteSettings={siteSettings} />
                 <ToastProvider />
