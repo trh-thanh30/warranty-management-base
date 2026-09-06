@@ -23,6 +23,7 @@ import { UpdateActivationCodeBatchUseCase } from '@/modules/activation-codes/use
 import { ListActivationCodesUseCase } from '@/modules/activation-codes/use-cases/list-activation-codes.use-case';
 import { ListAvailableActivationCodesUseCase } from '@/modules/activation-codes/use-cases/list-available-activation-codes.use-case';
 import { ReplaceActivationCodeDto } from '@/modules/activation-codes/dto/replace-activation-code.dto';
+import { RevokeActivationCodeBatchDto } from '@/modules/activation-codes/dto/revoke-activation-code-batch.dto';
 import { ReplaceActivationCodeUseCase } from '@/modules/activation-codes/use-cases/replace-activation-code.use-case';
 import {
   AssignActivationCodesToProductDto,
@@ -32,6 +33,7 @@ import {
 import { AssignActivationCodesToProductUseCase } from '@/modules/activation-codes/use-cases/assign-activation-codes-to-product.use-case';
 import { UnassignActivationCodesFromProductUseCase } from '@/modules/activation-codes/use-cases/unassign-activation-codes-from-product.use-case';
 import { ReplaceProductActivationCodeAssignmentUseCase } from '@/modules/activation-codes/use-cases/replace-product-activation-code-assignment.use-case';
+import { GetActivationCodeBatchRevokePreviewUseCase } from '@/modules/activation-codes/use-cases/get-activation-code-batch-revoke-preview.use-case';
 import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import { Patch } from '@nestjs/common';
 import { UpdateActivationCodeBatchDto } from '@/modules/activation-codes/dto/update-activation-code-batch.dto';
@@ -52,6 +54,7 @@ export class ActivationCodesController {
     private readonly exportReportUseCase: ExportActivationCodeReportUseCase,
     private readonly listBatchesUseCase: ListActivationCodeBatchesUseCase,
     private readonly revokeBatchUseCase: RevokeActivationCodeBatchUseCase,
+    private readonly getBatchRevokePreviewUseCase: GetActivationCodeBatchRevokePreviewUseCase,
     private readonly listCodesUseCase: ListActivationCodesUseCase,
     private readonly listAvailableCodesUseCase: ListAvailableActivationCodesUseCase,
     private readonly replaceActivationCodeUseCase: ReplaceActivationCodeUseCase,
@@ -77,6 +80,12 @@ export class ActivationCodesController {
   @Permissions([permission_key.ACTIVATION_CODE_BATCH_VIEW])
   listCodes(@Param('id') id: string, @Query() query: ListActivationCodesDto) {
     return this.listCodesUseCase.execute(id, query);
+  }
+
+  @Get(':id/revoke-preview')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_REVOKE])
+  getBatchRevokePreview(@Param('id') id: string) {
+    return this.getBatchRevokePreviewUseCase.execute(id);
   }
 
   @Get('reports/summary')
@@ -162,8 +171,11 @@ export class ActivationCodesController {
 
   @Post(':id/revoke')
   @Permissions([permission_key.ACTIVATION_CODE_BATCH_REVOKE])
-  revokeBatch(@Param('id') id: string) {
-    return this.revokeBatchUseCase.execute(id);
+  revokeBatch(
+    @Param('id') id: string,
+    @Body() dto?: RevokeActivationCodeBatchDto,
+  ) {
+    return this.revokeBatchUseCase.execute(id, dto?.scope);
   }
 
   @Post(':id/print-jobs')

@@ -9,6 +9,7 @@ import { SystemConfigModule } from '@/modules/system-config/system-config.module
 import { ProductsModule } from '@/modules/products/products.module';
 import { RevokeActivationCodeUseCase } from '@/modules/activation-codes/use-cases/revoke-activation-code.use-case';
 import { RevokeActivationCodeBatchUseCase } from '@/modules/activation-codes/use-cases/revoke-activation-code-batch.use-case';
+import { GetActivationCodeBatchRevokePreviewUseCase } from '@/modules/activation-codes/use-cases/get-activation-code-batch-revoke-preview.use-case';
 import { UpdateActivationCodeBatchUseCase } from '@/modules/activation-codes/use-cases/update-activation-code-batch.use-case';
 import { RequestActivationLabelPrintJobUseCase } from '@/modules/activation-codes/use-cases/request-activation-label-print-job.use-case';
 import { GetActivationLabelPrintJobUseCase } from '@/modules/activation-codes/use-cases/get-activation-label-print-job.use-case';
@@ -45,6 +46,7 @@ import { Module } from '@nestjs/common';
     CreateActivationCodeBatchUseCase,
     RevokeActivationCodeUseCase,
     RevokeActivationCodeBatchUseCase,
+    GetActivationCodeBatchRevokePreviewUseCase,
     UpdateActivationCodeBatchUseCase,
     ActivationCodePrintJobsRepository,
     ActivationLabelPrintQueueService,

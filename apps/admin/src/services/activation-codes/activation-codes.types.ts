@@ -1,5 +1,9 @@
 import type { HttpGet, HttpWrite } from "../service.types";
-import type { ActivationCodeReport } from "@repo/shared";
+import type {
+  ActivationCodeBatchRevokePreview,
+  ActivationCodeReport,
+  RevokeActivationCodeBatchRequest,
+} from "@repo/shared";
 import type {
   ActivationCodeBatchList,
   ActivationCodeBatchListQuery,
@@ -34,6 +38,12 @@ export type ActivationCodeBatchService = {
     batchId: string,
     batchName: string,
   ) => Promise<{ id: string; batchCode: string; batchName: string }>;
+  getBatchRevokePreview: (
+    batchId: string,
+  ) => Promise<ActivationCodeBatchRevokePreview>;
   revokeCode: (codeId: string) => Promise<void>;
-  revokeBatch: (batchId: string) => Promise<RevokeActivationCodeBatchResult>;
+  revokeBatch: (
+    batchId: string,
+    body?: RevokeActivationCodeBatchRequest,
+  ) => Promise<RevokeActivationCodeBatchResult>;
 };

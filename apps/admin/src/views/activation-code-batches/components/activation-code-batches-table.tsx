@@ -1,7 +1,7 @@
 "use client";
 
 import { ActivationCodeStatusBadge } from "@/src/components/activation-code-status-badge";
-import { ConfirmActionDialog } from "@/src/components/common/confirm-action-dialog";
+import type { ActivationCodeBatchRevokeScope } from "@repo/shared";
 import type { ActivationCodeBatchListItem } from "@/src/services/activation-codes/activation-code-batches.types";
 import { formatDate, type ActivationCodePrintJob } from "@repo/shared";
 import {
@@ -30,6 +30,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ACTIVATION_CODE_BATCH_STATUSES } from "../activation-code-batches.constants";
 import { ActivationCodePrintDialog } from "./activation-code-print-dialog";
+import { ActivationCodeBatchRevokeDialog } from "./activation-code-batch-revoke-dialog";
 
 type ActivationCodeBatchesTableProps = {
   canPrint: boolean;
@@ -39,7 +40,10 @@ type ActivationCodeBatchesTableProps = {
     batch: ActivationCodeBatchListItem,
     job: ActivationCodePrintJob,
   ) => void;
-  onRevoke: (batch: ActivationCodeBatchListItem) => void;
+  onRevoke: (
+    batch: ActivationCodeBatchListItem,
+    scope: ActivationCodeBatchRevokeScope,
+  ) => Promise<void>;
   onRename: (batch: ActivationCodeBatchListItem, name: string) => void;
 };
 
@@ -359,18 +363,11 @@ function ActivationCodeBatchActionsMenu({
           open={printOpen}
         />
       ) : null}
-      <ConfirmActionDialog
-        cancelLabel={t("cancel")}
-        confirmLabel={t("revokeAction")}
-        description={t("revokeConfirm", { batch: batch.batchCode })}
-        onConfirm={() => {
-          setRevokeOpen(false);
-          onRevoke(batch);
-        }}
+      <ActivationCodeBatchRevokeDialog
+        batch={batch}
         onOpenChange={setRevokeOpen}
+        onRevoke={onRevoke}
         open={revokeOpen}
-        title={t("revokeTitle")}
-        variant="destructive"
       />
       <Dialog open={renameOpen} onOpenChange={setRenameOpen}>
         <DialogContent className="space-y-5 sm:max-w-xl">

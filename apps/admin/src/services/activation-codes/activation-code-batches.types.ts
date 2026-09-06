@@ -1,4 +1,5 @@
 import type {
+  ActivationCodeBatchRevokeResult,
   ActivationCodeReportStatus,
   ActivationCodeAssignedProduct,
   ActivationCodeDetailList,
@@ -48,10 +49,7 @@ export type UpdateActivationCodeBatchResult = {
   batchName: string;
 };
 
-export type RevokeActivationCodeBatchResult = {
-  batchId: string;
-  revokedCount: number;
-};
+export type RevokeActivationCodeBatchResult = ActivationCodeBatchRevokeResult;
 
 export type ActivationCodeDetailQuery = {
   page?: number;

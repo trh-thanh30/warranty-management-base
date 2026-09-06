@@ -1,7 +1,10 @@
 "use client";
 
 import { useDebounce } from "@repo/hooks";
-import type { ActivationCodeReportStatus } from "@repo/shared";
+import type {
+  ActivationCodeBatchRevokeScope,
+  ActivationCodeReportStatus,
+} from "@repo/shared";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -50,8 +53,13 @@ export function useActivationCodeBatches() {
     },
   });
   const revokeMutation = useMutation({
-    mutationFn: (batchId: string) =>
-      activationCodesService.revokeBatch(batchId),
+    mutationFn: ({
+      batchId,
+      scope,
+    }: {
+      batchId: string;
+      scope: ActivationCodeBatchRevokeScope;
+    }) => activationCodesService.revokeBatch(batchId, { scope }),
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: ["activation-code-batches"],

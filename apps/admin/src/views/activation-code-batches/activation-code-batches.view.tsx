@@ -236,18 +236,23 @@ export function ActivationCodeBatchesView() {
                   canRevoke={directory.canRevoke}
                   items={data.items}
                   onJobRequested={printJobs.add}
-                  onRevoke={(batch) => {
-                    void directory.revokeMutation
-                      .mutateAsync(batch.id)
-                      .then(() => toast.success(t("revoked")))
-                      .catch((error) =>
-                        toast.error(
-                          getLocalizedApiError(error, t, {
-                            apiErrors: tApiErrors,
-                            fallbackKey: "revokeError",
-                          }),
-                        ),
+                  onRevoke={async (batch, scope) => {
+                    try {
+                      const result = await directory.revokeMutation.mutateAsync(
+                        { batchId: batch.id, scope },
                       );
+                      toast.success(
+                        t("revoked", { count: result.revokedCount }),
+                      );
+                    } catch (error) {
+                      toast.error(
+                        getLocalizedApiError(error, t, {
+                          apiErrors: tApiErrors,
+                          fallbackKey: "revokeError",
+                        }),
+                      );
+                      throw error;
+                    }
                   }}
                   onRename={(batch, batchName) => {
                     void renameMutation.mutateAsync({
