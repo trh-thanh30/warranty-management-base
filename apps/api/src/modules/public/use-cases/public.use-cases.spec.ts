@@ -9,6 +9,7 @@ import { toPublicWarrantyClaimResponse } from '@/modules/public/mappers/public-w
 import { CreatePublicWarrantyClaimUseCase } from '@/modules/public/use-cases/create-public-warranty-claim.use-case';
 import { PublicLookupWarrantyClaimByCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claim-by-code.use-case';
 import { CreatePublicWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-public-warranty-activation-request.dto';
+import { CreatePublicWarrantyActivationRequestUseCase } from '@/modules/public/use-cases/create-public-warranty-activation-request.use-case';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 
@@ -518,6 +519,34 @@ describe('Public warranty claim tracking', () => {
 });
 
 describe('Public warranty activation request endpoint', () => {
+  it('returns only the public activation receipt', async () => {
+    const createRequest = {
+      execute: jest.fn().mockResolvedValue({
+        id: 'private-request-id',
+        requestCode: 'WAR-20260907-0001',
+        status: 'PENDING',
+        createdAt: '2026-09-07T01:00:00.000Z',
+        customerEmail: 'private@example.com',
+        activationCode: { id: 'private-code-id', status: 'PENDING_APPROVAL' },
+      }),
+    };
+    const useCase = new CreatePublicWarrantyActivationRequestUseCase(
+      createRequest as never,
+    );
+
+    await expect(
+      useCase.execute({ activationCode: 'SP-ABCDEF123456' } as never),
+    ).resolves.toEqual({
+      requestCode: 'WAR-20260907-0001',
+      status: 'PENDING',
+      createdAt: '2026-09-07T01:00:00.000Z',
+    });
+    expect(createRequest.execute).toHaveBeenCalledWith(
+      { activationCode: 'SP-ABCDEF123456' },
+      { source: 'PUBLIC_WEB' },
+    );
+  });
+
   it('rate limits public activation submissions', () => {
     const controllerSource = readFileSync(
       require.resolve('@/modules/public/public.controller'),
@@ -538,7 +567,7 @@ describe('Public warranty activation request endpoint', () => {
       provinceName: 'Thanh pho Ho Chi Minh',
       wardCode: '26734',
       wardName: 'Phuong Thanh My Tay',
-      warrantyCode: 'FJ-8899-2026',
+      activationCode: 'SP-ABCDEF123456',
     });
 
     const errors = await validate(dto);

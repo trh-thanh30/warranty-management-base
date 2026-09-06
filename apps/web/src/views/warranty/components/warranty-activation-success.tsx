@@ -2,7 +2,7 @@
 
 import {
   formatDate,
-  type WarrantyActivationRequestSummary,
+  type PublicWarrantyActivationRequestReceipt,
 } from "@repo/shared";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
@@ -21,7 +21,7 @@ import { toast } from "sonner";
 
 type WarrantyActivationSuccessProps = {
   onReset: () => void;
-  request: WarrantyActivationRequestSummary;
+  request: PublicWarrantyActivationRequestReceipt;
 };
 
 export function WarrantyActivationSuccess({

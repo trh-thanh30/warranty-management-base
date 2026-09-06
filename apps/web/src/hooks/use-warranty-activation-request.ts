@@ -6,6 +6,7 @@ import { useMutation } from "@tanstack/react-query";
 import { warrantyActivationRequestsService } from "@/src/services/warranty-activation-requests/warranty-activation-requests.service";
 
 export type WarrantyActivationErrorKind =
+  | "activationCodeInvalid"
   | "alreadyOpen"
   | "invalid"
   | "notEligible"
@@ -27,8 +28,10 @@ export function getWarrantyActivationErrorKind(
       ? String(error.details.code)
       : error.code;
 
-  if (detailCode === "WARRANTY_CODE_NOT_FOUND") return "notFound";
-  if (detailCode === "WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION") {
+  if (detailCode === "ACTIVATION_CODE_INVALID_OR_EXPIRED") {
+    return "activationCodeInvalid";
+  }
+  if (detailCode === "ACTIVATION_CODE_PRODUCT_NOT_ASSIGNED") {
     return "notEligible";
   }
   if (detailCode === "ACTIVATION_REQUEST_ALREADY_OPEN") return "alreadyOpen";

@@ -207,11 +207,23 @@ export type CreateWarrantyActivationRequestBody = {
   note?: string;
 };
 
-export type CreatePublicWarrantyActivationRequestBody = Omit<
-  CreateWarrantyActivationRequestBody,
-  "customerBirthdate" | "customerEmail" | "activationCodeId"
-> & {
+export type CreatePublicWarrantyActivationRequestBody = {
+  activationCode: string;
+  addressDetail: string;
+  customerName: string;
+  customerPhone: string;
   customerEmail: string;
+  provinceCode: string;
+  provinceName: string;
+  wardCode: string;
+  wardName: string;
+  vehiclePlate?: string;
+};
+
+export type PublicWarrantyActivationRequestReceipt = {
+  requestCode: string;
+  status: WarrantyActivationRequestStatus;
+  createdAt: string;
 };
 
 export type CreateAdminWarrantyActivationRequestBody = Omit<

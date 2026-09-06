@@ -3,7 +3,7 @@ import { ListServiceCentersDto } from '@/modules/service-centers/dto/list-servic
 import { LookupWarrantyDto } from '@/modules/warranties/dto/lookup-warranty.dto';
 import { LookupWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/lookup-warranty-by-code.use-case';
 import { CreatePublicWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-public-warranty-activation-request.dto';
-import { CreateWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-warranty-activation-request.use-case';
+import { CreatePublicWarrantyActivationRequestUseCase } from '@/modules/public/use-cases/create-public-warranty-activation-request.use-case';
 import { CreateWarrantyClaimDto } from '@/modules/warranty-claims/dto/create-warranty-claim.dto';
 import { CreatePublicWarrantyClaimUseCase } from '@/modules/public/use-cases/create-public-warranty-claim.use-case';
 import { PublicListServiceCentersUseCase } from '@/modules/public/use-cases/public-list-service-centers.use-case';
@@ -31,7 +31,7 @@ import { Throttle } from '@nestjs/throttler';
 export class PublicController {
   constructor(
     private readonly lookupWarrantyByCodeUseCase: LookupWarrantyByCodeUseCase,
-    private readonly createWarrantyActivationRequestUseCase: CreateWarrantyActivationRequestUseCase,
+    private readonly createPublicWarrantyActivationRequestUseCase: CreatePublicWarrantyActivationRequestUseCase,
     private readonly createPublicWarrantyClaimUseCase: CreatePublicWarrantyClaimUseCase,
     private readonly publicLookupWarrantyClaimByCodeUseCase: PublicLookupWarrantyClaimByCodeUseCase,
     private readonly publicLookupWarrantyClaimsByWarrantyCodeUseCase: PublicLookupWarrantyClaimsByWarrantyCodeUseCase,
@@ -57,7 +57,7 @@ export class PublicController {
   createWarrantyActivationRequest(
     @Body() dto: CreatePublicWarrantyActivationRequestDto,
   ) {
-    return this.createWarrantyActivationRequestUseCase.execute(dto);
+    return this.createPublicWarrantyActivationRequestUseCase.execute(dto);
   }
 
   @Throttle({ default: { limit: 5, ttl: 60_000 } })

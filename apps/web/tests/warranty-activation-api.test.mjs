@@ -11,7 +11,7 @@ const validFormValues = {
   provinceCode: "79",
   vehiclePlate: " 51a-123.45 ",
   wardCode: "26734",
-  warrantyCode: " fj-8899-2026 ",
+  activationCode: " sp-abcdef123456 ",
 };
 
 const provinces = [{ code: 79, name: "Thanh pho Ho Chi Minh" }];
@@ -41,9 +41,9 @@ test("warranty activation service posts the public activation request", async ()
   );
   const calls = [];
   const responseData = {
-    id: "request-id",
     requestCode: "WAR-20260730-0001",
     status: "PENDING",
+    createdAt: "2026-07-30T00:00:00.000Z",
   };
   const body = {
     addressDetail: "7C Nguyen Ngoc Phuong",
@@ -55,7 +55,7 @@ test("warranty activation service posts the public activation request", async ()
     vehiclePlate: "51A-123.45",
     wardCode: "26734",
     wardName: "Phuong Thanh My Tay",
-    warrantyCode: "FJ-8899-2026",
+    activationCode: "SP-ABCDEF123456",
   };
   const service = new WarrantyActivationRequestsService({
     async post(url, requestBody) {
@@ -96,7 +96,7 @@ test("warranty activation form maps selected location names into the API body", 
       vehiclePlate: "51A-123.45",
       wardCode: "26734",
       wardName: "Phuong Thanh My Tay",
-      warrantyCode: "FJ-8899-2026",
+      activationCode: "SP-ABCDEF123456",
     },
   );
 });
@@ -114,7 +114,7 @@ test("warranty activation schema validates the required public fields", async ()
     provinceRequired: "provinceRequired",
     vehiclePlateInvalid: "vehiclePlateInvalid",
     wardRequired: "wardRequired",
-    warrantyCodeInvalid: "warrantyCodeInvalid",
+    activationCodeInvalid: "activationCodeInvalid",
   });
 
   assert.equal(schema.safeParse(validFormValues).success, true);
@@ -125,7 +125,7 @@ test("warranty activation schema validates the required public fields", async ()
     customerEmail: "",
     provinceCode: "",
     wardCode: "",
-    warrantyCode: "invalid code!",
+    activationCode: "invalid code!",
   });
 
   assert.equal(invalid.success, false);
@@ -136,7 +136,7 @@ test("warranty activation schema validates the required public fields", async ()
       "customerEmailRequired",
       "provinceRequired",
       "wardRequired",
-      "warrantyCodeInvalid",
+      "activationCodeInvalid",
     ]),
   );
 
@@ -175,12 +175,14 @@ test("warranty activation errors distinguish business and transport failures", a
     });
 
   assert.equal(
-    getWarrantyActivationErrorKind(businessError("WARRANTY_CODE_NOT_FOUND")),
-    "notFound",
+    getWarrantyActivationErrorKind(
+      businessError("ACTIVATION_CODE_INVALID_OR_EXPIRED"),
+    ),
+    "activationCodeInvalid",
   );
   assert.equal(
     getWarrantyActivationErrorKind(
-      businessError("WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION"),
+      businessError("ACTIVATION_CODE_PRODUCT_NOT_ASSIGNED"),
     ),
     "notEligible",
   );

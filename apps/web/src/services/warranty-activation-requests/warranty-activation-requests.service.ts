@@ -3,7 +3,7 @@ import type {
   ApiResponse,
   CreatePublicWarrantyActivationRequestBody,
   HttpClient,
-  WarrantyActivationRequestSummary,
+  PublicWarrantyActivationRequestReceipt,
 } from "@repo/shared";
 
 export class WarrantyActivationRequestsService {
@@ -11,9 +11,9 @@ export class WarrantyActivationRequestsService {
 
   async createActivationRequest(
     body: CreatePublicWarrantyActivationRequestBody,
-  ): Promise<WarrantyActivationRequestSummary> {
+  ): Promise<PublicWarrantyActivationRequestReceipt> {
     const response = await this.http.post<
-      ApiResponse<WarrantyActivationRequestSummary>
+      ApiResponse<PublicWarrantyActivationRequestReceipt>
     >("/public/warranty-activation-requests", body);
 
     return response.data;

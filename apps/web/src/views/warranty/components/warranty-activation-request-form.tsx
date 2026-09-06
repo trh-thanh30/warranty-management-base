@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type {
   CreatePublicWarrantyActivationRequestBody,
-  WarrantyActivationRequestSummary,
+  PublicWarrantyActivationRequestReceipt,
 } from "@repo/shared";
 import { Button } from "@repo/ui/button";
 import { Input } from "@repo/ui/input";
@@ -46,7 +46,7 @@ type WarrantyActivationRequestFormProps = {
   onResetError: () => void;
   onSubmit: (
     body: CreatePublicWarrantyActivationRequestBody,
-  ) => Promise<WarrantyActivationRequestSummary>;
+  ) => Promise<PublicWarrantyActivationRequestReceipt>;
 };
 
 const defaultValues: WarrantyActivationFormValues = {
@@ -57,7 +57,7 @@ const defaultValues: WarrantyActivationFormValues = {
   provinceCode: "",
   vehiclePlate: "",
   wardCode: "",
-  warrantyCode: "",
+  activationCode: "",
 };
 
 export function WarrantyActivationRequestForm({
@@ -78,7 +78,7 @@ export function WarrantyActivationRequestForm({
         provinceRequired: t("validation.provinceRequired"),
         vehiclePlateInvalid: t("validation.vehiclePlateInvalid"),
         wardRequired: t("validation.wardRequired"),
-        warrantyCodeInvalid: t("validation.warrantyCodeInvalid"),
+        activationCodeInvalid: t("validation.activationCodeInvalid"),
       }),
     [t],
   );
@@ -231,7 +231,7 @@ export function WarrantyActivationRequestForm({
 
           <FormField
             control={form.control}
-            name="warrantyCode"
+            name="activationCode"
             render={({ field }) => (
               <FormItem className="sm:col-span-2">
                 <FormLabel className="text-sm font-semibold uppercase text-deep-black">
@@ -241,7 +241,7 @@ export function WarrantyActivationRequestForm({
                   <Input
                     autoComplete="off"
                     className={`h-12 rounded-md border-border-gray bg-white font-mono uppercase ${formControlFocusClassName}`}
-                    maxLength={64}
+                    maxLength={120}
                     placeholder={t("fields.stampCode.placeholder")}
                     {...field}
                   />

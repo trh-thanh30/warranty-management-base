@@ -26,6 +26,7 @@ export function toWarrantyActivationRequestBody({
   const customerEmail = values.customerEmail.trim().toLowerCase();
 
   return {
+    activationCode: values.activationCode.trim().toUpperCase(),
     addressDetail: values.addressDetail.trim(),
     customerEmail,
     customerName: values.customerName.trim(),
@@ -35,6 +36,5 @@ export function toWarrantyActivationRequestBody({
     vehiclePlate: values.vehiclePlate.trim().toUpperCase(),
     wardCode: values.wardCode,
     wardName: ward.name,
-    warrantyCode: values.warrantyCode.trim().toUpperCase(),
   };
 }
