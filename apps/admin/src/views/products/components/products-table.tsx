@@ -38,7 +38,6 @@ import {
   Pencil,
   RotateCcw,
   Trash2,
-  UserPlus,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -52,7 +51,6 @@ type ProductsTableProps = {
   items: ProductResponse[];
   onDelete: (product: ProductResponse) => void;
   onRestore: (product: ProductResponse) => void;
-  onAssignOwner: (product: ProductResponse) => void;
   onAssignCodes: (product: ProductResponse) => void;
   onSortChange: (sortBy: ProductSortBy) => void;
   sortBy?: ProductSortBy;
@@ -62,7 +60,6 @@ type ProductsTableProps = {
 export function ProductsTable({
   items,
   onAssignCodes,
-  onAssignOwner,
   onDelete,
   onRestore,
   onSortChange,
@@ -77,7 +74,6 @@ export function ProductsTable({
         {items.map((product) => (
           <ProductMobileCard
             key={product.id}
-            onAssignOwner={onAssignOwner}
             onAssignCodes={onAssignCodes}
             onDelete={onDelete}
             onRestore={onRestore}
@@ -131,7 +127,6 @@ export function ProductsTable({
             {items.map((product) => (
               <ProductTableRow
                 key={product.id}
-                onAssignOwner={onAssignOwner}
                 onAssignCodes={onAssignCodes}
                 onDelete={onDelete}
                 onRestore={onRestore}
@@ -147,13 +142,11 @@ export function ProductsTable({
 
 function ProductTableRow({
   onAssignCodes,
-  onAssignOwner,
   onDelete,
   onRestore,
   product,
 }: {
   onAssignCodes: ProductsTableProps["onAssignCodes"];
-  onAssignOwner: ProductsTableProps["onAssignOwner"];
   onDelete: ProductsTableProps["onDelete"];
   onRestore: ProductsTableProps["onRestore"];
   product: ProductResponse;
@@ -187,7 +180,6 @@ function ProductTableRow({
       <TableCell className="text-right">
         <ProductActionsMenu
           onAssignCodes={onAssignCodes}
-          onAssignOwner={onAssignOwner}
           onDelete={onDelete}
           onRestore={onRestore}
           product={product}
@@ -199,13 +191,11 @@ function ProductTableRow({
 
 function ProductMobileCard({
   onAssignCodes,
-  onAssignOwner,
   onDelete,
   onRestore,
   product,
 }: {
   onAssignCodes: ProductsTableProps["onAssignCodes"];
-  onAssignOwner: ProductsTableProps["onAssignOwner"];
   onDelete: ProductsTableProps["onDelete"];
   onRestore: ProductsTableProps["onRestore"];
   product: ProductResponse;
@@ -218,7 +208,6 @@ function ProductMobileCard({
         <ProductName product={product} />
         <ProductActionsMenu
           onAssignCodes={onAssignCodes}
-          onAssignOwner={onAssignOwner}
           onDelete={onDelete}
           onRestore={onRestore}
           product={product}
@@ -335,13 +324,11 @@ function ProductMobileField({
 
 function ProductActionsMenu({
   onAssignCodes,
-  onAssignOwner,
   onDelete,
   onRestore,
   product,
 }: {
   onAssignCodes: ProductsTableProps["onAssignCodes"];
-  onAssignOwner: ProductsTableProps["onAssignOwner"];
   onDelete: ProductsTableProps["onDelete"];
   onRestore: ProductsTableProps["onRestore"];
   product: ProductResponse;
@@ -352,7 +339,6 @@ function ProductActionsMenu({
   const canEdit = hasPermission(PERMISSIONS.PRODUCT_UPDATE);
   const canCreate = hasPermission(PERMISSIONS.PRODUCT_CREATE);
   const canDelete = hasPermission(PERMISSIONS.PRODUCT_DELETE);
-  const canAssignOwner = hasPermission(PERMISSIONS.PRODUCT_ASSIGN_OWNER);
   const canAssignCodes = hasPermission(
     PERMISSIONS.ACTIVATION_CODE_ASSIGN_PRODUCT,
   );
@@ -364,7 +350,6 @@ function ProductActionsMenu({
       !canView &&
       !canEdit &&
       !canDelete &&
-      !canAssignOwner &&
       !canAssignCodes &&
       !canCreate)
   ) {
@@ -414,12 +399,6 @@ function ProductActionsMenu({
                   <Copy className="mr-2 size-4" />
                   {t("clone")}
                 </Link>
-              </DropdownMenuItem>
-            ) : null}
-            {canAssignOwner && product.warranty ? (
-              <DropdownMenuItem onSelect={() => onAssignOwner(product)}>
-                <UserPlus className="mr-2 size-4" />
-                {t("assignOwner")}
               </DropdownMenuItem>
             ) : null}
             {canAssignCodes &&

@@ -175,6 +175,11 @@ export type VoidWarrantyBody = {
   reason: string;
 };
 
+export type TransferWarrantyOwnerBody = {
+  customerId: string;
+  purchaseDate?: string;
+};
+
 export type ManualWarrantyActivationCustomerInput = {
   fullName: string;
   phone: string;

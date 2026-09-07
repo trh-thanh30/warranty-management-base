@@ -1,6 +1,12 @@
 "use client";
 
-import { Ban, PackageSearch, Pencil, ShieldCheck } from "lucide-react";
+import {
+  Ban,
+  PackageSearch,
+  Pencil,
+  ShieldCheck,
+  UserRoundPlus,
+} from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
@@ -13,6 +19,7 @@ import { useWarrantyDetail } from "@/src/hooks/use-warranties";
 import { Link } from "@/src/i18n/navigation";
 import { ActivateWarrantyDialog } from "./components/activate-warranty-dialog";
 import { VoidWarrantyDialog } from "./components/void-warranty-dialog";
+import { TransferOwnerDialog } from "./components/transfer-owner-dialog";
 import {
   WarrantyDetailCard,
   WarrantyDetailSkeleton,
@@ -28,6 +35,7 @@ export function WarrantyDetailView({ warrantyId }: WarrantyDetailViewProps) {
   const warrantyQuery = useWarrantyDetail(warrantyId);
   const [activateOpen, setActivateOpen] = useState(false);
   const [voidOpen, setVoidOpen] = useState(false);
+  const [transferOwnerOpen, setTransferOwnerOpen] = useState(false);
   const warranty = warrantyQuery.data;
   const canActivate =
     hasPermission(PERMISSIONS.WARRANTY_ACTIVATE) &&
@@ -78,6 +86,19 @@ export function WarrantyDetailView({ warrantyId }: WarrantyDetailViewProps) {
                 {t("void")}
               </Button>
             ) : null}
+            {canEdit &&
+            warranty?.status !== "VOIDED" &&
+            warranty?.status !== "EXPIRED" ? (
+              <Button
+                className="w-full sm:w-auto"
+                onClick={() => setTransferOwnerOpen(true)}
+                type="button"
+                variant="secondary"
+              >
+                <UserRoundPlus className="size-4" />
+                {t("transferOwner")}
+              </Button>
+            ) : null}
           </div>
         }
         eyebrow={t("eyebrow")}
@@ -120,6 +141,12 @@ export function WarrantyDetailView({ warrantyId }: WarrantyDetailViewProps) {
             void warrantyQuery.refetch();
           }}
           open={voidOpen}
+          warranty={warranty ?? null}
+        />
+        <TransferOwnerDialog
+          onOpenChange={setTransferOwnerOpen}
+          onTransferred={() => void warrantyQuery.refetch()}
+          open={transferOwnerOpen}
           warranty={warranty ?? null}
         />
       </FormPageShell>

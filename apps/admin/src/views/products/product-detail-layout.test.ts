@@ -34,7 +34,7 @@ test("product detail actions are grouped in an accessible dropdown", async () =>
     "utf8",
   );
 
-  assert.equal(source.match(/<DropdownMenuItem/g)?.length ?? 0, 4);
+  assert.equal(source.match(/<DropdownMenuItem/g)?.length ?? 0, 3);
   assert.match(source, /<DropdownMenuTrigger asChild>/);
   assert.match(source, /aria-label=\{t\("actions"\)\}/);
   assert.match(source, /descriptionAccessory={/);

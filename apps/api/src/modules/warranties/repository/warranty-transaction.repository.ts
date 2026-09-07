@@ -33,6 +33,85 @@ type PersistedManualActivationProduct = Prisma.ProductGetPayload<{
 export class WarrantyTransactionRepository {
   constructor(private readonly tx: Prisma.TransactionClient) {}
 
+  async transferWarrantyOwnership(input: {
+    customerId: string;
+    purchaseDate: Date | null;
+    warrantyId: string;
+  }) {
+    const [warranty, customer] = await Promise.all([
+      this.tx.warranty.findUnique({
+        where: { id: input.warrantyId },
+        include: {
+          activated_by: true,
+          voided_by: true,
+          dealer: true,
+          ownerships: {
+            where: { is_current_owner: true },
+            include: { customer: true },
+            orderBy: { created_at: 'desc' },
+          },
+          product: {
+            include: {
+              category_ref: true,
+              ownerships: {
+                include: { customer: true },
+                orderBy: { created_at: 'desc' },
+              },
+            },
+          },
+        },
+      }),
+      this.tx.customer.findUnique({ where: { id: input.customerId } }),
+    ]);
+
+    if (!warranty) throw new Error('Warranty not found');
+    if (!customer) throw new Error('Customer not found');
+
+    const current = warranty.ownerships.find(
+      (ownership) => ownership.is_current_owner,
+    );
+    if (current?.customer_id === customer.id) return warranty;
+
+    const now = new Date();
+    await this.tx.warrantyOwnership.updateMany({
+      where: { warranty_id: input.warrantyId, is_current_owner: true },
+      data: { is_current_owner: false, ended_at: now },
+    });
+    await this.tx.warrantyOwnership.create({
+      data: {
+        warranty_id: input.warrantyId,
+        customer_id: customer.id,
+        owner_user_id: customer.user_id ?? null,
+        purchase_date: input.purchaseDate,
+        activated_at: warranty.start_date,
+        is_current_owner: true,
+      },
+    });
+
+    return this.tx.warranty.findUniqueOrThrow({
+      where: { id: input.warrantyId },
+      include: {
+        activated_by: true,
+        voided_by: true,
+        dealer: true,
+        ownerships: {
+          where: { is_current_owner: true },
+          include: { customer: true },
+          orderBy: { created_at: 'desc' },
+        },
+        product: {
+          include: {
+            category_ref: true,
+            ownerships: {
+              include: { customer: true },
+              orderBy: { created_at: 'desc' },
+            },
+          },
+        },
+      },
+    });
+  }
+
   async findCustomerByEmail(email: string): Promise<WarrantyCustomer | null> {
     const customer = await this.tx.customer.findFirst({
       where: { email },

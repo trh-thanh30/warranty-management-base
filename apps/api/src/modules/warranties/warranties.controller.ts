@@ -8,6 +8,7 @@ import { LookupWarrantyDto } from '@/modules/warranties/dto/lookup-warranty.dto'
 import { ManualWarrantyActivationDto } from '@/modules/warranties/dto/manual-warranty-activation.dto';
 import { UpdateWarrantyDto } from '@/modules/warranties/dto/update-warranty.dto';
 import { VoidWarrantyDto } from '@/modules/warranties/dto/void-warranty.dto';
+import { TransferWarrantyOwnerDto } from '@/modules/warranties/dto/transfer-warranty-owner.dto';
 import { ActivateWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/activate-warranty-by-code.use-case';
 import { ActivateProductWarrantyUseCase } from '@/modules/warranties/use-cases/activate-product-warranty.use-case';
 import { ActivateWarrantyUseCase } from '@/modules/warranties/use-cases/activate-warranty.use-case';
@@ -24,6 +25,7 @@ import { ExportWarrantiesUseCase } from '@/modules/warranties/use-cases/export-w
 import { PreviewWarrantyImportUseCase } from '@/modules/warranties/use-cases/preview-warranty-import.use-case';
 import { UpdateWarrantyUseCase } from '@/modules/warranties/use-cases/update-warranty.use-case';
 import { VoidWarrantyUseCase } from '@/modules/warranties/use-cases/void-warranty.use-case';
+import { TransferWarrantyOwnerUseCase } from '@/modules/warranties/use-cases/transfer-warranty-owner.use-case';
 import {
   Body,
   Controller,
@@ -63,6 +65,7 @@ export class WarrantiesController {
     private readonly previewWarrantyImportUseCase: PreviewWarrantyImportUseCase,
     private readonly updateWarrantyUseCase: UpdateWarrantyUseCase,
     private readonly voidWarrantyUseCase: VoidWarrantyUseCase,
+    private readonly transferWarrantyOwnerUseCase: TransferWarrantyOwnerUseCase,
   ) {}
 
   @Get('warranties')
@@ -152,6 +155,15 @@ export class WarrantiesController {
     return this.voidWarrantyUseCase.execute(warrantyId, dto, {
       voidedByUserId: user.id,
     });
+  }
+
+  @Post('warranties/:id/transfer-owner')
+  @Permissions([permission_key.WARRANTY_UPDATE])
+  transferOwner(
+    @Param('id') warrantyId: string,
+    @Body() dto: TransferWarrantyOwnerDto,
+  ) {
+    return this.transferWarrantyOwnerUseCase.execute(warrantyId, dto);
   }
 
   @Post('warranties/manual-activation')

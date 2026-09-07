@@ -50,7 +50,6 @@ type ProductsDirectoryCardProps = {
   onCategoryIdChange: (categoryId: string) => void;
   onClearFilters: () => void;
   onAssignCodes: (product: ProductResponse) => void;
-  onAssignOwner: (product: ProductResponse) => void;
   onDelete: (product: ProductResponse) => void;
   onRestore: (product: ProductResponse) => void;
   onPageChange: (page: number) => void;
@@ -76,7 +75,6 @@ export function ProductsDirectoryCard({
   onCategoryIdChange,
   onClearFilters,
   onAssignCodes,
-  onAssignOwner,
   onDelete,
   onRestore,
   onPageChange,
@@ -126,7 +124,6 @@ export function ProductsDirectoryCard({
           isLoading={isLoading}
           onClearFilters={onClearFilters}
           onAssignCodes={onAssignCodes}
-          onAssignOwner={onAssignOwner}
           onDelete={onDelete}
           onRestore={onRestore}
           onPageChange={onPageChange}
@@ -231,7 +228,6 @@ function ProductsDirectoryContent({
   isLoading,
   onClearFilters,
   onAssignCodes,
-  onAssignOwner,
   onDelete,
   onRestore,
   onPageChange,
@@ -249,7 +245,6 @@ function ProductsDirectoryContent({
   | "isLoading"
   | "onClearFilters"
   | "onAssignCodes"
-  | "onAssignOwner"
   | "onDelete"
   | "onRestore"
   | "onPageChange"
@@ -287,7 +282,6 @@ function ProductsDirectoryContent({
         <ProductsTable
           items={data.items}
           onAssignCodes={onAssignCodes}
-          onAssignOwner={onAssignOwner}
           onDelete={onDelete}
           onRestore={onRestore}
           onSortChange={onSortChange}
