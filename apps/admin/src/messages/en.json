@@ -1287,11 +1287,11 @@
     }
   },
   "Products": {
-    "title": "Product management",
-    "eyebrow": "Warranty inventory",
-    "description": "Manage products, warranty codes, ownership, and dynamic categories.",
-    "directoryTitle": "Product directory",
-    "directoryDescription": "Search and filter products by code, serial number, category, status, owner, or warranty state.",
+    "title": "Product catalogue",
+    "eyebrow": "Product catalogue",
+    "description": "Manage product models, SKUs, catalogue content, and applicable policies.",
+    "directoryTitle": "Product catalogue",
+    "directoryDescription": "Search and filter product models by SKU, category, and status.",
     "backToDirectory": "Back to products",
     "create": "Add product",
     "createSubmit": "Create product",

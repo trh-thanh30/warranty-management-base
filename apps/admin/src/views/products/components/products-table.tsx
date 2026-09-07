@@ -45,7 +45,6 @@ import {
   getProductDisplayName,
 } from "../products.utils";
 import { ProductStatusBadge } from "./product-status-badge";
-import { WarrantyStatusBadge } from "./warranty-status-badge";
 
 type ProductsTableProps = {
   items: ProductResponse[];
@@ -94,9 +93,6 @@ export function ProductsTable({
               >
                 {t("name")}
               </SortableTableHead>
-              <TableHead className="whitespace-nowrap">
-                {t("warrantyStatus")}
-              </TableHead>
               <TableHead className="whitespace-nowrap">
                 {t("activationCode")}
               </TableHead>
@@ -160,9 +156,6 @@ function ProductTableRow({
         <ProductName product={product} />
       </TableCell>
       <TableCell>
-        <WarrantyStatusBadge status={product.warranty?.status} />
-      </TableCell>
-      <TableCell>
         <ProductActivationCodeCell product={product} />
       </TableCell>
       <TableCell>
@@ -214,14 +207,6 @@ function ProductMobileCard({
         />
       </div>
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-        <div>
-          <dt className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-            {t("warrantyStatus")}
-          </dt>
-          <dd className="mt-1">
-            <WarrantyStatusBadge status={product.warranty?.status} />
-          </dd>
-        </div>
         <div className="col-span-2 min-w-0">
           <dt className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
             {t("activationCode")}

@@ -26,14 +26,8 @@ import {
 import { PaginationControls } from "@repo/ui/pagination-controls";
 import { PackageSearch, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
-import {
-  PRODUCT_STATUS_FILTERS,
-  PRODUCT_WARRANTY_STATUS_FILTERS,
-} from "../products.constants";
-import type {
-  ProductStatusFilter,
-  ProductWarrantyStatusFilter,
-} from "../products.types";
+import { PRODUCT_STATUS_FILTERS } from "../products.constants";
+import type { ProductStatusFilter } from "../products.types";
 import { ProductsTable } from "./products-table";
 
 type ProductsDirectoryCardProps = {
@@ -43,7 +37,6 @@ type ProductsDirectoryCardProps = {
   filters: {
     categoryId: string;
     status: ProductStatusFilter;
-    warrantyStatus: ProductWarrantyStatusFilter;
   };
   isError: boolean;
   isLoading: boolean;
@@ -58,7 +51,6 @@ type ProductsDirectoryCardProps = {
   onSearchChange: (search: string) => void;
   onSortChange: (sortBy: ProductSortBy) => void;
   onStatusChange: (status: ProductStatusFilter) => void;
-  onWarrantyStatusChange: (status: ProductWarrantyStatusFilter) => void;
   pageSize: number;
   search: string;
   sortBy?: ProductSortBy;
@@ -83,7 +75,6 @@ export function ProductsDirectoryCard({
   onSearchChange,
   onSortChange,
   onStatusChange,
-  onWarrantyStatusChange,
   pageSize,
   search,
   sortBy,
@@ -93,8 +84,7 @@ export function ProductsDirectoryCard({
   const hasFilters =
     Boolean(search.trim()) ||
     filters.categoryId !== "ALL" ||
-    filters.status !== "ALL" ||
-    filters.warrantyStatus !== "ALL";
+    filters.status !== "ALL";
 
   return (
     <Card>
@@ -111,7 +101,6 @@ export function ProductsDirectoryCard({
           onCategoryIdChange={onCategoryIdChange}
           onSearchChange={onSearchChange}
           onStatusChange={onStatusChange}
-          onWarrantyStatusChange={onWarrantyStatusChange}
           search={search}
         />
       </CardHeader>
@@ -145,7 +134,6 @@ function ProductsDirectoryFilters({
   onCategoryIdChange,
   onSearchChange,
   onStatusChange,
-  onWarrantyStatusChange,
   search,
 }: Pick<
   ProductsDirectoryCardProps,
@@ -154,7 +142,6 @@ function ProductsDirectoryFilters({
   | "onCategoryIdChange"
   | "onSearchChange"
   | "onStatusChange"
-  | "onWarrantyStatusChange"
   | "search"
 >) {
   const t = useTranslations("Products");
@@ -195,23 +182,6 @@ function ProductsDirectoryFilters({
           {PRODUCT_STATUS_FILTERS.map((status) => (
             <SelectItem key={status} value={status}>
               {t(`statuses.${status}`)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Select
-        onValueChange={(value) =>
-          onWarrantyStatusChange(value as ProductWarrantyStatusFilter)
-        }
-        value={filters.warrantyStatus}
-      >
-        <SelectTrigger aria-label={t("warrantyStatusFilter")}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {PRODUCT_WARRANTY_STATUS_FILTERS.map((status) => (
-            <SelectItem key={status} value={status}>
-              {t(`warrantyStatuses.${status}`)}
             </SelectItem>
           ))}
         </SelectContent>

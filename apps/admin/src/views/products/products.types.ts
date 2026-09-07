@@ -1,13 +1,8 @@
-import type { ProductSortBy, WarrantyStatus } from "@repo/shared";
+import type { ProductSortBy } from "@repo/shared";
 import { z } from "zod";
-import {
-  type PRODUCT_STATUS_FILTERS,
-  type PRODUCT_WARRANTY_STATUS_FILTERS,
-} from "./products.constants";
+import { type PRODUCT_STATUS_FILTERS } from "./products.constants";
 
 export type ProductStatusFilter = (typeof PRODUCT_STATUS_FILTERS)[number];
-export type ProductWarrantyStatusFilter =
-  (typeof PRODUCT_WARRANTY_STATUS_FILTERS)[number] & ("ALL" | WarrantyStatus);
 export type ProductDirectorySortBy = ProductSortBy;
 
 const optionalText = z.string().trim();

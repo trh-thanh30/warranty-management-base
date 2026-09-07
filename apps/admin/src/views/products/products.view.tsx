@@ -60,7 +60,6 @@ export function ProductsView() {
     updateCategoryId,
     updateSearch,
     updateStatus,
-    updateWarrantyStatus,
     updateImportRowData,
   } = useProductsDirectory();
   const hasImportErrors = importSummary.invalidRows > 0;
@@ -124,7 +123,6 @@ export function ProductsView() {
           onSearchChange={updateSearch}
           onSortChange={toggleSort}
           onStatusChange={updateStatus}
-          onWarrantyStatusChange={updateWarrantyStatus}
           pageSize={pageSize}
           search={search}
           sortBy={sortBy}

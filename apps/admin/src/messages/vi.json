@@ -1287,11 +1287,11 @@
     }
   },
   "Products": {
-    "title": "Quản lý sản phẩm",
-    "eyebrow": "Kho bảo hành",
-    "description": "Quản lý sản phẩm, mã bảo hành, chủ sở hữu và danh mục động.",
+    "title": "Danh mục sản phẩm",
+    "eyebrow": "Danh mục sản phẩm",
+    "description": "Quản lý các mẫu sản phẩm, SKU, nội dung hiển thị và chính sách áp dụng.",
     "directoryTitle": "Danh sách sản phẩm",
-    "directoryDescription": "Tìm kiếm và lọc sản phẩm theo mã, số serial, danh mục, trạng thái, chủ sở hữu hoặc trạng thái bảo hành.",
+    "directoryDescription": "Tìm kiếm và lọc mẫu sản phẩm theo SKU, danh mục và trạng thái.",
     "backToDirectory": "Quay về sản phẩm",
     "create": "Thêm sản phẩm",
     "createSubmit": "Tạo sản phẩm",

@@ -23,10 +23,7 @@ import type {
 import type { ExcelImportMode } from "@/src/components/common/excel-import-dialog";
 import { useCategories } from "../../categories/hooks/use-categories";
 import type { EditableProductImportRow } from "../components/product-import-preview-table";
-import {
-  type ProductStatusFilter,
-  type ProductWarrantyStatusFilter,
-} from "../products.types";
+import { type ProductStatusFilter } from "../products.types";
 import {
   useConfirmProductImport,
   useDeleteProduct,
@@ -40,13 +37,11 @@ const PRODUCTS_PAGE_SIZE = 10;
 type ProductDirectoryFilters = {
   categoryId: string;
   status: ProductStatusFilter;
-  warrantyStatus: ProductWarrantyStatusFilter;
 };
 
 const INITIAL_PRODUCT_DIRECTORY_FILTERS = {
   categoryId: "ALL",
   status: "ACTIVE",
-  warrantyStatus: "ALL",
 } satisfies ProductDirectoryFilters;
 
 export function useProductsDirectory() {
@@ -93,8 +88,6 @@ export function useProductsDirectory() {
       sortBy,
       sortOrder,
       status: filters.status === "ALL" ? "ALL" : filters.status,
-      warrantyStatus:
-        filters.warrantyStatus === "ALL" ? undefined : filters.warrantyStatus,
     },
     {
       enabled: Boolean(currentUser) && canViewProducts,
@@ -299,8 +292,6 @@ export function useProductsDirectory() {
       sortBy,
       sortOrder,
       status: filters.status === "ALL" ? "ALL" : filters.status,
-      warrantyStatus:
-        filters.warrantyStatus === "ALL" ? undefined : filters.warrantyStatus,
     };
   }
 
@@ -348,7 +339,6 @@ export function useProductsDirectory() {
     updateCategoryId: filterHandlers.categoryId,
     updateSearch: setSearch,
     updateStatus: filterHandlers.status,
-    updateWarrantyStatus: filterHandlers.warrantyStatus,
     updateImportRowData,
   };
 }
