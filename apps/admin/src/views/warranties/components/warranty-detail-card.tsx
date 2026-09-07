@@ -128,6 +128,20 @@ export function WarrantyDetailCard({ warranty }: WarrantyDetailCardProps) {
             />
           </DetailSection>
 
+          <DetailSection
+            icon={<Package className="size-4" />}
+            title={t("sections.dealer")}
+          >
+            <DetailRow
+              label={t("dealer")}
+              value={warranty.dealer?.name ?? "-"}
+            />
+            <DetailRow
+              label={t("dealerCode")}
+              value={warranty.dealer?.dealerCode ?? "-"}
+            />
+          </DetailSection>
+
           {warranty.terms ? (
             <DetailSection
               icon={<CalendarDays className="size-4" />}

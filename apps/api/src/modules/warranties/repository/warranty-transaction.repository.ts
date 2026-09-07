@@ -313,6 +313,14 @@ export class WarrantyTransactionRepository {
   async findWarrantyByIdOrThrow(warrantyId: string): Promise<WarrantyRecord> {
     const warranty = await this.tx.warranty.findUniqueOrThrow({
       where: { id: warrantyId },
+      include: {
+        dealer: true,
+        ownerships: {
+          where: { is_current_owner: true },
+          include: { customer: true },
+          orderBy: { created_at: 'desc' },
+        },
+      },
     });
     return toWarrantyRecord(warranty);
   }

@@ -103,6 +103,38 @@ export class WarrantyActivationReviewTransactionRepository {
             },
           },
         },
+        ownerships: {
+          where: { is_current_owner: true },
+          take: 1,
+        },
+      },
+    });
+  }
+
+  assignWarrantyDealer(warrantyId: string, dealerId: string | null) {
+    return this.tx.warranty.update({
+      where: { id: warrantyId },
+      data: { dealer_id: dealerId },
+    });
+  }
+
+  createWarrantyOwnership(input: {
+    customerId: string;
+    ownerUserId?: string | null;
+    warrantyId: string;
+    purchaseDate: Date;
+    activatedAt: Date;
+  }) {
+    return this.tx.warrantyOwnership.create({
+      data: {
+        customer: { connect: { id: input.customerId } },
+        owner_user: input.ownerUserId
+          ? { connect: { id: input.ownerUserId } }
+          : undefined,
+        purchase_date: input.purchaseDate,
+        activated_at: input.activatedAt,
+        is_current_owner: true,
+        warranty: { connect: { id: input.warrantyId } },
       },
     });
   }
@@ -139,6 +171,7 @@ export class WarrantyActivationReviewTransactionRepository {
     durationMonths: number;
     method?: warranty_method;
     terms?: string | null;
+    dealerId?: string | null;
   }) {
     return this.tx.warranty.create({
       data: {
@@ -151,6 +184,9 @@ export class WarrantyActivationReviewTransactionRepository {
         warranty_code: input.warrantyCode,
         method: input.method ?? warranty_method.REPAIR,
         terms: input.terms ?? undefined,
+        dealer: input.dealerId
+          ? { connect: { id: input.dealerId } }
+          : undefined,
       },
       include: {
         product: {
@@ -160,6 +196,11 @@ export class WarrantyActivationReviewTransactionRepository {
               take: 1,
             },
           },
+        },
+        dealer: true,
+        ownerships: {
+          where: { is_current_owner: true },
+          take: 1,
         },
       },
     });

@@ -471,6 +471,7 @@ function createTransactionRepository() {
     completeActivation: jest.fn().mockResolvedValue(request),
     createCustomer: jest.fn(),
     createOwnership: jest.fn(),
+    createWarrantyOwnership: jest.fn(),
     createWarrantyForActivation: jest.fn(),
     findCustomerById: jest.fn(),
     findCustomerByEmail: jest.fn().mockResolvedValue(null),
@@ -493,6 +494,7 @@ function createTransactionRepository() {
         warranty_code: `WM-${id}`,
       }),
     ),
+    assignWarrantyDealer: jest.fn(),
     linkItemWarranty: jest.fn(),
     markActivationCodesActivated: jest
       .fn()

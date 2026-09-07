@@ -68,6 +68,7 @@ export function WarrantiesTable({
             <TableRow>
               <TableHead>{t("product")}</TableHead>
               <TableHead>{t("owner")}</TableHead>
+              <TableHead>{t("dealer")}</TableHead>
               <TableHead>{t("warrantyCode")}</TableHead>
               <TableHead>{t("status")}</TableHead>
               <SortableTableHead
@@ -138,6 +139,11 @@ function WarrantyTableRow({
           {formatWarrantyOwner(warranty)}
         </span>
       </TableCell>
+      <TableCell>
+        <span className="block max-w-52 truncate">
+          {warranty.dealer?.name ?? "-"}
+        </span>
+      </TableCell>
       <TableCell className="font-mono text-xs">
         {warranty.warrantyCode ?? "-"}
       </TableCell>
@@ -190,6 +196,10 @@ function WarrantyMobileCard({
         <WarrantyMobileField
           label={t("owner")}
           value={formatWarrantyOwner(warranty)}
+        />
+        <WarrantyMobileField
+          label={t("dealer")}
+          value={warranty.dealer?.name ?? "-"}
         />
         <WarrantyMobileField
           label={t("startDate")}

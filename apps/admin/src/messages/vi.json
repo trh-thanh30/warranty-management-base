@@ -1656,6 +1656,8 @@
     "product": "Sản phẩm",
     "productCount": "{count} sản phẩm",
     "owner": "Chủ sở hữu",
+    "dealer": "Đại lý",
+    "dealerCode": "Mã đại lý",
     "productCode": "Mã sản phẩm",
     "serialNumber": "Số serial",
     "model": "Mẫu",
@@ -1676,7 +1678,8 @@
     "sections": {
       "coverage": "Phạm vi bảo hành",
       "product": "Sản phẩm",
-      "owner": "Chủ sở hữu"
+      "owner": "Chủ sở hữu",
+      "dealer": "Đại lý"
     },
     "activate": "Kích hoạt",
     "activating": "Đang kích hoạt...",

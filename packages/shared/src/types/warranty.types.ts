@@ -57,6 +57,14 @@ export type WarrantySummary = {
   voidReason: string | null;
   createdAt: string;
   updatedAt: string;
+  dealer: WarrantyDealerSummary | null;
+  owner: WarrantyOwnerSummary | null;
+};
+
+export type WarrantyDealerSummary = {
+  id: string;
+  dealerCode: string;
+  name: string;
 };
 
 export type WarrantyUserSummary = {

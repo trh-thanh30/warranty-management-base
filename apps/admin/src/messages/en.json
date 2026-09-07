@@ -1656,6 +1656,8 @@
     "product": "Product",
     "productCount": "{count} products",
     "owner": "Owner",
+    "dealer": "Dealer",
+    "dealerCode": "Dealer code",
     "productCode": "Product code",
     "serialNumber": "Serial number",
     "model": "Model",
@@ -1676,7 +1678,8 @@
     "sections": {
       "coverage": "Warranty coverage",
       "product": "Product",
-      "owner": "Owner"
+      "owner": "Owner",
+      "dealer": "Dealer"
     },
     "activate": "Activate",
     "activating": "Activating...",

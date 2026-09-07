@@ -235,6 +235,7 @@ describe('toProductResponse', () => {
         warranty: {
           id: 'warranty-id',
           product_id: 'product-id',
+          dealer_id: null,
           activation_code_id: null,
           warranty_code: 'WM-2026-ABCDEF',
           method: warranty_method.REPAIR,

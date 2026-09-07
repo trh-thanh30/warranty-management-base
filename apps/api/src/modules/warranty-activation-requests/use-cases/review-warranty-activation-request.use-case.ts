@@ -242,6 +242,14 @@ export class ReviewWarrantyActivationRequestUseCase {
               target.product.warranty_method ?? target.product.warranty?.method,
             warrantyTerms:
               target.product.warranty_terms ?? target.product.warranty?.terms,
+            dealerId: request.dealer_id,
+          });
+          await repository.createWarrantyOwnership({
+            customerId: customer.id,
+            ownerUserId: customer.user_id,
+            warrantyId: updatedWarranty.id,
+            purchaseDate: reviewedAt,
+            activatedAt: reviewedAt,
           });
           activatedWarrantyIds.push(updatedWarranty.id);
           if (target.itemId) {
@@ -372,6 +380,7 @@ export class ReviewWarrantyActivationRequestUseCase {
       warrantyDurationMonths: number;
       warrantyMethod?: import('@prisma/client').warranty_method;
       warrantyTerms?: string | null;
+      dealerId?: string | null;
     },
   ) {
     const warranty = input.warrantyId
@@ -383,6 +392,7 @@ export class ReviewWarrantyActivationRequestUseCase {
           warrantyCode: input.warrantyCode,
           method: input.warrantyMethod,
           terms: input.warrantyTerms,
+          dealerId: input.dealerId,
         });
     if (!warranty) {
       throw new NotFoundError(
@@ -428,6 +438,10 @@ export class ReviewWarrantyActivationRequestUseCase {
         'BAD_REQUEST',
         { code: 'WARRANTY_CODE_REQUIRED', warrantyId: input.warrantyId },
       );
+    }
+
+    if (input.dealerId && warranty.dealer_id !== input.dealerId) {
+      await repository.assignWarrantyDealer(warranty.id, input.dealerId);
     }
 
     const currentOwnership = warranty.product.ownerships[0];

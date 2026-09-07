@@ -1,8 +1,10 @@
 import {
   Category,
   Customer,
+  Dealer,
   Product,
   ProductOwnership,
+  WarrantyOwnership,
   User,
   Warranty,
   WarrantyActivationRequest,
@@ -65,6 +67,17 @@ export type WarrantyRecord = {
   voidedBy?: WarrantyUserSummary | null;
   voidedById: string | null;
   warrantyCode: string | null;
+  dealer: {
+    id: string;
+    dealerCode: string;
+    name: string;
+  } | null;
+  owner: {
+    customerId: string;
+    customerCode: string | null;
+    fullName: string | null;
+    ownerUserId: string | null;
+  } | null;
 };
 
 export type ManualActivationProduct = {
@@ -119,6 +132,8 @@ export type WarrantyVoidCandidate = {
 type WarrantyWithProduct = Warranty & {
   activated_by?: User | null;
   voided_by?: User | null;
+  dealer?: Dealer | null;
+  ownerships?: Array<WarrantyOwnership & { customer?: Customer | null }>;
   product: Product & {
     ownerships?: Array<ProductOwnership & { customer?: Customer }>;
   };
@@ -163,6 +178,8 @@ export function toWarrantyResponse(warranty: WarrantyWithAuditUsers) {
     voidReason: warranty.voidReason,
     createdAt: warranty.createdAt,
     updatedAt: warranty.updatedAt,
+    dealer: warranty.dealer ?? null,
+    owner: warranty.owner ?? null,
   };
 }
 
@@ -268,9 +285,11 @@ function toOptionalString(value: unknown): string | null {
 }
 
 export function toWarrantyListItemResponse(warranty: WarrantyWithProduct) {
-  const currentOwnership = warranty.product.ownerships?.find(
-    (ownership) => ownership.is_current_owner,
-  );
+  const currentOwnership =
+    warranty.ownerships?.find((ownership) => ownership.is_current_owner) ??
+    warranty.product.ownerships?.find(
+      (ownership) => ownership.is_current_owner,
+    );
 
   return {
     ...toWarrantyResponse(toWarrantyRecord(warranty)),
@@ -298,8 +317,13 @@ export function toWarrantyRecord(
   warranty: Warranty & {
     activated_by?: User | null;
     voided_by?: User | null;
+    dealer?: Dealer | null;
+    ownerships?: Array<WarrantyOwnership & { customer?: Customer | null }>;
   },
 ): WarrantyRecord {
+  const currentOwnership = warranty.ownerships?.find(
+    (ownership) => ownership.is_current_owner,
+  );
   return {
     activatedBy: warranty.activated_by
       ? {
@@ -333,5 +357,20 @@ export function toWarrantyRecord(
       : null,
     voidedById: warranty.voided_by_id,
     warrantyCode: warranty.warranty_code,
+    dealer: warranty.dealer
+      ? {
+          id: warranty.dealer.id,
+          dealerCode: warranty.dealer.dealer_code,
+          name: warranty.dealer.name,
+        }
+      : null,
+    owner: currentOwnership
+      ? {
+          customerId: currentOwnership.customer_id,
+          customerCode: currentOwnership.customer?.customer_code ?? null,
+          fullName: currentOwnership.customer?.full_name ?? null,
+          ownerUserId: currentOwnership.owner_user_id,
+        }
+      : null,
   };
 }

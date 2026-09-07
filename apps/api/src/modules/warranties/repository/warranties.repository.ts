@@ -8,6 +8,12 @@ import { Prisma, warranty_status } from '@prisma/client';
 const warrantyInclude = {
   activated_by: true,
   voided_by: true,
+  dealer: true,
+  ownerships: {
+    where: { is_current_owner: true },
+    include: { customer: true },
+    orderBy: { created_at: 'desc' as const },
+  },
   product: {
     include: {
       category_ref: true,

@@ -1,8 +1,15 @@
 import { WarrantyExcelRow } from '@/modules/warranties/excel/warranty-excel.types';
-import { Customer, Product, ProductOwnership, Warranty } from '@prisma/client';
+import {
+  Customer,
+  Product,
+  ProductOwnership,
+  Warranty,
+  WarrantyOwnership,
+} from '@prisma/client';
 import { getProductCatalogue } from '@/modules/products/product-catalogue';
 
 type WarrantyWithProduct = Warranty & {
+  ownerships?: Array<WarrantyOwnership & { customer?: Customer | null }>;
   product: Product & {
     ownerships?: Array<ProductOwnership & { customer?: Customer }>;
   };
@@ -11,9 +18,11 @@ type WarrantyWithProduct = Warranty & {
 export function toWarrantyExcelRow(
   warranty: WarrantyWithProduct,
 ): WarrantyExcelRow {
-  const currentOwnership = warranty.product.ownerships?.find(
-    (ownership) => ownership.is_current_owner,
-  );
+  const currentOwnership =
+    warranty.ownerships?.find((ownership) => ownership.is_current_owner) ??
+    warranty.product.ownerships?.find(
+      (ownership) => ownership.is_current_owner,
+    );
 
   return {
     warrantyCode: warranty.warranty_code,
