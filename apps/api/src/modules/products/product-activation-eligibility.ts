@@ -29,6 +29,7 @@ type ActivationProductEligibilitySource = {
     request?: { id: string } | null;
     request_items?: Array<{ id: string }>;
   }>;
+  category_ref?: { activation_code_enabled: boolean } | null;
 };
 
 export function getActivationProductEligibility(
@@ -56,6 +57,8 @@ export function getActivationProductEligibility(
       !code.request &&
       (code.request_items?.length ?? 0) === 0,
   );
+  const isCodeLessProduct =
+    product.category_ref?.activation_code_enabled === false;
 
   if (!product.warranty) {
     return (product.warranty_duration_months ?? 0) > 0
@@ -66,7 +69,7 @@ export function getActivationProductEligibility(
     return ineligible('WARRANTY_CODE_MISSING');
   }
   if (product.warranty.status === warranty_status.ACTIVE) {
-    return hasAvailableActivationCode
+    return isCodeLessProduct || hasAvailableActivationCode
       ? { eligible: true, reason: null, requestCode: null }
       : ineligible('WARRANTY_ALREADY_ACTIVATED');
   }

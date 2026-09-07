@@ -129,6 +129,17 @@ describe('ListActivationProductOptionsUseCase', () => {
       ),
     ).toEqual({ eligible: true, reason: null, requestCode: null });
   });
+
+  it('keeps an active code-less product eligible for a new warranty request', () => {
+    expect(
+      getActivationProductEligibility(
+        createProduct({
+          warranty: createWarranty({ status: warranty_status.ACTIVE }),
+          category_ref: { activation_code_enabled: false },
+        }),
+      ),
+    ).toEqual({ eligible: true, reason: null, requestCode: null });
+  });
 });
 
 function createProduct(overrides: Record<string, unknown> = {}) {

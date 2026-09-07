@@ -256,12 +256,16 @@ export class ActivationRequestItemsValidatorService {
         productName: getProductDisplayName(product),
         productCode: product.product_code,
         serialNumber: product.serial_number,
-        warrantyId: item.activationCodeId
-          ? null
-          : (product.warranty?.id ?? null),
-        warrantyCode: item.activationCodeId
-          ? null
-          : (product.warranty?.warranty_code ?? null),
+        // A code-less product issues a fresh warranty per request instead of
+        // reusing the product's current warranty pointer.
+        warrantyId:
+          item.activationCodeId || !requiresActivationCode
+            ? null
+            : (product.warranty?.id ?? null),
+        warrantyCode:
+          item.activationCodeId || !requiresActivationCode
+            ? null
+            : (product.warranty?.warranty_code ?? null),
         warrantyDurationMonths:
           product.warranty?.duration_months ??
           product.warranty_duration_months ??

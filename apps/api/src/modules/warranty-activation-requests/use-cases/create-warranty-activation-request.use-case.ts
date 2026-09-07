@@ -132,6 +132,9 @@ export class CreateWarrantyActivationRequestUseCase {
         warrantyCode: dtoWarrantyCode,
       });
     }
+    const isCodeLessProduct =
+      product.category_ref?.activation_code_enabled === false;
+    const createsIndependentWarranty = hasGenericCode || isCodeLessProduct;
     if (
       hasGenericCode &&
       product.category_ref?.activation_code_enabled === false
@@ -150,11 +153,11 @@ export class CreateWarrantyActivationRequestUseCase {
       );
     }
 
-    // A generic activation code identifies a new physical item. Its warranty
-    // must be created independently, even when this catalogue product already
-    // has an active/current warranty from another activation code.
-    const existingWarrantyCode = hasGenericCode
-      ? dtoWarrantyCode
+    // A code (or code-less installation) identifies a new physical item. Its
+    // warranty must be created independently, even when this catalogue
+    // product already has an active/current warranty.
+    const existingWarrantyCode = createsIndependentWarranty
+      ? undefined
       : (product.warranty?.warranty_code ?? dtoWarrantyCode);
     const reservedWarrantyCodes = new Set<string>();
     let requestItems = validatedItems
@@ -162,7 +165,7 @@ export class CreateWarrantyActivationRequestUseCase {
           validatedItems.map(async (item) => {
             const itemWarrantyCode =
               item.warrantyCode ??
-              (!item.warrantyId
+              (!item.warrantyId || isCodeLessProduct
                 ? await this.generateDistinctWarrantyCode(reservedWarrantyCodes)
                 : existingWarrantyCode);
             if (itemWarrantyCode) reservedWarrantyCodes.add(itemWarrantyCode);
@@ -172,7 +175,7 @@ export class CreateWarrantyActivationRequestUseCase {
       : [];
     let warrantyCode =
       requestItems[0]?.warrantyCode ??
-      (hasGenericCode
+      (createsIndependentWarranty
         ? await this.generateDistinctWarrantyCode(reservedWarrantyCodes)
         : (existingWarrantyCode ??
           `PENDING-${activationCodeRecord?.id ?? Date.now()}`));
@@ -184,7 +187,7 @@ export class CreateWarrantyActivationRequestUseCase {
     }
 
     if (
-      !hasGenericCode &&
+      !createsIndependentWarranty &&
       product.warranty &&
       product.warranty.warranty_code !== warrantyCode
     ) {
@@ -195,7 +198,7 @@ export class CreateWarrantyActivationRequestUseCase {
     }
 
     if (
-      !hasGenericCode &&
+      !createsIndependentWarranty &&
       product.warranty &&
       !ACTIVATABLE_WARRANTY_STATUSES.has(product.warranty.status)
     ) {
@@ -306,7 +309,9 @@ export class CreateWarrantyActivationRequestUseCase {
               product,
               source:
                 context.source ?? WARRANTY_ACTIVATION_REQUEST_SOURCE.PUBLIC_WEB,
-              warrantyId: hasGenericCode ? '' : (product.warranty?.id ?? ''),
+              warrantyId: createsIndependentWarranty
+                ? ''
+                : (product.warranty?.id ?? ''),
             }),
             items: requestItems,
           },

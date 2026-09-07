@@ -65,7 +65,7 @@ describe('ProductsRepository', () => {
             },
           },
           warranty_activation_requests: {
-            select: { id: true },
+            select: { id: true, activation_code_id: true },
             take: 1,
             where: {
               status: {
