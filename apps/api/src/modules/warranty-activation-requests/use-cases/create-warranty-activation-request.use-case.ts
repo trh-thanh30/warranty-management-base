@@ -150,8 +150,12 @@ export class CreateWarrantyActivationRequestUseCase {
       );
     }
 
-    const existingWarrantyCode =
-      product.warranty?.warranty_code ?? dtoWarrantyCode;
+    // A generic activation code identifies a new physical item. Its warranty
+    // must be created independently, even when this catalogue product already
+    // has an active/current warranty from another activation code.
+    const existingWarrantyCode = hasGenericCode
+      ? dtoWarrantyCode
+      : (product.warranty?.warranty_code ?? dtoWarrantyCode);
     const reservedWarrantyCodes = new Set<string>();
     let requestItems = validatedItems
       ? await Promise.all(
@@ -168,10 +172,10 @@ export class CreateWarrantyActivationRequestUseCase {
       : [];
     let warrantyCode =
       requestItems[0]?.warrantyCode ??
-      existingWarrantyCode ??
       (hasGenericCode
         ? await this.generateDistinctWarrantyCode(reservedWarrantyCodes)
-        : `PENDING-${activationCodeRecord?.id ?? Date.now()}`);
+        : (existingWarrantyCode ??
+          `PENDING-${activationCodeRecord?.id ?? Date.now()}`));
     if (!validatedItems) {
       requestItems.push({
         ...this.toPrimaryRequestItem(product, warrantyCode),
@@ -179,7 +183,11 @@ export class CreateWarrantyActivationRequestUseCase {
       });
     }
 
-    if (product.warranty && product.warranty.warranty_code !== warrantyCode) {
+    if (
+      !hasGenericCode &&
+      product.warranty &&
+      product.warranty.warranty_code !== warrantyCode
+    ) {
       await this.productsRepository.synchronizeWarrantyCode({
         warrantyCode,
         warrantyId: product.warranty.id,
@@ -187,6 +195,7 @@ export class CreateWarrantyActivationRequestUseCase {
     }
 
     if (
+      !hasGenericCode &&
       product.warranty &&
       !ACTIVATABLE_WARRANTY_STATUSES.has(product.warranty.status)
     ) {
@@ -297,7 +306,7 @@ export class CreateWarrantyActivationRequestUseCase {
               product,
               source:
                 context.source ?? WARRANTY_ACTIVATION_REQUEST_SOURCE.PUBLIC_WEB,
-              warrantyId: product.warranty?.id ?? '',
+              warrantyId: hasGenericCode ? '' : (product.warranty?.id ?? ''),
             }),
             items: requestItems,
           },

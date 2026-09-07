@@ -111,6 +111,24 @@ describe('ListActivationProductOptionsUseCase', () => {
       requestCode: null,
     });
   });
+
+  it('keeps a product eligible when another activation code is available', () => {
+    expect(
+      getActivationProductEligibility(
+        createProduct({
+          warranty: createWarranty({ status: warranty_status.ACTIVE }),
+          activation_codes: [
+            {
+              status: 'AVAILABLE',
+              expires_at: new Date('2026-12-31T00:00:00.000Z'),
+              request: null,
+              request_items: [],
+            },
+          ],
+        }),
+      ),
+    ).toEqual({ eligible: true, reason: null, requestCode: null });
+  });
 });
 
 function createProduct(overrides: Record<string, unknown> = {}) {

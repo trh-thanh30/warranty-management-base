@@ -23,6 +23,12 @@ type ActivationProductEligibilitySource = {
     status: warranty_activation_request_status;
     request: ActivationRequestReference;
   }>;
+  activation_codes?: Array<{
+    status: string;
+    expires_at: Date;
+    request?: { id: string } | null;
+    request_items?: Array<{ id: string }>;
+  }>;
 };
 
 export function getActivationProductEligibility(
@@ -43,6 +49,14 @@ export function getActivationProductEligibility(
     return ineligible('ACTIVATION_REQUEST_APPROVED', openRequest.request_code);
   }
 
+  const hasAvailableActivationCode = product.activation_codes?.some(
+    (code) =>
+      code.status === 'AVAILABLE' &&
+      code.expires_at.getTime() > Date.now() &&
+      !code.request &&
+      (code.request_items?.length ?? 0) === 0,
+  );
+
   if (!product.warranty) {
     return (product.warranty_duration_months ?? 0) > 0
       ? { eligible: true, reason: null, requestCode: null }
@@ -52,7 +66,9 @@ export function getActivationProductEligibility(
     return ineligible('WARRANTY_CODE_MISSING');
   }
   if (product.warranty.status === warranty_status.ACTIVE) {
-    return ineligible('WARRANTY_ALREADY_ACTIVATED');
+    return hasAvailableActivationCode
+      ? { eligible: true, reason: null, requestCode: null }
+      : ineligible('WARRANTY_ALREADY_ACTIVATED');
   }
   if (product.warranty.status !== warranty_status.DRAFT) {
     return ineligible('WARRANTY_NOT_DRAFT');

@@ -48,7 +48,7 @@ const productInclude = {
         ],
       },
     },
-    select: { id: true },
+    select: { id: true, activation_code_id: true },
     take: 1,
   },
   category_ref: true,
@@ -74,6 +74,7 @@ const activationProductOptionInclude = {
     where: { status: { in: openActivationRequestStatuses } },
     select: {
       status: true,
+      activation_code_id: true,
       request: {
         select: { request_code: true, status: true },
       },
@@ -725,6 +726,20 @@ function buildActivationEligibleProductWhere(): Prisma.ProductWhereInput {
         warranty: { is: null },
         warranty_duration_months: { gt: 0 },
         category_ref: { activation_code_enabled: true },
+      },
+      {
+        warranty_duration_months: { gt: 0 },
+        category_ref: { activation_code_enabled: true },
+        activation_codes: {
+          some: {
+            status: 'AVAILABLE',
+            expires_at: { gt: new Date() },
+            request: { is: null },
+            request_items: {
+              none: { status: { in: openActivationRequestStatuses } },
+            },
+          },
+        },
       },
     ],
     warranty_activation_request_items: {

@@ -306,7 +306,10 @@ describe('WarrantyActivationRequestsUseCases', () => {
       ...baseDraftProduct,
       id: 'product-a',
       product_code: 'CODE-product-a',
-      warranty: null,
+      warranty: {
+        ...baseDraftProduct.warranty,
+        status: warranty_status.ACTIVE,
+      },
       warranty_duration_months: 24,
     });
     const genericItems = [
