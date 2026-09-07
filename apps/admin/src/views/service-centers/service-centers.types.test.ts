@@ -41,14 +41,14 @@ test("service center form requires a ward or commune", () => {
   assert.equal(result.success, false);
 });
 
-test("service center form requires a map location", () => {
+test("service center form allows an empty map location", () => {
   const result = serviceCenterFormSchema.safeParse({
     ...validForm,
     latitude: Number.NaN,
     longitude: Number.NaN,
   });
 
-  assert.equal(result.success, false);
+  assert.equal(result.success, true);
 });
 
 test("service center form rejects coordinates outside their valid ranges", () => {

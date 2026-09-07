@@ -38,13 +38,15 @@ export class CreateServiceCenterDto {
   @Length(4, 255)
   address: string;
 
+  @IsOptional()
   @IsNumber({ maxDecimalPlaces: 8 })
   @Min(-90)
   @Max(90)
-  latitude: number;
+  latitude?: number;
 
+  @IsOptional()
   @IsNumber({ maxDecimalPlaces: 8 })
   @Min(-180)
   @Max(180)
-  longitude: number;
+  longitude?: number;
 }
