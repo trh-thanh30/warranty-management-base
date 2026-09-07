@@ -813,8 +813,8 @@ model Dealer {
   province    String
   district    String?
   sales_name  String?
-  latitude    Float
-  longitude   Float
+  latitude    Float?
+  longitude   Float?
   is_active   Boolean  @default(true)
   metadata    Json?
   created_at  DateTime @default(now())
@@ -934,8 +934,8 @@ model ServiceCenter {
   province   String
   district   String?
   address    String
-  latitude   Float
-  longitude  Float
+  latitude   Float?
+  longitude  Float?
   is_active  Boolean  @default(true)
   metadata   Json?
   created_at DateTime @default(now())

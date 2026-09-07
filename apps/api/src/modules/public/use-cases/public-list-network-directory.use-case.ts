@@ -29,12 +29,16 @@ export class PublicListNetworkDirectoryUseCase {
     const search = normalizeSearch(query.search ?? '');
     const province = normalizeSearch(query.province ?? '');
     const district = normalizeSearch(query.district ?? '');
-    const hasCoordinates =
+    const hasQueryCoordinates =
       query.latitude !== undefined && query.longitude !== undefined;
     const radiusKm = query.radiusKm ?? 20;
     const locations = [
-      ...dealers.map((dealer) => mapLocation(dealer, 'DEALER')),
-      ...serviceCenters.map((center) => mapLocation(center, 'SERVICE_CENTER')),
+      ...dealers
+        .filter(hasCoordinates)
+        .map((dealer) => mapLocation(dealer, 'DEALER')),
+      ...serviceCenters
+        .filter(hasCoordinates)
+        .map((center) => mapLocation(center, 'SERVICE_CENTER')),
     ]
       .filter(
         (location) =>
@@ -52,7 +56,7 @@ export class PublicListNetworkDirectoryUseCase {
       )
       .map((location) => ({
         distance:
-          hasCoordinates &&
+          hasQueryCoordinates &&
           query.latitude !== undefined &&
           query.longitude !== undefined
             ? distanceInKilometers(
@@ -116,6 +120,12 @@ function normalizeSearch(value: string) {
     .replaceAll('Đ', 'D')
     .toLocaleLowerCase('vi')
     .trim();
+}
+
+function hasCoordinates<
+  T extends { latitude: number | null; longitude: number | null },
+>(record: T): record is T & { latitude: number; longitude: number } {
+  return record.latitude !== null && record.longitude !== null;
 }
 
 function distanceInKilometers(

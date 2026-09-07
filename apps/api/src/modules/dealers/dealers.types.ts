@@ -10,7 +10,13 @@ export function toDealerResponse(dealer: Dealer) {
     address: dealer.address,
     province: dealer.province,
     district: dealer.district,
-    googleMapsUrl: createGoogleMapsUrl(dealer),
+    googleMapsUrl:
+      dealer.latitude !== null && dealer.longitude !== null
+        ? createGoogleMapsUrl({
+            latitude: dealer.latitude,
+            longitude: dealer.longitude,
+          })
+        : '',
     latitude: dealer.latitude,
     longitude: dealer.longitude,
     salesName: dealer.sales_name,

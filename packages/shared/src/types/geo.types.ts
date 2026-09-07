@@ -3,12 +3,10 @@ export type GeoPoint = {
   longitude: number;
 };
 
-export type OptionalGeoPoint =
-  | GeoPoint
-  | {
-      latitude?: never;
-      longitude?: never;
-    };
+export type OptionalGeoPoint = {
+  latitude?: number | null;
+  longitude?: number | null;
+};
 
 export type PublicNetworkLocationKind = "DEALER" | "SERVICE_CENTER";
 
