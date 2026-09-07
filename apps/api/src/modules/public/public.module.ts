@@ -13,6 +13,7 @@ import { PublicLookupWarrantyClaimByCodeUseCase } from '@/modules/public/use-cas
 import { PublicLookupWarrantyClaimsByWarrantyCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claims-by-warranty-code.use-case';
 import { CreatePublicWarrantyClaimUseCase } from '@/modules/public/use-cases/create-public-warranty-claim.use-case';
 import { CreatePublicWarrantyActivationRequestUseCase } from '@/modules/public/use-cases/create-public-warranty-activation-request.use-case';
+import { PublicLookupWarrantyActivationRequestUseCase } from '@/modules/public/use-cases/public-lookup-warranty-activation-request.use-case';
 import { WarrantyClaimsModule } from '@/modules/warranty-claims/warranty-claims.module';
 import { WarrantyActivationRequestsModule } from '@/modules/warranty-activation-requests/warranty-activation-requests.module';
 import { WarrantiesModule } from '@/modules/warranties/warranties.module';
@@ -40,6 +41,7 @@ import { Module } from '@nestjs/common';
     PublicLookupWarrantyClaimsByWarrantyCodeUseCase,
     CreatePublicWarrantyClaimUseCase,
     CreatePublicWarrantyActivationRequestUseCase,
+    PublicLookupWarrantyActivationRequestUseCase,
   ],
 })
 export class PublicModule {}

@@ -1412,6 +1412,7 @@
         "reviewDescription": "Đang chờ bộ phận FUJITEK tiếp nhận và kiểm tra.",
         "activationStep": "Kích hoạt bảo hành",
         "activationDescription": "Bảo hành chỉ có hiệu lực sau khi yêu cầu được phê duyệt.",
+        "track": "Theo dõi yêu cầu",
         "reset": "Gửi yêu cầu khác"
       },
       "fields": {
@@ -1657,7 +1658,7 @@
     "track": {
       "guide": {
         "title": "Quy trình xử lý yêu cầu",
-        "description": "Mã CLM giúp bạn theo dõi yêu cầu qua từng giai đoạn.",
+        "description": "Dùng mã WAR hoặc CLM để theo dõi yêu cầu qua từng giai đoạn.",
         "steps": {
           "one": {
             "badge": "Bước 01",
@@ -1684,25 +1685,45 @@
       },
       "eyebrow": "Theo dõi tiến độ dịch vụ",
       "title": "Theo dõi xử lý bảo hành",
-      "description": "Nhập mã yêu cầu CLM để xem trạng thái hiện tại và lịch sử xử lý thực tế.",
+      "description": "Nhập mã WAR của yêu cầu kích hoạt hoặc mã CLM của yêu cầu bảo hành để xem trạng thái xử lý.",
       "form": {
         "title": "Tra cứu tiến độ yêu cầu",
-        "description": "Nhập mã CLM để xem trạng thái và lịch sử xử lý yêu cầu bảo hành.",
+        "description": "Tra cứu yêu cầu kích hoạt bằng mã WAR hoặc yêu cầu bảo hành bằng mã CLM.",
         "sectionTitle": "Thông tin theo dõi yêu cầu",
-        "sectionDescription": "Nhập mã CLM được cấp sau khi gửi yêu cầu để kiểm tra tiến độ xử lý.",
-        "claimCodeLabel": "Mã yêu cầu bảo hành",
-        "placeholder": "Ví dụ: CLM-0123456789ABCDEFABCD",
+        "sectionDescription": "Nhập mã được cấp sau khi gửi yêu cầu để kiểm tra tiến độ xử lý.",
+        "trackingCodeLabel": "Mã theo dõi yêu cầu",
+        "placeholder": "Ví dụ: WAR-20260907-0001 hoặc CLM-0123456789ABCDEFABCD",
         "submit": "Kiểm tra",
         "submitting": "Đang kiểm tra...",
-        "help": "Mã CLM được cấp sau khi bạn gửi yêu cầu bảo hành."
+        "help": "Mã WAR được cấp sau khi gửi yêu cầu kích hoạt; mã CLM được cấp sau khi gửi yêu cầu bảo hành."
       },
       "validation": {
-        "claimCodeInvalid": "Vui lòng nhập đúng mã yêu cầu CLM."
+        "trackingCodeInvalid": "Vui lòng nhập đúng mã yêu cầu WAR hoặc CLM."
       },
       "errors": {
-        "notFound": "Không tìm thấy yêu cầu bảo hành với mã này.",
+        "notFound": "Không tìm thấy yêu cầu với mã này.",
         "rateLimit": "Bạn đã tra cứu quá nhiều lần. Vui lòng thử lại sau.",
-        "request": "Không thể tra cứu tiến độ bảo hành. Vui lòng thử lại."
+        "request": "Không thể tra cứu tiến độ yêu cầu. Vui lòng thử lại."
+      },
+      "activationResult": {
+        "requestCode": "Mã yêu cầu kích hoạt",
+        "submittedAt": "Thời gian gửi",
+        "reviewedAt": "Thời gian xét duyệt",
+        "updatedAt": "Cập nhật gần nhất",
+        "statuses": {
+          "PENDING": "Chờ phê duyệt",
+          "APPROVED": "Đã phê duyệt",
+          "REJECTED": "Đã từ chối",
+          "ACTIVATED": "Đã kích hoạt",
+          "CANCELLED": "Đã hủy"
+        },
+        "descriptions": {
+          "PENDING": "FUJITEK đã tiếp nhận và đang kiểm tra yêu cầu. Bảo hành chưa có hiệu lực ở giai đoạn này.",
+          "APPROVED": "Yêu cầu đã được phê duyệt và đang hoàn tất bước kích hoạt bảo hành.",
+          "REJECTED": "Yêu cầu không được phê duyệt. Vui lòng liên hệ FUJITEK và cung cấp mã yêu cầu để được hỗ trợ.",
+          "ACTIVATED": "Yêu cầu đã hoàn tất và bảo hành điện tử đã được kích hoạt.",
+          "CANCELLED": "Yêu cầu này đã được hủy và sẽ không tiếp tục được xử lý."
+        }
       },
       "result": {
         "claimCode": "Mã yêu cầu",

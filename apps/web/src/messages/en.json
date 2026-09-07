@@ -1412,6 +1412,7 @@
         "reviewDescription": "Waiting for the FUJITEK team to receive and review the request.",
         "activationStep": "Warranty activation",
         "activationDescription": "The warranty becomes active only after the request is approved.",
+        "track": "Track request",
         "reset": "Submit another request"
       },
       "fields": {
@@ -1657,7 +1658,7 @@
     "track": {
       "guide": {
         "title": "Request processing flow",
-        "description": "Use your CLM code to follow the request through each stage.",
+        "description": "Use a WAR or CLM code to follow a request through each stage.",
         "steps": {
           "one": {
             "badge": "Step 01",
@@ -1684,25 +1685,45 @@
       },
       "eyebrow": "Track service progress",
       "title": "Track warranty processing",
-      "description": "Enter your CLM request code to view its current status and actual processing history.",
+      "description": "Enter the WAR code for an activation request or the CLM code for a warranty claim to view its status.",
       "form": {
         "title": "Check request progress",
-        "description": "Enter your CLM code to view the status and processing history of your warranty request.",
+        "description": "Track an activation request with a WAR code or a warranty claim with a CLM code.",
         "sectionTitle": "Request tracking information",
-        "sectionDescription": "Enter the CLM code issued after submission to check the processing progress.",
-        "claimCodeLabel": "Warranty claim code",
-        "placeholder": "For example: CLM-0123456789ABCDEFABCD",
+        "sectionDescription": "Enter the code issued after submission to check processing progress.",
+        "trackingCodeLabel": "Request tracking code",
+        "placeholder": "For example: WAR-20260907-0001 or CLM-0123456789ABCDEFABCD",
         "submit": "Check",
         "submitting": "Checking...",
-        "help": "The CLM code is issued after you submit a warranty support request."
+        "help": "A WAR code is issued for an activation request; a CLM code is issued for a warranty claim."
       },
       "validation": {
-        "claimCodeInvalid": "Enter a valid CLM request code."
+        "trackingCodeInvalid": "Enter a valid WAR or CLM request code."
       },
       "errors": {
-        "notFound": "No warranty request was found for this code.",
+        "notFound": "No request was found for this code.",
         "rateLimit": "You have made too many lookups. Please try again later.",
-        "request": "Unable to track this warranty request. Please try again."
+        "request": "Unable to track this request. Please try again."
+      },
+      "activationResult": {
+        "requestCode": "Activation request code",
+        "submittedAt": "Submitted at",
+        "reviewedAt": "Reviewed at",
+        "updatedAt": "Last updated",
+        "statuses": {
+          "PENDING": "Awaiting approval",
+          "APPROVED": "Approved",
+          "REJECTED": "Rejected",
+          "ACTIVATED": "Activated",
+          "CANCELLED": "Cancelled"
+        },
+        "descriptions": {
+          "PENDING": "FUJITEK has received and is reviewing this request. The warranty is not active at this stage.",
+          "APPROVED": "The request has been approved and warranty activation is being completed.",
+          "REJECTED": "The request was not approved. Contact FUJITEK with the request code for assistance.",
+          "ACTIVATED": "The request is complete and the electronic warranty has been activated.",
+          "CANCELLED": "This request has been cancelled and will not be processed further."
+        }
       },
       "result": {
         "claimCode": "Request code",

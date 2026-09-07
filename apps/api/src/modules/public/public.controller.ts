@@ -4,6 +4,7 @@ import { LookupWarrantyDto } from '@/modules/warranties/dto/lookup-warranty.dto'
 import { LookupWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/lookup-warranty-by-code.use-case';
 import { CreatePublicWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-public-warranty-activation-request.dto';
 import { CreatePublicWarrantyActivationRequestUseCase } from '@/modules/public/use-cases/create-public-warranty-activation-request.use-case';
+import { PublicLookupWarrantyActivationRequestUseCase } from '@/modules/public/use-cases/public-lookup-warranty-activation-request.use-case';
 import { CreateWarrantyClaimDto } from '@/modules/warranty-claims/dto/create-warranty-claim.dto';
 import { CreatePublicWarrantyClaimUseCase } from '@/modules/public/use-cases/create-public-warranty-claim.use-case';
 import { PublicListServiceCentersUseCase } from '@/modules/public/use-cases/public-list-service-centers.use-case';
@@ -32,6 +33,7 @@ export class PublicController {
   constructor(
     private readonly lookupWarrantyByCodeUseCase: LookupWarrantyByCodeUseCase,
     private readonly createPublicWarrantyActivationRequestUseCase: CreatePublicWarrantyActivationRequestUseCase,
+    private readonly publicLookupWarrantyActivationRequestUseCase: PublicLookupWarrantyActivationRequestUseCase,
     private readonly createPublicWarrantyClaimUseCase: CreatePublicWarrantyClaimUseCase,
     private readonly publicLookupWarrantyClaimByCodeUseCase: PublicLookupWarrantyClaimByCodeUseCase,
     private readonly publicLookupWarrantyClaimsByWarrantyCodeUseCase: PublicLookupWarrantyClaimsByWarrantyCodeUseCase,
@@ -58,6 +60,14 @@ export class PublicController {
     @Body() dto: CreatePublicWarrantyActivationRequestDto,
   ) {
     return this.createPublicWarrantyActivationRequestUseCase.execute(dto);
+  }
+
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Get('warranty-activation-requests/:requestCode')
+  lookupWarrantyActivationRequest(@Param('requestCode') requestCode: string) {
+    return this.publicLookupWarrantyActivationRequestUseCase.execute(
+      requestCode,
+    );
   }
 
   @Throttle({ default: { limit: 5, ttl: 60_000 } })

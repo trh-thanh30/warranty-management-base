@@ -88,6 +88,19 @@ export class WarrantyActivationRequestsRepository {
     });
   }
 
+  findPublicStatusByRequestCode(requestCode: string) {
+    return this.prismaService.warrantyActivationRequest.findUnique({
+      where: { request_code: requestCode },
+      select: {
+        request_code: true,
+        status: true,
+        created_at: true,
+        reviewed_at: true,
+        updated_at: true,
+      },
+    });
+  }
+
   findOpenByProductId(productId: string) {
     return this.prismaService.warrantyActivationRequest.findFirst({
       where: {

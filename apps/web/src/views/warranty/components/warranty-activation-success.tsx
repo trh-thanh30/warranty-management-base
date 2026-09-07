@@ -6,6 +6,8 @@ import {
 } from "@repo/shared";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
+import { APP_ROUTES } from "@/src/constants/routes.constants";
+import { Link } from "@/src/i18n/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   Check,
@@ -15,6 +17,7 @@ import {
   Clock3,
   Copy,
   Mail,
+  Search,
   ShieldCheck,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -235,14 +238,30 @@ export function WarrantyActivationSuccess({
           ))}
         </ol>
 
-        <Button
-          className="mt-7 h-12 w-full rounded-md border-premium-red text-sm font-semibold uppercase text-premium-red transition-colors hover:bg-premium-red hover:text-white"
-          onClick={onReset}
-          type="button"
-          variant="outline"
-        >
-          {t("reset")}
-        </Button>
+        <div className="mt-7 grid gap-3 sm:grid-cols-2">
+          <Button
+            asChild
+            className="h-12 rounded-md bg-premium-red text-sm font-semibold uppercase text-white hover:bg-warm-red"
+          >
+            <Link
+              href={{
+                pathname: APP_ROUTES.warrantyTrack,
+                query: { requestCode: request.requestCode },
+              }}
+            >
+              <Search className="size-4" aria-hidden="true" />
+              {t("track")}
+            </Link>
+          </Button>
+          <Button
+            className="h-12 rounded-md border-premium-red text-sm font-semibold uppercase text-premium-red transition-colors hover:bg-premium-red hover:text-white"
+            onClick={onReset}
+            type="button"
+            variant="outline"
+          >
+            {t("reset")}
+          </Button>
+        </div>
       </div>
     </motion.section>
   );

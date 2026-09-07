@@ -226,6 +226,15 @@ export type PublicWarrantyActivationRequestReceipt = {
   createdAt: string;
 };
 
+/** Public tracking response intentionally excludes customer and internal review data. */
+export type PublicWarrantyActivationRequestStatus = {
+  requestCode: string;
+  status: WarrantyActivationRequestStatus;
+  createdAt: string;
+  reviewedAt: string | null;
+  updatedAt: string;
+};
+
 export type CreateAdminWarrantyActivationRequestBody = Omit<
   CreateWarrantyActivationRequestBody,
   "warrantyCode"

@@ -1,17 +1,18 @@
 "use client";
 
-import Image from "next/image";
 import { Container } from "@/src/components/common/container";
 import { WarrantyPolicyShortcut } from "@/src/components/common/warranty-policy-shortcut";
 import { WarrantyProcessSteps } from "@/src/components/common/warranty-process-steps";
 import { PUBLIC_DEALER_NETWORK_URL } from "@/src/config/public-features.config";
+import { APP_ROUTES } from "@/src/constants/routes.constants";
+import { useWarrantyTracking } from "@/src/hooks/use-warranty-tracking";
 import { Link } from "@/src/i18n/navigation";
-import { useWarrantyClaimTracking } from "@/src/hooks/use-warranty-claim-tracking";
 import { AnimatePresence, motion } from "framer-motion";
 import { Building2, Clock3, FileText, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { APP_ROUTES } from "@/src/constants/routes.constants";
+import { WarrantyActivationRequestProgress } from "./components/warranty-activation-request-progress";
 import { WarrantyBackLink } from "./components/warranty-back-link";
 import { WarrantyClaimProgress } from "./components/warranty-claim-progress";
 import { WarrantyTrackForm } from "./components/warranty-track-form";
@@ -25,8 +26,9 @@ const guideSteps = [
 export function WarrantyTrackView() {
   const t = useTranslations("Warranty.track");
   const searchParams = useSearchParams();
-  const { data, isPending, reset, track } = useWarrantyClaimTracking();
-  const initialClaimCode = searchParams.get("claimCode") ?? "";
+  const { data, isPending, reset, track } = useWarrantyTracking();
+  const initialTrackingCode =
+    searchParams.get("requestCode") ?? searchParams.get("claimCode") ?? "";
 
   return (
     <main className="min-h-screen bg-white text-deep-black">
@@ -39,8 +41,8 @@ export function WarrantyTrackView() {
           sizes="100vw"
           className="object-cover opacity-35"
         />
-        <div className="absolute inset-0 z-10 bg-gradient-to-r from-deep-black via-deep-black/80 to-transparent" />
-        <Container className="relative z-20 max-w-[1400px] space-y-3">
+        <div className="absolute inset-0 z-10 bg-linear-to-r from-deep-black via-deep-black/80 to-transparent" />
+        <Container className="relative z-20 max-w-350 space-y-3">
           <span className="inline-block rounded-md bg-premium-red px-4 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-white">
             {t("eyebrow")}
           </span>
@@ -93,7 +95,7 @@ export function WarrantyTrackView() {
           layout
         >
           <WarrantyTrackForm
-            initialValue={initialClaimCode}
+            initialValue={initialTrackingCode}
             isPending={isPending}
             onSubmit={track}
             onValueChange={reset}
@@ -106,10 +108,21 @@ export function WarrantyTrackView() {
                 className="mt-8 overflow-hidden border-t border-border-gray pt-8"
                 exit={{ opacity: 0, height: 0 }}
                 initial={{ opacity: 0, height: 0 }}
-                key={data.claimCode}
+                key={
+                  data.kind === "activationRequest"
+                    ? data.request.requestCode
+                    : data.claim.claimCode
+                }
                 transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
               >
-                <WarrantyClaimProgress claim={data} embedded />
+                {data.kind === "activationRequest" ? (
+                  <WarrantyActivationRequestProgress
+                    embedded
+                    request={data.request}
+                  />
+                ) : (
+                  <WarrantyClaimProgress claim={data.claim} embedded />
+                )}
               </motion.div>
             ) : null}
           </AnimatePresence>
