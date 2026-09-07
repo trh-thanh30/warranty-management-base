@@ -47,6 +47,7 @@ export type WarrantySummary = {
   maxClaimCount: number | null;
   maxAmountPerClaim: string | null;
   status: WarrantyStatus;
+  serialNumber: string | null;
   terms: string | null;
   metadata: Record<string, unknown> | null;
   activatedByUserId: string | null;

@@ -530,6 +530,8 @@ model Warranty {
   dealer_id             String?         @db.Uuid
   activation_code_id    String?         @unique @db.Uuid
   warranty_code         String?         @unique
+  // Serial/VIN belongs to an issued warranty (physical unit), not the catalogue Product.
+  serial_number         String?
   start_date            DateTime?
   end_date              DateTime?
   duration_months       Int
@@ -560,6 +562,7 @@ model Warranty {
   ownerships              WarrantyOwnership[]              @relation("WarrantyOwnershipHistory")
 
   @@index([warranty_code])
+  @@index([serial_number])
   @@index([product_id])
   @@index([dealer_id])
   @@index([status])

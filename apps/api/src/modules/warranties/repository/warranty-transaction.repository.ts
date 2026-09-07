@@ -212,7 +212,7 @@ export class WarrantyTransactionRepository {
       .update({
         where: { id: input.productId },
         data: {
-          serial_number: input.serialNumber,
+          serial_number: undefined,
           display_name: input.displayName,
           status: product_status.ACTIVE,
           ownerships: {
@@ -228,6 +228,7 @@ export class WarrantyTransactionRepository {
           },
           warranty: {
             update: {
+              serial_number: input.serialNumber,
               warranty_code: input.warrantyCode,
               duration_months: input.warrantyDurationMonths,
               terms: input.warrantyTerms,
@@ -262,7 +263,7 @@ export class WarrantyTransactionRepository {
       .create({
         data: {
           product_code: input.productCode,
-          serial_number: input.serialNumber,
+          serial_number: undefined,
           display_name: input.name,
           slug: input.productCode.toLowerCase(),
           brand: input.brand,
@@ -283,6 +284,7 @@ export class WarrantyTransactionRepository {
           },
           warranties: {
             create: {
+              serial_number: input.serialNumber,
               warranty_code: input.warrantyCode,
               duration_months: input.warrantyDurationMonths,
               status: warranty_status.DRAFT,

@@ -92,7 +92,7 @@ export function toProductResponse(
     warrantyCode: product.warranty?.warranty_code ?? null,
     canEditWarrantyCode: warrantyCodeEditLockedReason === null,
     warrantyCodeEditLockedReason,
-    serialNumber: product.serial_number,
+    serialNumber: product.warranty?.serial_number ?? product.serial_number,
     displayName: product.display_name,
     name: catalogue.name,
     categoryId: product.category_id,

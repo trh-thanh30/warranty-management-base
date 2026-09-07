@@ -60,6 +60,7 @@ export type WarrantyRecord = {
   productId: string;
   startDate: Date | null;
   status: WarrantyStatus;
+  serialNumber: string | null;
   terms: string | null;
   updatedAt: Date;
   voidReason: string | null;
@@ -156,6 +157,7 @@ export function toWarrantyResponse(warranty: WarrantyWithAuditUsers) {
     maxClaimCount: warranty.maxClaimCount,
     maxAmountPerClaim: warranty.maxAmountPerClaim?.toString() ?? null,
     status: warranty.status,
+    serialNumber: warranty.serialNumber,
     terms: warranty.terms,
     metadata: warranty.metadata as Record<string, unknown> | null,
     activatedByUserId: warranty.activatedById,
@@ -344,6 +346,7 @@ export function toWarrantyRecord(
     productId: warranty.product_id,
     startDate: warranty.start_date,
     status: warranty.status,
+    serialNumber: warranty.serial_number,
     terms: warranty.terms,
     updatedAt: warranty.updated_at,
     voidReason: warranty.void_reason,

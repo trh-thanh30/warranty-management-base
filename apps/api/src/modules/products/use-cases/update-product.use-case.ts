@@ -44,17 +44,6 @@ export class UpdateProductUseCase {
       }
     }
 
-    if (
-      dto.serialNumber &&
-      dto.serialNumber !== existingProduct.serial_number
-    ) {
-      const productWithSerial =
-        await this.productsRepository.findBySerialNumber(dto.serialNumber);
-      if (productWithSerial && productWithSerial.id !== id) {
-        throw new ConflictError('Serial number already exists');
-      }
-    }
-
     const requestedCategoryId = dto.categoryId;
     if (
       requestedCategoryId &&
@@ -108,7 +97,8 @@ export class UpdateProductUseCase {
         ? { connect: { id: requestedCategoryId } }
         : undefined,
       status: dto.status,
-      serial_number: dto.serialNumber,
+      // Serial/VIN is immutable catalogue-external data stored on Warranty.
+      serial_number: undefined,
       warranty_duration_months: dto.warrantyDurationMonths,
       warranty_terms:
         dto.warrantyTerms === undefined

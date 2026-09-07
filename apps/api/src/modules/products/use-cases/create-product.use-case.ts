@@ -38,15 +38,6 @@ export class CreateProductUseCase {
       ? await this.resolveRequestedProductCode(requestedProductCode)
       : await this.generateProductCodeUseCase.execute();
 
-    if (dto.serialNumber) {
-      const existingSerial = await this.productsRepository.findBySerialNumber(
-        dto.serialNumber,
-      );
-      if (existingSerial) {
-        throw new ConflictError('Serial number already exists');
-      }
-    }
-
     const category =
       await this.productsRepository.findActiveProductCategoryById(
         dto.categoryId,
@@ -57,7 +48,8 @@ export class CreateProductUseCase {
 
     const product = await this.productsRepository.create({
       product_code: productCode,
-      serial_number: dto.serialNumber,
+      // Serial/VIN belongs to an issued Warranty, not catalogue Product.
+      serial_number: undefined,
       display_name: dto.name.trim(),
       slug: `${toSlug(dto.name)}-${productCode.toLowerCase()}`,
       brand: dto.brand?.trim() || null,

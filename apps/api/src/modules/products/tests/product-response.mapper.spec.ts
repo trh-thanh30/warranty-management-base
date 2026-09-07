@@ -238,6 +238,7 @@ describe('toProductResponse', () => {
           dealer_id: null,
           activation_code_id: null,
           warranty_code: 'WM-2026-ABCDEF',
+          serial_number: null,
           method: warranty_method.REPAIR,
           start_date: null,
           end_date: null,
