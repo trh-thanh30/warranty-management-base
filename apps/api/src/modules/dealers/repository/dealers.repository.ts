@@ -162,7 +162,11 @@ export class DealersRepository {
 
   listActiveForNetwork() {
     return this.prismaService.dealer.findMany({
-      where: { is_active: true },
+      where: {
+        is_active: true,
+        latitude: { not: null },
+        longitude: { not: null },
+      },
       orderBy: [{ province: 'asc' }, { name: 'asc' }],
       select: {
         id: true,
@@ -184,6 +188,8 @@ export class DealersRepository {
     const { page, limit, skip, take } = normalizePagination(filters);
     const where: Prisma.DealerWhereInput = {
       is_active: true,
+      latitude: { not: null },
+      longitude: { not: null },
       province: province
         ? { equals: province, mode: 'insensitive' }
         : undefined,

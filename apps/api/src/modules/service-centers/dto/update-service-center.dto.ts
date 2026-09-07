@@ -44,19 +44,25 @@ export class UpdateServiceCenterDto {
   @Length(4, 255)
   address?: string;
 
-  @ValidateIf((dto: UpdateServiceCenterDto) => dto.longitude !== undefined)
+  @ValidateIf(
+    (dto: UpdateServiceCenterDto) =>
+      dto.longitude !== undefined && dto.longitude !== null,
+  )
   @IsDefined()
   @IsNumber({ maxDecimalPlaces: 8 })
   @Min(-90)
   @Max(90)
-  latitude?: number;
+  latitude?: number | null;
 
-  @ValidateIf((dto: UpdateServiceCenterDto) => dto.latitude !== undefined)
+  @ValidateIf(
+    (dto: UpdateServiceCenterDto) =>
+      dto.latitude !== undefined && dto.latitude !== null,
+  )
   @IsDefined()
   @IsNumber({ maxDecimalPlaces: 8 })
   @Min(-180)
   @Max(180)
-  longitude?: number;
+  longitude?: number | null;
 
   @IsOptional()
   @IsBoolean()

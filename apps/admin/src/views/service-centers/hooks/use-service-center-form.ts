@@ -129,8 +129,7 @@ function toCreateBody(
     address: values.address.trim(),
     district: toOptionalValue(values.district),
     email: toOptionalValue(values.email),
-    latitude: values.latitude,
-    longitude: values.longitude,
+    ...toOptionalCoordinates(values.latitude, values.longitude),
     name: values.name.trim(),
     phone: toOptionalValue(values.phone),
     province: values.province.trim(),
@@ -142,6 +141,15 @@ function toUpdateBody(
 ): UpdateServiceCenterBody {
   return {
     ...toCreateBody(values),
+    ...(Number.isFinite(values.latitude) || Number.isFinite(values.longitude)
+      ? {}
+      : { latitude: null, longitude: null }),
     isActive: values.isActive,
   };
+}
+
+function toOptionalCoordinates(latitude: number, longitude: number) {
+  return Number.isFinite(latitude) && Number.isFinite(longitude)
+    ? { latitude, longitude }
+    : {};
 }

@@ -12,7 +12,13 @@ export function toServiceCenterResponse(serviceCenter: ServiceCenter) {
     province: serviceCenter.province,
     district: serviceCenter.district,
     address: serviceCenter.address,
-    googleMapsUrl: createGoogleMapsUrl(serviceCenter),
+    googleMapsUrl:
+      serviceCenter.latitude !== null && serviceCenter.longitude !== null
+        ? createGoogleMapsUrl({
+            latitude: serviceCenter.latitude,
+            longitude: serviceCenter.longitude,
+          })
+        : '',
     latitude: serviceCenter.latitude,
     longitude: serviceCenter.longitude,
     isActive: serviceCenter.is_active,

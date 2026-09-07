@@ -6,10 +6,9 @@ export type ServiceCenterStatusFilter =
   (typeof SERVICE_CENTER_STATUS_FILTERS)[number];
 
 const optionalText = z.string().trim();
-const requiredCoordinate = (minimum: number, maximum: number) =>
+const optionalCoordinate = (minimum: number, maximum: number) =>
   z
     .union([z.number(), z.nan()])
-    .refine(Number.isFinite, "locationRequired")
     .refine(
       (value) =>
         !Number.isFinite(value) || (value >= minimum && value <= maximum),
@@ -25,8 +24,8 @@ export const serviceCenterFormSchema = z.object({
     "emailInvalid",
   ),
   isActive: z.boolean(),
-  latitude: requiredCoordinate(-90, 90),
-  longitude: requiredCoordinate(-180, 180),
+  latitude: optionalCoordinate(-90, 90),
+  longitude: optionalCoordinate(-180, 180),
   name: optionalText.min(2, "nameRequired").max(160, "nameLength"),
   phone: optionalText
     .max(32, "phoneLength")

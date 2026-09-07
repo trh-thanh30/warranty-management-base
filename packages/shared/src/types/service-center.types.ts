@@ -10,8 +10,8 @@ export type ServiceCenterSummary = {
   district: string | null;
   address: string;
   googleMapsUrl: string;
-  latitude: number;
-  longitude: number;
+  latitude: number | null;
+  longitude: number | null;
   isActive: boolean;
   metadata: Record<string, unknown> | null;
   createdAt: string;
@@ -32,7 +32,7 @@ export type ListServiceCentersQuery = Omit<PaginationQuery, "sortBy"> & {
   sortBy?: ServiceCenterSortBy;
 };
 
-export type CreateServiceCenterBody = GeoPoint & {
+export type CreateServiceCenterBody = OptionalGeoPoint & {
   name: string;
   phone?: string;
   email?: string;
