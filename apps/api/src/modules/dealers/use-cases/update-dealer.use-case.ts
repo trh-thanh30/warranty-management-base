@@ -11,12 +11,20 @@ import {
   optionalTrim,
 } from '@/modules/dealers/dealers.utils';
 import { Injectable } from '@nestjs/common';
+import {
+  DealerAccessPolicy,
+  type DealerAccessActor,
+} from '@/modules/dealers/service/dealer-access.policy';
 
 @Injectable()
 export class UpdateDealerUseCase {
-  constructor(private readonly dealersRepository: DealersRepository) {}
+  constructor(
+    private readonly dealersRepository: DealersRepository,
+    private readonly dealerAccessPolicy: DealerAccessPolicy,
+  ) {}
 
-  async execute(id: string, dto: UpdateDealerDto) {
+  async execute(id: string, dto: UpdateDealerDto, actor: DealerAccessActor) {
+    await this.dealerAccessPolicy.assertCanAccess(actor, id);
     const existingDealer = await this.dealersRepository.findById(id);
 
     if (!existingDealer) {

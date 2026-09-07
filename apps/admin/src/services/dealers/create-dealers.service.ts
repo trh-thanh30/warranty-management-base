@@ -1,8 +1,10 @@
 import type {
   CreateDealerBody,
+  AddDealerMemberBody,
   DealerActivatedCustomerSummary,
   DealerImportResult,
   DealerResponse,
+  DealerMembershipSummary,
   ListDealerActivatedCustomersQuery,
   ListDealersQuery,
   PaginatedResponse,
@@ -17,7 +19,7 @@ export function createDealersService(http: DealersHttpClient) {
       query: ListDealersQuery,
     ): Promise<PaginatedResponse<DealerResponse>> {
       return unwrap(
-        await http.get<PaginatedResponse<DealerResponse>>("/dealers", {
+        await http.get<PaginatedResponse<DealerResponse>>("/dealers/managed", {
           params: query,
         }),
       );
@@ -29,6 +31,37 @@ export function createDealersService(http: DealersHttpClient) {
 
     async getDealer(dealerId: string): Promise<DealerResponse> {
       return unwrap(await http.get<DealerResponse>(`/dealers/${dealerId}`));
+    },
+
+    async listMembers(dealerId: string): Promise<DealerMembershipSummary[]> {
+      return unwrap(
+        await http.get<DealerMembershipSummary[]>(
+          `/dealers/${dealerId}/members`,
+        ),
+      );
+    },
+
+    async addMember(
+      dealerId: string,
+      body: AddDealerMemberBody,
+    ): Promise<DealerMembershipSummary> {
+      return unwrap(
+        await http.post<DealerMembershipSummary>(
+          `/dealers/${dealerId}/members`,
+          body,
+        ),
+      );
+    },
+
+    async removeMember(
+      dealerId: string,
+      membershipId: string,
+    ): Promise<{ id: string }> {
+      return unwrap(
+        await http.delete<{ id: string }>(
+          `/dealers/${dealerId}/members/${membershipId}`,
+        ),
+      );
     },
 
     async listActivatedCustomers(

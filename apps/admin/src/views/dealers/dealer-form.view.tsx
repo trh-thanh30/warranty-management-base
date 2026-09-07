@@ -3,12 +3,14 @@
 import { Building2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
-import { Button } from "@repo/ui";
+import { Button, Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui";
 import { FormPageShell } from "@/src/components/common/form-page-shell";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { useRouter } from "@/src/i18n/navigation";
+import { usePermissions } from "@/src/hooks/use-permissions";
 import { DealerFormCard } from "./components/dealer-form-card";
+import { DealerMembersCard } from "./components/dealer-members-card";
 import { useDealerDetail } from "./hooks/use-dealer-detail";
 
 type DealerFormViewProps =
@@ -24,6 +26,7 @@ type DealerFormViewProps =
 export function DealerFormView({ dealerId, mode }: DealerFormViewProps) {
   const t = useTranslations("Dealers");
   const router = useRouter();
+  const { hasRole } = usePermissions();
   const isEditing = mode === "edit";
   const { dealer, dealerQuery } = useDealerDetail(
     isEditing ? { dealerId, mode: "edit" } : { mode: "create" },
@@ -65,6 +68,26 @@ export function DealerFormView({ dealerId, mode }: DealerFormViewProps) {
             icon={Building2}
             title={t("loadErrorTitle")}
           />
+        ) : isEditing && dealer && hasRole("admin") ? (
+          <Tabs defaultValue="details">
+            <TabsList>
+              <TabsTrigger value="details">{t("detailsTab")}</TabsTrigger>
+              <TabsTrigger value="members">{t("membersTab")}</TabsTrigger>
+            </TabsList>
+            <TabsContent className="mt-4" value="details">
+              <DealerFormCard
+                dealer={dealer}
+                description={t("editDescription")}
+                isLoading={dealerQuery.isLoading}
+                onCancel={goBack}
+                onSaved={goBack}
+                title={t("editTitle")}
+              />
+            </TabsContent>
+            <TabsContent className="mt-4" value="members">
+              <DealerMembersCard dealerId={dealerId} />
+            </TabsContent>
+          </Tabs>
         ) : (
           <DealerFormCard
             dealer={dealer}

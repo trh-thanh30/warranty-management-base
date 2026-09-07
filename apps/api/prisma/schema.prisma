@@ -40,6 +40,8 @@ model User {
   activation_code_batches               ActivationCodeBatch[]               @relation("ActivationCodeBatchCreatedBy")
   activation_code_print_jobs            ActivationCodePrintJob[]            @relation("ActivationCodePrintJobRequestedBy")
   updated_system_configs                SystemConfig[]                      @relation("SystemConfigUpdatedBy")
+  dealer_memberships                    DealerMembership[]                  @relation("DealerMembershipUser")
+  created_dealer_memberships            DealerMembership[]                  @relation("DealerMembershipCreatedBy")
 
   @@index([role, status])
   @@index([email])
@@ -821,12 +823,32 @@ model Dealer {
   updated_at  DateTime @updatedAt
 
   warranty_activation_requests WarrantyActivationRequest[]
+  memberships                  DealerMembership[]
 
   @@index([is_active])
   @@index([email])
   @@index([province])
   @@index([name])
   @@map("dealer")
+}
+
+model DealerMembership {
+  id            String   @id @default(uuid()) @db.Uuid
+  dealer_id     String   @db.Uuid
+  user_id       String   @db.Uuid
+  created_by_id String?  @db.Uuid
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  dealer     Dealer @relation(fields: [dealer_id], references: [id], onDelete: Cascade)
+  user       User   @relation("DealerMembershipUser", fields: [user_id], references: [id], onDelete: Cascade)
+  created_by User?  @relation("DealerMembershipCreatedBy", fields: [created_by_id], references: [id], onDelete: SetNull)
+
+  @@unique([dealer_id, user_id])
+  @@index([user_id])
+  @@index([dealer_id])
+  @@index([created_by_id])
+  @@map("dealer_membership")
 }
 
 model SystemConfig {

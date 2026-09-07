@@ -29,6 +29,7 @@ type DealersDirectoryCardProps = {
   canCreate: boolean;
   data?: PaginatedResponse<DealerResponse>;
   isError: boolean;
+  isAdmin: boolean;
   isLoading: boolean;
   onClearFilters: () => void;
   onDeactivate: (dealer: DealerResponse) => void;
@@ -134,6 +135,7 @@ function DirectoryContent({
   data,
   hasFilters,
   isError,
+  isAdmin,
   isLoading,
   onClearFilters,
   onDeactivate,
@@ -207,10 +209,20 @@ function DirectoryContent({
         ) : null
       }
       description={
-        hasFilters ? t("emptyFilteredDescription") : t("emptyDescription")
+        hasFilters
+          ? t("emptyFilteredDescription")
+          : isAdmin
+            ? t("emptyDescription")
+            : t("unassignedDescription")
       }
       icon={Building2}
-      title={hasFilters ? t("emptyFilteredTitle") : t("emptyTitle")}
+      title={
+        hasFilters
+          ? t("emptyFilteredTitle")
+          : isAdmin
+            ? t("emptyTitle")
+            : t("unassignedTitle")
+      }
     />
   );
 }

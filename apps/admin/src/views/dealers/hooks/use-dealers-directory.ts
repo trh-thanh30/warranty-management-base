@@ -59,6 +59,7 @@ export function useDealersDirectory() {
   const debouncedSearch = useDebounce(search.trim(), 300);
   const canView = hasPermission(PERMISSIONS.DEALER_VIEW);
   const canCreate = hasPermission(PERMISSIONS.DEALER_CREATE);
+  const isAdmin = user?.role === "admin";
   const deactivateDealer = useDeactivateDealer();
   const importDealers = useImportDealers();
   const [dealerToDeactivate, setDealerToDeactivate] =
@@ -152,6 +153,7 @@ export function useDealersDirectory() {
     isDeactivating: deactivateDealer.isPending,
     isImportDialogOpen,
     isImporting: importDealers.isPending,
+    isAdmin,
     openDeactivate: setDealerToDeactivate,
     openImportDialog: () => setImportDialogOpen(true),
     pageSize,

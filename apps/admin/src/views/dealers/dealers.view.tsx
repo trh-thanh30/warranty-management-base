@@ -59,6 +59,7 @@ export function DealersView() {
           canCreate={directory.canCreate}
           data={directory.dealersQuery.data}
           isError={directory.dealersQuery.isError}
+          isAdmin={directory.isAdmin}
           isLoading={directory.dealersQuery.isLoading}
           onClearFilters={directory.clearFilters}
           onDeactivate={directory.openDeactivate}

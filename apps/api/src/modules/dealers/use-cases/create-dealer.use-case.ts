@@ -12,6 +12,7 @@ import {
 } from '@/modules/dealers/dealers.utils';
 import { Injectable } from '@nestjs/common';
 import { GenerateDealerCodeUseCase } from '@/modules/dealers/use-cases/generate-dealer-code.use-case';
+import { user_role } from '@prisma/client';
 
 @Injectable()
 export class CreateDealerUseCase {
@@ -20,7 +21,10 @@ export class CreateDealerUseCase {
     private readonly generateDealerCodeUseCase: GenerateDealerCodeUseCase = new GenerateDealerCodeUseCase(),
   ) {}
 
-  async execute(dto: CreateDealerDto) {
+  async execute(
+    dto: CreateDealerDto,
+    context: { userId?: string; userRole?: string } = {},
+  ) {
     const phone = normalizeDealerPhone(dto.phone);
 
     if (phone && (await this.dealersRepository.findByPhone(phone))) {
@@ -39,6 +43,15 @@ export class CreateDealerUseCase {
         latitude: dto.latitude,
         longitude: dto.longitude,
         sales_name: optionalTrim(dto.salesName),
+        memberships:
+          context.userId && context.userRole === user_role.MODERATOR
+            ? {
+                create: {
+                  created_by: { connect: { id: context.userId } },
+                  user: { connect: { id: context.userId } },
+                },
+              }
+            : undefined,
       });
 
       return toDealerResponse(dealer);

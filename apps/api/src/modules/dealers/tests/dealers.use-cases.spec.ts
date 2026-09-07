@@ -22,6 +22,8 @@ const baseDealer = {
 };
 
 describe('Dealers use cases', () => {
+  const actor = { id: 'admin-id', role: 'ADMIN' };
+  const accessPolicy = { assertCanAccess: jest.fn() };
   const repository = {
     create: jest.fn(),
     findById: jest.fn(),
@@ -33,6 +35,7 @@ describe('Dealers use cases', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    accessPolicy.assertCanAccess.mockResolvedValue(undefined);
   });
 
   it('creates a dealer with normalized fields', async () => {
@@ -62,6 +65,34 @@ describe('Dealers use cases', () => {
       }),
     );
     expect(result.name).toBe('Lexzenz Ha Noi');
+  });
+
+  it('automatically assigns a moderator to a dealer they create', async () => {
+    repository.findByPhone.mockResolvedValue(null);
+    repository.create.mockResolvedValue(baseDealer);
+    const useCase = new CreateDealerUseCase(repository as never);
+
+    await useCase.execute(
+      {
+        address: '1 Nguyen Trai',
+        name: 'Lexzenz Ha Noi',
+        province: 'Ha Noi',
+        latitude: 21.0285,
+        longitude: 105.8542,
+      },
+      { userId: 'moderator-id', userRole: 'MODERATOR' },
+    );
+
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        memberships: {
+          create: {
+            created_by: { connect: { id: 'moderator-id' } },
+            user: { connect: { id: 'moderator-id' } },
+          },
+        },
+      }),
+    );
   });
 
   it('rejects duplicate dealer phone', async () => {
@@ -107,9 +138,12 @@ describe('Dealers use cases', () => {
 
   it('throws not found for missing dealer detail', async () => {
     repository.findById.mockResolvedValue(null);
-    const useCase = new GetDealerDetailUseCase(repository as never);
+    const useCase = new GetDealerDetailUseCase(
+      repository as never,
+      accessPolicy as never,
+    );
 
-    await expect(useCase.execute('missing-id')).rejects.toBeInstanceOf(
+    await expect(useCase.execute('missing-id', actor)).rejects.toBeInstanceOf(
       NotFoundError,
     );
   });
@@ -155,8 +189,13 @@ describe('Dealers use cases', () => {
 
     const useCase = new ListDealerActivatedCustomersUseCase(
       repository as never,
+      accessPolicy as never,
     );
-    const result = await useCase.execute('dealer-id', { limit: 10, page: 1 });
+    const result = await useCase.execute(
+      'dealer-id',
+      { limit: 10, page: 1 },
+      actor,
+    );
 
     expect(repository.listActivatedCustomers).toHaveBeenCalledWith(
       'dealer-id',
@@ -177,10 +216,11 @@ describe('Dealers use cases', () => {
     repository.findById.mockResolvedValue(null);
     const useCase = new ListDealerActivatedCustomersUseCase(
       repository as never,
+      accessPolicy as never,
     );
 
     await expect(
-      useCase.execute('missing-id', { limit: 10, page: 1 }),
+      useCase.execute('missing-id', { limit: 10, page: 1 }, actor),
     ).rejects.toBeInstanceOf(NotFoundError);
     expect(repository.listActivatedCustomers).not.toHaveBeenCalled();
   });
@@ -188,9 +228,16 @@ describe('Dealers use cases', () => {
   it('updates a dealer and can deactivate it', async () => {
     repository.findById.mockResolvedValue(baseDealer);
     repository.update.mockResolvedValue({ ...baseDealer, is_active: false });
-    const useCase = new UpdateDealerUseCase(repository as never);
+    const useCase = new UpdateDealerUseCase(
+      repository as never,
+      accessPolicy as never,
+    );
 
-    const result = await useCase.execute('dealer-id', { isActive: false });
+    const result = await useCase.execute(
+      'dealer-id',
+      { isActive: false },
+      actor,
+    );
 
     expect(repository.update).toHaveBeenCalledWith('dealer-id', {
       address: undefined,

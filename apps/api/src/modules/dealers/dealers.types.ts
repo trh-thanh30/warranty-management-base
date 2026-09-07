@@ -1,5 +1,8 @@
 import { Dealer, Prisma } from '@prisma/client';
-import type { DealerActivatedCustomerSummary } from '@repo/shared';
+import type {
+  DealerActivatedCustomerSummary,
+  DealerMembershipSummary,
+} from '@repo/shared';
 import { createGoogleMapsUrl } from '@repo/shared/utils';
 
 export function toDealerResponse(dealer: Dealer) {
@@ -18,6 +21,52 @@ export function toDealerResponse(dealer: Dealer) {
     metadata: toMetadata(dealer.metadata),
     createdAt: dealer.created_at,
     updatedAt: dealer.updated_at,
+  };
+}
+
+export function toDealerMembershipResponse(membership: {
+  id: string;
+  dealer_id: string;
+  user_id: string;
+  created_by_id: string | null;
+  created_at: Date;
+  updated_at: Date;
+  user: {
+    id: string;
+    email: string;
+    username: string;
+    full_name: string | null;
+    status: DealerMembershipSummary['user']['status'];
+  };
+  created_by: {
+    id: string;
+    email: string;
+    username: string;
+    full_name: string | null;
+  } | null;
+}): DealerMembershipSummary {
+  return {
+    id: membership.id,
+    dealerId: membership.dealer_id,
+    userId: membership.user_id,
+    createdById: membership.created_by_id,
+    createdAt: membership.created_at.toISOString(),
+    updatedAt: membership.updated_at.toISOString(),
+    createdBy: membership.created_by
+      ? {
+          id: membership.created_by.id,
+          email: membership.created_by.email,
+          username: membership.created_by.username,
+          fullName: membership.created_by.full_name,
+        }
+      : null,
+    user: {
+      id: membership.user.id,
+      email: membership.user.email,
+      username: membership.user.username,
+      fullName: membership.user.full_name,
+      status: membership.user.status,
+    },
   };
 }
 
