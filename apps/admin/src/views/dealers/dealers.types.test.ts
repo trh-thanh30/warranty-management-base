@@ -14,14 +14,14 @@ const validForm = {
   salesName: "Nguyen Van A",
 };
 
-test("dealer form requires a map location", () => {
+test("dealer form allows an empty map location", () => {
   const result = dealerFormSchema.safeParse({
     ...validForm,
     latitude: Number.NaN,
     longitude: Number.NaN,
   });
 
-  assert.equal(result.success, false);
+  assert.equal(result.success, true);
 });
 
 test("dealer form rejects coordinates outside their valid ranges", () => {

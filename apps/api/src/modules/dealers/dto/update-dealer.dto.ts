@@ -45,19 +45,25 @@ export class UpdateDealerDto {
   @Length(1, 120)
   salesName?: string | null;
 
-  @ValidateIf((dto: UpdateDealerDto) => dto.longitude !== undefined)
+  @ValidateIf(
+    (dto: UpdateDealerDto) =>
+      dto.longitude !== undefined && dto.longitude !== null,
+  )
   @IsDefined()
   @IsNumber({ maxDecimalPlaces: 8 })
   @Min(-90)
   @Max(90)
-  latitude?: number;
+  latitude?: number | null;
 
-  @ValidateIf((dto: UpdateDealerDto) => dto.latitude !== undefined)
+  @ValidateIf(
+    (dto: UpdateDealerDto) =>
+      dto.latitude !== undefined && dto.latitude !== null,
+  )
   @IsDefined()
   @IsNumber({ maxDecimalPlaces: 8 })
   @Min(-180)
   @Max(180)
-  longitude?: number;
+  longitude?: number | null;
 
   @IsOptional()
   @IsBoolean()
