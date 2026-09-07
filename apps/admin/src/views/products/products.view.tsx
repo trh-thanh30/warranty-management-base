@@ -222,7 +222,6 @@ export function ProductsView() {
                   remove: t("excel.removeRow"),
                   row: t("excel.row"),
                   saveChanges: t("excel.saveRowChanges"),
-                  serialNumber: t("serialNumber"),
                   status: t("productStatus"),
                   warrantyDurationMonths: t("durationMonths"),
                   warrantyTerms: t("warrantyTerms"),

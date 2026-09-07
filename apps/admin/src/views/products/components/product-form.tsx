@@ -153,21 +153,7 @@ export function ProductForm({
             />
           </Field>
 
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field
-              error={formatFieldError(
-                form.formState.errors.serialNumber?.message,
-                t,
-              )}
-              id="product-serial-number"
-              label={t("serialNumber")}
-            >
-              <Input
-                id="product-serial-number"
-                placeholder={t("serialNumberPlaceholder")}
-                {...form.register("serialNumber")}
-              />
-            </Field>
+          <div className="grid gap-5">
             <Field
               error={formatFieldError(
                 form.formState.errors.installationPosition?.message,

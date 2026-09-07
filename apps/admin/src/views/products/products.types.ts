@@ -53,6 +53,7 @@ export const productFormSchema = z.object({
   specifications: z.array(catalogueSpecification).max(50),
   installationPosition: optionalText.max(160, "installationPositionLength"),
   productCode: optionalText.max(64, "productCodeLength"),
+  /** Legacy read/write compatibility; no longer rendered in the form. */
   serialNumber: optionalText.max(64, "serialNumberLength"),
   status: z.enum(["ACTIVE", "INACTIVE"]),
   warrantyTerms: optionalText.max(2000, "warrantyTermsLength"),

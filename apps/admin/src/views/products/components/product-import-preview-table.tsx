@@ -74,7 +74,6 @@ type ProductImportPreviewTableProps = {
     remove: string;
     row: string;
     saveChanges: string;
-    serialNumber: string;
     status: string;
     warrantyDurationMonths: string;
     warrantyTerms: string;
@@ -188,9 +187,6 @@ export function ProductImportPreviewTable({
                 <TableHead className="w-44 whitespace-nowrap">
                   {labels.installationPosition}
                 </TableHead>
-                <TableHead className="w-44 whitespace-nowrap">
-                  {labels.serialNumber}
-                </TableHead>
                 <TableHead className="w-40 whitespace-nowrap">
                   {labels.status}
                 </TableHead>
@@ -222,7 +218,6 @@ export function ProductImportPreviewTable({
                     <PreviewCell value={row.data.warrantyDurationMonths} />
                     <PreviewCell value={row.data.warrantyTerms} />
                     <PreviewCell value={row.data.installationPosition} />
-                    <PreviewCell value={row.data.serialNumber} />
                     <PreviewCell value={row.data.status} />
                     <TableCell className="w-[32rem] max-w-[32rem] whitespace-normal">
                       <ImportRowStatus
@@ -465,12 +460,6 @@ function ProductImportEditForm({
             required
             type="number"
             value={values.warrantyDurationMonths}
-          />
-        </ImportField>
-        <ImportField label={labels.serialNumber}>
-          <Input
-            onChange={(event) => setText("serialNumber", event.target.value)}
-            value={values.serialNumber ?? ""}
           />
         </ImportField>
         <ImportField label={labels.installationPosition}>
