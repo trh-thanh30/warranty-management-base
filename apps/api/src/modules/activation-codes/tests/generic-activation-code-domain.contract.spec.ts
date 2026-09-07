@@ -25,6 +25,10 @@ describe('Generic activation code pool domain contract', () => {
     const schema = readFileSync(schemaPath, 'utf8');
 
     expect(schema).toMatch(/warranties\s+Warranty\[\]/);
+    expect(schema).toMatch(
+      /activation_codes\s+ActivationCode\[\]\s+@relation\("ActivationCodeProduct"\)/,
+    );
+    expect(schema).toMatch(/product_id\s+String\?\s+@db\.Uuid/);
     expect(schema).not.toMatch(/product_id\s+String\s+@unique\s+@db\.Uuid/);
     expect(schema).toMatch(
       /activation_code_id\s+String\?\s+@unique\s+@db\.Uuid/,
@@ -32,6 +36,23 @@ describe('Generic activation code pool domain contract', () => {
     expect(schema).toMatch(
       /activation_code\s+ActivationCode\?\s+@relation\("ActivationCodeWarranty"/,
     );
+  });
+
+  it('removes the historical one-code-per-product index without touching assignments', () => {
+    const migrationPath = join(
+      __dirname,
+      '../../../../prisma/migrations/20260910100000_allow_multiple_activation_codes_per_product/migration.sql',
+    );
+    expect(existsSync(migrationPath)).toBe(true);
+    const migration = readFileSync(migrationPath, 'utf8');
+
+    expect(migration).toMatch(
+      /DROP INDEX IF EXISTS "activation_code_product_id_key"/,
+    );
+    expect(migration).toMatch(
+      /CREATE INDEX IF NOT EXISTS "activation_code_product_id_idx"/,
+    );
+    expect(migration).not.toMatch(/UPDATE\s+"activation_code"/);
   });
 
   it('allows pending request items to select the same product with different codes', () => {

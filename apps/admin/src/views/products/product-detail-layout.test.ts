@@ -40,11 +40,7 @@ test("product detail actions are grouped in an accessible dropdown", async () =>
   assert.match(source, /descriptionAccessory={/);
   assert.match(source, /PERMISSIONS\.ACTIVATION_CODE_ASSIGN_PRODUCT/);
   assert.match(source, /<AssignActivationCodesDialog/);
-  assert.match(
-    source,
-    /product\.assignedActivationCode &&[\s\S]*?!product\.assignedActivationCode\.canReplace/,
-  );
-  assert.match(source, /"activationCodeChangeLocked"/);
+  assert.match(source, /t\("assignActivationCodes"\)/);
 });
 
 test("product identifiers use distinct semantic icons", async () => {
@@ -61,7 +57,7 @@ test("product detail gives the assigned activation code its own section", async 
 
   assert.match(source, /title=\{t\("sections\.activationCode"\)\}/);
   assert.match(source, /AssignedActivationCodeDetails/);
-  assert.match(source, /product\.assignedActivationCode/);
+  assert.match(source, /product\.assignedActivationCodes/);
   assert.match(source, /t\("activationCodeUnassignedDescription"\)/);
 });
 

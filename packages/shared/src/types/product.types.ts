@@ -104,6 +104,8 @@ export type ProductSummary = {
   warrantyDurationMonths: number | null;
   warrantyTerms: string | null;
   assignedActivationCode: ProductAssignedActivationCodeSummary | null;
+  /** All codes assigned to this catalogue Product. */
+  assignedActivationCodes: ProductAssignedActivationCodeSummary[];
   assets: ProductAssetSummary[];
 };
 

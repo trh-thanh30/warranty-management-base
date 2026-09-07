@@ -77,6 +77,5 @@ test("assignment dialogs show the localized API error inline and as a toast", as
     assert.match(source, /setErrorMessage\(message\)/);
     assert.match(source, /toast\.error\(message\)/);
     assert.match(source, /\{errorMessage\}/);
-    assert.match(source, /setConfirmOpen\(false\)/);
   }
 });

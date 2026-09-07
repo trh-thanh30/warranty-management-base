@@ -599,9 +599,10 @@
   "ProductActivationCodeAssignment": {
     "title": "Gán mã kích hoạt cho sản phẩm",
     "replaceTitle": "Đổi mã kích hoạt của sản phẩm",
-    "description": "Chọn mã kích hoạt đã được dán lên sản phẩm {product}. Mỗi sản phẩm chỉ được gán một mã.",
+    "description": "Chọn thêm mã kích hoạt đã được dán lên sản phẩm {product}. Một sản phẩm có thể được gán nhiều mã.",
     "replaceDescription": "Chọn mã mới để thay thế mã đang gán cho sản phẩm {product}.",
     "currentCode": "Mã đang gán",
+    "currentCodes": "Các mã đang gán",
     "batchLabel": "Lô mã kích hoạt",
     "allBatches": "Tất cả mã",
     "allBatchesDescription": "Hiển thị mã kích hoạt từ tất cả các lô.",

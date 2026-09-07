@@ -71,7 +71,8 @@ export class AssignProductOwnerUseCase {
               orderBy: { created_at: 'desc' },
             },
             warranty: true,
-            activation_code: {
+            activation_codes: {
+              orderBy: [{ created_at: 'asc' }, { id: 'asc' }],
               select: {
                 id: true,
                 code_ciphertext: true,

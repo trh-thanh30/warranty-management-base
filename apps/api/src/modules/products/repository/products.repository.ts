@@ -26,7 +26,8 @@ const productInclude = {
     orderBy: { created_at: 'desc' as const },
   },
   warranty: true,
-  activation_code: {
+  activation_codes: {
+    orderBy: [{ created_at: 'asc' as const }, { id: 'asc' as const }],
     select: {
       id: true,
       code_ciphertext: true,
@@ -701,7 +702,7 @@ function buildEffectiveCatalogueFilters(filters: {
     clauses.push(
       { category_ref: { activation_code_enabled: true } },
       { warranty_duration_months: { gt: 0 } },
-      { activation_code: { is: null } },
+      { activation_codes: { none: {} } },
     );
   }
   return clauses.length > 0 ? clauses : undefined;

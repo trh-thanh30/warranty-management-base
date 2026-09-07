@@ -599,9 +599,10 @@
   "ProductActivationCodeAssignment": {
     "title": "Assign activation codes to product",
     "replaceTitle": "Change product activation code",
-    "description": "Select the activation code physically attached to {product}. Each product can have only one code.",
+    "description": "Select an additional activation code physically attached to {product}. A product can have multiple codes.",
     "replaceDescription": "Select a new code to replace the code currently assigned to {product}.",
     "currentCode": "Currently assigned code",
+    "currentCodes": "Currently assigned codes",
     "batchLabel": "Activation-code batch",
     "allBatches": "All codes",
     "allBatchesDescription": "Show activation codes from every batch.",

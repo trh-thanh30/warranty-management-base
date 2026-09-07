@@ -13,23 +13,25 @@ import {
 import { toCategoryResponse } from '@/modules/categories/categories.types';
 import { getProductCatalogue } from '@/modules/products/product-catalogue';
 
+type ProductActivationCodeRelation = Pick<
+  ActivationCode,
+  'id' | 'code_ciphertext' | 'status' | 'expires_at'
+> & {
+  batch: Pick<ActivationCodeBatch, 'batch_code'>;
+  request: { id: string } | null;
+  request_items: Array<{ id: string }>;
+  warranty: { id: string } | null;
+};
+
 type ProductWithRelations = Product & {
   assets?: Array<ProductAsset & { asset: Asset }>;
   ownerships?: Array<ProductOwnership & { customer?: Customer }>;
   warranty?: Warranty | null;
   warranty_activation_requests?: Array<{ id: string }>;
   category_ref?: Category;
-  activation_code?:
-    | (Pick<
-        ActivationCode,
-        'id' | 'code_ciphertext' | 'status' | 'expires_at'
-      > & {
-        batch: Pick<ActivationCodeBatch, 'batch_code'>;
-        request: { id: string } | null;
-        request_items: Array<{ id: string }>;
-        warranty: { id: string } | null;
-      })
-    | null;
+  activation_codes?: ProductActivationCodeRelation[];
+  /** Legacy test/consumer shape kept only while clients migrate. */
+  activation_code?: ProductActivationCodeRelation | null;
 };
 
 export function toProductResponse(
@@ -61,9 +63,26 @@ export function toProductResponse(
       : product.warranty_activation_requests?.length
         ? ('OPEN_ACTIVATION_REQUEST' as const)
         : null;
-  const assignedActivationCodeStatus = product.activation_code
-    ? getAssignedActivationCodeStatus(product.activation_code)
-    : null;
+  const sourceActivationCodes =
+    product.activation_codes ??
+    (product.activation_code ? [product.activation_code] : []);
+  const assignedActivationCodes = sourceActivationCodes.map(
+    (activationCode) => {
+      const status = getAssignedActivationCodeStatus(activationCode);
+      return {
+        id: activationCode.id,
+        code: requireActivationCodeDecryptor(decryptActivationCode)(
+          activationCode.code_ciphertext,
+        ),
+        status,
+        expiresAt: activationCode.expires_at,
+        batchCode: activationCode.batch.batch_code,
+        canReplace: status === 'AVAILABLE',
+        unavailableReason: status === 'AVAILABLE' ? null : status,
+      };
+    },
+  );
+  const assignedActivationCode = assignedActivationCodes[0] ?? null;
 
   return {
     id: product.id,
@@ -120,29 +139,15 @@ export function toProductResponse(
       : null,
     warrantyDurationMonths: product.warranty_duration_months,
     warrantyTerms: product.warranty_terms,
-    assignedActivationCode: product.activation_code
-      ? {
-          id: product.activation_code.id,
-          code: requireActivationCodeDecryptor(decryptActivationCode)(
-            product.activation_code.code_ciphertext,
-          ),
-          status: assignedActivationCodeStatus,
-          expiresAt: product.activation_code.expires_at,
-          batchCode: product.activation_code.batch.batch_code,
-          canReplace: assignedActivationCodeStatus === 'AVAILABLE',
-          unavailableReason:
-            assignedActivationCodeStatus === 'AVAILABLE'
-              ? null
-              : assignedActivationCodeStatus,
-        }
-      : null,
+    // Keep the singular field during the contract transition. New callers
+    // should use assignedActivationCodes.
+    assignedActivationCode,
+    assignedActivationCodes,
     assets: productAssets,
   };
 }
 
-function getAssignedActivationCodeStatus(
-  code: NonNullable<ProductWithRelations['activation_code']>,
-) {
+function getAssignedActivationCodeStatus(code: ProductActivationCodeRelation) {
   if (code.warranty || code.status === 'ACTIVATED') return 'ACTIVATED' as const;
   if (code.request || code.request_items.length > 0) {
     return 'PENDING_APPROVAL' as const;

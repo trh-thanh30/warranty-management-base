@@ -266,19 +266,24 @@ function ProductMobileCard({
 
 function ProductActivationCodeCell({ product }: { product: ProductResponse }) {
   const t = useTranslations("Products");
-  const activationCode = product.assignedActivationCode;
+  const activationCodes = product.assignedActivationCodes ?? [];
 
-  if (!activationCode) {
+  if (activationCodes.length === 0) {
     return <Badge variant="secondary">{t("activationCodeUnassigned")}</Badge>;
   }
   return (
-    <div className="flex items-center gap-2">
-      <div className="space-y-1">
-        <p className="text-xs font-semibold text-slate-950 dark:text-slate-50">
-          {activationCode.code}
-        </p>
-        <ActivationCodeStatusBadge status={activationCode.status} />
-      </div>
+    <div className="flex max-w-56 flex-wrap items-center gap-1.5">
+      {activationCodes.slice(0, 3).map((activationCode) => (
+        <div className="space-y-1" key={activationCode.id}>
+          <p className="max-w-48 truncate text-xs font-semibold text-slate-950 dark:text-slate-50">
+            {activationCode.code}
+          </p>
+          <ActivationCodeStatusBadge status={activationCode.status} />
+        </div>
+      ))}
+      {activationCodes.length > 3 ? (
+        <Badge variant="secondary">+{activationCodes.length - 3}</Badge>
+      ) : null}
     </div>
   );
 }
@@ -421,24 +426,12 @@ function ProductActionsMenu({
             product.categoryRef?.activationCodeEnabled === true ? (
               <DropdownMenuItem
                 disabled={
-                  product.status !== "ACTIVE" ||
-                  !product.warrantyDurationMonths ||
-                  Boolean(
-                    product.assignedActivationCode &&
-                    !product.assignedActivationCode.canReplace,
-                  )
+                  product.status !== "ACTIVE" || !product.warrantyDurationMonths
                 }
                 onSelect={() => onAssignCodes(product)}
               >
                 <KeyRound className="mr-2 size-4" />
-                {t(
-                  product.assignedActivationCode &&
-                    !product.assignedActivationCode.canReplace
-                    ? "activationCodeChangeLocked"
-                    : product.assignedActivationCode
-                      ? "replaceActivationCode"
-                      : "assignActivationCodes",
-                )}
+                {t("assignActivationCodes")}
               </DropdownMenuItem>
             ) : null}
             {canDelete ? (

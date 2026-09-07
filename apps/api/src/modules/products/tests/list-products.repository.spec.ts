@@ -224,7 +224,7 @@ describe('ProductsRepository.list', () => {
           AND: expect.arrayContaining([
             { category_ref: { activation_code_enabled: true } },
             { warranty_duration_months: { gt: 0 } },
-            { activation_code: { is: null } },
+            { activation_codes: { none: {} } },
           ]),
           deleted_at: null,
           status: product_status.ACTIVE,

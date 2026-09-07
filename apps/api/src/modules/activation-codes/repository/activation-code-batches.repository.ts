@@ -593,16 +593,6 @@ export class ActivationCodeBatchesRepository {
     });
   }
 
-  findCodeAssignedToProduct(productId: string, excludedCodeId: string) {
-    return this.prismaService.activationCode.findFirst({
-      where: {
-        id: { not: excludedCodeId },
-        product_id: productId,
-      },
-      select: { id: true },
-    });
-  }
-
   assignProduct(ids: string[], productId: string, now: Date) {
     return this.prismaService.activationCode.updateMany({
       where: {

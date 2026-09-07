@@ -1,8 +1,6 @@
 "use client";
 
 import { ActivationCodeStatusBadge } from "@/src/components/activation-code-status-badge";
-import { useMemo, useState, type ReactNode } from "react";
-import Lightbox from "yet-another-react-lightbox";
 import { formatDate, type ProductResponse } from "@repo/shared";
 import { Badge, Button, Skeleton } from "@repo/ui";
 import {
@@ -22,7 +20,10 @@ import {
   UserRound,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import Image from "next/image";
+import { useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
+import Lightbox from "yet-another-react-lightbox";
 import {
   formatProductOwner,
   getProductDisplayName,
@@ -73,13 +74,12 @@ export function ProductDetailCard({ product }: ProductDetailCardProps) {
                 aria-label={t("previewProductImage", {
                   name: asset.altText ?? product.name,
                 })}
-                className="group relative aspect-[4/3] overflow-hidden rounded-md border border-slate-200 bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 dark:border-slate-800 dark:bg-slate-900 dark:focus-visible:ring-slate-50"
+                className="group relative aspect-4/3 overflow-hidden rounded-md border border-slate-200 bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 dark:border-slate-800 dark:bg-slate-900 dark:focus-visible:ring-slate-50"
                 key={asset.id}
                 onClick={() => setPreviewIndex(index)}
                 type="button"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   alt={asset.altText ?? product.name}
                   className="size-full object-cover transition-transform group-hover:scale-[1.02]"
                   src={asset.url}
@@ -230,9 +230,9 @@ function AssignedActivationCodeDetails({
 }) {
   const locale = useLocale();
   const t = useTranslations("Products");
-  const activationCode = product.assignedActivationCode;
+  const activationCodes = product.assignedActivationCodes ?? [];
 
-  if (!activationCode) {
+  if (activationCodes.length === 0) {
     return (
       <div className="py-4">
         <div className="rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-900/50">
@@ -248,27 +248,35 @@ function AssignedActivationCodeDetails({
   }
 
   return (
-    <>
-      <CopyableDetailItem
-        icon={<KeyRound className="size-4" />}
-        label={t("activationCode")}
-        value={activationCode.code}
-      />
-      <DetailBadgeItem
-        label={t("activationCodeStatus")}
-        value={<ActivationCodeStatusBadge status={activationCode.status} />}
-      />
-      <DetailItem
-        icon={<Hash className="size-4" />}
-        label={t("activationCodeBatch")}
-        value={activationCode.batchCode}
-      />
-      <DetailItem
-        icon={<CalendarDays className="size-4" />}
-        label={t("activationCodeExpiresAt")}
-        value={formatDate(activationCode.expiresAt, { locale })}
-      />
-    </>
+    <div className="space-y-3">
+      {activationCodes.map((activationCode) => (
+        <div
+          className="rounded-md border border-slate-200 p-3 dark:border-slate-800"
+          key={activationCode.id}
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <CopyableDetailItem
+              icon={<KeyRound className="size-4" />}
+              label={t("activationCode")}
+              value={activationCode.code}
+            />
+            <ActivationCodeStatusBadge status={activationCode.status} />
+          </div>
+          <div className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
+            <DetailItem
+              icon={<Hash className="size-4" />}
+              label={t("activationCodeBatch")}
+              value={activationCode.batchCode}
+            />
+            <DetailItem
+              icon={<CalendarDays className="size-4" />}
+              label={t("activationCodeExpiresAt")}
+              value={formatDate(activationCode.expiresAt, { locale })}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -386,7 +394,7 @@ export function ProductDetailSkeleton() {
     <div className="space-y-4">
       <Skeleton className="h-24 w-full rounded-lg" />
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(20rem,0.9fr)]">
-        <Skeleton className="h-[28rem] w-full rounded-lg" />
+        <Skeleton className="h-112 w-full rounded-lg" />
         <Skeleton className="h-80 w-full rounded-lg" />
       </div>
     </div>
@@ -435,28 +443,11 @@ function DetailItem({
         </span>
       </dt>
       <dd
-        className="min-w-0 truncate text-right text-sm font-medium text-slate-950 sm:overflow-visible sm:text-clip sm:whitespace-normal sm:break-words dark:text-slate-50"
+        className="min-w-0 truncate text-right text-sm font-medium text-slate-950 sm:overflow-visible sm:text-clip sm:whitespace-normal sm:wrap-break-word dark:text-slate-50"
         title={value}
       >
         {value}
       </dd>
-    </div>
-  );
-}
-
-function DetailBadgeItem({
-  label,
-  value,
-}: {
-  label: string;
-  value: ReactNode;
-}) {
-  return (
-    <div className="grid min-h-11 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-3 py-2.5 sm:flex sm:justify-between sm:gap-4">
-      <dt className="min-w-0 truncate text-sm text-slate-500 sm:shrink-0 dark:text-slate-400">
-        {label}
-      </dt>
-      <dd className="flex min-w-0 justify-end">{value}</dd>
     </div>
   );
 }

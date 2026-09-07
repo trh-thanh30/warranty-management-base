@@ -56,29 +56,23 @@ test("product actions expose permissioned activation-code assignment", async () 
 
   assert.match(source, /PERMISSIONS\.ACTIVATION_CODE_ASSIGN_PRODUCT/);
   assert.match(source, /onSelect=\{\(\) => onAssignCodes\(product\)\}/);
-  assert.match(source, /product\.assignedActivationCode/);
-  assert.match(source, /"replaceActivationCode"/);
+  assert.match(source, /product\.assignedActivationCodes/);
   assert.match(source, /"assignActivationCodes"/);
-  assert.match(
-    source,
-    /product\.assignedActivationCode &&[\s\S]*?!product\.assignedActivationCode\.canReplace/,
-  );
-  assert.match(source, /"activationCodeChangeLocked"/);
 });
 
-test("activation-code dialog separates assignment from confirmed replacement", async () => {
+test("activation-code dialog lists existing codes and assigns another code", async () => {
   const source = await readFile(
     new URL("./components/assign-activation-codes-dialog.tsx", import.meta.url),
     "utf8",
   );
 
-  assert.match(source, /const currentCode = product\?\.assignedActivationCode/);
-  assert.match(source, /replaceProductAssignment/);
-  assert.match(source, /currentActivationCodeId: currentCode\.id/);
-  assert.match(source, /replacementActivationCodeId: selected!\.id/);
+  assert.match(
+    source,
+    /const currentCodes = product\?\.assignedActivationCodes/,
+  );
+  assert.match(source, /activationCodesService\.assignProduct/);
+  assert.match(source, /currentCodes\.map/);
   assert.match(source, /<ActivationCodeStatusBadge/);
-  assert.match(source, /<ConfirmActionDialog/);
-  assert.match(source, /!currentCode\.canReplace/);
 });
 
 test("activation-code dialog filters assignable codes by a searchable batch", async () => {
@@ -124,6 +118,6 @@ test("product table displays the assigned activation code on desktop and mobile"
 
   assert.match(source, /t\("activationCode"\)/);
   assert.match(source, /ProductActivationCodeCell/);
-  assert.match(source, /product\.assignedActivationCode/);
+  assert.match(source, /product\.assignedActivationCodes/);
   assert.match(source, /t\("activationCodeUnassigned"\)/);
 });

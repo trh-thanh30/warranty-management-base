@@ -40,7 +40,7 @@ describe('ProductsRepository', () => {
     );
   });
 
-  it('loads at most one open activation request with a product', async () => {
+  it('loads all activation codes assigned to a product', async () => {
     const findUnique = jest.fn().mockResolvedValue(null);
     const repository = new ProductsRepository({
       product: { findUnique },
@@ -51,7 +51,8 @@ describe('ProductsRepository', () => {
     expect(findUnique).toHaveBeenCalledWith(
       expect.objectContaining({
         include: expect.objectContaining({
-          activation_code: {
+          activation_codes: {
+            orderBy: [{ created_at: 'asc' }, { id: 'asc' }],
             select: {
               id: true,
               code_ciphertext: true,
