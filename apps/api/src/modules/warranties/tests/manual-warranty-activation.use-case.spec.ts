@@ -16,7 +16,6 @@ describe('ManualWarrantyActivationUseCase', () => {
       brand: 'Black Label',
       model: 'Premium',
       displayName: 'Film xe Nguyen Van A',
-      serialNumber: 'SN-BLF-001',
     },
     warranty: {
       activatedAt: '2026-07-19T00:00:00.000Z',
@@ -31,7 +30,6 @@ describe('ManualWarrantyActivationUseCase', () => {
     customerByEmail?: unknown;
     customerByPhone?: unknown;
     existingProduct?: unknown;
-    existingSerial?: unknown;
     existingWarranty?: unknown;
   }) {
     const customer = {
@@ -69,7 +67,7 @@ describe('ManualWarrantyActivationUseCase', () => {
     const product = {
       id: 'product-id',
       productCode: 'PRD-2026-ABCDEF',
-      serialNumber: dto.product.serialNumber,
+      serialNumber: null,
       displayName: dto.product.displayName,
       status: 'ACTIVE',
       metadata: { source: 'manual_warranty_activation' },
@@ -101,9 +99,6 @@ describe('ManualWarrantyActivationUseCase', () => {
         .fn()
         .mockResolvedValue(overrides?.existingProduct ?? null),
       isActiveProductCategory: jest.fn().mockResolvedValue(true),
-      findProductBySerialNumber: jest
-        .fn()
-        .mockResolvedValue(overrides?.existingSerial ?? null),
       findWarrantyByCode: jest
         .fn()
         .mockResolvedValue(overrides?.existingWarranty ?? null),
@@ -146,7 +141,7 @@ describe('ManualWarrantyActivationUseCase', () => {
     };
   }
 
-  it('creates customer, product ownership, and active warranty manually', async () => {
+  it('creates customer, warranty ownership, and active warranty manually', async () => {
     const dependencies = createDependencies();
 
     const result = await dependencies.useCase.execute(dto);
@@ -197,7 +192,7 @@ describe('ManualWarrantyActivationUseCase', () => {
     expect(result.customer.customerCode).toBe('CUS000001');
   });
 
-  it('updates and reuses an existing customer matched by email', async () => {
+  it('does not use a shared email as customer identity', async () => {
     const dependencies = createDependencies({
       customerByEmail: {
         id: 'customer-id',
@@ -209,29 +204,27 @@ describe('ManualWarrantyActivationUseCase', () => {
     await dependencies.useCase.execute(dto);
 
     expect(
-      dependencies.transactionRepository.createCustomer,
+      dependencies.transactionRepository.findCustomerByEmail,
     ).not.toHaveBeenCalled();
     expect(
-      dependencies.transactionRepository.updateCustomer,
-    ).toHaveBeenCalledWith(
-      'customer-id',
-      expect.objectContaining({
-        email: dto.customer.email,
-        fullName: dto.customer.fullName,
-      }),
-    );
+      dependencies.transactionRepository.createCustomer,
+    ).toHaveBeenCalled();
   });
 
-  it('rejects when email and phone belong to different customers', async () => {
+  it('uses phone identity even when the email is shared by another customer', async () => {
     const dependencies = createDependencies({
       customerByEmail: { id: 'customer-a' },
       customerByPhone: { id: 'customer-b' },
     });
 
-    await expect(dependencies.useCase.execute(dto)).rejects.toBeInstanceOf(
-      ConflictError,
-    );
-    expect(dependencies.certificateUseCase.execute).not.toHaveBeenCalled();
+    await dependencies.useCase.execute(dto);
+
+    expect(
+      dependencies.transactionRepository.updateCustomer,
+    ).toHaveBeenCalledWith('customer-b', expect.any(Object));
+    expect(
+      dependencies.transactionRepository.findCustomerByEmail,
+    ).not.toHaveBeenCalled();
   });
 
   it('rejects a warranty code owned by another product', async () => {
@@ -279,7 +272,7 @@ describe('ManualWarrantyActivationUseCase', () => {
 
     expect(
       dependencies.transactionRepository.closeCurrentOwnerships,
-    ).toHaveBeenCalledWith('product-id', new Date(dto.warranty.activatedAt));
+    ).not.toHaveBeenCalled();
     expect(
       dependencies.transactionRepository.updateManualActivationProduct,
     ).toHaveBeenCalledWith(

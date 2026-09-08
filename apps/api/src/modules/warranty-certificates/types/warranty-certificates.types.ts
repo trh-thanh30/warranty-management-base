@@ -67,18 +67,18 @@ export type WarrantyForCertificate = {
   durationMonths: number;
   endDate: Date | null;
   id: string;
+  ownerships: Array<{
+    customer: {
+      email: string | null;
+      fullName: string;
+      phone: string | null;
+    };
+  }>;
   product: {
     displayName: string | null;
-    ownerships: Array<{
-      customer: {
-        email: string | null;
-        fullName: string;
-        phone: string | null;
-      };
-    }>;
     name: string;
-    serialNumber: string | null;
   };
+  serialNumber: string | null;
   startDate: Date | null;
   warrantyCode: string | null;
 };

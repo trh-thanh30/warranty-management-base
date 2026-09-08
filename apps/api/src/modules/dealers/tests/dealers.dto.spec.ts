@@ -21,7 +21,7 @@ describe('Dealer DTO validation', () => {
     await expect(validate(dto)).resolves.toHaveLength(0);
   });
 
-  it('requires coordinates when creating a dealer', async () => {
+  it('allows coordinates to be omitted when creating a dealer', async () => {
     const dto = plainToInstance(CreateDealerDto, {
       name: validDealer.name,
       province: validDealer.province,
@@ -30,9 +30,7 @@ describe('Dealer DTO validation', () => {
 
     const errors = await validate(dto);
 
-    expect(errors.map((error) => error.property)).toEqual(
-      expect.arrayContaining(['latitude', 'longitude']),
-    );
+    expect(errors).toHaveLength(0);
   });
 
   it('rejects coordinates outside their valid ranges', async () => {

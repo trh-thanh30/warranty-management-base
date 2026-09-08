@@ -21,15 +21,12 @@ import {
 } from '@prisma/client';
 
 const warrantyForCertificateInclude = {
-  product: {
-    include: {
-      ownerships: {
-        where: { is_current_owner: true },
-        include: { customer: true },
-        take: 1,
-      },
-    },
+  ownerships: {
+    where: { is_current_owner: true },
+    include: { customer: true },
+    take: 1,
   },
+  product: true,
 } satisfies Prisma.WarrantyInclude;
 
 const activationRequestForCertificateInclude = {
@@ -178,13 +175,7 @@ export class WarrantyCertificatesRepository {
       {
         where: { id: certificateId },
         include: {
-          warranty: {
-            include: {
-              product: {
-                include: warrantyForCertificateInclude.product.include,
-              },
-            },
-          },
+          warranty: { include: warrantyForCertificateInclude },
         },
       },
     );
@@ -312,7 +303,7 @@ export class WarrantyCertificatesRepository {
           },
         });
 
-      const certificate = item?.warranty.certificates[0];
+      const certificate = item?.warranty?.certificates[0];
       return certificate
         ? {
             certificateNumber: certificate.certificate_number,
@@ -398,18 +389,18 @@ function toWarrantyForCertificate(
     durationMonths: warranty.duration_months,
     endDate: warranty.end_date,
     id: warranty.id,
+    ownerships: warranty.ownerships.map(({ customer }) => ({
+      customer: {
+        email: customer.email,
+        fullName: customer.full_name,
+        phone: customer.phone,
+      },
+    })),
     product: {
       displayName: warranty.product.display_name,
-      ownerships: warranty.product.ownerships.map(({ customer }) => ({
-        customer: {
-          email: customer.email,
-          fullName: customer.full_name,
-          phone: customer.phone,
-        },
-      })),
       name: catalogue.name,
-      serialNumber: warranty.product.serial_number,
     },
+    serialNumber: warranty.serial_number,
     startDate: warranty.start_date,
     warrantyCode: warranty.warranty_code,
   };
@@ -451,7 +442,7 @@ function toWarrantyCertificateForBatchEmail(
       product: {
         displayName: certificate.warranty.product.display_name,
         name: catalogue.name,
-        serialNumber: certificate.warranty.product.serial_number,
+        serialNumber: certificate.warranty.serial_number,
       },
       warrantyCode: certificate.warranty.warranty_code,
     },

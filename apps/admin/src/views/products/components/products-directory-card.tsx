@@ -26,14 +26,8 @@ import {
 import { PaginationControls } from "@repo/ui/pagination-controls";
 import { PackageSearch, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
-import {
-  PRODUCT_STATUS_FILTERS,
-  PRODUCT_WARRANTY_STATUS_FILTERS,
-} from "../products.constants";
-import type {
-  ProductStatusFilter,
-  ProductWarrantyStatusFilter,
-} from "../products.types";
+import { PRODUCT_STATUS_FILTERS } from "../products.constants";
+import type { ProductStatusFilter } from "../products.types";
 import { ProductsTable } from "./products-table";
 
 type ProductsDirectoryCardProps = {
@@ -43,13 +37,12 @@ type ProductsDirectoryCardProps = {
   filters: {
     categoryId: string;
     status: ProductStatusFilter;
-    warrantyStatus: ProductWarrantyStatusFilter;
   };
   isError: boolean;
   isLoading: boolean;
   onCategoryIdChange: (categoryId: string) => void;
   onClearFilters: () => void;
-  onAssignOwner: (product: ProductResponse) => void;
+  onAssignCodes: (product: ProductResponse) => void;
   onDelete: (product: ProductResponse) => void;
   onRestore: (product: ProductResponse) => void;
   onPageChange: (page: number) => void;
@@ -58,7 +51,6 @@ type ProductsDirectoryCardProps = {
   onSearchChange: (search: string) => void;
   onSortChange: (sortBy: ProductSortBy) => void;
   onStatusChange: (status: ProductStatusFilter) => void;
-  onWarrantyStatusChange: (status: ProductWarrantyStatusFilter) => void;
   pageSize: number;
   search: string;
   sortBy?: ProductSortBy;
@@ -74,7 +66,7 @@ export function ProductsDirectoryCard({
   isLoading,
   onCategoryIdChange,
   onClearFilters,
-  onAssignOwner,
+  onAssignCodes,
   onDelete,
   onRestore,
   onPageChange,
@@ -83,7 +75,6 @@ export function ProductsDirectoryCard({
   onSearchChange,
   onSortChange,
   onStatusChange,
-  onWarrantyStatusChange,
   pageSize,
   search,
   sortBy,
@@ -93,8 +84,7 @@ export function ProductsDirectoryCard({
   const hasFilters =
     Boolean(search.trim()) ||
     filters.categoryId !== "ALL" ||
-    filters.status !== "ALL" ||
-    filters.warrantyStatus !== "ALL";
+    filters.status !== "ALL";
 
   return (
     <Card>
@@ -111,7 +101,6 @@ export function ProductsDirectoryCard({
           onCategoryIdChange={onCategoryIdChange}
           onSearchChange={onSearchChange}
           onStatusChange={onStatusChange}
-          onWarrantyStatusChange={onWarrantyStatusChange}
           search={search}
         />
       </CardHeader>
@@ -123,7 +112,7 @@ export function ProductsDirectoryCard({
           isError={isError}
           isLoading={isLoading}
           onClearFilters={onClearFilters}
-          onAssignOwner={onAssignOwner}
+          onAssignCodes={onAssignCodes}
           onDelete={onDelete}
           onRestore={onRestore}
           onPageChange={onPageChange}
@@ -145,7 +134,6 @@ function ProductsDirectoryFilters({
   onCategoryIdChange,
   onSearchChange,
   onStatusChange,
-  onWarrantyStatusChange,
   search,
 }: Pick<
   ProductsDirectoryCardProps,
@@ -154,13 +142,12 @@ function ProductsDirectoryFilters({
   | "onCategoryIdChange"
   | "onSearchChange"
   | "onStatusChange"
-  | "onWarrantyStatusChange"
   | "search"
 >) {
   const t = useTranslations("Products");
 
   return (
-    <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_24rem_12rem_14rem]">
+    <div className="grid gap-3 md:grid-cols-3 grid-cols-1">
       <div className="relative">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
         <Input
@@ -199,23 +186,6 @@ function ProductsDirectoryFilters({
           ))}
         </SelectContent>
       </Select>
-      <Select
-        onValueChange={(value) =>
-          onWarrantyStatusChange(value as ProductWarrantyStatusFilter)
-        }
-        value={filters.warrantyStatus}
-      >
-        <SelectTrigger aria-label={t("warrantyStatusFilter")}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {PRODUCT_WARRANTY_STATUS_FILTERS.map((status) => (
-            <SelectItem key={status} value={status}>
-              {t(`warrantyStatuses.${status}`)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
     </div>
   );
 }
@@ -227,7 +197,7 @@ function ProductsDirectoryContent({
   isError,
   isLoading,
   onClearFilters,
-  onAssignOwner,
+  onAssignCodes,
   onDelete,
   onRestore,
   onPageChange,
@@ -244,7 +214,7 @@ function ProductsDirectoryContent({
   | "isError"
   | "isLoading"
   | "onClearFilters"
-  | "onAssignOwner"
+  | "onAssignCodes"
   | "onDelete"
   | "onRestore"
   | "onPageChange"
@@ -281,7 +251,7 @@ function ProductsDirectoryContent({
       <div className="scroll-mt-24" id="products-directory-results">
         <ProductsTable
           items={data.items}
-          onAssignOwner={onAssignOwner}
+          onAssignCodes={onAssignCodes}
           onDelete={onDelete}
           onRestore={onRestore}
           onSortChange={onSortChange}

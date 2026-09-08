@@ -37,8 +37,6 @@ export function ProductForm({
   const form = useProductForm({ isClone, onSaved, product });
   const categories = form.categoriesQuery.data?.items ?? [];
   const isSubmitting = form.formState.isSubmitting;
-  const canEditWarrantyDuration =
-    !product?.warranty || product.warranty.status === "DRAFT";
 
   return (
     <form className="min-w-0 space-y-4" noValidate onSubmit={form.onSubmit}>
@@ -134,15 +132,9 @@ export function ProductForm({
             </Field>
           </div>
 
-          <div className="grid min-w-0 gap-5 md:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-2">
             <Field
-              description={
-                !product
-                  ? t("warrantyDurationCreateDescription")
-                  : canEditWarrantyDuration
-                    ? t("warrantyDurationDraftDescription")
-                    : t("warrantyDurationLockedDescription")
-              }
+              description={t("warrantyPolicyDescription")}
               error={formatFieldError(
                 form.formState.errors.warrantyDurationMonths?.message,
                 t,
@@ -151,7 +143,7 @@ export function ProductForm({
               label={t("durationMonths")}
             >
               <Input
-                disabled={isSubmitting || !canEditWarrantyDuration}
+                disabled={isSubmitting}
                 id="product-warranty-duration"
                 inputMode="numeric"
                 min={1}
@@ -162,32 +154,17 @@ export function ProductForm({
               />
             </Field>
             <Field
-              description={
-                !product
-                  ? t("warrantyCodeCreateDescription")
-                  : product.warrantyCodeEditLockedReason ===
-                      "WARRANTY_NOT_DRAFT"
-                    ? t("warrantyCodeNotDraftDescription")
-                    : product.warrantyCodeEditLockedReason ===
-                        "OPEN_ACTIVATION_REQUEST"
-                      ? t("warrantyCodeOpenRequestDescription")
-                      : t("warrantyCodeEditableDescription")
-              }
               error={formatFieldError(
-                form.formState.errors.warrantyCode?.message,
+                form.formState.errors.installationPosition?.message,
                 t,
               )}
-              id="product-warranty-code"
-              label={t("warrantyCode")}
+              id="product-installation-position"
+              label={t("installationPosition")}
             >
               <Input
-                disabled={
-                  isSubmitting ||
-                  Boolean(product && !product.canEditWarrantyCode)
-                }
-                id="product-warranty-code"
-                placeholder={t("warrantyCodePlaceholder")}
-                {...form.register("warrantyCode")}
+                id="product-installation-position"
+                placeholder={t("installationPositionPlaceholder")}
+                {...form.register("installationPosition")}
               />
             </Field>
           </div>
@@ -220,37 +197,6 @@ export function ProductForm({
                 max={2200}
                 type="number"
                 {...form.register("modelYear")}
-              />
-            </Field>
-          </div>
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field
-              error={formatFieldError(
-                form.formState.errors.serialNumber?.message,
-                t,
-              )}
-              id="product-serial-number"
-              label={t("serialNumber")}
-            >
-              <Input
-                id="product-serial-number"
-                placeholder={t("serialNumberPlaceholder")}
-                {...form.register("serialNumber")}
-              />
-            </Field>
-            <Field
-              error={formatFieldError(
-                form.formState.errors.installationPosition?.message,
-                t,
-              )}
-              id="product-installation-position"
-              label={t("installationPosition")}
-            >
-              <Input
-                id="product-installation-position"
-                placeholder={t("installationPositionPlaceholder")}
-                {...form.register("installationPosition")}
               />
             </Field>
           </div>
@@ -301,7 +247,7 @@ export function ProductForm({
             label={t("warrantyTerms")}
           >
             <Textarea
-              disabled={isSubmitting || !canEditWarrantyDuration}
+              disabled={isSubmitting}
               id="product-warranty-terms"
               placeholder={t("warrantyTermsPlaceholder")}
               rows={3}
@@ -419,10 +365,8 @@ const formatFieldError = createFieldErrorFormatter(
     "nameRequired",
     "productCodeLength",
     "productCodeRequired",
-    "serialNumberLength",
     "specificationKeyLength",
     "specificationValueLength",
-    "warrantyCodeInvalid",
     "warrantyTermsLength",
   ]),
 );

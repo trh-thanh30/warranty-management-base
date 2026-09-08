@@ -126,6 +126,48 @@ test("product directory requests paginated products with filters", async () => {
   assert.deepEqual(result, response);
 });
 
+test("activation-code assignment requests only assignable products", async () => {
+  const calls: unknown[] = [];
+  const response = {
+    items: [product],
+    meta: {
+      page: 1,
+      limit: 20,
+      total: 1,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    },
+  };
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  await createProductsService(
+    http as unknown as ProductsHttpClient,
+  ).listProducts({
+    activationCodeAssignable: "true",
+    page: 1,
+    status: "ACTIVE",
+  });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/products",
+      config: {
+        params: {
+          activationCodeAssignable: "true",
+          page: 1,
+          status: "ACTIVE",
+        },
+      },
+    },
+  ]);
+});
+
 test("creating a product sends inventory fields", async () => {
   const calls: unknown[] = [];
   const http = {
@@ -182,37 +224,6 @@ test("updating a product can change dynamic category", async () => {
     },
   ]);
   assert.deepEqual(result, product);
-});
-
-test("assigning an owner posts to product assign-owner endpoint", async () => {
-  const calls: unknown[] = [];
-  const http = {
-    async post(url: string, body?: unknown) {
-      calls.push({ url, body });
-      return { data: { success: true, data: product } };
-    },
-  };
-
-  await createProductsService(
-    http as unknown as ProductsHttpClient,
-  ).assignOwner("product-id", {
-    autoGenerateWarrantyCode: false,
-    customerId: "customer-id",
-    purchaseDate: "2026-07-12",
-    warrantyCode: "WM-2026-MANUAL1",
-  });
-
-  assert.deepEqual(calls, [
-    {
-      url: "/products/product-id/assign-owner",
-      body: {
-        autoGenerateWarrantyCode: false,
-        customerId: "customer-id",
-        purchaseDate: "2026-07-12",
-        warrantyCode: "WM-2026-MANUAL1",
-      },
-    },
-  ]);
 });
 
 test("deleting a product uses the delete endpoint", async () => {
@@ -345,8 +356,6 @@ test("confirming product import posts edited preview rows", async () => {
         warrantyTerms: null,
         installationPosition: "Khoang động cơ",
         productCode: null,
-        warrantyCode: null,
-        serialNumber: "SN-001",
         status: "ACTIVE",
       },
     ],
@@ -368,8 +377,6 @@ test("confirming product import posts edited preview rows", async () => {
             warrantyTerms: null,
             installationPosition: "Khoang động cơ",
             productCode: null,
-            warrantyCode: null,
-            serialNumber: "SN-001",
             status: "ACTIVE",
           },
         ],

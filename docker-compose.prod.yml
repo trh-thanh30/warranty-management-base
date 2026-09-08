@@ -203,6 +203,41 @@ services:
       minio-init:
         condition: service_completed_successfully
 
+  worker-activation-labels:
+    image: ${API_IMAGE:-warranty-management-base-api}:${IMAGE_TAG:-latest}
+    container_name: warranty-management-base-worker-activation-labels
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    command: ["node", "dist/workers/activation-label-print/worker.main.js"]
+    env_file:
+      - path: .env.production
+        required: false
+    environment:
+      NODE_ENV: production
+      APP_ROLE: worker-activation-labels
+      DB_HOST: db
+      DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      PDF_RENDERER_URL: http://pdf-renderer:3001
+      DATABASE_URL: ${DOCKER_DATABASE_URL:-postgresql://${DB_USER:-warranty_management_base_user}:${DB_PASSWORD:-warranty_management_base_password}@db:5432/${DB_NAME:-warranty_management_base}?schema=${DB_SCHEMA:-public}}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-warranty_management_base_redis_password}@redis:6379
+    volumes:
+      - warranty_management_base_storage:/app/storage
+      - warranty_management_base_logs:/app/logs
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+      pdf-renderer:
+        condition: service_healthy
+
   web:
     image: ${WEB_IMAGE:-warranty-management-base-web}:${IMAGE_TAG:-latest}
     container_name: warranty-management-base-web

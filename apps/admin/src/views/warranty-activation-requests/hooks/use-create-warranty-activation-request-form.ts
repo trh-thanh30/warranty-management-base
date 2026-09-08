@@ -9,6 +9,7 @@ import type {
   ProductResponse,
 } from "@repo/shared";
 import { useTranslations } from "next-intl";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { useForm, type UseFormSetValue } from "react-hook-form";
 import {
@@ -25,6 +26,9 @@ import {
 } from "../../categories/hooks/use-categories";
 import { useInfiniteCustomers } from "../../customers/hooks/use-customers";
 import { useInfiniteActivationProductOptions } from "../../products/hooks/use-products";
+import { useProduct } from "../../products/hooks/use-products";
+import { activationCodesService } from "@/src/services/activation-codes/activation-codes.service";
+import type { AvailableActivationCode } from "@/src/services/activation-codes/activation-code-batches.types";
 import {
   type WarrantyActivationRequestCreateFormValues,
   warrantyActivationRequestCreateFormSchema,
@@ -34,9 +38,13 @@ import {
   resolveScopedProductSearch,
   toAdminActivationRequestBody,
 } from "../warranty-activation-requests.utils";
-import { getActivationProductDisplayName } from "../warranty-activation-request-product.utils";
+import {
+  getActivationProductDisplayName,
+  isActivationCodeRequiredForRequest,
+} from "../warranty-activation-request-product.utils";
 
 const DEFAULT_VALUES: WarrantyActivationRequestCreateFormValues = {
+  activationCodeId: "",
   addressDetail: "",
   activationProductIds: {},
   categoryId: "",
@@ -72,8 +80,12 @@ const DEFAULT_VALUES: WarrantyActivationRequestCreateFormValues = {
 
 export function useCreateWarrantyActivationRequestForm({
   onCreated,
+  activationCodeId,
+  assignedProductId,
 }: {
   onCreated: () => void;
+  activationCodeId?: string;
+  assignedProductId?: string;
 }) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const tApiErrors = useTranslations("ApiErrors");
@@ -85,11 +97,19 @@ export function useCreateWarrantyActivationRequestForm({
     value: "",
   });
   const [dealerSearch, setDealerSearch] = useState("");
+  const [pendingCategoryId, setPendingCategoryId] = useState<string | null>(
+    null,
+  );
   const [pendingWardName, setPendingWardName] = useState<string | null>(null);
   const [selectedCustomer, setSelectedCustomer] =
     useState<CustomerSummary | null>(null);
   const [selectedProduct, setSelectedProduct] =
     useState<ProductResponse | null>(null);
+  const [selectedActivationCode, setSelectedActivationCode] =
+    useState<AvailableActivationCode | null>(null);
+  const assignedProductQuery = useProduct(assignedProductId ?? null, {
+    enabled: Boolean(assignedProductId),
+  });
   const [selectedActivationProducts, setSelectedActivationProducts] = useState<
     Record<string, ProductResponse>
   >({});
@@ -98,10 +118,36 @@ export function useCreateWarrantyActivationRequestForm({
   );
   const form = useForm<WarrantyActivationRequestCreateFormValues>({
     resolver: zodResolver(warrantyActivationRequestCreateFormSchema),
-    defaultValues: DEFAULT_VALUES,
+    defaultValues: {
+      ...DEFAULT_VALUES,
+      activationCodeId: activationCodeId ?? "",
+    },
   });
+  useEffect(() => {
+    form.setValue("activationCodeId", activationCodeId ?? "", {
+      shouldDirty: false,
+      shouldValidate: false,
+    });
+  }, [activationCodeId, form]);
   const provinceCode = form.watch("provinceCode");
   const categoryId = form.watch("categoryId");
+  const categoriesQuery = useCategories({
+    isActive: "true",
+    limit: 100,
+    type: "PRODUCT",
+  });
+  const categories = useMemo(
+    () => categoriesQuery.data?.items ?? [],
+    [categoriesQuery.data?.items],
+  );
+  const selectedCategory = useMemo(
+    () => categories.find((category) => category.id === categoryId) ?? null,
+    [categories, categoryId],
+  );
+  const requiresActivationCode = isActivationCodeRequiredForRequest(
+    selectedCategory?.activationCodeEnabled,
+    selectedProduct?.categoryRef?.activationCodeEnabled,
+  );
   const provinceCodeNumber = provinceCode ? Number(provinceCode) : null;
   const provincesQuery = useVietnamProvinces();
   const wardsQuery = useVietnamWards(provinceCodeNumber);
@@ -117,11 +163,31 @@ export function useCreateWarrantyActivationRequestForm({
     debouncedProductSearch,
   );
   const debouncedDealerSearch = useDebounce(dealerSearch.trim(), 300);
-  const categoriesQuery = useCategories({
-    isActive: "true",
-    limit: 100,
-    type: "PRODUCT",
+  const activationCodesQuery = useInfiniteQuery({
+    enabled:
+      !activationCodeId && Boolean(selectedProduct) && requiresActivationCode,
+    queryKey: ["available-activation-codes", selectedProduct?.id ?? "all"],
+    queryFn: ({ pageParam }) =>
+      activationCodesService.listAvailableByProduct(selectedProduct?.id, {
+        assignment: "ASSIGNED",
+        limit: 10,
+        page: pageParam,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.meta.hasNextPage ? lastPage.meta.page + 1 : undefined,
   });
+  const availableActivationCodes = useMemo(
+    () =>
+      Array.from(
+        new Map(
+          (activationCodesQuery.data?.pages ?? [])
+            .flatMap((page) => page.items)
+            .map((code) => [code.id, code]),
+        ).values(),
+      ),
+    [activationCodesQuery.data?.pages],
+  );
   const activationFieldsQuery = useCategoryActivationFields(categoryId, {
     enabled: Boolean(categoryId),
   });
@@ -184,10 +250,6 @@ export function useCreateWarrantyActivationRequestForm({
           ),
     [categoryId, productsQuery.data?.pages],
   );
-  const categories = useMemo(
-    () => categoriesQuery.data?.items ?? [],
-    [categoriesQuery.data?.items],
-  );
   const dealers = useMemo(
     () =>
       Array.from(
@@ -199,10 +261,23 @@ export function useCreateWarrantyActivationRequestForm({
       ).map(([, dealer]) => dealer),
     [dealersQuery.data?.pages],
   );
-  const selectedCategory = useMemo(
-    () => categories.find((category) => category.id === categoryId) ?? null,
-    [categories, categoryId],
-  );
+  useEffect(() => {
+    const product = assignedProductQuery.data;
+    if (!product) return;
+
+    setSelectedProduct(product);
+    setProductSearchState({ categoryId: product.categoryId, value: "" });
+    setFormValues(
+      form.setValue,
+      {
+        categoryId: product.categoryId,
+        productId: product.id,
+        productName: getActivationProductDisplayName(product),
+        warrantyCode: product.warrantyCode ?? "",
+      },
+      false,
+    );
+  }, [assignedProductQuery.data, form.setValue]);
 
   useEffect(() => {
     if (!pendingWardName || wards.length === 0) return;
@@ -283,6 +358,28 @@ export function useCreateWarrantyActivationRequestForm({
       productName: getActivationProductDisplayName(product),
       warrantyCode: product.warrantyCode ?? "",
     });
+    setSelectedActivationCode(null);
+    form.setValue("activationCodeId", "", {
+      shouldDirty: true,
+      shouldValidate: false,
+    });
+  }
+
+  function selectActivationCode(code: AvailableActivationCode) {
+    setSelectedActivationCode(code);
+    form.setValue("activationCodeId", code.id, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    form.clearErrors("activationCodeId");
+  }
+
+  function clearActivationCode() {
+    setSelectedActivationCode(null);
+    form.setValue("activationCodeId", "", {
+      shouldDirty: true,
+      shouldValidate: false,
+    });
   }
 
   function selectCategory(value: string) {
@@ -291,12 +388,17 @@ export function useCreateWarrantyActivationRequestForm({
       categoryId &&
       (selectedProduct ||
         Object.keys(selectedActivationProducts).length > 0 ||
-        Object.values(form.getValues("categoryInputValues")).some(Boolean)) &&
-      !window.confirm(t("categoryChangeConfirm"))
+        Object.values(form.getValues("categoryInputValues")).some(Boolean))
     ) {
+      setPendingCategoryId(value);
       return false;
     }
 
+    applyCategory(value);
+    return true;
+  }
+
+  function applyCategory(value: string) {
     setProductSearchState({ categoryId: value, value: "" });
     setFormValues(form.setValue, {
       activationProductIds: {},
@@ -305,7 +407,16 @@ export function useCreateWarrantyActivationRequestForm({
     });
     setSelectedActivationProducts({});
     clearProduct();
-    return true;
+  }
+
+  function confirmCategoryChange() {
+    if (!pendingCategoryId) return;
+    applyCategory(pendingCategoryId);
+    setPendingCategoryId(null);
+  }
+
+  function cancelCategoryChange() {
+    setPendingCategoryId(null);
   }
 
   function clearProduct() {
@@ -316,6 +427,11 @@ export function useCreateWarrantyActivationRequestForm({
       vehicleModel: "",
       vehiclePlate: "",
       warrantyCode: "",
+    });
+    setSelectedActivationCode(null);
+    form.setValue("activationCodeId", "", {
+      shouldDirty: true,
+      shouldValidate: false,
     });
   }
 
@@ -388,6 +504,19 @@ export function useCreateWarrantyActivationRequestForm({
   }
 
   async function submit(values: WarrantyActivationRequestCreateFormValues) {
+    const hasActivationCode = Boolean(
+      values.activationCodeId || activationCodeId,
+    );
+
+    if (requiresActivationCode && !hasActivationCode) {
+      const message = t("activationCodeRequired");
+      toast.error(message);
+      return;
+    }
+
+    // When the request is created from an activation code, the backend resolves
+    // and locks the product from that code. There is intentionally no product
+    // selector in this mode, so do not require a locally selected product.
     if (!usesProductSelectors && !selectedProduct) {
       const message = t("productRequired");
       form.setError("productId", { message });
@@ -462,6 +591,7 @@ export function useCreateWarrantyActivationRequestForm({
     control: form.control,
     categories,
     categoriesQuery,
+    categoryChangePending: Boolean(pendingCategoryId),
     categoryId,
     customerSearch,
     customers,
@@ -478,17 +608,25 @@ export function useCreateWarrantyActivationRequestForm({
     products,
     productsQuery,
     register: form.register,
+    requiresActivationCode,
     selectedCustomer,
     selectedCategory,
     selectedDealer,
     selectedProduct,
     selectedActivationProducts,
+    activationCodesQuery,
+    availableActivationCodes,
+    selectedActivationCode,
+    confirmCategoryChange,
+    cancelCategoryChange,
     selectCategory,
     selectCustomer,
     selectDealer,
     selectProduct,
+    selectActivationCode,
     selectActivationProduct,
     clearProduct,
+    clearActivationCode,
     clearActivationProduct,
     setCustomerSearch,
     setDealerSearch,

@@ -1,4 +1,14 @@
 import {
+  getLocalizedApiError,
+  type ApiErrorTranslator,
+} from "@/src/lib/localized-api-error.utils";
+import type {
+  VietnamProvince,
+  VietnamWard,
+} from "@/src/services/locations/locations.types";
+import { translateFieldError } from "@/src/utils";
+import { compactActivationInputValues } from "@/src/utils/category-activation-fields";
+import {
   HttpClientError,
   formatDate,
   type CategoryActivationFieldConfig,
@@ -9,21 +19,11 @@ import {
   type ProductResponse,
   type WarrantyActivationRequestSummary,
 } from "@repo/shared";
-import type {
-  VietnamProvince,
-  VietnamWard,
-} from "@/src/services/locations/locations.types";
-import { translateFieldError } from "@/src/utils";
-import { compactActivationInputValues } from "@/src/utils/category-activation-fields";
-import {
-  getLocalizedApiError,
-  type ApiErrorTranslator,
-} from "@/src/lib/localized-api-error.utils";
+import { getActivationProductDisplayName } from "./warranty-activation-request-product.utils";
 import type {
   WarrantyActivationRequestCreateFormValues,
   WarrantyActivationRequestDirectoryFilters,
 } from "./warranty-activation-requests.types";
-import { getActivationProductDisplayName } from "./warranty-activation-request-product.utils";
 
 const CREATE_FIELD_ERROR_KEYS = new Set([
   "addressAdministrativeUnitNotAllowed",
@@ -43,6 +43,9 @@ const CREATE_FIELD_ERROR_KEYS = new Set([
 const CREATE_API_ERROR_CODES = new Set([
   "ACTIVATION_REQUEST_ALREADY_PENDING",
   "ACTIVATION_REQUEST_CREATE_FAILED",
+  "ACTIVATION_CODE_PRODUCT_MISMATCH",
+  "ACTIVATION_CODE_PRODUCT_NOT_ASSIGNED",
+  "ACTIVATION_CODE_INVALID_OR_EXPIRED",
   "CUSTOMER_OWNER_MISMATCH",
   "PRODUCT_NOT_ELIGIBLE_FOR_ACTIVATION_REQUEST",
   "PRODUCT_CATEGORY_MISMATCH",
@@ -94,7 +97,7 @@ export function buildWarrantyActivationRequestListQuery({
 export function formatActivationRequestCustomer(
   request: WarrantyActivationRequestSummary,
 ) {
-  return [request.customerName, request.customerPhone, request.customerEmail]
+  return [request.customerName, request.customerPhone]
     .filter(Boolean)
     .join(" · ");
 }
@@ -215,9 +218,10 @@ export function toAdminActivationRequestBody({
     product ?? Object.values(activationProducts)[0] ?? null;
 
   return omitUndefined({
+    activationCodeId: values.activationCodeId || undefined,
     addressDetail: values.addressDetail.trim(),
     brand: primaryProduct?.brand ?? undefined,
-    categoryId: values.categoryId,
+    categoryId: values.categoryId || undefined,
     customerBirthdate: values.customerBirthdate || undefined,
     customerEmail: values.customerEmail.trim() || undefined,
     customerId: values.customerId,
@@ -235,7 +239,7 @@ export function toAdminActivationRequestBody({
     model: primaryProduct?.model ?? undefined,
     metadata: activationMetadata,
     note: values.note.trim() || undefined,
-    productId: items.length > 0 ? undefined : values.productId,
+    productId: items.length > 0 ? undefined : values.productId || undefined,
     productName:
       (primaryProduct ? getActivationProductDisplayName(primaryProduct) : "") ||
       values.productName.trim() ||
@@ -243,7 +247,6 @@ export function toAdminActivationRequestBody({
     provinceCode: values.provinceCode,
     provinceName: province?.name ?? "",
     salesName: values.salesName.trim() || undefined,
-    serialNumber: primaryProduct?.serialNumber ?? undefined,
     vehicleModel: values.vehicleModel.trim() || undefined,
     vehiclePlate: values.vehiclePlate.trim() || undefined,
     wardCode: values.wardCode,

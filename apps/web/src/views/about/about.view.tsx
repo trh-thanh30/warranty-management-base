@@ -12,7 +12,7 @@ import { AboutB2BCta } from "./components/about-b2b-cta";
 
 export function AboutView() {
   return (
-    <main className="w-full overflow-x-hidden bg-white text-deep-black">
+    <main className="w-full overflow-x-clip bg-white text-deep-black">
       {/* 1. Hero Corporate Section (bg-surface-muted, 1 viewport height) */}
       <AboutHeroCorporate />
 

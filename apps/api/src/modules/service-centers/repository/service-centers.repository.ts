@@ -99,7 +99,11 @@ export class ServiceCentersRepository {
 
   listActiveForNetwork() {
     return this.prismaService.serviceCenter.findMany({
-      where: { is_active: true },
+      where: {
+        is_active: true,
+        latitude: { not: null },
+        longitude: { not: null },
+      },
       orderBy: [{ province: 'asc' }, { name: 'asc' }],
       select: {
         id: true,

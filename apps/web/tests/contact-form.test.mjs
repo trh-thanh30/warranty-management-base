@@ -376,10 +376,10 @@ test("province options share a query cache and quick chat loads them lazily", as
   assert.match(layoutSource, /<QueryProvider>/);
 });
 
-test("opening a Radix select does not shift the page scrollbar gutter", async () => {
+test("opening a Radix select does not add a competing root scrollbar", async () => {
   const globalStyles = await readFile(globalStylesPath, "utf8");
 
-  assert.match(globalStyles, /html\s*\{\s*scrollbar-gutter:\s*stable;/);
+  assert.doesNotMatch(globalStyles, /scrollbar-gutter:\s*stable/);
   assert.match(
     globalStyles,
     /html body\[data-scroll-locked\]\s*\{\s*margin-right:\s*0\s*!important;/,

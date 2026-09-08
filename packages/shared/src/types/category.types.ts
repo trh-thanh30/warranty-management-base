@@ -22,6 +22,8 @@ export type CategorySummary = {
   imageUrl: string | null;
   order: number;
   isActive: boolean;
+  /** Whether products in this category use the activation-code workflow. */
+  activationCodeEnabled?: boolean;
   metadata: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
@@ -113,6 +115,7 @@ export type CreateCategoryBody = {
   imageUrl?: string;
   order?: number;
   isActive?: boolean;
+  activationCodeEnabled?: boolean;
   metadata?: Record<string, unknown>;
 };
 
@@ -126,6 +129,7 @@ export type UpdateCategoryBody = {
   imageUrl?: string | null;
   order?: number;
   isActive?: boolean;
+  activationCodeEnabled?: boolean;
   metadata?: Record<string, unknown> | null;
 };
 

@@ -6,6 +6,7 @@ import type { DateRangeValue } from "@repo/ui/date-range-picker";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { useWarrantyClaims } from "@/src/hooks/use-warranty-claims";
+import { useDashboardActivationCodeReport } from "./use-dashboard-activation-codes";
 import type { DashboardQuickRangeDays } from "../dashboard.constants";
 import {
   DASHBOARD_TREND_METRIC,
@@ -35,6 +36,9 @@ export function useDashboard() {
   const { hasPermission } = usePermissions();
   const canViewDashboard = hasPermission(PERMISSIONS.DASHBOARD_VIEW);
   const canViewClaims = hasPermission(PERMISSIONS.WARRANTY_CLAIM_VIEW);
+  const canViewActivationCodes = hasPermission(
+    PERMISSIONS.ACTIVATION_CODE_BATCH_VIEW,
+  );
   const enabled = Boolean(user) && canViewDashboard;
   const effectiveWarrantyRange = useMemo(
     () => resolveDashboardWidgetRange(warrantyRange, range),
@@ -105,6 +109,13 @@ export function useDashboard() {
     }),
     [range.from, range.to],
   );
+  const activationCodeReportQuery = useDashboardActivationCodeReport(
+    {
+      dateFrom: range.from,
+      dateTo: range.to,
+    },
+    { enabled: enabled && canViewActivationCodes },
+  );
 
   const claimsQuery = useDashboardClaims(rangeQuery, { enabled });
   const warrantiesQuery = useDashboardWarranties(warrantyRangeQuery, {
@@ -156,10 +167,12 @@ export function useDashboard() {
     activationRequestRange: effectiveActivationRequestRange,
     activationRequestsQuery,
     activationRequestsTrendQuery,
+    activationCodeReportQuery,
     activeActivationRequestQuickRange,
     activeQuickRange,
     activeWarrantyQuickRange,
     canViewClaims,
+    canViewActivationCodes,
     claimsQuery,
     range,
     recentClaimsQuery,

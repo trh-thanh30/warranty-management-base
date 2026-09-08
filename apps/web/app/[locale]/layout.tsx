@@ -4,10 +4,9 @@ import { GoogleAnalytics } from "@/src/components/common/google-analytics";
 import { PublicQuickChat } from "@/src/components/common/public-quick-chat";
 import { SiteFooter } from "@/src/components/layout/site-footer";
 import { SiteHeader } from "@/src/components/layout/site-header";
-import { LenisProvider } from "@/src/components/providers/lenis-provider";
 import { QueryProvider } from "@/src/components/providers/query-provider";
-import { routing } from "@/src/i18n/routing";
 import { resolveSiteOrigin } from "@/src/config/seo.config";
+import { routing } from "@/src/i18n/routing";
 import { getCachedSiteSetting } from "@/src/services/website-config/website-config.service";
 import type { Metadata } from "next";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
@@ -84,13 +83,11 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <QueryProvider>
             <SiteSettingsProvider siteSettings={siteSettings}>
-              <LenisProvider>
-                <SiteHeader logoUrl={siteSettings?.headerLogo?.url} />
-                <div className="pt-[84px]">{children}</div>
-                <SiteFooter siteSettings={siteSettings} />
-                <PublicQuickChat siteSettings={siteSettings} />
-                <ToastProvider />
-              </LenisProvider>
+              <SiteHeader logoUrl={siteSettings?.headerLogo?.url} />
+              {children}
+              <SiteFooter siteSettings={siteSettings} />
+              <PublicQuickChat siteSettings={siteSettings} />
+              <ToastProvider />
             </SiteSettingsProvider>
           </QueryProvider>
         </NextIntlClientProvider>

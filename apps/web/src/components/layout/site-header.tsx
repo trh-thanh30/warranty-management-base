@@ -1,29 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Menu, X } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { Container } from "@/src/components/common/container";
 import { HeaderNavLink } from "@/src/components/layout/components/header-nav-link";
 import { LanguageSwitcher } from "@/src/components/layout/components/language-switcher";
 import { SiteLogo } from "@/src/components/layout/components/site-logo";
 import {
-  PUBLIC_FEATURES,
   PUBLIC_DEALER_NETWORK_URL,
+  PUBLIC_FEATURES,
   PUBLIC_PRODUCT_CATALOG_URL,
 } from "@/src/config/public-features.config";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { Link } from "@/src/i18n/navigation";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { Menu, X } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 
 const navigationItems = [
   { labelKey: "about", href: APP_ROUTES.home, external: false },
+  { labelKey: "warranty", href: APP_ROUTES.warranty, external: false },
   {
     labelKey: "products",
     href: PUBLIC_PRODUCT_CATALOG_URL,
     external: true,
   },
-  { labelKey: "warranty", href: APP_ROUTES.warranty, external: false },
   {
     labelKey: "dealers",
     href: PUBLIC_DEALER_NETWORK_URL,
@@ -71,7 +71,7 @@ export function SiteHeader({ logoUrl }: { logoUrl?: string | null }) {
   return (
     <header
       data-site-header
-      className="fixed inset-x-0 top-0 z-50 w-full border-b border-border-gray bg-off-white py-3 shadow-sm"
+      className="sticky top-0 z-50 w-full border-b border-border-gray bg-off-white py-3 shadow-sm"
     >
       <Container className="flex items-center justify-between gap-6">
         <Link
@@ -85,7 +85,7 @@ export function SiteHeader({ logoUrl }: { logoUrl?: string | null }) {
             alt={t("logoAlt")}
             width={260}
             height={70}
-            className="h-12 w-auto max-w-[280px] object-contain sm:h-14 md:h-[60px]"
+            className="h-12 w-auto max-w-70 object-contain sm:h-14 md:h-15"
             priority
           />
         </Link>

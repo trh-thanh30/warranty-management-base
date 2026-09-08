@@ -28,6 +28,7 @@ import {
   getWarrantyProductDisplayName,
 } from "../warranties.utils";
 import { WarrantyStatusBadge } from "./warranty-status-badge";
+import { ActivationCodeSummary } from "@/src/components/activation-code-summary";
 
 type WarrantiesTableProps = {
   items: WarrantyListItem[];
@@ -63,12 +64,14 @@ export function WarrantiesTable({
       </div>
 
       <TableScroll className="hidden rounded-md border border-slate-200 dark:border-slate-800 lg:block">
-        <Table className="min-w-[1280px] whitespace-nowrap [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
+        <Table className="min-w-[1440px] whitespace-nowrap [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
           <TableHeader>
             <TableRow>
               <TableHead>{t("product")}</TableHead>
               <TableHead>{t("owner")}</TableHead>
+              <TableHead>{t("dealer")}</TableHead>
               <TableHead>{t("warrantyCode")}</TableHead>
+              <TableHead>{t("activationCode")}</TableHead>
               <TableHead>{t("status")}</TableHead>
               <SortableTableHead
                 activeSortBy={sortBy}
@@ -138,8 +141,19 @@ function WarrantyTableRow({
           {formatWarrantyOwner(warranty)}
         </span>
       </TableCell>
+      <TableCell>
+        <span className="block max-w-52 truncate">
+          {warranty.dealer?.name ?? "-"}
+        </span>
+      </TableCell>
       <TableCell className="font-mono text-xs">
         {warranty.warrantyCode ?? "-"}
+      </TableCell>
+      <TableCell>
+        <ActivationCodeSummary
+          activationCode={warranty.activationCode}
+          notRequiredLabel={t("activationCodeNotRequired")}
+        />
       </TableCell>
       <TableCell>
         <WarrantyStatusBadge status={warranty.status} />
@@ -187,9 +201,24 @@ function WarrantyMobileCard({
           label={t("warrantyCode")}
           value={warranty.warrantyCode ?? "-"}
         />
+        <div className="min-w-0">
+          <dt className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+            {t("activationCode")}
+          </dt>
+          <dd className="mt-1">
+            <ActivationCodeSummary
+              activationCode={warranty.activationCode}
+              notRequiredLabel={t("activationCodeNotRequired")}
+            />
+          </dd>
+        </div>
         <WarrantyMobileField
           label={t("owner")}
           value={formatWarrantyOwner(warranty)}
+        />
+        <WarrantyMobileField
+          label={t("dealer")}
+          value={warranty.dealer?.name ?? "-"}
         />
         <WarrantyMobileField
           label={t("startDate")}

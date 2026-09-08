@@ -1,9 +1,8 @@
 import { ProductExcelRow } from '@/modules/products/excel/product-excel.types';
-import { Category, Product, Warranty } from '@prisma/client';
+import { Category, Product } from '@prisma/client';
 
 type ProductWithExportRelations = Product & {
   category_ref?: Category;
-  warranty?: Warranty | null;
 };
 
 export function toProductExcelRow(
@@ -28,11 +27,9 @@ export function toProductExcelRow(
     modelYear: product.model_year,
     shortDescription,
     description: product.description,
-    warrantyDurationMonths: product.warranty?.duration_months ?? 0,
-    warrantyTerms: product.warranty?.terms ?? null,
+    warrantyDurationMonths: product.warranty_duration_months ?? 0,
+    warrantyTerms: product.warranty_terms,
     installationPosition,
-    warrantyCode: product.warranty?.warranty_code ?? null,
-    serialNumber: product.serial_number,
     status: product.status,
   };
 }

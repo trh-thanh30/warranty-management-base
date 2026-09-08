@@ -23,15 +23,11 @@ export async function prepareProductImportRows(
   const errors: ExcelRowError[] = [];
   const preparedRows: PreparedProductImportRow[] = [];
   const seenProductCodes = new Set<string>();
-  const seenSerialNumbers = new Set<string>();
-  const seenWarrantyCodes = new Set<string>();
 
   for (const row of rows) {
     const productCode = row.data.productCode?.trim() || null;
-    const serialNumber = row.data.serialNumber?.trim() || null;
     const displayName = row.data.displayName?.trim() || null;
     const categoryCode = row.data.categoryCode?.trim().toUpperCase() || null;
-    const warrantyCode = row.data.warrantyCode?.trim().toUpperCase() || null;
 
     if (productCode) {
       if (seenProductCodes.has(productCode)) {
@@ -44,82 +40,24 @@ export async function prepareProductImportRows(
       seenProductCodes.add(productCode);
     }
 
-    if (serialNumber) {
-      if (seenSerialNumbers.has(serialNumber)) {
-        errors.push({
-          rowNumber: row.rowNumber,
-          field: 'serialNumber',
-          message: 'Số serial bị trùng trong file import',
-        });
-      }
-      seenSerialNumbers.add(serialNumber);
-    }
-
-    if (warrantyCode) {
-      if (seenWarrantyCodes.has(warrantyCode)) {
-        errors.push({
-          rowNumber: row.rowNumber,
-          field: 'warrantyCode',
-          message: 'Mã bảo hành bị trùng trong file import',
-        });
-      }
-      seenWarrantyCodes.add(warrantyCode);
-    }
-
-    const [existingProduct, productWithSerial, productWithWarranty, category] =
-      await Promise.all([
-        productCode
-          ? prismaService.product.findUnique({
-              where: { product_code: productCode },
-              select: { id: true, product_code: true },
-            })
-          : null,
-        serialNumber
-          ? prismaService.product.findUnique({
-              where: { serial_number: serialNumber },
-              select: { id: true, product_code: true },
-            })
-          : null,
-        warrantyCode
-          ? prismaService.warranty.findUnique({
-              where: { warranty_code: warrantyCode },
-              select: { product_id: true },
-            })
-          : null,
-        categoryCode
-          ? prismaService.category.findFirst({
-              where: {
-                code: categoryCode,
-                type: category_type.PRODUCT,
-                is_active: true,
-              },
-              select: { id: true },
-            })
-          : null,
-      ]);
-
-    if (
-      productWithSerial &&
-      (!existingProduct || productWithSerial.id !== existingProduct.id)
-    ) {
-      errors.push({
-        rowNumber: row.rowNumber,
-        field: 'serialNumber',
-        message: `Số serial đã thuộc sản phẩm ${productWithSerial.product_code}`,
-      });
-    }
-
-    if (
-      productWithWarranty &&
-      (!existingProduct ||
-        productWithWarranty.product_id !== existingProduct.id)
-    ) {
-      errors.push({
-        rowNumber: row.rowNumber,
-        field: 'warrantyCode',
-        message: 'Mã bảo hành đã thuộc sản phẩm khác',
-      });
-    }
+    const [existingProduct, category] = await Promise.all([
+      productCode
+        ? prismaService.product.findUnique({
+            where: { product_code: productCode },
+            select: { id: true, product_code: true },
+          })
+        : null,
+      categoryCode
+        ? prismaService.category.findFirst({
+            where: {
+              code: categoryCode,
+              type: category_type.PRODUCT,
+              is_active: true,
+            },
+            select: { id: true },
+          })
+        : null,
+    ]);
 
     if (!displayName) {
       errors.push({
@@ -151,7 +89,6 @@ export async function prepareProductImportRows(
       rowNumber: row.rowNumber,
       displayName: displayName ?? '',
       categoryCode: categoryCode ?? '',
-      warrantyCode,
       categoryId: category?.id ?? '',
     });
   }

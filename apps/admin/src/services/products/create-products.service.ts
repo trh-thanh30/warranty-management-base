@@ -1,6 +1,5 @@
 import type {
   ActivationProductOption,
-  AssignProductOwnerBody,
   AttachProductAssetBody,
   CreateProductBody,
   ListActivationProductOptionsQuery,
@@ -74,18 +73,6 @@ export function createProductsService(http: ProductsHttpClient) {
     async restoreProduct(productId: string): Promise<ProductResponse> {
       return unwrap(
         await http.patch<ProductResponse>(`/products/${productId}/restore`),
-      );
-    },
-
-    async assignOwner(
-      productId: string,
-      body: AssignProductOwnerBody,
-    ): Promise<ProductResponse> {
-      return unwrap(
-        await http.post<ProductResponse>(
-          `/products/${productId}/assign-owner`,
-          body,
-        ),
       );
     },
 

@@ -1,29 +1,52 @@
 import {
   Asset,
+  ActivationCode,
+  ActivationCodeBatch,
   Category,
   Customer,
   Product,
   ProductAsset,
-  ProductOwnership,
   Warranty,
+  WarrantyOwnership,
   warranty_status,
+  warranty_activation_request_status,
 } from '@prisma/client';
 import { toCategoryResponse } from '@/modules/categories/categories.types';
 import { getProductCatalogue } from '@/modules/products/product-catalogue';
 
+type ProductActivationCodeRelation = Pick<
+  ActivationCode,
+  'id' | 'code_ciphertext' | 'status' | 'expires_at'
+> & {
+  batch: Pick<ActivationCodeBatch, 'batch_code'>;
+  request: { id: string; status: warranty_activation_request_status } | null;
+  request_items: Array<{
+    id: string;
+    status: warranty_activation_request_status;
+  }>;
+  warranty: { id: string } | null;
+};
+
 type ProductWithRelations = Product & {
   assets?: Array<ProductAsset & { asset: Asset }>;
-  ownerships?: Array<ProductOwnership & { customer?: Customer }>;
-  warranty?: Warranty | null;
+  warranty?:
+    | (Warranty & {
+        ownerships?: Array<WarrantyOwnership & { customer?: Customer }>;
+      })
+    | null;
   warranty_activation_requests?: Array<{ id: string }>;
   category_ref?: Category;
+  activation_codes?: ProductActivationCodeRelation[];
+  /** Legacy test/consumer shape kept only while clients migrate. */
+  activation_code?: ProductActivationCodeRelation | null;
 };
 
 export function toProductResponse(
   product: ProductWithRelations,
   resolveAssetUrl: (asset: Asset) => string = (asset) => asset.path,
+  decryptActivationCode?: (ciphertext: string) => string,
 ) {
-  const currentOwnership = product.ownerships?.find(
+  const currentOwnership = product.warranty?.ownerships?.find(
     (ownership) => ownership.is_current_owner,
   );
   const catalogue = getProductCatalogue(product);
@@ -47,6 +70,26 @@ export function toProductResponse(
       : product.warranty_activation_requests?.length
         ? ('OPEN_ACTIVATION_REQUEST' as const)
         : null;
+  const sourceActivationCodes =
+    product.activation_codes ??
+    (product.activation_code ? [product.activation_code] : []);
+  const assignedActivationCodes = sourceActivationCodes.map(
+    (activationCode) => {
+      const status = getAssignedActivationCodeStatus(activationCode);
+      return {
+        id: activationCode.id,
+        code: requireActivationCodeDecryptor(decryptActivationCode)(
+          activationCode.code_ciphertext,
+        ),
+        status,
+        expiresAt: activationCode.expires_at,
+        batchCode: activationCode.batch.batch_code,
+        canReplace: status === 'AVAILABLE',
+        unavailableReason: status === 'AVAILABLE' ? null : status,
+      };
+    },
+  );
+  const assignedActivationCode = assignedActivationCodes[0] ?? null;
 
   return {
     id: product.id,
@@ -56,7 +99,6 @@ export function toProductResponse(
     warrantyCode: product.warranty?.warranty_code ?? null,
     canEditWarrantyCode: warrantyCodeEditLockedReason === null,
     warrantyCodeEditLockedReason,
-    serialNumber: product.serial_number,
     displayName: product.display_name,
     name: catalogue.name,
     categoryId: product.category_id,
@@ -88,6 +130,7 @@ export function toProductResponse(
     warranty: product.warranty
       ? {
           id: product.warranty.id,
+          serialNumber: product.warranty.serial_number,
           warrantyCode: product.warranty.warranty_code,
           startDate: product.warranty.start_date,
           endDate: product.warranty.end_date,
@@ -101,8 +144,41 @@ export function toProductResponse(
           terms: product.warranty.terms,
         }
       : null,
+    warrantyDurationMonths: product.warranty_duration_months,
+    warrantyTerms: product.warranty_terms,
+    // Keep the singular field during the contract transition. New callers
+    // should use assignedActivationCodes.
+    assignedActivationCode,
+    assignedActivationCodes,
     assets: productAssets,
   };
+}
+
+function getAssignedActivationCodeStatus(code: ProductActivationCodeRelation) {
+  if (code.warranty || code.status === 'ACTIVATED') return 'ACTIVATED' as const;
+  if (
+    (code.request && ['PENDING', 'APPROVED'].includes(code.request.status)) ||
+    code.request_items.some((item) =>
+      ['PENDING', 'APPROVED'].includes(item.status),
+    )
+  ) {
+    return 'PENDING_APPROVAL' as const;
+  }
+  if (code.status === 'AVAILABLE' && code.expires_at.getTime() <= Date.now()) {
+    return 'EXPIRED' as const;
+  }
+  return code.status;
+}
+
+function requireActivationCodeDecryptor(
+  decryptActivationCode?: (ciphertext: string) => string,
+) {
+  if (!decryptActivationCode) {
+    throw new Error(
+      'An activation-code decryptor is required for assigned product codes',
+    );
+  }
+  return decryptActivationCode;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -132,7 +208,7 @@ export function toPublicProductSummary(
     description: product.description,
     coverImageUrl: cover ? resolveAssetUrl(cover.asset) : null,
     specifications: toPublicSpecifications(metadata.specifications),
-    warrantyDurationMonths: product.warranty?.duration_months ?? 0,
+    warrantyDurationMonths: product.warranty_duration_months ?? 0,
     publishedAt: product.published_at ?? product.created_at,
   };
 }
@@ -185,8 +261,8 @@ export function toPublicProductDetail(
     features: toPublicStringList(metadata.features),
     applications: toPublicStringList(metadata.applications),
     warranty: {
-      durationMonths: product.warranty?.duration_months ?? 0,
-      terms: product.warranty?.terms ?? null,
+      durationMonths: product.warranty_duration_months ?? 0,
+      terms: product.warranty_terms,
     },
     publishedAt: product.published_at,
   };

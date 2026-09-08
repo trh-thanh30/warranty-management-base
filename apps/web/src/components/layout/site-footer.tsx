@@ -54,20 +54,20 @@ export function SiteFooter({
       {/* ── Footer ── */}
       <footer
         id="contact"
-        className="w-full scroll-mt-21 bg-surface-muted text-deep-black"
+        className="w-full scroll-mt-21 bg-white text-deep-black"
       >
         {/* Main Footer Container */}
         <Container className="py-12 lg:py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
             {/* Column 1: Logo & Company Address */}
             <div className="lg:col-span-4 space-y-4">
-              <div className="h-14 w-[240px]">
+              <div className="h-14 w-60">
                 <SiteLogo
                   src={siteSettings?.footerLogo?.url}
                   alt={t("logoAlt")}
                   width={240}
                   height={56}
-                  className="h-14 w-auto max-w-[240px] object-contain object-left"
+                  className="h-14 w-auto max-w-60 object-contain object-left"
                 />
               </div>
 
@@ -230,8 +230,8 @@ export function SiteFooter({
         </Container>
 
         {/* Bottom Copyright Bar */}
-        <div className="w-full border-t-2 border-t-premium-red bg-light-gray py-4">
-          <Container className="text-center text-xs sm:text-sm text-deep-black font-base">
+        <div className="w-full border-t-2 border-t-premium-red bg-light-gray/10 py-4">
+          <Container className="text-center text-xs sm:text-sm text-deep-black font-semibold">
             {t("copyright", { year: new Date().getFullYear() })}
           </Container>
         </div>

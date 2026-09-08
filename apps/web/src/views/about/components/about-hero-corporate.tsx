@@ -18,8 +18,8 @@ export function AboutHeroCorporate() {
   const t = useTranslations("AboutPage");
 
   return (
-    <section className="relative w-full min-h-[calc(100vh-5rem)] bg-surface-muted overflow-hidden flex items-center">
-      <div className="w-full min-h-[calc(100vh-5rem)] grid lg:grid-cols-12 items-stretch">
+    <section className="relative flex w-full items-center overflow-hidden bg-surface-muted lg:min-h-[calc(100svh-5.25rem)]">
+      <div className="grid w-full items-stretch lg:min-h-[calc(100svh-5.25rem)] lg:grid-cols-12">
         {/* Left Column: Padded Content Area (Order 2 on Mobile, Order 1 on Desktop) */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -118,7 +118,7 @@ export function AboutHeroCorporate() {
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8 }}
-          className="order-1 lg:order-2 lg:col-span-5 xl:col-span-6 relative min-h-[280px] sm:min-h-[380px] lg:min-h-full w-full overflow-hidden"
+          className="relative order-1 aspect-video w-full overflow-hidden lg:order-2 lg:col-span-5 lg:aspect-auto lg:min-h-full xl:col-span-6"
         >
           <Image
             src="/hero/hero_5.jpg"

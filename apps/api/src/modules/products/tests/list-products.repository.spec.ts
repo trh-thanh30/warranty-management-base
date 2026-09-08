@@ -161,13 +161,13 @@ describe('ProductsRepository.list', () => {
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          ownerships: expectedOwnerFilter,
+          warranties: { some: { ownerships: expectedOwnerFilter } },
         }),
       }),
     );
     expect(count).toHaveBeenCalledWith({
       where: expect.objectContaining({
-        ownerships: expectedOwnerFilter,
+        warranties: { some: { ownerships: expectedOwnerFilter } },
       }),
     });
   });
@@ -197,6 +197,36 @@ describe('ProductsRepository.list', () => {
       expect.objectContaining({
         where: expect.objectContaining({
           AND: [{ category_id: 'override-category-id' }],
+        }),
+      }),
+    );
+  });
+
+  it('filters activation-code assignment pickers to assignable products', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const count = jest.fn().mockResolvedValue(0);
+    const repository = new ProductsRepository({
+      $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
+        callback({ product: { count, findMany } }),
+      ),
+    } as never);
+
+    await repository.list({
+      activationCodeAssignable: 'true',
+      limit: 20,
+      page: 1,
+      status: product_status.ACTIVE,
+    });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          AND: expect.arrayContaining([
+            { category_ref: { activation_code_enabled: true } },
+            { warranty_duration_months: { gt: 0 } },
+          ]),
+          deleted_at: null,
+          status: product_status.ACTIVE,
         }),
       }),
     );
@@ -440,7 +470,11 @@ describe('ProductsRepository.list', () => {
     const count = jest.fn().mockResolvedValueOnce(2).mockResolvedValueOnce(4);
     const prismaService = {
       $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
-        callback({ product: { count, findMany } }),
+        callback({
+          activationCode: { groupBy: jest.fn().mockResolvedValue([]) },
+          activationCodeBatch: { findMany: jest.fn().mockResolvedValue([]) },
+          product: { count, findMany },
+        }),
       ),
     };
     const repository = new ProductsRepository(prismaService as never);
@@ -452,7 +486,10 @@ describe('ProductsRepository.list', () => {
       search: 'film',
     });
 
-    expect(result.items).toEqual([eligibleProduct, ineligibleProduct]);
+    expect(result.items).toEqual([
+      { ...eligibleProduct, activationCodeCounts: {} },
+      { ...ineligibleProduct, activationCodeCounts: {} },
+    ]);
     expect(result.meta).toEqual(
       expect.objectContaining({ limit: 3, page: 1, total: 4 }),
     );

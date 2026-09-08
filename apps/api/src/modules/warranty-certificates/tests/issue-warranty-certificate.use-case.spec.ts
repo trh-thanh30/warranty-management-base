@@ -10,22 +10,22 @@ describe('IssueWarrantyCertificateUseCase', () => {
     const warranty = {
       end_date: new Date('2029-07-24T00:00:00.000Z'),
       id: 'warranty-id',
+      ownerships: [
+        {
+          customer: {
+            email: null,
+            full_name: 'Thanh',
+            phone: '0344247918',
+          },
+        },
+      ],
       product: {
         display_name: null,
         template: {
           name: 'Film cách nhiệt ô tô Lexzenz Reflex Korea Film',
         },
-        ownerships: [
-          {
-            customer: {
-              email: null,
-              full_name: 'Thanh',
-              phone: '0344247918',
-            },
-          },
-        ],
-        serial_number: 'SN-001',
       },
+      serial_number: 'SN-001',
       start_date: new Date('2026-07-24T00:00:00.000Z'),
       duration_months: 36,
       warranty_code: 'WM-2026-ABC123',
@@ -103,12 +103,12 @@ describe('IssueWarrantyCertificateUseCase', () => {
     const warranty = {
       end_date: new Date('2029-07-24T00:00:00.000Z'),
       id: 'warranty-id',
+      ownerships: [],
       product: {
         display_name: null,
         template: { name: 'Lexzenz Film' },
-        ownerships: [],
-        serial_number: 'SN-001',
       },
+      serial_number: 'SN-001',
       start_date: new Date('2026-07-24T00:00:00.000Z'),
       duration_months: 36,
       warranty_code: 'WM-2026-ABC123',
@@ -282,12 +282,12 @@ function buildWarranty() {
     duration_months: 36,
     end_date: new Date('2029-07-24T00:00:00.000Z'),
     id: 'warranty-id',
+    ownerships: [],
     product: {
       display_name: null,
-      ownerships: [],
-      serial_number: 'SN-001',
       template: { name: 'Lexzenz Film' },
     },
+    serial_number: 'SN-001',
     start_date: new Date('2026-07-24T00:00:00.000Z'),
     warranty_code: 'WM-2026-ABC123',
   };

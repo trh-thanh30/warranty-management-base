@@ -25,6 +25,8 @@
     "start:worker:email": "pnpm --filter @repo/shared run build && dotenv -e ../../.env.development -- nest start worker:email --watch",
     "start:worker:email:prod": "cross-env NODE_ENV=production node dist/workers/email/worker.main.js",
     "start:worker:email:debug": "dotenv -e ../../.env.development -- nest start worker:email --debug --watch",
+    "start:worker:activation-labels": "pnpm --filter @repo/shared run build && dotenv -e ../../.env.development -- nest start worker:activation-labels --watch",
+    "start:worker:activation-labels:prod": "cross-env NODE_ENV=production node dist/workers/activation-label-print/worker.main.js",
     "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\"",
     "lint:fix": "eslint \"src/**/*.ts\" \"test/**/*.ts\" --fix",
     "lint:strict": "eslint \"src/**/*.ts\" \"test/**/*.ts\" --max-warnings 0",

@@ -2,6 +2,8 @@ import { PrismaModule } from '@/database/prisma/prisma.module';
 import { CustomersModule } from '@/modules/customers/customers.module';
 import { ProductsModule } from '@/modules/products/products.module';
 import { UsersModule } from '@/modules/user/user.module';
+import { DealersModule } from '@/modules/dealers/dealers.module';
+import { ActivationCodesModule } from '@/modules/activation-codes/activation-codes.module';
 import { WarrantiesRepository } from '@/modules/warranties/repository/warranties.repository';
 import { WarrantyLifecycleService } from '@/modules/warranties/services/warranty-lifecycle.service';
 import { ActivateProductWarrantyUseCase } from '@/modules/warranties/use-cases/activate-product-warranty.use-case';
@@ -20,6 +22,7 @@ import { ManualWarrantyActivationUseCase } from '@/modules/warranties/use-cases/
 import { PreviewWarrantyImportUseCase } from '@/modules/warranties/use-cases/preview-warranty-import.use-case';
 import { UpdateWarrantyUseCase } from '@/modules/warranties/use-cases/update-warranty.use-case';
 import { VoidWarrantyUseCase } from '@/modules/warranties/use-cases/void-warranty.use-case';
+import { TransferWarrantyOwnerUseCase } from '@/modules/warranties/use-cases/transfer-warranty-owner.use-case';
 import { WarrantiesController } from '@/modules/warranties/warranties.controller';
 import { WarrantyCertificatesModule } from '@/modules/warranty-certificates/modules/warranty-certificates.module';
 import { Module } from '@nestjs/common';
@@ -29,6 +32,8 @@ import { memoryStorage } from 'multer';
 @Module({
   imports: [
     PrismaModule,
+    ActivationCodesModule,
+    DealersModule,
     CustomersModule,
     UsersModule,
     ProductsModule,
@@ -57,6 +62,7 @@ import { memoryStorage } from 'multer';
     PreviewWarrantyImportUseCase,
     UpdateWarrantyUseCase,
     VoidWarrantyUseCase,
+    TransferWarrantyOwnerUseCase,
   ],
   exports: [
     ActivateWarrantyByCodeUseCase,

@@ -10,6 +10,7 @@ import type {
   WarrantySummary,
   UpdateWarrantyBody,
   VoidWarrantyBody,
+  TransferWarrantyOwnerBody,
 } from "@repo/shared";
 import { unwrap, unwrapBlob } from "../service.utils.ts";
 import type { WarrantiesHttpClient } from "./warranties.types";
@@ -84,6 +85,18 @@ export function createWarrantiesService(http: WarrantiesHttpClient) {
       return unwrap(
         await http.post<WarrantySummary>(
           `/warranties/${warrantyId}/void`,
+          body,
+        ),
+      );
+    },
+
+    async transferOwner(
+      warrantyId: string,
+      body: TransferWarrantyOwnerBody,
+    ): Promise<WarrantyListItem> {
+      return unwrap(
+        await http.post<WarrantyListItem>(
+          `/warranties/${warrantyId}/transfer-owner`,
           body,
         ),
       );

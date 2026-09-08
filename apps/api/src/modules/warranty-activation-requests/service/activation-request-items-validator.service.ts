@@ -5,12 +5,14 @@ import {
   getProductDisplayName,
 } from '@/modules/products/product-catalogue';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
+import { ActivationCodeBatchesRepository } from '@/modules/activation-codes/repository/activation-code-batches.repository';
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
 import { Injectable } from '@nestjs/common';
-import { product_status, type Customer, warranty_status } from '@prisma/client';
+import { product_status, warranty_status } from '@prisma/client';
 import type { CreateWarrantyActivationRequestItemBody } from '@repo/shared';
 
 export type ValidatedActivationRequestItem = {
+  activationCodeId: string | null;
   activationFieldId: string | null;
   positionKey: string;
   positionLabel: string;
@@ -18,13 +20,12 @@ export type ValidatedActivationRequestItem = {
   productName: string;
   productCode: string;
   serialNumber: string | null;
-  warrantyId: string;
-  warrantyCode: string;
+  warrantyId: string | null;
+  warrantyCode: string | null;
   warrantyDurationMonths: number;
   brand: string | null;
   model: string | null;
   manufactureYear: number | null;
-  currentOwner: Pick<Customer, 'email' | 'full_name' | 'phone'> | null;
 };
 
 @Injectable()
@@ -33,6 +34,7 @@ export class ActivationRequestItemsValidatorService {
     private readonly categoriesRepository: CategoriesRepository,
     private readonly productsRepository: ProductsRepository,
     private readonly requestsRepository: WarrantyActivationRequestsRepository,
+    private readonly activationCodesRepository: ActivationCodeBatchesRepository,
   ) {}
 
   async validate(
@@ -47,6 +49,13 @@ export class ActivationRequestItemsValidatorService {
         categoryId,
       });
     }
+    if (
+      category.activation_code_enabled === false &&
+      items.some((item) => item.activationCodeId)
+    ) {
+      this.throwValidation('ACTIVATION_CODE_NOT_APPLICABLE', { categoryId });
+    }
+    const requiresActivationCode = category.activation_code_enabled !== false;
 
     const config =
       await this.categoriesRepository.getActivationFields(categoryId);
@@ -67,6 +76,12 @@ export class ActivationRequestItemsValidatorService {
     );
     const seenPositions = new Set<string>();
     const seenProducts = new Set<string>();
+    const seenCodes = new Set<string>();
+    const genericMode =
+      items.length > 0 && items.every((item) => Boolean(item.activationCodeId));
+    if (!genericMode && items.some((item) => item.activationCodeId)) {
+      this.throwValidation('ACTIVATION_ITEM_MIXED_MODE', {});
+    }
 
     for (const item of items) {
       if (seenPositions.has(item.positionKey)) {
@@ -75,15 +90,24 @@ export class ActivationRequestItemsValidatorService {
         });
       }
       if (seenProducts.has(item.productId)) {
-        this.throwValidation('ACTIVATION_PRODUCT_DUPLICATE', {
-          productId: item.productId,
+        if (!item.activationCodeId) {
+          this.throwValidation('ACTIVATION_PRODUCT_DUPLICATE', {
+            productId: item.productId,
+          });
+        }
+      }
+      if (item.activationCodeId && seenCodes.has(item.activationCodeId)) {
+        this.throwValidation('ACTIVATION_CODE_DUPLICATE', {
+          activationCodeId: item.activationCodeId,
         });
       }
       seenPositions.add(item.positionKey);
       seenProducts.add(item.productId);
+      if (item.activationCodeId) seenCodes.add(item.activationCodeId);
     }
 
     for (const field of productFields) {
+      if (genericMode) break;
       if (field.required && !seenPositions.has(field.key)) {
         this.throwValidation('ACTIVATION_REQUIRED_POSITION_MISSING', {
           positionKey: field.key,
@@ -108,11 +132,59 @@ export class ActivationRequestItemsValidatorService {
       ]),
     );
 
+    const codeRecords = new Map(
+      (
+        await Promise.all(
+          items
+            .filter((item) => item.activationCodeId)
+            .map(async (item) => {
+              const code =
+                await this.activationCodesRepository.findAvailableById(
+                  item.activationCodeId!,
+                );
+              return [item.activationCodeId!, code] as const;
+            }),
+        )
+      ).filter((entry): entry is [string, NonNullable<(typeof entry)[1]>] =>
+        Boolean(entry[1]),
+      ),
+    );
+
+    for (const item of items) {
+      if (item.activationCodeId) {
+        const code = codeRecords.get(item.activationCodeId);
+        if (!code) {
+          this.throwValidation('ACTIVATION_CODE_INVALID_OR_EXPIRED', {
+            activationCodeId: item.activationCodeId,
+          });
+        }
+        if (code.expires_at <= new Date()) {
+          await this.activationCodesRepository.expireIfNeeded(code.id);
+          this.throwValidation('ACTIVATION_CODE_INVALID_OR_EXPIRED', {
+            activationCodeId: item.activationCodeId,
+          });
+        }
+        if (!code.product_id) {
+          this.throwValidation('ACTIVATION_CODE_PRODUCT_NOT_ASSIGNED', {
+            activationCodeId: item.activationCodeId,
+          });
+        }
+        if (code.product_id !== item.productId) {
+          this.throwValidation('ACTIVATION_CODE_PRODUCT_MISMATCH', {
+            activationCodeId: item.activationCodeId,
+            assignedProductId: code.product_id,
+            productId: item.productId,
+          });
+        }
+      }
+    }
+
     return items.map((item) => {
       const field = fieldsByKey.get(item.positionKey);
       if (
-        !field ||
-        (item.activationFieldId && field.id !== item.activationFieldId)
+        !genericMode &&
+        (!field ||
+          (item.activationFieldId && field.id !== item.activationFieldId))
       ) {
         this.throwValidation('ACTIVATION_POSITION_INVALID', {
           activationFieldId: item.activationFieldId,
@@ -120,10 +192,30 @@ export class ActivationRequestItemsValidatorService {
         });
       }
       const product = productsById.get(item.productId);
-      if (!product?.warranty) {
+      if (!product) {
+        throw new NotFoundError('Product not found', 'NOT_FOUND', {
+          code: 'PRODUCT_NOT_FOUND',
+          productId: item.productId,
+        });
+      }
+      if (
+        requiresActivationCode &&
+        !item.activationCodeId &&
+        !product.warranty
+      ) {
         throw new NotFoundError('Product warranty not found', 'NOT_FOUND', {
           code: 'PRODUCT_WARRANTY_NOT_FOUND',
           productId: item.productId,
+        });
+      }
+      if (
+        item.activationCodeId &&
+        (product.warranty_duration_months ??
+          product.warranty?.duration_months ??
+          0) <= 0
+      ) {
+        this.throwValidation('PRODUCT_WARRANTY_POLICY_MISSING', {
+          productId: product.id,
         });
       }
       if (product.category_id !== categoryId) {
@@ -135,35 +227,55 @@ export class ActivationRequestItemsValidatorService {
       }
       if (
         product.status !== product_status.ACTIVE ||
-        product.warranty.status !== warranty_status.DRAFT ||
-        !product.warranty.warranty_code
+        (requiresActivationCode &&
+          !item.activationCodeId &&
+          (!product.warranty ||
+            product.warranty.status !== warranty_status.DRAFT ||
+            !product.warranty.warranty_code))
       ) {
         this.throwValidation('PRODUCT_NOT_ELIGIBLE_FOR_ACTIVATION_REQUEST', {
           productId: product.id,
         });
       }
-      if (reservedProductIds.has(product.id)) {
+      if (
+        requiresActivationCode &&
+        !item.activationCodeId &&
+        reservedProductIds.has(product.id)
+      ) {
         this.throwValidation('ACTIVATION_REQUEST_ALREADY_OPEN', {
           productId: product.id,
         });
       }
 
       const catalogue = getProductCatalogue(product);
+      const issuesFreshWarranty =
+        Boolean(item.activationCodeId) || !requiresActivationCode;
       return {
-        activationFieldId: field.id ?? null,
-        positionKey: field.key,
-        positionLabel: field.label,
+        activationCodeId: item.activationCodeId ?? null,
+        activationFieldId: genericMode
+          ? (item.activationFieldId ?? null)
+          : (field?.id ?? null),
+        positionKey: genericMode ? item.positionKey : field!.key,
+        positionLabel: genericMode ? item.positionKey : field!.label,
         productId: product.id,
         productName: getProductDisplayName(product),
         productCode: product.product_code,
-        serialNumber: product.serial_number,
-        warrantyId: product.warranty.id,
-        warrantyCode: product.warranty.warranty_code,
-        warrantyDurationMonths: product.warranty.duration_months,
+        serialNumber: issuesFreshWarranty
+          ? null
+          : (product.warranty?.serial_number ?? null),
+        // A code-less product issues a fresh warranty per request instead of
+        // reusing the product's current warranty pointer.
+        warrantyId: issuesFreshWarranty ? null : (product.warranty?.id ?? null),
+        warrantyCode: issuesFreshWarranty
+          ? null
+          : (product.warranty?.warranty_code ?? null),
+        warrantyDurationMonths:
+          product.warranty?.duration_months ??
+          product.warranty_duration_months ??
+          0,
         brand: catalogue.brand,
         model: catalogue.model,
         manufactureYear: catalogue.modelYear,
-        currentOwner: product.ownerships?.[0]?.customer ?? null,
       };
     });
   }

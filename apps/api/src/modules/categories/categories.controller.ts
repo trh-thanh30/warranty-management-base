@@ -1,4 +1,5 @@
 import { Permissions } from '@/common/decorators/permissions.decorator';
+import { User } from '@/common/decorators/user.decorator';
 import { createDatedExcelFilename, sendExcelFile } from '@/common/excel';
 import { CreateCategoryDto } from '@/modules/categories/dto/create-category.dto';
 import { ListCategoriesDto } from '@/modules/categories/dto/list-categories.dto';
@@ -35,8 +36,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { permission_key } from '@prisma/client';
+import { permission_key, user_role } from '@prisma/client';
 import express from 'express';
+
+type RequestUser = { role: user_role };
 
 @Controller('categories')
 export class CategoriesController {
@@ -100,8 +103,8 @@ export class CategoriesController {
 
   @Post()
   @Permissions([permission_key.CATEGORY_CREATE])
-  create(@Body() dto: CreateCategoryDto) {
-    return this.createCategoryUseCase.execute(dto);
+  create(@Body() dto: CreateCategoryDto, @User() user: RequestUser) {
+    return this.createCategoryUseCase.execute(dto, user.role);
   }
 
   @Patch('reorder')
@@ -133,8 +136,12 @@ export class CategoriesController {
 
   @Patch(':id')
   @Permissions([permission_key.CATEGORY_UPDATE])
-  update(@Param('id') id: string, @Body() dto: UpdateCategoryDto) {
-    return this.updateCategoryUseCase.execute(id, dto);
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateCategoryDto,
+    @User() user: RequestUser,
+  ) {
+    return this.updateCategoryUseCase.execute(id, dto, user.role);
   }
 
   @Delete(':id')

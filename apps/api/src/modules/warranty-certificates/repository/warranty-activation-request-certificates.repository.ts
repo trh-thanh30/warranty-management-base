@@ -236,12 +236,18 @@ export class WarrantyActivationRequestCertificatesRepository {
       recipientEmail: certificate.recipient_email,
       request: {
         customerName: certificate.activation_request.customer_name,
-        items: certificate.activation_request.items.map((item) => ({
-          positionLabel: item.position_label,
-          productName: item.product_name,
-          serialNumber: item.serial_number,
-          warrantyCode: item.warranty_code,
-        })),
+        items: certificate.activation_request.items.flatMap((item) =>
+          item.warranty_code
+            ? [
+                {
+                  positionLabel: item.position_label,
+                  productName: item.product_name,
+                  serialNumber: item.serial_number,
+                  warrantyCode: item.warranty_code,
+                },
+              ]
+            : [],
+        ),
       },
       storageKey: certificate.storage_key,
     };
@@ -258,18 +264,24 @@ export class WarrantyActivationRequestCertificatesRepository {
       fullAddress: request.full_address,
       id: request.id,
       installedAt: request.installed_at,
-      items: request.items.map((item) => ({
-        activatedAt: item.activated_at,
-        durationMonths: item.warranty.duration_months,
-        endDate: item.warranty.end_date,
-        positionKey: item.position_key,
-        positionLabel: item.position_label,
-        productCode: item.product_code,
-        productName: item.product_name,
-        serialNumber: item.serial_number,
-        status: item.status,
-        warrantyCode: item.warranty_code,
-      })),
+      items: request.items.flatMap((item) =>
+        item.warranty && item.warranty_code
+          ? [
+              {
+                activatedAt: item.activated_at,
+                durationMonths: item.warranty.duration_months,
+                endDate: item.warranty.end_date,
+                positionKey: item.position_key,
+                positionLabel: item.position_label,
+                productCode: item.product_code,
+                productName: item.product_name,
+                serialNumber: item.serial_number,
+                status: item.status,
+                warrantyCode: item.warranty_code,
+              },
+            ]
+          : [],
+      ),
       status: request.status,
       vehicleModel: request.vehicle_model,
       vehiclePlate: request.vehicle_plate,

@@ -16,11 +16,17 @@ export function getActivationProductDisplayName(
   );
 }
 
+export function isActivationCodeRequiredForRequest(
+  selectedCategoryRule: boolean | undefined,
+  selectedProductCategoryRule: boolean | undefined,
+) {
+  return (selectedCategoryRule ?? selectedProductCategoryRule) !== false;
+}
+
 export function formatActivationProductSearchOption(product: ProductResponse) {
   return [
     getActivationProductDisplayName(product),
     product.warrantyCode,
-    product.serialNumber,
     product.owner?.fullName,
   ]
     .filter(Boolean)

@@ -38,7 +38,9 @@ export class PublicListDealersUseCase {
 
     return {
       ...result,
-      items: result.items.map((dealer) => this.mapDealer(dealer)),
+      items: result.items
+        .filter(hasCoordinates)
+        .map((dealer) => this.mapDealer(dealer)),
     };
   }
 
@@ -48,7 +50,9 @@ export class PublicListDealersUseCase {
       longitude: number;
     },
   ): Promise<PaginatedResponse<PublicDealerLocation>> {
-    const dealers = await this.dealersRepository.listActiveForNetwork();
+    const dealers = (
+      await this.dealersRepository.listActiveForNetwork()
+    ).filter(hasCoordinates);
     const search = normalizeSearch(query.search ?? '');
     const radiusKm = query.radiusKm ?? 20;
     const filtered = dealers
@@ -103,6 +107,12 @@ function normalizeSearch(value: string) {
     .replaceAll('Đ', 'D')
     .toLocaleLowerCase('vi')
     .trim();
+}
+
+function hasCoordinates<
+  T extends { latitude: number | null; longitude: number | null },
+>(record: T): record is T & { latitude: number; longitude: number } {
+  return record.latitude !== null && record.longitude !== null;
 }
 
 function distanceInKilometers(

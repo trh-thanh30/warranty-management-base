@@ -3,10 +3,12 @@ import { CategoriesRepository } from '@/modules/categories/repository/categories
 describe('CategoriesRepository active filter', () => {
   const findMany = jest.fn().mockResolvedValue([]);
   const count = jest.fn().mockResolvedValue(0);
+  const countActivationCodes = jest.fn().mockResolvedValue(2);
   const repository = new CategoriesRepository({
     $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
       callback({ category: { count, findMany } }),
     ),
+    activationCode: { count: countActivationCodes },
     category: { findMany },
   } as never);
 
@@ -36,5 +38,15 @@ describe('CategoriesRepository active filter', () => {
         where: expect.objectContaining({ is_active: expected }),
       }),
     );
+  });
+
+  it('counts activation codes assigned to products in a category', async () => {
+    await expect(
+      repository.countAssignedActivationCodes('category-1'),
+    ).resolves.toBe(2);
+
+    expect(countActivationCodes).toHaveBeenCalledWith({
+      where: { product: { is: { category_id: 'category-1' } } },
+    });
   });
 });

@@ -148,11 +148,9 @@ function getDefaultValues(
     specifications: getProductSpecifications(product?.catalogueMetadata),
     installationPosition: getProductInstallationPosition(product?.metadata),
     productCode: isClone ? "" : (product?.productCode ?? ""),
-    serialNumber: isClone ? "" : (product?.serialNumber ?? ""),
     status: product?.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
-    warrantyCode: isClone ? "" : (product?.warrantyCode ?? ""),
-    warrantyDurationMonths: product?.warranty?.durationMonths ?? "",
-    warrantyTerms: product?.warranty?.terms ?? "",
+    warrantyDurationMonths: product?.warrantyDurationMonths ?? "",
+    warrantyTerms: product?.warrantyTerms ?? "",
   };
 }
 

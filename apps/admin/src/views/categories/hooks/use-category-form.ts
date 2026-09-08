@@ -16,6 +16,7 @@ import {
   type UpdateCategoryBody,
 } from "@repo/shared";
 import { useToast } from "@/src/hooks/use-toast";
+import { usePermissions } from "@/src/hooks/use-permissions";
 import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import {
   categoryFormSchema,
@@ -39,6 +40,8 @@ export function useCategoryForm({
   const t = useTranslations("Categories");
   const tApiErrors = useTranslations("ApiErrors");
   const toast = useToast();
+  const { hasRole } = usePermissions();
+  const canConfigureActivationCodes = hasRole("admin");
   const creating = !category;
   const createCategory = useCreateCategory();
   const updateCategory = useUpdateCategory(category?.id ?? null);
@@ -63,7 +66,9 @@ export function useCategoryForm({
   async function submit(values: CategoryFormValues) {
     try {
       if (creating) {
-        await createCategory.mutateAsync(toCreateCategoryBody(values));
+        await createCategory.mutateAsync(
+          toCreateCategoryBody(values, canConfigureActivationCodes),
+        );
         toast.success(t("created"));
         onSaved();
         return;
@@ -76,7 +81,9 @@ export function useCategoryForm({
         category.description ?? "",
         values.description,
       ).length;
-      await updateCategory.mutateAsync(toUpdateCategoryBody(values));
+      await updateCategory.mutateAsync(
+        toUpdateCategoryBody(values, canConfigureActivationCodes),
+      );
       toast.success(
         imageRemoved || removedMediaCount > 0
           ? t("assetsRemoved")
@@ -116,6 +123,7 @@ function getDefaultValues(
     description: category?.description ?? "",
     imageUrl: category?.imageUrl ?? "",
     isActive: category?.isActive ?? true,
+    activationCodeEnabled: category?.activationCodeEnabled ?? true,
     name: category?.name ?? "",
     order: category?.order ?? 0,
     parentId: category?.parentId ?? "",
@@ -124,12 +132,18 @@ function getDefaultValues(
   };
 }
 
-function toCreateCategoryBody(values: CategoryFormValues): CreateCategoryBody {
+function toCreateCategoryBody(
+  values: CategoryFormValues,
+  includeActivationCodeConfig: boolean,
+): CreateCategoryBody {
   return {
     code: toOptionalValue(values.code)?.toUpperCase(),
     description: toOptionalRichText(values.description),
     imageUrl: toOptionalValue(values.imageUrl),
     isActive: values.isActive,
+    ...(includeActivationCodeConfig
+      ? { activationCodeEnabled: values.activationCodeEnabled }
+      : {}),
     name: values.name.trim(),
     order: values.order,
     parentId: toOptionalValue(values.parentId),
@@ -138,12 +152,18 @@ function toCreateCategoryBody(values: CategoryFormValues): CreateCategoryBody {
   };
 }
 
-function toUpdateCategoryBody(values: CategoryFormValues): UpdateCategoryBody {
+function toUpdateCategoryBody(
+  values: CategoryFormValues,
+  includeActivationCodeConfig: boolean,
+): UpdateCategoryBody {
   return {
     code: toNullableValue(values.code)?.toUpperCase() ?? null,
     description: toNullableRichText(values.description),
     imageUrl: toNullableValue(values.imageUrl),
     isActive: values.isActive,
+    ...(includeActivationCodeConfig
+      ? { activationCodeEnabled: values.activationCodeEnabled }
+      : {}),
     name: values.name.trim(),
     order: values.order,
     parentId: toNullableValue(values.parentId),

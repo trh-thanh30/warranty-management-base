@@ -5,8 +5,8 @@ export type ServiceCenterExcelRow = {
   province: string;
   district: string | null;
   address: string;
-  latitude: number;
-  longitude: number;
+  latitude: number | null;
+  longitude: number | null;
   isActive: boolean;
 };
 

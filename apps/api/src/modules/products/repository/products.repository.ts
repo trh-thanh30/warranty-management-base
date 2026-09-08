@@ -7,135 +7,53 @@ import {
   category_type,
   Prisma,
   product_status,
-  warranty_activation_request_status,
   warranty_status,
 } from '@prisma/client';
-
-const openActivationRequestStatuses = [
-  warranty_activation_request_status.PENDING,
-  warranty_activation_request_status.APPROVED,
-];
-
-const productInclude = {
-  assets: {
-    include: { asset: true },
-    orderBy: [{ role: 'asc' as const }, { sort_order: 'asc' as const }],
-  },
-  ownerships: {
-    include: { customer: true },
-    orderBy: { created_at: 'desc' as const },
-  },
-  warranty: true,
-  warranty_activation_requests: {
-    where: {
-      status: {
-        in: [
-          warranty_activation_request_status.PENDING,
-          warranty_activation_request_status.APPROVED,
-        ],
-      },
-    },
-    select: { id: true },
-    take: 1,
-  },
-  category_ref: true,
-};
-
-const productListInclude = {
-  ...productInclude,
-  assets: {
-    where: { role: 'COVER' as const },
-    include: { asset: true },
-    orderBy: { sort_order: 'asc' as const },
-  },
-};
-
-const activationProductOptionInclude = {
-  ...productListInclude,
-  warranty_activation_requests: {
-    where: { status: { in: openActivationRequestStatuses } },
-    select: { id: true, request_code: true, status: true },
-    orderBy: { created_at: 'desc' as const },
-  },
-  warranty_activation_request_items: {
-    where: { status: { in: openActivationRequestStatuses } },
-    select: {
-      status: true,
-      request: {
-        select: { request_code: true, status: true },
-      },
-    },
-    orderBy: { created_at: 'desc' as const },
-  },
-};
-
-const publicProductListInclude = {
-  category_ref: true,
-  warranty: true,
-  assets: {
-    where: {
-      role: 'COVER' as const,
-      asset: {
-        access_type: asset_access_type.PUBLIC,
-        is_deleted: false,
-      },
-    },
-    include: { asset: true },
-    orderBy: { sort_order: 'asc' as const },
-  },
-};
-
-function buildProductOrderBy(
-  sortBy?: keyof Prisma.ProductOrderByWithRelationInput,
-  sortOrder: 'asc' | 'desc' = 'desc',
-): Prisma.ProductOrderByWithRelationInput[] {
-  if (!sortBy) return [{ created_at: 'desc' }, { id: 'desc' }];
-
-  const orderBy = [
-    { [sortBy]: sortOrder },
-  ] as Prisma.ProductOrderByWithRelationInput[];
-
-  if (sortBy !== 'created_at') orderBy.push({ created_at: 'desc' });
-
-  orderBy.push({ id: 'desc' });
-  return orderBy;
-}
-
-function buildPublicProductWhere(filters: {
-  categoryId?: string;
-  search?: string;
-  slug?: string;
-}): Prisma.ProductWhereInput {
-  const search = filters.search?.trim();
-
-  return {
-    ...(filters.categoryId ? { category_id: filters.categoryId } : {}),
-    category_ref: { is_active: true },
-    deleted_at: null,
-    status: product_status.ACTIVE,
-    is_published: true,
-    ...(filters.slug ? { slug: filters.slug } : {}),
-    ...(search
-      ? {
-          OR: [
-            { display_name: { contains: search, mode: 'insensitive' } },
-            { product_code: { contains: search, mode: 'insensitive' } },
-            { brand: { contains: search, mode: 'insensitive' } },
-            { model: { contains: search, mode: 'insensitive' } },
-          ],
-        }
-      : {}),
-  };
-}
+import {
+  activationProductOptionInclude,
+  productInclude,
+  productListInclude,
+  publicProductListInclude,
+  openActivationRequestStatuses,
+} from './products.repository.includes';
+import {
+  buildActivationEligibleProductWhere,
+  buildEffectiveCatalogueFilters,
+  buildProductDeletionFilter,
+  buildProductOrderBy,
+  buildProductSearchWhere,
+  buildPublicProductWhere,
+} from './products.repository.queries';
 
 @Injectable()
 export class ProductsRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
   create(data: Prisma.ProductCreateInput) {
-    return this.prismaService.product.create({
-      data,
-      include: productInclude,
+    return this.prismaService.$transaction(async (tx) => {
+      const product = await tx.product.create({
+        data,
+        include: {
+          warranties: {
+            orderBy: { created_at: 'desc' },
+            take: 1,
+          },
+        },
+      });
+      const currentWarranty = product.warranties[0];
+
+      if (!currentWarranty) {
+        return tx.product.findUniqueOrThrow({
+          where: { id: product.id },
+          include: productInclude,
+        });
+      }
+
+      return tx.product.update({
+        where: { id: product.id },
+        data: { current_warranty_id: currentWarranty.id },
+        include: productInclude,
+      });
     });
   }
 
@@ -179,9 +97,9 @@ export class ProductsRepository {
   findByWarrantyCode(warrantyCode: string, tx?: Prisma.TransactionClient) {
     const client = tx ?? this.prismaService;
 
-    return client.product.findFirst({
-      where: { warranty: { warranty_code: warrantyCode } },
-      include: productInclude,
+    return client.warranty.findUnique({
+      where: { warranty_code: warrantyCode },
+      select: { id: true },
     });
   }
 
@@ -192,12 +110,8 @@ export class ProductsRepository {
         warranty: { warranty_code: warrantyCode },
       },
       include: {
+        category_ref: true,
         warranty: true,
-        ownerships: {
-          where: { is_current_owner: true },
-          include: { customer: true },
-          orderBy: { created_at: 'desc' },
-        },
       },
     });
   }
@@ -209,12 +123,8 @@ export class ProductsRepository {
         id: productId,
       },
       include: {
+        category_ref: true,
         warranty: true,
-        ownerships: {
-          where: { is_current_owner: true },
-          include: { customer: true },
-          orderBy: { created_at: 'desc' },
-        },
       },
     });
   }
@@ -226,12 +136,8 @@ export class ProductsRepository {
         id: { in: productIds },
       },
       include: {
+        category_ref: true,
         warranty: true,
-        ownerships: {
-          where: { is_current_owner: true },
-          include: { customer: true },
-          orderBy: { created_at: 'desc' },
-        },
       },
     });
   }
@@ -254,12 +160,6 @@ export class ProductsRepository {
     });
   }
 
-  findBySerialNumber(serialNumber: string) {
-    return this.prismaService.product.findUnique({
-      where: { serial_number: serialNumber },
-    });
-  }
-
   list(filters: {
     search?: string;
     category?: string;
@@ -268,6 +168,7 @@ export class ProductsRepository {
     status?: product_status | 'ALL';
     isPublished?: string;
     activationEligible?: string;
+    activationCodeAssignable?: string;
     claimEligible?: string;
     warrantyStatus?: warranty_status;
     page?: number;
@@ -279,11 +180,12 @@ export class ProductsRepository {
     const claimEligible = filters.claimEligible === 'true';
     const activationEligible =
       filters.activationEligible === 'true' && !claimEligible;
+    const activationCodeAssignable =
+      filters.activationCodeAssignable === 'true';
     const now = new Date();
     const { page, limit, skip, take } = normalizePagination(filters);
     const sortMap = {
       productCode: 'product_code',
-      serialNumber: 'serial_number',
       name: 'display_name',
       publishedAt: 'published_at',
       status: 'status',
@@ -292,16 +194,23 @@ export class ProductsRepository {
     } satisfies Record<string, keyof Prisma.ProductOrderByWithRelationInput>;
     const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
     const where: Prisma.ProductWhereInput = {
-      AND: buildEffectiveCatalogueFilters(filters),
+      AND: buildEffectiveCatalogueFilters({
+        ...filters,
+        activationCodeAssignable,
+      }),
       deleted_at:
-        activationEligible || claimEligible
+        activationEligible || claimEligible || activationCodeAssignable
           ? null
           : buildProductDeletionFilter(filters.status),
-      ownerships: filters.ownerCustomerId
+      warranties: filters.ownerCustomerId
         ? {
             some: {
-              customer_id: filters.ownerCustomerId,
-              is_current_owner: true,
+              ownerships: {
+                some: {
+                  customer_id: filters.ownerCustomerId,
+                  is_current_owner: true,
+                },
+              },
             },
           }
         : undefined,
@@ -309,11 +218,13 @@ export class ProductsRepository {
         ? product_status.ACTIVE
         : claimEligible
           ? product_status.ACTIVE
-          : filters.status === undefined
+          : activationCodeAssignable
             ? product_status.ACTIVE
-            : filters.status === 'ALL'
-              ? undefined
-              : filters.status,
+            : filters.status === undefined
+              ? product_status.ACTIVE
+              : filters.status === 'ALL'
+                ? undefined
+                : filters.status,
       is_published:
         filters.isPublished === undefined
           ? undefined
@@ -366,18 +277,21 @@ export class ProductsRepository {
                 warranty_code: { contains: search, mode: 'insensitive' },
               },
             },
-            { serial_number: { contains: search, mode: 'insensitive' } },
             { display_name: { contains: search, mode: 'insensitive' } },
             { display_name: { contains: search, mode: 'insensitive' } },
             { product_code: { contains: search, mode: 'insensitive' } },
             { brand: { contains: search, mode: 'insensitive' } },
             { model: { contains: search, mode: 'insensitive' } },
             {
-              ownerships: {
+              warranties: {
                 some: {
-                  is_current_owner: true,
-                  customer: {
-                    full_name: { contains: search, mode: 'insensitive' },
+                  ownerships: {
+                    some: {
+                      is_current_owner: true,
+                      customer: {
+                        full_name: { contains: search, mode: 'insensitive' },
+                      },
+                    },
                   },
                 },
               },
@@ -456,11 +370,35 @@ export class ProductsRepository {
           : Promise.resolve([]),
       ]);
 
-      return paginate([...eligibleItems, ...ineligibleItems], {
-        page,
-        limit,
-        total,
-      });
+      const products = [...eligibleItems, ...ineligibleItems];
+      const productIds = products.map((product) => product.id);
+      const groupedCodes = productIds.length
+        ? await tx.activationCode.groupBy({
+            by: ['product_id', 'status'],
+            where: { product_id: { in: productIds } },
+            _count: { _all: true },
+          })
+        : [];
+      const countsByProduct = new Map<string, Record<string, number>>();
+      for (const row of groupedCodes) {
+        const productId = row.product_id;
+        if (!productId) continue;
+        const counts = countsByProduct.get(productId) ?? {};
+        counts[row.status] = (counts[row.status] ?? 0) + row._count._all;
+        countsByProduct.set(productId, counts);
+      }
+
+      return paginate(
+        products.map((product) => ({
+          ...product,
+          activationCodeCounts: countsByProduct.get(product.id) ?? {},
+        })),
+        {
+          page,
+          limit,
+          total,
+        },
+      );
     });
   }
 
@@ -518,7 +456,6 @@ export class ProductsRepository {
     const activationEligible = filters.activationEligible === 'true';
     const sortMap = {
       productCode: 'product_code',
-      serialNumber: 'serial_number',
       name: 'display_name',
       publishedAt: 'published_at',
       status: 'status',
@@ -531,11 +468,15 @@ export class ProductsRepository {
       deleted_at: activationEligible
         ? null
         : buildProductDeletionFilter(filters.status),
-      ownerships: filters.ownerCustomerId
+      warranties: filters.ownerCustomerId
         ? {
             some: {
-              customer_id: filters.ownerCustomerId,
-              is_current_owner: true,
+              ownerships: {
+                some: {
+                  customer_id: filters.ownerCustomerId,
+                  is_current_owner: true,
+                },
+              },
             },
           }
         : undefined,
@@ -578,18 +519,21 @@ export class ProductsRepository {
                 warranty_code: { contains: search, mode: 'insensitive' },
               },
             },
-            { serial_number: { contains: search, mode: 'insensitive' } },
             { display_name: { contains: search, mode: 'insensitive' } },
             { display_name: { contains: search, mode: 'insensitive' } },
             { product_code: { contains: search, mode: 'insensitive' } },
             { brand: { contains: search, mode: 'insensitive' } },
             { model: { contains: search, mode: 'insensitive' } },
             {
-              ownerships: {
+              warranties: {
                 some: {
-                  is_current_owner: true,
-                  customer: {
-                    full_name: { contains: search, mode: 'insensitive' },
+                  ownerships: {
+                    some: {
+                      is_current_owner: true,
+                      customer: {
+                        full_name: { contains: search, mode: 'insensitive' },
+                      },
+                    },
                   },
                 },
               },
@@ -614,70 +558,4 @@ export class ProductsRepository {
       include: productInclude,
     });
   }
-}
-
-function buildProductDeletionFilter(status?: product_status | 'ALL') {
-  if (status === 'ALL') return undefined;
-  return status === product_status.DELETED ? { not: null } : null;
-}
-
-function buildEffectiveCatalogueFilters(filters: {
-  categoryId?: string;
-}): Prisma.ProductWhereInput[] | undefined {
-  const clauses: Prisma.ProductWhereInput[] = [];
-  if (filters.categoryId) {
-    clauses.push({ category_id: filters.categoryId });
-  }
-  return clauses.length > 0 ? clauses : undefined;
-}
-
-function buildActivationEligibleProductWhere(): Prisma.ProductWhereInput {
-  return {
-    deleted_at: null,
-    status: product_status.ACTIVE,
-    warranty: {
-      is: {
-        status: warranty_status.DRAFT,
-        warranty_code: { not: '' },
-      },
-    },
-    warranty_activation_request_items: {
-      none: { status: { in: openActivationRequestStatuses } },
-    },
-    warranty_activation_requests: {
-      none: { status: { in: openActivationRequestStatuses } },
-    },
-  };
-}
-
-function buildProductSearchWhere(search?: string): Prisma.ProductWhereInput {
-  const value = search?.trim();
-  if (!value) return {};
-
-  return {
-    OR: [
-      { product_code: { contains: value, mode: 'insensitive' } },
-      {
-        warranty: {
-          warranty_code: { contains: value, mode: 'insensitive' },
-        },
-      },
-      { serial_number: { contains: value, mode: 'insensitive' } },
-      { display_name: { contains: value, mode: 'insensitive' } },
-      { display_name: { contains: value, mode: 'insensitive' } },
-      { product_code: { contains: value, mode: 'insensitive' } },
-      { brand: { contains: value, mode: 'insensitive' } },
-      { model: { contains: value, mode: 'insensitive' } },
-      {
-        ownerships: {
-          some: {
-            is_current_owner: true,
-            customer: {
-              full_name: { contains: value, mode: 'insensitive' },
-            },
-          },
-        },
-      },
-    ],
-  };
 }

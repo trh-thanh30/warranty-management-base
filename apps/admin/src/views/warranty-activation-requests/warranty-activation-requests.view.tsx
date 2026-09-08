@@ -1,13 +1,13 @@
 "use client";
 
-import { Plus } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { PERMISSIONS } from "@repo/shared/constants";
-import { Button } from "@repo/ui";
 import { ImportExportMenu } from "@/src/components/common";
 import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
+import { PERMISSIONS } from "@repo/shared/constants";
+import { Button } from "@repo/ui";
+import { Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { WarrantyManagementTabs } from "../warranties/components/warranty-management-tabs";
 import { ReviewWarrantyActivationRequestDialog } from "./components/review-warranty-activation-request-dialog";
 import { WarrantyActivationRequestsDirectoryCard } from "./components/warranty-activation-requests-directory-card";
@@ -37,7 +37,7 @@ export function WarrantyActivationRequestsView() {
               />
               <Button asChild className="w-full justify-center sm:w-auto">
                 <Link href="/warranty-activation-requests/create">
-                  <div className="inline-flex items-center justify-center gap-2 pr-[22px] sm:pr-0">
+                  <div className="inline-flex items-center justify-center gap-2 pr-5.5 sm:pr-0">
                     <Plus className="size-4 shrink-0" aria-hidden="true" />
                     <span>{t("createAction")}</span>
                   </div>

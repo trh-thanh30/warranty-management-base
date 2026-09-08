@@ -36,4 +36,12 @@ export default registerAs('jobs', () => ({
     cron: process.env.STORAGE_USAGE_MONITOR_CRON ?? '0 4 * * *',
     enabled: parseBoolean(process.env.STORAGE_USAGE_MONITOR_ENABLED, false),
   },
+  activationCodeExpiry: {
+    cron: process.env.ACTIVATION_CODE_EXPIRY_CRON ?? '0 * * * *',
+    enabled: parseBoolean(process.env.ACTIVATION_CODE_EXPIRY_ENABLED, true),
+    batchSize: parsePositiveInt(
+      process.env.ACTIVATION_CODE_EXPIRY_BATCH_SIZE,
+      500,
+    ),
+  },
 }));

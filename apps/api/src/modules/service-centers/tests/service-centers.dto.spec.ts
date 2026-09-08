@@ -42,7 +42,7 @@ describe('Service center DTO validation', () => {
     expect(errors).toHaveLength(0);
   });
 
-  it('requires coordinates when creating a service center', async () => {
+  it('allows coordinates to be omitted when creating a service center', async () => {
     const dto = plainToInstance(CreateServiceCenterDto, {
       name: 'Da Nang Warranty Center',
       province: 'Da Nang',
@@ -51,8 +51,6 @@ describe('Service center DTO validation', () => {
 
     const errors = await validate(dto);
 
-    expect(errors.map((error) => error.property)).toEqual(
-      expect.arrayContaining(['latitude', 'longitude']),
-    );
+    expect(errors).toHaveLength(0);
   });
 });

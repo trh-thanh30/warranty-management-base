@@ -27,6 +27,25 @@ describe('ListProductsDto', () => {
     await expect(validate(dto)).resolves.not.toHaveLength(0);
   });
 
+  it.each(['true', 'false'])(
+    'accepts activationCodeAssignable=%s',
+    async (value) => {
+      const dto = plainToInstance(ListProductsDto, {
+        activationCodeAssignable: value,
+      });
+
+      await expect(validate(dto)).resolves.toHaveLength(0);
+    },
+  );
+
+  it('rejects a non-boolean activationCodeAssignable filter', async () => {
+    const dto = plainToInstance(ListProductsDto, {
+      activationCodeAssignable: 'yes',
+    });
+
+    await expect(validate(dto)).resolves.not.toHaveLength(0);
+  });
+
   it.each(['true', 'false'])('accepts claimEligible=%s', async (value) => {
     const dto = plainToInstance(ListProductsDto, {
       claimEligible: value,

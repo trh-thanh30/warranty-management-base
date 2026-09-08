@@ -25,6 +25,10 @@ import { seedContentPages } from './seed-content-pages';
 import { seedLexzenzDealers } from './seed-dealers';
 import { requireSeedPassword } from './seed-env';
 import { seedWebsiteSiteSettings } from './seed-website-config';
+import { randomUUID } from 'node:crypto';
+
+const generateSeedDealerCode = () =>
+  `DLR-${randomUUID().slice(0, 8).toUpperCase()}`;
 
 type DashboardWarrantyChartSeed = {
   offsetDays: number;
@@ -255,7 +259,6 @@ async function upsertDemoProduct(data: {
   const product = await prisma.product.upsert({
     where: { product_code: data.productCode },
     update: {
-      serial_number: data.serialNumber,
       category_id: category.id,
       display_name: data.name,
       product_code: data.productCode,
@@ -268,7 +271,6 @@ async function upsertDemoProduct(data: {
     },
     create: {
       product_code: data.productCode,
-      serial_number: data.serialNumber,
       category_id: category.id,
       display_name: data.name,
       slug: data.productCode.toLowerCase(),
@@ -283,7 +285,7 @@ async function upsertDemoProduct(data: {
   endDate.setMonth(endDate.getMonth() + data.durationMonths);
 
   const warranty = await prisma.warranty.upsert({
-    where: { product_id: product.id },
+    where: { warranty_code: data.warrantyCode },
     update: {
       warranty_code: data.warrantyCode,
       start_date: data.purchaseDate,
@@ -299,6 +301,11 @@ async function upsertDemoProduct(data: {
       duration_months: data.durationMonths,
       status: data.warrantyStatus,
     },
+  });
+
+  await prisma.product.update({
+    where: { id: product.id },
+    data: { current_warranty_id: warranty.id },
   });
 
   await prisma.productOwnership.updateMany({
@@ -391,6 +398,7 @@ async function upsertDemoDealer(data: {
     },
     create: {
       id: data.id,
+      dealer_code: generateSeedDealerCode(),
       name: data.name,
       phone: data.phone,
       province: data.province,
@@ -1054,7 +1062,7 @@ async function main() {
     productName:
       expiringMonthDemo.product.display_name ??
       expiringMonthDemo.product.product_code,
-    serialNumber: expiringMonthDemo.product.serial_number,
+    serialNumber: expiringMonthDemo.warranty.serial_number,
     brand: expiringMonthDemo.product.brand,
     model: expiringMonthDemo.product.model,
     manufactureYear: expiringMonthDemo.product.model_year,
@@ -1105,7 +1113,7 @@ async function main() {
     warrantyDurationMonths: camryDemo.warranty.duration_months,
     productName:
       camryDemo.product.display_name ?? camryDemo.product.product_code,
-    serialNumber: camryDemo.product.serial_number,
+    serialNumber: camryDemo.warranty.serial_number,
     brand: camryDemo.product.brand,
     model: camryDemo.product.model,
     manufactureYear: camryDemo.product.model_year,
@@ -1130,7 +1138,7 @@ async function main() {
     productName:
       expiringSoonDemo.product.display_name ??
       expiringSoonDemo.product.product_code,
-    serialNumber: expiringSoonDemo.product.serial_number,
+    serialNumber: expiringSoonDemo.warranty.serial_number,
     brand: expiringSoonDemo.product.brand,
     model: expiringSoonDemo.product.model,
     manufactureYear: expiringSoonDemo.product.model_year,
@@ -1152,7 +1160,7 @@ async function main() {
       productId: camryDemo.product.id,
       productName:
         camryDemo.product.display_name ?? camryDemo.product.product_code,
-      serialNumber: camryDemo.product.serial_number,
+      serialNumber: camryDemo.warranty.serial_number,
       brand: camryDemo.product.brand,
       model: camryDemo.product.model,
       manufactureYear: camryDemo.product.model_year,
@@ -1168,7 +1176,7 @@ async function main() {
       productName:
         expiringMonthDemo.product.display_name ??
         expiringMonthDemo.product.product_code,
-      serialNumber: expiringMonthDemo.product.serial_number,
+      serialNumber: expiringMonthDemo.warranty.serial_number,
       brand: expiringMonthDemo.product.brand,
       model: expiringMonthDemo.product.model,
       manufactureYear: expiringMonthDemo.product.model_year,
@@ -1184,7 +1192,7 @@ async function main() {
       productName:
         expiringSoonDemo.product.display_name ??
         expiringSoonDemo.product.product_code,
-      serialNumber: expiringSoonDemo.product.serial_number,
+      serialNumber: expiringSoonDemo.warranty.serial_number,
       brand: expiringSoonDemo.product.brand,
       model: expiringSoonDemo.product.model,
       manufactureYear: expiringSoonDemo.product.model_year,

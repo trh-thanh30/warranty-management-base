@@ -52,7 +52,7 @@ export const dealerExcelColumns: Array<ExcelColumnDefinition<DealerExcelRow>> =
     {
       key: 'latitude',
       header: 'Vĩ độ',
-      required: true,
+      required: false,
       width: 18,
       example: 21.0285,
       note: 'Giá trị từ -90 đến 90.',
@@ -61,7 +61,7 @@ export const dealerExcelColumns: Array<ExcelColumnDefinition<DealerExcelRow>> =
     {
       key: 'longitude',
       header: 'Kinh độ',
-      required: true,
+      required: false,
       width: 18,
       example: 105.8542,
       note: 'Giá trị từ -180 đến 180.',
@@ -86,7 +86,9 @@ function parseCoordinate(
   max: number,
   label: string,
 ) {
-  const parsed = Number(String(value ?? '').trim());
+  const raw = String(value ?? '').trim();
+  if (!raw) return null;
+  const parsed = Number(raw);
   if (!Number.isFinite(parsed) || parsed < min || parsed > max) {
     throw new Error(`${label} phải nằm trong khoảng ${min} đến ${max}`);
   }

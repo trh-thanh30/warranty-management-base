@@ -1,25 +1,25 @@
 "use client";
 
-import { PackagePlus } from "lucide-react";
-import { useState } from "react";
-import { useTranslations } from "next-intl";
-import type { ProductResponse } from "@repo/shared";
-import { PERMISSIONS } from "@repo/shared/constants";
-import { Badge, Button } from "@repo/ui";
 import { ExcelImportDialog, ImportExportMenu } from "@/src/components/common";
 import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
-import { AssignOwnerDialog } from "./components/assign-owner-dialog";
+import type { ProductResponse } from "@repo/shared";
+import { PERMISSIONS } from "@repo/shared/constants";
+import { Badge, Button } from "@repo/ui";
+import { PackagePlus } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { AssignActivationCodesDialog } from "./components/assign-activation-codes-dialog";
 import { DeleteProductDialog } from "./components/delete-product-dialog";
-import { RestoreProductDialog } from "./components/restore-product-dialog";
 import { ProductImportPreviewTable } from "./components/product-import-preview-table";
 import { ProductsDirectoryCard } from "./components/products-directory-card";
+import { RestoreProductDialog } from "./components/restore-product-dialog";
 import { useProductsDirectory } from "./hooks/use-products-directory";
 
 export function ProductsView() {
   const t = useTranslations("Products");
-  const [productToAssignOwner, setProductToAssignOwner] =
+  const [productToAssignCodes, setProductToAssignCodes] =
     useState<ProductResponse | null>(null);
   const {
     canCreateProducts,
@@ -60,7 +60,6 @@ export function ProductsView() {
     updateCategoryId,
     updateSearch,
     updateStatus,
-    updateWarrantyStatus,
     updateImportRowData,
   } = useProductsDirectory();
   const hasImportErrors = importSummary.invalidRows > 0;
@@ -90,7 +89,7 @@ export function ProductsView() {
               {canCreateProducts ? (
                 <Button asChild className="w-full justify-center sm:w-auto">
                   <Link href="/products/create">
-                    <div className="inline-flex items-center justify-center gap-2 pr-[22px] sm:pr-0">
+                    <div className="inline-flex items-center justify-center gap-2 pr-5.5 sm:pr-0">
                       <PackagePlus className="size-4 shrink-0" />
                       <span>{t("create")}</span>
                     </div>
@@ -112,7 +111,7 @@ export function ProductsView() {
           isError={productsQuery.isError}
           isLoading={productsQuery.isLoading}
           onCategoryIdChange={updateCategoryId}
-          onAssignOwner={setProductToAssignOwner}
+          onAssignCodes={setProductToAssignCodes}
           onClearFilters={clearFilters}
           onDelete={openDelete}
           onRestore={openRestore}
@@ -124,7 +123,6 @@ export function ProductsView() {
           onSearchChange={updateSearch}
           onSortChange={toggleSort}
           onStatusChange={updateStatus}
-          onWarrantyStatusChange={updateWarrantyStatus}
           pageSize={pageSize}
           search={search}
           sortBy={sortBy}
@@ -155,12 +153,12 @@ export function ProductsView() {
           product={productToRestore}
         />
 
-        <AssignOwnerDialog
+        <AssignActivationCodesDialog
           onOpenChange={(open) => {
-            if (!open) setProductToAssignOwner(null);
+            if (!open) setProductToAssignCodes(null);
           }}
-          open={Boolean(productToAssignOwner)}
-          product={productToAssignOwner}
+          open={Boolean(productToAssignCodes)}
+          product={productToAssignCodes}
         />
 
         <ExcelImportDialog
@@ -211,7 +209,6 @@ export function ProductsView() {
                   installationPosition: t("installationPosition"),
                   model: t("model"),
                   modelYear: t("modelYear"),
-                  warrantyCode: t("warrantyCode"),
                   invalidRows: t("excel.invalidRows", {
                     count: importSummary.invalidRows,
                   }),
@@ -225,7 +222,6 @@ export function ProductsView() {
                   remove: t("excel.removeRow"),
                   row: t("excel.row"),
                   saveChanges: t("excel.saveRowChanges"),
-                  serialNumber: t("serialNumber"),
                   status: t("productStatus"),
                   warrantyDurationMonths: t("durationMonths"),
                   warrantyTerms: t("warrantyTerms"),

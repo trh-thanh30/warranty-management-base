@@ -1,6 +1,6 @@
 import type { PaginationQuery } from "./pagination.types.ts";
 import type { WarrantyStatus } from "./warranty.types.ts";
-import type { GeoPoint, OptionalGeoPoint } from "./geo.types.ts";
+import type { OptionalGeoPoint } from "./geo.types.ts";
 
 export type DealerSortBy = "name" | "province" | "createdAt" | "updatedAt";
 
@@ -12,8 +12,8 @@ export type DealerSummary = {
   province: string;
   district: string | null;
   googleMapsUrl: string;
-  latitude: number;
-  longitude: number;
+  latitude: number | null;
+  longitude: number | null;
   salesName: string | null;
   isActive: boolean;
   metadata: Record<string, unknown> | null;
@@ -22,6 +22,32 @@ export type DealerSummary = {
 };
 
 export type DealerResponse = DealerSummary;
+
+export type DealerMembershipSummary = {
+  id: string;
+  dealerId: string;
+  userId: string;
+  createdById: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user: {
+    id: string;
+    email: string;
+    username: string;
+    fullName: string | null;
+    status: "ACTIVE" | "INACTIVE";
+  };
+  createdBy: {
+    id: string;
+    email: string;
+    username: string;
+    fullName: string | null;
+  } | null;
+};
+
+export type AddDealerMemberBody = {
+  userId: string;
+};
 
 export type DealerActivatedCustomerSummary = {
   id: string;
@@ -61,7 +87,7 @@ export type ListDealersQuery = PaginationQuery & {
   sortOrder?: "asc" | "desc";
 };
 
-export type CreateDealerBody = GeoPoint & {
+export type CreateDealerBody = OptionalGeoPoint & {
   name: string;
   phone?: string;
   address: string;

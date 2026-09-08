@@ -9,7 +9,6 @@ export type WarrantyClaimProductSummary = Pick<
   | "id"
   | "productCode"
   | "warrantyCode"
-  | "serialNumber"
   | "name"
   | "categoryId"
   | "categoryRef"
@@ -17,7 +16,7 @@ export type WarrantyClaimProductSummary = Pick<
   | "model"
   | "modelYear"
   | "status"
->;
+> & { serialNumber: string | null };
 
 export type WarrantyClaimWarrantySummary = Pick<
   WarrantySummary,

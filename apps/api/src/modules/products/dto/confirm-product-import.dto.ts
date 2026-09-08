@@ -1,5 +1,5 @@
 import { product_status } from '@prisma/client';
-import { Transform, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsEnum,
@@ -10,7 +10,6 @@ import {
   Length,
   Max,
   Min,
-  Matches,
   ValidateNested,
 } from 'class-validator';
 
@@ -67,20 +66,6 @@ export class ConfirmProductImportRowDto {
   @IsString()
   @Length(0, 160)
   installationPosition?: string | null;
-
-  @IsOptional()
-  @Transform(({ value }) =>
-    typeof value === 'string' ? value.trim().toUpperCase() || null : value,
-  )
-  @IsString()
-  @Length(6, 64)
-  @Matches(/^[A-Z0-9-]+$/i)
-  warrantyCode?: string | null;
-
-  @IsOptional()
-  @IsString()
-  @Length(1, 64)
-  serialNumber?: string | null;
 
   @IsEnum(product_status)
   status: product_status;

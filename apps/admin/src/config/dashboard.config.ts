@@ -15,6 +15,7 @@ import {
   Navigation,
   PanelsTopLeft,
   Settings,
+  Settings2,
   ShieldCheck,
   Store,
   Tags,
@@ -66,6 +67,12 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
             href: "/products",
             icon: Boxes,
             requiredPermission: PERMISSIONS.PRODUCT_VIEW,
+          },
+          {
+            title: t("items.activationCodeBatches"),
+            href: "/activation-code-batches",
+            icon: KeyRound,
+            requiredPermission: PERMISSIONS.ACTIVATION_CODE_BATCH_VIEW,
           },
           {
             title: t("items.warranties"),
@@ -183,6 +190,12 @@ export function getDashboardConfig(t: Translate): DashboardConfig {
                 title: t("items.settingsPermissions"),
                 href: "/settings/permissions",
                 icon: ShieldCheck,
+              },
+              {
+                title: t("items.settingsActivationCodePolicy"),
+                href: "/settings/activation-code-policy",
+                icon: Settings2,
+                requiredPermission: PERMISSIONS.SYSTEM_CONFIG_VIEW,
               },
             ],
           },

@@ -27,12 +27,9 @@ describe('Lexzenz product seed', () => {
     }
   });
 
-  it('upserts two published physical products for each catalogue definition', async () => {
+  it('upserts one published product per SKU without pre-issuing warranties', async () => {
     const productUpsert = jest.fn(({ where }: Prisma.ProductUpsertArgs) =>
       Promise.resolve({ id: `product-${where.product_code}` }),
-    );
-    const warrantyUpsert = jest.fn(({ where }: Prisma.WarrantyUpsertArgs) =>
-      Promise.resolve({ id: `warranty-${where.product_id}` }),
     );
     const client = {
       category: {
@@ -43,32 +40,25 @@ describe('Lexzenz product seed', () => {
         ),
       },
       product: { upsert: productUpsert },
-      warranty: { upsert: warrantyUpsert },
     };
 
     await seedLexzenzProducts(client);
 
-    expect(productUpsert).toHaveBeenCalledTimes(48);
-    expect(warrantyUpsert).toHaveBeenCalledTimes(48);
+    expect(productUpsert).toHaveBeenCalledTimes(24);
 
     const productCodes = productUpsert.mock.calls.map(
       ([input]) => input.create.product_code,
     );
-    const serialNumbers = productUpsert.mock.calls.map(
-      ([input]) => input.create.serial_number,
-    );
-    const warrantyCodes = warrantyUpsert.mock.calls.map(
-      ([input]) => input.create.warranty_code,
+    const displayNames = productUpsert.mock.calls.map(
+      ([input]) => input.create.display_name,
     );
 
-    expect(new Set(productCodes).size).toBe(48);
-    expect(new Set(serialNumbers).size).toBe(48);
-    expect(new Set(warrantyCodes).size).toBe(48);
+    expect(new Set(productCodes).size).toBe(24);
+    expect(new Set(displayNames).size).toBe(24);
+    expect(displayNames).toContain('Cảm biến áp suất lốp Pro 6 bánh');
 
     for (const [input] of productUpsert.mock.calls) {
-      const catalogueSku = input.create.product_code
-        .replace(/^PRD-/, '')
-        .replace(/-\d{2}$/, '');
+      const catalogueSku = input.create.product_code.replace(/^PRD-/, '');
 
       expect(input.create).toMatchObject({
         category_id: categoryIds.get(
@@ -83,6 +73,8 @@ describe('Lexzenz product seed', () => {
           applications: expect.arrayContaining([expect.any(String)]),
         }),
         published_at: expect.any(Date),
+        warranty_duration_months: expect.any(Number),
+        warranty_method: 'REPAIR',
         display_name: expect.any(String),
         status: 'ACTIVE',
       });
@@ -91,30 +83,11 @@ describe('Lexzenz product seed', () => {
         category_id: input.create.category_id,
         deleted_at: null,
         display_name: input.create.display_name,
-        serial_number: input.create.serial_number,
         status: 'ACTIVE',
       });
+      expect(input.create).not.toHaveProperty('serial_number');
+      expect(input.update).not.toHaveProperty('serial_number');
       expect(input.update).not.toHaveProperty('template_id');
-    }
-
-    for (const [input] of warrantyUpsert.mock.calls) {
-      expect(input.create).toMatchObject({
-        duration_months: expect.any(Number),
-        end_date: null,
-        product_id: expect.stringMatching(/^product-PRD-/),
-        start_date: null,
-        status: 'DRAFT',
-        warranty_code: expect.stringMatching(
-          /^WM-2026-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/,
-        ),
-      });
-      expect(input.update).toMatchObject({
-        duration_months: input.create.duration_months,
-        end_date: null,
-        start_date: null,
-        status: 'DRAFT',
-        warranty_code: input.create.warranty_code,
-      });
     }
   });
 
@@ -131,7 +104,6 @@ describe('Lexzenz product seed', () => {
         ),
       },
       product: { upsert: jest.fn() },
-      warranty: { upsert: jest.fn() },
     };
 
     await expect(seedLexzenzProducts(client)).rejects.toThrow(

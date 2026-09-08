@@ -57,18 +57,12 @@ export function LocationPickerField({
   googleMapsLabel,
   googleMapsPlaceholder,
   latitude,
-  latitudeLabel,
-  latitudePlaceholder,
   longitude,
-  longitudeLabel,
-  longitudePlaceholder,
   mapAriaLabel,
   mapBoundaryErrorLabel,
   mapBoundaryLoadingLabel,
   markerColor,
-  onLatitudeChange,
   onLocationChange,
-  onLongitudeChange,
   province,
   title,
   ward,
@@ -208,44 +202,48 @@ export function LocationPickerField({
         </div>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="network-location-latitude">{latitudeLabel}</Label>
-          <Input
-            aria-describedby={errorId}
-            aria-invalid={Boolean(coordinateError)}
-            id="network-location-latitude"
-            inputMode="decimal"
-            max={90}
-            min={-90}
-            onChange={(event) =>
-              onLatitudeChange(toCoordinate(event.currentTarget.value))
-            }
-            placeholder={latitudePlaceholder}
-            step="any"
-            type="number"
-            value={formatCoordinate(latitude)}
-          />
+      {/*
+        Tạm ẩn input tọa độ khỏi giao diện người dùng.
+        Giữ lại để có thể bật lại sau này mà không mất logic nhập tay.
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="network-location-latitude">{latitudeLabel}</Label>
+            <Input
+              aria-describedby={errorId}
+              aria-invalid={Boolean(coordinateError)}
+              id="network-location-latitude"
+              inputMode="decimal"
+              max={90}
+              min={-90}
+              onChange={(event) =>
+                onLatitudeChange(toCoordinate(event.currentTarget.value))
+              }
+              placeholder={latitudePlaceholder}
+              step="any"
+              type="number"
+              value={formatCoordinate(latitude)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="network-location-longitude">{longitudeLabel}</Label>
+            <Input
+              aria-describedby={errorId}
+              aria-invalid={Boolean(coordinateError)}
+              id="network-location-longitude"
+              inputMode="decimal"
+              max={180}
+              min={-180}
+              onChange={(event) =>
+                onLongitudeChange(toCoordinate(event.currentTarget.value))
+              }
+              placeholder={longitudePlaceholder}
+              step="any"
+              type="number"
+              value={formatCoordinate(longitude)}
+            />
+          </div>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="network-location-longitude">{longitudeLabel}</Label>
-          <Input
-            aria-describedby={errorId}
-            aria-invalid={Boolean(coordinateError)}
-            id="network-location-longitude"
-            inputMode="decimal"
-            max={180}
-            min={-180}
-            onChange={(event) =>
-              onLongitudeChange(toCoordinate(event.currentTarget.value))
-            }
-            placeholder={longitudePlaceholder}
-            step="any"
-            type="number"
-            value={formatCoordinate(longitude)}
-          />
-        </div>
-      </div>
+      */}
 
       {coordinateError ? (
         <p
@@ -299,6 +297,7 @@ function toOptionalText(value: string): string | undefined {
   return normalized ? normalized : undefined;
 }
 
+/*
 function formatCoordinate(value: number): number | "" {
   return Number.isFinite(value) ? value : "";
 }
@@ -306,6 +305,7 @@ function formatCoordinate(value: number): number | "" {
 function toCoordinate(value: string): number {
   return value.trim() === "" ? Number.NaN : Number(value);
 }
+*/
 
 function toGeoPoint(latitude: number, longitude: number): GeoPoint | null {
   if (

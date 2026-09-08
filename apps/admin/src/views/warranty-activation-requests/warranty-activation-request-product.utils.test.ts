@@ -5,6 +5,7 @@ import {
   getActivationProductOptionDisabledReason,
   formatActivationProductSearchOption,
   getActivationProductDisplayName,
+  isActivationCodeRequiredForRequest,
 } from "./warranty-activation-request-product.utils.ts";
 
 const translate = ((key: string, values?: Record<string, string>): string =>
@@ -33,18 +34,17 @@ test("activation product display name falls back to the template name", () => {
   );
 });
 
-test("activation product search option starts with the physical product name", () => {
+test("activation product search option uses catalogue and current warranty context", () => {
   const product = {
     displayName: "Phim cách nhiệt B C",
     name: "Phim cách nhiệt ô tô",
     owner: { fullName: "Nguyễn Văn A" },
-    serialNumber: "SN-001",
     warrantyCode: "WM-2026-001",
   } as ProductResponse;
 
   assert.equal(
     formatActivationProductSearchOption(product),
-    "Phim cách nhiệt B C · WM-2026-001 · SN-001 · Nguyễn Văn A",
+    "Phim cách nhiệt B C · WM-2026-001 · Nguyễn Văn A",
   );
 });
 
@@ -76,4 +76,13 @@ test("eligible activation product option remains selectable", () => {
     getActivationProductOptionDisabledReason(product, translate),
     null,
   );
+});
+
+test("does not require an activation code for a category with codes disabled", () => {
+  assert.equal(isActivationCodeRequiredForRequest(false, undefined), false);
+});
+
+test("falls back to the selected product category activation-code rule", () => {
+  assert.equal(isActivationCodeRequiredForRequest(undefined, false), false);
+  assert.equal(isActivationCodeRequiredForRequest(undefined, true), true);
 });

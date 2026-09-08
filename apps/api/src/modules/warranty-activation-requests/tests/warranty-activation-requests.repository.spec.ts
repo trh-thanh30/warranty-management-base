@@ -3,8 +3,10 @@ import { WarrantyActivationRequestQueries } from '@/modules/warranty-activation-
 import { CreateWarrantyActivationRequestCommand } from '@/modules/warranty-activation-requests/warranty-activation-requests.types';
 import { Prisma, warranty_activation_request_status } from '@prisma/client';
 import {
+  WarrantyActivationCodeReservationConflictError,
   WarrantyActivationRequestCodeConflictError,
   WarrantyActivationRequestUniqueConflictError,
+  WarrantyActivationRequestWarrantyCodeConflictError,
 } from '@/modules/warranty-activation-requests/repository/warranty-activation-request-errors';
 
 describe('WarrantyActivationRequestsRepository', () => {
@@ -73,6 +75,72 @@ describe('WarrantyActivationRequestsRepository', () => {
     );
   });
 
+  it('atomically reserves every selected activation code before creating the request', async () => {
+    const reserveCodes = jest.fn().mockResolvedValue({ count: 2 });
+    const createRequest = jest.fn().mockResolvedValue({ id: 'request-id' });
+    const transaction = jest.fn((callback: (tx: unknown) => unknown) =>
+      callback({
+        activationCode: { updateMany: reserveCodes },
+        warrantyActivationRequest: { create: createRequest },
+      }),
+    );
+    const repository = new WarrantyActivationRequestsRepository(
+      { $transaction: transaction } as never,
+      queries,
+    );
+    const command = createCommand('WAR-20260820-0003');
+    command.activationCodeId = 'activation-code-a';
+    command.items = [
+      {
+        activationCodeId: 'activation-code-b',
+        activationFieldId: null,
+        positionKey: 'primary',
+        positionLabel: 'Sản phẩm',
+        productId: 'product-id',
+        warrantyId: null,
+        warrantyCode: 'WM-002',
+        productName: 'Product',
+        productCode: 'PRODUCT-001',
+        serialNumber: null,
+      },
+    ];
+
+    await repository.create(command);
+
+    expect(reserveCodes).toHaveBeenCalledWith({
+      where: {
+        id: { in: ['activation-code-a', 'activation-code-b'] },
+        status: 'AVAILABLE',
+        expires_at: { gt: expect.any(Date) },
+      },
+      data: { status: 'PENDING_APPROVAL' },
+    });
+    expect(createRequest).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not create a request when an activation code loses the reservation race', async () => {
+    const createRequest = jest.fn();
+    const transaction = jest.fn((callback: (tx: unknown) => unknown) =>
+      callback({
+        activationCode: {
+          updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+        },
+        warrantyActivationRequest: { create: createRequest },
+      }),
+    );
+    const repository = new WarrantyActivationRequestsRepository(
+      { $transaction: transaction } as never,
+      queries,
+    );
+    const command = createCommand('WAR-20260820-0004');
+    command.activationCodeId = 'activation-code-a';
+
+    await expect(repository.create(command)).rejects.toBeInstanceOf(
+      WarrantyActivationCodeReservationConflictError,
+    );
+    expect(createRequest).not.toHaveBeenCalled();
+  });
+
   it('translates Prisma unique violations into application conflict errors', async () => {
     const conflict = new Prisma.PrismaClientKnownRequestError(
       'Unique constraint failed',
@@ -94,6 +162,29 @@ describe('WarrantyActivationRequestsRepository', () => {
     await expect(
       repository.create(createCommand('WAR-duplicate')),
     ).rejects.toBeInstanceOf(WarrantyActivationRequestCodeConflictError);
+
+    const warrantyCodeConflict = new Prisma.PrismaClientKnownRequestError(
+      'Unique constraint failed',
+      {
+        clientVersion: 'test',
+        code: 'P2002',
+        meta: { target: ['warranty_code'] },
+      },
+    );
+    const warrantyCodeRepository = new WarrantyActivationRequestsRepository(
+      {
+        warrantyActivationRequest: {
+          create: jest.fn().mockRejectedValue(warrantyCodeConflict),
+        },
+      } as never,
+      queries,
+    );
+
+    await expect(
+      warrantyCodeRepository.create(createCommand('WAR-warranty-code')),
+    ).rejects.toBeInstanceOf(
+      WarrantyActivationRequestWarrantyCodeConflictError,
+    );
 
     const otherConflict = new Prisma.PrismaClientKnownRequestError(
       'Unique constraint failed',

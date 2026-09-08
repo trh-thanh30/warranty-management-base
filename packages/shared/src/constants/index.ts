@@ -9,3 +9,5 @@ export * from "./warranty-domain.ts";
 export * from "./notification.ts";
 export * from "./website-defaults.ts";
 export * from "./category-activation-fields.ts";
+export * from "./activation-label-layout.ts";
+export * from "./activation-code-batches.ts";

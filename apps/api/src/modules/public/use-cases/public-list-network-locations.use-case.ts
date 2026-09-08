@@ -32,10 +32,14 @@ export class PublicListNetworkLocationsUseCase {
     ]);
 
     return [
-      ...dealers.map((dealer) => this.mapLocation(dealer, 'DEALER')),
-      ...serviceCenters.map((serviceCenter) =>
-        this.mapLocation(serviceCenter, 'SERVICE_CENTER'),
-      ),
+      ...dealers
+        .filter(hasCoordinates)
+        .map((dealer) => this.mapLocation(dealer, 'DEALER')),
+      ...serviceCenters
+        .filter(hasCoordinates)
+        .map((serviceCenter) =>
+          this.mapLocation(serviceCenter, 'SERVICE_CENTER'),
+        ),
     ];
   }
 
@@ -49,4 +53,10 @@ export class PublicListNetworkLocationsUseCase {
       googleMapsUrl: createGoogleMapsUrl(record),
     };
   }
+}
+
+function hasCoordinates<
+  T extends { latitude: number | null; longitude: number | null },
+>(record: T): record is T & { latitude: number; longitude: number } {
+  return record.latitude !== null && record.longitude !== null;
 }

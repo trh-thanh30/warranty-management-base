@@ -4,6 +4,10 @@ import {
   NotFoundError,
 } from '@/common/response';
 import { GenerateCustomerCodeUseCase } from '@/modules/customers/use-cases/generate-customer-code.use-case';
+import {
+  DealerAccessActor,
+  DealerAccessPolicy,
+} from '@/modules/dealers/service/dealer-access.policy';
 import { GenerateProductCodeUseCase } from '@/modules/products/use-cases/generate-product-code.use-case';
 import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { IssueWarrantyCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-certificate.use-case';
@@ -13,7 +17,6 @@ import { WarrantiesRepository } from '@/modules/warranties/repository/warranties
 import { WarrantyLifecycleService } from '@/modules/warranties/services/warranty-lifecycle.service';
 import {
   ManualActivationProduct,
-  WARRANTY_STATUS,
   toWarrantyResponse,
 } from '@/modules/warranties/warranties.types';
 import { Injectable } from '@nestjs/common';
@@ -27,11 +30,15 @@ export class ManualWarrantyActivationUseCase {
     private readonly generateProductCodeUseCase: GenerateProductCodeUseCase,
     private readonly generateWarrantyCodeUseCase: GenerateWarrantyCodeUseCase,
     private readonly issueWarrantyCertificateUseCase: IssueWarrantyCertificateUseCase,
+    private readonly dealerAccessPolicy?: DealerAccessPolicy,
   ) {}
 
   async execute(
     dto: ManualWarrantyActivationDto,
-    context: { activatedByUserId?: string } = {},
+    context: {
+      activatedByUserId?: string;
+      actor?: DealerAccessActor;
+    } = {},
   ) {
     const email = dto.customer.email.trim().toLowerCase();
     const phone = dto.customer.phone.trim();
@@ -45,6 +52,16 @@ export class ManualWarrantyActivationUseCase {
 
     if (purchaseDate > activatedAt) {
       throw new BadRequestError('Purchase date must be before activation date');
+    }
+
+    if (context.actor) {
+      const warranty = dto.product.id
+        ? await this.warrantiesRepository.findByProductId(dto.product.id)
+        : null;
+      await this.dealerAccessPolicy!.assertCanAccessRecord(
+        context.actor,
+        warranty?.dealer_id,
+      );
     }
 
     const productWithRelations =
@@ -66,37 +83,19 @@ export class ManualWarrantyActivationUseCase {
 
         const warrantyCode =
           requestedWarrantyCode ??
-          existingProduct?.warranty?.warrantyCode ??
           (await this.generateWarrantyCodeUseCase.execute(new Date()));
 
-        await this.ensureProductInputsAvailable(repository, dto, warrantyCode);
+        await this.ensureWarrantyCodeAvailable(repository, warrantyCode);
 
         let productWithRelations: ManualActivationProduct;
 
         if (existingProduct) {
-          if (!existingProduct.warranty) {
-            throw new NotFoundError('Warranty not found');
-          }
-          if (existingProduct.warranty.status !== WARRANTY_STATUS.DRAFT) {
-            throw new BadRequestError(
-              'Warranty is not eligible for activation',
-              'BAD_REQUEST',
-              { code: 'WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION' },
-            );
-          }
-
-          await repository.closeCurrentOwnerships(
-            existingProduct.id,
-            activatedAt,
-          );
-
           productWithRelations = await repository.updateManualActivationProduct(
             {
               customerId: customer.id,
               ownerUserId: customer.userId,
               productId: existingProduct.id,
               purchaseDate,
-              serialNumber: optionalText(dto.product.serialNumber),
               displayName: optionalText(dto.product.displayName),
               warrantyCode,
               warrantyDurationMonths: dto.warranty.durationMonths,
@@ -134,7 +133,6 @@ export class ManualWarrantyActivationUseCase {
               ownerUserId: customer.userId,
               productCode,
               purchaseDate,
-              serialNumber: optionalText(dto.product.serialNumber),
               warrantyCode,
               warrantyDurationMonths: dto.warranty.durationMonths,
               warrantyTerms: optionalText(dto.warranty.terms),
@@ -197,32 +195,15 @@ export class ManualWarrantyActivationUseCase {
     };
   }
 
-  private async ensureProductInputsAvailable(
+  private async ensureWarrantyCodeAvailable(
     repository: WarrantyTransactionRepository,
-    dto: ManualWarrantyActivationDto,
     warrantyCode: string,
   ) {
-    const [existingWarrantyCode, existingSerial] = await Promise.all([
-      repository.findWarrantyByCode(warrantyCode),
-      optionalText(dto.product.serialNumber)
-        ? repository.findProductBySerialNumber(
-            optionalText(dto.product.serialNumber)!,
-          )
-        : null,
-    ]);
+    const existingWarrantyCode =
+      await repository.findWarrantyByCode(warrantyCode);
 
-    if (
-      existingWarrantyCode &&
-      (!dto.product.id || existingWarrantyCode.productId !== dto.product.id)
-    ) {
+    if (existingWarrantyCode) {
       throw new ConflictError('Warranty code already exists');
-    }
-
-    if (
-      existingSerial &&
-      (!dto.product.id || existingSerial.id !== dto.product.id)
-    ) {
-      throw new ConflictError('Serial number already exists');
     }
   }
 
@@ -235,22 +216,7 @@ export class ManualWarrantyActivationUseCase {
       phone: string;
     },
   ) {
-    const [customerByEmail, customerByPhone] = await Promise.all([
-      repository.findCustomerByEmail(input.email),
-      repository.findCustomerByPhone(input.phone),
-    ]);
-
-    if (
-      customerByEmail &&
-      customerByPhone &&
-      customerByEmail.id !== customerByPhone.id
-    ) {
-      throw new ConflictError(
-        'Customer email and phone belong to different customers',
-      );
-    }
-
-    const existingCustomer = customerByEmail ?? customerByPhone;
+    const existingCustomer = await repository.findCustomerByPhone(input.phone);
     if (existingCustomer) {
       return repository.updateCustomer(existingCustomer.id, input);
     }

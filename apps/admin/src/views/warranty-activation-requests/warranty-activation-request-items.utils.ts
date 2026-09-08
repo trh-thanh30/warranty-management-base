@@ -41,7 +41,23 @@ export function getActivationRequestWarrantyCodes(
   request: WarrantyActivationRequestSummary,
 ) {
   if (request.items?.length) {
-    return request.items.map((item) => item.warrantyCode);
+    return request.items
+      .map((item) => item.warrantyCode)
+      .filter((code): code is string => Boolean(code));
   }
   return request.warrantyCode ? [request.warrantyCode] : [];
+}
+
+export function getActivationRequestActivationCodes(
+  request: WarrantyActivationRequestSummary,
+) {
+  const codes = request.items?.length
+    ? request.items.flatMap((item) =>
+        item.activationCode ? [item.activationCode] : [],
+      )
+    : request.activationCode
+      ? [request.activationCode]
+      : [];
+
+  return Array.from(new Map(codes.map((code) => [code.id, code])).values());
 }

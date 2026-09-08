@@ -42,6 +42,7 @@ export class WarrantyActivationRequestQueries {
       select: {
         id: true,
         name: true,
+        email: true,
         phone: true,
         address: true,
         province: true,
@@ -50,6 +51,9 @@ export class WarrantyActivationRequestQueries {
       },
     },
     certificate: true,
+    activation_code: {
+      select: { id: true, code_ciphertext: true, status: true },
+    },
     reviewed_by: {
       select: {
         id: true,
@@ -69,6 +73,9 @@ export class WarrantyActivationRequestQueries {
     items: {
       orderBy: [{ created_at: 'asc' as const }, { id: 'asc' as const }],
       include: {
+        activation_code: {
+          select: { id: true, code_ciphertext: true, status: true },
+        },
         warranty: {
           include: {
             certificates: {
@@ -81,7 +88,10 @@ export class WarrantyActivationRequestQueries {
     },
   } satisfies Prisma.WarrantyActivationRequestInclude;
 
-  buildListQuery(filters: ListWarrantyActivationRequestsDto) {
+  buildListQuery(
+    filters: ListWarrantyActivationRequestsDto,
+    dealerIds?: string[],
+  ) {
     const search = filters.search?.trim();
     const warrantyCode = filters.warrantyCode?.trim().toUpperCase();
     const createdAtFilter: Prisma.DateTimeFilter = {
@@ -149,6 +159,7 @@ export class WarrantyActivationRequestQueries {
         }
       : undefined;
     const where: Prisma.WarrantyActivationRequestWhereInput = {
+      dealer_id: dealerIds ? { in: dealerIds } : undefined,
       status: filters.status,
       created_at: hasCreatedAtFilter ? createdAtFilter : undefined,
       AND: [searchFilter, warrantyCodeFilter].filter(

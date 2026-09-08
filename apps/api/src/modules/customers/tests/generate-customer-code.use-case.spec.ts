@@ -22,19 +22,20 @@ describe('GenerateCustomerCodeUseCase', () => {
     );
   });
 
-  it('uses the supplied transaction client to read the last code', async () => {
+  it('uses a supplied transaction-bound sequence reader', async () => {
     const customersRepository = createCustomersRepository();
-    customersRepository.findLastCustomerCode.mockResolvedValue(null);
-    const tx = { customer: {} };
+    const sequenceReader = {
+      findLastCustomerCode: jest
+        .fn()
+        .mockResolvedValue({ customer_code: 'CUS000099' }),
+    };
     const useCase = new GenerateCustomerCodeUseCase(
       customersRepository as never,
     );
 
-    await expect(useCase.execute(tx as never)).resolves.toBe('CUS000001');
-    expect(customersRepository.findLastCustomerCode).toHaveBeenCalledWith(
-      'CUS',
-      tx,
-    );
+    await expect(useCase.execute(sequenceReader)).resolves.toBe('CUS000100');
+    expect(sequenceReader.findLastCustomerCode).toHaveBeenCalledWith('CUS');
+    expect(customersRepository.findLastCustomerCode).not.toHaveBeenCalled();
   });
 
   it('generates a sequential batch after the last customer code', async () => {
