@@ -90,6 +90,14 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
                     </Link>
                   </DropdownMenuItem>
                 ) : null}
+                {product?.assignedActivationCodes?.length ? (
+                  <DropdownMenuItem asChild>
+                    <Link href={`/products/${productId}/activation-codes`}>
+                      <KeyRound className="mr-2 size-4" />
+                      {t("manageAssignedActivationCodes")}
+                    </Link>
+                  </DropdownMenuItem>
+                ) : null}
                 {canCreate ? (
                   <DropdownMenuItem asChild>
                     <Link href={`/products/create?cloneFrom=${productId}`}>

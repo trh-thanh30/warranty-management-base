@@ -94,6 +94,18 @@ export function createActivationCodesService(http: ActivationCodesHttpClient) {
       );
     },
 
+    async listCodesByProduct(
+      productId: string,
+      query: ActivationCodeDetailQuery = {},
+    ): Promise<ActivationCodeDetailList> {
+      return unwrap(
+        await http.get<ActivationCodeDetailList>(
+          `/activation-code-batches/codes/product/${productId}`,
+          { params: query },
+        ),
+      );
+    },
+
     async listAvailableByProduct(
       productId?: string,
       query: {

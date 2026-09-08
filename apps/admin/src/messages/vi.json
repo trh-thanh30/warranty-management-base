@@ -604,6 +604,8 @@
     "replaceDescription": "Chọn mã mới để thay thế mã đang gán cho sản phẩm {product}.",
     "currentCode": "Mã đang gán",
     "currentCodes": "Các mã đang gán",
+    "assignedCodesCount": "{count} mã kích hoạt đã gán",
+    "viewCurrentCodes": "Xem danh sách",
     "batchLabel": "Lô mã kích hoạt",
     "allBatches": "Tất cả mã",
     "allBatchesDescription": "Hiển thị mã kích hoạt từ tất cả các lô.",
@@ -1375,6 +1377,8 @@
     "activationCodeStatus": "Trạng thái mã",
     "activationCodeUnassigned": "Chưa gán mã",
     "activationCodeUnassignedDescription": "Sản phẩm này chưa được liên kết với mã kích hoạt nào.",
+    "assignedActivationCodeCount": "mã kích hoạt",
+    "manageAssignedActivationCodes": "Quản lý mã kích hoạt đã gán",
     "activationCodeBatch": "Lô mã kích hoạt",
     "activationCodeExpiresAt": "Hạn kích hoạt",
     "activationCodeStatuses": {

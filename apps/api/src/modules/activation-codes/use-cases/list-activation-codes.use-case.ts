@@ -21,4 +21,21 @@ export class ListActivationCodesUseCase {
       return result;
     });
   }
+
+  executeByProduct(
+    productId: string,
+    filters: {
+      page?: number;
+      limit?: number;
+      search?: string;
+      status?: activation_code_status;
+    },
+  ) {
+    return this.repository
+      .listCodes(productId, filters, 'product')
+      .then((result) => {
+        if (!result) throw new NotFoundError('Product not found');
+        return result;
+      });
+  }
 }
