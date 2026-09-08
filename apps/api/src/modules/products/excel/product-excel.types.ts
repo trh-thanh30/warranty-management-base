@@ -12,6 +12,5 @@ export type ProductExcelRow = {
   warrantyDurationMonths: number;
   warrantyTerms: string | null;
   installationPosition: string | null;
-  serialNumber: string | null;
   status: product_status;
 };

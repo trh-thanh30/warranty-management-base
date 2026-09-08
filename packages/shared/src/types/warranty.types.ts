@@ -1,5 +1,6 @@
 import type { ProductSummary } from "./product.types.ts";
 import type { CategorySummary } from "./category.types.ts";
+import type { ActivationCodeReportStatus } from "./activation-code-report.types.ts";
 
 export type WarrantyStatus = "DRAFT" | "ACTIVE" | "EXPIRED" | "VOIDED";
 
@@ -83,9 +84,9 @@ export type WarrantyLookupResult = {
     | "name"
     | "brand"
     | "model"
-    | "serialNumber"
     | "warrantyCode"
   > & {
+    serialNumber: string | null;
     category: Pick<CategorySummary, "id" | "slug" | "name"> | null;
   };
   warranty: Pick<
@@ -127,8 +128,8 @@ export type WarrantyLookupFilmItems = Partial<
 
 export type WarrantyProductSummary = Pick<
   ProductSummary,
-  "id" | "name" | "brand" | "model" | "productCode" | "serialNumber"
->;
+  "id" | "name" | "brand" | "model" | "productCode"
+> & { serialNumber: string | null };
 
 export type WarrantyOwnerSummary = {
   customerId: string;
@@ -138,6 +139,11 @@ export type WarrantyOwnerSummary = {
 };
 
 export type WarrantyListItem = WarrantySummary & {
+  activationCode: {
+    id: string;
+    code: string | null;
+    status: ActivationCodeReportStatus;
+  } | null;
   owner: WarrantyOwnerSummary | null;
   product: WarrantyProductSummary;
 };
@@ -195,7 +201,6 @@ export type ManualWarrantyActivationProductInput = {
   brand?: string;
   model?: string;
   displayName?: string;
-  serialNumber?: string;
 };
 
 export type ManualWarrantyActivationWarrantyInput = {
@@ -223,13 +228,7 @@ export type ManualWarrantyActivationResult = {
   };
   product: Pick<
     ProductSummary,
-    | "id"
-    | "productCode"
-    | "warrantyCode"
-    | "serialNumber"
-    | "name"
-    | "brand"
-    | "model"
-  >;
+    "id" | "productCode" | "warrantyCode" | "name" | "brand" | "model"
+  > & { serialNumber: string | null };
   warranty: WarrantySummary;
 };

@@ -67,11 +67,6 @@ export class ConfirmProductImportRowDto {
   @Length(0, 160)
   installationPosition?: string | null;
 
-  @IsOptional()
-  @IsString()
-  @Length(1, 64)
-  serialNumber?: string | null;
-
   @IsEnum(product_status)
   status: product_status;
 }

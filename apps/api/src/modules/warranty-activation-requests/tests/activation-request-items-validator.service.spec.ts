@@ -170,6 +170,7 @@ describe('ActivationRequestItemsValidatorService', () => {
       expect.objectContaining({
         activationCodeId: null,
         productId: 'product-a',
+        serialNumber: null,
         warrantyCode: null,
         warrantyId: null,
         warrantyDurationMonths: 24,
@@ -200,6 +201,7 @@ describe('ActivationRequestItemsValidatorService', () => {
       expect.objectContaining({
         activationCodeId: null,
         productId: 'product-a',
+        serialNumber: null,
         warrantyCode: null,
         warrantyId: null,
       }),
@@ -302,11 +304,11 @@ function createProduct(id: string) {
     category_id: 'category-id',
     display_name: null,
     product_code: `CODE-${id}`,
-    serial_number: `SERIAL-${id}`,
     status: product_status.ACTIVE,
     template: { name: `Product ${id}` },
     warranty: {
       id: `warranty-${id}`,
+      serial_number: `SERIAL-${id}`,
       status: warranty_status.DRAFT,
       warranty_code: `WM-${id}`,
     },

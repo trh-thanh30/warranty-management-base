@@ -445,7 +445,6 @@ model Product {
   category_id              String           @db.Uuid
   current_warranty_id      String?          @unique @db.Uuid
   product_code             String           @unique
-  serial_number            String?          @unique
   display_name             String?
   // Product-owned catalogue fields.
   slug                     String           @unique
@@ -478,7 +477,6 @@ model Product {
 
   @@index([category_id])
   @@index([status])
-  @@index([serial_number])
   @@index([display_name])
   @@map("product")
 }

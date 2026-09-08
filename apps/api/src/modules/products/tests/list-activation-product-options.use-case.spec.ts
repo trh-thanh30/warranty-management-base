@@ -7,7 +7,7 @@ import {
 } from '@prisma/client';
 
 describe('ListActivationProductOptionsUseCase', () => {
-  it('returns the API eligibility contract with the open request code', async () => {
+  it('keeps the catalogue product selectable when another request is pending', async () => {
     const product = createProduct({
       warranty_activation_request_items: [
         {
@@ -41,9 +41,9 @@ describe('ListActivationProductOptionsUseCase', () => {
     });
 
     expect(result.items[0]?.activationEligibility).toEqual({
-      eligible: false,
-      reason: 'ACTIVATION_REQUEST_PENDING',
-      requestCode: 'WAR-20260827-0001',
+      eligible: true,
+      reason: null,
+      requestCode: null,
     });
   });
 
@@ -58,25 +58,7 @@ describe('ListActivationProductOptionsUseCase', () => {
     },
     {
       expected: 'WARRANTY_MISSING',
-      patch: { warranty: null },
-    },
-    {
-      expected: 'WARRANTY_CODE_MISSING',
-      patch: {
-        warranty: createWarranty({ warranty_code: null }),
-      },
-    },
-    {
-      expected: 'WARRANTY_ALREADY_ACTIVATED',
-      patch: {
-        warranty: createWarranty({ status: warranty_status.ACTIVE }),
-      },
-    },
-    {
-      expected: 'WARRANTY_NOT_DRAFT',
-      patch: {
-        warranty: createWarranty({ status: warranty_status.VOIDED }),
-      },
+      patch: { warranty: null, warranty_duration_months: null },
     },
   ])('returns $expected for an ineligible product', ({ expected, patch }) => {
     expect(getActivationProductEligibility(createProduct(patch))).toEqual({
@@ -86,7 +68,7 @@ describe('ListActivationProductOptionsUseCase', () => {
     });
   });
 
-  it('returns an approved request as an authoritative disabled reason', () => {
+  it('keeps the catalogue product selectable when another request is approved', () => {
     const product = createProduct({
       warranty_activation_requests: [
         {
@@ -98,13 +80,13 @@ describe('ListActivationProductOptionsUseCase', () => {
     });
 
     expect(getActivationProductEligibility(product)).toEqual({
-      eligible: false,
-      reason: 'ACTIVATION_REQUEST_APPROVED',
-      requestCode: 'WAR-20260827-0002',
+      eligible: true,
+      reason: null,
+      requestCode: null,
     });
   });
 
-  it('marks an active draft warranty without open requests as eligible', () => {
+  it('marks an active catalogue product with a warranty policy as eligible', () => {
     expect(getActivationProductEligibility(createProduct())).toEqual({
       eligible: true,
       reason: null,
@@ -162,6 +144,7 @@ function createProduct(overrides: Record<string, unknown> = {}) {
     warranty: createWarranty(),
     warranty_activation_requests: [],
     warranty_activation_request_items: [],
+    warranty_duration_months: 24,
     ...overrides,
   };
 }

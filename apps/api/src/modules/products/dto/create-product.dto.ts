@@ -78,11 +78,6 @@ export class CreateProductDto {
   status?: product_status;
 
   @IsOptional()
-  @IsString()
-  @Length(1, 64)
-  serialNumber?: string;
-
-  @IsOptional()
   @IsObject()
   metadata?: Record<string, unknown>;
 }

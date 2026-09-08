@@ -143,13 +143,4 @@ describe('UpdateProductUseCase', () => {
       useCase.execute('product-id', { productCode: 'PRD-OTHER' }),
     ).rejects.toThrow('Product code already exists');
   });
-
-  it('rejects a duplicate serial number', async () => {
-    const { repository, useCase } = setup();
-    repository.findBySerialNumber.mockResolvedValue({ id: 'other-product' });
-
-    await expect(
-      useCase.execute('product-id', { serialNumber: 'SN-OTHER' }),
-    ).rejects.toThrow('Serial number already exists');
-  });
 });

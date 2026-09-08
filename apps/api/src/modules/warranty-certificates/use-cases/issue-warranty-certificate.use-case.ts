@@ -48,7 +48,7 @@ export class IssueWarrantyCertificateUseCase {
           input.requestId,
         )
       : null;
-    const currentCustomer = warranty.product.ownerships[0]?.customer;
+    const currentCustomer = warranty.ownerships[0]?.customer;
     const recipientEmail = (
       input.recipientEmail ??
       request?.customerEmail ??
@@ -139,20 +139,20 @@ export class IssueWarrantyCertificateUseCase {
           certificateNumber,
           customerName:
             request?.customerName ??
-            warranty.product.ownerships[0]?.customer.fullName ??
+            warranty.ownerships[0]?.customer.fullName ??
             'Quy khach',
           customerAddress: request?.fullAddress ?? null,
           customerEmail: request?.customerEmail ?? null,
           customerPhone:
             request?.customerPhone ??
-            warranty.product.ownerships[0]?.customer.phone ??
+            warranty.ownerships[0]?.customer.phone ??
             null,
           dealerName: this.resolveDealerName(request),
           endDate: warranty.endDate,
           filmItems: this.resolveFilmItems(request),
           installedAt: request?.installedAt ?? warranty.startDate,
           productName: warranty.product.displayName ?? warranty.product.name,
-          serialNumber: warranty.product.serialNumber,
+          serialNumber: warranty.serialNumber,
           startDate: warranty.startDate,
           vehicleModel: request?.vehicleModel ?? null,
           vehiclePlate: request?.vehiclePlate ?? null,

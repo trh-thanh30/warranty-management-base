@@ -42,6 +42,6 @@ import { Module } from '@nestjs/common';
     DealerAccessPolicy,
     RemoveDealerMemberUseCase,
   ],
-  exports: [DealersRepository, GenerateDealerCodeUseCase],
+  exports: [DealerAccessPolicy, DealersRepository, GenerateDealerCodeUseCase],
 })
 export class DealersModule {}

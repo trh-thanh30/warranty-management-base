@@ -161,13 +161,13 @@ describe('ProductsRepository.list', () => {
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          ownerships: expectedOwnerFilter,
+          warranties: { some: { ownerships: expectedOwnerFilter } },
         }),
       }),
     );
     expect(count).toHaveBeenCalledWith({
       where: expect.objectContaining({
-        ownerships: expectedOwnerFilter,
+        warranties: { some: { ownerships: expectedOwnerFilter } },
       }),
     });
   });
@@ -224,7 +224,6 @@ describe('ProductsRepository.list', () => {
           AND: expect.arrayContaining([
             { category_ref: { activation_code_enabled: true } },
             { warranty_duration_months: { gt: 0 } },
-            { activation_codes: { none: {} } },
           ]),
           deleted_at: null,
           status: product_status.ACTIVE,

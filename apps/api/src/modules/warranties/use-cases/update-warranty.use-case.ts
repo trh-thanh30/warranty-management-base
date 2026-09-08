@@ -11,6 +11,10 @@ import type {
 } from '@repo/shared';
 import { Injectable } from '@nestjs/common';
 import { Prisma, warranty_status } from '@prisma/client';
+import {
+  DealerAccessPolicy,
+  type DealerAccessActor,
+} from '@/modules/dealers/service/dealer-access.policy';
 
 const MUTABLE_FIELDS = [
   'coverageLimitAmount',
@@ -25,16 +29,26 @@ export class UpdateWarrantyUseCase {
   constructor(
     private readonly warrantiesRepository: WarrantiesRepository,
     private readonly usersService: UsersService,
+    private readonly dealerAccessPolicy?: DealerAccessPolicy,
   ) {}
 
   async execute(
     id: string,
     dto: UpdateWarrantyDto,
-    context: { adjustedByUserId?: string } = {},
+    context: {
+      adjustedByUserId?: string;
+      actor?: DealerAccessActor;
+    } = {},
   ) {
     const warranty = await this.warrantiesRepository.findById(id);
     if (!warranty) {
       throw new NotFoundError('Warranty not found');
+    }
+    if (context.actor) {
+      await this.dealerAccessPolicy!.assertCanAccessRecord(
+        context.actor,
+        warranty.dealer_id,
+      );
     }
 
     if (

@@ -1,9 +1,9 @@
 import {
   Category,
+  ActivationCode,
   Customer,
   Dealer,
   Product,
-  ProductOwnership,
   WarrantyOwnership,
   User,
   Warranty,
@@ -131,13 +131,15 @@ export type WarrantyVoidCandidate = {
 };
 
 type WarrantyWithProduct = Warranty & {
+  activation_code?: Pick<
+    ActivationCode,
+    'id' | 'code_ciphertext' | 'status'
+  > | null;
   activated_by?: User | null;
   voided_by?: User | null;
   dealer?: Dealer | null;
   ownerships?: Array<WarrantyOwnership & { customer?: Customer | null }>;
-  product: Product & {
-    ownerships?: Array<ProductOwnership & { customer?: Customer }>;
-  };
+  product: Product;
 };
 
 type WarrantyWithAuditUsers = WarrantyRecord & {
@@ -205,7 +207,7 @@ export function toWarrantyLookupResponse(input: {
       displayName: input.product.display_name,
       brand: catalogue.brand,
       model: catalogue.model,
-      serialNumber: input.product.serial_number,
+      serialNumber: input.warranty.serial_number,
       warrantyCode: input.warranty.warranty_code,
       category: category
         ? {
@@ -286,15 +288,25 @@ function toOptionalString(value: unknown): string | null {
   return typeof value === 'string' && value.trim() ? value.trim() : null;
 }
 
-export function toWarrantyListItemResponse(warranty: WarrantyWithProduct) {
-  const currentOwnership =
-    warranty.ownerships?.find((ownership) => ownership.is_current_owner) ??
-    warranty.product.ownerships?.find(
-      (ownership) => ownership.is_current_owner,
-    );
+export function toWarrantyListItemResponse(
+  warranty: WarrantyWithProduct,
+  decryptActivationCode?: (ciphertext: string) => string,
+) {
+  const currentOwnership = warranty.ownerships?.find(
+    (ownership) => ownership.is_current_owner,
+  );
 
   return {
     ...toWarrantyResponse(toWarrantyRecord(warranty)),
+    activationCode: warranty.activation_code
+      ? {
+          id: warranty.activation_code.id,
+          code: decryptActivationCode
+            ? decryptActivationCode(warranty.activation_code.code_ciphertext)
+            : null,
+          status: warranty.activation_code.status,
+        }
+      : null,
     product: {
       id: warranty.product.id,
       name: getProductCatalogue(warranty.product).name,
@@ -302,7 +314,7 @@ export function toWarrantyListItemResponse(warranty: WarrantyWithProduct) {
       brand: getProductCatalogue(warranty.product).brand,
       model: getProductCatalogue(warranty.product).model,
       productCode: warranty.product.product_code,
-      serialNumber: warranty.product.serial_number,
+      serialNumber: warranty.serial_number,
     },
     owner: currentOwnership
       ? {

@@ -98,7 +98,6 @@ export class UpdateProductUseCase {
         : undefined,
       status: dto.status,
       // Serial/VIN is immutable catalogue-external data stored on Warranty.
-      serial_number: undefined,
       warranty_duration_months: dto.warrantyDurationMonths,
       warranty_terms:
         dto.warrantyTerms === undefined

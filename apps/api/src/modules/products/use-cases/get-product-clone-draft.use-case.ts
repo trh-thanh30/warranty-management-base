@@ -30,7 +30,6 @@ export class GetProductCloneDraftUseCase {
     return {
       ...product,
       productCode: null,
-      serialNumber: null,
       warrantyCode: null,
       owner: null,
       warranty: null,

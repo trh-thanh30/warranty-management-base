@@ -4,14 +4,31 @@ import { WarrantiesRepository } from '@/modules/warranties/repository/warranties
 import { toWarrantyListItemResponse } from '@/modules/warranties/warranties.types';
 import { Injectable } from '@nestjs/common';
 import { warranty_status } from '@prisma/client';
+import {
+  DealerAccessPolicy,
+  type DealerAccessActor,
+} from '@/modules/dealers/service/dealer-access.policy';
 
 @Injectable()
 export class TransferWarrantyOwnerUseCase {
-  constructor(private readonly warrantiesRepository: WarrantiesRepository) {}
+  constructor(
+    private readonly warrantiesRepository: WarrantiesRepository,
+    private readonly dealerAccessPolicy?: DealerAccessPolicy,
+  ) {}
 
-  async execute(warrantyId: string, dto: TransferWarrantyOwnerDto) {
+  async execute(
+    warrantyId: string,
+    dto: TransferWarrantyOwnerDto,
+    actor?: DealerAccessActor,
+  ) {
     const warranty = await this.warrantiesRepository.findById(warrantyId);
     if (!warranty) throw new NotFoundError('Warranty not found');
+    if (actor) {
+      await this.dealerAccessPolicy!.assertCanAccessRecord(
+        actor,
+        warranty.dealer_id,
+      );
+    }
     if (
       warranty.status === warranty_status.EXPIRED ||
       warranty.status === warranty_status.VOIDED

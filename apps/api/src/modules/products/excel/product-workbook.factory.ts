@@ -26,7 +26,6 @@ export async function createProductImportTemplateWorkbook() {
         warrantyDurationMonths: 24,
         warrantyTerms: null,
         installationPosition: 'Khoang động cơ',
-        serialNumber: 'SN-001',
         status: product_status.ACTIVE,
       },
     ],

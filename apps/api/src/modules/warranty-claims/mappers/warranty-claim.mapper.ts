@@ -161,7 +161,7 @@ export function toWarrantyClaimResponse(
           id: claim.product.id,
           productCode: claim.product.product_code,
           warrantyCode: claim.warranty?.warranty_code ?? null,
-          serialNumber: claim.product.serial_number,
+          serialNumber: claim.warranty?.serial_number ?? null,
           displayName: claim.product.display_name,
           name: catalogue?.name ?? claim.product.product_code,
           categoryId: claim.product.category_id,

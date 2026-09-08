@@ -7,71 +7,6 @@ import {
 import { toNullableValue, toOptionalValue } from "../../utils/form.ts";
 import type { ProductFormValues } from "./products.types";
 
-type ProductWarrantyPeriod = {
-  endDate: string;
-  startDate: string;
-};
-
-export type ProductWarrantyProgress = {
-  percentage: number;
-  remainingMonths: number;
-  state: "active" | "expired" | "upcoming";
-};
-
-export function getProductWarrantyProgress(
-  warranty: ProductWarrantyPeriod,
-  now = new Date(),
-): ProductWarrantyProgress {
-  const start = new Date(warranty.startDate);
-  const end = new Date(warranty.endDate);
-  const totalDuration = end.getTime() - start.getTime();
-  const elapsedDuration = now.getTime() - start.getTime();
-  const percentage =
-    totalDuration > 0
-      ? Math.round(
-          Math.min(1, Math.max(0, elapsedDuration / totalDuration)) * 100,
-        )
-      : 0;
-
-  return {
-    percentage,
-    remainingMonths: getRemainingCalendarMonths(now, end),
-    state: now < start ? "upcoming" : now >= end ? "expired" : "active",
-  };
-}
-
-function getRemainingCalendarMonths(from: Date, to: Date) {
-  if (from >= to) return 0;
-
-  const wholeMonths =
-    (to.getUTCFullYear() - from.getUTCFullYear()) * 12 +
-    to.getUTCMonth() -
-    from.getUTCMonth();
-  const anchor = new Date(from);
-  anchor.setUTCMonth(anchor.getUTCMonth() + wholeMonths);
-
-  return wholeMonths + (anchor < to ? 1 : 0);
-}
-
-export function formatProductOwner(product: ProductResponse) {
-  if (!product.owner) return "-";
-
-  return (
-    product.owner.fullName ||
-    product.owner.customerCode ||
-    product.owner.customerId
-  );
-}
-
-export function getInitials(name: string) {
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(-2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join("");
-}
-
 export function getProductCategoryLabel(product: ProductResponse) {
   return product.categoryRef.name;
 }
@@ -232,7 +167,6 @@ export function toCreateProductBody(
     displayName: values.displayName,
     metadata: metadata ?? undefined,
     ...(productCode ? { productCode } : {}),
-    serialNumber: toOptionalValue(values.serialNumber),
     status: values.status,
     warrantyDurationMonths: values.warrantyDurationMonths,
     ...(toOptionalValue(values.warrantyTerms)
@@ -267,7 +201,6 @@ export function toUpdateProductBody(
       values.installationPosition,
     ),
     productCode: values.productCode.trim(),
-    serialNumber: toNullableValue(values.serialNumber),
     status: values.status,
     warrantyDurationMonths: values.warrantyDurationMonths,
     warrantyTerms: toNullableValue(values.warrantyTerms),
@@ -296,7 +229,6 @@ export function getProductSaveErrorMatch(error: unknown) {
     "Product code already exists": ["productCode", "duplicateProductCode"],
     "Product code is required": ["productCode", "productCodeRequired"],
     "Product category not found": ["categoryId", "categoryNotFound"],
-    "Serial number already exists": ["serialNumber", "duplicateSerialNumber"],
     "Warranty duration is required": [
       "warrantyDurationMonths",
       "durationMonthsRange",

@@ -97,9 +97,9 @@ export class ProductsRepository {
   findByWarrantyCode(warrantyCode: string, tx?: Prisma.TransactionClient) {
     const client = tx ?? this.prismaService;
 
-    return client.product.findFirst({
-      where: { warranty: { warranty_code: warrantyCode } },
-      include: productInclude,
+    return client.warranty.findUnique({
+      where: { warranty_code: warrantyCode },
+      select: { id: true },
     });
   }
 
@@ -112,11 +112,6 @@ export class ProductsRepository {
       include: {
         category_ref: true,
         warranty: true,
-        ownerships: {
-          where: { is_current_owner: true },
-          include: { customer: true },
-          orderBy: { created_at: 'desc' },
-        },
       },
     });
   }
@@ -130,11 +125,6 @@ export class ProductsRepository {
       include: {
         category_ref: true,
         warranty: true,
-        ownerships: {
-          where: { is_current_owner: true },
-          include: { customer: true },
-          orderBy: { created_at: 'desc' },
-        },
       },
     });
   }
@@ -148,11 +138,6 @@ export class ProductsRepository {
       include: {
         category_ref: true,
         warranty: true,
-        ownerships: {
-          where: { is_current_owner: true },
-          include: { customer: true },
-          orderBy: { created_at: 'desc' },
-        },
       },
     });
   }
@@ -172,12 +157,6 @@ export class ProductsRepository {
     return client.product.findUnique({
       where: { product_code: productCode },
       include: productInclude,
-    });
-  }
-
-  findBySerialNumber(serialNumber: string) {
-    return this.prismaService.product.findUnique({
-      where: { serial_number: serialNumber },
     });
   }
 
@@ -207,7 +186,6 @@ export class ProductsRepository {
     const { page, limit, skip, take } = normalizePagination(filters);
     const sortMap = {
       productCode: 'product_code',
-      serialNumber: 'serial_number',
       name: 'display_name',
       publishedAt: 'published_at',
       status: 'status',
@@ -224,11 +202,15 @@ export class ProductsRepository {
         activationEligible || claimEligible || activationCodeAssignable
           ? null
           : buildProductDeletionFilter(filters.status),
-      ownerships: filters.ownerCustomerId
+      warranties: filters.ownerCustomerId
         ? {
             some: {
-              customer_id: filters.ownerCustomerId,
-              is_current_owner: true,
+              ownerships: {
+                some: {
+                  customer_id: filters.ownerCustomerId,
+                  is_current_owner: true,
+                },
+              },
             },
           }
         : undefined,
@@ -295,18 +277,21 @@ export class ProductsRepository {
                 warranty_code: { contains: search, mode: 'insensitive' },
               },
             },
-            { serial_number: { contains: search, mode: 'insensitive' } },
             { display_name: { contains: search, mode: 'insensitive' } },
             { display_name: { contains: search, mode: 'insensitive' } },
             { product_code: { contains: search, mode: 'insensitive' } },
             { brand: { contains: search, mode: 'insensitive' } },
             { model: { contains: search, mode: 'insensitive' } },
             {
-              ownerships: {
+              warranties: {
                 some: {
-                  is_current_owner: true,
-                  customer: {
-                    full_name: { contains: search, mode: 'insensitive' },
+                  ownerships: {
+                    some: {
+                      is_current_owner: true,
+                      customer: {
+                        full_name: { contains: search, mode: 'insensitive' },
+                      },
+                    },
                   },
                 },
               },
@@ -471,7 +456,6 @@ export class ProductsRepository {
     const activationEligible = filters.activationEligible === 'true';
     const sortMap = {
       productCode: 'product_code',
-      serialNumber: 'serial_number',
       name: 'display_name',
       publishedAt: 'published_at',
       status: 'status',
@@ -484,11 +468,15 @@ export class ProductsRepository {
       deleted_at: activationEligible
         ? null
         : buildProductDeletionFilter(filters.status),
-      ownerships: filters.ownerCustomerId
+      warranties: filters.ownerCustomerId
         ? {
             some: {
-              customer_id: filters.ownerCustomerId,
-              is_current_owner: true,
+              ownerships: {
+                some: {
+                  customer_id: filters.ownerCustomerId,
+                  is_current_owner: true,
+                },
+              },
             },
           }
         : undefined,
@@ -531,18 +519,21 @@ export class ProductsRepository {
                 warranty_code: { contains: search, mode: 'insensitive' },
               },
             },
-            { serial_number: { contains: search, mode: 'insensitive' } },
             { display_name: { contains: search, mode: 'insensitive' } },
             { display_name: { contains: search, mode: 'insensitive' } },
             { product_code: { contains: search, mode: 'insensitive' } },
             { brand: { contains: search, mode: 'insensitive' } },
             { model: { contains: search, mode: 'insensitive' } },
             {
-              ownerships: {
+              warranties: {
                 some: {
-                  is_current_owner: true,
-                  customer: {
-                    full_name: { contains: search, mode: 'insensitive' },
+                  ownerships: {
+                    some: {
+                      is_current_owner: true,
+                      customer: {
+                        full_name: { contains: search, mode: 'insensitive' },
+                      },
+                    },
                   },
                 },
               },

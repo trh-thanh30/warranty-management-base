@@ -3,7 +3,7 @@ import { ActivateWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/ac
 
 describe('ActivateWarrantyByCodeUseCase', () => {
   const warrantiesRepository = {
-    findActiveProductByWarrantyCode: jest.fn(),
+    findByWarrantyCode: jest.fn(),
   };
   const activateWarrantyUseCase = {
     execute: jest.fn(),
@@ -14,9 +14,8 @@ describe('ActivateWarrantyByCodeUseCase', () => {
   });
 
   it('resolves the warranty code and delegates to the canonical activation use case', async () => {
-    warrantiesRepository.findActiveProductByWarrantyCode.mockResolvedValue({
-      id: 'product-id',
-      warranty: { id: 'warranty-id' },
+    warrantiesRepository.findByWarrantyCode.mockResolvedValue({
+      id: 'warranty-id',
     });
     activateWarrantyUseCase.execute.mockResolvedValue({
       id: 'warranty-id',
@@ -35,9 +34,9 @@ describe('ActivateWarrantyByCodeUseCase', () => {
       { activatedByUserId: 'admin-id' },
     );
 
-    expect(
-      warrantiesRepository.findActiveProductByWarrantyCode,
-    ).toHaveBeenCalledWith('WM-2026-ABCDEF');
+    expect(warrantiesRepository.findByWarrantyCode).toHaveBeenCalledWith(
+      'WM-2026-ABCDEF',
+    );
     expect(activateWarrantyUseCase.execute).toHaveBeenCalledWith(
       'warranty-id',
       { warrantyCode: 'wm-2026-abcdef', startDate: '2026-07-02' },
@@ -47,9 +46,7 @@ describe('ActivateWarrantyByCodeUseCase', () => {
   });
 
   it('throws not found when warranty code does not belong to an active product', async () => {
-    warrantiesRepository.findActiveProductByWarrantyCode.mockResolvedValue(
-      null,
-    );
+    warrantiesRepository.findByWarrantyCode.mockResolvedValue(null);
     const useCase = new ActivateWarrantyByCodeUseCase(
       warrantiesRepository as never,
       activateWarrantyUseCase as never,

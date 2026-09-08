@@ -212,7 +212,6 @@ export class DealersRepository {
                 id: true,
                 display_name: true,
                 product_code: true,
-                serial_number: true,
               },
             },
             activated_warranty: {
@@ -223,6 +222,7 @@ export class DealersRepository {
                 start_date: true,
                 end_date: true,
                 duration_months: true,
+                serial_number: true,
               },
             },
           },

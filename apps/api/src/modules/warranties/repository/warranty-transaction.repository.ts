@@ -18,12 +18,18 @@ import {
 } from '@prisma/client';
 
 const manualActivationProductInclude = {
-  ownerships: {
-    include: { customer: true },
-    orderBy: { created_at: 'desc' as const },
-  },
   warranty: true,
-  warranties: { orderBy: { created_at: 'desc' as const }, take: 1 },
+  warranties: {
+    include: {
+      ownerships: {
+        where: { is_current_owner: true },
+        include: { customer: true },
+        take: 1,
+      },
+    },
+    orderBy: { created_at: 'desc' as const },
+    take: 1,
+  },
 } satisfies Prisma.ProductInclude;
 
 type PersistedManualActivationProduct = Prisma.ProductGetPayload<{
@@ -51,13 +57,7 @@ export class WarrantyTransactionRepository {
             orderBy: { created_at: 'desc' },
           },
           product: {
-            include: {
-              category_ref: true,
-              ownerships: {
-                include: { customer: true },
-                orderBy: { created_at: 'desc' },
-              },
-            },
+            include: { category_ref: true },
           },
         },
       }),
@@ -100,13 +100,7 @@ export class WarrantyTransactionRepository {
           orderBy: { created_at: 'desc' },
         },
         product: {
-          include: {
-            category_ref: true,
-            ownerships: {
-              include: { customer: true },
-              orderBy: { created_at: 'desc' },
-            },
-          },
+          include: { category_ref: true },
         },
       },
     });
@@ -190,61 +184,57 @@ export class WarrantyTransactionRepository {
     return category !== null;
   }
 
-  closeCurrentOwnerships(productId: string, endedAt: Date) {
-    return this.tx.productOwnership.updateMany({
-      where: { product_id: productId, is_current_owner: true },
-      data: { ended_at: endedAt, is_current_owner: false },
-    });
-  }
-
-  updateManualActivationProduct(input: {
+  async updateManualActivationProduct(input: {
     customerId: string;
     ownerUserId?: string | null;
     productId: string;
     purchaseDate: Date;
-    serialNumber?: string;
     displayName?: string;
     warrantyCode: string;
     warrantyDurationMonths: number;
     warrantyTerms?: string;
   }): Promise<ManualActivationProduct> {
-    return this.tx.product
-      .update({
-        where: { id: input.productId },
-        data: {
-          serial_number: undefined,
-          display_name: input.displayName,
-          status: product_status.ACTIVE,
-          ownerships: {
-            create: {
-              customer: { connect: { id: input.customerId } },
-              owner_user: input.ownerUserId
-                ? { connect: { id: input.ownerUserId } }
-                : undefined,
-              purchase_date: input.purchaseDate,
-              activated_at: null,
-              is_current_owner: true,
-            },
-          },
-          warranty: {
-            update: {
-              serial_number: input.serialNumber,
-              warranty_code: input.warrantyCode,
-              duration_months: input.warrantyDurationMonths,
-              terms: input.warrantyTerms,
-              metadata: {
-                source: 'manual_warranty_activation',
-                certificateEmailStatus: 'PENDING_TEMPLATE',
-              },
-            },
+    await this.tx.product.update({
+      where: { id: input.productId },
+      data: {
+        display_name: input.displayName,
+        status: product_status.ACTIVE,
+      },
+    });
+    const warranty = await this.tx.warranty.create({
+      data: {
+        product_id: input.productId,
+        serial_number: null,
+        warranty_code: input.warrantyCode,
+        duration_months: input.warrantyDurationMonths,
+        status: warranty_status.DRAFT,
+        terms: input.warrantyTerms,
+        metadata: {
+          source: 'manual_warranty_activation',
+          certificateEmailStatus: 'PENDING_TEMPLATE',
+        },
+        ownerships: {
+          create: {
+            customer_id: input.customerId,
+            owner_user_id: input.ownerUserId,
+            purchase_date: input.purchaseDate,
+            is_current_owner: true,
           },
         },
-        include: manualActivationProductInclude,
-      })
-      .then((product) => this.toManualActivationProduct(product));
+      },
+    });
+    await this.tx.product.update({
+      where: { id: input.productId },
+      data: { current_warranty_id: warranty.id },
+    });
+    const product = await this.tx.product.findUniqueOrThrow({
+      where: { id: input.productId },
+      include: manualActivationProductInclude,
+    });
+    return this.toManualActivationProduct(product);
   }
 
-  createManualActivationProduct(input: {
+  async createManualActivationProduct(input: {
     brand?: string;
     categoryId: string;
     customerId: string;
@@ -254,51 +244,52 @@ export class WarrantyTransactionRepository {
     name: string;
     productCode: string;
     purchaseDate: Date;
-    serialNumber?: string;
     warrantyCode: string;
     warrantyDurationMonths: number;
     warrantyTerms?: string;
   }): Promise<ManualActivationProduct> {
-    return this.tx.product
-      .create({
-        data: {
-          product_code: input.productCode,
-          serial_number: undefined,
-          display_name: input.name,
-          slug: input.productCode.toLowerCase(),
-          brand: input.brand,
-          model: input.model,
-          category_ref: { connect: { id: input.categoryId } },
-          status: product_status.ACTIVE,
-          metadata: { source: 'manual_warranty_activation' },
-          ownerships: {
-            create: {
-              customer: { connect: { id: input.customerId } },
-              owner_user: input.ownerUserId
-                ? { connect: { id: input.ownerUserId } }
-                : undefined,
-              purchase_date: input.purchaseDate,
-              activated_at: null,
-              is_current_owner: true,
+    const product = await this.tx.product.create({
+      data: {
+        product_code: input.productCode,
+        display_name: input.name,
+        slug: input.productCode.toLowerCase(),
+        brand: input.brand,
+        model: input.model,
+        category_ref: { connect: { id: input.categoryId } },
+        status: product_status.ACTIVE,
+        metadata: { source: 'manual_warranty_activation' },
+        warranties: {
+          create: {
+            serial_number: null,
+            warranty_code: input.warrantyCode,
+            duration_months: input.warrantyDurationMonths,
+            status: warranty_status.DRAFT,
+            terms: input.warrantyTerms,
+            metadata: {
+              source: 'manual_warranty_activation',
+              certificateEmailStatus: 'PENDING_TEMPLATE',
             },
-          },
-          warranties: {
-            create: {
-              serial_number: input.serialNumber,
-              warranty_code: input.warrantyCode,
-              duration_months: input.warrantyDurationMonths,
-              status: warranty_status.DRAFT,
-              terms: input.warrantyTerms,
-              metadata: {
-                source: 'manual_warranty_activation',
-                certificateEmailStatus: 'PENDING_TEMPLATE',
+            ownerships: {
+              create: {
+                customer_id: input.customerId,
+                owner_user_id: input.ownerUserId,
+                purchase_date: input.purchaseDate,
+                is_current_owner: true,
               },
             },
           },
         },
-        include: manualActivationProductInclude,
-      })
-      .then((product) => this.toManualActivationProduct(product));
+      },
+      include: manualActivationProductInclude,
+    });
+    const warranty = product.warranties[0];
+    if (warranty) {
+      await this.tx.product.update({
+        where: { id: product.id },
+        data: { current_warranty_id: warranty.id },
+      });
+    }
+    return this.toManualActivationProduct(product);
   }
 
   async findWarrantyByCode(
@@ -311,34 +302,21 @@ export class WarrantyTransactionRepository {
     return warranty ? { productId: warranty.product_id } : null;
   }
 
-  findProductBySerialNumber(
-    serialNumber: string,
-  ): Promise<{ id: string } | null> {
-    return this.tx.product.findUnique({
-      where: { serial_number: serialNumber },
-      select: { id: true },
-    });
-  }
-
   async findWarrantyForActivation(
     warrantyId: string,
   ): Promise<WarrantyActivationCandidate | null> {
     const warranty = await this.tx.warranty.findUnique({
       where: { id: warrantyId },
       include: {
-        product: {
-          include: {
-            ownerships: {
-              where: { is_current_owner: true },
-              take: 1,
-            },
-          },
+        ownerships: {
+          where: { is_current_owner: true },
+          take: 1,
         },
       },
     });
     return warranty
       ? {
-          currentOwnershipId: warranty.product.ownerships[0]?.id ?? null,
+          currentOwnershipId: warranty.ownerships[0]?.id ?? null,
           durationMonths: warranty.duration_months,
           id: warranty.id,
           status: warranty.status,
@@ -385,7 +363,7 @@ export class WarrantyTransactionRepository {
   }
 
   markOwnershipActivated(ownershipId: string, activatedAt: Date) {
-    return this.tx.productOwnership.update({
+    return this.tx.warrantyOwnership.update({
       where: { id: ownershipId },
       data: { activated_at: activatedAt },
     });
@@ -491,19 +469,21 @@ export class WarrantyTransactionRepository {
       deletedAt: product.deleted_at,
       displayName: product.display_name,
       id: product.id,
-      ownerships: product.ownerships.map((ownership) => ({
-        customer: {
-          address: ownership.customer.address,
-          customerCode: ownership.customer.customer_code,
-          email: ownership.customer.email,
-          fullName: ownership.customer.full_name,
-          id: ownership.customer.id,
-          phone: ownership.customer.phone,
-        },
-        isCurrentOwner: ownership.is_current_owner,
-      })),
+      ownerships: (product.warranties[0]?.ownerships ?? []).map(
+        (ownership) => ({
+          customer: {
+            address: ownership.customer.address,
+            customerCode: ownership.customer.customer_code,
+            email: ownership.customer.email,
+            fullName: ownership.customer.full_name,
+            id: ownership.customer.id,
+            phone: ownership.customer.phone,
+          },
+          isCurrentOwner: ownership.is_current_owner,
+        }),
+      ),
       productCode: product.product_code,
-      serialNumber: product.serial_number,
+      serialNumber: product.warranties[0]?.serial_number ?? null,
       catalogue: {
         brand: getProductCatalogue(product).brand,
         model: getProductCatalogue(product).model,

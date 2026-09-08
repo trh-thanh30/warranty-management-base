@@ -50,7 +50,10 @@ describe('toProductResponse', () => {
           status: activation_code_status.AVAILABLE,
           expires_at: new Date('2099-01-25T00:00:00.000Z'),
           batch: { batch_code: 'ACB-20260725-001' },
-          request: { id: 'request-id' },
+          request: {
+            id: 'request-id',
+            status: 'PENDING',
+          },
           request_items: [],
           warranty: null,
         },
@@ -161,7 +164,6 @@ describe('toProductResponse', () => {
         updated_at: new Date('2026-07-25T00:00:00.000Z'),
       },
       product_code: 'PRD-001',
-      serial_number: 'SERIAL-001',
       display_name: 'PPF X10',
       slug: 'ppf-x10-unit-001',
       brand: 'Demo',
@@ -178,7 +180,6 @@ describe('toProductResponse', () => {
       created_at: new Date('2026-07-25T00:00:00.000Z'),
       updated_at: new Date('2026-07-25T00:00:00.000Z'),
       deleted_at: null,
-      ownerships: [],
       assets: [],
       warranty: null,
     });

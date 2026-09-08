@@ -363,7 +363,6 @@ function normalizePreviewRow(row: {
       warrantyTerms: row.data.warrantyTerms ?? null,
       installationPosition: row.data.installationPosition ?? null,
       productCode: row.data.productCode ?? null,
-      serialNumber: row.data.serialNumber ?? null,
       status: row.data.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
     },
   };

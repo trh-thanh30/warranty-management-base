@@ -39,7 +39,11 @@ export type WarrantyActivationRequestWithRelations =
       full_name: string | null;
       username: string;
     } | null;
-    activation_code?: { id: string; status: activation_code_status } | null;
+    activation_code?: {
+      id: string;
+      code_ciphertext?: string;
+      status: activation_code_status;
+    } | null;
     activated_warranty?: {
       id: string;
       warranty_code: string | null;
@@ -62,6 +66,11 @@ export type WarrantyActivationRequestWithRelations =
     items?: Array<{
       id: string;
       activation_code_id: string | null;
+      activation_code?: {
+        id: string;
+        code_ciphertext?: string;
+        status: activation_code_status;
+      } | null;
       activation_field_id: string | null;
       position_key: string;
       position_label: string;
@@ -91,6 +100,7 @@ function toMetadata(
 
 export function toWarrantyActivationRequestResponse(
   request: WarrantyActivationRequestWithRelations,
+  decryptActivationCode?: (ciphertext: string) => string,
 ): WarrantyActivationRequestSummary {
   return {
     id: request.id,
@@ -101,6 +111,10 @@ export function toWarrantyActivationRequestResponse(
     activationCode: request.activation_code
       ? {
           id: request.activation_code.id,
+          code:
+            request.activation_code.code_ciphertext && decryptActivationCode
+              ? decryptActivationCode(request.activation_code.code_ciphertext)
+              : null,
           status: request.activation_code.status,
         }
       : null,
@@ -189,6 +203,16 @@ export function toWarrantyActivationRequestResponse(
     items: request.items?.map((item) => ({
       id: item.id,
       activationCodeId: item.activation_code_id,
+      activationCode: item.activation_code
+        ? {
+            id: item.activation_code.id,
+            code:
+              item.activation_code.code_ciphertext && decryptActivationCode
+                ? decryptActivationCode(item.activation_code.code_ciphertext)
+                : null,
+            status: item.activation_code.status,
+          }
+        : null,
       activationFieldId: item.activation_field_id,
       positionKey: item.position_key,
       positionLabel: item.position_label,

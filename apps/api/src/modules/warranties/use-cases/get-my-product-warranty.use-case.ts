@@ -11,18 +11,18 @@ export class GetMyProductWarrantyUseCase {
   constructor(private readonly warrantiesRepository: WarrantiesRepository) {}
 
   async execute(ownerUserId: string, productId: string) {
-    const product = await this.warrantiesRepository.findCurrentProductForUser(
+    const warranty = await this.warrantiesRepository.findCurrentProductForUser(
       productId,
       ownerUserId,
     );
 
-    if (!product?.warranty) {
+    if (!warranty) {
       throw new NotFoundError(LOOKUP_NOT_FOUND_MESSAGE);
     }
 
     return toWarrantyLookupResponse({
-      product,
-      warranty: product.warranty,
+      product: warranty.product,
+      warranty,
     });
   }
 }

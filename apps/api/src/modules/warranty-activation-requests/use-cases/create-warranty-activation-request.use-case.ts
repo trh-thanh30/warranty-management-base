@@ -17,7 +17,6 @@ import {
 import { GenerateWarrantyActivationRequestCodeUseCase } from '@/modules/warranty-activation-requests/use-cases/generate-warranty-activation-request-code.use-case';
 import {
   buildWarrantyActivationRequestFullAddress,
-  normalizeText,
   optionalTrim,
 } from '@/modules/warranty-activation-requests/utils/warranty-activation-request-normalization.utils';
 import {
@@ -26,15 +25,19 @@ import {
   WarrantyActivationRequestSource,
 } from '@/modules/warranty-activation-requests/warranty-activation-requests.types';
 import {
+  WarrantyActivationCodeReservationConflictError,
   WarrantyActivationRequestCodeConflictError,
   WarrantyActivationRequestUniqueConflictError,
   WarrantyActivationRequestWarrantyCodeConflictError,
 } from '@/modules/warranty-activation-requests/repository/warranty-activation-request-errors';
 import { Injectable, Optional } from '@nestjs/common';
 import { GenerateDealerCodeUseCase } from '@/modules/dealers/use-cases/generate-dealer-code.use-case';
-import { normalizePhoneNumber } from '@repo/shared/utils';
 import { ActivationCodeBatchesRepository } from '@/modules/activation-codes/repository/activation-code-batches.repository';
 import { ActivationCodeCryptoService } from '@/modules/activation-codes/services/activation-code-crypto.service';
+import {
+  DealerAccessPolicy,
+  type DealerAccessActor,
+} from '@/modules/dealers/service/dealer-access.policy';
 
 const REQUEST_CODE_GENERATION_ATTEMPTS = 3;
 const ACTIVATABLE_WARRANTY_STATUSES = new Set(['DRAFT']);
@@ -70,6 +73,8 @@ export class CreateWarrantyActivationRequestUseCase {
     private readonly activationCodeRepository?: ActivationCodeBatchesRepository,
     @Optional()
     private readonly activationCodeCrypto?: ActivationCodeCryptoService,
+    @Optional()
+    private readonly dealerAccessPolicy?: DealerAccessPolicy,
   ) {}
 
   async execute(
@@ -81,6 +86,7 @@ export class CreateWarrantyActivationRequestUseCase {
         birthdate?: Date;
       };
       source?: WarrantyActivationRequestSource;
+      actor?: DealerAccessActor;
     } = {},
   ) {
     const activationCode = dto.activationCode?.trim().toUpperCase();
@@ -123,10 +129,7 @@ export class CreateWarrantyActivationRequestUseCase {
       validatedItems?.some((item) => item.activationCodeId) ||
       activationCodeRecord,
     );
-    if (
-      !product ||
-      (!product.warranty && !hasGenericCode && !validatedItems?.length)
-    ) {
+    if (!product) {
       throw new NotFoundError('Warranty code not found', 'NOT_FOUND', {
         code: 'WARRANTY_CODE_NOT_FOUND',
         warrantyCode: dtoWarrantyCode,
@@ -134,6 +137,17 @@ export class CreateWarrantyActivationRequestUseCase {
     }
     const isCodeLessProduct =
       product.category_ref?.activation_code_enabled === false;
+    if (
+      !product.warranty &&
+      !hasGenericCode &&
+      !validatedItems?.length &&
+      !isCodeLessProduct
+    ) {
+      throw new NotFoundError('Warranty code not found', 'NOT_FOUND', {
+        code: 'WARRANTY_CODE_NOT_FOUND',
+        warrantyCode: dtoWarrantyCode,
+      });
+    }
     const createsIndependentWarranty = hasGenericCode || isCodeLessProduct;
     if (
       hasGenericCode &&
@@ -181,7 +195,11 @@ export class CreateWarrantyActivationRequestUseCase {
           `PENDING-${activationCodeRecord?.id ?? Date.now()}`));
     if (!validatedItems) {
       requestItems.push({
-        ...this.toPrimaryRequestItem(product, warrantyCode),
+        ...this.toPrimaryRequestItem(
+          product,
+          warrantyCode,
+          createsIndependentWarranty,
+        ),
         activationCodeId: activationCodeRecord?.id ?? null,
       });
     }
@@ -221,21 +239,21 @@ export class CreateWarrantyActivationRequestUseCase {
         product.id,
       );
 
-    if (openRequest && !hasGenericCode) {
+    if (openRequest && !createsIndependentWarranty) {
       this.throwAlreadyOpenRequest(product.id, openRequest);
     }
 
-    for (const item of requestItems) {
-      if (item.currentOwner) {
-        this.assertCustomerMatchesCurrentOwner({
-          customerEmail,
-          customerName,
-          customerPhone,
-          currentOwner: item.currentOwner,
-        });
+    if (context.actor) {
+      if (!this.dealerAccessPolicy) {
+        throw new Error(
+          'Dealer access policy is required for authenticated requests',
+        );
       }
+      await this.dealerAccessPolicy.assertCanAccessRecord(
+        context.actor,
+        dto.dealerId,
+      );
     }
-
     const dealer = await this.resolveDealer(dto);
 
     for (
@@ -289,7 +307,7 @@ export class CreateWarrantyActivationRequestUseCase {
             serialNumber:
               validatedItems !== null
                 ? validatedItems[0].serialNumber
-                : (optionalTrim(dto.serialNumber) ?? product.serial_number),
+                : (product.warranty?.serial_number ?? null),
             brand:
               validatedItems !== null
                 ? validatedItems[0].brand
@@ -324,6 +342,14 @@ export class CreateWarrantyActivationRequestUseCase {
 
         return toWarrantyActivationRequestResponse(request);
       } catch (error) {
+        if (error instanceof WarrantyActivationCodeReservationConflictError) {
+          throw new BadRequestError(
+            'Activation code is no longer available',
+            'BAD_REQUEST',
+            { code: 'ACTIVATION_CODE_INVALID_OR_EXPIRED' },
+          );
+        }
+
         if (
           attempt < REQUEST_CODE_GENERATION_ATTEMPTS - 1 &&
           error instanceof WarrantyActivationRequestWarrantyCodeConflictError
@@ -349,7 +375,10 @@ export class CreateWarrantyActivationRequestUseCase {
           continue;
         }
 
-        if (error instanceof WarrantyActivationRequestUniqueConflictError) {
+        if (
+          !createsIndependentWarranty &&
+          error instanceof WarrantyActivationRequestUniqueConflictError
+        ) {
           if (validatedItems) {
             const concurrentOpenRequests =
               await this.warrantyActivationRequestsRepository.findOpenByProductIds(
@@ -534,6 +563,7 @@ export class CreateWarrantyActivationRequestUseCase {
   private toPrimaryRequestItem(
     product: ActivationRequestProduct,
     warrantyCode: string,
+    createsIndependentWarranty: boolean,
   ): ValidatedActivationRequestItem {
     const catalogue = getProductCatalogue(product);
     return {
@@ -544,9 +574,15 @@ export class CreateWarrantyActivationRequestUseCase {
       productId: product.id,
       productName: getProductDisplayName(product),
       productCode: product.product_code,
-      serialNumber: product.serial_number,
-      warrantyId: product.warranty?.id ?? null,
-      warrantyCode: product.warranty?.warranty_code ?? warrantyCode,
+      serialNumber: createsIndependentWarranty
+        ? null
+        : (product.warranty?.serial_number ?? null),
+      warrantyId: createsIndependentWarranty
+        ? null
+        : (product.warranty?.id ?? null),
+      warrantyCode: createsIndependentWarranty
+        ? warrantyCode
+        : (product.warranty?.warranty_code ?? warrantyCode),
       warrantyDurationMonths:
         product.warranty?.duration_months ??
         product.warranty_duration_months ??
@@ -554,7 +590,6 @@ export class CreateWarrantyActivationRequestUseCase {
       brand: catalogue.brand,
       model: catalogue.model,
       manufactureYear: catalogue.modelYear,
-      currentOwner: product.ownerships[0]?.customer ?? null,
     };
   }
 
@@ -709,36 +744,5 @@ export class CreateWarrantyActivationRequestUseCase {
     );
 
     return Object.keys(compact).length > 0 ? compact : null;
-  }
-
-  private assertCustomerMatchesCurrentOwner(input: {
-    currentOwner: {
-      email: string | null;
-      full_name: string;
-      phone: string | null;
-    };
-    customerEmail: string | null;
-    customerName: string;
-    customerPhone: string;
-  }) {
-    const expectedPhone = normalizePhoneNumber(input.currentOwner.phone);
-    const expectedEmail = normalizeText(input.currentOwner.email);
-    const expectedName = normalizeText(input.currentOwner.full_name);
-    const phoneMatches =
-      !expectedPhone ||
-      expectedPhone === normalizePhoneNumber(input.customerPhone);
-    const emailMatches =
-      !expectedEmail ||
-      !input.customerEmail ||
-      expectedEmail === normalizeText(input.customerEmail);
-    const nameMatches = expectedName === normalizeText(input.customerName);
-
-    if (!phoneMatches || !emailMatches || !nameMatches) {
-      throw new BadRequestError(
-        'Customer information does not match warranty owner',
-        'BAD_REQUEST',
-        { code: 'CUSTOMER_OWNER_MISMATCH' },
-      );
-    }
   }
 }

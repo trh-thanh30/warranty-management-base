@@ -64,45 +64,11 @@ export class WarrantyActivationReviewTransactionRepository {
     return this.tx.customer.create({ data });
   }
 
-  closeCurrentOwnerships(productId: string, endedAt: Date) {
-    return this.tx.productOwnership.updateMany({
-      where: { product_id: productId, is_current_owner: true },
-      data: { ended_at: endedAt, is_current_owner: false },
-    });
-  }
-
-  createOwnership(input: {
-    customerId: string;
-    ownerUserId?: string | null;
-    productId: string;
-    purchaseDate: Date;
-  }) {
-    return this.tx.productOwnership.create({
-      data: {
-        activated_at: null,
-        customer: { connect: { id: input.customerId } },
-        is_current_owner: true,
-        owner_user: input.ownerUserId
-          ? { connect: { id: input.ownerUserId } }
-          : undefined,
-        product: { connect: { id: input.productId } },
-        purchase_date: input.purchaseDate,
-      },
-    });
-  }
-
   findWarrantyForActivation(warrantyId: string) {
     return this.tx.warranty.findUnique({
       where: { id: warrantyId },
       include: {
-        product: {
-          include: {
-            ownerships: {
-              where: { is_current_owner: true },
-              take: 1,
-            },
-          },
-        },
+        product: true,
         ownerships: {
           where: { is_current_owner: true },
           take: 1,
@@ -150,13 +116,6 @@ export class WarrantyActivationReviewTransactionRepository {
     return this.tx.product.update({
       where: { id: productId },
       data: { current_warranty_id: warrantyId },
-    });
-  }
-
-  markOwnershipActivated(ownershipId: string, activatedAt: Date) {
-    return this.tx.productOwnership.update({
-      where: { id: ownershipId },
-      data: { activated_at: activatedAt },
     });
   }
 
@@ -232,7 +191,7 @@ export class WarrantyActivationReviewTransactionRepository {
 
   markActivationCodeActivated(codeId: string, activatedAt: Date) {
     return this.tx.activationCode.updateMany({
-      where: { id: codeId, status: 'AVAILABLE' },
+      where: { id: codeId, status: { in: ['AVAILABLE', 'PENDING_APPROVAL'] } },
       data: { status: 'ACTIVATED', activated_at: activatedAt },
     });
   }
@@ -242,7 +201,7 @@ export class WarrantyActivationReviewTransactionRepository {
     return this.tx.activationCode.updateMany({
       where: {
         id: { in: codeIds },
-        status: 'AVAILABLE',
+        status: { in: ['AVAILABLE', 'PENDING_APPROVAL'] },
         expires_at: { gt: activatedAt },
       },
       data: { status: 'ACTIVATED', activated_at: activatedAt },

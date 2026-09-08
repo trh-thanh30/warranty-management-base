@@ -9,7 +9,6 @@ import {
   type UseQueryOptions,
 } from "@tanstack/react-query";
 import type {
-  AssignProductOwnerBody,
   AttachProductAssetBody,
   CreateProductBody,
   ListActivationProductOptionsQuery,
@@ -175,19 +174,6 @@ export function useConfirmProductImport() {
       if (result.errors.length === 0) {
         void queryClient.invalidateQueries({ queryKey: productKeys.lists() });
       }
-    },
-  });
-}
-
-export function useAssignProductOwner(productId: string | null) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (body: AssignProductOwnerBody) =>
-      productsService.assignOwner(productId ?? "", body),
-    onSuccess: (product) => {
-      void queryClient.invalidateQueries({ queryKey: productKeys.lists() });
-      queryClient.setQueryData(productKeys.detail(product.id), product);
     },
   });
 }

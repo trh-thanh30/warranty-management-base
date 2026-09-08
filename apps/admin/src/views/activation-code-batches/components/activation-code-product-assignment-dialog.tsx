@@ -174,10 +174,7 @@ export function ActivationCodeProductAssignmentDialog({
                   {products.map((product) => (
                     <ComboboxItem
                       key={product.id}
-                      keywords={[
-                        product.productCode,
-                        product.serialNumber ?? "",
-                      ]}
+                      keywords={[product.productCode, product.name]}
                       value={product.id}
                     >
                       {getProductLabel(product)}

@@ -247,7 +247,6 @@ export function toAdminActivationRequestBody({
     provinceCode: values.provinceCode,
     provinceName: province?.name ?? "",
     salesName: values.salesName.trim() || undefined,
-    serialNumber: primaryProduct?.serialNumber ?? undefined,
     vehicleModel: values.vehicleModel.trim() || undefined,
     vehiclePlate: values.vehiclePlate.trim() || undefined,
     wardCode: values.wardCode,

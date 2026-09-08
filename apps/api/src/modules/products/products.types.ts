@@ -6,9 +6,10 @@ import {
   Customer,
   Product,
   ProductAsset,
-  ProductOwnership,
   Warranty,
+  WarrantyOwnership,
   warranty_status,
+  warranty_activation_request_status,
 } from '@prisma/client';
 import { toCategoryResponse } from '@/modules/categories/categories.types';
 import { getProductCatalogue } from '@/modules/products/product-catalogue';
@@ -18,15 +19,21 @@ type ProductActivationCodeRelation = Pick<
   'id' | 'code_ciphertext' | 'status' | 'expires_at'
 > & {
   batch: Pick<ActivationCodeBatch, 'batch_code'>;
-  request: { id: string } | null;
-  request_items: Array<{ id: string }>;
+  request: { id: string; status: warranty_activation_request_status } | null;
+  request_items: Array<{
+    id: string;
+    status: warranty_activation_request_status;
+  }>;
   warranty: { id: string } | null;
 };
 
 type ProductWithRelations = Product & {
   assets?: Array<ProductAsset & { asset: Asset }>;
-  ownerships?: Array<ProductOwnership & { customer?: Customer }>;
-  warranty?: Warranty | null;
+  warranty?:
+    | (Warranty & {
+        ownerships?: Array<WarrantyOwnership & { customer?: Customer }>;
+      })
+    | null;
   warranty_activation_requests?: Array<{ id: string }>;
   category_ref?: Category;
   activation_codes?: ProductActivationCodeRelation[];
@@ -39,7 +46,7 @@ export function toProductResponse(
   resolveAssetUrl: (asset: Asset) => string = (asset) => asset.path,
   decryptActivationCode?: (ciphertext: string) => string,
 ) {
-  const currentOwnership = product.ownerships?.find(
+  const currentOwnership = product.warranty?.ownerships?.find(
     (ownership) => ownership.is_current_owner,
   );
   const catalogue = getProductCatalogue(product);
@@ -92,7 +99,6 @@ export function toProductResponse(
     warrantyCode: product.warranty?.warranty_code ?? null,
     canEditWarrantyCode: warrantyCodeEditLockedReason === null,
     warrantyCodeEditLockedReason,
-    serialNumber: product.warranty?.serial_number ?? product.serial_number,
     displayName: product.display_name,
     name: catalogue.name,
     categoryId: product.category_id,
@@ -124,6 +130,7 @@ export function toProductResponse(
     warranty: product.warranty
       ? {
           id: product.warranty.id,
+          serialNumber: product.warranty.serial_number,
           warrantyCode: product.warranty.warranty_code,
           startDate: product.warranty.start_date,
           endDate: product.warranty.end_date,
@@ -149,7 +156,12 @@ export function toProductResponse(
 
 function getAssignedActivationCodeStatus(code: ProductActivationCodeRelation) {
   if (code.warranty || code.status === 'ACTIVATED') return 'ACTIVATED' as const;
-  if (code.request || code.request_items.length > 0) {
+  if (
+    (code.request && ['PENDING', 'APPROVED'].includes(code.request.status)) ||
+    code.request_items.some((item) =>
+      ['PENDING', 'APPROVED'].includes(item.status),
+    )
+  ) {
     return 'PENDING_APPROVAL' as const;
   }
   if (code.status === 'AVAILABLE' && code.expires_at.getTime() <= Date.now()) {

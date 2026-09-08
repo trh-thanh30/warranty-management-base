@@ -19,6 +19,10 @@ import {
 import { IssueWarrantyActivationRequestCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-activation-request-certificate.use-case';
 import { Injectable, Logger } from '@nestjs/common';
 import {
+  DealerAccessPolicy,
+  type DealerAccessActor,
+} from '@/modules/dealers/service/dealer-access.policy';
+import {
   warranty_activation_request_status,
   warranty_status,
 } from '@prisma/client';
@@ -33,12 +37,16 @@ export class ReviewWarrantyActivationRequestUseCase {
     private readonly warrantyActivationRequestsRepository: WarrantyActivationRequestsRepository,
     private readonly issueRequestCertificate: IssueWarrantyActivationRequestCertificateUseCase,
     private readonly generateCustomerCodeUseCase: GenerateCustomerCodeUseCase,
+    private readonly dealerAccessPolicy?: DealerAccessPolicy,
   ) {}
 
   async execute(
     id: string,
     dto: ReviewWarrantyActivationRequestDto,
-    context: { reviewedByUserId?: string } = {},
+    context: {
+      reviewedByUserId?: string;
+      actor?: DealerAccessActor;
+    } = {},
   ) {
     const locale = dto.locale ?? 'vi';
     const existingRequest =
@@ -53,6 +61,12 @@ export class ReviewWarrantyActivationRequestUseCase {
         ),
         'NOT_FOUND',
         { code: 'WARRANTY_ACTIVATION_REQUEST_NOT_FOUND', requestId: id },
+      );
+    }
+    if (context.actor) {
+      await this.dealerAccessPolicy!.assertCanAccessRecord(
+        context.actor,
+        existingRequest.dealer_id,
       );
     }
 
@@ -214,16 +228,6 @@ export class ReviewWarrantyActivationRequestUseCase {
         const activatedWarrantyIds: string[] = [];
 
         for (const target of targets) {
-          await repository.closeCurrentOwnerships(
-            target.product.id,
-            reviewedAt,
-          );
-          await repository.createOwnership({
-            customerId: customer.id,
-            ownerUserId: customer.user_id,
-            productId: target.product.id,
-            purchaseDate: reviewedAt,
-          });
           const updatedWarranty = await this.activateDraftWarranty(repository, {
             activatedByUserId: input.reviewedById,
             locale: input.locale,
@@ -444,18 +448,6 @@ export class ReviewWarrantyActivationRequestUseCase {
       await repository.assignWarrantyDealer(warranty.id, input.dealerId);
     }
 
-    const currentOwnership = warranty.product.ownerships[0];
-    if (!currentOwnership) {
-      throw new BadRequestError(
-        getWarrantyActivationReviewErrorMessage(
-          'WARRANTY_OWNER_REQUIRED',
-          input.locale,
-          input.warrantyCode,
-        ),
-        'BAD_REQUEST',
-        { code: 'WARRANTY_OWNER_REQUIRED' },
-      );
-    }
     if (input.startDate.getTime() > Date.now()) {
       throw new BadRequestError(
         getWarrantyActivationReviewErrorMessage(
@@ -493,11 +485,6 @@ export class ReviewWarrantyActivationRequestUseCase {
     }
 
     await repository.setCurrentWarranty(input.productId, warranty.id);
-
-    await repository.markOwnershipActivated(
-      currentOwnership.id,
-      input.startDate,
-    );
 
     return repository.findWarrantyByIdOrThrow(warranty.id);
   }

@@ -2,6 +2,8 @@ import { PrismaModule } from '@/database/prisma/prisma.module';
 import { CustomersModule } from '@/modules/customers/customers.module';
 import { ProductsModule } from '@/modules/products/products.module';
 import { UsersModule } from '@/modules/user/user.module';
+import { DealersModule } from '@/modules/dealers/dealers.module';
+import { ActivationCodesModule } from '@/modules/activation-codes/activation-codes.module';
 import { WarrantiesRepository } from '@/modules/warranties/repository/warranties.repository';
 import { WarrantyLifecycleService } from '@/modules/warranties/services/warranty-lifecycle.service';
 import { ActivateProductWarrantyUseCase } from '@/modules/warranties/use-cases/activate-product-warranty.use-case';
@@ -30,6 +32,8 @@ import { memoryStorage } from 'multer';
 @Module({
   imports: [
     PrismaModule,
+    ActivationCodesModule,
+    DealersModule,
     CustomersModule,
     UsersModule,
     ProductsModule,

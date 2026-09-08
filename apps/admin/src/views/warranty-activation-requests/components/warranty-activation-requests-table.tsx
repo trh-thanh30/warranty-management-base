@@ -41,9 +41,11 @@ import {
 } from "../warranty-activation-requests.utils";
 import { WarrantyActivationRequestStatusBadge } from "./warranty-activation-request-status-badge";
 import {
+  getActivationRequestActivationCodes,
   getActivationRequestProductNames,
   getActivationRequestWarrantyCodes,
 } from "../warranty-activation-request-items.utils";
+import { ActivationCodeSummary } from "@/src/components/activation-code-summary";
 
 type WarrantyActivationRequestsTableProps = {
   items: WarrantyActivationRequestSummary[];
@@ -86,7 +88,7 @@ export function WarrantyActivationRequestsTable({
       </div>
 
       <TableScroll className="hidden overscroll-x-contain rounded-md border border-slate-200 dark:border-slate-800 md:block">
-        <Table className="min-w-[1180px] whitespace-nowrap">
+        <Table className="min-w-[1320px] whitespace-nowrap">
           <TableHeader>
             <TableRow>
               <SortableTableHead
@@ -107,6 +109,7 @@ export function WarrantyActivationRequestsTable({
               </SortableTableHead>
               <TableHead>{t("customer")}</TableHead>
               <TableHead>{t("product")}</TableHead>
+              <TableHead>{t("activationCodeLabel")}</TableHead>
               <SortableTableHead
                 activeSortBy={sortBy}
                 onSortChange={onSortChange}
@@ -192,6 +195,9 @@ function WarrantyActivationRequestTableRow({
           overflowAriaLabel={(count) => t("showMoreProducts", { count })}
           showItemTooltip
         />
+      </TableCell>
+      <TableCell>
+        <ActivationRequestCodeList request={request} />
       </TableCell>
       <TableCell>
         <WarrantyActivationRequestStatusBadge
@@ -280,8 +286,41 @@ function WarrantyActivationRequestMobileCard({
             showItemTooltip
           />
         </MobileField>
+        <MobileField label={t("activationCodeLabel")}>
+          <ActivationRequestCodeList request={request} />
+        </MobileField>
       </dl>
     </article>
+  );
+}
+
+function ActivationRequestCodeList({
+  request,
+}: {
+  request: WarrantyActivationRequestSummary;
+}) {
+  const t = useTranslations("WarrantyActivationRequestsAdmin");
+  const activationCodes = getActivationRequestActivationCodes(request);
+
+  if (activationCodes.length === 0) {
+    return (
+      <ActivationCodeSummary
+        activationCode={null}
+        notRequiredLabel={t("activationCodeNotRequired")}
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-1.5">
+      {activationCodes.map((activationCode) => (
+        <ActivationCodeSummary
+          activationCode={activationCode}
+          key={activationCode.id}
+          notRequiredLabel={t("activationCodeNotRequired")}
+        />
+      ))}
+    </div>
   );
 }
 

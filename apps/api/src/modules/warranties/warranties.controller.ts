@@ -44,6 +44,7 @@ import express from 'express';
 
 type RequestUser = {
   id: string;
+  role: string;
 };
 
 @Controller()
@@ -70,17 +71,18 @@ export class WarrantiesController {
 
   @Get('warranties')
   @Permissions([permission_key.WARRANTY_VIEW])
-  listWarranties(@Query() dto: ListWarrantiesDto) {
-    return this.listWarrantiesUseCase.execute(dto);
+  listWarranties(@Query() dto: ListWarrantiesDto, @User() user: RequestUser) {
+    return this.listWarrantiesUseCase.execute(dto, user);
   }
 
   @Get('warranties/export')
   @Permissions([permission_key.WARRANTY_VIEW])
   async exportWarranties(
     @Query() dto: ListWarrantiesDto,
+    @User() user: RequestUser,
     @Res() res: express.Response,
   ) {
-    const buffer = await this.exportWarrantiesUseCase.execute(dto);
+    const buffer = await this.exportWarrantiesUseCase.execute(dto, user);
     sendExcelFile(res, buffer, createDatedExcelFilename('warranties'));
   }
 
@@ -100,14 +102,17 @@ export class WarrantiesController {
 
   @Get('warranties/lookup')
   @Permissions([permission_key.WARRANTY_VIEW])
-  lookupWarrantyByCode(@Query() dto: LookupWarrantyDto) {
-    return this.lookupWarrantyByCodeUseCase.execute(dto);
+  lookupWarrantyByCode(
+    @Query() dto: LookupWarrantyDto,
+    @User() user: RequestUser,
+  ) {
+    return this.lookupWarrantyByCodeUseCase.execute(dto, user);
   }
 
   @Get('warranties/:id')
   @Permissions([permission_key.WARRANTY_VIEW])
-  getWarrantyDetail(@Param('id') id: string) {
-    return this.getWarrantyDetailUseCase.execute(id);
+  getWarrantyDetail(@Param('id') id: string, @User() user: RequestUser) {
+    return this.getWarrantyDetailUseCase.execute(id, user);
   }
 
   @Patch('warranties/:id')
@@ -119,6 +124,7 @@ export class WarrantiesController {
   ) {
     return this.updateWarrantyUseCase.execute(id, dto, {
       adjustedByUserId: user.id,
+      actor: user,
     });
   }
 
@@ -130,6 +136,7 @@ export class WarrantiesController {
   ) {
     return this.activateWarrantyByCodeUseCase.execute(dto, {
       activatedByUserId: user.id,
+      actor: user,
     });
   }
 
@@ -142,6 +149,7 @@ export class WarrantiesController {
   ) {
     return this.activateWarrantyUseCase.execute(warrantyId, dto, {
       activatedByUserId: user.id,
+      actor: user,
     });
   }
 
@@ -154,6 +162,7 @@ export class WarrantiesController {
   ) {
     return this.voidWarrantyUseCase.execute(warrantyId, dto, {
       voidedByUserId: user.id,
+      actor: user,
     });
   }
 
@@ -162,8 +171,9 @@ export class WarrantiesController {
   transferOwner(
     @Param('id') warrantyId: string,
     @Body() dto: TransferWarrantyOwnerDto,
+    @User() user: RequestUser,
   ) {
-    return this.transferWarrantyOwnerUseCase.execute(warrantyId, dto);
+    return this.transferWarrantyOwnerUseCase.execute(warrantyId, dto, user);
   }
 
   @Post('warranties/manual-activation')
@@ -174,6 +184,7 @@ export class WarrantiesController {
   ) {
     return this.manualWarrantyActivationUseCase.execute(dto, {
       activatedByUserId: user.id,
+      actor: user,
     });
   }
 
@@ -186,13 +197,17 @@ export class WarrantiesController {
   ) {
     return this.activateProductWarrantyUseCase.execute(productId, dto, {
       activatedByUserId: user.id,
+      actor: user,
     });
   }
 
   @Get('products/:id/warranty')
   @Permissions([permission_key.WARRANTY_VIEW])
-  getWarrantyByProduct(@Param('id') productId: string) {
-    return this.getWarrantyByProductUseCase.execute(productId);
+  getWarrantyByProduct(
+    @Param('id') productId: string,
+    @User() user: RequestUser,
+  ) {
+    return this.getWarrantyByProductUseCase.execute(productId, user);
   }
 
   @Get('me/products')

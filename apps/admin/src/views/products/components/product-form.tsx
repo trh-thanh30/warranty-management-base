@@ -366,7 +366,6 @@ const formatFieldError = createFieldErrorFormatter(
     "nameRequired",
     "productCodeLength",
     "productCodeRequired",
-    "serialNumberLength",
     "specificationKeyLength",
     "specificationValueLength",
     "warrantyTermsLength",

@@ -1,5 +1,4 @@
-import { Prisma, product_status, warranty_status } from '@prisma/client';
-import { openActivationRequestStatuses } from './products.repository.includes';
+import { Prisma, product_status } from '@prisma/client';
 
 export function buildProductOrderBy(
   sortBy?: keyof Prisma.ProductOrderByWithRelationInput,
@@ -58,7 +57,6 @@ export function buildEffectiveCatalogueFilters(filters: {
     clauses.push(
       { category_ref: { activation_code_enabled: true } },
       { warranty_duration_months: { gt: 0 } },
-      { activation_codes: { none: {} } },
     );
   }
   return clauses.length > 0 ? clauses : undefined;
@@ -68,42 +66,7 @@ export function buildActivationEligibleProductWhere(): Prisma.ProductWhereInput 
   return {
     deleted_at: null,
     status: product_status.ACTIVE,
-    OR: [
-      {
-        warranty: {
-          is: { status: warranty_status.DRAFT, warranty_code: { not: '' } },
-        },
-      },
-      {
-        warranty: { is: null },
-        warranty_duration_months: { gt: 0 },
-        category_ref: { activation_code_enabled: true },
-      },
-      {
-        warranty_duration_months: { gt: 0 },
-        category_ref: { activation_code_enabled: true },
-        activation_codes: {
-          some: {
-            status: 'AVAILABLE',
-            expires_at: { gt: new Date() },
-            request: { is: null },
-            request_items: {
-              none: { status: { in: openActivationRequestStatuses } },
-            },
-          },
-        },
-      },
-      {
-        warranty_duration_months: { gt: 0 },
-        category_ref: { activation_code_enabled: false },
-      },
-    ],
-    warranty_activation_request_items: {
-      none: { status: { in: openActivationRequestStatuses } },
-    },
-    warranty_activation_requests: {
-      none: { status: { in: openActivationRequestStatuses } },
-    },
+    warranty_duration_months: { gt: 0 },
   };
 }
 
@@ -117,15 +80,20 @@ export function buildProductSearchWhere(
     OR: [
       { product_code: { contains: value, mode: 'insensitive' } },
       { warranty: { warranty_code: { contains: value, mode: 'insensitive' } } },
-      { serial_number: { contains: value, mode: 'insensitive' } },
       { display_name: { contains: value, mode: 'insensitive' } },
       { brand: { contains: value, mode: 'insensitive' } },
       { model: { contains: value, mode: 'insensitive' } },
       {
-        ownerships: {
+        warranties: {
           some: {
-            is_current_owner: true,
-            customer: { full_name: { contains: value, mode: 'insensitive' } },
+            ownerships: {
+              some: {
+                is_current_owner: true,
+                customer: {
+                  full_name: { contains: value, mode: 'insensitive' },
+                },
+              },
+            },
           },
         },
       },

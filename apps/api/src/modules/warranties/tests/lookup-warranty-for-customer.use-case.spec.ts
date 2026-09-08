@@ -12,19 +12,22 @@ describe('LookupWarrantyForCustomerUseCase', () => {
 
   it('returns warranty details when the product belongs to the customer', async () => {
     warrantiesRepository.findLookupMatchForCustomer.mockResolvedValue({
-      id: 'product-id',
-      display_name: null,
-      template: {
-        name: 'Toyota Camry',
-        brand: 'Toyota',
-        model: 'Camry',
-      },
+      id: 'warranty-id',
       serial_number: 'VIN123',
-      warranty: {
-        warranty_code: 'WM-2026-ABCDEF',
-        start_date: new Date('2026-06-14T00:00:00.000Z'),
-        end_date: new Date('2029-06-14T00:00:00.000Z'),
-        status: 'ACTIVE',
+      warranty_code: 'WM-2026-ABCDEF',
+      start_date: new Date('2026-06-14T00:00:00.000Z'),
+      end_date: new Date('2029-06-14T00:00:00.000Z'),
+      status: 'ACTIVE',
+      product: {
+        id: 'product-id',
+        display_name: null,
+        product_code: 'PRD-001',
+        slug: 'toyota-camry',
+        template: {
+          name: 'Toyota Camry',
+          brand: 'Toyota',
+          model: 'Camry',
+        },
       },
     });
     const useCase = new LookupWarrantyForCustomerUseCase(

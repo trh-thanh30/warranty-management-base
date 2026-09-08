@@ -1,4 +1,5 @@
 import { NotFoundError } from '@/common/response';
+import { DealerAccessActor } from '@/modules/dealers/service/dealer-access.policy';
 import { ActivateWarrantyDto } from '@/modules/warranties/dto/activate-warranty.dto';
 import { WarrantiesRepository } from '@/modules/warranties/repository/warranties.repository';
 import { ActivateWarrantyUseCase } from '@/modules/warranties/use-cases/activate-warranty.use-case';
@@ -14,7 +15,10 @@ export class ActivateProductWarrantyUseCase {
   async execute(
     productId: string,
     dto: ActivateWarrantyDto,
-    context: { activatedByUserId?: string } = {},
+    context: {
+      activatedByUserId?: string;
+      actor?: DealerAccessActor;
+    } = {},
   ) {
     const warranty = await this.warrantiesRepository.findByProductId(productId);
     if (!warranty) {

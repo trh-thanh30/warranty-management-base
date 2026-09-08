@@ -15,12 +15,12 @@ describe('WarrantyCertificateEmailQueueService', () => {
       warranty: {
         duration_months: 36,
         end_date: new Date('2029-07-24T00:00:00.000Z'),
+        ownerships: [],
         product: {
           display_name: null,
           template: { name: 'Lexzenz Film' },
-          ownerships: [],
-          serial_number: 'SN-001',
         },
+        serial_number: 'SN-001',
         start_date: new Date('2026-07-24T00:00:00.000Z'),
         warranty_code: 'WM-2026-ABC123',
       },

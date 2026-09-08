@@ -13,11 +13,15 @@ export const productInclude = {
     include: { asset: true },
     orderBy: [{ role: 'asc' as const }, { sort_order: 'asc' as const }],
   },
-  ownerships: {
-    include: { customer: true },
-    orderBy: { created_at: 'desc' as const },
+  warranty: {
+    include: {
+      ownerships: {
+        where: { is_current_owner: true },
+        include: { customer: true },
+        take: 1,
+      },
+    },
   },
-  warranty: true,
   activation_codes: {
     orderBy: [{ created_at: 'asc' as const }, { id: 'asc' as const }],
     select: {
@@ -26,8 +30,8 @@ export const productInclude = {
       status: true,
       expires_at: true,
       batch: { select: { batch_code: true } },
-      request: { select: { id: true } },
-      request_items: { select: { id: true }, take: 1 },
+      request: { select: { id: true, status: true } },
+      request_items: { select: { id: true, status: true } },
       warranty: { select: { id: true } },
     },
   },

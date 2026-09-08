@@ -82,7 +82,6 @@ export function toDealerActivatedCustomerResponse(request: {
     id: string;
     display_name: string | null;
     product_code: string;
-    serial_number: string | null;
   } | null;
   activated_warranty: {
     id: string;
@@ -91,6 +90,7 @@ export function toDealerActivatedCustomerResponse(request: {
     start_date: Date | null;
     end_date: Date | null;
     duration_months: number;
+    serial_number: string | null;
   } | null;
   reviewed_at: Date | null;
 }): DealerActivatedCustomerSummary {
@@ -110,7 +110,7 @@ export function toDealerActivatedCustomerResponse(request: {
       id: request.product?.id ?? null,
       name: request.product?.display_name ?? null,
       productCode: request.product?.product_code ?? null,
-      serialNumber: request.product?.serial_number ?? null,
+      serialNumber: request.activated_warranty.serial_number,
     },
     warranty: {
       id: request.activated_warranty.id,

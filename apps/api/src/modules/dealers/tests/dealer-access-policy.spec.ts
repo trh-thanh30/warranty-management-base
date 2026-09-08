@@ -5,6 +5,7 @@ import { Test, type TestingModule } from '@nestjs/testing';
 describe('DealerAccessPolicy', () => {
   const repository = {
     findMembershipByDealerAndUser: jest.fn(),
+    listAssignedToUser: jest.fn(),
   };
   let module: TestingModule;
   let policy: DealerAccessPolicy;
@@ -51,5 +52,36 @@ describe('DealerAccessPolicy', () => {
       policy.assertCanAccess({ id: 'admin-id', role: 'ADMIN' }, 'dealer-id'),
     ).resolves.toBeUndefined();
     expect(repository.findMembershipByDealerAndUser).not.toHaveBeenCalled();
+  });
+
+  it('returns assigned dealer ids for a moderator', async () => {
+    repository.listAssignedToUser.mockResolvedValue([
+      { id: 'dealer-a' },
+      { id: 'dealer-b' },
+    ]);
+
+    await expect(
+      policy.resolveAccessibleDealerIds({
+        id: 'moderator-id',
+        role: 'MODERATOR',
+      }),
+    ).resolves.toEqual(['dealer-a', 'dealer-b']);
+    expect(repository.listAssignedToUser).toHaveBeenCalledWith('moderator-id');
+  });
+
+  it('does not constrain an admin list to dealer ids', async () => {
+    await expect(
+      policy.resolveAccessibleDealerIds({ id: 'admin-id', role: 'ADMIN' }),
+    ).resolves.toBeUndefined();
+    expect(repository.listAssignedToUser).not.toHaveBeenCalled();
+  });
+
+  it('denies a moderator access to a record without a dealer', async () => {
+    await expect(
+      policy.assertCanAccessRecord(
+        { id: 'moderator-id', role: 'MODERATOR' },
+        null,
+      ),
+    ).rejects.toMatchObject({ code: 'DEALER_ACCESS_DENIED' });
   });
 });

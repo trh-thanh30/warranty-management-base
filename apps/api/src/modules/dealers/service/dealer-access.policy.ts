@@ -28,4 +28,27 @@ export class DealerAccessPolicy {
       );
     }
   }
+
+  async resolveAccessibleDealerIds(
+    actor: DealerAccessActor,
+  ): Promise<string[] | undefined> {
+    if (actor.role === user_role.ADMIN) return undefined;
+
+    const dealers = await this.dealersRepository.listAssignedToUser(actor.id);
+    return dealers.map((dealer) => dealer.id);
+  }
+
+  async assertCanAccessRecord(
+    actor: DealerAccessActor,
+    dealerId: string | null | undefined,
+  ) {
+    if (actor.role === user_role.ADMIN) return;
+    if (!dealerId) {
+      throw new ForbiddenError(
+        'This record is not assigned to an accessible dealer',
+        'DEALER_ACCESS_DENIED',
+      );
+    }
+    await this.assertCanAccess(actor, dealerId);
+  }
 }

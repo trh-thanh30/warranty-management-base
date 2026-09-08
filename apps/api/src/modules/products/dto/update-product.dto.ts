@@ -81,11 +81,6 @@ export class UpdateProductDto {
   status?: product_status;
 
   @IsOptional()
-  @IsString()
-  @Length(1, 64)
-  serialNumber?: string | null;
-
-  @IsOptional()
   @IsObject()
   metadata?: Record<string, unknown> | null;
 }

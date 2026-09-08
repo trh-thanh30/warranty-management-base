@@ -18,3 +18,10 @@ export class WarrantyActivationRequestWarrantyCodeConflictError extends Warranty
     this.name = 'WarrantyActivationRequestWarrantyCodeConflictError';
   }
 }
+
+export class WarrantyActivationCodeReservationConflictError extends Error {
+  constructor() {
+    super('One or more activation codes are no longer available');
+    this.name = 'WarrantyActivationCodeReservationConflictError';
+  }
+}

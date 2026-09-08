@@ -56,7 +56,6 @@ export class AssignActivationCodesToProductUseCase {
         productCode: product.product_code,
         displayName: product.display_name,
         name: product.display_name ?? product.product_code,
-        serialNumber: product.serial_number,
       },
     };
   }

@@ -289,7 +289,6 @@ export class ActivationCodeBatchesRepository {
               id: true,
               product_code: true,
               display_name: true,
-              serial_number: true,
             },
           },
           replaced_by: {
@@ -326,7 +325,6 @@ export class ActivationCodeBatchesRepository {
                 productCode: row.product.product_code,
                 displayName: row.product.display_name,
                 name: row.product.display_name ?? row.product.product_code,
-                serialNumber: row.product.serial_number,
               }
             : null,
           replacedBy: row.replaced_by
@@ -417,7 +415,6 @@ export class ActivationCodeBatchesRepository {
           id: true,
           product_code: true,
           display_name: true,
-          serial_number: true,
         },
       },
     } satisfies Prisma.ActivationCodeSelect;
@@ -479,7 +476,6 @@ export class ActivationCodeBatchesRepository {
                 productCode: row.product.product_code,
                 displayName: row.product.display_name,
                 name: row.product.display_name ?? row.product.product_code,
-                serialNumber: row.product.serial_number,
               }
             : null,
         };
@@ -569,7 +565,6 @@ export class ActivationCodeBatchesRepository {
         id: true,
         product_code: true,
         display_name: true,
-        serial_number: true,
         status: true,
         deleted_at: true,
         warranty_duration_months: true,

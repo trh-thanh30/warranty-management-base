@@ -49,7 +49,6 @@ export class CreateProductUseCase {
     const product = await this.productsRepository.create({
       product_code: productCode,
       // Serial/VIN belongs to an issued Warranty, not catalogue Product.
-      serial_number: undefined,
       display_name: dto.name.trim(),
       slug: `${toSlug(dto.name)}-${productCode.toLowerCase()}`,
       brand: dto.brand?.trim() || null,
