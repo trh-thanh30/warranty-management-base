@@ -56,7 +56,13 @@ import { ActivationCodeProductAssignmentDialog } from "./components/activation-c
 
 const PAGE_SIZE = 10;
 
-export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
+export function ActivationCodeDetailView({
+  batchId,
+  productId,
+}: {
+  batchId?: string;
+  productId?: string;
+}) {
   const t = useTranslations("ActivationCodeDetail");
   const tApiErrors = useTranslations("ApiErrors");
   const locale = useLocale();
@@ -64,6 +70,12 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
+  const resourceId = batchId ?? productId!;
+  const queryKey = [
+    "activation-code-detail",
+    productId ? "product" : "batch",
+    resourceId,
+  ];
   const canRevoke = hasPermission(PERMISSIONS.ACTIVATION_CODE_BATCH_REVOKE);
   const canAssignProduct = hasPermission(
     PERMISSIONS.ACTIVATION_CODE_ASSIGN_PRODUCT,
@@ -88,17 +100,20 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
   const query = useQuery({
     placeholderData: (previous) => previous,
     queryFn: () =>
-      activationCodesService.listCodes(batchId, {
-        limit: PAGE_SIZE,
-        page,
-        search: debouncedSearch || undefined,
-        status: status || undefined,
-      }),
-    queryKey: [
-      "activation-code-detail",
-      batchId,
-      { page, search: debouncedSearch, status },
-    ],
+      productId
+        ? activationCodesService.listCodesByProduct(productId, {
+            limit: PAGE_SIZE,
+            page,
+            search: debouncedSearch || undefined,
+            status: status || undefined,
+          })
+        : activationCodesService.listCodes(batchId!, {
+            limit: PAGE_SIZE,
+            page,
+            search: debouncedSearch || undefined,
+            status: status || undefined,
+          }),
+    queryKey: [...queryKey, { page, search: debouncedSearch, status }],
   });
   const revokeMutation = useMutation({
     mutationFn: (codeId: string) => activationCodesService.revokeCode(codeId),
@@ -111,7 +126,7 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
       ),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ["activation-code-detail", batchId],
+        queryKey,
       });
       setRevokeTarget(null);
       toast.success(t("revoked"));
@@ -132,7 +147,7 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
       ),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ["activation-code-detail", batchId],
+        queryKey,
       });
       setReplaceTarget(null);
       setReplacementCode("");
@@ -153,7 +168,7 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
       ),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ["activation-code-detail", batchId],
+        queryKey,
       });
       setUnassignTarget(null);
       toast.success(t("unassigned"));
@@ -174,7 +189,9 @@ export function ActivationCodeDetailView({ batchId }: { batchId: string }) {
   return (
     <PermissionGuard permissions={[PERMISSIONS.ACTIVATION_CODE_BATCH_VIEW]}>
       <FormPageShell
-        backHref="/activation-code-batches"
+        backHref={
+          productId ? `/products/${productId}` : "/activation-code-batches"
+        }
         backLabel={t("back")}
         description={t("description")}
         eyebrow={t("eyebrow")}

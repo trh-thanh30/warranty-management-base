@@ -256,23 +256,33 @@ export class ActivationCodeBatchesRepository {
       search?: string;
       status?: activation_code_status;
     },
+    scope: 'batch' | 'product' = 'batch',
   ) {
     const { page, limit, skip, take } = normalizePagination(filters);
-    const batch = await this.prismaService.activationCodeBatch.findUnique({
-      where: { id: batchId },
-      select: { id: true },
-    });
-    if (!batch) return null;
+    const entity =
+      scope === 'batch'
+        ? await this.prismaService.activationCodeBatch.findUnique({
+            where: { id: batchId },
+            select: { id: true },
+          })
+        : await this.prismaService.product.findUnique({
+            where: { id: batchId },
+            select: { id: true },
+          });
+    if (!entity) return null;
     const search = filters.search?.trim();
     const where: Prisma.ActivationCodeWhereInput = {
-      batch_id: batchId,
+      ...(scope === 'batch' ? { batch_id: batchId } : { product_id: batchId }),
       ...(filters.status ? { status: filters.status } : {}),
       ...(search ? { code_hash: this.crypto.hash(search) } : {}),
     };
     const [rows, total] = await this.prismaService.$transaction([
       this.prismaService.activationCode.findMany({
         where,
-        orderBy: [{ product_id: 'asc' }, { created_at: 'asc' }, { id: 'asc' }],
+        orderBy:
+          scope === 'batch'
+            ? [{ product_id: 'asc' }, { created_at: 'asc' }, { id: 'asc' }]
+            : [{ created_at: 'desc' }, { id: 'desc' }],
         skip,
         take,
         select: {

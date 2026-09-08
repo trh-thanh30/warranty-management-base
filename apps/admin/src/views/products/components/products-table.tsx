@@ -1,6 +1,5 @@
 "use client";
 
-import { ActivationCodeStatusBadge } from "@/src/components/activation-code-status-badge";
 import { SortableTableHead } from "@/src/components/common/sortable-table-head";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
@@ -245,19 +244,18 @@ function ProductActivationCodeCell({ product }: { product: ProductResponse }) {
   if (activationCodes.length === 0) {
     return <Badge variant="secondary">{t("activationCodeUnassigned")}</Badge>;
   }
+  const availableCount = activationCodes.filter(
+    (activationCode) => activationCode.status === "AVAILABLE",
+  ).length;
+
   return (
-    <div className="flex max-w-56 flex-wrap items-center gap-1.5">
-      {activationCodes.slice(0, 3).map((activationCode) => (
-        <div className="space-y-1" key={activationCode.id}>
-          <p className="max-w-48 truncate text-xs font-semibold text-slate-950 dark:text-slate-50">
-            {activationCode.code}
-          </p>
-          <ActivationCodeStatusBadge status={activationCode.status} />
-        </div>
-      ))}
-      {activationCodes.length > 3 ? (
-        <Badge variant="secondary">+{activationCodes.length - 3}</Badge>
-      ) : null}
+    <div className="space-y-1">
+      <p className="text-sm font-medium text-slate-950 dark:text-slate-50">
+        {activationCodes.length} {t("assignedActivationCodeCount")}
+      </p>
+      <p className="text-xs text-slate-500 dark:text-slate-400">
+        {availableCount} {t("assignedActivationCodeAvailableCount")}
+      </p>
     </div>
   );
 }
@@ -396,6 +394,14 @@ function ProductActionsMenu({
               >
                 <KeyRound className="mr-2 size-4" />
                 {t("assignActivationCodes")}
+              </DropdownMenuItem>
+            ) : null}
+            {product.assignedActivationCodes?.length ? (
+              <DropdownMenuItem asChild>
+                <Link href={`/products/${product.id}/activation-codes`}>
+                  <KeyRound className="mr-2 size-4" />
+                  {t("manageAssignedActivationCodes")}
+                </Link>
               </DropdownMenuItem>
             ) : null}
             {canDelete ? (
