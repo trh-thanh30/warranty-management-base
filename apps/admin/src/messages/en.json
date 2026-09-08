@@ -604,7 +604,7 @@
     "replaceDescription": "Select a new code to replace the code currently assigned to {product}.",
     "currentCode": "Currently assigned code",
     "currentCodes": "Currently assigned codes",
-    "currentCodesSummary": "{available}/{total} codes available to activate",
+    "assignedCodesCount": "{count} activation codes assigned",
     "viewCurrentCodes": "View list",
     "batchLabel": "Activation-code batch",
     "allBatches": "All codes",

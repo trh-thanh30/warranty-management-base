@@ -54,9 +54,6 @@ export function AssignActivationCodesDialog({
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const currentCodes = product?.assignedActivationCodes ?? [];
-  const availableCurrentCodes = currentCodes.filter(
-    (code) => code.status === "AVAILABLE",
-  ).length;
   const canSubmit = Boolean(product);
   const debouncedBatchSearch = useDebounce(batchSearch.trim(), 300);
   const debouncedSearch = useDebounce(search.trim(), 300);
@@ -180,10 +177,7 @@ export function AssignActivationCodesDialog({
                       {t("currentCodes")}
                     </p>
                     <p className="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">
-                      {t("currentCodesSummary", {
-                        available: availableCurrentCodes,
-                        total: currentCodes.length,
-                      })}
+                      {t("assignedCodesCount", { count: currentCodes.length })}
                     </p>
                   </div>
                   <Popover>
@@ -200,7 +194,7 @@ export function AssignActivationCodesDialog({
                     </PopoverTrigger>
                     <PopoverContent
                       align="end"
-                      className="w-[calc(100vw-3rem)] max-w-md p-3"
+                      className="w-[calc(100vw-3rem)] max-w-md p-3 duration-150 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[side=bottom]:data-[state=open]:slide-in-from-top-2 data-[side=bottom]:data-[state=closed]:slide-out-to-top-2 motion-reduce:animate-none"
                       collisionPadding={12}
                     >
                       <p className="border-b border-slate-200 pb-2 text-sm font-semibold text-slate-900 dark:border-slate-700 dark:text-slate-100">

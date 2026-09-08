@@ -604,7 +604,7 @@
     "replaceDescription": "Chọn mã mới để thay thế mã đang gán cho sản phẩm {product}.",
     "currentCode": "Mã đang gán",
     "currentCodes": "Các mã đang gán",
-    "currentCodesSummary": "{available}/{total} mã có thể kích hoạt",
+    "assignedCodesCount": "{count} mã kích hoạt đã gán",
     "viewCurrentCodes": "Xem danh sách",
     "batchLabel": "Lô mã kích hoạt",
     "allBatches": "Tất cả mã",
