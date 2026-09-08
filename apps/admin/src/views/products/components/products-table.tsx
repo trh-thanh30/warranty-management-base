@@ -244,17 +244,10 @@ function ProductActivationCodeCell({ product }: { product: ProductResponse }) {
   if (activationCodes.length === 0) {
     return <Badge variant="secondary">{t("activationCodeUnassigned")}</Badge>;
   }
-  const availableCount = activationCodes.filter(
-    (activationCode) => activationCode.status === "AVAILABLE",
-  ).length;
-
   return (
-    <div className="space-y-1">
+    <div>
       <p className="text-sm font-medium text-slate-950 dark:text-slate-50">
         {activationCodes.length} {t("assignedActivationCodeCount")}
-      </p>
-      <p className="text-xs text-slate-500 dark:text-slate-400">
-        {availableCount} {t("assignedActivationCodeAvailableCount")}
       </p>
     </div>
   );

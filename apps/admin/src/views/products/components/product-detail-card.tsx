@@ -199,18 +199,11 @@ function AssignedActivationCodeDetails({
     );
   }
 
-  const availableCount = activationCodes.filter(
-    (activationCode) => activationCode.status === "AVAILABLE",
-  ).length;
-
   return (
     <div className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <p className="text-sm font-medium text-slate-950 dark:text-slate-50">
           {activationCodes.length} {t("assignedActivationCodeCount")}
-        </p>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          {availableCount} {t("assignedActivationCodeAvailableCount")}
         </p>
       </div>
       <Button asChild variant="secondary">

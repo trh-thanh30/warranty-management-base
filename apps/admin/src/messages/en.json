@@ -1378,7 +1378,6 @@
     "activationCodeUnassigned": "Not assigned",
     "activationCodeUnassignedDescription": "This product is not linked to an activation code yet.",
     "assignedActivationCodeCount": "activation codes",
-    "assignedActivationCodeAvailableCount": "available to activate",
     "manageAssignedActivationCodes": "Manage assigned activation codes",
     "activationCodeBatch": "Activation code batch",
     "activationCodeExpiresAt": "Activation deadline",

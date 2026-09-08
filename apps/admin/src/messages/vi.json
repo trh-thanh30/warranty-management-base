@@ -1378,7 +1378,6 @@
     "activationCodeUnassigned": "Chưa gán mã",
     "activationCodeUnassignedDescription": "Sản phẩm này chưa được liên kết với mã kích hoạt nào.",
     "assignedActivationCodeCount": "mã kích hoạt",
-    "assignedActivationCodeAvailableCount": "có thể kích hoạt",
     "manageAssignedActivationCodes": "Quản lý mã kích hoạt đã gán",
     "activationCodeBatch": "Lô mã kích hoạt",
     "activationCodeExpiresAt": "Hạn kích hoạt",
