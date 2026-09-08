@@ -602,7 +602,7 @@ test("API runtime excludes migration and unused build tooling", async () => {
     "brace-expansion@2": "2.1.4",
     "brace-expansion@5": "5.0.9",
     "cross-spawn@7": "7.0.6",
-    "fast-uri@3": "3.1.5",
+    "fast-uri@3": "3.1.6",
     "form-data": "4.0.6",
     "glob@10": "10.5.0",
     hono: "4.12.25",
