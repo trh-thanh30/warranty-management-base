@@ -82,6 +82,15 @@ export class ActivationCodesController {
     return this.listCodesUseCase.execute(id, query);
   }
 
+  @Get('codes/product/:productId')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_VIEW])
+  listProductCodes(
+    @Param('productId') productId: string,
+    @Query() query: ListActivationCodesDto,
+  ) {
+    return this.listCodesUseCase.executeByProduct(productId, query);
+  }
+
   @Get(':id/revoke-preview')
   @Permissions([permission_key.ACTIVATION_CODE_BATCH_REVOKE])
   getBatchRevokePreview(@Param('id') id: string) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { ActivationCodeStatusBadge } from "@/src/components/activation-code-status-badge";
+import { Link } from "@/src/i18n/navigation";
 import { formatDate, type ProductResponse } from "@repo/shared";
 import { Badge, Button, Skeleton } from "@repo/ui";
 import {
@@ -181,7 +181,6 @@ function AssignedActivationCodeDetails({
 }: {
   product: ProductResponse;
 }) {
-  const locale = useLocale();
   const t = useTranslations("Products");
   const activationCodes = product.assignedActivationCodes ?? [];
 
@@ -201,34 +200,18 @@ function AssignedActivationCodeDetails({
   }
 
   return (
-    <div className="space-y-3">
-      {activationCodes.map((activationCode) => (
-        <div
-          className="rounded-md border border-slate-200 p-3 dark:border-slate-800"
-          key={activationCode.id}
-        >
-          <div className="flex flex-wrap items-center gap-2">
-            <CopyableDetailItem
-              icon={<KeyRound className="size-4" />}
-              label={t("activationCode")}
-              value={activationCode.code}
-            />
-            <ActivationCodeStatusBadge status={activationCode.status} />
-          </div>
-          <div className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
-            <DetailItem
-              icon={<Hash className="size-4" />}
-              label={t("activationCodeBatch")}
-              value={activationCode.batchCode}
-            />
-            <DetailItem
-              icon={<CalendarDays className="size-4" />}
-              label={t("activationCodeExpiresAt")}
-              value={formatDate(activationCode.expiresAt, { locale })}
-            />
-          </div>
-        </div>
-      ))}
+    <div className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p className="text-sm font-medium text-slate-950 dark:text-slate-50">
+          {activationCodes.length} {t("assignedActivationCodeCount")}
+        </p>
+      </div>
+      <Button asChild variant="secondary">
+        <Link href={`/products/${product.id}/activation-codes`}>
+          <KeyRound className="size-4" />
+          {t("manageAssignedActivationCodes")}
+        </Link>
+      </Button>
     </div>
   );
 }

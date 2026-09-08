@@ -15,13 +15,16 @@ import {
   DialogDescription,
   DialogTitle,
   Label,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
 } from "@repo/ui";
 import {
   useInfiniteQuery,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { KeyRound } from "lucide-react";
+import { ChevronDown, KeyRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 
@@ -168,19 +171,56 @@ export function AssignActivationCodesDialog({
           <div className="mt-5 space-y-4">
             {currentCodes.length > 0 ? (
               <div className="rounded-lg border border-slate-200  p-3 dark:border-slate-800 dark:bg-slate-900/50">
-                <p className="text-xs font-medium uppercase text-slate-500">
-                  {t("currentCodes")}
-                </p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {currentCodes.map((currentCode) => (
-                    <div
-                      className="flex items-center gap-2 rounded-md bg-slate-100 px-2 py-1.5 text-sm dark:bg-slate-800"
-                      key={currentCode.id}
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-medium uppercase text-slate-500">
+                      {t("currentCodes")}
+                    </p>
+                    <p className="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">
+                      {t("assignedCodesCount", { count: currentCodes.length })}
+                    </p>
+                  </div>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        className="shrink-0"
+                        size="sm"
+                        type="button"
+                        variant="secondary"
+                      >
+                        {t("viewCurrentCodes")}
+                        <ChevronDown className="size-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      align="end"
+                      className="w-[calc(100vw-3rem)] max-w-md p-3 duration-150 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[side=bottom]:data-[state=open]:slide-in-from-top-2 data-[side=bottom]:data-[state=closed]:slide-out-to-top-2 motion-reduce:animate-none"
+                      collisionPadding={12}
                     >
-                      <span className="font-semibold">{currentCode.code}</span>
-                      <ActivationCodeStatusBadge status={currentCode.status} />
-                    </div>
-                  ))}
+                      <p className="border-b border-slate-200 pb-2 text-sm font-semibold text-slate-900 dark:border-slate-700 dark:text-slate-100">
+                        {t("currentCodes")}
+                      </p>
+                      <div
+                        className="mt-2 max-h-[min(12rem,40vh)] touch-pan-y space-y-2 overflow-y-auto overscroll-contain pr-1"
+                        onWheel={(event) => event.stopPropagation()}
+                      >
+                        {currentCodes.map((currentCode) => (
+                          <div
+                            className="flex min-w-0 items-center justify-between gap-2 rounded-md border border-slate-200 px-2 py-1.5 text-sm dark:border-slate-700"
+                            key={currentCode.id}
+                          >
+                            <span className="truncate font-semibold">
+                              {currentCode.code}
+                            </span>
+                            <ActivationCodeStatusBadge
+                              className="shrink-0"
+                              status={currentCode.status}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
             ) : null}
