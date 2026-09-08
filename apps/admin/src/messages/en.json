@@ -1653,6 +1653,8 @@
     "model": "Model",
     "customerCode": "Customer code",
     "warrantyCode": "Warranty code",
+    "activationCode": "Activation code",
+    "activationCodeNotRequired": "Code not required",
     "status": "Status",
     "startDate": "Start date",
     "endDate": "End date",

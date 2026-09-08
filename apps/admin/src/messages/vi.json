@@ -1653,6 +1653,8 @@
     "model": "Mẫu",
     "customerCode": "Mã khách hàng",
     "warrantyCode": "Mã bảo hành",
+    "activationCode": "Mã kích hoạt",
+    "activationCodeNotRequired": "Không áp dụng mã",
     "status": "Trạng thái",
     "startDate": "Ngày bắt đầu",
     "endDate": "Ngày kết thúc",
