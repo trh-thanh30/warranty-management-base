@@ -48,6 +48,12 @@ describe('ListWarrantiesUseCase', () => {
               code_ciphertext: 'encrypted-code',
               status: 'ACTIVATED',
             },
+            activation_request: {
+              customer_id: 'customer-id',
+              customer_email: 'customer@example.com',
+              customer_phone: '0901234567',
+              full_address: '12 Nguyen Trai, Ha Noi',
+            },
             product: {
               id: 'product-id',
               product_code: 'PRD-2026-ABCDEF',
@@ -124,6 +130,9 @@ describe('ListWarrantiesUseCase', () => {
           ownerUserId: null,
           customerCode: 'CUS-2026-000001',
           fullName: 'Nguyen Van A',
+          email: 'customer@example.com',
+          phone: '0901234567',
+          address: '12 Nguyen Trai, Ha Noi',
         },
       }),
     ]);

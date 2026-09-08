@@ -2,6 +2,7 @@ import { NotFoundError } from '@/common/response';
 import { WarrantiesRepository } from '@/modules/warranties/repository/warranties.repository';
 import { toWarrantyListItemResponse } from '@/modules/warranties/warranties.types';
 import { Injectable } from '@nestjs/common';
+import { ActivationCodeCryptoService } from '@/modules/activation-codes/services/activation-code-crypto.service';
 import {
   DealerAccessPolicy,
   type DealerAccessActor,
@@ -12,6 +13,7 @@ export class GetWarrantyDetailUseCase {
   constructor(
     private readonly warrantiesRepository: WarrantiesRepository,
     private readonly dealerAccessPolicy?: DealerAccessPolicy,
+    private readonly activationCodeCryptoService?: ActivationCodeCryptoService,
   ) {}
 
   async execute(id: string, actor?: DealerAccessActor) {
@@ -27,6 +29,11 @@ export class GetWarrantyDetailUseCase {
       throw new NotFoundError('Warranty not found');
     }
 
-    return toWarrantyListItemResponse(warranty);
+    return toWarrantyListItemResponse(
+      warranty,
+      this.activationCodeCryptoService
+        ? (ciphertext) => this.activationCodeCryptoService!.decrypt(ciphertext)
+        : undefined,
+    );
   }
 }

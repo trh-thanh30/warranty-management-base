@@ -1,4 +1,14 @@
 import {
+  getLocalizedApiError,
+  type ApiErrorTranslator,
+} from "@/src/lib/localized-api-error.utils";
+import type {
+  VietnamProvince,
+  VietnamWard,
+} from "@/src/services/locations/locations.types";
+import { translateFieldError } from "@/src/utils";
+import { compactActivationInputValues } from "@/src/utils/category-activation-fields";
+import {
   HttpClientError,
   formatDate,
   type CategoryActivationFieldConfig,
@@ -9,21 +19,11 @@ import {
   type ProductResponse,
   type WarrantyActivationRequestSummary,
 } from "@repo/shared";
-import type {
-  VietnamProvince,
-  VietnamWard,
-} from "@/src/services/locations/locations.types";
-import { translateFieldError } from "@/src/utils";
-import { compactActivationInputValues } from "@/src/utils/category-activation-fields";
-import {
-  getLocalizedApiError,
-  type ApiErrorTranslator,
-} from "@/src/lib/localized-api-error.utils";
+import { getActivationProductDisplayName } from "./warranty-activation-request-product.utils";
 import type {
   WarrantyActivationRequestCreateFormValues,
   WarrantyActivationRequestDirectoryFilters,
 } from "./warranty-activation-requests.types";
-import { getActivationProductDisplayName } from "./warranty-activation-request-product.utils";
 
 const CREATE_FIELD_ERROR_KEYS = new Set([
   "addressAdministrativeUnitNotAllowed",
@@ -97,7 +97,7 @@ export function buildWarrantyActivationRequestListQuery({
 export function formatActivationRequestCustomer(
   request: WarrantyActivationRequestSummary,
 ) {
-  return [request.customerName, request.customerPhone, request.customerEmail]
+  return [request.customerName, request.customerPhone]
     .filter(Boolean)
     .join(" · ");
 }

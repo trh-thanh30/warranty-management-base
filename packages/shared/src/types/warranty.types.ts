@@ -67,6 +67,11 @@ export type WarrantyDealerSummary = {
   id: string;
   dealerCode: string;
   name: string;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
+  province?: string | null;
+  district?: string | null;
 };
 
 export type WarrantyUserSummary = {
@@ -129,12 +134,18 @@ export type WarrantyLookupFilmItems = Partial<
 export type WarrantyProductSummary = Pick<
   ProductSummary,
   "id" | "name" | "brand" | "model" | "productCode"
-> & { serialNumber: string | null };
+> & {
+  serialNumber: string | null;
+  category?: Pick<CategorySummary, "id" | "slug" | "name"> | null;
+};
 
 export type WarrantyOwnerSummary = {
   customerId: string;
   customerCode?: string;
   fullName?: string;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
   ownerUserId?: string | null;
 };
 

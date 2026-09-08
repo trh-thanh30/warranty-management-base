@@ -72,11 +72,19 @@ export type WarrantyRecord = {
     id: string;
     dealerCode: string;
     name: string;
+    phone?: string | null;
+    email?: string | null;
+    address?: string | null;
+    province?: string | null;
+    district?: string | null;
   } | null;
   owner: {
     customerId: string;
     customerCode: string | null;
     fullName: string | null;
+    email?: string | null;
+    phone?: string | null;
+    address?: string | null;
     ownerUserId: string | null;
   } | null;
 };
@@ -131,6 +139,7 @@ export type WarrantyVoidCandidate = {
 };
 
 type WarrantyWithProduct = Warranty & {
+  activation_request?: WarrantyActivationRequest | null;
   activation_code?: Pick<
     ActivationCode,
     'id' | 'code_ciphertext' | 'status'
@@ -139,7 +148,7 @@ type WarrantyWithProduct = Warranty & {
   voided_by?: User | null;
   dealer?: Dealer | null;
   ownerships?: Array<WarrantyOwnership & { customer?: Customer | null }>;
-  product: Product;
+  product: Product & { category_ref?: Category | null };
 };
 
 type WarrantyWithAuditUsers = WarrantyRecord & {
@@ -182,7 +191,24 @@ export function toWarrantyResponse(warranty: WarrantyWithAuditUsers) {
     voidReason: warranty.voidReason,
     createdAt: warranty.createdAt,
     updatedAt: warranty.updatedAt,
-    dealer: warranty.dealer ?? null,
+    dealer: warranty.dealer
+      ? {
+          id: warranty.dealer.id,
+          dealerCode: warranty.dealer.dealerCode,
+          name: warranty.dealer.name,
+          ...(warranty.dealer.phone ? { phone: warranty.dealer.phone } : {}),
+          ...(warranty.dealer.email ? { email: warranty.dealer.email } : {}),
+          ...(warranty.dealer.address
+            ? { address: warranty.dealer.address }
+            : {}),
+          ...(warranty.dealer.province
+            ? { province: warranty.dealer.province }
+            : {}),
+          ...(warranty.dealer.district
+            ? { district: warranty.dealer.district }
+            : {}),
+        }
+      : null,
     owner: warranty.owner ?? null,
   };
 }
@@ -295,6 +321,12 @@ export function toWarrantyListItemResponse(
   const currentOwnership = warranty.ownerships?.find(
     (ownership) => ownership.is_current_owner,
   );
+  const activationRequest =
+    warranty.activation_request &&
+    (!warranty.activation_request.customer_id ||
+      warranty.activation_request.customer_id === currentOwnership?.customer_id)
+      ? warranty.activation_request
+      : null;
 
   return {
     ...toWarrantyResponse(toWarrantyRecord(warranty)),
@@ -315,6 +347,15 @@ export function toWarrantyListItemResponse(
       model: getProductCatalogue(warranty.product).model,
       productCode: warranty.product.product_code,
       serialNumber: warranty.serial_number,
+      ...(warranty.product.category_ref
+        ? {
+            category: {
+              id: warranty.product.category_ref.id,
+              name: warranty.product.category_ref.name,
+              slug: warranty.product.category_ref.slug,
+            },
+          }
+        : {}),
     },
     owner: currentOwnership
       ? {
@@ -322,6 +363,30 @@ export function toWarrantyListItemResponse(
           ownerUserId: currentOwnership.owner_user_id,
           customerCode: currentOwnership.customer?.customer_code,
           fullName: currentOwnership.customer?.full_name,
+          ...(currentOwnership.customer?.email ||
+          activationRequest?.customer_email
+            ? {
+                email:
+                  currentOwnership.customer?.email ??
+                  activationRequest?.customer_email,
+              }
+            : {}),
+          ...(currentOwnership.customer?.phone ||
+          activationRequest?.customer_phone
+            ? {
+                phone:
+                  currentOwnership.customer?.phone ??
+                  activationRequest?.customer_phone,
+              }
+            : {}),
+          ...(currentOwnership.customer?.address ||
+          activationRequest?.full_address
+            ? {
+                address:
+                  currentOwnership.customer?.address ??
+                  activationRequest?.full_address,
+              }
+            : {}),
         }
       : null,
   };
@@ -377,6 +442,17 @@ export function toWarrantyRecord(
           id: warranty.dealer.id,
           dealerCode: warranty.dealer.dealer_code,
           name: warranty.dealer.name,
+          ...(warranty.dealer.phone ? { phone: warranty.dealer.phone } : {}),
+          ...(warranty.dealer.email ? { email: warranty.dealer.email } : {}),
+          ...(warranty.dealer.address
+            ? { address: warranty.dealer.address }
+            : {}),
+          ...(warranty.dealer.province
+            ? { province: warranty.dealer.province }
+            : {}),
+          ...(warranty.dealer.district
+            ? { district: warranty.dealer.district }
+            : {}),
         }
       : null,
     owner: currentOwnership
@@ -384,6 +460,15 @@ export function toWarrantyRecord(
           customerId: currentOwnership.customer_id,
           customerCode: currentOwnership.customer?.customer_code ?? null,
           fullName: currentOwnership.customer?.full_name ?? null,
+          ...(currentOwnership.customer?.email
+            ? { email: currentOwnership.customer.email }
+            : {}),
+          ...(currentOwnership.customer?.phone
+            ? { phone: currentOwnership.customer.phone }
+            : {}),
+          ...(currentOwnership.customer?.address
+            ? { address: currentOwnership.customer.address }
+            : {}),
           ownerUserId: currentOwnership.owner_user_id,
         }
       : null,

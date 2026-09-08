@@ -1,15 +1,10 @@
 "use client";
 
-import {
-  CheckCircle2,
-  Download,
-  Eye,
-  FileText,
-  MoreHorizontal,
-  XCircle,
-} from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
-import type { ReactNode } from "react";
+import { ActivationCodeSummary } from "@/src/components/activation-code-summary";
+import { CompactBadgeList } from "@/src/components/common";
+import { SortableTableHead } from "@/src/components/common/sortable-table-head";
+import { usePermissions } from "@/src/hooks/use-permissions";
+import { Link } from "@/src/i18n/navigation";
 import type {
   WarrantyActivationRequestSortBy,
   WarrantyActivationRequestSummary,
@@ -23,29 +18,34 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   Table,
-  TableScroll,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
+  TableScroll,
 } from "@repo/ui";
-import { SortableTableHead } from "@/src/components/common/sortable-table-head";
-import { CompactBadgeList } from "@/src/components/common";
-import { usePermissions } from "@/src/hooks/use-permissions";
-import { Link } from "@/src/i18n/navigation";
+import {
+  CheckCircle2,
+  Download,
+  Eye,
+  FileText,
+  MoreHorizontal,
+  XCircle,
+} from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import type { ReactNode } from "react";
+import {
+  getActivationRequestActivationCodes,
+  getActivationRequestProductNames,
+  getActivationRequestWarrantyCodes,
+} from "../warranty-activation-request-items.utils";
 import type { WarrantyActivationRequestAction } from "../warranty-activation-requests.types";
 import {
   formatActivationRequestCustomer,
   formatActivationRequestDate,
 } from "../warranty-activation-requests.utils";
 import { WarrantyActivationRequestStatusBadge } from "./warranty-activation-request-status-badge";
-import {
-  getActivationRequestActivationCodes,
-  getActivationRequestProductNames,
-  getActivationRequestWarrantyCodes,
-} from "../warranty-activation-request-items.utils";
-import { ActivationCodeSummary } from "@/src/components/activation-code-summary";
 
 type WarrantyActivationRequestsTableProps = {
   items: WarrantyActivationRequestSummary[];
@@ -88,7 +88,7 @@ export function WarrantyActivationRequestsTable({
       </div>
 
       <TableScroll className="hidden overscroll-x-contain rounded-md border border-slate-200 dark:border-slate-800 md:block">
-        <Table className="min-w-[1320px] whitespace-nowrap">
+        <Table className="min-w-330 whitespace-nowrap">
           <TableHeader>
             <TableRow>
               <SortableTableHead
@@ -107,9 +107,10 @@ export function WarrantyActivationRequestsTable({
               >
                 {t("warrantyCode")}
               </SortableTableHead>
+              <TableHead>{t("activationCodeLabel")}</TableHead>
+
               <TableHead>{t("customer")}</TableHead>
               <TableHead>{t("product")}</TableHead>
-              <TableHead>{t("activationCodeLabel")}</TableHead>
               <SortableTableHead
                 activeSortBy={sortBy}
                 onSortChange={onSortChange}
@@ -182,6 +183,9 @@ function WarrantyActivationRequestTableRow({
         />
       </TableCell>
       <TableCell>
+        <ActivationRequestCodeList request={request} />
+      </TableCell>
+      <TableCell>
         <div className="max-w-[18rem]">
           <p className="truncate font-medium">{request.customerName}</p>
           <p className="mt-1 truncate text-xs text-slate-500">
@@ -196,9 +200,7 @@ function WarrantyActivationRequestTableRow({
           showItemTooltip
         />
       </TableCell>
-      <TableCell>
-        <ActivationRequestCodeList request={request} />
-      </TableCell>
+
       <TableCell>
         <WarrantyActivationRequestStatusBadge
           label={t(`statuses.${request.status}`)}

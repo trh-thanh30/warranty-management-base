@@ -12,7 +12,7 @@ test("activation request item columns stay readable and scroll horizontally", ()
     source,
     /TableScroll className="max-w-full overscroll-x-contain rounded-md/,
   );
-  assert.match(source, /Table className="min-w-\[920px\] whitespace-nowrap"/);
+  assert.match(source, /Table className="min-w-\[1040px\] whitespace-nowrap"/);
 });
 
 test("activation request items scroll vertically with a sticky header", () => {

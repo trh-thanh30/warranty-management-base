@@ -12,6 +12,7 @@ const warrantyInclude = {
   activation_code: {
     select: { id: true, code_ciphertext: true, status: true },
   },
+  activation_request: true,
   ownerships: {
     where: { is_current_owner: true },
     include: { customer: true },
