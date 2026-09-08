@@ -1,4 +1,5 @@
 import { ForbiddenError } from '@/common/response';
+import { DEALER_MEMBERSHIP_ACCESS_ENABLED } from '@/modules/dealers/dealers.constants';
 import { DealersRepository } from '@/modules/dealers/repository/dealers.repository';
 import { Injectable } from '@nestjs/common';
 import { user_role } from '@prisma/client';
@@ -13,7 +14,9 @@ export class DealerAccessPolicy {
   constructor(private readonly dealersRepository: DealersRepository) {}
 
   async assertCanAccess(actor: DealerAccessActor, dealerId: string) {
-    if (actor.role === user_role.ADMIN) return;
+    if (!DEALER_MEMBERSHIP_ACCESS_ENABLED || actor.role === user_role.ADMIN) {
+      return;
+    }
 
     const membership =
       await this.dealersRepository.findMembershipByDealerAndUser(
@@ -32,7 +35,9 @@ export class DealerAccessPolicy {
   async resolveAccessibleDealerIds(
     actor: DealerAccessActor,
   ): Promise<string[] | undefined> {
-    if (actor.role === user_role.ADMIN) return undefined;
+    if (!DEALER_MEMBERSHIP_ACCESS_ENABLED || actor.role === user_role.ADMIN) {
+      return undefined;
+    }
 
     const dealers = await this.dealersRepository.listAssignedToUser(actor.id);
     return dealers.map((dealer) => dealer.id);
@@ -42,7 +47,9 @@ export class DealerAccessPolicy {
     actor: DealerAccessActor,
     dealerId: string | null | undefined,
   ) {
-    if (actor.role === user_role.ADMIN) return;
+    if (!DEALER_MEMBERSHIP_ACCESS_ENABLED || actor.role === user_role.ADMIN) {
+      return;
+    }
     if (!dealerId) {
       throw new ForbiddenError(
         'This record is not assigned to an accessible dealer',

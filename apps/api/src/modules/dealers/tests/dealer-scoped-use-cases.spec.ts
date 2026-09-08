@@ -23,7 +23,10 @@ describe('Dealer-scoped use cases', () => {
   };
   const repository = {
     findById: jest.fn(),
+    findByPhone: jest.fn(),
     findMembershipByDealerAndUser: jest.fn(),
+    listActivatedCustomers: jest.fn(),
+    update: jest.fn(),
   };
   let module: TestingModule;
   let getDetail: GetDealerDetailUseCase;
@@ -52,32 +55,51 @@ describe('Dealer-scoped use cases', () => {
     repository.findMembershipByDealerAndUser.mockResolvedValue(null);
   });
 
-  it('denies dealer detail when a moderator is not assigned', async () => {
+  it('allows dealer detail when a moderator is not assigned', async () => {
     await expect(
       getDetail.execute('dealer-id', {
         id: 'moderator-id',
         role: 'MODERATOR',
       }),
-    ).rejects.toMatchObject({ code: 'DEALER_ACCESS_DENIED' });
+    ).resolves.toEqual(expect.objectContaining({ id: 'dealer-id' }));
   });
 
-  it('denies dealer updates when a moderator is not assigned', async () => {
+  it('allows dealer updates when a moderator is not assigned', async () => {
+    repository.update.mockResolvedValue({
+      ...dealer,
+      name: 'Updated dealer',
+    });
+
     await expect(
       updateDealer.execute(
         'dealer-id',
         { name: 'Updated dealer' },
         { id: 'moderator-id', role: 'MODERATOR' },
       ),
-    ).rejects.toMatchObject({ code: 'DEALER_ACCESS_DENIED' });
+    ).resolves.toEqual(expect.objectContaining({ name: 'Updated dealer' }));
   });
 
-  it('denies activated-customer access for an unassigned moderator', async () => {
+  it('allows activated-customer access for an unassigned moderator', async () => {
+    repository.listActivatedCustomers.mockResolvedValue({
+      items: [],
+      meta: {
+        hasNextPage: false,
+        hasPreviousPage: false,
+        limit: 10,
+        page: 1,
+        total: 0,
+        totalPages: 0,
+      },
+    });
+
     await expect(
       listActivatedCustomers.execute(
         'dealer-id',
         { limit: 10, page: 1 },
         { id: 'moderator-id', role: 'MODERATOR' },
       ),
-    ).rejects.toMatchObject({ code: 'DEALER_ACCESS_DENIED' });
+    ).resolves.toEqual(
+      expect.objectContaining({ items: [], meta: expect.any(Object) }),
+    );
   });
 });

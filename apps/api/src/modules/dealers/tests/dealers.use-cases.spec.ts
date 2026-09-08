@@ -67,7 +67,7 @@ describe('Dealers use cases', () => {
     expect(result.name).toBe('Lexzenz Ha Noi');
   });
 
-  it('automatically assigns a moderator to a dealer they create', async () => {
+  it('does not automatically assign the creator while membership access is disabled', async () => {
     repository.findByPhone.mockResolvedValue(null);
     repository.create.mockResolvedValue(baseDealer);
     const useCase = new CreateDealerUseCase(repository as never);
@@ -85,12 +85,7 @@ describe('Dealers use cases', () => {
 
     expect(repository.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        memberships: {
-          create: {
-            created_by: { connect: { id: 'moderator-id' } },
-            user: { connect: { id: 'moderator-id' } },
-          },
-        },
+        memberships: undefined,
       }),
     );
   });

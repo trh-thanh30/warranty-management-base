@@ -1,6 +1,7 @@
 import { ConflictError } from '@/common/response';
 import { CreateDealerDto } from '@/modules/dealers/dto/create-dealer.dto';
 import { DealersRepository } from '@/modules/dealers/repository/dealers.repository';
+import { DEALER_MEMBERSHIP_ACCESS_ENABLED } from '@/modules/dealers/dealers.constants';
 import {
   normalizeDealerMetadata,
   toDealerResponse,
@@ -44,7 +45,9 @@ export class CreateDealerUseCase {
         longitude: dto.longitude,
         sales_name: optionalTrim(dto.salesName),
         memberships:
-          context.userId && context.userRole === user_role.MODERATOR
+          DEALER_MEMBERSHIP_ACCESS_ENABLED &&
+          context.userId &&
+          context.userRole === user_role.MODERATOR
             ? {
                 create: {
                   created_by: { connect: { id: context.userId } },

@@ -5,6 +5,7 @@ import {
 } from '@/common/excel';
 import { BadRequestError } from '@/common/response';
 import { dealerExcelColumns } from '@/modules/dealers/excel/dealer-excel.schema';
+import { DEALER_MEMBERSHIP_ACCESS_ENABLED } from '@/modules/dealers/dealers.constants';
 import {
   DealerExcelRow,
   PreparedDealerImportRow,
@@ -57,7 +58,10 @@ export class ImportDealersUseCase {
     }
 
     const assignedUserId =
-      context.userRole === user_role.MODERATOR ? context.userId : undefined;
+      DEALER_MEMBERSHIP_ACCESS_ENABLED &&
+      context.userRole === user_role.MODERATOR
+        ? context.userId
+        : undefined;
     const existingDealers =
       await this.dealersRepository.listAll(assignedUserId);
     const { errors, preparedRows } = this.prepareRows(rows, existingDealers);

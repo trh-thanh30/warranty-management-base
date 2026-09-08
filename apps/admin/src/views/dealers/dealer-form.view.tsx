@@ -12,6 +12,7 @@ import { usePermissions } from "@/src/hooks/use-permissions";
 import { DealerFormCard } from "./components/dealer-form-card";
 import { DealerMembersCard } from "./components/dealer-members-card";
 import { useDealerDetail } from "./hooks/use-dealer-detail";
+import { DEALER_MEMBERSHIP_UI_ENABLED } from "./dealers.constants";
 
 type DealerFormViewProps =
   | {
@@ -68,7 +69,10 @@ export function DealerFormView({ dealerId, mode }: DealerFormViewProps) {
             icon={Building2}
             title={t("loadErrorTitle")}
           />
-        ) : isEditing && dealer && hasRole("admin") ? (
+        ) : isEditing &&
+          dealer &&
+          DEALER_MEMBERSHIP_UI_ENABLED &&
+          hasRole("admin") ? (
           <Tabs defaultValue="details">
             <TabsList>
               <TabsTrigger value="details">{t("detailsTab")}</TabsTrigger>

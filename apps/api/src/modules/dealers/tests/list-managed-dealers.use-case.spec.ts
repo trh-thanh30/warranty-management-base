@@ -20,7 +20,7 @@ describe('ListManagedDealersUseCase', () => {
   afterAll(async () => module.close());
   beforeEach(() => jest.clearAllMocks());
 
-  it('scopes the managed dealer list to the current moderator', async () => {
+  it('does not scope the dealer list to the current moderator while membership access is disabled', async () => {
     repository.list.mockResolvedValue({
       items: [],
       meta: {
@@ -40,7 +40,7 @@ describe('ListManagedDealersUseCase', () => {
 
     expect(repository.list).toHaveBeenCalledWith(
       { limit: 10, page: 1 },
-      'moderator-id',
+      undefined,
     );
   });
 

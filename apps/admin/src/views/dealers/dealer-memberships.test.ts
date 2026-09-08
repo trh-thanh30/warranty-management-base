@@ -47,13 +47,18 @@ test("dealer service manages membership through dealer-scoped endpoints", async 
   ]);
 });
 
-test("dealer edit view exposes an admin-only membership tab", () => {
+test("dealer edit view temporarily hides the membership tab", () => {
   const source = readFileSync(
     new URL("./dealer-form.view.tsx", import.meta.url),
     "utf8",
   );
+  const constants = readFileSync(
+    new URL("./dealers.constants.ts", import.meta.url),
+    "utf8",
+  );
 
+  assert.match(constants, /DEALER_MEMBERSHIP_UI_ENABLED = false/);
+  assert.match(source, /DEALER_MEMBERSHIP_UI_ENABLED/);
   assert.match(source, /membersTab/);
   assert.match(source, /DealerMembersCard/);
-  assert.match(source, /hasRole\("admin"\)/);
 });

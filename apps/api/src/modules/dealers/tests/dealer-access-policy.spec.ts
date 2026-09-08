@@ -24,14 +24,15 @@ describe('DealerAccessPolicy', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
-  it('denies a moderator who is not assigned to the dealer', async () => {
+  it('allows a moderator to access any dealer while membership scoping is disabled', async () => {
     repository.findMembershipByDealerAndUser.mockResolvedValue(null);
     await expect(
       policy.assertCanAccess(
         { id: 'moderator-id', role: 'MODERATOR' },
         'dealer-id',
       ),
-    ).rejects.toMatchObject({ code: 'DEALER_ACCESS_DENIED' });
+    ).resolves.toBeUndefined();
+    expect(repository.findMembershipByDealerAndUser).not.toHaveBeenCalled();
   });
 
   it('allows an assigned moderator', async () => {
@@ -54,7 +55,7 @@ describe('DealerAccessPolicy', () => {
     expect(repository.findMembershipByDealerAndUser).not.toHaveBeenCalled();
   });
 
-  it('returns assigned dealer ids for a moderator', async () => {
+  it('does not constrain a moderator list while membership scoping is disabled', async () => {
     repository.listAssignedToUser.mockResolvedValue([
       { id: 'dealer-a' },
       { id: 'dealer-b' },
@@ -65,8 +66,8 @@ describe('DealerAccessPolicy', () => {
         id: 'moderator-id',
         role: 'MODERATOR',
       }),
-    ).resolves.toEqual(['dealer-a', 'dealer-b']);
-    expect(repository.listAssignedToUser).toHaveBeenCalledWith('moderator-id');
+    ).resolves.toBeUndefined();
+    expect(repository.listAssignedToUser).not.toHaveBeenCalled();
   });
 
   it('does not constrain an admin list to dealer ids', async () => {
@@ -76,12 +77,12 @@ describe('DealerAccessPolicy', () => {
     expect(repository.listAssignedToUser).not.toHaveBeenCalled();
   });
 
-  it('denies a moderator access to a record without a dealer', async () => {
+  it('allows a moderator to access a record without a dealer while scoping is disabled', async () => {
     await expect(
       policy.assertCanAccessRecord(
         { id: 'moderator-id', role: 'MODERATOR' },
         null,
       ),
-    ).rejects.toMatchObject({ code: 'DEALER_ACCESS_DENIED' });
+    ).resolves.toBeUndefined();
   });
 });
