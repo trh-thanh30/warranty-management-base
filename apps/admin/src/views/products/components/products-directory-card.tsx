@@ -147,7 +147,7 @@ function ProductsDirectoryFilters({
   const t = useTranslations("Products");
 
   return (
-    <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_24rem_12rem_14rem]">
+    <div className="grid gap-3 md:grid-cols-3 grid-cols-1">
       <div className="relative">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
         <Input
