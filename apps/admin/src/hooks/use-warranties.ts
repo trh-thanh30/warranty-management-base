@@ -16,6 +16,7 @@ import type {
   WarrantyListItem,
   UpdateWarrantyBody,
   VoidWarrantyBody,
+  TransferWarrantyOwnerBody,
 } from "@repo/shared";
 import { warrantiesService } from "@/src/services/warranties/warranties.service";
 
@@ -104,6 +105,19 @@ export function useUpdateWarranty(warrantyId: string | null) {
   return useMutation({
     mutationFn: (body: UpdateWarrantyBody) =>
       warrantiesService.updateWarranty(warrantyId ?? "", body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: warrantyKeys.all });
+      void queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+  });
+}
+
+export function useTransferWarrantyOwner(warrantyId: string | null) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: TransferWarrantyOwnerBody) =>
+      warrantiesService.transferOwner(warrantyId ?? "", body),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: warrantyKeys.all });
       void queryClient.invalidateQueries({ queryKey: ["products"] });

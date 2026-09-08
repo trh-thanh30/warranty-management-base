@@ -13,18 +13,18 @@ export class LookupWarrantyForCustomerUseCase {
 
   async execute(ownerUserId: string, dto: LookupWarrantyDto) {
     const code = dto.code.trim().toUpperCase();
-    const product = await this.warrantiesRepository.findLookupMatchForCustomer(
+    const warranty = await this.warrantiesRepository.findLookupMatchForCustomer(
       code,
       ownerUserId,
     );
 
-    if (!product?.warranty) {
+    if (!warranty) {
       throw new NotFoundError(LOOKUP_NOT_FOUND_MESSAGE);
     }
 
     return toWarrantyLookupResponse({
-      product,
-      warranty: product.warranty,
+      product: warranty.product,
+      warranty,
     });
   }
 }

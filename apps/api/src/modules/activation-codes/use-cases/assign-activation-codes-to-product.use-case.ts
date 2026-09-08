@@ -33,6 +33,7 @@ export class AssignActivationCodesToProductUseCase {
       if (
         code.status !== activation_code_status.AVAILABLE ||
         code.expires_at <= now ||
+        code.product_id ||
         code.request ||
         code.request_items.length > 0 ||
         code.warranty
@@ -41,17 +42,6 @@ export class AssignActivationCodesToProductUseCase {
           activationCodeId: code.id,
         });
       }
-    }
-
-    const existingAssignment = await this.repository.findCodeAssignedToProduct(
-      product.id,
-      input.activationCodeId,
-    );
-    if (existingAssignment) {
-      throw this.invalid('PRODUCT_ALREADY_HAS_ACTIVATION_CODE', {
-        activationCodeId: existingAssignment.id,
-        productId: product.id,
-      });
     }
 
     const result = await this.assign(input.activationCodeId, product.id, now);
@@ -66,7 +56,6 @@ export class AssignActivationCodesToProductUseCase {
         productCode: product.product_code,
         displayName: product.display_name,
         name: product.display_name ?? product.product_code,
-        serialNumber: product.serial_number,
       },
     };
   }
@@ -83,7 +72,7 @@ export class AssignActivationCodesToProductUseCase {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        throw this.invalid('PRODUCT_ALREADY_HAS_ACTIVATION_CODE', {
+        throw this.invalid('ACTIVATION_CODE_ASSIGNMENT_CONFLICT', {
           productId,
         });
       }

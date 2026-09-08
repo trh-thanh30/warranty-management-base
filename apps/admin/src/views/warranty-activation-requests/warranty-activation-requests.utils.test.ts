@@ -220,7 +220,6 @@ test("admin activation request body combines form and selected product data", ()
       productName: "Film cach nhiet B C",
       provinceCode: "79",
       provinceName: "TP HCM",
-      serialNumber: "SN-001",
       vehicleModel: "Camry",
       vehiclePlate: "30A-12345",
       wardCode: "1",

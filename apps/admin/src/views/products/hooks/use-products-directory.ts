@@ -23,10 +23,7 @@ import type {
 import type { ExcelImportMode } from "@/src/components/common/excel-import-dialog";
 import { useCategories } from "../../categories/hooks/use-categories";
 import type { EditableProductImportRow } from "../components/product-import-preview-table";
-import {
-  type ProductStatusFilter,
-  type ProductWarrantyStatusFilter,
-} from "../products.types";
+import { type ProductStatusFilter } from "../products.types";
 import {
   useConfirmProductImport,
   useDeleteProduct,
@@ -40,13 +37,11 @@ const PRODUCTS_PAGE_SIZE = 10;
 type ProductDirectoryFilters = {
   categoryId: string;
   status: ProductStatusFilter;
-  warrantyStatus: ProductWarrantyStatusFilter;
 };
 
 const INITIAL_PRODUCT_DIRECTORY_FILTERS = {
   categoryId: "ALL",
   status: "ACTIVE",
-  warrantyStatus: "ALL",
 } satisfies ProductDirectoryFilters;
 
 export function useProductsDirectory() {
@@ -93,8 +88,6 @@ export function useProductsDirectory() {
       sortBy,
       sortOrder,
       status: filters.status === "ALL" ? "ALL" : filters.status,
-      warrantyStatus:
-        filters.warrantyStatus === "ALL" ? undefined : filters.warrantyStatus,
     },
     {
       enabled: Boolean(currentUser) && canViewProducts,
@@ -299,8 +292,6 @@ export function useProductsDirectory() {
       sortBy,
       sortOrder,
       status: filters.status === "ALL" ? "ALL" : filters.status,
-      warrantyStatus:
-        filters.warrantyStatus === "ALL" ? undefined : filters.warrantyStatus,
     };
   }
 
@@ -348,7 +339,6 @@ export function useProductsDirectory() {
     updateCategoryId: filterHandlers.categoryId,
     updateSearch: setSearch,
     updateStatus: filterHandlers.status,
-    updateWarrantyStatus: filterHandlers.warrantyStatus,
     updateImportRowData,
   };
 }
@@ -373,7 +363,6 @@ function normalizePreviewRow(row: {
       warrantyTerms: row.data.warrantyTerms ?? null,
       installationPosition: row.data.installationPosition ?? null,
       productCode: row.data.productCode ?? null,
-      serialNumber: row.data.serialNumber ?? null,
       status: row.data.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
     },
   };
@@ -383,23 +372,14 @@ function normalizePreviewRow(row: {
 
 function validateImportRows(rows: EditableProductImportRow[]) {
   const productCodeCounts = new Map<string, number>();
-  const serialNumberCounts = new Map<string, number>();
 
   rows.forEach((row) => {
     const productCode = row.data.productCode?.trim();
-    const serialNumber = row.data.serialNumber?.trim();
 
     if (productCode) {
       productCodeCounts.set(
         productCode,
         (productCodeCounts.get(productCode) ?? 0) + 1,
-      );
-    }
-
-    if (serialNumber) {
-      serialNumberCounts.set(
-        serialNumber,
-        (serialNumberCounts.get(serialNumber) ?? 0) + 1,
       );
     }
   });
@@ -409,7 +389,6 @@ function validateImportRows(rows: EditableProductImportRow[]) {
       (error) => !isRecomputedImportError(error),
     );
     const productCode = row.data.productCode?.trim();
-    const serialNumber = row.data.serialNumber?.trim();
     if (!row.data.displayName.trim()) {
       errors.push({
         field: "displayName",
@@ -448,14 +427,6 @@ function validateImportRows(rows: EditableProductImportRow[]) {
       });
     }
 
-    if (serialNumber && (serialNumberCounts.get(serialNumber) ?? 0) > 1) {
-      errors.push({
-        field: "serialNumber",
-        message: "Số serial bị trùng trong bảng preview.",
-        rowNumber: row.rowNumber,
-      });
-    }
-
     return {
       ...row,
       errors: dedupeImportErrors(errors),
@@ -471,8 +442,6 @@ const RECOMPUTED_IMPORT_ERROR_MESSAGES = new Set([
   "Thời hạn bảo hành phải từ 1 tháng.",
   "Mã sản phẩm bị trùng trong file import",
   "Mã sản phẩm bị trùng trong bảng preview.",
-  "Số serial bị trùng trong file import",
-  "Số serial bị trùng trong bảng preview.",
 ]);
 
 function isRecomputedImportError(error: ProductImportRowError) {

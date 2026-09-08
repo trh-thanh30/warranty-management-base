@@ -30,7 +30,6 @@ export function toProductExcelRow(
     warrantyDurationMonths: product.warranty_duration_months ?? 0,
     warrantyTerms: product.warranty_terms,
     installationPosition,
-    serialNumber: product.serial_number,
     status: product.status,
   };
 }

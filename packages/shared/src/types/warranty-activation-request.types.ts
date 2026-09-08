@@ -36,6 +36,17 @@ export type WarrantyCertificateSummary = {
 export type WarrantyActivationRequestItemSummary = {
   id: string;
   activationCodeId: string | null;
+  activationCode: {
+    id: string;
+    code: string | null;
+    status:
+      | "AVAILABLE"
+      | "ACTIVATED"
+      | "EXPIRED"
+      | "REVOKED"
+      | "REPLACED"
+      | "PENDING_APPROVAL";
+  } | null;
   activationFieldId: string | null;
   positionKey: string;
   positionLabel: string;
@@ -68,6 +79,7 @@ export type WarrantyActivationRequestSummary = {
   warrantyCode: string;
   activationCode: {
     id: string;
+    code: string | null;
     status:
       | "AVAILABLE"
       | "ACTIVATED"
@@ -200,7 +212,6 @@ export type CreateWarrantyActivationRequestBody = {
   wardName: string;
   addressDetail: string;
   productName?: string;
-  serialNumber?: string;
   brand?: string;
   model?: string;
   manufactureYear?: number;

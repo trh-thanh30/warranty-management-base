@@ -20,14 +20,15 @@ describe('GetProductCloneDraftUseCase', () => {
       { activityLog: { create: jest.fn() } } as never,
     );
 
-    await expect(useCase.execute('product-id')).resolves.toMatchObject({
+    const result = await useCase.execute('product-id');
+    expect(result).toMatchObject({
       name: 'Product',
       productCode: null,
-      serialNumber: null,
       warrantyCode: null,
       owner: null,
       warranty: null,
     });
+    expect(result).not.toHaveProperty('serialNumber');
   });
 
   it('rejects deleted products', async () => {

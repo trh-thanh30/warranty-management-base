@@ -27,10 +27,14 @@ export class GetProductCloneDraftUseCase {
         admin_name: 'product-clone-api',
       },
     });
+    const { serialNumber, ...cloneableProduct } = product as typeof product & {
+      serialNumber?: unknown;
+    };
+    void serialNumber;
+
     return {
-      ...product,
+      ...cloneableProduct,
       productCode: null,
-      serialNumber: null,
       warrantyCode: null,
       owner: null,
       warranty: null,

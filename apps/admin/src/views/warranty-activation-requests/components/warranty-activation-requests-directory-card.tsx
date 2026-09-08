@@ -1,7 +1,7 @@
 "use client";
 
-import { FileSearch, Search } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { SelectControl } from "@/src/components/common/select-control";
+import { StatePanel } from "@/src/components/common/state-panel";
 import type {
   PaginatedResponse,
   WarrantyActivationRequestSortBy,
@@ -19,8 +19,8 @@ import {
   Skeleton,
 } from "@repo/ui";
 import { PaginationControls } from "@repo/ui/pagination-controls";
-import { SelectControl } from "@/src/components/common/select-control";
-import { StatePanel } from "@/src/components/common/state-panel";
+import { FileSearch, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { WARRANTY_ACTIVATION_REQUEST_STATUS_FILTERS } from "../warranty-activation-requests.constants";
 import type {
   WarrantyActivationRequestAction,
@@ -89,7 +89,7 @@ export function WarrantyActivationRequestsDirectoryCard({
       <CardHeader className="min-w-0 gap-4 px-4 sm:px-6">
         <div className="min-w-0">
           <CardTitle>{t("directoryTitle")}</CardTitle>
-          <CardDescription className="mt-1.5 break-words">
+          <CardDescription className="mt-1.5 wrap-break-word">
             {t("directoryDescription")}
           </CardDescription>
         </div>

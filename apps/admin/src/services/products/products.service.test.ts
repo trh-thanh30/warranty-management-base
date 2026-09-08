@@ -226,33 +226,6 @@ test("updating a product can change dynamic category", async () => {
   assert.deepEqual(result, product);
 });
 
-test("assigning an owner posts to product assign-owner endpoint", async () => {
-  const calls: unknown[] = [];
-  const http = {
-    async post(url: string, body?: unknown) {
-      calls.push({ url, body });
-      return { data: { success: true, data: product } };
-    },
-  };
-
-  await createProductsService(
-    http as unknown as ProductsHttpClient,
-  ).assignOwner("product-id", {
-    customerId: "customer-id",
-    purchaseDate: "2026-07-12",
-  });
-
-  assert.deepEqual(calls, [
-    {
-      url: "/products/product-id/assign-owner",
-      body: {
-        customerId: "customer-id",
-        purchaseDate: "2026-07-12",
-      },
-    },
-  ]);
-});
-
 test("deleting a product uses the delete endpoint", async () => {
   const calls: unknown[] = [];
   const http = {
@@ -383,7 +356,6 @@ test("confirming product import posts edited preview rows", async () => {
         warrantyTerms: null,
         installationPosition: "Khoang động cơ",
         productCode: null,
-        serialNumber: "SN-001",
         status: "ACTIVE",
       },
     ],
@@ -405,7 +377,6 @@ test("confirming product import posts edited preview rows", async () => {
             warrantyTerms: null,
             installationPosition: "Khoang động cơ",
             productCode: null,
-            serialNumber: "SN-001",
             status: "ACTIVE",
           },
         ],

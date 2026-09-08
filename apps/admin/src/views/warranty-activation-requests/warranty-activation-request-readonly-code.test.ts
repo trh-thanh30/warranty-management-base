@@ -17,13 +17,11 @@ const hookSource = readFileSync(
   "utf8",
 );
 
-test("the assigned activation code is read-only in the activation request form", () => {
-  assert.match(
-    formSource,
-    /id="create-activation-request-activation-code"[\s\S]*?readOnly/,
-  );
-  assert.doesNotMatch(formSource, /selectAvailableActivationCode/);
-  assert.doesNotMatch(formSource, /clearAvailableActivationCode/);
+test("the activation request form requires an explicit activation code selection", () => {
+  assert.match(formSource, /items=\{selectableActivationCodes\}/);
+  assert.match(formSource, /selectActivationCode\(code\)/);
+  assert.match(formSource, /t\("chooseDifferentActivationCode"\)/);
+  assert.doesNotMatch(hookSource, /resolveAssignedActivationCodeForProduct/);
 });
 
 test("categories with activation codes disabled skip code UI and validation", () => {

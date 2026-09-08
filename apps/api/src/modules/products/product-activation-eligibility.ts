@@ -1,28 +1,15 @@
 import type { ActivationProductEligibility } from '@repo/shared';
-import {
-  product_status,
-  warranty_activation_request_status,
-  warranty_status,
-} from '@prisma/client';
-
-type ActivationRequestReference = {
-  request_code: string;
-  status: warranty_activation_request_status;
-};
+import { product_status } from '@prisma/client';
 
 type ActivationProductEligibilitySource = {
   deleted_at: Date | null;
   status: product_status;
   warranty: {
-    status: warranty_status;
+    status: string;
     warranty_code: string | null;
+    duration_months?: number;
   } | null;
   warranty_duration_months?: number | null;
-  warranty_activation_requests?: ActivationRequestReference[];
-  warranty_activation_request_items?: Array<{
-    status: warranty_activation_request_status;
-    request: ActivationRequestReference;
-  }>;
 };
 
 export function getActivationProductEligibility(
@@ -35,53 +22,11 @@ export function getActivationProductEligibility(
     return ineligible('PRODUCT_INACTIVE');
   }
 
-  const openRequest = getHighestPriorityOpenRequest(product);
-  if (openRequest?.status === warranty_activation_request_status.PENDING) {
-    return ineligible('ACTIVATION_REQUEST_PENDING', openRequest.request_code);
-  }
-  if (openRequest?.status === warranty_activation_request_status.APPROVED) {
-    return ineligible('ACTIVATION_REQUEST_APPROVED', openRequest.request_code);
-  }
-
-  if (!product.warranty) {
-    return (product.warranty_duration_months ?? 0) > 0
-      ? { eligible: true, reason: null, requestCode: null }
-      : ineligible('WARRANTY_MISSING');
-  }
-  if (!product.warranty.warranty_code?.trim()) {
-    return ineligible('WARRANTY_CODE_MISSING');
-  }
-  if (product.warranty.status === warranty_status.ACTIVE) {
-    return ineligible('WARRANTY_ALREADY_ACTIVATED');
-  }
-  if (product.warranty.status !== warranty_status.DRAFT) {
-    return ineligible('WARRANTY_NOT_DRAFT');
-  }
-
-  return { eligible: true, reason: null, requestCode: null };
-}
-
-function getHighestPriorityOpenRequest(
-  product: ActivationProductEligibilitySource,
-): ActivationRequestReference | undefined {
-  const requests = [
-    ...(product.warranty_activation_requests ?? []),
-    ...(product.warranty_activation_request_items ?? []).map((item) => ({
-      request_code: item.request.request_code,
-      status: item.status,
-    })),
-  ];
-
-  return (
-    requests.find(
-      (request) =>
-        request.status === warranty_activation_request_status.PENDING,
-    ) ??
-    requests.find(
-      (request) =>
-        request.status === warranty_activation_request_status.APPROVED,
-    )
-  );
+  const durationMonths =
+    product.warranty_duration_months ?? product.warranty?.duration_months ?? 0;
+  return durationMonths > 0
+    ? { eligible: true, reason: null, requestCode: null }
+    : ineligible('WARRANTY_MISSING');
 }
 
 function ineligible(

@@ -25,8 +25,7 @@ export class WarrantyCertificateEmailQueueService {
       throw new Error('Warranty certificate not found while queueing email');
     }
 
-    const currentCustomer =
-      certificate.warranty.product.ownerships[0]?.customer;
+    const currentCustomer = certificate.warranty.ownerships[0]?.customer;
     if (!certificate.recipientEmail) {
       throw new Error('Warranty certificate recipient email is required');
     }
@@ -55,7 +54,7 @@ export class WarrantyCertificateEmailQueueService {
       productName:
         certificate.warranty.product.displayName ??
         certificate.warranty.product.name,
-      serialNumber: certificate.warranty.product.serialNumber,
+      serialNumber: certificate.warranty.serialNumber,
       startDate: certificate.warranty.startDate,
       vehicleModel: request?.vehicleModel ?? null,
       vehiclePlate: request?.vehiclePlate ?? null,

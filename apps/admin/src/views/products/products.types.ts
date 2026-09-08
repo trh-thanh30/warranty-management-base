@@ -1,13 +1,8 @@
-import type { ProductSortBy, WarrantyStatus } from "@repo/shared";
+import type { ProductSortBy } from "@repo/shared";
 import { z } from "zod";
-import {
-  type PRODUCT_STATUS_FILTERS,
-  type PRODUCT_WARRANTY_STATUS_FILTERS,
-} from "./products.constants";
+import { type PRODUCT_STATUS_FILTERS } from "./products.constants";
 
 export type ProductStatusFilter = (typeof PRODUCT_STATUS_FILTERS)[number];
-export type ProductWarrantyStatusFilter =
-  (typeof PRODUCT_WARRANTY_STATUS_FILTERS)[number] & ("ALL" | WarrantyStatus);
 export type ProductDirectorySortBy = ProductSortBy;
 
 const optionalText = z.string().trim();
@@ -58,7 +53,6 @@ export const productFormSchema = z.object({
   specifications: z.array(catalogueSpecification).max(50),
   installationPosition: optionalText.max(160, "installationPositionLength"),
   productCode: optionalText.max(64, "productCodeLength"),
-  serialNumber: optionalText.max(64, "serialNumberLength"),
   status: z.enum(["ACTIVE", "INACTIVE"]),
   warrantyTerms: optionalText.max(2000, "warrantyTermsLength"),
   warrantyDurationMonths: requiredWarrantyDuration,
@@ -70,13 +64,5 @@ export const productEditFormSchema = productFormSchema.extend({
     .max(64, "productCodeLength"),
 });
 
-export const assignProductOwnerSchema = z.object({
-  customerId: optionalText.min(1, "customerRequired"),
-  purchaseDate: optionalText,
-});
-
 export type ProductFormInput = z.input<typeof productFormSchema>;
 export type ProductFormValues = z.output<typeof productFormSchema>;
-export type AssignProductOwnerFormValues = z.output<
-  typeof assignProductOwnerSchema
->;

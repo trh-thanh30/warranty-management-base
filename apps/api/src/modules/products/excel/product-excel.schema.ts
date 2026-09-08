@@ -90,13 +90,6 @@ export const productExcelColumns: Array<
     parse: parseOptionalString,
   },
   {
-    key: 'serialNumber',
-    header: 'Số serial',
-    width: 24,
-    example: 'SN-001',
-    parse: parseOptionalString,
-  },
-  {
     key: 'status',
     header: 'Trạng thái sản phẩm',
     required: true,

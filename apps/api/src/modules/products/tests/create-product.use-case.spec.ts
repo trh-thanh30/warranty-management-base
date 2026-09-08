@@ -68,7 +68,6 @@ describe('CreateProductUseCase', () => {
       brand: ' Acme ',
       model: ' C4K ',
       modelYear: 2026,
-      serialNumber: 'SN-001',
       warrantyDurationMonths: 24,
       warrantyTerms: ' Standard policy ',
     });
@@ -121,20 +120,6 @@ describe('CreateProductUseCase', () => {
     expect(productsRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({ product_code: 'PRD-MANUAL' }),
     );
-  });
-
-  it('rejects duplicate serial numbers', async () => {
-    const { productsRepository, useCase } = setup();
-    productsRepository.findBySerialNumber.mockResolvedValue({ id: 'other' });
-
-    await expect(
-      useCase.execute({
-        name: 'Camera AI 4K',
-        categoryId: 'category-id',
-        serialNumber: 'SN-001',
-        warrantyDurationMonths: 24,
-      }),
-    ).rejects.toThrow('Serial number already exists');
   });
 
   it('requires a positive warranty policy duration', async () => {

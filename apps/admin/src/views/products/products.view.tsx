@@ -11,7 +11,6 @@ import { PackagePlus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { AssignActivationCodesDialog } from "./components/assign-activation-codes-dialog";
-import { AssignOwnerDialog } from "./components/assign-owner-dialog";
 import { DeleteProductDialog } from "./components/delete-product-dialog";
 import { ProductImportPreviewTable } from "./components/product-import-preview-table";
 import { ProductsDirectoryCard } from "./components/products-directory-card";
@@ -20,8 +19,6 @@ import { useProductsDirectory } from "./hooks/use-products-directory";
 
 export function ProductsView() {
   const t = useTranslations("Products");
-  const [productToAssignOwner, setProductToAssignOwner] =
-    useState<ProductResponse | null>(null);
   const [productToAssignCodes, setProductToAssignCodes] =
     useState<ProductResponse | null>(null);
   const {
@@ -63,7 +60,6 @@ export function ProductsView() {
     updateCategoryId,
     updateSearch,
     updateStatus,
-    updateWarrantyStatus,
     updateImportRowData,
   } = useProductsDirectory();
   const hasImportErrors = importSummary.invalidRows > 0;
@@ -115,7 +111,6 @@ export function ProductsView() {
           isError={productsQuery.isError}
           isLoading={productsQuery.isLoading}
           onCategoryIdChange={updateCategoryId}
-          onAssignOwner={setProductToAssignOwner}
           onAssignCodes={setProductToAssignCodes}
           onClearFilters={clearFilters}
           onDelete={openDelete}
@@ -128,7 +123,6 @@ export function ProductsView() {
           onSearchChange={updateSearch}
           onSortChange={toggleSort}
           onStatusChange={updateStatus}
-          onWarrantyStatusChange={updateWarrantyStatus}
           pageSize={pageSize}
           search={search}
           sortBy={sortBy}
@@ -157,14 +151,6 @@ export function ProductsView() {
           }}
           open={Boolean(productToRestore)}
           product={productToRestore}
-        />
-
-        <AssignOwnerDialog
-          onOpenChange={(open) => {
-            if (!open) setProductToAssignOwner(null);
-          }}
-          open={Boolean(productToAssignOwner)}
-          product={productToAssignOwner}
         />
 
         <AssignActivationCodesDialog
@@ -236,7 +222,6 @@ export function ProductsView() {
                   remove: t("excel.removeRow"),
                   row: t("excel.row"),
                   saveChanges: t("excel.saveRowChanges"),
-                  serialNumber: t("serialNumber"),
                   status: t("productStatus"),
                   warrantyDurationMonths: t("durationMonths"),
                   warrantyTerms: t("warrantyTerms"),

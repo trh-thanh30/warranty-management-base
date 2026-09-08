@@ -49,17 +49,11 @@ describe('Lexzenz product seed', () => {
     const productCodes = productUpsert.mock.calls.map(
       ([input]) => input.create.product_code,
     );
-    const serialNumbers = productUpsert.mock.calls.map(
-      ([input]) => input.create.serial_number,
-    );
     const displayNames = productUpsert.mock.calls.map(
       ([input]) => input.create.display_name,
     );
 
     expect(new Set(productCodes).size).toBe(24);
-    expect(serialNumbers.every((serialNumber) => serialNumber === null)).toBe(
-      true,
-    );
     expect(new Set(displayNames).size).toBe(24);
     expect(displayNames).toContain('Cảm biến áp suất lốp Pro 6 bánh');
 
@@ -89,9 +83,10 @@ describe('Lexzenz product seed', () => {
         category_id: input.create.category_id,
         deleted_at: null,
         display_name: input.create.display_name,
-        serial_number: input.create.serial_number,
         status: 'ACTIVE',
       });
+      expect(input.create).not.toHaveProperty('serial_number');
+      expect(input.update).not.toHaveProperty('serial_number');
       expect(input.update).not.toHaveProperty('template_id');
     }
   });

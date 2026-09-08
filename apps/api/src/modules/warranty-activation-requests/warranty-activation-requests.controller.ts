@@ -31,7 +31,8 @@ import {
 import type { Response } from 'express';
 
 type RequestUser = {
-  id?: string;
+  id: string;
+  role: string;
 };
 
 @Controller('warranty-activation-requests')
@@ -56,6 +57,7 @@ export class WarrantyActivationRequestsController {
   ) {
     return this.createAdminWarrantyActivationRequestUseCase.execute(dto, {
       createdByUserId: user?.id,
+      actor: user,
     });
   }
 
@@ -68,23 +70,30 @@ export class WarrantyActivationRequestsController {
     return this.createWarrantyActivationRequestUseCase.execute(dto, {
       createdByUserId: user?.id,
       source: warranty_activation_request_source.ADMIN_PORTAL,
+      actor: user,
     });
   }
 
   @Get()
   @Permissions([permission_key.WARRANTY_VIEW])
-  list(@Query() query: ListWarrantyActivationRequestsDto) {
-    return this.listWarrantyActivationRequestsUseCase.execute(query);
+  list(
+    @Query() query: ListWarrantyActivationRequestsDto,
+    @User() user: { id: string; role: string },
+  ) {
+    return this.listWarrantyActivationRequestsUseCase.execute(query, user);
   }
 
   @Get('export')
   @Permissions([permission_key.WARRANTY_VIEW])
   async export(
     @Query() query: ListWarrantyActivationRequestsDto,
+    @User() user: { id: string; role: string },
     @Res() response: Response,
   ) {
-    const buffer =
-      await this.exportWarrantyActivationRequestsUseCase.execute(query);
+    const buffer = await this.exportWarrantyActivationRequestsUseCase.execute(
+      query,
+      user,
+    );
     sendExcelFile(
       response,
       buffer,
@@ -94,23 +103,28 @@ export class WarrantyActivationRequestsController {
 
   @Get(':id/certificate/view')
   @Permissions([permission_key.WARRANTY_VIEW])
-  async viewCertificate(@Param('id') id: string, @Res() response: Response) {
-    await this.sendCertificateFile(id, response, 'inline');
+  async viewCertificate(
+    @Param('id') id: string,
+    @User() user: RequestUser,
+    @Res() response: Response,
+  ) {
+    await this.sendCertificateFile(id, user, response, 'inline');
   }
 
   @Get(':id/certificate/download')
   @Permissions([permission_key.WARRANTY_VIEW])
   async downloadCertificate(
     @Param('id') id: string,
+    @User() user: RequestUser,
     @Res() response: Response,
   ) {
-    await this.sendCertificateFile(id, response, 'attachment');
+    await this.sendCertificateFile(id, user, response, 'attachment');
   }
 
   @Get(':id')
   @Permissions([permission_key.WARRANTY_VIEW])
-  detail(@Param('id') id: string) {
-    return this.getWarrantyActivationRequestDetailUseCase.execute(id);
+  detail(@Param('id') id: string, @User() user: { id: string; role: string }) {
+    return this.getWarrantyActivationRequestDetailUseCase.execute(id, user);
   }
 
   @Patch(':id/review')
@@ -122,30 +136,37 @@ export class WarrantyActivationRequestsController {
   ) {
     return this.reviewWarrantyActivationRequestUseCase.execute(id, dto, {
       reviewedByUserId: user?.id,
+      actor: user,
     });
   }
 
   @Post(':id/certificate/resend-email')
   @Permissions([permission_key.WARRANTY_UPDATE])
-  resendCertificateEmail(@Param('id') id: string) {
+  resendCertificateEmail(@Param('id') id: string, @User() user: RequestUser) {
     return this.resendWarrantyActivationRequestCertificateEmailUseCase.execute(
       id,
+      user,
     );
   }
 
   @Post(':id/certificate/retry')
   @Permissions([permission_key.WARRANTY_UPDATE])
-  retryCertificate(@Param('id') id: string) {
-    return this.retryWarrantyActivationRequestCertificateUseCase.execute(id);
+  retryCertificate(@Param('id') id: string, @User() user: RequestUser) {
+    return this.retryWarrantyActivationRequestCertificateUseCase.execute(
+      id,
+      user,
+    );
   }
   private async sendCertificateFile(
     id: string,
+    user: RequestUser,
     response: Response,
     disposition: 'attachment' | 'inline',
   ) {
     const { filename, stream } =
       await this.downloadWarrantyActivationRequestCertificateUseCase.execute(
         id,
+        user,
       );
 
     response.setHeader('Content-Type', 'application/pdf');

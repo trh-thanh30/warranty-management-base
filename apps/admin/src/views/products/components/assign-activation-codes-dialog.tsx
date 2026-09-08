@@ -1,7 +1,6 @@
 "use client";
 
 import { ActivationCodeStatusBadge } from "@/src/components/activation-code-status-badge";
-import { ConfirmActionDialog } from "@/src/components/common/confirm-action-dialog";
 import { SearchDropdown } from "@/src/components/common/search-dropdown";
 import { useToast } from "@/src/hooks/use-toast";
 import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
@@ -50,11 +49,9 @@ export function AssignActivationCodesDialog({
   const [selected, setSelected] = useState<AvailableActivationCode | null>(
     null,
   );
-  const [confirmOpen, setConfirmOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const currentCode = product?.assignedActivationCode ?? null;
-  const isReplacement = currentCode !== null;
-  const canSubmit = !isReplacement || currentCode.canReplace;
+  const currentCodes = product?.assignedActivationCodes ?? [];
+  const canSubmit = Boolean(product);
   const debouncedBatchSearch = useDebounce(batchSearch.trim(), 300);
   const debouncedSearch = useDebounce(search.trim(), 300);
   const batchesQuery = useInfiniteQuery({
@@ -106,13 +103,6 @@ export function AssignActivationCodesDialog({
   );
   const mutation = useMutation({
     mutationFn: () => {
-      if (currentCode) {
-        return activationCodesService.replaceProductAssignment({
-          currentActivationCodeId: currentCode.id,
-          replacementActivationCodeId: selected!.id,
-          productId: product!.id,
-        });
-      }
       return activationCodesService.assignProduct({
         activationCodeId: selected!.id,
         productId: product!.id,
@@ -128,8 +118,7 @@ export function AssignActivationCodesDialog({
         }),
       ]);
       await onAssigned?.();
-      toast.success(t(isReplacement ? "replaceSuccess" : "success"));
-      setConfirmOpen(false);
+      toast.success(t("success"));
       onOpenChange(false);
     },
     onError: (error) => {
@@ -137,7 +126,6 @@ export function AssignActivationCodesDialog({
         apiErrors: tApiErrors,
         fallbackKey: "error",
       });
-      setConfirmOpen(false);
       setErrorMessage(message);
       toast.error(message);
     },
@@ -151,14 +139,11 @@ export function AssignActivationCodesDialog({
     setBatchSearch("");
     setSearch("");
     setSelected(null);
-    setConfirmOpen(false);
     setErrorMessage(null);
     resetMutation();
   }, [open, resetMutation, t]);
 
   const productName = product?.displayName || product?.name || "";
-  const selectedCode = selected?.copyCode ?? selected?.maskedCode ?? "";
-
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -172,36 +157,31 @@ export function AssignActivationCodesDialog({
             </div>
             <div className="min-w-0">
               <DialogTitle className="text-base font-semibold">
-                {t(isReplacement ? "replaceTitle" : "title")}
+                {t("title")}
               </DialogTitle>
               <DialogDescription className="mt-1 leading-6 text-sm font-medium text-gray-500">
-                {t(isReplacement ? "replaceDescription" : "description", {
-                  product: productName,
-                })}
+                {t("description", { product: productName })}
               </DialogDescription>
             </div>
           </div>
 
           <div className="mt-5 space-y-4">
-            {currentCode ? (
+            {currentCodes.length > 0 ? (
               <div className="rounded-lg border border-slate-200  p-3 dark:border-slate-800 dark:bg-slate-900/50">
                 <p className="text-xs font-medium uppercase text-slate-500">
-                  {t("currentCode")}
+                  {t("currentCodes")}
                 </p>
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <span className=" text-sm font-semibold">
-                    {currentCode.code}
-                  </span>
-                  <ActivationCodeStatusBadge status={currentCode.status} />
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {currentCodes.map((currentCode) => (
+                    <div
+                      className="flex items-center gap-2 rounded-md bg-slate-100 px-2 py-1.5 text-sm dark:bg-slate-800"
+                      key={currentCode.id}
+                    >
+                      <span className="font-semibold">{currentCode.code}</span>
+                      <ActivationCodeStatusBadge status={currentCode.status} />
+                    </div>
+                  ))}
                 </div>
-                {!currentCode.canReplace ? (
-                  <p
-                    className="mt-2 text-sm text-amber-700 dark:text-amber-300"
-                    role="alert"
-                  >
-                    {t("replaceBlocked")}
-                  </p>
-                ) : null}
               </div>
             ) : null}
 
@@ -279,9 +259,7 @@ export function AssignActivationCodesDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="product-activation-codes">
-                {t(isReplacement ? "replacementCode" : "codes")}
-              </Label>
+              <Label htmlFor="product-activation-codes">{t("codes")}</Label>
               <SearchDropdown
                 disabled={mutation.isPending || !canSubmit}
                 emptyLabel={t("empty")}
@@ -365,32 +343,14 @@ export function AssignActivationCodesDialog({
               disabled={
                 !product || !selected || mutation.isPending || !canSubmit
               }
-              onClick={() =>
-                isReplacement ? setConfirmOpen(true) : mutation.mutate()
-              }
+              onClick={() => mutation.mutate()}
               type="button"
             >
-              {mutation.isPending
-                ? t(isReplacement ? "replacing" : "assigning")
-                : t(isReplacement ? "replace" : "confirm")}
+              {mutation.isPending ? t("assigning") : t("confirm")}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
-      <ConfirmActionDialog
-        cancelLabel={t("cancel")}
-        confirmLabel={t("replaceConfirm")}
-        description={t("replaceConfirmDescription", {
-          currentCode: currentCode?.code ?? "",
-          replacementCode: selectedCode,
-          product: productName,
-        })}
-        isLoading={mutation.isPending}
-        onConfirm={() => mutation.mutate()}
-        onOpenChange={setConfirmOpen}
-        open={confirmOpen}
-        title={t("replaceConfirmTitle")}
-      />
     </>
   );
 }

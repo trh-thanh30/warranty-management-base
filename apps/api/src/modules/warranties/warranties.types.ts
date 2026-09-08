@@ -1,8 +1,10 @@
 import {
   Category,
+  ActivationCode,
   Customer,
+  Dealer,
   Product,
-  ProductOwnership,
+  WarrantyOwnership,
   User,
   Warranty,
   WarrantyActivationRequest,
@@ -58,6 +60,7 @@ export type WarrantyRecord = {
   productId: string;
   startDate: Date | null;
   status: WarrantyStatus;
+  serialNumber: string | null;
   terms: string | null;
   updatedAt: Date;
   voidReason: string | null;
@@ -65,6 +68,25 @@ export type WarrantyRecord = {
   voidedBy?: WarrantyUserSummary | null;
   voidedById: string | null;
   warrantyCode: string | null;
+  dealer: {
+    id: string;
+    dealerCode: string;
+    name: string;
+    phone?: string | null;
+    email?: string | null;
+    address?: string | null;
+    province?: string | null;
+    district?: string | null;
+  } | null;
+  owner: {
+    customerId: string;
+    customerCode: string | null;
+    fullName: string | null;
+    email?: string | null;
+    phone?: string | null;
+    address?: string | null;
+    ownerUserId: string | null;
+  } | null;
 };
 
 export type ManualActivationProduct = {
@@ -117,11 +139,16 @@ export type WarrantyVoidCandidate = {
 };
 
 type WarrantyWithProduct = Warranty & {
+  activation_request?: WarrantyActivationRequest | null;
+  activation_code?: Pick<
+    ActivationCode,
+    'id' | 'code_ciphertext' | 'status'
+  > | null;
   activated_by?: User | null;
   voided_by?: User | null;
-  product: Product & {
-    ownerships?: Array<ProductOwnership & { customer?: Customer }>;
-  };
+  dealer?: Dealer | null;
+  ownerships?: Array<WarrantyOwnership & { customer?: Customer | null }>;
+  product: Product & { category_ref?: Category | null };
 };
 
 type WarrantyWithAuditUsers = WarrantyRecord & {
@@ -141,6 +168,7 @@ export function toWarrantyResponse(warranty: WarrantyWithAuditUsers) {
     maxClaimCount: warranty.maxClaimCount,
     maxAmountPerClaim: warranty.maxAmountPerClaim?.toString() ?? null,
     status: warranty.status,
+    serialNumber: warranty.serialNumber,
     terms: warranty.terms,
     metadata: warranty.metadata as Record<string, unknown> | null,
     activatedByUserId: warranty.activatedById,
@@ -163,6 +191,25 @@ export function toWarrantyResponse(warranty: WarrantyWithAuditUsers) {
     voidReason: warranty.voidReason,
     createdAt: warranty.createdAt,
     updatedAt: warranty.updatedAt,
+    dealer: warranty.dealer
+      ? {
+          id: warranty.dealer.id,
+          dealerCode: warranty.dealer.dealerCode,
+          name: warranty.dealer.name,
+          ...(warranty.dealer.phone ? { phone: warranty.dealer.phone } : {}),
+          ...(warranty.dealer.email ? { email: warranty.dealer.email } : {}),
+          ...(warranty.dealer.address
+            ? { address: warranty.dealer.address }
+            : {}),
+          ...(warranty.dealer.province
+            ? { province: warranty.dealer.province }
+            : {}),
+          ...(warranty.dealer.district
+            ? { district: warranty.dealer.district }
+            : {}),
+        }
+      : null,
+    owner: warranty.owner ?? null,
   };
 }
 
@@ -186,7 +233,7 @@ export function toWarrantyLookupResponse(input: {
       displayName: input.product.display_name,
       brand: catalogue.brand,
       model: catalogue.model,
-      serialNumber: input.product.serial_number,
+      serialNumber: input.warranty.serial_number,
       warrantyCode: input.warranty.warranty_code,
       category: category
         ? {
@@ -267,13 +314,31 @@ function toOptionalString(value: unknown): string | null {
   return typeof value === 'string' && value.trim() ? value.trim() : null;
 }
 
-export function toWarrantyListItemResponse(warranty: WarrantyWithProduct) {
-  const currentOwnership = warranty.product.ownerships?.find(
+export function toWarrantyListItemResponse(
+  warranty: WarrantyWithProduct,
+  decryptActivationCode?: (ciphertext: string) => string,
+) {
+  const currentOwnership = warranty.ownerships?.find(
     (ownership) => ownership.is_current_owner,
   );
+  const activationRequest =
+    warranty.activation_request &&
+    (!warranty.activation_request.customer_id ||
+      warranty.activation_request.customer_id === currentOwnership?.customer_id)
+      ? warranty.activation_request
+      : null;
 
   return {
     ...toWarrantyResponse(toWarrantyRecord(warranty)),
+    activationCode: warranty.activation_code
+      ? {
+          id: warranty.activation_code.id,
+          code: decryptActivationCode
+            ? decryptActivationCode(warranty.activation_code.code_ciphertext)
+            : null,
+          status: warranty.activation_code.status,
+        }
+      : null,
     product: {
       id: warranty.product.id,
       name: getProductCatalogue(warranty.product).name,
@@ -281,7 +346,16 @@ export function toWarrantyListItemResponse(warranty: WarrantyWithProduct) {
       brand: getProductCatalogue(warranty.product).brand,
       model: getProductCatalogue(warranty.product).model,
       productCode: warranty.product.product_code,
-      serialNumber: warranty.product.serial_number,
+      serialNumber: warranty.serial_number,
+      ...(warranty.product.category_ref
+        ? {
+            category: {
+              id: warranty.product.category_ref.id,
+              name: warranty.product.category_ref.name,
+              slug: warranty.product.category_ref.slug,
+            },
+          }
+        : {}),
     },
     owner: currentOwnership
       ? {
@@ -289,6 +363,30 @@ export function toWarrantyListItemResponse(warranty: WarrantyWithProduct) {
           ownerUserId: currentOwnership.owner_user_id,
           customerCode: currentOwnership.customer?.customer_code,
           fullName: currentOwnership.customer?.full_name,
+          ...(currentOwnership.customer?.email ||
+          activationRequest?.customer_email
+            ? {
+                email:
+                  currentOwnership.customer?.email ??
+                  activationRequest?.customer_email,
+              }
+            : {}),
+          ...(currentOwnership.customer?.phone ||
+          activationRequest?.customer_phone
+            ? {
+                phone:
+                  currentOwnership.customer?.phone ??
+                  activationRequest?.customer_phone,
+              }
+            : {}),
+          ...(currentOwnership.customer?.address ||
+          activationRequest?.full_address
+            ? {
+                address:
+                  currentOwnership.customer?.address ??
+                  activationRequest?.full_address,
+              }
+            : {}),
         }
       : null,
   };
@@ -298,8 +396,13 @@ export function toWarrantyRecord(
   warranty: Warranty & {
     activated_by?: User | null;
     voided_by?: User | null;
+    dealer?: Dealer | null;
+    ownerships?: Array<WarrantyOwnership & { customer?: Customer | null }>;
   },
 ): WarrantyRecord {
+  const currentOwnership = warranty.ownerships?.find(
+    (ownership) => ownership.is_current_owner,
+  );
   return {
     activatedBy: warranty.activated_by
       ? {
@@ -320,6 +423,7 @@ export function toWarrantyRecord(
     productId: warranty.product_id,
     startDate: warranty.start_date,
     status: warranty.status,
+    serialNumber: warranty.serial_number,
     terms: warranty.terms,
     updatedAt: warranty.updated_at,
     voidReason: warranty.void_reason,
@@ -333,5 +437,40 @@ export function toWarrantyRecord(
       : null,
     voidedById: warranty.voided_by_id,
     warrantyCode: warranty.warranty_code,
+    dealer: warranty.dealer
+      ? {
+          id: warranty.dealer.id,
+          dealerCode: warranty.dealer.dealer_code,
+          name: warranty.dealer.name,
+          ...(warranty.dealer.phone ? { phone: warranty.dealer.phone } : {}),
+          ...(warranty.dealer.email ? { email: warranty.dealer.email } : {}),
+          ...(warranty.dealer.address
+            ? { address: warranty.dealer.address }
+            : {}),
+          ...(warranty.dealer.province
+            ? { province: warranty.dealer.province }
+            : {}),
+          ...(warranty.dealer.district
+            ? { district: warranty.dealer.district }
+            : {}),
+        }
+      : null,
+    owner: currentOwnership
+      ? {
+          customerId: currentOwnership.customer_id,
+          customerCode: currentOwnership.customer?.customer_code ?? null,
+          fullName: currentOwnership.customer?.full_name ?? null,
+          ...(currentOwnership.customer?.email
+            ? { email: currentOwnership.customer.email }
+            : {}),
+          ...(currentOwnership.customer?.phone
+            ? { phone: currentOwnership.customer.phone }
+            : {}),
+          ...(currentOwnership.customer?.address
+            ? { address: currentOwnership.customer.address }
+            : {}),
+          ownerUserId: currentOwnership.owner_user_id,
+        }
+      : null,
   };
 }

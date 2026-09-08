@@ -132,40 +132,25 @@ export function ProductForm({
             </Field>
           </div>
 
-          <Field
-            description={t("warrantyPolicyDescription")}
-            error={formatFieldError(
-              form.formState.errors.warrantyDurationMonths?.message,
-              t,
-            )}
-            id="product-warranty-duration"
-            label={t("durationMonths")}
-          >
-            <Input
-              disabled={isSubmitting}
-              id="product-warranty-duration"
-              inputMode="numeric"
-              min={1}
-              placeholder={t("warrantyDurationPlaceholder")}
-              step={1}
-              type="number"
-              {...form.register("warrantyDurationMonths")}
-            />
-          </Field>
-
           <div className="grid gap-5 sm:grid-cols-2">
             <Field
+              description={t("warrantyPolicyDescription")}
               error={formatFieldError(
-                form.formState.errors.serialNumber?.message,
+                form.formState.errors.warrantyDurationMonths?.message,
                 t,
               )}
-              id="product-serial-number"
-              label={t("serialNumber")}
+              id="product-warranty-duration"
+              label={t("durationMonths")}
             >
               <Input
-                id="product-serial-number"
-                placeholder={t("serialNumberPlaceholder")}
-                {...form.register("serialNumber")}
+                disabled={isSubmitting}
+                id="product-warranty-duration"
+                inputMode="numeric"
+                min={1}
+                placeholder={t("warrantyDurationPlaceholder")}
+                step={1}
+                type="number"
+                {...form.register("warrantyDurationMonths")}
               />
             </Field>
             <Field
@@ -380,7 +365,6 @@ const formatFieldError = createFieldErrorFormatter(
     "nameRequired",
     "productCodeLength",
     "productCodeRequired",
-    "serialNumberLength",
     "specificationKeyLength",
     "specificationValueLength",
     "warrantyTermsLength",

@@ -5,7 +5,7 @@ import { Prisma } from '@prisma/client';
 
 describe('CreateWarrantyClaimUseCase', () => {
   const warrantyClaimsRepository = {
-    findWarrantyProductByCode: jest.fn(),
+    findWarrantyByCode: jest.fn(),
     findOpenByWarrantyId: jest.fn(),
     create: jest.fn(),
   };
@@ -13,6 +13,16 @@ describe('CreateWarrantyClaimUseCase', () => {
     execute: jest.fn(),
   };
   const warrantyClaimSlaService = new WarrantyClaimSlaService();
+  const buildWarranty = (overrides: Record<string, unknown> = {}) => ({
+    id: 'warranty-id',
+    warranty_code: 'WM-2026-ABCDEF',
+    status: 'ACTIVE',
+    start_date: new Date('2026-01-01T00:00:00.000Z'),
+    end_date: new Date('2028-01-01T00:00:00.000Z'),
+    ownerships: [],
+    product: { id: 'product-id', deleted_at: null },
+    ...overrides,
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -20,21 +30,17 @@ describe('CreateWarrantyClaimUseCase', () => {
   });
 
   it('creates a claim from a valid warranty code and current owner', async () => {
-    warrantyClaimsRepository.findWarrantyProductByCode.mockResolvedValue({
-      id: 'product-id',
-      warranty_code: 'WM-2026-ABCDEF',
-      warranty: {
-        id: 'warranty-id',
-        status: 'ACTIVE',
-      },
-      ownerships: [
-        {
-          customer: {
-            id: 'customer-id',
+    warrantyClaimsRepository.findWarrantyByCode.mockResolvedValue(
+      buildWarranty({
+        ownerships: [
+          {
+            customer: {
+              id: 'customer-id',
+            },
           },
-        },
-      ],
-    });
+        ],
+      }),
+    );
     generateWarrantyClaimCodeUseCase.execute.mockResolvedValue(
       'CLM-2026-ABC123',
     );
@@ -72,9 +78,9 @@ describe('CreateWarrantyClaimUseCase', () => {
       issueDetail: 'Mo ta loi',
     });
 
-    expect(
-      warrantyClaimsRepository.findWarrantyProductByCode,
-    ).toHaveBeenCalledWith('WM-2026-ABCDEF');
+    expect(warrantyClaimsRepository.findWarrantyByCode).toHaveBeenCalledWith(
+      'WM-2026-ABCDEF',
+    );
     expect(warrantyClaimsRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         claim_code: 'CLM-2026-ABC123',
@@ -90,15 +96,9 @@ describe('CreateWarrantyClaimUseCase', () => {
   });
 
   it('retries with a new claim code when claim code creation collides', async () => {
-    warrantyClaimsRepository.findWarrantyProductByCode.mockResolvedValue({
-      id: 'product-id',
-      warranty_code: 'WM-2026-ABCDEF',
-      warranty: {
-        id: 'warranty-id',
-        status: 'ACTIVE',
-      },
-      ownerships: [],
-    });
+    warrantyClaimsRepository.findWarrantyByCode.mockResolvedValue(
+      buildWarranty(),
+    );
     generateWarrantyClaimCodeUseCase.execute
       .mockResolvedValueOnce('CLM000001')
       .mockResolvedValueOnce('CLM000002');
@@ -149,7 +149,7 @@ describe('CreateWarrantyClaimUseCase', () => {
   });
 
   it('throws not found when the warranty code is absent', async () => {
-    warrantyClaimsRepository.findWarrantyProductByCode.mockResolvedValue(null);
+    warrantyClaimsRepository.findWarrantyByCode.mockResolvedValue(null);
     const useCase = new CreateWarrantyClaimUseCase(
       warrantyClaimsRepository as never,
       generateWarrantyClaimCodeUseCase as never,
@@ -167,14 +167,9 @@ describe('CreateWarrantyClaimUseCase', () => {
   });
 
   it('rejects a second claim while the warranty already has an open claim', async () => {
-    warrantyClaimsRepository.findWarrantyProductByCode.mockResolvedValue({
-      id: 'product-id',
-      warranty: {
-        id: 'warranty-id',
-        status: 'ACTIVE',
-      },
-      ownerships: [],
-    });
+    warrantyClaimsRepository.findWarrantyByCode.mockResolvedValue(
+      buildWarranty(),
+    );
     warrantyClaimsRepository.findOpenByWarrantyId.mockResolvedValue({
       claim_code: 'CLM-2026-OPEN01',
       status: 'REVIEWING',
@@ -203,21 +198,18 @@ describe('CreateWarrantyClaimUseCase', () => {
   });
 
   it('rejects a public claim when requester phone does not match the current owner', async () => {
-    warrantyClaimsRepository.findWarrantyProductByCode.mockResolvedValue({
-      id: 'product-id',
-      warranty: {
-        id: 'warranty-id',
-        status: 'ACTIVE',
-      },
-      ownerships: [
-        {
-          customer: {
-            id: 'customer-id',
-            phone: '0886 33 77 33',
+    warrantyClaimsRepository.findWarrantyByCode.mockResolvedValue(
+      buildWarranty({
+        ownerships: [
+          {
+            customer: {
+              id: 'customer-id',
+              phone: '0886 33 77 33',
+            },
           },
-        },
-      ],
-    });
+        ],
+      }),
+    );
     const useCase = new CreateWarrantyClaimUseCase(
       warrantyClaimsRepository as never,
       generateWarrantyClaimCodeUseCase as never,
@@ -241,21 +233,18 @@ describe('CreateWarrantyClaimUseCase', () => {
   });
 
   it('accepts a formatted public phone matching the normalized owner phone', async () => {
-    warrantyClaimsRepository.findWarrantyProductByCode.mockResolvedValue({
-      id: 'product-id',
-      warranty: {
-        id: 'warranty-id',
-        status: 'ACTIVE',
-      },
-      ownerships: [
-        {
-          customer: {
-            id: 'customer-id',
-            phone: '0886337733',
+    warrantyClaimsRepository.findWarrantyByCode.mockResolvedValue(
+      buildWarranty({
+        ownerships: [
+          {
+            customer: {
+              id: 'customer-id',
+              phone: '0886337733',
+            },
           },
-        },
-      ],
-    });
+        ],
+      }),
+    );
     generateWarrantyClaimCodeUseCase.execute.mockResolvedValue(
       'CLM-2026-ABC123',
     );
@@ -301,15 +290,12 @@ describe('CreateWarrantyClaimUseCase', () => {
   });
 
   it('rejects voided warranties', async () => {
-    warrantyClaimsRepository.findWarrantyProductByCode.mockResolvedValue({
-      id: 'product-id',
-      warranty_code: 'WM-2026-VOIDED',
-      warranty: {
-        id: 'warranty-id',
+    warrantyClaimsRepository.findWarrantyByCode.mockResolvedValue(
+      buildWarranty({
+        warranty_code: 'WM-2026-VOIDED',
         status: 'VOIDED',
-      },
-      ownerships: [],
-    });
+      }),
+    );
     const useCase = new CreateWarrantyClaimUseCase(
       warrantyClaimsRepository as never,
       generateWarrantyClaimCodeUseCase as never,
@@ -333,16 +319,13 @@ describe('CreateWarrantyClaimUseCase', () => {
   ])(
     'rejects a %s warranty that is not currently eligible',
     async (status, endDate) => {
-      warrantyClaimsRepository.findWarrantyProductByCode.mockResolvedValue({
-        id: 'product-id',
-        warranty_code: 'WM-2026-INELIGIBLE',
-        warranty: {
-          id: 'warranty-id',
+      warrantyClaimsRepository.findWarrantyByCode.mockResolvedValue(
+        buildWarranty({
+          warranty_code: 'WM-2026-INELIGIBLE',
           status,
           end_date: endDate,
-        },
-        ownerships: [],
-      });
+        }),
+      );
       const useCase = new CreateWarrantyClaimUseCase(
         warrantyClaimsRepository as never,
         generateWarrantyClaimCodeUseCase as never,
@@ -362,16 +345,12 @@ describe('CreateWarrantyClaimUseCase', () => {
   );
 
   it('rejects an active warranty before its start date', async () => {
-    warrantyClaimsRepository.findWarrantyProductByCode.mockResolvedValue({
-      id: 'product-id',
-      warranty_code: 'WM-2026-FUTURE',
-      warranty: {
-        id: 'warranty-id',
-        status: 'ACTIVE',
+    warrantyClaimsRepository.findWarrantyByCode.mockResolvedValue(
+      buildWarranty({
+        warranty_code: 'WM-2026-FUTURE',
         start_date: new Date('2099-01-01T00:00:00.000Z'),
-      },
-      ownerships: [],
-    });
+      }),
+    );
     const useCase = new CreateWarrantyClaimUseCase(
       warrantyClaimsRepository as never,
       generateWarrantyClaimCodeUseCase as never,

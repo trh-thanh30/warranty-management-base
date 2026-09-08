@@ -1,4 +1,8 @@
 import { BadRequestError, NotFoundError } from '@/common/response';
+import {
+  DealerAccessActor,
+  DealerAccessPolicy,
+} from '@/modules/dealers/service/dealer-access.policy';
 import { toWarrantyActivationRequestResponse } from '@/modules/warranty-activation-requests/mappers/warranty-activation-request.mapper';
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
 import { IssueWarrantyActivationRequestCertificateUseCase } from '@/modules/warranty-certificates/use-cases/issue-warranty-activation-request-certificate.use-case';
@@ -10,12 +14,19 @@ export class RetryWarrantyActivationRequestCertificateUseCase {
   constructor(
     private readonly repository: WarrantyActivationRequestsRepository,
     private readonly issueRequestCertificateUseCase: IssueWarrantyActivationRequestCertificateUseCase,
+    private readonly dealerAccessPolicy?: DealerAccessPolicy,
   ) {}
 
-  async execute(requestId: string) {
+  async execute(requestId: string, actor?: DealerAccessActor) {
     const request = await this.repository.findById(requestId);
     if (!request) {
       throw new NotFoundError('Warranty activation request not found');
+    }
+    if (actor) {
+      await this.dealerAccessPolicy!.assertCanAccessRecord(
+        actor,
+        request.dealer_id,
+      );
     }
     if (request.status !== warranty_activation_request_status.ACTIVATED) {
       throw new BadRequestError(

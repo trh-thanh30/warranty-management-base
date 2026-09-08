@@ -3,7 +3,7 @@ import { LookupWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/look
 
 describe('LookupWarrantyByCodeUseCase', () => {
   const warrantiesRepository = {
-    findActiveProductByWarrantyCode: jest.fn(),
+    findByWarrantyCode: jest.fn(),
   };
 
   beforeEach(() => {
@@ -15,49 +15,50 @@ describe('LookupWarrantyByCodeUseCase', () => {
     const endDate = new Date('2029-06-14T00:00:00.000Z');
     const installedAt = new Date('2026-06-10T00:00:00.000Z');
 
-    warrantiesRepository.findActiveProductByWarrantyCode.mockResolvedValue({
-      id: 'product-id',
-      product_code: 'LEX-SP50-001',
-      display_name: 'Toyota Camry',
-      slug: 'toyota-camry',
-      brand: 'Toyota',
-      model: 'Camry',
-      category_ref: {
-        id: 'category-id',
-        name: 'Phim cách nhiệt',
-        slug: 'phim-cach-nhiet',
-      },
+    warrantiesRepository.findByWarrantyCode.mockResolvedValue({
+      id: 'warranty-id',
+      warranty_code: 'WM-2026-ABCDEF',
       serial_number: 'VIN123',
-      warranty: {
-        warranty_code: 'WM-2026-ABCDEF',
-        start_date: startDate,
-        end_date: endDate,
-        duration_months: 36,
-        terms: 'Bảo hành chính hãng theo điều kiện công bố.',
-        status: 'ACTIVE',
-        activation_request: {
-          installed_at: installedAt,
-          vehicle_model: 'Toyota Camry',
-          vehicle_plate: '30H-888.88',
-          customer_name: 'Nguyễn Văn An',
-          customer_phone: '0988123456',
-          full_address: 'Địa chỉ khách hàng',
-          metadata: {
-            dealer: {
-              id: 'dealer-id',
-              name: 'FUJITEK Hà Nội',
-              phone: '19009169',
-              address: '62 Nghĩa Đô',
-              province: 'Hà Nội',
-              district: 'Cầu Giấy',
-            },
-            filmItems: {
-              windshield: 'SP50',
-              frontLeftSide: 'SP30',
-              ignoredValue: 123,
-            },
-            internalNote: 'Không được public',
+      start_date: startDate,
+      end_date: endDate,
+      duration_months: 36,
+      terms: 'Bảo hành chính hãng theo điều kiện công bố.',
+      status: 'ACTIVE',
+      product: {
+        id: 'product-id',
+        product_code: 'LEX-SP50-001',
+        display_name: 'Toyota Camry',
+        slug: 'toyota-camry',
+        brand: 'Toyota',
+        model: 'Camry',
+        category_ref: {
+          id: 'category-id',
+          name: 'Phim cách nhiệt',
+          slug: 'phim-cach-nhiet',
+        },
+      },
+      activation_request: {
+        installed_at: installedAt,
+        vehicle_model: 'Toyota Camry',
+        vehicle_plate: '30H-888.88',
+        customer_name: 'Nguyễn Văn An',
+        customer_phone: '0988123456',
+        full_address: 'Địa chỉ khách hàng',
+        metadata: {
+          dealer: {
+            id: 'dealer-id',
+            name: 'FUJITEK Hà Nội',
+            phone: '19009169',
+            address: '62 Nghĩa Đô',
+            province: 'Hà Nội',
+            district: 'Cầu Giấy',
           },
+          filmItems: {
+            windshield: 'SP50',
+            frontLeftSide: 'SP30',
+            ignoredValue: 123,
+          },
+          internalNote: 'Không được public',
         },
       },
     });
@@ -67,9 +68,9 @@ describe('LookupWarrantyByCodeUseCase', () => {
 
     const result = await useCase.execute({ code: 'wm-2026-abcdef' });
 
-    expect(
-      warrantiesRepository.findActiveProductByWarrantyCode,
-    ).toHaveBeenCalledWith('WM-2026-ABCDEF');
+    expect(warrantiesRepository.findByWarrantyCode).toHaveBeenCalledWith(
+      'WM-2026-ABCDEF',
+    );
     expect(result).toEqual({
       product: {
         id: 'product-id',
@@ -117,9 +118,7 @@ describe('LookupWarrantyByCodeUseCase', () => {
   });
 
   it('throws not found when no non-deleted product warranty matches', async () => {
-    warrantiesRepository.findActiveProductByWarrantyCode.mockResolvedValue(
-      null,
-    );
+    warrantiesRepository.findByWarrantyCode.mockResolvedValue(null);
     const useCase = new LookupWarrantyByCodeUseCase(
       warrantiesRepository as never,
     );

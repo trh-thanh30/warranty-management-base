@@ -58,11 +58,6 @@ export class ManualWarrantyActivationProductDto {
   @IsString()
   @Length(0, 160)
   displayName?: string;
-
-  @IsOptional()
-  @IsString()
-  @Length(1, 64)
-  serialNumber?: string;
 }
 
 export class ManualWarrantyActivationWarrantyDto {

@@ -23,6 +23,32 @@ export type DealerSummary = {
 
 export type DealerResponse = DealerSummary;
 
+export type DealerMembershipSummary = {
+  id: string;
+  dealerId: string;
+  userId: string;
+  createdById: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user: {
+    id: string;
+    email: string;
+    username: string;
+    fullName: string | null;
+    status: "ACTIVE" | "INACTIVE";
+  };
+  createdBy: {
+    id: string;
+    email: string;
+    username: string;
+    fullName: string | null;
+  } | null;
+};
+
+export type AddDealerMemberBody = {
+  userId: string;
+};
+
 export type DealerActivatedCustomerSummary = {
   id: string;
   customer: {

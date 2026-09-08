@@ -29,6 +29,7 @@ model User {
   permissions                           UserPermission[]
   customer_profile                      Customer?
   owned_products                        ProductOwnership[]
+  warranty_ownerships                   WarrantyOwnership[]                @relation("WarrantyOwnershipOwnerUser")
   warranty_claim_changes                WarrantyClaimStatusHistory[]        @relation("WarrantyClaimStatusChangedBy")
   warranty_claim_service_center_changes WarrantyClaimServiceCenterHistory[] @relation("WarrantyClaimServiceCenterChangedBy")
   reviewed_warranty_activation_requests WarrantyActivationRequest[]         @relation("WarrantyActivationRequestReviewedBy")
@@ -40,6 +41,8 @@ model User {
   activation_code_batches               ActivationCodeBatch[]               @relation("ActivationCodeBatchCreatedBy")
   activation_code_print_jobs            ActivationCodePrintJob[]            @relation("ActivationCodePrintJobRequestedBy")
   updated_system_configs                SystemConfig[]                      @relation("SystemConfigUpdatedBy")
+  dealer_memberships                    DealerMembership[]                  @relation("DealerMembershipUser")
+  created_dealer_memberships            DealerMembership[]                  @relation("DealerMembershipCreatedBy")
 
   @@index([role, status])
   @@index([email])
@@ -356,6 +359,7 @@ model Customer {
 
   user                         User?                       @relation(fields: [user_id], references: [id], onDelete: SetNull)
   ownerships                   ProductOwnership[]
+  warranty_ownerships          WarrantyOwnership[]
   claims                       WarrantyClaim[]
   warranty_activation_requests WarrantyActivationRequest[]
 
@@ -441,7 +445,6 @@ model Product {
   category_id              String           @db.Uuid
   current_warranty_id      String?          @unique @db.Uuid
   product_code             String           @unique
-  serial_number            String?          @unique
   display_name             String?
   // Product-owned catalogue fields.
   slug                     String           @unique
@@ -470,11 +473,10 @@ model Product {
   warranty_activation_requests      WarrantyActivationRequest[]
   warranty_activation_request_items WarrantyActivationRequestItem[]
   activation_code_batch_sources     ActivationCodeBatch[]           @relation("ActivationCodeBatchSourceProduct")
-  activation_code                   ActivationCode?                 @relation("ActivationCodeProduct")
+  activation_codes                  ActivationCode[]                @relation("ActivationCodeProduct")
 
   @@index([category_id])
   @@index([status])
-  @@index([serial_number])
   @@index([display_name])
   @@map("product")
 }
@@ -523,8 +525,11 @@ model ProductOwnership {
 model Warranty {
   id                    String          @id @default(uuid()) @db.Uuid
   product_id            String          @db.Uuid
+  dealer_id             String?         @db.Uuid
   activation_code_id    String?         @unique @db.Uuid
   warranty_code         String?         @unique
+  // Serial/VIN belongs to an issued warranty (physical unit), not the catalogue Product.
+  serial_number         String?
   start_date            DateTime?
   end_date              DateTime?
   duration_months       Int
@@ -543,6 +548,7 @@ model Warranty {
   updated_at            DateTime        @updatedAt
 
   product                  Product                         @relation("ProductWarrantyHistory", fields: [product_id], references: [id], onDelete: Cascade)
+  dealer                   Dealer?                        @relation(fields: [dealer_id], references: [id], onDelete: SetNull)
   current_for_product      Product?                        @relation("ProductCurrentWarranty")
   activation_code          ActivationCode?                 @relation("ActivationCodeWarranty", fields: [activation_code_id], references: [id], onDelete: SetNull)
   claims                   WarrantyClaim[]
@@ -551,15 +557,40 @@ model Warranty {
   certificates             WarrantyCertificate[]
   activated_by             User?                           @relation("WarrantyActivatedBy", fields: [activated_by_id], references: [id], onDelete: SetNull)
   voided_by                User?                           @relation("WarrantyVoidedBy", fields: [voided_by_id], references: [id], onDelete: SetNull)
+  ownerships              WarrantyOwnership[]              @relation("WarrantyOwnershipHistory")
 
   @@index([warranty_code])
+  @@index([serial_number])
   @@index([product_id])
+  @@index([dealer_id])
   @@index([status])
   @@index([end_date])
   @@index([activated_by_id])
   @@index([voided_by_id])
   @@index([voided_at])
   @@map("warranty")
+}
+
+model WarrantyOwnership {
+  id               String    @id @default(uuid()) @db.Uuid
+  warranty_id      String    @db.Uuid
+  customer_id      String    @db.Uuid
+  owner_user_id    String?   @db.Uuid
+  purchase_date    DateTime?
+  activated_at     DateTime?
+  ended_at         DateTime?
+  is_current_owner Boolean   @default(true)
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+
+  warranty   Warranty  @relation("WarrantyOwnershipHistory", fields: [warranty_id], references: [id], onDelete: Cascade)
+  customer   Customer  @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  owner_user User?     @relation("WarrantyOwnershipOwnerUser", fields: [owner_user_id], references: [id], onDelete: SetNull)
+
+  @@index([warranty_id, is_current_owner])
+  @@index([customer_id, is_current_owner])
+  @@index([owner_user_id, is_current_owner])
+  @@map("warranty_ownership")
 }
 
 model ActivationCodeBatch {
@@ -628,7 +659,7 @@ model ActivationCode {
   code_ciphertext String
   status          activation_code_status @default(AVAILABLE)
   expires_at      DateTime
-  product_id      String?                @unique @db.Uuid
+  product_id      String?                @db.Uuid
   activated_at    DateTime?
   revoked_at      DateTime?
   replaced_by_id  String?                @unique @db.Uuid
@@ -644,6 +675,7 @@ model ActivationCode {
   replaces      ActivationCode?                 @relation("ActivationCodeReplacement")
 
   @@index([batch_id, status])
+  @@index([product_id])
   @@index([status, expires_at])
   @@index([status, created_at])
   @@index([created_at])
@@ -821,12 +853,33 @@ model Dealer {
   updated_at  DateTime @updatedAt
 
   warranty_activation_requests WarrantyActivationRequest[]
+  warranties                    Warranty[]
+  memberships                  DealerMembership[]
 
   @@index([is_active])
   @@index([email])
   @@index([province])
   @@index([name])
   @@map("dealer")
+}
+
+model DealerMembership {
+  id            String   @id @default(uuid()) @db.Uuid
+  dealer_id     String   @db.Uuid
+  user_id       String   @db.Uuid
+  created_by_id String?  @db.Uuid
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  dealer     Dealer @relation(fields: [dealer_id], references: [id], onDelete: Cascade)
+  user       User   @relation("DealerMembershipUser", fields: [user_id], references: [id], onDelete: Cascade)
+  created_by User?  @relation("DealerMembershipCreatedBy", fields: [created_by_id], references: [id], onDelete: SetNull)
+
+  @@unique([dealer_id, user_id])
+  @@index([user_id])
+  @@index([dealer_id])
+  @@index([created_by_id])
+  @@map("dealer_membership")
 }
 
 model SystemConfig {

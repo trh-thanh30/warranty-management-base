@@ -23,11 +23,9 @@ export async function prepareProductImportRows(
   const errors: ExcelRowError[] = [];
   const preparedRows: PreparedProductImportRow[] = [];
   const seenProductCodes = new Set<string>();
-  const seenSerialNumbers = new Set<string>();
 
   for (const row of rows) {
     const productCode = row.data.productCode?.trim() || null;
-    const serialNumber = row.data.serialNumber?.trim() || null;
     const displayName = row.data.displayName?.trim() || null;
     const categoryCode = row.data.categoryCode?.trim().toUpperCase() || null;
 
@@ -42,27 +40,10 @@ export async function prepareProductImportRows(
       seenProductCodes.add(productCode);
     }
 
-    if (serialNumber) {
-      if (seenSerialNumbers.has(serialNumber)) {
-        errors.push({
-          rowNumber: row.rowNumber,
-          field: 'serialNumber',
-          message: 'Số serial bị trùng trong file import',
-        });
-      }
-      seenSerialNumbers.add(serialNumber);
-    }
-
-    const [existingProduct, productWithSerial, category] = await Promise.all([
+    const [existingProduct, category] = await Promise.all([
       productCode
         ? prismaService.product.findUnique({
             where: { product_code: productCode },
-            select: { id: true, product_code: true },
-          })
-        : null,
-      serialNumber
-        ? prismaService.product.findUnique({
-            where: { serial_number: serialNumber },
             select: { id: true, product_code: true },
           })
         : null,
@@ -77,17 +58,6 @@ export async function prepareProductImportRows(
           })
         : null,
     ]);
-
-    if (
-      productWithSerial &&
-      (!existingProduct || productWithSerial.id !== existingProduct.id)
-    ) {
-      errors.push({
-        rowNumber: row.rowNumber,
-        field: 'serialNumber',
-        message: `Số serial đã thuộc sản phẩm ${productWithSerial.product_code}`,
-      });
-    }
 
     if (!displayName) {
       errors.push({

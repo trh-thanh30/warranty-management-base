@@ -16,7 +16,6 @@ describe('ManualWarrantyActivationUseCase', () => {
       brand: 'Black Label',
       model: 'Premium',
       displayName: 'Film xe Nguyen Van A',
-      serialNumber: 'SN-BLF-001',
     },
     warranty: {
       activatedAt: '2026-07-19T00:00:00.000Z',
@@ -31,7 +30,6 @@ describe('ManualWarrantyActivationUseCase', () => {
     customerByEmail?: unknown;
     customerByPhone?: unknown;
     existingProduct?: unknown;
-    existingSerial?: unknown;
     existingWarranty?: unknown;
   }) {
     const customer = {
@@ -69,7 +67,7 @@ describe('ManualWarrantyActivationUseCase', () => {
     const product = {
       id: 'product-id',
       productCode: 'PRD-2026-ABCDEF',
-      serialNumber: dto.product.serialNumber,
+      serialNumber: null,
       displayName: dto.product.displayName,
       status: 'ACTIVE',
       metadata: { source: 'manual_warranty_activation' },
@@ -101,9 +99,6 @@ describe('ManualWarrantyActivationUseCase', () => {
         .fn()
         .mockResolvedValue(overrides?.existingProduct ?? null),
       isActiveProductCategory: jest.fn().mockResolvedValue(true),
-      findProductBySerialNumber: jest
-        .fn()
-        .mockResolvedValue(overrides?.existingSerial ?? null),
       findWarrantyByCode: jest
         .fn()
         .mockResolvedValue(overrides?.existingWarranty ?? null),
@@ -146,7 +141,7 @@ describe('ManualWarrantyActivationUseCase', () => {
     };
   }
 
-  it('creates customer, product ownership, and active warranty manually', async () => {
+  it('creates customer, warranty ownership, and active warranty manually', async () => {
     const dependencies = createDependencies();
 
     const result = await dependencies.useCase.execute(dto);
@@ -277,7 +272,7 @@ describe('ManualWarrantyActivationUseCase', () => {
 
     expect(
       dependencies.transactionRepository.closeCurrentOwnerships,
-    ).toHaveBeenCalledWith('product-id', new Date(dto.warranty.activatedAt));
+    ).not.toHaveBeenCalled();
     expect(
       dependencies.transactionRepository.updateManualActivationProduct,
     ).toHaveBeenCalledWith(

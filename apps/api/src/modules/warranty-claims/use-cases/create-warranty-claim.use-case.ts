@@ -36,16 +36,14 @@ export class CreateWarrantyClaimUseCase {
     const warrantyCode = dto.warrantyCode.trim().toUpperCase();
     const requesterName = dto.requesterName.trim();
     const requesterPhone = dto.requesterPhone.trim();
-    const product =
-      await this.warrantyClaimsRepository.findWarrantyProductByCode(
-        warrantyCode,
-      );
+    const warranty =
+      await this.warrantyClaimsRepository.findWarrantyByCode(warrantyCode);
 
-    if (!product?.warranty) {
+    if (!warranty || warranty.product.deleted_at) {
       throw new NotFoundError('Warranty not found');
     }
 
-    if (product.warranty.status !== warranty_status.ACTIVE) {
+    if (warranty.status !== warranty_status.ACTIVE) {
       const errorByStatus = {
         [warranty_status.DRAFT]: {
           code: 'WARRANTY_NOT_ACTIVE',
@@ -60,18 +58,16 @@ export class CreateWarrantyClaimUseCase {
           message: 'Warranty is voided',
         },
       } as const;
-      const error = errorByStatus[product.warranty.status];
+      const error = errorByStatus[warranty.status];
       throw new BadRequestError(error.message, 'BAD_REQUEST', {
         code: error.code,
       });
     }
 
     const hasNotStarted =
-      product.warranty.start_date &&
-      product.warranty.start_date.getTime() > Date.now();
+      warranty.start_date && warranty.start_date.getTime() > Date.now();
     const hasExpired =
-      product.warranty.end_date &&
-      product.warranty.end_date.getTime() < Date.now();
+      warranty.end_date && warranty.end_date.getTime() < Date.now();
     if (hasNotStarted || hasExpired) {
       throw new BadRequestError(
         hasNotStarted ? 'Warranty is not active yet' : 'Warranty is expired',
@@ -83,13 +79,13 @@ export class CreateWarrantyClaimUseCase {
     }
 
     const openClaim = await this.warrantyClaimsRepository.findOpenByWarrantyId(
-      product.warranty.id,
+      warranty.id,
     );
     if (openClaim) {
       this.throwOpenClaimError(warrantyCode, openClaim);
     }
 
-    const currentOwnership = product.ownerships[0];
+    const currentOwnership = warranty.ownerships[0];
     if (
       context.requireOwnerMatch &&
       (!currentOwnership?.customer?.phone ||
@@ -121,8 +117,8 @@ export class CreateWarrantyClaimUseCase {
           requester_phone: requesterPhone,
           issue_title: dto.issueTitle,
           issue_detail: dto.issueDetail,
-          warranty: { connect: { id: product.warranty.id } },
-          product: { connect: { id: product.id } },
+          warranty: { connect: { id: warranty.id } },
+          product: { connect: { id: warranty.product.id } },
           customer: currentOwnership?.customer
             ? { connect: { id: currentOwnership.customer.id } }
             : undefined,
@@ -142,7 +138,7 @@ export class CreateWarrantyClaimUseCase {
         if (this.isUniqueConstraintConflict(error)) {
           const concurrentOpenClaim =
             await this.warrantyClaimsRepository.findOpenByWarrantyId(
-              product.warranty.id,
+              warranty.id,
             );
           if (concurrentOpenClaim) {
             this.throwOpenClaimError(warrantyCode, concurrentOpenClaim);

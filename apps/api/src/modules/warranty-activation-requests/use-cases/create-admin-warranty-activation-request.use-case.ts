@@ -14,6 +14,7 @@ import {
   warranty_activation_request_source,
   warranty_status,
 } from '@prisma/client';
+import type { DealerAccessActor } from '@/modules/dealers/service/dealer-access.policy';
 
 @Injectable()
 export class CreateAdminWarrantyActivationRequestUseCase {
@@ -26,7 +27,10 @@ export class CreateAdminWarrantyActivationRequestUseCase {
 
   async execute(
     dto: CreateAdminWarrantyActivationRequestDto,
-    context: { createdByUserId?: string } = {},
+    context: {
+      createdByUserId?: string;
+      actor?: DealerAccessActor;
+    } = {},
   ) {
     const customer = await this.customersRepository.findById(dto.customerId);
     if (!customer) {
@@ -51,6 +55,7 @@ export class CreateAdminWarrantyActivationRequestUseCase {
     };
     const createContext = {
       createdByUserId: context.createdByUserId,
+      actor: context.actor,
       source: warranty_activation_request_source.ADMIN_PORTAL,
       customerProfile: {
         id: customer.id,
@@ -84,7 +89,29 @@ export class CreateAdminWarrantyActivationRequestUseCase {
         customerDto.productId,
       );
 
-    if (!product?.warranty) {
+    if (!product) {
+      throw new NotFoundError('Product not found', 'NOT_FOUND', {
+        code: 'PRODUCT_NOT_FOUND',
+      });
+    }
+
+    const catalogue = getProductCatalogue(product);
+    if (product.category_ref?.activation_code_enabled === false) {
+      return this.createWarrantyActivationRequestUseCase.execute(
+        {
+          ...customerDto,
+          brand: customerDto.brand ?? catalogue.brand ?? undefined,
+          manufactureYear:
+            customerDto.manufactureYear ?? catalogue.modelYear ?? undefined,
+          model: customerDto.model ?? catalogue.model ?? undefined,
+          productName:
+            customerDto.productName ?? getProductDisplayName(product),
+        },
+        createContext,
+      );
+    }
+
+    if (!product.warranty) {
       throw new NotFoundError('Product warranty not found', 'NOT_FOUND', {
         code: 'PRODUCT_WARRANTY_NOT_FOUND',
       });
@@ -111,7 +138,6 @@ export class CreateAdminWarrantyActivationRequestUseCase {
       });
     }
 
-    const catalogue = getProductCatalogue(product);
     return this.createWarrantyActivationRequestUseCase.execute(
       {
         ...customerDto,
@@ -120,8 +146,6 @@ export class CreateAdminWarrantyActivationRequestUseCase {
           customerDto.manufactureYear ?? catalogue.modelYear ?? undefined,
         model: customerDto.model ?? catalogue.model ?? undefined,
         productName: customerDto.productName ?? getProductDisplayName(product),
-        serialNumber:
-          customerDto.serialNumber ?? product.serial_number ?? undefined,
         warrantyCode,
       },
       createContext,

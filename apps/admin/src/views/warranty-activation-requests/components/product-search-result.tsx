@@ -12,10 +12,8 @@ type ProductSearchResultProps = {
     >
   >;
   disabledReason?: string | null;
-  ownerName?: string | null;
   productCode: string;
   productName: string;
-  serialNumber: string | null;
   statusLabel: string;
   warrantyCode: string | null;
 };
@@ -24,10 +22,8 @@ export function ProductSearchResult({
   activationCodeCounts,
   activationCodeSummary,
   disabledReason,
-  ownerName,
   productCode,
   productName,
-  serialNumber,
   statusLabel,
   warrantyCode,
 }: ProductSearchResultProps) {
@@ -50,13 +46,8 @@ export function ProductSearchResult({
           </span>
         ) : null}
       </span>
-      <span className="grid min-w-0 gap-1 text-xs text-slate-500 dark:text-slate-400 sm:grid-cols-2">
-        <span className="truncate">
-          {productCode} • {warrantyCode ?? "-"}
-        </span>
-        <span className="truncate">
-          {serialNumber ?? "-"} • {ownerName ?? "-"}
-        </span>
+      <span className="min-w-0 truncate text-xs text-slate-500 dark:text-slate-400">
+        {productCode} • {warrantyCode ?? "-"}
       </span>
       {disabledReason ? (
         <span className="text-xs font-medium text-red-600 dark:text-red-400">

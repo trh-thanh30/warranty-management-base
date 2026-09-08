@@ -1,5 +1,6 @@
 import type { ProductSummary } from "./product.types.ts";
 import type { CategorySummary } from "./category.types.ts";
+import type { ActivationCodeReportStatus } from "./activation-code-report.types.ts";
 
 export type WarrantyStatus = "DRAFT" | "ACTIVE" | "EXPIRED" | "VOIDED";
 
@@ -47,6 +48,7 @@ export type WarrantySummary = {
   maxClaimCount: number | null;
   maxAmountPerClaim: string | null;
   status: WarrantyStatus;
+  serialNumber: string | null;
   terms: string | null;
   metadata: Record<string, unknown> | null;
   activatedByUserId: string | null;
@@ -57,6 +59,19 @@ export type WarrantySummary = {
   voidReason: string | null;
   createdAt: string;
   updatedAt: string;
+  dealer: WarrantyDealerSummary | null;
+  owner: WarrantyOwnerSummary | null;
+};
+
+export type WarrantyDealerSummary = {
+  id: string;
+  dealerCode: string;
+  name: string;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
+  province?: string | null;
+  district?: string | null;
 };
 
 export type WarrantyUserSummary = {
@@ -74,9 +89,9 @@ export type WarrantyLookupResult = {
     | "name"
     | "brand"
     | "model"
-    | "serialNumber"
     | "warrantyCode"
   > & {
+    serialNumber: string | null;
     category: Pick<CategorySummary, "id" | "slug" | "name"> | null;
   };
   warranty: Pick<
@@ -118,17 +133,28 @@ export type WarrantyLookupFilmItems = Partial<
 
 export type WarrantyProductSummary = Pick<
   ProductSummary,
-  "id" | "name" | "brand" | "model" | "productCode" | "serialNumber"
->;
+  "id" | "name" | "brand" | "model" | "productCode"
+> & {
+  serialNumber: string | null;
+  category?: Pick<CategorySummary, "id" | "slug" | "name"> | null;
+};
 
 export type WarrantyOwnerSummary = {
   customerId: string;
   customerCode?: string;
   fullName?: string;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
   ownerUserId?: string | null;
 };
 
 export type WarrantyListItem = WarrantySummary & {
+  activationCode: {
+    id: string;
+    code: string | null;
+    status: ActivationCodeReportStatus;
+  } | null;
   owner: WarrantyOwnerSummary | null;
   product: WarrantyProductSummary;
 };
@@ -167,6 +193,11 @@ export type VoidWarrantyBody = {
   reason: string;
 };
 
+export type TransferWarrantyOwnerBody = {
+  customerId: string;
+  purchaseDate?: string;
+};
+
 export type ManualWarrantyActivationCustomerInput = {
   fullName: string;
   phone: string;
@@ -181,7 +212,6 @@ export type ManualWarrantyActivationProductInput = {
   brand?: string;
   model?: string;
   displayName?: string;
-  serialNumber?: string;
 };
 
 export type ManualWarrantyActivationWarrantyInput = {
@@ -209,13 +239,7 @@ export type ManualWarrantyActivationResult = {
   };
   product: Pick<
     ProductSummary,
-    | "id"
-    | "productCode"
-    | "warrantyCode"
-    | "serialNumber"
-    | "name"
-    | "brand"
-    | "model"
-  >;
+    "id" | "productCode" | "warrantyCode" | "name" | "brand" | "model"
+  > & { serialNumber: string | null };
   warranty: WarrantySummary;
 };

@@ -22,15 +22,13 @@ import { WARRANTY_CLAIM_OPEN_STATUSES } from '@repo/shared/constants';
 export class WarrantyClaimsRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  findWarrantyProductByCode(warrantyCode: string) {
-    return this.prismaService.product.findFirst({
+  findWarrantyByCode(warrantyCode: string) {
+    return this.prismaService.warranty.findUnique({
       where: {
-        warranty: { warranty_code: warrantyCode },
-        deleted_at: null,
+        warranty_code: warrantyCode,
       },
       include: {
-        category_ref: true,
-        warranty: true,
+        product: { include: { category_ref: true } },
         ownerships: {
           where: { is_current_owner: true },
           include: { customer: true },

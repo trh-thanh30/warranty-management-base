@@ -8,7 +8,7 @@ import { ProductsRepository } from '@/modules/products/repository/products.repos
 import { ActivationCodeBatchesRepository } from '@/modules/activation-codes/repository/activation-code-batches.repository';
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
 import { Injectable } from '@nestjs/common';
-import { product_status, type Customer, warranty_status } from '@prisma/client';
+import { product_status, warranty_status } from '@prisma/client';
 import type { CreateWarrantyActivationRequestItemBody } from '@repo/shared';
 
 export type ValidatedActivationRequestItem = {
@@ -26,7 +26,6 @@ export type ValidatedActivationRequestItem = {
   brand: string | null;
   model: string | null;
   manufactureYear: number | null;
-  currentOwner: Pick<Customer, 'email' | 'full_name' | 'phone'> | null;
 };
 
 @Injectable()
@@ -238,13 +237,19 @@ export class ActivationRequestItemsValidatorService {
           productId: product.id,
         });
       }
-      if (!item.activationCodeId && reservedProductIds.has(product.id)) {
+      if (
+        requiresActivationCode &&
+        !item.activationCodeId &&
+        reservedProductIds.has(product.id)
+      ) {
         this.throwValidation('ACTIVATION_REQUEST_ALREADY_OPEN', {
           productId: product.id,
         });
       }
 
       const catalogue = getProductCatalogue(product);
+      const issuesFreshWarranty =
+        Boolean(item.activationCodeId) || !requiresActivationCode;
       return {
         activationCodeId: item.activationCodeId ?? null,
         activationFieldId: genericMode
@@ -255,11 +260,13 @@ export class ActivationRequestItemsValidatorService {
         productId: product.id,
         productName: getProductDisplayName(product),
         productCode: product.product_code,
-        serialNumber: product.serial_number,
-        warrantyId: item.activationCodeId
+        serialNumber: issuesFreshWarranty
           ? null
-          : (product.warranty?.id ?? null),
-        warrantyCode: item.activationCodeId
+          : (product.warranty?.serial_number ?? null),
+        // A code-less product issues a fresh warranty per request instead of
+        // reusing the product's current warranty pointer.
+        warrantyId: issuesFreshWarranty ? null : (product.warranty?.id ?? null),
+        warrantyCode: issuesFreshWarranty
           ? null
           : (product.warranty?.warranty_code ?? null),
         warrantyDurationMonths:
@@ -269,7 +276,6 @@ export class ActivationRequestItemsValidatorService {
         brand: catalogue.brand,
         model: catalogue.model,
         manufactureYear: catalogue.modelYear,
-        currentOwner: product.ownerships?.[0]?.customer ?? null,
       };
     });
   }

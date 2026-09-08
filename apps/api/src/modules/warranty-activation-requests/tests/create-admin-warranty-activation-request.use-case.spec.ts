@@ -128,7 +128,6 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
     productsRepository.findActivationRequestTargetById.mockResolvedValue({
       id: dto.productId,
       display_name: null,
-      serial_number: 'SN-001',
       status: product_status.ACTIVE,
       product_code: 'BO-PIN-001',
       slug: 'bo-pin-chinh-hang',
@@ -137,6 +136,7 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
       model: 'Battery Plus',
       warranty: {
         id: 'warranty-id',
+        serial_number: 'SN-001',
         status: warranty_status.DRAFT,
         warranty_code: null,
       },
@@ -162,7 +162,6 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
       expect.objectContaining({
         brand: 'Toyota',
         productName: 'BO-PIN-001',
-        serialNumber: 'SN-001',
         warrantyCode: 'WM-2026-ABC123',
       }),
       expect.objectContaining({ source: 'ADMIN_PORTAL' }),
@@ -202,6 +201,46 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
     expect(productsRepository.synchronizeWarrantyCode).not.toHaveBeenCalled();
     expect(createWarrantyActivationRequestUseCase.execute).toHaveBeenCalledWith(
       expect.objectContaining({ warrantyCode: 'WM-2026-EXISTING' }),
+      expect.objectContaining({ source: 'ADMIN_PORTAL' }),
+    );
+  });
+
+  it('delegates a code-less catalogue product without requiring a draft warranty', async () => {
+    productsRepository.findActivationRequestTargetById.mockResolvedValue({
+      id: dto.productId,
+      category_ref: { activation_code_enabled: false },
+      display_name: 'Film cách nhiệt SP50',
+      status: product_status.ACTIVE,
+      product_code: 'FILM-SP50',
+      slug: 'film-sp50',
+      brand: 'Lexzenz',
+      model_year: null,
+      model: 'SP50',
+      warranty: {
+        id: 'previous-warranty-id',
+        status: warranty_status.ACTIVE,
+        warranty_code: 'WM-PREVIOUS',
+      },
+    });
+    createWarrantyActivationRequestUseCase.execute.mockResolvedValue({
+      id: 'request-id',
+    });
+    const useCase = new CreateAdminWarrantyActivationRequestUseCase(
+      productsRepository as never,
+      generateWarrantyCodeUseCase as never,
+      createWarrantyActivationRequestUseCase as never,
+      customersRepository as never,
+    );
+
+    await useCase.execute(dto);
+
+    expect(generateWarrantyCodeUseCase.execute).not.toHaveBeenCalled();
+    expect(productsRepository.synchronizeWarrantyCode).not.toHaveBeenCalled();
+    expect(createWarrantyActivationRequestUseCase.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        productId: dto.productId,
+        productName: 'Film cách nhiệt SP50',
+      }),
       expect.objectContaining({ source: 'ADMIN_PORTAL' }),
     );
   });

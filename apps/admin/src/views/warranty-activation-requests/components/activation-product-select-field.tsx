@@ -94,10 +94,8 @@ export function ActivationProductSelectField({
         renderItem={(product) => (
           <ProductSearchResult
             disabledReason={getDisabledReason(product)}
-            ownerName={product.owner?.fullName}
             productCode={product.productCode}
             productName={getActivationProductDisplayName(product)}
-            serialNumber={product.serialNumber}
             statusLabel={getProductWarrantyStatusLabel(product, t)}
             warrantyCode={product.warrantyCode}
           />
@@ -122,11 +120,7 @@ export function ActivationProductSelectField({
             {getActivationProductDisplayName(selectedProduct)}
           </p>
           <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
-            {[
-              selectedProduct.productCode,
-              selectedProduct.serialNumber,
-              selectedProduct.warrantyCode,
-            ]
+            {[selectedProduct.productCode, selectedProduct.warrantyCode]
               .filter(Boolean)
               .join(" · ")}
           </p>

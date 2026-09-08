@@ -4,7 +4,6 @@ import { ActivationCodeCryptoService } from '@/modules/activation-codes/services
 import { ProductsController } from '@/modules/products/products.controller';
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
 import { ProductAssetsRepository } from '@/modules/products/repository/product-assets.repository';
-import { AssignProductOwnerUseCase } from '@/modules/products/use-cases/assign-product-owner.use-case';
 import { AttachProductAssetUseCase } from '@/modules/products/use-cases/attach-product-asset.use-case';
 import { ConfirmProductImportUseCase } from '@/modules/products/use-cases/confirm-product-import.use-case';
 import { CreateProductUseCase } from '@/modules/products/use-cases/create-product.use-case';
@@ -53,7 +52,6 @@ import { memoryStorage } from 'multer';
     GetPublicProductDetailUseCase,
     GetProductDetailUseCase,
     GetProductCloneDraftUseCase,
-    AssignProductOwnerUseCase,
     AttachProductAssetUseCase,
     UpdateProductAssetUseCase,
     RemoveProductAssetUseCase,

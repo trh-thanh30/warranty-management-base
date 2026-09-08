@@ -25,7 +25,6 @@ describe('PreviewProductImportUseCase', () => {
       'Thời hạn bảo hành (tháng)',
       'Điều khoản bảo hành',
       'Vị trí gắn',
-      'Số serial',
       'Trạng thái sản phẩm',
     ]);
   });
@@ -73,7 +72,6 @@ describe('PreviewProductImportUseCase', () => {
         warrantyTerms: null,
         displayName: 'Genuine Battery Pack',
         installationPosition: 'Engine bay',
-        serialNumber: 'SN-001',
         status: product_status.ACTIVE,
       },
     ]);
@@ -124,7 +122,6 @@ describe('PreviewProductImportUseCase', () => {
         warrantyTerms: null,
         displayName: 'Battery Pack',
         installationPosition: null,
-        serialNumber: 'SN-UNKNOWN-CATEGORY',
         status: product_status.ACTIVE,
       },
     ]);
@@ -155,7 +152,6 @@ describe('PreviewProductImportUseCase', () => {
         warrantyTerms: null,
         displayName: 'Battery Pack',
         installationPosition: null,
-        serialNumber: 'SN-MISSING-CATEGORY',
         status: product_status.ACTIVE,
       },
     ]);
