@@ -6,7 +6,6 @@ describe('ReplaceProductActivationCodeAssignmentUseCase', () => {
     id: 'product-id',
     product_code: 'PRD-01',
     display_name: 'Camera hành trình',
-    serial_number: null,
     status: product_status.ACTIVE,
     deleted_at: null,
     warranty_duration_months: 24,
@@ -58,7 +57,6 @@ describe('ReplaceProductActivationCodeAssignmentUseCase', () => {
         productCode: product.product_code,
         displayName: product.display_name,
         name: product.display_name,
-        serialNumber: product.serial_number,
       },
     });
   });

@@ -13,7 +13,7 @@ const tablePolicies = [
   },
   {
     file: "./warranty-activation-requests/components/warranty-activation-requests-table.tsx",
-    tableClass: "min-w-[1320px] whitespace-nowrap",
+    tableClass: "min-w-330 whitespace-nowrap",
   },
   {
     file: "./warranty-claims/components/warranty-claims-table.tsx",
