@@ -563,7 +563,9 @@ export function AssignActivationCodesForm({
                       />
                     </div>
                     <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
-                      {code.batchName || code.batchCode}
+                      {t("codeBatch", {
+                        batch: code.batchName || code.batchCode,
+                      })}
                     </p>
                   </div>
                 </div>
@@ -602,7 +604,9 @@ export function AssignActivationCodesForm({
                           {code.copyCode ?? code.maskedCode}
                         </p>
                         <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-                          {code.batchName || code.batchCode}
+                          {t("codeBatch", {
+                            batch: code.batchName || code.batchCode,
+                          })}
                         </p>
                       </div>
                       <Button

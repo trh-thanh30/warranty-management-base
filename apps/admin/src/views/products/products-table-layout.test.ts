@@ -112,6 +112,8 @@ test("activation-code dialog filters assignable codes by a searchable batch", as
   assert.match(source, /setSelectedCodes\(\[\]\)/);
   assert.match(source, /t\("allBatches"\)/);
   assert.match(source, /code\.batchName \|\| code\.batchCode/);
+  assert.match(source, /t\("codeBatch", \{/);
+  assert.equal(source.match(/t\("codeBatch", \{/g)?.length, 2);
   assert.match(source, /batch\.assignableCount/);
   assert.match(source, /getItemDisabledReason=\{\(batch\) =>/);
   assert.match(source, /batch\.assignableCount === 0/);

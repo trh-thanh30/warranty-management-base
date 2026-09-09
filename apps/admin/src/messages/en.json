@@ -633,6 +633,7 @@
     "batchAssignedToProductCount": "Assigned to this product: {count} codes",
     "batchAssignableCount": "Assignable: {count} codes",
     "codesLoadError": "Could not load activation codes.",
+    "codeBatch": "Batch: {batch}",
     "tryAgain": "Try again",
     "allAvailableAssignment": "Assign all available codes",
     "allAvailableAssignmentDescription": "Assign every eligible code in the selected batch.",

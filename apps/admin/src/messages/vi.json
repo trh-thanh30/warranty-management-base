@@ -633,6 +633,7 @@
     "batchAssignedToProductCount": "Sản phẩm này đã gán: {count} mã",
     "batchAssignableCount": "Còn gán được: {count} mã",
     "codesLoadError": "Không thể tải danh sách mã kích hoạt.",
+    "codeBatch": "Lô mã: {batch}",
     "tryAgain": "Thử lại",
     "allAvailableAssignment": "Gán toàn bộ mã khả dụng",
     "allAvailableAssignmentDescription": "Gán tất cả mã đủ điều kiện trong lô đã chọn.",
