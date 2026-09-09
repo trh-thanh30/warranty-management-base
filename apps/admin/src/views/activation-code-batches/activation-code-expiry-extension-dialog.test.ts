@@ -19,6 +19,21 @@ test("expiry extension dialog shows live dates and accepts custom months", () =>
   assert.match(dialogSource, /addCalendarMonthsUtc/);
 });
 
+test("expiry extension dialog separates its header from the form content", () => {
+  assert.match(
+    dialogSource,
+    /<DialogTitle className="font-semibold text-slate-950 dark:text-slate-50">/,
+  );
+  assert.match(
+    dialogSource,
+    /<DialogDescription>[\s\S]*?<\/DialogDescription>[\s\S]*?<\/div>[\s\S]*?<\/div>[\s\S]*?<Separator/,
+  );
+  assert.match(
+    dialogSource,
+    /<Separator className="bg-slate-200 dark:bg-slate-800"/,
+  );
+});
+
 test("expiry extension actions are present on batch and shared code tables", () => {
   const batchTable = readFileSync(
     new URL("./components/activation-code-batches-table.tsx", import.meta.url),

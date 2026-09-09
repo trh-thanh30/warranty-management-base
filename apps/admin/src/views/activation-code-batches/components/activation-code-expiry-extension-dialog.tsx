@@ -15,6 +15,7 @@ import {
   DialogDescription,
   DialogTitle,
   Input,
+  Separator,
 } from "@repo/ui";
 import { useMutation } from "@tanstack/react-query";
 import { CalendarPlus } from "lucide-react";
@@ -91,7 +92,9 @@ export function ActivationCodeExpiryExtensionDialog({
             <CalendarPlus className="size-5" />
           </div>
           <div className="space-y-1.5">
-            <DialogTitle>{t("title")}</DialogTitle>
+            <DialogTitle className="font-semibold text-slate-950 dark:text-slate-50">
+              {t("title")}
+            </DialogTitle>
             <DialogDescription>
               {t(
                 target?.kind === "batch"
@@ -104,6 +107,7 @@ export function ActivationCodeExpiryExtensionDialog({
             </DialogDescription>
           </div>
         </div>
+        <Separator className="bg-slate-200 dark:bg-slate-800" />
 
         <dl className="grid gap-3 rounded-md border border-slate-200 p-4 text-sm dark:border-slate-800 sm:grid-cols-2">
           <div>
