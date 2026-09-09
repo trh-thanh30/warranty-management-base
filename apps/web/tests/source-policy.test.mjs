@@ -474,7 +474,7 @@ test("frontend images bake the public API URL into browser bundles", async () =>
   );
 });
 
-test("published images pass Trivy vulnerability gates before deployment", async () => {
+test("published images block deployment only for critical Trivy vulnerabilities", async () => {
   const [publishWorkflow, trivyIgnore] = await Promise.all([
     readFile(
       path.join(repoRoot, ".github", "workflows", "publish-images.yml"),
@@ -490,8 +490,13 @@ test("published images pass Trivy vulnerability gates before deployment", async 
     "API, PDF renderer, Migrator, Web, and Admin images must each be scanned",
   );
   assert.equal(
-    (publishWorkflow.match(/severity: CRITICAL,HIGH/g) ?? []).length,
+    (publishWorkflow.match(/severity: CRITICAL$/gm) ?? []).length,
     5,
+  );
+  assert.doesNotMatch(
+    publishWorkflow,
+    /severity: CRITICAL,HIGH/,
+    "high vulnerabilities must not block image publication",
   );
   assert.equal((publishWorkflow.match(/exit-code: "1"/g) ?? []).length, 5);
   assert.equal(

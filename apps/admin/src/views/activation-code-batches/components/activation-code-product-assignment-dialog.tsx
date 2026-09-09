@@ -79,7 +79,10 @@ export function ActivationCodeProductAssignmentDialog({
   );
   const mutation = useMutation({
     mutationFn: () =>
-      activationCodesService.assignProduct({ activationCodeId, productId }),
+      activationCodesService.assignProduct({
+        activationCodeIds: [activationCodeId],
+        productId,
+      }),
     onMutate: () => setErrorMessage(null),
     onError: (error) => {
       const message = getLocalizedApiError(error, t, {

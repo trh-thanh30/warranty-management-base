@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { CircleAlert, Loader2, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
@@ -113,6 +113,13 @@ export function ActivationCodePolicySettings() {
               type="number"
               value={expiryMonths}
             />
+            <div className="mt-2 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm leading-5 text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+              <CircleAlert
+                aria-hidden="true"
+                className="mt-0.5 size-4 shrink-0"
+              />
+              <p>{t("expirySyncDescription")}</p>
+            </div>
           </FormField>
           <FormField
             htmlFor="activation-policy-quantity"

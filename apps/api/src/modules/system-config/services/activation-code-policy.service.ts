@@ -43,7 +43,12 @@ export class ActivationCodePolicyService {
       expiryMonths: input.expiryMonths,
       defaultBatchQuantity: input.defaultBatchQuantity,
     };
-    await this.repository.upsert(POLICY_KEY, policy, updatedById);
+    await this.repository.updateActivationCodePolicy(
+      POLICY_KEY,
+      policy,
+      updatedById,
+      policy.expiryMonths,
+    );
     return policy;
   }
 

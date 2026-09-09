@@ -115,10 +115,10 @@ test("filters assignable activation codes by batch", async () => {
   assert.equal(result, response);
 });
 
-test("assigns one activation code to one physical product", async () => {
+test("assigns multiple activation codes to one product", async () => {
   const calls: unknown[] = [];
   const response = {
-    activationCodeId: "code-id",
+    activationCodeIds: ["code-id", "second-code-id"],
     product: {
       id: "product-id",
       productCode: "PRD-01",
@@ -136,15 +136,58 @@ test("assigns one activation code to one physical product", async () => {
 
   const result = await createActivationCodesService(
     http as unknown as ActivationCodesHttpClient,
-  ).assignProduct({ activationCodeId: "code-id", productId: "product-id" });
+  ).assignProduct({
+    activationCodeIds: ["code-id", "second-code-id"],
+    productId: "product-id",
+  });
 
   assert.deepEqual(calls, [
     {
       url: "/activation-code-batches/codes/assign-product",
-      body: { activationCodeId: "code-id", productId: "product-id" },
+      body: {
+        activationCodeIds: ["code-id", "second-code-id"],
+        productId: "product-id",
+      },
     },
   ]);
   assert.equal(result, response);
+});
+
+test("requests automatic assignment for a range in one batch", async () => {
+  const calls: unknown[] = [];
+  const response = {
+    activationCodeIds: ["code-3", "code-4"],
+    product: { id: "product-id" },
+  };
+  const http = {
+    async post(url: string, body?: unknown) {
+      calls.push({ url, body });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  await createActivationCodesService(
+    http as unknown as ActivationCodesHttpClient,
+  ).assignProduct({
+    assignmentMode: "RANGE",
+    batchId: "batch-id",
+    from: 3,
+    productId: "product-id",
+    to: 4,
+  });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/activation-code-batches/codes/assign-product",
+      body: {
+        assignmentMode: "RANGE",
+        batchId: "batch-id",
+        from: 3,
+        productId: "product-id",
+        to: 4,
+      },
+    },
+  ]);
 });
 
 test("removes an unused activation-code assignment", async () => {

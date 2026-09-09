@@ -49,7 +49,6 @@ type ProductsTableProps = {
   items: ProductResponse[];
   onDelete: (product: ProductResponse) => void;
   onRestore: (product: ProductResponse) => void;
-  onAssignCodes: (product: ProductResponse) => void;
   onSortChange: (sortBy: ProductSortBy) => void;
   sortBy?: ProductSortBy;
   sortOrder: "asc" | "desc";
@@ -57,7 +56,6 @@ type ProductsTableProps = {
 
 export function ProductsTable({
   items,
-  onAssignCodes,
   onDelete,
   onRestore,
   onSortChange,
@@ -72,7 +70,6 @@ export function ProductsTable({
         {items.map((product) => (
           <ProductMobileCard
             key={product.id}
-            onAssignCodes={onAssignCodes}
             onDelete={onDelete}
             onRestore={onRestore}
             product={product}
@@ -122,7 +119,6 @@ export function ProductsTable({
             {items.map((product) => (
               <ProductTableRow
                 key={product.id}
-                onAssignCodes={onAssignCodes}
                 onDelete={onDelete}
                 onRestore={onRestore}
                 product={product}
@@ -136,12 +132,10 @@ export function ProductsTable({
 }
 
 function ProductTableRow({
-  onAssignCodes,
   onDelete,
   onRestore,
   product,
 }: {
-  onAssignCodes: ProductsTableProps["onAssignCodes"];
   onDelete: ProductsTableProps["onDelete"];
   onRestore: ProductsTableProps["onRestore"];
   product: ProductResponse;
@@ -171,7 +165,6 @@ function ProductTableRow({
 
       <TableCell className="text-right">
         <ProductActionsMenu
-          onAssignCodes={onAssignCodes}
           onDelete={onDelete}
           onRestore={onRestore}
           product={product}
@@ -182,12 +175,10 @@ function ProductTableRow({
 }
 
 function ProductMobileCard({
-  onAssignCodes,
   onDelete,
   onRestore,
   product,
 }: {
-  onAssignCodes: ProductsTableProps["onAssignCodes"];
   onDelete: ProductsTableProps["onDelete"];
   onRestore: ProductsTableProps["onRestore"];
   product: ProductResponse;
@@ -199,7 +190,6 @@ function ProductMobileCard({
       <div className="flex items-start justify-between gap-3">
         <ProductName product={product} />
         <ProductActionsMenu
-          onAssignCodes={onAssignCodes}
           onDelete={onDelete}
           onRestore={onRestore}
           product={product}
@@ -299,12 +289,10 @@ function ProductMobileField({
 }
 
 function ProductActionsMenu({
-  onAssignCodes,
   onDelete,
   onRestore,
   product,
 }: {
-  onAssignCodes: ProductsTableProps["onAssignCodes"];
   onDelete: ProductsTableProps["onDelete"];
   onRestore: ProductsTableProps["onRestore"];
   product: ProductResponse;
@@ -354,7 +342,12 @@ function ProductActionsMenu({
         {!isDeleted ? (
           <>
             {canView ? (
-              <DropdownMenuItem asChild>
+              <DropdownMenuItem
+                asChild
+                disabled={
+                  product.status !== "ACTIVE" || !product.warrantyDurationMonths
+                }
+              >
                 <Link href={`/products/${product.id}`}>
                   <Eye className="mr-2 size-4" />
                   {t("viewDetail")}
@@ -379,21 +372,10 @@ function ProductActionsMenu({
             ) : null}
             {canAssignCodes &&
             product.categoryRef?.activationCodeEnabled === true ? (
-              <DropdownMenuItem
-                disabled={
-                  product.status !== "ACTIVE" || !product.warrantyDurationMonths
-                }
-                onSelect={() => onAssignCodes(product)}
-              >
-                <KeyRound className="mr-2 size-4" />
-                {t("assignActivationCodes")}
-              </DropdownMenuItem>
-            ) : null}
-            {product.assignedActivationCodes?.length ? (
               <DropdownMenuItem asChild>
                 <Link href={`/products/${product.id}/activation-codes`}>
                   <KeyRound className="mr-2 size-4" />
-                  {t("manageAssignedActivationCodes")}
+                  {t("assignActivationCodes")}
                 </Link>
               </DropdownMenuItem>
             ) : null}

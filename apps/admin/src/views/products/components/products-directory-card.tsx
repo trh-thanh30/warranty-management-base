@@ -42,7 +42,6 @@ type ProductsDirectoryCardProps = {
   isLoading: boolean;
   onCategoryIdChange: (categoryId: string) => void;
   onClearFilters: () => void;
-  onAssignCodes: (product: ProductResponse) => void;
   onDelete: (product: ProductResponse) => void;
   onRestore: (product: ProductResponse) => void;
   onPageChange: (page: number) => void;
@@ -66,7 +65,6 @@ export function ProductsDirectoryCard({
   isLoading,
   onCategoryIdChange,
   onClearFilters,
-  onAssignCodes,
   onDelete,
   onRestore,
   onPageChange,
@@ -112,7 +110,6 @@ export function ProductsDirectoryCard({
           isError={isError}
           isLoading={isLoading}
           onClearFilters={onClearFilters}
-          onAssignCodes={onAssignCodes}
           onDelete={onDelete}
           onRestore={onRestore}
           onPageChange={onPageChange}
@@ -197,7 +194,6 @@ function ProductsDirectoryContent({
   isError,
   isLoading,
   onClearFilters,
-  onAssignCodes,
   onDelete,
   onRestore,
   onPageChange,
@@ -214,7 +210,6 @@ function ProductsDirectoryContent({
   | "isError"
   | "isLoading"
   | "onClearFilters"
-  | "onAssignCodes"
   | "onDelete"
   | "onRestore"
   | "onPageChange"
@@ -251,7 +246,6 @@ function ProductsDirectoryContent({
       <div className="scroll-mt-24" id="products-directory-results">
         <ProductsTable
           items={data.items}
-          onAssignCodes={onAssignCodes}
           onDelete={onDelete}
           onRestore={onRestore}
           onSortChange={onSortChange}

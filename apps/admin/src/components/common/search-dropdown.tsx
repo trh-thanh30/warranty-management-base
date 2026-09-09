@@ -5,6 +5,7 @@ import { Loader2, RefreshCw, Search, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 type SearchDropdownProps<TItem> = {
+  closeOnSelect?: boolean;
   emptyLabel: string;
   errorLabel?: string;
   getItemKey: (item: TItem) => string;
@@ -15,6 +16,7 @@ type SearchDropdownProps<TItem> = {
   isLoading?: boolean;
   isError?: boolean;
   items: TItem[];
+  isItemSelected?: (item: TItem) => boolean;
   loadingLabel: string;
   onItemSelect: (item: TItem) => void;
   onReachEnd?: () => void;
@@ -28,6 +30,7 @@ type SearchDropdownProps<TItem> = {
 };
 
 export function SearchDropdown<TItem>({
+  closeOnSelect = true,
   emptyLabel,
   errorLabel,
   getItemKey,
@@ -38,6 +41,7 @@ export function SearchDropdown<TItem>({
   isLoading,
   isError,
   items,
+  isItemSelected,
   loadingLabel,
   onItemSelect,
   onReachEnd,
@@ -136,22 +140,26 @@ export function SearchDropdown<TItem>({
             {items.map((item) => {
               const disabledReason = getItemDisabledReason?.(item);
               const isDisabled = Boolean(disabledReason);
+              const isSelected = Boolean(isItemSelected?.(item));
 
               return (
                 <button
                   aria-disabled={isDisabled}
+                  aria-selected={isSelected}
                   className={cn(
                     "flex w-full items-start rounded-sm px-3 py-2 text-left text-sm outline-none",
                     isDisabled
                       ? "cursor-not-allowed text-slate-500 opacity-75 dark:text-slate-400"
-                      : "cursor-pointer text-slate-950 hover:bg-slate-100 focus:bg-slate-100 dark:text-slate-50 dark:hover:bg-slate-900 dark:focus:bg-slate-900",
+                      : isSelected
+                        ? "cursor-pointer bg-blue-50 text-slate-950 hover:bg-blue-100 focus:bg-blue-100 dark:bg-blue-950/50 dark:text-slate-50 dark:hover:bg-blue-950 dark:focus:bg-blue-950"
+                        : "cursor-pointer text-slate-950 hover:bg-slate-100 focus:bg-slate-100 dark:text-slate-50 dark:hover:bg-slate-900 dark:focus:bg-slate-900",
                   )}
                   key={getItemKey(item)}
                   onClick={() => {
                     if (isDisabled) return;
 
                     onItemSelect(item);
-                    setOpen(false);
+                    if (closeOnSelect) setOpen(false);
                   }}
                   role="option"
                   title={disabledReason ?? undefined}
