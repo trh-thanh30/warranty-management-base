@@ -7,6 +7,10 @@ import {
   Min,
   MaxLength,
 } from 'class-validator';
+import {
+  MAX_ACTIVATION_CODES_PER_BATCH,
+  MIN_ACTIVATION_CODES_PER_BATCH,
+} from '@repo/shared/constants';
 
 export class CreateActivationCodeBatchDto {
   @IsOptional()
@@ -20,7 +24,7 @@ export class CreateActivationCodeBatchDto {
 
   @IsOptional()
   @IsInt()
-  @Min(50)
-  @Max(1000)
+  @Min(MIN_ACTIVATION_CODES_PER_BATCH)
+  @Max(MAX_ACTIVATION_CODES_PER_BATCH)
   quantity?: number;
 }

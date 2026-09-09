@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { CircleAlert, Loader2, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { PERMISSIONS } from "@repo/shared/constants";
+import {
+  MAX_ACTIVATION_CODES_PER_BATCH,
+  MIN_ACTIVATION_CODES_PER_BATCH,
+  PERMISSIONS,
+} from "@repo/shared/constants";
 import {
   Button,
   Card,
@@ -30,6 +34,8 @@ export function ActivationCodePolicySettings() {
   const queryClient = useQueryClient();
   const [expiryMonths, setExpiryMonths] = useState(6);
   const [defaultBatchQuantity, setDefaultBatchQuantity] = useState(50);
+  const [minBatchQuantity, setMinBatchQuantity] = useState(50);
+  const [maxBatchQuantity, setMaxBatchQuantity] = useState(1000);
   const query = useQuery({
     enabled: canView,
     queryFn: systemConfigService.getActivationCodePolicy,
@@ -40,13 +46,26 @@ export function ActivationCodePolicySettings() {
     if (!query.data) return;
     setExpiryMonths(query.data.expiryMonths);
     setDefaultBatchQuantity(query.data.defaultBatchQuantity);
+    setMinBatchQuantity(query.data.minBatchQuantity);
+    setMaxBatchQuantity(query.data.maxBatchQuantity);
   }, [query.data]);
+
+  const isQuantityRangeValid =
+    Number.isInteger(minBatchQuantity) &&
+    Number.isInteger(defaultBatchQuantity) &&
+    Number.isInteger(maxBatchQuantity) &&
+    minBatchQuantity >= MIN_ACTIVATION_CODES_PER_BATCH &&
+    maxBatchQuantity <= MAX_ACTIVATION_CODES_PER_BATCH &&
+    minBatchQuantity <= defaultBatchQuantity &&
+    defaultBatchQuantity <= maxBatchQuantity;
 
   const mutation = useMutation({
     mutationFn: () =>
       systemConfigService.updateActivationCodePolicy({
         defaultBatchQuantity,
         expiryMonths,
+        minBatchQuantity,
+        maxBatchQuantity,
       }),
     onSuccess: (policy) => {
       queryClient.setQueryData(
@@ -99,48 +118,97 @@ export function ActivationCodePolicySettings() {
           mutation.mutate();
         }}
       >
-        <CardContent className="grid gap-4 md:grid-cols-2">
-          <FormField
-            htmlFor="activation-policy-expiry"
-            label={t("expiryMonths")}
-          >
-            <Input
-              disabled={!canUpdate}
-              id="activation-policy-expiry"
-              max={120}
-              min={1}
-              onChange={(event) => setExpiryMonths(Number(event.target.value))}
-              type="number"
-              value={expiryMonths}
-            />
-            <div className="mt-2 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm leading-5 text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
-              <CircleAlert
-                aria-hidden="true"
-                className="mt-0.5 size-4 shrink-0"
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <FormField
+              htmlFor="activation-policy-expiry"
+              label={t("expiryMonths")}
+            >
+              <Input
+                disabled={!canUpdate}
+                id="activation-policy-expiry"
+                max={120}
+                min={1}
+                onChange={(event) =>
+                  setExpiryMonths(Number(event.target.value))
+                }
+                type="number"
+                value={expiryMonths}
               />
-              <p>{t("expirySyncDescription")}</p>
-            </div>
-          </FormField>
-          <FormField
-            htmlFor="activation-policy-quantity"
-            label={t("defaultBatchQuantity")}
-          >
-            <Input
-              disabled={!canUpdate}
-              id="activation-policy-quantity"
-              max={1000}
-              min={50}
-              onChange={(event) =>
-                setDefaultBatchQuantity(Number(event.target.value))
-              }
-              type="number"
-              value={defaultBatchQuantity}
+            </FormField>
+            <FormField
+              htmlFor="activation-policy-quantity"
+              label={t("defaultBatchQuantity")}
+            >
+              <Input
+                aria-invalid={!isQuantityRangeValid}
+                disabled={!canUpdate}
+                id="activation-policy-quantity"
+                max={MAX_ACTIVATION_CODES_PER_BATCH}
+                min={MIN_ACTIVATION_CODES_PER_BATCH}
+                onChange={(event) =>
+                  setDefaultBatchQuantity(Number(event.target.value))
+                }
+                type="number"
+                value={defaultBatchQuantity}
+              />
+            </FormField>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <FormField
+              htmlFor="activation-policy-min-quantity"
+              label={t("minBatchQuantity")}
+            >
+              <Input
+                aria-invalid={!isQuantityRangeValid}
+                disabled={!canUpdate}
+                id="activation-policy-min-quantity"
+                max={MAX_ACTIVATION_CODES_PER_BATCH}
+                min={MIN_ACTIVATION_CODES_PER_BATCH}
+                onChange={(event) =>
+                  setMinBatchQuantity(Number(event.target.value))
+                }
+                type="number"
+                value={minBatchQuantity}
+              />
+            </FormField>
+            <FormField
+              htmlFor="activation-policy-max-quantity"
+              label={t("maxBatchQuantity")}
+            >
+              <Input
+                aria-invalid={!isQuantityRangeValid}
+                disabled={!canUpdate}
+                id="activation-policy-max-quantity"
+                max={MAX_ACTIVATION_CODES_PER_BATCH}
+                min={MIN_ACTIVATION_CODES_PER_BATCH}
+                onChange={(event) =>
+                  setMaxBatchQuantity(Number(event.target.value))
+                }
+                type="number"
+                value={maxBatchQuantity}
+              />
+            </FormField>
+          </div>
+          {!isQuantityRangeValid ? (
+            <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+              {t("quantityRangeError")}
+            </p>
+          ) : null}
+          <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm leading-5 text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+            <CircleAlert
+              aria-hidden="true"
+              className="mt-0.5 size-4 shrink-0"
             />
-          </FormField>
+            <p>{t("expirySyncDescription")}</p>
+          </div>
         </CardContent>
         {canUpdate ? (
           <div className="flex justify-end border-t border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-900/10">
-            <Button disabled={mutation.isPending} type="submit">
+            <Button
+              disabled={mutation.isPending || !isQuantityRangeValid}
+              type="submit"
+            >
               {mutation.isPending ? (
                 <Loader2 className="size-4 animate-spin" />
               ) : null}
