@@ -7,7 +7,6 @@ import {
   Pencil,
   MoreHorizontal,
 } from "lucide-react";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
@@ -22,7 +21,6 @@ import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
-import { AssignActivationCodesDialog } from "./components/assign-activation-codes-dialog";
 import {
   ProductDetailCard,
   ProductDetailSkeleton,
@@ -40,7 +38,6 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
     mode: "detail",
     productId,
   });
-  const [assignCodesOpen, setAssignCodesOpen] = useState(false);
   const canEdit = hasPermission(PERMISSIONS.PRODUCT_UPDATE);
   const canCreate = hasPermission(PERMISSIONS.PRODUCT_CREATE);
   const canAssignCodes = hasPermission(
@@ -71,15 +68,17 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
                 {canAssignCodes &&
                 product?.categoryRef?.activationCodeEnabled === true ? (
                   <DropdownMenuItem
+                    asChild
                     disabled={
                       !product ||
                       product.status !== "ACTIVE" ||
                       !product.warrantyDurationMonths
                     }
-                    onSelect={() => setAssignCodesOpen(true)}
                   >
-                    <KeyRound className="mr-2 size-4" />
-                    {t("assignActivationCodes")}
+                    <Link href={`/products/${productId}/activation-codes`}>
+                      <KeyRound className="mr-2 size-4" />
+                      {t("assignActivationCodes")}
+                    </Link>
                   </DropdownMenuItem>
                 ) : null}
                 {canEdit ? (
@@ -87,14 +86,6 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
                     <Link href={`/products/${productId}/edit`}>
                       <Pencil className="mr-2 size-4" />
                       {t("edit")}
-                    </Link>
-                  </DropdownMenuItem>
-                ) : null}
-                {product?.assignedActivationCodes?.length ? (
-                  <DropdownMenuItem asChild>
-                    <Link href={`/products/${productId}/activation-codes`}>
-                      <KeyRound className="mr-2 size-4" />
-                      {t("manageAssignedActivationCodes")}
                     </Link>
                   </DropdownMenuItem>
                 ) : null}
@@ -135,12 +126,6 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
         ) : (
           <ProductDetailCard product={product} />
         )}
-
-        <AssignActivationCodesDialog
-          onOpenChange={setAssignCodesOpen}
-          open={assignCodesOpen}
-          product={product}
-        />
       </FormPageShell>
     </PermissionGuard>
   );

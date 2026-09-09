@@ -32,12 +32,16 @@ test("product detail actions are grouped in an accessible dropdown", async () =>
     "utf8",
   );
 
-  assert.equal(source.match(/<DropdownMenuItem/g)?.length ?? 0, 4);
+  assert.equal(source.match(/<DropdownMenuItem/g)?.length ?? 0, 3);
   assert.match(source, /<DropdownMenuTrigger asChild>/);
   assert.match(source, /aria-label=\{t\("actions"\)\}/);
   assert.match(source, /descriptionAccessory={/);
   assert.match(source, /PERMISSIONS\.ACTIVATION_CODE_ASSIGN_PRODUCT/);
-  assert.match(source, /<AssignActivationCodesDialog/);
+  assert.match(
+    source,
+    /href=\{`\/products\/\$\{productId\}\/activation-codes`\}/,
+  );
+  assert.doesNotMatch(source, /<AssignActivationCodesDialog/);
   assert.match(source, /t\("assignActivationCodes"\)/);
 });
 

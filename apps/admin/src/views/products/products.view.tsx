@@ -4,13 +4,10 @@ import { ExcelImportDialog, ImportExportMenu } from "@/src/components/common";
 import { PageHeader } from "@/src/components/common/page-header";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
-import type { ProductResponse } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { Badge, Button } from "@repo/ui";
 import { PackagePlus } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
-import { AssignActivationCodesDialog } from "./components/assign-activation-codes-dialog";
 import { DeleteProductDialog } from "./components/delete-product-dialog";
 import { ProductImportPreviewTable } from "./components/product-import-preview-table";
 import { ProductsDirectoryCard } from "./components/products-directory-card";
@@ -19,8 +16,6 @@ import { useProductsDirectory } from "./hooks/use-products-directory";
 
 export function ProductsView() {
   const t = useTranslations("Products");
-  const [productToAssignCodes, setProductToAssignCodes] =
-    useState<ProductResponse | null>(null);
   const {
     canCreateProducts,
     categories,
@@ -111,7 +106,6 @@ export function ProductsView() {
           isError={productsQuery.isError}
           isLoading={productsQuery.isLoading}
           onCategoryIdChange={updateCategoryId}
-          onAssignCodes={setProductToAssignCodes}
           onClearFilters={clearFilters}
           onDelete={openDelete}
           onRestore={openRestore}
@@ -151,14 +145,6 @@ export function ProductsView() {
           }}
           open={Boolean(productToRestore)}
           product={productToRestore}
-        />
-
-        <AssignActivationCodesDialog
-          onOpenChange={(open) => {
-            if (!open) setProductToAssignCodes(null);
-          }}
-          open={Boolean(productToAssignCodes)}
-          product={productToAssignCodes}
         />
 
         <ExcelImportDialog
