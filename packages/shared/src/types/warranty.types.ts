@@ -199,6 +199,7 @@ export type TransferWarrantyOwnerBody = {
 };
 
 export type ManualWarrantyActivationCustomerInput = {
+  customerId?: string;
   fullName: string;
   phone: string;
   email: string;

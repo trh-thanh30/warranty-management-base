@@ -348,7 +348,7 @@ model Customer {
   user_id       String?   @unique @db.Uuid
   customer_code String    @unique
   full_name     String
-  phone         String?   @unique
+  phone         String?
   email         String?
   address       String?
   birthdate     DateTime?

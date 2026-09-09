@@ -7,26 +7,35 @@ import type {
   CustomerSummary,
   DealerResponse,
   ProductResponse,
+  WarrantyActivationRequestSummary,
 } from "@repo/shared";
 import { useTranslations } from "next-intl";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useInfiniteQuery, useQueries } from "@tanstack/react-query";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, type UseFormSetValue } from "react-hook-form";
 import {
   useVietnamProvinces,
   useVietnamWards,
 } from "@/src/hooks/use-locations";
 import { useToast } from "@/src/hooks/use-toast";
-import { useCreateAdminWarrantyActivationRequest } from "@/src/hooks/use-warranty-activation-requests";
+import {
+  useCreateAdminWarrantyActivationRequest,
+  useUpdateAdminWarrantyActivationRequest,
+} from "@/src/hooks/use-warranty-activation-requests";
 import { parseVietnamAddress } from "@/src/utils";
-import { useInfiniteDealers } from "@/src/hooks/use-dealers";
+import { useDealer, useInfiniteDealers } from "@/src/hooks/use-dealers";
 import {
   useCategories,
   useCategoryActivationFields,
 } from "../../categories/hooks/use-categories";
-import { useInfiniteCustomers } from "../../customers/hooks/use-customers";
+import {
+  useCustomer,
+  useInfiniteCustomers,
+} from "../../customers/hooks/use-customers";
 import { useInfiniteActivationProductOptions } from "../../products/hooks/use-products";
 import { useProduct } from "../../products/hooks/use-products";
+import { productKeys } from "../../products/hooks/use-products";
+import { productsService } from "@/src/services/products/products.service";
 import { activationCodesService } from "@/src/services/activation-codes/activation-codes.service";
 import type { AvailableActivationCode } from "@/src/services/activation-codes/activation-code-batches.types";
 import {
@@ -79,18 +88,27 @@ const DEFAULT_VALUES: WarrantyActivationRequestCreateFormValues = {
 };
 
 export function useCreateWarrantyActivationRequestForm({
-  onCreated,
+  onSaved,
   activationCodeId,
   assignedProductId,
+  initialRequest,
 }: {
-  onCreated: () => void;
+  onSaved: () => void;
   activationCodeId?: string;
   assignedProductId?: string;
+  initialRequest?: WarrantyActivationRequestSummary;
 }) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const tApiErrors = useTranslations("ApiErrors");
   const toast = useToast();
   const createMutation = useCreateAdminWarrantyActivationRequest();
+  const updateMutation = useUpdateAdminWarrantyActivationRequest(
+    initialRequest?.id ?? null,
+  );
+  const hasHydratedEditRequest = useRef(false);
+  const [isHydratingEditRequest, setIsHydratingEditRequest] = useState(
+    Boolean(initialRequest),
+  );
   const [customerSearch, setCustomerSearch] = useState("");
   const [productSearchState, setProductSearchState] = useState({
     categoryId: "",
@@ -107,9 +125,45 @@ export function useCreateWarrantyActivationRequestForm({
     useState<ProductResponse | null>(null);
   const [selectedActivationCode, setSelectedActivationCode] =
     useState<AvailableActivationCode | null>(null);
+  const [selectedItemActivationCodes, setSelectedItemActivationCodes] =
+    useState<Record<string, AvailableActivationCode>>({});
   const assignedProductQuery = useProduct(assignedProductId ?? null, {
     enabled: Boolean(assignedProductId),
   });
+  const initialCustomerQuery = useCustomer(initialRequest?.customerId ?? null, {
+    enabled: Boolean(initialRequest?.customerId),
+  });
+  const initialDealerQuery = useDealer(initialRequest?.dealerId ?? null, {
+    enabled: Boolean(initialRequest?.dealerId),
+  });
+  const initialProductIds = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          [
+            initialRequest?.productId,
+            ...(initialRequest?.items ?? []).map((item) => item.productId),
+          ].filter((id): id is string => Boolean(id)),
+        ),
+      ),
+    [initialRequest],
+  );
+  const initialProductQueries = useQueries({
+    queries: initialProductIds.map((productId) => ({
+      enabled: Boolean(initialRequest),
+      queryFn: () => productsService.getProduct(productId),
+      queryKey: productKeys.detail(productId),
+    })),
+  });
+  const isEditHydrationError = Boolean(
+    initialRequest &&
+    ((initialRequest.customerId && initialCustomerQuery.isError) ||
+      (initialRequest.dealerId && initialDealerQuery.isError) ||
+      initialProductQueries.some((query) => query.isError)),
+  );
+  const showItemActivationCodeSelectors = Boolean(
+    initialRequest?.items?.some((item) => item.activationCodeId),
+  );
   const [selectedActivationProducts, setSelectedActivationProducts] = useState<
     Record<string, ProductResponse>
   >({});
@@ -280,6 +334,133 @@ export function useCreateWarrantyActivationRequestForm({
   }, [assignedProductQuery.data, form.setValue]);
 
   useEffect(() => {
+    if (!initialRequest || hasHydratedEditRequest.current) return;
+    if (initialRequest.customerId && !initialCustomerQuery.data) return;
+    if (initialRequest.dealerId && !initialDealerQuery.data) return;
+    if (
+      initialProductIds.length > 0 &&
+      initialProductQueries.some((query) => !query.data)
+    ) {
+      return;
+    }
+
+    const productsById = new Map(
+      initialProductQueries
+        .map((query) => query.data)
+        .filter((product): product is ProductResponse => Boolean(product))
+        .map((product) => [product.id, product]),
+    );
+    const metadata = initialRequest.metadata ?? {};
+    const activationInputValues = toStringRecord(
+      metadata.activationInputValues,
+    );
+    const filmItems = toStringRecord(metadata.filmItems);
+    const primaryProduct = initialRequest.productId
+      ? (productsById.get(initialRequest.productId) ?? null)
+      : (productsById.values().next().value ?? null);
+    const activationProducts = Object.fromEntries(
+      (initialRequest.items ?? []).flatMap((item) => {
+        const product = productsById.get(item.productId);
+        return product ? [[item.positionKey, product] as const] : [];
+      }),
+    );
+    const requestActivationCode = initialRequest.activationCode;
+    const itemActivationCodes = Object.fromEntries(
+      (initialRequest.items ?? []).flatMap((item) =>
+        item.activationCode
+          ? [
+              [
+                item.positionKey,
+                {
+                  assignedProduct: null,
+                  batchCode: "",
+                  batchName: "",
+                  expiresAt: "",
+                  id: item.activationCode.id,
+                  maskedCode:
+                    item.activationCode.code ?? item.activationCode.id,
+                  productName: item.productName,
+                  productSku: item.productCode,
+                  selectable: true,
+                  status: item.activationCode.status,
+                } satisfies AvailableActivationCode,
+              ] as const,
+            ]
+          : [],
+      ),
+    );
+
+    form.reset({
+      ...DEFAULT_VALUES,
+      activationCodeId: requestActivationCode?.id ?? "",
+      activationProductIds: Object.fromEntries(
+        Object.entries(activationProducts).map(([key, product]) => [
+          key,
+          product.id,
+        ]),
+      ),
+      addressDetail: initialRequest.addressDetail,
+      categoryId: initialRequest.categoryId ?? "",
+      categoryInputValues: activationInputValues,
+      customerBirthdate: initialRequest.customerBirthdate?.slice(0, 10) ?? "",
+      customerEmail: initialRequest.customerEmail ?? "",
+      customerId: initialRequest.customerId ?? "",
+      customerName: initialRequest.customerName,
+      customerPhone: initialRequest.customerPhone,
+      dealerAddress: initialRequest.dealer?.address ?? "",
+      dealerDistrict: initialRequest.dealer?.district ?? "",
+      dealerId: initialRequest.dealerId ?? "",
+      dealerName: initialRequest.dealer?.name ?? "",
+      dealerPhone: initialRequest.dealer?.phone ?? "",
+      dealerProvince: initialRequest.dealer?.province ?? "",
+      filmFrontLeftSide: filmItems.frontLeftSide ?? "",
+      filmFrontRightSide: filmItems.frontRightSide ?? "",
+      filmRearGlass: filmItems.rearGlass ?? "",
+      filmRearLeftSide: filmItems.rearLeftSide ?? "",
+      filmRearRightSide: filmItems.rearRightSide ?? "",
+      filmSunroof: filmItems.sunroof ?? "",
+      filmWindshield: filmItems.windshield ?? "",
+      note: initialRequest.note ?? "",
+      productId: primaryProduct?.id ?? initialRequest.productId ?? "",
+      productName: initialRequest.productName ?? "",
+      provinceCode: initialRequest.provinceCode,
+      salesName: initialRequest.dealer?.salesName ?? "",
+      vehicleModel: initialRequest.vehicleModel ?? "",
+      vehiclePlate: initialRequest.vehiclePlate ?? "",
+      wardCode: initialRequest.wardCode,
+      warrantyCode: initialRequest.warrantyCode,
+    });
+    setSelectedCustomer(initialCustomerQuery.data ?? null);
+    setSelectedDealer(initialDealerQuery.data ?? null);
+    setSelectedProduct(primaryProduct);
+    setSelectedActivationProducts(activationProducts);
+    setSelectedItemActivationCodes(itemActivationCodes);
+    if (requestActivationCode) {
+      setSelectedActivationCode({
+        assignedProduct: null,
+        batchCode: "",
+        batchName: "",
+        expiresAt: "",
+        id: requestActivationCode.id,
+        maskedCode: requestActivationCode.code ?? requestActivationCode.id,
+        productName: initialRequest.productName ?? "",
+        productSku: "",
+        selectable: true,
+        status: requestActivationCode.status,
+      });
+    }
+    hasHydratedEditRequest.current = true;
+    setIsHydratingEditRequest(false);
+  }, [
+    form,
+    initialCustomerQuery.data,
+    initialDealerQuery.data,
+    initialProductIds.length,
+    initialProductQueries,
+    initialRequest,
+  ]);
+
+  useEffect(() => {
     if (!pendingWardName || wards.length === 0) return;
 
     const ward = wards.find((item) => pendingWardName.includes(item.name));
@@ -406,6 +587,7 @@ export function useCreateWarrantyActivationRequestForm({
       categoryInputValues: {},
     });
     setSelectedActivationProducts({});
+    setSelectedItemActivationCodes({});
     clearProduct();
   }
 
@@ -448,6 +630,10 @@ export function useCreateWarrantyActivationRequestForm({
     );
     if (isSelectedElsewhere) return;
 
+    if (selectedActivationProducts[positionKey]?.id !== product.id) {
+      clearItemActivationCode(positionKey);
+    }
+
     setSelectedActivationProducts((current) => ({
       ...current,
       [positionKey]: product,
@@ -467,6 +653,25 @@ export function useCreateWarrantyActivationRequestForm({
     form.setValue(`activationProductIds.${positionKey}`, "", {
       shouldDirty: true,
       shouldValidate: true,
+    });
+    clearItemActivationCode(positionKey);
+  }
+
+  function selectItemActivationCode(
+    positionKey: string,
+    code: AvailableActivationCode,
+  ) {
+    setSelectedItemActivationCodes((current) => ({
+      ...current,
+      [positionKey]: code,
+    }));
+  }
+
+  function clearItemActivationCode(positionKey: string) {
+    setSelectedItemActivationCodes((current) => {
+      const next = { ...current };
+      delete next[positionKey];
+      return next;
     });
   }
 
@@ -504,8 +709,15 @@ export function useCreateWarrantyActivationRequestForm({
   }
 
   async function submit(values: WarrantyActivationRequestCreateFormValues) {
+    const selectedActivationCodeIds = Object.fromEntries(
+      Object.entries(selectedItemActivationCodes).map(
+        ([positionKey, code]) => [positionKey, code.id] as const,
+      ),
+    );
     const hasActivationCode = Boolean(
-      values.activationCodeId || activationCodeId,
+      values.activationCodeId ||
+      activationCodeId ||
+      Object.keys(selectedActivationCodeIds).length > 0,
     );
 
     if (requiresActivationCode && !hasActivationCode) {
@@ -564,18 +776,24 @@ export function useCreateWarrantyActivationRequestForm({
     }
 
     try {
-      await createMutation.mutateAsync(
-        toAdminActivationRequestBody({
-          activationFields,
-          activationProducts: selectedActivationProducts,
-          product: selectedProduct,
-          provinces,
-          values,
-          wards,
-        }),
-      );
-      toast.success(t("created"));
-      onCreated();
+      const body = toAdminActivationRequestBody({
+        activationFields,
+        activationCodeIdsByPosition: selectedActivationCodeIds,
+        activationProducts: selectedActivationProducts,
+        existingMetadata: initialRequest?.metadata,
+        product: selectedProduct,
+        provinces,
+        values,
+        wards,
+      });
+      if (initialRequest) {
+        await updateMutation.mutateAsync(body);
+        toast.success(t("updated"));
+      } else {
+        await createMutation.mutateAsync(body);
+        toast.success(t("created"));
+      }
+      onSaved();
     } catch (error) {
       const message = resolveActivationRequestCreateError(error, t, tApiErrors);
       form.setError("root", { message });
@@ -600,9 +818,14 @@ export function useCreateWarrantyActivationRequestForm({
     dealers,
     dealersQuery,
     errors: form.formState.errors,
-    isSaving: form.formState.isSubmitting || createMutation.isPending,
+    isSaving:
+      form.formState.isSubmitting ||
+      createMutation.isPending ||
+      updateMutation.isPending,
+    isHydratingEditRequest,
+    isEditHydrationError,
     loadMoreProducts,
-    mutationIsPending: createMutation.isPending,
+    mutationIsPending: createMutation.isPending || updateMutation.isPending,
     onSubmit: form.handleSubmit(submit),
     productSearch: productSearchState.value,
     products,
@@ -614,6 +837,7 @@ export function useCreateWarrantyActivationRequestForm({
     selectedDealer,
     selectedProduct,
     selectedActivationProducts,
+    selectedItemActivationCodes,
     activationCodesQuery,
     availableActivationCodes,
     selectedActivationCode,
@@ -625,14 +849,38 @@ export function useCreateWarrantyActivationRequestForm({
     selectProduct,
     selectActivationCode,
     selectActivationProduct,
+    selectItemActivationCode,
     clearProduct,
     clearActivationCode,
     clearActivationProduct,
+    clearItemActivationCode,
     setCustomerSearch,
     setDealerSearch,
     setProductSearch,
     usesProductSelectors,
+    showItemActivationCodeSelectors,
+    retryEditHydration: async () => {
+      const retries: Promise<unknown>[] = [];
+      if (initialCustomerQuery.isError)
+        retries.push(initialCustomerQuery.refetch());
+      if (initialDealerQuery.isError)
+        retries.push(initialDealerQuery.refetch());
+      for (const query of initialProductQueries) {
+        if (query.isError) retries.push(query.refetch());
+      }
+      await Promise.all(retries);
+    },
   };
+}
+
+function toStringRecord(value: unknown): Record<string, string> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+
+  return Object.fromEntries(
+    Object.entries(value).filter(
+      (entry): entry is [string, string] => typeof entry[1] === "string",
+    ),
+  );
 }
 
 function setFormValues(

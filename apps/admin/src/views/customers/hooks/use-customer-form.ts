@@ -113,8 +113,6 @@ function handleCustomerSaveError(
 
   const messages = {
     "Customer code already exists": ["customerCode", "duplicateCustomerCode"],
-    "Customer phone already exists": ["phone", "duplicatePhone"],
-    "Customer email already exists": ["email", "duplicateEmail"],
   } as const;
   const match = messages[error.message as keyof typeof messages];
   if (!match) return null;

@@ -4,6 +4,7 @@ import type {
   ListWarrantyActivationRequestsQuery,
   PaginatedResponse,
   ReviewWarrantyActivationRequestBody,
+  UpdateAdminWarrantyActivationRequestBody,
   WarrantyActivationRequestSummary,
 } from "@repo/shared";
 import { unwrap, unwrapBlob } from "../service.utils.ts";
@@ -73,6 +74,18 @@ export function createWarrantyActivationRequestsService(
       return unwrap(
         await http.patch<WarrantyActivationRequestSummary>(
           `/warranty-activation-requests/${requestId}/review`,
+          body,
+        ),
+      );
+    },
+
+    async updateAdminWarrantyActivationRequest(
+      requestId: string,
+      body: UpdateAdminWarrantyActivationRequestBody,
+    ): Promise<WarrantyActivationRequestSummary> {
+      return unwrap(
+        await http.patch<WarrantyActivationRequestSummary>(
+          `/warranty-activation-requests/${requestId}`,
           body,
         ),
       );

@@ -235,11 +235,11 @@ function WarrantySummaryHeader({ warranty }: WarrantyDetailCardProps) {
         />
         <SummaryMetric
           label={t("startDate")}
-          value={formatDate(warranty.startDate, { locale })}
+          value={formatDate(warranty.startDate, { locale, showTime: true })}
         />
         <SummaryMetric
           label={t("endDate")}
-          value={formatDate(warranty.endDate, { locale })}
+          value={formatDate(warranty.endDate, { locale, showTime: true })}
         />
         <div className="flex items-center gap-2 sm:hidden">
           <span className="text-slate-500 dark:text-slate-400">

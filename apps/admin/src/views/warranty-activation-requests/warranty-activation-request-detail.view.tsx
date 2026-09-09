@@ -1,6 +1,7 @@
 "use client";
 
 import { FormPageShell } from "@/src/components/common/form-page-shell";
+import { Link } from "@/src/i18n/navigation";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { usePermissions } from "@/src/hooks/use-permissions";
@@ -19,10 +20,19 @@ import {
   FileSearch,
   FileText,
   Loader2,
+  MoreHorizontal,
+  Pencil,
   RotateCcw,
   Send,
   XCircle,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@repo/ui";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ReviewWarrantyActivationRequestDialog } from "./components/review-warranty-activation-request-dialog";
@@ -49,12 +59,17 @@ export function WarrantyActivationRequestDetailView({
     useResendWarrantyActivationRequestCertificateEmail(requestId);
   const actions = useWarrantyActivationRequestActions();
   const request = requestQuery.data;
+  const activationCodeReviewable =
+    !request?.activationCode ||
+    request.activationCode.status === "AVAILABLE" ||
+    request.activationCode.status === "PENDING_APPROVAL";
   const canReview =
     Boolean(request) &&
     (request?.status === "PENDING" || request?.status === "APPROVED") &&
-    (!request?.activationCode ||
-      request.activationCode.status === "AVAILABLE") &&
+    activationCodeReviewable &&
     hasPermission(PERMISSIONS.WARRANTY_UPDATE);
+  const canEdit =
+    request?.status === "PENDING" && hasPermission(PERMISSIONS.WARRANTY_UPDATE);
   const approveLabel =
     request?.status === "APPROVED" ? t("activate") : t("approve");
   const canResendCertificateEmail =
@@ -78,7 +93,7 @@ export function WarrantyActivationRequestDetailView({
       !request.certificate.storageKey) &&
     hasPermission(PERMISSIONS.WARRANTY_UPDATE);
   const activationCodeBlocked = Boolean(
-    request?.activationCode && request.activationCode.status !== "AVAILABLE",
+    request?.activationCode && !activationCodeReviewable,
   );
 
   async function resendCertificateEmail() {
@@ -121,7 +136,8 @@ export function WarrantyActivationRequestDetailView({
         backLabel={t("backToDirectory")}
         description={t("detailDescription")}
         descriptionAccessory={
-          (canReview ||
+          (canEdit ||
+            canReview ||
             canResendCertificateEmail ||
             canUseCertificate ||
             canRetryCertificate) &&
@@ -199,26 +215,48 @@ export function WarrantyActivationRequestDetailView({
                     : t("resendCertificateEmail")}
                 </Button>
               ) : null}
-              {request.status === "PENDING" ? (
-                <Button
-                  className="w-full sm:w-auto"
-                  onClick={() => actions.openAction(request, "reject")}
-                  type="button"
-                  variant="destructive"
-                >
-                  <XCircle className="size-4" />
-                  {t("reject")}
-                </Button>
-              ) : null}
-              {canReview ? (
-                <Button
-                  className="w-full sm:w-auto"
-                  onClick={() => actions.openAction(request, "approve")}
-                  type="button"
-                >
-                  <CheckCircle2 className="size-4" />
-                  {approveLabel}
-                </Button>
+              {canEdit || canReview ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      className="w-full sm:w-auto"
+                      type="button"
+                      variant="secondary"
+                    >
+                      <MoreHorizontal className="size-4" />
+                      {t("actions")}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {canEdit ? (
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href={`/warranty-activation-requests/${request.id}/edit`}
+                        >
+                          <Pencil className="mr-2 size-4" />
+                          {t("edit")}
+                        </Link>
+                      </DropdownMenuItem>
+                    ) : null}
+                    {canEdit && canReview ? <DropdownMenuSeparator /> : null}
+                    {canReview ? (
+                      <DropdownMenuItem
+                        onSelect={() => actions.openAction(request, "approve")}
+                      >
+                        <CheckCircle2 className="mr-2 size-4" />
+                        {approveLabel}
+                      </DropdownMenuItem>
+                    ) : null}
+                    {request.status === "PENDING" && canReview ? (
+                      <DropdownMenuItem
+                        onSelect={() => actions.openAction(request, "reject")}
+                      >
+                        <XCircle className="mr-2 size-4" />
+                        {t("reject")}
+                      </DropdownMenuItem>
+                    ) : null}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : null}
             </div>
           ) : null

@@ -56,3 +56,15 @@ export type CreateWarrantyActivationRequestOptions = {
     birthdate?: Date;
   };
 };
+
+export type UpdateWarrantyActivationRequestContext = {
+  id: string;
+  requestCode: string;
+  warrantyCode: string;
+  items: Array<{
+    activationCodeId: string | null;
+    positionKey: string;
+    productId: string;
+    warrantyCode: string | null;
+  }>;
+};

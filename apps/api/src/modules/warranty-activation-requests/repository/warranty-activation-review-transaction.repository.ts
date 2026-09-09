@@ -38,7 +38,17 @@ export class WarrantyActivationReviewTransactionRepository {
   }
 
   findCustomerByPhone(phone: string) {
-    return this.tx.customer.findUnique({ where: { phone } });
+    return this.tx.customer.findFirst({
+      where: { phone },
+      orderBy: { created_at: 'desc' },
+    });
+  }
+
+  findCustomersByPhone(phone: string) {
+    return this.tx.customer.findMany({
+      where: { phone },
+      orderBy: { created_at: 'desc' },
+    });
   }
 
   findCustomerByEmail(email: string) {

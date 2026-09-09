@@ -18,9 +18,11 @@ import {
 describe('WarrantyActivationRequestsUseCases', () => {
   const repository = {
     create: jest.fn(),
+    updatePending: jest.fn(),
     findById: jest.fn(),
     findLastRequestCode: jest.fn(),
     findOpenByProductId: jest.fn(),
+    findOpenByProductIds: jest.fn(),
     review: jest.fn(),
     withReviewTransaction: jest.fn(),
   };
@@ -457,6 +459,100 @@ describe('WarrantyActivationRequestsUseCases', () => {
         ],
       }),
     );
+  });
+
+  it('preserves existing warranty codes while editing unchanged activation items', async () => {
+    repository.findOpenByProductId.mockResolvedValue(null);
+    productsRepository.findActivationRequestTargetById.mockResolvedValue({
+      ...baseDraftProduct,
+      id: 'product-a',
+      product_code: 'CODE-product-a',
+      warranty: null,
+      warranty_duration_months: 24,
+    });
+    const itemValidator = {
+      validate: jest.fn().mockResolvedValue([
+        {
+          ...createValidatedItem('item-a', 'product-a'),
+          activationCodeId: 'activation-code-a',
+          warrantyCode: null,
+          warrantyId: null,
+        },
+      ]),
+    };
+    repository.updatePending.mockImplementation((_id, data) =>
+      Promise.resolve({
+        ...baseRequest,
+        request_code: data.requestCode,
+        warranty_code: data.warrantyCode,
+        product_id: data.productId,
+        items: data.items.map((item) => ({
+          ...createPersistedItem(item.positionKey, item.productId),
+          activation_code_id: item.activationCodeId,
+          warranty_code: item.warrantyCode,
+          warranty_id: null,
+          warranty: null,
+        })),
+      }),
+    );
+    const useCase = new CreateWarrantyActivationRequestUseCase(
+      repository as never,
+      new GenerateWarrantyActivationRequestCodeUseCase(repository as never),
+      productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
+      itemValidator as never,
+    );
+
+    await useCase.execute(
+      {
+        addressDetail: '1 Nguyen Trai',
+        categoryId: 'category-id',
+        customerName: 'Nguyen Van A',
+        customerPhone: '0901234567',
+        items: [
+          {
+            activationCodeId: 'activation-code-a',
+            positionKey: 'item-a',
+            productId: 'product-a',
+          },
+        ],
+        provinceCode: '79',
+        provinceName: 'TP Ho Chi Minh',
+        wardCode: '26734',
+        wardName: 'Phuong Ben Thanh',
+      },
+      {
+        updateRequest: {
+          id: 'request-id',
+          requestCode: 'WAR-EXISTING',
+          warrantyCode: 'WM-EXISTING',
+          items: [
+            {
+              activationCodeId: 'activation-code-a',
+              positionKey: 'item-a',
+              productId: 'product-a',
+              warrantyCode: 'WM-ITEM-EXISTING',
+            },
+          ],
+        },
+      },
+    );
+
+    expect(generateWarrantyCodeUseCase.execute).not.toHaveBeenCalled();
+    expect(repository.updatePending).toHaveBeenCalledWith(
+      'request-id',
+      expect.objectContaining({
+        requestCode: 'WAR-EXISTING',
+        warrantyCode: 'WM-ITEM-EXISTING',
+        items: [expect.objectContaining({ warrantyCode: 'WM-ITEM-EXISTING' })],
+      }),
+      undefined,
+    );
+    expect(
+      warrantyActivationRequestNotificationService.requestCreated,
+    ).not.toHaveBeenCalled();
   });
 
   it('regenerates all reserved item codes when a concurrent reservation wins', async () => {

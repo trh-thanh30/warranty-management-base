@@ -10,6 +10,7 @@ import { ActivationCodeStatusBadge } from "@/src/components/activation-code-stat
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { formatCustomerSearchOption } from "@/src/utils";
 import { PERMISSIONS } from "@repo/shared/constants";
+import type { WarrantyActivationRequestSummary } from "@repo/shared";
 import {
   Button,
   Card,
@@ -48,18 +49,20 @@ import { SelectedProductSummaryCard } from "./selected-product-summary-card";
 
 type CreateWarrantyActivationRequestFormCardProps = {
   onCancel: () => void;
-  onCreated: () => void;
+  onSaved: () => void;
   activationCodeId?: string;
   activationCode?: string;
   assignedProductId?: string;
+  initialRequest?: WarrantyActivationRequestSummary;
 };
 
 export function CreateWarrantyActivationRequestFormCard({
   onCancel,
-  onCreated,
+  onSaved,
   activationCodeId,
   activationCode,
   assignedProductId,
+  initialRequest,
 }: CreateWarrantyActivationRequestFormCardProps) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const { hasPermission } = usePermissions();
@@ -96,6 +99,8 @@ export function CreateWarrantyActivationRequestFormCard({
     clearProduct,
     errors,
     isSaving,
+    isHydratingEditRequest,
+    isEditHydrationError,
     loadMoreProducts,
     mutationIsPending,
     onSubmit,
@@ -109,6 +114,7 @@ export function CreateWarrantyActivationRequestFormCard({
     selectedDealer,
     selectedProduct,
     selectedActivationProducts,
+    selectedItemActivationCodes,
     selectedActivationCode,
     confirmCategoryChange,
     selectCategory,
@@ -117,14 +123,19 @@ export function CreateWarrantyActivationRequestFormCard({
     selectProduct,
     selectActivationCode,
     selectActivationProduct,
+    selectItemActivationCode,
     setCustomerSearch,
     setDealerSearch,
     setProductSearch,
     usesProductSelectors,
+    showItemActivationCodeSelectors,
+    clearItemActivationCode,
+    retryEditHydration,
   } = useCreateWarrantyActivationRequestForm({
-    onCreated,
+    onSaved,
     activationCodeId,
     assignedProductId,
+    initialRequest,
   });
   const hasSelectedProduct =
     Boolean(selectedProduct) ||
@@ -151,12 +162,44 @@ export function CreateWarrantyActivationRequestFormCard({
   const hasSelectableActivationCodes = availableActivationCodes.some(
     (code) => code.selectable,
   );
+  if (isEditHydrationError) {
+    return (
+      <Card className="min-w-0 w-full max-w-full">
+        <CardContent className="flex min-h-96 items-center justify-center">
+          <div className="space-y-4 text-center text-sm">
+            <p className="font-medium text-red-700 dark:text-red-300">
+              {t("editDataLoadError")}
+            </p>
+            <Button
+              onClick={() => void retryEditHydration()}
+              type="button"
+              variant="outline"
+            >
+              {t("tryAgain")}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  if (isHydratingEditRequest) {
+    return (
+      <Card className="min-w-0 w-full max-w-full">
+        <CardContent className="flex min-h-96 items-center justify-center">
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            {t("loadingEditData")}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
   return (
     <Card className="min-w-0 w-full max-w-full">
       <CardHeader className="px-4 sm:px-6">
-        <CardTitle>{t("createTitle")}</CardTitle>
+        <CardTitle>{t(initialRequest ? "editTitle" : "createTitle")}</CardTitle>
         <CardDescription className="mt-1.5">
-          {t("createDescription")}
+          {t(initialRequest ? "editDescription" : "createDescription")}
         </CardDescription>
       </CardHeader>
       <CardContent className="px-4 sm:px-6">
@@ -406,10 +449,14 @@ export function CreateWarrantyActivationRequestFormCard({
                   control={control}
                   errors={errors}
                   fields={activationFields}
+                  onActivationCodeClear={clearItemActivationCode}
+                  onActivationCodeSelect={selectItemActivationCode}
                   onProductClear={clearActivationProduct}
                   onProductSelect={selectActivationProduct}
                   register={register}
+                  selectedActivationCodes={selectedItemActivationCodes}
                   selectedProducts={selectedActivationProducts}
+                  showActivationCodeSelectors={showItemActivationCodeSelectors}
                 />
               ) : null}
             </FormSection>
@@ -738,7 +785,9 @@ export function CreateWarrantyActivationRequestFormCard({
               {mutationIsPending ? (
                 <Loader2 className="size-4 animate-spin" aria-hidden="true" />
               ) : null}
-              {mutationIsPending ? t("saving") : t("createSubmit")}
+              {mutationIsPending
+                ? t("saving")
+                : t(initialRequest ? "saveChanges" : "createSubmit")}
             </Button>
           </div>
         </form>

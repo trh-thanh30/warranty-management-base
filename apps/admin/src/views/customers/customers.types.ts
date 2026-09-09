@@ -5,7 +5,7 @@ const optionalText = z.string().trim();
 
 export const customerFormSchema = z.object({
   address: optionalText.max(255),
-  addressDetail: optionalText.min(1, "addressRequired").max(255),
+  addressDetail: optionalText.max(255),
   birthdate: optionalText.refine(isValidOptionalBirthdate, {
     message: "birthdateInvalid",
   }),
@@ -15,12 +15,12 @@ export const customerFormSchema = z.object({
       message: "customerCodeLength",
     },
   ),
-  email: optionalText.min(1, "emailRequired").email("emailInvalid"),
+  email: z.union([optionalText.email("emailInvalid"), z.literal("")]),
   fullName: optionalText.min(2, "fullNameRequired").max(120),
   phone: optionalText.min(1, "phoneRequired").min(6, "phoneLength").max(32),
-  provinceCode: optionalText.min(1, "provinceRequired"),
+  provinceCode: optionalText,
   provinceName: optionalText,
-  wardCode: optionalText.min(1, "wardRequired"),
+  wardCode: optionalText,
   wardName: optionalText,
 });
 

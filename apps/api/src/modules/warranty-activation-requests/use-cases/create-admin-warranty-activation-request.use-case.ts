@@ -15,6 +15,7 @@ import {
   warranty_status,
 } from '@prisma/client';
 import type { DealerAccessActor } from '@/modules/dealers/service/dealer-access.policy';
+import type { UpdateWarrantyActivationRequestContext } from '@/modules/warranty-activation-requests/warranty-activation-requests.types';
 
 @Injectable()
 export class CreateAdminWarrantyActivationRequestUseCase {
@@ -30,6 +31,7 @@ export class CreateAdminWarrantyActivationRequestUseCase {
     context: {
       createdByUserId?: string;
       actor?: DealerAccessActor;
+      updateRequest?: UpdateWarrantyActivationRequestContext;
     } = {},
   ) {
     const customer = await this.customersRepository.findById(dto.customerId);
@@ -40,9 +42,10 @@ export class CreateAdminWarrantyActivationRequestUseCase {
       });
     }
 
-    const submittedBirthdate = dto.customerBirthdate
-      ? new Date(dto.customerBirthdate)
-      : undefined;
+    const submittedBirthdate =
+      !context.updateRequest && dto.customerBirthdate
+        ? new Date(dto.customerBirthdate)
+        : undefined;
     const effectiveBirthdate = submittedBirthdate ?? customer.birthdate;
     const customerDto = {
       ...dto,
@@ -61,6 +64,7 @@ export class CreateAdminWarrantyActivationRequestUseCase {
         id: customer.id,
         birthdate: submittedBirthdate,
       },
+      updateRequest: context.updateRequest,
     };
 
     if (customerDto.activationCodeId) {

@@ -158,8 +158,12 @@ function WarrantyTableRow({
       <TableCell>
         <WarrantyStatusBadge status={warranty.status} />
       </TableCell>
-      <TableCell>{formatDate(warranty.startDate, { locale })}</TableCell>
-      <TableCell>{formatDate(warranty.endDate, { locale })}</TableCell>
+      <TableCell>
+        {formatDate(warranty.startDate, { locale, showTime: true })}
+      </TableCell>
+      <TableCell>
+        {formatDate(warranty.endDate, { locale, showTime: true })}
+      </TableCell>
       <TableCell>
         {t("durationValue", { count: warranty.durationMonths })}
       </TableCell>
@@ -222,11 +226,11 @@ function WarrantyMobileCard({
         />
         <WarrantyMobileField
           label={t("startDate")}
-          value={formatDate(warranty.startDate, { locale })}
+          value={formatDate(warranty.startDate, { locale, showTime: true })}
         />
         <WarrantyMobileField
           label={t("endDate")}
-          value={formatDate(warranty.endDate, { locale })}
+          value={formatDate(warranty.endDate, { locale, showTime: true })}
         />
       </dl>
       <div className="mt-4 flex justify-end">

@@ -12,6 +12,7 @@ describe('ImportCustomersUseCase', () => {
     const prismaService = {
       customer: {
         findUnique: jest.fn().mockResolvedValue(null),
+        findMany: jest.fn().mockResolvedValue([]),
       },
       $transaction: jest.fn((callback) => callback(tx)),
     };
@@ -53,6 +54,7 @@ describe('ImportCustomersUseCase', () => {
     const prismaService = {
       customer: {
         findUnique: jest.fn().mockResolvedValue(null),
+        findMany: jest.fn().mockResolvedValue([]),
       },
       $transaction: jest.fn((callback) => callback(tx)),
     };

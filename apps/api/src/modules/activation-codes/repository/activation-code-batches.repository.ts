@@ -567,6 +567,25 @@ export class ActivationCodeBatchesRepository {
     });
   }
 
+  findSelectableForPendingRequest(id: string, requestId: string) {
+    return this.prismaService.activationCode.findFirst({
+      where: {
+        id,
+        OR: [
+          { status: activation_code_status.AVAILABLE },
+          {
+            status: activation_code_status.PENDING_APPROVAL,
+            OR: [
+              { request: { is: { id: requestId } } },
+              { request_items: { some: { request_id: requestId } } },
+            ],
+          },
+        ],
+      },
+      include: { batch: true },
+    });
+  }
+
   expireIfNeeded(id: string, now = new Date()) {
     return this.prismaService.activationCode.updateMany({
       where: {

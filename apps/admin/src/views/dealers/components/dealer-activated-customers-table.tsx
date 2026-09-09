@@ -77,8 +77,8 @@ export function DealerActivatedCustomersTable({ items }: Props) {
               </TableCell>
               <TableCell>
                 <div>
-                  {formatDate(item.warranty.startDate)} -{" "}
-                  {formatDate(item.warranty.endDate)}
+                  {formatDate(item.warranty.startDate, { showTime: true })} -{" "}
+                  {formatDate(item.warranty.endDate, { showTime: true })}
                 </div>
                 <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                   {item.warranty.durationMonths} {t("monthUnit")}

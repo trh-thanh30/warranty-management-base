@@ -13,6 +13,7 @@ import type {
   ListWarrantyActivationRequestsQuery,
   PaginatedResponse,
   ReviewWarrantyActivationRequestBody,
+  UpdateAdminWarrantyActivationRequestBody,
   WarrantyActivationRequestSummary,
 } from "@repo/shared";
 import { warrantyActivationRequestsService } from "@/src/services/warranty-activation-requests/warranty-activation-requests.service";
@@ -88,6 +89,30 @@ export function useCreateAdminWarrantyActivationRequest() {
         queryKey: warrantyActivationRequestKeys.lists(),
       });
       void queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+  });
+}
+
+export function useUpdateAdminWarrantyActivationRequest(
+  requestId: string | null,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: UpdateAdminWarrantyActivationRequestBody) =>
+      warrantyActivationRequestsService.updateAdminWarrantyActivationRequest(
+        requestId ?? "",
+        body,
+      ),
+    onSuccess: (request) => {
+      void queryClient.invalidateQueries({
+        queryKey: warrantyActivationRequestKeys.all,
+      });
+      void queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.setQueryData(
+        warrantyActivationRequestKeys.detail(request.id),
+        request,
+      );
     },
   });
 }

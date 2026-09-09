@@ -14,6 +14,7 @@ import { ListWarrantyActivationRequestsUseCase } from '@/modules/warranty-activa
 import { ReviewWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/review-warranty-activation-request.use-case';
 import { ResendWarrantyActivationRequestCertificateEmailUseCase } from '@/modules/warranty-activation-requests/use-cases/resend-warranty-activation-request-certificate-email.use-case';
 import { RetryWarrantyActivationRequestCertificateUseCase } from '@/modules/warranty-activation-requests/use-cases/retry-warranty-activation-request-certificate.use-case';
+import { UpdateAdminWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/update-admin-warranty-activation-request.use-case';
 import {
   Body,
   Controller,
@@ -47,6 +48,7 @@ export class WarrantyActivationRequestsController {
     private readonly reviewWarrantyActivationRequestUseCase: ReviewWarrantyActivationRequestUseCase,
     private readonly resendWarrantyActivationRequestCertificateEmailUseCase: ResendWarrantyActivationRequestCertificateEmailUseCase,
     private readonly retryWarrantyActivationRequestCertificateUseCase: RetryWarrantyActivationRequestCertificateUseCase,
+    private readonly updateAdminWarrantyActivationRequestUseCase: UpdateAdminWarrantyActivationRequestUseCase,
   ) {}
 
   @Post('admin')
@@ -138,6 +140,20 @@ export class WarrantyActivationRequestsController {
       reviewedByUserId: user?.id,
       actor: user,
     });
+  }
+
+  @Patch(':id')
+  @Permissions([permission_key.WARRANTY_UPDATE])
+  updateAdmin(
+    @Param('id') id: string,
+    @Body() dto: CreateAdminWarrantyActivationRequestDto,
+    @User() user: RequestUser,
+  ) {
+    return this.updateAdminWarrantyActivationRequestUseCase.execute(
+      id,
+      dto,
+      user,
+    );
   }
 
   @Post(':id/certificate/resend-email')
