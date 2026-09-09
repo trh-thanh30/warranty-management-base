@@ -141,6 +141,93 @@ describe('WarrantyActivationRequestsRepository', () => {
     expect(createRequest).not.toHaveBeenCalled();
   });
 
+  it('atomically replaces a pending request and transfers activation-code reservations', async () => {
+    const guardPendingRequest = jest.fn().mockResolvedValue({ count: 1 });
+    const releaseCodes = jest.fn().mockResolvedValue({ count: 1 });
+    const reserveCodes = jest.fn().mockResolvedValue({ count: 1 });
+    const deleteItems = jest.fn().mockResolvedValue({ count: 1 });
+    const createItems = jest.fn().mockResolvedValue({ count: 1 });
+    const updateRequest = jest.fn().mockResolvedValue({ id: 'request-id' });
+    const findRequest = jest
+      .fn()
+      .mockResolvedValueOnce({
+        activation_code_id: null,
+        items: [{ activation_code_id: 'old-code' }],
+        status: 'PENDING',
+      })
+      .mockResolvedValueOnce({ id: 'request-id', status: 'PENDING' });
+    const transaction = jest.fn((callback: (tx: unknown) => unknown) =>
+      callback({
+        activationCode: {
+          updateMany: jest.fn((args) => {
+            const status = args.data.status;
+            return status === 'AVAILABLE'
+              ? releaseCodes(args)
+              : reserveCodes(args);
+          }),
+        },
+        warrantyActivationRequest: {
+          findUnique: findRequest,
+          findUniqueOrThrow: jest
+            .fn()
+            .mockResolvedValue({ id: 'request-id', status: 'PENDING' }),
+          update: updateRequest,
+          updateMany: guardPendingRequest,
+        },
+        warrantyActivationRequestItem: {
+          createMany: createItems,
+          deleteMany: deleteItems,
+        },
+      }),
+    );
+    const repository = new WarrantyActivationRequestsRepository(
+      { $transaction: transaction } as never,
+      queries,
+    );
+    const command = createCommand('WAR-20260820-0005');
+    command.items = [
+      {
+        activationCodeId: 'new-code',
+        activationFieldId: null,
+        positionKey: 'primary',
+        positionLabel: 'Product',
+        productId: 'product-id',
+        warrantyId: null,
+        warrantyCode: 'WM-NEW',
+        productName: 'Product',
+        productCode: 'PRODUCT-001',
+        serialNumber: null,
+      },
+    ];
+
+    await repository.updatePending('request-id', command);
+
+    expect(guardPendingRequest).toHaveBeenCalledWith({
+      where: { id: 'request-id', status: 'PENDING' },
+      data: { updated_at: expect.any(Date) },
+    });
+    expect(guardPendingRequest.mock.invocationCallOrder[0]).toBeLessThan(
+      findRequest.mock.invocationCallOrder[0]!,
+    );
+    expect(releaseCodes).toHaveBeenCalledWith({
+      where: { id: { in: ['old-code'] }, status: 'PENDING_APPROVAL' },
+      data: { status: 'AVAILABLE' },
+    });
+    expect(reserveCodes).toHaveBeenCalledWith({
+      where: {
+        expires_at: { gt: expect.any(Date) },
+        id: { in: ['new-code'] },
+        status: 'AVAILABLE',
+      },
+      data: { status: 'PENDING_APPROVAL' },
+    });
+    expect(deleteItems).toHaveBeenCalledWith({
+      where: { request_id: 'request-id' },
+    });
+    expect(createItems).toHaveBeenCalledTimes(1);
+    expect(updateRequest).toHaveBeenCalledTimes(1);
+  });
+
   it('translates Prisma unique violations into application conflict errors', async () => {
     const conflict = new Prisma.PrismaClientKnownRequestError(
       'Unique constraint failed',

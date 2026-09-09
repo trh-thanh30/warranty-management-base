@@ -3,6 +3,8 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const detailSourceUrls = [
+  new URL("./warranty-activation-request-detail.view.tsx", import.meta.url),
+  new URL("./warranty-activation-request-edit.view.tsx", import.meta.url),
   new URL("./components/activation-request-items-table.tsx", import.meta.url),
   new URL(
     "./components/review-warranty-activation-request-dialog.tsx",

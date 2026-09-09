@@ -124,6 +124,50 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
     );
   });
 
+  it('does not overwrite Customer birthdate from an activation request snapshot while editing', async () => {
+    createWarrantyActivationRequestUseCase.execute.mockResolvedValue({
+      id: 'request-id',
+    });
+    const useCase = new CreateAdminWarrantyActivationRequestUseCase(
+      productsRepository as never,
+      generateWarrantyCodeUseCase as never,
+      createWarrantyActivationRequestUseCase as never,
+      customersRepository as never,
+    );
+
+    await useCase.execute(
+      {
+        ...dto,
+        categoryId: 'fd47a803-b240-4935-aab4-554d44fce684',
+        customerBirthdate: '1990-01-01',
+        items: [
+          {
+            positionKey: 'windshield',
+            productId: '23684bbd-b6e0-401a-9ba4-97e1b98176fd',
+          },
+        ],
+      },
+      {
+        updateRequest: {
+          id: 'request-id',
+          items: [],
+          requestCode: 'WAR-20260909-0001',
+          warrantyCode: 'WM-EXISTING',
+        },
+      },
+    );
+
+    expect(createWarrantyActivationRequestUseCase.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ customerBirthdate: '2005-12-11' }),
+      expect.objectContaining({
+        customerProfile: {
+          id: dto.customerId,
+          birthdate: undefined,
+        },
+      }),
+    );
+  });
+
   it('generates and synchronizes a missing warranty code before creating the request', async () => {
     productsRepository.findActivationRequestTargetById.mockResolvedValue({
       id: dto.productId,

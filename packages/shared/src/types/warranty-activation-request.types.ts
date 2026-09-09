@@ -236,6 +236,9 @@ export type CreateAdminWarrantyActivationRequestBody = Omit<
   productId?: string;
 };
 
+export type UpdateAdminWarrantyActivationRequestBody =
+  CreateAdminWarrantyActivationRequestBody;
+
 export type ListWarrantyActivationRequestsQuery = PaginationQuery & {
   dateFrom?: string;
   dateTo?: string;

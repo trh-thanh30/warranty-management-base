@@ -36,7 +36,7 @@ export function WarrantyActivationRequestCreateView() {
           activationCode={activationCode}
           assignedProductId={assignedProductId}
           onCancel={goBack}
-          onCreated={goBack}
+          onSaved={goBack}
         />
       </FormPageShell>
     </PermissionGuard>

@@ -23,12 +23,14 @@ import {
   CreateWarrantyActivationRequestCommand,
   WARRANTY_ACTIVATION_REQUEST_SOURCE,
   WarrantyActivationRequestSource,
+  UpdateWarrantyActivationRequestContext,
 } from '@/modules/warranty-activation-requests/warranty-activation-requests.types';
 import {
   WarrantyActivationCodeReservationConflictError,
   WarrantyActivationRequestCodeConflictError,
   WarrantyActivationRequestUniqueConflictError,
   WarrantyActivationRequestWarrantyCodeConflictError,
+  WarrantyActivationRequestUpdateConflictError,
 } from '@/modules/warranty-activation-requests/repository/warranty-activation-request-errors';
 import { Injectable, Optional } from '@nestjs/common';
 import { GenerateDealerCodeUseCase } from '@/modules/dealers/use-cases/generate-dealer-code.use-case';
@@ -87,6 +89,7 @@ export class CreateWarrantyActivationRequestUseCase {
       };
       source?: WarrantyActivationRequestSource;
       actor?: DealerAccessActor;
+      updateRequest?: UpdateWarrantyActivationRequestContext;
     } = {},
   ) {
     const activationCode = dto.activationCode?.trim().toUpperCase();
@@ -100,7 +103,10 @@ export class CreateWarrantyActivationRequestUseCase {
       );
     }
     const activationCodeRecord = dto.activationCodeId
-      ? await this.resolveActivationCodeById(dto.activationCodeId)
+      ? await this.resolveActivationCodeById(
+          dto.activationCodeId,
+          context.updateRequest?.id,
+        )
       : activationCode
         ? await this.resolveActivationCode(activationCode)
         : null;
@@ -114,7 +120,10 @@ export class CreateWarrantyActivationRequestUseCase {
     const customerPhone = dto.customerPhone.trim();
     const customerEmail = dto.customerEmail?.trim().toLowerCase() || null;
     const customerName = dto.customerName.trim();
-    const validatedItems = await this.resolveValidatedItems(dto);
+    const validatedItems = await this.resolveValidatedItems(
+      dto,
+      context.updateRequest?.id,
+    );
     const product = validatedItems
       ? await this.productsRepository.findActivationRequestTargetById(
           validatedItems[0].productId,
@@ -178,6 +187,7 @@ export class CreateWarrantyActivationRequestUseCase {
       ? await Promise.all(
           validatedItems.map(async (item) => {
             const itemWarrantyCode =
+              this.findPreservedWarrantyCode(item, context.updateRequest) ??
               item.warrantyCode ??
               (!item.warrantyId || isCodeLessProduct
                 ? await this.generateDistinctWarrantyCode(reservedWarrantyCodes)
@@ -190,7 +200,8 @@ export class CreateWarrantyActivationRequestUseCase {
     let warrantyCode =
       requestItems[0]?.warrantyCode ??
       (createsIndependentWarranty
-        ? await this.generateDistinctWarrantyCode(reservedWarrantyCodes)
+        ? (context.updateRequest?.warrantyCode ??
+          (await this.generateDistinctWarrantyCode(reservedWarrantyCodes)))
         : (existingWarrantyCode ??
           `PENDING-${activationCodeRecord?.id ?? Date.now()}`));
     if (!validatedItems) {
@@ -234,10 +245,14 @@ export class CreateWarrantyActivationRequestUseCase {
 
     this.assertProductMatchesCategory(dto.categoryId, product);
 
-    const openRequest =
-      await this.warrantyActivationRequestsRepository.findOpenByProductId(
-        product.id,
-      );
+    const openRequest = context.updateRequest
+      ? await this.warrantyActivationRequestsRepository.findOpenByProductId(
+          product.id,
+          context.updateRequest.id,
+        )
+      : await this.warrantyActivationRequestsRepository.findOpenByProductId(
+          product.id,
+        );
 
     if (openRequest && !createsIndependentWarranty) {
       this.throwAlreadyOpenRequest(product.id, openRequest);
@@ -262,7 +277,8 @@ export class CreateWarrantyActivationRequestUseCase {
       attempt += 1
     ) {
       const requestCode =
-        await this.generateWarrantyActivationRequestCodeUseCase.execute();
+        context.updateRequest?.requestCode ??
+        (await this.generateWarrantyActivationRequestCodeUseCase.execute());
 
       try {
         const catalogue = getProductCatalogue(product);
@@ -334,11 +350,14 @@ export class CreateWarrantyActivationRequestUseCase {
             items: requestItems,
           },
           context.customerProfile,
+          context.updateRequest?.id,
         );
 
-        await this.warrantyActivationRequestNotificationService.requestCreated(
-          request,
-        );
+        if (!context.updateRequest) {
+          await this.warrantyActivationRequestNotificationService.requestCreated(
+            request,
+          );
+        }
 
         return toWarrantyActivationRequestResponse(request);
       } catch (error) {
@@ -347,6 +366,13 @@ export class CreateWarrantyActivationRequestUseCase {
             'Activation code is no longer available',
             'BAD_REQUEST',
             { code: 'ACTIVATION_CODE_INVALID_OR_EXPIRED' },
+          );
+        }
+
+        if (error instanceof WarrantyActivationRequestUpdateConflictError) {
+          throw new BadRequestError(
+            'Only pending warranty activation requests can be updated',
+            'ACTIVATION_REQUEST_NOT_PENDING',
           );
         }
 
@@ -380,10 +406,14 @@ export class CreateWarrantyActivationRequestUseCase {
           error instanceof WarrantyActivationRequestUniqueConflictError
         ) {
           if (validatedItems) {
-            const concurrentOpenRequests =
-              await this.warrantyActivationRequestsRepository.findOpenByProductIds(
-                validatedItems.map((item) => item.productId),
-              );
+            const concurrentOpenRequests = context.updateRequest
+              ? await this.warrantyActivationRequestsRepository.findOpenByProductIds(
+                  validatedItems.map((item) => item.productId),
+                  context.updateRequest.id,
+                )
+              : await this.warrantyActivationRequestsRepository.findOpenByProductIds(
+                  validatedItems.map((item) => item.productId),
+                );
             const conflictingRequest = concurrentOpenRequests[0];
             if (conflictingRequest) {
               const conflictingProductId =
@@ -397,10 +427,14 @@ export class CreateWarrantyActivationRequestUseCase {
             }
           }
 
-          const concurrentOpenRequest =
-            await this.warrantyActivationRequestsRepository.findOpenByProductId(
-              product.id,
-            );
+          const concurrentOpenRequest = context.updateRequest
+            ? await this.warrantyActivationRequestsRepository.findOpenByProductId(
+                product.id,
+                context.updateRequest.id,
+              )
+            : await this.warrantyActivationRequestsRepository.findOpenByProductId(
+                product.id,
+              );
 
           if (concurrentOpenRequest) {
             this.throwAlreadyOpenRequest(product.id, concurrentOpenRequest);
@@ -433,6 +467,20 @@ export class CreateWarrantyActivationRequestUseCase {
     );
   }
 
+  private findPreservedWarrantyCode(
+    item: ValidatedActivationRequestItem,
+    updateRequest?: UpdateWarrantyActivationRequestContext,
+  ) {
+    if (!updateRequest) return undefined;
+
+    return updateRequest.items.find((currentItem) =>
+      item.activationCodeId
+        ? currentItem.activationCodeId === item.activationCodeId
+        : currentItem.positionKey === item.positionKey &&
+          currentItem.productId === item.productId,
+    )?.warrantyCode;
+  }
+
   private async resolveActivationCode(code: string) {
     if (!this.activationCodeRepository || !this.activationCodeCrypto) {
       throw new BadRequestError(
@@ -462,14 +510,22 @@ export class CreateWarrantyActivationRequestUseCase {
     return record;
   }
 
-  private async resolveActivationCodeById(id: string) {
+  private async resolveActivationCodeById(
+    id: string,
+    updateRequestId?: string,
+  ) {
     if (!this.activationCodeRepository) {
       throw new BadRequestError(
         'Activation code support is unavailable',
         'BAD_REQUEST',
       );
     }
-    const record = await this.activationCodeRepository.findAvailableById(id);
+    const record = updateRequestId
+      ? await this.activationCodeRepository.findSelectableForPendingRequest(
+          id,
+          updateRequestId,
+        )
+      : await this.activationCodeRepository.findAvailableById(id);
     if (!record || record.expires_at <= new Date()) {
       if (record) await this.activationCodeRepository.expireIfNeeded(record.id);
       throw new BadRequestError(
@@ -487,7 +543,15 @@ export class CreateWarrantyActivationRequestUseCase {
       id: string;
       birthdate?: Date;
     },
+    updateRequestId?: string,
   ) {
+    if (updateRequestId) {
+      return this.warrantyActivationRequestsRepository.updatePending(
+        updateRequestId,
+        data,
+        customerProfile ? { customerProfile } : undefined,
+      );
+    }
     if (!customerProfile) {
       return this.warrantyActivationRequestsRepository.create(data);
     }
@@ -539,7 +603,10 @@ export class CreateWarrantyActivationRequestUseCase {
     );
   }
 
-  private async resolveValidatedItems(dto: CreateWarrantyActivationRequestDto) {
+  private async resolveValidatedItems(
+    dto: CreateWarrantyActivationRequestDto,
+    updateRequestId?: string,
+  ) {
     if (!dto.items?.length) return null;
     if (!dto.categoryId) {
       throw new BadRequestError(
@@ -554,10 +621,16 @@ export class CreateWarrantyActivationRequestUseCase {
       );
     }
 
-    return this.activationRequestItemsValidatorService.validate(
-      dto.categoryId,
-      dto.items,
-    );
+    return updateRequestId
+      ? this.activationRequestItemsValidatorService.validate(
+          dto.categoryId,
+          dto.items,
+          { updateRequestId },
+        )
+      : this.activationRequestItemsValidatorService.validate(
+          dto.categoryId,
+          dto.items,
+        );
   }
 
   private toPrimaryRequestItem(
