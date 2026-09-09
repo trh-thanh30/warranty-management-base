@@ -53,6 +53,7 @@ import {
   getActivationProductDisplayName,
   isActivationCodeRequiredForRequest,
 } from "../warranty-activation-request-product.utils";
+import { formatActivationRequestDateTimeInput } from "../warranty-activation-requests.utils";
 
 const DEFAULT_VALUES: WarrantyActivationRequestCreateFormValues = {
   activationCodeId: "",
@@ -79,6 +80,7 @@ const DEFAULT_VALUES: WarrantyActivationRequestCreateFormValues = {
   filmRearRightSide: "",
   filmSunroof: "",
   filmWindshield: "",
+  installedAt: formatActivationRequestDateTimeInput(new Date().toISOString()),
   note: "",
   productId: "",
   productName: "",
@@ -433,6 +435,9 @@ export function useCreateWarrantyActivationRequestForm({
       filmRearRightSide: filmItems.rearRightSide ?? "",
       filmSunroof: filmItems.sunroof ?? "",
       filmWindshield: filmItems.windshield ?? "",
+      installedAt: formatActivationRequestDateTimeInput(
+        initialRequest.installedAt,
+      ),
       note: initialRequest.note ?? "",
       productId: primaryProduct?.id ?? initialRequest.productId ?? "",
       productName: initialRequest.productName ?? "",

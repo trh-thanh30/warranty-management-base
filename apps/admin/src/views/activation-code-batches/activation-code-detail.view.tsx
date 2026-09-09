@@ -43,6 +43,7 @@ import { PaginationControls } from "@repo/ui/pagination-controls";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Copy,
+  CalendarPlus,
   KeyRound,
   MoreHorizontal,
   PackageCheck,
@@ -52,7 +53,9 @@ import {
 import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useMemo, useState } from "react";
 import { ACTIVATION_CODE_BATCH_STATUSES } from "./activation-code-batches.constants";
+import { canExtendActivationCode } from "./activation-code-expiry-extension.utils";
 import { ActivationCodeProductAssignmentDialog } from "./components/activation-code-product-assignment-dialog";
+import { ActivationCodeExpiryExtensionDialog } from "./components/activation-code-expiry-extension-dialog";
 
 const PAGE_SIZE = 10;
 
@@ -79,6 +82,7 @@ export function ActivationCodeDetailView({
     resourceId,
   ];
   const canRevoke = hasPermission(PERMISSIONS.ACTIVATION_CODE_BATCH_REVOKE);
+  const canExtend = hasPermission(PERMISSIONS.ACTIVATION_CODE_BATCH_EXTEND);
   const canAssignProduct = hasPermission(
     PERMISSIONS.ACTIVATION_CODE_ASSIGN_PRODUCT,
   );
@@ -97,6 +101,8 @@ export function ActivationCodeDetailView({
     currentProduct: ActivationCodeDetail["assignedProduct"];
   } | null>(null);
   const [unassignTarget, setUnassignTarget] =
+    useState<ActivationCodeDetail | null>(null);
+  const [extensionTarget, setExtensionTarget] =
     useState<ActivationCodeDetail | null>(null);
   const debouncedSearch = useDebounce(search.trim(), 300);
   const query = useQuery({
@@ -242,6 +248,7 @@ export function ActivationCodeDetailView({
               <>
                 <ActivationCodesTable
                   canAssignProduct={canAssignProduct}
+                  canExtend={canExtend}
                   canRevoke={canRevoke}
                   items={data.items}
                   locale={locale}
@@ -265,6 +272,7 @@ export function ActivationCodeDetailView({
                     })
                   }
                   onUnassign={setUnassignTarget}
+                  onExtend={setExtensionTarget}
                   onActivate={(code) =>
                     router.push(
                       `/warranty-activation-requests/create?activationCodeId=${encodeURIComponent(code.id)}&activationCode=${encodeURIComponent(code.copyCode ?? code.maskedCode)}&productId=${encodeURIComponent(code.assignedProduct!.id)}`,
@@ -351,6 +359,26 @@ export function ActivationCodeDetailView({
           }}
           open={Boolean(assignmentTarget)}
         />
+        <ActivationCodeExpiryExtensionDialog
+          onExtended={async () => {
+            await queryClient.invalidateQueries({ queryKey });
+            toast.success(t("expiryExtended"));
+          }}
+          onOpenChange={(open) => {
+            if (!open) setExtensionTarget(null);
+          }}
+          open={Boolean(extensionTarget)}
+          target={
+            extensionTarget
+              ? {
+                  expiresAt: extensionTarget.expiresAt,
+                  id: extensionTarget.id,
+                  kind: "code",
+                  label: extensionTarget.copyCode ?? extensionTarget.maskedCode,
+                }
+              : null
+          }
+        />
         {replaceTarget ? (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
@@ -395,6 +423,7 @@ export function ActivationCodeDetailView({
 
 function ActivationCodesTable({
   canAssignProduct,
+  canExtend,
   canRevoke,
   items,
   locale,
@@ -404,9 +433,11 @@ function ActivationCodesTable({
   onReplace,
   onUnassign,
   onActivate,
+  onExtend,
   t,
 }: {
   canAssignProduct: boolean;
+  canExtend: boolean;
   canRevoke: boolean;
   items: ActivationCodeDetail[];
   locale: string;
@@ -416,14 +447,16 @@ function ActivationCodesTable({
   onReplace: (code: ActivationCodeDetail) => void;
   onUnassign: (code: ActivationCodeDetail) => void;
   onActivate: (code: ActivationCodeDetail) => void;
+  onExtend: (code: ActivationCodeDetail) => void;
   t: ReturnType<typeof useTranslations<"ActivationCodeDetail">>;
 }) {
   return (
     <TableScroll className="rounded-md border border-slate-200 dark:border-slate-800">
-      <Table className="min-w-[850px]">
+      <Table className="min-w-[1200px] whitespace-nowrap">
         <TableHeader>
           <TableRow>
             <TableHead>{t("columns.code")}</TableHead>
+            <TableHead>{t("columns.batch")}</TableHead>
             <TableHead>{t("columns.product")}</TableHead>
             <TableHead>{t("columns.status")}</TableHead>
             <TableHead>{t("columns.createdAt")}</TableHead>
@@ -440,6 +473,16 @@ function ActivationCodesTable({
                   <span className="font-mono tabular-nums">
                     {item.copyCode ?? item.maskedCode}
                   </span>
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="max-w-56">
+                  <p className="truncate text-sm font-medium">
+                    {item.batchName}
+                  </p>
+                  <p className="truncate font-mono text-xs text-slate-500">
+                    {item.batchCode}
+                  </p>
                 </div>
               </TableCell>
               <TableCell>
@@ -482,7 +525,9 @@ function ActivationCodesTable({
               <TableCell className="text-right">
                 {item.copyCode ||
                 (canAssignProduct && item.status === "AVAILABLE") ||
-                (canRevoke && item.status === "EXPIRED" && !item.replacedBy) ? (
+                (canRevoke && item.status === "EXPIRED" && !item.replacedBy) ||
+                (canExtend &&
+                  canExtendActivationCode(item.status, item.expiresAt)) ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -508,6 +553,13 @@ function ActivationCodesTable({
                           {item.assignedProduct
                             ? t("changeProduct")
                             : t("assignProduct")}
+                        </DropdownMenuItem>
+                      ) : null}
+                      {canExtend &&
+                      canExtendActivationCode(item.status, item.expiresAt) ? (
+                        <DropdownMenuItem onSelect={() => onExtend(item)}>
+                          <CalendarPlus className="mr-2 size-4" />
+                          {t("extendExpiryAction")}
                         </DropdownMenuItem>
                       ) : null}
                       {canAssignProduct &&

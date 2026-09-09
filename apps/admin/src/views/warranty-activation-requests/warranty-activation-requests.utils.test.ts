@@ -56,6 +56,7 @@ const baseValues: WarrantyActivationRequestCreateFormValues = {
   filmRearRightSide: "",
   filmSunroof: "",
   filmWindshield: "",
+  installedAt: "",
   note: "",
   productId: "",
   productName: "",
@@ -170,6 +171,25 @@ test("admin activation request rejects invalid, unsupported, and future customer
   }
 });
 
+test("admin activation request rejects a future installation date", () => {
+  const futureInstallationDate = new Date(Date.now() + 60_000).toISOString();
+  const result = warrantyActivationRequestCreateFormSchema.safeParse({
+    ...validFormValues,
+    installedAt: futureInstallationDate,
+  });
+
+  assert.equal(result.success, false);
+  if (result.success) return;
+  assert.equal(
+    result.error.issues.some(
+      (issue) =>
+        issue.path[0] === "installedAt" &&
+        issue.message === "installedAtFuture",
+    ),
+    true,
+  );
+});
+
 test("admin activation request body combines form and selected product data", () => {
   const product = {
     brand: "Black Label",
@@ -238,6 +258,20 @@ test("admin activation request body combines form and selected product data", ()
       wardName: "Phuong Sai Gon",
     },
   );
+});
+
+test("admin activation request body preserves an optional installation timestamp", () => {
+  const body = toAdminActivationRequestBody({
+    product: null,
+    provinces,
+    values: {
+      ...validFormValues,
+      installedAt: "2026-09-09T14:30:00+07:00",
+    } as WarrantyActivationRequestCreateFormValues,
+    wards,
+  }) as unknown as Record<string, unknown>;
+
+  assert.equal(body.installedAt, "2026-09-09T07:30:00.000Z");
 });
 
 test("admin activation request body opts into updating the linked Customer profile", () => {

@@ -1,7 +1,10 @@
 "use client";
 
 import { ActivationCodeStatusBadge } from "@/src/components/activation-code-status-badge";
-import type { ActivationCodeBatchRevokeScope } from "@repo/shared";
+import type {
+  ActivationCodeBatchRevokeScope,
+  ExtendActivationCodeBatchExpiryResult,
+} from "@repo/shared";
 import type { ActivationCodeBatchListItem } from "@/src/services/activation-codes/activation-code-batches.types";
 import { formatDate, type ActivationCodePrintJob } from "@repo/shared";
 import {
@@ -24,15 +27,24 @@ import {
   TableRow,
   TableScroll,
 } from "@repo/ui";
-import { Eye, MoreHorizontal, Pencil, Printer, ShieldOff } from "lucide-react";
+import {
+  CalendarPlus,
+  Eye,
+  MoreHorizontal,
+  Pencil,
+  Printer,
+  ShieldOff,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 import { ACTIVATION_CODE_BATCH_STATUSES } from "../activation-code-batches.constants";
 import { ActivationCodePrintDialog } from "./activation-code-print-dialog";
 import { ActivationCodeBatchRevokeDialog } from "./activation-code-batch-revoke-dialog";
+import { ActivationCodeExpiryExtensionDialog } from "./activation-code-expiry-extension-dialog";
 
 type ActivationCodeBatchesTableProps = {
+  canExtend: boolean;
   canPrint: boolean;
   canRevoke: boolean;
   items: ActivationCodeBatchListItem[];
@@ -45,15 +57,21 @@ type ActivationCodeBatchesTableProps = {
     scope: ActivationCodeBatchRevokeScope,
   ) => Promise<void>;
   onRename: (batch: ActivationCodeBatchListItem, name: string) => void;
+  onExtend: (
+    batch: ActivationCodeBatchListItem,
+    result: ExtendActivationCodeBatchExpiryResult,
+  ) => void | Promise<void>;
 };
 
 export function ActivationCodeBatchesTable({
+  canExtend,
   canPrint,
   canRevoke,
   items,
   onJobRequested,
   onRevoke,
   onRename,
+  onExtend,
 }: ActivationCodeBatchesTableProps) {
   return (
     <>
@@ -61,12 +79,14 @@ export function ActivationCodeBatchesTable({
         {items.map((batch) => (
           <ActivationCodeBatchMobileCard
             batch={batch}
+            canExtend={canExtend}
             canPrint={canPrint}
             canRevoke={canRevoke}
             key={batch.id}
             onJobRequested={onJobRequested}
             onRevoke={onRevoke}
             onRename={onRename}
+            onExtend={onExtend}
           />
         ))}
       </div>
@@ -80,12 +100,14 @@ export function ActivationCodeBatchesTable({
             {items.map((batch) => (
               <ActivationCodeBatchTableRow
                 batch={batch}
+                canExtend={canExtend}
                 canPrint={canPrint}
                 canRevoke={canRevoke}
                 key={batch.id}
                 onJobRequested={onJobRequested}
                 onRevoke={onRevoke}
                 onRename={onRename}
+                onExtend={onExtend}
               />
             ))}
           </TableBody>
@@ -113,18 +135,22 @@ function ActivationCodeBatchTableHeader() {
 
 function ActivationCodeBatchTableRow({
   batch,
+  canExtend,
   canPrint,
   canRevoke,
   onJobRequested,
   onRevoke,
   onRename,
+  onExtend,
 }: {
   batch: ActivationCodeBatchListItem;
+  canExtend: boolean;
   canPrint: boolean;
   canRevoke: boolean;
   onJobRequested: ActivationCodeBatchesTableProps["onJobRequested"];
   onRevoke: ActivationCodeBatchesTableProps["onRevoke"];
   onRename: ActivationCodeBatchesTableProps["onRename"];
+  onExtend: ActivationCodeBatchesTableProps["onExtend"];
 }) {
   const locale = useLocale();
 
@@ -150,11 +176,13 @@ function ActivationCodeBatchTableRow({
       <TableCell className="text-right">
         <ActivationCodeBatchActionsMenu
           batch={batch}
+          canExtend={canExtend}
           canPrint={canPrint}
           canRevoke={canRevoke}
           onJobRequested={onJobRequested}
           onRevoke={onRevoke}
           onRename={onRename}
+          onExtend={onExtend}
         />
       </TableCell>
     </TableRow>
@@ -163,18 +191,22 @@ function ActivationCodeBatchTableRow({
 
 function ActivationCodeBatchMobileCard({
   batch,
+  canExtend,
   canPrint,
   canRevoke,
   onJobRequested,
   onRevoke,
   onRename,
+  onExtend,
 }: {
   batch: ActivationCodeBatchListItem;
+  canExtend: boolean;
   canPrint: boolean;
   canRevoke: boolean;
   onJobRequested: ActivationCodeBatchesTableProps["onJobRequested"];
   onRevoke: ActivationCodeBatchesTableProps["onRevoke"];
   onRename: ActivationCodeBatchesTableProps["onRename"];
+  onExtend: ActivationCodeBatchesTableProps["onExtend"];
 }) {
   const locale = useLocale();
   const t = useTranslations("ActivationCodeBatches");
@@ -193,11 +225,13 @@ function ActivationCodeBatchMobileCard({
         </div>
         <ActivationCodeBatchActionsMenu
           batch={batch}
+          canExtend={canExtend}
           canPrint={canPrint}
           canRevoke={canRevoke}
           onJobRequested={onJobRequested}
           onRevoke={onRevoke}
           onRename={onRename}
+          onExtend={onExtend}
         />
       </div>
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
@@ -288,26 +322,33 @@ function ActivationCodeStatusCounts({
 
 function ActivationCodeBatchActionsMenu({
   batch,
+  canExtend,
   canPrint,
   canRevoke,
   onJobRequested,
   onRevoke,
   onRename,
+  onExtend,
 }: {
   batch: ActivationCodeBatchListItem;
+  canExtend: boolean;
   canPrint: boolean;
   canRevoke: boolean;
   onJobRequested: ActivationCodeBatchesTableProps["onJobRequested"];
   onRevoke: ActivationCodeBatchesTableProps["onRevoke"];
   onRename: ActivationCodeBatchesTableProps["onRename"];
+  onExtend: ActivationCodeBatchesTableProps["onExtend"];
 }) {
   const t = useTranslations("ActivationCodeBatches");
   const [printOpen, setPrintOpen] = useState(false);
   const [revokeOpen, setRevokeOpen] = useState(false);
   const [renameOpen, setRenameOpen] = useState(false);
+  const [extendOpen, setExtendOpen] = useState(false);
   const [renameValue, setRenameValue] = useState(batch.batchName);
   const canRevokeAvailable =
     canRevoke && (batch.statusCounts.AVAILABLE ?? 0) > 0;
+  const canExtendBatch =
+    canExtend && new Date(batch.expiresAt).getTime() > Date.now();
 
   return (
     <>
@@ -344,6 +385,12 @@ function ActivationCodeBatchActionsMenu({
               {t("printAction")}
             </DropdownMenuItem>
           ) : null}
+          {canExtendBatch ? (
+            <DropdownMenuItem onSelect={() => setExtendOpen(true)}>
+              <CalendarPlus className="mr-2 size-4" />
+              {t("extendExpiryAction")}
+            </DropdownMenuItem>
+          ) : null}
           {canRevokeAvailable ? (
             <DropdownMenuItem
               className="text-red-600 focus:text-red-700 dark:text-red-400"
@@ -368,6 +415,19 @@ function ActivationCodeBatchActionsMenu({
         onOpenChange={setRevokeOpen}
         onRevoke={onRevoke}
         open={revokeOpen}
+      />
+      <ActivationCodeExpiryExtensionDialog
+        onExtended={(result) =>
+          onExtend(batch, result as ExtendActivationCodeBatchExpiryResult)
+        }
+        onOpenChange={setExtendOpen}
+        open={extendOpen}
+        target={{
+          expiresAt: batch.expiresAt,
+          id: batch.id,
+          kind: "batch",
+          label: batch.batchCode,
+        }}
       />
       <Dialog open={renameOpen} onOpenChange={setRenameOpen}>
         <DialogContent className="space-y-5 sm:max-w-xl">

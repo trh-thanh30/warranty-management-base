@@ -1,4 +1,6 @@
+import { loadWorkbookFromBuffer } from '@/common/excel';
 import { toWarrantyActivationRequestExcelRow } from '@/modules/warranty-activation-requests/excel/warranty-activation-request-excel.mapper';
+import { createWarrantyActivationRequestExportWorkbook } from '@/modules/warranty-activation-requests/excel/warranty-activation-request-workbook.factory';
 import { ExportWarrantyActivationRequestsUseCase } from '@/modules/warranty-activation-requests/use-cases/export-warranty-activation-requests.use-case';
 import { warranty_activation_request_status } from '@prisma/client';
 
@@ -16,6 +18,7 @@ const request = {
   brand: 'Toyota',
   model: 'Battery Plus',
   manufacture_year: 2026,
+  installed_at: new Date('2026-07-21T08:30:00.000Z'),
   note: 'Khách hàng gửi từ website',
   admin_note: 'Đã đối chiếu',
   rejection_reason: 'Thông tin không khớp',
@@ -58,8 +61,34 @@ describe('ExportWarrantyActivationRequestsUseCase', () => {
         rejectionReason: 'Thông tin không khớp',
         itemCount: 2,
         productsByPosition: 'Kính lái: WM-SP50; Kính lưng: WM-B55',
+        installedAt: new Date('2026-07-21T08:30:00.000Z'),
       }),
     );
+  });
+
+  it('exports installation date as a native Excel date-time cell', async () => {
+    const buffer = await createWarrantyActivationRequestExportWorkbook([
+      toWarrantyActivationRequestExcelRow(request as never),
+    ]);
+    const workbook = await loadWorkbookFromBuffer(buffer);
+    const worksheet = workbook.getWorksheet('Yêu cầu kích hoạt');
+    const headers = worksheet?.getRow(1).values as unknown[];
+    const installedAtColumnIndex = headers.indexOf('Ngày thi công');
+    const installedAtColumn = worksheet?.getColumn(installedAtColumnIndex);
+
+    expect(installedAtColumn?.numFmt).toBe('dd/mm/yyyy hh:mm');
+    expect(worksheet?.getCell(2, installedAtColumnIndex).value).toEqual(
+      new Date('2026-07-21T08:30:00.000Z'),
+    );
+  });
+
+  it('keeps the installation date cell empty when it is not set', () => {
+    const row = toWarrantyActivationRequestExcelRow({
+      ...request,
+      installed_at: null,
+    } as never);
+
+    expect(row.installedAt).toBeNull();
   });
 
   it('exports all requests matching the supplied filters', async () => {

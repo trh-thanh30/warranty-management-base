@@ -38,6 +38,7 @@ export function toWarrantyActivationRequestExcelRow(
     brand: request.brand,
     model: request.model,
     manufactureYear: request.manufacture_year,
+    installedAt: request.installed_at,
     customerNote: request.note,
     adminNote: request.admin_note,
     rejectionReason: request.rejection_reason,

@@ -32,6 +32,8 @@ const CREATE_FIELD_ERROR_KEYS = new Set([
   "customerRequired",
   "customerNameRequired",
   "emailInvalid",
+  "installedAtFuture",
+  "installedAtInvalid",
   "noteLength",
   "phoneInvalid",
   "productRequired",
@@ -62,6 +64,18 @@ export function formatActivationRequestDate(
   locale: string,
 ) {
   return formatDate(value, { locale, showTime: true });
+}
+
+export function formatActivationRequestDateTimeInput(
+  value: string | null | undefined,
+) {
+  if (!value) return "";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 export function buildWarrantyActivationRequestListQuery({
@@ -222,6 +236,7 @@ export function toAdminActivationRequestBody({
   );
   const primaryProduct =
     product ?? Object.values(activationProducts)[0] ?? null;
+  const installedAt = values.installedAt.trim();
 
   return omitUndefined({
     activationCodeId: values.activationCodeId || undefined,
@@ -242,6 +257,7 @@ export function toAdminActivationRequestBody({
     dealerProvince: values.dealerProvince.trim() || undefined,
     filmItems: buildFilmItems(values, activationInputValues),
     items: items.length > 0 ? items : undefined,
+    installedAt: installedAt ? new Date(installedAt).toISOString() : undefined,
     manufactureYear: primaryProduct?.modelYear ?? undefined,
     model: primaryProduct?.model ?? undefined,
     metadata: activationMetadata,

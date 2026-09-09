@@ -34,29 +34,27 @@ export class AssignActivationCodesToProductDto {
 
   @ValidateIf(
     (input: AssignActivationCodesToProductDto) =>
-      input.assignmentMode === 'ALL_AVAILABLE' ||
-      input.assignmentMode === 'RANGE',
+      input.assignmentMode === 'ALL_AVAILABLE',
   )
   @IsUUID()
   batchId?: string;
 
   @ValidateIf(
     (input: AssignActivationCodesToProductDto) =>
-      input.assignmentMode === 'RANGE',
+      input.assignmentMode === 'QUANTITY' && input.batchIds !== undefined,
   )
-  @IsInt()
-  @Min(1)
-  @Max(MAX_AUTOMATIC_ACTIVATION_CODES_PER_PRODUCT_ASSIGNMENT)
-  from?: number;
+  @IsArray()
+  @IsUUID('all', { each: true })
+  batchIds?: string[];
 
   @ValidateIf(
     (input: AssignActivationCodesToProductDto) =>
-      input.assignmentMode === 'RANGE',
+      input.assignmentMode === 'QUANTITY',
   )
   @IsInt()
   @Min(1)
   @Max(MAX_AUTOMATIC_ACTIVATION_CODES_PER_PRODUCT_ASSIGNMENT)
-  to?: number;
+  quantity?: number;
 
   @IsUUID()
   productId!: string;

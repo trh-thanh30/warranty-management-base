@@ -75,10 +75,10 @@ describe('AssignActivationCodesToProductUseCase', () => {
     });
   });
 
-  it('assigns an inclusive range of assignable codes from one batch', async () => {
+  it('assigns a requested quantity of assignable codes across selected batches', async () => {
     const repository = {
       findAssignmentProduct: jest.fn().mockResolvedValue(product),
-      assignProductByBatch: jest.fn().mockResolvedValue({
+      assignProductByQuantity: jest.fn().mockResolvedValue({
         activationCodeIds: ['third-code-id', 'fourth-code-id'],
         count: 2,
       }),
@@ -87,40 +87,57 @@ describe('AssignActivationCodesToProductUseCase', () => {
     await new AssignActivationCodesToProductUseCase(
       repository as never,
     ).execute({
-      assignmentMode: 'RANGE',
-      batchId: 'batch-id',
-      from: 3,
+      assignmentMode: 'QUANTITY',
+      batchIds: ['batch-a', 'batch-b'],
       productId: 'product-id',
-      to: 4,
+      quantity: 2,
     });
 
-    expect(repository.assignProductByBatch).toHaveBeenCalledWith({
-      batchId: 'batch-id',
-      from: 3,
+    expect(repository.assignProductByQuantity).toHaveBeenCalledWith({
+      batchIds: ['batch-a', 'batch-b'],
       productId: 'product-id',
       now: expect.any(Date),
-      to: 4,
+      quantity: 2,
     });
   });
 
-  it('rejects an invalid automatic assignment range', async () => {
+  it('rejects an invalid automatic assignment quantity', async () => {
     const repository = {
       findAssignmentProduct: jest.fn().mockResolvedValue(product),
-      assignProductByBatch: jest.fn(),
+      assignProductByQuantity: jest.fn(),
     };
 
     await expect(
       new AssignActivationCodesToProductUseCase(repository as never).execute({
-        assignmentMode: 'RANGE',
-        batchId: 'batch-id',
-        from: 10,
+        assignmentMode: 'QUANTITY',
         productId: 'product-id',
-        to: 2,
+        quantity: 0,
       }),
     ).rejects.toMatchObject({
-      code: 'ACTIVATION_CODE_ASSIGNMENT_RANGE_INVALID',
+      code: 'ACTIVATION_CODE_ASSIGNMENT_QUANTITY_INVALID',
     });
-    expect(repository.assignProductByBatch).not.toHaveBeenCalled();
+    expect(repository.assignProductByQuantity).not.toHaveBeenCalled();
+  });
+
+  it('does not assign any code when availability is below the requested quantity', async () => {
+    const repository = {
+      findAssignmentProduct: jest.fn().mockResolvedValue(product),
+      assignProductByQuantity: jest.fn().mockResolvedValue({
+        availableQuantity: 7,
+        kind: 'INSUFFICIENT',
+      }),
+    };
+
+    await expect(
+      new AssignActivationCodesToProductUseCase(repository as never).execute({
+        assignmentMode: 'QUANTITY',
+        productId: 'product-id',
+        quantity: 10,
+      }),
+    ).rejects.toMatchObject({
+      code: 'ACTIVATION_CODE_ASSIGNMENT_INSUFFICIENT',
+      details: { availableQuantity: 7, requestedQuantity: 10 },
+    });
   });
 
   it('returns stable not-found codes for assignment feedback', async () => {
