@@ -7,6 +7,7 @@ import type {
   ActivationCodeReportRow,
 } from '@/modules/activation-codes/activation-code-reporting.types';
 import { ActivationCodeCryptoService } from '@/modules/activation-codes/services/activation-code-crypto.service';
+import { addCalendarMonthsUtc } from '@/modules/activation-codes/utils/date.utils';
 import { Injectable } from '@nestjs/common';
 import {
   activation_code_status,
@@ -17,6 +18,7 @@ import type { ActivationCodeBatchRevokeScope } from '@repo/shared';
 
 export class ProductActivationCodeReplacementConflictError extends Error {}
 export class ProductActivationCodeAssignmentConflictError extends Error {}
+class ActivationCodeBatchExpiryExtensionConflictError extends Error {}
 
 export type CreateActivationCodeBatchRecord = {
   batchCode: string;
@@ -208,6 +210,155 @@ export class ActivationCodeBatchesRepository {
       data: { batch_name: batchName },
       select: { id: true, batch_code: true, batch_name: true },
     });
+  }
+
+  async extendCodeExpiry(input: { id: string; months: number; now: Date }) {
+    return this.prismaService.$transaction(async (tx) => {
+      const code = await tx.activationCode.findUnique({
+        where: { id: input.id },
+        select: { id: true, status: true, expires_at: true },
+      });
+      if (!code) return { kind: 'NOT_FOUND' as const };
+      if (code.status === activation_code_status.ACTIVATED) {
+        return { kind: 'ACTIVATED' as const };
+      }
+      if (code.status === activation_code_status.REVOKED) {
+        return { kind: 'REVOKED' as const };
+      }
+      if (code.expires_at <= input.now) {
+        return { kind: 'EXPIRED' as const };
+      }
+
+      const expiresAt = addCalendarMonthsUtc(code.expires_at, input.months);
+      const updated = await tx.activationCode.updateMany({
+        where: {
+          id: code.id,
+          status: code.status,
+          expires_at: { equals: code.expires_at, gt: input.now },
+        },
+        data: { expires_at: expiresAt },
+      });
+      if (updated.count !== 1) return { kind: 'CONFLICT' as const };
+
+      return {
+        kind: 'EXTENDED' as const,
+        previousExpiresAt: code.expires_at,
+        expiresAt,
+      };
+    });
+  }
+
+  async extendBatchExpiry(input: {
+    batchId: string;
+    months: number;
+    now: Date;
+  }) {
+    try {
+      return await this.prismaService.$transaction(async (tx) => {
+        const batch = await tx.activationCodeBatch.findUnique({
+          where: { id: input.batchId },
+          select: {
+            id: true,
+            expires_at: true,
+            codes: {
+              select: { id: true, status: true, expires_at: true },
+            },
+          },
+        });
+        if (!batch) return { kind: 'NOT_FOUND' as const };
+        if (batch.expires_at <= input.now) {
+          return { kind: 'EXPIRED_BATCH' as const };
+        }
+
+        const skipped = { activated: 0, revoked: 0, expired: 0 };
+        const eligible = batch.codes.filter((code) => {
+          if (code.status === activation_code_status.ACTIVATED) {
+            skipped.activated += 1;
+            return false;
+          }
+          if (code.status === activation_code_status.REVOKED) {
+            skipped.revoked += 1;
+            return false;
+          }
+          if (code.expires_at <= input.now) {
+            skipped.expired += 1;
+            return false;
+          }
+          return true;
+        });
+
+        if (eligible.length === 0) {
+          return {
+            kind: 'NO_ELIGIBLE_CODES' as const,
+            previousExpiresAt: batch.expires_at,
+            expiresAt: batch.expires_at,
+            extendedCount: 0,
+            skipped,
+          };
+        }
+
+        const groups = new Map<
+          string,
+          {
+            expiresAt: Date;
+            ids: string[];
+            statuses: Set<activation_code_status>;
+          }
+        >();
+        for (const code of eligible) {
+          const key = code.expires_at.toISOString();
+          const group = groups.get(key) ?? {
+            expiresAt: code.expires_at,
+            ids: [],
+            statuses: new Set<activation_code_status>(),
+          };
+          group.ids.push(code.id);
+          group.statuses.add(code.status);
+          groups.set(key, group);
+        }
+
+        for (const group of groups.values()) {
+          const updated = await tx.activationCode.updateMany({
+            where: {
+              id: { in: group.ids },
+              status: { in: [...group.statuses] },
+              expires_at: { equals: group.expiresAt, gt: input.now },
+            },
+            data: {
+              expires_at: addCalendarMonthsUtc(group.expiresAt, input.months),
+            },
+          });
+          if (updated.count !== group.ids.length) {
+            throw new ActivationCodeBatchExpiryExtensionConflictError();
+          }
+        }
+
+        const expiresAt = addCalendarMonthsUtc(batch.expires_at, input.months);
+        const updatedBatch = await tx.activationCodeBatch.updateMany({
+          where: {
+            id: batch.id,
+            expires_at: { equals: batch.expires_at, gt: input.now },
+          },
+          data: { expires_at: expiresAt },
+        });
+        if (updatedBatch.count !== 1) {
+          throw new ActivationCodeBatchExpiryExtensionConflictError();
+        }
+
+        return {
+          kind: 'EXTENDED' as const,
+          previousExpiresAt: batch.expires_at,
+          expiresAt,
+          extendedCount: eligible.length,
+          skipped,
+        };
+      });
+    } catch (error) {
+      if (error instanceof ActivationCodeBatchExpiryExtensionConflictError) {
+        return { kind: 'CONFLICT' as const };
+      }
+      throw error;
+    }
   }
 
   create(input: CreateActivationCodeBatchRecord) {

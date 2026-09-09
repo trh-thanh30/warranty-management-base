@@ -299,3 +299,59 @@ test("sends the selected scope when revoking an activation-code batch", async ()
   ]);
   assert.equal(result, response);
 });
+
+test("extends one activation code by the requested number of months", async () => {
+  const calls: unknown[] = [];
+  const response = {
+    activationCodeId: "code-id",
+    previousExpiresAt: "2027-01-31T10:30:00.000Z",
+    expiresAt: "2027-02-28T10:30:00.000Z",
+  };
+  const http = {
+    async post(url: string, body?: unknown) {
+      calls.push({ url, body });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  const result = await createActivationCodesService(
+    http as unknown as ActivationCodesHttpClient,
+  ).extendCodeExpiry("code-id", { months: 1 });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/activation-code-batches/codes/code-id/extend-expiry",
+      body: { months: 1 },
+    },
+  ]);
+  assert.equal(result, response);
+});
+
+test("extends an activation-code batch by the requested number of months", async () => {
+  const calls: unknown[] = [];
+  const response = {
+    batchId: "batch-id",
+    previousExpiresAt: "2027-01-31T10:30:00.000Z",
+    expiresAt: "2027-02-28T10:30:00.000Z",
+    extendedCount: 75,
+    skipped: { activated: 10, revoked: 10, expired: 5 },
+  };
+  const http = {
+    async post(url: string, body?: unknown) {
+      calls.push({ url, body });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  const result = await createActivationCodesService(
+    http as unknown as ActivationCodesHttpClient,
+  ).extendBatchExpiry("batch-id", { months: 2 });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/activation-code-batches/batch-id/extend-expiry",
+      body: { months: 2 },
+    },
+  ]);
+  assert.equal(result, response);
+});

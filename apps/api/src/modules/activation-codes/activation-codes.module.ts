@@ -27,6 +27,8 @@ import { ActivationCodeExpirySchedulerService } from '@/modules/activation-codes
 import { AssignActivationCodesToProductUseCase } from '@/modules/activation-codes/use-cases/assign-activation-codes-to-product.use-case';
 import { UnassignActivationCodesFromProductUseCase } from '@/modules/activation-codes/use-cases/unassign-activation-codes-from-product.use-case';
 import { ReplaceProductActivationCodeAssignmentUseCase } from '@/modules/activation-codes/use-cases/replace-product-activation-code-assignment.use-case';
+import { ExtendActivationCodeExpiryUseCase } from '@/modules/activation-codes/use-cases/extend-activation-code-expiry.use-case';
+import { ExtendActivationCodeBatchExpiryUseCase } from '@/modules/activation-codes/use-cases/extend-activation-code-batch-expiry.use-case';
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 
@@ -64,6 +66,8 @@ import { Module } from '@nestjs/common';
     AssignActivationCodesToProductUseCase,
     UnassignActivationCodesFromProductUseCase,
     ReplaceProductActivationCodeAssignmentUseCase,
+    ExtendActivationCodeExpiryUseCase,
+    ExtendActivationCodeBatchExpiryUseCase,
   ],
   exports: [ActivationCodeBatchesRepository, ActivationCodeCryptoService],
 })

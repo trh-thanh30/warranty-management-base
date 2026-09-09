@@ -1075,6 +1075,7 @@ enum permission_key {
   ACTIVATION_CODE_BATCH_CREATE // Tạo batch mã kích hoạt.
   ACTIVATION_CODE_BATCH_PRINT // In tem mã kích hoạt.
   ACTIVATION_CODE_BATCH_REVOKE // Thu hồi batch hoặc mã kích hoạt.
+  ACTIVATION_CODE_BATCH_EXTEND // Gia hạn batch hoặc mã kích hoạt.
   ACTIVATION_CODE_ASSIGN_PRODUCT // Gán mã kích hoạt vào sản phẩm trước khi kích hoạt.
 
   WARRANTY_VIEW // Xem hồ sơ bảo hành.

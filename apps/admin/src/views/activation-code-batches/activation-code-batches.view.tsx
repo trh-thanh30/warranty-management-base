@@ -45,6 +45,7 @@ export function ActivationCodeBatchesView() {
   const { hasPermission } = usePermissions();
   const canConfigurePolicy = hasPermission(PERMISSIONS.SYSTEM_CONFIG_VIEW);
   const canPrint = hasPermission(PERMISSIONS.ACTIVATION_CODE_BATCH_PRINT);
+  const canExtend = hasPermission(PERMISSIONS.ACTIVATION_CODE_BATCH_EXTEND);
   const [isPrintJobsOpen, setPrintJobsOpen] = useState(false);
   const data = directory.query.data;
   const renameMutation = useMutation({
@@ -232,6 +233,7 @@ export function ActivationCodeBatchesView() {
             ) : data?.items.length ? (
               <>
                 <ActivationCodeBatchesTable
+                  canExtend={canExtend}
                   canPrint={canPrint}
                   canRevoke={directory.canRevoke}
                   items={data.items}
@@ -259,6 +261,24 @@ export function ActivationCodeBatchesView() {
                       batchId: batch.id,
                       batchName,
                     });
+                  }}
+                  onExtend={async (_batch, result) => {
+                    await queryClient.invalidateQueries({
+                      queryKey: ["activation-code-batches"],
+                    });
+                    const skipped =
+                      result.skipped.activated +
+                      result.skipped.revoked +
+                      result.skipped.expired;
+                    toast.success(
+                      t("extendedSummary", {
+                        activated: result.skipped.activated,
+                        expired: result.skipped.expired,
+                        extended: result.extendedCount,
+                        revoked: result.skipped.revoked,
+                        skipped,
+                      }),
+                    );
                   }}
                 />
                 <PaginationControls

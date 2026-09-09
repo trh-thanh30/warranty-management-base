@@ -20,6 +20,8 @@ import { ListActivationCodeBatchesUseCase } from '@/modules/activation-codes/use
 import { RevokeActivationCodeUseCase } from '@/modules/activation-codes/use-cases/revoke-activation-code.use-case';
 import { RevokeActivationCodeBatchUseCase } from '@/modules/activation-codes/use-cases/revoke-activation-code-batch.use-case';
 import { UpdateActivationCodeBatchUseCase } from '@/modules/activation-codes/use-cases/update-activation-code-batch.use-case';
+import { ExtendActivationCodeExpiryUseCase } from '@/modules/activation-codes/use-cases/extend-activation-code-expiry.use-case';
+import { ExtendActivationCodeBatchExpiryUseCase } from '@/modules/activation-codes/use-cases/extend-activation-code-batch-expiry.use-case';
 import { ListActivationCodesUseCase } from '@/modules/activation-codes/use-cases/list-activation-codes.use-case';
 import { ListAvailableActivationCodesUseCase } from '@/modules/activation-codes/use-cases/list-available-activation-codes.use-case';
 import { ReplaceActivationCodeDto } from '@/modules/activation-codes/dto/replace-activation-code.dto';
@@ -37,6 +39,7 @@ import { GetActivationCodeBatchRevokePreviewUseCase } from '@/modules/activation
 import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import { Patch } from '@nestjs/common';
 import { UpdateActivationCodeBatchDto } from '@/modules/activation-codes/dto/update-activation-code-batch.dto';
+import { ExtendActivationCodeExpiryDto } from '@/modules/activation-codes/dto/extend-activation-code-expiry.dto';
 import { permission_key } from '@prisma/client';
 import type { Response } from 'express';
 
@@ -62,6 +65,8 @@ export class ActivationCodesController {
     private readonly unassignCodesFromProductUseCase: UnassignActivationCodesFromProductUseCase,
     private readonly replaceProductAssignmentUseCase: ReplaceProductActivationCodeAssignmentUseCase,
     private readonly updateBatchNameUseCase: UpdateActivationCodeBatchUseCase,
+    private readonly extendActivationCodeExpiryUseCase: ExtendActivationCodeExpiryUseCase,
+    private readonly extendActivationCodeBatchExpiryUseCase: ExtendActivationCodeBatchExpiryUseCase,
   ) {}
 
   @Get()
@@ -152,6 +157,15 @@ export class ActivationCodesController {
     return this.revokeActivationCodeUseCase.execute(id);
   }
 
+  @Post('codes/:id/extend-expiry')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_EXTEND])
+  extendCodeExpiry(
+    @Param('id') id: string,
+    @Body() dto: ExtendActivationCodeExpiryDto,
+  ) {
+    return this.extendActivationCodeExpiryUseCase.execute(id, dto.months);
+  }
+
   @Post('codes/assign-product')
   @Permissions([permission_key.ACTIVATION_CODE_ASSIGN_PRODUCT])
   assignProduct(@Body() dto: AssignActivationCodesToProductDto) {
@@ -185,6 +199,15 @@ export class ActivationCodesController {
     @Body() dto?: RevokeActivationCodeBatchDto,
   ) {
     return this.revokeBatchUseCase.execute(id, dto?.scope);
+  }
+
+  @Post(':id/extend-expiry')
+  @Permissions([permission_key.ACTIVATION_CODE_BATCH_EXTEND])
+  extendBatchExpiry(
+    @Param('id') id: string,
+    @Body() dto: ExtendActivationCodeExpiryDto,
+  ) {
+    return this.extendActivationCodeBatchExpiryUseCase.execute(id, dto.months);
   }
 
   @Post(':id/print-jobs')
