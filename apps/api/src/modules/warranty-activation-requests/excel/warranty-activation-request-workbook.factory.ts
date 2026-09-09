@@ -18,7 +18,7 @@ export async function createWarrantyActivationRequestExportWorkbook(
 
   worksheet.getColumn('customerPhone').numFmt = '@';
   worksheet.getColumn('customerBirthdate').numFmt = 'dd/mm/yyyy';
-  ['reviewedAt', 'createdAt', 'updatedAt'].forEach((key) => {
+  ['installedAt', 'reviewedAt', 'createdAt', 'updatedAt'].forEach((key) => {
     worksheet.getColumn(key).numFmt = 'dd/mm/yyyy hh:mm';
   });
 

@@ -23,6 +23,7 @@ export const warrantyActivationRequestExcelColumns: Array<
   { key: 'brand', header: 'Thương hiệu', width: 20 },
   { key: 'model', header: 'Dòng sản phẩm', width: 22 },
   { key: 'manufactureYear', header: 'Năm sản xuất', width: 16 },
+  { key: 'installedAt', header: 'Ngày thi công', width: 22 },
   { key: 'customerNote', header: 'Ghi chú khách hàng', width: 40 },
   { key: 'adminNote', header: 'Ghi chú xử lý', width: 40 },
   { key: 'rejectionReason', header: 'Lý do từ chối', width: 40 },

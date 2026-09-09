@@ -32,6 +32,7 @@ export type WarrantyActivationRequestExcelRow = {
   brand: string | null;
   model: string | null;
   manufactureYear: number | null;
+  installedAt: Date | null;
   customerNote: string | null;
   adminNote: string | null;
   rejectionReason: string | null;
