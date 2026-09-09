@@ -297,7 +297,14 @@ export class ActivationCodeBatchesRepository {
         take,
         select: {
           id: true,
-          batch: { select: { product_name: true, product_sku: true } },
+          batch: {
+            select: {
+              batch_code: true,
+              batch_name: true,
+              product_name: true,
+              product_sku: true,
+            },
+          },
           code_ciphertext: true,
           status: true,
           created_at: true,
@@ -327,6 +334,8 @@ export class ActivationCodeBatchesRepository {
         const plaintext = this.crypto.decrypt(row.code_ciphertext);
         return {
           id: row.id,
+          batchCode: row.batch.batch_code,
+          batchName: row.batch.batch_name,
           productName: row.batch.product_name,
           productSku: row.batch.product_sku,
           // The admin activation-code workspace is an operational screen;

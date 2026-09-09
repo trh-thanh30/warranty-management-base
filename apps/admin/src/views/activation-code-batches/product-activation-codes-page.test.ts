@@ -25,3 +25,39 @@ test("warranty activation dialog wraps the same shared assignment form", async (
   assert.match(source, /<AssignActivationCodesForm/);
   assert.match(source, /active=\{open\}/);
 });
+
+test("activation-code table identifies the source batch for each code", async () => {
+  const [detailViewSource, sharedTypeSource] = await Promise.all([
+    readFile(
+      new URL("./activation-code-detail.view.tsx", import.meta.url),
+      "utf8",
+    ),
+    readFile(
+      new URL(
+        "../../../../../packages/shared/src/types/activation-code-report.types.ts",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  ]);
+
+  assert.match(detailViewSource, /t\("columns\.batch"\)/);
+  assert.match(detailViewSource, /item\.batchName/);
+  assert.match(detailViewSource, /item\.batchCode/);
+  assert.match(
+    sharedTypeSource,
+    /export type ActivationCodeDetail = \{[\s\S]*?batchCode: string;[\s\S]*?batchName: string;/,
+  );
+});
+
+test("activation-code table preserves column widths and scrolls horizontally", async () => {
+  const detailViewSource = await readFile(
+    new URL("./activation-code-detail.view.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(
+    detailViewSource,
+    /<TableScroll[\s\S]*?<Table className="min-w-\[1200px\] whitespace-nowrap">/,
+  );
+});

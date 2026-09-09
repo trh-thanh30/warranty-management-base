@@ -26,6 +26,8 @@ export type ActivationCodeReportFilters = {
 
 export type ActivationCodeDetail = {
   id: string;
+  batchCode: string;
+  batchName: string;
   maskedCode: string;
   copyCode?: string;
   status: ActivationCodeReportStatus;

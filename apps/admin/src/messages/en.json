@@ -578,6 +578,7 @@
     },
     "columns": {
       "code": "Activation code",
+      "batch": "Activation-code batch",
       "product": "Assigned product",
       "status": "Status",
       "createdAt": "Created",

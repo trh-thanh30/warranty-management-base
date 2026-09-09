@@ -420,10 +420,11 @@ function ActivationCodesTable({
 }) {
   return (
     <TableScroll className="rounded-md border border-slate-200 dark:border-slate-800">
-      <Table className="min-w-[850px]">
+      <Table className="min-w-[1200px] whitespace-nowrap">
         <TableHeader>
           <TableRow>
             <TableHead>{t("columns.code")}</TableHead>
+            <TableHead>{t("columns.batch")}</TableHead>
             <TableHead>{t("columns.product")}</TableHead>
             <TableHead>{t("columns.status")}</TableHead>
             <TableHead>{t("columns.createdAt")}</TableHead>
@@ -440,6 +441,16 @@ function ActivationCodesTable({
                   <span className="font-mono tabular-nums">
                     {item.copyCode ?? item.maskedCode}
                   </span>
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="max-w-56">
+                  <p className="truncate text-sm font-medium">
+                    {item.batchName}
+                  </p>
+                  <p className="truncate font-mono text-xs text-slate-500">
+                    {item.batchCode}
+                  </p>
                 </div>
               </TableCell>
               <TableCell>

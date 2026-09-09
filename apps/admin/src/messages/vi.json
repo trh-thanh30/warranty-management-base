@@ -578,6 +578,7 @@
     },
     "columns": {
       "code": "Mã kích hoạt",
+      "batch": "Lô mã",
       "product": "Sản phẩm đã gán",
       "status": "Trạng thái",
       "createdAt": "Ngày tạo",
