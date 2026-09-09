@@ -9,8 +9,17 @@ const formSource = readFileSync(
   ),
   "utf8",
 );
+const customerDialogSource = readFileSync(
+  new URL(
+    "./components/edit-activation-request-customer-dialog.tsx",
+    import.meta.url,
+  ),
+  "utf8",
+);
 
-const translationKeys = [...formSource.matchAll(/\bt\("([^"]+)"/g)]
+const translationKeys = [
+  ...`${formSource}\n${customerDialogSource}`.matchAll(/\bt\("([^"]+)"/g),
+]
   .map((match) => match[1])
   .filter((key): key is string => Boolean(key));
 
@@ -27,6 +36,7 @@ const activationApiErrorCodes = [
   "CATEGORY_NOT_FOUND",
   "CUSTOMER_IDENTITY_CONFLICT",
   "CUSTOMER_NOT_FOUND",
+  "CUSTOMER_UPDATE_REQUIRED",
   "DEALER_NOT_FOUND",
   "WARRANTY_OWNER_REQUIRED",
   "WARRANTY_START_DATE_IN_FUTURE",
@@ -115,5 +125,27 @@ test("activation address copy asks only for the required local detail", () => {
     typeof enMessages.WarrantyActivationRequestsAdmin
       .addressAdministrativeUnitNotAllowed,
     "string",
+  );
+});
+
+test("activation customer summary localizes missing information", () => {
+  const viMessages = JSON.parse(
+    readFileSync(new URL("../../messages/vi.json", import.meta.url), "utf8"),
+  ) as {
+    WarrantyActivationRequestsAdmin: Record<string, unknown>;
+  };
+  const enMessages = JSON.parse(
+    readFileSync(new URL("../../messages/en.json", import.meta.url), "utf8"),
+  ) as {
+    WarrantyActivationRequestsAdmin: Record<string, unknown>;
+  };
+
+  assert.equal(
+    viMessages.WarrantyActivationRequestsAdmin.noInformation,
+    "Không có thông tin",
+  );
+  assert.equal(
+    enMessages.WarrantyActivationRequestsAdmin.noInformation,
+    "No information",
   );
 });

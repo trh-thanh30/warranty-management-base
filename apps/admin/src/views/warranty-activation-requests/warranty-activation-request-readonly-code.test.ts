@@ -18,7 +18,7 @@ const hookSource = readFileSync(
 );
 
 test("the activation request form requires an explicit activation code selection", () => {
-  assert.match(formSource, /items=\{selectableActivationCodes\}/);
+  assert.match(formSource, /items=\{displayedActivationCodes\}/);
   assert.match(formSource, /selectActivationCode\(code\)/);
   assert.match(formSource, /t\("chooseDifferentActivationCode"\)/);
   assert.doesNotMatch(hookSource, /resolveAssignedActivationCodeForProduct/);
@@ -43,5 +43,36 @@ test("an eligible admin can assign a missing activation code without leaving the
   assert.match(
     formSource,
     /onAssigned=\{async \(\) => \{[\s\S]*?activationCodesQuery\.refetch\(\)/,
+  );
+});
+
+test("activation code search queries the server instead of filtering only loaded pages", () => {
+  assert.match(
+    hookSource,
+    /const \[activationCodeSearch, setActivationCodeSearch\]/,
+  );
+  assert.match(
+    hookSource,
+    /const debouncedActivationCodeSearch = useDebounce\([\s\S]*?activationCodeSearch\.trim\(\),[\s\S]*?300,[\s\S]*?\)/,
+  );
+  assert.match(
+    hookSource,
+    /queryKey:\s*\[[\s\S]*?"available-activation-codes"[\s\S]*?debouncedActivationCodeSearch[\s\S]*?\]/,
+  );
+  assert.match(
+    hookSource,
+    /search:\s*debouncedActivationCodeSearch\s*\|\|\s*undefined/,
+  );
+  assert.doesNotMatch(
+    formSource,
+    /code\.maskedCode\.toLocaleLowerCase\(\)\.includes\(search\)/,
+  );
+  assert.match(
+    formSource,
+    /const displayedActivationCodes = isActivationCodeSearchPending\s*\? \[\]\s*:\s*selectableActivationCodes/,
+  );
+  assert.match(
+    formSource,
+    /selectedProduct &&\s*!activationCodeSearch\.trim\(\) &&\s*activationCodesQuery\.isSuccess/,
   );
 });

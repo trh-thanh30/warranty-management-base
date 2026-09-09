@@ -42,6 +42,7 @@ const baseValues: WarrantyActivationRequestCreateFormValues = {
   customerId: "",
   customerName: "",
   customerPhone: "",
+  updateCustomerProfile: false,
   dealerAddress: "",
   dealerDistrict: "",
   dealerId: "",
@@ -105,6 +106,17 @@ test("admin activation accepts an address made only from ward and province", () 
   const result = warrantyActivationRequestCreateFormSchema.safeParse({
     ...validFormValues,
     addressDetail: "",
+  });
+
+  assert.equal(result.success, true);
+});
+
+test("admin activation accepts a selected customer without address information", () => {
+  const result = warrantyActivationRequestCreateFormSchema.safeParse({
+    ...validFormValues,
+    addressDetail: "",
+    provinceCode: "",
+    wardCode: "",
   });
 
   assert.equal(result.success, true);
@@ -226,6 +238,26 @@ test("admin activation request body combines form and selected product data", ()
       wardName: "Phuong Sai Gon",
     },
   );
+});
+
+test("admin activation request body opts into updating the linked Customer profile", () => {
+  const body = toAdminActivationRequestBody({
+    product: { id: "product-1" } as ProductResponse,
+    provinces,
+    values: {
+      ...baseValues,
+      categoryId: "category-1",
+      customerId: "68a1578a-b13e-45de-b008-e357392be715",
+      customerName: "Nguyen Van An",
+      customerPhone: "0901234567",
+      provinceCode: "79",
+      updateCustomerProfile: true,
+      wardCode: "1",
+    },
+    wards,
+  });
+
+  assert.equal(body.updateCustomerProfile, true);
 });
 
 test("admin activation request body maps physical products to configured positions", () => {

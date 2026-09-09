@@ -32,6 +32,7 @@ export type WarrantyActivationRequestCreateFormValues = {
   customerId: string;
   customerName: string;
   customerPhone: string;
+  updateCustomerProfile: boolean;
   dealerAddress: string;
   dealerDistrict: string;
   dealerId: string;
@@ -85,6 +86,7 @@ export const warrantyActivationRequestCreateFormSchema = z
       .refine((value) => value.length <= 160, { message: "emailInvalid" }),
     customerName: z.string().trim().min(2, "customerNameRequired").max(120),
     customerPhone: z.string().trim().min(6, "phoneInvalid").max(32),
+    updateCustomerProfile: z.boolean(),
     dealerAddress: z.string().trim().max(255),
     dealerDistrict: z.string().trim().max(120),
     dealerId: z.string().trim(),
@@ -101,11 +103,11 @@ export const warrantyActivationRequestCreateFormSchema = z
     note: z.string().trim().max(1000, "noteLength"),
     productId: z.string().trim(),
     productName: z.string().trim(),
-    provinceCode: z.string().trim().min(1, "provinceRequired"),
+    provinceCode: z.string().trim(),
     salesName: z.string().trim().max(120),
     vehicleModel: z.string().trim().max(160),
     vehiclePlate: z.string().trim().max(32),
-    wardCode: z.string().trim().min(1, "wardRequired"),
+    wardCode: z.string().trim(),
     warrantyCode: z.string().trim(),
   })
   .superRefine((value, context) => {

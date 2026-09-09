@@ -37,6 +37,19 @@ describe('CreateAdminWarrantyActivationRequestDto', () => {
     await expect(validate(dto)).resolves.toHaveLength(0);
   });
 
+  it('accepts a selected Customer without address information', async () => {
+    const dto = plainToInstance(CreateAdminWarrantyActivationRequestDto, {
+      ...base,
+      addressDetail: '',
+      provinceCode: '',
+      provinceName: '',
+      wardCode: '',
+      wardName: '',
+    });
+
+    await expect(validate(dto)).resolves.toHaveLength(0);
+  });
+
   it('accepts the optional Customer profile update flag', async () => {
     const dto = plainToInstance(CreateAdminWarrantyActivationRequestDto, {
       ...base,

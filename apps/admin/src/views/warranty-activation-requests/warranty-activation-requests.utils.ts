@@ -233,6 +233,7 @@ export function toAdminActivationRequestBody({
     customerId: values.customerId,
     customerName: values.customerName.trim(),
     customerPhone: values.customerPhone.trim(),
+    updateCustomerProfile: values.updateCustomerProfile || undefined,
     dealerAddress: values.dealerAddress.trim() || undefined,
     dealerDistrict: values.dealerDistrict.trim() || undefined,
     dealerId: values.dealerId || undefined,
