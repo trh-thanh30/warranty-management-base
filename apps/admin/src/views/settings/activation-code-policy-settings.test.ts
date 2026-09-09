@@ -24,3 +24,14 @@ test("policy form warns that saving synchronizes existing and future code expiry
     /every existing batch and code/,
   );
 });
+
+test("policy form configures minimum, default, and maximum batch quantities", () => {
+  assert.match(componentSource, /t\("minBatchQuantity"\)/);
+  assert.match(componentSource, /t\("defaultBatchQuantity"\)/);
+  assert.match(componentSource, /t\("maxBatchQuantity"\)/);
+  assert.match(componentSource, /minBatchQuantity <= defaultBatchQuantity/);
+  assert.match(componentSource, /defaultBatchQuantity <= maxBatchQuantity/);
+  assert.match(componentSource, /MAX_ACTIVATION_CODES_PER_BATCH/);
+  assert.ok(viMessages.Settings.activationCodePolicy.quantityRangeError);
+  assert.ok(enMessages.Settings.activationCodePolicy.quantityRangeError);
+});

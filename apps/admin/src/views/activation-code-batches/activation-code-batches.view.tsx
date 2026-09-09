@@ -23,6 +23,10 @@ import {
   Input,
   Skeleton,
 } from "@repo/ui";
+import {
+  MAX_ACTIVATION_CODES_PER_BATCH,
+  MIN_ACTIVATION_CODES_PER_BATCH,
+} from "@repo/shared/constants";
 import { PaginationControls } from "@repo/ui/pagination-controls";
 import { AlertCircle, FileText, KeyRound, Plus, Settings2 } from "lucide-react";
 import Link from "next/link";
@@ -144,14 +148,18 @@ export function ActivationCodeBatchesView() {
                 <Input
                   autoFocus
                   inputMode="numeric"
-                  max={1000}
-                  min={50}
+                  max={MAX_ACTIVATION_CODES_PER_BATCH}
+                  min={MIN_ACTIVATION_CODES_PER_BATCH}
                   onChange={(event) =>
                     directory.setQuantity(event.target.value)
                   }
+                  placeholder={t("quantityPlaceholder")}
                   type="number"
                   value={directory.quantity}
                 />
+                <span className="block text-xs font-normal leading-5 text-slate-500 dark:text-slate-400">
+                  {t("quantityDescription")}
+                </span>
               </label>
               <div className="flex justify-end gap-2">
                 <Button

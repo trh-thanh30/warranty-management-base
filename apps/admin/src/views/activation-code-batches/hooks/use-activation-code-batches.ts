@@ -23,7 +23,7 @@ export function useActivationCodeBatches() {
   const [status, setStatus] = useState<ActivationCodeReportStatus | "">("");
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [batchName, setBatchName] = useState("");
-  const [quantity, setQuantity] = useState("50");
+  const [quantity, setQuantity] = useState("");
   const queryClient = useQueryClient();
   const debouncedSearch = useDebounce(search.trim(), 300);
   const query = useQuery({
@@ -41,7 +41,7 @@ export function useActivationCodeBatches() {
     mutationFn: () =>
       activationCodesService.createBatch({
         batchName: batchName.trim() || undefined,
-        quantity: Number(quantity),
+        quantity: quantity.trim() ? Number(quantity) : undefined,
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({
@@ -49,7 +49,7 @@ export function useActivationCodeBatches() {
       });
       setCreateOpen(false);
       setBatchName("");
-      setQuantity("50");
+      setQuantity("");
     },
   });
   const revokeMutation = useMutation({
