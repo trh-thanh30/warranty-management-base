@@ -15,7 +15,7 @@ export type CreateWarrantyActivationRequestCommand = {
   customerName: string;
   customerPhone: string;
   customerEmail: string | null;
-  customerBirthdate?: Date;
+  customerBirthdate?: Date | null;
   categoryId?: string;
   productId: string;
   dealerId?: string;
@@ -53,7 +53,13 @@ export type CreateWarrantyActivationRequestCommand = {
 export type CreateWarrantyActivationRequestOptions = {
   customerProfile?: {
     id: string;
-    birthdate?: Date;
+    update?: {
+      address: string | null;
+      birthdate: Date | null;
+      email: string | null;
+      fullName: string;
+      phone: string;
+    };
   };
 };
 

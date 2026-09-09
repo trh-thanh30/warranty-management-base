@@ -1,4 +1,4 @@
-import { BadRequestError } from '@/common/response';
+import { BadRequestError, ForbiddenError } from '@/common/response';
 import { CreateAdminWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-admin-warranty-activation-request.use-case';
 import { product_status, warranty_status } from '@prisma/client';
 
@@ -10,6 +10,7 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
   const generateWarrantyCodeUseCase = { execute: jest.fn() };
   const createWarrantyActivationRequestUseCase = { execute: jest.fn() };
   const customersRepository = { findById: jest.fn() };
+  const permissionService = { hasPermission: jest.fn() };
   const dto = {
     productId: '23684bbd-b6e0-401a-9ba4-97e1b98176fd',
     addressDetail: '1 Nguyen Trai',
@@ -32,6 +33,7 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
       full_name: dto.customerName,
       phone: dto.customerPhone,
     });
+    permissionService.hasPermission.mockResolvedValue(true);
   });
 
   it('rejects an unknown selected Customer', async () => {
@@ -90,7 +92,7 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
     );
   });
 
-  it('passes a submitted birthdate to the atomic Customer update context', async () => {
+  it('keeps a submitted birthdate in the request snapshot by default', async () => {
     createWarrantyActivationRequestUseCase.execute.mockResolvedValue({
       id: 'request-id',
     });
@@ -118,13 +120,13 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
       expect.objectContaining({
         customerProfile: {
           id: dto.customerId,
-          birthdate: new Date('2001-01-02T00:00:00.000Z'),
+          update: undefined,
         },
       }),
     );
   });
 
-  it('does not overwrite Customer birthdate from an activation request snapshot while editing', async () => {
+  it('preserves submitted customer snapshot fields while editing', async () => {
     createWarrantyActivationRequestUseCase.execute.mockResolvedValue({
       id: 'request-id',
     });
@@ -158,14 +160,98 @@ describe('CreateAdminWarrantyActivationRequestUseCase', () => {
     );
 
     expect(createWarrantyActivationRequestUseCase.execute).toHaveBeenCalledWith(
-      expect.objectContaining({ customerBirthdate: '2005-12-11' }),
+      expect.objectContaining({
+        customerBirthdate: '1990-01-01',
+        customerEmail: dto.customerEmail,
+        customerName: dto.customerName,
+        customerPhone: dto.customerPhone,
+      }),
       expect.objectContaining({
         customerProfile: {
           id: dto.customerId,
-          birthdate: undefined,
+          update: undefined,
         },
       }),
     );
+  });
+
+  it('passes a complete Customer update to the atomic request transaction when explicitly selected', async () => {
+    createWarrantyActivationRequestUseCase.execute.mockResolvedValue({
+      id: 'request-id',
+    });
+    const useCase = new CreateAdminWarrantyActivationRequestUseCase(
+      productsRepository as never,
+      generateWarrantyCodeUseCase as never,
+      createWarrantyActivationRequestUseCase as never,
+      customersRepository as never,
+      permissionService as never,
+    );
+
+    await useCase.execute(
+      {
+        ...dto,
+        categoryId: 'fd47a803-b240-4935-aab4-554d44fce684',
+        customerBirthdate: '1990-01-01',
+        items: [
+          {
+            positionKey: 'windshield',
+            productId: '23684bbd-b6e0-401a-9ba4-97e1b98176fd',
+          },
+        ],
+        updateCustomerProfile: true,
+      },
+      {
+        actor: { id: 'moderator-id', role: 'MODERATOR' },
+        updateRequest: {
+          id: 'request-id',
+          items: [],
+          requestCode: 'WAR-20260909-0001',
+          warrantyCode: 'WM-EXISTING',
+        },
+      },
+    );
+
+    expect(permissionService.hasPermission).toHaveBeenCalledWith(
+      'moderator-id',
+      'MODERATOR',
+      'CUSTOMER_UPDATE',
+    );
+    expect(createWarrantyActivationRequestUseCase.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ customerBirthdate: '1990-01-01' }),
+      expect.objectContaining({
+        customerProfile: {
+          id: dto.customerId,
+          update: {
+            address: '1 Nguyen Trai, Phuong Ben Thanh, TP Ho Chi Minh',
+            birthdate: new Date('1990-01-01T00:00:00.000Z'),
+            email: dto.customerEmail,
+            fullName: dto.customerName,
+            phone: dto.customerPhone,
+          },
+        },
+      }),
+    );
+  });
+
+  it('rejects a Customer profile update without CUSTOMER_UPDATE permission', async () => {
+    permissionService.hasPermission.mockResolvedValue(false);
+    const useCase = new CreateAdminWarrantyActivationRequestUseCase(
+      productsRepository as never,
+      generateWarrantyCodeUseCase as never,
+      createWarrantyActivationRequestUseCase as never,
+      customersRepository as never,
+      permissionService as never,
+    );
+
+    await expect(
+      useCase.execute(
+        { ...dto, updateCustomerProfile: true },
+        { actor: { id: 'moderator-id', role: 'MODERATOR' } },
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenError);
+    expect(
+      createWarrantyActivationRequestUseCase.execute,
+    ).not.toHaveBeenCalled();
   });
 
   it('generates and synchronizes a missing warranty code before creating the request', async () => {

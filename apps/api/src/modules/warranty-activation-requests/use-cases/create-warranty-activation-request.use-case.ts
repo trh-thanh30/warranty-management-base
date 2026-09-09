@@ -21,6 +21,7 @@ import {
 } from '@/modules/warranty-activation-requests/utils/warranty-activation-request-normalization.utils';
 import {
   CreateWarrantyActivationRequestCommand,
+  CreateWarrantyActivationRequestOptions,
   WARRANTY_ACTIVATION_REQUEST_SOURCE,
   WarrantyActivationRequestSource,
   UpdateWarrantyActivationRequestContext,
@@ -83,10 +84,7 @@ export class CreateWarrantyActivationRequestUseCase {
     dto: CreateWarrantyActivationRequestDto,
     context: {
       createdByUserId?: string;
-      customerProfile?: {
-        id: string;
-        birthdate?: Date;
-      };
+      customerProfile?: CreateWarrantyActivationRequestOptions['customerProfile'];
       source?: WarrantyActivationRequestSource;
       actor?: DealerAccessActor;
       updateRequest?: UpdateWarrantyActivationRequestContext;
@@ -539,10 +537,7 @@ export class CreateWarrantyActivationRequestUseCase {
 
   private createRequest(
     data: CreateWarrantyActivationRequestCommand,
-    customerProfile?: {
-      id: string;
-      birthdate?: Date;
-    },
+    customerProfile?: CreateWarrantyActivationRequestOptions['customerProfile'],
     updateRequestId?: string,
   ) {
     if (updateRequestId) {

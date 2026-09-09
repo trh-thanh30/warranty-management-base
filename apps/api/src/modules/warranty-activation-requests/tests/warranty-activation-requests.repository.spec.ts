@@ -12,7 +12,7 @@ import {
 describe('WarrantyActivationRequestsRepository', () => {
   const queries = new WarrantyActivationRequestQueries();
 
-  it('updates Customer birthdate and creates the request in one transaction', async () => {
+  it('updates Customer profile and creates the request in one transaction', async () => {
     const updateCustomer = jest.fn().mockResolvedValue({ id: 'customer-id' });
     const createRequest = jest.fn().mockResolvedValue({ id: 'request-id' });
     const transaction = jest.fn((callback: (tx: unknown) => unknown) =>
@@ -26,14 +26,27 @@ describe('WarrantyActivationRequestsRepository', () => {
       queries,
     );
     const birthdate = new Date('2005-12-11T00:00:00.000Z');
+    const update = {
+      address: '1 Nguyen Trai, Phuong Ben Thanh, TP Ho Chi Minh',
+      birthdate,
+      email: 'customer@example.com',
+      fullName: 'Nguyen Van A',
+      phone: '0901234567',
+    };
 
     await repository.create(createCommand('WAR-20260820-0001'), {
-      customerProfile: { id: 'customer-id', birthdate },
+      customerProfile: { id: 'customer-id', update },
     });
 
     expect(updateCustomer).toHaveBeenCalledWith({
       where: { id: 'customer-id' },
-      data: { birthdate },
+      data: {
+        address: update.address,
+        birthdate,
+        email: update.email,
+        full_name: update.fullName,
+        phone: update.phone,
+      },
     });
     expect(createRequest).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -44,7 +57,7 @@ describe('WarrantyActivationRequestsRepository', () => {
     );
   });
 
-  it('connects the Customer without overwriting birthdate when it is omitted', async () => {
+  it('connects the Customer without updating its profile by default', async () => {
     const updateCustomer = jest.fn();
     const createRequest = jest.fn().mockResolvedValue({ id: 'request-id' });
     const transaction = jest.fn((callback: (tx: unknown) => unknown) =>
@@ -61,7 +74,7 @@ describe('WarrantyActivationRequestsRepository', () => {
     await repository.create(createCommand('WAR-20260820-0002'), {
       customerProfile: {
         id: 'customer-id',
-        birthdate: undefined,
+        update: undefined,
       },
     });
 
@@ -148,6 +161,7 @@ describe('WarrantyActivationRequestsRepository', () => {
     const deleteItems = jest.fn().mockResolvedValue({ count: 1 });
     const createItems = jest.fn().mockResolvedValue({ count: 1 });
     const updateRequest = jest.fn().mockResolvedValue({ id: 'request-id' });
+    const updateCustomer = jest.fn().mockResolvedValue({ id: 'customer-id' });
     const findRequest = jest
       .fn()
       .mockResolvedValueOnce({
@@ -166,6 +180,7 @@ describe('WarrantyActivationRequestsRepository', () => {
               : reserveCodes(args);
           }),
         },
+        customer: { update: updateCustomer },
         warrantyActivationRequest: {
           findUnique: findRequest,
           findUniqueOrThrow: jest
@@ -200,7 +215,16 @@ describe('WarrantyActivationRequestsRepository', () => {
       },
     ];
 
-    await repository.updatePending('request-id', command);
+    const customerUpdate = {
+      address: '1 Nguyen Trai, Phuong Ben Thanh, TP Ho Chi Minh',
+      birthdate: new Date('1990-01-01T00:00:00.000Z'),
+      email: 'customer@example.com',
+      fullName: 'Nguyen Van A',
+      phone: '0901234567',
+    };
+    await repository.updatePending('request-id', command, {
+      customerProfile: { id: 'customer-id', update: customerUpdate },
+    });
 
     expect(guardPendingRequest).toHaveBeenCalledWith({
       where: { id: 'request-id', status: 'PENDING' },
@@ -226,6 +250,16 @@ describe('WarrantyActivationRequestsRepository', () => {
     });
     expect(createItems).toHaveBeenCalledTimes(1);
     expect(updateRequest).toHaveBeenCalledTimes(1);
+    expect(updateCustomer).toHaveBeenCalledWith({
+      where: { id: 'customer-id' },
+      data: {
+        address: customerUpdate.address,
+        birthdate: customerUpdate.birthdate,
+        email: customerUpdate.email,
+        full_name: customerUpdate.fullName,
+        phone: customerUpdate.phone,
+      },
+    });
   });
 
   it('translates Prisma unique violations into application conflict errors', async () => {

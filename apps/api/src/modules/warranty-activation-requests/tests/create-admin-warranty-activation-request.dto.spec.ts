@@ -37,6 +37,28 @@ describe('CreateAdminWarrantyActivationRequestDto', () => {
     await expect(validate(dto)).resolves.toHaveLength(0);
   });
 
+  it('accepts the optional Customer profile update flag', async () => {
+    const dto = plainToInstance(CreateAdminWarrantyActivationRequestDto, {
+      ...base,
+      updateCustomerProfile: true,
+    });
+
+    await expect(validate(dto)).resolves.toHaveLength(0);
+  });
+
+  it('rejects a non-boolean Customer profile update flag', async () => {
+    const dto = plainToInstance(CreateAdminWarrantyActivationRequestDto, {
+      ...base,
+      updateCustomerProfile: 'true',
+    });
+
+    const errors = await validate(dto);
+
+    expect(
+      errors.some((error) => error.property === 'updateCustomerProfile'),
+    ).toBe(true);
+  });
+
   it('rejects a future customer birthdate', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-08-20T12:00:00.000Z'));
 
