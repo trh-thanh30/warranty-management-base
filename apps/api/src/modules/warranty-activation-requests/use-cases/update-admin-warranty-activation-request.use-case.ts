@@ -36,7 +36,20 @@ export class UpdateAdminWarrantyActivationRequestUseCase {
       );
     }
 
-    return this.createAdminUseCase.execute(dto, {
+    const currentItem =
+      request.items.length === 1 &&
+      request.items[0].product_id === dto.productId
+        ? request.items[0]
+        : null;
+    const preservedActivationCodeId =
+      !dto.activationCodeId && !dto.items?.length
+        ? (request.activation_code_id ?? currentItem?.activation_code_id)
+        : null;
+    const updateDto = preservedActivationCodeId
+      ? { ...dto, activationCodeId: preservedActivationCodeId }
+      : dto;
+
+    return this.createAdminUseCase.execute(updateDto, {
       actor,
       updateRequest: {
         id: request.id,

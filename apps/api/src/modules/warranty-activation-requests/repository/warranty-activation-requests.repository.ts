@@ -60,10 +60,16 @@ export class WarrantyActivationRequestsRepository {
               }
             }
 
-            if (customerProfile?.birthdate !== undefined) {
+            if (customerProfile?.update) {
               await tx.customer.update({
                 where: { id: customerProfile.id },
-                data: { birthdate: customerProfile.birthdate },
+                data: {
+                  address: customerProfile.update.address,
+                  birthdate: customerProfile.update.birthdate,
+                  email: customerProfile.update.email,
+                  full_name: customerProfile.update.fullName,
+                  phone: customerProfile.update.phone,
+                },
               });
             }
 
@@ -155,10 +161,16 @@ export class WarrantyActivationRequestsRepository {
           }
         }
 
-        if (options.customerProfile?.birthdate !== undefined) {
+        if (options.customerProfile?.update) {
           await tx.customer.update({
             where: { id: options.customerProfile.id },
-            data: { birthdate: options.customerProfile.birthdate },
+            data: {
+              address: options.customerProfile.update.address,
+              birthdate: options.customerProfile.update.birthdate,
+              email: options.customerProfile.update.email,
+              full_name: options.customerProfile.update.fullName,
+              phone: options.customerProfile.update.phone,
+            },
           });
         }
 

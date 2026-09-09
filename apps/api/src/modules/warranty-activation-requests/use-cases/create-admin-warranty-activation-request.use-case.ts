@@ -1,4 +1,9 @@
-import { BadRequestError, NotFoundError } from '@/common/response';
+import { PermissionService } from '@/common/permissions/permissions.service';
+import {
+  BadRequestError,
+  ForbiddenError,
+  NotFoundError,
+} from '@/common/response';
 import { CustomersRepository } from '@/modules/customers/repository/customers.repository';
 import {
   getProductCatalogue,
@@ -8,14 +13,17 @@ import { ProductsRepository } from '@/modules/products/repository/products.repos
 import { GenerateWarrantyCodeUseCase } from '@/modules/products/use-cases/generate-warranty-code.use-case';
 import { CreateAdminWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-admin-warranty-activation-request.dto';
 import { CreateWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-warranty-activation-request.use-case';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import {
+  permission_key,
   product_status,
+  user_role,
   warranty_activation_request_source,
   warranty_status,
 } from '@prisma/client';
 import type { DealerAccessActor } from '@/modules/dealers/service/dealer-access.policy';
 import type { UpdateWarrantyActivationRequestContext } from '@/modules/warranty-activation-requests/warranty-activation-requests.types';
+import { buildWarrantyActivationRequestFullAddress } from '@/modules/warranty-activation-requests/utils/warranty-activation-request-normalization.utils';
 
 @Injectable()
 export class CreateAdminWarrantyActivationRequestUseCase {
@@ -24,6 +32,8 @@ export class CreateAdminWarrantyActivationRequestUseCase {
     private readonly generateWarrantyCodeUseCase: GenerateWarrantyCodeUseCase,
     private readonly createWarrantyActivationRequestUseCase: CreateWarrantyActivationRequestUseCase,
     private readonly customersRepository: CustomersRepository,
+    @Optional()
+    private readonly permissionService?: PermissionService,
   ) {}
 
   async execute(
@@ -42,19 +52,37 @@ export class CreateAdminWarrantyActivationRequestUseCase {
       });
     }
 
-    const submittedBirthdate =
-      !context.updateRequest && dto.customerBirthdate
-        ? new Date(dto.customerBirthdate)
-        : undefined;
-    const effectiveBirthdate = submittedBirthdate ?? customer.birthdate;
+    if (dto.updateCustomerProfile) {
+      const canUpdateCustomer =
+        context.actor &&
+        this.permissionService &&
+        (await this.permissionService.hasPermission(
+          context.actor.id,
+          context.actor.role as user_role,
+          permission_key.CUSTOMER_UPDATE,
+        ));
+      if (!canUpdateCustomer) {
+        throw new ForbiddenError(
+          'Customer update permission is required',
+          'CUSTOMER_UPDATE_REQUIRED',
+        );
+      }
+    }
+
+    const submittedBirthdate = dto.customerBirthdate
+      ? new Date(dto.customerBirthdate)
+      : undefined;
+    const effectiveBirthdate = context.updateRequest
+      ? (submittedBirthdate ?? null)
+      : (submittedBirthdate ?? customer.birthdate);
     const customerDto = {
       ...dto,
       customerBirthdate: effectiveBirthdate
         ? effectiveBirthdate.toISOString().slice(0, 10)
         : undefined,
-      customerEmail: customer.email ?? undefined,
-      customerName: customer.full_name,
-      customerPhone: customer.phone ?? dto.customerPhone,
+      customerEmail: dto.customerEmail?.trim() || undefined,
+      customerName: dto.customerName.trim(),
+      customerPhone: dto.customerPhone.trim(),
     };
     const createContext = {
       createdByUserId: context.createdByUserId,
@@ -62,7 +90,15 @@ export class CreateAdminWarrantyActivationRequestUseCase {
       source: warranty_activation_request_source.ADMIN_PORTAL,
       customerProfile: {
         id: customer.id,
-        birthdate: submittedBirthdate,
+        update: dto.updateCustomerProfile
+          ? {
+              address: buildWarrantyActivationRequestFullAddress(dto) || null,
+              birthdate: submittedBirthdate ?? null,
+              email: dto.customerEmail?.trim() || null,
+              fullName: dto.customerName.trim(),
+              phone: dto.customerPhone.trim(),
+            }
+          : undefined,
       },
       updateRequest: context.updateRequest,
     };

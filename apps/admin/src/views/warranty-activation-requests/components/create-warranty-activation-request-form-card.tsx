@@ -27,7 +27,6 @@ import { useTranslations } from "next-intl";
 import { Controller } from "react-hook-form";
 import { useMemo, useState } from "react";
 import { CreateCustomerDialog } from "../../customers/components/create-customer-dialog";
-import { EditCustomerAddressDialog } from "../../customers/components/edit-customer-address-dialog";
 import { CreateDealerDialog } from "../../dealers/components/create-dealer-dialog";
 import { AssignActivationCodesDialog } from "../../products/components/assign-activation-codes-dialog";
 import { useCreateWarrantyActivationRequestForm } from "../hooks/use-create-warranty-activation-request-form";
@@ -44,6 +43,7 @@ import {
 } from "../warranty-activation-requests.utils";
 import { CategoryActivationInputFields } from "./category-activation-input-fields";
 import { CustomerSearchResult } from "./customer-search-result";
+import { EditActivationRequestCustomerDialog } from "./edit-activation-request-customer-dialog";
 import { ProductSearchResult } from "./product-search-result";
 import { SelectedCustomerSummaryCard } from "./selected-customer-summary-card";
 import { SelectedDealerSummaryCard } from "./selected-dealer-summary-card";
@@ -69,15 +69,14 @@ export function CreateWarrantyActivationRequestFormCard({
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const { hasPermission } = usePermissions();
   const [categorySearch, setCategorySearch] = useState("");
-  const [activationCodeSearch, setActivationCodeSearch] = useState("");
   const [isCreateCustomerDialogOpen, setCreateCustomerDialogOpen] =
     useState(false);
-  const [isEditCustomerAddressDialogOpen, setEditCustomerAddressDialogOpen] =
-    useState(false);
+  const [isEditCustomerDialogOpen, setEditCustomerDialogOpen] = useState(false);
   const [isCreateDealerDialogOpen, setCreateDealerDialogOpen] = useState(false);
   const [isAssignActivationCodeDialogOpen, setAssignActivationCodeDialogOpen] =
     useState(false);
   const {
+    activationCodeSearch,
     activationFields,
     activationFieldsQuery,
     activationCodesQuery,
@@ -103,6 +102,7 @@ export function CreateWarrantyActivationRequestFormCard({
     isSaving,
     isHydratingEditRequest,
     isEditHydrationError,
+    isActivationCodeSearchPending,
     loadMoreProducts,
     mutationIsPending,
     onSubmit,
@@ -118,15 +118,18 @@ export function CreateWarrantyActivationRequestFormCard({
     selectedActivationProducts,
     selectedItemActivationCodes,
     selectedActivationCode,
+    updateCustomerProfile,
     confirmCategoryChange,
     selectCategory,
     selectCustomer,
+    updateCustomerSnapshot,
     selectDealer,
     selectProduct,
     selectActivationCode,
     selectActivationProduct,
     selectItemActivationCode,
     setCustomerSearch,
+    setActivationCodeSearch,
     setDealerSearch,
     setProductSearch,
     usesProductSelectors,
@@ -146,21 +149,18 @@ export function CreateWarrantyActivationRequestFormCard({
   const canAssignActivationCode = hasPermission(
     PERMISSIONS.ACTIVATION_CODE_ASSIGN_PRODUCT,
   );
+  const canUpdateCustomerProfile = hasPermission(PERMISSIONS.CUSTOMER_UPDATE);
   const filteredCategories = useMemo(
     () => filterActivationRequestCategories(categories, categorySearch),
     [categories, categorySearch],
   );
-  const selectableActivationCodes = useMemo(() => {
-    const search = activationCodeSearch.trim().toLocaleLowerCase();
-    return availableActivationCodes.filter(
-      (code) =>
-        code.selectable &&
-        (!search ||
-          code.maskedCode.toLocaleLowerCase().includes(search) ||
-          code.batchName.toLocaleLowerCase().includes(search) ||
-          code.batchCode.toLocaleLowerCase().includes(search)),
-    );
-  }, [activationCodeSearch, availableActivationCodes]);
+  const selectableActivationCodes = useMemo(
+    () => availableActivationCodes.filter((code) => code.selectable),
+    [availableActivationCodes],
+  );
+  const displayedActivationCodes = isActivationCodeSearchPending
+    ? []
+    : selectableActivationCodes;
   const hasSelectableActivationCodes = availableActivationCodes.some(
     (code) => code.selectable,
   );
@@ -567,9 +567,7 @@ export function CreateWarrantyActivationRequestFormCard({
               <SelectedCustomerSummaryCard
                 address={selectedCustomer.address}
                 addressError={formatActivationRequestCreateFieldError(
-                  errors.addressDetail?.message ??
-                    errors.provinceCode?.message ??
-                    errors.wardCode?.message,
+                  errors.addressDetail?.message,
                   t,
                 )}
                 customerCode={selectedCustomer.customerCode}
@@ -578,12 +576,13 @@ export function CreateWarrantyActivationRequestFormCard({
                 labels={{
                   address: t("address"),
                   customerCode: t("customerCode"),
-                  editAddress: t("editCustomerAddress"),
+                  editCustomer: t("editCustomer"),
                   email: t("email"),
+                  noInformation: t("noInformation"),
                   phone: t("phone"),
                   selected: t("customerSelected"),
                 }}
-                onEditAddress={() => setEditCustomerAddressDialogOpen(true)}
+                onEditCustomer={() => setEditCustomerDialogOpen(true)}
                 phone={selectedCustomer.phone}
               />
             ) : null}
@@ -595,13 +594,20 @@ export function CreateWarrantyActivationRequestFormCard({
               >
                 <SearchDropdown
                   disabled={!selectedProduct}
-                  emptyLabel={t("noAvailableActivationCodes")}
+                  emptyLabel={
+                    activationCodeSearch.trim()
+                      ? t("noMatchingActivationCode")
+                      : t("noAvailableActivationCodes")
+                  }
                   errorLabel={t("activationCodesLoadError")}
                   getItemKey={(code) => code.id}
                   id="create-activation-request-activation-code"
                   isError={activationCodesQuery.isError}
-                  isLoading={activationCodesQuery.isFetching}
-                  items={selectableActivationCodes}
+                  isLoading={
+                    isActivationCodeSearchPending ||
+                    activationCodesQuery.isFetching
+                  }
+                  items={displayedActivationCodes}
                   loadingLabel={t("loadingActivationCodes")}
                   onItemSelect={(code) => {
                     selectActivationCode(code);
@@ -658,6 +664,7 @@ export function CreateWarrantyActivationRequestFormCard({
                     {t("chooseDifferentActivationCode")}
                   </Button>
                 ) : selectedProduct &&
+                  !activationCodeSearch.trim() &&
                   activationCodesQuery.isSuccess &&
                   !hasSelectableActivationCodes ? (
                   <div
@@ -849,11 +856,13 @@ export function CreateWarrantyActivationRequestFormCard({
           }}
           open={isCreateDealerDialogOpen}
         />
-        <EditCustomerAddressDialog
+        <EditActivationRequestCustomerDialog
+          canUpdateCustomerProfile={canUpdateCustomerProfile}
           customer={selectedCustomer}
-          onOpenChange={setEditCustomerAddressDialogOpen}
-          onSaved={selectCustomer}
-          open={isEditCustomerAddressDialogOpen}
+          onOpenChange={setEditCustomerDialogOpen}
+          onSaved={updateCustomerSnapshot}
+          open={isEditCustomerDialogOpen}
+          updateCustomerProfile={updateCustomerProfile}
         />
         <AssignActivationCodesDialog
           onAssigned={async () => {

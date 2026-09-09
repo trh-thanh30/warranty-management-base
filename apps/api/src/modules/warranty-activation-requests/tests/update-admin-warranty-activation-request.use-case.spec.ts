@@ -22,7 +22,7 @@ describe('UpdateAdminWarrantyActivationRequestUseCase', () => {
     dealerAccessPolicy.resolveAccessibleDealerIds.mockResolvedValue(undefined);
   });
 
-  it('updates a pending request through the existing validated admin flow', async () => {
+  it('preserves the current item activation code when a single-product edit omits it', async () => {
     repository.findById.mockResolvedValue({
       id: 'request-id',
       request_code: 'WAR-20260909-0001',
@@ -49,22 +49,25 @@ describe('UpdateAdminWarrantyActivationRequestUseCase', () => {
       role: 'ADMIN',
     });
 
-    expect(createAdminUseCase.execute).toHaveBeenCalledWith(dto, {
-      actor: { id: 'admin-id', role: 'ADMIN' },
-      updateRequest: {
-        id: 'request-id',
-        items: [
-          {
-            activationCodeId: 'code-id',
-            positionKey: 'primaryProduct',
-            productId: dto.productId,
-            warrantyCode: 'WM-EXISTING',
-          },
-        ],
-        requestCode: 'WAR-20260909-0001',
-        warrantyCode: 'WM-EXISTING',
+    expect(createAdminUseCase.execute).toHaveBeenCalledWith(
+      { ...dto, activationCodeId: 'code-id' },
+      {
+        actor: { id: 'admin-id', role: 'ADMIN' },
+        updateRequest: {
+          id: 'request-id',
+          items: [
+            {
+              activationCodeId: 'code-id',
+              positionKey: 'primaryProduct',
+              productId: dto.productId,
+              warrantyCode: 'WM-EXISTING',
+            },
+          ],
+          requestCode: 'WAR-20260909-0001',
+          warrantyCode: 'WM-EXISTING',
+        },
       },
-    });
+    );
     expect(result).toEqual({ id: 'request-id' });
   });
 
