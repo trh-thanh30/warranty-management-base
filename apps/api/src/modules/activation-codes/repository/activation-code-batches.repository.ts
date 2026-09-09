@@ -16,6 +16,7 @@ import {
 import type { ActivationCodeBatchRevokeScope } from '@repo/shared';
 
 export class ProductActivationCodeReplacementConflictError extends Error {}
+export class ProductActivationCodeAssignmentConflictError extends Error {}
 
 export type CreateActivationCodeBatchRecord = {
   batchCode: string;
@@ -50,6 +51,7 @@ export class ActivationCodeBatchesRepository {
   }) {
     const { page, limit, skip, take } = normalizePagination(filters);
     const search = filters.search?.trim();
+    const now = new Date();
     const where: Prisma.ActivationCodeBatchWhereInput = {
       ...(search
         ? {
@@ -73,7 +75,14 @@ export class ActivationCodeBatchesRepository {
           orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
           skip,
           take,
-          include: { codes: { select: { status: true, product_id: true } } },
+          include: {
+            codes: { select: { status: true, product_id: true } },
+            _count: {
+              select: {
+                codes: { where: this.buildAssignableWhere({}, now) },
+              },
+            },
+          },
         }),
         tx.activationCodeBatch.count({ where }),
       ]);
@@ -100,6 +109,7 @@ export class ActivationCodeBatchesRepository {
             quantity: batch.quantity,
             expiresAt: batch.expires_at,
             createdAt: batch.created_at,
+            assignableCount: batch._count.codes,
             assignedCount,
             statusCounts,
           };
@@ -599,16 +609,68 @@ export class ActivationCodeBatchesRepository {
   }
 
   assignProduct(ids: string[], productId: string, now: Date) {
-    return this.prismaService.activationCode.updateMany({
-      where: {
-        id: { in: ids },
-        status: activation_code_status.AVAILABLE,
-        expires_at: { gt: now },
-        request: { is: null },
-        request_items: { none: {} },
-        warranty: { is: null },
-      },
-      data: { product_id: productId },
+    return this.prismaService.$transaction(async (tx) => {
+      const result = await tx.activationCode.updateMany({
+        where: {
+          id: { in: ids },
+          product_id: null,
+          status: activation_code_status.AVAILABLE,
+          expires_at: { gt: now },
+          request: { is: null },
+          request_items: { none: {} },
+          warranty: { is: null },
+        },
+        data: { product_id: productId },
+      });
+      if (result.count !== ids.length) {
+        throw new ProductActivationCodeAssignmentConflictError();
+      }
+      return result;
+    });
+  }
+
+  assignProductByBatch(input: {
+    batchId: string;
+    productId: string;
+    now: Date;
+    from?: number;
+    to?: number;
+  }) {
+    return this.prismaService.$transaction(async (tx) => {
+      const batch = await tx.activationCodeBatch.findUnique({
+        where: { id: input.batchId },
+        select: { id: true },
+      });
+      if (!batch) return null;
+
+      const codes = await tx.activationCode.findMany({
+        where: this.buildAssignableWhere(
+          { batch_id: input.batchId },
+          input.now,
+        ),
+        orderBy: [{ created_at: 'asc' }, { id: 'asc' }],
+        ...(input.from !== undefined ? { skip: input.from - 1 } : {}),
+        ...(input.from !== undefined && input.to !== undefined
+          ? { take: input.to - input.from + 1 }
+          : {}),
+        select: { id: true },
+      });
+      const activationCodeIds = codes.map((code) => code.id);
+      if (activationCodeIds.length === 0) {
+        return { activationCodeIds, count: 0 };
+      }
+
+      const result = await tx.activationCode.updateMany({
+        where: this.buildAssignableWhere(
+          { id: { in: activationCodeIds } },
+          input.now,
+        ),
+        data: { product_id: input.productId },
+      });
+      if (result.count !== activationCodeIds.length) {
+        throw new ProductActivationCodeAssignmentConflictError();
+      }
+      return { activationCodeIds, count: result.count };
     });
   }
 
@@ -806,6 +868,21 @@ export class ActivationCodeBatchesRepository {
     return {
       ...where,
       status: activation_code_status.AVAILABLE,
+      request: { is: null },
+      request_items: { none: {} },
+      warranty: { is: null },
+    };
+  }
+
+  private buildAssignableWhere(
+    where: Prisma.ActivationCodeWhereInput,
+    now: Date,
+  ): Prisma.ActivationCodeWhereInput {
+    return {
+      ...where,
+      product_id: null,
+      status: activation_code_status.AVAILABLE,
+      expires_at: { gt: now },
       request: { is: null },
       request_items: { none: {} },
       warranty: { is: null },

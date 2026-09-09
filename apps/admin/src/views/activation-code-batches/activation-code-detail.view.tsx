@@ -50,7 +50,7 @@ import {
   Unlink,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 import { ACTIVATION_CODE_BATCH_STATUSES } from "./activation-code-batches.constants";
 import { ActivationCodeProductAssignmentDialog } from "./components/activation-code-product-assignment-dialog";
 
@@ -58,9 +58,11 @@ const PAGE_SIZE = 10;
 
 export function ActivationCodeDetailView({
   batchId,
+  beforeDirectory,
   productId,
 }: {
   batchId?: string;
+  beforeDirectory?: ReactNode;
   productId?: string;
 }) {
   const t = useTranslations("ActivationCodeDetail");
@@ -189,15 +191,14 @@ export function ActivationCodeDetailView({
   return (
     <PermissionGuard permissions={[PERMISSIONS.ACTIVATION_CODE_BATCH_VIEW]}>
       <FormPageShell
-        backHref={
-          productId ? `/products/${productId}` : "/activation-code-batches"
-        }
-        backLabel={t("back")}
+        backHref={productId ? "/products" : "/activation-code-batches"}
+        backLabel={t(productId ? "backToProducts" : "back")}
         description={t("description")}
         eyebrow={t("eyebrow")}
         maxWidthClassName="max-w-7xl"
         title={t("title")}
       >
+        {beforeDirectory}
         <Card>
           <CardHeader>
             <CardTitle>{t("directoryTitle")}</CardTitle>

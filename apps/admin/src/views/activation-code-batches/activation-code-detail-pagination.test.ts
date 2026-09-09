@@ -64,7 +64,11 @@ test("activation code detail uses the shared detail-page shell", async () => {
   assert.match(source, /<FormPageShell/);
   assert.match(
     source,
-    /backHref=\{\s*productId \? `\/products\/\$\{productId\}` : "\/activation-code-batches"\s*\}/,
+    /backHref=\{productId \? "\/products" : "\/activation-code-batches"\}/,
+  );
+  assert.match(
+    source,
+    /backLabel=\{t\(productId \? "backToProducts" : "back"\)\}/,
   );
   assert.doesNotMatch(source, /<PageHeader/);
 });

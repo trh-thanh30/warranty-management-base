@@ -1,13 +1,38 @@
 import { BadRequestError, NotFoundError } from '@/common/response';
-import { ActivationCodeBatchesRepository } from '@/modules/activation-codes/repository/activation-code-batches.repository';
+import {
+  ActivationCodeBatchesRepository,
+  ProductActivationCodeAssignmentConflictError,
+} from '@/modules/activation-codes/repository/activation-code-batches.repository';
 import { Injectable } from '@nestjs/common';
 import { activation_code_status, Prisma, product_status } from '@prisma/client';
+import {
+  MAX_AUTOMATIC_ACTIVATION_CODES_PER_PRODUCT_ASSIGNMENT,
+  type ActivationCodeProductAssignmentMode,
+} from '@repo/shared/constants';
+
+type AssignActivationCodesToProductInput = {
+  activationCodeIds?: string[];
+  assignmentMode?: ActivationCodeProductAssignmentMode;
+  batchId?: string;
+  from?: number;
+  productId: string;
+  to?: number;
+};
 
 @Injectable()
 export class AssignActivationCodesToProductUseCase {
   constructor(private readonly repository: ActivationCodeBatchesRepository) {}
 
-  async execute(input: { activationCodeId: string; productId: string }) {
+  async execute(input: AssignActivationCodesToProductInput) {
+    const activationCodeIds = [...new Set(input.activationCodeIds ?? [])];
+    const assignmentMode = input.assignmentMode ?? 'SELECTED';
+    if (
+      assignmentMode === 'SELECTED' &&
+      (activationCodeIds.length === 0 ||
+        activationCodeIds.length !== input.activationCodeIds?.length)
+    ) {
+      throw this.invalid('ACTIVATION_CODE_ASSIGNMENT_CONFLICT');
+    }
     const product = await this.repository.findAssignmentProduct(
       input.productId,
     );
@@ -23,10 +48,35 @@ export class AssignActivationCodesToProductUseCase {
     }
 
     const now = new Date();
-    const codes = await this.repository.findCodesForAssignment([
-      input.activationCodeId,
-    ]);
-    if (codes.length !== 1) {
+    if (assignmentMode !== 'SELECTED') {
+      if (!input.batchId) {
+        throw this.invalid('ACTIVATION_CODE_ASSIGNMENT_BATCH_REQUIRED');
+      }
+      const range =
+        assignmentMode === 'RANGE'
+          ? this.validateRange(input.from, input.to)
+          : undefined;
+      const result = await this.assignByBatch({
+        batchId: input.batchId,
+        productId: product.id,
+        now,
+        ...range,
+      });
+      if (!result) {
+        throw new NotFoundError(
+          'Activation code batch',
+          'ACTIVATION_CODE_BATCH_NOT_FOUND',
+        );
+      }
+      if (result.count === 0) {
+        throw this.invalid('ACTIVATION_CODE_ASSIGNMENT_EMPTY');
+      }
+      return this.result(result.activationCodeIds, product);
+    }
+
+    const codes =
+      await this.repository.findCodesForAssignment(activationCodeIds);
+    if (codes.length !== activationCodeIds.length) {
       throw new NotFoundError('Activation code', 'ACTIVATION_CODE_NOT_FOUND');
     }
     for (const code of codes) {
@@ -44,13 +94,39 @@ export class AssignActivationCodesToProductUseCase {
       }
     }
 
-    const result = await this.assign(input.activationCodeId, product.id, now);
-    if (result.count !== 1) {
+    const result = await this.assign(activationCodeIds, product.id, now);
+    if (result.count !== activationCodeIds.length) {
       throw this.invalid('ACTIVATION_CODE_ASSIGNMENT_CONFLICT');
     }
 
+    return this.result(activationCodeIds, product);
+  }
+
+  private validateRange(from?: number, to?: number) {
+    if (
+      !Number.isInteger(from) ||
+      !Number.isInteger(to) ||
+      from === undefined ||
+      to === undefined ||
+      from < 1 ||
+      to < from ||
+      to > MAX_AUTOMATIC_ACTIVATION_CODES_PER_PRODUCT_ASSIGNMENT
+    ) {
+      throw this.invalid('ACTIVATION_CODE_ASSIGNMENT_RANGE_INVALID');
+    }
+    return { from, to };
+  }
+
+  private result(
+    activationCodeIds: string[],
+    product: {
+      id: string;
+      product_code: string;
+      display_name: string | null;
+    },
+  ) {
     return {
-      activationCodeId: input.activationCodeId,
+      activationCodeIds,
       product: {
         id: product.id,
         productCode: product.product_code,
@@ -60,20 +136,52 @@ export class AssignActivationCodesToProductUseCase {
     };
   }
 
-  private async assign(activationCodeId: string, productId: string, now: Date) {
+  private async assign(
+    activationCodeIds: string[],
+    productId: string,
+    now: Date,
+  ) {
     try {
       return await this.repository.assignProduct(
-        [activationCodeId],
+        activationCodeIds,
         productId,
         now,
       );
     } catch (error) {
+      if (error instanceof ProductActivationCodeAssignmentConflictError) {
+        throw this.invalid('ACTIVATION_CODE_ASSIGNMENT_CONFLICT', {
+          productId,
+        });
+      }
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
         throw this.invalid('ACTIVATION_CODE_ASSIGNMENT_CONFLICT', {
           productId,
+        });
+      }
+      throw error;
+    }
+  }
+
+  private async assignByBatch(input: {
+    batchId: string;
+    productId: string;
+    now: Date;
+    from?: number;
+    to?: number;
+  }) {
+    try {
+      return await this.repository.assignProductByBatch(input);
+    } catch (error) {
+      if (
+        error instanceof ProductActivationCodeAssignmentConflictError ||
+        (error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === 'P2002')
+      ) {
+        throw this.invalid('ACTIVATION_CODE_ASSIGNMENT_CONFLICT', {
+          productId: input.productId,
         });
       }
       throw error;
