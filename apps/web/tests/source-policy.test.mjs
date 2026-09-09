@@ -407,8 +407,6 @@ test("frontend runtimes retain patched framework and image-processing dependenci
   const rootPackage = JSON.parse(
     await readFile(path.join(repoRoot, "package.json"), "utf8"),
   );
-  const minimumNextVersion = [16, 2, 11];
-
   for (const app of ["web", "admin"]) {
     const [appPackage, dockerfile] = await Promise.all([
       readFile(path.join(repoRoot, "apps", app, "package.json"), "utf8").then(
@@ -416,23 +414,10 @@ test("frontend runtimes retain patched framework and image-processing dependenci
       ),
       readFile(path.join(repoRoot, "apps", app, "Dockerfile"), "utf8"),
     ]);
-    const nextVersion = appPackage.dependencies.next
-      .replace(/^[^\d]*/, "")
-      .split(".")
-      .map(Number);
-
-    assert.ok(
-      nextVersion.some(
-        (part, index) =>
-          part > minimumNextVersion[index] &&
-          nextVersion
-            .slice(0, index)
-            .every(
-              (value, prefixIndex) => value === minimumNextVersion[prefixIndex],
-            ),
-      ) ||
-        nextVersion.every((part, index) => part === minimumNextVersion[index]),
-      `${app} must use Next.js 16.2.11 or newer`,
+    assert.equal(
+      appPackage.dependencies.next,
+      "15.5.25",
+      `${app} must use the patched Next.js 15.5.25 backport`,
     );
     assert.match(
       dockerfile,
@@ -441,7 +426,7 @@ test("frontend runtimes retain patched framework and image-processing dependenci
     );
   }
 
-  assert.equal(rootPackage.pnpm?.overrides?.["next@16.2.11>sharp"], "0.35.0");
+  assert.equal(rootPackage.pnpm?.overrides?.["next@15.5.25>sharp"], "0.35.0");
 });
 
 test("frontend images bake the public API URL into browser bundles", async () => {
