@@ -18,18 +18,26 @@ export function formatDate(
     dateStyle = "medium",
     fallback = "-",
     locale,
-    showTime = false,
+    showTime = true,
     timeZone,
   } = options;
   const date = toDate(value);
 
   if (!date) return fallback;
 
-  return new Intl.DateTimeFormat(locale, {
+  const dateText = new Intl.DateTimeFormat(locale, {
     dateStyle,
-    ...(showTime ? { timeStyle: "short" as const } : {}),
     ...(timeZone ? { timeZone } : {}),
   }).format(date);
+
+  if (!showTime) return dateText;
+
+  const timeText = new Intl.DateTimeFormat(locale, {
+    timeStyle: "short",
+    ...(timeZone ? { timeZone } : {}),
+  }).format(date);
+
+  return `${dateText} · ${timeText}`;
 }
 
 function toDate(value: DateInput | null | undefined) {

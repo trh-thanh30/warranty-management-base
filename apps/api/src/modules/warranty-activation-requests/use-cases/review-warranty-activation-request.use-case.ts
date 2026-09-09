@@ -350,7 +350,19 @@ export class ReviewWarrantyActivationRequestUseCase {
       return customer;
     }
 
-    const existingCustomer = await repository.findCustomerByPhone(input.phone);
+    const customersByPhone = repository.findCustomersByPhone
+      ? await repository.findCustomersByPhone(input.phone)
+      : await this.findLegacyCustomerByPhone(repository, input.phone);
+
+    if (customersByPhone.length > 1) {
+      throw new BadRequestError(
+        'Multiple customer profiles use this phone number. Select a customer profile before approving.',
+        'CUSTOMER_SELECTION_REQUIRED',
+        { customerIds: customersByPhone.map((customer) => customer.id) },
+      );
+    }
+
+    const existingCustomer = customersByPhone[0];
 
     const data = {
       address: input.address,
@@ -367,6 +379,14 @@ export class ReviewWarrantyActivationRequestUseCase {
       customer_code:
         await this.generateCustomerCodeUseCase.generateCustomerCode(repository),
     });
+  }
+
+  private async findLegacyCustomerByPhone(
+    repository: WarrantyActivationReviewTransactionRepository,
+    phone: string,
+  ) {
+    const customer = await repository.findCustomerByPhone(phone);
+    return customer ? [customer] : [];
   }
 
   private async activateDraftWarranty(

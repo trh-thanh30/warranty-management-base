@@ -106,8 +106,7 @@ describe('ActivationCodeBatchesRepository product assignment', () => {
     ).rejects.toBeInstanceOf(ProductActivationCodeAssignmentConflictError);
   });
 
-  it('assigns an inclusive range from the assignable codes in one batch transaction', async () => {
-    const findUnique = jest.fn().mockResolvedValue({ id: 'batch-id' });
+  it('assigns the requested quantity across selected batches by expiry order', async () => {
     const findMany = jest
       .fn()
       .mockResolvedValue([{ id: 'third-code-id' }, { id: 'fourth-code-id' }]);
@@ -115,7 +114,6 @@ describe('ActivationCodeBatchesRepository product assignment', () => {
     const transaction = jest.fn(
       (operation: (tx: unknown) => Promise<unknown>) =>
         operation({
-          activationCodeBatch: { findUnique },
           activationCode: { findMany, updateMany },
         }),
     );
@@ -125,25 +123,23 @@ describe('ActivationCodeBatchesRepository product assignment', () => {
     );
     const now = new Date('2026-09-09T00:00:00.000Z');
 
-    const result = await repository.assignProductByBatch({
-      batchId: 'batch-id',
-      from: 3,
+    const result = await repository.assignProductByQuantity({
+      batchIds: ['batch-a', 'batch-b'],
       now,
       productId: 'product-id',
-      to: 4,
+      quantity: 2,
     });
 
     expect(result).toEqual({
       activationCodeIds: ['third-code-id', 'fourth-code-id'],
-      count: 2,
+      kind: 'ASSIGNED',
     });
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        orderBy: [{ created_at: 'asc' }, { id: 'asc' }],
-        skip: 2,
+        orderBy: [{ expires_at: 'asc' }, { created_at: 'asc' }, { id: 'asc' }],
         take: 2,
         where: expect.objectContaining({
-          batch_id: 'batch-id',
+          batch_id: { in: ['batch-a', 'batch-b'] },
           product_id: null,
           status: 'AVAILABLE',
         }),
@@ -157,6 +153,27 @@ describe('ActivationCodeBatchesRepository product assignment', () => {
         }),
       }),
     );
+  });
+
+  it('does not update any code when quantity availability is insufficient', async () => {
+    const findMany = jest.fn().mockResolvedValue([{ id: 'only-code-id' }]);
+    const updateMany = jest.fn();
+    const repository = new ActivationCodeBatchesRepository(
+      {
+        $transaction: (operation: (tx: unknown) => Promise<unknown>) =>
+          operation({ activationCode: { findMany, updateMany } }),
+      } as never,
+      {} as never,
+    );
+
+    await expect(
+      repository.assignProductByQuantity({
+        now: new Date('2026-09-09T00:00:00.000Z'),
+        productId: 'product-id',
+        quantity: 2,
+      }),
+    ).resolves.toEqual({ availableQuantity: 1, kind: 'INSUFFICIENT' });
+    expect(updateMany).not.toHaveBeenCalled();
   });
 
   it('releases the current code and assigns its replacement in one transaction', async () => {

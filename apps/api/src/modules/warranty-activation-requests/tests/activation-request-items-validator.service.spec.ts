@@ -10,6 +10,7 @@ describe('ActivationRequestItemsValidatorService', () => {
   const requestsRepository = { findOpenByProductIds: jest.fn() };
   const activationCodesRepository = {
     findAvailableById: jest.fn(),
+    findSelectableForPendingRequest: jest.fn(),
     expireIfNeeded: jest.fn(),
   };
   const service = new ActivationRequestItemsValidatorService(
@@ -113,6 +114,37 @@ describe('ActivationRequestItemsValidatorService', () => {
         warrantyId: null,
       }),
     ]);
+  });
+
+  it('reuses codes reserved by the request being edited and excludes that request from open checks', async () => {
+    activationCodesRepository.findSelectableForPendingRequest.mockResolvedValue(
+      {
+        id: 'code-a',
+        expires_at: new Date('2027-01-01T00:00:00.000Z'),
+        product_id: 'product-a',
+      },
+    );
+
+    await service.validate(
+      'category-id',
+      [
+        {
+          activationCodeId: 'code-a',
+          positionKey: 'windshield',
+          productId: 'product-a',
+        },
+      ],
+      { updateRequestId: 'request-id' },
+    );
+
+    expect(requestsRepository.findOpenByProductIds).toHaveBeenCalledWith(
+      ['product-a'],
+      'request-id',
+    );
+    expect(
+      activationCodesRepository.findSelectableForPendingRequest,
+    ).toHaveBeenCalledWith('code-a', 'request-id');
+    expect(activationCodesRepository.findAvailableById).not.toHaveBeenCalled();
   });
 
   it('rejects an activation code that has not been assigned to a product', async () => {

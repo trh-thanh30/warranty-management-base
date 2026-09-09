@@ -36,8 +36,8 @@ export type CreateCustomerBody = {
   customerCode?: string;
   fullName: string;
   phone: string;
-  email: string;
-  address: string;
+  email?: string;
+  address?: string;
   /** Date-only value in YYYY-MM-DD format. */
   birthdate?: string;
 };

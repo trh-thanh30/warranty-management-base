@@ -16,6 +16,8 @@ describe('CreateActivationCodeBatchUseCase', () => {
     get: jest.fn().mockResolvedValue({
       expiryMonths: 6,
       defaultBatchQuantity: 50,
+      minBatchQuantity: 50,
+      maxBatchQuantity: 1000,
     }),
   };
   const useCase = new CreateActivationCodeBatchUseCase(
@@ -29,6 +31,12 @@ describe('CreateActivationCodeBatchUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    policyService.get.mockResolvedValue({
+      expiryMonths: 6,
+      defaultBatchQuantity: 50,
+      minBatchQuantity: 50,
+      maxBatchQuantity: 1000,
+    });
     jest.useFakeTimers().setSystemTime(new Date('2026-08-31T10:30:00.000Z'));
   });
 
@@ -158,18 +166,56 @@ describe('CreateActivationCodeBatchUseCase', () => {
     ).rejects.toMatchObject({ code: 'ACTIVATION_CODE_PRODUCT_INACTIVE' });
   });
 
-  it.each([49, 1001, 50.5])('rejects invalid quantity %s', async (quantity) => {
-    await expect(
-      useCase.execute({
-        sourceProductId: 'product-id',
-        quantity,
-        createdById: 'admin-id',
-      }),
-    ).rejects.toMatchObject({
-      code: 'ACTIVATION_CODE_BATCH_QUANTITY_INVALID',
+  it.each([49, 10_001, 50.5])(
+    'rejects invalid quantity %s',
+    async (quantity) => {
+      await expect(
+        useCase.execute({
+          sourceProductId: 'product-id',
+          quantity,
+          createdById: 'admin-id',
+        }),
+      ).rejects.toMatchObject({
+        code: 'ACTIVATION_CODE_BATCH_QUANTITY_INVALID',
+      });
+      expect(productsRepository.findById).not.toHaveBeenCalled();
+    },
+  );
+
+  it('allows up to 10,000 codes when the policy maximum is increased', async () => {
+    policyService.get.mockResolvedValue({
+      expiryMonths: 6,
+      defaultBatchQuantity: 1000,
+      minBatchQuantity: 50,
+      maxBatchQuantity: 10_000,
     });
-    expect(productsRepository.findById).not.toHaveBeenCalled();
+    generator.executeBatch.mockReturnValue([]);
+
+    await useCase.execute({ quantity: 4000, createdById: 'admin-id' });
+
+    expect(generator.executeBatch).toHaveBeenCalledWith(4000);
+    expect(batchesRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ quantity: 4000 }),
+    );
   });
+
+  it.each([99, 501])(
+    'rejects quantity %s outside the configured policy range',
+    async (quantity) => {
+      policyService.get.mockResolvedValue({
+        expiryMonths: 6,
+        defaultBatchQuantity: 100,
+        minBatchQuantity: 100,
+        maxBatchQuantity: 500,
+      });
+
+      await expect(
+        useCase.execute({ quantity, createdById: 'admin-id' }),
+      ).rejects.toMatchObject({
+        code: 'ACTIVATION_CODE_BATCH_QUANTITY_INVALID',
+      });
+    },
+  );
 });
 
 describe('addCalendarMonthsUtc', () => {

@@ -41,13 +41,6 @@ export class CreateCustomerUseCase {
     const phone = dto.phone;
     const email = dto.email;
 
-    if (phone) {
-      const existingPhone = await this.customersRepository.findByPhone(phone);
-      if (existingPhone) {
-        throw new ConflictError('Customer phone already exists');
-      }
-    }
-
     const customer = await this.customersRepository.create({
       user: user ? { connect: { id: user.id } } : undefined,
       customer_code: customerCode,

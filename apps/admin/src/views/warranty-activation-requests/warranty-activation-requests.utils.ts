@@ -32,6 +32,8 @@ const CREATE_FIELD_ERROR_KEYS = new Set([
   "customerRequired",
   "customerNameRequired",
   "emailInvalid",
+  "installedAtFuture",
+  "installedAtInvalid",
   "noteLength",
   "phoneInvalid",
   "productRequired",
@@ -43,6 +45,7 @@ const CREATE_FIELD_ERROR_KEYS = new Set([
 const CREATE_API_ERROR_CODES = new Set([
   "ACTIVATION_REQUEST_ALREADY_PENDING",
   "ACTIVATION_REQUEST_CREATE_FAILED",
+  "ACTIVATION_REQUEST_NOT_PENDING",
   "ACTIVATION_CODE_PRODUCT_MISMATCH",
   "ACTIVATION_CODE_PRODUCT_NOT_ASSIGNED",
   "ACTIVATION_CODE_INVALID_OR_EXPIRED",
@@ -61,6 +64,18 @@ export function formatActivationRequestDate(
   locale: string,
 ) {
   return formatDate(value, { locale, showTime: true });
+}
+
+export function formatActivationRequestDateTimeInput(
+  value: string | null | undefined,
+) {
+  if (!value) return "";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 export function buildWarrantyActivationRequestListQuery({
@@ -186,15 +201,19 @@ export function resolveActivationRequestCreateError(
 
 export function toAdminActivationRequestBody({
   activationFields = [],
+  activationCodeIdsByPosition = {},
   activationProducts = {},
   product,
+  existingMetadata,
   provinces,
   values,
   wards,
 }: {
   activationFields?: CategoryActivationFieldConfig[];
+  activationCodeIdsByPosition?: Record<string, string>;
   activationProducts?: Record<string, ProductResponse>;
   product: ProductResponse | null;
+  existingMetadata?: Record<string, unknown> | null;
   provinces: VietnamProvince[];
   values: WarrantyActivationRequestCreateFormValues;
   wards: VietnamWard[];
@@ -206,16 +225,18 @@ export function toAdminActivationRequestBody({
   const activationInputValues = compactActivationInputValues(
     values.categoryInputValues,
   );
-  const activationMetadata =
-    Object.keys(activationInputValues).length > 0
-      ? { activationInputValues }
-      : undefined;
+  const activationMetadata = buildEditableActivationMetadata(
+    existingMetadata,
+    activationInputValues,
+  );
   const items = buildActivationRequestItems(
     activationFields,
     activationProducts,
+    activationCodeIdsByPosition,
   );
   const primaryProduct =
     product ?? Object.values(activationProducts)[0] ?? null;
+  const installedAt = values.installedAt.trim();
 
   return omitUndefined({
     activationCodeId: values.activationCodeId || undefined,
@@ -227,6 +248,7 @@ export function toAdminActivationRequestBody({
     customerId: values.customerId,
     customerName: values.customerName.trim(),
     customerPhone: values.customerPhone.trim(),
+    updateCustomerProfile: values.updateCustomerProfile || undefined,
     dealerAddress: values.dealerAddress.trim() || undefined,
     dealerDistrict: values.dealerDistrict.trim() || undefined,
     dealerId: values.dealerId || undefined,
@@ -235,6 +257,7 @@ export function toAdminActivationRequestBody({
     dealerProvince: values.dealerProvince.trim() || undefined,
     filmItems: buildFilmItems(values, activationInputValues),
     items: items.length > 0 ? items : undefined,
+    installedAt: installedAt ? new Date(installedAt).toISOString() : undefined,
     manufactureYear: primaryProduct?.modelYear ?? undefined,
     model: primaryProduct?.model ?? undefined,
     metadata: activationMetadata,
@@ -254,9 +277,29 @@ export function toAdminActivationRequestBody({
   });
 }
 
+function buildEditableActivationMetadata(
+  existingMetadata: Record<string, unknown> | null | undefined,
+  activationInputValues: Record<string, string>,
+) {
+  const metadata = { ...(existingMetadata ?? {}) };
+  delete metadata.activationInputValues;
+  delete metadata.dealer;
+  delete metadata.filmItems;
+  delete metadata.productId;
+  delete metadata.source;
+  delete metadata.warrantyId;
+
+  if (Object.keys(activationInputValues).length > 0) {
+    metadata.activationInputValues = activationInputValues;
+  }
+
+  return Object.keys(metadata).length > 0 ? metadata : undefined;
+}
+
 export function buildActivationRequestItems(
   fields: CategoryActivationFieldConfig[],
   productsByPosition: Record<string, ProductResponse>,
+  activationCodeIdsByPosition: Record<string, string> = {},
 ) {
   return fields.flatMap((field) => {
     if (field.type !== "PRODUCT_SELECT") return [];
@@ -265,6 +308,7 @@ export function buildActivationRequestItems(
 
     return [
       omitUndefined({
+        activationCodeId: activationCodeIdsByPosition[field.key],
         activationFieldId: field.id,
         positionKey: field.key,
         productId: selectedProduct.id,

@@ -31,6 +31,7 @@ import {
   Eye,
   FileText,
   MoreHorizontal,
+  Pencil,
   XCircle,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -404,6 +405,15 @@ function WarrantyActivationRequestActions({
             {t("viewDetail")}
           </Link>
         </DropdownMenuItem>
+        {request.status === "PENDING" &&
+        hasPermission(PERMISSIONS.WARRANTY_UPDATE) ? (
+          <DropdownMenuItem asChild>
+            <Link href={`/warranty-activation-requests/${request.id}/edit`}>
+              <Pencil className="mr-2 size-4" />
+              {t("edit")}
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
         {canUseParentCertificate ? (
           <>
             <DropdownMenuSeparator />

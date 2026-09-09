@@ -10,6 +10,10 @@ import { ActivationCodePolicyService } from '@/modules/system-config/services/ac
 import { addCalendarMonthsUtc } from '@/modules/activation-codes/utils/date.utils';
 import { Prisma, product_status } from '@prisma/client';
 import { randomBytes } from 'node:crypto';
+import {
+  MAX_ACTIVATION_CODES_PER_BATCH,
+  MIN_ACTIVATION_CODES_PER_BATCH,
+} from '@repo/shared/constants';
 
 @Injectable()
 export class CreateActivationCodeBatchUseCase {
@@ -30,8 +34,14 @@ export class CreateActivationCodeBatchUseCase {
     createdById: string;
   }) {
     const policy = await this.policyService.get();
-    const minBatchQuantity = this.config.minBatchQuantity;
-    const maxBatchQuantity = this.config.maxBatchQuantity;
+    const minBatchQuantity = Math.max(
+      policy.minBatchQuantity,
+      MIN_ACTIVATION_CODES_PER_BATCH,
+    );
+    const maxBatchQuantity = Math.min(
+      policy.maxBatchQuantity,
+      MAX_ACTIVATION_CODES_PER_BATCH,
+    );
     const quantity = input.quantity ?? policy.defaultBatchQuantity;
     if (
       !Number.isInteger(quantity) ||
@@ -39,8 +49,9 @@ export class CreateActivationCodeBatchUseCase {
       quantity > maxBatchQuantity
     ) {
       throw new BadRequestError(
-        'Activation code batch quantity must be between 50 and 1000',
+        `Activation code batch quantity must be between ${minBatchQuantity} and ${maxBatchQuantity}`,
         'ACTIVATION_CODE_BATCH_QUANTITY_INVALID',
+        { minBatchQuantity, maxBatchQuantity },
       );
     }
 

@@ -99,10 +99,10 @@ export function toCreateCustomerBody(
   values: CustomerFormValues,
 ): CreateCustomerBody {
   return {
-    address: buildCustomerAddress(values),
+    address: toOptionalValue(buildCustomerAddress(values)),
     birthdate: toOptionalValue(values.birthdate),
     customerCode: toOptionalValue(values.customerCode)?.toUpperCase(),
-    email: toRequiredValue(values.email),
+    email: toOptionalValue(values.email),
     fullName: values.fullName.trim(),
     phone: toRequiredValue(values.phone),
   };
@@ -112,9 +112,9 @@ export function toUpdateCustomerBody(
   values: CustomerFormValues,
 ): UpdateCustomerBody {
   return {
-    address: buildCustomerAddress(values),
+    address: toOptionalValue(buildCustomerAddress(values)),
     birthdate: toOptionalValue(values.birthdate) ?? null,
-    email: toRequiredValue(values.email),
+    email: toOptionalValue(values.email),
     fullName: values.fullName.trim(),
     phone: toRequiredValue(values.phone),
   };

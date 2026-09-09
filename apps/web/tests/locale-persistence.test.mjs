@@ -12,7 +12,7 @@ const routingPath = path.join(
   "i18n",
   "routing.ts",
 );
-const proxyPath = path.join(process.cwd(), "apps", "web", "proxy.ts");
+const middlewarePath = path.join(process.cwd(), "apps", "web", "middleware.ts");
 
 test("locale preference persists in the next-intl cookie for one year", async () => {
   const source = await readFile(routingPath, "utf8");
@@ -25,9 +25,9 @@ test("locale preference persists in the next-intl cookie for one year", async ()
 });
 
 test("first-time visitors default to Vietnamese instead of browser language", async () => {
-  const [routingSource, proxySource] = await Promise.all([
+  const [routingSource, middlewareSource] = await Promise.all([
     readFile(routingPath, "utf8"),
-    readFile(proxyPath, "utf8"),
+    readFile(middlewarePath, "utf8"),
   ]);
 
   assert.match(routingSource, /defaultLocale:\s*"vi"/);
@@ -36,9 +36,9 @@ test("first-time visitors default to Vietnamese instead of browser language", as
     /localeDetection:\s*false/,
     "locale detection must stay enabled so an explicit cookie is respected",
   );
-  assert.match(proxySource, /request\.cookies\.has\(LOCALE_COOKIE_NAME\)/);
+  assert.match(middlewareSource, /request\.cookies\.has\(LOCALE_COOKIE_NAME\)/);
   assert.match(
-    proxySource,
+    middlewareSource,
     /headers\.set\("accept-language", routing\.defaultLocale\)/,
     "requests without a locale cookie must negotiate the Vietnamese default",
   );

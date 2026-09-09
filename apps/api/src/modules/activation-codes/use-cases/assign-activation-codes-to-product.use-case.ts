@@ -14,9 +14,9 @@ type AssignActivationCodesToProductInput = {
   activationCodeIds?: string[];
   assignmentMode?: ActivationCodeProductAssignmentMode;
   batchId?: string;
-  from?: number;
+  batchIds?: string[];
   productId: string;
-  to?: number;
+  quantity?: number;
 };
 
 @Injectable()
@@ -48,19 +48,14 @@ export class AssignActivationCodesToProductUseCase {
     }
 
     const now = new Date();
-    if (assignmentMode !== 'SELECTED') {
+    if (assignmentMode === 'ALL_AVAILABLE') {
       if (!input.batchId) {
         throw this.invalid('ACTIVATION_CODE_ASSIGNMENT_BATCH_REQUIRED');
       }
-      const range =
-        assignmentMode === 'RANGE'
-          ? this.validateRange(input.from, input.to)
-          : undefined;
       const result = await this.assignByBatch({
         batchId: input.batchId,
         productId: product.id,
         now,
-        ...range,
       });
       if (!result) {
         throw new NotFoundError(
@@ -70,6 +65,23 @@ export class AssignActivationCodesToProductUseCase {
       }
       if (result.count === 0) {
         throw this.invalid('ACTIVATION_CODE_ASSIGNMENT_EMPTY');
+      }
+      return this.result(result.activationCodeIds, product);
+    }
+
+    if (assignmentMode === 'QUANTITY') {
+      const quantity = this.validateQuantity(input.quantity);
+      const result = await this.assignByQuantity({
+        batchIds: input.batchIds,
+        now,
+        productId: product.id,
+        quantity,
+      });
+      if (result.kind === 'INSUFFICIENT') {
+        throw this.invalid('ACTIVATION_CODE_ASSIGNMENT_INSUFFICIENT', {
+          availableQuantity: result.availableQuantity,
+          requestedQuantity: quantity,
+        });
       }
       return this.result(result.activationCodeIds, product);
     }
@@ -102,19 +114,16 @@ export class AssignActivationCodesToProductUseCase {
     return this.result(activationCodeIds, product);
   }
 
-  private validateRange(from?: number, to?: number) {
+  private validateQuantity(quantity?: number) {
     if (
-      !Number.isInteger(from) ||
-      !Number.isInteger(to) ||
-      from === undefined ||
-      to === undefined ||
-      from < 1 ||
-      to < from ||
-      to > MAX_AUTOMATIC_ACTIVATION_CODES_PER_PRODUCT_ASSIGNMENT
+      !Number.isInteger(quantity) ||
+      quantity === undefined ||
+      quantity < 1 ||
+      quantity > MAX_AUTOMATIC_ACTIVATION_CODES_PER_PRODUCT_ASSIGNMENT
     ) {
-      throw this.invalid('ACTIVATION_CODE_ASSIGNMENT_RANGE_INVALID');
+      throw this.invalid('ACTIVATION_CODE_ASSIGNMENT_QUANTITY_INVALID');
     }
-    return { from, to };
+    return quantity;
   }
 
   private result(
@@ -169,11 +178,31 @@ export class AssignActivationCodesToProductUseCase {
     batchId: string;
     productId: string;
     now: Date;
-    from?: number;
-    to?: number;
   }) {
     try {
       return await this.repository.assignProductByBatch(input);
+    } catch (error) {
+      if (
+        error instanceof ProductActivationCodeAssignmentConflictError ||
+        (error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === 'P2002')
+      ) {
+        throw this.invalid('ACTIVATION_CODE_ASSIGNMENT_CONFLICT', {
+          productId: input.productId,
+        });
+      }
+      throw error;
+    }
+  }
+
+  private async assignByQuantity(input: {
+    batchIds?: string[];
+    productId: string;
+    now: Date;
+    quantity: number;
+  }) {
+    try {
+      return await this.repository.assignProductByQuantity(input);
     } catch (error) {
       if (
         error instanceof ProductActivationCodeAssignmentConflictError ||

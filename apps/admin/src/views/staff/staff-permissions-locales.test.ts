@@ -1,7 +1,20 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { PERMISSION_GROUPS } from "@repo/shared/constants";
+import { PERMISSION_GROUPS, PERMISSIONS } from "@repo/shared/constants";
+
+test("activation-code permissions include expiry extension", () => {
+  const activationCodeGroup = PERMISSION_GROUPS.find(
+    (group) => group.key === "activationCodes",
+  );
+
+  assert.ok(activationCodeGroup);
+  assert.ok(
+    activationCodeGroup.permissions.includes(
+      PERMISSIONS.ACTIVATION_CODE_BATCH_EXTEND,
+    ),
+  );
+});
 
 for (const locale of ["vi", "en"]) {
   test(`every staff permission has a label in the ${locale} locale`, () => {

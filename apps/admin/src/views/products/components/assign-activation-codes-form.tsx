@@ -55,8 +55,8 @@ export function AssignActivationCodesForm({
   const [search, setSearch] = useState("");
   const [assignmentMode, setAssignmentMode] =
     useState<ActivationCodeProductAssignmentMode>("SELECTED");
-  const [rangeFrom, setRangeFrom] = useState("1");
-  const [rangeTo, setRangeTo] = useState("1");
+  const [quantity, setQuantity] = useState("1");
+  const [selectedBatchIds, setSelectedBatchIds] = useState<string[]>([]);
   const [selectedCodes, setSelectedCodes] = useState<AvailableActivationCode[]>(
     [],
   );
@@ -127,19 +127,17 @@ export function AssignActivationCodesForm({
     () => new Set(selectedCodes.map((code) => code.id)),
     [selectedCodes],
   );
-  const parsedRangeFrom = Number(rangeFrom);
-  const parsedRangeTo = Number(rangeTo);
-  const hasValidRange =
-    Number.isInteger(parsedRangeFrom) &&
-    Number.isInteger(parsedRangeTo) &&
-    parsedRangeFrom >= 1 &&
-    parsedRangeTo >= parsedRangeFrom &&
-    parsedRangeTo <= MAX_AUTOMATIC_ACTIVATION_CODES_PER_PRODUCT_ASSIGNMENT;
+  const parsedQuantity = Number(quantity);
+  const hasValidQuantity =
+    Number.isInteger(parsedQuantity) &&
+    parsedQuantity >= 1 &&
+    parsedQuantity <= MAX_AUTOMATIC_ACTIVATION_CODES_PER_PRODUCT_ASSIGNMENT;
   const hasValidAssignment =
     assignmentMode === "SELECTED"
       ? selectedCodes.length > 0
-      : batchId !== "ALL" &&
-        (assignmentMode === "ALL_AVAILABLE" || hasValidRange);
+      : assignmentMode === "ALL_AVAILABLE"
+        ? batchId !== "ALL"
+        : hasValidQuantity;
   const mutation = useMutation({
     mutationFn: () => {
       if (assignmentMode === "ALL_AVAILABLE") {
@@ -149,13 +147,12 @@ export function AssignActivationCodesForm({
           productId: product!.id,
         });
       }
-      if (assignmentMode === "RANGE") {
+      if (assignmentMode === "QUANTITY") {
         return activationCodesService.assignProduct({
           assignmentMode,
-          batchId,
-          from: parsedRangeFrom,
+          ...(selectedBatchIds.length ? { batchIds: selectedBatchIds } : {}),
           productId: product!.id,
-          to: parsedRangeTo,
+          quantity: parsedQuantity,
         });
       }
       return activationCodesService.assignProduct({
@@ -180,8 +177,8 @@ export function AssignActivationCodesForm({
       setBatchId("ALL");
       setSelectedBatchLabel(t("allBatches"));
       setAssignmentMode("SELECTED");
-      setRangeFrom("1");
-      setRangeTo("1");
+      setQuantity("1");
+      setSelectedBatchIds([]);
       setSearch("");
       setSelectedCodes([]);
       toast.success(t("success", { count: result.activationCodeIds.length }));
@@ -204,8 +201,8 @@ export function AssignActivationCodesForm({
     setBatchSearch("");
     setSearch("");
     setAssignmentMode("SELECTED");
-    setRangeFrom("1");
-    setRangeTo("1");
+    setQuantity("1");
+    setSelectedBatchIds([]);
     setSelectedCodes([]);
     setErrorMessage(null);
     resetMutation();
@@ -288,6 +285,7 @@ export function AssignActivationCodesForm({
             {t("batchLabel")}
           </Label>
           <SearchDropdown
+            closeOnSelect={assignmentMode !== "QUANTITY"}
             disabled={mutation.isPending || !canSubmit}
             emptyLabel={t("emptyBatches")}
             errorLabel={t("batchLoadError")}
@@ -299,6 +297,11 @@ export function AssignActivationCodesForm({
             getItemKey={(batch) => batch.id}
             id="product-activation-code-batch"
             isError={batchesQuery.isError}
+            isItemSelected={(batch) =>
+              assignmentMode === "QUANTITY" &&
+              batch.id !== "ALL" &&
+              selectedBatchIds.includes(batch.id)
+            }
             isLoading={batchesQuery.isFetching}
             items={batchOptions}
             loadingLabel={
@@ -307,6 +310,17 @@ export function AssignActivationCodesForm({
                 : t("loadingBatches")
             }
             onItemSelect={(batch) => {
+              if (assignmentMode === "QUANTITY") {
+                setSelectedBatchIds((current) => {
+                  if (batch.id === "ALL") return [];
+                  return current.includes(batch.id)
+                    ? current.filter((id) => id !== batch.id)
+                    : [...current, batch.id];
+                });
+                setBatchSearch("");
+                setErrorMessage(null);
+                return;
+              }
               setBatchId(batch.id);
               setSelectedBatchLabel(
                 batch.id === "ALL"
@@ -328,7 +342,7 @@ export function AssignActivationCodesForm({
             }}
             onRetry={() => void batchesQuery.refetch()}
             onSearchChange={(value) => {
-              if (batchId !== "ALL") {
+              if (assignmentMode !== "QUANTITY" && batchId !== "ALL") {
                 setBatchId("ALL");
                 setSelectedBatchLabel(t("allBatches"));
                 setSearch("");
@@ -380,7 +394,13 @@ export function AssignActivationCodesForm({
             }
             retryLabel={t("tryAgain")}
             searchValue={batchSearch}
-            selectedLabel={selectedBatchLabel ?? undefined}
+            selectedLabel={
+              assignmentMode === "QUANTITY"
+                ? selectedBatchIds.length > 0
+                  ? t("selectedBatchCount", { count: selectedBatchIds.length })
+                  : t("allBatches")
+                : (selectedBatchLabel ?? undefined)
+            }
           />
         </div>
 
@@ -412,11 +432,11 @@ export function AssignActivationCodesForm({
           </div>
           <div className="flex items-start gap-3 rounded-lg border border-slate-200 p-4 dark:border-slate-800">
             <Checkbox
-              checked={assignmentMode === "RANGE"}
-              disabled={mutation.isPending || !canSubmit || batchId === "ALL"}
-              id="product-activation-code-range-mode"
+              checked={assignmentMode === "QUANTITY"}
+              disabled={mutation.isPending || !canSubmit}
+              id="product-activation-code-quantity-mode"
               onCheckedChange={(checked) => {
-                setAssignmentMode(checked === true ? "RANGE" : "SELECTED");
+                setAssignmentMode(checked === true ? "QUANTITY" : "SELECTED");
                 setSelectedCodes([]);
                 setErrorMessage(null);
               }}
@@ -424,52 +444,34 @@ export function AssignActivationCodesForm({
             <div className="min-w-0">
               <Label
                 className="cursor-pointer font-medium"
-                htmlFor="product-activation-code-range-mode"
+                htmlFor="product-activation-code-quantity-mode"
               >
-                {t("rangeAssignment")}
+                {t("quantityAssignment")}
               </Label>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                {batchId === "ALL"
-                  ? t("automaticModeRequiresBatch")
-                  : t("rangeAssignmentDescription")}
+                {t("quantityAssignmentDescription")}
               </p>
             </div>
           </div>
         </div>
 
-        {assignmentMode === "RANGE" ? (
-          <div className="grid gap-4 rounded-lg border border-slate-200 bg-slate-50/60 p-4 sm:grid-cols-2 dark:border-slate-800 dark:bg-slate-900/40">
-            <div className="space-y-2">
-              <Label htmlFor="product-activation-code-range-from">
-                {t("rangeFrom")}
-              </Label>
-              <Input
-                disabled={mutation.isPending}
-                id="product-activation-code-range-from"
-                max={MAX_AUTOMATIC_ACTIVATION_CODES_PER_PRODUCT_ASSIGNMENT}
-                min={1}
-                onChange={(event) => setRangeFrom(event.target.value)}
-                type="number"
-                value={rangeFrom}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="product-activation-code-range-to">
-                {t("rangeTo")}
-              </Label>
-              <Input
-                disabled={mutation.isPending}
-                id="product-activation-code-range-to"
-                max={MAX_AUTOMATIC_ACTIVATION_CODES_PER_PRODUCT_ASSIGNMENT}
-                min={1}
-                onChange={(event) => setRangeTo(event.target.value)}
-                type="number"
-                value={rangeTo}
-              />
-            </div>
-            {!hasValidRange ? (
-              <p className="text-sm text-red-600 sm:col-span-2 dark:text-red-400">
-                {t("rangeInvalid")}
+        {assignmentMode === "QUANTITY" ? (
+          <div className="space-y-2 rounded-lg border border-slate-200 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-900/40">
+            <Label htmlFor="product-activation-code-quantity">
+              {t("quantity")}
+            </Label>
+            <Input
+              disabled={mutation.isPending}
+              id="product-activation-code-quantity"
+              max={MAX_AUTOMATIC_ACTIVATION_CODES_PER_PRODUCT_ASSIGNMENT}
+              min={1}
+              onChange={(event) => setQuantity(event.target.value)}
+              type="number"
+              value={quantity}
+            />
+            {!hasValidQuantity ? (
+              <p className="text-sm text-red-600 dark:text-red-400">
+                {t("quantityInvalid")}
               </p>
             ) : null}
           </div>
@@ -561,7 +563,9 @@ export function AssignActivationCodesForm({
                       />
                     </div>
                     <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
-                      {code.batchName || code.batchCode}
+                      {t("codeBatch", {
+                        batch: code.batchName || code.batchCode,
+                      })}
                     </p>
                   </div>
                 </div>
@@ -600,7 +604,9 @@ export function AssignActivationCodesForm({
                           {code.copyCode ?? code.maskedCode}
                         </p>
                         <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-                          {code.batchName || code.batchCode}
+                          {t("codeBatch", {
+                            batch: code.batchName || code.batchCode,
+                          })}
                         </p>
                       </div>
                       <Button

@@ -92,9 +92,12 @@ describe('ManualWarrantyActivationUseCase', () => {
       findCustomerByEmail: jest
         .fn()
         .mockResolvedValue(overrides?.customerByEmail ?? null),
-      findCustomerByPhone: jest
+      findCustomerById: jest.fn().mockResolvedValue(customer),
+      findCustomersByPhone: jest
         .fn()
-        .mockResolvedValue(overrides?.customerByPhone ?? null),
+        .mockResolvedValue(
+          overrides?.customerByPhone ? [overrides.customerByPhone] : [],
+        ),
       findManualActivationProduct: jest
         .fn()
         .mockResolvedValue(overrides?.existingProduct ?? null),

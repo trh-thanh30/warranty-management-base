@@ -12,6 +12,7 @@ import {
   WarrantyActivationRequestCodeConflictError,
   WarrantyActivationCodeReservationConflictError,
   WarrantyActivationRequestUniqueConflictError,
+  WarrantyActivationRequestUpdateConflictError,
   WarrantyActivationRequestWarrantyCodeConflictError,
 } from '@/modules/warranty-activation-requests/repository/warranty-activation-request-errors';
 import { Injectable } from '@nestjs/common';
@@ -59,10 +60,16 @@ export class WarrantyActivationRequestsRepository {
               }
             }
 
-            if (customerProfile?.birthdate !== undefined) {
+            if (customerProfile?.update) {
               await tx.customer.update({
                 where: { id: customerProfile.id },
-                data: { birthdate: customerProfile.birthdate },
+                data: {
+                  address: customerProfile.update.address,
+                  birthdate: customerProfile.update.birthdate,
+                  email: customerProfile.update.email,
+                  full_name: customerProfile.update.fullName,
+                  phone: customerProfile.update.phone,
+                },
               });
             }
 
@@ -86,6 +93,122 @@ export class WarrantyActivationRequestsRepository {
     });
   }
 
+  updatePending(
+    id: string,
+    command: CreateWarrantyActivationRequestCommand,
+    options: CreateWarrantyActivationRequestOptions = {},
+  ) {
+    const nextActivationCodeIds = this.getActivationCodeIds(command);
+
+    return this.prismaService
+      .$transaction(async (tx) => {
+        // This conditional write locks the request row. Reading its current
+        // reservations afterwards serializes concurrent edits correctly.
+        const guarded = await tx.warrantyActivationRequest.updateMany({
+          where: {
+            id,
+            status: warranty_activation_request_status.PENDING,
+          },
+          data: { updated_at: new Date() },
+        });
+        if (guarded.count !== 1) {
+          throw new WarrantyActivationRequestUpdateConflictError();
+        }
+        const current = await tx.warrantyActivationRequest.findUnique({
+          where: { id },
+          select: {
+            activation_code_id: true,
+            items: { select: { activation_code_id: true } },
+          },
+        });
+        if (!current) throw new WarrantyActivationRequestUpdateConflictError();
+
+        const currentActivationCodeIds = Array.from(
+          new Set(
+            [
+              current.activation_code_id,
+              ...current.items.map((item) => item.activation_code_id),
+            ].filter((codeId): codeId is string => Boolean(codeId)),
+          ),
+        );
+        const removedCodeIds = currentActivationCodeIds.filter(
+          (codeId) => !nextActivationCodeIds.includes(codeId),
+        );
+        const addedCodeIds = nextActivationCodeIds.filter(
+          (codeId) => !currentActivationCodeIds.includes(codeId),
+        );
+
+        if (removedCodeIds.length > 0) {
+          await tx.activationCode.updateMany({
+            where: {
+              id: { in: removedCodeIds },
+              status: activation_code_status.PENDING_APPROVAL,
+            },
+            data: { status: activation_code_status.AVAILABLE },
+          });
+        }
+        if (addedCodeIds.length > 0) {
+          const reserved = await tx.activationCode.updateMany({
+            where: {
+              expires_at: { gt: new Date() },
+              id: { in: addedCodeIds },
+              status: activation_code_status.AVAILABLE,
+            },
+            data: { status: activation_code_status.PENDING_APPROVAL },
+          });
+          if (reserved.count !== addedCodeIds.length) {
+            throw new WarrantyActivationCodeReservationConflictError();
+          }
+        }
+
+        if (options.customerProfile?.update) {
+          await tx.customer.update({
+            where: { id: options.customerProfile.id },
+            data: {
+              address: options.customerProfile.update.address,
+              birthdate: options.customerProfile.update.birthdate,
+              email: options.customerProfile.update.email,
+              full_name: options.customerProfile.update.fullName,
+              phone: options.customerProfile.update.phone,
+            },
+          });
+        }
+
+        await tx.warrantyActivationRequestItem.deleteMany({
+          where: { request_id: id },
+        });
+        await tx.warrantyActivationRequest.update({
+          where: { id },
+          data: this.toUpdateInput(command, options.customerProfile?.id),
+        });
+        if (command.items.length > 0) {
+          await tx.warrantyActivationRequestItem.createMany({
+            data: command.items.map((item) => ({
+              activation_code_id: item.activationCodeId ?? null,
+              activation_field_id: item.activationFieldId,
+              position_key: item.positionKey,
+              position_label: item.positionLabel,
+              product_id: item.productId,
+              product_name: item.productName,
+              product_code: item.productCode,
+              request_id: id,
+              serial_number: item.serialNumber,
+              warranty_code: item.warrantyCode,
+              warranty_id: item.warrantyId,
+            })),
+          });
+        }
+
+        return tx.warrantyActivationRequest.findUniqueOrThrow({
+          where: { id },
+          include: this.queries.include,
+        });
+      })
+      .catch((error: unknown) => {
+        throw toApplicationConflictError(error);
+      });
+  }
+
   findById(id: string, dealerIds?: string[]) {
     return this.prismaService.warrantyActivationRequest.findFirst({
       where: { id, dealer_id: dealerIds ? { in: dealerIds } : undefined },
@@ -93,9 +216,10 @@ export class WarrantyActivationRequestsRepository {
     });
   }
 
-  findOpenByProductId(productId: string) {
+  findOpenByProductId(productId: string, excludeRequestId?: string) {
     return this.prismaService.warrantyActivationRequest.findFirst({
       where: {
+        id: excludeRequestId ? { not: excludeRequestId } : undefined,
         status: {
           in: OPEN_WARRANTY_ACTIVATION_REQUEST_STATUSES,
         },
@@ -120,9 +244,10 @@ export class WarrantyActivationRequestsRepository {
     });
   }
 
-  findOpenByProductIds(productIds: string[]) {
+  findOpenByProductIds(productIds: string[], excludeRequestId?: string) {
     return this.prismaService.warrantyActivationRequest.findMany({
       where: {
+        id: excludeRequestId ? { not: excludeRequestId } : undefined,
         status: { in: OPEN_WARRANTY_ACTIVATION_REQUEST_STATUSES },
         OR: [
           { product_id: { in: productIds } },
@@ -307,6 +432,54 @@ export class WarrantyActivationRequestsRepository {
           serial_number: item.serialNumber,
         })),
       },
+    };
+  }
+
+  private getActivationCodeIds(
+    command: CreateWarrantyActivationRequestCommand,
+  ) {
+    return Array.from(
+      new Set(
+        [
+          command.activationCodeId,
+          ...command.items.map((item) => item.activationCodeId),
+        ].filter((codeId): codeId is string => Boolean(codeId)),
+      ),
+    );
+  }
+
+  private toUpdateInput(
+    command: CreateWarrantyActivationRequestCommand,
+    customerId?: string,
+  ): Prisma.WarrantyActivationRequestUncheckedUpdateInput {
+    return {
+      activation_code_id: command.activationCodeId ?? null,
+      address_detail: command.addressDetail,
+      brand: command.brand,
+      category_id: command.categoryId ?? null,
+      customer_birthdate: command.customerBirthdate,
+      customer_email: command.customerEmail,
+      customer_id: customerId ?? null,
+      customer_name: command.customerName,
+      customer_phone: command.customerPhone,
+      dealer_id: command.dealerId ?? null,
+      full_address: command.fullAddress,
+      installed_at: command.installedAt,
+      manufacture_year: command.manufactureYear,
+      metadata: command.metadata as Prisma.InputJsonObject,
+      model: command.model,
+      note: command.note,
+      product_id: command.productId,
+      product_name: command.productName,
+      province_code: command.provinceCode,
+      province_name: command.provinceName,
+      serial_number: command.serialNumber,
+      vehicle_model: command.vehicleModel,
+      vehicle_plate: command.vehiclePlate,
+      ward_code: command.wardCode,
+      ward_name: command.wardName,
+      warranty_code: command.warrantyCode,
+      warranty_duration_months: command.warrantyDurationMonths,
     };
   }
 }

@@ -68,6 +68,7 @@ export class ManualWarrantyActivationUseCase {
       await this.warrantiesRepository.withTransaction(async (repository) => {
         const customer = await this.resolveCustomer(repository, {
           address: dto.customer.address.trim(),
+          customerId: dto.customer.customerId,
           email,
           fullName: dto.customer.fullName.trim(),
           phone,
@@ -211,12 +212,32 @@ export class ManualWarrantyActivationUseCase {
     repository: WarrantyTransactionRepository,
     input: {
       address: string;
+      customerId?: string;
       email: string;
       fullName: string;
       phone: string;
     },
   ) {
-    const existingCustomer = await repository.findCustomerByPhone(input.phone);
+    if (input.customerId) {
+      const selectedCustomer = await repository.findCustomerById(
+        input.customerId,
+      );
+      if (!selectedCustomer) {
+        throw new NotFoundError('Customer not found');
+      }
+      return selectedCustomer;
+    }
+
+    const customersByPhone = await repository.findCustomersByPhone(input.phone);
+    if (customersByPhone.length > 1) {
+      throw new BadRequestError(
+        'Multiple customer profiles use this phone number. Select a customer profile before continuing.',
+        'CUSTOMER_SELECTION_REQUIRED',
+        { customerIds: customersByPhone.map((customer) => customer.id) },
+      );
+    }
+
+    const existingCustomer = customersByPhone[0];
     if (existingCustomer) {
       return repository.updateCustomer(existingCustomer.id, input);
     }

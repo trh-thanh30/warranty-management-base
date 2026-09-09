@@ -230,11 +230,16 @@ export type CreateAdminWarrantyActivationRequestBody = Omit<
   "warrantyCode"
 > & {
   customerId: string;
+  /** Also persist the submitted customer snapshot to the linked Customer. */
+  updateCustomerProfile?: boolean;
   activationCodeId?: string;
   /** Multi-product requests use items; productId remains for legacy clients. */
   items?: CreateWarrantyActivationRequestItemBody[];
   productId?: string;
 };
+
+export type UpdateAdminWarrantyActivationRequestBody =
+  CreateAdminWarrantyActivationRequestBody;
 
 export type ListWarrantyActivationRequestsQuery = PaginationQuery & {
   dateFrom?: string;

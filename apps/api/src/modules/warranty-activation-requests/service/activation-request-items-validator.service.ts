@@ -40,6 +40,7 @@ export class ActivationRequestItemsValidatorService {
   async validate(
     categoryId: string,
     items: CreateWarrantyActivationRequestItemBody[],
+    options: { updateRequestId?: string } = {},
   ): Promise<ValidatedActivationRequestItem[]> {
     const category =
       await this.productsRepository.findActiveProductCategoryById(categoryId);
@@ -122,9 +123,10 @@ export class ActivationRequestItemsValidatorService {
     const productsById = new Map(
       products.map((product) => [product.id, product]),
     );
-    const openRequests = await this.requestsRepository.findOpenByProductIds([
-      ...seenProducts,
-    ]);
+    const openRequests = await this.requestsRepository.findOpenByProductIds(
+      [...seenProducts],
+      options.updateRequestId,
+    );
     const reservedProductIds = new Set(
       openRequests.flatMap((request) => [
         ...(request.product_id ? [request.product_id] : []),
@@ -138,10 +140,14 @@ export class ActivationRequestItemsValidatorService {
           items
             .filter((item) => item.activationCodeId)
             .map(async (item) => {
-              const code =
-                await this.activationCodesRepository.findAvailableById(
-                  item.activationCodeId!,
-                );
+              const code = options.updateRequestId
+                ? await this.activationCodesRepository.findSelectableForPendingRequest(
+                    item.activationCodeId!,
+                    options.updateRequestId,
+                  )
+                : await this.activationCodesRepository.findAvailableById(
+                    item.activationCodeId!,
+                  );
               return [item.activationCodeId!, code] as const;
             }),
         )

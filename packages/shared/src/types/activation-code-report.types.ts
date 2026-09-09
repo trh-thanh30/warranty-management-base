@@ -26,6 +26,8 @@ export type ActivationCodeReportFilters = {
 
 export type ActivationCodeDetail = {
   id: string;
+  batchCode: string;
+  batchName: string;
   maskedCode: string;
   copyCode?: string;
   status: ActivationCodeReportStatus;
@@ -62,10 +64,9 @@ export type AssignActivationCodesToProductBody =
       batchId: string;
     })
   | (AssignActivationCodesToProductBase & {
-      assignmentMode: "RANGE";
-      batchId: string;
-      from: number;
-      to: number;
+      assignmentMode: "QUANTITY";
+      batchIds?: string[];
+      quantity: number;
     });
 
 export type AssignActivationCodesToProductResult = {
