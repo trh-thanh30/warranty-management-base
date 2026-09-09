@@ -17,9 +17,11 @@ import { useCreateCustomer, useUpdateCustomer } from "./use-customers";
 export function useCustomerForm({
   customer,
   onSaved,
+  onSubmitValues,
 }: {
   customer: CustomerSummary | null;
   onSaved: (customer?: CustomerSummary) => void;
+  onSubmitValues?: (values: CustomerFormValues) => Promise<void> | void;
 }) {
   const t = useTranslations("Customers");
   const tApiErrors = useTranslations("ApiErrors");
@@ -47,6 +49,11 @@ export function useCustomerForm({
 
   async function submit(values: CustomerFormValues) {
     try {
+      if (onSubmitValues) {
+        await onSubmitValues(values);
+        return;
+      }
+
       if (creating) {
         const createdCustomer = await createCustomer.mutateAsync(
           toCreateCustomerBody(values),

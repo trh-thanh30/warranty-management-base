@@ -32,6 +32,8 @@ import {
   useCustomer,
   useInfiniteCustomers,
 } from "../../customers/hooks/use-customers";
+import type { CustomerFormValues } from "../../customers/customers.types";
+import { buildCustomerAddress } from "../../customers/customers.utils";
 import { useInfiniteActivationProductOptions } from "../../products/hooks/use-products";
 import { useProduct } from "../../products/hooks/use-products";
 import { productKeys } from "../../products/hooks/use-products";
@@ -63,6 +65,7 @@ const DEFAULT_VALUES: WarrantyActivationRequestCreateFormValues = {
   customerId: "",
   customerName: "",
   customerPhone: "",
+  updateCustomerProfile: false,
   dealerAddress: "",
   dealerDistrict: "",
   dealerId: "",
@@ -109,6 +112,7 @@ export function useCreateWarrantyActivationRequestForm({
   const [isHydratingEditRequest, setIsHydratingEditRequest] = useState(
     Boolean(initialRequest),
   );
+  const [activationCodeSearch, setActivationCodeSearch] = useState("");
   const [customerSearch, setCustomerSearch] = useState("");
   const [productSearchState, setProductSearchState] = useState({
     categoryId: "",
@@ -211,6 +215,10 @@ export function useCreateWarrantyActivationRequestForm({
   );
   const wards = useMemo(() => wardsQuery.data ?? [], [wardsQuery.data]);
   const debouncedCustomerSearch = useDebounce(customerSearch.trim(), 300);
+  const debouncedActivationCodeSearch = useDebounce(
+    activationCodeSearch.trim(),
+    300,
+  );
   const debouncedProductSearch = useDebounce(productSearchState, 300);
   const productSearchQuery = resolveScopedProductSearch(
     categoryId,
@@ -220,12 +228,17 @@ export function useCreateWarrantyActivationRequestForm({
   const activationCodesQuery = useInfiniteQuery({
     enabled:
       !activationCodeId && Boolean(selectedProduct) && requiresActivationCode,
-    queryKey: ["available-activation-codes", selectedProduct?.id ?? "all"],
+    queryKey: [
+      "available-activation-codes",
+      selectedProduct?.id ?? "all",
+      debouncedActivationCodeSearch,
+    ],
     queryFn: ({ pageParam }) =>
       activationCodesService.listAvailableByProduct(selectedProduct?.id, {
         assignment: "ASSIGNED",
         limit: 10,
         page: pageParam,
+        search: debouncedActivationCodeSearch || undefined,
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
@@ -430,7 +443,18 @@ export function useCreateWarrantyActivationRequestForm({
       wardCode: initialRequest.wardCode,
       warrantyCode: initialRequest.warrantyCode,
     });
-    setSelectedCustomer(initialCustomerQuery.data ?? null);
+    setSelectedCustomer(
+      initialCustomerQuery.data
+        ? {
+            ...initialCustomerQuery.data,
+            address: initialRequest.fullAddress || null,
+            birthdate: initialRequest.customerBirthdate,
+            email: initialRequest.customerEmail,
+            fullName: initialRequest.customerName,
+            phone: initialRequest.customerPhone,
+          }
+        : null,
+    );
     setSelectedDealer(initialDealerQuery.data ?? null);
     setSelectedProduct(primaryProduct);
     setSelectedActivationProducts(activationProducts);
@@ -495,6 +519,7 @@ export function useCreateWarrantyActivationRequestForm({
         customerId: customer.id,
         customerName: customer.fullName ?? "",
         customerPhone: customer.phone ?? "",
+        updateCustomerProfile: false,
       },
       false,
     );
@@ -524,11 +549,51 @@ export function useCreateWarrantyActivationRequestForm({
         customerId: "",
         customerName: "",
         customerPhone: "",
+        updateCustomerProfile: false,
         provinceCode: "",
         wardCode: "",
       },
       shouldValidate,
     );
+  }
+
+  function updateCustomerSnapshot(
+    values: CustomerFormValues,
+    updateCustomerProfile: boolean,
+  ) {
+    if (!selectedCustomer) return;
+
+    const fullAddress = buildCustomerAddress(values);
+    const parsedAddress = parseVietnamAddress(fullAddress, provinces);
+    const customer = {
+      ...selectedCustomer,
+      address: fullAddress || null,
+      birthdate: values.birthdate || null,
+      email: values.email.trim() || null,
+      fullName: values.fullName.trim(),
+      phone: values.phone.trim() || null,
+    };
+
+    setSelectedCustomer(customer);
+    setPendingWardName(null);
+    form.clearErrors([
+      "addressDetail",
+      "customerEmail",
+      "customerName",
+      "customerPhone",
+      "provinceCode",
+      "wardCode",
+    ]);
+    setFormValues(form.setValue, {
+      addressDetail: parsedAddress.detail,
+      customerBirthdate: values.birthdate,
+      customerEmail: values.email.trim(),
+      customerName: values.fullName.trim(),
+      customerPhone: values.phone.trim(),
+      provinceCode: values.provinceCode,
+      updateCustomerProfile,
+      wardCode: values.wardCode,
+    });
   }
 
   function selectProduct(product: ProductResponse) {
@@ -802,6 +867,7 @@ export function useCreateWarrantyActivationRequestForm({
   }
 
   return {
+    activationCodeSearch,
     activationFields,
     activationFieldsQuery,
     clearCustomer,
@@ -824,6 +890,8 @@ export function useCreateWarrantyActivationRequestForm({
       updateMutation.isPending,
     isHydratingEditRequest,
     isEditHydrationError,
+    isActivationCodeSearchPending:
+      activationCodeSearch.trim() !== debouncedActivationCodeSearch,
     loadMoreProducts,
     mutationIsPending: createMutation.isPending || updateMutation.isPending,
     onSubmit: form.handleSubmit(submit),
@@ -841,10 +909,12 @@ export function useCreateWarrantyActivationRequestForm({
     activationCodesQuery,
     availableActivationCodes,
     selectedActivationCode,
+    updateCustomerProfile: form.watch("updateCustomerProfile"),
     confirmCategoryChange,
     cancelCategoryChange,
     selectCategory,
     selectCustomer,
+    updateCustomerSnapshot,
     selectDealer,
     selectProduct,
     selectActivationCode,
@@ -855,6 +925,7 @@ export function useCreateWarrantyActivationRequestForm({
     clearActivationProduct,
     clearItemActivationCode,
     setCustomerSearch,
+    setActivationCodeSearch,
     setDealerSearch,
     setProductSearch,
     usesProductSelectors,

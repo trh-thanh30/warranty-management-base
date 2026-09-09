@@ -19,8 +19,9 @@ import type { CustomerSummary } from "@repo/shared";
 import { Button, DatePicker, Input, Textarea } from "@repo/ui";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Controller } from "react-hook-form";
+import type { CustomerFormValues } from "../customers.types";
 import {
   fillCustomerAddressSelection,
   getCustomerAddressSelection,
@@ -32,6 +33,9 @@ type CustomerFormProps = {
   embedded?: boolean;
   onCancel: () => void;
   onSaved: (customer?: CustomerSummary) => void;
+  onSubmitValues?: (values: CustomerFormValues) => Promise<void> | void;
+  options?: ReactNode;
+  submitLabel?: string;
 };
 
 export function CustomerForm({
@@ -39,6 +43,9 @@ export function CustomerForm({
   embedded = false,
   onCancel,
   onSaved,
+  onSubmitValues,
+  options,
+  submitLabel,
 }: CustomerFormProps) {
   const t = useTranslations("Customers");
   const [hydratedAddressKey, setHydratedAddressKey] = useState<string | null>(
@@ -55,7 +62,7 @@ export function CustomerForm({
     register,
     setValue,
     watch,
-  } = useCustomerForm({ customer, onSaved });
+  } = useCustomerForm({ customer, onSaved, onSubmitValues });
   const provinceCode = watch("provinceCode");
   const wardCode = watch("wardCode");
   const provinceName = watch("provinceName");
@@ -393,6 +400,8 @@ export function CustomerForm({
         />
       </FormField>
 
+      {options}
+
       <div
         className={
           embedded
@@ -422,7 +431,7 @@ export function CustomerForm({
           {isSubmitting ? (
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
           ) : null}
-          {creating ? t("create") : t("save")}
+          {submitLabel ?? (creating ? t("create") : t("save"))}
         </Button>
       </div>
     </Wrapper>
