@@ -62,10 +62,9 @@ export type AssignActivationCodesToProductBody =
       batchId: string;
     })
   | (AssignActivationCodesToProductBase & {
-      assignmentMode: "RANGE";
-      batchId: string;
-      from: number;
-      to: number;
+      assignmentMode: "QUANTITY";
+      batchIds?: string[];
+      quantity: number;
     });
 
 export type AssignActivationCodesToProductResult = {

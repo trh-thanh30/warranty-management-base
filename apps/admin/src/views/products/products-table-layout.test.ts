@@ -129,31 +129,34 @@ test("activation-code dialog filters assignable codes by a searchable batch", as
   assert.match(source, /onRetry=\{\(\) => void codesQuery\.refetch\(\)\}/);
 });
 
-test("activation-code dialog uses a range checkbox and select-all action", async () => {
+test("activation-code dialog assigns a requested quantity from all or selected batches", async () => {
   const source = await readFile(assignmentFormUrl, "utf8");
 
   assert.match(source, /SELECTED/);
   assert.match(source, /ALL_AVAILABLE/);
-  assert.match(source, /RANGE/);
+  assert.match(source, /QUANTITY/);
   assert.match(source, /assignmentMode/);
   assert.equal(source.match(/<Checkbox/g)?.length, 2);
   assert.equal(
     source.match(
       /disabled=\{mutation\.isPending \|\| !canSubmit \|\| batchId === "ALL"\}/g,
     )?.length,
-    2,
+    1,
   );
   assert.match(
     source,
     /useState<ActivationCodeProductAssignmentMode>\("SELECTED"\)/,
   );
   assert.match(source, /t\("allAvailableAssignment"\)/);
-  assert.match(source, /t\("rangeAssignment"\)/);
+  assert.match(source, /t\("quantityAssignment"\)/);
   assert.match(source, /t\("allAvailableNotice", \{ product: productName \}\)/);
   assert.doesNotMatch(source, /t\("selectAllAvailable"\)/);
   assert.doesNotMatch(source, /<Select[\s>]/);
-  assert.match(source, /rangeFrom/);
-  assert.match(source, /rangeTo/);
+  assert.match(source, /selectedBatchIds/);
+  assert.match(source, /quantity/);
+  assert.doesNotMatch(source, /rangeFrom/);
+  assert.doesNotMatch(source, /rangeTo/);
+  assert.doesNotMatch(source, /assignmentMode === "RANGE"/);
   assert.match(source, /batchId/);
 
   for (const locale of ["vi", "en"]) {
@@ -165,16 +168,16 @@ test("activation-code dialog uses a range checkbox and select-all action", async
     );
     const translations = messages.ProductActivationCodeAssignment;
     for (const key of [
-      "rangeAssignment",
-      "rangeAssignmentDescription",
+      "quantityAssignment",
+      "quantityAssignmentDescription",
+      "quantity",
+      "quantityInvalid",
+      "selectedBatchCount",
       "allAvailableAssignment",
       "allAvailableAssignmentDescription",
       "automaticModeRequiresBatch",
       "selectAllAvailable",
       "clearAllAvailable",
-      "rangeFrom",
-      "rangeTo",
-      "rangeInvalid",
       "allAvailableNotice",
       "confirmAutomatic",
     ]) {

@@ -693,6 +693,44 @@ export class ActivationCodeBatchesRepository {
     });
   }
 
+  assignProductByQuantity(input: {
+    batchIds?: string[];
+    productId: string;
+    now: Date;
+    quantity: number;
+  }) {
+    return this.prismaService.$transaction(async (tx) => {
+      const codes = await tx.activationCode.findMany({
+        where: this.buildAssignableWhere(
+          input.batchIds?.length ? { batch_id: { in: input.batchIds } } : {},
+          input.now,
+        ),
+        orderBy: [{ expires_at: 'asc' }, { created_at: 'asc' }, { id: 'asc' }],
+        select: { id: true },
+        take: input.quantity,
+      });
+      if (codes.length < input.quantity) {
+        return {
+          availableQuantity: codes.length,
+          kind: 'INSUFFICIENT' as const,
+        };
+      }
+
+      const activationCodeIds = codes.map((code) => code.id);
+      const result = await tx.activationCode.updateMany({
+        where: this.buildAssignableWhere(
+          { id: { in: activationCodeIds } },
+          input.now,
+        ),
+        data: { product_id: input.productId },
+      });
+      if (result.count !== activationCodeIds.length) {
+        throw new ProductActivationCodeAssignmentConflictError();
+      }
+      return { activationCodeIds, kind: 'ASSIGNED' as const };
+    });
+  }
+
   replaceProductAssignment(input: {
     currentActivationCodeId: string;
     replacementActivationCodeId: string;

@@ -13,7 +13,7 @@ export const MAX_AUTOMATIC_ACTIVATION_CODES_PER_PRODUCT_ASSIGNMENT = 1000;
 export const ACTIVATION_CODE_PRODUCT_ASSIGNMENT_MODES = [
   "SELECTED",
   "ALL_AVAILABLE",
-  "RANGE",
+  "QUANTITY",
 ] as const;
 
 export type ActivationCodeProductAssignmentMode =

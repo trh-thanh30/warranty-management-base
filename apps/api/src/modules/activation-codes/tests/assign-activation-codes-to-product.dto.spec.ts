@@ -12,19 +12,23 @@ describe('AssignActivationCodesToProductDto', () => {
       productId,
     },
     { assignmentMode: 'ALL_AVAILABLE', batchId, productId },
-    { assignmentMode: 'RANGE', batchId, from: 2, productId, to: 20 },
+    {
+      assignmentMode: 'QUANTITY',
+      batchIds: [batchId],
+      productId,
+      quantity: 20,
+    },
   ])('accepts assignment payload %#', async (input) => {
     const dto = Object.assign(new AssignActivationCodesToProductDto(), input);
     await expect(validate(dto)).resolves.toHaveLength(0);
   });
 
-  it('requires a valid bounded range for range assignment', async () => {
+  it('requires a valid bounded quantity for automatic quantity assignment', async () => {
     const dto = Object.assign(new AssignActivationCodesToProductDto(), {
-      assignmentMode: 'RANGE',
-      batchId,
-      from: 0,
+      assignmentMode: 'QUANTITY',
+      batchIds: [batchId],
       productId,
-      to: 1001,
+      quantity: 1001,
     });
     await expect(validate(dto)).resolves.not.toHaveLength(0);
   });
