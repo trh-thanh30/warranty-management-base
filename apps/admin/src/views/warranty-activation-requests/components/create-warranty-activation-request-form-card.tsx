@@ -18,11 +18,13 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  DateTimePicker,
   Input,
   Textarea,
 } from "@repo/ui";
 import { Building2, KeyRound, Loader2, UserPlus } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Controller } from "react-hook-form";
 import { useMemo, useState } from "react";
 import { CreateCustomerDialog } from "../../customers/components/create-customer-dialog";
 import { EditCustomerAddressDialog } from "../../customers/components/edit-customer-address-dialog";
@@ -420,6 +422,34 @@ export function CreateWarrantyActivationRequestFormCard({
                       id="create-activation-request-vehicle-model"
                       placeholder={t("vehicleModelPlaceholder")}
                       {...register("vehicleModel")}
+                    />
+                  </FormField>
+                  <FormField
+                    error={formatActivationRequestCreateFieldError(
+                      errors.installedAt?.message,
+                      t,
+                    )}
+                    id="create-activation-request-installed-at"
+                    label={t("installedAt")}
+                  >
+                    <Controller
+                      control={control}
+                      name="installedAt"
+                      render={({ field }) => (
+                        <DateTimePicker
+                          ariaLabel={t("installedAt")}
+                          calendarAriaLabel={t("installedAtCalendar")}
+                          clearLabel={t("installedAtClear")}
+                          hourLabel={t("installedAtHour")}
+                          id="create-activation-request-installed-at"
+                          invalid={Boolean(errors.installedAt?.message)}
+                          minuteLabel={t("installedAtMinute")}
+                          onValueChange={field.onChange}
+                          placeholder={t("installedAtPlaceholder")}
+                          resetLabel={t("installedAtReset")}
+                          value={field.value}
+                        />
+                      )}
                     />
                   </FormField>
                 </div>

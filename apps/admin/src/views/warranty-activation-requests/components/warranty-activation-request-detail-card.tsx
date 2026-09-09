@@ -69,6 +69,10 @@ export function WarrantyActivationRequestDetailCard({
             value={formatActivationRequestDate(request.createdAt, locale)}
           />
           <DetailItem
+            label={t("installedAt")}
+            value={formatActivationRequestDate(request.installedAt, locale)}
+          />
+          <DetailItem
             className="sm:col-span-2"
             label={t("note")}
             value={request.note ?? "-"}

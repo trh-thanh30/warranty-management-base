@@ -45,6 +45,7 @@ export type WarrantyActivationRequestCreateFormValues = {
   filmRearRightSide: string;
   filmSunroof: string;
   filmWindshield: string;
+  installedAt: string;
   note: string;
   productId: string;
   productName: string;
@@ -98,6 +99,17 @@ export const warrantyActivationRequestCreateFormSchema = z
     filmRearRightSide: z.string().trim().max(120),
     filmSunroof: z.string().trim().max(120),
     filmWindshield: z.string().trim().max(120),
+    installedAt: z
+      .string()
+      .trim()
+      .refine(
+        (value) => !value || !Number.isNaN(new Date(value).getTime()),
+        "installedAtInvalid",
+      )
+      .refine(
+        (value) => !value || new Date(value).getTime() <= Date.now(),
+        "installedAtFuture",
+      ),
     note: z.string().trim().max(1000, "noteLength"),
     productId: z.string().trim(),
     productName: z.string().trim(),

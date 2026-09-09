@@ -15,6 +15,7 @@
     "./chart": "./src/chart.tsx",
     "./date-picker": "./src/date-picker.tsx",
     "./date-range-picker": "./src/date-range-picker.tsx",
+    "./date-time-picker": "./src/date-time-picker.tsx",
     "./dialog": "./src/dialog.tsx",
     "./dropdown-menu": "./src/dropdown-menu.tsx",
     "./input": "./src/input.tsx",
