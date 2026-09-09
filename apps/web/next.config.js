@@ -8,14 +8,9 @@ const assetCdnUrl = new URL(
     "http://localhost:19000/warranty-management-base-public",
 );
 const assetPathname = assetCdnUrl.pathname.replace(/\/$/, "");
-const isLocalAssetCdn = ["localhost", "127.0.0.1", "::1"].includes(
-  assetCdnUrl.hostname,
-);
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    dangerouslyAllowLocalIP: isLocalAssetCdn,
     remotePatterns: [
       {
         hostname: assetCdnUrl.hostname,

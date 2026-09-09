@@ -4,7 +4,7 @@ import { LOCALE_COOKIE_NAME, routing } from "@/src/i18n/routing";
 
 const handleI18nRouting = createMiddleware(routing);
 
-export default function proxy(request: NextRequest) {
+export default function middleware(request: NextRequest) {
   if (request.cookies.has(LOCALE_COOKIE_NAME)) {
     return handleI18nRouting(request);
   }
