@@ -266,7 +266,7 @@ test("admin activation request body preserves an optional installation timestamp
     provinces,
     values: {
       ...validFormValues,
-      installedAt: "2026-09-09T14:30",
+      installedAt: "2026-09-09T14:30:00+07:00",
     } as WarrantyActivationRequestCreateFormValues,
     wards,
   }) as unknown as Record<string, unknown>;
