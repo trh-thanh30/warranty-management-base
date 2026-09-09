@@ -14,6 +14,10 @@ import {
 } from 'class-validator';
 
 export class ManualWarrantyActivationCustomerDto {
+  @IsOptional()
+  @IsUUID()
+  customerId?: string;
+
   @IsString()
   @Length(2, 120)
   fullName: string;

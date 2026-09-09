@@ -114,9 +114,17 @@ export class WarrantyTransactionRepository {
     return customer ? this.toWarrantyCustomer(customer) : null;
   }
 
-  async findCustomerByPhone(phone: string): Promise<WarrantyCustomer | null> {
-    const customer = await this.tx.customer.findUnique({ where: { phone } });
+  async findCustomerById(id: string): Promise<WarrantyCustomer | null> {
+    const customer = await this.tx.customer.findUnique({ where: { id } });
     return customer ? this.toWarrantyCustomer(customer) : null;
+  }
+
+  async findCustomersByPhone(phone: string): Promise<WarrantyCustomer[]> {
+    const customers = await this.tx.customer.findMany({
+      where: { phone },
+      orderBy: { created_at: 'desc' },
+    });
+    return customers.map((customer) => this.toWarrantyCustomer(customer));
   }
 
   updateCustomer(

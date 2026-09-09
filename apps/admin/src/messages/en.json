@@ -41,6 +41,7 @@
     "CATEGORY_NOT_FOUND": "The selected category was not found.",
     "CUSTOMER_IDENTITY_CONFLICT": "The email and phone number belong to different customer profiles.",
     "CUSTOMER_NOT_FOUND": "The selected customer was not found.",
+    "CUSTOMER_SELECTION_REQUIRED": "This phone number belongs to multiple customer profiles. Select a customer profile before continuing.",
     "CUSTOMER_OWNER_MISMATCH": "Customer information does not match the current warranty owner.",
     "DATABASE_ERROR": "A database error occurred.",
     "DEALER_ACCESS_DENIED": "You can only view and manage data for dealers assigned to you.",

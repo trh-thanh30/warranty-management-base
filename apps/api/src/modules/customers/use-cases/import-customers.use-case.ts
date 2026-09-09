@@ -118,8 +118,8 @@ export class ImportCustomersUseCase {
   ) {
     const errors: ExcelRowError[] = [];
     const preparedRows: PreparedCustomerImportRow[] = [];
-    const seenCustomerCodes = new Set<string>();
     const seenPhones = new Set<string>();
+    const seenCustomerCodes = new Set<string>();
     const rowsNeedingGeneratedCode: Array<
       CustomerExcelRow & {
         rowNumber: number;
@@ -149,18 +149,34 @@ export class ImportCustomersUseCase {
         seen: seenPhones,
         value: phone,
       });
-      const [customerByCode, customerByPhone] = await Promise.all([
+      const [customerByCode, customersByPhone] = await Promise.all([
         customerCode
           ? this.prismaService.customer.findUnique({
               where: { customer_code: customerCode },
               select: { id: true },
             })
           : null,
-        this.prismaService.customer.findUnique({
+        this.prismaService.customer.findMany({
           where: { phone },
+          orderBy: { created_at: 'desc' },
           select: { id: true, customer_code: true },
         }),
       ]);
+
+      const customerByPhone = customerCode
+        ? customersByPhone.find(
+            (customer) => customer.id === customerByCode?.id,
+          )
+        : customersByPhone[0];
+
+      if (!customerByCode && customersByPhone.length > 1) {
+        errors.push({
+          rowNumber: row.rowNumber,
+          field: 'customerCode',
+          message:
+            'The phone number belongs to multiple customer profiles. Enter a customer code to identify the profile to update.',
+        });
+      }
 
       const matchedIds = new Set(
         [customerByCode?.id, customerByPhone?.id].filter(Boolean),

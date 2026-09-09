@@ -41,6 +41,7 @@
     "CATEGORY_NOT_FOUND": "Không tìm thấy danh mục đã chọn.",
     "CUSTOMER_IDENTITY_CONFLICT": "Email và số điện thoại đang thuộc về hai hồ sơ khách hàng khác nhau.",
     "CUSTOMER_NOT_FOUND": "Không tìm thấy khách hàng đã chọn.",
+    "CUSTOMER_SELECTION_REQUIRED": "Số điện thoại này thuộc nhiều hồ sơ khách hàng. Vui lòng chọn một hồ sơ khách hàng trước khi tiếp tục.",
     "CUSTOMER_OWNER_MISMATCH": "Thông tin khách hàng không khớp với chủ sở hữu hiện tại của mã bảo hành.",
     "DATABASE_ERROR": "Đã xảy ra lỗi cơ sở dữ liệu.",
     "DEALER_ACCESS_DENIED": "Bạn chỉ có thể xem và thao tác dữ liệu thuộc đại lý được phân công.",
