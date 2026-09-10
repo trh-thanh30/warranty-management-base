@@ -5,6 +5,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @source "../../../packages/ui/src/**/*.{ts,tsx}";
+@source "../../../packages/homepage/src/**/*.{ts,tsx}";
 
 :root {
   color-scheme: light;

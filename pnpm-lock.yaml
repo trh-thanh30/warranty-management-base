@@ -586,6 +586,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.4.0
         version: 5.4.0(react-hook-form@7.77.0(react@19.2.6))
+      '@repo/homepage':
+        specifier: workspace:*
+        version: link:../../packages/homepage
       '@repo/hooks':
         specifier: workspace:*
         version: link:../../packages/hooks
