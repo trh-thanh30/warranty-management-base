@@ -27,6 +27,14 @@ import { PublicLookupWarrantyClaimsByWarrantyCodeUseCase } from '@/modules/publi
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 
+const PUBLIC_WARRANTY_THROTTLE = {
+  default: {
+    blockDuration: 5 * 60_000,
+    limit: 5,
+    ttl: 60_000,
+  },
+} as const;
+
 @Public()
 @Controller('public')
 export class PublicController {
@@ -48,13 +56,13 @@ export class PublicController {
     private readonly listPublicProductCategoriesUseCase: ListPublicProductCategoriesUseCase,
   ) {}
 
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Throttle(PUBLIC_WARRANTY_THROTTLE)
   @Get('warranties/lookup')
   lookupWarranty(@Query() query: LookupWarrantyDto) {
     return this.lookupWarrantyByCodeUseCase.execute(query);
   }
 
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Throttle(PUBLIC_WARRANTY_THROTTLE)
   @Post('warranty-activation-requests')
   createWarrantyActivationRequest(
     @Body() dto: CreatePublicWarrantyActivationRequestDto,
@@ -62,7 +70,7 @@ export class PublicController {
     return this.createPublicWarrantyActivationRequestUseCase.execute(dto);
   }
 
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Throttle(PUBLIC_WARRANTY_THROTTLE)
   @Get('warranty-activation-requests/:requestCode')
   lookupWarrantyActivationRequest(@Param('requestCode') requestCode: string) {
     return this.publicLookupWarrantyActivationRequestUseCase.execute(
@@ -70,19 +78,19 @@ export class PublicController {
     );
   }
 
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Throttle(PUBLIC_WARRANTY_THROTTLE)
   @Post('warranty-claims')
   createWarrantyClaim(@Body() dto: CreateWarrantyClaimDto) {
     return this.createPublicWarrantyClaimUseCase.execute(dto);
   }
 
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Throttle(PUBLIC_WARRANTY_THROTTLE)
   @Get('warranty-claims/by-code/:claimCode')
   lookupWarrantyClaimByCode(@Param('claimCode') claimCode: string) {
     return this.publicLookupWarrantyClaimByCodeUseCase.execute(claimCode);
   }
 
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Throttle(PUBLIC_WARRANTY_THROTTLE)
   @Get('warranty-claims/by-warranty-code/:warrantyCode')
   lookupWarrantyClaimsByWarrantyCode(
     @Param('warrantyCode') warrantyCode: string,
