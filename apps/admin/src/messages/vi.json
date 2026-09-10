@@ -3223,6 +3223,7 @@
       "title": "Thông tin website",
       "description": "Chỉnh sửa thông tin dùng chung trên website công khai.",
       "media": "Hình ảnh website",
+      "openHomepageEditor": "Mở trình chỉnh sửa trang chủ",
       "mediaDescription": "Quản lý logo dùng ở header, footer và ảnh đại diện mặc định khi chia sẻ website.",
       "tabs": {
         "identity": "Nhận diện",

@@ -4,6 +4,7 @@ import type { WebsiteLocale, WebsiteSiteSetting } from "@repo/shared";
 import {
   Card,
   CardContent,
+  Button,
   Tabs,
   TabsContent,
   TabsList,
@@ -11,6 +12,7 @@ import {
 } from "@repo/ui";
 import { House, Image, Images, MapPin, Share2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/src/i18n/navigation";
 import { LocaleTabs } from "../../components/locale-tabs";
 import { HomepageHeroEditor, toPreviewUrl } from "../homepage-hero-editor";
 import { ThumbnailUploadPanel } from "../thumbnail-upload-panel";
@@ -182,6 +184,11 @@ export function WebsiteSiteConfigForm({
               locale={locale}
               onChange={onChange}
             />
+            <Button asChild variant="outline">
+              <Link href="/website-config/site/homepage-editor">
+                {t("site.openHomepageEditor")}
+              </Link>
+            </Button>
             <ContactEditor
               disabled={!canUpdate}
               form={form}

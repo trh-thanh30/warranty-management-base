@@ -3223,6 +3223,7 @@
       "title": "Website information",
       "description": "Edit shared information used across the public website.",
       "media": "Website images",
+      "openHomepageEditor": "Open homepage editor",
       "mediaDescription": "Manage the header logo, footer logo, and the default image used when the website is shared.",
       "tabs": {
         "identity": "Identity",
