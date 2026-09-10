@@ -41,3 +41,12 @@ test("homepage editor provides a fullscreen canvas toggle", () => {
   assert.match(source, /fixed inset-0 z-50/);
   assert.match(source, /homepageEditor\.openFullscreen/);
 });
+
+test("homepage image fallback resolves against the public web origin", () => {
+  const source = readFileSync(
+    "src/views/website-config/site/components/website-site-config-form.tsx",
+    "utf8",
+  );
+  assert.match(source, /toPreviewUrl\(/);
+  assert.match(source, /\?\? "\/hero\/hero_5\.jpg"/);
+});

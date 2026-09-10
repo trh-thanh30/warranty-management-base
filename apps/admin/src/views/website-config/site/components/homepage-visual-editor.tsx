@@ -128,35 +128,29 @@ export function HomepageVisualEditor({
           : "space-y-3"
       }
     >
-      <div className={isFullscreen ? "sr-only" : undefined}>
-        <h3 className="font-semibold text-slate-950 dark:text-slate-50">
-          {t("homepageEditor.title")}
-        </h3>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {disabled
-            ? t("homepageEditor.readOnly")
-            : t("homepageEditor.description")}
-        </p>
-      </div>
       {error ? (
         <p className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
           {error}
         </p>
       ) : null}
-      <div
-        className={
-          isFullscreen
-            ? "relative min-h-0 flex-1 overflow-hidden rounded-lg border bg-white"
-            : "min-h-[720px] overflow-hidden rounded-lg border bg-white"
-        }
-      >
+      <div className="flex items-center justify-between gap-3">
+        <div className={isFullscreen ? "sr-only" : undefined}>
+          <h3 className="font-semibold text-slate-950 dark:text-slate-50">
+            {t("homepageEditor.title")}
+          </h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {disabled
+              ? t("homepageEditor.readOnly")
+              : t("homepageEditor.description")}
+          </p>
+        </div>
         <button
           aria-label={
             isFullscreen
               ? t("homepageEditor.closeFullscreen")
               : t("homepageEditor.openFullscreen")
           }
-          className="absolute right-3 top-3 z-[60] inline-flex size-9 items-center justify-center rounded-md border bg-white text-slate-700 shadow-sm hover:bg-slate-50"
+          className="inline-flex shrink-0 items-center gap-2 rounded-md border bg-white px-3 py-2 text-sm text-slate-700 shadow-sm hover:bg-slate-50"
           onClick={() => setIsFullscreen((current) => !current)}
           type="button"
         >
@@ -165,7 +159,20 @@ export function HomepageVisualEditor({
           ) : (
             <Maximize2 aria-hidden="true" className="size-4" />
           )}
+          <span className="hidden sm:inline">
+            {isFullscreen
+              ? t("homepageEditor.closeFullscreen")
+              : t("homepageEditor.openFullscreen")}
+          </span>
         </button>
+      </div>
+      <div
+        className={
+          isFullscreen
+            ? "relative min-h-0 flex-1 overflow-hidden rounded-lg border bg-white"
+            : "min-h-[720px] overflow-hidden rounded-lg border bg-white"
+        }
+      >
         <Puck
           config={config}
           data={data}

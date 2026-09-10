@@ -12,7 +12,7 @@ import {
 import { House, Image, Images, MapPin, Share2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { LocaleTabs } from "../../components/locale-tabs";
-import { HomepageHeroEditor } from "../homepage-hero-editor";
+import { HomepageHeroEditor, toPreviewUrl } from "../homepage-hero-editor";
 import { ThumbnailUploadPanel } from "../thumbnail-upload-panel";
 import type {
   SiteAssetUrls,
@@ -141,10 +141,10 @@ export function WebsiteSiteConfigForm({
               <HomepageVisualEditor
                 disabled={!canUpdate}
                 form={form}
-                heroImageUrl={
+                heroImageUrl={toPreviewUrl(
                   site.heroSlides.find((slide) => slide.isActive)?.desktopImage
-                    ?.url ?? "/hero/hero_5.jpg"
-                }
+                    ?.url ?? "/hero/hero_5.jpg",
+                )}
                 locale={locale}
                 onChange={onChange}
               />
