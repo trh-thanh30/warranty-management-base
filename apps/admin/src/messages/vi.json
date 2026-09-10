@@ -3251,6 +3251,8 @@
         "unsavedChanges": "Các thay đổi chưa được lưu nháp.",
         "openFullscreen": "Mở trình chỉnh sửa toàn màn hình",
         "closeFullscreen": "Đóng trình chỉnh sửa toàn màn hình",
+        "brandStoryImage": "Ảnh câu chuyện thương hiệu",
+        "technologyOriginImage": "Ảnh xuất xứ công nghệ",
         "styles": {
           "font": "Phông chữ",
           "size": "Kích thước",

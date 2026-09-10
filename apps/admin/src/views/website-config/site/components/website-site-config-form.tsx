@@ -141,12 +141,14 @@ export function WebsiteSiteConfigForm({
               <HomepageVisualEditor
                 disabled={!canUpdate}
                 form={form}
+                imageUrls={assets}
                 heroImageUrl={toPreviewUrl(
                   site.heroSlides.find((slide) => slide.isActive)?.desktopImage
                     ?.url ?? "/hero/hero_5.jpg",
                 )}
                 locale={locale}
                 onChange={onChange}
+                onAssetsChange={onAssetsChange}
               />
               <div className="border-t" />
               <HomepageHeroEditor

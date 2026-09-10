@@ -20,9 +20,13 @@ export async function AboutView({
 
   return (
     <HomepageRenderer
+      brandStoryImageUrl={site?.homepage?.aboutImage?.url ?? "/hero/hero_6.jpg"}
       copy={copy}
       heroImageUrl={heroImageUrl}
       networkContent={<AboutNetworkMap />}
+      technologyOriginImageUrl={
+        site?.homepage?.sputterChamberImage?.url ?? "/hero/hero_7.jpg"
+      }
     />
   );
 }

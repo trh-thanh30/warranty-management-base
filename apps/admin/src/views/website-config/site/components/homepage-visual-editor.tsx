@@ -5,7 +5,14 @@ import type { WebsiteLocale } from "@repo/shared";
 import { Maximize2, Minimize2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import type { SiteDraft, SiteDraftUpdater } from "../website-site-config.types";
+import { ImageUpload } from "@/src/components/common/image-upload";
+import type {
+  SiteAssetUrls,
+  SiteAssetUrlsUpdater,
+  SiteDraft,
+  SiteDraftUpdater,
+} from "../website-site-config.types";
+import { toPreviewUrl } from "../homepage-hero-editor";
 import {
   fromHomepagePuckData,
   type HomepagePuckComponents,
@@ -64,14 +71,18 @@ export function HomepageVisualEditor({
   disabled,
   form,
   heroImageUrl,
+  imageUrls,
   locale,
   onChange,
+  onAssetsChange,
 }: {
   disabled: boolean;
   form: SiteDraft;
   heroImageUrl: string;
+  imageUrls: SiteAssetUrls;
   locale: WebsiteLocale;
   onChange: SiteDraftUpdater;
+  onAssetsChange: SiteAssetUrlsUpdater;
 }) {
   const t = useTranslations("WebsiteConfig.site");
   const [error, setError] = useState<string | null>(null);
@@ -96,8 +107,23 @@ export function HomepageVisualEditor({
     [t],
   );
   const config = useMemo(
-    () => createHomepagePuckConfig({ heroImageUrl, labels }),
-    [heroImageUrl, labels],
+    () =>
+      createHomepagePuckConfig({
+        brandStoryImageUrl: toPreviewUrl(
+          imageUrls.brandStoryImageUrl || "/hero/hero_6.jpg",
+        ),
+        heroImageUrl,
+        labels,
+        technologyOriginImageUrl: toPreviewUrl(
+          imageUrls.technologyOriginImageUrl || "/hero/hero_7.jpg",
+        ),
+      }),
+    [
+      heroImageUrl,
+      imageUrls.brandStoryImageUrl,
+      imageUrls.technologyOriginImageUrl,
+      labels,
+    ],
   );
 
   function update(next: Data<HomepagePuckComponents>) {
@@ -168,6 +194,48 @@ export function HomepageVisualEditor({
           </span>
         </button>
       </div>
+      <div className="grid gap-3 md:grid-cols-2">
+        <HomepageImageField
+          disabled={disabled}
+          id="homepage-brand-story-image"
+          label={t("homepageEditor.brandStoryImage")}
+          persistedUrl={imageUrls.brandStoryImageUrl}
+          url={imageUrls.brandStoryImageUrl}
+          onChange={(assetId, url) => {
+            onChange((current) => ({
+              ...current,
+              homepage: {
+                ...current.homepage,
+                aboutImageAssetId: assetId,
+              },
+            }));
+            onAssetsChange((current) => ({
+              ...current,
+              brandStoryImageUrl: url,
+            }));
+          }}
+        />
+        <HomepageImageField
+          disabled={disabled}
+          id="homepage-technology-origin-image"
+          label={t("homepageEditor.technologyOriginImage")}
+          persistedUrl={imageUrls.technologyOriginImageUrl}
+          url={imageUrls.technologyOriginImageUrl}
+          onChange={(assetId, url) => {
+            onChange((current) => ({
+              ...current,
+              homepage: {
+                ...current.homepage,
+                sputterChamberImageAssetId: assetId,
+              },
+            }));
+            onAssetsChange((current) => ({
+              ...current,
+              technologyOriginImageUrl: url,
+            }));
+          }}
+        />
+      </div>
       <div
         className={
           isFullscreen
@@ -195,5 +263,42 @@ export function HomepageVisualEditor({
         />
       </div>
     </section>
+  );
+}
+
+function HomepageImageField({
+  disabled,
+  id,
+  label,
+  onChange,
+  persistedUrl,
+  url,
+}: {
+  disabled: boolean;
+  id: string;
+  label: string;
+  onChange: (assetId: string | null, url: string) => void;
+  persistedUrl: string;
+  url: string;
+}) {
+  return (
+    <div className="rounded-md border bg-white p-3">
+      <p className="mb-2 text-sm font-medium">{label}</p>
+      <ImageUpload
+        compact
+        disabled={disabled}
+        id={id}
+        onAssetChange={(asset) => onChange(asset?.id ?? null, asset?.url ?? "")}
+        onChange={(value) => {
+          if (!value) onChange(null, "");
+        }}
+        persistedValue={persistedUrl}
+        uploadOptions={{
+          accessType: "PUBLIC",
+          folder: "website-config/homepage",
+        }}
+        value={url}
+      />
+    </div>
   );
 }

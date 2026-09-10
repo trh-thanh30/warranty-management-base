@@ -35,9 +35,11 @@ export function WebsiteSiteConfigView() {
   const [locale, setLocale] = useState<WebsiteLocale>("vi");
   const [form, setForm] = useState<SiteDraft | null>(null);
   const [assets, setAssets] = useState<SiteAssetUrls>({
+    brandStoryImageUrl: "",
     footerLogoUrl: "",
     headerLogoUrl: "",
     ogImageUrl: "",
+    technologyOriginImageUrl: "",
   });
   const [dirty, setDirty] = useState(false);
   const conflict =
@@ -48,9 +50,12 @@ export function WebsiteSiteConfigView() {
     if (!query.data) return;
     setForm(toSiteDraft(query.data));
     setAssets({
+      brandStoryImageUrl: query.data.homepage.aboutImage?.url ?? "",
       footerLogoUrl: query.data.footerLogo?.url ?? "",
       headerLogoUrl: query.data.headerLogo?.url ?? "",
       ogImageUrl: query.data.ogImage?.url ?? "",
+      technologyOriginImageUrl:
+        query.data.homepage.sputterChamberImage?.url ?? "",
     });
     setDirty(false);
   }, [query.data]);

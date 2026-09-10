@@ -55,13 +55,17 @@ export function getHomepageEditorPermissions(readOnly: boolean): Permissions {
 }
 
 export function createHomepagePuckConfig({
+  brandStoryImageUrl,
   heroImageUrl,
   labels,
   networkContent,
+  technologyOriginImageUrl,
 }: {
+  brandStoryImageUrl?: string;
   heroImageUrl: string;
   labels: HomepageEditorLabels;
   networkContent?: ReactNode;
+  technologyOriginImageUrl?: string;
 }): Config<HomepagePuckComponents> {
   const defaults = DEFAULT_WEBSITE_HOMEPAGE_CONTENT.vi.landing;
 
@@ -93,7 +97,10 @@ export function createHomepagePuckConfig({
         ]),
         permissions: homepageEditorPermissions,
         render: (props) => (
-          <BrandStorySection copy={sectionFromProps(props, "brandHeritage")} />
+          <BrandStorySection
+            copy={sectionFromProps(props, "brandHeritage")}
+            imageUrl={brandStoryImageUrl}
+          />
         ),
       },
       HomepageTechnologyOrigin: {
@@ -112,6 +119,7 @@ export function createHomepagePuckConfig({
         render: (props) => (
           <TechnologyOriginSection
             copy={sectionFromProps(props, "brandHeritage")}
+            imageUrl={technologyOriginImageUrl}
           />
         ),
       },

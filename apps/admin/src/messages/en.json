@@ -3251,6 +3251,8 @@
         "unsavedChanges": "There are unsaved draft changes.",
         "openFullscreen": "Open editor fullscreen",
         "closeFullscreen": "Close editor fullscreen",
+        "brandStoryImage": "Brand story image",
+        "technologyOriginImage": "Technology origin image",
         "styles": {
           "font": "Font",
           "size": "Size",

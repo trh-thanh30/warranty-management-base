@@ -6,14 +6,20 @@ import { NetworkSection } from "./components/network-section";
 import { B2bSection } from "./components/b2b-section";
 
 export function HomepageRenderer({
+  brandStoryImageUrl,
   copy,
   heroImageUrl,
   networkContent,
+  technologyOriginImageUrl,
 }: HomepageRendererProps) {
   return (
     <main className="w-full overflow-x-clip bg-white text-deep-black">
       <HeroSection copy={copy.hero} imageUrl={heroImageUrl} />
-      <BrandHeritageSection copy={copy.brandHeritage} />
+      <BrandHeritageSection
+        copy={copy.brandHeritage}
+        storyImageUrl={brandStoryImageUrl}
+        technologyOriginImageUrl={technologyOriginImageUrl}
+      />
       <HeadingSection {...copy.coreTech} id="core-tech" />
       <HeadingSection {...copy.milestones} id="milestones" muted />
       <HeadingSection {...copy.pillars} id="pillars" />

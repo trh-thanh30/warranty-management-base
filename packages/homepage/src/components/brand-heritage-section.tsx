@@ -3,28 +3,37 @@ import { EditableText } from "../editable-text";
 
 export function BrandHeritageSection({
   copy,
+  storyImageUrl,
+  technologyOriginImageUrl,
 }: {
   copy: HomepageLandingCopy["brandHeritage"];
+  storyImageUrl?: string;
+  technologyOriginImageUrl?: string;
 }) {
   return (
     <div data-homepage-section="brand-heritage">
-      <BrandStorySection copy={copy} />
-      <TechnologyOriginSection copy={copy} />
+      <BrandStorySection copy={copy} imageUrl={storyImageUrl} />
+      <TechnologyOriginSection
+        copy={copy}
+        imageUrl={technologyOriginImageUrl}
+      />
     </div>
   );
 }
 
 export function BrandStorySection({
   copy,
+  imageUrl,
 }: {
   copy: HomepageLandingCopy["brandHeritage"];
+  imageUrl?: string;
 }) {
   return (
     <section
       className="bg-white px-6 py-20 lg:px-20"
       data-homepage-section="brand-story"
     >
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1fr_0.85fr] lg:items-center">
         <div className="max-w-3xl space-y-5">
           <EditableText
             as="p"
@@ -48,6 +57,13 @@ export function BrandStorySection({
             value={copy.descriptionSecondary}
           />
         </div>
+        {imageUrl ? (
+          <img
+            alt=""
+            className="h-full min-h-72 w-full rounded-sm object-cover"
+            src={imageUrl}
+          />
+        ) : null}
       </div>
     </section>
   );
@@ -55,16 +71,25 @@ export function BrandStorySection({
 
 export function TechnologyOriginSection({
   copy,
+  imageUrl,
 }: {
   copy: HomepageLandingCopy["brandHeritage"];
+  imageUrl?: string;
 }) {
   return (
     <section
       className="bg-surface-muted px-6 py-20 lg:px-20"
       data-homepage-section="technology-origin"
     >
-      <div className="mx-auto max-w-7xl">
-        <div className="max-w-3xl space-y-5 border-l border-border-gray pl-8">
+      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.85fr_1fr] lg:items-center">
+        {imageUrl ? (
+          <img
+            alt=""
+            className="order-2 h-full min-h-72 w-full rounded-sm object-cover lg:order-1"
+            src={imageUrl}
+          />
+        ) : null}
+        <div className="order-1 max-w-3xl space-y-5 border-l border-border-gray pl-8 lg:order-2">
           <EditableText
             as="p"
             className="uppercase tracking-widest"
