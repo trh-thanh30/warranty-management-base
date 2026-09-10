@@ -140,6 +140,7 @@ export function HomepageVisualEditor({
           config={config}
           data={data}
           height="720px"
+          iframe={{ enabled: false }}
           onChange={update}
           permissions={getHomepageEditorPermissions(disabled)}
           ui={{

@@ -23,3 +23,11 @@ test("admin canvas loads homepage design tokens", () => {
   assert.match(styles, /--color-deep-black:\s*#040708/);
   assert.match(styles, /--font-heading:/);
 });
+
+test("admin canvas renders in the host document for local assets and styles", () => {
+  const source = readFileSync(
+    "src/views/website-config/site/components/homepage-visual-editor.tsx",
+    "utf8",
+  );
+  assert.match(source, /iframe=\{\{ enabled: false \}\}/);
+});
