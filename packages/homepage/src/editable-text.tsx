@@ -1,4 +1,4 @@
-import type { ElementType } from "react";
+import type { ElementType, ReactNode } from "react";
 import type { WebsiteEditableText } from "@repo/shared";
 
 const fontClasses = { heading: "font-heading", body: "font-sans" } as const;
@@ -21,7 +21,13 @@ const alignClasses = {
   right: "text-right",
 } as const;
 
-export function editableTextClassName(value: WebsiteEditableText) {
+type EditableTextValue = Omit<WebsiteEditableText, "content"> & {
+  content: ReactNode;
+};
+
+export function editableTextClassName(
+  value: Omit<WebsiteEditableText, "content">,
+) {
   return [
     fontClasses[value.font],
     sizeClasses[value.size],
@@ -39,7 +45,7 @@ export function EditableText({
 }: {
   as?: ElementType;
   className?: string;
-  value: WebsiteEditableText;
+  value: EditableTextValue;
 }) {
   return (
     <Component

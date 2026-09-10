@@ -6,6 +6,15 @@
 @source "../../../packages/ui/src/**/*.{ts,tsx}";
 @source "../../../packages/homepage/src/**/*.{ts,tsx}";
 
+@theme {
+  --font-heading: Inter, ui-sans-serif, system-ui, sans-serif;
+  --color-deep-black: #040708;
+  --color-premium-red: #db2114;
+  --color-stone-gray: #596273;
+  --color-surface-muted: #f9fafb;
+  --color-border-gray: #dfdfdf;
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {

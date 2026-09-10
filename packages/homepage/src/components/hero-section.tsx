@@ -1,5 +1,6 @@
 import type { HomepageLandingCopy } from "../homepage.types";
 import { EditableText } from "../editable-text";
+import type { ReactNode } from "react";
 
 export function HeroSection({
   copy,
@@ -34,7 +35,12 @@ export function HeroSection({
           <HeroStat label={copy.originLabel} value={`${copy.originPercent}%`} />
           <HeroStat
             label={copy.warrantyLabel}
-            value={`${copy.warrantyYears}${copy.yearsSuffix.content}`}
+            value={
+              <>
+                {copy.warrantyYears}
+                {copy.yearsSuffix.content}
+              </>
+            }
           />
         </div>
         <div className="flex flex-wrap gap-4">
@@ -52,7 +58,11 @@ export function HeroSection({
       </div>
       <div className="order-1 min-h-72 lg:order-2">
         <img
-          alt={copy.titleHighlight.content}
+          alt={
+            typeof copy.titleHighlight.content === "string"
+              ? copy.titleHighlight.content
+              : "Homepage hero"
+          }
           className="h-full w-full object-cover"
           src={imageUrl}
         />
@@ -66,7 +76,7 @@ function HeroStat({
   value,
 }: {
   label: HomepageLandingCopy["hero"]["uvLabel"];
-  value: string;
+  value: ReactNode;
 }) {
   return (
     <div className="border-l-2 border-premium-red pl-4">
