@@ -1,15 +1,15 @@
 "use client";
 
-import { FileText, ShieldCheck } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { Link } from "@/src/i18n/navigation";
+import { FileText, ShieldCheck } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export function WarrantyPolicyShortcut() {
   const t = useTranslations("Warranty.lookup.policyShortcut");
 
   return (
-    <section className="mx-auto max-w-3xl sm:max-w-4xl lg:max-w-5xl">
+    <section className="mx-auto">
       <div className="flex flex-col items-center justify-between gap-6 border-t border-border-gray pt-6 sm:flex-row">
         <div className="space-y-2 text-center sm:text-left">
           <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-premium-red">

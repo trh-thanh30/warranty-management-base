@@ -14,11 +14,11 @@ type WarrantyProcessStepsProps = {
 
 export function WarrantyProcessSteps({ steps }: WarrantyProcessStepsProps) {
   return (
-    <section className="mx-auto w-full max-w-5xl px-0 py-2 sm:px-2 sm:py-4">
+    <section className="mx-auto w-full">
       <ol className="grid gap-6 sm:grid-cols-3">
         {steps.map(({ number, Icon, badge, title, description }) => (
           <li
-            className="group flex h-[230px] flex-col justify-between rounded-md border border-border-gray bg-white p-6 text-left shadow-md transition-all hover:border-premium-red hover:shadow-xl"
+            className="group flex h-57.5 flex-col justify-between rounded-md border border-border-gray bg-white p-6 text-left shadow-md transition-all hover:border-premium-red hover:shadow-xl"
             key={number}
           >
             <div className="flex items-center justify-between">

@@ -1287,7 +1287,7 @@
     }
   },
   "SupportCentersPage": {
-    "eyebrow": "Mạng lưới dịch vụ FUJITEK",
+    "eyebrow": "Mạng lưới dịch vụ Fujitek – Lexzenz",
     "title": "Hệ thống trạm bảo hành & Đại lý",
     "description": "Mạng lưới đại lý ủy quyền và trung tâm dịch vụ chính hãng trên toàn quốc.",
     "centers": {
@@ -1299,13 +1299,13 @@
       },
       "haDong": {
         "city": "Hà Nội",
-        "name": "Trung tâm dán phim FUJITEK Hà Đông",
+        "name": "Trung tâm dán phim Fujitek – Lexzenz Hà Đông",
         "address": "Số 68 Quang Trung, Q. Hà Đông, Hà Nội",
         "hours": "08:00 - 18:00 (Thứ Hai - Thứ Bảy)"
       },
       "hoChiMinhCity": {
         "city": "TP. Hồ Chí Minh",
-        "name": "Trạm bảo hành ủy quyền FUJITEK TP. Hồ Chí Minh",
+        "name": "Trạm bảo hành ủy quyền Fujitek – Lexzenz TP. Hồ Chí Minh",
         "address": "Số 102 Xa Lộ Hà Nội, P. Thảo Điền, TP. Thủ Đức, TP. Hồ Chí Minh",
         "hours": "08:00 - 18:30 (Thứ Hai - Chủ Nhật)"
       }
@@ -1348,7 +1348,7 @@
         "dealers": {
           "badge": "Toàn quốc",
           "title": "Trạm bảo hành & Đại lý",
-          "description": "Tìm trung tâm dịch vụ FUJITEK được ủy quyền gần bạn.",
+          "description": "Tìm trung tâm dịch vụ Fujitek – Lexzenz được ủy quyền gần bạn.",
           "action": "Tìm trạm gần nhất"
         },
         "policy": {
@@ -1362,7 +1362,7 @@
     "activate": {
       "form": {
         "title": "Gửi yêu cầu kích hoạt bảo hành",
-        "description": "Nhập mã kích hoạt trên tem và thông tin chủ xe để FUJITEK kiểm tra, phê duyệt trước khi cấp bảo hành.",
+        "description": "Nhập mã kích hoạt trên tem và thông tin chủ xe để Fujitek – Lexzenz kiểm tra, phê duyệt trước khi cấp bảo hành.",
         "sectionTitle": "Thông tin kích hoạt bảo hành",
         "sectionDescription": "Vui lòng điền đầy đủ thông tin để quá trình xác minh và kích hoạt được thực hiện chính xác."
       },
@@ -1378,18 +1378,18 @@
           "two": {
             "badge": "Bước 02",
             "title": "Gửi yêu cầu",
-            "description": "Kiểm tra lại thông tin và gửi yêu cầu đến FUJITEK."
+            "description": "Kiểm tra lại thông tin và gửi yêu cầu đến Fujitek – Lexzenz."
           },
           "three": {
             "badge": "Bước 03",
             "title": "Chờ xác minh",
-            "description": "FUJITEK kiểm tra, phê duyệt và kích hoạt bảo hành cho bạn."
+            "description": "Fujitek – Lexzenz kiểm tra, phê duyệt và kích hoạt bảo hành cho bạn."
           }
         }
       },
       "eyebrow": "Yêu cầu kích hoạt E-Warranty",
       "title": "Đăng ký kích hoạt bảo hành điện tử",
-      "description": "Nhập mã kích hoạt trên tem để FUJITEK xác định sản phẩm, kiểm tra và phê duyệt bảo hành.",
+      "description": "Nhập mã kích hoạt trên tem để Fujitek – Lexzenz xác định sản phẩm, kiểm tra và phê duyệt bảo hành.",
       "submit": "Gửi yêu cầu kích hoạt",
       "submitting": "Đang gửi yêu cầu...",
       "success": {
@@ -1548,7 +1548,7 @@
       "policyShortcut": {
         "eyebrow": "Chính sách & Điều khoản",
         "title": "Bạn muốn tìm hiểu chi tiết về phạm vi & quy định bảo hành?",
-        "description": "Xem quy định thời gian bảo hành (10 - 15 năm), trường hợp được bảo hành & lưu ý sau khi dán phim.",
+        "description": "Xem quy định thời gian bảo hành, trường hợp được bảo hành & lưu ý sau khi kích hoạt.",
         "action": "Xem chính sách bảo hành"
       },
       "errors": {

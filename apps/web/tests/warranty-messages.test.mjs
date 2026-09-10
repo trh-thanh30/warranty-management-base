@@ -53,18 +53,31 @@ test("warranty policy card links to the dedicated warranty-return policy", async
   assert.equal(policyAction?.[1], "policyWarrantyReturn");
 });
 
-test("every warranty subpage shares the locale-aware warranty back link", async () => {
-  const componentSource = await readFile(
-    path.join(
-      webRoot,
-      "src",
-      "views",
-      "warranty",
-      "components",
-      "warranty-back-link.tsx",
+test("every warranty subpage shares the locale-aware warranty page shell", async () => {
+  const [componentSource, shellSource] = await Promise.all([
+    readFile(
+      path.join(
+        webRoot,
+        "src",
+        "views",
+        "warranty",
+        "components",
+        "warranty-back-link.tsx",
+      ),
+      "utf8",
     ),
-    "utf8",
-  );
+    readFile(
+      path.join(
+        webRoot,
+        "src",
+        "views",
+        "warranty",
+        "components",
+        "warranty-service-page-shell.tsx",
+      ),
+      "utf8",
+    ),
+  ]);
   const subpageFiles = [
     "activate.view.tsx",
     "lookup.view.tsx",
@@ -74,6 +87,7 @@ test("every warranty subpage shares the locale-aware warranty back link", async 
 
   assert.match(componentSource, /href=\{APP_ROUTES\.warranty\}/);
   assert.match(componentSource, /useTranslations\("Warranty"\)/);
+  assert.match(shellSource, /<WarrantyBackLink\s*\/>/);
 
   for (const filename of subpageFiles) {
     const source = await readFile(
@@ -81,7 +95,7 @@ test("every warranty subpage shares the locale-aware warranty back link", async 
       "utf8",
     );
 
-    assert.match(source, /<WarrantyBackLink(?:\s|\/|>)/, filename);
+    assert.match(source, /<WarrantyServicePageShell(?:\s|\/|>)/, filename);
   }
 
   for (const [locale, expectedLabel] of [

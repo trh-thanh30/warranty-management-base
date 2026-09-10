@@ -197,7 +197,7 @@ test("warranty tracking view composes claim and activation request workflows", a
   assert.match(source, /WarrantyClaimProgress/);
   assert.match(source, /WarrantyActivationRequestProgress/);
   assert.match(source, /AnimatePresence/);
-  assert.match(source, /<motion\.section[\s\S]*layout/);
+  assert.match(source, /<motion\.div[\s\S]*layout[\s\S]*<WarrantyFormCard/);
   assert.match(source, /initial=\{\{\s*opacity:\s*0,\s*height:\s*0/);
   assert.match(source, /embedded/);
   assert.doesNotMatch(source, /demoWarrantyTicket/);
