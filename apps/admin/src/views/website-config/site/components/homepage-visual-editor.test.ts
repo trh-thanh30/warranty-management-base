@@ -40,7 +40,8 @@ test("homepage editor is hosted on a dedicated route", () => {
     "utf8",
   );
   assert.match(source, /HomepageVisualEditor/);
-  assert.match(source, /RevisionStatusBar/);
+  assert.match(source, /standalone/);
+  assert.doesNotMatch(source, /RevisionStatusBar/);
 });
 
 test("homepage image fallback resolves against the public web origin", () => {

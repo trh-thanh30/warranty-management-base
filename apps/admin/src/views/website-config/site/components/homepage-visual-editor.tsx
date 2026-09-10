@@ -2,7 +2,6 @@
 
 import { Puck, type Data } from "@puckeditor/core";
 import type { WebsiteLocale } from "@repo/shared";
-import { Maximize2, Minimize2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { ImageUpload } from "@/src/components/common/image-upload";
@@ -75,6 +74,8 @@ export function HomepageVisualEditor({
   locale,
   onChange,
   onAssetsChange,
+  onPublish,
+  standalone = false,
 }: {
   disabled: boolean;
   form: SiteDraft;
@@ -83,10 +84,11 @@ export function HomepageVisualEditor({
   locale: WebsiteLocale;
   onChange: SiteDraftUpdater;
   onAssetsChange: SiteAssetUrlsUpdater;
+  onPublish?: () => void | Promise<void>;
+  standalone?: boolean;
 }) {
   const t = useTranslations("WebsiteConfig.site");
   const [error, setError] = useState<string | null>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const copy = form.homepage.content[locale].landing;
   const data = useMemo(() => toHomepagePuckData(copy), [copy]);
   const labels = useMemo(
@@ -149,106 +151,84 @@ export function HomepageVisualEditor({
   }
 
   return (
-    <section
-      className={
-        isFullscreen
-          ? "fixed inset-0 z-50 flex flex-col bg-background p-4"
-          : "space-y-3"
-      }
-    >
+    <section className={standalone ? "min-h-screen" : "space-y-3"}>
       {error ? (
         <p className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
           {error}
         </p>
       ) : null}
-      <div className="flex items-center justify-between gap-3">
-        <div className={isFullscreen ? "sr-only" : undefined}>
-          <h3 className="font-semibold text-slate-950 dark:text-slate-50">
-            {t("homepageEditor.title")}
-          </h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {disabled
-              ? t("homepageEditor.readOnly")
-              : t("homepageEditor.description")}
-          </p>
+      {!standalone ? (
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="font-semibold text-slate-950 dark:text-slate-50">
+              {t("homepageEditor.title")}
+            </h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {disabled
+                ? t("homepageEditor.readOnly")
+                : t("homepageEditor.description")}
+            </p>
+          </div>
         </div>
-        <button
-          aria-label={
-            isFullscreen
-              ? t("homepageEditor.closeFullscreen")
-              : t("homepageEditor.openFullscreen")
-          }
-          className="inline-flex shrink-0 items-center gap-2 rounded-md border bg-white px-3 py-2 text-sm text-slate-700 shadow-sm hover:bg-slate-50"
-          onClick={() => setIsFullscreen((current) => !current)}
-          type="button"
-        >
-          {isFullscreen ? (
-            <Minimize2 aria-hidden="true" className="size-4" />
-          ) : (
-            <Maximize2 aria-hidden="true" className="size-4" />
-          )}
-          <span className="hidden sm:inline">
-            {isFullscreen
-              ? t("homepageEditor.closeFullscreen")
-              : t("homepageEditor.openFullscreen")}
-          </span>
-        </button>
-      </div>
-      <div className="grid gap-3 md:grid-cols-2">
-        <HomepageImageField
-          disabled={disabled}
-          id="homepage-brand-story-image"
-          label={t("homepageEditor.brandStoryImage")}
-          persistedUrl={imageUrls.brandStoryImageUrl}
-          url={imageUrls.brandStoryImageUrl}
-          onChange={(assetId, url) => {
-            onChange((current) => ({
-              ...current,
-              homepage: {
-                ...current.homepage,
-                aboutImageAssetId: assetId,
-              },
-            }));
-            onAssetsChange((current) => ({
-              ...current,
-              brandStoryImageUrl: url,
-            }));
-          }}
-        />
-        <HomepageImageField
-          disabled={disabled}
-          id="homepage-technology-origin-image"
-          label={t("homepageEditor.technologyOriginImage")}
-          persistedUrl={imageUrls.technologyOriginImageUrl}
-          url={imageUrls.technologyOriginImageUrl}
-          onChange={(assetId, url) => {
-            onChange((current) => ({
-              ...current,
-              homepage: {
-                ...current.homepage,
-                sputterChamberImageAssetId: assetId,
-              },
-            }));
-            onAssetsChange((current) => ({
-              ...current,
-              technologyOriginImageUrl: url,
-            }));
-          }}
-        />
-      </div>
+      ) : null}
+      {!standalone ? (
+        <div className="grid gap-3 md:grid-cols-2">
+          <HomepageImageField
+            disabled={disabled}
+            id="homepage-brand-story-image"
+            label={t("homepageEditor.brandStoryImage")}
+            persistedUrl={imageUrls.brandStoryImageUrl}
+            url={imageUrls.brandStoryImageUrl}
+            onChange={(assetId, url) => {
+              onChange((current) => ({
+                ...current,
+                homepage: {
+                  ...current.homepage,
+                  aboutImageAssetId: assetId,
+                },
+              }));
+              onAssetsChange((current) => ({
+                ...current,
+                brandStoryImageUrl: url,
+              }));
+            }}
+          />
+          <HomepageImageField
+            disabled={disabled}
+            id="homepage-technology-origin-image"
+            label={t("homepageEditor.technologyOriginImage")}
+            persistedUrl={imageUrls.technologyOriginImageUrl}
+            url={imageUrls.technologyOriginImageUrl}
+            onChange={(assetId, url) => {
+              onChange((current) => ({
+                ...current,
+                homepage: {
+                  ...current.homepage,
+                  sputterChamberImageAssetId: assetId,
+                },
+              }));
+              onAssetsChange((current) => ({
+                ...current,
+                technologyOriginImageUrl: url,
+              }));
+            }}
+          />
+        </div>
+      ) : null}
       <div
         className={
-          isFullscreen
-            ? "relative min-h-0 flex-1 overflow-hidden rounded-lg border bg-white"
+          standalone
+            ? "min-h-screen overflow-hidden bg-white"
             : "min-h-[720px] overflow-hidden rounded-lg border bg-white"
         }
       >
         <Puck
           config={config}
           data={data}
-          height={isFullscreen ? "100%" : "720px"}
+          height={standalone ? "calc(100vh - 1rem)" : "720px"}
           iframe={{ enabled: false }}
           onChange={update}
+          onPublish={() => void onPublish?.()}
           permissions={getHomepageEditorPermissions(disabled)}
           ui={{
             leftSideBarVisible: false,
