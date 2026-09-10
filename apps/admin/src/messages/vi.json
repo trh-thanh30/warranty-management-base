@@ -3249,6 +3249,14 @@
         "readOnly": "Bạn đang xem trước trang chủ ở chế độ chỉ đọc.",
         "invalidData": "Dữ liệu trình chỉnh sửa không hợp lệ. Hãy tải lại trang và thử lại.",
         "unsavedChanges": "Các thay đổi chưa được lưu nháp.",
+        "styles": {
+          "font": "Phông chữ",
+          "size": "Kích thước",
+          "color": "Màu chữ",
+          "align": "Căn lề",
+          "bold": "In đậm",
+          "italic": "In nghiêng"
+        },
         "viewports": {
           "desktop": "Máy tính",
           "tablet": "Máy tính bảng",

@@ -4,7 +4,28 @@ import {
   createHomepagePuckConfig,
   getHomepageEditorPermissions,
   homepageEditorPermissions,
+  type HomepageEditorLabels,
 } from "./homepage-puck.config";
+
+const labels: HomepageEditorLabels = {
+  align: "Căn lề",
+  bold: "In đậm",
+  color: "Màu",
+  font: "Phông chữ",
+  italic: "In nghiêng",
+  sectionFields: {},
+  sections: {
+    b2b: "Hợp tác đại lý",
+    brandHeritage: "Câu chuyện thương hiệu",
+    coreTech: "Công nghệ cốt lõi",
+    hero: "Hero",
+    milestones: "Cột mốc",
+    network: "Mạng lưới đại lý",
+    pillars: "Giá trị cốt lõi",
+    testimonials: "Đánh giá",
+  },
+  size: "Kích thước",
+};
 
 test("homepage editor disables structural Puck actions", () => {
   assert.deepEqual(homepageEditorPermissions, {
@@ -21,7 +42,10 @@ test("homepage editor disables structural Puck actions", () => {
 });
 
 test("homepage text fields support direct canvas editing", () => {
-  const config = createHomepagePuckConfig({ heroImageUrl: "/hero.jpg" });
+  const config = createHomepagePuckConfig({
+    heroImageUrl: "/hero.jpg",
+    labels,
+  });
   const heroFields = config.components.HomepageHero.fields;
 
   assert.equal(heroFields?.eyebrowContent?.type, "text");
@@ -31,4 +55,13 @@ test("homepage text fields support direct canvas editing", () => {
     true,
   );
   assert.equal(heroFields?.eyebrowStyle?.type, "custom");
+});
+
+test("homepage editor labels are supplied by the active locale", () => {
+  const config = createHomepagePuckConfig({
+    heroImageUrl: "/hero.jpg",
+    labels,
+  });
+
+  assert.equal(config.components.HomepageCoreTech.label, "Công nghệ cốt lõi");
 });

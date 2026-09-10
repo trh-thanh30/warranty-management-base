@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
 import { DEFAULT_WEBSITE_HOMEPAGE_CONTENT } from "@repo/shared/constants";
-import { EditableText, HomepageRenderer } from "../src/index.ts";
+import {
+  EditableText,
+  HeadingSection,
+  HomepageRenderer,
+} from "../src/index.ts";
 
 test("renders the eight homepage sections in their fixed order", () => {
   const html = renderToStaticMarkup(
@@ -52,4 +56,18 @@ test("maps editable text through approved style classes only", () => {
   assert.match(html, /font-heading/);
   assert.match(html, /font-bold/);
   assert.doesNotMatch(html, /#ff00ff|72px|Comic Sans/);
+});
+
+test("section layout does not override an editable text alignment", () => {
+  const defaults = DEFAULT_WEBSITE_HOMEPAGE_CONTENT.vi.landing.coreTech;
+  const html = renderToStaticMarkup(
+    <HeadingSection
+      {...defaults}
+      id="core-tech"
+      title={{ ...defaults.title, align: "right" }}
+    />,
+  );
+
+  assert.match(html, />Hai nền tảng công nghệ dẫn đầu<\/h2>/);
+  assert.match(html, /<h2 class="[^"]*text-right[^"]*"/);
 });

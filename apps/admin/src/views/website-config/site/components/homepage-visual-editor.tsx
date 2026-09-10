@@ -15,6 +15,48 @@ import {
   getHomepageEditorPermissions,
 } from "./homepage-puck.config";
 
+const sectionKeys = [
+  "hero",
+  "brandHeritage",
+  "coreTech",
+  "milestones",
+  "pillars",
+  "network",
+  "testimonials",
+  "b2b",
+] as const;
+
+const fieldKeys = [
+  "eyebrow",
+  "title",
+  "titlePrefix",
+  "titleHighlight",
+  "titleSuffix",
+  "description",
+  "primaryCta",
+  "dealerCta",
+  "uvPercent",
+  "originPercent",
+  "warrantyYears",
+  "uvLabel",
+  "originLabel",
+  "warrantyLabel",
+  "yearsSuffix",
+  "brandLabel",
+  "headlineLine1",
+  "headlineLine2Prefix",
+  "headlineHighlight",
+  "headlineLine3",
+  "descriptionPrimary",
+  "descriptionSecondary",
+  "originEyebrow",
+  "originTitle",
+  "originDescriptionPrimary",
+  "originDescriptionSecondary",
+  "viewDealersCta",
+  "partnerCta",
+] as const;
+
 export function HomepageVisualEditor({
   disabled,
   form,
@@ -28,13 +70,30 @@ export function HomepageVisualEditor({
   locale: WebsiteLocale;
   onChange: SiteDraftUpdater;
 }) {
-  const t = useTranslations("WebsiteConfig.site.homepageEditor");
+  const t = useTranslations("WebsiteConfig.site");
   const [error, setError] = useState<string | null>(null);
   const copy = form.homepage.content[locale].landing;
   const data = useMemo(() => toHomepagePuckData(copy), [copy]);
+  const labels = useMemo(
+    () => ({
+      align: t("homepageEditor.styles.align"),
+      bold: t("homepageEditor.styles.bold"),
+      color: t("homepageEditor.styles.color"),
+      font: t("homepageEditor.styles.font"),
+      italic: t("homepageEditor.styles.italic"),
+      sectionFields: Object.fromEntries(
+        fieldKeys.map((key) => [key, t(`homepageContent.fields.${key}`)]),
+      ),
+      sections: Object.fromEntries(
+        sectionKeys.map((key) => [key, t(`homepageContent.sections.${key}`)]),
+      ) as Record<(typeof sectionKeys)[number], string>,
+      size: t("homepageEditor.styles.size"),
+    }),
+    [t],
+  );
   const config = useMemo(
-    () => createHomepagePuckConfig({ heroImageUrl }),
-    [heroImageUrl],
+    () => createHomepagePuckConfig({ heroImageUrl, labels }),
+    [heroImageUrl, labels],
   );
 
   function update(next: Data<HomepagePuckComponents>) {
@@ -55,7 +114,7 @@ export function HomepageVisualEditor({
         },
       }));
     } catch {
-      setError(t("invalidData"));
+      setError(t("homepageEditor.invalidData"));
     }
   }
 
@@ -63,10 +122,12 @@ export function HomepageVisualEditor({
     <section className="space-y-3">
       <div>
         <h3 className="font-semibold text-slate-950 dark:text-slate-50">
-          {t("title")}
+          {t("homepageEditor.title")}
         </h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          {disabled ? t("readOnly") : t("description")}
+          {disabled
+            ? t("homepageEditor.readOnly")
+            : t("homepageEditor.description")}
         </p>
       </div>
       {error ? (
@@ -87,9 +148,9 @@ export function HomepageVisualEditor({
             rightSideBarVisible: true,
           }}
           viewports={[
-            { label: t("viewports.desktop"), width: 1440 },
-            { label: t("viewports.tablet"), width: 768 },
-            { label: t("viewports.mobile"), width: 390 },
+            { label: t("homepageEditor.viewports.desktop"), width: 1440 },
+            { label: t("homepageEditor.viewports.tablet"), width: 768 },
+            { label: t("homepageEditor.viewports.mobile"), width: 390 },
           ]}
         />
       </div>

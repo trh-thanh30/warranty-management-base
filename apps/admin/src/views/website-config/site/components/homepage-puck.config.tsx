@@ -33,6 +33,17 @@ export const homepageEditorPermissions = {
   edit: true,
 } as const satisfies Permissions;
 
+export type HomepageEditorLabels = {
+  align: string;
+  bold: string;
+  color: string;
+  font: string;
+  italic: string;
+  sectionFields: Record<string, string>;
+  sections: Record<HomepageSectionKey, string>;
+  size: string;
+};
+
 export function getHomepageEditorPermissions(readOnly: boolean): Permissions {
   return readOnly
     ? { ...homepageEditorPermissions, edit: false }
@@ -41,9 +52,11 @@ export function getHomepageEditorPermissions(readOnly: boolean): Permissions {
 
 export function createHomepagePuckConfig({
   heroImageUrl,
+  labels,
   networkContent,
 }: {
   heroImageUrl: string;
+  labels: HomepageEditorLabels;
   networkContent?: ReactNode;
 }): Config<HomepagePuckComponents> {
   const defaults = DEFAULT_WEBSITE_HOMEPAGE_CONTENT.vi.landing;
@@ -51,9 +64,9 @@ export function createHomepagePuckConfig({
   return {
     components: {
       HomepageHero: {
-        label: "Hero",
+        label: labels.sections.hero,
         defaultProps: propsFor("homepage-hero", defaults.hero),
-        fields: fieldsFor("hero", defaults.hero),
+        fields: fieldsFor("hero", defaults.hero, labels),
         permissions: homepageEditorPermissions,
         render: (props) => (
           <HeroSection
@@ -63,12 +76,12 @@ export function createHomepagePuckConfig({
         ),
       },
       HomepageBrandHeritage: {
-        label: "Brand Heritage",
+        label: labels.sections.brandHeritage,
         defaultProps: propsFor(
           "homepage-brand-heritage",
           defaults.brandHeritage,
         ),
-        fields: fieldsFor("brandHeritage", defaults.brandHeritage),
+        fields: fieldsFor("brandHeritage", defaults.brandHeritage, labels),
         permissions: homepageEditorPermissions,
         render: (props) => (
           <BrandHeritageSection
@@ -76,17 +89,18 @@ export function createHomepagePuckConfig({
           />
         ),
       },
-      HomepageCoreTech: headingConfig("coreTech", defaults.coreTech),
+      HomepageCoreTech: headingConfig("coreTech", defaults.coreTech, labels),
       HomepageMilestones: headingConfig(
         "milestones",
         defaults.milestones,
+        labels,
         true,
       ),
-      HomepagePillars: headingConfig("pillars", defaults.pillars),
+      HomepagePillars: headingConfig("pillars", defaults.pillars, labels),
       HomepageNetwork: {
-        label: "Network",
+        label: labels.sections.network,
         defaultProps: propsFor("homepage-network", defaults.network),
-        fields: fieldsFor("network", defaults.network),
+        fields: fieldsFor("network", defaults.network, labels),
         permissions: homepageEditorPermissions,
         render: (props) => (
           <NetworkSection
@@ -98,11 +112,12 @@ export function createHomepagePuckConfig({
       HomepageTestimonials: headingConfig(
         "testimonials",
         defaults.testimonials,
+        labels,
       ),
       HomepageB2b: {
-        label: "B2B",
+        label: labels.sections.b2b,
         defaultProps: propsFor("homepage-b2b", defaults.b2b),
-        fields: fieldsFor("b2b", defaults.b2b),
+        fields: fieldsFor("b2b", defaults.b2b, labels),
         permissions: homepageEditorPermissions,
         render: (props) => <B2bSection copy={sectionFromProps(props, "b2b")} />,
       },
@@ -119,11 +134,16 @@ export function createHomepagePuckConfig({
 
 function headingConfig<
   Section extends "coreTech" | "milestones" | "pillars" | "testimonials",
->(section: Section, defaults: HomepageLandingCopy[Section], muted = false) {
+>(
+  section: Section,
+  defaults: HomepageLandingCopy[Section],
+  labels: HomepageEditorLabels,
+  muted = false,
+) {
   return {
-    label: section,
+    label: labels.sections[section],
     defaultProps: propsFor(`homepage-${toKebabCase(section)}`, defaults),
-    fields: fieldsFor(section, defaults),
+    fields: fieldsFor(section, defaults, labels),
     permissions: homepageEditorPermissions,
     render: (props: WithPuckProps<HomepagePuckSectionProps>) => {
       const copy = sectionFromProps(
@@ -157,6 +177,7 @@ function propsFor(
 function fieldsFor(
   section: HomepageSectionKey,
   values: HomepageLandingCopy[HomepageSectionKey],
+  labels: HomepageEditorLabels,
 ): Fields<HomepagePuckSectionProps> {
   const fields: Record<string, Field> = {};
 
@@ -165,13 +186,14 @@ function fieldsFor(
       fields[`${key}Content`] = {
         type: key.toLowerCase().includes("description") ? "textarea" : "text",
         contentEditable: true,
-        label: key,
+        label: labels.sectionFields[key] ?? key,
       };
       fields[`${key}Style`] = {
         type: "custom",
-        label: `${key} style`,
+        label: `${labels.sectionFields[key] ?? key} - ${labels.size}/${labels.color}`,
         render: ({ onChange, readOnly, value: style }) => (
           <HomepageStyleField
+            labels={labels}
             onChange={onChange}
             readOnly={readOnly}
             value={style as WebsiteTextStyle}
@@ -179,7 +201,11 @@ function fieldsFor(
         ),
       };
     } else if (typeof value === "number") {
-      fields[key] = { type: "number", label: key, min: 0 };
+      fields[key] = {
+        type: "number",
+        label: labels.sectionFields[key] ?? key,
+        min: 0,
+      };
     }
   }
 

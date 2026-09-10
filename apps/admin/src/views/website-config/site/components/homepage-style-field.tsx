@@ -10,10 +10,15 @@ const options = {
 } as const;
 
 export function HomepageStyleField({
+  labels,
   onChange,
   readOnly = false,
   value,
 }: {
+  labels: Record<
+    "align" | "bold" | "color" | "font" | "italic" | "size",
+    string
+  >;
   onChange: (value: WebsiteTextStyle) => void;
   readOnly?: boolean;
   value: WebsiteTextStyle;
@@ -22,7 +27,7 @@ export function HomepageStyleField({
     <div className="grid grid-cols-2 gap-2">
       {(["font", "size", "color", "align"] as const).map((property) => (
         <select
-          aria-label={property}
+          aria-label={labels[property]}
           className="h-9 rounded-md border bg-background px-2 text-sm"
           disabled={readOnly}
           key={property}
@@ -47,7 +52,7 @@ export function HomepageStyleField({
           }
           type="checkbox"
         />
-        Bold
+        {labels.bold}
       </label>
       <label className="flex h-9 items-center gap-2 rounded-md border px-3 text-sm">
         <input
@@ -58,7 +63,7 @@ export function HomepageStyleField({
           }
           type="checkbox"
         />
-        Italic
+        {labels.italic}
       </label>
     </div>
   );

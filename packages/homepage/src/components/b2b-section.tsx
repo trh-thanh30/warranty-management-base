@@ -7,21 +7,17 @@ export function B2bSection({ copy }: { copy: HomepageLandingCopy["b2b"] }) {
       className="bg-surface-muted px-6 py-20"
       data-homepage-section="b2b"
     >
-      <div className="mx-auto max-w-4xl space-y-5 text-center">
+      <div className="mx-auto max-w-4xl space-y-5">
         <EditableText
           as="p"
           className="uppercase tracking-widest"
-          value={{ ...copy.eyebrow, align: "center" }}
+          value={copy.eyebrow}
         />
-        <EditableText
-          as="h2"
-          className="uppercase"
-          value={{ ...copy.title, align: "center" }}
-        />
+        <EditableText as="h2" className="uppercase" value={copy.title} />
         <EditableText
           as="p"
           className="leading-relaxed"
-          value={{ ...copy.description, align: "center" }}
+          value={copy.description}
         />
         <EditableText
           as="span"
