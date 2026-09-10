@@ -11,9 +11,11 @@ import {
   ComboboxTrigger,
 } from "@/src/components/common/combobox";
 import { ConfirmActionDialog } from "@/src/components/common/confirm-action-dialog";
+import { SelectControl } from "@/src/components/common/select-control";
 import { useToast } from "@/src/hooks/use-toast";
 import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import { activationCodesService } from "@/src/services/activation-codes/activation-codes.service";
+import { useCategories } from "@/src/views/categories/hooks/use-categories";
 import { useInfiniteProducts } from "@/src/views/products/hooks/use-products";
 import { useDebounce } from "@repo/hooks";
 import type {
@@ -54,13 +56,25 @@ export function ActivationCodeProductAssignmentDialog({
   const tApiErrors = useTranslations("ApiErrors");
   const toast = useToast();
   const [productId, setProductId] = useState("");
+  const [categoryId, setCategoryId] = useState("ALL");
   const [search, setSearch] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const debouncedSearch = useDebounce(search.trim(), 300);
+  const categoriesQuery = useCategories(
+    {
+      isActive: "true",
+      limit: 100,
+      sortBy: "order",
+      sortOrder: "asc",
+      type: "PRODUCT",
+    },
+    { enabled: open },
+  );
   const productsQuery = useInfiniteProducts(
     {
       activationCodeAssignable: "true",
+      categoryId: categoryId === "ALL" ? undefined : categoryId,
       limit: 20,
       search: debouncedSearch || undefined,
       status: "ACTIVE",
@@ -79,7 +93,10 @@ export function ActivationCodeProductAssignmentDialog({
   );
   const mutation = useMutation({
     mutationFn: () =>
-      activationCodesService.assignProduct({ activationCodeId, productId }),
+      activationCodesService.assignProduct({
+        activationCodeIds: [activationCodeId],
+        productId,
+      }),
     onMutate: () => setErrorMessage(null),
     onError: (error) => {
       const message = getLocalizedApiError(error, t, {
@@ -101,6 +118,7 @@ export function ActivationCodeProductAssignmentDialog({
   useEffect(() => {
     if (!open) return;
     setProductId(currentProduct?.id ?? "");
+    setCategoryId("ALL");
     setSearch("");
     setConfirmOpen(false);
     setErrorMessage(null);
@@ -136,6 +154,31 @@ export function ActivationCodeProductAssignmentDialog({
                 </p>
               </div>
             ) : null}
+            <Label htmlFor="activation-code-category">{t("category")}</Label>
+            <SelectControl
+              ariaLabel={t("category")}
+              disabled={mutation.isPending || categoriesQuery.isLoading}
+              id="activation-code-category"
+              onValueChange={(value) => {
+                setCategoryId(value);
+                setProductId("");
+                setSearch("");
+                setErrorMessage(null);
+              }}
+              options={[
+                {
+                  label: categoriesQuery.isLoading
+                    ? t("loadingCategories")
+                    : t("allCategories"),
+                  value: "ALL",
+                },
+                ...(categoriesQuery.data?.items ?? []).map((category) => ({
+                  label: category.name,
+                  value: category.id,
+                })),
+              ]}
+              value={categoryId}
+            />
             <Label htmlFor="activation-code-product">{t("product")}</Label>
             <Combobox
               disabled={mutation.isPending}
@@ -174,10 +217,7 @@ export function ActivationCodeProductAssignmentDialog({
                   {products.map((product) => (
                     <ComboboxItem
                       key={product.id}
-                      keywords={[
-                        product.productCode,
-                        product.serialNumber ?? "",
-                      ]}
+                      keywords={[product.productCode, product.name]}
                       value={product.id}
                     >
                       {getProductLabel(product)}

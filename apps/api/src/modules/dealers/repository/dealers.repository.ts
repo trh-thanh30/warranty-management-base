@@ -8,6 +8,26 @@ import { resolveActiveFilter } from '@/common/helpers/active-filter.helper';
 import { Prisma } from '@prisma/client';
 import type { ListPublicDealersQuery } from '@repo/shared';
 
+const dealerMembershipInclude = {
+  created_by: {
+    select: {
+      id: true,
+      email: true,
+      username: true,
+      full_name: true,
+    },
+  },
+  user: {
+    select: {
+      id: true,
+      email: true,
+      username: true,
+      full_name: true,
+      status: true,
+    },
+  },
+} satisfies Prisma.DealerMembershipInclude;
+
 @Injectable()
 export class DealersRepository {
   constructor(private readonly prismaService: PrismaService) {}
@@ -22,6 +42,58 @@ export class DealersRepository {
     });
   }
 
+  findMembershipByDealerAndUser(dealerId: string, userId: string) {
+    return this.prismaService.dealerMembership.findUnique({
+      where: {
+        dealer_id_user_id: {
+          dealer_id: dealerId,
+          user_id: userId,
+        },
+      },
+      include: dealerMembershipInclude,
+    });
+  }
+
+  findMembershipById(dealerId: string, membershipId: string) {
+    return this.prismaService.dealerMembership.findFirst({
+      where: { id: membershipId, dealer_id: dealerId },
+      include: dealerMembershipInclude,
+    });
+  }
+
+  listMemberships(dealerId: string) {
+    return this.prismaService.dealerMembership.findMany({
+      where: { dealer_id: dealerId },
+      include: dealerMembershipInclude,
+      orderBy: { created_at: 'asc' },
+    });
+  }
+
+  listAssignedToUser(userId: string) {
+    return this.prismaService.dealer.findMany({
+      where: { memberships: { some: { user_id: userId } } },
+      orderBy: [{ is_active: 'desc' }, { name: 'asc' }],
+    });
+  }
+
+  createMembership(input: {
+    created_by_id?: string;
+    dealer_id: string;
+    user_id: string;
+  }) {
+    return this.prismaService.dealerMembership.create({
+      data: input,
+      include: dealerMembershipInclude,
+    });
+  }
+
+  deleteMembership(membershipId: string) {
+    return this.prismaService.dealerMembership.delete({
+      where: { id: membershipId },
+      include: dealerMembershipInclude,
+    });
+  }
+
   findByPhone(phone: string, excludeId?: string) {
     return this.prismaService.dealer.findFirst({
       where: {
@@ -31,15 +103,18 @@ export class DealersRepository {
     });
   }
 
-  listProvinces() {
+  listProvinces(assignedUserId?: string) {
     return this.prismaService.dealer.findMany({
       distinct: ['province'],
       orderBy: { province: 'asc' },
       select: { province: true },
+      where: assignedUserId
+        ? { memberships: { some: { user_id: assignedUserId } } }
+        : undefined,
     });
   }
 
-  list(filters: ListDealersDto) {
+  list(filters: ListDealersDto, assignedUserId?: string) {
     const search = filters.search?.trim();
     const province = filters.province?.trim();
     const isActive = resolveActiveFilter(filters.isActive);
@@ -53,6 +128,9 @@ export class DealersRepository {
     const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
     const where: Prisma.DealerWhereInput = {
       is_active: isActive,
+      memberships: assignedUserId
+        ? { some: { user_id: assignedUserId } }
+        : undefined,
       province: province
         ? { contains: province, mode: 'insensitive' }
         : undefined,
@@ -134,7 +212,6 @@ export class DealersRepository {
                 id: true,
                 display_name: true,
                 product_code: true,
-                serial_number: true,
               },
             },
             activated_warranty: {
@@ -145,6 +222,7 @@ export class DealersRepository {
                 start_date: true,
                 end_date: true,
                 duration_months: true,
+                serial_number: true,
               },
             },
           },
@@ -156,13 +234,21 @@ export class DealersRepository {
     });
   }
 
-  listAll() {
-    return this.prismaService.dealer.findMany();
+  listAll(assignedUserId?: string) {
+    return this.prismaService.dealer.findMany({
+      where: assignedUserId
+        ? { memberships: { some: { user_id: assignedUserId } } }
+        : undefined,
+    });
   }
 
   listActiveForNetwork() {
     return this.prismaService.dealer.findMany({
-      where: { is_active: true },
+      where: {
+        is_active: true,
+        latitude: { not: null },
+        longitude: { not: null },
+      },
       orderBy: [{ province: 'asc' }, { name: 'asc' }],
       select: {
         id: true,
@@ -184,6 +270,8 @@ export class DealersRepository {
     const { page, limit, skip, take } = normalizePagination(filters);
     const where: Prisma.DealerWhereInput = {
       is_active: true,
+      latitude: { not: null },
+      longitude: { not: null },
       province: province
         ? { equals: province, mode: 'insensitive' }
         : undefined,
@@ -257,7 +345,7 @@ export class DealersRepository {
     });
   }
 
-  listForExport(filters: ListDealersDto) {
+  listForExport(filters: ListDealersDto, assignedUserId?: string) {
     const search = filters.search?.trim();
     const province = filters.province?.trim();
     const isActive = resolveActiveFilter(filters.isActive);
@@ -270,6 +358,9 @@ export class DealersRepository {
     const sortBy = filters.sortBy ? sortMap[filters.sortBy] : undefined;
     const where: Prisma.DealerWhereInput = {
       is_active: isActive,
+      memberships: assignedUserId
+        ? { some: { user_id: assignedUserId } }
+        : undefined,
       province: province
         ? { contains: province, mode: 'insensitive' }
         : undefined,
@@ -294,7 +385,7 @@ export class DealersRepository {
     });
   }
 
-  importRows(rows: PreparedDealerImportRow[]) {
+  importRows(rows: PreparedDealerImportRow[], assignedUserId?: string) {
     return this.prismaService.$transaction(async (tx) => {
       let created = 0;
       let updated = 0;
@@ -320,7 +411,18 @@ export class DealersRepository {
           updated += 1;
         } else {
           await tx.dealer.create({
-            data: { ...data, dealer_code: row.dealerCode! },
+            data: {
+              ...data,
+              dealer_code: row.dealerCode!,
+              memberships: assignedUserId
+                ? {
+                    create: {
+                      created_by: { connect: { id: assignedUserId } },
+                      user: { connect: { id: assignedUserId } },
+                    },
+                  }
+                : undefined,
+            },
           });
           created += 1;
         }

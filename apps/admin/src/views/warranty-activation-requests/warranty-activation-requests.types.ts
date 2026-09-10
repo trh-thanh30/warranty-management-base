@@ -32,6 +32,7 @@ export type WarrantyActivationRequestCreateFormValues = {
   customerId: string;
   customerName: string;
   customerPhone: string;
+  updateCustomerProfile: boolean;
   dealerAddress: string;
   dealerDistrict: string;
   dealerId: string;
@@ -45,6 +46,7 @@ export type WarrantyActivationRequestCreateFormValues = {
   filmRearRightSide: string;
   filmSunroof: string;
   filmWindshield: string;
+  installedAt: string;
   note: string;
   productId: string;
   productName: string;
@@ -85,6 +87,7 @@ export const warrantyActivationRequestCreateFormSchema = z
       .refine((value) => value.length <= 160, { message: "emailInvalid" }),
     customerName: z.string().trim().min(2, "customerNameRequired").max(120),
     customerPhone: z.string().trim().min(6, "phoneInvalid").max(32),
+    updateCustomerProfile: z.boolean(),
     dealerAddress: z.string().trim().max(255),
     dealerDistrict: z.string().trim().max(120),
     dealerId: z.string().trim(),
@@ -98,14 +101,25 @@ export const warrantyActivationRequestCreateFormSchema = z
     filmRearRightSide: z.string().trim().max(120),
     filmSunroof: z.string().trim().max(120),
     filmWindshield: z.string().trim().max(120),
+    installedAt: z
+      .string()
+      .trim()
+      .refine(
+        (value) => !value || !Number.isNaN(new Date(value).getTime()),
+        "installedAtInvalid",
+      )
+      .refine(
+        (value) => !value || new Date(value).getTime() <= Date.now(),
+        "installedAtFuture",
+      ),
     note: z.string().trim().max(1000, "noteLength"),
     productId: z.string().trim(),
     productName: z.string().trim(),
-    provinceCode: z.string().trim().min(1, "provinceRequired"),
+    provinceCode: z.string().trim(),
     salesName: z.string().trim().max(120),
     vehicleModel: z.string().trim().max(160),
     vehiclePlate: z.string().trim().max(32),
-    wardCode: z.string().trim().min(1, "wardRequired"),
+    wardCode: z.string().trim(),
     warrantyCode: z.string().trim(),
   })
   .superRefine((value, context) => {

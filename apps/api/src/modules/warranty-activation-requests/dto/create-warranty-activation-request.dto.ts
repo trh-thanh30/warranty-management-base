@@ -227,11 +227,6 @@ export class CreateWarrantyActivationRequestDto {
 
   @IsOptional()
   @IsString()
-  @Length(1, 64)
-  serialNumber?: string;
-
-  @IsOptional()
-  @IsString()
   @Length(1, 80)
   brand?: string;
 

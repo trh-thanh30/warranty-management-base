@@ -115,10 +115,10 @@ test("filters assignable activation codes by batch", async () => {
   assert.equal(result, response);
 });
 
-test("assigns one activation code to one physical product", async () => {
+test("assigns multiple activation codes to one product", async () => {
   const calls: unknown[] = [];
   const response = {
-    activationCodeId: "code-id",
+    activationCodeIds: ["code-id", "second-code-id"],
     product: {
       id: "product-id",
       productCode: "PRD-01",
@@ -136,15 +136,56 @@ test("assigns one activation code to one physical product", async () => {
 
   const result = await createActivationCodesService(
     http as unknown as ActivationCodesHttpClient,
-  ).assignProduct({ activationCodeId: "code-id", productId: "product-id" });
+  ).assignProduct({
+    activationCodeIds: ["code-id", "second-code-id"],
+    productId: "product-id",
+  });
 
   assert.deepEqual(calls, [
     {
       url: "/activation-code-batches/codes/assign-product",
-      body: { activationCodeId: "code-id", productId: "product-id" },
+      body: {
+        activationCodeIds: ["code-id", "second-code-id"],
+        productId: "product-id",
+      },
     },
   ]);
   assert.equal(result, response);
+});
+
+test("requests automatic assignment by quantity across selected batches", async () => {
+  const calls: unknown[] = [];
+  const response = {
+    activationCodeIds: ["code-3", "code-4"],
+    product: { id: "product-id" },
+  };
+  const http = {
+    async post(url: string, body?: unknown) {
+      calls.push({ url, body });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  await createActivationCodesService(
+    http as unknown as ActivationCodesHttpClient,
+  ).assignProduct({
+    assignmentMode: "QUANTITY",
+    batchIds: ["batch-a", "batch-b"],
+    productId: "product-id",
+    quantity: 10,
+  });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/activation-code-batches/codes/assign-product",
+      body: {
+        assignmentMode: "QUANTITY",
+        batchIds: ["batch-a", "batch-b"],
+        productId: "product-id",
+        quantity: 10,
+      },
+    },
+  ]);
 });
 
 test("removes an unused activation-code assignment", async () => {
@@ -254,6 +295,62 @@ test("sends the selected scope when revoking an activation-code batch", async ()
     {
       url: "/activation-code-batches/batch-id/revoke",
       body: { scope: "ALL_REVOCABLE" },
+    },
+  ]);
+  assert.equal(result, response);
+});
+
+test("extends one activation code by the requested number of months", async () => {
+  const calls: unknown[] = [];
+  const response = {
+    activationCodeId: "code-id",
+    previousExpiresAt: "2027-01-31T10:30:00.000Z",
+    expiresAt: "2027-02-28T10:30:00.000Z",
+  };
+  const http = {
+    async post(url: string, body?: unknown) {
+      calls.push({ url, body });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  const result = await createActivationCodesService(
+    http as unknown as ActivationCodesHttpClient,
+  ).extendCodeExpiry("code-id", { months: 1 });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/activation-code-batches/codes/code-id/extend-expiry",
+      body: { months: 1 },
+    },
+  ]);
+  assert.equal(result, response);
+});
+
+test("extends an activation-code batch by the requested number of months", async () => {
+  const calls: unknown[] = [];
+  const response = {
+    batchId: "batch-id",
+    previousExpiresAt: "2027-01-31T10:30:00.000Z",
+    expiresAt: "2027-02-28T10:30:00.000Z",
+    extendedCount: 75,
+    skipped: { activated: 10, revoked: 10, expired: 5 },
+  };
+  const http = {
+    async post(url: string, body?: unknown) {
+      calls.push({ url, body });
+      return { data: { success: true, data: response } };
+    },
+  };
+
+  const result = await createActivationCodesService(
+    http as unknown as ActivationCodesHttpClient,
+  ).extendBatchExpiry("batch-id", { months: 2 });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/activation-code-batches/batch-id/extend-expiry",
+      body: { months: 2 },
     },
   ]);
   assert.equal(result, response);

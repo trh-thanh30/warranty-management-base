@@ -6,30 +6,39 @@ import {
   Customer,
   Product,
   ProductAsset,
-  ProductOwnership,
   Warranty,
+  WarrantyOwnership,
   warranty_status,
+  warranty_activation_request_status,
 } from '@prisma/client';
 import { toCategoryResponse } from '@/modules/categories/categories.types';
 import { getProductCatalogue } from '@/modules/products/product-catalogue';
 
+type ProductActivationCodeRelation = Pick<
+  ActivationCode,
+  'id' | 'code_ciphertext' | 'status' | 'expires_at'
+> & {
+  batch: Pick<ActivationCodeBatch, 'batch_code'>;
+  request: { id: string; status: warranty_activation_request_status } | null;
+  request_items: Array<{
+    id: string;
+    status: warranty_activation_request_status;
+  }>;
+  warranty: { id: string } | null;
+};
+
 type ProductWithRelations = Product & {
   assets?: Array<ProductAsset & { asset: Asset }>;
-  ownerships?: Array<ProductOwnership & { customer?: Customer }>;
-  warranty?: Warranty | null;
-  warranty_activation_requests?: Array<{ id: string }>;
-  category_ref?: Category;
-  activation_code?:
-    | (Pick<
-        ActivationCode,
-        'id' | 'code_ciphertext' | 'status' | 'expires_at'
-      > & {
-        batch: Pick<ActivationCodeBatch, 'batch_code'>;
-        request: { id: string } | null;
-        request_items: Array<{ id: string }>;
-        warranty: { id: string } | null;
+  warranty?:
+    | (Warranty & {
+        ownerships?: Array<WarrantyOwnership & { customer?: Customer }>;
       })
     | null;
+  warranty_activation_requests?: Array<{ id: string }>;
+  category_ref?: Category;
+  activation_codes?: ProductActivationCodeRelation[];
+  /** Legacy test/consumer shape kept only while clients migrate. */
+  activation_code?: ProductActivationCodeRelation | null;
 };
 
 export function toProductResponse(
@@ -37,7 +46,7 @@ export function toProductResponse(
   resolveAssetUrl: (asset: Asset) => string = (asset) => asset.path,
   decryptActivationCode?: (ciphertext: string) => string,
 ) {
-  const currentOwnership = product.ownerships?.find(
+  const currentOwnership = product.warranty?.ownerships?.find(
     (ownership) => ownership.is_current_owner,
   );
   const catalogue = getProductCatalogue(product);
@@ -61,9 +70,26 @@ export function toProductResponse(
       : product.warranty_activation_requests?.length
         ? ('OPEN_ACTIVATION_REQUEST' as const)
         : null;
-  const assignedActivationCodeStatus = product.activation_code
-    ? getAssignedActivationCodeStatus(product.activation_code)
-    : null;
+  const sourceActivationCodes =
+    product.activation_codes ??
+    (product.activation_code ? [product.activation_code] : []);
+  const assignedActivationCodes = sourceActivationCodes.map(
+    (activationCode) => {
+      const status = getAssignedActivationCodeStatus(activationCode);
+      return {
+        id: activationCode.id,
+        code: requireActivationCodeDecryptor(decryptActivationCode)(
+          activationCode.code_ciphertext,
+        ),
+        status,
+        expiresAt: activationCode.expires_at,
+        batchCode: activationCode.batch.batch_code,
+        canReplace: status === 'AVAILABLE',
+        unavailableReason: status === 'AVAILABLE' ? null : status,
+      };
+    },
+  );
+  const assignedActivationCode = assignedActivationCodes[0] ?? null;
 
   return {
     id: product.id,
@@ -73,7 +99,6 @@ export function toProductResponse(
     warrantyCode: product.warranty?.warranty_code ?? null,
     canEditWarrantyCode: warrantyCodeEditLockedReason === null,
     warrantyCodeEditLockedReason,
-    serialNumber: product.serial_number,
     displayName: product.display_name,
     name: catalogue.name,
     categoryId: product.category_id,
@@ -105,6 +130,7 @@ export function toProductResponse(
     warranty: product.warranty
       ? {
           id: product.warranty.id,
+          serialNumber: product.warranty.serial_number,
           warrantyCode: product.warranty.warranty_code,
           startDate: product.warranty.start_date,
           endDate: product.warranty.end_date,
@@ -120,31 +146,22 @@ export function toProductResponse(
       : null,
     warrantyDurationMonths: product.warranty_duration_months,
     warrantyTerms: product.warranty_terms,
-    assignedActivationCode: product.activation_code
-      ? {
-          id: product.activation_code.id,
-          code: requireActivationCodeDecryptor(decryptActivationCode)(
-            product.activation_code.code_ciphertext,
-          ),
-          status: assignedActivationCodeStatus,
-          expiresAt: product.activation_code.expires_at,
-          batchCode: product.activation_code.batch.batch_code,
-          canReplace: assignedActivationCodeStatus === 'AVAILABLE',
-          unavailableReason:
-            assignedActivationCodeStatus === 'AVAILABLE'
-              ? null
-              : assignedActivationCodeStatus,
-        }
-      : null,
+    // Keep the singular field during the contract transition. New callers
+    // should use assignedActivationCodes.
+    assignedActivationCode,
+    assignedActivationCodes,
     assets: productAssets,
   };
 }
 
-function getAssignedActivationCodeStatus(
-  code: NonNullable<ProductWithRelations['activation_code']>,
-) {
+function getAssignedActivationCodeStatus(code: ProductActivationCodeRelation) {
   if (code.warranty || code.status === 'ACTIVATED') return 'ACTIVATED' as const;
-  if (code.request || code.request_items.length > 0) {
+  if (
+    (code.request && ['PENDING', 'APPROVED'].includes(code.request.status)) ||
+    code.request_items.some((item) =>
+      ['PENDING', 'APPROVED'].includes(item.status),
+    )
+  ) {
     return 'PENDING_APPROVAL' as const;
   }
   if (code.status === 'AVAILABLE' && code.expires_at.getTime() <= Date.now()) {

@@ -148,7 +148,6 @@ function getDefaultValues(
     specifications: getProductSpecifications(product?.catalogueMetadata),
     installationPosition: getProductInstallationPosition(product?.metadata),
     productCode: isClone ? "" : (product?.productCode ?? ""),
-    serialNumber: isClone ? "" : (product?.serialNumber ?? ""),
     status: product?.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
     warrantyDurationMonths: product?.warrantyDurationMonths ?? "",
     warrantyTerms: product?.warrantyTerms ?? "",

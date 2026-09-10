@@ -8,25 +8,32 @@ import { Prisma, warranty_status } from '@prisma/client';
 const warrantyInclude = {
   activated_by: true,
   voided_by: true,
+  dealer: true,
+  activation_code: {
+    select: { id: true, code_ciphertext: true, status: true },
+  },
+  activation_request: true,
+  ownerships: {
+    where: { is_current_owner: true },
+    include: { customer: true },
+    orderBy: { created_at: 'desc' as const },
+  },
   product: {
     include: {
       category_ref: true,
-      ownerships: {
-        include: { customer: true },
-        orderBy: { created_at: 'desc' as const },
-      },
     },
   },
 };
 
 const warrantyLookupInclude = {
-  warranty: {
-    include: {
-      activation_request: true,
-    },
+  activation_request: true,
+  ownerships: {
+    where: { is_current_owner: true },
+    include: { customer: true },
+    take: 1,
   },
-  category_ref: true,
-} satisfies Prisma.ProductInclude;
+  product: { include: { category_ref: true } },
+} satisfies Prisma.WarrantyInclude;
 
 const warrantySortMap: Readonly<
   Record<string, keyof Prisma.WarrantyOrderByWithRelationInput>
@@ -72,6 +79,7 @@ export class WarrantiesRepository {
   }
 
   list(filters: {
+    dealerIds?: string[];
     search?: string;
     status?: warranty_status | 'ALL';
     page?: number;
@@ -82,6 +90,7 @@ export class WarrantiesRepository {
     const search = filters.search?.trim();
     const { page, limit, skip, take } = normalizePagination(filters);
     const where: Prisma.WarrantyWhereInput = {
+      dealer_id: filters.dealerIds ? { in: filters.dealerIds } : undefined,
       status:
         filters.status === undefined
           ? warranty_status.ACTIVE
@@ -104,32 +113,26 @@ export class WarrantiesRepository {
                 product_code: { contains: search, mode: 'insensitive' },
               },
             },
+            { serial_number: { contains: search, mode: 'insensitive' } },
             {
-              product: {
-                serial_number: { contains: search, mode: 'insensitive' },
-              },
-            },
-            {
-              product: {
-                ownerships: {
-                  some: {
-                    is_current_owner: true,
-                    customer: {
-                      OR: [
-                        {
-                          full_name: {
-                            contains: search,
-                            mode: 'insensitive',
-                          },
+              ownerships: {
+                some: {
+                  is_current_owner: true,
+                  customer: {
+                    OR: [
+                      {
+                        full_name: {
+                          contains: search,
+                          mode: 'insensitive',
                         },
-                        {
-                          customer_code: {
-                            contains: search,
-                            mode: 'insensitive',
-                          },
+                      },
+                      {
+                        customer_code: {
+                          contains: search,
+                          mode: 'insensitive',
                         },
-                      ],
-                    },
+                      },
+                    ],
                   },
                 },
               },
@@ -156,6 +159,7 @@ export class WarrantiesRepository {
   }
 
   listForExport(filters: {
+    dealerIds?: string[];
     search?: string;
     status?: warranty_status | 'ALL';
     sortBy?: string;
@@ -163,6 +167,7 @@ export class WarrantiesRepository {
   }) {
     const search = filters.search?.trim();
     const where: Prisma.WarrantyWhereInput = {
+      dealer_id: filters.dealerIds ? { in: filters.dealerIds } : undefined,
       status:
         filters.status === undefined
           ? warranty_status.ACTIVE
@@ -185,32 +190,26 @@ export class WarrantiesRepository {
                 product_code: { contains: search, mode: 'insensitive' },
               },
             },
+            { serial_number: { contains: search, mode: 'insensitive' } },
             {
-              product: {
-                serial_number: { contains: search, mode: 'insensitive' },
-              },
-            },
-            {
-              product: {
-                ownerships: {
-                  some: {
-                    is_current_owner: true,
-                    customer: {
-                      OR: [
-                        {
-                          full_name: {
-                            contains: search,
-                            mode: 'insensitive',
-                          },
+              ownerships: {
+                some: {
+                  is_current_owner: true,
+                  customer: {
+                    OR: [
+                      {
+                        full_name: {
+                          contains: search,
+                          mode: 'insensitive',
                         },
-                        {
-                          customer_code: {
-                            contains: search,
-                            mode: 'insensitive',
-                          },
+                      },
+                      {
+                        customer_code: {
+                          contains: search,
+                          mode: 'insensitive',
                         },
-                      ],
-                    },
+                      },
+                    ],
                   },
                 },
               },
@@ -235,19 +234,23 @@ export class WarrantiesRepository {
     });
   }
 
-  async findRecordByProductId(productId: string) {
+  async findRecordByProductId(productId: string, dealerIds?: string[]) {
     const warranty = await this.prismaService.warranty.findFirst({
-      where: { product_id: productId },
+      where: {
+        product_id: productId,
+        dealer_id: dealerIds ? { in: dealerIds } : undefined,
+      },
       orderBy: { created_at: 'desc' },
     });
 
     return warranty ? toWarrantyRecord(warranty) : null;
   }
 
-  findById(id: string) {
+  findById(id: string, dealerIds?: string[]) {
     return this.prismaService.warranty.findFirst({
       where: {
         id,
+        dealer_id: dealerIds ? { in: dealerIds } : undefined,
         product: {
           deleted_at: null,
         },
@@ -264,26 +267,22 @@ export class WarrantiesRepository {
     });
   }
 
-  findActiveProductByWarrantyCode(code: string) {
-    return this.prismaService.product.findFirst({
+  findByWarrantyCode(code: string) {
+    return this.prismaService.warranty.findUnique({
       where: {
-        warranty: { warranty_code: code },
-        deleted_at: null,
+        warranty_code: code,
       },
       include: warrantyLookupInclude,
     });
   }
 
   findLookupMatchForCustomer(code: string, ownerUserId: string) {
-    return this.prismaService.product.findFirst({
+    return this.prismaService.warranty.findFirst({
       where: {
-        warranty: { warranty_code: code },
-        deleted_at: null,
+        warranty_code: code,
+        product: { deleted_at: null },
         ownerships: {
-          some: {
-            owner_user_id: ownerUserId,
-            is_current_owner: true,
-          },
+          some: { owner_user_id: ownerUserId, is_current_owner: true },
         },
       },
       include: warrantyLookupInclude,
@@ -291,40 +290,29 @@ export class WarrantiesRepository {
   }
 
   listCurrentProductsForUser(ownerUserId: string) {
-    return this.prismaService.product.findMany({
+    return this.prismaService.warranty.findMany({
       where: {
-        deleted_at: null,
+        product: { deleted_at: null },
         ownerships: {
-          some: {
-            owner_user_id: ownerUserId,
-            is_current_owner: true,
-          },
+          some: { owner_user_id: ownerUserId, is_current_owner: true },
         },
       },
-      include: {
-        ...warrantyLookupInclude,
-        ownerships: {
-          include: { customer: true },
-          orderBy: { created_at: 'desc' },
-        },
-      },
+      include: warrantyLookupInclude,
       orderBy: { created_at: 'desc' },
     });
   }
 
   findCurrentProductForUser(productId: string, ownerUserId: string) {
-    return this.prismaService.product.findFirst({
+    return this.prismaService.warranty.findFirst({
       where: {
-        id: productId,
-        deleted_at: null,
+        product_id: productId,
+        product: { deleted_at: null },
         ownerships: {
-          some: {
-            owner_user_id: ownerUserId,
-            is_current_owner: true,
-          },
+          some: { owner_user_id: ownerUserId, is_current_owner: true },
         },
       },
       include: warrantyLookupInclude,
+      orderBy: { created_at: 'desc' },
     });
   }
 }

@@ -1,6 +1,6 @@
 import { IsDateString, IsOptional, IsUUID } from 'class-validator';
 
-export class AssignProductOwnerDto {
+export class TransferWarrantyOwnerDto {
   @IsUUID()
   customerId: string;
 

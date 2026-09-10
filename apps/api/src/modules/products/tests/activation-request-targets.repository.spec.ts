@@ -1,7 +1,7 @@
 import { ProductsRepository } from '@/modules/products/repository/products.repository';
 
 describe('ProductsRepository.findActivationRequestTargetsByIds', () => {
-  it('loads non-deleted physical products with warranty and current owner', async () => {
+  it('loads non-deleted catalogue products with warranty policy data', async () => {
     const findMany = jest.fn().mockResolvedValue([]);
     const repository = new ProductsRepository({
       product: { findMany },
@@ -19,9 +19,7 @@ describe('ProductsRepository.findActivationRequestTargetsByIds', () => {
       },
       include: expect.objectContaining({
         warranty: true,
-        ownerships: expect.objectContaining({
-          where: { is_current_owner: true },
-        }),
+        category_ref: true,
       }),
     });
   });

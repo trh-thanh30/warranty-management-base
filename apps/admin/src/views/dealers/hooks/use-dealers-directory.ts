@@ -53,8 +53,8 @@ export function useDealersDirectory() {
   } = useTableControls<DealerDirectoryFilters, DealerSortBy>({
     initialFilters: INITIAL_DEALER_FILTERS,
     initialPageSize: DEALERS_PAGE_SIZE,
-    initialSortBy: "name",
-    initialSortOrder: "asc",
+    initialSortBy: "createdAt",
+    initialSortOrder: "desc",
   });
   const debouncedSearch = useDebounce(search.trim(), 300);
   const canView = hasPermission(PERMISSIONS.DEALER_VIEW);

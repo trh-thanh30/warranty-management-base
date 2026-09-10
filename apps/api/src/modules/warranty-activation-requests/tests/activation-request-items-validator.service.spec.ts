@@ -14,6 +14,8 @@ describe('ActivationRequestItemsValidatorService', () => {
   const requestsRepository = { findOpenByProductIds: jest.fn() };
   const activationCodesRepository = {
     findById: jest.fn(),
+    findAvailableById: jest.fn(),
+    findSelectableForPendingRequest: jest.fn(),
     expireIfNeeded: jest.fn(),
   };
   const service = new ActivationRequestItemsValidatorService(
@@ -118,6 +120,38 @@ describe('ActivationRequestItemsValidatorService', () => {
     ]);
   });
 
+  it('reuses codes reserved by the request being edited and excludes that request from open checks', async () => {
+    activationCodesRepository.findSelectableForPendingRequest.mockResolvedValue(
+      {
+        id: 'code-a',
+        expires_at: new Date('2027-01-01T00:00:00.000Z'),
+        product_id: 'product-a',
+        status: activation_code_status.PENDING_APPROVAL,
+      },
+    );
+
+    await service.validate(
+      'category-id',
+      [
+        {
+          activationCodeId: 'code-a',
+          positionKey: 'windshield',
+          productId: 'product-a',
+        },
+      ],
+      { updateRequestId: 'request-id' },
+    );
+
+    expect(requestsRepository.findOpenByProductIds).toHaveBeenCalledWith(
+      ['product-a'],
+      'request-id',
+    );
+    expect(
+      activationCodesRepository.findSelectableForPendingRequest,
+    ).toHaveBeenCalledWith('code-a', 'request-id');
+    expect(activationCodesRepository.findAvailableById).not.toHaveBeenCalled();
+  });
+
   it('rejects an activation code that has not been assigned to a product', async () => {
     activationCodesRepository.findById.mockResolvedValue({
       id: 'code-a',
@@ -196,9 +230,40 @@ describe('ActivationRequestItemsValidatorService', () => {
       expect.objectContaining({
         activationCodeId: null,
         productId: 'product-a',
+        serialNumber: null,
         warrantyCode: null,
         warrantyId: null,
         warrantyDurationMonths: 24,
+      }),
+    ]);
+  });
+
+  it('creates a fresh warranty snapshot for an existing code-less product warranty', async () => {
+    productsRepository.findActiveProductCategoryById.mockResolvedValue({
+      id: 'category-id',
+      activation_code_enabled: false,
+    });
+    productsRepository.findActivationRequestTargetsByIds.mockResolvedValue([
+      {
+        ...createProduct('product-a'),
+        warranty: {
+          ...createProduct('product-a').warranty,
+          status: warranty_status.ACTIVE,
+        },
+      },
+    ]);
+
+    await expect(
+      service.validate('category-id', [
+        { positionKey: 'windshield', productId: 'product-a' },
+      ]),
+    ).resolves.toEqual([
+      expect.objectContaining({
+        activationCodeId: null,
+        productId: 'product-a',
+        serialNumber: null,
+        warrantyCode: null,
+        warrantyId: null,
       }),
     ]);
   });
@@ -300,11 +365,11 @@ function createProduct(id: string) {
     category_id: 'category-id',
     display_name: null,
     product_code: `CODE-${id}`,
-    serial_number: `SERIAL-${id}`,
     status: product_status.ACTIVE,
     template: { name: `Product ${id}` },
     warranty: {
       id: `warranty-${id}`,
+      serial_number: `SERIAL-${id}`,
       status: warranty_status.DRAFT,
       warranty_code: `WM-${id}`,
     },

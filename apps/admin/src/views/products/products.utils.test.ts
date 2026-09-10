@@ -1,64 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  getInitials,
-  getProductWarrantyProgress,
   getProductPhysicalMetadata,
   toCreateProductBody,
   toProductActiveStatus,
   toUpdateProductBody,
 } from "./products.utils.ts";
-import {
-  assignProductOwnerSchema,
-  productEditFormSchema,
-  productFormSchema,
-} from "./products.types.ts";
-
-test("gets initials from the last two parts of a product owner name", () => {
-  assert.equal(getInitials("Nguyễn Văn Hùng"), "VH");
-  assert.equal(getInitials("  Lê   Minh  "), "LM");
-});
-
-test("calculates active warranty progress and remaining months", () => {
-  assert.deepEqual(
-    getProductWarrantyProgress(
-      {
-        endDate: "2028-01-01T00:00:00.000Z",
-        startDate: "2026-01-01T00:00:00.000Z",
-      },
-      new Date("2026-03-01T00:00:00.000Z"),
-    ),
-    {
-      percentage: 8,
-      remainingMonths: 22,
-      state: "active",
-    },
-  );
-});
-
-test("clamps warranty progress before activation and after expiry", () => {
-  const warranty = {
-    endDate: "2027-01-01T00:00:00.000Z",
-    startDate: "2026-01-01T00:00:00.000Z",
-  };
-
-  assert.deepEqual(
-    getProductWarrantyProgress(warranty, new Date("2025-12-01T00:00:00.000Z")),
-    {
-      percentage: 0,
-      remainingMonths: 13,
-      state: "upcoming",
-    },
-  );
-  assert.deepEqual(
-    getProductWarrantyProgress(warranty, new Date("2027-02-01T00:00:00.000Z")),
-    {
-      percentage: 100,
-      remainingMonths: 0,
-      state: "expired",
-    },
-  );
-});
+import { productEditFormSchema, productFormSchema } from "./products.types.ts";
 
 test("maps the edit status toggle to an active product status", () => {
   assert.equal(toProductActiveStatus(true), "ACTIVE");
@@ -96,7 +44,6 @@ test("creates an inventory-only product payload", () => {
       specifications: [{ key: " Công suất ", value: " 75W " }],
       installationPosition: " Kính lái ",
       productCode: "",
-      serialNumber: " VIN-001 ",
       status: "ACTIVE",
       warrantyDurationMonths: 180,
       warrantyTerms: "",
@@ -116,7 +63,6 @@ test("creates an inventory-only product payload", () => {
       metadata: {
         installationPosition: "Kính lái",
       },
-      serialNumber: "VIN-001",
       status: "ACTIVE",
       warrantyDurationMonths: 180,
     },
@@ -139,7 +85,6 @@ test("sends an explicitly entered product code", () => {
       specifications: [],
       installationPosition: "",
       productCode: " CUSTOM-001 ",
-      serialNumber: "",
       status: "ACTIVE",
       warrantyDurationMonths: 24,
       warrantyTerms: "",
@@ -171,7 +116,6 @@ test("updates only physical product fields and preserves unrelated metadata", ()
         specifications: [{ key: " UV ", value: " 99% " }],
         installationPosition: " Cửa trước ",
         productCode: " PRD-EDIT-001 ",
-        serialNumber: "",
         status: "INACTIVE",
         warrantyDurationMonths: 60,
         warrantyTerms: "Product terms",
@@ -200,7 +144,6 @@ test("updates only physical product fields and preserves unrelated metadata", ()
         installationPosition: "Cửa trước",
       },
       productCode: "PRD-EDIT-001",
-      serialNumber: null,
       status: "INACTIVE",
       warrantyDurationMonths: 60,
       warrantyTerms: "Product terms",
@@ -223,7 +166,6 @@ test("requires a product code only when editing", () => {
     displayName: "Camera",
     installationPosition: "",
     productCode: "",
-    serialNumber: "",
     status: "ACTIVE" as const,
     warrantyTerms: "",
     warrantyDurationMonths: 24,
@@ -248,7 +190,6 @@ test("requires an individual warranty duration of at least one month", () => {
     displayName: "Camera",
     installationPosition: "",
     productCode: "",
-    serialNumber: "",
     status: "ACTIVE" as const,
     warrantyTerms: "",
   };
@@ -270,23 +211,6 @@ test("requires an individual warranty duration of at least one month", () => {
     productFormSchema.safeParse({
       ...values,
       warrantyDurationMonths: 180,
-    }).success,
-    true,
-  );
-});
-
-test("requires a customer when assigning an owner to a legacy warranty", () => {
-  assert.equal(
-    assignProductOwnerSchema.safeParse({
-      customerId: "",
-      purchaseDate: "",
-    }).success,
-    false,
-  );
-  assert.equal(
-    assignProductOwnerSchema.safeParse({
-      customerId: "customer-id",
-      purchaseDate: "",
     }).success,
     true,
   );

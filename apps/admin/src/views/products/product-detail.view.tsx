@@ -5,10 +5,8 @@ import {
   KeyRound,
   PackageSearch,
   Pencil,
-  UserPlus,
   MoreHorizontal,
 } from "lucide-react";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
@@ -23,8 +21,6 @@ import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
-import { AssignOwnerDialog } from "./components/assign-owner-dialog";
-import { AssignActivationCodesDialog } from "./components/assign-activation-codes-dialog";
 import {
   ProductDetailCard,
   ProductDetailSkeleton,
@@ -42,11 +38,8 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
     mode: "detail",
     productId,
   });
-  const [assignOpen, setAssignOpen] = useState(false);
-  const [assignCodesOpen, setAssignCodesOpen] = useState(false);
   const canEdit = hasPermission(PERMISSIONS.PRODUCT_UPDATE);
   const canCreate = hasPermission(PERMISSIONS.PRODUCT_CREATE);
-  const canAssignOwner = hasPermission(PERMISSIONS.PRODUCT_ASSIGN_OWNER);
   const canAssignCodes = hasPermission(
     PERMISSIONS.ACTIVATION_CODE_ASSIGN_PRODUCT,
   );
@@ -75,35 +68,17 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
                 {canAssignCodes &&
                 product?.categoryRef?.activationCodeEnabled === true ? (
                   <DropdownMenuItem
+                    asChild
                     disabled={
                       !product ||
                       product.status !== "ACTIVE" ||
-                      !product.warrantyDurationMonths ||
-                      Boolean(
-                        product.assignedActivationCode &&
-                        !product.assignedActivationCode.canReplace,
-                      )
+                      !product.warrantyDurationMonths
                     }
-                    onSelect={() => setAssignCodesOpen(true)}
                   >
-                    <KeyRound className="mr-2 size-4" />
-                    {t(
-                      product?.assignedActivationCode &&
-                        !product.assignedActivationCode.canReplace
-                        ? "activationCodeChangeLocked"
-                        : product?.assignedActivationCode
-                          ? "replaceActivationCode"
-                          : "assignActivationCodes",
-                    )}
-                  </DropdownMenuItem>
-                ) : null}
-                {canAssignOwner ? (
-                  <DropdownMenuItem
-                    disabled={!product}
-                    onSelect={() => setAssignOpen(true)}
-                  >
-                    <UserPlus className="mr-2 size-4" />
-                    {t("assignOwner")}
+                    <Link href={`/products/${productId}/activation-codes`}>
+                      <KeyRound className="mr-2 size-4" />
+                      {t("assignActivationCodes")}
+                    </Link>
                   </DropdownMenuItem>
                 ) : null}
                 {canEdit ? (
@@ -151,17 +126,6 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
         ) : (
           <ProductDetailCard product={product} />
         )}
-
-        <AssignOwnerDialog
-          onOpenChange={setAssignOpen}
-          open={assignOpen}
-          product={product}
-        />
-        <AssignActivationCodesDialog
-          onOpenChange={setAssignCodesOpen}
-          open={assignCodesOpen}
-          product={product}
-        />
       </FormPageShell>
     </PermissionGuard>
   );

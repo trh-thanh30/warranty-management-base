@@ -7,6 +7,7 @@ import type {
   ActivationCodeReportRow,
 } from '@/modules/activation-codes/activation-code-reporting.types';
 import { ActivationCodeCryptoService } from '@/modules/activation-codes/services/activation-code-crypto.service';
+import { addCalendarMonthsUtc } from '@/modules/activation-codes/utils/date.utils';
 import { Injectable } from '@nestjs/common';
 import {
   activation_code_status,
@@ -16,6 +17,8 @@ import {
 import type { ActivationCodeBatchRevokeScope } from '@repo/shared';
 
 export class ProductActivationCodeReplacementConflictError extends Error {}
+export class ProductActivationCodeAssignmentConflictError extends Error {}
+class ActivationCodeBatchExpiryExtensionConflictError extends Error {}
 
 export type CreateActivationCodeBatchRecord = {
   batchCode: string;
@@ -50,6 +53,7 @@ export class ActivationCodeBatchesRepository {
   }) {
     const { page, limit, skip, take } = normalizePagination(filters);
     const search = filters.search?.trim();
+    const now = new Date();
     const where: Prisma.ActivationCodeBatchWhereInput = {
       ...(search
         ? {
@@ -73,7 +77,14 @@ export class ActivationCodeBatchesRepository {
           orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
           skip,
           take,
-          include: { codes: { select: { status: true, product_id: true } } },
+          include: {
+            codes: { select: { status: true, product_id: true } },
+            _count: {
+              select: {
+                codes: { where: this.buildAssignableWhere({}, now) },
+              },
+            },
+          },
         }),
         tx.activationCodeBatch.count({ where }),
       ]);
@@ -100,6 +111,7 @@ export class ActivationCodeBatchesRepository {
             quantity: batch.quantity,
             expiresAt: batch.expires_at,
             createdAt: batch.created_at,
+            assignableCount: batch._count.codes,
             assignedCount,
             statusCounts,
           };
@@ -200,6 +212,155 @@ export class ActivationCodeBatchesRepository {
     });
   }
 
+  async extendCodeExpiry(input: { id: string; months: number; now: Date }) {
+    return this.prismaService.$transaction(async (tx) => {
+      const code = await tx.activationCode.findUnique({
+        where: { id: input.id },
+        select: { id: true, status: true, expires_at: true },
+      });
+      if (!code) return { kind: 'NOT_FOUND' as const };
+      if (code.status === activation_code_status.ACTIVATED) {
+        return { kind: 'ACTIVATED' as const };
+      }
+      if (code.status === activation_code_status.REVOKED) {
+        return { kind: 'REVOKED' as const };
+      }
+      if (code.expires_at <= input.now) {
+        return { kind: 'EXPIRED' as const };
+      }
+
+      const expiresAt = addCalendarMonthsUtc(code.expires_at, input.months);
+      const updated = await tx.activationCode.updateMany({
+        where: {
+          id: code.id,
+          status: code.status,
+          expires_at: { equals: code.expires_at, gt: input.now },
+        },
+        data: { expires_at: expiresAt },
+      });
+      if (updated.count !== 1) return { kind: 'CONFLICT' as const };
+
+      return {
+        kind: 'EXTENDED' as const,
+        previousExpiresAt: code.expires_at,
+        expiresAt,
+      };
+    });
+  }
+
+  async extendBatchExpiry(input: {
+    batchId: string;
+    months: number;
+    now: Date;
+  }) {
+    try {
+      return await this.prismaService.$transaction(async (tx) => {
+        const batch = await tx.activationCodeBatch.findUnique({
+          where: { id: input.batchId },
+          select: {
+            id: true,
+            expires_at: true,
+            codes: {
+              select: { id: true, status: true, expires_at: true },
+            },
+          },
+        });
+        if (!batch) return { kind: 'NOT_FOUND' as const };
+        if (batch.expires_at <= input.now) {
+          return { kind: 'EXPIRED_BATCH' as const };
+        }
+
+        const skipped = { activated: 0, revoked: 0, expired: 0 };
+        const eligible = batch.codes.filter((code) => {
+          if (code.status === activation_code_status.ACTIVATED) {
+            skipped.activated += 1;
+            return false;
+          }
+          if (code.status === activation_code_status.REVOKED) {
+            skipped.revoked += 1;
+            return false;
+          }
+          if (code.expires_at <= input.now) {
+            skipped.expired += 1;
+            return false;
+          }
+          return true;
+        });
+
+        if (eligible.length === 0) {
+          return {
+            kind: 'NO_ELIGIBLE_CODES' as const,
+            previousExpiresAt: batch.expires_at,
+            expiresAt: batch.expires_at,
+            extendedCount: 0,
+            skipped,
+          };
+        }
+
+        const groups = new Map<
+          string,
+          {
+            expiresAt: Date;
+            ids: string[];
+            statuses: Set<activation_code_status>;
+          }
+        >();
+        for (const code of eligible) {
+          const key = code.expires_at.toISOString();
+          const group = groups.get(key) ?? {
+            expiresAt: code.expires_at,
+            ids: [],
+            statuses: new Set<activation_code_status>(),
+          };
+          group.ids.push(code.id);
+          group.statuses.add(code.status);
+          groups.set(key, group);
+        }
+
+        for (const group of groups.values()) {
+          const updated = await tx.activationCode.updateMany({
+            where: {
+              id: { in: group.ids },
+              status: { in: [...group.statuses] },
+              expires_at: { equals: group.expiresAt, gt: input.now },
+            },
+            data: {
+              expires_at: addCalendarMonthsUtc(group.expiresAt, input.months),
+            },
+          });
+          if (updated.count !== group.ids.length) {
+            throw new ActivationCodeBatchExpiryExtensionConflictError();
+          }
+        }
+
+        const expiresAt = addCalendarMonthsUtc(batch.expires_at, input.months);
+        const updatedBatch = await tx.activationCodeBatch.updateMany({
+          where: {
+            id: batch.id,
+            expires_at: { equals: batch.expires_at, gt: input.now },
+          },
+          data: { expires_at: expiresAt },
+        });
+        if (updatedBatch.count !== 1) {
+          throw new ActivationCodeBatchExpiryExtensionConflictError();
+        }
+
+        return {
+          kind: 'EXTENDED' as const,
+          previousExpiresAt: batch.expires_at,
+          expiresAt,
+          extendedCount: eligible.length,
+          skipped,
+        };
+      });
+    } catch (error) {
+      if (error instanceof ActivationCodeBatchExpiryExtensionConflictError) {
+        return { kind: 'CONFLICT' as const };
+      }
+      throw error;
+    }
+  }
+
   create(input: CreateActivationCodeBatchRecord) {
     return this.prismaService.activationCodeBatch.create({
       data: {
@@ -256,28 +417,45 @@ export class ActivationCodeBatchesRepository {
       search?: string;
       status?: activation_code_status;
     },
+    scope: 'batch' | 'product' = 'batch',
   ) {
     const { page, limit, skip, take } = normalizePagination(filters);
-    const batch = await this.prismaService.activationCodeBatch.findUnique({
-      where: { id: batchId },
-      select: { id: true },
-    });
-    if (!batch) return null;
+    const entity =
+      scope === 'batch'
+        ? await this.prismaService.activationCodeBatch.findUnique({
+            where: { id: batchId },
+            select: { id: true },
+          })
+        : await this.prismaService.product.findUnique({
+            where: { id: batchId },
+            select: { id: true },
+          });
+    if (!entity) return null;
     const search = filters.search?.trim();
     const where: Prisma.ActivationCodeWhereInput = {
-      batch_id: batchId,
+      ...(scope === 'batch' ? { batch_id: batchId } : { product_id: batchId }),
       ...(filters.status ? { status: filters.status } : {}),
       ...(search ? { code_hash: this.crypto.hash(search) } : {}),
     };
     const [rows, total] = await this.prismaService.$transaction([
       this.prismaService.activationCode.findMany({
         where,
-        orderBy: [{ product_id: 'asc' }, { created_at: 'asc' }, { id: 'asc' }],
+        orderBy:
+          scope === 'batch'
+            ? [{ product_id: 'asc' }, { created_at: 'asc' }, { id: 'asc' }]
+            : [{ created_at: 'desc' }, { id: 'desc' }],
         skip,
         take,
         select: {
           id: true,
-          batch: { select: { product_name: true, product_sku: true } },
+          batch: {
+            select: {
+              batch_code: true,
+              batch_name: true,
+              product_name: true,
+              product_sku: true,
+            },
+          },
           code_ciphertext: true,
           status: true,
           created_at: true,
@@ -289,7 +467,6 @@ export class ActivationCodeBatchesRepository {
               id: true,
               product_code: true,
               display_name: true,
-              serial_number: true,
             },
           },
           replaced_by: {
@@ -308,6 +485,8 @@ export class ActivationCodeBatchesRepository {
         const plaintext = this.crypto.decrypt(row.code_ciphertext);
         return {
           id: row.id,
+          batchCode: row.batch.batch_code,
+          batchName: row.batch.batch_name,
           productName: row.batch.product_name,
           productSku: row.batch.product_sku,
           // The admin activation-code workspace is an operational screen;
@@ -326,7 +505,6 @@ export class ActivationCodeBatchesRepository {
                 productCode: row.product.product_code,
                 displayName: row.product.display_name,
                 name: row.product.display_name ?? row.product.product_code,
-                serialNumber: row.product.serial_number,
               }
             : null,
           replacedBy: row.replaced_by
@@ -417,7 +595,6 @@ export class ActivationCodeBatchesRepository {
           id: true,
           product_code: true,
           display_name: true,
-          serial_number: true,
         },
       },
     } satisfies Prisma.ActivationCodeSelect;
@@ -479,7 +656,6 @@ export class ActivationCodeBatchesRepository {
                 productCode: row.product.product_code,
                 displayName: row.product.display_name,
                 name: row.product.display_name ?? row.product.product_code,
-                serialNumber: row.product.serial_number,
               }
             : null,
         };
@@ -548,6 +724,25 @@ export class ActivationCodeBatchesRepository {
     });
   }
 
+  findSelectableForPendingRequest(id: string, requestId: string) {
+    return this.prismaService.activationCode.findFirst({
+      where: {
+        id,
+        OR: [
+          { status: activation_code_status.AVAILABLE },
+          {
+            status: activation_code_status.PENDING_APPROVAL,
+            OR: [
+              { request: { is: { id: requestId } } },
+              { request_items: { some: { request_id: requestId } } },
+            ],
+          },
+        ],
+      },
+      include: { batch: true },
+    });
+  }
+
   expireIfNeeded(id: string, now = new Date()) {
     return this.prismaService.activationCode.updateMany({
       where: {
@@ -566,7 +761,6 @@ export class ActivationCodeBatchesRepository {
         id: true,
         product_code: true,
         display_name: true,
-        serial_number: true,
         status: true,
         deleted_at: true,
         warranty_duration_months: true,
@@ -590,27 +784,107 @@ export class ActivationCodeBatchesRepository {
     });
   }
 
-  findCodeAssignedToProduct(productId: string, excludedCodeId: string) {
-    return this.prismaService.activationCode.findFirst({
-      where: {
-        id: { not: excludedCodeId },
-        product_id: productId,
-      },
-      select: { id: true },
+  assignProduct(ids: string[], productId: string, now: Date) {
+    return this.prismaService.$transaction(async (tx) => {
+      const result = await tx.activationCode.updateMany({
+        where: {
+          id: { in: ids },
+          product_id: null,
+          status: activation_code_status.AVAILABLE,
+          expires_at: { gt: now },
+          request: { is: null },
+          request_items: { none: {} },
+          warranty: { is: null },
+        },
+        data: { product_id: productId },
+      });
+      if (result.count !== ids.length) {
+        throw new ProductActivationCodeAssignmentConflictError();
+      }
+      return result;
     });
   }
 
-  assignProduct(ids: string[], productId: string, now: Date) {
-    return this.prismaService.activationCode.updateMany({
-      where: {
-        id: { in: ids },
-        status: activation_code_status.AVAILABLE,
-        expires_at: { gt: now },
-        request: { is: null },
-        request_items: { none: {} },
-        warranty: { is: null },
-      },
-      data: { product_id: productId },
+  assignProductByBatch(input: {
+    batchId: string;
+    productId: string;
+    now: Date;
+    from?: number;
+    to?: number;
+  }) {
+    return this.prismaService.$transaction(async (tx) => {
+      const batch = await tx.activationCodeBatch.findUnique({
+        where: { id: input.batchId },
+        select: { id: true },
+      });
+      if (!batch) return null;
+
+      const codes = await tx.activationCode.findMany({
+        where: this.buildAssignableWhere(
+          { batch_id: input.batchId },
+          input.now,
+        ),
+        orderBy: [{ created_at: 'asc' }, { id: 'asc' }],
+        ...(input.from !== undefined ? { skip: input.from - 1 } : {}),
+        ...(input.from !== undefined && input.to !== undefined
+          ? { take: input.to - input.from + 1 }
+          : {}),
+        select: { id: true },
+      });
+      const activationCodeIds = codes.map((code) => code.id);
+      if (activationCodeIds.length === 0) {
+        return { activationCodeIds, count: 0 };
+      }
+
+      const result = await tx.activationCode.updateMany({
+        where: this.buildAssignableWhere(
+          { id: { in: activationCodeIds } },
+          input.now,
+        ),
+        data: { product_id: input.productId },
+      });
+      if (result.count !== activationCodeIds.length) {
+        throw new ProductActivationCodeAssignmentConflictError();
+      }
+      return { activationCodeIds, count: result.count };
+    });
+  }
+
+  assignProductByQuantity(input: {
+    batchIds?: string[];
+    productId: string;
+    now: Date;
+    quantity: number;
+  }) {
+    return this.prismaService.$transaction(async (tx) => {
+      const codes = await tx.activationCode.findMany({
+        where: this.buildAssignableWhere(
+          input.batchIds?.length ? { batch_id: { in: input.batchIds } } : {},
+          input.now,
+        ),
+        orderBy: [{ expires_at: 'asc' }, { created_at: 'asc' }, { id: 'asc' }],
+        select: { id: true },
+        take: input.quantity,
+      });
+      if (codes.length < input.quantity) {
+        return {
+          availableQuantity: codes.length,
+          kind: 'INSUFFICIENT' as const,
+        };
+      }
+
+      const activationCodeIds = codes.map((code) => code.id);
+      const result = await tx.activationCode.updateMany({
+        where: this.buildAssignableWhere(
+          { id: { in: activationCodeIds } },
+          input.now,
+        ),
+        data: { product_id: input.productId },
+      });
+      if (result.count !== activationCodeIds.length) {
+        throw new ProductActivationCodeAssignmentConflictError();
+      }
+      return { activationCodeIds, kind: 'ASSIGNED' as const };
     });
   }
 
@@ -808,6 +1082,21 @@ export class ActivationCodeBatchesRepository {
     return {
       ...where,
       status: activation_code_status.AVAILABLE,
+      request: { is: null },
+      request_items: { none: {} },
+      warranty: { is: null },
+    };
+  }
+
+  private buildAssignableWhere(
+    where: Prisma.ActivationCodeWhereInput,
+    now: Date,
+  ): Prisma.ActivationCodeWhereInput {
+    return {
+      ...where,
+      product_id: null,
+      status: activation_code_status.AVAILABLE,
+      expires_at: { gt: now },
       request: { is: null },
       request_items: { none: {} },
       warranty: { is: null },

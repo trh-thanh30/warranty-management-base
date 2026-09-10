@@ -92,6 +92,24 @@ test("clears birthdate explicitly when updating a customer", () => {
   );
 });
 
+test("customer form only requires full name and phone", () => {
+  const result = customerFormSchema.safeParse({
+    address: "",
+    addressDetail: "",
+    birthdate: "",
+    customerCode: "",
+    email: "",
+    fullName: "Nguyen Van A",
+    phone: "0901234567",
+    provinceCode: "",
+    provinceName: "",
+    wardCode: "",
+    wardName: "",
+  });
+
+  assert.equal(result.success, true);
+});
+
 test("customer form rejects invalid, unsupported, and future birthdates", () => {
   for (const birthdate of ["not-a-date", "1899-12-31", "2999-01-01"]) {
     const result = customerFormSchema.safeParse({

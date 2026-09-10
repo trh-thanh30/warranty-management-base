@@ -13,6 +13,7 @@ export type ActivationCodeBatchListItem = {
   productSku: string;
   productName: string;
   quantity: number;
+  assignableCount: number;
   assignedCount: number;
   expiresAt: string;
   createdAt: string;

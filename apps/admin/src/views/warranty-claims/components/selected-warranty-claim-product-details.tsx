@@ -31,7 +31,7 @@ export function SelectedWarrantyClaimProductDetails({
           rows={[
             [t("product"), product.name],
             [t("productCode"), product.productCode],
-            [t("serialNumber"), product.serialNumber ?? "-"],
+            [t("serialNumber"), warranty?.serialNumber ?? "-"],
             [t("category"), product.categoryRef.name],
             [
               t("brandModel"),

@@ -62,7 +62,14 @@ test("activation code detail uses the shared detail-page shell", async () => {
   const source = await readFile(viewUrl, "utf8");
 
   assert.match(source, /<FormPageShell/);
-  assert.match(source, /backHref="\/activation-code-batches"/);
+  assert.match(
+    source,
+    /backHref=\{productId \? "\/products" : "\/activation-code-batches"\}/,
+  );
+  assert.match(
+    source,
+    /backLabel=\{t\(productId \? "backToProducts" : "back"\)\}/,
+  );
   assert.doesNotMatch(source, /<PageHeader/);
 });
 

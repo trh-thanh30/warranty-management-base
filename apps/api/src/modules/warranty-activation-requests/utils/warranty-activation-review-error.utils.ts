@@ -58,7 +58,10 @@ export function getActivationEligibilityFailure(
   if (target.product.status !== product_status.ACTIVE) {
     return 'PRODUCT_INACTIVE';
   }
-  if (!target.product.warranty && !target.warrantyId) return null;
+  // A request item without a Warranty link represents a new physical unit.
+  // The Product's compatibility current-warranty pointer may reference an
+  // older issuance and must not be compared with the new reserved code.
+  if (!target.warrantyId) return null;
   if (!target.product.warranty) return 'WARRANTY_MISSING';
   if (target.product.warranty!.id !== target.warrantyId) {
     return 'WARRANTY_PRODUCT_MISMATCH';

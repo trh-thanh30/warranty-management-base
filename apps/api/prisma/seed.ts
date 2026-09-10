@@ -259,7 +259,6 @@ async function upsertDemoProduct(data: {
   const product = await prisma.product.upsert({
     where: { product_code: data.productCode },
     update: {
-      serial_number: data.serialNumber,
       category_id: category.id,
       display_name: data.name,
       product_code: data.productCode,
@@ -272,7 +271,6 @@ async function upsertDemoProduct(data: {
     },
     create: {
       product_code: data.productCode,
-      serial_number: data.serialNumber,
       category_id: category.id,
       display_name: data.name,
       slug: data.productCode.toLowerCase(),
@@ -1064,7 +1062,7 @@ async function main() {
     productName:
       expiringMonthDemo.product.display_name ??
       expiringMonthDemo.product.product_code,
-    serialNumber: expiringMonthDemo.product.serial_number,
+    serialNumber: expiringMonthDemo.warranty.serial_number,
     brand: expiringMonthDemo.product.brand,
     model: expiringMonthDemo.product.model,
     manufactureYear: expiringMonthDemo.product.model_year,
@@ -1115,7 +1113,7 @@ async function main() {
     warrantyDurationMonths: camryDemo.warranty.duration_months,
     productName:
       camryDemo.product.display_name ?? camryDemo.product.product_code,
-    serialNumber: camryDemo.product.serial_number,
+    serialNumber: camryDemo.warranty.serial_number,
     brand: camryDemo.product.brand,
     model: camryDemo.product.model,
     manufactureYear: camryDemo.product.model_year,
@@ -1140,7 +1138,7 @@ async function main() {
     productName:
       expiringSoonDemo.product.display_name ??
       expiringSoonDemo.product.product_code,
-    serialNumber: expiringSoonDemo.product.serial_number,
+    serialNumber: expiringSoonDemo.warranty.serial_number,
     brand: expiringSoonDemo.product.brand,
     model: expiringSoonDemo.product.model,
     manufactureYear: expiringSoonDemo.product.model_year,
@@ -1162,7 +1160,7 @@ async function main() {
       productId: camryDemo.product.id,
       productName:
         camryDemo.product.display_name ?? camryDemo.product.product_code,
-      serialNumber: camryDemo.product.serial_number,
+      serialNumber: camryDemo.warranty.serial_number,
       brand: camryDemo.product.brand,
       model: camryDemo.product.model,
       manufactureYear: camryDemo.product.model_year,
@@ -1178,7 +1176,7 @@ async function main() {
       productName:
         expiringMonthDemo.product.display_name ??
         expiringMonthDemo.product.product_code,
-      serialNumber: expiringMonthDemo.product.serial_number,
+      serialNumber: expiringMonthDemo.warranty.serial_number,
       brand: expiringMonthDemo.product.brand,
       model: expiringMonthDemo.product.model,
       manufactureYear: expiringMonthDemo.product.model_year,
@@ -1194,7 +1192,7 @@ async function main() {
       productName:
         expiringSoonDemo.product.display_name ??
         expiringSoonDemo.product.product_code,
-      serialNumber: expiringSoonDemo.product.serial_number,
+      serialNumber: expiringSoonDemo.warranty.serial_number,
       brand: expiringSoonDemo.product.brand,
       model: expiringSoonDemo.product.model,
       manufactureYear: expiringSoonDemo.product.model_year,

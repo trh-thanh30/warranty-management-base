@@ -2,6 +2,9 @@ import type {
   ActivationCodeReport,
   ActivationCodeBatchRevokePreview,
   ActivationCodePrintJob,
+  ExtendActivationCodeBatchExpiryResult,
+  ExtendActivationCodeExpiryBody,
+  ExtendActivationCodeExpiryResult,
   AssignActivationCodesToProductBody,
   AssignActivationCodesToProductResult,
   ReplaceProductActivationCodeAssignmentBody,
@@ -94,6 +97,18 @@ export function createActivationCodesService(http: ActivationCodesHttpClient) {
       );
     },
 
+    async listCodesByProduct(
+      productId: string,
+      query: ActivationCodeDetailQuery = {},
+    ): Promise<ActivationCodeDetailList> {
+      return unwrap(
+        await http.get<ActivationCodeDetailList>(
+          `/activation-code-batches/codes/product/${productId}`,
+          { params: query },
+        ),
+      );
+    },
+
     async listAvailableByProduct(
       productId?: string,
       query: {
@@ -144,6 +159,30 @@ export function createActivationCodesService(http: ActivationCodesHttpClient) {
 
     async revokeCode(codeId: string): Promise<void> {
       await http.post(`/activation-code-batches/codes/${codeId}/revoke`);
+    },
+
+    async extendCodeExpiry(
+      codeId: string,
+      body: ExtendActivationCodeExpiryBody,
+    ): Promise<ExtendActivationCodeExpiryResult> {
+      return unwrap(
+        await http.post<ExtendActivationCodeExpiryResult>(
+          `/activation-code-batches/codes/${codeId}/extend-expiry`,
+          body,
+        ),
+      );
+    },
+
+    async extendBatchExpiry(
+      batchId: string,
+      body: ExtendActivationCodeExpiryBody,
+    ): Promise<ExtendActivationCodeBatchExpiryResult> {
+      return unwrap(
+        await http.post<ExtendActivationCodeBatchExpiryResult>(
+          `/activation-code-batches/${batchId}/extend-expiry`,
+          body,
+        ),
+      );
     },
 
     async assignProduct(

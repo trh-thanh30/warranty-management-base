@@ -25,3 +25,10 @@ export class WarrantyActivationCodeReservationConflictError extends Error {
     this.name = 'WarrantyActivationCodeReservationConflictError';
   }
 }
+
+export class WarrantyActivationRequestUpdateConflictError extends Error {
+  constructor() {
+    super('Warranty activation request is no longer pending');
+    this.name = 'WarrantyActivationRequestUpdateConflictError';
+  }
+}

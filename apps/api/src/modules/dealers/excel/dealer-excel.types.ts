@@ -5,8 +5,8 @@ export type DealerExcelRow = {
   phone: string | null;
   province: string;
   district: string | null;
-  latitude: number;
-  longitude: number;
+  latitude: number | null;
+  longitude: number | null;
   salesName: string | null;
 };
 

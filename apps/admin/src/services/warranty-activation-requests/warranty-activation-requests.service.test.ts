@@ -113,3 +113,32 @@ test("creates an admin activation request from a selected product", async () => 
     { url: "/warranty-activation-requests/admin", body },
   ]);
 });
+
+test("updates an admin activation request through its canonical detail route", async () => {
+  const calls: unknown[] = [];
+  const body = {
+    productId: "23684bbd-b6e0-401a-9ba4-97e1b98176fd",
+    addressDetail: "1 Nguyen Trai",
+    customerId: "68a1578a-b13e-45de-b008-e357392be715",
+    customerName: "Nguyen Van A",
+    customerPhone: "0901234567",
+    provinceCode: "79",
+    provinceName: "TP Ho Chi Minh",
+    wardCode: "26734",
+    wardName: "Phuong Ben Thanh",
+  };
+  const http = {
+    async patch(url: string, requestBody?: unknown) {
+      calls.push({ url, body: requestBody });
+      return { data: { success: true, data: { id: "request-id" } } };
+    },
+  };
+
+  await createWarrantyActivationRequestsService(
+    http as unknown as WarrantyActivationRequestsHttpClient,
+  ).updateAdminWarrantyActivationRequest("request-id", body);
+
+  assert.deepEqual(calls, [
+    { url: "/warranty-activation-requests/request-id", body },
+  ]);
+});

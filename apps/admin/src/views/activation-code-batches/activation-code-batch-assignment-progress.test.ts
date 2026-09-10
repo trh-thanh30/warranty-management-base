@@ -6,6 +6,10 @@ const tableSource = readFileSync(
   new URL("./components/activation-code-batches-table.tsx", import.meta.url),
   "utf8",
 );
+const constantsSource = readFileSync(
+  new URL("./activation-code-batches.constants.ts", import.meta.url),
+  "utf8",
+);
 
 test("batch rows show product assignment progress separately from code status", () => {
   assert.match(tableSource, /columns\.assignment/);
@@ -20,6 +24,23 @@ test("batch status counts reuse the shared activation code status badge", () => 
     /<ActivationCodeStatusBadge[\s\S]*?count=\{count\}[\s\S]*?status=\{status\}/,
   );
   assert.doesNotMatch(tableSource, /const statusClasses/);
+});
+
+test("batch status filters include codes reserved by pending requests", () => {
+  assert.match(constantsSource, /"PENDING_APPROVAL"/);
+
+  for (const locale of ["vi", "en"]) {
+    const messages = JSON.parse(
+      readFileSync(
+        new URL(`../../messages/${locale}.json`, import.meta.url),
+        "utf8",
+      ),
+    ) as {
+      ActivationCodeBatches: { statuses: Record<string, string> };
+    };
+
+    assert.ok(messages.ActivationCodeBatches.statuses.PENDING_APPROVAL);
+  }
 });
 
 test("mobile batch summaries use valid paragraph structure and identify rename action", () => {

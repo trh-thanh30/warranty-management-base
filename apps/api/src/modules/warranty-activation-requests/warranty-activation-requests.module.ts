@@ -20,6 +20,7 @@ import { ListWarrantyActivationRequestsUseCase } from '@/modules/warranty-activa
 import { ResendWarrantyActivationRequestCertificateEmailUseCase } from '@/modules/warranty-activation-requests/use-cases/resend-warranty-activation-request-certificate-email.use-case';
 import { RetryWarrantyActivationRequestCertificateUseCase } from '@/modules/warranty-activation-requests/use-cases/retry-warranty-activation-request-certificate.use-case';
 import { ReviewWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/review-warranty-activation-request.use-case';
+import { UpdateAdminWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/update-admin-warranty-activation-request.use-case';
 import { WarrantyActivationRequestsController } from '@/modules/warranty-activation-requests/warranty-activation-requests.controller';
 import { WarrantyCertificatesModule } from '@/modules/warranty-certificates/modules/warranty-certificates.module';
 import { ActivationCodesModule } from '@/modules/activation-codes/activation-codes.module';
@@ -52,6 +53,7 @@ import { Module } from '@nestjs/common';
     ListWarrantyActivationRequestsUseCase,
     GetWarrantyActivationRequestDetailUseCase,
     ReviewWarrantyActivationRequestUseCase,
+    UpdateAdminWarrantyActivationRequestUseCase,
     ResendWarrantyActivationRequestCertificateEmailUseCase,
     RetryWarrantyActivationRequestCertificateUseCase,
   ],

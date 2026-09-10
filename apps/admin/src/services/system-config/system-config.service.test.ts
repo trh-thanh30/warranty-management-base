@@ -5,7 +5,12 @@ import type { SystemConfigHttpClient } from "./system-config.types.ts";
 
 test("loads and updates activation code policy", async () => {
   const calls: unknown[] = [];
-  const policy = { expiryMonths: 6, defaultBatchQuantity: 50 };
+  const policy = {
+    expiryMonths: 6,
+    defaultBatchQuantity: 50,
+    minBatchQuantity: 50,
+    maxBatchQuantity: 1000,
+  };
   const http = {
     async get(url: string) {
       calls.push({ method: "get", url });

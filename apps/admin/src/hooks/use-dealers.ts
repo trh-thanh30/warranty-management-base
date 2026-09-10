@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-query";
 import type {
   CreateDealerBody,
+  AddDealerMemberBody,
   DealerResponse,
   DealerActivatedCustomerSummary,
   ListDealerActivatedCustomersQuery,
@@ -27,6 +28,8 @@ export const dealerKeys = {
   list: (query: ListDealersQuery) => [...dealerKeys.lists(), query] as const,
   lists: () => [...dealerKeys.all, "list"] as const,
   provinces: () => [...dealerKeys.all, "provinces"] as const,
+  members: (dealerId: string) =>
+    [...dealerKeys.detail(dealerId), "members"] as const,
   activatedCustomers: (
     dealerId: string,
     query: ListDealerActivatedCustomersQuery,
@@ -94,6 +97,34 @@ export function useDealer(
     ...options,
     queryKey: dealerKeys.detail(dealerId),
     queryFn: () => dealersService.getDealer(dealerId ?? ""),
+  });
+}
+
+export function useDealerMembers(dealerId: string, enabled = true) {
+  return useQuery({
+    enabled: enabled && Boolean(dealerId),
+    queryKey: dealerKeys.members(dealerId),
+    queryFn: () => dealersService.listMembers(dealerId),
+  });
+}
+
+export function useAddDealerMember(dealerId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: AddDealerMemberBody) =>
+      dealersService.addMember(dealerId, body),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: dealerKeys.members(dealerId) }),
+  });
+}
+
+export function useRemoveDealerMember(dealerId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (membershipId: string) =>
+      dealersService.removeMember(dealerId, membershipId),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: dealerKeys.members(dealerId) }),
   });
 }
 

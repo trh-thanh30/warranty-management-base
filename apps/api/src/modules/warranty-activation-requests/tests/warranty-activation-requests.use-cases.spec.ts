@@ -20,9 +20,11 @@ import {
 describe('WarrantyActivationRequestsUseCases', () => {
   const repository = {
     create: jest.fn(),
+    updatePending: jest.fn(),
     findById: jest.fn(),
     findLastRequestCode: jest.fn(),
     findOpenByProductId: jest.fn(),
+    findOpenByProductIds: jest.fn(),
     review: jest.fn(),
     withReviewTransaction: jest.fn(),
   };
@@ -131,6 +133,73 @@ describe('WarrantyActivationRequestsUseCases', () => {
       }),
     );
     expect(result.requestCode).toBe('WAR-20260719-0001');
+  });
+
+  it('creates an independent warranty request for a code-less catalogue product', async () => {
+    repository.findOpenByProductId.mockResolvedValue({
+      id: 'another-open-request',
+    });
+    repository.findLastRequestCode.mockResolvedValue(null);
+    productsRepository.findActivationRequestTargetById.mockResolvedValue({
+      ...baseDraftProduct,
+      category_ref: { activation_code_enabled: false },
+      warranty: {
+        ...baseDraftProduct.warranty,
+        status: warranty_status.ACTIVE,
+        warranty_code: 'WM-PREVIOUS',
+      },
+      warranty_duration_months: 24,
+    });
+    repository.create.mockImplementation((command) =>
+      Promise.resolve({
+        ...baseRequest,
+        product_id: command.productId,
+        request_code: command.requestCode,
+        warranty_code: command.warrantyCode,
+        items: command.items.map((item, index) => ({
+          ...createPersistedItem(item.positionKey, item.productId),
+          id: `item-${index}`,
+          serial_number: item.serialNumber,
+          warranty_id: item.warrantyId,
+          warranty_code: item.warrantyCode,
+        })),
+      }),
+    );
+    const useCase = new CreateWarrantyActivationRequestUseCase(
+      repository as never,
+      new GenerateWarrantyActivationRequestCodeUseCase(repository as never),
+      productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
+    );
+
+    await useCase.execute({
+      addressDetail: '1 Nguyen Trai',
+      categoryId: 'category-id',
+      customerName: 'Nguyen Van A',
+      customerPhone: '0901234567',
+      productId: 'product-id',
+      provinceCode: '79',
+      provinceName: 'TP Ho Chi Minh',
+      wardCode: '26734',
+      wardName: 'Phuong Ben Thanh',
+    });
+
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: [
+          expect.objectContaining({
+            activationCodeId: null,
+            productId: 'product-id',
+            serialNumber: null,
+            warrantyId: null,
+            warrantyCode: 'WM-2026-GENERATED',
+          }),
+        ],
+        warrantyCode: 'WM-2026-GENERATED',
+      }),
+    );
   });
 
   it('creates one parent with multiple validated activation items', async () => {
@@ -308,7 +377,10 @@ describe('WarrantyActivationRequestsUseCases', () => {
       ...baseDraftProduct,
       id: 'product-a',
       product_code: 'CODE-product-a',
-      warranty: null,
+      warranty: {
+        ...baseDraftProduct.warranty,
+        status: warranty_status.ACTIVE,
+      },
       warranty_duration_months: 24,
     });
     const genericItems = [
@@ -495,6 +567,100 @@ describe('WarrantyActivationRequestsUseCases', () => {
     ).not.toHaveBeenCalled();
   });
 
+  it('preserves existing warranty codes while editing unchanged activation items', async () => {
+    repository.findOpenByProductId.mockResolvedValue(null);
+    productsRepository.findActivationRequestTargetById.mockResolvedValue({
+      ...baseDraftProduct,
+      id: 'product-a',
+      product_code: 'CODE-product-a',
+      warranty: null,
+      warranty_duration_months: 24,
+    });
+    const itemValidator = {
+      validate: jest.fn().mockResolvedValue([
+        {
+          ...createValidatedItem('item-a', 'product-a'),
+          activationCodeId: 'activation-code-a',
+          warrantyCode: null,
+          warrantyId: null,
+        },
+      ]),
+    };
+    repository.updatePending.mockImplementation((_id, data) =>
+      Promise.resolve({
+        ...baseRequest,
+        request_code: data.requestCode,
+        warranty_code: data.warrantyCode,
+        product_id: data.productId,
+        items: data.items.map((item) => ({
+          ...createPersistedItem(item.positionKey, item.productId),
+          activation_code_id: item.activationCodeId,
+          warranty_code: item.warrantyCode,
+          warranty_id: null,
+          warranty: null,
+        })),
+      }),
+    );
+    const useCase = new CreateWarrantyActivationRequestUseCase(
+      repository as never,
+      new GenerateWarrantyActivationRequestCodeUseCase(repository as never),
+      productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
+      itemValidator as never,
+    );
+
+    await useCase.execute(
+      {
+        addressDetail: '1 Nguyen Trai',
+        categoryId: 'category-id',
+        customerName: 'Nguyen Van A',
+        customerPhone: '0901234567',
+        items: [
+          {
+            activationCodeId: 'activation-code-a',
+            positionKey: 'item-a',
+            productId: 'product-a',
+          },
+        ],
+        provinceCode: '79',
+        provinceName: 'TP Ho Chi Minh',
+        wardCode: '26734',
+        wardName: 'Phuong Ben Thanh',
+      },
+      {
+        updateRequest: {
+          id: 'request-id',
+          requestCode: 'WAR-EXISTING',
+          warrantyCode: 'WM-EXISTING',
+          items: [
+            {
+              activationCodeId: 'activation-code-a',
+              positionKey: 'item-a',
+              productId: 'product-a',
+              warrantyCode: 'WM-ITEM-EXISTING',
+            },
+          ],
+        },
+      },
+    );
+
+    expect(generateWarrantyCodeUseCase.execute).not.toHaveBeenCalled();
+    expect(repository.updatePending).toHaveBeenCalledWith(
+      'request-id',
+      expect.objectContaining({
+        requestCode: 'WAR-EXISTING',
+        warrantyCode: 'WM-ITEM-EXISTING',
+        items: [expect.objectContaining({ warrantyCode: 'WM-ITEM-EXISTING' })],
+      }),
+      undefined,
+    );
+    expect(
+      warrantyActivationRequestNotificationService.requestCreated,
+    ).not.toHaveBeenCalled();
+  });
+
   it('regenerates all reserved item codes when a concurrent reservation wins', async () => {
     repository.findLastRequestCode.mockResolvedValue(null);
     repository.findOpenByProductId.mockResolvedValue(null);
@@ -584,76 +750,38 @@ describe('WarrantyActivationRequestsUseCases', () => {
     );
   });
 
-  it('rejects a multi-product request when any current owner differs from the customer', async () => {
-    repository.findOpenByProductId.mockResolvedValue(null);
-    productsRepository.findActivationRequestTargetById.mockResolvedValue({
-      ...baseDraftProduct,
-      id: 'product-a',
-    });
-    const itemValidator = {
-      validate: jest.fn().mockResolvedValue([
-        createValidatedItem('windshield', 'product-a'),
-        {
-          ...createValidatedItem('rearGlass', 'product-b'),
-          currentOwner: {
-            email: 'another@example.com',
-            full_name: 'Another Customer',
-            phone: '0987654321',
-          },
-        },
-      ]),
-    };
-    const useCase = new CreateWarrantyActivationRequestUseCase(
-      repository as never,
-      new GenerateWarrantyActivationRequestCodeUseCase(repository as never),
-      productsRepository as never,
-      dealersRepository as never,
-      generateWarrantyCodeUseCase as never,
-      warrantyActivationRequestNotificationService as never,
-      itemValidator as never,
-    );
-
-    await expect(
-      useCase.execute({
-        addressDetail: '1 Nguyen Trai',
-        categoryId: 'category-id',
-        customerEmail: 'customer@example.com',
-        customerName: 'Nguyen Van A',
-        customerPhone: '0901234567',
-        items: [
-          { positionKey: 'windshield', productId: 'product-a' },
-          { positionKey: 'rearGlass', productId: 'product-b' },
-        ],
-        provinceCode: '79',
-        provinceName: 'TP Ho Chi Minh',
-        wardCode: '26734',
-        wardName: 'Phuong Ben Thanh',
-      }),
-    ).rejects.toMatchObject({
-      details: { code: 'CUSTOMER_OWNER_MISMATCH' },
-    });
-    expect(repository.create).not.toHaveBeenCalled();
-  });
-
   it('preserves singular fallback for a legacy request without items', () => {
-    const result = toWarrantyActivationRequestResponse({
-      ...baseRequest,
-      category_id: null,
-      activation_code_id: null,
-      dealer_id: null,
-      installed_at: null,
-      items: [],
-      product_id: 'legacy-product-id',
-      product_name: 'Legacy product',
-      source: warranty_activation_request_source.PUBLIC_WEB,
-      vehicle_model: null,
-      vehicle_plate: null,
-      warranty_duration_months: null,
-    });
+    const result = toWarrantyActivationRequestResponse(
+      {
+        ...baseRequest,
+        activation_code: {
+          id: 'activation-code-id',
+          code_ciphertext: 'encrypted-code',
+          status: 'PENDING_APPROVAL',
+        },
+        category_id: null,
+        activation_code_id: 'activation-code-id',
+        dealer_id: null,
+        installed_at: null,
+        items: [],
+        product_id: 'legacy-product-id',
+        product_name: 'Legacy product',
+        source: warranty_activation_request_source.PUBLIC_WEB,
+        vehicle_model: null,
+        vehicle_plate: null,
+        warranty_duration_months: null,
+      },
+      () => 'SP-PENDING-001',
+    );
 
     expect(result.itemCount).toBeUndefined();
     expect(result.productId).toBe('legacy-product-id');
     expect(result.productName).toBe('Legacy product');
+    expect(result.activationCode).toEqual({
+      id: 'activation-code-id',
+      code: 'SP-PENDING-001',
+      status: 'PENDING_APPROVAL',
+    });
   });
 
   it('publishes an admin notification when a public activation request is created', async () => {
@@ -1091,36 +1219,6 @@ describe('WarrantyActivationRequestsUseCases', () => {
         customerEmail: 'customer@example.com',
         customerName: 'Nguyen Van A',
         customerPhone: '0901234567',
-        provinceCode: '79',
-        provinceName: 'TP Ho Chi Minh',
-        wardCode: '26734',
-        wardName: 'Phuong Ben Thanh',
-        warrantyCode: 'WM-2026-ABC123',
-      }),
-    ).rejects.toBeInstanceOf(BadRequestError);
-  });
-
-  it('rejects activation requests when customer information does not match the current owner', async () => {
-    productsRepository.findActivationRequestTargetByWarrantyCode.mockResolvedValue(
-      baseDraftProduct,
-    );
-    const generateCodeUseCase =
-      new GenerateWarrantyActivationRequestCodeUseCase(repository as never);
-    const useCase = new CreateWarrantyActivationRequestUseCase(
-      repository as never,
-      generateCodeUseCase,
-      productsRepository as never,
-      dealersRepository as never,
-      generateWarrantyCodeUseCase as never,
-      warrantyActivationRequestNotificationService as never,
-    );
-
-    await expect(
-      useCase.execute({
-        addressDetail: '1 Nguyen Trai',
-        customerEmail: 'other@example.com',
-        customerName: 'Tran Van B',
-        customerPhone: '0999999999',
         provinceCode: '79',
         provinceName: 'TP Ho Chi Minh',
         wardCode: '26734',

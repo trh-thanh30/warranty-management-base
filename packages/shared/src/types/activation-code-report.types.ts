@@ -26,6 +26,8 @@ export type ActivationCodeReportFilters = {
 
 export type ActivationCodeDetail = {
   id: string;
+  batchCode: string;
+  batchName: string;
   maskedCode: string;
   copyCode?: string;
   status: ActivationCodeReportStatus;
@@ -48,13 +50,27 @@ export type ActivationCodeAssignedProduct = {
   serialNumber: string | null;
 };
 
-export type AssignActivationCodesToProductBody = {
-  activationCodeId: string;
+type AssignActivationCodesToProductBase = {
   productId: string;
 };
 
+export type AssignActivationCodesToProductBody =
+  | (AssignActivationCodesToProductBase & {
+      activationCodeIds: string[];
+      assignmentMode?: "SELECTED";
+    })
+  | (AssignActivationCodesToProductBase & {
+      assignmentMode: "ALL_AVAILABLE";
+      batchId: string;
+    })
+  | (AssignActivationCodesToProductBase & {
+      assignmentMode: "QUANTITY";
+      batchIds?: string[];
+      quantity: number;
+    });
+
 export type AssignActivationCodesToProductResult = {
-  activationCodeId: string;
+  activationCodeIds: string[];
   product: ActivationCodeAssignedProduct;
 };
 
@@ -64,10 +80,11 @@ export type ReplaceProductActivationCodeAssignmentBody = {
   productId: string;
 };
 
-export type ReplaceProductActivationCodeAssignmentResult =
-  AssignActivationCodesToProductResult & {
-    previousActivationCodeId: string;
-  };
+export type ReplaceProductActivationCodeAssignmentResult = {
+  activationCodeId: string;
+  previousActivationCodeId: string;
+  product: ActivationCodeAssignedProduct;
+};
 
 export type UnassignActivationCodesFromProductBody = {
   activationCodeId: string;

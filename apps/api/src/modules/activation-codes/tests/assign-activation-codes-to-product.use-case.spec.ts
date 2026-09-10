@@ -23,25 +23,121 @@ describe('AssignActivationCodesToProductUseCase', () => {
     warranty: null,
   };
 
-  it('assigns available codes to an eligible product', async () => {
+  it('assigns multiple available codes to an eligible product in one request', async () => {
+    const secondCode = { ...code, id: 'second-code-id' };
     const repository = {
       findAssignmentProduct: jest.fn().mockResolvedValue(product),
-      findCodesForAssignment: jest.fn().mockResolvedValue([code]),
-      findCodeAssignedToProduct: jest.fn().mockResolvedValue(null),
-      assignProduct: jest.fn().mockResolvedValue({ count: 1 }),
+      findCodesForAssignment: jest.fn().mockResolvedValue([code, secondCode]),
+      assignProduct: jest.fn().mockResolvedValue({ count: 2 }),
     };
 
     const result = await new AssignActivationCodesToProductUseCase(
       repository as never,
-    ).execute({ activationCodeId: 'code-id', productId: 'product-id' });
+    ).execute({
+      activationCodeIds: ['code-id', 'second-code-id'],
+      productId: 'product-id',
+    });
 
-    expect(result.activationCodeId).toBe('code-id');
+    expect(result.activationCodeIds).toEqual(['code-id', 'second-code-id']);
     expect(result.product.productCode).toBe('PRD-01');
     expect(repository.assignProduct).toHaveBeenCalledWith(
-      ['code-id'],
+      ['code-id', 'second-code-id'],
       'product-id',
       expect.any(Date),
     );
+  });
+
+  it('assigns every currently assignable code from one batch', async () => {
+    const repository = {
+      findAssignmentProduct: jest.fn().mockResolvedValue(product),
+      assignProductByBatch: jest.fn().mockResolvedValue({
+        activationCodeIds: ['first-code-id', 'second-code-id'],
+        count: 2,
+      }),
+    };
+
+    const result = await new AssignActivationCodesToProductUseCase(
+      repository as never,
+    ).execute({
+      assignmentMode: 'ALL_AVAILABLE',
+      batchId: 'batch-id',
+      productId: 'product-id',
+    });
+
+    expect(result.activationCodeIds).toEqual([
+      'first-code-id',
+      'second-code-id',
+    ]);
+    expect(repository.assignProductByBatch).toHaveBeenCalledWith({
+      batchId: 'batch-id',
+      productId: 'product-id',
+      now: expect.any(Date),
+    });
+  });
+
+  it('assigns a requested quantity of assignable codes across selected batches', async () => {
+    const repository = {
+      findAssignmentProduct: jest.fn().mockResolvedValue(product),
+      assignProductByQuantity: jest.fn().mockResolvedValue({
+        activationCodeIds: ['third-code-id', 'fourth-code-id'],
+        count: 2,
+      }),
+    };
+
+    await new AssignActivationCodesToProductUseCase(
+      repository as never,
+    ).execute({
+      assignmentMode: 'QUANTITY',
+      batchIds: ['batch-a', 'batch-b'],
+      productId: 'product-id',
+      quantity: 2,
+    });
+
+    expect(repository.assignProductByQuantity).toHaveBeenCalledWith({
+      batchIds: ['batch-a', 'batch-b'],
+      productId: 'product-id',
+      now: expect.any(Date),
+      quantity: 2,
+    });
+  });
+
+  it('rejects an invalid automatic assignment quantity', async () => {
+    const repository = {
+      findAssignmentProduct: jest.fn().mockResolvedValue(product),
+      assignProductByQuantity: jest.fn(),
+    };
+
+    await expect(
+      new AssignActivationCodesToProductUseCase(repository as never).execute({
+        assignmentMode: 'QUANTITY',
+        productId: 'product-id',
+        quantity: 0,
+      }),
+    ).rejects.toMatchObject({
+      code: 'ACTIVATION_CODE_ASSIGNMENT_QUANTITY_INVALID',
+    });
+    expect(repository.assignProductByQuantity).not.toHaveBeenCalled();
+  });
+
+  it('does not assign any code when availability is below the requested quantity', async () => {
+    const repository = {
+      findAssignmentProduct: jest.fn().mockResolvedValue(product),
+      assignProductByQuantity: jest.fn().mockResolvedValue({
+        availableQuantity: 7,
+        kind: 'INSUFFICIENT',
+      }),
+    };
+
+    await expect(
+      new AssignActivationCodesToProductUseCase(repository as never).execute({
+        assignmentMode: 'QUANTITY',
+        productId: 'product-id',
+        quantity: 10,
+      }),
+    ).rejects.toMatchObject({
+      code: 'ACTIVATION_CODE_ASSIGNMENT_INSUFFICIENT',
+      details: { availableQuantity: 7, requestedQuantity: 10 },
+    });
   });
 
   it('returns stable not-found codes for assignment feedback', async () => {
@@ -49,7 +145,7 @@ describe('AssignActivationCodesToProductUseCase', () => {
       new AssignActivationCodesToProductUseCase({
         findAssignmentProduct: jest.fn().mockResolvedValue(null),
       } as never).execute({
-        activationCodeId: 'code-id',
+        activationCodeIds: ['code-id'],
         productId: 'missing-product-id',
       }),
     ).rejects.toMatchObject({ code: 'PRODUCT_NOT_FOUND' });
@@ -59,7 +155,7 @@ describe('AssignActivationCodesToProductUseCase', () => {
         findAssignmentProduct: jest.fn().mockResolvedValue(product),
         findCodesForAssignment: jest.fn().mockResolvedValue([]),
       } as never).execute({
-        activationCodeId: 'missing-code-id',
+        activationCodeIds: ['missing-code-id'],
         productId: product.id,
       }),
     ).rejects.toMatchObject({ code: 'ACTIVATION_CODE_NOT_FOUND' });
@@ -75,7 +171,7 @@ describe('AssignActivationCodesToProductUseCase', () => {
 
     await expect(
       new AssignActivationCodesToProductUseCase(repository as never).execute({
-        activationCodeId: 'code-id',
+        activationCodeIds: ['code-id'],
         productId: 'product-id',
       }),
     ).rejects.toMatchObject({ code: 'ACTIVATION_CODE_NOT_APPLICABLE' });
@@ -87,31 +183,31 @@ describe('AssignActivationCodesToProductUseCase', () => {
       findCodesForAssignment: jest
         .fn()
         .mockResolvedValue([{ ...code, request: { id: 'request-id' } }]),
-      findCodeAssignedToProduct: jest.fn().mockResolvedValue(null),
     };
 
     await expect(
       new AssignActivationCodesToProductUseCase(repository as never).execute({
-        activationCodeId: 'code-id',
+        activationCodeIds: ['code-id'],
         productId: 'product-id',
       }),
     ).rejects.toMatchObject({ code: 'ACTIVATION_CODE_NOT_ASSIGNABLE' });
   });
 
-  it('rejects assigning a second activation code to the same product', async () => {
+  it('allows assigning a second activation code to the same product', async () => {
     const repository = {
       findAssignmentProduct: jest.fn().mockResolvedValue(product),
       findCodesForAssignment: jest.fn().mockResolvedValue([code]),
-      findCodeAssignedToProduct: jest
-        .fn()
-        .mockResolvedValue({ id: 'existing-code-id' }),
+      assignProduct: jest.fn().mockResolvedValue({ count: 1 }),
     };
 
-    await expect(
-      new AssignActivationCodesToProductUseCase(repository as never).execute({
-        activationCodeId: 'code-id',
-        productId: 'product-id',
-      }),
-    ).rejects.toMatchObject({ code: 'PRODUCT_ALREADY_HAS_ACTIVATION_CODE' });
+    const result = await new AssignActivationCodesToProductUseCase(
+      repository as never,
+    ).execute({
+      activationCodeIds: ['code-id'],
+      productId: 'product-id',
+    });
+
+    expect(result.product.id).toBe('product-id');
+    expect(repository.assignProduct).toHaveBeenCalled();
   });
 });

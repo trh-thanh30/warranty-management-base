@@ -5,6 +5,7 @@ import {
 } from '@/common/excel';
 import { BadRequestError } from '@/common/response';
 import { dealerExcelColumns } from '@/modules/dealers/excel/dealer-excel.schema';
+import { DEALER_MEMBERSHIP_ACCESS_ENABLED } from '@/modules/dealers/dealers.constants';
 import {
   DealerExcelRow,
   PreparedDealerImportRow,
@@ -12,7 +13,7 @@ import {
 import { DealersRepository } from '@/modules/dealers/repository/dealers.repository';
 import { GenerateDealerCodeUseCase } from '@/modules/dealers/use-cases/generate-dealer-code.use-case';
 import { Injectable } from '@nestjs/common';
-import { Dealer } from '@prisma/client';
+import { Dealer, user_role } from '@prisma/client';
 import type { DealerImportResult } from '@repo/shared';
 
 @Injectable()
@@ -22,7 +23,10 @@ export class ImportDealersUseCase {
     private readonly generateDealerCodeUseCase: GenerateDealerCodeUseCase = new GenerateDealerCodeUseCase(),
   ) {}
 
-  async execute(file: Express.Multer.File | undefined) {
+  async execute(
+    file: Express.Multer.File | undefined,
+    context: { userId?: string; userRole?: string } = {},
+  ) {
     if (!file) throw new BadRequestError('Excel file is required');
 
     const workbook = await loadWorkbookFromBuffer(file.buffer);
@@ -53,11 +57,20 @@ export class ImportDealersUseCase {
       ]);
     }
 
-    const existingDealers = await this.dealersRepository.listAll();
+    const assignedUserId =
+      DEALER_MEMBERSHIP_ACCESS_ENABLED &&
+      context.userRole === user_role.MODERATOR
+        ? context.userId
+        : undefined;
+    const existingDealers =
+      await this.dealersRepository.listAll(assignedUserId);
     const { errors, preparedRows } = this.prepareRows(rows, existingDealers);
     if (errors.length > 0) return this.failure(errors);
 
-    const result = await this.dealersRepository.importRows(preparedRows);
+    const result = await this.dealersRepository.importRows(
+      preparedRows,
+      assignedUserId,
+    );
     return { ...result, errors: [] } satisfies DealerImportResult;
   }
 

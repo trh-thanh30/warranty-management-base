@@ -11,7 +11,6 @@ import { Injectable } from '@nestjs/common';
 import {
   activation_code_status,
   product_status,
-  type Customer,
   warranty_status,
 } from '@prisma/client';
 import type { CreateWarrantyActivationRequestItemBody } from '@repo/shared';
@@ -31,7 +30,6 @@ export type ValidatedActivationRequestItem = {
   brand: string | null;
   model: string | null;
   manufactureYear: number | null;
-  currentOwner: Pick<Customer, 'email' | 'full_name' | 'phone'> | null;
 };
 
 @Injectable()
@@ -46,6 +44,7 @@ export class ActivationRequestItemsValidatorService {
   async validate(
     categoryId: string,
     items: CreateWarrantyActivationRequestItemBody[],
+    options: { updateRequestId?: string } = {},
   ): Promise<ValidatedActivationRequestItem[]> {
     const category =
       await this.productsRepository.findActiveProductCategoryById(categoryId);
@@ -128,9 +127,10 @@ export class ActivationRequestItemsValidatorService {
     const productsById = new Map(
       products.map((product) => [product.id, product]),
     );
-    const openRequests = await this.requestsRepository.findOpenByProductIds([
-      ...seenProducts,
-    ]);
+    const openRequests = await this.requestsRepository.findOpenByProductIds(
+      [...seenProducts],
+      options.updateRequestId,
+    );
     const reservedProductIds = new Set(
       openRequests.flatMap((request) => [
         ...(request.product_id ? [request.product_id] : []),
@@ -144,9 +144,14 @@ export class ActivationRequestItemsValidatorService {
           items
             .filter((item) => item.activationCodeId)
             .map(async (item) => {
-              const code = await this.activationCodesRepository.findById(
-                item.activationCodeId!,
-              );
+              const code = options.updateRequestId
+                ? await this.activationCodesRepository.findSelectableForPendingRequest(
+                    item.activationCodeId!,
+                    options.updateRequestId,
+                  )
+                : await this.activationCodesRepository.findById(
+                    item.activationCodeId!,
+                  );
               return [item.activationCodeId!, code] as const;
             }),
         )
@@ -163,12 +168,18 @@ export class ActivationRequestItemsValidatorService {
             activationCodeId: item.activationCodeId,
           });
         }
-        if (code.status === activation_code_status.PENDING_APPROVAL) {
+        if (
+          code.status === activation_code_status.PENDING_APPROVAL &&
+          !options.updateRequestId
+        ) {
           this.throwValidation('ACTIVATION_REQUEST_ALREADY_OPEN', {
             activationCodeId: item.activationCodeId,
           });
         }
-        if (code.status !== activation_code_status.AVAILABLE) {
+        if (
+          code.status !== activation_code_status.AVAILABLE &&
+          code.status !== activation_code_status.PENDING_APPROVAL
+        ) {
           this.throwValidation('ACTIVATION_CODE_INVALID_OR_EXPIRED', {
             activationCodeId: item.activationCodeId,
           });
@@ -252,13 +263,19 @@ export class ActivationRequestItemsValidatorService {
           productId: product.id,
         });
       }
-      if (!item.activationCodeId && reservedProductIds.has(product.id)) {
+      if (
+        requiresActivationCode &&
+        !item.activationCodeId &&
+        reservedProductIds.has(product.id)
+      ) {
         this.throwValidation('ACTIVATION_REQUEST_ALREADY_OPEN', {
           productId: product.id,
         });
       }
 
       const catalogue = getProductCatalogue(product);
+      const issuesFreshWarranty =
+        Boolean(item.activationCodeId) || !requiresActivationCode;
       return {
         activationCodeId: item.activationCodeId ?? null,
         activationFieldId: genericMode
@@ -269,11 +286,13 @@ export class ActivationRequestItemsValidatorService {
         productId: product.id,
         productName: getProductDisplayName(product),
         productCode: product.product_code,
-        serialNumber: product.serial_number,
-        warrantyId: item.activationCodeId
+        serialNumber: issuesFreshWarranty
           ? null
-          : (product.warranty?.id ?? null),
-        warrantyCode: item.activationCodeId
+          : (product.warranty?.serial_number ?? null),
+        // A code-less product issues a fresh warranty per request instead of
+        // reusing the product's current warranty pointer.
+        warrantyId: issuesFreshWarranty ? null : (product.warranty?.id ?? null),
+        warrantyCode: issuesFreshWarranty
           ? null
           : (product.warranty?.warranty_code ?? null),
         warrantyDurationMonths:
@@ -283,7 +302,6 @@ export class ActivationRequestItemsValidatorService {
         brand: catalogue.brand,
         model: catalogue.model,
         manufactureYear: catalogue.modelYear,
-        currentOwner: product.ownerships?.[0]?.customer ?? null,
       };
     });
   }

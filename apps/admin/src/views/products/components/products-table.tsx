@@ -1,6 +1,5 @@
 "use client";
 
-import { ActivationCodeStatusBadge } from "@/src/components/activation-code-status-badge";
 import { SortableTableHead } from "@/src/components/common/sortable-table-head";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
@@ -38,7 +37,6 @@ import {
   Pencil,
   RotateCcw,
   Trash2,
-  UserPlus,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -46,14 +44,11 @@ import {
   getProductDisplayName,
 } from "../products.utils";
 import { ProductStatusBadge } from "./product-status-badge";
-import { WarrantyStatusBadge } from "./warranty-status-badge";
 
 type ProductsTableProps = {
   items: ProductResponse[];
   onDelete: (product: ProductResponse) => void;
   onRestore: (product: ProductResponse) => void;
-  onAssignOwner: (product: ProductResponse) => void;
-  onAssignCodes: (product: ProductResponse) => void;
   onSortChange: (sortBy: ProductSortBy) => void;
   sortBy?: ProductSortBy;
   sortOrder: "asc" | "desc";
@@ -61,8 +56,6 @@ type ProductsTableProps = {
 
 export function ProductsTable({
   items,
-  onAssignCodes,
-  onAssignOwner,
   onDelete,
   onRestore,
   onSortChange,
@@ -77,8 +70,6 @@ export function ProductsTable({
         {items.map((product) => (
           <ProductMobileCard
             key={product.id}
-            onAssignOwner={onAssignOwner}
-            onAssignCodes={onAssignCodes}
             onDelete={onDelete}
             onRestore={onRestore}
             product={product}
@@ -98,9 +89,6 @@ export function ProductsTable({
               >
                 {t("name")}
               </SortableTableHead>
-              <TableHead className="whitespace-nowrap">
-                {t("warrantyStatus")}
-              </TableHead>
               <TableHead className="whitespace-nowrap">
                 {t("activationCode")}
               </TableHead>
@@ -131,8 +119,6 @@ export function ProductsTable({
             {items.map((product) => (
               <ProductTableRow
                 key={product.id}
-                onAssignOwner={onAssignOwner}
-                onAssignCodes={onAssignCodes}
                 onDelete={onDelete}
                 onRestore={onRestore}
                 product={product}
@@ -146,14 +132,10 @@ export function ProductsTable({
 }
 
 function ProductTableRow({
-  onAssignCodes,
-  onAssignOwner,
   onDelete,
   onRestore,
   product,
 }: {
-  onAssignCodes: ProductsTableProps["onAssignCodes"];
-  onAssignOwner: ProductsTableProps["onAssignOwner"];
   onDelete: ProductsTableProps["onDelete"];
   onRestore: ProductsTableProps["onRestore"];
   product: ProductResponse;
@@ -165,9 +147,6 @@ function ProductTableRow({
     <TableRow>
       <TableCell>
         <ProductName product={product} />
-      </TableCell>
-      <TableCell>
-        <WarrantyStatusBadge status={product.warranty?.status} />
       </TableCell>
       <TableCell>
         <ProductActivationCodeCell product={product} />
@@ -186,8 +165,6 @@ function ProductTableRow({
 
       <TableCell className="text-right">
         <ProductActionsMenu
-          onAssignCodes={onAssignCodes}
-          onAssignOwner={onAssignOwner}
           onDelete={onDelete}
           onRestore={onRestore}
           product={product}
@@ -198,14 +175,10 @@ function ProductTableRow({
 }
 
 function ProductMobileCard({
-  onAssignCodes,
-  onAssignOwner,
   onDelete,
   onRestore,
   product,
 }: {
-  onAssignCodes: ProductsTableProps["onAssignCodes"];
-  onAssignOwner: ProductsTableProps["onAssignOwner"];
   onDelete: ProductsTableProps["onDelete"];
   onRestore: ProductsTableProps["onRestore"];
   product: ProductResponse;
@@ -217,22 +190,12 @@ function ProductMobileCard({
       <div className="flex items-start justify-between gap-3">
         <ProductName product={product} />
         <ProductActionsMenu
-          onAssignCodes={onAssignCodes}
-          onAssignOwner={onAssignOwner}
           onDelete={onDelete}
           onRestore={onRestore}
           product={product}
         />
       </div>
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-        <div>
-          <dt className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-            {t("warrantyStatus")}
-          </dt>
-          <dd className="mt-1">
-            <WarrantyStatusBadge status={product.warranty?.status} />
-          </dd>
-        </div>
         <div className="col-span-2 min-w-0">
           <dt className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
             {t("activationCode")}
@@ -266,19 +229,16 @@ function ProductMobileCard({
 
 function ProductActivationCodeCell({ product }: { product: ProductResponse }) {
   const t = useTranslations("Products");
-  const activationCode = product.assignedActivationCode;
+  const activationCodes = product.assignedActivationCodes ?? [];
 
-  if (!activationCode) {
+  if (activationCodes.length === 0) {
     return <Badge variant="secondary">{t("activationCodeUnassigned")}</Badge>;
   }
   return (
-    <div className="flex items-center gap-2">
-      <div className="space-y-1">
-        <p className="text-xs font-semibold text-slate-950 dark:text-slate-50">
-          {activationCode.code}
-        </p>
-        <ActivationCodeStatusBadge status={activationCode.status} />
-      </div>
+    <div>
+      <p className="text-sm font-medium text-slate-950 dark:text-slate-50">
+        {activationCodes.length} {t("assignedActivationCodeCount")}
+      </p>
     </div>
   );
 }
@@ -329,14 +289,10 @@ function ProductMobileField({
 }
 
 function ProductActionsMenu({
-  onAssignCodes,
-  onAssignOwner,
   onDelete,
   onRestore,
   product,
 }: {
-  onAssignCodes: ProductsTableProps["onAssignCodes"];
-  onAssignOwner: ProductsTableProps["onAssignOwner"];
   onDelete: ProductsTableProps["onDelete"];
   onRestore: ProductsTableProps["onRestore"];
   product: ProductResponse;
@@ -347,7 +303,6 @@ function ProductActionsMenu({
   const canEdit = hasPermission(PERMISSIONS.PRODUCT_UPDATE);
   const canCreate = hasPermission(PERMISSIONS.PRODUCT_CREATE);
   const canDelete = hasPermission(PERMISSIONS.PRODUCT_DELETE);
-  const canAssignOwner = hasPermission(PERMISSIONS.PRODUCT_ASSIGN_OWNER);
   const canAssignCodes = hasPermission(
     PERMISSIONS.ACTIVATION_CODE_ASSIGN_PRODUCT,
   );
@@ -359,7 +314,6 @@ function ProductActionsMenu({
       !canView &&
       !canEdit &&
       !canDelete &&
-      !canAssignOwner &&
       !canAssignCodes &&
       !canCreate)
   ) {
@@ -388,7 +342,12 @@ function ProductActionsMenu({
         {!isDeleted ? (
           <>
             {canView ? (
-              <DropdownMenuItem asChild>
+              <DropdownMenuItem
+                asChild
+                disabled={
+                  product.status !== "ACTIVE" || !product.warrantyDurationMonths
+                }
+              >
                 <Link href={`/products/${product.id}`}>
                   <Eye className="mr-2 size-4" />
                   {t("viewDetail")}
@@ -411,34 +370,13 @@ function ProductActionsMenu({
                 </Link>
               </DropdownMenuItem>
             ) : null}
-            {canAssignOwner && product.warranty ? (
-              <DropdownMenuItem onSelect={() => onAssignOwner(product)}>
-                <UserPlus className="mr-2 size-4" />
-                {t("assignOwner")}
-              </DropdownMenuItem>
-            ) : null}
             {canAssignCodes &&
             product.categoryRef?.activationCodeEnabled === true ? (
-              <DropdownMenuItem
-                disabled={
-                  product.status !== "ACTIVE" ||
-                  !product.warrantyDurationMonths ||
-                  Boolean(
-                    product.assignedActivationCode &&
-                    !product.assignedActivationCode.canReplace,
-                  )
-                }
-                onSelect={() => onAssignCodes(product)}
-              >
-                <KeyRound className="mr-2 size-4" />
-                {t(
-                  product.assignedActivationCode &&
-                    !product.assignedActivationCode.canReplace
-                    ? "activationCodeChangeLocked"
-                    : product.assignedActivationCode
-                      ? "replaceActivationCode"
-                      : "assignActivationCodes",
-                )}
+              <DropdownMenuItem asChild>
+                <Link href={`/products/${product.id}/activation-codes`}>
+                  <KeyRound className="mr-2 size-4" />
+                  {t("assignActivationCodes")}
+                </Link>
               </DropdownMenuItem>
             ) : null}
             {canDelete ? (

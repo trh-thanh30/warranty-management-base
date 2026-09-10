@@ -29,7 +29,8 @@ export function WarrantyClaimProductSearchResult({
           {product.productCode} · {product.warrantyCode ?? "-"}
         </span>
         <span className="truncate">
-          {product.serialNumber ?? "-"} · {product.owner?.fullName ?? "-"}
+          {product.warranty?.serialNumber ?? "-"} ·{" "}
+          {product.owner?.fullName ?? "-"}
         </span>
         <span className="truncate sm:col-span-2">
           {[product.categoryRef?.name, product.brand, product.model]

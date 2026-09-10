@@ -30,7 +30,6 @@ export type ProductSpecification = ProductSpecificationInput & {
 export type ProductSortBy =
   | "productCode"
   | "warrantyCode"
-  | "serialNumber"
   | "name"
   | "category"
   | "status"
@@ -49,6 +48,7 @@ export type ProductOwnerSummary = {
 
 export type ProductWarrantySummary = {
   id: string;
+  serialNumber: string | null;
   warrantyCode: string | null;
   startDate: string;
   endDate: string;
@@ -82,7 +82,6 @@ export type ProductSummary = {
   warrantyCode: string | null;
   canEditWarrantyCode: boolean;
   warrantyCodeEditLockedReason: WarrantyCodeEditLockedReason | null;
-  serialNumber: string | null;
   displayName: string | null;
   name: string;
   categoryId: string;
@@ -104,6 +103,8 @@ export type ProductSummary = {
   warrantyDurationMonths: number | null;
   warrantyTerms: string | null;
   assignedActivationCode: ProductAssignedActivationCodeSummary | null;
+  /** All codes assigned to this catalogue Product. */
+  assignedActivationCodes: ProductAssignedActivationCodeSummary[];
   assets: ProductAssetSummary[];
 };
 
@@ -173,7 +174,6 @@ export type CreateProductBody = {
   productCode?: string;
   displayName?: string;
   status?: ProductStatus;
-  serialNumber?: string;
   metadata?: Record<string, unknown>;
 };
 
@@ -190,7 +190,6 @@ export type UpdateProductBody = {
   displayName?: string | null;
   productCode?: string;
   status?: ProductStatus;
-  serialNumber?: string | null;
   metadata?: Record<string, unknown> | null;
   warrantyDurationMonths?: number;
   warrantyTerms?: string | null;
@@ -247,11 +246,6 @@ export type ListPublicProductsQuery = PaginationQuery & {
   categoryId?: string;
   sortBy?: Extract<ProductSortBy, "name" | "publishedAt">;
   sortOrder?: "asc" | "desc";
-};
-
-export type AssignProductOwnerBody = {
-  customerId: string;
-  purchaseDate?: string;
 };
 
 export type AttachProductAssetBody = {

@@ -15,15 +15,13 @@ test("product detail uses a summary-first responsive layout", async () => {
     source,
     /lg:grid-cols-\[minmax\(0,1\.1fr\)_minmax\(20rem,0\.9fr\)\]/,
   );
-  assert.match(source, /WarrantyProgress/);
+  assert.match(source, /sections\.warrantyPolicy/);
   assert.doesNotMatch(source, /<CardTitle>\{title\}<\/CardTitle>/);
 });
 
-test("product detail formats warranty dates and exposes copy actions", async () => {
+test("product detail exposes copy actions", async () => {
   const source = await readFile(detailCardUrl, "utf8");
 
-  assert.match(source, /formatDate\(warranty\.startDate/);
-  assert.match(source, /formatDate\(warranty\.endDate/);
   assert.match(source, /navigator\.clipboard\.writeText/);
   assert.match(source, /aria-label=\{t\("copyValue"/);
 });
@@ -34,17 +32,17 @@ test("product detail actions are grouped in an accessible dropdown", async () =>
     "utf8",
   );
 
-  assert.equal(source.match(/<DropdownMenuItem/g)?.length ?? 0, 4);
+  assert.equal(source.match(/<DropdownMenuItem/g)?.length ?? 0, 3);
   assert.match(source, /<DropdownMenuTrigger asChild>/);
   assert.match(source, /aria-label=\{t\("actions"\)\}/);
   assert.match(source, /descriptionAccessory={/);
   assert.match(source, /PERMISSIONS\.ACTIVATION_CODE_ASSIGN_PRODUCT/);
-  assert.match(source, /<AssignActivationCodesDialog/);
   assert.match(
     source,
-    /product\.assignedActivationCode &&[\s\S]*?!product\.assignedActivationCode\.canReplace/,
+    /href=\{`\/products\/\$\{productId\}\/activation-codes`\}/,
   );
-  assert.match(source, /"activationCodeChangeLocked"/);
+  assert.doesNotMatch(source, /<AssignActivationCodesDialog/);
+  assert.match(source, /t\("assignActivationCodes"\)/);
 });
 
 test("product identifiers use distinct semantic icons", async () => {
@@ -52,7 +50,7 @@ test("product identifiers use distinct semantic icons", async () => {
 
   assert.match(source, /icon=\{<Hash className="size-4" \/>\}/);
   assert.match(source, /icon=\{<KeyRound className="size-4" \/>\}/);
-  assert.match(source, /icon=\{<Fingerprint className="size-4" \/>\}/);
+  assert.doesNotMatch(source, /Fingerprint/);
   assert.match(source, /icon=\{<CalendarRange className="size-4" \/>\}/);
 });
 
@@ -61,7 +59,7 @@ test("product detail gives the assigned activation code its own section", async 
 
   assert.match(source, /title=\{t\("sections\.activationCode"\)\}/);
   assert.match(source, /AssignedActivationCodeDetails/);
-  assert.match(source, /product\.assignedActivationCode/);
+  assert.match(source, /product\.assignedActivationCodes/);
   assert.match(source, /t\("activationCodeUnassignedDescription"\)/);
 });
 
@@ -71,7 +69,7 @@ test("product detail rows keep labels above values on mobile", async () => {
   assert.equal(
     source.match(/grid min-h-11 grid-cols-\[minmax\(0,1fr\)_minmax\(0,1fr\)\]/g)
       ?.length ?? 0,
-    3,
+    2,
   );
   assert.match(source, /flex min-w-0 items-center justify-end gap-1/);
   assert.match(source, /truncate text-right/);
@@ -93,26 +91,23 @@ test("product detail rows render localized placeholders for unavailable values",
   assert.doesNotMatch(source, /muted=/);
 });
 
-test("product summary and owner sections preserve mobile width", async () => {
+test("product summary and policy sections preserve mobile width", async () => {
   const source = await readFile(detailCardUrl, "utf8");
   const summarySource = source.slice(
     source.indexOf("function ProductSummaryHeader"),
-    source.indexOf("function OwnerSummary"),
+    source.indexOf("export function ProductDetailSkeleton"),
   );
 
   assert.match(source, /flex flex-col gap-4 rounded-lg border/);
   assert.match(summarySource, /getProductDisplayName\(product\)/);
   assert.match(summarySource, /product\.categoryRef\.name/);
-  assert.match(source, /<OwnerSummary product=\{product\} \/>/);
+  assert.match(source, /title=\{t\("sections\.warrantyPolicy"\)\}/);
   assert.match(
     source,
     /<CopyableDetailItem\s+icon=\{<Hash className="size-4" \/>\}\s+label=\{t\("productCode"\)\}/,
   );
-  assert.match(source, /flex items-center justify-between gap-3 border-b/);
-  assert.match(
-    source,
-    /<WarrantyStatusBadge status=\{product\.warranty\?\.status\} \/>/,
-  );
+  assert.doesNotMatch(source, /product\.owner/);
+  assert.doesNotMatch(source, /product\.warranty\?\.status/);
 });
 
 test("product detail translations exist in every admin locale", async () => {

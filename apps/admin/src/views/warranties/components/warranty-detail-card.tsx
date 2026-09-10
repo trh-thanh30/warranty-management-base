@@ -10,6 +10,7 @@ import {
   formatWarrantyMoneyLimit,
   formatWarrantyOwner,
   formatWarrantyUser,
+  formatWarrantyDealerAddress,
   getWarrantyProductDisplayName,
 } from "../warranties.utils";
 import { WarrantyStatusBadge } from "./warranty-status-badge";
@@ -87,16 +88,6 @@ export function WarrantyDetailCard({ warranty }: WarrantyDetailCardProps) {
       <WarrantySummaryHeader warranty={warranty} />
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.8fr)]">
-        <DetailSection
-          className="self-start"
-          icon={<ShieldCheck className="size-4" />}
-          title={t("sections.coverage")}
-        >
-          {coverageItems.map((item) => (
-            <DetailRow key={item.label} label={item.label} value={item.value} />
-          ))}
-        </DetailSection>
-
         <div className="space-y-4">
           <DetailSection
             icon={<Package className="size-4" />}
@@ -108,12 +99,34 @@ export function WarrantyDetailCard({ warranty }: WarrantyDetailCardProps) {
               value={warranty.product.productCode}
             />
             <DetailRow
-              label={t("serialNumber")}
-              value={warranty.product.serialNumber ?? "-"}
+              label={t("activationCode")}
+              value={
+                warranty.activationCode?.code ?? t("activationCodeNotRequired")
+              }
+            />
+            <DetailRow
+              label={t("category")}
+              value={warranty.product.category?.name ?? "-"}
             />
             <DetailRow label={t("model")} value={productDisplayName} />
           </DetailSection>
 
+          <DetailSection
+            className="self-start"
+            icon={<ShieldCheck className="size-4" />}
+            title={t("sections.coverage")}
+          >
+            {coverageItems.map((item) => (
+              <DetailRow
+                key={item.label}
+                label={item.label}
+                value={item.value}
+              />
+            ))}
+          </DetailSection>
+        </div>
+
+        <div className="space-y-4">
           <DetailSection
             icon={<UserRound className="size-4" />}
             title={t("sections.owner")}
@@ -123,8 +136,38 @@ export function WarrantyDetailCard({ warranty }: WarrantyDetailCardProps) {
               value={formatWarrantyOwner(warranty)}
             />
             <DetailRow
+              label={t("ownerEmail")}
+              value={warranty.owner?.email ?? "-"}
+            />
+            <DetailRow
+              label={t("ownerPhone")}
+              value={warranty.owner?.phone ?? "-"}
+            />
+            <DetailRow
               label={t("customerCode")}
               value={warranty.owner?.customerCode ?? "-"}
+            />
+          </DetailSection>
+
+          <DetailSection
+            icon={<Package className="size-4" />}
+            title={t("sections.dealer")}
+          >
+            <DetailRow
+              label={t("dealer")}
+              value={warranty.dealer?.name ?? "-"}
+            />
+            <DetailRow
+              label={t("dealerPhone")}
+              value={warranty.dealer?.phone ?? "-"}
+            />
+            <DetailRow
+              label={t("dealerAddress")}
+              value={formatWarrantyDealerAddress(warranty.dealer)}
+            />
+            <DetailRow
+              label={t("dealerCode")}
+              value={warranty.dealer?.dealerCode ?? "-"}
             />
           </DetailSection>
 
@@ -192,11 +235,11 @@ function WarrantySummaryHeader({ warranty }: WarrantyDetailCardProps) {
         />
         <SummaryMetric
           label={t("startDate")}
-          value={formatDate(warranty.startDate, { locale })}
+          value={formatDate(warranty.startDate, { locale, showTime: true })}
         />
         <SummaryMetric
           label={t("endDate")}
-          value={formatDate(warranty.endDate, { locale })}
+          value={formatDate(warranty.endDate, { locale, showTime: true })}
         />
         <div className="flex items-center gap-2 sm:hidden">
           <span className="text-slate-500 dark:text-slate-400">
@@ -226,9 +269,12 @@ function SummaryMetric({ label, value }: { label: string; value: string }) {
 export function WarrantyDetailSkeleton() {
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.8fr)]">
-      <Skeleton className="h-80 w-full" />
       <div className="space-y-4">
         <Skeleton className="h-56 w-full" />
+        <Skeleton className="h-80 w-full" />
+      </div>
+      <div className="space-y-4">
+        <Skeleton className="h-40 w-full" />
         <Skeleton className="h-40 w-full" />
       </div>
     </div>

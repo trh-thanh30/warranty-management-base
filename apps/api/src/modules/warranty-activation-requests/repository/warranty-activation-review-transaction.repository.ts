@@ -39,7 +39,17 @@ export class WarrantyActivationReviewTransactionRepository {
   }
 
   findCustomerByPhone(phone: string) {
-    return this.tx.customer.findUnique({ where: { phone } });
+    return this.tx.customer.findFirst({
+      where: { phone },
+      orderBy: { created_at: 'desc' },
+    });
+  }
+
+  findCustomersByPhone(phone: string) {
+    return this.tx.customer.findMany({
+      where: { phone },
+      orderBy: { created_at: 'desc' },
+    });
   }
 
   findCustomerByEmail(email: string) {
@@ -65,45 +75,43 @@ export class WarrantyActivationReviewTransactionRepository {
     return this.tx.customer.create({ data });
   }
 
-  closeCurrentOwnerships(productId: string, endedAt: Date) {
-    return this.tx.productOwnership.updateMany({
-      where: { product_id: productId, is_current_owner: true },
-      data: { ended_at: endedAt, is_current_owner: false },
-    });
-  }
-
-  createOwnership(input: {
-    customerId: string;
-    ownerUserId?: string | null;
-    productId: string;
-    purchaseDate: Date;
-  }) {
-    return this.tx.productOwnership.create({
-      data: {
-        activated_at: null,
-        customer: { connect: { id: input.customerId } },
-        is_current_owner: true,
-        owner_user: input.ownerUserId
-          ? { connect: { id: input.ownerUserId } }
-          : undefined,
-        product: { connect: { id: input.productId } },
-        purchase_date: input.purchaseDate,
-      },
-    });
-  }
-
   findWarrantyForActivation(warrantyId: string) {
     return this.tx.warranty.findUnique({
       where: { id: warrantyId },
       include: {
-        product: {
-          include: {
-            ownerships: {
-              where: { is_current_owner: true },
-              take: 1,
-            },
-          },
+        product: true,
+        ownerships: {
+          where: { is_current_owner: true },
+          take: 1,
         },
+      },
+    });
+  }
+
+  assignWarrantyDealer(warrantyId: string, dealerId: string | null) {
+    return this.tx.warranty.update({
+      where: { id: warrantyId },
+      data: { dealer_id: dealerId },
+    });
+  }
+
+  createWarrantyOwnership(input: {
+    customerId: string;
+    ownerUserId?: string | null;
+    warrantyId: string;
+    purchaseDate: Date;
+    activatedAt: Date;
+  }) {
+    return this.tx.warrantyOwnership.create({
+      data: {
+        customer: { connect: { id: input.customerId } },
+        owner_user: input.ownerUserId
+          ? { connect: { id: input.ownerUserId } }
+          : undefined,
+        purchase_date: input.purchaseDate,
+        activated_at: input.activatedAt,
+        is_current_owner: true,
+        warranty: { connect: { id: input.warrantyId } },
       },
     });
   }
@@ -122,13 +130,6 @@ export class WarrantyActivationReviewTransactionRepository {
     });
   }
 
-  markOwnershipActivated(ownershipId: string, activatedAt: Date) {
-    return this.tx.productOwnership.update({
-      where: { id: ownershipId },
-      data: { activated_at: activatedAt },
-    });
-  }
-
   findWarrantyByIdOrThrow(warrantyId: string) {
     return this.tx.warranty.findUniqueOrThrow({ where: { id: warrantyId } });
   }
@@ -140,6 +141,7 @@ export class WarrantyActivationReviewTransactionRepository {
     durationMonths: number;
     method?: warranty_method;
     terms?: string | null;
+    dealerId?: string | null;
   }) {
     return this.tx.warranty.create({
       data: {
@@ -152,6 +154,9 @@ export class WarrantyActivationReviewTransactionRepository {
         warranty_code: input.warrantyCode,
         method: input.method ?? warranty_method.REPAIR,
         terms: input.terms ?? undefined,
+        dealer: input.dealerId
+          ? { connect: { id: input.dealerId } }
+          : undefined,
       },
       include: {
         product: {
@@ -161,6 +166,11 @@ export class WarrantyActivationReviewTransactionRepository {
               take: 1,
             },
           },
+        },
+        dealer: true,
+        ownerships: {
+          where: { is_current_owner: true },
+          take: 1,
         },
       },
     });

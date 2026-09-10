@@ -53,11 +53,11 @@ for (const locale of ["vi", "en"] as const) {
   });
 }
 
-test("assignment dialogs show the localized API error inline and as a toast", async () => {
+test("assignment interfaces show the localized API error inline and as a toast", async () => {
   const sources = await Promise.all([
     readFile(
       new URL(
-        "../products/components/assign-activation-codes-dialog.tsx",
+        "../products/components/assign-activation-codes-form.tsx",
         import.meta.url,
       ),
       "utf8",
@@ -77,6 +77,5 @@ test("assignment dialogs show the localized API error inline and as a toast", as
     assert.match(source, /setErrorMessage\(message\)/);
     assert.match(source, /toast\.error\(message\)/);
     assert.match(source, /\{errorMessage\}/);
-    assert.match(source, /setConfirmOpen\(false\)/);
   }
 });

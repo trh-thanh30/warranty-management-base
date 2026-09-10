@@ -50,7 +50,9 @@ describe('Multi-item activation lifecycle', () => {
       status: warranty_activation_request_status.APPROVED,
     });
 
-    expect(transactionRepository.createOwnership).toHaveBeenCalledTimes(2);
+    expect(transactionRepository.createWarrantyOwnership).toHaveBeenCalledTimes(
+      2,
+    );
     expect(transactionRepository.transitionWarranty).toHaveBeenCalledTimes(2);
     expect(transactionRepository.setCurrentWarranty).toHaveBeenCalledTimes(2);
     expect(transactionRepository.setCurrentWarranty).toHaveBeenNthCalledWith(
@@ -131,6 +133,66 @@ describe('Multi-item activation lifecycle', () => {
       itemId: 'item-product-b',
       warrantyCode: 'WM-2026-RESERVED2',
       warrantyId: 'warranty-activation-code-2',
+    });
+  });
+
+  it('issues a new warranty from an activation code when the catalogue product already has an older warranty', async () => {
+    const transactionRepository = createTransactionRepository();
+    const request = createActivationRequest();
+    request.items = [
+      {
+        ...request.items[0],
+        activation_code_id: 'activation-code-new',
+        warranty_id: null,
+        warranty_code: 'WM-2026-HEE48L',
+        product: {
+          ...request.items[0].product,
+          warranty: {
+            id: 'older-current-warranty',
+            status: warranty_status.ACTIVE,
+          },
+          warranty_duration_months: 24,
+        },
+      },
+    ];
+    transactionRepository.findRequest.mockResolvedValue(request);
+    transactionRepository.createWarrantyForActivation.mockResolvedValue({
+      duration_months: 24,
+      id: 'new-warranty-id',
+      product: {
+        deleted_at: null,
+        ownerships: [],
+        status: product_status.ACTIVE,
+      },
+      status: warranty_status.DRAFT,
+      warranty_code: 'WM-2026-HEE48L',
+    });
+    transactionRepository.findWarrantyByIdOrThrow.mockResolvedValue({
+      id: 'new-warranty-id',
+    });
+    const useCase = new ReviewWarrantyActivationRequestUseCase(
+      createRepository(transactionRepository) as never,
+      { execute: jest.fn() } as never,
+      generateCustomerCode as never,
+    );
+
+    await useCase.execute('request-id', {
+      status: warranty_activation_request_status.APPROVED,
+    });
+
+    expect(
+      transactionRepository.createWarrantyForActivation,
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({
+        activationCodeId: 'activation-code-new',
+        productId: 'product-a',
+        warrantyCode: 'WM-2026-HEE48L',
+      }),
+    );
+    expect(transactionRepository.linkItemWarranty).toHaveBeenCalledWith({
+      itemId: 'item-product-a',
+      warrantyCode: 'WM-2026-HEE48L',
+      warrantyId: 'new-warranty-id',
     });
   });
 
@@ -225,8 +287,10 @@ describe('Multi-item activation lifecycle', () => {
     expect(transactionRepository.findCustomerByPhone).not.toHaveBeenCalled();
     expect(transactionRepository.findCustomerByEmail).not.toHaveBeenCalled();
     expect(transactionRepository.updateCustomer).not.toHaveBeenCalled();
-    expect(transactionRepository.createOwnership).toHaveBeenCalledTimes(2);
-    expect(transactionRepository.createOwnership).toHaveBeenCalledWith(
+    expect(transactionRepository.createWarrantyOwnership).toHaveBeenCalledTimes(
+      2,
+    );
+    expect(transactionRepository.createWarrantyOwnership).toHaveBeenCalledWith(
       expect.objectContaining({
         customerId: 'selected-customer-id',
         ownerUserId: 'selected-user-id',
@@ -306,7 +370,9 @@ describe('Multi-item activation lifecycle', () => {
         customerId: 'missing-customer-id',
       },
     });
-    expect(transactionRepository.createOwnership).not.toHaveBeenCalled();
+    expect(
+      transactionRepository.createWarrantyOwnership,
+    ).not.toHaveBeenCalled();
   });
 
   it('does not complete the request when any warranty transition fails', async () => {
@@ -356,7 +422,9 @@ describe('Multi-item activation lifecycle', () => {
         warrantyCode: 'WM-product-a',
       },
     });
-    expect(transactionRepository.createOwnership).not.toHaveBeenCalled();
+    expect(
+      transactionRepository.createWarrantyOwnership,
+    ).not.toHaveBeenCalled();
   });
 
   it('returns a clear English API message when a deleted product blocks approval', async () => {
@@ -385,7 +453,9 @@ describe('Multi-item activation lifecycle', () => {
         warrantyCode: 'WM-product-a',
       },
     });
-    expect(transactionRepository.createOwnership).not.toHaveBeenCalled();
+    expect(
+      transactionRepository.createWarrantyOwnership,
+    ).not.toHaveBeenCalled();
   });
 
   it('ignores a shared email when resolving customer identity', async () => {
@@ -409,7 +479,7 @@ describe('Multi-item activation lifecycle', () => {
       'customer-id',
       expect.any(Object),
     );
-    expect(transactionRepository.createOwnership).toHaveBeenCalled();
+    expect(transactionRepository.createWarrantyOwnership).toHaveBeenCalled();
   });
 
   it('rejects the parent and all items together', async () => {
@@ -467,6 +537,13 @@ describe('Multi-item activation lifecycle', () => {
       },
       data: { status: activation_code_status.AVAILABLE },
     });
+    expect(tx.warrantyActivationRequest.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          activation_code: { disconnect: true },
+        }),
+      }),
+    );
   });
 });
 
@@ -498,6 +575,7 @@ function createTransactionRepository() {
     completeActivation: jest.fn().mockResolvedValue(request),
     createCustomer: jest.fn(),
     createOwnership: jest.fn(),
+    createWarrantyOwnership: jest.fn(),
     createWarrantyForActivation: jest.fn(),
     findCustomerById: jest.fn(),
     findCustomerByEmail: jest.fn().mockResolvedValue(null),
@@ -520,6 +598,7 @@ function createTransactionRepository() {
         warranty_code: `WM-${id}`,
       }),
     ),
+    assignWarrantyDealer: jest.fn(),
     linkItemWarranty: jest.fn(),
     markActivationCodesActivated: jest
       .fn()

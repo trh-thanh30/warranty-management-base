@@ -39,15 +39,17 @@ export class CreateDealerDto {
   @Length(1, 120)
   salesName?: string;
 
+  @IsOptional()
   @IsNumber({ maxDecimalPlaces: 8 })
   @Min(-90)
   @Max(90)
-  latitude: number;
+  latitude?: number;
 
+  @IsOptional()
   @IsNumber({ maxDecimalPlaces: 8 })
   @Min(-180)
   @Max(180)
-  longitude: number;
+  longitude?: number;
 
   @IsOptional()
   @IsObject()

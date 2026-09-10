@@ -114,8 +114,7 @@ function toCreateBody(values: DealerFormValues): CreateDealerBody {
     phone: toOptionalValue(values.phone),
     province: values.province.trim(),
     district: toOptionalValue(values.district),
-    latitude: values.latitude,
-    longitude: values.longitude,
+    ...toOptionalCoordinates(values.latitude, values.longitude),
     salesName: toOptionalValue(values.salesName),
   };
 }
@@ -123,6 +122,15 @@ function toCreateBody(values: DealerFormValues): CreateDealerBody {
 function toUpdateBody(values: DealerFormValues): UpdateDealerBody {
   return {
     ...toCreateBody(values),
+    ...(Number.isFinite(values.latitude) || Number.isFinite(values.longitude)
+      ? {}
+      : { latitude: null, longitude: null }),
     isActive: values.isActive,
   };
+}
+
+function toOptionalCoordinates(latitude: number, longitude: number) {
+  return Number.isFinite(latitude) && Number.isFinite(longitude)
+    ? { latitude, longitude }
+    : {};
 }

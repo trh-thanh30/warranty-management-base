@@ -6,6 +6,14 @@ const productsTableUrl = new URL(
   "./components/products-table.tsx",
   import.meta.url,
 );
+const assignmentFormUrl = new URL(
+  "./components/assign-activation-codes-form.tsx",
+  import.meta.url,
+);
+const assignmentDialogUrl = new URL(
+  "./components/assign-activation-codes-dialog.tsx",
+  import.meta.url,
+);
 
 test("desktop product table keeps content on one line and scrolls long results", async () => {
   const source = await readFile(productsTableUrl, "utf8");
@@ -55,43 +63,37 @@ test("product actions expose permissioned activation-code assignment", async () 
   const source = await readFile(productsTableUrl, "utf8");
 
   assert.match(source, /PERMISSIONS\.ACTIVATION_CODE_ASSIGN_PRODUCT/);
-  assert.match(source, /onSelect=\{\(\) => onAssignCodes\(product\)\}/);
-  assert.match(source, /product\.assignedActivationCode/);
-  assert.match(source, /"replaceActivationCode"/);
-  assert.match(source, /"assignActivationCodes"/);
   assert.match(
     source,
-    /product\.assignedActivationCode &&[\s\S]*?!product\.assignedActivationCode\.canReplace/,
+    /href=\{`\/products\/\$\{product\.id\}\/activation-codes`\}/,
   );
-  assert.match(source, /"activationCodeChangeLocked"/);
+  assert.doesNotMatch(source, /onAssignCodes/);
+  assert.match(source, /product\.assignedActivationCodes/);
+  assert.match(source, /"assignActivationCodes"/);
 });
 
-test("activation-code dialog separates assignment from confirmed replacement", async () => {
-  const source = await readFile(
-    new URL("./components/assign-activation-codes-dialog.tsx", import.meta.url),
-    "utf8",
-  );
+test("activation-code dialog lists existing codes and bulk assigns selected codes", async () => {
+  const source = await readFile(assignmentFormUrl, "utf8");
 
-  assert.match(source, /const currentCode = product\?\.assignedActivationCode/);
-  assert.match(source, /replaceProductAssignment/);
-  assert.match(source, /currentActivationCodeId: currentCode\.id/);
-  assert.match(source, /replacementActivationCodeId: selected!\.id/);
+  assert.match(source, /product\?\.assignedActivationCodes \?\? \[\]/);
+  assert.match(source, /activationCodesService\.assignProduct/);
+  assert.match(source, /activationCodeIds: selectedCodes\.map/);
+  assert.match(source, /closeOnSelect=\{false\}/);
+  assert.match(source, /setSelectedCodes/);
+  assert.match(source, /t\("selectedCount"/);
+  assert.match(source, /currentCodes\.map/);
   assert.match(source, /<ActivationCodeStatusBadge/);
-  assert.match(source, /<ConfirmActionDialog/);
-  assert.match(source, /!currentCode\.canReplace/);
 });
 
 test("activation-code dialog filters assignable codes by a searchable batch", async () => {
-  const source = await readFile(
-    new URL("./components/assign-activation-codes-dialog.tsx", import.meta.url),
-    "utf8",
-  );
+  const source = await readFile(assignmentFormUrl, "utf8");
+  const dialogSource = await readFile(assignmentDialogUrl, "utf8");
 
   assert.match(source, /activationCodesService\.listBatches/);
   assert.match(source, /const \[batchId, setBatchId\] = useState\("ALL"\)/);
   assert.match(
-    source,
-    /className="w-\[min\(calc\(100vw-2rem\),42rem\)\] md:max-w-2xl"/,
+    dialogSource,
+    /className="max-h-\[calc\(100dvh-2rem\)\][^"]*overflow-y-auto[^"]*md:max-w-4xl"/,
   );
   assert.match(
     source,
@@ -103,14 +105,24 @@ test("activation-code dialog filters assignable codes by a searchable batch", as
   assert.match(source, /id: "ALL"/);
   assert.match(source, /setBatchId\("ALL"\)/);
   assert.match(
-    source,
+    dialogSource,
     /onOpenAutoFocus=\{\(event\) => event\.preventDefault\(\)\}/,
   );
   assert.match(source, /t\("allBatchesDescription"\)/);
-  assert.match(source, /setSelected\(null\)/);
+  assert.match(source, /setSelectedCodes\(\[\]\)/);
   assert.match(source, /t\("allBatches"\)/);
   assert.match(source, /code\.batchName \|\| code\.batchCode/);
-  assert.match(source, /selected\.batchName \|\| selected\.batchCode/);
+  assert.match(source, /t\("codeBatch", \{/);
+  assert.equal(source.match(/t\("codeBatch", \{/g)?.length, 2);
+  assert.match(source, /batch\.assignableCount/);
+  assert.match(source, /getItemDisabledReason=\{\(batch\) =>/);
+  assert.match(source, /batch\.assignableCount === 0/);
+  assert.match(source, /t\("batchUnavailableReason"\)/);
+  assert.match(source, /assignedCodeCountByBatch/);
+  assert.match(source, /t\("batchAssignableCount"/);
+  assert.match(source, /t\("batchAssignedToProductCount"/);
+  assert.match(source, /<Badge/);
+  assert.match(source, /selectedCodes\.map\(\(code\) =>/);
   assert.match(
     source,
     /<ActivationCodeStatusBadge[\s\S]*?status=\{code\.status\}/,
@@ -119,11 +131,68 @@ test("activation-code dialog filters assignable codes by a searchable batch", as
   assert.match(source, /onRetry=\{\(\) => void codesQuery\.refetch\(\)\}/);
 });
 
+test("activation-code dialog assigns a requested quantity from all or selected batches", async () => {
+  const source = await readFile(assignmentFormUrl, "utf8");
+
+  assert.match(source, /SELECTED/);
+  assert.match(source, /ALL_AVAILABLE/);
+  assert.match(source, /QUANTITY/);
+  assert.match(source, /assignmentMode/);
+  assert.equal(source.match(/<Checkbox/g)?.length, 2);
+  assert.equal(
+    source.match(
+      /disabled=\{mutation\.isPending \|\| !canSubmit \|\| batchId === "ALL"\}/g,
+    )?.length,
+    1,
+  );
+  assert.match(
+    source,
+    /useState<ActivationCodeProductAssignmentMode>\("SELECTED"\)/,
+  );
+  assert.match(source, /t\("allAvailableAssignment"\)/);
+  assert.match(source, /t\("quantityAssignment"\)/);
+  assert.match(source, /t\("allAvailableNotice", \{ product: productName \}\)/);
+  assert.doesNotMatch(source, /t\("selectAllAvailable"\)/);
+  assert.doesNotMatch(source, /<Select[\s>]/);
+  assert.match(source, /selectedBatchIds/);
+  assert.match(source, /quantity/);
+  assert.doesNotMatch(source, /rangeFrom/);
+  assert.doesNotMatch(source, /rangeTo/);
+  assert.doesNotMatch(source, /assignmentMode === "RANGE"/);
+  assert.match(source, /batchId/);
+
+  for (const locale of ["vi", "en"]) {
+    const messages = JSON.parse(
+      await readFile(
+        new URL(`../../messages/${locale}.json`, import.meta.url),
+        "utf8",
+      ),
+    );
+    const translations = messages.ProductActivationCodeAssignment;
+    for (const key of [
+      "quantityAssignment",
+      "quantityAssignmentDescription",
+      "quantity",
+      "quantityInvalid",
+      "selectedBatchCount",
+      "allAvailableAssignment",
+      "allAvailableAssignmentDescription",
+      "automaticModeRequiresBatch",
+      "selectAllAvailable",
+      "clearAllAvailable",
+      "allAvailableNotice",
+      "confirmAutomatic",
+    ]) {
+      assert.equal(typeof translations[key], "string", `${locale}.${key}`);
+    }
+  }
+});
+
 test("product table displays the assigned activation code on desktop and mobile", async () => {
   const source = await readFile(productsTableUrl, "utf8");
 
   assert.match(source, /t\("activationCode"\)/);
   assert.match(source, /ProductActivationCodeCell/);
-  assert.match(source, /product\.assignedActivationCode/);
+  assert.match(source, /product\.assignedActivationCodes/);
   assert.match(source, /t\("activationCodeUnassigned"\)/);
 });

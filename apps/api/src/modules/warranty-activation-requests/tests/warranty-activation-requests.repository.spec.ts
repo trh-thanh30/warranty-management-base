@@ -118,7 +118,7 @@ describe('WarrantyActivationRequestsRepository', () => {
     expect(createRequest).not.toHaveBeenCalled();
   });
 
-  it('updates Customer birthdate and creates the request in one transaction', async () => {
+  it('updates Customer profile and creates the request in one transaction', async () => {
     const updateCustomer = jest.fn().mockResolvedValue({ id: 'customer-id' });
     const createRequest = jest.fn().mockResolvedValue({ id: 'request-id' });
     const transaction = jest.fn((callback: (tx: unknown) => unknown) =>
@@ -132,14 +132,27 @@ describe('WarrantyActivationRequestsRepository', () => {
       queries,
     );
     const birthdate = new Date('2005-12-11T00:00:00.000Z');
+    const update = {
+      address: '1 Nguyen Trai, Phuong Ben Thanh, TP Ho Chi Minh',
+      birthdate,
+      email: 'customer@example.com',
+      fullName: 'Nguyen Van A',
+      phone: '0901234567',
+    };
 
     await repository.create(createCommand('WAR-20260820-0001'), {
-      customerProfile: { id: 'customer-id', birthdate },
+      customerProfile: { id: 'customer-id', update },
     });
 
     expect(updateCustomer).toHaveBeenCalledWith({
       where: { id: 'customer-id' },
-      data: { birthdate },
+      data: {
+        address: update.address,
+        birthdate,
+        email: update.email,
+        full_name: update.fullName,
+        phone: update.phone,
+      },
     });
     expect(createRequest).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -150,7 +163,7 @@ describe('WarrantyActivationRequestsRepository', () => {
     );
   });
 
-  it('connects the Customer without overwriting birthdate when it is omitted', async () => {
+  it('connects the Customer without updating its profile by default', async () => {
     const updateCustomer = jest.fn();
     const createRequest = jest.fn().mockResolvedValue({ id: 'request-id' });
     const transaction = jest.fn((callback: (tx: unknown) => unknown) =>
@@ -167,7 +180,7 @@ describe('WarrantyActivationRequestsRepository', () => {
     await repository.create(createCommand('WAR-20260820-0002'), {
       customerProfile: {
         id: 'customer-id',
-        birthdate: undefined,
+        update: undefined,
       },
     });
 
@@ -179,6 +192,180 @@ describe('WarrantyActivationRequestsRepository', () => {
         }),
       }),
     );
+  });
+
+  it('atomically reserves every selected activation code before creating the request', async () => {
+    const reserveCodes = jest.fn().mockResolvedValue({ count: 2 });
+    const createRequest = jest.fn().mockResolvedValue({ id: 'request-id' });
+    const transaction = jest.fn((callback: (tx: unknown) => unknown) =>
+      callback({
+        activationCode: { updateMany: reserveCodes },
+        warrantyActivationRequest: { create: createRequest },
+      }),
+    );
+    const repository = new WarrantyActivationRequestsRepository(
+      { $transaction: transaction } as never,
+      queries,
+    );
+    const command = createCommand('WAR-20260820-0003');
+    command.activationCodeId = 'activation-code-a';
+    command.items = [
+      {
+        activationCodeId: 'activation-code-b',
+        activationFieldId: null,
+        positionKey: 'primary',
+        positionLabel: 'Sản phẩm',
+        productId: 'product-id',
+        warrantyId: null,
+        warrantyCode: 'WM-002',
+        productName: 'Product',
+        productCode: 'PRODUCT-001',
+        serialNumber: null,
+      },
+    ];
+
+    await repository.create(command);
+
+    expect(reserveCodes).toHaveBeenCalledWith({
+      where: {
+        id: { in: ['activation-code-a', 'activation-code-b'] },
+        status: 'AVAILABLE',
+        expires_at: { gt: expect.any(Date) },
+      },
+      data: { status: 'PENDING_APPROVAL' },
+    });
+    expect(createRequest).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not create a request when an activation code loses the reservation race', async () => {
+    const createRequest = jest.fn();
+    const transaction = jest.fn((callback: (tx: unknown) => unknown) =>
+      callback({
+        activationCode: {
+          updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+        },
+        warrantyActivationRequest: { create: createRequest },
+      }),
+    );
+    const repository = new WarrantyActivationRequestsRepository(
+      { $transaction: transaction } as never,
+      queries,
+    );
+    const command = createCommand('WAR-20260820-0004');
+    command.activationCodeId = 'activation-code-a';
+
+    await expect(repository.create(command)).rejects.toBeInstanceOf(
+      WarrantyActivationCodeReservationConflictError,
+    );
+    expect(createRequest).not.toHaveBeenCalled();
+  });
+
+  it('atomically replaces a pending request and transfers activation-code reservations', async () => {
+    const guardPendingRequest = jest.fn().mockResolvedValue({ count: 1 });
+    const releaseCodes = jest.fn().mockResolvedValue({ count: 1 });
+    const reserveCodes = jest.fn().mockResolvedValue({ count: 1 });
+    const deleteItems = jest.fn().mockResolvedValue({ count: 1 });
+    const createItems = jest.fn().mockResolvedValue({ count: 1 });
+    const updateRequest = jest.fn().mockResolvedValue({ id: 'request-id' });
+    const updateCustomer = jest.fn().mockResolvedValue({ id: 'customer-id' });
+    const findRequest = jest
+      .fn()
+      .mockResolvedValueOnce({
+        activation_code_id: null,
+        items: [{ activation_code_id: 'old-code' }],
+        status: 'PENDING',
+      })
+      .mockResolvedValueOnce({ id: 'request-id', status: 'PENDING' });
+    const transaction = jest.fn((callback: (tx: unknown) => unknown) =>
+      callback({
+        activationCode: {
+          updateMany: jest.fn((args) => {
+            const status = args.data.status;
+            return status === 'AVAILABLE'
+              ? releaseCodes(args)
+              : reserveCodes(args);
+          }),
+        },
+        customer: { update: updateCustomer },
+        warrantyActivationRequest: {
+          findUnique: findRequest,
+          findUniqueOrThrow: jest
+            .fn()
+            .mockResolvedValue({ id: 'request-id', status: 'PENDING' }),
+          update: updateRequest,
+          updateMany: guardPendingRequest,
+        },
+        warrantyActivationRequestItem: {
+          createMany: createItems,
+          deleteMany: deleteItems,
+        },
+      }),
+    );
+    const repository = new WarrantyActivationRequestsRepository(
+      { $transaction: transaction } as never,
+      queries,
+    );
+    const command = createCommand('WAR-20260820-0005');
+    command.items = [
+      {
+        activationCodeId: 'new-code',
+        activationFieldId: null,
+        positionKey: 'primary',
+        positionLabel: 'Product',
+        productId: 'product-id',
+        warrantyId: null,
+        warrantyCode: 'WM-NEW',
+        productName: 'Product',
+        productCode: 'PRODUCT-001',
+        serialNumber: null,
+      },
+    ];
+
+    const customerUpdate = {
+      address: '1 Nguyen Trai, Phuong Ben Thanh, TP Ho Chi Minh',
+      birthdate: new Date('1990-01-01T00:00:00.000Z'),
+      email: 'customer@example.com',
+      fullName: 'Nguyen Van A',
+      phone: '0901234567',
+    };
+    await repository.updatePending('request-id', command, {
+      customerProfile: { id: 'customer-id', update: customerUpdate },
+    });
+
+    expect(guardPendingRequest).toHaveBeenCalledWith({
+      where: { id: 'request-id', status: 'PENDING' },
+      data: { updated_at: expect.any(Date) },
+    });
+    expect(guardPendingRequest.mock.invocationCallOrder[0]).toBeLessThan(
+      findRequest.mock.invocationCallOrder[0]!,
+    );
+    expect(releaseCodes).toHaveBeenCalledWith({
+      where: { id: { in: ['old-code'] }, status: 'PENDING_APPROVAL' },
+      data: { status: 'AVAILABLE' },
+    });
+    expect(reserveCodes).toHaveBeenCalledWith({
+      where: {
+        expires_at: { gt: expect.any(Date) },
+        id: { in: ['new-code'] },
+        status: 'AVAILABLE',
+      },
+      data: { status: 'PENDING_APPROVAL' },
+    });
+    expect(deleteItems).toHaveBeenCalledWith({
+      where: { request_id: 'request-id' },
+    });
+    expect(createItems).toHaveBeenCalledTimes(1);
+    expect(updateRequest).toHaveBeenCalledTimes(1);
+    expect(updateCustomer).toHaveBeenCalledWith({
+      where: { id: 'customer-id' },
+      data: {
+        address: customerUpdate.address,
+        birthdate: customerUpdate.birthdate,
+        email: customerUpdate.email,
+        full_name: customerUpdate.fullName,
+        phone: customerUpdate.phone,
+      },
+    });
   });
 
   it('translates Prisma unique violations into application conflict errors', async () => {

@@ -1,4 +1,8 @@
-import { type WarrantyListItem, type WarrantyUserSummary } from "@repo/shared";
+import {
+  type WarrantyDealerSummary,
+  type WarrantyListItem,
+  type WarrantyUserSummary,
+} from "@repo/shared";
 
 export function formatWarrantyUser(
   user: WarrantyUserSummary | null | undefined,
@@ -14,6 +18,7 @@ export function formatWarrantyOwner(warranty: WarrantyListItem) {
 
   return (
     warranty.owner.fullName ||
+    warranty.owner.email ||
     warranty.owner.customerCode ||
     warranty.owner.customerId
   );
@@ -27,6 +32,29 @@ export function getWarrantyProductDisplayName(warranty: WarrantyListItem) {
   return secondary
     ? `${warranty.product.name} · ${secondary}`
     : warranty.product.name;
+}
+
+export function formatWarrantyDealerAddress(
+  dealer: Pick<
+    WarrantyDealerSummary,
+    "address" | "district" | "province"
+  > | null,
+) {
+  if (!dealer) return "-";
+
+  const parts: string[] = [];
+  for (const value of [dealer.address, dealer.district, dealer.province]) {
+    const part = value?.trim();
+    if (!part) continue;
+
+    const normalizedPart = part.toLocaleLowerCase("vi-VN");
+    const existingAddress = parts.join(", ").toLocaleLowerCase("vi-VN");
+    if (existingAddress.includes(normalizedPart)) continue;
+
+    parts.push(part);
+  }
+
+  return parts.join(", ") || "-";
 }
 
 export function formatWarrantyMoneyLimit(

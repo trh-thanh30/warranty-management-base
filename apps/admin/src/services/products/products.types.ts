@@ -19,7 +19,6 @@ export type ProductImportRowData = {
   warrantyDurationMonths: number;
   warrantyTerms: string | null;
   installationPosition: string | null;
-  serialNumber: string | null;
   status: "ACTIVE" | "INACTIVE";
 };
 

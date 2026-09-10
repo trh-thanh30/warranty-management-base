@@ -26,12 +26,14 @@ export class CreateCustomerDto {
   @Length(6, 32)
   phone: string;
 
+  @IsOptional()
   @IsEmail()
-  email: string;
+  email?: string;
 
+  @IsOptional()
   @IsString()
   @Length(1, 255)
-  address: string;
+  address?: string;
 
   @ValidateIf((_, value) => value !== undefined)
   @IsBirthdate()

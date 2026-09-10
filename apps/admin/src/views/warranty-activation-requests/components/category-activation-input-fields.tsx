@@ -13,6 +13,8 @@ import { Controller } from "react-hook-form";
 import type { WarrantyActivationRequestCreateFormValues } from "../warranty-activation-requests.types";
 import { getUnavailableActivationProductIds } from "../warranty-activation-requests.utils";
 import { ActivationProductSelectField } from "./activation-product-select-field";
+import { ActivationItemCodeSelectField } from "./activation-item-code-select-field";
+import type { AvailableActivationCode } from "@/src/services/activation-codes/activation-code-batches.types";
 
 type CategoryActivationInputFieldsProps = {
   control: Control<WarrantyActivationRequestCreateFormValues>;
@@ -21,8 +23,15 @@ type CategoryActivationInputFieldsProps = {
   fields: CategoryActivationFieldConfig[];
   onProductClear: (positionKey: string) => void;
   onProductSelect: (positionKey: string, product: ProductResponse) => void;
+  onActivationCodeClear: (positionKey: string) => void;
+  onActivationCodeSelect: (
+    positionKey: string,
+    code: AvailableActivationCode,
+  ) => void;
   register: UseFormRegister<WarrantyActivationRequestCreateFormValues>;
+  selectedActivationCodes: Record<string, AvailableActivationCode>;
   selectedProducts: Record<string, ProductResponse>;
+  showActivationCodeSelectors: boolean;
 };
 
 export function CategoryActivationInputFields({
@@ -32,8 +41,12 @@ export function CategoryActivationInputFields({
   fields,
   onProductClear,
   onProductSelect,
+  onActivationCodeClear,
+  onActivationCodeSelect,
   register,
+  selectedActivationCodes,
   selectedProducts,
+  showActivationCodeSelectors,
 }: CategoryActivationInputFieldsProps) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   if (fields.length === 0) return null;
@@ -53,8 +66,12 @@ export function CategoryActivationInputFields({
             key={field.key}
             onProductClear={onProductClear}
             onProductSelect={onProductSelect}
+            onActivationCodeClear={onActivationCodeClear}
+            onActivationCodeSelect={onActivationCodeSelect}
             register={register}
+            selectedActivationCodes={selectedActivationCodes}
             selectedProducts={selectedProducts}
+            showActivationCodeSelectors={showActivationCodeSelectors}
           />
         ))}
       </div>
@@ -69,8 +86,12 @@ function DynamicActivationField({
   field,
   onProductClear,
   onProductSelect,
+  onActivationCodeClear,
+  onActivationCodeSelect,
   register,
+  selectedActivationCodes,
   selectedProducts,
+  showActivationCodeSelectors,
 }: {
   control: Control<WarrantyActivationRequestCreateFormValues>;
   categoryId: string;
@@ -78,23 +99,32 @@ function DynamicActivationField({
   field: CategoryActivationFieldConfig;
   onProductClear: (positionKey: string) => void;
   onProductSelect: (positionKey: string, product: ProductResponse) => void;
+  onActivationCodeClear: (positionKey: string) => void;
+  onActivationCodeSelect: (
+    positionKey: string,
+    code: AvailableActivationCode,
+  ) => void;
   register: UseFormRegister<WarrantyActivationRequestCreateFormValues>;
+  selectedActivationCodes: Record<string, AvailableActivationCode>;
   selectedProducts: Record<string, ProductResponse>;
+  showActivationCodeSelectors: boolean;
 }) {
+  const t = useTranslations("WarrantyActivationRequestsAdmin");
   const id = `create-activation-request-category-input-${field.key}`;
   const name = `categoryInputValues.${field.key}` as const;
   const label = field.required ? `${field.label} *` : field.label;
+  const selectedProduct = selectedProducts[field.key];
 
   return (
     <FormField error={error} id={id} label={label}>
       {field.type === "PRODUCT_SELECT" ? (
-        <>
+        <div className="space-y-3">
           <ActivationProductSelectField
             categoryId={categoryId}
             id={id}
             onClear={() => onProductClear(field.key)}
             onSelect={(product) => onProductSelect(field.key, product)}
-            selectedProduct={selectedProducts[field.key]}
+            selectedProduct={selectedProduct}
             unavailableProductIds={getUnavailableActivationProductIds(
               selectedProducts,
               field.key,
@@ -104,7 +134,21 @@ function DynamicActivationField({
             type="hidden"
             {...register(`activationProductIds.${field.key}` as const)}
           />
-        </>
+          {showActivationCodeSelectors && selectedProduct ? (
+            <div className="space-y-1.5">
+              <p className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                {t("activationCodeLabel")}
+              </p>
+              <ActivationItemCodeSelectField
+                id={`${id}-activation-code`}
+                onClear={() => onActivationCodeClear(field.key)}
+                onSelect={(code) => onActivationCodeSelect(field.key, code)}
+                productId={selectedProduct.id}
+                selectedCode={selectedActivationCodes[field.key]}
+              />
+            </div>
+          ) : null}
+        </div>
       ) : field.type === "TEXTAREA" ? (
         <Textarea
           id={id}

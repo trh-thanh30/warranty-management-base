@@ -6,9 +6,7 @@ import {
   formatActivationProductSearchOption,
   getActivationProductDisplayName,
   isActivationCodeRequiredForRequest,
-  resolveAssignedActivationCodeForProduct,
 } from "./warranty-activation-request-product.utils.ts";
-import type { AvailableActivationCode } from "@/src/services/activation-codes/activation-code-batches.types";
 
 const translate = ((key: string, values?: Record<string, string>): string =>
   values?.requestCode ? `${key}:${values.requestCode}` : key) as never;
@@ -36,18 +34,17 @@ test("activation product display name falls back to the template name", () => {
   );
 });
 
-test("activation product search option starts with the physical product name", () => {
+test("activation product search option uses catalogue and current warranty context", () => {
   const product = {
     displayName: "Phim cách nhiệt B C",
     name: "Phim cách nhiệt ô tô",
     owner: { fullName: "Nguyễn Văn A" },
-    serialNumber: "SN-001",
     warrantyCode: "WM-2026-001",
   } as ProductResponse;
 
   assert.equal(
     formatActivationProductSearchOption(product),
-    "Phim cách nhiệt B C · WM-2026-001 · SN-001 · Nguyễn Văn A",
+    "Phim cách nhiệt B C · WM-2026-001 · Nguyễn Văn A",
   );
 });
 
@@ -77,45 +74,6 @@ test("eligible activation product option remains selectable", () => {
 
   assert.equal(
     getActivationProductOptionDisabledReason(product, translate),
-    null,
-  );
-});
-
-test("resolves the available activation code assigned to the selected product", () => {
-  const assignedCode = {
-    id: "code-a",
-    selectable: true,
-    assignedProduct: { id: "product-a" },
-  } as AvailableActivationCode;
-
-  assert.equal(
-    resolveAssignedActivationCodeForProduct("product-a", [assignedCode]),
-    assignedCode,
-  );
-});
-
-test("does not reuse a code from the previously selected product", () => {
-  const staleCode = {
-    id: "code-a",
-    selectable: true,
-    assignedProduct: { id: "product-a" },
-  } as AvailableActivationCode;
-
-  assert.equal(
-    resolveAssignedActivationCodeForProduct("product-b", [staleCode]),
-    null,
-  );
-});
-
-test("does not auto-fill an unavailable assigned activation code", () => {
-  const expiredCode = {
-    id: "code-a",
-    selectable: false,
-    assignedProduct: { id: "product-a" },
-  } as AvailableActivationCode;
-
-  assert.equal(
-    resolveAssignedActivationCodeForProduct("product-a", [expiredCode]),
     null,
   );
 });

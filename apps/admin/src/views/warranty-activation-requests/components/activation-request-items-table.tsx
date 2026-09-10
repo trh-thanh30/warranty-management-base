@@ -11,6 +11,7 @@ import {
   TableScroll,
 } from "@repo/ui";
 import { useTranslations } from "next-intl";
+import { ActivationCodeSummary } from "@/src/components/activation-code-summary";
 import { Link } from "@/src/i18n/navigation";
 import { WarrantyActivationRequestStatusBadge } from "./warranty-activation-request-status-badge";
 
@@ -26,13 +27,14 @@ export function ActivationRequestItemsTable({
 
   return (
     <TableScroll className="max-w-full overscroll-x-contain rounded-md max-h-[30rem] overflow-y-auto border border-slate-200 dark:border-slate-800">
-      <Table className="min-w-[920px] whitespace-nowrap">
+      <Table className="min-w-[1040px] whitespace-nowrap">
         <TableHeader className="sticky top-0 z-10 bg-white dark:bg-slate-950">
           <TableRow>
             <TableHead>{t("position")}</TableHead>
             <TableHead>{t("product")}</TableHead>
             <TableHead>{t("productCodeSerial")}</TableHead>
             <TableHead>{t("warrantyCode")}</TableHead>
+            <TableHead>{tWarranties("activationCode")}</TableHead>
             <TableHead>{t("status")}</TableHead>
           </TableRow>
         </TableHeader>
@@ -69,6 +71,12 @@ export function ActivationRequestItemsTable({
                 ) : (
                   <span className="font-mono text-xs text-slate-500">-</span>
                 )}
+              </TableCell>
+              <TableCell>
+                <ActivationCodeSummary
+                  activationCode={item.activationCode}
+                  notRequiredLabel={tWarranties("activationCodeNotRequired")}
+                />
               </TableCell>
               <TableCell>
                 <div className="space-y-1.5">

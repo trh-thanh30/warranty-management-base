@@ -6,6 +6,7 @@ type ActivationRequestSummaryCardProps = {
   icon: ReactNode;
   meta: string;
   title: string;
+  titleAction?: ReactNode;
 };
 
 export function ActivationRequestSummaryCard({
@@ -14,6 +15,7 @@ export function ActivationRequestSummaryCard({
   icon,
   meta,
   title,
+  titleAction,
 }: ActivationRequestSummaryCardProps) {
   return (
     <div className="overflow-hidden rounded-md border border-blue-100 bg-white text-sm dark:border-blue-950/60 dark:bg-slate-950">
@@ -23,9 +25,12 @@ export function ActivationRequestSummaryCard({
             {icon}
           </span>
           <div className="min-w-0">
-            <p className="truncate font-semibold text-slate-950 dark:text-slate-50">
-              {title}
-            </p>
+            <div className="flex min-w-0 items-center gap-1">
+              <p className="truncate font-semibold text-slate-950 dark:text-slate-50">
+                {title}
+              </p>
+              {titleAction}
+            </div>
             <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
               {meta}
             </p>
@@ -57,17 +62,21 @@ export function SummaryGrid({
 
 export function SummaryItem({
   action,
+  emptyLabel,
   error,
   icon,
   label,
   value,
 }: {
   action?: ReactNode;
+  emptyLabel?: string;
   error?: string;
   icon?: ReactNode;
   label: string;
-  value: string;
+  value: string | null | undefined;
 }) {
+  const hasValue = Boolean(value?.trim());
+
   return (
     <div className="min-w-0 bg-white px-4 py-3 dark:bg-slate-950">
       <div className="flex items-center justify-between gap-2">
@@ -81,10 +90,12 @@ export function SummaryItem({
         className={`mt-1 truncate ${
           error
             ? "text-red-700 dark:text-red-300"
-            : "text-slate-950 dark:text-slate-50"
+            : !hasValue && emptyLabel
+              ? "italic text-slate-500 dark:text-slate-400"
+              : "text-slate-950 dark:text-slate-50"
         }`}
       >
-        {value}
+        {hasValue ? value : (emptyLabel ?? "-")}
       </p>
       {error ? (
         <p className="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
