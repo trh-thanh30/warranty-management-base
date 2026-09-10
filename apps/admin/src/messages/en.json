@@ -3257,6 +3257,8 @@
         "closeFullscreen": "Close editor fullscreen",
         "brandStoryImage": "Brand story image",
         "technologyOriginImage": "Technology origin image",
+        "imageReplaced": "Image replaced. Save the draft to keep the change.",
+        "imageReplaceFailed": "Could not replace the image.",
         "styles": {
           "font": "Font",
           "size": "Size",

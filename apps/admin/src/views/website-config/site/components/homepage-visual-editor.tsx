@@ -3,8 +3,10 @@
 import { Puck, type Data } from "@puckeditor/core";
 import type { WebsiteLocale } from "@repo/shared";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ImageUpload } from "@/src/components/common/image-upload";
+import { assetsService } from "@/src/services/assets/assets.service";
+import { useToast } from "@/src/hooks/use-toast";
 import type {
   SiteAssetUrls,
   SiteAssetUrlsUpdater,
@@ -88,7 +90,12 @@ export function HomepageVisualEditor({
   standalone?: boolean;
 }) {
   const t = useTranslations("WebsiteConfig.site");
+  const toast = useToast();
   const [error, setError] = useState<string | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [imageSlot, setImageSlot] = useState<
+    "brand-story" | "technology-origin" | null
+  >(null);
   const copy = form.homepage.content[locale].landing;
   const data = useMemo(() => toHomepagePuckData(copy), [copy]);
   const labels = useMemo(
@@ -147,6 +154,38 @@ export function HomepageVisualEditor({
       }));
     } catch {
       setError(t("homepageEditor.invalidData"));
+    }
+  }
+
+  async function replaceImage(file: File | undefined) {
+    if (!file || !imageSlot) return;
+    try {
+      const asset = await assetsService.uploadAsset(file, {
+        accessType: "PUBLIC",
+        folder: "website-config/homepage",
+        type: "IMAGE",
+      });
+      const slot = imageSlot;
+      onChange((current) => ({
+        ...current,
+        homepage: {
+          ...current.homepage,
+          ...(slot === "brand-story"
+            ? { aboutImageAssetId: asset.id }
+            : { sputterChamberImageAssetId: asset.id }),
+        },
+      }));
+      onAssetsChange((current) => ({
+        ...current,
+        ...(slot === "brand-story"
+          ? { brandStoryImageUrl: asset.url }
+          : { technologyOriginImageUrl: asset.url }),
+      }));
+      toast.success(t("homepageEditor.imageReplaced"));
+    } catch {
+      toast.error(t("homepageEditor.imageReplaceFailed"));
+    } finally {
+      setImageSlot(null);
     }
   }
 
@@ -221,7 +260,27 @@ export function HomepageVisualEditor({
             ? "min-h-screen overflow-hidden bg-white"
             : "min-h-[720px] overflow-hidden rounded-lg border bg-white"
         }
+        onDoubleClick={(event) => {
+          const image = (event.target as HTMLElement).closest<HTMLElement>(
+            "[data-homepage-image]",
+          );
+          const slot = image?.dataset.homepageImage;
+          if (
+            !disabled &&
+            (slot === "brand-story" || slot === "technology-origin")
+          ) {
+            setImageSlot(slot);
+            imageInputRef.current?.click();
+          }
+        }}
       >
+        <input
+          ref={imageInputRef}
+          accept="image/*"
+          className="hidden"
+          onChange={(event) => void replaceImage(event.target.files?.[0])}
+          type="file"
+        />
         <Puck
           config={config}
           data={data}

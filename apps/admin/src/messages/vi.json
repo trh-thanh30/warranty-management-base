@@ -3257,6 +3257,8 @@
         "closeFullscreen": "Đóng trình chỉnh sửa toàn màn hình",
         "brandStoryImage": "Ảnh câu chuyện thương hiệu",
         "technologyOriginImage": "Ảnh xuất xứ công nghệ",
+        "imageReplaced": "Đã thay ảnh. Hãy lưu nháp để giữ thay đổi.",
+        "imageReplaceFailed": "Không thể thay ảnh.",
         "styles": {
           "font": "Phông chữ",
           "size": "Kích thước",

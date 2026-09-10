@@ -61,6 +61,7 @@ export function BrandStorySection({
           <img
             alt=""
             className="h-full min-h-72 w-full rounded-sm object-cover"
+            data-homepage-image="brand-story"
             src={imageUrl}
           />
         ) : null}
@@ -86,6 +87,7 @@ export function TechnologyOriginSection({
           <img
             alt=""
             className="order-2 h-full min-h-72 w-full rounded-sm object-cover lg:order-1"
+            data-homepage-image="technology-origin"
             src={imageUrl}
           />
         ) : null}
