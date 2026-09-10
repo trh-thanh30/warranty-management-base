@@ -53,18 +53,6 @@ export type PublicWebsiteHomepage = {
   sputterStructureImage: WebsiteAssetReference | null;
 };
 
-export type HomepagePreviewData = {
-  heroSlides: WebsiteHeroSlide[];
-  homepage: PublicWebsiteHomepage;
-};
-
-export type HomepagePreviewMessage = {
-  data: HomepagePreviewData;
-  locale: WebsiteLocale;
-  type: "warranty-homepage-preview:update";
-  version: 1;
-};
-
 export type WebsiteOfficeText = {
   address: string;
   label: string;

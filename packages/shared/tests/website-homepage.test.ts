@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { DEFAULT_WEBSITE_HOMEPAGE_CONTENT } from "../src/constants/website-homepage.constants.ts";
 import {
-  isHomepagePreviewMessage,
   isWebsiteEditableText,
   resolveWebsiteHomepageContent,
 } from "../src/utils/website-homepage.ts";
@@ -73,33 +72,4 @@ test("replaces fixed comparison arrays atomically", () => {
   });
 
   assert.deepEqual(resolved.vi.comparison.standardItems, ["Một mục"]);
-});
-
-test("accepts only valid homepage preview update messages", () => {
-  const homepage = {
-    aboutImage: null,
-    copy: DEFAULT_WEBSITE_HOMEPAGE_CONTENT.vi,
-    sputterChamberImage: null,
-    sputterStructureImage: null,
-  };
-
-  assert.equal(
-    isHomepagePreviewMessage({
-      data: { heroSlides: [], homepage },
-      locale: "vi",
-      type: "warranty-homepage-preview:update",
-      version: 1,
-    }),
-    true,
-  );
-  assert.equal(isHomepagePreviewMessage({ type: "unknown" }), false);
-  assert.equal(
-    isHomepagePreviewMessage({
-      data: { heroSlides: [], homepage },
-      locale: "fr",
-      type: "warranty-homepage-preview:update",
-      version: 1,
-    }),
-    false,
-  );
 });

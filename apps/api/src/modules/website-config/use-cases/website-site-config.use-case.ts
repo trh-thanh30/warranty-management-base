@@ -41,11 +41,6 @@ export class WebsiteSiteConfigUseCase {
     return this.mapSite(draft, published);
   }
 
-  async preview(locale: WebsiteLocale) {
-    const draft = await this.repository.getOrCreateSiteDraft();
-    return this.mapPublicSite(draft, locale);
-  }
-
   async publish(expectedVersion: number, actorId: string) {
     const result = await this.repository.publishSite(
       expectedVersion,
