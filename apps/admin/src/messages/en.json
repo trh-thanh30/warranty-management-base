@@ -3377,7 +3377,7 @@
     "backToDashboard": "Back to dashboard",
     "brandName": "Lexzenz warranty administration",
     "notFoundTitle": "Admin page not found",
-    "unknownRoute": "Unknown route",
+    "unknownRoute": "Unknown route:",
     "notFoundDescription": "The admin route does not exist or has not been added to the dashboard navigation yet.",
     "tryAgain": "Try again",
     "errorTitle": "Dashboard failed to load",

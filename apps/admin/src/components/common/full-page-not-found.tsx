@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowLeft, LayoutDashboard } from "lucide-react";
+import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@repo/ui";
 import { Link, usePathname, useRouter } from "@/src/i18n/navigation";
@@ -25,19 +26,16 @@ export function FullPageNotFound({ embedded = false }: FullPageNotFoundProps) {
       }
     >
       <section className="w-full max-w-4xl text-center">
-        <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-600 dark:border-slate-800 dark:text-slate-300">
+        <div className="inline-flex max-w-[calc(100vw-3rem)] items-center gap-2 overflow-hidden rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-600 dark:border-slate-800 dark:text-slate-300">
           <span
             aria-hidden="true"
             className="size-1.5 shrink-0 rounded-full bg-slate-950 dark:bg-white"
           />
           <span className="shrink-0">{t("unknownRoute")}</span>
-          <span
-            aria-hidden="true"
-            className="text-slate-300 dark:text-slate-600"
-          >
+          <span aria-hidden="true" className="hidden">
             ·
           </span>
-          <code className="truncate font-mono text-slate-950 dark:text-white">
+          <code className="max-w-44 truncate font-mono text-slate-950 dark:text-white sm:max-w-80">
             {routePath}
           </code>
         </div>
@@ -81,9 +79,15 @@ export function FullPageNotFound({ embedded = false }: FullPageNotFoundProps) {
           </Button>
         </div>
 
-        <p className="mt-14 text-sm text-slate-400 dark:text-slate-500">
-          {t("brandName")}
-        </p>
+        <div className="mt-14 flex justify-center">
+          <Image
+            alt={t("brandName")}
+            className="h-10 w-auto opacity-70 dark:opacity-80"
+            height={40}
+            src="/logo.png"
+            width={200}
+          />
+        </div>
       </section>
     </main>
   );
