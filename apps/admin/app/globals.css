@@ -1,8 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "leaflet/dist/leaflet.css";
+@import "@puckeditor/core/puck.css";
 
 @source "../../../packages/ui/src/**/*.{ts,tsx}";
+@source "../../../packages/homepage/src/**/*.{ts,tsx}";
 
 @custom-variant dark (&:where(.dark, .dark *));
 

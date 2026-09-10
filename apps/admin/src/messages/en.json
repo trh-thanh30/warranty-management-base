@@ -3243,6 +3243,72 @@
       "heroMoveDown": "Move slide {index} down",
       "heroRemove": "Remove slide {index}",
       "heroRemovalPending": "The image will be removed from this slide when you save the draft.",
+      "homepageEditor": {
+        "title": "Edit the homepage directly",
+        "description": "Click text on the preview to edit it; select text to change its font, size, color, and alignment.",
+        "readOnly": "You are previewing the homepage in read-only mode.",
+        "invalidData": "The editor data is invalid. Reload the page and try again.",
+        "unsavedChanges": "There are unsaved draft changes.",
+        "viewports": {
+          "desktop": "Desktop",
+          "tablet": "Tablet",
+          "mobile": "Mobile"
+        }
+      },
+      "homepageContent": {
+        "title": "Homepage content",
+        "description": "Edit the fixed homepage sections for each language. Section order cannot be changed.",
+        "sections": {
+          "hero": "Hero",
+          "brandHeritage": "Brand story",
+          "coreTech": "Core technology",
+          "milestones": "Milestones",
+          "pillars": "Vision and values",
+          "network": "Dealer network",
+          "testimonials": "Partner testimonials",
+          "b2b": "Dealer partnership call to action"
+        },
+        "sectionDescriptions": {
+          "hero": "The first content customers see on the homepage.",
+          "brandHeritage": "Brand message and technology origin.",
+          "coreTech": "Heading for the main technology section.",
+          "milestones": "Heading for the development journey.",
+          "pillars": "Heading for the core values section.",
+          "network": "Dealer network message and call to action.",
+          "testimonials": "Heading for partner testimonials.",
+          "b2b": "Invitation to register as a dealer."
+        },
+        "fields": {
+          "eyebrow": "Eyebrow",
+          "title": "Title",
+          "titlePrefix": "Title prefix",
+          "titleHighlight": "Highlighted title",
+          "titleSuffix": "Title suffix",
+          "description": "Description",
+          "primaryCta": "Primary action",
+          "dealerCta": "Dealer network action",
+          "uvPercent": "UV/IR rejection (%)",
+          "originPercent": "Origin percentage (%)",
+          "warrantyYears": "Warranty years",
+          "uvLabel": "UV/IR label",
+          "originLabel": "Origin label",
+          "warrantyLabel": "Warranty label",
+          "yearsSuffix": "Years suffix",
+          "brandLabel": "Brand label",
+          "headlineLine1": "Headline line 1",
+          "headlineLine2Prefix": "Headline line 2 prefix",
+          "headlineHighlight": "Highlighted brand headline",
+          "headlineLine3": "Headline line 3",
+          "descriptionPrimary": "Primary description",
+          "descriptionSecondary": "Secondary description",
+          "originEyebrow": "Origin eyebrow",
+          "originTitle": "Origin title",
+          "originDescriptionPrimary": "Primary origin description",
+          "originDescriptionSecondary": "Secondary origin description",
+          "viewDealersCta": "View dealers action",
+          "partnerCta": "Dealer registration action"
+        }
+      },
       "addressOffices": "Addresses & Offices",
       "addressOfficesDescription": "Configure each office. The headquarters hotline is preferred; when none is selected, the first active office is used.",
       "hotlineContact": "Hotlines & Contact",
@@ -3320,7 +3386,7 @@
     },
     "actions": {
       "saveDraft": "Save draft",
-      "preview": "Preview data",
+      "preview": "Preview homepage",
       "saving": "Saving...",
       "publish": "Publish",
       "publishing": "Publishing...",
@@ -3338,7 +3404,10 @@
     },
     "preview": {
       "title": "Preview data",
-      "description": "This is the public-shaped response projected from the current draft."
+      "description": "This is the public-shaped response projected from the current draft.",
+      "homepageTitle": "Homepage preview",
+      "homepageDescription": "This preview updates with unsaved edits and does not affect the public website.",
+      "homepageFrameTitle": "Homepage interface preview"
     },
     "states": {
       "loading": "Loading configuration",

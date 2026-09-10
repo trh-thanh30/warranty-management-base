@@ -16,8 +16,6 @@ import {
 } from "@/src/hooks/use-website-config";
 import { useToast } from "@/src/hooks/use-toast";
 import { isWebsiteVersionConflict } from "@/src/lib/http-error.utils";
-import { websiteConfigService } from "@/src/services/website-config/website-config.service";
-import { PreviewDataDialog } from "../components/preview-data-dialog";
 import { RevisionStatusBar } from "../components/revision-status-bar";
 import { WebsiteConfigQueryState } from "../components/website-config-query-state";
 import { WebsiteSiteConfigForm } from "./components/website-site-config-form";
@@ -125,12 +123,6 @@ export function WebsiteSiteConfigView() {
     <PermissionGuard permissions={[PERMISSIONS.WEBSITE_CONFIG_VIEW]}>
       <div className="space-y-6">
         <PageHeader
-          actions={
-            <PreviewDataDialog
-              load={websiteConfigService.previewSite}
-              locale={locale}
-            />
-          }
           description={t("site.description")}
           eyebrow={t("eyebrow")}
           title={t("site.title")}

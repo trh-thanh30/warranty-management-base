@@ -21,6 +21,7 @@ import type {
   SiteDraftUpdater,
 } from "../website-site-config.types";
 import { ContactEditor } from "./contact-editor";
+import { HomepageVisualEditor } from "./homepage-visual-editor";
 import { IdentityEditor } from "./identity-editor";
 import { OfficeEditor } from "./office-editor";
 import { SocialEditor } from "./social-editor";
@@ -135,14 +136,28 @@ export function WebsiteSiteConfigForm({
       <TabsContent className="mt-0" value="homepage">
         <Card>
           <CardContent className="p-5 sm:p-6">
-            <HomepageHeroEditor
-              configuredSlides={site.heroSlides}
-              disabled={!canUpdate}
-              onChange={(heroSlides) =>
-                onChange((current) => ({ ...current, heroSlides }))
-              }
-              slides={form.heroSlides}
-            />
+            <div className="space-y-8">
+              <LocaleTabs locale={locale} onChange={onLocaleChange} />
+              <HomepageVisualEditor
+                disabled={!canUpdate}
+                form={form}
+                heroImageUrl={
+                  site.heroSlides.find((slide) => slide.isActive)?.desktopImage
+                    ?.url ?? "/hero/hero_5.jpg"
+                }
+                locale={locale}
+                onChange={onChange}
+              />
+              <div className="border-t" />
+              <HomepageHeroEditor
+                configuredSlides={site.heroSlides}
+                disabled={!canUpdate}
+                onChange={(heroSlides) =>
+                  onChange((current) => ({ ...current, heroSlides }))
+                }
+                slides={form.heroSlides}
+              />
+            </div>
           </CardContent>
         </Card>
       </TabsContent>
