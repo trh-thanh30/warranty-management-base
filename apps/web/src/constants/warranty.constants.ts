@@ -1,6 +1,6 @@
 export const warrantyLookupExamples = [
   "WM-2026-ABCDEF",
-  "FJ-8899-2026",
+  "WM-2026-123456",
 ] as const;
 
 export const warrantyLookupEmptyValue = "-";

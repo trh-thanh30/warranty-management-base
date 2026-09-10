@@ -9,6 +9,34 @@ const webRoot = path.join(process.cwd(), "apps", "web");
 const getPath = (value, keyPath) =>
   keyPath.split(".").reduce((current, key) => current?.[key], value);
 
+const collectMessageKeyPaths = (value, parentPath = "", paths = new Set()) => {
+  if (Array.isArray(value)) {
+    const arrayPath = `${parentPath}[]`;
+    paths.add(arrayPath);
+    for (const item of value) {
+      collectMessageKeyPaths(item, arrayPath, paths);
+    }
+    return paths;
+  }
+
+  if (!value || typeof value !== "object") return paths;
+
+  for (const [key, child] of Object.entries(value)) {
+    const keyPath = parentPath ? `${parentPath}.${key}` : key;
+    paths.add(keyPath);
+    collectMessageKeyPaths(child, keyPath, paths);
+  }
+
+  return paths;
+};
+
+const collectMessageText = (value) => {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.map(collectMessageText).join(" ");
+  if (!value || typeof value !== "object") return "";
+  return Object.values(value).map(collectMessageText).join(" ");
+};
+
 test("every warranty action resolves all card messages in every locale", async () => {
   const actionsSource = await readFile(
     path.join(webRoot, "src", "views", "warranty", "warranty.constants.ts"),
@@ -111,4 +139,46 @@ test("every warranty subpage shares the locale-aware warranty page shell", async
 
     assert.equal(messages.Warranty.backToWarranty, expectedLabel);
   }
+});
+
+test("public warranty terminology distinguishes every customer-facing code", async () => {
+  const [vi, en, lookupViewSource] = await Promise.all([
+    readFile(path.join(webRoot, "src", "messages", "vi.json"), "utf8").then(
+      JSON.parse,
+    ),
+    readFile(path.join(webRoot, "src", "messages", "en.json"), "utf8").then(
+      JSON.parse,
+    ),
+    readFile(
+      path.join(webRoot, "src", "views", "warranty", "lookup.view.tsx"),
+      "utf8",
+    ),
+  ]);
+
+  assert.deepEqual(
+    [...collectMessageKeyPaths(vi)].sort(),
+    [...collectMessageKeyPaths(en)].sort(),
+    "VI and EN message files must expose the same key structure",
+  );
+
+  for (const messages of [vi, en]) {
+    const allPublicText = collectMessageText(messages);
+    const activateText = collectMessageText(messages.Warranty.activate);
+    const lookupText = collectMessageText(messages.Warranty.lookup);
+    const requestText = collectMessageText(messages.Warranty.request);
+    const trackText = collectMessageText(messages.Warranty.track);
+
+    assert.doesNotMatch(allPublicText, /E-Warranty|e-warranty|FJ-/);
+    assert.match(activateText, /SP-/);
+    assert.doesNotMatch(activateText, /WM-|CLM-/);
+    assert.match(lookupText, /WM-/);
+    assert.doesNotMatch(lookupText, /SP-|FJ-/);
+    assert.match(requestText, /WM-/);
+    assert.match(requestText, /CLM/);
+    assert.match(trackText, /WAR-/);
+    assert.match(trackText, /CLM-/);
+  }
+
+  assert.doesNotMatch(lookupViewSource, /E-Warranty|Serial Number|FJ-/);
+  assert.match(lookupViewSource, /registration\.methods\.serial\.title/);
 });

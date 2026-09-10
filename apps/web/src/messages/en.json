@@ -27,31 +27,31 @@
     }
   },
   "WarrantyLookupModal": {
-    "title": "E-Warranty lookup",
-    "subtitle": "Verify official FUJITEK coverage using an E-Warranty code",
+    "title": "Electronic warranty lookup",
+    "subtitle": "Verify official FUJITEK coverage using a WM-* warranty code",
     "closeAriaLabel": "Close warranty lookup dialog",
     "supportMessage": "For further support, contact the installation center or FUJITEK hotline.",
     "supportHotlineLabel": "Hotline",
-    "supportClosing": "Thank you for using the FUJITEK E-Warranty system.",
+    "supportClosing": "Thank you for using the FUJITEK electronic warranty system.",
     "errors": {
-      "invalid": "The E-Warranty code is invalid. Check it and try again.",
-      "notFound": "No warranty information was found for this E-Warranty code.",
+      "invalid": "The warranty code is invalid. Check the WM-* code and try again.",
+      "notFound": "No information was found for this warranty code.",
       "rateLimit": "You have made too many lookup attempts. Try again in one minute.",
       "request": "Warranty lookup is unavailable right now. Please try again later."
     }
   },
   "WarrantyLookupForm": {
-    "ariaLabel": "E-Warranty code",
-    "placeholder": "Enter an E-Warranty code...",
+    "ariaLabel": "WM-* warranty code",
+    "placeholder": "Enter a WM-* warranty code...",
     "submit": "Search",
     "submitting": "Searching...",
     "tryPrefix": "For example, enter",
     "or": "or",
     "validation": {
-      "required": "Enter an E-Warranty code.",
-      "minLength": "The E-Warranty code must contain at least 6 characters.",
-      "maxLength": "The E-Warranty code must not exceed 64 characters.",
-      "format": "The E-Warranty code may contain only letters, numbers, and hyphens."
+      "required": "Enter a warranty code.",
+      "minLength": "The warranty code must contain at least 6 characters.",
+      "maxLength": "The warranty code must not exceed 64 characters.",
+      "format": "The warranty code may contain only letters, numbers, and hyphens."
     }
   },
   "WarrantyLookupResult": {
@@ -59,8 +59,8 @@
     "productCode": "Product code",
     "category": "Category",
     "brandModel": "Brand / Model",
-    "serial": "Serial number",
-    "warrantyCode": "E-Warranty code",
+    "serial": "Product serial number",
+    "warrantyCode": "Warranty code (WM-*)",
     "startDate": "Start date",
     "endDate": "Expiry date",
     "duration": "Coverage period",
@@ -231,7 +231,7 @@
       "details": {
         "warranty": {
           "title": "Nationwide electronic warranty",
-          "description": "Customer peace of mind is always the top priority. Alongside advanced heat-rejection technology, the E-Warranty system makes warranty information easy to manage, transparent, and protected throughout 10 years of use."
+          "description": "Customer peace of mind is always the top priority. Alongside advanced heat-rejection technology, the electronic warranty system keeps warranty information easy to manage, transparent, and protected throughout 10 years of use."
         },
         "uv": {
           "title": "Optimized UV protection",
@@ -697,7 +697,7 @@
     "specsTitle": "DETAILED TECHNICAL SPECIFICATIONS",
     "featuresTitle": "KEY FEATURES & CORE TECHNOLOGY",
     "warrantyLabel": "OFFICIAL WARRANTY",
-    "warrantyYears": "{years} YEARS E-WARRANTY",
+    "warrantyYears": "{years} YEARS ELECTRONIC WARRANTY",
     "bookInstallationCta": "BOOK INSTALLATION NOW",
     "consultHotline": "HOTLINE CONSULTATION: 0886.33.77.33",
     "notFound": "Requested product could not be found.",
@@ -782,8 +782,8 @@
           "description": "Maintains stable visibility across changing light conditions."
         },
         {
-          "title": "Long-term e-warranty",
-          "description": "Keeps warranty benefits transparent through the E-Warranty system."
+          "title": "Long-term electronic warranty",
+          "description": "Keeps warranty benefits transparent through the electronic warranty system."
         },
         {
           "title": "Stable connectivity",
@@ -810,7 +810,7 @@
         "introduction": [
           "Its multilayer sputtering structure helps control infrared radiation while preserving clear driver visibility.",
           "A subtle blue tone creates a premium look for vehicles that need a bright windshield with clear heat reduction.",
-          "E-Warranty support keeps warranty information transparent throughout use."
+          "Electronic warranty support keeps warranty information transparent throughout use."
         ],
         "features": [
           "Rejects up to 98% infrared radiation to reduce windshield heat.",
@@ -1260,25 +1260,25 @@
     },
     "duration": {
       "title": "1. Warranty duration",
-      "description": "FUJITEK automotive window film receives an official electronic warranty of 10 to 15 years from successful E-Warranty activation."
+      "description": "FUJITEK automotive window film receives an official electronic warranty of 10 to 15 years from successful warranty activation."
     },
     "conditions": {
       "title": "2. Warranty eligibility",
       "items": {
         "material": "Film cracking, peeling, or bubbling caused by eligible material or manufacturing defects.",
         "performance": "Film discoloration or performance loss beyond the limits defined by the policy.",
-        "registration": "E-Warranty information is registered and can be verified in the official system."
+        "registration": "Warranty information is registered and can be verified in the official system."
       }
     }
   },
   "GuidePage": {
     "eyebrow": "User guide",
-    "title": "Using & Checking E-Warranty",
+    "title": "Using and checking electronic warranty",
     "description": "Simple steps for activation, official-label lookup, and automotive window-film care.",
     "steps": {
       "receive": {
-        "title": "Step 1: Receive an E-Warranty label",
-        "description": "After installation, the dealer provides an official E-Warranty label or electronic activation record."
+        "title": "Step 1: Receive an activation label",
+        "description": "After installation, the dealer provides a label containing an SP-* activation code or an electronic activation record."
       },
       "lookup": {
         "title": "Step 2: Open online lookup",
@@ -1324,7 +1324,7 @@
         "lookup": {
           "badge": "Quick lookup",
           "title": "Check warranty coverage",
-          "description": "Verify an E-Warranty label and coverage period by phone number or license plate.",
+          "description": "Verify a warranty code and its official coverage period.",
           "action": "Look up now"
         },
         "activate": {
@@ -1387,7 +1387,7 @@
           }
         }
       },
-      "eyebrow": "E-Warranty activation request",
+      "eyebrow": "Warranty activation request",
       "title": "Request electronic warranty activation",
       "description": "Enter the activation code from the label so FUJITEK can identify the product, review it, and approve the warranty.",
       "submit": "Submit activation request",
@@ -1395,14 +1395,14 @@
       "success": {
         "title": "Request submitted successfully",
         "description": "Your request has been received, but the warranty is not active yet. FUJITEK will review and approve it before issuing the warranty.",
-        "requestCodeLabel": "Request code",
+        "requestCodeLabel": "Activation request code (WAR-*)",
         "requestCodeHint": "Keep this code for reference if you need support.",
         "statusLabel": "Status",
         "pendingStatus": "Awaiting approval",
         "submittedAtLabel": "Submitted at",
-        "copyCode": "Copy request code",
-        "copied": "Request code copied",
-        "copyFailed": "The request code could not be copied. Try again.",
+        "copyCode": "Copy activation request code",
+        "copied": "Activation request code copied",
+        "copyFailed": "The activation request code could not be copied. Try again.",
         "reservationTitle": "Activation code reserved",
         "reservationDescription": "The activation code is reserved for this request and cannot be used to submit another request while approval is pending.",
         "emailDescription": "Once the request is approved, the warranty certificate will be sent to the email address you provided.",
@@ -1433,9 +1433,9 @@
           "placeholder": "E.g. 30H-888.88"
         },
         "activationCode": {
-          "label": "Activation code *",
+          "label": "Activation code (SP-*) *",
           "placeholder": "E.g. SP-ABCDEF123456",
-          "description": "Enter the SP-* code printed on the product label. This is not the WM-* warranty code issued after activation."
+          "description": "Enter the code beginning with SP- printed on the product label."
         },
         "province": {
           "label": "Province / City *",
@@ -1486,18 +1486,18 @@
       }
     },
     "lookup": {
-      "eyebrow": "E-Warranty system",
+      "eyebrow": "FUJITEK electronic warranty",
       "title": "Check electronic warranty coverage",
-      "description": "Enter an E-Warranty code to verify official product and coverage information.",
+      "description": "Enter the warranty code beginning with WM- to verify the product and official coverage period.",
       "heroImageAlt": "FUJITEK electronic warranty lookup",
       "registration": {
-        "title": "Find your E-Warranty code",
+        "title": "Find your warranty code",
         "description": "Your lookup code may be provided through one of these channels",
         "methods": {
           "phone": {
             "label": "Source 01",
             "title": "Warranty document",
-            "description": "The E-Warranty code printed on the product warranty document"
+            "description": "The WM-* warranty code printed on the product warranty document"
           },
           "qr": {
             "label": "Source 02",
@@ -1506,21 +1506,22 @@
           },
           "serial": {
             "label": "Code format",
-            "description": "Examples: WM-2026-ABCDEF or FJ-8899-2026"
+            "title": "Warranty code",
+            "description": "A code beginning with WM-, for example: WM-2026-ABCDEF"
           }
         }
       },
       "searchSection": {
         "title": "Lookup",
-        "description": "Enter the complete E-Warranty code shown on the warranty document and follow the 3 steps below."
+        "description": "Enter the complete WM-* warranty code shown on the warranty document."
       },
       "guide": {
-        "title": "How to check E-Warranty in 3 steps",
+        "title": "How to check a warranty code in 3 steps",
         "steps": {
           "one": {
             "badge": "Step 01",
             "title": "Enter the code",
-            "description": "Enter the exact E-Warranty code from the warranty document."
+            "description": "Enter the exact WM-* warranty code from the warranty document."
           },
           "two": {
             "badge": "Step 02",
@@ -1530,7 +1531,7 @@
           "three": {
             "badge": "Step 03",
             "title": "View details",
-            "description": "Review product, serial number, status, and coverage dates."
+            "description": "Review the product, product serial number, status, and coverage dates."
           }
         }
       },
@@ -1552,8 +1553,8 @@
         "action": "View warranty policy"
       },
       "errors": {
-        "invalid": "The E-Warranty code is invalid. Check it and try again.",
-        "notFound": "No warranty information was found for this E-Warranty code.",
+        "invalid": "The warranty code is invalid. Check the WM-* code and try again.",
+        "notFound": "No information was found for this warranty code.",
         "rateLimit": "You have made too many lookup attempts. Try again in one minute.",
         "request": "Warranty lookup is unavailable right now. Please try again later."
       }
@@ -1575,7 +1576,7 @@
           "one": {
             "badge": "Step 01",
             "title": "Enter details",
-            "description": "Provide your contact details, E-Warranty code, and the issue that needs support."
+            "description": "Provide your contact details, WM-* warranty code, and the issue that needs support."
           },
           "two": {
             "badge": "Step 02",
@@ -1599,22 +1600,22 @@
       "submitting": "Submitting request...",
       "success": {
         "title": "Request received",
-        "description": "Your request is awaiting FUJITEK review and processing. Keep the request code for tracking or future support.",
-        "claimCodeLabel": "Request code",
+        "description": "Your request is awaiting FUJITEK review and processing. Keep the warranty/issue request code for tracking or future support.",
+        "claimCodeLabel": "Warranty/issue request code (CLM-*)",
         "issueLabel": "Support issue",
         "submittedAtLabel": "Submitted at",
         "statusLabel": "Status",
         "submittedStatus": "Submitted",
-        "copyCode": "Copy request code",
-        "copied": "Request code copied",
+        "copyCode": "Copy warranty/issue request code",
+        "copied": "Warranty/issue request code copied",
         "track": "Track progress",
         "reset": "Submit another request"
       },
       "errors": {
-        "alreadyOpen": "This E-Warranty code already has a warranty request being processed.",
+        "alreadyOpen": "This warranty code already has a warranty request being processed.",
         "invalid": "The request information is invalid. Check it and try again.",
         "notEligible": "This warranty is inactive, expired, or no longer eligible.",
-        "notFound": "This E-Warranty code was not found.",
+        "notFound": "This warranty code was not found.",
         "ownerMismatch": "The phone number does not match the current warranty owner.",
         "rateLimit": "You have submitted too many requests. Try again in one minute.",
         "request": "The warranty request could not be submitted. Please try again later."
@@ -1624,7 +1625,7 @@
         "issueRequired": "Select the issue you are experiencing.",
         "nameInvalid": "Enter a valid full name.",
         "phoneInvalid": "Enter a valid phone number.",
-        "warrantyCodeInvalid": "Enter a valid E-Warranty code."
+        "warrantyCodeInvalid": "Enter a valid WM-* warranty code."
       },
       "fields": {
         "customerName": {
@@ -1636,7 +1637,7 @@
           "placeholder": "E.g. 0988 123 456"
         },
         "reference": {
-          "label": "E-Warranty code *",
+          "label": "Warranty code (WM-*) *",
           "placeholder": "E.g. WM-2026-ABCDEF"
         },
         "issue": {
@@ -1658,7 +1659,7 @@
     "track": {
       "guide": {
         "title": "Request processing flow",
-        "description": "Use a WAR or CLM code to follow a request through each stage.",
+        "description": "Use a WAR-* activation request code or CLM-* warranty/issue request code to track progress.",
         "steps": {
           "one": {
             "badge": "Step 01",
@@ -1685,20 +1686,20 @@
       },
       "eyebrow": "Track service progress",
       "title": "Track warranty processing",
-      "description": "Enter the WAR code for an activation request or the CLM code for a warranty claim to view its status.",
+      "description": "Enter a WAR-* activation request code or CLM-* warranty/issue request code to view its status.",
       "form": {
         "title": "Check request progress",
-        "description": "Track an activation request with a WAR code or a warranty claim with a CLM code.",
+        "description": "Track an activation request with a WAR-* code or a warranty/issue request with a CLM-* code.",
         "sectionTitle": "Request tracking information",
         "sectionDescription": "Enter the code issued after submission to check processing progress.",
-        "trackingCodeLabel": "Request tracking code",
+        "trackingCodeLabel": "Request code to track",
         "placeholder": "For example: WAR-20260907-0001 or CLM-0123456789ABCDEFABCD",
         "submit": "Check",
         "submitting": "Checking...",
-        "help": "A WAR code is issued for an activation request; a CLM code is issued for a warranty claim."
+        "help": "WAR-* is an activation request code; CLM-* is a warranty/issue request code."
       },
       "validation": {
-        "trackingCodeInvalid": "Enter a valid WAR or CLM request code."
+        "trackingCodeInvalid": "Enter a valid WAR-* activation request code or CLM-* warranty/issue request code."
       },
       "errors": {
         "notFound": "No request was found for this code.",
@@ -1720,14 +1721,14 @@
         "descriptions": {
           "PENDING": "FUJITEK has received and is reviewing this request. The warranty is not active at this stage.",
           "APPROVED": "The request has been approved and warranty activation is being completed.",
-          "REJECTED": "The request was not approved. Contact FUJITEK with the request code for assistance.",
+          "REJECTED": "The request was not approved. Contact FUJITEK with the activation request code for assistance.",
           "ACTIVATED": "The request is complete and the electronic warranty has been activated.",
           "CANCELLED": "This request has been cancelled and will not be processed further."
         }
       },
       "result": {
-        "claimCode": "Request code",
-        "warrantyCode": "E-Warranty code",
+        "claimCode": "Warranty/issue request code (CLM-*)",
+        "warrantyCode": "Warranty code (WM-*)",
         "issue": "Reported issue",
         "priority": "Priority",
         "submittedAt": "Submitted",
@@ -1848,14 +1849,14 @@
           {
             "heading": "IV. Information protection",
             "bullets": [
-              "Customer, vehicle, and E-Warranty data is protected and used only for service, support, and relevant customer care."
+              "Customer, vehicle, and electronic warranty data is protected and used only for service, support, and relevant customer care."
             ]
           }
         ]
       },
       "privacy": {
         "title": "PRIVACY POLICY",
-        "lead": "FUJITEK protects personal and vehicle information supplied for consultation, installation, and E-Warranty services.",
+        "lead": "FUJITEK protects personal and vehicle information supplied for consultation, installation, and electronic warranty services.",
         "sections": [
           {
             "heading": "1. Information collected",
@@ -1914,7 +1915,7 @@
             ]
           },
           {
-            "heading": "3. Acceptance and E-Warranty activation",
+            "heading": "3. Acceptance and electronic warranty activation",
             "bullets": [
               "After installation, the vehicle glass is inspected with the customer before electronic warranty activation."
             ]
@@ -1930,7 +1931,7 @@
             "bullets": [
               "Nano Ceramic L15 and L50 products receive a 10-year electronic warranty.",
               "B55, B15, SP50, and SP10 products receive a 15-year electronic warranty for eligible manufacturing defects.",
-              "A valid E-Warranty registration is required."
+              "A valid WM-* warranty code is required."
             ]
           },
           {
@@ -2019,7 +2020,7 @@
   "AboutPage": {
     "metadata": {
       "title": "About FUJITEK Vietnam - Japanese Automotive Window Film Distribution",
-      "description": "FUJITEK Vietnam - High-performance Japanese automotive window film distribution network with genuine E-Warranty coverage."
+      "description": "FUJITEK Vietnam - High-performance Japanese automotive window film distribution network with genuine electronic warranty coverage."
     },
     "hero": {
       "eyebrow": "Automotive Tech Ecosystem",
@@ -2095,11 +2096,11 @@
           }
         },
         "ewarrantyRelease": {
-          "title": "E-Warranty Launch",
+          "title": "Electronic Warranty Launch",
           "description": "Rolled out digital warranty system, transparent and convenient.",
           "phase": "Phase 03/04",
           "tags": {
-            "ewarranty": "E-Warranty",
+            "ewarranty": "Electronic Warranty",
             "digitalApp": "Digital app",
             "records": "100K+ records"
           },
@@ -2294,7 +2295,7 @@
           "title": "Dedicated Service",
           "description": "Accompanying customers with 10-year warranty protection and nationwide dealer network coverage.",
           "checks": {
-            "ewarrantyDigital": "E-Warranty Digital Registration",
+            "ewarrantyDigital": "Electronic Warranty Registration",
             "support247": "24/7 Support",
             "dealerNetwork": "100+ Dealers Nationwide"
           }
@@ -2329,7 +2330,7 @@
       "eyebrow": "Nationwide Network",
       "titlePrefix": "Dealer System",
       "titleSuffix": "covering 34 provinces",
-      "description": "With over 100 dealers nationwide, Fujitek is committed to providing professional installation services and transparent E-Warranty coverage.",
+      "description": "With over 100 dealers nationwide, Fujitek is committed to providing professional installation services and transparent electronic warranty coverage.",
       "viewDealersCta": "Find Nearest Dealer",
       "mapTitle": "Dealer Network Map",
       "mapSubtitle": "Widespread authorized installation stations",

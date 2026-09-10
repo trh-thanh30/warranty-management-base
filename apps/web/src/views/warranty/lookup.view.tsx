@@ -89,7 +89,7 @@ export function WarrantyLookupView() {
                   {t("registration.methods.qr.label")}
                 </span>
                 <span className="rounded-md bg-premium-red px-2.5 py-0.5 text-xs font-semibold uppercase text-white">
-                  E-Warranty
+                  WM-*
                 </span>
               </div>
               <h3 className="text-lg sm:text-xl font-semibold uppercase text-deep-black group-hover:text-premium-red transition-colors">
@@ -115,7 +115,7 @@ export function WarrantyLookupView() {
                 {t("registration.methods.serial.label")}
               </span>
               <h3 className="text-lg sm:text-xl font-semibold uppercase text-deep-black group-hover:text-premium-red transition-colors">
-                Serial Number
+                {t("registration.methods.serial.title")}
               </h3>
               <p className="text-sm font-medium text-stone-gray">
                 {t("registration.methods.serial.description")}

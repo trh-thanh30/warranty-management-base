@@ -49,7 +49,7 @@ export const warrantyActions = [
 
 export const demoWarrantyRecord = {
   serial: "BL/BHDT/000199",
-  code: "FJ-8899-2026",
+  code: "WM-2026-ABCDEF",
   phone: "0988 123 456",
   address: "TP. Hồ Chí Minh",
   carPlate: "30H-888.88",

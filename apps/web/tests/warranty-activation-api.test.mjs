@@ -101,7 +101,7 @@ test("warranty activation form maps selected location names into the API body", 
   );
 });
 
-test("warranty activation form clearly distinguishes activation and warranty codes", async () => {
+test("warranty activation form only asks for an SP activation code", async () => {
   const [formSource, viSource, enSource] = await Promise.all([
     readFile(
       new URL(
@@ -124,8 +124,9 @@ test("warranty activation form clearly distinguishes activation and warranty cod
 
     assert.equal(typeof field.label, "string");
     assert.equal(typeof field.placeholder, "string");
+    assert.match(field.placeholder, /SP-/);
     assert.match(field.description, /SP-/);
-    assert.match(field.description, /WM-/);
+    assert.doesNotMatch(field.description, /WM-|FJ-|E-Warranty/i);
   }
 });
 

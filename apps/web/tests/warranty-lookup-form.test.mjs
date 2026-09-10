@@ -17,7 +17,7 @@ async function loadSchemaModule() {
   }
 }
 
-test("warranty lookup schema trims a valid E-Warranty code", async () => {
+test("warranty lookup schema trims a valid warranty code", async () => {
   const { createWarrantyLookupFormSchema } = await loadSchemaModule();
   const schema = createWarrantyLookupFormSchema(validationMessages);
 
@@ -26,7 +26,7 @@ test("warranty lookup schema trims a valid E-Warranty code", async () => {
   });
 });
 
-test("warranty lookup schema rejects invalid E-Warranty codes", async () => {
+test("warranty lookup schema rejects invalid warranty codes", async () => {
   const { createWarrantyLookupFormSchema } = await loadSchemaModule();
   const schema = createWarrantyLookupFormSchema(validationMessages);
   const invalidCases = [
