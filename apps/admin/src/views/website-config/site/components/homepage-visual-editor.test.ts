@@ -31,3 +31,13 @@ test("admin canvas renders in the host document for local assets and styles", ()
   );
   assert.match(source, /iframe=\{\{ enabled: false \}\}/);
 });
+
+test("homepage editor provides a fullscreen canvas toggle", () => {
+  const source = readFileSync(
+    "src/views/website-config/site/components/homepage-visual-editor.tsx",
+    "utf8",
+  );
+  assert.match(source, /setIsFullscreen\(\(current\) => !current\)/);
+  assert.match(source, /fixed inset-0 z-50/);
+  assert.match(source, /homepageEditor\.openFullscreen/);
+});

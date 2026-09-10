@@ -3249,6 +3249,8 @@
         "readOnly": "You are previewing the homepage in read-only mode.",
         "invalidData": "The editor data is invalid. Reload the page and try again.",
         "unsavedChanges": "There are unsaved draft changes.",
+        "openFullscreen": "Open editor fullscreen",
+        "closeFullscreen": "Close editor fullscreen",
         "styles": {
           "font": "Font",
           "size": "Size",

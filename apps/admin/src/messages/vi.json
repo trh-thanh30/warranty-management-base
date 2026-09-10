@@ -3249,6 +3249,8 @@
         "readOnly": "Bạn đang xem trước trang chủ ở chế độ chỉ đọc.",
         "invalidData": "Dữ liệu trình chỉnh sửa không hợp lệ. Hãy tải lại trang và thử lại.",
         "unsavedChanges": "Các thay đổi chưa được lưu nháp.",
+        "openFullscreen": "Mở trình chỉnh sửa toàn màn hình",
+        "closeFullscreen": "Đóng trình chỉnh sửa toàn màn hình",
         "styles": {
           "font": "Phông chữ",
           "size": "Kích thước",
