@@ -3259,6 +3259,8 @@
         "technologyOriginImage": "Technology origin image",
         "imageReplaced": "Image replaced. Save the draft to keep the change.",
         "imageReplaceFailed": "Could not replace the image.",
+        "replaceImage": "Replace image",
+        "cancelImageReplace": "Cancel",
         "styles": {
           "font": "Font",
           "size": "Size",

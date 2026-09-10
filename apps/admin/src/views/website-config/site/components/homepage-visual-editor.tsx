@@ -2,6 +2,7 @@
 
 import { Puck, type Data } from "@puckeditor/core";
 import type { WebsiteLocale } from "@repo/shared";
+import { Button } from "@repo/ui";
 import { useTranslations } from "next-intl";
 import { useMemo, useRef, useState } from "react";
 import { ImageUpload } from "@/src/components/common/image-upload";
@@ -257,8 +258,8 @@ export function HomepageVisualEditor({
       <div
         className={
           standalone
-            ? "min-h-screen overflow-hidden bg-white"
-            : "min-h-[720px] overflow-hidden rounded-lg border bg-white"
+            ? "relative min-h-screen overflow-hidden bg-white"
+            : "relative min-h-[720px] overflow-hidden rounded-lg border bg-white"
         }
         onDoubleClick={(event) => {
           const image = (event.target as HTMLElement).closest<HTMLElement>(
@@ -270,10 +271,33 @@ export function HomepageVisualEditor({
             (slot === "brand-story" || slot === "technology-origin")
           ) {
             setImageSlot(slot);
-            imageInputRef.current?.click();
           }
         }}
       >
+        {imageSlot ? (
+          <div className="absolute left-4 top-4 z-20 flex items-center gap-2 rounded-md border bg-white p-2 shadow-lg">
+            <span className="text-sm font-medium">
+              {imageSlot === "brand-story"
+                ? t("homepageEditor.brandStoryImage")
+                : t("homepageEditor.technologyOriginImage")}
+            </span>
+            <Button
+              onClick={() => imageInputRef.current?.click()}
+              size="sm"
+              type="button"
+            >
+              {t("homepageEditor.replaceImage")}
+            </Button>
+            <Button
+              onClick={() => setImageSlot(null)}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              {t("homepageEditor.cancelImageReplace")}
+            </Button>
+          </div>
+        ) : null}
         <input
           ref={imageInputRef}
           accept="image/*"

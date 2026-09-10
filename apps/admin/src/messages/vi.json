@@ -3259,6 +3259,8 @@
         "technologyOriginImage": "Ảnh xuất xứ công nghệ",
         "imageReplaced": "Đã thay ảnh. Hãy lưu nháp để giữ thay đổi.",
         "imageReplaceFailed": "Không thể thay ảnh.",
+        "replaceImage": "Thay ảnh",
+        "cancelImageReplace": "Hủy",
         "styles": {
           "font": "Phông chữ",
           "size": "Kích thước",
