@@ -220,10 +220,9 @@ function sectionFromProps<Section extends HomepageSectionKey>(
   props: HomepagePuckSectionProps,
   section: Section,
 ): WebsiteHomepageCopy["landing"][Section] {
-  return unflattenSection(
-    props,
-    section,
-  ) as WebsiteHomepageCopy["landing"][Section];
+  return unflattenSection(props, section, {
+    allowRenderableContent: true,
+  }) as WebsiteHomepageCopy["landing"][Section];
 }
 
 function toKebabCase(value: string) {

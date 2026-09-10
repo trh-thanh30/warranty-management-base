@@ -105,6 +105,7 @@ export function flattenSection(
 export function unflattenSection(
   props: HomepagePuckSectionProps,
   section: HomepageSectionKey,
+  options: { allowRenderableContent?: boolean } = {},
 ): HomepageLandingCopy[HomepageSectionKey] {
   const defaults = sectionShape(section);
   const restored: Record<
@@ -122,12 +123,18 @@ export function unflattenSection(
         content: props[`${key}Content`],
         ...style,
       };
-      if (!isWebsiteEditableText(candidate)) {
+      const isValid = options.allowRenderableContent
+        ? isWebsiteEditableText({ ...candidate, content: "" }) &&
+          (typeof candidate.content === "string" ||
+            (candidate.content !== null &&
+              typeof candidate.content === "object"))
+        : isWebsiteEditableText(candidate);
+      if (!isValid) {
         throw new HomepageEditorDataError(
           `Invalid editable text: ${section}.${key}`,
         );
       }
-      restored[key] = candidate;
+      restored[key] = candidate as WebsiteEditableText;
     } else {
       const value = props[key];
       if (typeof value !== typeof defaultValue) {
