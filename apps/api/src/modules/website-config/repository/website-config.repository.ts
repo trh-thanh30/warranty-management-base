@@ -18,6 +18,9 @@ import type { UpdateWebsiteSiteSettingBody } from '@repo/shared';
 export const websiteSiteRevisionInclude = {
   footer_logo: true,
   header_logo: true,
+  homepage_about_image: true,
+  homepage_sputter_chamber_image: true,
+  homepage_sputter_structure_image: true,
   og_image: true,
   hero_slides: {
     include: { desktop_image: true, mobile_image: true },
@@ -87,6 +90,9 @@ export class WebsiteConfigRepository {
         input.headerLogoAssetId,
         input.footerLogoAssetId,
         input.ogImageAssetId,
+        input.homepage.aboutImageAssetId,
+        input.homepage.sputterChamberImageAssetId,
+        input.homepage.sputterStructureImageAssetId,
       ]);
 
       await Promise.all([
@@ -108,6 +114,12 @@ export class WebsiteConfigRepository {
           contact_email: input.contactEmail.trim(),
           footer_logo_asset_id: input.footerLogoAssetId,
           header_logo_asset_id: input.headerLogoAssetId,
+          homepage_about_image_asset_id: input.homepage.aboutImageAssetId,
+          homepage_content: input.homepage.content as Prisma.InputJsonValue,
+          homepage_sputter_chamber_asset_id:
+            input.homepage.sputterChamberImageAssetId,
+          homepage_sputter_structure_asset_id:
+            input.homepage.sputterStructureImageAssetId,
           lock_version: { increment: 1 },
           og_image_asset_id: input.ogImageAssetId,
           website_url: input.websiteUrl.trim(),
@@ -193,6 +205,9 @@ export class WebsiteConfigRepository {
         draft.header_logo_asset_id,
         draft.footer_logo_asset_id,
         draft.og_image_asset_id,
+        draft.homepage_about_image_asset_id,
+        draft.homepage_sputter_chamber_asset_id,
+        draft.homepage_sputter_structure_asset_id,
         ...draft.hero_slides.flatMap((slide) => [
           slide.desktop_asset_id,
           slide.mobile_asset_id,
@@ -286,6 +301,16 @@ export class WebsiteConfigRepository {
         : undefined,
       header_logo: source.header_logo
         ? { connect: { id: source.header_logo.id } }
+        : undefined,
+      homepage_about_image: source.homepage_about_image
+        ? { connect: { id: source.homepage_about_image.id } }
+        : undefined,
+      homepage_content: source.homepage_content as Prisma.InputJsonValue,
+      homepage_sputter_chamber_image: source.homepage_sputter_chamber_image
+        ? { connect: { id: source.homepage_sputter_chamber_image.id } }
+        : undefined,
+      homepage_sputter_structure_image: source.homepage_sputter_structure_image
+        ? { connect: { id: source.homepage_sputter_structure_image.id } }
         : undefined,
       lock_version: 1,
       hero_slides: {

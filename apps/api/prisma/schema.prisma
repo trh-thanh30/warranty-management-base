@@ -71,6 +71,9 @@ model Asset {
   website_site_header_logos   WebsiteSiteRevision[] @relation("WebsiteSiteHeaderLogo")
   website_site_footer_logos   WebsiteSiteRevision[] @relation("WebsiteSiteFooterLogo")
   website_site_og_images      WebsiteSiteRevision[] @relation("WebsiteSiteOgImage")
+  website_homepage_about_images WebsiteSiteRevision[] @relation("WebsiteHomepageAboutImage")
+  website_homepage_sputter_chamber_images WebsiteSiteRevision[] @relation("WebsiteHomepageSputterChamberImage")
+  website_homepage_sputter_structure_images WebsiteSiteRevision[] @relation("WebsiteHomepageSputterStructureImage")
   website_hero_desktop_images WebsiteHeroSlide[]    @relation("WebsiteHeroDesktopImage")
   website_hero_mobile_images  WebsiteHeroSlide[]    @relation("WebsiteHeroMobileImage")
 
@@ -182,6 +185,10 @@ model WebsiteSiteRevision {
   header_logo_asset_id String?                @db.Uuid
   footer_logo_asset_id String?                @db.Uuid
   og_image_asset_id    String?                @db.Uuid
+  homepage_content     Json                   @default("{}")
+  homepage_about_image_asset_id String?       @db.Uuid
+  homepage_sputter_chamber_asset_id String?   @db.Uuid
+  homepage_sputter_structure_asset_id String? @db.Uuid
   published_at         DateTime?
   published_by_id      String?                @db.Uuid
   created_at           DateTime               @default(now())
@@ -190,6 +197,9 @@ model WebsiteSiteRevision {
   header_logo  Asset? @relation("WebsiteSiteHeaderLogo", fields: [header_logo_asset_id], references: [id], onDelete: Restrict)
   footer_logo  Asset? @relation("WebsiteSiteFooterLogo", fields: [footer_logo_asset_id], references: [id], onDelete: Restrict)
   og_image     Asset? @relation("WebsiteSiteOgImage", fields: [og_image_asset_id], references: [id], onDelete: Restrict)
+  homepage_about_image Asset? @relation("WebsiteHomepageAboutImage", fields: [homepage_about_image_asset_id], references: [id], onDelete: Restrict)
+  homepage_sputter_chamber_image Asset? @relation("WebsiteHomepageSputterChamberImage", fields: [homepage_sputter_chamber_asset_id], references: [id], onDelete: Restrict)
+  homepage_sputter_structure_image Asset? @relation("WebsiteHomepageSputterStructureImage", fields: [homepage_sputter_structure_asset_id], references: [id], onDelete: Restrict)
   published_by User?  @relation("WebsiteSitePublishedBy", fields: [published_by_id], references: [id], onDelete: SetNull)
 
   offices      WebsiteOffice[]
@@ -198,6 +208,9 @@ model WebsiteSiteRevision {
 
   @@index([site_key, state])
   @@index([site_key, revision_number])
+  @@index([homepage_about_image_asset_id])
+  @@index([homepage_sputter_chamber_asset_id])
+  @@index([homepage_sputter_structure_asset_id])
   @@map("website_site_revision")
 }
 
