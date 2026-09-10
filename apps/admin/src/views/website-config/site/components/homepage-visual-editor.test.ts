@@ -12,8 +12,10 @@ const view = readFileSync(
 );
 const styles = readFileSync("app/globals.css", "utf8");
 
-test("homepage tab mounts the visual editor instead of legacy preview UI", () => {
-  assert.match(form, /import \{ HomepageVisualEditor \}/);
+test("homepage tab opens the dedicated editor instead of mounting it inline", () => {
+  assert.doesNotMatch(form, /HomepageVisualEditor/);
+  assert.match(form, /target="_blank"/);
+  assert.match(form, /homepage-editor/);
   assert.doesNotMatch(form, /HomepageContentEditor/);
   assert.doesNotMatch(view, /HomepagePreviewDialog|PreviewDataDialog/);
 });
@@ -32,21 +34,20 @@ test("admin canvas renders in the host document for local assets and styles", ()
   assert.match(source, /iframe=\{\{ enabled: false \}\}/);
 });
 
-test("homepage editor provides a fullscreen canvas toggle", () => {
+test("homepage editor is hosted on a dedicated route", () => {
   const source = readFileSync(
-    "src/views/website-config/site/components/homepage-visual-editor.tsx",
+    "src/views/website-config/site/homepage-editor.view.tsx",
     "utf8",
   );
-  assert.match(source, /setIsFullscreen\(\(current\) => !current\)/);
-  assert.match(source, /fixed inset-0 z-50/);
-  assert.match(source, /homepageEditor\.openFullscreen/);
+  assert.match(source, /HomepageVisualEditor/);
+  assert.match(source, /RevisionStatusBar/);
 });
 
 test("homepage image fallback resolves against the public web origin", () => {
   const source = readFileSync(
-    "src/views/website-config/site/components/website-site-config-form.tsx",
+    "src/views/website-config/site/homepage-editor.view.tsx",
     "utf8",
   );
   assert.match(source, /toPreviewUrl\(/);
-  assert.match(source, /\?\? "\/hero\/hero_5\.jpg"/);
+  assert.match(source, /\/hero\/hero_5\.jpg/);
 });

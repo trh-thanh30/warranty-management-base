@@ -19,7 +19,8 @@ import {
 import { useToast } from "@/src/hooks/use-toast";
 import { toPreviewUrl } from "./homepage-hero-editor";
 import { HomepageVisualEditor } from "./components/homepage-visual-editor";
-import { LocaleTabs } from "../../components/locale-tabs";
+import { HomepageHeroEditor } from "./homepage-hero-editor";
+import { LocaleTabs } from "../components/locale-tabs";
 import { RevisionStatusBar } from "../components/revision-status-bar";
 import { WebsiteConfigQueryState } from "../components/website-config-query-state";
 import type { SiteAssetUrls, SiteDraft } from "./website-site-config.types";
@@ -146,6 +147,15 @@ export function HomepageEditorView() {
                 locale={locale}
                 onAssetsChange={setAssets}
                 onChange={change}
+              />
+              <div className="my-8 border-t" />
+              <HomepageHeroEditor
+                configuredSlides={query.data.heroSlides}
+                disabled={!canUpdate}
+                onChange={(heroSlides) =>
+                  change((current) => ({ ...current, heroSlides }))
+                }
+                slides={form.heroSlides}
               />
             </CardContent>
           </Card>

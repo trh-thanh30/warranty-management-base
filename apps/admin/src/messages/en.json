@@ -3224,6 +3224,8 @@
       "description": "Edit shared information used across the public website.",
       "media": "Website images",
       "openHomepageEditor": "Open homepage editor",
+      "homepageEditorSummaryTitle": "Homepage content",
+      "homepageEditorSummaryDescription": "Open the dedicated editor to customize homepage text, styles, images, and hero slides.",
       "mediaDescription": "Manage the header logo, footer logo, and the default image used when the website is shared.",
       "tabs": {
         "identity": "Identity",

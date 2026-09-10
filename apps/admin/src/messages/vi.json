@@ -3224,6 +3224,8 @@
       "description": "Chỉnh sửa thông tin dùng chung trên website công khai.",
       "media": "Hình ảnh website",
       "openHomepageEditor": "Mở trình chỉnh sửa trang chủ",
+      "homepageEditorSummaryTitle": "Nội dung trang chủ",
+      "homepageEditorSummaryDescription": "Mở trình chỉnh sửa riêng để tùy chỉnh nội dung, kiểu chữ, hình ảnh và slide hero trên trang chủ.",
       "mediaDescription": "Quản lý logo dùng ở header, footer và ảnh đại diện mặc định khi chia sẻ website.",
       "tabs": {
         "identity": "Nhận diện",
