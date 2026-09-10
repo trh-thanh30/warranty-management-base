@@ -17,12 +17,14 @@ const labels: HomepageEditorLabels = {
   sections: {
     b2b: "Hợp tác đại lý",
     brandHeritage: "Câu chuyện thương hiệu",
+    brandStory: "Định nghĩa thương hiệu",
     coreTech: "Công nghệ cốt lõi",
     hero: "Hero",
     milestones: "Cột mốc",
     network: "Mạng lưới đại lý",
     pillars: "Giá trị cốt lõi",
     testimonials: "Đánh giá",
+    technologyOrigin: "Xuất xứ công nghệ",
   },
   size: "Kích thước",
 };

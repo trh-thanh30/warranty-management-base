@@ -7,10 +7,11 @@ import type {
 } from "@puckeditor/core";
 import {
   B2bSection,
-  BrandHeritageSection,
+  BrandStorySection,
   HeadingSection,
   HeroSection,
   NetworkSection,
+  TechnologyOriginSection,
 } from "@repo/homepage";
 import type { WebsiteHomepageCopy, WebsiteTextStyle } from "@repo/shared";
 import { DEFAULT_WEBSITE_HOMEPAGE_CONTENT } from "@repo/shared/constants";
@@ -40,7 +41,10 @@ export type HomepageEditorLabels = {
   font: string;
   italic: string;
   sectionFields: Record<string, string>;
-  sections: Record<HomepageSectionKey, string>;
+  sections: Record<
+    HomepageSectionKey | "brandStory" | "technologyOrigin",
+    string
+  >;
   size: string;
 };
 
@@ -75,16 +79,38 @@ export function createHomepagePuckConfig({
           />
         ),
       },
-      HomepageBrandHeritage: {
-        label: labels.sections.brandHeritage,
-        defaultProps: propsFor(
-          "homepage-brand-heritage",
-          defaults.brandHeritage,
-        ),
-        fields: fieldsFor("brandHeritage", defaults.brandHeritage, labels),
+      HomepageBrandStory: {
+        label: labels.sections.brandStory,
+        defaultProps: propsFor("homepage-brand-story", defaults.brandHeritage),
+        fields: fieldsFor("brandHeritage", defaults.brandHeritage, labels, [
+          "brandLabel",
+          "headlineLine1",
+          "headlineLine2Prefix",
+          "headlineHighlight",
+          "headlineLine3",
+          "descriptionPrimary",
+          "descriptionSecondary",
+        ]),
         permissions: homepageEditorPermissions,
         render: (props) => (
-          <BrandHeritageSection
+          <BrandStorySection copy={sectionFromProps(props, "brandHeritage")} />
+        ),
+      },
+      HomepageTechnologyOrigin: {
+        label: labels.sections.technologyOrigin,
+        defaultProps: propsFor(
+          "homepage-technology-origin",
+          defaults.brandHeritage,
+        ),
+        fields: fieldsFor("brandHeritage", defaults.brandHeritage, labels, [
+          "originEyebrow",
+          "originTitle",
+          "originDescriptionPrimary",
+          "originDescriptionSecondary",
+        ]),
+        permissions: homepageEditorPermissions,
+        render: (props) => (
+          <TechnologyOriginSection
             copy={sectionFromProps(props, "brandHeritage")}
           />
         ),
@@ -178,10 +204,12 @@ function fieldsFor(
   section: HomepageSectionKey,
   values: HomepageLandingCopy[HomepageSectionKey],
   labels: HomepageEditorLabels,
+  editableKeys?: readonly string[],
 ): Fields<HomepagePuckSectionProps> {
   const fields: Record<string, Field> = {};
 
   for (const [key, value] of Object.entries(values)) {
+    if (editableKeys && !editableKeys.includes(key)) continue;
     if (typeof value === "object" && value && "content" in value) {
       fields[`${key}Content`] = {
         type: key.toLowerCase().includes("description") ? "textarea" : "text",

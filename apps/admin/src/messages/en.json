@@ -3271,6 +3271,8 @@
         "sections": {
           "hero": "Hero",
           "brandHeritage": "Brand story",
+          "brandStory": "Brand definition",
+          "technologyOrigin": "Technology origin",
           "coreTech": "Core technology",
           "milestones": "Milestones",
           "pillars": "Vision and values",

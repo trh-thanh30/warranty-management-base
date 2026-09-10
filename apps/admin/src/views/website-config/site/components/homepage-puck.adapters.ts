@@ -15,7 +15,8 @@ export type HomepagePuckSectionProps = {
 
 export type HomepagePuckComponents = {
   HomepageHero: HomepagePuckSectionProps;
-  HomepageBrandHeritage: HomepagePuckSectionProps;
+  HomepageBrandStory: HomepagePuckSectionProps;
+  HomepageTechnologyOrigin: HomepagePuckSectionProps;
   HomepageCoreTech: HomepagePuckSectionProps;
   HomepageMilestones: HomepagePuckSectionProps;
   HomepagePillars: HomepagePuckSectionProps;
@@ -28,7 +29,6 @@ type HomepagePuckComponentName = keyof HomepagePuckComponents;
 
 const sectionDefinitions = [
   ["hero", "HomepageHero", "homepage-hero"],
-  ["brandHeritage", "HomepageBrandHeritage", "homepage-brand-heritage"],
   ["coreTech", "HomepageCoreTech", "homepage-core-tech"],
   ["milestones", "HomepageMilestones", "homepage-milestones"],
   ["pillars", "HomepagePillars", "homepage-pillars"],
@@ -39,7 +39,19 @@ const sectionDefinitions = [
   readonly [HomepageSectionKey, HomepagePuckComponentName, string]
 >;
 
-export const homepagePuckSectionIds = sectionDefinitions.map(([, , id]) => id);
+const brandSectionDefinitions = [
+  ["HomepageBrandStory", "homepage-brand-story"],
+  ["HomepageTechnologyOrigin", "homepage-technology-origin"],
+] as const;
+
+export const homepagePuckSectionIds = [
+  "homepage-hero",
+  "homepage-brand-story",
+  "homepage-technology-origin",
+  ...sectionDefinitions
+    .filter(([section]) => section !== "hero")
+    .map(([, , id]) => id),
+];
 
 export class HomepageEditorDataError extends Error {
   constructor(message: string) {
@@ -53,10 +65,22 @@ export function toHomepagePuckData(
 ): Data<HomepagePuckComponents> {
   return {
     root: { props: { title: "Homepage" } },
-    content: sectionDefinitions.map(([section, type, id]) => ({
-      type,
-      props: { id, ...flattenSection(copy[section]) },
-    })),
+    content: [
+      {
+        type: "HomepageHero",
+        props: { id: "homepage-hero", ...flattenSection(copy.hero) },
+      },
+      ...brandSectionDefinitions.map(([type, id]) => ({
+        type,
+        props: { id, ...flattenSection(copy.brandHeritage) },
+      })),
+      ...sectionDefinitions
+        .filter(([section]) => section !== "hero")
+        .map(([section, type, id]) => ({
+          type,
+          props: { id, ...flattenSection(copy[section]) },
+        })),
+    ],
   };
 }
 
@@ -76,6 +100,25 @@ export function fromHomepagePuckData(
     const restored = unflattenSection(matches[0].props, section);
     (result as Record<HomepageSectionKey, typeof restored>)[section] = restored;
   }
+
+  const brandCopies = brandSectionDefinitions.map(([type, id]) => {
+    const matches = data.content.filter((item) => item.props.id === id);
+    if (matches.length !== 1 || matches[0]?.type !== type) {
+      throw new HomepageEditorDataError(
+        `Expected exactly one ${type} component with id ${id}`,
+      );
+    }
+    return unflattenSection(matches[0].props, "brandHeritage");
+  });
+  const story = brandCopies[0] as HomepageLandingCopy["brandHeritage"];
+  const origin = brandCopies[1] as HomepageLandingCopy["brandHeritage"];
+  result.brandHeritage = {
+    ...story,
+    originEyebrow: origin.originEyebrow,
+    originTitle: origin.originTitle,
+    originDescriptionPrimary: origin.originDescriptionPrimary,
+    originDescriptionSecondary: origin.originDescriptionSecondary,
+  };
 
   return result as HomepageLandingCopy;
 }
@@ -148,6 +191,7 @@ export function unflattenSection(
 }
 
 function sectionShape(section: HomepageSectionKey) {
+  if (section === "brandHeritage") return sectionShapeRegistry[section];
   const definition = sectionDefinitions.find(([key]) => key === section);
   if (!definition)
     throw new HomepageEditorDataError(`Unknown section: ${section}`);

@@ -19,6 +19,8 @@ import {
 const sectionKeys = [
   "hero",
   "brandHeritage",
+  "brandStory",
+  "technologyOrigin",
   "coreTech",
   "milestones",
   "pillars",

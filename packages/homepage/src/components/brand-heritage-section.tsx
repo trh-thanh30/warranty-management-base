@@ -7,12 +7,25 @@ export function BrandHeritageSection({
   copy: HomepageLandingCopy["brandHeritage"];
 }) {
   return (
+    <div data-homepage-section="brand-heritage">
+      <BrandStorySection copy={copy} />
+      <TechnologyOriginSection copy={copy} />
+    </div>
+  );
+}
+
+export function BrandStorySection({
+  copy,
+}: {
+  copy: HomepageLandingCopy["brandHeritage"];
+}) {
+  return (
     <section
-      className="space-y-16 bg-white px-6 py-20 lg:px-20"
-      data-homepage-section="brand-heritage"
+      className="bg-white px-6 py-20 lg:px-20"
+      data-homepage-section="brand-story"
     >
-      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-2">
-        <div className="space-y-5">
+      <div className="mx-auto max-w-7xl">
+        <div className="max-w-3xl space-y-5">
           <EditableText
             as="p"
             className="uppercase tracking-widest"
@@ -35,7 +48,23 @@ export function BrandHeritageSection({
             value={copy.descriptionSecondary}
           />
         </div>
-        <div className="space-y-5 border-l border-border-gray pl-8">
+      </div>
+    </section>
+  );
+}
+
+export function TechnologyOriginSection({
+  copy,
+}: {
+  copy: HomepageLandingCopy["brandHeritage"];
+}) {
+  return (
+    <section
+      className="bg-surface-muted px-6 py-20 lg:px-20"
+      data-homepage-section="technology-origin"
+    >
+      <div className="mx-auto max-w-7xl">
+        <div className="max-w-3xl space-y-5 border-l border-border-gray pl-8">
           <EditableText
             as="p"
             className="uppercase tracking-widest"
