@@ -4,7 +4,7 @@
     "description": "Public app shell for the monorepo base"
   },
   "PublicRouteStates": {
-    "unknownRoute": "Unknown route",
+    "unknownRoute": "Unknown route:",
     "title": "This page does not exist",
     "description": "This address may have changed or is no longer available. Return to the homepage to continue exploring FUJITEK.",
     "back": "Go back",

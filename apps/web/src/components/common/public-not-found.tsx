@@ -19,16 +19,16 @@ export function PublicNotFound() {
         className="absolute inset-x-0 top-0 h-1 bg-premium-red"
       />
       <section className="relative w-full max-w-4xl text-center">
-        <div className="inline-flex w-full max-w-[calc(100vw-3rem)] items-center gap-2 overflow-hidden rounded-full border border-premium-red/25 bg-white px-4 py-2 text-sm text-stone-gray shadow-sm sm:max-w-xl">
+        <div className="inline-flex max-w-[calc(100vw-3rem)] items-center gap-2 overflow-hidden rounded-full border border-premium-red/25 bg-white px-4 py-2 text-sm text-stone-gray shadow-sm">
           <span
             aria-hidden="true"
             className="size-1.5 shrink-0 rounded-full bg-premium-red"
           />
           <span className="shrink-0">{t("unknownRoute")}</span>
-          <span aria-hidden="true" className="text-premium-red/40">
+          <span aria-hidden="true" className="hidden">
             ·
           </span>
-          <code className="min-w-0 flex-1 truncate font-mono text-deep-black">
+          <code className="max-w-44 truncate font-mono text-deep-black sm:max-w-80">
             {routePath}
           </code>
         </div>
