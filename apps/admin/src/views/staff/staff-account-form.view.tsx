@@ -5,8 +5,8 @@ import { useTranslations } from "next-intl";
 import { PERMISSIONS, type PermissionKey } from "@repo/shared/constants";
 import { Button } from "@repo/ui";
 import { FormPageShell } from "@/src/components/common/form-page-shell";
+import { EntityQueryState } from "@/src/components/common/entity-query-state";
 import { PermissionGuard } from "@/src/components/permission-guard";
-import { StatePanel } from "@/src/components/common/state-panel";
 import {
   StaffAccountFormCard,
   StaffAccountFormSkeleton,
@@ -53,7 +53,8 @@ export function StaffAccountFormView({
         {isEditing && userQuery.isLoading ? (
           <StaffAccountFormSkeleton description={description} title={title} />
         ) : isEditing && (userQuery.isError || !formUser) ? (
-          <StatePanel
+          <EntityQueryState
+            error={userQuery.error}
             action={
               <Button
                 onClick={() => {

@@ -3373,8 +3373,11 @@
     "redirectLabel": "Chuyển đến bảng điều khiển"
   },
   "RouteStates": {
+    "back": "Quay lại",
     "backToDashboard": "Quay về bảng điều khiển",
+    "brandName": "Quản trị bảo hành Lexzenz",
     "notFoundTitle": "Không tìm thấy trang admin",
+    "unknownRoute": "Route không xác định",
     "notFoundDescription": "Route admin này không tồn tại hoặc chưa được thêm vào điều hướng dashboard.",
     "tryAgain": "Thử lại",
     "errorTitle": "Không tải được dashboard",

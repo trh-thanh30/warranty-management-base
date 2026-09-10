@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { PERMISSIONS, type PermissionKey } from "@repo/shared/constants";
 import { Button } from "@repo/ui";
 import { FormPageShell } from "@/src/components/common/form-page-shell";
-import { StatePanel } from "@/src/components/common/state-panel";
+import { EntityQueryState } from "@/src/components/common/entity-query-state";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import {
   CategoryFormCard,
@@ -49,7 +49,8 @@ export function CategoryFormView({ categoryId, mode }: CategoryFormViewProps) {
         {isEditing && categoryQuery.isLoading ? (
           <CategoryFormSkeleton description={description} title={title} />
         ) : isEditing && (categoryQuery.isError || !category) ? (
-          <StatePanel
+          <EntityQueryState
+            error={categoryQuery.error}
             action={
               <Button
                 onClick={() => {

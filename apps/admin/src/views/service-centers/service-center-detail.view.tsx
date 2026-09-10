@@ -1,7 +1,7 @@
 "use client";
 
 import { FormPageShell } from "@/src/components/common/form-page-shell";
-import { StatePanel } from "@/src/components/common/state-panel";
+import { EntityQueryState } from "@/src/components/common/entity-query-state";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { useDeactivateServiceCenter } from "@/src/hooks/use-service-centers";
@@ -91,7 +91,8 @@ export function ServiceCenterDetailView({
         {serviceCenterQuery.isLoading ? (
           <ServiceCenterDetailSkeleton />
         ) : serviceCenterQuery.isError || !serviceCenter ? (
-          <StatePanel
+          <EntityQueryState
+            error={serviceCenterQuery.error}
             action={
               <Button
                 onClick={() => {

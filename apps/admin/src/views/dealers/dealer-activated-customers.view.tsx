@@ -22,6 +22,7 @@ import {
 import { FormPageShell } from "@/src/components/common/form-page-shell";
 import { PaginationControls } from "@repo/ui/pagination-controls";
 import { SelectControl } from "@/src/components/common/select-control";
+import { EntityQueryState } from "@/src/components/common/entity-query-state";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { DealerActivatedCustomersTable } from "./components/dealer-activated-customers-table";
@@ -108,7 +109,8 @@ export function DealerActivatedCustomersView({ dealerId }: Props) {
           </CardHeader>
           <CardContent className="px-3 sm:px-6">
             {dealerQuery.isError || customersQuery.isError ? (
-              <StatePanel
+              <EntityQueryState
+                error={dealerQuery.error ?? customersQuery.error}
                 action={
                   <Button
                     onClick={() => {
