@@ -19,7 +19,6 @@ import {
 import { useToast } from "@/src/hooks/use-toast";
 import { toPreviewUrl } from "./homepage-hero-editor";
 import { HomepageVisualEditor } from "./components/homepage-visual-editor";
-import { HomepageHeroEditor } from "./homepage-hero-editor";
 import { LocaleTabs } from "../components/locale-tabs";
 import { RevisionStatusBar } from "../components/revision-status-bar";
 import { WebsiteConfigQueryState } from "../components/website-config-query-state";
@@ -107,13 +106,13 @@ export function HomepageEditorView() {
         <Button asChild variant="ghost">
           <Link href="/website-config/site">
             <ArrowLeft className="size-4" />
-            {t("homepageEditor.backToSite")}
+            {t("site.homepageEditor.backToSite")}
           </Link>
         </Button>
         <PageHeader
-          description={t("homepageEditor.description")}
+          description={t("site.homepageEditor.description")}
           eyebrow={t("eyebrow")}
-          title={t("homepageEditor.title")}
+          title={t("site.homepageEditor.title")}
         />
         <WebsiteConfigQueryState
           isError={query.isError}
@@ -147,15 +146,6 @@ export function HomepageEditorView() {
                 locale={locale}
                 onAssetsChange={setAssets}
                 onChange={change}
-              />
-              <div className="my-8 border-t" />
-              <HomepageHeroEditor
-                configuredSlides={query.data.heroSlides}
-                disabled={!canUpdate}
-                onChange={(heroSlides) =>
-                  change((current) => ({ ...current, heroSlides }))
-                }
-                slides={form.heroSlides}
               />
             </CardContent>
           </Card>

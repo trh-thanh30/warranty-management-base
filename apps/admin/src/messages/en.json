@@ -3248,6 +3248,7 @@
       "heroRemovalPending": "The image will be removed from this slide when you save the draft.",
       "homepageEditor": {
         "title": "Edit the homepage directly",
+        "backToSite": "Back to website settings",
         "description": "Click text on the preview to edit it; select text to change its font, size, color, and alignment.",
         "readOnly": "You are previewing the homepage in read-only mode.",
         "invalidData": "The editor data is invalid. Reload the page and try again.",

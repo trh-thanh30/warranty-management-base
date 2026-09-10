@@ -14,6 +14,7 @@ import { House, Image, Images, MapPin, Share2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/src/i18n/navigation";
 import { LocaleTabs } from "../../components/locale-tabs";
+import { HomepageHeroEditor } from "../homepage-hero-editor";
 import { ThumbnailUploadPanel } from "../thumbnail-upload-panel";
 import type {
   SiteAssetUrls,
@@ -153,6 +154,15 @@ export function WebsiteSiteConfigForm({
                   </Link>
                 </Button>
               </div>
+              <div className="border-t" />
+              <HomepageHeroEditor
+                configuredSlides={site.heroSlides}
+                disabled={!canUpdate}
+                onChange={(heroSlides) =>
+                  onChange((current) => ({ ...current, heroSlides }))
+                }
+                slides={form.heroSlides}
+              />
             </div>
           </CardContent>
         </Card>

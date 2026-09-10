@@ -3248,6 +3248,7 @@
       "heroRemovalPending": "Ảnh sẽ được gỡ khỏi slide này khi bạn lưu draft.",
       "homepageEditor": {
         "title": "Chỉnh sửa trực tiếp trang chủ",
+        "backToSite": "Quay lại cài đặt website",
         "description": "Bấm vào từng đoạn chữ trên bản xem trước để sửa nội dung; chọn đoạn chữ để đổi font, cỡ, màu và căn chỉnh.",
         "readOnly": "Bạn đang xem trước trang chủ ở chế độ chỉ đọc.",
         "invalidData": "Dữ liệu trình chỉnh sửa không hợp lệ. Hãy tải lại trang và thử lại.",
