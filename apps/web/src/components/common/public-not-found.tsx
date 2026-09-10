@@ -35,7 +35,7 @@ export function PublicNotFound() {
 
         <div className="mt-12 flex items-center gap-4 sm:gap-8">
           <span aria-hidden="true" className="h-px flex-1 bg-premium-red/30" />
-          <p className="font-condensed text-8xl font-black leading-none tracking-[0.06em] text-premium-red sm:text-9xl">
+          <p className="font-condensed text-8xl font-bold leading-none tracking-[0.06em] text-premium-red sm:text-9xl">
             404
           </p>
           <span aria-hidden="true" className="h-px flex-1 bg-premium-red/30" />
@@ -68,7 +68,7 @@ export function PublicNotFound() {
 
         <div className="mt-14 flex justify-center">
           <SiteLogo
-            alt="FUJITEK Việt Nam"
+            alt={t("brandAlt")}
             className="h-10 w-auto opacity-80"
             height={40}
             width={200}
