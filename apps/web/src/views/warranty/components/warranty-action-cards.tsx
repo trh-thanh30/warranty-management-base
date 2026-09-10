@@ -61,7 +61,7 @@ export function WarrantyActionCards() {
                 initial="hidden"
                 whileInView="show"
                 viewport={revealViewportOnce}
-                className="group rounded-md border border-border-gray bg-white transition-all hover:border-premium-red hover:shadow-xs"
+                className="group rounded-md border border-border-gray bg-white transition-all hover:border-premium-red hover:shadow-sm shadow-xs "
               >
                 {isExternal ? (
                   <a
@@ -77,9 +77,12 @@ export function WarrantyActionCards() {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex size-12 items-center justify-center text-stone-gray transition-colors group-hover:text-deep-black">
-                        <Icon className="size-7" strokeWidth={1.6} />
+                        <Icon
+                          className="size-7 transition-colors duration-300 group-hover:text-premium-red"
+                          strokeWidth={1.6}
+                        />
                       </div>
-                      <span className="rounded-md bg-light-gray px-3 py-1 text-xs font-medium uppercase text-stone-gray">
+                      <span className="rounded-md bg-light-gray px-3 py-1 text-xs font-semibold uppercase text-stone-gray">
                         {t(`items.${action.id}.badge`)}
                       </span>
                     </div>
@@ -108,7 +111,10 @@ export function WarrantyActionCards() {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex size-12 items-center justify-center text-stone-gray transition-colors group-hover:text-deep-black">
-                        <Icon className="size-7" strokeWidth={1.6} />
+                        <Icon
+                          className="size-7 transition-colors duration-300 group-hover:text-premium-red"
+                          strokeWidth={1.6}
+                        />
                       </div>
                       <span className="rounded-md bg-light-gray px-3 py-1 text-xs font-medium uppercase text-stone-gray">
                         {t(`items.${action.id}.badge`)}
