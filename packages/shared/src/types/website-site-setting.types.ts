@@ -4,6 +4,10 @@ import type {
   WebsiteTranslation,
   WebsiteVersionedMutation,
 } from "./website-config-common.types.ts";
+import type {
+  WebsiteHomepageContentByLocale,
+  WebsiteHomepageCopy,
+} from "./website-homepage.types.ts";
 
 export type WebsiteAssetReference = {
   id: string;
@@ -26,6 +30,39 @@ export type WebsiteHeroFallbackSlide = {
   key: string;
   mobileUrl: string;
   sortOrder: number;
+};
+
+export type WebsiteHomepageDraft = {
+  aboutImage: WebsiteAssetReference | null;
+  content: WebsiteHomepageContentByLocale;
+  sputterChamberImage: WebsiteAssetReference | null;
+  sputterStructureImage: WebsiteAssetReference | null;
+};
+
+export type UpdateWebsiteHomepageBody = {
+  aboutImageAssetId: string | null;
+  content: WebsiteHomepageContentByLocale;
+  sputterChamberImageAssetId: string | null;
+  sputterStructureImageAssetId: string | null;
+};
+
+export type PublicWebsiteHomepage = {
+  aboutImage: WebsiteAssetReference | null;
+  copy: WebsiteHomepageCopy;
+  sputterChamberImage: WebsiteAssetReference | null;
+  sputterStructureImage: WebsiteAssetReference | null;
+};
+
+export type HomepagePreviewData = {
+  heroSlides: WebsiteHeroSlide[];
+  homepage: PublicWebsiteHomepage;
+};
+
+export type HomepagePreviewMessage = {
+  data: HomepagePreviewData;
+  locale: WebsiteLocale;
+  type: "warranty-homepage-preview:update";
+  version: 1;
 };
 
 export type WebsiteOfficeText = {
@@ -63,6 +100,7 @@ export type WebsiteSiteSetting = {
   footerLogo: WebsiteAssetReference | null;
   headerLogo: WebsiteAssetReference | null;
   heroSlides: WebsiteHeroSlide[];
+  homepage: WebsiteHomepageDraft;
   offices: WebsiteOffice[];
   ogImage: WebsiteAssetReference | null;
   revision: WebsiteRevisionMeta;
@@ -83,6 +121,7 @@ export type UpdateWebsiteSiteSettingBody = WebsiteVersionedMutation & {
     mobileAssetId: string | null;
     sortOrder: number;
   }>;
+  homepage: UpdateWebsiteHomepageBody;
   offices: WebsiteOffice[];
   ogImageAssetId: string | null;
   socialLinks: WebsiteSocialLink[];
@@ -94,6 +133,7 @@ export type PublicWebsiteSiteSetting = {
   footerLogo: WebsiteAssetReference | null;
   headerLogo: WebsiteAssetReference | null;
   heroSlides: WebsiteHeroSlide[];
+  homepage: PublicWebsiteHomepage;
   locale: WebsiteLocale;
   offices: Array<Omit<WebsiteOffice, "translations"> & WebsiteOfficeText>;
   ogImage: WebsiteAssetReference | null;
