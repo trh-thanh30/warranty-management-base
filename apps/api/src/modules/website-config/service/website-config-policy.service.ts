@@ -1,6 +1,10 @@
 import { ValidationError } from '@/common/response/client-errors';
 import { Injectable } from '@nestjs/common';
-import type { UpdateWebsiteSiteSettingBody } from '@repo/shared';
+import type {
+  UpdateWebsiteSiteSettingBody,
+  WebsiteHomepageCopy,
+} from '@repo/shared';
+import { isWebsiteEditableText } from '@repo/shared/utils';
 
 type SiteDraft = Omit<UpdateWebsiteSiteSettingBody, 'expectedVersion'>;
 
@@ -19,6 +23,7 @@ export class WebsiteConfigPolicyService {
 
   assertSitePublishable(site: SiteDraft) {
     this.assertSiteDraftValid(site);
+    this.assertHomepagePublishable(site.homepage.content);
 
     if (!this.isEmail(site.contactEmail)) {
       throw new ValidationError(
@@ -74,6 +79,71 @@ export class WebsiteConfigPolicyService {
       'Website link is not allowed',
       'WEBSITE_CONFIG_URL_INVALID',
       { href: normalizedHref },
+    );
+  }
+
+  private assertHomepagePublishable(content: SiteDraft['homepage']['content']) {
+    for (const locale of ['vi', 'en'] as const) {
+      const copy = content[locale];
+      this.assertHomepageStrings(copy, `homepage.content.${locale}`);
+
+      for (const [field, value] of [
+        ['warrantyYears', copy.sputter.warrantyYears],
+        ['uvPercent', copy.sputter.uvPercent],
+        ['irPercent', copy.sputter.irPercent],
+        ['landing.hero.uvPercent', copy.landing.hero.uvPercent],
+        ['landing.hero.originPercent', copy.landing.hero.originPercent],
+        ['landing.hero.warrantyYears', copy.landing.hero.warrantyYears],
+      ] as const) {
+        if (!Number.isFinite(value) || value < 0 || value > 100) {
+          this.invalidHomepageField(
+            field.startsWith('landing.')
+              ? `homepage.content.${locale}.${field}`
+              : `homepage.content.${locale}.sputter.${field}`,
+          );
+        }
+      }
+
+      if (
+        copy.comparison.standardItems.length !== 3 ||
+        copy.comparison.fujitekItems.length !== 3
+      ) {
+        this.invalidHomepageField(`homepage.content.${locale}.comparison`);
+      }
+    }
+  }
+
+  private assertHomepageStrings(value: unknown, path: string) {
+    if (typeof value === 'string') {
+      if (!value.trim()) this.invalidHomepageField(path);
+      return;
+    }
+    if (Array.isArray(value)) {
+      value.forEach((item, index) =>
+        this.assertHomepageStrings(item, `${path}.${index}`),
+      );
+      return;
+    }
+    if (!value || typeof value !== 'object') return;
+
+    if ('content' in value && 'font' in value && 'size' in value) {
+      if (!isWebsiteEditableText(value)) this.invalidHomepageField(path);
+      if (!value.content.trim()) this.invalidHomepageField(`${path}.content`);
+      return;
+    }
+
+    for (const [key, child] of Object.entries(
+      value as Record<keyof WebsiteHomepageCopy, unknown>,
+    )) {
+      this.assertHomepageStrings(child, `${path}.${key}`);
+    }
+  }
+
+  private invalidHomepageField(field: string): never {
+    throw new ValidationError(
+      'Homepage content is invalid',
+      'WEBSITE_CONFIG_PUBLISH_INVALID',
+      { field },
     );
   }
 

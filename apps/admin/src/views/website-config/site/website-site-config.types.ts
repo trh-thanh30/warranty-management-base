@@ -7,9 +7,11 @@ export type SiteDraftUpdater = (
 ) => void;
 
 export type SiteAssetUrls = {
+  brandStoryImageUrl: string;
   footerLogoUrl: string;
   headerLogoUrl: string;
   ogImageUrl: string;
+  technologyOriginImageUrl: string;
 };
 
 export type SiteAssetUrlsUpdater = (

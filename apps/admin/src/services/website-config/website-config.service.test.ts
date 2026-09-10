@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { DEFAULT_WEBSITE_HOMEPAGE_CONTENT } from "@repo/shared/constants";
 import { createWebsiteConfigService } from "./create-website-config.service.ts";
 import type { WebsiteConfigHttpClient } from "./website-config.types.ts";
 
@@ -25,6 +26,12 @@ test("uses the protected site draft and publish endpoints", async () => {
     footerLogoAssetId: null,
     headerLogoAssetId: null,
     heroSlides: [],
+    homepage: {
+      aboutImageAssetId: null,
+      content: structuredClone(DEFAULT_WEBSITE_HOMEPAGE_CONTENT),
+      sputterChamberImageAssetId: null,
+      sputterStructureImageAssetId: null,
+    },
     offices: [],
     socialLinks: [],
     ogImageAssetId: null,

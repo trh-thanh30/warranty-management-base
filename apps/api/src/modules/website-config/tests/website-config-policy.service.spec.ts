@@ -1,5 +1,13 @@
 import { WebsiteConfigPolicyService } from '@/modules/website-config/service/website-config-policy.service';
 import { ValidationError } from '@/common/response/client-errors';
+import { DEFAULT_WEBSITE_HOMEPAGE_CONTENT } from '@repo/shared/constants';
+
+const validHomepage = {
+  aboutImageAssetId: null,
+  content: structuredClone(DEFAULT_WEBSITE_HOMEPAGE_CONTENT),
+  sputterChamberImageAssetId: null,
+  sputterStructureImageAssetId: null,
+};
 
 describe('WebsiteConfigPolicyService', () => {
   const policy = new WebsiteConfigPolicyService();
@@ -11,6 +19,7 @@ describe('WebsiteConfigPolicyService', () => {
         footerLogoAssetId: null,
         headerLogoAssetId: null,
         heroSlides: [],
+        homepage: validHomepage,
         offices: [
           {
             id: 'c20b9c36-b839-4e47-9dd1-a75b43a34bca',
@@ -42,6 +51,7 @@ describe('WebsiteConfigPolicyService', () => {
         footerLogoAssetId: null,
         headerLogoAssetId: null,
         heroSlides: [],
+        homepage: validHomepage,
         offices: [
           {
             id: '10000000-0000-4000-8000-000000000001',
@@ -78,6 +88,7 @@ describe('WebsiteConfigPolicyService', () => {
         footerLogoAssetId: null,
         headerLogoAssetId: null,
         heroSlides: [],
+        homepage: validHomepage,
         offices: [],
         socialLinks: [],
         ogImageAssetId: null,
@@ -97,6 +108,7 @@ describe('WebsiteConfigPolicyService', () => {
         footerLogoAssetId: null,
         headerLogoAssetId: null,
         heroSlides: [],
+        homepage: validHomepage,
         offices: [],
         socialLinks: [
           {
@@ -142,6 +154,7 @@ describe('WebsiteConfigPolicyService', () => {
             sortOrder: 1,
           },
         ],
+        homepage: validHomepage,
         offices: [],
         socialLinks: [],
         ogImageAssetId: null,
@@ -170,11 +183,96 @@ describe('WebsiteConfigPolicyService', () => {
             sortOrder: 0,
           },
         ],
+        homepage: validHomepage,
         offices: [],
         socialLinks: [],
         ogImageAssetId: null,
         websiteUrl: 'https://example.com',
       }),
     ).not.toThrow();
+  });
+
+  it('rejects blank required homepage copy before publishing', () => {
+    const homepage = structuredClone(validHomepage);
+    homepage.content.vi.about.title = '   ';
+
+    expect(() =>
+      policy.assertSitePublishable({
+        contactEmail: 'contact@example.com',
+        footerLogoAssetId: null,
+        headerLogoAssetId: null,
+        heroSlides: [],
+        homepage,
+        offices: [],
+        socialLinks: [],
+        ogImageAssetId: null,
+        websiteUrl: 'https://example.com',
+      }),
+    ).toThrow(
+      expect.objectContaining({
+        code: 'WEBSITE_CONFIG_PUBLISH_INVALID',
+        details: expect.objectContaining({
+          field: 'homepage.content.vi.about.title',
+        }),
+      }) as ValidationError,
+    );
+  });
+
+  it('rejects blank styled homepage text before publishing', () => {
+    const homepage = structuredClone(validHomepage);
+    homepage.content.vi.landing.hero.titlePrefix.content = '   ';
+
+    expect(() =>
+      policy.assertSitePublishable({
+        contactEmail: 'contact@example.com',
+        footerLogoAssetId: null,
+        headerLogoAssetId: null,
+        heroSlides: [],
+        homepage,
+        offices: [],
+        socialLinks: [],
+        ogImageAssetId: null,
+        websiteUrl: 'https://example.com',
+      }),
+    ).toThrow(
+      expect.objectContaining({
+        code: 'WEBSITE_CONFIG_PUBLISH_INVALID',
+        details: expect.objectContaining({
+          field: 'homepage.content.vi.landing.hero.titlePrefix.content',
+        }),
+      }) as ValidationError,
+    );
+  });
+
+  it('rejects styled homepage text with an unapproved token', () => {
+    const homepage = structuredClone(
+      validHomepage,
+    ) as unknown as typeof validHomepage;
+    const unsafeTitle = homepage.content.vi.landing.hero
+      .titlePrefix as unknown as {
+      color: string;
+    };
+    unsafeTitle.color = '#ff00ff';
+
+    expect(() =>
+      policy.assertSitePublishable({
+        contactEmail: 'contact@example.com',
+        footerLogoAssetId: null,
+        headerLogoAssetId: null,
+        heroSlides: [],
+        homepage,
+        offices: [],
+        socialLinks: [],
+        ogImageAssetId: null,
+        websiteUrl: 'https://example.com',
+      }),
+    ).toThrow(
+      expect.objectContaining({
+        code: 'WEBSITE_CONFIG_PUBLISH_INVALID',
+        details: expect.objectContaining({
+          field: 'homepage.content.vi.landing.hero.titlePrefix',
+        }),
+      }) as ValidationError,
+    );
   });
 });

@@ -3223,6 +3223,9 @@
       "title": "Thông tin website",
       "description": "Chỉnh sửa thông tin dùng chung trên website công khai.",
       "media": "Hình ảnh website",
+      "openHomepageEditor": "Mở trình chỉnh sửa trang chủ",
+      "homepageEditorSummaryTitle": "Nội dung trang chủ",
+      "homepageEditorSummaryDescription": "Mở trình chỉnh sửa riêng để tùy chỉnh nội dung, kiểu chữ, hình ảnh và slide hero trên trang chủ.",
       "mediaDescription": "Quản lý logo dùng ở header, footer và ảnh đại diện mặc định khi chia sẻ website.",
       "tabs": {
         "identity": "Nhận diện",
@@ -3243,6 +3246,91 @@
       "heroMoveDown": "Di chuyển slide {index} xuống",
       "heroRemove": "Xóa slide {index}",
       "heroRemovalPending": "Ảnh sẽ được gỡ khỏi slide này khi bạn lưu draft.",
+      "homepageEditor": {
+        "title": "Chỉnh sửa trực tiếp trang chủ",
+        "backToSite": "Quay lại cài đặt website",
+        "description": "Bấm vào từng đoạn chữ trên bản xem trước để sửa nội dung; chọn đoạn chữ để đổi font, cỡ, màu và căn chỉnh.",
+        "readOnly": "Bạn đang xem trước trang chủ ở chế độ chỉ đọc.",
+        "invalidData": "Dữ liệu trình chỉnh sửa không hợp lệ. Hãy tải lại trang và thử lại.",
+        "unsavedChanges": "Các thay đổi chưa được lưu nháp.",
+        "openFullscreen": "Mở trình chỉnh sửa toàn màn hình",
+        "closeFullscreen": "Đóng trình chỉnh sửa toàn màn hình",
+        "brandStoryImage": "Ảnh câu chuyện thương hiệu",
+        "technologyOriginImage": "Ảnh xuất xứ công nghệ",
+        "imageReplaced": "Đã thay ảnh. Hãy lưu nháp để giữ thay đổi.",
+        "imageReplaceFailed": "Không thể thay ảnh.",
+        "replaceImage": "Thay ảnh",
+        "cancelImageReplace": "Hủy",
+        "styles": {
+          "font": "Phông chữ",
+          "size": "Kích thước",
+          "color": "Màu chữ",
+          "align": "Căn lề",
+          "bold": "In đậm",
+          "italic": "In nghiêng"
+        },
+        "viewports": {
+          "desktop": "Máy tính",
+          "tablet": "Máy tính bảng",
+          "mobile": "Điện thoại"
+        }
+      },
+      "homepageContent": {
+        "title": "Nội dung trang chủ",
+        "description": "Chỉnh nội dung đang hiển thị trên trang chủ theo từng ngôn ngữ. Thứ tự các khu vực được giữ cố định.",
+        "sections": {
+          "hero": "Hero",
+          "brandHeritage": "Câu chuyện thương hiệu",
+          "brandStory": "Định nghĩa thương hiệu",
+          "technologyOrigin": "Xuất xứ công nghệ",
+          "coreTech": "Công nghệ cốt lõi",
+          "milestones": "Cột mốc phát triển",
+          "pillars": "Tầm nhìn và giá trị",
+          "network": "Mạng lưới đại lý",
+          "testimonials": "Đánh giá đối tác",
+          "b2b": "Kêu gọi hợp tác đại lý"
+        },
+        "sectionDescriptions": {
+          "hero": "Nội dung đầu tiên khách hàng nhìn thấy trên trang chủ.",
+          "brandHeritage": "Thông điệp thương hiệu và xuất xứ công nghệ.",
+          "coreTech": "Tiêu đề giới thiệu các công nghệ chính.",
+          "milestones": "Tiêu đề khu vực hành trình phát triển.",
+          "pillars": "Tiêu đề khu vực giá trị cốt lõi.",
+          "network": "Thông điệp và nút dẫn tới mạng lưới đại lý.",
+          "testimonials": "Tiêu đề khu vực đánh giá từ đối tác.",
+          "b2b": "Thông điệp mời đăng ký trở thành đại lý."
+        },
+        "fields": {
+          "eyebrow": "Nhãn phía trên",
+          "title": "Tiêu đề",
+          "titlePrefix": "Phần đầu tiêu đề",
+          "titleHighlight": "Phần tiêu đề nổi bật",
+          "titleSuffix": "Phần cuối tiêu đề",
+          "description": "Mô tả",
+          "primaryCta": "Nút hành động chính",
+          "dealerCta": "Nút mạng lưới đại lý",
+          "uvPercent": "Tỷ lệ cản UV/IR (%)",
+          "originPercent": "Tỷ lệ xuất xứ (%)",
+          "warrantyYears": "Số năm bảo hành",
+          "uvLabel": "Nhãn chỉ số UV/IR",
+          "originLabel": "Nhãn xuất xứ",
+          "warrantyLabel": "Nhãn bảo hành",
+          "yearsSuffix": "Hậu tố năm",
+          "brandLabel": "Nhãn thương hiệu",
+          "headlineLine1": "Dòng tiêu đề 1",
+          "headlineLine2Prefix": "Phần đầu dòng tiêu đề 2",
+          "headlineHighlight": "Phần tiêu đề thương hiệu nổi bật",
+          "headlineLine3": "Dòng tiêu đề 3",
+          "descriptionPrimary": "Mô tả chính",
+          "descriptionSecondary": "Mô tả bổ sung",
+          "originEyebrow": "Nhãn xuất xứ",
+          "originTitle": "Tiêu đề xuất xứ",
+          "originDescriptionPrimary": "Mô tả xuất xứ chính",
+          "originDescriptionSecondary": "Mô tả xuất xứ bổ sung",
+          "viewDealersCta": "Nút xem đại lý",
+          "partnerCta": "Nút đăng ký đại lý"
+        }
+      },
       "addressOffices": "Địa chỉ & Văn phòng",
       "addressOfficesDescription": "Cấu hình tên, địa chỉ và hotline của từng văn phòng. Hotline trụ sở chính được ưu tiên; nếu chưa chọn, hệ thống dùng văn phòng hoạt động đầu tiên.",
       "hotlineContact": "Hotline & Liên hệ",
@@ -3320,7 +3408,7 @@
     },
     "actions": {
       "saveDraft": "Lưu nháp",
-      "preview": "Xem trước dữ liệu",
+      "preview": "Xem trước trang chủ",
       "saving": "Đang lưu...",
       "publish": "Xuất bản",
       "publishing": "Đang xuất bản...",
@@ -3338,7 +3426,10 @@
     },
     "preview": {
       "title": "Dữ liệu preview",
-      "description": "Đây là dữ liệu xem trước được dựng từ bản nháp hiện tại."
+      "description": "Đây là dữ liệu xem trước được dựng từ bản nháp hiện tại.",
+      "homepageTitle": "Xem trước trang chủ",
+      "homepageDescription": "Bản xem trước cập nhật theo nội dung đang chỉnh sửa và chưa ảnh hưởng website công khai.",
+      "homepageFrameTitle": "Bản xem trước giao diện trang chủ"
     },
     "states": {
       "loading": "Đang tải cấu hình",

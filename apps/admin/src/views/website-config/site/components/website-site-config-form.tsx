@@ -4,6 +4,7 @@ import type { WebsiteLocale, WebsiteSiteSetting } from "@repo/shared";
 import {
   Card,
   CardContent,
+  Button,
   Tabs,
   TabsContent,
   TabsList,
@@ -11,6 +12,7 @@ import {
 } from "@repo/ui";
 import { House, Image, Images, MapPin, Share2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/src/i18n/navigation";
 import { LocaleTabs } from "../../components/locale-tabs";
 import { HomepageHeroEditor } from "../homepage-hero-editor";
 import { ThumbnailUploadPanel } from "../thumbnail-upload-panel";
@@ -135,14 +137,33 @@ export function WebsiteSiteConfigForm({
       <TabsContent className="mt-0" value="homepage">
         <Card>
           <CardContent className="p-5 sm:p-6">
-            <HomepageHeroEditor
-              configuredSlides={site.heroSlides}
-              disabled={!canUpdate}
-              onChange={(heroSlides) =>
-                onChange((current) => ({ ...current, heroSlides }))
-              }
-              slides={form.heroSlides}
-            />
+            <div className="space-y-8">
+              <div className="rounded-lg border bg-slate-50 p-5">
+                <h3 className="font-semibold text-slate-950">
+                  {t("site.homepageEditorSummaryTitle")}
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {t("site.homepageEditorSummaryDescription")}
+                </p>
+                <Button asChild className="mt-4" variant="outline">
+                  <Link
+                    href="/website-config/site/homepage-editor"
+                    target="_blank"
+                  >
+                    {t("site.openHomepageEditor")}
+                  </Link>
+                </Button>
+              </div>
+              <div className="border-t" />
+              <HomepageHeroEditor
+                configuredSlides={site.heroSlides}
+                disabled={!canUpdate}
+                onChange={(heroSlides) =>
+                  onChange((current) => ({ ...current, heroSlides }))
+                }
+                slides={form.heroSlides}
+              />
+            </div>
           </CardContent>
         </Card>
       </TabsContent>
@@ -165,6 +186,11 @@ export function WebsiteSiteConfigForm({
               locale={locale}
               onChange={onChange}
             />
+            <Button asChild variant="outline">
+              <Link href="/website-config/site/homepage-editor">
+                {t("site.openHomepageEditor")}
+              </Link>
+            </Button>
             <ContactEditor
               disabled={!canUpdate}
               form={form}

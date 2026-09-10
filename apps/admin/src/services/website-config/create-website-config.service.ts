@@ -1,8 +1,6 @@
 import type {
-  PublicWebsiteSiteSetting,
   UpdateWebsiteSiteSettingBody,
   WebsiteConfigOverview,
-  WebsiteLocale,
   WebsiteSiteSetting,
   WebsiteVersionedMutation,
 } from "@repo/shared";
@@ -21,13 +19,6 @@ export function createWebsiteConfigService(http: WebsiteConfigHttpClient) {
     saveSite: (body: UpdateWebsiteSiteSettingBody) =>
       http
         .patch<WebsiteSiteSetting>("/website-config/site-settings/draft", body)
-        .then(unwrap),
-    previewSite: (locale: WebsiteLocale) =>
-      http
-        .get<PublicWebsiteSiteSetting>(
-          "/website-config/site-settings/preview",
-          { params: { locale } },
-        )
         .then(unwrap),
     publishSite: (body: WebsiteVersionedMutation) =>
       http

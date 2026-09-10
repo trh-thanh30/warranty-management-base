@@ -24,7 +24,7 @@ const publicWebUrl = (
   process.env.NEXT_PUBLIC_WEB_URL ?? "http://localhost:4101"
 ).replace(/\/$/, "");
 
-function toPreviewUrl(url: string) {
+export function toPreviewUrl(url: string) {
   return url.startsWith("/") ? `${publicWebUrl}${url}` : url;
 }
 

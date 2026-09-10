@@ -17,6 +17,8 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^5.4.0",
+    "@puckeditor/core": "^0.23.0",
+    "@repo/homepage": "workspace:^",
     "@repo/hooks": "workspace:*",
     "@repo/shared": "workspace:*",
     "@repo/ui": "workspace:*",

@@ -16,8 +16,6 @@ import {
 } from "@/src/hooks/use-website-config";
 import { useToast } from "@/src/hooks/use-toast";
 import { isWebsiteVersionConflict } from "@/src/lib/http-error.utils";
-import { websiteConfigService } from "@/src/services/website-config/website-config.service";
-import { PreviewDataDialog } from "../components/preview-data-dialog";
 import { RevisionStatusBar } from "../components/revision-status-bar";
 import { WebsiteConfigQueryState } from "../components/website-config-query-state";
 import { WebsiteSiteConfigForm } from "./components/website-site-config-form";
@@ -37,9 +35,11 @@ export function WebsiteSiteConfigView() {
   const [locale, setLocale] = useState<WebsiteLocale>("vi");
   const [form, setForm] = useState<SiteDraft | null>(null);
   const [assets, setAssets] = useState<SiteAssetUrls>({
+    brandStoryImageUrl: "",
     footerLogoUrl: "",
     headerLogoUrl: "",
     ogImageUrl: "",
+    technologyOriginImageUrl: "",
   });
   const [dirty, setDirty] = useState(false);
   const conflict =
@@ -50,9 +50,12 @@ export function WebsiteSiteConfigView() {
     if (!query.data) return;
     setForm(toSiteDraft(query.data));
     setAssets({
+      brandStoryImageUrl: query.data.homepage.aboutImage?.url ?? "",
       footerLogoUrl: query.data.footerLogo?.url ?? "",
       headerLogoUrl: query.data.headerLogo?.url ?? "",
       ogImageUrl: query.data.ogImage?.url ?? "",
+      technologyOriginImageUrl:
+        query.data.homepage.sputterChamberImage?.url ?? "",
     });
     setDirty(false);
   }, [query.data]);
@@ -125,12 +128,6 @@ export function WebsiteSiteConfigView() {
     <PermissionGuard permissions={[PERMISSIONS.WEBSITE_CONFIG_VIEW]}>
       <div className="space-y-6">
         <PageHeader
-          actions={
-            <PreviewDataDialog
-              load={websiteConfigService.previewSite}
-              locale={locale}
-            />
-          }
           description={t("site.description")}
           eyebrow={t("eyebrow")}
           title={t("site.title")}

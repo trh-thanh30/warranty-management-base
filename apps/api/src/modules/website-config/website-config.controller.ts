@@ -32,12 +32,6 @@ export class WebsiteConfigController {
     return this.siteUseCase.save(dto, user.id);
   }
 
-  @Get('website-config/site-settings/preview')
-  @Permissions([permission_key.WEBSITE_CONFIG_VIEW])
-  previewSite(@Query() query: WebsiteLocaleQueryDto) {
-    return this.siteUseCase.preview(query.locale);
-  }
-
   @Post('website-config/site-settings/publish')
   @Permissions([permission_key.WEBSITE_CONFIG_PUBLISH])
   publishSite(@Body() dto: WebsiteVersionedDto, @User() user: UserEntity) {

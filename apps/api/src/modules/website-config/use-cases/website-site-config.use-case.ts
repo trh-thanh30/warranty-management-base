@@ -15,6 +15,7 @@ import type {
   WebsiteRevisionMeta,
   WebsiteSiteSetting,
 } from '@repo/shared';
+import { resolveWebsiteHomepageContent } from '@repo/shared/utils';
 import type { Asset, User } from '@prisma/client';
 
 @Injectable()
@@ -38,11 +39,6 @@ export class WebsiteSiteConfigUseCase {
     const draft = await this.repository.saveSiteDraft(input, actorId);
     const published = await this.repository.findSitePublished();
     return this.mapSite(draft, published);
-  }
-
-  async preview(locale: WebsiteLocale) {
-    const draft = await this.repository.getOrCreateSiteDraft();
-    return this.mapPublicSite(draft, locale);
   }
 
   async publish(expectedVersion: number, actorId: string) {
@@ -70,6 +66,9 @@ export class WebsiteSiteConfigUseCase {
   }
 
   private assertSiteRevisionPublishable(draft: WebsiteSiteRevisionRecord) {
+    const homepageContent = resolveWebsiteHomepageContent(
+      draft.homepage_content,
+    );
     this.policy.assertSitePublishable({
       contactEmail: draft.contact_email,
       footerLogoAssetId: draft.footer_logo_asset_id,
@@ -82,6 +81,12 @@ export class WebsiteSiteConfigUseCase {
         mobileAssetId: slide.mobile_asset_id,
         sortOrder: slide.sort_order,
       })),
+      homepage: {
+        aboutImageAssetId: draft.homepage_about_image_asset_id,
+        content: homepageContent,
+        sputterChamberImageAssetId: draft.homepage_sputter_chamber_asset_id,
+        sputterStructureImageAssetId: draft.homepage_sputter_structure_asset_id,
+      },
       offices: draft.offices.map((office) => ({
         id: office.id,
         isActive: office.is_active,
@@ -111,6 +116,9 @@ export class WebsiteSiteConfigUseCase {
     draft: WebsiteSiteRevisionRecord,
     published: WebsiteSiteRevisionRecord | null,
   ): WebsiteSiteSetting {
+    const homepageContent = resolveWebsiteHomepageContent(
+      draft.homepage_content,
+    );
     return {
       contactEmail: draft.contact_email,
       footerLogo: this.asset(draft.footer_logo),
@@ -123,6 +131,14 @@ export class WebsiteSiteConfigUseCase {
         mobileImage: this.asset(slide.mobile_image),
         sortOrder: slide.sort_order,
       })),
+      homepage: {
+        aboutImage: this.asset(draft.homepage_about_image),
+        content: homepageContent,
+        sputterChamberImage: this.asset(draft.homepage_sputter_chamber_image),
+        sputterStructureImage: this.asset(
+          draft.homepage_sputter_structure_image,
+        ),
+      },
       offices: draft.offices.map((office) => ({
         id: office.id,
         isActive: office.is_active,
@@ -154,6 +170,9 @@ export class WebsiteSiteConfigUseCase {
     revision: WebsiteSiteRevisionRecord,
     locale: WebsiteLocale,
   ): PublicWebsiteSiteSetting {
+    const homepageContent = resolveWebsiteHomepageContent(
+      revision.homepage_content,
+    );
     return {
       contactEmail: revision.contact_email,
       footerLogo: this.asset(revision.footer_logo),
@@ -168,6 +187,16 @@ export class WebsiteSiteConfigUseCase {
           mobileImage: this.asset(slide.mobile_image),
           sortOrder: slide.sort_order,
         })),
+      homepage: {
+        aboutImage: this.asset(revision.homepage_about_image),
+        copy: homepageContent[locale],
+        sputterChamberImage: this.asset(
+          revision.homepage_sputter_chamber_image,
+        ),
+        sputterStructureImage: this.asset(
+          revision.homepage_sputter_structure_image,
+        ),
+      },
       locale,
       offices: revision.offices
         .filter((office) => office.is_active)
