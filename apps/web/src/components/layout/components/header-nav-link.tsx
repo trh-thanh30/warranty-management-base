@@ -1,9 +1,9 @@
 "use client";
 
-import type { ComponentProps, MouseEventHandler, ReactNode } from "react";
-import { cn } from "@repo/ui/lib/utils";
 import { Link, usePathname } from "@/src/i18n/navigation";
 import { isNavigationItemActive } from "@/src/utils/pathname.utils";
+import { cn } from "@repo/ui/lib/utils";
+import type { ComponentProps, MouseEventHandler, ReactNode } from "react";
 
 type HeaderNavLinkProps = {
   children: ReactNode;
@@ -23,7 +23,7 @@ export function HeaderNavLink({
   const pathname = usePathname();
   const isActive = !external && isNavigationItemActive(pathname, href);
   const className = cn(
-    "text-base font-medium uppercase tracking-wide transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red",
+    "text-base font-semibold uppercase tracking-wide transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red",
     isMobile
       ? "block rounded-md px-3 py-2.5 focus-visible:ring-offset-2"
       : "relative inline-flex py-1.5 focus-visible:ring-offset-4",

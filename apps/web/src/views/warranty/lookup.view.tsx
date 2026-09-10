@@ -1,7 +1,18 @@
 "use client";
 
-import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { usePrimaryWebsiteHotline } from "@/src/app/providers/site-settings-provider";
+import { Container } from "@/src/components/common/container";
+import { WarrantyLookupForm } from "@/src/components/common/warranty-lookup-form";
+import { WarrantyPolicyShortcut } from "@/src/components/common/warranty-policy-shortcut";
+import { WarrantyProcessSteps } from "@/src/components/common/warranty-process-steps";
+import { WarrantyLookupResultDetails } from "@/src/components/warranty-lookup-result";
+import {
+  PUBLIC_DEALER_NETWORK_URL,
+  PUBLIC_FEATURES,
+} from "@/src/config/public-features.config";
+import { APP_ROUTES } from "@/src/constants/routes.constants";
+import { useWarrantyLookup } from "@/src/hooks/use-warranty-lookup";
+import { Link } from "@/src/i18n/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Building2,
@@ -12,19 +23,8 @@ import {
   Search,
   ShieldCheck,
 } from "lucide-react";
-import { usePrimaryWebsiteHotline } from "@/src/app/providers/site-settings-provider";
-import { APP_ROUTES } from "@/src/constants/routes.constants";
-import {
-  PUBLIC_DEALER_NETWORK_URL,
-  PUBLIC_FEATURES,
-} from "@/src/config/public-features.config";
-import { Link } from "@/src/i18n/navigation";
-import { Container } from "@/src/components/common/container";
-import { WarrantyLookupForm } from "@/src/components/common/warranty-lookup-form";
-import { WarrantyLookupResultDetails } from "@/src/components/warranty-lookup-result";
-import { WarrantyPolicyShortcut } from "@/src/components/common/warranty-policy-shortcut";
-import { WarrantyProcessSteps } from "@/src/components/common/warranty-process-steps";
-import { useWarrantyLookup } from "@/src/hooks/use-warranty-lookup";
+import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { WarrantyBackLink } from "./components/warranty-back-link";
 
 const lookupGuideSteps = [
@@ -56,8 +56,8 @@ export function WarrantyLookupView() {
           sizes="100vw"
           className="object-cover opacity-35"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-deep-black via-deep-black/80 to-transparent z-10" />
-        <Container className="relative z-20 max-w-[1400px] space-y-3">
+        <div className="absolute inset-0 bg-linear-to-r from-deep-black via-deep-black/80 to-transparent z-10" />
+        <Container className="relative z-20 max-w-360 space-y-3">
           <span className="inline-block bg-premium-red text-white px-4 py-1 rounded-md text-xs font-semibold uppercase tracking-[0.25em]">
             {t("eyebrow")}
           </span>
@@ -70,7 +70,7 @@ export function WarrantyLookupView() {
         </Container>
       </section>
 
-      <Container className="mt-12 max-w-[1400px] space-y-16 sm:mt-16">
+      <Container className="mt-12 max-w-360 space-y-16 sm:mt-16">
         <div className="border-b border-border-gray pb-6">
           <WarrantyBackLink />
         </div>

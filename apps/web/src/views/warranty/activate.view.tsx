@@ -1,8 +1,5 @@
 "use client";
 
-import Image from "next/image";
-import { useTranslations } from "next-intl";
-import { Building2, Clock3, FileText, Send, ShieldCheck } from "lucide-react";
 import { Container } from "@/src/components/common/container";
 import { WarrantyPolicyShortcut } from "@/src/components/common/warranty-policy-shortcut";
 import { WarrantyProcessSteps } from "@/src/components/common/warranty-process-steps";
@@ -10,6 +7,9 @@ import { PUBLIC_DEALER_NETWORK_URL } from "@/src/config/public-features.config";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { useWarrantyActivationRequest } from "@/src/hooks/use-warranty-activation-request";
 import { Link } from "@/src/i18n/navigation";
+import { Building2, Clock3, FileText, Send, ShieldCheck } from "lucide-react";
+import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { WarrantyActivationRequestForm } from "./components/warranty-activation-request-form";
 import { WarrantyActivationSuccess } from "./components/warranty-activation-success";
 import { WarrantyBackLink } from "./components/warranty-back-link";
@@ -41,8 +41,8 @@ export function WarrantyActivateView() {
           sizes="100vw"
           className="object-cover opacity-35"
         />
-        <div className="absolute inset-0 z-10 bg-gradient-to-r from-deep-black via-deep-black/80 to-transparent" />
-        <Container className="relative z-20 max-w-[1400px] space-y-3">
+        <div className="absolute inset-0 z-10 bg-linear-to-r from-deep-black via-deep-black/80 to-transparent" />
+        <Container className="relative z-20 max-w-360 space-y-3">
           <span className="inline-block rounded-md bg-premium-red px-4 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-white">
             {t("eyebrow")}
           </span>

@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { Container } from "@/src/components/common/container";
 import { WarrantyPolicyShortcut } from "@/src/components/common/warranty-policy-shortcut";
 import { WarrantyProcessSteps } from "@/src/components/common/warranty-process-steps";
@@ -26,6 +25,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import Image from "next/image";
 import { useState } from "react";
 import { WarrantyBackLink } from "./components/warranty-back-link";
 import { WarrantyClaimRequestForm } from "./components/warranty-claim-request-form";
@@ -76,8 +76,8 @@ export function WarrantyClaimRequestView() {
           sizes="100vw"
           className="object-cover opacity-35"
         />
-        <div className="absolute inset-0 z-10 bg-gradient-to-r from-deep-black via-deep-black/80 to-transparent" />
-        <Container className="relative z-20 max-w-[1400px] space-y-3">
+        <div className="absolute inset-0 z-10 bg-linear-to-r from-deep-black via-deep-black/80 to-transparent" />
+        <Container className="relative z-20 max-w-360 space-y-3">
           <span className="inline-block rounded-md bg-premium-red px-4 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-white">
             {t("eyebrow")}
           </span>

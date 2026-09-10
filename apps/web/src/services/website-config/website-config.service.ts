@@ -5,6 +5,7 @@ import type {
   PublicWebsiteSiteSetting,
   WebsiteLocale,
 } from "@repo/shared";
+import { unstable_cache } from "next/cache";
 import { cache } from "react";
 
 export class WebsiteConfigService {
@@ -23,6 +24,10 @@ export class WebsiteConfigService {
 
 export const websiteConfigService = new WebsiteConfigService(publicHttpClient);
 
-export const getCachedSiteSetting = cache((locale: WebsiteLocale) =>
-  websiteConfigService.getSiteSetting(locale),
+const getPersistedSiteSetting = unstable_cache(
+  (locale: WebsiteLocale) => websiteConfigService.getSiteSetting(locale),
+  ["public-site-setting"],
+  { revalidate: 60 },
 );
+
+export const getCachedSiteSetting = cache(getPersistedSiteSetting);
