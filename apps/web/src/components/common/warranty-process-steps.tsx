@@ -18,7 +18,7 @@ export function WarrantyProcessSteps({ steps }: WarrantyProcessStepsProps) {
       <ol className="grid gap-6 sm:grid-cols-3">
         {steps.map(({ number, Icon, badge, title, description }) => (
           <li
-            className="group flex h-57.5 flex-col justify-between rounded-md border border-border-gray bg-white p-6 text-left shadow-md transition-all hover:border-premium-red hover:shadow-xl"
+            className="group flex h-57.5 flex-col justify-between rounded-md border border-border-gray bg-white p-6 text-left shadow-sm transition-all hover:border-premium-red hover:shadow-xl"
             key={number}
           >
             <div className="flex items-center justify-between">

@@ -1501,7 +1501,7 @@
           },
           "qr": {
             "label": "Nguồn 02",
-            "title": "Tin nhắn / Email",
+            "title": "Email",
             "description": "Mã bảo hành được gửi sau khi sản phẩm được kích hoạt"
           },
           "serial": {
@@ -1564,9 +1564,9 @@
       "description": "Nhận hỗ trợ cho các vấn đề bong tróc, bọt khí, bay màu hoặc lỗi kỹ thuật thi công.",
       "form": {
         "title": "Gửi yêu cầu bảo hành",
-        "description": "Điền thông tin để FUJITEK tiếp nhận và xử lý yêu cầu của bạn.",
+        "description": "Điền thông tin để Fujitek – Lexzenz tiếp nhận và xử lý yêu cầu của bạn.",
         "sectionTitle": "Thông tin yêu cầu bảo hành",
-        "sectionDescription": "Vui lòng điền đầy đủ thông tin để FUJITEK có thể tiếp nhận và hỗ trợ bạn chính xác."
+        "sectionDescription": "Vui lòng điền đầy đủ thông tin để Fujitek – Lexzenz có thể tiếp nhận và hỗ trợ bạn chính xác."
       },
       "guide": {
         "title": "Quy trình gửi yêu cầu bảo hành",

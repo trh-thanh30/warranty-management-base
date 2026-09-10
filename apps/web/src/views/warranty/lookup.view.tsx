@@ -43,7 +43,7 @@ export function WarrantyLookupView() {
       mainClassName="pb-16 sm:pb-24"
     >
       {/* 2. Registration Methods Section */}
-      <section className="space-y-8 text-center max-w-4xl lg:max-w-5xl mx-auto">
+      <section className="space-y-8 text-center  mx-auto">
         <WarrantyPageHeading
           accent
           description={t("registration.description")}
@@ -52,7 +52,7 @@ export function WarrantyLookupView() {
         />
 
         <div className="grid gap-6 sm:grid-cols-3">
-          <div className="group bg-white rounded-md border border-border-gray shadow-md hover:shadow-xl hover:border-premium-red transition-all p-6 sm:p-7 text-left flex flex-col justify-between h-[230px]">
+          <div className="group bg-white rounded-md border border-border-gray shadow-xs hover:shadow-sm hover:border-premium-red transition-all p-6 sm:p-7 text-left flex flex-col justify-between h-57.5">
             <div className="flex items-center justify-between">
               <div className="flex size-12 items-center justify-center rounded-md bg-surface-muted border border-border-gray text-stone-gray group-hover:text-premium-red group-hover:border-premium-red/30 transition-colors">
                 <Phone className="size-6" strokeWidth={1.8} />
@@ -74,7 +74,7 @@ export function WarrantyLookupView() {
             </div>
           </div>
 
-          <div className="group bg-white rounded-md border border-border-gray shadow-md hover:shadow-xl hover:border-premium-red transition-all p-6 sm:p-7 text-left flex flex-col justify-between h-[230px]">
+          <div className="group bg-white rounded-md border border-border-gray shadow-xs hover:shadow-sm hover:border-premium-red transition-all p-6 sm:p-7 text-left flex flex-col justify-between h-57.5">
             <div className="flex items-center justify-between">
               <div className="flex size-12 items-center justify-center rounded-md bg-surface-muted border border-border-gray text-stone-gray group-hover:text-premium-red group-hover:border-premium-red/30 transition-colors">
                 <FileText className="size-6" strokeWidth={1.8} />
@@ -88,7 +88,7 @@ export function WarrantyLookupView() {
                 <span className="text-xs font-semibold uppercase tracking-wider text-stone-gray">
                   {t("registration.methods.qr.label")}
                 </span>
-                <span className="rounded-md bg-accent-gold px-2.5 py-0.5 text-xs font-semibold uppercase text-deep-black">
+                <span className="rounded-md bg-premium-red px-2.5 py-0.5 text-xs font-semibold uppercase text-white">
                   E-Warranty
                 </span>
               </div>
@@ -101,7 +101,7 @@ export function WarrantyLookupView() {
             </div>
           </div>
 
-          <div className="group bg-white rounded-md border border-border-gray shadow-md hover:shadow-xl hover:border-premium-red transition-all p-6 sm:p-7 text-left flex flex-col justify-between h-[230px]">
+          <div className="group bg-white rounded-md border border-border-gray shadow-xs hover:shadow-sm hover:border-premium-red transition-all p-6 sm:p-7 text-left flex flex-col justify-between h-57.5">
             <div className="flex items-center justify-between">
               <div className="flex size-12 items-center justify-center rounded-md bg-surface-muted border border-border-gray text-stone-gray group-hover:text-premium-red group-hover:border-premium-red/30 transition-colors">
                 <Hash className="size-6" strokeWidth={1.8} />
@@ -126,7 +126,7 @@ export function WarrantyLookupView() {
       </section>
 
       {/* 3. Search Section */}
-      <section className="space-y-6 max-w-3xl sm:max-w-4xl lg:max-w-5xl mx-auto">
+      <section className="space-y-6 mx-auto">
         <WarrantyPageHeading
           className="max-w-none"
           description={t("searchSection.description")}
@@ -144,11 +144,8 @@ export function WarrantyLookupView() {
           }))}
         />
 
-        <motion.div
-          className="mx-auto max-w-3xl sm:max-w-4xl lg:max-w-5xl"
-          layout
-        >
-          <WarrantyFormCard className="max-w-none overflow-hidden shadow-xl">
+        <motion.div className="mx-auto " layout>
+          <WarrantyFormCard className="max-w-none overflow-hidden shadow-sm">
             <WarrantyLookupForm
               isPending={isPending}
               onSubmit={lookup}
