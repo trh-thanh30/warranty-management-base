@@ -5,7 +5,7 @@
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {
-    "dev": "node ../../scripts/next-port.mjs dev ADMIN_PORT 4102",
+    "dev": "node ../../scripts/next-port.mjs dev ADMIN_PORT 4102 --turbopack",
     "build": "next build",
     "start": "node ../../scripts/next-port.mjs start ADMIN_PORT 4102",
     "test": "node scripts/run-tests.mjs",

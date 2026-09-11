@@ -5,7 +5,7 @@
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {
-    "dev": "node ../../scripts/next-port.mjs dev WEB_PORT 4101",
+    "dev": "node ../../scripts/next-port.mjs dev WEB_PORT 4101 --turbopack",
     "build": "next build",
     "test": "node scripts/run-tests.mjs",
     "start": "node ../../scripts/next-port.mjs start WEB_PORT 4101",
