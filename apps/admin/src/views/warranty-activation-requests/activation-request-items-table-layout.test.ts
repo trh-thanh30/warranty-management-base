@@ -33,6 +33,6 @@ test("activation request items do not expose certificate actions", () => {
 });
 
 test("activation request items show a generated warranty code before its warranty exists", () => {
-  assert.match(source, /\) : \(\s*item\.warrantyCode \? \(/);
+  assert.match(source, /\) : item\.warrantyCode \? \(/);
   assert.match(source, /\{item\.warrantyCode\}\s*<\/span>/);
 });
