@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Eye, Loader2, RefreshCw, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Lightbox from "yet-another-react-lightbox";
-import { Button } from "@repo/ui";
+import { Button, MediaPreviewDialog } from "@repo/ui";
 import { ImageUpload } from "@/src/components/common/image-upload";
 import { useToast } from "@/src/hooks/use-toast";
 import {
@@ -166,24 +165,17 @@ export function ThumbnailUploadPanel({ disabled }: { disabled: boolean }) {
           ))
         ) : null}
       </div>
-      <Lightbox
-        carousel={{ finite: true, imageFit: "contain" }}
-        close={() => setPreviewAsset(null)}
-        controller={{
-          closeOnBackdropClick: true,
-          disableSwipeNavigation: true,
-        }}
-        labels={{ Close: commonT("closeImagePreview") }}
-        open={Boolean(previewAsset)}
-        render={{
-          buttonNext: () => null,
-          buttonPrev: () => null,
-        }}
-        slides={
+      <MediaPreviewDialog
+        closeLabel={commonT("closeImagePreview")}
+        items={
           previewAsset
             ? [{ alt: previewAsset.original_name, src: previewAsset.url }]
             : []
         }
+        onOpenChange={(open) => {
+          if (!open) setPreviewAsset(null);
+        }}
+        open={Boolean(previewAsset)}
       />
     </div>
   );

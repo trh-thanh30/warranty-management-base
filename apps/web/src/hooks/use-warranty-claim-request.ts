@@ -47,8 +47,13 @@ export function getWarrantyClaimRequestErrorKind(
 
 export function useWarrantyClaimRequest() {
   const mutation = useMutation({
-    mutationFn: (body: CreateWarrantyClaimBody) =>
-      warrantyClaimsService.createWarrantyClaim(body),
+    mutationFn: ({
+      attachments,
+      body,
+    }: {
+      attachments: File[];
+      body: CreateWarrantyClaimBody;
+    }) => warrantyClaimsService.createWarrantyClaim(body, attachments),
   });
 
   return {
@@ -56,6 +61,7 @@ export function useWarrantyClaimRequest() {
     errorKind: mutation.error
       ? getWarrantyClaimRequestErrorKind(mutation.error)
       : null,
-    submit: mutation.mutateAsync,
+    submit: (body: CreateWarrantyClaimBody, attachments: File[]) =>
+      mutation.mutateAsync({ attachments, body }),
   };
 }

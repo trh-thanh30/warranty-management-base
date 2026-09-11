@@ -1610,6 +1610,9 @@
       },
       "validation": {
         "detailsInvalid": "Issue details must not exceed 4000 characters.",
+        "evidenceInvalid": "Only JPG, PNG, GIF, WEBP images and MP4 or MOV videos are supported.",
+        "evidenceRequired": "Add at least one image or video showing the product condition.",
+        "evidenceTooLarge": "Each image or video must be no larger than 10 MB.",
         "issueRequired": "Select the issue you are experiencing.",
         "nameInvalid": "Enter a valid full name.",
         "phoneInvalid": "Enter a valid phone number.",
@@ -1639,8 +1642,17 @@
           }
         },
         "details": {
-          "label": "Issue details",
-          "placeholder": "Describe the affected window and the issue..."
+          "label": "Product condition",
+          "placeholder": "Describe the condition, affected area, when it was noticed, or any receiving notes."
+        },
+        "evidence": {
+          "label": "Product condition images / videos *",
+          "choose": "Drag and drop or choose images and videos",
+          "hint": "No file-count limit. Supports JPG, PNG, GIF, WEBP, MP4 and MOV; up to 10 MB per file.",
+          "selectedFiles": "Selected images and videos",
+          "preview": "Preview {name}",
+          "closePreview": "Close preview",
+          "remove": "Remove {name}"
         }
       }
     },

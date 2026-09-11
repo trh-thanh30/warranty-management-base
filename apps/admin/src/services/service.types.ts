@@ -11,6 +11,7 @@ export type HttpResponse<T> = {
 export type RequestConfig = {
   params?: Record<string, unknown>;
   responseType?: "blob";
+  timeout?: number;
 };
 
 export type HttpDelete = <T>(

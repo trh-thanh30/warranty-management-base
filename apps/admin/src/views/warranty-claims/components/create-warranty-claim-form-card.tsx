@@ -10,8 +10,10 @@ import {
   CardHeader,
   CardTitle,
   Input,
+  Dropzone,
   Textarea,
 } from "@repo/ui";
+import { WARRANTY_CLAIM_EVIDENCE_MIME_TYPES } from "@repo/shared/constants";
 import { SearchDropdown } from "@/src/components/common/search-dropdown";
 import { FormField } from "@/src/components/common/form-field";
 import { formatProductSearchOption } from "@/src/utils";
@@ -32,6 +34,7 @@ export function CreateWarrantyClaimFormCard({
 }: CreateWarrantyClaimFormCardProps) {
   const t = useTranslations("WarrantyClaims");
   const {
+    attachments,
     clearProduct,
     customer,
     customerQuery,
@@ -46,6 +49,7 @@ export function CreateWarrantyClaimFormCard({
     selectedProduct,
     selectProduct,
     setProductSearch,
+    setAttachments,
   } = useCreateWarrantyClaimForm({ onCreated });
 
   return (
@@ -203,6 +207,28 @@ export function CreateWarrantyClaimFormCard({
                 placeholder={t("issueDetailPlaceholder")}
                 rows={5}
                 {...register("issueDetail")}
+              />
+            </FormField>
+            <FormField
+              error={translateWarrantyClaimCreateFieldError(
+                errors.attachments?.message,
+                t,
+              )}
+              htmlFor="create-warranty-claim-evidence"
+              label={t("evidenceLabel")}
+            >
+              <Dropzone
+                accept={WARRANTY_CLAIM_EVIDENCE_MIME_TYPES.join(",")}
+                chooseLabel={t("evidenceChoose")}
+                disabled={isSaving}
+                files={attachments}
+                hint={t("evidenceHint")}
+                id="create-warranty-claim-evidence"
+                onFilesChange={setAttachments}
+                previewFileLabel={(name) => t("evidencePreview", { name })}
+                closePreviewLabel={t("evidenceClosePreview")}
+                removeFileLabel={(name) => t("evidenceRemove", { name })}
+                selectedFilesLabel={t("evidenceSelectedFiles")}
               />
             </FormField>
           </WarrantyClaimFormSection>

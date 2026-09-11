@@ -2,7 +2,7 @@
 
 import { Link } from "@/src/i18n/navigation";
 import { formatDate, type ProductResponse } from "@repo/shared";
-import { Badge, Button, Skeleton } from "@repo/ui";
+import { Badge, Button, MediaPreviewDialog, Skeleton } from "@repo/ui";
 import {
   CalendarDays,
   CalendarRange,
@@ -21,7 +21,6 @@ import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import { useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
-import Lightbox from "yet-another-react-lightbox";
 import {
   getProductDisplayName,
   getProductInstallationPosition,
@@ -35,6 +34,7 @@ type ProductDetailCardProps = {
 export function ProductDetailCard({ product }: ProductDetailCardProps) {
   const locale = useLocale();
   const t = useTranslations("Products");
+  const commonT = useTranslations("Common");
   const [previewIndex, setPreviewIndex] = useState(-1);
   const installationPosition = getProductInstallationPosition(product.metadata);
   const slides = useMemo(
@@ -85,11 +85,17 @@ export function ProductDetailCard({ product }: ProductDetailCardProps) {
               </button>
             ))}
           </div>
-          <Lightbox
-            close={() => setPreviewIndex(-1)}
-            index={Math.max(previewIndex, 0)}
+          <MediaPreviewDialog
+            activeIndex={Math.max(previewIndex, 0)}
+            closeLabel={commonT("closeImagePreview")}
+            items={slides}
+            nextLabel={commonT("nextImage")}
+            onActiveIndexChange={setPreviewIndex}
+            onOpenChange={(open) => {
+              if (!open) setPreviewIndex(-1);
+            }}
             open={previewIndex >= 0}
-            slides={slides}
+            previousLabel={commonT("previousImage")}
           />
         </section>
       ) : null}

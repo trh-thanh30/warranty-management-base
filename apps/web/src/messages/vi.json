@@ -1610,6 +1610,9 @@
       },
       "validation": {
         "detailsInvalid": "Mô tả sự cố không được vượt quá 4000 ký tự.",
+        "evidenceInvalid": "Chỉ hỗ trợ tệp ảnh JPG, PNG, GIF, WEBP và video MP4, MOV.",
+        "evidenceRequired": "Vui lòng thêm ít nhất một ảnh hoặc video về tình trạng sản phẩm.",
+        "evidenceTooLarge": "Mỗi ảnh hoặc video không được vượt quá 10 MB.",
         "issueRequired": "Vui lòng chọn vấn đề gặp phải.",
         "nameInvalid": "Vui lòng nhập họ tên hợp lệ.",
         "phoneInvalid": "Vui lòng nhập số điện thoại hợp lệ.",
@@ -1639,8 +1642,17 @@
           }
         },
         "details": {
-          "label": "Mô tả chi tiết sự cố",
-          "placeholder": "Mô tả vị trí kính và hiện tượng cần hỗ trợ..."
+          "label": "Tình trạng sản phẩm",
+          "placeholder": "Nhập tình trạng, vị trí lỗi, thời điểm phát hiện hoặc ghi chú tiếp nhận."
+        },
+        "evidence": {
+          "label": "Hình ảnh / Video tình trạng sản phẩm *",
+          "choose": "Kéo thả hoặc chọn ảnh, video",
+          "hint": "Không giới hạn số lượng tệp. Hỗ trợ JPG, PNG, GIF, WEBP, MP4, MOV; tối đa 10 MB mỗi tệp.",
+          "selectedFiles": "Ảnh và video đã chọn",
+          "preview": "Xem trước tệp {name}",
+          "closePreview": "Đóng xem trước",
+          "remove": "Gỡ tệp {name}"
         }
       }
     },

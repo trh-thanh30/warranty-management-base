@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@repo/ui/select";
 import { Textarea } from "@repo/ui/textarea";
+import { Dropzone } from "@repo/ui/dropzone";
 import { Send } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
@@ -43,6 +44,7 @@ import {
   type WarrantyClaimRequestFormValues,
 } from "../warranty-claim-request-form.schema";
 import { toWarrantyClaimRequestBody } from "../warranty-claim-request.utils";
+import { WARRANTY_CLAIM_EVIDENCE_ACCEPT } from "../warranty-claim-evidence.constants";
 
 type WarrantyClaimRequestFormProps = {
   errorKind: WarrantyClaimRequestErrorKind | null;
@@ -50,6 +52,7 @@ type WarrantyClaimRequestFormProps = {
   onResetError: () => void;
   onSubmit: (
     body: CreateWarrantyClaimBody,
+    attachments: File[],
   ) => Promise<PublicWarrantyClaimSummary>;
 };
 
@@ -64,6 +67,9 @@ export function WarrantyClaimRequestForm({
     () =>
       createWarrantyClaimRequestFormSchema({
         detailsInvalid: t("validation.detailsInvalid"),
+        evidenceInvalid: t("validation.evidenceInvalid"),
+        evidenceRequired: t("validation.evidenceRequired"),
+        evidenceTooLarge: t("validation.evidenceTooLarge"),
         issueRequired: t("validation.issueRequired"),
         nameInvalid: t("validation.nameInvalid"),
         phoneInvalid: t("validation.phoneInvalid"),
@@ -73,6 +79,7 @@ export function WarrantyClaimRequestForm({
   );
   const form = useForm<WarrantyClaimRequestFormValues>({
     defaultValues: {
+      attachments: [],
       issue: undefined,
       issueDetail: "",
       requesterName: "",
@@ -98,7 +105,10 @@ export function WarrantyClaimRequestForm({
 
   const handleSubmit = async (values: WarrantyClaimRequestFormValues) => {
     try {
-      await onSubmit(toWarrantyClaimRequestBody(values, issueTitles));
+      await onSubmit(
+        toWarrantyClaimRequestBody(values, issueTitles),
+        values.attachments,
+      );
       toast.success(t("success.title"));
       form.reset();
     } catch (error) {
@@ -229,6 +239,38 @@ export function WarrantyClaimRequestForm({
                     maxLength={4000}
                     placeholder={t("fields.details.placeholder")}
                     {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="attachments"
+            render={({ field }) => (
+              <FormItem className="sm:col-span-2">
+                <FormLabel className="text-sm font-semibold uppercase text-deep-black">
+                  {t("fields.evidence.label")}
+                </FormLabel>
+                <FormControl>
+                  <Dropzone
+                    accept={WARRANTY_CLAIM_EVIDENCE_ACCEPT}
+                    chooseLabel={t("fields.evidence.choose")}
+                    disabled={isPending}
+                    files={field.value}
+                    hint={t("fields.evidence.hint")}
+                    id="warranty-claim-evidence"
+                    onFilesChange={field.onChange}
+                    previewFileLabel={(name) =>
+                      t("fields.evidence.preview", { name })
+                    }
+                    closePreviewLabel={t("fields.evidence.closePreview")}
+                    removeFileLabel={(name) =>
+                      t("fields.evidence.remove", { name })
+                    }
+                    selectedFilesLabel={t("fields.evidence.selectedFiles")}
                   />
                 </FormControl>
                 <FormMessage />

@@ -38,6 +38,11 @@ import { memoryStorage } from 'multer';
           : new LocalStorageService(config),
     },
   ],
-  exports: [AssetsService, GetStorageUsageUseCase, UploadAssetService],
+  exports: [
+    AssetsService,
+    FileValidatorService,
+    GetStorageUsageUseCase,
+    UploadAssetService,
+  ],
 })
 export class AssetsModule {}
