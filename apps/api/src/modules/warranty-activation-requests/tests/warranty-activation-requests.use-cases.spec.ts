@@ -368,6 +368,89 @@ describe('WarrantyActivationRequestsUseCases', () => {
     );
   });
 
+  it('reserves a distinct warranty code for each position using the same code-less catalogue product', async () => {
+    repository.findLastRequestCode.mockResolvedValue(null);
+    repository.findOpenByProductId.mockResolvedValue(null);
+    productsRepository.findActivationRequestTargetById.mockResolvedValue({
+      ...baseDraftProduct,
+      category_ref: { activation_code_enabled: false },
+      id: 'product-a',
+      product_code: 'CODE-product-a',
+      warranty: null,
+      warranty_duration_months: 24,
+    });
+    const itemValidator = {
+      validate: jest.fn().mockResolvedValue([
+        {
+          ...createValidatedItem('windshield', 'product-a'),
+          activationCodeId: null,
+          warrantyCode: null,
+          warrantyId: null,
+        },
+        {
+          ...createValidatedItem('rearGlass', 'product-a'),
+          activationCodeId: null,
+          warrantyCode: null,
+          warrantyId: null,
+        },
+      ]),
+    };
+    generateWarrantyCodeUseCase.execute
+      .mockResolvedValueOnce('WM-2026-WINDSHIELD')
+      .mockResolvedValueOnce('WM-2026-REARGLASS');
+    repository.create.mockImplementation((data) =>
+      Promise.resolve({
+        ...baseRequest,
+        request_code: data.requestCode,
+        warranty_code: data.warrantyCode,
+        product_id: data.productId,
+        items: data.items,
+      }),
+    );
+    const useCase = new CreateWarrantyActivationRequestUseCase(
+      repository as never,
+      new GenerateWarrantyActivationRequestCodeUseCase(repository as never),
+      productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
+      itemValidator as never,
+    );
+
+    await useCase.execute({
+      addressDetail: '1 Nguyen Trai',
+      categoryId: 'category-id',
+      customerName: 'Nguyen Van A',
+      customerPhone: '0901234567',
+      items: [
+        { positionKey: 'windshield', productId: 'product-a' },
+        { positionKey: 'rearGlass', productId: 'product-a' },
+      ],
+      provinceCode: '79',
+      provinceName: 'TP Ho Chi Minh',
+      wardCode: '26734',
+      wardName: 'Phuong Ben Thanh',
+    });
+
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        warrantyCode: 'WM-2026-WINDSHIELD',
+        items: [
+          expect.objectContaining({
+            positionKey: 'windshield',
+            productId: 'product-a',
+            warrantyCode: 'WM-2026-WINDSHIELD',
+          }),
+          expect.objectContaining({
+            positionKey: 'rearGlass',
+            productId: 'product-a',
+            warrantyCode: 'WM-2026-REARGLASS',
+          }),
+        ],
+      }),
+    );
+  });
+
   it('reserves a different warranty code for every generic activation item', async () => {
     repository.findLastRequestCode.mockResolvedValue(null);
     repository.findOpenByProductId.mockResolvedValue(null);

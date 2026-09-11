@@ -82,7 +82,7 @@ describe('ActivationRequestItemsValidatorService', () => {
 
   it('allows the same product for different generic activation codes', async () => {
     activationCodesRepository.findAvailableById.mockImplementation(
-      async (id: string) => ({
+      (id: string) => ({
         id,
         expires_at: new Date('2027-01-01T00:00:00.000Z'),
         product_id: 'product-a',
@@ -273,13 +273,34 @@ describe('ActivationRequestItemsValidatorService', () => {
     ).rejects.toMatchObject({ code: 'ACTIVATION_REQUIRED_POSITION_MISSING' });
   });
 
-  it('rejects duplicate products across positions', async () => {
+  it('allows the same code-less catalogue product across positions', async () => {
+    productsRepository.findActiveProductCategoryById.mockResolvedValue({
+      id: 'category-id',
+      activation_code_enabled: false,
+    });
+    productsRepository.findActivationRequestTargetsByIds.mockResolvedValue([
+      createProduct('product-a'),
+    ]);
+
     await expect(
       service.validate('category-id', [
         { positionKey: 'windshield', productId: 'product-a' },
         { positionKey: 'rearGlass', productId: 'product-a' },
       ]),
-    ).rejects.toMatchObject({ code: 'ACTIVATION_PRODUCT_DUPLICATE' });
+    ).resolves.toEqual([
+      expect.objectContaining({
+        positionKey: 'windshield',
+        productId: 'product-a',
+        warrantyCode: null,
+        warrantyId: null,
+      }),
+      expect.objectContaining({
+        positionKey: 'rearGlass',
+        productId: 'product-a',
+        warrantyCode: null,
+        warrantyId: null,
+      }),
+    ]);
   });
 
   it('rejects products from another category', async () => {
