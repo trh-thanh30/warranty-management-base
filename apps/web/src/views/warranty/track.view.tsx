@@ -61,7 +61,7 @@ export function WarrantyTrackView() {
         />
       ) : null}
 
-      <motion.div className="mx-auto w-full max-w-5xl" layout>
+      <motion.div className="mx-auto w-full" layout>
         <WarrantyFormCard className="max-w-none">
           <WarrantyTrackForm
             initialValue={initialTrackingCode}
