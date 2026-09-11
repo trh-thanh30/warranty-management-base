@@ -56,7 +56,7 @@ const baseValues: WarrantyActivationRequestCreateFormValues = {
   filmRearRightSide: "",
   filmSunroof: "",
   filmWindshield: "",
-  installedAt: "",
+  installedAt: "2026-09-09T14:30",
   note: "",
   productId: "",
   productName: "",
@@ -190,6 +190,24 @@ test("admin activation request rejects a future installation date", () => {
   );
 });
 
+test("admin activation request requires an installation date", () => {
+  const result = warrantyActivationRequestCreateFormSchema.safeParse({
+    ...validFormValues,
+    installedAt: "",
+  });
+
+  assert.equal(result.success, false);
+  if (result.success) return;
+  assert.equal(
+    result.error.issues.some(
+      (issue) =>
+        issue.path[0] === "installedAt" &&
+        issue.message === "installedAtRequired",
+    ),
+    true,
+  );
+});
+
 test("admin activation request body combines form and selected product data", () => {
   const product = {
     brand: "Black Label",
@@ -241,6 +259,7 @@ test("admin activation request body combines form and selected product data", ()
         windshield: "FILM-001",
       },
       manufactureYear: 2026,
+      installedAt: new Date(baseValues.installedAt).toISOString(),
       metadata: {
         activationInputValues: {
           customNote: "Gia tri rieng",

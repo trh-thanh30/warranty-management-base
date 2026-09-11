@@ -3,6 +3,7 @@ import {
   type WarrantyListItem,
   type WarrantyUserSummary,
 } from "@repo/shared";
+import { addCalendarMonths } from "@repo/shared/utils";
 
 export function formatWarrantyUser(
   user: WarrantyUserSummary | null | undefined,
@@ -32,6 +33,32 @@ export function getWarrantyProductDisplayName(warranty: WarrantyListItem) {
   return secondary
     ? `${warranty.product.name} · ${secondary}`
     : warranty.product.name;
+}
+
+export function formatWarrantyDateTimeInput(value: string | null | undefined) {
+  if (!value) return "";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+export function calculateWarrantyEndDate(
+  startDateValue: string,
+  durationMonths: number,
+) {
+  const startDate = new Date(startDateValue);
+  if (
+    Number.isNaN(startDate.getTime()) ||
+    !Number.isInteger(durationMonths) ||
+    durationMonths < 1
+  ) {
+    return null;
+  }
+
+  return addCalendarMonths(startDate, durationMonths);
 }
 
 export function formatWarrantyDealerAddress(

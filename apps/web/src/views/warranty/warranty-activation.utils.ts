@@ -30,6 +30,7 @@ export function toWarrantyActivationRequestBody({
     customerEmail,
     customerName: values.customerName.trim(),
     customerPhone: values.customerPhone.trim(),
+    installedAt: new Date(values.installedAt).toISOString(),
     provinceCode: values.provinceCode,
     provinceName: province.name,
     vehiclePlate: values.vehiclePlate.trim().toUpperCase(),

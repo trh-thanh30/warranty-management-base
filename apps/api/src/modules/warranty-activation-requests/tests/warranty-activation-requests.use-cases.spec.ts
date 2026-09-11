@@ -101,6 +101,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
 
     const result = await useCase.execute({
       addressDetail: '1 Nguyen Trai',
+      installedAt: '2026-07-18T03:00:00.000Z',
       customerEmail: 'CUSTOMER@EXAMPLE.COM',
       customerName: 'Nguyen Van A',
       customerPhone: '0901234567',
@@ -132,6 +133,38 @@ describe('WarrantyActivationRequestsUseCases', () => {
     );
     expect(result.requestCode).toBe('WAR-20260719-0001');
   });
+
+  it.each([
+    ['', 'INSTALLATION_DATE_REQUIRED'],
+    ['2026-07-20T03:00:00.000Z', 'INSTALLATION_DATE_INVALID'],
+  ])(
+    'rejects an invalid installation date before creating a request',
+    async (installedAt, errorCode) => {
+      const useCase = new CreateWarrantyActivationRequestUseCase(
+        repository as never,
+        new GenerateWarrantyActivationRequestCodeUseCase(repository as never),
+        productsRepository as never,
+        dealersRepository as never,
+        generateWarrantyCodeUseCase as never,
+        warrantyActivationRequestNotificationService as never,
+      );
+
+      await expect(
+        useCase.execute({
+          addressDetail: '1 Nguyen Trai',
+          customerName: 'Nguyen Van A',
+          customerPhone: '0901234567',
+          installedAt,
+          provinceCode: '79',
+          provinceName: 'TP Ho Chi Minh',
+          wardCode: '26734',
+          wardName: 'Phuong Ben Thanh',
+          warrantyCode: 'WM-2026-ABC123',
+        }),
+      ).rejects.toMatchObject({ details: { code: errorCode } });
+      expect(repository.create).not.toHaveBeenCalled();
+    },
+  );
 
   it('creates an independent warranty request for a code-less catalogue product', async () => {
     repository.findOpenByProductId.mockResolvedValue({
@@ -174,6 +207,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
 
     await useCase.execute({
       addressDetail: '1 Nguyen Trai',
+      installedAt: '2026-07-18T03:00:00.000Z',
       categoryId: 'category-id',
       customerName: 'Nguyen Van A',
       customerPhone: '0901234567',
@@ -254,6 +288,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
 
     const result = await useCase.execute({
       addressDetail: '1 Nguyen Trai',
+      installedAt: '2026-07-18T03:00:00.000Z',
       categoryId: 'category-id',
       customerName: 'Nguyen Van A',
       customerPhone: '0901234567',
@@ -342,6 +377,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
 
     await useCase.execute({
       addressDetail: '1 Nguyen Trai',
+      installedAt: '2026-07-18T03:00:00.000Z',
       categoryId: 'category-id',
       customerName: 'Nguyen Van A',
       customerPhone: '0901234567',
@@ -419,6 +455,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
 
     await useCase.execute({
       addressDetail: '1 Nguyen Trai',
+      installedAt: '2026-07-18T03:00:00.000Z',
       categoryId: 'category-id',
       customerName: 'Nguyen Van A',
       customerPhone: '0901234567',
@@ -512,6 +549,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
 
     await useCase.execute({
       addressDetail: '1 Nguyen Trai',
+      installedAt: '2026-07-18T03:00:00.000Z',
       categoryId: 'category-id',
       customerName: 'Nguyen Van A',
       customerPhone: '0901234567',
@@ -591,6 +629,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     await useCase.execute(
       {
         addressDetail: '1 Nguyen Trai',
+        installedAt: '2026-07-18T03:00:00.000Z',
         categoryId: 'category-id',
         customerName: 'Nguyen Van A',
         customerPhone: '0901234567',
@@ -694,6 +733,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
 
     await useCase.execute({
       addressDetail: '1 Nguyen Trai',
+      installedAt: '2026-07-18T03:00:00.000Z',
       categoryId: 'category-id',
       customerName: 'Nguyen Van A',
       customerPhone: '0901234567',
@@ -788,6 +828,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
 
     await useCase.execute({
       addressDetail: '1 Nguyen Trai',
+      installedAt: '2026-07-18T03:00:00.000Z',
       customerEmail: 'CUSTOMER@EXAMPLE.COM',
       customerName: 'Nguyen Van A',
       customerPhone: '0901234567',
@@ -845,6 +886,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
 
     await useCase.execute({
       addressDetail: '1 Nguyen Trai',
+      installedAt: '2026-07-18T03:00:00.000Z',
       customerName: 'Nguyen Van A',
       customerPhone: '0901234567',
       dealerAddress: '12 Nguyen Trai',
@@ -900,6 +942,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     await expect(
       useCase.execute({
         addressDetail: '1 Nguyen Trai',
+        installedAt: '2026-07-18T03:00:00.000Z',
         categoryId: 'other-category-id',
         customerName: 'Nguyen Van A',
         customerPhone: '0901234567',
@@ -939,6 +982,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     await expect(
       useCase.execute({
         addressDetail: '1 Nguyen Trai',
+        installedAt: '2026-07-18T03:00:00.000Z',
         customerEmail: 'customer@example.com',
         customerName: 'Nguyen Van A',
         customerPhone: '0988888888',
@@ -988,6 +1032,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     await expect(
       useCase.execute({
         addressDetail: '1 Nguyen Trai',
+        installedAt: '2026-07-18T03:00:00.000Z',
         customerEmail: 'customer@example.com',
         customerName: 'Nguyen Van A',
         customerPhone: '0901234567',
@@ -1032,6 +1077,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
 
     const result = await useCase.execute({
       addressDetail: '1 Nguyen Trai',
+      installedAt: '2026-07-18T03:00:00.000Z',
       customerEmail: 'customer@example.com',
       customerName: 'Nguyen Van A',
       customerPhone: '0901234567',
@@ -1077,6 +1123,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     await expect(
       useCase.execute({
         addressDetail: '1 Nguyen Trai',
+        installedAt: '2026-07-18T03:00:00.000Z',
         customerEmail: 'customer@example.com',
         customerName: 'Nguyen Van A',
         customerPhone: '0901234567',
@@ -1125,6 +1172,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     await expect(
       useCase.execute({
         addressDetail: '1 Nguyen Trai',
+        installedAt: '2026-07-18T03:00:00.000Z',
         customerEmail: 'customer@example.com',
         customerName: 'Nguyen Van A',
         customerPhone: '0901234567',
@@ -1157,6 +1205,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     await expect(
       useCase.execute({
         addressDetail: '1 Nguyen Trai',
+        installedAt: '2026-07-18T03:00:00.000Z',
         customerEmail: 'customer@example.com',
         customerName: 'Nguyen Van A',
         customerPhone: '0901234567',
@@ -1193,6 +1242,7 @@ describe('WarrantyActivationRequestsUseCases', () => {
     await expect(
       useCase.execute({
         addressDetail: '1 Nguyen Trai',
+        installedAt: '2026-07-18T03:00:00.000Z',
         customerEmail: 'customer@example.com',
         customerName: 'Nguyen Van A',
         customerPhone: '0901234567',

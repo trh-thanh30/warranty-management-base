@@ -11,6 +11,7 @@ describe('CreateAdminWarrantyActivationRequestDto', () => {
     customerId: '68a1578a-b13e-45de-b008-e357392be715',
     customerName: 'Nguyen Van A',
     customerPhone: '0901234567',
+    installedAt: '2026-07-08T03:10:00.000Z',
     provinceCode: '79',
     provinceName: 'TP Ho Chi Minh',
     wardCode: '26734',

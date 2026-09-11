@@ -17,6 +17,7 @@ type WarrantyAdjustmentHistoryProps = {
 };
 
 const ADJUSTMENT_FIELDS = [
+  "startDate",
   "durationMonths",
   "coverageLimitAmount",
   "maxClaimCount",
@@ -181,11 +182,14 @@ function formatAdjustmentValue(
 ) {
   if (value === undefined) return t("adjustmentHistory.valueUnavailable");
   if (value === null || value === "") {
-    return field === "terms"
+    return field === "terms" || field === "startDate"
       ? t("adjustmentHistory.valueUnavailable")
       : t("unlimited");
   }
 
+  if (field === "startDate") {
+    return formatDate(String(value), { locale, showTime: true });
+  }
   if (field === "durationMonths") {
     return t("durationValue", { count: Number(value) });
   }

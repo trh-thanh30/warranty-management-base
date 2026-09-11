@@ -28,17 +28,14 @@ export type WarrantyActivationRequestExcelRow = {
   customerBirthdate: Date | null;
   fullAddress: string;
   productName: string | null;
-  serialNumber: string | null;
   brand: string | null;
   model: string | null;
-  manufactureYear: number | null;
   installedAt: Date | null;
   customerNote: string | null;
   adminNote: string | null;
   rejectionReason: string | null;
   reviewedBy: string | null;
   reviewedAt: Date | null;
-  activatedWarrantyId: string | null;
   createdAt: Date;
   updatedAt: Date;
 };

@@ -10,6 +10,7 @@ describe('UpdateAdminWarrantyActivationRequestUseCase', () => {
     customerName: 'Nguyen Van A',
     customerPhone: '0901234567',
     addressDetail: '1 Nguyen Trai',
+    installedAt: '2026-07-18T03:00:00.000Z',
     provinceCode: '79',
     provinceName: 'TP Ho Chi Minh',
     wardCode: '26734',

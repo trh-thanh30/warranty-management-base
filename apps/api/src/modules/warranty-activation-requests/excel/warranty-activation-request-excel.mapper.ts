@@ -34,10 +34,8 @@ export function toWarrantyActivationRequestExcelRow(
     customerBirthdate: request.customer_birthdate,
     fullAddress: request.full_address,
     productName: request.product_name,
-    serialNumber: request.serial_number,
     brand: request.brand,
     model: request.model,
-    manufactureYear: request.manufacture_year,
     installedAt: request.installed_at,
     customerNote: request.note,
     adminNote: request.admin_note,
@@ -46,7 +44,6 @@ export function toWarrantyActivationRequestExcelRow(
       ? (request.reviewed_by.full_name ?? request.reviewed_by.username)
       : null,
     reviewedAt: request.reviewed_at,
-    activatedWarrantyId: request.activated_warranty_id,
     createdAt: request.created_at,
     updatedAt: request.updated_at,
   };

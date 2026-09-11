@@ -54,6 +54,7 @@ const defaultValues: WarrantyActivationFormValues = {
   customerEmail: "",
   customerName: "",
   customerPhone: "",
+  installedAt: "",
   provinceCode: "",
   vehiclePlate: "",
   wardCode: "",
@@ -75,6 +76,9 @@ export function WarrantyActivationRequestForm({
         customerEmailRequired: t("validation.customerEmailRequired"),
         customerNameInvalid: t("validation.customerNameInvalid"),
         customerPhoneInvalid: t("validation.customerPhoneInvalid"),
+        installedAtFuture: t("validation.installedAtFuture"),
+        installedAtInvalid: t("validation.installedAtInvalid"),
+        installedAtRequired: t("validation.installedAtRequired"),
         provinceRequired: t("validation.provinceRequired"),
         vehiclePlateInvalid: t("validation.vehiclePlateInvalid"),
         wardRequired: t("validation.wardRequired"),
@@ -253,6 +257,27 @@ export function WarrantyActivationRequestForm({
 
           <FormField
             control={form.control}
+            name="installedAt"
+            render={({ field }) => (
+              <FormItem className="sm:col-span-2">
+                <FormLabel className="text-sm font-semibold uppercase text-deep-black">
+                  {t("fields.installedAt.label")}
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    className={`h-12 rounded-md border-border-gray bg-white ${formControlFocusClassName}`}
+                    max={formatLocalDateTimeInput(new Date())}
+                    type="datetime-local"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="provinceCode"
             render={({ field }) => (
               <FormItem>
@@ -399,6 +424,13 @@ export function WarrantyActivationRequestForm({
       </form>
     </Form>
   );
+}
+
+function formatLocalDateTimeInput(date: Date) {
+  const localTime = new Date(
+    date.getTime() - date.getTimezoneOffset() * 60 * 1000,
+  );
+  return localTime.toISOString().slice(0, 16);
 }
 
 function LocationLoadError({

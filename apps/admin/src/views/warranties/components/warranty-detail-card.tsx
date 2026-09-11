@@ -1,16 +1,16 @@
 "use client";
 
-import { CalendarDays, Package, ShieldCheck, UserRound } from "lucide-react";
-import type { ReactNode } from "react";
-import { useMemo } from "react";
-import { useLocale, useTranslations } from "next-intl";
 import { formatDate, type WarrantyListItem } from "@repo/shared";
 import { Skeleton } from "@repo/ui";
+import { CalendarDays, Package, ShieldCheck, UserRound } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import type { ReactNode } from "react";
+import { useMemo } from "react";
 import {
+  formatWarrantyDealerAddress,
   formatWarrantyMoneyLimit,
   formatWarrantyOwner,
   formatWarrantyUser,
-  formatWarrantyDealerAddress,
   getWarrantyProductDisplayName,
 } from "../warranties.utils";
 import { WarrantyStatusBadge } from "./warranty-status-badge";
@@ -209,7 +209,7 @@ function WarrantySummaryHeader({ warranty }: WarrantyDetailCardProps) {
   const t = useTranslations("Warranties");
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+    <section className="rounded-lg border border-slate-200 bg-white pt-4 px-4 dark:border-slate-800 dark:bg-slate-950">
       <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
           <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
@@ -228,7 +228,8 @@ function WarrantySummaryHeader({ warranty }: WarrantyDetailCardProps) {
           <WarrantyStatusBadge status={warranty.status} />
         </div>
       </div>
-      <div className="mt-3 grid gap-2 border-t border-slate-100 pt-3 text-sm sm:grid-cols-3 dark:border-slate-800">
+      <hr className=" border-t border-slate-100 my-3" />
+      <div className="flex-row  md:flex items-center  justify-between space-y-4  text-sm  dark:border-slate-800">
         <SummaryMetric
           label={t("duration")}
           value={t("durationValue", { count: warranty.durationMonths })}

@@ -10,6 +10,7 @@ import {
   WARRANTY_STATUS,
 } from '@/modules/warranties/warranties.types';
 import { Injectable } from '@nestjs/common';
+import { addCalendarMonths } from '@repo/shared/utils';
 
 const OPEN_CLAIM_STATUSES = [
   WARRANTY_CLAIM_STATUS.SUBMITTED,
@@ -66,7 +67,7 @@ export class WarrantyLifecycleService {
     }
     const transition = await repository.activateDraftWarranty({
       activatedByUserId: input.activatedByUserId,
-      endDate: this.addMonths(startDate, warranty.durationMonths),
+      endDate: addCalendarMonths(startDate, warranty.durationMonths),
       startDate,
       warrantyId: warranty.id,
     });
@@ -167,11 +168,5 @@ export class WarrantyLifecycleService {
     }
 
     return repository.findWarrantyByIdOrThrow(warranty.id);
-  }
-
-  private addMonths(date: Date, months: number) {
-    const nextDate = new Date(date);
-    nextDate.setMonth(nextDate.getMonth() + months);
-    return nextDate;
   }
 }

@@ -22,7 +22,7 @@ export function ActivationCodeSummary({
 
   return (
     <div className="flex min-w-0 flex-col items-start gap-1">
-      <span className="max-w-52 truncate font-mono text-xs font-semibold text-slate-950 dark:text-slate-50">
+      <span className="max-w-52 truncate  text-xs font-medium text-slate-950 dark:text-slate-50">
         {activationCode.code ?? "-"}
       </span>
       <ActivationCodeStatusBadge status={activationCode.status} />
