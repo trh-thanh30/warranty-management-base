@@ -81,6 +81,17 @@ describe('CreatePublicWarrantyActivationRequestDto', () => {
     );
   });
 
+  it('accepts the required installation timestamp', async () => {
+    const dto = plainToInstance(CreatePublicWarrantyActivationRequestDto, {
+      addressDetail: '1 Nguyen Trai',
+      ...base,
+    });
+
+    await expect(
+      validate(dto, { forbidNonWhitelisted: true, whitelist: true }),
+    ).resolves.toHaveLength(0);
+  });
+
   it.each([
     '123 Nguyễn Trãi, Phường 1',
     'Khu phố Hoàng Xá, Xã A, Tỉnh B',

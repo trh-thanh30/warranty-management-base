@@ -1,4 +1,5 @@
 import {
+  IsDateString,
   IsEmail,
   IsOptional,
   IsString,
@@ -30,6 +31,9 @@ export class CreatePublicWarrantyActivationRequestDto {
   @IsString()
   @Length(2, 32)
   vehiclePlate?: string;
+
+  @IsDateString()
+  installedAt: string;
 
   @IsString()
   @Length(1, 32)

@@ -224,6 +224,7 @@ export type CreatePublicWarrantyActivationRequestBody = {
   customerName: string;
   customerPhone: string;
   customerEmail: string;
+  installedAt: string;
   provinceCode: string;
   provinceName: string;
   wardCode: string;
