@@ -1,11 +1,25 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  calculateWarrantyEndDate,
+  formatWarrantyDateTimeInput,
   formatWarrantyDealerAddress,
   formatWarrantyMoneyLimit,
   isValidWarrantyAmount,
   isValidWarrantyDuration,
 } from "./warranties.utils";
+
+test("warranty edit previews the end date from installation date and duration", () => {
+  assert.equal(
+    calculateWarrantyEndDate("2026-07-08T10:10", 36)?.toISOString(),
+    new Date(2029, 6, 8, 10, 10).toISOString(),
+  );
+});
+
+test("warranty edit formats the stored start date for the date-time picker", () => {
+  const storedDate = new Date(2026, 6, 8, 10, 10).toISOString();
+  assert.equal(formatWarrantyDateTimeInput(storedDate), "2026-07-08T10:10");
+});
 
 test("formatWarrantyDealerAddress does not duplicate location already in address", () => {
   assert.equal(

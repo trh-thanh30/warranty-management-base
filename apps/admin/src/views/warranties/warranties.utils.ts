@@ -34,6 +34,34 @@ export function getWarrantyProductDisplayName(warranty: WarrantyListItem) {
     : warranty.product.name;
 }
 
+export function formatWarrantyDateTimeInput(value: string | null | undefined) {
+  if (!value) return "";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+export function calculateWarrantyEndDate(
+  startDateValue: string,
+  durationMonths: number,
+) {
+  const startDate = new Date(startDateValue);
+  if (
+    Number.isNaN(startDate.getTime()) ||
+    !Number.isInteger(durationMonths) ||
+    durationMonths < 1
+  ) {
+    return null;
+  }
+
+  const endDate = new Date(startDate);
+  endDate.setMonth(endDate.getMonth() + durationMonths);
+  return endDate;
+}
+
 export function formatWarrantyDealerAddress(
   dealer: Pick<
     WarrantyDealerSummary,

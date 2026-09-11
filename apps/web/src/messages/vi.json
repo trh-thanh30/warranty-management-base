@@ -1430,6 +1430,9 @@
           "label": "Mã tem E-Warranty *",
           "placeholder": "VD: FJ-8899-2026"
         },
+        "installedAt": {
+          "label": "Ngày lắp đặt (Ngày bắt đầu bảo hành) *"
+        },
         "province": {
           "label": "Tỉnh / Thành phố *",
           "placeholder": "Chọn tỉnh hoặc thành phố",
@@ -1454,6 +1457,9 @@
         "customerEmailRequired": "Vui lòng nhập email để nhận giấy bảo hành.",
         "customerNameInvalid": "Họ và tên phải có từ 2 đến 120 ký tự.",
         "customerPhoneInvalid": "Số điện thoại không hợp lệ.",
+        "installedAtFuture": "Ngày lắp đặt không được lớn hơn thời điểm hiện tại.",
+        "installedAtInvalid": "Ngày lắp đặt không hợp lệ.",
+        "installedAtRequired": "Vui lòng chọn ngày lắp đặt.",
         "provinceRequired": "Vui lòng chọn tỉnh hoặc thành phố.",
         "vehiclePlateInvalid": "Biển số xe không hợp lệ.",
         "wardRequired": "Vui lòng chọn phường hoặc xã.",

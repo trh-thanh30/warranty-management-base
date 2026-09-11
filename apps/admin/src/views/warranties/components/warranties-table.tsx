@@ -23,10 +23,7 @@ import { SortableTableHead } from "@/src/components/common/sortable-table-head";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
 import type { WarrantySortBy } from "../warranties.types";
-import {
-  formatWarrantyOwner,
-  getWarrantyProductDisplayName,
-} from "../warranties.utils";
+import { formatWarrantyOwner } from "../warranties.utils";
 import { WarrantyStatusBadge } from "./warranty-status-badge";
 import { ActivationCodeSummary } from "@/src/components/activation-code-summary";
 
@@ -254,7 +251,7 @@ function WarrantyProductName({ warranty }: { warranty: WarrantyListItem }) {
         {warranty.product.name}
       </Link>
       <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
-        {getWarrantyProductDisplayName(warranty)}
+        {warranty.product.category?.name ?? "-"}
       </p>
     </div>
   );

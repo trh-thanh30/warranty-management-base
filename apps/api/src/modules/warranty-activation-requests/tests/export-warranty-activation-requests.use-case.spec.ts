@@ -80,6 +80,10 @@ describe('ExportWarrantyActivationRequestsUseCase', () => {
     expect(worksheet?.getCell(2, installedAtColumnIndex).value).toEqual(
       new Date('2026-07-21T08:30:00.000Z'),
     );
+    expect(headers).not.toContain('ID bảo hành đã kích hoạt');
+    expect(headers).not.toContain('Số serial');
+    expect(headers).not.toContain('Năm sản xuất');
+    expect(installedAtColumnIndex).toBe(headers.indexOf('Ngày xử lý') + 1);
   });
 
   it('keeps the installation date cell empty when it is not set', () => {

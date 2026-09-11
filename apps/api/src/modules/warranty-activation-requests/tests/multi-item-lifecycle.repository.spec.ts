@@ -76,6 +76,40 @@ describe('Multi-item activation lifecycle', () => {
     });
   });
 
+  it('starts every warranty from the installation date instead of the review date', async () => {
+    const transactionRepository = createTransactionRepository();
+    const request = createActivationRequest();
+    request.installed_at = new Date('2026-06-15T08:30:00.000Z');
+    transactionRepository.findRequest.mockResolvedValue(request);
+    const useCase = new ReviewWarrantyActivationRequestUseCase(
+      createRepository(transactionRepository) as never,
+      { execute: jest.fn() } as never,
+      generateCustomerCode as never,
+    );
+
+    await useCase.execute('request-id', {
+      status: warranty_activation_request_status.APPROVED,
+    });
+
+    expect(transactionRepository.transitionWarranty).toHaveBeenCalledTimes(2);
+    expect(transactionRepository.transitionWarranty).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ id: 'warranty-a' }),
+      expect.objectContaining({
+        start_date: new Date('2026-06-15T08:30:00.000Z'),
+        end_date: new Date('2028-06-15T08:30:00.000Z'),
+      }),
+    );
+    expect(transactionRepository.transitionWarranty).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ id: 'warranty-b' }),
+      expect.objectContaining({
+        start_date: new Date('2026-06-15T08:30:00.000Z'),
+        end_date: new Date('2028-06-15T08:30:00.000Z'),
+      }),
+    );
+  });
+
   it('creates and links one warranty for every reserved activation item', async () => {
     const transactionRepository = createTransactionRepository();
     const request = createActivationRequest();
@@ -610,6 +644,7 @@ function createActivationRequest() {
     customer_phone: '0901234567',
     full_address: '1 Nguyen Trai',
     id: 'request-id',
+    installed_at: null as Date | null,
     items: [
       createItem('product-a', 'warranty-a'),
       createItem('product-b', 'warranty-b'),

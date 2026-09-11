@@ -21,6 +21,7 @@ const MUTABLE_FIELDS = [
   'durationMonths',
   'maxAmountPerClaim',
   'maxClaimCount',
+  'startDate',
   'terms',
 ] as const;
 
@@ -70,6 +71,19 @@ export class UpdateWarrantyUseCase {
       dto.maxAmountPerClaim,
       warranty.max_amount_per_claim,
     );
+    const startDate = dto.startDate ? new Date(dto.startDate) : undefined;
+    if (startDate && Number.isNaN(startDate.getTime())) {
+      throw new BadRequestError(
+        'Warranty start date is invalid',
+        'WARRANTY_START_DATE_INVALID',
+      );
+    }
+    if (startDate && startDate.getTime() > Date.now()) {
+      throw new BadRequestError(
+        'Warranty start date cannot be in the future',
+        'WARRANTY_START_DATE_FUTURE',
+      );
+    }
 
     if (
       coverageLimitAmount &&
@@ -99,14 +113,21 @@ export class UpdateWarrantyUseCase {
       : null;
 
     let endDate: Date | undefined;
-    if (dto.durationMonths !== undefined && warranty.status === 'ACTIVE') {
-      if (!warranty.start_date) {
+    if (
+      (dto.durationMonths !== undefined || startDate !== undefined) &&
+      warranty.status === 'ACTIVE'
+    ) {
+      const effectiveStartDate = startDate ?? warranty.start_date;
+      if (!effectiveStartDate) {
         throw new BadRequestError(
           'Active warranty must have a start date',
           'WARRANTY_START_DATE_REQUIRED',
         );
       }
-      endDate = addMonths(warranty.start_date, dto.durationMonths);
+      endDate = addMonths(
+        effectiveStartDate,
+        dto.durationMonths ?? warranty.duration_months,
+      );
     }
 
     const updatedWarranty = await this.warrantiesRepository.update(id, {
@@ -114,6 +135,7 @@ export class UpdateWarrantyUseCase {
         dto.coverageLimitAmount === undefined ? undefined : coverageLimitAmount,
       duration_months: dto.durationMonths,
       end_date: endDate,
+      start_date: startDate,
       max_amount_per_claim:
         dto.maxAmountPerClaim === undefined ? undefined : maxAmountPerClaim,
       max_claim_count: dto.maxClaimCount,
@@ -216,6 +238,7 @@ function buildAdjustmentChanges(
     duration_months: number;
     max_amount_per_claim: Prisma.Decimal | null;
     max_claim_count: number | null;
+    start_date: Date | null;
     terms: string | null;
   },
   dto: UpdateWarrantyDto,
@@ -229,6 +252,7 @@ function buildAdjustmentChanges(
     durationMonths: warranty.duration_months,
     maxAmountPerClaim: toAdjustmentValue(warranty.max_amount_per_claim),
     maxClaimCount: warranty.max_claim_count,
+    startDate: warranty.start_date?.toISOString() ?? null,
     terms: warranty.terms,
   };
   const after: Record<string, WarrantyAdjustmentValue> = {
@@ -239,6 +263,9 @@ function buildAdjustmentChanges(
       dto.maxClaimCount === undefined
         ? warranty.max_claim_count
         : dto.maxClaimCount,
+    startDate: dto.startDate
+      ? new Date(dto.startDate).toISOString()
+      : (warranty.start_date?.toISOString() ?? null),
     terms:
       dto.terms === undefined
         ? warranty.terms

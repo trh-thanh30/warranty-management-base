@@ -1430,6 +1430,9 @@
           "label": "E-Warranty label code *",
           "placeholder": "E.g. FJ-8899-2026"
         },
+        "installedAt": {
+          "label": "Installation date (Warranty start date) *"
+        },
         "province": {
           "label": "Province / City *",
           "placeholder": "Select a province or city",
@@ -1454,6 +1457,9 @@
         "customerEmailRequired": "Enter an email address to receive the warranty certificate.",
         "customerNameInvalid": "The owner name must contain 2 to 120 characters.",
         "customerPhoneInvalid": "Enter a valid phone number.",
+        "installedAtFuture": "Installation date cannot be later than the current time.",
+        "installedAtInvalid": "Enter a valid installation date.",
+        "installedAtRequired": "Select the installation date.",
         "provinceRequired": "Select a province or city.",
         "vehiclePlateInvalid": "Enter a valid license plate.",
         "wardRequired": "Select a ward.",

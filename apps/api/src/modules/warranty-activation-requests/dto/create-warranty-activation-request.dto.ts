@@ -138,9 +138,8 @@ export class CreateWarrantyActivationRequestDto {
   @Length(2, 160)
   vehicleModel?: string;
 
-  @IsOptional()
   @IsDateString()
-  installedAt?: string;
+  installedAt: string;
 
   @IsOptional()
   @Type(() => Number)

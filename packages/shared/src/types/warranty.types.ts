@@ -184,6 +184,7 @@ export type UpdateWarrantyBody = {
   adjustmentReason: string;
   coverageLimitAmount?: string | null;
   durationMonths?: number;
+  startDate?: string;
   maxAmountPerClaim?: string | null;
   maxClaimCount?: number | null;
   terms?: string | null;

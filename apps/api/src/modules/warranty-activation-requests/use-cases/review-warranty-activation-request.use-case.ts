@@ -226,6 +226,7 @@ export class ReviewWarrantyActivationRequestUseCase {
           phone: request.customer_phone,
         });
         const activatedWarrantyIds: string[] = [];
+        const warrantyStartAt = request.installed_at ?? reviewedAt;
 
         for (const target of targets) {
           const updatedWarranty = await this.activateDraftWarranty(repository, {
@@ -234,7 +235,7 @@ export class ReviewWarrantyActivationRequestUseCase {
             positionLabel: target.positionLabel,
             productId: target.product.id,
             productName: target.productName,
-            startDate: reviewedAt,
+            startDate: warrantyStartAt,
             warrantyCode: target.warrantyCode,
             warrantyId: target.warrantyId,
             activationCodeId: target.activationCodeId ?? null,
