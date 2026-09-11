@@ -1,6 +1,6 @@
 "use client";
 
-import type { CustomerSummary, ProductResponse } from "@repo/shared";
+import type { CustomerSummary, WarrantyListItem } from "@repo/shared";
 import { Loader2, Package, ShieldCheck, UserRound } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
@@ -10,18 +10,18 @@ type SelectedWarrantyClaimProductDetailsProps = {
   customer: CustomerSummary | null;
   isCustomerError: boolean;
   isCustomerLoading: boolean;
-  product: ProductResponse;
+  warranty: WarrantyListItem;
 };
 
 export function SelectedWarrantyClaimProductDetails({
   customer,
   isCustomerError,
   isCustomerLoading,
-  product,
+  warranty,
 }: SelectedWarrantyClaimProductDetailsProps) {
   const t = useTranslations("WarrantyClaims");
   const locale = useLocale();
-  const warranty = product.warranty;
+  const product = warranty.product;
 
   return (
     <div aria-live="polite" className="space-y-4">
@@ -29,10 +29,10 @@ export function SelectedWarrantyClaimProductDetails({
         <DetailsTable
           icon={<Package aria-hidden="true" className="size-4" />}
           rows={[
-            [t("product"), product.name],
+            [t("product"), product.displayName ?? product.name],
             [t("productCode"), product.productCode],
-            [t("serialNumber"), warranty?.serialNumber ?? "-"],
-            [t("category"), product.categoryRef.name],
+            [t("serialNumber"), warranty.serialNumber ?? "-"],
+            [t("category"), product.category?.name ?? "-"],
             [
               t("brandModel"),
               [product.brand, product.model].filter(Boolean).join(" / ") || "-",
@@ -49,37 +49,30 @@ export function SelectedWarrantyClaimProductDetails({
         <DetailsTable
           icon={<ShieldCheck aria-hidden="true" className="size-4" />}
           rows={[
-            [t("warrantyCode"), product.warrantyCode ?? "-"],
-            [
-              t("warrantyStatus"),
-              warranty?.status ? t(`warrantyStatuses.${warranty.status}`) : "-",
-            ],
-            [t("startDate"), formatClaimDate(warranty?.startDate, locale)],
-            [t("endDate"), formatClaimDate(warranty?.endDate, locale)],
+            [t("warrantyCode"), warranty.warrantyCode ?? "-"],
+            [t("warrantyStatus"), t(`warrantyStatuses.${warranty.status}`)],
+            [t("startDate"), formatClaimDate(warranty.startDate, locale)],
+            [t("endDate"), formatClaimDate(warranty.endDate, locale)],
             [
               t("durationMonths"),
-              warranty
-                ? t("durationMonthsValue", {
-                    count: warranty.durationMonths,
-                  })
-                : "-",
+              t("durationMonthsValue", { count: warranty.durationMonths }),
             ],
             [
               t("coverageLimitAmount"),
-              formatMoneyLimit(warranty?.coverageLimitAmount, locale, t),
+              formatMoneyLimit(warranty.coverageLimitAmount, locale, t),
             ],
             [
               t("maxClaimCount"),
-              warranty?.maxClaimCount === null ||
-              warranty?.maxClaimCount === undefined
+              warranty.maxClaimCount === null ||
+              warranty.maxClaimCount === undefined
                 ? t("unlimited")
                 : String(warranty.maxClaimCount),
             ],
             [
               t("maxAmountPerClaim"),
-              formatMoneyLimit(warranty?.maxAmountPerClaim, locale, t),
+              formatMoneyLimit(warranty.maxAmountPerClaim, locale, t),
             ],
-            [t("terms"), warranty?.terms ?? "-"],
+            [t("terms"), warranty.terms ?? "-"],
           ]}
           title={t("warrantyInfo")}
         />
@@ -111,11 +104,11 @@ export function SelectedWarrantyClaimProductDetails({
             [t("address"), customer.address ?? "-"],
             [
               t("purchaseDate"),
-              formatClaimDate(product.owner?.purchaseDate, locale),
+              formatClaimDate(warranty.owner?.purchaseDate, locale),
             ],
             [
               t("activatedAt"),
-              formatClaimDate(product.owner?.activatedAt, locale),
+              formatClaimDate(warranty.owner?.activatedAt, locale),
             ],
           ]}
           title={t("customerInfo")}

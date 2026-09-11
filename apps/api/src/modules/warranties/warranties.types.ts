@@ -345,8 +345,10 @@ export function toWarrantyListItemResponse(
       displayName: warranty.product.display_name,
       brand: getProductCatalogue(warranty.product).brand,
       model: getProductCatalogue(warranty.product).model,
+      modelYear: warranty.product.model_year,
       productCode: warranty.product.product_code,
       serialNumber: warranty.serial_number,
+      status: warranty.product.status,
       ...(warranty.product.category_ref
         ? {
             category: {
@@ -359,8 +361,10 @@ export function toWarrantyListItemResponse(
     },
     owner: currentOwnership
       ? {
+          activatedAt: currentOwnership.activated_at,
           customerId: currentOwnership.customer_id,
           ownerUserId: currentOwnership.owner_user_id,
+          purchaseDate: currentOwnership.purchase_date,
           customerCode: currentOwnership.customer?.customer_code,
           fullName: currentOwnership.customer?.full_name,
           ...(currentOwnership.customer?.email ||

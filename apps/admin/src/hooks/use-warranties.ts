@@ -2,6 +2,7 @@
 
 import {
   keepPreviousData,
+  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
@@ -42,6 +43,21 @@ export function useWarranties(
     queryKey: warrantyKeys.list(query),
     queryFn: () => warrantiesService.listWarranties(query),
     placeholderData: keepPreviousData,
+  });
+}
+
+export function useInfiniteWarranties(
+  query: Omit<ListWarrantiesQuery, "page">,
+  options?: { enabled?: boolean },
+) {
+  return useInfiniteQuery({
+    ...options,
+    queryKey: [...warrantyKeys.lists(), "infinite", query] as const,
+    queryFn: ({ pageParam }) =>
+      warrantiesService.listWarranties({ ...query, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.meta.hasNextPage ? lastPage.meta.page + 1 : undefined,
   });
 }
 

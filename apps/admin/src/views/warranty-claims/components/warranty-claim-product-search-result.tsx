@@ -1,41 +1,38 @@
-import type { ProductResponse } from "@repo/shared";
+import type { WarrantyListItem } from "@repo/shared";
+import { useLocale, useTranslations } from "next-intl";
+import { formatClaimDate } from "../warranty-claims.utils";
 
 type WarrantyClaimProductSearchResultProps = {
-  product: ProductResponse;
-  productStatus: string;
-  warrantyStatus: string;
+  warranty: WarrantyListItem;
 };
 
 export function WarrantyClaimProductSearchResult({
-  product,
-  productStatus,
-  warrantyStatus,
+  warranty,
 }: WarrantyClaimProductSearchResultProps) {
+  const locale = useLocale();
+  const t = useTranslations("WarrantyClaims");
+  const productName = warranty.product.displayName ?? warranty.product.name;
+
   return (
     <span className="flex min-w-0 flex-1 flex-col gap-1.5">
       <span className="flex min-w-0 flex-wrap items-center gap-2">
-        <span className="min-w-0 font-medium text-slate-950 dark:text-slate-50">
-          {product.name}
-        </span>
-        <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-900 dark:text-slate-300">
-          {productStatus}
+        <span className="min-w-0 font-semibold text-slate-950 dark:text-slate-50">
+          {warranty.warrantyCode}
         </span>
         <span className="rounded bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
-          {warrantyStatus}
+          {t(`warrantyStatuses.${warranty.status}`)}
         </span>
       </span>
       <span className="grid min-w-0 gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400 sm:grid-cols-2">
         <span className="truncate">
-          {product.productCode} · {product.warrantyCode ?? "-"}
+          {productName} · {warranty.product.productCode}
         </span>
         <span className="truncate">
-          {product.warranty?.serialNumber ?? "-"} ·{" "}
-          {product.owner?.fullName ?? "-"}
+          {warranty.serialNumber ?? "-"} · {warranty.owner?.fullName ?? "-"}
         </span>
         <span className="truncate sm:col-span-2">
-          {[product.categoryRef?.name, product.brand, product.model]
-            .filter(Boolean)
-            .join(" · ") || "-"}
+          {formatClaimDate(warranty.startDate, locale)} –{" "}
+          {formatClaimDate(warranty.endDate, locale)}
         </span>
       </span>
     </span>

@@ -1,5 +1,6 @@
 import { WarrantiesRepository } from '@/modules/warranties/repository/warranties.repository';
-import { warranty_status } from '@prisma/client';
+import { product_status, warranty_status } from '@prisma/client';
+import { WARRANTY_CLAIM_OPEN_STATUSES } from '@repo/shared/constants';
 
 describe('WarrantiesRepository sorting', () => {
   const findMany = jest.fn().mockResolvedValue([]);
@@ -21,6 +22,46 @@ describe('WarrantiesRepository sorting', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('filters claim options from every eligible warranty record', async () => {
+    const now = new Date('2026-09-11T12:00:00.000Z');
+    jest.useFakeTimers().setSystemTime(now);
+
+    await repository.list({
+      categoryId: 'category-id',
+      claimEligible: 'true',
+      limit: 20,
+      page: 1,
+      productId: 'product-id',
+    });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          AND: [
+            { OR: [{ start_date: null }, { start_date: { lte: now } }] },
+            { OR: [{ end_date: null }, { end_date: { gte: now } }] },
+          ],
+          claims: {
+            none: { status: { in: [...WARRANTY_CLAIM_OPEN_STATUSES] } },
+          },
+          ownerships: { some: { is_current_owner: true } },
+          product: {
+            category_id: 'category-id',
+            deleted_at: null,
+            status: product_status.ACTIVE,
+          },
+          product_id: 'product-id',
+          status: warranty_status.ACTIVE,
+          warranty_code: { not: '' },
+        }),
+      }),
+    );
   });
 
   it('lists newest warranties first with a stable id tie-breaker', async () => {
