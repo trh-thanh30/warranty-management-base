@@ -182,3 +182,59 @@ test("public warranty terminology distinguishes every customer-facing code", asy
   assert.doesNotMatch(lookupViewSource, /E-Warranty|Serial Number|FJ-/);
   assert.match(lookupViewSource, /registration\.methods\.serial\.title/);
 });
+
+test("warranty claim form offers shared issue choices for every product category", async () => {
+  const [vi, en, sharedSource] = await Promise.all([
+    readFile(path.join(webRoot, "src", "messages", "vi.json"), "utf8").then(
+      JSON.parse,
+    ),
+    readFile(path.join(webRoot, "src", "messages", "en.json"), "utf8").then(
+      JSON.parse,
+    ),
+    readFile(
+      path.join(
+        process.cwd(),
+        "packages",
+        "shared",
+        "src",
+        "constants",
+        "warranty-domain.ts",
+      ),
+      "utf8",
+    ),
+  ]);
+  const expectedIssueKeys = [
+    "bubble",
+    "fade",
+    "scratch",
+    "noPower",
+    "intermittentOperation",
+    "weakOrWrongLight",
+    "moisture",
+    "noRecording",
+    "poorVideoQuality",
+    "storageFailure",
+    "connectionFailure",
+    "inaccurateReading",
+    "lowSensorBattery",
+    "other",
+  ];
+
+  assert.deepEqual(
+    Object.keys(vi.Warranty.request.fields.issue.options),
+    expectedIssueKeys,
+  );
+  assert.deepEqual(
+    Object.keys(en.Warranty.request.fields.issue.options),
+    expectedIssueKeys,
+  );
+
+  const sharedOptions = sharedSource.match(
+    /WARRANTY_CLAIM_ISSUE_OPTIONS\s*=\s*\[([\s\S]*?)\]\s*as const/,
+  )?.[1];
+  assert.ok(sharedOptions, "shared warranty claim issue options must exist");
+  assert.deepEqual(
+    [...sharedOptions.matchAll(/"([^"]+)"/g)].map(([, key]) => key),
+    expectedIssueKeys,
+  );
+});

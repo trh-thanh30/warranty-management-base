@@ -15,7 +15,8 @@ export type WarrantyActivationErrorKind =
   | "notFound"
   | "rateLimit"
   | "request"
-  | "serviceUnavailable";
+  | "serviceUnavailable"
+  | "verification";
 
 export type ActivationCodeErrorKind = Extract<
   WarrantyActivationErrorKind,
@@ -62,6 +63,8 @@ export function getWarrantyActivationErrorKind(
       ? String(error.details.code)
       : error.code;
 
+  if (detailCode?.startsWith("TURNSTILE_")) return "verification";
+
   if (detailCode === "ACTIVATION_CODE_INVALID_OR_EXPIRED") {
     return "activationCodeInvalid";
   }
@@ -87,8 +90,17 @@ export function getWarrantyActivationErrorKind(
 
 export function useWarrantyActivationRequest() {
   const mutation = useMutation({
-    mutationFn: (body: CreatePublicWarrantyActivationRequestBody) =>
-      warrantyActivationRequestsService.createActivationRequest(body),
+    mutationFn: ({
+      body,
+      turnstileToken,
+    }: {
+      body: CreatePublicWarrantyActivationRequestBody;
+      turnstileToken?: string;
+    }) =>
+      warrantyActivationRequestsService.createActivationRequest(
+        body,
+        turnstileToken,
+      ),
   });
 
   return {
@@ -96,6 +108,9 @@ export function useWarrantyActivationRequest() {
     errorKind: mutation.error
       ? getWarrantyActivationErrorKind(mutation.error)
       : null,
-    submit: mutation.mutateAsync,
+    submit: (
+      body: CreatePublicWarrantyActivationRequestBody,
+      turnstileToken?: string,
+    ) => mutation.mutateAsync({ body, turnstileToken }),
   };
 }

@@ -24,7 +24,16 @@ import { ListPublicProductCategoriesUseCase } from '@/modules/categories/use-cas
 import { ListPublicProductCategoriesDto } from '@/modules/categories/dto/list-public-product-categories.dto';
 import { PublicLookupWarrantyClaimByCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claim-by-code.use-case';
 import { PublicLookupWarrantyClaimsByWarrantyCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claims-by-warranty-code.use-case';
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { PublicSubmissionAbuseGuard } from '@/modules/public/guards/public-submission-abuse.guard';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 
 const PUBLIC_WARRANTY_THROTTLE = {
@@ -62,6 +71,7 @@ export class PublicController {
     return this.lookupWarrantyByCodeUseCase.execute(query);
   }
 
+  @UseGuards(PublicSubmissionAbuseGuard)
   @Throttle(PUBLIC_WARRANTY_THROTTLE)
   @Post('warranty-activation-requests')
   createWarrantyActivationRequest(
@@ -78,6 +88,7 @@ export class PublicController {
     );
   }
 
+  @UseGuards(PublicSubmissionAbuseGuard)
   @Throttle(PUBLIC_WARRANTY_THROTTLE)
   @Post('warranty-claims')
   createWarrantyClaim(@Body() dto: CreateWarrantyClaimDto) {

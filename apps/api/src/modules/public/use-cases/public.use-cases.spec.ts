@@ -501,6 +501,20 @@ describe('Public warranty lookup endpoint', () => {
       /@Throttle\(PUBLIC_WARRANTY_THROTTLE\)\s*@Get\('warranty-claims\/by-warranty-code\/:warrantyCode'\)/,
     );
   });
+
+  it('protects both public submission endpoints with the abuse guard', () => {
+    const controllerSource = readFileSync(
+      require.resolve('@/modules/public/public.controller'),
+      'utf8',
+    );
+
+    expect(controllerSource).toMatch(
+      /@UseGuards\(PublicSubmissionAbuseGuard\)\s*@Throttle\(PUBLIC_WARRANTY_THROTTLE\)\s*@Post\('warranty-activation-requests'\)/,
+    );
+    expect(controllerSource).toMatch(
+      /@UseGuards\(PublicSubmissionAbuseGuard\)\s*@Throttle\(PUBLIC_WARRANTY_THROTTLE\)\s*@Post\('warranty-claims'\)/,
+    );
+  });
 });
 
 describe('Public warranty claim tracking', () => {

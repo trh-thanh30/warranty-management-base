@@ -18,6 +18,10 @@ import { WarrantyClaimsModule } from '@/modules/warranty-claims/warranty-claims.
 import { WarrantyActivationRequestsModule } from '@/modules/warranty-activation-requests/warranty-activation-requests.module';
 import { WarrantiesModule } from '@/modules/warranties/warranties.module';
 import { Module } from '@nestjs/common';
+import { RedisModule } from '@/database/redis/redis.module';
+import { PublicSubmissionAbuseGuard } from '@/modules/public/guards/public-submission-abuse.guard';
+import { PublicSubmissionQuotaService } from '@/modules/public/service/public-submission-quota.service';
+import { TurnstileVerificationService } from '@/modules/public/service/turnstile-verification.service';
 
 @Module({
   imports: [
@@ -28,6 +32,7 @@ import { Module } from '@nestjs/common';
     DealersModule,
     ProductsModule,
     CategoriesModule,
+    RedisModule,
   ],
   controllers: [PublicController],
   providers: [
@@ -42,6 +47,9 @@ import { Module } from '@nestjs/common';
     CreatePublicWarrantyClaimUseCase,
     CreatePublicWarrantyActivationRequestUseCase,
     PublicLookupWarrantyActivationRequestUseCase,
+    PublicSubmissionAbuseGuard,
+    PublicSubmissionQuotaService,
+    TurnstileVerificationService,
   ],
 })
 export class PublicModule {}

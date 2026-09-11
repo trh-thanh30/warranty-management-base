@@ -16,7 +16,7 @@ import {
 } from "@repo/ui/select";
 import { Send } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, type WheelEvent } from "react";
+import { useEffect, useMemo, useState, type WheelEvent } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {
@@ -29,6 +29,10 @@ import {
   FormMessage,
 } from "@/src/components/common/form";
 import { formControlFocusClassName } from "@/src/components/common/form-control.constants";
+import {
+  isTurnstileEnabled,
+  TurnstileWidget,
+} from "@/src/components/common/turnstile-widget";
 import {
   getWarrantyActivationErrorKind,
   isActivationCodeErrorKind,
@@ -48,6 +52,7 @@ type WarrantyActivationRequestFormProps = {
   onResetError: () => void;
   onSubmit: (
     body: CreatePublicWarrantyActivationRequestBody,
+    turnstileToken?: string,
   ) => Promise<PublicWarrantyActivationRequestReceipt>;
 };
 
@@ -88,6 +93,8 @@ export function WarrantyActivationRequestForm({
     defaultValues,
     resolver: zodResolver(schema),
   });
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const provinceCode = form.watch("provinceCode");
   const provinceCodeNumber = provinceCode ? Number(provinceCode) : null;
   const provincesQuery = useVietnamProvinces();
@@ -150,10 +157,13 @@ export function WarrantyActivationRequestForm({
           values,
           wards: wardsQuery.data,
         }),
+        turnstileToken ?? undefined,
       );
       toast.success(t("success.title"));
       form.reset();
+      setTurnstileToken(null);
     } catch (error) {
+      setTurnstileResetKey((value) => value + 1);
       const submittedErrorKind = getWarrantyActivationErrorKind(error);
 
       if (isActivationCodeErrorKind(submittedErrorKind)) {
@@ -418,9 +428,16 @@ export function WarrantyActivationRequestForm({
           />
         </div>
 
+        <TurnstileWidget
+          onTokenChange={setTurnstileToken}
+          resetKey={turnstileResetKey}
+        />
+
         <Button
           className="flex h-12 w-full items-center justify-center gap-2 rounded-md bg-premium-red text-sm font-semibold uppercase text-white shadow-md transition-colors hover:bg-warm-red"
-          disabled={isPending}
+          disabled={
+            isPending || (isTurnstileEnabled && turnstileToken === null)
+          }
           type="submit"
         >
           <span>{isPending ? t("submitting") : t("submit")}</span>

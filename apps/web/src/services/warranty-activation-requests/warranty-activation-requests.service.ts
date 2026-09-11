@@ -27,10 +27,17 @@ export class WarrantyActivationRequestsService {
 
   async createActivationRequest(
     body: CreatePublicWarrantyActivationRequestBody,
+    turnstileToken?: string,
   ): Promise<PublicWarrantyActivationRequestReceipt> {
     const response = await this.http.post<
       ApiResponse<PublicWarrantyActivationRequestReceipt>
-    >("/public/warranty-activation-requests", body);
+    >(
+      "/public/warranty-activation-requests",
+      body,
+      turnstileToken
+        ? { headers: { "X-Turnstile-Token": turnstileToken } }
+        : undefined,
+    );
 
     return response.data;
   }

@@ -163,6 +163,28 @@ export const envSchema = z
     // Rate Limiting
     RATE_LIMIT_TTL: z.coerce.number().int().positive().default(60),
     RATE_LIMIT_MAX: z.coerce.number().int().positive().default(100),
+    PUBLIC_SUBMISSION_DAILY_WINDOW_SECONDS: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(86400),
+    PUBLIC_SUBMISSION_DAILY_IP_LIMIT: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(20),
+    PUBLIC_SUBMISSION_DAILY_PHONE_LIMIT: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(5),
+    PUBLIC_SUBMISSION_DAILY_CODE_LIMIT: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(3),
+    TURNSTILE_SECRET_KEY: z.string().optional(),
+    TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(0),
 
     // CORS Configuration
     CORS_ORIGINS: z

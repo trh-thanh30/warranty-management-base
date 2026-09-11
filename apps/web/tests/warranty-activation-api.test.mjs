@@ -75,6 +75,30 @@ test("warranty activation service posts the public activation request", async ()
   ]);
 });
 
+test("warranty activation service sends the Turnstile token separately from domain data", async () => {
+  const { WarrantyActivationRequestsService } = await importRequired(
+    "../src/services/warranty-activation-requests/warranty-activation-requests.service.ts",
+  );
+  const calls = [];
+  const service = new WarrantyActivationRequestsService({
+    async post(url, body, config) {
+      calls.push({ body, config, url });
+      return { data: { requestCode: "WAR-1" } };
+    },
+  });
+  const body = { activationCode: "SP-ABC123" };
+
+  await service.createActivationRequest(body, "turnstile-token");
+
+  assert.deepEqual(calls, [
+    {
+      body,
+      config: { headers: { "X-Turnstile-Token": "turnstile-token" } },
+      url: "/public/warranty-activation-requests",
+    },
+  ]);
+});
+
 test("warranty activation form maps selected location names into the API body", async () => {
   const { toWarrantyActivationRequestBody } = await importRequired(
     "../src/views/warranty/warranty-activation.utils.ts",

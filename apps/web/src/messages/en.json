@@ -1476,7 +1476,8 @@
         "notFound": "This activation code was not found.",
         "rateLimit": "Too many requests were submitted. Try again later.",
         "request": "The activation request could not be submitted. Try again.",
-        "serviceUnavailable": "The activation service is temporarily unavailable. Try again later."
+        "serviceUnavailable": "The activation service is temporarily unavailable. Try again later.",
+        "verification": "We could not verify that you are a valid user. Complete verification again and resubmit."
       },
       "otherActions": {
         "title": "Other warranty services",
@@ -1617,8 +1618,9 @@
         "notEligible": "This warranty is inactive, expired, or no longer eligible.",
         "notFound": "This warranty code was not found.",
         "ownerMismatch": "The phone number does not match the current warranty owner.",
-        "rateLimit": "You have submitted too many requests. Try again in one minute.",
-        "request": "The warranty request could not be submitted. Please try again later."
+        "rateLimit": "You have submitted too many requests. Try again later.",
+        "request": "The warranty request could not be submitted. Please try again later.",
+        "verification": "We could not verify that you are a valid user. Complete verification again and resubmit."
       },
       "validation": {
         "detailsInvalid": "Issue details must not exceed 4000 characters.",
@@ -1647,6 +1649,16 @@
             "bubble": "Peeling / Film bubbles",
             "fade": "Discoloration / Fading",
             "scratch": "Impact scratches",
+            "noPower": "No power / Not working",
+            "intermittentOperation": "Intermittent operation",
+            "weakOrWrongLight": "Weak light / Incorrect light color",
+            "moisture": "Internal moisture / Condensation",
+            "noRecording": "Not recording",
+            "poorVideoQuality": "Blurry / Choppy video",
+            "storageFailure": "Memory card error / Data loss",
+            "connectionFailure": "App / Device connection failure",
+            "inaccurateReading": "Incorrect readings",
+            "lowSensorBattery": "Low / Depleted sensor battery",
             "other": "Other issue"
           }
         },

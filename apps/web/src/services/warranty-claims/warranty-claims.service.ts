@@ -25,10 +25,17 @@ export class WarrantyClaimsService {
 
   async createWarrantyClaim(
     body: CreateWarrantyClaimBody,
+    turnstileToken?: string,
   ): Promise<PublicWarrantyClaimSummary> {
     const response = await this.http.post<
       ApiResponse<PublicWarrantyClaimSummary>
-    >("/public/warranty-claims", body);
+    >(
+      "/public/warranty-claims",
+      body,
+      turnstileToken
+        ? { headers: { "X-Turnstile-Token": turnstileToken } }
+        : undefined,
+    );
 
     return response.data;
   }

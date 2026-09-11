@@ -60,6 +60,30 @@ test("warranty claims service posts the public claim request", async () => {
   ]);
 });
 
+test("warranty claims service sends the Turnstile token separately from claim data", async () => {
+  const { WarrantyClaimsService } = await importRequired(
+    "../src/services/warranty-claims/warranty-claims.service.ts",
+  );
+  const calls = [];
+  const service = new WarrantyClaimsService({
+    async post(url, body, config) {
+      calls.push({ body, config, url });
+      return { data: { claimCode: "CLM-1" } };
+    },
+  });
+  const body = { warrantyCode: "WM-ABC123" };
+
+  await service.createWarrantyClaim(body, "turnstile-token");
+
+  assert.deepEqual(calls, [
+    {
+      body,
+      config: { headers: { "X-Turnstile-Token": "turnstile-token" } },
+      url: "/public/warranty-claims",
+    },
+  ]);
+});
+
 test("warranty claim form schema validates public request fields", async () => {
   const { createWarrantyClaimRequestFormSchema } = await importRequired(
     "../src/views/warranty/warranty-claim-request-form.schema.ts",
@@ -102,9 +126,19 @@ test("warranty claim form maps the selected shared issue into the API body", asy
   assert.deepEqual(
     toWarrantyClaimRequestBody(validFormValues, {
       bubble: "Peeling / Film bubbles",
+      connectionFailure: "App / Device connection failure",
       fade: "Discoloration / Fading",
+      inaccurateReading: "Incorrect readings",
+      intermittentOperation: "Intermittent operation",
+      lowSensorBattery: "Low / Depleted sensor battery",
+      moisture: "Internal moisture / Condensation",
+      noPower: "No power / Not working",
+      noRecording: "Not recording",
       other: "Other issue",
+      poorVideoQuality: "Blurry / Choppy video",
       scratch: "Impact scratches",
+      storageFailure: "Memory card error / Data loss",
+      weakOrWrongLight: "Weak light / Incorrect light color",
     }),
     {
       issueDetail: "Bubbles on the windshield",
