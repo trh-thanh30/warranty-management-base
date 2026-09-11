@@ -54,6 +54,13 @@ describe('ListWarrantiesUseCase', () => {
               customer_phone: '0901234567',
               full_address: '12 Nguyen Trai, Ha Noi',
             },
+            claims: [
+              {
+                id: 'claim-id',
+                claim_code: 'CLM-2026-OPEN01',
+                status: 'SUBMITTED',
+              },
+            ],
             product: {
               id: 'product-id',
               product_code: 'PRD-2026-ABCDEF',
@@ -61,11 +68,20 @@ describe('ListWarrantiesUseCase', () => {
               slug: 'genuine-battery-pack',
               brand: 'Toyota',
               model: 'Battery Plus',
+              model_year: 2026,
+              status: 'ACTIVE',
+              category_ref: {
+                id: 'category-id',
+                name: 'Battery',
+                slug: 'battery',
+              },
             },
             ownerships: [
               {
+                activated_at: new Date('2026-07-13T00:00:00.000Z'),
                 customer_id: 'customer-id',
                 owner_user_id: null,
+                purchase_date: new Date('2026-07-12T00:00:00.000Z'),
                 is_current_owner: true,
                 customer: {
                   customer_code: 'CUS-2026-000001',
@@ -116,22 +132,36 @@ describe('ListWarrantiesUseCase', () => {
           code: 'SP-ACTIVATED-001',
           status: 'ACTIVATED',
         },
+        openClaim: {
+          id: 'claim-id',
+          claimCode: 'CLM-2026-OPEN01',
+          status: 'SUBMITTED',
+        },
         product: {
           id: 'product-id',
           name: 'Genuine Battery Pack',
           displayName: 'Genuine Battery Pack',
           brand: 'Toyota',
           model: 'Battery Plus',
+          modelYear: 2026,
           productCode: 'PRD-2026-ABCDEF',
           serialNumber: 'SN-001',
+          status: 'ACTIVE',
+          category: {
+            id: 'category-id',
+            name: 'Battery',
+            slug: 'battery',
+          },
         },
         owner: {
+          activatedAt: new Date('2026-07-13T00:00:00.000Z'),
           customerId: 'customer-id',
           ownerUserId: null,
           customerCode: 'CUS-2026-000001',
           fullName: 'Nguyen Van A',
           email: 'customer@example.com',
           phone: '0901234567',
+          purchaseDate: new Date('2026-07-12T00:00:00.000Z'),
           address: '12 Nguyen Trai, Ha Noi',
         },
       }),

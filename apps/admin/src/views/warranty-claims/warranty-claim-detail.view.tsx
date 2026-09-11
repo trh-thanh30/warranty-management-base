@@ -108,7 +108,11 @@ export function WarrantyClaimDetailView({
           <UpdateClaimStatusDialog
             allowedStatuses={detail.allowedStatusTransitions}
             claim={detail.claim}
+            isCompletingImmediately={detail.isCompletingImmediately}
             isUpdating={detail.isUpdatingStatus}
+            onCompleteImmediately={(note) => {
+              void detail.completeImmediately(note);
+            }}
             onConfirm={(status, note) => {
               void detail.updateStatus(status, note);
             }}

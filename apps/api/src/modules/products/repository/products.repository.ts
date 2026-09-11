@@ -202,36 +202,9 @@ export class ProductsRepository {
         activationEligible || claimEligible || activationCodeAssignable
           ? null
           : buildProductDeletionFilter(filters.status),
-      warranties: filters.ownerCustomerId
+      warranties: claimEligible
         ? {
             some: {
-              ownerships: {
-                some: {
-                  customer_id: filters.ownerCustomerId,
-                  is_current_owner: true,
-                },
-              },
-            },
-          }
-        : undefined,
-      status: activationEligible
-        ? product_status.ACTIVE
-        : claimEligible
-          ? product_status.ACTIVE
-          : activationCodeAssignable
-            ? product_status.ACTIVE
-            : filters.status === undefined
-              ? product_status.ACTIVE
-              : filters.status === 'ALL'
-                ? undefined
-                : filters.status,
-      is_published:
-        filters.isPublished === undefined
-          ? undefined
-          : filters.isPublished === 'true',
-      warranty: claimEligible
-        ? {
-            is: {
               status: warranty_status.ACTIVE,
               warranty_code: { not: '' },
               AND: [
@@ -247,18 +220,51 @@ export class ProductsRepository {
                   status: { in: [...WARRANTY_CLAIM_OPEN_STATUSES] },
                 },
               },
+              ownerships: {
+                some: {
+                  customer_id: filters.ownerCustomerId,
+                  is_current_owner: true,
+                },
+              },
             },
           }
-        : activationEligible
+        : filters.ownerCustomerId
           ? {
-              is: {
-                status: warranty_status.DRAFT,
-                warranty_code: { not: '' },
+              some: {
+                ownerships: {
+                  some: {
+                    customer_id: filters.ownerCustomerId,
+                    is_current_owner: true,
+                  },
+                },
               },
             }
-          : filters.warrantyStatus
-            ? { status: filters.warrantyStatus }
-            : undefined,
+          : undefined,
+      status: activationEligible
+        ? product_status.ACTIVE
+        : claimEligible
+          ? product_status.ACTIVE
+          : activationCodeAssignable
+            ? product_status.ACTIVE
+            : filters.status === undefined
+              ? product_status.ACTIVE
+              : filters.status === 'ALL'
+                ? undefined
+                : filters.status,
+      is_published:
+        filters.isPublished === undefined
+          ? undefined
+          : filters.isPublished === 'true',
+      warranty: activationEligible
+        ? {
+            is: {
+              status: warranty_status.DRAFT,
+              warranty_code: { not: '' },
+            },
+          }
+        : filters.warrantyStatus
+          ? { status: filters.warrantyStatus }
+          : undefined,
       warranty_activation_request_items: activationEligible
         ? {
             none: { status: { in: openActivationRequestStatuses } },
@@ -273,8 +279,10 @@ export class ProductsRepository {
         ? [
             { product_code: { contains: search, mode: 'insensitive' } },
             {
-              warranty: {
-                warranty_code: { contains: search, mode: 'insensitive' },
+              warranties: {
+                some: {
+                  warranty_code: { contains: search, mode: 'insensitive' },
+                },
               },
             },
             { display_name: { contains: search, mode: 'insensitive' } },

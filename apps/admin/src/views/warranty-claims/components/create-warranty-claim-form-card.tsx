@@ -1,7 +1,8 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { FormField } from "@/src/components/common/form-field";
+import { SearchDropdown } from "@/src/components/common/search-dropdown";
+import { Link } from "@/src/i18n/navigation";
 import {
   Button,
   Card,
@@ -12,14 +13,14 @@ import {
   Input,
   Textarea,
 } from "@repo/ui";
-import { SearchDropdown } from "@/src/components/common/search-dropdown";
-import { FormField } from "@/src/components/common/form-field";
-import { formatProductSearchOption } from "@/src/utils";
+import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useCreateWarrantyClaimForm } from "../hooks/use-create-warranty-claim-form";
 import { translateWarrantyClaimCreateFieldError } from "../warranty-claims.utils";
-import { WarrantyClaimFormSection } from "./warranty-claim-form-layout";
 import { SelectedWarrantyClaimProductDetails } from "./selected-warranty-claim-product-details";
+import { WarrantyClaimFormSection } from "./warranty-claim-form-layout";
 import { WarrantyClaimProductSearchResult } from "./warranty-claim-product-search-result";
+import { WarrantyClaimWarrantyFilters } from "./warranty-claim-warranty-filters";
 
 type CreateWarrantyClaimFormCardProps = {
   onCancel: () => void;
@@ -32,7 +33,14 @@ export function CreateWarrantyClaimFormCard({
 }: CreateWarrantyClaimFormCardProps) {
   const t = useTranslations("WarrantyClaims");
   const {
-    clearProduct,
+    blockedWarranty,
+    categories,
+    categoriesQuery,
+    categoryId,
+    changeCategory,
+    clearFilters,
+    clearProductFilter,
+    clearWarranty,
     customer,
     customerQuery,
     errors,
@@ -43,9 +51,15 @@ export function CreateWarrantyClaimFormCard({
     products,
     productsQuery,
     register,
-    selectedProduct,
-    selectProduct,
+    selectedFilterProduct,
+    selectedWarranty,
+    selectFilterProduct,
+    selectWarranty,
     setProductSearch,
+    setWarrantySearch,
+    warranties,
+    warrantiesQuery,
+    warrantySearch,
   } = useCreateWarrantyClaimForm({ onCreated });
 
   return (
@@ -71,64 +85,107 @@ export function CreateWarrantyClaimFormCard({
             description={t("createWarrantyDescription")}
             title={t("warrantyInfo")}
           >
+            <WarrantyClaimWarrantyFilters
+              categories={categories}
+              categoriesLoading={categoriesQuery.isFetching}
+              categoryId={categoryId}
+              onCategoryChange={changeCategory}
+              onClearFilters={clearFilters}
+              onClearProduct={clearProductFilter}
+              onProductSearchChange={setProductSearch}
+              onProductSelect={selectFilterProduct}
+              onProductsReachEnd={() => {
+                if (
+                  productsQuery.hasNextPage &&
+                  !productsQuery.isFetchingNextPage
+                ) {
+                  void productsQuery.fetchNextPage();
+                }
+              }}
+              productSearch={productSearch}
+              products={products}
+              productsError={productsQuery.isError}
+              productsLoading={productsQuery.isFetching}
+              selectedProduct={selectedFilterProduct}
+            />
             <FormField
               error={translateWarrantyClaimCreateFieldError(
                 errors.productId?.message,
                 t,
               )}
-              htmlFor="create-warranty-claim-product"
-              label={t("productSearch")}
+              htmlFor="create-warranty-claim-warranty"
+              label={t("warrantySearch")}
             >
               <SearchDropdown
-                emptyLabel={t("noProduct")}
-                getItemKey={(product) => product.id}
-                id="create-warranty-claim-product"
+                emptyLabel={t("noWarranty")}
+                errorLabel={t("warrantySearchLoadError")}
+                getItemKey={(warranty) => warranty.id}
+                getItemDisabledReason={(warranty) =>
+                  warranty.openClaim
+                    ? t("openClaimDisabled", {
+                        claimCode: warranty.openClaim.claimCode,
+                      })
+                    : undefined
+                }
+                id="create-warranty-claim-warranty"
                 inputClassName="h-11 text-base sm:h-10 sm:text-sm"
-                isLoading={productsQuery.isFetching}
-                items={products}
-                loadingLabel={t("loadingProducts")}
-                onItemSelect={selectProduct}
+                isError={warrantiesQuery.isError}
+                isLoading={warrantiesQuery.isFetching}
+                items={warranties}
+                loadingLabel={t("loadingWarranties")}
+                onItemSelect={selectWarranty}
                 onReachEnd={() => {
                   if (
-                    productsQuery.hasNextPage &&
-                    !productsQuery.isFetchingNextPage
+                    warrantiesQuery.hasNextPage &&
+                    !warrantiesQuery.isFetchingNextPage
                   ) {
-                    void productsQuery.fetchNextPage();
+                    void warrantiesQuery.fetchNextPage();
                   }
                 }}
                 onSearchChange={(value) => {
-                  if (selectedProduct) clearProduct();
-                  setProductSearch(value);
+                  if (selectedWarranty) clearWarranty();
+                  setWarrantySearch(value);
                 }}
-                placeholder={t("productSearchPlaceholder")}
-                renderItem={(product) => (
-                  <WarrantyClaimProductSearchResult
-                    product={product}
-                    productStatus={t(`productStatuses.${product.status}`)}
-                    warrantyStatus={
-                      product.warranty?.status
-                        ? t(`warrantyStatuses.${product.warranty.status}`)
-                        : "-"
-                    }
-                  />
+                placeholder={t("warrantySearchPlaceholder")}
+                renderItem={(warranty) => (
+                  <WarrantyClaimProductSearchResult warranty={warranty} />
                 )}
-                searchValue={productSearch}
+                searchValue={warrantySearch}
                 selectedLabel={
-                  selectedProduct
-                    ? formatProductSearchOption(selectedProduct)
+                  selectedWarranty
+                    ? `${selectedWarranty.warrantyCode} · ${selectedWarranty.product.displayName ?? selectedWarranty.product.name}`
                     : undefined
                 }
               />
+              {blockedWarranty?.openClaim ? (
+                <div
+                  className="mt-2 flex flex-col gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-950 sm:flex-row sm:items-center sm:justify-between dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100"
+                  role="status"
+                >
+                  <span>
+                    {t("openClaimNotice", {
+                      claimCode: blockedWarranty.openClaim.claimCode,
+                      status: t(`statuses.${blockedWarranty.openClaim.status}`),
+                    })}
+                  </span>
+                  <Link
+                    className="shrink-0 font-semibold underline underline-offset-4 outline-none transition-colors duration-200 hover:text-amber-700 focus-visible:ring-2 focus-visible:ring-amber-700 focus-visible:ring-offset-2 dark:hover:text-amber-300"
+                    href={`/warranty-claims/${blockedWarranty.openClaim.id}`}
+                  >
+                    {t("viewOpenClaim")}
+                  </Link>
+                </div>
+              ) : null}
             </FormField>
 
             <input type="hidden" {...register("warrantyCode")} />
 
-            {selectedProduct ? (
+            {selectedWarranty ? (
               <SelectedWarrantyClaimProductDetails
                 customer={customer}
                 isCustomerError={customerQuery.isError}
                 isCustomerLoading={customerQuery.isFetching}
-                product={selectedProduct}
+                warranty={selectedWarranty}
               />
             ) : null}
           </WarrantyClaimFormSection>

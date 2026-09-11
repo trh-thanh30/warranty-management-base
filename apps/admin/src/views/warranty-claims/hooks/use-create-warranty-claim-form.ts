@@ -3,11 +3,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDebounce } from "@repo/hooks";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import type { ProductResponse } from "@repo/shared";
+import type { ProductResponse, WarrantyListItem } from "@repo/shared";
+import { useInfiniteWarranties } from "@/src/hooks/use-warranties";
 import { useToast } from "@/src/hooks/use-toast";
 import { useCreateWarrantyClaim } from "@/src/hooks/use-warranty-claims";
+import { useCategories } from "../../categories/hooks/use-categories";
 import { useCustomer } from "../../customers/hooks/use-customers";
 import { useInfiniteProducts } from "../../products/hooks/use-products";
 import {
@@ -16,6 +18,8 @@ import {
 } from "../warranty-claims.types";
 import {
   buildWarrantyClaimProductQuery,
+  buildWarrantyClaimWarrantyQuery,
+  flattenWarrantyClaimOptions,
   getWarrantyClaimRequesterPrefill,
   getWarrantyClaimRequesterValues,
   resolveWarrantyClaimCreateError,
@@ -40,11 +44,16 @@ export function useCreateWarrantyClaimForm({
   const tApiErrors = useTranslations("ApiErrors");
   const toast = useToast();
   const createMutation = useCreateWarrantyClaim();
+  const [categoryId, setCategoryId] = useState("");
   const [productSearch, setProductSearch] = useState("");
-  const [selectedProduct, setSelectedProduct] =
+  const [selectedFilterProduct, setSelectedFilterProduct] =
     useState<ProductResponse | null>(null);
+  const [warrantySearch, setWarrantySearch] = useState("");
+  const [selectedWarranty, setSelectedWarranty] =
+    useState<WarrantyListItem | null>(null);
   const requesterPrefillCustomerIdRef = useRef<string | null>(null);
   const debouncedProductSearch = useDebounce(productSearch.trim(), 300);
+  const debouncedWarrantySearch = useDebounce(warrantySearch.trim(), 300);
   const {
     clearErrors,
     formState: { errors, isSubmitting },
@@ -56,19 +65,51 @@ export function useCreateWarrantyClaimForm({
     resolver: zodResolver(warrantyClaimCreateFormSchema),
     defaultValues: DEFAULT_VALUES,
   });
+  const categoriesQuery = useCategories({
+    isActive: "true",
+    limit: 100,
+    sortBy: "order",
+    sortOrder: "asc",
+    type: "PRODUCT",
+  });
   const productsQuery = useInfiniteProducts(
-    buildWarrantyClaimProductQuery(debouncedProductSearch),
+    buildWarrantyClaimProductQuery(debouncedProductSearch, categoryId),
   );
-  const products = Array.from(
-    new Map(
-      (productsQuery.data?.pages ?? [])
-        .flatMap((page) => page.items)
-        .map((product) => [product.id, product]),
-    ),
-  ).map(([, product]) => product);
+  const products = useMemo(
+    () =>
+      Array.from(
+        new Map(
+          (productsQuery.data?.pages ?? [])
+            .flatMap((page) => page.items)
+            .map((product) => [product.id, product]),
+        ).values(),
+      ),
+    [productsQuery.data?.pages],
+  );
+  const warrantiesQuery = useInfiniteWarranties(
+    buildWarrantyClaimWarrantyQuery(debouncedWarrantySearch, {
+      categoryId,
+      productId: selectedFilterProduct?.id,
+    }),
+  );
+  const warranties = useMemo(
+    () => flattenWarrantyClaimOptions(warrantiesQuery.data?.pages ?? []),
+    [warrantiesQuery.data?.pages],
+  );
+  const blockedWarranty = useMemo(() => {
+    const normalizedSearch = debouncedWarrantySearch.toUpperCase();
+
+    return (
+      warranties.find(
+        (warranty) =>
+          warranty.openClaim &&
+          warranty.warrantyCode?.toUpperCase() === normalizedSearch,
+      ) ?? null
+    );
+  }, [debouncedWarrantySearch, warranties]);
   const customerQuery = useCustomer(
-    selectedProduct?.owner?.customerId ?? null,
-    { enabled: Boolean(selectedProduct?.owner?.customerId) },
+    selectedWarranty?.owner?.customerId ?? null,
+    { enabled: Boolean(selectedWarranty?.owner?.customerId) },
   );
   const setRequesterValues = useCallback(
     (
@@ -90,7 +131,7 @@ export function useCreateWarrantyClaimForm({
 
   useEffect(() => {
     const customer = customerQuery.data;
-    const ownerCustomerId = selectedProduct?.owner?.customerId;
+    const ownerCustomerId = selectedWarranty?.owner?.customerId;
     if (
       !customer ||
       customer.id !== ownerCustomerId ||
@@ -103,38 +144,37 @@ export function useCreateWarrantyClaimForm({
     requesterPrefillCustomerIdRef.current = customer.id;
   }, [
     customerQuery.data,
-    selectedProduct?.owner?.customerId,
+    selectedWarranty?.owner?.customerId,
     setRequesterValues,
   ]);
 
-  function selectProduct(product: ProductResponse) {
-    if (!product.warrantyCode) return;
-
+  function selectWarranty(warranty: WarrantyListItem) {
+    if (!warranty.warrantyCode || !warranty.owner) return;
     requesterPrefillCustomerIdRef.current = null;
-    setSelectedProduct(product);
-    setProductSearch("");
-    setValue("productId", product.id, {
+    setSelectedWarranty(warranty);
+    setWarrantySearch("");
+    setValue("productId", warranty.productId, {
       shouldDirty: true,
       shouldValidate: true,
     });
-    setValue("warrantyCode", product.warrantyCode, {
+    setValue("warrantyCode", warranty.warrantyCode, {
       shouldDirty: true,
       shouldValidate: true,
     });
 
     const hydratedCustomer =
-      customerQuery.data?.id === product.owner?.customerId
+      customerQuery.data?.id === warranty.owner.customerId
         ? customerQuery.data
         : null;
     setRequesterValues(
-      getWarrantyClaimRequesterPrefill(product.owner, hydratedCustomer),
+      getWarrantyClaimRequesterPrefill(warranty.owner, hydratedCustomer),
     );
     requesterPrefillCustomerIdRef.current = hydratedCustomer?.id ?? null;
   }
 
-  function clearProduct() {
+  function clearWarranty() {
     requesterPrefillCustomerIdRef.current = null;
-    setSelectedProduct(null);
+    setSelectedWarranty(null);
     setValue("productId", "", {
       shouldDirty: true,
       shouldValidate: true,
@@ -144,6 +184,32 @@ export function useCreateWarrantyClaimForm({
       shouldValidate: true,
     });
     setRequesterValues(getWarrantyClaimRequesterValues(null));
+  }
+
+  function changeCategory(nextCategoryId: string) {
+    setCategoryId(nextCategoryId);
+    setProductSearch("");
+    setSelectedFilterProduct(null);
+    clearWarranty();
+  }
+
+  function selectFilterProduct(product: ProductResponse) {
+    setSelectedFilterProduct(product);
+    setProductSearch("");
+    clearWarranty();
+  }
+
+  function clearProductFilter() {
+    setSelectedFilterProduct(null);
+    setProductSearch("");
+    clearWarranty();
+  }
+
+  function clearFilters() {
+    setCategoryId("");
+    setSelectedFilterProduct(null);
+    setProductSearch("");
+    clearWarranty();
   }
 
   async function submit(values: WarrantyClaimCreateFormValues) {
@@ -161,7 +227,14 @@ export function useCreateWarrantyClaimForm({
   }
 
   return {
-    clearProduct,
+    blockedWarranty,
+    categories: categoriesQuery.data?.items ?? [],
+    categoriesQuery,
+    categoryId,
+    changeCategory,
+    clearFilters,
+    clearProductFilter,
+    clearWarranty,
     customer: customerQuery.data ?? null,
     customerQuery,
     errors,
@@ -172,8 +245,14 @@ export function useCreateWarrantyClaimForm({
     products,
     productsQuery,
     register,
-    selectedProduct,
-    selectProduct,
+    selectedFilterProduct,
+    selectedWarranty,
+    selectFilterProduct,
+    selectWarranty,
     setProductSearch,
+    setWarrantySearch,
+    warranties,
+    warrantiesQuery,
+    warrantySearch,
   };
 }

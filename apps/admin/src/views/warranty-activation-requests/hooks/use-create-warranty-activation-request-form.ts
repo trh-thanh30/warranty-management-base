@@ -115,6 +115,7 @@ export function useCreateWarrantyActivationRequestForm({
     Boolean(initialRequest),
   );
   const [activationCodeSearch, setActivationCodeSearch] = useState("");
+  const [activationCodeBatchId, setActivationCodeBatchId] = useState("ALL");
   const [customerSearch, setCustomerSearch] = useState("");
   const [productSearchState, setProductSearchState] = useState({
     categoryId: "",
@@ -233,11 +234,14 @@ export function useCreateWarrantyActivationRequestForm({
     queryKey: [
       "available-activation-codes",
       selectedProduct?.id ?? "all",
+      activationCodeBatchId,
       debouncedActivationCodeSearch,
     ],
     queryFn: ({ pageParam }) =>
       activationCodesService.listAvailableByProduct(selectedProduct?.id, {
         assignment: "ASSIGNED",
+        batchId:
+          activationCodeBatchId === "ALL" ? undefined : activationCodeBatchId,
         limit: 10,
         page: pageParam,
         search: debouncedActivationCodeSearch || undefined,
@@ -610,6 +614,7 @@ export function useCreateWarrantyActivationRequestForm({
       warrantyCode: product.warrantyCode ?? "",
     });
     setSelectedActivationCode(null);
+    setActivationCodeBatchId("ALL");
     form.setValue("activationCodeId", "", {
       shouldDirty: true,
       shouldValidate: false,
@@ -631,6 +636,12 @@ export function useCreateWarrantyActivationRequestForm({
       shouldDirty: true,
       shouldValidate: false,
     });
+  }
+
+  function selectActivationCodeBatch(batchId: string) {
+    setActivationCodeBatchId(batchId);
+    setActivationCodeSearch("");
+    clearActivationCode();
   }
 
   function selectCategory(value: string) {
@@ -681,6 +692,7 @@ export function useCreateWarrantyActivationRequestForm({
       warrantyCode: "",
     });
     setSelectedActivationCode(null);
+    setActivationCodeBatchId("ALL");
     form.setValue("activationCodeId", "", {
       shouldDirty: true,
       shouldValidate: false,
@@ -873,6 +885,7 @@ export function useCreateWarrantyActivationRequestForm({
 
   return {
     activationCodeSearch,
+    activationCodeBatchId,
     activationFields,
     activationFieldsQuery,
     clearCustomer,
@@ -923,6 +936,7 @@ export function useCreateWarrantyActivationRequestForm({
     selectDealer,
     selectProduct,
     selectActivationCode,
+    selectActivationCodeBatch,
     selectActivationProduct,
     selectItemActivationCode,
     clearProduct,

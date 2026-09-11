@@ -321,10 +321,11 @@ describe('ProductsRepository.list', () => {
       const expectedEligibility = {
         deleted_at: null,
         status: product_status.ACTIVE,
-        warranty: {
-          is: {
+        warranties: {
+          some: {
             status: warranty_status.ACTIVE,
             warranty_code: { not: '' },
+            ownerships: { some: { is_current_owner: true } },
             AND: [
               { OR: [{ start_date: null }, { start_date: { lte: now } }] },
               { OR: [{ end_date: null }, { end_date: { gte: now } }] },

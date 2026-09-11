@@ -15,7 +15,7 @@ export function WarrantyClaimDetailSkeleton() {
         <Skeleton className="h-10 w-full sm:w-80" />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="space-y-6">
           {Array.from({ length: 3 }, (_, index) => (
             <SkeletonCard key={index} />

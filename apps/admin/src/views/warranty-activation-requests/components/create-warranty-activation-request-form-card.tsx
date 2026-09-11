@@ -42,6 +42,7 @@ import {
   formatDealerSearchOption,
 } from "../warranty-activation-requests.utils";
 import { CategoryActivationInputFields } from "./category-activation-input-fields";
+import { ActivationCodeBatchSelectField } from "./activation-code-batch-select-field";
 import { CustomerSearchResult } from "./customer-search-result";
 import { EditActivationRequestCustomerDialog } from "./edit-activation-request-customer-dialog";
 import { ProductSearchResult } from "./product-search-result";
@@ -77,6 +78,7 @@ export function CreateWarrantyActivationRequestFormCard({
     useState(false);
   const {
     activationCodeSearch,
+    activationCodeBatchId,
     activationFields,
     activationFieldsQuery,
     activationCodesQuery,
@@ -126,6 +128,7 @@ export function CreateWarrantyActivationRequestFormCard({
     selectDealer,
     selectProduct,
     selectActivationCode,
+    selectActivationCodeBatch,
     selectActivationProduct,
     selectItemActivationCode,
     setCustomerSearch,
@@ -588,109 +591,124 @@ export function CreateWarrantyActivationRequestFormCard({
             ) : null}
 
             {!activationCodeId && requiresActivationCode ? (
-              <FormField
-                id="create-activation-request-activation-code"
-                label={t("activationCodeLabel")}
-              >
-                <SearchDropdown
-                  disabled={!selectedProduct}
-                  emptyLabel={
-                    activationCodeSearch.trim()
-                      ? t("noMatchingActivationCode")
-                      : t("noAvailableActivationCodes")
-                  }
-                  errorLabel={t("activationCodesLoadError")}
-                  getItemKey={(code) => code.id}
+              <>
+                <FormField
+                  id="create-activation-request-activation-code-batch"
+                  label={t("activationCodeBatchLabel")}
+                >
+                  <ActivationCodeBatchSelectField
+                    id="create-activation-request-activation-code-batch"
+                    onChange={selectActivationCodeBatch}
+                    productId={selectedProduct?.id}
+                    value={activationCodeBatchId}
+                  />
+                </FormField>
+                <FormField
                   id="create-activation-request-activation-code"
-                  isError={activationCodesQuery.isError}
-                  isLoading={
-                    isActivationCodeSearchPending ||
-                    activationCodesQuery.isFetching
-                  }
-                  items={displayedActivationCodes}
-                  loadingLabel={t("loadingActivationCodes")}
-                  onItemSelect={(code) => {
-                    selectActivationCode(code);
-                    setActivationCodeSearch("");
-                  }}
-                  onReachEnd={() => {
-                    if (
-                      activationCodesQuery.hasNextPage &&
-                      !activationCodesQuery.isFetchingNextPage
-                    ) {
-                      void activationCodesQuery.fetchNextPage();
+                  label={t("activationCodeLabel")}
+                >
+                  <SearchDropdown
+                    disabled={!selectedProduct}
+                    emptyLabel={
+                      activationCodeSearch.trim()
+                        ? t("noMatchingActivationCode")
+                        : t("noAvailableActivationCodes")
                     }
-                  }}
-                  onRetry={() => void activationCodesQuery.refetch()}
-                  onSearchChange={(value) => {
-                    if (selectedActivationCode) clearActivationCode();
-                    setActivationCodeSearch(value);
-                  }}
-                  placeholder={
-                    selectedProduct
-                      ? t("activationCodeOptionalPlaceholder")
-                      : t("selectProductBeforeActivationCode")
-                  }
-                  renderItem={(code) => (
-                    <div className="flex w-full min-w-0 items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="truncate font-mono font-semibold text-slate-950 dark:text-slate-50">
-                          {code.maskedCode}
-                        </p>
-                        <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
-                          {code.batchName}
-                        </p>
-                      </div>
-                      <ActivationCodeStatusBadge
-                        className="shrink-0"
-                        status={code.status}
-                      />
-                    </div>
-                  )}
-                  retryLabel={t("tryAgain")}
-                  searchValue={activationCodeSearch}
-                  selectedLabel={selectedActivationCode?.maskedCode}
-                />
-                {selectedProduct && selectedActivationCode ? (
-                  <Button
-                    className="mt-1 h-auto px-0 text-sm text-blue-700 hover:bg-transparent hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200"
-                    onClick={() => {
-                      clearActivationCode();
+                    errorLabel={t("activationCodesLoadError")}
+                    getItemKey={(code) => code.id}
+                    id="create-activation-request-activation-code"
+                    isError={activationCodesQuery.isError}
+                    isLoading={
+                      isActivationCodeSearchPending ||
+                      activationCodesQuery.isFetching
+                    }
+                    items={displayedActivationCodes}
+                    loadingLabel={t("loadingActivationCodes")}
+                    onItemSelect={(code) => {
+                      selectActivationCode(code);
                       setActivationCodeSearch("");
                     }}
-                    type="button"
-                    variant="ghost"
-                  >
-                    {t("chooseDifferentActivationCode")}
-                  </Button>
-                ) : selectedProduct &&
-                  !activationCodeSearch.trim() &&
-                  activationCodesQuery.isSuccess &&
-                  !hasSelectableActivationCodes ? (
-                  <div
-                    className="mt-2 flex flex-col gap-2 rounded-md border border-amber-200 bg-amber-50/70 px-3 py-2.5 text-sm text-amber-800 dark:border-amber-900/70 dark:bg-amber-950/30 dark:text-amber-200 sm:flex-row sm:items-center sm:justify-between"
-                    role="status"
-                  >
-                    <span>{t("activationCodeNotAssignedToProduct")}</span>
-                    {canAssignActivationCode ? (
-                      <Button
-                        className="shrink-0 self-start sm:self-auto hover:bg-amber-50 border border-amber-400 cursor-pointer"
-                        onClick={() => setAssignActivationCodeDialogOpen(true)}
-                        size="sm"
-                        type="button"
-                        variant="outline"
-                      >
-                        <KeyRound aria-hidden="true" className="size-4" />
-                        {t("assignActivationCode")}
-                      </Button>
-                    ) : (
-                      <span className="text-xs text-amber-700 dark:text-amber-300">
-                        {t("activationCodeAssignmentPermissionRequired")}
-                      </span>
+                    onReachEnd={() => {
+                      if (
+                        activationCodesQuery.hasNextPage &&
+                        !activationCodesQuery.isFetchingNextPage
+                      ) {
+                        void activationCodesQuery.fetchNextPage();
+                      }
+                    }}
+                    onRetry={() => void activationCodesQuery.refetch()}
+                    onSearchChange={(value) => {
+                      if (selectedActivationCode) clearActivationCode();
+                      setActivationCodeSearch(value);
+                    }}
+                    placeholder={
+                      selectedProduct
+                        ? t("activationCodeOptionalPlaceholder")
+                        : t("selectProductBeforeActivationCode")
+                    }
+                    renderItem={(code) => (
+                      <div className="flex w-full min-w-0 items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate font-mono font-semibold text-slate-950 dark:text-slate-50">
+                            {code.maskedCode}
+                          </p>
+                          <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
+                            {code.batchName}
+                          </p>
+                        </div>
+                        <ActivationCodeStatusBadge
+                          className="shrink-0"
+                          status={code.status}
+                        />
+                      </div>
                     )}
-                  </div>
-                ) : null}
-              </FormField>
+                    retryLabel={t("tryAgain")}
+                    searchValue={activationCodeSearch}
+                    selectedLabel={selectedActivationCode?.maskedCode}
+                  />
+                  {selectedProduct && selectedActivationCode ? (
+                    <Button
+                      className="mt-1 h-auto px-0 text-sm text-blue-700 hover:bg-transparent hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200"
+                      onClick={() => {
+                        clearActivationCode();
+                        setActivationCodeSearch("");
+                      }}
+                      type="button"
+                      variant="ghost"
+                    >
+                      {t("chooseDifferentActivationCode")}
+                    </Button>
+                  ) : selectedProduct &&
+                    !activationCodeSearch.trim() &&
+                    activationCodesQuery.isSuccess &&
+                    !hasSelectableActivationCodes ? (
+                    <div
+                      className="mt-2 flex flex-col gap-2 rounded-md border border-amber-200 bg-amber-50/70 px-3 py-2.5 text-sm text-amber-800 dark:border-amber-900/70 dark:bg-amber-950/30 dark:text-amber-200 sm:flex-row sm:items-center sm:justify-between"
+                      role="status"
+                    >
+                      <span>{t("activationCodeNotAssignedToProduct")}</span>
+                      {canAssignActivationCode ? (
+                        <Button
+                          className="shrink-0 self-start sm:self-auto hover:bg-amber-50 border border-amber-400 cursor-pointer"
+                          onClick={() =>
+                            setAssignActivationCodeDialogOpen(true)
+                          }
+                          size="sm"
+                          type="button"
+                          variant="outline"
+                        >
+                          <KeyRound aria-hidden="true" className="size-4" />
+                          {t("assignActivationCode")}
+                        </Button>
+                      ) : (
+                        <span className="text-xs text-amber-700 dark:text-amber-300">
+                          {t("activationCodeAssignmentPermissionRequired")}
+                        </span>
+                      )}
+                    </div>
+                  ) : null}
+                </FormField>
+              </>
             ) : null}
           </FormSection>
 

@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-query";
 import type {
   AssignWarrantyClaimServiceCenterBody,
+  CompleteWarrantyClaimBody,
   CreateWarrantyClaimBody,
   ListWarrantyClaimsQuery,
   PaginatedResponse,
@@ -132,6 +133,19 @@ export function useUpdateWarrantyClaimStatus(claimId: string | null) {
   return useMutation({
     mutationFn: (body: UpdateWarrantyClaimStatusBody) =>
       warrantyClaimsService.updateStatus(claimId ?? "", body),
+    onSuccess: (claim) => {
+      void queryClient.invalidateQueries({ queryKey: warrantyClaimKeys.all });
+      queryClient.setQueryData(warrantyClaimKeys.detail(claim.id), claim);
+    },
+  });
+}
+
+export function useCompleteWarrantyClaim(claimId: string | null) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: CompleteWarrantyClaimBody) =>
+      warrantyClaimsService.completeWarrantyClaim(claimId ?? "", body),
     onSuccess: (claim) => {
       void queryClient.invalidateQueries({ queryKey: warrantyClaimKeys.all });
       queryClient.setQueryData(warrantyClaimKeys.detail(claim.id), claim);
