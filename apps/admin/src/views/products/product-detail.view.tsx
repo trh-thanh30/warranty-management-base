@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@repo/ui";
 import { FormPageShell } from "@/src/components/common/form-page-shell";
-import { StatePanel } from "@/src/components/common/state-panel";
+import { EntityQueryState } from "@/src/components/common/entity-query-state";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { Link } from "@/src/i18n/navigation";
@@ -108,7 +108,8 @@ export function ProductDetailView({ productId }: ProductDetailViewProps) {
         {productQuery.isLoading ? (
           <ProductDetailSkeleton />
         ) : productQuery.isError || !product ? (
-          <StatePanel
+          <EntityQueryState
+            error={productQuery.error}
             action={
               <Button
                 onClick={() => {

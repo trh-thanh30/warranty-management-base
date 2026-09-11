@@ -1,8 +1,8 @@
 "use client";
 
 import { FormPageShell } from "@/src/components/common/form-page-shell";
+import { EntityQueryState } from "@/src/components/common/entity-query-state";
 import { Link } from "@/src/i18n/navigation";
-import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { useToast } from "@/src/hooks/use-toast";
@@ -277,7 +277,8 @@ export function WarrantyActivationRequestDetailView({
         {requestQuery.isLoading ? (
           <WarrantyActivationRequestDetailSkeleton />
         ) : requestQuery.isError || !request ? (
-          <StatePanel
+          <EntityQueryState
+            error={requestQuery.error}
             action={
               <Button
                 onClick={() => {

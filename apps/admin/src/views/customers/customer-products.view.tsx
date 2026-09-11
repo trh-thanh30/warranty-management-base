@@ -2,6 +2,7 @@
 
 import { FormPageShell } from "@/src/components/common/form-page-shell";
 import { PaginationControls } from "@repo/ui/pagination-controls";
+import { EntityQueryState } from "@/src/components/common/entity-query-state";
 import { SortableTableHead } from "@/src/components/common/sortable-table-head";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
@@ -172,7 +173,8 @@ export function CustomerProductsView({
               </div>
             ) : null}
             {productsQuery.isError ? (
-              <StatePanel
+              <EntityQueryState
+                error={productsQuery.error}
                 action={
                   <Button
                     onClick={() => {

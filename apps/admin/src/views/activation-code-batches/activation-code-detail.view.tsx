@@ -2,6 +2,7 @@
 
 import { ConfirmActionDialog } from "@/src/components/common/confirm-action-dialog";
 import { FormPageShell } from "@/src/components/common/form-page-shell";
+import { EntityQueryState } from "@/src/components/common/entity-query-state";
 import { SelectControl } from "@/src/components/common/select-control";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { ActivationCodeStatusBadge } from "@/src/components/activation-code-status-badge";
@@ -239,7 +240,8 @@ export function ActivationCodeDetailView({
                 ))}
               </div>
             ) : query.isError ? (
-              <StatePanel
+              <EntityQueryState
+                error={query.error}
                 description={t("error")}
                 icon={KeyRound}
                 title={t("errorTitle")}

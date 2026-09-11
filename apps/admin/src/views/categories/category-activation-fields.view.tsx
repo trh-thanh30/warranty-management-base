@@ -2,8 +2,8 @@
 
 import { FloatingActionButton } from "@/src/components/common/floating-action-button";
 import { FormPageShell } from "@/src/components/common/form-page-shell";
+import { EntityQueryState } from "@/src/components/common/entity-query-state";
 import { SelectControl } from "@/src/components/common/select-control";
-import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { useToast } from "@/src/hooks/use-toast";
 import { useRouter } from "@/src/i18n/navigation";
@@ -138,7 +138,8 @@ export function CategoryActivationFieldsView({
         ) : categoryQuery.isError ||
           activationFieldsQuery.isError ||
           !category ? (
-          <StatePanel
+          <EntityQueryState
+            error={categoryQuery.error ?? activationFieldsQuery.error}
             action={
               <Button
                 onClick={() => {

@@ -11,6 +11,17 @@ export function isForbiddenError(error: unknown) {
   );
 }
 
+export function isNotFoundError(error: unknown) {
+  if (error instanceof HttpClientError) return error.status === 404;
+
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    (error as { status?: unknown }).status === 404
+  );
+}
+
 export function isWebsiteVersionConflict(error: unknown) {
   if (error instanceof HttpClientError) {
     return error.code === "WEBSITE_CONFIG_VERSION_CONFLICT";

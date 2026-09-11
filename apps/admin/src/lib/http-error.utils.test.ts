@@ -3,6 +3,7 @@ import test from "node:test";
 import { HttpClientError } from "@repo/shared";
 import {
   isForbiddenError,
+  isNotFoundError,
   isWebsiteVersionConflict,
 } from "./http-error.utils.ts";
 
@@ -21,6 +22,20 @@ test("ordinary errors are not misclassified as forbidden", () => {
   assert.equal(isForbiddenError(new Error("Request 4032 failed")), false);
   assert.equal(isForbiddenError(new Error("Something went wrong")), false);
   assert.equal(isForbiddenError(null), false);
+});
+
+test("not-found HTTP errors are recognized without treating other failures as missing data", () => {
+  const notFound = new HttpClientError({
+    message: "Record not found",
+    status: 404,
+    isNetworkError: false,
+  });
+
+  assert.equal(isNotFoundError(notFound), true);
+  assert.equal(isNotFoundError({ status: 404 }), true);
+  assert.equal(isNotFoundError({ status: 500 }), false);
+  assert.equal(isNotFoundError(new Error("Not found")), false);
+  assert.equal(isNotFoundError(null), false);
 });
 
 test("website version conflicts are recognized by stable error code", () => {

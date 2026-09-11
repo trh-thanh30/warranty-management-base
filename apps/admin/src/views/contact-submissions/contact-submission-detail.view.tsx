@@ -35,7 +35,7 @@ import {
   TableRow,
 } from "@repo/ui";
 import { PageHeader } from "@/src/components/common/page-header";
-import { StatePanel } from "@/src/components/common/state-panel";
+import { EntityQueryState } from "@/src/components/common/entity-query-state";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import {
   useContactSubmission,
@@ -84,7 +84,8 @@ export function ContactSubmissionDetailView({
       {submissionQuery.isLoading ? (
         <ContactSubmissionDetailSkeleton />
       ) : submissionQuery.isError || !submissionQuery.data ? (
-        <StatePanel
+        <EntityQueryState
+          error={submissionQuery.error}
           action={
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button asChild variant="secondary">

@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { Button } from "@repo/ui";
 import { ConfirmActionDialog } from "@/src/components/common/confirm-action-dialog";
-import { StatePanel } from "@/src/components/common/state-panel";
+import { EntityQueryState } from "@/src/components/common/entity-query-state";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { Link } from "@/src/i18n/navigation";
 import { AssignClaimServiceCenterDialog } from "./components/assign-claim-service-center-dialog";
@@ -33,7 +33,8 @@ export function WarrantyClaimDetailView({
       {detail.claimQuery.isLoading ? (
         <WarrantyClaimDetailSkeleton />
       ) : detail.claimQuery.isError || !detail.claim ? (
-        <StatePanel
+        <EntityQueryState
+          error={detail.claimQuery.error}
           action={
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button asChild variant="secondary">
