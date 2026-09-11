@@ -6,7 +6,8 @@ import { activationCodesService } from "@/src/services/activation-codes/activati
 import type { AvailableActivationCode } from "@/src/services/activation-codes/activation-code-batches.types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { ActivationCodeBatchSelectField } from "./activation-code-batch-select-field";
 
 type ActivationItemCodeSelectFieldProps = {
   id: string;
@@ -25,11 +26,23 @@ export function ActivationItemCodeSelectField({
 }: ActivationItemCodeSelectFieldProps) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const [search, setSearch] = useState("");
+  const [batchId, setBatchId] = useState("ALL");
+  useEffect(() => {
+    setBatchId("ALL");
+    setSearch("");
+  }, [productId]);
   const query = useInfiniteQuery({
-    queryKey: ["available-activation-codes", "edit-item", productId, search],
+    queryKey: [
+      "available-activation-codes",
+      "edit-item",
+      productId,
+      batchId,
+      search,
+    ],
     queryFn: ({ pageParam }) =>
       activationCodesService.listAvailableByProduct(productId, {
         assignment: "ASSIGNED",
+        batchId: batchId === "ALL" ? undefined : batchId,
         limit: 10,
         page: pageParam,
         search: search.trim() || undefined,
@@ -55,40 +68,52 @@ export function ActivationItemCodeSelectField({
   );
 
   return (
-    <SearchDropdown
-      emptyLabel={t("noAvailableActivationCodes")}
-      errorLabel={t("activationCodesLoadError")}
-      getItemDisabledReason={(code) => (code.selectable ? null : code.status)}
-      getItemKey={(code) => code.id}
-      id={id}
-      isError={query.isError}
-      isLoading={query.isFetching}
-      items={codes}
-      loadingLabel={t("loadingActivationCodes")}
-      onItemSelect={(code) => {
-        onSelect(code);
-        setSearch("");
-      }}
-      onReachEnd={() => {
-        if (query.hasNextPage && !query.isFetchingNextPage) {
-          void query.fetchNextPage();
-        }
-      }}
-      onRetry={() => void query.refetch()}
-      onSearchChange={(value) => {
-        if (!value && selectedCode) onClear();
-        setSearch(value);
-      }}
-      placeholder={t("activationCodeOptionalPlaceholder")}
-      renderItem={(code) => (
-        <div className="flex w-full min-w-0 items-center justify-between gap-3">
-          <span className="truncate font-medium">{code.maskedCode}</span>
-          <ActivationCodeStatusBadge status={code.status} />
-        </div>
-      )}
-      retryLabel={t("tryAgain")}
-      searchValue={search}
-      selectedLabel={selectedCode?.maskedCode}
-    />
+    <div className="space-y-2">
+      <ActivationCodeBatchSelectField
+        id={`${id}-batch`}
+        onChange={(nextBatchId) => {
+          setBatchId(nextBatchId);
+          setSearch("");
+          onClear();
+        }}
+        productId={productId}
+        value={batchId}
+      />
+      <SearchDropdown
+        emptyLabel={t("noAvailableActivationCodes")}
+        errorLabel={t("activationCodesLoadError")}
+        getItemDisabledReason={(code) => (code.selectable ? null : code.status)}
+        getItemKey={(code) => code.id}
+        id={id}
+        isError={query.isError}
+        isLoading={query.isFetching}
+        items={codes}
+        loadingLabel={t("loadingActivationCodes")}
+        onItemSelect={(code) => {
+          onSelect(code);
+          setSearch("");
+        }}
+        onReachEnd={() => {
+          if (query.hasNextPage && !query.isFetchingNextPage) {
+            void query.fetchNextPage();
+          }
+        }}
+        onRetry={() => void query.refetch()}
+        onSearchChange={(value) => {
+          if (!value && selectedCode) onClear();
+          setSearch(value);
+        }}
+        placeholder={t("activationCodeOptionalPlaceholder")}
+        renderItem={(code) => (
+          <div className="flex w-full min-w-0 items-center justify-between gap-3">
+            <span className="truncate font-medium">{code.maskedCode}</span>
+            <ActivationCodeStatusBadge status={code.status} />
+          </div>
+        )}
+        retryLabel={t("tryAgain")}
+        searchValue={search}
+        selectedLabel={selectedCode?.maskedCode}
+      />
+    </div>
   );
 }
