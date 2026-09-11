@@ -23,8 +23,19 @@ import { ListPublicProductCategoriesUseCase } from '@/modules/categories/use-cas
 import { ListPublicProductCategoriesDto } from '@/modules/categories/dto/list-public-product-categories.dto';
 import { PublicLookupWarrantyClaimByCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claim-by-code.use-case';
 import { PublicLookupWarrantyClaimsByWarrantyCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claims-by-warranty-code.use-case';
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { WARRANTY_CLAIM_EVIDENCE_MAX_FILE_SIZE } from '@repo/shared/constants';
 
 @Public()
 @Controller('public')
@@ -60,10 +71,18 @@ export class PublicController {
     return this.createWarrantyActivationRequestUseCase.execute(dto);
   }
 
+  @UseInterceptors(
+    FilesInterceptor('attachments', undefined, {
+      limits: { fileSize: WARRANTY_CLAIM_EVIDENCE_MAX_FILE_SIZE },
+    }),
+  )
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('warranty-claims')
-  createWarrantyClaim(@Body() dto: CreateWarrantyClaimDto) {
-    return this.createPublicWarrantyClaimUseCase.execute(dto);
+  createWarrantyClaim(
+    @Body() dto: CreateWarrantyClaimDto,
+    @UploadedFiles() files: Express.Multer.File[] = [],
+  ) {
+    return this.createPublicWarrantyClaimUseCase.execute(dto, files);
   }
 
   @Throttle({ default: { limit: 10, ttl: 60_000 } })

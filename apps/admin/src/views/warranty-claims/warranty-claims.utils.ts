@@ -28,6 +28,9 @@ import type {
 type TranslateWarrantyClaim = (key: string) => string;
 
 const CREATE_FIELD_ERROR_KEYS = [
+  "evidenceRequired",
+  "evidenceTooLarge",
+  "evidenceTypeInvalid",
   "issueDetailLength",
   "issueTitleRequired",
   "productRequired",

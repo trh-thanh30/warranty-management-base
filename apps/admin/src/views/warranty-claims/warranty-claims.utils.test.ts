@@ -47,6 +47,7 @@ test("claim attachment validation accepts supported files within the limit", () 
 test("create claim body trims required requester fields and optional detail", () => {
   assert.deepEqual(
     toCreateWarrantyClaimBody({
+      attachments: [],
       issueDetail: " ",
       issueTitle: "  Kinh bi bong  ",
       productId: "product-1",
@@ -130,6 +131,7 @@ test("requester prefill does not reuse a cached customer from another owner", ()
 
 test("create claim schema requires requester name and phone", () => {
   const result = warrantyClaimCreateFormSchema.safeParse({
+    attachments: [new File(["photo"], "damage.webp", { type: "image/webp" })],
     issueDetail: "",
     issueTitle: "Kinh bi bong",
     productId: "product-1",
@@ -145,6 +147,22 @@ test("create claim schema requires requester name and phone", () => {
     result.error.issues.map((issue) => issue.message),
     ["requesterNameRequired", "requesterPhoneRequired"],
   );
+});
+
+test("create claim schema requires image or video evidence", () => {
+  const result = warrantyClaimCreateFormSchema.safeParse({
+    attachments: [],
+    issueDetail: "",
+    issueTitle: "Kinh bi bong",
+    productId: "product-1",
+    requesterName: "Nguyen Van A",
+    requesterPhone: "0901234567",
+    warrantyCode: "WM-2026-TEST",
+  });
+
+  assert.equal(result.success, false);
+  if (result.success) return;
+  assert.equal(result.error.issues[0]?.message, "evidenceRequired");
 });
 
 test("create claim field errors translate known validation keys", () => {

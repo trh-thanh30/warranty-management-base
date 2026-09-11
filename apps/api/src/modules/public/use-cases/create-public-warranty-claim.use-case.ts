@@ -1,17 +1,19 @@
 import { CreateWarrantyClaimDto } from '@/modules/warranty-claims/dto/create-warranty-claim.dto';
-import { CreateWarrantyClaimUseCase } from '@/modules/warranty-claims/use-cases/create-warranty-claim.use-case';
+import { CreateWarrantyClaimWithEvidenceUseCase } from '@/modules/warranty-claims/use-cases/create-warranty-claim-with-evidence.use-case';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class CreatePublicWarrantyClaimUseCase {
   constructor(
-    private readonly createWarrantyClaimUseCase: CreateWarrantyClaimUseCase,
+    private readonly createWarrantyClaimWithEvidenceUseCase: CreateWarrantyClaimWithEvidenceUseCase,
   ) {}
 
-  async execute(dto: CreateWarrantyClaimDto) {
-    const claim = await this.createWarrantyClaimUseCase.execute(dto, {
-      requireOwnerMatch: true,
-    });
+  async execute(dto: CreateWarrantyClaimDto, files: Express.Multer.File[]) {
+    const claim = await this.createWarrantyClaimWithEvidenceUseCase.execute(
+      dto,
+      files,
+      { requireOwnerMatch: true },
+    );
 
     return {
       claimCode: claim.claimCode,

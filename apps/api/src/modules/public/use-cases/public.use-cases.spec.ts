@@ -456,7 +456,9 @@ describe('Public use cases', () => {
       createWarrantyClaimUseCase as never,
     );
 
-    const result = await useCase.execute({} as never);
+    const result = await useCase.execute({} as never, [
+      { mimetype: 'image/webp' } as Express.Multer.File,
+    ]);
 
     expect(result.timeline).toEqual([
       {

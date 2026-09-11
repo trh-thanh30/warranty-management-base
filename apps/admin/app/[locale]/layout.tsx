@@ -8,7 +8,6 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import NextTopLoader from "nextjs-toploader";
-import "yet-another-react-lightbox/styles.css";
 import "../globals.css";
 
 export async function generateMetadata({

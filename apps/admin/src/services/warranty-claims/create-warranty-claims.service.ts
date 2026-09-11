@@ -18,9 +18,18 @@ export function createWarrantyClaimsService(http: WarrantyClaimsHttpClient) {
   return {
     async createWarrantyClaim(
       body: CreateWarrantyClaimBody,
+      attachments: File[],
     ): Promise<WarrantyClaimSummary> {
+      const formData = new FormData();
+      Object.entries(body).forEach(([key, value]) => {
+        if (value !== undefined) formData.append(key, value);
+      });
+      attachments.forEach((file) => formData.append("attachments", file));
+
       return unwrap(
-        await http.post<WarrantyClaimSummary>("/warranty-claims", body),
+        await http.post<WarrantyClaimSummary>("/warranty-claims", formData, {
+          timeout: 120_000,
+        }),
       );
     },
 

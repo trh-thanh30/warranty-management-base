@@ -4,6 +4,10 @@ import type {
   WarrantyClaimStatus,
 } from "@repo/shared";
 import { z } from "zod";
+import {
+  WARRANTY_CLAIM_EVIDENCE_MAX_FILE_SIZE,
+  WARRANTY_CLAIM_EVIDENCE_MIME_TYPES,
+} from "@repo/shared/constants";
 import type {
   WARRANTY_CLAIM_OVERDUE_FILTERS,
   WARRANTY_CLAIM_PRIORITY_FILTERS,
@@ -46,6 +50,31 @@ export type WarrantyClaimRequesterSource = {
 };
 
 export const warrantyClaimCreateFormSchema = z.object({
+  attachments: z
+    .array(z.custom<File>((value) => value instanceof File))
+    .min(1, "evidenceRequired")
+    .superRefine((files, context) => {
+      for (const file of files) {
+        if (
+          !WARRANTY_CLAIM_EVIDENCE_MIME_TYPES.includes(
+            file.type as (typeof WARRANTY_CLAIM_EVIDENCE_MIME_TYPES)[number],
+          )
+        ) {
+          context.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "evidenceTypeInvalid",
+          });
+          return;
+        }
+        if (file.size > WARRANTY_CLAIM_EVIDENCE_MAX_FILE_SIZE) {
+          context.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "evidenceTooLarge",
+          });
+          return;
+        }
+      }
+    }),
   issueDetail: z.string().trim().max(4000, "issueDetailLength"),
   issueTitle: z.string().trim().min(3, "issueTitleRequired").max(255),
   productId: z.string().trim().min(1, "productRequired"),

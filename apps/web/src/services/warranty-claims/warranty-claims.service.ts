@@ -25,10 +25,17 @@ export class WarrantyClaimsService {
 
   async createWarrantyClaim(
     body: CreateWarrantyClaimBody,
+    attachments: File[],
   ): Promise<PublicWarrantyClaimSummary> {
+    const formData = new FormData();
+    Object.entries(body).forEach(([key, value]) => {
+      if (value !== undefined) formData.append(key, value);
+    });
+    attachments.forEach((file) => formData.append("attachments", file));
+
     const response = await this.http.post<
       ApiResponse<PublicWarrantyClaimSummary>
-    >("/public/warranty-claims", body);
+    >("/public/warranty-claims", formData, { timeout: 120_000 });
 
     return response.data;
   }

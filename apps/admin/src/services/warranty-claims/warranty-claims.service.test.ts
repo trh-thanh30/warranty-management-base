@@ -31,6 +31,35 @@ const claim = {
   attachments: [],
 };
 
+test("creates a warranty claim with required image and video evidence", async () => {
+  const calls: Array<{ body: unknown; config?: unknown; url: string }> = [];
+  const http = {
+    async post(url: string, body: unknown, config?: unknown) {
+      calls.push({ body, config, url });
+      return { data: { success: true, data: claim } };
+    },
+  };
+  const image = new File(["image"], "damage.webp", { type: "image/webp" });
+  const video = new File(["video"], "damage.mp4", { type: "video/mp4" });
+  const body = {
+    issueTitle: "Kinh bi bong",
+    requesterName: "Nguyen Van A",
+    requesterPhone: "0901234567",
+    warrantyCode: "WM-2026-ABCDEF",
+  };
+
+  const result = await createWarrantyClaimsService(
+    http as unknown as WarrantyClaimsHttpClient,
+  ).createWarrantyClaim(body, [image, video]);
+
+  assert.equal(result, claim);
+  assert.equal(calls[0]?.url, "/warranty-claims");
+  assert.ok(calls[0]?.body instanceof FormData);
+  assert.equal(calls[0].body.get("warrantyCode"), body.warrantyCode);
+  assert.deepEqual(calls[0].body.getAll("attachments"), [image, video]);
+  assert.deepEqual(calls[0]?.config, { timeout: 120_000 });
+});
+
 test("warranty claim directory requests paginated claims with filters", async () => {
   const calls: unknown[] = [];
   const response = {

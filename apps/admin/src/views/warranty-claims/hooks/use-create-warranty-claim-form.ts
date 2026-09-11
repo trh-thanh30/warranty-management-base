@@ -23,6 +23,7 @@ import {
 } from "../warranty-claims.utils";
 
 const DEFAULT_VALUES: WarrantyClaimCreateFormValues = {
+  attachments: [],
   issueDetail: "",
   issueTitle: "",
   productId: "",
@@ -52,6 +53,7 @@ export function useCreateWarrantyClaimForm({
     register,
     setError,
     setValue,
+    watch,
   } = useForm<WarrantyClaimCreateFormValues>({
     resolver: zodResolver(warrantyClaimCreateFormSchema),
     defaultValues: DEFAULT_VALUES,
@@ -148,9 +150,10 @@ export function useCreateWarrantyClaimForm({
 
   async function submit(values: WarrantyClaimCreateFormValues) {
     try {
-      const claim = await createMutation.mutateAsync(
-        toCreateWarrantyClaimBody(values),
-      );
+      const claim = await createMutation.mutateAsync({
+        attachments: values.attachments,
+        body: toCreateWarrantyClaimBody(values),
+      });
       toast.success(t("created"));
       onCreated(claim.id);
     } catch (error) {
@@ -161,6 +164,7 @@ export function useCreateWarrantyClaimForm({
   }
 
   return {
+    attachments: watch("attachments"),
     clearProduct,
     customer: customerQuery.data ?? null,
     customerQuery,
@@ -175,5 +179,10 @@ export function useCreateWarrantyClaimForm({
     selectedProduct,
     selectProduct,
     setProductSearch,
+    setAttachments: (attachments: File[]) =>
+      setValue("attachments", attachments, {
+        shouldDirty: true,
+        shouldValidate: true,
+      }),
   };
 }

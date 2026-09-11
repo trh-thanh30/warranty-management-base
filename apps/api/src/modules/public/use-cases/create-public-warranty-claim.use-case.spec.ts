@@ -2,7 +2,7 @@ import { CreatePublicWarrantyClaimUseCase } from '@/modules/public/use-cases/cre
 
 describe('CreatePublicWarrantyClaimUseCase', () => {
   it('requires owner verification and returns a public-safe claim response', async () => {
-    const createWarrantyClaimUseCase = {
+    const createWarrantyClaimWithEvidenceUseCase = {
       execute: jest.fn().mockResolvedValue({
         id: 'claim-id',
         claimCode: 'CLM-0123456789ABCDEFABCD',
@@ -40,7 +40,7 @@ describe('CreatePublicWarrantyClaimUseCase', () => {
       }),
     };
     const useCase = new CreatePublicWarrantyClaimUseCase(
-      createWarrantyClaimUseCase as never,
+      createWarrantyClaimWithEvidenceUseCase as never,
     );
     const dto = {
       warrantyCode: 'WM-2026-ABCDEF',
@@ -50,11 +50,18 @@ describe('CreatePublicWarrantyClaimUseCase', () => {
       issueDetail: 'Windshield',
     };
 
-    const result = await useCase.execute(dto);
+    const file = {
+      mimetype: 'image/webp',
+      originalname: 'damage.webp',
+      size: 5,
+    } as Express.Multer.File;
+    const result = await useCase.execute(dto, [file]);
 
-    expect(createWarrantyClaimUseCase.execute).toHaveBeenCalledWith(dto, {
-      requireOwnerMatch: true,
-    });
+    expect(createWarrantyClaimWithEvidenceUseCase.execute).toHaveBeenCalledWith(
+      dto,
+      [file],
+      { requireOwnerMatch: true },
+    );
     expect(result).toMatchObject({
       claimCode: 'CLM-0123456789ABCDEFABCD',
       warrantyCode: 'WM-2026-ABCDEF',
