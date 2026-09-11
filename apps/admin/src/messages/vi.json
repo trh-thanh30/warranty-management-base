@@ -1897,7 +1897,7 @@
     "activationCodeBlocked": "Không thể duyệt vì mã kích hoạt đang ở trạng thái {status}.",
     "activationCodeLockedProduct": "Mã kích hoạt đã được gán sẵn với sản phẩm. Hệ thống tự tải đúng sản phẩm và không cho phép thay đổi.",
     "activationCodeLabel": "Mã kích hoạt",
-    "activationCodeBatchLabel": "Lô mã kích hoạt",
+    "activationCodeBatchLabel": "Lọc lô mã kích hoạt (cho tìm kiếm)",
     "allActivationCodeBatches": "Tất cả lô",
     "allActivationCodeBatchesDescription": "Hiển thị mã kích hoạt từ tất cả các lô.",
     "searchActivationCodeBatches": "Tìm theo tên hoặc mã lô",
