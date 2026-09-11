@@ -209,7 +209,7 @@ function WarrantySummaryHeader({ warranty }: WarrantyDetailCardProps) {
   const t = useTranslations("Warranties");
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+    <section className="rounded-lg border border-slate-200 bg-white pt-4 px-4 dark:border-slate-800 dark:bg-slate-950">
       <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
           <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
