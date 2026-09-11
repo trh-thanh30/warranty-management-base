@@ -64,6 +64,23 @@ describe('WarrantiesRepository sorting', () => {
     );
   });
 
+  it('includes warranties with an open claim when explicitly requested', async () => {
+    await repository.list({
+      claimEligible: 'true',
+      includeOpenClaim: 'true',
+      search: 'WM-2026-ABC123',
+    });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          claims: undefined,
+          status: warranty_status.ACTIVE,
+        }),
+      }),
+    );
+  });
+
   it('lists newest warranties first with a stable id tie-breaker', async () => {
     await repository.list({ limit: 10, page: 1 });
 

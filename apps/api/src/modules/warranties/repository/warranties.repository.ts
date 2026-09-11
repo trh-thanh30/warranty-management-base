@@ -14,6 +14,12 @@ const warrantyInclude = {
     select: { id: true, code_ciphertext: true, status: true },
   },
   activation_request: true,
+  claims: {
+    where: { status: { in: [...WARRANTY_CLAIM_OPEN_STATUSES] } },
+    orderBy: { submitted_at: 'desc' as const },
+    take: 1,
+    select: { id: true, claim_code: true, status: true },
+  },
   ownerships: {
     where: { is_current_owner: true },
     include: { customer: true },
@@ -82,6 +88,7 @@ export class WarrantiesRepository {
   list(filters: {
     categoryId?: string;
     claimEligible?: string;
+    includeOpenClaim?: string;
     dealerIds?: string[];
     productId?: string;
     search?: string;
@@ -93,6 +100,8 @@ export class WarrantiesRepository {
   }) {
     const search = filters.search?.trim();
     const claimEligible = filters.claimEligible === 'true';
+    const includeOpenClaim =
+      claimEligible && filters.includeOpenClaim === 'true';
     const now = new Date();
     const { page, limit, skip, take } = normalizePagination(filters);
     const where: Prisma.WarrantyWhereInput = {
@@ -102,13 +111,14 @@ export class WarrantiesRepository {
             { OR: [{ end_date: null }, { end_date: { gte: now } }] },
           ]
         : undefined,
-      claims: claimEligible
-        ? {
-            none: {
-              status: { in: [...WARRANTY_CLAIM_OPEN_STATUSES] },
-            },
-          }
-        : undefined,
+      claims:
+        claimEligible && !includeOpenClaim
+          ? {
+              none: {
+                status: { in: [...WARRANTY_CLAIM_OPEN_STATUSES] },
+              },
+            }
+          : undefined,
       dealer_id: filters.dealerIds ? { in: filters.dealerIds } : undefined,
       ownerships: claimEligible
         ? { some: { is_current_owner: true } }

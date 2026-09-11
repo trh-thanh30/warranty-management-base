@@ -54,6 +54,13 @@ describe('ListWarrantiesUseCase', () => {
               customer_phone: '0901234567',
               full_address: '12 Nguyen Trai, Ha Noi',
             },
+            claims: [
+              {
+                id: 'claim-id',
+                claim_code: 'CLM-2026-OPEN01',
+                status: 'SUBMITTED',
+              },
+            ],
             product: {
               id: 'product-id',
               product_code: 'PRD-2026-ABCDEF',
@@ -124,6 +131,11 @@ describe('ListWarrantiesUseCase', () => {
           id: 'activation-code-id',
           code: 'SP-ACTIVATED-001',
           status: 'ACTIVATED',
+        },
+        openClaim: {
+          id: 'claim-id',
+          claimCode: 'CLM-2026-OPEN01',
+          status: 'SUBMITTED',
         },
         product: {
           id: 'product-id',

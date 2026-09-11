@@ -208,10 +208,11 @@ test("claim product selector requests only claim-eligible products", () => {
 });
 
 test("claim warranty selector supports direct search and optional filters", () => {
-  assert.deepEqual(buildWarrantyClaimWarrantyQuery("  WM-2026-ABC  "), {
+  assert.deepEqual(buildWarrantyClaimWarrantyQuery("  WM-2026-ABCDEF  "), {
     claimEligible: "true",
+    includeOpenClaim: "true",
     limit: 20,
-    search: "WM-2026-ABC",
+    search: "WM-2026-ABCDEF",
     sortBy: "createdAt",
     sortOrder: "desc",
   });
@@ -224,6 +225,7 @@ test("claim warranty selector supports direct search and optional filters", () =
     {
       categoryId: "category-id",
       claimEligible: "true",
+      includeOpenClaim: "true",
       limit: 20,
       productId: "product-id",
       search: "Nguyễn Văn A",
@@ -231,6 +233,22 @@ test("claim warranty selector supports direct search and optional filters", () =
       sortOrder: "desc",
     },
   );
+});
+
+test("claim warranty selector includes blocked claims when opened or searched", () => {
+  assert.equal(
+    buildWarrantyClaimWarrantyQuery("WM-2026-ABCDEF").includeOpenClaim,
+    "true",
+  );
+  assert.equal(
+    buildWarrantyClaimWarrantyQuery("WM-2026-").includeOpenClaim,
+    "true",
+  );
+  assert.equal(
+    buildWarrantyClaimWarrantyQuery("Nguyen Van A").includeOpenClaim,
+    "true",
+  );
+  assert.equal(buildWarrantyClaimWarrantyQuery("").includeOpenClaim, "true");
 });
 
 test("claim warranty options preserve warranties sharing one product", () => {

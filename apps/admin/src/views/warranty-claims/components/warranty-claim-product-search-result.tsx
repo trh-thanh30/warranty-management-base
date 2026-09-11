@@ -34,6 +34,14 @@ export function WarrantyClaimProductSearchResult({
           {formatClaimDate(warranty.startDate, locale)} –{" "}
           {formatClaimDate(warranty.endDate, locale)}
         </span>
+        {warranty.openClaim ? (
+          <span className="font-medium text-amber-700 dark:text-amber-300 sm:col-span-2">
+            {t("openClaimOption", {
+              claimCode: warranty.openClaim.claimCode,
+              status: t(`statuses.${warranty.openClaim.status}`),
+            })}
+          </span>
+        ) : null}
       </span>
     </span>
   );

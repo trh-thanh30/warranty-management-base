@@ -1,12 +1,12 @@
 "use client";
 
+import { SearchDropdown } from "@/src/components/common/search-dropdown";
+import { SelectControl } from "@/src/components/common/select-control";
+import { formatProductSearchOption } from "@/src/utils";
 import type { CategoryResponse, ProductResponse } from "@repo/shared";
 import { Button } from "@repo/ui";
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { SearchDropdown } from "@/src/components/common/search-dropdown";
-import { SelectControl } from "@/src/components/common/select-control";
-import { formatProductSearchOption } from "@/src/utils";
 
 type WarrantyClaimWarrantyFiltersProps = {
   categories: CategoryResponse[];
@@ -45,7 +45,7 @@ export function WarrantyClaimWarrantyFilters({
   const hasFilters = Boolean(categoryId || selectedProduct);
 
   return (
-    <div className="rounded-md border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-900/40">
+    <div className="rounded-md border border-slate-200 bg-slate-50/90 p-4 dark:border-slate-800 dark:bg-slate-900/40">
       <div className="mb-3 flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-semibold text-slate-950 dark:text-slate-50">

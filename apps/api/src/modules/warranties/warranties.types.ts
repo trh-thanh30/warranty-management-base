@@ -8,6 +8,7 @@ import {
   User,
   Warranty,
   WarrantyActivationRequest,
+  warranty_claim_status,
 } from '@prisma/client';
 import { getProductCatalogue } from '@/modules/products/product-catalogue';
 
@@ -147,6 +148,11 @@ type WarrantyWithProduct = Warranty & {
   activated_by?: User | null;
   voided_by?: User | null;
   dealer?: Dealer | null;
+  claims?: Array<{
+    id: string;
+    claim_code: string;
+    status: warranty_claim_status;
+  }>;
   ownerships?: Array<WarrantyOwnership & { customer?: Customer | null }>;
   product: Product & { category_ref?: Category | null };
 };
@@ -337,6 +343,13 @@ export function toWarrantyListItemResponse(
             ? decryptActivationCode(warranty.activation_code.code_ciphertext)
             : null,
           status: warranty.activation_code.status,
+        }
+      : null,
+    openClaim: warranty.claims?.[0]
+      ? {
+          id: warranty.claims[0].id,
+          claimCode: warranty.claims[0].claim_code,
+          status: warranty.claims[0].status,
         }
       : null,
     product: {

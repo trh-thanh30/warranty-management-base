@@ -96,6 +96,17 @@ export function useCreateWarrantyClaimForm({
     () => flattenWarrantyClaimOptions(warrantiesQuery.data?.pages ?? []),
     [warrantiesQuery.data?.pages],
   );
+  const blockedWarranty = useMemo(() => {
+    const normalizedSearch = debouncedWarrantySearch.toUpperCase();
+
+    return (
+      warranties.find(
+        (warranty) =>
+          warranty.openClaim &&
+          warranty.warrantyCode?.toUpperCase() === normalizedSearch,
+      ) ?? null
+    );
+  }, [debouncedWarrantySearch, warranties]);
   const customerQuery = useCustomer(
     selectedWarranty?.owner?.customerId ?? null,
     { enabled: Boolean(selectedWarranty?.owner?.customerId) },
@@ -216,6 +227,7 @@ export function useCreateWarrantyClaimForm({
   }
 
   return {
+    blockedWarranty,
     categories: categoriesQuery.data?.items ?? [],
     categoriesQuery,
     categoryId,

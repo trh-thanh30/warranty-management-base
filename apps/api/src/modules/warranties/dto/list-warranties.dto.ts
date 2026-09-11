@@ -18,6 +18,10 @@ export class ListWarrantiesDto extends PaginationQueryDto {
   claimEligible?: string;
 
   @IsOptional()
+  @IsBooleanString()
+  includeOpenClaim?: string;
+
+  @IsOptional()
   @IsUUID()
   productId?: string;
 

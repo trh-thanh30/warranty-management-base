@@ -20,6 +20,23 @@ describe('ListWarrantiesDto', () => {
     await expect(validate(dto)).resolves.not.toHaveLength(0);
   });
 
+  it.each(['true', 'false'])(
+    'accepts includeOpenClaim=%s',
+    async (includeOpenClaim) => {
+      const dto = plainToInstance(ListWarrantiesDto, { includeOpenClaim });
+
+      await expect(validate(dto)).resolves.toHaveLength(0);
+    },
+  );
+
+  it('rejects a non-boolean includeOpenClaim filter', async () => {
+    const dto = plainToInstance(ListWarrantiesDto, {
+      includeOpenClaim: 'yes',
+    });
+
+    await expect(validate(dto)).resolves.not.toHaveLength(0);
+  });
+
   it.each(['categoryId', 'productId'] as const)(
     'accepts a UUID %s filter',
     async (field) => {

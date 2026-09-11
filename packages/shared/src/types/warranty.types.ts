@@ -1,6 +1,7 @@
 import type { ProductSummary } from "./product.types.ts";
 import type { CategorySummary } from "./category.types.ts";
 import type { ActivationCodeReportStatus } from "./activation-code-report.types.ts";
+import type { WarrantyClaimStatus } from "./warranty-claim.types.ts";
 
 export type WarrantyStatus = "DRAFT" | "ACTIVE" | "EXPIRED" | "VOIDED";
 
@@ -164,6 +165,11 @@ export type WarrantyListItem = WarrantySummary & {
     code: string | null;
     status: ActivationCodeReportStatus;
   } | null;
+  openClaim: {
+    id: string;
+    claimCode: string;
+    status: WarrantyClaimStatus;
+  } | null;
   owner: WarrantyOwnerSummary | null;
   product: WarrantyProductSummary;
 };
@@ -171,6 +177,7 @@ export type WarrantyListItem = WarrantySummary & {
 export type ListWarrantiesQuery = {
   categoryId?: string;
   claimEligible?: "true" | "false";
+  includeOpenClaim?: "true" | "false";
   limit?: number;
   page?: number;
   productId?: string;

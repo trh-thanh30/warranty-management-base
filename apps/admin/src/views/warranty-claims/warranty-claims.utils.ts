@@ -107,6 +107,7 @@ export function buildWarrantyClaimWarrantyQuery(
   return {
     ...(filters.categoryId ? { categoryId: filters.categoryId } : {}),
     claimEligible: "true",
+    includeOpenClaim: "true",
     limit: 20,
     ...(filters.productId ? { productId: filters.productId } : {}),
     search: normalizedSearch || undefined,
