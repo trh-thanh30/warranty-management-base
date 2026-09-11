@@ -14,7 +14,8 @@ test("warranty detail separates summary, coverage, and cancellation details", as
   assert.match(source, /warranty\.status === "VOIDED"/);
   assert.match(source, /voidItems\.length/);
   assert.match(source, /const voidItems/);
-  assert.match(source, /mt-3 grid gap-2 border-t.*sm:grid-cols-3/s);
+  assert.match(source, /<hr className=" border-t border-slate-100 my-3" \/>/);
+  assert.match(source, /flex-row\s+md:flex\s+items-center\s+justify-between/);
 });
 
 test("warranty detail uses the product-style detail sections with lighter row dividers", async () => {
