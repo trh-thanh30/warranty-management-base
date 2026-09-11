@@ -54,7 +54,7 @@ export function SiteFooter({
       {/* ── Footer ── */}
       <footer
         id="contact"
-        className="w-full scroll-mt-21 bg-white text-deep-black"
+        className="w-full scroll-mt-21 bg-white text-deep-black border-t border-t-premium-red"
       >
         {/* Main Footer Container */}
         <Container className="py-12 lg:py-16">

@@ -35,31 +35,31 @@
     }
   },
   "WarrantyLookupModal": {
-    "title": "Tra cứu bảo hành điện tử E-Warranty",
-    "subtitle": "Kiểm tra thông tin bảo hành chính hãng FUJITEK bằng mã E-Warranty",
+    "title": "Tra cứu bảo hành điện tử",
+    "subtitle": "Kiểm tra thông tin bảo hành chính hãng FUJITEK bằng mã bảo hành WM-*",
     "closeAriaLabel": "Đóng cửa sổ tra cứu bảo hành",
     "supportMessage": "Nếu cần hỗ trợ thêm, vui lòng liên hệ đại lý thi công hoặc hotline FUJITEK.",
     "supportHotlineLabel": "Hotline",
-    "supportClosing": "Cảm ơn bạn đã sử dụng hệ thống E-Warranty FUJITEK.",
+    "supportClosing": "Cảm ơn bạn đã sử dụng hệ thống bảo hành điện tử FUJITEK.",
     "errors": {
-      "invalid": "Mã E-Warranty không hợp lệ. Vui lòng kiểm tra và nhập lại.",
-      "notFound": "Không tìm thấy thông tin bảo hành cho mã E-Warranty này.",
+      "invalid": "Mã bảo hành không hợp lệ. Vui lòng kiểm tra mã WM-* và nhập lại.",
+      "notFound": "Không tìm thấy thông tin cho mã bảo hành này.",
       "rateLimit": "Bạn đã tra cứu quá nhiều lần. Vui lòng thử lại sau một phút.",
       "request": "Không thể tra cứu bảo hành lúc này. Vui lòng thử lại sau."
     }
   },
   "WarrantyLookupForm": {
-    "ariaLabel": "Mã E-Warranty",
-    "placeholder": "Nhập mã E-Warranty...",
+    "ariaLabel": "Mã bảo hành WM-*",
+    "placeholder": "Nhập mã bảo hành WM-*...",
     "submit": "Tra cứu",
     "submitting": "Đang tra cứu...",
     "tryPrefix": "Ví dụ: nhập",
     "or": "hoặc",
     "validation": {
-      "required": "Vui lòng nhập mã E-Warranty.",
-      "minLength": "Mã E-Warranty phải có ít nhất 6 ký tự.",
-      "maxLength": "Mã E-Warranty không được vượt quá 64 ký tự.",
-      "format": "Mã E-Warranty chỉ được chứa chữ cái, số và dấu gạch ngang."
+      "required": "Vui lòng nhập mã bảo hành.",
+      "minLength": "Mã bảo hành phải có ít nhất 6 ký tự.",
+      "maxLength": "Mã bảo hành không được vượt quá 64 ký tự.",
+      "format": "Mã bảo hành chỉ được chứa chữ cái, số và dấu gạch ngang."
     }
   },
   "WarrantyLookupResult": {
@@ -67,8 +67,8 @@
     "productCode": "Mã sản phẩm",
     "category": "Danh mục",
     "brandModel": "Thương hiệu / Model",
-    "serial": "Số Serial",
-    "warrantyCode": "Mã E-Warranty",
+    "serial": "Số sê-ri sản phẩm",
+    "warrantyCode": "Mã bảo hành (WM-*)",
     "startDate": "Ngày bắt đầu",
     "endDate": "Ngày hết hạn",
     "duration": "Thời hạn",
@@ -239,7 +239,7 @@
       "details": {
         "warranty": {
           "title": "Bảo hành điện tử toàn quốc",
-          "description": "Sự an tâm của khách hàng luôn là ưu tiên hàng đầu. Bên cạnh công nghệ cách nhiệt tiên tiến, hệ thống bảo hành điện tử (E-Warranty) mang đến trải nghiệm quản lý thông tin dễ dàng, minh bạch và đảm bảo quyền lợi lâu dài trong suốt 10 năm sử dụng."
+          "description": "Sự an tâm của khách hàng luôn là ưu tiên hàng đầu. Bên cạnh công nghệ cách nhiệt tiên tiến, hệ thống bảo hành điện tử mang đến trải nghiệm quản lý thông tin dễ dàng, minh bạch và đảm bảo quyền lợi lâu dài trong suốt 10 năm sử dụng."
         },
         "uv": {
           "title": "Chống tia UV tối ưu",
@@ -705,7 +705,7 @@
     "specsTitle": "THÔNG SỐ KỸ THUẬT CHI TIẾT",
     "featuresTitle": "ĐẶC ĐIỂM NỔI BẬT & CÔNG NGHỆ LÕI",
     "warrantyLabel": "BẢO HÀNH CHÍNH HÃNG",
-    "warrantyYears": "{years} NĂM BẢO HÀNH E-WARRANTY",
+    "warrantyYears": "{years} NĂM BẢO HÀNH ĐIỆN TỬ",
     "bookInstallationCta": "ĐẶT LỊCH THI CÔNG NGAY",
     "consultHotline": "TƯ VẤN HOTLINE: 0886.33.77.33",
     "notFound": "Không tìm thấy sản phẩm yêu cầu.",
@@ -791,7 +791,7 @@
         },
         {
           "title": "Bảo hành điện tử dài hạn",
-          "description": "Quản lý quyền lợi minh bạch trên hệ thống E-Warranty."
+          "description": "Quản lý quyền lợi minh bạch trên hệ thống bảo hành điện tử."
         },
         {
           "title": "Kết nối ổn định",
@@ -818,7 +818,7 @@
         "introduction": [
           "Cấu trúc phún xạ đa lớp giúp kiểm soát bức xạ hồng ngoại hiệu quả mà vẫn giữ tầm nhìn rõ ràng cho người lái.",
           "Tông màu xanh nhẹ tạo cảm giác cao cấp, phù hợp xe cần kính lái sáng nhưng vẫn giảm nóng rõ rệt.",
-          "Hệ thống E-Warranty hỗ trợ bảo hành điện tử minh bạch trong suốt quá trình sử dụng."
+          "Hệ thống bảo hành điện tử giúp quyền lợi được minh bạch trong suốt quá trình sử dụng."
         ],
         "features": [
           "Cản tia hồng ngoại đến 98% để giảm cảm giác nóng từ kính lái.",
@@ -1268,25 +1268,25 @@
     },
     "duration": {
       "title": "1. Thời hạn bảo hành",
-      "description": "Phim cách nhiệt FUJITEK được bảo hành điện tử chính hãng từ 10 đến 15 năm kể từ ngày kích hoạt E-Warranty thành công."
+      "description": "Phim cách nhiệt FUJITEK được bảo hành điện tử chính hãng từ 10 đến 15 năm kể từ ngày kích hoạt bảo hành thành công."
     },
     "conditions": {
       "title": "2. Điều kiện áp dụng bảo hành",
       "items": {
         "material": "Màng phim rạn nứt, bong tróc hoặc nổi bọt khí do lỗi vật liệu hay kỹ thuật sản xuất.",
         "performance": "Màng phim đổi màu hoặc suy giảm hiệu suất vượt mức cho phép trong chính sách.",
-        "registration": "Thông tin E-Warranty được đăng ký và tra cứu thành công trên hệ thống chính hãng."
+        "registration": "Thông tin bảo hành được đăng ký và có thể tra cứu trên hệ thống chính hãng."
       }
     }
   },
   "GuidePage": {
     "eyebrow": "Hướng dẫn sử dụng",
-    "title": "Hướng dẫn sử dụng & Tra cứu E-Warranty",
+    "title": "Hướng dẫn sử dụng và tra cứu bảo hành điện tử",
     "description": "Các bước kích hoạt, tra cứu tem chính hãng và chăm sóc phim cách nhiệt ô tô.",
     "steps": {
       "receive": {
-        "title": "Bước 1: Nhận tem E-Warranty sau thi công",
-        "description": "Sau khi hoàn tất thi công, đại lý cung cấp tem E-Warranty chính hãng hoặc phiếu kích hoạt điện tử."
+        "title": "Bước 1: Nhận tem kích hoạt sau thi công",
+        "description": "Sau khi hoàn tất thi công, đại lý cung cấp tem có mã kích hoạt SP-* hoặc phiếu kích hoạt điện tử."
       },
       "lookup": {
         "title": "Bước 2: Truy cập tra cứu trực tuyến",
@@ -1295,7 +1295,7 @@
     }
   },
   "SupportCentersPage": {
-    "eyebrow": "Mạng lưới dịch vụ FUJITEK",
+    "eyebrow": "Mạng lưới dịch vụ Fujitek – Lexzenz",
     "title": "Hệ thống trạm bảo hành & Đại lý",
     "description": "Mạng lưới đại lý ủy quyền và trung tâm dịch vụ chính hãng trên toàn quốc.",
     "centers": {
@@ -1307,13 +1307,13 @@
       },
       "haDong": {
         "city": "Hà Nội",
-        "name": "Trung tâm dán phim FUJITEK Hà Đông",
+        "name": "Trung tâm dán phim Fujitek – Lexzenz Hà Đông",
         "address": "Số 68 Quang Trung, Q. Hà Đông, Hà Nội",
         "hours": "08:00 - 18:00 (Thứ Hai - Thứ Bảy)"
       },
       "hoChiMinhCity": {
         "city": "TP. Hồ Chí Minh",
-        "name": "Trạm bảo hành ủy quyền FUJITEK TP. Hồ Chí Minh",
+        "name": "Trạm bảo hành ủy quyền Fujitek – Lexzenz TP. Hồ Chí Minh",
         "address": "Số 102 Xa Lộ Hà Nội, P. Thảo Điền, TP. Thủ Đức, TP. Hồ Chí Minh",
         "hours": "08:00 - 18:30 (Thứ Hai - Chủ Nhật)"
       }
@@ -1323,16 +1323,16 @@
     "backToWarranty": "Quay lại bảo hành",
     "hub": {
       "title": "Trung tâm dịch vụ bảo hành điện tử",
-      "description": "Hệ thống bảo hành điện tử chính hãng FUJITEK giúp tra cứu, kích hoạt và gửi yêu cầu hỗ trợ trên toàn quốc."
+      "description": "Hệ thống bảo hành điện tử chính hãng Fujitek – Lexzenz  giúp tra cứu, kích hoạt và gửi yêu cầu hỗ trợ trên toàn quốc."
     },
     "actions": {
       "title": "Bạn cần làm gì?",
-      "description": "Chọn thao tác bên dưới để sử dụng dịch vụ bảo hành điện tử FUJITEK.",
+      "description": "Chọn thao tác bên dưới để sử dụng dịch vụ bảo hành điện tử Fujitek – Lexzenz Việt Nam.",
       "items": {
         "lookup": {
           "badge": "Tra cứu nhanh",
           "title": "Tra cứu hạn bảo hành",
-          "description": "Kiểm tra tem E-Warranty và thời hạn bảo hành bằng số điện thoại hoặc biển số xe.",
+          "description": "Kiểm tra mã bảo hành và thời hạn bảo hành chính hãng.",
           "action": "Tra cứu ngay"
         },
         "activate": {
@@ -1356,7 +1356,7 @@
         "dealers": {
           "badge": "Toàn quốc",
           "title": "Trạm bảo hành & Đại lý",
-          "description": "Tìm trung tâm dịch vụ FUJITEK được ủy quyền gần bạn.",
+          "description": "Tìm trung tâm dịch vụ Fujitek – Lexzenz được ủy quyền gần bạn.",
           "action": "Tìm trạm gần nhất"
         },
         "policy": {
@@ -1370,7 +1370,7 @@
     "activate": {
       "form": {
         "title": "Gửi yêu cầu kích hoạt bảo hành",
-        "description": "Điền thông tin để FUJITEK tiếp nhận, kiểm tra và kích hoạt bảo hành cho sản phẩm.",
+        "description": "Nhập mã kích hoạt trên tem và thông tin chủ xe để Fujitek – Lexzenz kiểm tra, phê duyệt trước khi cấp bảo hành.",
         "sectionTitle": "Thông tin kích hoạt bảo hành",
         "sectionDescription": "Vui lòng điền đầy đủ thông tin để quá trình xác minh và kích hoạt được thực hiện chính xác."
       },
@@ -1381,40 +1381,46 @@
           "one": {
             "badge": "Bước 01",
             "title": "Điền thông tin",
-            "description": "Cung cấp thông tin chủ xe, sản phẩm và địa chỉ kích hoạt."
+            "description": "Nhập mã kích hoạt trên tem, thông tin chủ xe và địa chỉ kích hoạt."
           },
           "two": {
             "badge": "Bước 02",
             "title": "Gửi yêu cầu",
-            "description": "Kiểm tra lại thông tin và gửi yêu cầu đến FUJITEK."
+            "description": "Kiểm tra lại thông tin và gửi yêu cầu đến Fujitek – Lexzenz."
           },
           "three": {
             "badge": "Bước 03",
             "title": "Chờ xác minh",
-            "description": "FUJITEK kiểm tra, phê duyệt và kích hoạt bảo hành cho bạn."
+            "description": "Fujitek – Lexzenz kiểm tra, phê duyệt và kích hoạt bảo hành cho bạn."
           }
         }
       },
-      "eyebrow": "Yêu cầu kích hoạt E-Warranty",
+      "eyebrow": "Yêu cầu kích hoạt bảo hành",
       "title": "Đăng ký kích hoạt bảo hành điện tử",
-      "description": "Gửi thông tin E-Warranty để FUJITEK kiểm tra và xác nhận trước khi kích hoạt bảo hành.",
+      "description": "Nhập mã kích hoạt trên tem để Fujitek – Lexzenz xác định sản phẩm, kiểm tra và phê duyệt bảo hành.",
       "submit": "Gửi yêu cầu kích hoạt",
       "submitting": "Đang gửi yêu cầu...",
       "success": {
-        "title": "Đã tiếp nhận yêu cầu",
-        "description": "Yêu cầu đang chờ FUJITEK kiểm tra và phê duyệt. Vui lòng lưu mã yêu cầu để đối chiếu khi cần hỗ trợ.",
-        "requestCodeLabel": "Mã yêu cầu",
+        "title": "Đã gửi yêu cầu thành công",
+        "description": "Yêu cầu đã được tiếp nhận nhưng bảo hành chưa được kích hoạt. FUJITEK sẽ kiểm tra và phê duyệt trước khi cấp bảo hành.",
+        "requestCodeLabel": "Mã yêu cầu kích hoạt (WAR-*)",
+        "requestCodeHint": "Vui lòng lưu mã này để đối chiếu khi cần hỗ trợ.",
         "statusLabel": "Trạng thái",
-        "pendingStatus": "Chờ xử lý",
-        "copyCode": "Sao chép mã yêu cầu",
-        "copied": "Đã sao chép mã yêu cầu",
-        "copyFailed": "Không thể sao chép mã yêu cầu. Vui lòng thử lại.",
+        "pendingStatus": "Chờ phê duyệt",
+        "submittedAtLabel": "Thời gian gửi",
+        "copyCode": "Sao chép mã yêu cầu kích hoạt",
+        "copied": "Đã sao chép mã yêu cầu kích hoạt",
+        "copyFailed": "Không thể sao chép mã yêu cầu kích hoạt. Vui lòng thử lại.",
+        "reservationTitle": "Mã kích hoạt đang được giữ",
+        "reservationDescription": "Mã kích hoạt đã được giữ cho yêu cầu này và không thể dùng để gửi yêu cầu khác trong khi chờ duyệt.",
+        "emailDescription": "Sau khi yêu cầu được phê duyệt, giấy chứng nhận bảo hành sẽ được gửi đến email bạn đã cung cấp.",
         "timelineTitle": "Tiến trình xử lý",
         "submittedStep": "Yêu cầu đã được gửi",
         "reviewStep": "FUJITEK kiểm tra yêu cầu",
         "reviewDescription": "Đang chờ bộ phận FUJITEK tiếp nhận và kiểm tra.",
         "activationStep": "Kích hoạt bảo hành",
-        "activationDescription": "Được thực hiện sau khi yêu cầu được phê duyệt.",
+        "activationDescription": "Bảo hành chỉ có hiệu lực sau khi yêu cầu được phê duyệt.",
+        "track": "Theo dõi yêu cầu",
         "reset": "Gửi yêu cầu khác"
       },
       "fields": {
@@ -1434,9 +1440,10 @@
           "label": "Biển số xe *",
           "placeholder": "VD: 30H-888.88"
         },
-        "stampCode": {
-          "label": "Mã tem E-Warranty *",
-          "placeholder": "VD: FJ-8899-2026"
+        "activationCode": {
+          "label": "Mã kích hoạt (SP-*) *",
+          "placeholder": "VD: SP-ABCDEF123456",
+          "description": "Nhập mã bắt đầu bằng SP- được in trên tem sản phẩm."
         },
         "province": {
           "label": "Tỉnh / Thành phố *",
@@ -1465,15 +1472,20 @@
         "provinceRequired": "Vui lòng chọn tỉnh hoặc thành phố.",
         "vehiclePlateInvalid": "Biển số xe không hợp lệ.",
         "wardRequired": "Vui lòng chọn phường hoặc xã.",
-        "warrantyCodeInvalid": "Mã E-Warranty không hợp lệ."
+        "activationCodeInvalid": "Mã kích hoạt không hợp lệ."
       },
       "errors": {
-        "alreadyOpen": "Sản phẩm này đã có yêu cầu kích hoạt đang chờ xử lý.",
+        "activationCodeInvalid": "Mã kích hoạt không hợp lệ hoặc đã hết hạn.",
+        "activationCodeNotApplicable": "Danh mục của sản phẩm này không áp dụng mã kích hoạt. Vui lòng liên hệ đại lý để được hỗ trợ.",
+        "activationCodeNotAssigned": "Mã kích hoạt chưa được gán cho sản phẩm. Vui lòng liên hệ đại lý để kiểm tra.",
+        "alreadyOpen": "Mã kích hoạt này đã có yêu cầu đang chờ xử lý. Vui lòng không gửi lại.",
         "invalid": "Thông tin gửi lên chưa hợp lệ. Vui lòng kiểm tra lại.",
-        "notEligible": "Mã E-Warranty này không còn đủ điều kiện tạo yêu cầu kích hoạt.",
-        "notFound": "Không tìm thấy mã E-Warranty trên hệ thống.",
+        "network": "Không thể kết nối đến hệ thống. Vui lòng kiểm tra mạng và thử lại.",
+        "notFound": "Không tìm thấy mã kích hoạt trên hệ thống.",
         "rateLimit": "Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau.",
-        "request": "Không thể gửi yêu cầu kích hoạt. Vui lòng thử lại."
+        "request": "Không thể gửi yêu cầu kích hoạt. Vui lòng thử lại.",
+        "serviceUnavailable": "Hệ thống kích hoạt đang tạm thời gián đoạn. Vui lòng thử lại sau.",
+        "verification": "Không thể xác minh bạn là người dùng hợp lệ. Vui lòng xác minh lại rồi gửi yêu cầu."
       },
       "otherActions": {
         "title": "Dịch vụ bảo hành khác",
@@ -1483,41 +1495,42 @@
       }
     },
     "lookup": {
-      "eyebrow": "Hệ thống E-Warranty",
+      "eyebrow": "Bảo hành điện tử FUJITEK",
       "title": "Tra cứu hạn bảo hành điện tử",
-      "description": "Nhập mã E-Warranty để kiểm tra thông tin sản phẩm và thời hạn bảo hành chính hãng.",
+      "description": "Nhập mã bảo hành bắt đầu bằng WM- để kiểm tra sản phẩm và thời hạn bảo hành chính hãng.",
       "heroImageAlt": "Tra cứu bảo hành điện tử FUJITEK",
       "registration": {
-        "title": "Tìm mã E-Warranty của Quý khách",
+        "title": "Tìm mã bảo hành của Quý khách",
         "description": "Mã tra cứu có thể được cung cấp qua một trong các kênh dưới đây",
         "methods": {
           "phone": {
             "label": "Nguồn 01",
             "title": "Phiếu bảo hành",
-            "description": "Mã E-Warranty được in trên phiếu bảo hành của sản phẩm"
+            "description": "Mã bảo hành WM-* được in trên phiếu bảo hành của sản phẩm"
           },
           "qr": {
             "label": "Nguồn 02",
-            "title": "Tin nhắn / Email",
+            "title": "Email",
             "description": "Mã bảo hành được gửi sau khi sản phẩm được kích hoạt"
           },
           "serial": {
             "label": "Định dạng mã",
-            "description": "Ví dụ: WM-2026-ABCDEF hoặc FJ-8899-2026"
+            "title": "Mã bảo hành",
+            "description": "Mã bắt đầu bằng WM-, ví dụ: WM-2026-ABCDEF"
           }
         }
       },
       "searchSection": {
         "title": "Tra cứu",
-        "description": "Vui lòng nhập đầy đủ mã E-Warranty được cung cấp trên phiếu bảo hành và thực hiện theo 3 bước dưới đây."
+        "description": "Nhập đầy đủ mã bảo hành WM-* được cung cấp trên phiếu bảo hành."
       },
       "guide": {
-        "title": "Hướng dẫn tra cứu E-Warranty trong 3 bước",
+        "title": "Hướng dẫn tra cứu mã bảo hành trong 3 bước",
         "steps": {
           "one": {
             "badge": "Bước 01",
             "title": "Nhập mã",
-            "description": "Nhập chính xác mã E-Warranty trên phiếu bảo hành."
+            "description": "Nhập chính xác mã bảo hành WM-* trên phiếu bảo hành."
           },
           "two": {
             "badge": "Bước 02",
@@ -1527,7 +1540,7 @@
           "three": {
             "badge": "Bước 03",
             "title": "Xem chi tiết",
-            "description": "Xem sản phẩm, số serial, trạng thái và thời hạn bảo hành."
+            "description": "Xem sản phẩm, số sê-ri, trạng thái và thời hạn bảo hành."
           }
         }
       },
@@ -1545,12 +1558,12 @@
       "policyShortcut": {
         "eyebrow": "Chính sách & Điều khoản",
         "title": "Bạn muốn tìm hiểu chi tiết về phạm vi & quy định bảo hành?",
-        "description": "Xem quy định thời gian bảo hành (10 - 15 năm), trường hợp được bảo hành & lưu ý sau khi dán phim.",
+        "description": "Xem quy định thời gian bảo hành, trường hợp được bảo hành & lưu ý sau khi kích hoạt.",
         "action": "Xem chính sách bảo hành"
       },
       "errors": {
-        "invalid": "Mã E-Warranty không hợp lệ. Vui lòng kiểm tra và nhập lại.",
-        "notFound": "Không tìm thấy thông tin bảo hành cho mã E-Warranty này.",
+        "invalid": "Mã bảo hành không hợp lệ. Vui lòng kiểm tra mã WM-* và nhập lại.",
+        "notFound": "Không tìm thấy thông tin cho mã bảo hành này.",
         "rateLimit": "Bạn đã tra cứu quá nhiều lần. Vui lòng thử lại sau một phút.",
         "request": "Không thể tra cứu bảo hành lúc này. Vui lòng thử lại sau."
       }
@@ -1561,9 +1574,9 @@
       "description": "Nhận hỗ trợ cho các vấn đề bong tróc, bọt khí, bay màu hoặc lỗi kỹ thuật thi công.",
       "form": {
         "title": "Gửi yêu cầu bảo hành",
-        "description": "Điền thông tin để FUJITEK tiếp nhận và xử lý yêu cầu của bạn.",
+        "description": "Điền thông tin để Fujitek – Lexzenz tiếp nhận và xử lý yêu cầu của bạn.",
         "sectionTitle": "Thông tin yêu cầu bảo hành",
-        "sectionDescription": "Vui lòng điền đầy đủ thông tin để FUJITEK có thể tiếp nhận và hỗ trợ bạn chính xác."
+        "sectionDescription": "Vui lòng điền đầy đủ thông tin để Fujitek – Lexzenz có thể tiếp nhận và hỗ trợ bạn chính xác."
       },
       "guide": {
         "title": "Quy trình gửi yêu cầu bảo hành",
@@ -1572,7 +1585,7 @@
           "one": {
             "badge": "Bước 01",
             "title": "Điền thông tin",
-            "description": "Cung cấp thông tin liên hệ, mã E-Warranty và vấn đề cần hỗ trợ."
+            "description": "Cung cấp thông tin liên hệ, mã bảo hành WM-* và vấn đề cần hỗ trợ."
           },
           "two": {
             "badge": "Bước 02",
@@ -1596,32 +1609,33 @@
       "submitting": "Đang gửi yêu cầu...",
       "success": {
         "title": "Đã tiếp nhận yêu cầu",
-        "description": "Yêu cầu đang chờ FUJITEK kiểm tra và xử lý. Vui lòng lưu mã yêu cầu để tra cứu hoặc đối chiếu khi cần hỗ trợ.",
-        "claimCodeLabel": "Mã yêu cầu",
+        "description": "Yêu cầu đang chờ FUJITEK kiểm tra và xử lý. Vui lòng lưu mã yêu cầu bảo hành/sự cố để tra cứu hoặc đối chiếu khi cần hỗ trợ.",
+        "claimCodeLabel": "Mã yêu cầu bảo hành/sự cố (CLM-*)",
         "issueLabel": "Vấn đề cần hỗ trợ",
         "submittedAtLabel": "Ngày gửi",
         "statusLabel": "Trạng thái",
         "submittedStatus": "Đã gửi",
-        "copyCode": "Sao chép mã yêu cầu",
-        "copied": "Đã sao chép mã yêu cầu",
+        "copyCode": "Sao chép mã yêu cầu bảo hành/sự cố",
+        "copied": "Đã sao chép mã yêu cầu bảo hành/sự cố",
         "track": "Theo dõi tiến độ",
         "reset": "Gửi yêu cầu khác"
       },
       "errors": {
-        "alreadyOpen": "Mã E-Warranty này đã có một yêu cầu bảo hành đang được xử lý.",
+        "alreadyOpen": "Mã bảo hành này đã có một yêu cầu bảo hành đang được xử lý.",
         "invalid": "Thông tin yêu cầu chưa hợp lệ. Vui lòng kiểm tra và thử lại.",
         "notEligible": "Bảo hành này chưa kích hoạt, đã hết hạn hoặc không còn hiệu lực.",
-        "notFound": "Không tìm thấy mã E-Warranty trong hệ thống.",
+        "notFound": "Không tìm thấy mã bảo hành trong hệ thống.",
         "ownerMismatch": "Số điện thoại không khớp với chủ sở hữu hiện tại của bảo hành.",
-        "rateLimit": "Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau một phút.",
-        "request": "Không thể gửi yêu cầu bảo hành lúc này. Vui lòng thử lại sau."
+        "rateLimit": "Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau.",
+        "request": "Không thể gửi yêu cầu bảo hành lúc này. Vui lòng thử lại sau.",
+        "verification": "Không thể xác minh bạn là người dùng hợp lệ. Vui lòng xác minh lại rồi gửi yêu cầu."
       },
       "validation": {
         "detailsInvalid": "Mô tả sự cố không được vượt quá 4000 ký tự.",
         "issueRequired": "Vui lòng chọn vấn đề gặp phải.",
         "nameInvalid": "Vui lòng nhập họ tên hợp lệ.",
         "phoneInvalid": "Vui lòng nhập số điện thoại hợp lệ.",
-        "warrantyCodeInvalid": "Vui lòng nhập mã E-Warranty hợp lệ."
+        "warrantyCodeInvalid": "Vui lòng nhập mã bảo hành WM-* hợp lệ."
       },
       "fields": {
         "customerName": {
@@ -1633,7 +1647,7 @@
           "placeholder": "VD: 0988 123 456"
         },
         "reference": {
-          "label": "Mã E-Warranty *",
+          "label": "Mã bảo hành (WM-*) *",
           "placeholder": "VD: WM-2026-ABCDEF"
         },
         "issue": {
@@ -1643,6 +1657,16 @@
             "bubble": "Bong tróc / Bọt khí màng phim",
             "fade": "Đổi màu / Bay màu",
             "scratch": "Trầy xước do va chạm",
+            "noPower": "Không lên nguồn / Không hoạt động",
+            "intermittentOperation": "Hoạt động chập chờn",
+            "weakOrWrongLight": "Ánh sáng yếu / Sai màu ánh sáng",
+            "moisture": "Hơi nước / Đọng ẩm bên trong",
+            "noRecording": "Không ghi hình",
+            "poorVideoQuality": "Hình ảnh mờ / Giật",
+            "storageFailure": "Lỗi thẻ nhớ / Mất dữ liệu",
+            "connectionFailure": "Mất kết nối ứng dụng / Thiết bị",
+            "inaccurateReading": "Hiển thị sai thông số",
+            "lowSensorBattery": "Pin cảm biến yếu / Hết pin",
             "other": "Hiện tượng khác"
           }
         },
@@ -1655,7 +1679,7 @@
     "track": {
       "guide": {
         "title": "Quy trình xử lý yêu cầu",
-        "description": "Mã CLM giúp bạn theo dõi yêu cầu qua từng giai đoạn.",
+        "description": "Dùng mã yêu cầu kích hoạt WAR-* hoặc mã yêu cầu bảo hành/sự cố CLM-* để theo dõi tiến độ.",
         "steps": {
           "one": {
             "badge": "Bước 01",
@@ -1682,29 +1706,49 @@
       },
       "eyebrow": "Theo dõi tiến độ dịch vụ",
       "title": "Theo dõi xử lý bảo hành",
-      "description": "Nhập mã yêu cầu CLM để xem trạng thái hiện tại và lịch sử xử lý thực tế.",
+      "description": "Nhập mã yêu cầu kích hoạt WAR-* hoặc mã yêu cầu bảo hành/sự cố CLM-* để xem trạng thái xử lý.",
       "form": {
         "title": "Tra cứu tiến độ yêu cầu",
-        "description": "Nhập mã CLM để xem trạng thái và lịch sử xử lý yêu cầu bảo hành.",
+        "description": "Tra cứu yêu cầu kích hoạt bằng mã WAR-* hoặc yêu cầu bảo hành/sự cố bằng mã CLM-*.",
         "sectionTitle": "Thông tin theo dõi yêu cầu",
-        "sectionDescription": "Nhập mã CLM được cấp sau khi gửi yêu cầu để kiểm tra tiến độ xử lý.",
-        "claimCodeLabel": "Mã yêu cầu bảo hành",
-        "placeholder": "Ví dụ: CLM-0123456789ABCDEFABCD",
+        "sectionDescription": "Nhập mã được cấp sau khi gửi yêu cầu để kiểm tra tiến độ xử lý.",
+        "trackingCodeLabel": "Mã yêu cầu cần theo dõi",
+        "placeholder": "Ví dụ: WAR-20260907-0001 hoặc CLM-0123456789ABCDEFABCD",
         "submit": "Kiểm tra",
         "submitting": "Đang kiểm tra...",
-        "help": "Mã CLM được cấp sau khi bạn gửi yêu cầu bảo hành."
+        "help": "WAR-* là mã yêu cầu kích hoạt; CLM-* là mã yêu cầu bảo hành/sự cố."
       },
       "validation": {
-        "claimCodeInvalid": "Vui lòng nhập đúng mã yêu cầu CLM."
+        "trackingCodeInvalid": "Vui lòng nhập đúng mã yêu cầu kích hoạt WAR-* hoặc mã yêu cầu bảo hành/sự cố CLM-*."
       },
       "errors": {
-        "notFound": "Không tìm thấy yêu cầu bảo hành với mã này.",
+        "notFound": "Không tìm thấy yêu cầu với mã này.",
         "rateLimit": "Bạn đã tra cứu quá nhiều lần. Vui lòng thử lại sau.",
-        "request": "Không thể tra cứu tiến độ bảo hành. Vui lòng thử lại."
+        "request": "Không thể tra cứu tiến độ yêu cầu. Vui lòng thử lại."
+      },
+      "activationResult": {
+        "requestCode": "Mã yêu cầu kích hoạt",
+        "submittedAt": "Thời gian gửi",
+        "reviewedAt": "Thời gian xét duyệt",
+        "updatedAt": "Cập nhật gần nhất",
+        "statuses": {
+          "PENDING": "Chờ phê duyệt",
+          "APPROVED": "Đã phê duyệt",
+          "REJECTED": "Đã từ chối",
+          "ACTIVATED": "Đã kích hoạt",
+          "CANCELLED": "Đã hủy"
+        },
+        "descriptions": {
+          "PENDING": "FUJITEK đã tiếp nhận và đang kiểm tra yêu cầu. Bảo hành chưa có hiệu lực ở giai đoạn này.",
+          "APPROVED": "Yêu cầu đã được phê duyệt và đang hoàn tất bước kích hoạt bảo hành.",
+          "REJECTED": "Yêu cầu không được phê duyệt. Vui lòng liên hệ FUJITEK và cung cấp mã yêu cầu kích hoạt để được hỗ trợ.",
+          "ACTIVATED": "Yêu cầu đã hoàn tất và bảo hành điện tử đã được kích hoạt.",
+          "CANCELLED": "Yêu cầu này đã được hủy và sẽ không tiếp tục được xử lý."
+        }
       },
       "result": {
-        "claimCode": "Mã yêu cầu",
-        "warrantyCode": "Mã E-Warranty",
+        "claimCode": "Mã yêu cầu bảo hành/sự cố (CLM-*)",
+        "warrantyCode": "Mã bảo hành (WM-*)",
         "issue": "Vấn đề cần hỗ trợ",
         "priority": "Mức ưu tiên",
         "submittedAt": "Ngày gửi",
@@ -1825,7 +1869,7 @@
           {
             "heading": "IV. Cam kết bảo mật thông tin",
             "bullets": [
-              "FUJITEK cam kết bảo mật tuyệt đối dữ liệu cá nhân, thông tin phương tiện và lịch sử kích hoạt E-Warranty của quý khách.",
+              "FUJITEK cam kết bảo mật tuyệt đối dữ liệu cá nhân, thông tin phương tiện và lịch sử kích hoạt bảo hành điện tử của quý khách.",
               "Thông tin chỉ được sử dụng cho mục đích tra cứu bảo hành, hỗ trợ kỹ thuật và thông báo ưu đãi chăm sóc xe định kỳ."
             ]
           }
@@ -1833,12 +1877,12 @@
       },
       "privacy": {
         "title": "CHÍNH SÁCH BẢO MẬT THÔNG TIN",
-        "lead": "Tại FUJITEK Việt Nam, việc bảo vệ thông tin cá nhân và dữ liệu phương tiện của khách hàng là rất quan trọng. Quý khách hoàn toàn yên tâm khi cung cấp thông tin cho chúng tôi để sử dụng dịch vụ dán phim cách nhiệt và tra cứu E-Warranty.",
+        "lead": "Tại FUJITEK Việt Nam, việc bảo vệ thông tin cá nhân và dữ liệu phương tiện của khách hàng là rất quan trọng. Quý khách hoàn toàn yên tâm khi cung cấp thông tin cho chúng tôi để sử dụng dịch vụ dán phim cách nhiệt và tra cứu bảo hành điện tử.",
         "sections": [
           {
             "heading": "1. Mục đích và phạm vi thu thập",
             "bullets": [
-              "Để truy cập và sử dụng một số dịch vụ tại website (tra cứu E-Warranty hoặc đăng ký tư vấn), quý khách có thể được yêu cầu cung cấp thông tin cá nhân bao gồm: Email, Họ tên, Số điện thoại liên lạc, Địa chỉ, Công ty, Tên đăng nhập, Mật khẩu.",
+              "Để truy cập và sử dụng một số dịch vụ tại website (tra cứu bảo hành điện tử hoặc đăng ký tư vấn), quý khách có thể được yêu cầu cung cấp thông tin cá nhân bao gồm: Email, Họ tên, Số điện thoại liên lạc, Địa chỉ, Công ty, Tên đăng nhập, Mật khẩu.",
               "Chúng tôi cũng thu thập thông tin về số lần viếng thăm, bao gồm số trang quý khách xem, số liên kết (links) bạn click, những thông tin liên quan đến kết nối và thông tin trình duyệt Web (Browser) quý khách sử dụng mỗi khi truy cập bao gồm: Địa chỉ IP, loại Browser, ngôn ngữ sử dụng, thời gian và những địa chỉ mà Browser truy xuất đến."
             ]
           },
@@ -1905,9 +1949,9 @@
             ]
           },
           {
-            "heading": "3. Quy trình nghiệm thu và Kích hoạt E-Warranty",
+            "heading": "3. Quy trình nghiệm thu và kích hoạt bảo hành điện tử",
             "bullets": [
-              "Sau khi hoàn tất thi công dán phim, kỹ thuật viên sẽ cùng khách hàng kiểm tra mặt kính, thử nghiệm khả năng cản nhiệt và cấp Mã bảo hành điện tử (E-Warranty) chính thức trên hệ thống."
+              "Sau khi hoàn tất thi công dán phim, kỹ thuật viên sẽ cùng khách hàng kiểm tra mặt kính, thử nghiệm khả năng cản nhiệt và cấp mã bảo hành WM-* chính thức trên hệ thống."
             ]
           }
         ]
@@ -1926,7 +1970,7 @@
               "• Phim cách nhiệt bị bay màu, đổi màu;",
               "• Phim gây mùi khó chịu trong khoang xe;",
               "• Phim được chứng minh sụt giảm tác dụng cản nhiệt so với thông số niêm yết.",
-              "Tất cả các sản phẩm FUJITEK để được bảo hành cần đảm bảo điều kiện có mã Bảo hành điện tử (E-Warranty) hợp lệ và trong thời gian bảo hành theo quy định."
+              "Tất cả các sản phẩm FUJITEK để được bảo hành cần có mã bảo hành WM-* hợp lệ và còn trong thời hạn bảo hành theo quy định."
             ]
           },
           {
@@ -1935,7 +1979,7 @@
               "Phim bị rách, trầy xước, kéo dãn, biến đổi hình dạng do tác động ngoại lực, va chạm tai nạn, mưa gió, thiên tai mà không phải do lỗi kỹ thuật dán.",
               "Phim bị va đập hoặc bị sử dụng hóa chất tẩy rửa mạnh (axit) tác động làm hỏng bề mặt phim.",
               "Sử dụng sai nội dung hướng dẫn bảo quản sau dán (như hạ kính khi keo chưa ổn định trong 3-5 ngày đầu).",
-              "Sản phẩm quá thời hạn bảo hành E-Warranty.",
+              "Sản phẩm đã quá thời hạn bảo hành điện tử.",
               "Khách hàng tự ý can thiệp vào bề mặt phim hoặc đem xe đến một nơi nào khác sửa chữa không thuộc hệ thống ủy quyền FUJITEK."
             ]
           },
@@ -2036,7 +2080,7 @@
   "AboutPage": {
     "metadata": {
       "title": "Giới thiệu FUJITEK Việt Nam - Phân Phối Phim Cách Nhiệt Ô Tô Nhật Bản",
-      "description": "FUJITEK Việt Nam - Hệ thống phân phối phim cách nhiệt cao cấp công nghệ Nhật Bản, bảo hành điện tử E-Warranty chính hãng."
+      "description": "FUJITEK Việt Nam - Hệ thống phân phối phim cách nhiệt cao cấp công nghệ Nhật Bản với bảo hành điện tử chính hãng."
     },
     "hero": {
       "eyebrow": "Hệ Sinh Thái Công Nghệ Ô Tô",
@@ -2112,11 +2156,11 @@
           }
         },
         "ewarrantyRelease": {
-          "title": "E-Warranty ra mắt",
+          "title": "Ra mắt bảo hành điện tử",
           "description": "Triển khai hệ thống bảo hành điện tử, minh bạch và tiện lợi.",
           "phase": "Giai đoạn 03/04",
           "tags": {
-            "ewarranty": "E-Warranty",
+            "ewarranty": "Bảo hành điện tử",
             "digitalApp": "Ứng dụng số",
             "records": "100K+ hồ sơ"
           },
@@ -2311,7 +2355,7 @@
           "title": "Dịch Vụ Tận Tâm",
           "description": "Đồng hành cùng khách hàng với chế độ bảo hành 10 năm và mạng lưới đại lý phủ sóng toàn quốc.",
           "checks": {
-            "ewarrantyDigital": "Bảo hành điện tử E-Warranty",
+            "ewarrantyDigital": "Bảo hành điện tử",
             "support247": "Hỗ trợ 24/7",
             "dealerNetwork": "100+ đại lý toàn quốc"
           }
@@ -2346,7 +2390,7 @@
       "eyebrow": "Mạng lưới toàn quốc",
       "titlePrefix": "Hệ thống đại lý",
       "titleSuffix": "phủ sóng 34 tỉnh thành",
-      "description": "Với hơn 100 đại lý trên toàn quốc, Fujitek cam kết mang đến dịch vụ lắp đặt chuyên nghiệp và chế độ bảo hành E-Warranty minh bạch.",
+      "description": "Với hơn 100 đại lý trên toàn quốc, Fujitek cam kết mang đến dịch vụ lắp đặt chuyên nghiệp và chế độ bảo hành điện tử minh bạch.",
       "viewDealersCta": "Tìm Đại lý gần nhất",
       "mapTitle": "Bản đồ mạng lưới đại lý",
       "mapSubtitle": "Hệ thống trạm lắp đặt ủy quyền rộng khắp",

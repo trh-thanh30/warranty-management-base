@@ -9,6 +9,7 @@ import { toPublicWarrantyClaimResponse } from '@/modules/public/mappers/public-w
 import { CreatePublicWarrantyClaimUseCase } from '@/modules/public/use-cases/create-public-warranty-claim.use-case';
 import { PublicLookupWarrantyClaimByCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claim-by-code.use-case';
 import { CreatePublicWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-public-warranty-activation-request.dto';
+import { CreatePublicWarrantyActivationRequestUseCase } from '@/modules/public/use-cases/create-public-warranty-activation-request.use-case';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 
@@ -469,14 +470,49 @@ describe('Public use cases', () => {
 });
 
 describe('Public warranty lookup endpoint', () => {
-  it('uses a stricter read rate limit than the global API limit', () => {
+  it('applies the shared public warranty abuse cooldown to every endpoint', () => {
     const controllerSource = readFileSync(
       require.resolve('@/modules/public/public.controller'),
       'utf8',
     );
 
     expect(controllerSource).toMatch(
-      /@Throttle\(\{\s*default:\s*\{\s*limit:\s*10,\s*ttl:\s*60_000\s*\}\s*\}\)\s*@Get\('warranties\/lookup'\)/,
+      /const PUBLIC_WARRANTY_THROTTLE = \{\s*default: \{\s*blockDuration: 5 \* 60_000,\s*limit: 5,\s*ttl: 60_000,\s*\},\s*\} as const;/,
+    );
+    expect(
+      controllerSource.match(/@Throttle\(PUBLIC_WARRANTY_THROTTLE\)/g),
+    ).toHaveLength(6);
+    expect(controllerSource).toMatch(
+      /@Throttle\(PUBLIC_WARRANTY_THROTTLE\)\s*@Get\('warranties\/lookup'\)/,
+    );
+    expect(controllerSource).toMatch(
+      /@Throttle\(PUBLIC_WARRANTY_THROTTLE\)\s*@Post\('warranty-activation-requests'\)/,
+    );
+    expect(controllerSource).toMatch(
+      /@Throttle\(PUBLIC_WARRANTY_THROTTLE\)\s*@Get\('warranty-activation-requests\/:requestCode'\)/,
+    );
+    expect(controllerSource).toMatch(
+      /@Throttle\(PUBLIC_WARRANTY_THROTTLE\)\s*@Post\('warranty-claims'\)/,
+    );
+    expect(controllerSource).toMatch(
+      /@Throttle\(PUBLIC_WARRANTY_THROTTLE\)\s*@Get\('warranty-claims\/by-code\/:claimCode'\)/,
+    );
+    expect(controllerSource).toMatch(
+      /@Throttle\(PUBLIC_WARRANTY_THROTTLE\)\s*@Get\('warranty-claims\/by-warranty-code\/:warrantyCode'\)/,
+    );
+  });
+
+  it('protects both public submission endpoints with the abuse guard', () => {
+    const controllerSource = readFileSync(
+      require.resolve('@/modules/public/public.controller'),
+      'utf8',
+    );
+
+    expect(controllerSource).toMatch(
+      /@UseGuards\(PublicSubmissionAbuseGuard\)\s*@Throttle\(PUBLIC_WARRANTY_THROTTLE\)\s*@Post\('warranty-activation-requests'\)/,
+    );
+    expect(controllerSource).toMatch(
+      /@UseGuards\(PublicSubmissionAbuseGuard\)\s*@Throttle\(PUBLIC_WARRANTY_THROTTLE\)\s*@Post\('warranty-claims'\)/,
     );
   });
 });
@@ -518,14 +554,31 @@ describe('Public warranty claim tracking', () => {
 });
 
 describe('Public warranty activation request endpoint', () => {
-  it('rate limits public activation submissions', () => {
-    const controllerSource = readFileSync(
-      require.resolve('@/modules/public/public.controller'),
-      'utf8',
+  it('returns only the public activation receipt', async () => {
+    const createRequest = {
+      execute: jest.fn().mockResolvedValue({
+        id: 'private-request-id',
+        requestCode: 'WAR-20260907-0001',
+        status: 'PENDING',
+        createdAt: '2026-09-07T01:00:00.000Z',
+        customerEmail: 'private@example.com',
+        activationCode: { id: 'private-code-id', status: 'PENDING_APPROVAL' },
+      }),
+    };
+    const useCase = new CreatePublicWarrantyActivationRequestUseCase(
+      createRequest as never,
     );
 
-    expect(controllerSource).toMatch(
-      /@Throttle\(\{\s*default:\s*\{\s*limit:\s*5,\s*ttl:\s*60_000\s*\}\s*\}\)\s*@Post\('warranty-activation-requests'\)/,
+    await expect(
+      useCase.execute({ activationCode: 'SP-ABCDEF123456' } as never),
+    ).resolves.toEqual({
+      requestCode: 'WAR-20260907-0001',
+      status: 'PENDING',
+      createdAt: '2026-09-07T01:00:00.000Z',
+    });
+    expect(createRequest.execute).toHaveBeenCalledWith(
+      { activationCode: 'SP-ABCDEF123456' },
+      { source: 'PUBLIC_WEB' },
     );
   });
 
@@ -538,7 +591,7 @@ describe('Public warranty activation request endpoint', () => {
       provinceName: 'Thanh pho Ho Chi Minh',
       wardCode: '26734',
       wardName: 'Phuong Thanh My Tay',
-      warrantyCode: 'FJ-8899-2026',
+      activationCode: 'SP-ABCDEF123456',
     });
 
     const errors = await validate(dto);
@@ -549,33 +602,6 @@ describe('Public warranty activation request endpoint', () => {
           property: 'customerEmail',
         }),
       ]),
-    );
-  });
-});
-
-describe('Public warranty claim endpoint', () => {
-  it('rate limits public warranty claim submissions', () => {
-    const controllerSource = readFileSync(
-      require.resolve('@/modules/public/public.controller'),
-      'utf8',
-    );
-
-    expect(controllerSource).toMatch(
-      /@Throttle\(\{\s*default:\s*\{\s*limit:\s*5,\s*ttl:\s*60_000\s*\}\s*\}\)\s*@Post\('warranty-claims'\)/,
-    );
-  });
-
-  it('rate limits public warranty claim tracking reads', () => {
-    const controllerSource = readFileSync(
-      require.resolve('@/modules/public/public.controller'),
-      'utf8',
-    );
-
-    expect(controllerSource).toMatch(
-      /@Throttle\(\{\s*default:\s*\{\s*limit:\s*10,\s*ttl:\s*60_000\s*\}\s*\}\)\s*@Get\('warranty-claims\/by-code\/:claimCode'\)/,
-    );
-    expect(controllerSource).toMatch(
-      /@Throttle\(\{\s*default:\s*\{\s*limit:\s*10,\s*ttl:\s*60_000\s*\}\s*\}\)\s*@Get\('warranty-claims\/by-warranty-code\/:warrantyCode'\)/,
     );
   });
 });

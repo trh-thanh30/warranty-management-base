@@ -22,7 +22,7 @@ import {
 import { Textarea } from "@repo/ui/textarea";
 import { Send } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {
@@ -34,6 +34,10 @@ import {
   FormMessage,
 } from "@/src/components/common/form";
 import { formControlFocusClassName } from "@/src/components/common/form-control.constants";
+import {
+  isTurnstileEnabled,
+  TurnstileWidget,
+} from "@/src/components/common/turnstile-widget";
 import {
   getWarrantyClaimRequestErrorKind,
   type WarrantyClaimRequestErrorKind,
@@ -50,6 +54,7 @@ type WarrantyClaimRequestFormProps = {
   onResetError: () => void;
   onSubmit: (
     body: CreateWarrantyClaimBody,
+    turnstileToken?: string,
   ) => Promise<PublicWarrantyClaimSummary>;
 };
 
@@ -81,11 +86,23 @@ export function WarrantyClaimRequestForm({
     },
     resolver: zodResolver(schema),
   });
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const issueTitles = {
     bubble: t("fields.issue.options.bubble"),
+    connectionFailure: t("fields.issue.options.connectionFailure"),
     fade: t("fields.issue.options.fade"),
+    inaccurateReading: t("fields.issue.options.inaccurateReading"),
+    intermittentOperation: t("fields.issue.options.intermittentOperation"),
+    lowSensorBattery: t("fields.issue.options.lowSensorBattery"),
+    moisture: t("fields.issue.options.moisture"),
+    noPower: t("fields.issue.options.noPower"),
+    noRecording: t("fields.issue.options.noRecording"),
     other: t("fields.issue.options.other"),
+    poorVideoQuality: t("fields.issue.options.poorVideoQuality"),
     scratch: t("fields.issue.options.scratch"),
+    storageFailure: t("fields.issue.options.storageFailure"),
+    weakOrWrongLight: t("fields.issue.options.weakOrWrongLight"),
   } satisfies Record<WarrantyClaimIssueOption, string>;
 
   useEffect(() => {
@@ -98,10 +115,15 @@ export function WarrantyClaimRequestForm({
 
   const handleSubmit = async (values: WarrantyClaimRequestFormValues) => {
     try {
-      await onSubmit(toWarrantyClaimRequestBody(values, issueTitles));
+      await onSubmit(
+        toWarrantyClaimRequestBody(values, issueTitles),
+        turnstileToken ?? undefined,
+      );
       toast.success(t("success.title"));
       form.reset();
+      setTurnstileToken(null);
     } catch (error) {
+      setTurnstileResetKey((value) => value + 1);
       toast.error(t(`errors.${getWarrantyClaimRequestErrorKind(error)}`));
     }
   };
@@ -237,9 +259,16 @@ export function WarrantyClaimRequestForm({
           />
         </div>
 
+        <TurnstileWidget
+          onTokenChange={setTurnstileToken}
+          resetKey={turnstileResetKey}
+        />
+
         <Button
           className="flex h-12 w-full items-center justify-center gap-2 rounded-md bg-premium-red text-sm font-semibold uppercase text-white shadow-md transition-colors hover:bg-warm-red"
-          disabled={isPending}
+          disabled={
+            isPending || (isTurnstileEnabled && turnstileToken === null)
+          }
           type="submit"
         >
           <span>{isPending ? t("submitting") : t("submit")}</span>

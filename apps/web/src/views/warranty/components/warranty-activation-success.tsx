@@ -2,17 +2,22 @@
 
 import {
   formatDate,
-  type WarrantyActivationRequestSummary,
+  type PublicWarrantyActivationRequestReceipt,
 } from "@repo/shared";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
+import { APP_ROUTES } from "@/src/constants/routes.constants";
+import { Link } from "@/src/i18n/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   Check,
   CheckCircle2,
+  CircleAlert,
   ClipboardCheck,
   Clock3,
   Copy,
+  Mail,
+  Search,
   ShieldCheck,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -21,7 +26,7 @@ import { toast } from "sonner";
 
 type WarrantyActivationSuccessProps = {
   onReset: () => void;
-  request: WarrantyActivationRequestSummary;
+  request: PublicWarrantyActivationRequestReceipt;
 };
 
 export function WarrantyActivationSuccess({
@@ -72,6 +77,7 @@ export function WarrantyActivationSuccess({
   return (
     <motion.section
       animate={{ opacity: 1, y: 0 }}
+      aria-atomic="true"
       aria-live="polite"
       className="mx-auto max-w-2xl overflow-hidden rounded-md border border-border-gray bg-white shadow-xl"
       initial={
@@ -87,7 +93,7 @@ export function WarrantyActivationSuccess({
       <div className="border-b border-border-gray px-5 py-8 text-center sm:px-10 sm:py-10">
         <motion.div
           animate={{ opacity: 1, scale: 1 }}
-          className="mx-auto flex size-12 items-center justify-center rounded-full bg-premium-red/10 text-premium-red"
+          className="mx-auto flex size-12 items-center justify-center rounded-full bg-success-surface text-success-text"
           initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.75 }}
           transition={{
             delay: shouldReduceMotion ? 0 : 0.12,
@@ -106,7 +112,7 @@ export function WarrantyActivationSuccess({
         </p>
       </div>
 
-      <div className="grid bg-surface-muted sm:grid-cols-2">
+      <div className="grid bg-surface-muted sm:grid-cols-3">
         <div className="min-w-0 border-b border-border-gray p-5 sm:border-b-0 sm:border-r sm:p-6">
           <p className="text-xs font-semibold uppercase text-stone-gray">
             {t("requestCodeLabel")}
@@ -130,23 +136,56 @@ export function WarrantyActivationSuccess({
               )}
             </Button>
           </div>
+          <p className="mt-2 text-xs leading-5 text-stone-gray">
+            {t("requestCodeHint")}
+          </p>
         </div>
 
-        <div className="p-5 sm:p-6">
+        <div className="border-b border-border-gray p-5 sm:border-b-0 sm:border-r sm:p-6">
           <p className="text-xs font-semibold uppercase text-stone-gray">
             {t("statusLabel")}
           </p>
           <Badge
-            className="mt-3 gap-2 bg-premium-red/10 px-3 py-1.5 text-premium-red"
-            variant="destructive"
+            className="mt-3 gap-2 bg-info-surface px-3 py-1.5 text-info-text"
+            variant="secondary"
           >
             <Clock3 className="size-4" aria-hidden="true" />
             {request.status === "PENDING" ? t("pendingStatus") : request.status}
           </Badge>
         </div>
+
+        <div className="p-5 sm:p-6">
+          <p className="text-xs font-semibold uppercase text-stone-gray">
+            {t("submittedAtLabel")}
+          </p>
+          <p className="mt-3 text-sm font-semibold leading-6 text-deep-black">
+            {submittedAt}
+          </p>
+        </div>
       </div>
 
-      <div className="border-t border-border-gray px-5 py-7 sm:px-10 sm:py-8">
+      <div className="px-5 pt-6 sm:px-10 sm:pt-8">
+        <div className="rounded-md border border-info-border bg-info-surface p-4 text-deep-black">
+          <div className="flex gap-3">
+            <CircleAlert
+              aria-hidden="true"
+              className="mt-0.5 size-5 shrink-0 text-info-text"
+            />
+            <div className="min-w-0">
+              <h3 className="text-sm font-semibold">{t("reservationTitle")}</h3>
+              <p className="mt-1 text-sm leading-6 text-stone-gray">
+                {t("reservationDescription")}
+              </p>
+              <p className="mt-3 flex gap-2 text-sm leading-6 text-stone-gray">
+                <Mail aria-hidden="true" className="mt-1 size-4 shrink-0" />
+                <span>{t("emailDescription")}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-5 py-7 sm:px-10 sm:py-8">
         <h3 className="text-sm font-semibold uppercase text-deep-black">
           {t("timelineTitle")}
         </h3>
@@ -168,7 +207,7 @@ export function WarrantyActivationSuccess({
                 <span
                   aria-hidden="true"
                   className={`absolute bottom-0 left-3.5 top-7 w-px ${
-                    state === "done" ? "bg-premium-red" : "bg-border-gray"
+                    state === "done" ? "bg-success" : "bg-border-gray"
                   }`}
                 />
               ) : null}
@@ -176,9 +215,9 @@ export function WarrantyActivationSuccess({
               <span
                 className={`relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full border ${
                   state === "done"
-                    ? "border-premium-red bg-premium-red text-white"
+                    ? "border-success bg-success text-white"
                     : state === "active"
-                      ? "border-premium-red bg-white text-premium-red"
+                      ? "border-info bg-info-surface text-info-text"
                       : "border-border-gray bg-white text-stone-gray"
                 }`}
               >
@@ -199,14 +238,30 @@ export function WarrantyActivationSuccess({
           ))}
         </ol>
 
-        <Button
-          className="mt-7 h-12 w-full rounded-md border-premium-red text-sm font-semibold uppercase text-premium-red transition-colors hover:bg-premium-red hover:text-white"
-          onClick={onReset}
-          type="button"
-          variant="outline"
-        >
-          {t("reset")}
-        </Button>
+        <div className="mt-7 grid gap-3 sm:grid-cols-2">
+          <Button
+            asChild
+            className="h-12 rounded-md bg-premium-red text-sm font-semibold uppercase text-white hover:bg-warm-red"
+          >
+            <Link
+              href={{
+                pathname: APP_ROUTES.warrantyTrack,
+                query: { requestCode: request.requestCode },
+              }}
+            >
+              <Search className="size-4" aria-hidden="true" />
+              {t("track")}
+            </Link>
+          </Button>
+          <Button
+            className="h-12 rounded-md border-premium-red text-sm font-semibold uppercase text-premium-red transition-colors hover:bg-premium-red hover:text-white"
+            onClick={onReset}
+            type="button"
+            variant="outline"
+          >
+            {t("reset")}
+          </Button>
+        </div>
       </div>
     </motion.section>
   );

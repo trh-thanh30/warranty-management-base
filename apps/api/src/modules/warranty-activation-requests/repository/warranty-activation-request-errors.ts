@@ -20,8 +20,8 @@ export class WarrantyActivationRequestWarrantyCodeConflictError extends Warranty
 }
 
 export class WarrantyActivationCodeReservationConflictError extends Error {
-  constructor() {
-    super('One or more activation codes are no longer available');
+  constructor(readonly activationCodeIds: string[]) {
+    super('One or more activation codes could not be reserved');
     this.name = 'WarrantyActivationCodeReservationConflictError';
   }
 }

@@ -11,7 +11,7 @@ const schema = createWarrantyActivationFormSchema({
   provinceRequired: "province required",
   vehiclePlateInvalid: "plate invalid",
   wardRequired: "ward required",
-  warrantyCodeInvalid: "code invalid",
+  activationCodeInvalid: "code invalid",
 });
 
 const validValues = {
@@ -22,7 +22,7 @@ const validValues = {
   provinceCode: "27",
   vehiclePlate: "30A-12345",
   wardCode: "09442",
-  warrantyCode: "WM-2026-ABCDE",
+  activationCode: "SP-ABCDEF123456",
 };
 
 test("public activation accepts previously valid Vietnamese address details", () => {

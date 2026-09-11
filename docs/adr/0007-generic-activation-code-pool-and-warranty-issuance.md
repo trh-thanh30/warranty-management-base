@@ -49,6 +49,52 @@ activation flow and is not eligible for the generic code pool.
   identity continues to use customer code and phone; delivery recipient
   resolution is `customer.email ?? dealer.email ?? null`.
 
+## Activation-code lifecycle
+
+Assignment and lifecycle state are separate concepts. Assigning a code records
+which Product carries the physical label, but the code remains `AVAILABLE`.
+Submitting an activation request is the operation that consumes its
+availability and reserves it for review.
+
+`PENDING_APPROVAL` is an ActivationCode state. `PENDING` is the corresponding
+WarrantyActivationRequest state. They must be transitioned atomically so the
+system never exposes a pending request whose code is still available for a
+second submission.
+
+| Event                                   | Required current code state | Next code state    | Request outcome                                                          |
+| --------------------------------------- | --------------------------- | ------------------ | ------------------------------------------------------------------------ |
+| Assign code to Product                  | `AVAILABLE`                 | `AVAILABLE`        | No request or Warranty is created                                        |
+| Submit activation request               | `AVAILABLE`                 | `PENDING_APPROVAL` | Create one `PENDING` request and reserve a new Warranty code             |
+| Approve request                         | `PENDING_APPROVAL`          | `ACTIVATED`        | Issue and activate one Warranty, then mark the request `ACTIVATED`       |
+| Reject request while code remains valid | `PENDING_APPROVAL`          | `AVAILABLE`        | Mark the request `REJECTED`; keep the Product assignment                 |
+| Cancel request while code remains valid | `PENDING_APPROVAL`          | `AVAILABLE`        | Mark the request `CANCELLED`; keep the Product assignment                |
+| Reject or cancel after expiry           | `PENDING_APPROVAL`          | `EXPIRED`          | Preserve the terminal request history and do not release an expired code |
+| Code expires while awaiting review      | `PENDING_APPROVAL`          | `EXPIRED`          | Cancel the pending request with a system expiry reason                   |
+| Revoke an available code                | `AVAILABLE`                 | `REVOKED`          | No open activation request may reference the code                        |
+
+Ordinary batch revocation excludes `PENDING_APPROVAL` codes. Staff must first
+reject or cancel the pending request before revoking a released code. A race
+between expiry, review, cancellation, and revocation is resolved by a
+conditional transactional state transition; exactly one transition may win.
+
+The following invariants apply:
+
+- One code may have at most one open activation request.
+- A code in `PENDING_APPROVAL` is neither assignable nor submittable again.
+- A duplicate public submission receives a stable
+  `ACTIVATION_REQUEST_ALREADY_OPEN` conflict and never a database constraint
+  error.
+- Rejecting or cancelling a valid request releases the code but does not remove
+  its Product assignment, allowing corrected customer information to be
+  submitted for the same physical item.
+- A rejected or cancelled request keeps its reserved Warranty code as
+  historical data. A later request receives a new reserved Warranty code.
+- `ACTIVATED`, `REVOKED`, and `REPLACED` are terminal for that code. An
+  `EXPIRED` code may only move to `REPLACED` through the explicit replacement
+  workflow.
+- Approval is permitted only while the code is `PENDING_APPROVAL`, unexpired,
+  assigned to the request Product, and not already linked to a Warranty.
+
 ## Compatibility and rollout
 
 - `Product.current_warranty_id` temporarily preserves the legacy singular
@@ -57,6 +103,14 @@ activation flow and is not eligible for the generic code pool.
 - Existing issued request-to-warranty activation-code links are backfilled.
 - Existing product-bound batches remain readable and printable. New batch
   creation will stop writing product snapshots in the API cut-over.
+- During the lifecycle cut-over, existing pending requests whose codes are
+  still `AVAILABLE` must be reconciled to `PENDING_APPROVAL` before public Web
+  starts submitting activation codes. The reconciliation must skip expired,
+  revoked, activated, and conflicting records and report them for manual
+  review.
+- Runtime implementation must reserve/release the code and create/update its
+  activation request in one transaction. Relationship constraints remain
+  defense in depth; they are not a substitute for the lifecycle state.
 
 ## Rollback
 
@@ -74,6 +128,8 @@ mandatory before migration.
   codes may be counted for their Product before activation.
 - Product-level reports distinguish assigned available codes, pending request
   items and issued warranties.
+- Product and batch UIs distinguish `AVAILABLE` from `PENDING_APPROVAL`; an
+  assigned pending code must not be labelled as available for activation.
 - Approval must create warranties transactionally and idempotently by
   activation code.
 - Rejected requests retain their reserved warranty codes as immutable history;

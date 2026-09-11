@@ -3,7 +3,8 @@ import { ListServiceCentersDto } from '@/modules/service-centers/dto/list-servic
 import { LookupWarrantyDto } from '@/modules/warranties/dto/lookup-warranty.dto';
 import { LookupWarrantyByCodeUseCase } from '@/modules/warranties/use-cases/lookup-warranty-by-code.use-case';
 import { CreatePublicWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-public-warranty-activation-request.dto';
-import { CreateWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/create-warranty-activation-request.use-case';
+import { CreatePublicWarrantyActivationRequestUseCase } from '@/modules/public/use-cases/create-public-warranty-activation-request.use-case';
+import { PublicLookupWarrantyActivationRequestUseCase } from '@/modules/public/use-cases/public-lookup-warranty-activation-request.use-case';
 import { CreateWarrantyClaimDto } from '@/modules/warranty-claims/dto/create-warranty-claim.dto';
 import { CreatePublicWarrantyClaimUseCase } from '@/modules/public/use-cases/create-public-warranty-claim.use-case';
 import { PublicListServiceCentersUseCase } from '@/modules/public/use-cases/public-list-service-centers.use-case';
@@ -23,15 +24,33 @@ import { ListPublicProductCategoriesUseCase } from '@/modules/categories/use-cas
 import { ListPublicProductCategoriesDto } from '@/modules/categories/dto/list-public-product-categories.dto';
 import { PublicLookupWarrantyClaimByCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claim-by-code.use-case';
 import { PublicLookupWarrantyClaimsByWarrantyCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claims-by-warranty-code.use-case';
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { PublicSubmissionAbuseGuard } from '@/modules/public/guards/public-submission-abuse.guard';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
+
+const PUBLIC_WARRANTY_THROTTLE = {
+  default: {
+    blockDuration: 5 * 60_000,
+    limit: 5,
+    ttl: 60_000,
+  },
+} as const;
 
 @Public()
 @Controller('public')
 export class PublicController {
   constructor(
     private readonly lookupWarrantyByCodeUseCase: LookupWarrantyByCodeUseCase,
-    private readonly createWarrantyActivationRequestUseCase: CreateWarrantyActivationRequestUseCase,
+    private readonly createPublicWarrantyActivationRequestUseCase: CreatePublicWarrantyActivationRequestUseCase,
+    private readonly publicLookupWarrantyActivationRequestUseCase: PublicLookupWarrantyActivationRequestUseCase,
     private readonly createPublicWarrantyClaimUseCase: CreatePublicWarrantyClaimUseCase,
     private readonly publicLookupWarrantyClaimByCodeUseCase: PublicLookupWarrantyClaimByCodeUseCase,
     private readonly publicLookupWarrantyClaimsByWarrantyCodeUseCase: PublicLookupWarrantyClaimsByWarrantyCodeUseCase,
@@ -46,33 +65,43 @@ export class PublicController {
     private readonly listPublicProductCategoriesUseCase: ListPublicProductCategoriesUseCase,
   ) {}
 
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Throttle(PUBLIC_WARRANTY_THROTTLE)
   @Get('warranties/lookup')
   lookupWarranty(@Query() query: LookupWarrantyDto) {
     return this.lookupWarrantyByCodeUseCase.execute(query);
   }
 
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @UseGuards(PublicSubmissionAbuseGuard)
+  @Throttle(PUBLIC_WARRANTY_THROTTLE)
   @Post('warranty-activation-requests')
   createWarrantyActivationRequest(
     @Body() dto: CreatePublicWarrantyActivationRequestDto,
   ) {
-    return this.createWarrantyActivationRequestUseCase.execute(dto);
+    return this.createPublicWarrantyActivationRequestUseCase.execute(dto);
   }
 
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Throttle(PUBLIC_WARRANTY_THROTTLE)
+  @Get('warranty-activation-requests/:requestCode')
+  lookupWarrantyActivationRequest(@Param('requestCode') requestCode: string) {
+    return this.publicLookupWarrantyActivationRequestUseCase.execute(
+      requestCode,
+    );
+  }
+
+  @UseGuards(PublicSubmissionAbuseGuard)
+  @Throttle(PUBLIC_WARRANTY_THROTTLE)
   @Post('warranty-claims')
   createWarrantyClaim(@Body() dto: CreateWarrantyClaimDto) {
     return this.createPublicWarrantyClaimUseCase.execute(dto);
   }
 
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Throttle(PUBLIC_WARRANTY_THROTTLE)
   @Get('warranty-claims/by-code/:claimCode')
   lookupWarrantyClaimByCode(@Param('claimCode') claimCode: string) {
     return this.publicLookupWarrantyClaimByCodeUseCase.execute(claimCode);
   }
 
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Throttle(PUBLIC_WARRANTY_THROTTLE)
   @Get('warranty-claims/by-warranty-code/:warrantyCode')
   lookupWarrantyClaimsByWarrantyCode(
     @Param('warrantyCode') warrantyCode: string,

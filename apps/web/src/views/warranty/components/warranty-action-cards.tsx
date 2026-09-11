@@ -1,6 +1,5 @@
 "use client";
 
-import type { ComponentProps } from "react";
 import { Container } from "@/src/components/common/container";
 import { revealViewportOnce } from "@/src/constants/motion.constants";
 import { useScrollReveal } from "@/src/hooks/use-scroll-reveal";
@@ -16,6 +15,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import type { ComponentProps } from "react";
 import { warrantyActions } from "../warranty.constants";
 
 const actionIcons = {
@@ -32,7 +32,7 @@ export function WarrantyActionCards() {
   const { fadeUp } = useScrollReveal();
 
   return (
-    <section className="w-full py-16 lg:py-24 bg-surface-muted border-b border-border-gray">
+    <section className="w-full py-16 lg:py-24 ">
       <Container className="space-y-12">
         <motion.div
           variants={fadeUp}
@@ -61,7 +61,7 @@ export function WarrantyActionCards() {
                 initial="hidden"
                 whileInView="show"
                 viewport={revealViewportOnce}
-                className="group rounded-md border border-border-gray bg-white shadow-md transition-all hover:border-premium-red hover:shadow-xl"
+                className="group rounded-md border border-border-gray bg-white transition-all hover:border-premium-red hover:shadow-sm shadow-xs "
               >
                 {isExternal ? (
                   <a
@@ -77,9 +77,12 @@ export function WarrantyActionCards() {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex size-12 items-center justify-center text-stone-gray transition-colors group-hover:text-deep-black">
-                        <Icon className="size-7" strokeWidth={1.6} />
+                        <Icon
+                          className="size-7 transition-colors duration-300 group-hover:text-premium-red"
+                          strokeWidth={1.6}
+                        />
                       </div>
-                      <span className="rounded-md bg-light-gray px-3 py-1 text-xs font-medium uppercase text-stone-gray">
+                      <span className="rounded-md bg-light-gray px-3 py-1 text-xs font-semibold uppercase text-stone-gray">
                         {t(`items.${action.id}.badge`)}
                       </span>
                     </div>
@@ -108,7 +111,10 @@ export function WarrantyActionCards() {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex size-12 items-center justify-center text-stone-gray transition-colors group-hover:text-deep-black">
-                        <Icon className="size-7" strokeWidth={1.6} />
+                        <Icon
+                          className="size-7 transition-colors duration-300 group-hover:text-premium-red"
+                          strokeWidth={1.6}
+                        />
                       </div>
                       <span className="rounded-md bg-light-gray px-3 py-1 text-xs font-medium uppercase text-stone-gray">
                         {t(`items.${action.id}.badge`)}

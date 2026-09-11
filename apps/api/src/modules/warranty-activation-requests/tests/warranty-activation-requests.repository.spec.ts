@@ -1,7 +1,11 @@
 import { WarrantyActivationRequestsRepository } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository';
 import { WarrantyActivationRequestQueries } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository.queries';
 import { CreateWarrantyActivationRequestCommand } from '@/modules/warranty-activation-requests/warranty-activation-requests.types';
-import { Prisma, warranty_activation_request_status } from '@prisma/client';
+import {
+  activation_code_status,
+  Prisma,
+  warranty_activation_request_status,
+} from '@prisma/client';
 import {
   WarrantyActivationCodeReservationConflictError,
   WarrantyActivationRequestCodeConflictError,
@@ -11,6 +15,108 @@ import {
 
 describe('WarrantyActivationRequestsRepository', () => {
   const queries = new WarrantyActivationRequestQueries();
+
+  it('reserves activation codes and creates the request atomically', async () => {
+    const reserveCodes = jest.fn().mockResolvedValue({ count: 1 });
+    const createRequest = jest.fn().mockResolvedValue({ id: 'request-id' });
+    const transaction = jest.fn((callback: (tx: unknown) => unknown) =>
+      callback({
+        activationCode: { updateMany: reserveCodes },
+        warrantyActivationRequest: { create: createRequest },
+      }),
+    );
+    const repository = new WarrantyActivationRequestsRepository(
+      { $transaction: transaction } as never,
+      queries,
+    );
+    const command = createCommand('WAR-20260820-RESERVE');
+    command.activationCodeId = 'activation-code-id';
+    command.items = [
+      {
+        activationCodeId: 'activation-code-id',
+        activationFieldId: null,
+        positionKey: 'primaryProduct',
+        positionLabel: 'Sản phẩm chính',
+        productCode: 'PRODUCT-001',
+        productId: 'product-id',
+        productName: 'Product',
+        serialNumber: null,
+        warrantyCode: 'WM-001',
+        warrantyId: null,
+      },
+    ];
+
+    await repository.create(command);
+
+    expect(reserveCodes).toHaveBeenCalledWith({
+      where: {
+        expires_at: { gt: expect.any(Date) },
+        id: { in: ['activation-code-id'] },
+        status: activation_code_status.AVAILABLE,
+      },
+      data: { status: activation_code_status.PENDING_APPROVAL },
+    });
+    expect(createRequest).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not create a request when an activation code cannot be reserved', async () => {
+    const createRequest = jest.fn();
+    const transaction = jest.fn((callback: (tx: unknown) => unknown) =>
+      callback({
+        activationCode: {
+          updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+        },
+        warrantyActivationRequest: { create: createRequest },
+      }),
+    );
+    const repository = new WarrantyActivationRequestsRepository(
+      { $transaction: transaction } as never,
+      queries,
+    );
+    const command = createCommand('WAR-20260820-CONFLICT');
+    command.activationCodeId = 'activation-code-id';
+
+    await expect(repository.create(command)).rejects.toBeInstanceOf(
+      WarrantyActivationCodeReservationConflictError,
+    );
+    expect(createRequest).not.toHaveBeenCalled();
+  });
+
+  it('rejects the whole request when only part of a multi-code reservation succeeds', async () => {
+    const createRequest = jest.fn();
+    const reserveCodes = jest.fn().mockResolvedValue({ count: 1 });
+    const repository = new WarrantyActivationRequestsRepository(
+      {
+        $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
+          callback({
+            activationCode: { updateMany: reserveCodes },
+            warrantyActivationRequest: { create: createRequest },
+          }),
+        ),
+      } as never,
+      queries,
+    );
+    const command = createCommand('WAR-20260820-PARTIAL');
+    command.items = ['activation-code-a', 'activation-code-b'].map(
+      (activationCodeId, index) => ({
+        activationCodeId,
+        activationFieldId: null,
+        positionKey: `position${index}`,
+        positionLabel: `Position ${index}`,
+        productCode: `PRODUCT-${index}`,
+        productId: `product-${index}`,
+        productName: `Product ${index}`,
+        serialNumber: null,
+        warrantyCode: `WM-${index}`,
+        warrantyId: null,
+      }),
+    );
+
+    await expect(repository.create(command)).rejects.toMatchObject({
+      activationCodeIds: ['activation-code-a', 'activation-code-b'],
+    });
+    expect(createRequest).not.toHaveBeenCalled();
+  });
 
   it('updates Customer profile and creates the request in one transaction', async () => {
     const updateCustomer = jest.fn().mockResolvedValue({ id: 'customer-id' });

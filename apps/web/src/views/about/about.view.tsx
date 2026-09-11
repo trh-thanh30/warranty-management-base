@@ -32,7 +32,7 @@ export function AboutView() {
       {/* 5. Vision & 3 Core Brand Pillars (bg-white, Minimalist Unboxed) */}
       <AboutVisionValues />
 
-      {/* 6. Dealer Network & E-Warranty Banner (bg-white) */}
+      {/* 6. Dealer Network & Electronic Warranty Banner (bg-white) */}
       <AboutNetworkBanner />
 
       {/* 7. Showroom Partner & Customer Testimonials (bg-surface-muted) */}

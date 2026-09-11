@@ -9,8 +9,8 @@ import {
   CreateWarrantyActivationRequestOptions,
 } from '@/modules/warranty-activation-requests/warranty-activation-requests.types';
 import {
-  WarrantyActivationRequestCodeConflictError,
   WarrantyActivationCodeReservationConflictError,
+  WarrantyActivationRequestCodeConflictError,
   WarrantyActivationRequestUniqueConflictError,
   WarrantyActivationRequestUpdateConflictError,
   WarrantyActivationRequestWarrantyCodeConflictError,
@@ -35,14 +35,7 @@ export class WarrantyActivationRequestsRepository {
   ) {
     const data = this.toCreateInput(command);
     const customerProfile = options.customerProfile;
-    const activationCodeIds = Array.from(
-      new Set(
-        [
-          command.activationCodeId,
-          ...command.items.map((item) => item.activationCodeId),
-        ].filter((id): id is string => Boolean(id)),
-      ),
-    );
+    const activationCodeIds = this.getActivationCodeIds(command);
     const operation =
       customerProfile || activationCodeIds.length > 0
         ? this.prismaService.$transaction(async (tx) => {
@@ -56,7 +49,9 @@ export class WarrantyActivationRequestsRepository {
                 data: { status: activation_code_status.PENDING_APPROVAL },
               });
               if (reserved.count !== activationCodeIds.length) {
-                throw new WarrantyActivationCodeReservationConflictError();
+                throw new WarrantyActivationCodeReservationConflictError(
+                  activationCodeIds,
+                );
               }
             }
 
@@ -157,7 +152,9 @@ export class WarrantyActivationRequestsRepository {
             data: { status: activation_code_status.PENDING_APPROVAL },
           });
           if (reserved.count !== addedCodeIds.length) {
-            throw new WarrantyActivationCodeReservationConflictError();
+            throw new WarrantyActivationCodeReservationConflictError(
+              addedCodeIds,
+            );
           }
         }
 
@@ -213,6 +210,19 @@ export class WarrantyActivationRequestsRepository {
     return this.prismaService.warrantyActivationRequest.findFirst({
       where: { id, dealer_id: dealerIds ? { in: dealerIds } : undefined },
       include: this.queries.include,
+    });
+  }
+
+  findPublicStatusByRequestCode(requestCode: string) {
+    return this.prismaService.warrantyActivationRequest.findUnique({
+      where: { request_code: requestCode },
+      select: {
+        request_code: true,
+        status: true,
+        created_at: true,
+        reviewed_at: true,
+        updated_at: true,
+      },
     });
   }
 
@@ -329,17 +339,35 @@ export class WarrantyActivationRequestsRepository {
     reviewedById?: string;
   }) {
     return this.prismaService.$transaction(async (tx) => {
+      const reviewedAt = new Date();
       if (input.status === warranty_activation_request_status.REJECTED) {
-        await tx.activationCode.updateMany({
-          where: {
-            status: activation_code_status.PENDING_APPROVAL,
-            OR: [
-              { request: { is: { id: input.id } } },
-              { request_items: { some: { request_id: input.id } } },
-            ],
+        const request = await tx.warrantyActivationRequest.findUnique({
+          where: { id: input.id },
+          select: {
+            activation_code_id: true,
+            items: { select: { activation_code_id: true } },
           },
-          data: { status: activation_code_status.AVAILABLE },
         });
+        const activationCodeIds = [
+          request?.activation_code_id,
+          ...(request?.items.map((item) => item.activation_code_id) ?? []),
+        ].filter((id): id is string => Boolean(id));
+        const uniqueActivationCodeIds = [...new Set(activationCodeIds)];
+
+        if (uniqueActivationCodeIds.length > 0) {
+          const pendingCodes = {
+            id: { in: uniqueActivationCodeIds },
+            status: activation_code_status.PENDING_APPROVAL,
+          };
+          await tx.activationCode.updateMany({
+            where: { ...pendingCodes, expires_at: { lte: reviewedAt } },
+            data: { status: activation_code_status.EXPIRED },
+          });
+          await tx.activationCode.updateMany({
+            where: { ...pendingCodes, expires_at: { gt: reviewedAt } },
+            data: { status: activation_code_status.AVAILABLE },
+          });
+        }
       }
 
       await tx.warrantyActivationRequestItem.updateMany({
@@ -356,7 +384,7 @@ export class WarrantyActivationRequestsRepository {
               : undefined,
           admin_note: input.adminNote,
           rejection_reason: input.rejectionReason,
-          reviewed_at: new Date(),
+          reviewed_at: reviewedAt,
           reviewed_by: input.reviewedById
             ? { connect: { id: input.reviewedById } }
             : undefined,

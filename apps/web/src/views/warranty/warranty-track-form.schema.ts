@@ -1,21 +1,24 @@
 import {
-  isWarrantyClaimCode,
-  normalizeWarrantyClaimCode,
+  getWarrantyTrackingCodeType,
+  normalizeWarrantyActivationRequestCode,
 } from "@repo/shared/utils";
 import { z } from "zod";
 
 export type WarrantyTrackFormValues = {
-  claimCode: string;
+  trackingCode: string;
 };
 
 export function createWarrantyTrackFormSchema(messages: {
-  claimCodeInvalid: string;
+  trackingCodeInvalid: string;
 }) {
   return z.object({
-    claimCode: z
+    trackingCode: z
       .string()
       .trim()
-      .transform(normalizeWarrantyClaimCode)
-      .refine(isWarrantyClaimCode, messages.claimCodeInvalid),
+      .transform(normalizeWarrantyActivationRequestCode)
+      .refine(
+        (value) => getWarrantyTrackingCodeType(value) !== null,
+        messages.trackingCodeInvalid,
+      ),
   });
 }

@@ -41,6 +41,11 @@ async function bootstrap() {
     });
     app.enableShutdownHooks();
 
+    const trustProxyHops = Number(process.env.TRUST_PROXY_HOPS ?? 0);
+    if (trustProxyHops > 0) {
+      app.set('trust proxy', trustProxyHops);
+    }
+
     // Get app config
     const appCfg = app.get<ConfigType<typeof appConfig>>(appConfig.KEY);
 
@@ -71,6 +76,7 @@ async function bootstrap() {
         'Authorization',
         'X-Auth-Context',
         'X-Requested-With',
+        'X-Turnstile-Token',
         'apollo-require-preflight',
       ],
       exposedHeaders: [

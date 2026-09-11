@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type {
   CreatePublicWarrantyActivationRequestBody,
-  WarrantyActivationRequestSummary,
+  PublicWarrantyActivationRequestReceipt,
 } from "@repo/shared";
 import { Button } from "@repo/ui/button";
 import { Input } from "@repo/ui/input";
@@ -16,12 +16,13 @@ import {
 } from "@repo/ui/select";
 import { Send } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, type WheelEvent } from "react";
+import { useEffect, useMemo, useState, type WheelEvent } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -29,7 +30,12 @@ import {
 } from "@/src/components/common/form";
 import { formControlFocusClassName } from "@/src/components/common/form-control.constants";
 import {
+  isTurnstileEnabled,
+  TurnstileWidget,
+} from "@/src/components/common/turnstile-widget";
+import {
   getWarrantyActivationErrorKind,
+  isActivationCodeErrorKind,
   type WarrantyActivationErrorKind,
 } from "@/src/hooks/use-warranty-activation-request";
 import { useVietnamProvinces } from "@/src/hooks/use-vietnam-provinces";
@@ -46,7 +52,8 @@ type WarrantyActivationRequestFormProps = {
   onResetError: () => void;
   onSubmit: (
     body: CreatePublicWarrantyActivationRequestBody,
-  ) => Promise<WarrantyActivationRequestSummary>;
+    turnstileToken?: string,
+  ) => Promise<PublicWarrantyActivationRequestReceipt>;
 };
 
 const defaultValues: WarrantyActivationFormValues = {
@@ -57,7 +64,7 @@ const defaultValues: WarrantyActivationFormValues = {
   provinceCode: "",
   vehiclePlate: "",
   wardCode: "",
-  warrantyCode: "",
+  activationCode: "",
 };
 
 export function WarrantyActivationRequestForm({
@@ -78,7 +85,7 @@ export function WarrantyActivationRequestForm({
         provinceRequired: t("validation.provinceRequired"),
         vehiclePlateInvalid: t("validation.vehiclePlateInvalid"),
         wardRequired: t("validation.wardRequired"),
-        warrantyCodeInvalid: t("validation.warrantyCodeInvalid"),
+        activationCodeInvalid: t("validation.activationCodeInvalid"),
       }),
     [t],
   );
@@ -86,18 +93,40 @@ export function WarrantyActivationRequestForm({
     defaultValues,
     resolver: zodResolver(schema),
   });
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const provinceCode = form.watch("provinceCode");
   const provinceCodeNumber = provinceCode ? Number(provinceCode) : null;
   const provincesQuery = useVietnamProvinces();
   const wardsQuery = useVietnamWards(provinceCodeNumber);
 
   useEffect(() => {
-    const subscription = form.watch(() => {
-      if (errorKind) onResetError();
+    const subscription = form.watch((_values, { name }) => {
+      if (!errorKind) return;
+
+      if (isActivationCodeErrorKind(errorKind)) {
+        if (name !== "activationCode") return;
+        form.clearErrors("activationCode");
+      }
+
+      onResetError();
     });
 
     return () => subscription.unsubscribe();
   }, [errorKind, form, onResetError]);
+
+  useEffect(() => {
+    if (!isActivationCodeErrorKind(errorKind)) return;
+
+    form.setError(
+      "activationCode",
+      {
+        message: t(`errors.${errorKind}`),
+        type: "server",
+      },
+      { shouldFocus: true },
+    );
+  }, [errorKind, form, t]);
 
   const handleSubmit = async (values: WarrantyActivationFormValues) => {
     const province = provincesQuery.data.find(
@@ -128,11 +157,25 @@ export function WarrantyActivationRequestForm({
           values,
           wards: wardsQuery.data,
         }),
+        turnstileToken ?? undefined,
       );
       toast.success(t("success.title"));
       form.reset();
+      setTurnstileToken(null);
     } catch (error) {
-      toast.error(t(`errors.${getWarrantyActivationErrorKind(error)}`));
+      setTurnstileResetKey((value) => value + 1);
+      const submittedErrorKind = getWarrantyActivationErrorKind(error);
+
+      if (isActivationCodeErrorKind(submittedErrorKind)) {
+        form.setError(
+          "activationCode",
+          {
+            message: t(`errors.${submittedErrorKind}`),
+            type: "server",
+          },
+          { shouldFocus: true },
+        );
+      }
     }
   };
 
@@ -231,21 +274,24 @@ export function WarrantyActivationRequestForm({
 
           <FormField
             control={form.control}
-            name="warrantyCode"
+            name="activationCode"
             render={({ field }) => (
               <FormItem className="sm:col-span-2">
                 <FormLabel className="text-sm font-semibold uppercase text-deep-black">
-                  {t("fields.stampCode.label")}
+                  {t("fields.activationCode.label")}
                 </FormLabel>
                 <FormControl>
                   <Input
                     autoComplete="off"
                     className={`h-12 rounded-md border-border-gray bg-white font-mono uppercase ${formControlFocusClassName}`}
-                    maxLength={64}
-                    placeholder={t("fields.stampCode.placeholder")}
+                    maxLength={120}
+                    placeholder={t("fields.activationCode.placeholder")}
                     {...field}
                   />
                 </FormControl>
+                <FormDescription className="text-xs leading-5">
+                  {t("fields.activationCode.description")}
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -382,16 +428,23 @@ export function WarrantyActivationRequestForm({
           />
         </div>
 
+        <TurnstileWidget
+          onTokenChange={setTurnstileToken}
+          resetKey={turnstileResetKey}
+        />
+
         <Button
           className="flex h-12 w-full items-center justify-center gap-2 rounded-md bg-premium-red text-sm font-semibold uppercase text-white shadow-md transition-colors hover:bg-warm-red"
-          disabled={isPending}
+          disabled={
+            isPending || (isTurnstileEnabled && turnstileToken === null)
+          }
           type="submit"
         >
           <span>{isPending ? t("submitting") : t("submit")}</span>
           <Send className="size-4" />
         </Button>
 
-        {errorKind ? (
+        {errorKind && !isActivationCodeErrorKind(errorKind) ? (
           <p role="alert" className="text-sm font-medium text-premium-red">
             {t(`errors.${errorKind}`)}
           </p>
