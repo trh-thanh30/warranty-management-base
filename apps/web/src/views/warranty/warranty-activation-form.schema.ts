@@ -7,6 +7,9 @@ export type WarrantyActivationFormValidationMessages = {
   customerEmailRequired: string;
   customerNameInvalid: string;
   customerPhoneInvalid: string;
+  installedAtFuture: string;
+  installedAtInvalid: string;
+  installedAtRequired: string;
   provinceRequired: string;
   vehiclePlateInvalid: string;
   wardRequired: string;
@@ -18,6 +21,7 @@ export type WarrantyActivationFormValues = {
   customerEmail: string;
   customerName: string;
   customerPhone: string;
+  installedAt: string;
   provinceCode: string;
   vehiclePlate: string;
   wardCode: string;
@@ -53,6 +57,18 @@ export function createWarrantyActivationFormSchema(
       .min(6, messages.customerPhoneInvalid)
       .max(32, messages.customerPhoneInvalid)
       .regex(PHONE_NUMBER_PATTERN, messages.customerPhoneInvalid),
+    installedAt: z
+      .string()
+      .trim()
+      .min(1, messages.installedAtRequired)
+      .refine(
+        (value) => !Number.isNaN(new Date(value).getTime()),
+        messages.installedAtInvalid,
+      )
+      .refine(
+        (value) => new Date(value).getTime() <= Date.now(),
+        messages.installedAtFuture,
+      ),
     provinceCode: z.string().trim().min(1, messages.provinceRequired),
     vehiclePlate: z
       .string()

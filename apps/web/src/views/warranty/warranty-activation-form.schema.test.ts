@@ -8,6 +8,9 @@ const schema = createWarrantyActivationFormSchema({
   customerEmailRequired: "email required",
   customerNameInvalid: "name invalid",
   customerPhoneInvalid: "phone invalid",
+  installedAtFuture: "installation date future",
+  installedAtInvalid: "installation date invalid",
+  installedAtRequired: "installation date required",
   provinceRequired: "province required",
   vehiclePlateInvalid: "plate invalid",
   wardRequired: "ward required",
@@ -19,6 +22,7 @@ const validValues = {
   customerEmail: "customer@example.com",
   customerName: "Nguyễn Văn A",
   customerPhone: "0901234567",
+  installedAt: "2026-09-09T14:30",
   provinceCode: "27",
   vehiclePlate: "30A-12345",
   wardCode: "09442",
@@ -36,6 +40,26 @@ test("public activation accepts previously valid Vietnamese address details", ()
   ]) {
     assert.equal(
       schema.safeParse({ ...validValues, addressDetail }).success,
+      true,
+    );
+  }
+});
+
+test("public activation requires a valid installation date that is not in the future", () => {
+  for (const [installedAt, expectedMessage] of [
+    ["", "installation date required"],
+    ["not-a-date", "installation date invalid"],
+    [new Date(Date.now() + 60_000).toISOString(), "installation date future"],
+  ] as const) {
+    const result = schema.safeParse({ ...validValues, installedAt });
+
+    assert.equal(result.success, false);
+    if (result.success) continue;
+    assert.equal(
+      result.error.issues.some(
+        (issue) =>
+          issue.path[0] === "installedAt" && issue.message === expectedMessage,
+      ),
       true,
     );
   }

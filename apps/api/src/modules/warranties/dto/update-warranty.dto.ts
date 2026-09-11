@@ -1,4 +1,5 @@
 import {
+  IsDateString,
   IsDecimal,
   IsInt,
   IsOptional,
@@ -12,6 +13,10 @@ export class UpdateWarrantyDto {
   @IsString()
   @Length(3, 10000)
   adjustmentReason: string;
+
+  @IsOptional()
+  @IsDateString()
+  startDate?: string;
 
   @IsOptional()
   @IsInt()

@@ -457,7 +457,9 @@ describe('Public use cases', () => {
       createWarrantyClaimUseCase as never,
     );
 
-    const result = await useCase.execute({} as never);
+    const result = await useCase.execute({} as never, [
+      { mimetype: 'image/webp' } as Express.Multer.File,
+    ]);
 
     expect(result.timeline).toEqual([
       {
@@ -502,17 +504,17 @@ describe('Public warranty lookup endpoint', () => {
     );
   });
 
-  it('protects both public submission endpoints with the abuse guard', () => {
+  it('applies abuse protection after multipart parsing for warranty claims', () => {
     const controllerSource = readFileSync(
       require.resolve('@/modules/public/public.controller'),
       'utf8',
     );
 
     expect(controllerSource).toMatch(
-      /@UseGuards\(PublicSubmissionAbuseGuard\)\s*@Throttle\(PUBLIC_WARRANTY_THROTTLE\)\s*@Post\('warranty-activation-requests'\)/,
+      /@PublicSubmissionAction\('activation-request'\)\s*@UseInterceptors\(PublicSubmissionAbuseInterceptor\)\s*@Throttle\(PUBLIC_WARRANTY_THROTTLE\)\s*@Post\('warranty-activation-requests'\)/,
     );
     expect(controllerSource).toMatch(
-      /@UseGuards\(PublicSubmissionAbuseGuard\)\s*@Throttle\(PUBLIC_WARRANTY_THROTTLE\)\s*@Post\('warranty-claims'\)/,
+      /@PublicSubmissionAction\('warranty-claim'\)\s*@UseInterceptors\(\s*FilesInterceptor\([\s\S]*?\),\s*PublicSubmissionAbuseInterceptor,?\s*\)\s*@Throttle\(PUBLIC_WARRANTY_THROTTLE\)\s*@Post\('warranty-claims'\)/,
     );
   });
 });

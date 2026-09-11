@@ -34,6 +34,7 @@ const CREATE_FIELD_ERROR_KEYS = new Set([
   "emailInvalid",
   "installedAtFuture",
   "installedAtInvalid",
+  "installedAtRequired",
   "noteLength",
   "phoneInvalid",
   "productRequired",
@@ -257,7 +258,7 @@ export function toAdminActivationRequestBody({
     dealerProvince: values.dealerProvince.trim() || undefined,
     filmItems: buildFilmItems(values, activationInputValues),
     items: items.length > 0 ? items : undefined,
-    installedAt: installedAt ? new Date(installedAt).toISOString() : undefined,
+    installedAt: new Date(installedAt).toISOString(),
     manufactureYear: primaryProduct?.modelYear ?? undefined,
     model: primaryProduct?.model ?? undefined,
     metadata: activationMetadata,
@@ -315,17 +316,6 @@ export function buildActivationRequestItems(
       }),
     ];
   });
-}
-
-export function getUnavailableActivationProductIds(
-  productsByPosition: Record<string, ProductResponse>,
-  currentPositionKey: string,
-) {
-  return new Set(
-    Object.entries(productsByPosition)
-      .filter(([positionKey]) => positionKey !== currentPositionKey)
-      .map(([, product]) => product.id),
-  );
 }
 
 function buildFilmItems(

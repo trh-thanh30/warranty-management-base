@@ -1445,6 +1445,9 @@
           "placeholder": "VD: SP-ABCDEF123456",
           "description": "Nhập mã bắt đầu bằng SP- được in trên tem sản phẩm."
         },
+        "installedAt": {
+          "label": "Ngày lắp đặt (Ngày bắt đầu bảo hành) *"
+        },
         "province": {
           "label": "Tỉnh / Thành phố *",
           "placeholder": "Chọn tỉnh hoặc thành phố",
@@ -1469,6 +1472,9 @@
         "customerEmailRequired": "Vui lòng nhập email để nhận giấy bảo hành.",
         "customerNameInvalid": "Họ và tên phải có từ 2 đến 120 ký tự.",
         "customerPhoneInvalid": "Số điện thoại không hợp lệ.",
+        "installedAtFuture": "Ngày lắp đặt không được lớn hơn thời điểm hiện tại.",
+        "installedAtInvalid": "Ngày lắp đặt không hợp lệ.",
+        "installedAtRequired": "Vui lòng chọn ngày lắp đặt.",
         "provinceRequired": "Vui lòng chọn tỉnh hoặc thành phố.",
         "vehiclePlateInvalid": "Biển số xe không hợp lệ.",
         "wardRequired": "Vui lòng chọn phường hoặc xã.",
@@ -1632,6 +1638,9 @@
       },
       "validation": {
         "detailsInvalid": "Mô tả sự cố không được vượt quá 4000 ký tự.",
+        "evidenceInvalid": "Chỉ hỗ trợ tệp ảnh JPG, PNG, GIF, WEBP và video MP4, MOV.",
+        "evidenceRequired": "Vui lòng thêm ít nhất một ảnh hoặc video về tình trạng sản phẩm.",
+        "evidenceTooLarge": "Mỗi ảnh hoặc video không được vượt quá 10 MB.",
         "issueRequired": "Vui lòng chọn vấn đề gặp phải.",
         "nameInvalid": "Vui lòng nhập họ tên hợp lệ.",
         "phoneInvalid": "Vui lòng nhập số điện thoại hợp lệ.",
@@ -1671,8 +1680,17 @@
           }
         },
         "details": {
-          "label": "Mô tả chi tiết sự cố",
-          "placeholder": "Mô tả vị trí kính và hiện tượng cần hỗ trợ..."
+          "label": "Tình trạng sản phẩm",
+          "placeholder": "Nhập tình trạng, vị trí lỗi, thời điểm phát hiện hoặc ghi chú tiếp nhận."
+        },
+        "evidence": {
+          "label": "Hình ảnh / Video tình trạng sản phẩm *",
+          "choose": "Kéo thả hoặc chọn ảnh, video",
+          "hint": "Không giới hạn số lượng tệp. Hỗ trợ JPG, PNG, GIF, WEBP, MP4, MOV; tối đa 10 MB mỗi tệp.",
+          "selectedFiles": "Ảnh và video đã chọn",
+          "preview": "Xem trước tệp {name}",
+          "closePreview": "Đóng xem trước",
+          "remove": "Gỡ tệp {name}"
         }
       }
     },

@@ -707,11 +707,6 @@ export function useCreateWarrantyActivationRequestForm({
     positionKey: string,
     product: ProductResponse,
   ) {
-    const isSelectedElsewhere = Object.entries(selectedActivationProducts).some(
-      ([key, selected]) => key !== positionKey && selected.id === product.id,
-    );
-    if (isSelectedElsewhere) return;
-
     if (selectedActivationProducts[positionKey]?.id !== product.id) {
       clearItemActivationCode(positionKey);
     }

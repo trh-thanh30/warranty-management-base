@@ -16,6 +16,7 @@ async function importRequired(relativePath) {
 }
 
 const validFormValues = {
+  attachments: [new File(["photo"], "damage.webp", { type: "image/webp" })],
   issue: "bubble",
   issueDetail: "Bubbles on the windshield",
   requesterName: " Nguyen Van An ",
@@ -23,7 +24,7 @@ const validFormValues = {
   warrantyCode: " wm-2026-abcdef ",
 };
 
-test("warranty claims service posts the public claim request", async () => {
+test("warranty claims service posts the public claim request with required evidence", async () => {
   const { WarrantyClaimsService } = await importRequired(
     "../src/services/warranty-claims/warranty-claims.service.ts",
   );
@@ -43,21 +44,26 @@ test("warranty claims service posts the public claim request", async () => {
     warrantyCode: "WM-2026-ABCDEF",
   };
   const service = new WarrantyClaimsService({
-    async post(url, requestBody) {
-      calls.push({ body: requestBody, url });
+    async post(url, requestBody, config) {
+      calls.push({ body: requestBody, config, url });
       return { data: responseData };
     },
   });
 
-  const result = await service.createWarrantyClaim(body);
+  const attachments = [
+    new File(["photo"], "damage.webp", { type: "image/webp" }),
+    new File(["video"], "damage.mp4", { type: "video/mp4" }),
+  ];
+  const result = await service.createWarrantyClaim(body, attachments);
 
   assert.deepEqual(result, responseData);
-  assert.deepEqual(calls, [
-    {
-      body,
-      url: "/public/warranty-claims",
-    },
-  ]);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0]?.url, "/public/warranty-claims");
+  assert.ok(calls[0]?.body instanceof FormData);
+  assert.equal(calls[0].body.get("warrantyCode"), body.warrantyCode);
+  assert.equal(calls[0].body.get("issueTitle"), body.issueTitle);
+  assert.deepEqual(calls[0].body.getAll("attachments"), attachments);
+  assert.equal(calls[0].config.timeout, 120_000);
 });
 
 test("warranty claims service sends the Turnstile token separately from claim data", async () => {
@@ -72,16 +78,21 @@ test("warranty claims service sends the Turnstile token separately from claim da
     },
   });
   const body = { warrantyCode: "WM-ABC123" };
+  const attachments = [
+    new File(["photo"], "damage.webp", { type: "image/webp" }),
+  ];
 
-  await service.createWarrantyClaim(body, "turnstile-token");
+  await service.createWarrantyClaim(body, attachments, "turnstile-token");
 
-  assert.deepEqual(calls, [
-    {
-      body,
-      config: { headers: { "X-Turnstile-Token": "turnstile-token" } },
-      url: "/public/warranty-claims",
-    },
-  ]);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0]?.url, "/public/warranty-claims");
+  assert.ok(calls[0]?.body instanceof FormData);
+  assert.equal(calls[0].body.get("warrantyCode"), body.warrantyCode);
+  assert.deepEqual(calls[0].body.getAll("attachments"), attachments);
+  assert.deepEqual(calls[0]?.config, {
+    headers: { "X-Turnstile-Token": "turnstile-token" },
+    timeout: 120_000,
+  });
 });
 
 test("warranty claim form schema validates public request fields", async () => {
@@ -90,6 +101,9 @@ test("warranty claim form schema validates public request fields", async () => {
   );
   const schema = createWarrantyClaimRequestFormSchema({
     detailsInvalid: "detailsInvalid",
+    evidenceInvalid: "evidenceInvalid",
+    evidenceRequired: "evidenceRequired",
+    evidenceTooLarge: "evidenceTooLarge",
     issueRequired: "issueRequired",
     nameInvalid: "nameInvalid",
     phoneInvalid: "phoneInvalid",
@@ -116,6 +130,22 @@ test("warranty claim form schema validates public request fields", async () => {
       "warrantyCodeInvalid",
     ]),
   );
+
+  const withoutEvidence = schema.safeParse({
+    ...validFormValues,
+    attachments: [],
+  });
+  assert.equal(withoutEvidence.success, false);
+  assert.equal(withoutEvidence.error.issues[0]?.message, "evidenceRequired");
+
+  const unsupportedEvidence = schema.safeParse({
+    ...validFormValues,
+    attachments: [
+      new File(["document"], "damage.pdf", { type: "application/pdf" }),
+    ],
+  });
+  assert.equal(unsupportedEvidence.success, false);
+  assert.equal(unsupportedEvidence.error.issues[0]?.message, "evidenceInvalid");
 });
 
 test("warranty claim form maps the selected shared issue into the API body", async () => {

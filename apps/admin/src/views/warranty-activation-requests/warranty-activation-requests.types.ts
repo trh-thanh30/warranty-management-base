@@ -104,12 +104,13 @@ export const warrantyActivationRequestCreateFormSchema = z
     installedAt: z
       .string()
       .trim()
+      .min(1, "installedAtRequired")
       .refine(
-        (value) => !value || !Number.isNaN(new Date(value).getTime()),
+        (value) => !Number.isNaN(new Date(value).getTime()),
         "installedAtInvalid",
       )
       .refine(
-        (value) => !value || new Date(value).getTime() <= Date.now(),
+        (value) => new Date(value).getTime() <= Date.now(),
         "installedAtFuture",
       ),
     note: z.string().trim().max(1000, "noteLength"),

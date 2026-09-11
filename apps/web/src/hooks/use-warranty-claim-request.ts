@@ -51,12 +51,19 @@ export function getWarrantyClaimRequestErrorKind(
 export function useWarrantyClaimRequest() {
   const mutation = useMutation({
     mutationFn: ({
+      attachments,
       body,
       turnstileToken,
     }: {
+      attachments: File[];
       body: CreateWarrantyClaimBody;
       turnstileToken?: string;
-    }) => warrantyClaimsService.createWarrantyClaim(body, turnstileToken),
+    }) =>
+      warrantyClaimsService.createWarrantyClaim(
+        body,
+        attachments,
+        turnstileToken,
+      ),
   });
 
   return {
@@ -64,7 +71,10 @@ export function useWarrantyClaimRequest() {
     errorKind: mutation.error
       ? getWarrantyClaimRequestErrorKind(mutation.error)
       : null,
-    submit: (body: CreateWarrantyClaimBody, turnstileToken?: string) =>
-      mutation.mutateAsync({ body, turnstileToken }),
+    submit: (
+      body: CreateWarrantyClaimBody,
+      attachments: File[],
+      turnstileToken?: string,
+    ) => mutation.mutateAsync({ attachments, body, turnstileToken }),
   };
 }

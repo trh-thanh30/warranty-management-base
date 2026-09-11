@@ -11,7 +11,6 @@ import { useTranslations } from "next-intl";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import type { WarrantyActivationRequestCreateFormValues } from "../warranty-activation-requests.types";
-import { getUnavailableActivationProductIds } from "../warranty-activation-requests.utils";
 import { ActivationProductSelectField } from "./activation-product-select-field";
 import { ActivationItemCodeSelectField } from "./activation-item-code-select-field";
 import type { AvailableActivationCode } from "@/src/services/activation-codes/activation-code-batches.types";
@@ -125,10 +124,6 @@ function DynamicActivationField({
             onClear={() => onProductClear(field.key)}
             onSelect={(product) => onProductSelect(field.key, product)}
             selectedProduct={selectedProduct}
-            unavailableProductIds={getUnavailableActivationProductIds(
-              selectedProducts,
-              field.key,
-            )}
           />
           <input
             type="hidden"

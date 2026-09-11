@@ -4,7 +4,10 @@ import {
   NotFoundError,
 } from '@/common/response';
 import { CreateWarrantyClaimDto } from '@/modules/warranty-claims/dto/create-warranty-claim.dto';
-import { WarrantyClaimsRepository } from '@/modules/warranty-claims/repository/warranty-claims.repository';
+import {
+  WarrantyClaimsRepository,
+  type WarrantyClaimAttachmentCreateData,
+} from '@/modules/warranty-claims/repository/warranty-claims.repository';
 import { WarrantyClaimNotificationService } from '@/modules/warranty-claims/service/warranty-claim-notification.service';
 import { WarrantyClaimSlaService } from '@/modules/warranty-claims/service/warranty-claim-sla.service';
 import { GenerateWarrantyClaimCodeUseCase } from '@/modules/warranty-claims/use-cases/generate-warranty-claim-code.use-case';
@@ -31,7 +34,10 @@ export class CreateWarrantyClaimUseCase {
 
   async execute(
     dto: CreateWarrantyClaimDto,
-    context: { requireOwnerMatch?: boolean } = {},
+    context: {
+      attachments?: WarrantyClaimAttachmentCreateData[];
+      requireOwnerMatch?: boolean;
+    } = {},
   ) {
     const warrantyCode = dto.warrantyCode.trim().toUpperCase();
     const requesterName = dto.requesterName.trim();
@@ -109,7 +115,7 @@ export class CreateWarrantyClaimUseCase {
       );
 
       try {
-        const claim = await this.warrantyClaimsRepository.create({
+        const createData: Prisma.WarrantyClaimCreateInput = {
           claim_code: claimCode,
           warranty_code: warrantyCode,
           due_at: dueAt,
@@ -122,7 +128,13 @@ export class CreateWarrantyClaimUseCase {
           customer: currentOwnership?.customer
             ? { connect: { id: currentOwnership.customer.id } }
             : undefined,
-        });
+        };
+        const claim = context.attachments?.length
+          ? await this.warrantyClaimsRepository.createWithAttachments(
+              createData,
+              context.attachments,
+            )
+          : await this.warrantyClaimsRepository.create(createData);
 
         await this.warrantyClaimNotificationService?.claimCreated(claim);
 

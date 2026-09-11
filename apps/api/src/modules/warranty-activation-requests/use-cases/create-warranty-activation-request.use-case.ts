@@ -95,6 +95,22 @@ export class CreateWarrantyActivationRequestUseCase {
       updateRequest?: UpdateWarrantyActivationRequestContext;
     } = {},
   ) {
+    if (!dto.installedAt) {
+      throw new BadRequestError(
+        'Installation date is required',
+        'BAD_REQUEST',
+        { code: 'INSTALLATION_DATE_REQUIRED' },
+      );
+    }
+    const installedAt = new Date(dto.installedAt);
+    if (
+      Number.isNaN(installedAt.getTime()) ||
+      installedAt.getTime() > Date.now()
+    ) {
+      throw new BadRequestError('Installation date is invalid', 'BAD_REQUEST', {
+        code: 'INSTALLATION_DATE_INVALID',
+      });
+    }
     const activationCode = dto.activationCode?.trim().toUpperCase();
     if (
       dto.activationCodeId &&
@@ -304,9 +320,7 @@ export class CreateWarrantyActivationRequestUseCase {
             dealerId: dealer?.id,
             vehiclePlate: optionalTrim(dto.vehiclePlate),
             vehicleModel: optionalTrim(dto.vehicleModel),
-            installedAt: dto.installedAt
-              ? new Date(dto.installedAt)
-              : undefined,
+            installedAt,
             warrantyDurationMonths:
               validatedItems?.[0].warrantyDurationMonths ??
               dto.warrantyDurationMonths ??

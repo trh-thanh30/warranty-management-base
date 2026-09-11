@@ -10,6 +10,23 @@ export type FormatDateOptions = {
 
 const DATE_ONLY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
+export function addCalendarMonths(date: Date, months: number) {
+  const result = new Date(date);
+  const originalDay = result.getDate();
+
+  result.setDate(1);
+  result.setMonth(result.getMonth() + months);
+
+  const lastDayOfTargetMonth = new Date(
+    result.getFullYear(),
+    result.getMonth() + 1,
+    0,
+  ).getDate();
+  result.setDate(Math.min(originalDay, lastDayOfTargetMonth));
+
+  return result;
+}
+
 export function formatDate(
   value: DateInput | null | undefined,
   options: FormatDateOptions = {},

@@ -186,7 +186,7 @@ export type CreateWarrantyActivationRequestBody = {
   customerBirthdate?: string;
   vehiclePlate?: string;
   vehicleModel?: string;
-  installedAt?: string;
+  installedAt: string;
   warrantyDurationMonths?: number;
   dealerName?: string;
   dealerPhone?: string;

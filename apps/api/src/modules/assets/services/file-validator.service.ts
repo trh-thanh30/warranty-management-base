@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
 import { storageConfig } from '@/config';
+import { WARRANTY_CLAIM_EVIDENCE_MIME_TYPES } from '@repo/shared/constants';
 
 /**
  * Validates uploaded files against configurable MIME types and size limits.
@@ -40,14 +41,7 @@ export class FileValidatorService {
    */
   validateFeedbackFile(file: Express.Multer.File): void {
     this.checkSize(file);
-    this.checkMimeType(file, [
-      'image/jpeg',
-      'image/png',
-      'image/gif',
-      'image/webp',
-      'video/mp4',
-      'video/quicktime',
-    ]);
+    this.checkMimeType(file, [...WARRANTY_CLAIM_EVIDENCE_MIME_TYPES]);
   }
 
   // ─── Private Helpers ─────────────────────────────────────────────────────────

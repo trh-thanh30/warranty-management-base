@@ -6,11 +6,10 @@ import {
   assetsService,
   type UploadAssetOptions,
 } from "@/src/services/assets/assets.service";
-import { Button, cn } from "@repo/ui";
+import { Button, cn, MediaPreviewDialog } from "@repo/ui";
 import { Eye, ImageIcon, Loader2, UploadCloud, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
-import Lightbox from "yet-another-react-lightbox";
+import { useState } from "react";
 
 export type ImageUploadLabels = {
   choose: string;
@@ -77,10 +76,6 @@ export function ImageUpload({
     uploaded: labels?.uploaded ?? t("imageUploaded"),
     uploading: labels?.uploading ?? t("uploadingImage"),
   };
-  const previewSlides = useMemo(
-    () => (value ? [{ src: value, alt: copy.previewAlt }] : []),
-    [copy.previewAlt, value],
-  );
 
   async function uploadImage(file: File | undefined) {
     if (!file) return;
@@ -251,20 +246,11 @@ export function ImageUpload({
         </p>
       ) : null}
 
-      <Lightbox
-        carousel={{ finite: true, imageFit: "contain" }}
-        close={() => setPreviewOpen(false)}
-        controller={{
-          closeOnBackdropClick: true,
-          disableSwipeNavigation: true,
-        }}
-        labels={{ Close: copy.closePreview }}
+      <MediaPreviewDialog
+        closeLabel={copy.closePreview}
+        items={value ? [{ alt: copy.previewAlt, src: value }] : []}
+        onOpenChange={setPreviewOpen}
         open={previewOpen && Boolean(value)}
-        render={{
-          buttonNext: () => null,
-          buttonPrev: () => null,
-        }}
-        slides={previewSlides}
       />
     </div>
   );

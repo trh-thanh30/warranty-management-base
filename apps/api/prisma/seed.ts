@@ -17,6 +17,7 @@ import {
 } from '@prisma/client';
 import { Pool } from 'pg';
 import { NOTIFICATION_TYPES } from '@repo/shared/constants';
+import { addCalendarMonths } from '@repo/shared/utils';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -281,8 +282,7 @@ async function upsertDemoProduct(data: {
     },
   });
 
-  const endDate = new Date(data.purchaseDate);
-  endDate.setMonth(endDate.getMonth() + data.durationMonths);
+  const endDate = addCalendarMonths(data.purchaseDate, data.durationMonths);
 
   const warranty = await prisma.warranty.upsert({
     where: { warranty_code: data.warrantyCode },

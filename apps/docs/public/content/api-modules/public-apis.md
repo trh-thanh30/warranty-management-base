@@ -79,17 +79,25 @@ Response: `WarrantyResponse`.
 
 Dùng cho: Guest gửi yêu cầu bảo hành/sửa chữa.
 
-Body:
+Content-Type: `multipart/form-data`.
+
+Fields:
 
 ```ts
 type Body = {
   warrantyCode: string;
-  requesterName?: string;
-  requesterPhone?: string;
+  requesterName: string;
+  requesterPhone: string;
   issueTitle: string;
   issueDetail?: string;
+  attachments: File[];
 };
 ```
+
+`attachments` bắt buộc có ít nhất một ảnh hoặc video. Không giới hạn số lượng
+tệp trong form; mỗi tệp tối đa 10 MB và hỗ trợ JPG, PNG, GIF, WEBP, MP4, MOV.
+Claim, asset metadata và asset links được ghi cùng một transaction; object đã
+upload sẽ được dọn nếu tạo claim thất bại.
 
 Response: `WarrantyClaimResponse`.
 

@@ -199,6 +199,7 @@ test("updates warranty coverage through the warranty endpoint", async () => {
     coverageLimitAmount: "50000000",
     maxAmountPerClaim: "10000000",
     maxClaimCount: 3,
+    startDate: "2026-07-08T03:10:00.000Z",
   });
 
   assert.deepEqual(calls, [
@@ -209,6 +210,7 @@ test("updates warranty coverage through the warranty endpoint", async () => {
         coverageLimitAmount: "50000000",
         maxAmountPerClaim: "10000000",
         maxClaimCount: 3,
+        startDate: "2026-07-08T03:10:00.000Z",
       },
     },
   ]);

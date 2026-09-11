@@ -259,7 +259,8 @@ export function toWarrantyLookupResponse(input: {
     },
     installation: activationRequest
       ? {
-          installedAt: activationRequest.installed_at,
+          installedAt:
+            input.warranty.start_date ?? activationRequest.installed_at,
           vehicleModel: activationRequest.vehicle_model,
           dealer: getPublicDealer(activationRequest.metadata),
           filmItems: getPublicFilmItems(activationRequest.metadata),

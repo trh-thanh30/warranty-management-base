@@ -12,11 +12,26 @@ import {
 import { WARRANTY_CLAIM_ASSET_ENTITY_TYPE } from '@/modules/warranty-claims/warranty-claims.constants';
 import { Injectable } from '@nestjs/common';
 import {
+  asset_access_type,
+  asset_type,
   Prisma,
   warranty_claim_priority,
   warranty_claim_status,
 } from '@prisma/client';
 import { WARRANTY_CLAIM_OPEN_STATUSES } from '@repo/shared/constants';
+
+export type WarrantyClaimAttachmentCreateData = {
+  accessType: asset_access_type;
+  filename: string;
+  folder: string;
+  id: string;
+  mimeType: string;
+  originalName: string;
+  path: string;
+  size: number;
+  type: asset_type;
+  uploadedById?: string;
+};
 
 @Injectable()
 export class WarrantyClaimsRepository {
@@ -109,6 +124,43 @@ export class WarrantyClaimsRepository {
     return this.prismaService.warrantyClaim.create({
       data,
       include: warrantyClaimInclude,
+    });
+  }
+
+  createWithAttachments(
+    data: Prisma.WarrantyClaimCreateInput,
+    attachments: WarrantyClaimAttachmentCreateData[],
+  ) {
+    return this.prismaService.$transaction(async (tx) => {
+      const claim = await tx.warrantyClaim.create({ data });
+
+      await tx.asset.createMany({
+        data: attachments.map((attachment) => ({
+          access_type: attachment.accessType,
+          filename: attachment.filename,
+          folder: attachment.folder,
+          id: attachment.id,
+          metadata: {},
+          mime_type: attachment.mimeType,
+          original_name: attachment.originalName,
+          path: attachment.path,
+          size: attachment.size,
+          type: attachment.type,
+          uploaded_by_id: attachment.uploadedById ?? null,
+        })),
+      });
+      await tx.assetLink.createMany({
+        data: attachments.map((attachment) => ({
+          asset_id: attachment.id,
+          entity_id: claim.id,
+          entity_type: WARRANTY_CLAIM_ASSET_ENTITY_TYPE,
+        })),
+      });
+
+      return tx.warrantyClaim.findUniqueOrThrow({
+        where: { id: claim.id },
+        include: warrantyClaimInclude,
+      });
     });
   }
 

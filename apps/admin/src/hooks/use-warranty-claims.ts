@@ -118,11 +118,15 @@ export function useCreateWarrantyClaim() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (body: CreateWarrantyClaimBody) =>
-      warrantyClaimsService.createWarrantyClaim(body),
-    onSuccess: (claim) => {
+    mutationFn: ({
+      attachments,
+      body,
+    }: {
+      attachments: File[];
+      body: CreateWarrantyClaimBody;
+    }) => warrantyClaimsService.createWarrantyClaim(body, attachments),
+    onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: warrantyClaimKeys.all });
-      queryClient.setQueryData(warrantyClaimKeys.detail(claim.id), claim);
     },
   });
 }

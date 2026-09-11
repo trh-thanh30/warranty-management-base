@@ -4,9 +4,16 @@ import {
 } from "@repo/shared/constants";
 import type { WarrantyClaimIssueOption } from "@repo/shared";
 import { z } from "zod";
+import {
+  isWarrantyClaimEvidence,
+  WARRANTY_CLAIM_EVIDENCE_MAX_FILE_SIZE,
+} from "./warranty-claim-evidence.constants";
 
 export type WarrantyClaimRequestValidationMessages = {
   detailsInvalid: string;
+  evidenceInvalid: string;
+  evidenceRequired: string;
+  evidenceTooLarge: string;
   issueRequired: string;
   nameInvalid: string;
   phoneInvalid: string;
@@ -14,6 +21,7 @@ export type WarrantyClaimRequestValidationMessages = {
 };
 
 export type WarrantyClaimRequestFormValues = {
+  attachments: File[];
   issue: WarrantyClaimIssueOption;
   issueDetail: string;
   requesterName: string;
@@ -25,6 +33,27 @@ export function createWarrantyClaimRequestFormSchema(
   messages: WarrantyClaimRequestValidationMessages,
 ) {
   return z.object({
+    attachments: z
+      .array(z.custom<File>((value) => value instanceof File))
+      .min(1, messages.evidenceRequired)
+      .superRefine((files, context) => {
+        for (const file of files) {
+          if (!isWarrantyClaimEvidence(file)) {
+            context.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: messages.evidenceInvalid,
+            });
+            return;
+          }
+          if (file.size > WARRANTY_CLAIM_EVIDENCE_MAX_FILE_SIZE) {
+            context.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: messages.evidenceTooLarge,
+            });
+            return;
+          }
+        }
+      }),
     issue: z.enum(WARRANTY_CLAIM_ISSUE_OPTIONS, {
       errorMap: () => ({ message: messages.issueRequired }),
     }),

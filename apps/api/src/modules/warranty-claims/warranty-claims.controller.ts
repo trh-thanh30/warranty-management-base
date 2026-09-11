@@ -11,7 +11,7 @@ import { UpdateWarrantyClaimStatusDto } from '@/modules/warranty-claims/dto/upda
 import { WarrantyClaimMetricsDto } from '@/modules/warranty-claims/dto/warranty-claim-metrics.dto';
 import { AssignWarrantyClaimServiceCenterUseCase } from '@/modules/warranty-claims/use-cases/assign-warranty-claim-service-center.use-case';
 import { CompleteWarrantyClaimUseCase } from '@/modules/warranty-claims/use-cases/complete-warranty-claim.use-case';
-import { CreateWarrantyClaimUseCase } from '@/modules/warranty-claims/use-cases/create-warranty-claim.use-case';
+import { CreateWarrantyClaimWithEvidenceUseCase } from '@/modules/warranty-claims/use-cases/create-warranty-claim-with-evidence.use-case';
 import { ExportWarrantyClaimsUseCase } from '@/modules/warranty-claims/use-cases/export-warranty-claims.use-case';
 import { GetWarrantyClaimDetailUseCase } from '@/modules/warranty-claims/use-cases/get-warranty-claim-detail.use-case';
 import { GetWarrantyClaimMetricsUseCase } from '@/modules/warranty-claims/use-cases/get-warranty-claim-metrics.use-case';
@@ -34,9 +34,13 @@ import {
   Post,
   Query,
   Res,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { permission_key } from '@prisma/client';
 import type { Response } from 'express';
+import { WARRANTY_CLAIM_EVIDENCE_MAX_FILE_SIZE } from '@repo/shared/constants';
 
 type RequestUser = {
   id?: string;
@@ -45,7 +49,7 @@ type RequestUser = {
 @Controller('warranty-claims')
 export class WarrantyClaimsController {
   constructor(
-    private readonly createWarrantyClaimUseCase: CreateWarrantyClaimUseCase,
+    private readonly createWarrantyClaimWithEvidenceUseCase: CreateWarrantyClaimWithEvidenceUseCase,
     private readonly exportWarrantyClaimsUseCase: ExportWarrantyClaimsUseCase,
     private readonly listWarrantyClaimsUseCase: ListWarrantyClaimsUseCase,
     private readonly getWarrantyClaimDetailUseCase: GetWarrantyClaimDetailUseCase,
@@ -62,10 +66,21 @@ export class WarrantyClaimsController {
     private readonly completeWarrantyClaimUseCase: CompleteWarrantyClaimUseCase,
   ) {}
 
+  @UseInterceptors(
+    FilesInterceptor('attachments', undefined, {
+      limits: { fileSize: WARRANTY_CLAIM_EVIDENCE_MAX_FILE_SIZE },
+    }),
+  )
   @Post()
   @Permissions([permission_key.WARRANTY_CLAIM_CREATE])
-  create(@Body() dto: CreateWarrantyClaimDto) {
-    return this.createWarrantyClaimUseCase.execute(dto);
+  create(
+    @Body() dto: CreateWarrantyClaimDto,
+    @UploadedFiles() files: Express.Multer.File[] = [],
+    @User() user: RequestUser,
+  ) {
+    return this.createWarrantyClaimWithEvidenceUseCase.execute(dto, files, {
+      uploadedById: user.id,
+    });
   }
 
   @Get()

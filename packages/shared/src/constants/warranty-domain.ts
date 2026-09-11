@@ -80,6 +80,16 @@ export const WARRANTY_CLAIM_ISSUE_OPTIONS = [
   "other",
 ] as const;
 
+export const WARRANTY_CLAIM_EVIDENCE_MAX_FILE_SIZE = 10 * 1024 * 1024;
+export const WARRANTY_CLAIM_EVIDENCE_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "video/mp4",
+  "video/quicktime",
+] as const;
+
 export type WarrantyClaimIssueOption =
   (typeof WARRANTY_CLAIM_ISSUE_OPTIONS)[number];
 

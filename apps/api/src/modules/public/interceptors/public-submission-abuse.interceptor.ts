@@ -1,29 +1,50 @@
 import { RateLimitError } from '@/common/response/client-errors';
 import { PublicSubmissionQuotaService } from '@/modules/public/service/public-submission-quota.service';
 import { TurnstileVerificationService } from '@/modules/public/service/turnstile-verification.service';
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  NestInterceptor,
+  SetMetadata,
+} from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import type { Request, Response } from 'express';
 
+export const PUBLIC_SUBMISSION_ACTION_KEY = 'publicSubmissionAction';
+
+type PublicSubmissionAction = 'activation-request' | 'warranty-claim';
+
+export const PublicSubmissionAction = (action: PublicSubmissionAction) =>
+  SetMetadata(PUBLIC_SUBMISSION_ACTION_KEY, action);
+
 @Injectable()
-export class PublicSubmissionAbuseGuard implements CanActivate {
+export class PublicSubmissionAbuseInterceptor implements NestInterceptor {
   constructor(
     private readonly quotaService: PublicSubmissionQuotaService,
     private readonly turnstileService: TurnstileVerificationService,
+    private readonly reflector: Reflector,
   ) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  async intercept(context: ExecutionContext, next: CallHandler) {
+    const action = this.reflector.get<PublicSubmissionAction>(
+      PUBLIC_SUBMISSION_ACTION_KEY,
+      context.getHandler(),
+    );
+    if (!action) return next.handle();
+
     const http = context.switchToHttp();
     const request = http.getRequest<Request>();
-    const body = request.body as Record<string, unknown>;
+    const body = (request.body ?? {}) as Record<string, unknown>;
     const ip = request.ip || request.socket.remoteAddress || 'unknown';
     const token = getHeader(request.headers['x-turnstile-token']);
-    const isActivationRequest = typeof body.activationCode === 'string';
+    const isActivationRequest = action === 'activation-request';
 
     await this.turnstileService.verify({ ip, token });
 
     try {
       await this.quotaService.assertWithinDailyQuota({
-        action: isActivationRequest ? 'activation-request' : 'warranty-claim',
+        action,
         ip,
         phone: getString(
           isActivationRequest ? body.customerPhone : body.requesterPhone,
@@ -44,7 +65,7 @@ export class PublicSubmissionAbuseGuard implements CanActivate {
       throw error;
     }
 
-    return true;
+    return next.handle();
   }
 }
 

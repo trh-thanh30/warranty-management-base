@@ -14,15 +14,12 @@ import { useTranslations } from "next-intl";
 import type { WarrantyClaimAttachmentSummary } from "@repo/shared";
 import {
   Button,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  MediaPreviewDialog,
 } from "@repo/ui";
 import { PaginationControls } from "@repo/ui/pagination-controls";
 import { formatAttachmentSize } from "../warranty-claims.utils";
@@ -43,10 +40,21 @@ export function ClaimAttachmentsSection({
   onRemove,
 }: ClaimAttachmentsSectionProps) {
   const t = useTranslations("WarrantyClaims");
+  const commonT = useTranslations("Common");
   const [page, setPage] = useState(1);
-  const [preview, setPreview] = useState<WarrantyClaimAttachmentSummary | null>(
-    null,
+  const [previewIndex, setPreviewIndex] = useState(-1);
+  const previewableAttachments = attachments.filter(
+    (attachment) =>
+      attachment.mimeType.startsWith("image/") ||
+      attachment.mimeType.startsWith("video/"),
   );
+  const previewItems = previewableAttachments.map((attachment) => ({
+    alt: attachment.originalName,
+    src: attachment.url,
+    type: attachment.mimeType.startsWith("video/")
+      ? ("video" as const)
+      : ("image" as const),
+  }));
   const totalPages = Math.max(
     1,
     Math.ceil(attachments.length / ATTACHMENTS_PAGE_SIZE),
@@ -57,6 +65,12 @@ export function ClaimAttachmentsSection({
     startIndex,
     startIndex + ATTACHMENTS_PAGE_SIZE,
   );
+  const openPreview = (attachment: WarrantyClaimAttachmentSummary) => {
+    const index = previewableAttachments.findIndex(
+      (item) => item.id === attachment.id,
+    );
+    if (index >= 0) setPreviewIndex(index);
+  };
 
   return (
     <section className="p-4 sm:p-6">
@@ -100,7 +114,7 @@ export function ClaimAttachmentsSection({
                       : ""
                   }
                   key={attachment.id}
-                  onPreview={setPreview}
+                  onPreview={openPreview}
                   onRemove={onRemove}
                 />
               ))}
@@ -112,7 +126,7 @@ export function ClaimAttachmentsSection({
                   attachment={attachment}
                   canUpdate={canUpdate}
                   key={attachment.id}
-                  onPreview={setPreview}
+                  onPreview={openPreview}
                   onRemove={onRemove}
                 />
               ))}
@@ -143,7 +157,18 @@ export function ClaimAttachmentsSection({
         <p className="mt-4 text-sm text-slate-500">{t("noAttachments")}</p>
       )}
 
-      <AttachmentPreviewDialog preview={preview} setPreview={setPreview} />
+      <MediaPreviewDialog
+        activeIndex={Math.max(previewIndex, 0)}
+        closeLabel={commonT("closeMediaPreview")}
+        items={previewItems}
+        nextLabel={commonT("nextMedia")}
+        onActiveIndexChange={setPreviewIndex}
+        onOpenChange={(open) => {
+          if (!open) setPreviewIndex(-1);
+        }}
+        open={previewIndex >= 0}
+        previousLabel={commonT("previousMedia")}
+      />
     </section>
   );
 }
@@ -161,7 +186,9 @@ function MobileAttachmentItem({
   onPreview: (attachment: WarrantyClaimAttachmentSummary) => void;
   onRemove: (attachment: WarrantyClaimAttachmentSummary) => void;
 }) {
-  const isImage = attachment.mimeType.startsWith("image/");
+  const isPreviewable =
+    attachment.mimeType.startsWith("image/") ||
+    attachment.mimeType.startsWith("video/");
 
   return (
     <li className={`flex min-w-0 items-center gap-3 p-2.5 ${className}`}>
@@ -174,7 +201,7 @@ function MobileAttachmentItem({
       <AttachmentActionsMenu
         attachment={attachment}
         canUpdate={canUpdate}
-        onPreview={isImage ? onPreview : undefined}
+        onPreview={isPreviewable ? onPreview : undefined}
         onRemove={onRemove}
       />
     </li>
@@ -192,7 +219,9 @@ function GalleryAttachmentItem({
   onPreview: (attachment: WarrantyClaimAttachmentSummary) => void;
   onRemove: (attachment: WarrantyClaimAttachmentSummary) => void;
 }) {
-  const isImage = attachment.mimeType.startsWith("image/");
+  const isPreviewable =
+    attachment.mimeType.startsWith("image/") ||
+    attachment.mimeType.startsWith("video/");
 
   return (
     <li className="group min-w-0">
@@ -206,7 +235,7 @@ function GalleryAttachmentItem({
           <AttachmentActionsMenu
             attachment={attachment}
             canUpdate={canUpdate}
-            onPreview={isImage ? onPreview : undefined}
+            onPreview={isPreviewable ? onPreview : undefined}
             onRemove={onRemove}
             overlay
           />
@@ -230,9 +259,10 @@ function AttachmentThumbnail({
 }) {
   const t = useTranslations("WarrantyClaims");
   const isImage = attachment.mimeType.startsWith("image/");
+  const isVideo = attachment.mimeType.startsWith("video/");
   const baseClassName = `${className} overflow-hidden rounded-md bg-slate-100 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800`;
 
-  if (!isImage) {
+  if (!isImage && !isVideo) {
     return (
       <span className={`flex items-center justify-center ${baseClassName}`}>
         <FileText aria-hidden="true" className="size-5 text-slate-500" />
@@ -247,12 +277,23 @@ function AttachmentThumbnail({
       onClick={() => onPreview(attachment)}
       type="button"
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        alt=""
-        className="size-full object-cover transition-transform duration-200 group-hover:scale-[1.02] motion-reduce:transition-none"
-        src={attachment.url}
-      />
+      {isVideo ? (
+        <video
+          aria-hidden="true"
+          className="size-full object-cover transition-transform duration-200 group-hover:scale-[1.02] motion-reduce:transition-none"
+          muted
+          playsInline
+          preload="metadata"
+          src={attachment.url}
+        />
+      ) : (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          alt=""
+          className="size-full object-cover transition-transform duration-200 group-hover:scale-[1.02] motion-reduce:transition-none"
+          src={attachment.url}
+        />
+      )}
     </button>
   );
 }
@@ -338,51 +379,5 @@ function AttachmentActionsMenu({
         ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
-  );
-}
-
-function AttachmentPreviewDialog({
-  preview,
-  setPreview,
-}: {
-  preview: WarrantyClaimAttachmentSummary | null;
-  setPreview: (attachment: WarrantyClaimAttachmentSummary | null) => void;
-}) {
-  const t = useTranslations("WarrantyClaims");
-
-  return (
-    <Dialog
-      onOpenChange={(open) => !open && setPreview(null)}
-      open={Boolean(preview)}
-    >
-      <DialogContent className="w-[min(calc(100vw-2rem),56rem)] p-4 sm:p-5">
-        <DialogTitle className="truncate pr-8 text-lg font-semibold">
-          {preview?.originalName}
-        </DialogTitle>
-        <DialogDescription className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          {preview ? formatAttachmentSize(preview.size) : ""}
-        </DialogDescription>
-        {preview ? (
-          <div className="mt-4 space-y-3">
-            <div className="flex max-h-[70vh] items-center justify-center overflow-auto rounded-md bg-slate-100 p-2 dark:bg-slate-900">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                alt={preview.originalName}
-                className="max-h-[62vh] max-w-full object-contain"
-                src={preview.url}
-              />
-            </div>
-            <div className="flex justify-end">
-              <Button asChild variant="secondary">
-                <a href={preview.url} rel="noopener noreferrer" target="_blank">
-                  <ExternalLink aria-hidden="true" className="size-4" />
-                  {t("openInNewTab")}
-                </a>
-              </Button>
-            </div>
-          </div>
-        ) : null}
-      </DialogContent>
-    </Dialog>
   );
 }

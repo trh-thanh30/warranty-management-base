@@ -94,13 +94,6 @@ export class ActivationRequestItemsValidatorService {
           positionKey: item.positionKey,
         });
       }
-      if (seenProducts.has(item.productId)) {
-        if (!item.activationCodeId) {
-          this.throwValidation('ACTIVATION_PRODUCT_DUPLICATE', {
-            productId: item.productId,
-          });
-        }
-      }
       if (item.activationCodeId && seenCodes.has(item.activationCodeId)) {
         this.throwValidation('ACTIVATION_CODE_DUPLICATE', {
           activationCodeId: item.activationCodeId,

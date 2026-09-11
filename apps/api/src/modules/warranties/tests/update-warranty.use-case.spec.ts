@@ -105,6 +105,75 @@ describe('UpdateWarrantyUseCase', () => {
     );
   });
 
+  it('updates the installation date and recalculates the warranty end date', async () => {
+    const warranty = createWarranty();
+    repository.findById.mockResolvedValue(warranty);
+    repository.update.mockImplementation(
+      (_id: string, data: Record<string, unknown>) => ({
+        ...warranty,
+        end_date: data.end_date,
+        metadata: data.metadata,
+        start_date: data.start_date,
+      }),
+    );
+    const useCase = new UpdateWarrantyUseCase(
+      repository as never,
+      usersService as never,
+    );
+
+    const result = await useCase.execute(
+      warranty.id,
+      {
+        adjustmentReason: 'Điều chỉnh theo ngày lắp đặt thực tế',
+        startDate: '2026-02-10T08:30:00.000Z',
+      },
+      { adjustedByUserId: 'admin-id' },
+    );
+
+    expect(repository.update).toHaveBeenCalledWith(
+      warranty.id,
+      expect.objectContaining({
+        end_date: new Date('2027-02-10T08:30:00.000Z'),
+        start_date: new Date('2026-02-10T08:30:00.000Z'),
+      }),
+    );
+    expect(result).toEqual(
+      expect.objectContaining({
+        endDate: new Date('2027-02-10T08:30:00.000Z'),
+        startDate: new Date('2026-02-10T08:30:00.000Z'),
+      }),
+    );
+    expect(repository.update.mock.calls[0][1].metadata).toEqual(
+      expect.objectContaining({
+        lastAdjustment: expect.objectContaining({
+          changedFields: ['startDate'],
+          changes: {
+            startDate: {
+              after: '2026-02-10T08:30:00.000Z',
+              before: '2026-01-15T00:00:00.000Z',
+            },
+          },
+        }),
+      }),
+    );
+  });
+
+  it('rejects an installation date in the future', async () => {
+    repository.findById.mockResolvedValue(createWarranty());
+    const useCase = new UpdateWarrantyUseCase(
+      repository as never,
+      usersService as never,
+    );
+
+    await expect(
+      useCase.execute('warranty-id', {
+        adjustmentReason: 'Ngày lắp đặt không hợp lệ',
+        startDate: new Date(Date.now() + 60_000).toISOString(),
+      }),
+    ).rejects.toMatchObject({ code: 'WARRANTY_START_DATE_FUTURE' });
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
   it('appends a new history entry without removing previous adjustments', async () => {
     const warranty = createWarranty({
       metadata: {

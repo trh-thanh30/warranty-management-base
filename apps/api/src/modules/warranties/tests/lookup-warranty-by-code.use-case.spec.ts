@@ -96,7 +96,7 @@ describe('LookupWarrantyByCodeUseCase', () => {
         status: 'ACTIVE',
       },
       installation: {
-        installedAt,
+        installedAt: startDate,
         vehicleModel: 'Toyota Camry',
         dealer: {
           id: 'dealer-id',

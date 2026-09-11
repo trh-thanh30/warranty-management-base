@@ -24,7 +24,10 @@ import { ListPublicProductCategoriesUseCase } from '@/modules/categories/use-cas
 import { ListPublicProductCategoriesDto } from '@/modules/categories/dto/list-public-product-categories.dto';
 import { PublicLookupWarrantyClaimByCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claim-by-code.use-case';
 import { PublicLookupWarrantyClaimsByWarrantyCodeUseCase } from '@/modules/public/use-cases/public-lookup-warranty-claims-by-warranty-code.use-case';
-import { PublicSubmissionAbuseGuard } from '@/modules/public/guards/public-submission-abuse.guard';
+import {
+  PublicSubmissionAbuseInterceptor,
+  PublicSubmissionAction,
+} from '@/modules/public/interceptors/public-submission-abuse.interceptor';
 import {
   Body,
   Controller,
@@ -32,9 +35,12 @@ import {
   Param,
   Post,
   Query,
-  UseGuards,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { WARRANTY_CLAIM_EVIDENCE_MAX_FILE_SIZE } from '@repo/shared/constants';
 
 const PUBLIC_WARRANTY_THROTTLE = {
   default: {
@@ -71,7 +77,8 @@ export class PublicController {
     return this.lookupWarrantyByCodeUseCase.execute(query);
   }
 
-  @UseGuards(PublicSubmissionAbuseGuard)
+  @PublicSubmissionAction('activation-request')
+  @UseInterceptors(PublicSubmissionAbuseInterceptor)
   @Throttle(PUBLIC_WARRANTY_THROTTLE)
   @Post('warranty-activation-requests')
   createWarrantyActivationRequest(
@@ -88,11 +95,21 @@ export class PublicController {
     );
   }
 
-  @UseGuards(PublicSubmissionAbuseGuard)
+  // Keep Multer first so abuse protection reads the parsed multipart fields.
+  @PublicSubmissionAction('warranty-claim')
+  @UseInterceptors(
+    FilesInterceptor('attachments', undefined, {
+      limits: { fileSize: WARRANTY_CLAIM_EVIDENCE_MAX_FILE_SIZE },
+    }),
+    PublicSubmissionAbuseInterceptor,
+  )
   @Throttle(PUBLIC_WARRANTY_THROTTLE)
   @Post('warranty-claims')
-  createWarrantyClaim(@Body() dto: CreateWarrantyClaimDto) {
-    return this.createPublicWarrantyClaimUseCase.execute(dto);
+  createWarrantyClaim(
+    @Body() dto: CreateWarrantyClaimDto,
+    @UploadedFiles() files: Express.Multer.File[] = [],
+  ) {
+    return this.createPublicWarrantyClaimUseCase.execute(dto, files);
   }
 
   @Throttle(PUBLIC_WARRANTY_THROTTLE)

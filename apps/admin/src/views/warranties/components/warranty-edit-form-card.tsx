@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { UpdateWarrantyBody, WarrantyListItem } from "@repo/shared";
-import { HttpClientError } from "@repo/shared";
+import { formatDate, HttpClientError } from "@repo/shared";
 import {
   Button,
   Card,
@@ -12,6 +12,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  DateTimePicker,
   Input,
   Label,
   Skeleton,
@@ -28,6 +29,8 @@ import {
   toNullableRichText,
 } from "@/src/utils/rich-text";
 import {
+  calculateWarrantyEndDate,
+  formatWarrantyDateTimeInput,
   isValidWarrantyAmount,
   isValidWarrantyDuration,
 } from "../warranties.utils";
@@ -38,11 +41,15 @@ type WarrantyEditFormCardProps = {
 
 export function WarrantyEditFormCard({ warranty }: WarrantyEditFormCardProps) {
   const t = useTranslations("Warranties");
+  const locale = useLocale();
   const router = useRouter();
   const toast = useToast();
   const updateWarranty = useUpdateWarranty(warranty.id);
   const [durationMonths, setDurationMonths] = useState(
     String(warranty.durationMonths),
+  );
+  const [startDate, setStartDate] = useState(
+    formatWarrantyDateTimeInput(warranty.startDate),
   );
   const [coverageLimitAmount, setCoverageLimitAmount] = useState(
     warranty.coverageLimitAmount ?? "",
@@ -57,6 +64,11 @@ export function WarrantyEditFormCard({ warranty }: WarrantyEditFormCardProps) {
   const [adjustmentReason, setAdjustmentReason] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
   const detailHref = `/warranties/${warranty.id}`;
+  const parsedDurationMonths = Number(durationMonths);
+  const projectedEndDate = calculateWarrantyEndDate(
+    startDate,
+    parsedDurationMonths,
+  );
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -82,6 +94,7 @@ export function WarrantyEditFormCard({ warranty }: WarrantyEditFormCardProps) {
     const claimCount = maxClaimCount.trim() ? Number(maxClaimCount) : null;
     const coverage = coverageLimitAmount.trim() || null;
     const perClaim = maxAmountPerClaim.trim() || null;
+    const parsedStartDate = new Date(startDate);
 
     if (
       isEmptyRichText(adjustmentReason) ||
@@ -92,6 +105,14 @@ export function WarrantyEditFormCard({ warranty }: WarrantyEditFormCardProps) {
     }
     if (!isValidWarrantyDuration(duration)) {
       setFormError(t("durationInvalid"));
+      return null;
+    }
+    if (
+      !startDate ||
+      Number.isNaN(parsedStartDate.getTime()) ||
+      parsedStartDate.getTime() > Date.now()
+    ) {
+      setFormError(t("startDateInvalid"));
       return null;
     }
     if (
@@ -119,6 +140,7 @@ export function WarrantyEditFormCard({ warranty }: WarrantyEditFormCardProps) {
       adjustmentReason: adjustmentReason.trim(),
       coverageLimitAmount: coverage,
       durationMonths: duration,
+      startDate: parsedStartDate.toISOString(),
       maxAmountPerClaim: perClaim,
       maxClaimCount: claimCount,
       terms: toNullableRichText(terms),
@@ -136,6 +158,37 @@ export function WarrantyEditFormCard({ warranty }: WarrantyEditFormCardProps) {
       <CardContent>
         <form className="space-y-6" onSubmit={submit}>
           <div className="grid gap-5 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <FormField
+                description={
+                  projectedEndDate
+                    ? t("projectedEndDate", {
+                        date: formatDate(projectedEndDate.toISOString(), {
+                          locale,
+                          showTime: true,
+                        }),
+                      })
+                    : t("projectedEndDateUnavailable")
+                }
+                id="edit-warranty-start-date"
+                label={t("installationStartDate")}
+              >
+                <DateTimePicker
+                  ariaLabel={t("installationStartDate")}
+                  calendarAriaLabel={t("startDateCalendar")}
+                  clearLabel={t("startDateClear")}
+                  disabled={updateWarranty.isPending}
+                  hourLabel={t("startDateHour")}
+                  id="edit-warranty-start-date"
+                  invalid={Boolean(startDate && !projectedEndDate)}
+                  minuteLabel={t("startDateMinute")}
+                  onValueChange={setStartDate}
+                  placeholder={t("startDatePlaceholder")}
+                  resetLabel={t("startDateReset")}
+                  value={startDate}
+                />
+              </FormField>
+            </div>
             <FormField id="edit-warranty-duration" label={t("durationMonths")}>
               <Input
                 id="edit-warranty-duration"

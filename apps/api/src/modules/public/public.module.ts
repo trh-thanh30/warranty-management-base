@@ -19,7 +19,7 @@ import { WarrantyActivationRequestsModule } from '@/modules/warranty-activation-
 import { WarrantiesModule } from '@/modules/warranties/warranties.module';
 import { Module } from '@nestjs/common';
 import { RedisModule } from '@/database/redis/redis.module';
-import { PublicSubmissionAbuseGuard } from '@/modules/public/guards/public-submission-abuse.guard';
+import { PublicSubmissionAbuseInterceptor } from '@/modules/public/interceptors/public-submission-abuse.interceptor';
 import { PublicSubmissionQuotaService } from '@/modules/public/service/public-submission-quota.service';
 import { TurnstileVerificationService } from '@/modules/public/service/turnstile-verification.service';
 
@@ -47,7 +47,7 @@ import { TurnstileVerificationService } from '@/modules/public/service/turnstile
     CreatePublicWarrantyClaimUseCase,
     CreatePublicWarrantyActivationRequestUseCase,
     PublicLookupWarrantyActivationRequestUseCase,
-    PublicSubmissionAbuseGuard,
+    PublicSubmissionAbuseInterceptor,
     PublicSubmissionQuotaService,
     TurnstileVerificationService,
   ],
