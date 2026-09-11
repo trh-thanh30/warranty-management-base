@@ -3,6 +3,7 @@ import {
   type WarrantyListItem,
   type WarrantyUserSummary,
 } from "@repo/shared";
+import { addCalendarMonths } from "@repo/shared/utils";
 
 export function formatWarrantyUser(
   user: WarrantyUserSummary | null | undefined,
@@ -57,9 +58,7 @@ export function calculateWarrantyEndDate(
     return null;
   }
 
-  const endDate = new Date(startDate);
-  endDate.setMonth(endDate.getMonth() + durationMonths);
-  return endDate;
+  return addCalendarMonths(startDate, durationMonths);
 }
 
 export function formatWarrantyDealerAddress(

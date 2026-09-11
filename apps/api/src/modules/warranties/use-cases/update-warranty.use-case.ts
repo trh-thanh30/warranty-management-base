@@ -1,20 +1,21 @@
 import { BadRequestError, NotFoundError } from '@/common/response';
+import {
+  DealerAccessPolicy,
+  type DealerAccessActor,
+} from '@/modules/dealers/service/dealer-access.policy';
+import { UsersService } from '@/modules/user/user.service';
 import { UpdateWarrantyDto } from '@/modules/warranties/dto/update-warranty.dto';
 import { WarrantiesRepository } from '@/modules/warranties/repository/warranties.repository';
-import { UsersService } from '@/modules/user/user.service';
 import { toWarrantyListItemResponse } from '@/modules/warranties/warranties.types';
+import { Injectable } from '@nestjs/common';
+import { Prisma, warranty_status } from '@prisma/client';
 import type {
   WarrantyAdjustmentChange,
   WarrantyAdjustmentHistoryEntry,
   WarrantyAdjustmentMetadata,
   WarrantyAdjustmentValue,
 } from '@repo/shared';
-import { Injectable } from '@nestjs/common';
-import { Prisma, warranty_status } from '@prisma/client';
-import {
-  DealerAccessPolicy,
-  type DealerAccessActor,
-} from '@/modules/dealers/service/dealer-access.policy';
+import { addCalendarMonths } from '@repo/shared/utils';
 
 const MUTABLE_FIELDS = [
   'coverageLimitAmount',
@@ -63,11 +64,11 @@ export class UpdateWarrantyUseCase {
       );
     }
 
-    const coverageLimitAmount = toDecimalOrNull(
+    const coverageLimitAmount = this.toDecimalOrNull(
       dto.coverageLimitAmount,
       warranty.coverage_limit_amount,
     );
-    const maxAmountPerClaim = toDecimalOrNull(
+    const maxAmountPerClaim = this.toDecimalOrNull(
       dto.maxAmountPerClaim,
       warranty.max_amount_per_claim,
     );
@@ -96,7 +97,7 @@ export class UpdateWarrantyUseCase {
       );
     }
 
-    const changes = buildAdjustmentChanges(warranty, dto, {
+    const changes = this.buildAdjustmentChanges(warranty, dto, {
       coverageLimitAmount,
       maxAmountPerClaim,
     });
@@ -124,7 +125,7 @@ export class UpdateWarrantyUseCase {
           'WARRANTY_START_DATE_REQUIRED',
         );
       }
-      endDate = addMonths(
+      endDate = addCalendarMonths(
         effectiveStartDate,
         dto.durationMonths ?? warranty.duration_months,
       );
@@ -139,11 +140,11 @@ export class UpdateWarrantyUseCase {
       max_amount_per_claim:
         dto.maxAmountPerClaim === undefined ? undefined : maxAmountPerClaim,
       max_claim_count: dto.maxClaimCount,
-      metadata: mergeAdjustmentMetadata(warranty.metadata, {
+      metadata: this.mergeAdjustmentMetadata(warranty.metadata, {
         adjustedByUserId: context.adjustedByUserId,
         changedFields,
         changes,
-        reason: stripHtml(dto.adjustmentReason).trim(),
+        reason: this.stripHtml(dto.adjustmentReason).trim(),
         adjustedByUser: adjustedByUser
           ? {
               id: adjustedByUser.id,
@@ -157,147 +158,145 @@ export class UpdateWarrantyUseCase {
 
     return toWarrantyListItemResponse(updatedWarranty);
   }
-}
 
-function toDecimalOrNull(
-  value: string | null | undefined,
-  fallback: Prisma.Decimal | null,
-) {
-  if (value === undefined) return fallback;
-  if (value === null) return null;
+  private toDecimalOrNull(
+    value: string | null | undefined,
+    fallback: Prisma.Decimal | null,
+  ) {
+    if (value === undefined) return fallback;
+    if (value === null) return null;
 
-  const decimal = new Prisma.Decimal(value);
-  if (decimal.isNegative()) {
-    throw new BadRequestError(
-      'Warranty monetary limits cannot be negative',
-      'WARRANTY_LIMIT_NEGATIVE',
+    const decimal = new Prisma.Decimal(value);
+    if (decimal.isNegative()) {
+      throw new BadRequestError(
+        'Warranty monetary limits cannot be negative',
+        'WARRANTY_LIMIT_NEGATIVE',
+      );
+    }
+    return decimal;
+  }
+
+  private mergeAdjustmentMetadata(
+    value: Prisma.JsonValue,
+    adjustment: {
+      adjustedByUserId?: string;
+      changedFields: readonly string[];
+      changes: Record<string, WarrantyAdjustmentChange>;
+      reason: string;
+      adjustedByUser: {
+        id: string;
+        email: string;
+        name: string | null;
+      } | null;
+    },
+  ) {
+    const metadata =
+      value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+    const currentMetadata = metadata as WarrantyAdjustmentMetadata;
+    const history = Array.isArray(currentMetadata.adjustmentHistory)
+      ? currentMetadata.adjustmentHistory
+      : currentMetadata.lastAdjustment
+        ? [
+            {
+              adjustedAt: currentMetadata.lastAdjustment.adjustedAt,
+              adjustedByUserId:
+                currentMetadata.lastAdjustment.adjustedByUserId ?? null,
+              adjustedByUser:
+                currentMetadata.lastAdjustment.adjustedByUser ?? null,
+              changedFields: [...currentMetadata.lastAdjustment.changedFields],
+              changes: currentMetadata.lastAdjustment.changes ?? {},
+              reason: currentMetadata.lastAdjustment.reason,
+            },
+          ]
+        : [];
+    const entry: WarrantyAdjustmentHistoryEntry = {
+      adjustedAt: new Date().toISOString(),
+      adjustedByUserId: adjustment.adjustedByUserId ?? null,
+      adjustedByUser: adjustment.adjustedByUser,
+      changedFields: [...adjustment.changedFields],
+      changes: adjustment.changes,
+      reason: adjustment.reason,
+    };
+
+    return {
+      ...metadata,
+      adjustmentHistory: [...history, entry],
+      lastAdjustment: entry,
+    } satisfies Prisma.InputJsonObject;
+  }
+
+  private stripHtml(value: string) {
+    return value
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  private buildAdjustmentChanges(
+    warranty: {
+      coverage_limit_amount: Prisma.Decimal | null;
+      duration_months: number;
+      max_amount_per_claim: Prisma.Decimal | null;
+      max_claim_count: number | null;
+      start_date: Date | null;
+      terms: string | null;
+    },
+    dto: UpdateWarrantyDto,
+    normalized: {
+      coverageLimitAmount: Prisma.Decimal | null;
+      maxAmountPerClaim: Prisma.Decimal | null;
+    },
+  ) {
+    const before: Record<string, WarrantyAdjustmentValue> = {
+      coverageLimitAmount: this.toAdjustmentValue(
+        warranty.coverage_limit_amount,
+      ),
+      durationMonths: warranty.duration_months,
+      maxAmountPerClaim: this.toAdjustmentValue(warranty.max_amount_per_claim),
+      maxClaimCount: warranty.max_claim_count,
+      startDate: warranty.start_date?.toISOString() ?? null,
+      terms: warranty.terms,
+    };
+    const after: Record<string, WarrantyAdjustmentValue> = {
+      coverageLimitAmount: this.toAdjustmentValue(
+        normalized.coverageLimitAmount,
+      ),
+      durationMonths: dto.durationMonths ?? warranty.duration_months,
+      maxAmountPerClaim: this.toAdjustmentValue(normalized.maxAmountPerClaim),
+      maxClaimCount:
+        dto.maxClaimCount === undefined
+          ? warranty.max_claim_count
+          : dto.maxClaimCount,
+      startDate: dto.startDate
+        ? new Date(dto.startDate).toISOString()
+        : (warranty.start_date?.toISOString() ?? null),
+      terms:
+        dto.terms === undefined
+          ? warranty.terms
+          : dto.terms === null
+            ? null
+            : dto.terms.trim() || null,
+    };
+
+    return MUTABLE_FIELDS.reduce<Record<string, WarrantyAdjustmentChange>>(
+      (changes, field) => {
+        if (!this.areAdjustmentValuesEqual(before[field], after[field])) {
+          changes[field] = { before: before[field], after: after[field] };
+        }
+        return changes;
+      },
+      {},
     );
   }
-  return decimal;
-}
 
-function mergeAdjustmentMetadata(
-  value: Prisma.JsonValue,
-  adjustment: {
-    adjustedByUserId?: string;
-    changedFields: readonly string[];
-    changes: Record<string, WarrantyAdjustmentChange>;
-    reason: string;
-    adjustedByUser: {
-      id: string;
-      email: string;
-      name: string | null;
-    } | null;
-  },
-) {
-  const metadata =
-    value && typeof value === 'object' && !Array.isArray(value) ? value : {};
-  const currentMetadata = metadata as WarrantyAdjustmentMetadata;
-  const history = Array.isArray(currentMetadata.adjustmentHistory)
-    ? currentMetadata.adjustmentHistory
-    : currentMetadata.lastAdjustment
-      ? [
-          {
-            adjustedAt: currentMetadata.lastAdjustment.adjustedAt,
-            adjustedByUserId:
-              currentMetadata.lastAdjustment.adjustedByUserId ?? null,
-            adjustedByUser:
-              currentMetadata.lastAdjustment.adjustedByUser ?? null,
-            changedFields: [...currentMetadata.lastAdjustment.changedFields],
-            changes: currentMetadata.lastAdjustment.changes ?? {},
-            reason: currentMetadata.lastAdjustment.reason,
-          },
-        ]
-      : [];
-  const entry: WarrantyAdjustmentHistoryEntry = {
-    adjustedAt: new Date().toISOString(),
-    adjustedByUserId: adjustment.adjustedByUserId ?? null,
-    adjustedByUser: adjustment.adjustedByUser,
-    changedFields: [...adjustment.changedFields],
-    changes: adjustment.changes,
-    reason: adjustment.reason,
-  };
+  private toAdjustmentValue(value: Prisma.Decimal | null) {
+    return value?.toString() ?? null;
+  }
 
-  return {
-    ...metadata,
-    adjustmentHistory: [...history, entry],
-    lastAdjustment: entry,
-  } satisfies Prisma.InputJsonObject;
-}
-
-function stripHtml(value: string) {
-  return value
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function buildAdjustmentChanges(
-  warranty: {
-    coverage_limit_amount: Prisma.Decimal | null;
-    duration_months: number;
-    max_amount_per_claim: Prisma.Decimal | null;
-    max_claim_count: number | null;
-    start_date: Date | null;
-    terms: string | null;
-  },
-  dto: UpdateWarrantyDto,
-  normalized: {
-    coverageLimitAmount: Prisma.Decimal | null;
-    maxAmountPerClaim: Prisma.Decimal | null;
-  },
-) {
-  const before: Record<string, WarrantyAdjustmentValue> = {
-    coverageLimitAmount: toAdjustmentValue(warranty.coverage_limit_amount),
-    durationMonths: warranty.duration_months,
-    maxAmountPerClaim: toAdjustmentValue(warranty.max_amount_per_claim),
-    maxClaimCount: warranty.max_claim_count,
-    startDate: warranty.start_date?.toISOString() ?? null,
-    terms: warranty.terms,
-  };
-  const after: Record<string, WarrantyAdjustmentValue> = {
-    coverageLimitAmount: toAdjustmentValue(normalized.coverageLimitAmount),
-    durationMonths: dto.durationMonths ?? warranty.duration_months,
-    maxAmountPerClaim: toAdjustmentValue(normalized.maxAmountPerClaim),
-    maxClaimCount:
-      dto.maxClaimCount === undefined
-        ? warranty.max_claim_count
-        : dto.maxClaimCount,
-    startDate: dto.startDate
-      ? new Date(dto.startDate).toISOString()
-      : (warranty.start_date?.toISOString() ?? null),
-    terms:
-      dto.terms === undefined
-        ? warranty.terms
-        : dto.terms === null
-          ? null
-          : dto.terms.trim() || null,
-  };
-
-  return MUTABLE_FIELDS.reduce<Record<string, WarrantyAdjustmentChange>>(
-    (changes, field) => {
-      if (!areAdjustmentValuesEqual(before[field], after[field])) {
-        changes[field] = { before: before[field], after: after[field] };
-      }
-      return changes;
-    },
-    {},
-  );
-}
-
-function toAdjustmentValue(value: Prisma.Decimal | null) {
-  return value?.toString() ?? null;
-}
-
-function areAdjustmentValuesEqual(
-  before: WarrantyAdjustmentValue,
-  after: WarrantyAdjustmentValue,
-) {
-  return before === after;
-}
-
-function addMonths(date: Date, months: number) {
-  const nextDate = new Date(date);
-  nextDate.setMonth(nextDate.getMonth() + months);
-  return nextDate;
+  private areAdjustmentValuesEqual(
+    before: WarrantyAdjustmentValue,
+    after: WarrantyAdjustmentValue,
+  ) {
+    return before === after;
+  }
 }

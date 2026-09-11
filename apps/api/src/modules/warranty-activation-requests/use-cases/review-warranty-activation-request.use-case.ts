@@ -26,6 +26,7 @@ import {
   warranty_activation_request_status,
   warranty_status,
 } from '@prisma/client';
+import { addCalendarMonths } from '@repo/shared/utils';
 
 @Injectable()
 export class ReviewWarrantyActivationRequestUseCase {
@@ -484,7 +485,7 @@ export class ReviewWarrantyActivationRequestUseCase {
       { id: warranty.id, status: warranty_status.DRAFT },
       {
         activated_by_id: input.activatedByUserId,
-        end_date: addMonths(input.startDate, warranty.duration_months),
+        end_date: addCalendarMonths(input.startDate, warranty.duration_months),
         start_date: input.startDate,
         status: warranty_status.ACTIVE,
       },
@@ -509,10 +510,4 @@ export class ReviewWarrantyActivationRequestUseCase {
 
     return repository.findWarrantyByIdOrThrow(warranty.id);
   }
-}
-
-function addMonths(date: Date, months: number) {
-  const nextDate = new Date(date);
-  nextDate.setMonth(nextDate.getMonth() + months);
-  return nextDate;
 }
