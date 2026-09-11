@@ -220,9 +220,13 @@ export class WarrantyActivationReviewTransactionRepository {
     return this.tx.activationCode.updateMany({
       where: {
         id: { in: codeIds },
-        status: activation_code_status.PENDING_APPROVAL,
+        status: {
+          in: [
+            activation_code_status.AVAILABLE,
+            activation_code_status.PENDING_APPROVAL,
+          ],
+        },
         expires_at: { gt: activatedAt },
-        warranty: { is: null },
       },
       data: {
         status: activation_code_status.ACTIVATED,
