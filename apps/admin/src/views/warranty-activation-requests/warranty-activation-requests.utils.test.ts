@@ -259,7 +259,7 @@ test("admin activation request body combines form and selected product data", ()
         windshield: "FILM-001",
       },
       manufactureYear: 2026,
-      installedAt: "2026-09-09T07:30:00.000Z",
+      installedAt: new Date(baseValues.installedAt).toISOString(),
       metadata: {
         activationInputValues: {
           customNote: "Gia tri rieng",
