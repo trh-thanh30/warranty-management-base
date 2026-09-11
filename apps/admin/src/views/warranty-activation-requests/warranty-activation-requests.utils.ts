@@ -317,17 +317,6 @@ export function buildActivationRequestItems(
   });
 }
 
-export function getUnavailableActivationProductIds(
-  productsByPosition: Record<string, ProductResponse>,
-  currentPositionKey: string,
-) {
-  return new Set(
-    Object.entries(productsByPosition)
-      .filter(([positionKey]) => positionKey !== currentPositionKey)
-      .map(([, product]) => product.id),
-  );
-}
-
 function buildFilmItems(
   values: WarrantyActivationRequestCreateFormValues,
   activationInputValues: Record<string, string>,

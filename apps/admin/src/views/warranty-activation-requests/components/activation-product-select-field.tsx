@@ -19,7 +19,6 @@ type ActivationProductSelectFieldProps = {
   onClear: () => void;
   onSelect: (product: ProductResponse) => void;
   selectedProduct?: ProductResponse;
-  unavailableProductIds: Set<string>;
 };
 
 export function ActivationProductSelectField({
@@ -28,7 +27,6 @@ export function ActivationProductSelectField({
   onClear,
   onSelect,
   selectedProduct,
-  unavailableProductIds,
 }: ActivationProductSelectFieldProps) {
   const t = useTranslations("WarrantyActivationRequestsAdmin");
   const [search, setSearch] = useState("");
@@ -54,9 +52,6 @@ export function ActivationProductSelectField({
   );
 
   function getDisabledReason(product: ActivationProductOption) {
-    if (unavailableProductIds.has(product.id)) {
-      return t("activationProductAlreadySelected");
-    }
     return getActivationProductOptionDisabledReason(product, t);
   }
 

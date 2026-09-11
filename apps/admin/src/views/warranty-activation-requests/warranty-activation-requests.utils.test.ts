@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import {
   HttpClientError,
@@ -17,7 +18,6 @@ import {
   formatDealerSearchOption,
   resolveActivationRequestCreateError,
   resolveScopedProductSearch,
-  getUnavailableActivationProductIds,
   toAdminActivationRequestBody,
 } from "./warranty-activation-requests.utils.ts";
 import {
@@ -362,17 +362,59 @@ test("admin activation request body maps physical products to configured positio
   );
 });
 
-test("product selectors exclude products selected in other positions", () => {
+test("one catalogue product can be assigned to multiple activation positions", () => {
+  const sharedProduct = { id: "product-1" } as ProductResponse;
+  const fields = [
+    {
+      id: "field-1",
+      key: "windshield",
+      label: "Kinh lai",
+      type: "PRODUCT_SELECT" as const,
+    },
+    {
+      id: "field-2",
+      key: "rearGlass",
+      label: "Kinh lung",
+      type: "PRODUCT_SELECT" as const,
+    },
+  ];
+
   assert.deepEqual(
-    getUnavailableActivationProductIds(
+    buildActivationRequestItems(fields, {
+      rearGlass: sharedProduct,
+      windshield: sharedProduct,
+    }),
+    [
       {
-        rearGlass: { id: "product-2" } as ProductResponse,
-        windshield: { id: "product-1" } as ProductResponse,
+        activationFieldId: "field-1",
+        positionKey: "windshield",
+        productId: "product-1",
       },
-      "rearGlass",
-    ),
-    new Set(["product-1"]),
+      {
+        activationFieldId: "field-2",
+        positionKey: "rearGlass",
+        productId: "product-1",
+      },
+    ],
   );
+
+  const selectorSource = readFileSync(
+    new URL(
+      "./components/category-activation-input-fields.tsx",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+  const formHookSource = readFileSync(
+    new URL(
+      "./hooks/use-create-warranty-activation-request-form.ts",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+
+  assert.doesNotMatch(selectorSource, /unavailableProductIds/);
+  assert.doesNotMatch(formHookSource, /isSelectedElsewhere/);
 });
 
 test("activation request list summarizes one or many physical products", () => {
