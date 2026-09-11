@@ -240,6 +240,10 @@ export type UpdateWarrantyClaimStatusBody = {
   note?: string;
 };
 
+export type CompleteWarrantyClaimBody = {
+  note?: string;
+};
+
 export type AssignWarrantyClaimServiceCenterBody = {
   serviceCenterId: string;
   note?: string;

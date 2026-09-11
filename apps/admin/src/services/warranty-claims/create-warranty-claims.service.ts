@@ -1,5 +1,6 @@
 import type {
   AssignWarrantyClaimServiceCenterBody,
+  CompleteWarrantyClaimBody,
   CreateWarrantyClaimBody,
   ListWarrantyClaimsQuery,
   PaginatedResponse,
@@ -99,6 +100,18 @@ export function createWarrantyClaimsService(http: WarrantyClaimsHttpClient) {
       return unwrap(
         await http.patch<WarrantyClaimSummary>(
           `/warranty-claims/${claimId}/status`,
+          body,
+        ),
+      );
+    },
+
+    async completeWarrantyClaim(
+      claimId: string,
+      body: CompleteWarrantyClaimBody,
+    ): Promise<WarrantyClaimSummary> {
+      return unwrap(
+        await http.patch<WarrantyClaimSummary>(
+          `/warranty-claims/${claimId}/complete`,
           body,
         ),
       );
