@@ -20,7 +20,7 @@ describe('current warranty pointer contract', () => {
     });
   });
 
-  it('activates only codes reserved by a pending request', async () => {
+  it('activates a reserved code even after its warranty is linked', async () => {
     const updateMany = jest.fn().mockResolvedValue({ count: 1 });
     const repository = new WarrantyActivationReviewTransactionRepository(
       { activationCode: { updateMany } } as never,
@@ -37,8 +37,12 @@ describe('current warranty pointer contract', () => {
       where: {
         expires_at: { gt: activatedAt },
         id: { in: ['activation-code-id'] },
-        status: activation_code_status.PENDING_APPROVAL,
-        warranty: { is: null },
+        status: {
+          in: [
+            activation_code_status.AVAILABLE,
+            activation_code_status.PENDING_APPROVAL,
+          ],
+        },
       },
       data: {
         activated_at: activatedAt,
