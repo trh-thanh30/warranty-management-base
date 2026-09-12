@@ -26,11 +26,20 @@ export function isActivationCodeRequiredForRequest(
 export function formatActivationProductSearchOption(product: ProductResponse) {
   return [
     getActivationProductDisplayName(product),
-    product.warrantyCode,
+    product.productCode,
     product.owner?.fullName,
   ]
     .filter(Boolean)
     .join(" · ");
+}
+
+export function isVisibleActivationProductOption(
+  product: Pick<ActivationProductOption, "deletedAt" | "activationEligibility">,
+) {
+  return (
+    !product.deletedAt &&
+    product.activationEligibility.reason !== "PRODUCT_DELETED"
+  );
 }
 
 export function getActivationProductOptionDisabledReason(

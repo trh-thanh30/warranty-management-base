@@ -52,6 +52,7 @@ import {
 import {
   getActivationProductDisplayName,
   isActivationCodeRequiredForRequest,
+  isVisibleActivationProductOption,
 } from "../warranty-activation-request-product.utils";
 import { formatActivationRequestDateTimeInput } from "../warranty-activation-requests.utils";
 
@@ -318,6 +319,7 @@ export function useCreateWarrantyActivationRequestForm({
             new Map(
               (productsQuery.data?.pages ?? [])
                 .flatMap((page) => page.items)
+                .filter(isVisibleActivationProductOption)
                 .map((product) => [product.id, product]),
             ).values(),
           ),

@@ -9,7 +9,7 @@ import { useInfiniteActivationProductOptions } from "../../products/hooks/use-pr
 import {
   getActivationProductOptionDisabledReason,
   getActivationProductDisplayName,
-  getProductWarrantyStatusLabel,
+  isVisibleActivationProductOption,
 } from "../warranty-activation-request-product.utils";
 import { ProductSearchResult } from "./product-search-result";
 
@@ -45,6 +45,7 @@ export function ActivationProductSelectField({
         new Map(
           (productsQuery.data?.pages ?? [])
             .flatMap((page) => page.items)
+            .filter(isVisibleActivationProductOption)
             .map((product) => [product.id, product]),
         ).values(),
       ),
@@ -91,8 +92,6 @@ export function ActivationProductSelectField({
             disabledReason={getDisabledReason(product)}
             productCode={product.productCode}
             productName={getActivationProductDisplayName(product)}
-            statusLabel={getProductWarrantyStatusLabel(product, t)}
-            warrantyCode={product.warrantyCode}
           />
         )}
         retryLabel={t("tryAgain")}
@@ -102,7 +101,6 @@ export function ActivationProductSelectField({
             ? [
                 getActivationProductDisplayName(selectedProduct),
                 selectedProduct.productCode,
-                selectedProduct.warrantyCode,
               ]
                 .filter(Boolean)
                 .join(" · ")
@@ -111,13 +109,14 @@ export function ActivationProductSelectField({
       />
       {selectedProduct ? (
         <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-900/50">
-          <p className="truncate text-sm font-medium text-slate-950 dark:text-slate-50">
+          <p
+            className="line-clamp-2 whitespace-normal break-words text-sm font-medium text-slate-950 dark:text-slate-50"
+            title={getActivationProductDisplayName(selectedProduct)}
+          >
             {getActivationProductDisplayName(selectedProduct)}
           </p>
           <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
-            {[selectedProduct.productCode, selectedProduct.warrantyCode]
-              .filter(Boolean)
-              .join(" · ")}
+            {selectedProduct.productCode}
           </p>
         </div>
       ) : null}

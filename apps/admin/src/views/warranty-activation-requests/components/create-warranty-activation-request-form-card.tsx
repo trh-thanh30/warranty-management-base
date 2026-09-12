@@ -343,8 +343,6 @@ export function CreateWarrantyActivationRequestFormCard({
                         })}
                         productCode={product.productCode}
                         productName={getActivationProductDisplayName(product)}
-                        statusLabel={getProductWarrantyStatusLabel(product, t)}
-                        warrantyCode={product.warrantyCode}
                       />
                     )}
                     retryLabel={t("tryAgain")}
