@@ -1,4 +1,4 @@
-import { timeConfig } from '@/config';
+import { clientConfig, timeConfig } from '@/config';
 import { PrismaModule } from '@/database/prisma/prisma.module';
 import { AssetsModule } from '@/modules/assets/assets.module';
 import { EmailModule } from '@/modules/email/email.module';
@@ -26,6 +26,7 @@ import { ConfigModule } from '@nestjs/config';
   imports: [
     AssetsModule,
     ConfigModule.forFeature(timeConfig),
+    ConfigModule.forFeature(clientConfig),
     EmailModule,
     PrismaModule,
     WarrantyCertificateEmailStatusModule,

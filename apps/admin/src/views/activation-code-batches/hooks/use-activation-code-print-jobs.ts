@@ -8,6 +8,7 @@ const STORAGE_KEY = "admin.activation-code-print-jobs";
 
 export type TrackedActivationCodePrintJob = {
   batchCode: string;
+  batchName?: string;
   productName: string;
   job: ActivationCodePrintJob;
 };
@@ -39,7 +40,12 @@ export function useActivationCodePrintJobs() {
   return {
     add(batch: ActivationCodeBatchListItem, job: ActivationCodePrintJob) {
       setJobs((current) => [
-        { batchCode: batch.batchCode, job, productName: batch.productName },
+        {
+          batchCode: batch.batchCode,
+          batchName: batch.batchName,
+          job,
+          productName: batch.productName,
+        },
         ...current.filter((item) => item.job.id !== job.id),
       ]);
     },
