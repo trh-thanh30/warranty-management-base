@@ -114,10 +114,10 @@ function ActivationCodePrintJobItem({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate font-medium text-slate-950 dark:text-slate-50">
-            {tracked.batchCode}
+            {tracked.batchName?.trim() || tracked.batchCode}
           </p>
           <p className="truncate text-sm text-slate-500 dark:text-slate-400">
-            {tracked.productName} · {job.from_index}–{job.to_index}
+            {tracked.batchCode} · {job.from_index}–{job.to_index}
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-1">

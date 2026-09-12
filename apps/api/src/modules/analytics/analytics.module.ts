@@ -1,4 +1,9 @@
 import { PrismaModule } from '@/database/prisma/prisma.module';
+import { RedisModule } from '@/database/redis/redis.module';
+import { AnalyticsPresenceController } from '@/modules/analytics/analytics-presence.controller';
+import { PresenceRepository } from '@/modules/analytics/repository/presence.repository';
+import { GetOnlinePresenceUseCase } from '@/modules/analytics/use-cases/get-online-presence.use-case';
+import { RecordPresenceHeartbeatUseCase } from '@/modules/analytics/use-cases/record-presence-heartbeat.use-case';
 import { AnalyticsController } from '@/modules/analytics/analytics.controller';
 import { AnalyticsDateRangeService } from '@/modules/analytics/analytics.utils';
 import { AnalyticsRepository } from '@/modules/analytics/repository/analytics.repository';
@@ -12,10 +17,13 @@ import { GetRecentActivityUseCase } from '@/modules/analytics/use-cases/get-rece
 import { Module } from '@nestjs/common';
 
 @Module({
-  imports: [PrismaModule],
-  controllers: [AnalyticsController],
+  imports: [PrismaModule, RedisModule],
+  controllers: [AnalyticsController, AnalyticsPresenceController],
   providers: [
     AnalyticsRepository,
+    PresenceRepository,
+    GetOnlinePresenceUseCase,
+    RecordPresenceHeartbeatUseCase,
     AnalyticsDateRangeService,
     GetDashboardOverviewUseCase,
     GetDashboardClaimsUseCase,

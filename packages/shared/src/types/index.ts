@@ -18,6 +18,7 @@ export * from "./geo.types.ts";
 export * from "./notification.types.ts";
 export * from "./pagination.types.ts";
 export * from "./product.types.ts";
+export * from "./presence.types.ts";
 export * from "./service-center.types.ts";
 export * from "./storage.types.ts";
 export * from "./system-health.types.ts";

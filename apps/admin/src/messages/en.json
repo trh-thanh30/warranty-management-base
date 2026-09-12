@@ -268,6 +268,13 @@
   "Dashboard": {
     "title": "Dashboard",
     "eyebrow": "Operations overview",
+    "presence": {
+      "web": "Web",
+      "admin": "Admin",
+      "online": "{source}: {count} online",
+      "description": "Active in the last 2 minutes. Web counts browsers; Admin counts signed-in accounts.",
+      "unavailable": "Online count is unavailable for {source}"
+    },
     "description": "Monitor warranty claims, service workload, SLA risk, and recent activity from live operational data.",
     "dateRange": {
       "ariaLabel": "Select dashboard date range",

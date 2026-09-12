@@ -8,10 +8,6 @@ export function PublicPageLoading() {
       className="min-h-[calc(100dvh-5rem)] bg-surface-muted"
     >
       <div aria-hidden="true">
-        <div className="h-1 w-full overflow-hidden bg-border-gray">
-          <div className="h-full w-1/3 animate-pulse bg-premium-red motion-reduce:animate-none" />
-        </div>
-
         <Skeleton className="h-64 w-full rounded-none bg-light-gray motion-reduce:animate-none sm:h-96" />
 
         <Container className="py-10 lg:py-16">

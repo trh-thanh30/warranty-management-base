@@ -1,6 +1,7 @@
 import { SiteSettingsProvider } from "@/src/app/providers/site-settings-provider";
 import { ToastProvider } from "@/src/app/providers/toast-provider";
 import { GoogleAnalytics } from "@/src/components/common/google-analytics";
+import { PresenceTracker } from "@/src/components/common/presence-tracker";
 import { PublicQuickChat } from "@/src/components/common/public-quick-chat";
 import { SiteFooter } from "@/src/components/layout/site-footer";
 import { SiteHeader } from "@/src/components/layout/site-header";
@@ -13,6 +14,7 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { Inter, Maven_Pro, Saira_Condensed } from "next/font/google";
 import { notFound } from "next/navigation";
+import NextTopLoader from "nextjs-toploader";
 import "../globals.css";
 
 const sairaCondensed = Saira_Condensed({
@@ -82,6 +84,17 @@ export default async function LocaleLayout({
       <body>
         <NextIntlClientProvider messages={messages}>
           <QueryProvider>
+            <NextTopLoader
+              color="var(--color-premium-red)"
+              crawlSpeed={180}
+              easing="ease-out"
+              height={4}
+              shadow="0 0 10px var(--color-premium-red)"
+              showSpinner={false}
+              speed={220}
+              zIndex={2147483647}
+            />
+            <PresenceTracker />
             <SiteSettingsProvider siteSettings={siteSettings}>
               <SiteHeader logoUrl={siteSettings?.headerLogo?.url} />
               {children}

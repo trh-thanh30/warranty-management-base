@@ -268,6 +268,13 @@
   "Dashboard": {
     "title": "Bảng điều khiển",
     "eyebrow": "Tổng quan vận hành",
+    "presence": {
+      "web": "Web",
+      "admin": "Admin",
+      "online": "{source}: {count} online",
+      "description": "Online trong 2 phút gần nhất. Web đếm theo trình duyệt, Admin đếm theo tài khoản đăng nhập.",
+      "unavailable": "Chưa tải được số người online trên {source}"
+    },
     "description": "Theo dõi yêu cầu bảo hành, khối lượng xử lý, rủi ro hạn xử lý và hoạt động gần đây từ dữ liệu thực tế.",
     "dateRange": {
       "ariaLabel": "Chọn khoảng thời gian cho bảng điều khiển",
@@ -2151,10 +2158,10 @@
     "downloadedCertificate": "Đã tải chứng nhận.",
     "viewCertificateError": "Không thể mở chứng nhận.",
     "downloadCertificateError": "Không thể tải chứng nhận.",
-    "resendCertificateEmail": "Gửi lại email kèm chứng nhận",
+    "resendCertificateEmail": "Gửi lại chứng nhận",
     "resendConfirmationEmail": "Gửi lại email xác nhận",
     "resendWithoutPdfHint": "Email xác nhận không đính kèm PDF.",
-    "resendingCertificateEmail": "Đang gửi lại...",
+    "resendingCertificateEmail": "Đang gửi...",
     "resentCertificateEmail": "Đã đưa email vào hàng đợi gửi lại.",
     "resendCertificateEmailError": "Không thể gửi lại email chứng nhận.",
     "retryCertificate": "Tạo lại chứng nhận",

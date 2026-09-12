@@ -7,5 +7,6 @@ export * from "./use-dropdown";
 export * from "./use-local-storage";
 export * from "./use-pagination";
 export * from "./use-permission";
+export * from "./use-presence-heartbeat";
 export * from "./use-query-params";
 export * from "./use-table";
