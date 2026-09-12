@@ -39,7 +39,8 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
   async execute(input: {
     recipientEmail?: string;
     requestId: string;
-    forceEmail?: boolean;
+    // Approval defaults to email delivery; explicit PDF retry opts out.
+    sendEmail?: boolean;
   }) {
     const existing = await this.repository.findByRequestId(input.requestId);
     if (existing?.status === WARRANTY_CERTIFICATE_STATUS.GENERATED) {
@@ -86,11 +87,9 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
       });
     } catch (error) {
       const failed = await this.recordFailure(existing, input, error);
-      if (failed?.recipientEmail) {
+      if (input.sendEmail !== false && failed?.recipientEmail) {
         try {
-          const confirmation = input.forceEmail
-            ? await this.emailService.queueEmail(failed.id, { force: true })
-            : await this.emailService.queueEmail(failed.id);
+          const confirmation = await this.emailService.queueEmail(failed.id);
           this.logger.warn(
             `Request ${input.requestId}: PDF unavailable (${String(error)}); confirmation email queued or already sent.`,
           );
@@ -105,15 +104,13 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
     }
 
     if (
+      input.sendEmail === false ||
       !certificate.recipientEmail ||
-      (!input.forceEmail &&
-        (certificate.emailStatus === 'QUEUED' ||
-          certificate.emailStatus === 'SENT'))
+      certificate.emailStatus === 'QUEUED' ||
+      certificate.emailStatus === 'SENT'
     )
       return certificate;
-    return input.forceEmail
-      ? this.emailService.queueEmail(certificate.id, { force: true })
-      : this.emailService.queueEmail(certificate.id);
+    return this.emailService.queueEmail(certificate.id);
   }
 
   private async generateCertificate(input: {

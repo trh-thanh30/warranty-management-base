@@ -216,6 +216,58 @@ describe('IssueWarrantyActivationRequestCertificateUseCase', () => {
     expect(repository.create).not.toHaveBeenCalled();
   });
 
+  it('rejects PDF-only retry failure even when the customer has email', async () => {
+    repository.findByRequestId.mockResolvedValue(null);
+    repository.findRequestForIssuance.mockResolvedValue(
+      buildRequest([buildItem('windshield', 'WM-A')]),
+    );
+    pdfService.createPdfFromViewModel.mockRejectedValue(
+      new Error('PDF_RENDERER_UNAVAILABLE'),
+    );
+    repository.create.mockImplementation((data) =>
+      Promise.resolve({ id: 'failed-certificate', ...data }),
+    );
+
+    await expect(
+      createUseCase().execute({
+        requestId: 'request-1',
+        recipientEmail: 'customer@example.com',
+        sendEmail: false,
+      }),
+    ).rejects.toThrow('PDF_RENDERER_UNAVAILABLE');
+    expect(emailService.queueEmail).not.toHaveBeenCalled();
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'FAILED',
+        lastError: 'PDF_RENDERER_UNAVAILABLE',
+      }),
+    );
+  });
+
+  it('generates a PDF-only retry without queueing email even if no confirmation was sent', async () => {
+    repository.findByRequestId.mockResolvedValue(null);
+    repository.findRequestForIssuance.mockResolvedValue(
+      buildRequest([buildItem('windshield', 'WM-A')]),
+    );
+    pdfService.createPdfFromViewModel.mockResolvedValue(Buffer.from('pdf'));
+    uploadAssetService.upload.mockResolvedValue({ path: 'private/cert.pdf' });
+    repository.create.mockImplementation((data) =>
+      Promise.resolve({ id: 'certificate-1', ...data }),
+    );
+
+    await expect(
+      createUseCase().execute({
+        requestId: 'request-1',
+        recipientEmail: 'customer@example.com',
+        sendEmail: false,
+      }),
+    ).resolves.toMatchObject({
+      status: 'GENERATED',
+      storageKey: 'private/cert.pdf',
+    });
+    expect(emailService.queueEmail).not.toHaveBeenCalled();
+  });
+
   function createUseCase() {
     return new IssueWarrantyActivationRequestCertificateUseCase(
       repository as never,
