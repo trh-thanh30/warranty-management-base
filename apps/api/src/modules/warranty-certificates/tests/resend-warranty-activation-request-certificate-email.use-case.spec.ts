@@ -17,7 +17,9 @@ describe('ResendWarrantyActivationRequestCertificateEmailUseCase', () => {
 
     await useCase.execute('request-1');
 
-    expect(emailService.queueEmail).toHaveBeenCalledWith('certificate-1');
+    expect(emailService.queueEmail).toHaveBeenCalledWith('certificate-1', {
+      force: true,
+    });
     expect(issueCertificateUseCase.execute).not.toHaveBeenCalled();
   });
 
@@ -35,6 +37,7 @@ describe('ResendWarrantyActivationRequestCertificateEmailUseCase', () => {
     expect(issueCertificateUseCase.execute).toHaveBeenCalledWith({
       recipientEmail: 'customer@example.com',
       requestId: 'request-1',
+      forceEmail: true,
     });
     expect(emailService.queueEmail).not.toHaveBeenCalled();
   });

@@ -27,9 +27,12 @@ export class ResendWarrantyActivationRequestCertificateEmailUseCase {
       return this.issueCertificateUseCase.execute({
         recipientEmail: certificate.recipientEmail ?? undefined,
         requestId,
+        forceEmail: true,
       });
     }
 
-    return this.certificateEmailService.queueEmail(certificate.id);
+    return this.certificateEmailService.queueEmail(certificate.id, {
+      force: true,
+    });
   }
 }

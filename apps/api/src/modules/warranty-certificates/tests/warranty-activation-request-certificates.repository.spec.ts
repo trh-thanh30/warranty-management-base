@@ -1,6 +1,27 @@
 import { WarrantyActivationRequestCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-activation-request-certificates.repository';
 
 describe('WarrantyActivationRequestCertificatesRepository application contracts', () => {
+  it('marks confirmation sent without clearing PDF failures', async () => {
+    const updateMany = jest.fn().mockResolvedValue({ count: 1 });
+    const repository = new WarrantyActivationRequestCertificatesRepository({
+      warrantyActivationRequestCertificate: { updateMany },
+    } as never);
+    await repository.markEmailSent('failed-certificate', new Date());
+    expect(updateMany).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        data: { email_status: 'SENT', emailed_at: expect.any(Date) },
+      }),
+    );
+    expect(updateMany).toHaveBeenNthCalledWith(2, {
+      where: {
+        id: 'failed-certificate',
+        status: 'GENERATED',
+        email_status: 'SENT',
+      },
+      data: { last_error: null },
+    });
+  });
   it('maps certificate writes and persisted records at the repository seam', async () => {
     const persisted = buildPersistedCertificate();
     const prismaService = {
@@ -147,6 +168,10 @@ describe('WarrantyActivationRequestCertificatesRepository application contracts'
     await expect(
       repository.findEmailDataById('certificate-1'),
     ).resolves.toEqual({
+      activationRequestId: 'request-1',
+      emailStatus: 'PENDING',
+      lastError: null,
+      status: 'GENERATED',
       certificateNumber: 'CERT-001',
       id: 'certificate-1',
       recipientEmail: 'customer@example.com',

@@ -133,6 +133,59 @@ describe('IssueWarrantyActivationRequestCertificateUseCase', () => {
     );
   });
 
+  it('queues confirmation without PDF while preserving generation failure', async () => {
+    repository.findByRequestId.mockResolvedValue(null);
+    repository.findRequestForIssuance.mockResolvedValue(
+      buildRequest([buildItem('windshield', 'WM-A')]),
+    );
+    pdfService.createPdfFromViewModel.mockRejectedValue(
+      new Error('PDF_RENDERER_UNAVAILABLE'),
+    );
+    repository.create.mockImplementation((data) =>
+      Promise.resolve({ id: 'failed-certificate', ...data }),
+    );
+    await expect(
+      createUseCase().execute({
+        requestId: 'request-1',
+        recipientEmail: 'customer@example.com',
+      }),
+    ).resolves.toMatchObject({ id: 'failed-certificate', status: 'FAILED' });
+    expect(emailService.queueEmail).toHaveBeenCalledWith('failed-certificate');
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'FAILED',
+        lastError: 'PDF_RENDERER_UNAVAILABLE',
+        recipientEmail: 'customer@example.com',
+      }),
+    );
+  });
+
+  it('does not send another email when a PDF retry succeeds after confirmation was sent', async () => {
+    repository.findByRequestId.mockResolvedValue({
+      id: 'failed-certificate',
+      status: 'FAILED',
+      emailStatus: 'SENT',
+      certificateNumber: 'CERT-FAILED-1',
+    });
+    repository.findRequestForIssuance.mockResolvedValue(
+      buildRequest([buildItem('windshield', 'WM-A')]),
+    );
+    pdfService.createPdfFromViewModel.mockResolvedValue(Buffer.from('pdf'));
+    uploadAssetService.upload.mockResolvedValue({ path: 'private/cert.pdf' });
+    repository.update.mockImplementation((_id, data) =>
+      Promise.resolve({ id: 'failed-certificate', ...data }),
+    );
+    await createUseCase().execute({
+      requestId: 'request-1',
+      recipientEmail: 'customer@example.com',
+    });
+    expect(emailService.queueEmail).not.toHaveBeenCalled();
+    expect(repository.update).toHaveBeenCalledWith(
+      'failed-certificate',
+      expect.objectContaining({ emailStatus: 'SENT', status: 'GENERATED' }),
+    );
+  });
+
   it('reuses a failed certificate record when generation is retried', async () => {
     repository.findByRequestId.mockResolvedValue({
       certificateNumber: 'CERT-FAILED-1',
