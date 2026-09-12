@@ -68,6 +68,7 @@
     "category": "Danh mục",
     "brandModel": "Thương hiệu / Model",
     "serial": "Số sê-ri sản phẩm",
+    "activationCode": "Mã kích hoạt (SP-*)",
     "warrantyCode": "Mã bảo hành (WM-*)",
     "startDate": "Ngày bắt đầu",
     "endDate": "Ngày hết hạn",

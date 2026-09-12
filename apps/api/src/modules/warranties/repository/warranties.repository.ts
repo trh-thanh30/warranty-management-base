@@ -33,6 +33,7 @@ const warrantyInclude = {
 };
 
 const warrantyLookupInclude = {
+  activation_code: { select: { code_ciphertext: true } },
   activation_request: true,
   ownerships: {
     where: { is_current_owner: true },

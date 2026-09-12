@@ -220,6 +220,7 @@ export function toWarrantyResponse(warranty: WarrantyWithAuditUsers) {
 }
 
 export function toWarrantyLookupResponse(input: {
+  activationCode?: string | null;
   product: Product & {
     category_ref?: Category | null;
   };
@@ -250,6 +251,9 @@ export function toWarrantyLookupResponse(input: {
         : null,
     },
     warranty: {
+      ...(input.activationCode !== undefined
+        ? { activationCode: input.activationCode }
+        : {}),
       warrantyCode: input.warranty.warranty_code,
       startDate: input.warranty.start_date,
       endDate: input.warranty.end_date,

@@ -4,7 +4,40 @@ import test from "node:test";
 import { HttpClientError } from "@repo/shared";
 import { WarrantiesService } from "../src/services/warranties/warranties.service.ts";
 import { getWarrantyLookupErrorKind } from "../src/hooks/use-warranty-lookup.ts";
-import { getPopulatedWarrantyFilmItems } from "../src/utils/warranty-lookup.utils.ts";
+import {
+  formatWarrantyDealerAddress,
+  getPopulatedWarrantyFilmItems,
+} from "../src/utils/warranty-lookup.utils.ts";
+
+test("dealer address does not repeat locality already in the full address", () => {
+  assert.equal(
+    formatWarrantyDealerAddress({
+      address: "Phường Ba Đình, Thành phố Hà Nội",
+      district: "Phường Ba Đình",
+      province: "Thành phố Hà Nội",
+    }),
+    "Phường Ba Đình, Thành phố Hà Nội",
+  );
+  assert.equal(
+    formatWarrantyDealerAddress({
+      address: "62 Nghĩa Đô",
+      district: "Cầu Giấy",
+      province: "Hà Nội",
+    }),
+    "62 Nghĩa Đô, Cầu Giấy, Hà Nội",
+  );
+  assert.equal(formatWarrantyDealerAddress(null), null);
+});
+
+test("lookup displays activation code instead of product serial", async () => {
+  const source = await readFile(
+    new URL("../src/components/warranty-lookup-result.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(source, /label=\{t\("activationCode"\)\}/);
+  assert.match(source, /value=\{warranty.activationCode\}/);
+  assert.doesNotMatch(source, /label=\{t\("serial"\)\}/);
+});
 
 const lookupResult = {
   product: {

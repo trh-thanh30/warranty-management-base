@@ -103,7 +103,7 @@ export type WarrantyLookupResult = {
     | "durationMonths"
     | "terms"
     | "status"
-  >;
+  > & { activationCode?: string | null };
   installation: {
     installedAt: string | null;
     vehicleModel: string | null;

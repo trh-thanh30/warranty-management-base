@@ -68,6 +68,7 @@
     "category": "Category",
     "brandModel": "Brand / Model",
     "serial": "Product serial number",
+    "activationCode": "Activation code (SP-*)",
     "warrantyCode": "Warranty code (WM-*)",
     "startDate": "Start date",
     "endDate": "Expiry date",

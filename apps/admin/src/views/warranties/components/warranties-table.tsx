@@ -1,7 +1,9 @@
 "use client";
 
-import { Ban, Eye, MoreHorizontal, Pencil, ShieldCheck } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { ActivationCodeSummary } from "@/src/components/activation-code-summary";
+import { SortableTableHead } from "@/src/components/common/sortable-table-head";
+import { usePermissions } from "@/src/hooks/use-permissions";
+import { Link } from "@/src/i18n/navigation";
 import { formatDate, type WarrantyListItem } from "@repo/shared";
 import { PERMISSIONS } from "@repo/shared/constants";
 import {
@@ -12,20 +14,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   Table,
-  TableScroll,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
+  TableScroll,
 } from "@repo/ui";
-import { SortableTableHead } from "@/src/components/common/sortable-table-head";
-import { usePermissions } from "@/src/hooks/use-permissions";
-import { Link } from "@/src/i18n/navigation";
+import { Ban, Eye, MoreHorizontal, Pencil, ShieldCheck } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import type { WarrantySortBy } from "../warranties.types";
 import { formatWarrantyOwner } from "../warranties.utils";
 import { WarrantyStatusBadge } from "./warranty-status-badge";
-import { ActivationCodeSummary } from "@/src/components/activation-code-summary";
 
 type WarrantiesTableProps = {
   items: WarrantyListItem[];
@@ -61,7 +61,7 @@ export function WarrantiesTable({
       </div>
 
       <TableScroll className="hidden rounded-md border border-slate-200 dark:border-slate-800 lg:block">
-        <Table className="min-w-[1440px] whitespace-nowrap [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
+        <Table className="min-w-360 whitespace-nowrap [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
           <TableHeader>
             <TableRow>
               <TableHead>{t("product")}</TableHead>
@@ -143,7 +143,7 @@ function WarrantyTableRow({
           {warranty.dealer?.name ?? "-"}
         </span>
       </TableCell>
-      <TableCell className="font-mono text-xs">
+      <TableCell className="font-semibold text-xs">
         {warranty.warrantyCode ?? "-"}
       </TableCell>
       <TableCell>
