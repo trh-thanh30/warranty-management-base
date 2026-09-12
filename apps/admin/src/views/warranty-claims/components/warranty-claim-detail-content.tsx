@@ -1,14 +1,14 @@
 "use client";
 
-import { FileText, Package, ShieldCheck, UserRound } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
-import type { ReactNode } from "react";
 import type {
   WarrantyClaimAttachmentSummary,
   WarrantyClaimSummary,
   WarrantyClaimTimelineItem,
 } from "@repo/shared";
 import { Card, Table, TableBody, TableCell, TableRow } from "@repo/ui";
+import { FileText, Package, ShieldCheck, UserRound } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import {
   formatClaimCustomer,
   formatClaimDate,
@@ -43,8 +43,8 @@ export function WarrantyClaimDetailContent({
   const warranty = claim.warranty;
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
-      <Card className="min-w-0 overflow-hidden">
+    <div className="grid items-start gap-3 xl:grid-cols-[minmax(0,1fr)_22rem]">
+      <Card className="h-fit min-w-0 overflow-hidden">
         <section className="border-b border-slate-200 p-5 dark:border-slate-800 sm:p-6">
           <SectionHeading icon={FileText} title={t("issueDetails")} />
           <h2 className="mt-4 text-lg font-semibold text-slate-950 dark:text-slate-50">
@@ -140,7 +140,7 @@ export function WarrantyClaimDetailContent({
         <WarrantyClaimTimeline claim={claim} timeline={timeline} />
       </Card>
 
-      <Card className="overflow-hidden xl:sticky xl:top-24 xl:self-start">
+      <Card className="h-fit overflow-hidden xl:sticky xl:top-24 xl:self-start">
         <section className="border-b border-slate-200 p-5 dark:border-slate-800 sm:p-6">
           <SectionHeading icon={FileText} title={t("claimInfo")} />
           <DetailList

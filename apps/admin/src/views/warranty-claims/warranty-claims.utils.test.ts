@@ -4,6 +4,8 @@ import { HttpClientError } from "@repo/shared";
 import {
   buildWarrantyClaimListQuery,
   buildWarrantyClaimProductQuery,
+  buildWarrantyClaimWarrantyQuery,
+  flattenWarrantyClaimOptions,
   getWarrantyClaimRequesterPrefill,
   getWarrantyClaimRequesterValues,
   getStatusBadgeVariant,
@@ -205,21 +207,88 @@ test("claim statuses use distinct semantic badge colors", () => {
 });
 
 test("claim product selector requests only claim-eligible products", () => {
-  assert.deepEqual(buildWarrantyClaimProductQuery("  WM-2026-ABC  "), {
+  assert.deepEqual(buildWarrantyClaimProductQuery("  Đèn  ", "category-id"), {
+    categoryId: "category-id",
     claimEligible: "true",
     limit: 20,
-    search: "WM-2026-ABC",
+    search: "Đèn",
     sortBy: "createdAt",
     sortOrder: "desc",
   });
 
-  assert.deepEqual(buildWarrantyClaimProductQuery("   "), {
+  assert.deepEqual(buildWarrantyClaimProductQuery("   ", ""), {
     claimEligible: "true",
     limit: 20,
     search: undefined,
     sortBy: "createdAt",
     sortOrder: "desc",
   });
+});
+
+test("claim warranty selector supports direct search and optional filters", () => {
+  assert.deepEqual(buildWarrantyClaimWarrantyQuery("  WM-2026-ABCDEF  "), {
+    claimEligible: "true",
+    includeOpenClaim: "true",
+    limit: 20,
+    search: "WM-2026-ABCDEF",
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  });
+
+  assert.deepEqual(
+    buildWarrantyClaimWarrantyQuery("  Nguyễn Văn A  ", {
+      categoryId: "category-id",
+      productId: "product-id",
+    }),
+    {
+      categoryId: "category-id",
+      claimEligible: "true",
+      includeOpenClaim: "true",
+      limit: 20,
+      productId: "product-id",
+      search: "Nguyễn Văn A",
+      sortBy: "createdAt",
+      sortOrder: "desc",
+    },
+  );
+});
+
+test("claim warranty selector includes blocked claims when opened or searched", () => {
+  assert.equal(
+    buildWarrantyClaimWarrantyQuery("WM-2026-ABCDEF").includeOpenClaim,
+    "true",
+  );
+  assert.equal(
+    buildWarrantyClaimWarrantyQuery("WM-2026-").includeOpenClaim,
+    "true",
+  );
+  assert.equal(
+    buildWarrantyClaimWarrantyQuery("Nguyen Van A").includeOpenClaim,
+    "true",
+  );
+  assert.equal(buildWarrantyClaimWarrantyQuery("").includeOpenClaim, "true");
+});
+
+test("claim warranty options preserve warranties sharing one product", () => {
+  const result = flattenWarrantyClaimOptions([
+    {
+      items: [
+        { id: "warranty-a", productId: "product-1" },
+        { id: "warranty-b", productId: "product-1" },
+      ],
+    },
+    {
+      items: [
+        { id: "warranty-a", productId: "product-1" },
+        { id: "warranty-c", productId: "product-2" },
+      ],
+    },
+  ]);
+
+  assert.deepEqual(
+    result.map((warranty) => warranty.id),
+    ["warranty-a", "warranty-b", "warranty-c"],
+  );
 });
 
 test("claim directory uses one search term for claim and warranty codes", () => {

@@ -66,6 +66,35 @@ test("warranty claims service posts the public claim request with required evide
   assert.equal(calls[0].config.timeout, 120_000);
 });
 
+test("warranty claims service sends the Turnstile token separately from claim data", async () => {
+  const { WarrantyClaimsService } = await importRequired(
+    "../src/services/warranty-claims/warranty-claims.service.ts",
+  );
+  const calls = [];
+  const service = new WarrantyClaimsService({
+    async post(url, body, config) {
+      calls.push({ body, config, url });
+      return { data: { claimCode: "CLM-1" } };
+    },
+  });
+  const body = { warrantyCode: "WM-ABC123" };
+  const attachments = [
+    new File(["photo"], "damage.webp", { type: "image/webp" }),
+  ];
+
+  await service.createWarrantyClaim(body, attachments, "turnstile-token");
+
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0]?.url, "/public/warranty-claims");
+  assert.ok(calls[0]?.body instanceof FormData);
+  assert.equal(calls[0].body.get("warrantyCode"), body.warrantyCode);
+  assert.deepEqual(calls[0].body.getAll("attachments"), attachments);
+  assert.deepEqual(calls[0]?.config, {
+    headers: { "X-Turnstile-Token": "turnstile-token" },
+    timeout: 120_000,
+  });
+});
+
 test("warranty claim form schema validates public request fields", async () => {
   const { createWarrantyClaimRequestFormSchema } = await importRequired(
     "../src/views/warranty/warranty-claim-request-form.schema.ts",
@@ -127,9 +156,19 @@ test("warranty claim form maps the selected shared issue into the API body", asy
   assert.deepEqual(
     toWarrantyClaimRequestBody(validFormValues, {
       bubble: "Peeling / Film bubbles",
+      connectionFailure: "App / Device connection failure",
       fade: "Discoloration / Fading",
+      inaccurateReading: "Incorrect readings",
+      intermittentOperation: "Intermittent operation",
+      lowSensorBattery: "Low / Depleted sensor battery",
+      moisture: "Internal moisture / Condensation",
+      noPower: "No power / Not working",
+      noRecording: "Not recording",
       other: "Other issue",
+      poorVideoQuality: "Blurry / Choppy video",
       scratch: "Impact scratches",
+      storageFailure: "Memory card error / Data loss",
+      weakOrWrongLight: "Weak light / Incorrect light color",
     }),
     {
       issueDetail: "Bubbles on the windshield",

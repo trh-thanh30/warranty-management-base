@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { Button } from "@repo/ui";
 import { FormPageShell } from "@/src/components/common/form-page-shell";
+import { EntityQueryState } from "@/src/components/common/entity-query-state";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { useWarrantyDetail } from "@/src/hooks/use-warranties";
@@ -41,7 +42,8 @@ export function WarrantyEditView({ warrantyId }: WarrantyEditViewProps) {
         {warrantyQuery.isLoading ? (
           <WarrantyEditFormSkeleton />
         ) : warrantyQuery.isError || !warranty ? (
-          <StatePanel
+          <EntityQueryState
+            error={warrantyQuery.error}
             action={
               <Button
                 onClick={() => {

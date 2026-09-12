@@ -3,6 +3,8 @@
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { Card, CardContent, Skeleton } from "@repo/ui";
+import { FullPageNotFound } from "@/src/components/common/full-page-not-found";
+import { isNotFoundError } from "@/src/lib/http-error.utils";
 import { AssignActivationCodesForm } from "../products/components/assign-activation-codes-form";
 import { useProductDetail } from "../products/hooks/use-product-detail";
 import { ActivationCodeDetailView } from "./activation-code-detail.view";
@@ -20,6 +22,10 @@ export function ProductActivationCodesView({
   const canAssignCodes = hasPermission(
     PERMISSIONS.ACTIVATION_CODE_ASSIGN_PRODUCT,
   );
+
+  if (productQuery.isError && isNotFoundError(productQuery.error)) {
+    return <FullPageNotFound embedded />;
+  }
 
   return (
     <ActivationCodeDetailView

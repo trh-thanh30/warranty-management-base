@@ -24,6 +24,7 @@ describe('LookupWarrantyByCodeUseCase', () => {
       duration_months: 36,
       terms: 'Bảo hành chính hãng theo điều kiện công bố.',
       status: 'ACTIVE',
+      activation_code: { code_ciphertext: 'encrypted-code' },
       product: {
         id: 'product-id',
         product_code: 'LEX-SP50-001',
@@ -64,6 +65,8 @@ describe('LookupWarrantyByCodeUseCase', () => {
     });
     const useCase = new LookupWarrantyByCodeUseCase(
       warrantiesRepository as never,
+      undefined,
+      { decrypt: jest.fn().mockReturnValue('SP-ABCDEF123456') } as never,
     );
 
     const result = await useCase.execute({ code: 'wm-2026-abcdef' });
@@ -88,6 +91,7 @@ describe('LookupWarrantyByCodeUseCase', () => {
         },
       },
       warranty: {
+        activationCode: 'SP-ABCDEF123456',
         warrantyCode: 'WM-2026-ABCDEF',
         startDate,
         endDate,

@@ -22,6 +22,7 @@ import {
   jobsConfig,
   jwtConfig,
   pdfRendererConfig,
+  publicAbuseConfig,
   rateLimitConfig,
   redisConfig,
   storageConfig,
@@ -43,6 +44,7 @@ import { PermissionsGuard } from '@/common/guards/permissions.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { IdentityMiddleware } from '@/common/middleware/identity.middleware';
 import { PermissionsModule } from '@/common/permissions/permissions.module';
+import { RedisThrottlerStorage } from '@/common/throttling/redis-throttler-storage.service';
 import { PrismaModule } from '@/database/prisma/prisma.module';
 import { RedisModule } from '@/database/redis/redis.module';
 import { ActivationCodesModule } from '@/modules/activation-codes/activation-codes.module';
@@ -95,6 +97,7 @@ const envPath = join(rootDir, envFile);
         jobsConfig,
         jwtConfig,
         pdfRendererConfig,
+        publicAbuseConfig,
         rateLimitConfig,
         bullConfig,
         redisConfig,
@@ -111,18 +114,21 @@ const envPath = join(rootDir, envFile);
       useFactory: bullConfigFactory,
     }),
     ThrottlerModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => {
+      imports: [ConfigModule, RedisModule],
+      inject: [ConfigService, RedisThrottlerStorage],
+      useFactory: (config: ConfigService, storage: RedisThrottlerStorage) => {
         const throttlerConfig = config.get<{ ttl: number; limit: number }>(
           'throttler',
         );
-        return [
-          {
-            ttl: (throttlerConfig?.ttl ?? 60) * 1000,
-            limit: throttlerConfig?.limit ?? 10,
-          },
-        ];
+        return {
+          storage,
+          throttlers: [
+            {
+              ttl: (throttlerConfig?.ttl ?? 60) * 1000,
+              limit: throttlerConfig?.limit ?? 10,
+            },
+          ],
+        };
       },
     }),
     LoggerCoreModule,

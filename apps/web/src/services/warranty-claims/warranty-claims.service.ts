@@ -26,6 +26,7 @@ export class WarrantyClaimsService {
   async createWarrantyClaim(
     body: CreateWarrantyClaimBody,
     attachments: File[],
+    turnstileToken?: string,
   ): Promise<PublicWarrantyClaimSummary> {
     const formData = new FormData();
     Object.entries(body).forEach(([key, value]) => {
@@ -35,7 +36,12 @@ export class WarrantyClaimsService {
 
     const response = await this.http.post<
       ApiResponse<PublicWarrantyClaimSummary>
-    >("/public/warranty-claims", formData, { timeout: 120_000 });
+    >("/public/warranty-claims", formData, {
+      timeout: 120_000,
+      ...(turnstileToken
+        ? { headers: { "X-Turnstile-Token": turnstileToken } }
+        : {}),
+    });
 
     return response.data;
   }

@@ -39,6 +39,7 @@ export class RetryWarrantyActivationRequestCertificateUseCase {
     await this.issueRequestCertificateUseCase.execute({
       recipientEmail: request.customer_email ?? undefined,
       requestId,
+      sendEmail: false,
     });
 
     const updatedRequest = await this.repository.findById(requestId);

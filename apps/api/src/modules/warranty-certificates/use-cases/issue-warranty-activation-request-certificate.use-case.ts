@@ -36,7 +36,12 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
     private readonly emailService: WarrantyActivationRequestCertificateEmailService,
   ) {}
 
-  async execute(input: { recipientEmail?: string; requestId: string }) {
+  async execute(input: {
+    recipientEmail?: string;
+    requestId: string;
+    // Approval defaults to email delivery; explicit PDF retry opts out.
+    sendEmail?: boolean;
+  }) {
     const existing = await this.repository.findByRequestId(input.requestId);
     if (existing?.status === WARRANTY_CERTIFICATE_STATUS.GENERATED) {
       return existing;
@@ -81,11 +86,30 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
         request,
       });
     } catch (error) {
-      await this.recordFailure(existing, input, error);
+      const failed = await this.recordFailure(existing, input, error);
+      if (input.sendEmail !== false && failed?.recipientEmail) {
+        try {
+          const confirmation = await this.emailService.queueEmail(failed.id);
+          this.logger.warn(
+            `Request ${input.requestId}: PDF unavailable (${String(error)}); confirmation email queued or already sent.`,
+          );
+          return confirmation ?? failed;
+        } catch (emailError) {
+          this.logger.error(
+            `Could not queue activation confirmation email: ${String(emailError)}`,
+          );
+        }
+      }
       throw error;
     }
 
-    if (!input.recipientEmail) return certificate;
+    if (
+      input.sendEmail === false ||
+      !certificate.recipientEmail ||
+      certificate.emailStatus === 'QUEUED' ||
+      certificate.emailStatus === 'SENT'
+    )
+      return certificate;
     return this.emailService.queueEmail(certificate.id);
   }
 
@@ -146,7 +170,9 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
         uploadedPath = uploaded.path;
         const data = {
           certificateNumber,
-          emailStatus: WARRANTY_CERTIFICATE_EMAIL_STATUS.PENDING,
+          emailStatus:
+            input.existing?.emailStatus ??
+            WARRANTY_CERTIFICATE_EMAIL_STATUS.PENDING,
           generatedAt: new Date(),
           lastError: null,
           metadata: {
@@ -154,7 +180,10 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
             requestId: input.input.requestId,
             warrantyCodes: input.request.items.map((item) => item.warrantyCode),
           },
-          recipientEmail: normalizeEmail(input.input.recipientEmail),
+          recipientEmail:
+            normalizeEmail(input.input.recipientEmail) ??
+            input.existing?.recipientEmail ??
+            null,
           status: WARRANTY_CERTIFICATE_STATUS.GENERATED,
           storageKey: uploaded.path,
         };
@@ -193,17 +222,21 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
     error: unknown,
   ) {
     const data = {
-      emailStatus: WARRANTY_CERTIFICATE_EMAIL_STATUS.PENDING,
+      emailStatus:
+        existing?.emailStatus ?? WARRANTY_CERTIFICATE_EMAIL_STATUS.PENDING,
       lastError: error instanceof Error ? error.message : String(error),
-      recipientEmail: normalizeEmail(input.recipientEmail),
+      recipientEmail:
+        normalizeEmail(input.recipientEmail) ??
+        existing?.recipientEmail ??
+        null,
       status: WARRANTY_CERTIFICATE_STATUS.FAILED,
       storageKey: null,
     };
     try {
       if (existing) {
-        await this.repository.update(existing.id, data);
+        return await this.repository.update(existing.id, data);
       } else {
-        await this.repository.create({
+        return await this.repository.create({
           ...data,
           activationRequestId: input.requestId,
           certificateNumber: generateCertificateNumber(),
@@ -213,6 +246,7 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
       this.logger.error(
         `Failed to persist request certificate error: ${String(persistenceError)}`,
       );
+      return null;
     }
   }
 }

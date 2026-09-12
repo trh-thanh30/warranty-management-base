@@ -68,6 +68,10 @@ export function ActivationRequestItemsTable({
                   >
                     {item.warrantyCode ?? "-"}
                   </Link>
+                ) : item.warrantyCode ? (
+                  <span className="font-mono text-xs text-slate-700 dark:text-slate-300">
+                    {item.warrantyCode}
+                  </span>
                 ) : (
                   <span className="font-mono text-xs text-slate-500">-</span>
                 )}

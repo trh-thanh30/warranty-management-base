@@ -47,6 +47,15 @@
   --color-service-center-soft: #eff6ff;
   --color-service-center-text: #1d4ed8;
 
+  /* SEMANTIC: feedback states */
+  --color-success: #059669;
+  --color-success-surface: #ecfdf5;
+  --color-success-text: #047857;
+  --color-info: #2563eb;
+  --color-info-surface: #eff6ff;
+  --color-info-border: #bfdbfe;
+  --color-info-text: #1d4ed8;
+
   /* PRIMITIVE: neutral scale */
   --color-dark-charcoal: #333333;
   --color-medium-gray: #4a4a4a;

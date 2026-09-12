@@ -8,6 +8,7 @@ import {
   User,
   Warranty,
   WarrantyActivationRequest,
+  warranty_claim_status,
 } from '@prisma/client';
 import { getProductCatalogue } from '@/modules/products/product-catalogue';
 
@@ -147,6 +148,11 @@ type WarrantyWithProduct = Warranty & {
   activated_by?: User | null;
   voided_by?: User | null;
   dealer?: Dealer | null;
+  claims?: Array<{
+    id: string;
+    claim_code: string;
+    status: warranty_claim_status;
+  }>;
   ownerships?: Array<WarrantyOwnership & { customer?: Customer | null }>;
   product: Product & { category_ref?: Category | null };
 };
@@ -214,6 +220,7 @@ export function toWarrantyResponse(warranty: WarrantyWithAuditUsers) {
 }
 
 export function toWarrantyLookupResponse(input: {
+  activationCode?: string | null;
   product: Product & {
     category_ref?: Category | null;
   };
@@ -244,6 +251,9 @@ export function toWarrantyLookupResponse(input: {
         : null,
     },
     warranty: {
+      ...(input.activationCode !== undefined
+        ? { activationCode: input.activationCode }
+        : {}),
       warrantyCode: input.warranty.warranty_code,
       startDate: input.warranty.start_date,
       endDate: input.warranty.end_date,
@@ -340,14 +350,23 @@ export function toWarrantyListItemResponse(
           status: warranty.activation_code.status,
         }
       : null,
+    openClaim: warranty.claims?.[0]
+      ? {
+          id: warranty.claims[0].id,
+          claimCode: warranty.claims[0].claim_code,
+          status: warranty.claims[0].status,
+        }
+      : null,
     product: {
       id: warranty.product.id,
       name: getProductCatalogue(warranty.product).name,
       displayName: warranty.product.display_name,
       brand: getProductCatalogue(warranty.product).brand,
       model: getProductCatalogue(warranty.product).model,
+      modelYear: warranty.product.model_year,
       productCode: warranty.product.product_code,
       serialNumber: warranty.serial_number,
+      status: warranty.product.status,
       ...(warranty.product.category_ref
         ? {
             category: {
@@ -360,8 +379,10 @@ export function toWarrantyListItemResponse(
     },
     owner: currentOwnership
       ? {
+          activatedAt: currentOwnership.activated_at,
           customerId: currentOwnership.customer_id,
           ownerUserId: currentOwnership.owner_user_id,
+          purchaseDate: currentOwnership.purchase_date,
           customerCode: currentOwnership.customer?.customer_code,
           fullName: currentOwnership.customer?.full_name,
           ...(currentOwnership.customer?.email ||

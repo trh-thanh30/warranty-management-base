@@ -13,6 +13,7 @@ export const envSchema = z
     PORT: z.coerce.number().int().min(1).max(65535).default(3000),
     MILLISECONDS_PER_DAY: z.coerce.number().int().positive().default(86400000),
     PUBLIC_API_URL: z.string().url().optional(),
+    CLIENT_WARRANTY_LOOKUP_URL: z.string().trim().url().optional(),
     PDF_RENDERER_URL: z.string().url().optional(),
     PUPPETEER_EXECUTABLE_PATH: z.string().optional(),
     PDF_RENDER_TIMEOUT_MS: z.coerce.number().int().positive().default(45000),
@@ -163,6 +164,28 @@ export const envSchema = z
     // Rate Limiting
     RATE_LIMIT_TTL: z.coerce.number().int().positive().default(60),
     RATE_LIMIT_MAX: z.coerce.number().int().positive().default(100),
+    PUBLIC_SUBMISSION_DAILY_WINDOW_SECONDS: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(86400),
+    PUBLIC_SUBMISSION_DAILY_IP_LIMIT: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(20),
+    PUBLIC_SUBMISSION_DAILY_PHONE_LIMIT: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(5),
+    PUBLIC_SUBMISSION_DAILY_CODE_LIMIT: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(3),
+    TURNSTILE_SECRET_KEY: z.string().optional(),
+    TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(0),
 
     // CORS Configuration
     CORS_ORIGINS: z

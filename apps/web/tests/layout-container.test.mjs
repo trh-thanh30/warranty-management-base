@@ -13,11 +13,9 @@ const pageLayoutFiles = [
   "views/product-detail/product-detail.view.tsx",
   "views/products/products.view.tsx",
   "views/support-centers/support-centers.view.tsx",
-  "views/warranty/activate.view.tsx",
   "views/warranty/components/warranty-action-cards.tsx",
-  "views/warranty/lookup.view.tsx",
-  "views/warranty/request.view.tsx",
-  "views/warranty/track.view.tsx",
+  "views/warranty/components/warranty-page-hero.tsx",
+  "views/warranty/components/warranty-service-page-shell.tsx",
   "views/warranty/warranty-hub.view.tsx",
 ];
 

@@ -11,10 +11,7 @@ const navigationSources = [
   "../src/views/about/components/about-network-banner.tsx",
   "../src/views/about/components/about-b2b-cta.tsx",
   "../src/views/product-detail/product-detail.view.tsx",
-  "../src/views/warranty/activate.view.tsx",
-  "../src/views/warranty/lookup.view.tsx",
-  "../src/views/warranty/request.view.tsx",
-  "../src/views/warranty/track.view.tsx",
+  "../src/views/warranty/components/warranty-other-actions.tsx",
   "../src/views/warranty/warranty.constants.ts",
 ];
 

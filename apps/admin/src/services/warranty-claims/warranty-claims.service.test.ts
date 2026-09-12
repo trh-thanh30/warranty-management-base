@@ -208,6 +208,29 @@ test("updating claim status uses status endpoint", async () => {
   ]);
 });
 
+test("completing a claim immediately uses the dedicated endpoint", async () => {
+  const calls: unknown[] = [];
+  const http = {
+    async patch(url: string, body?: unknown) {
+      calls.push({ url, body });
+      return { data: { success: true, data: claim } };
+    },
+  };
+
+  await createWarrantyClaimsService(
+    http as unknown as WarrantyClaimsHttpClient,
+  ).completeWarrantyClaim("claim-id", {
+    note: "Resolved at service center",
+  });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/warranty-claims/claim-id/complete",
+      body: { note: "Resolved at service center" },
+    },
+  ]);
+});
+
 test("assigning service center uses assignment endpoint", async () => {
   const calls: unknown[] = [];
   const http = {

@@ -1,5 +1,9 @@
 import { ActivationRequestItemsValidatorService } from '@/modules/warranty-activation-requests/service/activation-request-items-validator.service';
-import { product_status, warranty_status } from '@prisma/client';
+import {
+  activation_code_status,
+  product_status,
+  warranty_status,
+} from '@prisma/client';
 
 describe('ActivationRequestItemsValidatorService', () => {
   const categoriesRepository = { getActivationFields: jest.fn() };
@@ -9,6 +13,7 @@ describe('ActivationRequestItemsValidatorService', () => {
   };
   const requestsRepository = { findOpenByProductIds: jest.fn() };
   const activationCodesRepository = {
+    findById: jest.fn(),
     findAvailableById: jest.fn(),
     findSelectableForPendingRequest: jest.fn(),
     expireIfNeeded: jest.fn(),
@@ -81,13 +86,12 @@ describe('ActivationRequestItemsValidatorService', () => {
   });
 
   it('allows the same product for different generic activation codes', async () => {
-    activationCodesRepository.findAvailableById.mockImplementation(
-      (id: string) => ({
-        id,
-        expires_at: new Date('2027-01-01T00:00:00.000Z'),
-        product_id: 'product-a',
-      }),
-    );
+    activationCodesRepository.findById.mockImplementation((id: string) => ({
+      id,
+      expires_at: new Date('2027-01-01T00:00:00.000Z'),
+      product_id: 'product-a',
+      status: activation_code_status.AVAILABLE,
+    }));
 
     await expect(
       service.validate('category-id', [
@@ -122,6 +126,7 @@ describe('ActivationRequestItemsValidatorService', () => {
         id: 'code-a',
         expires_at: new Date('2027-01-01T00:00:00.000Z'),
         product_id: 'product-a',
+        status: activation_code_status.PENDING_APPROVAL,
       },
     );
 
@@ -148,10 +153,11 @@ describe('ActivationRequestItemsValidatorService', () => {
   });
 
   it('rejects an activation code that has not been assigned to a product', async () => {
-    activationCodesRepository.findAvailableById.mockResolvedValue({
+    activationCodesRepository.findById.mockResolvedValue({
       id: 'code-a',
       expires_at: new Date('2027-01-01T00:00:00.000Z'),
       product_id: null,
+      status: activation_code_status.AVAILABLE,
     });
 
     await expect(
@@ -164,6 +170,28 @@ describe('ActivationRequestItemsValidatorService', () => {
       ]),
     ).rejects.toMatchObject({
       code: 'ACTIVATION_CODE_PRODUCT_NOT_ASSIGNED',
+    });
+  });
+
+  it('returns the open-request conflict for a pending activation code', async () => {
+    activationCodesRepository.findById.mockResolvedValue({
+      id: 'code-a',
+      expires_at: new Date('2027-01-01T00:00:00.000Z'),
+      product_id: 'product-a',
+      status: activation_code_status.PENDING_APPROVAL,
+    });
+
+    await expect(
+      service.validate('category-id', [
+        {
+          activationCodeId: 'code-a',
+          positionKey: 'windshield',
+          productId: 'product-a',
+        },
+      ]),
+    ).rejects.toMatchObject({
+      code: 'ACTIVATION_REQUEST_ALREADY_OPEN',
+      details: { activationCodeId: 'code-a' },
     });
   });
 
@@ -182,7 +210,7 @@ describe('ActivationRequestItemsValidatorService', () => {
         },
       ]),
     ).rejects.toMatchObject({ code: 'ACTIVATION_CODE_NOT_APPLICABLE' });
-    expect(activationCodesRepository.findAvailableById).not.toHaveBeenCalled();
+    expect(activationCodesRepository.findById).not.toHaveBeenCalled();
   });
 
   it('allows a product without a pre-issued warranty when its category does not use activation codes', async () => {
@@ -241,10 +269,11 @@ describe('ActivationRequestItemsValidatorService', () => {
   });
 
   it('rejects a product different from the activation code assignment', async () => {
-    activationCodesRepository.findAvailableById.mockResolvedValue({
+    activationCodesRepository.findById.mockResolvedValue({
       id: 'code-a',
       expires_at: new Date('2027-01-01T00:00:00.000Z'),
       product_id: 'product-b',
+      status: activation_code_status.AVAILABLE,
     });
 
     await expect(

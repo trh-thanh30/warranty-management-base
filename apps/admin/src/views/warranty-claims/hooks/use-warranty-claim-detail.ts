@@ -15,6 +15,7 @@ import { useToast } from "@/src/hooks/use-toast";
 import { assetsService } from "@/src/services/assets/assets.service";
 import {
   useAssignWarrantyClaimServiceCenter,
+  useCompleteWarrantyClaim,
   useLinkWarrantyClaimAttachment,
   useUnlinkWarrantyClaimAttachment,
   useUpdateWarrantyClaimPriority,
@@ -50,6 +51,7 @@ export function useWarrantyClaimDetail(claimId: string) {
     enabled: enabled && canUpdate,
   });
   const updateStatusMutation = useUpdateWarrantyClaimStatus(claimId);
+  const completeClaimMutation = useCompleteWarrantyClaim(claimId);
   const assignServiceCenterMutation =
     useAssignWarrantyClaimServiceCenter(claimId);
   const updatePriorityMutation = useUpdateWarrantyClaimPriority(claimId);
@@ -84,6 +86,19 @@ export function useWarrantyClaimDetail(claimId: string) {
       closeAction();
     } catch {
       toast.error(t("statusUpdateError"));
+    }
+  }
+
+  async function completeImmediately(note: string) {
+    try {
+      await completeClaimMutation.mutateAsync({
+        note: note.trim() || undefined,
+      });
+      await refreshDetail();
+      toast.success(t("claimCompletedImmediately"));
+      closeAction();
+    } catch {
+      toast.error(t("claimCompleteImmediatelyError"));
     }
   }
 
@@ -176,7 +191,9 @@ export function useWarrantyClaimDetail(claimId: string) {
     claim,
     claimQuery,
     closeAction,
+    completeImmediately,
     isAssigningServiceCenter: assignServiceCenterMutation.isPending,
+    isCompletingImmediately: completeClaimMutation.isPending,
     isRemovingAttachment: unlinkAttachmentMutation.isPending,
     isUpdatingPriority: updatePriorityMutation.isPending,
     isUpdatingStatus: updateStatusMutation.isPending,

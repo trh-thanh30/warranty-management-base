@@ -12,7 +12,8 @@ export type WarrantyClaimRequestErrorKind =
   | "notFound"
   | "ownerMismatch"
   | "rateLimit"
-  | "request";
+  | "request"
+  | "verification";
 
 const WARRANTY_NOT_ELIGIBLE_CODES = new Set([
   "WARRANTY_EXPIRED",
@@ -35,6 +36,8 @@ export function getWarrantyClaimRequestErrorKind(
       ? String(error.details.code)
       : error.code;
 
+  if (detailCode?.startsWith("TURNSTILE_")) return "verification";
+
   if (detailCode === "WARRANTY_CLAIM_ALREADY_OPEN") return "alreadyOpen";
   if (detailCode === "WARRANTY_CLAIM_OWNER_MISMATCH") return "ownerMismatch";
   if (detailCode !== undefined && WARRANTY_NOT_ELIGIBLE_CODES.has(detailCode)) {
@@ -50,10 +53,17 @@ export function useWarrantyClaimRequest() {
     mutationFn: ({
       attachments,
       body,
+      turnstileToken,
     }: {
       attachments: File[];
       body: CreateWarrantyClaimBody;
-    }) => warrantyClaimsService.createWarrantyClaim(body, attachments),
+      turnstileToken?: string;
+    }) =>
+      warrantyClaimsService.createWarrantyClaim(
+        body,
+        attachments,
+        turnstileToken,
+      ),
   });
 
   return {
@@ -61,7 +71,10 @@ export function useWarrantyClaimRequest() {
     errorKind: mutation.error
       ? getWarrantyClaimRequestErrorKind(mutation.error)
       : null,
-    submit: (body: CreateWarrantyClaimBody, attachments: File[]) =>
-      mutation.mutateAsync({ attachments, body }),
+    submit: (
+      body: CreateWarrantyClaimBody,
+      attachments: File[],
+      turnstileToken?: string,
+    ) => mutation.mutateAsync({ attachments, body, turnstileToken }),
   };
 }

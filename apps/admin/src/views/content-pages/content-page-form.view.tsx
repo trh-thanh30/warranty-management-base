@@ -13,8 +13,8 @@ import {
   Skeleton,
 } from "@repo/ui";
 import { FormPageShell } from "@/src/components/common/form-page-shell";
+import { EntityQueryState } from "@/src/components/common/entity-query-state";
 import { PermissionGuard } from "@/src/components/permission-guard";
-import { StatePanel } from "@/src/components/common/state-panel";
 import { useRouter } from "@/src/i18n/navigation";
 import { ContentPageForm } from "./components/content-page-form";
 import { useContentPage } from "./hooks/use-content-pages";
@@ -58,7 +58,8 @@ export function ContentPageFormView({ mode, pageId }: Props) {
             </CardContent>
           </Card>
         ) : editing && (query.isError || !query.data) ? (
-          <StatePanel
+          <EntityQueryState
+            error={query.error}
             action={
               <Button onClick={() => void query.refetch()} variant="secondary">
                 {t("tryAgain")}

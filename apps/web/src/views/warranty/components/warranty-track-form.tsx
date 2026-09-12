@@ -8,9 +8,8 @@ import {
   FormMessage,
 } from "@/src/components/common/form";
 import { formControlFocusClassName } from "@/src/components/common/form-control.constants";
-import { getWarrantyClaimTrackingErrorKind } from "@/src/hooks/use-warranty-claim-tracking";
+import { getWarrantyTrackingErrorKind } from "@/src/hooks/use-warranty-tracking";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { PublicWarrantyClaimSummary } from "@repo/shared";
 import { Button } from "@repo/ui/button";
 import { Input } from "@repo/ui/input";
 import { cn } from "@repo/ui/lib/utils";
@@ -28,7 +27,7 @@ type WarrantyTrackFormProps = {
   initialValue?: string;
   isPending: boolean;
   onValueChange: () => void;
-  onSubmit: (claimCode: string) => Promise<PublicWarrantyClaimSummary>;
+  onSubmit: (trackingCode: string) => Promise<unknown>;
 };
 
 export function WarrantyTrackForm({
@@ -41,24 +40,24 @@ export function WarrantyTrackForm({
   const schema = useMemo(
     () =>
       createWarrantyTrackFormSchema({
-        claimCodeInvalid: t("validation.claimCodeInvalid"),
+        trackingCodeInvalid: t("validation.trackingCodeInvalid"),
       }),
     [t],
   );
   const form = useForm<WarrantyTrackFormValues>({
-    defaultValues: { claimCode: initialValue },
+    defaultValues: { trackingCode: initialValue },
     resolver: zodResolver(schema),
   });
 
   useEffect(() => {
-    form.reset({ claimCode: initialValue });
+    form.reset({ trackingCode: initialValue });
   }, [form, initialValue]);
 
-  const handleSubmit = async ({ claimCode }: WarrantyTrackFormValues) => {
+  const handleSubmit = async ({ trackingCode }: WarrantyTrackFormValues) => {
     try {
-      await onSubmit(claimCode);
+      await onSubmit(trackingCode);
     } catch (error) {
-      toast.error(t(`errors.${getWarrantyClaimTrackingErrorKind(error)}`));
+      toast.error(t(`errors.${getWarrantyTrackingErrorKind(error)}`));
     }
   };
 
@@ -71,7 +70,7 @@ export function WarrantyTrackForm({
       >
         <FormField
           control={form.control}
-          name="claimCode"
+          name="trackingCode"
           render={({ field }) => (
             <FormItem className="min-w-0 flex-1 space-y-1.5">
               <div className="relative">
@@ -79,7 +78,7 @@ export function WarrantyTrackForm({
                 <FormControl>
                   <Input
                     {...field}
-                    aria-label={t("form.claimCodeLabel")}
+                    aria-label={t("form.trackingCodeLabel")}
                     autoComplete="off"
                     className={cn(
                       "h-12 rounded-md border-border-gray bg-white pl-12 text-base uppercase aria-invalid:border-premium-red",

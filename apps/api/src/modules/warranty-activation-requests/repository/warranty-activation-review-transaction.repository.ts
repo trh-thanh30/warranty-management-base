@@ -1,5 +1,6 @@
 import { WarrantyActivationRequestQueries } from '@/modules/warranty-activation-requests/repository/warranty-activation-requests.repository.queries';
 import {
+  activation_code_status,
   Prisma,
   warranty_activation_request_status,
   warranty_method,
@@ -201,8 +202,16 @@ export class WarrantyActivationReviewTransactionRepository {
 
   markActivationCodeActivated(codeId: string, activatedAt: Date) {
     return this.tx.activationCode.updateMany({
-      where: { id: codeId, status: { in: ['AVAILABLE', 'PENDING_APPROVAL'] } },
-      data: { status: 'ACTIVATED', activated_at: activatedAt },
+      where: {
+        id: codeId,
+        status: activation_code_status.PENDING_APPROVAL,
+        expires_at: { gt: activatedAt },
+        warranty: { is: null },
+      },
+      data: {
+        status: activation_code_status.ACTIVATED,
+        activated_at: activatedAt,
+      },
     });
   }
 
@@ -211,10 +220,18 @@ export class WarrantyActivationReviewTransactionRepository {
     return this.tx.activationCode.updateMany({
       where: {
         id: { in: codeIds },
-        status: { in: ['AVAILABLE', 'PENDING_APPROVAL'] },
+        status: {
+          in: [
+            activation_code_status.AVAILABLE,
+            activation_code_status.PENDING_APPROVAL,
+          ],
+        },
         expires_at: { gt: activatedAt },
       },
-      data: { status: 'ACTIVATED', activated_at: activatedAt },
+      data: {
+        status: activation_code_status.ACTIVATED,
+        activated_at: activatedAt,
+      },
     });
   }
 

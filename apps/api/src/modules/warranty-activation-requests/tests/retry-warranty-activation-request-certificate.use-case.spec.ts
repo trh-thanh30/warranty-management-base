@@ -43,6 +43,7 @@ describe('RetryWarrantyActivationRequestCertificateUseCase', () => {
     expect(issueRequestCertificateUseCase.execute).toHaveBeenCalledWith({
       recipientEmail: 'customer@example.com',
       requestId: 'request-id',
+      sendEmail: false,
     });
     expect(result.certificate?.status).toBe('GENERATED');
   });

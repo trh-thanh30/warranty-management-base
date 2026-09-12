@@ -3,6 +3,7 @@ import {
   HttpClientError,
   type CreateWarrantyClaimBody,
   type ListProductsQuery,
+  type ListWarrantiesQuery,
   type ListWarrantyClaimsQuery,
   type ServiceCenterSummary,
   type WarrantyClaimPriority,
@@ -86,16 +87,48 @@ export function buildWarrantyClaimListQuery(
 
 export function buildWarrantyClaimProductQuery(
   search: string,
+  categoryId?: string,
 ): ListProductsQuery {
   const normalizedSearch = search.trim();
 
   return {
+    ...(categoryId ? { categoryId } : {}),
     claimEligible: "true",
     limit: 20,
     search: normalizedSearch || undefined,
     sortBy: "createdAt",
     sortOrder: "desc",
   };
+}
+
+export function buildWarrantyClaimWarrantyQuery(
+  search: string,
+  filters: { categoryId?: string; productId?: string } = {},
+): ListWarrantiesQuery {
+  const normalizedSearch = search.trim();
+
+  return {
+    ...(filters.categoryId ? { categoryId: filters.categoryId } : {}),
+    claimEligible: "true",
+    includeOpenClaim: "true",
+    limit: 20,
+    ...(filters.productId ? { productId: filters.productId } : {}),
+    search: normalizedSearch || undefined,
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  };
+}
+
+export function flattenWarrantyClaimOptions<T extends { id: string }>(
+  pages: Array<{ items: T[] }>,
+) {
+  return Array.from(
+    new Map(
+      pages
+        .flatMap((page) => page.items)
+        .map((warranty) => [warranty.id, warranty]),
+    ).values(),
+  );
 }
 
 export function getWarrantyClaimRequesterValues(

@@ -5,11 +5,13 @@ import { GenerateWarrantyActivationRequestCodeUseCase } from '@/modules/warranty
 import { ReviewWarrantyActivationRequestUseCase } from '@/modules/warranty-activation-requests/use-cases/review-warranty-activation-request.use-case';
 import { ResendWarrantyActivationRequestCertificateEmailUseCase } from '@/modules/warranty-activation-requests/use-cases/resend-warranty-activation-request-certificate-email.use-case';
 import {
+  WarrantyActivationCodeReservationConflictError,
   WarrantyActivationRequestCodeConflictError,
   WarrantyActivationRequestUniqueConflictError,
   WarrantyActivationRequestWarrantyCodeConflictError,
 } from '@/modules/warranty-activation-requests/repository/warranty-activation-request-errors';
 import {
+  activation_code_status,
   warranty_activation_request_source,
   warranty_activation_request_status,
   warranty_status,
@@ -580,6 +582,112 @@ describe('WarrantyActivationRequestsUseCases', () => {
         ],
       }),
     );
+  });
+
+  it('returns a stable conflict when a concurrent submission reserves the activation code', async () => {
+    repository.findLastRequestCode.mockResolvedValue(null);
+    repository.findOpenByProductId.mockResolvedValue(null);
+    repository.create.mockRejectedValue(
+      new WarrantyActivationCodeReservationConflictError(['activation-code-a']),
+    );
+    productsRepository.findActivationRequestTargetById.mockResolvedValue({
+      ...baseDraftProduct,
+      id: 'product-a',
+      product_code: 'CODE-product-a',
+      warranty: null,
+      warranty_duration_months: 24,
+    });
+    const itemValidator = {
+      validate: jest.fn().mockResolvedValue([
+        {
+          ...createValidatedItem('item-a', 'product-a'),
+          activationCodeId: 'activation-code-a',
+          warrantyCode: null,
+          warrantyId: null,
+        },
+      ]),
+    };
+    const useCase = new CreateWarrantyActivationRequestUseCase(
+      repository as never,
+      new GenerateWarrantyActivationRequestCodeUseCase(repository as never),
+      productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
+      itemValidator as never,
+    );
+
+    await expect(
+      useCase.execute({
+        addressDetail: '1 Nguyen Trai',
+        categoryId: 'category-id',
+        customerName: 'Nguyen Van A',
+        customerPhone: '0901234567',
+        installedAt: '2026-07-18T03:00:00.000Z',
+        items: [
+          {
+            activationCodeId: 'activation-code-a',
+            positionKey: 'item-a',
+            productId: 'product-a',
+          },
+        ],
+        provinceCode: '79',
+        provinceName: 'TP Ho Chi Minh',
+        wardCode: '26734',
+        wardName: 'Phuong Ben Thanh',
+      }),
+    ).rejects.toMatchObject({
+      code: 'ACTIVATION_REQUEST_ALREADY_OPEN',
+      details: {
+        activationCodeIds: ['activation-code-a'],
+      },
+      statusCode: 409,
+    });
+  });
+
+  it('returns the open-request conflict when a plaintext code is already pending', async () => {
+    const activationCodeRepository = {
+      findByHash: jest.fn().mockResolvedValue({
+        id: 'activation-code-a',
+        status: activation_code_status.PENDING_APPROVAL,
+      }),
+    };
+    const activationCodeCrypto = { hash: jest.fn().mockReturnValue('hash') };
+    const useCase = new CreateWarrantyActivationRequestUseCase(
+      repository as never,
+      new GenerateWarrantyActivationRequestCodeUseCase(repository as never),
+      productsRepository as never,
+      dealersRepository as never,
+      generateWarrantyCodeUseCase as never,
+      warrantyActivationRequestNotificationService as never,
+      undefined,
+      undefined,
+      activationCodeRepository as never,
+      activationCodeCrypto as never,
+    );
+
+    await expect(
+      useCase.execute({
+        activationCode: 'sp-code-a',
+        addressDetail: '1 Nguyen Trai',
+        customerName: 'Nguyen Van A',
+        customerPhone: '0901234567',
+        installedAt: '2026-07-18T03:00:00.000Z',
+        provinceCode: '79',
+        provinceName: 'TP Ho Chi Minh',
+        wardCode: '26734',
+        wardName: 'Phuong Ben Thanh',
+      }),
+    ).rejects.toMatchObject({
+      code: 'ACTIVATION_REQUEST_ALREADY_OPEN',
+      details: {
+        activationCodeIds: ['activation-code-a'],
+      },
+      statusCode: 409,
+    });
+    expect(
+      productsRepository.findActivationRequestTargetById,
+    ).not.toHaveBeenCalled();
   });
 
   it('preserves existing warranty codes while editing unchanged activation items', async () => {

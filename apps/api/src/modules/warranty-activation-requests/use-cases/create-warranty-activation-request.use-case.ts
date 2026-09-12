@@ -1,4 +1,8 @@
-import { BadRequestError, NotFoundError } from '@/common/response';
+import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+} from '@/common/response';
 import { DealersRepository } from '@/modules/dealers/repository/dealers.repository';
 import {
   getProductCatalogue,
@@ -37,6 +41,7 @@ import { Injectable, Optional } from '@nestjs/common';
 import { GenerateDealerCodeUseCase } from '@/modules/dealers/use-cases/generate-dealer-code.use-case';
 import { ActivationCodeBatchesRepository } from '@/modules/activation-codes/repository/activation-code-batches.repository';
 import { ActivationCodeCryptoService } from '@/modules/activation-codes/services/activation-code-crypto.service';
+import { activation_code_status } from '@prisma/client';
 import {
   DealerAccessPolicy,
   type DealerAccessActor,
@@ -374,10 +379,12 @@ export class CreateWarrantyActivationRequestUseCase {
         return toWarrantyActivationRequestResponse(request);
       } catch (error) {
         if (error instanceof WarrantyActivationCodeReservationConflictError) {
-          throw new BadRequestError(
-            'Activation code is no longer available',
-            'BAD_REQUEST',
-            { code: 'ACTIVATION_CODE_INVALID_OR_EXPIRED' },
+          throw new ConflictError(
+            'Activation code already has an open activation request',
+            'ACTIVATION_REQUEST_ALREADY_OPEN',
+            {
+              activationCodeIds: error.activationCodeIds,
+            },
           );
         }
 
@@ -501,9 +508,12 @@ export class CreateWarrantyActivationRequestUseCase {
         { code: 'ACTIVATION_CODE_UNAVAILABLE' },
       );
     }
-    const record = await this.activationCodeRepository.findAvailableByHash(
+    const record = await this.activationCodeRepository.findByHash(
       this.activationCodeCrypto.hash(code),
     );
+    if (record?.status === activation_code_status.PENDING_APPROVAL) {
+      this.throwActivationCodeAlreadyPending(record.id);
+    }
     if (!record) {
       throw new BadRequestError(
         'Activation code is invalid or expired',
@@ -511,7 +521,10 @@ export class CreateWarrantyActivationRequestUseCase {
         { code: 'ACTIVATION_CODE_INVALID_OR_EXPIRED' },
       );
     }
-    if (record.expires_at <= new Date()) {
+    if (
+      record.status !== activation_code_status.AVAILABLE ||
+      record.expires_at <= new Date()
+    ) {
       await this.activationCodeRepository.expireIfNeeded(record.id);
       throw new BadRequestError(
         'Activation code is invalid or expired',
@@ -537,9 +550,22 @@ export class CreateWarrantyActivationRequestUseCase {
           id,
           updateRequestId,
         )
-      : await this.activationCodeRepository.findAvailableById(id);
-    if (!record || record.expires_at <= new Date()) {
-      if (record) await this.activationCodeRepository.expireIfNeeded(record.id);
+      : await this.activationCodeRepository.findById(id);
+    if (
+      record?.status === activation_code_status.PENDING_APPROVAL &&
+      !updateRequestId
+    ) {
+      this.throwActivationCodeAlreadyPending(record.id);
+    }
+    if (
+      !record ||
+      (record.status !== activation_code_status.AVAILABLE &&
+        record.status !== activation_code_status.PENDING_APPROVAL) ||
+      record.expires_at <= new Date()
+    ) {
+      if (record?.status === activation_code_status.AVAILABLE) {
+        await this.activationCodeRepository.expireIfNeeded(record.id);
+      }
       throw new BadRequestError(
         'Activation code is invalid or expired',
         'BAD_REQUEST',
@@ -547,6 +573,16 @@ export class CreateWarrantyActivationRequestUseCase {
       );
     }
     return record;
+  }
+
+  private throwActivationCodeAlreadyPending(activationCodeId: string): never {
+    throw new ConflictError(
+      'Activation code already has an open activation request',
+      'ACTIVATION_REQUEST_ALREADY_OPEN',
+      {
+        activationCodeIds: [activationCodeId],
+      },
+    );
   }
 
   private createRequest(

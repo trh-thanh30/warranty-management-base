@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { PERMISSIONS, type PermissionKey } from "@repo/shared/constants";
 import { Button } from "@repo/ui";
 import { FormPageShell } from "@/src/components/common/form-page-shell";
-import { StatePanel } from "@/src/components/common/state-panel";
+import { EntityQueryState } from "@/src/components/common/entity-query-state";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import {
   ProductFormCard,
@@ -66,7 +66,8 @@ export function ProductFormView({ mode, productId }: ProductFormViewProps) {
         {(isEditing || isCloning) && productQuery.isLoading ? (
           <ProductFormSkeleton description={description} title={title} />
         ) : (isEditing || isCloning) && (productQuery.isError || !product) ? (
-          <StatePanel
+          <EntityQueryState
+            error={productQuery.error}
             action={
               <Button
                 onClick={() => {

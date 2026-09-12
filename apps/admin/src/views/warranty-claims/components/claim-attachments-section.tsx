@@ -102,7 +102,7 @@ export function ClaimAttachmentsSection({
 
       {attachments.length > 0 ? (
         <>
-          <div className="mt-4 min-h-[26rem] sm:min-h-[29rem]">
+          <div className="mt-4">
             <ul className="overflow-hidden rounded-lg border border-slate-200 sm:hidden dark:border-slate-800">
               {visibleAttachments.map((attachment, index) => (
                 <MobileAttachmentItem

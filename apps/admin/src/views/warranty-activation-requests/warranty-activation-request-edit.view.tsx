@@ -1,6 +1,7 @@
 "use client";
 
 import { FormPageShell } from "@/src/components/common/form-page-shell";
+import { EntityQueryState } from "@/src/components/common/entity-query-state";
 import { StatePanel } from "@/src/components/common/state-panel";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { useWarrantyActivationRequest } from "@/src/hooks/use-warranty-activation-requests";
@@ -36,7 +37,8 @@ export function WarrantyActivationRequestEditView({
         {requestQuery.isLoading ? (
           <div className="h-96 animate-pulse rounded-lg border bg-slate-100 dark:bg-slate-900" />
         ) : requestQuery.isError || !request ? (
-          <StatePanel
+          <EntityQueryState
+            error={requestQuery.error}
             action={
               <Button
                 onClick={() => void requestQuery.refetch()}

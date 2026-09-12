@@ -14,8 +14,6 @@ type ProductSearchResultProps = {
   disabledReason?: string | null;
   productCode: string;
   productName: string;
-  statusLabel: string;
-  warrantyCode: string | null;
 };
 
 export function ProductSearchResult({
@@ -24,15 +22,15 @@ export function ProductSearchResult({
   disabledReason,
   productCode,
   productName,
-  statusLabel,
-  warrantyCode,
 }: ProductSearchResultProps) {
   return (
     <span className="flex min-w-0 flex-1 flex-col gap-1">
       <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-        <span className="min-w-0 truncate font-medium">{productName}</span>
-        <span className="shrink-0 rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-900 dark:text-slate-300">
-          {statusLabel}
+        <span
+          className="line-clamp-2 w-full min-w-0 whitespace-normal wrap-break-word font-medium"
+          title={productName}
+        >
+          {productName}
         </span>
         {activationCodeSummary ? (
           <span
@@ -47,7 +45,7 @@ export function ProductSearchResult({
         ) : null}
       </span>
       <span className="min-w-0 truncate text-xs text-slate-500 dark:text-slate-400">
-        {productCode} • {warrantyCode ?? "-"}
+        {productCode}
       </span>
       {disabledReason ? (
         <span className="text-xs font-medium text-red-600 dark:text-red-400">

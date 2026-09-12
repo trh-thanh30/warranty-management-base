@@ -76,3 +76,22 @@ test("activation code search queries the server instead of filtering only loaded
     /selectedProduct &&\s*!activationCodeSearch\.trim\(\) &&\s*activationCodesQuery\.isSuccess/,
   );
 });
+
+test("activation code selection can be narrowed to a searchable batch", () => {
+  assert.match(
+    formSource,
+    /<ActivationCodeBatchSelectField[\s\S]*?onChange=\{selectActivationCodeBatch\}/,
+  );
+  assert.match(
+    hookSource,
+    /const \[activationCodeBatchId, setActivationCodeBatchId\] = useState\("ALL"\)/,
+  );
+  assert.match(
+    hookSource,
+    /batchId:\s*activationCodeBatchId === "ALL"[\s\S]*?\?[\s\S]*?undefined[\s\S]*?:\s*activationCodeBatchId/,
+  );
+  assert.match(
+    hookSource,
+    /function selectActivationCodeBatch\(batchId: string\)[\s\S]*?clearActivationCode\(\)/,
+  );
+});

@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { PERMISSIONS, type PermissionKey } from "@repo/shared/constants";
 import { Button } from "@repo/ui";
 import { FormPageShell } from "@/src/components/common/form-page-shell";
-import { StatePanel } from "@/src/components/common/state-panel";
+import { EntityQueryState } from "@/src/components/common/entity-query-state";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import {
   ServiceCenterFormCard,
@@ -48,7 +48,8 @@ export function ServiceCenterFormView({
           <ServiceCenterFormSkeleton description={description} title={title} />
         ) : isEditing &&
           (detail.serviceCenterQuery.isError || !detail.serviceCenter) ? (
-          <StatePanel
+          <EntityQueryState
+            error={detail.serviceCenterQuery.error}
             action={
               <Button
                 onClick={() => {

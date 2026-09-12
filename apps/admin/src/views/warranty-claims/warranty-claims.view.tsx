@@ -86,7 +86,11 @@ export function WarrantyClaimsView() {
         <UpdateClaimStatusDialog
           allowedStatuses={directory.actions.allowedStatusTransitions}
           claim={directory.actions.selectedClaim}
+          isCompletingImmediately={directory.actions.isCompletingImmediately}
           isUpdating={directory.actions.isUpdatingStatus}
+          onCompleteImmediately={(note) => {
+            void directory.actions.completeImmediately(note);
+          }}
           onConfirm={(status, note) => {
             void directory.actions.updateStatus(status, note);
           }}

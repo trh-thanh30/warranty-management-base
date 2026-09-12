@@ -2,7 +2,10 @@
 
 import { WarrantyResultRow } from "@/src/components/common/warranty-result-row";
 import { warrantyLookupEmptyValue } from "@/src/constants/warranty.constants";
-import { getPopulatedWarrantyFilmItems } from "@/src/utils/warranty-lookup.utils";
+import {
+  formatWarrantyDealerAddress,
+  getPopulatedWarrantyFilmItems,
+} from "@/src/utils/warranty-lookup.utils";
 import type { WarrantyLookupResult } from "@repo/shared";
 import {
   Building2,
@@ -49,15 +52,7 @@ export function WarrantyLookupResultDetails({
     .filter(Boolean)
     .join(" / ");
   const warrantyCode = warranty.warrantyCode ?? product.warrantyCode;
-  const dealerAddress = installation?.dealer
-    ? [
-        installation.dealer.address,
-        installation.dealer.district,
-        installation.dealer.province,
-      ]
-        .filter(Boolean)
-        .join(", ")
-    : null;
+  const dealerAddress = formatWarrantyDealerAddress(installation?.dealer);
   const filmItems = getPopulatedWarrantyFilmItems(
     installation?.filmItems ?? null,
   );
@@ -108,8 +103,8 @@ export function WarrantyLookupResultDetails({
         />
         <WarrantyResultRow
           icon={<Hash className="size-4" />}
-          label={t("serial")}
-          value={product.serialNumber}
+          label={t("activationCode")}
+          value={warranty.activationCode}
         />
         <WarrantyResultRow
           icon={<ShieldCheck className="size-4" />}

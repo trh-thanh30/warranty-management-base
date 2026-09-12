@@ -13,6 +13,43 @@ const renderMjml = mjml2html as unknown as (
 ) => Promise<MjmlRenderResult>;
 
 describe('warranty-certificates email template', () => {
+  it('renders confirmation without falsely advertising an attached PDF', async () => {
+    const template = Handlebars.compile(
+      readFileSync(
+        path.resolve(
+          process.cwd(),
+          'src/modules/email/templates/warranty-certificates.mjml.hbs',
+        ),
+        'utf8',
+      ),
+    );
+    const result = await renderMjml(
+      template({
+        withoutPdf: true,
+        certificateNumber: 'CERT-FAILED',
+        subject: 'Xác nhận kích hoạt bảo hành thành công',
+        customerName: 'Nguyễn Văn A',
+        certificateCount: 1,
+        certificates: [
+          {
+            positionLabel: 'Kính lái',
+            productName: 'Film A',
+            warrantyCode: 'WM-2026-ABC123',
+          },
+        ],
+      }),
+      { validationLevel: 'strict' },
+    );
+    expect(result.html).toContain('Xác nhận kích hoạt bảo hành');
+    expect(result.html).toContain('WM-2026-ABC123');
+    expect(result.html).toContain(
+      'https://baohanh.lexzenz.com/warranty/lookup',
+    );
+    expect(result.html).not.toContain('Chứng nhận PDF đã được đính kèm');
+    expect(result.html).not.toContain(
+      'File chứng nhận PDF chính thức được đính kèm',
+    );
+  });
   it('renders the approved light digital certificate layout', async () => {
     const templatePath = path.resolve(
       process.cwd(),

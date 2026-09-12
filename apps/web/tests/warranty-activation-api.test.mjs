@@ -12,7 +12,7 @@ const validFormValues = {
   provinceCode: "79",
   vehiclePlate: " 51a-123.45 ",
   wardCode: "26734",
-  warrantyCode: " fj-8899-2026 ",
+  activationCode: " sp-abcdef123456 ",
 };
 
 const provinces = [{ code: 79, name: "Thanh pho Ho Chi Minh" }];
@@ -42,9 +42,9 @@ test("warranty activation service posts the public activation request", async ()
   );
   const calls = [];
   const responseData = {
-    id: "request-id",
     requestCode: "WAR-20260730-0001",
     status: "PENDING",
+    createdAt: "2026-07-30T00:00:00.000Z",
   };
   const body = {
     addressDetail: "7C Nguyen Ngoc Phuong",
@@ -57,7 +57,7 @@ test("warranty activation service posts the public activation request", async ()
     vehiclePlate: "51A-123.45",
     wardCode: "26734",
     wardName: "Phuong Thanh My Tay",
-    warrantyCode: "FJ-8899-2026",
+    activationCode: "SP-ABCDEF123456",
   };
   const service = new WarrantyActivationRequestsService({
     async post(url, requestBody) {
@@ -72,6 +72,30 @@ test("warranty activation service posts the public activation request", async ()
   assert.deepEqual(calls, [
     {
       body,
+      url: "/public/warranty-activation-requests",
+    },
+  ]);
+});
+
+test("warranty activation service sends the Turnstile token separately from domain data", async () => {
+  const { WarrantyActivationRequestsService } = await importRequired(
+    "../src/services/warranty-activation-requests/warranty-activation-requests.service.ts",
+  );
+  const calls = [];
+  const service = new WarrantyActivationRequestsService({
+    async post(url, body, config) {
+      calls.push({ body, config, url });
+      return { data: { requestCode: "WAR-1" } };
+    },
+  });
+  const body = { activationCode: "SP-ABC123" };
+
+  await service.createActivationRequest(body, "turnstile-token");
+
+  assert.deepEqual(calls, [
+    {
+      body,
+      config: { headers: { "X-Turnstile-Token": "turnstile-token" } },
       url: "/public/warranty-activation-requests",
     },
   ]);
@@ -99,9 +123,38 @@ test("warranty activation form maps selected location names into the API body", 
       vehiclePlate: "51A-123.45",
       wardCode: "26734",
       wardName: "Phuong Thanh My Tay",
-      warrantyCode: "FJ-8899-2026",
+      activationCode: "SP-ABCDEF123456",
     },
   );
+});
+
+test("warranty activation form only asks for an SP activation code", async () => {
+  const [formSource, viSource, enSource] = await Promise.all([
+    readFile(
+      new URL(
+        "../src/views/warranty/components/warranty-activation-request-form.tsx",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+    readFile(new URL("../src/messages/vi.json", import.meta.url), "utf8"),
+    readFile(new URL("../src/messages/en.json", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(formSource, /name="activationCode"/);
+  assert.match(formSource, /fields\.activationCode\.description/);
+  assert.doesNotMatch(formSource, /fields\.stampCode/);
+
+  for (const source of [viSource, enSource]) {
+    const messages = JSON.parse(source);
+    const field = messages.Warranty.activate.fields.activationCode;
+
+    assert.equal(typeof field.label, "string");
+    assert.equal(typeof field.placeholder, "string");
+    assert.match(field.placeholder, /SP-/);
+    assert.match(field.description, /SP-/);
+    assert.doesNotMatch(field.description, /WM-|FJ-|E-Warranty/i);
+  }
 });
 
 test("warranty activation schema validates the required public fields", async () => {
@@ -120,7 +173,7 @@ test("warranty activation schema validates the required public fields", async ()
     provinceRequired: "provinceRequired",
     vehiclePlateInvalid: "vehiclePlateInvalid",
     wardRequired: "wardRequired",
-    warrantyCodeInvalid: "warrantyCodeInvalid",
+    activationCodeInvalid: "activationCodeInvalid",
   });
 
   assert.equal(schema.safeParse(validFormValues).success, true);
@@ -132,7 +185,7 @@ test("warranty activation schema validates the required public fields", async ()
     installedAt: "",
     provinceCode: "",
     wardCode: "",
-    warrantyCode: "invalid code!",
+    activationCode: "invalid code!",
   });
 
   assert.equal(invalid.success, false);
@@ -146,7 +199,7 @@ test("warranty activation schema validates the required public fields", async ()
       "installedAtRequired",
       "provinceRequired",
       "wardRequired",
-      "warrantyCodeInvalid",
+      "activationCodeInvalid",
     ]),
   );
 
@@ -173,9 +226,8 @@ test("warranty activation schema validates the required public fields", async ()
 });
 
 test("warranty activation errors distinguish business and transport failures", async () => {
-  const { getWarrantyActivationErrorKind } = await importRequired(
-    "../src/hooks/use-warranty-activation-request.ts",
-  );
+  const { getWarrantyActivationErrorKind, isActivationCodeErrorKind } =
+    await importRequired("../src/hooks/use-warranty-activation-request.ts");
   const businessError = (code) =>
     new HttpClientError({
       details: { code },
@@ -185,18 +237,37 @@ test("warranty activation errors distinguish business and transport failures", a
     });
 
   assert.equal(
-    getWarrantyActivationErrorKind(businessError("WARRANTY_CODE_NOT_FOUND")),
-    "notFound",
+    getWarrantyActivationErrorKind(
+      businessError("ACTIVATION_CODE_INVALID_OR_EXPIRED"),
+    ),
+    "activationCodeInvalid",
   );
   assert.equal(
     getWarrantyActivationErrorKind(
-      businessError("WARRANTY_NOT_ELIGIBLE_FOR_ACTIVATION"),
+      businessError("ACTIVATION_CODE_PRODUCT_NOT_ASSIGNED"),
     ),
-    "notEligible",
+    "activationCodeNotAssigned",
+  );
+  assert.equal(
+    getWarrantyActivationErrorKind(
+      businessError("ACTIVATION_CODE_NOT_APPLICABLE"),
+    ),
+    "activationCodeNotApplicable",
   );
   assert.equal(
     getWarrantyActivationErrorKind(
       businessError("ACTIVATION_REQUEST_ALREADY_OPEN"),
+    ),
+    "alreadyOpen",
+  );
+  assert.equal(
+    getWarrantyActivationErrorKind(
+      new HttpClientError({
+        code: "ACTIVATION_REQUEST_ALREADY_OPEN",
+        isNetworkError: false,
+        message: "Activation code already has an open request",
+        status: 409,
+      }),
     ),
     "alreadyOpen",
   );
@@ -210,6 +281,92 @@ test("warranty activation errors distinguish business and transport failures", a
     ),
     "rateLimit",
   );
+  assert.equal(
+    getWarrantyActivationErrorKind(
+      new HttpClientError({
+        isNetworkError: true,
+        message: "Network Error",
+      }),
+    ),
+    "network",
+  );
+  assert.equal(
+    getWarrantyActivationErrorKind(
+      new HttpClientError({
+        isNetworkError: false,
+        message: "Service unavailable",
+        status: 503,
+      }),
+    ),
+    "serviceUnavailable",
+  );
+  assert.equal(
+    getWarrantyActivationErrorKind(
+      businessError("ACTIVATION_CODE_UNAVAILABLE"),
+    ),
+    "serviceUnavailable",
+  );
+  assert.equal(
+    getWarrantyActivationErrorKind(
+      new HttpClientError({
+        isNetworkError: false,
+        message: "Not found",
+        status: 404,
+      }),
+    ),
+    "notFound",
+  );
+
+  for (const kind of [
+    "activationCodeInvalid",
+    "activationCodeNotApplicable",
+    "activationCodeNotAssigned",
+    "alreadyOpen",
+    "notFound",
+  ]) {
+    assert.equal(isActivationCodeErrorKind(kind), true);
+  }
+  assert.equal(isActivationCodeErrorKind("network"), false);
+  assert.equal(isActivationCodeErrorKind(null), false);
+});
+
+test("warranty activation form renders code errors at the activation-code field", async () => {
+  const [source, viSource, enSource] = await Promise.all([
+    readFile(
+      new URL(
+        "../src/views/warranty/components/warranty-activation-request-form.tsx",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+    readFile(new URL("../src/messages/vi.json", import.meta.url), "utf8"),
+    readFile(new URL("../src/messages/en.json", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(source, /form\.setError\(\s*"activationCode"/);
+  assert.match(source, /isActivationCodeErrorKind\(errorKind\)/);
+  assert.doesNotMatch(source, /toast\.error/);
+
+  const errorKinds = [
+    "activationCodeInvalid",
+    "activationCodeNotApplicable",
+    "activationCodeNotAssigned",
+    "alreadyOpen",
+    "invalid",
+    "network",
+    "notFound",
+    "rateLimit",
+    "request",
+    "serviceUnavailable",
+  ];
+
+  for (const messagesSource of [viSource, enSource]) {
+    const errors = JSON.parse(messagesSource).Warranty.activate.errors;
+    for (const kind of errorKinds) {
+      assert.equal(typeof errors[kind], "string", `missing errors.${kind}`);
+      assert.notEqual(errors[kind].trim(), "", `empty errors.${kind}`);
+    }
+  }
 });
 
 test("web locations service loads wards for the selected province", async () => {
@@ -267,19 +424,41 @@ test("warranty activation success keeps a receipt and static process timeline in
   assert.match(source, /formatDate\(request\.createdAt/);
   assert.match(source, /framer-motion/);
   assert.match(source, /timelineTitle/);
+  assert.match(source, /submittedAtLabel/);
+  assert.match(source, /reservationTitle/);
+  assert.match(source, /reservationDescription/);
+  assert.match(source, /aria-atomic="true"/);
+  assert.match(source, /bg-success-surface/);
+  assert.match(source, /bg-info-surface/);
   assert.doesNotMatch(source, /function formatRequestDateTime/);
   assert.doesNotMatch(source, /1-2/);
 
-  for (const messages of [vi.default, en.default]) {
+  for (const [locale, messages] of [
+    ["vi", vi.default],
+    ["en", en.default],
+  ]) {
     const success = messages.Warranty.activate.success;
     assert.equal(typeof success.timelineTitle, "string");
     assert.equal(typeof success.submittedStep, "string");
     assert.equal(typeof success.reviewStep, "string");
     assert.equal(typeof success.activationStep, "string");
+    assert.equal(typeof success.submittedAtLabel, "string");
+    assert.equal(typeof success.requestCodeHint, "string");
+    assert.equal(typeof success.reservationTitle, "string");
+    assert.equal(typeof success.reservationDescription, "string");
+    assert.equal(typeof success.emailDescription, "string");
+
+    if (locale === "vi") {
+      assert.match(success.description, /chưa được kích hoạt/i);
+      assert.match(success.reservationDescription, /mã kích hoạt/i);
+    } else {
+      assert.match(success.description, /not active yet/i);
+      assert.match(success.reservationDescription, /activation code/i);
+    }
   }
 });
 
-test("warranty activation reports submit and clipboard results through localized toasts", async () => {
+test("warranty activation reports success and clipboard results through localized toasts", async () => {
   const [formSource, successSource, vi, en] = await Promise.all([
     readFile(
       new URL(
@@ -300,10 +479,7 @@ test("warranty activation reports submit and clipboard results through localized
   ]);
 
   assert.match(formSource, /toast\.success\(t\("success\.title"\)\)/);
-  assert.match(
-    formSource,
-    /toast\.error\(t\(`errors\.\$\{getWarrantyActivationErrorKind\(error\)\}`\)\)/,
-  );
+  assert.doesNotMatch(formSource, /toast\.error/);
   assert.match(successSource, /toast\.success\(t\("copied"\)\)/);
   assert.match(successSource, /toast\.error\(t\("copyFailed"\)\)/);
 

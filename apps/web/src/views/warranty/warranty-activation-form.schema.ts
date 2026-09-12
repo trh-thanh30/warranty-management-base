@@ -13,7 +13,7 @@ export type WarrantyActivationFormValidationMessages = {
   provinceRequired: string;
   vehiclePlateInvalid: string;
   wardRequired: string;
-  warrantyCodeInvalid: string;
+  activationCodeInvalid: string;
 };
 
 export type WarrantyActivationFormValues = {
@@ -25,7 +25,7 @@ export type WarrantyActivationFormValues = {
   provinceCode: string;
   vehiclePlate: string;
   wardCode: string;
-  warrantyCode: string;
+  activationCode: string;
 };
 
 export function createWarrantyActivationFormSchema(
@@ -76,11 +76,11 @@ export function createWarrantyActivationFormSchema(
       .min(2, messages.vehiclePlateInvalid)
       .max(32, messages.vehiclePlateInvalid),
     wardCode: z.string().trim().min(1, messages.wardRequired),
-    warrantyCode: z
+    activationCode: z
       .string()
       .trim()
-      .min(6, messages.warrantyCodeInvalid)
-      .max(64, messages.warrantyCodeInvalid)
-      .regex(/^[A-Z0-9-]+$/i, messages.warrantyCodeInvalid),
+      .min(6, messages.activationCodeInvalid)
+      .max(120, messages.activationCodeInvalid)
+      .regex(/^[A-Z0-9-]+$/i, messages.activationCodeInvalid),
   });
 }

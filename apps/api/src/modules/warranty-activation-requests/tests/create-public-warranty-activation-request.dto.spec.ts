@@ -1,11 +1,13 @@
 import 'reflect-metadata';
 
+import { randomUUID } from 'node:crypto';
 import { CreatePublicWarrantyActivationRequestDto } from '@/modules/warranty-activation-requests/dto/create-public-warranty-activation-request.dto';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 
 describe('CreatePublicWarrantyActivationRequestDto', () => {
   const base = {
+    activationCode: 'SP-ABCDEF123456',
     customerEmail: 'customer@example.com',
     customerName: 'Nguyen Van A',
     customerPhone: '0901234567',
@@ -15,6 +17,39 @@ describe('CreatePublicWarrantyActivationRequestDto', () => {
     wardCode: '26734',
     wardName: 'Phuong Ben Thanh',
   };
+
+  it('requires the plaintext activation code', async () => {
+    const withoutActivationCode: Record<string, string> = { ...base };
+    delete withoutActivationCode.activationCode;
+    const dto = plainToInstance(CreatePublicWarrantyActivationRequestDto, {
+      addressDetail: '1 Nguyen Trai',
+      ...withoutActivationCode,
+    });
+
+    const errors = await validate(dto);
+
+    expect(errors.some((error) => error.property === 'activationCode')).toBe(
+      true,
+    );
+  });
+
+  it.each(['activationCodeId', 'warrantyCode', 'productId', 'categoryId'])(
+    'rejects the server-owned or legacy field %s',
+    async (property) => {
+      const dto = plainToInstance(CreatePublicWarrantyActivationRequestDto, {
+        addressDetail: '1 Nguyen Trai',
+        ...base,
+        [property]: property === 'warrantyCode' ? 'WM-LEGACY' : randomUUID(),
+      });
+
+      const errors = await validate(dto, {
+        forbidNonWhitelisted: true,
+        whitelist: true,
+      });
+
+      expect(errors.some((error) => error.property === property)).toBe(true);
+    },
+  );
 
   it('does not accept the Admin-only customer birthdate field', async () => {
     const dto = plainToInstance(CreatePublicWarrantyActivationRequestDto, {
@@ -44,6 +79,17 @@ describe('CreatePublicWarrantyActivationRequestDto', () => {
     expect(errors.some((error) => error.property === 'addressDetail')).toBe(
       true,
     );
+  });
+
+  it('accepts the required installation timestamp', async () => {
+    const dto = plainToInstance(CreatePublicWarrantyActivationRequestDto, {
+      addressDetail: '1 Nguyen Trai',
+      ...base,
+    });
+
+    await expect(
+      validate(dto, { forbidNonWhitelisted: true, whitelist: true }),
+    ).resolves.toHaveLength(0);
   });
 
   it.each([

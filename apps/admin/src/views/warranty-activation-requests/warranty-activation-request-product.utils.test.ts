@@ -6,6 +6,7 @@ import {
   formatActivationProductSearchOption,
   getActivationProductDisplayName,
   isActivationCodeRequiredForRequest,
+  isVisibleActivationProductOption,
 } from "./warranty-activation-request-product.utils.ts";
 
 const translate = ((key: string, values?: Record<string, string>): string =>
@@ -34,17 +35,45 @@ test("activation product display name falls back to the template name", () => {
   );
 });
 
-test("activation product search option uses catalogue and current warranty context", () => {
+test("activation product search option shows product code without a singular warranty code", () => {
   const product = {
     displayName: "Phim cách nhiệt B C",
     name: "Phim cách nhiệt ô tô",
     owner: { fullName: "Nguyễn Văn A" },
+    productCode: "LEX-CR50",
     warrantyCode: "WM-2026-001",
   } as ProductResponse;
 
   assert.equal(
     formatActivationProductSearchOption(product),
-    "Phim cách nhiệt B C · WM-2026-001 · Nguyễn Văn A",
+    "Phim cách nhiệt B C · LEX-CR50 · Nguyễn Văn A",
+  );
+});
+
+test("activation pickers hide deleted products but keep other blocked options", () => {
+  const product = {
+    deletedAt: null,
+    activationEligibility: {
+      eligible: false,
+      reason: "PRODUCT_INACTIVE",
+      requestCode: null,
+    },
+  } as ActivationProductOption;
+  assert.equal(isVisibleActivationProductOption(product), true);
+  assert.equal(
+    isVisibleActivationProductOption({ ...product, deletedAt: "2026-09-12" }),
+    false,
+  );
+  assert.equal(
+    isVisibleActivationProductOption({
+      ...product,
+      activationEligibility: {
+        eligible: false,
+        reason: "PRODUCT_DELETED",
+        requestCode: null,
+      },
+    }),
+    false,
   );
 });
 

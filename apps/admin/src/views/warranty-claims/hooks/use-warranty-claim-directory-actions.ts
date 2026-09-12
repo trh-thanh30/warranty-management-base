@@ -6,6 +6,7 @@ import type { WarrantyClaimSummary } from "@repo/shared";
 import { useToast } from "@/src/hooks/use-toast";
 import {
   useAssignWarrantyClaimServiceCenter,
+  useCompleteWarrantyClaim,
   useUpdateWarrantyClaimPriority,
   useUpdateWarrantyClaimStatus,
 } from "@/src/hooks/use-warranty-claims";
@@ -21,6 +22,9 @@ export function useWarrantyClaimDirectoryActions() {
   const [selectedClaim, setSelectedClaim] =
     useState<WarrantyClaimSummary | null>(null);
   const updateStatusMutation = useUpdateWarrantyClaimStatus(
+    selectedClaim?.id ?? null,
+  );
+  const completeClaimMutation = useCompleteWarrantyClaim(
     selectedClaim?.id ?? null,
   );
   const assignServiceCenterMutation = useAssignWarrantyClaimServiceCenter(
@@ -55,6 +59,20 @@ export function useWarrantyClaimDirectoryActions() {
       closeAction();
     } catch {
       toast.error(t("statusUpdateError"));
+    }
+  }
+
+  async function completeImmediately(note: string) {
+    if (!selectedClaim) return;
+
+    try {
+      await completeClaimMutation.mutateAsync({
+        note: note.trim() || undefined,
+      });
+      toast.success(t("claimCompletedImmediately"));
+      closeAction();
+    } catch {
+      toast.error(t("claimCompleteImmediatelyError"));
     }
   }
 
@@ -98,8 +116,10 @@ export function useWarrantyClaimDirectoryActions() {
       ? WARRANTY_CLAIM_STATUS_TRANSITIONS[selectedClaim.status]
       : [],
     assignServiceCenter,
+    completeImmediately,
     closeAction,
     isAssigningServiceCenter: assignServiceCenterMutation.isPending,
+    isCompletingImmediately: completeClaimMutation.isPending,
     isUpdatingPriority: updatePriorityMutation.isPending,
     isUpdatingStatus: updateStatusMutation.isPending,
     openAction,

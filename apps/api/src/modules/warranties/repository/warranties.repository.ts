@@ -3,7 +3,8 @@ import { PrismaService } from '@/database/prisma/prisma.service';
 import { WarrantyTransactionRepository } from '@/modules/warranties/repository/warranty-transaction.repository';
 import { toWarrantyRecord } from '@/modules/warranties/warranties.types';
 import { Injectable } from '@nestjs/common';
-import { Prisma, warranty_status } from '@prisma/client';
+import { Prisma, product_status, warranty_status } from '@prisma/client';
+import { WARRANTY_CLAIM_OPEN_STATUSES } from '@repo/shared/constants';
 
 const warrantyInclude = {
   activated_by: true,
@@ -13,6 +14,12 @@ const warrantyInclude = {
     select: { id: true, code_ciphertext: true, status: true },
   },
   activation_request: true,
+  claims: {
+    where: { status: { in: [...WARRANTY_CLAIM_OPEN_STATUSES] } },
+    orderBy: { submitted_at: 'desc' as const },
+    take: 1,
+    select: { id: true, claim_code: true, status: true },
+  },
   ownerships: {
     where: { is_current_owner: true },
     include: { customer: true },
@@ -26,6 +33,7 @@ const warrantyInclude = {
 };
 
 const warrantyLookupInclude = {
+  activation_code: { select: { code_ciphertext: true } },
   activation_request: true,
   ownerships: {
     where: { is_current_owner: true },
@@ -79,7 +87,11 @@ export class WarrantiesRepository {
   }
 
   list(filters: {
+    categoryId?: string;
+    claimEligible?: string;
+    includeOpenClaim?: string;
     dealerIds?: string[];
+    productId?: string;
     search?: string;
     status?: warranty_status | 'ALL';
     page?: number;
@@ -88,17 +100,43 @@ export class WarrantiesRepository {
     sortOrder?: 'asc' | 'desc';
   }) {
     const search = filters.search?.trim();
+    const claimEligible = filters.claimEligible === 'true';
+    const includeOpenClaim =
+      claimEligible && filters.includeOpenClaim === 'true';
+    const now = new Date();
     const { page, limit, skip, take } = normalizePagination(filters);
     const where: Prisma.WarrantyWhereInput = {
+      AND: claimEligible
+        ? [
+            { OR: [{ start_date: null }, { start_date: { lte: now } }] },
+            { OR: [{ end_date: null }, { end_date: { gte: now } }] },
+          ]
+        : undefined,
+      claims:
+        claimEligible && !includeOpenClaim
+          ? {
+              none: {
+                status: { in: [...WARRANTY_CLAIM_OPEN_STATUSES] },
+              },
+            }
+          : undefined,
       dealer_id: filters.dealerIds ? { in: filters.dealerIds } : undefined,
-      status:
-        filters.status === undefined
+      ownerships: claimEligible
+        ? { some: { is_current_owner: true } }
+        : undefined,
+      product_id: filters.productId,
+      status: claimEligible
+        ? warranty_status.ACTIVE
+        : filters.status === undefined
           ? warranty_status.ACTIVE
           : filters.status === 'ALL'
             ? undefined
             : filters.status,
+      warranty_code: claimEligible ? { not: '' } : undefined,
       product: {
+        category_id: filters.categoryId,
         deleted_at: null,
+        status: claimEligible ? product_status.ACTIVE : undefined,
       },
       OR: search
         ? [

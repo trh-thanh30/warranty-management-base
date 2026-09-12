@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { Button, Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui";
 import { FormPageShell } from "@/src/components/common/form-page-shell";
-import { StatePanel } from "@/src/components/common/state-panel";
+import { EntityQueryState } from "@/src/components/common/entity-query-state";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { useRouter } from "@/src/i18n/navigation";
 import { usePermissions } from "@/src/hooks/use-permissions";
@@ -54,7 +54,8 @@ export function DealerFormView({ dealerId, mode }: DealerFormViewProps) {
       >
         {isEditing &&
         (dealerQuery.isError || (!dealerQuery.isLoading && !dealer)) ? (
-          <StatePanel
+          <EntityQueryState
+            error={dealerQuery.error}
             action={
               <Button
                 onClick={() => {

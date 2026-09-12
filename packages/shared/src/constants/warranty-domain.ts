@@ -67,6 +67,16 @@ export const WARRANTY_CLAIM_ISSUE_OPTIONS = [
   "bubble",
   "fade",
   "scratch",
+  "noPower",
+  "intermittentOperation",
+  "weakOrWrongLight",
+  "moisture",
+  "noRecording",
+  "poorVideoQuality",
+  "storageFailure",
+  "connectionFailure",
+  "inaccurateReading",
+  "lowSensorBattery",
   "other",
 ] as const;
 

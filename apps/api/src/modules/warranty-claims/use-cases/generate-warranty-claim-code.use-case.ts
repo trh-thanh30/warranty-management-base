@@ -1,15 +1,22 @@
 import type { IGenerateWarrantyClaimCodeUseCase } from '@/modules/warranty-claims/types/generate-warranty-claim-code.types';
 import { Injectable } from '@nestjs/common';
-import { randomBytes } from 'node:crypto';
+import { randomInt } from 'node:crypto';
 
 const CLAIM_CODE_PREFIX = 'CLM-';
-const CLAIM_CODE_RANDOM_BYTES = 10;
+const CLAIM_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const CLAIM_CODE_SUFFIX_LENGTH = 6;
 
 @Injectable()
 export class GenerateWarrantyClaimCodeUseCase implements IGenerateWarrantyClaimCodeUseCase {
   generateWarrantyClaimCodeBatch(count: number): Promise<string[]> {
+    const generatedCodes = new Set<string>();
     return Promise.resolve(
-      Array.from({ length: count }, () => this.createRandomClaimCode()),
+      Array.from({ length: count }, () => {
+        let code = this.createRandomClaimCode();
+        while (generatedCodes.has(code)) code = this.createRandomClaimCode();
+        generatedCodes.add(code);
+        return code;
+      }),
     );
   }
 
@@ -22,8 +29,10 @@ export class GenerateWarrantyClaimCodeUseCase implements IGenerateWarrantyClaimC
   }
 
   private createRandomClaimCode() {
-    return `${CLAIM_CODE_PREFIX}${randomBytes(CLAIM_CODE_RANDOM_BYTES)
-      .toString('hex')
-      .toUpperCase()}`;
+    const suffix = Array.from(
+      { length: CLAIM_CODE_SUFFIX_LENGTH },
+      () => CLAIM_CODE_ALPHABET[randomInt(CLAIM_CODE_ALPHABET.length)],
+    ).join('');
+    return `${CLAIM_CODE_PREFIX}${new Date().getFullYear()}-${suffix}`;
   }
 }
