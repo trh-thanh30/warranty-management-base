@@ -10,6 +10,7 @@ import type {
   AnalyticsRecentActivityQuery,
   AnalyticsTrendsQuery,
   ApiResponse,
+  OnlinePresenceSummary,
 } from "@repo/shared";
 import { adminHttpClient } from "@/src/lib/admin-http-client";
 
@@ -21,6 +22,14 @@ async function getData<T>(path: string, params?: Record<string, unknown>) {
 }
 
 export const analyticsService = {
+  sendPresenceHeartbeat() {
+    return adminHttpClient.post("/analytics/presence/admin/heartbeat");
+  },
+
+  onlinePresence() {
+    return getData<OnlinePresenceSummary>("/analytics/presence/online");
+  },
+
   claims(query?: AnalyticsRangeQuery) {
     return getData<AnalyticsDashboardClaims>(`${BASE_PATH}/claims`, query);
   },

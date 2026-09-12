@@ -14,6 +14,7 @@ import { DashboardQuickActions } from "./components/dashboard-quick-actions";
 import { DashboardRecentClaims } from "./components/dashboard-recent-claims";
 import { DashboardWarrantyAnalytics } from "./components/dashboard-warranty-analytics";
 import { useDashboard } from "./hooks/use-dashboard";
+import { DashboardOnlinePresence } from "./components/dashboard-online-presence";
 
 export function DashboardView() {
   const t = useTranslations("Dashboard");
@@ -94,6 +95,7 @@ export function DashboardView() {
           actions={renderDashboardDateRangeFilter()}
           description={t("description")}
           eyebrow={t("eyebrow")}
+          eyebrowAddon={<DashboardOnlinePresence />}
           title={t("title")}
         />
 

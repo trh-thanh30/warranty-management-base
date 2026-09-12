@@ -1,6 +1,7 @@
 import { SiteSettingsProvider } from "@/src/app/providers/site-settings-provider";
 import { ToastProvider } from "@/src/app/providers/toast-provider";
 import { GoogleAnalytics } from "@/src/components/common/google-analytics";
+import { PresenceTracker } from "@/src/components/common/presence-tracker";
 import { PublicQuickChat } from "@/src/components/common/public-quick-chat";
 import { SiteFooter } from "@/src/components/layout/site-footer";
 import { SiteHeader } from "@/src/components/layout/site-header";
@@ -82,6 +83,7 @@ export default async function LocaleLayout({
       <body>
         <NextIntlClientProvider messages={messages}>
           <QueryProvider>
+            <PresenceTracker />
             <SiteSettingsProvider siteSettings={siteSettings}>
               <SiteHeader logoUrl={siteSettings?.headerLogo?.url} />
               {children}
