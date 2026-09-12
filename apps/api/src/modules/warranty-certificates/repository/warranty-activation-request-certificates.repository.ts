@@ -163,8 +163,12 @@ export class WarrantyActivationRequestCertificatesRepository {
       data: {
         email_status: warranty_certificate_email_status.SENT,
         emailed_at: emailedAt,
-        last_error: null,
       },
+    });
+    // A successful confirmation email must not erase a PDF generation error.
+    await this.prismaService.warrantyActivationRequestCertificate.updateMany({
+      where: { id: certificateId, status: 'GENERATED', email_status: 'SENT' },
+      data: { last_error: null },
     });
   }
 
@@ -172,6 +176,20 @@ export class WarrantyActivationRequestCertificatesRepository {
     await this.prismaService.warrantyActivationRequestCertificate.updateMany({
       where: {
         id: certificateId,
+        status: 'FAILED',
+        email_status: {
+          notIn: [
+            warranty_certificate_email_status.FAILED,
+            warranty_certificate_email_status.SENT,
+          ],
+        },
+      },
+      data: { email_status: warranty_certificate_email_status.FAILED },
+    });
+    await this.prismaService.warrantyActivationRequestCertificate.updateMany({
+      where: {
+        id: certificateId,
+        status: { not: 'FAILED' },
         email_status: {
           notIn: [
             warranty_certificate_email_status.FAILED,
@@ -231,6 +249,10 @@ export class WarrantyActivationRequestCertificatesRepository {
     certificate: PersistedRequestCertificateEmailData,
   ): WarrantyActivationRequestCertificateEmailData {
     return {
+      activationRequestId: certificate.activation_request_id,
+      emailStatus: certificate.email_status,
+      lastError: certificate.last_error,
+      status: certificate.status,
       certificateNumber: certificate.certificate_number,
       id: certificate.id,
       recipientEmail: certificate.recipient_email,

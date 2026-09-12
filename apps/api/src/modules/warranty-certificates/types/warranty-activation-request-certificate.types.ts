@@ -68,6 +68,10 @@ export type WarrantyActivationRequestForCertificateIssuance = {
 };
 
 export type WarrantyActivationRequestCertificateEmailData = {
+  activationRequestId: string;
+  emailStatus: WarrantyCertificateEmailStatus;
+  lastError: string | null;
+  status: WarrantyCertificateStatus;
   certificateNumber: string;
   id: string;
   recipientEmail: string | null;

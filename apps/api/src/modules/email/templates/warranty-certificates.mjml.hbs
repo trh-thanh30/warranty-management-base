@@ -1,7 +1,7 @@
 <mjml>
   <mj-head>
     <mj-title>{{subject}}</mj-title>
-    <mj-preview>Chứng nhận bảo hành điện tử {{certificateNumber}} đã được kích hoạt thành công.</mj-preview>
+    <mj-preview>{{#if withoutPdf}}Bảo hành điện tử đã được kích hoạt thành công.{{else}}Chứng nhận bảo hành điện tử {{certificateNumber}} đã được kích hoạt thành công.{{/if}}</mj-preview>
     <mj-font name="Inter" href="https://fonts.googleapis.com/css?family=Inter:400,500,600,700" />
     <mj-attributes>
       <mj-all font-family="'Inter', Arial, Helvetica, sans-serif" />
@@ -53,7 +53,7 @@
           HỆ THỐNG E-WARRANTY
         </mj-text>
         <mj-text css-class="certificate-meta" align="right" color="#111827" font-size="12px" font-weight="700" padding="4px 0 0" line-height="1.4">
-          <span style="white-space:nowrap;">MÃ CHỨNG NHẬN: <span style="color:#dc2626;font-family:'Inter',Arial,Helvetica,sans-serif;">{{certificateNumber}}</span></span>
+          <span style="white-space:nowrap;">{{#if withoutPdf}}MÃ THAM CHIẾU{{else}}MÃ CHỨNG NHẬN{{/if}}: <span style="color:#dc2626;font-family:'Inter',Arial,Helvetica,sans-serif;">{{certificateNumber}}</span></span>
         </mj-text>
       </mj-column>
     </mj-section>
@@ -62,7 +62,7 @@
     <mj-section css-class="mobile-padding" background-color="#ffffff" padding="10px 32px 8px" border-top="1px solid #e5e7eb">
       <mj-column width="100%">
         <mj-text css-class="hero-title" font-family="'Inter', Arial, Helvetica, sans-serif" color="#dc2626" font-size="26px" font-weight="700" line-height="1.3" letter-spacing=".2px" text-transform="uppercase" padding="24px 0 0" align="center">
-          Chứng nhận bảo hành điện tử
+          {{#if withoutPdf}}Xác nhận kích hoạt bảo hành{{else}}Chứng nhận bảo hành điện tử{{/if}}
         </mj-text>
         <mj-divider border-color="#e5e7eb" border-width="1px" padding="24px 0 0" />
       </mj-column>
@@ -75,7 +75,7 @@
           Xin chào <strong>{{customerName}}</strong>,
         </mj-text>
         <mj-text color="#6b7280" font-size="15px" line-height="1.7" padding="0">
-          FUJITEK đã xác nhận và kích hoạt bảo hành điện tử cho các sản phẩm dưới đây. File chứng nhận PDF chính thức được đính kèm trong email này.
+          FUJITEK đã xác nhận và kích hoạt bảo hành điện tử cho các sản phẩm dưới đây. {{#if withoutPdf}}Bảo hành đã có hiệu lực. Email này không đính kèm chứng nhận PDF.{{else}}File chứng nhận PDF chính thức được đính kèm trong email này.{{/if}}
         </mj-text>
       </mj-column>
     </mj-section>
@@ -117,6 +117,7 @@
     </mj-section>
 
     <!-- PDF notice -->
+    {{#unless withoutPdf}}
     <mj-section css-class="mobile-padding" background-color="#ffffff" padding="0 32px 32px">
       <mj-column width="100%">
         <mj-table padding="0">
@@ -141,6 +142,7 @@
     </mj-section>
 
     <!-- Footer -->
+    {{/unless}}
     <mj-section css-class="mobile-padding" background-color="#f8fafc" padding="26px 32px 6px" border-top="1px solid #e2e8f0">
       <mj-column width="100%">
         <mj-text align="center" color="#4b5563" font-size="12px" line-height="1.6" padding="0">

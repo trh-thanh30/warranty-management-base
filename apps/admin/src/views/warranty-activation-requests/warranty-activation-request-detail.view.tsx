@@ -73,8 +73,9 @@ export function WarrantyActivationRequestDetailView({
   const approveLabel =
     request?.status === "APPROVED" ? t("activate") : t("approve");
   const canResendCertificateEmail =
-    request?.certificate?.status === "GENERATED" &&
-    Boolean(request.certificate.storageKey) &&
+    request?.status === "ACTIVATED" &&
+    (request.certificate?.status === "GENERATED" ||
+      request.certificate?.status === "FAILED") &&
     Boolean(request?.certificate?.recipientEmail) &&
     hasPermission(PERMISSIONS.WARRANTY_UPDATE);
   const canUseCertificate =
@@ -113,18 +114,22 @@ export function WarrantyActivationRequestDetailView({
   async function retryCertificate() {
     try {
       setIsRetryingCertificate(true);
-      await warrantyActivationRequestsService.retryWarrantyActivationRequestCertificate(
-        requestId,
-      );
+      const result =
+        await warrantyActivationRequestsService.retryWarrantyActivationRequestCertificate(
+          requestId,
+        );
       await requestQuery.refetch();
-      toast.success(t("retriedCertificate"));
-    } catch (error) {
-      toast.error(
-        getLocalizedApiError(error, t, {
-          apiErrors: tApiErrors,
-          fallbackKey: "retryCertificateError",
-        }),
-      );
+      if (
+        result.certificate?.status === "GENERATED" &&
+        result.certificate.storageKey
+      ) {
+        toast.success(t("retriedCertificate"));
+      } else {
+        toast.error(t("retryCertificateError"));
+      }
+    } catch {
+      toast.error(t("retryCertificateError"));
+      void requestQuery.refetch();
     } finally {
       setIsRetryingCertificate(false);
     }
@@ -186,7 +191,10 @@ export function WarrantyActivationRequestDetailView({
               {canRetryCertificate ? (
                 <Button
                   className="w-full sm:w-auto"
-                  disabled={isRetryingCertificate}
+                  disabled={
+                    isRetryingCertificate ||
+                    resendCertificateEmailMutation.isPending
+                  }
                   onClick={() => {
                     void retryCertificate();
                   }}
@@ -200,20 +208,39 @@ export function WarrantyActivationRequestDetailView({
                 </Button>
               ) : null}
               {canResendCertificateEmail ? (
-                <Button
-                  className="w-full sm:w-auto"
-                  disabled={resendCertificateEmailMutation.isPending}
-                  onClick={() => {
-                    void resendCertificateEmail();
-                  }}
-                  type="button"
-                  variant="secondary"
-                >
-                  <Send className="size-4" />
-                  {resendCertificateEmailMutation.isPending
-                    ? t("resendingCertificateEmail")
-                    : t("resendCertificateEmail")}
-                </Button>
+                <div className="flex flex-col gap-1">
+                  <Button
+                    className="w-full sm:w-auto"
+                    disabled={
+                      resendCertificateEmailMutation.isPending ||
+                      isRetryingCertificate ||
+                      request.certificate?.emailStatus === "QUEUED"
+                    }
+                    title={
+                      !canUseCertificate ? t("resendWithoutPdfHint") : undefined
+                    }
+                    onClick={() => {
+                      void resendCertificateEmail();
+                    }}
+                    type="button"
+                    variant="secondary"
+                  >
+                    <Send className="size-4" />
+                    {resendCertificateEmailMutation.isPending ||
+                    request.certificate?.emailStatus === "QUEUED"
+                      ? t("resendingCertificateEmail")
+                      : t(
+                          canUseCertificate
+                            ? "resendCertificateEmail"
+                            : "resendConfirmationEmail",
+                        )}
+                  </Button>
+                  {!canUseCertificate ? (
+                    <p className="text-xs text-slate-500">
+                      {t("resendWithoutPdfHint")}
+                    </p>
+                  ) : null}
+                </div>
               ) : null}
               {canEdit || canReview ? (
                 <DropdownMenu>
