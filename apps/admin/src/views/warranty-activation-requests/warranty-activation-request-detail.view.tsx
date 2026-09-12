@@ -93,9 +93,6 @@ export function WarrantyActivationRequestDetailView({
       request.certificate.status !== "GENERATED" ||
       !request.certificate.storageKey) &&
     hasPermission(PERMISSIONS.WARRANTY_UPDATE);
-  const activationCodeBlocked = Boolean(
-    request?.activationCode && !activationCodeReviewable,
-  );
 
   async function resendCertificateEmail() {
     try {
@@ -292,15 +289,6 @@ export function WarrantyActivationRequestDetailView({
         maxWidthClassName="max-w-5xl"
         title={request?.requestCode ?? t("detailTitle")}
       >
-        {activationCodeBlocked ? (
-          <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
-            {t("activationCodeBlocked", {
-              status: t(
-                `activationCodeStatuses.${request?.activationCode?.status}`,
-              ),
-            })}
-          </div>
-        ) : null}
         {requestQuery.isLoading ? (
           <WarrantyActivationRequestDetailSkeleton />
         ) : requestQuery.isError || !request ? (
