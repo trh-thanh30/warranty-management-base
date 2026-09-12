@@ -1,4 +1,5 @@
 export const WARRANTY_CLAIM_RANDOM_CODE_PATTERN = /^CLM-[A-F0-9]{20}$/;
+export const WARRANTY_CLAIM_YEAR_CODE_PATTERN = /^CLM-\d{4}-[A-Z0-9]{6}$/;
 export const WARRANTY_CLAIM_CODE_MAX_LENGTH = 32;
 
 export function normalizeWarrantyClaimCode(value: string) {
@@ -12,6 +13,7 @@ export function isWarrantyClaimCode(value: unknown): value is string {
 
   return (
     normalizedValue.length <= WARRANTY_CLAIM_CODE_MAX_LENGTH &&
-    WARRANTY_CLAIM_RANDOM_CODE_PATTERN.test(normalizedValue)
+    (WARRANTY_CLAIM_YEAR_CODE_PATTERN.test(normalizedValue) ||
+      WARRANTY_CLAIM_RANDOM_CODE_PATTERN.test(normalizedValue))
   );
 }

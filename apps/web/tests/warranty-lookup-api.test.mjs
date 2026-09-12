@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { HttpClientError } from "@repo/shared";
+import { createTranslator } from "next-intl";
 import { WarrantiesService } from "../src/services/warranties/warranties.service.ts";
 import { getWarrantyLookupErrorKind } from "../src/hooks/use-warranty-lookup.ts";
 import {
@@ -37,6 +38,30 @@ test("lookup displays activation code instead of product serial", async () => {
   assert.match(source, /label=\{t\("activationCode"\)\}/);
   assert.match(source, /value=\{warranty.activationCode\}/);
   assert.doesNotMatch(source, /label=\{t\("serial"\)\}/);
+});
+
+test("activation code label resolves through next-intl in both locales", async () => {
+  for (const locale of ["vi", "en"]) {
+    const messages = JSON.parse(
+      await readFile(
+        new URL(`../src/messages/${locale}.json`, import.meta.url),
+        "utf8",
+      ),
+    );
+    const t = createTranslator({
+      locale,
+      messages,
+      namespace: "WarrantyLookupResult",
+      onError(error) {
+        throw error;
+      },
+    });
+
+    assert.equal(
+      t("activationCode"),
+      locale === "vi" ? "Mã kích hoạt (SP-*)" : "Activation code (SP-*)",
+    );
+  }
 });
 
 const lookupResult = {

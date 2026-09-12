@@ -1732,7 +1732,7 @@
         "sectionTitle": "Thông tin theo dõi yêu cầu",
         "sectionDescription": "Nhập mã được cấp sau khi gửi yêu cầu để kiểm tra tiến độ xử lý.",
         "trackingCodeLabel": "Mã yêu cầu cần theo dõi",
-        "placeholder": "Ví dụ: WAR-20260907-0001 hoặc CLM-0123456789ABCDEFABCD",
+        "placeholder": "Ví dụ: WAR-20260907-0001 hoặc CLM-2026-CJ8L7D",
         "submit": "Kiểm tra",
         "submitting": "Đang kiểm tra...",
         "help": "WAR-* là mã yêu cầu kích hoạt; CLM-* là mã yêu cầu bảo hành/sự cố."

@@ -62,7 +62,7 @@ test("warranty tracking schema accepts supported codes and rejects unrelated val
   assert.equal(schema.safeParse({ trackingCode: "CLM000001" }).success, false);
   assert.equal(
     schema.safeParse({ trackingCode: "CLM-2026-ABC123" }).success,
-    false,
+    true,
   );
   assert.equal(schema.safeParse({ trackingCode: "0886337733" }).success, false);
 });
@@ -81,7 +81,12 @@ test("warranty claim codes share normalization and compatibility rules", async (
     "CLM-0123456789ABCDEFABCD",
   );
   assert.equal(isWarrantyClaimCode("CLM000001"), false);
-  assert.equal(isWarrantyClaimCode("CLM-2026-ABC123"), false);
+  assert.equal(isWarrantyClaimCode("CLM-2026-ABC123"), true);
+  assert.equal(isWarrantyClaimCode(" clm-2026-cj8l7d "), true);
+  assert.equal(isWarrantyClaimCode("CLM-2026-ABC12"), false);
+  assert.equal(isWarrantyClaimCode("CLM-2026-ABC1234"), false);
+  assert.equal(isWarrantyClaimCode("CLM-26-ABC123"), false);
+  assert.equal(isWarrantyClaimCode("CLM-0123456789ABCDEFABCD"), true);
   assert.equal(
     WARRANTY_CLAIM_RANDOM_CODE_PATTERN.test("CLM-0123456789ABCDEFABCD"),
     true,
@@ -115,6 +120,7 @@ test("warranty tracking accepts and classifies WAR activation request codes", as
     getWarrantyTrackingCodeType("WAR-20260907-0001"),
     "activationRequest",
   );
+  assert.equal(getWarrantyTrackingCodeType("CLM-2026-CJ8L7D"), "claim");
   assert.deepEqual(schema.parse({ trackingCode: " war-20260907-0001 " }), {
     trackingCode: "WAR-20260907-0001",
   });

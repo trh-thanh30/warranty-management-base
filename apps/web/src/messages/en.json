@@ -1732,7 +1732,7 @@
         "sectionTitle": "Request tracking information",
         "sectionDescription": "Enter the code issued after submission to check processing progress.",
         "trackingCodeLabel": "Request code to track",
-        "placeholder": "For example: WAR-20260907-0001 or CLM-0123456789ABCDEFABCD",
+        "placeholder": "For example: WAR-20260907-0001 or CLM-2026-CJ8L7D",
         "submit": "Check",
         "submitting": "Checking...",
         "help": "WAR-* is an activation request code; CLM-* is a warranty/issue request code."

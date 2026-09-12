@@ -1,13 +1,13 @@
 "use client";
 
+import { APP_ROUTES } from "@/src/constants/routes.constants";
+import { Link } from "@/src/i18n/navigation";
 import {
   formatDate,
   type PublicWarrantyActivationRequestReceipt,
 } from "@repo/shared";
 import { Badge } from "@repo/ui/badge";
 import { Button } from "@repo/ui/button";
-import { APP_ROUTES } from "@/src/constants/routes.constants";
-import { Link } from "@/src/i18n/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   Check,
@@ -79,7 +79,7 @@ export function WarrantyActivationSuccess({
       animate={{ opacity: 1, y: 0 }}
       aria-atomic="true"
       aria-live="polite"
-      className="mx-auto max-w-2xl overflow-hidden rounded-md border border-border-gray bg-white shadow-xl"
+      className="mx-auto max-w-4xl overflow-hidden rounded-md border border-border-gray bg-white"
       initial={
         shouldReduceMotion
           ? false
