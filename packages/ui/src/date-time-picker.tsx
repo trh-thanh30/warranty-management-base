@@ -227,7 +227,10 @@ export function DateTimePicker({
           </Button>
         </PopoverTrigger>
       </div>
-      <PopoverContent align="start" className="w-auto min-w-80 p-3">
+      <PopoverContent
+        align="start"
+        className="w-80 max-w-[calc(100vw-2rem)] p-3"
+      >
         <Calendar
           mode="single"
           onSelect={(date) => {

@@ -1447,7 +1447,13 @@
           "description": "Nhập mã bắt đầu bằng SP- được in trên tem sản phẩm."
         },
         "installedAt": {
-          "label": "Ngày lắp đặt (Ngày bắt đầu bảo hành) *"
+          "label": "Ngày lắp đặt (Ngày bắt đầu bảo hành) *",
+          "placeholder": "DD/MM/YYYY HH:mm",
+          "calendarAriaLabel": "Mở lịch chọn ngày lắp đặt",
+          "clearLabel": "Xóa ngày lắp đặt",
+          "hourLabel": "Giờ",
+          "minuteLabel": "Phút",
+          "resetLabel": "Đặt về thời điểm hiện tại"
         },
         "province": {
           "label": "Tỉnh / Thành phố *",

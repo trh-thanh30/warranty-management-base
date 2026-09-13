@@ -1447,7 +1447,13 @@
           "description": "Enter the code beginning with SP- printed on the product label."
         },
         "installedAt": {
-          "label": "Installation date (Warranty start date) *"
+          "label": "Installation date (Warranty start date) *",
+          "placeholder": "DD/MM/YYYY HH:mm",
+          "calendarAriaLabel": "Open installation date calendar",
+          "clearLabel": "Clear installation date",
+          "hourLabel": "Hour",
+          "minuteLabel": "Minute",
+          "resetLabel": "Set to current time"
         },
         "province": {
           "label": "Province / City *",
