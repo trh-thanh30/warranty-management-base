@@ -1697,7 +1697,10 @@
           "selectedFiles": "Ảnh và video đã chọn",
           "preview": "Xem trước tệp {name}",
           "closePreview": "Đóng xem trước",
-          "remove": "Gỡ tệp {name}"
+          "remove": "Gỡ tệp {name}",
+          "removed": "Đã gỡ tệp",
+          "uploaded": "Đã thêm tệp",
+          "duplicate": "Tệp này đã được thêm"
         }
       }
     },

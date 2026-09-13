@@ -1697,7 +1697,10 @@
           "selectedFiles": "Selected images and videos",
           "preview": "Preview {name}",
           "closePreview": "Close preview",
-          "remove": "Remove {name}"
+          "remove": "Remove {name}",
+          "removed": "File removed",
+          "uploaded": "File added",
+          "duplicate": "This file has already been added"
         }
       }
     },

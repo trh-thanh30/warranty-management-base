@@ -48,7 +48,11 @@ import {
   type WarrantyClaimRequestFormValues,
 } from "../warranty-claim-request-form.schema";
 import { toWarrantyClaimRequestBody } from "../warranty-claim-request.utils";
-import { WARRANTY_CLAIM_EVIDENCE_ACCEPT } from "../warranty-claim-evidence.constants";
+import {
+  isWarrantyClaimEvidence,
+  WARRANTY_CLAIM_EVIDENCE_ACCEPT,
+  WARRANTY_CLAIM_EVIDENCE_MAX_FILE_SIZE,
+} from "../warranty-claim-evidence.constants";
 
 type WarrantyClaimRequestFormProps = {
   errorKind: WarrantyClaimRequestErrorKind | null;
@@ -282,7 +286,50 @@ export function WarrantyClaimRequestForm({
                     files={field.value}
                     hint={t("fields.evidence.hint")}
                     id="warranty-claim-evidence"
-                    onFilesChange={field.onChange}
+                    onDuplicateFiles={() =>
+                      toast.error(t("fields.evidence.duplicate"))
+                    }
+                    onFilesChange={(files) => {
+                      if (files.length < field.value.length) {
+                        toast.success(t("fields.evidence.removed"));
+                      }
+
+                      const invalidFile = files.find(
+                        (file) =>
+                          !isWarrantyClaimEvidence(file) ||
+                          file.size > WARRANTY_CLAIM_EVIDENCE_MAX_FILE_SIZE,
+                      );
+                      const validFiles = files.filter(
+                        (file) =>
+                          isWarrantyClaimEvidence(file) &&
+                          file.size <= WARRANTY_CLAIM_EVIDENCE_MAX_FILE_SIZE,
+                      );
+                      const hasAddedFiles = validFiles.some(
+                        (file) => !field.value.includes(file),
+                      );
+
+                      if (hasAddedFiles) {
+                        toast.success(t("fields.evidence.uploaded"));
+                      }
+
+                      if (invalidFile) {
+                        const errorMessage = isWarrantyClaimEvidence(
+                          invalidFile,
+                        )
+                          ? t("validation.evidenceTooLarge")
+                          : t("validation.evidenceInvalid");
+
+                        form.setError("attachments", {
+                          type: "validate",
+                          message: errorMessage,
+                        });
+                        toast.error(errorMessage);
+                      } else {
+                        form.clearErrors("attachments");
+                      }
+
+                      field.onChange(validFiles);
+                    }}
                     previewFileLabel={(name) =>
                       t("fields.evidence.preview", { name })
                     }
