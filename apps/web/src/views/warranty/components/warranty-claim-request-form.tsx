@@ -270,7 +270,7 @@ export function WarrantyClaimRequestForm({
             control={form.control}
             name="attachments"
             render={({ field }) => (
-              <FormItem className="sm:col-span-2">
+              <FormItem className="min-w-0 sm:col-span-2">
                 <FormLabel className="text-sm font-semibold uppercase text-deep-black">
                   {t("fields.evidence.label")}
                 </FormLabel>

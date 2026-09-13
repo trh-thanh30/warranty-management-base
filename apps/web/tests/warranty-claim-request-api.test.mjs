@@ -24,6 +24,21 @@ const validFormValues = {
   warrantyCode: " wm-2026-abcdef ",
 };
 
+test("warranty claim evidence field can shrink within the form grid", async () => {
+  const source = await readFile(
+    new URL(
+      "../src/views/warranty/components/warranty-claim-request-form.tsx",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    source,
+    /<FormItem className="min-w-0 sm:col-span-2">[\s\S]*<Dropzone/,
+  );
+});
+
 test("warranty claims service posts the public claim request with required evidence", async () => {
   const { WarrantyClaimsService } = await importRequired(
     "../src/services/warranty-claims/warranty-claims.service.ts",
