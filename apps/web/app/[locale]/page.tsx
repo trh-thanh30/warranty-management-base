@@ -1,25 +1,13 @@
-import { PUBLIC_FEATURES } from "@/src/config/public-features.config";
-import { createGeneratePageMetadata } from "@/src/config/seo.config";
-import { AboutView } from "@/src/views/about/about.view";
-import { generateAboutMetadata } from "@/src/views/about/about.metadata";
-import { HomeView } from "@/src/views/home/home.view";
+import { APP_ROUTES } from "@/src/constants/routes.constants";
+import { redirect } from "@/src/i18n/navigation";
+import type { AppLocale } from "@/src/i18n/routing";
 
-const generateHomeMetadata = createGeneratePageMetadata("/");
+type RootPageProps = {
+  params: Promise<{ locale: AppLocale }>;
+};
 
-export async function generateMetadata(
-  props: Parameters<typeof generateHomeMetadata>[0],
-) {
-  if (PUBLIC_FEATURES.pages.about) {
-    return generateAboutMetadata(props);
-  }
+export default async function Page({ params }: RootPageProps) {
+  const { locale } = await params;
 
-  return generateHomeMetadata(props);
-}
-
-export default function Page(props: Parameters<typeof HomeView>[0]) {
-  if (!PUBLIC_FEATURES.pages.about) {
-    return <HomeView {...props} />;
-  }
-
-  return <AboutView />;
+  redirect({ href: APP_ROUTES.warranty, locale });
 }
