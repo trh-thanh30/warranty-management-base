@@ -106,6 +106,11 @@ export const envSchema = z
       .min(1)
       .max(8)
       .default(2),
+    ACTIVATION_LABEL_TEMPLATE_VERSION: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(2),
     ACTIVATION_CODE_PRINT_QUEUE_SIZE: z.coerce
       .number()
       .int()
