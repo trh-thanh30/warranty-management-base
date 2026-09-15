@@ -48,7 +48,11 @@ import {
   type WarrantyClaimRequestFormValues,
 } from "../warranty-claim-request-form.schema";
 import { toWarrantyClaimRequestBody } from "../warranty-claim-request.utils";
-import { WARRANTY_CLAIM_EVIDENCE_ACCEPT } from "../warranty-claim-evidence.constants";
+import {
+  isWarrantyClaimEvidence,
+  WARRANTY_CLAIM_EVIDENCE_ACCEPT,
+  WARRANTY_CLAIM_EVIDENCE_MAX_FILE_SIZE,
+} from "../warranty-claim-evidence.constants";
 
 type WarrantyClaimRequestFormProps = {
   errorKind: WarrantyClaimRequestErrorKind | null;
@@ -68,6 +72,8 @@ export function WarrantyClaimRequestForm({
   onSubmit,
 }: WarrantyClaimRequestFormProps) {
   const t = useTranslations("Warranty.request");
+  // Temporarily hidden per client request; keep the Dropzone ready to restore.
+  const showEvidenceUpload = false;
   const schema = useMemo(
     () =>
       createWarrantyClaimRequestFormSchema({
@@ -266,37 +272,82 @@ export function WarrantyClaimRequestForm({
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="attachments"
-            render={({ field }) => (
-              <FormItem className="sm:col-span-2">
-                <FormLabel className="text-sm font-semibold uppercase text-deep-black">
-                  {t("fields.evidence.label")}
-                </FormLabel>
-                <FormControl>
-                  <Dropzone
-                    accept={WARRANTY_CLAIM_EVIDENCE_ACCEPT}
-                    chooseLabel={t("fields.evidence.choose")}
-                    disabled={isPending}
-                    files={field.value}
-                    hint={t("fields.evidence.hint")}
-                    id="warranty-claim-evidence"
-                    onFilesChange={field.onChange}
-                    previewFileLabel={(name) =>
-                      t("fields.evidence.preview", { name })
-                    }
-                    closePreviewLabel={t("fields.evidence.closePreview")}
-                    removeFileLabel={(name) =>
-                      t("fields.evidence.remove", { name })
-                    }
-                    selectedFilesLabel={t("fields.evidence.selectedFiles")}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {showEvidenceUpload && (
+            <FormField
+              control={form.control}
+              name="attachments"
+              render={({ field }) => (
+                <FormItem className="min-w-0 sm:col-span-2">
+                  <FormLabel className="text-sm font-semibold uppercase text-deep-black">
+                    {t("fields.evidence.label")}
+                  </FormLabel>
+                  <FormControl>
+                    <Dropzone
+                      accept={WARRANTY_CLAIM_EVIDENCE_ACCEPT}
+                      chooseLabel={t("fields.evidence.choose")}
+                      disabled={isPending}
+                      files={field.value}
+                      hint={t("fields.evidence.hint")}
+                      id="warranty-claim-evidence"
+                      onDuplicateFiles={() =>
+                        toast.error(t("fields.evidence.duplicate"))
+                      }
+                      onFilesChange={(files) => {
+                        if (files.length < field.value.length) {
+                          toast.success(t("fields.evidence.removed"));
+                        }
+
+                        const invalidFile = files.find(
+                          (file) =>
+                            !isWarrantyClaimEvidence(file) ||
+                            file.size > WARRANTY_CLAIM_EVIDENCE_MAX_FILE_SIZE,
+                        );
+                        const validFiles = files.filter(
+                          (file) =>
+                            isWarrantyClaimEvidence(file) &&
+                            file.size <= WARRANTY_CLAIM_EVIDENCE_MAX_FILE_SIZE,
+                        );
+                        const hasAddedFiles = validFiles.some(
+                          (file) => !field.value.includes(file),
+                        );
+
+                        if (hasAddedFiles) {
+                          toast.success(t("fields.evidence.uploaded"));
+                        }
+
+                        if (invalidFile) {
+                          const errorMessage = isWarrantyClaimEvidence(
+                            invalidFile,
+                          )
+                            ? t("validation.evidenceTooLarge")
+                            : t("validation.evidenceInvalid");
+
+                          form.setError("attachments", {
+                            type: "validate",
+                            message: errorMessage,
+                          });
+                          toast.error(errorMessage);
+                        } else {
+                          form.clearErrors("attachments");
+                        }
+
+                        field.onChange(validFiles);
+                      }}
+                      previewFileLabel={(name) =>
+                        t("fields.evidence.preview", { name })
+                      }
+                      closePreviewLabel={t("fields.evidence.closePreview")}
+                      removeFileLabel={(name) =>
+                        t("fields.evidence.remove", { name })
+                      }
+                      selectedFilesLabel={t("fields.evidence.selectedFiles")}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
         </div>
 
         <TurnstileWidget

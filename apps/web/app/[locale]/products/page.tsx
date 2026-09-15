@@ -3,7 +3,7 @@ import { ProductsView } from "@/src/views/products/products.view";
 import { notFound } from "next/navigation";
 
 export default function ProductsPage() {
-  if (!PUBLIC_FEATURES.products) {
+  if (!PUBLIC_FEATURES.pages.products) {
     notFound();
   }
 

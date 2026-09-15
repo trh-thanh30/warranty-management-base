@@ -3,7 +3,7 @@ import { WarrantyActivateView } from "@/src/views/warranty/activate.view";
 import { notFound } from "next/navigation";
 
 export default function WarrantyActivatePage() {
-  if (!PUBLIC_FEATURES.warrantyActivation) {
+  if (!PUBLIC_FEATURES.pages.warrantyActivation) {
     notFound();
   }
 

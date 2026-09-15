@@ -33,6 +33,19 @@ describe('ActivationLabelTemplateService', () => {
     expect(html).not.toContain('SKU:');
   });
 
+  it('keeps text inset from precut edges without moving label boundaries', () => {
+    const defaultHtml = service.render(batch, ['SP-1']);
+    const compactHtml = service.render(batch, ['SP-1'], {
+      labelHeightMm: 12,
+      labelWidthMm: 30,
+    });
+
+    expect(defaultHtml).toContain('padding:2mm 3mm');
+    expect(compactHtml).toContain('padding:1.4mm 2.1mm');
+    expect(defaultHtml).toContain('.label{width:45.7mm;height:16.9mm');
+    expect(compactHtml).toContain('.label{width:30mm;height:12mm');
+  });
+
   it('uses a custom label size and recalculates labels per A4 sheet', () => {
     const html = service.render(
       batch,

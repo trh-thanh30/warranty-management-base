@@ -24,6 +24,50 @@ const validFormValues = {
   warrantyCode: " wm-2026-abcdef ",
 };
 
+test("warranty claim evidence field can shrink within the form grid", async () => {
+  const source = await readFile(
+    new URL(
+      "../src/views/warranty/components/warranty-claim-request-form.tsx",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    source,
+    /<FormItem className="min-w-0 sm:col-span-2">[\s\S]*<Dropzone/,
+  );
+});
+
+test("warranty claim upload rejects invalid files immediately", async () => {
+  const source = await readFile(
+    new URL(
+      "../src/views/warranty/components/warranty-claim-request-form.tsx",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+
+  assert.match(source, /form\.setError\("attachments"/);
+  assert.match(source, /form\.clearErrors\("attachments"/);
+  assert.match(source, /files\.filter\([\s\S]*isWarrantyClaimEvidence/);
+  assert.match(source, /toast\.error\(errorMessage\)/);
+  assert.match(source, /toast\.success\(t\("fields\.evidence\.uploaded"\)\)/);
+  assert.match(source, /onDuplicateFiles=\{\(\) =>/);
+  assert.match(source, /toast\.error\(t\("fields\.evidence\.duplicate"\)\)/);
+  assert.match(source, /toast\.success\(t\("fields\.evidence\.removed"\)\)/);
+});
+
+test("dropzone reports duplicate files without adding them", async () => {
+  const source = await readFile(
+    new URL("../../../packages/ui/src/dropzone.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(source, /onDuplicateFiles\?: \(count: number\) => void/);
+  assert.match(source, /onDuplicateFiles\?\.\(duplicateCount\)/);
+});
+
 test("warranty claims service posts the public claim request with required evidence", async () => {
   const { WarrantyClaimsService } = await importRequired(
     "../src/services/warranty-claims/warranty-claims.service.ts",
@@ -135,8 +179,7 @@ test("warranty claim form schema validates public request fields", async () => {
     ...validFormValues,
     attachments: [],
   });
-  assert.equal(withoutEvidence.success, false);
-  assert.equal(withoutEvidence.error.issues[0]?.message, "evidenceRequired");
+  assert.equal(withoutEvidence.success, true);
 
   const unsupportedEvidence = schema.safeParse({
     ...validFormValues,

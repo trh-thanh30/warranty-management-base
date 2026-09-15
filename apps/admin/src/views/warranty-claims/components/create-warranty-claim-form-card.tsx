@@ -34,6 +34,8 @@ export function CreateWarrantyClaimFormCard({
   onCreated,
 }: CreateWarrantyClaimFormCardProps) {
   const t = useTranslations("WarrantyClaims");
+  // Temporarily hidden per client request; keep the Dropzone ready to restore.
+  const showEvidenceUpload = false;
   const {
     attachments,
     blockedWarranty,
@@ -266,28 +268,30 @@ export function CreateWarrantyClaimFormCard({
                 {...register("issueDetail")}
               />
             </FormField>
-            <FormField
-              error={translateWarrantyClaimCreateFieldError(
-                errors.attachments?.message,
-                t,
-              )}
-              htmlFor="create-warranty-claim-evidence"
-              label={t("evidenceLabel")}
-            >
-              <Dropzone
-                accept={WARRANTY_CLAIM_EVIDENCE_MIME_TYPES.join(",")}
-                chooseLabel={t("evidenceChoose")}
-                disabled={isSaving}
-                files={attachments}
-                hint={t("evidenceHint")}
-                id="create-warranty-claim-evidence"
-                onFilesChange={setAttachments}
-                previewFileLabel={(name) => t("evidencePreview", { name })}
-                closePreviewLabel={t("evidenceClosePreview")}
-                removeFileLabel={(name) => t("evidenceRemove", { name })}
-                selectedFilesLabel={t("evidenceSelectedFiles")}
-              />
-            </FormField>
+            {showEvidenceUpload && (
+              <FormField
+                error={translateWarrantyClaimCreateFieldError(
+                  errors.attachments?.message,
+                  t,
+                )}
+                htmlFor="create-warranty-claim-evidence"
+                label={t("evidenceLabel")}
+              >
+                <Dropzone
+                  accept={WARRANTY_CLAIM_EVIDENCE_MIME_TYPES.join(",")}
+                  chooseLabel={t("evidenceChoose")}
+                  disabled={isSaving}
+                  files={attachments}
+                  hint={t("evidenceHint")}
+                  id="create-warranty-claim-evidence"
+                  onFilesChange={setAttachments}
+                  previewFileLabel={(name) => t("evidencePreview", { name })}
+                  closePreviewLabel={t("evidenceClosePreview")}
+                  removeFileLabel={(name) => t("evidenceRemove", { name })}
+                  selectedFilesLabel={t("evidenceSelectedFiles")}
+                />
+              </FormField>
+            )}
           </WarrantyClaimFormSection>
 
           <div className="flex flex-col-reverse gap-2 border-t border-slate-200 pt-5 dark:border-slate-800 sm:flex-row sm:justify-end">

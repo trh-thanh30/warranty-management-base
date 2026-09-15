@@ -17,7 +17,9 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 const navigationItems = [
-  { labelKey: "about", href: APP_ROUTES.home, external: false },
+  ...(PUBLIC_FEATURES.pages.about
+    ? [{ labelKey: "about" as const, href: APP_ROUTES.home, external: false }]
+    : []),
   { labelKey: "warranty", href: APP_ROUTES.warranty, external: false },
   {
     labelKey: "products",
@@ -29,7 +31,7 @@ const navigationItems = [
     href: PUBLIC_DEALER_NETWORK_URL,
     external: true,
   },
-  ...(PUBLIC_FEATURES.contactNavigation
+  ...(PUBLIC_FEATURES.navigation.contact
     ? [
         {
           labelKey: "contact" as const,

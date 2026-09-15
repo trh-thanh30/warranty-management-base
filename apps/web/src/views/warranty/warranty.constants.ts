@@ -11,7 +11,7 @@ export const warrantyActions = [
     icon: "search",
     href: APP_ROUTES.warrantyLookup,
   },
-  ...(PUBLIC_FEATURES.warrantyActivation
+  ...(PUBLIC_FEATURES.pages.warrantyActivation
     ? [
         {
           id: "activate" as const,

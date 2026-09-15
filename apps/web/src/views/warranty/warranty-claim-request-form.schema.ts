@@ -35,7 +35,7 @@ export function createWarrantyClaimRequestFormSchema(
   return z.object({
     attachments: z
       .array(z.custom<File>((value) => value instanceof File))
-      .min(1, messages.evidenceRequired)
+      // Evidence is optional while the upload field is temporarily hidden.
       .superRefine((files, context) => {
         for (const file of files) {
           if (!isWarrantyClaimEvidence(file)) {

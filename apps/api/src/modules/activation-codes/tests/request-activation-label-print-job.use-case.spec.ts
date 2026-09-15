@@ -9,10 +9,12 @@ describe('RequestActivationLabelPrintJobUseCase', () => {
     markQueued: jest.fn(),
   };
   const queue = { enqueue: jest.fn() };
+  const config = { printTemplateVersion: 2 };
   const useCase = new RequestActivationLabelPrintJobUseCase(
     batches as never,
     jobs as never,
     queue as never,
+    config as never,
   );
 
   beforeEach(() => {
@@ -61,7 +63,71 @@ describe('RequestActivationLabelPrintJobUseCase', () => {
       }),
     ).resolves.toBe(existing);
 
+    expect(jobs.findByIdempotencyKey).toHaveBeenCalledWith(
+      'activation-labels-v2-batch-id-1-50-45.7x16.9',
+    );
     expect(queue.enqueue).not.toHaveBeenCalled();
+  });
+
+  it('creates a new job when only a pre-versioned completed PDF exists', async () => {
+    const oldKey = 'activation-labels-batch-id-1-50-45.7x16.9';
+    const oldJob = { id: 'old-print-job-id', status: 'COMPLETED' };
+    jobs.findByIdempotencyKey.mockImplementation((key: string) =>
+      Promise.resolve(key === oldKey ? oldJob : null),
+    );
+    jobs.create.mockResolvedValue({ id: 'new-print-job-id' });
+    jobs.markQueued.mockResolvedValue({
+      id: 'new-print-job-id',
+      status: 'QUEUED',
+    });
+    queue.enqueue.mockResolvedValue({ id: 'new-bull-job-id' });
+
+    await expect(
+      useCase.execute({
+        batchId: 'batch-id',
+        requestedById: 'admin-id',
+      }),
+    ).resolves.toMatchObject({ id: 'new-print-job-id', status: 'QUEUED' });
+
+    expect(jobs.findByIdempotencyKey).toHaveBeenCalledWith(
+      'activation-labels-v2-batch-id-1-50-45.7x16.9',
+    );
+    expect(jobs.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        idempotencyKey: 'activation-labels-v2-batch-id-1-50-45.7x16.9',
+      }),
+    );
+    expect(queue.enqueue).toHaveBeenCalledWith('new-print-job-id');
+  });
+
+  it('uses an injected template version to create a distinct print job', async () => {
+    jobs.findByIdempotencyKey.mockResolvedValue(null);
+    jobs.create.mockResolvedValue({ id: 'version-3-job-id' });
+    jobs.markQueued.mockResolvedValue({
+      id: 'version-3-job-id',
+      status: 'QUEUED',
+    });
+    queue.enqueue.mockResolvedValue({ id: 'bull-job-id' });
+    const versionThreeUseCase = new RequestActivationLabelPrintJobUseCase(
+      batches as never,
+      jobs as never,
+      queue as never,
+      { printTemplateVersion: 3 } as never,
+    );
+
+    await versionThreeUseCase.execute({
+      batchId: 'batch-id',
+      requestedById: 'admin-id',
+    });
+
+    expect(jobs.findByIdempotencyKey).toHaveBeenCalledWith(
+      'activation-labels-v3-batch-id-1-50-45.7x16.9',
+    );
+    expect(jobs.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        idempotencyKey: 'activation-labels-v3-batch-id-1-50-45.7x16.9',
+      }),
+    );
   });
 
   it('ensures an existing queued job is still present in BullMQ', async () => {
@@ -94,12 +160,12 @@ describe('RequestActivationLabelPrintJobUseCase', () => {
     });
 
     expect(jobs.findByIdempotencyKey).toHaveBeenCalledWith(
-      'activation-labels-batch-id-1-50-40x20',
+      'activation-labels-v2-batch-id-1-50-40x20',
     );
     expect(jobs.create).toHaveBeenCalledWith({
       batchId: 'batch-id',
       from: 1,
-      idempotencyKey: 'activation-labels-batch-id-1-50-40x20',
+      idempotencyKey: 'activation-labels-v2-batch-id-1-50-40x20',
       labelHeightMm: 20,
       labelWidthMm: 40,
       requestedById: 'admin-id',

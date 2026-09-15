@@ -10,6 +10,10 @@
   color-scheme: light;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 .fujitek-dealer-marker {
   background: transparent !important;
   border: 0 !important;

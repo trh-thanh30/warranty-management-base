@@ -8,7 +8,9 @@ import { FaFacebookF, FaTiktok, FaYoutube } from "react-icons/fa6";
 import { SiZalo } from "react-icons/si";
 
 export const footerNavigationItems = [
-  { id: "about", href: APP_ROUTES.home, external: false },
+  ...(PUBLIC_FEATURES.pages.about
+    ? [{ id: "about" as const, href: APP_ROUTES.home, external: false }]
+    : []),
   {
     id: "products",
     href: PUBLIC_PRODUCT_CATALOG_URL,
@@ -16,7 +18,7 @@ export const footerNavigationItems = [
   },
   { id: "warranty", href: APP_ROUTES.warranty, external: false },
   { id: "dealers", href: PUBLIC_DEALER_NETWORK_URL, external: true },
-  ...(PUBLIC_FEATURES.contactNavigation
+  ...(PUBLIC_FEATURES.navigation.contact
     ? [{ id: "contact" as const, href: APP_ROUTES.contact, external: false }]
     : []),
 ] as const;

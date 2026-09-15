@@ -157,6 +157,38 @@ test("warranty activation form only asks for an SP activation code", async () =>
   }
 });
 
+test("warranty activation uses the shared date-time picker", async () => {
+  const [formSource, viSource, enSource] = await Promise.all([
+    readFile(
+      new URL(
+        "../src/views/warranty/components/warranty-activation-request-form.tsx",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+    readFile(new URL("../src/messages/vi.json", import.meta.url), "utf8"),
+    readFile(new URL("../src/messages/en.json", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(formSource, /DateTimePicker/);
+  assert.doesNotMatch(formSource, /type="datetime-local"/);
+
+  for (const source of [viSource, enSource]) {
+    const installedAt = JSON.parse(source).Warranty.activate.fields.installedAt;
+    for (const key of [
+      "calendarAriaLabel",
+      "clearLabel",
+      "hourLabel",
+      "minuteLabel",
+      "placeholder",
+      "resetLabel",
+    ]) {
+      assert.equal(typeof installedAt[key], "string", `missing ${key}`);
+      assert.notEqual(installedAt[key].trim(), "", `empty ${key}`);
+    }
+  }
+});
+
 test("warranty activation schema validates the required public fields", async () => {
   const { createWarrantyActivationFormSchema } = await importRequired(
     "../src/views/warranty/warranty-activation-form.schema.ts",

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { PhoneCall } from "lucide-react";
 import { APP_ROUTES } from "@/src/constants/routes.constants";
+import { PUBLIC_FEATURES } from "@/src/config/public-features.config";
 import { Link } from "@/src/i18n/navigation";
 import { BrandsSection } from "./brands-section";
 
@@ -69,14 +70,16 @@ export function AboutSection() {
 
             {/* CTA Buttons & Phone Row */}
             <div className="mt-6 sm:mt-8 flex items-center gap-3.5 sm:gap-6">
-              <Link
-                href={APP_ROUTES.about}
-                className="group/btn relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-md bg-premium-red hover:bg-warm-red px-5 py-3 sm:px-8 sm:py-3.5 text-xs sm:text-sm font-semibold uppercase tracking-wider text-white shadow-md shadow-premium-red/20 transition-all duration-300 cursor-pointer"
-              >
-                <span className="relative z-10 text-white">
-                  {t("learnMore")}
-                </span>
-              </Link>
+              {PUBLIC_FEATURES.pages.about ? (
+                <Link
+                  href={APP_ROUTES.about}
+                  className="group/btn relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-md bg-premium-red hover:bg-warm-red px-5 py-3 sm:px-8 sm:py-3.5 text-xs sm:text-sm font-semibold uppercase tracking-wider text-white shadow-md shadow-premium-red/20 transition-all duration-300 cursor-pointer"
+                >
+                  <span className="relative z-10 text-white">
+                    {t("learnMore")}
+                  </span>
+                </Link>
+              ) : null}
 
               {hotline && (
                 <a

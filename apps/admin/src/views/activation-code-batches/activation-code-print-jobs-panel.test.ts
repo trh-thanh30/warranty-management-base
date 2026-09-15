@@ -24,3 +24,16 @@ test("print progress stores the batch name and shows its code alongside the rang
     /text-sm text-slate-500 dark:text-slate-400">\s*\{tracked\.batchCode\} · \{job\.from_index\}–\{job\.to_index\}/,
   );
 });
+
+test("print progress dialog keeps a usable width on mobile", () => {
+  const panel = readFileSync(
+    new URL(
+      "./components/activation-code-print-jobs-panel.tsx",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+
+  assert.match(panel, /w-\[min\(calc\(100vw-2rem\),64rem\)\]/);
+  assert.doesNotMatch(panel, /100vw-60rem/);
+});

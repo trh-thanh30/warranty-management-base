@@ -46,7 +46,7 @@ test("public pages use one native root scroll container", async () => {
   ]);
 
   assert.doesNotMatch(layoutSource, /LenisProvider/);
-  assert.doesNotMatch(globalStyles, /scrollbar-gutter:\s*stable/);
+  assert.match(globalStyles, /html\s*\{\s*scrollbar-gutter:\s*stable;/);
   assert.match(aboutViewSource, /overflow-x-clip/);
   assert.doesNotMatch(aboutViewSource, /overflow-x-hidden/);
 });

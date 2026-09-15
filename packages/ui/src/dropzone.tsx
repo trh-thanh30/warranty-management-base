@@ -14,6 +14,7 @@ export type DropzoneProps = {
   hint?: string;
   id: string;
   onFilesChange: (files: File[]) => void;
+  onDuplicateFiles?: (count: number) => void;
   previewFileLabel: (fileName: string) => string;
   closePreviewLabel: string;
   removeFileLabel: (fileName: string) => string;
@@ -29,6 +30,7 @@ export function Dropzone({
   hint,
   id,
   onFilesChange,
+  onDuplicateFiles,
   previewFileLabel,
   closePreviewLabel,
   removeFileLabel,
@@ -39,9 +41,20 @@ export function Dropzone({
 
   function addFiles(incomingFiles: File[]) {
     const existing = new Set(files.map(getFileIdentity));
-    const uniqueFiles = incomingFiles.filter(
-      (file) => !existing.has(getFileIdentity(file)),
-    );
+    const uniqueFiles: File[] = [];
+    let duplicateCount = 0;
+
+    for (const file of incomingFiles) {
+      const identity = getFileIdentity(file);
+      if (existing.has(identity)) {
+        duplicateCount += 1;
+      } else {
+        existing.add(identity);
+        uniqueFiles.push(file);
+      }
+    }
+
+    if (duplicateCount > 0) onDuplicateFiles?.(duplicateCount);
     onFilesChange([...files, ...uniqueFiles]);
   }
 
