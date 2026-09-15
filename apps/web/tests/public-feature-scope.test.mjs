@@ -9,22 +9,27 @@ const readWebFile = (relativePath) =>
   readFile(path.join(webRoot, relativePath), "utf8");
 
 test("the locale root opens warranty while the about page stays disabled", async () => {
-  const [rootPage, aboutPage, featureConfig] = await Promise.all([
-    readWebFile("app/[locale]/page.tsx"),
-    readWebFile("app/[locale]/about/page.tsx"),
-    readWebFile("src/config/public-features.config.ts"),
-  ]);
+  const [rootPage, rootRedirectView, aboutPage, featureConfig] =
+    await Promise.all([
+      readWebFile("app/[locale]/page.tsx"),
+      readWebFile("src/views/warranty/warranty-root-redirect.view.tsx"),
+      readWebFile("app/[locale]/about/page.tsx"),
+      readWebFile("src/config/public-features.config.ts"),
+    ]);
 
-  assert.match(rootPage, /import \{ APP_ROUTES \}/);
   assert.match(
     rootPage,
-    /import \{ redirect \} from "@\/src\/i18n\/navigation"/,
+    /import \{ WarrantyRootRedirectView \} from "@\/src\/views\/warranty\/warranty-root-redirect\.view"/,
   );
   assert.match(
     rootPage,
+    /return <WarrantyRootRedirectView \{\.\.\.props\} \/>;/,
+  );
+  assert.doesNotMatch(rootPage, /HomeView|AboutView|redirect\(/);
+  assert.match(
+    rootRedirectView,
     /redirect\(\{\s*href:\s*APP_ROUTES\.warranty,\s*locale\s*\}\)/,
   );
-  assert.doesNotMatch(rootPage, /HomeView|AboutView/);
   assert.match(aboutPage, /import \{ AboutRedirectView \}/);
   assert.doesNotMatch(aboutPage, /<AboutView/);
   assert.match(aboutPage, /if \(!PUBLIC_FEATURES\.pages\.about\)/);

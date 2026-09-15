@@ -1,13 +1,7 @@
-import { APP_ROUTES } from "@/src/constants/routes.constants";
-import { redirect } from "@/src/i18n/navigation";
-import type { AppLocale } from "@/src/i18n/routing";
+import { WarrantyRootRedirectView } from "@/src/views/warranty/warranty-root-redirect.view";
 
-type RootPageProps = {
-  params: Promise<{ locale: AppLocale }>;
-};
-
-export default async function Page({ params }: RootPageProps) {
-  const { locale } = await params;
-
-  redirect({ href: APP_ROUTES.warranty, locale });
+export default function Page(
+  props: Parameters<typeof WarrantyRootRedirectView>[0],
+) {
+  return <WarrantyRootRedirectView {...props} />;
 }
