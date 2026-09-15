@@ -1,4 +1,5 @@
 import { BadRequestError, NotFoundError } from '@/common/response';
+import { requestCertificateConfig } from '@/config';
 import { UploadAssetService } from '@/modules/assets/services/upload-asset.service';
 import { ASSET_ACCESS_TYPE } from '@/modules/assets/types/assets.types';
 import { WarrantyActivationRequestCertificatesRepository } from '@/modules/warranty-certificates/repository/warranty-activation-request-certificates.repository';
@@ -17,11 +18,9 @@ import {
   isCertificateNumberConflict,
 } from '@/modules/warranty-certificates/utils/warranty-certificate-number.util';
 import { buildRequestWarrantyCertificateViewModel } from '@/modules/warranty-certificates/utils/warranty-certificate-view-model.util';
-import {
-  needsRequestCertificateRegeneration,
-  REQUEST_CERTIFICATE_TEMPLATE_VERSION,
-} from '@/modules/warranty-certificates/utils/request-certificate-template-version.util';
-import { Injectable, Logger } from '@nestjs/common';
+import { needsRequestCertificateRegeneration } from '@/modules/warranty-certificates/utils/request-certificate-template-version.util';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import type { ConfigType } from '@nestjs/config';
 import { Readable } from 'node:stream';
 
 const CERTIFICATE_NUMBER_GENERATION_ATTEMPTS = 3;
@@ -38,6 +37,8 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
     private readonly uploadAssetService: UploadAssetService,
     private readonly pdfService: WarrantyCertificatePdfService,
     private readonly emailService: WarrantyActivationRequestCertificateEmailService,
+    @Inject(requestCertificateConfig.KEY)
+    private readonly config: ConfigType<typeof requestCertificateConfig>,
   ) {}
 
   async execute(input: {
@@ -188,7 +189,7 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
           metadata: {
             itemCount: input.request.items.length,
             requestId: input.input.requestId,
-            templateVersion: REQUEST_CERTIFICATE_TEMPLATE_VERSION,
+            templateVersion: this.config.templateVersion,
             warrantyCodes: input.request.items.map((item) => item.warrantyCode),
           },
           recipientEmail:

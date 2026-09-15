@@ -411,6 +411,7 @@ describe('IssueWarrantyActivationRequestCertificateUseCase', () => {
       uploadAssetService as never,
       pdfService as never,
       emailService as never,
+      { templateVersion: 1 },
     );
   }
 });

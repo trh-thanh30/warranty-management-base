@@ -14,6 +14,7 @@ export { default as jobsConfig } from '@/config/jobs.config';
 export { default as jwtConfig } from '@/config/jwt.config';
 export { default as pdfRendererConfig } from '@/config/pdf-renderer.config';
 export { default as publicAbuseConfig } from '@/config/public-abuse.config';
+export { default as requestCertificateConfig } from '@/config/request-certificate.config';
 export { default as rateLimitConfig } from '@/config/rate-limit.config';
 export { default as redisConfig } from '@/config/redis.config';
 export { default as storageConfig } from '@/config/storage.config';

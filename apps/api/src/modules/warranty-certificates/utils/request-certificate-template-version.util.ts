@@ -1,7 +1,13 @@
-// Bump this only when the request certificate PDF output changes.
-export const REQUEST_CERTIFICATE_TEMPLATE_VERSION = 1;
+export function getRequestCertificateTemplateVersion(
+  env: NodeJS.ProcessEnv = process.env,
+) {
+  return Number(env.REQUEST_CERTIFICATE_TEMPLATE_VERSION ?? 1);
+}
 
-export function needsRequestCertificateRegeneration(metadata: unknown) {
+export function needsRequestCertificateRegeneration(
+  metadata: unknown,
+  currentVersion = getRequestCertificateTemplateVersion(),
+) {
   if (!metadata || Array.isArray(metadata) || typeof metadata !== 'object') {
     return true;
   }
@@ -12,6 +18,6 @@ export function needsRequestCertificateRegeneration(metadata: unknown) {
   return (
     typeof version !== 'number' ||
     !Number.isInteger(version) ||
-    version < REQUEST_CERTIFICATE_TEMPLATE_VERSION
+    version < currentVersion
   );
 }
