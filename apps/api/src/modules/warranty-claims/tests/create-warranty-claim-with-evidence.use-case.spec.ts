@@ -48,17 +48,27 @@ describe('CreateWarrantyClaimWithEvidenceUseCase', () => {
     );
   });
 
-  it('requires at least one image or video', async () => {
+  it('creates a warranty claim without evidence when no files are provided', async () => {
+    const createWarrantyClaimUseCase = {
+      execute: jest.fn().mockResolvedValue({ id: 'claim-id' }),
+    };
+    const uploadAssetService = { delete: jest.fn(), upload: jest.fn() };
+    const fileValidatorService = { validateFeedbackFile: jest.fn() };
     const useCase = new CreateWarrantyClaimWithEvidenceUseCase(
-      { execute: jest.fn() } as never,
-      { delete: jest.fn(), upload: jest.fn() } as never,
-      { validateFeedbackFile: jest.fn() } as never,
+      createWarrantyClaimUseCase as never,
+      uploadAssetService as never,
+      fileValidatorService as never,
     );
 
-    await expect(useCase.execute({} as never, [])).rejects.toMatchObject({
-      details: { code: 'WARRANTY_CLAIM_EVIDENCE_REQUIRED' },
-      statusCode: 400,
+    await expect(useCase.execute({} as never, [])).resolves.toEqual({
+      id: 'claim-id',
     });
+    expect(createWarrantyClaimUseCase.execute).toHaveBeenCalledWith(
+      {},
+      expect.objectContaining({ attachments: [] }),
+    );
+    expect(uploadAssetService.upload).not.toHaveBeenCalled();
+    expect(fileValidatorService.validateFeedbackFile).not.toHaveBeenCalled();
   });
 
   it('removes uploaded objects when claim creation fails', async () => {

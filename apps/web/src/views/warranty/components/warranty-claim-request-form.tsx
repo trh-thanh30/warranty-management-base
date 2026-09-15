@@ -68,6 +68,8 @@ export function WarrantyClaimRequestForm({
   onSubmit,
 }: WarrantyClaimRequestFormProps) {
   const t = useTranslations("Warranty.request");
+  // Temporarily hidden per client request; keep the Dropzone ready to restore.
+  const showEvidenceUpload = false;
   const schema = useMemo(
     () =>
       createWarrantyClaimRequestFormSchema({
@@ -266,37 +268,39 @@ export function WarrantyClaimRequestForm({
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="attachments"
-            render={({ field }) => (
-              <FormItem className="sm:col-span-2">
-                <FormLabel className="text-sm font-semibold uppercase text-deep-black">
-                  {t("fields.evidence.label")}
-                </FormLabel>
-                <FormControl>
-                  <Dropzone
-                    accept={WARRANTY_CLAIM_EVIDENCE_ACCEPT}
-                    chooseLabel={t("fields.evidence.choose")}
-                    disabled={isPending}
-                    files={field.value}
-                    hint={t("fields.evidence.hint")}
-                    id="warranty-claim-evidence"
-                    onFilesChange={field.onChange}
-                    previewFileLabel={(name) =>
-                      t("fields.evidence.preview", { name })
-                    }
-                    closePreviewLabel={t("fields.evidence.closePreview")}
-                    removeFileLabel={(name) =>
-                      t("fields.evidence.remove", { name })
-                    }
-                    selectedFilesLabel={t("fields.evidence.selectedFiles")}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {showEvidenceUpload && (
+            <FormField
+              control={form.control}
+              name="attachments"
+              render={({ field }) => (
+                <FormItem className="sm:col-span-2">
+                  <FormLabel className="text-sm font-semibold uppercase text-deep-black">
+                    {t("fields.evidence.label")}
+                  </FormLabel>
+                  <FormControl>
+                    <Dropzone
+                      accept={WARRANTY_CLAIM_EVIDENCE_ACCEPT}
+                      chooseLabel={t("fields.evidence.choose")}
+                      disabled={isPending}
+                      files={field.value}
+                      hint={t("fields.evidence.hint")}
+                      id="warranty-claim-evidence"
+                      onFilesChange={field.onChange}
+                      previewFileLabel={(name) =>
+                        t("fields.evidence.preview", { name })
+                      }
+                      closePreviewLabel={t("fields.evidence.closePreview")}
+                      removeFileLabel={(name) =>
+                        t("fields.evidence.remove", { name })
+                      }
+                      selectedFilesLabel={t("fields.evidence.selectedFiles")}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
         </div>
 
         <TurnstileWidget
