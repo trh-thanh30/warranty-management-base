@@ -25,6 +25,12 @@ test("request certificate actions remain available when request items exist", ()
   assert.match(detailCard, /<DetailSection title=\{t\("certificateInfo"\)\}>/);
 });
 
+test("outdated generated certificates offer a separate refresh action", () => {
+  assert.match(detailView, /request\.certificate\?\.needsRegeneration/);
+  assert.match(detailView, /t\("refreshCertificate"\)/);
+  assert.match(detailView, /t\("refreshCertificateHint"\)/);
+});
+
 test("view and download certificate actions use full width only on mobile", () => {
   assert.match(
     detailView,
@@ -33,6 +39,13 @@ test("view and download certificate actions use full width only on mobile", () =
   assert.match(
     detailView,
     /<Button\b(?=[^>]*className="w-full sm:w-auto")(?=[^>]*onClick=\{\(\) => \{\s+void actions\.downloadCertificate\(request\);)[^>]*>/,
+  );
+});
+
+test("certificate actions use two columns on extra-large screens", () => {
+  assert.match(
+    detailView,
+    /flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end xl:grid xl:grid-cols-2/,
   );
 });
 

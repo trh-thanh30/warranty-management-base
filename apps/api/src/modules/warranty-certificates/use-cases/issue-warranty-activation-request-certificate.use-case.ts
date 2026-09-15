@@ -17,6 +17,10 @@ import {
   isCertificateNumberConflict,
 } from '@/modules/warranty-certificates/utils/warranty-certificate-number.util';
 import { buildRequestWarrantyCertificateViewModel } from '@/modules/warranty-certificates/utils/warranty-certificate-view-model.util';
+import {
+  needsRequestCertificateRegeneration,
+  REQUEST_CERTIFICATE_TEMPLATE_VERSION,
+} from '@/modules/warranty-certificates/utils/request-certificate-template-version.util';
 import { Injectable, Logger } from '@nestjs/common';
 import { Readable } from 'node:stream';
 
@@ -37,13 +41,19 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
   ) {}
 
   async execute(input: {
+    regenerateOutdated?: boolean;
     recipientEmail?: string;
     requestId: string;
     // Approval defaults to email delivery; explicit PDF retry opts out.
     sendEmail?: boolean;
   }) {
     const existing = await this.repository.findByRequestId(input.requestId);
-    if (existing?.status === WARRANTY_CERTIFICATE_STATUS.GENERATED) {
+    if (
+      existing?.status === WARRANTY_CERTIFICATE_STATUS.GENERATED &&
+      existing.storageKey &&
+      (!input.regenerateOutdated ||
+        !needsRequestCertificateRegeneration(existing.metadata))
+    ) {
       return existing;
     }
 
@@ -178,6 +188,7 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
           metadata: {
             itemCount: input.request.items.length,
             requestId: input.input.requestId,
+            templateVersion: REQUEST_CERTIFICATE_TEMPLATE_VERSION,
             warrantyCodes: input.request.items.map((item) => item.warrantyCode),
           },
           recipientEmail:
@@ -188,12 +199,28 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
           storageKey: uploaded.path,
         };
 
-        return input.existing
+        const saved = input.existing
           ? this.repository.update(input.existing.id, data)
           : this.repository.create({
               ...data,
               activationRequestId: input.input.requestId,
             });
+        const certificate = await saved;
+
+        if (
+          input.existing?.storageKey &&
+          input.existing.storageKey !== uploaded.path
+        ) {
+          await this.uploadAssetService
+            .delete(input.existing.storageKey)
+            .catch((cleanup) =>
+              this.logger.error(
+                `Failed to delete superseded request certificate: ${String(cleanup)}`,
+              ),
+            );
+        }
+
+        return certificate;
       } catch (error) {
         if (uploadedPath) {
           await this.uploadAssetService
@@ -221,6 +248,25 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
     input: { recipientEmail?: string; requestId: string },
     error: unknown,
   ) {
+    // A failed refresh must not invalidate the previously generated PDF.
+    if (
+      existing?.status === WARRANTY_CERTIFICATE_STATUS.GENERATED &&
+      existing.storageKey
+    ) {
+      try {
+        return await this.repository.update(existing.id, {
+          lastError: error instanceof Error ? error.message : String(error),
+          status: existing.status,
+          storageKey: existing.storageKey,
+        });
+      } catch (persistenceError) {
+        this.logger.error(
+          `Failed to persist request certificate refresh error: ${String(persistenceError)}`,
+        );
+        return null;
+      }
+    }
+
     const data = {
       emailStatus:
         existing?.emailStatus ?? WARRANTY_CERTIFICATE_EMAIL_STATUS.PENDING,

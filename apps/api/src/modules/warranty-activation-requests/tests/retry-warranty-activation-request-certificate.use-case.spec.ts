@@ -41,6 +41,7 @@ describe('RetryWarrantyActivationRequestCertificateUseCase', () => {
     const result = await useCase.execute('request-id');
 
     expect(issueRequestCertificateUseCase.execute).toHaveBeenCalledWith({
+      regenerateOutdated: true,
       recipientEmail: 'customer@example.com',
       requestId: 'request-id',
       sendEmail: false,
