@@ -1,7 +1,25 @@
+import { PUBLIC_FEATURES } from "@/src/config/public-features.config";
+import { createGeneratePageMetadata } from "@/src/config/seo.config";
 import { AboutView } from "@/src/views/about/about.view";
+import { generateAboutMetadata } from "@/src/views/about/about.metadata";
+import { HomeView } from "@/src/views/home/home.view";
 
-export { generateAboutMetadata as generateMetadata } from "@/src/views/about/about.metadata";
+const generateHomeMetadata = createGeneratePageMetadata("/");
 
-export default function Page() {
+export async function generateMetadata(
+  props: Parameters<typeof generateHomeMetadata>[0],
+) {
+  if (PUBLIC_FEATURES.pages.about) {
+    return generateAboutMetadata(props);
+  }
+
+  return generateHomeMetadata(props);
+}
+
+export default function Page(props: Parameters<typeof HomeView>[0]) {
+  if (!PUBLIC_FEATURES.pages.about) {
+    return <HomeView {...props} />;
+  }
+
   return <AboutView />;
 }

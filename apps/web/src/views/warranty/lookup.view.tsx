@@ -207,7 +207,7 @@ export function WarrantyLookupView() {
 
       <WarrantyOtherActions
         items={
-          PUBLIC_FEATURES.warrantyActivation
+          PUBLIC_FEATURES.pages.warrantyActivation
             ? [
                 { id: "activate", label: t("otherActions.activate") },
                 { id: "request", label: t("otherActions.request") },

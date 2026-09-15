@@ -76,7 +76,7 @@ export function AboutHeroCorporate() {
 
           {/* CTA Buttons */}
           <div className="flex flex-wrap gap-4 pt-2">
-            {PUBLIC_FEATURES.products ? (
+            {PUBLIC_FEATURES.pages.products ? (
               <Button
                 asChild
                 className="h-auto rounded-md bg-premium-red px-7 py-3.5 text-xs font-semibold uppercase tracking-wider text-white shadow-md transition-all hover:bg-warm-red sm:text-sm"
