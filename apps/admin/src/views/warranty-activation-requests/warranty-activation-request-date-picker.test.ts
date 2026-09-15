@@ -28,6 +28,10 @@ test("installation date keeps a direct text input alongside the picker", () => {
   assert.match(pickerSource, /onChange=\{\(event\)/);
   assert.match(pickerSource, /formatDateTimeInput\(event\.target\.value\)/);
   assert.match(pickerSource, /resetLabel/);
+  assert.match(
+    pickerSource,
+    /<PopoverContent[\s\S]*?className="w-80 max-w-\[calc\(100vw-2rem\)\] p-3"/,
+  );
   assert.match(formSource, /onValueChange=\{field\.onChange\}/);
 });
 
