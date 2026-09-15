@@ -4,6 +4,7 @@ import type {
   WarrantyCertificateViewModel,
 } from '@/modules/warranty-certificates/types/warranty-certificate.types';
 import { formatWarrantyCertificateDate } from '@/modules/warranty-certificates/utils/warranty-certificate-date.util';
+import { addCalendarMonths } from '@repo/shared/utils';
 import {
   formatWarrantyCertificateValue,
   formatWarrantyDuration,
@@ -87,7 +88,13 @@ export function buildRequestWarrantyCertificateViewModel(
     },
     products: input.items.map((item) => ({
       durationLabel: formatWarrantyDuration(item.durationMonths),
-      expiryDate: formatValue(formatWarrantyCertificateDate(item.endDate)),
+      expiryDate: formatValue(
+        formatWarrantyCertificateDate(
+          input.installedAt
+            ? addCalendarMonths(input.installedAt, item.durationMonths)
+            : item.endDate,
+        ),
+      ),
       positionLabel: formatValue(item.positionLabel),
       productCode: formatValue(item.productCode),
       productName: formatValue(item.productName),
