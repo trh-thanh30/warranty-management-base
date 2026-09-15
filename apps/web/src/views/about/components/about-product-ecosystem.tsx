@@ -21,10 +21,10 @@ const productIcons = {
 
 export function AboutProductEcosystem() {
   const t = useTranslations("AboutPage");
-  const viewAllCtaLabel = PUBLIC_FEATURES.products
+  const viewAllCtaLabel = PUBLIC_FEATURES.pages.products
     ? "ecosystem.viewAllCta"
     : "hero.contactCta";
-  const productDetailCtaLabel = PUBLIC_FEATURES.products
+  const productDetailCtaLabel = PUBLIC_FEATURES.pages.products
     ? "ecosystem.productDetailCta"
     : "hero.contactCta";
 
@@ -44,7 +44,7 @@ export function AboutProductEcosystem() {
             </p>
           </div>
 
-          {PUBLIC_FEATURES.products ? (
+          {PUBLIC_FEATURES.pages.products ? (
             <Button
               asChild
               className="h-auto shrink-0 p-0 font-sans text-xs font-semibold uppercase tracking-wider text-premium-red hover:bg-transparent hover:text-warm-red sm:text-sm"
@@ -109,7 +109,7 @@ export function AboutProductEcosystem() {
                 </div>
 
                 <div className="px-6 pb-6 pt-2">
-                  {PUBLIC_FEATURES.products ? (
+                  {PUBLIC_FEATURES.pages.products ? (
                     <Button
                       asChild
                       className="h-auto p-0 font-sans text-xs font-semibold uppercase tracking-wider text-deep-black group-hover:text-premium-red hover:bg-transparent hover:text-premium-red"

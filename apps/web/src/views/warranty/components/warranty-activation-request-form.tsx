@@ -6,6 +6,7 @@ import type {
   PublicWarrantyActivationRequestReceipt,
 } from "@repo/shared";
 import { Button } from "@repo/ui/button";
+import { DateTimePicker } from "@repo/ui/date-time-picker";
 import { Input } from "@repo/ui/input";
 import {
   Select,
@@ -304,19 +305,24 @@ export function WarrantyActivationRequestForm({
           <FormField
             control={form.control}
             name="installedAt"
-            render={({ field }) => (
+            render={({ field, fieldState }) => (
               <FormItem className="sm:col-span-2">
                 <FormLabel className="text-sm font-semibold uppercase text-deep-black">
                   {t("fields.installedAt.label")}
                 </FormLabel>
-                <FormControl>
-                  <Input
-                    className={`h-12 rounded-md border-border-gray bg-white ${formControlFocusClassName}`}
-                    max={formatLocalDateTimeInput(new Date())}
-                    type="datetime-local"
-                    {...field}
-                  />
-                </FormControl>
+                <DateTimePicker
+                  ariaLabel={t("fields.installedAt.label")}
+                  calendarAriaLabel={t("fields.installedAt.calendarAriaLabel")}
+                  clearLabel={t("fields.installedAt.clearLabel")}
+                  hourLabel={t("fields.installedAt.hourLabel")}
+                  id="warranty-activation-installed-at"
+                  invalid={fieldState.invalid}
+                  minuteLabel={t("fields.installedAt.minuteLabel")}
+                  onValueChange={field.onChange}
+                  placeholder={t("fields.installedAt.placeholder")}
+                  resetLabel={t("fields.installedAt.resetLabel")}
+                  value={field.value}
+                />
                 <FormMessage />
               </FormItem>
             )}
@@ -477,13 +483,6 @@ export function WarrantyActivationRequestForm({
       </form>
     </Form>
   );
-}
-
-function formatLocalDateTimeInput(date: Date) {
-  const localTime = new Date(
-    date.getTime() - date.getTimezoneOffset() * 60 * 1000,
-  );
-  return localTime.toISOString().slice(0, 16);
 }
 
 function LocationLoadError({
