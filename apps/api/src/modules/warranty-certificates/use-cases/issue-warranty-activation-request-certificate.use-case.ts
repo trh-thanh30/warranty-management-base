@@ -53,7 +53,10 @@ export class IssueWarrantyActivationRequestCertificateUseCase {
       existing?.status === WARRANTY_CERTIFICATE_STATUS.GENERATED &&
       existing.storageKey &&
       (!input.regenerateOutdated ||
-        !needsRequestCertificateRegeneration(existing.metadata))
+        !needsRequestCertificateRegeneration(
+          existing.metadata,
+          this.config.templateVersion,
+        ))
     ) {
       return existing;
     }

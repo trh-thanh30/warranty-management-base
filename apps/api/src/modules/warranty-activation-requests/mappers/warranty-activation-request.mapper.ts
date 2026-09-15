@@ -7,6 +7,7 @@ import type {
   activation_code_status,
 } from '@prisma/client';
 import type { WarrantyActivationRequestSummary } from '@repo/shared';
+import { requestCertificateConfig } from '@/config';
 import { needsRequestCertificateRegeneration } from '@/modules/warranty-certificates/utils/request-certificate-template-version.util';
 
 export type WarrantyActivationRequestWithRelations =
@@ -268,6 +269,9 @@ function toCertificateSummary(
     needsRegeneration:
       certificate.status === 'GENERATED' &&
       Boolean(certificate.storage_key) &&
-      needsRequestCertificateRegeneration(certificate.metadata),
+      needsRequestCertificateRegeneration(
+        certificate.metadata,
+        requestCertificateConfig().templateVersion,
+      ),
   };
 }

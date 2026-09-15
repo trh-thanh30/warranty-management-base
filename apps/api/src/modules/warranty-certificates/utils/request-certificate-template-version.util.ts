@@ -1,12 +1,6 @@
-export function getRequestCertificateTemplateVersion(
-  env: NodeJS.ProcessEnv = process.env,
-) {
-  return Number(env.REQUEST_CERTIFICATE_TEMPLATE_VERSION ?? 1);
-}
-
 export function needsRequestCertificateRegeneration(
   metadata: unknown,
-  currentVersion = getRequestCertificateTemplateVersion(),
+  currentVersion: number,
 ) {
   if (!metadata || Array.isArray(metadata) || typeof metadata !== 'object') {
     return true;
