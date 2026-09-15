@@ -7,6 +7,8 @@ import type {
   activation_code_status,
 } from '@prisma/client';
 import type { WarrantyActivationRequestSummary } from '@repo/shared';
+import { requestCertificateConfig } from '@/config';
+import { needsRequestCertificateRegeneration } from '@/modules/warranty-certificates/utils/request-certificate-template-version.util';
 
 export type WarrantyActivationRequestWithRelations =
   WarrantyActivationRequest & {
@@ -62,6 +64,7 @@ export type WarrantyActivationRequestWithRelations =
       emailed_at: Date | null;
       email_status: warranty_certificate_email_status;
       last_error: string | null;
+      metadata?: Prisma.JsonValue | null;
     } | null;
     items?: Array<{
       id: string;
@@ -245,6 +248,7 @@ function toCertificateSummary(
     emailed_at: Date | null;
     email_status: warranty_certificate_email_status;
     last_error: string | null;
+    metadata?: Prisma.JsonValue | null;
   } | null,
 ) {
   if (!certificate) return null;
@@ -262,5 +266,12 @@ function toCertificateSummary(
     emailedAt: certificate.emailed_at?.toISOString() ?? null,
     emailStatus: certificate.email_status,
     lastError: certificate.last_error,
+    needsRegeneration:
+      certificate.status === 'GENERATED' &&
+      Boolean(certificate.storage_key) &&
+      needsRequestCertificateRegeneration(
+        certificate.metadata,
+        requestCertificateConfig().templateVersion,
+      ),
   };
 }

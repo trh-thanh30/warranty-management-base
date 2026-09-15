@@ -37,6 +37,7 @@ export class RetryWarrantyActivationRequestCertificateUseCase {
     }
 
     await this.issueRequestCertificateUseCase.execute({
+      regenerateOutdated: true,
       recipientEmail: request.customer_email ?? undefined,
       requestId,
       sendEmail: false,

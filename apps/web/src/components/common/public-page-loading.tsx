@@ -1,7 +1,56 @@
+"use client";
+
 import { Container } from "@/src/components/common/container";
+import { PublicNotFound } from "@/src/components/common/public-not-found";
+import { routing, type AppLocale } from "@/src/i18n/routing";
 import { Skeleton } from "@repo/ui/skeleton";
+import { usePathname } from "next/navigation";
+
+const dynamicSegmentPattern = /^\[[^/]+\]$/;
+const localizedPathnames = routing.pathnames as Record<
+  string,
+  string | Record<AppLocale, string>
+>;
+
+function matchesPathnameTemplate(pathname: string, template: string) {
+  const pathnameSegments = pathname.split("/").filter(Boolean);
+  const templateSegments = template.split("/").filter(Boolean);
+
+  return (
+    pathnameSegments.length === templateSegments.length &&
+    templateSegments.every(
+      (segment, index) =>
+        dynamicSegmentPattern.test(segment) ||
+        segment === pathnameSegments[index],
+    )
+  );
+}
+
+export function isKnownPublicPathname(pathname: string) {
+  const segments = pathname.split("/").filter(Boolean);
+  const locale = routing.locales.find((candidate) => candidate === segments[0]);
+  const routePathname = locale ? `/${segments.slice(1).join("/")}` : pathname;
+  const normalizedPathname = routePathname === "" ? "/" : routePathname;
+
+  return Object.entries(localizedPathnames).some(
+    ([canonicalPathname, localizedPathname]) => {
+      const template =
+        locale && typeof localizedPathname !== "string"
+          ? localizedPathname[locale]
+          : canonicalPathname;
+
+      return matchesPathnameTemplate(normalizedPathname, template);
+    },
+  );
+}
 
 export function PublicPageLoading() {
+  const pathname = usePathname();
+
+  if (!isKnownPublicPathname(pathname)) {
+    return <PublicNotFound />;
+  }
+
   return (
     <main
       aria-busy="true"

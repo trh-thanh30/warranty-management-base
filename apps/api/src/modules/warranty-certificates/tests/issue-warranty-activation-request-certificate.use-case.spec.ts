@@ -12,12 +12,16 @@ describe('IssueWarrantyActivationRequestCertificateUseCase', () => {
   const pdfService = { createPdfFromViewModel: jest.fn() };
   const emailService = { queueEmail: jest.fn() };
 
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => {
+    jest.resetAllMocks();
+    uploadAssetService.delete.mockResolvedValue(undefined);
+  });
 
   it('returns an existing generated request certificate without rendering again', async () => {
     const generated = {
       id: 'request-certificate-1',
       status: 'GENERATED',
+      storageKey: 'private/current.pdf',
     };
     repository.findByRequestId.mockResolvedValue(generated);
     const useCase = createUseCase();
@@ -27,6 +31,138 @@ describe('IssueWarrantyActivationRequestCertificateUseCase', () => {
     );
     expect(pdfService.createPdfFromViewModel).not.toHaveBeenCalled();
     expect(uploadAssetService.upload).not.toHaveBeenCalled();
+  });
+
+  it('regenerates a legacy generated certificate only when explicitly requested', async () => {
+    repository.findByRequestId.mockResolvedValue({
+      certificateNumber: 'CERT-LEGACY-1',
+      emailStatus: 'SENT',
+      id: 'request-certificate-1',
+      metadata: null,
+      status: 'GENERATED',
+      storageKey: 'private/legacy.pdf',
+    });
+    repository.findRequestForIssuance.mockResolvedValue(
+      buildRequest([buildItem('windshield', 'WM-A')]),
+    );
+    pdfService.createPdfFromViewModel.mockResolvedValue(Buffer.from('new-pdf'));
+    uploadAssetService.upload.mockResolvedValue({
+      path: 'private/current.pdf',
+    });
+    repository.update.mockImplementation((_id, data) =>
+      Promise.resolve({ id: 'request-certificate-1', ...data }),
+    );
+
+    await createUseCase().execute({
+      regenerateOutdated: true,
+      requestId: 'request-1',
+      sendEmail: false,
+    });
+
+    expect(pdfService.createPdfFromViewModel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        products: [expect.objectContaining({ expiryDate: '17/08/2027' })],
+      }),
+    );
+    expect(repository.update).toHaveBeenCalledWith(
+      'request-certificate-1',
+      expect.objectContaining({
+        certificateNumber: 'CERT-LEGACY-1',
+        storageKey: 'private/current.pdf',
+        status: 'GENERATED',
+        metadata: expect.objectContaining({ templateVersion: 1 }),
+      }),
+    );
+    expect(uploadAssetService.delete).toHaveBeenCalledWith(
+      'private/legacy.pdf',
+    );
+    expect(emailService.queueEmail).not.toHaveBeenCalled();
+  });
+
+  it('keeps a generated legacy PDF available when regeneration fails', async () => {
+    repository.findByRequestId.mockResolvedValue({
+      certificateNumber: 'CERT-LEGACY-1',
+      emailStatus: 'SENT',
+      id: 'request-certificate-1',
+      metadata: null,
+      status: 'GENERATED',
+      storageKey: 'private/legacy.pdf',
+    });
+    repository.findRequestForIssuance.mockResolvedValue(
+      buildRequest([buildItem('windshield', 'WM-A')]),
+    );
+    pdfService.createPdfFromViewModel.mockRejectedValue(
+      new Error('PDF_RENDERER_UNAVAILABLE'),
+    );
+
+    await expect(
+      createUseCase().execute({
+        regenerateOutdated: true,
+        requestId: 'request-1',
+        sendEmail: false,
+      }),
+    ).rejects.toThrow('PDF_RENDERER_UNAVAILABLE');
+    expect(repository.update).toHaveBeenCalledWith(
+      'request-certificate-1',
+      expect.objectContaining({
+        lastError: 'PDF_RENDERER_UNAVAILABLE',
+        status: 'GENERATED',
+        storageKey: 'private/legacy.pdf',
+      }),
+    );
+    expect(emailService.queueEmail).not.toHaveBeenCalled();
+  });
+
+  it('does not regenerate a generated certificate already on the current template', async () => {
+    const current = {
+      id: 'request-certificate-1',
+      metadata: { templateVersion: 1 },
+      status: 'GENERATED',
+      storageKey: 'private/current.pdf',
+    };
+    repository.findByRequestId.mockResolvedValue(current);
+
+    await expect(
+      createUseCase().execute({
+        regenerateOutdated: true,
+        requestId: 'request-1',
+        sendEmail: false,
+      }),
+    ).resolves.toBe(current);
+    expect(pdfService.createPdfFromViewModel).not.toHaveBeenCalled();
+  });
+
+  it('regenerates a generated record whose PDF storage key is missing', async () => {
+    repository.findByRequestId.mockResolvedValue({
+      certificateNumber: 'CERT-MISSING-1',
+      id: 'request-certificate-1',
+      metadata: { templateVersion: 1 },
+      status: 'GENERATED',
+      storageKey: null,
+    });
+    repository.findRequestForIssuance.mockResolvedValue(
+      buildRequest([buildItem('windshield', 'WM-A')]),
+    );
+    pdfService.createPdfFromViewModel.mockResolvedValue(Buffer.from('pdf'));
+    uploadAssetService.upload.mockResolvedValue({
+      path: 'private/current.pdf',
+    });
+    repository.update.mockResolvedValue({
+      id: 'request-certificate-1',
+      status: 'GENERATED',
+      storageKey: 'private/current.pdf',
+    });
+
+    await createUseCase().execute({
+      regenerateOutdated: true,
+      requestId: 'request-1',
+      sendEmail: false,
+    });
+
+    expect(repository.update).toHaveBeenCalledWith(
+      'request-certificate-1',
+      expect.objectContaining({ storageKey: 'private/current.pdf' }),
+    );
   });
 
   it.each([
@@ -67,6 +203,7 @@ describe('IssueWarrantyActivationRequestCertificateUseCase', () => {
         metadata: {
           itemCount: items.length,
           requestId: 'request-1',
+          templateVersion: 1,
           warrantyCodes: items.map((item) => item.warrantyCode),
         },
         recipientEmail: 'customer@example.com',
@@ -274,6 +411,7 @@ describe('IssueWarrantyActivationRequestCertificateUseCase', () => {
       uploadAssetService as never,
       pdfService as never,
       emailService as never,
+      { templateVersion: 1 },
     );
   }
 });

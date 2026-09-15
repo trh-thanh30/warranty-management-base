@@ -111,6 +111,11 @@ export const envSchema = z
       .int()
       .positive()
       .default(2),
+    REQUEST_CERTIFICATE_TEMPLATE_VERSION: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(1),
     ACTIVATION_CODE_PRINT_QUEUE_SIZE: z.coerce
       .number()
       .int()

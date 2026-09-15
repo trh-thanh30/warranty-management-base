@@ -1,10 +1,22 @@
 import createMiddleware from "next-intl/middleware";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { LOCALE_COOKIE_NAME, routing } from "@/src/i18n/routing";
 
 const handleI18nRouting = createMiddleware(routing);
 
 export default function middleware(request: NextRequest) {
+  if (request.nextUrl.pathname === "/") {
+    const savedLocale = request.cookies.get(LOCALE_COOKIE_NAME)?.value;
+    const locale =
+      routing.locales.find((candidate) => candidate === savedLocale) ??
+      routing.defaultLocale;
+    const destination = request.nextUrl.clone();
+
+    destination.pathname = `/${locale}${routing.pathnames["/warranty"][locale]}`;
+
+    return NextResponse.redirect(destination);
+  }
+
   if (request.cookies.has(LOCALE_COOKIE_NAME)) {
     return handleI18nRouting(request);
   }

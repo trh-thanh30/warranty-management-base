@@ -37,6 +37,24 @@ test("the locale root opens warranty while the about page stays disabled", async
   assert.match(featureConfig, /pages\s*:\s*\{[\s\S]*about:\s*false/);
 });
 
+test("home affordances navigate directly to warranty without visiting the redirect page", async () => {
+  const [header, notFound] = await Promise.all([
+    readWebFile("src/components/layout/site-header.tsx"),
+    readWebFile("src/components/common/public-not-found.tsx"),
+  ]);
+
+  assert.match(
+    header,
+    /<Link\s+href=\{APP_ROUTES\.warranty\}[\s\S]*?<SiteLogo/,
+  );
+  assert.doesNotMatch(
+    header,
+    /<Link\s+href=\{APP_ROUTES\.home\}[\s\S]*?<SiteLogo/,
+  );
+  assert.match(notFound, /href=\{APP_ROUTES\.warranty\}/);
+  assert.doesNotMatch(notFound, /href="\/"/);
+});
+
 test("product navigation opens the external catalog while internal routes stay disabled", async () => {
   const [
     featureConfig,

@@ -3,6 +3,8 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import test from "node:test";
+import { NextRequest } from "next/server";
+import middleware from "../middleware.ts";
 
 const routingPath = path.join(
   process.cwd(),
@@ -41,5 +43,29 @@ test("first-time visitors default to Vietnamese instead of browser language", as
     middlewareSource,
     /headers\.set\("accept-language", routing\.defaultLocale\)/,
     "requests without a locale cookie must negotiate the Vietnamese default",
+  );
+});
+
+test("the bare domain redirects first-time visitors directly to Vietnamese warranty", () => {
+  const request = new NextRequest("https://baohanh.lexzenz.com/");
+
+  const response = middleware(request);
+
+  assert.equal(
+    response.headers.get("location"),
+    "https://baohanh.lexzenz.com/vi/bao-hanh",
+  );
+});
+
+test("the bare domain redirects returning visitors directly to warranty in their saved locale", () => {
+  const request = new NextRequest("https://baohanh.lexzenz.com/", {
+    headers: { cookie: "NEXT_LOCALE=en" },
+  });
+
+  const response = middleware(request);
+
+  assert.equal(
+    response.headers.get("location"),
+    "https://baohanh.lexzenz.com/en/warranty",
   );
 });

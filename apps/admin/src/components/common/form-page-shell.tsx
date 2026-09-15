@@ -44,7 +44,7 @@ export function FormPageShell({
             {title}
           </h1>
           {description ? (
-            <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <p className="max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
                 {description}
               </p>

@@ -31,6 +31,7 @@ export type WarrantyCertificateSummary = {
   emailedAt: string | null;
   emailStatus: WarrantyCertificateEmailStatus;
   lastError: string | null;
+  needsRegeneration: boolean;
 };
 
 export type WarrantyActivationRequestItemSummary = {

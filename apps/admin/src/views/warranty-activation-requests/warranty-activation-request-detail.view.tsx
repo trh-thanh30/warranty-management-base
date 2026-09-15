@@ -1,8 +1,7 @@
 "use client";
 
-import { FormPageShell } from "@/src/components/common/form-page-shell";
 import { EntityQueryState } from "@/src/components/common/entity-query-state";
-import { Link } from "@/src/i18n/navigation";
+import { FormPageShell } from "@/src/components/common/form-page-shell";
 import { PermissionGuard } from "@/src/components/permission-guard";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { useToast } from "@/src/hooks/use-toast";
@@ -10,10 +9,18 @@ import {
   useResendWarrantyActivationRequestCertificateEmail,
   useWarrantyActivationRequest,
 } from "@/src/hooks/use-warranty-activation-requests";
+import { Link } from "@/src/i18n/navigation";
 import { getLocalizedApiError } from "@/src/lib/localized-api-error.utils";
 import { warrantyActivationRequestsService } from "@/src/services/warranty-activation-requests/warranty-activation-requests.service";
 import { PERMISSIONS } from "@repo/shared/constants";
-import { Button } from "@repo/ui";
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@repo/ui";
 import {
   CheckCircle2,
   Download,
@@ -26,13 +33,6 @@ import {
   Send,
   XCircle,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@repo/ui";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ReviewWarrantyActivationRequestDialog } from "./components/review-warranty-activation-request-dialog";
@@ -81,6 +81,8 @@ export function WarrantyActivationRequestDetailView({
   const canUseCertificate =
     request?.certificate?.status === "GENERATED" &&
     Boolean(request.certificate.storageKey);
+  const isCertificateOutdated =
+    request?.certificate?.needsRegeneration ?? false;
   const isCertificateActionPending =
     actions.certificateActionRequestId === request?.id;
   const isViewingCertificate =
@@ -91,7 +93,8 @@ export function WarrantyActivationRequestDetailView({
     request?.status === "ACTIVATED" &&
     (!request.certificate ||
       request.certificate.status !== "GENERATED" ||
-      !request.certificate.storageKey) &&
+      !request.certificate.storageKey ||
+      request.certificate?.needsRegeneration) &&
     hasPermission(PERMISSIONS.WARRANTY_UPDATE);
 
   async function resendCertificateEmail() {
@@ -120,7 +123,13 @@ export function WarrantyActivationRequestDetailView({
         result.certificate?.status === "GENERATED" &&
         result.certificate.storageKey
       ) {
-        toast.success(t("retriedCertificate"));
+        toast.success(
+          t(
+            isCertificateOutdated
+              ? "refreshedCertificate"
+              : "retriedCertificate",
+          ),
+        );
       } else {
         toast.error(t("retryCertificateError"));
       }
@@ -144,7 +153,7 @@ export function WarrantyActivationRequestDetailView({
             canUseCertificate ||
             canRetryCertificate) &&
           request ? (
-            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end xl:grid xl:grid-cols-2">
               {canUseCertificate ? (
                 <>
                   <Button
@@ -186,23 +195,32 @@ export function WarrantyActivationRequestDetailView({
                 </>
               ) : null}
               {canRetryCertificate ? (
-                <Button
-                  className="w-full sm:w-auto"
-                  disabled={
-                    isRetryingCertificate ||
-                    resendCertificateEmailMutation.isPending
-                  }
-                  onClick={() => {
-                    void retryCertificate();
-                  }}
-                  type="button"
-                  variant="secondary"
-                >
-                  <RotateCcw className="size-4" />
-                  {isRetryingCertificate
-                    ? t("retryingCertificate")
-                    : t("retryCertificate")}
-                </Button>
+                <div className="flex w-full flex-col gap-1 sm:w-auto">
+                  <Button
+                    className="w-full sm:w-auto"
+                    disabled={
+                      isRetryingCertificate ||
+                      resendCertificateEmailMutation.isPending
+                    }
+                    onClick={() => {
+                      void retryCertificate();
+                    }}
+                    type="button"
+                    variant="secondary"
+                  >
+                    <RotateCcw className="size-4" />
+                    {isRetryingCertificate
+                      ? t("retryingCertificate")
+                      : isCertificateOutdated
+                        ? t("refreshCertificate")
+                        : t("retryCertificate")}
+                  </Button>
+                  {isCertificateOutdated ? (
+                    <p className="max-w-72 text-xs text-slate-500 dark:text-slate-400">
+                      {t("refreshCertificateHint")}
+                    </p>
+                  ) : null}
+                </div>
               ) : null}
               {canResendCertificateEmail ? (
                 <div className="flex flex-col gap-1">

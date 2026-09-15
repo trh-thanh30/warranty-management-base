@@ -8,7 +8,10 @@ const webRoot = path.join(process.cwd(), "apps", "web");
 
 test("public routes keep a stable loading boundary during navigation", async () => {
   const [loadingSource, loadingViewSource] = await Promise.all([
-    readFile(path.join(webRoot, "app", "[locale]", "loading.tsx"), "utf8"),
+    readFile(
+      path.join(webRoot, "app", "[locale]", "loading.tsx"),
+      "utf8",
+    ).catch(() => ""),
     readFile(
       path.join(
         webRoot,
@@ -25,6 +28,24 @@ test("public routes keep a stable loading boundary during navigation", async () 
   assert.match(loadingViewSource, /aria-busy="true"/);
   assert.match(loadingViewSource, /min-h-/);
   assert.match(loadingViewSource, /motion-reduce:animate-none/);
+});
+
+test("unknown public routes show the not-found state instead of the generic page skeleton", async () => {
+  const source = await readFile(
+    path.join(
+      webRoot,
+      "src",
+      "components",
+      "common",
+      "public-page-loading.tsx",
+    ),
+    "utf8",
+  );
+
+  assert.match(source, /usePathname\(\)/);
+  assert.match(source, /isKnownPublicPathname\(pathname\)/);
+  assert.match(source, /return <PublicNotFound\s*\/>/);
+  assert.match(source, /routing\.pathnames/);
 });
 
 test("homepage streams remote sections through independent suspense boundaries", async () => {

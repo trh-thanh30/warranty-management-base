@@ -11,6 +11,7 @@ describe('activation request certificate resolution', () => {
         generated_at: new Date('2026-08-20T00:00:00.000Z'),
         id: 'request-certificate-1',
         last_error: null,
+        metadata: null,
         recipient_email: 'customer@example.com',
         status: 'GENERATED',
         storage_key: 'private/request.pdf',
@@ -36,12 +37,33 @@ describe('activation request certificate resolution', () => {
 
     expect(response.certificate).toMatchObject({
       certificateNumber: 'CERT-REQUEST-1',
+      needsRegeneration: true,
       downloadUrl:
         '/warranty-activation-requests/request-1/certificate/download',
       scope: 'ACTIVATION_REQUEST',
       viewUrl: '/warranty-activation-requests/request-1/certificate/view',
     });
     expect(response.items?.[0]).not.toHaveProperty('certificate');
+  });
+
+  it('does not offer regeneration for a certificate on the current template', () => {
+    const response = toWarrantyActivationRequestResponse({
+      ...buildRequest(),
+      certificate: {
+        certificate_number: 'CERT-REQUEST-1',
+        email_status: 'SENT',
+        emailed_at: null,
+        generated_at: new Date('2026-08-20T00:00:00.000Z'),
+        id: 'request-certificate-1',
+        last_error: null,
+        metadata: { templateVersion: 1 },
+        recipient_email: 'customer@example.com',
+        status: 'GENERATED',
+        storage_key: 'private/current.pdf',
+      },
+    } as never);
+
+    expect(response.certificate?.needsRegeneration).toBe(false);
   });
 });
 
