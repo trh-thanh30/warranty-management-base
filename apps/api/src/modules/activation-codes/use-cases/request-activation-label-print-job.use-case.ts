@@ -1,8 +1,10 @@
 import { BadRequestError, NotFoundError } from '@/common/response';
+import { activationCodeConfig } from '@/config';
 import { ActivationCodeBatchesRepository } from '@/modules/activation-codes/repository/activation-code-batches.repository';
 import { ActivationCodePrintJobsRepository } from '@/modules/activation-codes/repository/activation-code-print-jobs.repository';
 import { ActivationLabelPrintQueueService } from '@/modules/activation-codes/services/activation-label-print-queue.service';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import type { ConfigType } from '@nestjs/config';
 import {
   DEFAULT_ACTIVATION_LABEL_HEIGHT_MM,
   DEFAULT_ACTIVATION_LABEL_WIDTH_MM,
@@ -15,6 +17,8 @@ export class RequestActivationLabelPrintJobUseCase {
     private readonly batches: ActivationCodeBatchesRepository,
     private readonly jobs: ActivationCodePrintJobsRepository,
     private readonly queue: ActivationLabelPrintQueueService,
+    @Inject(activationCodeConfig.KEY)
+    private readonly config: ConfigType<typeof activationCodeConfig>,
   ) {}
 
   async execute(input: {
@@ -57,7 +61,7 @@ export class RequestActivationLabelPrintJobUseCase {
     }
 
     const boundedTo = Math.min(to, batch.codes.length);
-    const idempotencyKey = `activation-labels-${input.batchId}-${from}-${boundedTo}-${labelWidthMm}x${labelHeightMm}`;
+    const idempotencyKey = `activation-labels-v${this.config.printTemplateVersion}-${input.batchId}-${from}-${boundedTo}-${labelWidthMm}x${labelHeightMm}`;
     const existing = await this.jobs.findByIdempotencyKey(idempotencyKey);
     if (existing) {
       if (existing.status === 'COMPLETED') return existing;

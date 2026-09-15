@@ -146,4 +146,32 @@ describe('buildWarrantyCertificateViewModel', () => {
     ]);
     expect(result.activationFields).toEqual([]);
   });
+
+  it('calculates PDF expiry from installation date instead of a stale stored end date', () => {
+    const result = buildRequestWarrantyCertificateViewModel({
+      certificateNumber: 'CERT-REQUEST-002',
+      customerAddress: null,
+      customerEmail: null,
+      customerName: 'Khách hàng',
+      customerPhone: null,
+      dealerName: null,
+      installedAt: new Date('2026-08-21T00:00:00.000Z'),
+      items: [
+        {
+          durationMonths: 36,
+          endDate: new Date('2029-09-11T00:00:00.000Z'),
+          positionLabel: 'Sản phẩm chính',
+          productCode: 'PRD-001',
+          productName: 'Bi gầm',
+          serialNumber: null,
+          warrantyCode: 'WM-001',
+        },
+      ],
+      vehicleModel: null,
+      vehiclePlate: null,
+    });
+
+    expect(result.certificate.installedAt).toBe('21/08/2026');
+    expect(result.products[0].expiryDate).toBe('21/08/2029');
+  });
 });

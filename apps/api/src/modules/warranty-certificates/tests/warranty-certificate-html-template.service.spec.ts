@@ -60,6 +60,7 @@ describe('WarrantyCertificateHtmlTemplateService', () => {
     expect(html).toContain('TRA CỨU BẢO HÀNH ĐIỆN TỬ');
     expect(html).toContain('Kiểm tra hiệu lực và thời hạn bảo hành tại');
     expect(html).toContain('baohanh.lexzenz.com/tra-cuu');
+    expect(html).not.toContain('class="section__meta"');
     expect(html).toMatch(/Ngày cấp:\s*<strong>20\/8\/2026<\/strong>/);
     expect(html).toContain('Mã chứng nhận:');
     expect(html).toContain('CERT-2026-001');

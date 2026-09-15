@@ -1,4 +1,3 @@
-import { BadRequestError } from '@/common/response';
 import { FileValidatorService } from '@/modules/assets/services/file-validator.service';
 import {
   UploadAssetService,
@@ -24,14 +23,6 @@ export class CreateWarrantyClaimWithEvidenceUseCase {
     files: Express.Multer.File[],
     context: { requireOwnerMatch?: boolean; uploadedById?: string } = {},
   ) {
-    if (!files.length) {
-      throw new BadRequestError(
-        'At least one product image or video is required',
-        'BAD_REQUEST',
-        { code: 'WARRANTY_CLAIM_EVIDENCE_REQUIRED' },
-      );
-    }
-
     files.forEach((file) =>
       this.fileValidatorService.validateFeedbackFile(file),
     );

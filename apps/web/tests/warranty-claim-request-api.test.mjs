@@ -179,8 +179,7 @@ test("warranty claim form schema validates public request fields", async () => {
     ...validFormValues,
     attachments: [],
   });
-  assert.equal(withoutEvidence.success, false);
-  assert.equal(withoutEvidence.error.issues[0]?.message, "evidenceRequired");
+  assert.equal(withoutEvidence.success, true);
 
   const unsupportedEvidence = schema.safeParse({
     ...validFormValues,

@@ -23,6 +23,9 @@ export default registerAs('activationCode', () => ({
   ),
   createAttempts: Number(process.env.ACTIVATION_CODE_CREATE_ATTEMPTS ?? 3),
   printConcurrency: getActivationCodePrintConcurrency(),
+  printTemplateVersion: Number(
+    process.env.ACTIVATION_LABEL_TEMPLATE_VERSION ?? 2,
+  ),
   printQueueSize: Number(process.env.ACTIVATION_CODE_PRINT_QUEUE_SIZE ?? 8),
   printAttempts: Number(process.env.ACTIVATION_CODE_PRINT_ATTEMPTS ?? 3),
   printBackoffMs: Number(process.env.ACTIVATION_CODE_PRINT_BACKOFF_MS ?? 5000),

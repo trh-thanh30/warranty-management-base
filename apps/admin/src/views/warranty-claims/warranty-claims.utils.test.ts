@@ -151,7 +151,7 @@ test("create claim schema requires requester name and phone", () => {
   );
 });
 
-test("create claim schema requires image or video evidence", () => {
+test("create claim schema allows a claim without image or video evidence", () => {
   const result = warrantyClaimCreateFormSchema.safeParse({
     attachments: [],
     issueDetail: "",
@@ -162,9 +162,7 @@ test("create claim schema requires image or video evidence", () => {
     warrantyCode: "WM-2026-TEST",
   });
 
-  assert.equal(result.success, false);
-  if (result.success) return;
-  assert.equal(result.error.issues[0]?.message, "evidenceRequired");
+  assert.equal(result.success, true);
 });
 
 test("create claim field errors translate known validation keys", () => {
