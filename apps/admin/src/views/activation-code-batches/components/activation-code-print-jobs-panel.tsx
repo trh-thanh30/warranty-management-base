@@ -32,7 +32,7 @@ export function ActivationCodePrintJobsDialog({
 
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
-      <DialogContent className="max-h-[calc(100dvh-2rem)] w-[min(calc(100vw-60rem),64rem)] overflow-y-auto">
+      <DialogContent className="max-h-[calc(100dvh-2rem)] w-[min(calc(100vw-2rem),64rem)] overflow-y-auto">
         <DialogClose asChild>
           <Button
             aria-label={t("close")}
@@ -43,10 +43,10 @@ export function ActivationCodePrintJobsDialog({
             <X className="size-4" />
           </Button>
         </DialogClose>
-        <DialogTitle className="flex items-center gap-2 text-base font-semibold">
+        <DialogTitle className="pr-10 text-base font-semibold">
           {t("printJobsTitle")}
         </DialogTitle>
-        <DialogDescription className="mt-1 text-sm font-medium text-slate-500">
+        <DialogDescription className="mt-1 pr-10 text-sm font-medium text-slate-500">
           {t("printJobsDescription")}
         </DialogDescription>
         <div className="mt-5 space-y-3">
@@ -111,7 +111,7 @@ function ActivationCodePrintJobItem({
 
   return (
     <article className="rounded-lg border border-slate-200 p-4 dark:border-slate-800">
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <p className="truncate font-medium text-slate-950 dark:text-slate-50">
             {tracked.batchName?.trim() || tracked.batchCode}
@@ -120,7 +120,7 @@ function ActivationCodePrintJobItem({
             {tracked.batchCode} · {job.from_index}–{job.to_index}
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1 self-end empty:hidden sm:self-auto">
           {job.status === "COMPLETED" ? (
             <Button
               disabled={downloadMutation.isPending}
