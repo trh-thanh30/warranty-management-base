@@ -77,7 +77,7 @@ export function SiteHeader({ logoUrl }: { logoUrl?: string | null }) {
     >
       <Container className="flex items-center justify-between gap-6">
         <Link
-          href={APP_ROUTES.home}
+          href={APP_ROUTES.warranty}
           aria-label={t("homeAriaLabel")}
           className="flex shrink-0 items-center gap-3 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-4"
           onClick={closeMobileMenu}

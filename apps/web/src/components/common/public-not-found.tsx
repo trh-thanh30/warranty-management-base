@@ -2,6 +2,7 @@
 
 import { ArrowLeft, Home } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { APP_ROUTES } from "@/src/constants/routes.constants";
 import { SiteLogo } from "@/src/components/layout/components/site-logo";
 import { Link, usePathname, useRouter } from "@/src/i18n/navigation";
 
@@ -59,7 +60,7 @@ export function PublicNotFound() {
           </button>
           <Link
             className="inline-flex h-11 items-center justify-center gap-2 rounded-button bg-premium-red px-5 text-sm font-semibold text-white transition-colors hover:bg-warm-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2"
-            href="/"
+            href={APP_ROUTES.warranty}
           >
             <Home aria-hidden="true" className="size-4" />
             {t("home")}
