@@ -22,7 +22,7 @@ export function FloatingQuickAction() {
           <Search className="size-5 text-premium-red" />
           <span>{t("mobile.lookup")}</span>
         </Link>
-        {PUBLIC_FEATURES.warrantyActivation ? (
+        {PUBLIC_FEATURES.pages.warrantyActivation ? (
           <Link
             href="/warranty/activate"
             className="flex flex-col items-center gap-1 text-light-gray hover:text-premium-red text-xs font-semibold uppercase tracking-wider"
@@ -69,7 +69,7 @@ export function FloatingQuickAction() {
                 <span>{t("lookup")}</span>
               </Link>
 
-              {PUBLIC_FEATURES.warrantyActivation ? (
+              {PUBLIC_FEATURES.pages.warrantyActivation ? (
                 <Link
                   href="/warranty/activate"
                   onClick={() => setIsOpen(false)}

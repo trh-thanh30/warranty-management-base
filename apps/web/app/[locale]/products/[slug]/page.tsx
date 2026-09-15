@@ -11,7 +11,7 @@ interface ProductsDetailPageProps {
 export default async function ProductsDetailPage({
   params,
 }: ProductsDetailPageProps) {
-  if (!PUBLIC_FEATURES.products) {
+  if (!PUBLIC_FEATURES.pages.products) {
     notFound();
   }
 
