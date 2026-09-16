@@ -41,6 +41,9 @@ describe('warranty-certificates email template', () => {
       { validationLevel: 'strict' },
     );
     expect(result.html).toContain('Xác nhận kích hoạt bảo hành');
+    expect(result.html).toMatch(
+      /Fujitek (?:&|&amp;) Lexzenz Việt Nam đã xác nhận và kích hoạt bảo hành điện tử/,
+    );
     expect(result.html).toContain('WM-2026-ABC123');
     expect(result.html).toContain(
       'https://baohanh.lexzenz.com/warranty/lookup',
@@ -91,6 +94,9 @@ describe('warranty-certificates email template', () => {
       '.certificate-meta div { text-align: center !important; }',
     );
     expect(result.html).toContain('Chứng nhận bảo hành điện tử');
+    expect(result.html).toMatch(
+      /Fujitek (?:&|&amp;) Lexzenz Việt Nam đã xác nhận và kích hoạt bảo hành điện tử/,
+    );
     expect(result.html).toContain(
       "font-family:'Inter', Arial, Helvetica, sans-serif;font-size:26px;font-weight:700",
     );

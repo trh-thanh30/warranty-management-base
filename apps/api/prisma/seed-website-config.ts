@@ -41,7 +41,7 @@ const offices = [
     isHeadquarters: false,
     phone: '0989 017 999',
     sortOrder: 1,
-    address: 'Số 62, Ngõ 20 Nghĩa Đô, Phường Nghĩa Đô, TP. Hà Nội',
+    address: 'Số 62/20, Phường Nghĩa Đô, TP. Hà Nội',
     label: 'Văn phòng Hà Nội',
   },
 ] as const;
