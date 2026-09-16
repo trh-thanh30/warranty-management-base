@@ -1,28 +1,5 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2, Send } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useMemo, useState, type WheelEvent } from "react";
-import { useForm } from "react-hook-form";
-import { Button } from "@repo/ui/button";
-import { Input } from "@repo/ui/input";
-import { cn } from "@repo/ui/lib/utils";
-import { Textarea } from "@repo/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@repo/ui/select";
-import { HttpClientError } from "@repo/shared";
-import {
-  CONTACT_CONSULTATION_TOPICS,
-  CONTACT_SUBMISSION_ERROR_CODES,
-  CONTACT_SUBMISSION_LIMITS,
-} from "@repo/shared/constants";
-import { contactSubmissionsService } from "@/src/services/contact-submissions/contact-submissions.service";
 import {
   Form,
   FormControl,
@@ -33,10 +10,37 @@ import {
 } from "@/src/components/common/form";
 import { formControlFocusClassName } from "@/src/components/common/form-control.constants";
 import {
+  isTurnstileEnabled,
+  TurnstileWidget,
+} from "@/src/components/common/turnstile-widget";
+import { useVietnamProvinces } from "@/src/hooks/use-vietnam-provinces";
+import { contactSubmissionsService } from "@/src/services/contact-submissions/contact-submissions.service";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { HttpClientError } from "@repo/shared";
+import {
+  CONTACT_CONSULTATION_TOPICS,
+  CONTACT_SUBMISSION_ERROR_CODES,
+  CONTACT_SUBMISSION_LIMITS,
+} from "@repo/shared/constants";
+import { Button } from "@repo/ui/button";
+import { Input } from "@repo/ui/input";
+import { cn } from "@repo/ui/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@repo/ui/select";
+import { Textarea } from "@repo/ui/textarea";
+import { CheckCircle2, Send } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useMemo, useState, type WheelEvent } from "react";
+import { useForm } from "react-hook-form";
+import {
   createContactMessageSchema,
   type ContactMessageFormValues,
 } from "./contact-message-form.schema";
-import { useVietnamProvinces } from "@/src/hooks/use-vietnam-provinces";
 
 type ContactMessageFormProps = {
   loadLocations?: boolean;
@@ -50,6 +54,8 @@ export function ContactMessageForm({
   const t = useTranslations("ContactPage");
   const isQuickChat = variant === "quickChat";
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const provincesQuery = useVietnamProvinces({ enabled: loadLocations });
   const submitErrorMessage = t("form.validation.submitError");
   const submittingLabel = t("form.submitting");
@@ -92,20 +98,37 @@ export function ContactMessageForm({
     }
 
     try {
-      await contactSubmissionsService.createContactSubmission({
-        ...values,
-        ...(variant === "page"
-          ? {
-              sourcePath:
-                typeof window === "undefined"
-                  ? "/contact"
-                  : window.location.pathname,
-            }
-          : {}),
-      });
+      await contactSubmissionsService.createContactSubmission(
+        {
+          ...values,
+          ...(variant === "page"
+            ? {
+                sourcePath:
+                  typeof window === "undefined"
+                    ? "/contact"
+                    : window.location.pathname,
+              }
+            : {}),
+        },
+        turnstileToken ?? undefined,
+      );
       setIsSubmitted(true);
+      setTurnstileToken(null);
       form.reset();
     } catch (error) {
+      setTurnstileToken(null);
+      setTurnstileResetKey((value) => value + 1);
+      if (
+        error instanceof HttpClientError &&
+        typeof error.code === "string" &&
+        error.code.startsWith("TURNSTILE_")
+      ) {
+        form.setError("root", {
+          message: t("form.validation.turnstileError"),
+        });
+        return;
+      }
+
       if (
         error instanceof HttpClientError &&
         error.code === CONTACT_SUBMISSION_ERROR_CODES.PHONE_PENDING
@@ -238,7 +261,7 @@ export function ContactMessageForm({
                     />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent className={isQuickChat ? "z-[70]" : undefined}>
+                <SelectContent className={isQuickChat ? "z-70" : undefined}>
                   {CONTACT_CONSULTATION_TOPICS.map((topic) => (
                     <SelectItem key={topic} value={topic}>
                       {t(`form.consultationTopics.${topic}`)}
@@ -278,7 +301,7 @@ export function ContactMessageForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent
-                  className={isQuickChat ? "z-[70]" : undefined}
+                  className={isQuickChat ? "z-70" : undefined}
                   onWheelCapture={handleProvinceSelectWheel}
                   viewportClassName="h-auto max-h-72 overflow-y-auto"
                 >
@@ -325,7 +348,7 @@ export function ContactMessageForm({
                   maxLength={CONTACT_SUBMISSION_LIMITS.content.max}
                   rows={isQuickChat ? 3 : 5}
                   placeholder={t("form.fields.content.placeholder")}
-                  className={`${isQuickChat ? "min-h-24" : "min-h-[134px]"} rounded-md bg-white border-border-gray ${formControlFocusClassName}`}
+                  className={`${isQuickChat ? "min-h-24" : "min-h-33.5"} rounded-md bg-white border-border-gray ${formControlFocusClassName}`}
                   {...field}
                 />
               </FormControl>
@@ -334,8 +357,18 @@ export function ContactMessageForm({
           )}
         />
 
+        {!isQuickChat || loadLocations ? (
+          <TurnstileWidget
+            onTokenChange={setTurnstileToken}
+            resetKey={turnstileResetKey}
+          />
+        ) : null}
+
         <Button
-          disabled={form.formState.isSubmitting}
+          disabled={
+            form.formState.isSubmitting ||
+            (isTurnstileEnabled && turnstileToken === null)
+          }
           type="submit"
           className={cn(
             "flex w-full items-center justify-center gap-2 rounded-md bg-premium-red px-8 py-3.5 text-xs font-medium uppercase tracking-wider text-white shadow-md shadow-premium-red/20 transition-colors duration-300 hover:bg-warm-red",

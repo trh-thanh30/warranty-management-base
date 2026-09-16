@@ -394,7 +394,54 @@ test("contact message form supports a compact quick-chat variant", async () => {
   assert.match(formSource, /variant === "quickChat"/);
   assert.match(formSource, /variant === "page"/);
   assert.match(formSource, /sourcePath/);
-  assert.match(formSource, /isQuickChat \? "z-\[70\]"/);
+  assert.match(formSource, /isQuickChat \? "z-70"/);
+});
+
+test("header consultation actions open the quick-chat form instead of leaving the site", async () => {
+  const headerSource = await readFile(
+    path.join(webRoot, "src", "components", "layout", "site-header.tsx"),
+    "utf8",
+  );
+
+  assert.equal(
+    (headerSource.match(/openPublicQuickChat\(\)/g) ?? []).length,
+    1,
+  );
+  assert.match(headerSource, /onClick=\{openPublicQuickChat\}/);
+  assert.match(headerSource, /closeMobileMenu\(\);\s*openPublicQuickChat\(\);/);
+});
+
+test("contact form requires Turnstile and resets it after a failed submission", async () => {
+  const formSource = await readFile(contactFormPath, "utf8");
+
+  assert.match(formSource, /<TurnstileWidget/);
+  assert.match(formSource, /!isQuickChat \|\| loadLocations/);
+  assert.match(formSource, /turnstileToken \?\? undefined/);
+  assert.match(formSource, /isTurnstileEnabled && turnstileToken === null/);
+  assert.match(formSource, /setTurnstileResetKey\(\(value\) => value \+ 1\)/);
+});
+
+test("contact submission service sends Turnstile token in the verification header", async () => {
+  const { ContactSubmissionsService } =
+    await import("../src/services/contact-submissions/contact-submissions.service.ts");
+  const calls = [];
+  const service = new ContactSubmissionsService({
+    async post(url, body, config) {
+      calls.push({ url, body, config });
+      return { data: { id: "submission-1" } };
+    },
+  });
+  const body = { fullName: "Test" };
+
+  await service.createContactSubmission(body, "captcha-token");
+
+  assert.deepEqual(calls, [
+    {
+      url: "/public/contact-submissions",
+      body,
+      config: { headers: { "X-Turnstile-Token": "captcha-token" } },
+    },
+  ]);
 });
 
 test("public layout mounts one accessible responsive quick chat", async () => {

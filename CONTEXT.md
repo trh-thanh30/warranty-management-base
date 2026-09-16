@@ -19,6 +19,7 @@
 - **Reserved warranty code**: the unique customer-facing `WM-*` lookup code allocated to one activation request item when the request is submitted. It becomes the issued Warranty's code only after approval and remains historical if the request is rejected.
 - **Legacy current warranty**: the temporary `Product.current_warranty_id` compatibility pointer used while singular warranty consumers migrate to Product's warranty history.
 - **Network location**: an active Dealer or Service Center with first-class latitude and longitude, suitable for public map display. Coordinates are authoritative; Google Maps URLs are derived values.
+- **Public submission protection**: shared verification and submission-quota policy for customer-facing forms. It verifies Turnstile tokens and limits repeated submissions; it does not permanently block IP addresses.
 
 ## Architecture Principles
 

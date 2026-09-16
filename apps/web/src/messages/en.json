@@ -492,7 +492,7 @@
       "companyName": "Công ty Cổ phần Vilatek",
       "navigationTitle": "About FUJITEK Window Films",
       "policyTitle": "Policies & Terms",
-      "japan": "FUJITEK JAPAN",
+      "japan": "FFUJITEK LEXZENZ",
       "backToTopAriaLabel": "Scroll to top",
       "copyright": "© {year} FUJITEK Window Films. All rights reserved.",
       "navigation": {
@@ -1230,6 +1230,7 @@
         "phonePending": "This phone number already has a message being processed. Please wait for a response before sending another.",
         "provinceRequired": "Select a province or city.",
         "rateLimit": "You have sent too many requests. Please wait a moment and try again.",
+        "turnstileError": "Security verification failed. Please verify again and resubmit.",
         "submitError": "We could not send your message. Please try again."
       }
     },

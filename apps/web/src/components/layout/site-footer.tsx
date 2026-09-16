@@ -58,7 +58,7 @@ export function SiteFooter({
       >
         {/* Main Footer Container */}
         <Container className="py-12 lg:py-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-11 items-start">
             {/* Column 1: Logo & Company Address */}
             <div className="lg:col-span-4 space-y-4">
               <div className="h-14 w-60">
@@ -163,7 +163,7 @@ export function SiteFooter({
                     </span>
                     <a
                       href={`tel:${toTelephoneHref(office.phone ?? "")}`}
-                      className="text-xl sm:text-2xl font-semibold text-premium-red hover:underline block"
+                      className="text-xl sm:text-2xl text-nowrap font-semibold text-premium-red hover:underline block"
                     >
                       {office.phone}
                     </a>
