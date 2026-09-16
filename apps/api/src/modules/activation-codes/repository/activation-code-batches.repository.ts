@@ -1037,7 +1037,12 @@ export class ActivationCodeBatchesRepository {
         expires_at: true,
         activated_at: true,
         batch: {
-          select: { batch_code: true, product_sku: true, product_name: true },
+          select: {
+            batch_code: true,
+            batch_name: true,
+            product_sku: true,
+            product_name: true,
+          },
         },
         request: {
           select: {
@@ -1052,6 +1057,7 @@ export class ActivationCodeBatchesRepository {
     return rows.map((row) => ({
       id: row.id,
       batchCode: row.batch.batch_code,
+      batchName: row.batch.batch_name,
       productSku: row.batch.product_sku,
       productName: row.batch.product_name,
       status: row.status,

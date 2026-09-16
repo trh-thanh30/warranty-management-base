@@ -307,6 +307,10 @@
       },
       "provinceTitle": "Phân bổ theo tỉnh/thành",
       "emptyProvince": "Chưa có dữ liệu phân bổ theo tỉnh/thành.",
+      "export": "Xuất Excel",
+      "exporting": "Đang xuất...",
+      "exported": "Đã xuất báo cáo mã kích hoạt.",
+      "exportError": "Không thể xuất báo cáo mã kích hoạt.",
       "retry": "Thử lại",
       "errorDescription": "Không tải được báo cáo mã kích hoạt."
     },
@@ -411,6 +415,12 @@
   },
   "ActivationCodeBatches": {
     "title": "Lô mã kích hoạt",
+    "excel": {
+      "title": "Xuất Excel",
+      "exportAll": "Xuất toàn bộ báo cáo mã kích hoạt",
+      "exported": "Đã xuất báo cáo mã kích hoạt.",
+      "exportError": "Không thể xuất báo cáo mã kích hoạt."
+    },
     "eyebrow": "Vận hành bảo hành",
     "description": "Theo dõi các lô mã kích hoạt được tạo và thời hạn sử dụng.",
     "settings": "Cấu hình mã kích hoạt",

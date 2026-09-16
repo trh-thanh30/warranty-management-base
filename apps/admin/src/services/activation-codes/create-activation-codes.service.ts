@@ -25,7 +25,10 @@ import type {
   ActivationCodeDetailQuery,
   AvailableActivationCodeList,
 } from "./activation-code-batches.types";
-import type { ActivationCodesHttpClient } from "./activation-codes.types";
+import type {
+  ActivationCodeReportFilters,
+  ActivationCodesHttpClient,
+} from "./activation-codes.types";
 
 export function createActivationCodesService(http: ActivationCodesHttpClient) {
   return {
@@ -60,18 +63,24 @@ export function createActivationCodesService(http: ActivationCodesHttpClient) {
     },
 
     async getReport(
-      filters: {
-        dateFrom?: string;
-        dateTo?: string;
-        batchId?: string;
-        provinceCode?: string;
-      } = {},
+      filters: ActivationCodeReportFilters = {},
     ): Promise<ActivationCodeReport> {
       return unwrap(
         await http.get<ActivationCodeReport>(
           "/activation-code-batches/reports/summary",
           { params: filters },
         ),
+      );
+    },
+
+    async exportReport(
+      filters: ActivationCodeReportFilters = {},
+    ): Promise<Blob> {
+      return unwrapBlob(
+        await http.get<Blob>("/activation-code-batches/reports/export", {
+          params: filters,
+          responseType: "blob",
+        }),
       );
     },
 

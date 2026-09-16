@@ -87,6 +87,38 @@ test("loads activation code report filters", async () => {
   assert.equal(result, report);
 });
 
+test("exports the filtered activation code report as a blob", async () => {
+  const calls: unknown[] = [];
+  const blob = new Blob(["excel"]);
+  const http = {
+    async get(url: string, config?: unknown) {
+      calls.push({ url, config });
+      return { data: blob };
+    },
+  };
+
+  const result = await createActivationCodesService(
+    http as unknown as ActivationCodesHttpClient,
+  ).exportReport({
+    dateFrom: "2026-09-01T00:00:00.000Z",
+    dateTo: "2026-09-30T23:59:59.999Z",
+  });
+
+  assert.deepEqual(calls, [
+    {
+      url: "/activation-code-batches/reports/export",
+      config: {
+        params: {
+          dateFrom: "2026-09-01T00:00:00.000Z",
+          dateTo: "2026-09-30T23:59:59.999Z",
+        },
+        responseType: "blob",
+      },
+    },
+  ]);
+  assert.equal(result, blob);
+});
+
 test("filters assignable activation codes by batch", async () => {
   const calls: unknown[] = [];
   const response = { items: [], meta: { page: 1, total: 0 } };

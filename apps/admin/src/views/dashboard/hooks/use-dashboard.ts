@@ -109,11 +109,15 @@ export function useDashboard() {
     }),
     [range.from, range.to],
   );
+  const activationCodeReportFilters = useMemo(
+    () => ({
+      dateFrom: toDashboardDateBoundary(range.from, "start"),
+      dateTo: toDashboardDateBoundary(range.to, "end"),
+    }),
+    [range.from, range.to],
+  );
   const activationCodeReportQuery = useDashboardActivationCodeReport(
-    {
-      dateFrom: range.from,
-      dateTo: range.to,
-    },
+    activationCodeReportFilters,
     { enabled: enabled && canViewActivationCodes },
   );
 
@@ -168,6 +172,7 @@ export function useDashboard() {
     activationRequestsQuery,
     activationRequestsTrendQuery,
     activationCodeReportQuery,
+    activationCodeReportFilters,
     activeActivationRequestQuickRange,
     activeQuickRange,
     activeWarrantyQuickRange,

@@ -307,6 +307,10 @@
       },
       "provinceTitle": "By province",
       "emptyProvince": "No province breakdown is available.",
+      "export": "Export Excel",
+      "exporting": "Exporting...",
+      "exported": "Activation code report exported.",
+      "exportError": "Could not export the activation code report.",
       "retry": "Retry",
       "errorDescription": "Activation code reporting could not be loaded."
     },
@@ -411,6 +415,12 @@
   },
   "ActivationCodeBatches": {
     "title": "Activation batches",
+    "excel": {
+      "title": "Export Excel",
+      "exportAll": "Export full activation code report",
+      "exported": "Activation code report exported.",
+      "exportError": "Could not export the activation code report."
+    },
     "eyebrow": "Warranty operations",
     "description": "Track generated activation-code batches and their validity period.",
     "settings": "Activation code settings",

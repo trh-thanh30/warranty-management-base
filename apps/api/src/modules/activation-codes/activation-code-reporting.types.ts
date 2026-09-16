@@ -27,6 +27,7 @@ export type ActivationCodeReportQueryResult = {
 export type ActivationCodeReportRow = {
   id: string;
   batchCode: string;
+  batchName: string;
   productSku: string | null;
   productName: string | null;
   status: activation_code_status;
