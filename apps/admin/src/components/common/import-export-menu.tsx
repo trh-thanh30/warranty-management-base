@@ -45,20 +45,20 @@ export function ImportExportMenu({
       <DropdownMenuTrigger asChild>
         <Button
           aria-label={labels.title}
-          className="h-10 w-full justify-center border-slate-200 bg-white px-3 text-slate-800 shadow-sm hover:bg-slate-50 sm:w-auto"
+          className="group h-10 w-full justify-center border-slate-200 bg-white px-3 text-slate-800 shadow-sm outline-none hover:bg-slate-50 focus-visible:outline-none sm:w-auto"
           disabled={disabled}
           variant="secondary"
         >
           <div className="inline-flex items-center justify-center gap-2 sm:w-auto">
             <FileSpreadsheet className="size-4 shrink-0 text-slate-700" />
             <span>{labels.title}</span>
-            <ChevronDown className="size-4 shrink-0 text-slate-500" />
+            <ChevronDown className="size-4 shrink-0 text-slate-500 transition-transform duration-150 group-data-[state=open]:rotate-180 motion-reduce:transition-none" />
           </div>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-max min-w-64 max-w-[calc(100vw-2rem)] p-1.5"
+        className="w-max min-w-64 max-w-[calc(100vw-2rem)] origin-[var(--radix-dropdown-menu-content-transform-origin)] p-1.5 outline-none duration-150 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 motion-reduce:animate-none"
       >
         {onUpload && labels.upload ? (
           <DropdownMenuItem

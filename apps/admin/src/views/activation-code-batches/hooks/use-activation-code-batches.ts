@@ -6,13 +6,19 @@ import type {
   ActivationCodeReportStatus,
 } from "@repo/shared";
 import { useAuth } from "@/src/app/providers/auth-provider";
+import { useExcel } from "@/src/hooks/use-excel";
 import { usePermissions } from "@/src/hooks/use-permissions";
+import { useToast } from "@/src/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PERMISSIONS } from "@repo/shared/constants";
 import { activationCodesService } from "@/src/services/activation-codes/activation-codes.service";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 export function useActivationCodeBatches() {
+  const t = useTranslations("ActivationCodeBatches");
+  const toast = useToast();
+  const { createDatedFilename, downloadBlob } = useExcel();
   const { user } = useAuth();
   const { hasPermission } = usePermissions();
   const canView = hasPermission(PERMISSIONS.ACTIVATION_CODE_BATCH_VIEW);
@@ -66,6 +72,14 @@ export function useActivationCodeBatches() {
       });
     },
   });
+  const exportMutation = useMutation({
+    mutationFn: () => activationCodesService.exportReport(),
+    onSuccess: (blob) => {
+      downloadBlob(blob, createDatedFilename("activation-code-report"));
+      toast.success(t("excel.exported"));
+    },
+    onError: () => toast.error(t("excel.exportError")),
+  });
 
   return {
     canView,
@@ -73,6 +87,7 @@ export function useActivationCodeBatches() {
     canRevoke,
     batchName,
     createMutation,
+    exportMutation,
     isCreateOpen,
     page,
     query,
