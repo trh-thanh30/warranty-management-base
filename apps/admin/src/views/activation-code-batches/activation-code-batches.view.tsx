@@ -1,5 +1,6 @@
 "use client";
 
+import { ImportExportMenu } from "@/src/components/common";
 import { PageHeader } from "@/src/components/common/page-header";
 import { SelectControl } from "@/src/components/common/select-control";
 import { StatePanel } from "@/src/components/common/state-panel";
@@ -75,6 +76,16 @@ export function ActivationCodeBatchesView() {
         <PageHeader
           actions={
             <div className="flex flex-wrap items-center justify-end gap-2">
+              <ImportExportMenu
+                disabled={directory.exportMutation.isPending}
+                labels={{
+                  exportAll: t("excel.exportAll"),
+                  title: t("excel.title"),
+                }}
+                onExportAll={() => {
+                  directory.exportMutation.mutate();
+                }}
+              />
               {canConfigurePolicy ? (
                 <Button asChild size="md" variant="outline">
                   <Link href="/settings/activation-code-policy">

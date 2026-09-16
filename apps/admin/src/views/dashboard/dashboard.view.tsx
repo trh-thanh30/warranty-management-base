@@ -23,6 +23,7 @@ export function DashboardView() {
     activationRequestsQuery,
     activationRequestsTrendQuery,
     activationCodeReportQuery,
+    activationCodeReportFilters,
     activeActivationRequestQuickRange,
     activeQuickRange,
     activeWarrantyQuickRange,
@@ -147,6 +148,7 @@ export function DashboardView() {
             <DashboardActivationCodeOperations
               data={activationCodeReportQuery.data}
               error={activationCodeReportQuery.isError}
+              filters={activationCodeReportFilters}
               loading={activationCodeReportQuery.isPending}
               onRetry={() => void activationCodeReportQuery.refetch()}
             />

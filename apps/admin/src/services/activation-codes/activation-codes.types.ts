@@ -18,13 +18,18 @@ export type ActivationCodesHttpClient = {
   patch: HttpWrite;
 };
 
+export type ActivationCodeReportFilters = {
+  dateFrom?: string;
+  dateTo?: string;
+  batchId?: string;
+  provinceCode?: string;
+};
+
 export type ActivationCodeReportService = {
-  getReport: (filters?: {
-    dateFrom?: string;
-    dateTo?: string;
-    batchId?: string;
-    provinceCode?: string;
-  }) => Promise<ActivationCodeReport>;
+  exportReport: (filters?: ActivationCodeReportFilters) => Promise<Blob>;
+  getReport: (
+    filters?: ActivationCodeReportFilters,
+  ) => Promise<ActivationCodeReport>;
 };
 
 export type ActivationCodeBatchService = {

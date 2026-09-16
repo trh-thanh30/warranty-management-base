@@ -1,4 +1,11 @@
-import { AlertTriangle, CheckCircle2, KeyRound, Layers3 } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Download,
+  KeyRound,
+  Layers3,
+  LoaderCircle,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import type { ActivationCodeReport } from "@repo/shared";
 import {
@@ -8,13 +15,17 @@ import {
   CardHeader,
   CardTitle,
   Skeleton,
+  Button,
 } from "@repo/ui";
 import { formatDashboardNumber } from "../dashboard.utils";
 import { DashboardWidgetState } from "./dashboard-widget-state";
+import type { ActivationCodeReportQuery } from "../hooks/use-dashboard-activation-codes";
+import { useDashboardActivationCodeReportExport } from "../hooks/use-dashboard-activation-codes";
 
 type Props = {
   data?: ActivationCodeReport;
   error: boolean;
+  filters: ActivationCodeReportQuery;
   loading: boolean;
   onRetry: () => void;
 };
@@ -22,11 +33,13 @@ type Props = {
 export function DashboardActivationCodeOperations({
   data,
   error,
+  filters,
   loading,
   onRetry,
 }: Props) {
   const locale = useLocale();
   const t = useTranslations("Dashboard.activationCodes");
+  const exportMutation = useDashboardActivationCodeReportExport(filters);
 
   if (loading) {
     return (
@@ -85,9 +98,27 @@ export function DashboardActivationCodeOperations({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>{t("title")}</CardTitle>
-        <CardDescription>{t("description")}</CardDescription>
+      <CardHeader className="gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <CardTitle>{t("title")}</CardTitle>
+          <CardDescription className="mt-1.5">
+            {t("description")}
+          </CardDescription>
+        </div>
+        <Button
+          className="w-full shrink-0 sm:w-auto"
+          disabled={exportMutation.isPending}
+          onClick={() => exportMutation.mutate()}
+          size="sm"
+          variant="outline"
+        >
+          {exportMutation.isPending ? (
+            <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+          ) : (
+            <Download className="size-4" aria-hidden="true" />
+          )}
+          {exportMutation.isPending ? t("exporting") : t("export")}
+        </Button>
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
