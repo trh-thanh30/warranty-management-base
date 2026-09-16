@@ -3,6 +3,7 @@
 import { Container } from "@/src/components/common/container";
 import { FooterSocialLink } from "@/src/components/layout/components/footer-social-link";
 import { SiteLogo } from "@/src/components/layout/components/site-logo";
+import { FLOATING_ACTIONS_SCROLL_THRESHOLD } from "@/src/constants/floating-actions.constants";
 import { Link, usePathname } from "@/src/i18n/navigation";
 import {
   displayWebsite,
@@ -39,13 +40,11 @@ export function SiteFooter({
 
   useEffect(() => {
     const toggleVisibility = () => {
-      if (window.scrollY > 400) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
+      setIsVisible(window.scrollY > FLOATING_ACTIONS_SCROLL_THRESHOLD);
     };
-    window.addEventListener("scroll", toggleVisibility);
+
+    toggleVisibility();
+    window.addEventListener("scroll", toggleVisibility, { passive: true });
     return () => window.removeEventListener("scroll", toggleVisibility);
   }, []);
 
@@ -245,7 +244,7 @@ export function SiteFooter({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 10 }}
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="group fixed bottom-24 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-premium-red text-white shadow-xl border border-white/20 transition-all duration-300 cursor-pointer hover:bg-warm-red"
+            className="group fixed bottom-24 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-premium-red text-white shadow-xl border border-white/20 transition-colors duration-300 cursor-pointer hover:bg-warm-red"
             aria-label={t("backToTopAriaLabel")}
           >
             <ArrowUp className="h-5 w-5" />

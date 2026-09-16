@@ -1,5 +1,6 @@
 "use client";
 
+import { FLOATING_ACTIONS_SCROLL_THRESHOLD } from "@/src/constants/floating-actions.constants";
 import type { PublicWebsiteSiteSetting } from "@repo/shared";
 import { cn } from "@repo/ui/lib/utils";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -25,7 +26,7 @@ export function PublicQuickChat({
 
   useEffect(() => {
     const updateTriggerVisibility = () => {
-      const nextIsVisible = window.scrollY > 400;
+      const nextIsVisible = window.scrollY > FLOATING_ACTIONS_SCROLL_THRESHOLD;
       setIsTriggerVisible(nextIsVisible);
       setIsTriggerHovered(false);
     };
