@@ -37,6 +37,7 @@ import { CheckCircle2, Send } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState, type WheelEvent } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import {
   createContactMessageSchema,
   type ContactMessageFormValues,
@@ -54,6 +55,7 @@ export function ContactMessageForm({
   const t = useTranslations("ContactPage");
   const isQuickChat = variant === "quickChat";
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [animateFormOnReset, setAnimateFormOnReset] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const provincesQuery = useVietnamProvinces({ enabled: loadLocations });
@@ -112,6 +114,7 @@ export function ContactMessageForm({
         },
         turnstileToken ?? undefined,
       );
+      toast.success(t("form.success.toast"));
       setIsSubmitted(true);
       setTurnstileToken(null);
       form.reset();
@@ -160,7 +163,7 @@ export function ContactMessageForm({
     return (
       <div
         className={cn(
-          "animate-in space-y-4 rounded-md border border-premium-red/30 bg-surface-muted text-center zoom-in-95",
+          "animate-in space-y-4 rounded-md border border-premium-red/30 bg-white text-center zoom-in-95 motion-reduce:animate-none",
           isQuickChat ? "p-5" : "p-8",
         )}
       >
@@ -180,8 +183,11 @@ export function ContactMessageForm({
         </p>
         <Button
           type="button"
-          onClick={() => setIsSubmitted(false)}
-          className="bg-deep-black hover:bg-premium-red text-white px-6 py-2.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer"
+          onClick={() => {
+            setAnimateFormOnReset(true);
+            setIsSubmitted(false);
+          }}
+          className="bg-deep-black hover:bg-premium-red text-white px-6 py-2.5 rounded-md text-xs font-semibold uppercase tracking-wider duration-300 transition-colors cursor-pointer"
         >
           {t("form.success.reset")}
         </Button>
@@ -192,7 +198,11 @@ export function ContactMessageForm({
   return (
     <Form {...form}>
       <form
-        className={isQuickChat ? "space-y-4" : "space-y-5"}
+        className={cn(
+          isQuickChat ? "space-y-4" : "space-y-5",
+          animateFormOnReset &&
+            "animate-in fade-in slide-in-from-bottom-4 duration-300 motion-reduce:animate-none",
+        )}
         onSubmit={form.handleSubmit(handleSubmit)}
       >
         <div
@@ -371,7 +381,7 @@ export function ContactMessageForm({
           }
           type="submit"
           className={cn(
-            "flex w-full items-center justify-center gap-2 rounded-md bg-premium-red px-8 py-3.5 text-xs font-medium uppercase tracking-wider text-white shadow-md shadow-premium-red/20 transition-colors duration-300 hover:bg-warm-red",
+            "flex w-full items-center justify-center gap-2 rounded-md bg-premium-red px-8 py-3.5 text-sm font-medium uppercase  text-white shadow-md shadow-premium-red/20 transition-colors duration-300 hover:bg-warm-red cursor-pointer",
             !isQuickChat && "sm:w-auto",
           )}
         >

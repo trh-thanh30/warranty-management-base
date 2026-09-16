@@ -421,6 +421,42 @@ test("contact form requires Turnstile and resets it after a failed submission", 
   assert.match(formSource, /setTurnstileResetKey\(\(value\) => value \+ 1\)/);
 });
 
+test("contact form animates reopening after sending a new message", async () => {
+  const formSource = await readFile(contactFormPath, "utf8");
+
+  assert.match(formSource, /setAnimateFormOnReset\(true\)/);
+  assert.match(formSource, /animateFormOnReset &&/);
+  assert.match(formSource, /fade-in slide-in-from-bottom-4 duration-300/);
+  assert.match(formSource, /motion-reduce:animate-none/);
+});
+
+test("contact form shows a localized success toast only after submission succeeds", async () => {
+  const formSource = await readFile(contactFormPath, "utf8");
+
+  assert.match(
+    formSource,
+    /await contactSubmissionsService\.createContactSubmission\(/,
+  );
+  assert.match(formSource, /toast\.success\(t\("form\.success\.toast"\)\)/);
+  assert.ok(
+    formSource.indexOf('toast.success(t("form.success.toast"))') >
+      formSource.indexOf(
+        "await contactSubmissionsService.createContactSubmission(",
+      ),
+  );
+
+  for (const locale of ["vi", "en"]) {
+    const messages = JSON.parse(
+      await readFile(
+        path.join(webRoot, "src", "messages", `${locale}.json`),
+        "utf8",
+      ),
+    );
+
+    assert.ok(messages.ContactPage?.form?.success?.toast);
+  }
+});
+
 test("contact submission service sends Turnstile token in the verification header", async () => {
   const { ContactSubmissionsService } =
     await import("../src/services/contact-submissions/contact-submissions.service.ts");

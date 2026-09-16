@@ -1186,7 +1186,8 @@
       "success": {
         "title": "Thank you for contacting us!",
         "description": "A FUJITEK Films consultant will respond by phone as soon as possible.",
-        "reset": "Send another message"
+        "reset": "Send another message",
+        "toast": "Your message was sent successfully!"
       },
       "fields": {
         "consultationTopic": {
