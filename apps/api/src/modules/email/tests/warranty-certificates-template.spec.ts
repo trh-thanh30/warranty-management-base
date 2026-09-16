@@ -105,7 +105,7 @@ describe('warranty-certificates email template', () => {
       'Sản phẩm chính hãng FUJITEK &amp; LEXZENZ',
     );
     expect(result.html).toContain('MÃ CHỨNG NHẬN');
-    expect(result.html).toContain('HỆ THỐNG E-WARRANTY');
+    expect(result.html).toContain('HỆ THỐNG BẢO HÀNH');
     expect(result.html).toContain('Tra cứu thời hạn bảo hành');
     expect(result.html).not.toContain('🔍');
     expect(result.html).toContain('baohanh.lexzenz.com/tra-cuu');
@@ -116,7 +116,7 @@ describe('warranty-certificates email template', () => {
     expect(result.html).toContain('Email được gửi tự động');
     expect(result.html).toContain('0989 017 999');
     expect(result.html).toContain('0886 33 77 33');
-    expect(result.html).toContain('Số 62, Ngõ 20 Nghĩa Đô');
+    expect(result.html).toContain('Số 62/20, Phường Nghĩa Đô, TP. Hà Nội');
     expect(result.html).toContain('7C Nguyễn Ngọc Phương');
     expect(result.html).toContain('https://maps.google.com/?q=S%E1%BB%91%2062');
     expect(result.html).toContain(

@@ -28,7 +28,7 @@ test("footer social buttons use maintained brand icon components", async () => {
   );
 });
 
-test("footer identifies FUJITEK Japan with an accessible decorative flag", async () => {
+test("footer displays the current FUJITEK LEXZENZ brand with a decorative flag", async () => {
   const [source, viMessages, enMessages] = await Promise.all([
     readFile(
       path.join(
@@ -60,7 +60,7 @@ test("footer identifies FUJITEK Japan with an accessible decorative flag", async
   );
 
   for (const messages of [viMessages, enMessages]) {
-    assert.equal(messages.HomePage.footer.japan, "FUJITEK JAPAN");
+    assert.match(messages.HomePage.footer.japan, /FUJITEK LEXZENZ$/);
     assert.equal(messages.HomePage.footer.korea, undefined);
   }
 });
