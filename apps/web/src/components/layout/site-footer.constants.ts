@@ -38,7 +38,8 @@ export const footerSocialItems = [
     label: "Facebook",
     platform: "FACEBOOK",
     icon: FaFacebookF,
-    className: "bg-facebook-blue",
+    className:
+      "bg-facebook-blue text-white focus-visible:bg-facebook-blue focus-visible:text-white",
     iconClassName: "size-4",
   },
   {
@@ -46,7 +47,8 @@ export const footerSocialItems = [
     label: "Zalo",
     platform: "ZALO",
     icon: SiZalo,
-    className: "bg-zalo-blue",
+    className:
+      "bg-zalo-blue text-white focus-visible:bg-zalo-blue focus-visible:text-white",
     iconClassName: "size-5",
   },
   {
@@ -54,7 +56,8 @@ export const footerSocialItems = [
     label: "TikTok",
     platform: "TIKTOK",
     icon: FaTiktok,
-    className: "bg-black",
+    className:
+      "border-white/40 bg-black text-white focus-visible:bg-black focus-visible:text-white",
     iconClassName: "size-5",
   },
   {
@@ -62,7 +65,8 @@ export const footerSocialItems = [
     label: "YouTube",
     platform: "YOUTUBE",
     icon: FaYoutube,
-    className: "bg-danger-red",
+    className:
+      "bg-danger-red text-white focus-visible:bg-danger-red focus-visible:text-white",
     iconClassName: "size-5",
   },
 ] as const;

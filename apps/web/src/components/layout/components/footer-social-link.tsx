@@ -17,9 +17,9 @@ export function FooterSocialLink({
   iconClassName,
 }: FooterSocialLinkProps) {
   const classes = cn(
-    "flex size-9 items-center justify-center rounded-full text-sm font-medium text-white shadow-xs transition-opacity",
+    "flex size-11 items-center justify-center rounded-full border border-transparent text-sm font-medium text-white shadow-sm transition-colors",
     href
-      ? "hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2"
+      ? "hover:border-white/40 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2 focus-visible:ring-offset-deep-black"
       : "cursor-default",
     className,
   );
