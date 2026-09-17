@@ -57,9 +57,9 @@ export function SiteFooter({
       >
         {/* Main Footer Container */}
         <Container className="relative z-10 py-12 lg:py-16">
-          <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-2 lg:grid-cols-12 lg:gap-11">
+          <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-2 xl:grid-cols-[4fr_3fr_3fr_3fr] xl:gap-11">
             {/* Column 1: Logo & Company Address */}
-            <div className="lg:col-span-4 space-y-4">
+            <div className="space-y-4">
               <div className="h-14 w-60">
                 <SiteLogo
                   src={siteSettings?.footerLogo?.url}
@@ -89,7 +89,7 @@ export function SiteFooter({
             </div>
 
             {/* Column 2: Navigation Links */}
-            <div className="lg:col-span-3 space-y-4">
+            <div className="space-y-4">
               <h4 className="text-base font-semibold uppercase tracking-wider text-white">
                 {t("navigationTitle")}
               </h4>
@@ -127,7 +127,7 @@ export function SiteFooter({
             </div>
 
             {/* Column 3: Policy Links */}
-            <div className="lg:col-span-3 space-y-4">
+            <div className="space-y-4">
               <h4 className="text-base font-semibold uppercase tracking-wider text-white">
                 {t("policyTitle")}
               </h4>
@@ -152,12 +152,12 @@ export function SiteFooter({
             </div>
 
             {/* Column 4: Hotline & Socials */}
-            <div className="lg:col-span-2 space-y-4">
+            <div className="min-w-0 space-y-4 pr-16 sm:pr-0">
               {offices
                 .filter((office) => office.phone?.trim())
                 .map((office) => (
                   <div key={office.id}>
-                    <span className="block text-nowrap text-xs font-medium uppercase text-white sm:text-sm">
+                    <span className="block text-nowrap text-xs font-medium uppercase text-white sm:text-sm xl:text-xs 2xl:text-sm">
                       {t("hotline", { office: office.label })}
                     </span>
                     <a
@@ -177,7 +177,7 @@ export function SiteFooter({
                 <a
                   href={`mailto:${contactEmail}`}
                   aria-label={`${t("emailLabel")} ${contactEmail}`}
-                  className="flex min-h-11 items-center gap-2 break-all text-sm font-medium text-white hover:text-premium-red sm:text-base"
+                  className="flex min-h-11 min-w-0 items-center gap-2 break-words text-sm font-medium text-white hover:text-premium-red sm:text-base"
                 >
                   <Mail aria-hidden="true" className="size-5 shrink-0" />
                   {contactEmail}
@@ -190,7 +190,7 @@ export function SiteFooter({
                   rel="noopener noreferrer"
                   target="_blank"
                   aria-label={`${t("websiteLabel")} ${displayWebsite(siteSettings?.websiteUrl ?? websiteHref)}`}
-                  className="flex min-h-11 items-center gap-2 break-all text-sm font-medium text-white hover:text-premium-red sm:text-base"
+                  className="flex min-h-11 min-w-0 items-center gap-2 break-words text-sm font-medium text-white hover:text-premium-red sm:text-base"
                 >
                   <Globe2 aria-hidden="true" className="size-5 shrink-0" />
                   {displayWebsite(siteSettings?.websiteUrl ?? websiteHref)}
