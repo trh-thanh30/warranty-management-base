@@ -49,3 +49,17 @@ test("footer uses a black-and-white hierarchy with red interaction accents", asy
   assert.match(constants, /border-white\/40 bg-black/);
   assert.match(constants, /bg-danger-red/);
 });
+
+test("footer delays its four-column layout until wide screens", async () => {
+  const footer = await readFile(
+    path.join(webRoot, "src", "components", "layout", "site-footer.tsx"),
+    "utf8",
+  );
+
+  assert.match(footer, /md:grid-cols-2 xl:grid-cols-\[4fr_3fr_3fr_3fr\]/);
+  assert.match(footer, /min-w-0 space-y-4 pr-16 sm:pr-0/);
+  assert.doesNotMatch(footer, /xl:col-span-/);
+  assert.match(footer, /sm:text-sm xl:text-xs 2xl:text-sm/);
+  assert.doesNotMatch(footer, /lg:grid-cols-12/);
+  assert.doesNotMatch(footer, /break-all/);
+});
