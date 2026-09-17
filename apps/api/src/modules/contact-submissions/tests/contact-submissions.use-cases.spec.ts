@@ -319,16 +319,30 @@ describe('Contact submission notification service', () => {
   const createSystemNotificationUseCase = {
     execute: jest.fn(),
   };
+  const emailService = { sendJob: jest.fn() };
+  const settingsService = { get: jest.fn() };
+  const configService = { get: jest.fn() };
+
+  function createService() {
+    return new ContactSubmissionNotificationService(
+      createSystemNotificationUseCase as never,
+      emailService as never,
+      settingsService as never,
+      configService as never,
+    );
+  }
 
   beforeEach(() => {
     jest.clearAllMocks();
+    createSystemNotificationUseCase.execute.mockResolvedValue(undefined);
+    emailService.sendJob.mockResolvedValue(undefined);
+    settingsService.get.mockResolvedValue({ email: 'admin@lexzenz.vn' });
+    configService.get.mockReturnValue('https://admin.lexzenz.com');
   });
 
   it('publishes new submissions to active admin roles', async () => {
     createSystemNotificationUseCase.execute.mockResolvedValue(undefined);
-    const service = new ContactSubmissionNotificationService(
-      createSystemNotificationUseCase as never,
-    );
+    const service = createService();
 
     await service.submissionCreated(baseSubmission);
 
@@ -354,13 +368,65 @@ describe('Contact submission notification service', () => {
     createSystemNotificationUseCase.execute.mockRejectedValue(
       new Error('notification unavailable'),
     );
-    const service = new ContactSubmissionNotificationService(
-      createSystemNotificationUseCase as never,
-    );
+    const service = createService();
 
     await expect(
       service.submissionCreated(baseSubmission),
     ).resolves.toBeUndefined();
+    expect(emailService.sendJob).toHaveBeenCalledTimes(1);
+  });
+
+  it('queues a separate email for each contact using its submission id', async () => {
+    settingsService.get.mockResolvedValue({ email: 'inbox@example.com' });
+    const service = createService();
+
+    await service.submissionCreated(baseSubmission);
+    await service.submissionCreated({
+      ...baseSubmission,
+      id: 'second-contact-id',
+    });
+
+    expect(emailService.sendJob).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        to: 'inbox@example.com',
+        idempotencyKey: 'contact-submission:contact-submission-id',
+        template: 'contact-submission',
+        context: expect.objectContaining({
+          brandLogoUrl: expect.any(String),
+          fullName: baseSubmission.full_name,
+          content: baseSubmission.content,
+          detailUrl: expect.stringContaining(
+            '/contact-submissions/contact-submission-id',
+          ),
+        }),
+        text: expect.stringContaining(
+          '/contact-submissions/contact-submission-id',
+        ),
+      }),
+    );
+    expect(emailService.sendJob).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        idempotencyKey: 'contact-submission:second-contact-id',
+      }),
+    );
+    expect(emailService.sendJob.mock.calls[0][0].text).toContain(
+      baseSubmission.content,
+    );
+    expect(emailService.sendJob.mock.calls[0][0].text).toContain(
+      'Tư vấn sản phẩm',
+    );
+  });
+
+  it('does not fail the public request when queuing email fails', async () => {
+    emailService.sendJob.mockRejectedValue(new Error('queue unavailable'));
+    const service = createService();
+
+    await expect(
+      service.submissionCreated(baseSubmission),
+    ).resolves.toBeUndefined();
+    expect(createSystemNotificationUseCase.execute).toHaveBeenCalledTimes(1);
   });
 });
 

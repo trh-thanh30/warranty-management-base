@@ -9,6 +9,8 @@ import { GetContactSubmissionUseCase } from '@/modules/contact-submissions/use-c
 import { ListContactSubmissionsUseCase } from '@/modules/contact-submissions/use-cases/list-contact-submissions.use-case';
 import { UpdateContactSubmissionStatusUseCase } from '@/modules/contact-submissions/use-cases/update-contact-submission-status.use-case';
 import { NotificationModule } from '@/modules/notification/notification.module';
+import { EmailModule } from '@/modules/email/email.module';
+import { SystemConfigModule } from '@/modules/system-config/system-config.module';
 import { PublicSubmissionProtectionModule } from '@/modules/public-submission-protection/public-submission-protection.module';
 import { Module } from '@nestjs/common';
 
@@ -17,6 +19,8 @@ import { Module } from '@nestjs/common';
     PrismaModule,
     LocationsModule,
     NotificationModule,
+    EmailModule,
+    SystemConfigModule,
     PublicSubmissionProtectionModule,
   ],
   controllers: [ContactSubmissionsController],

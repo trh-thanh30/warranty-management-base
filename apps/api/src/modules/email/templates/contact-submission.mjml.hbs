@@ -1,0 +1,132 @@
+<mjml>
+  <mj-head>
+    <mj-title>{{subject}}</mj-title>
+    <mj-preview>Có lời nhắn liên hệ mới từ {{fullName}} trên website.</mj-preview>
+    <mj-font name="Inter" href="https://fonts.googleapis.com/css?family=Inter:400,500,600,700" />
+    <mj-attributes>
+      <mj-all font-family="'Inter', Arial, Helvetica, sans-serif" />
+      <mj-text color="#374151" font-size="15px" line-height="1.7" />
+      <mj-section padding="0" />
+    </mj-attributes>
+    <mj-style>
+      @media only screen and (max-width: 600px) {
+        .mobile-padding > table > tbody > tr > td { padding-left: 20px !important; padding-right: 20px !important; }
+        .mobile-center div, .mobile-center td { text-align: center !important; }
+        .mobile-logo { text-align: center !important; }
+        .mobile-logo table { margin: 0 auto !important; }
+        .mobile-logo img { margin: 0 auto !important; }
+        .hero-title div { font-size: 24px !important; line-height: 1.25 !important; }
+      }
+    </mj-style>
+  </mj-head>
+
+  <mj-body background-color="#f3f4f6" width="600px">
+    <mj-section background-color="#dc2626" padding="4px 0 0">
+      <mj-column><mj-spacer height="1px" /></mj-column>
+    </mj-section>
+
+    <mj-section css-class="mobile-padding" background-color="#ffffff" padding="24px 32px 20px">
+      <mj-column width="56%" vertical-align="middle">
+        {{#if brandLogoUrl}}
+        <mj-image css-class="mobile-logo" align="left" alt="FUJITEK và LEXZENZ" href="https://baohanh.lexzenz.com" target="_blank" padding="0" src="{{brandLogoUrl}}" width="180px" />
+        {{else}}
+        <mj-text css-class="mobile-center" color="#111827" font-size="22px" font-weight="800" letter-spacing=".2px" padding="0">
+          FUJITEK <span style="color:#9ca3af;font-weight:400;padding:0 7px;">|</span> <span style="color:#dc2626;">LEXZENZ</span>
+        </mj-text>
+        {{/if}}
+      </mj-column>
+      <mj-column width="44%" vertical-align="middle">
+        <mj-text css-class="mobile-center" align="right" color="#64748b" font-size="10px" font-weight="700" letter-spacing="1px" padding="0" text-transform="uppercase">
+          HỆ THỐNG BẢO HÀNH
+        </mj-text>
+        <mj-text css-class="mobile-center" align="right" color="#111827" font-size="12px" font-weight="700" padding="4px 0 0" line-height="1.4">
+          THÔNG BÁO NỘI BỘ
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section css-class="mobile-padding" background-color="#ffffff" padding="10px 32px 8px" border-top="1px solid #e5e7eb">
+      <mj-column width="100%">
+        <mj-text css-class="hero-title" color="#dc2626" font-size="26px" font-weight="700" line-height="1.3" letter-spacing=".2px" text-transform="uppercase" padding="24px 0 0" align="center">
+          Lời nhắn liên hệ mới
+        </mj-text>
+        <mj-divider border-color="#e5e7eb" border-width="1px" padding="24px 0 0" />
+      </mj-column>
+    </mj-section>
+
+    <mj-section css-class="mobile-padding" background-color="#ffffff" padding="22px 32px 18px">
+      <mj-column width="100%">
+        <mj-text color="#111827" font-size="15px" padding="0 0 10px">
+          Xin chào quản trị viên, <strong>{{to}}</strong>
+        </mj-text>
+        <mj-text color="#6b7280" font-size="15px" line-height="1.7" padding="0">
+          Fujitek &amp; Lexzenz Việt Nam vừa nhận được một lời nhắn từ form liên hệ trên website. Thông tin khách hàng và nội dung lời nhắn ở bên dưới.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section css-class="mobile-padding" background-color="#ffffff" padding="0 32px 28px">
+      <mj-column width="100%">
+        <mj-table padding="0" table-layout="fixed" width="100%">
+          <tr>
+            <td colspan="2" style="padding:14px 20px;border:1px solid #e5e7eb;border-bottom:1px dashed #dbe4ef;font-family:'Inter',Arial,Helvetica,sans-serif;color:#64748b;font-size:13px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;">CHI TIẾT LIÊN HỆ</td>
+          </tr>
+          <tr>
+            <td width="35%" style="padding:14px 12px 10px 20px;border-left:4px solid #dc2626;background:#f8fafc;color:#64748b;font-size:12px;vertical-align:top;">Khách hàng</td>
+            <td width="65%" style="padding:14px 20px 10px 0;background:#f8fafc;color:#111827;font-size:14px;font-weight:700;overflow-wrap:anywhere;word-break:break-word;">{{fullName}}</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 12px 10px 20px;border-left:4px solid #dc2626;background:#f8fafc;color:#64748b;font-size:12px;vertical-align:top;">Điện thoại</td>
+            <td style="padding:10px 20px 10px 0;background:#f8fafc;color:#111827;font-size:14px;font-weight:700;overflow-wrap:anywhere;">{{phone}}</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 12px 10px 20px;border-left:4px solid #dc2626;background:#f8fafc;color:#64748b;font-size:12px;vertical-align:top;">Hỗ trợ tư vấn</td>
+            <td style="padding:10px 20px 10px 0;background:#f8fafc;color:#111827;font-size:14px;overflow-wrap:anywhere;">{{consultationTopic}}</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 12px 10px 20px;border-left:4px solid #dc2626;background:#f8fafc;color:#64748b;font-size:12px;vertical-align:top;">Tỉnh / thành phố</td>
+            <td style="padding:10px 20px 10px 0;background:#f8fafc;color:#111827;font-size:14px;overflow-wrap:anywhere;">{{provinceName}}</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 12px 16px 20px;border-left:4px solid #dc2626;border-bottom:1px solid #e5e7eb;background:#f8fafc;color:#64748b;font-size:12px;vertical-align:top;">Thời gian gửi</td>
+            <td style="padding:10px 20px 16px 0;border-bottom:1px solid #e5e7eb;background:#f8fafc;color:#111827;font-size:14px;">{{createdAt}}</td>
+          </tr>
+        </mj-table>
+      </mj-column>
+    </mj-section>
+
+    <mj-section css-class="mobile-padding" background-color="#ffffff" padding="0 32px 24px">
+      <mj-column width="100%">
+        <mj-text color="#64748b" font-size="13px" font-weight="700" letter-spacing=".6px" text-transform="uppercase" padding="0 0 10px">
+          NỘI DUNG LỜI NHẮN
+        </mj-text>
+        <mj-table padding="0" width="100%">
+          <tr>
+            <td style="padding:16px 20px;border:1px solid #e2e8f0;border-left:4px solid #dc2626;background:#f8fafc;color:#111827;font-family:'Inter',Arial,Helvetica,sans-serif;font-size:14px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;">{{content}}</td>
+          </tr>
+        </mj-table>
+      </mj-column>
+    </mj-section>
+
+    {{#if detailUrl}}
+    <mj-section css-class="mobile-padding" background-color="#ffffff" padding="0 32px 32px">
+      <mj-column width="100%">
+        <mj-button align="center" background-color="#dc2626" color="#ffffff" font-size="14px" font-weight="700" border-radius="6px" padding="0" href="{{detailUrl}}">
+          Xem lời nhắn trong Admin &rarr;
+        </mj-button>
+      </mj-column>
+    </mj-section>
+    {{/if}}
+
+    <mj-section css-class="mobile-padding" background-color="#f8fafc" padding="26px 32px 28px" border-top="1px solid #e2e8f0">
+      <mj-column width="100%">
+        <mj-text align="center" color="#4b5563" font-size="12px" line-height="1.6" padding="0">
+          Email được gửi tự động tới địa chỉ nhận thông báo liên hệ đã cấu hình trong Admin.
+        </mj-text>
+        <mj-text align="center" color="#9ca3af" font-size="11px" padding="8px 0 0">
+          &copy; {{year}} FUJITEK - LEXZENZ. Bảo hành chính hãng.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
