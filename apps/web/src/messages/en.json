@@ -557,11 +557,12 @@
     "footer": {
       "logoAlt": "FUJITEK Window Films",
       "companyName": "Công ty Cổ phần Vilatek",
-      "navigationTitle": "About FUJITEK Window Films",
+      "navigationTitle": "ABOUT FUJITEK & LEXZENZ VIETNAM",
       "policyTitle": "Policies & Terms",
-      "japan": "FFUJITEK LEXZENZ",
+      "japan": "FUJITEK LEXZENZ",
       "backToTopAriaLabel": "Scroll to top",
-      "copyright": "© {year} FUJITEK Window Films. All rights reserved.",
+      "copyrightCompany": "© {year} Fujitek & Lexzenz Vietnam.",
+      "copyrightNotice": "All rights reserved.",
       "navigation": {
         "about": "About FUJITEK Films",
         "products": "Products",
@@ -577,7 +578,9 @@
         "shipping": "Shipping Policy",
         "payment": "Payment Policy"
       },
-      "hotline": "{office} hotline:"
+      "hotline": "{office} hotline:",
+      "emailLabel": "Email:",
+      "websiteLabel": "Website:"
     }
   },
   "ProductsPage": {
@@ -1397,7 +1400,7 @@
     },
     "actions": {
       "title": "How can we help?",
-      "description": "Choose an action below to use FUJITEK electronic warranty services.",
+      "description": "Choose an action below to use Fujitek & Lexzenz Vietnam electronic warranty services.",
       "items": {
         "lookup": {
           "badge": "Quick lookup",

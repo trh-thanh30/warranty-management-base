@@ -561,7 +561,8 @@
       "policyTitle": "Chính sách & Quy định",
       "japan": "FUJITEK LEXZENZ",
       "backToTopAriaLabel": "Cuộn lên đầu trang",
-      "copyright": "© {year} FUJITEK Window Films. Đã đăng ký bản quyền.",
+      "copyrightCompany": "© {year} Fujitek & Lexzenz Việt Nam.",
+      "copyrightNotice": "Đã đăng ký bản quyền.",
       "navigation": {
         "about": "Về FUJITEK Films",
         "products": "Sản phẩm",
@@ -577,7 +578,9 @@
         "shipping": "Chính sách giao hàng",
         "payment": "Chính sách thanh toán"
       },
-      "hotline": "Hotline {office}:"
+      "hotline": "Hotline {office}:",
+      "emailLabel": "Email:",
+      "websiteLabel": "Website:"
     }
   },
   "ProductsPage": {
@@ -1397,7 +1400,7 @@
     },
     "actions": {
       "title": "Bạn cần làm gì?",
-      "description": "Chọn thao tác bên dưới để sử dụng dịch vụ bảo hành điện tử Fujitek – Lexzenz Việt Nam.",
+      "description": "Chọn thao tác bên dưới để sử dụng dịch vụ bảo hành điện tử Fujitek & Lexzenz Việt Nam.",
       "items": {
         "lookup": {
           "badge": "Tra cứu nhanh",
