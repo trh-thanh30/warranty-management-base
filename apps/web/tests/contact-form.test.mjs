@@ -506,6 +506,20 @@ test("public layout mounts one accessible responsive quick chat", async () => {
   assert.match(quickChatSource, /data-lenis-prevent/);
 });
 
+test("quick chat header only reserves close-button space beside its title", async () => {
+  const source = await readFile(
+    path.join(webRoot, "src", "components", "common", "public-quick-chat.tsx"),
+    "utf8",
+  );
+
+  assert.match(source, /<header className="relative shrink-0/);
+  assert.match(source, /px-4 py-4 text-white sm:px-5/);
+  assert.match(source, /tracking-tight text-white sm:tracking-normal/);
+  assert.match(source, /<h2 className="pr-12 text-xl/);
+  assert.match(source, /className="absolute right-3 top-3/);
+  assert.doesNotMatch(source, /items-start justify-between gap-4/);
+});
+
 test("quick chat only expands after deliberate mouse movement", async () => {
   const quickChatSource = await readFile(quickChatPath, "utf8");
 

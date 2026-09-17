@@ -84,18 +84,18 @@ export function PublicQuickChat({
               : { duration: 0.18, ease: "easeIn" }
         }
       >
-        <header className="flex shrink-0 items-start justify-between gap-4 bg-premium-red px-5 py-4 text-white">
+        <header className="relative shrink-0 bg-premium-red px-4 py-4 text-white sm:px-5">
           <div className="min-w-0">
-            <h2 className="text-xl font-semibold" id={titleId}>
+            <h2 className="pr-12 text-xl font-semibold" id={titleId}>
               {t("title")}
             </h2>
-            <p className="mt-1 text-sm leading-5 text-white font-medium">
+            <p className="mt-1 text-sm font-medium leading-5 tracking-tight text-white sm:tracking-normal">
               {t("description")}
             </p>
           </div>
           <button
             aria-label={t("closeAriaLabel")}
-            className="flex size-11 shrink-0 items-center justify-center rounded-md text-white transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            className="absolute right-3 top-3 flex size-11 items-center justify-center rounded-md text-white transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             onClick={() => setIsOpen(false)}
             type="button"
           >
