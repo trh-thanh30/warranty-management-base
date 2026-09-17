@@ -119,6 +119,7 @@
       "settingsSecurity": "Bảo mật",
       "settingsPermissions": "Quyền hạn & Vai trò",
       "settingsActivationCodePolicy": "Chính sách mã kích hoạt",
+      "settingsContactNotification": "Email nhận liên hệ",
       "overview": "Tổng quan",
       "customers": "Khách hàng",
       "categories": "Danh mục",
@@ -2980,13 +2981,14 @@
   },
   "Settings": {
     "title": "Cài đặt hệ thống",
-    "eyebrow": "Cấu hình tài khoản",
-    "description": "Quản lý cài đặt tài khoản quản trị viên, cập nhật thông tin cá nhân, thay đổi mật khẩu và xem quyền hạn.",
+    "eyebrow": "Cấu hình hệ thống",
+    "description": "Quản lý tài khoản quản trị, quyền hạn và các cấu hình vận hành hệ thống.",
     "tabs": {
       "profile": "Thông tin cá nhân",
       "security": "Bảo mật",
       "permissions": "Quyền hạn & Vai trò",
-      "activationCodePolicy": "Chính sách mã kích hoạt"
+      "activationCodePolicy": "Chính sách mã kích hoạt",
+      "contactNotification": "Email nhận liên hệ"
     },
     "activationCodePolicy": {
       "title": "Chính sách mã kích hoạt",
@@ -3002,6 +3004,20 @@
       "saveSuccess": "Đã cập nhật thời hạn cho cả mã cũ và mã mới.",
       "saveError": "Không thể cập nhật chính sách mã kích hoạt.",
       "errorTitle": "Không thể tải chính sách",
+      "errorDescription": "Kiểm tra quyền và kết nối API rồi thử lại.",
+      "retry": "Thử lại"
+    },
+    "contactNotification": {
+      "title": "Email nhận thông báo liên hệ",
+      "description": "Khi khách gửi lời nhắn từ website, hệ thống sẽ gửi email thông báo đến địa chỉ này.",
+      "emailLabel": "Địa chỉ email nhận thông báo",
+      "emailHelp": "Mặc định là admin@lexzenz.vn. Thay đổi này không ảnh hưởng đến email liên hệ hiển thị trên website.",
+      "emailInvalid": "Nhập địa chỉ email hợp lệ (tối đa 160 ký tự).",
+      "save": "Lưu email",
+      "saving": "Đang lưu...",
+      "saveSuccess": "Đã cập nhật email nhận thông báo liên hệ.",
+      "saveError": "Không thể cập nhật email nhận thông báo liên hệ.",
+      "errorTitle": "Không thể tải cấu hình email",
       "errorDescription": "Kiểm tra quyền và kết nối API rồi thử lại.",
       "retry": "Thử lại"
     },
@@ -3240,7 +3256,6 @@
       "phone": "Điện thoại",
       "consultationTopic": "Nhu cầu tư vấn",
       "province": "Tỉnh / Thành phố",
-      "source": "Nguồn",
       "createdAt": "Ngày gửi",
       "updatedAt": "Cập nhật lần cuối",
       "status": "Trạng thái",

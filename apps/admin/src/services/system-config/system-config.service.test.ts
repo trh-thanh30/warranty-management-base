@@ -36,3 +36,33 @@ test("loads and updates activation code policy", async () => {
     },
   ]);
 });
+
+test("loads and updates the contact notification recipient", async () => {
+  const calls: unknown[] = [];
+  const settings = { email: "admin@lexzenz.vn" };
+  const http = {
+    async get(url: string) {
+      calls.push({ method: "get", url });
+      return { data: { success: true, data: settings } };
+    },
+    async post(url: string, body: unknown) {
+      calls.push({ method: "post", url, body });
+      return { data: { success: true, data: settings } };
+    },
+  };
+  const service = createSystemConfigService(http as SystemConfigHttpClient);
+
+  assert.deepEqual(await service.getContactNotificationSettings(), settings);
+  assert.deepEqual(
+    await service.updateContactNotificationSettings(settings),
+    settings,
+  );
+  assert.deepEqual(calls, [
+    { method: "get", url: "/system-config/contact-notification-settings" },
+    {
+      method: "post",
+      url: "/system-config/contact-notification-settings",
+      body: settings,
+    },
+  ]);
+});

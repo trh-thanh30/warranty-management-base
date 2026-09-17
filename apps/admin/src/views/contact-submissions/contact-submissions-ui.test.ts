@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { toContactSubmissionStatusQuery } from "./contact-submissions.utils";
 
 const directorySource = readFileSync(
   new URL(
@@ -50,6 +51,11 @@ test("contact submission status controls only render allowed transitions", () =>
   );
 });
 
+test("all contact statuses omit the status query while archived is explicit", () => {
+  assert.equal(toContactSubmissionStatusQuery("ALL"), undefined);
+  assert.equal(toContactSubmissionStatusQuery("ARCHIVED"), "ARCHIVED");
+});
+
 test("new and archived contact statuses use the swapped badge colors", () => {
   assert.match(
     statusBadgeSource,
@@ -78,6 +84,7 @@ test("contact submission detail exposes phone, update time and error state", () 
   assert.match(detailSource, /submission\.provinceName/);
   assert.match(detailSource, /detail\.consultationTopic/);
   assert.match(detailSource, /detail\.province/);
+  assert.doesNotMatch(detailSource, /detail\.source|submission\.sourcePath/);
   assert.match(detailSource, /isError/);
   assert.match(detailSource, /onUpdateStatus/);
   assert.doesNotMatch(detailSource, /DetailItem/);

@@ -4,7 +4,8 @@ export type SettingsSection =
   | "profile"
   | "security"
   | "permissions"
-  | "activation-code-policy";
+  | "activation-code-policy"
+  | "contact-notification";
 
 export const profileSchema = z.object({
   fullName: z.string().trim().max(120, "fullNameLength").nullable(),

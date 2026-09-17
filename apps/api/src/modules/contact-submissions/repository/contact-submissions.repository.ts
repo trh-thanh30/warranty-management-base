@@ -5,7 +5,6 @@ import type {
   ContactSubmissionStatus,
   ListContactSubmissionsQuery,
 } from '@repo/shared';
-import { CONTACT_SUBMISSION_PENDING_STATUSES } from '@repo/shared/constants';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import type { ContactSubmissionRecord } from '../contact-submissions.types';
@@ -26,21 +25,11 @@ export class ContactSubmissionsRepository {
     }) as Promise<ContactSubmissionRecord | null>;
   }
 
-  findPendingByPhone(phone: string) {
-    return this.prismaService.contactSubmission.findFirst({
-      orderBy: { created_at: 'desc' },
-      where: {
-        phone,
-        status: { in: [...CONTACT_SUBMISSION_PENDING_STATUSES] },
-      },
-    }) as Promise<ContactSubmissionRecord | null>;
-  }
-
   list(query: ListContactSubmissionsQuery) {
     const search = query.search?.trim();
     const { page, limit, skip, take } = normalizePagination(query);
     const where: Prisma.ContactSubmissionWhereInput = {
-      status: query.status,
+      status: query.status ?? { not: 'ARCHIVED' },
       OR: search
         ? [
             { full_name: { contains: search, mode: 'insensitive' } },

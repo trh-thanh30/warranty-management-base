@@ -24,4 +24,32 @@ describe('ContactSubmissionsRepository.list', () => {
       }),
     );
   });
+
+  it.each([
+    { status: undefined, expectedStatus: { not: 'ARCHIVED' } },
+    { status: 'ARCHIVED' as const, expectedStatus: 'ARCHIVED' },
+    { status: 'NEW' as const, expectedStatus: 'NEW' },
+  ])(
+    'uses the same status filter for items and total when status is $status',
+    async ({ status, expectedStatus }) => {
+      const findMany = jest.fn().mockResolvedValue([]);
+      const count = jest.fn().mockResolvedValue(0);
+      const repository = new ContactSubmissionsRepository({
+        $transaction: jest.fn((callback: (tx: unknown) => unknown) =>
+          callback({ contactSubmission: { count, findMany } }),
+        ),
+      } as never);
+
+      await repository.list({ page: 1, limit: 10, status });
+
+      expect(findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ status: expectedStatus }),
+        }),
+      );
+      expect(count).toHaveBeenCalledWith({
+        where: expect.objectContaining({ status: expectedStatus }),
+      });
+    },
+  );
 });

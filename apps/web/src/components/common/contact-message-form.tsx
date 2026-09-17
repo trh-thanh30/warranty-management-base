@@ -19,7 +19,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { HttpClientError } from "@repo/shared";
 import {
   CONTACT_CONSULTATION_TOPICS,
-  CONTACT_SUBMISSION_ERROR_CODES,
   CONTACT_SUBMISSION_LIMITS,
 } from "@repo/shared/constants";
 import { Button } from "@repo/ui/button";
@@ -35,13 +34,17 @@ import {
 import { Textarea } from "@repo/ui/textarea";
 import { CheckCircle2, Send } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useMemo, useState, type WheelEvent } from "react";
+import { useEffect, useMemo, useState, type WheelEvent } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {
   createContactMessageSchema,
   type ContactMessageFormValues,
 } from "./contact-message-form.schema";
+import {
+  getContactRateLimitSeconds,
+  getRemainingRateLimitSeconds,
+} from "./contact-message-form.utils";
 
 type ContactMessageFormProps = {
   loadLocations?: boolean;
@@ -58,6 +61,10 @@ export function ContactMessageForm({
   const [animateFormOnReset, setAnimateFormOnReset] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileResetKey, setTurnstileResetKey] = useState(0);
+  const [rateLimitDeadlineMs, setRateLimitDeadlineMs] = useState<number | null>(
+    null,
+  );
+  const [remainingRateLimitSeconds, setRemainingRateLimitSeconds] = useState(0);
   const provincesQuery = useVietnamProvinces({ enabled: loadLocations });
   const submitErrorMessage = t("form.validation.submitError");
   const submittingLabel = t("form.submitting");
@@ -86,6 +93,26 @@ export function ContactMessageForm({
     },
     resolver: zodResolver(schema),
   });
+  const clearFormErrors = form.clearErrors;
+
+  useEffect(() => {
+    if (rateLimitDeadlineMs === null) return;
+
+    const updateRemainingTime = () => {
+      const remaining = getRemainingRateLimitSeconds(
+        rateLimitDeadlineMs,
+        Date.now(),
+      );
+      setRemainingRateLimitSeconds(remaining);
+      if (remaining === 0) {
+        setRateLimitDeadlineMs(null);
+        clearFormErrors("root");
+      }
+    };
+
+    const interval = window.setInterval(updateRemainingTime, 1000);
+    return () => window.clearInterval(interval);
+  }, [rateLimitDeadlineMs, clearFormErrors]);
 
   const handleSubmit = async (values: ContactMessageFormValues) => {
     const selectedProvince = provincesQuery.data.find(
@@ -132,21 +159,14 @@ export function ContactMessageForm({
         return;
       }
 
-      if (
-        error instanceof HttpClientError &&
-        error.code === CONTACT_SUBMISSION_ERROR_CODES.PHONE_PENDING
-      ) {
-        form.setError(
-          "phone",
-          {
-            message: t("form.validation.phonePending"),
-          },
-          { shouldFocus: true },
-        );
-        return;
-      }
-
       if (error instanceof HttpClientError && error.status === 429) {
+        const retryAfterSeconds = getContactRateLimitSeconds(error);
+        setRateLimitDeadlineMs(
+          retryAfterSeconds === undefined
+            ? null
+            : Date.now() + retryAfterSeconds * 1000,
+        );
+        setRemainingRateLimitSeconds(retryAfterSeconds ?? 0);
         form.setError("root", {
           message: t("form.validation.rateLimit"),
         });
@@ -377,6 +397,7 @@ export function ContactMessageForm({
         <Button
           disabled={
             form.formState.isSubmitting ||
+            remainingRateLimitSeconds > 0 ||
             (isTurnstileEnabled && turnstileToken === null)
           }
           type="submit"
@@ -391,8 +412,13 @@ export function ContactMessageForm({
           <Send className="size-4" />
         </Button>
         {form.formState.errors.root?.message ? (
-          <p className="text-xs font-medium text-premium-red">
-            {form.formState.errors.root.message}
+          <p className="text-xs font-medium text-premium-red" role="status">
+            {remainingRateLimitSeconds > 0
+              ? t("form.validation.rateLimitWithTime", {
+                  minutes: Math.floor(remainingRateLimitSeconds / 60),
+                  seconds: remainingRateLimitSeconds % 60,
+                })
+              : form.formState.errors.root.message}
           </p>
         ) : null}
       </form>

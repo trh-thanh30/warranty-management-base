@@ -219,10 +219,6 @@ function ContactSubmissionDetailContent({
                 </a>
               </ContactSubmissionDetailRow>
               <ContactSubmissionDetailRow
-                label={t("detail.source")}
-                value={submission.sourcePath ?? "-"}
-              />
-              <ContactSubmissionDetailRow
                 label={t("detail.consultationTopic")}
                 value={
                   submission.consultationTopic

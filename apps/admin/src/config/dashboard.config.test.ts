@@ -98,12 +98,19 @@ test("groups settings sections under dedicated routes", () => {
         "items.settingsActivationCodePolicy",
         "/settings/activation-code-policy",
       ],
+      ["items.settingsContactNotification", "/settings/contact-notification"],
     ],
   );
 
   assert.equal(
     settings?.children?.find(
       (item) => item.href === "/settings/activation-code-policy",
+    )?.requiredPermission,
+    PERMISSIONS.SYSTEM_CONFIG_VIEW,
+  );
+  assert.equal(
+    settings?.children?.find(
+      (item) => item.href === "/settings/contact-notification",
     )?.requiredPermission,
     PERMISSIONS.SYSTEM_CONFIG_VIEW,
   );

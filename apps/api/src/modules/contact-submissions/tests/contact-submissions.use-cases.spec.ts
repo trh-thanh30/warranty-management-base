@@ -48,7 +48,6 @@ function createPrismaServiceMock(client: ContactSubmissionTransactionMock) {
 describe('Contact submission use cases', () => {
   const repository = {
     create: jest.fn(),
-    findPendingByPhone: jest.fn(),
     findById: jest.fn(),
     list: jest.fn(),
     updateStatus: jest.fn(),
@@ -80,7 +79,6 @@ describe('Contact submission use cases', () => {
   }
 
   it('creates a contact submission with the canonical province returned by Locations', async () => {
-    repository.findPendingByPhone.mockResolvedValue(null);
     repository.create.mockResolvedValue(baseSubmission);
     const useCase = createSubmissionUseCase();
 
@@ -132,15 +130,14 @@ describe('Contact submission use cases', () => {
     ).rejects.toBeInstanceOf(BadRequestError);
 
     expect(getVietnamProvinceUseCase.execute).not.toHaveBeenCalled();
-    expect(repository.findPendingByPhone).not.toHaveBeenCalled();
     expect(repository.create).not.toHaveBeenCalled();
     expect(
       contactSubmissionNotificationService.submissionCreated,
     ).not.toHaveBeenCalled();
   });
 
-  it('rejects a contact submission when the normalized phone already has a pending message', async () => {
-    repository.findPendingByPhone.mockResolvedValue(baseSubmission);
+  it('accepts another contact submission from a phone with a pending message', async () => {
+    repository.create.mockResolvedValue(baseSubmission);
     const useCase = createSubmissionUseCase();
 
     await expect(
@@ -151,18 +148,16 @@ describe('Contact submission use cases', () => {
         phone: ' 0886 33 77 33 ',
         provinceCode: '79',
       }),
-    ).rejects.toMatchObject<Partial<ConflictError>>({
-      code: 'CONTACT_SUBMISSION_PHONE_PENDING',
-    });
-    expect(repository.findPendingByPhone).toHaveBeenCalledWith('0886337733');
-    expect(repository.create).not.toHaveBeenCalled();
+    ).resolves.toMatchObject({ phone: '0886337733' });
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ phone: '0886337733' }),
+    );
     expect(
       contactSubmissionNotificationService.submissionCreated,
-    ).not.toHaveBeenCalled();
+    ).toHaveBeenCalledWith(baseSubmission);
   });
 
-  it('maps a concurrent pending-phone unique collision to the domain conflict', async () => {
-    repository.findPendingByPhone.mockResolvedValue(null);
+  it('does not mislabel unrelated database unique errors as a pending phone', async () => {
     repository.create.mockRejectedValue(
       new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
         clientVersion: 'test',
@@ -180,10 +175,7 @@ describe('Contact submission use cases', () => {
         phone: '0886 33 77 33',
         provinceCode: '79',
       }),
-    ).rejects.toMatchObject<Partial<ConflictError>>({
-      code: 'CONTACT_SUBMISSION_PHONE_PENDING',
-      details: { phone: '0886337733' },
-    });
+    ).rejects.toMatchObject({ code: 'P2002' });
     expect(
       contactSubmissionNotificationService.submissionCreated,
     ).not.toHaveBeenCalled();
@@ -201,7 +193,6 @@ describe('Contact submission use cases', () => {
         provinceCode: '79',
       }),
     ).rejects.toBeInstanceOf(BadRequestError);
-    expect(repository.findPendingByPhone).not.toHaveBeenCalled();
     expect(repository.create).not.toHaveBeenCalled();
     expect(
       contactSubmissionNotificationService.submissionCreated,
@@ -328,16 +319,30 @@ describe('Contact submission notification service', () => {
   const createSystemNotificationUseCase = {
     execute: jest.fn(),
   };
+  const emailService = { sendJob: jest.fn() };
+  const settingsService = { get: jest.fn() };
+  const configService = { get: jest.fn() };
+
+  function createService() {
+    return new ContactSubmissionNotificationService(
+      createSystemNotificationUseCase as never,
+      emailService as never,
+      settingsService as never,
+      configService as never,
+    );
+  }
 
   beforeEach(() => {
     jest.clearAllMocks();
+    createSystemNotificationUseCase.execute.mockResolvedValue(undefined);
+    emailService.sendJob.mockResolvedValue(undefined);
+    settingsService.get.mockResolvedValue({ email: 'admin@lexzenz.vn' });
+    configService.get.mockReturnValue('https://admin.lexzenz.com');
   });
 
   it('publishes new submissions to active admin roles', async () => {
     createSystemNotificationUseCase.execute.mockResolvedValue(undefined);
-    const service = new ContactSubmissionNotificationService(
-      createSystemNotificationUseCase as never,
-    );
+    const service = createService();
 
     await service.submissionCreated(baseSubmission);
 
@@ -363,13 +368,65 @@ describe('Contact submission notification service', () => {
     createSystemNotificationUseCase.execute.mockRejectedValue(
       new Error('notification unavailable'),
     );
-    const service = new ContactSubmissionNotificationService(
-      createSystemNotificationUseCase as never,
-    );
+    const service = createService();
 
     await expect(
       service.submissionCreated(baseSubmission),
     ).resolves.toBeUndefined();
+    expect(emailService.sendJob).toHaveBeenCalledTimes(1);
+  });
+
+  it('queues a separate email for each contact using its submission id', async () => {
+    settingsService.get.mockResolvedValue({ email: 'inbox@example.com' });
+    const service = createService();
+
+    await service.submissionCreated(baseSubmission);
+    await service.submissionCreated({
+      ...baseSubmission,
+      id: 'second-contact-id',
+    });
+
+    expect(emailService.sendJob).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        to: 'inbox@example.com',
+        idempotencyKey: 'contact-submission:contact-submission-id',
+        template: 'contact-submission',
+        context: expect.objectContaining({
+          brandLogoUrl: expect.any(String),
+          fullName: baseSubmission.full_name,
+          content: baseSubmission.content,
+          detailUrl: expect.stringContaining(
+            '/contact-submissions/contact-submission-id',
+          ),
+        }),
+        text: expect.stringContaining(
+          '/contact-submissions/contact-submission-id',
+        ),
+      }),
+    );
+    expect(emailService.sendJob).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        idempotencyKey: 'contact-submission:second-contact-id',
+      }),
+    );
+    expect(emailService.sendJob.mock.calls[0][0].text).toContain(
+      baseSubmission.content,
+    );
+    expect(emailService.sendJob.mock.calls[0][0].text).toContain(
+      'Tư vấn sản phẩm',
+    );
+  });
+
+  it('does not fail the public request when queuing email fails', async () => {
+    emailService.sendJob.mockRejectedValue(new Error('queue unavailable'));
+    const service = createService();
+
+    await expect(
+      service.submissionCreated(baseSubmission),
+    ).resolves.toBeUndefined();
+    expect(createSystemNotificationUseCase.execute).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -424,26 +481,6 @@ describe('Contact submissions repository', () => {
     ).resolves.toBeNull();
     expect(findUnique).not.toHaveBeenCalled();
   });
-
-  it('finds pending contact submissions by normalized phone', async () => {
-    const findFirst = jest.fn().mockResolvedValue(baseSubmission);
-    const repository = new ContactSubmissionsRepository({
-      contactSubmission: {
-        findFirst,
-      },
-    } as never);
-
-    const result = await repository.findPendingByPhone('0886337733');
-
-    expect(findFirst).toHaveBeenCalledWith({
-      orderBy: { created_at: 'desc' },
-      where: {
-        phone: '0886337733',
-        status: { in: ['NEW', 'IN_PROGRESS'] },
-      },
-    });
-    expect(result).toBe(baseSubmission);
-  });
 });
 
 describe('Contact submission public endpoint', () => {
@@ -460,20 +497,17 @@ describe('Contact submission public endpoint', () => {
 });
 
 describe('Contact submission database invariants', () => {
-  it('enforces one pending submission per normalized phone', () => {
+  it('removes the pending-phone unique index', () => {
     const migrationSource = readFileSync(
       join(
         __dirname,
-        '../../../../prisma/migrations/20260729140000_enforce_unique_pending_contact_phone/migration.sql',
+        '../../../../prisma/migrations/20260917010000_allow_multiple_pending_contact_submissions_per_phone/migration.sql',
       ),
       'utf8',
     );
 
     expect(migrationSource).toMatch(
-      /CREATE UNIQUE INDEX "contact_submissions_pending_phone_unique"/,
-    );
-    expect(migrationSource).toMatch(
-      /WHERE "status" IN \('NEW', 'IN_PROGRESS'\)/,
+      /DROP INDEX IF EXISTS "contact_submissions_pending_phone_unique"/,
     );
   });
 });

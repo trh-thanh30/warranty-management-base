@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { PageHeader } from "@/src/components/common/page-header";
 import { ActivationCodePolicySettings } from "./components/activation-code-policy-settings";
+import { ContactNotificationSettings } from "./components/contact-notification-settings";
 import { SettingsPermissionsSection } from "./components/settings-permissions-section";
 import { SettingsProfileSection } from "./components/settings-profile-section";
 import { SettingsSecuritySection } from "./components/settings-security-section";
@@ -24,6 +25,9 @@ export function SettingsView({ section }: { section: SettingsSection }) {
         {section === "permissions" ? <SettingsPermissionsSection /> : null}
         {section === "activation-code-policy" ? (
           <ActivationCodePolicySettings />
+        ) : null}
+        {section === "contact-notification" ? (
+          <ContactNotificationSettings />
         ) : null}
       </div>
     </div>
