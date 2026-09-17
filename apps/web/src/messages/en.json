@@ -1255,7 +1255,7 @@
       "submitting": "Sending...",
       "success": {
         "title": "Thank you for contacting us!",
-        "description": "A FUJITEK Films consultant will respond by phone as soon as possible.",
+        "description": "A Fujitek & Lexzenz Vietnam consultant will respond by phone as soon as possible.",
         "reset": "Send another message",
         "toast": "Your message was sent successfully!"
       },
@@ -1298,9 +1298,9 @@
         "phoneInvalid": "Enter a valid phone number.",
         "contentMin": "Enter a message with at least 10 characters.",
         "contentMax": "Message must not exceed 2000 characters.",
-        "phonePending": "This phone number already has a message being processed. Please wait for a response before sending another.",
         "provinceRequired": "Select a province or city.",
         "rateLimit": "You have sent too many requests. Please wait a moment and try again.",
+        "rateLimitWithTime": "You have sent too many requests. Please try again in {minutes} min {seconds} sec.",
         "turnstileError": "Security verification failed. Please verify again and resubmit.",
         "submitError": "We could not send your message. Please try again."
       }
@@ -1636,9 +1636,9 @@
         "dealers": "Find an installation center"
       },
       "support": {
-        "message": "Whenever you need FUJITEK support, contact the customer service hotline.",
+        "message": "Whenever you need support from Fujitek & Lexzenz Vietnam, contact the customer service hotline.",
         "hotlineLabel": "Hotline",
-        "closing": "FUJITEK Films is pleased to serve you."
+        "closing": "Fujitek & Lexzenz Vietnam is pleased to serve you."
       },
       "policyShortcut": {
         "eyebrow": "Policy & Terms",

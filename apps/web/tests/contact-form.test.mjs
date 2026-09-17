@@ -192,7 +192,6 @@ test("contact form validation messages exist in every locale", async () => {
     "contentMin",
     "contentMax",
     "consultationTopicRequired",
-    "phonePending",
     "provinceRequired",
     "rateLimit",
     "submitError",
@@ -260,24 +259,17 @@ test("contact form submits public messages through contact submissions service",
   assert.doesNotMatch(createBodyType, /provinceName/);
 });
 
-test("contact form shows a pending submission conflict on the phone field", async () => {
+test("contact form no longer blocks a phone with a pending submission", async () => {
   const [formSource, constantsSource] = await Promise.all([
     readFile(contactFormPath, "utf8"),
     readFile(contactSubmissionConstantsPath, "utf8"),
   ]);
 
-  assert.match(
-    constantsSource,
-    /PHONE_PENDING:\s*"CONTACT_SUBMISSION_PHONE_PENDING"/,
-  );
-  assert.match(formSource, /CONTACT_SUBMISSION_ERROR_CODES/);
-  assert.match(formSource, /catch \(error\)/);
-  assert.match(
+  assert.doesNotMatch(constantsSource, /CONTACT_SUBMISSION_PHONE_PENDING/);
+  assert.doesNotMatch(
     formSource,
-    /error\.code === CONTACT_SUBMISSION_ERROR_CODES\.PHONE_PENDING/,
+    /phonePending|CONTACT_SUBMISSION_ERROR_CODES/,
   );
-  assert.match(formSource, /form\.setError\(\s*"phone"/);
-  assert.match(formSource, /t\("form\.validation\.phonePending"\)/);
 });
 
 test("contact form shows a specific message when the API rate limit is reached", async () => {
@@ -285,6 +277,9 @@ test("contact form shows a specific message when the API rate limit is reached",
 
   assert.match(formSource, /error\.status === 429/);
   assert.match(formSource, /t\("form\.validation\.rateLimit"\)/);
+  assert.match(formSource, /getContactRateLimitSeconds\(error\)/);
+  assert.match(formSource, /rateLimitWithTime/);
+  assert.match(formSource, /getRemainingRateLimitSeconds/);
   assert.match(formSource, /form\.setError\("root"/);
 });
 
@@ -504,6 +499,20 @@ test("public layout mounts one accessible responsive quick chat", async () => {
   assert.match(quickChatSource, /inset-x-4/);
   assert.match(quickChatSource, /overflow-y-auto/);
   assert.match(quickChatSource, /data-lenis-prevent/);
+});
+
+test("quick chat header only reserves close-button space beside its title", async () => {
+  const source = await readFile(
+    path.join(webRoot, "src", "components", "common", "public-quick-chat.tsx"),
+    "utf8",
+  );
+
+  assert.match(source, /<header className="relative shrink-0/);
+  assert.match(source, /px-4 py-4 text-white sm:px-5/);
+  assert.match(source, /tracking-tight text-white sm:tracking-normal/);
+  assert.match(source, /<h2 className="pr-12 text-xl/);
+  assert.match(source, /className="absolute right-3 top-3/);
+  assert.doesNotMatch(source, /items-start justify-between gap-4/);
 });
 
 test("quick chat only expands after deliberate mouse movement", async () => {

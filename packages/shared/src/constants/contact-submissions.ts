@@ -7,10 +7,6 @@ export const CONTACT_SUBMISSION_LIMITS = {
   sourcePath: { min: 1, max: 300 },
 } as const;
 
-export const CONTACT_SUBMISSION_ERROR_CODES = {
-  PHONE_PENDING: "CONTACT_SUBMISSION_PHONE_PENDING",
-} as const;
-
 export const CONTACT_SUBMISSION_STATUSES = [
   "NEW",
   "IN_PROGRESS",
@@ -40,11 +36,6 @@ export function isContactConsultationTopic(
 
 export type ContactSubmissionStatus =
   (typeof CONTACT_SUBMISSION_STATUSES)[number];
-
-export const CONTACT_SUBMISSION_PENDING_STATUSES = [
-  "NEW",
-  "IN_PROGRESS",
-] as const satisfies readonly ContactSubmissionStatus[];
 
 export const CONTACT_SUBMISSION_STATUS_TRANSITIONS = {
   ARCHIVED: [],

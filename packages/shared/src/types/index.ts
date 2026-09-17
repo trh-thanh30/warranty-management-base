@@ -11,6 +11,7 @@ export * from "./category.types.ts";
 export * from "./category-activation-field.types.ts";
 export * from "./content-page.types.ts";
 export * from "./contact-submission.types.ts";
+export * from "./contact-notification-settings.types.ts";
 export * from "./location.types.ts";
 export * from "./customer.types.ts";
 export * from "./dealer.types.ts";

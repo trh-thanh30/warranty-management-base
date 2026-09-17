@@ -1255,7 +1255,7 @@
       "submitting": "Đang gửi...",
       "success": {
         "title": "Cảm ơn bạn đã liên hệ!",
-        "description": "Chuyên viên FUJITEK Films sẽ phản hồi qua số điện thoại của bạn trong thời gian sớm nhất.",
+        "description": "Chuyên viên Fujitek & Lexzenz Việt Nam sẽ phản hồi qua số điện thoại của bạn trong thời gian sớm nhất.",
         "reset": "Gửi lời nhắn mới",
         "toast": "Gửi lời nhắn thành công!"
       },
@@ -1298,9 +1298,9 @@
         "phoneInvalid": "Vui lòng nhập số điện thoại hợp lệ.",
         "contentMin": "Vui lòng nhập nội dung tối thiểu 10 ký tự.",
         "contentMax": "Nội dung không được vượt quá 2000 ký tự.",
-        "phonePending": "Số điện thoại này đã có lời nhắn đang được xử lý. Vui lòng chờ phản hồi trước khi gửi lời nhắn mới.",
         "provinceRequired": "Vui lòng chọn tỉnh/thành phố.",
         "rateLimit": "Bạn đã gửi quá nhiều yêu cầu. Vui lòng chờ một lúc rồi thử lại.",
+        "rateLimitWithTime": "Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau {minutes} phút {seconds} giây.",
         "turnstileError": "Không thể xác minh bảo mật. Vui lòng xác minh lại rồi thử gửi.",
         "submitError": "Không thể gửi lời nhắn. Vui lòng thử lại."
       }
@@ -1636,9 +1636,9 @@
         "dealers": "Tìm trạm thi công"
       },
       "support": {
-        "message": "Bất cứ khi nào cần sự hỗ trợ từ FUJITEK, Quý khách vui lòng liên hệ hotline CSKH.",
+        "message": "Bất cứ khi nào cần sự hỗ trợ từ Fujitek & Lexzenz Việt Nam, Quý khách vui lòng liên hệ hotline CSKH.",
         "hotlineLabel": "Hotline",
-        "closing": "FUJITEK Films hân hạnh được phục vụ Quý khách!"
+        "closing": "Fujitek & Lexzenz Việt Nam hân hạnh được phục vụ Quý khách!"
       },
       "policyShortcut": {
         "eyebrow": "Chính sách & Điều khoản",

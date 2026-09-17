@@ -119,6 +119,7 @@
       "settingsSecurity": "Security",
       "settingsPermissions": "Permissions & roles",
       "settingsActivationCodePolicy": "Activation code policy",
+      "settingsContactNotification": "Contact notification email",
       "overview": "Overview",
       "customers": "Customers",
       "categories": "Categories",
@@ -2980,13 +2981,14 @@
   },
   "Settings": {
     "title": "System Settings",
-    "eyebrow": "Account Configuration",
-    "description": "Manage your administrator account profile settings, modify security options, and review permissions.",
+    "eyebrow": "System Configuration",
+    "description": "Manage administrator accounts, permissions, and system settings.",
     "tabs": {
       "profile": "Profile details",
       "security": "Security & Password",
       "permissions": "Roles & Permissions",
-      "activationCodePolicy": "Activation code policy"
+      "activationCodePolicy": "Activation code policy",
+      "contactNotification": "Contact notification email"
     },
     "activationCodePolicy": {
       "title": "Activation code policy",
@@ -3002,6 +3004,20 @@
       "saveSuccess": "Validity updated for existing and new activation codes.",
       "saveError": "Activation code policy could not be updated.",
       "errorTitle": "Unable to load policy",
+      "errorDescription": "Check your permissions and API connection, then try again.",
+      "retry": "Retry"
+    },
+    "contactNotification": {
+      "title": "Contact notification email",
+      "description": "When a customer submits a message on the website, a notification email is sent to this address.",
+      "emailLabel": "Notification recipient email",
+      "emailHelp": "Defaults to admin@lexzenz.vn. This does not change the public contact email shown on the website.",
+      "emailInvalid": "Enter a valid email address (160 characters maximum).",
+      "save": "Save email",
+      "saving": "Saving...",
+      "saveSuccess": "Contact notification recipient updated.",
+      "saveError": "Could not update the contact notification recipient.",
+      "errorTitle": "Unable to load email settings",
       "errorDescription": "Check your permissions and API connection, then try again.",
       "retry": "Retry"
     },
@@ -3240,7 +3256,6 @@
       "phone": "Phone",
       "consultationTopic": "Consultation topic",
       "province": "Province / City",
-      "source": "Source",
       "createdAt": "Submitted",
       "updatedAt": "Last updated",
       "status": "Status",
