@@ -1,5 +1,26 @@
 "use client";
 
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/src/components/common/form";
+import { formControlFocusClassName } from "@/src/components/common/form-control.constants";
+import {
+  isTurnstileEnabled,
+  TurnstileWidget,
+} from "@/src/components/common/turnstile-widget";
+import { useVietnamProvinces } from "@/src/hooks/use-vietnam-provinces";
+import { useVietnamWards } from "@/src/hooks/use-vietnam-wards";
+import {
+  getWarrantyActivationErrorKind,
+  isActivationCodeErrorKind,
+  type WarrantyActivationErrorKind,
+} from "@/src/hooks/use-warranty-activation-request";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type {
   CreatePublicWarrantyActivationRequestBody,
@@ -15,32 +36,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@repo/ui/select";
+import { Textarea } from "@repo/ui/textarea";
 import { Send } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState, type WheelEvent } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/src/components/common/form";
-import { formControlFocusClassName } from "@/src/components/common/form-control.constants";
-import {
-  isTurnstileEnabled,
-  TurnstileWidget,
-} from "@/src/components/common/turnstile-widget";
-import {
-  getWarrantyActivationErrorKind,
-  isActivationCodeErrorKind,
-  type WarrantyActivationErrorKind,
-} from "@/src/hooks/use-warranty-activation-request";
-import { useVietnamProvinces } from "@/src/hooks/use-vietnam-provinces";
-import { useVietnamWards } from "@/src/hooks/use-vietnam-wards";
 import {
   createWarrantyActivationFormSchema,
   type WarrantyActivationFormValues,
@@ -281,7 +282,7 @@ export function WarrantyActivationRequestForm({
             control={form.control}
             name="activationCode"
             render={({ field }) => (
-              <FormItem className="sm:col-span-2">
+              <FormItem className="min-w-0 space-y-0">
                 <FormLabel className="text-sm font-semibold uppercase text-deep-black">
                   {t("fields.activationCode.label")}
                 </FormLabel>
@@ -294,7 +295,7 @@ export function WarrantyActivationRequestForm({
                     {...field}
                   />
                 </FormControl>
-                <FormDescription className="text-xs leading-5">
+                <FormDescription className="text-xs leading-5 font-medium">
                   {t("fields.activationCode.description")}
                 </FormDescription>
                 <FormMessage />
@@ -306,23 +307,27 @@ export function WarrantyActivationRequestForm({
             control={form.control}
             name="installedAt"
             render={({ field, fieldState }) => (
-              <FormItem className="sm:col-span-2">
+              <FormItem className="min-w-0">
                 <FormLabel className="text-sm font-semibold uppercase text-deep-black">
                   {t("fields.installedAt.label")}
                 </FormLabel>
-                <DateTimePicker
-                  ariaLabel={t("fields.installedAt.label")}
-                  calendarAriaLabel={t("fields.installedAt.calendarAriaLabel")}
-                  clearLabel={t("fields.installedAt.clearLabel")}
-                  hourLabel={t("fields.installedAt.hourLabel")}
-                  id="warranty-activation-installed-at"
-                  invalid={fieldState.invalid}
-                  minuteLabel={t("fields.installedAt.minuteLabel")}
-                  onValueChange={field.onChange}
-                  placeholder={t("fields.installedAt.placeholder")}
-                  resetLabel={t("fields.installedAt.resetLabel")}
-                  value={field.value}
-                />
+                <div className="[&_input]:h-12 [&_button]:size-12">
+                  <DateTimePicker
+                    ariaLabel={t("fields.installedAt.label")}
+                    calendarAriaLabel={t(
+                      "fields.installedAt.calendarAriaLabel",
+                    )}
+                    clearLabel={t("fields.installedAt.clearLabel")}
+                    hourLabel={t("fields.installedAt.hourLabel")}
+                    id="warranty-activation-installed-at"
+                    invalid={fieldState.invalid}
+                    minuteLabel={t("fields.installedAt.minuteLabel")}
+                    onValueChange={field.onChange}
+                    placeholder={t("fields.installedAt.placeholder")}
+                    resetLabel={t("fields.installedAt.resetLabel")}
+                    value={field.value}
+                  />
+                </div>
                 <FormMessage />
               </FormItem>
             )}
@@ -445,9 +450,9 @@ export function WarrantyActivationRequestForm({
                   {t("fields.addressDetail.label")}
                 </FormLabel>
                 <FormControl>
-                  <Input
+                  <Textarea
                     autoComplete="street-address"
-                    className={`h-12 rounded-md border-border-gray bg-white ${formControlFocusClassName}`}
+                    className={`min-h-24 resize-y rounded-md border-border-gray bg-white ${formControlFocusClassName}`}
                     maxLength={255}
                     placeholder={t("fields.addressDetail.placeholder")}
                     {...field}

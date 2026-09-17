@@ -1,11 +1,12 @@
 "use client";
 
-import { MessageCircle, X } from "lucide-react";
+import { FLOATING_ACTIONS_SCROLL_THRESHOLD } from "@/src/constants/floating-actions.constants";
+import type { PublicWebsiteSiteSetting } from "@repo/shared";
+import { cn } from "@repo/ui/lib/utils";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { MessageCircle, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useId, useState } from "react";
-import { cn } from "@repo/ui/lib/utils";
-import type { PublicWebsiteSiteSetting } from "@repo/shared";
 import { ContactMessageForm } from "./contact-message-form";
 import { PublicContactActions } from "./public-contact-actions";
 import { PUBLIC_QUICK_CHAT_OPEN_EVENT } from "./public-quick-chat.events";
@@ -25,7 +26,7 @@ export function PublicQuickChat({
 
   useEffect(() => {
     const updateTriggerVisibility = () => {
-      const nextIsVisible = window.scrollY > 400;
+      const nextIsVisible = window.scrollY > FLOATING_ACTIONS_SCROLL_THRESHOLD;
       setIsTriggerVisible(nextIsVisible);
       setIsTriggerHovered(false);
     };
@@ -88,7 +89,7 @@ export function PublicQuickChat({
             <h2 className="text-xl font-semibold" id={titleId}>
               {t("title")}
             </h2>
-            <p className="mt-1 text-sm leading-5 text-white/90">
+            <p className="mt-1 text-sm leading-5 text-white font-medium">
               {t("description")}
             </p>
           </div>

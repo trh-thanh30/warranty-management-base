@@ -30,3 +30,12 @@ test("footer marks navigation and policy links for the current page", async () =
   );
   assert.match(source, /font-semibold text-premium-red/);
 });
+
+test("back-to-top motion does not compete with a CSS transition", async () => {
+  const source = await readFile(footerPath, "utf8");
+  const button = source.match(/<motion\.button[\s\S]*?<ArrowUp/);
+
+  assert.ok(button, "back-to-top motion button should exist");
+  assert.match(button[0], /transition-colors/);
+  assert.doesNotMatch(button[0], /transition-all/);
+});

@@ -1,6 +1,6 @@
 import { RateLimitError } from '@/common/response/client-errors';
-import { PublicSubmissionQuotaService } from '@/modules/public/service/public-submission-quota.service';
-import { TurnstileVerificationService } from '@/modules/public/service/turnstile-verification.service';
+import { PublicSubmissionQuotaService } from '@/modules/public-submission-protection/service/public-submission-quota.service';
+import { TurnstileVerificationService } from '@/modules/public-submission-protection/service/turnstile-verification.service';
 import {
   CallHandler,
   ExecutionContext,

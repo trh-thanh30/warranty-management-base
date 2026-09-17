@@ -3,6 +3,7 @@
 import { Container } from "@/src/components/common/container";
 import { FooterSocialLink } from "@/src/components/layout/components/footer-social-link";
 import { SiteLogo } from "@/src/components/layout/components/site-logo";
+import { FLOATING_ACTIONS_SCROLL_THRESHOLD } from "@/src/constants/floating-actions.constants";
 import { Link, usePathname } from "@/src/i18n/navigation";
 import {
   displayWebsite,
@@ -13,7 +14,7 @@ import { isNavigationItemActive } from "@/src/utils/pathname.utils";
 import type { PublicWebsiteSiteSetting } from "@repo/shared";
 import { cn } from "@repo/ui/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, Globe2, Mail, Phone } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import {
@@ -39,13 +40,11 @@ export function SiteFooter({
 
   useEffect(() => {
     const toggleVisibility = () => {
-      if (window.scrollY > 400) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
+      setIsVisible(window.scrollY > FLOATING_ACTIONS_SCROLL_THRESHOLD);
     };
-    window.addEventListener("scroll", toggleVisibility);
+
+    toggleVisibility();
+    window.addEventListener("scroll", toggleVisibility, { passive: true });
     return () => window.removeEventListener("scroll", toggleVisibility);
   }, []);
 
@@ -54,11 +53,11 @@ export function SiteFooter({
       {/* ── Footer ── */}
       <footer
         id="contact"
-        className="w-full scroll-mt-21 bg-white text-deep-black border-t border-t-premium-red"
+        className="relative isolate w-full scroll-mt-21 overflow-hidden border-t border-white/10 bg-deep-black text-white"
       >
         {/* Main Footer Container */}
-        <Container className="py-12 lg:py-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+        <Container className="relative z-10 py-12 lg:py-16">
+          <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-2 lg:grid-cols-12 lg:gap-11">
             {/* Column 1: Logo & Company Address */}
             <div className="lg:col-span-4 space-y-4">
               <div className="h-14 w-60">
@@ -67,19 +66,19 @@ export function SiteFooter({
                   alt={t("logoAlt")}
                   width={240}
                   height={56}
-                  className="h-14 w-auto max-w-60 object-contain object-left"
+                  className="h-14 w-auto max-w-60 object-contain object-left brightness-0 invert"
                 />
               </div>
 
-              <h4 className="text-base font-semibold uppercase text-deep-black tracking-wider pt-2">
+              <h4 className="pt-2 text-base font-semibold uppercase tracking-wider text-white">
                 {t("companyName")}
               </h4>
 
               {offices.length > 0 && (
-                <div className="space-y-3 text-sm sm:text-base text-dark-charcoal font-medium leading-relaxed">
+                <div className="space-y-3 text-sm font-medium leading-relaxed text-white sm:text-base">
                   {offices.map((office) => (
                     <div key={office.id}>
-                      <span className="block font-medium text-deep-black uppercase">
+                      <span className="block font-medium uppercase text-white">
                         {office.label}
                       </span>
                       <span>{office.address}</span>
@@ -91,10 +90,10 @@ export function SiteFooter({
 
             {/* Column 2: Navigation Links */}
             <div className="lg:col-span-3 space-y-4">
-              <h4 className="text-base font-semibold uppercase text-deep-black tracking-wider">
+              <h4 className="text-base font-semibold uppercase tracking-wider text-white">
                 {t("navigationTitle")}
               </h4>
-              <ul className="space-y-2.5 text-sm sm:text-base font-medium text-medium-gray">
+              <ul className="space-y-1 text-sm font-medium text-white sm:text-base">
                 {footerNavigationItems.map((item) => {
                   const isActive =
                     !item.external &&
@@ -129,10 +128,10 @@ export function SiteFooter({
 
             {/* Column 3: Policy Links */}
             <div className="lg:col-span-3 space-y-4">
-              <h4 className="text-base font-semibold uppercase text-deep-black tracking-wider">
+              <h4 className="text-base font-semibold uppercase tracking-wider text-white">
                 {t("policyTitle")}
               </h4>
-              <ul className="space-y-2.5 text-sm sm:text-base font-medium text-medium-gray">
+              <ul className="space-y-1 text-sm font-medium text-white sm:text-base">
                 {footerPolicyItems.map((item) => {
                   const isActive = isNavigationItemActive(pathname, item.href);
 
@@ -158,13 +157,17 @@ export function SiteFooter({
                 .filter((office) => office.phone?.trim())
                 .map((office) => (
                   <div key={office.id}>
-                    <span className="block text-xs sm:text-sm font-medium text-stone-gray uppercase">
+                    <span className="block text-nowrap text-xs font-medium uppercase text-white sm:text-sm">
                       {t("hotline", { office: office.label })}
                     </span>
                     <a
                       href={`tel:${toTelephoneHref(office.phone ?? "")}`}
-                      className="text-xl sm:text-2xl font-semibold text-premium-red hover:underline block"
+                      className="inline-flex min-h-11 items-center gap-2 text-nowrap text-xl font-semibold text-premium-red hover:text-premium-red hover:underline sm:text-2xl"
                     >
+                      <Phone
+                        aria-hidden="true"
+                        className="size-4 shrink-0 sm:size-5"
+                      />
                       {office.phone}
                     </a>
                   </div>
@@ -173,8 +176,10 @@ export function SiteFooter({
               {contactEmail && (
                 <a
                   href={`mailto:${contactEmail}`}
-                  className="block break-all pt-1 text-xs font-medium text-medium-gray sm:text-sm hover:text-premium-red"
+                  aria-label={`${t("emailLabel")} ${contactEmail}`}
+                  className="flex min-h-11 items-center gap-2 break-all text-sm font-medium text-white hover:text-premium-red sm:text-base"
                 >
+                  <Mail aria-hidden="true" className="size-5 shrink-0" />
                   {contactEmail}
                 </a>
               )}
@@ -184,13 +189,15 @@ export function SiteFooter({
                   href={websiteHref}
                   rel="noopener noreferrer"
                   target="_blank"
-                  className="block break-all text-xs font-medium text-medium-gray sm:text-sm hover:text-premium-red"
+                  aria-label={`${t("websiteLabel")} ${displayWebsite(siteSettings?.websiteUrl ?? websiteHref)}`}
+                  className="flex min-h-11 items-center gap-2 break-all text-sm font-medium text-white hover:text-premium-red sm:text-base"
                 >
+                  <Globe2 aria-hidden="true" className="size-5 shrink-0" />
                   {displayWebsite(siteSettings?.websiteUrl ?? websiteHref)}
                 </a>
               )}
 
-              <div className="flex items-center gap-2 pt-1 text-sm font-semibold uppercase text-premium-red sm:text-base">
+              <div className="flex min-h-11 items-center gap-2 text-sm font-semibold uppercase text-white sm:text-base">
                 <svg
                   data-footer-japan-flag
                   className="h-3.5 w-5 shrink-0 rounded-xs overflow-hidden border border-border-gray"
@@ -230,9 +237,12 @@ export function SiteFooter({
         </Container>
 
         {/* Bottom Copyright Bar */}
-        <div className="w-full border-t-2 border-t-premium-red bg-light-gray/10 py-4">
-          <Container className="text-center text-xs sm:text-sm text-deep-black font-semibold">
-            {t("copyright", { year: new Date().getFullYear() })}
+        <div className="relative z-10 w-full border-t border-white/15 bg-deep-black/90 py-4">
+          <Container className="px-12 text-center text-xs font-semibold text-white sm:px-4 sm:text-sm">
+            <span>
+              {t("copyrightCompany", { year: new Date().getFullYear() })}
+            </span>{" "}
+            <span className="block sm:inline">{t("copyrightNotice")}</span>
           </Container>
         </div>
       </footer>
@@ -245,7 +255,7 @@ export function SiteFooter({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 10 }}
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="group fixed bottom-24 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-premium-red text-white shadow-xl border border-white/20 transition-all duration-300 cursor-pointer hover:bg-warm-red"
+            className="group fixed bottom-24 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-premium-red text-white shadow-xl border border-white/20 transition-colors duration-300 cursor-pointer hover:bg-warm-red"
             aria-label={t("backToTopAriaLabel")}
           >
             <ArrowUp className="h-5 w-5" />
@@ -258,9 +268,9 @@ export function SiteFooter({
 
 function footerLinkClassName(isActive: boolean) {
   return cn(
-    "relative inline-flex py-0.5 transition-colors duration-200 focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2",
+    "relative inline-flex min-h-11 items-center py-0.5 transition-colors duration-200 focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2 focus-visible:ring-offset-deep-black lg:min-h-0",
     isActive
-      ? "font-semibold text-premium-red after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:rounded-full after:bg-premium-red"
-      : "text-medium-gray hover:text-premium-red",
+      ? "font-semibold text-premium-red after:absolute after:inset-x-0 after:bottom-1 after:h-px after:rounded-full after:bg-premium-red lg:after:-bottom-0.5"
+      : "text-white hover:text-premium-red",
   );
 }

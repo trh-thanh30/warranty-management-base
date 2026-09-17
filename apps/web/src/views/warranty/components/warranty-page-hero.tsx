@@ -44,7 +44,7 @@ export function WarrantyPageHero({
           compact ? "max-w-350" : "max-w-360",
         )}
       >
-        <span className="inline-block rounded-md bg-premium-red px-4 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-white">
+        <span className="inline-block rounded-md bg-premium-red px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white">
           {eyebrow}
         </span>
         <h1 className="font-condensed text-3xl font-semibold uppercase leading-tight tracking-wider text-white sm:text-5xl lg:text-6xl">

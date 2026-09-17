@@ -12,8 +12,75 @@
     "brandAlt": "FUJITEK Vietnam"
   },
   "Metadata": {
-    "title": "FUJITEK - Premium automotive window films",
-    "description": "Premium FUJITEK – LEXZENZ automotive window-film solutions in Vietnam."
+    "title": "Fujitek & Lexzenz Vietnam Digital Warranty",
+    "description": "Look up and activate digital warranties, submit support requests, and track their progress for Fujitek & Lexzenz products in Vietnam."
+  },
+  "Seo": {
+    "siteName": "Fujitek & Lexzenz Digital Warranty",
+    "warranty": {
+      "title": "Digital Warranty Center | Fujitek & Lexzenz",
+      "description": "The Fujitek & Lexzenz Vietnam digital warranty center: check coverage, activate a warranty, submit a request, and track its progress."
+    },
+    "activation": {
+      "title": "Activate Your Warranty | Fujitek & Lexzenz",
+      "description": "Activate a Fujitek & Lexzenz digital warranty with the SP code on the product label and the installation date."
+    },
+    "lookup": {
+      "title": "Check Warranty Coverage | Fujitek & Lexzenz",
+      "description": "Use your warranty code to check the product, coverage period, and expiry date for a Fujitek & Lexzenz product."
+    },
+    "request": {
+      "title": "Submit a Warranty Request | Fujitek & Lexzenz",
+      "description": "Submit a Fujitek & Lexzenz product warranty request online and receive a code to track its progress."
+    },
+    "track": {
+      "title": "Track a Warranty Request | Fujitek & Lexzenz",
+      "description": "Check the status of a Fujitek & Lexzenz warranty activation or service request using its reference code."
+    },
+    "dealers": {
+      "title": "Dealer Network | Fujitek & Lexzenz Vietnam",
+      "description": "Find a Fujitek & Lexzenz dealer in your area for product advice and warranty support."
+    },
+    "supportCenters": {
+      "title": "Warranty Support Centers | Fujitek & Lexzenz",
+      "description": "Find Fujitek & Lexzenz warranty support locations and contact information for your area."
+    },
+    "contact": {
+      "title": "Contact Support | Fujitek & Lexzenz Vietnam",
+      "description": "Contact Fujitek & Lexzenz Vietnam for product advice, activation help, and digital warranty support."
+    },
+    "guide": {
+      "title": "Digital Warranty Guide | Fujitek & Lexzenz",
+      "description": "Learn how to use an activation code, check coverage, and track a Fujitek & Lexzenz digital warranty request."
+    },
+    "policies": {
+      "title": "Policies and Terms | Fujitek & Lexzenz",
+      "description": "Review Fujitek & Lexzenz Vietnam policies for warranties, purchases, shipping, payments, and privacy."
+    },
+    "generalPolicy": {
+      "title": "General Terms | Fujitek & Lexzenz Vietnam",
+      "description": "Read the general terms for using the Fujitek & Lexzenz Vietnam website and services."
+    },
+    "privacyPolicy": {
+      "title": "Privacy Policy | Fujitek & Lexzenz Vietnam",
+      "description": "Learn how Fujitek & Lexzenz Vietnam collects, uses, and protects personal information on this website."
+    },
+    "purchasingPolicy": {
+      "title": "Purchasing Policy | Fujitek & Lexzenz",
+      "description": "Review purchasing steps and applicable terms for Fujitek & Lexzenz products in Vietnam."
+    },
+    "warrantyReturnPolicy": {
+      "title": "Warranty and Returns Policy | Fujitek & Lexzenz",
+      "description": "Read the coverage, conditions, and process for Fujitek & Lexzenz Vietnam warranty and return requests."
+    },
+    "shippingPolicy": {
+      "title": "Shipping Policy | Fujitek & Lexzenz",
+      "description": "Review shipping and delivery information for Fujitek & Lexzenz products in Vietnam."
+    },
+    "paymentPolicy": {
+      "title": "Payment Policy | Fujitek & Lexzenz",
+      "description": "Learn about payment methods and terms when purchasing Fujitek & Lexzenz products in Vietnam."
+    }
   },
   "QuickContact": {
     "navigationLabel": "Quick contact",
@@ -490,11 +557,12 @@
     "footer": {
       "logoAlt": "FUJITEK Window Films",
       "companyName": "Công ty Cổ phần Vilatek",
-      "navigationTitle": "About FUJITEK Window Films",
+      "navigationTitle": "ABOUT FUJITEK & LEXZENZ VIETNAM",
       "policyTitle": "Policies & Terms",
-      "japan": "FUJITEK JAPAN",
+      "japan": "FUJITEK LEXZENZ",
       "backToTopAriaLabel": "Scroll to top",
-      "copyright": "© {year} FUJITEK Window Films. All rights reserved.",
+      "copyrightCompany": "© {year} Fujitek & Lexzenz Vietnam.",
+      "copyrightNotice": "All rights reserved.",
       "navigation": {
         "about": "About FUJITEK Films",
         "products": "Products",
@@ -510,7 +578,9 @@
         "shipping": "Shipping Policy",
         "payment": "Payment Policy"
       },
-      "hotline": "{office} hotline:"
+      "hotline": "{office} hotline:",
+      "emailLabel": "Email:",
+      "websiteLabel": "Website:"
     }
   },
   "ProductsPage": {
@@ -1186,7 +1256,8 @@
       "success": {
         "title": "Thank you for contacting us!",
         "description": "A FUJITEK Films consultant will respond by phone as soon as possible.",
-        "reset": "Send another message"
+        "reset": "Send another message",
+        "toast": "Your message was sent successfully!"
       },
       "fields": {
         "consultationTopic": {
@@ -1230,6 +1301,7 @@
         "phonePending": "This phone number already has a message being processed. Please wait for a response before sending another.",
         "provinceRequired": "Select a province or city.",
         "rateLimit": "You have sent too many requests. Please wait a moment and try again.",
+        "turnstileError": "Security verification failed. Please verify again and resubmit.",
         "submitError": "We could not send your message. Please try again."
       }
     },
@@ -1328,7 +1400,7 @@
     },
     "actions": {
       "title": "How can we help?",
-      "description": "Choose an action below to use FUJITEK electronic warranty services.",
+      "description": "Choose an action below to use Fujitek & Lexzenz Vietnam electronic warranty services.",
       "items": {
         "lookup": {
           "badge": "Quick lookup",

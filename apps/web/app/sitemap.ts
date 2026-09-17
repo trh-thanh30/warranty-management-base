@@ -16,8 +16,8 @@ export function createSitemap(
       alternates: {
         languages: createLanguageAlternates(siteOrigin, pathname),
       },
-      changeFrequency: pathname === "/" ? "weekly" : "monthly",
-      priority: pathname === "/" ? 1 : 0.7,
+      changeFrequency: pathname === "/warranty" ? "weekly" : "monthly",
+      priority: pathname === "/warranty" ? 1 : 0.7,
     })),
   );
 }

@@ -1,5 +1,6 @@
 import { Permissions } from '@/common/decorators/permissions.decorator';
 import { Public } from '@/common/decorators/public.decorator';
+import { ContactSubmissionTurnstileGuard } from '@/modules/contact-submissions/guards/contact-submission-turnstile.guard';
 import {
   CreateContactSubmissionDto,
   ListContactSubmissionsDto,
@@ -17,6 +18,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { permission_key } from '@prisma/client';
@@ -31,6 +33,7 @@ export class ContactSubmissionsController {
   ) {}
 
   @Public()
+  @UseGuards(ContactSubmissionTurnstileGuard)
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('public/contact-submissions')
   create(@Body() dto: CreateContactSubmissionDto) {

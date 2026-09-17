@@ -11,10 +11,17 @@ export class ContactSubmissionsService {
 
   async createContactSubmission(
     body: CreateContactSubmissionBody,
+    turnstileToken?: string,
   ): Promise<ContactSubmissionResponse> {
     const response = await this.http.post<
       ApiResponse<ContactSubmissionResponse>
-    >("/public/contact-submissions", body);
+    >(
+      "/public/contact-submissions",
+      body,
+      turnstileToken
+        ? { headers: { "X-Turnstile-Token": turnstileToken } }
+        : undefined,
+    );
     return response.data;
   }
 }

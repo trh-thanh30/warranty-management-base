@@ -157,6 +157,31 @@ test("warranty activation form only asks for an SP activation code", async () =>
   }
 });
 
+test("warranty activation pairs code and installation date and accepts multiline address", async () => {
+  const formSource = await readFile(
+    new URL(
+      "../src/views/warranty/components/warranty-activation-request-form.tsx",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+
+  for (const name of ["activationCode", "installedAt"]) {
+    assert.match(
+      formSource,
+      new RegExp(
+        `name="${name}"[\\s\\S]*?<FormItem className="min-w-0(?: [^"]*)?">`,
+      ),
+    );
+  }
+
+  assert.match(formSource, /className="grid gap-5 sm:grid-cols-2"/);
+  assert.match(
+    formSource,
+    /name="addressDetail"[\s\S]*?<Textarea[\s\S]*?maxLength=\{255\}/,
+  );
+});
+
 test("warranty activation uses the shared date-time picker", async () => {
   const [formSource, viSource, enSource] = await Promise.all([
     readFile(
@@ -171,6 +196,10 @@ test("warranty activation uses the shared date-time picker", async () => {
   ]);
 
   assert.match(formSource, /DateTimePicker/);
+  assert.match(
+    formSource,
+    /<div className="\[&_input\]:h-12 \[&_button\]:size-12">\s*<DateTimePicker/,
+  );
   assert.doesNotMatch(formSource, /type="datetime-local"/);
 
   for (const source of [viSource, enSource]) {

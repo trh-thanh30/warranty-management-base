@@ -19,6 +19,10 @@ const detailViewPath = new URL(
   import.meta.url,
 );
 const detailSource = readFileSync(detailViewPath, "utf8");
+const statusBadgeSource = readFileSync(
+  new URL("./components/contact-submission-status-badge.tsx", import.meta.url),
+  "utf8",
+);
 const viMessages = JSON.parse(
   readFileSync(new URL("../../messages/vi.json", import.meta.url), "utf8"),
 ) as Record<string, unknown>;
@@ -43,6 +47,17 @@ test("contact submission status controls only render allowed transitions", () =>
   assert.doesNotMatch(
     directorySource,
     /Object\.entries\(CONTACT_SUBMISSION_STATUS_LABELS\)/,
+  );
+});
+
+test("new and archived contact statuses use the swapped badge colors", () => {
+  assert.match(
+    statusBadgeSource,
+    /ARCHIVED:\s*"border-red-200 bg-red-50 text-red-700/,
+  );
+  assert.match(
+    statusBadgeSource,
+    /NEW:\s*"border-slate-200 bg-slate-100 text-slate-700/,
   );
 });
 

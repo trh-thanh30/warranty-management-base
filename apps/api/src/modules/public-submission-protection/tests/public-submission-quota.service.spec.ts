@@ -1,6 +1,6 @@
 import { RateLimitError } from '@/common/response/client-errors';
 import { RedisService } from '@/database/redis/redis.service';
-import { PublicSubmissionQuotaService } from '@/modules/public/service/public-submission-quota.service';
+import { PublicSubmissionQuotaService } from '@/modules/public-submission-protection/service/public-submission-quota.service';
 
 describe('PublicSubmissionQuotaService', () => {
   it('rejects a submission when any daily identity quota is exceeded', async () => {

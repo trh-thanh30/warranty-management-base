@@ -1,4 +1,4 @@
-import { TurnstileVerificationService } from '@/modules/public/service/turnstile-verification.service';
+import { TurnstileVerificationService } from '@/modules/public-submission-protection/service/turnstile-verification.service';
 
 describe('TurnstileVerificationService', () => {
   afterEach(() => jest.restoreAllMocks());

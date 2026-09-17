@@ -12,8 +12,75 @@
     "brandAlt": "FUJITEK Việt Nam"
   },
   "Metadata": {
-    "title": "FUJITEK - Phim cách nhiệt ô tô cao cấp",
-    "description": "Giải pháp phim cách nhiệt cao cấp FUJITEK – LEXZENZ Việt Nam."
+    "title": "Bảo hành điện tử Fujitek & Lexzenz Việt Nam",
+    "description": "Tra cứu, kích hoạt bảo hành điện tử, gửi yêu cầu và theo dõi tiến độ xử lý cho sản phẩm Fujitek & Lexzenz Việt Nam."
+  },
+  "Seo": {
+    "siteName": "Bảo hành điện tử Fujitek & Lexzenz",
+    "warranty": {
+      "title": "Trung tâm bảo hành điện tử | Fujitek & Lexzenz",
+      "description": "Trung tâm bảo hành điện tử Fujitek & Lexzenz Việt Nam: tra cứu thời hạn, kích hoạt bảo hành, gửi yêu cầu và theo dõi tiến độ xử lý."
+    },
+    "activation": {
+      "title": "Kích hoạt bảo hành điện tử | Fujitek & Lexzenz",
+      "description": "Kích hoạt bảo hành điện tử cho sản phẩm Fujitek & Lexzenz bằng mã SP trên tem và ngày lắp đặt."
+    },
+    "lookup": {
+      "title": "Tra cứu bảo hành điện tử | Fujitek & Lexzenz",
+      "description": "Kiểm tra thông tin sản phẩm, thời hạn và ngày hết hạn bảo hành điện tử Fujitek & Lexzenz bằng mã bảo hành."
+    },
+    "request": {
+      "title": "Gửi yêu cầu bảo hành | Fujitek & Lexzenz",
+      "description": "Gửi yêu cầu bảo hành sản phẩm Fujitek & Lexzenz trực tuyến và nhận mã để theo dõi quá trình xử lý."
+    },
+    "track": {
+      "title": "Theo dõi yêu cầu bảo hành | Fujitek & Lexzenz",
+      "description": "Tra cứu trạng thái yêu cầu kích hoạt hoặc yêu cầu bảo hành Fujitek & Lexzenz bằng mã đã được cấp."
+    },
+    "dealers": {
+      "title": "Hệ thống đại lý | Fujitek & Lexzenz Việt Nam",
+      "description": "Tìm đại lý Fujitek & Lexzenz tại khu vực của bạn để được tư vấn sản phẩm và hỗ trợ bảo hành."
+    },
+    "supportCenters": {
+      "title": "Trung tâm hỗ trợ bảo hành | Fujitek & Lexzenz",
+      "description": "Tìm địa điểm hỗ trợ bảo hành Fujitek & Lexzenz và thông tin liên hệ phù hợp với khu vực của bạn."
+    },
+    "contact": {
+      "title": "Liên hệ hỗ trợ | Fujitek & Lexzenz Việt Nam",
+      "description": "Liên hệ Fujitek & Lexzenz Việt Nam để được tư vấn sản phẩm, hỗ trợ kích hoạt và giải đáp về bảo hành điện tử."
+    },
+    "guide": {
+      "title": "Hướng dẫn bảo hành điện tử | Fujitek & Lexzenz",
+      "description": "Hướng dẫn sử dụng mã kích hoạt, tra cứu thời hạn và theo dõi yêu cầu bảo hành điện tử Fujitek & Lexzenz."
+    },
+    "policies": {
+      "title": "Chính sách và quy định | Fujitek & Lexzenz",
+      "description": "Xem các chính sách bảo hành, mua hàng, giao hàng, thanh toán và bảo mật của Fujitek & Lexzenz Việt Nam."
+    },
+    "generalPolicy": {
+      "title": "Quy định chung | Fujitek & Lexzenz Việt Nam",
+      "description": "Đọc các quy định chung khi sử dụng website và dịch vụ của Fujitek & Lexzenz Việt Nam."
+    },
+    "privacyPolicy": {
+      "title": "Chính sách bảo mật | Fujitek & Lexzenz Việt Nam",
+      "description": "Tìm hiểu cách Fujitek & Lexzenz Việt Nam thu thập, sử dụng và bảo vệ thông tin cá nhân trên website."
+    },
+    "purchasingPolicy": {
+      "title": "Chính sách mua hàng | Fujitek & Lexzenz",
+      "description": "Xem thông tin về quy trình mua hàng và điều kiện áp dụng tại Fujitek & Lexzenz Việt Nam."
+    },
+    "warrantyReturnPolicy": {
+      "title": "Chính sách bảo hành và đổi trả | Fujitek & Lexzenz",
+      "description": "Tìm hiểu điều kiện, thời hạn và quy trình bảo hành, đổi trả sản phẩm Fujitek & Lexzenz Việt Nam."
+    },
+    "shippingPolicy": {
+      "title": "Chính sách giao hàng | Fujitek & Lexzenz",
+      "description": "Xem chính sách giao hàng và thông tin vận chuyển khi mua sản phẩm Fujitek & Lexzenz Việt Nam."
+    },
+    "paymentPolicy": {
+      "title": "Chính sách thanh toán | Fujitek & Lexzenz",
+      "description": "Tìm hiểu phương thức và quy định thanh toán khi mua sản phẩm Fujitek & Lexzenz Việt Nam."
+    }
   },
   "QuickContact": {
     "navigationLabel": "Liên hệ nhanh",
@@ -40,7 +107,7 @@
     "closeAriaLabel": "Đóng cửa sổ tra cứu bảo hành",
     "supportMessage": "Nếu cần hỗ trợ thêm, vui lòng liên hệ đại lý thi công hoặc hotline FUJITEK.",
     "supportHotlineLabel": "Hotline",
-    "supportClosing": "Cảm ơn bạn đã sử dụng hệ thống bảo hành điện tử FUJITEK.",
+    "supportClosing": "Cảm ơn bạn đã sử dụng hệ thống bảo hành điện tử FUJITEK LEXZENZ.",
     "errors": {
       "invalid": "Mã bảo hành không hợp lệ. Vui lòng kiểm tra mã WM-* và nhập lại.",
       "notFound": "Không tìm thấy thông tin cho mã bảo hành này.",
@@ -490,11 +557,12 @@
     "footer": {
       "logoAlt": "FUJITEK Window Films",
       "companyName": "Công ty Cổ phần Vilatek",
-      "navigationTitle": "Về FUJITEK Window Films",
+      "navigationTitle": "VỀ FUJITEK & LEXZENZ VIỆT NAM",
       "policyTitle": "Chính sách & Quy định",
-      "japan": "FUJITEK JAPAN",
+      "japan": "FUJITEK LEXZENZ",
       "backToTopAriaLabel": "Cuộn lên đầu trang",
-      "copyright": "© {year} FUJITEK Window Films. Đã đăng ký bản quyền.",
+      "copyrightCompany": "© {year} Fujitek & Lexzenz Việt Nam.",
+      "copyrightNotice": "Đã đăng ký bản quyền.",
       "navigation": {
         "about": "Về FUJITEK Films",
         "products": "Sản phẩm",
@@ -510,7 +578,9 @@
         "shipping": "Chính sách giao hàng",
         "payment": "Chính sách thanh toán"
       },
-      "hotline": "Hotline {office}:"
+      "hotline": "Hotline {office}:",
+      "emailLabel": "Email:",
+      "websiteLabel": "Website:"
     }
   },
   "ProductsPage": {
@@ -1090,7 +1160,7 @@
       "eyebrow": "Hệ thống đại lý",
       "title": "Trở thành đại lý chính thức ngay hôm nay",
       "description": "Tìm trung tâm thi công phim cách nhiệt FUJITEK chính hãng gần bạn trên toàn quốc.",
-      "dealerCta": "Tuyển đại lý"
+      "dealerCta": "Đăng ký tư vấn"
     },
     "recruitment": {
       "eyebrow": "Cơ hội hợp tác",
@@ -1152,7 +1222,7 @@
   "QuickChat": {
     "helpPrompt": "Bạn cần hỗ trợ?",
     "title": "Đăng ký nhận tư vấn",
-    "description": "Để lại thông tin, FUJITEK sẽ liên hệ hỗ trợ bạn trong thời gian sớm nhất.",
+    "description": "Để lại thông tin, Fujitek & Lexzenz Việt Nam sẽ liên hệ hỗ trợ bạn trong thời gian sớm nhất.",
     "openAriaLabel": "Mở form tư vấn nhanh",
     "closeAriaLabel": "Đóng form tư vấn nhanh"
   },
@@ -1171,7 +1241,7 @@
       },
       "hanoi": {
         "label": "Chi nhánh Hà Nội:",
-        "address": "Số 62, Ngõ 20 Nghĩa Đô, Phường Nghĩa Đô, TP. Hà Nội"
+        "address": "Số 62/20, Phường Nghĩa Đô, TP. Hà Nội"
       }
     },
     "hotlines": {
@@ -1186,7 +1256,8 @@
       "success": {
         "title": "Cảm ơn bạn đã liên hệ!",
         "description": "Chuyên viên FUJITEK Films sẽ phản hồi qua số điện thoại của bạn trong thời gian sớm nhất.",
-        "reset": "Gửi lời nhắn mới"
+        "reset": "Gửi lời nhắn mới",
+        "toast": "Gửi lời nhắn thành công!"
       },
       "fields": {
         "consultationTopic": {
@@ -1230,6 +1301,7 @@
         "phonePending": "Số điện thoại này đã có lời nhắn đang được xử lý. Vui lòng chờ phản hồi trước khi gửi lời nhắn mới.",
         "provinceRequired": "Vui lòng chọn tỉnh/thành phố.",
         "rateLimit": "Bạn đã gửi quá nhiều yêu cầu. Vui lòng chờ một lúc rồi thử lại.",
+        "turnstileError": "Không thể xác minh bảo mật. Vui lòng xác minh lại rồi thử gửi.",
         "submitError": "Không thể gửi lời nhắn. Vui lòng thử lại."
       }
     },
@@ -1328,7 +1400,7 @@
     },
     "actions": {
       "title": "Bạn cần làm gì?",
-      "description": "Chọn thao tác bên dưới để sử dụng dịch vụ bảo hành điện tử Fujitek – Lexzenz Việt Nam.",
+      "description": "Chọn thao tác bên dưới để sử dụng dịch vụ bảo hành điện tử Fujitek & Lexzenz Việt Nam.",
       "items": {
         "lookup": {
           "badge": "Tra cứu nhanh",
@@ -1508,10 +1580,10 @@
       }
     },
     "lookup": {
-      "eyebrow": "Bảo hành điện tử FUJITEK",
+      "eyebrow": "Bảo hành điện tử FUJITEK LEXZENZ",
       "title": "Tra cứu hạn bảo hành điện tử",
       "description": "Nhập mã bảo hành bắt đầu bằng WM- để kiểm tra sản phẩm và thời hạn bảo hành chính hãng.",
-      "heroImageAlt": "Tra cứu bảo hành điện tử FUJITEK",
+      "heroImageAlt": "Tra cứu bảo hành điện tử FUJITEK LEXZENZ",
       "registration": {
         "title": "Tìm mã bảo hành của Quý khách",
         "description": "Mã tra cứu có thể được cung cấp qua một trong các kênh dưới đây",
@@ -1816,7 +1888,7 @@
     "openMenuAriaLabel": "Mở menu",
     "closeMenuAriaLabel": "Đóng menu",
     "warrantyLookupAriaLabel": "Tra cứu bảo hành",
-    "dealerCta": "Tuyển đại lý",
+    "dealerCta": "Đăng ký tư vấn",
     "languageMenuAriaLabel": "Chọn ngôn ngữ",
     "languages": {
       "vietnamese": "Tiếng Việt",
@@ -1863,7 +1935,7 @@
       },
       "hanoi": {
         "label": "Chi nhánh Hà Nội",
-        "address": "Số 62, Ngõ 20 Nghĩa Đô, Phường Nghĩa Đô, TP. Hà Nội",
+        "address": "Số 62/20, Phường Nghĩa Đô, TP. Hà Nội",
         "hotline": "Hotline Hà Nội: 0989 017 999"
       }
     },
@@ -1933,7 +2005,7 @@
             "heading": "4. Địa chỉ của đơn vị thu thập và quản lý thông tin cá nhân",
             "bullets": [
               "CÔNG TY CỔ PHẦN THƯƠNG MẠI ĐẦU TƯ FUJITEK VIỆT NAM (FUJITEK – THE ULTIMATE WINDOW FILMS).",
-              "Trụ sở Hà Nội: Số 62, Ngõ 20 Nghĩa Đô, Phường Nghĩa Đô, TP. Hà Nội.",
+              "Trụ sở Hà Nội: Số 62/20, Phường Nghĩa Đô, TP. Hà Nội.",
               "Văn phòng TP. Hồ Chí Minh: 7C Nguyễn Ngọc Phương, Phường Thạnh Mỹ Tây, TP. Hồ Chí Minh.",
               "Website: https://fujitek.vn | Email: info@fujitek.vn | Hotline CSKH: 0886 33 77 33 / 0989 017 999."
             ]

@@ -1,6 +1,7 @@
 "use client";
 
 import { Container } from "@/src/components/common/container";
+import { openPublicQuickChat } from "@/src/components/common/public-quick-chat.events";
 import { HeaderNavLink } from "@/src/components/layout/components/header-nav-link";
 import { LanguageSwitcher } from "@/src/components/layout/components/language-switcher";
 import { SiteLogo } from "@/src/components/layout/components/site-logo";
@@ -105,14 +106,13 @@ export function SiteHeader({ logoUrl }: { logoUrl?: string | null }) {
         </nav>
 
         <div className="hidden shrink-0 items-center gap-4 xl:flex">
-          <a
-            href={PUBLIC_DEALER_NETWORK_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            onClick={openPublicQuickChat}
             className="rounded-md bg-premium-red px-7 py-3 text-xs font-medium uppercase tracking-wide text-off-white shadow-md shadow-premium-red/20 transition-colors duration-200 hover:bg-warm-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2 sm:text-sm"
           >
             {t("dealerCta")}
-          </a>
+          </button>
           <LanguageSwitcher />
         </div>
 
@@ -166,15 +166,16 @@ export function SiteHeader({ logoUrl }: { logoUrl?: string | null }) {
                 </li>
               ))}
               <li className="pt-3">
-                <a
-                  href={PUBLIC_DEALER_NETWORK_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={closeMobileMenu}
-                  className="block rounded-md bg-premium-red py-3.5 text-center text-sm font-medium uppercase tracking-wide text-off-white shadow-md shadow-premium-red/20 transition-colors duration-200 hover:bg-warm-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2"
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeMobileMenu();
+                    openPublicQuickChat();
+                  }}
+                  className="block w-full rounded-md bg-premium-red py-3.5 text-center text-sm font-medium uppercase tracking-wide text-off-white shadow-md shadow-premium-red/20 transition-colors duration-200 hover:bg-warm-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-premium-red focus-visible:ring-offset-2"
                 >
                   {t("dealerCta")}
-                </a>
+                </button>
               </li>
               <li>
                 <LanguageSwitcher
