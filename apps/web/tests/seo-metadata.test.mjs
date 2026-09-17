@@ -5,8 +5,10 @@ import process from "node:process";
 import test from "node:test";
 import {
   INDEXABLE_PATHNAMES,
+  SEO_PAGE_KEYS,
   createLocalizedUrl,
   createPageAlternates,
+  createPageSeoMetadata,
   resolveSiteOrigin,
 } from "../src/config/seo.config.ts";
 import { createRobots } from "../app/robots.ts";
@@ -36,6 +38,54 @@ test("page alternates expose canonical, Vietnamese, English and x-default URLs",
   });
 });
 
+test("warranty page metadata has its own title, description and social URLs", () => {
+  const metadata = createPageSeoMetadata({
+    siteOrigin,
+    pathname: "/warranty/lookup",
+    locale: "vi",
+    title: "Tra cứu bảo hành điện tử | Fujitek & Lexzenz",
+    description: "Tra cứu thời hạn bảo hành bằng mã bảo hành.",
+    siteName: "Bảo hành điện tử Fujitek & Lexzenz",
+  });
+
+  assert.equal(metadata.title, "Tra cứu bảo hành điện tử | Fujitek & Lexzenz");
+  assert.equal(
+    metadata.description,
+    "Tra cứu thời hạn bảo hành bằng mã bảo hành.",
+  );
+  assert.equal(
+    metadata.alternates?.canonical,
+    "https://baohanh.lexzenz.com/vi/bao-hanh/tra-cuu",
+  );
+  assert.equal(metadata.openGraph?.url, metadata.alternates?.canonical);
+  assert.equal(metadata.openGraph?.locale, "vi_VN");
+  assert.equal(metadata.twitter?.card, "summary");
+});
+
+test("each indexable page has distinct Vietnamese and English SEO copy", async () => {
+  const [vi, en] = await Promise.all(
+    ["vi", "en"].map(async (locale) =>
+      JSON.parse(
+        await readFile(
+          path.join(process.cwd(), "apps/web/src/messages", `${locale}.json`),
+          "utf8",
+        ),
+      ),
+    ),
+  );
+
+  assert.equal(Object.keys(SEO_PAGE_KEYS).length, INDEXABLE_PATHNAMES.length);
+  for (const messages of [vi, en]) {
+    const titles = INDEXABLE_PATHNAMES.map((pathname) => {
+      const copy = messages.Seo[SEO_PAGE_KEYS[pathname]];
+      assert.ok(copy?.title, `Missing title for ${pathname}`);
+      assert.ok(copy?.description, `Missing description for ${pathname}`);
+      return copy.title;
+    });
+    assert.equal(new Set(titles).size, titles.length);
+  }
+});
+
 test("site origin normalization removes paths and trailing slashes", () => {
   assert.equal(
     resolveSiteOrigin("https://baohanh.lexzenz.com/an-unwanted-path/"),
@@ -58,10 +108,16 @@ test("sitemap contains both locales for every indexable route only", () => {
       (entry) => entry.url === "https://baohanh.lexzenz.com/en/warranty",
     ),
   );
+  assert.ok(
+    sitemap.some(
+      (entry) =>
+        entry.url === "https://baohanh.lexzenz.com/vi/bao-hanh/kich-hoat",
+    ),
+  );
 
   for (const entry of sitemap) {
+    assert.doesNotMatch(entry.url, /\/(?:vi|en)\/?$/);
     assert.doesNotMatch(entry.url, /\/products(?:\/|$)/);
-    assert.doesNotMatch(entry.url, /\/warranty\/activate(?:\/|$)/);
     assert.equal(Object.keys(entry.alternates?.languages ?? {}).length, 3);
   }
 });
