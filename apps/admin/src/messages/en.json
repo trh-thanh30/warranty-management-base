@@ -3240,7 +3240,6 @@
       "phone": "Phone",
       "consultationTopic": "Consultation topic",
       "province": "Province / City",
-      "source": "Source",
       "createdAt": "Submitted",
       "updatedAt": "Last updated",
       "status": "Status",

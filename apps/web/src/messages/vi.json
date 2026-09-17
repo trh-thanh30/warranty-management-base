@@ -1298,9 +1298,9 @@
         "phoneInvalid": "Vui lòng nhập số điện thoại hợp lệ.",
         "contentMin": "Vui lòng nhập nội dung tối thiểu 10 ký tự.",
         "contentMax": "Nội dung không được vượt quá 2000 ký tự.",
-        "phonePending": "Số điện thoại này đã có lời nhắn đang được xử lý. Vui lòng chờ phản hồi trước khi gửi lời nhắn mới.",
         "provinceRequired": "Vui lòng chọn tỉnh/thành phố.",
         "rateLimit": "Bạn đã gửi quá nhiều yêu cầu. Vui lòng chờ một lúc rồi thử lại.",
+        "rateLimitWithTime": "Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau {minutes} phút {seconds} giây.",
         "turnstileError": "Không thể xác minh bảo mật. Vui lòng xác minh lại rồi thử gửi.",
         "submitError": "Không thể gửi lời nhắn. Vui lòng thử lại."
       }

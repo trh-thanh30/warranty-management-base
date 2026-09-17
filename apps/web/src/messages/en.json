@@ -1298,9 +1298,9 @@
         "phoneInvalid": "Enter a valid phone number.",
         "contentMin": "Enter a message with at least 10 characters.",
         "contentMax": "Message must not exceed 2000 characters.",
-        "phonePending": "This phone number already has a message being processed. Please wait for a response before sending another.",
         "provinceRequired": "Select a province or city.",
         "rateLimit": "You have sent too many requests. Please wait a moment and try again.",
+        "rateLimitWithTime": "You have sent too many requests. Please try again in {minutes} min {seconds} sec.",
         "turnstileError": "Security verification failed. Please verify again and resubmit.",
         "submitError": "We could not send your message. Please try again."
       }

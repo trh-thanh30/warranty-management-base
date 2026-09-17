@@ -1,16 +1,14 @@
-import { BadRequestError, ConflictError } from '@/common/response';
+import { BadRequestError } from '@/common/response';
 import { GetVietnamProvinceUseCase } from '@/modules/locations/use-cases/get-vietnam-province.use-case';
 import { ContactSubmissionNotificationService } from '@/modules/contact-submissions/service/contact-submission-notification.service';
 import type { CreateContactSubmissionBody } from '@repo/shared';
 import { normalizePhoneNumber } from '@repo/shared/utils';
 import {
   CONTACT_CONSULTATION_TOPICS,
-  CONTACT_SUBMISSION_ERROR_CODES,
   CONTACT_SUBMISSION_LIMITS,
   PHONE_NUMBER_PATTERN,
 } from '@repo/shared/constants';
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { ContactSubmissionsRepository } from '../repository/contact-submissions.repository';
 import { toContactSubmissionResponse } from '../contact-submissions.types';
 
@@ -72,12 +70,6 @@ export class CreateContactSubmissionUseCase {
       throw new BadRequestError('Contact message source path is too long');
     }
 
-    const pendingSubmission = await this.repository.findPendingByPhone(phone);
-
-    if (pendingSubmission) {
-      throw createPhonePendingError(phone);
-    }
-
     const province = await this.getVietnamProvinceUseCase.execute(
       Number(provinceCode),
       1,
@@ -93,28 +85,15 @@ export class CreateContactSubmissionUseCase {
       throw new BadRequestError('Contact submission province is invalid');
     }
 
-    let submission;
-
-    try {
-      submission = await this.repository.create({
-        consultation_topic: consultationTopic,
-        content,
-        full_name: fullName,
-        phone,
-        province_code: canonicalProvinceCode,
-        province_name: canonicalProvinceName,
-        source_path: sourcePath,
-      });
-    } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2002'
-      ) {
-        throw createPhonePendingError(phone);
-      }
-
-      throw error;
-    }
+    const submission = await this.repository.create({
+      consultation_topic: consultationTopic,
+      content,
+      full_name: fullName,
+      phone,
+      province_code: canonicalProvinceCode,
+      province_name: canonicalProvinceName,
+      source_path: sourcePath,
+    });
 
     await this.contactSubmissionNotificationService.submissionCreated(
       submission,
@@ -122,12 +101,4 @@ export class CreateContactSubmissionUseCase {
 
     return toContactSubmissionResponse(submission);
   }
-}
-
-function createPhonePendingError(phone: string) {
-  return new ConflictError(
-    'Phone already has a pending contact submission',
-    CONTACT_SUBMISSION_ERROR_CODES.PHONE_PENDING,
-    { phone },
-  );
 }
