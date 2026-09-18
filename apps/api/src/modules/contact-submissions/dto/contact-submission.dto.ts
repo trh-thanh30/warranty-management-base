@@ -61,6 +61,17 @@ export class ListContactSubmissionsDto extends PaginationQueryDto {
   status?: (typeof CONTACT_SUBMISSION_STATUSES)[number];
 }
 
+export class ExportContactSubmissionsDto {
+  @IsOptional()
+  @IsString()
+  @Length(1, 120)
+  search?: string;
+
+  @IsOptional()
+  @IsIn(CONTACT_SUBMISSION_STATUSES)
+  status?: (typeof CONTACT_SUBMISSION_STATUSES)[number];
+}
+
 export class UpdateContactSubmissionStatusDto {
   @IsIn(CONTACT_SUBMISSION_STATUSES)
   status: (typeof CONTACT_SUBMISSION_STATUSES)[number];

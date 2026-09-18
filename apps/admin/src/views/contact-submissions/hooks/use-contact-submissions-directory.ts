@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useDebounce } from "@repo/hooks";
 import type {
@@ -13,8 +14,10 @@ import {
   useUpdateContactSubmissionStatus,
 } from "@/src/hooks/use-contact-submissions";
 import { usePermissions } from "@/src/hooks/use-permissions";
+import { useExcel } from "@/src/hooks/use-excel";
 import { useTableControls } from "@/src/hooks/use-table-controls";
 import { useToast } from "@/src/hooks/use-toast";
+import { contactSubmissionsService } from "@/src/services/contact-submissions/contact-submissions.service";
 import {
   CONTACT_SUBMISSIONS_PAGE_SIZE,
   type ContactSubmissionStatusFilter,
@@ -32,6 +35,8 @@ const INITIAL_FILTERS = {
 export function useContactSubmissionsDirectory() {
   const t = useTranslations("ContactSubmissions");
   const toast = useToast();
+  const { createDatedFilename, downloadBlob } = useExcel();
+  const [isExporting, setIsExporting] = useState(false);
   const { user } = useAuth();
   const { hasPermission } = usePermissions();
   const {
@@ -62,6 +67,23 @@ export function useContactSubmissionsDirectory() {
   );
   const updateStatus = useUpdateContactSubmissionStatus();
 
+  async function exportSubmissions() {
+    if (isExporting) return;
+    setIsExporting(true);
+    try {
+      const blob = await contactSubmissionsService.exportContactSubmissions({
+        search: search.trim() || undefined,
+        status: toContactSubmissionStatusQuery(filters.status),
+      });
+      downloadBlob(blob, createDatedFilename("contact-submissions"));
+      toast.success(t("toasts.exportSuccess"));
+    } catch {
+      toast.error(t("toasts.exportError"));
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
   async function updateSubmissionStatus(
     submission: ContactSubmissionResponse,
     status: ContactSubmissionStatus,
@@ -82,6 +104,8 @@ export function useContactSubmissionsDirectory() {
   return {
     canUpdate,
     clearFilters: resetControls,
+    exportSubmissions,
+    isExporting,
     isUpdating: updateStatus.isPending,
     pageSize,
     search,

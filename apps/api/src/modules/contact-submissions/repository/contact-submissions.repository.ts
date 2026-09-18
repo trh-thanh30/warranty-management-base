@@ -3,6 +3,7 @@ import { PrismaService } from '@/database/prisma/prisma.service';
 import type {
   ContactConsultationTopic,
   ContactSubmissionStatus,
+  ExportContactSubmissionsQuery,
   ListContactSubmissionsQuery,
 } from '@repo/shared';
 import { Injectable } from '@nestjs/common';
@@ -26,19 +27,8 @@ export class ContactSubmissionsRepository {
   }
 
   list(query: ListContactSubmissionsQuery) {
-    const search = query.search?.trim();
     const { page, limit, skip, take } = normalizePagination(query);
-    const where: Prisma.ContactSubmissionWhereInput = {
-      status: query.status ?? { not: 'ARCHIVED' },
-      OR: search
-        ? [
-            { full_name: { contains: search, mode: 'insensitive' } },
-            { phone: { contains: search, mode: 'insensitive' } },
-            { content: { contains: search, mode: 'insensitive' } },
-            { source_path: { contains: search, mode: 'insensitive' } },
-          ]
-        : undefined,
-    };
+    const where = buildContactSubmissionWhere(query);
 
     return this.prismaService.$transaction(async (tx) => {
       const [items, total] = await Promise.all([
@@ -57,6 +47,13 @@ export class ContactSubmissionsRepository {
         total,
       });
     });
+  }
+
+  listForExport(query: ExportContactSubmissionsQuery) {
+    return this.prismaService.contactSubmission.findMany({
+      where: buildContactSubmissionWhere(query),
+      orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
+    }) as Promise<ContactSubmissionRecord[]>;
   }
 
   updateStatus(
@@ -82,6 +79,23 @@ export class ContactSubmissionsRepository {
       });
     });
   }
+}
+
+function buildContactSubmissionWhere(
+  query: ExportContactSubmissionsQuery,
+): Prisma.ContactSubmissionWhereInput {
+  const search = query.search?.trim();
+  return {
+    status: query.status ?? { not: 'ARCHIVED' },
+    OR: search
+      ? [
+          { full_name: { contains: search, mode: 'insensitive' } },
+          { phone: { contains: search, mode: 'insensitive' } },
+          { content: { contains: search, mode: 'insensitive' } },
+          { source_path: { contains: search, mode: 'insensitive' } },
+        ]
+      : undefined,
+  };
 }
 
 export type CreateContactSubmissionData = {

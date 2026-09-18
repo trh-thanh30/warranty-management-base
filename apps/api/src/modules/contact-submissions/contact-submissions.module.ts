@@ -5,6 +5,7 @@ import { ContactSubmissionsRepository } from '@/modules/contact-submissions/repo
 import { ContactSubmissionTurnstileGuard } from '@/modules/contact-submissions/guards/contact-submission-turnstile.guard';
 import { ContactSubmissionNotificationService } from '@/modules/contact-submissions/service/contact-submission-notification.service';
 import { CreateContactSubmissionUseCase } from '@/modules/contact-submissions/use-cases/create-contact-submission.use-case';
+import { ExportContactSubmissionsUseCase } from '@/modules/contact-submissions/use-cases/export-contact-submissions.use-case';
 import { GetContactSubmissionUseCase } from '@/modules/contact-submissions/use-cases/get-contact-submission.use-case';
 import { ListContactSubmissionsUseCase } from '@/modules/contact-submissions/use-cases/list-contact-submissions.use-case';
 import { UpdateContactSubmissionStatusUseCase } from '@/modules/contact-submissions/use-cases/update-contact-submission-status.use-case';
@@ -29,6 +30,7 @@ import { Module } from '@nestjs/common';
     ContactSubmissionTurnstileGuard,
     ContactSubmissionNotificationService,
     CreateContactSubmissionUseCase,
+    ExportContactSubmissionsUseCase,
     ListContactSubmissionsUseCase,
     GetContactSubmissionUseCase,
     UpdateContactSubmissionStatusUseCase,
