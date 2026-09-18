@@ -53,3 +53,35 @@ describe('ContactSubmissionsRepository.list', () => {
     },
   );
 });
+
+describe('ContactSubmissionsRepository.listForExport', () => {
+  it.each([
+    { status: undefined, expectedStatus: { not: 'ARCHIVED' } },
+    { status: 'ARCHIVED' as const, expectedStatus: 'ARCHIVED' },
+  ])(
+    'exports all matching rows when status is $status',
+    async ({ status, expectedStatus }) => {
+      const findMany = jest.fn().mockResolvedValue([]);
+      const repository = new ContactSubmissionsRepository({
+        contactSubmission: { findMany },
+      } as never);
+
+      await repository.listForExport({ search: ' Nguyen ', status });
+
+      expect(findMany).toHaveBeenCalledWith({
+        where: {
+          status: expectedStatus,
+          OR: [
+            { full_name: { contains: 'Nguyen', mode: 'insensitive' } },
+            { phone: { contains: 'Nguyen', mode: 'insensitive' } },
+            { content: { contains: 'Nguyen', mode: 'insensitive' } },
+            { source_path: { contains: 'Nguyen', mode: 'insensitive' } },
+          ],
+        },
+        orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
+      });
+      expect(findMany.mock.calls[0][0]).not.toHaveProperty('take');
+      expect(findMany.mock.calls[0][0]).not.toHaveProperty('skip');
+    },
+  );
+});

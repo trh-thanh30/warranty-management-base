@@ -3220,6 +3220,10 @@
     "eyebrow": "Website contact",
     "title": "Contact messages",
     "description": "Manage messages customers submit through the public website contact form.",
+    "excel": {
+      "title": "Export Excel",
+      "exportFiltered": "Export filtered messages"
+    },
     "directory": {
       "title": "Contact form messages",
       "description": "Track consultation requests submitted from the public website.",
@@ -3285,6 +3289,8 @@
       "moveTo": "Move to {status}"
     },
     "toasts": {
+      "exportSuccess": "Contact messages Excel file downloaded.",
+      "exportError": "Could not export contact messages to Excel.",
       "updateSuccess": "Contact message status updated.",
       "updateError": "Contact message status could not be updated."
     }

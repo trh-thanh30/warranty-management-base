@@ -15,6 +15,10 @@ const listViewSource = readFileSync(
   new URL("./contact-submissions.view.tsx", import.meta.url),
   "utf8",
 );
+const directoryHookSource = readFileSync(
+  new URL("./hooks/use-contact-submissions-directory.ts", import.meta.url),
+  "utf8",
+);
 const detailViewPath = new URL(
   "./contact-submission-detail.view.tsx",
   import.meta.url,
@@ -54,6 +58,16 @@ test("contact submission status controls only render allowed transitions", () =>
 test("all contact statuses omit the status query while archived is explicit", () => {
   assert.equal(toContactSubmissionStatusQuery("ALL"), undefined);
   assert.equal(toContactSubmissionStatusQuery("ARCHIVED"), "ARCHIVED");
+});
+
+test("contact export uses the active search and status filters", () => {
+  assert.match(listViewSource, /ImportExportMenu/);
+  assert.match(directoryHookSource, /exportContactSubmissions/);
+  assert.match(directoryHookSource, /search: search\.trim\(\) \|\| undefined/);
+  assert.match(
+    directoryHookSource,
+    /status: toContactSubmissionStatusQuery\(filters\.status\)/,
+  );
 });
 
 test("new and archived contact statuses use the swapped badge colors", () => {

@@ -12,6 +12,7 @@
     "prepare": "husky",
     "dev": "turbo run dev",
     "dev:apps": "turbo run dev --filter=@repo/web --filter=@repo/admin",
+    "dev:client": "pnpm run dev:apps",
     "dev:full": "turbo run dev --filter=@repo/api --filter=@repo/web --filter=@repo/admin",
     "dev:api": "pnpm --filter @repo/api start:dev",
     "dev:api:debug": "pnpm --filter @repo/api start:debug",

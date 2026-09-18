@@ -3220,6 +3220,10 @@
     "eyebrow": "Liên hệ website",
     "title": "Lời nhắn liên hệ",
     "description": "Quản lý các lời nhắn khách hàng gửi từ form liên hệ trên website công khai.",
+    "excel": {
+      "title": "Xuất Excel",
+      "exportFiltered": "Xuất lời nhắn theo bộ lọc"
+    },
     "directory": {
       "title": "Lời nhắn từ form liên hệ",
       "description": "Theo dõi yêu cầu tư vấn khách hàng gửi từ website công khai.",
@@ -3285,6 +3289,8 @@
       "moveTo": "Chuyển sang {status}"
     },
     "toasts": {
+      "exportSuccess": "Đã tải file Excel lời nhắn liên hệ.",
+      "exportError": "Không thể xuất file Excel lời nhắn liên hệ.",
       "updateSuccess": "Đã cập nhật trạng thái lời nhắn.",
       "updateError": "Không thể cập nhật trạng thái lời nhắn."
     }

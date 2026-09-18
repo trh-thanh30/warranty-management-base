@@ -35,6 +35,11 @@ export type ListContactSubmissionsQuery = PaginationQuery & {
   status?: ContactSubmissionStatus;
 };
 
+export type ExportContactSubmissionsQuery = Pick<
+  ListContactSubmissionsQuery,
+  "search" | "status"
+>;
+
 export type ListContactSubmissionsResponse =
   PaginatedResponse<ContactSubmissionResponse>;
 
