@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useToast } from "@/src/hooks/use-toast";
+import { useVoidWarranty } from "@/src/hooks/use-warranties";
 import type { WarrantyListItem } from "@repo/shared";
 import {
   Button,
@@ -13,8 +13,8 @@ import {
   Label,
   Textarea,
 } from "@repo/ui";
-import { useToast } from "@/src/hooks/use-toast";
-import { useVoidWarranty } from "@/src/hooks/use-warranties";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 
 type VoidWarrantyDialogProps = {
   onOpenChange: (open: boolean) => void;
@@ -60,15 +60,17 @@ export function VoidWarrantyDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
-        <DialogTitle className="text-lg font-semibold">
+        <DialogTitle className="text-base font-semibold">
           {t("voidTitle")}
         </DialogTitle>
-        <DialogDescription className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
+        <DialogDescription className="text-sm  text-slate-500 dark:text-slate-400">
           {t("voidDescription", { code: warranty?.warrantyCode ?? "-" })}
         </DialogDescription>
 
-        <div className="mt-5 space-y-2">
-          <Label htmlFor="void-warranty-reason">{t("voidReason")}</Label>
+        <div className="mt-3.5 space-y-2">
+          <Label htmlFor="void-warranty-reason" className="mb-1">
+            {t("voidReason")}
+          </Label>
           <Textarea
             id="void-warranty-reason"
             maxLength={1000}

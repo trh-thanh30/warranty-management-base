@@ -1,10 +1,10 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useAdminUiStore } from "@/src/app/stores/ui.store";
 import { AppSidebar } from "@/src/components/layout/app-sidebar";
 import { Header } from "@/src/components/layout/header";
-import { useAdminUiStore } from "@/src/app/stores/ui.store";
 import { cn } from "@repo/ui/lib/utils";
+import type { ReactNode } from "react";
 
 export function DashboardShell({ children }: { children: ReactNode }) {
   const collapsed = useAdminUiStore((state) => state.sidebarCollapsed);
@@ -26,7 +26,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         )}
       >
         <Header />
-        <main className="mx-auto w-full max-w-[88rem] px-4 py-8 lg:px-8">
+        <main className="mx-auto w-full max-w-352 px-4 py-8 lg:px-8">
           {children}
         </main>
       </div>

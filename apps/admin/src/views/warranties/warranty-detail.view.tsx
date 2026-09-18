@@ -1,5 +1,13 @@
 "use client";
 
+import { EntityQueryState } from "@/src/components/common/entity-query-state";
+import { FormPageShell } from "@/src/components/common/form-page-shell";
+import { PermissionGuard } from "@/src/components/permission-guard";
+import { usePermissions } from "@/src/hooks/use-permissions";
+import { useWarrantyDetail } from "@/src/hooks/use-warranties";
+import { Link } from "@/src/i18n/navigation";
+import { PERMISSIONS } from "@repo/shared/constants";
+import { Button } from "@repo/ui";
 import {
   Ban,
   PackageSearch,
@@ -7,19 +15,11 @@ import {
   ShieldCheck,
   UserRoundPlus,
 } from "lucide-react";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { PERMISSIONS } from "@repo/shared/constants";
-import { Button } from "@repo/ui";
-import { FormPageShell } from "@/src/components/common/form-page-shell";
-import { EntityQueryState } from "@/src/components/common/entity-query-state";
-import { PermissionGuard } from "@/src/components/permission-guard";
-import { usePermissions } from "@/src/hooks/use-permissions";
-import { useWarrantyDetail } from "@/src/hooks/use-warranties";
-import { Link } from "@/src/i18n/navigation";
+import { useState } from "react";
 import { ActivateWarrantyDialog } from "./components/activate-warranty-dialog";
-import { VoidWarrantyDialog } from "./components/void-warranty-dialog";
 import { TransferOwnerDialog } from "./components/transfer-owner-dialog";
+import { VoidWarrantyDialog } from "./components/void-warranty-dialog";
 import {
   WarrantyDetailCard,
   WarrantyDetailSkeleton,
@@ -66,7 +66,7 @@ export function WarrantyDetailView({ warrantyId }: WarrantyDetailViewProps) {
             ) : null}
             {canActivate ? (
               <Button
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto cursor-pointer"
                 onClick={() => setActivateOpen(true)}
                 type="button"
                 variant="secondary"
@@ -75,22 +75,11 @@ export function WarrantyDetailView({ warrantyId }: WarrantyDetailViewProps) {
                 {t("activate")}
               </Button>
             ) : null}
-            {canVoid ? (
-              <Button
-                className="w-full sm:w-auto"
-                onClick={() => setVoidOpen(true)}
-                type="button"
-                variant="destructive"
-              >
-                <Ban className="size-4" />
-                {t("void")}
-              </Button>
-            ) : null}
             {canEdit &&
             warranty?.status !== "VOIDED" &&
             warranty?.status !== "EXPIRED" ? (
               <Button
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto cursor-pointer"
                 onClick={() => setTransferOwnerOpen(true)}
                 type="button"
                 variant="secondary"
@@ -99,10 +88,21 @@ export function WarrantyDetailView({ warrantyId }: WarrantyDetailViewProps) {
                 {t("transferOwner")}
               </Button>
             ) : null}
+            {canVoid ? (
+              <Button
+                className="w-full sm:w-auto cursor-pointer"
+                onClick={() => setVoidOpen(true)}
+                type="button"
+                variant="destructive"
+              >
+                <Ban className="size-4" />
+                {t("void")}
+              </Button>
+            ) : null}
           </div>
         }
         eyebrow={t("eyebrow")}
-        maxWidthClassName="max-w-5xl"
+        maxWidthClassName="max-w-7xl"
         title={t("detailTitle")}
       >
         {warrantyQuery.isLoading ? (
